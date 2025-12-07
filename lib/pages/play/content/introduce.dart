@@ -180,13 +180,18 @@ class _IntroduceViewState extends State<IntroduceView>
                             Text(
                               sourceTitle,
                               style: TextStyle(
-                                  fontSize: 20, fontWeight: FontWeight.bold),
+                                fontSize: 15,
+                              ),
                             ),
-                            Obx(() => episodesController.episodeTitle.value !=
+                            Obx(() => videoSourceController.webSiteName.value !=
                                     ''
-                                ? Text(episodesController.episodeTitle.value,
+                                ? Text(
+                                    videoSourceController.webSiteName.value,
                                     maxLines: 3,
-                                    overflow: TextOverflow.ellipsis)
+                                    overflow: TextOverflow.ellipsis,
+                                    style:
+                                        TextStyle(fontWeight: FontWeight.bold),
+                                  )
                                 : SizedBox.shrink()),
                           ],
                         ),

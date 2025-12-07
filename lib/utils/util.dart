@@ -24,8 +24,8 @@ class Util {
         final config = jsonDecode(jsonStr);
 
         final name = config['name'];
-        // 如果 Hive 中没有这个配置，才写入
-        if (!box.containsKey(name)) {
+        final version = config['version'];
+        if (!box.containsKey(name) || box.get(name)['version'] != version) {
           await box.put(name, config);
           logger.i('已加载配置：$name');
         }

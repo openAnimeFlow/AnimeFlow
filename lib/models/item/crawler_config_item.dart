@@ -40,7 +40,11 @@ class CrawlConfigItem {
       lineNames: json['lineNames'] ?? '',
       lineList: json['lineList'] ?? '',
       episode: json['episode'] ?? '',
-      matchVideo: MatchVideoConfig.fromJson(json['matchVideo'] ?? {}),
+      matchVideo: MatchVideoConfig.fromJson(
+        json['matchVideo'] != null 
+          ? Map<String, dynamic>.from(json['matchVideo']) 
+          : {}
+      ),
     );
   }
 

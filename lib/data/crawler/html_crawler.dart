@@ -15,7 +15,6 @@ class HtmlCrawler {
   ///解析html搜索页
   static Future<List<SearchResourcesItem>> parseSearchHtml(
       String searchHtml, CrawlConfigItem crawlConfig) async {
-    final config = await CrawlConfig.loadPluginConfig();
     final String searchList = crawlConfig.searchList;
     final String searchName = crawlConfig.searchName;
     final String searchLink = crawlConfig.searchLink;

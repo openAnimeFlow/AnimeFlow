@@ -25,14 +25,15 @@ class IntroduceView extends StatefulWidget {
 
 class _IntroduceViewState extends State<IntroduceView>
     with AutomaticKeepAliveClientMixin {
+  Logger logger = Logger();
   late PlayPageController playPageController;
   late VideoSourceController videoResourcesController;
   late EpisodesController episodesController;
   late VideoSourceController videoSourceController;
   late CrawlerConfigController crawlerConfigController;
-  late List<ResourcesItem> videoResources;
+  List<ResourcesItem> videoResources = [];
   Worker? _screenWorker; // 屏幕宽高监听器
-  bool isVideoSource = true;
+  bool isVideoSourceLoading = true;
 
   // 保持页面状态，防止切换Tab时重新加载
   @override
@@ -45,6 +46,7 @@ class _IntroduceViewState extends State<IntroduceView>
     videoResourcesController = Get.find<VideoSourceController>();
     episodesController = Get.find<EpisodesController>();
     videoSourceController = Get.find<VideoSourceController>();
+    crawlerConfigController = Get.find<CrawlerConfigController>();
 
     getVideoResources();
     // 初始化监听器
@@ -98,14 +100,15 @@ class _IntroduceViewState extends State<IntroduceView>
         if (mounted) {
           setState(() {
             videoResources = allVideoResources;
-            isVideoSource = false;
+            isVideoSourceLoading = false;
           });
         }
       }
     } catch (e) {
+      logger.e(e);
       if (mounted) {
         setState(() {
-          isVideoSource = false;
+          isVideoSourceLoading = false;
         });
       }
     }
@@ -189,7 +192,7 @@ class _IntroduceViewState extends State<IntroduceView>
                         ),
                       ),
                       SizedBox(width: 8),
-                      isVideoSource
+                      isVideoSourceLoading
                           ? SizedBox(
                               width: 20,
                               height: 20,

@@ -1,3 +1,4 @@
+import 'package:anime_flow/components/image/animation_network_image.dart';
 import 'package:anime_flow/constants/play_layout_constant.dart';
 import 'package:anime_flow/controllers/episodes/episodes_controller.dart';
 import 'package:anime_flow/controllers/video/video_source_controller.dart';
@@ -26,6 +27,7 @@ class _VideoSourceDrawersState extends State<VideoSourceDrawers> {
   late EpisodesController episodesController;
   final logger = Logger();
   bool isShowEpisodes = false;
+  int selectedWebsiteIndex = 0; // 当前选中的网站索引
 
   @override
   void initState() {
@@ -38,6 +40,13 @@ class _VideoSourceDrawersState extends State<VideoSourceDrawers> {
   void setShowEpisodes() {
     setState(() {
       isShowEpisodes = !isShowEpisodes;
+    });
+  }
+
+  void setSelectedWebsite(int index) {
+    setState(() {
+      selectedWebsiteIndex = index;
+      isShowEpisodes = false;
     });
   }
 
@@ -75,14 +84,24 @@ class _VideoSourceDrawersState extends State<VideoSourceDrawers> {
               ),
             ),
             const SizedBox(height: 10),
+            // 网站选择器
+            _buildWebsiteSelector(),
+            const SizedBox(height: 16),
+            // 剧集列表
             Expanded(
               child: Material(
                 child: ListView.builder(
                   padding: EdgeInsets.symmetric(vertical: 0),
-                  itemCount: widget.episodesList.length,
+                  itemCount: widget.videoResources[selectedWebsiteIndex]
+                      .episodeResources.length,
                   itemBuilder: (context, index) {
-                    final resourceItem = widget.episodesList[index];
-                    final isLastItem = index == widget.episodesList.length - 1;
+                    final resourceItem = widget
+                        .videoResources[selectedWebsiteIndex]
+                        .episodeResources[index];
+                    final isLastItem = index ==
+                        widget.videoResources[selectedWebsiteIndex]
+                                .episodeResources.length -
+                            1;
 
                     // 使用 Obx 包裹每个列表项，监听 episodeIndex 变化
                     return Obx(() {
@@ -94,7 +113,9 @@ class _VideoSourceDrawersState extends State<VideoSourceDrawers> {
                             episodesController.episodeIndex.value,
                       );
 
-                      final excludedEpisodesCount = widget.episodesList
+
+                      final excludedEpisodesCount = widget
+                          .videoResources[selectedWebsiteIndex].episodeResources
                           .expand((item) => item.episodes.where((ep) =>
                               ep.episodeSort !=
                               episodesController.episodeIndex.value))
@@ -108,7 +129,12 @@ class _VideoSourceDrawersState extends State<VideoSourceDrawers> {
                       // 只渲染当前选中的剧集
                       return Column(
                         children: [
-                          _buildVideoSource(currentEpisode, resourceItem,),
+                          _buildVideoSource(
+                            currentEpisode,
+                            resourceItem,
+                            widget.videoResources[selectedWebsiteIndex]
+                                .videoConfig,
+                          ),
 
                           // 在最后一项后显示开关按钮
                           if (isLastItem) ...[
@@ -134,7 +160,9 @@ class _VideoSourceDrawersState extends State<VideoSourceDrawers> {
 
                             // 当开关打开时，显示所有资源的所有其他剧集
                             if (isShowEpisodes)
-                              ...widget.episodesList.expand((item) {
+                              ...widget.videoResources[selectedWebsiteIndex]
+                                  .episodeResources
+                                  .expand((item) {
                                 // 获取该资源的所有非当前集数的剧集
                                 final excludedEpisodes = item.episodes
                                     .where(
@@ -144,8 +172,14 @@ class _VideoSourceDrawersState extends State<VideoSourceDrawers> {
                                     )
                                     .toList();
                                 // 遍历所有其他剧集
-                                return excludedEpisodes.map((excludedEpisode) =>
-                                    _buildVideoSource(excludedEpisode, item));
+                                return excludedEpisodes.map(
+                                  (excludedEpisode) => _buildVideoSource(
+                                    excludedEpisode,
+                                    item,
+                                    widget.videoResources[selectedWebsiteIndex]
+                                        .videoConfig,
+                                  ),
+                                );
                               }),
                           ],
                         ],
@@ -161,7 +195,11 @@ class _VideoSourceDrawersState extends State<VideoSourceDrawers> {
     );
   }
 
-  Widget _buildVideoSource(Episode episode, EpisodeResourcesItem item) {
+  Widget _buildVideoSource(
+    Episode episode,
+    EpisodeResourcesItem item,
+    dynamic videoConfig,
+  ) {
     return Card.filled(
       margin: EdgeInsets.only(bottom: 8),
       child: InkWell(
@@ -169,8 +207,10 @@ class _VideoSourceDrawersState extends State<VideoSourceDrawers> {
           try {
             Get.back();
             videoStateController.disposeVideo();
-            final videoUrl =
-                await WebRequest.getVideoSourceService(episode.like,.);
+            final videoUrl = await WebRequest.getVideoSourceService(
+              episode.like,
+              videoConfig,
+            );
             videoSourceController.setVideoUrl(videoUrl);
             Get.snackbar(
               '视频资源解析成功',
@@ -244,5 +284,87 @@ class _VideoSourceDrawersState extends State<VideoSourceDrawers> {
         ),
       ),
     );
+  }
+
+  // 数据源选择器
+  Widget _buildWebsiteSelector() {
+    return SizedBox(
+        height: 40,
+        child: Row(
+          children: [
+            Icon(
+              Icons.public,
+              size: 24,
+              color: Theme.of(context).colorScheme.onSurface,
+            ),
+            SizedBox(width: 8),
+            Expanded(
+              child: ListView.builder(
+                scrollDirection: Axis.horizontal,
+                itemCount: widget.videoResources.length,
+                itemBuilder: (context, index) {
+                  final resource = widget.videoResources[index];
+                  final isSelected = selectedWebsiteIndex == index;
+
+                  return Obx(() {
+                    final currentEpisodeCount = resource.episodeResources
+                        .where((item) => item.episodes.any((ep) =>
+                            ep.episodeSort ==
+                            episodesController.episodeIndex.value))
+                        .length;
+
+                    return GestureDetector(
+                      onTap: () => setSelectedWebsite(index),
+                      child: Container(
+                        margin: EdgeInsets.only(right: 12),
+                        padding: EdgeInsets.all(8),
+                        decoration: BoxDecoration(
+                          color: isSelected
+                              ? Theme.of(context)
+                                  .colorScheme
+                                  .surfaceContainerHighest
+                              : Theme.of(context)
+                                  .colorScheme
+                                  .surfaceContainerHighest,
+                          borderRadius: BorderRadius.circular(12),
+                          border: Border.all(
+                            color: isSelected
+                                ? Theme.of(context).colorScheme.primary
+                                : Colors.transparent,
+                            width: 2,
+                          ),
+                        ),
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            ClipOval(
+                              child: AnimationNetworkImage(
+                                  width: 24,
+                                  height: 24,
+                                  url: resource.websiteIcon),
+                            ),
+                            SizedBox(width: 8),
+                            Text(
+                              '${resource.websiteName}($currentEpisodeCount)',
+                              style: TextStyle(
+                                  fontSize: 12,
+                                  fontWeight: isSelected
+                                      ? FontWeight.bold
+                                      : FontWeight.normal,
+                                  color: isSelected
+                                      ? Theme.of(context).colorScheme.primary
+                                      : Theme.of(context).colorScheme.onSurface,
+                                  decoration: TextDecoration.none),
+                            ),
+                          ],
+                        ),
+                      ),
+                    );
+                  });
+                },
+              ),
+            )
+          ],
+        ));
   }
 }

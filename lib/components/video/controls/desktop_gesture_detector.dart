@@ -28,7 +28,7 @@ class DesktopGestureDetector extends StatelessWidget {
             // 向上滚动增加音量，向下滚动减少音量
             // 除以20是为了控制调整幅度（每次约5%）
             var scrollDelta = -event.scrollDelta.dy / 20;
-            videoStateController.setVolume(scrollDelta);
+            videoStateController.adjustVolumeByWheel(scrollDelta);
           }
         },
         child: MouseRegion(

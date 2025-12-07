@@ -47,6 +47,7 @@ class _VideoControlsUiViewState extends State<VideoControlsUiView> {
 
   @override
   Widget build(BuildContext context) {
+    final isMobile = PlatformUtil.isMobile;
     return Column(children: [
       ///顶部
       TopAreaControl(
@@ -58,7 +59,7 @@ class _VideoControlsUiViewState extends State<VideoControlsUiView> {
 
       ///中间占满剩余区域
       Expanded(
-          child: PlatformUtil.isMobile
+          child: isMobile
               //移动端手势
               ? MobileGestureDetector(
                   child: MiddleAreaControl(

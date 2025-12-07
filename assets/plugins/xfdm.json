@@ -1,6 +1,7 @@
 {
   "version": "0.0.1",
   "name": "稀饭动漫",
+  "iconUrl": "https://dm1.xfdm.pro/upload/site/20240308-1/813e41f81d6f85bfd7a44bf8a813f9e5.png",
   "baseURL": "https://dm1.xfdm.pro",
   "searchURL": "https://dm1.xfdm.pro/search.html?wd={keyword}",
   "searchList": "//div[@class='public-list-box search-box flex rel']",
@@ -10,5 +11,9 @@
   "lineList": "//ul[@class='anthology-list-play size']",
   "episode": "/li /a",
   "matchEpisodeSort": "^第\\d+[\\s\\S]*[\\d]集$",
-  "matchVideoUrl": "(^http(s)?:\\/\\/(?!.*http(s)?:\\/\\/).+((\\.mp4)|(\\.mkv)|(m3u8)).*(\\?.+)?)|(akamaized)|(bilivideo.com)"
+  "matchVideo": {
+    "enableNestedUrl": false,
+    "matchNestedUrl": "https?://[^\\s&\"]+\\.m3u8|.mp4|.mkv",
+    "matchVideoUrl": "(^http(s)?:\\/\\/(?!.*http(s)?:\\/\\/).+((\\.mp4)|(\\.mkv)|(m3u8)).*(\\?.+)?)|(akamaized)|(bilivideo.com)"
+  }
 }

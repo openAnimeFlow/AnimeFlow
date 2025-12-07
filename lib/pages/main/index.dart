@@ -1,9 +1,9 @@
 import 'package:anime_flow/models/item/tab_item.dart';
+import 'package:anime_flow/utils/util.dart';
 import 'package:flutter/material.dart';
 import 'package:anime_flow/pages/Category/index.dart';
 import 'package:anime_flow/pages/recommend/index.dart';
 import 'package:anime_flow/pages/play/index.dart';
-
 
 class MainPage extends StatefulWidget {
   const MainPage({super.key});
@@ -45,6 +45,10 @@ class _MainPageState extends State<MainPage> {
     super.initState();
     // 默认初始化第一个页面
     _pageCache[0] = const RecommendView();
+    // 在首帧渲染后初始化爬虫配置
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      Util.initCrawlConfigs();
+    });
   }
 
   int _currentIndex = 0;
@@ -79,7 +83,7 @@ class _MainPageState extends State<MainPage> {
         children: [
           if (isDesktop)
             NavigationRail(
-              backgroundColor: Colors.black12.withValues(alpha: 0.04) ,
+              backgroundColor: Colors.black12.withValues(alpha: 0.04),
               selectedIndex: _currentIndex,
               groupAlignment: 1,
               onDestinationSelected: _onDestinationSelected,
@@ -87,7 +91,8 @@ class _MainPageState extends State<MainPage> {
               destinations: _tabs.map((tab) {
                 return NavigationRailDestination(
                   icon: Icon(tab.icon),
-                  selectedIcon: Icon(tab.activeIcon, color: colorScheme.primary),
+                  selectedIcon:
+                      Icon(tab.activeIcon, color: colorScheme.primary),
                   label: Text(tab.title),
                 );
               }).toList(),
@@ -96,7 +101,8 @@ class _MainPageState extends State<MainPage> {
             child: IndexedStack(
               key: _bodyKey,
               index: _currentIndex,
-              children: _pageCache.map((e) => e ?? const SizedBox.shrink()).toList(),
+              children:
+                  _pageCache.map((e) => e ?? const SizedBox.shrink()).toList(),
             ),
           ),
         ],
@@ -109,7 +115,8 @@ class _MainPageState extends State<MainPage> {
               destinations: _tabs.map((tab) {
                 return NavigationDestination(
                   icon: Icon(tab.icon),
-                  selectedIcon: Icon(tab.activeIcon, color: colorScheme.primary),
+                  selectedIcon:
+                      Icon(tab.activeIcon, color: colorScheme.primary),
                   label: tab.title,
                 );
               }).toList(),

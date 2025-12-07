@@ -4,7 +4,7 @@ import 'package:anime_flow/data/crawler/html_crawler.dart';
 import 'package:anime_flow/http/api/common_api.dart';
 import 'package:anime_flow/models/item/video/episode_resources_item.dart';
 import 'package:anime_flow/models/item/video/search_resources_item.dart';
-import 'package:anime_flow/utils/getConfigFlie.dart';
+import 'package:anime_flow/utils/crawl_config.dart';
 import 'package:anime_flow/utils/http/dio_request.dart';
 import 'package:dio/dio.dart';
 import 'package:anime_flow/constants/constants.dart';
@@ -16,10 +16,10 @@ class WebRequest {
   ///获取搜索条目列表
   static Future<List<SearchResourcesItem>> getSearchSubjectListService(
       String keyword) async {
-    final config = await GetConfigFile.loadPluginConfig();
+    final config = await CrawlConfig.loadPluginConfig();
 
     final String searchURL = config['searchURL'];
-    final userAgent = userAgentsList[Random().nextInt(userAgentsList.length)];
+    final userAgent = Constants.userAgentsList[Random().nextInt(Constants.userAgentsList.length)];
 
     final response =
         await dioRequest.get(searchURL.replaceFirst("{keyword}", keyword),
@@ -32,10 +32,10 @@ class WebRequest {
   ///获取剧集资源列表
   static Future<List<CrawlerEpisodeResourcesItem>> getResourcesListService(
       String link) async {
-    final config = await GetConfigFile.loadPluginConfig();
+    final config = await CrawlConfig.loadPluginConfig();
     final String baseURL = config['baseURL'];
 
-    final userAgent = userAgentsList[Random().nextInt(userAgentsList.length)];
+    final userAgent = Constants.userAgentsList[Random().nextInt(Constants.userAgentsList.length)];
 
     final response = await dioRequest.get(baseURL + link,
         options: Options(headers: {
@@ -46,7 +46,7 @@ class WebRequest {
 
   /// 获取视频源
   static Future<String> getVideoSourceService(String link) async {
-    final config = await GetConfigFile.loadPluginConfig();
+    final config = await CrawlConfig.loadPluginConfig();
     final String baseURL = config['baseURL'];
     final url = baseURL + link;
 

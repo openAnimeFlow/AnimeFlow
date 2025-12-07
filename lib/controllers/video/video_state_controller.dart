@@ -53,10 +53,14 @@ class VideoStateController extends GetxController {
     isVerticalDragging.value = true;
   }
 
+  //滚轮调节音量
+  void adjustVolumeByWheel(double delta) {
+    double newVolume = (volume.value + delta);
+    setVolume(newVolume);
+  }
+
   // 更新垂直拖动音量
   void updateVerticalDrag(double dragDistance, double screenHeight) {
-    // 向上滑动增加音量，向下滑动减少音量
-    // 滑动整个屏幕高度改变100%音量
     final volumeChange = -(dragDistance / screenHeight) * 100;
     double newVolume = _dragStartVolume + volumeChange;
     setVolume(newVolume);
@@ -67,8 +71,7 @@ class VideoStateController extends GetxController {
     isVerticalDragging.value = false;
     // 2秒后隐藏音量指示器
     Future.delayed(const Duration(seconds: 2), () {
-      if (!isVerticalDragging.value) {
-      }
+      if (!isVerticalDragging.value) {}
     });
   }
 }

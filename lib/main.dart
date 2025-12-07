@@ -1,13 +1,18 @@
+import 'package:anime_flow/constants/constants.dart';
+import 'package:anime_flow/utils/util.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:hive_flutter/hive_flutter.dart';
 import 'package:media_kit/media_kit.dart';
 import 'package:anime_flow/routes/index.dart';
 import 'package:anime_flow/controllers/theme_controller.dart';
 
-void main() {
+void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   MediaKit.ensureInitialized();
 
+  await Hive.initFlutter();
+  await Hive.openBox(Constants.crawlConfigs);
   runApp(MyApp());
 }
 

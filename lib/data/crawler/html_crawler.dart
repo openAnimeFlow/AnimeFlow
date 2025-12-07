@@ -2,7 +2,7 @@ import 'dart:async';
 
 import 'package:anime_flow/models/item/video/episode_resources_item.dart';
 import 'package:anime_flow/models/item/video/search_resources_item.dart';
-import 'package:anime_flow/utils/getConfigFlie.dart';
+import 'package:anime_flow/utils/crawl_config.dart';
 import 'package:flutter_inappwebview/flutter_inappwebview.dart';
 import 'package:html/parser.dart';
 import 'package:logger/logger.dart';
@@ -14,7 +14,7 @@ class HtmlCrawler {
   ///解析html搜索页
   static Future<List<SearchResourcesItem>> parseSearchHtml(
       String searchHtml) async {
-    final config = await GetConfigFile.loadPluginConfig();
+    final config = await CrawlConfig.loadPluginConfig();
     final String searchList = config['searchList'];
     final String searchName = config['searchName'];
     final String searchLink = config['searchLink'];
@@ -40,7 +40,7 @@ class HtmlCrawler {
   ///解析html资源页面
   static Future<List<CrawlerEpisodeResourcesItem>> parseResourcesHtml(
       String resourcesHtml) async {
-    final config = await GetConfigFile.loadPluginConfig();
+    final config = await CrawlConfig.loadPluginConfig();
     final String lineNames = config['lineNames'];
     final String lineList = config['lineList'];
     final String episode = config['episode'];
@@ -94,7 +94,7 @@ class HtmlCrawler {
   ///解析html视频源
   static Future<String> getVideoSourceWithInAppWebView(
       String url, RegExp videoRegex) async {
-    final config = await GetConfigFile.loadPluginConfig();
+    final config = await CrawlConfig.loadPluginConfig();
     final bool enableNestedUrl = config['matchVideo']['enableNestedUrl'];
     final String matchNestedUrl = config['matchVideo']['matchNestedUrl'];
 

@@ -61,6 +61,8 @@ dependencies:
   html: ^0.15.6
   flutter_inappwebview: ^6.1.5
   cached_network_image: ^3.4.1
+  hive: ^2.2.3
+  hive_flutter: ^1.1.0
 
 # logo图标生成生成命令:dart run flutter_launcher_icons
 flutter_launcher_icons:
@@ -101,7 +103,7 @@ flutter:
 
   # To add assets to your application, add an assets section, like this:
   assets:
-    - lib/assets/login_image/
+    - lib/assets/image/
     - lib/assets/icons/
     - assets/plugins/
   #   - images/a_dot_ham.jpeg

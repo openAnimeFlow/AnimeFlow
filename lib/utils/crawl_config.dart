@@ -8,14 +8,14 @@ import 'package:logger/logger.dart';
 class CrawlConfig {
   static final Logger logger = Logger();
 
-  //读取所有配置
-  static Future<List<CrawlConfigItem>> loadAllCrawlConfigs() async {
-    final box = Hive.box(Constants.crawlConfigs);
-
-    return box.values
-        .map((value) => CrawlConfigItem.fromJson(
-              Map<String, dynamic>.from(value),
-            ))
-        .toList();
-  }
+//读取所有配置
+// static Future<List<CrawlConfigItem>> loadAllCrawlConfigs() async {
+//   final box = Hive.box(Constants.crawlConfigs);
+//
+//   return box.values
+//       .map((value) => CrawlConfigItem.fromJson(
+//             Map<String, dynamic>.from(value),
+//           ))
+//       .toList();
+// }
 }

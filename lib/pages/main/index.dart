@@ -45,10 +45,7 @@ class _MainPageState extends State<MainPage> {
     super.initState();
     // 默认初始化第一个页面
     _pageCache[0] = const RecommendView();
-    // 在首帧渲染后初始化爬虫配置
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      Util.initCrawlConfigs();
-    });
+    Util.initCrawlConfigs();
   }
 
   int _currentIndex = 0;

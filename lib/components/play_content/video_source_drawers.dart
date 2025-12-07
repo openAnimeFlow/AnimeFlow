@@ -218,7 +218,9 @@ class _VideoSourceDrawersState extends State<VideoSourceDrawers> {
             videoSourceController.setWebSiteName(
                 widget.videoResources[selectedWebsiteIndex].websiteName);
             Get.back();
+
             videoStateController.disposeVideo();
+            //TODO 需要线停止上一次请求
             final videoUrl = await WebRequest.getVideoSourceService(
               episode.like,
               videoConfig,

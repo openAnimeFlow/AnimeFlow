@@ -10,7 +10,6 @@ class CrawlConfigItem {
   final String lineNames;
   final String lineList;
   final String episode;
-  final String matchEpisodeSort;
   final MatchVideoConfig matchVideo;
 
   CrawlConfigItem({
@@ -25,7 +24,6 @@ class CrawlConfigItem {
     required this.lineNames,
     required this.lineList,
     required this.episode,
-    required this.matchEpisodeSort,
     required this.matchVideo,
   });
 
@@ -42,14 +40,13 @@ class CrawlConfigItem {
       lineNames: json['lineNames'] ?? '',
       lineList: json['lineList'] ?? '',
       episode: json['episode'] ?? '',
-      matchEpisodeSort: json['matchEpisodeSort'] ?? '',
       matchVideo: MatchVideoConfig.fromJson(json['matchVideo'] ?? {}),
     );
   }
 
   @override
   String toString() {
-    return 'CrawlConfig{version: $version, name: $name, iconUrl: $iconUrl, baseURL: $baseURL, searchURL: $searchURL, searchList: $searchList, searchName: $searchName, searchLink: $searchLink, lineNames: $lineNames, lineList: $lineList, episode: $episode, matchEpisodeSort: $matchEpisodeSort, matchVideo: $matchVideo}';
+    return 'CrawlConfigItem{version: $version, name: $name, iconUrl: $iconUrl, baseURL: $baseURL, searchURL: $searchURL, searchList: $searchList, searchName: $searchName, searchLink: $searchLink, lineNames: $lineNames, lineList: $lineList, episode: $episode, matchVideo: $matchVideo}';
   }
 }
 
@@ -76,4 +73,14 @@ class MatchVideoConfig {
   String toString() {
     return 'MatchVideoConfig{enableNestedUrl: $enableNestedUrl, matchNestedUrl: $matchNestedUrl, matchVideoUrl: $matchVideoUrl}';
   }
+}
+
+class VideoConfig extends MatchVideoConfig {
+  final String baseURL;
+
+  VideoConfig(
+      {required super.enableNestedUrl,
+      required super.matchNestedUrl,
+      required super.matchVideoUrl,
+      required this.baseURL});
 }

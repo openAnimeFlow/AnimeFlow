@@ -1,11 +1,13 @@
 import 'package:anime_flow/components/play_content/video_source_drawers.dart';
 import 'package:anime_flow/constants/play_layout_constant.dart';
+import 'package:anime_flow/controllers/crawler/crawler_config_controller.dart';
 import 'package:anime_flow/controllers/episodes/episodes_controller.dart';
 import 'package:anime_flow/controllers/play/PlayPageController.dart';
 import 'package:anime_flow/controllers/video/video_source_controller.dart';
+import 'package:anime_flow/models/item/crawler_config_item.dart';
 import 'package:anime_flow/models/item/episodes_item.dart';
 import 'package:anime_flow/models/item/hot_item.dart';
-import 'package:anime_flow/models/item/video/episode_resources_item.dart';
+import 'package:anime_flow/models/item/video/resources_item.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:logger/logger.dart';
@@ -27,8 +29,8 @@ class _IntroduceViewState extends State<IntroduceView>
   late VideoSourceController videoResourcesController;
   late EpisodesController episodesController;
   late VideoSourceController videoSourceController;
-
-  late List<EpisodeResourcesItem> episodeResources;
+  late CrawlerConfigController crawlerConfigController;
+  late List<ResourcesItem> videoResources;
   Worker? _screenWorker; // 屏幕宽高监听器
   bool isVideoSource = true;
 
@@ -66,17 +68,41 @@ class _IntroduceViewState extends State<IntroduceView>
 
   void getVideoResources() async {
     try {
-      final resources = await videoResourcesController
-          .getVideoResources(widget.subject.nameCN ?? widget.subject.name);
+      final configs = await crawlerConfigController.loadAllCrawlConfigs();
+      List<ResourcesItem> allVideoResources = [];
+      for (var config in configs) {
+        final allEpisodesList =
+            await videoResourcesController.getEpisodeResources(
+                widget.subject.nameCN ?? widget.subject.name, config);
 
-      if (mounted) {
-        setState(() {
-          episodeResources = resources;
-          isVideoSource = false;
-        });
+        final baseURL = config.baseURL;
+        final websiteName = config.name;
+        final websiteIcon = config.iconUrl;
+        final matchVideoConfig = config.matchVideo;
+
+        VideoConfig videoConfig = VideoConfig(
+          enableNestedUrl: matchVideoConfig.enableNestedUrl,
+          matchNestedUrl: matchVideoConfig.matchNestedUrl,
+          matchVideoUrl: matchVideoConfig.matchNestedUrl,
+          baseURL: baseURL,
+        );
+
+        ResourcesItem resourcesItem = ResourcesItem(
+          websiteName: websiteName,
+          websiteIcon: websiteIcon,
+          episodeResources: allEpisodesList,
+          videoConfig: videoConfig,
+        );
+
+        allVideoResources.add(resourcesItem);
+        if (mounted) {
+          setState(() {
+            videoResources = allVideoResources;
+            isVideoSource = false;
+          });
+        }
       }
     } catch (e) {
-      // 处理错误情况
       if (mounted) {
         setState(() {
           isVideoSource = false;
@@ -194,7 +220,9 @@ class _IntroduceViewState extends State<IntroduceView>
                                     pageBuilder: (context, animation,
                                         secondaryAnimation) {
                                       return VideoSourceDrawers(
-                                          sourceTitle, episodeResources);
+                                        sourceTitle,
+                                        videoResources: videoResources,
+                                      );
                                     });
                               },
                               style: OutlinedButton.styleFrom(

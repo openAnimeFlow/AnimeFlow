@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:anime_flow/models/item/crawler_config_item.dart';
 import 'package:anime_flow/models/item/video/episode_resources_item.dart';
 import 'package:anime_flow/models/item/video/search_resources_item.dart';
 import 'package:anime_flow/utils/crawl_config.dart';
@@ -13,11 +14,11 @@ class HtmlCrawler {
 
   ///解析html搜索页
   static Future<List<SearchResourcesItem>> parseSearchHtml(
-      String searchHtml) async {
+      String searchHtml, CrawlConfigItem crawlConfig) async {
     final config = await CrawlConfig.loadPluginConfig();
-    final String searchList = config['searchList'];
-    final String searchName = config['searchName'];
-    final String searchLink = config['searchLink'];
+    final String searchList = crawlConfig.searchList;
+    final String searchName = crawlConfig.searchName;
+    final String searchLink = crawlConfig.searchLink;
 
     final parser = parse(searchHtml).documentElement!;
 
@@ -39,12 +40,10 @@ class HtmlCrawler {
 
   ///解析html资源页面
   static Future<List<CrawlerEpisodeResourcesItem>> parseResourcesHtml(
-      String resourcesHtml) async {
-    final config = await CrawlConfig.loadPluginConfig();
-    final String lineNames = config['lineNames'];
-    final String lineList = config['lineList'];
-    final String episode = config['episode'];
-    final String matchEpisodeSort = config['matchEpisodeSort'];
+      String resourcesHtml, CrawlConfigItem crawlConfig) async {
+    final String lineNames = crawlConfig.lineNames;
+    final String lineList = crawlConfig.lineList;
+    final String episode = crawlConfig.episode;
 
     final parser = parse(resourcesHtml).documentElement!;
     final lineNamesElement = parser.queryXPath(lineNames);
@@ -69,6 +68,7 @@ class HtmlCrawler {
       for (int j = 0; j < currentEpisodesElement.nodes.length; j++) {
         var episodeNode = currentEpisodesElement.nodes[j];
         int episodeStr = (j + 1);
+        //TODO episodeLike需要单独创建一个xpath配置
         String episodeLike = episodeNode.attributes['href'] ?? '';
 
         Episode episodeObj = Episode(
@@ -93,10 +93,14 @@ class HtmlCrawler {
 
   ///解析html视频源
   static Future<String> getVideoSourceWithInAppWebView(
-      String url, RegExp videoRegex) async {
-    final config = await CrawlConfig.loadPluginConfig();
-    final bool enableNestedUrl = config['matchVideo']['enableNestedUrl'];
-    final String matchNestedUrl = config['matchVideo']['matchNestedUrl'];
+      String url, VideoConfig videoConfig) async {
+    final bool enableNestedUrl = videoConfig.enableNestedUrl;
+    final String matchNestedUrl = videoConfig.matchNestedUrl;
+    final String matchVideoUrl = videoConfig.matchVideoUrl;
+    final RegExp videoRegex = RegExp(
+      matchVideoUrl,
+      caseSensitive: false,
+    );
 
     final Completer<String> completer = Completer<String>();
     late InAppWebViewController webViewController;

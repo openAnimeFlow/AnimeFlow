@@ -10,7 +10,6 @@
   "lineNames": "//div[@class='swiper-wrapper'] /a",
   "lineList": "//ul[@class='anthology-list-play size']",
   "episode": "/li /a",
-  "matchEpisodeSort": "^第\\d+[\\s\\S]*[\\d]集$",
   "matchVideo": {
     "enableNestedUrl": false,
     "matchNestedUrl": "https?://[^\\s&\"]+\\.m3u8|.mp4|.mkv",

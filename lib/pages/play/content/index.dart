@@ -1,6 +1,8 @@
+import 'package:anime_flow/controllers/crawler/crawler_config_controller.dart';
 import 'package:anime_flow/models/item/episodes_item.dart';
 import 'package:anime_flow/models/item/hot_item.dart';
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 
 import 'comments.dart';
 import 'introduce.dart';
@@ -26,6 +28,13 @@ class _ContentViewState extends State<ContentView>
   void initState() {
     super.initState();
     _tabController = TabController(length: _tabs.length, vsync: this);
+    Get.put(CrawlerConfigController());
+  }
+
+  @override
+  void dispose() {
+    Get.delete<CrawlerConfigController>();
+    super.dispose();
   }
 
   @override
@@ -45,8 +54,14 @@ class _ContentViewState extends State<ContentView>
               controller: _tabController,
               children: [
                 //简介view
-                IntroduceView(widget.subject, widget.episodes,key: _introduceKey,),
-                CommentsView(key: _commentKey,)
+                IntroduceView(
+                  widget.subject,
+                  widget.episodes,
+                  key: _introduceKey,
+                ),
+                CommentsView(
+                  key: _commentKey,
+                )
               ],
             ),
           ),

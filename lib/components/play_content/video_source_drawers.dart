@@ -4,15 +4,17 @@ import 'package:anime_flow/controllers/video/video_source_controller.dart';
 import 'package:anime_flow/controllers/video/video_state_controller.dart';
 import 'package:anime_flow/data/crawler/html_request.dart';
 import 'package:anime_flow/models/item/video/episode_resources_item.dart';
+import 'package:anime_flow/models/item/video/resources_item.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:logger/logger.dart';
 
 class VideoSourceDrawers extends StatefulWidget {
   final String title;
-  final List<EpisodeResourcesItem> episodesList;
+  final List<ResourcesItem> videoResources;
 
-  const VideoSourceDrawers(this.title, this.episodesList, {super.key});
+  const VideoSourceDrawers(this.title,
+      {super.key, required this.videoResources});
 
   @override
   State<VideoSourceDrawers> createState() => _VideoSourceDrawersState();
@@ -106,7 +108,7 @@ class _VideoSourceDrawersState extends State<VideoSourceDrawers> {
                       // 只渲染当前选中的剧集
                       return Column(
                         children: [
-                          _buildVideoSource(currentEpisode, resourceItem),
+                          _buildVideoSource(currentEpisode, resourceItem,),
 
                           // 在最后一项后显示开关按钮
                           if (isLastItem) ...[
@@ -168,7 +170,7 @@ class _VideoSourceDrawersState extends State<VideoSourceDrawers> {
             Get.back();
             videoStateController.disposeVideo();
             final videoUrl =
-                await WebRequest.getVideoSourceService(episode.like);
+                await WebRequest.getVideoSourceService(episode.like,.);
             videoSourceController.setVideoUrl(videoUrl);
             Get.snackbar(
               '视频资源解析成功',

@@ -264,7 +264,6 @@ class _VideoSourceDrawersState extends State<VideoSourceDrawers> {
             Get.back();
 
             videoStateController.disposeVideo();
-            //TODO 需要线停止上一次请求
             final videoUrl = await WebRequest.getVideoSourceService(
               episode.like,
               videoConfig,
@@ -277,10 +276,6 @@ class _VideoSourceDrawersState extends State<VideoSourceDrawers> {
               maxWidth: 300,
             );
           } catch (e) {
-            logger.e('获取视频源失败: $e');
-            if (Get.isDialogOpen == true) {
-              Get.back();
-            }
             Get.snackbar(
               '错误',
               '获取视频源失败: $e',
@@ -357,71 +352,69 @@ class _VideoSourceDrawersState extends State<VideoSourceDrawers> {
             ),
             SizedBox(width: 8),
             Expanded(
-              child: ListView.builder(
-                scrollDirection: Axis.horizontal,
-                itemCount: widget.videoResources.length,
-                itemBuilder: (context, index) {
-                  final resource = widget.videoResources[index];
-                  final isSelected = selectedWebsiteIndex == index;
+                child: ListView.builder(
+                    scrollDirection: Axis.horizontal,
+                    itemCount: widget.videoResources.length,
+                    itemBuilder: (context, index) {
+                      final resource = widget.videoResources[index];
+                      final isSelected = selectedWebsiteIndex == index;
 
-                  return Obx(() {
-                    final currentEpisodeCount = resource.episodeResources
-                        .where((item) => item.episodes.any((ep) =>
-                            ep.episodeSort ==
-                            episodesController.episodeIndex.value))
-                        .length;
+                      // final currentEpisodeCount = resource.episodeResources
+                      //     .where((item) => item.episodes.any((ep) =>
+                      //         ep.episodeSort ==
+                      //         episodesController.episodeIndex.value))
+                      //     .length;
 
-                    return GestureDetector(
-                      onTap: () => setSelectedWebsite(index),
-                      child: Container(
-                        margin: EdgeInsets.only(right: 12),
-                        padding: EdgeInsets.all(8),
-                        decoration: BoxDecoration(
-                          color: isSelected
-                              ? Theme.of(context)
-                                  .colorScheme
-                                  .surfaceContainerHighest
-                              : Theme.of(context)
-                                  .colorScheme
-                                  .surfaceContainerHighest,
-                          borderRadius: BorderRadius.circular(12),
-                          border: Border.all(
+                      return GestureDetector(
+                        onTap: () => setSelectedWebsite(index),
+                        child: Container(
+                          margin: EdgeInsets.only(right: 12),
+                          padding: EdgeInsets.all(8),
+                          decoration: BoxDecoration(
                             color: isSelected
-                                ? Theme.of(context).colorScheme.primary
-                                : Colors.transparent,
-                            width: 2,
+                                ? Theme.of(context)
+                                    .colorScheme
+                                    .surfaceContainerHighest
+                                : Theme.of(context)
+                                    .colorScheme
+                                    .surfaceContainerHighest,
+                            borderRadius: BorderRadius.circular(12),
+                            border: Border.all(
+                              color: isSelected
+                                  ? Theme.of(context).colorScheme.primary
+                                  : Colors.transparent,
+                              width: 2,
+                            ),
+                          ),
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              ClipOval(
+                                child: AnimationNetworkImage(
+                                    width: 24,
+                                    height: 24,
+                                    url: resource.websiteIcon),
+                              ),
+                              SizedBox(width: 8),
+                              Text(
+                                '${resource.websiteName}',
+                                style: TextStyle(
+                                    fontSize: 12,
+                                    fontWeight: isSelected
+                                        ? FontWeight.bold
+                                        : FontWeight.normal,
+                                    color: isSelected
+                                        ? Theme.of(context).colorScheme.primary
+                                        : Theme.of(context)
+                                            .colorScheme
+                                            .onSurface,
+                                    decoration: TextDecoration.none),
+                              ),
+                            ],
                           ),
                         ),
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            ClipOval(
-                              child: AnimationNetworkImage(
-                                  width: 24,
-                                  height: 24,
-                                  url: resource.websiteIcon),
-                            ),
-                            SizedBox(width: 8),
-                            Text(
-                              '${resource.websiteName}($currentEpisodeCount)',
-                              style: TextStyle(
-                                  fontSize: 12,
-                                  fontWeight: isSelected
-                                      ? FontWeight.bold
-                                      : FontWeight.normal,
-                                  color: isSelected
-                                      ? Theme.of(context).colorScheme.primary
-                                      : Theme.of(context).colorScheme.onSurface,
-                                  decoration: TextDecoration.none),
-                            ),
-                          ],
-                        ),
-                      ),
-                    );
-                  });
-                },
-              ),
-            )
+                      );
+                    })),
           ],
         ));
   }

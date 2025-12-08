@@ -1,9 +1,12 @@
 import 'dart:async';
+import 'dart:math';
 
+import 'package:anime_flow/constants/constants.dart';
 import 'package:anime_flow/models/item/crawler_config_item.dart';
 import 'package:anime_flow/models/item/video/episode_resources_item.dart';
 import 'package:anime_flow/models/item/video/search_resources_item.dart';
-import 'package:anime_flow/utils/crawl_config.dart';
+import 'package:anime_flow/utils/http/dio_request.dart';
+import 'package:dio/dio.dart';
 import 'package:flutter_inappwebview/flutter_inappwebview.dart';
 import 'package:html/parser.dart';
 import 'package:logger/logger.dart';
@@ -11,6 +14,54 @@ import 'package:xpath_selector_html_parser/xpath_selector_html_parser.dart';
 
 class HtmlCrawler {
   static Logger logger = Logger();
+  static HeadlessInAppWebView? _currentWebView;
+  static Completer<String>? _currentCompleter;
+
+  /// 取消当前的视频源请求
+  static Future<void> cancelCurrentVideoRequest() async {
+    if (_currentWebView != null) {
+      logger.w('取消上一次视频源请求');
+      try {
+        await _currentWebView?.dispose();
+        _currentWebView = null;
+      } catch (e) {
+        logger.e('取消请求时出错: $e');
+      }
+    }
+
+    if (_currentCompleter != null && !_currentCompleter!.isCompleted) {
+      _currentCompleter!.completeError('请求已取消');
+      _currentCompleter = null;
+    }
+  }
+
+  /// 跟随重定向获取最终URL
+  static Future<String> _followRedirects(String url, String userAgent) async {
+    try {
+      final response = await dioRequest.head(
+        url,
+        options: Options(
+          followRedirects: true, // 自动跟随重定向
+          maxRedirects: 5, // 最多跟随5次重定向
+          validateStatus: (status) => status != null && status < 400,
+          headers: {
+            'User-Agent': userAgent,
+            'Referer': url,
+          },
+        ),
+      );
+
+      // 返回最终的 URL（已跟随重定向）
+      final finalUrl = response.realUri.toString();
+      if (finalUrl != url) {
+        logger.i('🔀 重定向: $url → $finalUrl');
+      }
+      return finalUrl;
+    } catch (e) {
+      logger.w('跟随重定向失败，使用原始URL: $e');
+      return url; // 如果失败，返回原始URL
+    }
+  }
 
   ///解析html搜索页
   static Future<List<SearchResourcesItem>> parseSearchHtml(
@@ -93,85 +144,114 @@ class HtmlCrawler {
   ///解析html视频源
   static Future<String> getVideoSourceWithInAppWebView(
       String url, VideoConfig videoConfig) async {
+    // 取消上一次请求
+    await cancelCurrentVideoRequest();
+
+    final userAgent = Constants
+        .userAgentList[Random().nextInt(Constants.userAgentList.length)];
     final bool enableNestedUrl = videoConfig.enableNestedUrl;
     final String matchNestedUrl = videoConfig.matchNestedUrl;
     final String matchVideoUrl = videoConfig.matchVideoUrl;
-    final RegExp videoRegex = RegExp(
-      matchVideoUrl,
-      caseSensitive: false,
-    );
+
+    final RegExp matchNestedRegex = RegExp(matchNestedUrl);
+    final RegExp matchVideoRegex = RegExp(matchVideoUrl);
 
     final Completer<String> completer = Completer<String>();
-    late InAppWebViewController webViewController;
+    _currentCompleter = completer;
 
     final headlessWebView = HeadlessInAppWebView(
-      initialUrlRequest: URLRequest(url: WebUri(url)),
-      onLoadStop: (controller, uri) async {
-        try {
-          // 等待页面 JavaScript 执行完成
-          await Future.delayed(const Duration(seconds: 3));
+      initialUrlRequest: URLRequest(url: WebUri(url), headers: {
+        Constants.userAgentName: userAgent,
+      }),
+      initialSettings: InAppWebViewSettings(
+        // 启用网络拦截
+        useShouldInterceptRequest: true,
+        // 允许后台播放
+        // mediaPlaybackRequiresUserGesture: false,
+      ),
 
-          // 获取页面 HTML 内容
-          final html = await controller.evaluateJavascript(
-              source: "document.documentElement.outerHTML");
+      // 拦截所有网络请求
+      shouldInterceptRequest: (controller, request) async {
+        final requestUrl = request.url.toString();
 
-          if (html != null) {
-            // 清理返回的 HTML 字符串
-            final cleanHtml = html
-                .toString()
-                .replaceAll(r'\n', '\n')
-                .replaceAll(r'\"', '"')
-                .replaceAll(r"\'", "'");
-
-            // 查找视频链接
-            final directMatches = videoRegex.allMatches(cleanHtml);
-            if (directMatches.isNotEmpty) {
-              final foundVideoUrl = directMatches.first.group(0);
-
-              if (!completer.isCompleted) {
-                //TODO 需要更新嵌套链接匹配逻辑，先匹配出嵌套链接在从链接中解析video url。
-                if (enableNestedUrl) {
-                  final nestedUrlRegex = RegExp(matchNestedUrl);
-                  final nestedUrlMatches =
-                      nestedUrlRegex.allMatches(foundVideoUrl!);
-                  logger.i("原链接: $foundVideoUrl");
-                  final realVideoUrl = nestedUrlMatches.first.group(0);
-                  completer.complete(realVideoUrl);
-                  logger.i('✅ 找到视频源 (嵌套匹配): $realVideoUrl');
-                } else {
-                  logger.i('✅ 找到视频源 (直接匹配): $foundVideoUrl');
-                  completer.complete(foundVideoUrl);
-                }
+        if (enableNestedUrl) {
+          // 检查请求 URL 是否匹配嵌套格式
+          final matches = matchNestedRegex.allMatches(requestUrl);
+          if (matches.isNotEmpty && !completer.isCompleted) {
+            logger.i('🎯 从网络请求中找到匹配URL: $requestUrl');
+            
+            try {
+              // 跟随重定向获取最终URL
+              final finalUrl = await _followRedirects(requestUrl, userAgent);
+              logger.i('🔀 重定向后的URL: $finalUrl');
+              
+              // 从重定向后的URL中提取视频源
+              final videoMatches = matchVideoRegex.allMatches(finalUrl);
+              if (videoMatches.isNotEmpty) {
+                final realVideoUrl = videoMatches.first.group(0);
+                logger.i('✅ 提取视频源: $realVideoUrl');
+                completer.complete(realVideoUrl);
+              } else {
+                logger.i('✅ 使用完整URL: $finalUrl');
+                completer.complete(finalUrl);
               }
+            } catch (e) {
+              logger.e('处理重定向失败: $e，使用原始URL');
+              completer.complete(requestUrl);
             }
           }
-        } catch (e) {
-          logger.e('提取视频源时出错: $e');
-          if (!completer.isCompleted) {
-            completer.completeError('提取视频源失败: $e');
+        } else {
+          // 检查请求 URL 是否匹配视频格式
+          final matches = matchVideoRegex.allMatches(requestUrl);
+
+          if (matches.isNotEmpty && !completer.isCompleted) {
+            logger.i('🎯 从网络请求中找到视频URL: $requestUrl');
+            
+            try {
+              // 跟随重定向获取最终URL
+              final finalUrl = await _followRedirects(requestUrl, userAgent);
+              logger.i('✅ 最终视频源: $finalUrl');
+              completer.complete(finalUrl);
+            } catch (e) {
+              logger.e('处理重定向失败: $e，使用原始URL');
+              completer.complete(requestUrl);
+            }
           }
         }
+
+        // 返回 null 继续正常请求
+        return null;
       },
-      onWebViewCreated: (controller) {
-        webViewController = controller;
+      onLoadStop: (controller, uri) async {
+        // 页面加载完成，等待资源请求完成
+        logger.i('📄 页面加载完成: $uri');
       },
     );
 
     try {
       // 启动无头 WebView
       await headlessWebView.run();
+      _currentWebView = headlessWebView;
 
-      //等待结果，超时时间 30 秒
       final result = await completer.future.timeout(
-        const Duration(seconds: 30),
+        const Duration(seconds: 60),
         onTimeout: () {
           throw TimeoutException('获取视频源超时');
         },
       );
       logger.i('✅ 最终返回视频源: $result');
       return result;
+    } catch (e) {
+      logger.e('获取视频源失败: $e');
+      rethrow;
     } finally {
       // 清理资源
+      if (_currentWebView == headlessWebView) {
+        _currentWebView = null;
+      }
+      if (_currentCompleter == completer) {
+        _currentCompleter = null;
+      }
       await headlessWebView.dispose();
     }
   }

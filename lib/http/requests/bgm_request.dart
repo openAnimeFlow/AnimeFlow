@@ -1,3 +1,4 @@
+import 'package:anime_flow/constants/constants.dart';
 import 'package:anime_flow/http/api/bgm_api.dart';
 import 'package:anime_flow/http/api/common_api.dart';
 import 'package:anime_flow/models/item/episodes_item.dart';
@@ -12,7 +13,7 @@ class BgmRequest {
     final response = await dioRequest.get(BgmApi.hot,
         queryParameters: {"type": 2, "limit": limit, "offset": offset},
         options: Options(
-            headers: {CommonApi.userAgent: CommonApi.bangumiUserAgent}));
+            headers: {Constants.userAgentName: CommonApi.bangumiUserAgent}));
     return HotItem.fromJson(response.data);
   }
 
@@ -21,7 +22,7 @@ class BgmRequest {
     final response = await dioRequest.get(
         BgmApi.subjectById.replaceFirst('{subjectId}', id.toString()),
         options: Options(
-            headers: {CommonApi.userAgent: CommonApi.bangumiUserAgent}));
+            headers: {Constants.userAgentName: CommonApi.bangumiUserAgent}));
     return SubjectsItem.fromJson(response.data);
   }
 
@@ -32,7 +33,7 @@ class BgmRequest {
         BgmApi.episodes.replaceFirst('{subjectId}', id.toString()),
         queryParameters: {"limit": limit, "offset": offset},
         options: Options(
-            headers: {CommonApi.userAgent: CommonApi.bangumiUserAgent}));
+            headers: {Constants.userAgentName: CommonApi.bangumiUserAgent}));
     return EpisodesItem.fromJson(response.data);
   }
 }

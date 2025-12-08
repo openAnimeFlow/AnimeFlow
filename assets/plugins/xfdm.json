@@ -1,5 +1,5 @@
 {
-  "version": "0.0.3",
+  "version": "0.0.5",
   "name": "稀饭动漫",
   "iconUrl": "https://dm.xifanacg.com/upload/site/20240308-1/813e41f81d6f85bfd7a44bf8a813f9e5.png",
   "baseURL": "https://dm.xifanacg.com",
@@ -11,8 +11,8 @@
   "lineList": "//ul[@class='anthology-list-play size']",
   "episode": "/li /a",
   "matchVideo": {
-    "enableNestedUrl": false,
-    "matchNestedUrl": "https?://[^\\s&\"]+\\.m3u8|.mp4|.mkv",
+    "enableNestedUrl": true,
+    "matchNestedUrl": "\\.php.*\\.(mp4|m3u8|mkv)",
     "matchVideoUrl": "https://[^\\s]+(\\.mp4|\\.mkv|\\.m3u8)"
   }
 }

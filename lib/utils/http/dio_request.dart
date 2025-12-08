@@ -119,6 +119,23 @@ class DioRequest {
     }
   }
 
+  /// HEAD 请求（用于获取资源信息，不下载内容）
+  Future<Response> head(
+    String path, {
+    Map<String, dynamic>? queryParameters,
+    Options? options,
+  }) async {
+    try {
+      return await _dio!.head(
+        path,
+        queryParameters: queryParameters,
+        options: options,
+      );
+    } on DioException catch (e) {
+      throw _handleError(e);
+    }
+  }
+
   /// 下载文件
   Future<Response> download(String url, String savePath) async {
     try {

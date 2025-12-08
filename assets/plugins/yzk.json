@@ -1,0 +1,18 @@
+{
+  "version": "0.0.3",
+  "name": "樱之空动漫",
+  "iconUrl": "https://m.qpic.cn/psc?/V53GaiZ23yMSZp4PeFLA3GMb1z3uMyFk/LiySpxowE0yeWXwBdXN*SQRTNWNNxzVW4TsBtTVMz4q8cGMoOXe5rsZnG8YYfz18qwv7YG3ApKJfb2AH*YQ18qftEy3*mLu*G3rpiq.Q*Nk!/b&bo=yADIAMgAyAADByI",
+  "baseURL": "https://skr.skr1.cc:666",
+  "searchURL": "https://skr.skr1.cc:666/vodsearch/-------------/?wd={keyword}",
+  "searchList": "//div[@class='container_d pannel search_box clearfix'] //ul[@class='vodlist clearfix'] /li",
+  "searchName": "/div[2] /h4 /a",
+  "searchLink": "/div[2] /h4 /a",
+  "lineNames": "//div[@class='play_source'] /div /a",
+  "lineList": "//div[@class='playlist_full'] /ul",
+  "episode": "/li /a",
+  "matchVideo": {
+    "enableNestedUrl": true,
+    "matchNestedUrl": "\\.php.*\\.(mp4|m3u8|mkv)",
+    "matchVideoUrl": "https://[^\\s]+(\\.mp4|\\.mkv|\\.m3u8)"
+  }
+}

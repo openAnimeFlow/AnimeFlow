@@ -1,6 +1,6 @@
 class Constants {
   /// 随机UA列表
-  static const List<String> userAgentsList = [
+  static const List<String> userAgentList = [
     'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/141.0.0.0 Safari/537.36',
     'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/136.0.0.0 Safari/537.36',
     'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/134.0.0.0 Safari/537.36',
@@ -14,4 +14,7 @@ class Constants {
 
   /// 爬虫配置表
   static const String crawlConfigs = 'crawl_configs';
+
+  //常规请求头
+  static const String userAgentName = 'User-Agent';
 }

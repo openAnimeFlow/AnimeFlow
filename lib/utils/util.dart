@@ -16,6 +16,7 @@ class Util {
     final pluginFiles = [
       'assets/plugins/girigiri.json',
       'assets/plugins/xfdm.json',
+      'assets/plugins/yzk.json',
     ];
 
     for (final path in pluginFiles) {
@@ -27,7 +28,7 @@ class Util {
         final version = config['version'];
         if (!box.containsKey(name) || box.get(name)['version'] != version) {
           await box.put(name, config);
-          logger.i('已加载配置：$name版本：$version');
+          logger.i('已加载配置：$name,版本：$version');
         }
       } catch (e) {
         logger.e('加载配置失败：$path, 错误：$e');

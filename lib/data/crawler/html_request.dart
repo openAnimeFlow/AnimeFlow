@@ -1,7 +1,6 @@
 import 'dart:async';
 import 'dart:math';
 import 'package:anime_flow/data/crawler/html_crawler.dart';
-import 'package:anime_flow/http/api/common_api.dart';
 import 'package:anime_flow/models/item/crawler_config_item.dart';
 import 'package:anime_flow/models/item/video/episode_resources_item.dart';
 import 'package:anime_flow/models/item/video/search_resources_item.dart';
@@ -18,13 +17,13 @@ class WebRequest {
       String keyword, CrawlConfigItem crawlConfig) async {
     final String searchURL = crawlConfig.searchURL;
     final userAgent = Constants
-        .userAgentsList[Random().nextInt(Constants.userAgentsList.length)];
+        .userAgentList[Random().nextInt(Constants.userAgentList.length)];
 
     final response =
-        await dioRequest.get(searchURL.replaceFirst("{keyword}", keyword),
-            options: Options(headers: {
-              CommonApi.userAgent: userAgent,
-            }));
+    await dioRequest.get(searchURL.replaceFirst("{keyword}", keyword),
+        options: Options(headers: {
+          Constants.userAgentName: userAgent,
+        }));
     return HtmlCrawler.parseSearchHtml(response.data, crawlConfig);
   }
 
@@ -34,11 +33,11 @@ class WebRequest {
     final String baseURL = crawlConfig.baseURL;
 
     final userAgent = Constants
-        .userAgentsList[Random().nextInt(Constants.userAgentsList.length)];
+        .userAgentList[Random().nextInt(Constants.userAgentName.length)];
 
     final response = await dioRequest.get(baseURL + link,
         options: Options(headers: {
-          CommonApi.userAgent: userAgent,
+          Constants.userAgentName: userAgent,
         }));
     return HtmlCrawler.parseResourcesHtml(response.data, crawlConfig);
   }
@@ -48,12 +47,6 @@ class WebRequest {
       String link, VideoConfig videoConfig) async {
     final String baseUrl = videoConfig.baseURL;
     final url = baseUrl + link;
-
-    // 正则表达式：匹配 https:// 开头，以 .mp4、.mkv 或 .m3u8 结尾的链接
-    // final RegExp videoRegex = RegExp(
-    //   r'https://[^\s"<>\\]+\.(mp4|mkv|m3u8)',
-    //   caseSensitive: false,
-    // );
 
     // 根据平台选择不同的实现方式
     return HtmlCrawler.getVideoSourceWithInAppWebView(url, videoConfig);

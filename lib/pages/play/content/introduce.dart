@@ -147,19 +147,18 @@ class _IntroduceViewState extends State<IntroduceView>
                     children: [
                       Text("选集"),
                       IconButton(
-                        onPressed: () {
-                          if (playPageController.isWideScreen.value) {
-                            // 宽屏展示侧边抽屉
-                            _showSideDrawer(context,
-                                title: IntroduceView.drawerTitle);
-                          } else {
-                            // 窄屏展示底部抽屉
-                            _showBottomSheet(context,
-                                title: IntroduceView.drawerTitle);
-                          }
-                        },
-                        icon: Icon(Icons.more_horiz_rounded),
-                      )
+                          onPressed: () {
+                            if (playPageController.isWideScreen.value) {
+                              // 宽屏展示侧边抽屉
+                              _showSideDrawer(context,
+                                  title: IntroduceView.drawerTitle);
+                            } else {
+                              // 窄屏展示底部抽屉
+                              _showBottomSheet(context,
+                                  title: IntroduceView.drawerTitle);
+                            }
+                          },
+                          icon: Icon(Icons.keyboard_arrow_down_rounded))
                     ],
                   ),
                   //横向滚动卡片
@@ -168,6 +167,7 @@ class _IntroduceViewState extends State<IntroduceView>
               ),
               //数据源
               Card(
+                elevation: 0,
                 child: Padding(
                   padding: EdgeInsets.all(10),
                   child: Row(
@@ -441,6 +441,12 @@ class _IntroduceViewState extends State<IntroduceView>
           if (episodeList.isEmpty) {
             return const Text('暂无章节数据');
           }
+          //TODO 暂时默认选择第一集
+          if (episodesController.episodeSort.value == 0) {
+            final firstEpisode = episodeList.first;
+            episodesController.setEpisodeSort(firstEpisode.sort, 1);
+            episodesController.setEpisodeTitle(firstEpisode.nameCN);
+          }
           return SingleChildScrollView(
             scrollDirection: Axis.horizontal,
             child: Row(
@@ -449,6 +455,7 @@ class _IntroduceViewState extends State<IntroduceView>
                 (index) {
                   final episode = episodeList[index];
                   return Obx(() => Card(
+                      elevation: 0,
                       color:
                           episodesController.episodeSort.value == episode.sort
                               ? Theme.of(context).colorScheme.primaryContainer

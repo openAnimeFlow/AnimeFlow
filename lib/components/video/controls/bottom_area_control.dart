@@ -19,90 +19,83 @@ class BottomAreaControl extends StatelessWidget {
   Widget build(BuildContext context) {
     //使用media_kit_video提供的全屏判断
     bool fullscreen = isFullscreen(context);
-    return Obx(() => AnimatedSize(
-          duration: const Duration(milliseconds: 300),
-          curve: Curves.easeInOut,
-          child: videoUiStateController.isShowControlsUi.value
-              ? Container(
-                  decoration: BoxDecoration(
-                    gradient: LinearGradient(colors: [
-                      Colors.black38,
-                      Colors.transparent,
-                    ], begin: Alignment.bottomCenter, end: Alignment.topCenter),
-                  ),
-                  child: Padding(
-                    padding: EdgeInsets.all(3),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        // 时间显示组件
-                        Padding(
-                          padding: EdgeInsets.symmetric(horizontal: 12),
-                          child: VideoTimeDisplay(
-                              videoController: videoUiStateController),
-                        ),
+    return Obx(() => AnimatedOpacity(
+        duration: const Duration(milliseconds: 300),
+        opacity: videoUiStateController.isShowControlsUi.value ? 1 : 0,
+        child: Container(
+          decoration: BoxDecoration(
+            gradient: LinearGradient(colors: [
+              Colors.black38,
+              Colors.transparent,
+            ], begin: Alignment.bottomCenter, end: Alignment.topCenter),
+          ),
+          child: Padding(
+            padding: EdgeInsets.only(
+                left: MediaQuery.of(context).padding.left, right: 5),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                // 时间显示组件
+                Padding(
+                  padding: EdgeInsets.symmetric(horizontal: 12),
+                  child:
+                      VideoTimeDisplay(videoController: videoUiStateController),
+                ),
 
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          crossAxisAlignment: CrossAxisAlignment.center,
-                          children: [
-                            // 播放按钮
-                            Obx(() => IconButton(
-                                padding: EdgeInsets.all(0),
-                                key: ValueKey<bool>(
-                                    videoStateController.playing.value),
-                                onPressed: () => {
-                                      videoStateController.playOrPauseVideo(),
-                                      videoUiStateController
-                                          .updateIndicatorType(
-                                              VideoControlsIndicatorType
-                                                  .playStatusIndicator),
-                                      videoUiStateController.showIndicator()
-                                    },
-                                icon: Icon(
-                                  videoStateController.playing.value
-                                      ? Icons.pause_rounded
-                                      : Icons.play_arrow_rounded,
-                                  size: 33,
-                                  color: Colors.white.withValues(alpha: 0.8),
-                                ))),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  children: [
+                    // 播放按钮
+                    Obx(() => IconButton(
+                        padding: EdgeInsets.all(0),
+                        key: ValueKey<bool>(videoStateController.playing.value),
+                        onPressed: () => {
+                              videoStateController.playOrPauseVideo(),
+                              videoUiStateController.updateIndicatorType(
+                                  VideoControlsIndicatorType
+                                      .playStatusIndicator),
+                              videoUiStateController.showIndicator()
+                            },
+                        icon: Icon(
+                          videoStateController.playing.value
+                              ? Icons.pause_rounded
+                              : Icons.play_arrow_rounded,
+                          size: 33,
+                          color: Colors.white.withValues(alpha: 0.8),
+                        ))),
 
-                            // 进度条
-                            Expanded(
-                              child: VideoProgressBar(
-                                  videoUiStateController:
-                                      videoUiStateController),
-                            ),
-
-                            // 全屏按钮
-                            AnimatedContainer(
-                              duration: Duration(milliseconds: 500),
-                              child: IconButton(
-                                //使用media_kit_video提供的全屏方法
-                                onPressed: () => toggleFullscreen(context),
-                                padding: EdgeInsets.all(0),
-                                icon: fullscreen
-                                    ? Icon(
-                                        size: 33,
-                                        Icons.fullscreen_exit,
-                                        color:
-                                            Colors.white.withValues(alpha: 0.8),
-                                      )
-                                    : Icon(
-                                        size: 33,
-                                        Icons.fullscreen,
-                                        color:
-                                            Colors.white.withValues(alpha: 0.8),
-                                      ),
-                              ),
-                            ),
-                          ],
-                        ),
-                      ],
+                    // 进度条
+                    Expanded(
+                      child: VideoProgressBar(
+                          videoUiStateController: videoUiStateController),
                     ),
-                  ),
-                )
-              : SizedBox.shrink(),
-        ));
+
+                    // 全屏按钮
+                    AnimatedContainer(
+                      duration: Duration(milliseconds: 500),
+                      child: IconButton(
+                        //使用media_kit_video提供的全屏方法
+                        onPressed: () => toggleFullscreen(context),
+                        padding: EdgeInsets.all(0),
+                        icon: fullscreen
+                            ? Icon(
+                                size: 33,
+                                Icons.fullscreen_exit,
+                                color: Colors.white.withValues(alpha: 0.8),
+                              )
+                            : Icon(
+                                size: 33,
+                                Icons.fullscreen,
+                                color: Colors.white.withValues(alpha: 0.8),
+                              ),
+                      ),
+                    ),
+                  ],
+                ),
+              ],
+            ),
+          ),
+        )));
   }
 }

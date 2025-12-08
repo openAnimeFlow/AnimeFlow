@@ -84,7 +84,7 @@ class MobileGestureDetector extends StatelessWidget {
         // 根据已确定的拖动类型，持续更新相应的值
         if (dragType == DragType.horizontal) {
           // 水平拖动：更新播放进度
-          videoUiStateController.updateHorizontalDrag(currentX, screenWidth);
+          // videoUiStateController.updateHorizontalDrag(currentX, screenWidth);
         } else if (dragType == DragType.vertical && isRightSide) {
           // 垂直拖动（右半屏）：更新音量
           videoStateController.updateVerticalDrag(

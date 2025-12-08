@@ -179,21 +179,19 @@ class HtmlCrawler {
           final matches = matchNestedRegex.allMatches(requestUrl);
           if (matches.isNotEmpty && !completer.isCompleted) {
             logger.i('🎯 从网络请求中找到匹配URL: $requestUrl');
-            
+            // 如果链接需要重定向直接返回给到播放器，播放器会自动处理。
+            if (request.url.hashCode > 301 && request.url.hashCode < 400) {
+              completer.complete(requestUrl);
+            }
             try {
-              // 跟随重定向获取最终URL
-              final finalUrl = await _followRedirects(requestUrl, userAgent);
-              logger.i('🔀 重定向后的URL: $finalUrl');
-              
-              // 从重定向后的URL中提取视频源
-              final videoMatches = matchVideoRegex.allMatches(finalUrl);
+              final videoMatches = matchVideoRegex.allMatches(requestUrl);
               if (videoMatches.isNotEmpty) {
                 final realVideoUrl = videoMatches.first.group(0);
                 logger.i('✅ 提取视频源: $realVideoUrl');
                 completer.complete(realVideoUrl);
               } else {
-                logger.i('✅ 使用完整URL: $finalUrl');
-                completer.complete(finalUrl);
+                logger.i('✅ 使用完整URL: $requestUrl');
+                completer.complete(requestUrl);
               }
             } catch (e) {
               logger.e('处理重定向失败: $e，使用原始URL');
@@ -206,7 +204,7 @@ class HtmlCrawler {
 
           if (matches.isNotEmpty && !completer.isCompleted) {
             logger.i('🎯 从网络请求中找到视频URL: $requestUrl');
-            
+
             try {
               // 跟随重定向获取最终URL
               final finalUrl = await _followRedirects(requestUrl, userAgent);
@@ -239,7 +237,6 @@ class HtmlCrawler {
           throw TimeoutException('获取视频源超时');
         },
       );
-      logger.i('✅ 最终返回视频源: $result');
       return result;
     } catch (e) {
       logger.e('获取视频源失败: $e');

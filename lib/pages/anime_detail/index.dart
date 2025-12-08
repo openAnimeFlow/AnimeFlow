@@ -89,7 +89,7 @@ class _AnimeDetailPageState extends State<AnimeDetailPage>
                       IconButton(
                         padding: EdgeInsets.all(0),
                         iconSize: 25,
-                        icon: const Icon(Icons.arrow_back_ios_new_rounded),
+                        icon: const Icon(Icons.arrow_back_rounded),
                         onPressed: () {
                           Get.back();
                         },
@@ -102,15 +102,15 @@ class _AnimeDetailPageState extends State<AnimeDetailPage>
                               ClipRRect(
                                 borderRadius: BorderRadius.circular(5),
                                 child: AnimationNetworkImage(
-                                    width: 25,
-                                    height: 25,
+                                    width: 26,
+                                    height: 36,
                                     fit: BoxFit.cover,
                                     url: subject.images.common),
                               ),
                               SizedBox(width: 5),
                               Text(
                                 subject.nameCN ?? subject.name,
-                                style: const TextStyle(fontSize: 18),
+                                style: const TextStyle(fontSize: 15),
                               ),
                             ],
                           )),

@@ -192,7 +192,7 @@ class _IntroduceViewState extends State<IntroduceView>
                                     style:
                                         TextStyle(fontWeight: FontWeight.bold),
                                   )
-                                : SizedBox.shrink()),
+                                : Text('选择数据源')),
                           ],
                         ),
                       ),
@@ -442,10 +442,15 @@ class _IntroduceViewState extends State<IntroduceView>
             return const Text('暂无章节数据');
           }
           //TODO 暂时默认选择第一集
-          if (episodesController.episodeSort.value == 0) {
-            final firstEpisode = episodeList.first;
-            episodesController.setEpisodeSort(firstEpisode.sort, 1);
-            episodesController.setEpisodeTitle(firstEpisode.nameCN);
+          if (episodesController.episodeSort.value == 0 &&
+              episodeList.isNotEmpty) {
+            WidgetsBinding.instance.addPostFrameCallback((_) {
+              if (mounted) {
+                final firstEpisode = episodeList.first;
+                episodesController.setEpisodeSort(firstEpisode.sort, 1);
+                episodesController.setEpisodeTitle(firstEpisode.nameCN);
+              }
+            });
           }
           return SingleChildScrollView(
             scrollDirection: Axis.horizontal,

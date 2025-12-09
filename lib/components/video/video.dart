@@ -28,11 +28,9 @@ class _VideoViewState extends State<VideoView> {
     super.initState();
     videoSourceController = Get.find<VideoSourceController>();
     videoUiStateController = Get.put(VideoUiStateController(player));
-    // videoSourceController.videoRul.listen((url) {
-    //   player.open(Media(url));
-    // });
-    player.open(Media(
-        "https://vod.skr0.cc:666/skr.php?t=0b07c4aabfdc28bb8236e195c401e1b2&ad=1&td=46&id=214289&link=https://vip.ffzy-online1.com/20251208/58771_3f14abec/index.m3u8"));
+    videoSourceController.videoRul.listen((url) {
+      player.open(Media(url));
+    });
     Get.put(VideoStateController(player));
   }
 

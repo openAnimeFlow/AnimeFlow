@@ -174,49 +174,12 @@ class HtmlCrawler {
       shouldInterceptRequest: (controller, request) async {
         final requestUrl = request.url.toString();
 
-        if (enableNestedUrl) {
-          // 检查请求 URL 是否匹配嵌套格式
-          final matches = matchNestedRegex.allMatches(requestUrl);
-          if (matches.isNotEmpty && !completer.isCompleted) {
-            logger.i('🎯 从网络请求中找到匹配URL: $requestUrl');
-            // 如果链接需要重定向直接返回给到播放器，播放器会自动处理。
-            if (request.url.hashCode > 301 && request.url.hashCode < 400) {
-              completer.complete(requestUrl);
-            }
-            try {
-              final videoMatches = matchVideoRegex.allMatches(requestUrl);
-              if (videoMatches.isNotEmpty) {
-                final realVideoUrl = videoMatches.first.group(0);
-                logger.i('✅ 提取视频源: $realVideoUrl');
-                completer.complete(realVideoUrl);
-              } else {
-                logger.i('✅ 使用完整URL: $requestUrl');
-                completer.complete(requestUrl);
-              }
-            } catch (e) {
-              logger.e('处理重定向失败: $e，使用原始URL');
-              completer.complete(requestUrl);
-            }
-          }
-        } else {
-          // 检查请求 URL 是否匹配视频格式
-          final matches = matchVideoRegex.allMatches(requestUrl);
+        final videoMatches = matchVideoRegex.allMatches(requestUrl);
 
-          if (matches.isNotEmpty && !completer.isCompleted) {
-            logger.i('🎯 从网络请求中找到视频URL: $requestUrl');
-
-            try {
-              // 跟随重定向获取最终URL
-              final finalUrl = await _followRedirects(requestUrl, userAgent);
-              logger.i('✅ 最终视频源: $finalUrl');
-              completer.complete(finalUrl);
-            } catch (e) {
-              logger.e('处理重定向失败: $e，使用原始URL');
-              completer.complete(requestUrl);
-            }
-          }
+        if (videoMatches.isNotEmpty && !completer.isCompleted) {
+          logger.i('视频源: $requestUrl');
+          completer.complete(requestUrl);
         }
-
         // 返回 null 继续正常请求
         return null;
       },

@@ -1,5 +1,4 @@
 import 'package:anime_flow/constants/constants.dart';
-import 'package:anime_flow/utils/util.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:hive_flutter/hive_flutter.dart';

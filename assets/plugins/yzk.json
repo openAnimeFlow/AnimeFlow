@@ -1,5 +1,5 @@
 {
-  "version": "0.0.3",
+  "version": "0.0.4",
   "name": "樱之空动漫",
   "iconUrl": "https://m.qpic.cn/psc?/V53GaiZ23yMSZp4PeFLA3GMb1z3uMyFk/LiySpxowE0yeWXwBdXN*SQRTNWNNxzVW4TsBtTVMz4q8cGMoOXe5rsZnG8YYfz18qwv7YG3ApKJfb2AH*YQ18qftEy3*mLu*G3rpiq.Q*Nk!/b&bo=yADIAMgAyAADByI",
   "baseURL": "https://skr.skr1.cc:666",
@@ -12,7 +12,7 @@
   "episode": "/li /a",
   "matchVideo": {
     "enableNestedUrl": true,
-    "matchNestedUrl": "\\.php.*\\.(mp4|m3u8|mkv)",
+    "matchNestedUrl": ".*\\.php.*\\.(mp4|avi|mov|wmv|flv|webm|m3u8|mkv|mpeg|mpg)$",
     "matchVideoUrl": "https://[^\\s]+(\\.mp4|\\.mkv|\\.m3u8)"
   }
 }

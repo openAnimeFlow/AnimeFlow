@@ -1,5 +1,5 @@
 {
-  "version": "0.0.1",
+  "version": "0.0.2",
   "name": "girigiri愛動漫",
   "iconUrl": "https://bgm.girigirilove.com/guanggao/fdd2694db66628a9deadd86e50aedd43.png",
   "baseURL": "https://bgm.girigirilove.com",
@@ -12,7 +12,7 @@
   "episode": "/li /a",
   "matchVideo": {
     "enableNestedUrl": true,
-    "matchNestedUrl": "https?://[^\\s&\"]+\\.m3u8|.mp4|.mkv",
+    "matchNestedUrl": ".*\\.php.*\\.(mp4|avi|mov|wmv|flv|webm|m3u8|mkv|mpeg|mpg)$",
     "matchVideoUrl": "https://[^\\s]+(\\.mp4|\\.mkv|\\.m3u8)"
   }
 }

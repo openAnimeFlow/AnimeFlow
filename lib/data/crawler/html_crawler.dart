@@ -173,13 +173,18 @@ class HtmlCrawler {
       // 拦截所有网络请求
       shouldInterceptRequest: (controller, request) async {
         final requestUrl = request.url.toString();
+        if(enableNestedUrl) {
+          final videoMatches = matchNestedRegex.allMatches(requestUrl);
 
-        final videoMatches = matchVideoRegex.allMatches(requestUrl);
-
-        if (videoMatches.isNotEmpty && !completer.isCompleted) {
-          logger.i('视频源: $requestUrl');
-          completer.complete(requestUrl);
+          if (videoMatches.isNotEmpty && !completer.isCompleted) {
+            final videoUrl = requestUrl.split('url=')[1];
+            logger.i('视频源: $videoUrl');
+            completer.complete(videoUrl);
+          }
+        } else {
+          //直接匹配
         }
+
         // 返回 null 继续正常请求
         return null;
       },

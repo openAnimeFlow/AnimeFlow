@@ -116,7 +116,7 @@ class TopAreaControl extends StatelessWidget {
                                       icon: playPageController
                                               .isContentExpanded.value
                                           ? SvgPicture.asset(
-                                              "lib/assets/icons/right_panel_close.svg",
+                                              "assets/icons/right_panel_close.svg",
                                               width: 30,
                                               height: 30,
                                               colorFilter: ColorFilter.mode(
@@ -125,7 +125,7 @@ class TopAreaControl extends StatelessWidget {
                                               ),
                                             )
                                           : SvgPicture.asset(
-                                              "lib/assets/icons/left_panel_close.svg",
+                                              "assets/icons/left_panel_close.svg",
                                               width: 30,
                                               height: 30,
                                               colorFilter: ColorFilter.mode(

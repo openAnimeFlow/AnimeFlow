@@ -61,101 +61,6 @@ class _RecommendViewState extends State<RecommendView> {
     }
   }
 
-  Widget _buildPage() {
-    if (_dataList.isEmpty && _isLoading) {
-      return const Center(child: CircularProgressIndicator());
-    }
-
-    return LayoutBuilder(
-      builder: (context, constraints) {
-        return Center(
-          child: ConstrainedBox(
-            constraints: const BoxConstraints(maxWidth: 1800),
-            child: GridView.builder(
-              controller: _scrollController,
-              padding: const EdgeInsets.all(10),
-              gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                crossAxisCount: LayoutUtil.getCrossAxisCount(constraints),
-                crossAxisSpacing: 5, // 横向间距
-                mainAxisSpacing: 5, // 纵向间距
-                childAspectRatio: 0.7, // 宽高比
-              ),
-              itemCount: _dataList.length + 1,
-              itemBuilder: (BuildContext context, int index) {
-                if (index == _dataList.length) {
-                  return _hasMore
-                      ? const Center(child: CircularProgressIndicator())
-                      : const Center(
-                          child: Padding(
-                          padding: EdgeInsets.all(8.0),
-                          child: Text("没有更多了"),
-                        ));
-                }
-
-                final dataItem = _dataList[index].subject;
-                return Card(
-                  clipBehavior: Clip.hardEdge,
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                  child: InkWell(
-                    onTap: () {
-                      Get.toNamed("/anime_detail", arguments: dataItem);
-                    },
-                    highlightColor: Colors.white.withValues(alpha: 0.1),
-                    child: Stack(
-                      children: [
-                        Positioned(
-                            top: 0,
-                            left: 0,
-                            bottom: 0,
-                            right: 0,
-                            child: AnimationNetworkImage(
-                              url: dataItem.images.large,
-                              fit: BoxFit.cover,
-                            )),
-                        Positioned(
-                          bottom: 0,
-                          left: 0,
-                          right: 0,
-                          child: Container(
-                            padding: const EdgeInsets.all(5),
-                            decoration: const BoxDecoration(
-                              gradient: LinearGradient(
-                                begin: Alignment.bottomCenter,
-                                end: Alignment.topCenter,
-                                colors: [
-                                  //从灰到白
-                                  Colors.black38,
-                                  Colors.transparent,
-                                ],
-                              ),
-                            ),
-                            child: Text(
-                              style: const TextStyle(
-                                color: Colors.white,
-                                fontSize: 15,
-                                fontWeight: FontWeight.bold,
-                              ),
-                              textAlign: TextAlign.left,
-                              maxLines: 2,
-                              overflow: TextOverflow.ellipsis,
-                              dataItem.nameCN ?? dataItem.name,
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                );
-              },
-            ),
-          ),
-        );
-      },
-    );
-  }
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -182,6 +87,103 @@ class _RecommendViewState extends State<RecommendView> {
         ),
       ),
       body: _buildPage(),
+    );
+  }
+
+  Widget _buildPage() {
+    if (_dataList.isEmpty && _isLoading) {
+      return const Center(child: CircularProgressIndicator());
+    }
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        return Center(
+          child: ConstrainedBox(
+            constraints: const BoxConstraints(maxWidth: 1800),
+            child: GridView.builder(
+              controller: _scrollController,
+              padding: const EdgeInsets.all(10),
+              gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                crossAxisCount: LayoutUtil.getCrossAxisCount(constraints),
+                crossAxisSpacing: 5, // 横向间距
+                mainAxisSpacing: 5, // 纵向间距
+                childAspectRatio: 0.7, // 宽高比
+              ),
+              itemCount: _dataList.length + 1,
+              itemBuilder: (BuildContext context, int index) {
+                if (index == _dataList.length) {
+                  return _hasMore
+                      ? const Center(child: CircularProgressIndicator())
+                      : const Center(
+                          child: Padding(
+                          padding: EdgeInsets.all(8.0),
+                          child: Text("没有更多了"),
+                        ));
+                }
+                final subject = _dataList[index].subject;
+                return _buildCard(subject);
+              },
+            ),
+          ),
+        );
+      },
+    );
+  }
+
+  Widget _buildCard(Subject subject) {
+    return Card(
+      clipBehavior: Clip.hardEdge,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(12),
+      ),
+      child: InkWell(
+        onTap: () {
+          Get.toNamed("/anime_detail", arguments: subject);
+        },
+        highlightColor: Colors.white.withValues(alpha: 0.1),
+        child: Stack(
+          children: [
+            Positioned(
+                top: 0,
+                left: 0,
+                bottom: 0,
+                right: 0,
+                child: AnimationNetworkImage(
+                  url: subject.images.large,
+                  fit: BoxFit.cover,
+                )),
+            Positioned(
+              bottom: 0,
+              left: 0,
+              right: 0,
+              child: Container(
+                padding: const EdgeInsets.all(5),
+                decoration: const BoxDecoration(
+                  gradient: LinearGradient(
+                    begin: Alignment.bottomCenter,
+                    end: Alignment.topCenter,
+                    colors: [
+                      //从灰到白
+                      Colors.black38,
+                      Colors.transparent,
+                    ],
+                  ),
+                ),
+                child: Text(
+                  subject.nameCN ?? subject.name,
+                  style: const TextStyle(
+                    color: Colors.white,
+                    fontSize: 15,
+                    fontWeight: FontWeight.bold,
+                  ),
+                  textAlign: TextAlign.left,
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
     );
   }
 }

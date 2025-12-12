@@ -2,5 +2,5 @@
 class PlayLayoutConstant {
 
   ///播放页面内容宽度
-  static const double playContentWidth = 350.0;
+  static const double playContentWidth = 360.0;
 }

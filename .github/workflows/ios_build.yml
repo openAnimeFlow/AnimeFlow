@@ -1,0 +1,42 @@
+name: Build Flutter iOS
+
+on:
+  workflow_dispatch:
+
+jobs:
+  build_ios:
+    runs-on: macos-14
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Install Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          flutter-version-file: pubspec.yaml
+          channel: stable
+
+      - name: Install dependencies
+        run: flutter pub get
+
+      # 输出可用模拟器和 SDK
+      - name: Show available simulators
+        run: |
+          xcrun simctl list devices
+          xcodebuild -showsdks
+
+      - name: Build iOS
+        run: flutter build ios --release --no-codesign
+
+      - name: Create IPA
+        run: |
+          mkdir Payload
+          cp -R build/ios/iphoneos/Runner.app Payload/Runner.app
+          zip -q -r AnimeFlow.ipa Payload
+
+      - name: Upload IPA artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: AnimeFlow_ios
+          path: AnimeFlow.ipa

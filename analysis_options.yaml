@@ -23,6 +23,12 @@ linter:
   rules:
     # avoid_print: false  # Uncomment to disable the `avoid_print` rule
     # prefer_single_quotes: true  # Uncomment to enable the `prefer_single_quotes` rule
+    
+    # Const 相关规则 - 提高性能
+    prefer_const_constructors: true  # 建议使用 const 构造函数
+    prefer_const_constructors_in_immutables: true  # 在不可变类中使用 const
+    prefer_const_declarations: true  # 建议使用 const 声明
+    prefer_const_literals_to_create_immutables: true  # 使用 const 字面量
 
 # Additional information about this file can be found at
 # https://dart.dev/guides/language/analysis-options

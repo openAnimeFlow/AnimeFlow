@@ -1,4 +1,4 @@
-import 'package:anime_flow/components/play_content/video_source_drawers.dart';
+import 'package:anime_flow/components/play_content/source_drawers/video_source_drawers.dart';
 import 'package:anime_flow/constants/play_layout_constant.dart';
 import 'package:anime_flow/controllers/crawler/crawler_config_controller.dart';
 import 'package:anime_flow/controllers/episodes/episodes_controller.dart';
@@ -8,6 +8,7 @@ import 'package:anime_flow/models/item/crawler_config_item.dart';
 import 'package:anime_flow/models/item/episodes_item.dart';
 import 'package:anime_flow/models/item/hot_item.dart';
 import 'package:anime_flow/models/item/video/resources_item.dart';
+import 'package:anime_flow/pages/play/content/video_resources/index.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:logger/logger.dart';
@@ -29,9 +30,7 @@ class _IntroduceViewState extends State<IntroduceView>
   late PlayPageController playPageController;
   late VideoSourceController videoResourcesController;
   late EpisodesController episodesController;
-  late VideoSourceController videoSourceController;
   late CrawlerConfigController crawlerConfigController;
-  List<ResourcesItem> videoResources = [];
   Worker? _screenWorker; // 屏幕宽高监听器
   bool isVideoSourceLoading = true;
 
@@ -45,10 +44,8 @@ class _IntroduceViewState extends State<IntroduceView>
     playPageController = Get.find<PlayPageController>();
     videoResourcesController = Get.find<VideoSourceController>();
     episodesController = Get.find<EpisodesController>();
-    videoSourceController = Get.find<VideoSourceController>();
     crawlerConfigController = Get.find<CrawlerConfigController>();
 
-    getVideoResources();
     // 初始化监听器
     _screenWorker = ever(playPageController.isWideScreen, (isWide) {
       // 如果有任何弹窗打开（BottomSheet 或 GeneralDialog），则关闭
@@ -68,51 +65,51 @@ class _IntroduceViewState extends State<IntroduceView>
     });
   }
 
-  void getVideoResources() async {
-    try {
-      final configs = await crawlerConfigController.loadAllCrawlConfigs();
-      List<ResourcesItem> allVideoResources = [];
-      for (var config in configs) {
-        final allEpisodesList =
-            await videoResourcesController.getEpisodeResources(
-                widget.subject.nameCN ?? widget.subject.name, config);
-
-        final baseURL = config.baseURL;
-        final websiteName = config.name;
-        final websiteIcon = config.iconUrl;
-        final matchVideoConfig = config.matchVideo;
-
-        VideoConfig videoConfig = VideoConfig(
-          enableNestedUrl: matchVideoConfig.enableNestedUrl,
-          matchNestedUrl: matchVideoConfig.matchNestedUrl,
-          matchVideoUrl: matchVideoConfig.matchNestedUrl,
-          baseURL: baseURL,
-        );
-
-        ResourcesItem resourcesItem = ResourcesItem(
-          websiteName: websiteName,
-          websiteIcon: websiteIcon,
-          episodeResources: allEpisodesList,
-          videoConfig: videoConfig,
-        );
-
-        allVideoResources.add(resourcesItem);
-        if (mounted) {
-          setState(() {
-            videoResources = allVideoResources;
-            isVideoSourceLoading = false;
-          });
-        }
-      }
-    } catch (e) {
-      logger.e(e);
-      if (mounted) {
-        setState(() {
-          isVideoSourceLoading = false;
-        });
-      }
-    }
-  }
+  // void getVideoResources() async {
+  //   try {
+  //     final configs = await crawlerConfigController.loadAllCrawlConfigs();
+  //     List<ResourcesItem> allVideoResources = [];
+  //     for (var config in configs) {
+  //       final allEpisodesList =
+  //           await videoResourcesController.getEpisodeResources(
+  //               widget.subject.nameCN ?? widget.subject.name, config);
+  //
+  //       final baseURL = config.baseURL;
+  //       final websiteName = config.name;
+  //       final websiteIcon = config.iconUrl;
+  //       final matchVideoConfig = config.matchVideo;
+  //
+  //       VideoConfig videoConfig = VideoConfig(
+  //         enableNestedUrl: matchVideoConfig.enableNestedUrl,
+  //         matchNestedUrl: matchVideoConfig.matchNestedUrl,
+  //         matchVideoUrl: matchVideoConfig.matchNestedUrl,
+  //         baseURL: baseURL,
+  //       );
+  //
+  //       ResourcesItem resourcesItem = ResourcesItem(
+  //         websiteName: websiteName,
+  //         websiteIcon: websiteIcon,
+  //         episodeResources: allEpisodesList,
+  //         videoConfig: videoConfig,
+  //       );
+  //
+  //       allVideoResources.add(resourcesItem);
+  //       if (mounted) {
+  //         setState(() {
+  //           videoResources = allVideoResources;
+  //           isVideoSourceLoading = false;
+  //         });
+  //       }
+  //     }
+  //   } catch (e) {
+  //     logger.e(e);
+  //     if (mounted) {
+  //       setState(() {
+  //         isVideoSourceLoading = false;
+  //       });
+  //     }
+  //   }
+  // }
 
   @override
   void dispose() {
@@ -127,17 +124,18 @@ class _IntroduceViewState extends State<IntroduceView>
     super.build(context);
     const String sourceTitle = "数据源";
     return Padding(
-        padding: EdgeInsets.all(10),
+        padding: const EdgeInsets.all(10),
         child: SingleChildScrollView(
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
                 widget.subject.nameCN ?? widget.subject.name,
-                style: TextStyle(fontSize: 15, fontWeight: FontWeight.bold),
+                style:
+                    const TextStyle(fontSize: 15, fontWeight: FontWeight.bold),
                 textAlign: TextAlign.left,
               ),
-              SizedBox(height: 10),
+              const SizedBox(height: 10),
               //章节
               Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -145,7 +143,7 @@ class _IntroduceViewState extends State<IntroduceView>
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      Text("选集"),
+                      const Text("选集"),
                       IconButton(
                           onPressed: () {
                             if (playPageController.isWideScreen.value) {
@@ -158,7 +156,7 @@ class _IntroduceViewState extends State<IntroduceView>
                                   title: IntroduceView.drawerTitle);
                             }
                           },
-                          icon: Icon(Icons.keyboard_arrow_down_rounded))
+                          icon: const Icon(Icons.keyboard_arrow_down_rounded))
                     ],
                   ),
                   //横向滚动卡片
@@ -166,85 +164,7 @@ class _IntroduceViewState extends State<IntroduceView>
                 ],
               ),
               //数据源
-              Card(
-                elevation: 0,
-                child: Padding(
-                  padding: EdgeInsets.all(10),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              sourceTitle,
-                              style: TextStyle(
-                                fontSize: 15,
-                              ),
-                            ),
-                            Obx(() => videoSourceController.webSiteName.value !=
-                                    ''
-                                ? Text(
-                                    videoSourceController.webSiteName.value,
-                                    maxLines: 3,
-                                    overflow: TextOverflow.ellipsis,
-                                    style:
-                                        TextStyle(fontWeight: FontWeight.bold),
-                                  )
-                                : Text('选择数据源')),
-                          ],
-                        ),
-                      ),
-                      SizedBox(width: 8),
-                      isVideoSourceLoading
-                          ? SizedBox(
-                              width: 20,
-                              height: 20,
-                              child: CircularProgressIndicator(),
-                            )
-                          : OutlinedButton.icon(
-                              onPressed: () {
-                                Get.generalDialog(
-                                    barrierDismissible: true,
-                                    barrierLabel: "SourceDrawer",
-                                    barrierColor: Colors.black54,
-                                    transitionDuration:
-                                        const Duration(milliseconds: 300),
-                                    // 动画
-                                    transitionBuilder: (context, animation,
-                                        secondaryAnimation, child) {
-                                      return SlideTransition(
-                                        position: Tween<Offset>(
-                                          begin: const Offset(1, 0),
-                                          end: Offset.zero,
-                                        ).animate(CurvedAnimation(
-                                          parent: animation,
-                                          curve: Curves.easeOut,
-                                        )),
-                                        child: child,
-                                      );
-                                    },
-                                    pageBuilder: (context, animation,
-                                        secondaryAnimation) {
-                                      return VideoSourceDrawers(
-                                        sourceTitle,
-                                        videoResources: videoResources,
-                                      );
-                                    });
-                              },
-                              style: OutlinedButton.styleFrom(
-                                side: BorderSide(
-                                  color: Theme.of(context).colorScheme.primary,
-                                ),
-                              ),
-                              icon: Icon(Icons.sync_alt_rounded),
-                              label: const Text("切换源"),
-                            ),
-                    ],
-                  ),
-                ),
-              )
+              const VideoResourcesView(title: sourceTitle)
             ],
           ),
         ));
@@ -259,10 +179,10 @@ class _IntroduceViewState extends State<IntroduceView>
         Container(
           //TODO 获取竖屏播放器高度状态，动态设置底部抽屉弹出占满剩余高度
           height: MediaQuery.of(context).size.height * 0.75,
-          padding: EdgeInsets.all(10),
+          padding: const EdgeInsets.all(10),
           decoration: BoxDecoration(
             color: Theme.of(context).cardColor,
-            borderRadius: BorderRadius.vertical(top: Radius.circular(15)),
+            borderRadius: const BorderRadius.vertical(top: Radius.circular(15)),
           ),
           child: Column(
             children: [

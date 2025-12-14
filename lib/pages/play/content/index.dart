@@ -29,14 +29,10 @@ class _ContentViewState extends State<ContentView>
   void initState() {
     super.initState();
     _tabController = TabController(length: _tabs.length, vsync: this);
-    Get.put(CrawlerConfigController());
-    Get.put(DataSourceController());
   }
 
   @override
   void dispose() {
-    Get.delete<CrawlerConfigController>();
-    Get.delete<DataSourceController>();
     super.dispose();
   }
 

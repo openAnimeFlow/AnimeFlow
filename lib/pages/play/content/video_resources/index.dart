@@ -53,9 +53,9 @@ class _VideoResourcesViewState extends State<VideoResourcesView> {
                       fontSize: 15,
                     ),
                   ),
-                  Obx(() => videoSourceController.webSiteName.value != ''
+                  Obx(() => videoSourceController.webSiteTitle.value != ''
                       ? Text(
-                          videoSourceController.webSiteName.value,
+                          videoSourceController.webSiteTitle.value,
                           maxLines: 3,
                           overflow: TextOverflow.ellipsis,
                           style: const TextStyle(fontWeight: FontWeight.bold),

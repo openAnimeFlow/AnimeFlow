@@ -1,4 +1,5 @@
 import 'package:anime_flow/components/video/controls/index_controls.dart';
+import 'package:anime_flow/controllers/video/data/data_source_controller.dart';
 import 'package:anime_flow/controllers/video/video_source_controller.dart';
 import 'package:anime_flow/controllers/video/video_state_controller.dart';
 import 'package:anime_flow/controllers/video/video_ui_state_controller.dart';
@@ -22,16 +23,18 @@ class _VideoViewState extends State<VideoView> {
   late final controller = VideoController(player);
   late VideoSourceController videoSourceController;
   late VideoUiStateController videoUiStateController;
+  late DataSourceController dataSourceController;
 
   @override
   void initState() {
     super.initState();
+    Get.put(VideoStateController(player));
     videoSourceController = Get.find<VideoSourceController>();
+    dataSourceController = Get.find<DataSourceController>();
     videoUiStateController = Get.put(VideoUiStateController(player));
-    videoSourceController.videoRul.listen((url) {
+    dataSourceController.videoUrl.listen((url) {
       player.open(Media(url));
     });
-    Get.put(VideoStateController(player));
   }
 
   @override

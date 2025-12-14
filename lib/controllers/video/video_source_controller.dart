@@ -7,10 +7,12 @@ import 'package:get/get.dart';
 /// 视频源控制器
 class VideoSourceController extends GetxController {
   final RxString videoRul = ''.obs;
-  final RxString webSiteName = ''.obs;
+  final RxString webSiteTitle = ''.obs;
+  final RxString webSiteIcon = ''.obs;
 
-  void setWebSiteName(String name) {
-    webSiteName.value = name;
+  void setWebSite({required String title, required String iconUrl}) {
+    webSiteTitle.value = title;
+    webSiteIcon.value = iconUrl;
   }
 
   void setVideoUrl(String url) {

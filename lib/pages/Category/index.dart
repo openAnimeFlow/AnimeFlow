@@ -11,19 +11,16 @@ class CategoryView extends StatefulWidget {
 }
 
 class _CategoryViewState extends State<CategoryView> {
-  late CrawlerConfigController crawlerConfigController;
   Logger logger = Logger();
 
   @override
   void initState() {
     super.initState();
-    crawlerConfigController = Get.put(CrawlerConfigController());
   }
 
   @override
   void dispose() {
     super.dispose();
-    Get.delete<CrawlerConfigController>();
   }
 
   @override
@@ -31,10 +28,7 @@ class _CategoryViewState extends State<CategoryView> {
     return Center(
         child: OutlinedButton(
             onPressed: () async {
-              final crawlerConfig =
-                  await crawlerConfigController.loadAllCrawlConfigs();
-              logger.i(crawlerConfig);
             },
-            child: Text("查看全部配置")));
+            child: const Text("查看全部配置")));
   }
 }

@@ -30,7 +30,6 @@ class _IntroduceViewState extends State<IntroduceView>
   late PlayPageController playPageController;
   late VideoSourceController videoResourcesController;
   late EpisodesController episodesController;
-  late CrawlerConfigController crawlerConfigController;
   Worker? _screenWorker; // 屏幕宽高监听器
   bool isVideoSourceLoading = true;
 
@@ -44,7 +43,6 @@ class _IntroduceViewState extends State<IntroduceView>
     playPageController = Get.find<PlayPageController>();
     videoResourcesController = Get.find<VideoSourceController>();
     episodesController = Get.find<EpisodesController>();
-    crawlerConfigController = Get.find<CrawlerConfigController>();
 
     // 初始化监听器
     _screenWorker = ever(playPageController.isWideScreen, (isWide) {
@@ -64,52 +62,6 @@ class _IntroduceViewState extends State<IntroduceView>
       }
     });
   }
-
-  // void getVideoResources() async {
-  //   try {
-  //     final configs = await crawlerConfigController.loadAllCrawlConfigs();
-  //     List<ResourcesItem> allVideoResources = [];
-  //     for (var config in configs) {
-  //       final allEpisodesList =
-  //           await videoResourcesController.getEpisodeResources(
-  //               widget.subject.nameCN ?? widget.subject.name, config);
-  //
-  //       final baseURL = config.baseURL;
-  //       final websiteName = config.name;
-  //       final websiteIcon = config.iconUrl;
-  //       final matchVideoConfig = config.matchVideo;
-  //
-  //       VideoConfig videoConfig = VideoConfig(
-  //         enableNestedUrl: matchVideoConfig.enableNestedUrl,
-  //         matchNestedUrl: matchVideoConfig.matchNestedUrl,
-  //         matchVideoUrl: matchVideoConfig.matchNestedUrl,
-  //         baseURL: baseURL,
-  //       );
-  //
-  //       ResourcesItem resourcesItem = ResourcesItem(
-  //         websiteName: websiteName,
-  //         websiteIcon: websiteIcon,
-  //         episodeResources: allEpisodesList,
-  //         videoConfig: videoConfig,
-  //       );
-  //
-  //       allVideoResources.add(resourcesItem);
-  //       if (mounted) {
-  //         setState(() {
-  //           videoResources = allVideoResources;
-  //           isVideoSourceLoading = false;
-  //         });
-  //       }
-  //     }
-  //   } catch (e) {
-  //     logger.e(e);
-  //     if (mounted) {
-  //       setState(() {
-  //         isVideoSourceLoading = false;
-  //       });
-  //     }
-  //   }
-  // }
 
   @override
   void dispose() {

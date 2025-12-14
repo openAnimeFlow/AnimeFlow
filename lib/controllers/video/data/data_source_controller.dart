@@ -8,6 +8,10 @@ import 'package:get/get.dart';
 
 class DataSourceController extends GetxController {
   late final Rx<List<ResourcesItem>> videoResources;
+  final RxString videoUrl = ''.obs;
+  final RxString webSiteName = ''.obs;
+  final RxString webSiteTitle = ''.obs;
+  final RxString webSiteIcon = ''.obs;
 
   DataSourceController() {
     videoResources = Rx<List<ResourcesItem>>([]);
@@ -103,5 +107,18 @@ class DataSourceController extends GetxController {
     }).toList();
 
     videoResources.value = updatedResources;
+  }
+
+  void setWebSiteName(String name) {
+    webSiteName.value = name;
+  }
+
+  void setVideoUrl(String url) {
+    videoUrl.value = url;
+  }
+
+  void setWebSite({required String title, required String iconUrl}) {
+    webSiteTitle.value = title;
+    webSiteIcon.value = iconUrl;
   }
 }

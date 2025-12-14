@@ -180,7 +180,8 @@ class _VideoSourceDrawersState extends State<VideoSourceDrawers> {
                                   height: 12,
                                   child: CircularProgressIndicator(
                                     strokeWidth: 2,
-                                    color: Theme.of(context).colorScheme.primary,
+                                    color:
+                                        Theme.of(context).colorScheme.primary,
                                   ),
                                 ),
                               ] else if (data.errorMessage != null) ...[
@@ -244,20 +245,21 @@ class _VideoSourceDrawersState extends State<VideoSourceDrawers> {
                   resourceItem,
                   dataSource[selectedWebsiteIndex].videoConfig,
                   websiteName: dataSource[selectedWebsiteIndex].websiteName,
+                  websiteIcon: dataSource[selectedWebsiteIndex].websiteIcon,
                 ),
 
                 // 在最后一项后显示开关按钮
                 if (isLastItem) ...[
                   Padding(
-                    padding: EdgeInsets.symmetric(vertical: 8),
+                    padding: const EdgeInsets.symmetric(vertical: 8),
                     child: Row(
                       mainAxisAlignment: MainAxisAlignment.end,
                       children: [
                         Text(
                           '显示已被排除的资源($excludedEpisodesCount)',
-                          style: TextStyle(fontSize: 14),
+                          style: const TextStyle(fontSize: 14),
                         ),
-                        SizedBox(width: 8),
+                        const SizedBox(width: 8),
                         Switch(
                           value: isShowEpisodes,
                           onChanged: (value) {
@@ -289,6 +291,8 @@ class _VideoSourceDrawersState extends State<VideoSourceDrawers> {
                           dataSource[selectedWebsiteIndex].videoConfig,
                           websiteName:
                               dataSource[selectedWebsiteIndex].websiteName,
+                          websiteIcon:
+                              dataSource[selectedWebsiteIndex].websiteIcon,
                         ),
                       );
                     }),
@@ -303,27 +307,30 @@ class _VideoSourceDrawersState extends State<VideoSourceDrawers> {
 
   Widget _buildSource(
       Episode episode, EpisodeResourcesItem item, VideoConfig videoConfig,
-      {required String websiteName}) {
+      {required String websiteName, required String websiteIcon}) {
     return Card.filled(
       margin: const EdgeInsets.only(bottom: 8),
       child: InkWell(
         onTap: () async {
           try {
-            videoSourceController.setWebSiteName(websiteName);
             Get.back();
+            dataSourceController.setWebSite(
+                title: websiteName, iconUrl: websiteIcon);
 
             videoStateController.disposeVideo();
             final videoUrl = await WebRequest.getVideoSourceService(
               episode.like,
               videoConfig,
             );
-            videoSourceController.setVideoUrl(videoUrl);
+
+            dataSourceController.setVideoUrl(videoUrl);
             Get.snackbar(
               '视频资源解析成功',
               '',
               duration: const Duration(seconds: 2),
               maxWidth: 300,
             );
+
           } catch (e) {
             Get.snackbar(
               '错误',

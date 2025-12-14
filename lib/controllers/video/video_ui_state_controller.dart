@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:anime_flow/models/enums/video_controls_icon_type.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:get/get.dart';
 import 'package:media_kit/media_kit.dart';
 
@@ -12,13 +13,14 @@ class VideoUiStateController extends GetxController {
   final Rx<Duration> buffer = Duration.zero.obs;
   final RxBool isBuffering = false.obs; // 是否正在缓冲
   final RxBool isDragging = false.obs; // 是否正在拖拽进度条
-  final RxBool isParsing = false.obs; //是否正在解析视频资源
   final RxBool isShowControlsUi = true.obs; //是否显示控件ui
   final RxBool isHorizontalDragging = false.obs; // 是否正在水平拖动
   final Rx<Duration> dragPosition = Duration.zero.obs; // 拖动时的临时进度
   final RxBool isShowIndicatorUi = false.obs; // 是否显示指示器ui
   final Rx<VideoControlsIndicatorType> indicatorType =
       VideoControlsIndicatorType.noIndicator.obs; // 指示器类型
+  final Rx<MainAxisAlignment> mainAxisAlignmentType =
+      MainAxisAlignment.start.obs; // 主轴对齐类型
 
   // 拖动相关
   double _dragStartX = 0;
@@ -26,6 +28,7 @@ class VideoUiStateController extends GetxController {
 
   //指示器计时器
   Timer? _indicatorTimer;
+
   //控件ui计时器
   Timer? _controlsUiTimer;
 
@@ -67,18 +70,25 @@ class VideoUiStateController extends GetxController {
     });
   }
 
+  //修改主轴类型
+  void updateMainAxisAlignmentType(MainAxisAlignment type) {
+    mainAxisAlignmentType.value = type;
+  }
+
   // 更新指示器类型
-  void updateIndicatorType(VideoControlsIndicatorType type) {
+  void updateIndicatorTypeAndShowIndicator(VideoControlsIndicatorType type) {
     indicatorType.value = type;
+    _showIndicator();
   }
 
   // 显示指示器
-  void showIndicator() {
+  void _showIndicator() {
     _indicatorTimer?.cancel();
     isShowIndicatorUi.value = true;
     _indicatorTimer = Timer(const Duration(seconds: 3), () {
       isShowIndicatorUi.value = false;
-      updateIndicatorType(VideoControlsIndicatorType.noIndicator);
+      updateIndicatorTypeAndShowIndicator(VideoControlsIndicatorType.noIndicator);
+      updateMainAxisAlignmentType(MainAxisAlignment.start);
     });
   }
 
@@ -96,11 +106,6 @@ class VideoUiStateController extends GetxController {
   void endDrag(Duration pos) {
     isDragging.value = false;
     seekTo(pos);
-  }
-
-  //更新资源解析状态
-  void updateParsingStatus(bool isParsing) {
-    this.isParsing.value = isParsing;
   }
 
   ///显示获|隐藏控件ui

@@ -34,9 +34,8 @@ class MobileGestureDetector extends StatelessWidget {
       //双击事件
       onDoubleTap: () {
         videoStateController.playOrPauseVideo();
-        videoUiStateController.updateIndicatorType(
+        videoUiStateController.updateIndicatorTypeAndShowIndicator(
             VideoControlsIndicatorType.playStatusIndicator);
-        videoUiStateController.showIndicator();
       },
 
       // 拖动开始事件：记录起始位置并判断屏幕区域
@@ -73,9 +72,8 @@ class MobileGestureDetector extends StatelessWidget {
               // 且在右半屏 → 垂直拖动（调整音量）
               dragType = DragType.vertical;
               videoStateController.startVerticalDrag();
-              videoUiStateController.updateIndicatorType(
+              videoUiStateController.updateIndicatorTypeAndShowIndicator(
                   VideoControlsIndicatorType.volumeIndicator);
-              videoUiStateController.showIndicator();
             }
             // TODO 左半屏的垂直拖动,调整亮度
           }

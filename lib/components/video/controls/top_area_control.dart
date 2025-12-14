@@ -7,6 +7,7 @@ import 'package:flutter_svg/svg.dart';
 import 'package:get/get.dart';
 import 'package:media_kit_video/media_kit_video.dart';
 
+/// 顶部区域空间
 class TopAreaControl extends StatelessWidget {
   final String subjectName;
   final PlayPageController playPageController;
@@ -36,7 +37,7 @@ class TopAreaControl extends StatelessWidget {
                       videoUiStateController.isShowControlsUi.value),
                   padding:
                       EdgeInsets.only(top: MediaQuery.of(context).padding.top),
-                  decoration: BoxDecoration(
+                  decoration: const BoxDecoration(
                       gradient: LinearGradient(
                           colors: [Colors.black45, Colors.transparent],
                           begin: Alignment.topCenter,

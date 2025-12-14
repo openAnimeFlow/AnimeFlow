@@ -6,6 +6,7 @@ import 'package:anime_flow/controllers/video/video_source_controller.dart';
 import 'package:anime_flow/controllers/video/video_state_controller.dart';
 import 'package:anime_flow/controllers/video/video_ui_state_controller.dart';
 import 'package:anime_flow/data/crawler/html_request.dart';
+import 'package:anime_flow/models/enums/video_controls_icon_type.dart';
 import 'package:anime_flow/models/item/crawler_config_item.dart';
 import 'package:anime_flow/models/item/video/episode_resources_item.dart';
 import 'package:anime_flow/models/item/video/resources_item.dart';
@@ -322,7 +323,12 @@ class _VideoSourceDrawersState extends State<VideoSourceDrawers> {
 
             videoStateController.disposeVideo();
 
-            videoUiStateController.updateParsingStatus(true);
+            videoUiStateController
+                .updateMainAxisAlignmentType(MainAxisAlignment.center);
+
+            videoUiStateController.updateIndicatorTypeAndShowIndicator(
+                VideoControlsIndicatorType.parsingIndicator);
+
             final videoUrl = await WebRequest.getVideoSourceService(
               episode.like,
               videoConfig,
@@ -342,8 +348,6 @@ class _VideoSourceDrawersState extends State<VideoSourceDrawers> {
               duration: const Duration(seconds: 3),
               backgroundColor: Colors.red.shade100,
             );
-          } finally {
-            videoUiStateController.updateParsingStatus(false);
           }
         },
         child: Padding(

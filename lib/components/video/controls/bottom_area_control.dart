@@ -6,6 +6,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:media_kit_video/media_kit_video.dart';
 
+/// 底部区域控件
 class BottomAreaControl extends StatelessWidget {
   final VideoUiStateController videoUiStateController;
   final VideoStateController videoStateController;
@@ -27,7 +28,7 @@ class BottomAreaControl extends StatelessWidget {
             ? Container(
                 key: ValueKey<bool>(
                     videoUiStateController.isShowControlsUi.value),
-                decoration: BoxDecoration(
+                decoration: const BoxDecoration(
                   gradient: LinearGradient(colors: [
                     Colors.black38,
                     Colors.transparent,
@@ -52,15 +53,14 @@ class BottomAreaControl extends StatelessWidget {
                         children: [
                           // 播放按钮
                           Obx(() => IconButton(
-                              padding: EdgeInsets.all(0),
+                              padding: const EdgeInsets.all(0),
                               key: ValueKey<bool>(
                                   videoStateController.playing.value),
                               onPressed: () => {
                                     videoStateController.playOrPauseVideo(),
-                                    videoUiStateController.updateIndicatorType(
+                                    videoUiStateController.updateIndicatorTypeAndShowIndicator(
                                         VideoControlsIndicatorType
                                             .playStatusIndicator),
-                                    videoUiStateController.showIndicator()
                                   },
                               icon: Icon(
                                 videoStateController.playing.value

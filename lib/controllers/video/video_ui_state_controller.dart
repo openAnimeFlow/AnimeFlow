@@ -182,7 +182,7 @@ class VideoUiStateController extends GetxController {
     isShowControlsUi.value = !isShowControlsUi.value;
   }
 
-  ///显示空间ui
+  ///显示控件ui
   void showControlsUi() {
     isShowControlsUi.value = true;
   }

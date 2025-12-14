@@ -32,8 +32,15 @@ class DesktopGestureDetector extends StatelessWidget {
         },
         child: MouseRegion(
           // 鼠标移入事件
-          onEnter: (event) {
+          // onEnter: (event) {
+          //   videoUiStateController.showControlsUi();
+          // },
+
+          // 鼠标悬停事件
+          onHover: (event) {
             videoUiStateController.showControlsUi();
+            videoUiStateController.hideControlsUi(
+                duration: const Duration(seconds: 3));
           },
 
           // 鼠标移出事件

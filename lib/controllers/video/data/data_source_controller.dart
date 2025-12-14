@@ -36,39 +36,67 @@ class DataSourceController extends GetxController {
   //初始化资源
   Future<void> initResources(String keyword) async {
     final configs = await CrawlConfig.loadAllCrawlConfigs();
-    for (var config in configs) {
-      await _getResources(keyword, config);
-    }
+
+    // 并发执行所有网站的资源获取
+    await Future.wait(
+      configs.map((config) => _getResources(keyword, config)),
+    );
   }
 
   Future<void> _getResources(String keyword, CrawlConfigItem config) async {
-    List<SearchResourcesItem> searchList =
-        await WebRequest.getSearchSubjectListService(keyword, config);
-    List<EpisodeResourcesItem> allEpisodesList = [];
-    for (var search in searchList) {
-      var crawlerEpisodeResources =
-          await WebRequest.getResourcesListService(search.link, config);
+    try {
+      // 设置解析中状态
+      _updateResourceStatus(config.name, isLoading: true, errorMessage: null);
 
-      // 转换 CrawlerEpisodeResourcesItem 到 EpisodeResourcesItem
-      for (var crawlerResource in crawlerEpisodeResources) {
-        var episodeResource = EpisodeResourcesItem(
-          lineNames: crawlerResource.lineNames,
-          episodes: crawlerResource.episodes,
-          subjectsTitle: search.name,
-        );
-        allEpisodesList.add(episodeResource);
+      List<SearchResourcesItem> searchList =
+          await WebRequest.getSearchSubjectListService(keyword, config);
+      List<EpisodeResourcesItem> allEpisodesList = [];
+
+      for (var search in searchList) {
+        var crawlerEpisodeResources =
+            await WebRequest.getResourcesListService(search.link, config);
+
+        // 转换 CrawlerEpisodeResourcesItem 到 EpisodeResourcesItem
+        for (var crawlerResource in crawlerEpisodeResources) {
+          var episodeResource = EpisodeResourcesItem(
+            lineNames: crawlerResource.lineNames,
+            episodes: crawlerResource.episodes,
+            subjectsTitle: search.name,
+          );
+          allEpisodesList.add(episodeResource);
+        }
       }
-    }
 
-    // 将 allEpisodesList 添加给 videoResources 的 episodeResources
+      // 更新资源并设置完成状态
+      _updateResourceStatus(
+        config.name,
+        isLoading: false,
+        episodeResources: allEpisodesList,
+      );
+    } catch (e) {
+      // 解析失败，设置错误状态
+      _updateResourceStatus(
+        config.name,
+        isLoading: false,
+        errorMessage: '解析失败: $e',
+      );
+    }
+  }
+
+  // 更新指定网站的状态
+  void _updateResourceStatus(
+    String websiteName, {
+    bool? isLoading,
+    List<EpisodeResourcesItem>? episodeResources,
+    String? errorMessage,
+  }) {
     final currentResources = videoResources.value;
     final updatedResources = currentResources.map((resource) {
-      if (resource.websiteName == config.name) {
-        return ResourcesItem(
-          websiteName: resource.websiteName,
-          websiteIcon: resource.websiteIcon,
-          videoConfig: resource.videoConfig,
-          episodeResources: allEpisodesList,
+      if (resource.websiteName == websiteName) {
+        return resource.copyWith(
+          isLoading: isLoading,
+          episodeResources: episodeResources,
+          errorMessage: errorMessage,
         );
       }
       return resource;

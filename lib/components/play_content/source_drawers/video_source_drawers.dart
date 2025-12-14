@@ -54,7 +54,6 @@ class _VideoSourceDrawersState extends State<VideoSourceDrawers> {
 
   @override
   Widget build(BuildContext context) {
-    final dataSource = dataSourceController.videoResources.value;
     return Align(
       alignment: Alignment.centerRight,
       child: Container(
@@ -87,11 +86,15 @@ class _VideoSourceDrawersState extends State<VideoSourceDrawers> {
               ),
             ),
             const SizedBox(height: 10),
-            // 网站选择器
-            _buildWebsiteSelector(dataSource: dataSource),
+            // 网站选择器 - 使用 Obx 实现响应式渲染
+            Obx(() => _buildWebsiteSelector(
+                dataSource: dataSourceController.videoResources.value)),
             const SizedBox(height: 16),
-            // 剧集列表
-            Expanded(child: _buildVideoSource(dataSource: dataSource)),
+            // 剧集列表 - 使用 Obx 实现响应式渲染
+            Expanded(
+              child: Obx(() => _buildVideoSource(
+                  dataSource: dataSourceController.videoResources.value)),
+            ),
           ],
         ),
       ),
@@ -169,6 +172,32 @@ class _VideoSourceDrawersState extends State<VideoSourceDrawers> {
                                             .onSurface,
                                     decoration: TextDecoration.none),
                               ),
+                              // 显示解析状态
+                              if (data.isLoading) ...[
+                                const SizedBox(width: 4),
+                                SizedBox(
+                                  width: 12,
+                                  height: 12,
+                                  child: CircularProgressIndicator(
+                                    strokeWidth: 2,
+                                    color: Theme.of(context).colorScheme.primary,
+                                  ),
+                                ),
+                              ] else if (data.errorMessage != null) ...[
+                                const SizedBox(width: 4),
+                                Icon(
+                                  Icons.error_outline,
+                                  size: 14,
+                                  color: Theme.of(context).colorScheme.error,
+                                ),
+                              ] else if (data.episodeResources.isNotEmpty) ...[
+                                const SizedBox(width: 4),
+                                Icon(
+                                  Icons.check_circle_outline,
+                                  size: 14,
+                                  color: Theme.of(context).colorScheme.primary,
+                                ),
+                              ],
                             ],
                           ),
                         ),
@@ -305,7 +334,7 @@ class _VideoSourceDrawersState extends State<VideoSourceDrawers> {
           }
         },
         child: Padding(
-          padding: EdgeInsets.all(12),
+          padding: const EdgeInsets.all(12),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
@@ -313,43 +342,43 @@ class _VideoSourceDrawersState extends State<VideoSourceDrawers> {
                 children: [
                   Text(
                     item.subjectsTitle,
-                    style: TextStyle(
+                    style: const TextStyle(
                       fontSize: 16,
                       fontWeight: FontWeight.bold,
                     ),
                   ),
-                  SizedBox(width: 8),
+                  const SizedBox(width: 8),
                   Text(
                     '第${episode.episodeSort}集',
-                    style: TextStyle(
+                    style: const TextStyle(
                       fontSize: 14,
                       fontWeight: FontWeight.bold,
                     ),
                   ),
-                  Spacer(),
+                  const Spacer(),
                 ],
               ),
-              SizedBox(height: 12),
+              const SizedBox(height: 12),
               Row(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(
+                  const Text(
                     '线路:',
                     style: TextStyle(
                       fontSize: 12,
                       color: Colors.grey,
                     ),
                   ),
-                  SizedBox(width: 8),
+                  const SizedBox(width: 8),
                   Text(
                     item.lineNames,
-                    style: TextStyle(
+                    style: const TextStyle(
                       fontSize: 12,
                       color: Colors.grey,
                     ),
                   ),
-                  Icon(Icons.link, size: 20, color: Colors.grey),
-                  Spacer(),
+                  const Icon(Icons.link, size: 20, color: Colors.grey),
+                  const Spacer(),
                 ],
               ),
             ],

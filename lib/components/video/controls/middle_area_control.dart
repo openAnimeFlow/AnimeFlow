@@ -17,14 +17,13 @@ class MiddleAreaControl extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    var videoControlsIconType =
-        videoUiStateController.mainAxisAlignmentType.value;
     return Obx(() => Container(
           height: double.infinity,
           width: double.infinity,
           color: Colors.transparent,
           child: Column(
-            mainAxisAlignment: videoControlsIconType,
+            mainAxisAlignment:
+                videoUiStateController.mainAxisAlignmentType.value,
             children: [
               //指示器Icon
               switch (videoUiStateController.indicatorType.value) {
@@ -33,21 +32,41 @@ class MiddleAreaControl extends StatelessWidget {
                   const SizedBox.shrink(),
 
                 //缓冲指示器
-                VideoControlsIndicatorType.bufferingIndicator => Column(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      CircularProgressIndicator(
-                        color: Theme.of(context).primaryColor,
-                      ),
-                      const SizedBox(height: 5),
-                      const Text(
-                        '缓冲中...',
-                        style: TextStyle(
-                          color: Colors.white,
-                          fontSize: 14,
+                VideoControlsIndicatorType.bufferingIndicator => Container(
+                    padding: const EdgeInsets.symmetric(
+                        horizontal: 20, vertical: 16),
+                    decoration: BoxDecoration(
+                      color: Colors.black.withValues(alpha: 0.75),
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        CircularProgressIndicator(
+                          color: Theme.of(context).primaryColor,
+                          strokeWidth: 5,
                         ),
-                      ),
-                    ],
+                        const SizedBox(height: 5),
+                        const Text(
+                          '正在缓冲...',
+                          style: TextStyle(
+                            color: Colors.white,
+                            fontSize: 14,
+                            fontWeight: FontWeight.w500,
+                          ),
+                        ),
+                        // 网络速率
+                        Text(
+                          '${videoUiStateController.networkSpeed.value.toStringAsFixed(2)} MB/s',
+                          style: TextStyle(
+                            color: Colors.white.withValues(alpha: 0.9),
+                            fontSize: 13,
+                            fontWeight: FontWeight.w600,
+                            letterSpacing: 0.5,
+                          ),
+                        ),
+                      ],
+                    ),
                   ),
 
                 //音量指示器

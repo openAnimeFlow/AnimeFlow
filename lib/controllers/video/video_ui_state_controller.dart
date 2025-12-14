@@ -12,6 +12,7 @@ class VideoUiStateController extends GetxController {
   final Rx<Duration> duration = Duration.zero.obs;
   final Rx<Duration> buffer = Duration.zero.obs;
   final RxBool isBuffering = false.obs; // 是否正在缓冲
+  final RxDouble networkSpeed = 0.0.obs; // 网络速率 (MB/s)
   final RxBool isDragging = false.obs; // 是否正在拖拽进度条
   final RxBool isShowControlsUi = true.obs; //是否显示控件ui
   final RxBool isHorizontalDragging = false.obs; // 是否正在水平拖动
@@ -25,6 +26,11 @@ class VideoUiStateController extends GetxController {
   // 拖动相关
   double _dragStartX = 0;
   Duration _dragStartPosition = Duration.zero;
+
+  // 网速计算相关
+  Duration _lastBufferPosition = Duration.zero;
+  DateTime _lastBufferTime = DateTime.now();
+  static const double _estimatedBitrateMBps = 2.0; // 假设平均比特率 2 MB/s
 
   //指示器计时器
   Timer? _indicatorTimer;
@@ -59,15 +65,63 @@ class VideoUiStateController extends GetxController {
     // 监听缓冲进度
     player.stream.buffer.listen((buf) {
       buffer.value = buf;
+      _calculateNetworkSpeed(buf);
     });
 
-    // 监听缓冲状态 - 只有在有视频源时才显示缓冲动画
+    // 监听缓冲状态
     player.stream.buffering.listen((buffering) {
-      // 只有当播放器有内容（duration > 0）时才显示缓冲状态
-      if (duration.value > Duration.zero) {
-        isBuffering.value = buffering;
+      isBuffering.value = buffering;
+
+      // 只有当播放器有内容（duration > 0）并且正在播放时才显示缓冲指示器
+      if (duration.value > Duration.zero && playing.value) {
+        if (buffering) {
+          // 开始缓冲，重置网速计算
+          _resetNetworkSpeed();
+          updateIndicatorType(VideoControlsIndicatorType.bufferingIndicator);
+          updateMainAxisAlignmentType(MainAxisAlignment.center);
+          showIndicator();
+        } else {
+          // 缓冲结束
+          if (indicatorType.value ==
+              VideoControlsIndicatorType.bufferingIndicator) {
+            hideIndicator();
+            updateIndicatorType(VideoControlsIndicatorType.noIndicator);
+            updateMainAxisAlignmentType(MainAxisAlignment.start);
+            networkSpeed.value = 0.0; // 重置网速显示
+          }
+        }
       }
     });
+  }
+
+  // 计算网络速率 (MB/s)
+  void _calculateNetworkSpeed(Duration currentBuffer) {
+    final now = DateTime.now();
+    final timeDiffMs = now.difference(_lastBufferTime).inMilliseconds;
+
+    // 每500毫秒更新一次网速
+    if (timeDiffMs >= 500 && isBuffering.value) {
+      final bufferDiffMs = currentBuffer.inMilliseconds - _lastBufferPosition.inMilliseconds;
+
+      if (bufferDiffMs > 0 && timeDiffMs > 0) {
+        // 计算缓冲速度倍率（缓冲进度增长 / 实际时间）
+        final bufferSpeedMultiplier = bufferDiffMs / timeDiffMs;
+        
+        // 根据估计的比特率计算实际网速 (MB/s)
+        // 网速 = 比特率 × 缓冲速度倍率
+        networkSpeed.value = _estimatedBitrateMBps * bufferSpeedMultiplier;
+      }
+
+      _lastBufferPosition = currentBuffer;
+      _lastBufferTime = now;
+    }
+  }
+
+  // 重置网速计算
+  void _resetNetworkSpeed() {
+    _lastBufferPosition = buffer.value;
+    _lastBufferTime = DateTime.now();
+    networkSpeed.value = 0.0;
   }
 
   //修改主轴类型
@@ -78,16 +132,31 @@ class VideoUiStateController extends GetxController {
   // 更新指示器类型
   void updateIndicatorTypeAndShowIndicator(VideoControlsIndicatorType type) {
     indicatorType.value = type;
-    _showIndicator();
+    _showIndicatorSetUp();
   }
 
-  // 显示指示器
-  void _showIndicator() {
+  void updateIndicatorType(VideoControlsIndicatorType type) {
+    indicatorType.value = type;
+  }
+
+  void showIndicator() {
+    _indicatorTimer?.cancel();
+    isShowIndicatorUi.value = true;
+  }
+
+  void hideIndicator() {
+    _indicatorTimer?.cancel();
+    isShowIndicatorUi.value = false;
+  }
+
+  // 显示指示器and
+  void _showIndicatorSetUp() {
     _indicatorTimer?.cancel();
     isShowIndicatorUi.value = true;
     _indicatorTimer = Timer(const Duration(seconds: 3), () {
       isShowIndicatorUi.value = false;
-      updateIndicatorTypeAndShowIndicator(VideoControlsIndicatorType.noIndicator);
+      updateIndicatorTypeAndShowIndicator(
+          VideoControlsIndicatorType.noIndicator);
       updateMainAxisAlignmentType(MainAxisAlignment.start);
     });
   }

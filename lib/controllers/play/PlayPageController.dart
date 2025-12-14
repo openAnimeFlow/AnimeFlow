@@ -1,8 +1,8 @@
 import 'package:get/get.dart';
 
 class PlayPageController extends GetxController {
-  var isWideScreen = false.obs; // 宽屏状态
-  var isContentExpanded = true.obs;// 内容区域展开状态
+  final isWideScreen = false.obs; // 宽屏状态
+  final isContentExpanded = true.obs;// 内容区域展开状态
 
   void updateIsWideScreen(bool value) {
     isWideScreen.value = value;

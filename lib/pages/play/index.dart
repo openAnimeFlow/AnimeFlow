@@ -68,7 +68,7 @@ class _PlayPageState extends State<PlayPage> {
                   ),
                 ),
                 Obx(() => AnimatedContainer(
-                    duration: Duration(milliseconds: 100),
+                    duration: const Duration(milliseconds: 100),
                     width: playController.isContentExpanded.value
                         ? PlayLayoutConstant.playContentWidth
                         : 0,

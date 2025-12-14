@@ -101,12 +101,13 @@ class VideoUiStateController extends GetxController {
 
     // 每500毫秒更新一次网速
     if (timeDiffMs >= 500 && _isBuffering.value) {
-      final bufferDiffMs = currentBuffer.inMilliseconds - _lastBufferPosition.inMilliseconds;
+      final bufferDiffMs =
+          currentBuffer.inMilliseconds - _lastBufferPosition.inMilliseconds;
 
       if (bufferDiffMs > 0 && timeDiffMs > 0) {
         // 计算缓冲速度倍率（缓冲进度增长 / 实际时间）
         final bufferSpeedMultiplier = bufferDiffMs / timeDiffMs;
-        
+
         // 根据估计的比特率计算实际网速 (MB/s)
         // 网速 = 比特率 × 缓冲速度倍率
         networkSpeed.value = _estimatedBitrateMBps * bufferSpeedMultiplier;

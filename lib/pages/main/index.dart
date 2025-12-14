@@ -1,9 +1,11 @@
+import 'package:anime_flow/controllers/main_page/main_page_state.dart';
 import 'package:anime_flow/models/item/tab_item.dart';
 import 'package:anime_flow/utils/util.dart';
 import 'package:flutter/material.dart';
 import 'package:anime_flow/pages/Category/index.dart';
 import 'package:anime_flow/pages/recommend/index.dart';
 import 'package:anime_flow/pages/play/index.dart';
+import 'package:get/get.dart';
 
 class MainPage extends StatefulWidget {
   const MainPage({super.key});
@@ -13,6 +15,8 @@ class MainPage extends StatefulWidget {
 }
 
 class _MainPageState extends State<MainPage> {
+  late MainPageState mainPageState;
+
   // 使用 GlobalKey 保持 IndexedStack 的状态，防止在布局切换（Row <-> Column）时页面重构
   final GlobalKey _bodyKey = GlobalKey();
 
@@ -43,6 +47,7 @@ class _MainPageState extends State<MainPage> {
   @override
   void initState() {
     super.initState();
+    mainPageState = Get.put(MainPageState());
     // 默认初始化第一个页面
     _pageCache[0] = const RecommendView();
     Util.initCrawlConfigs();
@@ -74,7 +79,7 @@ class _MainPageState extends State<MainPage> {
     // 使用 MediaQuery 获取宽度，判断是否为桌面端（宽屏）
     final bool isDesktop = MediaQuery.of(context).size.width >= 640;
     final colorScheme = Theme.of(context).colorScheme;
-
+    mainPageState.changeIsDesktop(isDesktop);
     return Scaffold(
       body: Row(
         children: [
@@ -82,9 +87,38 @@ class _MainPageState extends State<MainPage> {
             NavigationRail(
               backgroundColor: Colors.black12.withValues(alpha: 0.04),
               selectedIndex: _currentIndex,
-              groupAlignment: 1,
+              groupAlignment: 1.0,
               onDestinationSelected: _onDestinationSelected,
               labelType: NavigationRailLabelType.all,
+              // 顶部搜索按钮
+              leading: Padding(
+                padding: const EdgeInsets.only(bottom: 16, top: 8),
+                child: FloatingActionButton(
+                  elevation: 0,
+                  onPressed: () {
+                    // TODO: 实现搜索功能
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(content: Text('搜索功能开发中...')),
+                    );
+                  },
+                  child: const Icon(Icons.search),
+                ),
+              ),
+              // 底部设置按钮
+              trailing: Padding(
+                padding: const EdgeInsets.only(bottom: 16, top: 16),
+                child: IconButton(
+                  icon: const Icon(Icons.settings_outlined),
+                  iconSize: 28,
+                  tooltip: '设置',
+                  onPressed: () {
+                    // TODO: 实现设置功能
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(content: Text('设置功能开发中...')),
+                    );
+                  },
+                ),
+              ),
               destinations: _tabs.map((tab) {
                 return NavigationRailDestination(
                   icon: Icon(tab.icon),

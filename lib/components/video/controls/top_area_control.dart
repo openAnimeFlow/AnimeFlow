@@ -53,13 +53,15 @@ class TopAreaControl extends StatelessWidget {
                         Row(children: [
                           IconButton(
                               onPressed: () {
+                                //返回上一级路由
+                                // Navigator.of(context).pop();
                                 Get.back();
                               },
                               icon: Icon(
                                 Icons.arrow_back_ios_new,
                                 color: Colors.white.withValues(alpha: 0.8),
                               )),
-                          SizedBox(width: 5),
+                          const SizedBox(width: 5),
                           if (PlatformUtil.isDesktop || fullscreen)
                             Column(
                               mainAxisAlignment: MainAxisAlignment.center,
@@ -67,7 +69,7 @@ class TopAreaControl extends StatelessWidget {
                               children: [
                                 Text(
                                   subjectName,
-                                  style: TextStyle(
+                                  style: const TextStyle(
                                       color: Colors.white70,
                                       fontSize: 16,
                                       fontWeight: FontWeight.bold),
@@ -79,21 +81,21 @@ class TopAreaControl extends StatelessWidget {
                                             episodesController.episodeSort.value
                                                 .toString()
                                                 .padLeft(2, '0'),
-                                            style: TextStyle(
+                                            style: const TextStyle(
                                                 color: Colors.white70,
                                                 fontSize: 15),
                                           ),
-                                          SizedBox(width: 8),
+                                          const SizedBox(width: 8),
                                           Text(
                                             episodesController
                                                 .episodeTitle.value,
-                                            style: TextStyle(
+                                            style: const TextStyle(
                                                 color: Colors.white70,
                                                 fontSize: 15),
                                           )
                                         ],
                                       )
-                                    : SizedBox.shrink()
+                                    : const SizedBox.shrink()
                               ],
                             )
                         ]),
@@ -120,7 +122,7 @@ class TopAreaControl extends StatelessWidget {
                                               "assets/icons/right_panel_close.svg",
                                               width: 30,
                                               height: 30,
-                                              colorFilter: ColorFilter.mode(
+                                              colorFilter: const ColorFilter.mode(
                                                 Colors.white70,
                                                 BlendMode.srcIn,
                                               ),
@@ -129,7 +131,7 @@ class TopAreaControl extends StatelessWidget {
                                               "assets/icons/left_panel_close.svg",
                                               width: 30,
                                               height: 30,
-                                              colorFilter: ColorFilter.mode(
+                                              colorFilter: const ColorFilter.mode(
                                                 Colors.white70,
                                                 BlendMode.srcIn,
                                               ),

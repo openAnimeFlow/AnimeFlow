@@ -1,4 +1,5 @@
 import 'package:anime_flow/components/image/animation_network_image.dart';
+import 'package:anime_flow/controllers/main_page/main_page_state.dart';
 import 'package:anime_flow/http/requests/bgm_request.dart';
 import 'package:anime_flow/utils/layout_util.dart';
 import 'package:flutter/material.dart';
@@ -14,6 +15,7 @@ class RecommendView extends StatefulWidget {
 }
 
 class _RecommendViewState extends State<RecommendView> {
+  late MainPageState mainPageState;
   final List<Data> _dataList = [];
   bool _isLoading = false;
   int _offset = 0;
@@ -24,6 +26,7 @@ class _RecommendViewState extends State<RecommendView> {
   @override
   void initState() {
     super.initState();
+    mainPageState = Get.find<MainPageState>();
     _loadData();
 
     _scrollController.addListener(() {
@@ -68,21 +71,41 @@ class _RecommendViewState extends State<RecommendView> {
         title: Row(
           children: [
             const Expanded(child: Text("推荐")),
-            GetBuilder<ThemeController>(
-              builder: (controller) {
-                return IconButton(
-                  icon: Icon(
-                    controller.isDarkMode
-                        ? Icons.brightness_7
-                        : Icons.brightness_4,
-                    color: controller.isDarkMode ? Colors.white : Colors.black,
-                  ),
-                  onPressed: () {
-                    controller.toggleTheme();
-                  },
-                );
-              },
-            ),
+            Obx(() => Row(
+                  children: [
+                    if (!mainPageState.isDesktop.value)
+                      GetBuilder<ThemeController>(
+                        builder: (controller) {
+                          return IconButton(
+                            icon: const Icon(
+                              size: 25,
+                              Icons.search_rounded,
+                            ),
+                            onPressed: () {
+                              controller.toggleTheme();
+                            },
+                          );
+                        },
+                      ),
+                    GetBuilder<ThemeController>(
+                      builder: (controller) {
+                        return IconButton(
+                          icon: Icon(
+                            controller.isDarkMode
+                                ? Icons.brightness_7
+                                : Icons.brightness_4,
+                            color: controller.isDarkMode
+                                ? Colors.white
+                                : Colors.black,
+                          ),
+                          onPressed: () {
+                            controller.toggleTheme();
+                          },
+                        );
+                      },
+                    ),
+                  ],
+                )),
           ],
         ),
       ),

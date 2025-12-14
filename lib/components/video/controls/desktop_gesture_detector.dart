@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:anime_flow/controllers/video/video_state_controller.dart';
 import 'package:anime_flow/controllers/video/video_ui_state_controller.dart';
 import 'package:anime_flow/models/enums/video_controls_icon_type.dart';
@@ -9,6 +11,7 @@ import 'package:media_kit_video/media_kit_video.dart';
 /// 视频控制手势检测器
 class DesktopGestureDetector extends StatelessWidget {
   final Widget child;
+  static Timer? _hoverTimer;
 
   const DesktopGestureDetector({super.key, required this.child});
 
@@ -16,7 +19,6 @@ class DesktopGestureDetector extends StatelessWidget {
   Widget build(BuildContext context) {
     final videoStateController = Get.find<VideoStateController>();
     final videoUiStateController = Get.find<VideoUiStateController>();
-
     return Listener(
         // 鼠标指针信号事件监听（用于鼠标滚轮）
         onPointerSignal: (event) {
@@ -38,13 +40,16 @@ class DesktopGestureDetector extends StatelessWidget {
 
           // 鼠标悬停事件
           onHover: (event) {
+            _hoverTimer?.cancel();
             videoUiStateController.showControlsUi();
-            videoUiStateController.hideControlsUi(
-                duration: const Duration(seconds: 3));
+            _hoverTimer = Timer(const Duration(seconds: 3), () {
+              videoUiStateController.hideControlsUi();
+            });
           },
 
           // 鼠标移出事件
           onExit: (event) {
+            _hoverTimer?.cancel();
             videoUiStateController.hideControlsUi(
                 duration: const Duration(seconds: 3));
           },

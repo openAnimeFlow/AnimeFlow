@@ -4,6 +4,7 @@ import 'package:anime_flow/controllers/episodes/episodes_controller.dart';
 import 'package:anime_flow/controllers/video/data/data_source_controller.dart';
 import 'package:anime_flow/controllers/video/video_source_controller.dart';
 import 'package:anime_flow/controllers/video/video_state_controller.dart';
+import 'package:anime_flow/controllers/video/video_ui_state_controller.dart';
 import 'package:anime_flow/data/crawler/html_request.dart';
 import 'package:anime_flow/models/item/crawler_config_item.dart';
 import 'package:anime_flow/models/item/video/episode_resources_item.dart';
@@ -26,6 +27,7 @@ class _VideoSourceDrawersState extends State<VideoSourceDrawers> {
   late VideoStateController videoStateController;
   late EpisodesController episodesController;
   late DataSourceController dataSourceController;
+  late VideoUiStateController videoUiStateController;
   final logger = Logger();
   bool isShowEpisodes = false;
   int selectedWebsiteIndex = 0; // 当前选中的网站索引
@@ -33,6 +35,7 @@ class _VideoSourceDrawersState extends State<VideoSourceDrawers> {
   @override
   void initState() {
     super.initState();
+    videoUiStateController = Get.find<VideoUiStateController>();
     videoStateController = Get.find<VideoStateController>();
     videoSourceController = Get.find<VideoSourceController>();
     episodesController = Get.find<EpisodesController>();
@@ -318,6 +321,8 @@ class _VideoSourceDrawersState extends State<VideoSourceDrawers> {
                 title: websiteName, iconUrl: websiteIcon);
 
             videoStateController.disposeVideo();
+
+            videoUiStateController.updateParsingStatus(true);
             final videoUrl = await WebRequest.getVideoSourceService(
               episode.like,
               videoConfig,
@@ -330,7 +335,6 @@ class _VideoSourceDrawersState extends State<VideoSourceDrawers> {
               duration: const Duration(seconds: 2),
               maxWidth: 300,
             );
-
           } catch (e) {
             Get.snackbar(
               '错误',
@@ -338,6 +342,8 @@ class _VideoSourceDrawersState extends State<VideoSourceDrawers> {
               duration: const Duration(seconds: 3),
               backgroundColor: Colors.red.shade100,
             );
+          } finally {
+            videoUiStateController.updateParsingStatus(false);
           }
         },
         child: Padding(

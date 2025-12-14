@@ -11,7 +11,7 @@ class VideoUiStateController extends GetxController {
   final Rx<Duration> position = Duration.zero.obs;
   final Rx<Duration> duration = Duration.zero.obs;
   final Rx<Duration> buffer = Duration.zero.obs;
-  final RxBool isBuffering = false.obs; // 是否正在缓冲
+  final RxBool _isBuffering = false.obs; // 是否正在缓冲
   final RxDouble networkSpeed = 0.0.obs; // 网络速率 (MB/s)
   final RxBool isDragging = false.obs; // 是否正在拖拽进度条
   final RxBool isShowControlsUi = true.obs; //是否显示控件ui
@@ -70,7 +70,7 @@ class VideoUiStateController extends GetxController {
 
     // 监听缓冲状态
     player.stream.buffering.listen((buffering) {
-      isBuffering.value = buffering;
+      _isBuffering.value = buffering;
 
       // 只有当播放器有内容（duration > 0）并且正在播放时才显示缓冲指示器
       if (duration.value > Duration.zero && playing.value) {
@@ -100,7 +100,7 @@ class VideoUiStateController extends GetxController {
     final timeDiffMs = now.difference(_lastBufferTime).inMilliseconds;
 
     // 每500毫秒更新一次网速
-    if (timeDiffMs >= 500 && isBuffering.value) {
+    if (timeDiffMs >= 500 && _isBuffering.value) {
       final bufferDiffMs = currentBuffer.inMilliseconds - _lastBufferPosition.inMilliseconds;
 
       if (bufferDiffMs > 0 && timeDiffMs > 0) {

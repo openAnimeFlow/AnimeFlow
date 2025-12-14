@@ -23,6 +23,7 @@ class _VideoResourcesViewState extends State<VideoResourcesView> {
   @override
   void initState() {
     super.initState();
+    //TODO 将视频源数据添加到DataSource中进行状态管理
     videoSourceController = Get.find<VideoSourceController>();
   }
 

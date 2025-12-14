@@ -22,9 +22,6 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // 初始化主题
-    themeController.initTheme();
-
     return GetBuilder<ThemeController>(
       builder: (controller) {
         return GetMaterialApp(

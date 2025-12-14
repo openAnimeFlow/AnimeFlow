@@ -1,5 +1,5 @@
 import 'package:anime_flow/controllers/crawler/crawler_config_controller.dart';
-import 'package:anime_flow/controllers/video/data/data_source.dart';
+import 'package:anime_flow/controllers/video/data/data_source_controller.dart';
 import 'package:anime_flow/models/item/episodes_item.dart';
 import 'package:anime_flow/models/item/hot_item.dart';
 import 'package:flutter/material.dart';
@@ -30,13 +30,13 @@ class _ContentViewState extends State<ContentView>
     super.initState();
     _tabController = TabController(length: _tabs.length, vsync: this);
     Get.put(CrawlerConfigController());
-    Get.put(DataSource());
+    Get.put(DataSourceController());
   }
 
   @override
   void dispose() {
     Get.delete<CrawlerConfigController>();
-    Get.delete<DataSource>();
+    Get.delete<DataSourceController>();
     super.dispose();
   }
 

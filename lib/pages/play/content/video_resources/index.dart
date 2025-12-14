@@ -1,5 +1,7 @@
 import 'package:anime_flow/components/play_content/source_drawers/video_source_drawers.dart';
+import 'package:anime_flow/controllers/video/data/data_source_controller.dart';
 import 'package:anime_flow/controllers/video/video_source_controller.dart';
+import 'package:anime_flow/models/item/hot_item.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get_core/src/get_main.dart';
 import 'package:get/get_instance/src/extension_instance.dart';
@@ -7,24 +9,29 @@ import 'package:get/get_navigation/src/extension_navigation.dart';
 import 'package:get/get_state_manager/src/rx_flutter/rx_obx_widget.dart';
 
 class VideoResourcesView extends StatefulWidget {
-  final String title;
+  final String sourceTitle;
+  final Subject subject;
 
-  const VideoResourcesView({super.key, required this.title});
+  const VideoResourcesView(
+      {super.key, required this.sourceTitle, required this.subject});
 
   @override
   State<VideoResourcesView> createState() => _VideoResourcesViewState();
 }
 
-
 class _VideoResourcesViewState extends State<VideoResourcesView> {
   late VideoSourceController videoSourceController;
-
+  late DataSourceController dataSourceController;
 
   @override
   void initState() {
     super.initState();
     //TODO 将视频源数据添加到DataSource中进行状态管理
     videoSourceController = Get.find<VideoSourceController>();
+    dataSourceController = Get.find<DataSourceController>();
+
+    dataSourceController
+        .initResources(widget.subject.nameCN ?? widget.subject.name);
   }
 
   @override
@@ -41,7 +48,7 @@ class _VideoResourcesViewState extends State<VideoResourcesView> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    widget.title,
+                    widget.sourceTitle,
                     style: const TextStyle(
                       fontSize: 15,
                     ),
@@ -81,7 +88,7 @@ class _VideoResourcesViewState extends State<VideoResourcesView> {
                     },
                     pageBuilder: (context, animation, secondaryAnimation) {
                       return VideoSourceDrawers(
-                        widget.title,
+                        widget.sourceTitle,
                       );
                     });
               },

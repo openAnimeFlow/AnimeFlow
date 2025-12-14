@@ -164,7 +164,8 @@ class _IntroduceViewState extends State<IntroduceView>
                 ],
               ),
               //数据源
-              const VideoResourcesView(title: sourceTitle)
+              VideoResourcesView(
+                  subject: widget.subject, sourceTitle: sourceTitle)
             ],
           ),
         ));

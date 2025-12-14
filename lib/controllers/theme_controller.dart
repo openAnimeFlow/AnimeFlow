@@ -28,10 +28,10 @@ class ThemeController extends GetxController {
   static final ThemeData lightTheme = ThemeData(
     useMaterial3: true,
     colorScheme: ColorScheme.fromSeed(
-      seedColor: Color(0xFF5CDCF6),
+      seedColor: const Color(0xFF5CDCF6),
       brightness: Brightness.light,
     ),
-    appBarTheme: AppBarTheme(
+    appBarTheme: const AppBarTheme(
       systemOverlayStyle: SystemUiOverlayStyle(
         statusBarColor: Colors.transparent, // 状态栏透明
         statusBarIconBrightness: Brightness.dark, // 浅色主题下状态栏图标为深色
@@ -50,10 +50,10 @@ class ThemeController extends GetxController {
   static final ThemeData darkTheme = ThemeData(
     useMaterial3: true,
     colorScheme: ColorScheme.fromSeed(
-      seedColor: Color(0xFF5CDCF6),
+      seedColor: const Color(0xFF5CDCF6),
       brightness: Brightness.dark,
     ),
-    appBarTheme: AppBarTheme(
+    appBarTheme: const AppBarTheme(
       systemOverlayStyle: SystemUiOverlayStyle(
         statusBarColor: Colors.transparent, // 状态栏透明
         statusBarIconBrightness: Brightness.light, // 深色主题下状态栏图标为浅色

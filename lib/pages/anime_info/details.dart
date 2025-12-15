@@ -26,6 +26,7 @@ class Details extends StatelessWidget {
           title,
           style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
         ),
+        const SizedBox(height: 5),
         _buildText(textData: subject.infobox, themeTextColor: themeTextColor)
       ],
     );
@@ -105,6 +106,7 @@ class _ExpandableTextListState extends State<_ExpandableTextList> {
     return Column(
       children: [
         ListView.builder(
+          padding: EdgeInsets.zero,
             shrinkWrap: true,
             physics: const NeverScrollableScrollPhysics(),
             itemCount: displayItems.length,

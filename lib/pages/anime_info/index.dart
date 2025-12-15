@@ -1,3 +1,4 @@
+import 'package:anime_flow/models/item/subject_comments_item.dart';
 import 'package:anime_flow/pages/anime_info/info_head.dart';
 import 'package:anime_flow/controllers/anime/anime_state_controller.dart';
 import 'package:anime_flow/http/requests/bgm_request.dart';
@@ -23,7 +24,7 @@ class _AnimeDetailPageState extends State<AnimeDetailPage>
   late AnimeStateController animeStateController;
   late Future<SubjectsItem?> _subjectsItem;
   late Future<EpisodesItem> episodesFuture;
-
+  SubjectCommentItem? subjectCommentItem;
   final List<String> _tabs = ['简介', '评论', '论坛'];
   final double _contentHeight = 200.0; // 内容区域的高度
   bool isPinned = false;
@@ -37,12 +38,22 @@ class _AnimeDetailPageState extends State<AnimeDetailPage>
     _subjectsItem = BgmRequest.getSubjectByIdService(subject.id);
     episodesFuture =
         BgmRequest.getSubjectEpisodesByIdService(subject.id, 100, 0);
-
+    _getSubjectComment();
     setSubjectName();
   }
 
   void setSubjectName() {
     animeStateController.setAnimeName(subject.nameCN ?? subject.name);
+  }
+
+  void _getSubjectComment() async {
+    final result = await BgmRequest.getSubjectCommentsByIdService(
+        subjectId: subject.id, limit: 20, offset: 0);
+    if (mounted) {
+      setState(() {
+        subjectCommentItem = result;
+      });
+    }
   }
 
   @override
@@ -160,7 +171,10 @@ class _AnimeDetailPageState extends State<AnimeDetailPage>
           body: TabBarView(
             controller: tabController,
             children: [
-              InfoSynopsisView(subjectsItem: _subjectsItem),
+              InfoSynopsisView(
+                subjectsItem: _subjectsItem,
+                subjectCommentItem: subjectCommentItem,
+              ),
               _CommentsPage(subject: subject),
               _ForumPage(subject: subject),
             ],
@@ -197,21 +211,21 @@ class _CommentsPage extends StatelessWidget {
           child: CustomScrollView(
             key: const PageStorageKey<String>('评论'),
             slivers: <Widget>[
-            // 注入重叠区域，防止内容被 Header 遮挡
-            SliverOverlapInjector(
-              handle: NestedScrollView.sliverOverlapAbsorberHandleFor(
-                context,
+              // 注入重叠区域，防止内容被 Header 遮挡
+              SliverOverlapInjector(
+                handle: NestedScrollView.sliverOverlapAbsorberHandleFor(
+                  context,
+                ),
               ),
-            ),
-            SliverList(
-              delegate: SliverChildBuilderDelegate((
-                BuildContext context,
-                int index,
-              ) {
-                return ListTile(title: Text('评论 内容 $index'));
-              }, childCount: 50),
-            ),
-          ],
+              SliverList(
+                delegate: SliverChildBuilderDelegate((
+                  BuildContext context,
+                  int index,
+                ) {
+                  return ListTile(title: Text('评论 内容 $index'));
+                }, childCount: 50),
+              ),
+            ],
           ),
         );
       },
@@ -236,21 +250,21 @@ class _ForumPage extends StatelessWidget {
           child: CustomScrollView(
             key: const PageStorageKey<String>('论坛'),
             slivers: <Widget>[
-            // 注入重叠区域，防止内容被 Header 遮挡
-            SliverOverlapInjector(
-              handle: NestedScrollView.sliverOverlapAbsorberHandleFor(
-                context,
+              // 注入重叠区域，防止内容被 Header 遮挡
+              SliverOverlapInjector(
+                handle: NestedScrollView.sliverOverlapAbsorberHandleFor(
+                  context,
+                ),
               ),
-            ),
-            SliverList(
-              delegate: SliverChildBuilderDelegate((
-                BuildContext context,
-                int index,
-              ) {
-                return ListTile(title: Text('论坛 内容 $index'));
-              }, childCount: 50),
-            ),
-          ],
+              SliverList(
+                delegate: SliverChildBuilderDelegate((
+                  BuildContext context,
+                  int index,
+                ) {
+                  return ListTile(title: Text('论坛 内容 $index'));
+                }, childCount: 50),
+              ),
+            ],
           ),
         );
       },

@@ -8,4 +8,7 @@ class BgmApi {
 
   //章节s
   static const String episodes = '/p1/subjects/{subjectId}/episodes';
+
+  //条目评论
+  static const String subjectComments = '/p1/subjects/{subjectId}/comments';
 }

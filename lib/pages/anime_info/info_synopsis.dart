@@ -1,10 +1,12 @@
 import 'package:anime_flow/constants/play_layout_constant.dart';
+import 'package:anime_flow/models/item/subject_comments_item.dart';
 import 'package:anime_flow/models/item/subjects_item.dart';
 import 'package:anime_flow/pages/anime_info/tags.dart';
 import 'package:anime_flow/widget/text/expandable_text.dart';
 import 'package:flutter/material.dart';
 
 import 'details.dart';
+import 'info_comment.dart';
 
 /// 隐藏滚动条的ScrollBehavior
 class _NoScrollbarBehavior extends ScrollBehavior {
@@ -18,8 +20,12 @@ class _NoScrollbarBehavior extends ScrollBehavior {
 /// 简介页面
 class InfoSynopsisView extends StatelessWidget {
   final Future<SubjectsItem?> subjectsItem;
+  final SubjectCommentItem? subjectCommentItem;
 
-  const InfoSynopsisView({super.key, required this.subjectsItem});
+  const InfoSynopsisView(
+      {super.key,
+      required this.subjectsItem,
+      required this.subjectCommentItem});
 
   @override
   Widget build(BuildContext context) {
@@ -86,7 +92,9 @@ class InfoSynopsisView extends StatelessWidget {
                                       subject: data,
                                       textSize: 13,
                                       textFontWeight: FontWeight.w600,
-                                    )
+                                    ),
+                                    InfoCommentView(
+                                        subjectCommentItem: subjectCommentItem)
                                   ],
                                 );
                               }

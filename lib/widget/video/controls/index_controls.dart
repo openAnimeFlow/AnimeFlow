@@ -1,7 +1,7 @@
-import 'package:anime_flow/components/video/controls/bottom_area_control.dart';
-import 'package:anime_flow/components/video/controls/desktop_gesture_detector.dart';
-import 'package:anime_flow/components/video/controls/middle_area_control.dart';
-import 'package:anime_flow/components/video/controls/top_area_control.dart';
+import 'package:anime_flow/widget/video/controls/bottom_area_control.dart';
+import 'package:anime_flow/widget/video/controls/desktop_gesture_detector.dart';
+import 'package:anime_flow/widget/video/controls/middle_area_control.dart';
+import 'package:anime_flow/widget/video/controls/top_area_control.dart';
 import 'package:anime_flow/controllers/episodes/episodes_controller.dart';
 import 'package:anime_flow/controllers/play/PlayPageController.dart';
 import 'package:anime_flow/controllers/video/video_state_controller.dart';

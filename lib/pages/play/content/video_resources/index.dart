@@ -1,4 +1,4 @@
-import 'package:anime_flow/components/play_content/source_drawers/video_source_drawers.dart';
+import 'package:anime_flow/widget/play_content/source_drawers/video_source_drawers.dart';
 import 'package:anime_flow/controllers/video/data/data_source_controller.dart';
 import 'package:anime_flow/controllers/video/video_source_controller.dart';
 import 'package:anime_flow/models/item/hot_item.dart';

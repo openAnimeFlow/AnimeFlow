@@ -1,4 +1,4 @@
-import 'package:anime_flow/components/video/controls/index_controls.dart';
+import 'package:anime_flow/widget/video/controls/index_controls.dart';
 import 'package:anime_flow/controllers/video/data/data_source_controller.dart';
 import 'package:anime_flow/controllers/video/video_source_controller.dart';
 import 'package:anime_flow/controllers/video/video_state_controller.dart';

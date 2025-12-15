@@ -1,5 +1,5 @@
-import 'package:anime_flow/components/anime_head_detail/head_detail.dart';
-import 'package:anime_flow/components/image/animation_network_image.dart';
+import 'package:anime_flow/pages/anime_detail/head_detail.dart';
+import 'package:anime_flow/widget/image/animation_network_image.dart';
 import 'package:anime_flow/controllers/anime/anime_state_controller.dart';
 import 'package:anime_flow/http/requests/bgm_request.dart';
 import 'package:anime_flow/models/item/episodes_item.dart';
@@ -134,17 +134,17 @@ class _AnimeDetailPageState extends State<AnimeDetailPage>
                   flexibleSpace: FlexibleSpaceBar(
                     collapseMode: CollapseMode.pin,
                     background: Container(
-                      padding: EdgeInsets.only(
+                      padding: const EdgeInsets.only(
                         bottom: tabBarHeight, // 底部留出 TabBar 的空间
                       ),
                       // 数据内容
                       child: FutureBuilder<SubjectsItem?>(
                         future: _subjectsItem,
                         builder: (context, snapshot) {
-                          return HeadDetail(
-                            subject,
-                            snapshot.data,
-                            episodesFuture,
+                          return HeadDetailView(
+                            subject: subject,
+                            subjectItem: snapshot.data,
+                            episodesItem: episodesFuture,
                             statusBarHeight: statusBarHeight,
                             contentHeight: _contentHeight,
                           );

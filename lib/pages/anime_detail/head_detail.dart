@@ -1,28 +1,27 @@
 import 'dart:ui';
-
-import 'package:anime_flow/components/image/animation_network_image.dart';
+import 'package:anime_flow/widget/anime_detail/episodes_dialog.dart';
+import 'package:anime_flow/widget/anime_detail/star.dart';
+import 'package:anime_flow/widget/image/animation_network_image.dart';
 import 'package:anime_flow/models/item/episodes_item.dart';
 import 'package:anime_flow/models/item/hot_item.dart';
 import 'package:anime_flow/models/item/subjects_item.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
-import 'episodes_dialog.dart';
-
-class HeadDetail extends StatelessWidget {
+class HeadDetailView extends StatelessWidget {
   final Subject subject;
   final SubjectsItem? subjectItem;
   final Future<EpisodesItem> episodesItem;
   final double statusBarHeight;
   final double contentHeight;
 
-  const HeadDetail(
-    this.subject,
-    this.subjectItem,
-    this.episodesItem, {
+  const HeadDetailView({
     super.key,
     required this.statusBarHeight,
     required this.contentHeight,
+    required this.episodesItem,
+    required this.subject,
+    required this.subjectItem,
   });
 
   @override
@@ -75,6 +74,7 @@ class HeadDetail extends StatelessWidget {
             child: Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
+                //封面
                 Flexible(
                   flex: 2,
                   child: AspectRatio(
@@ -92,7 +92,8 @@ class HeadDetail extends StatelessWidget {
                     ),
                   ),
                 ),
-                SizedBox(width: 5),
+                const SizedBox(width: 5),
+                //信息
                 Flexible(
                   flex: 3, // 文本占3份
                   child: Column(
@@ -121,6 +122,19 @@ class HeadDetail extends StatelessWidget {
                           ),
                         ),
                       ),
+                      Row(
+                        crossAxisAlignment: CrossAxisAlignment.center,
+                        children: [
+                          StarView(score: subjectItem?.rating.score ?? 0,iconSize: 20),
+                          const SizedBox(width: 5),
+                          Text(
+                            subjectItem?.rating.score.toStringAsFixed(1) ?? '',
+                            style: TextStyle(
+                                fontWeight: FontWeight.bold, color: themeColor),
+                          )
+                        ],
+                      ),
+
                       const Spacer(),
                       Row(
                         children: [
@@ -128,7 +142,7 @@ class HeadDetail extends StatelessWidget {
                               onPressed: () {
                                 episodesDialog(context, episodesItem);
                               },
-                              icon: Icon(
+                              icon: const Icon(
                                 Icons.grid_view_rounded,
                                 size: 28,
                               )),
@@ -169,6 +183,4 @@ class HeadDetail extends StatelessWidget {
       ],
     );
   }
-
-  ///章节弹窗
 }

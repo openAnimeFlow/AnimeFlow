@@ -1,4 +1,4 @@
-import 'package:anime_flow/components/video/video.dart';
+import 'package:anime_flow/widget/video/video.dart';
 import 'package:anime_flow/constants/play_layout_constant.dart';
 import 'package:anime_flow/controllers/episodes/episodes_controller.dart';
 import 'package:anime_flow/controllers/play/PlayPageController.dart';

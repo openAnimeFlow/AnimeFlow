@@ -8,9 +8,10 @@ import 'package:anime_flow/utils/http/dio_request.dart';
 import 'package:dio/dio.dart';
 
 class BgmRequest {
+  static const String _nextBaseUrl = BgmApi.nextBaseUrl;
   /// 获取热门
   static Future<HotItem> getHotService(int limit, int offset) async {
-    final response = await dioRequest.get(BgmApi.hot,
+    final response = await dioRequest.get(_nextBaseUrl + BgmApi.hot,
         queryParameters: {"type": 2, "limit": limit, "offset": offset},
         options: Options(
             headers: {Constants.userAgentName: CommonApi.bangumiUserAgent}));
@@ -20,7 +21,7 @@ class BgmRequest {
   ///根据id获取条目
   static Future<SubjectsItem> getSubjectByIdService(int id) async {
     final response = await dioRequest.get(
-        BgmApi.subjectById.replaceFirst('{subjectId}', id.toString()),
+        _nextBaseUrl + BgmApi.subjectById.replaceFirst('{subjectId}', id.toString()),
         options: Options(
             headers: {Constants.userAgentName: CommonApi.bangumiUserAgent}));
     return SubjectsItem.fromJson(response.data);
@@ -30,7 +31,7 @@ class BgmRequest {
   static Future<EpisodesItem> getSubjectEpisodesByIdService(
       int id, int limit, int offset) async {
     final response = await dioRequest.get(
-        BgmApi.episodes.replaceFirst('{subjectId}', id.toString()),
+        _nextBaseUrl + BgmApi.episodes.replaceFirst('{subjectId}', id.toString()),
         queryParameters: {"limit": limit, "offset": offset},
         options: Options(
             headers: {Constants.userAgentName: CommonApi.bangumiUserAgent}));

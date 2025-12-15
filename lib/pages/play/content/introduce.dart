@@ -1,13 +1,9 @@
-import 'package:anime_flow/components/play_content/source_drawers/video_source_drawers.dart';
 import 'package:anime_flow/constants/play_layout_constant.dart';
-import 'package:anime_flow/controllers/crawler/crawler_config_controller.dart';
 import 'package:anime_flow/controllers/episodes/episodes_controller.dart';
 import 'package:anime_flow/controllers/play/PlayPageController.dart';
 import 'package:anime_flow/controllers/video/video_source_controller.dart';
-import 'package:anime_flow/models/item/crawler_config_item.dart';
 import 'package:anime_flow/models/item/episodes_item.dart';
 import 'package:anime_flow/models/item/hot_item.dart';
-import 'package:anime_flow/models/item/video/resources_item.dart';
 import 'package:anime_flow/pages/play/content/video_resources/index.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';

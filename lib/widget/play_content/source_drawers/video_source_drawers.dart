@@ -1,4 +1,4 @@
-import 'package:anime_flow/components/image/animation_network_image.dart';
+import 'package:anime_flow/widget/image/animation_network_image.dart';
 import 'package:anime_flow/constants/play_layout_constant.dart';
 import 'package:anime_flow/controllers/episodes/episodes_controller.dart';
 import 'package:anime_flow/controllers/video/data/data_source_controller.dart';

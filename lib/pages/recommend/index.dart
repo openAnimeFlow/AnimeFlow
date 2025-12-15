@@ -1,4 +1,4 @@
-import 'package:anime_flow/components/image/animation_network_image.dart';
+import 'package:anime_flow/widget/image/animation_network_image.dart';
 import 'package:anime_flow/controllers/main_page/main_page_state.dart';
 import 'package:anime_flow/http/requests/bgm_request.dart';
 import 'package:anime_flow/utils/layout_util.dart';

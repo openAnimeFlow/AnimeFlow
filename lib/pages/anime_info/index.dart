@@ -25,6 +25,9 @@ class _AnimeDetailPageState extends State<AnimeDetailPage>
   late Future<SubjectsItem?> _subjectsItem;
   late Future<EpisodesItem> episodesFuture;
   SubjectCommentItem? subjectCommentItem;
+  int _commentOffset = 0;
+  bool _isLoadingComments = false;
+  bool _hasMoreComments = true;
   final List<String> _tabs = ['简介', '评论', '论坛'];
   final double _contentHeight = 200.0; // 内容区域的高度
   bool isPinned = false;
@@ -46,12 +49,37 @@ class _AnimeDetailPageState extends State<AnimeDetailPage>
     animeStateController.setAnimeName(subject.nameCN ?? subject.name);
   }
 
-  void _getSubjectComment() async {
+  void _getSubjectComment({bool loadMore = false}) async {
+    if (_isLoadingComments || (loadMore && !_hasMoreComments)) return;
+    
+    setState(() {
+      _isLoadingComments = true;
+    });
+
+    final currentOffset = loadMore ? _commentOffset + 1 : 0;
     final result = await BgmRequest.getSubjectCommentsByIdService(
-        subjectId: subject.id, limit: 20, offset: 0);
+        subjectId: subject.id, limit: 20, offset: currentOffset);
+    
     if (mounted) {
       setState(() {
-        subjectCommentItem = result;
+        if (loadMore && subjectCommentItem != null) {
+          // 追加数据
+          final newDataList = [
+            ...subjectCommentItem!.data,
+            ...result.data,
+          ];
+          subjectCommentItem = SubjectCommentItem(
+            data: newDataList,
+            total: result.total,
+          );
+        } else {
+          // 首次加载，替换数据
+          subjectCommentItem = result;
+        }
+        _commentOffset = currentOffset;
+        _hasMoreComments = result.data.isNotEmpty && 
+                          (subjectCommentItem?.data.length ?? 0) < (result.total);
+        _isLoadingComments = false;
       });
     }
   }
@@ -174,6 +202,9 @@ class _AnimeDetailPageState extends State<AnimeDetailPage>
               InfoSynopsisView(
                 subjectsItem: _subjectsItem,
                 subjectCommentItem: subjectCommentItem,
+                onLoadMoreComments: () => _getSubjectComment(loadMore: true),
+                isLoadingComments: _isLoadingComments,
+                hasMoreComments: _hasMoreComments,
               ),
               _CommentsPage(subject: subject),
               _ForumPage(subject: subject),

@@ -5,10 +5,16 @@ import 'package:flutter/material.dart';
 
 class InfoCommentView extends StatelessWidget {
   final SubjectCommentItem? subjectCommentItem;
+  final VoidCallback? onLoadMore;
+  final bool isLoading;
+  final bool hasMore;
 
   const InfoCommentView({
     super.key,
     required this.subjectCommentItem,
+    this.onLoadMore,
+    this.isLoading = false,
+    this.hasMore = true,
   });
 
   @override
@@ -43,14 +49,24 @@ class InfoCommentView extends StatelessWidget {
             padding: EdgeInsets.zero,
             shrinkWrap: true,
             physics: const NeverScrollableScrollPhysics(),
-            itemCount: subjectComments.data.length,
+            itemCount: subjectComments.data.length + (hasMore && isLoading ? 1 : 0),
             itemBuilder: (context, index) {
+              // 显示加载中指示器
+              if (index == subjectComments.data.length) {
+                return const Padding(
+                  padding: EdgeInsets.all(16.0),
+                  child: Center(
+                    child: CircularProgressIndicator(),
+                  ),
+                );
+              }
+              
               final comment = subjectComments.data[index];
               return Column(
                 children: [
                   _CommentItem(comment: comment),
                   if (index < subjectComments.data.length - 1)
-                    const SizedBox(height: 16),
+                    const SizedBox(height: 5),
                 ],
               );
             },

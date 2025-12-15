@@ -21,11 +21,17 @@ class _NoScrollbarBehavior extends ScrollBehavior {
 class InfoSynopsisView extends StatelessWidget {
   final Future<SubjectsItem?> subjectsItem;
   final SubjectCommentItem? subjectCommentItem;
+  final VoidCallback? onLoadMoreComments;
+  final bool isLoadingComments;
+  final bool hasMoreComments;
 
-  const InfoSynopsisView(
-      {super.key,
+  const InfoSynopsisView({
+      super.key,
       required this.subjectsItem,
-      required this.subjectCommentItem});
+      required this.subjectCommentItem,
+      this.onLoadMoreComments,
+      this.isLoadingComments = false,
+      this.hasMoreComments = true});
 
   @override
   Widget build(BuildContext context) {
@@ -38,9 +44,20 @@ class InfoSynopsisView extends StatelessWidget {
       builder: (BuildContext context) {
         return ScrollConfiguration(
           behavior: _NoScrollbarBehavior(),
-          child: CustomScrollView(
-            key: const PageStorageKey<String>(title),
-            slivers: <Widget>[
+          child: NotificationListener<ScrollNotification>(
+            onNotification: (ScrollNotification scrollInfo) {
+              // 当滚动到底部时加载更多评论
+              if (scrollInfo.metrics.pixels >= scrollInfo.metrics.maxScrollExtent - 200 &&
+                  !isLoadingComments &&
+                  hasMoreComments &&
+                  onLoadMoreComments != null) {
+                onLoadMoreComments!();
+              }
+              return false;
+            },
+            child: CustomScrollView(
+              key: const PageStorageKey<String>(title),
+              slivers: <Widget>[
               // 注入重叠区域，防止内容被 Header 遮挡
               SliverOverlapInjector(
                 handle: NestedScrollView.sliverOverlapAbsorberHandleFor(
@@ -94,7 +111,11 @@ class InfoSynopsisView extends StatelessWidget {
                                       textFontWeight: FontWeight.w600,
                                     ),
                                     InfoCommentView(
-                                        subjectCommentItem: subjectCommentItem)
+                                      subjectCommentItem: subjectCommentItem,
+                                      onLoadMore: onLoadMoreComments,
+                                      isLoading: isLoadingComments,
+                                      hasMore: hasMoreComments,
+                                    )
                                   ],
                                 );
                               }
@@ -103,6 +124,7 @@ class InfoSynopsisView extends StatelessWidget {
                     )),
               ),
             ],
+            ),
           ),
         );
       },

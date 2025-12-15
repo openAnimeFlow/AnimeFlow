@@ -204,23 +204,23 @@ class InfoHeadView extends StatelessWidget {
     final collectionTotal =
         subjectItem.collection.data.values.reduce((a, b) => a + b);
     const double fontSize = 12;
-    const FontWeight fontWeight = FontWeight.bold;
+    const FontWeight fontWeight = FontWeight.w600;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
+        Text(
+          subject.nameCN ?? subject.name,
+          style: const TextStyle(
+            fontSize: 20,
+            fontWeight: FontWeight.bold,
+          ),
+          maxLines: 2,
+          overflow: TextOverflow.ellipsis,
+        ),
         Wrap(
           spacing: 5, // 子组件之间的水平间距
           runSpacing: 5, // 行之间的垂直间距
           children: [
-            Text(
-              subject.nameCN ?? subject.name,
-              style: const TextStyle(
-                fontSize: 20,
-                fontWeight: FontWeight.bold,
-              ),
-              maxLines: 2,
-              overflow: TextOverflow.ellipsis,
-            ),
             Text(
               '${subjectItem.airtime.date}(${subjectItem.platform.typeCN})',
               style:

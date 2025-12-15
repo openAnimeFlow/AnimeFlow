@@ -7,6 +7,7 @@ import 'package:anime_flow/models/item/subjects_item.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'info_appBar.dart';
+import 'info_synopsis.dart';
 
 class AnimeDetailPage extends StatefulWidget {
   const AnimeDetailPage({super.key});
@@ -23,7 +24,7 @@ class _AnimeDetailPageState extends State<AnimeDetailPage>
   late Future<SubjectsItem?> _subjectsItem;
   late Future<EpisodesItem> episodesFuture;
 
-  final List<String> _tabs = ['章节', '简介', '评论'];
+  final List<String> _tabs = ['简介', '评论', '论坛'];
   final double _contentHeight = 200.0; // 内容区域的高度
   bool isPinned = false;
 
@@ -59,8 +60,6 @@ class _AnimeDetailPageState extends State<AnimeDetailPage>
     const double tabBarHeight = 46.0;
 
     return Scaffold(
-      // 让 Body 内容延伸到 AppBar 后方
-      extendBodyBehindAppBar: true,
       body: NotificationListener<ScrollNotification>(
         onNotification: (notification) {
           if (notification.depth == 0 &&
@@ -160,34 +159,101 @@ class _AnimeDetailPageState extends State<AnimeDetailPage>
           // Body 使用 TabBarView
           body: TabBarView(
             controller: tabController,
-            children: _tabs.map((name) {
-              return Builder(
-                builder: (BuildContext context) {
-                  return CustomScrollView(
-                    key: PageStorageKey<String>(name),
-                    slivers: <Widget>[
-                      // 注入重叠区域，防止内容被 Header 遮挡
-                      SliverOverlapInjector(
-                        handle: NestedScrollView.sliverOverlapAbsorberHandleFor(
-                          context,
-                        ),
-                      ),
-                      SliverList(
-                        delegate: SliverChildBuilderDelegate((
-                          BuildContext context,
-                          int index,
-                        ) {
-                          return ListTile(title: Text('$name 内容 $index'));
-                        }, childCount: 50),
-                      ),
-                    ],
-                  );
-                },
-              );
-            }).toList(),
+            children: [
+              InfoSynopsisView(subjectsItem: _subjectsItem),
+              _CommentsPage(subject: subject),
+              _ForumPage(subject: subject),
+            ],
           ),
         ),
       ),
+    );
+  }
+}
+
+/// 隐藏滚动条的ScrollBehavior
+class _NoScrollbarBehavior extends ScrollBehavior {
+  @override
+  Widget buildScrollbar(
+      BuildContext context, Widget child, ScrollableDetails details) {
+    return child;
+  }
+}
+
+/// 评论页面
+class _CommentsPage extends StatelessWidget {
+  final Subject subject;
+
+  const _CommentsPage({
+    required this.subject,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Builder(
+      builder: (BuildContext context) {
+        return ScrollConfiguration(
+          behavior: _NoScrollbarBehavior(),
+          child: CustomScrollView(
+            key: const PageStorageKey<String>('评论'),
+            slivers: <Widget>[
+            // 注入重叠区域，防止内容被 Header 遮挡
+            SliverOverlapInjector(
+              handle: NestedScrollView.sliverOverlapAbsorberHandleFor(
+                context,
+              ),
+            ),
+            SliverList(
+              delegate: SliverChildBuilderDelegate((
+                BuildContext context,
+                int index,
+              ) {
+                return ListTile(title: Text('评论 内容 $index'));
+              }, childCount: 50),
+            ),
+          ],
+          ),
+        );
+      },
+    );
+  }
+}
+
+/// 论坛页面
+class _ForumPage extends StatelessWidget {
+  final Subject subject;
+
+  const _ForumPage({
+    required this.subject,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Builder(
+      builder: (BuildContext context) {
+        return ScrollConfiguration(
+          behavior: _NoScrollbarBehavior(),
+          child: CustomScrollView(
+            key: const PageStorageKey<String>('论坛'),
+            slivers: <Widget>[
+            // 注入重叠区域，防止内容被 Header 遮挡
+            SliverOverlapInjector(
+              handle: NestedScrollView.sliverOverlapAbsorberHandleFor(
+                context,
+              ),
+            ),
+            SliverList(
+              delegate: SliverChildBuilderDelegate((
+                BuildContext context,
+                int index,
+              ) {
+                return ListTile(title: Text('论坛 内容 $index'));
+              }, childCount: 50),
+            ),
+          ],
+          ),
+        );
+      },
     );
   }
 }

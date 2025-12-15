@@ -1,5 +1,6 @@
 import 'dart:math';
 import 'dart:ui';
+import 'package:anime_flow/constants/play_layout_constant.dart';
 import 'package:anime_flow/widget/anime_detail/episodes_dialog.dart';
 import 'package:anime_flow/widget/anime_detail/star.dart';
 import 'package:anime_flow/widget/image/animation_network_image.dart';
@@ -69,87 +70,89 @@ class InfoHeadView extends StatelessWidget {
           left: 5,
           right: 5,
           bottom: 5,
-          child: SizedBox(
-            height: double.infinity,
-            width: double.infinity,
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                //封面
-                Flexible(
-                  flex: 2,
-                  child: AspectRatio(
-                    aspectRatio: 2 / 3,
-                    child: Container(
-                      margin: const EdgeInsets.only(left: 6),
-                      clipBehavior: Clip.hardEdge,
-                      decoration: BoxDecoration(
-                        borderRadius: BorderRadius.circular(8.0),
-                      ),
-                      child: AnimationNetworkImage(
-                        url: subject.images.large,
-                        fit: BoxFit.cover,
-                      ),
-                    ),
-                  ),
-                ),
-                const SizedBox(width: 5),
-                //信息
-                Flexible(
-                  flex: 3, // 文本占3份
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      subjectItem == null
-                          ? _skeletonView()
-                          : _dataView(
-                              subjectItem: subjectItem!,
-                              themeColor: themeColor),
-                      const Spacer(),
-                      Row(
-                        children: [
-                          IconButton(
-                              onPressed: () {
-                                episodesDialog(context, episodesItem);
-                              },
-                              icon: const Icon(
-                                Icons.grid_view_rounded,
-                                size: 28,
-                              )),
-                          OutlinedButton.icon(
-                            onPressed: () {
-                              Get.toNamed("/play", arguments: {
-                                "subject": subject,
-                                "episodes": episodesItem
-                              });
-                            },
-                            style: OutlinedButton.styleFrom(
-                              side: BorderSide(color: themeColor),
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(20),
-                              ),
-                              padding: const EdgeInsets.symmetric(
-                                horizontal: 12,
+          child: Align(
+              alignment: Alignment.center,
+              child: ConstrainedBox(
+                  constraints: const BoxConstraints(
+                      maxWidth: PlayLayoutConstant.infoMaxWidth),
+                  child: SizedBox(
+                      height: double.infinity,
+                      child: Row(
+                          mainAxisAlignment: MainAxisAlignment.start,
+                          children: [
+                            //封面
+                            Flexible(
+                              flex: 2,
+                              child: AspectRatio(
+                                aspectRatio: 2 / 3,
+                                child: Container(
+                                  margin: const EdgeInsets.only(left: 6),
+                                  clipBehavior: Clip.hardEdge,
+                                  decoration: BoxDecoration(
+                                    borderRadius: BorderRadius.circular(8.0),
+                                  ),
+                                  child: AnimationNetworkImage(
+                                    url: subject.images.large,
+                                    fit: BoxFit.cover,
+                                  ),
+                                ),
                               ),
                             ),
-                            icon: const Icon(
-                              Icons.play_circle_outline,
-                              size: 16,
-                            ),
-                            label: const Text(
-                              "播放",
-                              style: TextStyle(fontSize: 12),
-                            ),
-                          ),
-                        ],
-                      ),
-                    ],
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ),
+                            const SizedBox(width: 5),
+                            //信息
+                            Flexible(
+                                flex: 3, // 文本占3份
+                                child: Column(
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
+                                    children: [
+                                      subjectItem == null
+                                          ? _skeletonView()
+                                          : _dataView(
+                                              subjectItem: subjectItem!,
+                                              themeColor: themeColor),
+                                      const Spacer(),
+                                      Row(children: [
+                                        IconButton(
+                                            onPressed: () {
+                                              episodesDialog(
+                                                  context, episodesItem);
+                                            },
+                                            icon: const Icon(
+                                              Icons.grid_view_rounded,
+                                              size: 28,
+                                            )),
+                                        OutlinedButton.icon(
+                                            onPressed: () {
+                                              Get.toNamed("/play", arguments: {
+                                                "subject": subject,
+                                                "episodes": episodesItem
+                                              });
+                                            },
+                                            style: OutlinedButton.styleFrom(
+                                              side:
+                                                  BorderSide(color: themeColor),
+                                              shape: RoundedRectangleBorder(
+                                                borderRadius:
+                                                    BorderRadius.circular(20),
+                                              ),
+                                              padding:
+                                                  const EdgeInsets.symmetric(
+                                                horizontal: 12,
+                                              ),
+                                            ),
+                                            icon: const Icon(
+                                              Icons.play_circle_outline,
+                                              size: 16,
+                                            ),
+                                            label: const Text(
+                                              "播放",
+                                              style: TextStyle(fontSize: 12),
+                                            ))
+                                      ])
+                                    ]))
+                          ])))),
+        )
       ],
     );
   }

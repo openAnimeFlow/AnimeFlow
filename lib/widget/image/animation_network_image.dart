@@ -28,7 +28,7 @@ class AnimationNetworkImage extends StatelessWidget {
       fadeInDuration: fadeInDuration,
       fadeOutDuration: fadeOutDuration,
       placeholder: (context, url) {
-        return _ShimmerLoading();
+        return const _ShimmerLoading();
       },
     );
   }

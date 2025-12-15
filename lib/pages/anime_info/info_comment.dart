@@ -33,13 +33,14 @@ class InfoCommentView extends StatelessWidget {
               const SizedBox(width: 5),
               Text(
                 '${subjectComments.total}',
-                style: const TextStyle(fontWeight: FontWeight.w500,fontSize: 12),
+                style:
+                    const TextStyle(fontWeight: FontWeight.w500, fontSize: 12),
               )
             ],
           ),
           const SizedBox(height: 16),
           ListView.builder(
-            padding: const EdgeInsets.all(0),
+            padding: EdgeInsets.zero,
             shrinkWrap: true,
             physics: const NeverScrollableScrollPhysics(),
             itemCount: subjectComments.data.length,

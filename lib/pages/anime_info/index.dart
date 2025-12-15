@@ -136,9 +136,21 @@ class _AnimeDetailPageState extends State<AnimeDetailPage>
                   /// TabBar
                   bottom: PreferredSize(
                     preferredSize: const Size.fromHeight(tabBarHeight),
-                    child: TabBar(
-                      controller: tabController,
-                      tabs: _tabs.map((name) => Tab(text: name)).toList(),
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        TabBar(
+                          controller: tabController,
+                          tabs: _tabs.map((name) => Tab(text: name)).toList(),
+                          tabAlignment: TabAlignment.center,
+                          dividerColor: Colors.transparent,
+                        ),
+                        const Divider(
+                          height: 1,
+                          thickness: 1,
+                          color: Colors.grey,
+                        ),
+                      ],
                     ),
                   ),
                 ),

@@ -9,7 +9,6 @@ class StarView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Row(
-      mainAxisSize: MainAxisSize.min,
       children: List.generate(5, (index) {
         final fullStars = (score / 2).floor();
         final halfStars = (score / 2) - fullStars >= 0.5;

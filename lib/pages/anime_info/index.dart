@@ -1,5 +1,4 @@
-import 'package:anime_flow/pages/anime_detail/head_detail.dart';
-import 'package:anime_flow/widget/image/animation_network_image.dart';
+import 'package:anime_flow/pages/anime_info/info_head.dart';
 import 'package:anime_flow/controllers/anime/anime_state_controller.dart';
 import 'package:anime_flow/http/requests/bgm_request.dart';
 import 'package:anime_flow/models/item/episodes_item.dart';
@@ -7,6 +6,7 @@ import 'package:anime_flow/models/item/hot_item.dart';
 import 'package:anime_flow/models/item/subjects_item.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'info_appBar.dart';
 
 class AnimeDetailPage extends StatefulWidget {
   const AnimeDetailPage({super.key});
@@ -84,37 +84,17 @@ class _AnimeDetailPageState extends State<AnimeDetailPage>
                 sliver: SliverAppBar(
                   automaticallyImplyLeading: false,
                   titleSpacing: 0,
-                  title: Row(
-                    children: [
-                      IconButton(
-                        padding: EdgeInsets.all(0),
-                        iconSize: 25,
-                        icon: const Icon(Icons.arrow_back_rounded),
-                        onPressed: () {
-                          Get.back();
-                        },
-                      ),
-                      AnimatedOpacity(
-                          opacity: isPinned ? 1.0 : 0.0,
-                          duration: const Duration(milliseconds: 300),
-                          child: Row(
-                            children: [
-                              ClipRRect(
-                                borderRadius: BorderRadius.circular(5),
-                                child: AnimationNetworkImage(
-                                    width: 26,
-                                    height: 36,
-                                    fit: BoxFit.cover,
-                                    url: subject.images.common),
-                              ),
-                              SizedBox(width: 5),
-                              Text(
-                                subject.nameCN ?? subject.name,
-                                style: const TextStyle(fontSize: 15),
-                              ),
-                            ],
-                          )),
-                    ],
+                  title: FutureBuilder<SubjectsItem?>(
+                    future: _subjectsItem,
+                    builder: (context, snapshot) {
+                      return snapshot.data != null
+                          ? InfoAppbarView(
+                              subject: subject,
+                              subjectsItem: snapshot.data!,
+                              isPinned: isPinned,
+                            )
+                          : const SizedBox.shrink();
+                    },
                   ),
                   pinned: true,
                   floating: false,
@@ -141,7 +121,7 @@ class _AnimeDetailPageState extends State<AnimeDetailPage>
                       child: FutureBuilder<SubjectsItem?>(
                         future: _subjectsItem,
                         builder: (context, snapshot) {
-                          return HeadDetailView(
+                          return InfoHeadView(
                             subject: subject,
                             subjectItem: snapshot.data,
                             episodesItem: episodesFuture,

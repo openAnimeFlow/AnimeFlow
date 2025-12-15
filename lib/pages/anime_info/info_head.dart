@@ -1,3 +1,4 @@
+import 'dart:math';
 import 'dart:ui';
 import 'package:anime_flow/widget/anime_detail/episodes_dialog.dart';
 import 'package:anime_flow/widget/anime_detail/star.dart';
@@ -7,15 +8,16 @@ import 'package:anime_flow/models/item/hot_item.dart';
 import 'package:anime_flow/models/item/subjects_item.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:shimmer/shimmer.dart';
 
-class HeadDetailView extends StatelessWidget {
+class InfoHeadView extends StatelessWidget {
   final Subject subject;
   final SubjectsItem? subjectItem;
   final Future<EpisodesItem> episodesItem;
   final double statusBarHeight;
   final double contentHeight;
 
-  const HeadDetailView({
+  const InfoHeadView({
     super.key,
     required this.statusBarHeight,
     required this.contentHeight,
@@ -26,8 +28,7 @@ class HeadDetailView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final Color themeColor = Theme.of(context).colorScheme.primary;
-
+    final themeColor = Theme.of(context).colorScheme.primary;
     return Stack(
       children: [
         // 背景层
@@ -99,42 +100,11 @@ class HeadDetailView extends StatelessWidget {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text(
-                        subject.nameCN ?? subject.name,
-                        style: const TextStyle(
-                          fontSize: 20,
-                          fontWeight: FontWeight.bold,
-                        ),
-                        maxLines: 2,
-                        overflow: TextOverflow.ellipsis,
-                      ),
-                      //TODO 添加骨架屏
-                      Card(
-                        color: Colors.transparent,
-                        child: Padding(
-                          padding: const EdgeInsets.all(8.0),
-                          child: Text(
-                            subjectItem?.airtime.date ?? '',
-                            style: const TextStyle(
-                                fontSize: 12, fontWeight: FontWeight.bold),
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
-                          ),
-                        ),
-                      ),
-                      Row(
-                        crossAxisAlignment: CrossAxisAlignment.center,
-                        children: [
-                          StarView(score: subjectItem?.rating.score ?? 0,iconSize: 20),
-                          const SizedBox(width: 5),
-                          Text(
-                            subjectItem?.rating.score.toStringAsFixed(1) ?? '',
-                            style: TextStyle(
-                                fontWeight: FontWeight.bold, color: themeColor),
-                          )
-                        ],
-                      ),
-
+                      subjectItem == null
+                          ? _skeletonView()
+                          : _dataView(
+                              subjectItem: subjectItem!,
+                              themeColor: themeColor),
                       const Spacer(),
                       Row(
                         children: [
@@ -180,6 +150,113 @@ class HeadDetailView extends StatelessWidget {
             ),
           ),
         ),
+      ],
+    );
+  }
+
+  ///骨架屏
+  Widget _skeletonView() {
+    const baseColor = Colors.white38;
+    const highlightColor = Colors.white24;
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Shimmer.fromColors(
+          baseColor: baseColor,
+          highlightColor: highlightColor,
+          child: Container(
+            height: 30,
+            width: double.infinity,
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(8.0),
+            ),
+          ),
+        ),
+        Shimmer.fromColors(
+            baseColor: baseColor,
+            highlightColor: highlightColor,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: List.generate(5, (index) {
+                final double width = Random().nextInt(200).toDouble();
+                return Container(
+                  margin: const EdgeInsets.only(top: 5),
+                  height: 20,
+                  width: width,
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(8.0),
+                  ),
+                );
+              }),
+            ))
+      ],
+    );
+  }
+
+  ///数据视图
+  Widget _dataView(
+      {required SubjectsItem subjectItem, required Color themeColor}) {
+    final collectionTotal =
+        subjectItem.collection.data.values.reduce((a, b) => a + b);
+    const double fontSize = 12;
+    const FontWeight fontWeight = FontWeight.bold;
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Wrap(
+          spacing: 5, // 子组件之间的水平间距
+          runSpacing: 5, // 行之间的垂直间距
+          children: [
+            Text(
+              subject.nameCN ?? subject.name,
+              style: const TextStyle(
+                fontSize: 20,
+                fontWeight: FontWeight.bold,
+              ),
+              maxLines: 2,
+              overflow: TextOverflow.ellipsis,
+            ),
+            Text(
+              '${subjectItem.airtime.date}(${subjectItem.platform.typeCN})',
+              style:
+                  const TextStyle(fontSize: fontSize, fontWeight: fontWeight),
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+            ),
+            Text('全${subjectItem.eps}话',
+                style: const TextStyle(
+                    fontSize: fontSize, fontWeight: fontWeight)),
+            Row(children: [
+              StarView(score: subjectItem.rating.score, iconSize: 20),
+              Text(
+                subjectItem.rating.score.toStringAsFixed(1),
+                style: TextStyle(fontWeight: fontWeight, color: themeColor),
+              ),
+              const SizedBox(width: 5),
+              Text('#${subjectItem.rating.rank}',
+                  style: TextStyle(
+                      fontSize: fontSize,
+                      fontWeight: fontWeight,
+                      color: themeColor))
+            ]),
+            Text(
+              '(${subjectItem.rating.total})人评分',
+              style:
+                  const TextStyle(fontSize: fontSize, fontWeight: fontWeight),
+            ),
+            Text('$collectionTotal收藏/',
+                style: const TextStyle(
+                    fontSize: fontSize, fontWeight: fontWeight)),
+            Text('${subjectItem.collection.data['3']}再看/',
+                style: const TextStyle(
+                    fontSize: fontSize, fontWeight: fontWeight)),
+            Text('${subjectItem.collection.data['5']}抛弃',
+                style: const TextStyle(
+                    fontSize: fontSize, fontWeight: fontWeight)),
+          ],
+        )
       ],
     );
   }

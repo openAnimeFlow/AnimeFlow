@@ -1,5 +1,9 @@
+import 'package:anime_flow/http/requests/bgm_request.dart';
+import 'package:anime_flow/models/item/search_item.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+
+import 'content.dart';
 
 /// 搜索页
 class SearchPage extends StatefulWidget {
@@ -13,10 +17,8 @@ class _SearchPageState extends State<SearchPage> {
   final TextEditingController _searchController = TextEditingController();
   final ScrollController _scrollController = ScrollController();
   final FocusNode _searchFocusNode = FocusNode();
-
-  // 模拟搜索结果数据
-  final List<String> _searchResults = [];
   bool _isSearching = false;
+  SearchItem? searchItem;
 
   @override
   void dispose() {
@@ -26,26 +28,30 @@ class _SearchPageState extends State<SearchPage> {
     super.dispose();
   }
 
-  void _onSearch(String query) {
+  void _onSearch(String query) async {
     if (query.isEmpty) return;
 
     setState(() {
       _isSearching = true;
     });
-
-    // TODO: 实现实际的搜索逻辑
-    Future.delayed(const Duration(milliseconds: 500), () {
+    try {
+      final value = await BgmRequest.searchSubjectService(
+        keyword: query,
+        limit: 10,
+        offset: 0,
+      );
       if (mounted) {
         setState(() {
-          _searchResults.clear();
-          // 模拟搜索结果
-          for (int i = 0; i < 30; i++) {
-            _searchResults.add('搜索结果 $i: $query');
-          }
+          searchItem = value;
+        });
+      }
+    } finally {
+      if (mounted) {
+        setState(() {
           _isSearching = false;
         });
       }
-    });
+    }
   }
 
   @override
@@ -63,6 +69,11 @@ class _SearchPageState extends State<SearchPage> {
               searchController: _searchController,
               focusNode: _searchFocusNode,
               onSearch: _onSearch,
+              onClear: () {
+                setState(() {
+                  searchItem = null;
+                });
+              },
               topPadding: topPadding,
             ),
           ),
@@ -71,7 +82,7 @@ class _SearchPageState extends State<SearchPage> {
             const SliverFillRemaining(
               child: Center(child: CircularProgressIndicator()),
             )
-          else if (_searchResults.isEmpty)
+          else if (searchItem == null)
             SliverFillRemaining(
               child: Center(
                 child: Column(
@@ -94,35 +105,46 @@ class _SearchPageState extends State<SearchPage> {
                 ),
               ),
             )
-          else
-            SliverList(
-              delegate: SliverChildBuilderDelegate(
-                (context, index) {
-                  return ListTile(
-                    leading: Container(
-                      width: 60,
-                      height: 80,
-                      decoration: BoxDecoration(
-                        color: Theme.of(context)
-                            .colorScheme
-                            .surfaceContainerHighest,
-                        borderRadius: BorderRadius.circular(8),
-                      ),
-                      child: Icon(
-                        Icons.movie_outlined,
-                        color: Theme.of(context).colorScheme.outline,
-                      ),
-                    ),
-                    title: Text(_searchResults[index]),
-                    subtitle: const Text('动漫简介'),
-                    onTap: () {
-                      // TODO: 跳转到详情页
-                    },
-                  );
-                },
-                childCount: _searchResults.length,
+          else ...[
+            SliverToBoxAdapter(
+              child: Padding(
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                child: Text(
+                  '搜索到 ${searchItem!.data.length} 条内容',
+                  style: TextStyle(
+                    color: Theme.of(context).colorScheme.outline,
+                  ),
+                ),
               ),
             ),
+            // 搜索结果列表
+            SliverPadding(
+              padding: EdgeInsets.only(
+                left: 16,
+                right: 16,
+                bottom: MediaQuery.of(context).padding.bottom,
+              ),
+              sliver: SliverList(
+                delegate: SliverChildBuilderDelegate(
+                  (context, index) {
+                    final searchData = searchItem!.data[index];
+                    return ConstrainedBox(
+                      constraints: const BoxConstraints(maxWidth: 1200),
+                      child: Padding(
+                        padding: const EdgeInsets.only(bottom: 16),
+                        // 添加底部间隔
+                        child: ContentView(
+                          searchData: searchData,
+                        ),
+                      ),
+                    );
+                  },
+                  childCount: searchItem!.data.length,
+                ),
+              ),
+            ),
+          ]
         ],
       ),
     );
@@ -134,6 +156,7 @@ class _StickySearchHeaderDelegate extends SliverPersistentHeaderDelegate {
   final TextEditingController searchController;
   final FocusNode focusNode;
   final Function(String) onSearch;
+  final VoidCallback onClear;
   final double topPadding;
 
   // AppBar 高度
@@ -146,6 +169,7 @@ class _StickySearchHeaderDelegate extends SliverPersistentHeaderDelegate {
     required this.searchController,
     required this.focusNode,
     required this.onSearch,
+    required this.onClear,
     required this.topPadding,
   });
 
@@ -231,6 +255,7 @@ class _StickySearchHeaderDelegate extends SliverPersistentHeaderDelegate {
                               icon: const Icon(Icons.clear),
                               onPressed: () {
                                 searchController.clear();
+                                onClear();
                               },
                             )
                           : null,

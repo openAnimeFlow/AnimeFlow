@@ -1,6 +1,6 @@
 import 'package:anime_flow/models/item/hot_item.dart';
 import 'package:anime_flow/models/item/subjects_item.dart';
-import 'package:anime_flow/widget/anime_detail/star.dart';
+import 'package:anime_flow/widget/star.dart';
 import 'package:anime_flow/widget/image/animation_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get_core/src/get_main.dart';

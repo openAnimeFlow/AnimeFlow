@@ -11,4 +11,7 @@ class BgmApi {
 
   //条目评论
   static const String subjectComments = '/p1/subjects/{subjectId}/comments';
+
+  //条目搜索
+  static const String search = '/p1/search/subjects';
 }

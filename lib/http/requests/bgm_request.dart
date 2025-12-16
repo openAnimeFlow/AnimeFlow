@@ -3,6 +3,7 @@ import 'package:anime_flow/http/api/bgm_api.dart';
 import 'package:anime_flow/http/api/common_api.dart';
 import 'package:anime_flow/models/item/episodes_item.dart';
 import 'package:anime_flow/models/item/hot_item.dart';
+import 'package:anime_flow/models/item/search_item.dart';
 import 'package:anime_flow/models/item/subject_comments_item.dart';
 import 'package:anime_flow/models/item/subjects_item.dart';
 import 'package:anime_flow/utils/http/dio_request.dart';
@@ -62,5 +63,32 @@ class BgmRequest {
       ),
     );
     return SubjectCommentItem.fromJson(response.data);
+  }
+
+  ///条目搜索
+  static Future<SearchItem> searchSubjectService(
+      {required String keyword,
+      required int limit,
+      required int offset}) async {
+    final response = await dioRequest.post(
+      _nextBaseUrl + BgmApi.search,
+      queryParameters: {
+        "limit": limit,
+        "offset": offset,
+      },
+      data: {
+        "filter": {
+          "type": [
+            2
+          ]
+        },
+        "keyword": keyword,
+      },
+      options: Options(
+        headers: {Constants.userAgentName: CommonApi.bangumiUserAgent},
+      ),
+    );
+
+    return SearchItem.fromJson(response.data);
   }
 }

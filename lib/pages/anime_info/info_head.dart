@@ -2,7 +2,7 @@ import 'dart:math';
 import 'dart:ui';
 import 'package:anime_flow/constants/play_layout_constant.dart';
 import 'package:anime_flow/widget/anime_detail/episodes_dialog.dart';
-import 'package:anime_flow/widget/anime_detail/star.dart';
+import 'package:anime_flow/widget/star.dart';
 import 'package:anime_flow/widget/image/animation_network_image.dart';
 import 'package:anime_flow/models/item/episodes_item.dart';
 import 'package:anime_flow/models/item/hot_item.dart';

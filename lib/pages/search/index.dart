@@ -3,7 +3,7 @@ import 'package:anime_flow/models/item/search_item.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
-import 'content.dart';
+import 'search_content.dart';
 
 /// 搜索页
 class SearchPage extends StatefulWidget {
@@ -54,9 +54,18 @@ class _SearchPageState extends State<SearchPage> {
     }
   }
 
+  // 计算网格列数：手机端 1 列，宽屏多列
+  int _calculateCrossAxisCount(double screenWidth) {
+    const minItemWidth = 320.0; // 每个项目最小宽度
+    if (screenWidth < 450) return 1; // 手机端固定 1 列
+    return (screenWidth / minItemWidth).floor().clamp(1, 4);
+  }
+
   @override
   Widget build(BuildContext context) {
     final topPadding = MediaQuery.of(context).padding.top;
+    final screenWidth = MediaQuery.of(context).size.width - 32; // 减去左右 padding
+    final crossAxisCount = _calculateCrossAxisCount(screenWidth);
 
     return Scaffold(
       body: CustomScrollView(
@@ -125,20 +134,17 @@ class _SearchPageState extends State<SearchPage> {
                 right: 16,
                 bottom: MediaQuery.of(context).padding.bottom,
               ),
-              sliver: SliverList(
+              sliver: SliverGrid(
+                gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                  crossAxisCount: crossAxisCount,
+                  crossAxisSpacing: 16,
+                  mainAxisSpacing: 16,
+                  mainAxisExtent: SearchContentView.itemHeight,
+                ),
                 delegate: SliverChildBuilderDelegate(
                   (context, index) {
                     final searchData = searchItem!.data[index];
-                    return ConstrainedBox(
-                      constraints: const BoxConstraints(maxWidth: 1200),
-                      child: Padding(
-                        padding: const EdgeInsets.only(bottom: 16),
-                        // 添加底部间隔
-                        child: ContentView(
-                          searchData: searchData,
-                        ),
-                      ),
-                    );
+                    return SearchContentView(searchData: searchData);
                   },
                   childCount: searchItem!.data.length,
                 ),

@@ -97,7 +97,7 @@ class ContentView extends StatelessWidget {
                             fontWeight: textFontWeight,
                             color: disabledColor)),
                     Text(
-                      '(${searchData.rating.total})人评论',
+                      '(${searchData.rating.total}人评分)',
                       style: TextStyle(
                           fontSize: 8,
                           fontWeight: textFontWeight,

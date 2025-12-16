@@ -66,6 +66,7 @@ class _SearchPageState extends State<SearchPage> {
     final topPadding = MediaQuery.of(context).padding.top;
     final screenWidth = MediaQuery.of(context).size.width - 32; // 减去左右 padding
     final crossAxisCount = _calculateCrossAxisCount(screenWidth);
+    const maxWidth = 1400.0;
 
     return Scaffold(
       body: CustomScrollView(
@@ -78,6 +79,7 @@ class _SearchPageState extends State<SearchPage> {
               searchController: _searchController,
               focusNode: _searchFocusNode,
               onSearch: _onSearch,
+              maxWidth: maxWidth,
               onClear: () {
                 setState(() {
                   searchItem = null;
@@ -116,37 +118,54 @@ class _SearchPageState extends State<SearchPage> {
             )
           else ...[
             SliverToBoxAdapter(
-              child: Padding(
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                child: Text(
-                  '搜索到 ${searchItem!.data.length} 条内容',
-                  style: TextStyle(
-                    color: Theme.of(context).colorScheme.outline,
+              child: Align(
+                alignment: Alignment.topCenter,
+                child: ConstrainedBox(
+                  constraints: const BoxConstraints(maxWidth: maxWidth),
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(
+                        horizontal: 16, vertical: 8),
+                    child: Align(
+                      alignment: Alignment.centerLeft,
+                      child: Text(
+                        '搜索到 ${searchItem!.data.length} 条内容',
+                        style: TextStyle(
+                          color: Theme.of(context).colorScheme.outline,
+                        ),
+                      ),
+                    ),
                   ),
                 ),
               ),
             ),
             // 搜索结果列表
-            SliverPadding(
-              padding: EdgeInsets.only(
-                left: 16,
-                right: 16,
-                bottom: MediaQuery.of(context).padding.bottom,
-              ),
-              sliver: SliverGrid(
-                gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                  crossAxisCount: crossAxisCount,
-                  crossAxisSpacing: 16,
-                  mainAxisSpacing: 16,
-                  mainAxisExtent: SearchContentView.itemHeight,
-                ),
-                delegate: SliverChildBuilderDelegate(
-                  (context, index) {
-                    final searchData = searchItem!.data[index];
-                    return SearchContentView(searchData: searchData);
-                  },
-                  childCount: searchItem!.data.length,
+            SliverToBoxAdapter(
+              child: Center(
+                child: ConstrainedBox(
+                  constraints: const BoxConstraints(maxWidth: maxWidth),
+                  child: Padding(
+                    padding: EdgeInsets.only(
+                      left: 16,
+                      right: 16,
+                      bottom: MediaQuery.of(context).padding.bottom,
+                    ),
+                    child: GridView.builder(
+                      padding: EdgeInsets.zero,
+                      shrinkWrap: true,
+                      physics: const NeverScrollableScrollPhysics(),
+                      gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                        crossAxisCount: crossAxisCount,
+                        crossAxisSpacing: 16,
+                        mainAxisSpacing: 16,
+                        mainAxisExtent: SearchContentView.itemHeight,
+                      ),
+                      itemCount: searchItem!.data.length,
+                      itemBuilder: (context, index) {
+                        final searchData = searchItem!.data[index];
+                        return SearchContentView(searchData: searchData);
+                      },
+                    ),
+                  ),
                 ),
               ),
             ),
@@ -164,6 +183,7 @@ class _StickySearchHeaderDelegate extends SliverPersistentHeaderDelegate {
   final Function(String) onSearch;
   final VoidCallback onClear;
   final double topPadding;
+  final double maxWidth;
 
   // AppBar 高度
   static const double _appBarHeight = 56;
@@ -176,7 +196,7 @@ class _StickySearchHeaderDelegate extends SliverPersistentHeaderDelegate {
     required this.focusNode,
     required this.onSearch,
     required this.onClear,
-    required this.topPadding,
+    required this.topPadding, required this.maxWidth,
   });
 
   @override
@@ -249,7 +269,7 @@ class _StickySearchHeaderDelegate extends SliverPersistentHeaderDelegate {
                 padding:
                     const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
                 child: ConstrainedBox(
-                  constraints: const BoxConstraints(maxWidth: 1200),
+                  constraints: BoxConstraints(maxWidth: maxWidth),
                   child: TextField(
                     controller: searchController,
                     focusNode: focusNode,

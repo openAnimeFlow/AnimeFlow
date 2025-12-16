@@ -1,4 +1,5 @@
 import 'package:anime_flow/models/item/subject_comments_item.dart';
+import 'package:anime_flow/utils/timeUtil.dart';
 import 'package:anime_flow/widget/anime_detail/star.dart';
 import 'package:anime_flow/widget/image/animation_network_image.dart';
 import 'package:flutter/material.dart';
@@ -49,7 +50,8 @@ class InfoCommentView extends StatelessWidget {
             padding: EdgeInsets.zero,
             shrinkWrap: true,
             physics: const NeverScrollableScrollPhysics(),
-            itemCount: subjectComments.data.length + (hasMore && isLoading ? 1 : 0),
+            itemCount:
+                subjectComments.data.length + (hasMore && isLoading ? 1 : 0),
             itemBuilder: (context, index) {
               // 显示加载中指示器
               if (index == subjectComments.data.length) {
@@ -60,7 +62,7 @@ class InfoCommentView extends StatelessWidget {
                   ),
                 );
               }
-              
+
               final comment = subjectComments.data[index];
               return Column(
                 children: [
@@ -82,26 +84,6 @@ class _CommentItem extends StatelessWidget {
   final DataItem comment;
 
   const _CommentItem({required this.comment});
-
-  String _formatTime(int timestamp) {
-    final dateTime = DateTime.fromMillisecondsSinceEpoch(timestamp * 1000);
-    final now = DateTime.now();
-    final difference = now.difference(dateTime);
-
-    if (difference.inDays > 365) {
-      return '${(difference.inDays / 365).floor()}年前';
-    } else if (difference.inDays > 30) {
-      return '${(difference.inDays / 30).floor()}个月前';
-    } else if (difference.inDays > 0) {
-      return '${difference.inDays}天前';
-    } else if (difference.inHours > 0) {
-      return '${difference.inHours}小时前';
-    } else if (difference.inMinutes > 0) {
-      return '${difference.inMinutes}分钟前';
-    } else {
-      return '刚刚';
-    }
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -152,7 +134,7 @@ class _CommentItem extends StatelessWidget {
                         // 时间
                         if (comment.rate > 0)
                           Text(
-                            _formatTime(comment.updatedAt),
+                            TimeUtil.formatTime(comment.updatedAt),
                             style: TextStyle(
                               fontSize: 12,
                               color:
@@ -181,7 +163,7 @@ class _CommentItem extends StatelessWidget {
                       ),
                     ] else
                       Text(
-                        _formatTime(comment.updatedAt),
+                        TimeUtil.formatTime(comment.updatedAt),
                         style: TextStyle(
                           fontSize: 12,
                           color: Theme.of(context).textTheme.bodySmall?.color,

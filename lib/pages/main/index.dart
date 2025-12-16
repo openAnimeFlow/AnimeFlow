@@ -1,10 +1,10 @@
 import 'package:anime_flow/controllers/main_page/main_page_state.dart';
 import 'package:anime_flow/models/item/tab_item.dart';
+import 'package:anime_flow/pages/Login/index.dart';
 import 'package:anime_flow/utils/util.dart';
 import 'package:flutter/material.dart';
 import 'package:anime_flow/pages/Category/index.dart';
 import 'package:anime_flow/pages/recommend/index.dart';
-import 'package:anime_flow/pages/play/index.dart';
 import 'package:get/get.dart';
 
 class MainPage extends StatefulWidget {
@@ -35,7 +35,7 @@ class _MainPageState extends State<MainPage> {
     ),
     TabItem(
       type: TabType.profile,
-      title: "视频",
+      title: "我的",
       icon: Icons.person_outline,
       activeIcon: Icons.person,
     ),
@@ -67,7 +67,7 @@ class _MainPageState extends State<MainPage> {
             _pageCache[index] = const CategoryView();
             break;
           case 2:
-            _pageCache[index] = const PlayPage();
+            _pageCache[index] = const LoginPage();
             break;
         }
       }
@@ -96,10 +96,7 @@ class _MainPageState extends State<MainPage> {
                 child: FloatingActionButton(
                   elevation: 0,
                   onPressed: () {
-                    // TODO: 实现搜索功能
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(content: Text('搜索功能开发中...')),
-                    );
+                    Get.toNamed("/search");
                   },
                   child: const Icon(Icons.search),
                 ),

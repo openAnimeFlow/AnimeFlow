@@ -106,7 +106,7 @@ class _RecommendViewState extends State<RecommendView> {
                               Icons.search_rounded,
                             ),
                             onPressed: () {
-                              controller.toggleTheme();
+                              Get.toNamed("/search");
                             },
                           );
                         },

@@ -18,10 +18,11 @@ class _RecommendViewState extends State<RecommendView> {
   late MainPageState mainPageState;
   final List<Data> _dataList = [];
   bool _isLoading = false;
+  bool _hasMore = true;
+  bool _showBackToTopButton = false;
   int _offset = 0;
   final int _limit = 20;
-  bool _hasMore = true;
-  final ScrollController _scrollController = ScrollController();
+  final _scrollController = ScrollController();
 
   @override
   void initState() {
@@ -30,19 +31,36 @@ class _RecommendViewState extends State<RecommendView> {
     _loadData();
 
     _scrollController.addListener(() {
+      // 加载更多数据
       if (_scrollController.position.pixels >=
           _scrollController.position.maxScrollExtent - 200) {
         _loadData();
       }
+
+      // 监听滚动位置，控制返回顶部按钮显示
+      if (_scrollController.position.pixels > 300) {
+        if (!_showBackToTopButton) {
+          setState(() {
+            _showBackToTopButton = true;
+          });
+        }
+      } else {
+        if (_showBackToTopButton) {
+          setState(() {
+            _showBackToTopButton = false;
+          });
+        }
+      }
     });
   }
 
-  @override
-  void dispose() {
-    _scrollController.dispose();
-    super.dispose();
+  //返回顶部
+  void _scrollToTop() {
+    _scrollController.animateTo(0,
+        duration: const Duration(milliseconds: 300), curve: Curves.easeInOut);
   }
 
+  // 加载数据
   Future<void> _loadData() async {
     if (_isLoading || !_hasMore) return;
 
@@ -62,6 +80,12 @@ class _RecommendViewState extends State<RecommendView> {
         _isLoading = false;
       });
     }
+  }
+
+  @override
+  void dispose() {
+    _scrollController.dispose();
+    super.dispose();
   }
 
   @override
@@ -119,34 +143,47 @@ class _RecommendViewState extends State<RecommendView> {
     }
     return LayoutBuilder(
       builder: (context, constraints) {
-        return Center(
-          child: ConstrainedBox(
-            constraints: const BoxConstraints(maxWidth: 1800),
-            child: GridView.builder(
-              controller: _scrollController,
-              padding: const EdgeInsets.all(10),
-              gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                crossAxisCount: LayoutUtil.getCrossAxisCount(constraints),
-                crossAxisSpacing: 5, // 横向间距
-                mainAxisSpacing: 5, // 纵向间距
-                childAspectRatio: 0.7, // 宽高比
+        return Stack(
+          children: [
+            Center(
+              child: ConstrainedBox(
+                constraints: const BoxConstraints(maxWidth: 1800),
+                child: GridView.builder(
+                  controller: _scrollController,
+                  padding: const EdgeInsets.all(10),
+                  gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                    crossAxisCount: LayoutUtil.getCrossAxisCount(constraints),
+                    crossAxisSpacing: 5, // 横向间距
+                    mainAxisSpacing: 5, // 纵向间距
+                    childAspectRatio: 0.7, // 宽高比
+                  ),
+                  itemCount: _dataList.length + 1,
+                  itemBuilder: (BuildContext context, int index) {
+                    if (index == _dataList.length) {
+                      return _hasMore
+                          ? const Center(child: CircularProgressIndicator())
+                          : const Center(
+                              child: Padding(
+                              padding: EdgeInsets.all(8.0),
+                              child: Text("没有更多了"),
+                            ));
+                    }
+                    final subject = _dataList[index].subject;
+                    return _buildCard(subject);
+                  },
+                ),
               ),
-              itemCount: _dataList.length + 1,
-              itemBuilder: (BuildContext context, int index) {
-                if (index == _dataList.length) {
-                  return _hasMore
-                      ? const Center(child: CircularProgressIndicator())
-                      : const Center(
-                          child: Padding(
-                          padding: EdgeInsets.all(8.0),
-                          child: Text("没有更多了"),
-                        ));
-                }
-                final subject = _dataList[index].subject;
-                return _buildCard(subject);
-              },
             ),
-          ),
+            if (_showBackToTopButton)
+              Positioned(
+                right: 16,
+                bottom: 16,
+                child: FloatingActionButton(
+                  onPressed: _scrollToTop,
+                  child: const Icon(Icons.arrow_upward_rounded),
+                ),
+              )
+          ],
         );
       },
     );
@@ -185,7 +222,6 @@ class _RecommendViewState extends State<RecommendView> {
                     begin: Alignment.bottomCenter,
                     end: Alignment.topCenter,
                     colors: [
-                      //从灰到白
                       Colors.black38,
                       Colors.transparent,
                     ],

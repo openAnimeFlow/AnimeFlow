@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:anime_flow/models/enums/video_controls_icon_type.dart';
 import 'package:anime_flow/models/item/subject_basic_data_item.dart';
 import 'package:anime_flow/webview/webview_controller.dart';
 import 'package:anime_flow/widget/video/controls/index_controls.dart';
@@ -33,6 +34,13 @@ class _VideoViewState extends State<VideoView> {
 
   StreamSubscription<bool>? _initSubscription;
   StreamSubscription<(String, int)>? _videoURLSubscription;
+  StreamSubscription<bool>? _videoLoadingSubscription;
+  StreamSubscription<String>? _logSubscription;
+
+  // 解析状态跟踪
+  bool _isParsing = false;
+  bool _hasReceivedVideoUrl = false;
+  Timer? _parseTimeoutTimer;
 
   @override
   void initState() {
@@ -48,9 +56,14 @@ class _VideoViewState extends State<VideoView> {
 
   Future<void> _initWebview() async {
     // 监听视频URL解析结果
-    _videoURLSubscription = webviewItemController.onVideoURLParser.listen((result) async {
+    _videoURLSubscription =
+        webviewItemController.onVideoURLParser.listen((result) async {
       final (url, offset) = result;
       logger.i('WebView解析到视频URL: $url, 偏移: $offset');
+
+      // 标记已收到视频URL
+      _hasReceivedVideoUrl = true;
+      _parseTimeoutTimer?.cancel();
 
       // 播放解析出的视频
       if (url.isNotEmpty) {
@@ -64,9 +77,53 @@ class _VideoViewState extends State<VideoView> {
       }
     });
 
+    // 监听视频加载状态
+    _videoLoadingSubscription =
+        webviewItemController.onVideoLoading.listen((loading) {
+      _isParsing = loading;
+
+      if (loading) {
+        // 开始解析，重置状态并启动超时计时器
+        _hasReceivedVideoUrl = false;
+        _parseTimeoutTimer?.cancel();
+        _parseTimeoutTimer = Timer(const Duration(seconds: 16), () {
+          // 16秒超时（比WebView内部的15秒稍长，确保能收到日志）
+          if (!_hasReceivedVideoUrl && _isParsing) {
+            _parsingState(false, failureReason: '解析超时');
+          }
+        });
+      } else {
+        // 解析结束，取消超时计时器
+        _parseTimeoutTimer?.cancel();
+
+        // 如果解析结束但没有收到视频URL，说明解析失败
+        if (!_hasReceivedVideoUrl && _isParsing) {
+          _parsingState(false, failureReason: '未获取到有效的视频URL');
+        } else {
+          // 解析成功
+          _parsingState(false);
+        }
+      }
+
+      // 只在开始解析时调用，结束时的处理在上面已经完成
+      if (loading) {
+        _parsingState(true);
+      }
+    });
+
+    // 监听日志消息（检测解析超时）
+    _logSubscription = webviewItemController.onLog.listen((logMessage) {
+      // 检测解析超时消息
+      if (logMessage.contains('解析视频资源超时')) {
+        _parsingState(false, failureReason: '解析超时：$logMessage');
+      } else if (logMessage.contains('请切换到其他播放列表或视频源')) {
+        logger.w('解析失败提示: $logMessage');
+      }
+    });
     // 如果webview尚未初始化，则初始化
     if (webviewItemController.webviewController == null) {
-      _initSubscription = webviewItemController.onInitialized.listen((initialized) {
+      _initSubscription =
+          webviewItemController.onInitialized.listen((initialized) {
         if (initialized) {
           logger.i('WebView初始化完成');
         }
@@ -75,10 +132,63 @@ class _VideoViewState extends State<VideoView> {
     }
   }
 
+  //解析状态
+  void _parsingState(bool parsing, {String? failureReason}) {
+    if (!mounted) return;
+
+    if (parsing) {
+      // 开始解析
+      videoUiStateController.setParsingTitle('正在解析视频资源...');
+      videoUiStateController
+          .updateMainAxisAlignmentType(MainAxisAlignment.center);
+      videoUiStateController
+          .updateIndicatorType(VideoControlsIndicatorType.parsingIndicator);
+      videoUiStateController.showIndicator();
+    } else if (failureReason != null) {
+      // 解析失败
+      logger.e('视频解析失败: $failureReason');
+
+      videoUiStateController.setParsingTitle('解析失败：$failureReason');
+
+      // 显示错误提示
+      Get.snackbar(
+        '解析失败',
+        failureReason,
+        duration: const Duration(seconds: 3),
+        backgroundColor: Colors.red.shade100,
+        colorText: Colors.red.shade900,
+      );
+
+      // 延迟隐藏指示器
+      Future.delayed(const Duration(seconds: 2), () {
+        if (!mounted) return;
+        videoUiStateController.hideIndicator();
+        videoUiStateController
+            .updateIndicatorType(VideoControlsIndicatorType.noIndicator);
+        videoUiStateController
+            .updateMainAxisAlignmentType(MainAxisAlignment.start);
+      });
+    } else {
+      // 解析成功
+      videoUiStateController.setParsingTitle('视频资源解析成功');
+      Future.delayed(const Duration(seconds: 2), () {
+        if (!mounted) return;
+        videoUiStateController.hideIndicator();
+        videoUiStateController
+            .updateIndicatorType(VideoControlsIndicatorType.noIndicator);
+        videoUiStateController
+            .updateMainAxisAlignmentType(MainAxisAlignment.start);
+      });
+    }
+  }
+
   @override
   void dispose() {
+    _parseTimeoutTimer?.cancel();
     _initSubscription?.cancel();
     _videoURLSubscription?.cancel();
+    _videoLoadingSubscription?.cancel();
+    _logSubscription?.cancel();
     Get.delete<VideoUiStateController>();
     Get.delete<VideoStateController>();
     player.dispose();

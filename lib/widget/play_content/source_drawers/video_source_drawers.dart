@@ -333,16 +333,8 @@ class _VideoSourceDrawersState extends State<VideoSourceDrawers> {
 
             videoStateController.disposeVideo();
 
-            videoUiStateController
-                .updateMainAxisAlignmentType(MainAxisAlignment.center);
-
-            videoUiStateController.updateIndicatorTypeAndShowIndicator(
-                VideoControlsIndicatorType.parsingIndicator);
-
             logger.i('开始解析视频源: ${videoConfig.baseURL + episode.like}');
 
-            // 使用 WebView 解析视频源
-            // video.dart 中已经监听了 onVideoURLParser，这里只需加载URL
             await _loadVideoPage(videoConfig.baseURL + episode.like);
           } catch (e) {
             logger.e('获取视频源失败', error: e);

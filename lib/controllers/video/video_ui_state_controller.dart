@@ -16,6 +16,7 @@ class VideoUiStateController extends GetxController {
   final RxBool isDragging = false.obs; // 是否正在拖拽进度条
   final RxBool isShowControlsUi = true.obs; //是否显示控件ui
   final RxBool isHorizontalDragging = false.obs; // 是否正在水平拖动
+  final RxString parsingTitle = ''.obs;// 正在解析的标题
   final Rx<Duration> dragPosition = Duration.zero.obs; // 拖动时的临时进度
   final RxBool isShowIndicatorUi = false.obs; // 是否显示指示器ui
   final Rx<VideoControlsIndicatorType> indicatorType =
@@ -125,6 +126,10 @@ class VideoUiStateController extends GetxController {
     networkSpeed.value = 0.0;
   }
 
+  //设置解析标题
+  void setParsingTitle(String title) {
+    parsingTitle.value = title;
+  }
   //修改主轴类型
   void updateMainAxisAlignmentType(MainAxisAlignment type) {
     mainAxisAlignmentType.value = type;

@@ -150,9 +150,9 @@ class MiddleAreaControl extends StatelessWidget {
                         color: Theme.of(context).primaryColor,
                       ),
                       const SizedBox(height: 5),
-                      const Text(
-                        '视频资源解析中...',
-                        style: TextStyle(
+                       Text(
+                        videoUiStateController.parsingTitle.value,
+                        style: const TextStyle(
                             color: Colors.white,
                             fontWeight: FontWeight.bold,
                             fontSize: 14),

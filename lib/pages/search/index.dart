@@ -55,20 +55,31 @@ class _SearchPageState extends State<SearchPage> {
     }
   }
 
-  // 计算网格列数：手机端 1 列，宽屏多列
-  int _calculateCrossAxisCount(double screenWidth) {
-    const minItemWidth = 320.0; // 每个项目最小宽度
-    if (screenWidth < 450) return 1; // 手机端固定 1 列
+  // 详情视图列数
+  int _calculateDetailsCount(double screenWidth) {
+    const minItemWidth = 320.0;
+    if (screenWidth < 450) return 1;
     return (screenWidth / minItemWidth).floor().clamp(1, 4);
+  }
+
+  // 简洁视图列数
+  int _calculateOmittedCount(double screenWidth) {
+    const minItemWidth = 200.0; // 海报宽度
+    return (screenWidth / minItemWidth).floor().clamp(3, 6);
   }
 
   @override
   Widget build(BuildContext context) {
     final topPadding = MediaQuery.of(context).padding.top;
     final screenWidth = MediaQuery.of(context).size.width - 32; // 减去左右 padding
-    final crossAxisCount = _calculateCrossAxisCount(screenWidth);
     const maxWidth = 1400.0;
-    const double itemHeight = 160.0;
+
+    // 根据视图类型计算列数
+    final effectiveWidth = screenWidth.clamp(0.0, maxWidth - 32);
+    final crossAxisCount = _isDetailsContent
+        ? _calculateDetailsCount(screenWidth)
+        : _calculateOmittedCount(effectiveWidth);
+    const double detailsItemHeight = 160.0;
 
     return Scaffold(
       body: CustomScrollView(
@@ -163,22 +174,27 @@ class _SearchPageState extends State<SearchPage> {
                       padding: EdgeInsets.zero,
                       shrinkWrap: true,
                       physics: const NeverScrollableScrollPhysics(),
-                      gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                        crossAxisCount: crossAxisCount,
-                        crossAxisSpacing: 16,
-                        mainAxisSpacing: 16,
-                        mainAxisExtent: itemHeight,
-                      ),
+                      gridDelegate: _isDetailsContent
+                          ? SliverGridDelegateWithFixedCrossAxisCount(
+                              crossAxisCount: crossAxisCount,
+                              crossAxisSpacing: 16,
+                              mainAxisSpacing: 16,
+                              mainAxisExtent: detailsItemHeight,
+                            )
+                          : SliverGridDelegateWithFixedCrossAxisCount(
+                              crossAxisCount: crossAxisCount,
+                              crossAxisSpacing: 8,
+                              mainAxisSpacing: 8,
+                              childAspectRatio: 2 / 3, // 海报比例
+                            ),
                       itemCount: searchItem!.data.length,
                       itemBuilder: (context, index) {
                         final searchData = searchItem!.data[index];
                         return _isDetailsContent
                             ? SearchDetailsContentView(
-                                searchData: searchData, itemHeight: itemHeight)
-                            : SearchOmittedContent(
                                 searchData: searchData,
-                                itemHeight: itemHeight,
-                              );
+                                itemHeight: detailsItemHeight)
+                            : SearchOmittedContent(searchData: searchData);
                       },
                     ),
                   ),

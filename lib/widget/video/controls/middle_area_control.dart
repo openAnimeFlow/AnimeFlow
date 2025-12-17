@@ -32,41 +32,23 @@ class MiddleAreaControl extends StatelessWidget {
                   const SizedBox.shrink(),
 
                 //缓冲指示器
-                VideoControlsIndicatorType.bufferingIndicator => Container(
-                    padding: const EdgeInsets.symmetric(
-                        horizontal: 20, vertical: 16),
-                    decoration: BoxDecoration(
-                      color: Colors.black.withValues(alpha: 0.75),
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                    child: Column(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        CircularProgressIndicator(
-                          color: Theme.of(context).colorScheme.primary,
-                          strokeWidth: 5,
+                VideoControlsIndicatorType.bufferingIndicator => Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      CircularProgressIndicator(
+                        color: Theme.of(context).colorScheme.primary,
+                        strokeWidth: 5,
+                      ),
+                      const SizedBox(height: 8),
+                      const Text(
+                        '正在缓冲...',
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontSize: 14,
+                          fontWeight: FontWeight.w500,
                         ),
-                        const SizedBox(height: 5),
-                        const Text(
-                          '正在缓冲...',
-                          style: TextStyle(
-                            color: Colors.white,
-                            fontSize: 14,
-                            fontWeight: FontWeight.w500,
-                          ),
-                        ),
-                        // 网络速率
-                        Text(
-                          '${videoUiStateController.networkSpeed.value.toStringAsFixed(2)} MB/s',
-                          style: TextStyle(
-                            color: Colors.white.withValues(alpha: 0.9),
-                            fontSize: 13,
-                            fontWeight: FontWeight.w600,
-                            letterSpacing: 0.5,
-                          ),
-                        ),
-                      ],
-                    ),
+                      ),
+                    ],
                   ),
 
                 //音量指示器
@@ -150,7 +132,7 @@ class MiddleAreaControl extends StatelessWidget {
                         color: Theme.of(context).colorScheme.primary,
                       ),
                       const SizedBox(height: 5),
-                       Text(
+                      Text(
                         videoUiStateController.parsingTitle.value,
                         style: const TextStyle(
                             color: Colors.white,

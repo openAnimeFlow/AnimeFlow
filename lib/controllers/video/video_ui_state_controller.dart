@@ -16,7 +16,7 @@ class VideoUiStateController extends GetxController {
   final RxBool isDragging = false.obs; // 是否正在拖拽进度条
   final RxBool isShowControlsUi = true.obs; //是否显示控件ui
   final RxBool isHorizontalDragging = false.obs; // 是否正在水平拖动
-  final RxString parsingTitle = ''.obs;// 正在解析的标题
+  final RxString parsingTitle = ''.obs; // 正在解析的标题
   final Rx<Duration> dragPosition = Duration.zero.obs; // 拖动时的临时进度
   final RxBool isShowIndicatorUi = false.obs; // 是否显示指示器ui
   final Rx<VideoControlsIndicatorType> indicatorType =
@@ -98,7 +98,9 @@ class VideoUiStateController extends GetxController {
   // 计算网络速率 (MB/s)
   void _calculateNetworkSpeed(Duration currentBuffer) {
     final now = DateTime.now();
-    final timeDiffMs = now.difference(_lastBufferTime).inMilliseconds;
+    final timeDiffMs = now
+        .difference(_lastBufferTime)
+        .inMilliseconds;
 
     // 每500毫秒更新一次网速
     if (timeDiffMs >= 500 && _isBuffering.value) {
@@ -130,6 +132,7 @@ class VideoUiStateController extends GetxController {
   void setParsingTitle(String title) {
     parsingTitle.value = title;
   }
+
   //修改主轴类型
   void updateMainAxisAlignmentType(MainAxisAlignment type) {
     mainAxisAlignmentType.value = type;
@@ -211,12 +214,12 @@ class VideoUiStateController extends GetxController {
     _dragStartPosition = position.value;
     isHorizontalDragging.value = true;
     isDragging.value = true;
-    
-    // 取消之前的自动隐藏UI计时器
-    _controlsUiTimer?.cancel();
-    
+
     // 显示控件UI
     showControlsUi();
+
+    // 取消之前的自动隐藏UI计时器
+    _controlsUiTimer?.cancel();
   }
 
   // 更新水平拖动进度
@@ -246,9 +249,10 @@ class VideoUiStateController extends GetxController {
       seekTo(dragPosition.value);
       isHorizontalDragging.value = false;
       isDragging.value = false;
-      
+
       // 1秒后隐藏控件UI
       hideControlsUi(duration: const Duration(seconds: 1));
+      updateMainAxisAlignmentType(MainAxisAlignment.start);
     }
   }
 
@@ -261,6 +265,7 @@ class VideoUiStateController extends GetxController {
       dragPosition.value = _dragStartPosition;
       // 1秒后隐藏控件UI
       hideControlsUi(duration: const Duration(seconds: 1));
+      updateMainAxisAlignmentType(MainAxisAlignment.start);
     }
   }
 

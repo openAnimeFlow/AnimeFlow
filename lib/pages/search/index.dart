@@ -1,9 +1,9 @@
 import 'package:anime_flow/http/requests/bgm_request.dart';
 import 'package:anime_flow/models/item/search_item.dart';
+import 'package:anime_flow/pages/search/search_details_content.dart';
+import 'package:anime_flow/pages/search/search_omitted_content.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-
-import 'search_content.dart';
 
 /// 搜索页
 class SearchPage extends StatefulWidget {
@@ -19,6 +19,7 @@ class _SearchPageState extends State<SearchPage> {
   final FocusNode _searchFocusNode = FocusNode();
   bool _isSearching = false;
   SearchItem? searchItem;
+  bool _isDetailsContent = true;
 
   @override
   void dispose() {
@@ -67,6 +68,7 @@ class _SearchPageState extends State<SearchPage> {
     final screenWidth = MediaQuery.of(context).size.width - 32; // 减去左右 padding
     final crossAxisCount = _calculateCrossAxisCount(screenWidth);
     const maxWidth = 1400.0;
+    const double itemHeight = 160.0;
 
     return Scaffold(
       body: CustomScrollView(
@@ -123,17 +125,25 @@ class _SearchPageState extends State<SearchPage> {
                 child: ConstrainedBox(
                   constraints: const BoxConstraints(maxWidth: maxWidth),
                   child: Padding(
-                    padding: const EdgeInsets.symmetric(
-                        horizontal: 16, vertical: 8),
-                    child: Align(
-                      alignment: Alignment.centerLeft,
-                      child: Text(
-                        '搜索到 ${searchItem!.data.length} 条内容',
-                        style: TextStyle(
-                          color: Theme.of(context).colorScheme.outline,
-                        ),
-                      ),
-                    ),
+                    padding:
+                        const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                    child: Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Text(
+                            '搜索到 ${searchItem!.data.length} 条内容',
+                            style: TextStyle(
+                              color: Theme.of(context).colorScheme.outline,
+                            ),
+                          ),
+                          IconButton(
+                              onPressed: () {
+                                setState(() {
+                                  _isDetailsContent = !_isDetailsContent;
+                                });
+                              },
+                              icon: const Icon(Icons.image_rounded))
+                        ]),
                   ),
                 ),
               ),
@@ -157,12 +167,18 @@ class _SearchPageState extends State<SearchPage> {
                         crossAxisCount: crossAxisCount,
                         crossAxisSpacing: 16,
                         mainAxisSpacing: 16,
-                        mainAxisExtent: SearchContentView.itemHeight,
+                        mainAxisExtent: itemHeight,
                       ),
                       itemCount: searchItem!.data.length,
                       itemBuilder: (context, index) {
                         final searchData = searchItem!.data[index];
-                        return SearchContentView(searchData: searchData);
+                        return _isDetailsContent
+                            ? SearchDetailsContentView(
+                                searchData: searchData, itemHeight: itemHeight)
+                            : SearchOmittedContent(
+                                searchData: searchData,
+                                itemHeight: itemHeight,
+                              );
                       },
                     ),
                   ),
@@ -196,7 +212,8 @@ class _StickySearchHeaderDelegate extends SliverPersistentHeaderDelegate {
     required this.focusNode,
     required this.onSearch,
     required this.onClear,
-    required this.topPadding, required this.maxWidth,
+    required this.topPadding,
+    required this.maxWidth,
   });
 
   @override

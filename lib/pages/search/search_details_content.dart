@@ -4,17 +4,15 @@ import 'package:anime_flow/widget/star.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
-///搜索内容
-class SearchContentView extends StatelessWidget {
+///详情View
+class SearchDetailsContentView extends StatelessWidget {
   final SearchData searchData;
-
-  const SearchContentView({
+  final double itemHeight;
+  const SearchDetailsContentView({
     super.key,
-    required this.searchData,
+    required this.searchData, required this.itemHeight,
   });
 
-  // 内容项固定高度
-  static const double itemHeight = 160.0;
 
   @override
   Widget build(BuildContext context) {
@@ -61,7 +59,6 @@ class SearchContentView extends StatelessWidget {
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                 ),
-                const Spacer(),
                 Text(
                   searchData.info,
                   style:
@@ -69,7 +66,7 @@ class SearchContentView extends StatelessWidget {
                   maxLines: 2,
                   overflow: TextOverflow.ellipsis,
                 ),
-                const SizedBox(height: 8),
+                const Spacer(),
                 Row(
                   children: [
                     Container(

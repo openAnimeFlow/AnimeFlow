@@ -18,7 +18,7 @@ class SearchDetailsContentView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final SubjectBasicData subjectBasicDataItem = SubjectBasicData(
+    final subjectBasicData = SubjectBasicData(
       id: searchData.id,
       name: searchData.name,
       image: searchData.images.large,
@@ -29,101 +29,104 @@ class SearchDetailsContentView extends StatelessWidget {
     const textFontWeight = FontWeight.w600;
 
     return SizedBox(
-      height: itemHeight,
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          ClipRRect(
-            borderRadius: BorderRadius.circular(10),
-            child: SizedBox(
-              height: itemHeight,
-              width: 110,
-              child: AnimationNetworkImage(
-                url: searchData.images.large,
-                fit: BoxFit.cover,
-              ),
-            ),
-          ),
-          const SizedBox(width: 12),
-          Expanded(
-            child: Column(
+        height: itemHeight,
+        child: InkWell(
+            onTap: () {
+              Get.toNamed("/anime_detail", arguments: subjectBasicData);
+            },
+            child: Row(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(
-                  searchData.nameCN ?? searchData.name,
-                  style: const TextStyle(
-                      fontSize: 16, fontWeight: FontWeight.bold),
-                  maxLines: 2,
-                  overflow: TextOverflow.ellipsis,
-                ),
-                const SizedBox(height: 2),
-                Text(
-                  searchData.name,
-                  style: TextStyle(
-                    fontSize: 10,
-                    fontWeight: textFontWeight,
-                    color: disabledColor,
+                ClipRRect(
+                  borderRadius: BorderRadius.circular(10),
+                  child: SizedBox(
+                    height: itemHeight,
+                    width: 110,
+                    child: AnimationNetworkImage(
+                      url: searchData.images.large,
+                      fit: BoxFit.cover,
+                    ),
                   ),
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
                 ),
-                Text(
-                  searchData.info,
-                  style:
-                      const TextStyle(fontSize: 10, fontWeight: textFontWeight),
-                  maxLines: 2,
-                  overflow: TextOverflow.ellipsis,
-                ),
-                const Spacer(),
-                Row(
-                  children: [
-                    Container(
-                      padding: const EdgeInsets.symmetric(
-                          horizontal: 5.5, vertical: 1),
-                      decoration: BoxDecoration(
-                        borderRadius: BorderRadius.circular(5),
-                        color: isDark ? disabledColor : Colors.amber[400],
-                      ),
-                      child: Text(
-                        searchData.rating.total.toString(),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        searchData.nameCN ?? searchData.name,
                         style: const TextStyle(
-                          fontSize: 8,
+                            fontSize: 16, fontWeight: FontWeight.bold),
+                        maxLines: 2,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                      const SizedBox(height: 2),
+                      Text(
+                        searchData.name,
+                        style: TextStyle(
+                          fontSize: 10,
                           fontWeight: textFontWeight,
-                          color: Colors.white,
-                          shadows: [
-                            Shadow(
-                              color: Colors.black,
-                              offset: Offset(0.5, 0.5),
-                              blurRadius: 1,
-                            )
-                          ],
+                          color: disabledColor,
                         ),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
                       ),
-                    ),
-                    StarView(score: searchData.rating.score),
-                    Text(
-                      searchData.rating.score.toStringAsFixed(1),
-                      style: TextStyle(
-                        fontSize: 10,
-                        fontWeight: textFontWeight,
-                        color: disabledColor,
+                      Text(
+                        searchData.info,
+                        style: const TextStyle(
+                            fontSize: 10, fontWeight: textFontWeight),
+                        maxLines: 2,
+                        overflow: TextOverflow.ellipsis,
                       ),
-                    ),
-                    Text(
-                      '(${searchData.rating.total}人评分)',
-                      style: TextStyle(
-                        fontSize: 8,
-                        fontWeight: textFontWeight,
-                        color: disabledColor,
+                      const Spacer(),
+                      Row(
+                        children: [
+                          Container(
+                            padding: const EdgeInsets.symmetric(
+                                horizontal: 5.5, vertical: 1),
+                            decoration: BoxDecoration(
+                              borderRadius: BorderRadius.circular(5),
+                              color: isDark ? disabledColor : Colors.amber[400],
+                            ),
+                            child: Text(
+                              searchData.rating.total.toString(),
+                              style: const TextStyle(
+                                fontSize: 8,
+                                fontWeight: textFontWeight,
+                                color: Colors.white,
+                                shadows: [
+                                  Shadow(
+                                    color: Colors.black,
+                                    offset: Offset(0.5, 0.5),
+                                    blurRadius: 1,
+                                  )
+                                ],
+                              ),
+                            ),
+                          ),
+                          StarView(score: searchData.rating.score),
+                          Text(
+                            searchData.rating.score.toStringAsFixed(1),
+                            style: TextStyle(
+                              fontSize: 10,
+                              fontWeight: textFontWeight,
+                              color: disabledColor,
+                            ),
+                          ),
+                          Text(
+                            '(${searchData.rating.total}人评分)',
+                            style: TextStyle(
+                              fontSize: 8,
+                              fontWeight: textFontWeight,
+                              color: disabledColor,
+                            ),
+                          ),
+                        ],
                       ),
-                    ),
-                  ],
+                    ],
+                  ),
                 ),
               ],
-            ),
-          ),
-        ],
-      ),
-    );
+            )));
   }
 }

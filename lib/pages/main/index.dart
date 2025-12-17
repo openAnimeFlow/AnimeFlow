@@ -1,7 +1,7 @@
 import 'package:anime_flow/controllers/main_page/main_page_state.dart';
 import 'package:anime_flow/models/item/tab_item.dart';
 import 'package:anime_flow/pages/Login/index.dart';
-import 'package:anime_flow/utils/util.dart';
+import 'package:anime_flow/utils/utils.dart';
 import 'package:flutter/material.dart';
 import 'package:anime_flow/pages/Category/index.dart';
 import 'package:anime_flow/pages/recommend/index.dart';
@@ -50,7 +50,7 @@ class _MainPageState extends State<MainPage> {
     mainPageState = Get.put(MainPageState());
     // 默认初始化第一个页面
     _pageCache[0] = const RecommendView();
-    Util.initCrawlConfigs();
+    Utils.initCrawlConfigs();
   }
 
   int _currentIndex = 0;

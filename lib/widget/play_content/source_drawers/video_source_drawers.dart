@@ -1,3 +1,4 @@
+import 'package:anime_flow/webview/webview_controller.dart';
 import 'package:anime_flow/widget/image/animation_network_image.dart';
 import 'package:anime_flow/constants/play_layout_constant.dart';
 import 'package:anime_flow/controllers/episodes/episodes_controller.dart';
@@ -5,7 +6,6 @@ import 'package:anime_flow/controllers/video/data/data_source_controller.dart';
 import 'package:anime_flow/controllers/video/video_source_controller.dart';
 import 'package:anime_flow/controllers/video/video_state_controller.dart';
 import 'package:anime_flow/controllers/video/video_ui_state_controller.dart';
-import 'package:anime_flow/data/crawler/html_request.dart';
 import 'package:anime_flow/models/enums/video_controls_icon_type.dart';
 import 'package:anime_flow/models/item/crawler_config_item.dart';
 import 'package:anime_flow/models/item/video/episode_resources_item.dart';
@@ -24,6 +24,7 @@ class VideoSourceDrawers extends StatefulWidget {
 }
 
 class _VideoSourceDrawersState extends State<VideoSourceDrawers> {
+  final webviewItemController = Get.find<WebviewItemController>();
   late VideoSourceController videoSourceController;
   late VideoStateController videoStateController;
   late EpisodesController episodesController;
@@ -54,6 +55,15 @@ class _VideoSourceDrawersState extends State<VideoSourceDrawers> {
       selectedWebsiteIndex = index;
       isShowEpisodes = false;
     });
+  }
+
+  Future<void> _loadVideoPage(String url) async {
+    await webviewItemController.loadUrl(
+      url,
+      true, // useNativePlayer: 使用原生播放器
+      false, // useLegacyParser: 不使用旧解析器
+      offset: 0,
+    );
   }
 
   @override
@@ -329,19 +339,13 @@ class _VideoSourceDrawersState extends State<VideoSourceDrawers> {
             videoUiStateController.updateIndicatorTypeAndShowIndicator(
                 VideoControlsIndicatorType.parsingIndicator);
 
-            final videoUrl = await WebRequest.getVideoSourceService(
-              episode.like,
-              videoConfig,
-            );
+            logger.i('开始解析视频源: ${videoConfig.baseURL + episode.like}');
 
-            dataSourceController.setVideoUrl(videoUrl);
-            Get.snackbar(
-              '视频资源解析成功',
-              '',
-              duration: const Duration(seconds: 2),
-              maxWidth: 300,
-            );
+            // 使用 WebView 解析视频源
+            // video.dart 中已经监听了 onVideoURLParser，这里只需加载URL
+            await _loadVideoPage(videoConfig.baseURL + episode.like);
           } catch (e) {
+            logger.e('获取视频源失败', error: e);
             Get.snackbar(
               '错误',
               '获取视频源失败: $e',

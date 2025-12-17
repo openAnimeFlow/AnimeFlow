@@ -1,4 +1,5 @@
 import 'package:anime_flow/models/item/subject_basic_data_item.dart';
+import 'package:anime_flow/webview/webview_controller.dart';
 import 'package:anime_flow/widget/video/video.dart';
 import 'package:anime_flow/constants/play_layout_constant.dart';
 import 'package:anime_flow/controllers/episodes/episodes_controller.dart';
@@ -33,6 +34,7 @@ class _PlayPageState extends State<PlayPage> {
     Get.put(VideoSourceController());
     Get.put(DataSourceController());
     Get.put(EpisodesController());
+    Get.put<WebviewItemController>(WebviewItemControllerFactory.getController());
 
     var args = Get.arguments;
     subjectBasicData = args['subjectBasicData'] as SubjectBasicData;

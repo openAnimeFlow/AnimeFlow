@@ -43,12 +43,12 @@ class WebRequest {
   }
 
   /// 获取视频源
-  static Future<String> getVideoSourceService(
-      String link, VideoConfig videoConfig) async {
-    final String baseUrl = videoConfig.baseURL;
-    final url = baseUrl + link;
-
-    // 根据平台选择不同的实现方式
-    return HtmlCrawler.getVideoSourceWithInAppWebView(url, videoConfig);
-  }
+  // static Future<String> getVideoSourceService(
+  //     String link, VideoConfig videoConfig) async {
+  //   final String baseUrl = videoConfig.baseURL;
+  //   final url = baseUrl + link;
+  //
+  //   // 根据平台选择不同的实现方式
+  //   return HtmlCrawler.getVideoSourceWithInAppWebView(url, videoConfig);
+  // }
 }

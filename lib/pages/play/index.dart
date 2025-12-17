@@ -35,7 +35,11 @@ class _PlayPageState extends State<PlayPage> {
     Get.put(DataSourceController());
     Get.put(EpisodesController());
     Get.put<WebviewItemController>(WebviewItemControllerFactory.getController());
-
+    // // 注册 WebviewItemController (全局单例)
+    // Get.put<WebviewItemController>(
+    //   WebviewItemControllerFactory.getController(),
+    //   permanent: true,
+    // );
     var args = Get.arguments;
     subjectBasicData = args['subjectBasicData'] as SubjectBasicData;
     episodes = args['episodes'] as Future<EpisodesItem>;
@@ -47,6 +51,7 @@ class _PlayPageState extends State<PlayPage> {
     Get.delete<VideoSourceController>();
     Get.delete<EpisodesController>();
     Get.delete<DataSourceController>();
+    Get.delete<WebviewItemControllerFactory>();
     super.dispose();
   }
 

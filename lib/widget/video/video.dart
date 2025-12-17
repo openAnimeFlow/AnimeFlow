@@ -42,13 +42,6 @@ class _VideoViewState extends State<VideoView> {
     dataSourceController = Get.find<DataSourceController>();
     videoUiStateController = Get.put(VideoUiStateController(player));
 
-    // 监听通过旧方式设置的videoUrl（保留兼容）
-    dataSourceController.videoUrl.listen((url) {
-      if (url.isNotEmpty) {
-        player.open(Media(url));
-      }
-    });
-
     // 初始化 WebView 并监听视频URL解析结果
     _initWebview();
   }

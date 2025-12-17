@@ -13,13 +13,6 @@ void main() async {
 
   await Hive.initFlutter();
   await Hive.openBox(Constants.crawlConfigs);
-
-  // 注册 WebviewItemController (全局单例)
-  Get.put<WebviewItemController>(
-    WebviewItemControllerFactory.getController(),
-    permanent: true,
-  );
-
   runApp(MyApp());
 }
 

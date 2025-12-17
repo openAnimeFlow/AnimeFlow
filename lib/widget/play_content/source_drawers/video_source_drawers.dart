@@ -61,7 +61,7 @@ class _VideoSourceDrawersState extends State<VideoSourceDrawers> {
     await webviewItemController.loadUrl(
       url,
       true, // useNativePlayer: 使用原生播放器
-      false, // useLegacyParser: 不使用旧解析器
+      true, // useLegacyParser: 不使用旧解析器
       offset: 0,
     );
   }

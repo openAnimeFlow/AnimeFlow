@@ -1,5 +1,6 @@
 import 'package:anime_flow/models/item/subjects_item.dart';
 import 'package:flutter/material.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 ///详情信息
 class Details extends StatelessWidget {
@@ -34,9 +35,11 @@ class Details extends StatelessWidget {
 
   Widget _buildText(
       {required List<Infobox> textData, required Color themeTextColor}) {
-    // 过滤掉空值的条目
-    final filteredData =
-        textData.where((item) => item.values.isNotEmpty).toList();
+    // 过滤掉空值的条目（包括values为空或所有v字段都为空字符串的情况）
+    final filteredData = textData.where((item) {
+      return item.values.isNotEmpty &&
+          item.values.any((value) => value.v.isNotEmpty);
+    }).toList();
 
     // 如果条目少于等于10条，直接显示
     if (filteredData.length <= 10) {
@@ -67,11 +70,7 @@ class Details extends StatelessWidget {
               style: TextStyle(fontSize: textSize, fontWeight: textFontWeight),
             ),
             Expanded(
-                child: Text(' ${values.map((v) => v.v).join(', ')}',
-                    style: TextStyle(
-                      fontSize: textSize,
-                      color: themeTextColor,
-                    ))),
+                child: _buildValueContent(values, themeTextColor, textSize)),
           ]);
         });
   }
@@ -106,7 +105,7 @@ class _ExpandableTextListState extends State<_ExpandableTextList> {
     return Column(
       children: [
         ListView.builder(
-          padding: EdgeInsets.zero,
+            padding: EdgeInsets.zero,
             shrinkWrap: true,
             physics: const NeverScrollableScrollPhysics(),
             itemCount: displayItems.length,
@@ -124,11 +123,8 @@ class _ExpandableTextListState extends State<_ExpandableTextList> {
                           fontWeight: widget.textFontWeight),
                     ),
                     Expanded(
-                        child: Text(' ${values.map((v) => v.v).join(', ')}',
-                            style: TextStyle(
-                              fontSize: widget.textSize,
-                              color: widget.themeTextColor,
-                            ))),
+                        child: _buildValueContent(
+                            values, widget.themeTextColor, widget.textSize)),
                   ]);
             }),
         if (widget.textData.length > 10)
@@ -161,4 +157,48 @@ class _ExpandableTextListState extends State<_ExpandableTextList> {
       ],
     );
   }
+}
+
+
+//检查是否为URL
+bool _isUrl(String text) {
+  final trimmedText = text.trim();
+  // 更完善的URL匹配正则表达式
+  return RegExp(
+      r'^https?:\/\/(www\.)?[-a-zA-Z0-9@:%._\+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b([-a-zA-Z0-9()@:%_\+.~#?&//=]*)')
+      .hasMatch(trimmedText);
+}
+
+// 构建链接文本
+Widget _buildLinkText(String url, Color themeTextColor, double? textSize) {
+  return GestureDetector(
+    onTap: () async {
+      final uri = Uri.parse(url.trim());
+      if (await canLaunchUrl(uri)) {
+        await launchUrl(uri);
+      }
+    },
+    child: Text(' $url',
+        style: TextStyle(
+          fontSize: textSize,
+          color: Colors.blue,
+        )),
+  );
+}
+
+// 构建值内容
+Widget _buildValueContent(
+    List<Values> values, Color themeTextColor, double? textSize) {
+  if (values.length == 1) {
+    final value = values.first.v;
+    if (_isUrl(value)) {
+      return _buildLinkText(value, themeTextColor, textSize);
+    }
+  }
+
+  return Text(' ${values.map((v) => v.v).join(', ')}',
+      style: TextStyle(
+        fontSize: textSize,
+        color: themeTextColor,
+      ));
 }

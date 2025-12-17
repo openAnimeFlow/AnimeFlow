@@ -1,4 +1,5 @@
 import 'package:anime_flow/models/item/search_item.dart';
+import 'package:anime_flow/models/item/subject_basic_data_item.dart';
 import 'package:anime_flow/widget/image/animation_network_image.dart';
 import 'package:anime_flow/widget/star.dart';
 import 'package:flutter/material.dart';
@@ -8,14 +9,21 @@ import 'package:get/get.dart';
 class SearchDetailsContentView extends StatelessWidget {
   final SearchData searchData;
   final double itemHeight;
+
   const SearchDetailsContentView({
     super.key,
-    required this.searchData, required this.itemHeight,
+    required this.searchData,
+    required this.itemHeight,
   });
-
 
   @override
   Widget build(BuildContext context) {
+    final SubjectBasicData subjectBasicDataItem = SubjectBasicData(
+      id: searchData.id,
+      name: searchData.name,
+      image: searchData.images.large,
+    );
+
     bool isDark = Get.isDarkMode;
     final disabledColor = Get.theme.disabledColor;
     const textFontWeight = FontWeight.w600;

@@ -5,14 +5,15 @@ import 'package:anime_flow/widget/anime_detail/episodes_dialog.dart';
 import 'package:anime_flow/widget/star.dart';
 import 'package:anime_flow/widget/image/animation_network_image.dart';
 import 'package:anime_flow/models/item/episodes_item.dart';
-import 'package:anime_flow/models/item/hot_item.dart';
 import 'package:anime_flow/models/item/subjects_item.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:shimmer/shimmer.dart';
+import 'package:anime_flow/models/item/subject_basic_data_item.dart' show SubjectBasicData;
+
 
 class InfoHeadView extends StatelessWidget {
-  final Subject subject;
+  final SubjectBasicData subjectBasicData;
   final SubjectsItem? subjectItem;
   final Future<EpisodesItem> episodesItem;
   final double statusBarHeight;
@@ -23,8 +24,7 @@ class InfoHeadView extends StatelessWidget {
     required this.statusBarHeight,
     required this.contentHeight,
     required this.episodesItem,
-    required this.subject,
-    required this.subjectItem,
+    required this.subjectItem, required this.subjectBasicData,
   });
 
   @override
@@ -51,7 +51,7 @@ class InfoHeadView extends StatelessWidget {
                         ).createShader(bounds);
                       },
                       child: AnimationNetworkImage(
-                        url: subject.images.large,
+                        url: subjectBasicData.image,
                         width: boxConstraints.maxWidth,
                         height: boxConstraints.maxHeight,
                         fit: BoxFit.cover,
@@ -92,7 +92,7 @@ class InfoHeadView extends StatelessWidget {
                                     borderRadius: BorderRadius.circular(8.0),
                                   ),
                                   child: AnimationNetworkImage(
-                                    url: subject.images.large,
+                                    url: subjectBasicData.image,
                                     fit: BoxFit.cover,
                                   ),
                                 ),
@@ -104,13 +104,13 @@ class InfoHeadView extends StatelessWidget {
                                 flex: 3, // 文本占3份
                                 child: Column(
                                     crossAxisAlignment:
-                                        CrossAxisAlignment.start,
+                                    CrossAxisAlignment.start,
                                     children: [
                                       subjectItem == null
                                           ? _skeletonView()
                                           : _dataView(
-                                              subjectItem: subjectItem!,
-                                              themeColor: themeColor),
+                                          subjectItem: subjectItem!,
+                                          themeColor: themeColor),
                                       const Spacer(),
                                       Row(children: [
                                         IconButton(
@@ -125,19 +125,19 @@ class InfoHeadView extends StatelessWidget {
                                         OutlinedButton.icon(
                                             onPressed: () {
                                               Get.toNamed("/play", arguments: {
-                                                "subject": subject,
+                                                "subjectBasicData": subjectBasicData,
                                                 "episodes": episodesItem
                                               });
                                             },
                                             style: OutlinedButton.styleFrom(
                                               side:
-                                                  BorderSide(color: themeColor),
+                                              BorderSide(color: themeColor),
                                               shape: RoundedRectangleBorder(
                                                 borderRadius:
-                                                    BorderRadius.circular(20),
+                                                BorderRadius.circular(20),
                                               ),
                                               padding:
-                                                  const EdgeInsets.symmetric(
+                                              const EdgeInsets.symmetric(
                                                 horizontal: 12,
                                               ),
                                             ),
@@ -202,14 +202,14 @@ class InfoHeadView extends StatelessWidget {
   Widget _dataView(
       {required SubjectsItem subjectItem, required Color themeColor}) {
     final collectionTotal =
-        subjectItem.collection.data.values.reduce((a, b) => a + b);
+    subjectItem.collection.data.values.reduce((a, b) => a + b);
     const double fontSize = 12;
     const FontWeight fontWeight = FontWeight.w600;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
-          subject.nameCN ?? subject.name,
+          subjectBasicData.name,
           style: const TextStyle(
             fontSize: 20,
             fontWeight: FontWeight.bold,
@@ -224,7 +224,7 @@ class InfoHeadView extends StatelessWidget {
             Text(
               '${subjectItem.airtime.date}(${subjectItem.platform.typeCN})',
               style:
-                  const TextStyle(fontSize: fontSize, fontWeight: fontWeight),
+              const TextStyle(fontSize: fontSize, fontWeight: fontWeight),
               maxLines: 1,
               overflow: TextOverflow.ellipsis,
             ),
@@ -247,7 +247,7 @@ class InfoHeadView extends StatelessWidget {
             Text(
               '(${subjectItem.rating.total})人评分',
               style:
-                  const TextStyle(fontSize: fontSize, fontWeight: fontWeight),
+              const TextStyle(fontSize: fontSize, fontWeight: fontWeight),
             ),
             Text('$collectionTotal收藏/',
                 style: const TextStyle(

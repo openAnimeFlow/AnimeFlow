@@ -1,21 +1,20 @@
-import 'package:anime_flow/models/item/hot_item.dart';
 import 'package:anime_flow/models/item/subjects_item.dart';
 import 'package:anime_flow/widget/star.dart';
 import 'package:anime_flow/widget/image/animation_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get_core/src/get_main.dart';
 import 'package:get/get_navigation/src/extension_navigation.dart';
+import 'package:anime_flow/models/item/subject_basic_data_item.dart' show SubjectBasicData;
 
 class InfoAppbarView extends StatelessWidget {
   final bool isPinned;
-  final Subject subject;
+  final SubjectBasicData subjectBasicData;
   final SubjectsItem subjectsItem;
 
   const InfoAppbarView({
     super.key,
-    required this.subject,
     required this.subjectsItem,
-    required this.isPinned,
+    required this.isPinned, required this.subjectBasicData,
   });
 
   @override
@@ -42,14 +41,14 @@ class InfoAppbarView extends StatelessWidget {
                       width: 26,
                       height: 36,
                       fit: BoxFit.cover,
-                      url: subject.images.common),
+                      url: subjectBasicData.image),
                 ),
                 const SizedBox(width: 5),
                 Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      subject.nameCN ?? subject.name,
+                      subjectBasicData.name,
                       style: const TextStyle(fontSize: 15),
                     ),
                     Row(

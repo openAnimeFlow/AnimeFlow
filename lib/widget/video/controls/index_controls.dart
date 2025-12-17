@@ -1,3 +1,4 @@
+import 'package:anime_flow/models/item/subject_basic_data_item.dart';
 import 'package:anime_flow/widget/video/controls/bottom_area_control.dart';
 import 'package:anime_flow/widget/video/controls/desktop_gesture_detector.dart';
 import 'package:anime_flow/widget/video/controls/middle_area_control.dart';
@@ -5,7 +6,6 @@ import 'package:anime_flow/widget/video/controls/top_area_control.dart';
 import 'package:anime_flow/controllers/episodes/episodes_controller.dart';
 import 'package:anime_flow/controllers/play/PlayPageController.dart';
 import 'package:anime_flow/controllers/video/video_state_controller.dart';
-import 'package:anime_flow/models/item/hot_item.dart';
 import 'package:anime_flow/controllers/video/video_ui_state_controller.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -16,10 +16,10 @@ import 'mobile_gesture_detector.dart';
 
 ///播放器控件
 class VideoControlsUiView extends StatefulWidget {
-  final Subject subject;
+  final SubjectBasicData subjectBasicData;
   final Player player;
 
-  const VideoControlsUiView(this.player, {super.key, required this.subject});
+  const VideoControlsUiView(this.player, {super.key,  required this.subjectBasicData});
 
   @override
   State<VideoControlsUiView> createState() => _VideoControlsUiViewState();
@@ -51,7 +51,7 @@ class _VideoControlsUiViewState extends State<VideoControlsUiView> {
     return Column(children: [
       ///顶部
       TopAreaControl(
-        subjectName: widget.subject.nameCN ?? widget.subject.name,
+        subjectName: widget.subjectBasicData.name,
         playPageController: playPageController,
         videoUiStateController: videoUiStateController,
         episodesController: episodesController,

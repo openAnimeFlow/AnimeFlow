@@ -1,18 +1,15 @@
-import 'package:anime_flow/controllers/crawler/crawler_config_controller.dart';
-import 'package:anime_flow/controllers/video/data/data_source_controller.dart';
 import 'package:anime_flow/models/item/episodes_item.dart';
-import 'package:anime_flow/models/item/hot_item.dart';
+import 'package:anime_flow/models/item/subject_basic_data_item.dart';
 import 'package:flutter/material.dart';
-import 'package:get/get.dart';
 
 import 'comments.dart';
 import 'introduce.dart';
 
 class ContentView extends StatefulWidget {
-  final Subject subject;
+  final SubjectBasicData subjectBasicData;
   final Future<EpisodesItem> episodes;
 
-  const ContentView(this.subject, this.episodes, {super.key});
+  const ContentView(this.episodes, {super.key, required this.subjectBasicData});
 
   @override
   State<ContentView> createState() => _ContentViewState();
@@ -54,9 +51,9 @@ class _ContentViewState extends State<ContentView>
               children: [
                 //简介view
                 IntroduceView(
-                  widget.subject,
                   widget.episodes,
                   key: _introduceKey,
+                  subjectBasicData: widget.subjectBasicData,
                 ),
                 CommentsView(
                   key: _commentKey,

@@ -3,18 +3,18 @@ import 'package:anime_flow/controllers/episodes/episodes_controller.dart';
 import 'package:anime_flow/controllers/play/PlayPageController.dart';
 import 'package:anime_flow/controllers/video/video_source_controller.dart';
 import 'package:anime_flow/models/item/episodes_item.dart';
-import 'package:anime_flow/models/item/hot_item.dart';
+import 'package:anime_flow/models/item/subject_basic_data_item.dart';
 import 'package:anime_flow/pages/play/content/video_resources/index.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:logger/logger.dart';
 
 class IntroduceView extends StatefulWidget {
-  final Subject subject;
+  final SubjectBasicData subjectBasicData;
   final Future<EpisodesItem> episodes;
   static const String drawerTitle = "章节列表";
 
-  const IntroduceView(this.subject, this.episodes, {super.key});
+  const IntroduceView( this.episodes, {super.key, required this.subjectBasicData});
 
   @override
   State<IntroduceView> createState() => _IntroduceViewState();
@@ -78,7 +78,7 @@ class _IntroduceViewState extends State<IntroduceView>
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
-                widget.subject.nameCN ?? widget.subject.name,
+                widget.subjectBasicData.name,
                 style:
                     const TextStyle(fontSize: 15, fontWeight: FontWeight.bold),
                 textAlign: TextAlign.left,
@@ -113,7 +113,7 @@ class _IntroduceViewState extends State<IntroduceView>
               ),
               //数据源
               VideoResourcesView(
-                  subject: widget.subject, sourceTitle: sourceTitle)
+                  subjectBasicData: widget.subjectBasicData, sourceTitle: sourceTitle)
             ],
           ),
         ));

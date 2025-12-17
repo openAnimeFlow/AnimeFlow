@@ -1,3 +1,4 @@
+import 'package:anime_flow/models/item/subject_basic_data_item.dart';
 import 'package:anime_flow/models/item/subject_comments_item.dart';
 import 'package:anime_flow/pages/anime_info/info_head.dart';
 import 'package:anime_flow/controllers/anime/anime_state_controller.dart';
@@ -19,7 +20,7 @@ class AnimeDetailPage extends StatefulWidget {
 
 class _AnimeDetailPageState extends State<AnimeDetailPage>
     with SingleTickerProviderStateMixin {
-  late Subject subject;
+  late SubjectBasicData subjectBasicData;
   late TabController tabController;
   late AnimeStateController animeStateController;
   late Future<SubjectsItem?> _subjectsItem;
@@ -36,30 +37,30 @@ class _AnimeDetailPageState extends State<AnimeDetailPage>
   void initState() {
     super.initState();
     tabController = TabController(length: _tabs.length, vsync: this);
-    subject = Get.arguments;
+    subjectBasicData = Get.arguments;
     animeStateController = Get.put(AnimeStateController());
-    _subjectsItem = BgmRequest.getSubjectByIdService(subject.id);
+    _subjectsItem = BgmRequest.getSubjectByIdService(subjectBasicData.id);
     episodesFuture =
-        BgmRequest.getSubjectEpisodesByIdService(subject.id, 100, 0);
+        BgmRequest.getSubjectEpisodesByIdService(subjectBasicData.id, 100, 0);
     _getSubjectComment();
     setSubjectName();
   }
 
   void setSubjectName() {
-    animeStateController.setAnimeName(subject.nameCN ?? subject.name);
+    animeStateController.setAnimeName(subjectBasicData.name);
   }
 
   void _getSubjectComment({bool loadMore = false}) async {
     if (_isLoadingComments || (loadMore && !_hasMoreComments)) return;
-    
+
     setState(() {
       _isLoadingComments = true;
     });
 
     final currentOffset = loadMore ? _commentOffset + 1 : 0;
     final result = await BgmRequest.getSubjectCommentsByIdService(
-        subjectId: subject.id, limit: 20, offset: currentOffset);
-    
+        subjectId: subjectBasicData.id, limit: 20, offset: currentOffset);
+
     if (mounted) {
       setState(() {
         if (loadMore && subjectCommentItem != null) {
@@ -77,8 +78,8 @@ class _AnimeDetailPageState extends State<AnimeDetailPage>
           subjectCommentItem = result;
         }
         _commentOffset = currentOffset;
-        _hasMoreComments = result.data.isNotEmpty && 
-                          (subjectCommentItem?.data.length ?? 0) < (result.total);
+        _hasMoreComments = result.data.isNotEmpty &&
+            (subjectCommentItem?.data.length ?? 0) < (result.total);
         _isLoadingComments = false;
       });
     }
@@ -127,7 +128,7 @@ class _AnimeDetailPageState extends State<AnimeDetailPage>
                     builder: (context, snapshot) {
                       return snapshot.data != null
                           ? InfoAppbarView(
-                              subject: subject,
+                              subjectBasicData: subjectBasicData,
                               subjectsItem: snapshot.data!,
                               isPinned: isPinned,
                             )
@@ -160,11 +161,11 @@ class _AnimeDetailPageState extends State<AnimeDetailPage>
                         future: _subjectsItem,
                         builder: (context, snapshot) {
                           return InfoHeadView(
-                            subject: subject,
                             subjectItem: snapshot.data,
                             episodesItem: episodesFuture,
                             statusBarHeight: statusBarHeight,
                             contentHeight: _contentHeight,
+                            subjectBasicData: subjectBasicData,
                           );
                         },
                       ),
@@ -206,8 +207,8 @@ class _AnimeDetailPageState extends State<AnimeDetailPage>
                 isLoadingComments: _isLoadingComments,
                 hasMoreComments: _hasMoreComments,
               ),
-              _CommentsPage(subject: subject),
-              _ForumPage(subject: subject),
+              _CommentsPage(subjectBasicData: subjectBasicData),
+              _ForumPage(subjectBasicData: subjectBasicData),
             ],
           ),
         ),
@@ -227,10 +228,10 @@ class _NoScrollbarBehavior extends ScrollBehavior {
 
 /// 评论页面
 class _CommentsPage extends StatelessWidget {
-  final Subject subject;
+  final SubjectBasicData subjectBasicData;
 
   const _CommentsPage({
-    required this.subject,
+     required this.subjectBasicData,
   });
 
   @override
@@ -266,10 +267,10 @@ class _CommentsPage extends StatelessWidget {
 
 /// 论坛页面
 class _ForumPage extends StatelessWidget {
-  final Subject subject;
+  final SubjectBasicData subjectBasicData;
 
   const _ForumPage({
-    required this.subject,
+    required this.subjectBasicData,
   });
 
   @override

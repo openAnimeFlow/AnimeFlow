@@ -1,18 +1,18 @@
+import 'package:anime_flow/models/item/subject_basic_data_item.dart';
 import 'package:anime_flow/widget/video/controls/index_controls.dart';
 import 'package:anime_flow/controllers/video/data/data_source_controller.dart';
 import 'package:anime_flow/controllers/video/video_source_controller.dart';
 import 'package:anime_flow/controllers/video/video_state_controller.dart';
 import 'package:anime_flow/controllers/video/video_ui_state_controller.dart';
-import 'package:anime_flow/models/item/hot_item.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:media_kit/media_kit.dart';
 import 'package:media_kit_video/media_kit_video.dart';
 
 class VideoView extends StatefulWidget {
-  final Subject subject;
+  final SubjectBasicData subjectBasicData;
 
-  const VideoView({super.key, required this.subject});
+  const VideoView({super.key, required this.subjectBasicData});
 
   @override
   State<VideoView> createState() => _VideoViewState();
@@ -53,7 +53,7 @@ class _VideoViewState extends State<VideoView> {
           controller: controller,
           controls: (state) => VideoControlsUiView(
             player,
-            subject: widget.subject,
+             subjectBasicData: widget.subjectBasicData,
           ),
         ),
       ],

@@ -3,6 +3,7 @@ import 'package:anime_flow/utils/timeUtil.dart';
 import 'package:anime_flow/widget/star.dart';
 import 'package:anime_flow/widget/image/animation_network_image.dart';
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 
 class InfoCommentView extends StatelessWidget {
   final SubjectCommentItem? subjectCommentItem;
@@ -68,7 +69,7 @@ class InfoCommentView extends StatelessWidget {
                 children: [
                   _CommentItem(comment: comment),
                   if (index < subjectComments.data.length - 1)
-                    const SizedBox(height: 5),
+                    const SizedBox(height: 8),
                 ],
               );
             },
@@ -90,7 +91,7 @@ class _CommentItem extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
-        color: Theme.of(context).focusColor.withValues(alpha: 0.1),
+        color: Get.theme.disabledColor.withValues(alpha: 0.05),
         borderRadius: BorderRadius.circular(8),
         // border: Border.all(
         //   color: Theme.of(context).dividerColor.withValues(alpha: 0.2),

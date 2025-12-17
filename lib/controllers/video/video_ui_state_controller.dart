@@ -4,6 +4,7 @@ import 'package:anime_flow/models/enums/video_controls_icon_type.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:get/get.dart';
 import 'package:media_kit/media_kit.dart';
+import 'package:screen_brightness/screen_brightness.dart';
 
 class VideoUiStateController extends GetxController {
   final Player player;
@@ -38,6 +39,13 @@ class VideoUiStateController extends GetxController {
 
   //控件ui计时器
   Timer? _controlsUiTimer;
+
+  // 屏幕亮度相关
+  final ScreenBrightness _screenBrightness = ScreenBrightness();
+  double _originalBrightness = 0.5; // 保存原始亮度
+  final RxDouble currentBrightness = 0.5.obs; // 当前亮度 0.0-1.0
+  final RxBool isBrightnessDragging = false.obs; // 是否正在拖动调整亮度
+  double _dragStartBrightness = 0.5; // 拖动开始时的亮度
 
   VideoUiStateController(this.player) {
     // 初始化状态，防止 player 已经加载完成导致 stream 不触发
@@ -269,9 +277,80 @@ class VideoUiStateController extends GetxController {
     }
   }
 
+  // 初始化并保存原始亮度
+  Future<void> initializeBrightness() async {
+    try {
+      final brightness = await _screenBrightness.application;
+      _originalBrightness = brightness;
+      currentBrightness.value = brightness;
+    } catch (e) {
+      // 如果获取失败，使用默认值
+      _originalBrightness = 0.5;
+      currentBrightness.value = 0.5;
+    }
+  }
+
+  // 开始垂直拖动调整亮度
+  void startBrightnessDrag() {
+    _dragStartBrightness = currentBrightness.value;
+    isBrightnessDragging.value = true;
+    
+    // 取消之前的自动隐藏UI计时器
+    _controlsUiTimer?.cancel();
+    
+    // 显示控件UI
+    showControlsUi();
+    
+    // 显示亮度指示器
+    updateIndicatorTypeAndShowIndicator(VideoControlsIndicatorType.brightnessIndicator);
+  }
+
+  // 更新垂直拖动亮度
+  void updateBrightnessDrag(double dragDistance, double screenHeight) {
+    // 向上拖动减少亮度，向下拖动增加亮度
+    final brightnessChange = -(dragDistance / screenHeight);
+    double newBrightness = (_dragStartBrightness + brightnessChange).clamp(0.0, 1.0);
+    
+    currentBrightness.value = newBrightness;
+    
+    // 更新屏幕亮度
+    _screenBrightness.setApplicationScreenBrightness(newBrightness);
+  }
+
+  // 结束垂直拖动亮度
+  void endBrightnessDrag() {
+    isBrightnessDragging.value = false;
+    
+    // 隐藏亮度指示器
+    hideIndicator();
+    updateIndicatorType(VideoControlsIndicatorType.noIndicator);
+    updateMainAxisAlignmentType(MainAxisAlignment.start);
+    
+    // 1秒后隐藏控件UI
+    hideControlsUi(duration: const Duration(seconds: 1));
+  }
+
+  // 恢复原始屏幕亮度
+  Future<void> _resetBrightness() async {
+    try {
+      await _screenBrightness.resetApplicationScreenBrightness();
+      currentBrightness.value = _originalBrightness;
+    } catch (e) {
+      // 如果重置失败，尝试设置为原始值
+      try {
+        await _screenBrightness.setApplicationScreenBrightness(_originalBrightness);
+        currentBrightness.value = _originalBrightness;
+      } catch (_) {
+        // 忽略错误
+      }
+    }
+  }
+
   @override
   void onClose() {
     _indicatorTimer?.cancel();
+    _controlsUiTimer?.cancel();
+    _resetBrightness();
     super.onClose();
   }
 }

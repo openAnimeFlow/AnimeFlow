@@ -49,6 +49,8 @@ class _VideoViewState extends State<VideoView> {
     videoSourceController = Get.find<VideoSourceController>();
     dataSourceController = Get.find<DataSourceController>();
     videoUiStateController = Get.put(VideoUiStateController(player));
+    // 初始化屏幕亮度
+    videoUiStateController.initializeBrightness();
 
     // 初始化 WebView 并监听视频URL解析结果
     _initWebview();

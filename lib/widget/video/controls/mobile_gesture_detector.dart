@@ -75,8 +75,11 @@ class MobileGestureDetector extends StatelessWidget {
               videoStateController.startVerticalDrag();
               videoUiStateController.updateIndicatorTypeAndShowIndicator(
                   VideoControlsIndicatorType.volumeIndicator);
+            } else {
+              // 左半屏 → 垂直拖动（调整屏幕亮度）
+              dragType = DragType.vertical;
+              videoUiStateController.startBrightnessDrag();
             }
-            // TODO 左半屏的垂直拖动,调整亮度
           }
         }
 
@@ -84,12 +87,20 @@ class MobileGestureDetector extends StatelessWidget {
         if (dragType == DragType.horizontal) {
           // 水平拖动：更新播放进度
           videoUiStateController.updateHorizontalDrag(currentX, screenWidth);
-        } else if (dragType == DragType.vertical && isRightSide) {
-          // 垂直拖动（右半屏）：更新音量
-          videoStateController.updateVerticalDrag(
-            currentY - dragStartY, // 拖动的垂直距离
-            screenHeight, // 屏幕高度（用于计算音量变化百分比）
-          );
+        } else if (dragType == DragType.vertical) {
+          if (isRightSide) {
+            // 垂直拖动（右半屏）：更新音量
+            videoStateController.updateVerticalDrag(
+              currentY - dragStartY, // 拖动的垂直距离
+              screenHeight, // 屏幕高度（用于计算音量变化百分比）
+            );
+          } else {
+            // 垂直拖动（左半屏）：更新屏幕亮度
+            videoUiStateController.updateBrightnessDrag(
+              currentY - dragStartY, // 拖动的垂直距离
+              screenHeight, // 屏幕高度（用于计算亮度变化百分比）
+            );
+          }
         }
       },
       // 拖动结束事件：完成拖动操作
@@ -97,9 +108,14 @@ class MobileGestureDetector extends StatelessWidget {
         if (dragType == DragType.horizontal) {
           // 水平拖动结束：应用新的播放进度
           videoUiStateController.endHorizontalDrag();
-        } else if (dragType == DragType.vertical && isRightSide) {
-          // 垂直拖动结束：应用新的音量并隐藏指示器
-          videoStateController.endVerticalDrag();
+        } else if (dragType == DragType.vertical) {
+          if (isRightSide) {
+            // 垂直拖动结束（右半屏）：应用新的音量并隐藏指示器
+            videoStateController.endVerticalDrag();
+          } else {
+            // 垂直拖动结束（左半屏）：结束亮度调整
+            videoUiStateController.endBrightnessDrag();
+          }
         }
 
         // 重置拖动类型，准备下一次拖动
@@ -111,9 +127,14 @@ class MobileGestureDetector extends StatelessWidget {
         if (dragType == DragType.horizontal) {
           // 水平拖动取消：恢复到拖动前的播放位置
           videoUiStateController.cancelHorizontalDrag();
-        } else if (dragType == DragType.vertical && isRightSide) {
-          // 垂直拖动取消：结束音量调整并隐藏指示器
-          videoStateController.endVerticalDrag();
+        } else if (dragType == DragType.vertical) {
+          if (isRightSide) {
+            // 垂直拖动取消（右半屏）：结束音量调整并隐藏指示器
+            videoStateController.endVerticalDrag();
+          } else {
+            // 垂直拖动取消（左半屏）：结束亮度调整
+            videoUiStateController.endBrightnessDrag();
+          }
         }
 
         // 重置拖动类型

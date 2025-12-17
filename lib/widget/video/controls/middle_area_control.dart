@@ -141,6 +141,44 @@ class MiddleAreaControl extends StatelessWidget {
                       )
                     ],
                   ),
+
+                //亮度指示器
+                VideoControlsIndicatorType.brightnessIndicator => Container(
+                    padding: const EdgeInsets.symmetric(
+                        horizontal: 16, vertical: 12),
+                    decoration: BoxDecoration(
+                      color: Colors.black.withValues(alpha: 0.7),
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Icon(
+                          videoUiStateController.currentBrightness.value < 0.3
+                              ? Icons.brightness_2
+                              : videoUiStateController.currentBrightness.value < 0.7
+                                  ? Icons.brightness_4
+                                  : Icons.brightness_high,
+                          color: Colors.white,
+                          size: 24,
+                        ),
+                        const SizedBox(width: 5),
+                        Container(
+                          width: 100,
+                          decoration: BoxDecoration(
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                          clipBehavior: Clip.antiAliasWithSaveLayer,
+                          child: LinearProgressIndicator(
+                            value: videoUiStateController.currentBrightness.value,
+                            backgroundColor: Colors.white30,
+                            valueColor: AlwaysStoppedAnimation<Color>(
+                                Theme.of(context).colorScheme.primary),
+                          ),
+                        )
+                      ],
+                    ),
+                  ),
               }
             ],
           ),

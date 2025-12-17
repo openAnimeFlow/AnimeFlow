@@ -15,7 +15,10 @@ class VideoProgressBar extends StatelessWidget {
       height: 40,
       child: Obx(() {
         final max = videoUiStateController.duration.value.inMilliseconds.toDouble();
-        final value = videoUiStateController.position.value.inMilliseconds.toDouble();
+        // 如果正在水平拖动，使用拖动位置；否则使用当前播放位置
+        final value = videoUiStateController.isHorizontalDragging.value
+            ? videoUiStateController.dragPosition.value.inMilliseconds.toDouble()
+            : videoUiStateController.position.value.inMilliseconds.toDouble();
         final buffer = videoUiStateController.buffer.value.inMilliseconds.toDouble();
 
         return Stack(
@@ -106,12 +109,15 @@ class VideoTimeDisplay extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Obx(() {
-      final position = videoController.position.value;
+      // 如果正在水平拖动，使用拖动位置；否则使用当前播放位置
+      final position = videoController.isHorizontalDragging.value
+          ? videoController.dragPosition.value
+          : videoController.position.value;
       final duration = videoController.duration.value;
 
       return Text(
         "${TimeUtil.formatDuration(position)} / ${TimeUtil.formatDuration(duration)}",
-        style: TextStyle(
+        style: const TextStyle(
           color: Colors.white,
           fontSize: 12,
           fontWeight: FontWeight.w800,

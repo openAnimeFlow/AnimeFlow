@@ -211,6 +211,12 @@ class VideoUiStateController extends GetxController {
     _dragStartPosition = position.value;
     isHorizontalDragging.value = true;
     isDragging.value = true;
+    
+    // 取消之前的自动隐藏UI计时器
+    _controlsUiTimer?.cancel();
+    
+    // 显示控件UI
+    showControlsUi();
   }
 
   // 更新水平拖动进度
@@ -231,15 +237,18 @@ class VideoUiStateController extends GetxController {
     newPosition = newPosition.clamp(0, duration.value.inMilliseconds);
 
     dragPosition.value = Duration(milliseconds: newPosition);
-    position.value = dragPosition.value; // 实时更新位置显示
   }
 
   // 结束水平拖动
   void endHorizontalDrag() {
     if (isHorizontalDragging.value) {
+      // 更新视频进度
       seekTo(dragPosition.value);
       isHorizontalDragging.value = false;
       isDragging.value = false;
+      
+      // 1秒后隐藏控件UI
+      hideControlsUi(duration: const Duration(seconds: 1));
     }
   }
 
@@ -249,7 +258,9 @@ class VideoUiStateController extends GetxController {
       isHorizontalDragging.value = false;
       isDragging.value = false;
       // 恢复到拖动开始前的位置
-      position.value = _dragStartPosition;
+      dragPosition.value = _dragStartPosition;
+      // 1秒后隐藏控件UI
+      hideControlsUi(duration: const Duration(seconds: 1));
     }
   }
 

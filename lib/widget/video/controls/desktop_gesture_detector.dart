@@ -8,7 +8,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:media_kit_video/media_kit_video.dart';
 
-/// 视频控制手势检测器
+/// 桌面端手势检测器
 class DesktopGestureDetector extends StatelessWidget {
   final Widget child;
   static Timer? _hoverTimer;

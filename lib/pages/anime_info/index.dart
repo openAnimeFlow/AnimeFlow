@@ -4,7 +4,6 @@ import 'package:anime_flow/pages/anime_info/info_head.dart';
 import 'package:anime_flow/controllers/anime/anime_state_controller.dart';
 import 'package:anime_flow/http/requests/bgm_request.dart';
 import 'package:anime_flow/models/item/episodes_item.dart';
-import 'package:anime_flow/models/item/hot_item.dart';
 import 'package:anime_flow/models/item/subjects_item.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -21,7 +20,6 @@ class AnimeDetailPage extends StatefulWidget {
 class _AnimeDetailPageState extends State<AnimeDetailPage>
     with SingleTickerProviderStateMixin {
   late SubjectBasicData subjectBasicData;
-  late TabController tabController;
   late AnimeStateController animeStateController;
   late Future<SubjectsItem?> _subjectsItem;
   late Future<EpisodesItem> episodesFuture;
@@ -29,14 +27,12 @@ class _AnimeDetailPageState extends State<AnimeDetailPage>
   int _commentOffset = 0;
   bool _isLoadingComments = false;
   bool _hasMoreComments = true;
-  final List<String> _tabs = ['简介', '评论', '论坛'];
   final double _contentHeight = 200.0; // 内容区域的高度
   bool isPinned = false;
 
   @override
   void initState() {
     super.initState();
-    tabController = TabController(length: _tabs.length, vsync: this);
     subjectBasicData = Get.arguments;
     animeStateController = Get.put(AnimeStateController());
     _subjectsItem = BgmRequest.getSubjectByIdService(subjectBasicData.id);
@@ -87,7 +83,6 @@ class _AnimeDetailPageState extends State<AnimeDetailPage>
 
   @override
   void dispose() {
-    tabController.dispose();
     Get.delete<AnimeStateController>();
     super.dispose();
   }
@@ -96,8 +91,6 @@ class _AnimeDetailPageState extends State<AnimeDetailPage>
   Widget build(BuildContext context) {
     // 状态栏高度
     final double statusBarHeight = MediaQuery.of(context).padding.top;
-    // TabBar高度 (标准高度)
-    const double tabBarHeight = 46.0;
 
     return Scaffold(
       body: NotificationListener<ScrollNotification>(
@@ -142,22 +135,15 @@ class _AnimeDetailPageState extends State<AnimeDetailPage>
                   elevation: isPinned ? 4.0 : 0.0,
                   forceElevated: isPinned,
 
-                  // 展开高度计算：内容高度 + 状态栏 + Toolbar + TabBar
-                  // 这样确保内容区域有足够的空间展示，且不会被 TabBar 遮挡太多
+                  // 展开高度计算：内容高度 + 状态栏 + Toolbar
                   expandedHeight: _contentHeight +
                       statusBarHeight +
-                      kToolbarHeight +
-                      tabBarHeight,
+                      kToolbarHeight,
 
                   /// 头部内容区域
                   flexibleSpace: FlexibleSpaceBar(
                     collapseMode: CollapseMode.pin,
-                    background: Container(
-                      padding: const EdgeInsets.only(
-                        bottom: tabBarHeight, // 底部留出 TabBar 的空间
-                      ),
-                      // 数据内容
-                      child: FutureBuilder<SubjectsItem?>(
+                    background: FutureBuilder<SubjectsItem?>(
                         future: _subjectsItem,
                         builder: (context, snapshot) {
                           return InfoHeadView(
@@ -171,135 +157,18 @@ class _AnimeDetailPageState extends State<AnimeDetailPage>
                       ),
                     ),
                   ),
-
-                  /// TabBar
-                  bottom: PreferredSize(
-                    preferredSize: const Size.fromHeight(tabBarHeight),
-                    child: Column(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        TabBar(
-                          controller: tabController,
-                          tabs: _tabs.map((name) => Tab(text: name)).toList(),
-                          tabAlignment: TabAlignment.center,
-                          dividerColor: Colors.transparent,
-                        ),
-                        const Divider(
-                          height: 1,
-                          thickness: 1,
-                          color: Colors.grey,
-                        ),
-                      ],
-                    ),
-                  ),
                 ),
-              ),
             ];
           },
-          // Body 使用 TabBarView
-          body: TabBarView(
-            controller: tabController,
-            children: [
-              InfoSynopsisView(
-                subjectsItem: _subjectsItem,
-                subjectCommentItem: subjectCommentItem,
-                onLoadMoreComments: () => _getSubjectComment(loadMore: true),
-                isLoadingComments: _isLoadingComments,
-                hasMoreComments: _hasMoreComments,
-              ),
-              _CommentsPage(subjectBasicData: subjectBasicData),
-              _ForumPage(subjectBasicData: subjectBasicData),
-            ],
+          body: InfoSynopsisView(
+            subjectsItem: _subjectsItem,
+            subjectCommentItem: subjectCommentItem,
+            onLoadMoreComments: () => _getSubjectComment(loadMore: true),
+            isLoadingComments: _isLoadingComments,
+            hasMoreComments: _hasMoreComments,
           ),
         ),
       ),
-    );
-  }
-}
-
-/// 隐藏滚动条的ScrollBehavior
-class _NoScrollbarBehavior extends ScrollBehavior {
-  @override
-  Widget buildScrollbar(
-      BuildContext context, Widget child, ScrollableDetails details) {
-    return child;
-  }
-}
-
-/// 评论页面
-class _CommentsPage extends StatelessWidget {
-  final SubjectBasicData subjectBasicData;
-
-  const _CommentsPage({
-     required this.subjectBasicData,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return Builder(
-      builder: (BuildContext context) {
-        return ScrollConfiguration(
-          behavior: _NoScrollbarBehavior(),
-          child: CustomScrollView(
-            key: const PageStorageKey<String>('评论'),
-            slivers: <Widget>[
-              // 注入重叠区域，防止内容被 Header 遮挡
-              SliverOverlapInjector(
-                handle: NestedScrollView.sliverOverlapAbsorberHandleFor(
-                  context,
-                ),
-              ),
-              SliverList(
-                delegate: SliverChildBuilderDelegate((
-                  BuildContext context,
-                  int index,
-                ) {
-                  return ListTile(title: Text('评论 内容 $index'));
-                }, childCount: 50),
-              ),
-            ],
-          ),
-        );
-      },
-    );
-  }
-}
-
-/// 论坛页面
-class _ForumPage extends StatelessWidget {
-  final SubjectBasicData subjectBasicData;
-
-  const _ForumPage({
-    required this.subjectBasicData,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return Builder(
-      builder: (BuildContext context) {
-        return ScrollConfiguration(
-          behavior: _NoScrollbarBehavior(),
-          child: CustomScrollView(
-            key: const PageStorageKey<String>('论坛'),
-            slivers: <Widget>[
-              // 注入重叠区域，防止内容被 Header 遮挡
-              SliverOverlapInjector(
-                handle: NestedScrollView.sliverOverlapAbsorberHandleFor(
-                  context,
-                ),
-              ),
-              SliverList(
-                delegate: SliverChildBuilderDelegate((
-                  BuildContext context,
-                  int index,
-                ) {
-                  return ListTile(title: Text('论坛 内容 $index'));
-                }, childCount: 50),
-              ),
-            ],
-          ),
-        );
-      },
     );
   }
 }

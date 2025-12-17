@@ -48,10 +48,10 @@ class _VideoViewState extends State<VideoView> {
 
   Future<void> _initWebview() async {
     // 监听视频URL解析结果
-    _videoURLSubscription = webviewItemController.onVideoURLParser.listen((result) {
+    _videoURLSubscription = webviewItemController.onVideoURLParser.listen((result) async {
       final (url, offset) = result;
       logger.i('WebView解析到视频URL: $url, 偏移: $offset');
-      
+
       // 播放解析出的视频
       if (url.isNotEmpty) {
         player.open(Media(url));
@@ -93,7 +93,7 @@ class _VideoViewState extends State<VideoView> {
           controller: controller,
           controls: (state) => VideoControlsUiView(
             player,
-             subjectBasicData: widget.subjectBasicData,
+            subjectBasicData: widget.subjectBasicData,
           ),
         ),
       ],

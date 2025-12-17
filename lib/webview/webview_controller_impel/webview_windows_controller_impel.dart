@@ -8,16 +8,25 @@ class WebviewWindowsItemControllerImpel
 
   @override
   Future<void> init() async {
-    webviewController ??= WebviewController();
+    initEventController.add(true);
+  }
+  
+  Future<void> _ensureInitialized() async {
+    if (webviewController != null) {
+      return;
+    }
+    
+    webviewController = WebviewController();
     await webviewController!.initialize();
     await webviewController!
         .setPopupWindowPolicy(WebviewPopupWindowPolicy.deny);
-    initEventController.add(true);
   }
 
   @override
   Future<void> loadUrl(String url, bool useNativePlayer, bool useLegacyParser,
       {int offset = 0}) async {
+    await _ensureInitialized();
+    
     await unloadPage();
     count = 0;
     this.offset = offset;
@@ -35,6 +44,7 @@ class WebviewWindowsItemControllerImpel
       videoLoadingEventController.add(false);
       logEventController.add('Loading m3u8 source: $url');
       videoParserEventController.add((url, offset));
+      _destroyWindowAfterDelay();
     }));
     subscriptions.add(webviewController!.onVideoSourceLoaded.listen((data) {
       String url = data['url'] ?? '';
@@ -47,6 +57,7 @@ class WebviewWindowsItemControllerImpel
       videoLoadingEventController.add(false);
       logEventController.add('Loading video source: $url');
       videoParserEventController.add((url, offset));
+      _destroyWindowAfterDelay();
     }));
     await webviewController!.loadUrl(url);
   }
@@ -58,7 +69,9 @@ class WebviewWindowsItemControllerImpel
         s.cancel();
       } catch (_) {}
     });
-    await redirect2Blank();
+    if (webviewController != null) {
+      await redirect2Blank();
+    }
   }
 
   @override
@@ -68,7 +81,10 @@ class WebviewWindowsItemControllerImpel
         s.cancel();
       } catch (_) {}
     });
-    webviewController!.dispose();
+    if (webviewController != null) {
+      webviewController!.dispose();
+      webviewController = null;
+    }
   }
 
   // The webview_windows package does not have a method to unload the current page. 
@@ -76,8 +92,29 @@ class WebviewWindowsItemControllerImpel
   // Directly disposing of the webview controller would require reinitialization when switching episodes, which is costly. 
   // Therefore, this method is used to redirect to a blank page instead.
   Future<void> redirect2Blank() async {
-    await webviewController!.executeScript('''
-      window.location.href = 'about:blank';
-    ''');
+    if (webviewController == null) {
+      return;
+    }
+    try {
+      await webviewController!.executeScript('''
+        window.location.href = 'about:blank';
+      ''');
+    } catch (e) {
+      // 忽略错误，可能窗口已经被销毁
+    }
+  }
+
+  void _destroyWindowAfterDelay() {
+    Future.delayed(const Duration(seconds: 2), () {
+      if (webviewController != null && isVideoSourceLoaded) {
+        try {
+          webviewController!.dispose();
+          webviewController = null;
+          logEventController.add('WebView 窗口已销毁，释放桌面资源');
+        } catch (e) {
+          // 忽略错误
+        }
+      }
+    });
   }
 }

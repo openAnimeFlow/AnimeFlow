@@ -148,12 +148,18 @@ class _SearchPageState extends State<SearchPage> {
                             ),
                           ),
                           IconButton(
+                              padding: EdgeInsets.zero,
                               onPressed: () {
                                 setState(() {
                                   _isDetailsContent = !_isDetailsContent;
                                 });
                               },
-                              icon: const Icon(Icons.image_rounded))
+                              icon: Icon(
+                                _isDetailsContent
+                                    ? Icons.art_track_rounded
+                                    : Icons.view_in_ar_rounded,
+                                size: 35,
+                              ))
                         ]),
                   ),
                 ),
@@ -170,32 +176,38 @@ class _SearchPageState extends State<SearchPage> {
                       right: 16,
                       bottom: MediaQuery.of(context).padding.bottom,
                     ),
-                    child: GridView.builder(
-                      padding: EdgeInsets.zero,
-                      shrinkWrap: true,
-                      physics: const NeverScrollableScrollPhysics(),
-                      gridDelegate: _isDetailsContent
-                          ? SliverGridDelegateWithFixedCrossAxisCount(
-                              crossAxisCount: crossAxisCount,
-                              crossAxisSpacing: 16,
-                              mainAxisSpacing: 16,
-                              mainAxisExtent: detailsItemHeight,
-                            )
-                          : SliverGridDelegateWithFixedCrossAxisCount(
-                              crossAxisCount: crossAxisCount,
-                              crossAxisSpacing: 8,
-                              mainAxisSpacing: 8,
-                              childAspectRatio: 2 / 3, // 海报比例
-                            ),
-                      itemCount: searchItem!.data.length,
-                      itemBuilder: (context, index) {
-                        final searchData = searchItem!.data[index];
-                        return _isDetailsContent
-                            ? SearchDetailsContentView(
-                                searchData: searchData,
-                                itemHeight: detailsItemHeight)
-                            : SearchOmittedContent(searchData: searchData);
-                      },
+                    child: AnimatedSwitcher(
+                      duration: const Duration(milliseconds: 300),
+                      switchInCurve: Curves.easeInOut,
+                      switchOutCurve: Curves.easeInOut,
+                      child: GridView.builder(
+                        key: ValueKey(_isDetailsContent),
+                        padding: EdgeInsets.zero,
+                        shrinkWrap: true,
+                        physics: const NeverScrollableScrollPhysics(),
+                        gridDelegate: _isDetailsContent
+                            ? SliverGridDelegateWithFixedCrossAxisCount(
+                                crossAxisCount: crossAxisCount,
+                                crossAxisSpacing: 16,
+                                mainAxisSpacing: 16,
+                                mainAxisExtent: detailsItemHeight,
+                              )
+                            : SliverGridDelegateWithFixedCrossAxisCount(
+                                crossAxisCount: crossAxisCount,
+                                crossAxisSpacing: 8,
+                                mainAxisSpacing: 8,
+                                childAspectRatio: 2 / 3, // 海报比例
+                              ),
+                        itemCount: searchItem!.data.length,
+                        itemBuilder: (context, index) {
+                          final searchData = searchItem!.data[index];
+                          return _isDetailsContent
+                              ? SearchDetailsContentView(
+                                  searchData: searchData,
+                                  itemHeight: detailsItemHeight)
+                              : SearchOmittedContent(searchData: searchData);
+                        },
+                      ),
                     ),
                   ),
                 ),

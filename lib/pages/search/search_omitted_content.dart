@@ -41,7 +41,7 @@ class SearchOmittedContent extends StatelessWidget {
                 searchData.nameCN ?? searchData.name,
                 style: const TextStyle(
                   color: Colors.white,
-                  fontSize: 12,
+                  fontSize: 20,
                   fontWeight: FontWeight.bold,
                 ),
                 maxLines: 2,

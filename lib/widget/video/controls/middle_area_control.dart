@@ -43,7 +43,7 @@ class MiddleAreaControl extends StatelessWidget {
                       mainAxisSize: MainAxisSize.min,
                       children: [
                         CircularProgressIndicator(
-                          color: Theme.of(context).primaryColor,
+                          color: Theme.of(context).colorScheme.primary,
                           strokeWidth: 5,
                         ),
                         const SizedBox(height: 5),
@@ -147,7 +147,7 @@ class MiddleAreaControl extends StatelessWidget {
                 VideoControlsIndicatorType.parsingIndicator => Column(
                     children: [
                       CircularProgressIndicator(
-                        color: Theme.of(context).primaryColorLight,
+                        color: Theme.of(context).colorScheme.primary,
                       ),
                       const SizedBox(height: 5),
                        Text(

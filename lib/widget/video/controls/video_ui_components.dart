@@ -49,11 +49,10 @@ class VideoProgressBar extends StatelessWidget {
             SliderTheme(
               data: SliderThemeData(
                 trackHeight: 6,
-                thumbShape: RoundSliderThumbShape(enabledThumbRadius: 8),
-                overlayShape: RoundSliderOverlayShape(overlayRadius: 16),
+                thumbShape: const RoundSliderThumbShape(enabledThumbRadius: 8),
+                overlayShape: const RoundSliderOverlayShape(overlayRadius: 16),
                 activeTrackColor: Theme.of(context).colorScheme.primary,
                 inactiveTrackColor: Colors.transparent,
-                // 透明背景，露出缓冲条
                 thumbColor: Theme.of(context).colorScheme.primary,
               ),
               child: Slider(

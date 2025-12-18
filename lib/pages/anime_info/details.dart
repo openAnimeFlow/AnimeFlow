@@ -171,7 +171,8 @@ bool _isUrl(String text) {
 
 // 构建链接文本
 Widget _buildLinkText(String url, Color themeTextColor, double? textSize) {
-  return GestureDetector(
+  return InkWell(
+    splashFactory: NoSplash.splashFactory,
     onTap: () async {
       final uri = Uri.parse(url.trim());
       if (await canLaunchUrl(uri)) {

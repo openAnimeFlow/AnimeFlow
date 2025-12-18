@@ -144,23 +144,21 @@ class _RecommendViewState extends State<RecommendView> {
                 ),
               ],
             )),
-            if (!mainPageState.isDesktop.value)
-              GetBuilder<ThemeController>(
-                builder: (controller) {
-                  return IconButton(
-                    icon: Icon(
-                      controller.isDarkMode
-                          ? Icons.brightness_7
-                          : Icons.brightness_4,
-                      color:
-                          controller.isDarkMode ? Colors.white : Colors.black,
-                    ),
-                    onPressed: () {
-                      controller.toggleTheme();
-                    },
-                  );
-                },
-              ),
+            GetBuilder<ThemeController>(
+              builder: (controller) {
+                return IconButton(
+                  icon: Icon(
+                    controller.isDarkMode
+                        ? Icons.brightness_7
+                        : Icons.brightness_4,
+                    color: controller.isDarkMode ? Colors.white : Colors.black,
+                  ),
+                  onPressed: () {
+                    controller.toggleTheme();
+                  },
+                );
+              },
+            ),
           ],
         ),
       ),

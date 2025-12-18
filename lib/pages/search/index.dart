@@ -314,6 +314,7 @@ class _SearchPageState extends State<SearchPage> {
                     (index) {
                       final keyword = _searchHistory[index];
                       return Card(
+                        elevation: 0,
                         margin: const EdgeInsets.only(bottom: 8),
                         child: ListTile(
                           leading: const Icon(Icons.history),

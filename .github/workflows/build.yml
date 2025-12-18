@@ -1,4 +1,4 @@
-name: Build Flutter iOS
+name: Build Flutter project
 
 on:
   workflow_dispatch:

@@ -59,7 +59,7 @@ class _CalendarPageState extends State<CalendarPage>
               Column(
                 children: [
                   ConstrainedBox(
-                      constraints: BoxConstraints(maxWidth: 1800),
+                      constraints: const BoxConstraints(maxWidth: 1800),
                       child: TabBar(
                         tabAlignment: TabAlignment.start,
                         controller: _tabController,

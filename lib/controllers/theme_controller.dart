@@ -64,7 +64,7 @@ class ThemeController extends GetxController {
         systemNavigationBarDividerColor: Colors.transparent,
       ),
       // scrolledUnderElevation: 0,
-      surfaceTintColor: Colors.transparent,
+      // surfaceTintColor: Colors.transparent,
     ),
   );
 

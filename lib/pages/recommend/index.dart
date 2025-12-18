@@ -100,45 +100,47 @@ class _RecommendViewState extends State<RecommendView> {
               children: [
                 const Text("推荐"),
                 const SizedBox(width: 10),
-                Container(
-                  width: 200,
-                  height: 40,
-                  decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(20),
-                    border: Border.all(
-                      color: Colors.black26,
-                      width: 1,
-                    ),
-                  ),
-                  child: TextField(
-                    decoration: InputDecoration(
-                      hintText: "搜索动漫番剧...",
-                      hintStyle: TextStyle(
-                        color: Colors.grey.shade600,
-                        fontSize: 14,
+                GetBuilder<ThemeController>(
+                  builder: (controller) {
+                    final borderColor = controller.isDarkMode
+                        ? ThemeController.darkTheme.colorScheme.primary
+                        : ThemeController.lightTheme.colorScheme.primary;
+                    return Container(
+                      width: 200,
+                      height: 40,
+                      decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(20),
+                        border: Border.all(
+                          color: borderColor,
+                          width: 1,
+                        ),
                       ),
-                      prefixIcon: const Icon(
-                        Icons.search,
-                        size: 25,
-                        color: Colors.black54,
+                      child: TextField(
+                        decoration: InputDecoration(
+                          hintText: "搜索动漫番剧...",
+                          hintStyle: TextStyle(
+                            color: Colors.grey.shade600,
+                            fontSize: 14,
+                          ),
+                          prefixIcon: const Icon(
+                            Icons.search,
+                            size: 25,
+                          ),
+                          filled: false,
+                          border: const OutlineInputBorder(
+                            borderSide: BorderSide.none,
+                          ),
+                          contentPadding: const EdgeInsets.symmetric(
+                            horizontal: 12,
+                          ),
+                        ),
+                        onTap: () {
+                          Get.toNamed("/search");
+                        },
+                        readOnly: true,
                       ),
-                      filled: false,
-                      border: const OutlineInputBorder(
-                        borderSide: BorderSide.none,
-                      ),
-                      contentPadding: const EdgeInsets.symmetric(
-                        horizontal: 12,
-                      ),
-                    ),
-                    onTap: () {
-                      Get.toNamed("/search");
-                    },
-                    readOnly: true,
-                    style: const TextStyle(
-                      fontSize: 14,
-                      color: Colors.black87,
-                    ),
-                  ),
+                    );
+                  },
                 ),
               ],
             )),

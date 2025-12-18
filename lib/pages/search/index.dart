@@ -22,6 +22,14 @@ class _SearchPageState extends State<SearchPage> {
   bool _isDetailsContent = true;
 
   @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      FocusScope.of(context).requestFocus(_searchFocusNode);
+    });
+  }
+
+  @override
   void dispose() {
     _searchController.dispose();
     _scrollController.dispose();

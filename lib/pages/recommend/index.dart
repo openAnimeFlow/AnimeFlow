@@ -1,5 +1,6 @@
 import 'package:anime_flow/models/item/subject_basic_data_item.dart';
 import 'package:anime_flow/pages/recommend/calendar.dart';
+import 'package:anime_flow/routes/index.dart';
 import 'package:anime_flow/widget/image/animation_network_image.dart';
 import 'package:anime_flow/controllers/main_page/main_page_state.dart';
 import 'package:anime_flow/http/requests/bgm_request.dart';
@@ -192,7 +193,7 @@ class _RecommendViewState extends State<RecommendView> {
                       padding: _contentPadding,
                       sliver: SliverMainAxisGroup(
                         slivers: [
-                           SliverToBoxAdapter(
+                          SliverToBoxAdapter(
                             child: Row(
                               children: [
                                 Text(
@@ -269,7 +270,7 @@ class _RecommendViewState extends State<RecommendView> {
       ),
       child: InkWell(
         onTap: () {
-          Get.toNamed("/anime_detail", arguments: subjectBasicData);
+          Get.toNamed(RouteName.animeDetail, arguments: subjectBasicData);
         },
         highlightColor: Colors.white.withValues(alpha: 0.1),
         child: Stack(

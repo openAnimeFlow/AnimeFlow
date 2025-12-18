@@ -1,9 +1,13 @@
 import 'package:anime_flow/http/requests/bgm_request.dart';
 import 'package:anime_flow/models/item/calendar_item.dart';
+import 'package:anime_flow/models/item/subject_basic_data_item.dart';
+import 'package:anime_flow/routes/index.dart';
 import 'package:anime_flow/widget/image/animation_network_image.dart';
 import 'package:anime_flow/widget/ranking.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:get/get.dart';
+import 'package:get/get_core/src/get_main.dart';
 
 class CalendarView extends StatefulWidget {
   const CalendarView({super.key});
@@ -105,60 +109,71 @@ class _CalendarViewState extends State<CalendarView> {
   }
 
   Widget _buildCard(Subject itemData) {
+    final subjectBasicData = SubjectBasicData(
+      id: itemData.id,
+      name: itemData.nameCN == '' ? itemData.name : itemData.nameCN,
+      image: itemData.images.large,
+    );
     return Container(
       width: 140,
       margin: const EdgeInsets.only(right: 10),
       child: ClipRRect(
-        borderRadius: BorderRadius.circular(10),
-        child: Stack(
-          children: [
-            Positioned.fill(
-              child: AnimationNetworkImage(
-                url: itemData.images.large,
-                fit: BoxFit.cover,
-              ),
-            ),
-            Positioned(
-              left: 0,
-              right: 0,
-              bottom: 0,
-              child: Container(
-                padding: const EdgeInsets.all(5),
-                decoration: const BoxDecoration(
-                  gradient: LinearGradient(
-                    begin: Alignment.bottomCenter,
-                    end: Alignment.topCenter,
-                    colors: [
-                      Colors.black38,
-                      Colors.transparent,
-                    ],
-                  ),
-                ),
-                child: Padding(
-                  padding: const EdgeInsets.all(5),
-                  child: Text(
-                      itemData.nameCN == '' ? itemData.name : itemData.nameCN,
-                      style: const TextStyle(
-                          color: Colors.white, fontWeight: FontWeight.bold),
-                      maxLines: 2,
-                      overflow: TextOverflow.ellipsis,
-                      textAlign: TextAlign.left),
-                ),
-              ),
-            ),
-            if (itemData.rating.rank > 0)
-              Positioned(
-                  top: 0,
-                  left: 0,
-                  child: Padding(
-                    padding: const EdgeInsets.all(5),
-                    child: RankingView(
-                      ranking: itemData.rating.rank,
+          borderRadius: BorderRadius.circular(10),
+          child: InkWell(
+              onTap: () {
+                Get.toNamed(RouteName.animeDetail, arguments: subjectBasicData);
+              },
+              child: Stack(
+                children: [
+                  Positioned.fill(
+                    child: AnimationNetworkImage(
+                      url: itemData.images.large,
+                      fit: BoxFit.cover,
                     ),
-                  ))
-          ],
-        ),
-      ),
+                  ),
+                  Positioned(
+                    left: 0,
+                    right: 0,
+                    bottom: 0,
+                    child: Container(
+                      padding: const EdgeInsets.all(5),
+                      decoration: const BoxDecoration(
+                        gradient: LinearGradient(
+                          begin: Alignment.bottomCenter,
+                          end: Alignment.topCenter,
+                          colors: [
+                            Colors.black38,
+                            Colors.transparent,
+                          ],
+                        ),
+                      ),
+                      child: Padding(
+                        padding: const EdgeInsets.all(5),
+                        child: Text(
+                            itemData.nameCN == ''
+                                ? itemData.name
+                                : itemData.nameCN,
+                            style: const TextStyle(
+                                color: Colors.white,
+                                fontWeight: FontWeight.bold),
+                            maxLines: 2,
+                            overflow: TextOverflow.ellipsis,
+                            textAlign: TextAlign.left),
+                      ),
+                    ),
+                  ),
+                  if (itemData.rating.rank > 0)
+                    Positioned(
+                        top: 0,
+                        left: 0,
+                        child: Padding(
+                          padding: const EdgeInsets.all(5),
+                          child: RankingView(
+                            ranking: itemData.rating.rank,
+                          ),
+                        ))
+                ],
+              ))),
     );
   }
 }

@@ -39,7 +39,7 @@ class MyApp extends StatelessWidget {
               darkTheme: ThemeController.darkTheme,
               themeMode:
                   controller.isDarkMode ? ThemeMode.dark : ThemeMode.light,
-              initialRoute: "/",
+              initialRoute: RouteName.main,
               routes: getRootRoutes(),
             );
           },

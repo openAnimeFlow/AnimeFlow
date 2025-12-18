@@ -436,35 +436,42 @@ class _StickySearchHeaderDelegate extends SliverPersistentHeaderDelegate {
                     const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
                 child: ConstrainedBox(
                   constraints: BoxConstraints(maxWidth: maxWidth),
-                  child: TextField(
-                    controller: searchController,
-                    focusNode: focusNode,
-                    decoration: InputDecoration(
-                      hintText: '搜索动漫...',
-                      prefixIcon: const Icon(Icons.search),
-                      suffixIcon: searchController.text.isNotEmpty
-                          ? IconButton(
-                              icon: const Icon(Icons.clear),
-                              onPressed: () {
-                                searchController.clear();
-                                onClear();
-                              },
-                            )
-                          : null,
-                      filled: true,
-                      fillColor:
-                          Theme.of(context).colorScheme.surfaceContainerHighest,
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(28),
-                        borderSide: BorderSide.none,
-                      ),
-                      contentPadding: const EdgeInsets.symmetric(
-                        horizontal: 20,
-                        vertical: 12,
-                      ),
-                    ),
-                    textInputAction: TextInputAction.search,
-                    onSubmitted: onSearch,
+                  child: ValueListenableBuilder<TextEditingValue>(
+                    valueListenable: searchController,
+                    builder: (context, value, child) {
+                      return TextField(
+                        scrollPadding: const EdgeInsets.symmetric(horizontal: 50),
+                        controller: searchController,
+                        focusNode: focusNode,
+                        decoration: InputDecoration(
+                          hintText: '搜索动漫...',
+                          prefixIcon: const Icon(Icons.search),
+                          suffixIcon: value.text.isNotEmpty
+                              ? IconButton(
+                                  icon: const Icon(Icons.clear),
+                                  onPressed: () {
+                                    searchController.clear();
+                                    onClear();
+                                  },
+                                )
+                              : null,
+                          filled: true,
+                          fillColor: Theme.of(context)
+                              .colorScheme
+                              .surfaceContainerHighest,
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(28),
+                            borderSide: BorderSide.none,
+                          ),
+                          contentPadding: const EdgeInsets.symmetric(
+                            horizontal: 20,
+                            vertical: 12,
+                          ),
+                        ),
+                        textInputAction: TextInputAction.search,
+                        onSubmitted: onSearch,
+                      );
+                    },
                   ),
                 )),
           ),

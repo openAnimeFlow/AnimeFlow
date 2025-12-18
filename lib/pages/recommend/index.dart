@@ -95,42 +95,70 @@ class _RecommendViewState extends State<RecommendView> {
       appBar: AppBar(
         title: Row(
           children: [
-            const Expanded(child: Text("推荐")),
-            Obx(() => Row(
-                  children: [
-                    if (!mainPageState.isDesktop.value)
-                      GetBuilder<ThemeController>(
-                        builder: (controller) {
-                          return IconButton(
-                            icon: const Icon(
-                              size: 25,
-                              Icons.search_rounded,
-                            ),
-                            onPressed: () {
-                              Get.toNamed("/search");
-                            },
-                          );
-                        },
-                      ),
-                    GetBuilder<ThemeController>(
-                      builder: (controller) {
-                        return IconButton(
-                          icon: Icon(
-                            controller.isDarkMode
-                                ? Icons.brightness_7
-                                : Icons.brightness_4,
-                            color: controller.isDarkMode
-                                ? Colors.white
-                                : Colors.black,
-                          ),
-                          onPressed: () {
-                            controller.toggleTheme();
-                          },
-                        );
-                      },
+            Expanded(
+                child: Row(
+              children: [
+                const Text("推荐"),
+                const SizedBox(width: 10),
+                Container(
+                  width: 200,
+                  height: 40,
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(20),
+                    border: Border.all(
+                      color: Colors.black26,
+                      width: 1,
                     ),
-                  ],
-                )),
+                  ),
+                  child: TextField(
+                    decoration: InputDecoration(
+                      hintText: "搜索动漫番剧...",
+                      hintStyle: TextStyle(
+                        color: Colors.grey.shade600,
+                        fontSize: 14,
+                      ),
+                      prefixIcon: const Icon(
+                        Icons.search,
+                        size: 25,
+                        color: Colors.black54,
+                      ),
+                      filled: false,
+                      border: const OutlineInputBorder(
+                        borderSide: BorderSide.none,
+                      ),
+                      contentPadding: const EdgeInsets.symmetric(
+                        horizontal: 12,
+                      ),
+                    ),
+                    onTap: () {
+                      Get.toNamed("/search");
+                    },
+                    readOnly: true,
+                    style: const TextStyle(
+                      fontSize: 14,
+                      color: Colors.black87,
+                    ),
+                  ),
+                ),
+              ],
+            )),
+            if (!mainPageState.isDesktop.value)
+              GetBuilder<ThemeController>(
+                builder: (controller) {
+                  return IconButton(
+                    icon: Icon(
+                      controller.isDarkMode
+                          ? Icons.brightness_7
+                          : Icons.brightness_4,
+                      color:
+                          controller.isDarkMode ? Colors.white : Colors.black,
+                    ),
+                    onPressed: () {
+                      controller.toggleTheme();
+                    },
+                  );
+                },
+              ),
           ],
         ),
       ),
@@ -193,7 +221,7 @@ class _RecommendViewState extends State<RecommendView> {
   Widget _buildCard(Subject subject) {
     final SubjectBasicData subjectBasicData = SubjectBasicData(
       id: subject.id,
-      name: subject.nameCN??subject.name,
+      name: subject.nameCN ?? subject.name,
       image: subject.images.large,
     );
     return Card(

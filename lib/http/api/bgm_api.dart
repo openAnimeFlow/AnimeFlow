@@ -1,5 +1,6 @@
 class BgmApi {
   static const String nextBaseUrl = 'https://next.bgm.tv';
+
   //热门条目
   static const String hot = '/p1/trending/subjects';
 
@@ -14,4 +15,7 @@ class BgmApi {
 
   //条目搜索
   static const String search = '/p1/search/subjects';
+
+  //每日放送
+  static const String calendar = '/p1/calendar';
 }

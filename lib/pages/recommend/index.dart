@@ -1,4 +1,5 @@
 import 'package:anime_flow/models/item/subject_basic_data_item.dart';
+import 'package:anime_flow/pages/recommend/calendar.dart';
 import 'package:anime_flow/widget/image/animation_network_image.dart';
 import 'package:anime_flow/controllers/main_page/main_page_state.dart';
 import 'package:anime_flow/http/requests/bgm_request.dart';
@@ -24,6 +25,8 @@ class _RecommendViewState extends State<RecommendView> {
   int _offset = 0;
   final int _limit = 20;
   final _scrollController = ScrollController();
+
+  static const _contentPadding = EdgeInsets.all(10);
 
   @override
   void initState() {
@@ -177,29 +180,63 @@ class _RecommendViewState extends State<RecommendView> {
             Center(
               child: ConstrainedBox(
                 constraints: const BoxConstraints(maxWidth: 1800),
-                child: GridView.builder(
+                child: CustomScrollView(
                   controller: _scrollController,
-                  padding: const EdgeInsets.all(10),
-                  gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                    crossAxisCount: LayoutUtil.getCrossAxisCount(constraints),
-                    crossAxisSpacing: 5, // 横向间距
-                    mainAxisSpacing: 5, // 纵向间距
-                    childAspectRatio: 0.7, // 宽高比
-                  ),
-                  itemCount: _dataList.length + 1,
-                  itemBuilder: (BuildContext context, int index) {
-                    if (index == _dataList.length) {
-                      return _hasMore
-                          ? const Center(child: CircularProgressIndicator())
-                          : const Center(
-                              child: Padding(
-                              padding: EdgeInsets.all(8.0),
-                              child: Text("没有更多了"),
-                            ));
-                    }
-                    final subject = _dataList[index].subject;
-                    return _buildCard(subject);
-                  },
+                  slivers: [
+                    const CalendarView(),
+                    const SliverToBoxAdapter(
+                      child: SizedBox(height: 20),
+                    ),
+                    SliverPadding(
+                      padding: _contentPadding,
+                      sliver: SliverMainAxisGroup(
+                        slivers: [
+                          const SliverToBoxAdapter(
+                            child: Row(
+                              children: [
+                                Text(
+                                  "热门动画",
+                                  style: TextStyle(
+                                      fontSize: 25,
+                                      fontWeight: FontWeight.bold),
+                                )
+                              ],
+                            ),
+                          ),
+                          const SliverToBoxAdapter(
+                            child: SizedBox(height: 5),
+                          ),
+                          SliverGrid(
+                            gridDelegate:
+                                SliverGridDelegateWithFixedCrossAxisCount(
+                              crossAxisCount:
+                                  LayoutUtil.getCrossAxisCount(constraints),
+                              crossAxisSpacing: 5, // 横向间距
+                              mainAxisSpacing: 5, // 纵向间距
+                              childAspectRatio: 0.7, // 宽高比
+                            ),
+                            delegate: SliverChildBuilderDelegate(
+                              (BuildContext context, int index) {
+                                if (index == _dataList.length) {
+                                  return _hasMore
+                                      ? const Center(
+                                          child: CircularProgressIndicator())
+                                      : const Center(
+                                          child: Padding(
+                                          padding: EdgeInsets.all(8.0),
+                                          child: Text("没有更多了"),
+                                        ));
+                                }
+                                final subject = _dataList[index].subject;
+                                return _buildCard(subject);
+                              },
+                              childCount: _dataList.length + 1,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
                 ),
               ),
             ),

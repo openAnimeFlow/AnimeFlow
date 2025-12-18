@@ -1,6 +1,7 @@
 import 'package:anime_flow/constants/constants.dart';
 import 'package:anime_flow/http/api/bgm_api.dart';
 import 'package:anime_flow/http/api/common_api.dart';
+import 'package:anime_flow/models/item/calendar_item.dart';
 import 'package:anime_flow/models/item/episodes_item.dart';
 import 'package:anime_flow/models/item/hot_item.dart';
 import 'package:anime_flow/models/item/search_item.dart';
@@ -90,5 +91,16 @@ class BgmRequest {
     );
 
     return SearchItem.fromJson(response.data);
+  }
+
+  ///每日放送
+  static Future<Calendar> calendarService() async {
+    final response = await dioRequest.get(
+      _nextBaseUrl + BgmApi.calendar,
+      options: Options(
+        headers: {Constants.userAgentName: CommonApi.bangumiUserAgent},
+      ),
+    );
+    return Calendar.fromJson(response.data);
   }
 }

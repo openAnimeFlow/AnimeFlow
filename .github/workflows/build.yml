@@ -3,7 +3,7 @@ name: Build Flutter Project
 on:
   workflow_dispatch:
     inputs:
-      inputs:
+      platform:
         type: choice
         description: "选择构建的平台"
         options:

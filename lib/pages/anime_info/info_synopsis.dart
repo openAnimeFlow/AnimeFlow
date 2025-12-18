@@ -25,8 +25,8 @@ class InfoSynopsisView extends StatelessWidget {
   final bool isLoadingComments;
   final bool hasMoreComments;
 
-  const InfoSynopsisView({
-      super.key,
+  const InfoSynopsisView(
+      {super.key,
       required this.subjectsItem,
       required this.subjectCommentItem,
       this.onLoadMoreComments,
@@ -47,7 +47,8 @@ class InfoSynopsisView extends StatelessWidget {
           child: NotificationListener<ScrollNotification>(
             onNotification: (ScrollNotification scrollInfo) {
               // 当滚动到底部时加载更多评论
-              if (scrollInfo.metrics.pixels >= scrollInfo.metrics.maxScrollExtent - 200 &&
+              if (scrollInfo.metrics.pixels >=
+                      scrollInfo.metrics.maxScrollExtent - 200 &&
                   !isLoadingComments &&
                   hasMoreComments &&
                   onLoadMoreComments != null) {
@@ -58,72 +59,79 @@ class InfoSynopsisView extends StatelessWidget {
             child: CustomScrollView(
               key: const PageStorageKey<String>(title),
               slivers: <Widget>[
-              // 注入重叠区域，防止内容被 Header 遮挡
-              SliverOverlapInjector(
-                handle: NestedScrollView.sliverOverlapAbsorberHandleFor(
-                  context,
+                // 注入重叠区域，防止内容被 Header 遮挡
+                SliverOverlapInjector(
+                  handle: NestedScrollView.sliverOverlapAbsorberHandleFor(
+                    context,
+                  ),
                 ),
-              ),
-              SliverToBoxAdapter(
-                child: Align(
-                    alignment: Alignment.center,
-                    child: ConstrainedBox(
-                      constraints: const BoxConstraints(
-                        maxWidth: PlayLayoutConstant.infoMaxWidth,
-                      ),
-                      child: Container(
-                          padding: const EdgeInsets.all(16),
-                          width: double.infinity,
-                          child: FutureBuilder<SubjectsItem?>(
-                            future: subjectsItem,
-                            builder: (context, snapshot) {
-                              if (snapshot.data == null) {
-                                //TODO 添加骨架屏
-                                return const Text('加载中...');
-                              } else {
-                                final data = snapshot.data!;
-                                return Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    ExpandableText(
-                                      title: title,
-                                      fontSizeTitle: fontSizeTitle,
-                                      fontWeightTitle: fontWeightTitle,
-                                      text: data.summary,
-                                      fontWeight: fontWeight,
-                                    ),
-                                    const SizedBox(height: 25),
-                                    TagView(
-                                      title: '标签',
-                                      fontSizeTitle: fontSizeTitle,
-                                      fontWeightTitle: fontWeightTitle,
-                                      tags: data.tags,
-                                      fontSize: 12,
-                                      fontWeight: FontWeight.w700,
-                                      numbersSize: 10,
-                                      numbersWeight: FontWeight.w600,
-                                    ),
-                                    const SizedBox(height: 25),
-                                    Details(
-                                      title: '详情',
-                                      subject: data,
-                                      textSize: 13,
-                                      textFontWeight: FontWeight.w600,
-                                    ),
-                                    InfoCommentView(
-                                      subjectCommentItem: subjectCommentItem,
-                                      onLoadMore: onLoadMoreComments,
-                                      isLoading: isLoadingComments,
-                                      hasMore: hasMoreComments,
-                                    )
-                                  ],
-                                );
-                              }
-                            },
-                          )),
-                    )),
-              ),
-            ],
+                SliverToBoxAdapter(
+                  child: Align(
+                      alignment: Alignment.center,
+                      child: ConstrainedBox(
+                        constraints: const BoxConstraints(
+                          maxWidth: PlayLayoutConstant.infoMaxWidth,
+                        ),
+                        child: Container(
+                            padding: const EdgeInsets.all(16),
+                            width: double.infinity,
+                            child: FutureBuilder<SubjectsItem?>(
+                              future: subjectsItem,
+                              builder: (context, snapshot) {
+                                if (snapshot.data == null) {
+                                  //TODO 添加骨架屏
+                                  return const Text('加载中...');
+                                } else {
+                                  final data = snapshot.data!;
+                                  return Padding(
+                                      padding: EdgeInsets.only(
+                                          left: MediaQuery.of(context)
+                                              .padding
+                                              .left),
+                                      child: Column(
+                                        crossAxisAlignment:
+                                            CrossAxisAlignment.start,
+                                        children: [
+                                          ExpandableText(
+                                            title: title,
+                                            fontSizeTitle: fontSizeTitle,
+                                            fontWeightTitle: fontWeightTitle,
+                                            text: data.summary,
+                                            fontWeight: fontWeight,
+                                          ),
+                                          const SizedBox(height: 25),
+                                          TagView(
+                                            title: '标签',
+                                            fontSizeTitle: fontSizeTitle,
+                                            fontWeightTitle: fontWeightTitle,
+                                            tags: data.tags,
+                                            fontSize: 12,
+                                            fontWeight: FontWeight.w700,
+                                            numbersSize: 10,
+                                            numbersWeight: FontWeight.w600,
+                                          ),
+                                          const SizedBox(height: 25),
+                                          Details(
+                                            title: '详情',
+                                            subject: data,
+                                            textSize: 13,
+                                            textFontWeight: FontWeight.w600,
+                                          ),
+                                          InfoCommentView(
+                                            subjectCommentItem:
+                                                subjectCommentItem,
+                                            onLoadMore: onLoadMoreComments,
+                                            isLoading: isLoadingComments,
+                                            hasMore: hasMoreComments,
+                                          )
+                                        ],
+                                      ));
+                                }
+                              },
+                            )),
+                      )),
+                ),
+              ],
             ),
           ),
         );

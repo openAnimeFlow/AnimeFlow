@@ -4,8 +4,7 @@ import 'package:anime_flow/models/enums/video_controls_icon_type.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:get/get.dart';
 import 'package:media_kit/media_kit.dart';
-import 'package:screen_brightness/screen_brightness.dart';
-
+import 'package:screen_brightness_platform_interface/screen_brightness_platform_interface.dart';
 class VideoUiStateController extends GetxController {
   final Player player;
   final RxBool playing = false.obs;
@@ -41,7 +40,7 @@ class VideoUiStateController extends GetxController {
   Timer? _controlsUiTimer;
 
   // 屏幕亮度相关
-  final ScreenBrightness _screenBrightness = ScreenBrightness();
+  final ScreenBrightnessPlatform _screenBrightness = ScreenBrightnessPlatform.instance;
   double _originalBrightness = 0.5; // 保存原始亮度
   final RxDouble currentBrightness = 0.5.obs; // 当前亮度 0.0-1.0
   final RxBool isBrightnessDragging = false.obs; // 是否正在拖动调整亮度

@@ -103,7 +103,8 @@ class _MainPageState extends State<MainPage> {
               ),
               // 底部设置按钮
               trailing: Padding(
-                padding: const EdgeInsets.only(bottom: 16, top: 16),
+                padding: EdgeInsets.only(
+                    bottom: MediaQuery.of(context).padding.bottom + 5),
                 child: IconButton(
                   icon: const Icon(Icons.settings_outlined),
                   iconSize: 28,

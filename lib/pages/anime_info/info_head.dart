@@ -9,8 +9,8 @@ import 'package:anime_flow/models/item/subjects_item.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:shimmer/shimmer.dart';
-import 'package:anime_flow/models/item/subject_basic_data_item.dart' show SubjectBasicData;
-
+import 'package:anime_flow/models/item/subject_basic_data_item.dart'
+    show SubjectBasicData;
 
 class InfoHeadView extends StatelessWidget {
   final SubjectBasicData subjectBasicData;
@@ -24,7 +24,8 @@ class InfoHeadView extends StatelessWidget {
     required this.statusBarHeight,
     required this.contentHeight,
     required this.episodesItem,
-    required this.subjectItem, required this.subjectBasicData,
+    required this.subjectItem,
+    required this.subjectBasicData,
   });
 
   @override
@@ -77,81 +78,86 @@ class InfoHeadView extends StatelessWidget {
                       maxWidth: PlayLayoutConstant.infoMaxWidth),
                   child: SizedBox(
                       height: double.infinity,
-                      child: Row(
-                          mainAxisAlignment: MainAxisAlignment.start,
-                          children: [
-                            //封面
-                            Flexible(
-                              flex: 2,
-                              child: AspectRatio(
-                                aspectRatio: 2 / 3,
-                                child: Container(
-                                  margin: const EdgeInsets.only(left: 6),
-                                  clipBehavior: Clip.hardEdge,
-                                  decoration: BoxDecoration(
-                                    borderRadius: BorderRadius.circular(8.0),
-                                  ),
-                                  child: AnimationNetworkImage(
-                                    url: subjectBasicData.image,
-                                    fit: BoxFit.cover,
+                      child: Padding(
+                        padding: EdgeInsets.only(left: MediaQuery.of(context).padding.left),
+                        child: Row(
+                            mainAxisAlignment: MainAxisAlignment.start,
+                            children: [
+                              //封面
+                              Flexible(
+                                flex: 2,
+                                child: AspectRatio(
+                                  aspectRatio: 2 / 3,
+                                  child: Container(
+                                    margin: const EdgeInsets.only(left: 6),
+                                    clipBehavior: Clip.hardEdge,
+                                    decoration: BoxDecoration(
+                                      borderRadius: BorderRadius.circular(8.0),
+                                    ),
+                                    child: AnimationNetworkImage(
+                                      url: subjectBasicData.image,
+                                      fit: BoxFit.cover,
+                                    ),
                                   ),
                                 ),
                               ),
-                            ),
-                            const SizedBox(width: 5),
-                            //信息
-                            Flexible(
-                                flex: 3, // 文本占3份
-                                child: Column(
-                                    crossAxisAlignment:
-                                    CrossAxisAlignment.start,
-                                    children: [
-                                      subjectItem == null
-                                          ? _skeletonView()
-                                          : _dataView(
-                                          subjectItem: subjectItem!,
-                                          themeColor: themeColor),
-                                      const Spacer(),
-                                      Row(children: [
-                                        IconButton(
-                                            onPressed: () {
-                                              episodesDialog(
-                                                  context, episodesItem);
-                                            },
-                                            icon: const Icon(
-                                              Icons.grid_view_rounded,
-                                              size: 28,
-                                            )),
-                                        OutlinedButton.icon(
-                                            onPressed: () {
-                                              Get.toNamed("/play", arguments: {
-                                                "subjectBasicData": subjectBasicData,
-                                                "episodes": episodesItem
-                                              });
-                                            },
-                                            style: OutlinedButton.styleFrom(
-                                              side:
-                                              BorderSide(color: themeColor),
-                                              shape: RoundedRectangleBorder(
-                                                borderRadius:
-                                                BorderRadius.circular(20),
+                              const SizedBox(width: 5),
+                              //信息
+                              Flexible(
+                                  flex: 3, // 文本占3份
+                                  child: Column(
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.start,
+                                      children: [
+                                        subjectItem == null
+                                            ? _skeletonView()
+                                            : _dataView(
+                                                subjectItem: subjectItem!,
+                                                themeColor: themeColor),
+                                        const Spacer(),
+                                        Row(children: [
+                                          IconButton(
+                                              onPressed: () {
+                                                episodesDialog(
+                                                    context, episodesItem);
+                                              },
+                                              icon: const Icon(
+                                                Icons.grid_view_rounded,
+                                                size: 28,
+                                              )),
+                                          OutlinedButton.icon(
+                                              onPressed: () {
+                                                Get.toNamed("/play",
+                                                    arguments: {
+                                                      "subjectBasicData":
+                                                          subjectBasicData,
+                                                      "episodes": episodesItem
+                                                    });
+                                              },
+                                              style: OutlinedButton.styleFrom(
+                                                side: BorderSide(
+                                                    color: themeColor),
+                                                shape: RoundedRectangleBorder(
+                                                  borderRadius:
+                                                      BorderRadius.circular(20),
+                                                ),
+                                                padding:
+                                                    const EdgeInsets.symmetric(
+                                                  horizontal: 12,
+                                                ),
                                               ),
-                                              padding:
-                                              const EdgeInsets.symmetric(
-                                                horizontal: 12,
+                                              icon: const Icon(
+                                                Icons.play_circle_outline,
+                                                size: 16,
                                               ),
-                                            ),
-                                            icon: const Icon(
-                                              Icons.play_circle_outline,
-                                              size: 16,
-                                            ),
-                                            label: const Text(
-                                              "播放",
-                                              style: TextStyle(fontSize: 12),
-                                            ))
-                                      ])
-                                    ]))
-                          ])))),
+                                              label: const Text(
+                                                "播放",
+                                                style: TextStyle(fontSize: 12),
+                                              ))
+                                        ])
+                                      ]))
+                            ]),
+                      )))),
         )
       ],
     );
@@ -202,7 +208,7 @@ class InfoHeadView extends StatelessWidget {
   Widget _dataView(
       {required SubjectsItem subjectItem, required Color themeColor}) {
     final collectionTotal =
-    subjectItem.collection.data.values.reduce((a, b) => a + b);
+        subjectItem.collection.data.values.reduce((a, b) => a + b);
     const double fontSize = 12;
     const FontWeight fontWeight = FontWeight.w600;
     return Column(
@@ -224,7 +230,7 @@ class InfoHeadView extends StatelessWidget {
             Text(
               '${subjectItem.airtime.date}(${subjectItem.platform.typeCN})',
               style:
-              const TextStyle(fontSize: fontSize, fontWeight: fontWeight),
+                  const TextStyle(fontSize: fontSize, fontWeight: fontWeight),
               maxLines: 1,
               overflow: TextOverflow.ellipsis,
             ),
@@ -247,7 +253,7 @@ class InfoHeadView extends StatelessWidget {
             Text(
               '(${subjectItem.rating.total})人评分',
               style:
-              const TextStyle(fontSize: fontSize, fontWeight: fontWeight),
+                  const TextStyle(fontSize: fontSize, fontWeight: fontWeight),
             ),
             Text('$collectionTotal收藏/',
                 style: const TextStyle(

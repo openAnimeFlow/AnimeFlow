@@ -107,7 +107,7 @@ class _RecommendViewState extends State<RecommendView> {
                         : ThemeController.lightTheme.colorScheme.primary;
                     return Container(
                       width: 200,
-                      height: 40,
+                      height: 35,
                       decoration: BoxDecoration(
                         borderRadius: BorderRadius.circular(20),
                         border: Border.all(

@@ -1,7 +1,7 @@
 import 'package:anime_flow/controllers/episodes/episodes_controller.dart';
 import 'package:anime_flow/controllers/play/PlayPageController.dart';
 import 'package:anime_flow/controllers/video/video_ui_state_controller.dart';
-import 'package:anime_flow/utils/platform_util.dart';
+import 'package:anime_flow/utils/utils.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:get/get.dart';
@@ -62,7 +62,7 @@ class TopAreaControl extends StatelessWidget {
                                 color: Colors.white.withValues(alpha: 0.8),
                               )),
                           const SizedBox(width: 5),
-                          if (PlatformUtil.isDesktop || fullscreen)
+                          if (Utils.isDesktop || fullscreen)
                             Column(
                               mainAxisAlignment: MainAxisAlignment.center,
                               crossAxisAlignment: CrossAxisAlignment.start,
@@ -110,7 +110,7 @@ class TopAreaControl extends StatelessWidget {
                                 color: Colors.white.withValues(alpha: 0.8),
                               ),
                             ),
-                            if (PlatformUtil.isDesktop)
+                            if (Utils.isDesktop)
                               Obx(() => playPageController.isWideScreen.value
                                   ? IconButton(
                                       onPressed: () => playPageController

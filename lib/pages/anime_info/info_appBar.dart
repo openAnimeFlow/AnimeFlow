@@ -1,10 +1,12 @@
 import 'package:anime_flow/models/item/subjects_item.dart';
+import 'package:anime_flow/widget/ranking.dart';
 import 'package:anime_flow/widget/star.dart';
 import 'package:anime_flow/widget/image/animation_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get_core/src/get_main.dart';
 import 'package:get/get_navigation/src/extension_navigation.dart';
-import 'package:anime_flow/models/item/subject_basic_data_item.dart' show SubjectBasicData;
+import 'package:anime_flow/models/item/subject_basic_data_item.dart'
+    show SubjectBasicData;
 
 class InfoAppbarView extends StatelessWidget {
   final bool isPinned;
@@ -14,7 +16,8 @@ class InfoAppbarView extends StatelessWidget {
   const InfoAppbarView({
     super.key,
     required this.subjectsItem,
-    required this.isPinned, required this.subjectBasicData,
+    required this.isPinned,
+    required this.subjectBasicData,
   });
 
   @override
@@ -53,19 +56,7 @@ class InfoAppbarView extends StatelessWidget {
                     ),
                     Row(
                       children: [
-                        Container(
-                          padding: const EdgeInsets.all(2),
-                          decoration: BoxDecoration(
-                              color: Colors.amber,
-                              borderRadius: BorderRadius.circular(5)),
-                          child: Text(
-                            data.rating.rank.toString(),
-                            style: const TextStyle(
-                                fontSize: 8,
-                                fontWeight: FontWeight.bold,
-                                color: Colors.white),
-                          ),
-                        ),
+                        RankingView(ranking: data.rating.rank),
                         StarView(score: data.rating.score),
                         const SizedBox(width: 5),
                         Text(data.rating.score.toStringAsFixed(1),

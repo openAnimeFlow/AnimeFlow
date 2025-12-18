@@ -1,4 +1,5 @@
 import 'package:anime_flow/models/item/subject_basic_data_item.dart';
+import 'package:anime_flow/utils/utils.dart';
 import 'package:anime_flow/widget/video/controls/bottom_area_control.dart';
 import 'package:anime_flow/widget/video/controls/desktop_gesture_detector.dart';
 import 'package:anime_flow/widget/video/controls/middle_area_control.dart';
@@ -10,7 +11,6 @@ import 'package:anime_flow/controllers/video/video_ui_state_controller.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:media_kit/media_kit.dart';
-import 'package:anime_flow/utils/platform_util.dart';
 
 import 'mobile_gesture_detector.dart';
 
@@ -47,7 +47,7 @@ class _VideoControlsUiViewState extends State<VideoControlsUiView> {
 
   @override
   Widget build(BuildContext context) {
-    final isMobile = PlatformUtil.isMobile;
+    final isMobile = Utils.isMobile;
     return Column(children: [
       ///顶部
       TopAreaControl(

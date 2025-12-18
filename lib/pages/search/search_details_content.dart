@@ -1,6 +1,7 @@
 import 'package:anime_flow/models/item/search_item.dart';
 import 'package:anime_flow/models/item/subject_basic_data_item.dart';
 import 'package:anime_flow/widget/image/animation_network_image.dart';
+import 'package:anime_flow/widget/ranking.dart';
 import 'package:anime_flow/widget/star.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -20,11 +21,10 @@ class SearchDetailsContentView extends StatelessWidget {
   Widget build(BuildContext context) {
     final subjectBasicData = SubjectBasicData(
       id: searchData.id,
-      name: searchData.name,
+      name: searchData.nameCN ?? searchData.name,
       image: searchData.images.large,
     );
 
-    bool isDark = Get.isDarkMode;
     final disabledColor = Get.theme.disabledColor;
     const textFontWeight = FontWeight.w600;
 
@@ -81,29 +81,10 @@ class SearchDetailsContentView extends StatelessWidget {
                       const Spacer(),
                       Row(
                         children: [
-                          Container(
-                            padding: const EdgeInsets.symmetric(
-                                horizontal: 5.5, vertical: 1),
-                            decoration: BoxDecoration(
-                              borderRadius: BorderRadius.circular(5),
-                              color: isDark ? disabledColor : Colors.amber[400],
-                            ),
-                            child: Text(
-                              searchData.rating.total.toString(),
-                              style: const TextStyle(
-                                fontSize: 8,
-                                fontWeight: textFontWeight,
-                                color: Colors.white,
-                                shadows: [
-                                  Shadow(
-                                    color: Colors.black,
-                                    offset: Offset(0.5, 0.5),
-                                    blurRadius: 1,
-                                  )
-                                ],
-                              ),
-                            ),
-                          ),
+                          RankingView(
+                              ranking: searchData.rating.total,
+                              fontWeight: textFontWeight,
+                              fontSize: 8),
                           StarView(score: searchData.rating.score),
                           Text(
                             searchData.rating.score.toStringAsFixed(1),

@@ -5,6 +5,7 @@ import 'package:anime_flow/controllers/main_page/main_page_state.dart';
 import 'package:anime_flow/http/requests/bgm_request.dart';
 import 'package:anime_flow/utils/layout_util.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart' show SizeExtension;
 import 'package:get/get.dart';
 import 'package:anime_flow/controllers/theme_controller.dart';
 import 'package:anime_flow/models/item/hot_item.dart';
@@ -191,13 +192,13 @@ class _RecommendViewState extends State<RecommendView> {
                       padding: _contentPadding,
                       sliver: SliverMainAxisGroup(
                         slivers: [
-                          const SliverToBoxAdapter(
+                           SliverToBoxAdapter(
                             child: Row(
                               children: [
                                 Text(
                                   "热门动画",
                                   style: TextStyle(
-                                      fontSize: 25,
+                                      fontSize: 25.sp,
                                       fontWeight: FontWeight.bold),
                                 )
                               ],

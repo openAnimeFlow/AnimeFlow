@@ -3,6 +3,8 @@ import 'dart:io';
 import 'dart:math';
 
 import 'package:anime_flow/constants/constants.dart';
+import 'package:flutter/cupertino.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_inappwebview_platform_interface/flutter_inappwebview_platform_interface.dart';
 import 'package:hive/hive.dart';
@@ -10,7 +12,13 @@ import 'package:logger/logger.dart';
 
 class Utils {
   static Logger logger = Logger();
+  static const double kMobileBreakpoint = 480;
+  static const double kTabletBreakpoint = 1024;
 
+  // --- 默认设计稿尺寸 ---
+  static const Size kMobileDesignSize = Size(375, 812); // 手机主流尺寸
+  static const Size kTabletDesignSize = Size(768, 1024); // 平板
+  static const Size kDesktopDesignSize = Size(1440, 900); // 桌面端
   ///初始化爬虫配置
   static Future<void> initCrawlConfigs() async {
     final box = Hive.box(Constants.crawlConfigs);
@@ -80,4 +88,36 @@ class Utils {
   static bool get isDocumentStartScriptSupported =>
       _isDocumentStartScriptSupported ?? false;
 
+  /// 判断是否为桌面端
+  static bool get isDesktop {
+    return defaultTargetPlatform == TargetPlatform.linux ||
+        defaultTargetPlatform == TargetPlatform.windows ||
+        defaultTargetPlatform == TargetPlatform.macOS;
+  }
+
+  ///判断是否位移动端
+  static bool get isMobile {
+    return defaultTargetPlatform == TargetPlatform.android ||
+        defaultTargetPlatform == TargetPlatform.iOS;
+  }
+
+  // 根据屏幕宽度确定设计稿尺寸
+  static Size getDesignSize(BuildContext context) {
+    double width = MediaQuery.of(context).size.width;
+
+    // 1. 桌面端 (Windows, MacOS, Web)
+    if (kIsWeb || isDesktop) {
+      // 如果窗口被用户拉得非常小，则回退到平板设计稿，避免字体缩到看不见
+      if (width < kMobileBreakpoint) return kMobileDesignSize;
+      if (width < kTabletBreakpoint) return kTabletDesignSize;
+      return kDesktopDesignSize;
+    }
+
+    // 2. 移动端 (iOS, Android)
+    if (width <= kMobileBreakpoint) {
+      return kMobileDesignSize;
+    } else {
+      return kTabletDesignSize;
+    }
+  }
 }

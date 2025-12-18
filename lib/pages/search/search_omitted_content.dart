@@ -18,7 +18,7 @@ class SearchOmittedContent extends StatelessWidget {
   Widget build(BuildContext context) {
     final subjectBasicData = SubjectBasicData(
       id: searchData.id,
-      name: searchData.name,
+      name: searchData.nameCN ?? searchData.name,
       image: searchData.images.large,
     );
     return ClipRRect(

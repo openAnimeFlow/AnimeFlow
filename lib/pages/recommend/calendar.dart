@@ -1,7 +1,9 @@
 import 'package:anime_flow/http/requests/bgm_request.dart';
 import 'package:anime_flow/models/item/calendar_item.dart';
 import 'package:anime_flow/widget/image/animation_network_image.dart';
+import 'package:anime_flow/widget/ranking.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 class CalendarView extends StatefulWidget {
   const CalendarView({super.key});
@@ -26,19 +28,41 @@ class _CalendarViewState extends State<CalendarView> {
     });
   }
 
+  final weekday = DateTime.now().weekday;
+
   @override
   Widget build(BuildContext context) {
+    final numberOfReleases =
+        calendar?.calendarData[weekday.toString()]?.length ?? 0;
+    final numberOfViewers = calendar?.calendarData[weekday.toString()]
+            ?.fold(0, (sum, item) => sum + item.subject.rating.total) ??
+        0;
     return SliverMainAxisGroup(
       slivers: [
-        const SliverPadding(
-          padding: EdgeInsets.all(10),
+        SliverPadding(
+          padding: const EdgeInsets.all(10),
           sliver: SliverToBoxAdapter(
             child: Row(
+              crossAxisAlignment: CrossAxisAlignment.end,
               children: [
-                Text(
-                  "今日放送",
-                  style: TextStyle(
-                      fontSize: 25, fontWeight: FontWeight.bold),
+                Expanded(
+                  child: Text(
+                    "今日放送",
+                    style:
+                        TextStyle(fontSize: 25.sp, fontWeight: FontWeight.bold),
+                  ),
+                ),
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.end,
+                  children: [
+                    const InkWell(
+                      child: Icon(Icons.keyboard_double_arrow_right_rounded),
+                    ),
+                    Text(
+                      '周$weekday上映$numberOfReleases部,总$numberOfViewers人收看',
+                      style: TextStyle(fontSize: 10.sp, color: Colors.grey),
+                    )
+                  ],
                 )
               ],
             ),
@@ -60,7 +84,6 @@ class _CalendarViewState extends State<CalendarView> {
         child: CircularProgressIndicator(),
       );
     } else {
-      final weekday = DateTime.now().weekday;
       final items = calendar!.calendarData[weekday.toString()];
 
       if (items == null || items.isEmpty) {
@@ -74,26 +97,68 @@ class _CalendarViewState extends State<CalendarView> {
           padding: const EdgeInsets.symmetric(horizontal: 10),
           itemBuilder: (BuildContext context, int index) {
             final itemData = items[index].subject;
-            return Container(
-              width: 140,
-              margin: const EdgeInsets.only(right: 10),
-              child: ClipRRect(
-                borderRadius: BorderRadius.circular(10),
-                child: Stack(
-                  children: [
-                    Positioned.fill(
-                      child: AnimationNetworkImage(
-                        url: itemData.images.large,
-                        fit: BoxFit.cover,
-                      ),
-                    )
-                  ],
-                ),
-              ),
-            );
+            return _buildCard(itemData);
           },
         );
       }
     }
+  }
+
+  Widget _buildCard(Subject itemData) {
+    return Container(
+      width: 140,
+      margin: const EdgeInsets.only(right: 10),
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(10),
+        child: Stack(
+          children: [
+            Positioned.fill(
+              child: AnimationNetworkImage(
+                url: itemData.images.large,
+                fit: BoxFit.cover,
+              ),
+            ),
+            Positioned(
+              left: 0,
+              right: 0,
+              bottom: 0,
+              child: Container(
+                padding: const EdgeInsets.all(5),
+                decoration: const BoxDecoration(
+                  gradient: LinearGradient(
+                    begin: Alignment.bottomCenter,
+                    end: Alignment.topCenter,
+                    colors: [
+                      Colors.black38,
+                      Colors.transparent,
+                    ],
+                  ),
+                ),
+                child: Padding(
+                  padding: const EdgeInsets.all(5),
+                  child: Text(
+                      itemData.nameCN == '' ? itemData.name : itemData.nameCN,
+                      style: const TextStyle(
+                          color: Colors.white, fontWeight: FontWeight.bold),
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
+                      textAlign: TextAlign.left),
+                ),
+              ),
+            ),
+            if (itemData.rating.rank > 0)
+              Positioned(
+                  top: 0,
+                  left: 0,
+                  child: Padding(
+                    padding: const EdgeInsets.all(5),
+                    child: RankingView(
+                      ranking: itemData.rating.rank,
+                    ),
+                  ))
+          ],
+        ),
+      ),
+    );
   }
 }

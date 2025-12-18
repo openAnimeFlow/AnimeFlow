@@ -1,6 +1,8 @@
 import 'package:anime_flow/constants/constants.dart';
+import 'package:anime_flow/utils/utils.dart';
 import 'package:anime_flow/webview/webview_controller.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'package:media_kit/media_kit.dart';
@@ -24,14 +26,23 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     themeController.initTheme();
-    return GetBuilder<ThemeController>(
-      builder: (controller) {
-        return GetMaterialApp(
-          theme: ThemeController.lightTheme,
-          darkTheme: ThemeController.darkTheme,
-          themeMode: controller.isDarkMode ? ThemeMode.dark : ThemeMode.light,
-          initialRoute: "/",
-          routes: getRootRoutes(),
+    final designSize = Utils.getDesignSize(context);
+    return ScreenUtilInit(
+      designSize: designSize,
+      minTextAdapt: true,
+      splitScreenMode: true,
+      builder: (context, child) {
+        return GetBuilder<ThemeController>(
+          builder: (controller) {
+            return GetMaterialApp(
+              theme: ThemeController.lightTheme,
+              darkTheme: ThemeController.darkTheme,
+              themeMode:
+                  controller.isDarkMode ? ThemeMode.dark : ThemeMode.light,
+              initialRoute: "/",
+              routes: getRootRoutes(),
+            );
+          },
         );
       },
     );

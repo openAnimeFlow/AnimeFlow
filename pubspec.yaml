@@ -83,6 +83,7 @@ dependencies:
   window_manager: ^0.5.1
   url_launcher: ^6.3.2
   screen_brightness_platform_interface: ^2.1.0
+  flutter_screenutil: ^5.9.3
 
 # logo图标生成生成命令:dart run flutter_launcher_icons
 flutter_launcher_icons:

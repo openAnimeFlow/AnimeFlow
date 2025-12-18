@@ -1,0 +1,89 @@
+name: Build Flutter iOS
+
+on:
+  workflow_dispatch:
+    inputs:
+      inputs:
+        type: choice
+        description: "选择构建的平台"
+        options:
+          - android
+          - ios
+          - macos
+          - windows
+          - linux
+          - all
+        default: all
+jobs:
+  build_ios:
+    if: ${{ inputs.inputs == 'android' || inputs.inputs == 'all' }}
+    runs-on: macos-14
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Install Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          flutter-version-file: pubspec.yaml
+          channel: stable
+
+      - name: Install dependencies
+        run: flutter pub get
+
+      # 输出可用模拟器和 SDK
+      - name: Show available simulators
+        run: |
+          xcrun simctl list devices
+          xcodebuild -showsdks
+
+      - name: Build iOS
+        run: flutter build ios --release --no-codesign
+
+      - name: Create IPA
+        run: |
+          mkdir Payload
+          cp -R build/ios/iphoneos/Runner.app Payload/Runner.app
+          zip -q -r AnimeFlow.ipa Payload
+
+      - name: Upload IPA artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: AnimeFlow_ios
+          path: AnimeFlow.ipa
+
+  build-android:
+    if: ${{ inputs.inputs == 'android' || inputs.inputs == 'all' }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up JDK 17
+        uses: actions/setup-java@v4
+        with:
+          java-version: '17'
+          distribution: 'temurin'
+
+      - name: Setup Flutter
+        uses: subosito/flutter-action@v2.16.0
+        with:
+          channel: stable
+          flutter-version-file: pubspec.yaml
+
+      - name: Install dependencies
+        run: flutter pub get
+
+      - name: Build apk
+        run: |
+          flutter --version
+          flutter build apk --split-per-abi
+          echo "Android build completed"
+
+      - name: Archive artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: android
+          path: build/app/outputs/flutter-apk/*.apk
+          if-no-files-found: ignore

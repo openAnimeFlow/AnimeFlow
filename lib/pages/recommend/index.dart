@@ -140,7 +140,7 @@ class _RecommendViewState extends State<RecommendView> {
                           ),
                         ),
                         onTap: () {
-                          Get.toNamed(RouteName.animeDetail);
+                          Get.toNamed(RouteName.search);
                         },
                         readOnly: true,
                       ),

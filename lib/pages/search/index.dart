@@ -1,3 +1,4 @@
+import 'package:anime_flow/controllers/search/search_history_manager.dart';
 import 'package:anime_flow/http/requests/bgm_request.dart';
 import 'package:anime_flow/models/item/search_item.dart';
 import 'package:anime_flow/pages/search/search_details_content.dart';
@@ -20,25 +21,33 @@ class _SearchPageState extends State<SearchPage> {
   bool _isSearching = false;
   SearchItem? searchItem;
   bool _isDetailsContent = true;
+  List<String> _searchHistory = [];
 
   @override
   void initState() {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) {
       FocusScope.of(context).requestFocus(_searchFocusNode);
+      _loadSearchHistory();
     });
   }
 
-  @override
-  void dispose() {
-    _searchController.dispose();
-    _scrollController.dispose();
-    _searchFocusNode.dispose();
-    super.dispose();
+  // 加载搜索历史
+  void _loadSearchHistory() async {
+    final history = await SearchHistoryManager.getSearchHistory();
+    if (mounted) {
+      setState(() {
+        _searchHistory = history;
+      });
+    }
   }
 
   void _onSearch(String query) async {
     if (query.isEmpty) return;
+
+    // 保存搜索记录
+    await SearchHistoryManager.saveSearchHistory(query);
+    _loadSearchHistory();
 
     setState(() {
       _isSearching = true;
@@ -63,6 +72,18 @@ class _SearchPageState extends State<SearchPage> {
     }
   }
 
+  // 清除搜索历史
+  void _clearSearchHistory() async {
+    await SearchHistoryManager.clearSearchHistory();
+    _loadSearchHistory();
+  }
+
+  // 删除单个搜索历史项
+  void _removeSearchHistoryItem(String keyword) async {
+    await SearchHistoryManager.removeSearchHistoryItem(keyword);
+    _loadSearchHistory();
+  }
+
   // 详情视图列数
   int _calculateDetailsCount(double screenWidth) {
     const minItemWidth = 320.0;
@@ -74,6 +95,14 @@ class _SearchPageState extends State<SearchPage> {
   int _calculateOmittedCount(double screenWidth) {
     const minItemWidth = 200.0; // 海报宽度
     return (screenWidth / minItemWidth).floor().clamp(3, 6);
+  }
+
+  @override
+  void dispose() {
+    _searchController.dispose();
+    _scrollController.dispose();
+    _searchFocusNode.dispose();
+    super.dispose();
   }
 
   @override
@@ -115,28 +144,7 @@ class _SearchPageState extends State<SearchPage> {
               child: Center(child: CircularProgressIndicator()),
             )
           else if (searchItem == null)
-            SliverFillRemaining(
-              child: Center(
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Icon(
-                      Icons.search,
-                      size: 80,
-                      color: Theme.of(context).colorScheme.outline,
-                    ),
-                    const SizedBox(height: 16),
-                    Text(
-                      '输入关键词开始搜索',
-                      style: TextStyle(
-                        fontSize: 16,
-                        color: Theme.of(context).colorScheme.outline,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            )
+            _buildSearchHistory()
           else ...[
             SliverToBoxAdapter(
               child: Align(
@@ -164,8 +172,8 @@ class _SearchPageState extends State<SearchPage> {
                               },
                               icon: Icon(
                                 _isDetailsContent
-                                    ? Icons.art_track_rounded
-                                    : Icons.view_in_ar_rounded,
+                                    ? Icons.image_outlined
+                                    : Icons.art_track_rounded,
                                 size: 35,
                               ))
                         ]),
@@ -224,6 +232,111 @@ class _SearchPageState extends State<SearchPage> {
           ]
         ],
       ),
+    );
+  }
+
+  // 搜索历史
+  Widget _buildSearchHistory() {
+    if (_searchHistory.isEmpty) {
+      return SliverFillRemaining(
+        child: Center(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Icon(
+                Icons.search,
+                size: 80,
+                color: Theme.of(context).colorScheme.outline,
+              ),
+              const SizedBox(height: 16),
+              Text(
+                '输入关键词开始搜索',
+                style: TextStyle(
+                  fontSize: 16,
+                  color: Theme.of(context).colorScheme.outline,
+                ),
+              ),
+            ],
+          ),
+        ),
+      );
+    }
+
+    return SliverMainAxisGroup(
+      slivers: [
+        // 标题和清除按钮
+        SliverToBoxAdapter(
+          child: Center(
+            child: ConstrainedBox(
+              constraints: const BoxConstraints(maxWidth: 1400),
+              child: Padding(
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Text(
+                      '搜索历史',
+                      style: TextStyle(
+                        fontSize: 18,
+                        fontWeight: FontWeight.bold,
+                        color: Theme.of(context).colorScheme.onSurface,
+                      ),
+                    ),
+                    TextButton.icon(
+                      onPressed: _clearSearchHistory,
+                      icon: const Icon(Icons.delete_outline, size: 18),
+                      label: const Text('清除全部'),
+                      style: TextButton.styleFrom(
+                        foregroundColor: Theme.of(context).colorScheme.error,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ),
+        ),
+        // 历史列表
+        SliverPadding(
+          padding: EdgeInsets.only(
+            left: 16,
+            right: 16,
+            bottom: MediaQuery.of(context).padding.bottom,
+          ),
+          sliver: SliverToBoxAdapter(
+            child: Center(
+              child: ConstrainedBox(
+                constraints: const BoxConstraints(maxWidth: 1400),
+                child: Column(
+                  children: List.generate(
+                    _searchHistory.length,
+                    (index) {
+                      final keyword = _searchHistory[index];
+                      return Card(
+                        margin: const EdgeInsets.only(bottom: 8),
+                        child: ListTile(
+                          leading: const Icon(Icons.history),
+                          title: Text(keyword),
+                          trailing: IconButton(
+                            icon: const Icon(Icons.close, size: 20),
+                            onPressed: () => _removeSearchHistoryItem(keyword),
+                            tooltip: '删除',
+                          ),
+                          onTap: () {
+                            _searchController.text = keyword;
+                            _onSearch(keyword);
+                          },
+                        ),
+                      );
+                    },
+                  ),
+                ),
+              ),
+            ),
+          ),
+        ),
+      ],
     );
   }
 }

@@ -16,7 +16,7 @@ on:
         default: all
 jobs:
   build_ios:
-    if: ${{ inputs.inputs == 'android' || inputs.inputs == 'all' }}
+    if: ${{ github.event.inputs.platform == 'ios' || github.event.inputs.platform == 'all'}}
     runs-on: macos-14
 
     steps:
@@ -54,7 +54,7 @@ jobs:
           path: AnimeFlow.ipa
 
   build-android:
-    if: ${{ inputs.inputs == 'android' || inputs.inputs == 'all' }}
+    if: ${{ github.event.inputs.platform == 'android' || github.event.inputs.platform == 'all'}}
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository

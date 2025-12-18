@@ -136,28 +136,28 @@ class _AnimeDetailPageState extends State<AnimeDetailPage>
                   forceElevated: isPinned,
 
                   // 展开高度计算：内容高度 + 状态栏 + Toolbar
-                  expandedHeight: _contentHeight +
-                      statusBarHeight +
-                      kToolbarHeight,
+                  expandedHeight:
+                      _contentHeight + statusBarHeight + kToolbarHeight,
 
                   /// 头部内容区域
                   flexibleSpace: FlexibleSpaceBar(
-                    collapseMode: CollapseMode.pin,
-                    background: FutureBuilder<SubjectsItem?>(
-                        future: _subjectsItem,
-                        builder: (context, snapshot) {
-                          return InfoHeadView(
-                            subjectItem: snapshot.data,
-                            episodesItem: episodesFuture,
-                            statusBarHeight: statusBarHeight,
-                            contentHeight: _contentHeight,
-                            subjectBasicData: subjectBasicData,
-                          );
-                        },
-                      ),
-                    ),
-                  ),
+                      collapseMode: CollapseMode.pin,
+                      background: Padding(
+                          padding: const EdgeInsets.only(bottom: 15),
+                          child: FutureBuilder<SubjectsItem?>(
+                            future: _subjectsItem,
+                            builder: (context, snapshot) {
+                              return InfoHeadView(
+                                subjectItem: snapshot.data,
+                                episodesItem: episodesFuture,
+                                statusBarHeight: statusBarHeight,
+                                contentHeight: _contentHeight,
+                                subjectBasicData: subjectBasicData,
+                              );
+                            },
+                          ))),
                 ),
+              ),
             ];
           },
           body: InfoSynopsisView(

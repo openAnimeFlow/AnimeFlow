@@ -140,7 +140,7 @@ class _RecommendViewState extends State<RecommendView> {
                           ),
                         ),
                         onTap: () {
-                          Get.toNamed("/search");
+                          Get.toNamed(RouteName.animeDetail);
                         },
                         readOnly: true,
                       ),
@@ -212,7 +212,7 @@ class _RecommendViewState extends State<RecommendView> {
                             gridDelegate:
                                 SliverGridDelegateWithFixedCrossAxisCount(
                               crossAxisCount:
-                                  LayoutUtil.getCrossAxisCount(constraints),
+                                  LayoutUtil.getCrossAxisCount(context),
                               crossAxisSpacing: 5, // 横向间距
                               mainAxisSpacing: 5, // 纵向间距
                               childAspectRatio: 0.7, // 宽高比
@@ -258,7 +258,7 @@ class _RecommendViewState extends State<RecommendView> {
   }
 
   Widget _buildCard(Subject subject) {
-    final SubjectBasicData subjectBasicData = SubjectBasicData(
+    final subjectBasicData = SubjectBasicData(
       id: subject.id,
       name: subject.nameCN ?? subject.name,
       image: subject.images.large,

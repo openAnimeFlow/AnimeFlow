@@ -7,7 +7,6 @@ import 'package:anime_flow/widget/ranking.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
-import 'package:get/get_core/src/get_main.dart';
 
 class CalendarView extends StatefulWidget {
   const CalendarView({super.key});
@@ -59,9 +58,25 @@ class _CalendarViewState extends State<CalendarView> {
                 Column(
                   crossAxisAlignment: CrossAxisAlignment.end,
                   children: [
-                    const InkWell(
-                      child: Icon(Icons.keyboard_double_arrow_right_rounded),
-                    ),
+                    if (calendar != null)
+                      InkWell(
+                          onTap: () {
+                            Get.toNamed(RouteName.calendar,
+                                arguments: calendar);
+                          },
+                          child: Row(
+                            children: [
+                              Text(
+                                '查看更多',
+                                style: TextStyle(
+                                    fontSize: 10.sp, color: Colors.grey),
+                              ),
+                              const Icon(
+                                Icons.keyboard_double_arrow_right_rounded,
+                                color: Colors.grey,
+                              ),
+                            ],
+                          )),
                     Text(
                       '周$weekday上映$numberOfReleases部,总$numberOfViewers人收看',
                       style: TextStyle(fontSize: 10.sp, color: Colors.grey),

@@ -443,6 +443,13 @@ class _StickySearchHeaderDelegate extends SliverPersistentHeaderDelegate {
                         scrollPadding: const EdgeInsets.symmetric(horizontal: 50),
                         controller: searchController,
                         focusNode: focusNode,
+                        textInputAction: TextInputAction.search,
+                        onSubmitted: onSearch,
+                        onChanged: (text) {
+                          if (text.isEmpty) {
+                            onClear();
+                          }
+                        },
                         decoration: InputDecoration(
                           hintText: '搜索动漫...',
                           prefixIcon: const Icon(Icons.search),
@@ -468,8 +475,6 @@ class _StickySearchHeaderDelegate extends SliverPersistentHeaderDelegate {
                             vertical: 12,
                           ),
                         ),
-                        textInputAction: TextInputAction.search,
-                        onSubmitted: onSearch,
                       );
                     },
                   ),

@@ -120,4 +120,20 @@ class Utils {
       return kTabletDesignSize;
     }
   }
+
+  static String formatTimestamp(int timestamp) {
+    final dateTime = DateTime.fromMillisecondsSinceEpoch(timestamp * 1000);
+    final now = DateTime.now();
+    final difference = now.difference(dateTime);
+
+    if (difference.inDays > 0) {
+      return '${dateTime.month}-${dateTime.day.toString().padLeft(2, '0')} ${dateTime.hour.toString().padLeft(2, '0')}:${dateTime.minute.toString().padLeft(2, '0')}';
+    } else if (difference.inHours > 0) {
+      return '${difference.inHours}小时前';
+    } else if (difference.inMinutes > 0) {
+      return '${difference.inMinutes}分钟前';
+    } else {
+      return '刚刚';
+    }
+  }
 }

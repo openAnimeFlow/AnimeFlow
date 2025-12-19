@@ -1,6 +1,8 @@
 import 'package:anime_flow/controllers/episodes/episodes_controller.dart';
 import 'package:anime_flow/http/requests/bgm_request.dart';
 import 'package:anime_flow/models/item/episode_comments_item.dart';
+import 'package:anime_flow/utils/utils.dart';
+import 'package:anime_flow/widget/bbcode/bbcode_widget.dart';
 import 'package:anime_flow/widget/image/animation_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -138,9 +140,10 @@ class _CommentsViewState extends State<CommentsView>
             )
           else
             SliverPadding(
-              padding: EdgeInsets.only(left: 10, right: 10, bottom:
-                MediaQuery.of(context).padding.bottom
-              ),
+              padding: EdgeInsets.only(
+                  left: 10,
+                  right: 10,
+                  bottom: MediaQuery.of(context).padding.bottom),
               sliver: SliverList.builder(
                 itemCount: comments.length,
                 itemBuilder: (BuildContext context, int index) {
@@ -189,7 +192,7 @@ class _CommentsViewState extends State<CommentsView>
                         ),
                         const SizedBox(width: 8),
                         Text(
-                          _formatTime(comment.createdAt),
+                          Utils.formatTimestamp(comment.createdAt),
                           style: TextStyle(
                             fontSize: 12,
                             color: Theme.of(context).colorScheme.outline,
@@ -198,9 +201,8 @@ class _CommentsViewState extends State<CommentsView>
                       ],
                     ),
                     const SizedBox(height: 4),
-                    Text(
-                      comment.content,
-                      style: const TextStyle(fontSize: 14),
+                    BBCodeWidget(
+                      bbcode: comment.content,
                     ),
                   ],
                 ),
@@ -245,25 +247,6 @@ class _CommentsViewState extends State<CommentsView>
   }
 
   Widget _buildReplyItem(Reply reply) {
-    // 解析引用内容
-    final content = reply.content;
-    final hasQuote = content.contains('[quote]');
-    
-    String? quoteText;
-    String replyText = content;
-    
-    if (hasQuote) {
-      // 匹配 [quote][b]用户名[/b] 说: 内容[/quote]
-      final quoteMatch = RegExp(r'\[quote\]\[b\](.*?)\[/b\].*?说:\s*(.*?)\[/quote\]', dotAll: true).firstMatch(content);
-      if (quoteMatch != null) {
-        final quotedUser = quoteMatch.group(1) ?? '';
-        final quotedContent = quoteMatch.group(2) ?? '';
-        quoteText = '$quotedUser: $quotedContent';
-        // 移除引用部分，保留剩余内容
-        replyText = content.replaceAll(RegExp(r'\[quote\].*?\[/quote\]\s*', dotAll: true), '').trim();
-      }
-    }
-
     return Padding(
       padding: const EdgeInsets.all(8),
       child: Row(
@@ -294,7 +277,7 @@ class _CommentsViewState extends State<CommentsView>
                     ),
                     const SizedBox(width: 8),
                     Text(
-                      _formatTime(reply.createdAt),
+                      Utils.formatTimestamp( reply.createdAt),
                       style: TextStyle(
                         fontSize: 11,
                         color: Theme.of(context).colorScheme.outline,
@@ -302,7 +285,7 @@ class _CommentsViewState extends State<CommentsView>
                     ),
                   ],
                 ),
-                if (quoteText != null) ...[
+                ...[
                   const SizedBox(height: 4),
                   Container(
                     padding: const EdgeInsets.all(6),
@@ -310,28 +293,22 @@ class _CommentsViewState extends State<CommentsView>
                       color: Theme.of(context).colorScheme.surface,
                       borderRadius: BorderRadius.circular(4),
                       border: Border.all(
-                        color: Theme.of(context).colorScheme.outline.withOpacity(0.2),
+                        color: Theme.of(context)
+                            .colorScheme
+                            .outline
+                            .withOpacity(0.2),
                       ),
                     ),
-                    child: Text(
-                      quoteText,
-                      style: TextStyle(
-                        fontSize: 12,
-                        color: Theme.of(context).colorScheme.onSurface.withOpacity(0.7),
-                        fontStyle: FontStyle.italic,
-                      ),
+                    child: BBCodeWidget(
+                      bbcode: reply.content,
                     ),
                   ),
                 ],
-                if (replyText.isNotEmpty) ...[
+                if (reply.content.isNotEmpty) ...[
                   const SizedBox(height: 4),
-                  Text(
-                    replyText,
-                    style: TextStyle(
-                      fontSize: 13,
-                      color: Theme.of(context).colorScheme.onSurface,
-                    ),
-                  ),
+                  BBCodeWidget(
+                    bbcode: reply.content,
+                  )
                 ],
               ],
             ),
@@ -339,21 +316,5 @@ class _CommentsViewState extends State<CommentsView>
         ],
       ),
     );
-  }
-
-  String _formatTime(int timestamp) {
-    final dateTime = DateTime.fromMillisecondsSinceEpoch(timestamp * 1000);
-    final now = DateTime.now();
-    final difference = now.difference(dateTime);
-
-    if (difference.inDays > 0) {
-      return '${dateTime.month}-${dateTime.day.toString().padLeft(2, '0')} ${dateTime.hour.toString().padLeft(2, '0')}:${dateTime.minute.toString().padLeft(2, '0')}';
-    } else if (difference.inHours > 0) {
-      return '${difference.inHours}小时前';
-    } else if (difference.inMinutes > 0) {
-      return '${difference.inMinutes}分钟前';
-    } else {
-      return '刚刚';
-    }
   }
 }

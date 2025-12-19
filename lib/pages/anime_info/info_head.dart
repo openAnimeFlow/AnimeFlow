@@ -2,6 +2,7 @@ import 'dart:math';
 import 'dart:ui';
 import 'package:anime_flow/constants/play_layout_constant.dart';
 import 'package:anime_flow/widget/anime_detail/episodes_dialog.dart';
+import 'package:anime_flow/widget/image/image_preview_page.dart';
 import 'package:anime_flow/widget/star.dart';
 import 'package:animation_network_image/animation_network_image.dart';
 import 'package:anime_flow/models/item/episodes_item.dart';
@@ -79,7 +80,8 @@ class InfoHeadView extends StatelessWidget {
                   child: SizedBox(
                       height: double.infinity,
                       child: Padding(
-                        padding: EdgeInsets.only(left: MediaQuery.of(context).padding.left),
+                        padding: EdgeInsets.only(
+                            left: MediaQuery.of(context).padding.left),
                         child: Row(
                             mainAxisAlignment: MainAxisAlignment.start,
                             children: [
@@ -89,16 +91,26 @@ class InfoHeadView extends StatelessWidget {
                                 child: AspectRatio(
                                   aspectRatio: 2 / 3,
                                   child: Container(
-                                    margin: const EdgeInsets.only(left: 6),
-                                    clipBehavior: Clip.hardEdge,
-                                    decoration: BoxDecoration(
-                                      borderRadius: BorderRadius.circular(8.0),
-                                    ),
-                                    child: AnimationNetworkImage(
-                                      url: subjectBasicData.image,
-                                      fit: BoxFit.cover,
-                                    ),
-                                  ),
+                                      margin: const EdgeInsets.only(left: 6),
+                                      child: InkWell(
+                                          onTap: () {
+                                            Navigator.of(context).push(
+                                              TransparentImageRoute(
+                                                imageUrl:
+                                                    subjectBasicData.image,
+                                                heroTag: subjectBasicData.image,
+                                              ),
+                                            );
+                                          },
+                                          child: Hero(
+                                            tag: subjectBasicData.image,
+                                            child: AnimationNetworkImage(
+                                              borderRadius:
+                                                  BorderRadius.circular(8),
+                                              url: subjectBasicData.image,
+                                              fit: BoxFit.cover,
+                                            ),
+                                          ))),
                                 ),
                               ),
                               const SizedBox(width: 5),

@@ -88,6 +88,7 @@ dependencies:
   screen_brightness_platform_interface: ^2.1.0
   flutter_screenutil: ^5.9.3
   antlr4: ^4.13.2
+  photo_view: ^0.15.0
 
 # logo图标生成生成命令:dart run flutter_launcher_icons
 flutter_launcher_icons:

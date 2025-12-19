@@ -100,11 +100,9 @@ class _VideoSourceDrawersState extends State<VideoSourceDrawers> {
               ),
             ),
             const SizedBox(height: 10),
-            // 网站选择器 - 使用 Obx 实现响应式渲染
             Obx(() => _buildWebsiteSelector(
                 dataSource: dataSourceController.videoResources.value)),
             const SizedBox(height: 16),
-            // 剧集列表 - 使用 Obx 实现响应式渲染
             Expanded(
               child: Obx(() => _buildVideoSource(
                   dataSource: dataSourceController.videoResources.value)),
@@ -233,7 +231,6 @@ class _VideoSourceDrawersState extends State<VideoSourceDrawers> {
           final isLastItem = index ==
               dataSource[selectedWebsiteIndex].episodeResources.length - 1;
 
-          // 使用 Obx 包裹每个列表项，监听 episodeIndex 变化
           return Obx(() {
             // 当前选中剧集对应的剧集数据
             final currentEpisode = resourceItem.episodes.firstWhereOrNull(
@@ -336,6 +333,7 @@ class _VideoSourceDrawersState extends State<VideoSourceDrawers> {
             logger.i('开始解析视频源: ${videoConfig.baseURL + episode.like}');
 
             await _loadVideoPage(videoConfig.baseURL + episode.like);
+
           } catch (e) {
             logger.e('获取视频源失败', error: e);
             Get.snackbar(

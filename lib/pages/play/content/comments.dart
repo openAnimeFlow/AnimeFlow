@@ -3,7 +3,7 @@ import 'package:anime_flow/http/requests/bgm_request.dart';
 import 'package:anime_flow/models/item/episode_comments_item.dart';
 import 'package:anime_flow/utils/utils.dart';
 import 'package:anime_flow/widget/bbcode/bbcode_widget.dart';
-import 'package:anime_flow/widget/image/animation_network_image.dart';
+import 'package:animation_network_image/animation_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:logger/logger.dart';

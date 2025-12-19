@@ -1,4 +1,5 @@
 import 'dart:ui' as ui;
+import 'package:animation_network_image/animation_network_image.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:antlr4/antlr4.dart';
@@ -114,19 +115,15 @@ class _BBCodeWidgetState extends State<BBCodeWidget> {
                     fontSize: e.size.toDouble(),
                     color: textColor,
                     backgroundColor:
-                        (!_isVisible && e.masked) ? Color(0xFF555555) : null,
-                    fontFeatures: [FontFeature.tabularFigures()],
+                        (!_isVisible && e.masked) ? const Color(0xFF555555) : null,
+                    fontFeatures: const [FontFeature.tabularFigures()],
                   ),
                 );
               } else if (e is BBCodeImg) {
                 return WidgetSpan(
-                  child: CachedNetworkImage(
-                    imageUrl: e.imageUrl,
-                    placeholder: (context, url) =>
-                        const SizedBox(width: 1, height: 1),
-                    errorWidget: (context, error, stackTrace) {
-                      return const Text('.');
-                    },
+                  child: AnimationNetworkImage(
+                    borderRadius: BorderRadius.circular(5),
+                    url: e.imageUrl,
                   ),
                 );
               } else if (e is BBCodeBgm) {
@@ -142,24 +139,16 @@ class _BBCodeWidgetState extends State<BBCodeWidget> {
                 }
                 url = 'https://bangumi.tv/img/smiles/tv/${e.id - 23}.gif';
                 return WidgetSpan(
-                  child: CachedNetworkImage(
-                    imageUrl: url,
-                    placeholder: (context, url) =>
-                        const SizedBox(width: 1, height: 1),
-                    errorWidget: (context, error, stackTrace) {
-                      return const Text('.');
-                    },
+                  child: AnimationNetworkImage(
+                    borderRadius: BorderRadius.circular(5),
+                    url: url,
                   ),
                 );
               } else if (e is BBCodeSticker) {
                 return WidgetSpan(
-                  child: CachedNetworkImage(
-                    imageUrl: 'https://bangumi.tv/img/smiles/${e.id}.gif',
-                    placeholder: (context, url) =>
-                        const SizedBox(width: 1, height: 1),
-                    errorWidget: (context, error, stackTrace) {
-                      return const Text('.');
-                    },
+                  child: AnimationNetworkImage(
+                    borderRadius: BorderRadius.circular(5),
+                    url: 'https://bangumi.tv/img/smiles/${e.id}.gif',
                   ),
                 );
               } else {

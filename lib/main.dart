@@ -29,8 +29,6 @@ class MyApp extends StatelessWidget {
     final designSize = Utils.getDesignSize(context);
     return ScreenUtilInit(
       designSize: designSize,
-      minTextAdapt: true,
-      splitScreenMode: true,
       builder: (context, child) {
         return GetBuilder<ThemeController>(
           builder: (controller) {

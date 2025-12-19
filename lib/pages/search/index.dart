@@ -146,38 +146,34 @@ class _SearchPageState extends State<SearchPage> {
           else if (searchItem == null)
             _buildSearchHistory()
           else ...[
-            SliverToBoxAdapter(
-              child: Align(
-                alignment: Alignment.topCenter,
+            SliverPadding(
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+              sliver: SliverToBoxAdapter(
                 child: ConstrainedBox(
                   constraints: const BoxConstraints(maxWidth: maxWidth),
-                  child: Padding(
-                    padding:
-                        const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                    child: Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          Text(
-                            '搜索到 ${searchItem!.data.length} 条内容',
-                            style: TextStyle(
-                              color: Theme.of(context).colorScheme.outline,
-                            ),
+                  child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Text(
+                          '搜索到 ${searchItem!.data.length} 条内容',
+                          style: TextStyle(
+                            color: Theme.of(context).colorScheme.outline,
                           ),
-                          IconButton(
-                              padding: EdgeInsets.zero,
-                              onPressed: () {
-                                setState(() {
-                                  _isDetailsContent = !_isDetailsContent;
-                                });
-                              },
-                              icon: Icon(
-                                _isDetailsContent
-                                    ? Icons.image_outlined
-                                    : Icons.art_track_rounded,
-                                size: 35,
-                              ))
-                        ]),
-                  ),
+                        ),
+                        IconButton(
+                            padding: EdgeInsets.zero,
+                            onPressed: () {
+                              setState(() {
+                                _isDetailsContent = !_isDetailsContent;
+                              });
+                            },
+                            icon: Icon(
+                              _isDetailsContent
+                                  ? Icons.image_outlined
+                                  : Icons.art_track_rounded,
+                              size: 35,
+                            ))
+                      ]),
                 ),
               ),
             ),
@@ -441,7 +437,8 @@ class _StickySearchHeaderDelegate extends SliverPersistentHeaderDelegate {
                     valueListenable: searchController,
                     builder: (context, value, child) {
                       return TextField(
-                        scrollPadding: const EdgeInsets.symmetric(horizontal: 50),
+                        scrollPadding:
+                            const EdgeInsets.symmetric(horizontal: 50),
                         controller: searchController,
                         focusNode: focusNode,
                         textInputAction: TextInputAction.search,

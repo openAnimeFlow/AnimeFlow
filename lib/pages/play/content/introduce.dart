@@ -351,7 +351,7 @@ class _IntroduceViewState extends State<IntroduceView>
                             mainAxisSize: MainAxisSize.min,
                             children: [
                               Text('第${episode.sort}话'),
-                              SizedBox(height: 5),
+                              const SizedBox(height: 5),
                               Text(
                                 episode.nameCN.isNotEmpty
                                     ? episode.nameCN

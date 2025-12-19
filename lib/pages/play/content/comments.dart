@@ -156,7 +156,7 @@ class _CommentsViewState extends State<CommentsView>
 
   Widget _buildCommentItem(EpisodeComment comment) {
     return Padding(
-      padding: const EdgeInsets.only(bottom: 10),
+      padding: const EdgeInsets.symmetric(vertical: 10),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -177,7 +177,8 @@ class _CommentsViewState extends State<CommentsView>
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Row(
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
                           comment.user.nickname,

@@ -2,6 +2,7 @@ import 'package:anime_flow/constants/constants.dart';
 import 'package:anime_flow/http/api/bgm_api.dart';
 import 'package:anime_flow/http/api/common_api.dart';
 import 'package:anime_flow/models/item/calendar_item.dart';
+import 'package:anime_flow/models/item/episode_comments_item.dart';
 import 'package:anime_flow/models/item/episodes_item.dart';
 import 'package:anime_flow/models/item/hot_item.dart';
 import 'package:anime_flow/models/item/search_item.dart';
@@ -11,11 +12,11 @@ import 'package:anime_flow/utils/http/dio_request.dart';
 import 'package:dio/dio.dart';
 
 class BgmRequest {
-  static const String _nextBaseUrl = BgmApi.nextBaseUrl;
+  static const String _nextBaseUrl = BgmNextApi.nextBaseUrl;
 
   /// 获取热门
   static Future<HotItem> getHotService(int limit, int offset) async {
-    final response = await dioRequest.get(_nextBaseUrl + BgmApi.hot,
+    final response = await dioRequest.get(_nextBaseUrl + BgmNextApi.hot,
         queryParameters: {"type": 2, "limit": limit, "offset": offset},
         options: Options(
             headers: {Constants.userAgentName: CommonApi.bangumiUserAgent}));
@@ -26,7 +27,7 @@ class BgmRequest {
   static Future<SubjectsItem> getSubjectByIdService(int id) async {
     final response = await dioRequest.get(
         _nextBaseUrl +
-            BgmApi.subjectById.replaceFirst('{subjectId}', id.toString()),
+            BgmNextApi.subjectById.replaceFirst('{subjectId}', id.toString()),
         options: Options(
             headers: {Constants.userAgentName: CommonApi.bangumiUserAgent}));
     return SubjectsItem.fromJson(response.data);
@@ -37,7 +38,7 @@ class BgmRequest {
       int id, int limit, int offset) async {
     final response = await dioRequest.get(
         _nextBaseUrl +
-            BgmApi.episodes.replaceFirst('{subjectId}', id.toString()),
+            BgmNextApi.episodes.replaceFirst('{subjectId}', id.toString()),
         queryParameters: {"limit": limit, "offset": offset},
         options: Options(
             headers: {Constants.userAgentName: CommonApi.bangumiUserAgent}));
@@ -52,7 +53,7 @@ class BgmRequest {
   }) async {
     final response = await dioRequest.get(
       _nextBaseUrl +
-          BgmApi.subjectComments
+          BgmNextApi.subjectComments
               .replaceFirst('{subjectId}', subjectId.toString()),
       queryParameters: {
         "type": 2,
@@ -72,16 +73,14 @@ class BgmRequest {
       required int limit,
       required int offset}) async {
     final response = await dioRequest.post(
-      _nextBaseUrl + BgmApi.search,
+      _nextBaseUrl + BgmNextApi.search,
       queryParameters: {
         "limit": limit,
         "offset": offset,
       },
       data: {
         "filter": {
-          "type": [
-            2
-          ]
+          "type": [2]
         },
         "keyword": keyword,
       },
@@ -96,11 +95,24 @@ class BgmRequest {
   ///每日放送
   static Future<Calendar> calendarService() async {
     final response = await dioRequest.get(
-      _nextBaseUrl + BgmApi.calendar,
+      _nextBaseUrl + BgmNextApi.calendar,
       options: Options(
         headers: {Constants.userAgentName: CommonApi.bangumiUserAgent},
       ),
     );
     return Calendar.fromJson(response.data);
+  }
+
+  ///剧集评论
+  static Future<List<EpisodeComment>> episodeCommentsService({
+    required int episodeId,
+  }) async {
+    final response = await dioRequest.get(_nextBaseUrl +
+        BgmNextApi.episodeComments
+            .replaceFirst('{episodeId}', episodeId.toString()));
+    final data = response.data as List<dynamic>;
+    return data
+        .map((item) => EpisodeComment.fromJson(item as Map<String, dynamic>))
+        .toList();
   }
 }

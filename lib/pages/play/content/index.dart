@@ -17,7 +17,7 @@ class ContentView extends StatefulWidget {
 
 class _ContentViewState extends State<ContentView>
     with SingleTickerProviderStateMixin {
-  final List<String> _tabs = ['简介', '评论'];
+  final List<String> _tabs = ['简介', '吐槽'];
   late TabController _tabController;
   final GlobalKey _introduceKey = GlobalKey();
   final GlobalKey _commentKey = GlobalKey();
@@ -49,12 +49,13 @@ class _ContentViewState extends State<ContentView>
             child: TabBarView(
               controller: _tabController,
               children: [
-                //简介view
+                //简介
                 IntroduceView(
                   widget.episodes,
                   key: _introduceKey,
                   subjectBasicData: widget.subjectBasicData,
                 ),
+                //吐槽
                 CommentsView(
                   key: _commentKey,
                 )

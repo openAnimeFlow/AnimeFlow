@@ -13,7 +13,8 @@ class IntroduceView extends StatefulWidget {
   final Future<EpisodesItem> episodes;
   static const String drawerTitle = "章节列表";
 
-  const IntroduceView( this.episodes, {super.key, required this.subjectBasicData});
+  const IntroduceView(this.episodes,
+      {super.key, required this.subjectBasicData});
 
   @override
   State<IntroduceView> createState() => _IntroduceViewState();
@@ -68,52 +69,50 @@ class _IntroduceViewState extends State<IntroduceView>
     // 必须调用 super.build 来启用 AutomaticKeepAliveClientMixin
     super.build(context);
     const String sourceTitle = "数据源";
-    return Padding(
-        padding: const EdgeInsets.all(10),
-        child: SingleChildScrollView(
-          child: Column(
+    return SingleChildScrollView(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            widget.subjectBasicData.name,
+            style: const TextStyle(fontSize: 15, fontWeight: FontWeight.bold),
+            textAlign: TextAlign.left,
+          ),
+          const SizedBox(height: 10),
+          //章节
+          Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text(
-                widget.subjectBasicData.name,
-                style:
-                    const TextStyle(fontSize: 15, fontWeight: FontWeight.bold),
-                textAlign: TextAlign.left,
-              ),
-              const SizedBox(height: 10),
-              //章节
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      const Text("选集"),
-                      IconButton(
-                          onPressed: () {
-                            if (playPageController.isWideScreen.value) {
-                              // 宽屏展示侧边抽屉
-                              _showSideDrawer(context,
-                                  title: IntroduceView.drawerTitle);
-                            } else {
-                              // 窄屏展示底部抽屉
-                              _showBottomSheet(context,
-                                  title: IntroduceView.drawerTitle);
-                            }
-                          },
-                          icon: const Icon(Icons.keyboard_arrow_down_rounded))
-                    ],
-                  ),
-                  //横向滚动卡片
-                  _scrollTheCardHorizontally()
+                  const Text("选集"),
+                  IconButton(
+                      onPressed: () {
+                        if (playPageController.isWideScreen.value) {
+                          // 宽屏展示侧边抽屉
+                          _showSideDrawer(context,
+                              title: IntroduceView.drawerTitle);
+                        } else {
+                          // 窄屏展示底部抽屉
+                          _showBottomSheet(context,
+                              title: IntroduceView.drawerTitle);
+                        }
+                      },
+                      icon: const Icon(Icons.keyboard_arrow_down_rounded))
                 ],
               ),
-              //数据源
-              VideoResourcesView(
-                  subjectBasicData: widget.subjectBasicData, sourceTitle: sourceTitle)
+              //横向滚动卡片
+              _scrollTheCardHorizontally()
             ],
           ),
-        ));
+          //数据源
+          VideoResourcesView(
+              subjectBasicData: widget.subjectBasicData,
+              sourceTitle: sourceTitle)
+        ],
+      ),
+    );
   }
 
   /// 底部抽屉
@@ -313,7 +312,10 @@ class _IntroduceViewState extends State<IntroduceView>
             WidgetsBinding.instance.addPostFrameCallback((_) {
               if (mounted) {
                 final firstEpisode = episodeList.first;
-                episodesController.setEpisodeSort(firstEpisode.sort, 1);
+                episodesController.setEpisodeSort(
+                    sort: firstEpisode.sort,
+                    episodeIndex: 1,
+                    episodeId: firstEpisode.id);
                 episodesController.setEpisodeTitle(firstEpisode.nameCN);
               }
             });
@@ -335,7 +337,9 @@ class _IntroduceViewState extends State<IntroduceView>
                         onTap: () {
                           final episodeIndex = index + 1;
                           episodesController.setEpisodeSort(
-                              episode.sort, episodeIndex);
+                              episodeId: episode.id,
+                              episodeIndex: episodeIndex,
+                              sort: episode.sort);
                           episodesController.setEpisodeTitle(episode.nameCN);
                           logger.i('选中剧集索引:$episodeIndex');
                         },

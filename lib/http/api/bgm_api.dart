@@ -1,4 +1,4 @@
-class BgmApi {
+class BgmNextApi {
   static const String nextBaseUrl = 'https://next.bgm.tv';
 
   //热门条目
@@ -18,4 +18,7 @@ class BgmApi {
 
   //每日放送
   static const String calendar = '/p1/calendar';
+
+  //剧集评论
+  static const String episodeComments = '/p1/episodes/{episodeId}/comments';
 }

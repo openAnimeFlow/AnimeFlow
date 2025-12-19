@@ -1,6 +1,4 @@
-import 'package:anime_flow/controllers/crawler/crawler_config_controller.dart';
 import 'package:flutter/material.dart';
-import 'package:get/get.dart';
 import 'package:logger/logger.dart';
 
 class CategoryView extends StatefulWidget {

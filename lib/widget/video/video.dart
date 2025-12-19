@@ -5,7 +5,6 @@ import 'package:anime_flow/models/item/subject_basic_data_item.dart';
 import 'package:anime_flow/webview/webview_controller.dart';
 import 'package:anime_flow/widget/video/controls/index_controls.dart';
 import 'package:anime_flow/controllers/video/data/data_source_controller.dart';
-import 'package:anime_flow/controllers/video/video_source_controller.dart';
 import 'package:anime_flow/controllers/video/video_state_controller.dart';
 import 'package:anime_flow/controllers/video/video_ui_state_controller.dart';
 import 'package:flutter/material.dart';
@@ -26,7 +25,6 @@ class VideoView extends StatefulWidget {
 class _VideoViewState extends State<VideoView> {
   late final player = Player();
   late final controller = VideoController(player);
-  late VideoSourceController videoSourceController;
   late VideoUiStateController videoUiStateController;
   late DataSourceController dataSourceController;
   final webviewItemController = Get.find<WebviewItemController>();
@@ -46,7 +44,6 @@ class _VideoViewState extends State<VideoView> {
   void initState() {
     super.initState();
     Get.put(VideoStateController(player));
-    videoSourceController = Get.find<VideoSourceController>();
     dataSourceController = Get.find<DataSourceController>();
     videoUiStateController = Get.put(VideoUiStateController(player));
     // 初始化屏幕亮度

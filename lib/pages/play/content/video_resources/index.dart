@@ -1,7 +1,7 @@
 import 'package:anime_flow/models/item/subject_basic_data_item.dart';
+import 'package:anime_flow/widget/image/animation_network_image.dart';
 import 'package:anime_flow/widget/play_content/source_drawers/video_source_drawers.dart';
 import 'package:anime_flow/controllers/video/data/data_source_controller.dart';
-import 'package:anime_flow/controllers/video/video_source_controller.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get_core/src/get_main.dart';
 import 'package:get/get_instance/src/extension_instance.dart';
@@ -20,17 +20,13 @@ class VideoResourcesView extends StatefulWidget {
 }
 
 class _VideoResourcesViewState extends State<VideoResourcesView> {
-  late VideoSourceController videoSourceController;
   late DataSourceController dataSourceController;
 
   @override
   void initState() {
     super.initState();
-    videoSourceController = Get.find<VideoSourceController>();
     dataSourceController = Get.find<DataSourceController>();
-
-    dataSourceController
-        .initResources(widget.subjectBasicData.name);
+    dataSourceController.initResources(widget.subjectBasicData.name);
   }
 
   @override
@@ -52,12 +48,26 @@ class _VideoResourcesViewState extends State<VideoResourcesView> {
                       fontSize: 15,
                     ),
                   ),
-                  Obx(() => videoSourceController.webSiteTitle.value != ''
-                      ? Text(
-                          videoSourceController.webSiteTitle.value,
-                          maxLines: 3,
-                          overflow: TextOverflow.ellipsis,
-                          style: const TextStyle(fontWeight: FontWeight.bold),
+                  const SizedBox(height: 5),
+                  Obx(() => dataSourceController.webSiteTitle.value != ''
+                      ? Row(
+                          children: [
+                            ClipRRect(
+                              borderRadius: BorderRadius.circular(5),
+                              child: AnimationNetworkImage(
+                                  height: 25,
+                                  width: 25,
+                                  url: dataSourceController.webSiteIcon.value),
+                            ),
+                            const SizedBox(width: 5),
+                            Text(
+                              dataSourceController.webSiteTitle.value,
+                              maxLines: 3,
+                              overflow: TextOverflow.ellipsis,
+                              style:
+                                  const TextStyle(fontSize: 20,fontWeight: FontWeight.bold),
+                            )
+                          ],
                         )
                       : const Text('选择数据源')),
                 ],

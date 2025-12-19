@@ -5,7 +5,6 @@ import 'package:anime_flow/constants/play_layout_constant.dart';
 import 'package:anime_flow/controllers/episodes/episodes_controller.dart';
 import 'package:anime_flow/controllers/play/PlayPageController.dart';
 import 'package:anime_flow/controllers/video/data/data_source_controller.dart';
-import 'package:anime_flow/controllers/video/video_source_controller.dart';
 import 'package:anime_flow/models/item/episodes_item.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -31,7 +30,6 @@ class _PlayPageState extends State<PlayPage> {
   void initState() {
     super.initState();
     playController = Get.put(PlayPageController());
-    Get.put(VideoSourceController());
     Get.put(DataSourceController());
     Get.put(EpisodesController());
     Get.put<WebviewItemController>(
@@ -45,7 +43,6 @@ class _PlayPageState extends State<PlayPage> {
   void dispose() {
     Get.delete<WebviewItemController>();
     Get.delete<PlayPageController>();
-    Get.delete<VideoSourceController>();
     Get.delete<EpisodesController>();
     Get.delete<DataSourceController>();
     super.dispose();

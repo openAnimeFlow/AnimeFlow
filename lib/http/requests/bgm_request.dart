@@ -12,7 +12,7 @@ import 'package:anime_flow/utils/http/dio_request.dart';
 import 'package:dio/dio.dart';
 
 class BgmRequest {
-  static const String _nextBaseUrl = BgmNextApi.nextBaseUrl;
+  static const String _nextBaseUrl = BgmNextApi.baseUrl;
 
   /// 获取热门
   static Future<HotItem> getHotService(int limit, int offset) async {

@@ -1,5 +1,5 @@
 class BgmNextApi {
-  static const String nextBaseUrl = 'https://next.bgm.tv';
+  static const String baseUrl = 'https://next.bgm.tv';
 
   //热门条目
   static const String hot = '/p1/trending/subjects';
@@ -21,4 +21,11 @@ class BgmNextApi {
 
   //剧集评论
   static const String episodeComments = '/p1/episodes/{episodeId}/comments';
+}
+
+class BgmApi {
+  static const String baseUrl = 'https://bgm.tv';
+
+  // 授权
+  static const String oauth = '/oauth/authorize';
 }

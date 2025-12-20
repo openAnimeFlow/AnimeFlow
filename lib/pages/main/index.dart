@@ -1,6 +1,6 @@
 import 'package:anime_flow/controllers/main_page/main_page_state.dart';
 import 'package:anime_flow/models/item/tab_item.dart';
-import 'package:anime_flow/pages/Login/index.dart';
+import 'package:anime_flow/pages/my/index.dart';
 import 'package:anime_flow/utils/utils.dart';
 import 'package:flutter/material.dart';
 import 'package:anime_flow/pages/Category/index.dart';
@@ -67,7 +67,7 @@ class _MainPageState extends State<MainPage> {
             _pageCache[index] = const CategoryView();
             break;
           case 2:
-            _pageCache[index] = const LoginPage();
+            _pageCache[index] = const MyPage();
             break;
         }
       }

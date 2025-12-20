@@ -121,6 +121,7 @@ class _BBCodeWidgetState extends State<BBCodeWidget> {
               } else if (e is BBCodeImg) {
                 return WidgetSpan(
                   child: AnimationNetworkImage(
+                    preview:  true,
                     borderRadius: BorderRadius.circular(5),
                     url: e.imageUrl,
                   ),
@@ -139,6 +140,7 @@ class _BBCodeWidgetState extends State<BBCodeWidget> {
                 url = 'https://bangumi.tv/img/smiles/tv/${e.id - 23}.gif';
                 return WidgetSpan(
                   child: AnimationNetworkImage(
+                    preview:  true,
                     borderRadius: BorderRadius.circular(5),
                     url: url,
                   ),
@@ -146,6 +148,7 @@ class _BBCodeWidgetState extends State<BBCodeWidget> {
               } else if (e is BBCodeSticker) {
                 return WidgetSpan(
                   child: AnimationNetworkImage(
+                    preview:  true,
                     borderRadius: BorderRadius.circular(5),
                     url: 'https://bangumi.tv/img/smiles/${e.id}.gif',
                   ),

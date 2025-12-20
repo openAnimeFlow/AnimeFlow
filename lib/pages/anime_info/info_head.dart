@@ -2,7 +2,6 @@ import 'dart:math';
 import 'dart:ui';
 import 'package:anime_flow/constants/play_layout_constant.dart';
 import 'package:anime_flow/widget/anime_detail/episodes_dialog.dart';
-import 'package:anime_flow/widget/image/image_preview_page.dart';
 import 'package:anime_flow/widget/star.dart';
 import 'package:animation_network_image/animation_network_image.dart';
 import 'package:anime_flow/models/item/episodes_item.dart';
@@ -87,32 +86,19 @@ class InfoHeadView extends StatelessWidget {
                             children: [
                               //封面
                               Flexible(
-                                flex: 2,
-                                child: AspectRatio(
-                                  aspectRatio: 2 / 3,
-                                  child: Container(
-                                      margin: const EdgeInsets.only(left: 6),
-                                      child: InkWell(
-                                          onTap: () {
-                                            Navigator.of(context).push(
-                                              TransparentImageRoute(
-                                                imageUrl:
-                                                    subjectBasicData.image,
-                                                heroTag: subjectBasicData.image,
-                                              ),
-                                            );
-                                          },
-                                          child: Hero(
-                                            tag: subjectBasicData.image,
-                                            child: AnimationNetworkImage(
-                                              borderRadius:
-                                                  BorderRadius.circular(8),
-                                              url: subjectBasicData.image,
-                                              fit: BoxFit.cover,
-                                            ),
-                                          ))),
-                                ),
-                              ),
+                                  flex: 2,
+                                  child: AspectRatio(
+                                      aspectRatio: 2 / 3,
+                                      child: Container(
+                                        margin: const EdgeInsets.only(left: 6),
+                                        child: AnimationNetworkImage(
+                                          preview:  true,
+                                          borderRadius:
+                                              BorderRadius.circular(8),
+                                          url: subjectBasicData.image,
+                                          fit: BoxFit.cover,
+                                        ),
+                                      ))),
                               const SizedBox(width: 5),
                               //信息
                               Flexible(
@@ -204,7 +190,7 @@ class InfoHeadView extends StatelessWidget {
                 return Container(
                   margin: const EdgeInsets.only(top: 5),
                   height: 20,
-                  width: width,
+                  width: 180,
                   decoration: BoxDecoration(
                     color: Colors.white,
                     borderRadius: BorderRadius.circular(8.0),

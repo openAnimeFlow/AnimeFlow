@@ -2,6 +2,7 @@ import 'package:anime_flow/constants/constants.dart';
 import 'package:anime_flow/utils/utils.dart';
 import 'package:anime_flow/webview/webview_controller.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 import 'package:hive_flutter/hive_flutter.dart';
@@ -12,7 +13,7 @@ import 'package:anime_flow/controllers/theme_controller.dart';
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   MediaKit.ensureInitialized();
-
+  await dotenv.load(fileName: ".env");
   await Hive.initFlutter();
   await Hive.openBox(Constants.crawlConfigs);
   runApp(MyApp());

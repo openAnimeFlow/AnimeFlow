@@ -10,6 +10,7 @@ import 'package:anime_flow/models/item/subject_comments_item.dart';
 import 'package:anime_flow/models/item/subjects_item.dart';
 import 'package:anime_flow/http/dio/bgm_dio_request.dart';
 import 'package:anime_flow/http/dio/dio_request.dart';
+import 'package:anime_flow/models/item/user_info_item.dart';
 import 'package:dio/dio.dart';
 
 class BgmRequest {
@@ -115,5 +116,22 @@ class BgmRequest {
     return data
         .map((item) => EpisodeComment.fromJson(item as Map<String, dynamic>))
         .toList();
+  }
+}
+
+class UserRequest {
+  static const String _nextBaseUrl = BgmNextApi.baseUrl;
+
+  /// 查询用户信息
+  static Future<UserInfoItem> queryUserInfoService(String username) async {
+    return await dioRequest
+        .get(
+          _nextBaseUrl +
+              BgmNextApi.userInfo.replaceFirst('{username}', username),
+          options: Options(
+            headers: {Constants.userAgentName: CommonApi.bangumiUserAgent},
+          ),
+        )
+        .then((value) => (UserInfoItem.fromJson(value.data)));
   }
 }

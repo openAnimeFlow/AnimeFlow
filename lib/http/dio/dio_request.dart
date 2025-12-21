@@ -57,6 +57,7 @@ class DioRequest {
         options: options,
       );
     } on DioException catch (e) {
+      Logger().e(e.message);
       throw _handleError(e);
     }
   }
@@ -77,6 +78,7 @@ class DioRequest {
       );
       return response;
     } on DioException catch (e) {
+      Logger().e(e.message);
       throw _handleError(e);
     }
   }
@@ -97,6 +99,7 @@ class DioRequest {
       );
       return response;
     } on DioException catch (e) {
+      Logger().e(e.message);
       throw _handleError(e);
     }
   }
@@ -115,6 +118,7 @@ class DioRequest {
       );
       return response;
     } on DioException catch (e) {
+      Logger().e(e.message);
       throw _handleError(e);
     }
   }
@@ -132,6 +136,7 @@ class DioRequest {
         options: options,
       );
     } on DioException catch (e) {
+      Logger().e(e.message);
       throw _handleError(e);
     }
   }
@@ -142,6 +147,7 @@ class DioRequest {
       final Response response = await _dio!.download(url, savePath);
       return response;
     } on DioException catch (e) {
+      Logger().e(e.message);
       throw _handleError(e);
     }
   }
@@ -152,6 +158,7 @@ class DioRequest {
       final Response response = await _dio!.post(path, data: formData);
       return response;
     } on DioException catch (e) {
+      Logger().e(e.message);
       throw _handleError(e);
     }
   }

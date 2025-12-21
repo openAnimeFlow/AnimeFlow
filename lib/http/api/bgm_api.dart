@@ -21,6 +21,8 @@ class BgmNextApi {
 
   //剧集评论
   static const String episodeComments = '/p1/episodes/{episodeId}/comments';
+
+  static const String userInfo = '/p1/users/{username}';
 }
 
 class BgmApi {

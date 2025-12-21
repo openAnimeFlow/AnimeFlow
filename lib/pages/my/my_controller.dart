@@ -7,7 +7,7 @@ import 'package:url_launcher/url_launcher.dart';
 
 class MyController {
   // 处理深度链接
-  static void handleDeepLink(String deepLink) async {
+  static Future<void> handleDeepLink(String deepLink) async {
     final uri = Uri.parse(deepLink);
     String code = uri.queryParameters['code'] ?? '';
 
@@ -15,7 +15,7 @@ class MyController {
       Logger().d('获取code:$code');
       final token = await OAuthRequest.getTokenService(code: code);
       Logger().d('获取token:$token');
-      tokenStorage.saveToken(token);
+      await tokenStorage.saveToken(token);
     }
   }
 

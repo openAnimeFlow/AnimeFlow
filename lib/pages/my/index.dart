@@ -1,5 +1,4 @@
 import 'package:anime_flow/http/requests/bgm_request.dart';
-import 'package:anime_flow/models/item/collections_item.dart';
 import 'package:anime_flow/stores/TokenStorage.dart';
 import 'package:anime_flow/stores/user_info_store.dart';
 import 'package:app_links/app_links.dart';

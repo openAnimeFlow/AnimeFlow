@@ -1,4 +1,5 @@
 import 'package:anime_flow/constants/constants.dart';
+import 'package:anime_flow/models/item/token_item.dart';
 import 'package:anime_flow/stores/TokenStorage.dart';
 import 'package:dio/dio.dart';
 import 'package:logger/logger.dart';
@@ -21,14 +22,11 @@ class BgmDioRequest {
     _dio!.interceptors.add(
       InterceptorsWrapper(
         onRequest: (options, handler) async {
-          await tokenStorage.getToken().then((token) {
-            if (token != null) {
-              _dio!.options.headers[Constants.authorization] =
-                  '${token.tokenType} ${token.accessToken}';
-            }
-          });
-
-          // options.headers['Authorization'] = 'Bearer your_token';
+          final token = await tokenStorage.getToken();
+          if (token != null) {
+            options.headers[Constants.authorization] =
+                '${token.tokenType} ${token.accessToken}';
+          }
           logger.i(
             'HTTP Request: ${options.method} ${options.path}',
             time: DateTime.now(),
@@ -46,9 +44,8 @@ class BgmDioRequest {
         },
         onError: (DioException e, handler) async {
           if (e.response?.statusCode == 401) {
-            await tokenStorage.deleteToken();
-            _dio!.options.headers.remove(Constants.authorization);
-            logger.w('token过期,已清理本地token');
+            // await tokenStorage.deleteToken();
+            // clearAuthorization();
           }
           logger.e('error: ${e.message}');
           return handler.next(e);
@@ -193,13 +190,14 @@ class BgmDioRequest {
   }
 
   /// 设置认证token
-  void setAuthorization(String token) {
-    _dio!.options.headers['Authorization'] = 'Bearer $token';
+  void setAuthorization(TokenItem token) async {
+     _dio!.options.headers[Constants.authorization] =
+        '${token.tokenType} ${token.accessToken}';
   }
 
   /// 清除认证信息
   void clearAuthorization() {
-    _dio!.options.headers.remove('Authorization');
+    _dio!.options.headers.remove(Constants.authorization);
   }
 }
 

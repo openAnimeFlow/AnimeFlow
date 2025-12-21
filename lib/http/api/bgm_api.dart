@@ -23,11 +23,14 @@ class BgmNextApi {
   static const String episodeComments = '/p1/episodes/{episodeId}/comments';
 
   static const String userInfo = '/p1/users/{username}';
+
+  static const String collections = '/p1/users/{username}/collections/subjects';
 }
 
 class BgmUsersApi {
-  static const String collections = '/p1/users/{username}/collections/subjects';
 
+  ///当前用条目收藏
+  static const String collections = '/p1/collections/subjects';
 }
 
 class BgmApi {

@@ -1,4 +1,5 @@
 import 'package:anime_flow/http/requests/bgm_request.dart';
+import 'package:anime_flow/models/item/collections_item.dart';
 import 'package:anime_flow/stores/TokenStorage.dart';
 import 'package:anime_flow/stores/user_info_store.dart';
 import 'package:app_links/app_links.dart';
@@ -6,7 +7,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:logger/logger.dart';
 
-import 'login_view.dart';
+import 'login_view/login_view.dart';
 import 'my_controller.dart';
 import 'no_login_view.dart';
 
@@ -45,27 +46,19 @@ class _MyPageState extends State<MyPage> with SingleTickerProviderStateMixin {
       // 监听深度链接
       appLinks.uriLinkStream.listen((Uri uri) async {
         await MyController.handleDeepLink(uri.toString());
-        _getUserInfo();
+        _fetchUserInfo();
       });
     } catch (e) {
       Logger().e("Error in deep link listener: $e");
     }
   }
 
-  Future<void> _getUserInfo() async {
-    // 如果已有正在进行的请求，不重复请求
-    final token = await tokenStorage.getToken();
-    if (token != null) {
-      _fetchUserInfo(token.userId);
-    }
-  }
-
-  Future<void> _fetchUserInfo(int userId) async {
+  Future<void> _fetchUserInfo() async {
     try {
       final token = await tokenStorage.getToken();
       if(token != null) {
         final userInfo =
-        await UserRequest.queryUserInfoService(userId.toString());
+        await UserRequest.queryUserInfoService(token.userId.toString());
         if (mounted) {
           userInfoStore.userInfo.value = userInfo;
         }
@@ -74,6 +67,7 @@ class _MyPageState extends State<MyPage> with SingleTickerProviderStateMixin {
       Logger().e("Error fetching user info: $e");
     }
   }
+
 
   @override
   Widget build(BuildContext context) {

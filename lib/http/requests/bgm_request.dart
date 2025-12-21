@@ -2,6 +2,7 @@ import 'package:anime_flow/constants/constants.dart';
 import 'package:anime_flow/http/api/bgm_api.dart';
 import 'package:anime_flow/http/api/common_api.dart';
 import 'package:anime_flow/models/item/calendar_item.dart';
+import 'package:anime_flow/models/item/collections_item.dart';
 import 'package:anime_flow/models/item/episode_comments_item.dart';
 import 'package:anime_flow/models/item/episodes_item.dart';
 import 'package:anime_flow/models/item/hot_item.dart';
@@ -136,16 +137,20 @@ class UserRequest {
   }
 
   ///用户条目收藏
-  static Future<SubjectsItem> queryUserCollectionsService(
-      String username) async {
-    return await dioRequest
+  static Future<CollectionsItem> queryUserCollectionsService(
+      {required int type, required int limit, required int offset}) async {
+    return await bgmDioRequest
         .get(
-          _nextBaseUrl +
-              BgmUsersApi.collections.replaceFirst('{username}', username),
+          _nextBaseUrl + BgmUsersApi.collections,
+          queryParameters: {
+            "type": type,
+            "limit": limit,
+            "offset": offset,
+          },
           options: Options(
             headers: {Constants.userAgentName: CommonApi.bangumiUserAgent},
           ),
         )
-        .then((value) => (SubjectsItem.fromJson(value.data)));
+        .then((value) => (CollectionsItem.fromJson(value.data)));
   }
 }

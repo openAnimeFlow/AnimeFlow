@@ -20,7 +20,6 @@ class MyPage extends StatefulWidget {
 class _MyPageState extends State<MyPage> with SingleTickerProviderStateMixin {
   late AppLinks _appLinks;
   bool isPinned = false;
-  Future<void>? _getUserInfoFuture;
   late UserInfoStore userInfoStore;
 
   @override
@@ -38,10 +37,10 @@ class _MyPageState extends State<MyPage> with SingleTickerProviderStateMixin {
   Future<void> _listenForDeepLink(AppLinks appLinks) async {
     try {
       final initialLink = await appLinks.getInitialLink();
-      if (initialLink != null) {
-        await MyController.handleDeepLink(initialLink.toString());
-        _getUserInfo();
-      }
+      // if (initialLink != null) {
+      //   await MyController.handleDeepLink(initialLink.toString());
+      //   _getUserInfo();
+      // }
 
       // 监听深度链接
       appLinks.uriLinkStream.listen((Uri uri) async {
@@ -55,28 +54,24 @@ class _MyPageState extends State<MyPage> with SingleTickerProviderStateMixin {
 
   Future<void> _getUserInfo() async {
     // 如果已有正在进行的请求，不重复请求
-    if (_getUserInfoFuture != null) {
-      return;
-    }
     final token = await tokenStorage.getToken();
     if (token != null) {
-      _getUserInfoFuture = _fetchUserInfo(token.userId);
+      _fetchUserInfo(token.userId);
     }
   }
 
   Future<void> _fetchUserInfo(int userId) async {
     try {
-      final userInfo =
-          await UserRequest.queryUserInfoService(userId.toString());
-      if (mounted) {
-        userInfoStore.userInfo.value = userInfo;
+      final token = await tokenStorage.getToken();
+      if(token != null) {
+        final userInfo =
+        await UserRequest.queryUserInfoService(userId.toString());
+        if (mounted) {
+          userInfoStore.userInfo.value = userInfo;
+        }
       }
     } catch (e) {
       Logger().e("Error fetching user info: $e");
-    } finally {
-      if (mounted) {
-        _getUserInfoFuture = null;
-      }
     }
   }
 

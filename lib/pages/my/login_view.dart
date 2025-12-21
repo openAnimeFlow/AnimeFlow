@@ -94,7 +94,6 @@ class _LoginViewState extends State<LoginView>
                   labelColor: Theme.of(context).colorScheme.primary,
                   unselectedLabelColor: Colors.grey,
                   indicatorColor: Theme.of(context).colorScheme.primary,
-                  dividerHeight: isPinned ? 1 : 0,
                 ),
               ),
             ),

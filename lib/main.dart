@@ -1,6 +1,5 @@
 import 'package:anime_flow/constants/constants.dart';
 import 'package:anime_flow/utils/utils.dart';
-import 'package:anime_flow/webview/webview_controller.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';

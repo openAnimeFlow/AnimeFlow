@@ -103,7 +103,7 @@ class TopAreaControl extends StatelessWidget {
                         Row(
                           children: [
                             IconButton(
-                              padding: EdgeInsets.all(0),
+                              padding: const EdgeInsets.all(0),
                               onPressed: () {},
                               icon: Icon(
                                 Icons.settings,
@@ -115,7 +115,7 @@ class TopAreaControl extends StatelessWidget {
                                   ? IconButton(
                                       onPressed: () => playPageController
                                           .toggleContentExpanded(),
-                                      padding: EdgeInsets.all(0),
+                                      padding: const EdgeInsets.all(0),
                                       icon: playPageController
                                               .isContentExpanded.value
                                           ? SvgPicture.asset(
@@ -137,7 +137,7 @@ class TopAreaControl extends StatelessWidget {
                                               ),
                                             ),
                                     )
-                                  : SizedBox.shrink())
+                                  : const SizedBox.shrink())
                           ],
                         )
                       ],

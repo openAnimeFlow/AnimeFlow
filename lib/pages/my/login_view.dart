@@ -74,6 +74,8 @@ class _LoginViewState extends State<LoginView>
                 pinned: true,
                 floating: false,
                 snap: false,
+                elevation: isPinned ? 4.0 : 0.0,
+                forceElevated: isPinned,
                 expandedHeight: _contentHeight +
                     statusBarHeight +
                     kToolbarHeight +
@@ -113,28 +115,30 @@ class _LoginViewState extends State<LoginView>
               '我的',
               style: TextStyle(fontWeight: FontWeight.bold),
             ),
-            if (isPinned)
-              Expanded(
-                  child: Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  ClipRRect(
-                    borderRadius: BorderRadius.circular(5),
-                    child: AnimationNetworkImage(
-                        width: 30, height: 30, url: userInfo.avatar.large),
-                  ),
-                  const SizedBox(width: 5),
-                  Text(
-                    userInfo.nickname != ''
-                        ? userInfo.nickname
-                        : userInfo.username,
-                    style: const TextStyle(
-                        fontSize: 12, fontWeight: FontWeight.bold),
-                  )
-                ],
-              ))
-            else
-              const Spacer(),
+            Expanded(
+              child: AnimatedOpacity(
+                opacity: isPinned ? 1 : 0,
+                duration: const Duration(milliseconds: 500),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    ClipRRect(
+                      borderRadius: BorderRadius.circular(5),
+                      child: AnimationNetworkImage(
+                          width: 30, height: 30, url: userInfo.avatar.large),
+                    ),
+                    const SizedBox(width: 5),
+                    Text(
+                      userInfo.nickname != ''
+                          ? userInfo.nickname
+                          : userInfo.username,
+                      style: const TextStyle(
+                          fontSize: 12, fontWeight: FontWeight.bold),
+                    )
+                  ],
+                ),
+              ),
+            ),
             IconButton(
                 onPressed: () {
                   setState(() {

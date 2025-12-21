@@ -42,7 +42,7 @@ class BottomAreaControl extends StatelessWidget {
                     children: [
                       // 时间显示组件
                       Padding(
-                        padding: EdgeInsets.symmetric(horizontal: 12),
+                        padding: const EdgeInsets.symmetric(horizontal: 12),
                         child: VideoTimeDisplay(
                             videoController: videoUiStateController),
                       ),
@@ -78,11 +78,11 @@ class BottomAreaControl extends StatelessWidget {
 
                           // 全屏按钮
                           AnimatedContainer(
-                            duration: Duration(milliseconds: 500),
+                            duration: const Duration(milliseconds: 500),
                             child: IconButton(
                               //使用media_kit_video提供的全屏方法
                               onPressed: () => toggleFullscreen(context),
-                              padding: EdgeInsets.all(0),
+                              padding: const EdgeInsets.all(0),
                               icon: fullscreen
                                   ? Icon(
                                       size: 33,

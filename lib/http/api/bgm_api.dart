@@ -27,6 +27,7 @@ class BgmNextApi {
 
 class BgmUsersApi {
   static const String collections = '/p1/users/{username}/collections/subjects';
+
 }
 
 class BgmApi {

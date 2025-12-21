@@ -134,4 +134,18 @@ class UserRequest {
         )
         .then((value) => (UserInfoItem.fromJson(value.data)));
   }
+
+  ///用户条目收藏
+  static Future<SubjectsItem> queryUserCollectionsService(
+      String username) async {
+    return await dioRequest
+        .get(
+          _nextBaseUrl +
+              BgmUsersApi.collections.replaceFirst('{username}', username),
+          options: Options(
+            headers: {Constants.userAgentName: CommonApi.bangumiUserAgent},
+          ),
+        )
+        .then((value) => (SubjectsItem.fromJson(value.data)));
+  }
 }

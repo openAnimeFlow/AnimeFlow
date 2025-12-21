@@ -62,7 +62,7 @@ class _LoginViewState extends State<LoginView>
       },
       child: NestedScrollView(
         headerSliverBuilder: (BuildContext context, bool innerBoxIsScrolled) {
-          final widgets = <Widget>[
+          return <Widget>[
             SliverOverlapAbsorber(
               handle: NestedScrollView.sliverOverlapAbsorberHandleFor(
                 context,
@@ -74,35 +74,29 @@ class _LoginViewState extends State<LoginView>
                 pinned: true,
                 floating: false,
                 snap: false,
-                elevation: isPinned ? 4.0 : 0.0,
-                forceElevated: isPinned,
-                backgroundColor: Theme.of(context).scaffoldBackgroundColor,
-                expandedHeight:
-                    _contentHeight + statusBarHeight + kToolbarHeight,
+                expandedHeight: _contentHeight +
+                    statusBarHeight +
+                    kToolbarHeight +
+                    kTextTabBarHeight,
                 flexibleSpace: FlexibleSpaceBar(
                   collapseMode: CollapseMode.pin,
                   background: Padding(
-                    padding: const EdgeInsets.only(bottom: 15),
+                    padding:
+                        const EdgeInsets.only(bottom: kTextTabBarHeight + 15),
                     child: _buildHeaderContent(statusBarHeight),
                   ),
+                ),
+                bottom: TabBar(
+                  controller: _tabController,
+                  tabs: _tabs.map((String name) => Tab(text: name)).toList(),
+                  labelColor: Theme.of(context).colorScheme.primary,
+                  unselectedLabelColor: Colors.grey,
+                  indicatorColor: Theme.of(context).colorScheme.primary,
+                  dividerHeight: isPinned ? 1 : 0,
                 ),
               ),
             ),
           ];
-
-          widgets.add(SliverPersistentHeader(
-            pinned: true,
-            delegate: _SliverAppBarDelegate(
-              TabBar(
-                controller: _tabController,
-                tabs: _tabs.map((String name) => Tab(text: name)).toList(),
-                labelColor: Theme.of(context).colorScheme.primary,
-                unselectedLabelColor: Colors.grey,
-                indicatorColor: Theme.of(context).colorScheme.primary,
-              ),
-            ),
-          ));
-          return widgets;
         },
         body: _buildBody(),
       ),
@@ -219,32 +213,5 @@ class _LoginViewState extends State<LoginView>
             },
           );
         }).toList());
-  }
-}
-
-// SliverPersistentHeader 委托类，用于实现吸顶的 TabBar
-class _SliverAppBarDelegate extends SliverPersistentHeaderDelegate {
-  final TabBar tabBar;
-
-  _SliverAppBarDelegate(this.tabBar);
-
-  @override
-  double get minExtent => tabBar.preferredSize.height;
-
-  @override
-  double get maxExtent => tabBar.preferredSize.height;
-
-  @override
-  Widget build(
-      BuildContext context, double shrinkOffset, bool overlapsContent) {
-    return Container(
-      color: Theme.of(context).scaffoldBackgroundColor,
-      child: tabBar,
-    );
-  }
-
-  @override
-  bool shouldRebuild(_SliverAppBarDelegate oldDelegate) {
-    return tabBar != oldDelegate.tabBar;
   }
 }

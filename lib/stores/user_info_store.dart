@@ -19,6 +19,12 @@ class UserInfoStore extends GetxController {
     }
   }
 
+  ///清理userInfo
+  void clearUserInfo() {
+    userInfo.value = null;
+    tokenStorage.deleteToken();
+  }
+
   @override
   void onInit() {
     super.onInit();

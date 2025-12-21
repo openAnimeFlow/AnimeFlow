@@ -25,6 +25,10 @@ class BgmNextApi {
   static const String userInfo = '/p1/users/{username}';
 }
 
+class BgmUsersApi {
+  static const String collections = '/p1/users/{username}/collections/subjects';
+}
+
 class BgmApi {
   static const String baseUrl = 'https://bgm.tv';
 

@@ -8,7 +8,8 @@ import 'package:anime_flow/models/item/hot_item.dart';
 import 'package:anime_flow/models/item/search_item.dart';
 import 'package:anime_flow/models/item/subject_comments_item.dart';
 import 'package:anime_flow/models/item/subjects_item.dart';
-import 'package:anime_flow/utils/http/dio_request.dart';
+import 'package:anime_flow/http/dio/bgm_dio_request.dart';
+import 'package:anime_flow/http/dio/dio_request.dart';
 import 'package:dio/dio.dart';
 
 class BgmRequest {
@@ -25,7 +26,7 @@ class BgmRequest {
 
   ///根据id获取条目
   static Future<SubjectsItem> getSubjectByIdService(int id) async {
-    final response = await dioRequest.get(
+    final response = await bgmDioRequest.get(
         _nextBaseUrl +
             BgmNextApi.subjectById.replaceFirst('{subjectId}', id.toString()),
         options: Options(
@@ -36,7 +37,7 @@ class BgmRequest {
   ///获取条目章节
   static Future<EpisodesItem> getSubjectEpisodesByIdService(
       int id, int limit, int offset) async {
-    final response = await dioRequest.get(
+    final response = await bgmDioRequest.get(
         _nextBaseUrl +
             BgmNextApi.episodes.replaceFirst('{subjectId}', id.toString()),
         queryParameters: {"limit": limit, "offset": offset},
@@ -51,7 +52,7 @@ class BgmRequest {
     required int offset,
     required int subjectId,
   }) async {
-    final response = await dioRequest.get(
+    final response = await bgmDioRequest.get(
       _nextBaseUrl +
           BgmNextApi.subjectComments
               .replaceFirst('{subjectId}', subjectId.toString()),

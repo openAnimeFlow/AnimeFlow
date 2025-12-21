@@ -7,7 +7,7 @@ class SearchHistoryManager {
   static const int _maxHistoryCount = 20;
 
   /// 保存搜索记录
-  static Future<void> saveSearchHistory(String keyword) async {
+  Future<void> saveSearchHistory(String keyword) async {
     if (keyword.trim().isEmpty) return;
 
     final prefs = await SharedPreferences.getInstance();
@@ -26,7 +26,7 @@ class SearchHistoryManager {
   }
 
   /// 获取搜索历史
-  static Future<List<String>> getSearchHistory() async {
+  Future<List<String>> getSearchHistory() async {
     final prefs = await SharedPreferences.getInstance();
     final historyString = prefs.getString(_searchHistoryKey);
 
@@ -41,13 +41,13 @@ class SearchHistoryManager {
   }
 
   /// 清除搜索历史
-  static Future<void> clearSearchHistory() async {
+  Future<void> clearSearchHistory() async {
     final prefs = await SharedPreferences.getInstance();
     await prefs.remove(_searchHistoryKey);
   }
 
   /// 删除单个搜索记录
-  static Future<void> removeSearchHistoryItem(String keyword) async {
+  Future<void> removeSearchHistoryItem(String keyword) async {
     final prefs = await SharedPreferences.getInstance();
     final history = await getSearchHistory();
 
@@ -55,3 +55,5 @@ class SearchHistoryManager {
     await prefs.setString(_searchHistoryKey, jsonEncode(history));
   }
 }
+
+final searchHistoryManager = SearchHistoryManager();

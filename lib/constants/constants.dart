@@ -17,4 +17,6 @@ class Constants {
 
   //常规请求头
   static const String userAgentName = 'User-Agent';
+
+  static const String authorization = 'Authorization';
 }

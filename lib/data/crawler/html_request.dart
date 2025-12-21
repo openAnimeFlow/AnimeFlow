@@ -4,7 +4,7 @@ import 'package:anime_flow/data/crawler/html_crawler.dart';
 import 'package:anime_flow/models/item/crawler_config_item.dart';
 import 'package:anime_flow/models/item/video/episode_resources_item.dart';
 import 'package:anime_flow/models/item/video/search_resources_item.dart';
-import 'package:anime_flow/utils/http/dio_request.dart';
+import 'package:anime_flow/http/dio/dio_request.dart';
 import 'package:dio/dio.dart';
 import 'package:anime_flow/constants/constants.dart';
 import 'package:logger/logger.dart';

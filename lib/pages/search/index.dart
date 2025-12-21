@@ -1,8 +1,8 @@
-import 'package:anime_flow/controllers/search/search_history_manager.dart';
 import 'package:anime_flow/http/requests/bgm_request.dart';
 import 'package:anime_flow/models/item/search_item.dart';
 import 'package:anime_flow/pages/search/search_details_content.dart';
 import 'package:anime_flow/pages/search/search_omitted_content.dart';
+import 'package:anime_flow/stores/search/search_history_manager.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
@@ -34,7 +34,7 @@ class _SearchPageState extends State<SearchPage> {
 
   // 加载搜索历史
   void _loadSearchHistory() async {
-    final history = await SearchHistoryManager.getSearchHistory();
+    final history = await searchHistoryManager.getSearchHistory();
     if (mounted) {
       setState(() {
         _searchHistory = history;
@@ -46,7 +46,7 @@ class _SearchPageState extends State<SearchPage> {
     if (query.isEmpty) return;
 
     // 保存搜索记录
-    await SearchHistoryManager.saveSearchHistory(query);
+    await searchHistoryManager.saveSearchHistory(query);
     _loadSearchHistory();
 
     setState(() {
@@ -74,13 +74,13 @@ class _SearchPageState extends State<SearchPage> {
 
   // 清除搜索历史
   void _clearSearchHistory() async {
-    await SearchHistoryManager.clearSearchHistory();
+    await searchHistoryManager.clearSearchHistory();
     _loadSearchHistory();
   }
 
   // 删除单个搜索历史项
   void _removeSearchHistoryItem(String keyword) async {
-    await SearchHistoryManager.removeSearchHistoryItem(keyword);
+    await searchHistoryManager.removeSearchHistoryItem(keyword);
     _loadSearchHistory();
   }
 

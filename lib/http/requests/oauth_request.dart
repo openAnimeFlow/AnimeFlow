@@ -30,4 +30,30 @@ class OAuthRequest {
     return await dioRequest.get(_animeFlowApi + AnimeFlowApi.session,
         queryParameters: {'platform': deviceName}).then((value) => value.data);
   }
+
+  // 持续轮询直到获取到 token 或超时（60秒，与 session 过期时间一致）
+  static Future<TokenItem?> pollTokenService({required String state}) async {
+    const maxDuration = Duration(seconds: 60); // session 过期时间
+    const pollInterval = Duration(seconds: 2); // 每2秒轮询一次
+    final startTime = DateTime.now();
+
+    while (DateTime.now().difference(startTime) < maxDuration) {
+      try {
+        final response = await dioRequest.get(
+          _animeFlowApi + AnimeFlowApi.token,
+          queryParameters: {'sessionId': state},
+        );
+
+        if (response.data['code'] == 200 && response.data['data'] != null) {
+          return TokenItem.fromJson(response.data['data']);
+        }
+      } catch (e) {
+        // 忽略错误，继续轮询
+      }
+
+      await Future.delayed(pollInterval);
+    }
+
+    return null; // 超时未获取到 token
+  }
 }

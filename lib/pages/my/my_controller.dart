@@ -1,7 +1,11 @@
 import 'package:anime_flow/http/api/bgm_api.dart';
+import 'package:anime_flow/http/requests/bgm_request.dart';
 import 'package:anime_flow/http/requests/oauth_request.dart';
 import 'package:anime_flow/stores/TokenStorage.dart';
+import 'package:anime_flow/stores/user_info_store.dart';
+import 'package:anime_flow/utils/utils.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'package:get/get.dart';
 import 'package:logger/logger.dart';
 import 'package:url_launcher/url_launcher.dart';
 
@@ -10,7 +14,6 @@ class MyController {
   static Future<void> handleDeepLink(String deepLink) async {
     final uri = Uri.parse(deepLink);
     String code = uri.queryParameters['code']!;
-    String state = uri.queryParameters['state']!;
     if (code.isNotEmpty) {
       Logger().d('获取code:$code');
       // final token = await OAuthRequest.callbackService(code, state);
@@ -30,8 +33,39 @@ class MyController {
     Logger().d('authUrl: $authUrl');
     if (await canLaunchUrl(authUrl)) {
       await launchUrl(authUrl);
+      
+      // 桌面端：打开授权页面后，启动轮询任务等待用户完成授权
+      if (Utils.isDesktop) {
+        _pollTokenAfterAuth(sessionId);
+      }
     } else {
       throw 'Could not launch $authUrl';
+    }
+  }
+
+  // 桌面端轮询 token（异步执行，不阻塞）
+  static Future<void> _pollTokenAfterAuth(String sessionId) async {
+    try {
+      Logger().d('开始轮询 token，sessionId: $sessionId');
+      final token = await OAuthRequest.pollTokenService(state: sessionId);
+      if (token != null) {
+        Logger().d('轮询获取到 token: $token');
+        await tokenStorage.saveToken(token);
+        
+        // 获取用户信息并更新 store
+        try {
+          final userInfoStore = Get.find<UserInfoStore>();
+          final userInfo = await UserRequest.queryUserInfoService(token.userId.toString());
+          userInfoStore.userInfo.value = userInfo;
+          Logger().d('用户信息已更新');
+        } catch (e) {
+          Logger().e('获取用户信息失败: $e');
+        }
+      } else {
+        Logger().w('轮询超时，未获取到 token');
+      }
+    } catch (e) {
+      Logger().e('轮询 token 异常: $e');
     }
   }
 }

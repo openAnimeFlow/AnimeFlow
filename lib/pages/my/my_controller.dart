@@ -33,7 +33,7 @@ class MyController {
     Logger().d('authUrl: $authUrl');
     if (await canLaunchUrl(authUrl)) {
       await launchUrl(authUrl);
-      
+
       // 桌面端：打开授权页面后，启动轮询任务等待用户完成授权
       if (Utils.isDesktop) {
         _pollTokenAfterAuth(sessionId);
@@ -51,16 +51,11 @@ class MyController {
       if (token != null) {
         Logger().d('轮询获取到 token: $token');
         await tokenStorage.saveToken(token);
-        
+
         // 获取用户信息并更新 store
-        try {
-          final userInfoStore = Get.find<UserInfoStore>();
-          final userInfo = await UserRequest.queryUserInfoService(token.userId.toString());
-          userInfoStore.userInfo.value = userInfo;
-          Logger().d('用户信息已更新');
-        } catch (e) {
-          Logger().e('获取用户信息失败: $e');
-        }
+        final userInfoStore = Get.find<UserInfoStore>();
+        await UserRequest.queryUserInfoService(token.userId.toString())
+            .then((userInfo) => {userInfoStore.userInfo.value = userInfo});
       } else {
         Logger().w('轮询超时，未获取到 token');
       }

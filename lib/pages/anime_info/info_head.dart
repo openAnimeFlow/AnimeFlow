@@ -1,6 +1,7 @@
 import 'dart:math';
 import 'dart:ui';
 import 'package:anime_flow/constants/play_layout_constant.dart';
+import 'package:anime_flow/routes/index.dart';
 import 'package:anime_flow/widget/anime_detail/episodes_dialog.dart';
 import 'package:anime_flow/widget/star.dart';
 import 'package:animation_network_image/animation_network_image.dart';
@@ -92,7 +93,7 @@ class InfoHeadView extends StatelessWidget {
                                       child: Container(
                                         margin: const EdgeInsets.only(left: 6),
                                         child: AnimationNetworkImage(
-                                          preview:  true,
+                                          preview: true,
                                           borderRadius:
                                               BorderRadius.circular(8),
                                           url: subjectBasicData.image,
@@ -102,58 +103,63 @@ class InfoHeadView extends StatelessWidget {
                               const SizedBox(width: 5),
                               //信息
                               Flexible(
-                                  flex: 3, // 文本占3份
-                                  child: Column(
-                                      crossAxisAlignment:
-                                          CrossAxisAlignment.start,
-                                      children: [
-                                        subjectItem == null
-                                            ? _skeletonView()
-                                            : _dataView(
-                                                subjectItem: subjectItem!,
-                                                themeColor: themeColor),
-                                        const Spacer(),
-                                        Row(children: [
-                                          IconButton(
-                                              onPressed: () {
-                                                episodesDialog(
-                                                    context, episodesItem);
-                                              },
-                                              icon: const Icon(
-                                                Icons.grid_view_rounded,
-                                                size: 28,
-                                              )),
-                                          OutlinedButton.icon(
-                                              onPressed: () {
-                                                Get.toNamed("/play",
-                                                    arguments: {
-                                                      "subjectBasicData":
-                                                          subjectBasicData,
-                                                      "episodes": episodesItem
-                                                    });
-                                              },
-                                              style: OutlinedButton.styleFrom(
-                                                side: BorderSide(
-                                                    color: themeColor),
-                                                shape: RoundedRectangleBorder(
-                                                  borderRadius:
-                                                      BorderRadius.circular(20),
-                                                ),
-                                                padding:
-                                                    const EdgeInsets.symmetric(
-                                                  horizontal: 12,
-                                                ),
+                                flex: 3, // 文本占3份
+                                child: Column(
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
+                                    children: [
+                                      subjectItem == null
+                                          ? _skeletonView()
+                                          : _dataView(
+                                              subjectItem: subjectItem!,
+                                              themeColor: themeColor),
+                                      const Spacer(),
+                                      Row(children: [
+                                        IconButton(
+                                            onPressed: () {
+                                              episodesDialog(
+                                                  context, episodesItem);
+                                            },
+                                            icon: const Icon(
+                                              Icons.grid_view_rounded,
+                                              size: 28,
+                                            )),
+                                        SizedBox(
+                                          width: 150,
+                                          child: OutlinedButton.icon(
+                                            onPressed: () {
+                                              Get.toNamed(RouteName.play,
+                                                  arguments: {
+                                                    "subjectBasicData":
+                                                        subjectBasicData,
+                                                    "episodes": episodesItem
+                                                  });
+                                            },
+                                            style: OutlinedButton.styleFrom(
+                                              side:
+                                                  BorderSide(color: themeColor),
+                                              shape: RoundedRectangleBorder(
+                                                borderRadius:
+                                                    BorderRadius.circular(20),
                                               ),
-                                              icon: const Icon(
-                                                Icons.play_circle_outline,
-                                                size: 16,
+                                              padding:
+                                                  const EdgeInsets.symmetric(
+                                                horizontal: 12,
                                               ),
-                                              label: const Text(
-                                                "播放",
-                                                style: TextStyle(fontSize: 12),
-                                              ))
-                                        ])
-                                      ]))
+                                            ),
+                                            icon: const Icon(
+                                              Icons.play_circle_outline,
+                                              size: 16,
+                                            ),
+                                            label: const Text(
+                                              "播放",
+                                              style: TextStyle(fontSize: 12),
+                                            ),
+                                          ),
+                                        ),
+                                      ]),
+                                    ]),
+                              ),
                             ]),
                       )))),
         )

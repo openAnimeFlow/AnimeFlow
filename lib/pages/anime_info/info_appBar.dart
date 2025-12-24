@@ -1,5 +1,5 @@
 import 'package:anime_flow/widget/animation_network_image/animation_network_image.dart';
-import 'package:anime_flow/models/item/subjects_item.dart';
+import 'package:anime_flow/models/item/bangumi/subjects_item.dart';
 import 'package:anime_flow/widget/ranking.dart';
 import 'package:anime_flow/widget/star.dart';
 import 'package:flutter/material.dart';

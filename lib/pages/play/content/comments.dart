@@ -1,6 +1,6 @@
 import 'package:anime_flow/controllers/episodes/episodes_controller.dart';
 import 'package:anime_flow/http/requests/bgm_request.dart';
-import 'package:anime_flow/models/item/episode_comments_item.dart';
+import 'package:anime_flow/models/item/bangumi/episode_comments_item.dart';
 import 'package:anime_flow/utils/utils.dart';
 import 'package:anime_flow/widget/bbcode/bbcode_widget.dart';
 import 'package:anime_flow/widget/animation_network_image/animation_network_image.dart';

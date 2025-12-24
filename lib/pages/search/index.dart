@@ -1,5 +1,5 @@
 import 'package:anime_flow/http/requests/bgm_request.dart';
-import 'package:anime_flow/models/item/search_item.dart';
+import 'package:anime_flow/models/item/bangumi/search_item.dart';
 import 'package:anime_flow/pages/search/search_details_content.dart';
 import 'package:anime_flow/pages/search/search_omitted_content.dart';
 import 'package:anime_flow/stores/search/search_history_manager.dart';

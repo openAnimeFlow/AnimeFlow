@@ -1,17 +1,18 @@
 import 'package:anime_flow/constants/constants.dart';
 import 'package:anime_flow/http/api/bgm_api.dart';
 import 'package:anime_flow/http/api/common_api.dart';
-import 'package:anime_flow/models/item/calendar_item.dart';
-import 'package:anime_flow/models/item/collections_item.dart';
-import 'package:anime_flow/models/item/episode_comments_item.dart';
-import 'package:anime_flow/models/item/episodes_item.dart';
-import 'package:anime_flow/models/item/hot_item.dart';
-import 'package:anime_flow/models/item/search_item.dart';
-import 'package:anime_flow/models/item/subject_comments_item.dart';
-import 'package:anime_flow/models/item/subjects_item.dart';
+import 'package:anime_flow/models/item/bangumi/actor_ite.dart';
+import 'package:anime_flow/models/item/bangumi/calendar_item.dart';
+import 'package:anime_flow/models/item/bangumi/collections_item.dart';
+import 'package:anime_flow/models/item/bangumi/episode_comments_item.dart';
+import 'package:anime_flow/models/item/bangumi/episodes_item.dart';
+import 'package:anime_flow/models/item/bangumi/hot_item.dart';
+import 'package:anime_flow/models/item/bangumi/search_item.dart';
+import 'package:anime_flow/models/item/bangumi/subject_comments_item.dart';
+import 'package:anime_flow/models/item/bangumi/subjects_item.dart';
 import 'package:anime_flow/http/dio/bgm_dio_request.dart';
 import 'package:anime_flow/http/dio/dio_request.dart';
-import 'package:anime_flow/models/item/user_info_item.dart';
+import 'package:anime_flow/models/item/bangumi/user_info_item.dart';
 import 'package:dio/dio.dart';
 import 'package:logger/logger.dart';
 
@@ -124,6 +125,19 @@ class BgmRequest {
     return data
         .map((item) => EpisodeComment.fromJson(item as Map<String, dynamic>))
         .toList();
+  }
+
+  ///角色信息
+  static Future<CharactersItem> charactersService(int id) async {
+    return dioRequest
+        .get(
+          _nextBaseUrl +
+              BgmNextApi.characters.replaceFirst('{subjectId}', id.toString()),
+          options: Options(
+            headers: {Constants.userAgentName: CommonApi.bangumiUserAgent},
+          ),
+        )
+        .then((response) => (CharactersItem.fromJson(response.data)));
   }
 }
 

@@ -1,6 +1,7 @@
 import 'package:anime_flow/constants/play_layout_constant.dart';
-import 'package:anime_flow/models/item/subject_comments_item.dart';
-import 'package:anime_flow/models/item/subjects_item.dart';
+import 'package:anime_flow/models/item/bangumi/subject_comments_item.dart';
+import 'package:anime_flow/models/item/bangumi/subjects_item.dart';
+import 'package:anime_flow/pages/anime_info/role.dart';
 import 'package:anime_flow/pages/anime_info/tags.dart';
 import 'package:anime_flow/widget/text/expandable_text.dart';
 import 'package:flutter/material.dart';
@@ -111,7 +112,8 @@ class InfoSynopsisView extends StatelessWidget {
                                             numbersWeight: FontWeight.w600,
                                           ),
                                           const SizedBox(height: 25),
-                                          Details(
+                                          const RoleView(title: '角色',),
+                                          DetailsView(
                                             title: '详情',
                                             subject: data,
                                             textSize: 13,

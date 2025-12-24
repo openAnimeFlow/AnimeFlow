@@ -24,11 +24,14 @@ class BgmNextApi {
 
   static const String userInfo = '/p1/users/{username}';
 
+  //用户收藏
   static const String collections = '/p1/users/{username}/collections/subjects';
+
+  //角色
+  static const String characters = '/p1/subjects/{subjectId}/characters';
 }
 
 class BgmUsersApi {
-
   ///当前用条目收藏
   static const String collections = '/p1/collections/subjects';
 }

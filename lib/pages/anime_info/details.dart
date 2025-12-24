@@ -1,15 +1,15 @@
-import 'package:anime_flow/models/item/subjects_item.dart';
+import 'package:anime_flow/models/item/bangumi/subjects_item.dart';
 import 'package:flutter/material.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 ///详情信息
-class Details extends StatelessWidget {
+class DetailsView extends StatelessWidget {
   final String title;
   final double? textSize;
   final FontWeight? textFontWeight;
   final SubjectsItem subject;
 
-  const Details(
+  const DetailsView(
       {super.key,
       required this.subject,
       required this.title,

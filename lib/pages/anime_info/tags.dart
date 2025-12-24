@@ -1,4 +1,4 @@
-import 'package:anime_flow/models/item/subjects_item.dart';
+import 'package:anime_flow/models/item/bangumi/subjects_item.dart';
 import 'package:flutter/material.dart';
 
 /// 标签组件（支持展开/收起）

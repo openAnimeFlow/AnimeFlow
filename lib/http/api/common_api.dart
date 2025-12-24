@@ -7,5 +7,5 @@ class CommonApi {
   //bangumi.tv动漫页
   static const String bangumiTV = 'https://bangumi.tv/anime/browser';
   // bangumi请求头
-  static const String bangumiUserAgent = 'my-Anime/1.0.1 (https://github.com/LiggMax/Flutter-Anime.git)';
+  static const String bangumiUserAgent = 'AnimeFlow/1.0.1 (https://github.com/openAnimeFlow/AnimeFlow.git)';
 }

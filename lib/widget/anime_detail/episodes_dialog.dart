@@ -1,4 +1,4 @@
-import 'package:anime_flow/models/item/episodes_item.dart';
+import 'package:anime_flow/models/item/bangumi/episodes_item.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 

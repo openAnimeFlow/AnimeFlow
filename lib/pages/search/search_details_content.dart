@@ -1,4 +1,4 @@
-import 'package:anime_flow/models/item/search_item.dart';
+import 'package:anime_flow/models/item/bangumi/search_item.dart';
 import 'package:anime_flow/models/item/subject_basic_data_item.dart';
 import 'package:anime_flow/widget/animation_network_image/animation_network_image.dart';
 import 'package:anime_flow/widget/ranking.dart';

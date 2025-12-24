@@ -1,7 +1,7 @@
 import 'package:anime_flow/widget/animation_network_image/animation_network_image.dart';
 import 'package:anime_flow/http/requests/bgm_request.dart';
-import 'package:anime_flow/models/item/collections_item.dart';
-import 'package:anime_flow/models/item/user_info_item.dart';
+import 'package:anime_flow/models/item/bangumi/collections_item.dart';
+import 'package:anime_flow/models/item/bangumi/user_info_item.dart';
 import 'package:anime_flow/stores/user_info_store.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';

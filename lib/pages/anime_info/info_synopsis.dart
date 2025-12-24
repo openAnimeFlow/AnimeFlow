@@ -62,93 +62,139 @@ class InfoSynopsisView extends StatelessWidget {
               }
               return false;
             },
-            child: CustomScrollView(
-              key: const PageStorageKey<String>(title),
-              slivers: <Widget>[
-                // 注入重叠区域，防止内容被 Header 遮挡
-                SliverOverlapInjector(
-                  handle: NestedScrollView.sliverOverlapAbsorberHandleFor(
-                    context,
-                  ),
-                ),
-                SliverToBoxAdapter(
-                  child: Align(
-                      alignment: Alignment.center,
-                      child: ConstrainedBox(
-                        constraints: const BoxConstraints(
-                          maxWidth: PlayLayoutConstant.infoMaxWidth,
+            child: FutureBuilder<SubjectsItem?>(
+              future: subjectsItem,
+              builder: (context, snapshot) {
+                final data = snapshot.data;
+                final leftPadding = MediaQuery.of(context).padding.left;
+                
+                return CustomScrollView(
+                  key: const PageStorageKey<String>(title),
+                  slivers: <Widget>[
+                    // 注入重叠区域，防止内容被 Header 遮挡
+                    SliverOverlapInjector(
+                      handle: NestedScrollView.sliverOverlapAbsorberHandleFor(
+                        context,
+                      ),
+                    ),
+                    
+                    // 加载中状态
+                    if (data == null)
+                      const SliverToBoxAdapter(
+                        child: Padding(
+                          padding: EdgeInsets.all(16),
+                          child: Text('加载中...'),
                         ),
-                        child: Container(
-                            padding: const EdgeInsets.all(16),
-                            width: double.infinity,
-                            child: FutureBuilder<SubjectsItem?>(
-                              future: subjectsItem,
-                              builder: (context, snapshot) {
-                                if (snapshot.data == null) {
-                                  //TODO 添加骨架屏
-                                  return const Text('加载中...');
-                                } else {
-                                  final data = snapshot.data!;
-                                  return Padding(
-                                      padding: EdgeInsets.only(
-                                          left: MediaQuery.of(context)
-                                              .padding
-                                              .left),
-                                      child: Column(
-                                        crossAxisAlignment:
-                                            CrossAxisAlignment.start,
-                                        children: [
-                                          ExpandableText(
-                                            title: title,
-                                            fontSizeTitle: fontSizeTitle,
-                                            fontWeightTitle: fontWeightTitle,
-                                            text: data.summary,
-                                            fontWeight: fontWeight,
-                                          ),
-                                          const SizedBox(height: 25),
-                                          TagView(
-                                            title: '标签',
-                                            fontSizeTitle: fontSizeTitle,
-                                            fontWeightTitle: fontWeightTitle,
-                                            tags: data.tags,
-                                            fontSize: 12,
-                                            fontWeight: FontWeight.w700,
-                                            numbersSize: 10,
-                                            numbersWeight: FontWeight.w600,
-                                          ),
-                                          const SizedBox(height: 25),
-                                          DetailsView(
-                                            title: '详情',
-                                            subject: data,
-                                            textSize: 13,
-                                            textFontWeight: FontWeight.w600,
-                                          ),
-                                          CharactersView(
-                                            title: '角色',
-                                            subjectsId: data.id,
-                                          ),
-                                          RelatedView(
-                                              title: '关联条目',
-                                              subjectId: data.id),
-                                          CommentView(
-                                            subjectCommentItem:
-                                                subjectCommentItem,
-                                            onLoadMore: onLoadMoreComments,
-                                            isLoading: isLoadingComments,
-                                            hasMore: hasMoreComments,
-                                          )
-                                        ],
-                                      ));
-                                }
-                              },
-                            )),
-                      )),
-                ),
-              ],
+                      )
+                    else ...[
+                      // 简介
+                      SliverToBoxAdapter(
+                        child: _buildContainer(
+                          leftPadding,
+                          ExpandableText(
+                            title: title,
+                            fontSizeTitle: fontSizeTitle,
+                            fontWeightTitle: fontWeightTitle,
+                            text: data.summary,
+                            fontWeight: fontWeight,
+                          ),
+                        ),
+                      ),
+                      
+                      // 标签
+                      SliverToBoxAdapter(
+                        child: _buildContainer(
+                          leftPadding,
+                          TagView(
+                            title: '标签',
+                            fontSizeTitle: fontSizeTitle,
+                            fontWeightTitle: fontWeightTitle,
+                            tags: data.tags,
+                            fontSize: 12,
+                            fontWeight: FontWeight.w700,
+                            numbersSize: 10,
+                            numbersWeight: FontWeight.w600,
+                          ),
+                          topPadding: 25,
+                        ),
+                      ),
+                      
+                      // 详情
+                      SliverToBoxAdapter(
+                        child: _buildContainer(
+                          leftPadding,
+                          DetailsView(
+                            title: '详情',
+                            subject: data,
+                            textSize: 13,
+                            textFontWeight: FontWeight.w600,
+                          ),
+                          topPadding: 25,
+                        ),
+                      ),
+                      
+                      // 角色
+                      SliverToBoxAdapter(
+                        child: _buildContainer(
+                          leftPadding,
+                          CharactersView(
+                            title: '角色',
+                            subjectsId: data.id,
+                          ),
+                        ),
+                      ),
+                      
+                      // 关联条目
+                      SliverToBoxAdapter(
+                        child: _buildContainer(
+                          leftPadding,
+                          RelatedView(
+                            title: '关联条目',
+                            subjectId: data.id,
+                          ),
+                        ),
+                      ),
+                      
+                      // 评论
+                      SliverToBoxAdapter(
+                        child: _buildContainer(
+                          leftPadding,
+                          CommentView(
+                            subjectCommentItem: subjectCommentItem,
+                            onLoadMore: onLoadMoreComments,
+                            isLoading: isLoadingComments,
+                            hasMore: hasMoreComments,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ],
+                );
+              },
             ),
           ),
         );
       },
+    );
+  }
+
+  /// 构建带约束的容器
+  Widget _buildContainer(double leftPadding, Widget child, {double topPadding = 0}) {
+    return Align(
+      alignment: Alignment.center,
+      child: ConstrainedBox(
+        constraints: const BoxConstraints(
+          maxWidth: PlayLayoutConstant.infoMaxWidth,
+        ),
+        child: Padding(
+          padding: EdgeInsets.only(
+            left: 16 + leftPadding,
+            right: 16,
+            top: topPadding,
+          ),
+          child: child,
+        ),
+      ),
     );
   }
 }

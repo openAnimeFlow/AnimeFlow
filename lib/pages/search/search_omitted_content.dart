@@ -1,5 +1,6 @@
 import 'package:anime_flow/models/item/bangumi/search_item.dart';
 import 'package:anime_flow/models/item/subject_basic_data_item.dart';
+import 'package:anime_flow/routes/index.dart';
 import 'package:anime_flow/widget/animation_network_image/animation_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get_core/src/get_main.dart';
@@ -25,7 +26,7 @@ class SearchOmittedContent extends StatelessWidget {
         borderRadius: BorderRadius.circular(10),
         child: InkWell(
           onTap: () {
-            Get.toNamed("/anime_detail", arguments: subjectBasicData);
+            Get.toNamed(RouteName.animeInfo, arguments: subjectBasicData);
           },
           child: Stack(
             children: [

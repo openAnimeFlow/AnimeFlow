@@ -36,7 +36,7 @@ class _MyPageState extends State<MyPage> with SingleTickerProviderStateMixin {
 
   Future<void> _listenForDeepLink(AppLinks appLinks) async {
     try {
-      final initialLink = await appLinks.getInitialLink();
+      // final initialLink = await appLinks.getInitialLink();
       // if (initialLink != null) {
       //   await MyController.handleDeepLink(initialLink.toString());
       //   _getUserInfo();

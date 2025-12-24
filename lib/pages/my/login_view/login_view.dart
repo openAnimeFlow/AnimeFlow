@@ -32,18 +32,19 @@ class _LoginViewState extends State<LoginView>
 
   List<String> get _tabs {
     const Map<int, String> collectionTypes = {
-      1: '抛弃',
-      2: '想看',
+      1: '想看',
+      2: '看过',
       3: '在看',
       4: '搁置',
-      5: '看过',
+      5: '抛弃',
     };
+    final stats = widget.userInfoItem.stats.subject.two;
     return [
-      '${collectionTypes[1]}',
-      '${collectionTypes[2]}',
-      '${collectionTypes[3]}',
-      '${collectionTypes[4]}',
-      '${collectionTypes[5]}',
+      '${collectionTypes[1]}\n${stats.one}',
+      '${collectionTypes[2]}\n${stats.two}',
+      '${collectionTypes[3]}\n${stats.three}',
+      '${collectionTypes[4]}\n${stats.four}',
+      '${collectionTypes[5]}\n${stats.five}',
     ];
   }
 
@@ -84,8 +85,6 @@ class _LoginViewState extends State<LoginView>
         _getCollections(type);
       }
     });
-    // 不在这里直接加载，让 _CollectionTabView 的 build 方法负责首次加载
-    // 这样可以确保 token 已经准备好（在拦截器中异步设置）
   }
 
   @override
@@ -140,7 +139,32 @@ class _LoginViewState extends State<LoginView>
                 ),
                 bottom: TabBar(
                   controller: _tabController,
-                  tabs: _tabs.map((String name) => Tab(text: name)).toList(),
+                  isScrollable: true,
+                  tabAlignment: TabAlignment.start,
+                  tabs: _tabs.map((String name) {
+                    final parts = name.split('\n');
+                    return Tab(
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Flexible(
+                            child: Text(
+                              parts[0],
+                              style: const TextStyle(fontSize: 12),
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                          ),
+                          const SizedBox(width: 4),
+                          Text(
+                            parts.length > 1 ? parts[1] : '0',
+                            style: const TextStyle(fontSize: 11),
+                          ),
+                        ],
+                      ),
+                    );
+                  }).toList(),
                   labelColor: Theme.of(context).colorScheme.primary,
                   unselectedLabelColor: Colors.grey,
                   indicatorColor: Theme.of(context).colorScheme.primary,
@@ -197,7 +221,7 @@ class _LoginViewState extends State<LoginView>
             IconButton(
                 onPressed: () {
                   setState(() {
-                    userInfoStore.clearUserInfo();
+                    // userInfoStore.clearUserInfo();
                   });
                 },
                 icon: const Icon(Icons.settings_outlined))
@@ -224,13 +248,20 @@ class _LoginViewState extends State<LoginView>
             ),
           ),
           const SizedBox(height: 16),
-          Text(
-            userInfo.nickname != '' ? userInfo.nickname : userInfo.username,
+          Text.rich(TextSpan(
+            text:
+                userInfo.nickname != '' ? userInfo.nickname : userInfo.username,
+            children: [
+              TextSpan(
+                  text: '@${userInfo.id}',
+                  style: TextStyle(
+                      fontSize: 16, color: Theme.of(context).disabledColor))
+            ],
             style: const TextStyle(
-              fontSize: 24,
+              fontSize: 23,
               fontWeight: FontWeight.bold,
             ),
-          ),
+          )),
         ],
       ),
     );

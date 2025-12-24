@@ -1,17 +1,18 @@
 import 'package:anime_flow/models/item/bangumi/subject_comments_item.dart';
 import 'package:anime_flow/utils/timeUtil.dart';
+import 'package:anime_flow/widget/bbcode/bbcode_widget.dart';
 import 'package:anime_flow/widget/star.dart';
 import 'package:anime_flow/widget/animation_network_image/animation_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
-class InfoCommentView extends StatelessWidget {
+class CommentView extends StatelessWidget {
   final SubjectCommentItem? subjectCommentItem;
   final VoidCallback? onLoadMore;
   final bool isLoading;
   final bool hasMore;
 
-  const InfoCommentView({
+  const CommentView({
     super.key,
     required this.subjectCommentItem,
     this.onLoadMore,
@@ -173,13 +174,8 @@ class _CommentItem extends StatelessWidget {
 
                     // 评论内容
                     if (comment.comment.isNotEmpty) ...[
-                      Text(
-                        comment.comment,
-                        style: const TextStyle(
-                          fontSize: 14,
-                          height: 1.5,
-                        ),
-                      ),
+                      BBCodeWidget(
+                        bbcode: comment.comment),
                     ],
                   ],
                 ),

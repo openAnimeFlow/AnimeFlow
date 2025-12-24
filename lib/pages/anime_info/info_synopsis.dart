@@ -2,12 +2,14 @@ import 'package:anime_flow/constants/play_layout_constant.dart';
 import 'package:anime_flow/models/item/bangumi/subject_comments_item.dart';
 import 'package:anime_flow/models/item/bangumi/subjects_item.dart';
 import 'package:anime_flow/pages/anime_info/characters.dart';
+import 'package:anime_flow/pages/anime_info/related.dart';
 import 'package:anime_flow/pages/anime_info/tags.dart';
 import 'package:anime_flow/widget/text/expandable_text.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/scheduler.dart';
 
 import 'details.dart';
-import 'info_comment.dart';
+import 'comment.dart';
 
 /// 隐藏滚动条的ScrollBehavior
 class _NoScrollbarBehavior extends ScrollBehavior {
@@ -53,7 +55,10 @@ class InfoSynopsisView extends StatelessWidget {
                   !isLoadingComments &&
                   hasMoreComments &&
                   onLoadMoreComments != null) {
-                onLoadMoreComments!();
+                // 使用 addPostFrameCallback 延迟调用，避免在 layout/paint 期间调用 setState
+                SchedulerBinding.instance.addPostFrameCallback((_) {
+                  onLoadMoreComments!();
+                });
               }
               return false;
             },
@@ -112,17 +117,20 @@ class InfoSynopsisView extends StatelessWidget {
                                             numbersWeight: FontWeight.w600,
                                           ),
                                           const SizedBox(height: 25),
-                                          CharactersView(
-                                            title: '角色',
-                                            subjectsId: data.id,
-                                          ),
                                           DetailsView(
                                             title: '详情',
                                             subject: data,
                                             textSize: 13,
                                             textFontWeight: FontWeight.w600,
                                           ),
-                                          InfoCommentView(
+                                          CharactersView(
+                                            title: '角色',
+                                            subjectsId: data.id,
+                                          ),
+                                          RelatedView(
+                                              title: '关联条目',
+                                              subjectId: data.id),
+                                          CommentView(
                                             subjectCommentItem:
                                                 subjectCommentItem,
                                             onLoadMore: onLoadMoreComments,

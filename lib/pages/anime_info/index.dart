@@ -29,6 +29,8 @@ class _AnimeDetailPageState extends State<AnimeDetailPage>
   bool _hasMoreComments = true;
   final double _contentHeight = 200.0; // 内容区域的高度
   bool isPinned = false;
+  bool _showBackToTop = false;
+  final ScrollController _scrollController = ScrollController();
 
   @override
   void initState() {
@@ -83,8 +85,17 @@ class _AnimeDetailPageState extends State<AnimeDetailPage>
 
   @override
   void dispose() {
+    _scrollController.dispose();
     Get.delete<AnimeStateController>();
     super.dispose();
+  }
+
+  void _scrollToTop() {
+    _scrollController.animateTo(
+      0,
+      duration: const Duration(milliseconds: 300),
+      curve: Curves.easeOut,
+    );
   }
 
   @override
@@ -93,20 +104,33 @@ class _AnimeDetailPageState extends State<AnimeDetailPage>
     final double statusBarHeight = MediaQuery.of(context).padding.top;
 
     return Scaffold(
-      body: NotificationListener<ScrollNotification>(
+      body: Stack(
+        children: [
+          NotificationListener<ScrollNotification>(
         onNotification: (notification) {
-          if (notification.depth == 0 &&
-              notification is ScrollUpdateNotification) {
-            final bool isPinned = notification.metrics.pixels >= _contentHeight;
-            if (this.isPinned != isPinned) {
+          if (notification is ScrollUpdateNotification) {
+            if (notification.depth == 0) {
+              final bool isPinned = notification.metrics.pixels >= _contentHeight;
+              if (this.isPinned != isPinned) {
+                setState(() {
+                  this.isPinned = isPinned;
+                });
+              }
+            }
+            
+            // 计算总滚动距离：外层滚动 + 内层滚动
+            final outerOffset = _scrollController.hasClients ? _scrollController.offset : 0.0;
+            final showBackToTop = outerOffset > 300 || notification.metrics.pixels > 100;
+            if (_showBackToTop != showBackToTop) {
               setState(() {
-                this.isPinned = isPinned;
+                _showBackToTop = showBackToTop;
               });
             }
           }
           return false;
         },
         child: NestedScrollView(
+          controller: _scrollController,
           headerSliverBuilder: (BuildContext context, bool innerBoxIsScrolled) {
             return <Widget>[
               SliverOverlapAbsorber(
@@ -119,10 +143,10 @@ class _AnimeDetailPageState extends State<AnimeDetailPage>
                   title: FutureBuilder<SubjectsItem?>(
                     future: _subjectsItem,
                     builder: (context, snapshot) {
-                      return  InfoAppbarView(
-                              subjectBasicData: subjectBasicData,
-                              subjectsItem: snapshot.data,
-                              isPinned: isPinned);
+                      return InfoAppbarView(
+                          subjectBasicData: subjectBasicData,
+                          subjectsItem: snapshot.data,
+                          isPinned: isPinned);
                     },
                   ),
                   pinned: true,
@@ -165,6 +189,17 @@ class _AnimeDetailPageState extends State<AnimeDetailPage>
             hasMoreComments: _hasMoreComments,
           ),
         ),
+      ),
+      if (_showBackToTop)
+        Positioned(
+          right: 16,
+          bottom: 16 + MediaQuery.of(context).padding.bottom,
+          child: FloatingActionButton(
+            onPressed: _scrollToTop,
+            child: const Icon(Icons.arrow_upward,size: 30,),
+          ),
+        ),
+        ],
       ),
     );
   }

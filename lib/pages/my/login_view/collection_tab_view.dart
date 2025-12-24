@@ -193,7 +193,7 @@ class __CollectionTabViewState extends State<_CollectionTabView> {
                           );
                           return GestureDetector(
                             onTap: () {
-                              Get.toNamed(RouteName.animeDetail,
+                              Get.toNamed(RouteName.animeInfo,
                                   arguments: subjectBasicData);
                             },
                             child: IntrinsicHeight(

@@ -29,6 +29,9 @@ class BgmNextApi {
 
   //角色
   static const String characters = '/p1/subjects/{subjectId}/characters';
+
+  //关联条目
+  static const String relations = '/p1/subjects/{subjectId}/relations';
 }
 
 class BgmUsersApi {

@@ -270,7 +270,7 @@ class _RecommendViewState extends State<RecommendView> {
       ),
       child: InkWell(
         onTap: () {
-          Get.toNamed(RouteName.animeDetail, arguments: subjectBasicData);
+          Get.toNamed(RouteName.animeInfo, arguments: subjectBasicData);
         },
         highlightColor: Colors.white.withValues(alpha: 0.1),
         child: Stack(

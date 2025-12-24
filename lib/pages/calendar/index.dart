@@ -216,7 +216,7 @@ class _CalendarPageState extends State<CalendarPage>
       ),
       child: InkWell(
         onTap: () {
-          Get.toNamed(RouteName.animeDetail, arguments: subjectBasicData);
+          Get.toNamed(RouteName.animeInfo, arguments: subjectBasicData);
         },
         child: Stack(
           children: [

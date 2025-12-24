@@ -136,7 +136,7 @@ class _CalendarViewState extends State<CalendarView> {
           borderRadius: BorderRadius.circular(10),
           child: InkWell(
               onTap: () {
-                Get.toNamed(RouteName.animeDetail, arguments: subjectBasicData);
+                Get.toNamed(RouteName.animeInfo, arguments: subjectBasicData);
               },
               child: Stack(
                 children: [

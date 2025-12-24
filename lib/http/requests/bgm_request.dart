@@ -7,6 +7,7 @@ import 'package:anime_flow/models/item/bangumi/collections_item.dart';
 import 'package:anime_flow/models/item/bangumi/episode_comments_item.dart';
 import 'package:anime_flow/models/item/bangumi/episodes_item.dart';
 import 'package:anime_flow/models/item/bangumi/hot_item.dart';
+import 'package:anime_flow/models/item/bangumi/related_subjects_item.dart';
 import 'package:anime_flow/models/item/bangumi/search_item.dart';
 import 'package:anime_flow/models/item/bangumi/subject_comments_item.dart';
 import 'package:anime_flow/models/item/bangumi/subjects_item.dart';
@@ -67,7 +68,6 @@ class BgmRequest {
           BgmNextApi.subjectComments
               .replaceFirst('{subjectId}', subjectId.toString()),
       queryParameters: {
-        "type": 2,
         "limit": limit,
         "offset": offset,
       },
@@ -148,6 +148,20 @@ class BgmRequest {
           ),
         )
         .then((response) => (CharactersItem.fromJson(response.data)));
+  }
+
+  ///相关条目
+  static Future<SubjectRelationItem> relatedSubjectsService(int subjectId,
+      {required int limit, required int offset, int? type = 2}) async {
+    return dioRequest.get(
+        _nextBaseUrl +
+            BgmNextApi.relations
+                .replaceFirst('{subjectId}', subjectId.toString()),
+        queryParameters: {
+          "type": type,
+          "limit": limit,
+          "offset": offset,
+        }).then((response) => (SubjectRelationItem.fromJson(response.data)));
   }
 }
 

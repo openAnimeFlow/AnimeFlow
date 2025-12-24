@@ -13,9 +13,11 @@ import 'package:anime_flow/http/dio/bgm_dio_request.dart';
 import 'package:anime_flow/http/dio/dio_request.dart';
 import 'package:anime_flow/models/item/user_info_item.dart';
 import 'package:dio/dio.dart';
+import 'package:logger/logger.dart';
 
 class BgmRequest {
   static const String _nextBaseUrl = BgmNextApi.baseUrl;
+  static final Logger _logger = Logger();
 
   /// 获取热门
   static Future<HotItem> getHotService(int limit, int offset) async {
@@ -39,13 +41,18 @@ class BgmRequest {
   ///获取条目章节
   static Future<EpisodesItem> getSubjectEpisodesByIdService(
       int id, int limit, int offset) async {
-    final response = await bgmDioRequest.get(
-        _nextBaseUrl +
-            BgmNextApi.episodes.replaceFirst('{subjectId}', id.toString()),
-        queryParameters: {"limit": limit, "offset": offset},
-        options: Options(
-            headers: {Constants.userAgentName: CommonApi.bangumiUserAgent}));
-    return EpisodesItem.fromJson(response.data);
+    try {
+      final response = await bgmDioRequest.get(
+          _nextBaseUrl +
+              BgmNextApi.episodes.replaceFirst('{subjectId}', id.toString()),
+          queryParameters: {"limit": limit, "offset": offset},
+          options: Options(
+              headers: {Constants.userAgentName: CommonApi.bangumiUserAgent}));
+      return EpisodesItem.fromJson(response.data);
+    } catch (e) {
+      _logger.e(e);
+      throw Exception('Failed to fetch episodes: $e');
+    }
   }
 
   ///获取条目评论

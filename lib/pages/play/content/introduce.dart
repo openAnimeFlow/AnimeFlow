@@ -70,6 +70,8 @@ class _IntroduceViewState extends State<IntroduceView>
     super.build(context);
     const String sourceTitle = "数据源";
     return SingleChildScrollView(
+        child: Padding(
+      padding: const EdgeInsets.all(10),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -112,7 +114,7 @@ class _IntroduceViewState extends State<IntroduceView>
               sourceTitle: sourceTitle)
         ],
       ),
-    );
+    ));
   }
 
   /// 底部抽屉

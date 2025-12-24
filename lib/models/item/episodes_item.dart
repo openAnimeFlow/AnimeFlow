@@ -166,7 +166,7 @@ class Data {
 class Collection {
   Collection({
     required int status,
-    required int updatedAt,
+    int? updatedAt,
   }) {
     _status = status;
     _updatedAt = updatedAt;
@@ -178,7 +178,7 @@ class Collection {
   }
 
   late int _status;
-  late int _updatedAt;
+  int? _updatedAt;
 
   Collection copyWith({
     int? status,
@@ -190,12 +190,14 @@ class Collection {
       );
 
   int get status => _status;
-  int get updatedAt => _updatedAt;
+  int? get updatedAt => _updatedAt;
 
   Map<String, dynamic> toJson() {
     final map = <String, dynamic>{};
     map['status'] = _status;
-    map['updatedAt'] = _updatedAt;
+    if (_updatedAt != null) {
+      map['updatedAt'] = _updatedAt;
+    }
     return map;
   }
 }

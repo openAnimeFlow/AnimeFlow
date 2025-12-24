@@ -128,11 +128,21 @@ class BgmRequest {
   }
 
   ///角色信息
-  static Future<CharactersItem> charactersService(int id) async {
+  static Future<CharactersItem> charactersService(int subjectId,
+      {required int limit, required int offset, int? type}) async {
+    final queryParameters = <String, dynamic>{
+      "limit": limit,
+      "offset": offset,
+    };
+    if (type != null) {
+      queryParameters['type'] = type;
+    }
     return dioRequest
         .get(
           _nextBaseUrl +
-              BgmNextApi.characters.replaceFirst('{subjectId}', id.toString()),
+              BgmNextApi.characters
+                  .replaceFirst('{subjectId}', subjectId.toString()),
+          queryParameters: queryParameters,
           options: Options(
             headers: {Constants.userAgentName: CommonApi.bangumiUserAgent},
           ),

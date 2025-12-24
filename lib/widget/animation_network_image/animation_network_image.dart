@@ -8,12 +8,14 @@ import 'image_preview_page.dart';
 class AnimationNetworkImage extends StatelessWidget {
   final String url;
   final BoxFit? fit;
+  final Color? color;
   final double? width;
   final double? height;
   final bool preview;
   final Duration fadeInDuration;
   final Duration fadeOutDuration;
   final BorderRadiusGeometry borderRadius;
+  final Alignment alignment;
 
   const AnimationNetworkImage({
     super.key,
@@ -25,6 +27,8 @@ class AnimationNetworkImage extends StatelessWidget {
     this.borderRadius = BorderRadius.zero,
     this.fadeInDuration = const Duration(milliseconds: 500),
     this.fadeOutDuration = const Duration(milliseconds: 300),
+    this.alignment = Alignment.center,
+    this.color,
   });
 
   @override
@@ -33,7 +37,7 @@ class AnimationNetworkImage extends StatelessWidget {
       final heroTag = 'emoji_${url.hashCode}_${Random().nextInt(10000)}';
       return GestureDetector(
         onTap: () {
-          ImageViewer.show(context, url,heroTag:  heroTag);
+          ImageViewer.show(context, url, heroTag: heroTag);
         },
         child: Hero(tag: heroTag, child: _buildImage()),
       );
@@ -50,6 +54,8 @@ class AnimationNetworkImage extends StatelessWidget {
         fit: fit,
         width: width,
         height: height,
+        color: color,
+        alignment: alignment,
         fadeInDuration: fadeInDuration,
         fadeOutDuration: fadeOutDuration,
         placeholder: (context, url) {

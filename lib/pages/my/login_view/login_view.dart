@@ -30,6 +30,12 @@ class _LoginViewState extends State<LoginView>
   // 记录正在加载的 type
   final Set<int> _loadingTypes = {};
 
+  // 记录每个 type 的 offset
+  final Map<int, int> _offsets = {};
+
+  // 记录每个 type 是否还有更多数据
+  final Map<int, bool> _hasMore = {};
+
   List<String> get _tabs {
     const Map<int, String> collectionTypes = {
       1: '想看',
@@ -48,9 +54,19 @@ class _LoginViewState extends State<LoginView>
     ];
   }
 
-  void _getCollections(int type) async {
-    // 如果已经有缓存数据或正在加载，则不再加载
-    if (_collectionsCache.containsKey(type) || _loadingTypes.contains(type)) {
+  void _getCollections(int type, {bool loadMore = false}) async {
+    // 如果正在加载，则不再加载
+    if (_loadingTypes.contains(type)) {
+      return;
+    }
+
+    // 如果是加载更多，但没有更多数据，则不加载
+    if (loadMore && (_hasMore[type] == false)) {
+      return;
+    }
+
+    // 如果是首次加载，但已经有缓存数据，则不加载
+    if (!loadMore && _collectionsCache.containsKey(type)) {
       return;
     }
 
@@ -59,10 +75,24 @@ class _LoginViewState extends State<LoginView>
     });
 
     try {
+      final offset = loadMore 
+          ? (_offsets[type] ?? _collectionsCache[type]?.data.length ?? 0)
+          : 0;
       final collections = await UserRequest.queryUserCollectionsService(
-          type: type, limit: 20, offset: 0);
+          type: type, limit: 20, offset: offset);
+
       setState(() {
-        _collectionsCache[type] = collections;
+        if (loadMore && _collectionsCache[type] != null) {
+          // 追加数据
+          _collectionsCache[type]!.data.addAll(collections.data);
+        } else {
+          // 首次加载
+          _collectionsCache[type] = collections;
+          _offsets[type] = 0; // 重置 offset
+        }
+        _offsets[type] = offset + collections.data.length;
+        _hasMore[type] = collections.data.length == 20 && 
+                         _collectionsCache[type]!.data.length < collections.total;
         _loadingTypes.remove(type);
       });
     } catch (e) {
@@ -177,8 +207,10 @@ class _LoginViewState extends State<LoginView>
           collectionsCache: _collectionsCache,
           tabController: _tabController,
           tabs: _tabs,
-          onLoad: _getCollections,
+          onLoad: (type) => _getCollections(type),
+          onLoadMore: (type) => _getCollections(type, loadMore: true),
           loadingTypes: _loadingTypes,
+          hasMore: _hasMore,
         ),
       ),
     );

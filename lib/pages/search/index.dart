@@ -22,6 +22,10 @@ class _SearchPageState extends State<SearchPage> {
   SearchItem? searchItem;
   bool _isDetailsContent = true;
   List<String> _searchHistory = [];
+  String _currentKeyword = '';
+  int _offset = 0;
+  final int _limit = 10;
+  bool _hasMore = true;
 
   @override
   void initState() {
@@ -29,6 +33,14 @@ class _SearchPageState extends State<SearchPage> {
     WidgetsBinding.instance.addPostFrameCallback((_) {
       FocusScope.of(context).requestFocus(_searchFocusNode);
       _loadSearchHistory();
+    });
+
+    // 监听滚动，触发加载更多
+    _scrollController.addListener(() {
+      if (_scrollController.position.pixels >=
+          _scrollController.position.maxScrollExtent - 200) {
+        _loadMore();
+      }
     });
   }
 
@@ -42,33 +54,68 @@ class _SearchPageState extends State<SearchPage> {
     }
   }
 
-  void _onSearch(String query) async {
+  void _onSearch(String query, {bool loadMore = false}) async {
     if (query.isEmpty) return;
 
-    // 保存搜索记录
-    await searchHistoryManager.saveSearchHistory(query);
-    _loadSearchHistory();
+    // 如果是首次搜索，保存搜索记录
+    if (!loadMore) {
+      await searchHistoryManager.saveSearchHistory(query);
+      _loadSearchHistory();
+    }
+
+    // 如果正在加载，则不再加载
+    if (_isSearching) return;
+
+    // 如果是加载更多，但没有更多数据，则不加载
+    if (loadMore && !_hasMore) return;
 
     setState(() {
       _isSearching = true;
+      if (!loadMore) {
+        _currentKeyword = query;
+        _offset = 0;
+        _hasMore = true;
+      }
     });
+
     try {
+      final offset = loadMore ? _offset : 0;
       final value = await BgmRequest.searchSubjectService(
-        keyword: query,
-        limit: 10,
-        offset: 0,
+        keyword: _currentKeyword,
+        limit: _limit,
+        offset: offset,
       );
       if (mounted) {
         setState(() {
-          searchItem = value;
+          if (loadMore && searchItem != null) {
+            // 追加数据
+            searchItem = SearchItem(
+              data: [...searchItem!.data, ...value.data],
+              total: value.total,
+            );
+          } else {
+            // 首次加载
+            searchItem = value;
+          }
+          _offset = offset + value.data.length;
+          _hasMore = value.data.length == _limit &&
+              searchItem!.data.length < value.total;
+          _isSearching = false;
         });
       }
-    } finally {
+    } catch (e) {
       if (mounted) {
         setState(() {
           _isSearching = false;
         });
       }
+    }
+  }
+
+  // 加载更多
+  void _loadMore() {
+    if (_currentKeyword.isNotEmpty && !_isSearching && _hasMore) {
+      _onSearch(_currentKeyword, loadMore: true);
     }
   }
 
@@ -133,19 +180,23 @@ class _SearchPageState extends State<SearchPage> {
               onClear: () {
                 setState(() {
                   searchItem = null;
+                  _currentKeyword = '';
+                  _offset = 0;
+                  _hasMore = true;
                 });
               },
               topPadding: topPadding,
             ),
           ),
-          // 搜索结果列表
-          if (_isSearching)
+          // 只在首次搜索时（没有搜索结果且正在加载）显示全屏加载动画
+          if (_isSearching && searchItem == null)
             const SliverFillRemaining(
               child: Center(child: CircularProgressIndicator()),
             )
           else if (searchItem == null)
             _buildSearchHistory()
           else ...[
+            // 搜索结果列表
             SliverPadding(
               padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
               sliver: SliverToBoxAdapter(
@@ -155,7 +206,7 @@ class _SearchPageState extends State<SearchPage> {
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
                         Text(
-                          '搜索到 ${searchItem!.data.length} 条内容',
+                          '搜索到 ${searchItem!.total} 条内容',
                           style: TextStyle(
                             color: Theme.of(context).colorScheme.outline,
                           ),
@@ -183,10 +234,10 @@ class _SearchPageState extends State<SearchPage> {
                 child: ConstrainedBox(
                   constraints: const BoxConstraints(maxWidth: maxWidth),
                   child: Padding(
-                    padding: EdgeInsets.only(
+                    padding: const EdgeInsets.only(
                       left: 16,
                       right: 16,
-                      bottom: MediaQuery.of(context).padding.bottom,
+                      bottom: 16,
                     ),
                     child: AnimatedSwitcher(
                       duration: const Duration(milliseconds: 300),
@@ -210,8 +261,22 @@ class _SearchPageState extends State<SearchPage> {
                                 mainAxisSpacing: 8,
                                 childAspectRatio: 2 / 3, // 海报比例
                               ),
-                        itemCount: searchItem!.data.length,
+                        itemCount: searchItem!.data.length + 1,
                         itemBuilder: (context, index) {
+                          // 如果是最后一项，显示加载指示器或"没有更多了"
+                          if (index == searchItem!.data.length) {
+                            return _hasMore
+                                ? _isSearching
+                                    ? const Center(
+                                        child: CircularProgressIndicator())
+                                    : const SizedBox.shrink()
+                                : const Center(
+                                    child: Padding(
+                                    padding: EdgeInsets.all(8.0),
+                                    child: Text("没有更多了"),
+                                  ));
+                          }
+
                           final searchData = searchItem!.data[index];
                           return _isDetailsContent
                               ? SearchDetailsContentView(

@@ -75,10 +75,11 @@ dependencies:
     git:
       url: https://github.com/Predidit/linux_webview_window.git
       ref: b107a03068b8c4249cec4a3b159d56f1326103c5
-  animation_network_image:
-    git:
-      url: https://github.com/openAnimeFlow/AnimationNetworkImage.git
-      ref: e7f7ed4b5a5117a2d9bb86399694bdb2299865e3
+#  animation_network_image:
+#    git:
+#      url: https://github.com/openAnimeFlow/AnimationNetworkImage.git
+#      ref: 04ea497b5c0111dd3396aaa157e2312620a1764c
+  cached_network_image: ^3.4.1
   hive: ^2.2.3
   hive_flutter: ^1.1.0
   shimmer: ^3.0.0

@@ -1,5 +1,5 @@
 import 'package:anime_flow/webview/webview_controller.dart';
-import 'package:animation_network_image/animation_network_image.dart';
+import 'package:anime_flow/widget/animation_network_image/animation_network_image.dart';
 import 'package:anime_flow/constants/play_layout_constant.dart';
 import 'package:anime_flow/controllers/episodes/episodes_controller.dart';
 import 'package:anime_flow/controllers/video/data/data_source_controller.dart';

@@ -1,8 +1,10 @@
 import 'package:anime_flow/controllers/main_page/main_page_state.dart';
 import 'package:anime_flow/models/item/tab_item.dart';
 import 'package:anime_flow/pages/my/index.dart';
+import 'package:anime_flow/routes/index.dart';
 import 'package:anime_flow/stores/user_info_store.dart';
 import 'package:anime_flow/utils/utils.dart';
+import 'package:animation_network_image/animation_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:anime_flow/pages/Category/index.dart';
 import 'package:anime_flow/pages/recommend/index.dart';
@@ -17,25 +19,23 @@ class MainPage extends StatefulWidget {
 
 class _MainPageState extends State<MainPage> {
   late MainPageState mainPageState;
+  late UserInfoStore userInfoStore;
 
   // 使用 GlobalKey 保持 IndexedStack 的状态，防止在布局切换（Row <-> Column）时页面重构
   final GlobalKey _bodyKey = GlobalKey();
 
   final List<TabItem> _tabs = [
     TabItem(
-      type: TabType.home,
       title: "推荐",
-      icon: Icons.home,
-      activeIcon: Icons.home_filled,
+      icon: Icons.smart_display_outlined,
+      activeIcon: Icons.smart_display_rounded,
     ),
     TabItem(
-      type: TabType.category,
-      title: "分类",
-      icon: Icons.category_outlined,
-      activeIcon: Icons.category,
+      title: "排行",
+      icon: Icons.leaderboard_outlined,
+      activeIcon: Icons.leaderboard_rounded,
     ),
     TabItem(
-      type: TabType.profile,
       title: "我的",
       icon: Icons.person_outline,
       activeIcon: Icons.person,
@@ -52,10 +52,103 @@ class _MainPageState extends State<MainPage> {
     // 默认初始化第一个页面
     _pageCache[0] = const RecommendView();
     Utils.initCrawlConfigs();
-    Get.put(UserInfoStore());
+    userInfoStore = Get.put(UserInfoStore());
   }
 
   int _currentIndex = 0;
+
+  // 构建 NavigationRail
+  List<NavigationRailDestination> _buildRailDestinations(
+      ColorScheme colorScheme) {
+    return _tabs.asMap().entries.map((entry) {
+      final index = entry.key;
+      final tab = entry.value;
+
+      // 如果是"我的"标签（index == 2），根据用户信息动态显示
+      if (index == 2) {
+        final userInfo = userInfoStore.userInfo.value;
+        if (userInfo != null) {
+          return NavigationRailDestination(
+            icon:  AnimationNetworkImage(
+                borderRadius: BorderRadius.circular(50),
+                url: userInfo.avatar.medium,
+                width: 24,
+                height: 24,
+                fit: BoxFit.cover,
+              ),
+            selectedIcon: Container(
+              decoration: BoxDecoration(
+                border: Border.all(
+                  color: colorScheme.primary,
+                  width: 2,
+                ),
+                borderRadius: BorderRadius.circular(50),
+              ),
+              child: AnimationNetworkImage(
+                borderRadius: BorderRadius.circular(50),
+                url: userInfo.avatar.medium,
+                width: 24,
+                height: 24,
+                fit: BoxFit.cover,
+              ),
+            ),
+            label: Text(tab.title),
+          );
+        }
+      }
+      return NavigationRailDestination(
+        icon: Icon(tab.icon),
+        selectedIcon: Icon(tab.activeIcon, color: colorScheme.primary),
+        label: Text(tab.title),
+      );
+    }).toList();
+  }
+
+  // 构建 NavigationBar
+  List<NavigationDestination> _buildBarDestinations(ColorScheme colorScheme) {
+    return _tabs.asMap().entries.map((entry) {
+      final index = entry.key;
+      final tab = entry.value;
+      if (index == 2) {
+        final userInfo = userInfoStore.userInfo.value;
+        if (userInfo != null) {
+          return NavigationDestination(
+            icon:  AnimationNetworkImage(
+                borderRadius: BorderRadius.circular(50),
+                url: userInfo.avatar.medium,
+                width: 24,
+                height: 24,
+                fit: BoxFit.cover,
+            ),
+            selectedIcon:  Container(
+                decoration: BoxDecoration(
+                  border: Border.all(
+                    color: colorScheme.primary,
+                    width: 2,
+                  ),
+                  borderRadius: BorderRadius.circular(50),
+                ),
+                child: AnimationNetworkImage(
+                  borderRadius: BorderRadius.circular(50),
+                  url: userInfo.avatar.medium,
+                  width: 24,
+                  height: 24,
+                  fit: BoxFit.fill,
+                ),
+              ),
+            label: tab.title,
+          );
+        }
+      }
+
+      // 默认显示或没有用户信息时
+      return NavigationDestination(
+        icon: Icon(tab.icon),
+        selectedIcon: Icon(tab.activeIcon, color: colorScheme.primary),
+        label: tab.title,
+      );
+    }).toList();
+  }
 
   void _onDestinationSelected(int index) {
     setState(() {
@@ -86,48 +179,41 @@ class _MainPageState extends State<MainPage> {
       body: Row(
         children: [
           if (isDesktop)
-            NavigationRail(
-              backgroundColor: Colors.black12.withValues(alpha: 0.04),
-              selectedIndex: _currentIndex,
-              groupAlignment: 1.0,
-              onDestinationSelected: _onDestinationSelected,
-              labelType: NavigationRailLabelType.all,
-              // 顶部搜索按钮
-              leading: Padding(
-                padding: const EdgeInsets.only(bottom: 16, top: 8),
-                child: FloatingActionButton(
-                  elevation: 0,
-                  onPressed: () {
-                    Get.toNamed("/search");
-                  },
-                  child: const Icon(Icons.search),
-                ),
-              ),
-              // 底部设置按钮
-              trailing: Padding(
-                padding: EdgeInsets.only(
-                    bottom: MediaQuery.of(context).padding.bottom + 5),
-                child: IconButton(
-                  icon: const Icon(Icons.settings_outlined),
-                  iconSize: 28,
-                  tooltip: '设置',
-                  onPressed: () {
-                    // TODO: 实现设置功能
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(content: Text('设置功能开发中...')),
-                    );
-                  },
-                ),
-              ),
-              destinations: _tabs.map((tab) {
-                return NavigationRailDestination(
-                  icon: Icon(tab.icon),
-                  selectedIcon:
-                      Icon(tab.activeIcon, color: colorScheme.primary),
-                  label: Text(tab.title),
-                );
-              }).toList(),
-            ),
+            Obx(() => NavigationRail(
+                  backgroundColor: Colors.black12.withValues(alpha: 0.04),
+                  selectedIndex: _currentIndex,
+                  groupAlignment: 1.0,
+                  onDestinationSelected: _onDestinationSelected,
+                  labelType: NavigationRailLabelType.all,
+                  // 顶部搜索按钮
+                  leading: Padding(
+                    padding: const EdgeInsets.only(bottom: 16, top: 8),
+                    child: FloatingActionButton(
+                      elevation: 0,
+                      onPressed: () {
+                        Get.toNamed(RouteName.search);
+                      },
+                      child: const Icon(Icons.search),
+                    ),
+                  ),
+                  // 底部设置按钮
+                  trailing: Padding(
+                    padding: EdgeInsets.only(
+                        bottom: MediaQuery.of(context).padding.bottom + 5),
+                    child: IconButton(
+                      icon: const Icon(Icons.settings_outlined),
+                      iconSize: 28,
+                      tooltip: '设置',
+                      onPressed: () {
+                        // TODO: 实现设置功能
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(content: Text('设置功能开发中...')),
+                        );
+                      },
+                    ),
+                  ),
+                  destinations: _buildRailDestinations(colorScheme),
+                )),
           Expanded(
             child: IndexedStack(
               key: _bodyKey,
@@ -140,18 +226,11 @@ class _MainPageState extends State<MainPage> {
       ),
       bottomNavigationBar: isDesktop
           ? null
-          : NavigationBar(
-              selectedIndex: _currentIndex,
-              onDestinationSelected: _onDestinationSelected,
-              destinations: _tabs.map((tab) {
-                return NavigationDestination(
-                  icon: Icon(tab.icon),
-                  selectedIcon:
-                      Icon(tab.activeIcon, color: colorScheme.primary),
-                  label: tab.title,
-                );
-              }).toList(),
-            ),
+          : Obx(() => NavigationBar(
+                selectedIndex: _currentIndex,
+                onDestinationSelected: _onDestinationSelected,
+                destinations: _buildBarDestinations(colorScheme),
+              )),
     );
   }
 }

@@ -11,7 +11,7 @@ import 'package:anime_flow/models/item/subject_basic_data_item.dart'
 class InfoAppbarView extends StatelessWidget {
   final bool isPinned;
   final SubjectBasicData subjectBasicData;
-  final SubjectsItem subjectsItem;
+  final SubjectsItem? subjectsItem;
 
   const InfoAppbarView({
     super.key,
@@ -22,53 +22,65 @@ class InfoAppbarView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final data = subjectsItem;
-    return Row(
-      children: [
-        IconButton(
-          padding: const EdgeInsets.all(0),
-          iconSize: 25,
-          icon: const Icon(Icons.arrow_back_rounded),
-          onPressed: () {
-            Get.back();
-          },
-        ),
-        AnimatedOpacity(
-            opacity: isPinned ? 1.0 : 0.0,
-            duration: const Duration(milliseconds: 300),
-            child: Row(
-              children: [
-                ClipRRect(
-                  borderRadius: BorderRadius.circular(5),
-                  child: AnimationNetworkImage(
-                      width: 26,
-                      height: 36,
-                      fit: BoxFit.cover,
-                      url: subjectBasicData.image),
-                ),
-                const SizedBox(width: 5),
-                Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      subjectBasicData.name,
-                      style: const TextStyle(fontSize: 15),
-                    ),
-                    Row(
-                      children: [
-                        RankingView(ranking: data.rating.rank),
-                        StarView(score: data.rating.score),
-                        const SizedBox(width: 5),
-                        Text(data.rating.score.toStringAsFixed(1),
-                            style: const TextStyle(
-                                fontSize: 10, fontWeight: FontWeight.bold))
-                      ],
-                    )
-                  ],
-                )
-              ],
-            )),
-      ],
+    if (subjectsItem == null) {
+      return Row(
+        children: [_buildIconButton],
+      );
+    } else {
+      return Row(
+        children: [_buildIconButton, _buildInfo],
+      );
+    }
+  }
+
+  Widget get _buildInfo {
+    final data = subjectsItem!;
+    return AnimatedOpacity(
+      opacity: isPinned ? 1.0 : 0.0,
+      duration: const Duration(milliseconds: 300),
+      child: Row(
+        children: [
+          ClipRRect(
+            borderRadius: BorderRadius.circular(5),
+            child: AnimationNetworkImage(
+                width: 26,
+                height: 36,
+                fit: BoxFit.cover,
+                url: subjectBasicData.image),
+          ),
+          const SizedBox(width: 5),
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                subjectBasicData.name,
+                style: const TextStyle(fontSize: 15),
+              ),
+              Row(
+                children: [
+                  RankingView(ranking: data.rating.rank),
+                  StarView(score: data.rating.score),
+                  const SizedBox(width: 5),
+                  Text(data.rating.score.toStringAsFixed(1),
+                      style: const TextStyle(
+                          fontSize: 10, fontWeight: FontWeight.bold))
+                ],
+              )
+            ],
+          )
+        ],
+      ),
+    );
+  }
+
+  Widget get _buildIconButton {
+    return IconButton(
+      padding: const EdgeInsets.all(0),
+      iconSize: 25,
+      icon: const Icon(Icons.arrow_back_rounded),
+      onPressed: () {
+        Get.back();
+      },
     );
   }
 }

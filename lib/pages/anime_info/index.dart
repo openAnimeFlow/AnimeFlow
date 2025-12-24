@@ -119,13 +119,10 @@ class _AnimeDetailPageState extends State<AnimeDetailPage>
                   title: FutureBuilder<SubjectsItem?>(
                     future: _subjectsItem,
                     builder: (context, snapshot) {
-                      return snapshot.data != null
-                          ? InfoAppbarView(
+                      return  InfoAppbarView(
                               subjectBasicData: subjectBasicData,
-                              subjectsItem: snapshot.data!,
-                              isPinned: isPinned,
-                            )
-                          : const SizedBox.shrink();
+                              subjectsItem: snapshot.data,
+                              isPinned: isPinned);
                     },
                   ),
                   pinned: true,

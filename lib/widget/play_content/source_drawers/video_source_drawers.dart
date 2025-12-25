@@ -129,7 +129,6 @@ class _VideoSourceDrawersState extends State<VideoSourceDrawers> {
       alignment: Alignment.centerRight,
       child: Container(
         width: PlayLayoutConstant.playContentWidth,
-        height: double.infinity,
         padding: const EdgeInsets.all(16),
         color: Theme.of(context).cardColor,
         child: Column(
@@ -475,6 +474,7 @@ class _VideoSourceDrawersState extends State<VideoSourceDrawers> {
                 '错误',
                 '获取视频源失败: $e',
                 duration: const Duration(seconds: 3),
+                maxWidth: 300,
                 backgroundColor: Colors.red.shade100,
               );
             }

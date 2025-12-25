@@ -39,19 +39,9 @@ dependencies:
   #构建每个架构一个APK
   #flutter build apk --split-per-abi
 
-  # 统一appName dart run rename_app:main all="My App Name"
-  # 文档:https://github.com/Syed-Waleed-Shah/rename_app/blob/master/README.md
-  rename_app: ^1.6.5
-
-  # 修改包名
-  # 命令: flutter pub run change_app_package_name:main com.ligg.anime_flow
-  change_app_package_name: ^1.5.0
-
-  ##播放器
   media_kit: ^1.2.1 # 主要包装.
   media_kit_video: ^1.3.1 # 用于视频渲染.
   media_kit_libs_video: ^1.0.7 # 原生视频依赖项.
-
   carousel_slider: ^5.1.1
   dio: ^5.9.0
   get: ^4.7.3
@@ -75,10 +65,10 @@ dependencies:
     git:
       url: https://github.com/Predidit/linux_webview_window.git
       ref: b107a03068b8c4249cec4a3b159d56f1326103c5
-#  animation_network_image:
-#    git:
-#      url: https://github.com/openAnimeFlow/AnimationNetworkImage.git
-#      ref: 04ea497b5c0111dd3396aaa157e2312620a1764c
+  #  animation_network_image:
+  #    git:
+  #      url: https://github.com/openAnimeFlow/AnimationNetworkImage.git
+  #      ref: 04ea497b5c0111dd3396aaa157e2312620a1764c
   cached_network_image: ^3.4.1
   hive: ^2.2.3
   hive_flutter: ^1.1.0
@@ -120,8 +110,8 @@ dev_dependencies:
   # rules and activating additional ones.
   flutter_lints: ^6.0.0
 
-  # For information on the generic Dart part of this file, see the
-  # following page: https://dart.dev/tools/pub/pubspec
+# For information on the generic Dart part of this file, see the
+# following page: https://dart.dev/tools/pub/pubspec
 
 # The following section is specific to Flutter packages.
 flutter:
@@ -136,8 +126,6 @@ flutter:
     - assets/icons/
     - assets/plugins/
     - .env
-  #   - images/a_dot_ham.jpeg
-
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/to/resolution-aware-images
 

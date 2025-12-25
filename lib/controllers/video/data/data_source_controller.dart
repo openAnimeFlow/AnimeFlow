@@ -10,6 +10,7 @@ class DataSourceController extends GetxController {
   late final Rx<List<ResourcesItem>> videoResources;
   final RxString webSiteTitle = ''.obs;
   final RxString webSiteIcon = ''.obs;
+  final RxString videoUrl = ''.obs;
 
   DataSourceController() {
     videoResources = Rx<List<ResourcesItem>>([]);
@@ -37,6 +38,7 @@ class DataSourceController extends GetxController {
 
   //初始化资源
   Future<void> initResources(String keyword) async {
+    _clearAllResources();
     final configs = await CrawlConfig.loadAllCrawlConfigs();
 
     // 并发执行所有网站的资源获取
@@ -45,18 +47,34 @@ class DataSourceController extends GetxController {
     );
   }
 
+  void _clearAllResources() {
+    final currentResources = videoResources.value;
+    final clearedResources = currentResources.map((resource) {
+      return ResourcesItem(
+        websiteName: resource.websiteName,
+        websiteIcon: resource.websiteIcon,
+        videoConfig: resource.videoConfig,
+        episodeResources: [],
+        isLoading: false,
+        errorMessage: null,
+      );
+    }).toList();
+
+    videoResources.value = clearedResources;
+  }
+
   Future<void> _getResources(String keyword, CrawlConfigItem config) async {
     try {
       // 设置解析中状态
       _updateResourceStatus(config.name, isLoading: true, errorMessage: null);
 
       List<SearchResourcesItem> searchList =
-          await WebRequest.getSearchSubjectListService(keyword, config);
+      await WebRequest.getSearchSubjectListService(keyword, config);
       List<EpisodeResourcesItem> allEpisodesList = [];
 
       for (var search in searchList) {
         var crawlerEpisodeResources =
-            await WebRequest.getResourcesListService(search.link, config);
+        await WebRequest.getResourcesListService(search.link, config);
 
         // 转换 CrawlerEpisodeResourcesItem 到 EpisodeResourcesItem
         for (var crawlerResource in crawlerEpisodeResources) {
@@ -86,8 +104,7 @@ class DataSourceController extends GetxController {
   }
 
   // 更新指定网站的状态
-  void _updateResourceStatus(
-    String websiteName, {
+  void _updateResourceStatus(String websiteName, {
     bool? isLoading,
     List<EpisodeResourcesItem>? episodeResources,
     String? errorMessage,
@@ -107,8 +124,10 @@ class DataSourceController extends GetxController {
     videoResources.value = updatedResources;
   }
 
-  void setWebSite({required String title, required String iconUrl}) {
+  void setWebSite(
+      {required String title, required String iconUrl, required String videoUrl}) {
     webSiteTitle.value = title;
     webSiteIcon.value = iconUrl;
+    this.videoUrl.value = videoUrl;
   }
 }

@@ -66,8 +66,11 @@ class _VideoSourceDrawersState extends State<VideoSourceDrawers> {
   void _performSearch() {
     String searchQuery = _searchController.text;
     if (searchQuery.isNotEmpty) {
-      // 执行搜索逻辑
-      print('搜索内容: $searchQuery');
+      // 重置选中索引和状态
+      setState(() {
+        selectedWebsiteIndex = 0;
+        isShowEpisodes = false;
+      });
       dataSourceController.initResources(searchQuery);
     }
   }
@@ -80,7 +83,6 @@ class _VideoSourceDrawersState extends State<VideoSourceDrawers> {
 
   @override
   Widget build(BuildContext context) {
-
     return Align(
       alignment: Alignment.centerRight,
       child: Container(
@@ -114,12 +116,36 @@ class _VideoSourceDrawersState extends State<VideoSourceDrawers> {
             ),
             _manualSearch(),
             const SizedBox(height: 16),
-            Obx(() => _buildWebsiteSelector(
-                dataSource: dataSourceController.videoResources.value)),
+            Obx(() {
+              final dataSource = dataSourceController.videoResources.value;
+              if (dataSource.isEmpty) {
+                return const SizedBox.shrink();
+              }
+              return _buildWebsiteSelector(dataSource: dataSource);
+            }),
             const SizedBox(height: 16),
             Expanded(
-              child: Obx(() => _buildVideoSource(
-                  dataSource: dataSourceController.videoResources.value)),
+              child: Obx(() {
+                final dataSource = dataSourceController.videoResources.value;
+                if (dataSource.isEmpty) {
+                  return const SizedBox.shrink();
+                }
+                // 确保索引有效，如果无效则使用 0
+                final validIndex = selectedWebsiteIndex >= dataSource.length
+                    ? 0
+                    : selectedWebsiteIndex;
+                // 如果索引需要修正，异步更新状态
+                if (validIndex != selectedWebsiteIndex) {
+                  WidgetsBinding.instance.addPostFrameCallback((_) {
+                    if (mounted) {
+                      setState(() {
+                        selectedWebsiteIndex = validIndex;
+                      });
+                    }
+                  });
+                }
+                return _buildVideoSource(dataSource: dataSource);
+              }),
             ),
           ],
         ),
@@ -151,13 +177,11 @@ class _VideoSourceDrawersState extends State<VideoSourceDrawers> {
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(8),
                   ),
-                  contentPadding: const EdgeInsets.symmetric(
-                    horizontal: 12,
-                    vertical: 5
-                  ),
+                  contentPadding:
+                      const EdgeInsets.symmetric(horizontal: 12, vertical: 5),
                   floatingLabelBehavior: FloatingLabelBehavior.always,
                 ),
-                onSubmitted: (value)  {
+                onSubmitted: (value) {
                   _performSearch();
                 },
               ),
@@ -222,21 +246,6 @@ class _VideoSourceDrawersState extends State<VideoSourceDrawers> {
                                     height: 24,
                                     url: data.websiteIcon),
                               ),
-                              const SizedBox(width: 8),
-                              Text(
-                                data.websiteName,
-                                style: TextStyle(
-                                    fontSize: 12,
-                                    fontWeight: isSelected
-                                        ? FontWeight.bold
-                                        : FontWeight.normal,
-                                    color: isSelected
-                                        ? Theme.of(context).colorScheme.primary
-                                        : Theme.of(context)
-                                            .colorScheme
-                                            .onSurface,
-                                    decoration: TextDecoration.none),
-                              ),
                               // 显示解析状态
                               if (data.isLoading) ...[
                                 const SizedBox(width: 4),
@@ -274,15 +283,21 @@ class _VideoSourceDrawersState extends State<VideoSourceDrawers> {
   }
 
   Widget _buildVideoSource({required List<ResourcesItem> dataSource}) {
+    // 确保索引有效
+    if (selectedWebsiteIndex >= dataSource.length) {
+      return const SizedBox.shrink();
+    }
+
+    final selectedResource = dataSource[selectedWebsiteIndex];
+
     return Material(
       child: ListView.builder(
         padding: const EdgeInsets.symmetric(vertical: 0),
-        itemCount: dataSource[selectedWebsiteIndex].episodeResources.length,
+        itemCount: selectedResource.episodeResources.length,
         itemBuilder: (context, index) {
-          final resourceItem =
-              dataSource[selectedWebsiteIndex].episodeResources[index];
-          final isLastItem = index ==
-              dataSource[selectedWebsiteIndex].episodeResources.length - 1;
+          final resourceItem = selectedResource.episodeResources[index];
+          final isLastItem =
+              index == selectedResource.episodeResources.length - 1;
 
           return Obx(() {
             // 当前选中剧集对应的剧集数据
@@ -290,8 +305,7 @@ class _VideoSourceDrawersState extends State<VideoSourceDrawers> {
               (ep) => ep.episodeSort == episodesController.episodeIndex.value,
             );
 
-            final excludedEpisodesCount = dataSource[selectedWebsiteIndex]
-                .episodeResources
+            final excludedEpisodesCount = selectedResource.episodeResources
                 .expand((item) => item.episodes.where((ep) =>
                     ep.episodeSort != episodesController.episodeIndex.value))
                 .length;
@@ -307,9 +321,9 @@ class _VideoSourceDrawersState extends State<VideoSourceDrawers> {
                 _buildSource(
                   currentEpisode,
                   resourceItem,
-                  dataSource[selectedWebsiteIndex].videoConfig,
-                  websiteName: dataSource[selectedWebsiteIndex].websiteName,
-                  websiteIcon: dataSource[selectedWebsiteIndex].websiteIcon,
+                  selectedResource.videoConfig,
+                  websiteName: selectedResource.websiteName,
+                  websiteIcon: selectedResource.websiteIcon,
                 ),
 
                 // 在最后一项后显示开关按钮
@@ -336,9 +350,7 @@ class _VideoSourceDrawersState extends State<VideoSourceDrawers> {
 
                   // 当开关打开时，显示所有资源的所有其他剧集
                   if (isShowEpisodes)
-                    ...dataSource[selectedWebsiteIndex]
-                        .episodeResources
-                        .expand((item) {
+                    ...selectedResource.episodeResources.expand((item) {
                       // 获取该资源的所有非当前集数的剧集
                       final excludedEpisodes = item.episodes
                           .where(
@@ -352,11 +364,9 @@ class _VideoSourceDrawersState extends State<VideoSourceDrawers> {
                         (excludedEpisode) => _buildSource(
                           excludedEpisode,
                           item,
-                          dataSource[selectedWebsiteIndex].videoConfig,
-                          websiteName:
-                              dataSource[selectedWebsiteIndex].websiteName,
-                          websiteIcon:
-                              dataSource[selectedWebsiteIndex].websiteIcon,
+                          selectedResource.videoConfig,
+                          websiteName: selectedResource.websiteName,
+                          websiteIcon: selectedResource.websiteIcon,
                         ),
                       );
                     }),
@@ -372,82 +382,93 @@ class _VideoSourceDrawersState extends State<VideoSourceDrawers> {
   Widget _buildSource(
       Episode episode, EpisodeResourcesItem item, VideoConfig videoConfig,
       {required String websiteName, required String websiteIcon}) {
+    final videoUrl = dataSourceController.videoUrl.value;
     return Card.filled(
       margin: const EdgeInsets.only(bottom: 8),
       child: InkWell(
-        onTap: () async {
-          try {
-            Get.back();
-            dataSourceController.setWebSite(
-                title: websiteName, iconUrl: websiteIcon);
+          onTap: () async {
+            try {
+              Get.back();
+              dataSourceController.setWebSite(
+                  title: websiteName,
+                  iconUrl: websiteIcon,
+                  videoUrl: videoConfig.baseURL + episode.like);
 
-            videoStateController.disposeVideo();
+              videoStateController.disposeVideo();
 
-            logger.i('开始解析视频源: ${videoConfig.baseURL + episode.like}');
-
-            await _loadVideoPage(videoConfig.baseURL + episode.like);
-          } catch (e) {
-            logger.e('获取视频源失败', error: e);
-            Get.snackbar(
-              '错误',
-              '获取视频源失败: $e',
-              duration: const Duration(seconds: 3),
-              backgroundColor: Colors.red.shade100,
-            );
-          }
-        },
-        child: Padding(
-          padding: const EdgeInsets.all(12),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Row(
-                children: [
-                  Text(
-                    item.subjectsTitle,
-                    style: const TextStyle(
-                      fontSize: 16,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                  const SizedBox(width: 8),
-                  Text(
-                    '第${episode.episodeSort}集',
-                    style: const TextStyle(
-                      fontSize: 14,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                  const Spacer(),
-                ],
-              ),
-              const SizedBox(height: 12),
-              Row(
+              await _loadVideoPage(videoConfig.baseURL + episode.like);
+            } catch (e) {
+              logger.e('获取视频源失败', error: e);
+              Get.snackbar(
+                '错误',
+                '获取视频源失败: $e',
+                duration: const Duration(seconds: 3),
+                backgroundColor: Colors.red.shade100,
+              );
+            }
+          },
+          child: Container(
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(10),
+              border: (videoConfig.baseURL + episode.like == videoUrl)
+                  ? Border.all(
+                      width: 2,
+                      color: Theme.of(context).primaryColor,
+                    )
+                  : null,
+            ),
+            child: Padding(
+              padding: const EdgeInsets.all(12),
+              child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  const Text(
-                    '线路:',
-                    style: TextStyle(
-                      fontSize: 12,
-                      color: Colors.grey,
-                    ),
+                  Row(
+                    children: [
+                      Text(
+                        item.subjectsTitle,
+                        style: const TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      const SizedBox(width: 8),
+                      Text(
+                        '第${episode.episodeSort}集',
+                        style: const TextStyle(
+                          fontSize: 14,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      const Spacer(),
+                    ],
                   ),
-                  const SizedBox(width: 8),
-                  Text(
-                    item.lineNames,
-                    style: const TextStyle(
-                      fontSize: 12,
-                      color: Colors.grey,
-                    ),
+                  const SizedBox(height: 12),
+                  Row(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      const Text(
+                        '线路:',
+                        style: TextStyle(
+                          fontSize: 12,
+                          color: Colors.grey,
+                        ),
+                      ),
+                      const SizedBox(width: 8),
+                      Text(
+                        item.lineNames,
+                        style: const TextStyle(
+                          fontSize: 12,
+                          color: Colors.grey,
+                        ),
+                      ),
+                      const Icon(Icons.link, size: 20, color: Colors.grey),
+                      const Spacer(),
+                    ],
                   ),
-                  const Icon(Icons.link, size: 20, color: Colors.grey),
-                  const Spacer(),
                 ],
               ),
-            ],
-          ),
-        ),
-      ),
+            ),
+          )),
     );
   }
 }

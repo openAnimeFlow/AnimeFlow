@@ -87,6 +87,9 @@ class _CharactersViewState extends State<CharactersView> {
                 child: ListView.builder(
                   scrollDirection: Axis.horizontal,
                   itemCount: characters!.data.length,
+                  cacheExtent: 200, // 缓存范围，优化滚动性能
+                  addAutomaticKeepAlives: false, // 不自动保持item状态，节省内存
+                  addRepaintBoundaries: true, // 添加重绘边界，优化性能
                   itemBuilder: (context, index) {
                     final actor = characters!.data[index];
                     return Container(

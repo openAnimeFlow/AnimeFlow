@@ -1,5 +1,4 @@
 import 'package:anime_flow/models/item/subject_basic_data_item.dart';
-import 'package:anime_flow/models/item/bangumi/subject_comments_item.dart';
 import 'package:anime_flow/pages/anime_info/info_head.dart';
 import 'package:anime_flow/controllers/anime/anime_state_controller.dart';
 import 'package:anime_flow/http/requests/bgm_request.dart';
@@ -17,16 +16,11 @@ class AnimeDetailPage extends StatefulWidget {
   State<AnimeDetailPage> createState() => _AnimeDetailPageState();
 }
 
-class _AnimeDetailPageState extends State<AnimeDetailPage>
-    with SingleTickerProviderStateMixin {
+class _AnimeDetailPageState extends State<AnimeDetailPage> {
   late SubjectBasicData subjectBasicData;
   late AnimeStateController animeStateController;
   late Future<SubjectsItem?> _subjectsItem;
   late Future<EpisodesItem> episodesFuture;
-  SubjectCommentItem? subjectCommentItem;
-  int _commentOffset = 0;
-  bool _isLoadingComments = false;
-  bool _hasMoreComments = true;
   final double _contentHeight = 200.0; // 内容区域的高度
   bool isPinned = false;
 
@@ -38,47 +32,11 @@ class _AnimeDetailPageState extends State<AnimeDetailPage>
     _subjectsItem = BgmRequest.getSubjectByIdService(subjectBasicData.id);
     episodesFuture =
         BgmRequest.getSubjectEpisodesByIdService(subjectBasicData.id, 100, 0);
-    _getSubjectComment();
     setSubjectName();
   }
 
   void setSubjectName() {
     animeStateController.setAnimeName(subjectBasicData.name);
-  }
-
-  void _getSubjectComment({bool loadMore = false}) async {
-    if (_isLoadingComments || (loadMore && !_hasMoreComments)) return;
-
-    setState(() {
-      _isLoadingComments = true;
-    });
-
-    final currentOffset = loadMore ? _commentOffset + 1 : 0;
-    final result = await BgmRequest.getSubjectCommentsByIdService(
-        subjectId: subjectBasicData.id, limit: 20, offset: currentOffset);
-
-    if (mounted) {
-      setState(() {
-        if (loadMore && subjectCommentItem != null) {
-          // 追加数据
-          final newDataList = [
-            ...subjectCommentItem!.data,
-            ...result.data,
-          ];
-          subjectCommentItem = SubjectCommentItem(
-            data: newDataList,
-            total: result.total,
-          );
-        } else {
-          // 首次加载，替换数据
-          subjectCommentItem = result;
-        }
-        _commentOffset = currentOffset;
-        _hasMoreComments = result.data.isNotEmpty &&
-            (subjectCommentItem?.data.length ?? 0) < (result.total);
-        _isLoadingComments = false;
-      });
-    }
   }
 
   @override
@@ -164,10 +122,6 @@ class _AnimeDetailPageState extends State<AnimeDetailPage>
               },
               body: InfoSynopsisView(
                 subjectsItem: _subjectsItem,
-                subjectCommentItem: subjectCommentItem,
-                onLoadMoreComments: () => _getSubjectComment(loadMore: true),
-                isLoadingComments: _isLoadingComments,
-                hasMoreComments: _hasMoreComments,
               ),
             ),
           ),

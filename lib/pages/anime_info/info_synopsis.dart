@@ -1,12 +1,10 @@
 import 'package:anime_flow/constants/play_layout_constant.dart';
-import 'package:anime_flow/models/item/bangumi/subject_comments_item.dart';
 import 'package:anime_flow/models/item/bangumi/subjects_item.dart';
 import 'package:anime_flow/pages/anime_info/characters.dart';
 import 'package:anime_flow/pages/anime_info/related.dart';
 import 'package:anime_flow/pages/anime_info/tags.dart';
 import 'package:anime_flow/widget/text/expandable_text.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/scheduler.dart';
 
 import 'details.dart';
 import 'comment.dart';
@@ -23,18 +21,11 @@ class _NoScrollbarBehavior extends ScrollBehavior {
 /// 简介页面
 class InfoSynopsisView extends StatelessWidget {
   final Future<SubjectsItem?> subjectsItem;
-  final SubjectCommentItem? subjectCommentItem;
-  final VoidCallback? onLoadMoreComments;
-  final bool isLoadingComments;
-  final bool hasMoreComments;
 
-  const InfoSynopsisView(
-      {super.key,
-      required this.subjectsItem,
-      required this.subjectCommentItem,
-      this.onLoadMoreComments,
-      this.isLoadingComments = false,
-      this.hasMoreComments = true});
+  const InfoSynopsisView({
+    super.key,
+    required this.subjectsItem,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -47,21 +38,6 @@ class InfoSynopsisView extends StatelessWidget {
       builder: (BuildContext context) {
         return ScrollConfiguration(
           behavior: _NoScrollbarBehavior(),
-          child: NotificationListener<ScrollNotification>(
-            onNotification: (ScrollNotification scrollInfo) {
-              // 当滚动到底部时加载更多评论
-              if (scrollInfo.metrics.pixels >=
-                      scrollInfo.metrics.maxScrollExtent - 200 &&
-                  !isLoadingComments &&
-                  hasMoreComments &&
-                  onLoadMoreComments != null) {
-                // 使用 addPostFrameCallback 延迟调用，避免在 layout/paint 期间调用 setState
-                SchedulerBinding.instance.addPostFrameCallback((_) {
-                  onLoadMoreComments!();
-                });
-              }
-              return false;
-            },
             child: FutureBuilder<SubjectsItem?>(
               future: subjectsItem,
               builder: (context, snapshot) {
@@ -160,10 +136,7 @@ class InfoSynopsisView extends StatelessWidget {
                         child: _buildContainer(
                           leftPadding,
                           CommentView(
-                            subjectCommentItem: subjectCommentItem,
-                            onLoadMore: onLoadMoreComments,
-                            isLoading: isLoadingComments,
-                            hasMore: hasMoreComments,
+                            subjectId: data.id,
                           ),
                         ),
                       ),
@@ -172,7 +145,6 @@ class InfoSynopsisView extends StatelessWidget {
                 );
               },
             ),
-          ),
         );
       },
     );

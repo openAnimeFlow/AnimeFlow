@@ -1,16 +1,208 @@
 # AnimeFlow
 
-A new Flutter project.
+<div align="center">
 
-## Getting Started
+![AnimeFlow Logo](assets/logo/Logo.png)
 
-This project is a starting point for a Flutter application.
+**一个现代化的跨平台动漫视频应用**
 
-A few resources to get you started if this is your first Flutter project:
+[![Flutter](https://img.shields.io/badge/Flutter-3.38.3-blue.svg)](https://flutter.dev/)
+[![Dart](https://img.shields.io/badge/Dart-3.3.4+-blue.svg)](https://dart.dev/)
+[![License](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
 
-- [Lab: Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
-- [Cookbook: Useful Flutter samples](https://docs.flutter.dev/cookbook)
+</div>
 
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev/), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+## 📱 简介
+
+AnimeFlow 是一款基于 Flutter 开发的跨平台动漫视频应用，支持 iOS、Android、Windows、macOS、Linux 和 Web 平台。应用集成了 Bangumi 数据源，提供丰富的动漫信息、视频播放、用户收藏和社区互动功能。
+
+## ✨ 主要特性
+
+### 🎬 内容浏览
+- **推荐页面**：每日更新的热门动漫推荐，发现最新最热的内容
+- **排行榜**：查看各类动漫排行榜，了解当前最受欢迎的作品
+- **日历视图**：按播出日期查看每日更新的番剧
+- **搜索功能**：强大的搜索功能，快速找到你想看的动漫
+
+### 📺 视频播放
+- **高质量播放**：基于 MediaKit 的高性能视频播放引擎
+- **多平台支持**：完美适配移动端和桌面端
+- **播放控制**：支持亮度调节、全屏播放等完整播放控制
+
+### 👤 用户功能
+- **OAuth 登录**：支持 Bangumi 账号登录
+- **个人收藏**：管理你的动漫收藏，支持多种收藏状态（想看、在看、看过、搁置、抛弃）
+- **动态头像**：登录后显示个人头像和昵称
+- **评论互动**：查看和参与动漫评论讨论
+
+### 🎨 界面设计
+- **Material Design 3**：采用最新的 Material Design 3 设计规范
+- **响应式布局**：自适应移动端和桌面端，提供最佳用户体验
+- **深色模式**：支持明暗主题切换
+- **流畅动画**：精心设计的过渡动画和交互效果
+
+### ⚡ 性能优化
+- **懒加载渲染**：使用 Sliver 实现可见区域渲染，提升长列表性能
+- **图片缓存**：智能图片缓存机制，减少网络请求
+- **状态管理**：基于 GetX 的高效状态管理
+- **内存优化**：优化的内存使用，确保应用流畅运行
+
+## 🛠️ 技术栈
+
+- **框架**：Flutter 3.38.3
+- **语言**：Dart 3.3.4+
+- **状态管理**：GetX
+- **网络请求**：Dio
+- **本地存储**：Hive、SharedPreferences、Flutter Secure Storage
+- **视频播放**：MediaKit
+- **图片加载**：Cached Network Image
+- **路由管理**：GetX Navigation
+- **UI 组件**：Material Design 3
+
+## 📦 安装与运行
+
+### 环境要求
+
+- Flutter SDK >= 3.38.3
+- Dart SDK >= 3.3.4
+- Android Studio / Xcode / VS Code（根据目标平台选择）
+
+### 安装步骤
+
+1. **克隆项目**
+   ```bash
+   git clone https://github.com/your-username/anime_flow.git
+   cd anime_flow
+   ```
+
+2. **安装依赖**
+   ```bash
+   flutter pub get
+   ```
+
+3. **配置环境变量**
+   - 复制 `.env.example` 为 `.env`
+   - 填入必要的 API 密钥和配置信息
+
+4. **运行应用**
+   ```bash
+   # 移动端
+   flutter run
+   
+   # 桌面端
+   flutter run -d windows
+   flutter run -d macos
+   flutter run -d linux
+   
+   # Web
+   flutter run -d chrome
+   ```
+
+### 构建发布版本
+
+```bash
+# Android APK
+flutter build apk --split-per-abi
+
+# iOS
+flutter build ios
+
+# Windows
+flutter build windows
+
+# macOS
+flutter build macos
+
+# Linux
+flutter build linux
+
+# Web
+flutter build web
+```
+
+## 📱 平台支持
+
+| 平台 | 状态 | 说明 |
+|------|------|------|
+| iOS | ✅ | 完全支持 |
+| Android | ✅ | 完全支持 |
+| Windows | ✅ | 完全支持 |
+| macOS | ✅ | 完全支持 |
+| Linux | ✅ | 完全支持 |
+| Web | ✅ | 完全支持 |
+
+## 🎯 主要功能模块
+
+### 推荐页面
+- 每日更新日历
+- 热门动画推荐
+- 无限滚动加载
+
+### 详情页面
+- 动漫基本信息
+- 简介和标签
+- 角色和声优信息
+- 关联条目推荐
+- 用户评论和评分
+
+### 搜索功能
+- 实时搜索建议
+- 搜索结果展示
+- 分页加载
+
+### 个人中心
+- 用户信息展示
+- 收藏管理
+- 按状态分类查看
+
+## 🔧 开发工具
+
+### 代码规范
+- 使用 `flutter_lints` 进行代码检查
+- 遵循 Dart 官方代码规范
+
+### 图标生成
+```bash
+dart run flutter_launcher_icons
+```
+
+### 应用重命名
+```bash
+dart run rename_app:main all="Your App Name"
+```
+
+### 包名修改
+```bash
+flutter pub run change_app_package_name:main com.your.package.name
+```
+
+## 📄 许可证
+
+本项目采用 MIT 许可证。详情请参阅 [LICENSE](LICENSE) 文件。
+
+## 🤝 贡献
+
+欢迎提交 Issue 和 Pull Request！
+
+## 📞 联系方式
+
+如有问题或建议，请通过以下方式联系：
+
+- 提交 Issue：[GitHub Issues](https://github.com/your-username/anime_flow/issues)
+- 邮箱：your-email@example.com
+
+## 🙏 致谢
+
+- [Bangumi](https://bgm.tv/) - 提供动漫数据支持
+- [Flutter](https://flutter.dev/) - 跨平台开发框架
+- 所有贡献者和用户的支持
+
+---
+
+<div align="center">
+
+**⭐ 如果这个项目对你有帮助，请给个 Star ⭐**
+
+Made with ❤️ by AnimeFlow Team
+
+</div>

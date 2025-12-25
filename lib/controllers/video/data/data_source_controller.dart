@@ -26,12 +26,7 @@ class DataSourceController extends GetxController {
       return ResourcesItem(
         websiteName: config.name,
         websiteIcon: config.iconUrl,
-        videoConfig: VideoConfig(
-          enableNestedUrl: config.matchVideo.enableNestedUrl,
-          matchNestedUrl: config.matchVideo.matchNestedUrl,
-          matchVideoUrl: config.matchVideo.matchVideoUrl,
-          baseURL: config.baseURL,
-        ),
+        baseUrl: config.baseUrl,
         episodeResources: [],
       );
     }).toList();
@@ -56,7 +51,7 @@ class DataSourceController extends GetxController {
       return ResourcesItem(
         websiteName: resource.websiteName,
         websiteIcon: resource.websiteIcon,
-        videoConfig: resource.videoConfig,
+        baseUrl: resource.baseUrl,
         episodeResources: [],
         isLoading: false,
         errorMessage: null,

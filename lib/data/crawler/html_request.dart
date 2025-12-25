@@ -15,7 +15,7 @@ class WebRequest {
   ///获取搜索条目列表
   static Future<List<SearchResourcesItem>> getSearchSubjectListService(
       String keyword, CrawlConfigItem crawlConfig) async {
-    final String searchURL = crawlConfig.searchURL;
+    final String searchURL = crawlConfig.searchUrl;
     final userAgent = Constants
         .userAgentList[Random().nextInt(Constants.userAgentList.length)];
 
@@ -30,7 +30,7 @@ class WebRequest {
   ///获取剧集资源列表
   static Future<List<CrawlerEpisodeResourcesItem>> getResourcesListService(
       String link, CrawlConfigItem crawlConfig) async {
-    final String baseURL = crawlConfig.baseURL;
+    final String baseURL = crawlConfig.baseUrl;
 
     final userAgent = Constants
         .userAgentList[Random().nextInt(Constants.userAgentName.length)];

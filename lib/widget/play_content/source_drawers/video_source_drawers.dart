@@ -5,7 +5,6 @@ import 'package:anime_flow/controllers/episodes/episodes_controller.dart';
 import 'package:anime_flow/controllers/video/data/data_source_controller.dart';
 import 'package:anime_flow/controllers/video/video_state_controller.dart';
 import 'package:anime_flow/controllers/video/video_ui_state_controller.dart';
-import 'package:anime_flow/models/item/crawler_config_item.dart';
 import 'package:anime_flow/models/item/video/episode_resources_item.dart';
 import 'package:anime_flow/models/item/video/resources_item.dart';
 import 'package:flutter/material.dart';
@@ -77,18 +76,18 @@ class _VideoSourceDrawersState extends State<VideoSourceDrawers> {
     // 遍历资源列表，找到第一个匹配当前剧集的资源
     for (var resourceItem in resource.episodeResources) {
       final currentEpisode = resourceItem.episodes.firstWhereOrNull(
-        (ep) => ep.episodeSort == episodesController.episodeIndex.value,
+            (ep) => ep.episodeSort == episodesController.episodeIndex.value,
       );
       if (currentEpisode != null) {
         try {
           dataSourceController.setWebSite(
             title: resource.websiteName,
             iconUrl: resource.websiteIcon,
-            videoUrl: resource.videoConfig.baseURL + currentEpisode.like,
+            videoUrl: resource.baseUrl + currentEpisode.like,
           );
           videoStateController.disposeVideo();
           await _loadVideoPage(
-              resource.videoConfig.baseURL + currentEpisode.like);
+              resource.baseUrl + currentEpisode.like);
           dataSourceController.updateLoading(false);
         } catch (e) {
           dataSourceController.updateLoading(false);
@@ -132,15 +131,22 @@ class _VideoSourceDrawersState extends State<VideoSourceDrawers> {
   Widget build(BuildContext context) {
     return Align(
       alignment: Alignment.centerRight,
-      child: Container(
+      child: SizedBox(
         width: PlayLayoutConstant.playContentWidth,
-        padding: const EdgeInsets.all(16),
-        color: Theme.of(context).cardColor,
-        child: Column(
+        height: MediaQuery.of(context).size.height,
+        child: Container(
+          padding: const EdgeInsets.all(16),
+          color: Theme
+              .of(context)
+              .cardColor,
+          child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Padding(
-              padding: EdgeInsets.only(top: MediaQuery.of(context).padding.top),
+              padding: EdgeInsets.only(top: MediaQuery
+                  .of(context)
+                  .padding
+                  .top),
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
@@ -149,7 +155,11 @@ class _VideoSourceDrawersState extends State<VideoSourceDrawers> {
                     style: TextStyle(
                       fontSize: 20,
                       fontWeight: FontWeight.bold,
-                      color: Theme.of(context).textTheme.titleLarge?.color,
+                      color: Theme
+                          .of(context)
+                          .textTheme
+                          .titleLarge
+                          ?.color,
                       decoration: TextDecoration.none,
                     ),
                   ),
@@ -184,10 +194,10 @@ class _VideoSourceDrawersState extends State<VideoSourceDrawers> {
                 // 资源初始化完成后，自动选择第一个有资源的网站
                 if (_needAutoSelect) {
                   final firstResourceIndex =
-                      _findFirstResourceIndex(dataSource);
+                  _findFirstResourceIndex(dataSource);
                   // 只有当找到有资源的网站且还没有选中资源时，才自动选择并加载
                   final hasResource =
-                      dataSource.any((r) => r.episodeResources.isNotEmpty);
+                  dataSource.any((r) => r.episodeResources.isNotEmpty);
                   if (hasResource &&
                       dataSourceController.webSiteTitle.value.isEmpty) {
                     validIndex = firstResourceIndex;
@@ -228,6 +238,7 @@ class _VideoSourceDrawersState extends State<VideoSourceDrawers> {
             ),
           ],
         ),
+        ),
       ),
     );
   }
@@ -242,29 +253,33 @@ class _VideoSourceDrawersState extends State<VideoSourceDrawers> {
               style: TextStyle(
                 fontSize: 20,
                 fontWeight: FontWeight.bold,
-                color: Theme.of(context).textTheme.titleLarge?.color,
+                color: Theme
+                    .of(context)
+                    .textTheme
+                    .titleLarge
+                    ?.color,
                 decoration: TextDecoration.none,
               ),
             ),
             const SizedBox(width: 5),
             Expanded(
                 child: Material(
-              child: TextField(
-                controller: _searchController,
-                decoration: InputDecoration(
-                  hintText: '手动搜索资源',
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(8),
-                  ),
-                  contentPadding:
+                  child: TextField(
+                    controller: _searchController,
+                    decoration: InputDecoration(
+                      hintText: '手动搜索资源',
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                      contentPadding:
                       const EdgeInsets.symmetric(horizontal: 12, vertical: 5),
-                  floatingLabelBehavior: FloatingLabelBehavior.always,
-                ),
-                onSubmitted: (value) {
-                  _performSearch();
-                },
-              ),
-            ))
+                      floatingLabelBehavior: FloatingLabelBehavior.always,
+                    ),
+                    onSubmitted: (value) {
+                      _performSearch();
+                    },
+                  ),
+                ))
           ],
         ));
   }
@@ -278,7 +293,10 @@ class _VideoSourceDrawersState extends State<VideoSourceDrawers> {
             Icon(
               Icons.public,
               size: 24,
-              color: Theme.of(context).colorScheme.onSurface,
+              color: Theme
+                  .of(context)
+                  .colorScheme
+                  .onSurface,
             ),
             const SizedBox(width: 8),
             Expanded(
@@ -302,16 +320,21 @@ class _VideoSourceDrawersState extends State<VideoSourceDrawers> {
                           padding: const EdgeInsets.all(8),
                           decoration: BoxDecoration(
                             color: isSelected
-                                ? Theme.of(context)
-                                    .colorScheme
-                                    .surfaceContainerHighest
-                                : Theme.of(context)
-                                    .colorScheme
-                                    .surfaceContainerHighest,
+                                ? Theme
+                                .of(context)
+                                .colorScheme
+                                .surfaceContainerHighest
+                                : Theme
+                                .of(context)
+                                .colorScheme
+                                .surfaceContainerHighest,
                             borderRadius: BorderRadius.circular(12),
                             border: Border.all(
                               color: isSelected
-                                  ? Theme.of(context).colorScheme.primary
+                                  ? Theme
+                                  .of(context)
+                                  .colorScheme
+                                  .primary
                                   : Colors.transparent,
                               width: 2,
                             ),
@@ -334,24 +357,35 @@ class _VideoSourceDrawersState extends State<VideoSourceDrawers> {
                                   child: CircularProgressIndicator(
                                     strokeWidth: 2,
                                     color:
-                                        Theme.of(context).colorScheme.primary,
+                                    Theme
+                                        .of(context)
+                                        .colorScheme
+                                        .primary,
                                   ),
                                 ),
-                              ] else if (data.errorMessage != null) ...[
-                                const SizedBox(width: 4),
-                                Icon(
-                                  Icons.error_outline,
-                                  size: 14,
-                                  color: Theme.of(context).colorScheme.error,
-                                ),
-                              ] else if (data.episodeResources.isNotEmpty) ...[
-                                const SizedBox(width: 4),
-                                Icon(
-                                  Icons.check_circle_outline,
-                                  size: 14,
-                                  color: Theme.of(context).colorScheme.primary,
-                                ),
-                              ],
+                              ] else
+                                if (data.errorMessage != null) ...[
+                                  const SizedBox(width: 4),
+                                  Icon(
+                                    Icons.error_outline,
+                                    size: 14,
+                                    color: Theme
+                                        .of(context)
+                                        .colorScheme
+                                        .error,
+                                  ),
+                                ] else
+                                  if (data.episodeResources.isNotEmpty) ...[
+                                    const SizedBox(width: 4),
+                                    Icon(
+                                      Icons.check_circle_outline,
+                                      size: 14,
+                                      color: Theme
+                                          .of(context)
+                                          .colorScheme
+                                          .primary,
+                                    ),
+                                  ],
                             ],
                           ),
                         ),
@@ -381,12 +415,14 @@ class _VideoSourceDrawersState extends State<VideoSourceDrawers> {
           return Obx(() {
             // 当前选中剧集对应的剧集数据
             final currentEpisode = resourceItem.episodes.firstWhereOrNull(
-              (ep) => ep.episodeSort == episodesController.episodeIndex.value,
+                  (ep) =>
+              ep.episodeSort == episodesController.episodeIndex.value,
             );
 
             final excludedEpisodesCount = selectedResource.episodeResources
-                .expand((item) => item.episodes.where((ep) =>
-                    ep.episodeSort != episodesController.episodeIndex.value))
+                .expand((item) =>
+                item.episodes.where((ep) =>
+                ep.episodeSort != episodesController.episodeIndex.value))
                 .length;
 
             // 如果当前资源组没有匹配的剧集，不渲染
@@ -400,7 +436,7 @@ class _VideoSourceDrawersState extends State<VideoSourceDrawers> {
                 _buildSource(
                   currentEpisode,
                   resourceItem,
-                  selectedResource.videoConfig,
+                  baseUrl: selectedResource.baseUrl,
                   websiteName: selectedResource.websiteName,
                   websiteIcon: selectedResource.websiteIcon,
                 ),
@@ -434,19 +470,20 @@ class _VideoSourceDrawersState extends State<VideoSourceDrawers> {
                       final excludedEpisodes = item.episodes
                           .where(
                             (ep) =>
-                                ep.episodeSort !=
-                                episodesController.episodeIndex.value,
-                          )
+                        ep.episodeSort !=
+                            episodesController.episodeIndex.value,
+                      )
                           .toList();
                       // 遍历所有其他剧集
                       return excludedEpisodes.map(
-                        (excludedEpisode) => _buildSource(
-                          excludedEpisode,
-                          item,
-                          selectedResource.videoConfig,
-                          websiteName: selectedResource.websiteName,
-                          websiteIcon: selectedResource.websiteIcon,
-                        ),
+                            (excludedEpisode) =>
+                            _buildSource(
+                              excludedEpisode,
+                              item,
+                              baseUrl: selectedResource.baseUrl,
+                              websiteName: selectedResource.websiteName,
+                              websiteIcon: selectedResource.websiteIcon,
+                            ),
                       );
                     }),
                 ],
@@ -458,9 +495,8 @@ class _VideoSourceDrawersState extends State<VideoSourceDrawers> {
     );
   }
 
-  Widget _buildSource(
-      Episode episode, EpisodeResourcesItem item, VideoConfig videoConfig,
-      {required String websiteName, required String websiteIcon}) {
+  Widget _buildSource(Episode episode, EpisodeResourcesItem item,
+      {required String websiteName, required String websiteIcon, required String baseUrl}) {
     final videoUrl = dataSourceController.videoUrl.value;
     return Card.filled(
       margin: const EdgeInsets.only(bottom: 8),
@@ -471,11 +507,11 @@ class _VideoSourceDrawersState extends State<VideoSourceDrawers> {
               dataSourceController.setWebSite(
                   title: websiteName,
                   iconUrl: websiteIcon,
-                  videoUrl: videoConfig.baseURL + episode.like);
+                  videoUrl: baseUrl + episode.like);
 
               videoStateController.disposeVideo();
 
-              await _loadVideoPage(videoConfig.baseURL + episode.like);
+              await _loadVideoPage(baseUrl + episode.like);
             } catch (e) {
               logger.e('获取视频源失败', error: e);
               Get.snackbar(
@@ -490,11 +526,13 @@ class _VideoSourceDrawersState extends State<VideoSourceDrawers> {
           child: Container(
             decoration: BoxDecoration(
               borderRadius: BorderRadius.circular(10),
-              border: (videoConfig.baseURL + episode.like == videoUrl)
+              border: (baseUrl + episode.like == videoUrl)
                   ? Border.all(
-                      width: 2,
-                      color: Theme.of(context).primaryColor,
-                    )
+                width: 2,
+                color: Theme
+                    .of(context)
+                    .primaryColor,
+              )
                   : null,
             ),
             child: Padding(

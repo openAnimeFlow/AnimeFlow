@@ -147,6 +147,10 @@ class _RecommendViewState extends State<RecommendView> {
                     );
                   },
                 ),
+                IconButton(
+                    onPressed: () =>
+                        Navigator.of(context).pushNamed(RouteName.settings),
+                    icon: Icon(Icons.settings))
               ],
             )),
             GetBuilder<ThemeController>(

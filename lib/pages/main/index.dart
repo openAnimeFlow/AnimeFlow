@@ -69,13 +69,13 @@ class _MainPageState extends State<MainPage> {
         final userInfo = userInfoStore.userInfo.value;
         if (userInfo != null) {
           return NavigationRailDestination(
-            icon:  AnimationNetworkImage(
-                borderRadius: BorderRadius.circular(50),
-                url: userInfo.avatar.medium,
-                width: 24,
-                height: 24,
-                fit: BoxFit.cover,
-              ),
+            icon: AnimationNetworkImage(
+              borderRadius: BorderRadius.circular(50),
+              url: userInfo.avatar.medium,
+              width: 24,
+              height: 24,
+              fit: BoxFit.cover,
+            ),
             selectedIcon: Container(
               decoration: BoxDecoration(
                 border: Border.all(
@@ -113,29 +113,29 @@ class _MainPageState extends State<MainPage> {
         final userInfo = userInfoStore.userInfo.value;
         if (userInfo != null) {
           return NavigationDestination(
-            icon:  AnimationNetworkImage(
+            icon: AnimationNetworkImage(
+              borderRadius: BorderRadius.circular(50),
+              url: userInfo.avatar.medium,
+              width: 24,
+              height: 24,
+              fit: BoxFit.cover,
+            ),
+            selectedIcon: Container(
+              decoration: BoxDecoration(
+                border: Border.all(
+                  color: colorScheme.primary,
+                  width: 2,
+                ),
+                borderRadius: BorderRadius.circular(50),
+              ),
+              child: AnimationNetworkImage(
                 borderRadius: BorderRadius.circular(50),
                 url: userInfo.avatar.medium,
                 width: 24,
                 height: 24,
-                fit: BoxFit.cover,
-            ),
-            selectedIcon:  Container(
-                decoration: BoxDecoration(
-                  border: Border.all(
-                    color: colorScheme.primary,
-                    width: 2,
-                  ),
-                  borderRadius: BorderRadius.circular(50),
-                ),
-                child: AnimationNetworkImage(
-                  borderRadius: BorderRadius.circular(50),
-                  url: userInfo.avatar.medium,
-                  width: 24,
-                  height: 24,
-                  fit: BoxFit.fill,
-                ),
+                fit: BoxFit.fill,
               ),
+            ),
             label: tab.title,
           );
         }
@@ -201,16 +201,11 @@ class _MainPageState extends State<MainPage> {
                     padding: EdgeInsets.only(
                         bottom: MediaQuery.of(context).padding.bottom + 5),
                     child: IconButton(
-                      icon: const Icon(Icons.settings_outlined),
-                      iconSize: 28,
-                      tooltip: '设置',
-                      onPressed: () {
-                        // TODO: 实现设置功能
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          const SnackBar(content: Text('设置功能开发中...')),
-                        );
-                      },
-                    ),
+                        icon: const Icon(Icons.settings_outlined),
+                        iconSize: 28,
+                        tooltip: '设置',
+                        onPressed: () => Navigator.of(context)
+                            .pushNamed(RouteName.settings)),
                   ),
                   destinations: _buildRailDestinations(colorScheme),
                 )),

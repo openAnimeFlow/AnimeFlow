@@ -21,10 +21,12 @@ class _NoScrollbarBehavior extends ScrollBehavior {
 /// 简介页面
 class InfoSynopsisView extends StatefulWidget {
   final Future<SubjectsItem?> subjectsItem;
+  final ValueChanged<bool>? onScrollChanged;
 
   const InfoSynopsisView({
     super.key,
     required this.subjectsItem,
+    this.onScrollChanged,
   });
 
   @override
@@ -32,7 +34,8 @@ class InfoSynopsisView extends StatefulWidget {
 }
 
 class _InfoSynopsisViewState extends State<InfoSynopsisView> {
-  final GlobalKey<CommentViewState> _commentViewKey = GlobalKey<CommentViewState>();
+  final GlobalKey<CommentViewState> _commentViewKey =
+      GlobalKey<CommentViewState>();
 
   @override
   Widget build(BuildContext context) {
@@ -45,132 +48,139 @@ class _InfoSynopsisViewState extends State<InfoSynopsisView> {
       builder: (BuildContext context) {
         return ScrollConfiguration(
           behavior: _NoScrollbarBehavior(),
-            child: NotificationListener<ScrollNotification>(
-              onNotification: (ScrollNotification scrollInfo) {
-                // 只处理垂直滚动的更新事件
-                if (scrollInfo.metrics.axis == Axis.vertical &&
-                    scrollInfo is ScrollUpdateNotification) {
-                  // 通知 CommentView 检查是否需要加载更多
-                  _commentViewKey.currentState?.checkAndLoadMore(scrollInfo.metrics);
-                }
-                return false;
-              },
-              child: FutureBuilder<SubjectsItem?>(
-                future: widget.subjectsItem,
-                builder: (context, snapshot) {
-                  final data = snapshot.data;
-                  final leftPadding = MediaQuery.of(context).padding.left;
-                  
-                  return CustomScrollView(
-                  key: const PageStorageKey<String>(title),
-                  slivers: <Widget>[
-                    // 注入重叠区域，防止内容被 Header 遮挡
-                    SliverOverlapInjector(
-                      handle: NestedScrollView.sliverOverlapAbsorberHandleFor(
-                        context,
-                      ),
-                    ),
+              child: NotificationListener<ScrollNotification>(
+                onNotification: (ScrollNotification scrollInfo) {
+                  // 只处理垂直滚动的更新事件
+                  if (scrollInfo.metrics.axis == Axis.vertical &&
+                      scrollInfo is ScrollUpdateNotification) {
+                    // 通知 CommentView 检查是否需要加载更多
+                    _commentViewKey.currentState
+                        ?.checkAndLoadMore(scrollInfo.metrics);
                     
-                    // 加载中状态
-                    if (data == null)
-                      const SliverToBoxAdapter(
-                        child: Padding(
-                          padding: EdgeInsets.all(16),
-                          child: Text('加载中...'),
-                        ),
-                      )
-                    else ...[
-                      // 简介
-                      SliverToBoxAdapter(
-                        child: _buildContainer(
-                          leftPadding,
-                          ExpandableText(
-                            title: title,
-                            fontSizeTitle: fontSizeTitle,
-                            fontWeightTitle: fontWeightTitle,
-                            text: data.summary,
-                            fontWeight: fontWeight,
+                    // 监听页面滚动位置，通知父组件更新按钮显示状态
+                    final bool shouldShowButton = scrollInfo.metrics.pixels >= 300;
+                    widget.onScrollChanged?.call(shouldShowButton);
+                  }
+                  return false;
+                },
+                child: FutureBuilder<SubjectsItem?>(
+                  future: widget.subjectsItem,
+                  builder: (context, snapshot) {
+                    final data = snapshot.data;
+                    final leftPadding = MediaQuery.of(context).padding.left;
+
+                    return CustomScrollView(
+                      key: const PageStorageKey<String>(title),
+                      slivers: <Widget>[
+                        // 注入重叠区域，防止内容被 Header 遮挡
+                        SliverOverlapInjector(
+                          handle:
+                              NestedScrollView.sliverOverlapAbsorberHandleFor(
+                            context,
                           ),
                         ),
-                      ),
-                      
-                      // 标签
-                      SliverToBoxAdapter(
-                        child: _buildContainer(
-                          leftPadding,
-                          TagView(
-                            title: '标签',
-                            fontSizeTitle: fontSizeTitle,
-                            fontWeightTitle: fontWeightTitle,
-                            tags: data.tags,
-                            fontSize: 12,
-                            fontWeight: FontWeight.w700,
-                            numbersSize: 10,
-                            numbersWeight: FontWeight.w600,
+
+                        // 加载中状态
+                        if (data == null)
+                          const SliverToBoxAdapter(
+                            child: Padding(
+                              padding: EdgeInsets.all(16),
+                              child: Text('加载中...'),
+                            ),
+                          )
+                        else ...[
+                          // 简介
+                          SliverToBoxAdapter(
+                            child: _buildContainer(
+                              leftPadding,
+                              ExpandableText(
+                                title: title,
+                                fontSizeTitle: fontSizeTitle,
+                                fontWeightTitle: fontWeightTitle,
+                                text: data.summary,
+                                fontWeight: fontWeight,
+                              ),
+                            ),
                           ),
-                          topPadding: 25,
-                        ),
-                      ),
-                      
-                      // 详情
-                      SliverToBoxAdapter(
-                        child: _buildContainer(
-                          leftPadding,
-                          DetailsView(
-                            title: '详情',
-                            subject: data,
-                            textSize: 13,
-                            textFontWeight: FontWeight.w600,
+
+                          // 标签
+                          SliverToBoxAdapter(
+                            child: _buildContainer(
+                              leftPadding,
+                              TagView(
+                                title: '标签',
+                                fontSizeTitle: fontSizeTitle,
+                                fontWeightTitle: fontWeightTitle,
+                                tags: data.tags,
+                                fontSize: 12,
+                                fontWeight: FontWeight.w700,
+                                numbersSize: 10,
+                                numbersWeight: FontWeight.w600,
+                              ),
+                              topPadding: 25,
+                            ),
                           ),
-                          topPadding: 25,
-                        ),
-                      ),
-                      
-                      // 角色
-                      SliverToBoxAdapter(
-                        child: _buildContainer(
-                          leftPadding,
-                          CharactersView(
-                            title: '角色',
-                            subjectsId: data.id,
+
+                          // 详情
+                          SliverToBoxAdapter(
+                            child: _buildContainer(
+                              leftPadding,
+                              DetailsView(
+                                title: '详情',
+                                subject: data,
+                                textSize: 13,
+                                textFontWeight: FontWeight.w600,
+                              ),
+                              topPadding: 25,
+                            ),
                           ),
-                        ),
-                      ),
-                      
-                      // 关联条目
-                      SliverToBoxAdapter(
-                        child: _buildContainer(
-                          leftPadding,
-                          RelatedView(
-                            title: '关联条目',
-                            subjectId: data.id,
+
+                          // 角色
+                          SliverToBoxAdapter(
+                            child: _buildContainer(
+                              leftPadding,
+                              CharactersView(
+                                title: '角色',
+                                subjectsId: data.id,
+                              ),
+                            ),
                           ),
-                        ),
-                      ),
-                      
-                      // 评论
-                      SliverToBoxAdapter(
-                        child: _buildContainer(
-                          leftPadding,
-                          CommentView(
-                            key: _commentViewKey,
-                            subjectId: data.id,
+
+                          // 关联条目
+                          SliverToBoxAdapter(
+                            child: _buildContainer(
+                              leftPadding,
+                              RelatedView(
+                                title: '关联条目',
+                                subjectId: data.id,
+                              ),
+                            ),
                           ),
-                        ),
-                      ),
-                    ],
-                  ],
-                );
-              },
+
+                          // 评论
+                          SliverToBoxAdapter(
+                            child: _buildContainer(
+                              leftPadding,
+                              CommentView(
+                                key: _commentViewKey,
+                                subjectId: data.id,
+                              ),
+                            ),
+                          ),
+                        ],
+                      ],
+                    );
+                  },
+                ),
               ),
-            ),
         );
       },
     );
   }
 
   /// 构建带约束的容器
-  Widget _buildContainer(double leftPadding, Widget child, {double topPadding = 0}) {
+  Widget _buildContainer(double leftPadding, Widget child,
+      {double topPadding = 0}) {
     return Align(
       alignment: Alignment.center,
       child: ConstrainedBox(

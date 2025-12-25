@@ -36,6 +36,14 @@ dependencies:
   # Use with the CupertinoIcons class for iOS style icons.
   cupertino_icons: ^1.0.8
 
+  # 统一appName dart run rename_app:main all="My App Name"
+  # 文档:https://github.com/Syed-Waleed-Shah/rename_app/blob/master/README.md
+  rename_app: ^1.6.5
+
+  # 修改包名
+  # 命令: flutter pub run change_app_package_name:main com.ligg.anime_flow
+  change_app_package_name: ^1.5.0
+
   #构建每个架构一个APK
   #flutter build apk --split-per-abi
 

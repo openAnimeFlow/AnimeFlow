@@ -23,6 +23,8 @@ class _AnimeDetailPageState extends State<AnimeDetailPage> {
   late Future<EpisodesItem> episodesFuture;
   final double _contentHeight = 200.0; // 内容区域的高度
   bool isPinned = false;
+  bool topButton = false;
+  final _nestedScrollController = ScrollController();
 
   @override
   void initState() {
@@ -41,6 +43,7 @@ class _AnimeDetailPageState extends State<AnimeDetailPage> {
 
   @override
   void dispose() {
+    _nestedScrollController.dispose();
     Get.delete<AnimeStateController>();
     super.dispose();
   }
@@ -69,6 +72,7 @@ class _AnimeDetailPageState extends State<AnimeDetailPage> {
               return false;
             },
             child: NestedScrollView(
+              controller: _nestedScrollController,
               headerSliverBuilder:
                   (BuildContext context, bool innerBoxIsScrolled) {
                 return <Widget>[
@@ -122,9 +126,31 @@ class _AnimeDetailPageState extends State<AnimeDetailPage> {
               },
               body: InfoSynopsisView(
                 subjectsItem: _subjectsItem,
+                onScrollChanged: (bool showButton) {
+                  if (topButton != showButton) {
+                    setState(() {
+                      topButton = showButton;
+                    });
+                  }
+                },
               ),
             ),
           ),
+          if (topButton)
+            Positioned(
+              right: 10,
+              bottom: 10,
+              child: FloatingActionButton(
+                onPressed: () {
+                  _nestedScrollController.animateTo(
+                    0,
+                    duration: const Duration(milliseconds: 300),
+                    curve: Curves.easeInOut,
+                  );
+                },
+                child: const Icon(Icons.arrow_upward_rounded),
+              ),
+            ),
         ],
       ),
     );

@@ -11,10 +11,10 @@ import 'generated/BBCodeParser.dart';
 import 'generated/BBCodeLexer.dart';
 
 class BBCodeWidget extends StatefulWidget {
-  const BBCodeWidget({super.key, required this.bbcode});
+  const BBCodeWidget({super.key, required this.bbcode, this.borderRadius = BorderRadius.zero});
 
   final String bbcode;
-
+  final BorderRadiusGeometry borderRadius;
   @override
   State<StatefulWidget> createState() => _BBCodeWidgetState();
 }
@@ -122,7 +122,7 @@ class _BBCodeWidgetState extends State<BBCodeWidget> {
                 return WidgetSpan(
                   child: AnimationNetworkImage(
                     preview:  true,
-                    borderRadius: BorderRadius.circular(5),
+                    borderRadius: widget.borderRadius,
                     url: e.imageUrl,
                   ),
                 );
@@ -141,7 +141,7 @@ class _BBCodeWidgetState extends State<BBCodeWidget> {
                 return WidgetSpan(
                   child: AnimationNetworkImage(
                     preview:  true,
-                    borderRadius: BorderRadius.circular(5),
+                    borderRadius: widget.borderRadius,
                     url: url,
                   ),
                 );
@@ -149,7 +149,7 @@ class _BBCodeWidgetState extends State<BBCodeWidget> {
                 return WidgetSpan(
                   child: AnimationNetworkImage(
                     preview:  true,
-                    borderRadius: BorderRadius.circular(5),
+                    borderRadius: widget.borderRadius,
                     url: 'https://bangumi.tv/img/smiles/${e.id}.gif',
                   ),
                 );

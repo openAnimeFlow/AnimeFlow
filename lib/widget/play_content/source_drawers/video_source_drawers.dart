@@ -30,6 +30,7 @@ class _VideoSourceDrawersState extends State<VideoSourceDrawers> {
   final logger = Logger();
   bool isShowEpisodes = false;
   int selectedWebsiteIndex = 0; // 当前选中的网站索引
+  final _searchController = TextEditingController();
 
   @override
   void initState() {
@@ -62,8 +63,24 @@ class _VideoSourceDrawersState extends State<VideoSourceDrawers> {
     );
   }
 
+  void _performSearch() {
+    String searchQuery = _searchController.text;
+    if (searchQuery.isNotEmpty) {
+      // 执行搜索逻辑
+      print('搜索内容: $searchQuery');
+      dataSourceController.initResources(searchQuery);
+    }
+  }
+
+  @override
+  void dispose() {
+    _searchController.dispose();
+    super.dispose();
+  }
+
   @override
   Widget build(BuildContext context) {
+
     return Align(
       alignment: Alignment.centerRight,
       child: Container(
@@ -95,7 +112,8 @@ class _VideoSourceDrawersState extends State<VideoSourceDrawers> {
                 ],
               ),
             ),
-            const SizedBox(height: 10),
+            _manualSearch(),
+            const SizedBox(height: 16),
             Obx(() => _buildWebsiteSelector(
                 dataSource: dataSourceController.videoResources.value)),
             const SizedBox(height: 16),
@@ -107,6 +125,45 @@ class _VideoSourceDrawersState extends State<VideoSourceDrawers> {
         ),
       ),
     );
+  }
+
+  Widget _manualSearch() {
+    return SizedBox(
+        height: 40,
+        child: Row(
+          children: [
+            Text(
+              '手动搜索',
+              style: TextStyle(
+                fontSize: 20,
+                fontWeight: FontWeight.bold,
+                color: Theme.of(context).textTheme.titleLarge?.color,
+                decoration: TextDecoration.none,
+              ),
+            ),
+            const SizedBox(width: 5),
+            Expanded(
+                child: Material(
+              child: TextField(
+                controller: _searchController,
+                decoration: InputDecoration(
+                  hintText: '手动搜索资源',
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  contentPadding: const EdgeInsets.symmetric(
+                    horizontal: 12,
+                    vertical: 5
+                  ),
+                  floatingLabelBehavior: FloatingLabelBehavior.always,
+                ),
+                onSubmitted: (value)  {
+                  _performSearch();
+                },
+              ),
+            ))
+          ],
+        ));
   }
 
   // 数据源选择器
@@ -329,7 +386,6 @@ class _VideoSourceDrawersState extends State<VideoSourceDrawers> {
             logger.i('开始解析视频源: ${videoConfig.baseURL + episode.like}');
 
             await _loadVideoPage(videoConfig.baseURL + episode.like);
-
           } catch (e) {
             logger.e('获取视频源失败', error: e);
             Get.snackbar(

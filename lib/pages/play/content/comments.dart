@@ -285,6 +285,7 @@ class _CommentsViewState extends State<CommentsView>
                 if (reply.content.isNotEmpty) ...[
                   const SizedBox(height: 4),
                   BBCodeWidget(
+                    borderRadius: BorderRadius.circular(8),
                     bbcode: reply.content,
                   )
                 ],

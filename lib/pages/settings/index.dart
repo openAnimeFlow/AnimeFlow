@@ -19,32 +19,51 @@ class _SettingsPageState extends State<SettingsPage> {
   late SettingController settingController;
   int _selectedIndex = 0;
 
-  final List<_SettingsMenuItem> _menuItems = [
-    _SettingsMenuItem(
-      title: '通用',
-      icon: Icons.settings_outlined,
-      route: RouteName.settingsGeneral,
-      page: const GeneralSettingsPage(),
+  final List<_SettingsCategory> _categories = [
+    _SettingsCategory(
+      title: '播放历史与视频源',
+      items: [
+        _SettingsMenuItem(
+          title: '数据源管理',
+          icon: Icons.smart_display_rounded,
+          route: RouteName.settingsDataSource,
+          page: const DataSourcePage(),
+        ),
+      ],
     ),
-    _SettingsMenuItem(
-      title: '数据源管理',
-      icon: Icons.smart_display_rounded,
-      route: RouteName.settingsDataSource,
-      page: const DataSourcePage(),
+    _SettingsCategory(
+      title: '播放器设置',
+      items: [
+        _SettingsMenuItem(
+          title: '播放',
+          icon: Icons.play_circle_outline,
+          route: RouteName.settingsPlayback,
+          page: const PlaybackSettingsPage(),
+        ),
+      ],
     ),
-    _SettingsMenuItem(
-      title: '播放',
-      icon: Icons.play_circle_outline,
-      route: RouteName.settingsPlayback,
-      page: const PlaybackSettingsPage(),
-    ),
-    _SettingsMenuItem(
-      title: '关于',
-      icon: Icons.info_outline,
-      route: RouteName.settingsAbout,
-      page: const AboutSettingsPage(),
+    _SettingsCategory(
+      title: '应用与外观',
+      items: [
+        _SettingsMenuItem(
+          title: '通用',
+          icon: Icons.settings_outlined,
+          route: RouteName.settingsGeneral,
+          page: const GeneralSettingsPage(),
+        ),
+        _SettingsMenuItem(
+          title: '关于',
+          icon: Icons.info_outline,
+          route: RouteName.settingsAbout,
+          page: const AboutSettingsPage(),
+        ),
+      ],
     ),
   ];
+
+  List<_SettingsMenuItem> get _allMenuItems {
+    return _categories.expand((category) => category.items).toList();
+  }
 
   @override
   void initState() {
@@ -65,11 +84,10 @@ class _SettingsPageState extends State<SettingsPage> {
               children: [
                 // 左侧菜单
                 Container(
-                  width: 200,
+                  width: 250,
                   color: Theme.of(context).colorScheme.surfaceContainerHighest,
                   child: Column(
                     children: [
-                      // 返回按钮
                       ListTile(
                         leading: const Icon(Icons.arrow_back),
                         title: const Text("返回"),
@@ -81,47 +99,90 @@ class _SettingsPageState extends State<SettingsPage> {
                       // 菜单列表
                       Expanded(
                         child: ListView(
-                          padding: const EdgeInsets.symmetric(vertical: 8),
-                          children: _menuItems.asMap().entries.map((entry) {
-                            final index = entry.key;
-                            final item = entry.value;
-                            final isSelected = _selectedIndex == index;
-
-                            return InkWell(
-                                onTap: () {
-                                  setState(() {
-                                    _selectedIndex = index;
-                                  });
-                                },
-                                child: Container(
-                                  margin: const EdgeInsets.symmetric(
-                                      vertical: 5, horizontal: 10),
-                                  padding: const EdgeInsets.symmetric(
-                                      horizontal: 15, vertical: 10),
-                                  decoration: BoxDecoration(
-                                      borderRadius: BorderRadius.circular(50),
-                                      color: isSelected
-                                          ? Theme.of(context)
+                            padding: const EdgeInsets.symmetric(
+                                vertical: 8, horizontal: 10),
+                            children: [
+                              ..._categories.map((category) {
+                                return Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Padding(
+                                      padding: const EdgeInsets.symmetric(
+                                          vertical: 8, horizontal: 10),
+                                      child: Text(
+                                        category.title,
+                                        style: TextStyle(
+                                          fontWeight: FontWeight.bold,
+                                          color: Theme.of(context)
                                               .colorScheme
-                                              .primaryContainer
-                                              .withValues(alpha: 0.5)
-                                          : null),
-                                  child: Row(
-                                    children: [
-                                      Icon(item.icon),
-                                      Text(item.title)
-                                    ],
-                                  ),
-                                ));
-                          }).toList(),
-                        ),
+                                              .primary,
+                                          fontSize: 14,
+                                        ),
+                                      ),
+                                    ),
+                                    ...category.items.map((item) {
+                                      // 计算在所有菜单项中的全局索引
+                                      final globalIndex = _allMenuItems.indexOf(item);
+                                      final isSelected =
+                                          globalIndex == _selectedIndex;
+                                      return InkWell(
+                                        onTap: () {
+                                          setState(() {
+                                            _selectedIndex = globalIndex;
+                                          });
+                                        },
+                                        child: Container(
+                                          margin: const EdgeInsets.symmetric(
+                                              vertical: 3, horizontal: 5),
+                                          padding: const EdgeInsets.symmetric(
+                                              vertical: 12, horizontal: 16),
+                                          decoration: BoxDecoration(
+                                            borderRadius:
+                                                BorderRadius.circular(50),
+                                            color: isSelected
+                                                ? Theme.of(context)
+                                                    .colorScheme
+                                                    .primaryContainer
+                                                : null,
+                                          ),
+                                          child: Row(
+                                            children: [
+                                              Icon(
+                                                item.icon,
+                                                color: isSelected
+                                                    ? Theme.of(context)
+                                                        .colorScheme
+                                                        .onPrimaryContainer
+                                                    : null,
+                                              ),
+                                              const SizedBox(width: 12),
+                                              Text(
+                                                item.title,
+                                                style: TextStyle(
+                                                  color: isSelected
+                                                      ? Theme.of(context)
+                                                          .colorScheme
+                                                          .onPrimaryContainer
+                                                      : null,
+                                                ),
+                                              ),
+                                            ],
+                                          ),
+                                        ),
+                                      );
+                                    }).toList(),
+                                    const SizedBox(height: 8),
+                                  ],
+                                );
+                              }).toList(),
+                            ]),
                       ),
                     ],
                   ),
                 ),
                 // 右侧内容
                 Expanded(
-                  child: _menuItems[_selectedIndex].page,
+                  child: _allMenuItems[_selectedIndex].page,
                 ),
               ],
             ),
@@ -133,14 +194,35 @@ class _SettingsPageState extends State<SettingsPage> {
               title: const Text("设置"),
             ),
             body: ListView(
-              children: _menuItems.map((item) {
-                return ListTile(
-                  leading: Icon(item.icon),
-                  title: Text(item.title),
-                  trailing: const Icon(Icons.chevron_right),
-                  onTap: () {
-                    Navigator.of(context).pushNamed(item.route);
-                  },
+              padding: const EdgeInsets.symmetric(vertical: 8),
+              children: _categories.map((category) {
+                return Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Padding(
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 16, vertical: 8),
+                      child: Text(
+                        category.title,
+                        style: TextStyle(
+                          fontWeight: FontWeight.bold,
+                          color: Theme.of(context).colorScheme.primary,
+                          fontSize: 14,
+                        ),
+                      ),
+                    ),
+                    ...category.items.map((item) {
+                      return ListTile(
+                        leading: Icon(item.icon),
+                        title: Text(item.title),
+                        trailing: const Icon(Icons.chevron_right),
+                        onTap: () {
+                          Navigator.of(context).pushNamed(item.route);
+                        },
+                      );
+                    }).toList(),
+                    const SizedBox(height: 8),
+                  ],
                 );
               }).toList(),
             ),
@@ -149,6 +231,16 @@ class _SettingsPageState extends State<SettingsPage> {
       },
     );
   }
+}
+
+class _SettingsCategory {
+  final String title;
+  final List<_SettingsMenuItem> items;
+
+  _SettingsCategory({
+    required this.title,
+    required this.items,
+  });
 }
 
 class _SettingsMenuItem {

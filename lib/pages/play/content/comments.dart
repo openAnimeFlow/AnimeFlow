@@ -221,9 +221,8 @@ class _CommentsViewState extends State<CommentsView>
 
   Widget _buildReplies(List<Reply> replies) {
     return Container(
-      margin: const EdgeInsets.only(left: 56), // 与头像对齐
+      margin: const EdgeInsets.only(left: 56),
       decoration: BoxDecoration(
-        color: Theme.of(context).colorScheme.surfaceContainerHighest,
         borderRadius: BorderRadius.circular(8),
       ),
       child: Column(
@@ -237,7 +236,7 @@ class _CommentsViewState extends State<CommentsView>
                 Divider(
                   height: 1,
                   thickness: 1,
-                  color: Theme.of(context).dividerColor.withOpacity(0.1),
+                  color: Theme.of(context).dividerColor.withValues(alpha: 0.1),
                 ),
             ],
           );
@@ -252,13 +251,11 @@ class _CommentsViewState extends State<CommentsView>
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          ClipRRect(
-            borderRadius: BorderRadius.circular(6),
-            child: AnimationNetworkImage(
-              height: 32,
-              width: 32,
-              url: reply.user.avatar.large,
-            ),
+          AnimationNetworkImage(
+            borderRadius: BorderRadius.circular(8),
+            height: 32,
+            width: 32,
+            url: reply.user.avatar.large,
           ),
           const SizedBox(width: 8),
           Expanded(
@@ -277,7 +274,7 @@ class _CommentsViewState extends State<CommentsView>
                     ),
                     const SizedBox(width: 8),
                     Text(
-                      Utils.formatTimestamp( reply.createdAt),
+                      Utils.formatTimestamp(reply.createdAt),
                       style: TextStyle(
                         fontSize: 11,
                         color: Theme.of(context).colorScheme.outline,
@@ -285,25 +282,6 @@ class _CommentsViewState extends State<CommentsView>
                     ),
                   ],
                 ),
-                ...[
-                  const SizedBox(height: 4),
-                  Container(
-                    padding: const EdgeInsets.all(6),
-                    decoration: BoxDecoration(
-                      color: Theme.of(context).colorScheme.surface,
-                      borderRadius: BorderRadius.circular(4),
-                      border: Border.all(
-                        color: Theme.of(context)
-                            .colorScheme
-                            .outline
-                            .withOpacity(0.2),
-                      ),
-                    ),
-                    child: BBCodeWidget(
-                      bbcode: reply.content,
-                    ),
-                  ),
-                ],
                 if (reply.content.isNotEmpty) ...[
                   const SizedBox(height: 4),
                   BBCodeWidget(

@@ -37,7 +37,8 @@ class AnimationNetworkImage extends StatelessWidget {
       final heroTag = 'emoji_${url.hashCode}_${Random().nextInt(10000)}';
       return GestureDetector(
         onTap: () {
-          ImageViewer.show(context, url, heroTag: heroTag);
+          ImageViewer.show(context, url,
+              heroTag: heroTag, borderRadius: borderRadius);
         },
         child: Hero(tag: heroTag, child: _buildImage()),
       );

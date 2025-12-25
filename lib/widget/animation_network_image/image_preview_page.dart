@@ -9,17 +9,21 @@ import 'package:flutter/material.dart';
 class ImageViewer extends StatelessWidget {
   final String imageUrl;
   final String? heroTag;
+  final BorderRadiusGeometry borderRadius;
 
-  const ImageViewer({super.key, required this.imageUrl, this.heroTag});
+  const ImageViewer(
+      {super.key, required this.imageUrl, this.heroTag, required this.borderRadius});
 
   /// 显示图片查看器
-  static void show(BuildContext context, String imageUrl, {String? heroTag}) {
+  static void show(BuildContext context, String imageUrl,
+      {String? heroTag, required BorderRadiusGeometry borderRadius}) {
     Navigator.of(context).push(
       PageRouteBuilder(
         opaque: false,
         barrierColor: Colors.black.withValues(alpha: 0.8),
         pageBuilder: (context, animation, secondaryAnimation) {
-          return ImageViewer(imageUrl: imageUrl, heroTag: heroTag);
+          return ImageViewer(
+              imageUrl: imageUrl, heroTag: heroTag, borderRadius: borderRadius);
         },
         transitionDuration: const Duration(milliseconds: 300),
         transitionsBuilder: (context, animation, secondaryAnimation, child) {
@@ -49,9 +53,11 @@ class ImageViewer extends StatelessWidget {
             boundaryMargin: const EdgeInsets.all(double.infinity),
             child: Center(
               child: Hero(
-                  tag: heroTag ?? imageUrl,
-                  child: GestureDetector(
-                    onTap: () => Navigator.of(context).pop(),
+                tag: heroTag ?? imageUrl,
+                child: GestureDetector(
+                  onTap: () => Navigator.of(context).pop(),
+                  child: ClipRRect(
+                    borderRadius: borderRadius,
                     child: CachedNetworkImage(
                       imageUrl: imageUrl,
                       fit: BoxFit.contain,
@@ -96,7 +102,9 @@ class ImageViewer extends StatelessWidget {
                         ),
                       ),
                     ),
-                  )),
+                  ),
+                ),
+              ),
             ),
           ),
           // 关闭按钮

@@ -138,8 +138,8 @@ class _AnimeDetailPageState extends State<AnimeDetailPage> {
           ),
           if (topButton)
             Positioned(
-              right: 10,
-              bottom: 10,
+              right: 15,
+              bottom: 15,
               child: FloatingActionButton(
                 onPressed: () {
                   _nestedScrollController.animateTo(

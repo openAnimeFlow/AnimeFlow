@@ -9,8 +9,10 @@ class CharactersItem {
 
   factory CharactersItem.fromJson(Map<String, dynamic> json) {
     return CharactersItem(
-      data: (json['data'] as List).map((item) => CharacterActorData.fromJson(item)).toList(),
-      total: json['total'] as int,
+      data: json['data'] != null
+          ? (json['data'] as List).map((item) => CharacterActorData.fromJson(item as Map<String, dynamic>)).toList()
+          : <CharacterActorData>[],
+      total: json['total'] as int? ?? 0,
     );
   }
 
@@ -37,10 +39,24 @@ class CharacterActorData {
 
   factory CharacterActorData.fromJson(Map<String, dynamic> json) {
     return CharacterActorData(
-      character: Character.fromJson(json['character']),
-      actors: (json['actors'] as List).map((item) => Actor.fromJson(item)).toList(),
-      type: json['type'] as int,
-      order: json['order'] as int,
+      character: json['character'] != null
+          ? Character.fromJson(json['character'] as Map<String, dynamic>)
+          : Character(
+              id: 0,
+              name: '',
+              nameCN: '',
+              role: 0,
+              info: '',
+              comment: 0,
+              lock: false,
+              nsfw: false,
+              images: Images(large: '', medium: '', small: '', grid: ''),
+            ),
+      actors: json['actors'] != null
+          ? (json['actors'] as List).map((item) => Actor.fromJson(item as Map<String, dynamic>)).toList()
+          : <Actor>[],
+      type: json['type'] as int? ?? 0,
+      order: json['order'] as int? ?? 0,
     );
   }
 
@@ -87,7 +103,14 @@ class Character {
       comment: json['comment'] as int,
       lock: json['lock'] as bool,
       nsfw: json['nsfw'] as bool,
-      images: Images.fromJson(json['images']),
+      images: json['images'] != null
+          ? Images.fromJson(json['images'] as Map<String, dynamic>)
+          : Images(
+              large: '',
+              medium: '',
+              small: '',
+              grid: '',
+            ),
     );
   }
 
@@ -142,7 +165,14 @@ class Actor {
       comment: json['comment'] as int,
       lock: json['lock'] as bool,
       nsfw: json['nsfw'] as bool,
-      images: Images.fromJson(json['images']),
+      images: json['images'] != null
+          ? Images.fromJson(json['images'] as Map<String, dynamic>)
+          : Images(
+              large: '',
+              medium: '',
+              small: '',
+              grid: '',
+            ),
     );
   }
 

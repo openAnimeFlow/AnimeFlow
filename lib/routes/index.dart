@@ -4,6 +4,8 @@ import 'package:anime_flow/pages/my/index.dart';
 import 'package:anime_flow/pages/play/index.dart';
 import 'package:anime_flow/pages/search/index.dart';
 import 'package:anime_flow/pages/settings/index.dart';
+import 'package:anime_flow/pages/settings/pages/add_source.dart';
+import 'package:anime_flow/pages/settings/pages/data_source.dart';
 import 'package:anime_flow/pages/settings/pages/general_settings.dart';
 import 'package:anime_flow/pages/settings/pages/playback_settings.dart';
 import 'package:anime_flow/pages/settings/pages/about_settings.dart';
@@ -21,6 +23,8 @@ class RouteName {
   static const String settingsGeneral = "/settings/general";
   static const String settingsPlayback = "/settings/playback";
   static const String settingsAbout = "/settings/about";
+  static const String settingsDataSource = "/settings/dataSource";
+  static const String settingAddSource = "/settings/addSource";
 }
 
 Map<String, Widget Function(BuildContext)> getRootRoutes() {
@@ -35,5 +39,7 @@ Map<String, Widget Function(BuildContext)> getRootRoutes() {
     RouteName.settingsGeneral: (context) => const GeneralSettingsPage(),
     RouteName.settingsPlayback: (context) => const PlaybackSettingsPage(),
     RouteName.settingsAbout: (context) => const AboutSettingsPage(),
+    RouteName.settingsDataSource: (context) => const DataSourcePage(),
+    RouteName.settingAddSource: (context) => const AddSourcePage(),
   };
 }

@@ -1,4 +1,6 @@
+import 'package:anime_flow/pages/settings/pages/data_source.dart';
 import 'package:anime_flow/pages/settings/setting_controller.dart';
+import 'package:anime_flow/routes/index.dart';
 import 'package:flutter/material.dart';
 import 'package:anime_flow/pages/settings/pages/general_settings.dart';
 import 'package:anime_flow/pages/settings/pages/playback_settings.dart';
@@ -17,23 +19,29 @@ class _SettingsPageState extends State<SettingsPage> {
   late SettingController settingController;
   int _selectedIndex = 0;
 
-  final List<SettingsMenuItem> _menuItems = [
-    SettingsMenuItem(
+  final List<_SettingsMenuItem> _menuItems = [
+    _SettingsMenuItem(
       title: '通用',
       icon: Icons.settings_outlined,
-      route: '/settings/general',
+      route: RouteName.settingsGeneral,
       page: const GeneralSettingsPage(),
     ),
-    SettingsMenuItem(
+    _SettingsMenuItem(
+      title: '数据源管理',
+      icon: Icons.smart_display_rounded,
+      route: RouteName.settingsDataSource,
+      page: const DataSourcePage(),
+    ),
+    _SettingsMenuItem(
       title: '播放',
       icon: Icons.play_circle_outline,
-      route: '/settings/playback',
+      route: RouteName.settingsPlayback,
       page: const PlaybackSettingsPage(),
     ),
-    SettingsMenuItem(
+    _SettingsMenuItem(
       title: '关于',
       icon: Icons.info_outline,
-      route: '/settings/about',
+      route: RouteName.settingsAbout,
       page: const AboutSettingsPage(),
     ),
   ];
@@ -53,53 +61,64 @@ class _SettingsPageState extends State<SettingsPage> {
         if (isWideScreen) {
           // 宽屏布局：左侧菜单，右侧内容
           return Scaffold(
-              body: Row(
-                children: [
-                  // 左侧菜单
-                  Container(
-                    width: 200,
-                    color: Theme.of(context).colorScheme.surfaceContainerHighest,
-                    child: Column(
-                      children: [
-                        // 返回按钮
-                        ListTile(
-                          leading: const Icon(Icons.arrow_back),
-                          title: const Text("返回"),
-                          onTap: () {
-                            Navigator.of(context).pop();
-                          },
-                        ),
-                        const Divider(height: 1),
-                        // 菜单列表
-                        Expanded(
-                          child: ListView(
-                            padding: const EdgeInsets.symmetric(vertical: 8),
-                            children: _menuItems.asMap().entries.map((entry) {
-                              final index = entry.key;
-                              final item = entry.value;
-                              final isSelected = _selectedIndex == index;
+            body: Row(
+              children: [
+                // 左侧菜单
+                Container(
+                  width: 200,
+                  color: Theme.of(context).colorScheme.surfaceContainerHighest,
+                  child: Column(
+                    children: [
+                      // 返回按钮
+                      ListTile(
+                        leading: const Icon(Icons.arrow_back),
+                        title: const Text("返回"),
+                        onTap: () {
+                          Navigator.of(context).pop();
+                        },
+                      ),
+                      const Divider(height: 1),
+                      // 菜单列表
+                      Expanded(
+                        child: ListView(
+                          padding: const EdgeInsets.symmetric(vertical: 8),
+                          children: _menuItems.asMap().entries.map((entry) {
+                            final index = entry.key;
+                            final item = entry.value;
+                            final isSelected = _selectedIndex == index;
 
-                              return ListTile(
-                                selected: isSelected,
-                                leading: Icon(
-                                  item.icon,
-                                  color: isSelected
-                                      ? Theme.of(context).colorScheme.primary
-                                      : null,
-                                ),
-                                title: Text(item.title),
+                            return InkWell(
                                 onTap: () {
                                   setState(() {
                                     _selectedIndex = index;
                                   });
                                 },
-                              );
-                            }).toList(),
-                          ),
+                                child: Container(
+                                  margin: const EdgeInsets.symmetric(
+                                      vertical: 5, horizontal: 10),
+                                  padding: const EdgeInsets.symmetric(
+                                      horizontal: 15, vertical: 10),
+                                  decoration: BoxDecoration(
+                                      borderRadius: BorderRadius.circular(50),
+                                      color: isSelected
+                                          ? Theme.of(context)
+                                              .colorScheme
+                                              .primaryContainer
+                                              .withValues(alpha: 0.5)
+                                          : null),
+                                  child: Row(
+                                    children: [
+                                      Icon(item.icon),
+                                      Text(item.title)
+                                    ],
+                                  ),
+                                ));
+                          }).toList(),
                         ),
-                      ],
-                    ),
+                      ),
+                    ],
                   ),
+                ),
                 // 右侧内容
                 Expanded(
                   child: _menuItems[_selectedIndex].page,
@@ -132,13 +151,13 @@ class _SettingsPageState extends State<SettingsPage> {
   }
 }
 
-class SettingsMenuItem {
+class _SettingsMenuItem {
   final String title;
   final IconData icon;
   final String route;
   final Widget page;
 
-  SettingsMenuItem({
+  _SettingsMenuItem({
     required this.title,
     required this.icon,
     required this.route,

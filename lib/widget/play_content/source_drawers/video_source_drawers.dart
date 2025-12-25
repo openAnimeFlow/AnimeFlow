@@ -40,6 +40,7 @@ class _VideoSourceDrawersState extends State<VideoSourceDrawers> {
     episodesController = Get.find<EpisodesController>();
     dataSourceController = Get.find<DataSourceController>();
     _searchController.text = dataSourceController.keyword.value;
+    // 初始化时标记需要自动选择（在资源加载完成后检查）
     _needAutoSelect = true;
   }
 
@@ -64,6 +65,35 @@ class _VideoSourceDrawersState extends State<VideoSourceDrawers> {
       }
     }
     return 0;
+  }
+
+  /// 自动加载第一个匹配当前剧集的资源
+  Future<void> _autoLoadFirstResource(ResourcesItem resource) async {
+    // 如果已经有选中的资源，不再自动加载
+    if (dataSourceController.webSiteTitle.value.isNotEmpty) {
+      return;
+    }
+    
+    // 遍历资源列表，找到第一个匹配当前剧集的资源
+    for (var resourceItem in resource.episodeResources) {
+      final currentEpisode = resourceItem.episodes.firstWhereOrNull(
+        (ep) => ep.episodeSort == episodesController.episodeIndex.value,
+      );
+      if (currentEpisode != null) {
+        try {
+          dataSourceController.setWebSite(
+            title: resource.websiteName,
+            iconUrl: resource.websiteIcon,
+            videoUrl: resource.videoConfig.baseURL + currentEpisode.like,
+          );
+          videoStateController.disposeVideo();
+          await _loadVideoPage(resource.videoConfig.baseURL + currentEpisode.like);
+        } catch (e) {
+          logger.e('自动加载视频源失败', error: e);
+        }
+        return;
+      }
+    }
   }
 
   Future<void> _loadVideoPage(String url) async {
@@ -120,7 +150,7 @@ class _VideoSourceDrawersState extends State<VideoSourceDrawers> {
                     ),
                   ),
                   IconButton(
-                    onPressed: () => Get.back(),
+                    onPressed: () => Navigator.of(context).pop(),
                     icon: const Icon(Icons.close_rounded),
                   ),
                 ],
@@ -150,9 +180,23 @@ class _VideoSourceDrawersState extends State<VideoSourceDrawers> {
                 // 资源初始化完成后，自动选择第一个有资源的网站
                 if (_needAutoSelect) {
                   final firstResourceIndex = _findFirstResourceIndex(dataSource);
-                  // 只有当找到有资源的网站时，才自动选择并关闭标志
+                  // 只有当找到有资源的网站且还没有选中资源时，才自动选择并加载
                   final hasResource = dataSource.any((r) => r.episodeResources.isNotEmpty);
-                  if (hasResource) {
+                  if (hasResource && dataSourceController.webSiteTitle.value.isEmpty) {
+                    validIndex = firstResourceIndex;
+                    final selectedResource = dataSource[firstResourceIndex];
+                    WidgetsBinding.instance.addPostFrameCallback((_) {
+                      if (mounted) {
+                        setState(() {
+                          selectedWebsiteIndex = validIndex;
+                          _needAutoSelect = false;
+                        });
+                        // 自动加载第一个匹配的资源
+                        _autoLoadFirstResource(selectedResource);
+                      }
+                    });
+                  } else if (hasResource) {
+                    // 已经有选中的资源，只更新选中索引，不自动加载
                     validIndex = firstResourceIndex;
                     WidgetsBinding.instance.addPostFrameCallback((_) {
                       if (mounted) {
@@ -416,7 +460,7 @@ class _VideoSourceDrawersState extends State<VideoSourceDrawers> {
       child: InkWell(
           onTap: () async {
             try {
-              Get.back();
+              Navigator.of(context).pop();
               dataSourceController.setWebSite(
                   title: websiteName,
                   iconUrl: websiteIcon,

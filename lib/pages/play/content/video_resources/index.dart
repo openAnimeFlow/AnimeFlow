@@ -5,7 +5,6 @@ import 'package:anime_flow/controllers/video/data/data_source_controller.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get_core/src/get_main.dart';
 import 'package:get/get_instance/src/extension_instance.dart';
-import 'package:get/get_navigation/src/extension_navigation.dart';
 import 'package:get/get_state_manager/src/rx_flutter/rx_obx_widget.dart';
 
 class VideoResourcesView extends StatefulWidget {
@@ -31,85 +30,93 @@ class _VideoResourcesViewState extends State<VideoResourcesView> {
 
   @override
   Widget build(BuildContext context) {
-    return Card(
-      elevation: 0,
-      child: Padding(
-        padding: const EdgeInsets.all(10),
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    widget.sourceTitle,
-                    style: const TextStyle(
-                      fontSize: 15,
+    return Stack(
+      children: [
+        Offstage(child: VideoSourceDrawers()),
+        Card(
+          elevation: 0,
+          child: Padding(
+            padding: const EdgeInsets.all(10),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        widget.sourceTitle,
+                        style: const TextStyle(
+                          fontSize: 15,
+                        ),
+                      ),
+                      const SizedBox(height: 5),
+                      Obx(() => dataSourceController.webSiteTitle.value != ''
+                          ? Row(
+                              children: [
+                                ClipRRect(
+                                  borderRadius: BorderRadius.circular(5),
+                                  child: AnimationNetworkImage(
+                                      height: 25,
+                                      width: 25,
+                                      url: dataSourceController
+                                          .webSiteIcon.value),
+                                ),
+                                const SizedBox(width: 5),
+                                Text(
+                                  dataSourceController.webSiteTitle.value,
+                                  maxLines: 3,
+                                  overflow: TextOverflow.ellipsis,
+                                  style: const TextStyle(
+                                      fontSize: 20,
+                                      fontWeight: FontWeight.bold),
+                                )
+                              ],
+                            )
+                          : const Text('选择数据源')),
+                    ],
+                  ),
+                ),
+                const SizedBox(width: 8),
+                OutlinedButton.icon(
+                  onPressed: () {
+                    showGeneralDialog(
+                      context: context,
+                      barrierDismissible: true,
+                      barrierLabel: "SourceDrawer",
+                      barrierColor: Colors.black54,
+                      transitionDuration: const Duration(milliseconds: 300),
+                      transitionBuilder:
+                          (context, animation, secondaryAnimation, child) {
+                        return SlideTransition(
+                          position: Tween<Offset>(
+                            begin: const Offset(1, 0),
+                            end: Offset.zero,
+                          ).animate(CurvedAnimation(
+                            parent: animation,
+                            curve: Curves.easeOut,
+                          )),
+                          child: child,
+                        );
+                      },
+                      pageBuilder: (context, animation, secondaryAnimation) {
+                        return VideoSourceDrawers();
+                      },
+                    );
+                  },
+                  style: OutlinedButton.styleFrom(
+                    side: BorderSide(
+                      color: Theme.of(context).colorScheme.primary,
                     ),
                   ),
-                  const SizedBox(height: 5),
-                  Obx(() => dataSourceController.webSiteTitle.value != ''
-                      ? Row(
-                          children: [
-                            ClipRRect(
-                              borderRadius: BorderRadius.circular(5),
-                              child: AnimationNetworkImage(
-                                  height: 25,
-                                  width: 25,
-                                  url: dataSourceController.webSiteIcon.value),
-                            ),
-                            const SizedBox(width: 5),
-                            Text(
-                              dataSourceController.webSiteTitle.value,
-                              maxLines: 3,
-                              overflow: TextOverflow.ellipsis,
-                              style:
-                                  const TextStyle(fontSize: 20,fontWeight: FontWeight.bold),
-                            )
-                          ],
-                        )
-                      : const Text('选择数据源')),
-                ],
-              ),
-            ),
-            const SizedBox(width: 8),
-            OutlinedButton.icon(
-              onPressed: () {
-                Get.generalDialog(
-                    barrierDismissible: true,
-                    barrierLabel: "SourceDrawer",
-                    barrierColor: Colors.black54,
-                    transitionDuration: const Duration(milliseconds: 300),
-                    // 动画
-                    transitionBuilder:
-                        (context, animation, secondaryAnimation, child) {
-                      return SlideTransition(
-                        position: Tween<Offset>(
-                          begin: const Offset(1, 0),
-                          end: Offset.zero,
-                        ).animate(CurvedAnimation(
-                          parent: animation,
-                          curve: Curves.easeOut,
-                        )),
-                        child: child,
-                      );
-                    },
-                    pageBuilder: (context, animation, secondaryAnimation) {
-                      return VideoSourceDrawers();
-                    });
-              },
-              style: OutlinedButton.styleFrom(
-                side: BorderSide(
-                  color: Theme.of(context).colorScheme.primary,
+                  icon: const Icon(Icons.sync_alt_rounded),
+                  label: const Text("切换源"),
                 ),
-              ),
-              icon: const Icon(Icons.sync_alt_rounded),
-              label: const Text("切换源"),
+              ],
             ),
-          ],
-        ),
-      ),
+          ),
+        )
+      ],
     );
   }
 }

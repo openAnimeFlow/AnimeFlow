@@ -13,7 +13,6 @@ import 'package:get/get.dart';
 import 'package:logger/logger.dart';
 
 class VideoSourceDrawers extends StatefulWidget {
-
   const VideoSourceDrawers({super.key});
 
   @override
@@ -73,7 +72,8 @@ class _VideoSourceDrawersState extends State<VideoSourceDrawers> {
     if (dataSourceController.webSiteTitle.value.isNotEmpty) {
       return;
     }
-    
+
+    dataSourceController.updateLoading(true);
     // 遍历资源列表，找到第一个匹配当前剧集的资源
     for (var resourceItem in resource.episodeResources) {
       final currentEpisode = resourceItem.episodes.firstWhereOrNull(
@@ -87,9 +87,14 @@ class _VideoSourceDrawersState extends State<VideoSourceDrawers> {
             videoUrl: resource.videoConfig.baseURL + currentEpisode.like,
           );
           videoStateController.disposeVideo();
-          await _loadVideoPage(resource.videoConfig.baseURL + currentEpisode.like);
+          await _loadVideoPage(
+              resource.videoConfig.baseURL + currentEpisode.like);
+          dataSourceController.updateLoading(false);
         } catch (e) {
+          dataSourceController.updateLoading(false);
           logger.e('自动加载视频源失败', error: e);
+        } finally {
+          dataSourceController.updateLoading(false);
         }
         return;
       }
@@ -175,13 +180,16 @@ class _VideoSourceDrawersState extends State<VideoSourceDrawers> {
                 int validIndex = selectedWebsiteIndex >= dataSource.length
                     ? 0
                     : selectedWebsiteIndex;
-                
+
                 // 资源初始化完成后，自动选择第一个有资源的网站
                 if (_needAutoSelect) {
-                  final firstResourceIndex = _findFirstResourceIndex(dataSource);
+                  final firstResourceIndex =
+                      _findFirstResourceIndex(dataSource);
                   // 只有当找到有资源的网站且还没有选中资源时，才自动选择并加载
-                  final hasResource = dataSource.any((r) => r.episodeResources.isNotEmpty);
-                  if (hasResource && dataSourceController.webSiteTitle.value.isEmpty) {
+                  final hasResource =
+                      dataSource.any((r) => r.episodeResources.isNotEmpty);
+                  if (hasResource &&
+                      dataSourceController.webSiteTitle.value.isEmpty) {
                     validIndex = firstResourceIndex;
                     final selectedResource = dataSource[firstResourceIndex];
                     WidgetsBinding.instance.addPostFrameCallback((_) {

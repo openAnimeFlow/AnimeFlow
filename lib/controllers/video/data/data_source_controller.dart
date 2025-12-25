@@ -12,6 +12,7 @@ class DataSourceController extends GetxController {
   final RxString webSiteIcon = ''.obs;
   final RxString videoUrl = ''.obs;
   final RxString keyword = ''.obs;
+  final RxBool isLoading = false.obs;
 
   DataSourceController() {
     videoResources = Rx<List<ResourcesItem>>([]);
@@ -103,6 +104,10 @@ class DataSourceController extends GetxController {
         errorMessage: '解析失败: $e',
       );
     }
+  }
+
+  void updateLoading(bool isLoading) {
+    this.isLoading.value = isLoading;
   }
 
   // 更新指定网站的状态

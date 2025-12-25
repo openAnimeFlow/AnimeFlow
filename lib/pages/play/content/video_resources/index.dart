@@ -51,7 +51,7 @@ class _VideoResourcesViewState extends State<VideoResourcesView> {
                         ),
                       ),
                       const SizedBox(height: 5),
-                      Obx(() => dataSourceController.webSiteTitle.value != ''
+                      Obx(() => !dataSourceController.isLoading.value
                           ? Row(
                               children: [
                                 ClipRRect(
@@ -73,7 +73,17 @@ class _VideoResourcesViewState extends State<VideoResourcesView> {
                                 )
                               ],
                             )
-                          : const Text('选择数据源')),
+                          : const Row(
+                              children: [
+                                Text('自动选择资源中'),
+                                SizedBox(width: 5),
+                                SizedBox(
+                                  height: 10,
+                                  width: 10,
+                                  child: CircularProgressIndicator(),
+                                )
+                              ],
+                            )),
                     ],
                   ),
                 ),

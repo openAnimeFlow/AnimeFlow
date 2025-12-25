@@ -13,9 +13,8 @@ import 'package:get/get.dart';
 import 'package:logger/logger.dart';
 
 class VideoSourceDrawers extends StatefulWidget {
-  final String title;
 
-  const VideoSourceDrawers(this.title, {super.key});
+  const VideoSourceDrawers({super.key});
 
   @override
   State<VideoSourceDrawers> createState() => _VideoSourceDrawersState();
@@ -30,6 +29,7 @@ class _VideoSourceDrawersState extends State<VideoSourceDrawers> {
   final logger = Logger();
   bool isShowEpisodes = false;
   int selectedWebsiteIndex = 0; // 当前选中的网站索引
+  bool _needAutoSelect = false; // 是否需要自动选择第一个有资源的网站
   final _searchController = TextEditingController();
 
   @override
@@ -39,6 +39,8 @@ class _VideoSourceDrawersState extends State<VideoSourceDrawers> {
     videoStateController = Get.find<VideoStateController>();
     episodesController = Get.find<EpisodesController>();
     dataSourceController = Get.find<DataSourceController>();
+    _searchController.text = dataSourceController.keyword.value;
+    _needAutoSelect = true;
   }
 
   void setShowEpisodes() {
@@ -54,6 +56,16 @@ class _VideoSourceDrawersState extends State<VideoSourceDrawers> {
     });
   }
 
+  /// 查找第一个有资源的网站索引
+  int _findFirstResourceIndex(List<ResourcesItem> dataSource) {
+    for (int i = 0; i < dataSource.length; i++) {
+      if (dataSource[i].episodeResources.isNotEmpty) {
+        return i;
+      }
+    }
+    return 0;
+  }
+
   Future<void> _loadVideoPage(String url) async {
     await webviewItemController.loadUrl(
       url,
@@ -66,10 +78,10 @@ class _VideoSourceDrawersState extends State<VideoSourceDrawers> {
   void _performSearch() {
     String searchQuery = _searchController.text;
     if (searchQuery.isNotEmpty) {
-      // 重置选中索引和状态
       setState(() {
         selectedWebsiteIndex = 0;
         isShowEpisodes = false;
+        _needAutoSelect = true;
       });
       dataSourceController.initResources(searchQuery);
     }
@@ -99,7 +111,7 @@ class _VideoSourceDrawersState extends State<VideoSourceDrawers> {
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   Text(
-                    widget.title,
+                    '数据源',
                     style: TextStyle(
                       fontSize: 20,
                       fontWeight: FontWeight.bold,
@@ -131,11 +143,27 @@ class _VideoSourceDrawersState extends State<VideoSourceDrawers> {
                   return const SizedBox.shrink();
                 }
                 // 确保索引有效，如果无效则使用 0
-                final validIndex = selectedWebsiteIndex >= dataSource.length
+                int validIndex = selectedWebsiteIndex >= dataSource.length
                     ? 0
                     : selectedWebsiteIndex;
-                // 如果索引需要修正，异步更新状态
-                if (validIndex != selectedWebsiteIndex) {
+                
+                // 资源初始化完成后，自动选择第一个有资源的网站
+                if (_needAutoSelect) {
+                  final firstResourceIndex = _findFirstResourceIndex(dataSource);
+                  // 只有当找到有资源的网站时，才自动选择并关闭标志
+                  final hasResource = dataSource.any((r) => r.episodeResources.isNotEmpty);
+                  if (hasResource) {
+                    validIndex = firstResourceIndex;
+                    WidgetsBinding.instance.addPostFrameCallback((_) {
+                      if (mounted) {
+                        setState(() {
+                          selectedWebsiteIndex = validIndex;
+                          _needAutoSelect = false;
+                        });
+                      }
+                    });
+                  }
+                } else if (validIndex != selectedWebsiteIndex) {
                   WidgetsBinding.instance.addPostFrameCallback((_) {
                     if (mounted) {
                       setState(() {

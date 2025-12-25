@@ -11,6 +11,7 @@ class DataSourceController extends GetxController {
   final RxString webSiteTitle = ''.obs;
   final RxString webSiteIcon = ''.obs;
   final RxString videoUrl = ''.obs;
+  final RxString keyword = ''.obs;
 
   DataSourceController() {
     videoResources = Rx<List<ResourcesItem>>([]);
@@ -39,6 +40,7 @@ class DataSourceController extends GetxController {
   //初始化资源
   Future<void> initResources(String keyword) async {
     _clearAllResources();
+    this.keyword.value = keyword;
     final configs = await CrawlConfig.loadAllCrawlConfigs();
 
     // 并发执行所有网站的资源获取

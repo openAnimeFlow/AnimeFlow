@@ -96,9 +96,7 @@ class _VideoResourcesViewState extends State<VideoResourcesView> {
                       );
                     },
                     pageBuilder: (context, animation, secondaryAnimation) {
-                      return VideoSourceDrawers(
-                        widget.sourceTitle,
-                      );
+                      return VideoSourceDrawers();
                     });
               },
               style: OutlinedButton.styleFrom(

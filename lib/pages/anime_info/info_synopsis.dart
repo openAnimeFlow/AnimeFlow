@@ -19,13 +19,20 @@ class _NoScrollbarBehavior extends ScrollBehavior {
 }
 
 /// 简介页面
-class InfoSynopsisView extends StatelessWidget {
+class InfoSynopsisView extends StatefulWidget {
   final Future<SubjectsItem?> subjectsItem;
 
   const InfoSynopsisView({
     super.key,
     required this.subjectsItem,
   });
+
+  @override
+  State<InfoSynopsisView> createState() => _InfoSynopsisViewState();
+}
+
+class _InfoSynopsisViewState extends State<InfoSynopsisView> {
+  final GlobalKey<CommentViewState> _commentViewKey = GlobalKey<CommentViewState>();
 
   @override
   Widget build(BuildContext context) {
@@ -38,13 +45,23 @@ class InfoSynopsisView extends StatelessWidget {
       builder: (BuildContext context) {
         return ScrollConfiguration(
           behavior: _NoScrollbarBehavior(),
-            child: FutureBuilder<SubjectsItem?>(
-              future: subjectsItem,
-              builder: (context, snapshot) {
-                final data = snapshot.data;
-                final leftPadding = MediaQuery.of(context).padding.left;
-                
-                return CustomScrollView(
+            child: NotificationListener<ScrollNotification>(
+              onNotification: (ScrollNotification scrollInfo) {
+                // 只处理垂直滚动的更新事件
+                if (scrollInfo.metrics.axis == Axis.vertical &&
+                    scrollInfo is ScrollUpdateNotification) {
+                  // 通知 CommentView 检查是否需要加载更多
+                  _commentViewKey.currentState?.checkAndLoadMore(scrollInfo.metrics);
+                }
+                return false;
+              },
+              child: FutureBuilder<SubjectsItem?>(
+                future: widget.subjectsItem,
+                builder: (context, snapshot) {
+                  final data = snapshot.data;
+                  final leftPadding = MediaQuery.of(context).padding.left;
+                  
+                  return CustomScrollView(
                   key: const PageStorageKey<String>(title),
                   slivers: <Widget>[
                     // 注入重叠区域，防止内容被 Header 遮挡
@@ -136,6 +153,7 @@ class InfoSynopsisView extends StatelessWidget {
                         child: _buildContainer(
                           leftPadding,
                           CommentView(
+                            key: _commentViewKey,
                             subjectId: data.id,
                           ),
                         ),
@@ -144,6 +162,7 @@ class InfoSynopsisView extends StatelessWidget {
                   ],
                 );
               },
+              ),
             ),
         );
       },

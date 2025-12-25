@@ -10,10 +10,12 @@ import 'package:get/get.dart';
 
 class CommentView extends StatefulWidget {
   final int subjectId;
+  final VoidCallback? onScrollToBottom;
 
   const CommentView({
     super.key,
     required this.subjectId,
+    this.onScrollToBottom,
   });
 
   @override
@@ -73,35 +75,19 @@ class CommentViewState extends State<CommentView> {
     _getSubjectComment(loadMore: true);
   }
 
-  @override
-  Widget build(BuildContext context) {
-    return NotificationListener<ScrollNotification>(
-      onNotification: (ScrollNotification scrollInfo) {
-        // 只处理主滚动视图的滚动事件（depth == 0），忽略嵌套滚动视图
-        if (scrollInfo.depth != 0) {
-          return false;
-        }
-        // 只处理垂直滚动
-        if (scrollInfo.metrics.axis != Axis.vertical) {
-          return false;
-        }
-        // 当滚动到底部时加载更多评论
-        if (scrollInfo.metrics.pixels >=
-            scrollInfo.metrics.maxScrollExtent - 200 &&
-            !_isLoadingComments &&
-            _hasMoreComments) {
-          // 使用 addPostFrameCallback 延迟调用，避免在 layout/paint 期间调用 setState
-          SchedulerBinding.instance.addPostFrameCallback((_) {
-            loadMore();
-          });
-        }
-        return false;
-      },
-      child: _buildContent(),
-    );
+  /// 检查是否应该加载更多（由外部滚动监听调用）
+  void checkAndLoadMore(ScrollMetrics metrics) {
+    if (metrics.pixels >= metrics.maxScrollExtent - 200 &&
+        !_isLoadingComments &&
+        _hasMoreComments) {
+      SchedulerBinding.instance.addPostFrameCallback((_) {
+        loadMore();
+      });
+    }
   }
 
-  Widget _buildContent() {
+  @override
+  Widget build(BuildContext context) {
     if (subjectCommentItem == null) {
       return const SizedBox.shrink();
     } else {
@@ -123,7 +109,7 @@ class CommentViewState extends State<CommentView> {
               Text(
                 '${subjectComments.total}',
                 style:
-                const TextStyle(fontWeight: FontWeight.w500, fontSize: 12),
+                    const TextStyle(fontWeight: FontWeight.w500, fontSize: 12),
               )
             ],
           ),
@@ -220,7 +206,7 @@ class _CommentItem extends StatelessWidget {
                             style: TextStyle(
                               fontSize: 12,
                               color:
-                              Theme.of(context).textTheme.bodySmall?.color,
+                                  Theme.of(context).textTheme.bodySmall?.color,
                             ),
                           ),
                       ],
@@ -254,8 +240,7 @@ class _CommentItem extends StatelessWidget {
 
                     // 评论内容
                     if (comment.comment.isNotEmpty) ...[
-                      BBCodeWidget(
-                          bbcode: comment.comment),
+                      Text(comment.comment),
                     ],
                   ],
                 ),

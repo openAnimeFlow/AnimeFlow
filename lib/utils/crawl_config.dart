@@ -53,4 +53,13 @@ class CrawlConfig {
       logger.e('保存配置失败：$e');
     }
   }
+
+  ///删除配置
+  static Future<void> deleteCrawl(String key) async {
+    try {
+      await box.delete(key);
+    } catch (e) {
+      logger.e('删除配置失败：$e');
+    }
+  }
 }

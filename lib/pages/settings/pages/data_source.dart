@@ -34,6 +34,42 @@ class _DataSourcePageState extends State<DataSourcePage> {
     });
   }
 
+  void _deleteDataSource(String name) async {
+    // 使用Get.dialog显示确认弹窗
+    Get.defaultDialog(
+      title: "确认删除",
+      middleText: "确定要删除数据源 \"$name\" 吗？此操作不可恢复。",
+      textConfirm: "删除",
+      textCancel: "取消",
+      confirmTextColor: Colors.white,
+      cancelTextColor: Colors.black,
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
+      buttonColor: Theme.of(context).colorScheme.error,
+      onConfirm: () async {
+        try {
+          await CrawlConfig.deleteCrawl(name);
+          setState(() {
+            _initData();
+          });
+          Get.back();
+          Get.snackbar(
+            "删除成功",
+            "数据源 \"$name\" 已被删除",
+            maxWidth: 300,
+          );
+        } catch (e) {
+          Get.back();
+          Get.snackbar(
+            "删除失败",
+            "删除数据源 \"$name\" 时发生错误：$e",
+            maxWidth: 300,
+          );
+        }
+      },
+    );
+  }
+
+
   @override
   Widget build(BuildContext context) {
     return Obx(
@@ -82,7 +118,7 @@ class _DataSourcePageState extends State<DataSourcePage> {
                   trailing: IconButton(
                     icon: Icon(Icons.delete),
                     onPressed: () {
-                      _initData();
+                      _deleteDataSource(data.name);
                     },
                   ),
                 ),

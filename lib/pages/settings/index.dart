@@ -1,6 +1,7 @@
 import 'package:anime_flow/pages/settings/pages/data_source.dart';
 import 'package:anime_flow/pages/settings/setting_controller.dart';
 import 'package:anime_flow/routes/index.dart';
+import 'package:anime_flow/utils/utils.dart';
 import 'package:flutter/material.dart';
 import 'package:anime_flow/pages/settings/pages/general_settings.dart';
 import 'package:anime_flow/pages/settings/pages/playback_settings.dart';
@@ -88,19 +89,25 @@ class _SettingsPageState extends State<SettingsPage> {
                   color: Theme.of(context).colorScheme.surfaceContainerHighest,
                   child: Column(
                     children: [
-                      ListTile(
-                        leading: const Icon(Icons.arrow_back),
-                        title: const Text("返回"),
-                        onTap: () {
-                          Navigator.of(context).pop();
-                        },
+                      Padding(
+                        padding: EdgeInsets.only(
+                            top: MediaQuery.of(context).padding.top),
+                        child: ListTile(
+                          leading: const Icon(Icons.arrow_back),
+                          title: const Text("返回"),
+                          onTap: () {
+                            Navigator.of(context).pop();
+                          },
+                        ),
                       ),
                       const Divider(height: 1),
                       // 菜单列表
                       Expanded(
                         child: ListView(
-                            padding: const EdgeInsets.symmetric(
-                                vertical: 8, horizontal: 10),
+                            padding: EdgeInsets.only(
+                                left: MediaQuery.of(context).padding.left +
+                                    (Utils.isDesktop ? 15 : 0),
+                                right: 15),
                             children: [
                               ..._categories.map((category) {
                                 return Column(
@@ -122,7 +129,8 @@ class _SettingsPageState extends State<SettingsPage> {
                                     ),
                                     ...category.items.map((item) {
                                       // 计算在所有菜单项中的全局索引
-                                      final globalIndex = _allMenuItems.indexOf(item);
+                                      final globalIndex =
+                                          _allMenuItems.indexOf(item);
                                       final isSelected =
                                           globalIndex == _selectedIndex;
                                       return InkWell(

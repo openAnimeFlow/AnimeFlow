@@ -15,67 +15,56 @@ class _AddSourcePageState extends State<AddSourcePage> {
     _Field(
       title: '版本号',
       message: '如（1.0.0）',
-      key: 'version',
       isRequired: true,
     ),
     _Field(
       title: '名称',
       message: '网站名称,唯一值避免与其他配置名称重复,否则将被覆盖',
-      key: 'name',
       isRequired: true,
     ),
     _Field(
       title: '图标链接',
       message: '网站图标链接',
-      key: 'iconUrl',
       isRequired: true,
     ),
     _Field(
       title: '网站链接',
       message: '网站主链接,避免以 / 结尾',
-      key: 'baseUrl',
       isRequired: true,
     ),
     _Field(
       title: '搜索链接',
       message: '用{keyword}搜索关键字,示例:https://dm.xifanacg.com/search.html?wd={keyword}',
-      key: 'searchUrl',
       isRequired: true,
     ),
     _Field(
       title: '搜索内容列表',
       message: '搜索内容列表',
-      key: 'searchList',
       isRequired: true,
     ),
     _Field(
       title: '搜索列表名称',
       message: '搜索列表名称',
-      key: 'searchName',
       isRequired: true,
     ),
     _Field(
       title: '搜索列表链接',
       message: '搜索列表链接',
-      key: 'searchLink',
       isRequired: true,
     ),
     _Field(
       title: '线路名称',
       message: '线路名称',
-      key: 'lineNames',
       isRequired: true,
     ),
     _Field(
       title: '剧集列表',
       message: '剧集列表',
-      key: 'lineList',
       isRequired: true,
     ),
     _Field(
       title: '剧集',
       message: '剧集链接,从剧集列表中获取的数据的xpath',
-      key: 'episode',
       isRequired: true,
     )
   ];
@@ -243,13 +232,11 @@ class _AddSourcePageState extends State<AddSourcePage> {
 class _Field {
   final String title;
   final String message;
-  final String key;
   final bool isRequired;
 
   _Field({
     required this.title,
     required this.message,
-    required this.key,
     this.isRequired = false,
   });
 }

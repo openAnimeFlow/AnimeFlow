@@ -34,9 +34,12 @@ class _RankingPageState extends State<RankingPage> {
             size: 100,
             color: Theme.of(context).colorScheme.primary,
           ),
-          const Text(
+          Text(
             "排行榜页面施工中",
-            style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+            style: TextStyle(
+                fontSize: 20,
+                fontWeight: FontWeight.bold,
+                color: Theme.of(context).colorScheme.primary),
           )
         ],
       ),

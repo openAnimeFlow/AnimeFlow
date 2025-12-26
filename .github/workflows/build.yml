@@ -131,3 +131,71 @@ jobs:
           name: windows
           path: build/windows/x64/runner/Release/
           if-no-files-found: ignore
+
+  flutter-build-linux:
+    if: ${{ github.event.inputs.platform == 'linux' || github.event.inputs.platform == 'all'}}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v2
+
+      - name: Install Linux build dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y clang cmake ninja-build pkg-config libgtk-3-dev liblzma-dev libasound2-dev libmpv-dev
+
+      - name: Setup Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          flutter-version-file: pubspec.yaml
+
+      - name: Install dependencies
+        run: flutter pub get
+
+      - name: Build Linux
+        run: |
+          flutter build linux
+          echo "Linux build completed"
+
+      - name: Archive artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: linux
+          path: build/linux/
+          if-no-files-found: ignore
+
+  flutter-build-macos:
+    if: ${{ github.event.inputs.platform == 'macos' || github.event.inputs.platform == 'all'}}
+    runs-on: macos-14
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v2
+
+      - name: Setup Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          flutter-version-file: pubspec.yaml
+
+      - name: Install dependencies
+        run: flutter pub get
+
+      - name: Build macOS
+        run: |
+          flutter build macos
+          echo "macOS build completed"
+
+      - name: Create DMG
+        run: |
+          mkdir -p build/dist
+          cp -a build/macos/Build/Products/Release/AnimeFlow.app build/dist
+          ln -s /Applications build/dist/Applications
+          hdiutil create -fs HFS+ -volname 1.0.0 -srcfolder build/dist AnimeFlow.dmg
+
+      - name: Archive artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: macos
+          path: build/macos/Build/Products/Release/*.dmg
+          if-no-files-found: ignore

@@ -3,7 +3,7 @@ import 'package:anime_flow/models/item/tab_item.dart';
 import 'package:anime_flow/pages/my/index.dart';
 import 'package:anime_flow/routes/index.dart';
 import 'package:anime_flow/stores/user_info_store.dart';
-import 'package:anime_flow/utils/utils.dart';
+import 'package:anime_flow/utils/crawl_config.dart';
 import 'package:anime_flow/widget/animation_network_image/animation_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:anime_flow/pages/Category/index.dart';
@@ -51,7 +51,7 @@ class _MainPageState extends State<MainPage> {
     mainPageState = Get.put(MainPageState());
     // 默认初始化第一个页面
     _pageCache[0] = const RecommendView();
-    Utils.initCrawlConfigs();
+    CrawlConfig.initCrawlConfigs();
     userInfoStore = Get.put(UserInfoStore());
   }
 

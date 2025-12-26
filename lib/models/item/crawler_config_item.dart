@@ -41,6 +41,22 @@ class CrawlConfigItem {
     );
   }
 
+  Map<String, dynamic> toJson() {
+    return {
+      'version': version,
+      'name': name,
+      'iconUrl': iconUrl,
+      'baseUrl': baseUrl,
+      'searchUrl': searchUrl,
+      'searchList': searchList,
+      'searchName': searchName,
+      'searchLink': searchLink,
+      'lineNames': lineNames,
+      'lineList': lineList,
+      'episode': episode,
+    };
+  }
+
   @override
   String toString() {
     return 'CrawlConfigItem{version: $version, name: $name, iconUrl: $iconUrl, baseURL: $baseUrl, searchUrl: $searchUrl, searchList: $searchList, searchName: $searchName, searchLink: $searchLink, lineNames: $lineNames, lineList: $lineList, episode: $episode}';

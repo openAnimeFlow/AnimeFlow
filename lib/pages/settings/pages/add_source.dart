@@ -1,3 +1,5 @@
+import 'package:anime_flow/models/item/crawler_config_item.dart';
+import 'package:anime_flow/utils/crawl_config.dart';
 import 'package:flutter/material.dart';
 
 class AddSourcePage extends StatefulWidget {
@@ -8,19 +10,160 @@ class AddSourcePage extends StatefulWidget {
 }
 
 class _AddSourcePageState extends State<AddSourcePage> {
-  final List<String> _textField = [
-    '版本号',
-    '名称',
-    '图标链接',
-    '网站链接',
-    '搜索链接',
-    '搜索内容列表',
-    '搜索列表名称',
-    '搜索列表链接',
-    '线路名称',
-    '剧集列表',
-    '剧集'
+  final List<_Field> _textFields = [
+    _Field(
+      title: '版本号',
+      message: '如（1.0.0）',
+      key: 'version',
+      isRequired: true,
+    ),
+    _Field(
+      title: '名称',
+      message: '网站名称,唯一值避免与其他配置名称重复,否则将被覆盖',
+      key: 'name',
+      isRequired: true,
+    ),
+    _Field(
+      title: '图标链接',
+      message: '网站图标链接',
+      key: 'iconUrl',
+      isRequired: true,
+    ),
+    _Field(
+      title: '网站链接',
+      message: '网站主链接,避免以 / 结尾',
+      key: 'baseUrl',
+      isRequired: true,
+    ),
+    _Field(
+      title: '搜索链接',
+      message: '用{keyword}搜索关键字,示例:https://dm.xifanacg.com/search.html?wd={keyword}',
+      key: 'searchUrl',
+      isRequired: true,
+    ),
+    _Field(
+      title: '搜索内容列表',
+      message: '搜索内容列表',
+      key: 'searchList',
+      isRequired: true,
+    ),
+    _Field(
+      title: '搜索列表名称',
+      message: '搜索列表名称',
+      key: 'searchName',
+      isRequired: true,
+    ),
+    _Field(
+      title: '搜索列表链接',
+      message: '搜索列表链接',
+      key: 'searchLink',
+      isRequired: true,
+    ),
+    _Field(
+      title: '线路名称',
+      message: '线路名称',
+      key: 'lineNames',
+      isRequired: true,
+    ),
+    _Field(
+      title: '剧集列表',
+      message: '剧集列表',
+      key: 'lineList',
+      isRequired: true,
+    ),
+    _Field(
+      title: '剧集',
+      message: '剧集链接,从剧集列表中获取的数据的xpath',
+      key: 'episode',
+      isRequired: true,
+    )
   ];
+
+  late final List<TextEditingController> _controllers;
+  final Set<int> _errorFields = {};
+
+  @override
+  void initState() {
+    super.initState();
+    _controllers = _textFields.map((field) => TextEditingController()).toList();
+    // 监听输入变化，清除错误状态
+    for (int i = 0; i < _controllers.length; i++) {
+      _controllers[i].addListener(() {
+        if (_errorFields.contains(i) &&
+            _controllers[i].text.trim().isNotEmpty) {
+          setState(() {
+            _errorFields.remove(i);
+          });
+        }
+      });
+    }
+  }
+
+  Future<void> _saveConfig() async {
+    // 空值校验 - 所有字段都不允许为空
+    _errorFields.clear();
+    for (int i = 0; i < _textFields.length; i++) {
+      final controller = _controllers[i];
+      final value = controller.text.trim();
+
+      if (value.isEmpty) {
+        _errorFields.add(i);
+      }
+    }
+
+    if (_errorFields.isNotEmpty) {
+      setState(() {});
+      return;
+    }
+
+    try {
+      final item = CrawlConfigItem(
+        version: _controllers[0].text.trim(),
+        name: _controllers[1].text.trim(),
+        iconUrl: _controllers[2].text.trim(),
+        baseUrl: _controllers[3].text.trim(),
+        searchUrl: _controllers[4].text.trim(),
+        searchList: _controllers[5].text.trim(),
+        searchName: _controllers[6].text.trim(),
+        searchLink: _controllers[7].text.trim(),
+        lineNames: _controllers[8].text.trim(),
+        lineList: _controllers[9].text.trim(),
+        episode: _controllers[10].text.trim(),
+      );
+
+      await CrawlConfig.saveCrawl(item);
+
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: const Text('保存成功'),
+            backgroundColor: Theme.of(context).colorScheme.primaryContainer,
+            duration: const Duration(seconds: 2),
+          ),
+        );
+        // 保存成功后返回上一页
+        Navigator.of(context).pop();
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('保存失败：$e'),
+            backgroundColor: Theme.of(context).colorScheme.error,
+            duration: const Duration(seconds: 3),
+          ),
+        );
+      }
+    }
+  }
+
+  @override
+  void dispose() {
+    for (var controller in _controllers) {
+      controller.dispose();
+    }
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -30,27 +173,67 @@ class _AddSourcePageState extends State<AddSourcePage> {
       ),
       //右下角按钮
       floatingActionButton: FloatingActionButton(
-        onPressed: () {},
-        child: Icon(Icons.save_rounded),
+        onPressed: _saveConfig,
+        child: const Icon(Icons.save_rounded),
       ),
       body: Center(
         child: ConstrainedBox(
           constraints: const BoxConstraints(maxWidth: 1440),
           child: Padding(
-            padding: EdgeInsets.symmetric(vertical: 10),
+            padding: const EdgeInsets.symmetric(vertical: 10),
             child: ListView(
-              children: List.generate(_textField.length, (index) {
-                final String text = _textField[index];
+              children: List.generate(_textFields.length, (index) {
+                final textField = _textFields[index];
+                final controller = _controllers[index];
+                final hasError = _errorFields.contains(index);
                 return Container(
-                  margin: EdgeInsets.symmetric(vertical: 5),
-                  padding: EdgeInsets.symmetric(horizontal: 16),
-                  child: TextField(
-                    decoration: InputDecoration(
-                      labelText: text,
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(10),
+                  margin: const EdgeInsets.symmetric(vertical: 5),
+                  padding: const EdgeInsets.symmetric(horizontal: 16),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      TextField(
+                        controller: controller,
+                        decoration: InputDecoration(
+                          labelText: textField.title,
+                          errorText: hasError ? '此字段不能为空' : null,
+                          errorBorder: hasError
+                              ? OutlineInputBorder(
+                                  borderRadius: BorderRadius.circular(10),
+                                  borderSide: BorderSide(
+                                    color: Theme.of(context).colorScheme.error,
+                                    width: 2,
+                                  ),
+                                )
+                              : null,
+                          focusedErrorBorder: hasError
+                              ? OutlineInputBorder(
+                                  borderRadius: BorderRadius.circular(10),
+                                  borderSide: BorderSide(
+                                    color: Theme.of(context).colorScheme.error,
+                                    width: 2,
+                                  ),
+                                )
+                              : null,
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(10),
+                          ),
+                        ),
                       ),
-                    ),
+                      Padding(
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 10, vertical: 4),
+                        child: Text(
+                          textField.message,
+                          style: TextStyle(
+                            fontSize: 12,
+                            fontWeight: FontWeight.w600,
+                            color:
+                                Theme.of(context).colorScheme.onSurfaceVariant,
+                          ),
+                        ),
+                      )
+                    ],
                   ),
                 );
               }),
@@ -60,4 +243,18 @@ class _AddSourcePageState extends State<AddSourcePage> {
       ),
     );
   }
+}
+
+class _Field {
+  final String title;
+  final String message;
+  final String key;
+  final bool isRequired;
+
+  _Field({
+    required this.title,
+    required this.message,
+    required this.key,
+    this.isRequired = false,
+  });
 }

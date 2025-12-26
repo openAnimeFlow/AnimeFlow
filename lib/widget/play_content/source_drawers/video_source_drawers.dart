@@ -101,6 +101,7 @@ class _VideoSourceDrawersState extends State<VideoSourceDrawers> {
   }
 
   Future<void> _loadVideoPage(String url) async {
+    logger.d('加载视频页面: $url');
     await webviewItemController.loadUrl(
       url,
       true, // useNativePlayer: 使用原生播放器

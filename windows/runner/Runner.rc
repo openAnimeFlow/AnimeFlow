@@ -90,12 +90,12 @@ BEGIN
         BLOCK "040904e4"
         BEGIN
             VALUE "CompanyName", "com.example" "\0"
-            VALUE "FileDescription", "untitled1" "\0"
+            VALUE "FileDescription", "AnimeFlow" "\0"
             VALUE "FileVersion", VERSION_AS_STRING "\0"
-            VALUE "InternalName", "untitled1" "\0"
+            VALUE "InternalName", "AnimeFlow" "\0"
             VALUE "LegalCopyright", "Copyright (C) 2025 com.example. All rights reserved." "\0"
-            VALUE "OriginalFilename", "untitled1.exe" "\0"
-            VALUE "ProductName", "untitled1" "\0"
+            VALUE "OriginalFilename", "AnimeFlow.exe" "\0"
+            VALUE "ProductName", "AnimeFlow" "\0"
             VALUE "ProductVersion", VERSION_AS_STRING "\0"
         END
     END

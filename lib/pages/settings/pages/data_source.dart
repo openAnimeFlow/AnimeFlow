@@ -69,7 +69,6 @@ class _DataSourcePageState extends State<DataSourcePage> {
     );
   }
 
-
   @override
   Widget build(BuildContext context) {
     return Obx(
@@ -83,8 +82,13 @@ class _DataSourcePageState extends State<DataSourcePage> {
                 Icons.save_as_outlined,
                 size: 30,
               ),
-              onPressed: () {
-                Navigator.of(context).pushNamed(RouteName.settingAddSource);
+              onPressed: () async {
+                final result = await Navigator.of(context)
+                    .pushNamed(RouteName.settingAddSource);
+                // 如果返回成功标志，刷新数据
+                if (result == true) {
+                  _initData();
+                }
               },
             )
           ],
@@ -116,7 +120,10 @@ class _DataSourcePageState extends State<DataSourcePage> {
                     style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
                   ),
                   trailing: IconButton(
-                    icon: Icon(Icons.delete),
+                    icon: Icon(
+                      Icons.delete_outline_outlined,
+                      color: Theme.of(context).colorScheme.primary,
+                    ),
                     onPressed: () {
                       _deleteDataSource(data.name);
                     },

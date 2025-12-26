@@ -1,6 +1,7 @@
 import 'package:anime_flow/models/item/crawler_config_item.dart';
 import 'package:anime_flow/utils/crawl_config.dart';
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 
 class AddSourcePage extends StatefulWidget {
   const AddSourcePage({super.key});
@@ -100,7 +101,7 @@ class _AddSourcePageState extends State<AddSourcePage> {
   }
 
   Future<void> _saveConfig() async {
-    // 空值校验 - 所有字段都不允许为空
+    // 空值校验
     _errorFields.clear();
     for (int i = 0; i < _textFields.length; i++) {
       final controller = _controllers[i];
@@ -134,24 +135,19 @@ class _AddSourcePageState extends State<AddSourcePage> {
       await CrawlConfig.saveCrawl(item);
 
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: const Text('保存成功'),
-            backgroundColor: Theme.of(context).colorScheme.primaryContainer,
-            duration: const Duration(seconds: 2),
-          ),
+        Get.snackbar(
+          '保存成功',
+          '数据源已保存',
+          maxWidth: 400,
         );
-        // 保存成功后返回上一页
-        Navigator.of(context).pop();
+        Navigator.of(context).pop(true); // 返回 true 表示保存成功
       }
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('保存失败：$e'),
-            backgroundColor: Theme.of(context).colorScheme.error,
-            duration: const Duration(seconds: 3),
-          ),
+        Get.snackbar(
+          '保存失败',
+          '数据保存失败:$e',
+          maxWidth: 400,
         );
       }
     }
@@ -171,7 +167,6 @@ class _AddSourcePageState extends State<AddSourcePage> {
       appBar: AppBar(
         title: Text('数据源管理'),
       ),
-      //右下角按钮
       floatingActionButton: FloatingActionButton(
         onPressed: _saveConfig,
         child: const Icon(Icons.save_rounded),

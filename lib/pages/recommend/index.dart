@@ -11,14 +11,14 @@ import 'package:get/get.dart';
 import 'package:anime_flow/controllers/theme_controller.dart';
 import 'package:anime_flow/models/item/bangumi/hot_item.dart';
 
-class RecommendView extends StatefulWidget {
-  const RecommendView({super.key});
+class RecommendPage extends StatefulWidget {
+  const RecommendPage({super.key});
 
   @override
-  State<RecommendView> createState() => _RecommendViewState();
+  State<RecommendPage> createState() => _RecommendPageState();
 }
 
-class _RecommendViewState extends State<RecommendView> {
+class _RecommendPageState extends State<RecommendPage> {
   late MainPageState mainPageState;
   final List<Data> _dataList = [];
   bool _isLoading = false;

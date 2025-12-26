@@ -1,12 +1,12 @@
 import 'package:anime_flow/controllers/main_page/main_page_state.dart';
 import 'package:anime_flow/models/item/tab_item.dart';
 import 'package:anime_flow/pages/my/index.dart';
+import 'package:anime_flow/pages/ranking/index.dart';
 import 'package:anime_flow/routes/index.dart';
 import 'package:anime_flow/stores/user_info_store.dart';
 import 'package:anime_flow/utils/crawl_config.dart';
 import 'package:anime_flow/widget/animation_network_image/animation_network_image.dart';
 import 'package:flutter/material.dart';
-import 'package:anime_flow/pages/Category/index.dart';
 import 'package:anime_flow/pages/recommend/index.dart';
 import 'package:get/get.dart';
 
@@ -50,7 +50,7 @@ class _MainPageState extends State<MainPage> {
     super.initState();
     mainPageState = Get.put(MainPageState());
     // 默认初始化第一个页面
-    _pageCache[0] = const RecommendView();
+    _pageCache[0] = const RecommendPage();
     CrawlConfig.initCrawlConfigs();
     userInfoStore = Get.put(UserInfoStore());
   }
@@ -156,10 +156,10 @@ class _MainPageState extends State<MainPage> {
       if (_pageCache[index] == null) {
         switch (index) {
           case 0:
-            _pageCache[index] = const RecommendView();
+            _pageCache[index] = const RecommendPage();
             break;
           case 1:
-            _pageCache[index] = const CategoryView();
+            _pageCache[index] = const RankingPage();
             break;
           case 2:
             _pageCache[index] = const MyPage();

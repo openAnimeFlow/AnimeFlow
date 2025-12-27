@@ -147,10 +147,6 @@ class _RecommendPageState extends State<RecommendPage> {
                     );
                   },
                 ),
-                IconButton(
-                    onPressed: () =>
-                        Navigator.of(context).pushNamed(RouteName.settings),
-                    icon: Icon(Icons.settings))
               ],
             )),
             GetBuilder<ThemeController>(

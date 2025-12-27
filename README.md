@@ -1,6 +1,7 @@
 <div align="center">
   <img width="200" alt="file_00000000f82071f79ac51eb74f68d0d5" src="https://github.com/user-attachments/assets/012a476e-1f24-4fac-963b-56b861823a43" />
 </div>
+
 # AnimeFlow
 
 一个跨平台的动漫视频播放应用，支持多数据源、自定义爬虫配置,对接Bangumi服务同步用户收藏数据,为您提供流畅的观影体验。

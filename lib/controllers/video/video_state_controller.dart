@@ -54,11 +54,11 @@ class VideoStateController extends GetxController {
 
   ///设置播放倍数
   void startSpeedBoost(double speed) {
-    // 保存长按前的倍速
-    _originalSpeed = rate.value;
-    // 设置新的倍速
-    rate.value = speed;
-    player.setRate(speed);
+      // 保存长按前的倍速
+      _originalSpeed = rate.value;
+      // 设置新的倍速
+      rate.value = speed;
+      player.setRate(speed);
   }
 
   /// 结束速度提升

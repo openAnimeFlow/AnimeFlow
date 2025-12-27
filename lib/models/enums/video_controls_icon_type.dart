@@ -5,5 +5,6 @@ enum VideoControlsIndicatorType {
   parsingIndicator,
   playStatusIndicator,
   horizontalDraggingIndicator,
-  brightnessIndicator
+  brightnessIndicator,
+  speedIndicator
 }

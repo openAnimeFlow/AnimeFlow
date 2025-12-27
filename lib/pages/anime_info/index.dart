@@ -4,6 +4,7 @@ import 'package:anime_flow/controllers/anime/anime_state_controller.dart';
 import 'package:anime_flow/http/requests/bgm_request.dart';
 import 'package:anime_flow/models/item/bangumi/episodes_item.dart';
 import 'package:anime_flow/models/item/bangumi/subjects_item.dart';
+import 'package:anime_flow/routes/index.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'info_appBar.dart';
@@ -136,21 +137,39 @@ class _AnimeDetailPageState extends State<AnimeDetailPage> {
               ),
             ),
           ),
-          if (topButton)
-            Positioned(
-              right: 15,
-              bottom: 15,
-              child: FloatingActionButton(
-                onPressed: () {
-                  _nestedScrollController.animateTo(
-                    0,
-                    duration: const Duration(milliseconds: 300),
-                    curve: Curves.easeInOut,
-                  );
-                },
-                child: const Icon(Icons.arrow_upward_rounded),
-              ),
-            ),
+          Positioned(
+              right: 20,
+              bottom: 20,
+              child: Column(
+                children: [
+                  if (topButton) ...[
+                    FloatingActionButton(
+                      onPressed: () {
+                        _nestedScrollController.animateTo(
+                          0,
+                          duration: const Duration(milliseconds: 300),
+                          curve: Curves.easeInOut,
+                        );
+                      },
+                      child: Icon(Icons.arrow_upward_rounded,
+                          color: Theme.of(context).colorScheme.primary),
+                    ),
+                  ],
+                  const SizedBox(height: 5),
+                  FloatingActionButton(
+                    onPressed: () {
+                      Get.toNamed(RouteName.play, arguments: {
+                        "subjectBasicData": subjectBasicData,
+                        "episodes": episodesFuture
+                      });
+                    },
+                    child: Icon(
+                      Icons.play_arrow_rounded,
+                      color: Theme.of(context).colorScheme.primary,
+                    ),
+                  ),
+                ],
+              )),
         ],
       ),
     );

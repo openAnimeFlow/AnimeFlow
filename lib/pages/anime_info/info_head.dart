@@ -73,95 +73,92 @@ class InfoHeadView extends StatelessWidget {
           right: 5,
           bottom: 5,
           child: Align(
-              alignment: Alignment.center,
-              child: ConstrainedBox(
-                  constraints: const BoxConstraints(
-                      maxWidth: PlayLayoutConstant.infoMaxWidth),
-                  child: SizedBox(
-                      height: double.infinity,
-                      child: Padding(
-                        padding: EdgeInsets.only(
-                            left: MediaQuery.of(context).padding.left),
-                        child: Row(
-                            mainAxisAlignment: MainAxisAlignment.start,
-                            children: [
-                              //封面
-                              Flexible(
-                                  flex: 2,
-                                  child: AspectRatio(
-                                      aspectRatio: 2 / 3,
-                                      child: Container(
-                                        margin: const EdgeInsets.only(left: 6),
-                                        child: AnimationNetworkImage(
-                                          preview: true,
+            alignment: Alignment.center,
+            child: ConstrainedBox(
+              constraints: const BoxConstraints(
+                  maxWidth: PlayLayoutConstant.infoMaxWidth),
+              child: SizedBox(
+                height: double.infinity,
+                child: Padding(
+                  padding: EdgeInsets.only(
+                      left: MediaQuery.of(context).padding.left),
+                  child: Row(
+                      mainAxisAlignment: MainAxisAlignment.start,
+                      children: [
+                        //封面
+                        Flexible(
+                            flex: 2,
+                            child: AspectRatio(
+                                aspectRatio: 2 / 3,
+                                child: Container(
+                                  margin: const EdgeInsets.only(left: 6),
+                                  child: AnimationNetworkImage(
+                                    preview: true,
+                                    borderRadius: BorderRadius.circular(8),
+                                    url: subjectBasicData.image,
+                                    fit: BoxFit.cover,
+                                  ),
+                                ))),
+                        const SizedBox(width: 5),
+                        //信息
+                        Flexible(
+                          flex: 3, // 文本占3份
+                          child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                subjectItem == null
+                                    ? _skeletonView()
+                                    : _dataView(
+                                        subjectItem: subjectItem!,
+                                        themeColor: themeColor),
+                                const Spacer(),
+                                Row(children: [
+                                  IconButton(
+                                    onPressed: () {
+                                      episodesDialog(context, episodesItem);
+                                    },
+                                    icon: const Icon(
+                                      Icons.grid_view_rounded,
+                                      size: 28,
+                                    ),
+                                  ),
+                                  SizedBox(
+                                    width: 150,
+                                    child: OutlinedButton.icon(
+                                      onPressed: () {
+                                        Get.toNamed(RouteName.play, arguments: {
+                                          "subjectBasicData": subjectBasicData,
+                                          "episodes": episodesItem
+                                        });
+                                      },
+                                      style: OutlinedButton.styleFrom(
+                                        side: BorderSide(color: themeColor),
+                                        shape: RoundedRectangleBorder(
                                           borderRadius:
-                                              BorderRadius.circular(8),
-                                          url: subjectBasicData.image,
-                                          fit: BoxFit.cover,
+                                              BorderRadius.circular(20),
                                         ),
-                                      ))),
-                              const SizedBox(width: 5),
-                              //信息
-                              Flexible(
-                                flex: 3, // 文本占3份
-                                child: Column(
-                                    crossAxisAlignment:
-                                        CrossAxisAlignment.start,
-                                    children: [
-                                      subjectItem == null
-                                          ? _skeletonView()
-                                          : _dataView(
-                                              subjectItem: subjectItem!,
-                                              themeColor: themeColor),
-                                      const Spacer(),
-                                      Row(children: [
-                                        IconButton(
-                                            onPressed: () {
-                                              episodesDialog(
-                                                  context, episodesItem);
-                                            },
-                                            icon: const Icon(
-                                              Icons.grid_view_rounded,
-                                              size: 28,
-                                            )),
-                                        SizedBox(
-                                          width: 150,
-                                          child: OutlinedButton.icon(
-                                            onPressed: () {
-                                              Get.toNamed(RouteName.play,
-                                                  arguments: {
-                                                    "subjectBasicData":
-                                                        subjectBasicData,
-                                                    "episodes": episodesItem
-                                                  });
-                                            },
-                                            style: OutlinedButton.styleFrom(
-                                              side:
-                                                  BorderSide(color: themeColor),
-                                              shape: RoundedRectangleBorder(
-                                                borderRadius:
-                                                    BorderRadius.circular(20),
-                                              ),
-                                              padding:
-                                                  const EdgeInsets.symmetric(
-                                                horizontal: 12,
-                                              ),
-                                            ),
-                                            icon: const Icon(
-                                              Icons.play_circle_outline,
-                                              size: 16,
-                                            ),
-                                            label: const Text(
-                                              "播放",
-                                              style: TextStyle(fontSize: 12),
-                                            ),
-                                          ),
+                                        padding: const EdgeInsets.symmetric(
+                                          horizontal: 12,
                                         ),
-                                      ]),
-                                    ]),
-                              ),
-                            ]),
-                      )))),
+                                      ),
+                                      icon: const Icon(
+                                        Icons.play_circle_outline,
+                                        size: 16,
+                                      ),
+                                      label: const Text(
+                                        "播放",
+                                        style: TextStyle(fontSize: 12),
+                                      ),
+                                    ),
+                                  ),
+                                ]),
+                              ]),
+                        ),
+                      ]),
+                ),
+              ),
+            ),
+          ),
         )
       ],
     );

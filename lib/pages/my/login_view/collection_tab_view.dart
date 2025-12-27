@@ -134,7 +134,6 @@ class __CollectionTabViewState extends State<_CollectionTabView> {
     final crossAxisCount = _calculateCrossAxisCount(context);
     final collections = widget.collectionsItem!.data;
     return Builder(
-
       builder: (context) {
         final handle = NestedScrollView.sliverOverlapAbsorberHandleFor(context);
         return NotificationListener<ScrollNotification>(
@@ -178,11 +177,11 @@ class __CollectionTabViewState extends State<_CollectionTabView> {
                                     ? const SizedBox.shrink()
                                     : const Center(
                                         child: Padding(
-                                          padding: EdgeInsets.all(8.0),
-                                          child: Text("没有更多了"),
-                                        ));
+                                        padding: EdgeInsets.all(8.0),
+                                        child: Text("没有更多了"),
+                                      ));
                           }
-                          
+
                           final collection = collections[index];
                           final subjectBasicData = SubjectBasicData(
                             id: collection.id,
@@ -196,94 +195,91 @@ class __CollectionTabViewState extends State<_CollectionTabView> {
                               Get.toNamed(RouteName.animeInfo,
                                   arguments: subjectBasicData);
                             },
-                            child: IntrinsicHeight(
-                              child: Row(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  // 左侧封面
-                                  AspectRatio(
-                                      aspectRatio: 2 / 3,
-                                      child: ClipRRect(
-                                        borderRadius: const BorderRadius.all(
-                                            Radius.circular(12)),
-                                        child: SizedBox(
-                                          child: AnimationNetworkImage(
-                                            url: collection.images.large,
-                                            fit: BoxFit.cover,
-                                          ),
+                            child: Row(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                // 左侧封面
+                                AspectRatio(
+                                    aspectRatio: 2 / 3,
+                                    child: ClipRRect(
+                                      borderRadius: const BorderRadius.all(
+                                          Radius.circular(12)),
+                                      child: SizedBox(
+                                        child: AnimationNetworkImage(
+                                          url: collection.images.large,
+                                          fit: BoxFit.cover,
                                         ),
-                                      )),
+                                      ),
+                                    )),
 
-                                  // 右侧信息
-                                  Expanded(
-                                    child: Padding(
-                                      padding: const EdgeInsets.all(5),
-                                      child: Column(
-                                        crossAxisAlignment:
-                                            CrossAxisAlignment.start,
-                                        mainAxisAlignment:
-                                            MainAxisAlignment.start,
-                                        children: [
+                                // 右侧信息
+                                Expanded(
+                                  child: Padding(
+                                    padding: const EdgeInsets.all(5),
+                                    child: Column(
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.start,
+                                      mainAxisAlignment:
+                                          MainAxisAlignment.start,
+                                      children: [
+                                        Text(
+                                          collection.nameCN.isEmpty
+                                              ? collection.name
+                                              : collection.nameCN,
+                                          style: const TextStyle(
+                                            fontWeight: FontWeight.bold,
+                                            fontSize: 14,
+                                          ),
+                                          maxLines: 2,
+                                          overflow: TextOverflow.ellipsis,
+                                        ),
+                                        if (collection.summary.isNotEmpty) ...[
+                                          const SizedBox(height: 4),
                                           Text(
-                                            collection.nameCN.isEmpty
-                                                ? collection.name
-                                                : collection.nameCN,
-                                            style: const TextStyle(
-                                              fontWeight: FontWeight.bold,
-                                              fontSize: 14,
+                                            collection.summary,
+                                            style: TextStyle(
+                                              fontSize: 12,
+                                              color: Colors.grey[600],
                                             ),
                                             maxLines: 2,
                                             overflow: TextOverflow.ellipsis,
                                           ),
-                                          if (collection
-                                              .summary.isNotEmpty) ...[
-                                            const SizedBox(height: 4),
-                                            Text(
-                                              collection.summary,
-                                              style: TextStyle(
-                                                fontSize: 12,
-                                                color: Colors.grey[600],
-                                              ),
-                                              maxLines: 2,
-                                              overflow: TextOverflow.ellipsis,
-                                            ),
-                                          ],
-                                          const Spacer(),
-                                          Row(
-                                            children: [
-                                              RankingView(
-                                                  ranking:
-                                                      collection.rating.rank),
-                                              if (collection.rating.score >
-                                                  0) ...[
-                                                const SizedBox(height: 4),
-                                                Row(
-                                                  children: [
-                                                    StarView(
-                                                        iconSize: 16,
-                                                        score: collection
-                                                            .rating.score),
-                                                    const SizedBox(width: 4),
-                                                    Text(
-                                                      '${collection.rating.score}',
-                                                      style: TextStyle(
-                                                        fontWeight:
-                                                            FontWeight.bold,
-                                                        fontSize: 12,
-                                                        color: Colors.grey[600],
-                                                      ),
-                                                    ),
-                                                  ],
-                                                ),
-                                              ],
-                                            ],
-                                          )
                                         ],
-                                      ),
+                                        const Spacer(),
+                                        Row(
+                                          children: [
+                                            RankingView(
+                                                ranking:
+                                                    collection.rating.rank),
+                                            if (collection.rating.score >
+                                                0) ...[
+                                              const SizedBox(height: 4),
+                                              Row(
+                                                children: [
+                                                  StarView(
+                                                      iconSize: 16,
+                                                      score: collection
+                                                          .rating.score),
+                                                  const SizedBox(width: 4),
+                                                  Text(
+                                                    '${collection.rating.score}',
+                                                    style: TextStyle(
+                                                      fontWeight:
+                                                          FontWeight.bold,
+                                                      fontSize: 12,
+                                                      color: Colors.grey[600],
+                                                    ),
+                                                  ),
+                                                ],
+                                              ),
+                                            ],
+                                          ],
+                                        )
+                                      ],
                                     ),
                                   ),
-                                ],
-                              ),
+                                ),
+                              ],
                             ),
                           );
                         },

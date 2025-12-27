@@ -58,20 +58,23 @@ class _LoginViewState extends State<LoginView>
     ];
   }
 
-  void _getCollections(int type, {bool loadMore = false}) async {
-    // 如果正在加载，则不再加载
-    if (_loadingTypes.contains(type)) {
-      return;
-    }
+  Future<void> _getCollections(int type, {bool loadMore = false, bool refresh = false}) async {
+    // 如果是刷新，允许重新加载
+    if (!refresh) {
+      // 如果正在加载，则不再加载
+      if (_loadingTypes.contains(type)) {
+        return;
+      }
 
-    // 如果是加载更多，但没有更多数据，则不加载
-    if (loadMore && (_hasMore[type] == false)) {
-      return;
-    }
+      // 如果是加载更多，但没有更多数据，则不加载
+      if (loadMore && (_hasMore[type] == false)) {
+        return;
+      }
 
-    // 如果是首次加载，但已经有缓存数据，则不加载
-    if (!loadMore && _collectionsCache.containsKey(type)) {
-      return;
+      // 如果是首次加载，但已经有缓存数据，则不加载
+      if (!loadMore && _collectionsCache.containsKey(type)) {
+        return;
+      }
     }
 
     setState(() {
@@ -79,18 +82,18 @@ class _LoginViewState extends State<LoginView>
     });
 
     try {
-      final offset = loadMore
+      final offset = loadMore && !refresh
           ? (_offsets[type] ?? _collectionsCache[type]?.data.length ?? 0)
           : 0;
       final collections = await UserRequest.queryUserCollectionsService(
           type: type, limit: 20, offset: offset);
 
       setState(() {
-        if (loadMore && _collectionsCache[type] != null) {
+        if (loadMore && !refresh && _collectionsCache[type] != null) {
           // 追加数据
           _collectionsCache[type]!.data.addAll(collections.data);
         } else {
-          // 首次加载
+          // 首次加载或刷新
           _collectionsCache[type] = collections;
           _offsets[type] = 0; // 重置 offset
         }
@@ -104,6 +107,10 @@ class _LoginViewState extends State<LoginView>
         _loadingTypes.remove(type);
       });
     }
+  }
+
+  Future<void> _refreshCollections(int type) async {
+    await _getCollections(type, refresh: true);
   }
 
   @override
@@ -213,6 +220,7 @@ class _LoginViewState extends State<LoginView>
           tabs: _tabs,
           onLoad: (type) => _getCollections(type),
           onLoadMore: (type) => _getCollections(type, loadMore: true),
+          onRefresh: (type) => _refreshCollections(type),
           loadingTypes: _loadingTypes,
           hasMore: _hasMore,
         ),

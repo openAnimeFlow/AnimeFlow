@@ -12,6 +12,7 @@ class CollectionTabView extends StatelessWidget {
   final List<String> tabs;
   final Function(int) onLoad;
   final Function(int) onLoadMore;
+  final Function(int) onRefresh;
   final Set<int> loadingTypes;
   final Map<int, CollectionsItem?> collectionsCache;
   final Map<int, bool> hasMore;
@@ -23,6 +24,7 @@ class CollectionTabView extends StatelessWidget {
       required this.tabs,
       required this.onLoad,
       required this.onLoadMore,
+      required this.onRefresh,
       required this.loadingTypes,
       required this.hasMore});
 
@@ -40,6 +42,7 @@ class CollectionTabView extends StatelessWidget {
             hasMore: hasMore[type] ?? true,
             onLoad: () => onLoad(type),
             onLoadMore: () => onLoadMore(type),
+            onRefresh: () => onRefresh(type),
           );
         }));
   }
@@ -52,6 +55,7 @@ class _CollectionTabView extends StatefulWidget {
   final bool hasMore;
   final VoidCallback onLoad;
   final VoidCallback onLoadMore;
+  final Future<void> Function() onRefresh;
 
   const _CollectionTabView({
     super.key,
@@ -61,6 +65,7 @@ class _CollectionTabView extends StatefulWidget {
     required this.hasMore,
     required this.onLoad,
     required this.onLoadMore,
+    required this.onRefresh,
   });
 
   @override
@@ -136,160 +141,163 @@ class __CollectionTabViewState extends State<_CollectionTabView> {
     return Builder(
       builder: (context) {
         final handle = NestedScrollView.sliverOverlapAbsorberHandleFor(context);
-        return NotificationListener<ScrollNotification>(
-          onNotification: (notification) {
-            if (notification is ScrollUpdateNotification) {
-              final metrics = notification.metrics;
-              // 当滚动到距离底部 200px 时，触发加载更多
-              // 确保有数据且不在加载中
-              if (metrics.pixels >= metrics.maxScrollExtent - 200 &&
-                  collections.isNotEmpty &&
-                  !widget.isLoading) {
-                widget.onLoadMore();
+        return RefreshIndicator(
+          onRefresh: widget.onRefresh,
+          child: NotificationListener<ScrollNotification>(
+            onNotification: (notification) {
+              if (notification is ScrollUpdateNotification) {
+                final metrics = notification.metrics;
+                // 当滚动到距离底部 200px 时，触发加载更多
+                // 确保有数据且不在加载中
+                if (metrics.pixels >= metrics.maxScrollExtent - 200 &&
+                    collections.isNotEmpty &&
+                    !widget.isLoading) {
+                  widget.onLoadMore();
+                }
               }
-            }
-            return false;
-          },
-          child: CustomScrollView(
-            slivers: <Widget>[
-              SliverOverlapInjector(handle: handle),
-              SliverPadding(
-                padding:
-                    const EdgeInsets.symmetric(vertical: 10, horizontal: 10),
-                sliver: SliverMainAxisGroup(
-                  slivers: [
-                    SliverGrid(
-                      gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                        crossAxisCount: crossAxisCount,
-                        crossAxisSpacing: 12,
-                        mainAxisSpacing: 12,
-                        childAspectRatio: 2.5,
-                      ),
-                      delegate: SliverChildBuilderDelegate(
-                        (context, index) {
-                          // 最后一项
-                          if (index == collections.length) {
-                            return widget.isLoading
-                                ? const Center(
-                                    child: CircularProgressIndicator(),
-                                  )
-                                : widget.hasMore
-                                    ? const SizedBox.shrink()
-                                    : const Center(
-                                        child: Padding(
-                                        padding: EdgeInsets.all(8.0),
-                                        child: Text("没有更多了"),
-                                      ));
-                          }
+              return false;
+            },
+            child: CustomScrollView(
+              slivers: <Widget>[
+                SliverOverlapInjector(handle: handle),
+                SliverPadding(
+                  padding:
+                      const EdgeInsets.symmetric(vertical: 10, horizontal: 10),
+                  sliver: SliverMainAxisGroup(
+                    slivers: [
+                      SliverGrid(
+                        gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                          crossAxisCount: crossAxisCount,
+                          crossAxisSpacing: 12,
+                          mainAxisSpacing: 12,
+                          childAspectRatio: 2.5,
+                        ),
+                        delegate: SliverChildBuilderDelegate(
+                          (context, index) {
+                            // 最后一项
+                            if (index == collections.length) {
+                              return widget.isLoading
+                                  ? const Center(
+                                      child: CircularProgressIndicator(),
+                                    )
+                                  : widget.hasMore
+                                      ? const SizedBox.shrink()
+                                      : const Center(
+                                          child: Padding(
+                                          padding: EdgeInsets.all(8.0),
+                                          child: Text("没有更多了"),
+                                        ));
+                            }
 
-                          final collection = collections[index];
-                          final subjectBasicData = SubjectBasicData(
-                            id: collection.id,
-                            name: collection.nameCN.isEmpty
-                                ? collection.name
-                                : collection.nameCN,
-                            image: collection.images.large,
-                          );
-                          return GestureDetector(
-                            onTap: () {
-                              Get.toNamed(RouteName.animeInfo,
-                                  arguments: subjectBasicData);
-                            },
-                            child: Row(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                // 左侧封面
-                                AspectRatio(
-                                    aspectRatio: 2 / 3,
-                                    child: ClipRRect(
-                                      borderRadius: const BorderRadius.all(
-                                          Radius.circular(12)),
-                                      child: SizedBox(
-                                        child: AnimationNetworkImage(
-                                          url: collection.images.large,
-                                          fit: BoxFit.cover,
-                                        ),
-                                      ),
-                                    )),
-
-                                // 右侧信息
-                                Expanded(
-                                  child: Padding(
-                                    padding: const EdgeInsets.all(5),
-                                    child: Column(
-                                      crossAxisAlignment:
-                                          CrossAxisAlignment.start,
-                                      mainAxisAlignment:
-                                          MainAxisAlignment.start,
-                                      children: [
-                                        Text(
-                                          collection.nameCN.isEmpty
-                                              ? collection.name
-                                              : collection.nameCN,
-                                          style: const TextStyle(
-                                            fontWeight: FontWeight.bold,
-                                            fontSize: 14,
+                            final collection = collections[index];
+                            final subjectBasicData = SubjectBasicData(
+                              id: collection.id,
+                              name: collection.nameCN.isEmpty
+                                  ? collection.name
+                                  : collection.nameCN,
+                              image: collection.images.large,
+                            );
+                            return GestureDetector(
+                              onTap: () {
+                                Get.toNamed(RouteName.animeInfo,
+                                    arguments: subjectBasicData);
+                              },
+                              child: Row(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  // 左侧封面
+                                  AspectRatio(
+                                      aspectRatio: 2 / 3,
+                                      child: ClipRRect(
+                                        borderRadius: const BorderRadius.all(
+                                            Radius.circular(12)),
+                                        child: SizedBox(
+                                          child: AnimationNetworkImage(
+                                            url: collection.images.large,
+                                            fit: BoxFit.cover,
                                           ),
-                                          maxLines: 2,
-                                          overflow: TextOverflow.ellipsis,
                                         ),
-                                        if (collection.summary.isNotEmpty) ...[
-                                          const SizedBox(height: 4),
+                                      )),
+
+                                  // 右侧信息
+                                  Expanded(
+                                    child: Padding(
+                                      padding: const EdgeInsets.all(5),
+                                      child: Column(
+                                        crossAxisAlignment:
+                                            CrossAxisAlignment.start,
+                                        mainAxisAlignment:
+                                            MainAxisAlignment.start,
+                                        children: [
                                           Text(
-                                            collection.summary,
-                                            style: TextStyle(
-                                              fontSize: 12,
-                                              color: Colors.grey[600],
+                                            collection.nameCN.isEmpty
+                                                ? collection.name
+                                                : collection.nameCN,
+                                            style: const TextStyle(
+                                              fontWeight: FontWeight.bold,
+                                              fontSize: 14,
                                             ),
                                             maxLines: 2,
                                             overflow: TextOverflow.ellipsis,
                                           ),
-                                        ],
-                                        const Spacer(),
-                                        Row(
-                                          children: [
-                                            RankingView(
-                                                ranking:
-                                                    collection.rating.rank),
-                                            if (collection.rating.score >
-                                                0) ...[
-                                              const SizedBox(height: 4),
-                                              Row(
-                                                children: [
-                                                  StarView(
-                                                      iconSize: 16,
-                                                      score: collection
-                                                          .rating.score),
-                                                  const SizedBox(width: 4),
-                                                  Text(
-                                                    '${collection.rating.score}',
-                                                    style: TextStyle(
-                                                      fontWeight:
-                                                          FontWeight.bold,
-                                                      fontSize: 12,
-                                                      color: Colors.grey[600],
-                                                    ),
-                                                  ),
-                                                ],
+                                          if (collection.summary.isNotEmpty) ...[
+                                            const SizedBox(height: 4),
+                                            Text(
+                                              collection.summary,
+                                              style: TextStyle(
+                                                fontSize: 12,
+                                                color: Colors.grey[600],
                                               ),
-                                            ],
+                                              maxLines: 2,
+                                              overflow: TextOverflow.ellipsis,
+                                            ),
                                           ],
-                                        )
-                                      ],
+                                          const Spacer(),
+                                          Row(
+                                            children: [
+                                              RankingView(
+                                                  ranking:
+                                                      collection.rating.rank),
+                                              if (collection.rating.score >
+                                                  0) ...[
+                                                const SizedBox(height: 4),
+                                                Row(
+                                                  children: [
+                                                    StarView(
+                                                        iconSize: 16,
+                                                        score: collection
+                                                            .rating.score),
+                                                    const SizedBox(width: 4),
+                                                    Text(
+                                                      '${collection.rating.score}',
+                                                      style: TextStyle(
+                                                        fontWeight:
+                                                            FontWeight.bold,
+                                                        fontSize: 12,
+                                                        color: Colors.grey[600],
+                                                      ),
+                                                    ),
+                                                  ],
+                                                ),
+                                              ],
+                                            ],
+                                          )
+                                        ],
+                                      ),
                                     ),
                                   ),
-                                ),
-                              ],
-                            ),
-                          );
-                        },
-                        childCount: collections.length + 1,
+                                ],
+                              ),
+                            );
+                          },
+                          childCount: collections.length + 1,
+                        ),
                       ),
-                    ),
-                  ],
+                    ],
+                  ),
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
         );
       },

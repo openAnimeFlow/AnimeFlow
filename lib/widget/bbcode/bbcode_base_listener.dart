@@ -46,6 +46,8 @@ class BBCodeBaseListener implements BBCodeListener {
       case 'photo':
       case 'IMG':
       case 'img':
+      case 'BG':
+      case 'bg':
         bbCodeTag.img = bbcode.length;
         break;
       case 'MASK':
@@ -138,6 +140,8 @@ class BBCodeBaseListener implements BBCodeListener {
       case 'photo':
       case 'IMG':
       case 'img':
+      case 'BG':
+      case 'bg':
         if (bbCodeTag.img! < bbcode.length &&
             bbcode.isNotEmpty &&
             bbcode[bbCodeTag.img!] is BBCodeText) {

@@ -7,6 +7,10 @@ class VideoStateController extends GetxController {
   final Rx<Duration> position = Duration.zero.obs;
   final RxDouble volume = 100.0.obs; //音量 0-100
   final RxBool isVerticalDragging = false.obs; //是否正在垂直拖动调整音量
+  final RxDouble rate = 1.0.obs;
+
+  //记录原始倍速
+  double _originalSpeed = 1.0;
 
   // 垂直拖动相关
   double _dragStartVolume = 100.0;
@@ -15,6 +19,8 @@ class VideoStateController extends GetxController {
   VideoStateController(this.player) {
     playing.value = player.state.playing;
     volume.value = player.state.volume;
+    rate.value = player.state.rate;
+    _originalSpeed = rate.value;
 
     // 监听播放器播放状态变化
     player.stream.playing.listen((playing) {
@@ -24,6 +30,11 @@ class VideoStateController extends GetxController {
     // 监听播放器音量变化
     player.stream.volume.listen((vol) {
       volume.value = vol;
+    });
+
+    // 监听播放器倍速变化
+    player.stream.rate.listen((r) {
+      rate.value = r;
     });
   }
 
@@ -39,6 +50,22 @@ class VideoStateController extends GetxController {
         '',
       ),
     );
+  }
+
+  ///设置播放倍数
+  void startSpeedBoost(double speed) {
+    // 保存长按前的倍速
+    _originalSpeed = rate.value;
+    // 设置新的倍速
+    rate.value = speed;
+    player.setRate(speed);
+  }
+
+  /// 结束速度提升
+  void endSpeedBoost() {
+    // 恢复为长按前的倍速
+    rate.value = _originalSpeed;
+    player.setRate(_originalSpeed);
   }
 
   ///设置视频音量（绝对值）

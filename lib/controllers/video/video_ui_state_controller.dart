@@ -47,7 +47,7 @@ class VideoUiStateController extends GetxController {
   double _dragStartBrightness = 0.5; // 拖动开始时的亮度
 
   VideoUiStateController(this.player) {
-    // 初始化状态，防止 player 已经加载完成导致 stream 不触发
+    // 初始化状态
     duration.value = player.state.duration;
     position.value = player.state.position;
     playing.value = player.state.playing;

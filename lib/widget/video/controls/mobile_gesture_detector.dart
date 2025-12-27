@@ -39,6 +39,21 @@ class MobileGestureDetector extends StatelessWidget {
             VideoControlsIndicatorType.playStatusIndicator);
       },
 
+      //长按
+      // onLongPress: () {
+      //   videoStateController.startSpeedBoost(2);
+      // },
+
+      //长按开始
+      onLongPressStart: (LongPressStartDetails details) {
+        videoStateController.startSpeedBoost(2);
+      },
+
+      //长按结束
+      onLongPressEnd: (LongPressEndDetails details) {
+        videoStateController.endSpeedBoost();
+      },
+
       // 拖动开始事件：记录起始位置并判断屏幕区域
       onPanStart: (details) {
         // 记录拖动起始坐标

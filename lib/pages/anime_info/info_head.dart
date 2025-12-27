@@ -103,26 +103,16 @@ class InfoHeadView extends StatelessWidget {
                           flex: 3, // 文本占3份
                           child: Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
+                              mainAxisSize: MainAxisSize.max,
                               children: [
                                 subjectItem == null
-                                    ? _skeletonView()
-                                    : _dataView(
-                                        subjectItem: subjectItem!,
-                                        themeColor: themeColor),
-                                const Spacer(),
-                                Row(children: [
-                                  IconButton(
-                                    onPressed: () {
-                                      episodesDialog(context, episodesItem);
-                                    },
-                                    icon: const Icon(
-                                      Icons.grid_view_rounded,
-                                      size: 28,
-                                    ),
-                                  ),
-                                  CollectionButton(
-                                      subjectId: subjectBasicData.id)
-                                ]),
+                                    ? Expanded(child: _skeletonView())
+                                    : Expanded(
+                                        child: _dataView(context,
+                                            episodes: episodesItem,
+                                            subjectItem: subjectItem!,
+                                            themeColor: themeColor),
+                                      ),
                               ]),
                         ),
                       ]),
@@ -141,6 +131,7 @@ class InfoHeadView extends StatelessWidget {
     const highlightColor = Colors.white24;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
+      mainAxisSize: MainAxisSize.max,
       children: [
         Shimmer.fromColors(
           baseColor: baseColor,
@@ -155,29 +146,62 @@ class InfoHeadView extends StatelessWidget {
           ),
         ),
         Shimmer.fromColors(
-            baseColor: baseColor,
-            highlightColor: highlightColor,
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: List.generate(5, (index) {
-                return Container(
-                  margin: const EdgeInsets.only(top: 5),
-                  height: 20,
-                  width: 180,
-                  decoration: BoxDecoration(
-                    color: Colors.white,
-                    borderRadius: BorderRadius.circular(8.0),
-                  ),
-                );
-              }),
-            ))
+          baseColor: baseColor,
+          highlightColor: highlightColor,
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: List.generate(5, (index) {
+              return Container(
+                margin: const EdgeInsets.only(top: 5),
+                height: 20,
+                width: 180,
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(8.0),
+                ),
+              );
+            }),
+          ),
+        ),
+        const Spacer(),
+        Row(
+          children: [
+            Shimmer.fromColors(
+              baseColor: baseColor,
+              highlightColor: highlightColor,
+              child: Container(
+                height: 40,
+                width: 40,
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(8.0),
+                ),
+              ),
+            ),
+            const SizedBox(width: 5),
+            Shimmer.fromColors(
+              baseColor: baseColor,
+              highlightColor: highlightColor,
+              child: Container(
+                height: 40,
+                width: 100,
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(8.0),
+                ),
+              ),
+            ),
+          ],
+        ),
       ],
     );
   }
 
   ///数据视图
-  Widget _dataView(
-      {required SubjectsItem subjectItem, required Color themeColor}) {
+  Widget _dataView(BuildContext context,
+      {required SubjectsItem subjectItem,
+      required Future<EpisodesItem> episodes,
+      required Color themeColor}) {
     final collectionTotal =
         subjectItem.collection.data.values.reduce((a, b) => a + b);
     const double fontSize = 12;
@@ -235,6 +259,24 @@ class InfoHeadView extends StatelessWidget {
             Text('${subjectItem.collection.data['5']}抛弃',
                 style: const TextStyle(
                     fontSize: fontSize, fontWeight: fontWeight)),
+          ],
+        ),
+        const Spacer(),
+        Row(
+          children: [
+            IconButton(
+              onPressed: () {
+                episodesDialog(context, episodes);
+              },
+              icon: const Icon(
+                Icons.grid_view_rounded,
+                size: 28,
+              ),
+            ),
+            CollectionButton(
+              subjectId: subjectBasicData.id,
+              subject: subjectItem,
+            ),
           ],
         )
       ],

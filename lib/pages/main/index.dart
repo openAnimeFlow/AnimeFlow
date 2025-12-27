@@ -45,17 +45,38 @@ class _MainPageState extends State<MainPage> {
   // 懒加载页面缓存
   final List<Widget?> _pageCache = List.filled(3, null);
 
+  int _currentIndex = 0;
+
+  void _initializePage(int index) {
+    if (_pageCache[index] == null) {
+      switch (index) {
+        case 0:
+          _pageCache[index] = const RecommendPage();
+          break;
+        case 1:
+          _pageCache[index] = const RankingPage();
+          break;
+        case 2:
+          _pageCache[index] = const MyPage();
+          break;
+      }
+    }
+  }
+
   @override
   void initState() {
     super.initState();
     mainPageState = Get.put(MainPageState());
-    // 默认初始化第一个页面
-    _pageCache[0] = const RecommendPage();
     CrawlConfig.initCrawlConfigs();
     userInfoStore = Get.put(UserInfoStore());
+    
+    // 从参数中获取初始 index，默认为 0
+    final initialIndex = Get.arguments as int? ?? 0;
+    _currentIndex = initialIndex.clamp(0, 2);
+    
+    // 初始化对应的页面
+    _initializePage(_currentIndex);
   }
-
-  int _currentIndex = 0;
 
   // 构建 NavigationRail
   List<NavigationRailDestination> _buildRailDestinations(
@@ -153,19 +174,7 @@ class _MainPageState extends State<MainPage> {
   void _onDestinationSelected(int index) {
     setState(() {
       _currentIndex = index;
-      if (_pageCache[index] == null) {
-        switch (index) {
-          case 0:
-            _pageCache[index] = const RecommendPage();
-            break;
-          case 1:
-            _pageCache[index] = const RankingPage();
-            break;
-          case 2:
-            _pageCache[index] = const MyPage();
-            break;
-        }
-      }
+      _initializePage(index);
     });
   }
 

@@ -8,7 +8,7 @@ class UserInfoItem {
   final String sign;
   final String site;
   final String location;
-  final String bio;
+  final String? bio;
   final List<dynamic> networkServices;
   final Homepage homepage;
   final Stats stats;
@@ -23,7 +23,7 @@ class UserInfoItem {
     required this.sign,
     required this.site,
     required this.location,
-    required this.bio,
+    this.bio,
     required this.networkServices,
     required this.homepage,
     required this.stats,

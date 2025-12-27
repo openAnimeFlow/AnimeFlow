@@ -139,6 +139,11 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v2
 
+      - name: Create .env file
+        run: |
+          echo "CLIENT_ID=${{ secrets.CLIENT_ID }}" >> .env
+          echo "REDIRECT_URI=${{ secrets.REDIRECT_URI }}" >> .env
+
       - name: Install Linux build dependencies
         run: |
           sudo apt-get update
@@ -172,6 +177,11 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v2
 
+      - name: Create .env file
+        run: |
+          echo "CLIENT_ID=${{ secrets.CLIENT_ID }}" >> .env
+          echo "REDIRECT_URI=${{ secrets.REDIRECT_URI }}" >> .env
+          
       - name: Setup Flutter
         uses: subosito/flutter-action@v2
         with:

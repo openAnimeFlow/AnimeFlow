@@ -202,6 +202,7 @@ class _CommentsViewState extends State<CommentsView>
                     ),
                     const SizedBox(height: 4),
                     BBCodeWidget(
+                      borderRadius: BorderRadius.circular(8),
                       bbcode: comment.content,
                     ),
                   ],

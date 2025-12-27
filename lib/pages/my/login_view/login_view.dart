@@ -1,8 +1,12 @@
+import 'dart:ui';
+
+import 'package:anime_flow/routes/index.dart';
 import 'package:anime_flow/widget/animation_network_image/animation_network_image.dart';
 import 'package:anime_flow/http/requests/bgm_request.dart';
 import 'package:anime_flow/models/item/bangumi/collections_item.dart';
 import 'package:anime_flow/models/item/bangumi/user_info_item.dart';
 import 'package:anime_flow/stores/user_info_store.dart';
+import 'package:anime_flow/widget/bbcode/bbcode_widget.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
@@ -75,7 +79,7 @@ class _LoginViewState extends State<LoginView>
     });
 
     try {
-      final offset = loadMore 
+      final offset = loadMore
           ? (_offsets[type] ?? _collectionsCache[type]?.data.length ?? 0)
           : 0;
       final collections = await UserRequest.queryUserCollectionsService(
@@ -91,8 +95,8 @@ class _LoginViewState extends State<LoginView>
           _offsets[type] = 0; // 重置 offset
         }
         _offsets[type] = offset + collections.data.length;
-        _hasMore[type] = collections.data.length == 20 && 
-                         _collectionsCache[type]!.data.length < collections.total;
+        _hasMore[type] = collections.data.length == 20 &&
+            _collectionsCache[type]!.data.length < collections.total;
         _loadingTypes.remove(type);
       });
     } catch (e) {
@@ -162,8 +166,7 @@ class _LoginViewState extends State<LoginView>
                 flexibleSpace: FlexibleSpaceBar(
                   collapseMode: CollapseMode.pin,
                   background: Padding(
-                    padding:
-                        const EdgeInsets.only(bottom: kTextTabBarHeight + 15),
+                    padding: const EdgeInsets.only(bottom: 20),
                     child: _buildHeaderContent(statusBarHeight),
                   ),
                 ),
@@ -171,6 +174,7 @@ class _LoginViewState extends State<LoginView>
                   controller: _tabController,
                   isScrollable: true,
                   tabAlignment: TabAlignment.start,
+                  dividerHeight: 0,
                   tabs: _tabs.map((String name) {
                     final parts = name.split('\n');
                     return Tab(
@@ -253,7 +257,7 @@ class _LoginViewState extends State<LoginView>
             IconButton(
                 onPressed: () {
                   setState(() {
-                    // userInfoStore.clearUserInfo();
+                    Navigator.of(context).pushNamed(RouteName.settings);
                   });
                 },
                 icon: const Icon(Icons.settings_outlined))
@@ -263,39 +267,105 @@ class _LoginViewState extends State<LoginView>
 
   Widget _buildHeaderContent(double statusBarHeight) {
     final userInfo = widget.userInfoItem;
-    return Container(
-      padding: EdgeInsets.only(top: statusBarHeight + kToolbarHeight),
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          ClipRRect(
-            borderRadius: BorderRadius.circular(60),
-            child: SizedBox(
-              width: 120,
-              height: 120,
-              child: AnimationNetworkImage(
-                url: userInfo.avatar.large,
-                fit: BoxFit.cover,
+    final bio = userInfo.bio;
+    return Stack(
+      children: [
+        // Positioned.fill(
+        //   child: IgnorePointer(
+        //     child: Opacity(
+        //       opacity: 0.4,
+        //       child: LayoutBuilder(
+        //         builder: (context, boxConstraints) {
+        //           return ImageFiltered(
+        //             imageFilter: ImageFilter.blur(sigmaX: 15.0, sigmaY: 15.0),
+        //             child: ShaderMask(
+        //               shaderCallback: (Rect bounds) {
+        //                 return const LinearGradient(
+        //                   begin: Alignment.topCenter,
+        //                   end: Alignment.bottomCenter,
+        //                   colors: [Colors.white, Colors.transparent],
+        //                   stops: [0.8, 1],
+        //                 ).createShader(bounds);
+        //               },
+        //               child: AnimationNetworkImage(
+        //                 url: userInfo.avatar.large,
+        //                 fit: BoxFit.cover,
+        //               ),
+        //             ),
+        //           );
+        //         },
+        //       ),
+        //     ),
+        //   ),
+        // ),
+        Positioned.fill(
+          child: IgnorePointer(
+            child: Opacity(
+              opacity: 0.4,
+              child: LayoutBuilder(
+                builder: (context, boxConstraints) {
+                  return ImageFiltered(
+                    imageFilter: ImageFilter.blur(
+                        sigmaX: bio != null ? 0 : 15,
+                        sigmaY: bio != null ? 0 : 15),
+                    child:
+                    ShaderMask(
+                      shaderCallback: (Rect bounds) {
+                        return const LinearGradient(
+                          begin: Alignment.topCenter,
+                          end: Alignment.bottomCenter,
+                          colors: [Colors.white, Colors.transparent],
+                          stops: [0.9, 1],
+                        ).createShader(bounds);
+                      },
+                      child:
+                      bio != null
+                          ? BBCodeWidget(
+                              bbcode: userInfo.bio ?? '',
+                              fit: BoxFit.cover,
+                            )
+                          : AnimationNetworkImage(
+                              url: userInfo.avatar.large,
+                              fit: BoxFit.cover,
+                            ),
+                    ),
+                  );
+                },
               ),
             ),
           ),
-          const SizedBox(height: 16),
-          Text.rich(TextSpan(
-            text:
-                userInfo.nickname != '' ? userInfo.nickname : userInfo.username,
+        ),
+        Positioned.fill(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              TextSpan(
-                  text: '@${userInfo.id}',
-                  style: TextStyle(
-                      fontSize: 16, color: Theme.of(context).disabledColor))
+              ClipRRect(
+                borderRadius: BorderRadius.circular(60),
+                child: AnimationNetworkImage(
+                  url: userInfo.avatar.large,
+                  fit: BoxFit.cover,
+                ),
+              ),
+              const SizedBox(height: 16),
+              Text.rich(TextSpan(
+                text: userInfo.nickname != ''
+                    ? userInfo.nickname
+                    : userInfo.username,
+                children: [
+                  TextSpan(
+                      text: '@${userInfo.id}',
+                      style: TextStyle(
+                          fontSize: 16, color: Theme.of(context).disabledColor))
+                ],
+                style: const TextStyle(
+                  fontSize: 23,
+                  fontWeight: FontWeight.bold,
+                ),
+              )),
             ],
-            style: const TextStyle(
-              fontSize: 23,
-              fontWeight: FontWeight.bold,
-            ),
-          )),
-        ],
-      ),
+          ),
+        )
+      ],
     );
   }
 }

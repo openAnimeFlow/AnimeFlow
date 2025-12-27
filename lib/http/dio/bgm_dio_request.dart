@@ -44,7 +44,7 @@ class BgmDioRequest {
         },
         onError: (DioException e, handler) async {
           if (e.response?.statusCode == 401) {
-            // await tokenStorage.deleteToken();
+            await tokenStorage.deleteToken();
             // clearAuthorization();
           }
           logger.e('error: ${e.message}');

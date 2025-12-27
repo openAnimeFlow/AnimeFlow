@@ -11,10 +11,17 @@ import 'generated/BBCodeParser.dart';
 import 'generated/BBCodeLexer.dart';
 
 class BBCodeWidget extends StatefulWidget {
-  const BBCodeWidget({super.key, required this.bbcode, this.borderRadius = BorderRadius.zero});
-
   final String bbcode;
   final BorderRadiusGeometry borderRadius;
+  final BoxFit? fit;
+  final bool imagPreview;
+
+  const BBCodeWidget(
+      {super.key,
+      required this.bbcode,
+      this.borderRadius = BorderRadius.zero,
+      this.fit, this.imagPreview = false});
+
   @override
   State<StatefulWidget> createState() => _BBCodeWidgetState();
 }
@@ -70,6 +77,29 @@ class _BBCodeWidgetState extends State<BBCodeWidget> {
     ParseTreeWalker.DEFAULT.walk(bbcodeBaseListener, tree);
     bbCodeTag.clear();
 
+    // 如果指定了 fit 参数，检查是否只包含图片，如果是则填充整个区域
+    if (widget.fit != null) {
+      final imageElements = bbcodeBaseListener.bbcode
+          .where((e) => e is BBCodeImg)
+          .toList();
+      final hasOnlyImage = bbcodeBaseListener.bbcode.length == 1 &&
+          imageElements.length == 1;
+      
+      if (hasOnlyImage) {
+        return LayoutBuilder(
+          builder: (context, constraints) {
+            return AnimationNetworkImage(
+              url: (imageElements.first as BBCodeImg).imageUrl,
+              width: constraints.maxWidth,
+              height: constraints.maxHeight,
+              fit: widget.fit,
+              borderRadius: widget.borderRadius,
+            );
+          },
+        );
+      }
+    }
+
     return Wrap(
       children: [
         SelectableText.rich(
@@ -113,17 +143,19 @@ class _BBCodeWidgetState extends State<BBCodeWidget> {
                     decorationColor: textColor,
                     fontSize: e.size.toDouble(),
                     color: textColor,
-                    backgroundColor:
-                        (!_isVisible && e.masked) ? const Color(0xFF555555) : null,
+                    backgroundColor: (!_isVisible && e.masked)
+                        ? const Color(0xFF555555)
+                        : null,
                     fontFeatures: const [FontFeature.tabularFigures()],
                   ),
                 );
               } else if (e is BBCodeImg) {
                 return WidgetSpan(
                   child: AnimationNetworkImage(
-                    preview:  true,
+                    preview: widget.imagPreview,
                     borderRadius: widget.borderRadius,
                     url: e.imageUrl,
+                    fit: widget.fit,
                   ),
                 );
               } else if (e is BBCodeBgm) {
@@ -140,17 +172,19 @@ class _BBCodeWidgetState extends State<BBCodeWidget> {
                 url = 'https://bangumi.tv/img/smiles/tv/${e.id - 23}.gif';
                 return WidgetSpan(
                   child: AnimationNetworkImage(
-                    preview:  true,
+                    preview: widget.imagPreview,
                     borderRadius: widget.borderRadius,
                     url: url,
+                    fit: widget.fit,
                   ),
                 );
               } else if (e is BBCodeSticker) {
                 return WidgetSpan(
                   child: AnimationNetworkImage(
-                    preview:  true,
+                    preview: widget.imagPreview,
                     borderRadius: widget.borderRadius,
                     url: 'https://bangumi.tv/img/smiles/${e.id}.gif',
+                    fit: widget.fit,
                   ),
                 );
               } else {

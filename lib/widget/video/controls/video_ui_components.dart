@@ -97,7 +97,7 @@ class _CustomTrackShape extends RoundedRectSliderTrackShape {
     final double trackLeft = offset.dx; // 补偿 Thumb 半径
     final double trackTop =
         offset.dy + (parentBox.size.height - trackHeight) / 2;
-    final double trackWidth = parentBox.size.width ; // 补偿两侧 Thumb 半径
+    final double trackWidth = parentBox.size.width; // 补偿两侧 Thumb 半径
     return Rect.fromLTWH(trackLeft, trackTop, trackWidth, trackHeight);
   }
 }
@@ -126,5 +126,60 @@ class VideoTimeDisplay extends StatelessWidget {
         ),
       );
     });
+  }
+}
+
+class DanmakuTextField extends StatelessWidget {
+  const DanmakuTextField({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      children: [
+        const SizedBox(width: 12),
+        Icon(
+          Icons.chat_bubble_outline,
+          size: 18,
+          color: Colors.white
+              .withValues(alpha: 0.7),
+        ),
+        const SizedBox(width: 8),
+        Expanded(
+          child: TextField(
+            style: const TextStyle(
+              color: Colors.white,
+              fontSize: 14,
+              height: 1.0,
+            ),
+            decoration: InputDecoration(
+              hintText: '发送弹幕...',
+              hintStyle: TextStyle(
+                color: Colors.white
+                    .withValues(
+                    alpha: 0.5),
+                fontSize: 14,
+                height: 1.0,
+              ),
+              border: InputBorder.none,
+              contentPadding:
+              const EdgeInsets
+                  .symmetric(
+                  vertical: 0),
+              isDense: true,
+            ),
+          ),
+        ),
+        IconButton(
+          icon: const Icon(
+            Icons.send_rounded,
+            size: 20,
+            color: Colors.white,
+          ),
+          onPressed: () {
+            // 发送弹幕逻辑
+          },
+        ),
+      ],
+    );
   }
 }

@@ -56,8 +56,8 @@ class BottomAreaControl extends StatelessWidget {
                           ),
                           fullscreen || playPageController.isWideScreen.value
                               ? Padding(
-                                  padding: const EdgeInsets.symmetric(
-                                      horizontal: 5),
+                                  padding:
+                                      const EdgeInsets.symmetric(horizontal: 5),
                                   child: VideoProgressBar(
                                       videoUiStateController:
                                           videoUiStateController),
@@ -91,15 +91,22 @@ class BottomAreaControl extends StatelessWidget {
                               Expanded(
                                   child: fullscreen ||
                                           playPageController.isWideScreen.value
-                                      ? TextField(
-                                          decoration: InputDecoration(
-                                            hintText: '请输入时间',
-                                            hintStyle: TextStyle(
+                                      ? Container(
+                                          height: 36,
+                                          margin: const EdgeInsets.symmetric(
+                                              horizontal: 8),
+                                          decoration: BoxDecoration(
+                                            color: Colors.black
+                                                .withValues(alpha: 0.5),
+                                            borderRadius:
+                                                BorderRadius.circular(18),
+                                            border: Border.all(
                                               color: Colors.white
-                                                  .withValues(alpha: 0.8),
+                                                  .withValues(alpha: 0.3),
+                                              width: 1,
                                             ),
-                                            border: InputBorder.none,
                                           ),
+                                          child: DanmakuTextField()
                                         )
                                       // 进度条
                                       : Padding(

@@ -1,5 +1,6 @@
 import 'package:anime_flow/models/item/bangumi/episodes_item.dart';
 import 'package:anime_flow/models/item/subject_basic_data_item.dart';
+import 'package:anime_flow/widget/video/controls/video_ui_components.dart';
 import 'package:flutter/material.dart';
 
 import 'comments.dart';
@@ -39,11 +40,21 @@ class _ContentViewState extends State<ContentView>
       preferredSize: const Size.fromHeight(100),
       child: Column(
         children: [
-          TabBar(
-            controller: _tabController,
-            tabAlignment: TabAlignment.start,
-            isScrollable: true,
-            tabs: _tabs.map((name) => Tab(text: name)).toList(),
+          Row(
+            children: [
+              TabBar(
+                controller: _tabController,
+                tabAlignment: TabAlignment.start,
+                isScrollable: true,
+                tabs: _tabs.map((name) => Tab(text: name)).toList(),
+              ),
+              Expanded(
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 8),
+                  child: DanmakuTextField(),
+                ),
+              ),
+            ],
           ),
           Expanded(
             child: TabBarView(

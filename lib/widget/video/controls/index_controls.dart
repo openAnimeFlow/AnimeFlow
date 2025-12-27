@@ -77,6 +77,7 @@ class _VideoControlsUiViewState extends State<VideoControlsUiView> {
       BottomAreaControl(
         videoUiStateController: videoUiStateController,
         videoStateController: videoStateController,
+        playPageController: playPageController,
       )
     ]);
   }

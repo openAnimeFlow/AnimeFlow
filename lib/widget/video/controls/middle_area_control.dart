@@ -183,7 +183,7 @@ class MiddleAreaControl extends StatelessWidget {
                 //加速指示器
                 VideoControlsIndicatorType.speedIndicator => Container(
                     padding: const EdgeInsets.symmetric(
-                        horizontal: 16, vertical: 12),
+                        horizontal: 13, vertical: 9),
                     decoration: BoxDecoration(
                       color: Colors.black.withValues(alpha: 0.7),
                       borderRadius: BorderRadius.circular(8),
@@ -194,7 +194,7 @@ class MiddleAreaControl extends StatelessWidget {
                         Icon(
                           Icons.fast_forward_rounded,
                           color: Colors.white,
-                          size: 30,
+                          size: 35,
                         ),
                         const SizedBox(width: 8),
                         Text(

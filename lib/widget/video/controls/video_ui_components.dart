@@ -12,14 +12,17 @@ class VideoProgressBar extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return SizedBox(
-      height: 40,
+      height: 20,
       child: Obx(() {
-        final max = videoUiStateController.duration.value.inMilliseconds.toDouble();
+        final max =
+            videoUiStateController.duration.value.inMilliseconds.toDouble();
         // 如果正在水平拖动，使用拖动位置；否则使用当前播放位置
         final value = videoUiStateController.isHorizontalDragging.value
-            ? videoUiStateController.dragPosition.value.inMilliseconds.toDouble()
+            ? videoUiStateController.dragPosition.value.inMilliseconds
+                .toDouble()
             : videoUiStateController.position.value.inMilliseconds.toDouble();
-        final buffer = videoUiStateController.buffer.value.inMilliseconds.toDouble();
+        final buffer =
+            videoUiStateController.buffer.value.inMilliseconds.toDouble();
 
         return Stack(
           alignment: Alignment.centerLeft,
@@ -35,7 +38,6 @@ class VideoProgressBar extends StatelessWidget {
                 // 缓冲颜色
                 disabledActiveTrackColor: Colors.white.withValues(alpha: 0.4),
                 disabledThumbColor: Colors.transparent,
-                // 移除缓冲条默认的Padding，使其与带滑块的进度条对齐
                 trackShape: _CustomTrackShape(),
               ),
               child: Slider(
@@ -54,6 +56,7 @@ class VideoProgressBar extends StatelessWidget {
                 activeTrackColor: Theme.of(context).colorScheme.primary,
                 inactiveTrackColor: Colors.transparent,
                 thumbColor: Theme.of(context).colorScheme.primary,
+                trackShape: _CustomTrackShape(),
               ),
               child: Slider(
                 value: value.clamp(0.0, max > 0 ? max : 1.0),
@@ -67,8 +70,8 @@ class VideoProgressBar extends StatelessWidget {
                       Duration(milliseconds: v.toInt());
                 },
                 // 进度条结束拖动
-                onChangeEnd: (v) =>
-                    videoUiStateController.endDrag(Duration(milliseconds: v.toInt())),
+                onChangeEnd: (v) => videoUiStateController
+                    .endDrag(Duration(milliseconds: v.toInt())),
               ),
             ),
           ],
@@ -91,10 +94,10 @@ class _CustomTrackShape extends RoundedRectSliderTrackShape {
     final double trackHeight = sliderTheme.trackHeight!;
     // Flutter Slider 默认两端有 Padding 来容纳 Thumb
     // 这里手动模拟这个 Padding，确保无 Thumb 的 Slider 与有 Thumb 的 Slider 轨道长度一致
-    final double trackLeft = offset.dx + 16; // 补偿 Thumb 半径
+    final double trackLeft = offset.dx; // 补偿 Thumb 半径
     final double trackTop =
         offset.dy + (parentBox.size.height - trackHeight) / 2;
-    final double trackWidth = parentBox.size.width - 25; // 补偿两侧 Thumb 半径
+    final double trackWidth = parentBox.size.width ; // 补偿两侧 Thumb 半径
     return Rect.fromLTWH(trackLeft, trackTop, trackWidth, trackHeight);
   }
 }

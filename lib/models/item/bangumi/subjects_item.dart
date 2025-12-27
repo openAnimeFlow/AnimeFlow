@@ -1,3 +1,5 @@
+import 'package:anime_flow/models/item/bangumi/collections_item.dart';
+
 class SubjectsItem {
   final Airtime airtime;
   final Collection collection;
@@ -20,6 +22,7 @@ class SubjectsItem {
   final int volumes;
   final List<Tags> tags;
   final Images images;
+  final Interest? interest;
 
   SubjectsItem({
     required this.airtime,
@@ -43,6 +46,7 @@ class SubjectsItem {
     required this.volumes,
     required this.tags,
     required this.images,
+    this.interest,
   });
 
   SubjectsItem.fromJson(Map<String, dynamic> json)
@@ -68,7 +72,10 @@ class SubjectsItem {
         type = json['type'],
         volumes = json['volumes'],
         tags = (json['tags'] as List).map((e) => Tags.fromJson(e)).toList(),
-        images = Images.fromJson(json['images']);
+        images = Images.fromJson(json['images']),
+        interest = json['interest'] != null
+            ? Interest.fromJson(json['interest'])
+            : null;
 
   Map<String, dynamic> toJson() {
     return {
@@ -93,6 +100,7 @@ class SubjectsItem {
       'volumes': volumes,
       'tags': tags.map((e) => e.toJson()).toList(),
       'images': images.toJson(),
+      if (interest != null) 'interest': interest!.toJson(),
     };
   }
 }

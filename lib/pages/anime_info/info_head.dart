@@ -1,14 +1,12 @@
-import 'dart:math';
 import 'dart:ui';
 import 'package:anime_flow/constants/play_layout_constant.dart';
-import 'package:anime_flow/routes/index.dart';
 import 'package:anime_flow/widget/animation_network_image/animation_network_image.dart';
 import 'package:anime_flow/widget/anime_detail/episodes_dialog.dart';
+import 'package:anime_flow/widget/collection/collection_button.dart';
 import 'package:anime_flow/widget/star.dart';
 import 'package:anime_flow/models/item/bangumi/episodes_item.dart';
 import 'package:anime_flow/models/item/bangumi/subjects_item.dart';
 import 'package:flutter/material.dart';
-import 'package:get/get.dart';
 import 'package:shimmer/shimmer.dart';
 import 'package:anime_flow/models/item/subject_basic_data_item.dart'
     show SubjectBasicData;
@@ -122,35 +120,8 @@ class InfoHeadView extends StatelessWidget {
                                       size: 28,
                                     ),
                                   ),
-                                  SizedBox(
-                                    width: 150,
-                                    child: OutlinedButton.icon(
-                                      onPressed: () {
-                                        Get.toNamed(RouteName.play, arguments: {
-                                          "subjectBasicData": subjectBasicData,
-                                          "episodes": episodesItem
-                                        });
-                                      },
-                                      style: OutlinedButton.styleFrom(
-                                        side: BorderSide(color: themeColor),
-                                        shape: RoundedRectangleBorder(
-                                          borderRadius:
-                                              BorderRadius.circular(20),
-                                        ),
-                                        padding: const EdgeInsets.symmetric(
-                                          horizontal: 12,
-                                        ),
-                                      ),
-                                      icon: const Icon(
-                                        Icons.play_circle_outline,
-                                        size: 16,
-                                      ),
-                                      label: const Text(
-                                        "播放",
-                                        style: TextStyle(fontSize: 12),
-                                      ),
-                                    ),
-                                  ),
+                                  CollectionButton(
+                                      subjectId: subjectBasicData.id)
                                 ]),
                               ]),
                         ),
@@ -189,7 +160,6 @@ class InfoHeadView extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: List.generate(5, (index) {
-                final double width = Random().nextInt(200).toDouble();
                 return Container(
                   margin: const EdgeInsets.only(top: 5),
                   height: 20,

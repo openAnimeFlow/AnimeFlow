@@ -35,7 +35,7 @@ class BgmNextApi {
 }
 
 class BgmUsersApi {
-  ///当前用条目收藏
+  ///条目收藏
   static const String collections = '/p1/collections/subjects';
 }
 

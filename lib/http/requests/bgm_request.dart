@@ -198,4 +198,35 @@ class UserRequest {
         )
         .then((value) => (CollectionsItem.fromJson(value.data)));
   }
+
+  ///更新用户条目
+  static Future<void> updateCollectionService(int subjectId,
+      {int? type,
+      bool? private,
+      bool? progress,
+      int? rate,
+      String? comment,
+      List<String>? tags}) async {
+    final data = <String, dynamic>{};
+    if (type != null) data['type'] = type;
+    if (rate != null) data['rate'] = rate;
+    if (private != null) data['private'] = private;
+    if (progress != null) data['progress'] = progress;
+    if (comment != null) data['comment'] = comment;
+    if (tags != null) data['tags'] = tags;
+    try {
+      bgmDioRequest
+          .put(
+            '$_nextBaseUrl${BgmUsersApi.collections}/$subjectId',
+            data: data,
+            options: Options(
+              headers: {Constants.userAgentName: CommonApi.bangumiUserAgent},
+            ),
+          )
+          .then((value) => (value.data));
+    } catch (e) {
+      Logger().e(e);
+      rethrow;
+    }
+  }
 }

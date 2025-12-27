@@ -185,15 +185,15 @@ class _CollectionButtonState extends State<CollectionButton> {
   IconData _getCollectTypeIcon(CollectType type) {
     switch (type) {
       case CollectType.watching:
-        return Icons.play_circle_outline;
+        return Icons.subscriptions_outlined;
       case CollectType.planToWatch:
         return Icons.bookmark_outline;
       case CollectType.onHold:
-        return Icons.pause_circle_outline;
+        return Icons.pending_actions_outlined;
       case CollectType.watched:
-        return Icons.check_circle_outline;
+        return Icons.task_alt_outlined;
       case CollectType.abandoned:
-        return Icons.cancel_outlined;
+        return Icons.auto_delete_outlined;
       case CollectType.none:
         return Icons.circle_outlined;
     }

@@ -20,6 +20,7 @@ class _CommentsViewState extends State<CommentsView>
   List<EpisodeComment>? comments;
   late EpisodesController episodesController;
   Worker? _episodeIdWorker;
+  int? _lastRequestedEpisodeId; // 记录上次请求的 episodeId，避免重复请求
 
   @override
   bool get wantKeepAlive => true;
@@ -30,7 +31,8 @@ class _CommentsViewState extends State<CommentsView>
     episodesController = Get.find<EpisodesController>();
     _getComments();
     _episodeIdWorker = ever(episodesController.episodeId, (episodeId) {
-      if (episodeId > 0) {
+      // 只有当 episodeId 真的变化且大于 0 时才重新获取评论
+      if (episodeId > 0 && episodeId != _lastRequestedEpisodeId) {
         setState(() {
           comments = null;
         });
@@ -47,24 +49,36 @@ class _CommentsViewState extends State<CommentsView>
 
   void _getComments() async {
     final episodeId = episodesController.episodeId.value;
+    
+    // 如果 episodeId 没有变化，直接返回，避免重复请求
+    if (episodeId == _lastRequestedEpisodeId) {
+      return;
+    }
+    
     if (episodeId > 0) {
+      // 更新上次请求的 episodeId
+      _lastRequestedEpisodeId = episodeId;
+      
       try {
         final fetchedComments =
             await BgmRequest.episodeCommentsService(episodeId: episodeId);
-        if (mounted) {
+        // 再次检查 episodeId 是否仍然是当前值（防止请求期间 episodeId 变化）
+        if (mounted && episodesController.episodeId.value == episodeId) {
           setState(() {
             comments = fetchedComments;
           });
         }
       } catch (e) {
         Logger().e(e);
-        if (mounted) {
+        // 请求失败时也要检查 episodeId 是否仍然是当前值
+        if (mounted && episodesController.episodeId.value == episodeId) {
           setState(() {
             comments = [];
           });
         }
       }
     } else {
+      _lastRequestedEpisodeId = episodeId;
       if (mounted) {
         setState(() {
           comments = [];

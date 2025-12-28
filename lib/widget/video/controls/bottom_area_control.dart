@@ -46,15 +46,13 @@ class BottomAreaControl extends StatelessWidget {
                         child: VideoTimeDisplay(
                             videoController: videoUiStateController),
                       ),
-                      fullscreen || playPageController.isWideScreen.value
-                          ? Padding(
-                              padding: const EdgeInsets.symmetric(
-                                  horizontal: 5, vertical: 5),
-                              child: VideoProgressBar(
-                                  videoUiStateController:
-                                      videoUiStateController),
-                            )
-                          : const SizedBox.shrink(),
+                      if (fullscreen || playPageController.isWideScreen.value)
+                        Padding(
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: 5, vertical: 5),
+                          child: VideoProgressBar(
+                              videoUiStateController: videoUiStateController),
+                        ),
                       SizedBox(
                         child: Row(
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,

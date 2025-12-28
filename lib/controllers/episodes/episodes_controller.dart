@@ -11,8 +11,15 @@ class EpisodesController extends GetxController {
   }
 
   void setEpisodeSort({required int sort, required int episodeIndex, required int episodeId}) {
-    episodeSort.value = sort;
-    this.episodeIndex.value = episodeIndex;
-    this.episodeId.value = episodeId;
+    // 只有当值真的变化时才更新，避免不必要的通知触发
+    if (episodeSort.value != sort) {
+      episodeSort.value = sort;
+    }
+    if (this.episodeIndex.value != episodeIndex) {
+      this.episodeIndex.value = episodeIndex;
+    }
+    if (this.episodeId.value != episodeId) {
+      this.episodeId.value = episodeId;
+    }
   }
 }

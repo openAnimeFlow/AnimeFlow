@@ -10,21 +10,18 @@ import 'package:media_kit_video/media_kit_video.dart';
 /// 顶部区域空间
 class TopAreaControl extends StatelessWidget {
   final String subjectName;
-  final PlayPageController playPageController;
-  final VideoUiStateController videoUiStateController;
-  final EpisodesController episodesController;
 
   const TopAreaControl({
     super.key,
     required this.subjectName,
-    required this.playPageController,
-    required this.videoUiStateController,
-    required this.episodesController,
   });
 
   @override
   Widget build(BuildContext context) {
     bool fullscreen = isFullscreen(context);
+    final playPageController = Get.find<PlayPageController>();
+    final videoUiStateController = Get.find<VideoUiStateController>();
+    final episodesController = Get.find<EpisodesController>();
 
     return Obx(() => AnimatedSwitcher(
           duration: const Duration(milliseconds: 200),
@@ -122,7 +119,8 @@ class TopAreaControl extends StatelessWidget {
                                               "assets/icons/right_panel_close.svg",
                                               width: 30,
                                               height: 30,
-                                              colorFilter: const ColorFilter.mode(
+                                              colorFilter:
+                                                  const ColorFilter.mode(
                                                 Colors.white70,
                                                 BlendMode.srcIn,
                                               ),
@@ -131,7 +129,8 @@ class TopAreaControl extends StatelessWidget {
                                               "assets/icons/left_panel_close.svg",
                                               width: 30,
                                               height: 30,
-                                              colorFilter: const ColorFilter.mode(
+                                              colorFilter:
+                                                  const ColorFilter.mode(
                                                 Colors.white70,
                                                 BlendMode.srcIn,
                                               ),

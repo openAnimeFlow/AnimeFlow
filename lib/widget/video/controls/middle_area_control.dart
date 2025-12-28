@@ -7,16 +7,13 @@ import 'package:get/get.dart';
 
 /// 中间区域控件
 class MiddleAreaControl extends StatelessWidget {
-  final VideoUiStateController videoUiStateController;
-  final VideoStateController videoStateController;
-
-  const MiddleAreaControl(
-      {super.key,
-      required this.videoUiStateController,
-      required this.videoStateController});
+  const MiddleAreaControl({super.key});
 
   @override
   Widget build(BuildContext context) {
+    final videoStateController = Get.find<VideoStateController>();
+    final videoUiStateController = Get.find<VideoUiStateController>();
+
     return Obx(() => Container(
           height: double.infinity,
           width: double.infinity,
@@ -156,7 +153,8 @@ class MiddleAreaControl extends StatelessWidget {
                         Icon(
                           videoUiStateController.currentBrightness.value < 0.3
                               ? Icons.brightness_2
-                              : videoUiStateController.currentBrightness.value < 0.7
+                              : videoUiStateController.currentBrightness.value <
+                                      0.7
                                   ? Icons.brightness_4
                                   : Icons.brightness_high,
                           color: Colors.white,
@@ -170,7 +168,8 @@ class MiddleAreaControl extends StatelessWidget {
                           ),
                           clipBehavior: Clip.antiAliasWithSaveLayer,
                           child: LinearProgressIndicator(
-                            value: videoUiStateController.currentBrightness.value,
+                            value:
+                                videoUiStateController.currentBrightness.value,
                             backgroundColor: Colors.white30,
                             valueColor: AlwaysStoppedAnimation<Color>(
                                 Theme.of(context).colorScheme.primary),
@@ -182,8 +181,8 @@ class MiddleAreaControl extends StatelessWidget {
 
                 //加速指示器
                 VideoControlsIndicatorType.speedIndicator => Container(
-                    padding: const EdgeInsets.symmetric(
-                        horizontal: 13, vertical: 9),
+                    padding:
+                        const EdgeInsets.symmetric(horizontal: 13, vertical: 9),
                     decoration: BoxDecoration(
                       color: Colors.black.withValues(alpha: 0.7),
                       borderRadius: BorderRadius.circular(8),

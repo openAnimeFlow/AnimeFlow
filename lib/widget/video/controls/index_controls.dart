@@ -51,35 +51,18 @@ class _VideoControlsUiViewState extends State<VideoControlsUiView> {
       ///顶部
       TopAreaControl(
         subjectName: widget.subjectBasicData.name,
-        playPageController: playPageController,
-        videoUiStateController: videoUiStateController,
-        episodesController: episodesController,
       ),
 
       ///中间占满剩余区域
       Expanded(
           child: isMobile
               //移动端手势
-              ? MobileGestureDetector(
-                  child: MiddleAreaControl(
-                  videoUiStateController: videoUiStateController,
-                  videoStateController: videoStateController,
-                ))
+              ? MobileGestureDetector(child: MiddleAreaControl())
               //桌面端手势
-              : DesktopGestureDetector(
-                  child: MiddleAreaControl(
-                  videoUiStateController: videoUiStateController,
-                  videoStateController: videoStateController,
-                ))),
+              : DesktopGestureDetector(child: MiddleAreaControl())),
 
       ///底部
-      Obx(() {
-        return Padding(
-          padding: EdgeInsets.only(
-              bottom: playPageController.isWideScreen.value ? 10 : 0),
-          child: BottomAreaControl(),
-        );
-      })
+      BottomAreaControl()
     ]);
   }
 }

@@ -1,3 +1,4 @@
+import 'package:anime_flow/constants/play_layout_constant.dart';
 import 'package:anime_flow/models/item/subject_basic_data_item.dart';
 import 'package:anime_flow/pages/recommend/calendar.dart';
 import 'package:anime_flow/routes/index.dart';
@@ -181,7 +182,7 @@ class _RecommendPageState extends State<RecommendPage> {
           children: [
             Center(
               child: ConstrainedBox(
-                constraints: const BoxConstraints(maxWidth: 1800),
+                constraints: const BoxConstraints(maxWidth: PlayLayoutConstant.maxWidth),
                 child: CustomScrollView(
                   controller: _scrollController,
                   slivers: [

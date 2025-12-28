@@ -3,7 +3,7 @@ import 'package:anime_flow/pages/anime_info/info_head.dart';
 import 'package:anime_flow/controllers/anime/anime_state_controller.dart';
 import 'package:anime_flow/http/requests/bgm_request.dart';
 import 'package:anime_flow/models/item/bangumi/episodes_item.dart';
-import 'package:anime_flow/models/item/bangumi/subjects_item.dart';
+import 'package:anime_flow/models/item/bangumi/subjects_info_item.dart';
 import 'package:anime_flow/routes/index.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -20,7 +20,7 @@ class AnimeDetailPage extends StatefulWidget {
 class _AnimeDetailPageState extends State<AnimeDetailPage> {
   late SubjectBasicData subjectBasicData;
   late AnimeStateController animeStateController;
-  late Future<SubjectsItem?> _subjectsItem;
+  late Future<SubjectsInfoItem?> _subjectsItem;
   late Future<EpisodesItem> episodesFuture;
   final double _contentHeight = 200.0; // 内容区域的高度
   bool isPinned = false;
@@ -84,7 +84,7 @@ class _AnimeDetailPageState extends State<AnimeDetailPage> {
                     sliver: SliverAppBar(
                       automaticallyImplyLeading: false,
                       titleSpacing: 0,
-                      title: FutureBuilder<SubjectsItem?>(
+                      title: FutureBuilder<SubjectsInfoItem?>(
                         future: _subjectsItem,
                         builder: (context, snapshot) {
                           return InfoAppbarView(
@@ -109,7 +109,7 @@ class _AnimeDetailPageState extends State<AnimeDetailPage> {
                           collapseMode: CollapseMode.pin,
                           background: Padding(
                               padding: const EdgeInsets.only(bottom: 15),
-                              child: FutureBuilder<SubjectsItem?>(
+                              child: FutureBuilder<SubjectsInfoItem?>(
                                 future: _subjectsItem,
                                 builder: (context, snapshot) {
                                   return InfoHeadView(

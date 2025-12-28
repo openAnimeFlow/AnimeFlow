@@ -1,5 +1,5 @@
 import 'package:anime_flow/widget/animation_network_image/animation_network_image.dart';
-import 'package:anime_flow/models/item/bangumi/subjects_item.dart';
+import 'package:anime_flow/models/item/bangumi/subjects_info_item.dart';
 import 'package:anime_flow/widget/ranking.dart';
 import 'package:anime_flow/widget/star.dart';
 import 'package:flutter/material.dart';
@@ -11,7 +11,7 @@ import 'package:anime_flow/models/item/subject_basic_data_item.dart'
 class InfoAppbarView extends StatelessWidget {
   final bool isPinned;
   final SubjectBasicData subjectBasicData;
-  final SubjectsItem? subjectsItem;
+  final SubjectsInfoItem? subjectsItem;
 
   const InfoAppbarView({
     super.key,

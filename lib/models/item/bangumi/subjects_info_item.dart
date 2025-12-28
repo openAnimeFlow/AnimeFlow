@@ -1,6 +1,6 @@
 import 'package:anime_flow/models/item/bangumi/collections_item.dart';
 
-class SubjectsItem {
+class SubjectsInfoItem {
   final Airtime airtime;
   final Collection collection;
   final int eps;
@@ -24,7 +24,7 @@ class SubjectsItem {
   final Images images;
   final Interest? interest;
 
-  SubjectsItem({
+  SubjectsInfoItem({
     required this.airtime,
     required this.collection,
     required this.eps,
@@ -49,7 +49,7 @@ class SubjectsItem {
     this.interest,
   });
 
-  SubjectsItem.fromJson(Map<String, dynamic> json)
+  SubjectsInfoItem.fromJson(Map<String, dynamic> json)
       : airtime = Airtime.fromJson(json['airtime']),
         collection = Collection.fromJson(json['collection']),
         eps = json['eps'],

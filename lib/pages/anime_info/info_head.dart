@@ -5,7 +5,7 @@ import 'package:anime_flow/widget/anime_detail/episodes_dialog.dart';
 import 'package:anime_flow/widget/collection/collection_button.dart';
 import 'package:anime_flow/widget/star.dart';
 import 'package:anime_flow/models/item/bangumi/episodes_item.dart';
-import 'package:anime_flow/models/item/bangumi/subjects_item.dart';
+import 'package:anime_flow/models/item/bangumi/subjects_info_item.dart';
 import 'package:flutter/material.dart';
 import 'package:shimmer/shimmer.dart';
 import 'package:anime_flow/models/item/subject_basic_data_item.dart'
@@ -13,7 +13,7 @@ import 'package:anime_flow/models/item/subject_basic_data_item.dart'
 
 class InfoHeadView extends StatelessWidget {
   final SubjectBasicData subjectBasicData;
-  final SubjectsItem? subjectItem;
+  final SubjectsInfoItem? subjectItem;
   final Future<EpisodesItem> episodesItem;
   final double statusBarHeight;
   final double contentHeight;
@@ -73,8 +73,8 @@ class InfoHeadView extends StatelessWidget {
           child: Align(
             alignment: Alignment.center,
             child: ConstrainedBox(
-              constraints: const BoxConstraints(
-                  maxWidth: PlayLayoutConstant.infoMaxWidth),
+              constraints:
+                  const BoxConstraints(maxWidth: PlayLayoutConstant.maxWidth),
               child: SizedBox(
                 height: double.infinity,
                 child: Padding(
@@ -199,7 +199,7 @@ class InfoHeadView extends StatelessWidget {
 
   ///数据视图
   Widget _dataView(BuildContext context,
-      {required SubjectsItem subjectItem,
+      {required SubjectsInfoItem subjectItem,
       required Future<EpisodesItem> episodes,
       required Color themeColor}) {
     final collectionTotal =

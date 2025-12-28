@@ -11,7 +11,7 @@ import 'package:anime_flow/models/item/bangumi/hot_item.dart';
 import 'package:anime_flow/models/item/bangumi/related_subjects_item.dart';
 import 'package:anime_flow/models/item/bangumi/search_item.dart';
 import 'package:anime_flow/models/item/bangumi/subject_comments_item.dart';
-import 'package:anime_flow/models/item/bangumi/subjects_item.dart';
+import 'package:anime_flow/models/item/bangumi/subjects_info_item.dart';
 import 'package:anime_flow/http/dio/bgm_dio_request.dart';
 import 'package:anime_flow/http/dio/dio_request.dart';
 import 'package:anime_flow/models/item/bangumi/user_info_item.dart';
@@ -25,19 +25,19 @@ class BgmRequest {
   /// 获取热门
   static Future<HotItem> getHotService(int limit, int offset) async {
     final response = await dioRequest.get(_nextBaseUrl + BgmNextApi.hot,
-        queryParameters: {"type": 2, "limit": limit, "offset": offset},
+        queryParameters: {'type': 2, 'limit': limit, 'offset': offset},
         options: Options(
             headers: {Constants.userAgentName: CommonApi.bangumiUserAgent}));
     return HotItem.fromJson(response.data);
   }
 
   ///根据id获取条目
-  static Future<SubjectsItem> getSubjectByIdService(int id) async {
+  static Future<SubjectsInfoItem> getSubjectByIdService(int id) async {
     final response = await bgmDioRequest.get(
         '$_nextBaseUrl${BgmNextApi.subjects}/$id',
         options: Options(
             headers: {Constants.userAgentName: CommonApi.bangumiUserAgent}));
-    return SubjectsItem.fromJson(response.data);
+    return SubjectsInfoItem.fromJson(response.data);
   }
 
   ///获取条目章节
@@ -47,7 +47,7 @@ class BgmRequest {
       final response = await bgmDioRequest.get(
           _nextBaseUrl +
               BgmNextApi.episodes.replaceFirst('{subjectId}', id.toString()),
-          queryParameters: {"limit": limit, "offset": offset},
+          queryParameters: {'limit': limit, 'offset': offset},
           options: Options(
               headers: {Constants.userAgentName: CommonApi.bangumiUserAgent}));
       return EpisodesItem.fromJson(response.data);
@@ -68,8 +68,8 @@ class BgmRequest {
           BgmNextApi.subjectComments
               .replaceFirst('{subjectId}', subjectId.toString()),
       queryParameters: {
-        "limit": limit,
-        "offset": offset,
+        'limit': limit,
+        'offset': offset,
       },
       options: Options(
         headers: {Constants.userAgentName: CommonApi.bangumiUserAgent},
@@ -86,14 +86,14 @@ class BgmRequest {
     final response = await dioRequest.post(
       _nextBaseUrl + BgmNextApi.search,
       queryParameters: {
-        "limit": limit,
-        "offset": offset,
+        'limit': limit,
+        'offset': offset,
       },
       data: {
-        "filter": {
-          "type": [2]
+        'filter': {
+          'type': [2]
         },
-        "keyword": keyword,
+        'keyword': keyword,
       },
       options: Options(
         headers: {Constants.userAgentName: CommonApi.bangumiUserAgent},
@@ -132,8 +132,8 @@ class BgmRequest {
   static Future<CharactersItem> charactersService(int subjectId,
       {required int limit, required int offset, int? type}) async {
     final queryParameters = <String, dynamic>{
-      "limit": limit,
-      "offset": offset,
+      'limit': limit,
+      'offset': offset,
     };
     if (type != null) {
       queryParameters['type'] = type;
@@ -159,9 +159,9 @@ class BgmRequest {
           BgmNextApi.relations
               .replaceFirst('{subjectId}', subjectId.toString()),
       queryParameters: {
-        "type": type,
-        "limit": limit,
-        "offset": offset,
+        'type': type,
+        'limit': limit,
+        'offset': offset,
       },
     ).then((response) => (SubjectRelationItem.fromJson(response.data)));
   }

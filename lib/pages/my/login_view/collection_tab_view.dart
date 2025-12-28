@@ -32,7 +32,7 @@ class CollectionTabView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return ConstrainedBox(
-      constraints: BoxConstraints(maxWidth: PlayLayoutConstant.maxWidth),
+      constraints: const BoxConstraints(maxWidth: PlayLayoutConstant.maxWidth),
       child: TabBarView(
         controller: tabController,
         children: List.generate(tabs.length, (tabIndex) {

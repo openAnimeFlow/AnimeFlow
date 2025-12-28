@@ -1,5 +1,5 @@
 import 'package:anime_flow/constants/play_layout_constant.dart';
-import 'package:anime_flow/models/item/bangumi/subjects_item.dart';
+import 'package:anime_flow/models/item/bangumi/subjects_info_item.dart';
 import 'package:anime_flow/pages/anime_info/characters.dart';
 import 'package:anime_flow/pages/anime_info/related.dart';
 import 'package:anime_flow/pages/anime_info/tags.dart';
@@ -20,7 +20,7 @@ class _NoScrollbarBehavior extends ScrollBehavior {
 
 /// 简介页面
 class InfoSynopsisView extends StatefulWidget {
-  final Future<SubjectsItem?> subjectsItem;
+  final Future<SubjectsInfoItem?> subjectsItem;
   final ValueChanged<bool>? onScrollChanged;
 
   const InfoSynopsisView({
@@ -63,7 +63,7 @@ class _InfoSynopsisViewState extends State<InfoSynopsisView> {
                   }
                   return false;
                 },
-                child: FutureBuilder<SubjectsItem?>(
+                child: FutureBuilder<SubjectsInfoItem?>(
                   future: widget.subjectsItem,
                   builder: (context, snapshot) {
                     final data = snapshot.data;

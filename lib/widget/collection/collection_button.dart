@@ -1,6 +1,6 @@
 import 'package:anime_flow/http/requests/bgm_request.dart';
 import 'package:anime_flow/models/enums/collect_type.dart';
-import 'package:anime_flow/models/item/bangumi/subjects_item.dart';
+import 'package:anime_flow/models/item/bangumi/subjects_info_item.dart';
 import 'package:anime_flow/routes/index.dart';
 import 'package:anime_flow/stores/user_info_store.dart';
 import 'package:flutter/material.dart';
@@ -8,7 +8,7 @@ import 'package:get/get.dart';
 
 class CollectionButton extends StatefulWidget {
   final int subjectId;
-  final SubjectsItem subject;
+  final SubjectsInfoItem subject;
 
   const CollectionButton(
       {super.key, required this.subjectId, required this.subject});

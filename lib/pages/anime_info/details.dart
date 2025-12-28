@@ -1,4 +1,4 @@
-import 'package:anime_flow/models/item/bangumi/subjects_item.dart';
+import 'package:anime_flow/models/item/bangumi/subjects_info_item.dart';
 import 'package:flutter/material.dart';
 import 'package:url_launcher/url_launcher.dart';
 
@@ -7,7 +7,7 @@ class DetailsView extends StatelessWidget {
   final String title;
   final double? textSize;
   final FontWeight? textFontWeight;
-  final SubjectsItem subject;
+  final SubjectsInfoItem subject;
 
   const DetailsView(
       {super.key,

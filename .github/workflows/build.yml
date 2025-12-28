@@ -200,7 +200,7 @@ jobs:
       - name: Create DMG
         run: |
           mkdir -p build/dist
-          cp -a build/macos/Build/Products/Release/AnimeFlow.app build/dist
+          cp -a build/macos/Build/Products/Release/*.app build/dist
           ln -s /Applications build/dist/Applications
           hdiutil create -fs HFS+ -volname 1.0.0 -srcfolder build/dist AnimeFlow.dmg
 

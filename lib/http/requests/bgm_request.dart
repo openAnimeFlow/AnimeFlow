@@ -1,6 +1,7 @@
 import 'package:anime_flow/constants/constants.dart';
 import 'package:anime_flow/http/api/bgm_api.dart';
 import 'package:anime_flow/http/api/common_api.dart';
+import 'package:anime_flow/models/enums/sort_type.dart';
 import 'package:anime_flow/models/item/bangumi/actor_ite.dart';
 import 'package:anime_flow/models/item/bangumi/calendar_item.dart';
 import 'package:anime_flow/models/item/bangumi/collections_item.dart';
@@ -33,8 +34,7 @@ class BgmRequest {
   ///根据id获取条目
   static Future<SubjectsItem> getSubjectByIdService(int id) async {
     final response = await bgmDioRequest.get(
-        _nextBaseUrl +
-            BgmNextApi.subjectById.replaceFirst('{subjectId}', id.toString()),
+        '$_nextBaseUrl${BgmNextApi.subjects}/$id',
         options: Options(
             headers: {Constants.userAgentName: CommonApi.bangumiUserAgent}));
     return SubjectsItem.fromJson(response.data);
@@ -105,13 +105,14 @@ class BgmRequest {
 
   ///每日放送
   static Future<Calendar> calendarService() async {
-    final response = await dioRequest.get(
-      _nextBaseUrl + BgmNextApi.calendar,
-      options: Options(
-        headers: {Constants.userAgentName: CommonApi.bangumiUserAgent},
-      ),
-    );
-    return Calendar.fromJson(response.data);
+    return await bgmDioRequest
+        .get(
+          _nextBaseUrl + BgmNextApi.calendar,
+          options: Options(
+            headers: {Constants.userAgentName: CommonApi.bangumiUserAgent},
+          ),
+        )
+        .then((value) => Calendar.fromJson(value.data));
   }
 
   ///剧集评论
@@ -154,14 +155,44 @@ class BgmRequest {
   static Future<SubjectRelationItem> relatedSubjectsService(int subjectId,
       {required int limit, required int offset, int? type = 2}) async {
     return dioRequest.get(
-        _nextBaseUrl +
-            BgmNextApi.relations
-                .replaceFirst('{subjectId}', subjectId.toString()),
-        queryParameters: {
-          "type": type,
-          "limit": limit,
-          "offset": offset,
-        }).then((response) => (SubjectRelationItem.fromJson(response.data)));
+      _nextBaseUrl +
+          BgmNextApi.relations
+              .replaceFirst('{subjectId}', subjectId.toString()),
+      queryParameters: {
+        "type": type,
+        "limit": limit,
+        "offset": offset,
+      },
+    ).then((response) => (SubjectRelationItem.fromJson(response.data)));
+  }
+
+  ///排行
+  static Future<SearchItem> rankService({
+    int? type = 2,
+    SortType? sort,
+    int? cat,
+    int? year,
+    int? month,
+    List<String>? tags,
+    required int page,
+  }) async {
+    final queryParameters = <String, dynamic>{};
+    if (type != null) queryParameters['type'] = type;
+    if (sort != null) queryParameters['sort'] = sort.value;
+    if (cat != null) queryParameters['cat'] = cat;
+    if (year != null) queryParameters['year'] = year;
+    if (month != null) queryParameters['month'] = month;
+    if (tags != null) queryParameters['tags'] = tags;
+
+    return dioRequest
+        .get(
+          _nextBaseUrl + BgmNextApi.subjects,
+          queryParameters: queryParameters,
+          options: Options(
+            headers: {Constants.userAgentName: CommonApi.bangumiUserAgent},
+          ),
+        )
+        .then((response) => (SearchItem.fromJson(response.data)));
   }
 }
 
@@ -173,7 +204,7 @@ class UserRequest {
     return await dioRequest
         .get(
           _nextBaseUrl +
-              BgmNextApi.userInfo.replaceFirst('{username}', username),
+              BgmUsersApi.userInfo.replaceFirst('{username}', username),
           options: Options(
             headers: {Constants.userAgentName: CommonApi.bangumiUserAgent},
           ),

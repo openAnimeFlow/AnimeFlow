@@ -29,11 +29,11 @@ class DioRequest {
           return handler.next(options);
         },
         onResponse: (response, handler) {
-          logger.i(
-            'HTTP Response: ${response.statusCode} ${response.data}',
-            time: DateTime.now(),
-            stackTrace: StackTrace.current,
-          );
+          // logger.i(
+          //   'HTTP Response: ${response.statusCode} ${response.data}',
+          //   time: DateTime.now(),
+          //   stackTrace: StackTrace.current,
+          // );
           return handler.next(response);
         },
         onError: (DioException e, handler) {

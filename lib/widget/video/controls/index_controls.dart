@@ -17,9 +17,8 @@ import 'mobile_gesture_detector.dart';
 ///播放器控件
 class VideoControlsUiView extends StatefulWidget {
   final SubjectBasicData subjectBasicData;
-  final Player player;
 
-  const VideoControlsUiView(this.player, {super.key,  required this.subjectBasicData});
+  const VideoControlsUiView({super.key, required this.subjectBasicData});
 
   @override
   State<VideoControlsUiView> createState() => _VideoControlsUiViewState();
@@ -74,11 +73,17 @@ class _VideoControlsUiViewState extends State<VideoControlsUiView> {
                 ))),
 
       ///底部
-      BottomAreaControl(
-        videoUiStateController: videoUiStateController,
-        videoStateController: videoStateController,
-        playPageController: playPageController,
-      )
+      Obx(() {
+        return Padding(
+          padding: EdgeInsets.only(
+              bottom: playPageController.isWideScreen.value ? 10 : 0),
+          child: BottomAreaControl(
+            videoUiStateController: videoUiStateController,
+            videoStateController: videoStateController,
+            playPageController: playPageController,
+          ),
+        );
+      })
     ]);
   }
 }

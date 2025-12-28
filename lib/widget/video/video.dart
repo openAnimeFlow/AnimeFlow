@@ -203,7 +203,6 @@ class _VideoViewState extends State<VideoView> {
         Video(
           controller: controller,
           controls: (state) => VideoControlsUiView(
-            player,
             subjectBasicData: widget.subjectBasicData,
           ),
         ),

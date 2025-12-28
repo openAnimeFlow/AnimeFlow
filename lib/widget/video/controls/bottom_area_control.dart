@@ -57,27 +57,27 @@ class BottomAreaControl extends StatelessWidget {
                           fullscreen || playPageController.isWideScreen.value
                               ? Padding(
                                   padding:
-                                      const EdgeInsets.symmetric(horizontal: 5),
+                                      const EdgeInsets.symmetric(horizontal: 5,vertical: 5),
                                   child: VideoProgressBar(
                                       videoUiStateController:
                                           videoUiStateController),
                                 )
                               : const SizedBox.shrink(),
-                          Row(
+                          SizedBox(child: Row(
                             mainAxisAlignment: MainAxisAlignment.spaceBetween,
                             crossAxisAlignment: CrossAxisAlignment.center,
                             children: [
                               // 播放按钮
                               Obx(
-                                () => InkWell(
+                                    () => InkWell(
                                   key: ValueKey<bool>(
                                       videoStateController.playing.value),
                                   onTap: () => {
                                     videoStateController.playOrPauseVideo(),
                                     videoUiStateController
                                         .updateIndicatorTypeAndShowIndicator(
-                                            VideoControlsIndicatorType
-                                                .playStatusIndicator),
+                                        VideoControlsIndicatorType
+                                            .playStatusIndicator),
                                   },
                                   child: Icon(
                                     videoStateController.playing.value
@@ -90,16 +90,16 @@ class BottomAreaControl extends StatelessWidget {
                               ),
                               Expanded(
                                   child: fullscreen ||
-                                          playPageController.isWideScreen.value
+                                      playPageController.isWideScreen.value
                                       ? DanmakuTextField()
-                                      // 进度条
+                                  // 进度条
                                       : Padding(
-                                          padding: EdgeInsets.symmetric(
-                                              horizontal: 5),
-                                          child: VideoProgressBar(
-                                              videoUiStateController:
-                                                  videoUiStateController),
-                                        )),
+                                    padding: EdgeInsets.symmetric(
+                                        horizontal: 5),
+                                    child: VideoProgressBar(
+                                        videoUiStateController:
+                                        videoUiStateController),
+                                  )),
 
                               // 全屏按钮
                               AnimatedContainer(
@@ -110,21 +110,21 @@ class BottomAreaControl extends StatelessWidget {
                                   padding: const EdgeInsets.all(0),
                                   icon: fullscreen
                                       ? Icon(
-                                          size: 33,
-                                          Icons.fullscreen_exit,
-                                          color: Colors.white
-                                              .withValues(alpha: 0.8),
-                                        )
+                                    size: 33,
+                                    Icons.fullscreen_exit,
+                                    color: Colors.white
+                                        .withValues(alpha: 0.8),
+                                  )
                                       : Icon(
-                                          size: 33,
-                                          Icons.fullscreen,
-                                          color: Colors.white
-                                              .withValues(alpha: 0.8),
-                                        ),
+                                    size: 33,
+                                    Icons.fullscreen,
+                                    color: Colors.white
+                                        .withValues(alpha: 0.8),
+                                  ),
                                 ),
                               ),
                             ],
-                          ),
+                          ),)
                         ],
                       ),
                     ),

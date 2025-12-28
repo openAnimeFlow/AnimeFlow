@@ -174,7 +174,7 @@ class DanmakuTextField extends StatelessWidget {
                 height: 1.0,
               ),
               decoration: InputDecoration(
-                hintText: '发送弹幕...',
+                hintText: '发送弹幕开发中...',
                 hintStyle: TextStyle(
                   color: textColor,
                   fontSize: 14,

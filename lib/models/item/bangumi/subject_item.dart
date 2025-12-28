@@ -1,17 +1,16 @@
-// search_item.dart
-class SearchItem {
-  final List<SearchData> data;
+class SubjectItem {
+  final List<Data> data;
   final int total;
 
-  SearchItem({
+  SubjectItem({
     required this.data,
     required this.total,
   });
 
-  factory SearchItem.fromJson(Map<String, dynamic> json) {
-    return SearchItem(
+  factory SubjectItem.fromJson(Map<String, dynamic> json) {
+    return SubjectItem(
       data: (json['data'] as List<dynamic>)
-          .map((e) => SearchData.fromJson(e as Map<String, dynamic>))
+          .map((e) => Data.fromJson(e as Map<String, dynamic>))
           .toList(),
       total: json['total'] as int,
     );
@@ -25,7 +24,7 @@ class SearchItem {
   }
 }
 
-class SearchData {
+class Data {
   final int id;
   final String name;
   final String? nameCN;
@@ -36,7 +35,7 @@ class SearchData {
   final bool nsfw;
   final Images images;
 
-  SearchData({
+  Data({
     required this.id,
     required this.name,
     required this.nameCN,
@@ -48,8 +47,8 @@ class SearchData {
     required this.images,
   });
 
-  factory SearchData.fromJson(Map<String, dynamic> json) {
-    return SearchData(
+  factory Data.fromJson(Map<String, dynamic> json) {
+    return Data(
       id: json['id'] as int,
       name: json['name'] as String,
       nameCN: json['nameCN'] as String?,

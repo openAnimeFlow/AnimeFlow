@@ -9,7 +9,7 @@ import 'package:anime_flow/models/item/bangumi/episode_comments_item.dart';
 import 'package:anime_flow/models/item/bangumi/episodes_item.dart';
 import 'package:anime_flow/models/item/bangumi/hot_item.dart';
 import 'package:anime_flow/models/item/bangumi/related_subjects_item.dart';
-import 'package:anime_flow/models/item/bangumi/search_item.dart';
+import 'package:anime_flow/models/item/bangumi/subject_item.dart';
 import 'package:anime_flow/models/item/bangumi/subject_comments_item.dart';
 import 'package:anime_flow/models/item/bangumi/subjects_info_item.dart';
 import 'package:anime_flow/http/dio/bgm_dio_request.dart';
@@ -79,7 +79,7 @@ class BgmRequest {
   }
 
   ///条目搜索
-  static Future<SearchItem> searchSubjectService(
+  static Future<SubjectItem> searchSubjectService(
       {required String keyword,
       required int limit,
       required int offset}) async {
@@ -100,7 +100,7 @@ class BgmRequest {
       ),
     );
 
-    return SearchItem.fromJson(response.data);
+    return SubjectItem.fromJson(response.data);
   }
 
   ///每日放送
@@ -167,7 +167,7 @@ class BgmRequest {
   }
 
   ///排行
-  static Future<SearchItem> rankService({
+  static Future<SubjectItem> rankService({
     int? type = 2,
     SortType? sort,
     int? cat,
@@ -192,7 +192,7 @@ class BgmRequest {
             headers: {Constants.userAgentName: CommonApi.bangumiUserAgent},
           ),
         )
-        .then((response) => (SearchItem.fromJson(response.data)));
+        .then((response) => (SubjectItem.fromJson(response.data)));
   }
 }
 

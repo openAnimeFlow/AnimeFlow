@@ -1,5 +1,5 @@
 import 'package:anime_flow/http/requests/bgm_request.dart';
-import 'package:anime_flow/models/item/bangumi/search_item.dart';
+import 'package:anime_flow/models/item/bangumi/subject_item.dart';
 import 'package:anime_flow/pages/search/search_details_content.dart';
 import 'package:anime_flow/pages/search/search_omitted_content.dart';
 import 'package:anime_flow/stores/search/search_history_manager.dart';
@@ -19,7 +19,7 @@ class _SearchPageState extends State<SearchPage> {
   final ScrollController _scrollController = ScrollController();
   final FocusNode _searchFocusNode = FocusNode();
   bool _isSearching = false;
-  SearchItem? searchItem;
+  SubjectItem? searchItem;
   bool _isDetailsContent = true;
   List<String> _searchHistory = [];
   String _currentKeyword = '';
@@ -89,7 +89,7 @@ class _SearchPageState extends State<SearchPage> {
         setState(() {
           if (loadMore && searchItem != null) {
             // 追加数据
-            searchItem = SearchItem(
+            searchItem = SubjectItem(
               data: [...searchItem!.data, ...value.data],
               total: value.total,
             );

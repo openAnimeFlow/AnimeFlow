@@ -1,4 +1,4 @@
-import 'package:anime_flow/models/item/bangumi/search_item.dart';
+import 'package:anime_flow/models/item/bangumi/subject_item.dart';
 import 'package:anime_flow/models/item/subject_basic_data_item.dart';
 import 'package:anime_flow/routes/index.dart';
 import 'package:anime_flow/widget/animation_network_image/animation_network_image.dart';
@@ -9,7 +9,7 @@ import 'package:get/get.dart';
 
 ///详情View
 class SearchDetailsContentView extends StatelessWidget {
-  final SearchData searchData;
+  final Data searchData;
   final double itemHeight;
 
   const SearchDetailsContentView({

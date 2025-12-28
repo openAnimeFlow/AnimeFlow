@@ -1,5 +1,5 @@
 class SubjectItem {
-  final List<Data> data;
+  final List<Subject> data;
   final int total;
 
   SubjectItem({
@@ -10,7 +10,7 @@ class SubjectItem {
   factory SubjectItem.fromJson(Map<String, dynamic> json) {
     return SubjectItem(
       data: (json['data'] as List<dynamic>)
-          .map((e) => Data.fromJson(e as Map<String, dynamic>))
+          .map((e) => Subject.fromJson(e as Map<String, dynamic>))
           .toList(),
       total: json['total'] as int,
     );
@@ -24,7 +24,7 @@ class SubjectItem {
   }
 }
 
-class Data {
+class Subject {
   final int id;
   final String name;
   final String? nameCN;
@@ -35,7 +35,7 @@ class Data {
   final bool nsfw;
   final Images images;
 
-  Data({
+  Subject({
     required this.id,
     required this.name,
     required this.nameCN,
@@ -47,8 +47,8 @@ class Data {
     required this.images,
   });
 
-  factory Data.fromJson(Map<String, dynamic> json) {
-    return Data(
+  factory Subject.fromJson(Map<String, dynamic> json) {
+    return Subject(
       id: json['id'] as int,
       name: json['name'] as String,
       nameCN: json['nameCN'] as String?,

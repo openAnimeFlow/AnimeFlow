@@ -8,6 +8,7 @@ import 'package:anime_flow/widget/ranking.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart' show SizeExtension;
 import 'package:get/get.dart';
+import 'package:anime_flow/models/item/bangumi/subject_item.dart';
 
 // 每日放送页面
 class CalendarPage extends StatefulWidget {
@@ -206,7 +207,7 @@ class _CalendarPageState extends State<CalendarPage>
   Widget _buildCard(Subject itemData, int watchers) {
     final subjectBasicData = SubjectBasicData(
       id: itemData.id,
-      name: itemData.nameCN == '' ? itemData.name : itemData.nameCN,
+      name: itemData.nameCN?? itemData.name,
       image: itemData.images.large,
     );
 
@@ -245,7 +246,7 @@ class _CalendarPageState extends State<CalendarPage>
                   ),
                 ),
                 child: Text(
-                  itemData.nameCN == '' ? itemData.name : itemData.nameCN,
+                  itemData.nameCN ?? itemData.name,
                   style: TextStyle(
                     color: Colors.white,
                     fontSize: 14.sp,

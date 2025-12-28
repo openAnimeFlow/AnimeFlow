@@ -7,6 +7,7 @@ import 'package:anime_flow/widget/ranking.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
+import 'package:anime_flow/models/item/bangumi/subject_item.dart';
 
 class CalendarView extends StatefulWidget {
   const CalendarView({super.key});
@@ -126,7 +127,7 @@ class _CalendarViewState extends State<CalendarView> {
   Widget _buildCard(Subject itemData) {
     final subjectBasicData = SubjectBasicData(
       id: itemData.id,
-      name: itemData.nameCN == '' ? itemData.name : itemData.nameCN,
+      name: itemData.nameCN ?? itemData.name,
       image: itemData.images.large,
     );
     return Container(
@@ -164,10 +165,7 @@ class _CalendarViewState extends State<CalendarView> {
                       ),
                       child: Padding(
                         padding: const EdgeInsets.all(5),
-                        child: Text(
-                            itemData.nameCN == ''
-                                ? itemData.name
-                                : itemData.nameCN,
+                        child: Text(itemData.nameCN ?? itemData.name,
                             style: const TextStyle(
                                 color: Colors.white,
                                 fontWeight: FontWeight.bold),

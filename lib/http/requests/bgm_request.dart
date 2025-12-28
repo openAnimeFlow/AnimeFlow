@@ -219,9 +219,9 @@ class UserRequest {
         .get(
           _nextBaseUrl + BgmUsersApi.collections,
           queryParameters: {
-            "type": type,
-            "limit": limit,
-            "offset": offset,
+            'type': type,
+            'limit': limit,
+            'offset': offset,
           },
           options: Options(
             headers: {Constants.userAgentName: CommonApi.bangumiUserAgent},

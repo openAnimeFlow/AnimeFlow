@@ -9,7 +9,7 @@ import 'package:get/get.dart';
 
 ///详情View
 class SearchDetailsContentView extends StatelessWidget {
-  final Data searchData;
+  final Subject searchData;
   final double itemHeight;
 
   const SearchDetailsContentView({

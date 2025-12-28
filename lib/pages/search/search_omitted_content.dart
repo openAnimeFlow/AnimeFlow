@@ -8,7 +8,7 @@ import 'package:get/get_navigation/src/extension_navigation.dart';
 
 /// 简洁View（海报卡片）
 class SearchOmittedContent extends StatelessWidget {
-  final Data searchData;
+  final Subject searchData;
 
   const SearchOmittedContent({
     super.key,

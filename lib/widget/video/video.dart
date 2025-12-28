@@ -1,8 +1,10 @@
 import 'dart:async';
+import 'dart:io';
 
 import 'package:anime_flow/models/enums/video_controls_icon_type.dart';
 import 'package:anime_flow/models/item/subject_basic_data_item.dart';
 import 'package:anime_flow/webview/webview_controller.dart';
+import 'package:anime_flow/webview/webview_item.dart';
 import 'package:anime_flow/widget/video/controls/index_controls.dart';
 import 'package:anime_flow/controllers/video/data/data_source_controller.dart';
 import 'package:anime_flow/controllers/video/video_state_controller.dart';
@@ -205,6 +207,15 @@ class _VideoViewState extends State<VideoView> {
             subjectBasicData: widget.subjectBasicData,
           ),
         ),
+        /// webview_windows 的窗口必须嵌入到 Widget 树中才能被控制
+        /// 通过 SizedBox 的 height 为 0 来隐藏它，但保持其在 Widget 树中(Kazumi)
+        if (Platform.isWindows || Platform.isLinux)
+          Positioned(
+            child: SizedBox(
+              height: 0,
+              child: const WebviewItem(),
+            ),
+          ),
       ],
     );
   }

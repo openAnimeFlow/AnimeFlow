@@ -1,6 +1,6 @@
 import 'package:anime_flow/webview/webview_controller.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_modular/flutter_modular.dart' show Modular;
+import 'package:get/get.dart';
 import 'package:webview_flutter/webview_flutter.dart';
 
 class WebviewItemImpel extends StatefulWidget {
@@ -11,11 +11,12 @@ class WebviewItemImpel extends StatefulWidget {
 }
 
 class _WebviewItemImpelState extends State<WebviewItemImpel> {
-  final webviewItemController = Modular.get<WebviewItemController>();
+  late final WebviewItemController webviewItemController;
 
   @override
   void initState() {
     super.initState();
+    webviewItemController = Get.find<WebviewItemController>();
     initPlatformState();
   }
 

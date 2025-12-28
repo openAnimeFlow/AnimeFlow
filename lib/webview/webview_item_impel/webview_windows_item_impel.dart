@@ -2,7 +2,7 @@ import 'dart:async';
 import 'package:anime_flow/webview/webview_controller.dart';
 import 'package:flutter/material.dart';
 import 'package:webview_windows/webview_windows.dart';
-import 'package:flutter_modular/flutter_modular.dart';
+import 'package:get/get.dart';
 import 'package:window_manager/window_manager.dart';
 
 class WebviewWindowsItemImpel extends StatefulWidget {
@@ -15,13 +15,12 @@ class WebviewWindowsItemImpel extends StatefulWidget {
 
 class _WebviewWindowsItemImpelState extends State<WebviewWindowsItemImpel> {
   final List<StreamSubscription> _subscriptions = [];
-  final webviewDesktopItemController = Modular.get<WebviewItemController>();
-  // final VideoPageController videoPageController =
-  //     Modular.get<VideoPageController>();
+  late final WebviewItemController webviewDesktopItemController;
 
   @override
   void initState() {
     super.initState();
+    webviewDesktopItemController = Get.find<WebviewItemController>();
     initPlatformState();
   }
 

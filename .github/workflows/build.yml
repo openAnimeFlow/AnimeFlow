@@ -202,7 +202,7 @@ jobs:
           mkdir -p build/dist
           cp -a build/macos/Build/Products/Release/*.app build/dist
           ln -s /Applications build/dist/Applications
-          hdiutil create -fs HFS+ -volname 1.0.0 -srcfolder build/dist AnimeFlow.dmg
+          hdiutil create -fs HFS+ -volname 1.0.0 -srcfolder build/dist build/dist/AnimeFlow.dmg
 
       - name: Archive artifacts
         uses: actions/upload-artifact@v4

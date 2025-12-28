@@ -53,10 +53,10 @@ class _ContentViewState extends State<ContentView>
               Obx(
                 () => playPageController.isWideScreen.value
                     ? const Spacer()
-                    : SizedBox(
+                    : const SizedBox(
                         width: 200,
                         child: Padding(
-                          padding: const EdgeInsets.symmetric(horizontal: 8),
+                          padding: EdgeInsets.symmetric(horizontal: 8),
                           child: DanmakuTextField(),
                         ),
                       ),

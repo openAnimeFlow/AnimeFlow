@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:logger/logger.dart';
 
+import '../../models/item/bangumi/hot_item.dart';
+
 class RankingPage extends StatefulWidget {
   const RankingPage({super.key});
 
@@ -10,11 +12,13 @@ class RankingPage extends StatefulWidget {
 
 class _RankingPageState extends State<RankingPage> {
   Logger logger = Logger();
-
+  Subject? subject;
   @override
   void initState() {
     super.initState();
   }
+
+
 
   @override
   void dispose() {
@@ -23,26 +27,23 @@ class _RankingPageState extends State<RankingPage> {
 
   @override
   Widget build(BuildContext context) {
-    return SizedBox(
-      height: double.infinity,
-      width: double.infinity,
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Icon(
-            Icons.construction,
-            size: 100,
-            color: Theme.of(context).colorScheme.primary,
+    return Scaffold(
+        appBar: AppBar(
+          title: Text("排行榜"),
+        ),
+        body: Center(
+          child: ConstrainedBox(
+            constraints: BoxConstraints(maxWidth: 1400),
+            child: CustomScrollView(slivers: [
+              SliverToBoxAdapter(
+                child: Center(
+                  child: Wrap(children: [
+                    Text('排名'),Text('年'),Text('月')
+                  ]),
+                ),
+              ),
+            ]),
           ),
-          Text(
-            "排行榜页面施工中",
-            style: TextStyle(
-                fontSize: 20,
-                fontWeight: FontWeight.bold,
-                color: Theme.of(context).colorScheme.primary),
-          )
-        ],
-      ),
-    );
+        ));
   }
 }

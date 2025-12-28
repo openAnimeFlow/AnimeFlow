@@ -1,7 +1,9 @@
+import 'package:anime_flow/controllers/play/PlayPageController.dart';
 import 'package:anime_flow/models/item/bangumi/episodes_item.dart';
 import 'package:anime_flow/models/item/subject_basic_data_item.dart';
 import 'package:anime_flow/widget/video/controls/video_ui_components.dart';
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 
 import 'comments.dart';
 import 'introduce.dart';
@@ -18,6 +20,7 @@ class ContentView extends StatefulWidget {
 
 class _ContentViewState extends State<ContentView>
     with SingleTickerProviderStateMixin {
+  late PlayPageController playPageController;
   final List<String> _tabs = ['简介', '吐槽'];
   late TabController _tabController;
   final GlobalKey _introduceKey = GlobalKey();
@@ -27,6 +30,7 @@ class _ContentViewState extends State<ContentView>
   void initState() {
     super.initState();
     _tabController = TabController(length: _tabs.length, vsync: this);
+    playPageController = Get.find<PlayPageController>();
   }
 
   @override
@@ -41,21 +45,31 @@ class _ContentViewState extends State<ContentView>
       child: Column(
         children: [
           Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               TabBar(
+                dividerHeight: 0,
                 controller: _tabController,
                 tabAlignment: TabAlignment.start,
                 isScrollable: true,
                 tabs: _tabs.map((name) => Tab(text: name)).toList(),
               ),
-              Expanded(
-                child: Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 8),
-                  child: DanmakuTextField(),
-                ),
-              ),
+              Obx(
+                () => playPageController.isWideScreen.value
+                    ? const Expanded(
+                        child: Spacer(),
+                      )
+                    : SizedBox(
+                        width: 200,
+                        child: Padding(
+                          padding: const EdgeInsets.symmetric(horizontal: 8),
+                          child: DanmakuTextField(),
+                        ),
+                      ),
+              )
             ],
           ),
+          const Divider(height: 1),
           Expanded(
             child: TabBarView(
               controller: _tabController,

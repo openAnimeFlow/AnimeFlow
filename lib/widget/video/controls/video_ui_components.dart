@@ -130,56 +130,76 @@ class VideoTimeDisplay extends StatelessWidget {
 }
 
 class DanmakuTextField extends StatelessWidget {
-  const DanmakuTextField({super.key});
+  final Color? iconColor;
+  final Color? textColor;
+  final Color? backgroundColor;
+  final bool leftIcon;
+  final bool rightIcon;
+
+  const DanmakuTextField(
+      {super.key,
+      this.iconColor,
+      this.textColor,
+      this.leftIcon = true,
+      this.rightIcon = true, this.backgroundColor});
 
   @override
   Widget build(BuildContext context) {
-    return Row(
-      children: [
-        const SizedBox(width: 12),
-        Icon(
-          Icons.chat_bubble_outline,
-          size: 18,
-          color: Colors.white
-              .withValues(alpha: 0.7),
+    return Container(
+      height: 36,
+      margin: const EdgeInsets.symmetric(horizontal: 8),
+      decoration: BoxDecoration(
+        color: backgroundColor,
+        borderRadius: BorderRadius.circular(18),
+        border: Border.all(
+          color: Colors.white.withValues(alpha: 0.3),
+          width: 1,
         ),
-        const SizedBox(width: 8),
-        Expanded(
-          child: TextField(
-            style: const TextStyle(
-              color: Colors.white,
-              fontSize: 14,
-              height: 1.0,
-            ),
-            decoration: InputDecoration(
-              hintText: '发送弹幕...',
-              hintStyle: TextStyle(
-                color: Colors.white
-                    .withValues(
-                    alpha: 0.5),
+      ),
+      child: Row(
+        children: [
+          const SizedBox(width: 12),
+          leftIcon
+              ? Icon(
+                  Icons.chat_bubble_outline,
+                  size: 18,
+                  color: iconColor,
+                )
+              : const SizedBox.shrink(),
+          const SizedBox(width: 8),
+          Expanded(
+            child: TextField(
+              style: const TextStyle(
                 fontSize: 14,
                 height: 1.0,
               ),
-              border: InputBorder.none,
-              contentPadding:
-              const EdgeInsets
-                  .symmetric(
-                  vertical: 0),
-              isDense: true,
+              decoration: InputDecoration(
+                hintText: '发送弹幕...',
+                hintStyle: TextStyle(
+                  color: textColor,
+                  fontSize: 14,
+                  height: 1.0,
+                ),
+                border: InputBorder.none,
+                contentPadding: const EdgeInsets.symmetric(vertical: 0),
+                isDense: true,
+              ),
             ),
           ),
-        ),
-        IconButton(
-          icon: const Icon(
-            Icons.send_rounded,
-            size: 20,
-            color: Colors.white,
-          ),
-          onPressed: () {
-            // 发送弹幕逻辑
-          },
-        ),
-      ],
+          rightIcon
+              ? IconButton(
+                  icon: Icon(
+                    Icons.send_rounded,
+                    size: 20,
+                    color: iconColor,
+                  ),
+                  onPressed: () {
+                    // 发送弹幕逻辑
+                  },
+                )
+              : const SizedBox.shrink(),
+        ],
+      ),
     );
   }
 }

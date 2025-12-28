@@ -91,23 +91,7 @@ class BottomAreaControl extends StatelessWidget {
                               Expanded(
                                   child: fullscreen ||
                                           playPageController.isWideScreen.value
-                                      ? Container(
-                                          height: 36,
-                                          margin: const EdgeInsets.symmetric(
-                                              horizontal: 8),
-                                          decoration: BoxDecoration(
-                                            color: Colors.black
-                                                .withValues(alpha: 0.5),
-                                            borderRadius:
-                                                BorderRadius.circular(18),
-                                            border: Border.all(
-                                              color: Colors.white
-                                                  .withValues(alpha: 0.3),
-                                              width: 1,
-                                            ),
-                                          ),
-                                          child: DanmakuTextField()
-                                        )
+                                      ? DanmakuTextField()
                                       // 进度条
                                       : Padding(
                                           padding: EdgeInsets.symmetric(

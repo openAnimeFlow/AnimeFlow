@@ -185,7 +185,7 @@ class _InfoSynopsisViewState extends State<InfoSynopsisView> {
       alignment: Alignment.center,
       child: ConstrainedBox(
         constraints: const BoxConstraints(
-          maxWidth: PlayLayoutConstant.infoMaxWidth,
+          maxWidth: PlayLayoutConstant.maxWidth,
         ),
         child: Padding(
           padding: EdgeInsets.only(

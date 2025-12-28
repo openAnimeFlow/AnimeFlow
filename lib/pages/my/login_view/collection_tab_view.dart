@@ -1,3 +1,4 @@
+import 'package:anime_flow/constants/play_layout_constant.dart';
 import 'package:anime_flow/widget/animation_network_image/animation_network_image.dart';
 import 'package:anime_flow/models/item/bangumi/collections_item.dart';
 import 'package:anime_flow/models/item/subject_basic_data_item.dart';
@@ -30,7 +31,9 @@ class CollectionTabView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return TabBarView(
+    return ConstrainedBox(
+      constraints: BoxConstraints(maxWidth: PlayLayoutConstant.maxWidth),
+      child: TabBarView(
         controller: tabController,
         children: List.generate(tabs.length, (tabIndex) {
           final type = tabIndex + 1;
@@ -44,7 +47,9 @@ class CollectionTabView extends StatelessWidget {
             onLoadMore: () => onLoadMore(type),
             onRefresh: () => onRefresh(type),
           );
-        }));
+        }),
+      ),
+    );
   }
 }
 
@@ -240,7 +245,8 @@ class __CollectionTabViewState extends State<_CollectionTabView> {
                                             maxLines: 2,
                                             overflow: TextOverflow.ellipsis,
                                           ),
-                                          if (collection.summary.isNotEmpty) ...[
+                                          if (collection
+                                              .summary.isNotEmpty) ...[
                                             const SizedBox(height: 4),
                                             Text(
                                               collection.summary,

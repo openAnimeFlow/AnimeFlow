@@ -33,10 +33,6 @@ class _ContentViewState extends State<ContentView>
     playPageController = Get.find<PlayPageController>();
   }
 
-  @override
-  void dispose() {
-    super.dispose();
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -56,9 +52,7 @@ class _ContentViewState extends State<ContentView>
               ),
               Obx(
                 () => playPageController.isWideScreen.value
-                    ? const Expanded(
-                        child: Spacer(),
-                      )
+                    ? const Spacer()
                     : SizedBox(
                         width: 200,
                         child: Padding(

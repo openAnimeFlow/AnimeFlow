@@ -77,11 +77,7 @@ class _VideoControlsUiViewState extends State<VideoControlsUiView> {
         return Padding(
           padding: EdgeInsets.only(
               bottom: playPageController.isWideScreen.value ? 10 : 0),
-          child: BottomAreaControl(
-            videoUiStateController: videoUiStateController,
-            videoStateController: videoStateController,
-            playPageController: playPageController,
-          ),
+          child: BottomAreaControl(),
         );
       })
     ]);

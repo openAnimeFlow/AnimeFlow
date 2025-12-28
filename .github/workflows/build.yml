@@ -147,7 +147,10 @@ jobs:
       - name: Install Linux build dependencies
         run: |
           sudo apt-get update
-          sudo apt-get install -y clang cmake ninja-build pkg-config libgtk-3-dev liblzma-dev libasound2-dev libmpv-dev libwebkit2gtk-4.0-dev libwebkit2gtk-4.1-dev
+          sudo apt-get install -y clang cmake libgtk-3-dev ninja-build libayatana-appindicator3-dev libasound2-dev libwebkit2gtk-4.1-dev
+          if [ -f /usr/lib/pkgconfig/webkit2gtk-4.1.pc ] && [ ! -f /usr/lib/pkgconfig/webkit2gtk-4.0.pc ]; then
+            sudo ln -s /usr/lib/pkgconfig/webkit2gtk-4.1.pc /usr/lib/pkgconfig/webkit2gtk-4.0.pc
+          fi
 
       - name: Setup Flutter
         uses: subosito/flutter-action@v2

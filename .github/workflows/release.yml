@@ -1,0 +1,226 @@
+name: Build Flutter Project
+
+on:
+  workflow_dispatch:
+    inputs:
+      platform:
+        type: choice
+        description: "选择构建的平台"
+        options:
+          - android
+          - ios
+          - macos
+          - windows
+          - linux
+          - all
+        default: all
+jobs:
+  build_ios:
+    if: ${{ github.event.inputs.platform == 'ios' || github.event.inputs.platform == 'all'}}
+    runs-on: macos-14
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Create .env file
+        run: |
+          echo "CLIENT_ID=${{ secrets.CLIENT_ID }}" >> .env
+          echo "REDIRECT_URI=${{ secrets.REDIRECT_URI }}" >> .env
+
+      - name: Install Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          flutter-version-file: pubspec.yaml
+          channel: stable
+
+      - name: Install dependencies
+        run: flutter pub get
+
+      # 输出可用模拟器和 SDK
+      - name: Show available simulators
+        run: |
+          xcrun simctl list devices
+          xcodebuild -showsdks
+
+      - name: Build iOS
+        run: flutter build ios --release --no-codesign
+
+      - name: Create IPA
+        run: |
+          mkdir Payload
+          cp -R build/ios/iphoneos/Runner.app Payload/Runner.app
+          zip -q -r AnimeFlow.ipa Payload
+
+#      - name: Upload IPA artifact
+#        uses: actions/upload-artifact@v4
+#        with:
+#          name: ios
+#          path: AnimeFlow.ipa
+
+  build-android:
+    if: ${{ github.event.inputs.platform == 'android' || github.event.inputs.platform == 'all'}}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Create .env file
+        run: |
+          echo "CLIENT_ID=${{ secrets.CLIENT_ID }}" >> .env
+          echo "REDIRECT_URI=${{ secrets.REDIRECT_URI }}" >> .env
+
+      - name: Set up JDK 17
+        uses: actions/setup-java@v4
+        with:
+          java-version: '17'
+          distribution: 'temurin'
+
+      - name: Setup Flutter
+        uses: subosito/flutter-action@v2.16.0
+        with:
+          channel: stable
+          flutter-version-file: pubspec.yaml
+
+      - name: Install dependencies
+        run: flutter pub get
+
+      - name: Build apk
+        run: |
+          flutter --version
+          flutter build apk --split-per-abi
+          echo "Android build completed"
+
+#      - name: Archive artifacts
+#        uses: actions/upload-artifact@v4
+#        with:
+#          name: android
+#          path: build/app/outputs/flutter-apk/*.apk
+#          if-no-files-found: ignore
+
+  build-windows:
+    if: ${{ github.event.inputs.platform == 'windows' || github.event.inputs.platform == 'all'}}
+    runs-on: windows-2025
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v2
+
+      - name: Create .env file
+        shell: pwsh
+        run: |
+          Add-Content -Path .env -Value "CLIENT_ID=${{ secrets.CLIENT_ID }}"
+          Add-Content -Path .env -Value "REDIRECT_URI=${{ secrets.REDIRECT_URI }}"
+
+      - name: Setup Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          flutter-version-file: pubspec.yaml
+
+      - name: Install dependencies
+        run: flutter pub get
+
+      - name: Build Windows
+        run: |
+          flutter build windows
+          echo "Windows build completed"
+
+#      - name: Archive artifacts
+#        uses: actions/upload-artifact@v4
+#        with:
+#          name: windows
+#          path: build/windows/x64/runner/Release/
+#          if-no-files-found: ignore
+
+  flutter-build-linux:
+    if: ${{ github.event.inputs.platform == 'linux' || github.event.inputs.platform == 'all'}}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v2
+
+      - name: Create .env file
+        run: |
+          echo "CLIENT_ID=${{ secrets.CLIENT_ID }}" >> .env
+          echo "REDIRECT_URI=${{ secrets.REDIRECT_URI }}" >> .env
+
+      - name: Install Linux build dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y clang cmake libgtk-3-dev ninja-build libayatana-appindicator3-dev unzip webkit2gtk-4.1 libasound2-dev libsecret-1-dev libmpv-dev
+          sudo apt-get install -y gcc g++ autoconf automake debhelper glslang-dev ladspa-sdk xutils-dev libasound2-dev \
+              libarchive-dev libbluray-dev libbs2b-dev libcaca-dev libcdio-paranoia-dev libdrm-dev \
+              libdav1d-dev libdvdnav-dev libegl1-mesa-dev libepoxy-dev libfontconfig-dev libfreetype6-dev \
+              libfribidi-dev libgl1-mesa-dev libgbm-dev libgme-dev libgsm1-dev libharfbuzz-dev libjpeg-dev \
+              libbrotli-dev liblcms2-dev libmodplug-dev libmp3lame-dev libopenal-dev \
+              libopus-dev libopencore-amrnb-dev libopencore-amrwb-dev libpulse-dev librtmp-dev \
+              libsdl2-dev libsixel-dev libssh-dev libsoxr-dev libspeex-dev libtool \
+              libv4l-dev libva-dev libvdpau-dev libvorbis-dev libvo-amrwbenc-dev \
+              libunwind-dev libvpx-dev libwayland-dev libx11-dev libxext-dev \
+              libxkbcommon-dev libxrandr-dev libxss-dev libxv-dev libxvidcore-dev \
+              linux-libc-dev nasm ninja-build pkg-config python3 python3-docutils wayland-protocols \
+              x11proto-core-dev zlib1g-dev libfdk-aac-dev libtheora-dev libwebp-dev \
+              unixodbc-dev libpq-dev libxxhash-dev libaom-dev
+        shell: bash
+
+      - name: Setup Flutter
+        uses: subosito/flutter-action@v2.16.0
+        with:
+          channel: stable
+          flutter-version-file: pubspec.yaml
+
+      - name: Install dependencies
+        run: flutter pub get
+
+      - name: Build Linux
+        run: |
+          flutter build linux
+          echo "Linux build completed"
+
+#      - name: Archive artifacts
+#        uses: actions/upload-artifact@v4
+#        with:
+#          name: linux
+#          path: build/linux/x64/release/bundle/
+#          if-no-files-found: ignore
+
+  flutter-build-macos:
+    if: ${{ github.event.inputs.platform == 'macos' || github.event.inputs.platform == 'all'}}
+    name: Build macOS
+    runs-on: macos-14
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v2
+
+      - name: Create .env file
+        run: |
+          echo "CLIENT_ID=${{ secrets.CLIENT_ID }}" >> .env
+          echo "REDIRECT_URI=${{ secrets.REDIRECT_URI }}" >> .env
+
+      - name: Setup Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          flutter-version-file: pubspec.yaml
+
+      - name: Install dependencies
+        run: flutter pub get
+
+      - name: Build macOS
+        run: |
+          flutter build macos
+          echo "macOS build completed"
+
+      - name: Create DMG
+        run: |
+          mkdir -p build/dist
+          cp -a build/macos/Build/Products/Release/*.app build/dist
+          ln -s /Applications build/dist/Applications
+          hdiutil create -fs HFS+ -volname 1.0.0 -srcfolder build/dist build/dist/AnimeFlow.dmg
+
+#      - name: Archive artifacts
+#        uses: actions/upload-artifact@v4
+#        with:
+#          name: macos
+#          path: build/dist/*.dmg
+#          if-no-files-found: ignore

@@ -139,6 +139,11 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v2
 
+      - name: Extract version
+        run: |
+          VERSION=$(grep '^version:' pubspec.yaml | sed 's/version: //')
+          echo "VERSION=${VERSION}" >> $GITHUB_ENV
+
       - name: Create .env file
         run: |
           echo "CLIENT_ID=${{ secrets.CLIENT_ID }}" >> .env
@@ -177,11 +182,75 @@ jobs:
           flutter build linux
           echo "Linux build completed"
 
+      - name: Create TAR.GZ archive
+        run: |
+          cd build/linux/x64/release
+          tar -czf ../../../../AnimeFlow-${{ env.VERSION }}.tar.gz -C bundle .
+          echo "Created AnimeFlow-${{ env.VERSION }}.tar.gz"
+
+      - name: Create DEB package
+        run: |
+          # 创建 Debian 包目录结构
+          PACKAGE_NAME="animeflow"
+          PACKAGE_DIR="animeflow_${{ env.VERSION }}_amd64"
+          APP_DIR="${PACKAGE_DIR}/usr/lib/animeflow"
+          mkdir -p ${PACKAGE_DIR}/DEBIAN
+          mkdir -p ${APP_DIR}
+          mkdir -p ${PACKAGE_DIR}/usr/bin
+          mkdir -p ${PACKAGE_DIR}/usr/share/applications
+          mkdir -p ${PACKAGE_DIR}/usr/share/pixmaps
+          
+          # 复制应用文件到 /usr/lib/animeflow
+          cp -r build/linux/x64/release/bundle/* ${APP_DIR}/
+          
+          # 创建启动脚本
+          cat > ${PACKAGE_DIR}/usr/bin/animeflow << 'EOF'
+          #!/bin/bash
+          cd /usr/lib/animeflow
+          ./anime_flow "$@"
+          EOF
+          chmod +x ${PACKAGE_DIR}/usr/bin/animeflow
+          
+          # 创建 control 文件
+          cat > ${PACKAGE_DIR}/DEBIAN/control << EOF
+          Package: ${PACKAGE_NAME}
+          Version: ${{ env.VERSION }}
+          Section: utils
+          Priority: optional
+          Architecture: amd64
+          Maintainer: AnimeFlow Team
+          Description: Anime video player
+           AnimeFlow is an anime video player application.
+          EOF
+          
+          # 创建 desktop 文件
+          cat > ${PACKAGE_DIR}/usr/share/applications/animeflow.desktop << EOF
+          [Desktop Entry]
+          Version=1.0
+          Type=Application
+          Name=AnimeFlow
+          Comment=Anime video player
+          Exec=/usr/bin/animeflow
+          Icon=animeflow
+          Terminal=false
+          Categories=Video;Player;
+          EOF
+          
+          if [ -f build/linux/x64/release/bundle/data/flutter_assets/assets/logo/Logo.png ]; then
+            cp build/linux/x64/release/bundle/data/flutter_assets/assets/logo/Logo.png ${PACKAGE_DIR}/usr/share/pixmaps/animeflow.png
+          fi
+          
+          # 构建 deb 包
+          dpkg-deb --build ${PACKAGE_DIR} AnimeFlow-${{ env.VERSION }}.deb
+          echo "Created AnimeFlow-${{ env.VERSION }}.deb"
+
       - name: Archive artifacts
         uses: actions/upload-artifact@v4
         with:
           name: linux
-          path: build/linux/x64/release/bundle/
+          path: |
+            AnimeFlow-${{ env.VERSION }}.tar.gz
+            AnimeFlow-${{ env.VERSION }}.deb
           if-no-files-found: ignore
 
   flutter-build-macos:

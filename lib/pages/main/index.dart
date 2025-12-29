@@ -198,6 +198,7 @@ class _MainPageState extends State<MainPage> {
                   leading: Padding(
                     padding: const EdgeInsets.only(bottom: 16, top: 8),
                     child: FloatingActionButton(
+                      heroTag: 'main_search',
                       elevation: 0,
                       onPressed: () {
                         Get.toNamed(RouteName.search);

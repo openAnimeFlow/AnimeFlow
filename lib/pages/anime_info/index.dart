@@ -144,6 +144,7 @@ class _AnimeDetailPageState extends State<AnimeDetailPage> {
                 children: [
                   if (topButton) ...[
                     FloatingActionButton(
+                      heroTag: 'anime_info_back_to_top',
                       onPressed: () {
                         _nestedScrollController.animateTo(
                           0,
@@ -157,10 +158,11 @@ class _AnimeDetailPageState extends State<AnimeDetailPage> {
                   ],
                   const SizedBox(height: 5),
                   FloatingActionButton(
+                    heroTag: 'anime_info_play',
                     onPressed: () {
                       Get.toNamed(RouteName.play, arguments: {
-                        "subjectBasicData": subjectBasicData,
-                        "episodes": episodesFuture
+                        'subjectBasicData': subjectBasicData,
+                        'episodes': episodesFuture
                       });
                     },
                     child: Icon(

@@ -154,9 +154,10 @@ class _AddSourcePageState extends State<AddSourcePage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('数据源管理'),
+        title: const Text('数据源管理'),
       ),
       floatingActionButton: FloatingActionButton(
+        heroTag: 'add_source_save',
         onPressed: _saveConfig,
         child: const Icon(Icons.save_rounded),
       ),

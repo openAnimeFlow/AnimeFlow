@@ -227,7 +227,7 @@ class _RecommendPageState extends State<RecommendPage> {
                                       : const Center(
                                           child: Padding(
                                           padding: EdgeInsets.all(8.0),
-                                          child: Text("没有更多了"),
+                                          child: Text('没有更多了'),
                                         ));
                                 }
                                 final subject = _dataList[index].subject;
@@ -248,6 +248,7 @@ class _RecommendPageState extends State<RecommendPage> {
                 right: 16,
                 bottom: 16,
                 child: FloatingActionButton(
+                  heroTag: 'recommend_back_to_top',
                   onPressed: _scrollToTop,
                   child: const Icon(Icons.arrow_upward_rounded),
                 ),

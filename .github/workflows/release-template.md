@@ -1,5 +1,3 @@
-## AnimeFlow: {Version}
-
 ### 更新说明
 
 ---

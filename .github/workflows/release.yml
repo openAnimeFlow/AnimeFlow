@@ -49,13 +49,13 @@ jobs:
         run: |
           mkdir Payload
           cp -R build/ios/iphoneos/Runner.app Payload/Runner.app
-          zip -q -r "AnimeFlow-${{ env.VERSION }}.ipa" Payload
+          zip -q -r "AnimeFlow-ios-${{ env.VERSION }}.ipa" Payload
 
       - name: Upload IPA artifact
         uses: actions/upload-artifact@v4
         with:
           name: ios
-          path: AnimeFlow-${{ env.VERSION }}.ipa
+          path: AnimeFlow-ios-${{ env.VERSION }}.ipa
 
   flutter-build-android:
     runs-on: ubuntu-latest
@@ -98,22 +98,22 @@ jobs:
         run: |
           cd build/app/outputs/flutter-apk
           if [ -f app-armeabi-v7a-release.apk ]; then
-            mv app-armeabi-v7a-release.apk "AnimeFlow-v7a-${{ env.VERSION }}.apk"
+            mv app-armeabi-v7a-release.apk "AnimeFlow-android-v7a-${{ env.VERSION }}.apk"
           fi
           if [ -f app-arm64-v8a-release.apk ]; then
-            mv app-arm64-v8a-release.apk "AnimeFlow-arm64-${{ env.VERSION }}.apk"
+            mv app-arm64-v8a-release.apk "AnimeFlow-android-arm64-${{ env.VERSION }}.apk"
           fi
           if [ -f app-x86_64-release.apk ]; then
-            mv app-x86_64-release.apk "AnimeFlow-x86_64-${{ env.VERSION }}.apk"
+            mv app-x86_64-release.apk "AnimeFlow-android-x86_64-${{ env.VERSION }}.apk"
           fi
           echo "Renamed APK files:"
-          ls -lh AnimeFlow-*.apk || true
+          ls -lh AnimeFlow-android-*.apk || true
 
       - name: Archive artifacts
         uses: actions/upload-artifact@v4
         with:
           name: android
-          path: build/app/outputs/flutter-apk/AnimeFlow-*.apk
+          path: build/app/outputs/flutter-apk/AnimeFlow-android-*.apk
           if-no-files-found: ignore
 
   flutter-build-windows:
@@ -269,16 +269,16 @@ jobs:
           fi
           
           # 构建 deb 包
-          dpkg-deb --build ${PACKAGE_DIR} AnimeFlow-${{ env.VERSION }}.deb
-          echo "Created AnimeFlow-${{ env.VERSION }}.deb"
+          dpkg-deb --build ${PACKAGE_DIR} AnimeFlow-linux-${{ env.VERSION }}.deb
+          echo "Created AnimeFlow-linux-${{ env.VERSION }}.deb"
 
       - name: Archive artifacts
         uses: actions/upload-artifact@v4
         with:
           name: linux
           path: |
-            AnimeFlow-${{ env.VERSION }}.tar.gz
-            AnimeFlow-${{ env.VERSION }}.deb
+            AnimeFlow-linux-${{ env.VERSION }}.tar.gz
+            AnimeFlow-linux-${{ env.VERSION }}.deb
           if-no-files-found: ignore
 
   flutter-build-macos:
@@ -317,13 +317,13 @@ jobs:
           mkdir -p build/dist
           cp -a build/macos/Build/Products/Release/*.app build/dist
           ln -s /Applications build/dist/Applications
-          hdiutil create -fs HFS+ -volname "${{ env.VERSION }}" -srcfolder build/dist build/dist/AnimeFlow-${{ env.VERSION }}.dmg
+          hdiutil create -fs HFS+ -volname "${{ env.VERSION }}" -srcfolder build/dist build/dist/AnimeFlow-macos-${{ env.VERSION }}.dmg
 
       - name: Archive artifacts
         uses: actions/upload-artifact@v4
         with:
           name: macos
-          path: build/dist/AnimeFlow-${{ env.VERSION }}.dmg
+          path: build/dist/AnimeFlow-macos-${{ env.VERSION }}.dmg
           if-no-files-found: ignore
 
   release:
@@ -348,8 +348,6 @@ jobs:
           
           # 读取 release-template.md 模板
           TEMPLATE=$(cat .github/workflows/release-template.md)
-          
-          TEMPLATE=$(echo "$TEMPLATE" | sed "s/{Version}/${VERSION}/g")
           
           # 在两个 --- 之间插入 CHANGELOG 内容
           RELEASE_NOTES=$(echo "$TEMPLATE" | awk -v changelog="$CHANGELOG_CONTENT" '
@@ -382,12 +380,12 @@ jobs:
           name: AnimeFlow ${{ env.VERSION }}
           body_path: release_notes.md
           files: |
-            artifacts/ios/AnimeFlow-*.ipa
+            artifacts/ios/*.ipa
             artifacts/android/*.apk
             artifacts/windows/*.zip
             artifacts/linux/*.tar.gz
             artifacts/linux/*.deb
-            artifacts/macos/AnimeFlow-*.dmg
+            artifacts/macos/*.dmg
           draft: false
           prerelease: false
         env:

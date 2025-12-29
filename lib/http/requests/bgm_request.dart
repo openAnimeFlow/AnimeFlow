@@ -183,6 +183,7 @@ class BgmRequest {
   }) async {
     final queryParameters = <String, dynamic>{};
     queryParameters['sort'] = sort.value;
+    queryParameters['page'] = page;
     if (type != null) queryParameters['type'] = type;
     if (cat != null) queryParameters['cat'] = cat;
     if (year != null) queryParameters['year'] = year;

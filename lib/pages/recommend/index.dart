@@ -253,7 +253,10 @@ class _RecommendPageState extends State<RecommendPage> {
                 child: FloatingActionButton(
                   heroTag: 'recommend_back_to_top',
                   onPressed: _scrollToTop,
-                  child: const Icon(Icons.arrow_upward_rounded),
+                  child: Icon(
+                    Icons.arrow_upward_rounded,
+                    color: Theme.of(context).colorScheme.primary,
+                  ),
                 ),
               )
           ],

@@ -1,4 +1,5 @@
 import 'package:anime_flow/pages/settings/pages/data_source.dart';
+import 'package:anime_flow/pages/settings/pages/theme.dart';
 import 'package:anime_flow/pages/settings/setting_controller.dart';
 import 'package:anime_flow/routes/index.dart';
 import 'package:anime_flow/utils/utils.dart';
@@ -22,6 +23,29 @@ class _SettingsPageState extends State<SettingsPage> {
 
   final List<_SettingsCategory> _categories = [
     _SettingsCategory(
+      title: '应用与外观',
+      items: [
+        _SettingsMenuItem(
+          title: '通用',
+          icon: Icons.settings_outlined,
+          route: RouteName.settingsGeneral,
+          page: const GeneralSettingsPage(),
+        ),
+        _SettingsMenuItem(
+          title: '主题',
+          icon: Icons.color_lens_outlined,
+          route: RouteName.settingsTheme,
+          page: const ThemePage(),
+        ),
+        _SettingsMenuItem(
+          title: '关于',
+          icon: Icons.info_outline,
+          route: RouteName.settingsAbout,
+          page: const AboutSettingsPage(),
+        ),
+      ],
+    ),
+    _SettingsCategory(
       title: '播放历史与视频源',
       items: [
         _SettingsMenuItem(
@@ -42,24 +66,7 @@ class _SettingsPageState extends State<SettingsPage> {
           page: const PlaybackSettingsPage(),
         ),
       ],
-    ),
-    _SettingsCategory(
-      title: '应用与外观',
-      items: [
-        _SettingsMenuItem(
-          title: '通用',
-          icon: Icons.settings_outlined,
-          route: RouteName.settingsGeneral,
-          page: const GeneralSettingsPage(),
-        ),
-        _SettingsMenuItem(
-          title: '关于',
-          icon: Icons.info_outline,
-          route: RouteName.settingsAbout,
-          page: const AboutSettingsPage(),
-        ),
-      ],
-    ),
+    )
   ];
 
   List<_SettingsMenuItem> get _allMenuItems {

@@ -74,11 +74,11 @@ class _DataSourcePageState extends State<DataSourcePage> {
     return Obx(
       () => Scaffold(
         appBar: AppBar(
-          title: Text('数据源管理'),
+          title: const Text('数据源管理'),
           automaticallyImplyLeading: !settingController.isWideScreen.value,
           actions: [
             IconButton(
-              icon: Icon(
+              icon: const Icon(
                 Icons.save_as_outlined,
                 size: 30,
               ),

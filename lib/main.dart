@@ -15,17 +15,19 @@ void main() async {
   await dotenv.load(fileName: ".env");
   await Hive.initFlutter();
   await Hive.openBox(Constants.crawlConfigs);
+  final themeController = Get.put(ThemeController());
+  await themeController.initTheme();
+  
   runApp(MyApp());
 }
 
 class MyApp extends StatelessWidget {
-  final themeController = Get.put(ThemeController());
-
-  MyApp({super.key});
+  const MyApp({super.key});
+  
+  ThemeController get themeController => Get.find<ThemeController>();
 
   @override
   Widget build(BuildContext context) {
-    themeController.initTheme();
     final designSize = Utils.getDesignSize(context);
     return ScreenUtilInit(
       designSize: designSize,
@@ -34,10 +36,9 @@ class MyApp extends StatelessWidget {
           builder: (controller) {
             return GetMaterialApp(
               debugShowCheckedModeBanner: false,
-              theme: ThemeController.lightTheme,
-              darkTheme: ThemeController.darkTheme,
-              themeMode:
-                  controller.isDarkMode ? ThemeMode.dark : ThemeMode.light,
+              theme: controller.lightTheme,
+              darkTheme: controller.darkTheme,
+              themeMode: controller.themeMode,
               initialRoute: RouteName.main,
               routes: getRootRoutes(),
             );

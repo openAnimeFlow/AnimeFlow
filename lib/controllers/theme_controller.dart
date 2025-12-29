@@ -4,70 +4,108 @@ import 'package:get/get.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class ThemeController extends GetxController {
-  bool _isDarkMode = false;
-  static const String _themeKey = 'isDarkMode';
+  ThemeMode _themeMode = ThemeMode.system;
+  Color _seedColor = const Color(0xFF5CDCF6);
+  
+  static const String _themeModeKey = 'themeMode';
+  static const String _seedColorKey = 'seedColor';
 
-  bool get isDarkMode => _isDarkMode;
+  ThemeMode get themeMode => _themeMode;
+  Color get seedColor => _seedColor;
+
+  // 预定义的主题颜色
+  static final List<Color> themeColors = [
+    Colors.blue,
+    Colors.purple,
+    Colors.pink,
+    Colors.red,
+    Colors.orange,
+    Colors.amber,
+    Colors.yellow,
+    Colors.lime,
+    Colors.green,
+    Colors.teal,
+    Colors.cyan,
+    Colors.indigo,
+  ];
 
   // 初始化主题设置
   Future<void> initTheme() async {
     final prefs = await SharedPreferences.getInstance();
-    _isDarkMode = prefs.getBool(_themeKey) ?? false;
+    
+    // 读取主题模式
+    final themeModeIndex = prefs.getInt(_themeModeKey);
+    if (themeModeIndex != null && themeModeIndex >= 0 && themeModeIndex <= 2) {
+      _themeMode = ThemeMode.values[themeModeIndex];
+    } else {
+      _themeMode = ThemeMode.system;
+    }
+    
+    // 读取主题颜色
+    final seedColorValue = prefs.getInt(_seedColorKey);
+    if (seedColorValue != null) {
+      _seedColor = Color(seedColorValue);
+    } else {
+      _seedColor = const Color(0xFF5CDCF6);
+    }
+    
     update();
   }
 
-  // 切换主题并保存
-  Future<void> toggleTheme() async {
-    _isDarkMode = !_isDarkMode;
+  // 设置主题模式并保存
+  Future<void> setThemeMode(ThemeMode mode) async {
+    _themeMode = mode;
     final prefs = await SharedPreferences.getInstance();
-    await prefs.setBool(_themeKey, _isDarkMode);
+    await prefs.setInt(_themeModeKey, mode.index);
     update();
   }
 
-  // 浅色主题
-  static final ThemeData lightTheme = ThemeData(
-    useMaterial3: true,
-    colorScheme: ColorScheme.fromSeed(
-      seedColor: const Color(0xFF5CDCF6),
-      brightness: Brightness.light,
-    ),
-    appBarTheme: const AppBarTheme(
-      systemOverlayStyle: SystemUiOverlayStyle(
-        statusBarColor: Colors.transparent, // 状态栏透明
-        statusBarIconBrightness: Brightness.dark, // 浅色主题下状态栏图标为深色
-        statusBarBrightness: Brightness.light,
+  // 设置主题颜色并保存
+  Future<void> setSeedColor(Color color) async {
+    _seedColor = color;
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setInt(_seedColorKey, color.value);
+    update();
+  }
 
-        ///浅色主题下系统导航条透明
-        systemNavigationBarColor: Colors.transparent,
-        systemNavigationBarDividerColor: Colors.transparent,
+
+  // 获取浅色主题
+  ThemeData get lightTheme {
+    return ThemeData(
+      useMaterial3: true,
+      colorScheme: ColorScheme.fromSeed(
+        seedColor: _seedColor,
+        brightness: Brightness.light,
       ),
-      // scrolledUnderElevation: 0,
-      // surfaceTintColor: Colors.transparent,
-    ),
-  );
-
-  // 深色主题
-  static final ThemeData darkTheme = ThemeData(
-    useMaterial3: true,
-    colorScheme: ColorScheme.fromSeed(
-      seedColor: const Color(0xFF5CDCF6),
-      brightness: Brightness.dark,
-    ),
-    appBarTheme: const AppBarTheme(
-      systemOverlayStyle: SystemUiOverlayStyle(
-        statusBarColor: Colors.transparent, // 状态栏透明
-        statusBarIconBrightness: Brightness.light, // 深色主题下状态栏图标为浅色
-        statusBarBrightness: Brightness.dark,
-
-        ///深色主题下系统导航条透明
-        systemNavigationBarColor: Colors.transparent,
-        systemNavigationBarDividerColor: Colors.transparent,
+      appBarTheme: const AppBarTheme(
+        systemOverlayStyle: SystemUiOverlayStyle(
+          statusBarColor: Colors.transparent,
+          statusBarIconBrightness: Brightness.dark,
+          statusBarBrightness: Brightness.light,
+          systemNavigationBarColor: Colors.transparent,
+          systemNavigationBarDividerColor: Colors.transparent,
+        ),
       ),
-      // scrolledUnderElevation: 0,
-      // surfaceTintColor: Colors.transparent,
-    ),
-  );
+    );
+  }
 
-  // 获取当前主题
-  ThemeData get currentTheme => _isDarkMode ? darkTheme : lightTheme;
+  // 获取深色主题
+  ThemeData get darkTheme {
+    return ThemeData(
+      useMaterial3: true,
+      colorScheme: ColorScheme.fromSeed(
+        seedColor: _seedColor,
+        brightness: Brightness.dark,
+      ),
+      appBarTheme: const AppBarTheme(
+        systemOverlayStyle: SystemUiOverlayStyle(
+          statusBarColor: Colors.transparent,
+          statusBarIconBrightness: Brightness.light,
+          statusBarBrightness: Brightness.dark,
+          systemNavigationBarColor: Colors.transparent,
+          systemNavigationBarDividerColor: Colors.transparent,
+        ),
+      ),
+    );
+  }
 }

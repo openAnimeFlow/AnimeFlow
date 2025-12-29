@@ -1,8 +1,6 @@
 import 'package:anime_flow/constants/play_layout_constant.dart';
-import 'package:anime_flow/models/item/subject_basic_data_item.dart';
 import 'package:anime_flow/pages/recommend/calendar.dart';
 import 'package:anime_flow/routes/index.dart';
-import 'package:anime_flow/widget/animation_network_image/animation_network_image.dart';
 import 'package:anime_flow/controllers/main_page/main_page_state.dart';
 import 'package:anime_flow/http/requests/bgm_request.dart';
 import 'package:anime_flow/utils/layout_util.dart';
@@ -12,7 +10,6 @@ import 'package:flutter_screenutil/flutter_screenutil.dart' show SizeExtension;
 import 'package:get/get.dart';
 import 'package:anime_flow/controllers/theme_controller.dart';
 import 'package:anime_flow/models/item/bangumi/hot_item.dart';
-import 'package:anime_flow/models/item/bangumi/subject_item.dart';
 
 class RecommendPage extends StatefulWidget {
   const RecommendPage({super.key});
@@ -23,6 +20,7 @@ class RecommendPage extends StatefulWidget {
 
 class _RecommendPageState extends State<RecommendPage> {
   late MainPageState mainPageState;
+  late ThemeController themeController;
   final List<Data> _dataList = [];
   bool _isLoading = false;
   bool _hasMore = true;
@@ -37,6 +35,7 @@ class _RecommendPageState extends State<RecommendPage> {
   void initState() {
     super.initState();
     mainPageState = Get.find<MainPageState>();
+    themeController = Get.find<ThemeController>();
     _loadData();
 
     _scrollController.addListener(() {
@@ -108,65 +107,43 @@ class _RecommendPageState extends State<RecommendPage> {
               children: [
                 const Text("推荐"),
                 const SizedBox(width: 10),
-                GetBuilder<ThemeController>(
-                  builder: (controller) {
-                    final borderColor = controller.isDarkMode
-                        ? ThemeController.darkTheme.colorScheme.primary
-                        : ThemeController.lightTheme.colorScheme.primary;
-                    return Container(
-                      width: 200,
-                      height: 35,
-                      decoration: BoxDecoration(
-                        borderRadius: BorderRadius.circular(20),
-                        border: Border.all(
-                          color: borderColor,
-                          width: 1,
-                        ),
+                Container(
+                  width: 200,
+                  height: 35,
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(20),
+                    border: Border.all(
+                      color: Theme.of(context).colorScheme.primary,
+                      width: 1,
+                    ),
+                  ),
+                  child: TextField(
+                    decoration: InputDecoration(
+                      hintText: "搜索动漫番剧...",
+                      hintStyle: TextStyle(
+                        color: Colors.grey.shade600,
+                        fontSize: 14,
                       ),
-                      child: TextField(
-                        decoration: InputDecoration(
-                          hintText: "搜索动漫番剧...",
-                          hintStyle: TextStyle(
-                            color: Colors.grey.shade600,
-                            fontSize: 14,
-                          ),
-                          prefixIcon: const Icon(
-                            Icons.search,
-                            size: 25,
-                          ),
-                          filled: false,
-                          border: const OutlineInputBorder(
-                            borderSide: BorderSide.none,
-                          ),
-                          contentPadding: const EdgeInsets.symmetric(
-                            horizontal: 12,
-                          ),
-                        ),
-                        onTap: () {
-                          Get.toNamed(RouteName.search);
-                        },
-                        readOnly: true,
+                      prefixIcon: const Icon(
+                        Icons.search,
+                        size: 25,
                       ),
-                    );
-                  },
+                      filled: false,
+                      border: const OutlineInputBorder(
+                        borderSide: BorderSide.none,
+                      ),
+                      contentPadding: const EdgeInsets.symmetric(
+                        horizontal: 12,
+                      ),
+                    ),
+                    onTap: () {
+                      Get.toNamed(RouteName.search);
+                    },
+                    readOnly: true,
+                  ),
                 ),
               ],
             )),
-            GetBuilder<ThemeController>(
-              builder: (controller) {
-                return IconButton(
-                  icon: Icon(
-                    controller.isDarkMode
-                        ? Icons.brightness_7
-                        : Icons.brightness_4,
-                    color: controller.isDarkMode ? Colors.white : Colors.black,
-                  ),
-                  onPressed: () {
-                    controller.toggleTheme();
-                  },
-                );
-              },
-            ),
           ],
         ),
       ),

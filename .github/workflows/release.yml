@@ -6,7 +6,7 @@ on:
       - '*'
 
 jobs:
-  build_ios:
+  flutter-build_ios:
     runs-on: macos-14
     steps:
       - name: Checkout repository
@@ -52,7 +52,7 @@ jobs:
           name: ios
           path: AnimeFlow-${{ env.VERSION }}.ipa
 
-  build-android:
+  flutter-build-android:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository
@@ -322,7 +322,7 @@ jobs:
           if-no-files-found: ignore
 
   release:
-    needs: [build_ios, build-android, flutter-build-windows, flutter-build-linux, flutter-build-macos]
+    needs: [flutter-build_ios, flutter-build-android, flutter-build-windows, flutter-build-linux, flutter-build-macos]
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository
@@ -342,11 +342,9 @@ jobs:
           # 读取 release-template.md 模板
           TEMPLATE=$(cat .github/workflows/release-template.md)
           
-          # 替换 {Version} 为实际版本号
           TEMPLATE=$(echo "$TEMPLATE" | sed "s/{Version}/${VERSION}/g")
           
           # 在两个 --- 之间插入 CHANGELOG 内容
-          # 使用 awk 来处理：找到第一个 ---，打印到它，插入 CHANGELOG，然后继续
           RELEASE_NOTES=$(echo "$TEMPLATE" | awk -v changelog="$CHANGELOG_CONTENT" '
             /^---$/ {
               if (found_first == 0) {

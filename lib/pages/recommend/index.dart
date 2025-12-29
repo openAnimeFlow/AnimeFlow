@@ -6,6 +6,7 @@ import 'package:anime_flow/widget/animation_network_image/animation_network_imag
 import 'package:anime_flow/controllers/main_page/main_page_state.dart';
 import 'package:anime_flow/http/requests/bgm_request.dart';
 import 'package:anime_flow/utils/layout_util.dart';
+import 'package:anime_flow/widget/subject_carf.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart' show SizeExtension;
 import 'package:get/get.dart';
@@ -183,7 +184,8 @@ class _RecommendPageState extends State<RecommendPage> {
           children: [
             Center(
               child: ConstrainedBox(
-                constraints: const BoxConstraints(maxWidth: PlayLayoutConstant.maxWidth),
+                constraints:
+                    const BoxConstraints(maxWidth: PlayLayoutConstant.maxWidth),
                 child: CustomScrollView(
                   controller: _scrollController,
                   slivers: [
@@ -199,7 +201,7 @@ class _RecommendPageState extends State<RecommendPage> {
                             child: Row(
                               children: [
                                 Text(
-                                  "热门动画",
+                                  '热门动画',
                                   style: TextStyle(
                                       fontSize: 25.sp,
                                       fontWeight: FontWeight.bold),
@@ -232,7 +234,7 @@ class _RecommendPageState extends State<RecommendPage> {
                                         ));
                                 }
                                 final subject = _dataList[index].subject;
-                                return _buildCard(subject);
+                                return SubjectCarfView(subject: subject);
                               },
                               childCount: _dataList.length + 1,
                             ),
@@ -257,68 +259,6 @@ class _RecommendPageState extends State<RecommendPage> {
           ],
         );
       },
-    );
-  }
-
-  Widget _buildCard(Subject subject) {
-    final subjectBasicData = SubjectBasicData(
-      id: subject.id,
-      name: subject.nameCN ?? subject.name,
-      image: subject.images.large,
-    );
-    return Card(
-      clipBehavior: Clip.hardEdge,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(12),
-      ),
-      child: InkWell(
-        onTap: () {
-          Get.toNamed(RouteName.animeInfo, arguments: subjectBasicData);
-        },
-        highlightColor: Colors.white.withValues(alpha: 0.1),
-        child: Stack(
-          children: [
-            Positioned(
-                top: 0,
-                left: 0,
-                bottom: 0,
-                right: 0,
-                child: AnimationNetworkImage(
-                  url: subject.images.large,
-                  fit: BoxFit.cover,
-                )),
-            Positioned(
-              bottom: 0,
-              left: 0,
-              right: 0,
-              child: Container(
-                padding: const EdgeInsets.all(5),
-                decoration: const BoxDecoration(
-                  gradient: LinearGradient(
-                    begin: Alignment.bottomCenter,
-                    end: Alignment.topCenter,
-                    colors: [
-                      Colors.black38,
-                      Colors.transparent,
-                    ],
-                  ),
-                ),
-                child: Text(
-                  subject.nameCN ?? subject.name,
-                  style: const TextStyle(
-                    color: Colors.white,
-                    fontSize: 15,
-                    fontWeight: FontWeight.bold,
-                  ),
-                  textAlign: TextAlign.left,
-                  maxLines: 2,
-                  overflow: TextOverflow.ellipsis,
-                ),
-              ),
-            ),
-          ],
-        ),
-      ),
     );
   }
 }

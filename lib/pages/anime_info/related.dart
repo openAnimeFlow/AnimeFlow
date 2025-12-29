@@ -76,9 +76,7 @@ class _RelatedViewState extends State<RelatedView> {
                 final item = relation.data[index];
                 final subjectBasicData = SubjectBasicData(
                   id: item.subject.id,
-                  name: item.subject.nameCN.isEmpty
-                      ? item.subject.name
-                      : item.subject.nameCN,
+                  name: item.subject.nameCN?? item.subject.name,
                   image: item.subject.images.large,
                 );
                 return Container(
@@ -95,9 +93,7 @@ class _RelatedViewState extends State<RelatedView> {
                                 borderRadius: BorderRadius.circular(10),
                                 url: item.subject.images.large),
                             Text(
-                              item.subject.nameCN.isEmpty
-                                  ? item.subject.name
-                                  : item.subject.nameCN,
+                              item.subject.nameCN?? item.subject.name,
                               maxLines: 1,
                               overflow: TextOverflow.ellipsis,
                             )

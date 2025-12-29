@@ -174,7 +174,7 @@ class BgmRequest {
   ///排行
   static Future<SubjectItem> rankService({
     int? type = 2,
-    SortType? sort,
+    required SortType sort,
     int? cat,
     int? year,
     int? month,
@@ -182,8 +182,8 @@ class BgmRequest {
     required int page,
   }) async {
     final queryParameters = <String, dynamic>{};
+    queryParameters['sort'] = sort.value;
     if (type != null) queryParameters['type'] = type;
-    if (sort != null) queryParameters['sort'] = sort.value;
     if (cat != null) queryParameters['cat'] = cat;
     if (year != null) queryParameters['year'] = year;
     if (month != null) queryParameters['month'] = month;

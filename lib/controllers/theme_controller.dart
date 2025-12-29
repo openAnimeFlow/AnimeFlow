@@ -25,7 +25,7 @@ class ThemeController extends GetxController {
     Colors.lime,
     Colors.green,
     Colors.teal,
-    Colors.cyan,
+    const Color(0xFF5CDCF6),
     Colors.indigo,
   ];
 
@@ -46,7 +46,7 @@ class ThemeController extends GetxController {
     if (seedColorValue != null) {
       _seedColor = Color(seedColorValue);
     } else {
-      _seedColor = const Color(0xFF5CDCF6);
+      _seedColor = themeColors[11];
     }
     
     update();
@@ -64,7 +64,7 @@ class ThemeController extends GetxController {
   Future<void> setSeedColor(Color color) async {
     _seedColor = color;
     final prefs = await SharedPreferences.getInstance();
-    await prefs.setInt(_seedColorKey, color.value);
+    await prefs.setInt(_seedColorKey, color.toARGB32());
     update();
   }
 

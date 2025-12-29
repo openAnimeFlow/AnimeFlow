@@ -1,27 +1,21 @@
-name: Build Flutter Project
+name: Release
 
 on:
-  workflow_dispatch:
-    inputs:
-      platform:
-        type: choice
-        description: "选择构建的平台"
-        options:
-          - android
-          - ios
-          - macos
-          - windows
-          - linux
-          - all
-        default: all
+  push:
+    tags:
+      - '*'
+
 jobs:
   build_ios:
-    if: ${{ github.event.inputs.platform == 'ios' || github.event.inputs.platform == 'all'}}
     runs-on: macos-14
-
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
+
+      - name: Extract version
+        run: |
+          VERSION=$(grep '^version:' pubspec.yaml | sed 's/version: //')
+          echo "VERSION=${VERSION}" >> $GITHUB_ENV
 
       - name: Create .env file
         run: |
@@ -50,20 +44,24 @@ jobs:
         run: |
           mkdir Payload
           cp -R build/ios/iphoneos/Runner.app Payload/Runner.app
-          zip -q -r AnimeFlow.ipa Payload
+          zip -q -r "AnimeFlow-${{ env.VERSION }}.ipa" Payload
 
-#      - name: Upload IPA artifact
-#        uses: actions/upload-artifact@v4
-#        with:
-#          name: ios
-#          path: AnimeFlow.ipa
+      - name: Upload IPA artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: ios
+          path: AnimeFlow-${{ env.VERSION }}.ipa
 
   build-android:
-    if: ${{ github.event.inputs.platform == 'android' || github.event.inputs.platform == 'all'}}
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
+
+      - name: Extract version
+        run: |
+          VERSION=$(grep '^version:' pubspec.yaml | sed 's/version: //')
+          echo "VERSION=${VERSION}" >> $GITHUB_ENV
 
       - name: Create .env file
         run: |
@@ -91,19 +89,39 @@ jobs:
           flutter build apk --split-per-abi
           echo "Android build completed"
 
-#      - name: Archive artifacts
-#        uses: actions/upload-artifact@v4
-#        with:
-#          name: android
-#          path: build/app/outputs/flutter-apk/*.apk
-#          if-no-files-found: ignore
+      - name: Rename APK files
+        run: |
+          cd build/app/outputs/flutter-apk
+          if [ -f app-armeabi-v7a-release.apk ]; then
+            mv app-armeabi-v7a-release.apk "AnimeFlow-v7a-${{ env.VERSION }}.apk"
+          fi
+          if [ -f app-arm64-v8a-release.apk ]; then
+            mv app-arm64-v8a-release.apk "AnimeFlow-arm64-${{ env.VERSION }}.apk"
+          fi
+          if [ -f app-x86_64-release.apk ]; then
+            mv app-x86_64-release.apk "AnimeFlow-x86_64-${{ env.VERSION }}.apk"
+          fi
+          echo "Renamed APK files:"
+          ls -lh AnimeFlow-*.apk || true
 
-  build-windows:
-    if: ${{ github.event.inputs.platform == 'windows' || github.event.inputs.platform == 'all'}}
+      - name: Archive artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: android
+          path: build/app/outputs/flutter-apk/AnimeFlow-*.apk
+          if-no-files-found: ignore
+
+  flutter-build-windows:
     runs-on: windows-2025
     steps:
       - name: Checkout repository
         uses: actions/checkout@v2
+
+      - name: Extract version
+        shell: pwsh
+        run: |
+          $version = (Select-String -Path pubspec.yaml -Pattern '^version:' | ForEach-Object { $_.Line -replace 'version: ', '' })
+          echo "VERSION=$version" >> $env:GITHUB_ENV
 
       - name: Create .env file
         shell: pwsh
@@ -125,19 +143,29 @@ jobs:
           flutter build windows
           echo "Windows build completed"
 
-#      - name: Archive artifacts
-#        uses: actions/upload-artifact@v4
-#        with:
-#          name: windows
-#          path: build/windows/x64/runner/Release/
-#          if-no-files-found: ignore
+      - name: Create ZIP archive
+        shell: pwsh
+        run: |
+          Compress-Archive -Path "build/windows/x64/runner/Release/*" -DestinationPath "AnimeFlow-windows-${{ env.VERSION }}.zip" -Force
+          echo "Created AnimeFlow-windows-${{ env.VERSION }}.zip"
+
+      - name: Archive artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: windows
+          path: AnimeFlow-windows-${{ env.VERSION }}.zip
+          if-no-files-found: ignore
 
   flutter-build-linux:
-    if: ${{ github.event.inputs.platform == 'linux' || github.event.inputs.platform == 'all'}}
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository
         uses: actions/checkout@v2
+
+      - name: Extract version
+        run: |
+          VERSION=$(grep '^version:' pubspec.yaml | sed 's/version: //')
+          echo "VERSION=${VERSION}" >> $GITHUB_ENV
 
       - name: Create .env file
         run: |
@@ -177,20 +205,88 @@ jobs:
           flutter build linux
           echo "Linux build completed"
 
-#      - name: Archive artifacts
-#        uses: actions/upload-artifact@v4
-#        with:
-#          name: linux
-#          path: build/linux/x64/release/bundle/
-#          if-no-files-found: ignore
+      - name: Create TAR.GZ archive
+        run: |
+          cd build/linux/x64/release
+          tar -czf ../../../../AnimeFlow-${{ env.VERSION }}.tar.gz -C bundle .
+          echo "Created AnimeFlow-${{ env.VERSION }}.tar.gz"
+
+      - name: Create DEB package
+        run: |
+          # 创建 Debian 包目录结构
+          PACKAGE_NAME="animeflow"
+          PACKAGE_DIR="animeflow_${{ env.VERSION }}_amd64"
+          APP_DIR="${PACKAGE_DIR}/usr/lib/animeflow"
+          mkdir -p ${PACKAGE_DIR}/DEBIAN
+          mkdir -p ${APP_DIR}
+          mkdir -p ${PACKAGE_DIR}/usr/bin
+          mkdir -p ${PACKAGE_DIR}/usr/share/applications
+          mkdir -p ${PACKAGE_DIR}/usr/share/pixmaps
+          
+          # 复制应用文件到 /usr/lib/animeflow
+          cp -r build/linux/x64/release/bundle/* ${APP_DIR}/
+          
+          # 创建启动脚本
+          cat > ${PACKAGE_DIR}/usr/bin/animeflow << 'EOF'
+          #!/bin/bash
+          cd /usr/lib/animeflow
+          ./anime_flow "$@"
+          EOF
+          chmod +x ${PACKAGE_DIR}/usr/bin/animeflow
+          
+          # 创建 control 文件
+          cat > ${PACKAGE_DIR}/DEBIAN/control << EOF
+          Package: ${PACKAGE_NAME}
+          Version: ${{ env.VERSION }}
+          Section: utils
+          Priority: optional
+          Architecture: amd64
+          Maintainer: AnimeFlow Team
+          Description: Anime video player
+           AnimeFlow is an anime video player application.
+          EOF
+          
+          # 创建 desktop 文件
+          cat > ${PACKAGE_DIR}/usr/share/applications/animeflow.desktop << EOF
+          [Desktop Entry]
+          Version=1.0
+          Type=Application
+          Name=AnimeFlow
+          Comment=Anime video player
+          Exec=/usr/bin/animeflow
+          Icon=animeflow
+          Terminal=false
+          Categories=Video;Player;
+          EOF
+          
+          if [ -f build/linux/x64/release/bundle/data/flutter_assets/assets/logo/Logo.png ]; then
+            cp build/linux/x64/release/bundle/data/flutter_assets/assets/logo/Logo.png ${PACKAGE_DIR}/usr/share/pixmaps/animeflow.png
+          fi
+          
+          # 构建 deb 包
+          dpkg-deb --build ${PACKAGE_DIR} AnimeFlow-${{ env.VERSION }}.deb
+          echo "Created AnimeFlow-${{ env.VERSION }}.deb"
+
+      - name: Archive artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: linux
+          path: |
+            AnimeFlow-${{ env.VERSION }}.tar.gz
+            AnimeFlow-${{ env.VERSION }}.deb
+          if-no-files-found: ignore
 
   flutter-build-macos:
-    if: ${{ github.event.inputs.platform == 'macos' || github.event.inputs.platform == 'all'}}
     name: Build macOS
     runs-on: macos-14
     steps:
       - name: Checkout repository
         uses: actions/checkout@v2
+
+      - name: Extract version
+        run: |
+          VERSION=$(grep '^version:' pubspec.yaml | sed 's/version: //')
+          echo "VERSION=${VERSION}" >> $GITHUB_ENV
 
       - name: Create .env file
         run: |
@@ -216,11 +312,78 @@ jobs:
           mkdir -p build/dist
           cp -a build/macos/Build/Products/Release/*.app build/dist
           ln -s /Applications build/dist/Applications
-          hdiutil create -fs HFS+ -volname 1.0.0 -srcfolder build/dist build/dist/AnimeFlow.dmg
+          hdiutil create -fs HFS+ -volname "${{ env.VERSION }}" -srcfolder build/dist build/dist/AnimeFlow-${{ env.VERSION }}.dmg
 
-#      - name: Archive artifacts
-#        uses: actions/upload-artifact@v4
-#        with:
-#          name: macos
-#          path: build/dist/*.dmg
-#          if-no-files-found: ignore
+      - name: Archive artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: macos
+          path: build/dist/AnimeFlow-${{ env.VERSION }}.dmg
+          if-no-files-found: ignore
+
+  release:
+    needs: [build_ios, build-android, flutter-build-windows, flutter-build-linux, flutter-build-macos]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Extract version
+        run: |
+          VERSION=$(grep '^version:' pubspec.yaml | sed 's/version: //')
+          echo "VERSION=${VERSION}" >> $GITHUB_ENV
+          echo "TAG_NAME=v${VERSION}" >> $GITHUB_ENV
+
+      - name: Generate release notes
+        run: |
+          # 读取 CHANGELOG.md 内容
+          CHANGELOG_CONTENT=$(cat .github/workflows/CHANGELOG.md)
+          
+          # 读取 release-template.md 模板
+          TEMPLATE=$(cat .github/workflows/release-template.md)
+          
+          # 替换 {Version} 为实际版本号
+          TEMPLATE=$(echo "$TEMPLATE" | sed "s/{Version}/${VERSION}/g")
+          
+          # 在两个 --- 之间插入 CHANGELOG 内容
+          # 使用 awk 来处理：找到第一个 ---，打印到它，插入 CHANGELOG，然后继续
+          RELEASE_NOTES=$(echo "$TEMPLATE" | awk -v changelog="$CHANGELOG_CONTENT" '
+            /^---$/ {
+              if (found_first == 0) {
+                found_first = 1
+                print
+                print changelog
+                next
+              }
+            }
+            { print }
+          ')
+          
+          echo "$RELEASE_NOTES" > release_notes.md
+          echo "Generated release notes:"
+          cat release_notes.md
+        env:
+          VERSION: ${{ env.VERSION }}
+
+      - name: Download all artifacts
+        uses: actions/download-artifact@v4
+        with:
+          path: artifacts
+
+      - name: Create Release
+        uses: softprops/action-gh-release@v1
+        with:
+          tag_name: ${{ env.TAG_NAME }}
+          name: AnimeFlow ${{ env.VERSION }}
+          body_path: release_notes.md
+          files: |
+            artifacts/ios/AnimeFlow-*.ipa
+            artifacts/android/*.apk
+            artifacts/windows/*.zip
+            artifacts/linux/*.tar.gz
+            artifacts/linux/*.deb
+            artifacts/macos/AnimeFlow-*.dmg
+          draft: false
+          prerelease: false
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

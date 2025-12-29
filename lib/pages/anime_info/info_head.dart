@@ -150,7 +150,7 @@ class InfoHeadView extends StatelessWidget {
           highlightColor: highlightColor,
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
-            children: List.generate(5, (index) {
+            children: List.generate(4, (index) {
               return Container(
                 margin: const EdgeInsets.only(top: 5),
                 height: 20,
@@ -170,8 +170,8 @@ class InfoHeadView extends StatelessWidget {
               baseColor: baseColor,
               highlightColor: highlightColor,
               child: Container(
-                height: 40,
-                width: 40,
+                height: 30,
+                width: 30,
                 decoration: BoxDecoration(
                   color: Colors.white,
                   borderRadius: BorderRadius.circular(8.0),
@@ -183,7 +183,7 @@ class InfoHeadView extends StatelessWidget {
               baseColor: baseColor,
               highlightColor: highlightColor,
               child: Container(
-                height: 40,
+                height: 30,
                 width: 100,
                 decoration: BoxDecoration(
                   color: Colors.white,

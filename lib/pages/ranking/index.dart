@@ -1,7 +1,7 @@
+import 'package:anime_flow/models/item/bangumi/subject_item.dart';
 import 'package:flutter/material.dart';
 import 'package:logger/logger.dart';
 
-import '../../models/item/bangumi/hot_item.dart';
 
 class RankingPage extends StatefulWidget {
   const RankingPage({super.key});
@@ -11,8 +11,8 @@ class RankingPage extends StatefulWidget {
 }
 
 class _RankingPageState extends State<RankingPage> {
+  SubjectItem? subjectItem;
   Logger logger = Logger();
-  Subject? subject;
   @override
   void initState() {
     super.initState();
@@ -29,12 +29,12 @@ class _RankingPageState extends State<RankingPage> {
   Widget build(BuildContext context) {
     return Scaffold(
         appBar: AppBar(
-          title: Text("排行榜"),
+          title: const Text('排行榜'),
         ),
         body: Center(
           child: ConstrainedBox(
-            constraints: BoxConstraints(maxWidth: 1400),
-            child: CustomScrollView(slivers: [
+            constraints: const BoxConstraints(maxWidth: 1400),
+            child: const CustomScrollView(slivers: [
               SliverToBoxAdapter(
                 child: Center(
                   child: Wrap(children: [

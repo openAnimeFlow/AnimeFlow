@@ -324,6 +324,8 @@ jobs:
   release:
     needs: [flutter-build_ios, flutter-build-android, flutter-build-windows, flutter-build-linux, flutter-build-macos]
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4

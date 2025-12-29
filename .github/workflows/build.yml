@@ -15,13 +15,18 @@ on:
           - all
         default: all
 jobs:
-  build_ios:
+  flutter-build_ios:
     if: ${{ github.event.inputs.platform == 'ios' || github.event.inputs.platform == 'all'}}
     runs-on: macos-14
 
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
+
+      - name: Extract version
+        run: |
+          VERSION=$(grep '^version:' pubspec.yaml | sed 's/version: //')
+          echo "VERSION=${VERSION}" >> $GITHUB_ENV
 
       - name: Create .env file
         run: |
@@ -50,13 +55,13 @@ jobs:
         run: |
           mkdir Payload
           cp -R build/ios/iphoneos/Runner.app Payload/Runner.app
-          zip -q -r AnimeFlow.ipa Payload
+          zip -q -r AnimeFlow-${{ env.VERSION }}.ipa Payload
 
       - name: Upload IPA artifact
         uses: actions/upload-artifact@v4
         with:
           name: ios
-          path: AnimeFlow.ipa
+          path: AnimeFlow-${{ env.VERSION }}.ipa
 
   build-android:
     if: ${{ github.event.inputs.platform == 'android' || github.event.inputs.platform == 'all'}}
@@ -98,12 +103,18 @@ jobs:
           path: build/app/outputs/flutter-apk/*.apk
           if-no-files-found: ignore
 
-  build-windows:
+  flutter-build-windows:
     if: ${{ github.event.inputs.platform == 'windows' || github.event.inputs.platform == 'all'}}
     runs-on: windows-2025
     steps:
       - name: Checkout repository
         uses: actions/checkout@v2
+
+      - name: Extract version
+        shell: pwsh
+        run: |
+          $version = (Select-String -Path pubspec.yaml -Pattern '^version:' | ForEach-Object { $_.Line -replace 'version: ', '' })
+          echo "VERSION=$version" >> $env:GITHUB_ENV
 
       - name: Create .env file
         shell: pwsh
@@ -125,11 +136,17 @@ jobs:
           flutter build windows
           echo "Windows build completed"
 
+      - name: Create ZIP archive
+        shell: pwsh
+        run: |
+          Compress-Archive -Path "build/windows/x64/runner/Release/*" -DestinationPath "AnimeFlow-windows-${{ env.VERSION }}.zip" -Force
+          echo "Created AnimeFlow-windows-${{ env.VERSION }}.zip"
+
       - name: Archive artifacts
         uses: actions/upload-artifact@v4
         with:
           name: windows
-          path: build/windows/x64/runner/Release/
+          path: AnimeFlow-windows-${{ env.VERSION }}.zip
           if-no-files-found: ignore
 
   flutter-build-linux:
@@ -261,6 +278,11 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v2
 
+      - name: Extract version
+        run: |
+          VERSION=$(grep '^version:' pubspec.yaml | sed 's/version: //')
+          echo "VERSION=${VERSION}" >> $GITHUB_ENV
+
       - name: Create .env file
         run: |
           echo "CLIENT_ID=${{ secrets.CLIENT_ID }}" >> .env
@@ -285,11 +307,11 @@ jobs:
           mkdir -p build/dist
           cp -a build/macos/Build/Products/Release/*.app build/dist
           ln -s /Applications build/dist/Applications
-          hdiutil create -fs HFS+ -volname 1.0.0 -srcfolder build/dist build/dist/AnimeFlow.dmg
+          hdiutil create -fs HFS+ -volname "${{ env.VERSION }}" -srcfolder build/dist build/dist/AnimeFlow-${{ env.VERSION }}.dmg
 
       - name: Archive artifacts
         uses: actions/upload-artifact@v4
         with:
           name: macos
-          path: build/dist/*.dmg
+          path: build/dist/AnimeFlow-${{ env.VERSION }}.dmg
           if-no-files-found: ignore

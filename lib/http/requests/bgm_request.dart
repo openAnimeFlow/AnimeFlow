@@ -75,7 +75,12 @@ class BgmRequest {
         headers: {Constants.userAgentName: CommonApi.bangumiUserAgent},
       ),
     );
-    return SubjectCommentItem.fromJson(response.data);
+    try {
+      return SubjectCommentItem.fromJson(response.data);
+    } catch (e) {
+      _logger.e(e);
+      throw Exception('Failed to fetch comments: $e');
+    }
   }
 
   ///条目搜索

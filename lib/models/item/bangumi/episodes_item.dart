@@ -44,7 +44,7 @@ class Data {
   Data({
     required int id,
     required int subjectID,
-    required int sort,
+    required num sort,
     required int type,
     required int disc,
     required String name,
@@ -87,7 +87,7 @@ class Data {
 
   late int _id;
   late int _subjectID;
-  late int _sort;
+  late num _sort;
   late int _type;
   late int _disc;
   late String _name;
@@ -101,7 +101,7 @@ class Data {
   Data copyWith({
     int? id,
     int? subjectID,
-    int? sort,
+    num? sort,
     int? type,
     int? disc,
     String? name,
@@ -129,7 +129,7 @@ class Data {
 
   int get id => _id;
   int get subjectID => _subjectID;
-  int get sort => _sort;
+  num get sort => _sort;
   int get type => _type;
   int get disc => _disc;
   String get name => _name;

@@ -1,3 +1,5 @@
+import 'dart:ui';
+
 import 'package:anime_flow/controllers/theme_controller.dart';
 import 'package:anime_flow/pages/settings/setting_controller.dart';
 import 'package:anime_flow/widget/theme/theme_preview.dart';
@@ -54,67 +56,72 @@ class _ThemePageState extends State<ThemePage> {
             const SizedBox(height: 12),
             GetBuilder<ThemeController>(
               builder: (controller) {
-                return Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    GestureDetector(
-                      onTap: () {
-                        setState(() {
-                          controller.setThemeMode(ThemeMode.dark);
-                        });
-                      },
-                      child: ThemePreviewCard(
-                        bg: const Color(0xFF020617),
-                        primary: const Color(0xFF3B82F6),
-                        titleColor: Colors.white,
-                        subtitleColor: const Color(0xFF6B7280),
-                        icon: Icons.nightlight_round,
-                        title: "深色模式",
-                        subtitle: "深色护眼",
-                        selected: themeMode == ThemeMode.dark,
-                      ),
-                    ),
-                    GestureDetector(
-                      onTap: () {
-                        setState(() {
-                          controller.setThemeMode(ThemeMode.light);
-                        });
-                      },
-                      child: ThemePreviewCard(
-                        bg: const Color(0xFFF8FAFC),
-                        primary: const Color(0xFFFACC15),
-                        titleColor: Colors.black,
-                        subtitleColor: Colors.black54,
-                        icon: Icons.wb_sunny,
-                        title: "浅色模式",
-                        subtitle: "明亮清爽",
-                        selected: themeMode == ThemeMode.light,
-                      ),
-                    ),
-                    GestureDetector(
-                      onTap: () {
-                        setState(() {
-                          controller.setThemeMode(ThemeMode.system);
-                        });
-                      },
-                      child: Container(
-                        decoration: BoxDecoration(
-                          borderRadius: BorderRadius.circular(18),
-                        ),
+                return glassPanel(
+                  padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 5),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      GestureDetector(
+                        onTap: () {
+                          setState(() {
+                            controller.setThemeMode(ThemeMode.dark);
+                          });
+                        },
                         child: ThemePreviewCard(
                           bg: const Color(0xFF020617),
-                          primary: const Color(0xFF38BDF8),
+                          primary: const Color(0xFF3B82F6),
                           titleColor: Colors.white,
-                          subtitleColor: Colors.black54,
-                          icon: Icons.settings,
-                          title: "跟随系统",
-                          subtitle: "自动适配",
-                          overlay: const DiagonalOverlay(),
-                          selected: themeMode == ThemeMode.system,
+                          subtitleColor: const Color(0xFF6B7280),
+                          icon: Icons.nightlight_round,
+                          title: "深色模式",
+                          subtitle: "深色护眼",
+                          selected: themeMode == ThemeMode.dark,
                         ),
                       ),
-                    ),
-                  ],
+                      const SizedBox(width: 5),
+                      GestureDetector(
+                        onTap: () {
+                          setState(() {
+                            controller.setThemeMode(ThemeMode.light);
+                          });
+                        },
+                        child: ThemePreviewCard(
+                          bg: const Color(0xFFF8FAFC),
+                          primary: const Color(0xFFFACC15),
+                          titleColor: Colors.black,
+                          subtitleColor: Colors.black54,
+                          icon: Icons.wb_sunny,
+                          title: "浅色模式",
+                          subtitle: "明亮清爽",
+                          selected: themeMode == ThemeMode.light,
+                        ),
+                      ),
+                      const SizedBox(width: 5),
+                      GestureDetector(
+                        onTap: () {
+                          setState(() {
+                            controller.setThemeMode(ThemeMode.system);
+                          });
+                        },
+                        child: Container(
+                          decoration: BoxDecoration(
+                            borderRadius: BorderRadius.circular(18),
+                          ),
+                          child: ThemePreviewCard(
+                            bg: const Color(0xFF020617),
+                            primary: const Color(0xFF38BDF8),
+                            titleColor: Colors.white,
+                            subtitleColor: Colors.black54,
+                            icon: Icons.settings,
+                            title: "跟随系统",
+                            subtitle: "自动适配",
+                            overlay: const DiagonalOverlay(),
+                            selected: themeMode == ThemeMode.system,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
                 );
               },
             ),
@@ -184,6 +191,32 @@ class _ThemePageState extends State<ThemePage> {
               },
             ),
           ],
+        ),
+      ),
+    );
+  }
+
+  Widget glassPanel({required Widget child, EdgeInsetsGeometry? padding}) {
+    final themeMode = themeController.themeMode;
+    ThemeMode.light;
+    return ClipRRect(
+      borderRadius: BorderRadius.circular(24),
+      child: BackdropFilter(
+        filter: ImageFilter.blur(sigmaX: 20, sigmaY: 20),
+        child: Container(
+          padding: padding,
+          decoration: BoxDecoration(
+            color: themeMode == ThemeMode.dark
+                ? Colors.white.withValues(alpha: 0.08)
+                : Colors.black.withValues(alpha: 0.08),
+            borderRadius: BorderRadius.circular(24),
+            border: Border.all(
+              color: themeMode == ThemeMode.dark
+                  ? Colors.white.withValues(alpha: 0.15)
+                  : Colors.black.withValues(alpha: 0.15),
+            ),
+          ),
+          child: child,
         ),
       ),
     );

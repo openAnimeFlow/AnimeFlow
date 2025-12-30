@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-class ThemePreviewCard extends StatelessWidget {
+class ThemePreviewCard extends StatefulWidget {
   final Color bg;
   final Color primary;
   final IconData icon;
@@ -25,6 +25,71 @@ class ThemePreviewCard extends StatelessWidget {
   });
 
   @override
+  State<ThemePreviewCard> createState() => _ThemePreviewCardState();
+}
+
+class _ThemePreviewCardState extends State<ThemePreviewCard>
+    with SingleTickerProviderStateMixin {
+  late AnimationController _animationController;
+  late Animation<double> _positionAnimation;
+  late Animation<double> _scaleAnimation;
+
+  @override
+  void initState() {
+    super.initState();
+    _animationController = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 600),
+    );
+
+    // 位置动画：从左侧到右侧（前60%的时间）
+    // 容器宽度：110 - 24 (左右padding) = 86
+    // 最大位置：86 - 22 (圆宽度) = 64
+    _positionAnimation = Tween<double>(
+      begin: 0.0,
+      end: 64.0,
+    ).animate(
+      CurvedAnimation(
+        parent: _animationController,
+        curve: const Interval(0.0, 0.6, curve: Curves.easeInOut),
+      ),
+    );
+
+    // 缩放动画：圆变成对勾（后50%的时间，从50%开始）
+    _scaleAnimation = Tween<double>(
+      begin: 0.0,
+      end: 1.0,
+    ).animate(
+      CurvedAnimation(
+        parent: _animationController,
+        curve: const Interval(0.5, 1.0, curve: Curves.easeInOut),
+      ),
+    );
+
+    if (widget.selected) {
+      _animationController.forward();
+    }
+  }
+
+  @override
+  void didUpdateWidget(ThemePreviewCard oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (widget.selected != oldWidget.selected) {
+      if (widget.selected) {
+        _animationController.forward();
+      } else {
+        _animationController.reverse();
+      }
+    }
+  }
+
+  @override
+  void dispose() {
+    _animationController.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
     return Stack(
       children: [
@@ -34,16 +99,16 @@ class ThemePreviewCard extends StatelessWidget {
           height: 160,
           padding: const EdgeInsets.all(12),
           decoration: BoxDecoration(
-            color: bg,
+            color: widget.bg,
             borderRadius: BorderRadius.circular(18),
             border: Border.all(
-              color: selected ? primary : Colors.white24,
-              width: selected ? 2 : 1,
+              color: widget.selected ? widget.primary : Colors.white24,
+              width: widget.selected ? 2 : 1,
             ),
-            boxShadow: selected
+            boxShadow: widget.selected
                 ? [
                     BoxShadow(
-                      color: primary.withValues(alpha: 0.6),
+                      color: widget.primary.withValues(alpha: 0.6),
                       blurRadius: 16,
                     )
                   ]
@@ -52,55 +117,91 @@ class ThemePreviewCard extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Icon(icon, color: primary, size: 28),
+              Icon(widget.icon, color: widget.primary, size: 28),
               const SizedBox(height: 16),
-              Text(title,
-                  style: TextStyle(color: titleColor,
-                      fontSize: 16, fontWeight: FontWeight.bold)),
-              const SizedBox(height: 4),
-              Text(subtitle,
+              Text(widget.title,
                   style: TextStyle(
-                      fontSize: 12,
-                      color: subtitleColor)),
+                      color: widget.titleColor,
+                      fontSize: 16,
+                      fontWeight: FontWeight.bold)),
+              const SizedBox(height: 4),
+              Text(widget.subtitle,
+                  style: TextStyle(fontSize: 12, color: widget.subtitleColor)),
               const Spacer(),
 
-              /// 底部按钮模拟
+              /// 底部按钮
               Container(
                 height: 22,
                 decoration: BoxDecoration(
-                  color: primary.withValues(alpha: 0.25),
+                  color: widget.primary.withValues(alpha: 0.25),
                   borderRadius: BorderRadius.circular(12),
                 ),
-                child: Align(
-                  alignment: Alignment.centerLeft,
-                  child: Container(
-                    width: 22,
-                    height: 22,
-                    decoration: BoxDecoration(
-                      color: primary,
-                      shape: BoxShape.circle,
-                    ),
-                  ),
+                child: AnimatedBuilder(
+                  animation: _animationController,
+                  builder: (context, child) {
+                    // 圆形按钮的透明度（在转换前显示）
+                    final circleOpacity = 1.0 - _scaleAnimation.value;
+                    // 对勾图标的透明度（在转换后显示）
+                    final checkOpacity = _scaleAnimation.value;
+                    
+                    return Stack(
+                      clipBehavior: Clip.none,
+                      children: [
+                        // 圆形按钮（只在需要时显示）
+                        if (circleOpacity > 0.01)
+                          Positioned(
+                            left: _positionAnimation.value,
+                            top: 0,
+                            child: IgnorePointer(
+                              ignoring: circleOpacity < 0.5,
+                              child: Opacity(
+                                opacity: circleOpacity,
+                                child: Container(
+                                  width: 22,
+                                  height: 22,
+                                  decoration: BoxDecoration(
+                                    color: widget.primary,
+                                    shape: BoxShape.circle,
+                                  ),
+                                ),
+                              ),
+                            ),
+                          ),
+                        // 对勾图标
+                        if (checkOpacity > 0.01)
+                          Positioned(
+                            left: _positionAnimation.value,
+                            top: 0,
+                            child: IgnorePointer(
+                              ignoring: checkOpacity < 0.5,
+                              child: Opacity(
+                                opacity: checkOpacity,
+                                child: Container(
+                                  width: 22,
+                                  height: 22,
+                                  decoration: BoxDecoration(
+                                    color: widget.primary,
+                                    shape: BoxShape.circle,
+                                  ),
+                                  child: const Icon(
+                                    Icons.check,
+                                    size: 14,
+                                    color: Colors.white,
+                                  ),
+                                ),
+                              ),
+                            ),
+                          ),
+                      ],
+                    );
+                  },
                 ),
               ),
             ],
           ),
         ),
-
-        /// 右上角选中 ✔
-        if (selected)
-          Positioned(
-            top: 8,
-            right: 8,
-            child: CircleAvatar(
-              radius: 10,
-              backgroundColor: primary,
-              child: const Icon(Icons.check, size: 14, color: Colors.white),
-            ),
-          ),
-
-        /// 斜切覆盖（跟随系统）
-        if (overlay != null) overlay!,
+        /// 斜切覆盖
+        if (widget.overlay != null) widget.overlay!,
       ],
     );
   }

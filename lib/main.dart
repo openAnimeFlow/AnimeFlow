@@ -18,7 +18,7 @@ void main() async {
   final themeController = Get.put(ThemeController());
   await themeController.initTheme();
   
-  runApp(MyApp());
+  runApp(const MyApp());
 }
 
 class MyApp extends StatelessWidget {
@@ -35,7 +35,7 @@ class MyApp extends StatelessWidget {
         return GetBuilder<ThemeController>(
           builder: (controller) {
             return GetMaterialApp(
-              debugShowCheckedModeBanner: false,
+              // debugShowCheckedModeBanner: false,
               theme: controller.lightTheme,
               darkTheme: controller.darkTheme,
               themeMode: controller.themeMode,

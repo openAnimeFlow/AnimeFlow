@@ -140,14 +140,15 @@ class _ThemePageState extends State<ThemePage> {
                   shrinkWrap: true,
                   physics: const NeverScrollableScrollPhysics(),
                   gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                    crossAxisCount: LayoutUtil.getCrossAxisCount(context) * 2,
+                    crossAxisCount: LayoutUtil.getCrossAxisCount(context),
                     crossAxisSpacing: 12,
                     mainAxisSpacing: 12,
                     childAspectRatio: 1,
                   ),
                   itemCount: ThemeController.themeColors.length,
                   itemBuilder: (context, index) {
-                    final color = ThemeController.themeColors[index];
+                    final themeColorData = ThemeController.themeColors[index];
+                    final color = themeColorData.color;
                     final isSelected = index ==
                         ThemeController.getColorIndex(
                             themeController.seedColor);
@@ -155,34 +156,15 @@ class _ThemePageState extends State<ThemePage> {
                       onTap: () {
                         themeController.setSeedColor(color);
                       },
-                      child: Container(
-                        decoration: BoxDecoration(
-                          shape: BoxShape.circle,
-                          color: color,
-                          border: Border.all(
-                            color: isSelected
-                                ? controller.seedColor
-                                : Colors.transparent,
-                            width: isSelected ? 3 : 0,
-                          ),
-                          boxShadow: isSelected
-                              ? [
-                                  BoxShadow(
-                                    color: color.withValues(alpha: 0.5),
-                                    blurRadius: 8,
-                                    spreadRadius: 2,
-                                  ),
-                                ]
-                              : null,
-                        ),
-                        child: isSelected
-                            ? Icon(
-                                Icons.check,
-                                color: color.computeLuminance() > 0.5
-                                    ? Colors.black
-                                    : Colors.white,
-                              )
-                            : null,
+                      child: ThemeColorCard(
+                        title: themeColorData.name,
+                        background: color.withValues(alpha: 0.5),
+                        header: color.withValues(alpha: 0.8),
+                        text: Colors.white.withValues(alpha: 0.8),
+                        button: color,
+                        borderColor: isSelected
+                            ? Theme.of(context).colorScheme.primary
+                            : Colors.transparent,
                       ),
                     );
                   },

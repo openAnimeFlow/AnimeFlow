@@ -5,7 +5,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 class ThemeController extends GetxController {
   ThemeMode _themeMode = ThemeMode.system;
-  Color _seedColor = themeColors[0];
+  Color _seedColor = themeColors[0].color;
 
   static const String _themeModeKey = 'themeMode';
   static const String _seedColorKey = 'seedColor';
@@ -15,23 +15,53 @@ class ThemeController extends GetxController {
   Color get seedColor => _seedColor;
 
   // 预定义主题颜色
-  static final List<Color> themeColors = [
-    const Color(0xFF5CDCF6),
-    Colors.green,
-    Colors.teal,
-    Colors.blue,
-    Colors.indigo,
-    const Color(0xff6750a4),
-    Colors.pink,
-    Colors.yellow,
-    Colors.orange,
-    Colors.deepOrange,
+  static final List<_ThemeColorData> themeColors = [
+    const _ThemeColorData(
+      color: Color(0xFF5CDCF6),
+      name: '青色',
+    ),
+    const _ThemeColorData(
+      color: Colors.green,
+      name: '绿色',
+    ),
+    const _ThemeColorData(
+      color: Colors.teal,
+      name: '青绿色',
+    ),
+    const _ThemeColorData(
+      color: Colors.blue,
+      name: '蓝色',
+    ),
+    const _ThemeColorData(
+      color: Colors.indigo,
+      name: '靛蓝色',
+    ),
+    const _ThemeColorData(
+      color: Color(0xff6750a4),
+      name: '紫罗兰色',
+    ),
+    const _ThemeColorData(
+      color: Colors.pink,
+      name: '粉色',
+    ),
+    const _ThemeColorData(
+      color: Colors.yellow,
+      name: '黄色',
+    ),
+    const _ThemeColorData(
+      color: Colors.orange,
+      name: '橙色',
+    ),
+    const _ThemeColorData(
+      color: Colors.deepOrange,
+      name: '深橙色',
+    ),
   ];
 
   // 获取颜色在列表中的索引
   static int getColorIndex(Color color) {
     return themeColors.indexWhere(
-      (c) => c.toARGB32() == color.toARGB32(),
+      (c) => c.color.toARGB32() == color.toARGB32(),
     );
   }
 
@@ -52,7 +82,7 @@ class ThemeController extends GetxController {
     if (seedColorValue != null) {
       _seedColor = Color(seedColorValue);
     } else {
-      _seedColor = themeColors[0];
+      _seedColor = themeColors[0].color;
     }
 
     update();
@@ -113,4 +143,14 @@ class ThemeController extends GetxController {
       ),
     );
   }
+}
+
+class _ThemeColorData {
+  final Color color;
+  final String name;
+
+  const _ThemeColorData({
+    required this.color,
+    required this.name,
+  });
 }

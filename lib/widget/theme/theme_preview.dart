@@ -143,7 +143,7 @@ class _ThemePreviewCardState extends State<ThemePreviewCard>
                     final circleOpacity = 1.0 - _scaleAnimation.value;
                     // 对勾图标的透明度（在转换后显示）
                     final checkOpacity = _scaleAnimation.value;
-                    
+
                     return Stack(
                       clipBehavior: Clip.none,
                       children: [
@@ -200,13 +200,13 @@ class _ThemePreviewCardState extends State<ThemePreviewCard>
             ],
           ),
         ),
+
         /// 斜切覆盖
         if (widget.overlay != null) widget.overlay!,
       ],
     );
   }
 }
-
 
 class ThemeColorCard extends StatelessWidget {
   final Color background;
@@ -215,6 +215,7 @@ class ThemeColorCard extends StatelessWidget {
   final double borderWidth;
   final Color borderColor;
   final Color button;
+  final String title;
   final EdgeInsetsGeometry? margin;
   final List<BoxShadow>? boxShadow;
 
@@ -226,14 +227,14 @@ class ThemeColorCard extends StatelessWidget {
     required this.button,
     this.borderColor = Colors.black45,
     this.margin,
-    this.borderWidth = 3, this.boxShadow,
+    this.borderWidth = 3,
+    this.boxShadow,
+    required this.title,
   });
 
   @override
   Widget build(BuildContext context) {
     return Container(
-      width: 96,
-      height: 120,
       margin: margin,
       padding: const EdgeInsets.all(8),
       decoration: BoxDecoration(
@@ -241,7 +242,6 @@ class ThemeColorCard extends StatelessWidget {
         color: background,
         borderRadius: BorderRadius.circular(16),
         boxShadow: boxShadow,
-
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -249,10 +249,24 @@ class ThemeColorCard extends StatelessWidget {
           // 顶部栏
           Container(
             height: 20,
+            width: double.infinity,
+            padding: const EdgeInsets.symmetric(horizontal: 4),
             decoration: BoxDecoration(
               color: header,
               borderRadius: BorderRadius.circular(6),
             ),
+            child: Text(title,
+                style: const TextStyle(
+                    color: Colors.white,
+                    fontSize: 12,
+                    fontWeight: FontWeight.bold,
+                    shadows: [
+                      Shadow(
+                        color: Colors.black26,
+                        offset: Offset(1, 1),
+                        blurRadius: 1,
+                      ),
+                    ])),
           ),
           const SizedBox(height: 8),
 
@@ -263,7 +277,6 @@ class ThemeColorCard extends StatelessWidget {
 
           const Spacer(),
 
-          // 底部按钮
           Container(
             height: 18,
             decoration: BoxDecoration(
@@ -275,20 +288,20 @@ class ThemeColorCard extends StatelessWidget {
       ),
     );
   }
-  Widget _line(Color color, {double width = 60}) => Padding(
-    padding: const EdgeInsets.only(bottom: 6),
-    child: Container(
-      height: 6,
-      width: width,
-      decoration: BoxDecoration(
-        color: color.withValues(alpha: 0.6),
-        borderRadius: BorderRadius.circular(18),
-      ),
-      clipBehavior: Clip.hardEdge,
-    ),
-  );
-}
 
+  Widget _line(Color color, {double width = 60}) => Padding(
+        padding: const EdgeInsets.only(bottom: 6),
+        child: Container(
+          height: 6,
+          width: width,
+          decoration: BoxDecoration(
+            color: color.withValues(alpha: 0.6),
+            borderRadius: BorderRadius.circular(18),
+          ),
+          clipBehavior: Clip.hardEdge,
+        ),
+      );
+}
 
 class DiagonalOverlay extends StatelessWidget {
   const DiagonalOverlay({super.key});

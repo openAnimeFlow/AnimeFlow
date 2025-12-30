@@ -5,34 +5,40 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 class ThemeController extends GetxController {
   ThemeMode _themeMode = ThemeMode.system;
-  Color _seedColor = const Color(0xFF5CDCF6);
-  
+  Color _seedColor = themeColors[0];
+
   static const String _themeModeKey = 'themeMode';
   static const String _seedColorKey = 'seedColor';
 
   ThemeMode get themeMode => _themeMode;
+
   Color get seedColor => _seedColor;
 
   // 预定义主题颜色
   static final List<Color> themeColors = [
-    Colors.blue,
-    Colors.purple,
-    Colors.pink,
-    Colors.red,
-    Colors.orange,
-    Colors.amber,
-    Colors.yellow,
-    Colors.lime,
+    const Color(0xFF5CDCF6),
     Colors.green,
     Colors.teal,
-    const Color(0xFF5CDCF6),
+    Colors.blue,
     Colors.indigo,
+    const Color(0xff6750a4),
+    Colors.pink,
+    Colors.yellow,
+    Colors.orange,
+    Colors.deepOrange,
   ];
+
+  // 获取颜色在列表中的索引
+  static int getColorIndex(Color color) {
+    return themeColors.indexWhere(
+      (c) => c.toARGB32() == color.toARGB32(),
+    );
+  }
 
   // 初始化主题设置
   Future<void> initTheme() async {
     final prefs = await SharedPreferences.getInstance();
-    
+
     // 读取主题模式
     final themeModeIndex = prefs.getInt(_themeModeKey);
     if (themeModeIndex != null && themeModeIndex >= 0 && themeModeIndex <= 2) {
@@ -40,15 +46,15 @@ class ThemeController extends GetxController {
     } else {
       _themeMode = ThemeMode.system;
     }
-    
+
     // 读取主题颜色
     final seedColorValue = prefs.getInt(_seedColorKey);
     if (seedColorValue != null) {
       _seedColor = Color(seedColorValue);
     } else {
-      _seedColor = themeColors[10];
+      _seedColor = themeColors[0];
     }
-    
+
     update();
   }
 
@@ -67,7 +73,6 @@ class ThemeController extends GetxController {
     await prefs.setInt(_seedColorKey, color.toARGB32());
     update();
   }
-
 
   // 获取浅色主题
   ThemeData get lightTheme {

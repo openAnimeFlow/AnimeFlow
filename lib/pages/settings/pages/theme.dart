@@ -2,6 +2,7 @@ import 'dart:ui';
 
 import 'package:anime_flow/controllers/theme_controller.dart';
 import 'package:anime_flow/pages/settings/setting_controller.dart';
+import 'package:anime_flow/utils/layout_util.dart';
 import 'package:anime_flow/widget/theme/theme_preview.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -22,14 +23,6 @@ class _ThemePageState extends State<ThemePage> {
     super.initState();
     settingController = Get.find<SettingController>();
     themeController = Get.find<ThemeController>();
-  }
-
-  // 获取当前颜色索引
-  int get _selectedColorIndex {
-    final currentColor = themeController.seedColor;
-    return ThemeController.themeColors.indexWhere(
-      (color) => color.toARGB32() == currentColor.toARGB32(),
-    );
   }
 
   @override
@@ -56,72 +49,75 @@ class _ThemePageState extends State<ThemePage> {
             const SizedBox(height: 12),
             GetBuilder<ThemeController>(
               builder: (controller) {
-                return glassPanel(
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 5, vertical: 10),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      GestureDetector(
-                        onTap: () {
-                          setState(() {
-                            controller.setThemeMode(ThemeMode.dark);
-                          });
-                        },
-                        child: ThemePreviewCard(
-                          bg: const Color(0xFF020617),
-                          primary: const Color(0xFF3B82F6),
-                          titleColor: Colors.white,
-                          subtitleColor: const Color(0xFF6B7280),
-                          icon: Icons.nightlight_round,
-                          title: "深色模式",
-                          subtitle: "深色护眼",
-                          selected: themeMode == ThemeMode.dark,
-                        ),
-                      ),
-                      const SizedBox(width: 5),
-                      GestureDetector(
-                        onTap: () {
-                          setState(() {
-                            controller.setThemeMode(ThemeMode.light);
-                          });
-                        },
-                        child: ThemePreviewCard(
-                          bg: const Color(0xFFF8FAFC),
-                          primary: const Color(0xFFFACC15),
-                          titleColor: Colors.black,
-                          subtitleColor: Colors.black54,
-                          icon: Icons.wb_sunny,
-                          title: "浅色模式",
-                          subtitle: "明亮清爽",
-                          selected: themeMode == ThemeMode.light,
-                        ),
-                      ),
-                      const SizedBox(width: 5),
-                      GestureDetector(
-                        onTap: () {
-                          setState(() {
-                            controller.setThemeMode(ThemeMode.system);
-                          });
-                        },
-                        child: Container(
-                          decoration: BoxDecoration(
-                            borderRadius: BorderRadius.circular(18),
+                return Center(
+                  child: IntrinsicWidth(
+                    child: glassPanel(
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 8, vertical: 10),
+                      child: Row(
+                        children: [
+                          GestureDetector(
+                            onTap: () {
+                              setState(() {
+                                controller.setThemeMode(ThemeMode.dark);
+                              });
+                            },
+                            child: ThemePreviewCard(
+                              bg: const Color(0xFF020617),
+                              primary: const Color(0xFF3B82F6),
+                              titleColor: Colors.white,
+                              subtitleColor: const Color(0xFF6B7280),
+                              icon: Icons.nightlight_round,
+                              title: "深色模式",
+                              subtitle: "深色护眼",
+                              selected: themeMode == ThemeMode.dark,
+                            ),
                           ),
-                          child: ThemePreviewCard(
-                            bg: const Color(0xFF020617),
-                            primary: Theme.of(context).colorScheme.primary,
-                            titleColor: Colors.white,
-                            subtitleColor: Colors.white60,
-                            icon: Icons.settings,
-                            title: "跟随系统",
-                            subtitle: "自动适配",
-                            overlay: const DiagonalOverlay(),
-                            selected: themeMode == ThemeMode.system,
+                          const SizedBox(width: 5),
+                          GestureDetector(
+                            onTap: () {
+                              setState(() {
+                                controller.setThemeMode(ThemeMode.light);
+                              });
+                            },
+                            child: ThemePreviewCard(
+                              bg: const Color(0xFFF8FAFC),
+                              primary: const Color(0xFFFACC15),
+                              titleColor: Colors.black,
+                              subtitleColor: Colors.black54,
+                              icon: Icons.wb_sunny,
+                              title: "浅色模式",
+                              subtitle: "明亮清爽",
+                              selected: themeMode == ThemeMode.light,
+                            ),
                           ),
-                        ),
+                          const SizedBox(width: 5),
+                          GestureDetector(
+                            onTap: () {
+                              setState(() {
+                                controller.setThemeMode(ThemeMode.system);
+                              });
+                            },
+                            child: Container(
+                              decoration: BoxDecoration(
+                                borderRadius: BorderRadius.circular(18),
+                              ),
+                              child: ThemePreviewCard(
+                                bg: const Color(0xFF020617),
+                                primary: Theme.of(context).colorScheme.primary,
+                                titleColor: Colors.white,
+                                subtitleColor: Colors.white60,
+                                icon: Icons.settings,
+                                title: "跟随系统",
+                                subtitle: "自动适配",
+                                overlay: const DiagonalOverlay(),
+                                selected: themeMode == ThemeMode.system,
+                              ),
+                            ),
+                          ),
+                        ],
                       ),
-                    ],
+                    ),
                   ),
                 );
               },
@@ -143,8 +139,8 @@ class _ThemePageState extends State<ThemePage> {
                 return GridView.builder(
                   shrinkWrap: true,
                   physics: const NeverScrollableScrollPhysics(),
-                  gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                    crossAxisCount: 6,
+                  gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                    crossAxisCount: LayoutUtil.getCrossAxisCount(context) * 2,
                     crossAxisSpacing: 12,
                     mainAxisSpacing: 12,
                     childAspectRatio: 1,
@@ -152,7 +148,9 @@ class _ThemePageState extends State<ThemePage> {
                   itemCount: ThemeController.themeColors.length,
                   itemBuilder: (context, index) {
                     final color = ThemeController.themeColors[index];
-                    final isSelected = index == _selectedColorIndex;
+                    final isSelected = index ==
+                        ThemeController.getColorIndex(
+                            themeController.seedColor);
                     return GestureDetector(
                       onTap: () {
                         themeController.setSeedColor(color);

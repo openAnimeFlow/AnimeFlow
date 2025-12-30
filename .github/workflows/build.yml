@@ -1,9 +1,9 @@
 name: Build Flutter Project
 
 on:
-  push:
-    branches:
-      - main
+#  push:
+#    branches:
+#      - main
   workflow_dispatch:
     inputs:
       platform:

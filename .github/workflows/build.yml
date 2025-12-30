@@ -346,47 +346,9 @@ jobs:
       - name: Install dependencies
         run: flutter pub get
 
-      - name: Update macOS deployment target
-        run: |
-          # 确保项目配置文件中的部署目标版本是 11.0
-          if [ -f macos/Runner.xcodeproj/project.pbxproj ]; then
-            sed -i '' 's/MACOSX_DEPLOYMENT_TARGET = [^;]*/MACOSX_DEPLOYMENT_TARGET = 11.0/g' macos/Runner.xcodeproj/project.pbxproj
-            echo "✓ Updated project.pbxproj deployment target to 11.0"
-          fi
-
       - name: Build macOS
         run: |
-          # 尝试构建，如果失败则更新 Podfile
-          if ! flutter build macos 2>&1 | tee build.log; then
-            if grep -q "deployment target" build.log || grep -q "gal.*requires" build.log; then
-              echo "Build failed due to deployment target, updating Podfile..."
-              # 确保 Podfile 存在并设置正确的部署目标
-              if [ -f macos/Podfile ]; then
-                # 更新现有 Podfile
-                if grep -q "platform :osx" macos/Podfile; then
-                  sed -i '' 's/platform :osx, .*/platform :osx, "11.0"/' macos/Podfile
-                else
-                  # 在文件开头添加 platform 行
-                  sed -i '' '1i\
-          platform :osx, "11.0"
-          ' macos/Podfile
-                fi
-              else
-                # 创建新的 Podfile
-                cat > macos/Podfile << 'EOF'
-          platform :osx, '11.0'
-          EOF
-              fi
-              echo "Updated Podfile:"
-              head -5 macos/Podfile || true
-              # 清理 Pods 并重试
-              cd macos && rm -rf Pods Podfile.lock .symlinks && cd ..
-              flutter build macos
-            else
-              cat build.log
-              exit 1
-            fi
-          fi
+          flutter build macos
           echo "macOS build completed"
 
       - name: Create DMG

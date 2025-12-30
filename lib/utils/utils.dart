@@ -3,10 +3,14 @@ import 'dart:io';
 import 'dart:math';
 
 import 'package:anime_flow/constants/constants.dart';
+import 'package:anime_flow/http/dio/dio_request.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_inappwebview_platform_interface/flutter_inappwebview_platform_interface.dart';
+import 'package:gal/gal.dart';
+import 'package:get/get.dart';
+import 'package:path_provider/path_provider.dart';
 import 'package:hive/hive.dart';
 import 'package:logger/logger.dart';
 
@@ -68,7 +72,7 @@ class Utils {
         defaultTargetPlatform == TargetPlatform.macOS;
   }
 
-  ///判断是否位移动端
+  ///判断是否为移动端
   static bool get isMobile {
     return defaultTargetPlatform == TargetPlatform.android ||
         defaultTargetPlatform == TargetPlatform.iOS;
@@ -125,6 +129,43 @@ class Utils {
       return 'windows';
     } else {
       return 'unknown';
+    }
+  }
+
+  static Future<void> downloadImage(String url, String name) async {
+    try {
+      final String time = DateTime.now().millisecondsSinceEpoch.toString();
+      if (isMobile) {
+        /*
+          移动端(保持到相册)
+          检查并申请存储权限
+        */
+        final hasAccess = await Gal.hasAccess();
+        if (!hasAccess) {
+          bool granted = await Gal.requestAccess();
+          if (!granted) {
+            Get.snackbar('提示', '存储权限被拒绝，无法保存图片',maxWidth: 500);
+            throw Exception('存储权限被拒绝，无法保存图片');
+          }
+        }
+        final tempDir = await getTemporaryDirectory();
+        final filePath = '${tempDir.path}/$time.jpg';
+        await dioRequest.download(url, filePath);
+        final bytes = await File(filePath).readAsBytes();
+        await Gal.putImageBytes(bytes, name: '${name}_$time');
+        await File(filePath).delete();
+        Get.snackbar('提示', '图片已保存到相册',maxWidth: 500);
+      } else {
+        //桌面端(保持到下载目录)
+        final dir = await getDownloadsDirectory();
+        final filePath = '${dir?.path}/${name}_$time.jpg';
+        await dioRequest.download(url, filePath);
+        Logger().i('图片已保存到:$filePath');
+        Get.snackbar('提示', '图片已保存到:$filePath',maxWidth: 500);
+      }
+    } catch (e) {
+      Get.snackbar('提示', '保存图片失败:$e',maxWidth: 500);
+      Logger().e('保存图片失败:$e');
     }
   }
 }

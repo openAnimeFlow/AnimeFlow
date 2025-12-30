@@ -3,7 +3,6 @@
   @Time 2025/8/5
  */
 class CommonApi {
-  static const String bgmTv = 'https://bgm.tv';
   //bangumi.tv动漫页
   static const String bangumiTV = 'https://bangumi.tv/anime/browser';
   // bangumi请求头

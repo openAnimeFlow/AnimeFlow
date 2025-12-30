@@ -19,9 +19,8 @@ on:
         default: all
 jobs:
   flutter-build_ios:
-    if: ${{ github.event.inputs.platform == 'ios' || github.event.inputs.platform == 'all'}}
+    if: ${{ !github.event.inputs.platform || github.event.inputs.platform == 'ios' || github.event.inputs.platform == 'all'}}
     runs-on: macos-14
-
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -58,16 +57,16 @@ jobs:
         run: |
           mkdir Payload
           cp -R build/ios/iphoneos/Runner.app Payload/Runner.app
-          zip -q -r AnimeFlow-${{ env.VERSION }}.ipa Payload
+          zip -q -r "AnimeFlow-ios-${{ env.VERSION }}.ipa" Payload
 
       - name: Upload IPA artifact
         uses: actions/upload-artifact@v4
         with:
           name: ios
-          path: AnimeFlow-${{ env.VERSION }}.ipa
+          path: AnimeFlow-ios-${{ env.VERSION }}.ipa
 
   build-android:
-    if: ${{ github.event.inputs.platform == 'android' || github.event.inputs.platform == 'all'}}
+    if: ${{ !github.event.inputs.platform || github.event.inputs.platform == 'android' || github.event.inputs.platform == 'all'}}
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository
@@ -99,15 +98,30 @@ jobs:
           flutter build apk --split-per-abi
           echo "Android build completed"
 
+      - name: Rename APK files
+        run: |
+          cd build/app/outputs/flutter-apk
+          if [ -f app-armeabi-v7a-release.apk ]; then
+            mv app-armeabi-v7a-release.apk "AnimeFlow-android-v7a-${{ env.VERSION }}.apk"
+          fi
+          if [ -f app-arm64-v8a-release.apk ]; then
+            mv app-arm64-v8a-release.apk "AnimeFlow-android-arm64-${{ env.VERSION }}.apk"
+          fi
+          if [ -f app-x86_64-release.apk ]; then
+            mv app-x86_64-release.apk "AnimeFlow-android-x86_64-${{ env.VERSION }}.apk"
+          fi
+          echo "Renamed APK files:"
+          ls -lh AnimeFlow-android-*.apk || true
+
       - name: Archive artifacts
         uses: actions/upload-artifact@v4
         with:
           name: android
-          path: build/app/outputs/flutter-apk/*.apk
+          path: build/app/outputs/flutter-apk/AnimeFlow-android-*.apk
           if-no-files-found: ignore
 
   flutter-build-windows:
-    if: ${{ github.event.inputs.platform == 'windows' || github.event.inputs.platform == 'all'}}
+    if: ${{ !github.event.inputs.platform || github.event.inputs.platform == 'windows' || github.event.inputs.platform == 'all'}}
     runs-on: windows-2025
     steps:
       - name: Checkout repository
@@ -153,7 +167,7 @@ jobs:
           if-no-files-found: ignore
 
   flutter-build-linux:
-    if: ${{ github.event.inputs.platform == 'linux' || github.event.inputs.platform == 'all'}}
+    if: ${{ !github.event.inputs.platform || github.event.inputs.platform == 'linux' || github.event.inputs.platform == 'all'}}
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository
@@ -219,10 +233,10 @@ jobs:
           mkdir -p ${PACKAGE_DIR}/usr/bin
           mkdir -p ${PACKAGE_DIR}/usr/share/applications
           mkdir -p ${PACKAGE_DIR}/usr/share/pixmaps
-          
+
           # 复制应用文件到 /usr/lib/animeflow
           cp -r build/linux/x64/release/bundle/* ${APP_DIR}/
-          
+
           # 创建启动脚本
           cat > ${PACKAGE_DIR}/usr/bin/animeflow << 'EOF'
           #!/bin/bash
@@ -230,7 +244,7 @@ jobs:
           ./anime_flow "$@"
           EOF
           chmod +x ${PACKAGE_DIR}/usr/bin/animeflow
-          
+
           # 创建 control 文件
           cat > ${PACKAGE_DIR}/DEBIAN/control << EOF
           Package: ${PACKAGE_NAME}
@@ -242,7 +256,7 @@ jobs:
           Description: Anime video player
            AnimeFlow is an anime video player application.
           EOF
-          
+
           # 创建 desktop 文件
           cat > ${PACKAGE_DIR}/usr/share/applications/animeflow.desktop << EOF
           [Desktop Entry]
@@ -255,26 +269,27 @@ jobs:
           Terminal=false
           Categories=Video;Player;
           EOF
-          
+
           if [ -f build/linux/x64/release/bundle/data/flutter_assets/assets/logo/Logo.png ]; then
             cp build/linux/x64/release/bundle/data/flutter_assets/assets/logo/Logo.png ${PACKAGE_DIR}/usr/share/pixmaps/animeflow.png
           fi
-          
+
           # 构建 deb 包
-          dpkg-deb --build ${PACKAGE_DIR} AnimeFlow-${{ env.VERSION }}.deb
-          echo "Created AnimeFlow-${{ env.VERSION }}.deb"
+          dpkg-deb --build ${PACKAGE_DIR} AnimeFlow-linux-${{ env.VERSION }}.deb
+          echo "Created AnimeFlow-linux-${{ env.VERSION }}.deb"
 
       - name: Archive artifacts
         uses: actions/upload-artifact@v4
         with:
           name: linux
           path: |
-            AnimeFlow-${{ env.VERSION }}.tar.gz
-            AnimeFlow-${{ env.VERSION }}.deb
+            AnimeFlow-linux-${{ env.VERSION }}.tar.gz
+            AnimeFlow-linux-${{ env.VERSION }}.deb
           if-no-files-found: ignore
 
+
   flutter-build-macos:
-    if: ${{ github.event.inputs.platform == 'macos' || github.event.inputs.platform == 'all'}}
+    if: ${{ !github.event.inputs.platform || github.event.inputs.platform == 'macos' || github.event.inputs.platform == 'all'}}
     name: Build macOS
     runs-on: macos-14
     steps:
@@ -290,7 +305,7 @@ jobs:
         run: |
           echo "CLIENT_ID=${{ secrets.CLIENT_ID }}" >> .env
           echo "REDIRECT_URI=${{ secrets.REDIRECT_URI }}" >> .env
-          
+
       - name: Setup Flutter
         uses: subosito/flutter-action@v2
         with:
@@ -310,11 +325,11 @@ jobs:
           mkdir -p build/dist
           cp -a build/macos/Build/Products/Release/*.app build/dist
           ln -s /Applications build/dist/Applications
-          hdiutil create -fs HFS+ -volname "${{ env.VERSION }}" -srcfolder build/dist build/dist/AnimeFlow-${{ env.VERSION }}.dmg
+          hdiutil create -fs HFS+ -volname "${{ env.VERSION }}" -srcfolder build/dist build/dist/AnimeFlow-macos-${{ env.VERSION }}.dmg
 
       - name: Archive artifacts
         uses: actions/upload-artifact@v4
         with:
           name: macos
-          path: build/dist/AnimeFlow-${{ env.VERSION }}.dmg
+          path: build/dist/AnimeFlow-macos-${{ env.VERSION }}.dmg
           if-no-files-found: ignore

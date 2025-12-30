@@ -173,7 +173,7 @@ class _RecommendPageState extends State<RecommendPage> {
                       padding: _contentPadding,
                       sliver: SliverMainAxisGroup(
                         slivers: [
-                          SliverToBoxAdapter(
+                          const SliverToBoxAdapter(
                             child: Row(
                               children: [
                                 Text(

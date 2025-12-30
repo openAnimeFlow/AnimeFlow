@@ -37,12 +37,6 @@ class _SettingsPageState extends State<SettingsPage> {
           route: RouteName.settingsTheme,
           page: const ThemePage(),
         ),
-        _SettingsMenuItem(
-          title: '关于',
-          icon: Icons.info_outline,
-          route: RouteName.settingsAbout,
-          page: const AboutSettingsPage(),
-        ),
       ],
     ),
     _SettingsCategory(
@@ -64,6 +58,17 @@ class _SettingsPageState extends State<SettingsPage> {
           icon: Icons.play_circle_outline,
           route: RouteName.settingsPlayback,
           page: const PlaybackSettingsPage(),
+        ),
+      ],
+    ),
+    _SettingsCategory(
+      title: '其他',
+      items: [
+        _SettingsMenuItem(
+          title: '关于',
+          icon: Icons.info_outline,
+          route: RouteName.settingsAbout,
+          page: const AboutSettingsPage(),
         ),
       ],
     )

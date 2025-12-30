@@ -45,6 +45,12 @@
   <img src="assets/features/img_1.png" width="45%" alt="添加数据源">
 </div>
 
+### 主题管理
+<div align="center">
+  <img src="assets/features/mobile/img_6.png" alt="添加数据源">
+</div>
+
+
 ## 📦 安装与运行
 
 ### 安装步骤

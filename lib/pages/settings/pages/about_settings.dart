@@ -2,6 +2,7 @@ import 'package:anime_flow/pages/settings/setting_controller.dart';
 import 'package:anime_flow/widget/animation_network_image/animation_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 class AboutSettingsPage extends StatelessWidget {
   const AboutSettingsPage({super.key});
@@ -21,7 +22,7 @@ class AboutSettingsPage extends StatelessWidget {
               Center(
                 child: Column(
                   children: [
-                    CircleAvatar(
+                    const CircleAvatar(
                       radius: 80,
                       backgroundColor: Colors.transparent,
                       child: AnimationNetworkImage(
@@ -57,10 +58,16 @@ class AboutSettingsPage extends StatelessWidget {
               ),
               const Divider(),
               ListTile(
-                title: const Text("开源许可"),
+                title: const Text("开源地址"),
                 trailing: const Icon(Icons.chevron_right),
-                onTap: () {
-                  // TODO: 显示开源许可
+                onTap: () async {
+                  final uri =
+                      Uri.parse('https://github.com/openAnimeFlow/AnimeFlow');
+                  if (await canLaunchUrl(uri)) {
+                    await launchUrl(uri);
+                  } else {
+                    Get.snackbar('无法打开网页', '你的设备可能不支持此功能');
+                  }
                 },
               ),
               const Divider(),

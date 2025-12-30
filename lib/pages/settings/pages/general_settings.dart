@@ -16,33 +16,20 @@ class GeneralSettingsPage extends StatelessWidget {
       ),
       body: ListView(
         padding: const EdgeInsets.all(16),
-        children: [
-          ListTile(
-            title: const Text("主题"),
-            subtitle: const Text("选择应用主题"),
-            trailing: const Icon(Icons.chevron_right),
-            onTap: () {
-              // TODO: 实现主题设置
-            },
-          ),
-          const Divider(),
-          ListTile(
-            title: const Text("语言"),
-            subtitle: const Text("选择应用语言"),
-            trailing: const Icon(Icons.chevron_right),
-            onTap: () {
-              // TODO: 实现语言设置
-            },
-          ),
-          const Divider(),
-          SwitchListTile(
-            title: const Text("自动播放"),
-            subtitle: const Text("自动播放下一集"),
-            value: false,
-            onChanged: (value) {
-              // TODO: 实现自动播放设置
-            },
-          ),
+        children: const [
+          Center(
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Icon(Icons.construction, size: 200),
+                Text(
+                  "施工中",
+                  style:
+                  TextStyle(fontSize: 30, fontWeight: FontWeight.bold),
+                )
+              ],
+            ),
+          )
         ],
       ),
     ));

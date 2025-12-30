@@ -334,7 +334,7 @@ jobs:
 
       - name: Build macOS
         run: |
-          flutter build macos
+          flutter build macos --release
           echo "macOS build completed"
 
       - name: Create DMG

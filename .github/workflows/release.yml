@@ -88,10 +88,35 @@ jobs:
       - name: Install dependencies
         run: flutter pub get
 
+      - name: Setup Android signing
+        run: |
+          # Read base64 encoded key file from secrets and decode
+          if [ -n "${{ secrets.ANDROID_KEYSTORE_BASE64 }}" ]; then
+            echo "${{ secrets.ANDROID_KEYSTORE_BASE64 }}" | base64 -d > android/app/key.jks
+            echo "Key store file created from base64"
+          fi
+          
+          # create key.properties flie
+          mkdir -p android
+          cat > android/key.properties << EOF
+          storePassword=${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
+          keyPassword=${{ secrets.ANDROID_KEY_PASSWORD }}
+          keyAlias=${{ secrets.ANDROID_KEY_ALIAS || 'key' }}
+          storeFile=app/key.jks
+          EOF
+          
+          # verifyFileExists
+          if [ -f android/app/key.jks ]; then
+            echo "✓ Key store file exists"
+            ls -lh android/app/key.jks
+          else
+            echo "⚠ Warning: Key store file not found, build will use debug signing"
+          fi
+
       - name: Build apk
         run: |
           flutter --version
-          flutter build apk --split-per-abi
+          flutter build apk --split-per-abi --release
           echo "Android build completed"
 
       - name: Rename APK files

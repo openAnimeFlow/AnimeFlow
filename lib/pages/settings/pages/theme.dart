@@ -1,6 +1,5 @@
 import 'dart:ui';
 
-import 'package:anime_flow/constants/play_layout_constant.dart';
 import 'package:anime_flow/controllers/theme_controller.dart';
 import 'package:anime_flow/pages/settings/setting_controller.dart';
 import 'package:anime_flow/utils/layout_util.dart';

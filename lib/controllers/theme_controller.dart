@@ -15,44 +15,44 @@ class ThemeController extends GetxController {
   Color get seedColor => _seedColor;
 
   // 预定义主题颜色
-  static final List<_ThemeColorData> themeColors = [
-    const _ThemeColorData(
+  static final List<ThemeColorData> themeColors = [
+    const ThemeColorData(
       color: Color(0xFF5CDCF6),
       name: '青色',
     ),
-    const _ThemeColorData(
+    const ThemeColorData(
       color: Colors.green,
       name: '绿色',
     ),
-    const _ThemeColorData(
+    const ThemeColorData(
       color: Colors.teal,
       name: '青绿色',
     ),
-    const _ThemeColorData(
+    const ThemeColorData(
       color: Colors.blue,
       name: '蓝色',
     ),
-    const _ThemeColorData(
+    const ThemeColorData(
       color: Colors.indigo,
       name: '靛蓝色',
     ),
-    const _ThemeColorData(
+    const ThemeColorData(
       color: Color(0xff6750a4),
       name: '紫罗兰色',
     ),
-    const _ThemeColorData(
+    const ThemeColorData(
       color: Colors.pink,
       name: '粉色',
     ),
-    const _ThemeColorData(
+    const ThemeColorData(
       color: Colors.yellow,
       name: '黄色',
     ),
-    const _ThemeColorData(
+    const ThemeColorData(
       color: Colors.orange,
       name: '橙色',
     ),
-    const _ThemeColorData(
+    const ThemeColorData(
       color: Colors.deepOrange,
       name: '深橙色',
     ),
@@ -145,11 +145,11 @@ class ThemeController extends GetxController {
   }
 }
 
-class _ThemeColorData {
+class ThemeColorData {
   final Color color;
   final String name;
 
-  const _ThemeColorData({
+  const ThemeColorData({
     required this.color,
     required this.name,
   });

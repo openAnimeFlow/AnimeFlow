@@ -3,7 +3,6 @@ import 'package:anime_flow/models/enums/collect_type.dart';
 import 'package:anime_flow/models/item/bangumi/subjects_info_item.dart';
 import 'package:anime_flow/routes/index.dart';
 import 'package:anime_flow/stores/user_info_store.dart';
-import 'package:anime_flow/widget/drop_down_menu.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 

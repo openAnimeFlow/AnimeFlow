@@ -6,7 +6,6 @@ import 'package:anime_flow/utils/layout_util.dart';
 import 'package:anime_flow/widget/animation_network_image/animation_network_image.dart';
 import 'package:anime_flow/widget/ranking.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_screenutil/flutter_screenutil.dart' show SizeExtension;
 import 'package:get/get.dart';
 import 'package:anime_flow/models/item/bangumi/subject_item.dart';
 
@@ -77,7 +76,7 @@ class _CalendarPageState extends State<CalendarPage>
                                 Text(_weekdayLabels[index]),
                                 Text(
                                   '${items.length}部',
-                                  style: TextStyle(fontSize: 10.sp),
+                                  style: TextStyle(fontSize: 10),
                                 ),
                               ],
                             ),
@@ -112,7 +111,7 @@ class _CalendarPageState extends State<CalendarPage>
       return Center(
         child: Text(
           '${_weekdayLabels[int.parse(weekday) - 1]}无番剧更新',
-          style: TextStyle(fontSize: 16.sp, color: Colors.grey),
+          style: TextStyle(fontSize: 16, color: Colors.grey),
         ),
       );
     }
@@ -187,16 +186,16 @@ class _CalendarPageState extends State<CalendarPage>
       children: [
         Text(
           value,
-          style: TextStyle(
-            fontSize: 16.sp,
+          style: const TextStyle(
+            fontSize: 16,
             fontWeight: FontWeight.bold,
           ),
         ),
         const SizedBox(height: 4),
         Text(
           label,
-          style: TextStyle(
-            fontSize: 12.sp,
+          style: const TextStyle(
+            fontSize: 12,
             color: Colors.grey,
           ),
         ),
@@ -247,9 +246,9 @@ class _CalendarPageState extends State<CalendarPage>
                 ),
                 child: Text(
                   itemData.nameCN ?? itemData.name,
-                  style: TextStyle(
+                  style: const TextStyle(
                     color: Colors.white,
-                    fontSize: 14.sp,
+                    fontSize: 14,
                     fontWeight: FontWeight.bold,
                   ),
                   maxLines: 2,

@@ -6,7 +6,6 @@ import 'package:anime_flow/http/requests/bgm_request.dart';
 import 'package:anime_flow/utils/layout_util.dart';
 import 'package:anime_flow/widget/subject_carf.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_screenutil/flutter_screenutil.dart' show SizeExtension;
 import 'package:get/get.dart';
 import 'package:anime_flow/controllers/theme_controller.dart';
 import 'package:anime_flow/models/item/bangumi/hot_item.dart';
@@ -180,7 +179,7 @@ class _RecommendPageState extends State<RecommendPage> {
                                 Text(
                                   '热门动画',
                                   style: TextStyle(
-                                      fontSize: 25.sp,
+                                      fontSize: 25,
                                       fontWeight: FontWeight.bold),
                                 )
                               ],

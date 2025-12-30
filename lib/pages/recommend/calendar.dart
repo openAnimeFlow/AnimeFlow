@@ -5,7 +5,6 @@ import 'package:anime_flow/routes/index.dart';
 import 'package:anime_flow/widget/animation_network_image/animation_network_image.dart';
 import 'package:anime_flow/widget/ranking.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 import 'package:anime_flow/models/item/bangumi/subject_item.dart';
 
@@ -53,7 +52,7 @@ class _CalendarViewState extends State<CalendarView> {
                   child: Text(
                     "今日放送",
                     style:
-                        TextStyle(fontSize: 25.sp, fontWeight: FontWeight.bold),
+                        TextStyle(fontSize: 25, fontWeight: FontWeight.bold),
                   ),
                 ),
                 Column(
@@ -70,7 +69,7 @@ class _CalendarViewState extends State<CalendarView> {
                               Text(
                                 '查看更多',
                                 style: TextStyle(
-                                    fontSize: 10.sp, color: Colors.grey),
+                                    fontSize: 10, color: Colors.grey),
                               ),
                               const Icon(
                                 Icons.keyboard_double_arrow_right_rounded,
@@ -80,7 +79,7 @@ class _CalendarViewState extends State<CalendarView> {
                           )),
                     Text(
                       '周$weekday上映$numberOfReleases部,总$numberOfViewers人收看',
-                      style: TextStyle(fontSize: 10.sp, color: Colors.grey),
+                      style: TextStyle(fontSize: 10, color: Colors.grey),
                     )
                   ],
                 )

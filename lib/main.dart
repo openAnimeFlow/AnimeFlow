@@ -1,8 +1,6 @@
 import 'package:anime_flow/constants/constants.dart';
-import 'package:anime_flow/utils/utils.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
-import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'package:media_kit/media_kit.dart';
@@ -28,10 +26,6 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final designSize = Utils.getDesignSize(context);
-    return ScreenUtilInit(
-      designSize: designSize,
-      builder: (context, child) {
         return GetBuilder<ThemeController>(
           builder: (controller) {
             return GetMaterialApp(
@@ -44,7 +38,5 @@ class MyApp extends StatelessWidget {
             );
           },
         );
-      },
-    );
   }
 }

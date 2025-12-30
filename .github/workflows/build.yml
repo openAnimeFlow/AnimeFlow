@@ -72,6 +72,11 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
+      - name: Extract version
+        run: |
+          VERSION=$(grep '^version:' pubspec.yaml | sed 's/version: //')
+          echo "VERSION=${VERSION}" >> $GITHUB_ENV
+
       - name: Create .env file
         run: |
           echo "CLIENT_ID=${{ secrets.CLIENT_ID }}" >> .env
@@ -121,12 +126,6 @@ jobs:
         run: |
           flutter --version
           flutter build apk --split-per-abi --release
-          echo "Android build completed"
-
-      - name: Build apk
-        run: |
-          flutter --version
-          flutter build apk --split-per-abi
           echo "Android build completed"
 
       - name: Rename APK files

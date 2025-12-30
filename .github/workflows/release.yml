@@ -95,16 +95,16 @@ jobs:
             echo "${{ secrets.ANDROID_KEYSTORE_BASE64 }}" | base64 -d > android/app/key.jks
             echo "Key store file created from base64"
           fi
-          
+
           # create key.properties flie
           mkdir -p android
           cat > android/key.properties << EOF
           storePassword=${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
           keyPassword=${{ secrets.ANDROID_KEY_PASSWORD }}
           keyAlias=${{ secrets.ANDROID_KEY_ALIAS || 'key' }}
-          storeFile=app/key.jks
+          storeFile=key.jks
           EOF
-          
+
           # verifyFileExists
           if [ -f android/app/key.jks ]; then
             echo "✓ Key store file exists"

@@ -13,7 +13,7 @@ class ThemeController extends GetxController {
   ThemeMode get themeMode => _themeMode;
   Color get seedColor => _seedColor;
 
-  // 预定义的主题颜色
+  // 预定义主题颜色
   static final List<Color> themeColors = [
     Colors.blue,
     Colors.purple,
@@ -46,7 +46,7 @@ class ThemeController extends GetxController {
     if (seedColorValue != null) {
       _seedColor = Color(seedColorValue);
     } else {
-      _seedColor = themeColors[11];
+      _seedColor = themeColors[10];
     }
     
     update();

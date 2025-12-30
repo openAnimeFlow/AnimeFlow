@@ -22,7 +22,6 @@ class _ThemePageState extends State<ThemePage> {
     themeController = Get.find<ThemeController>();
   }
 
-
   // 获取当前颜色索引
   int get _selectedColorIndex {
     final currentColor = themeController.seedColor;
@@ -34,6 +33,7 @@ class _ThemePageState extends State<ThemePage> {
   @override
   Widget build(BuildContext context) {
     final themeMode = themeController.themeMode;
+
     return GetBuilder<ThemeController>(
       builder: (themeCtrl) => Scaffold(
         appBar: AppBar(
@@ -63,25 +63,15 @@ class _ThemePageState extends State<ThemePage> {
                           controller.setThemeMode(ThemeMode.dark);
                         });
                       },
-                      child: Column(
-                        children: [
-                          ThemePreviewCard(
-                            borderWidth: 5,
-                            borderColor: themeMode == ThemeMode.dark
-                                ? controller.seedColor
-                                : Colors.black45,
-                            margin: const EdgeInsets.symmetric(horizontal: 5),
-                            background: const Color(0xFF121212),
-                            header: Colors.blueGrey,
-                            text: Colors.white70,
-                            button: Colors.tealAccent,
-                          ),
-                          const Text(
-                            '深色',
-                            style: TextStyle(
-                                fontSize: 18, fontWeight: FontWeight.bold),
-                          )
-                        ],
+                      child: ThemePreviewCard(
+                        bg: const Color(0xFF020617),
+                        primary: const Color(0xFF3B82F6),
+                        titleColor: Colors.white,
+                        subtitleColor: const Color(0xFF6B7280),
+                        icon: Icons.nightlight_round,
+                        title: "深色模式",
+                        subtitle: "深色护眼",
+                        selected: themeMode == ThemeMode.dark,
                       ),
                     ),
                     GestureDetector(
@@ -90,25 +80,15 @@ class _ThemePageState extends State<ThemePage> {
                           controller.setThemeMode(ThemeMode.light);
                         });
                       },
-                      child: Column(
-                        children: [
-                          ThemePreviewCard(
-                            borderColor: themeMode == ThemeMode.light
-                                ? controller.seedColor
-                                : Colors.black45,
-                            borderWidth: 5,
-                            margin: const EdgeInsets.symmetric(horizontal: 5),
-                            background: Colors.white,
-                            header: Colors.blue.shade200,
-                            text: Colors.black87,
-                            button: Colors.blue,
-                          ),
-                          const Text(
-                            '浅色',
-                            style: TextStyle(
-                                fontSize: 18, fontWeight: FontWeight.bold),
-                          )
-                        ],
+                      child: ThemePreviewCard(
+                        bg: const Color(0xFFF8FAFC),
+                        primary: const Color(0xFFFACC15),
+                        titleColor: Colors.black,
+                        subtitleColor: Colors.black54,
+                        icon: Icons.wb_sunny,
+                        title: "浅色模式",
+                        subtitle: "明亮清爽",
+                        selected: themeMode == ThemeMode.light,
                       ),
                     ),
                     GestureDetector(
@@ -117,56 +97,28 @@ class _ThemePageState extends State<ThemePage> {
                           controller.setThemeMode(ThemeMode.system);
                         });
                       },
-                      child: Column(
-                        children: [
-                          Stack(
-                            children: [
-                              // 底层：深色
-                              ThemePreviewCard(
-                                borderWidth: 5,
-                                borderColor: themeMode == ThemeMode.system
-                                    ? controller.seedColor
-                                    : Colors.black45,
-                                margin:
-                                    const EdgeInsets.symmetric(horizontal: 5),
-                                background: const Color(0xFF121212),
-                                header: Colors.blueGrey,
-                                text: Colors.white70,
-                                button: Colors.tealAccent,
-                              ),
-
-                              // 上层：浅色 + 对角裁剪
-                              ClipPath(
-                                clipper: DiagonalClipper(),
-                                child: ThemePreviewCard(
-                                  borderWidth: 5,
-                                  borderColor: themeMode == ThemeMode.system
-                                      ? controller.seedColor
-                                      : Colors.black45,
-                                  margin:
-                                      const EdgeInsets.symmetric(horizontal: 5),
-                                  background: Colors.white,
-                                  header: Colors.blue.shade200,
-                                  text: Colors.black87,
-                                  button: Colors.blue,
-                                ),
-                              ),
-                            ],
-                          ),
-                          const Text(
-                            '跟随系统',
-                            style: TextStyle(
-                                fontSize: 18, fontWeight: FontWeight.bold),
-                          )
-                        ],
+                      child: Container(
+                        decoration: BoxDecoration(
+                          borderRadius: BorderRadius.circular(18),
+                        ),
+                        child: ThemePreviewCard(
+                          bg: const Color(0xFF020617),
+                          primary: const Color(0xFF38BDF8),
+                          titleColor: Colors.white,
+                          subtitleColor: Colors.black54,
+                          icon: Icons.settings,
+                          title: "跟随系统",
+                          subtitle: "自动适配",
+                          overlay: const DiagonalOverlay(),
+                          selected: themeMode == ThemeMode.system,
+                        ),
                       ),
-                    )
+                    ),
                   ],
                 );
               },
             ),
             const SizedBox(height: 32),
-
             // 主题颜色选择
             const Text(
               '主题颜色',

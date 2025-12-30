@@ -18,22 +18,28 @@ class _NoNoLoginView extends State<NoLoginView> {
   Widget build(BuildContext context) {
     return Column(
       children: [
-        Row(children: [
-          Spacer(),
-          IconButton(
-              onPressed: () =>
-                  Navigator.of(context).pushNamed(RouteName.settings),
-              icon: Icon(Icons.settings))
-        ]),
+        Padding(
+          padding: EdgeInsets.only(top: MediaQuery.of(context).padding.top),
+          child: Row(
+            children: [
+              const Spacer(),
+              IconButton(
+                  onPressed: () =>
+                      Navigator.of(context).pushNamed(RouteName.settings),
+                  icon: const Icon(Icons.settings_outlined,size: 30,))
+            ],
+          ),
+        ),
         Expanded(
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              CircleAvatar(
-                radius: 100,
-                backgroundColor: Colors.transparent,
-                child: AnimationNetworkImage(url: 'https://gitee.com/anime-flow/anime-flow-assets/raw/master/logo.png')
-              ),
+              const CircleAvatar(
+                  radius: 100,
+                  backgroundColor: Colors.transparent,
+                  child: AnimationNetworkImage(
+                      url:
+                          'https://gitee.com/anime-flow/anime-flow-assets/raw/master/logo.png')),
               const Text(
                 '未登录',
                 style: TextStyle(
@@ -61,10 +67,10 @@ class _NoNoLoginView extends State<NoLoginView> {
                                 ),
                               ),
                             ),
-                            child: Row(
+                            child: const Row(
                               mainAxisSize: MainAxisSize.min,
                               mainAxisAlignment: MainAxisAlignment.center,
-                              children: const [
+                              children: [
                                 SizedBox(
                                   width: 18,
                                   height: 18,

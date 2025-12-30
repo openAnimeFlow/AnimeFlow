@@ -57,7 +57,8 @@ class _ThemePageState extends State<ThemePage> {
             GetBuilder<ThemeController>(
               builder: (controller) {
                 return glassPanel(
-                  padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 5),
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 5, vertical: 10),
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
@@ -109,9 +110,9 @@ class _ThemePageState extends State<ThemePage> {
                           ),
                           child: ThemePreviewCard(
                             bg: const Color(0xFF020617),
-                            primary: const Color(0xFF38BDF8),
+                            primary: Theme.of(context).colorScheme.primary,
                             titleColor: Colors.white,
-                            subtitleColor: Colors.black54,
+                            subtitleColor: Colors.white60,
                             icon: Icons.settings,
                             title: "跟随系统",
                             subtitle: "自动适配",
@@ -125,7 +126,7 @@ class _ThemePageState extends State<ThemePage> {
                 );
               },
             ),
-            const SizedBox(height: 32),
+            const SizedBox(height: 10),
             // 主题颜色选择
             const Text(
               '主题颜色',
@@ -196,11 +197,14 @@ class _ThemePageState extends State<ThemePage> {
     );
   }
 
-  Widget glassPanel({required Widget child, EdgeInsetsGeometry? padding}) {
+  Widget glassPanel(
+      {required Widget child,
+      EdgeInsetsGeometry? padding,
+      BorderRadiusGeometry? borderRadius}) {
     final themeMode = themeController.themeMode;
-    ThemeMode.light;
+    borderRadius ??= BorderRadius.circular(24);
     return ClipRRect(
-      borderRadius: BorderRadius.circular(24),
+      borderRadius: borderRadius,
       child: BackdropFilter(
         filter: ImageFilter.blur(sigmaX: 20, sigmaY: 20),
         child: Container(
@@ -209,7 +213,7 @@ class _ThemePageState extends State<ThemePage> {
             color: themeMode == ThemeMode.dark
                 ? Colors.white.withValues(alpha: 0.08)
                 : Colors.black.withValues(alpha: 0.08),
-            borderRadius: BorderRadius.circular(24),
+            borderRadius: borderRadius,
             border: Border.all(
               color: themeMode == ThemeMode.dark
                   ? Colors.white.withValues(alpha: 0.15)

@@ -76,7 +76,7 @@ class _VideoSourceDrawersState extends State<VideoSourceDrawers> {
     // 遍历资源列表，找到第一个匹配当前剧集的资源
     for (var resourceItem in resource.episodeResources) {
       final currentEpisode = resourceItem.episodes.firstWhereOrNull(
-            (ep) => ep.episodeSort == episodesController.episodeIndex.value,
+        (ep) => ep.episodeSort == episodesController.episodeIndex.value,
       );
       if (currentEpisode != null) {
         try {
@@ -86,8 +86,7 @@ class _VideoSourceDrawersState extends State<VideoSourceDrawers> {
             videoUrl: resource.baseUrl + currentEpisode.like,
           );
           videoStateController.disposeVideo();
-          await _loadVideoPage(
-              resource.baseUrl + currentEpisode.like);
+          await _loadVideoPage(resource.baseUrl + currentEpisode.like);
           dataSourceController.updateLoading(false);
         } catch (e) {
           dataSourceController.updateLoading(false);
@@ -137,108 +136,100 @@ class _VideoSourceDrawersState extends State<VideoSourceDrawers> {
         height: MediaQuery.of(context).size.height,
         child: Container(
           padding: const EdgeInsets.all(16),
-          color: Theme
-              .of(context)
-              .cardColor,
+          color: Theme.of(context).cardColor,
           child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Padding(
-              padding: EdgeInsets.only(top: MediaQuery
-                  .of(context)
-                  .padding
-                  .top),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Text(
-                    '数据源',
-                    style: TextStyle(
-                      fontSize: 20,
-                      fontWeight: FontWeight.bold,
-                      color: Theme
-                          .of(context)
-                          .textTheme
-                          .titleLarge
-                          ?.color,
-                      decoration: TextDecoration.none,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Padding(
+                padding:
+                    EdgeInsets.only(top: MediaQuery.of(context).padding.top),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Text(
+                      '数据源',
+                      style: TextStyle(
+                        fontSize: 20,
+                        fontWeight: FontWeight.bold,
+                        color: Theme.of(context).textTheme.titleLarge?.color,
+                        decoration: TextDecoration.none,
+                      ),
                     ),
-                  ),
-                  IconButton(
-                    onPressed: () => Navigator.of(context).pop(),
-                    icon: const Icon(Icons.close_rounded),
-                  ),
-                ],
+                    IconButton(
+                      onPressed: () => Navigator.of(context).pop(),
+                      icon: const Icon(Icons.close_rounded),
+                    ),
+                  ],
+                ),
               ),
-            ),
-            _manualSearch(),
-            const SizedBox(height: 16),
-            Obx(() {
-              final dataSource = dataSourceController.videoResources.value;
-              if (dataSource.isEmpty) {
-                return const SizedBox.shrink();
-              }
-              return _buildWebsiteSelector(dataSource: dataSource);
-            }),
-            const SizedBox(height: 16),
-            Expanded(
-              child: Obx(() {
+              _manualSearch(),
+              const SizedBox(height: 16),
+              Obx(() {
                 final dataSource = dataSourceController.videoResources.value;
                 if (dataSource.isEmpty) {
                   return const SizedBox.shrink();
                 }
-                // 确保索引有效，如果无效则使用 0
-                int validIndex = selectedWebsiteIndex >= dataSource.length
-                    ? 0
-                    : selectedWebsiteIndex;
+                return _buildWebsiteSelector(dataSource: dataSource);
+              }),
+              const SizedBox(height: 16),
+              Expanded(
+                child: Obx(() {
+                  final dataSource = dataSourceController.videoResources.value;
+                  if (dataSource.isEmpty) {
+                    return const SizedBox.shrink();
+                  }
+                  // 确保索引有效，如果无效则使用 0
+                  int validIndex = selectedWebsiteIndex >= dataSource.length
+                      ? 0
+                      : selectedWebsiteIndex;
 
-                // 资源初始化完成后，自动选择第一个有资源的网站
-                if (_needAutoSelect) {
-                  final firstResourceIndex =
-                  _findFirstResourceIndex(dataSource);
-                  // 只有当找到有资源的网站且还没有选中资源时，才自动选择并加载
-                  final hasResource =
-                  dataSource.any((r) => r.episodeResources.isNotEmpty);
-                  if (hasResource &&
-                      dataSourceController.webSiteTitle.value.isEmpty) {
-                    validIndex = firstResourceIndex;
-                    final selectedResource = dataSource[firstResourceIndex];
+                  // 资源初始化完成后，自动选择第一个有资源的网站
+                  if (_needAutoSelect) {
+                    final firstResourceIndex =
+                        _findFirstResourceIndex(dataSource);
+                    // 只有当找到有资源的网站且还没有选中资源时，才自动选择并加载
+                    final hasResource =
+                        dataSource.any((r) => r.episodeResources.isNotEmpty);
+                    if (hasResource &&
+                        dataSourceController.webSiteTitle.value.isEmpty) {
+                      validIndex = firstResourceIndex;
+                      final selectedResource = dataSource[firstResourceIndex];
+                      WidgetsBinding.instance.addPostFrameCallback((_) {
+                        if (mounted) {
+                          setState(() {
+                            selectedWebsiteIndex = validIndex;
+                            _needAutoSelect = false;
+                          });
+                          // 自动加载第一个匹配的资源
+                          _autoLoadFirstResource(selectedResource);
+                        }
+                      });
+                    } else if (hasResource) {
+                      // 已经有选中的资源，只更新选中索引，不自动加载
+                      validIndex = firstResourceIndex;
+                      WidgetsBinding.instance.addPostFrameCallback((_) {
+                        if (mounted) {
+                          setState(() {
+                            selectedWebsiteIndex = validIndex;
+                            _needAutoSelect = false;
+                          });
+                        }
+                      });
+                    }
+                  } else if (validIndex != selectedWebsiteIndex) {
                     WidgetsBinding.instance.addPostFrameCallback((_) {
                       if (mounted) {
                         setState(() {
                           selectedWebsiteIndex = validIndex;
-                          _needAutoSelect = false;
-                        });
-                        // 自动加载第一个匹配的资源
-                        _autoLoadFirstResource(selectedResource);
-                      }
-                    });
-                  } else if (hasResource) {
-                    // 已经有选中的资源，只更新选中索引，不自动加载
-                    validIndex = firstResourceIndex;
-                    WidgetsBinding.instance.addPostFrameCallback((_) {
-                      if (mounted) {
-                        setState(() {
-                          selectedWebsiteIndex = validIndex;
-                          _needAutoSelect = false;
                         });
                       }
                     });
                   }
-                } else if (validIndex != selectedWebsiteIndex) {
-                  WidgetsBinding.instance.addPostFrameCallback((_) {
-                    if (mounted) {
-                      setState(() {
-                        selectedWebsiteIndex = validIndex;
-                      });
-                    }
-                  });
-                }
-                return _buildVideoSource(dataSource: dataSource);
-              }),
-            ),
-          ],
-        ),
+                  return _buildVideoSource(dataSource: dataSource);
+                }),
+              ),
+            ],
+          ),
         ),
       ),
     );
@@ -246,43 +237,40 @@ class _VideoSourceDrawersState extends State<VideoSourceDrawers> {
 
   Widget _manualSearch() {
     return SizedBox(
-        height: 40,
-        child: Row(
-          children: [
-            Text(
-              '手动搜索',
-              style: TextStyle(
-                fontSize: 20,
-                fontWeight: FontWeight.bold,
-                color: Theme
-                    .of(context)
-                    .textTheme
-                    .titleLarge
-                    ?.color,
-                decoration: TextDecoration.none,
-              ),
+      height: 40,
+      child: Row(
+        children: [
+          Text(
+            '手动搜索',
+            style: TextStyle(
+              fontSize: 20,
+              fontWeight: FontWeight.bold,
+              color: Theme.of(context).textTheme.titleLarge?.color,
+              decoration: TextDecoration.none,
             ),
-            const SizedBox(width: 5),
-            Expanded(
-                child: Material(
-                  child: TextField(
-                    controller: _searchController,
-                    decoration: InputDecoration(
-                      hintText: '手动搜索资源',
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(8),
-                      ),
-                      contentPadding:
-                      const EdgeInsets.symmetric(horizontal: 12, vertical: 5),
-                      floatingLabelBehavior: FloatingLabelBehavior.always,
-                    ),
-                    onSubmitted: (value) {
-                      _performSearch();
-                    },
-                  ),
-                ))
-          ],
-        ));
+          ),
+          const SizedBox(width: 5),
+          Expanded(
+              child: Material(
+            child: TextField(
+              controller: _searchController,
+              decoration: InputDecoration(
+                hintText: '手动搜索资源',
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                contentPadding:
+                    const EdgeInsets.symmetric(horizontal: 12, vertical: 5),
+                floatingLabelBehavior: FloatingLabelBehavior.always,
+              ),
+              onSubmitted: (value) {
+                _performSearch();
+              },
+            ),
+          ))
+        ],
+      ),
+    );
   }
 
   // 数据源选择器
@@ -294,10 +282,7 @@ class _VideoSourceDrawersState extends State<VideoSourceDrawers> {
             Icon(
               Icons.public,
               size: 24,
-              color: Theme
-                  .of(context)
-                  .colorScheme
-                  .onSurface,
+              color: Theme.of(context).colorScheme.onSurface,
             ),
             const SizedBox(width: 8),
             Expanded(
@@ -321,21 +306,16 @@ class _VideoSourceDrawersState extends State<VideoSourceDrawers> {
                           padding: const EdgeInsets.all(8),
                           decoration: BoxDecoration(
                             color: isSelected
-                                ? Theme
-                                .of(context)
-                                .colorScheme
-                                .surfaceContainerHighest
-                                : Theme
-                                .of(context)
-                                .colorScheme
-                                .surfaceContainerHighest,
+                                ? Theme.of(context)
+                                    .colorScheme
+                                    .surfaceContainerHighest
+                                : Theme.of(context)
+                                    .colorScheme
+                                    .surfaceContainerHighest,
                             borderRadius: BorderRadius.circular(12),
                             border: Border.all(
                               color: isSelected
-                                  ? Theme
-                                  .of(context)
-                                  .colorScheme
-                                  .primary
+                                  ? Theme.of(context).colorScheme.primary
                                   : Colors.transparent,
                               width: 2,
                             ),
@@ -358,35 +338,24 @@ class _VideoSourceDrawersState extends State<VideoSourceDrawers> {
                                   child: CircularProgressIndicator(
                                     strokeWidth: 2,
                                     color:
-                                    Theme
-                                        .of(context)
-                                        .colorScheme
-                                        .primary,
+                                        Theme.of(context).colorScheme.primary,
                                   ),
                                 ),
-                              ] else
-                                if (data.errorMessage != null) ...[
-                                  const SizedBox(width: 4),
-                                  Icon(
-                                    Icons.error_outline,
-                                    size: 14,
-                                    color: Theme
-                                        .of(context)
-                                        .colorScheme
-                                        .error,
-                                  ),
-                                ] else
-                                  if (data.episodeResources.isNotEmpty) ...[
-                                    const SizedBox(width: 4),
-                                    Icon(
-                                      Icons.check_circle_outline,
-                                      size: 14,
-                                      color: Theme
-                                          .of(context)
-                                          .colorScheme
-                                          .primary,
-                                    ),
-                                  ],
+                              ] else if (data.errorMessage != null) ...[
+                                const SizedBox(width: 4),
+                                Icon(
+                                  Icons.error_outline,
+                                  size: 14,
+                                  color: Theme.of(context).colorScheme.error,
+                                ),
+                              ] else if (data.episodeResources.isNotEmpty) ...[
+                                const SizedBox(width: 4),
+                                Icon(
+                                  Icons.check_circle_outline,
+                                  size: 14,
+                                  color: Theme.of(context).colorScheme.primary,
+                                ),
+                              ],
                             ],
                           ),
                         ),
@@ -416,14 +385,12 @@ class _VideoSourceDrawersState extends State<VideoSourceDrawers> {
           return Obx(() {
             // 当前选中剧集对应的剧集数据
             final currentEpisode = resourceItem.episodes.firstWhereOrNull(
-                  (ep) =>
-              ep.episodeSort == episodesController.episodeIndex.value,
+              (ep) => ep.episodeSort == episodesController.episodeIndex.value,
             );
 
             final excludedEpisodesCount = selectedResource.episodeResources
-                .expand((item) =>
-                item.episodes.where((ep) =>
-                ep.episodeSort != episodesController.episodeIndex.value))
+                .expand((item) => item.episodes.where((ep) =>
+                    ep.episodeSort != episodesController.episodeIndex.value))
                 .length;
 
             // 如果当前资源组没有匹配的剧集，不渲染
@@ -471,20 +438,19 @@ class _VideoSourceDrawersState extends State<VideoSourceDrawers> {
                       final excludedEpisodes = item.episodes
                           .where(
                             (ep) =>
-                        ep.episodeSort !=
-                            episodesController.episodeIndex.value,
-                      )
+                                ep.episodeSort !=
+                                episodesController.episodeIndex.value,
+                          )
                           .toList();
                       // 遍历所有其他剧集
                       return excludedEpisodes.map(
-                            (excludedEpisode) =>
-                            _buildSource(
-                              excludedEpisode,
-                              item,
-                              baseUrl: selectedResource.baseUrl,
-                              websiteName: selectedResource.websiteName,
-                              websiteIcon: selectedResource.websiteIcon,
-                            ),
+                        (excludedEpisode) => _buildSource(
+                          excludedEpisode,
+                          item,
+                          baseUrl: selectedResource.baseUrl,
+                          websiteName: selectedResource.websiteName,
+                          websiteIcon: selectedResource.websiteIcon,
+                        ),
                       );
                     }),
                 ],
@@ -497,45 +463,52 @@ class _VideoSourceDrawersState extends State<VideoSourceDrawers> {
   }
 
   Widget _buildSource(Episode episode, EpisodeResourcesItem item,
-      {required String websiteName, required String websiteIcon, required String baseUrl}) {
+      {required String websiteName,
+      required String websiteIcon,
+      required String baseUrl}) {
     final videoUrl = dataSourceController.videoUrl.value;
-    return Card.filled(
+    final isSelected = baseUrl + episode.like == videoUrl;
+    
+    return Container(
       margin: const EdgeInsets.only(bottom: 8),
-      child: InkWell(
-          onTap: () async {
-            try {
-              Navigator.of(context).pop();
-              dataSourceController.setWebSite(
-                  title: websiteName,
-                  iconUrl: websiteIcon,
-                  videoUrl: baseUrl + episode.like);
-
-              videoStateController.disposeVideo();
-
-              await _loadVideoPage(baseUrl + episode.like);
-            } catch (e) {
-              logger.e('获取视频源失败', error: e);
-              Get.snackbar(
-                '错误',
-                '获取视频源失败: $e',
-                duration: const Duration(seconds: 3),
-                maxWidth: 300,
-                backgroundColor: Colors.red.shade100,
-              );
-            }
-          },
-          child: Container(
-            decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(10),
-              border: (baseUrl + episode.like == videoUrl)
-                  ? Border.all(
-                width: 2,
-                color: Theme
-                    .of(context)
-                    .primaryColor,
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(12),
+        border: isSelected
+            ? Border.all(
+                width: 2.5,
+                color: Theme.of(context).colorScheme.primary,
               )
-                  : null,
-            ),
+            : null,
+      ),
+      child: Card.filled(
+        margin: EdgeInsets.zero,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(12),
+        ),
+        child: InkWell(
+            onTap: () async {
+              try {
+                Get.back();
+                dataSourceController.setWebSite(
+                    title: websiteName,
+                    iconUrl: websiteIcon,
+                    videoUrl: baseUrl + episode.like);
+
+                videoStateController.disposeVideo();
+
+                await _loadVideoPage(baseUrl + episode.like);
+              } catch (e) {
+                logger.e('获取视频源失败', error: e);
+                Get.snackbar(
+                  '错误',
+                  '获取视频源失败: $e',
+                  duration: const Duration(seconds: 3),
+                  maxWidth: 300,
+                  backgroundColor: Colors.red.shade100,
+                );
+              }
+            },
+            borderRadius: BorderRadius.circular(12),
             child: Padding(
               padding: const EdgeInsets.all(12),
               child: Column(
@@ -586,8 +559,8 @@ class _VideoSourceDrawersState extends State<VideoSourceDrawers> {
                   ),
                 ],
               ),
-            ),
-          )),
+            )),
+      ),
     );
   }
 }

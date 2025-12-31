@@ -323,6 +323,7 @@ class _VideoSourceDrawersState extends State<VideoSourceDrawers> {
           const SizedBox(width: 8),
           Expanded(
             child: ListView.builder(
+              padding: EdgeInsets.zero,
               scrollDirection: Axis.horizontal,
               itemCount: dataSource.length,
               itemBuilder: (context, index) {

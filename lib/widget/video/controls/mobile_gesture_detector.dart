@@ -38,6 +38,7 @@ class _MobileGestureDetectorState extends State<MobileGestureDetector> {
       //双击事件
       onDoubleTap: () {
         videoStateController.playOrPauseVideo();
+        videoUiStateController.updateMainAxisAlignmentType(MainAxisAlignment.start);
         videoUiStateController.updateIndicatorTypeAndShowIndicator(
             VideoControlsIndicatorType.playStatusIndicator);
       },

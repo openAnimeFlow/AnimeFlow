@@ -260,7 +260,6 @@ class VideoUiStateController extends GetxController {
 
       // 1秒后隐藏控件UI
       hideControlsUi(duration: const Duration(seconds: 1));
-      updateMainAxisAlignmentType(MainAxisAlignment.start);
     }
   }
 
@@ -273,7 +272,6 @@ class VideoUiStateController extends GetxController {
       dragPosition.value = _dragStartPosition;
       // 1秒后隐藏控件UI
       hideControlsUi(duration: const Duration(seconds: 1));
-      updateMainAxisAlignmentType(MainAxisAlignment.start);
     }
   }
 

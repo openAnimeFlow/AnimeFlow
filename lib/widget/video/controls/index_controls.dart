@@ -56,12 +56,12 @@ class _VideoControlsUiViewState extends State<VideoControlsUiView> {
       Expanded(
           child: isMobile
               //移动端手势
-              ? MobileGestureDetector(child: MiddleAreaControl())
+              ? const MobileGestureDetector(child: MiddleAreaControl())
               //桌面端手势
-              : DesktopGestureDetector(child: MiddleAreaControl())),
+              : const DesktopGestureDetector(child: MiddleAreaControl())),
 
       ///底部
-      BottomAreaControl()
+      const BottomAreaControl()
     ]);
   }
 }

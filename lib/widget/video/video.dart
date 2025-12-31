@@ -209,10 +209,10 @@ class _VideoViewState extends State<VideoView> {
         /// webview_windows 的窗口必须嵌入到 Widget 树中才能被控制
         /// 通过 SizedBox 的 height 为 0 来隐藏它，但保持其在 Widget 树中(Kazumi)
         if (Platform.isWindows || Platform.isLinux)
-          Positioned(
+          const Positioned(
             child: SizedBox(
               height: 0,
-              child: const WebviewItem(),
+              child: WebviewItem(),
             ),
           ),
       ],

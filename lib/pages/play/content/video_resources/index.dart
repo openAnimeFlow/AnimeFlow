@@ -1,7 +1,7 @@
 import 'package:anime_flow/controllers/play/PlayPageController.dart';
 import 'package:anime_flow/models/item/subject_basic_data_item.dart';
 import 'package:anime_flow/widget/animation_network_image/animation_network_image.dart';
-import 'package:anime_flow/widget/play_content/source_drawers/video_source_drawers.dart';
+import 'package:anime_flow/pages/play/content/video_resources/video_source_drawers.dart';
 import 'package:anime_flow/controllers/video/data/data_source_controller.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -20,6 +20,8 @@ class VideoResourcesView extends StatefulWidget {
 class _VideoResourcesViewState extends State<VideoResourcesView> {
   late DataSourceController dataSourceController;
   late PlayPageController playPageController;
+  bool _isSourceDrawerExpanded = false; // 控制源抽屉是否展开
+  final GlobalKey _videoSourceKey = GlobalKey();
   @override
   void initState() {
     super.initState();
@@ -30,12 +32,12 @@ class _VideoResourcesViewState extends State<VideoResourcesView> {
 
   @override
   Widget build(BuildContext context) {
-    return Stack(
-      children: [
-        const Offstage(child: VideoSourceDrawers()),
-        Card(
-          elevation: 0,
-          child: Padding(
+    return Card(
+      elevation: 0,
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Padding(
             padding: const EdgeInsets.all(10),
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -59,8 +61,7 @@ class _VideoResourcesViewState extends State<VideoResourcesView> {
                                   child: AnimationNetworkImage(
                                       height: 25,
                                       width: 25,
-                                      url: dataSourceController
-                                          .webSiteIcon.value),
+                                      url: dataSourceController.webSiteIcon.value),
                                 ),
                                 const SizedBox(width: 5),
                                 Text(
@@ -68,8 +69,7 @@ class _VideoResourcesViewState extends State<VideoResourcesView> {
                                   maxLines: 3,
                                   overflow: TextOverflow.ellipsis,
                                   style: const TextStyle(
-                                      fontSize: 20,
-                                      fontWeight: FontWeight.bold),
+                                      fontSize: 20, fontWeight: FontWeight.bold),
                                 )
                               ],
                             )
@@ -90,52 +90,61 @@ class _VideoResourcesViewState extends State<VideoResourcesView> {
                 const SizedBox(width: 8),
                 OutlinedButton.icon(
                   onPressed: () {
-                    if (playPageController.isWideScreen.value) {
-                      // 侧边抽屉
-                      Get.generalDialog(
-                        barrierDismissible: true,
-                        barrierLabel: "SourceDrawer",
-                        transitionDuration: const Duration(milliseconds: 300),
-                        pageBuilder: (context, animation, secondaryAnimation) {
-                          return const VideoSourceDrawers();
-                        },
-                        transitionBuilder: (context, animation, secondaryAnimation, child) {
-                          return SlideTransition(
-                            position: Tween<Offset>(
-                              begin: const Offset(1, 0),
-                              end: Offset.zero,
-                            ).animate(CurvedAnimation(
-                              parent: animation,
-                              curve: Curves.easeOut,
-                            )),
-                            child: child,
-                          );
-                        },
-                      );
-                    } else {
-                      // 底部抽屉
-                      Get.bottomSheet(
-                        const VideoSourceDrawers(isBottomSheet: true),
-                        isScrollControlled: true,
-                        backgroundColor: Colors.transparent,
-                        isDismissible: true,
-                        enableDrag: true,
-                      );
-                    }
+                    setState(() {
+                      _isSourceDrawerExpanded = !_isSourceDrawerExpanded;
+                    });
                   },
                   style: OutlinedButton.styleFrom(
                     side: BorderSide(
                       color: Theme.of(context).colorScheme.primary,
                     ),
                   ),
-                  icon: const Icon(Icons.sync_alt_rounded),
-                  label: const Text("切换源"),
+                  icon: Icon(_isSourceDrawerExpanded
+                      ? Icons.keyboard_arrow_up
+                      : Icons.sync_alt_rounded),
+                  label: Text(_isSourceDrawerExpanded ? "收起" : "切换源"),
                 ),
               ],
             ),
           ),
-        )
-      ],
+          // 展开/收起动画 - 始终挂载 VideoSourceDrawers，通过高度控制显示
+          ClipRect(
+            child: AnimatedSize(
+              duration: const Duration(milliseconds: 300),
+              curve: Curves.easeInOut,
+              alignment: Alignment.topCenter,
+              child: _isSourceDrawerExpanded
+                  ? Container(
+                    color: Colors.black12,
+                      constraints: BoxConstraints(
+                        maxHeight: MediaQuery.of(context).size.height * 0.6,
+                      ),
+                      child: VideoSourceDrawers(
+                        key: _videoSourceKey,
+                        isEmbedded: true,
+                        onClose: () {
+                          setState(() {
+                            _isSourceDrawerExpanded = false;
+                          });
+                        },
+                      ),
+                    )
+                  : SizedBox(
+                      height: 0,
+                      child: VideoSourceDrawers(
+                        key: _videoSourceKey,
+                        isEmbedded: true,
+                        onClose: () {
+                          setState(() {
+                            _isSourceDrawerExpanded = false;
+                          });
+                        },
+                      ),
+                    ),
+            ),
+          ),
+        ],
+      ),
     );
   }
 }

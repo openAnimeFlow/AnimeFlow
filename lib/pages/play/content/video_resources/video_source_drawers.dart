@@ -13,10 +13,14 @@ import 'package:logger/logger.dart';
 
 class VideoSourceDrawers extends StatefulWidget {
   final bool isBottomSheet;
+  final bool isEmbedded;
+  final VoidCallback? onClose; // 嵌入模式下的关闭回调
 
   const VideoSourceDrawers({
     super.key,
     this.isBottomSheet = false,
+    this.isEmbedded = false,
+    this.onClose,
   });
 
   @override
@@ -34,6 +38,8 @@ class _VideoSourceDrawersState extends State<VideoSourceDrawers> {
   int selectedWebsiteIndex = 0; // 当前选中的网站索引
   bool _needAutoSelect = false; // 是否需要自动选择第一个有资源的网站
   final _searchController = TextEditingController();
+  Worker? _episodeWorker; // 监听剧集切换的 Worker
+  Worker? _resourcesWorker; // 监听资源加载完成的 Worker
 
   @override
   void initState() {
@@ -45,6 +51,75 @@ class _VideoSourceDrawersState extends State<VideoSourceDrawers> {
     _searchController.text = dataSourceController.keyword.value;
     // 初始化时标记需要自动选择（在资源加载完成后检查）
     _needAutoSelect = true;
+    
+    // 监听剧集切换，重新选择资源
+    _episodeWorker = ever(episodesController.episodeIndex, (episodeIndex) {
+      if (mounted) {
+        // 清除当前选中的资源
+        dataSourceController.setWebSite(
+          title: '',
+          iconUrl: '',
+          videoUrl: '',
+        );
+        // 标记需要重新自动选择资源
+        setState(() {
+          _needAutoSelect = true;
+        });
+      }
+    });
+    
+    // 监听资源加载完成，当所有资源加载完成且有视频资源时触发自动选择
+    bool hasStartedLoading = false; // 标记是否已经开始加载资源
+    _resourcesWorker = ever(dataSourceController.videoResources, (resources) {
+      if (!mounted || resources.isEmpty) return;
+      
+      // 检查是否有资源正在加载
+      final hasLoading = resources.any((resource) => resource.isLoading);
+      
+      // 如果检测到有资源开始加载，标记为已开始加载
+      if (hasLoading) {
+        hasStartedLoading = true;
+        return;
+      }
+      
+      // 只有当已经开始加载过，且现在所有资源都加载完成时，才检查是否需要自动选择
+      if (!hasStartedLoading) return;
+      
+      // 检查是否所有资源都加载完成（所有 isLoading 为 false）
+      // 包括成功和失败的情况，只要不再加载就算完成
+      final allLoaded = resources.every((resource) => !resource.isLoading);
+      
+      if (!allLoaded) return;
+      
+      // 所有资源都加载完成（无论成功或失败），重置标记
+      hasStartedLoading = false;
+      
+      // 检查是否有资源包含视频资源（至少有一个资源成功加载）
+      final hasResources = resources.any((resource) => resource.episodeResources.isNotEmpty);
+      
+      // 当所有资源加载完成、有视频资源、且需要自动选择时，触发自动选择
+      if (hasResources && _needAutoSelect) {
+        // 如果还没有选中资源，触发 Obx 中的自动选择逻辑
+        if (dataSourceController.webSiteTitle.value.isEmpty) {
+          WidgetsBinding.instance.addPostFrameCallback((_) {
+            if (mounted) {
+              setState(() {
+                // 保持 _needAutoSelect 为 true，让 Obx 中的逻辑执行
+              });
+            }
+          });
+        }
+      } else if (!hasResources) {
+        // 所有资源都加载失败，清除自动选择标记，避免一直等待
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          if (mounted) {
+            setState(() {
+              _needAutoSelect = false;
+            });
+          }
+        });
+      }
+    });
   }
 
   void setShowEpisodes() {
@@ -72,11 +147,6 @@ class _VideoSourceDrawersState extends State<VideoSourceDrawers> {
 
   /// 自动加载第一个匹配当前剧集的资源
   Future<void> _autoLoadFirstResource(ResourcesItem resource) async {
-    // 如果已经有选中的资源，不再自动加载
-    if (dataSourceController.webSiteTitle.value.isNotEmpty) {
-      return;
-    }
-
     dataSourceController.updateLoading(true);
     // 遍历资源列表，找到第一个匹配当前剧集的资源
     for (var resourceItem in resource.episodeResources) {
@@ -102,6 +172,8 @@ class _VideoSourceDrawersState extends State<VideoSourceDrawers> {
         return;
       }
     }
+    // 如果没有找到匹配的资源，停止加载状态
+    dataSourceController.updateLoading(false);
   }
 
   Future<void> _loadVideoPage(String url) async {
@@ -128,6 +200,8 @@ class _VideoSourceDrawersState extends State<VideoSourceDrawers> {
 
   @override
   void dispose() {
+    _episodeWorker?.dispose();
+    _resourcesWorker?.dispose();
     _searchController.dispose();
     super.dispose();
   }
@@ -136,6 +210,15 @@ class _VideoSourceDrawersState extends State<VideoSourceDrawers> {
   Widget build(BuildContext context) {
     final screenHeight = MediaQuery.of(context).size.height;
     final maxHeight = widget.isBottomSheet ? screenHeight * 0.9 : screenHeight;
+
+    // 嵌入模式：直接显示内容，不需要额外的容器和定位
+    if (widget.isEmbedded) {
+      return Container(
+        padding: const EdgeInsets.all(16),
+        color: Theme.of(context).cardColor,
+        child: _buildContent(),
+      );
+    }
 
     Widget content = widget.isBottomSheet
         ? ConstrainedBox(
@@ -195,10 +278,11 @@ class _VideoSourceDrawersState extends State<VideoSourceDrawers> {
                   decoration: TextDecoration.none,
                 ),
               ),
-              IconButton(
-                onPressed: () => Get.back(),
-                icon: const Icon(Icons.close_rounded),
-              ),
+              if (!widget.isEmbedded)
+                IconButton(
+                  onPressed: () => Get.back(),
+                  icon: const Icon(Icons.close_rounded),
+                ),
             ],
           ),
         ),
@@ -226,11 +310,10 @@ class _VideoSourceDrawersState extends State<VideoSourceDrawers> {
             // 资源初始化完成后，自动选择第一个有资源的网站
             if (_needAutoSelect) {
               final firstResourceIndex = _findFirstResourceIndex(dataSource);
-              // 只有当找到有资源的网站且还没有选中资源时，才自动选择并加载
+              // 找到有资源的网站时，自动选择并加载
               final hasResource =
                   dataSource.any((r) => r.episodeResources.isNotEmpty);
-              if (hasResource &&
-                  dataSourceController.webSiteTitle.value.isEmpty) {
+              if (hasResource) {
                 validIndex = firstResourceIndex;
                 final selectedResource = dataSource[firstResourceIndex];
                 WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -239,17 +322,15 @@ class _VideoSourceDrawersState extends State<VideoSourceDrawers> {
                       selectedWebsiteIndex = validIndex;
                       _needAutoSelect = false;
                     });
-                    // 自动加载第一个匹配的资源
+                    // 自动加载第一个匹配的资源（切换剧集时会重新加载）
                     _autoLoadFirstResource(selectedResource);
                   }
                 });
-              } else if (hasResource) {
-                // 已经有选中的资源，只更新选中索引，不自动加载
-                validIndex = firstResourceIndex;
+              } else {
+                // 没有资源时，清除自动选择标记
                 WidgetsBinding.instance.addPostFrameCallback((_) {
                   if (mounted) {
                     setState(() {
-                      selectedWebsiteIndex = validIndex;
                       _needAutoSelect = false;
                     });
                   }
@@ -525,7 +606,12 @@ class _VideoSourceDrawersState extends State<VideoSourceDrawers> {
         child: InkWell(
             onTap: () async {
               try {
-                Get.back();
+                // 如果是嵌入模式，调用关闭回调；否则使用 Get.back()
+                if (widget.isEmbedded) {
+                  widget.onClose?.call();
+                } else {
+                  Get.back();
+                }
                 dataSourceController.setWebSite(
                     title: websiteName,
                     iconUrl: websiteIcon,
@@ -609,3 +695,4 @@ class _VideoSourceDrawersState extends State<VideoSourceDrawers> {
     );
   }
 }
+

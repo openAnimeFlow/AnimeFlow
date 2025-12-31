@@ -468,7 +468,7 @@ class _VideoSourceDrawersState extends State<VideoSourceDrawers> {
       required String baseUrl}) {
     final videoUrl = dataSourceController.videoUrl.value;
     final isSelected = baseUrl + episode.like == videoUrl;
-    
+
     return Container(
       margin: const EdgeInsets.only(bottom: 8),
       decoration: BoxDecoration(
@@ -515,23 +515,31 @@ class _VideoSourceDrawersState extends State<VideoSourceDrawers> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Row(
+                    crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text(
-                        item.subjectsTitle,
-                        style: const TextStyle(
-                          fontSize: 16,
-                          fontWeight: FontWeight.bold,
+                      Expanded(
+                        child: Text.rich(
+                          TextSpan(
+                            style: const TextStyle(
+                              fontSize: 16,
+                              fontWeight: FontWeight.bold,
+                            ),
+                            text: item.subjectsTitle,
+                            children: [
+                              TextSpan(
+                                text:
+                                    ' 第${episode.episodeSort.toString().padLeft(2, '0')}集',
+                                style: const TextStyle(
+                                  fontSize: 14,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              )
+                            ],
+                          ),
+                          maxLines: 2,
+                          overflow: TextOverflow.ellipsis,
                         ),
                       ),
-                      const SizedBox(width: 8),
-                      Text(
-                        '第${episode.episodeSort}集',
-                        style: const TextStyle(
-                          fontSize: 14,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                      const Spacer(),
                     ],
                   ),
                   const SizedBox(height: 12),

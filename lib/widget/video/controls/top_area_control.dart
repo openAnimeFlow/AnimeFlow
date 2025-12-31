@@ -49,9 +49,8 @@ class TopAreaControl extends StatelessWidget {
                       children: [
                         Row(children: [
                           IconButton(
+                            padding: const EdgeInsets.all(0),
                               onPressed: () {
-                                //返回上一级路由
-                                // Navigator.of(context).pop();
                                 Get.back();
                               },
                               icon: Icon(

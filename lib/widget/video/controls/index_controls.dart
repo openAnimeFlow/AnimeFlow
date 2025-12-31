@@ -46,22 +46,27 @@ class _VideoControlsUiViewState extends State<VideoControlsUiView> {
   @override
   Widget build(BuildContext context) {
     final isMobile = Utils.isMobile;
-    return Column(children: [
-      ///顶部
-      TopAreaControl(
-        subjectName: widget.subjectBasicData.name,
-      ),
-
-      ///中间占满剩余区域
-      Expanded(
+    return Stack(children: [
+      /// 控件事件
+      Positioned.fill(
           child: isMobile
               //移动端手势
               ? const MobileGestureDetector(child: MiddleAreaControl())
               //桌面端手势
               : const DesktopGestureDetector(child: MiddleAreaControl())),
 
+      ///顶部
+      Positioned(
+        top: 0,
+        left: 0,
+        right: 0,
+        child: TopAreaControl(
+          subjectName: widget.subjectBasicData.name,
+        ),
+      ),
+
       ///底部
-      const BottomAreaControl()
+      const Positioned(bottom: 0, left: 0, right: 0, child: BottomAreaControl()),
     ]);
   }
 }

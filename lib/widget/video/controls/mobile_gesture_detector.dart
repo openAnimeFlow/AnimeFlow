@@ -93,11 +93,16 @@ class _MobileGestureDetectorState extends State<MobileGestureDetector> {
         if (_isRightSide) {
           // 右半屏：调整音量
           videoStateController.startVerticalDrag();
-          videoUiStateController.updateIndicatorTypeAndShowIndicator(
+          videoUiStateController.updateIndicatorType(
               VideoControlsIndicatorType.volumeIndicator);
+          videoUiStateController.showIndicator();
         } else {
           // 左半屏：调整屏幕亮度
-          videoUiStateController.startBrightnessDrag();
+          // 手动开始亮度拖动，避免设置3秒自动隐藏定时器
+          videoUiStateController.startBrightnessDragWithoutAutoHide();
+          videoUiStateController.updateIndicatorType(
+              VideoControlsIndicatorType.brightnessIndicator);
+          videoUiStateController.showIndicator();
         }
       },
 
@@ -123,11 +128,29 @@ class _MobileGestureDetectorState extends State<MobileGestureDetector> {
       // 垂直拖动结束：完成拖动操作
       onVerticalDragEnd: (DragEndDetails details) {
         if (_isRightSide) {
-          // 垂直拖动结束（右半屏）：应用新的音量并隐藏指示器
+          // 垂直拖动结束（右半屏）：应用新的音量
           videoStateController.endVerticalDrag();
+          // 保持指示器显示，2秒后自动隐藏
+          videoUiStateController.showIndicator();
+          Future.delayed(const Duration(seconds: 2), () {
+            if (!videoStateController.isVerticalDragging.value) {
+              videoUiStateController.hideIndicator();
+              videoUiStateController.updateIndicatorType(
+                  VideoControlsIndicatorType.noIndicator);
+            }
+          });
         } else {
           // 垂直拖动结束（左半屏）：结束亮度调整
-          videoUiStateController.endBrightnessDrag();
+          videoUiStateController.isBrightnessDragging.value = false;
+          // 保持指示器显示，2秒后自动隐藏
+          videoUiStateController.showIndicator();
+          Future.delayed(const Duration(seconds: 2), () {
+            if (!videoUiStateController.isBrightnessDragging.value) {
+              videoUiStateController.hideIndicator();
+              videoUiStateController.updateIndicatorType(
+                  VideoControlsIndicatorType.noIndicator);
+            }
+          });
         }
       },
 

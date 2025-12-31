@@ -13,6 +13,7 @@ class MiddleAreaControl extends StatelessWidget {
   Widget build(BuildContext context) {
     final videoStateController = Get.find<VideoStateController>();
     final videoUiStateController = Get.find<VideoUiStateController>();
+    const double topAreaHeight = 50.0;
 
     return Obx(() => Container(
           height: double.infinity,
@@ -50,38 +51,39 @@ class MiddleAreaControl extends StatelessWidget {
 
                 //音量指示器
                 VideoControlsIndicatorType.volumeIndicator => Container(
-                    padding: const EdgeInsets.symmetric(
-                        horizontal: 16, vertical: 12),
+                    width: 180,
+                    height: 35,
+                    margin: const EdgeInsets.only(top: topAreaHeight),
                     decoration: BoxDecoration(
                       color: Colors.black.withValues(alpha: 0.7),
-                      borderRadius: BorderRadius.circular(8),
+                      borderRadius: BorderRadius.circular(10),
                     ),
-                    child: Row(
-                      mainAxisSize: MainAxisSize.min,
+                    clipBehavior: Clip.hardEdge,
+                    child: Stack(
                       children: [
-                        Icon(
-                          videoStateController.volume.value == 0
-                              ? Icons.volume_off
-                              : videoStateController.volume.value < 50
-                                  ? Icons.volume_down
-                                  : Icons.volume_up,
-                          color: Colors.white,
-                          size: 24,
-                        ),
-                        const SizedBox(width: 5),
-                        Container(
-                          width: 100,
-                          decoration: BoxDecoration(
-                            borderRadius: BorderRadius.circular(8),
-                          ),
-                          clipBehavior: Clip.antiAliasWithSaveLayer,
+                        Positioned.fill(
                           child: LinearProgressIndicator(
                             value: videoStateController.volume.value / 100,
                             backgroundColor: Colors.white30,
                             valueColor: AlwaysStoppedAnimation<Color>(
                                 Theme.of(context).colorScheme.primary),
                           ),
-                        )
+                        ),
+                        Positioned(
+                          child: Padding(
+                            padding: const EdgeInsets.symmetric(
+                                vertical: 5, horizontal: 5),
+                            child: Icon(
+                              videoStateController.volume.value == 0
+                                  ? Icons.volume_off
+                                  : videoStateController.volume.value < 50
+                                      ? Icons.volume_down
+                                      : Icons.volume_up,
+                              color: Colors.white,
+                              size: 24,
+                            ),
+                          ),
+                        ),
                       ],
                     ),
                   ),
@@ -90,6 +92,7 @@ class MiddleAreaControl extends StatelessWidget {
                 VideoControlsIndicatorType.playStatusIndicator => Container(
                     height: 50,
                     width: 60,
+                    margin: const EdgeInsets.only(top: topAreaHeight),
                     decoration: BoxDecoration(
                       color: Colors.black54,
                       borderRadius: BorderRadius.circular(10),
@@ -141,32 +144,17 @@ class MiddleAreaControl extends StatelessWidget {
 
                 //亮度指示器
                 VideoControlsIndicatorType.brightnessIndicator => Container(
-                    padding: const EdgeInsets.symmetric(
-                        horizontal: 16, vertical: 12),
+                    width: 180,
+                    height: 35,
+                    margin: const EdgeInsets.only(top: 0),
                     decoration: BoxDecoration(
                       color: Colors.black.withValues(alpha: 0.7),
-                      borderRadius: BorderRadius.circular(8),
+                      borderRadius: BorderRadius.circular(10),
                     ),
-                    child: Row(
-                      mainAxisSize: MainAxisSize.min,
+                    clipBehavior: Clip.hardEdge,
+                    child: Stack(
                       children: [
-                        Icon(
-                          videoUiStateController.currentBrightness.value < 0.3
-                              ? Icons.brightness_2
-                              : videoUiStateController.currentBrightness.value <
-                                      0.7
-                                  ? Icons.brightness_4
-                                  : Icons.brightness_high,
-                          color: Colors.white,
-                          size: 24,
-                        ),
-                        const SizedBox(width: 5),
-                        Container(
-                          width: 100,
-                          decoration: BoxDecoration(
-                            borderRadius: BorderRadius.circular(8),
-                          ),
-                          clipBehavior: Clip.antiAliasWithSaveLayer,
+                        Positioned.fill(
                           child: LinearProgressIndicator(
                             value:
                                 videoUiStateController.currentBrightness.value,
@@ -174,7 +162,22 @@ class MiddleAreaControl extends StatelessWidget {
                             valueColor: AlwaysStoppedAnimation<Color>(
                                 Theme.of(context).colorScheme.primary),
                           ),
-                        )
+                        ),
+                        Padding(
+                          padding: const EdgeInsets.symmetric(
+                              vertical: 5, horizontal: 5),
+                          child: Icon(
+                            videoUiStateController.currentBrightness.value < 0.3
+                                ? Icons.brightness_2
+                                : videoUiStateController
+                                            .currentBrightness.value <
+                                        0.7
+                                    ? Icons.brightness_4
+                                    : Icons.brightness_high,
+                            color: Colors.white,
+                            size: 24,
+                          ),
+                        ),
                       ],
                     ),
                   ),
@@ -190,7 +193,7 @@ class MiddleAreaControl extends StatelessWidget {
                     child: Row(
                       mainAxisSize: MainAxisSize.min,
                       children: [
-                        Icon(
+                        const Icon(
                           Icons.fast_forward_rounded,
                           color: Colors.white,
                           size: 35,

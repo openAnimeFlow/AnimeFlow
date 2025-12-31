@@ -5,6 +5,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:get/get.dart';
 import 'package:media_kit/media_kit.dart';
 import 'package:screen_brightness_platform_interface/screen_brightness_platform_interface.dart';
+
 class VideoUiStateController extends GetxController {
   final Player player;
   final RxBool playing = false.obs;
@@ -40,7 +41,8 @@ class VideoUiStateController extends GetxController {
   Timer? _controlsUiTimer;
 
   // 屏幕亮度相关
-  final ScreenBrightnessPlatform _screenBrightness = ScreenBrightnessPlatform.instance;
+  final ScreenBrightnessPlatform _screenBrightness =
+      ScreenBrightnessPlatform.instance;
   double _originalBrightness = 0.5; // 保存原始亮度
   final RxDouble currentBrightness = 0.5.obs; // 当前亮度 0.0-1.0
   final RxBool isBrightnessDragging = false.obs; // 是否正在拖动调整亮度
@@ -105,9 +107,7 @@ class VideoUiStateController extends GetxController {
   // 计算网络速率 (MB/s)
   void _calculateNetworkSpeed(Duration currentBuffer) {
     final now = DateTime.now();
-    final timeDiffMs = now
-        .difference(_lastBufferTime)
-        .inMilliseconds;
+    final timeDiffMs = now.difference(_lastBufferTime).inMilliseconds;
 
     // 每500毫秒更新一次网速
     if (timeDiffMs >= 500 && _isBuffering.value) {
@@ -151,15 +151,18 @@ class VideoUiStateController extends GetxController {
     _showIndicatorSetUp();
   }
 
+  ///  更新指示器类型
   void updateIndicatorType(VideoControlsIndicatorType type) {
     indicatorType.value = type;
   }
 
+  ///  显示指示器
   void showIndicator() {
     _indicatorTimer?.cancel();
     isShowIndicatorUi.value = true;
   }
 
+  /// 隐藏指示器
   void hideIndicator() {
     _indicatorTimer?.cancel();
     isShowIndicatorUi.value = false;
@@ -293,25 +296,39 @@ class VideoUiStateController extends GetxController {
   void startBrightnessDrag() {
     _dragStartBrightness = currentBrightness.value;
     isBrightnessDragging.value = true;
-    
+
     // 取消之前的自动隐藏UI计时器
     _controlsUiTimer?.cancel();
-    
+
     // 显示控件UI
     showControlsUi();
-    
+
     // 显示亮度指示器
-    updateIndicatorTypeAndShowIndicator(VideoControlsIndicatorType.brightnessIndicator);
+    updateIndicatorTypeAndShowIndicator(
+        VideoControlsIndicatorType.brightnessIndicator);
+  }
+
+  // 开始垂直拖动调整亮度（不设置自动隐藏定时器）
+  void startBrightnessDragWithoutAutoHide() {
+    _dragStartBrightness = currentBrightness.value;
+    isBrightnessDragging.value = true;
+
+    // 取消之前的自动隐藏UI计时器
+    _controlsUiTimer?.cancel();
+
+    // 显示控件UI
+    showControlsUi();
   }
 
   // 更新垂直拖动亮度
   void updateBrightnessDrag(double dragDistance, double screenHeight) {
     // 向上拖动减少亮度，向下拖动增加亮度
     final brightnessChange = -(dragDistance / screenHeight);
-    double newBrightness = (_dragStartBrightness + brightnessChange).clamp(0.0, 1.0);
-    
+    double newBrightness =
+        (_dragStartBrightness + brightnessChange).clamp(0.0, 1.0);
+
     currentBrightness.value = newBrightness;
-    
+
     // 更新屏幕亮度
     _screenBrightness.setApplicationScreenBrightness(newBrightness);
   }
@@ -319,12 +336,12 @@ class VideoUiStateController extends GetxController {
   // 结束垂直拖动亮度
   void endBrightnessDrag() {
     isBrightnessDragging.value = false;
-    
+
     // 隐藏亮度指示器
     hideIndicator();
     updateIndicatorType(VideoControlsIndicatorType.noIndicator);
     updateMainAxisAlignmentType(MainAxisAlignment.start);
-    
+
     // 1秒后隐藏控件UI
     hideControlsUi(duration: const Duration(seconds: 1));
   }
@@ -337,7 +354,8 @@ class VideoUiStateController extends GetxController {
     } catch (e) {
       // 如果重置失败，尝试设置为原始值
       try {
-        await _screenBrightness.setApplicationScreenBrightness(_originalBrightness);
+        await _screenBrightness
+            .setApplicationScreenBrightness(_originalBrightness);
         currentBrightness.value = _originalBrightness;
       } catch (_) {
         // 忽略错误

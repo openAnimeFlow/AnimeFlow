@@ -144,7 +144,7 @@ class _IntroduceViewState extends State<IntroduceView>
                 ),
               ),
               Container(
-                padding: EdgeInsets.only(bottom: 10),
+                padding: const EdgeInsets.only(bottom: 10),
                 alignment: Alignment.centerLeft,
                 child: Text(
                   title ?? '',
@@ -237,7 +237,7 @@ class _IntroduceViewState extends State<IntroduceView>
             return const Center(child: Text('暂无章节数据'));
           }
           return LayoutBuilder(builder: (context, constraints) {
-            final double spacing = 8.0;
+            const double spacing = 8.0;
             // 动态计算列数，最小2列，最大6列
             final int crossAxisCount =
                 (constraints.maxWidth / 160).floor().clamp(2, 6);
@@ -246,7 +246,7 @@ class _IntroduceViewState extends State<IntroduceView>
                     crossAxisCount;
 
             return SingleChildScrollView(
-              physics: AlwaysScrollableScrollPhysics(),
+              physics: const AlwaysScrollableScrollPhysics(),
               child: Wrap(
                 spacing: spacing,
                 runSpacing: spacing,
@@ -261,21 +261,21 @@ class _IntroduceViewState extends State<IntroduceView>
                           //TODO 实现播放
                         },
                         child: Padding(
-                          padding: EdgeInsets.all(12),
+                          padding: const EdgeInsets.all(12),
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               Text(
                                 '第${episode.sort}话',
-                                style: TextStyle(fontWeight: FontWeight.bold),
+                                style: const TextStyle(fontWeight: FontWeight.bold),
                               ),
-                              SizedBox(height: 6),
+                              const SizedBox(height: 6),
                               Text(
                                 episode.nameCN.isNotEmpty
                                     ? episode.nameCN
                                     : episode.name,
                                 style:
-                                    TextStyle(fontSize: 12, color: Colors.grey),
+                                    const TextStyle(fontSize: 12, color: Colors.grey),
                               ),
                             ],
                           ),

@@ -12,7 +12,12 @@ import 'package:get/get.dart';
 import 'package:logger/logger.dart';
 
 class VideoSourceDrawers extends StatefulWidget {
-  const VideoSourceDrawers({super.key});
+  final bool isBottomSheet;
+
+  const VideoSourceDrawers({
+    super.key,
+    this.isBottomSheet = false,
+  });
 
   @override
   State<VideoSourceDrawers> createState() => _VideoSourceDrawersState();
@@ -129,109 +134,140 @@ class _VideoSourceDrawersState extends State<VideoSourceDrawers> {
 
   @override
   Widget build(BuildContext context) {
-    return Align(
-      alignment: Alignment.centerRight,
-      child: SizedBox(
-        width: PlayLayoutConstant.playContentWidth,
-        height: MediaQuery.of(context).size.height,
-        child: Container(
-          padding: const EdgeInsets.all(16),
-          color: Theme.of(context).cardColor,
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
+    final screenHeight = MediaQuery.of(context).size.height;
+    final maxHeight = widget.isBottomSheet ? screenHeight * 0.9 : screenHeight;
+
+    Widget content = widget.isBottomSheet
+        ? ConstrainedBox(
+            constraints: BoxConstraints(maxHeight: maxHeight),
+            child: SizedBox(
+              width: double.infinity,
+              child: Container(
+                padding: const EdgeInsets.all(16),
+                decoration: BoxDecoration(
+                  color: Theme.of(context).cardColor,
+                  borderRadius:
+                      const BorderRadius.vertical(top: Radius.circular(20)),
+                ),
+                child: _buildContent(),
+              ),
+            ),
+          )
+        : SizedBox(
+            width: PlayLayoutConstant.playContentWidth,
+            height: maxHeight,
+            child: Container(
+              padding: EdgeInsets.only(
+                left: 16,
+                right: 16,
+                top: (MediaQuery.of(context).padding.top),
+              ),
+              color: Theme.of(context).cardColor,
+              child: _buildContent(),
+            ),
+          );
+
+    if (widget.isBottomSheet) {
+      return content;
+    } else {
+      return Align(
+        alignment: Alignment.centerRight,
+        child: content,
+      );
+    }
+  }
+
+  Widget _buildContent() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Padding(
+          padding: EdgeInsets.only(top: 0),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Padding(
-                padding:
-                    EdgeInsets.only(top: MediaQuery.of(context).padding.top),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Text(
-                      '数据源',
-                      style: TextStyle(
-                        fontSize: 20,
-                        fontWeight: FontWeight.bold,
-                        color: Theme.of(context).textTheme.titleLarge?.color,
-                        decoration: TextDecoration.none,
-                      ),
-                    ),
-                    IconButton(
-                      onPressed: () => Navigator.of(context).pop(),
-                      icon: const Icon(Icons.close_rounded),
-                    ),
-                  ],
+              Text(
+                '数据源',
+                style: TextStyle(
+                  fontSize: 20,
+                  fontWeight: FontWeight.bold,
+                  color: Theme.of(context).textTheme.titleLarge?.color,
+                  decoration: TextDecoration.none,
                 ),
               ),
-              _manualSearch(),
-              const SizedBox(height: 16),
-              Obx(() {
-                final dataSource = dataSourceController.videoResources.value;
-                if (dataSource.isEmpty) {
-                  return const SizedBox.shrink();
-                }
-                return _buildWebsiteSelector(dataSource: dataSource);
-              }),
-              const SizedBox(height: 16),
-              Expanded(
-                child: Obx(() {
-                  final dataSource = dataSourceController.videoResources.value;
-                  if (dataSource.isEmpty) {
-                    return const SizedBox.shrink();
-                  }
-                  // 确保索引有效，如果无效则使用 0
-                  int validIndex = selectedWebsiteIndex >= dataSource.length
-                      ? 0
-                      : selectedWebsiteIndex;
-
-                  // 资源初始化完成后，自动选择第一个有资源的网站
-                  if (_needAutoSelect) {
-                    final firstResourceIndex =
-                        _findFirstResourceIndex(dataSource);
-                    // 只有当找到有资源的网站且还没有选中资源时，才自动选择并加载
-                    final hasResource =
-                        dataSource.any((r) => r.episodeResources.isNotEmpty);
-                    if (hasResource &&
-                        dataSourceController.webSiteTitle.value.isEmpty) {
-                      validIndex = firstResourceIndex;
-                      final selectedResource = dataSource[firstResourceIndex];
-                      WidgetsBinding.instance.addPostFrameCallback((_) {
-                        if (mounted) {
-                          setState(() {
-                            selectedWebsiteIndex = validIndex;
-                            _needAutoSelect = false;
-                          });
-                          // 自动加载第一个匹配的资源
-                          _autoLoadFirstResource(selectedResource);
-                        }
-                      });
-                    } else if (hasResource) {
-                      // 已经有选中的资源，只更新选中索引，不自动加载
-                      validIndex = firstResourceIndex;
-                      WidgetsBinding.instance.addPostFrameCallback((_) {
-                        if (mounted) {
-                          setState(() {
-                            selectedWebsiteIndex = validIndex;
-                            _needAutoSelect = false;
-                          });
-                        }
-                      });
-                    }
-                  } else if (validIndex != selectedWebsiteIndex) {
-                    WidgetsBinding.instance.addPostFrameCallback((_) {
-                      if (mounted) {
-                        setState(() {
-                          selectedWebsiteIndex = validIndex;
-                        });
-                      }
-                    });
-                  }
-                  return _buildVideoSource(dataSource: dataSource);
-                }),
+              IconButton(
+                onPressed: () => Get.back(),
+                icon: const Icon(Icons.close_rounded),
               ),
             ],
           ),
         ),
-      ),
+        _manualSearch(),
+        const SizedBox(height: 16),
+        Obx(() {
+          final dataSource = dataSourceController.videoResources.value;
+          if (dataSource.isEmpty) {
+            return const SizedBox.shrink();
+          }
+          return _buildWebsiteSelector(dataSource: dataSource);
+        }),
+        const SizedBox(height: 16),
+        Expanded(
+          child: Obx(() {
+            final dataSource = dataSourceController.videoResources.value;
+            if (dataSource.isEmpty) {
+              return const SizedBox.shrink();
+            }
+            // 确保索引有效，如果无效则使用 0
+            int validIndex = selectedWebsiteIndex >= dataSource.length
+                ? 0
+                : selectedWebsiteIndex;
+
+            // 资源初始化完成后，自动选择第一个有资源的网站
+            if (_needAutoSelect) {
+              final firstResourceIndex = _findFirstResourceIndex(dataSource);
+              // 只有当找到有资源的网站且还没有选中资源时，才自动选择并加载
+              final hasResource =
+                  dataSource.any((r) => r.episodeResources.isNotEmpty);
+              if (hasResource &&
+                  dataSourceController.webSiteTitle.value.isEmpty) {
+                validIndex = firstResourceIndex;
+                final selectedResource = dataSource[firstResourceIndex];
+                WidgetsBinding.instance.addPostFrameCallback((_) {
+                  if (mounted) {
+                    setState(() {
+                      selectedWebsiteIndex = validIndex;
+                      _needAutoSelect = false;
+                    });
+                    // 自动加载第一个匹配的资源
+                    _autoLoadFirstResource(selectedResource);
+                  }
+                });
+              } else if (hasResource) {
+                // 已经有选中的资源，只更新选中索引，不自动加载
+                validIndex = firstResourceIndex;
+                WidgetsBinding.instance.addPostFrameCallback((_) {
+                  if (mounted) {
+                    setState(() {
+                      selectedWebsiteIndex = validIndex;
+                      _needAutoSelect = false;
+                    });
+                  }
+                });
+              }
+            } else if (validIndex != selectedWebsiteIndex) {
+              WidgetsBinding.instance.addPostFrameCallback((_) {
+                if (mounted) {
+                  setState(() {
+                    selectedWebsiteIndex = validIndex;
+                  });
+                }
+              });
+            }
+            return _buildVideoSource(dataSource: dataSource);
+          }),
+        ),
+      ],
     );
   }
 
@@ -276,93 +312,93 @@ class _VideoSourceDrawersState extends State<VideoSourceDrawers> {
   // 数据源选择器
   Widget _buildWebsiteSelector({required List<ResourcesItem> dataSource}) {
     return SizedBox(
-        height: 40,
-        child: Row(
-          children: [
-            Icon(
-              Icons.public,
-              size: 24,
-              color: Theme.of(context).colorScheme.onSurface,
-            ),
-            const SizedBox(width: 8),
-            Expanded(
-                child: ListView.builder(
-                    scrollDirection: Axis.horizontal,
-                    itemCount: dataSource.length,
-                    itemBuilder: (context, index) {
-                      final data = dataSource[index];
-                      final isSelected = selectedWebsiteIndex == index;
+      height: 40,
+      child: Row(
+        children: [
+          Icon(
+            Icons.public,
+            size: 24,
+            color: Theme.of(context).colorScheme.onSurface,
+          ),
+          const SizedBox(width: 8),
+          Expanded(
+            child: ListView.builder(
+              scrollDirection: Axis.horizontal,
+              itemCount: dataSource.length,
+              itemBuilder: (context, index) {
+                final data = dataSource[index];
+                final isSelected = selectedWebsiteIndex == index;
 
-                      // final currentEpisodeCount = resource.episodeResources
-                      //     .where((item) => item.episodes.any((ep) =>
-                      //         ep.episodeSort ==
-                      //         episodesController.episodeIndex.value))
-                      //     .length;
+                // final currentEpisodeCount = resource.episodeResources
+                //     .where((item) => item.episodes.any((ep) =>
+                //         ep.episodeSort ==
+                //         episodesController.episodeIndex.value))
+                //     .length;
 
-                      return GestureDetector(
-                        onTap: () => setSelectedWebsite(index),
-                        child: Container(
-                          margin: const EdgeInsets.only(right: 12),
-                          padding: const EdgeInsets.all(8),
-                          decoration: BoxDecoration(
-                            color: isSelected
-                                ? Theme.of(context)
-                                    .colorScheme
-                                    .surfaceContainerHighest
-                                : Theme.of(context)
-                                    .colorScheme
-                                    .surfaceContainerHighest,
-                            borderRadius: BorderRadius.circular(12),
-                            border: Border.all(
-                              color: isSelected
-                                  ? Theme.of(context).colorScheme.primary
-                                  : Colors.transparent,
-                              width: 2,
+                return GestureDetector(
+                  onTap: () => setSelectedWebsite(index),
+                  child: Container(
+                    margin: const EdgeInsets.only(right: 12),
+                    padding: const EdgeInsets.all(8),
+                    decoration: BoxDecoration(
+                      color: isSelected
+                          ? Theme.of(context)
+                              .colorScheme
+                              .surfaceContainerHighest
+                          : Theme.of(context)
+                              .colorScheme
+                              .surfaceContainerHighest,
+                      borderRadius: BorderRadius.circular(12),
+                      border: Border.all(
+                        color: isSelected
+                            ? Theme.of(context).colorScheme.primary
+                            : Colors.transparent,
+                        width: 2,
+                      ),
+                    ),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        ClipOval(
+                          child: AnimationNetworkImage(
+                              width: 24, height: 24, url: data.websiteIcon),
+                        ),
+                        // 显示解析状态
+                        if (data.isLoading) ...[
+                          const SizedBox(width: 4),
+                          SizedBox(
+                            width: 12,
+                            height: 12,
+                            child: CircularProgressIndicator(
+                              strokeWidth: 2,
+                              color: Theme.of(context).colorScheme.primary,
                             ),
                           ),
-                          child: Row(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              ClipOval(
-                                child: AnimationNetworkImage(
-                                    width: 24,
-                                    height: 24,
-                                    url: data.websiteIcon),
-                              ),
-                              // 显示解析状态
-                              if (data.isLoading) ...[
-                                const SizedBox(width: 4),
-                                SizedBox(
-                                  width: 12,
-                                  height: 12,
-                                  child: CircularProgressIndicator(
-                                    strokeWidth: 2,
-                                    color:
-                                        Theme.of(context).colorScheme.primary,
-                                  ),
-                                ),
-                              ] else if (data.errorMessage != null) ...[
-                                const SizedBox(width: 4),
-                                Icon(
-                                  Icons.error_outline,
-                                  size: 14,
-                                  color: Theme.of(context).colorScheme.error,
-                                ),
-                              ] else if (data.episodeResources.isNotEmpty) ...[
-                                const SizedBox(width: 4),
-                                Icon(
-                                  Icons.check_circle_outline,
-                                  size: 14,
-                                  color: Theme.of(context).colorScheme.primary,
-                                ),
-                              ],
-                            ],
+                        ] else if (data.errorMessage != null) ...[
+                          const SizedBox(width: 4),
+                          Icon(
+                            Icons.error_outline,
+                            size: 14,
+                            color: Theme.of(context).colorScheme.error,
                           ),
-                        ),
-                      );
-                    })),
-          ],
-        ));
+                        ] else if (data.episodeResources.isNotEmpty) ...[
+                          const SizedBox(width: 4),
+                          Icon(
+                            Icons.check_circle_outline,
+                            size: 14,
+                            color: Theme.of(context).colorScheme.primary,
+                          ),
+                        ],
+                      ],
+                    ),
+                  ),
+                );
+              },
+            ),
+          ),
+        ],
+      ),
+    );
   }
 
   Widget _buildVideoSource({required List<ResourcesItem> dataSource}) {

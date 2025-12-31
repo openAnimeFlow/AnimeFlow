@@ -146,7 +146,7 @@ class MiddleAreaControl extends StatelessWidget {
                 VideoControlsIndicatorType.brightnessIndicator => Container(
                     width: 180,
                     height: 35,
-                    margin: const EdgeInsets.only(top: 0),
+                    margin: const EdgeInsets.only(top: topAreaHeight),
                     decoration: BoxDecoration(
                       color: Colors.black.withValues(alpha: 0.7),
                       borderRadius: BorderRadius.circular(10),

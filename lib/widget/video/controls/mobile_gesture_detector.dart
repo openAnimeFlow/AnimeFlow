@@ -89,16 +89,16 @@ class _MobileGestureDetectorState extends State<MobileGestureDetector> {
 
         // 判断是否在屏幕右半侧开始拖动
         _isRightSide = details.globalPosition.dx > screenWidth / 2;
-
+        videoUiStateController
+            .updateMainAxisAlignmentType(MainAxisAlignment.start);
         if (_isRightSide) {
           // 右半屏：调整音量
           videoStateController.startVerticalDrag();
-          videoUiStateController.updateIndicatorType(
-              VideoControlsIndicatorType.volumeIndicator);
+          videoUiStateController
+              .updateIndicatorType(VideoControlsIndicatorType.volumeIndicator);
           videoUiStateController.showIndicator();
         } else {
           // 左半屏：调整屏幕亮度
-          // 手动开始亮度拖动，避免设置3秒自动隐藏定时器
           videoUiStateController.startBrightnessDragWithoutAutoHide();
           videoUiStateController.updateIndicatorType(
               VideoControlsIndicatorType.brightnessIndicator);
@@ -127,6 +127,7 @@ class _MobileGestureDetectorState extends State<MobileGestureDetector> {
 
       // 垂直拖动结束：完成拖动操作
       onVerticalDragEnd: (DragEndDetails details) {
+
         if (_isRightSide) {
           // 垂直拖动结束（右半屏）：应用新的音量
           videoStateController.endVerticalDrag();
@@ -135,8 +136,8 @@ class _MobileGestureDetectorState extends State<MobileGestureDetector> {
           Future.delayed(const Duration(seconds: 2), () {
             if (!videoStateController.isVerticalDragging.value) {
               videoUiStateController.hideIndicator();
-              videoUiStateController.updateIndicatorType(
-                  VideoControlsIndicatorType.noIndicator);
+              videoUiStateController
+                  .updateIndicatorType(VideoControlsIndicatorType.noIndicator);
             }
           });
         } else {
@@ -147,8 +148,8 @@ class _MobileGestureDetectorState extends State<MobileGestureDetector> {
           Future.delayed(const Duration(seconds: 2), () {
             if (!videoUiStateController.isBrightnessDragging.value) {
               videoUiStateController.hideIndicator();
-              videoUiStateController.updateIndicatorType(
-                  VideoControlsIndicatorType.noIndicator);
+              videoUiStateController
+                  .updateIndicatorType(VideoControlsIndicatorType.noIndicator);
             }
           });
         }

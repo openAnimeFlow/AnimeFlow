@@ -96,8 +96,6 @@ class VideoUiStateController extends GetxController {
               VideoControlsIndicatorType.bufferingIndicator) {
             hideIndicator();
             updateIndicatorType(VideoControlsIndicatorType.noIndicator);
-            updateMainAxisAlignmentType(MainAxisAlignment.start);
-            networkSpeed.value = 0.0; // 重置网速显示
           }
         }
       }
@@ -312,12 +310,6 @@ class VideoUiStateController extends GetxController {
   void startBrightnessDragWithoutAutoHide() {
     _dragStartBrightness = currentBrightness.value;
     isBrightnessDragging.value = true;
-
-    // 取消之前的自动隐藏UI计时器
-    _controlsUiTimer?.cancel();
-
-    // 显示控件UI
-    showControlsUi();
   }
 
   // 更新垂直拖动亮度

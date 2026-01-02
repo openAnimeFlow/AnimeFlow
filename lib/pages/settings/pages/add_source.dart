@@ -34,7 +34,8 @@ class _AddSourcePageState extends State<AddSourcePage> {
     ),
     _Field(
       title: '搜索链接',
-      message: '用{keyword}搜索关键字,示例:https://dm.xifanacg.com/search.html?wd={keyword}',
+      message:
+          '用{keyword}搜索关键字,示例:https://dm.xifanacg.com/search.html?wd={keyword}',
       isRequired: true,
     ),
     _Field(
@@ -76,6 +77,24 @@ class _AddSourcePageState extends State<AddSourcePage> {
   void initState() {
     super.initState();
     _controllers = _textFields.map((field) => TextEditingController()).toList();
+
+    final editConfig = Get.arguments as CrawlConfigItem?;
+
+    // 如果是编辑模式，填充表单数据
+    if (editConfig != null) {
+      _controllers[0].text = editConfig.version;
+      _controllers[1].text = editConfig.name;
+      _controllers[2].text = editConfig.iconUrl;
+      _controllers[3].text = editConfig.baseUrl;
+      _controllers[4].text = editConfig.searchUrl;
+      _controllers[5].text = editConfig.searchList;
+      _controllers[6].text = editConfig.searchName;
+      _controllers[7].text = editConfig.searchLink;
+      _controllers[8].text = editConfig.lineNames;
+      _controllers[9].text = editConfig.lineList;
+      _controllers[10].text = editConfig.episode;
+    }
+
     // 监听输入变化，清除错误状态
     for (int i = 0; i < _controllers.length; i++) {
       _controllers[i].addListener(() {
@@ -129,7 +148,7 @@ class _AddSourcePageState extends State<AddSourcePage> {
           '数据源已保存',
           maxWidth: 400,
         );
-        Navigator.of(context).pop(true); // 返回 true 表示保存成功
+        Get.back(result: true); // 返回 true 表示保存成功
       }
     } catch (e) {
       if (mounted) {
@@ -154,7 +173,7 @@ class _AddSourcePageState extends State<AddSourcePage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('数据源管理'),
+        title: Text(Get.arguments != null ? '编辑数据源' : '添加数据源'),
       ),
       floatingActionButton: FloatingActionButton(
         heroTag: 'add_source_save',
@@ -164,65 +183,62 @@ class _AddSourcePageState extends State<AddSourcePage> {
       body: Center(
         child: ConstrainedBox(
           constraints: const BoxConstraints(maxWidth: 1440),
-          child: Padding(
+          child: ListView(
             padding: const EdgeInsets.symmetric(vertical: 10),
-            child: ListView(
-              children: List.generate(_textFields.length, (index) {
-                final textField = _textFields[index];
-                final controller = _controllers[index];
-                final hasError = _errorFields.contains(index);
-                return Container(
-                  margin: const EdgeInsets.symmetric(vertical: 5),
-                  padding: const EdgeInsets.symmetric(horizontal: 16),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      TextField(
-                        controller: controller,
-                        decoration: InputDecoration(
-                          labelText: textField.title,
-                          errorText: hasError ? '此字段不能为空' : null,
-                          errorBorder: hasError
-                              ? OutlineInputBorder(
-                                  borderRadius: BorderRadius.circular(10),
-                                  borderSide: BorderSide(
-                                    color: Theme.of(context).colorScheme.error,
-                                    width: 2,
-                                  ),
-                                )
-                              : null,
-                          focusedErrorBorder: hasError
-                              ? OutlineInputBorder(
-                                  borderRadius: BorderRadius.circular(10),
-                                  borderSide: BorderSide(
-                                    color: Theme.of(context).colorScheme.error,
-                                    width: 2,
-                                  ),
-                                )
-                              : null,
-                          border: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(10),
-                          ),
+            children: List.generate(_textFields.length, (index) {
+              final textField = _textFields[index];
+              final controller = _controllers[index];
+              final hasError = _errorFields.contains(index);
+              return Container(
+                margin: const EdgeInsets.symmetric(vertical: 5),
+                padding: const EdgeInsets.symmetric(horizontal: 16),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    TextField(
+                      controller: controller,
+                      decoration: InputDecoration(
+                        labelText: textField.title,
+                        errorText: hasError ? '此字段不能为空' : null,
+                        errorBorder: hasError
+                            ? OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(10),
+                                borderSide: BorderSide(
+                                  color: Theme.of(context).colorScheme.error,
+                                  width: 2,
+                                ),
+                              )
+                            : null,
+                        focusedErrorBorder: hasError
+                            ? OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(10),
+                                borderSide: BorderSide(
+                                  color: Theme.of(context).colorScheme.error,
+                                  width: 2,
+                                ),
+                              )
+                            : null,
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(10),
                         ),
                       ),
-                      Padding(
-                        padding: const EdgeInsets.symmetric(
-                            horizontal: 10, vertical: 4),
-                        child: Text(
-                          textField.message,
-                          style: TextStyle(
-                            fontSize: 12,
-                            fontWeight: FontWeight.w600,
-                            color:
-                                Theme.of(context).colorScheme.onSurfaceVariant,
-                          ),
+                    ),
+                    Padding(
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 10, vertical: 4),
+                      child: Text(
+                        textField.message,
+                        style: TextStyle(
+                          fontSize: 12,
+                          fontWeight: FontWeight.w600,
+                          color: Theme.of(context).colorScheme.onSurfaceVariant,
                         ),
-                      )
-                    ],
-                  ),
-                );
-              }),
-            ),
+                      ),
+                    )
+                  ],
+                ),
+              );
+            }),
           ),
         ),
       ),

@@ -80,8 +80,7 @@ class _DataSourcePageState extends State<DataSourcePage> {
                 size: 30,
               ),
               onPressed: () async {
-                final result = await Navigator.of(context)
-                    .pushNamed(RouteName.settingAddSource);
+                final result = await Get.toNamed(RouteName.settingAddSource);
                 // 如果返回成功标志，刷新数据
                 if (result == true) {
                   _initData();
@@ -95,8 +94,15 @@ class _DataSourcePageState extends State<DataSourcePage> {
           children: List.generate(dataSources.length, (index) {
             final data = dataSources[index];
             return InkWell(
-              onTap: () {
-                print(data.name);
+              onTap: () async {
+                final result = await Get.toNamed(
+                  RouteName.settingAddSource,
+                  arguments: data,
+                );
+                // 如果返回成功标志，刷新数据
+                if (result == true) {
+                  _initData();
+                }
               },
               child: Container(
                 margin: const EdgeInsets.symmetric(vertical: 2),

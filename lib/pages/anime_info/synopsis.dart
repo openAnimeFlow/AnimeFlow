@@ -107,6 +107,7 @@ class _InfoSynopsisViewState extends State<InfoSynopsisView> {
                           SliverToBoxAdapter(
                             child: _buildContainer(
                               leftPadding,
+                              topPadding: 25,
                               TagView(
                                 title: '标签',
                                 fontSizeTitle: fontSizeTitle,
@@ -117,7 +118,6 @@ class _InfoSynopsisViewState extends State<InfoSynopsisView> {
                                 numbersSize: 10,
                                 numbersWeight: FontWeight.w600,
                               ),
-                              topPadding: 25,
                             ),
                           ),
 

@@ -45,5 +45,17 @@
     <true/>
     <key>UIApplicationSupportsIndirectInputEvents</key>
     <true/>
+
+    <key>CFBundleURLTypes</key>
+    <array>
+        <dict>
+            <key>CFBundleURLName</key>
+            <string>flow</string>
+            <key>CFBundleURLSchemes</key>
+            <array>
+                <string>flow</string>
+            </array>
+        </dict>
+    </array>
   </dict>
 </plist>

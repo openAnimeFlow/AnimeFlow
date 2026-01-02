@@ -8,6 +8,7 @@ import 'package:anime_flow/models/item/video/search_resources_item.dart';
 import 'package:anime_flow/http/dio/dio_request.dart';
 import 'package:dio/dio.dart';
 import 'package:html/parser.dart';
+import 'package:html/dom.dart';
 import 'package:logger/logger.dart';
 import 'package:xpath_selector_html_parser/xpath_selector_html_parser.dart';
 
@@ -102,10 +103,19 @@ class HtmlCrawler {
 
     // 根据lineListElement长度循环（每个线路）
     for (int i = 0; i < lineListElement.nodes.length; i++) {
-      // 获取线路名称
+      // 获取线路名称（只提取直接文本节点，不包括子元素的文本）
       String lineName = '';
       if (i < lineNamesElement.nodes.length) {
-        lineName = lineNamesElement.nodes[i].text?.trim() ?? '';
+        final lineNameNode = lineNamesElement.nodes[i];
+        // 访问原始 Element，提取直接文本节点（不包括子元素的文本）
+        final element = lineNameNode.node;
+        // 提取直接文本节点（不包括子元素的文本）
+        final directTextNodes = element.nodes
+            .whereType<Text>()
+            .map((text) => text.text)
+            .join('')
+            .trim();
+        lineName = directTextNodes;
       }
 
       // 将lineListElement转换为HTML元素，在该元素内查找剧集

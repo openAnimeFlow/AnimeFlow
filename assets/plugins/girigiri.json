@@ -1,5 +1,5 @@
 {
-  "version": "0.0.5",
+  "version": "0.0.6",
   "name": "girigiri愛動漫",
   "iconUrl": "https://bgm.girigirilove.com/guanggao/fdd2694db66628a9deadd86e50aedd43.png",
   "baseUrl": "https://bgm.girigirilove.com",
@@ -7,7 +7,7 @@
   "searchList": "//div[@class='vod-detail style-detail cor4 search-list']",
   "searchName": "//div/div[2] /a /h3",
   "searchLink": "//div[@class='detail-info rel flex-auto lightSpeedIn'] /a",
-  "lineNames": "//div[@class='swiper-wrapper'] //a //text()",
+  "lineNames": "//div[@class='swiper-wrapper'] //a /text()",
   "lineList": "//ul[@class='anthology-list-play size']",
   "episode": "/li /a"
 }

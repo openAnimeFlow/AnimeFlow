@@ -61,10 +61,52 @@ class InfoAppbarView extends StatelessWidget {
   Widget build(BuildContext context) {
     return Row(
       children: [
-        _buildIconButton,
-        if (subjectsItem != null) _buildInfo,
-        const Spacer(),
-        _buildMoreButton
+        IconButton(
+          padding: const EdgeInsets.all(0),
+          iconSize: 25,
+          icon: const Icon(Icons.arrow_back_rounded),
+          onPressed: () {
+            Get.back();
+          },
+        ),
+        if (subjectsItem != null)
+          Expanded(child: _buildInfo)
+        else
+          const Spacer(),
+        Builder(
+          builder: (context) {
+            return DropDownMenu<MoreMenuAction>(
+              items: MoreMenuAction.values,
+              offset: const Offset(0, 40),
+              disableSelected: false,
+              buttonBuilder: (context, selectedItem) {
+                return const Padding(
+                  padding: EdgeInsets.all(8.0),
+                  child: Icon(
+                    Icons.share_outlined,
+                    size: 25,
+                  ),
+                );
+              },
+              itemBuilder: (context, item, isSelected) {
+                return Row(
+                  children: [
+                    Icon(
+                      item.icon,
+                      size: 20,
+                      color: Theme.of(context).colorScheme.primary,
+                    ),
+                    const SizedBox(width: 12),
+                    Text(item.label),
+                  ],
+                );
+              },
+              onSelected: (MoreMenuAction action) {
+                _handleMenuAction(context, action);
+              },
+            );
+          },
+        )
       ],
     );
   }
@@ -76,85 +118,46 @@ class InfoAppbarView extends StatelessWidget {
       duration: const Duration(milliseconds: 300),
       child: Row(
         children: [
-          ClipRRect(
-            borderRadius: BorderRadius.circular(5),
-            child: AnimationNetworkImage(
-                width: 26,
-                height: 36,
-                fit: BoxFit.cover,
-                url: subjectBasicData.image),
-          ),
+          AnimationNetworkImage(
+              borderRadius: BorderRadius.circular(5),
+              width: 26,
+              height: 36,
+              fit: BoxFit.cover,
+              url: subjectBasicData.image),
           const SizedBox(width: 5),
-          Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                subjectBasicData.name,
-                style: const TextStyle(fontSize: 15),
-              ),
-              Row(
-                children: [
-                  RankingView(ranking: data.rating.rank),
-                  StarView(score: data.rating.score),
-                  const SizedBox(width: 5),
-                  Text(data.rating.score.toStringAsFixed(1),
-                      style: const TextStyle(
-                          fontSize: 10, fontWeight: FontWeight.bold))
-                ],
-              )
-            ],
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Text(
+                  subjectBasicData.name,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: const TextStyle(fontSize: 15),
+                ),
+                Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    RankingView(ranking: data.rating.rank),
+                    StarView(score: data.rating.score),
+                    const SizedBox(width: 5),
+                    Flexible(
+                      child: Text(
+                        data.rating.score.toStringAsFixed(1),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: const TextStyle(
+                            fontSize: 10, fontWeight: FontWeight.bold),
+                      ),
+                    )
+                  ],
+                )
+              ],
+            ),
           )
         ],
       ),
-    );
-  }
-
-  Widget get _buildIconButton {
-    return IconButton(
-      padding: const EdgeInsets.all(0),
-      iconSize: 25,
-      icon: const Icon(Icons.arrow_back_rounded),
-      onPressed: () {
-        Get.back();
-      },
-    );
-  }
-
-  //更多按钮
-  Widget get _buildMoreButton {
-    return Builder(
-      builder: (context) {
-        return DropDownMenu<MoreMenuAction>(
-          items: MoreMenuAction.values,
-          offset: const Offset(0, 40),
-          disableSelected: false,
-          buttonBuilder: (context, selectedItem) {
-            return const Padding(
-              padding: EdgeInsets.all(8.0),
-              child: Icon(
-                Icons.share_outlined,
-                size: 25,
-              ),
-            );
-          },
-          itemBuilder: (context, item, isSelected) {
-            return Row(
-              children: [
-                Icon(
-                  item.icon,
-                  size: 20,
-                  color: Theme.of(context).colorScheme.primary,
-                ),
-                const SizedBox(width: 12),
-                Text(item.label),
-              ],
-            );
-          },
-          onSelected: (MoreMenuAction action) {
-            _handleMenuAction(context, action);
-          },
-        );
-      },
     );
   }
 }

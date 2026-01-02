@@ -6,6 +6,7 @@ import 'package:anime_flow/routes/index.dart';
 import 'package:anime_flow/stores/user_info_store.dart';
 import 'package:anime_flow/utils/crawl_config.dart';
 import 'package:anime_flow/widget/animation_network_image/animation_network_image.dart';
+import 'package:anime_flow/widget/windows_title_bar.dart';
 import 'package:flutter/material.dart';
 import 'package:anime_flow/pages/recommend/index.dart';
 import 'package:get/get.dart';
@@ -184,8 +185,9 @@ class _MainPageState extends State<MainPage> {
     final bool isDesktop = MediaQuery.of(context).size.width >= 640;
     final colorScheme = Theme.of(context).colorScheme;
     mainPageState.changeIsDesktop(isDesktop);
-    return Scaffold(
-      body: Row(
+    return WindowsTitleBar(
+      child: Scaffold(
+        body: Row(
         children: [
           if (isDesktop)
             Obx(() => NavigationRail(
@@ -236,6 +238,7 @@ class _MainPageState extends State<MainPage> {
                 onDestinationSelected: _onDestinationSelected,
                 destinations: _buildBarDestinations(colorScheme),
               )),
+      ),
     );
   }
 }

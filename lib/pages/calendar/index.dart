@@ -76,7 +76,7 @@ class _CalendarPageState extends State<CalendarPage>
                                 Text(_weekdayLabels[index]),
                                 Text(
                                   '${items.length}部',
-                                  style: TextStyle(fontSize: 10),
+                                  style: const TextStyle(fontSize: 10),
                                 ),
                               ],
                             ),
@@ -111,7 +111,7 @@ class _CalendarPageState extends State<CalendarPage>
       return Center(
         child: Text(
           '${_weekdayLabels[int.parse(weekday) - 1]}无番剧更新',
-          style: TextStyle(fontSize: 16, color: Colors.grey),
+          style: const TextStyle(fontSize: 16, color: Colors.grey),
         ),
       );
     }

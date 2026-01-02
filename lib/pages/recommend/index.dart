@@ -147,6 +147,12 @@ class _RecommendPageState extends State<RecommendPage> {
         ),
       ),
       body: _buildPage(),
+      floatingActionButton: _showBackToTopButton
+          ? FloatingActionButton(
+              onPressed: _scrollToTop,
+              child: const Icon(Icons.arrow_upward),
+            )
+          : null,
     );
   }
 
@@ -222,19 +228,6 @@ class _RecommendPageState extends State<RecommendPage> {
                 ),
               ),
             ),
-            if (_showBackToTopButton)
-              Positioned(
-                right: 16,
-                bottom: 16,
-                child: FloatingActionButton(
-                  heroTag: 'recommend_back_to_top',
-                  onPressed: _scrollToTop,
-                  child: Icon(
-                    Icons.arrow_upward_rounded,
-                    color: Theme.of(context).colorScheme.primary,
-                  ),
-                ),
-              )
           ],
         );
       },

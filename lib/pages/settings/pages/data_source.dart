@@ -3,11 +3,8 @@ import 'package:anime_flow/pages/settings/setting_controller.dart';
 import 'package:anime_flow/routes/index.dart';
 import 'package:anime_flow/utils/crawl_config.dart';
 import 'package:anime_flow/widget/animation_network_image/animation_network_image.dart';
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:get/get_core/src/get_main.dart';
-import 'package:get/get_instance/src/extension_instance.dart';
 
 class DataSourcePage extends StatefulWidget {
   const DataSourcePage({super.key});
@@ -94,7 +91,7 @@ class _DataSourcePageState extends State<DataSourcePage> {
           ],
         ),
         body: ListView(
-          padding: EdgeInsets.symmetric(horizontal: 16),
+          padding: const EdgeInsets.symmetric(horizontal: 16),
           children: List.generate(dataSources.length, (index) {
             final data = dataSources[index];
             return InkWell(
@@ -102,8 +99,8 @@ class _DataSourcePageState extends State<DataSourcePage> {
                 print(data.name);
               },
               child: Container(
-                margin: EdgeInsets.symmetric(vertical: 2),
-                padding: EdgeInsets.symmetric(vertical: 5),
+                margin: const EdgeInsets.symmetric(vertical: 2),
+                padding: const EdgeInsets.symmetric(vertical: 5),
                 decoration: BoxDecoration(
                     borderRadius: BorderRadius.circular(10),
                     color:
@@ -117,7 +114,7 @@ class _DataSourcePageState extends State<DataSourcePage> {
                   ),
                   title: Text(
                     data.name,
-                    style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                    style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
                   ),
                   trailing: IconButton(
                     icon: Icon(

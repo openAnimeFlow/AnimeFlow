@@ -48,7 +48,7 @@ class _CalendarViewState extends State<CalendarView> {
             child: Row(
               crossAxisAlignment: CrossAxisAlignment.end,
               children: [
-                Expanded(
+                const Expanded(
                   child: Text(
                     "今日放送",
                     style:
@@ -64,14 +64,14 @@ class _CalendarViewState extends State<CalendarView> {
                             Get.toNamed(RouteName.calendar,
                                 arguments: calendar);
                           },
-                          child: Row(
+                          child: const Row(
                             children: [
                               Text(
                                 '查看更多',
                                 style: TextStyle(
                                     fontSize: 10, color: Colors.grey),
                               ),
-                              const Icon(
+                              Icon(
                                 Icons.keyboard_double_arrow_right_rounded,
                                 color: Colors.grey,
                               ),
@@ -79,7 +79,7 @@ class _CalendarViewState extends State<CalendarView> {
                           )),
                     Text(
                       '周$weekday上映$numberOfReleases部,总$numberOfViewers人收看',
-                      style: TextStyle(fontSize: 10, color: Colors.grey),
+                      style: const TextStyle(fontSize: 10, color: Colors.grey),
                     )
                   ],
                 )

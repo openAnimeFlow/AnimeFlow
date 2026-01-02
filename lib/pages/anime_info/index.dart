@@ -55,124 +55,125 @@ class _AnimeDetailPageState extends State<AnimeDetailPage> {
     final double statusBarHeight = MediaQuery.of(context).padding.top;
 
     return Scaffold(
-      body: Stack(
-        children: [
-          NotificationListener<ScrollNotification>(
-            onNotification: (notification) {
-              if (notification is ScrollUpdateNotification) {
-                if (notification.depth == 0) {
-                  final bool isPinned =
-                      notification.metrics.pixels >= _contentHeight;
-                  if (this.isPinned != isPinned) {
-                    setState(() {
-                      this.isPinned = isPinned;
-                    });
-                  }
-                }
+      body: NotificationListener<ScrollNotification>(
+        onNotification: (notification) {
+          if (notification is ScrollUpdateNotification) {
+            if (notification.depth == 0) {
+              final bool isPinned =
+                  notification.metrics.pixels >= _contentHeight;
+              if (this.isPinned != isPinned) {
+                setState(() {
+                  this.isPinned = isPinned;
+                });
               }
-              return false;
-            },
-            child: NestedScrollView(
-              controller: _nestedScrollController,
-              headerSliverBuilder:
-                  (BuildContext context, bool innerBoxIsScrolled) {
-                return <Widget>[
-                  SliverOverlapAbsorber(
-                    handle: NestedScrollView.sliverOverlapAbsorberHandleFor(
-                      context,
-                    ),
-                    sliver: SliverAppBar(
-                      automaticallyImplyLeading: false,
-                      titleSpacing: 0,
-                      title: FutureBuilder<SubjectsInfoItem?>(
-                        future: _subjectsItem,
-                        builder: (context, snapshot) {
-                          return InfoAppbarView(
-                              subjectBasicData: subjectBasicData,
-                              subjectsItem: snapshot.data,
-                              isPinned: isPinned);
-                        },
-                      ),
-                      pinned: true,
-                      floating: false,
-                      snap: false,
-                      // 动态设置背景色
-                      elevation: isPinned ? 4.0 : 0.0,
-                      forceElevated: isPinned,
-
-                      // 展开高度计算：内容高度 + 状态栏 + Toolbar
-                      expandedHeight:
-                          _contentHeight + statusBarHeight + kToolbarHeight,
-
-                      /// 头部内容区域
-                      flexibleSpace: FlexibleSpaceBar(
-                          collapseMode: CollapseMode.pin,
-                          background: Padding(
-                              padding: const EdgeInsets.only(bottom: 15),
-                              child: FutureBuilder<SubjectsInfoItem?>(
-                                future: _subjectsItem,
-                                builder: (context, snapshot) {
-                                  return InfoHeadView(
-                                    subjectItem: snapshot.data,
-                                    episodesItem: episodesFuture,
-                                    statusBarHeight: statusBarHeight,
-                                    contentHeight: _contentHeight,
-                                    subjectBasicData: subjectBasicData,
-                                  );
-                                },
-                              ))),
-                    ),
+            }
+          }
+          return false;
+        },
+        child: NestedScrollView(
+          controller: _nestedScrollController,
+          headerSliverBuilder: (BuildContext context, bool innerBoxIsScrolled) {
+            return <Widget>[
+              SliverOverlapAbsorber(
+                handle: NestedScrollView.sliverOverlapAbsorberHandleFor(
+                  context,
+                ),
+                sliver: SliverAppBar(
+                  automaticallyImplyLeading: false,
+                  titleSpacing: 0,
+                  title: FutureBuilder<SubjectsInfoItem?>(
+                    future: _subjectsItem,
+                    builder: (context, snapshot) {
+                      return InfoAppbarView(
+                          subjectBasicData: subjectBasicData,
+                          subjectsItem: snapshot.data,
+                          isPinned: isPinned);
+                    },
                   ),
-                ];
-              },
-              body: InfoSynopsisView(
-                subjectsItem: _subjectsItem,
-                onScrollChanged: (bool showButton) {
-                  if (topButton != showButton) {
-                    setState(() {
-                      topButton = showButton;
-                    });
-                  }
+                  pinned: true,
+                  floating: false,
+                  snap: false,
+                  // 动态设置背景色
+                  elevation: isPinned ? 4.0 : 0.0,
+                  forceElevated: isPinned,
+
+                  // 展开高度计算：内容高度 + 状态栏 + Toolbar
+                  expandedHeight:
+                      _contentHeight + statusBarHeight + kToolbarHeight,
+
+                  /// 头部内容区域
+                  flexibleSpace: FlexibleSpaceBar(
+                      collapseMode: CollapseMode.pin,
+                      background: Padding(
+                          padding: const EdgeInsets.only(bottom: 15),
+                          child: FutureBuilder<SubjectsInfoItem?>(
+                            future: _subjectsItem,
+                            builder: (context, snapshot) {
+                              return InfoHeadView(
+                                subjectItem: snapshot.data,
+                                episodesItem: episodesFuture,
+                                statusBarHeight: statusBarHeight,
+                                contentHeight: _contentHeight,
+                                subjectBasicData: subjectBasicData,
+                              );
+                            },
+                          ))),
+                ),
+              ),
+            ];
+          },
+          body: InfoSynopsisView(
+            subjectsItem: _subjectsItem,
+            onScrollChanged: (bool showButton) {
+              if (topButton != showButton) {
+                setState(() {
+                  topButton = showButton;
+                });
+              }
+            },
+          ),
+        ),
+      ),
+      floatingActionButton: AnimatedSwitcher(
+        duration: const Duration(milliseconds: 300),
+        transitionBuilder: (Widget child, Animation<double> animation) {
+          return ScaleTransition(
+            scale: animation,
+            child: child,
+          );
+        },
+        child: Column(
+          key: ValueKey<bool>(topButton),
+          mainAxisAlignment: MainAxisAlignment.end,
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            if (topButton)
+              FloatingActionButton(
+                onPressed: () {
+                  _nestedScrollController.animateTo(
+                    0,
+                    duration: const Duration(milliseconds: 300),
+                    curve: Curves.easeInOut,
+                  );
                 },
+                child: Icon(Icons.arrow_upward_rounded,
+                    color: Theme.of(context).colorScheme.primary),
+              ),
+            const SizedBox(height: 10),
+            FloatingActionButton(
+              onPressed: () {
+                Get.toNamed(RouteName.play, arguments: {
+                  'subjectBasicData': subjectBasicData,
+                  'episodes': episodesFuture
+                });
+              },
+              child: Icon(
+                Icons.play_arrow_rounded,
+                color: Theme.of(context).colorScheme.primary,
               ),
             ),
-          ),
-          Positioned(
-              right: 20,
-              bottom: 20,
-              child: Column(
-                children: [
-                  if (topButton) ...[
-                    FloatingActionButton(
-                      heroTag: 'anime_info_back_to_top',
-                      onPressed: () {
-                        _nestedScrollController.animateTo(
-                          0,
-                          duration: const Duration(milliseconds: 300),
-                          curve: Curves.easeInOut,
-                        );
-                      },
-                      child: Icon(Icons.arrow_upward_rounded,
-                          color: Theme.of(context).colorScheme.primary),
-                    ),
-                  ],
-                  const SizedBox(height: 5),
-                  FloatingActionButton(
-                    heroTag: 'anime_info_play',
-                    onPressed: () {
-                      Get.toNamed(RouteName.play, arguments: {
-                        'subjectBasicData': subjectBasicData,
-                        'episodes': episodesFuture
-                      });
-                    },
-                    child: Icon(
-                      Icons.play_arrow_rounded,
-                      color: Theme.of(context).colorScheme.primary,
-                    ),
-                  ),
-                ],
-              )),
-        ],
+          ],
+        ),
       ),
     );
   }

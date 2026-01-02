@@ -32,7 +32,7 @@ class _VideoResourcesViewState extends State<VideoResourcesView> {
   Widget build(BuildContext context) {
     return Stack(
       children: [
-        Offstage(child: VideoSourceDrawers()),
+        const Offstage(child: VideoSourceDrawers()),
         Card(
           elevation: 0,
           child: Padding(
@@ -110,7 +110,7 @@ class _VideoResourcesViewState extends State<VideoResourcesView> {
                         );
                       },
                       pageBuilder: (context, animation, secondaryAnimation) {
-                        return VideoSourceDrawers();
+                        return const VideoSourceDrawers();
                       },
                     );
                   },

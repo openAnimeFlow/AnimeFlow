@@ -77,7 +77,7 @@ class _TagViewState extends State<TagView> {
                     ),
                   ),
                   child: Padding(
-                    padding: EdgeInsets.symmetric(
+                    padding: const EdgeInsets.symmetric(
                       vertical: 4,
                       horizontal: 8,
                     ),

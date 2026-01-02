@@ -94,9 +94,9 @@ class BottomAreaControl extends StatelessWidget {
                             //倍速按钮
                             if (playPageController.isWideScreen.value ||
                                 fullscreen)
-                              Padding(
+                              const Padding(
                                   padding:
-                                      const EdgeInsets.symmetric(horizontal: 0),
+                                      EdgeInsets.symmetric(horizontal: 0),
                                   child: RateButton()),
 
                             // 全屏按钮

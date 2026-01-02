@@ -190,11 +190,11 @@ class _SettingsPageState extends State<SettingsPage> {
                                           ),
                                         ),
                                       );
-                                    }).toList(),
+                                    }),
                                     const SizedBox(height: 8),
                                   ],
                                 );
-                              }).toList(),
+                              }),
                             ]),
                       ),
                     ],
@@ -240,7 +240,7 @@ class _SettingsPageState extends State<SettingsPage> {
                           Navigator.of(context).pushNamed(item.route);
                         },
                       );
-                    }).toList(),
+                    }),
                     const SizedBox(height: 8),
                   ],
                 );

@@ -27,8 +27,12 @@ class CrawlConfig {
       'assets/plugins/xfdm.json',
       'assets/plugins/yzk.json',
     ];
+    final assetManifest = await AssetManifest.loadFromAssetBundle(rootBundle);
+    final assets = assetManifest.listAssets();
+    final jsonFiles = assets.where((String asset) =>
+    asset.startsWith('assets/plugins/') && asset.endsWith('.json'));
 
-    for (final path in pluginFiles) {
+    for (final path in jsonFiles) {
       try {
         final jsonStr = await rootBundle.loadString(path);
         final config = jsonDecode(jsonStr);

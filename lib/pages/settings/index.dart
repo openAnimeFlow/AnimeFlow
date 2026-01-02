@@ -105,12 +105,9 @@ class _SettingsPageState extends State<SettingsPage> {
                         padding: EdgeInsets.only(
                             top: MediaQuery.of(context).padding.top),
                         child: ListTile(
-                          leading: const Icon(Icons.arrow_back),
-                          title: const Text("返回"),
-                          onTap: () {
-                            Navigator.of(context).pop();
-                          },
-                        ),
+                            leading: const Icon(Icons.arrow_back),
+                            title: const Text("设置"),
+                            onTap: () => Get.back()),
                       ),
                       const Divider(height: 1),
                       // 菜单列表

@@ -84,9 +84,9 @@ class AppInfoController extends GetxController {
             .map((e) => Map<String, dynamic>.from(e))
             .toList();
 
-        List<String> urlList = getDownloadUrl(downloadInfo);
+        List<DownloadInfo> download = getDownloadInfo(downloadInfo);
 
-        if (urlList.isEmpty) {
+        if (download.isEmpty) {
           Get.snackbar("检查更新", "未找到对应平台的下载地址", maxWidth: 500);
           return VersionType.localNewer;
         }
@@ -102,7 +102,7 @@ class AppInfoController extends GetxController {
         Get.dialog(
           barrierDismissible: false,
           ApplyUpdatesView(
-            urlList: urlList,
+            download: download,
             versionMessage: VersionType.newVersion.message,
             onStartDownload: (downloadUrl) async {
               Get.log('选中的下载地址: $downloadUrl');
@@ -195,9 +195,9 @@ class AppInfoController extends GetxController {
   }
 
   ///根据平台获取下载地址
-  List<String> getDownloadUrl(List<Map<String, dynamic>> assets) {
+  List<DownloadInfo> getDownloadInfo(List<Map<String, dynamic>> assets) {
     final platform = Utils.getDevice();
-    final List<String> urlList = [];
+    final List<DownloadInfo> urlList = [];
 
     for (var asset in assets) {
       final name = asset['name']?.toString() ?? '';
@@ -208,29 +208,29 @@ class AppInfoController extends GetxController {
       switch (platform) {
         case 'android':
           if (name.toLowerCase().contains('android')) {
-            urlList.add(url);
+            urlList.add(DownloadInfo.fromJson(asset));
           }
           break;
         case 'ios':
           if (name.toLowerCase().contains('ios')) {
-            urlList.add(url);
+            urlList.add(DownloadInfo.fromJson(asset));
           }
           break;
         case 'macos':
           if (name.toLowerCase().contains('macos') ||
               name.toLowerCase().contains('mac')) {
-            urlList.add(url);
+            urlList.add(DownloadInfo.fromJson(asset));
           }
           break;
         case 'windows':
           if (name.toLowerCase().contains('windows') ||
               name.toLowerCase().contains('win')) {
-            urlList.add(url);
+            urlList.add(DownloadInfo.fromJson(asset));
           }
           break;
         case 'linux':
           if (name.toLowerCase().contains('linux')) {
-            urlList.add(url);
+            urlList.add(DownloadInfo.fromJson(asset));
           }
           break;
       }
@@ -238,6 +238,7 @@ class AppInfoController extends GetxController {
 
     return urlList;
   }
+
 
   /// 获取版本号
   String get version => appInfo.value?.version ?? '未知';
@@ -250,17 +251,20 @@ class AppInfoController extends GetxController {
 
   /// 获取包名
   String get packageName => appInfo.value?.packageName ?? '未知';
+}
 
-  /// 格式化字节数
-  String formatBytes(int bytes) {
-    if (bytes < 1024) {
-      return '$bytes B';
-    } else if (bytes < 1024 * 1024) {
-      return '${(bytes / 1024).toStringAsFixed(2)} KB';
-    } else if (bytes < 1024 * 1024 * 1024) {
-      return '${(bytes / (1024 * 1024)).toStringAsFixed(2)} MB';
-    } else {
-      return '${(bytes / (1024 * 1024 * 1024)).toStringAsFixed(2)} GB';
-    }
+class DownloadInfo {
+  final String url;
+  final String fileName;
+  final int size;
+
+  DownloadInfo(this.url, this.fileName, this.size);
+
+  factory DownloadInfo.fromJson(Map<String, dynamic> json) {
+    return DownloadInfo(
+      json['browser_download_url'] as String,
+      json['name'] as String,
+      json['size'] as int,
+    );
   }
 }

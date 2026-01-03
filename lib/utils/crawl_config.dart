@@ -22,11 +22,6 @@ class CrawlConfig {
   ///初始化爬虫配置
   static Future<void> initCrawlConfigs() async {
     // 插件文件列表
-    final pluginFiles = [
-      'assets/plugins/girigiri.json',
-      'assets/plugins/xfdm.json',
-      'assets/plugins/yzk.json',
-    ];
     final assetManifest = await AssetManifest.loadFromAssetBundle(rootBundle);
     final assets = assetManifest.listAssets();
     final jsonFiles = assets.where((String asset) =>

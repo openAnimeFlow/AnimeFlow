@@ -12,8 +12,8 @@ class DioRequest {
   DioRequest._internal() {
     _dio = Dio();
     // 配置dio实例
-    _dio!.options.connectTimeout = const Duration(seconds: 10); // 连接超时时间
-    _dio!.options.receiveTimeout = const Duration(seconds: 10); // 超时时间
+    _dio!.options.connectTimeout = const Duration(seconds: 30); // 连接超时时间
+    _dio!.options.receiveTimeout = const Duration(seconds: 30); // 超时时间
 
     // 添加拦截器
     _dio!.interceptors.add(

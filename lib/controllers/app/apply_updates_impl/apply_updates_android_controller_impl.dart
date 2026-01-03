@@ -16,24 +16,20 @@ class ApplyUpdatesAndroidController implements ApplyUpdatesController {
   @override
   Future<void> applyUpdates(
     String downloadUrl, {
+    String? fileName,
     void Function(int received, int total)? onProgress,
   }) async {
-    // 创建新的 CancelToken
     _cancelToken = CancelToken();
 
     try {
       final dir = await getExternalStorageDirectory();
-      final savePath = '${dir!.path}/AnimeFlow.apk';
+      final savePath = '${dir!.path}/${fileName ?? 'AnimeFlow.apk'}';
       Get.log(savePath);
-      await dioRequest.download(
-        downloadUrl,
-        savePath,
-        onReceiveProgress: (received, total) {
-          // 调用进度回调
-          onProgress?.call(received, total);
-        },
-        cancelToken: _cancelToken,
-      );
+      await dioRequest.download(downloadUrl, savePath,
+          onReceiveProgress: (received, total) {
+        // 调用进度回调
+        onProgress?.call(received, total);
+      }, cancelToken: _cancelToken);
 
       final result = await OpenFilex.open(File(savePath).path);
       if (result.type != ResultType.done) {

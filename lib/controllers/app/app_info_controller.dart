@@ -1,9 +1,14 @@
+import 'dart:io';
+
 import 'package:anime_flow/http/requests/request.dart';
 import 'package:anime_flow/models/enums/version_type.dart';
 import 'package:anime_flow/utils/utils.dart';
+import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:logger/logger.dart';
 import 'package:package_info_plus/package_info_plus.dart';
+import 'package:path_provider/path_provider.dart' show getDownloadsDirectory;
+import 'package:path/path.dart' as path;
 
 import 'apply_updates_controller.dart';
 import 'apply_updates_view.dart';
@@ -104,9 +109,7 @@ class AppInfoController extends GetxController {
           ApplyUpdatesView(
             download: download,
             versionMessage: VersionType.newVersion.message,
-            onStartDownload: (downloadUrl) async {
-              Get.log('选中的下载地址: $downloadUrl');
-
+            onStartDownload: (downloadUrl, fileName) async {
               // 开始下载
               isDownloading.value = true;
               downloadProgress.value = 0.0;
@@ -118,6 +121,7 @@ class AppInfoController extends GetxController {
               try {
                 await updateController!.applyUpdates(
                   downloadUrl,
+                  fileName: fileName,
                   onProgress: (received, total) {
                     receivedBytes.value = received;
                     totalBytes.value = total;
@@ -126,7 +130,16 @@ class AppInfoController extends GetxController {
                     }
                   },
                 );
+                
+                // 关闭下载进度对话框
                 Get.back();
+                
+                // Windows 平台下载完成后显示完成对话框
+                if (Platform.isWindows) {
+                  final tempDir = await getDownloadsDirectory();
+                  final savePath = path.join(tempDir!.path, fileName);
+                  _showWindowsDownloadCompleteDialog(savePath);
+                }
               } catch (e) {
                 // 如果是取消操作，不显示错误提示
                 if (!e.toString().contains('下载已取消')) {
@@ -251,6 +264,62 @@ class AppInfoController extends GetxController {
 
   /// 获取包名
   String get packageName => appInfo.value?.packageName ?? '未知';
+
+  /// 显示 Windows 平台下载完成对话框
+  void _showWindowsDownloadCompleteDialog(String savePath) {
+    Get.dialog(
+      barrierDismissible: false,
+      Builder(
+        builder: (context) => AlertDialog(
+          title: const Text('下载完成'),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              const Text('安装包已下载完成'),
+              const SizedBox(height: 8),
+              SelectableText(
+                savePath,
+                style: TextStyle(
+                  fontSize: 12,
+                  color: Theme.of(context).colorScheme.onSurfaceVariant,
+                  fontFamily: 'monospace',
+                ),
+              ),
+            ],
+          ),
+          actions: [
+            TextButton(
+              onPressed: () {
+                Get.back();
+              },
+              child: const Text('取消'),
+            ),
+            TextButton(
+              onPressed: () async {
+                try {
+                  await Process.start(
+                    'explorer.exe',
+                    ['/select,', savePath],
+                    runInShell: true,
+                  );
+                  Get.back();
+                } catch (e) {
+                  Get.back();
+                  Get.snackbar(
+                    '打开失败',
+                    '无法打开文件管理器: $e',
+                    maxWidth: 500,
+                  );
+                }
+              },
+              child: const Text('打开安装包文件夹'),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
 }
 
 class DownloadInfo {

@@ -11,6 +11,7 @@ abstract class ApplyUpdatesController {
   /// [onProgress] 下载进度回调，参数为 (已下载字节数, 总字节数)
   Future<void> applyUpdates(
     String downloadUrl, {
+        String? fileName,
     void Function(int received, int total)? onProgress,
   });
 

@@ -7,6 +7,7 @@ class ApplyUpdatesIOSController implements ApplyUpdatesController {
   @override
   Future<void> applyUpdates(
     String downloadUrl, {
+        String? fileName,
     void Function(int received, int total)? onProgress,
   }) async {
     final authUrl = Uri.parse(downloadUrl);

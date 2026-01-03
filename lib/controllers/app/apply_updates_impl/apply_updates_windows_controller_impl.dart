@@ -1,26 +1,44 @@
 import 'package:anime_flow/controllers/app/apply_updates_controller.dart';
+import 'package:anime_flow/http/dio/dio_request.dart';
+import 'package:dio/dio.dart';
+import 'package:path_provider/path_provider.dart' show getDownloadsDirectory;
+import 'package:path/path.dart' as path;
 
 /// Windows 平台更新实现
 class ApplyUpdatesWindowsController implements ApplyUpdatesController {
+  CancelToken? _cancelToken;
+
   @override
   Future<void> applyUpdates(
     String downloadUrl, {
+    String? fileName,
     void Function(int received, int total)? onProgress,
   }) async {
-    // TODO: 实现 Windows 平台更新逻辑
-    // 1. 下载安装包（.exe 或 .msix）
-    // 2. 执行安装程序
-    // 示例：
-    // - 使用 dio 或 http 下载文件，在 onReceiveProgress 中调用 onProgress
-    // - 使用 process_run 执行安装程序
-    // - 或者使用 windows 特定的更新机制
-    print('Windows 平台更新: $downloadUrl');
-    onProgress?.call(0, 100); // 示例：模拟进度
+    _cancelToken = CancelToken();
+    try {
+      final tempDir = await getDownloadsDirectory();
+      final savePath = path.join(tempDir!.path, fileName ?? 'AnimeFlow.zip');
+      await dioRequest.download(
+        downloadUrl,
+        savePath,
+        onReceiveProgress: (received, total) {
+          onProgress?.call(received, total);
+        },
+        cancelToken: _cancelToken,
+      );
+    } catch (e) {
+      if (e.toString().contains('下载已取消')) {
+        return;
+      }
+      rethrow;
+    } finally {
+      _cancelToken = null;
+    }
   }
 
   @override
   void cancelDownload() {
-    // TODO: 实现 Windows 平台取消下载逻辑
+    _cancelToken?.cancel('用户取消下载');
+    _cancelToken = null;
   }
 }
-

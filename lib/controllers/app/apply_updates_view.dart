@@ -6,7 +6,7 @@ import 'package:get/get.dart';
 class ApplyUpdatesView extends StatefulWidget {
   final List<DownloadInfo> download;
   final String versionMessage;
-  final Future<void> Function(String) onStartDownload;
+  final Future<void> Function(String url, String fileName) onStartDownload;
   final void Function() onCancelDownload;
 
   const ApplyUpdatesView({
@@ -60,7 +60,6 @@ class _ApplyUpdatesViewState extends State<ApplyUpdatesView> {
                       ),
                       child: const Text('安装包会在GitHub仓库中下载，国内网络速度较慢，请使用代理改善网络'),
                     ),
-                    const Divider(),
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
@@ -144,19 +143,23 @@ class _ApplyUpdatesViewState extends State<ApplyUpdatesView> {
                           ),
                           child: Row(
                             children: [
-                              if (isSelected)
-                                Icon(
-                                  Icons.check_circle,
-                                  color: Theme.of(context).colorScheme.primary,
-                                  size: 20,
-                                )
-                              else
-                                Icon(
-                                  Icons.radio_button_unchecked,
-                                  color: Theme.of(context).colorScheme.outline,
-                                  size: 20,
-                                ),
-                              const SizedBox(width: 8),
+                              if (widget.download.length > 1) ...[
+                                if (isSelected)
+                                  Icon(
+                                    Icons.check_circle,
+                                    color:
+                                        Theme.of(context).colorScheme.primary,
+                                    size: 20,
+                                  )
+                                else
+                                  Icon(
+                                    Icons.radio_button_unchecked,
+                                    color:
+                                        Theme.of(context).colorScheme.outline,
+                                    size: 20,
+                                  ),
+                                const SizedBox(width: 8),
+                              ],
                               Expanded(
                                   child: Column(
                                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -216,7 +219,8 @@ class _ApplyUpdatesViewState extends State<ApplyUpdatesView> {
             return TextButton(
               onPressed: () async {
                 final downloadData = widget.download[_selectedIndex];
-                await widget.onStartDownload(downloadData.url);
+                await widget.onStartDownload(
+                    downloadData.url, downloadData.fileName);
               },
               child: const Text("立即更新"),
             );

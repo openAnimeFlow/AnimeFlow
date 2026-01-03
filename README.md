@@ -12,6 +12,7 @@
 
 一个跨平台的动漫视频播放应用，支持多数据源、自定义爬虫配置,对接Bangumi服务同步用户收藏数据,为您提供流畅的观影体验。
 
+[下载](https://github.com/openAnimeFlow/AnimeFlow/releases)
 
 ### 📱 多平台支持
 - **移动端**：Android、iOS
@@ -56,60 +57,6 @@
   <img src="assets/features/mobile/img_6.png" alt="添加数据源">
 </div>
 
-
-## 📦 安装与运行
-
-### 安装步骤
-
-1. **克隆项目**
-```bash
-git clone https://github.com/openAnimeFlow/AnimeFlow.git
-cd AnimeFlow
-```
-
-2. **安装依赖**
-```bash
-flutter pub get
-```
-
-3. **配置环境变量**
-创建 `.env` 文件并配置必要的环境变量:`CLIENT_ID=bgmxxx,REDIRECT_URI=bgm回调链接`
-
-4. **运行项目**
-```bash
-# 运行在移动设备/模拟器
-flutter run
-
-# 运行在桌面端
-flutter run -d windows  # Windows
-flutter run -d macos    # macOS
-flutter run -d linux    # Linux
-
-# 运行在 Web
-flutter run -d chrome
-```
-
-### 构建发布版本
-
-```bash
-# Android APK
-flutter build apk --split-per-abi
-
-# iOS
-flutter build ios
-
-# Windows
-flutter build windows
-
-# macOS
-flutter build macos
-
-# Linux
-flutter build linux
-
-# Web
-flutter build web
-```
 
 ### 添加数据源
 

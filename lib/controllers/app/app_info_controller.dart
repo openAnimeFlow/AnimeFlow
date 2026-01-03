@@ -1,12 +1,12 @@
 import 'package:anime_flow/http/requests/request.dart';
 import 'package:anime_flow/models/enums/version_type.dart';
 import 'package:anime_flow/utils/utils.dart';
-import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:logger/logger.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 
 import 'apply_updates_controller.dart';
+import 'apply_updates_view.dart';
 
 class AppInfoController extends GetxController {
   // 应用信息
@@ -91,210 +91,70 @@ class AppInfoController extends GetxController {
           return VersionType.localNewer;
         }
 
-        // 默认选择第一条
-        int selectedIndex = 0;
-        
         // 重置下载状态
         isDownloading.value = false;
         downloadProgress.value = 0.0;
         receivedBytes.value = 0;
         totalBytes.value = 0;
 
+        ApplyUpdatesController? updateController;
+
         Get.dialog(
-          AlertDialog(
-            title: const Text("检查更新"),
-            content: Obx(() {
-              return Column(
-                mainAxisSize: MainAxisSize.min,
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(VersionType.newVersion.message),
-                  const SizedBox(height: 16),
-                  if (isDownloading.value) ...[
-                    // 下载进度显示
-                    Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            Text(
-                              '正在下载...',
-                              style: TextStyle(
-                                fontSize: 14,
-                                color: Theme.of(Get.context!).colorScheme.onSurface,
-                              ),
-                            ),
-                            Text(
-                              '${(downloadProgress.value * 100).toStringAsFixed(1)}%',
-                              style: TextStyle(
-                                fontSize: 14,
-                                color: Theme.of(Get.context!).colorScheme.primary,
-                                fontWeight: FontWeight.bold,
-                              ),
-                            ),
-                          ],
-                        ),
-                        const SizedBox(height: 8),
-                        LinearProgressIndicator(
-                          value: downloadProgress.value,
-                          backgroundColor:
-                              Theme.of(Get.context!).colorScheme.surfaceContainerHighest,
-                          valueColor: AlwaysStoppedAnimation<Color>(
-                            Theme.of(Get.context!).colorScheme.primary,
-                          ),
-                        ),
-                        const SizedBox(height: 4),
-                        if (totalBytes.value > 0)
-                          Text(
-                            '${_formatBytes(receivedBytes.value)} / ${_formatBytes(totalBytes.value)}',
-                            style: TextStyle(
-                              fontSize: 12,
-                              color: Theme.of(Get.context!).colorScheme.onSurfaceVariant,
-                            ),
-                          ),
-                      ],
-                    ),
-                  ] else ...[
-                    // URL 选择界面
-                    StatefulBuilder(
-                      builder: (context, setState) {
-                        return Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            if (urlList.length > 1)
-                              Text(
-                                "请选择下载地址:",
-                                style: TextStyle(
-                                  fontSize: 14,
-                                  color: Theme.of(context).colorScheme.onSurfaceVariant,
-                                ),
-                              ),
-                            if (urlList.length > 1) const SizedBox(height: 8),
-                            ...List.generate(urlList.length, (index) {
-                              final url = urlList[index];
-                              final isSelected = index == selectedIndex;
-                              return InkWell(
-                                onTap: () {
-                                  setState(() {
-                                    selectedIndex = index;
-                                  });
-                                },
-                                child: Container(
-                                  margin: const EdgeInsets.only(bottom: 8),
-                                  padding: const EdgeInsets.all(12),
-                                  decoration: BoxDecoration(
-                                    border: Border.all(
-                                      color: isSelected
-                                          ? Theme.of(context).colorScheme.primary
-                                          : Theme.of(context).colorScheme.outline,
-                                      width: isSelected ? 2 : 1,
-                                    ),
-                                    borderRadius: BorderRadius.circular(8),
-                                    color: isSelected
-                                        ? Theme.of(context)
-                                            .colorScheme
-                                            .primaryContainer
-                                            .withValues(alpha: 0.3)
-                                        : Colors.transparent,
-                                  ),
-                                  child: Row(
-                                    children: [
-                                      if (isSelected)
-                                        Icon(
-                                          Icons.check_circle,
-                                          color: Theme.of(context).colorScheme.primary,
-                                          size: 20,
-                                        )
-                                      else
-                                        Icon(
-                                          Icons.radio_button_unchecked,
-                                          color: Theme.of(context).colorScheme.outline,
-                                          size: 20,
-                                        ),
-                                      const SizedBox(width: 8),
-                                      Expanded(
-                                        child: Text(
-                                          url,
-                                          style: TextStyle(
-                                            fontSize: 12,
-                                            color:
-                                                Theme.of(context).colorScheme.onSurface,
-                                          ),
-                                          maxLines: 2,
-                                          overflow: TextOverflow.ellipsis,
-                                        ),
-                                      ),
-                                    ],
-                                  ),
-                                ),
-                              );
-                            }),
-                          ],
-                        );
-                      },
-                    ),
-                  ],
-                ],
+          barrierDismissible: false,
+          ApplyUpdatesView(
+            urlList: urlList,
+            versionMessage: VersionType.newVersion.message,
+            onStartDownload: (downloadUrl) async {
+              Get.log('选中的下载地址: $downloadUrl');
+
+              // 开始下载
+              isDownloading.value = true;
+              downloadProgress.value = 0.0;
+              receivedBytes.value = 0;
+              totalBytes.value = 0;
+
+              updateController = ApplyUpdatesFactory.getController();
+
+              try {
+                await updateController!.applyUpdates(
+                  downloadUrl,
+                  onProgress: (received, total) {
+                    receivedBytes.value = received;
+                    totalBytes.value = total;
+                    if (total > 0) {
+                      downloadProgress.value = received / total;
+                    }
+                  },
+                );
+                Get.back();
+              } catch (e) {
+                // 如果是取消操作，不显示错误提示
+                if (!e.toString().contains('下载已取消')) {
+                  Get.back();
+                  Get.snackbar(
+                    "下载失败",
+                    "更新下载失败: $e",
+                    maxWidth: 500,
+                  );
+                }
+              } finally {
+                isDownloading.value = false;
+                updateController = null;
+              }
+            },
+            onCancelDownload: () {
+              // 取消下载
+              updateController?.cancelDownload();
+              isDownloading.value = false;
+              downloadProgress.value = 0.0;
+              receivedBytes.value = 0;
+              totalBytes.value = 0;
+              Get.snackbar(
+                "下载已取消",
+                "已取消下载",
+                maxWidth: 500,
               );
-            }),
-            actions: [
-              Obx(() => TextButton(
-                    onPressed: isDownloading.value
-                        ? null
-                        : () {
-                            Get.back();
-                          },
-                    child: const Text("稍后更新"),
-                  )),
-              Obx(() => TextButton(
-                    onPressed: isDownloading.value
-                        ? null
-                        : () async {
-                            final downloadUrl = urlList[selectedIndex];
-                            Get.log('选中的下载地址: $downloadUrl');
-                            
-                            // 开始下载
-                            isDownloading.value = true;
-                            downloadProgress.value = 0.0;
-                            receivedBytes.value = 0;
-                            totalBytes.value = 0;
-                            
-                            final controller = ApplyUpdatesFactory.getController();
-                            
-                            try {
-                              await controller.applyUpdates(
-                                downloadUrl,
-                                onProgress: (received, total) {
-                                  receivedBytes.value = received;
-                                  totalBytes.value = total;
-                                  if (total > 0) {
-                                    downloadProgress.value = received / total;
-                                  }
-                                },
-                              );
-                              
-                              // 下载完成，关闭对话框
-                              Get.back();
-                              Get.snackbar(
-                                "下载完成",
-                                "安装包已下载，请按照提示安装",
-                                maxWidth: 500,
-                              );
-                            } catch (e) {
-                              Get.back();
-                              Get.snackbar(
-                                "下载失败",
-                                "更新下载失败: $e",
-                                maxWidth: 500,
-                              );
-                            } finally {
-                              isDownloading.value = false;
-                            }
-                          },
-                    child: Text(isDownloading.value ? "下载中..." : "立即更新"),
-                  )),
-            ],
+            },
           ),
         );
         return VersionType.newVersion; // 远程版本更高，有新版本
@@ -392,7 +252,7 @@ class AppInfoController extends GetxController {
   String get packageName => appInfo.value?.packageName ?? '未知';
 
   /// 格式化字节数
-  String _formatBytes(int bytes) {
+  String formatBytes(int bytes) {
     if (bytes < 1024) {
       return '$bytes B';
     } else if (bytes < 1024 * 1024) {

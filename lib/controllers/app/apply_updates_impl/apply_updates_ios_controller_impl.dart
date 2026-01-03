@@ -17,4 +17,8 @@ class ApplyUpdatesIOSController implements ApplyUpdatesController {
       throw 'Could not launch ';
     }
   }
+
+  @override
+  void cancelDownload() {
+  }
 }

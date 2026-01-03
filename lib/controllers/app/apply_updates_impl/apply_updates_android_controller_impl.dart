@@ -2,27 +2,50 @@ import 'dart:io';
 
 import 'package:anime_flow/controllers/app/apply_updates_controller.dart';
 import 'package:anime_flow/http/dio/dio_request.dart';
+import 'package:dio/dio.dart';
 import 'package:open_filex/open_filex.dart';
 import 'package:path_provider/path_provider.dart'
     show getExternalStorageDirectory;
 
 /// Android 平台更新实现
 class ApplyUpdatesAndroidController implements ApplyUpdatesController {
+  CancelToken? _cancelToken;
+
   @override
   Future<void> applyUpdates(
     String downloadUrl, {
     void Function(int received, int total)? onProgress,
   }) async {
-    final dir = await getExternalStorageDirectory();
-    final savePath = '${dir!.path}/AnimeFlow.apk';
-    await dioRequest.download(
-      downloadUrl,
-      savePath,
-      onReceiveProgress: (received, total) {
-        // 调用进度回调
-        onProgress?.call(received, total);
-      },
-    );
-    await OpenFilex.open(File(savePath).path);
+    // 创建新的 CancelToken
+    _cancelToken = CancelToken();
+    
+    try {
+      final dir = await getExternalStorageDirectory();
+      final savePath = '${dir!.path}/AnimeFlow.apk';
+      await dioRequest.download(
+        downloadUrl,
+        savePath,
+        onReceiveProgress: (received, total) {
+          // 调用进度回调
+          onProgress?.call(received, total);
+        },
+        cancelToken: _cancelToken,
+      );
+      await OpenFilex.open(File(savePath).path);
+    } catch (e) {
+      // 如果是取消操作，不抛出异常
+      if (e.toString().contains('下载已取消')) {
+        return;
+      }
+      rethrow;
+    } finally {
+      _cancelToken = null;
+    }
+  }
+
+  @override
+  void cancelDownload() {
+    _cancelToken?.cancel('用户取消下载');
+    _cancelToken = null;
   }
 }

@@ -146,12 +146,21 @@ class DioRequest {
     String url,
     String savePath, {
     ProgressCallback? onReceiveProgress,
+    CancelToken? cancelToken,
   }) async {
     try {
-      final Response response = await _dio!
-          .download(url, savePath, onReceiveProgress: onReceiveProgress);
+      final Response response = await _dio!.download(
+        url,
+        savePath,
+        onReceiveProgress: onReceiveProgress,
+        cancelToken: cancelToken,
+      );
       return response;
     } on DioException catch (e) {
+      if (e.type == DioExceptionType.cancel) {
+        Logger().i('下载已取消');
+        throw '下载已取消';
+      }
       Logger().e(e.message);
       throw _handleError(e);
     }

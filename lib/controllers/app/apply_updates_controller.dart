@@ -13,6 +13,9 @@ abstract class ApplyUpdatesController {
     String downloadUrl, {
     void Function(int received, int total)? onProgress,
   });
+
+  ///取消下载
+  void cancelDownload();
 }
 
 /// 更新控制器工厂类

@@ -17,5 +17,10 @@ class ApplyUpdatesLinuxController implements ApplyUpdatesController {
     print('Linux 平台更新: $downloadUrl');
     onProgress?.call(0, 100); // 示例：模拟进度
   }
+
+  @override
+  void cancelDownload() {
+    // TODO: 实现 Linux 平台取消下载逻辑
+  }
 }
 

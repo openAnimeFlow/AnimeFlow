@@ -1,5 +1,7 @@
 import 'dart:io';
 import 'package:anime_flow/constants/constants.dart';
+import 'package:anime_flow/utils/utils.dart';
+import 'package:anime_flow/widget/windows_title_bar.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:get/get.dart';
@@ -17,7 +19,7 @@ void main() async {
   await Hive.openBox(Constants.crawlConfigs);
   final themeController = Get.put(ThemeController());
   await themeController.initTheme();
-  
+
   // Windows 平台初始化窗口管理器
   if (Platform.isWindows) {
     await windowManager.ensureInitialized();
@@ -30,28 +32,37 @@ void main() async {
       await windowManager.focus();
     });
   }
-  
+
   runApp(const MyApp());
 }
 
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
-  
+
   ThemeController get themeController => Get.find<ThemeController>();
 
   @override
   Widget build(BuildContext context) {
-        return GetBuilder<ThemeController>(
-          builder: (controller) {
-            return GetMaterialApp(
-              debugShowCheckedModeBanner: false,
-              theme: controller.lightTheme,
-              darkTheme: controller.darkTheme,
-              themeMode: controller.themeMode,
-              initialRoute: RouteName.main,
-              routes: getRootRoutes(),
-            );
+    return GetBuilder<ThemeController>(
+      builder: (controller) {
+        return GetMaterialApp(
+          debugShowCheckedModeBanner: false,
+          theme: controller.lightTheme,
+          darkTheme: controller.darkTheme,
+          themeMode: controller.themeMode,
+          initialRoute: RouteName.main,
+          routes: getRootRoutes(),
+          builder: (context, child) {
+            if (Utils.isDesktop) {
+              return WindowsTitleBar(
+                child: child,
+              );
+            } else {
+              return child ?? const SizedBox.shrink();
+            }
           },
         );
+      },
+    );
   }
 }

@@ -1,4 +1,4 @@
-import 'dart:io';
+import 'package:anime_flow/utils/utils.dart';
 import 'package:flutter/material.dart';
 import 'package:window_manager/window_manager.dart';
 
@@ -12,118 +12,183 @@ class WindowsTitleBar extends StatelessWidget {
     super.key,
     this.child,
     this.backgroundColor,
-    this.height = 40,
+    this.height = 35,
   });
 
   @override
   Widget build(BuildContext context) {
-    // 只在 Windows 平台显示自定义标题栏
-    if (!Platform.isWindows) {
+    final colorScheme = Theme.of(context).colorScheme;
+    if (!Utils.isDesktop) {
       return child ?? const SizedBox.shrink();
     }
 
-    return Stack(
+    return Column(
       children: [
-        // 子内容，添加顶部 padding 避免被标题栏遮挡
-        if (child != null)
-          Padding(
-            padding: EdgeInsets.only(top: height),
-            child: child!,
-          ),
-        // 自定义标题栏覆盖在顶层
-        Positioned(
-          top: 0,
-          left: 0,
-          right: 0,
-          child: Container(
-            height: height,
-            decoration: BoxDecoration(
-              color: backgroundColor ?? Theme.of(context).scaffoldBackgroundColor,
-              border: Border(
-                bottom: BorderSide(
-                  color: Theme.of(context).dividerColor.withValues(alpha: 0.12),
-                  width: 1,
-                ),
+        // 标题栏在顶部
+        Container(
+          height: height,
+          decoration: BoxDecoration(
+            color: backgroundColor ?? colorScheme.surfaceContainerHighest,
+            border: Border(
+              bottom: BorderSide(
+                color: Theme.of(context).dividerColor.withValues(alpha: 0.12),
+                width: 1,
               ),
             ),
-            child: Row(
-              children: [
-                Expanded(
-                  child:  GestureDetector(
-                      behavior: HitTestBehavior.opaque,
-                      onPanStart: (details) {
-                        windowManager.startDragging();
-                      },
-                      onDoubleTap: () async {
-                        if (await windowManager.isMaximized()) {
-                          windowManager.restore();
-                        } else {
-                          windowManager.maximize();
-                        }
-                      },
-                      child: Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 16),
-                      ),
-                    ),
-                ),
-                // 右侧窗口控制按钮
-                Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    // 最小化按钮
-                    _WindowButton(
-                      icon: Icons.remove,
-                      onPressed: () {
-                        windowManager.minimize();
-                      },
-                    ),
-                    // 最大化/还原按钮
-                    _WindowButton(
-                      icon: Icons.crop_square,
-                      onPressed: () async {
-                        if (await windowManager.isMaximized()) {
-                          windowManager.restore();
-                        } else {
-                          windowManager.maximize();
-                        }
-                      },
-                    ),
-                    // 关闭按钮
-                    _WindowButton(
-                      icon: Icons.close,
-                      onPressed: () {
-                        windowManager.close();
-                      },
-                      isClose: true,
-                    ),
-                  ],
-                ),
-              ],
-            ),
           ),
+          child: const Row(
+            children: [
+              Expanded(
+                child: WindowDragArea(),
+              ),
+              // 右侧窗口控制按钮
+              WindowControlButtons(),
+            ],
+          ),
+        ),
+        // 内容区域
+        Expanded(
+          child: child ?? const SizedBox.shrink(),
         ),
       ],
     );
   }
 }
 
-/// 窗口控制按钮
-class _WindowButton extends StatefulWidget {
-  final IconData icon;
-  final VoidCallback onPressed;
-  final bool isClose;
+/// 窗口拖拽区域组件
+class WindowDragArea extends StatelessWidget {
+  final Widget? child;
+  final EdgeInsetsGeometry? padding;
 
-  const _WindowButton({
-    required this.icon,
-    required this.onPressed,
-    this.isClose = false,
+  const WindowDragArea({
+    super.key,
+    this.child,
+    this.padding,
   });
 
   @override
-  State<_WindowButton> createState() => _WindowButtonState();
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      behavior: HitTestBehavior.opaque,
+      onPanStart: (details) {
+        windowManager.startDragging();
+      },
+      onDoubleTap: () async {
+        if (await windowManager.isMaximized()) {
+          windowManager.restore();
+        } else {
+          windowManager.maximize();
+        }
+      },
+      child: Container(
+        padding: padding,
+        child: child,
+      ),
+    );
+  }
 }
 
-class _WindowButtonState extends State<_WindowButton> {
+/// 窗口控制按钮组
+class WindowControlButtons extends StatelessWidget {
+  const WindowControlButtons({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        if (Utils.isDesktop) ...[
+          const WindowMinimizeButton(),
+          const WindowMaximizeButton(),
+          const WindowCloseButton(),
+        ]
+      ],
+    );
+  }
+}
+
+/// 窗口最小化按钮
+class WindowMinimizeButton extends StatelessWidget {
+  const WindowMinimizeButton({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return WindowControlButton(
+      icon: Icons.remove_rounded,
+      onPressed: () {
+        windowManager.minimize();
+      },
+    );
+  }
+}
+
+/// 窗口最大化/还原按钮
+class WindowMaximizeButton extends StatefulWidget {
+  const WindowMaximizeButton({super.key});
+
+  @override
+  State<WindowMaximizeButton> createState() => _WindowMaximizeButtonState();
+}
+
+class _WindowMaximizeButtonState extends State<WindowMaximizeButton> {
+  @override
+  void dispose() {
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return WindowControlButton(
+      icon: Icons.crop_square_rounded,
+      onPressed: () async {
+        if (await windowManager.isMaximized()) {
+          await windowManager.restore();
+        } else {
+          await windowManager.maximize();
+        }
+      },
+    );
+  }
+}
+
+/// 窗口关闭按钮
+class WindowCloseButton extends StatelessWidget {
+  const WindowCloseButton({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return WindowControlButton(
+      icon: Icons.close_rounded,
+      onPressed: () {
+        windowManager.close();
+      },
+      isClose: true,
+    );
+  }
+}
+
+/// 窗口控制按钮基础组件
+class WindowControlButton extends StatefulWidget {
+  final IconData icon;
+  final VoidCallback onPressed;
+  final bool isClose;
+  final double width;
+  final double height;
+
+  const WindowControlButton({
+    super.key,
+    required this.icon,
+    required this.onPressed,
+    this.isClose = false,
+    this.width = 46,
+    this.height = 40,
+  });
+
+  @override
+  State<WindowControlButton> createState() => _WindowControlButtonState();
+}
+
+class _WindowControlButtonState extends State<WindowControlButton> {
   bool _isHovered = false;
 
   @override
@@ -149,9 +214,12 @@ class _WindowButtonState extends State<_WindowButton> {
       child: GestureDetector(
         onTap: widget.onPressed,
         child: Container(
-          width: 46,
-          height: 40,
-          color: backgroundColor,
+          width: widget.width,
+          height: widget.height,
+          decoration: BoxDecoration(
+            color: backgroundColor,
+            borderRadius: BorderRadius.circular(8),
+          ),
           child: Icon(
             widget.icon,
             size: 16,

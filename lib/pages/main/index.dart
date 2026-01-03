@@ -6,7 +6,6 @@ import 'package:anime_flow/routes/index.dart';
 import 'package:anime_flow/stores/user_info_store.dart';
 import 'package:anime_flow/utils/crawl_config.dart';
 import 'package:anime_flow/widget/animation_network_image/animation_network_image.dart';
-import 'package:anime_flow/widget/windows_title_bar.dart';
 import 'package:flutter/material.dart';
 import 'package:anime_flow/pages/recommend/index.dart';
 import 'package:get/get.dart';
@@ -70,11 +69,11 @@ class _MainPageState extends State<MainPage> {
     mainPageState = Get.put(MainPageState());
     CrawlConfig.initCrawlConfigs();
     userInfoStore = Get.put(UserInfoStore());
-    
+
     // 从参数中获取初始 index，默认为 0
     final initialIndex = Get.arguments as int? ?? 0;
     _currentIndex = initialIndex.clamp(0, 2);
-    
+
     // 初始化对应的页面
     _initializePage(_currentIndex);
   }
@@ -185,42 +184,43 @@ class _MainPageState extends State<MainPage> {
     final bool isDesktop = MediaQuery.of(context).size.width >= 640;
     final colorScheme = Theme.of(context).colorScheme;
     mainPageState.changeIsDesktop(isDesktop);
-    return WindowsTitleBar(
-      child: Scaffold(
-        body: Row(
+    return Scaffold(
+      body: Row(
         children: [
           if (isDesktop)
-            Obx(() => NavigationRail(
-                  backgroundColor: Colors.black12.withValues(alpha: 0.04),
-                  selectedIndex: _currentIndex,
-                  groupAlignment: 1.0,
-                  onDestinationSelected: _onDestinationSelected,
-                  labelType: NavigationRailLabelType.all,
-                  // 顶部搜索按钮
-                  leading: Padding(
-                    padding: const EdgeInsets.only(bottom: 16, top: 8),
-                    child: FloatingActionButton(
-                      heroTag: 'main_search',
-                      elevation: 0,
-                      onPressed: () {
-                        Get.toNamed(RouteName.search);
-                      },
-                      child: const Icon(Icons.search),
-                    ),
+            Obx(
+              () => NavigationRail(
+                backgroundColor: colorScheme.surfaceContainerHighest,
+                selectedIndex: _currentIndex,
+                groupAlignment: 1.0,
+                onDestinationSelected: _onDestinationSelected,
+                labelType: NavigationRailLabelType.all,
+                // 顶部搜索按钮
+                leading: Padding(
+                  padding: const EdgeInsets.only(bottom: 16, top: 8),
+                  child: FloatingActionButton(
+                    heroTag: 'main_search',
+                    elevation: 0,
+                    onPressed: () {
+                      Get.toNamed(RouteName.search);
+                    },
+                    child: const Icon(Icons.search),
                   ),
-                  // 底部设置按钮
-                  trailing: Padding(
-                    padding: EdgeInsets.only(
-                        bottom: MediaQuery.of(context).padding.bottom + 5),
-                    child: IconButton(
-                        icon: const Icon(Icons.settings_outlined),
-                        iconSize: 28,
-                        tooltip: '设置',
-                        onPressed: () => Navigator.of(context)
-                            .pushNamed(RouteName.settings)),
+                ),
+                // 底部设置按钮
+                trailing: Padding(
+                  padding: EdgeInsets.only(
+                      bottom: MediaQuery.of(context).padding.bottom + 5),
+                  child: IconButton(
+                    icon: const Icon(Icons.settings_outlined),
+                    iconSize: 28,
+                    tooltip: '设置',
+                    onPressed: () => Get.toNamed(RouteName.settings),
                   ),
-                  destinations: _buildRailDestinations(colorScheme),
-                )),
+                ),
+                destinations: _buildRailDestinations(colorScheme),
+              ),
+            ),
           Expanded(
             child: IndexedStack(
               key: _bodyKey,
@@ -234,11 +234,11 @@ class _MainPageState extends State<MainPage> {
       bottomNavigationBar: isDesktop
           ? null
           : Obx(() => NavigationBar(
+                backgroundColor: colorScheme.surfaceContainerHighest,
                 selectedIndex: _currentIndex,
                 onDestinationSelected: _onDestinationSelected,
                 destinations: _buildBarDestinations(colorScheme),
               )),
-      ),
     );
   }
 }

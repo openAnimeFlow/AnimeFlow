@@ -142,9 +142,14 @@ class DioRequest {
   }
 
   /// 下载文件
-  Future<Response> download(String url, String savePath) async {
+  Future<Response> download(
+    String url,
+    String savePath, {
+    ProgressCallback? onReceiveProgress,
+  }) async {
     try {
-      final Response response = await _dio!.download(url, savePath);
+      final Response response = await _dio!
+          .download(url, savePath, onReceiveProgress: onReceiveProgress);
       return response;
     } on DioException catch (e) {
       Logger().e(e.message);

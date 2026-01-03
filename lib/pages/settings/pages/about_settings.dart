@@ -1,3 +1,4 @@
+import 'package:anime_flow/controllers/app_info_controller.dart';
 import 'package:anime_flow/pages/settings/setting_controller.dart';
 import 'package:anime_flow/widget/animation_network_image/animation_network_image.dart';
 import 'package:flutter/material.dart';
@@ -10,7 +11,7 @@ class AboutSettingsPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final settingController = Get.find<SettingController>();
-
+    final appInfoController = Get.put(AppInfoController());
     return Obx(() => Scaffold(
           appBar: AppBar(
             title: const Text("关于(开发中)"),
@@ -19,32 +20,34 @@ class AboutSettingsPage extends StatelessWidget {
           body: ListView(
             padding: const EdgeInsets.all(16),
             children: [
-              Center(
-                child: Column(
-                  children: [
-                    const CircleAvatar(
-                      radius: 80,
-                      backgroundColor: Colors.transparent,
-                      child: AnimationNetworkImage(
-                        url:
-                            'https://gitee.com/anime-flow/anime-flow-assets/raw/master/logo.png',
+              Obx(
+                () => Center(
+                  child: Column(
+                    children: [
+                      const CircleAvatar(
+                        radius: 80,
+                        backgroundColor: Colors.transparent,
+                        child: AnimationNetworkImage(
+                          url:
+                              'https://gitee.com/anime-flow/anime-flow-assets/raw/master/logo.png',
+                        ),
                       ),
-                    ),
-                    const Text(
-                      "AnimeFlow",
-                      style: TextStyle(
-                        fontSize: 24,
-                        fontWeight: FontWeight.bold,
+                       Text(
+                        appInfoController.appName,
+                        style: const TextStyle(
+                          fontSize: 24,
+                          fontWeight: FontWeight.bold,
+                        ),
                       ),
-                    ),
-                    const SizedBox(height: 8),
-                    Text(
-                      "版本 1.0.1",
-                      style: TextStyle(
-                        color: Theme.of(context).colorScheme.onSurfaceVariant,
+                      const SizedBox(height: 8),
+                      Text(
+                        '版本 ${appInfoController.version}',
+                        style: TextStyle(
+                          color: Theme.of(context).colorScheme.onSurfaceVariant,
+                        ),
                       ),
-                    ),
-                  ],
+                    ],
+                  ),
                 ),
               ),
               const SizedBox(height: 32),
@@ -52,8 +55,8 @@ class AboutSettingsPage extends StatelessWidget {
               ListTile(
                 title: const Text("检查更新"),
                 trailing: const Icon(Icons.chevron_right),
-                onTap: () {
-                  // TODO: 实现检查更新
+                onTap: ()  {
+                  appInfoController.compareVersion();
                 },
               ),
               const Divider(),

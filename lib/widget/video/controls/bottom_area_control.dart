@@ -80,11 +80,14 @@ class BottomAreaControl extends StatelessWidget {
                             Expanded(
                               child: fullscreen ||
                                       playPageController.isWideScreen.value
-                                  ? DanmakuTextField()
+                                  ? const DanmakuTextField(
+                                      iconColor: Colors.white,
+                                      textColor: Colors.white,
+                                    )
                                   // 进度条
                                   : Padding(
-                                      padding:
-                                          EdgeInsets.symmetric(horizontal: 5),
+                                      padding: const EdgeInsets.symmetric(
+                                          horizontal: 5),
                                       child: VideoProgressBar(
                                           videoUiStateController:
                                               videoUiStateController),
@@ -95,8 +98,7 @@ class BottomAreaControl extends StatelessWidget {
                             if (playPageController.isWideScreen.value ||
                                 fullscreen)
                               const Padding(
-                                  padding:
-                                      EdgeInsets.symmetric(horizontal: 0),
+                                  padding: EdgeInsets.symmetric(horizontal: 0),
                                   child: RateButton()),
 
                             // 全屏按钮

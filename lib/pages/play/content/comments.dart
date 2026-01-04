@@ -21,6 +21,7 @@ class _CommentsViewState extends State<CommentsView>
   late EpisodesController episodesController;
   Worker? _episodeIdWorker;
   int? _lastRequestedEpisodeId; // 记录上次请求的 episodeId，避免重复请求
+  String _sortOrder = 'default';
 
   @override
   bool get wantKeepAlive => true;
@@ -49,23 +50,26 @@ class _CommentsViewState extends State<CommentsView>
 
   void _getComments() async {
     final episodeId = episodesController.episodeId.value;
-    
+
     // 如果 episodeId 没有变化，直接返回，避免重复请求
     if (episodeId == _lastRequestedEpisodeId) {
       return;
     }
-    
+
     if (episodeId > 0) {
       // 更新上次请求的 episodeId
       _lastRequestedEpisodeId = episodeId;
-      
+
       try {
-        final fetchedComments =
+        final comments =
             await BgmRequest.episodeCommentsService(episodeId: episodeId);
+        if (_sortOrder == 'newest') {
+          comments.sort((a, b) => b.createdAt.compareTo(a.createdAt));
+        }
         // 再次检查 episodeId 是否仍然是当前值（防止请求期间 episodeId 变化）
         if (mounted && episodesController.episodeId.value == episodeId) {
           setState(() {
-            comments = fetchedComments;
+            this.comments = comments;
           });
         }
       } catch (e) {
@@ -85,6 +89,17 @@ class _CommentsViewState extends State<CommentsView>
         });
       }
     }
+  }
+
+  // 评论排序
+  void _sortComments() {
+    setState(() {
+      if (_sortOrder == 'newest') {
+        comments!.sort((a, b) => b.createdAt.compareTo(a.createdAt));
+      } else {
+        comments!.sort((a, b) => a.createdAt.compareTo(b.createdAt));
+      }
+    });
   }
 
   @override
@@ -121,6 +136,33 @@ class _CommentsViewState extends State<CommentsView>
                       style: TextStyle(
                         color: Theme.of(context).colorScheme.outline,
                       ),
+                    ),
+                    //排序
+                    PopupMenuButton<String>(
+                      icon: const Icon(Icons.sort_rounded),
+                      offset: const Offset(0, 40),
+                      itemBuilder: (BuildContext context) {
+                        return [
+                          CheckedPopupMenuItem<String>(
+                            padding: const EdgeInsets.symmetric(vertical: 5),
+                            checked: _sortOrder == 'default',
+                            value: 'default',
+                            child: const Text('默认'),
+                          ),
+                          CheckedPopupMenuItem<String>(
+                            padding: const EdgeInsets.symmetric(vertical: 5),
+                            value: 'newest',
+                            checked: _sortOrder == 'newest',
+                            child: const Text('最新'),
+                          ),
+                        ];
+                      },
+                      onSelected: (value) {
+                        setState(() {
+                          _sortOrder = value;
+                        });
+                        _sortComments();
+                      },
                     )
                   ],
                 ),
@@ -171,13 +213,13 @@ class _CommentsViewState extends State<CommentsView>
     }
   }
 
+  // 主评论
   Widget _buildCommentItem(EpisodeComment comment) {
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 10),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // 主评论
           Row(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
@@ -216,6 +258,7 @@ class _CommentsViewState extends State<CommentsView>
                     ),
                     const SizedBox(height: 4),
                     BBCodeWidget(
+                      imagPreview:  true,
                       borderRadius: BorderRadius.circular(8),
                       bbcode: comment.content,
                     ),
@@ -246,7 +289,56 @@ class _CommentsViewState extends State<CommentsView>
           final reply = entry.value;
           return Column(
             children: [
-              _buildReplyItem(reply),
+              Padding(
+                padding: const EdgeInsets.all(8),
+                child: Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    AnimationNetworkImage(
+                      borderRadius: BorderRadius.circular(8),
+                      height: 32,
+                      width: 32,
+                      url: reply.user.avatar.large,
+                    ),
+                    const SizedBox(width: 8),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Row(
+                            children: [
+                              Text(
+                                reply.user.nickname,
+                                style: TextStyle(
+                                  fontSize: 14,
+                                  fontWeight: FontWeight.bold,
+                                  color:
+                                      Theme.of(context).colorScheme.onSurface,
+                                ),
+                              ),
+                              const SizedBox(width: 8),
+                              Text(
+                                FormatUtil.formatTimestamp(reply.createdAt),
+                                style: TextStyle(
+                                  fontSize: 11,
+                                  color: Theme.of(context).colorScheme.outline,
+                                ),
+                              ),
+                            ],
+                          ),
+                          if (reply.content.isNotEmpty) ...[
+                            const SizedBox(height: 4),
+                            BBCodeWidget(
+                              borderRadius: BorderRadius.circular(8),
+                              bbcode: reply.content,
+                            )
+                          ],
+                        ],
+                      ),
+                    )
+                  ],
+                ),
+              ),
               if (index < replies.length - 1)
                 Divider(
                   height: 1,
@@ -256,58 +348,6 @@ class _CommentsViewState extends State<CommentsView>
             ],
           );
         }).toList(),
-      ),
-    );
-  }
-
-  Widget _buildReplyItem(Reply reply) {
-    return Padding(
-      padding: const EdgeInsets.all(8),
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          AnimationNetworkImage(
-            borderRadius: BorderRadius.circular(8),
-            height: 32,
-            width: 32,
-            url: reply.user.avatar.large,
-          ),
-          const SizedBox(width: 8),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Row(
-                  children: [
-                    Text(
-                      reply.user.nickname,
-                      style: TextStyle(
-                        fontSize: 14,
-                        fontWeight: FontWeight.bold,
-                        color: Theme.of(context).colorScheme.onSurface,
-                      ),
-                    ),
-                    const SizedBox(width: 8),
-                    Text(
-                      FormatUtil.formatTimestamp(reply.createdAt),
-                      style: TextStyle(
-                        fontSize: 11,
-                        color: Theme.of(context).colorScheme.outline,
-                      ),
-                    ),
-                  ],
-                ),
-                if (reply.content.isNotEmpty) ...[
-                  const SizedBox(height: 4),
-                  BBCodeWidget(
-                    borderRadius: BorderRadius.circular(8),
-                    bbcode: reply.content,
-                  )
-                ],
-              ],
-            ),
-          )
-        ],
       ),
     );
   }

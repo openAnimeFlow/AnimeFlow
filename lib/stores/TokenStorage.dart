@@ -11,6 +11,21 @@ class TokenStorage {
     await _storage.write(key: _tokenKey, value: jsonEncode(token.toJson()));
   }
 
+  ///更新token
+  Future<void> updateToken(TokenItem token) async {
+    final oldToken = await getToken();
+    if (oldToken != null) {
+      TokenItem newToken = TokenItem(
+          accessToken: token.accessToken,
+          refreshToken: token.refreshToken,
+          expiresIn: token.expiresIn,
+          tokenType: token.tokenType,
+          scope: token.scope,
+          userId: oldToken.userId);
+      await _storage.write(key: _tokenKey, value: jsonEncode(newToken.toJson()));
+    }
+  }
+
   Future<TokenItem?> getToken() async {
     final token = await _storage.read(key: _tokenKey);
     return token != null ? TokenItem.fromJson(jsonDecode(token)) : null;

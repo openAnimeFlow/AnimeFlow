@@ -14,6 +14,14 @@ class OAuthRequest {
     return TokenItem.fromJson(response.data['data']);
   }
 
+  ///刷新token
+  static Future<TokenItem> refreshTokenService({required String refreshToken}) async {
+    final response = await dioRequest.post(
+        '$_animeFlowApi${AnimeFlowApi.refreshToken}',
+        queryParameters: {'refreshToken': refreshToken});
+    return TokenItem.fromJson(response.data['data']);
+  }
+
   //回调api
   static Future<Map<String, dynamic>> callbackService(
       String code, String state) async {

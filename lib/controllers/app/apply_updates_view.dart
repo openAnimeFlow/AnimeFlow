@@ -1,20 +1,20 @@
 import 'package:anime_flow/controllers/app/app_info_controller.dart';
 import 'package:anime_flow/utils/formatUtil.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_markdown/flutter_markdown.dart';
 import 'package:get/get.dart';
 
 class ApplyUpdatesView extends StatefulWidget {
   final List<DownloadInfo> download;
-  final String versionMessage;
+  final String body;
   final Future<void> Function(String url, String fileName) onStartDownload;
   final void Function() onCancelDownload;
 
   const ApplyUpdatesView({
     super.key,
-    required this.versionMessage,
     required this.onStartDownload,
     required this.onCancelDownload,
-    required this.download,
+    required this.download, required this.body,
   });
 
   @override
@@ -34,7 +34,7 @@ class _ApplyUpdatesViewState extends State<ApplyUpdatesView> {
   @override
   Widget build(BuildContext context) {
     return AlertDialog(
-      title: const Text("检查更新"),
+      title: const Text("有版本更新"),
       content: Obx(() {
         return
             //滚动视图
@@ -43,8 +43,39 @@ class _ApplyUpdatesViewState extends State<ApplyUpdatesView> {
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text(widget.versionMessage),
-              const SizedBox(height: 5),
+              MarkdownBody(
+                data: widget.body,
+                styleSheet: MarkdownStyleSheet(
+                  p: TextStyle(
+                    fontSize: 14,
+                    color: Theme.of(context).colorScheme.onSurface,
+                  ),
+                  h3: TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.bold,
+                    color: Theme.of(context).colorScheme.onSurface,
+                  ),
+                  listBullet: TextStyle(
+                    fontSize: 14,
+                    color: Theme.of(context).colorScheme.onSurface,
+                  ),
+                  code: TextStyle(
+                    fontSize: 12,
+                    fontFamily: 'monospace',
+                    color: Theme.of(context).colorScheme.onSurfaceVariant,
+                    backgroundColor: Theme.of(context)
+                        .colorScheme
+                        .surfaceContainerHighest,
+                  ),
+                  codeblockDecoration: BoxDecoration(
+                    color: Theme.of(context)
+                        .colorScheme
+                        .surfaceContainerHighest,
+                    borderRadius: BorderRadius.circular(4),
+                  ),
+                ),
+              ),
+              const SizedBox(height: 10),
               if (appInfoController.isDownloading.value) ...[
                 // 下载进度显示
                 Column(

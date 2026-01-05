@@ -61,7 +61,6 @@ class AppInfoController extends GetxController {
     try {
       final release = await Request.getReleases();
       final remoteVersion = release['tag_name']?.toString();
-
       if (remoteVersion == null || remoteVersion.isEmpty) {
         Get.log('无法获取远程版本号');
         return VersionType.localNewer;
@@ -103,12 +102,12 @@ class AppInfoController extends GetxController {
         totalBytes.value = 0;
 
         ApplyUpdatesController? updateController;
-
+        final body = release['body']?.toString() ?? '';
         Get.dialog(
           barrierDismissible: false,
           ApplyUpdatesView(
             download: download,
-            versionMessage: VersionType.newVersion.message,
+            body: body,
             onStartDownload: (downloadUrl, fileName) async {
               // 开始下载
               isDownloading.value = true;
@@ -174,7 +173,6 @@ class AppInfoController extends GetxController {
       } else if (comparison < 0) {
         return VersionType.localNewer; // 本地版本更高（开发版本）
       } else {
-        Get.snackbar("检查更新", VersionType.sameVersion.message, maxWidth: 500);
         return VersionType.sameVersion; // 版本相同
       }
     } catch (e) {

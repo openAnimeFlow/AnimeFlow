@@ -50,69 +50,8 @@ class BgmDioRequest {
         onError: (DioException e, handler) async {
           // 处理 401 错误，尝试刷新 token
           if (e.response?.statusCode == 401) {
-            final token = await tokenStorage.getToken();
-            
-            // 如果 token 存在且 refreshToken 不为空，尝试刷新
-            if (token != null && token.refreshToken.isNotEmpty) {
-              // 如果正在刷新，等待刷新完成
-              if (_isRefreshing && _refreshCompleter != null) {
-                try {
-                  await _refreshCompleter!.future;
-                  
-                  // 刷新完成后，使用新的 token 重试请求
-                  final newToken = await tokenStorage.getToken();
-                  if (newToken != null) {
-                    final opts = e.requestOptions;
-                    opts.headers[Constants.authorization] =
-                        '${newToken.tokenType} ${newToken.accessToken}';
-                    try {
-                      final response = await _dio!.fetch(opts);
-                      return handler.resolve(response);
-                    } catch (err) {
-                      return handler.next(e);
-                    }
-                  } else {
-                    return handler.next(e);
-                  }
-                } catch (refreshError) {
-                  // 刷新失败，直接返回原错误
-                  return handler.next(e);
-                }
-              } else {
-                // 开始刷新 token
-                _isRefreshing = true;
-                _refreshCompleter = Completer<void>();
-                
-                try {
-                  final newToken = await OAuthRequest.refreshTokenService(
-                    refreshToken: token.refreshToken,
-                  );
-                  // 更新 token
-                  await tokenStorage.updateToken(newToken);
-                  // 使用新 token 重试原请求
-                  final opts = e.requestOptions;
-                  opts.headers[Constants.authorization] =
-                      '${newToken.tokenType} ${newToken.accessToken}';
-                  final response = await _dio!.fetch(opts);
-                  
-                  _isRefreshing = false;
-                  _refreshCompleter?.complete();
-                  _refreshCompleter = null;
-                  return handler.resolve(response);
-                } catch (refreshError) {
-                  // 刷新失败，删除 token
-                  _isRefreshing = false;
-                  _refreshCompleter?.completeError(refreshError);
-                  _refreshCompleter = null;
-                  await tokenStorage.deleteToken();
-                  logger.e('刷新 token 失败: $refreshError');
-                  return handler.next(e);
-                }
-              }
-            } else {
-              // token 不存在或 refreshToken 为空，删除 token
-              await tokenStorage.deleteToken();
-            }
+            // 刷新 token
+            refreshToken(e, handler);
           }
           logger.e('error: ${e.message}');
           return handler.next(e);
@@ -256,15 +195,77 @@ class BgmDioRequest {
     }
   }
 
-  /// 设置认证token
-  void setAuthorization(TokenItem token) async {
-     _dio!.options.headers[Constants.authorization] =
-        '${token.tokenType} ${token.accessToken}';
-  }
+  ///刷新token
+  void refreshToken(DioException e, ErrorInterceptorHandler handler) async {
+    final oldToken = await tokenStorage.getToken();
 
-  /// 清除认证信息
-  void clearAuthorization() {
-    _dio!.options.headers.remove(Constants.authorization);
+    // 如果 token 存在且 refreshToken 不为空，尝试刷新
+    if (oldToken != null && oldToken.refreshToken.isNotEmpty) {
+      // 如果正在刷新，等待刷新完成
+      if (_isRefreshing && _refreshCompleter != null) {
+        try {
+          await _refreshCompleter!.future;
+
+          // 刷新完成后，使用新的 token 重试请求
+          final newToken = await tokenStorage.getToken();
+          if (newToken != null) {
+            final opts = e.requestOptions;
+            opts.headers[Constants.authorization] =
+                '${newToken.tokenType} ${newToken.accessToken}';
+            try {
+              final response = await _dio!.fetch(opts);
+              return handler.resolve(response);
+            } catch (err) {
+              return handler.next(e);
+            }
+          } else {
+            return handler.next(e);
+          }
+        } catch (refreshError) {
+          // 刷新失败，直接返回原错误
+          return handler.next(e);
+        }
+      } else {
+        // 开始刷新 token
+        _isRefreshing = true;
+        _refreshCompleter = Completer<void>();
+
+        try {
+          final newToken = await OAuthRequest.refreshTokenService(
+            refreshToken: oldToken.refreshToken,
+          );
+          TokenItem newTokenItem = TokenItem(
+              accessToken: newToken.accessToken,
+              refreshToken: newToken.refreshToken,
+              expiresIn: newToken.expiresIn,
+              tokenType: newToken.tokenType,
+              scope: newToken.scope,
+              userId: oldToken.userId);
+          await tokenStorage.saveToken(newTokenItem);
+          // 使用新 token 重试原请求
+          final opts = e.requestOptions;
+          opts.headers[Constants.authorization] =
+              '${newToken.tokenType} ${newToken.accessToken}';
+          final response = await _dio!.fetch(opts);
+
+          _isRefreshing = false;
+          _refreshCompleter?.complete();
+          _refreshCompleter = null;
+          return handler.resolve(response);
+        } catch (refreshError) {
+          // 刷新失败，删除 token
+          _isRefreshing = false;
+          _refreshCompleter?.completeError(refreshError);
+          _refreshCompleter = null;
+          await tokenStorage.deleteToken();
+          logger.e('刷新 token 失败: $refreshError');
+          return handler.next(e);
+        }
+      }
+    } else {
+      // token 不存在或 refreshToken 为空，删除 token
+      await tokenStorage.deleteToken();
+    }
   }
 }
 

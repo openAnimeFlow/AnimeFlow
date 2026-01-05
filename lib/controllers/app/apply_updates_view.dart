@@ -1,7 +1,7 @@
 import 'package:anime_flow/controllers/app/app_info_controller.dart';
 import 'package:anime_flow/utils/formatUtil.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_markdown/flutter_markdown.dart';
+import 'package:flutter_markdown_plus/flutter_markdown_plus.dart';
 import 'package:get/get.dart';
 
 class ApplyUpdatesView extends StatefulWidget {

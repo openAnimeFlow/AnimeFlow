@@ -8,6 +8,7 @@ import 'package:get/get.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'package:media_kit/media_kit.dart';
 import 'package:anime_flow/routes/index.dart';
+import 'package:anime_flow/controllers/app/app_info_controller.dart';
 import 'package:anime_flow/controllers/theme_controller.dart';
 import 'package:window_manager/window_manager.dart';
 
@@ -18,6 +19,7 @@ void main() async {
   await Hive.initFlutter();
   await Hive.openBox(Constants.crawlConfigs);
   final themeController = Get.put(ThemeController());
+  final appInfoController = Get.put(AppInfoController());
   await themeController.initTheme();
 
   // Windows 平台初始化窗口管理器
@@ -34,6 +36,9 @@ void main() async {
   }
 
   runApp(const MyApp());
+  Future.delayed(const Duration(seconds: 2), () {
+    appInfoController.compareVersion();
+  });
 }
 
 class MyApp extends StatelessWidget {

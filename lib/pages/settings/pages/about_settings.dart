@@ -11,7 +11,7 @@ class AboutSettingsPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final settingController = Get.find<SettingController>();
-    final appInfoController = Get.put(AppInfoController());
+    final appInfoController = Get.find<AppInfoController>();
     return Obx(() => Scaffold(
           appBar: AppBar(
             title: const Text("关于(开发中)"),
@@ -32,7 +32,7 @@ class AboutSettingsPage extends StatelessWidget {
                               'https://gitee.com/anime-flow/anime-flow-assets/raw/master/logo.png',
                         ),
                       ),
-                       Text(
+                      Text(
                         appInfoController.appName,
                         style: const TextStyle(
                           fontSize: 24,
@@ -55,7 +55,7 @@ class AboutSettingsPage extends StatelessWidget {
               ListTile(
                 title: const Text("检查更新"),
                 trailing: const Icon(Icons.chevron_right),
-                onTap: ()  {
+                onTap: () {
                   appInfoController.compareVersion();
                 },
               ),

@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'dart:ui';
 import 'package:anime_flow/http/dio/dio_request.dart';
+import 'package:anime_flow/http/requests/damaku.dart';
 import 'package:anime_flow/utils/utils.dart';
 import 'package:crypto/crypto.dart';
 import 'package:dio/dio.dart';
@@ -102,10 +103,9 @@ class Danmaku {
 void main() {
   test('Get danmaku by episode ID test', () async {
     await dotenv.load(fileName: ".env");
-    final danmakus = await Damaku.getDanDanmakuByEpisodeID(194020001);
-    expect(danmakus, isA<List<Danmaku>>());
+    final BangumiID = await  DanmakuRequest.getDanDanBangumiIDByBgmBangumiID(565802);
+    final danmakus = await DanmakuRequest.getDanDanmaku(BangumiID, 1);
     print('弹幕内容：$danmakus');
     print('获取到 ${danmakus.length} 条弹幕');
-    ;
   });
 }

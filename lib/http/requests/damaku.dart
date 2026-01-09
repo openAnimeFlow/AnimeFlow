@@ -49,8 +49,8 @@ class DanmakuRequest {
       return danmakus;
     }
 
-    var path = DamakuApi.dandanAPIComment + bangumiID.toString() + episode.toString().padLeft(4,'0');
-    var endPoint = _danDanPlayMain + path;
+    final path = DamakuApi.dandanAPIComment + bangumiID.toString() + episode.toString().padLeft(4,'0');
+    final endPoint = _danDanPlayMain + path;
     Map<String, String> withRelated = {
       'withRelated': 'true',
     };

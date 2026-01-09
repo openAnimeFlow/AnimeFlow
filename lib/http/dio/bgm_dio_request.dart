@@ -4,6 +4,7 @@ import 'package:anime_flow/constants/constants.dart';
 import 'package:anime_flow/http/requests/oauth_request.dart';
 import 'package:anime_flow/models/item/token_item.dart';
 import 'package:anime_flow/stores/TokenStorage.dart';
+import 'package:anime_flow/stores/user_info_store.dart';
 import 'package:dio/dio.dart';
 import 'package:logger/logger.dart';
 
@@ -254,10 +255,12 @@ class BgmDioRequest {
           return handler.resolve(response);
         } catch (refreshError) {
           // 刷新失败，删除 token
+          final UserInfoStore userInfoStore = UserInfoStore();
           _isRefreshing = false;
           _refreshCompleter?.completeError(refreshError);
           _refreshCompleter = null;
           await tokenStorage.deleteToken();
+          userInfoStore.clearUserInfo();
           logger.e('刷新 token 失败: $refreshError');
           return handler.next(e);
         }

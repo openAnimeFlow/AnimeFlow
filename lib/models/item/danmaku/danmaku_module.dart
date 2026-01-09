@@ -24,4 +24,9 @@ class Danmaku {
     String sourceValue = parts[3];
     return Danmaku(time: timeValue, message: messageValue, type: typeValue, color: color, source: sourceValue);
   }
+
+  @override
+  String toString() {
+    return 'Danmaku{message: $message, time: $time, type: $type, color: $color, source: $source}';
+  }
 }

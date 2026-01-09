@@ -1,6 +1,6 @@
+import 'package:anime_flow/controllers/subject/subject_state_controller.dart';
 import 'package:anime_flow/models/item/subject_basic_data_item.dart';
 import 'package:anime_flow/pages/anime_info/head.dart';
-import 'package:anime_flow/controllers/anime/anime_state_controller.dart';
 import 'package:anime_flow/http/requests/bgm_request.dart';
 import 'package:anime_flow/models/item/bangumi/episodes_item.dart';
 import 'package:anime_flow/models/item/bangumi/subjects_info_item.dart';
@@ -19,7 +19,7 @@ class AnimeDetailPage extends StatefulWidget {
 
 class _AnimeDetailPageState extends State<AnimeDetailPage> {
   late SubjectBasicData subjectBasicData;
-  late AnimeStateController animeStateController;
+  late SubjectStateController animeStateController;
   late Future<SubjectsInfoItem?> _subjectsItem;
   late Future<EpisodesItem> episodesFuture;
   final double _contentHeight = 200.0; // 内容区域的高度
@@ -31,21 +31,17 @@ class _AnimeDetailPageState extends State<AnimeDetailPage> {
   void initState() {
     super.initState();
     subjectBasicData = Get.arguments;
-    animeStateController = Get.put(AnimeStateController());
+    animeStateController = Get.put(SubjectStateController());
     _subjectsItem = BgmRequest.getSubjectByIdService(subjectBasicData.id);
     episodesFuture =
         BgmRequest.getSubjectEpisodesByIdService(subjectBasicData.id, 100, 0);
-    setSubjectName();
-  }
-
-  void setSubjectName() {
-    animeStateController.setAnimeName(subjectBasicData.name);
+    animeStateController.setSubject(subjectBasicData.name, subjectBasicData.id);
   }
 
   @override
   void dispose() {
     _nestedScrollController.dispose();
-    Get.delete<AnimeStateController>();
+    Get.delete<SubjectStateController>();
     super.dispose();
   }
 

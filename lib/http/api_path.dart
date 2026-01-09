@@ -1,0 +1,90 @@
+class BgmNextApi {
+  static const String baseUrl = 'https://next.bgm.tv';
+
+  ///条目
+  static const String subjects = '/p1/subjects';
+
+  ///热门条目
+  static const String hot = '/p1/trending/subjects';
+
+  ///章节s
+  static const String episodes = '/p1/subjects/{subjectId}/episodes';
+
+  ///条目评论
+  static const String subjectComments = '/p1/subjects/{subjectId}/comments';
+
+  ///条目搜索
+  static const String search = '/p1/search/subjects';
+
+  ///每日放送
+  static const String calendar = '/p1/calendar';
+
+  ///剧集评论
+  static const String episodeComments = '/p1/episodes/{episodeId}/comments';
+
+  ///角色
+  static const String characters = '/p1/subjects/{subjectId}/characters';
+
+  ///关联条目
+  static const String relations = '/p1/subjects/{subjectId}/relations';
+}
+
+class BgmUsersApi {
+  ///条目收藏
+  static const String collections = '/p1/collections/subjects';
+
+  ///用户信息
+  static const String userInfo = '/p1/users/{username}';
+
+  ///用户收藏
+  static const String userCollections =
+      '/p1/users/{username}/collections/subjects';
+}
+
+class BgmApi {
+  static const String baseUrl = 'https://bgm.tv';
+
+  // 授权
+  static const String oauth = '/oauth/authorize';
+}
+
+class CommonApi {
+  //bangumi.tv动漫页
+  static const String bangumiTV = 'https://bangumi.tv/anime/browser';
+
+  // bangumi请求头
+  static const String bangumiUserAgent =
+      'AnimeFlow/1.0.1 (https://github.com/openAnimeFlow/AnimeFlow.git)';
+
+  /// github版本信息
+  static const String githubReleases =
+      'https://api.github.com/repos/openAnimeFlow/AnimeFlow/releases/latest';
+}
+
+class AnimeFlowApi {
+  static const String animeFlowApi = 'http://129.204.224.233:1024';
+
+  static const String token = '/oauth/token';
+
+  static const String refreshToken = '/oauth/refresh';
+
+  static const String session = '/oauth/session';
+
+  static const String callback = '/oauth/callback';
+}
+
+class DamakuApi {
+  static const String dandanAPIDomain = 'https://api.dandanplay.net';
+
+  /// 获取弹幕
+  static const String dandanAPIComment = "/api/v2/comment/";
+
+  /// 检索弹弹番剧元数据
+  static const String dandanAPISearch = "/api/v2/search/anime";
+
+  /// 获取弹弹番剧元数据
+  static const String dandanAPIInfo = "/api/v2/bangumi/";
+
+  /// 获取弹弹番剧元数据（通过BGM番剧ID）
+  static const String dandanAPIInfoByBgmBangumiId = "/api/v2/bangumi/bgmtv/{bgmtvSubjectId}";
+}

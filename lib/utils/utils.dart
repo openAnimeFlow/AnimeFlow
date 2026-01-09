@@ -1,6 +1,5 @@
 import 'dart:io';
 import 'dart:math';
-
 import 'package:anime_flow/constants/constants.dart';
 import 'package:anime_flow/http/dio/dio_request.dart';
 import 'package:flutter/cupertino.dart';
@@ -149,5 +148,15 @@ class Utils {
       Get.snackbar('提示', '保存图片失败:$e', maxWidth: 500);
       Logger().e('保存图片失败:$e');
     }
+  }
+
+  static Color generateDanmakuColor(int colorValue) {
+    // 提取颜色分量
+    int red = (colorValue >> 16) & 0xFF;
+    int green = (colorValue >> 8) & 0xFF;
+    int blue = colorValue & 0xFF;
+    // 创建Color对象
+    Color color = Color.fromARGB(255, red, green, blue);
+    return color;
   }
 }

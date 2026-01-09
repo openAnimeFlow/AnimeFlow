@@ -1,4 +1,4 @@
-import 'package:anime_flow/http/api/common_api.dart';
+import 'package:anime_flow/http/api_path.dart';
 import 'package:anime_flow/http/dio/dio_request.dart';
 
 class Request {

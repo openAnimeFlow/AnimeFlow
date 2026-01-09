@@ -1,4 +1,4 @@
-import 'package:anime_flow/http/api/bgm_api.dart';
+import 'package:anime_flow/http/api_path.dart';
 import 'package:anime_flow/utils/utils.dart';
 import 'package:anime_flow/widget/animation_network_image/animation_network_image.dart';
 import 'package:anime_flow/models/item/bangumi/subjects_info_item.dart';

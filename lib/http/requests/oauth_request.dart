@@ -1,4 +1,4 @@
-import 'package:anime_flow/http/api/anime_flow_api.dart';
+import 'package:anime_flow/http/api_path.dart';
 import 'package:anime_flow/http/dio/bgm_dio_request.dart';
 import 'package:anime_flow/http/dio/dio_request.dart';
 import 'package:anime_flow/models/item/token_item.dart';

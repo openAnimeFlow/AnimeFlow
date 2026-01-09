@@ -6,14 +6,14 @@ import 'package:anime_flow/http/requests/damaku.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
-class DanmakuView extends StatefulWidget {
-  const DanmakuView({super.key});
+class DanmakuCard extends StatefulWidget {
+  const DanmakuCard({super.key});
 
   @override
-  State<DanmakuView> createState() => _DanmakuViewState();
+  State<DanmakuCard> createState() => _DanmakuCardState();
 }
 
-class _DanmakuViewState extends State<DanmakuView> {
+class _DanmakuCardState extends State<DanmakuCard> {
   late SubjectStateController subjectStateController;
   late VideoStateController videoStateController;
   late DanmakuController danmakuController;

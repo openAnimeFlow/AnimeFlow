@@ -9,6 +9,7 @@ import 'package:anime_flow/widget/video/controls/index_controls.dart';
 import 'package:anime_flow/controllers/video/data/data_source_controller.dart';
 import 'package:anime_flow/controllers/video/video_state_controller.dart';
 import 'package:anime_flow/controllers/video/video_ui_state_controller.dart';
+import 'package:anime_flow/pages/play/content/DanmakuView.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:logger/logger.dart';
@@ -205,6 +206,10 @@ class _VideoViewState extends State<VideoView> {
           controls: (state) => VideoControlsUiView(
             subjectBasicData: widget.subjectBasicData,
           ),
+        ),
+        // 弹幕层，叠加在播放器上
+        Positioned.fill(
+          child: const DanmakuView(),
         ),
         /// webview_windows 的窗口必须嵌入到 Widget 树中才能被控制
         /// 通过 SizedBox 的 height 为 0 来隐藏它，但保持其在 Widget 树中(Kazumi)

@@ -1,9 +1,9 @@
-import 'package:anime_flow/models/item/subject_basic_data_item.dart';
 import 'package:anime_flow/utils/utils.dart';
 import 'package:anime_flow/widget/video/controls/bottom_area_control.dart';
 import 'package:anime_flow/widget/video/controls/desktop_gesture_detector.dart';
 import 'package:anime_flow/widget/video/controls/middle_area_control.dart';
 import 'package:anime_flow/widget/video/controls/top_area_control.dart';
+import 'package:anime_flow/widget/video/danmaku/danmaku_view.dart';
 import 'package:anime_flow/controllers/episodes/episodes_controller.dart';
 import 'package:anime_flow/controllers/play/PlayPageController.dart';
 import 'package:anime_flow/controllers/video/video_state_controller.dart';
@@ -13,16 +13,16 @@ import 'package:get/get.dart';
 
 import 'mobile_gesture_detector.dart';
 
-///播放器控件
-class VideoControlsUiView extends StatefulWidget {
+///播放器ui
+class VideoUi extends StatefulWidget {
 
-  const VideoControlsUiView({super.key});
+  const VideoUi({super.key});
 
   @override
-  State<VideoControlsUiView> createState() => _VideoControlsUiViewState();
+  State<VideoUi> createState() => _VideoUiState();
 }
 
-class _VideoControlsUiViewState extends State<VideoControlsUiView> {
+class _VideoUiState extends State<VideoUi> {
   late VideoUiStateController videoUiStateController;
   late PlayController playPageController;
   late VideoStateController videoStateController;
@@ -53,6 +53,11 @@ class _VideoControlsUiViewState extends State<VideoControlsUiView> {
               ? const MobileGestureDetector(child: MiddleAreaControl())
               //桌面端手势
               : const DesktopGestureDetector(child: MiddleAreaControl())),
+
+      /// 弹幕层
+      const Positioned.fill(
+        child: DanmakuView(),
+      ),
 
       ///顶部
       const Positioned(

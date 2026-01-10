@@ -202,9 +202,7 @@ class _VideoViewState extends State<VideoView> {
       children: [
         Video(
           controller: controller,
-          controls: (controller) {
-            return const VideoControlsUiView();
-          },
+          controls: (state) => const VideoControlsUiView(),
         ),
         // 弹幕层
         const Positioned.fill(

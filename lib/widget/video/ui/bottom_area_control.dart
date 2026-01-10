@@ -1,9 +1,9 @@
 import 'package:anime_flow/controllers/play/PlayPageController.dart';
-import 'package:anime_flow/widget/video/controls/rate_button.dart';
-import 'package:anime_flow/widget/video/controls/video_ui_components.dart';
 import 'package:anime_flow/controllers/video/video_state_controller.dart';
 import 'package:anime_flow/controllers/video/video_ui_state_controller.dart';
 import 'package:anime_flow/models/enums/video_controls_icon_type.dart';
+import 'package:anime_flow/widget/video/ui/rate_button.dart';
+import 'package:anime_flow/widget/video/ui/video_ui_components.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:media_kit_video/media_kit_video.dart';

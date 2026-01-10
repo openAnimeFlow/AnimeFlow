@@ -1,16 +1,16 @@
 import 'package:anime_flow/utils/utils.dart';
-import 'package:anime_flow/widget/video/controls/bottom_area_control.dart';
-import 'package:anime_flow/widget/video/controls/desktop_gesture_detector.dart';
-import 'package:anime_flow/widget/video/controls/middle_area_control.dart';
-import 'package:anime_flow/widget/video/controls/top_area_control.dart';
-import 'package:anime_flow/widget/video/danmaku/danmaku_view.dart';
+import 'package:anime_flow/widget/video/ui/danmaku_view.dart';
 import 'package:anime_flow/controllers/episodes/episodes_controller.dart';
 import 'package:anime_flow/controllers/play/PlayPageController.dart';
 import 'package:anime_flow/controllers/video/video_state_controller.dart';
 import 'package:anime_flow/controllers/video/video_ui_state_controller.dart';
+import 'package:anime_flow/widget/video/ui/middle_area_control.dart';
+import 'package:anime_flow/widget/video/ui/top_area_control.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
+import 'bottom_area_control.dart';
+import 'desktop_gesture_detector.dart';
 import 'mobile_gesture_detector.dart';
 
 ///播放器ui

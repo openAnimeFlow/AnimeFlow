@@ -26,6 +26,7 @@ class _VideoResourcesViewState extends State<VideoResourcesView> {
     super.initState();
     dataSourceController = Get.find<DataSourceController>();
     subjectStateController = Get.find<SubjectStateController>();
+    // TODO 切换全屏状态会重新初始化，等待修复
     dataSourceController.initResources(subjectStateController.name);
   }
 

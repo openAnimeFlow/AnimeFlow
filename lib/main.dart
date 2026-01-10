@@ -27,7 +27,7 @@ void main() async {
     await windowManager.ensureInitialized();
     const windowOptions = WindowOptions(
       titleBarStyle: TitleBarStyle.hidden,
-      backgroundColor: Colors.transparent,
+      // backgroundColor: Colors.transparent,
     );
     await windowManager.waitUntilReadyToShow(windowOptions, () async {
       await windowManager.show();

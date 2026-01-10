@@ -43,6 +43,7 @@ class _DanmakuCardState extends State<DanmakuCard> {
     });
 
     // 监听播放状态变化，只在视频第一次开始播放时加载弹幕
+    // TODO 需要修改到当视频解析成功后调用
     ever(videoStateController.playing, (bool playing) {
       if (playing &&
           !_hasDanmakuLoaded &&

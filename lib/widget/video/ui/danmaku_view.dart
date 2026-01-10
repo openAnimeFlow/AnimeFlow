@@ -13,10 +13,9 @@ class DanmakuView extends StatefulWidget {
   State<DanmakuView> createState() => _DanmakuViewState();
 }
 
-class _DanmakuViewState extends State<DanmakuView> {
+class _DanmakuViewState extends State<DanmakuView> with AutomaticKeepAliveClientMixin{
   late VideoStateController videoStateController;
   late PlayController playPageController;
-  final _danmuKey = GlobalKey();
   Timer? _danmakuTimer;
   bool _danmakuOn = true;
 
@@ -34,6 +33,10 @@ class _DanmakuViewState extends State<DanmakuView> {
   late double _danmakuLineHeight;
   late int _danmakuFontWeight;
   late bool _danmakuUseSystemFont;
+
+
+  @override
+  bool get wantKeepAlive => true;
 
   @override
   void initState() {
@@ -132,13 +135,22 @@ class _DanmakuViewState extends State<DanmakuView> {
 
   @override
   Widget build(BuildContext context) {
+    super.build(context);
     return IgnorePointer(
       // 弹幕层不拦截点击事件，让播放器控件可以正常交互
       ignoring: true,
       child: DanmakuScreen(
-        key: _danmuKey,
+        // 使用稳定的 ValueKey，确保全屏切换时 Flutter 复用同一个 widget 实例
+        // 注意：不能使用 widget.key（可能是 GlobalKey），因为 GlobalKey 只能用于一个 widget
+        // ，使用稳定的 ValueKey 来保持实例
+        key: const ValueKey('danmaku_screen'),
         createdController: (DanmakuController controller) {
+          // 更新全局控制器引用
           playPageController.danmakuController = controller;
+          // 如果需要更新弹幕速度，可以在这里添加
+          // WidgetsBinding.instance.addPostFrameCallback((_) {
+          //   // 更新弹幕速度的逻辑
+          // });
         },
         option: DanmakuOption(
           hideTop: _hideTop,

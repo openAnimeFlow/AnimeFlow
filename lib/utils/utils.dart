@@ -4,12 +4,14 @@ import 'package:anime_flow/constants/constants.dart';
 import 'package:anime_flow/http/dio/dio_request.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_inappwebview_platform_interface/flutter_inappwebview_platform_interface.dart';
 import 'package:gal/gal.dart';
 import 'package:get/get.dart';
 import 'package:path_provider/path_provider.dart'
     show getDownloadsDirectory, getTemporaryDirectory;
 import 'package:logger/logger.dart';
+import 'package:window_manager/window_manager.dart';
 
 class Utils {
   static Logger logger = Logger();
@@ -158,5 +160,52 @@ class Utils {
     // 创建Color对象
     Color color = Color.fromARGB(255, red, green, blue);
     return color;
+  }
+
+  /// 进入全屏显示
+  /// 
+  static Future<void> enterFullScreen({bool lockOrientation = true}) async {
+    if (Platform.isLinux || Platform.isMacOS || Platform.isWindows) {
+      await windowManager.setFullScreen(true);
+      return;
+    }
+    await SystemChrome.setEnabledSystemUIMode(
+      SystemUiMode.immersiveSticky,
+    );
+    if (!lockOrientation) {
+      return;
+    }
+    // Android 多窗口模式下不锁定方向
+    // 简化处理，如果需要可以添加 device_info_plus 来检测
+    // 横屏
+    await SystemChrome.setPreferredOrientations(
+        [DeviceOrientation.landscapeLeft, DeviceOrientation.landscapeRight]);
+  }
+
+  /// 退出全屏显示
+  ///
+  static Future<void> exitFullScreen({bool lockOrientation = true}) async {
+    if (Platform.isLinux || Platform.isMacOS || Platform.isWindows) {
+      await windowManager.setFullScreen(false);
+    }
+    late SystemUiMode mode = SystemUiMode.edgeToEdge;
+    try {
+      if (Platform.isAndroid || Platform.isIOS) {
+        // 简化处理，直接使用 edgeToEdge
+        // 如果需要更精确的控制，可以添加 device_info_plus 来检测 Android 版本
+        mode = SystemUiMode.edgeToEdge;
+      }
+      await SystemChrome.setEnabledSystemUIMode(mode);
+    } catch (_) {}
+    if (!lockOrientation) {
+      return;
+    }
+    // 恢复方向
+    await SystemChrome.setPreferredOrientations([
+      DeviceOrientation.portraitUp,
+      DeviceOrientation.portraitDown,
+      DeviceOrientation.landscapeLeft,
+      DeviceOrientation.landscapeRight
+    ]);
   }
 }

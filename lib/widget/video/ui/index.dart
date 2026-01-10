@@ -15,7 +15,6 @@ import 'mobile_gesture_detector.dart';
 
 ///播放器ui
 class VideoUi extends StatefulWidget {
-
   const VideoUi({super.key});
 
   @override
@@ -54,21 +53,11 @@ class _VideoUiState extends State<VideoUi> {
               //桌面端手势
               : const DesktopGestureDetector(child: MiddleAreaControl())),
 
-      /// 弹幕层
-      const Positioned.fill(
-        child: DanmakuView(),
-      ),
-
       ///顶部
-      const Positioned(
-        top: 0,
-        left: 0,
-        right: 0,
-        child: TopAreaControl(),
-      ),
+      const Positioned(top: 0, left: 0, right: 0, child: TopAreaControl()),
 
       ///底部
-      const Positioned(bottom: 0, left: 0, right: 0, child: BottomAreaControl()),
+      const Positioned(bottom: 0, left: 0, right: 0, child: BottomAreaControl())
     ]);
   }
 }

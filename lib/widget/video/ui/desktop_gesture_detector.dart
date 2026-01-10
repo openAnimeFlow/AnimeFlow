@@ -1,12 +1,12 @@
 import 'dart:async';
 
+import 'package:anime_flow/controllers/play/PlayPageController.dart';
 import 'package:anime_flow/controllers/video/video_state_controller.dart';
 import 'package:anime_flow/controllers/video/video_ui_state_controller.dart';
 import 'package:anime_flow/models/enums/video_controls_icon_type.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:media_kit_video/media_kit_video.dart';
 
 /// 桌面端手势检测器
 class DesktopGestureDetector extends StatelessWidget {
@@ -19,6 +19,7 @@ class DesktopGestureDetector extends StatelessWidget {
   Widget build(BuildContext context) {
     final videoStateController = Get.find<VideoStateController>();
     final videoUiStateController = Get.find<VideoUiStateController>();
+    final playPageController = Get.find<PlayController>();
     return Listener(
         // 鼠标指针信号事件监听（用于鼠标滚轮）
         onPointerSignal: (event) {
@@ -56,8 +57,10 @@ class DesktopGestureDetector extends StatelessWidget {
 
           child: GestureDetector(
             // 双击事件
+            // 使用自定义全屏方法，
             onDoubleTap: () {
-              toggleFullscreen(context);
+              playPageController.handleFullscreenChange();
+              playPageController.toggleFullScreen();
             },
 
             // 单击事件

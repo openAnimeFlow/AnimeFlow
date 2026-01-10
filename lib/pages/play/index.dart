@@ -58,59 +58,71 @@ class _PlayPageState extends State<PlayPage> {
     return LayoutBuilder(builder: (context, constraints) {
       final bool isWideScreen = constraints.maxWidth > 600;
       playController.updateIsWideScreen(isWideScreen); // 更新布局状态
-      return isWideScreen
-          // 水平布局
-          ? Scaffold(
-              body: Row(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Expanded(
-                  child: Center(
-                    child: VideoView(
-                      key: _videoKey,
+      
+      // 使用 Obx 监听全屏状态变化，
+      return Obx(() {
+        // 全屏时，视频占满整个屏幕
+        if (playController.isFullscreen.value) {
+          return Scaffold(
+            backgroundColor: Colors.black,
+            body: VideoView(key: _videoKey),
+          );
+        }
+        
+        return isWideScreen
+            // 水平布局
+            ? Scaffold(
+                body: Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Expanded(
+                    child: Center(
+                      child: VideoView(
+                        key: _videoKey,
+                      ),
                     ),
                   ),
+                  AnimatedContainer(
+                      duration: const Duration(milliseconds: 100),
+                      width: playController.isContentExpanded.value
+                          ? PlayLayoutConstant.playContentWidth
+                          : 0,
+                      child: Opacity(
+                        opacity: playController.isContentExpanded.value ? 1 : 0,
+                        child: ContentView(
+                          episodes,
+                          key: _contentKey),
+                      ))
+                ],
+              ))
+            // 垂直布局
+            : Scaffold(
+                appBar: AppBar(
+                  toolbarHeight: 0,
+                  backgroundColor: Colors.black,
+                  systemOverlayStyle: SystemUiOverlayStyle.light.copyWith(
+                    systemNavigationBarColor: Colors.transparent,
+                  ),
                 ),
-                Obx(() => AnimatedContainer(
-                    duration: const Duration(milliseconds: 100),
-                    width: playController.isContentExpanded.value
-                        ? PlayLayoutConstant.playContentWidth
-                        : 0,
-                    child: Opacity(
-                      opacity: playController.isContentExpanded.value ? 1 : 0,
-                      child: ContentView(
-                        episodes,
-                        key: _contentKey),
-                    )))
-              ],
-            ))
-          // 垂直布局
-          : Scaffold(
-              appBar: AppBar(
-                toolbarHeight: 0,
-                backgroundColor: Colors.black,
-                systemOverlayStyle: SystemUiOverlayStyle.light.copyWith(
-                  systemNavigationBarColor: Colors.transparent,
+                body: SafeArea(
+                  bottom: false,
+                  child: Column(
+                    children: [
+                      AspectRatio(
+                        aspectRatio: 16 / 9,
+                        child: VideoView(
+                          key: _videoKey),
+                      ),
+                      Expanded(
+                        child: ContentView(
+                          episodes,
+                          key: _contentKey),
+                      ),
+                    ],
+                  ),
                 ),
-              ),
-              body: SafeArea(
-                bottom: false,
-                child: Column(
-                  children: [
-                    AspectRatio(
-                      aspectRatio: 16 / 9,
-                      child: VideoView(
-                        key: _videoKey),
-                    ),
-                    Expanded(
-                      child: ContentView(
-                        episodes,
-                        key: _contentKey),
-                    ),
-                  ],
-                ),
-              ),
-            );
+              );
+      });
     });
   }
 }

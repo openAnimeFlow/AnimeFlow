@@ -4,15 +4,18 @@ import 'dart:io';
 import 'package:anime_flow/models/enums/video_controls_icon_type.dart';
 import 'package:anime_flow/webview/webview_controller.dart';
 import 'package:anime_flow/webview/webview_item.dart';
+import 'package:anime_flow/controllers/play/PlayPageController.dart';
 import 'package:anime_flow/controllers/video/data/data_source_controller.dart';
 import 'package:anime_flow/controllers/video/video_state_controller.dart';
 import 'package:anime_flow/controllers/video/video_ui_state_controller.dart';
+import 'package:anime_flow/widget/video/ui/danmaku_view.dart';
 import 'package:anime_flow/widget/video/ui/index.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:logger/logger.dart';
 import 'package:media_kit/media_kit.dart';
 import 'package:media_kit_video/media_kit_video.dart';
+import 'package:window_manager/window_manager.dart';
 
 class VideoView extends StatefulWidget {
 
@@ -22,13 +25,15 @@ class VideoView extends StatefulWidget {
   State<VideoView> createState() => _VideoViewState();
 }
 
-class _VideoViewState extends State<VideoView> {
+class _VideoViewState extends State<VideoView> with WindowListener {
   late final player = Player();
   late final controller = VideoController(player);
   late VideoUiStateController videoUiStateController;
   late DataSourceController dataSourceController;
+  late PlayController playController;
   final webviewItemController = Get.find<WebviewItemController>();
   final logger = Logger();
+  final _danmuKey = GlobalKey();
 
   StreamSubscription<bool>? _initSubscription;
   StreamSubscription<(String, int)>? _videoURLSubscription;
@@ -46,11 +51,19 @@ class _VideoViewState extends State<VideoView> {
     Get.put(VideoStateController(player));
     dataSourceController = Get.find<DataSourceController>();
     videoUiStateController = Get.put(VideoUiStateController(player));
+    playController = Get.find<PlayController>();
     // 初始化屏幕亮度
     videoUiStateController.initializeBrightness();
 
     // 初始化 WebView 并监听视频URL解析结果
     _initWebview();
+
+    // 监听窗口状态变化，
+    if (Platform.isWindows || Platform.isLinux || Platform.isMacOS) {
+      windowManager.addListener(this);
+      // 检测桌面端全屏状态
+      playController.checkDesktopFullscreen();
+    }
   }
 
   Future<void> _initWebview() async {
@@ -188,10 +201,38 @@ class _VideoViewState extends State<VideoView> {
     _videoURLSubscription?.cancel();
     _videoLoadingSubscription?.cancel();
     _logSubscription?.cancel();
+    // 移除窗口监听器
+    if (Platform.isWindows || Platform.isLinux || Platform.isMacOS) {
+      windowManager.removeListener(this);
+    }
     Get.delete<VideoUiStateController>();
     Get.delete<VideoStateController>();
     player.dispose();
     super.dispose();
+  }
+
+  /// 窗口恢复时处理
+  /// 
+  @override
+  void onWindowRestore() {
+    playController.checkDesktopFullscreen();
+    playController.handleFullscreenChange();
+  }
+
+  /// 窗口进入全屏时处理
+  /// 
+  @override
+  void onWindowEnterFullScreen() {
+    playController.isFullscreen.value = true;
+    playController.handleFullscreenChange();
+  }
+
+  /// 窗口退出全屏时处理
+  /// 
+  @override
+  void onWindowLeaveFullScreen() {
+    playController.isFullscreen.value = false;
+    playController.handleFullscreenChange();
   }
 
   @override
@@ -200,8 +241,16 @@ class _VideoViewState extends State<VideoView> {
       children: [
         Video(
           controller: controller,
-          controls: (state) => const VideoUi(),
+          controls: NoVideoControls,
         ),
+
+        /// 弹幕层
+        Positioned.fill(
+          child: DanmakuView(key: _danmuKey),
+        ),
+
+        const Positioned.fill(child: VideoUi()),
+
         /// webview_windows 的窗口必须嵌入到 Widget 树中才能被控制
         /// 通过 SizedBox 的 height 为 0 来隐藏它，但保持其在 Widget 树中(Kazumi)
         if (Platform.isWindows || Platform.isLinux)

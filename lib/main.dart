@@ -22,12 +22,11 @@ void main() async {
   final appInfoController = Get.put(AppInfoController());
   await themeController.initTheme();
 
-  // Windows 平台初始化窗口管理器
-  if (Platform.isWindows) {
+  // 桌面平台初始化窗口管理器
+  if (Platform.isWindows || Platform.isLinux || Platform.isMacOS) {
     await windowManager.ensureInitialized();
     const windowOptions = WindowOptions(
       titleBarStyle: TitleBarStyle.hidden,
-      // backgroundColor: Colors.transparent,
     );
     await windowManager.waitUntilReadyToShow(windowOptions, () async {
       await windowManager.show();
@@ -57,15 +56,15 @@ class MyApp extends StatelessWidget {
           themeMode: controller.themeMode,
           initialRoute: RouteName.main,
           routes: getRootRoutes(),
-          builder: (context, child) {
-            if (Utils.isDesktop) {
-              return WindowsTitleBar(
-                child: child,
-              );
-            } else {
-              return child ?? const SizedBox.shrink();
-            }
-          },
+          // builder: (context, child) {
+          //   if (Utils.isDesktop) {
+          //     return WindowsTitleBar(
+          //       child: child,
+          //     );
+          //   } else {
+          //     return child ?? const SizedBox.shrink();
+          //   }
+          // },
         );
       },
     );

@@ -6,7 +6,6 @@ import 'package:anime_flow/widget/video/ui/rate_button.dart';
 import 'package:anime_flow/widget/video/ui/video_ui_components.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:media_kit_video/media_kit_video.dart';
 
 /// 底部区域控件
 class BottomAreaControl extends StatelessWidget {
@@ -18,9 +17,10 @@ class BottomAreaControl extends StatelessWidget {
     final videoStateController = Get.find<VideoStateController>();
     final playPageController = Get.find<PlayController>();
 
-    //使用media_kit_video提供的全屏判断
-    bool fullscreen = isFullscreen(context);
-    return Obx(() => AnimatedSwitcher(
+    return Obx(() {
+      // 使用自定义全屏状态，
+      final fullscreen = playPageController.isFullscreen.value;
+      return AnimatedSwitcher(
         duration: const Duration(milliseconds: 200),
         transitionBuilder: (child, animation) =>
             FadeTransition(opacity: animation, child: child),
@@ -105,8 +105,11 @@ class BottomAreaControl extends StatelessWidget {
                             AnimatedContainer(
                               duration: const Duration(milliseconds: 500),
                               child: IconButton(
-                                //使用media_kit_video提供的全屏方法
-                                onPressed: () => toggleFullscreen(context),
+                                // 使用自定义全屏方法，
+                                onPressed: () {
+                                  playPageController.handleFullscreenChange();
+                                  playPageController.toggleFullScreen();
+                                },
                                 padding: const EdgeInsets.all(0),
                                 icon: fullscreen
                                     ? Icon(
@@ -133,6 +136,7 @@ class BottomAreaControl extends StatelessWidget {
             : SizedBox.shrink(
                 key: ValueKey<bool>(
                     videoUiStateController.isShowControlsUi.value),
-              )));
+              ));
+    });
   }
 }

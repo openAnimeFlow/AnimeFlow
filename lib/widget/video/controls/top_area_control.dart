@@ -19,7 +19,7 @@ class TopAreaControl extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     bool fullscreen = isFullscreen(context);
-    final playPageController = Get.find<PlayPageController>();
+    final playPageController = Get.find<PlayController>();
     final videoUiStateController = Get.find<VideoUiStateController>();
     final episodesController = Get.find<EpisodesController>();
 

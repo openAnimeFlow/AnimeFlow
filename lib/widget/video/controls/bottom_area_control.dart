@@ -16,7 +16,7 @@ class BottomAreaControl extends StatelessWidget {
   Widget build(BuildContext context) {
     final videoUiStateController = Get.find<VideoUiStateController>();
     final videoStateController = Get.find<VideoStateController>();
-    final playPageController = Get.find<PlayPageController>();
+    final playPageController = Get.find<PlayController>();
 
     //使用media_kit_video提供的全屏判断
     bool fullscreen = isFullscreen(context);

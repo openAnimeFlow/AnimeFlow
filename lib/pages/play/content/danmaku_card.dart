@@ -1,8 +1,9 @@
-import 'package:anime_flow/controllers/danmaku/danmaku_controller.dart';
 import 'package:anime_flow/controllers/episodes/episodes_controller.dart';
+import 'package:anime_flow/controllers/play/PlayPageController.dart';
 import 'package:anime_flow/controllers/subject/subject_state_controller.dart';
 import 'package:anime_flow/controllers/video/video_state_controller.dart';
 import 'package:anime_flow/http/requests/damaku.dart';
+import 'package:anime_flow/models/item/danmaku/danmaku_module.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
@@ -16,8 +17,8 @@ class DanmakuCard extends StatefulWidget {
 class _DanmakuCardState extends State<DanmakuCard> {
   late SubjectStateController subjectStateController;
   late VideoStateController videoStateController;
-  late DanmakuController danmakuController;
   late EpisodesController episodesController;
+  late PlayController playController;
   bool isExpanded = false;
   bool _previousPlayingState = false;
   bool _isLoading = false;
@@ -27,9 +28,8 @@ class _DanmakuCardState extends State<DanmakuCard> {
     super.initState();
     subjectStateController = Get.find<SubjectStateController>();
     videoStateController = Get.find<VideoStateController>();
-    danmakuController = Get.find<DanmakuController>();
     episodesController = Get.find<EpisodesController>();
-
+    playController = Get.find<PlayController>();
     // 记录初始播放状态
     _previousPlayingState = videoStateController.playing.value;
 
@@ -54,7 +54,7 @@ class _DanmakuCardState extends State<DanmakuCard> {
     final bgmBangumiId = await DanmakuRequest.getDanDanBangumiIDByBgmBangumiID(
         subjectStateController.subjectId.value);
     final danmaku = await DanmakuRequest.getDanDanmaku(bgmBangumiId, episode);
-    danmakuController.addDanmaku(danmaku);
+    playController.addDanmaku(danmaku);
     Get.log('弹幕数量为：${danmaku.length}');
     setState(() {
       _isLoading = false;
@@ -85,16 +85,24 @@ class _DanmakuCardState extends State<DanmakuCard> {
                 ],
               ),
               Obx(
-                () => AnimatedContainer(
+                () {
+                  final allDanmakus = <Danmaku>[];
+                  playController.danDanmakus.forEach((time, danmakus) {
+                    allDanmakus.addAll(danmakus);
+                  });
+                  // 按时间排序
+                  allDanmakus.sort((a, b) => a.time.compareTo(b.time));
+                  
+                  return AnimatedContainer(
                     duration: const Duration(milliseconds: 300),
                     height: isExpanded ? 200 : 0,
                     child: ListView.builder(
-                        itemCount: danmakuController.danmaku.length,
+                        itemCount: allDanmakus.length,
                         itemExtent: 56.0, // 固定item高度，提升滚动性能
-                        cacheExtent: 200.0, // 限制缓存范围，减少内存占用
+                        cacheExtent: 200.0, // 缓存范围
                         physics: const ClampingScrollPhysics(),
                         itemBuilder: (context, index) {
-                          final danmaku = danmakuController.danmaku[index];
+                          final danmaku = allDanmakus[index];
                           return ListTile(
                               dense: true, // 使用紧凑模式减少padding
                               visualDensity: VisualDensity.compact,
@@ -107,7 +115,9 @@ class _DanmakuCardState extends State<DanmakuCard> {
                                 '${danmaku.time}',
                                 style: Theme.of(context).textTheme.bodySmall,
                               ));
-                        })),
+                        }),
+                  );
+                },
               )
             ],
           )),

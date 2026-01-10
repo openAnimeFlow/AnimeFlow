@@ -20,7 +20,7 @@ class ContentView extends StatefulWidget {
 
 class _ContentViewState extends State<ContentView>
     with SingleTickerProviderStateMixin {
-  late PlayPageController playPageController;
+  late PlayController playPageController;
   final List<String> _tabs = ['简介', '吐槽'];
   late TabController _tabController;
   final GlobalKey _introduceKey = GlobalKey();
@@ -30,7 +30,7 @@ class _ContentViewState extends State<ContentView>
   void initState() {
     super.initState();
     _tabController = TabController(length: _tabs.length, vsync: this);
-    playPageController = Get.find<PlayPageController>();
+    playPageController = Get.find<PlayController>();
   }
 
 

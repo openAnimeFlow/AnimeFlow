@@ -24,7 +24,7 @@ class IntroduceView extends StatefulWidget {
 class _IntroduceViewState extends State<IntroduceView>
     with AutomaticKeepAliveClientMixin {
   Logger logger = Logger();
-  late PlayPageController playPageController;
+  late PlayController playPageController;
   late EpisodesController episodesController;
   Worker? _screenWorker; // 屏幕宽高监听器
   bool isVideoSourceLoading = true;
@@ -36,7 +36,7 @@ class _IntroduceViewState extends State<IntroduceView>
   @override
   void initState() {
     super.initState();
-    playPageController = Get.find<PlayPageController>();
+    playPageController = Get.find<PlayController>();
     episodesController = Get.find<EpisodesController>();
 
     // 初始化监听器

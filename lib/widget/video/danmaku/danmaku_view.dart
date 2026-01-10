@@ -1,5 +1,5 @@
 import 'dart:async';
-import 'package:anime_flow/controllers/danmaku/danmaku_controller.dart' as anime_flow;
+import 'package:anime_flow/controllers/play/PlayPageController.dart';
 import 'package:anime_flow/controllers/video/video_state_controller.dart';
 import 'package:anime_flow/utils/utils.dart';
 import 'package:canvas_danmaku/canvas_danmaku.dart';
@@ -14,10 +14,8 @@ class DanmakuView extends StatefulWidget {
 }
 
 class _DanmakuViewState extends State<DanmakuView> {
-  late DanmakuController _canvasDanmakuController;
   late VideoStateController videoStateController;
-  late anime_flow.DanmakuController danmakuController;
-  
+  late PlayController playPageController;
   final _danmuKey = GlobalKey();
   Timer? _danmakuTimer;
   bool _danmakuOn = true;
@@ -41,8 +39,7 @@ class _DanmakuViewState extends State<DanmakuView> {
   void initState() {
     super.initState();
     videoStateController = Get.find<VideoStateController>();
-    danmakuController = Get.find<anime_flow.DanmakuController>();
-    
+    playPageController = Get.find<PlayController>();
     // 初始化弹幕配置（可以从设置中读取）
     _border = true;
     _opacity = 1.0;
@@ -79,7 +76,7 @@ class _DanmakuViewState extends State<DanmakuView> {
       // 只有在播放时才添加弹幕
       if (currentPosition.inMicroseconds != 0 && playing && _danmakuOn) {
         final currentSecond = currentPosition.inSeconds;
-        final danmakus = danmakuController.danDanmakus[currentSecond];
+        final danmakus = playPageController.danDanmakus[currentSecond];
         
         if (danmakus != null && danmakus.isNotEmpty) {
           // 按索引延迟添加弹幕，避免同时显示过多
@@ -110,9 +107,9 @@ class _DanmakuViewState extends State<DanmakuView> {
                 if (!_danmakuColor) {
                   danmakuColor = Colors.white;
                 }
-                
-                // 添加到 canvas_danmaku 控制器
-                _canvasDanmakuController.addDanmaku(
+
+                // 添加弹幕
+                playPageController.danmakuController.addDanmaku(
                   DanmakuContentItem(
                     danmaku.message,
                     color: danmakuColor,
@@ -141,7 +138,7 @@ class _DanmakuViewState extends State<DanmakuView> {
       child: DanmakuScreen(
         key: _danmuKey,
         createdController: (DanmakuController controller) {
-          _canvasDanmakuController = controller;
+          playPageController.danmakuController = controller;
         },
         option: DanmakuOption(
           hideTop: _hideTop,

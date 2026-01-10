@@ -1,4 +1,3 @@
-import 'package:anime_flow/controllers/danmaku/danmaku_controller.dart';
 import 'package:anime_flow/models/item/subject_basic_data_item.dart';
 import 'package:anime_flow/webview/webview_controller.dart';
 import 'package:anime_flow/widget/video/video.dart';
@@ -23,17 +22,16 @@ class PlayPage extends StatefulWidget {
 class _PlayPageState extends State<PlayPage> {
   late SubjectBasicData subjectBasicData;
   late Future<EpisodesItem> episodes;
-  late PlayPageController playController;
+  late PlayController playController;
   final GlobalKey _videoKey = GlobalKey();
   final GlobalKey _contentKey = GlobalKey();
   
   @override
   void initState() {
     super.initState();
-    playController = Get.put(PlayPageController());
+    playController = Get.put(PlayController());
     Get.put(DataSourceController());
     Get.put(EpisodesController());
-    Get.put(DanmakuController());
     Get.put<WebviewItemController>(
         WebviewItemControllerFactory.getController());
     var args = Get.arguments;
@@ -44,8 +42,7 @@ class _PlayPageState extends State<PlayPage> {
   @override
   void dispose() {
     Get.delete<WebviewItemController>();
-    Get.delete<PlayPageController>();
-    Get.delete<DanmakuController>();
+    Get.delete<PlayController>();
     Get.delete<EpisodesController>();
     Get.delete<DataSourceController>();
     super.dispose();

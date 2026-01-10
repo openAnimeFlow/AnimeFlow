@@ -17,9 +17,8 @@ import 'package:media_kit/media_kit.dart';
 import 'package:media_kit_video/media_kit_video.dart';
 
 class VideoView extends StatefulWidget {
-  final SubjectBasicData subjectBasicData;
 
-  const VideoView({super.key, required this.subjectBasicData});
+  const VideoView({super.key});
 
   @override
   State<VideoView> createState() => _VideoViewState();
@@ -203,17 +202,13 @@ class _VideoViewState extends State<VideoView> {
       children: [
         Video(
           controller: controller,
-          controls: NoVideoControls,
+          controls: (controller) {
+            return const VideoControlsUiView();
+          },
         ),
         // 弹幕层
         const Positioned.fill(
           child: DanmakuView(),
-        ),
-        // 视频控制面板
-        Positioned.fill(
-          child: VideoControlsUiView(
-            subjectBasicData: widget.subjectBasicData,
-          ),
         ),
         /// webview_windows 的窗口必须嵌入到 Widget 树中才能被控制
         /// 通过 SizedBox 的 height 为 0 来隐藏它，但保持其在 Widget 树中(Kazumi)

@@ -20,8 +20,9 @@ class _DanmakuCardState extends State<DanmakuCard> {
   late EpisodesController episodesController;
   late PlayController playController;
   bool isExpanded = false;
-  bool _previousPlayingState = false;
   bool _isLoading = false;
+  bool _hasDanmakuLoaded = false; // 标记弹幕是否已加载
+  int _currentEpisode = 0; // 记录当前集数
 
   @override
   void initState() {
@@ -30,35 +31,59 @@ class _DanmakuCardState extends State<DanmakuCard> {
     videoStateController = Get.find<VideoStateController>();
     episodesController = Get.find<EpisodesController>();
     playController = Get.find<PlayController>();
-    // 记录初始播放状态
-    _previousPlayingState = videoStateController.playing.value;
 
-    // 监听播放状态变化，当从暂停变为播放时加载弹幕
+    // 监听集数变化，当集数改变时重置弹幕加载状态
+    ever(episodesController.episodeIndex, (int episode) {
+      if (_currentEpisode != episode) {
+        _currentEpisode = episode;
+        _hasDanmakuLoaded = false;
+        // 清空之前的弹幕
+        playController.removeDanmaku();
+      }
+    });
+
+    // 监听播放状态变化，只在视频第一次开始播放时加载弹幕
     ever(videoStateController.playing, (bool playing) {
-      if (playing && !_previousPlayingState) {
-        // 从暂停变为播放，加载弹幕
+      if (playing &&
+          !_hasDanmakuLoaded &&
+          episodesController.episodeIndex.value > 0) {
+        // 视频开始播放且弹幕未加载，加载弹幕
         getDanmaku();
       }
-      _previousPlayingState = playing;
     });
   }
 
   void getDanmaku() async {
+    if (_hasDanmakuLoaded || _isLoading) {
+      return; // 如果已经加载过或正在加载中，直接返回
+    }
+
     setState(() {
       _isLoading = true;
     });
-    int episode = episodesController.episodeIndex.value;
-    if (episode == 0) {
-      return;
+
+    try {
+      int episode = episodesController.episodeIndex.value;
+      if (episode == 0) {
+        return;
+      }
+
+      final bgmBangumiId =
+          await DanmakuRequest.getDanDanBangumiIDByBgmBangumiID(
+              subjectStateController.subjectId.value);
+      final danmaku = await DanmakuRequest.getDanDanmaku(bgmBangumiId, episode);
+      playController.addDanmaku(danmaku);
+      Get.log('弹幕数量为：${danmaku.length}');
+
+      // 标记弹幕已加载
+      _hasDanmakuLoaded = true;
+    } catch (e) {
+      Get.log('加载弹幕失败: $e');
+    } finally {
+      setState(() {
+        _isLoading = false;
+      });
     }
-    final bgmBangumiId = await DanmakuRequest.getDanDanBangumiIDByBgmBangumiID(
-        subjectStateController.subjectId.value);
-    final danmaku = await DanmakuRequest.getDanDanmaku(bgmBangumiId, episode);
-    playController.addDanmaku(danmaku);
-    Get.log('弹幕数量为：${danmaku.length}');
-    setState(() {
-      _isLoading = false;
-    });
   }
 
   @override
@@ -74,14 +99,17 @@ class _DanmakuCardState extends State<DanmakuCard> {
                   const Spacer(),
                   if (_isLoading)
                     const CircularProgressIndicator()
-                  else
+                  else ...[
                     IconButton(
-                        onPressed: () {
-                          setState(() {
-                            isExpanded = !isExpanded;
-                          });
-                        },
-                        icon: const Icon(Icons.vertical_align_bottom_sharp))
+                      onPressed: () {
+                        setState(() {
+                          isExpanded = !isExpanded;
+                        });
+                      },
+                      icon: Icon(
+                          isExpanded ? Icons.expand_less : Icons.expand_more),
+                    )
+                  ]
                 ],
               ),
               Obx(
@@ -92,14 +120,16 @@ class _DanmakuCardState extends State<DanmakuCard> {
                   });
                   // 按时间排序
                   allDanmakus.sort((a, b) => a.time.compareTo(b.time));
-                  
+
                   return AnimatedContainer(
                     duration: const Duration(milliseconds: 300),
                     height: isExpanded ? 200 : 0,
                     child: ListView.builder(
                         itemCount: allDanmakus.length,
-                        itemExtent: 56.0, // 固定item高度，提升滚动性能
-                        cacheExtent: 200.0, // 缓存范围
+                        itemExtent: 56.0,
+                        // 固定item高度，提升滚动性能
+                        cacheExtent: 200.0,
+                        // 缓存范围
                         physics: const ClampingScrollPhysics(),
                         itemBuilder: (context, index) {
                           final danmaku = allDanmakus[index];

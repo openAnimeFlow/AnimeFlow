@@ -3,7 +3,6 @@ import 'package:canvas_danmaku/danmaku_controller.dart';
 import 'package:get/get.dart';
 
 class PlayController extends GetxController {
-  RxList<Danmaku> danmaku = <Danmaku>[].obs;
   // 按时间（秒）分组的弹幕数据，用于 canvas_danmaku 显示
   final RxMap<int, List<Danmaku>> danDanmakus = <int, List<Danmaku>>{}.obs;
   late DanmakuController danmakuController;
@@ -20,7 +19,6 @@ class PlayController extends GetxController {
   }
 
   void addDanmaku(List<Danmaku> danmaku) {
-    this.danmaku.addAll(danmaku);
     // 按时间分组
     danDanmakus.clear();
     for (var item in danmaku) {
@@ -33,7 +31,6 @@ class PlayController extends GetxController {
   }
 
   void removeDanmaku() {
-    danmaku.clear();
     danDanmakus.clear();
   }
 }

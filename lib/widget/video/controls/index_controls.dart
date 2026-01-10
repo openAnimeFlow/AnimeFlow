@@ -15,9 +15,8 @@ import 'mobile_gesture_detector.dart';
 
 ///播放器控件
 class VideoControlsUiView extends StatefulWidget {
-  final SubjectBasicData subjectBasicData;
 
-  const VideoControlsUiView({super.key, required this.subjectBasicData});
+  const VideoControlsUiView({super.key});
 
   @override
   State<VideoControlsUiView> createState() => _VideoControlsUiViewState();
@@ -56,13 +55,11 @@ class _VideoControlsUiViewState extends State<VideoControlsUiView> {
               : const DesktopGestureDetector(child: MiddleAreaControl())),
 
       ///顶部
-      Positioned(
+      const Positioned(
         top: 0,
         left: 0,
         right: 0,
-        child: TopAreaControl(
-          subjectName: widget.subjectBasicData.name,
-        ),
+        child: TopAreaControl(),
       ),
 
       ///底部

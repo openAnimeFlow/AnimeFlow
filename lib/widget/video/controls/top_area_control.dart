@@ -1,5 +1,6 @@
 import 'package:anime_flow/controllers/episodes/episodes_controller.dart';
 import 'package:anime_flow/controllers/play/PlayPageController.dart';
+import 'package:anime_flow/controllers/subject/subject_state_controller.dart';
 import 'package:anime_flow/controllers/video/video_ui_state_controller.dart';
 import 'package:anime_flow/utils/utils.dart';
 import 'package:flutter/material.dart';
@@ -9,11 +10,9 @@ import 'package:media_kit_video/media_kit_video.dart';
 
 /// 顶部区域空间
 class TopAreaControl extends StatelessWidget {
-  final String subjectName;
 
   const TopAreaControl({
     super.key,
-    required this.subjectName,
   });
 
   @override
@@ -22,7 +21,7 @@ class TopAreaControl extends StatelessWidget {
     final playPageController = Get.find<PlayController>();
     final videoUiStateController = Get.find<VideoUiStateController>();
     final episodesController = Get.find<EpisodesController>();
-
+    final subjectStateController = Get.find<SubjectStateController>();
     return Obx(() => AnimatedSwitcher(
           duration: const Duration(milliseconds: 200),
           transitionBuilder: (child, animation) {
@@ -53,9 +52,9 @@ class TopAreaControl extends StatelessWidget {
                               onPressed: () {
                                 Get.back();
                               },
-                              icon: Icon(
+                              icon: const Icon(
                                 Icons.arrow_back_ios_new,
-                                color: Colors.white.withValues(alpha: 0.8),
+                                color: Colors.white,
                               )),
                           const SizedBox(width: 5),
                           if (Utils.isDesktop || fullscreen)
@@ -64,9 +63,8 @@ class TopAreaControl extends StatelessWidget {
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
                                 Text(
-                                  subjectName,
+                                  subjectStateController.name,
                                   style: const TextStyle(
-                                      color: Colors.white70,
                                       fontSize: 16,
                                       fontWeight: FontWeight.bold),
                                 ),

@@ -1,4 +1,4 @@
-import 'package:anime_flow/models/item/subject_basic_data_item.dart';
+import 'package:anime_flow/controllers/subject/subject_state_controller.dart';
 import 'package:anime_flow/widget/animation_network_image/animation_network_image.dart';
 import 'package:anime_flow/widget/play_content/source_drawers/video_source_drawers.dart';
 import 'package:anime_flow/controllers/video/data/data_source_controller.dart';
@@ -9,10 +9,9 @@ import 'package:get/get_state_manager/src/rx_flutter/rx_obx_widget.dart';
 
 class VideoResourcesView extends StatefulWidget {
   final String sourceTitle;
-  final SubjectBasicData subjectBasicData;
 
   const VideoResourcesView(
-      {super.key, required this.sourceTitle, required this.subjectBasicData});
+      {super.key, required this.sourceTitle});
 
   @override
   State<VideoResourcesView> createState() => _VideoResourcesViewState();
@@ -20,12 +19,14 @@ class VideoResourcesView extends StatefulWidget {
 
 class _VideoResourcesViewState extends State<VideoResourcesView> {
   late DataSourceController dataSourceController;
+  late SubjectStateController subjectStateController;
 
   @override
   void initState() {
     super.initState();
     dataSourceController = Get.find<DataSourceController>();
-    dataSourceController.initResources(widget.subjectBasicData.name);
+    subjectStateController = Get.find<SubjectStateController>();
+    dataSourceController.initResources(subjectStateController.name);
   }
 
   @override

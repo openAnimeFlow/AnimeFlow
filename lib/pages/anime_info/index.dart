@@ -19,7 +19,6 @@ class AnimeDetailPage extends StatefulWidget {
 
 class _AnimeDetailPageState extends State<AnimeDetailPage> {
   late SubjectBasicData subjectBasicData;
-  late SubjectStateController animeStateController;
   late Future<SubjectsInfoItem?> _subjectsItem;
   late Future<EpisodesItem> episodesFuture;
   final double _contentHeight = 200.0; // 内容区域的高度
@@ -31,17 +30,14 @@ class _AnimeDetailPageState extends State<AnimeDetailPage> {
   void initState() {
     super.initState();
     subjectBasicData = Get.arguments;
-    animeStateController = Get.put(SubjectStateController());
     _subjectsItem = BgmRequest.getSubjectByIdService(subjectBasicData.id);
     episodesFuture =
         BgmRequest.getSubjectEpisodesByIdService(subjectBasicData.id, 100, 0);
-    animeStateController.setSubject(subjectBasicData.name, subjectBasicData.id);
   }
 
   @override
   void dispose() {
     _nestedScrollController.dispose();
-    Get.delete<SubjectStateController>();
     super.dispose();
   }
 

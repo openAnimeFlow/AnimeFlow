@@ -1,6 +1,5 @@
 import 'package:anime_flow/controllers/play/PlayPageController.dart';
 import 'package:anime_flow/models/item/bangumi/episodes_item.dart';
-import 'package:anime_flow/models/item/subject_basic_data_item.dart';
 import 'package:anime_flow/widget/video/controls/video_ui_components.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -9,10 +8,9 @@ import 'comments.dart';
 import 'introduce.dart';
 
 class ContentView extends StatefulWidget {
-  final SubjectBasicData subjectBasicData;
   final Future<EpisodesItem> episodes;
 
-  const ContentView(this.episodes, {super.key, required this.subjectBasicData});
+  const ContentView(this.episodes, {super.key});
 
   @override
   State<ContentView> createState() => _ContentViewState();
@@ -71,9 +69,7 @@ class _ContentViewState extends State<ContentView>
                 //简介
                 IntroduceView(
                   widget.episodes,
-                  key: _introduceKey,
-                  subjectBasicData: widget.subjectBasicData,
-                ),
+                  key: _introduceKey),
                 //吐槽
                 CommentsView(
                   key: _commentKey,

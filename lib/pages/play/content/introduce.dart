@@ -1,8 +1,8 @@
 import 'package:anime_flow/constants/play_layout_constant.dart';
 import 'package:anime_flow/controllers/episodes/episodes_controller.dart';
 import 'package:anime_flow/controllers/play/PlayPageController.dart';
+import 'package:anime_flow/controllers/subject/subject_state_controller.dart';
 import 'package:anime_flow/models/item/bangumi/episodes_item.dart';
-import 'package:anime_flow/models/item/subject_basic_data_item.dart';
 import 'package:anime_flow/pages/play/content/danmaku_card.dart';
 import 'package:anime_flow/pages/play/content/video_resources/index.dart';
 import 'package:flutter/material.dart';
@@ -10,12 +10,11 @@ import 'package:get/get.dart';
 import 'package:logger/logger.dart';
 
 class IntroduceView extends StatefulWidget {
-  final SubjectBasicData subjectBasicData;
   final Future<EpisodesItem> episodes;
   static const String drawerTitle = "章节列表";
 
   const IntroduceView(this.episodes,
-      {super.key, required this.subjectBasicData});
+      {super.key});
 
   @override
   State<IntroduceView> createState() => _IntroduceViewState();
@@ -26,6 +25,7 @@ class _IntroduceViewState extends State<IntroduceView>
   Logger logger = Logger();
   late PlayController playPageController;
   late EpisodesController episodesController;
+  late SubjectStateController subjectStateController;
   Worker? _screenWorker; // 屏幕宽高监听器
   bool isVideoSourceLoading = true;
 
@@ -38,7 +38,7 @@ class _IntroduceViewState extends State<IntroduceView>
     super.initState();
     playPageController = Get.find<PlayController>();
     episodesController = Get.find<EpisodesController>();
-
+    subjectStateController = Get.find<SubjectStateController>();
     // 初始化监听器
     _screenWorker = ever(playPageController.isWideScreen, (isWide) {
       // 如果有任何弹窗打开（BottomSheet 或 GeneralDialog），则关闭
@@ -77,7 +77,7 @@ class _IntroduceViewState extends State<IntroduceView>
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
-            widget.subjectBasicData.name,
+            subjectStateController.name,
             style: const TextStyle(fontSize: 15, fontWeight: FontWeight.bold),
             textAlign: TextAlign.left,
           ),
@@ -110,9 +110,7 @@ class _IntroduceViewState extends State<IntroduceView>
             ],
           ),
           //数据源
-          VideoResourcesView(
-              subjectBasicData: widget.subjectBasicData,
-              sourceTitle: sourceTitle),
+          const VideoResourcesView(sourceTitle: sourceTitle),
           const DanmakuCard()
         ],
       ),

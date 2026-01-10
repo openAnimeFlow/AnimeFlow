@@ -51,7 +51,7 @@ class MyApp extends StatelessWidget {
     return GetBuilder<ThemeController>(
       builder: (controller) {
         return GetMaterialApp(
-          debugShowCheckedModeBanner: false,
+          // debugShowCheckedModeBanner: false,
           theme: controller.lightTheme,
           darkTheme: controller.darkTheme,
           themeMode: controller.themeMode,

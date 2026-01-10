@@ -1,3 +1,4 @@
+import 'package:anime_flow/controllers/subject/subject_state_controller.dart';
 import 'package:anime_flow/models/item/subject_basic_data_item.dart';
 import 'package:anime_flow/webview/webview_controller.dart';
 import 'package:anime_flow/widget/video/video.dart';
@@ -21,6 +22,7 @@ class PlayPage extends StatefulWidget {
 
 class _PlayPageState extends State<PlayPage> {
   late SubjectBasicData subjectBasicData;
+  late SubjectStateController animeStateController;
   late Future<EpisodesItem> episodes;
   late PlayController playController;
   final GlobalKey _videoKey = GlobalKey();
@@ -37,6 +39,8 @@ class _PlayPageState extends State<PlayPage> {
     var args = Get.arguments;
     subjectBasicData = args['subjectBasicData'] as SubjectBasicData;
     episodes = args['episodes'] as Future<EpisodesItem>;
+    animeStateController = Get.put(SubjectStateController());
+    animeStateController.setSubject(subjectBasicData.name, subjectBasicData.id);
   }
 
   @override
@@ -45,6 +49,7 @@ class _PlayPageState extends State<PlayPage> {
     Get.delete<PlayController>();
     Get.delete<EpisodesController>();
     Get.delete<DataSourceController>();
+    Get.delete<SubjectStateController>();
     super.dispose();
   }
 
@@ -63,7 +68,6 @@ class _PlayPageState extends State<PlayPage> {
                   child: Center(
                     child: VideoView(
                       key: _videoKey,
-                      subjectBasicData: subjectBasicData,
                     ),
                   ),
                 ),
@@ -76,9 +80,7 @@ class _PlayPageState extends State<PlayPage> {
                       opacity: playController.isContentExpanded.value ? 1 : 0,
                       child: ContentView(
                         episodes,
-                        key: _contentKey,
-                        subjectBasicData: subjectBasicData,
-                      ),
+                        key: _contentKey),
                     )))
               ],
             ))
@@ -98,16 +100,12 @@ class _PlayPageState extends State<PlayPage> {
                     AspectRatio(
                       aspectRatio: 16 / 9,
                       child: VideoView(
-                        key: _videoKey,
-                        subjectBasicData: subjectBasicData,
-                      ),
+                        key: _videoKey),
                     ),
                     Expanded(
                       child: ContentView(
                         episodes,
-                        key: _contentKey,
-                        subjectBasicData: subjectBasicData,
-                      ),
+                        key: _contentKey),
                     ),
                   ],
                 ),

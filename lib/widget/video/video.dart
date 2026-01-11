@@ -212,27 +212,21 @@ class _VideoViewState extends State<VideoView> with WindowListener {
   }
 
   /// 窗口恢复时处理
-  /// 
   @override
   void onWindowRestore() {
     playController.checkDesktopFullscreen();
-    playController.handleFullscreenChange();
   }
 
   /// 窗口进入全屏时处理
-  /// 
   @override
   void onWindowEnterFullScreen() {
     playController.isFullscreen.value = true;
-    playController.handleFullscreenChange();
   }
 
   /// 窗口退出全屏时处理
-  /// 
   @override
   void onWindowLeaveFullScreen() {
     playController.isFullscreen.value = false;
-    playController.handleFullscreenChange();
   }
 
   @override

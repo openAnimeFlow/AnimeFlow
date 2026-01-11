@@ -107,7 +107,6 @@ class BottomAreaControl extends StatelessWidget {
                               child: IconButton(
                                 // 使用自定义全屏方法，
                                 onPressed: () {
-                                  playPageController.handleFullscreenChange();
                                   playPageController.toggleFullScreen();
                                 },
                                 padding: const EdgeInsets.all(0),

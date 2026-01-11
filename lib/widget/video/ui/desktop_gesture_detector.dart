@@ -59,7 +59,6 @@ class DesktopGestureDetector extends StatelessWidget {
             // 双击事件
             // 使用自定义全屏方法，
             onDoubleTap: () {
-              playPageController.handleFullscreenChange();
               playPageController.toggleFullScreen();
             },
 

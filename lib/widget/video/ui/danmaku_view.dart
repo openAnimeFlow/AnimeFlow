@@ -140,10 +140,6 @@ class _DanmakuViewState extends State<DanmakuView> with AutomaticKeepAliveClient
       // 弹幕层不拦截点击事件，让播放器控件可以正常交互
       ignoring: true,
       child: DanmakuScreen(
-        // 使用稳定的 ValueKey，确保全屏切换时 Flutter 复用同一个 widget 实例
-        // 注意：不能使用 widget.key（可能是 GlobalKey），因为 GlobalKey 只能用于一个 widget
-        // ，使用稳定的 ValueKey 来保持实例
-        key: const ValueKey('danmaku_screen'),
         createdController: (DanmakuController controller) {
           // 更新全局控制器引用
           playPageController.danmakuController = controller;

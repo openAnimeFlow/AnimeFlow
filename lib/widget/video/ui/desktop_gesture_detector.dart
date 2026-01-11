@@ -24,8 +24,11 @@ class DesktopGestureDetector extends StatelessWidget {
         // 鼠标指针信号事件监听（用于鼠标滚轮）
         onPointerSignal: (event) {
           if (event is PointerScrollEvent) {
+            videoUiStateController
+                .updateMainAxisAlignmentType(MainAxisAlignment.start);
             videoUiStateController.updateIndicatorTypeAndShowIndicator(
                 VideoControlsIndicatorType.volumeIndicator);
+
             // 处理鼠标滚轮事件：调整音量
             // 向上滚动增加音量，向下滚动减少音量
             // 除以20是为了控制调整幅度（每次约5%）

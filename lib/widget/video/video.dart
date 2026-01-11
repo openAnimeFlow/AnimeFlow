@@ -4,10 +4,13 @@ import 'dart:io';
 import 'package:anime_flow/models/enums/video_controls_icon_type.dart';
 import 'package:anime_flow/webview/webview_controller.dart';
 import 'package:anime_flow/webview/webview_item.dart';
+import 'package:anime_flow/controllers/episodes/episodes_controller.dart';
 import 'package:anime_flow/controllers/play/PlayPageController.dart';
+import 'package:anime_flow/controllers/subject/subject_state_controller.dart';
 import 'package:anime_flow/controllers/video/data/data_source_controller.dart';
 import 'package:anime_flow/controllers/video/video_state_controller.dart';
 import 'package:anime_flow/controllers/video/video_ui_state_controller.dart';
+import 'package:anime_flow/http/requests/damaku.dart';
 import 'package:anime_flow/widget/video/ui/danmaku_view.dart';
 import 'package:anime_flow/widget/video/ui/index.dart';
 import 'package:flutter/material.dart';
@@ -31,9 +34,15 @@ class _VideoViewState extends State<VideoView> with WindowListener {
   late VideoUiStateController videoUiStateController;
   late DataSourceController dataSourceController;
   late PlayController playController;
+  late EpisodesController episodesController;
+  late SubjectStateController subjectStateController;
   final webviewItemController = Get.find<WebviewItemController>();
   final logger = Logger();
   final _danmuKey = GlobalKey();
+
+  // 弹幕加载状态
+  bool _isLoadingDanmaku = false;
+  bool _hasDanmakuLoaded = false;
 
   StreamSubscription<bool>? _initSubscription;
   StreamSubscription<(String, int)>? _videoURLSubscription;
@@ -52,8 +61,19 @@ class _VideoViewState extends State<VideoView> with WindowListener {
     dataSourceController = Get.find<DataSourceController>();
     videoUiStateController = Get.put(VideoUiStateController(player));
     playController = Get.find<PlayController>();
+    episodesController = Get.find<EpisodesController>();
+    subjectStateController = Get.find<SubjectStateController>();
     // 初始化屏幕亮度
     videoUiStateController.initializeBrightness();
+
+    // 监听集数变化，当集数改变时重置弹幕加载状态
+    ever(episodesController.episodeIndex, (int episode) {
+      if (episode > 0) {
+        _hasDanmakuLoaded = false;
+        // 清空之前的弹幕
+        playController.removeDanmaku();
+      }
+    });
 
     // 初始化 WebView 并监听视频URL解析结果
     _initWebview();
@@ -183,6 +203,8 @@ class _VideoViewState extends State<VideoView> with WindowListener {
     } else {
       // 解析成功
       videoUiStateController.setParsingTitle('视频资源解析成功');
+      // 视频解析成功后加载弹幕
+      _loadDanmaku();
       Future.delayed(const Duration(seconds: 2), () {
         if (!mounted) return;
         videoUiStateController.hideIndicator();
@@ -191,6 +213,37 @@ class _VideoViewState extends State<VideoView> with WindowListener {
         videoUiStateController
             .updateMainAxisAlignmentType(MainAxisAlignment.start);
       });
+    }
+  }
+
+  /// 加载弹幕
+  Future<void> _loadDanmaku() async {
+    if (_hasDanmakuLoaded || _isLoadingDanmaku) {
+      return; // 如果已经加载过或正在加载中，直接返回
+    }
+
+    _isLoadingDanmaku = true;
+
+    try {
+      int episode = episodesController.episodeIndex.value;
+      if (episode == 0) {
+        _isLoadingDanmaku = false;
+        return;
+      }
+
+      final bgmBangumiId =
+          await DanmakuRequest.getDanDanBangumiIDByBgmBangumiID(
+              subjectStateController.subjectId.value);
+      final danmaku = await DanmakuRequest.getDanDanmaku(bgmBangumiId, episode);
+      playController.addDanmaku(danmaku);
+      logger.i('弹幕数量为：${danmaku.length}');
+
+      // 标记弹幕已加载
+      _hasDanmakuLoaded = true;
+    } catch (e) {
+      logger.e('加载弹幕失败: $e');
+    } finally {
+      _isLoadingDanmaku = false;
     }
   }
 

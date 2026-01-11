@@ -26,8 +26,13 @@ class _VideoResourcesViewState extends State<VideoResourcesView> {
     super.initState();
     dataSourceController = Get.find<DataSourceController>();
     subjectStateController = Get.find<SubjectStateController>();
-    // TODO 切换全屏状态会重新初始化，等待修复
-    dataSourceController.initResources(subjectStateController.name);
+    
+    // 检查资源是否已经为当前关键词初始化过，避免全屏切换时重复初始化
+    final currentKeyword = subjectStateController.name;
+    if (dataSourceController.keyword.value != currentKeyword) {
+      // 只有当关键词不同时才重新初始化
+      dataSourceController.initResources(currentKeyword);
+    }
   }
 
   @override

@@ -183,24 +183,6 @@ class _DanmakuSettingState extends State<DanmakuSetting> {
             ],
           ),
           _buildSettingItem(
-            title: '显示边框',
-            value: _border,
-            onChanged: (value) {
-              setState(() {
-                _border = value;
-              });
-            },
-          ),
-          _buildSettingItem(
-            title: '显示颜色',
-            value: _danmakuColor,
-            onChanged: (value) {
-              setState(() {
-                _danmakuColor = value;
-              });
-            },
-          ),
-          _buildSettingItem(
             title: '密集模式',
             value: danmakuController.option.massiveMode,
             onChanged: (value) {

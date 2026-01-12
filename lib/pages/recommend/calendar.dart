@@ -7,6 +7,7 @@ import 'package:anime_flow/widget/ranking.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:anime_flow/models/item/bangumi/subject_item.dart';
+import 'package:logger/logger.dart';
 
 class CalendarView extends StatefulWidget {
   const CalendarView({super.key});
@@ -17,6 +18,7 @@ class CalendarView extends StatefulWidget {
 
 class _CalendarViewState extends State<CalendarView> {
   Calendar? calendar;
+  bool isLoading = false;
 
   @override
   void initState() {
@@ -25,10 +27,24 @@ class _CalendarViewState extends State<CalendarView> {
   }
 
   void _fetchCalendar() async {
-    final response = await BgmRequest.calendarService();
-    setState(() {
-      calendar = response;
-    });
+    try {
+      setState(() {
+        isLoading = true;
+      });
+      final response = await BgmRequest.calendarService();
+      setState(() {
+        calendar = response;
+      });
+    } catch (e) {
+      Logger().e(e);
+      setState(() {
+        isLoading = false;
+      });
+    } finally {
+      setState(() {
+        isLoading = false;
+      });
+    }
   }
 
   final weekday = DateTime.now().weekday;
@@ -51,8 +67,7 @@ class _CalendarViewState extends State<CalendarView> {
                 const Expanded(
                   child: Text(
                     "今日放送",
-                    style:
-                        TextStyle(fontSize: 25, fontWeight: FontWeight.bold),
+                    style: TextStyle(fontSize: 25, fontWeight: FontWeight.bold),
                   ),
                 ),
                 Column(
@@ -68,8 +83,8 @@ class _CalendarViewState extends State<CalendarView> {
                             children: [
                               Text(
                                 '查看更多',
-                                style: TextStyle(
-                                    fontSize: 10, color: Colors.grey),
+                                style:
+                                    TextStyle(fontSize: 10, color: Colors.grey),
                               ),
                               Icon(
                                 Icons.keyboard_double_arrow_right_rounded,
@@ -98,10 +113,23 @@ class _CalendarViewState extends State<CalendarView> {
   }
 
   Widget _buildContent() {
-    if (calendar == null) {
+    if (isLoading) {
       return const Center(
         child: CircularProgressIndicator(),
       );
+    }
+    if (calendar == null) {
+      return Center(
+          child: Row(
+        children: [
+          const Text('获取数据失败'),
+          IconButton(
+              onPressed: () {
+                _fetchCalendar();
+              },
+              icon: const Icon(Icons.refresh))
+        ],
+      ));
     } else {
       final items = calendar!.calendarData[weekday.toString()];
 

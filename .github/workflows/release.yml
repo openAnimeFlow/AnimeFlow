@@ -26,6 +26,8 @@ jobs:
         run: |
           echo "CLIENT_ID=${{ secrets.CLIENT_ID }}" >> .env
           echo "REDIRECT_URI=${{ secrets.REDIRECT_URI }}" >> .env
+          echo "DANDANPLAY_ID=${{ secrets.DANDANPLAY_ID }}" >> .env
+          echo "DANDANPLAY_SECRET=${{ secrets.DANDANPLAY_SECRET }}" >> .env
 
       - name: Install Flutter
         uses: subosito/flutter-action@v2
@@ -72,6 +74,8 @@ jobs:
         run: |
           echo "CLIENT_ID=${{ secrets.CLIENT_ID }}" >> .env
           echo "REDIRECT_URI=${{ secrets.REDIRECT_URI }}" >> .env
+          echo "DANDANPLAY_ID=${{ secrets.DANDANPLAY_ID }}" >> .env
+          echo "DANDANPLAY_SECRET=${{ secrets.DANDANPLAY_SECRET }}" >> .env
 
       - name: Set up JDK 17
         uses: actions/setup-java@v4
@@ -158,6 +162,8 @@ jobs:
         run: |
           Add-Content -Path .env -Value "CLIENT_ID=${{ secrets.CLIENT_ID }}"
           Add-Content -Path .env -Value "REDIRECT_URI=${{ secrets.REDIRECT_URI }}"
+          Add-Content -Path .env -Value "DANDANPLAY_ID=${{ secrets.DANDANPLAY_ID }}" 
+          Add-Content -Path .env -Value "DANDANPLAY_SECRET=${{ secrets.DANDANPLAY_SECRET }}"
 
       - name: Setup Flutter
         uses: subosito/flutter-action@v2
@@ -201,6 +207,8 @@ jobs:
         run: |
           echo "CLIENT_ID=${{ secrets.CLIENT_ID }}" >> .env
           echo "REDIRECT_URI=${{ secrets.REDIRECT_URI }}" >> .env
+          echo "DANDANPLAY_ID=${{ secrets.DANDANPLAY_ID }}" >> .env
+          echo "DANDANPLAY_SECRET=${{ secrets.DANDANPLAY_SECRET }}" >> .env
 
       - name: Install Linux build dependencies
         run: |
@@ -321,7 +329,10 @@ jobs:
       - name: Create .env file
         run: |
           echo "CLIENT_ID=${{ secrets.CLIENT_ID }}" >> .env
-          echo "REDIRECT_URI=${{ secrets.REDIRECT_URI }}" >> .env
+          echo "REDIRECT_URI=${{ secrets.REDIRECT_URI }}" >> .env          
+          echo "DANDANPLAY_ID=${{ secrets.DANDANPLAY_ID }}" >> .env
+          echo "DANDANPLAY_SECRET=${{ secrets.DANDANPLAY_SECRET }}" >> .env
+          
 
       - name: Setup Flutter
         uses: subosito/flutter-action@v2

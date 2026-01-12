@@ -112,26 +112,17 @@ class TopAreaControl extends StatelessWidget {
                                     onPressed: () => playPageController
                                         .toggleContentExpanded(),
                                     padding: const EdgeInsets.all(0),
-                                    icon: playPageController
-                                            .isContentExpanded.value
-                                        ? SvgPicture.asset(
-                                            "assets/icons/right_panel_close.svg",
-                                            width: 30,
-                                            height: 30,
-                                            colorFilter: const ColorFilter.mode(
-                                              Colors.white70,
-                                              BlendMode.srcIn,
-                                            ),
-                                          )
-                                        : SvgPicture.asset(
-                                            "assets/icons/left_panel_close.svg",
-                                            width: 30,
-                                            height: 30,
-                                            colorFilter: const ColorFilter.mode(
-                                              Colors.white70,
-                                              BlendMode.srcIn,
-                                            ),
-                                          ),
+                                    icon: SvgPicture.asset(
+                                      playPageController.isContentExpanded.value
+                                          ? "assets/icons/right_panel_close.svg"
+                                          : "assets/icons/left_panel_close.svg",
+                                      width: 30,
+                                      height: 30,
+                                      colorFilter: const ColorFilter.mode(
+                                        Colors.white70,
+                                        BlendMode.srcIn,
+                                      ),
+                                    ),
                                   )
                                 : const SizedBox.shrink())
                         ],

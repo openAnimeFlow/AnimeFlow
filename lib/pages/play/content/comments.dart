@@ -22,6 +22,7 @@ class _CommentsViewState extends State<CommentsView>
   Worker? _episodeIdWorker;
   int? _lastRequestedEpisodeId; // 记录上次请求的 episodeId，避免重复请求
   String _sortOrder = 'default';
+  bool _isRequesting = false; // 标记是否正在请求中，防止并发请求
 
   @override
   bool get wantKeepAlive => true;
@@ -48,6 +49,7 @@ class _CommentsViewState extends State<CommentsView>
     super.dispose();
   }
 
+  // TODO 桌面端当缩放窗口时会频繁触发请求，应该将获取评论逻辑放CommentsView父组件中，通过传值获取数据(当tab索引==评论 || 评论内容内容 != null || EpisodeId放生变化)
   void _getComments() async {
     final episodeId = episodesController.episodeId.value;
 
@@ -56,7 +58,14 @@ class _CommentsViewState extends State<CommentsView>
       return;
     }
 
+    // 如果正在请求中，直接返回，防止并发请求
+    if (_isRequesting) {
+      return;
+    }
+
     if (episodeId > 0) {
+      // 标记正在请求中
+      _isRequesting = true;
       // 更新上次请求的 episodeId
       _lastRequestedEpisodeId = episodeId;
 
@@ -80,6 +89,9 @@ class _CommentsViewState extends State<CommentsView>
             comments = [];
           });
         }
+      } finally {
+        // 请求完成，重置标记
+        _isRequesting = false;
       }
     } else {
       _lastRequestedEpisodeId = episodeId;

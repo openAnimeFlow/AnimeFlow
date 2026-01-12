@@ -11,7 +11,7 @@ import 'package:anime_flow/controllers/video/data/data_source_controller.dart';
 import 'package:anime_flow/controllers/video/video_state_controller.dart';
 import 'package:anime_flow/controllers/video/video_ui_state_controller.dart';
 import 'package:anime_flow/http/requests/damaku.dart';
-import 'package:anime_flow/widget/video/ui/danmaku_view.dart';
+import 'package:anime_flow/widget/video/ui/danmaku/danmaku_view.dart';
 import 'package:anime_flow/widget/video/ui/index.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';

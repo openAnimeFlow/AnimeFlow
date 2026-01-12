@@ -82,7 +82,7 @@ class _DanmakuViewState extends State<DanmakuView> with AutomaticKeepAliveClient
         final danmakus = playPageController.danDanmakus[currentSecond];
         
         if (danmakus != null && danmakus.isNotEmpty) {
-          // 按索引延迟添加弹幕，避免同时显示过多
+          // 按索引延迟添加弹幕
           danmakus.asMap().forEach((idx, danmaku) {
             Future.delayed(
               Duration(

@@ -13,7 +13,9 @@ class PlayController extends GetxController {
   final isFullscreen = false.obs; // 全屏状态，
 
   void updateIsWideScreen(bool value) {
-    isWideScreen.value = value;
+    if (isWideScreen.value != value) {
+      isWideScreen.value = value;
+    }
   }
 
   // 切换内容区域展开状态

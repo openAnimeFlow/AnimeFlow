@@ -17,6 +17,7 @@ class _DanmakuViewState extends State<DanmakuView> with AutomaticKeepAliveClient
   late VideoStateController videoStateController;
   late PlayController playPageController;
   Timer? _danmakuTimer;
+  Worker? _playingWorker;
 
   // 弹幕配置
   late bool _border;
@@ -64,6 +65,20 @@ class _DanmakuViewState extends State<DanmakuView> with AutomaticKeepAliveClient
     ever(videoStateController.rate, (rate) {
       // 倍速变化时，更新弹幕速度需要在 DanmakuScreen 重建时更新
       setState(() {});
+    });
+    
+    // 监听播放状态变化，控制弹幕暂停/恢复
+    _playingWorker = ever(videoStateController.playing, (playing) {
+      if (mounted) {
+        try {
+          if (playing) {
+            playPageController.danmakuController.resume();
+          } else {
+            playPageController.danmakuController.pause();
+          }
+        } catch (_) {
+        }
+      }
     });
   }
 
@@ -129,6 +144,7 @@ class _DanmakuViewState extends State<DanmakuView> with AutomaticKeepAliveClient
   @override
   void dispose() {
     _danmakuTimer?.cancel();
+    _playingWorker?.dispose();
     super.dispose();
   }
 

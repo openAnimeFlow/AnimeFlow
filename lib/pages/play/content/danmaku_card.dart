@@ -36,6 +36,7 @@ class _DanmakuCardState extends State<DanmakuCard> {
   @override
   Widget build(BuildContext context) {
     return Card(
+      elevation: 0,
       child: Padding(
           padding: const EdgeInsets.all(8),
           child: Column(

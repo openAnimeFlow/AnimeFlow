@@ -17,7 +17,6 @@ class _DanmakuViewState extends State<DanmakuView> with AutomaticKeepAliveClient
   late VideoStateController videoStateController;
   late PlayController playPageController;
   Timer? _danmakuTimer;
-  bool _danmakuOn = true;
 
   // 弹幕配置
   late bool _border;
@@ -77,7 +76,7 @@ class _DanmakuViewState extends State<DanmakuView> with AutomaticKeepAliveClient
       final playing = videoStateController.playing.value;
       
       // 只有在播放时才添加弹幕
-      if (currentPosition.inMicroseconds != 0 && playing && _danmakuOn) {
+      if (currentPosition.inMicroseconds != 0 && playing && playPageController.danmakuOn.value) {
         final currentSecond = currentPosition.inSeconds;
         final danmakus = playPageController.danDanmakus[currentSecond];
         
@@ -91,7 +90,7 @@ class _DanmakuViewState extends State<DanmakuView> with AutomaticKeepAliveClient
               () {
                 if (!mounted || 
                     !videoStateController.playing.value ||
-                    !_danmakuOn) {
+                    !playPageController.danmakuOn.value) {
                   return;
                 }
                 

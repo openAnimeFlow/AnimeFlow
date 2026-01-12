@@ -6,12 +6,19 @@ import 'package:anime_flow/widget/video/ui/danmaku/danmaku_setting.dart';
 import 'package:anime_flow/widget/video/ui/rate_button.dart';
 import 'package:anime_flow/widget/video/ui/video_ui_components.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_svg/svg.dart';
 import 'package:get/get.dart';
 
 /// 底部区域控件
-class BottomAreaControl extends StatelessWidget {
+
+class BottomAreaControl extends StatefulWidget {
   const BottomAreaControl({super.key});
 
+  @override
+  State<BottomAreaControl> createState() => _BottomAreaControlState();
+}
+
+class _BottomAreaControlState extends State<BottomAreaControl> {
   @override
   Widget build(BuildContext context) {
     final videoUiStateController = Get.find<VideoUiStateController>();
@@ -78,21 +85,42 @@ class BottomAreaControl extends StatelessWidget {
                                   color: Colors.white.withValues(alpha: 0.8),
                                 ),
                               ),
-                              //弹幕设置
-                              IconButton(
+                              //弹幕开关
+                              Obx(() => IconButton(
                                 onPressed: () {
-                                  Get.bottomSheet(
-                                    const DanmakuSetting(),
-                                    ignoreSafeArea: false,
-                                    isScrollControlled: true,
-                                    backgroundColor: Colors.transparent,
-                                  );
+                                  playPageController.toggleDanmaku();
                                 },
-                                icon: Icon(
-                                  Icons.text_snippet_rounded,
-                                  color: Colors.white.withValues(alpha: 0.8),
+                                icon: SvgPicture.asset(
+                                  playPageController.danmakuOn.value
+                                      ? 'assets/icons/danmaku_on.svg'
+                                      : 'assets/icons/danmaku_off.svg',
+                                  width: 25,
+                                  height: 25,
+                                  colorFilter: const ColorFilter.mode(
+                                      Colors.white,
+                                      BlendMode.srcIn),
                                 ),
-                              ),
+                              )),
+                              //弹幕设置
+                              Obx(() => playPageController.danmakuOn.value
+                                  ? IconButton(
+                                      onPressed: () {
+                                        Get.bottomSheet(
+                                          const DanmakuSetting(),
+                                          ignoreSafeArea: false,
+                                          isScrollControlled: true,
+                                          backgroundColor: Colors.transparent,
+                                        );
+                                      },
+                                      icon: SvgPicture.asset(
+                                        'assets/icons/danmaku_setting.svg',
+                                        width: 24,
+                                        height: 24,
+                                        colorFilter: const ColorFilter.mode(
+                                            Colors.white,
+                                            BlendMode.srcIn),
+                                      ))
+                                  : const SizedBox.shrink()),
                               Expanded(
                                 child: fullscreen ||
                                         playPageController.isWideScreen.value

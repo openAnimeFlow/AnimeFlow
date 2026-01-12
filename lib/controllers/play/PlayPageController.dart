@@ -5,12 +5,14 @@ import 'package:get/get.dart';
 import 'package:window_manager/window_manager.dart';
 
 class PlayController extends GetxController {
-  // 按时间（秒）分组的弹幕数据，用于 canvas_danmaku 显示
-  final RxMap<int, List<Danmaku>> danDanmakus = <int, List<Danmaku>>{}.obs;
-  late DanmakuController danmakuController;
   final isWideScreen = false.obs; // 宽屏状态
   final isContentExpanded = true.obs; // 内容区域展开状态
-  final isFullscreen = false.obs; // 全屏状态，
+  final isFullscreen = false.obs; // 全屏状态
+
+  ///弹幕相关
+  final RxMap<int, List<Danmaku>> danDanmakus = <int, List<Danmaku>>{}.obs;
+  late DanmakuController danmakuController;
+  final danmakuOn = true.obs; // 弹幕开关状态
 
   void updateIsWideScreen(bool value) {
     if (isWideScreen.value != value) {
@@ -77,5 +79,16 @@ class PlayController extends GetxController {
 
   void removeDanmaku() {
     danDanmakus.clear();
+  }
+
+  /// 切换弹幕开关
+  void toggleDanmaku() {
+    danmakuOn.value = !danmakuOn.value;
+    if (!danmakuOn.value) {
+      try {
+        danmakuController.clear();
+      } catch (_) {
+      }
+    }
   }
 }

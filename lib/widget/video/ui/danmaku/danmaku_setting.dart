@@ -10,7 +10,6 @@ class DanmakuSetting extends StatefulWidget {
 
 class _DanmakuSettingState extends State<DanmakuSetting> {
   // 弹幕设置状态
-  bool _danmakuOn = true;
   bool _border = true;
   double _opacity = 1.0;
   double _fontSize = 20.0;
@@ -55,16 +54,6 @@ class _DanmakuSettingState extends State<DanmakuSetting> {
                 color: Theme.of(context).textTheme.titleLarge?.color,
               ),
             ),
-          ),
-          // 设置项列表
-          _buildSettingItem(
-            title: '显示弹幕',
-            value: _danmakuOn,
-            onChanged: (value) {
-              setState(() {
-                _danmakuOn = value;
-              });
-            },
           ),
           _buildSettingItem(
             title: '显示边框',

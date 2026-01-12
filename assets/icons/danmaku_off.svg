@@ -1,0 +1,43 @@
+<svg width="64" height="64" viewBox="0 0 64 64" fill="none"
+     xmlns="http://www.w3.org/2000/svg">
+
+    <!-- 遮罩：用来“挖掉”斜线区域 -->
+    <mask id="cut-mask">
+        <!-- 默认全部可见 -->
+        <rect width="64" height="64" fill="white"/>
+
+        <!-- 斜线区域：涂黑 = 被挖掉 -->
+        <line x1="14" y1="16" x2="50" y2="48"
+              stroke="black"
+              stroke-width="8"
+              stroke-linecap="round"/>
+    </mask>
+
+    <!-- 整个弹幕图形套上 mask -->
+    <g mask="url(#cut-mask)">
+
+        <!-- 外框 -->
+        <rect x="6" y="10" width="52" height="38" rx="6"
+              stroke="currentColor" stroke-width="4"/>
+
+        <!-- 弹幕条 -->
+        <rect x="14" y="18" width="36" height="6" rx="3"
+              fill="currentColor"/>
+
+        <rect x="14" y="28" width="22" height="6" rx="3"
+              fill="currentColor"/>
+
+        <rect x="40" y="28" width="10" height="6" rx="3"
+              fill="currentColor"/>
+
+        <rect x="26" y="38" width="24" height="6" rx="3"
+              fill="currentColor"/>
+
+    </g>
+
+    <!-- 再画一条真正可见的禁用斜线 -->
+    <line x1="14" y1="16" x2="50" y2="48"
+          stroke="currentColor"
+          stroke-width="4"
+          stroke-linecap="round"/>
+</svg>

@@ -12,7 +12,12 @@ class PlayController extends GetxController {
   ///弹幕相关
   final RxMap<int, List<Danmaku>> danDanmakus = <int, List<Danmaku>>{}.obs;
   late DanmakuController danmakuController;
-  final danmakuOn = true.obs; // 弹幕开关状态
+  final RxBool danmakuOn = true.obs; // 弹幕开关状态
+  final RxDouble danmakuFontSize = 20.0.obs;
+  final RxDouble danmakuArea = 1.0.obs; // 弹幕显示区域，默认100%
+  final RxBool danmakuScroll = true.obs;
+  final RxBool danmakuHideTop = true.obs;
+  final RxBool danmakuHideBottom = true.obs;
 
   void updateIsWideScreen(bool value) {
     if (isWideScreen.value != value) {
@@ -89,6 +94,61 @@ class PlayController extends GetxController {
         danmakuController.clear();
       } catch (_) {
       }
+    }
+  }
+
+  ///设置弹幕字体大小
+  void setDanmakuFontSize(double fontSize) {
+    danmakuFontSize.value = fontSize;
+    try {
+      danmakuController.updateOption(
+        danmakuController.option.copyWith(fontSize: fontSize),
+      );
+    } catch (_) {
+    }
+  }
+
+  ///弹幕显示区域
+  void setDanmakuArea(double area) {
+    danmakuArea.value = area;
+    try {
+      danmakuController.updateOption(
+        danmakuController.option.copyWith(area: area),
+      );
+    } catch (_) {
+    }
+  }
+
+  ///滚动弹幕
+  void setScrollDanmaku(bool scroll){
+    danmakuScroll.value = scroll;
+    try {
+      danmakuController.updateOption(
+        danmakuController.option.copyWith(hideScroll: scroll),
+      );
+    } catch (_) {
+    }
+  }
+
+  ///顶部弹幕
+  void setTopDanmaku(bool top){
+    danmakuHideTop.value = top;
+    try {
+      danmakuController.updateOption(
+        danmakuController.option.copyWith(hideTop: top),
+      );
+    } catch (_) {
+    }
+  }
+
+  ///底部弹幕
+  void setBottomDanmaku(bool bottom){
+    danmakuHideBottom.value = bottom;
+    try {
+      danmakuController.updateOption(
+        danmakuController.option.copyWith(hideBottom: bottom),
+      );
+    } catch (_) {
     }
   }
 }

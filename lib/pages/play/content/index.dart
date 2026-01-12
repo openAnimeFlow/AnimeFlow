@@ -1,8 +1,12 @@
+import 'package:anime_flow/controllers/episodes/episodes_controller.dart';
 import 'package:anime_flow/controllers/play/PlayPageController.dart';
+import 'package:anime_flow/http/requests/bgm_request.dart';
+import 'package:anime_flow/models/item/bangumi/episode_comments_item.dart';
 import 'package:anime_flow/models/item/bangumi/episodes_item.dart';
 import 'package:anime_flow/widget/video/ui/video_ui_components.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:logger/logger.dart';
 
 import 'comments.dart';
 import 'introduce.dart';
@@ -18,20 +22,101 @@ class ContentView extends StatefulWidget {
 
 class _ContentViewState extends State<ContentView>
     with SingleTickerProviderStateMixin {
+  late EpisodesController episodesController;
   late PlayController playPageController;
   final List<String> _tabs = ['简介', '吐槽'];
   late TabController _tabController;
   final GlobalKey _introduceKey = GlobalKey();
   final GlobalKey _commentKey = GlobalKey();
+  bool _isRequesting = false;
+  List<EpisodeComment>? comments;
+  int? _lastRequestedEpisodeId; // 记录上次请求的 episodeId，避免重复请求
+  Worker? _episodeIdWorker; // 监听 episodeId 变化
 
   @override
   void initState() {
     super.initState();
+    episodesController = Get.find<EpisodesController>();
     _tabController = TabController(length: _tabs.length, vsync: this);
     playPageController = Get.find<PlayController>();
+    
+    // 监听 Tab 切换
+    _tabController.addListener(_onTabChanged);
+    
+    // 监听 episodeId 变化
+    _episodeIdWorker = ever(episodesController.episodeId, (episodeId) {
+      // 当 episodeId 变化时，重置 comments 并重新获取
+      if (episodeId > 0 && episodeId != _lastRequestedEpisodeId) {
+        setState(() {
+          comments = null;
+        });
+        if (_tabController.index == 1) {
+          _getComments();
+        }
+      }
+    });
   }
 
+  @override
+  void dispose() {
+    _tabController.removeListener(_onTabChanged);
+    _tabController.dispose();
+    _episodeIdWorker?.dispose();
+    super.dispose();
+  }
 
+  void _onTabChanged() {
+    // 当切换到"吐槽"标签页（索引1）且 comments 为 null 时，获取评论
+    if (_tabController.index == 1 && comments == null && !_isRequesting) {
+      _getComments();
+    }
+  }
+
+  void _getComments() async {
+    final episodeId = episodesController.episodeId.value;
+
+    if (episodeId == _lastRequestedEpisodeId) {
+      return;
+    }
+
+    if (_isRequesting) {
+      return;
+    }
+
+    if (episodeId > 0) {
+      // 标记正在请求中
+      _isRequesting = true;
+      _lastRequestedEpisodeId = episodeId;
+
+      try {
+        final commentsData =
+            await BgmRequest.episodeCommentsService(episodeId: episodeId);
+        // 再次检查 episodeId 是否仍然是当前值（防止请求期间 episodeId 变化）
+        if (mounted && episodesController.episodeId.value == episodeId) {
+          setState(() {
+            comments = commentsData;
+          });
+        }
+      } catch (e) {
+        Logger().e(e);
+        // 请求失败时也要检查 episodeId 是否仍然是当前值
+        if (mounted && episodesController.episodeId.value == episodeId) {
+          setState(() {
+            comments = [];
+          });
+        }
+      } finally {
+        _isRequesting = false;
+      }
+    } else {
+      _lastRequestedEpisodeId = episodeId;
+      if (mounted) {
+        setState(() {
+          comments = [];
+        });
+      }
+    }
+  }
   @override
   Widget build(BuildContext context) {
     return PreferredSize(
@@ -73,6 +158,7 @@ class _ContentViewState extends State<ContentView>
                 //吐槽
                 CommentsView(
                   key: _commentKey,
+                  comments: comments,
                 )
               ],
             ),

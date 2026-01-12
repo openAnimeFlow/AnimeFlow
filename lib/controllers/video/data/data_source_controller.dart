@@ -14,7 +14,9 @@ class DataSourceController extends GetxController {
   final RxString keyword = ''.obs;
   final RxBool isLoading = false.obs;
 
-  DataSourceController() {
+  @override
+  void onInit() {
+    super.onInit();
     videoResources = Rx<List<ResourcesItem>>([]);
     _initVideoResources();
   }

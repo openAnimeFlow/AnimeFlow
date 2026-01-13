@@ -71,14 +71,14 @@ class Data {
         infobox = (json['infobox'] as List).map((e) => Infobox.fromJson(e)).toList(),
         info = json['info'],
         metaTags = List<String>.from(json['metaTags']),
-        locked = json['locked'],
+        locked = json['locked'] ?? false,
         name = json['name'],
         nameCN = json['nameCN'],
-        nsfw = json['nsfw'],
+        nsfw = json['nsfw'] ?? false,
         platform = Platform.fromJson(json['platform']),
         rating = Rating.fromJson(json['rating']),
         redirect = json['redirect'],
-        series = json['series'],
+        series = json['series'] ?? false,
         seriesEntry = json['seriesEntry'],
         summary = json['summary'],
         type = json['type'],
@@ -191,7 +191,7 @@ class Platform {
         typeCN = json['typeCN'],
         alias = json['alias'],
         order = json['order'],
-        enableHeader = json['enableHeader'],
+        enableHeader = json['enableHeader'] ?? false,
         wikiTpl = json['wikiTpl'];
 
   Map<String, dynamic> toJson() => {
@@ -310,7 +310,7 @@ class Interest {
         tags = json['tags'],
         epStatus = json['epStatus'],
         volStatus = json['volStatus'],
-        private = json['private'],
+        private = json['private'] ?? false,
         updatedAt = json['updatedAt'];
 
   Map<String, dynamic> toJson() => {

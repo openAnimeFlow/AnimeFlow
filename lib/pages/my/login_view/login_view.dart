@@ -72,7 +72,7 @@ class _LoginViewState extends State<LoginView>
       }
 
       // 如果是首次加载，但已经有缓存数据，则不加载
-      if (!loadMore && _collectionsCache.containsKey(type)) {
+      if (!loadMore && _collectionsCache[type] != null) {
         return;
       }
     }
@@ -92,12 +92,12 @@ class _LoginViewState extends State<LoginView>
         if (loadMore && !refresh && _collectionsCache[type] != null) {
           // 追加数据
           _collectionsCache[type]!.data.addAll(collections.data);
+          _offsets[type] = offset + collections.data.length;
         } else {
           // 首次加载或刷新
           _collectionsCache[type] = collections;
-          _offsets[type] = 0; // 重置 offset
+          _offsets[type] = collections.data.length;
         }
-        _offsets[type] = offset + collections.data.length;
         _hasMore[type] = collections.data.length == 20 &&
             _collectionsCache[type]!.data.length < collections.total;
         _loadingTypes.remove(type);

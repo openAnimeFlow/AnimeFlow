@@ -89,6 +89,7 @@ class _DanmakuSettingState extends State<DanmakuSetting> {
                                 danmakuController.option
                                     .copyWith(hideScroll: !hideScroll),
                               );
+                              playController.saveDanmakuSettings();
                             });
                           },
                           child: Container(
@@ -123,6 +124,7 @@ class _DanmakuSettingState extends State<DanmakuSetting> {
                               danmakuController.updateOption(
                                 danmakuController.option.copyWith(hideTop: !hideTop),
                               );
+                              playController.saveDanmakuSettings();
                             });
                           },
                           child: Container(
@@ -158,6 +160,7 @@ class _DanmakuSettingState extends State<DanmakuSetting> {
                                 danmakuController.option
                                     .copyWith(hideBottom: !hideBottom),
                               );
+                              playController.saveDanmakuSettings();
                             });
                           },
                           child: Container(
@@ -196,6 +199,7 @@ class _DanmakuSettingState extends State<DanmakuSetting> {
                       danmakuController.updateOption(
                         danmakuController.option.copyWith(massiveMode: value),
                       );
+                      playController.saveDanmakuSettings();
                     });
                   },
                 ),
@@ -235,6 +239,7 @@ class _DanmakuSettingState extends State<DanmakuSetting> {
                                   duration: newDuration,
                                 ),
                               );
+                              playController.saveDanmakuSettings();
                             });
                           },
                         ),
@@ -258,11 +263,14 @@ class _DanmakuSettingState extends State<DanmakuSetting> {
                       max: 1.0,
                       label: '${(danmakuController.option.opacity * 100).round()}%',
                       onChanged: (value) {
-                        setState(() => danmakuController.updateOption(
-                          danmakuController.option.copyWith(
-                            opacity: value,
-                          ),
-                        ));
+                        setState(() {
+                          danmakuController.updateOption(
+                            danmakuController.option.copyWith(
+                              opacity: value,
+                            ),
+                          );
+                          playController.saveDanmakuSettings();
+                        });
                       },
                     ),
                   ],
@@ -287,6 +295,7 @@ class _DanmakuSettingState extends State<DanmakuSetting> {
                           danmakuController.updateOption(
                             danmakuController.option.copyWith(fontSize: value),
                           );
+                          playController.saveDanmakuSettings();
                         });
                       },
                     ),
@@ -314,6 +323,7 @@ class _DanmakuSettingState extends State<DanmakuSetting> {
                           danmakuController.updateOption(
                             danmakuController.option.copyWith(area: fixedValues[index]),
                           );
+                          playController.saveDanmakuSettings();
                         });
                       },
                     ),

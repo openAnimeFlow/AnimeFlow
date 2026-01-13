@@ -43,20 +43,8 @@ class _DanmakuViewState extends State<DanmakuView> with AutomaticKeepAliveClient
     super.initState();
     videoStateController = Get.find<VideoStateController>();
     playPageController = Get.find<PlayController>();
-    // 初始化弹幕配置（可以从设置中读取）
-    _border = true;
-    _opacity = 1.0;
-    _fontSize = Utils.isMobile ? 16.0 : 25.0;
-    _danmakuArea = 1.0;
-    _hideTop = false;
-    _hideBottom = false;
-    _hideScroll = false;
-    _massiveMode = false;
-    _danmakuColor = true;
-    _danmakuDuration = 8.0;
-    _danmakuLineHeight = 1.6;
-    _danmakuFontWeight = 4;
-    _danmakuUseSystemFont = false;
+    // 初始化弹幕配置
+    _loadDanmakuSettings();
     
     // 启动弹幕定时器
     _startDanmakuTimer();
@@ -80,6 +68,26 @@ class _DanmakuViewState extends State<DanmakuView> with AutomaticKeepAliveClient
         }
       }
     });
+  }
+
+  /// 加载弹幕设置
+  Future<void> _loadDanmakuSettings() async {
+    final settings = await playPageController.getSavedDanmakuSettings();
+    _opacity = settings['opacity'] ?? 1.0;
+    _fontSize = settings['fontSize'] ?? (Utils.isMobile ? 16.0 : 25.0);
+    _danmakuArea = settings['area'] ?? 1.0;
+    _hideTop = settings['hideTop'] ?? false;
+    _hideBottom = settings['hideBottom'] ?? false;
+    _hideScroll = settings['hideScroll'] ?? false;
+    _massiveMode = settings['massiveMode'] ?? false;
+    _border = settings['border'] ?? true;
+    _danmakuColor = settings['danmakuColor'] ?? true;
+    _danmakuDuration = settings['duration'] ?? 8.0;
+    
+    // 固定值
+    _danmakuLineHeight = 1.6;
+    _danmakuFontWeight = 4;
+    _danmakuUseSystemFont = false;
   }
 
   void _startDanmakuTimer() {
@@ -158,10 +166,25 @@ class _DanmakuViewState extends State<DanmakuView> with AutomaticKeepAliveClient
         createdController: (DanmakuController controller) {
           // 更新全局控制器引用
           playPageController.danmakuController = controller;
-          // 如果需要更新弹幕速度，可以在这里添加
-          // WidgetsBinding.instance.addPostFrameCallback((_) {
-          //   // 更新弹幕速度的逻辑
-          // });
+          // 应用保存的设置
+          WidgetsBinding.instance.addPostFrameCallback((_) {
+            try {
+              controller.updateOption(
+                controller.option.copyWith(
+                  fontSize: _fontSize,
+                  area: _danmakuArea,
+                  opacity: _opacity,
+                  hideScroll: _hideScroll,
+                  hideTop: _hideTop,
+                  hideBottom: _hideBottom,
+                  duration: _danmakuDuration / videoStateController.rate.value,
+                  massiveMode: _massiveMode,
+                ),
+              );
+            } catch (_) {
+              // 如果控制器未初始化，忽略错误
+            }
+          });
         },
         option: DanmakuOption(
           hideTop: _hideTop,

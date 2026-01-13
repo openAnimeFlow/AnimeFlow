@@ -60,4 +60,12 @@ class FormatUtil {
       return '${(bytes / (1024 * 1024 * 1024)).toStringAsFixed(2)} GB';
     }
   }
+
+  /// 格式化弹幕时间（秒数）
+  /// [seconds] 弹幕时间，单位：秒
+  /// 返回格式：MM:SS 或 HH:MM:SS
+  static String formatDanmakuTime(double seconds) {
+    final duration = Duration(milliseconds: (seconds * 1000).round());
+    return formatDuration(duration);
+  }
 }

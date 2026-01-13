@@ -1,6 +1,7 @@
 import 'package:anime_flow/controllers/episodes/episodes_controller.dart';
 import 'package:anime_flow/controllers/play/PlayPageController.dart';
 import 'package:anime_flow/models/item/danmaku/danmaku_module.dart';
+import 'package:anime_flow/utils/formatUtil.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
@@ -33,6 +34,23 @@ class _DanmakuCardState extends State<DanmakuCard> {
     });
   }
 
+  /// 从 source 字段中提取平台名称（如 [Gamer]Sabrina2001 -> Gamer）
+  String _extractPlatform(String source) {
+    final regex = RegExp(r'\[([^\]]+)\]');
+    final match = regex.firstMatch(source);
+    return match?.group(1) ?? '弹弹Play';
+  }
+
+  /// 统计各平台弹幕数量
+  Map<String, int> _countByPlatform(List<Danmaku> danmakus) {
+    final Map<String, int> counts = {};
+    for (var danmaku in danmakus) {
+      final platform = _extractPlatform(danmaku.source);
+      counts[platform] = (counts[platform] ?? 0) + 1;
+    }
+    return counts;
+  }
+
   @override
   Widget build(BuildContext context) {
     return Obx(() {
@@ -42,6 +60,12 @@ class _DanmakuCardState extends State<DanmakuCard> {
       });
       // 按时间排序
       allDanmakus.sort((a, b) => a.time.compareTo(b.time));
+      
+      // 统计各平台弹幕数量
+      final platformCounts = _countByPlatform(allDanmakus);
+      final sortedPlatforms = platformCounts.entries.toList()
+        ..sort((a, b) => b.value.compareTo(a.value)); // 按数量降序排列
+      
       return Card(
         elevation: 0,
         child: Padding(
@@ -50,8 +74,19 @@ class _DanmakuCardState extends State<DanmakuCard> {
             children: [
               Row(
                 children: [
-                  const Text('弹幕源'),
-                  const Spacer(),
+                  const Text('弹幕源:',style: TextStyle(fontWeight: FontWeight.bold),),
+                  if (allDanmakus.isNotEmpty)
+                    ...[
+                      const SizedBox(width: 5),
+                      Text(
+                        '总装填(${allDanmakus.length})条弹幕',
+                        style: Theme.of(context).textTheme.bodySmall
+                      ),
+                      const Spacer(),
+                    ]
+                  else ...[
+                    const Spacer(),
+                  ],
                   IconButton(
                     onPressed: () {
                       setState(() {
@@ -63,9 +98,26 @@ class _DanmakuCardState extends State<DanmakuCard> {
                   )
                 ],
               ),
+              // 平台统计信息
+              if (isExpanded && sortedPlatforms.isNotEmpty)
+                Padding(
+                  padding: const EdgeInsets.only(bottom: 8),
+                  child: Wrap(
+                    spacing: 8,
+                    runSpacing: 4,
+                    children: sortedPlatforms.map((entry) {
+                      return Chip(
+                        label: Text('${entry.key}: ${entry.value}'),
+                        labelStyle: Theme.of(context).textTheme.bodySmall,
+                        materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                        visualDensity: VisualDensity.compact,
+                      );
+                    }).toList(),
+                  ),
+                ),
               AnimatedContainer(
                 duration: const Duration(milliseconds: 300),
-                height: isExpanded ? 200 : 0,
+                height: isExpanded ? 300 : 0,
                 child: ListView.builder(
                     itemCount: allDanmakus.length,
                     itemExtent: 56.0,
@@ -84,7 +136,7 @@ class _DanmakuCardState extends State<DanmakuCard> {
                             overflow: TextOverflow.ellipsis,
                           ),
                           trailing: Text(
-                            '${danmaku.time}',
+                            '${FormatUtil.formatDanmakuTime(danmaku.time)} · ${_extractPlatform(danmaku.source)}',
                             style: Theme.of(context).textTheme.bodySmall,
                           ));
                     }),

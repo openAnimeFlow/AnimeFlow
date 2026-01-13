@@ -54,7 +54,8 @@ class BottomAreaControl extends StatelessWidget {
                       if (fullscreen || isWideScreen)
                         Padding(
                           padding: EdgeInsets.symmetric(
-                              horizontal: paddingLeft == 0 ? 10 : 0, vertical: 5),
+                              horizontal: paddingLeft == 0 ? 10 : 0,
+                              vertical: 5),
                           child: VideoProgressBar(
                               videoUiStateController: videoUiStateController),
                         ),
@@ -87,15 +88,20 @@ class BottomAreaControl extends StatelessWidget {
                               onPressed: () {
                                 playPageController.toggleDanmaku();
                               },
-                              icon: SvgPicture.asset(
-                                danmakuOn
-                                    ? 'assets/icons/danmaku_on.svg'
-                                    : 'assets/icons/danmaku_off.svg',
-                                width: 25,
-                                height: 25,
-                                colorFilter: const ColorFilter.mode(
-                                    Colors.white, BlendMode.srcIn),
-                              ),
+                              // icon: SvgPicture.asset(
+                              //   danmakuOn
+                              //       ? 'assets/icons/danmaku_on.svg'
+                              //       : 'assets/icons/danmaku_off.svg',
+                              //   width: 25,
+                              //   height: 25,
+                              //   colorFilter: const ColorFilter.mode(
+                              //       Colors.white, BlendMode.srcIn),
+                              // ),
+                              icon: Icon(
+                                  danmakuOn
+                                      ? Icons.subtitles_outlined
+                                      : Icons.subtitles_off_outlined,
+                                  color: Colors.white),
                             ),
                             //弹幕设置
                             if (danmakuOn)

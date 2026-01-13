@@ -18,8 +18,10 @@ class AnimeDetailPage extends StatefulWidget {
 }
 
 class _AnimeDetailPageState extends State<AnimeDetailPage> {
+  late SubjectStateController subjectStateController;
   late SubjectBasicData subjectBasicData;
   late Future<SubjectsInfoItem?> _subjectsItem;
+  SubjectsInfoItem? subjectsInfo;
   late Future<EpisodesItem> episodesFuture;
   final double _contentHeight = 200.0; // 内容区域的高度
   bool isPinned = false;
@@ -29,15 +31,26 @@ class _AnimeDetailPageState extends State<AnimeDetailPage> {
   @override
   void initState() {
     super.initState();
+    subjectStateController = Get.put(SubjectStateController());
     subjectBasicData = Get.arguments;
     _subjectsItem = BgmRequest.getSubjectByIdService(subjectBasicData.id);
     episodesFuture =
         BgmRequest.getSubjectEpisodesByIdService(subjectBasicData.id, 100, 0);
+    _getSubjects();
+  }
+
+  void _getSubjects() async {
+    final response =
+        await BgmRequest.getSubjectByIdService(subjectBasicData.id);
+    setState(() {
+      subjectsInfo = response;
+    });
   }
 
   @override
   void dispose() {
     _nestedScrollController.dispose();
+    Get.delete<SubjectStateController>();
     super.dispose();
   }
 
@@ -73,15 +86,10 @@ class _AnimeDetailPageState extends State<AnimeDetailPage> {
                 sliver: SliverAppBar(
                   automaticallyImplyLeading: false,
                   titleSpacing: 0,
-                  title: FutureBuilder<SubjectsInfoItem?>(
-                    future: _subjectsItem,
-                    builder: (context, snapshot) {
-                      return InfoAppbarView(
-                          subjectBasicData: subjectBasicData,
-                          subjectsItem: snapshot.data,
-                          isPinned: isPinned);
-                    },
-                  ),
+                  title: InfoAppbarView(
+                      subjectBasicData: subjectBasicData,
+                      subjectsItem: subjectsInfo,
+                      isPinned: isPinned),
                   pinned: true,
                   floating: false,
                   snap: false,
@@ -95,27 +103,24 @@ class _AnimeDetailPageState extends State<AnimeDetailPage> {
 
                   /// 头部内容区域
                   flexibleSpace: FlexibleSpaceBar(
-                      collapseMode: CollapseMode.pin,
-                      background: Padding(
-                          padding: const EdgeInsets.only(bottom: 15),
-                          child: FutureBuilder<SubjectsInfoItem?>(
-                            future: _subjectsItem,
-                            builder: (context, snapshot) {
-                              return InfoHeadView(
-                                subjectItem: snapshot.data,
-                                episodesItem: episodesFuture,
-                                statusBarHeight: statusBarHeight,
-                                contentHeight: _contentHeight,
-                                subjectBasicData: subjectBasicData,
-                              );
-                            },
-                          ))),
+                    collapseMode: CollapseMode.pin,
+                    background: Padding(
+                      padding: const EdgeInsets.only(bottom: 15),
+                      child: InfoHeadView(
+                        subjectItem: subjectsInfo,
+                        episodesItem: episodesFuture,
+                        statusBarHeight: statusBarHeight,
+                        contentHeight: _contentHeight,
+                        subjectBasicData: subjectBasicData,
+                      ),
+                    ),
+                  ),
                 ),
               ),
             ];
           },
           body: InfoSynopsisView(
-            subjectsItem: _subjectsItem,
+            subjectsInfo: subjectsInfo,
             onScrollChanged: (bool showButton) {
               if (topButton != showButton) {
                 setState(() {

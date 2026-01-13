@@ -20,12 +20,12 @@ class _NoScrollbarBehavior extends ScrollBehavior {
 
 /// 简介页面
 class InfoSynopsisView extends StatefulWidget {
-  final Future<SubjectsInfoItem?> subjectsItem;
+  final SubjectsInfoItem? subjectsInfo;
   final ValueChanged<bool>? onScrollChanged;
 
   const InfoSynopsisView({
     super.key,
-    required this.subjectsItem,
+    this.subjectsInfo,
     this.onScrollChanged,
   });
 
@@ -63,10 +63,8 @@ class _InfoSynopsisViewState extends State<InfoSynopsisView> {
                   }
                   return false;
                 },
-                child: FutureBuilder<SubjectsInfoItem?>(
-                  future: widget.subjectsItem,
-                  builder: (context, snapshot) {
-                    final data = snapshot.data;
+                child: Builder(
+                  builder: (context) {
                     final leftPadding = MediaQuery.of(context).padding.left;
 
                     return CustomScrollView(
@@ -81,7 +79,7 @@ class _InfoSynopsisViewState extends State<InfoSynopsisView> {
                         ),
 
                         // 加载中状态
-                        if (data == null)
+                        if (widget.subjectsInfo == null)
                           const SliverToBoxAdapter(
                             child: Padding(
                               padding: EdgeInsets.all(16),
@@ -97,7 +95,7 @@ class _InfoSynopsisViewState extends State<InfoSynopsisView> {
                                 title: title,
                                 fontSizeTitle: fontSizeTitle,
                                 fontWeightTitle: fontWeightTitle,
-                                text: data.summary,
+                                text: widget.subjectsInfo!.summary,
                                 fontWeight: fontWeight,
                               ),
                             ),
@@ -112,7 +110,7 @@ class _InfoSynopsisViewState extends State<InfoSynopsisView> {
                                 title: '标签',
                                 fontSizeTitle: fontSizeTitle,
                                 fontWeightTitle: fontWeightTitle,
-                                tags: data.tags,
+                                tags: widget.subjectsInfo!.tags,
                                 fontSize: 12,
                                 fontWeight: FontWeight.w700,
                                 numbersSize: 10,
@@ -127,7 +125,7 @@ class _InfoSynopsisViewState extends State<InfoSynopsisView> {
                               leftPadding,
                               DetailsView(
                                 title: '详情',
-                                subject: data,
+                                subject: widget.subjectsInfo!,
                                 textSize: 13,
                                 textFontWeight: FontWeight.w600,
                               ),
@@ -141,7 +139,7 @@ class _InfoSynopsisViewState extends State<InfoSynopsisView> {
                               leftPadding,
                               CharactersView(
                                 title: '角色',
-                                subjectsId: data.id,
+                                subjectsId: widget.subjectsInfo!.id,
                               ),
                             ),
                           ),
@@ -152,7 +150,7 @@ class _InfoSynopsisViewState extends State<InfoSynopsisView> {
                               leftPadding,
                               RelatedView(
                                 title: '关联条目',
-                                subjectId: data.id,
+                                subjectId: widget.subjectsInfo!.id,
                               ),
                             ),
                           ),
@@ -163,7 +161,7 @@ class _InfoSynopsisViewState extends State<InfoSynopsisView> {
                               leftPadding,
                               CommentView(
                                 key: _commentViewKey,
-                                subjectId: data.id,
+                                subjectId: widget.subjectsInfo!.id,
                               ),
                             ),
                           ),

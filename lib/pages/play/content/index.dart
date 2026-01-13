@@ -3,13 +3,12 @@ import 'package:anime_flow/controllers/play/PlayPageController.dart';
 import 'package:anime_flow/http/requests/bgm_request.dart';
 import 'package:anime_flow/models/item/bangumi/episode_comments_item.dart';
 import 'package:anime_flow/models/item/bangumi/episodes_item.dart';
+import 'package:anime_flow/pages/play/content/introduce/index.dart';
 import 'package:anime_flow/widget/video/ui/video_ui_components.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:logger/logger.dart';
-
-import 'comments.dart';
-import 'introduce.dart';
+import 'comments/index.dart';
 
 class ContentView extends StatefulWidget {
   final Future<EpisodesItem> episodes;

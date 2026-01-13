@@ -1,7 +1,9 @@
 import 'package:anime_flow/controllers/play/PlayPageController.dart';
+import 'package:anime_flow/utils/storage.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:get/get.dart';
+import 'package:hive/hive.dart';
 
 /// 弹幕设置弹窗
 class DanmakuSetting extends StatefulWidget {
@@ -13,10 +15,8 @@ class DanmakuSetting extends StatefulWidget {
 
 class _DanmakuSettingState extends State<DanmakuSetting> {
   late PlayController playController;
+  Box setting = Storage.setting;
 
-  // 弹幕设置状态
-  bool _border = true;
-  bool _danmakuColor = true;
   @override
   void initState() {
     super.initState();
@@ -89,7 +89,7 @@ class _DanmakuSettingState extends State<DanmakuSetting> {
                                 danmakuController.option
                                     .copyWith(hideScroll: !hideScroll),
                               );
-                              playController.saveDanmakuSettings();
+                              setting.put(DanmakuKey.danmakuHideScroll, !hideScroll);
                             });
                           },
                           child: Container(
@@ -124,7 +124,7 @@ class _DanmakuSettingState extends State<DanmakuSetting> {
                               danmakuController.updateOption(
                                 danmakuController.option.copyWith(hideTop: !hideTop),
                               );
-                              playController.saveDanmakuSettings();
+                              setting.put(DanmakuKey.danmakuHideTop, !hideTop);
                             });
                           },
                           child: Container(
@@ -160,7 +160,7 @@ class _DanmakuSettingState extends State<DanmakuSetting> {
                                 danmakuController.option
                                     .copyWith(hideBottom: !hideBottom),
                               );
-                              playController.saveDanmakuSettings();
+                              setting.put(DanmakuKey.danmakuHideBottom, !hideBottom);
                             });
                           },
                           child: Container(
@@ -199,7 +199,7 @@ class _DanmakuSettingState extends State<DanmakuSetting> {
                       danmakuController.updateOption(
                         danmakuController.option.copyWith(massiveMode: value),
                       );
-                      playController.saveDanmakuSettings();
+                      setting.put(DanmakuKey.danmakuMassiveMode, value);
                     });
                   },
                 ),
@@ -239,7 +239,7 @@ class _DanmakuSettingState extends State<DanmakuSetting> {
                                   duration: newDuration,
                                 ),
                               );
-                              playController.saveDanmakuSettings();
+                              setting.put(DanmakuKey.danmakuDuration, newDuration);
                             });
                           },
                         ),
@@ -269,7 +269,7 @@ class _DanmakuSettingState extends State<DanmakuSetting> {
                               opacity: value,
                             ),
                           );
-                          playController.saveDanmakuSettings();
+                          setting.put(DanmakuKey.danmakuOpacity, value);
                         });
                       },
                     ),
@@ -295,7 +295,7 @@ class _DanmakuSettingState extends State<DanmakuSetting> {
                           danmakuController.updateOption(
                             danmakuController.option.copyWith(fontSize: value),
                           );
-                          playController.saveDanmakuSettings();
+                          setting.put(DanmakuKey.danmakuFontSize, value);
                         });
                       },
                     ),
@@ -323,7 +323,7 @@ class _DanmakuSettingState extends State<DanmakuSetting> {
                           danmakuController.updateOption(
                             danmakuController.option.copyWith(area: fixedValues[index]),
                           );
-                          playController.saveDanmakuSettings();
+                          setting.put(DanmakuKey.danmakuArea, fixedValues[index]);
                         });
                       },
                     ),

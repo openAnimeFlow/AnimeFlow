@@ -1,10 +1,12 @@
 import 'dart:async';
 import 'package:anime_flow/controllers/play/PlayPageController.dart';
 import 'package:anime_flow/controllers/video/video_state_controller.dart';
+import 'package:anime_flow/utils/storage.dart';
 import 'package:anime_flow/utils/utils.dart';
 import 'package:canvas_danmaku/canvas_danmaku.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:hive/hive.dart';
 
 class DanmakuView extends StatefulWidget {
   const DanmakuView({super.key});
@@ -13,7 +15,9 @@ class DanmakuView extends StatefulWidget {
   State<DanmakuView> createState() => _DanmakuViewState();
 }
 
-class _DanmakuViewState extends State<DanmakuView> with AutomaticKeepAliveClientMixin{
+class _DanmakuViewState extends State<DanmakuView>
+    with AutomaticKeepAliveClientMixin {
+  Box setting = Storage.setting;
   late VideoStateController videoStateController;
   late PlayController playPageController;
   Timer? _danmakuTimer;
@@ -34,7 +38,6 @@ class _DanmakuViewState extends State<DanmakuView> with AutomaticKeepAliveClient
   late int _danmakuFontWeight;
   late bool _danmakuUseSystemFont;
 
-
   @override
   bool get wantKeepAlive => true;
 
@@ -43,18 +46,31 @@ class _DanmakuViewState extends State<DanmakuView> with AutomaticKeepAliveClient
     super.initState();
     videoStateController = Get.find<VideoStateController>();
     playPageController = Get.find<PlayController>();
+
     // 初始化弹幕配置
-    _loadDanmakuSettings();
-    
+    _border = setting.get(DanmakuKey.danmakuBorder, defaultValue: true);
+    _opacity = setting.get(DanmakuKey.danmakuOpacity, defaultValue: 1.0);
+    _fontSize = setting.get(DanmakuKey.danmakuFontSize, defaultValue: 16.0);
+    _danmakuArea = setting.get(DanmakuKey.danmakuArea, defaultValue: 1.0);
+    _hideTop = setting.get(DanmakuKey.danmakuHideTop, defaultValue: false);
+    _hideBottom = setting.get(DanmakuKey.danmakuHideBottom, defaultValue: false);
+    _hideScroll = setting.get(DanmakuKey.danmakuHideScroll, defaultValue: false);
+    _massiveMode = setting.get(DanmakuKey.danmakuMassiveMode, defaultValue: false);
+    _danmakuColor = setting.get(DanmakuKey.danmakuColor, defaultValue: true);
+    _danmakuDuration = setting.get(DanmakuKey.danmakuDuration, defaultValue: 8.0);
+    _danmakuLineHeight = setting.get(DanmakuKey.danmakuLineHeight, defaultValue: 1.6);
+    _danmakuFontWeight = setting.get(DanmakuKey.danmakuFontWeight, defaultValue: 4);
+    _danmakuUseSystemFont = setting.get(DanmakuKey.danmakuUseSystemFont, defaultValue: false);
+
     // 启动弹幕定时器
     _startDanmakuTimer();
-    
+
     // 监听倍速变化，更新弹幕速度
     ever(videoStateController.rate, (rate) {
       // 倍速变化时，更新弹幕速度需要在 DanmakuScreen 重建时更新
       setState(() {});
     });
-    
+
     // 监听播放状态变化，控制弹幕暂停/恢复
     _playingWorker = ever(videoStateController.playing, (playing) {
       if (mounted) {
@@ -64,45 +80,26 @@ class _DanmakuViewState extends State<DanmakuView> with AutomaticKeepAliveClient
           } else {
             playPageController.danmakuController.pause();
           }
-        } catch (_) {
-        }
+        } catch (_) {}
       }
     });
-  }
-
-  /// 加载弹幕设置
-  Future<void> _loadDanmakuSettings() async {
-    final settings = await playPageController.getSavedDanmakuSettings();
-    _opacity = settings['opacity'] ?? 1.0;
-    _fontSize = settings['fontSize'] ?? (Utils.isMobile ? 16.0 : 25.0);
-    _danmakuArea = settings['area'] ?? 1.0;
-    _hideTop = settings['hideTop'] ?? false;
-    _hideBottom = settings['hideBottom'] ?? false;
-    _hideScroll = settings['hideScroll'] ?? false;
-    _massiveMode = settings['massiveMode'] ?? false;
-    _border = settings['border'] ?? true;
-    _danmakuColor = settings['danmakuColor'] ?? true;
-    _danmakuDuration = settings['duration'] ?? 8.0;
-    
-    // 固定值
-    _danmakuLineHeight = 1.6;
-    _danmakuFontWeight = 4;
-    _danmakuUseSystemFont = false;
   }
 
   void _startDanmakuTimer() {
     _danmakuTimer?.cancel();
     _danmakuTimer = Timer.periodic(const Duration(seconds: 1), (timer) {
       if (!mounted) return;
-      
+
       final currentPosition = videoStateController.position.value;
       final playing = videoStateController.playing.value;
-      
+
       // 只有在播放时才添加弹幕
-      if (currentPosition.inMicroseconds != 0 && playing && playPageController.danmakuOn.value) {
+      if (currentPosition.inMicroseconds != 0 &&
+          playing &&
+          playPageController.danmakuOn.value) {
         final currentSecond = currentPosition.inSeconds;
         final danmakus = playPageController.danDanmakus[currentSecond];
-        
+
         if (danmakus != null && danmakus.isNotEmpty) {
           // 按索引延迟添加弹幕
           danmakus.asMap().forEach((idx, danmaku) {
@@ -111,12 +108,12 @@ class _DanmakuViewState extends State<DanmakuView> with AutomaticKeepAliveClient
                 milliseconds: idx * 1000 ~/ danmakus.length,
               ),
               () {
-                if (!mounted || 
+                if (!mounted ||
                     !videoStateController.playing.value ||
                     !playPageController.danmakuOn.value) {
                   return;
                 }
-                
+
                 // 转换弹幕类型
                 DanmakuItemType danmakuType;
                 if (danmaku.type == 4) {
@@ -126,7 +123,7 @@ class _DanmakuViewState extends State<DanmakuView> with AutomaticKeepAliveClient
                 } else {
                   danmakuType = DanmakuItemType.scroll;
                 }
-                
+
                 // 处理颜色
                 Color danmakuColor = danmaku.color;
                 if (!_danmakuColor) {

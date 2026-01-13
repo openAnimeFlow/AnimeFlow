@@ -35,9 +35,16 @@ class _DanmakuCardState extends State<DanmakuCard> {
 
   @override
   Widget build(BuildContext context) {
-    return Card(
-      elevation: 0,
-      child: Padding(
+    return Obx(() {
+      final allDanmakus = <Danmaku>[];
+      playController.danDanmakus.forEach((time, danmakus) {
+        allDanmakus.addAll(danmakus);
+      });
+      // 按时间排序
+      allDanmakus.sort((a, b) => a.time.compareTo(b.time));
+      return Card(
+        elevation: 0,
+        child: Padding(
           padding: const EdgeInsets.all(8),
           child: Column(
             children: [
@@ -56,45 +63,36 @@ class _DanmakuCardState extends State<DanmakuCard> {
                   )
                 ],
               ),
-              Obx(
-                () {
-                  final allDanmakus = <Danmaku>[];
-                  playController.danDanmakus.forEach((time, danmakus) {
-                    allDanmakus.addAll(danmakus);
-                  });
-                  // 按时间排序
-                  allDanmakus.sort((a, b) => a.time.compareTo(b.time));
-
-                  return AnimatedContainer(
-                    duration: const Duration(milliseconds: 300),
-                    height: isExpanded ? 200 : 0,
-                    child: ListView.builder(
-                        itemCount: allDanmakus.length,
-                        itemExtent: 56.0,
-                        // 固定item高度，提升滚动性能
-                        cacheExtent: 200.0,
-                        // 缓存范围
-                        physics: const ClampingScrollPhysics(),
-                        itemBuilder: (context, index) {
-                          final danmaku = allDanmakus[index];
-                          return ListTile(
-                              dense: true, // 使用紧凑模式减少padding
-                              visualDensity: VisualDensity.compact,
-                              title: Text(
-                                danmaku.message,
-                                maxLines: 1,
-                                overflow: TextOverflow.ellipsis,
-                              ),
-                              trailing: Text(
-                                '${danmaku.time}',
-                                style: Theme.of(context).textTheme.bodySmall,
-                              ));
-                        }),
-                  );
-                },
-              )
+              AnimatedContainer(
+                duration: const Duration(milliseconds: 300),
+                height: isExpanded ? 200 : 0,
+                child: ListView.builder(
+                    itemCount: allDanmakus.length,
+                    itemExtent: 56.0,
+                    // 固定item高度，提升滚动性能
+                    cacheExtent: 200.0,
+                    // 缓存范围
+                    physics: const ClampingScrollPhysics(),
+                    itemBuilder: (context, index) {
+                      final danmaku = allDanmakus[index];
+                      return ListTile(
+                          dense: true, // 使用紧凑模式减少padding
+                          visualDensity: VisualDensity.compact,
+                          title: Text(
+                            danmaku.message,
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                          trailing: Text(
+                            '${danmaku.time}',
+                            style: Theme.of(context).textTheme.bodySmall,
+                          ));
+                    }),
+              ),
             ],
-          )),
-    );
+          ),
+        ),
+      );
+    });
   }
 }

@@ -1,7 +1,6 @@
 import 'dart:io';
 import 'package:anime_flow/constants/constants.dart';
-import 'package:anime_flow/utils/utils.dart';
-import 'package:anime_flow/widget/windows_title_bar.dart';
+import 'package:anime_flow/utils/storage.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:get/get.dart';
@@ -17,7 +16,7 @@ void main() async {
   MediaKit.ensureInitialized();
   await dotenv.load(fileName: ".env");
   await Hive.initFlutter();
-  await Hive.openBox(Constants.crawlConfigs);
+  await Storage.init();
   final themeController = Get.put(ThemeController());
   final appInfoController = Get.put(AppInfoController());
   await themeController.initTheme();
@@ -26,8 +25,8 @@ void main() async {
   if (Platform.isWindows || Platform.isLinux || Platform.isMacOS) {
     await windowManager.ensureInitialized();
     const windowOptions = WindowOptions(
-      // titleBarStyle: TitleBarStyle.hidden,
-    );
+        // titleBarStyle: TitleBarStyle.hidden,
+        );
     await windowManager.waitUntilReadyToShow(windowOptions, () async {
       await windowManager.show();
       await windowManager.focus();

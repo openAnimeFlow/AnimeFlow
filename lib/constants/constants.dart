@@ -15,6 +15,8 @@ class Constants {
   /// 爬虫配置表
   static const String crawlConfigs = 'crawl_configs';
 
+  static const String settingsKey = 'settings_key';
+
   //常规请求头
   static const String userAgentName = 'User-Agent';
 

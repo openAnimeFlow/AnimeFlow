@@ -1,14 +1,10 @@
-import 'package:anime_flow/constants/play_layout_constant.dart';
-import 'package:anime_flow/pages/recommend/calendar.dart';
+import 'package:anime_flow/pages/recommend/anime/index.dart';
+import 'package:anime_flow/pages/recommend/timeline/timeline_page.dart';
 import 'package:anime_flow/routes/index.dart';
 import 'package:anime_flow/controllers/main_page/main_page_state.dart';
-import 'package:anime_flow/http/requests/bgm_request.dart';
-import 'package:anime_flow/utils/layout_util.dart';
-import 'package:anime_flow/widget/subject_carf.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:anime_flow/controllers/theme_controller.dart';
-import 'package:anime_flow/models/item/bangumi/hot_item.dart';
 
 class RecommendPage extends StatefulWidget {
   const RecommendPage({super.key});
@@ -17,81 +13,54 @@ class RecommendPage extends StatefulWidget {
   State<RecommendPage> createState() => _RecommendPageState();
 }
 
-class _RecommendPageState extends State<RecommendPage> {
+class _RecommendPageState extends State<RecommendPage>
+    with SingleTickerProviderStateMixin {
   late MainPageState mainPageState;
   late ThemeController themeController;
-  final List<Data> _dataList = [];
-  bool _isLoading = false;
-  bool _hasMore = true;
+  late TabController _tabController;
+  final _animeKey = GlobalKey();
+  final _timelineKey = GlobalKey();
   bool _showBackToTopButton = false;
-  int _offset = 0;
-  final int _limit = 20;
-  final _scrollController = ScrollController();
-
-  static const _contentPadding = EdgeInsets.all(10);
+  VoidCallback? _scrollToTopCallback;
+  final List<String> _tabs = ['动漫', '时间胶囊'];
 
   @override
   void initState() {
     super.initState();
     mainPageState = Get.find<MainPageState>();
     themeController = Get.find<ThemeController>();
-    _loadData();
-
-    _scrollController.addListener(() {
-      // 加载更多数据
-      if (_scrollController.position.pixels >=
-          _scrollController.position.maxScrollExtent - 200) {
-        _loadData();
-      }
-
-      // 监听滚动位置，控制返回顶部按钮显示
-      if (_scrollController.position.pixels > 300) {
-        if (!_showBackToTopButton) {
-          setState(() {
-            _showBackToTopButton = true;
-          });
-        }
-      } else {
-        if (_showBackToTopButton) {
-          setState(() {
-            _showBackToTopButton = false;
-          });
-        }
-      }
-    });
+    _tabController = TabController(length: _tabs.length, vsync: this);
+    _tabController.addListener(_handleTabChange);
   }
 
   //返回顶部
   void _scrollToTop() {
-    _scrollController.animateTo(0,
-        duration: const Duration(milliseconds: 300), curve: Curves.easeInOut);
+    _scrollToTopCallback?.call();
   }
 
-  // 加载数据
-  Future<void> _loadData() async {
-    if (_isLoading || !_hasMore) return;
+  void _handleShowBackToTopChanged(bool show) {
+    if (mounted && _showBackToTopButton != show) {
+      setState(() {
+        _showBackToTopButton = show;
+      });
+    }
+  }
 
-    setState(() {
-      _isLoading = true;
-    });
-
-    final hotItem = await BgmRequest.getHotService(_limit, _offset);
-
+  void _handleTabChange() {
+    // 切换标签页时，重置返回顶部按钮状态
     if (mounted) {
       setState(() {
-        _dataList.addAll(hotItem.data);
-        _offset += hotItem.data.length;
-        if (hotItem.data.length < _limit) {
-          _hasMore = false;
+        if (_tabController.index != 0) {
+          _showBackToTopButton = false;
         }
-        _isLoading = false;
       });
     }
   }
 
   @override
   void dispose() {
-    _scrollController.dispose();
+    _tabController.removeListener(_handleTabChange);
+    _tabController.dispose();
     super.dispose();
   }
 
@@ -103,134 +72,76 @@ class _RecommendPageState extends State<RecommendPage> {
           children: [
             Expanded(
                 child: Row(
-              children: [
-                const Text("推荐"),
-                const SizedBox(width: 10),
-                Container(
-                  width: 200,
-                  height: 35,
-                  decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(20),
-                    border: Border.all(
-                      color: Theme.of(context).colorScheme.primary,
-                      width: 1,
-                    ),
-                  ),
-                  child: TextField(
-                    decoration: InputDecoration(
-                      hintText: "搜索动漫番剧...",
-                      hintStyle: TextStyle(
-                        color: Colors.grey.shade600,
-                        fontSize: 14,
+                  children: [
+                    const Text("推荐"),
+                    const SizedBox(width: 10),
+                    Container(
+                      width: 200,
+                      height: 35,
+                      decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(20),
+                        border: Border.all(
+                          color: Theme.of(context).colorScheme.primary,
+                          width: 1,
+                        ),
                       ),
-                      prefixIcon: const Icon(
-                        Icons.search,
-                        size: 25,
-                      ),
-                      filled: false,
-                      border: const OutlineInputBorder(
-                        borderSide: BorderSide.none,
-                      ),
-                      contentPadding: const EdgeInsets.symmetric(
-                        horizontal: 12,
-                      ),
-                    ),
-                    onTap: () {
-                      Get.toNamed(RouteName.search);
-                    },
-                    readOnly: true,
-                  ),
-                ),
-              ],
-            )),
-          ],
-        ),
-      ),
-      body: _buildPage(),
-      floatingActionButton: _showBackToTopButton
-          ? FloatingActionButton(
-              onPressed: _scrollToTop,
-              child: const Icon(Icons.arrow_upward),
-            )
-          : null,
-    );
-  }
-
-  Widget _buildPage() {
-    if (_dataList.isEmpty && _isLoading) {
-      return const Center(child: CircularProgressIndicator());
-    }
-    return LayoutBuilder(
-      builder: (context, constraints) {
-        return Stack(
-          children: [
-            Center(
-              child: ConstrainedBox(
-                constraints:
-                    const BoxConstraints(maxWidth: PlayLayoutConstant.maxWidth),
-                child: CustomScrollView(
-                  controller: _scrollController,
-                  slivers: [
-                    const CalendarView(),
-                    const SliverToBoxAdapter(
-                      child: SizedBox(height: 20),
-                    ),
-                    SliverPadding(
-                      padding: _contentPadding,
-                      sliver: SliverMainAxisGroup(
-                        slivers: [
-                          const SliverToBoxAdapter(
-                            child: Row(
-                              children: [
-                                Text(
-                                  '热门动画',
-                                  style: TextStyle(
-                                      fontSize: 25,
-                                      fontWeight: FontWeight.bold),
-                                )
-                              ],
-                            ),
+                      child: TextField(
+                        decoration: InputDecoration(
+                          hintText: "搜索动漫番剧...",
+                          hintStyle: TextStyle(
+                            color: Colors.grey.shade600,
+                            fontSize: 14,
                           ),
-                          const SliverToBoxAdapter(
-                            child: SizedBox(height: 5),
+                          prefixIcon: const Icon(
+                            Icons.search,
+                            size: 25,
                           ),
-                          SliverGrid(
-                            gridDelegate:
-                                SliverGridDelegateWithFixedCrossAxisCount(
-                              crossAxisCount:
-                                  LayoutUtil.getCrossAxisCount(context),
-                              crossAxisSpacing: 5, // 横向间距
-                              mainAxisSpacing: 5, // 纵向间距
-                              childAspectRatio: 0.7, // 宽高比
-                            ),
-                            delegate: SliverChildBuilderDelegate(
-                              (BuildContext context, int index) {
-                                if (index == _dataList.length) {
-                                  return _hasMore
-                                      ? const Center(
-                                          child: CircularProgressIndicator())
-                                      : const Center(
-                                          child: Padding(
-                                          padding: EdgeInsets.all(8.0),
-                                          child: Text('没有更多了'),
-                                        ));
-                                }
-                                final subject = _dataList[index].subject;
-                                return SubjectCarfView(subject: subject);
-                              },
-                              childCount: _dataList.length + 1,
-                            ),
+                          filled: false,
+                          border: const OutlineInputBorder(
+                            borderSide: BorderSide.none,
                           ),
-                        ],
+                          contentPadding: const EdgeInsets.symmetric(
+                            horizontal: 12,
+                          ),
+                        ),
+                        onTap: () {
+                          Get.toNamed(RouteName.search);
+                        },
+                        readOnly: true,
                       ),
                     ),
                   ],
-                ),
-              ),
-            ),
+                )),
           ],
-        );
-      },
+        ),
+        bottom: TabBar(
+          controller: _tabController,
+          tabs: List.generate(_tabs.length, (index) {
+            return Tab(
+              text: _tabs[index],
+            );
+          })
+        ),
+      ),
+      body: TabBarView(
+        controller: _tabController,
+        children: [
+          AnimePage(
+            key: _animeKey,
+            onShowBackToTopChanged: _handleShowBackToTopChanged,
+            onScrollToTopCallback: (callback) {
+              _scrollToTopCallback = callback;
+            },
+          ),
+          TimelinePage(key: _timelineKey),
+        ],
+      ),
+      floatingActionButton: _tabController.index == 0 && _showBackToTopButton
+          ? FloatingActionButton(
+        onPressed: _scrollToTop,
+        child: const Icon(Icons.arrow_upward),
+      )
+          : null,
     );
   }
 }

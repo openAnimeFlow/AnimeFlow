@@ -27,6 +27,9 @@ class BgmNextApi {
 
   ///关联条目
   static const String relations = '/p1/subjects/{subjectId}/relations';
+
+  ///时间线
+  static const String timeline = '/p1/timeline';
 }
 
 class BgmUsersApi {

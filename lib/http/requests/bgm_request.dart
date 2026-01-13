@@ -14,6 +14,7 @@ import 'package:anime_flow/models/item/bangumi/subject_comments_item.dart';
 import 'package:anime_flow/models/item/bangumi/subjects_info_item.dart';
 import 'package:anime_flow/http/dio/bgm_dio_request.dart';
 import 'package:anime_flow/http/dio/dio_request.dart';
+import 'package:anime_flow/models/item/bangumi/timeline_item.dart';
 import 'package:anime_flow/models/item/bangumi/user_info_item.dart';
 import 'package:dio/dio.dart';
 import 'package:get/get.dart';
@@ -206,6 +207,31 @@ class BgmRequest {
           ),
         )
         .then((response) => (SubjectItem.fromJson(response.data)));
+  }
+
+  ///时间线
+  static Future<List<TimelineItem>> timelineService(
+    int limit, {
+    String? mode,
+    int? until,
+  }) async {
+    final queryParameters = <String, dynamic>{'limit': limit};
+    if (mode != null) queryParameters['mode'] = mode;
+    if (until != null) queryParameters['until'] = until;
+    try {
+      final response = await dioRequest.get(
+        _nextBaseUrl + BgmNextApi.timeline,
+        queryParameters: queryParameters,
+        options: Options(
+          headers: {Constants.userAgentName: _getBangumiUserAgent},
+        ),
+      );
+      response.data as List<dynamic>;
+      return response.data.map((item) => TimelineItem.fromJson(item)).toList();
+    } catch (e) {
+      _logger.e(e);
+      throw Exception('Failed to fetch timeline: $e');
+    }
   }
 }
 

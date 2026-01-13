@@ -1,3 +1,5 @@
+import 'package:anime_flow/models/item/bangumi/subject_item.dart';
+
 class CollectionsItem {
   List<Data> data;
   int total;
@@ -245,37 +247,6 @@ class Tags {
   Map<String, dynamic> toJson() => {
     'name': name,
     'count': count,
-  };
-}
-
-class Images {
-  String large;
-  String common;
-  String medium;
-  String small;
-  String grid;
-
-  Images({
-    required this.large,
-    required this.common,
-    required this.medium,
-    required this.small,
-    required this.grid,
-  });
-
-  Images.fromJson(Map<String, dynamic> json) :
-        large = json['large'],
-        common = json['common'],
-        medium = json['medium'],
-        small = json['small'],
-        grid = json['grid'];
-
-  Map<String, dynamic> toJson() => {
-    'large': large,
-    'common': common,
-    'medium': medium,
-    'small': small,
-    'grid': grid,
   };
 }
 

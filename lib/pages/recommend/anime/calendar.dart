@@ -1,4 +1,3 @@
-import 'package:anime_flow/http/requests/bgm_request.dart';
 import 'package:anime_flow/models/item/bangumi/calendar_item.dart';
 import 'package:anime_flow/models/item/subject_basic_data_item.dart';
 import 'package:anime_flow/routes/index.dart';
@@ -7,50 +6,22 @@ import 'package:anime_flow/widget/ranking.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:anime_flow/models/item/bangumi/subject_item.dart';
-import 'package:logger/logger.dart';
 
-class CalendarView extends StatefulWidget {
-  const CalendarView({super.key});
+class CalendarView extends StatelessWidget {
+  final Calendar? calendar;
+  final bool isLoading;
+  final VoidCallback? onRefresh;
 
-  @override
-  State<CalendarView> createState() => _CalendarViewState();
-}
-
-class _CalendarViewState extends State<CalendarView> {
-  Calendar? calendar;
-  bool isLoading = false;
-
-  @override
-  void initState() {
-    super.initState();
-    _fetchCalendar();
-  }
-
-  void _fetchCalendar() async {
-    try {
-      setState(() {
-        isLoading = true;
-      });
-      final response = await BgmRequest.calendarService();
-      setState(() {
-        calendar = response;
-      });
-    } catch (e) {
-      Logger().e(e);
-      setState(() {
-        isLoading = false;
-      });
-    } finally {
-      setState(() {
-        isLoading = false;
-      });
-    }
-  }
-
-  final weekday = DateTime.now().weekday;
+  const CalendarView({
+    super.key,
+    this.calendar,
+    this.isLoading = false,
+    this.onRefresh,
+  });
 
   @override
   Widget build(BuildContext context) {
+    final weekday = DateTime.now().weekday;
     final numberOfReleases =
         calendar?.calendarData[weekday.toString()]?.length ?? 0;
     final numberOfViewers = calendar?.calendarData[weekday.toString()]
@@ -105,14 +76,14 @@ class _CalendarViewState extends State<CalendarView> {
         SliverToBoxAdapter(
           child: SizedBox(
             height: 200,
-            child: _buildContent(),
+            child: _buildContent(weekday),
           ),
         ),
       ],
     );
   }
 
-  Widget _buildContent() {
+  Widget _buildContent(int weekday) {
     if (isLoading) {
       return const Center(
         child: CircularProgressIndicator(),
@@ -121,13 +92,13 @@ class _CalendarViewState extends State<CalendarView> {
     if (calendar == null) {
       return Center(
           child: Row(
+        mainAxisAlignment: MainAxisAlignment.center,
         children: [
           const Text('获取数据失败'),
-          IconButton(
-              onPressed: () {
-                _fetchCalendar();
-              },
-              icon: const Icon(Icons.refresh))
+          if (onRefresh != null)
+            IconButton(
+                onPressed: onRefresh,
+                icon: const Icon(Icons.refresh))
         ],
       ));
     } else {

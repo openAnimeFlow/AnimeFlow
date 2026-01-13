@@ -1,3 +1,4 @@
+import 'package:anime_flow/pages/settings/pages/danmaku_setting_page.dart';
 import 'package:anime_flow/pages/settings/pages/data_source.dart';
 import 'package:anime_flow/pages/settings/pages/theme.dart';
 import 'package:anime_flow/pages/settings/setting_controller.dart';
@@ -28,13 +29,13 @@ class _SettingsPageState extends State<SettingsPage> {
         _SettingsMenuItem(
           title: '通用',
           icon: Icons.settings_outlined,
-          route: RouteName.settingsGeneral,
+          route: RouteName.settingGeneral,
           page: const GeneralSettingsPage(),
         ),
         _SettingsMenuItem(
           title: '主题',
           icon: Icons.color_lens_outlined,
-          route: RouteName.settingsTheme,
+          route: RouteName.settingTheme,
           page: const ThemePage(),
         ),
       ],
@@ -45,7 +46,7 @@ class _SettingsPageState extends State<SettingsPage> {
         _SettingsMenuItem(
           title: '数据源管理',
           icon: Icons.smart_display_rounded,
-          route: RouteName.settingsDataSource,
+          route: RouteName.settingDataSource,
           page: const DataSourcePage(),
         ),
       ],
@@ -56,8 +57,14 @@ class _SettingsPageState extends State<SettingsPage> {
         _SettingsMenuItem(
           title: '播放',
           icon: Icons.play_circle_outline,
-          route: RouteName.settingsPlayback,
+          route: RouteName.settingPlayback,
           page: const PlaybackSettingsPage(),
+        ),
+        _SettingsMenuItem(
+          title: '弹幕设置',
+          icon: Icons.subtitles_outlined,
+          route: RouteName.settingDanmaku,
+          page: const DanmakuSettingPage(),
         ),
       ],
     ),
@@ -67,7 +74,7 @@ class _SettingsPageState extends State<SettingsPage> {
         _SettingsMenuItem(
           title: '关于',
           icon: Icons.info_outline,
-          route: RouteName.settingsAbout,
+          route: RouteName.settingAbout,
           page: const AboutSettingsPage(),
         ),
       ],
@@ -82,6 +89,12 @@ class _SettingsPageState extends State<SettingsPage> {
   void initState() {
     super.initState();
     settingController = Get.put(SettingController());
+  }
+
+  @override
+  void dispose() {
+    Get.delete<SettingController>();
+    super.dispose();
   }
 
   @override

@@ -19,8 +19,9 @@ class TopAreaControl extends StatelessWidget {
     final videoUiStateController = Get.find<VideoUiStateController>();
     final episodesController = Get.find<EpisodesController>();
     final subjectStateController = Get.find<SubjectStateController>();
+    final leftPadding = MediaQuery.of(context).padding.left;
     return Obx(() {
-      // 使用自定义全屏状态，
+      // 全屏状态
       final fullscreen = playPageController.isFullscreen.value;
       return AnimatedSwitcher(
         duration: const Duration(milliseconds: 200),
@@ -40,26 +41,26 @@ class TopAreaControl extends StatelessWidget {
                         end: Alignment.bottomCenter)),
                 child: Padding(
                   padding: EdgeInsets.only(
-                      left: MediaQuery.of(context).padding.left,
+                      left: leftPadding != 0 ? leftPadding : 5,
                       right: 5,
                       top: 2),
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
                       Row(children: [
-                        IconButton(
-                            padding: const EdgeInsets.all(0),
-                            onPressed: () {
-                              if (fullscreen) {
-                                playPageController.exitFullScreen();
-                              } else {
-                                Get.back();
-                              }
-                            },
-                            icon: const Icon(
-                              Icons.arrow_back_ios_new,
-                              color: Colors.white,
-                            )),
+                        InkWell(
+                          onTap: () {
+                            if (fullscreen) {
+                              playPageController.exitFullScreen();
+                            } else {
+                              Get.back();
+                            }
+                          },
+                          child: const Icon(
+                            Icons.arrow_back_ios_new,
+                            color: Colors.white,
+                          ),
+                        ),
                         const SizedBox(width: 5),
                         if (Utils.isDesktop || fullscreen)
                           Column(

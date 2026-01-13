@@ -18,13 +18,14 @@ class BottomAreaControl extends StatelessWidget {
     final videoUiStateController = Get.find<VideoUiStateController>();
     final videoStateController = Get.find<VideoStateController>();
     final playPageController = Get.find<PlayController>();
-
+    final paddingLeft = MediaQuery.of(context).padding.left;
     return Obx(() {
       // 使用自定义全屏状态，
       final fullscreen = playPageController.isFullscreen.value;
       final danmakuOn = playPageController.danmakuOn.value;
       final isWideScreen = playPageController.isWideScreen.value;
       final isShowControlsUi = videoUiStateController.isShowControlsUi.value;
+
       return AnimatedSwitcher(
         duration: const Duration(milliseconds: 200),
         transitionBuilder: (child, animation) =>
@@ -52,8 +53,8 @@ class BottomAreaControl extends StatelessWidget {
                       ),
                       if (fullscreen || isWideScreen)
                         Padding(
-                          padding: const EdgeInsets.symmetric(
-                              horizontal: 5, vertical: 5),
+                          padding: EdgeInsets.symmetric(
+                              horizontal: paddingLeft == 0 ? 10 : 0, vertical: 5),
                           child: VideoProgressBar(
                               videoUiStateController: videoUiStateController),
                         ),

@@ -301,25 +301,28 @@ class Rating {
 
 class Source {
   final String name;
-  final String url;
+  final String? url;
 
   Source({
     required this.name,
-    required this.url,
+    this.url,
   });
 
   factory Source.fromJson(Map<String, dynamic> json) {
     return Source(
       name: json['name'] as String,
-      url: json['url'] as String,
+      url: json['url'] as String?,
     );
   }
 
   Map<String, dynamic> toJson() {
-    return {
+    final map = <String, dynamic>{
       'name': name,
-      'url': url,
     };
+    if (url != null) {
+      map['url'] = url;
+    }
+    return map;
   }
 }
 

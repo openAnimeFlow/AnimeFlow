@@ -226,8 +226,22 @@ class BgmRequest {
           headers: {Constants.userAgentName: _getBangumiUserAgent},
         ),
       );
-      response.data as List<dynamic>;
-      return response.data.map((item) => TimelineItem.fromJson(item)).toList();
+      final data = response.data;
+      if (data == null) {
+        return [];
+      }
+      final List<dynamic> items = data is List ? data : [];
+      final List<TimelineItem> result = [];
+      for (final item in items) {
+        try {
+          final itemMap = item as Map<String, dynamic>;
+          result.add(TimelineItem.fromJson(itemMap));
+        } catch (e) {
+          _logger.w('Failed to parse timeline item: $e');
+          // 继续处理其他条目，不抛出异常
+        }
+      }
+      return result;
     } catch (e) {
       _logger.e(e);
       throw Exception('Failed to fetch timeline: $e');

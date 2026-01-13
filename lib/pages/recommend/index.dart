@@ -1,5 +1,5 @@
 import 'package:anime_flow/pages/recommend/anime/index.dart';
-import 'package:anime_flow/pages/recommend/timeline/timeline_page.dart';
+import 'package:anime_flow/pages/recommend/timeline/index.dart';
 import 'package:anime_flow/routes/index.dart';
 import 'package:anime_flow/controllers/main_page/main_page_state.dart';
 import 'package:flutter/material.dart';

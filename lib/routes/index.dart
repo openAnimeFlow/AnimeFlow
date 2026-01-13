@@ -5,6 +5,7 @@ import 'package:anime_flow/pages/play/index.dart';
 import 'package:anime_flow/pages/search/index.dart';
 import 'package:anime_flow/pages/settings/index.dart';
 import 'package:anime_flow/pages/settings/pages/add_source.dart';
+import 'package:anime_flow/pages/settings/pages/danmaku_setting_page.dart';
 import 'package:anime_flow/pages/settings/pages/data_source.dart';
 import 'package:anime_flow/pages/settings/pages/general_settings.dart';
 import 'package:anime_flow/pages/settings/pages/playback_settings.dart';
@@ -21,12 +22,13 @@ class RouteName {
   static const String search = "/search";
   static const String calendar = "/calendar";
   static const String settings = "/settings";
-  static const String settingsGeneral = "/settings/general";
-  static const String settingsPlayback = "/settings/playback";
-  static const String settingsAbout = "/settings/about";
-  static const String settingsDataSource = "/settings/dataSource";
+  static const String settingGeneral = "/settings/general";
+  static const String settingPlayback = "/settings/playback";
+  static const String settingAbout = "/settings/about";
+  static const String settingDataSource = "/settings/dataSource";
   static const String settingAddSource = "/settings/addSource";
-  static const String settingsTheme = "/settings/theme";
+  static const String settingTheme = "/settings/theme";
+  static const String settingDanmaku = "/settings/danmaku";
 }
 
 Map<String, Widget Function(BuildContext)> getRootRoutes() {
@@ -38,11 +40,12 @@ Map<String, Widget Function(BuildContext)> getRootRoutes() {
     RouteName.search: (context) => const SearchPage(),
     RouteName.calendar: (context) => const CalendarPage(),
     RouteName.settings: (context) => const SettingsPage(),
-    RouteName.settingsGeneral: (context) => const GeneralSettingsPage(),
-    RouteName.settingsPlayback: (context) => const PlaybackSettingsPage(),
-    RouteName.settingsAbout: (context) => const AboutSettingsPage(),
-    RouteName.settingsDataSource: (context) => const DataSourcePage(),
+    RouteName.settingGeneral: (context) => const GeneralSettingsPage(),
+    RouteName.settingPlayback: (context) => const PlaybackSettingsPage(),
+    RouteName.settingDanmaku: (context) => const DanmakuSettingPage(),
+    RouteName.settingAbout: (context) => const AboutSettingsPage(),
+    RouteName.settingDataSource: (context) => const DataSourcePage(),
     RouteName.settingAddSource: (context) => const AddSourcePage(),
-    RouteName.settingsTheme: (context) => const ThemePage(),
+    RouteName.settingTheme: (context) => const ThemePage(),
   };
 }

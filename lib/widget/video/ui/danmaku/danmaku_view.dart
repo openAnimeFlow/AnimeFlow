@@ -2,7 +2,6 @@ import 'dart:async';
 import 'package:anime_flow/controllers/play/PlayPageController.dart';
 import 'package:anime_flow/controllers/video/video_state_controller.dart';
 import 'package:anime_flow/utils/storage.dart';
-import 'package:anime_flow/utils/utils.dart';
 import 'package:canvas_danmaku/canvas_danmaku.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -112,6 +111,14 @@ class _DanmakuViewState extends State<DanmakuView>
                     !videoStateController.playing.value ||
                     !playPageController.danmakuOn.value) {
                   return;
+                }
+
+                // 检查平台是否被隐藏
+                final regex = RegExp(r'\[([^\]]+)\]');
+                final match = regex.firstMatch(danmaku.source);
+                final platform = match?.group(1) ?? '弹弹Play';
+                if (playPageController.isPlatformHidden(platform)) {
+                  return; // 如果平台被隐藏，不添加弹幕
                 }
 
                 // 转换弹幕类型

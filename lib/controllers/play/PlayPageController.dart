@@ -4,7 +4,7 @@ import 'package:anime_flow/utils/storage.dart';
 import 'package:anime_flow/utils/utils.dart';
 import 'package:canvas_danmaku/canvas_danmaku.dart';
 import 'package:get/get.dart';
-import 'package:shared_preferences/shared_preferences.dart';
+import 'package:hive/hive.dart';
 import 'package:window_manager/window_manager.dart';
 
 class PlayController extends GetxController {
@@ -16,11 +16,63 @@ class PlayController extends GetxController {
   final RxMap<int, List<Danmaku>> danDanmakus = <int, List<Danmaku>>{}.obs;
   late DanmakuController danmakuController;
   final RxBool danmakuOn = true.obs;
+  final RxSet<String> hiddenPlatforms = <String>{}.obs;
   Timer? _saveSettingsTimer;
 
   @override
   void onInit() {
     super.onInit();
+    _initPlatformVisibility();
+  }
+
+  /// 初始化平台显示/隐藏状态（从持久化设置读取）
+  void _initPlatformVisibility() {
+    syncPlatformVisibilityFromStorage();
+  }
+
+  /// 从存储同步平台显示/隐藏状态
+  void syncPlatformVisibilityFromStorage() {
+    final Box setting = Storage.setting;
+
+    // 读取各平台的显示设置
+    final platformBilibili = setting.get(DanmakuKey.danmakuPlatformBilibili, defaultValue: true);
+    final platformGamer = setting.get(DanmakuKey.danmakuPlatformGamer, defaultValue: true);
+    final platformDanDanPlay = setting.get(DanmakuKey.danmakuPlatformDanDanPlay, defaultValue: true);
+
+    // 平台名称映射（从 source 字段中提取的实际名称，如 [BiliBili]、[Gamer]）
+    const String platformNameBilibili = 'BiliBili';
+    const String platformNameGamer = 'Gamer';
+    const String platformNameDanDanPlay = '弹弹Play';
+
+    // 根据设置更新 hiddenPlatforms
+    if (!platformBilibili) {
+      if (!hiddenPlatforms.contains(platformNameBilibili)) {
+        hiddenPlatforms.add(platformNameBilibili);
+      }
+    } else {
+      hiddenPlatforms.remove(platformNameBilibili);
+    }
+
+    if (!platformGamer) {
+      if (!hiddenPlatforms.contains(platformNameGamer)) {
+        hiddenPlatforms.add(platformNameGamer);
+      }
+    } else {
+      hiddenPlatforms.remove(platformNameGamer);
+    }
+
+    if (!platformDanDanPlay) {
+      if (!hiddenPlatforms.contains(platformNameDanDanPlay)) {
+        hiddenPlatforms.add(platformNameDanDanPlay);
+      }
+    } else {
+      hiddenPlatforms.remove(platformNameDanDanPlay);
+    }
+
+    // 同步后清空屏幕弹幕，让新设置生效
+    try {
+      danmakuController.clear();
+    } catch (_) {}
   }
 
   @override
@@ -107,6 +159,24 @@ class PlayController extends GetxController {
       } catch (_) {}
     }
   }
+
+  /// 切换平台显示/隐藏状态
+  void togglePlatformVisibility(String platform) {
+    if (hiddenPlatforms.contains(platform)) {
+      hiddenPlatforms.remove(platform);
+    } else {
+      hiddenPlatforms.add(platform);
+    }
+    // 清空屏幕上的弹幕，新弹幕会按照新的隐藏状态过滤
+    try {
+      danmakuController.clear();
+    } catch (_) {}
+  }
+
+  /// 检查平台是否被隐藏
+  bool isPlatformHidden(String platform) {
+    return hiddenPlatforms.contains(platform);
+  }
 }
 
 class DanmakuKey {
@@ -123,5 +193,8 @@ class DanmakuKey {
       danmakuColor = 'danmaku_color',
       danmakuLineHeight = 'danmaku_line_height',
       danmakuFontWeight = 'danmaku_font_weight',
-      danmakuUseSystemFont = 'danmaku_use_system_font';
+      danmakuUseSystemFont = 'danmaku_use_system_font',
+      danmakuPlatformBilibili = 'danmaku_platform_bilibili',
+      danmakuPlatformGamer = 'danmaku_platform_gamer',
+      danmakuPlatformDanDanPlay = 'danmaku_platform_dandanplay';
 }

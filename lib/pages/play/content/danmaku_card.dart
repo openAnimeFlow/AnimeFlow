@@ -58,8 +58,15 @@ class _DanmakuCardState extends State<DanmakuCard> {
       playController.danDanmakus.forEach((time, danmakus) {
         allDanmakus.addAll(danmakus);
       });
+      
+      // 过滤掉被隐藏平台的弹幕
+      final filteredDanmakus = allDanmakus.where((danmaku) {
+        final platform = _extractPlatform(danmaku.source);
+        return !playController.isPlatformHidden(platform);
+      }).toList();
+      
       // 按时间排序
-      allDanmakus.sort((a, b) => a.time.compareTo(b.time));
+      filteredDanmakus.sort((a, b) => a.time.compareTo(b.time));
       
       // 统计各平台弹幕数量
       final platformCounts = _countByPlatform(allDanmakus);
@@ -100,33 +107,46 @@ class _DanmakuCardState extends State<DanmakuCard> {
               ),
               // 平台统计信息
               if (isExpanded && sortedPlatforms.isNotEmpty)
-                Padding(
+                Obx(() => Padding(
                   padding: const EdgeInsets.only(bottom: 8),
                   child: Wrap(
                     spacing: 8,
                     runSpacing: 4,
                     children: sortedPlatforms.map((entry) {
-                      return Chip(
+                      final platform = entry.key;
+                      final isHidden = playController.isPlatformHidden(platform);
+                      return ActionChip(
                         label: Text('${entry.key}: ${entry.value}'),
-                        labelStyle: Theme.of(context).textTheme.bodySmall,
+                        labelStyle: Theme.of(context).textTheme.bodySmall?.copyWith(
+                          decoration: isHidden ? TextDecoration.lineThrough : null,
+                          color: isHidden 
+                              ? Theme.of(context).textTheme.bodySmall?.color?.withValues(alpha: 0.5)
+                              : null,
+                        ),
                         materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
                         visualDensity: VisualDensity.compact,
+                        backgroundColor: isHidden 
+                            ? Theme.of(context).colorScheme.surfaceContainerHighest
+                            : null,
+                        onPressed: () {
+                          playController.togglePlatformVisibility(platform);
+                        },
                       );
                     }).toList(),
                   ),
-                ),
+                )),
               AnimatedContainer(
                 duration: const Duration(milliseconds: 300),
                 height: isExpanded ? 300 : 0,
                 child: ListView.builder(
-                    itemCount: allDanmakus.length,
+                    itemCount: filteredDanmakus.length,
                     itemExtent: 56.0,
                     // 固定item高度，提升滚动性能
                     cacheExtent: 200.0,
                     // 缓存范围
                     physics: const ClampingScrollPhysics(),
                     itemBuilder: (context, index) {
-                      final danmaku = allDanmakus[index];
+                      final danmaku = filteredDanmakus[index];
                       return ListTile(
                           dense: true, // 使用紧凑模式减少padding
                           visualDensity: VisualDensity.compact,

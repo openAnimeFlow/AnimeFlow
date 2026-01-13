@@ -7,6 +7,7 @@ import 'package:anime_flow/controllers/episodes/episodes_controller.dart';
 import 'package:anime_flow/controllers/play/PlayPageController.dart';
 import 'package:anime_flow/controllers/video/data/data_source_controller.dart';
 import 'package:anime_flow/models/item/bangumi/episodes_item.dart';
+import 'package:anime_flow/utils/utils.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:get/get.dart';
@@ -59,69 +60,87 @@ class _PlayPageState extends State<PlayPage> {
       final bool isWideScreen = constraints.maxWidth > 600;
       playController.updateIsWideScreen(isWideScreen); // 更新布局状态
       
-      // 使用 Obx 监听全屏状态变化，
       return Obx(() {
-        // 全屏时，视频占满整个屏幕
-        if (playController.isFullscreen.value) {
-          return Scaffold(
+        final isFullscreen = playController.isFullscreen.value;
+        
+        // 构建内容
+        Widget content;
+        if (isFullscreen) {
+          content = Scaffold(
             backgroundColor: Colors.black,
             body: VideoView(key: _videoKey),
           );
-        }
-        
-        return isWideScreen
-            // 水平布局
-            ? Scaffold(
-                body: Row(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Expanded(
-                    child: Center(
-                      child: VideoView(
-                        key: _videoKey,
+        } else {
+          content = isWideScreen
+              // 水平布局
+              ? Scaffold(
+                  body: Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Expanded(
+                      child: Center(
+                        child: VideoView(
+                          key: _videoKey,
+                        ),
                       ),
                     ),
+                    AnimatedContainer(
+                        duration: const Duration(milliseconds: 100),
+                        width: playController.isContentExpanded.value
+                            ? PlayLayoutConstant.playContentWidth
+                            : 0,
+                        child: Opacity(
+                          opacity: playController.isContentExpanded.value ? 1 : 0,
+                          child: ContentView(
+                            episodes,
+                            key: _contentKey),
+                        ))
+                  ],
+                ))
+              // 垂直布局
+              : Scaffold(
+                  appBar: AppBar(
+                    toolbarHeight: 0,
+                    backgroundColor: Colors.black,
+                    systemOverlayStyle: SystemUiOverlayStyle.light.copyWith(
+                      systemNavigationBarColor: Colors.transparent,
+                    ),
                   ),
-                  AnimatedContainer(
-                      duration: const Duration(milliseconds: 100),
-                      width: playController.isContentExpanded.value
-                          ? PlayLayoutConstant.playContentWidth
-                          : 0,
-                      child: Opacity(
-                        opacity: playController.isContentExpanded.value ? 1 : 0,
-                        child: ContentView(
-                          episodes,
-                          key: _contentKey),
-                      ))
-                ],
-              ))
-            // 垂直布局
-            : Scaffold(
-                appBar: AppBar(
-                  toolbarHeight: 0,
-                  backgroundColor: Colors.black,
-                  systemOverlayStyle: SystemUiOverlayStyle.light.copyWith(
-                    systemNavigationBarColor: Colors.transparent,
+                  body: SafeArea(
+                    bottom: false,
+                    child: Column(
+                      children: [
+                        AspectRatio(
+                          aspectRatio: 16 / 9,
+                          child: VideoView(
+                            key: _videoKey),
+                        ),
+                        Expanded(
+                          child: ContentView(
+                            episodes,
+                            key: _contentKey),
+                        ),
+                      ],
+                    ),
                   ),
-                ),
-                body: SafeArea(
-                  bottom: false,
-                  child: Column(
-                    children: [
-                      AspectRatio(
-                        aspectRatio: 16 / 9,
-                        child: VideoView(
-                          key: _videoKey),
-                      ),
-                      Expanded(
-                        child: ContentView(
-                          episodes,
-                          key: _contentKey),
-                      ),
-                    ],
-                  ),
-                ),
-              );
+                );
+        }
+        
+        // 手机端监听系统返回事件
+        if (Utils.isMobile) {
+          return PopScope(
+            canPop: !isFullscreen, // 全屏时不允许返回
+            onPopInvokedWithResult: (bool didPop, dynamic result) {
+              if (!didPop && isFullscreen) {
+                // 如果返回被阻止且当前是全屏状态，退出全屏
+                playController.exitFullScreen();
+              }
+            },
+            child: content,
+          );
+        }
+        
+        return content;
       });
     });
   }

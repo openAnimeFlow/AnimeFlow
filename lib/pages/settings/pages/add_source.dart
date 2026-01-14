@@ -1,5 +1,4 @@
 import 'package:anime_flow/models/item/crawler_config_item.dart';
-import 'package:anime_flow/utils/crawl_config.dart';
 import 'package:anime_flow/utils/storage.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';

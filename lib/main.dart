@@ -1,5 +1,4 @@
 import 'dart:io';
-import 'package:anime_flow/constants/constants.dart';
 import 'package:anime_flow/utils/storage.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';

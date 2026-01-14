@@ -5,6 +5,8 @@ import 'package:anime_flow/http/requests/bgm_request.dart';
 import 'package:anime_flow/models/item/bangumi/episodes_item.dart';
 import 'package:anime_flow/models/item/bangumi/subjects_info_item.dart';
 import 'package:anime_flow/routes/index.dart';
+import 'package:anime_flow/stores/anime_info_store.dart';
+import 'package:anime_flow/stores/user_info_store.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'appBar.dart';
@@ -19,8 +21,10 @@ class AnimeDetailPage extends StatefulWidget {
 
 class _AnimeDetailPageState extends State<AnimeDetailPage> {
   late SubjectBasicData subjectBasicData;
-  SubjectsInfoItem? subjectsInfo;
+  late UserInfoStore userInfoStore;
+  late AnimeInfoStore animeInfoStore;
   late Future<EpisodesItem> episodesFuture;
+  SubjectsInfoItem? subjectsInfo;
   final double _contentHeight = 200.0; // 内容区域的高度
   bool isPinned = false;
   bool topButton = false;
@@ -33,12 +37,15 @@ class _AnimeDetailPageState extends State<AnimeDetailPage> {
     episodesFuture =
         BgmRequest.getSubjectEpisodesByIdService(subjectBasicData.id, 100, 0);
     _getSubjects();
+    userInfoStore = Get.find<UserInfoStore>();
+    animeInfoStore = Get.put(AnimeInfoStore());
   }
 
   void _getSubjects() async {
     final response =
         await BgmRequest.getSubjectByIdService(subjectBasicData.id);
     setState(() {
+      animeInfoStore.setAnimeInfo(response);
       subjectsInfo = response;
     });
   }
@@ -46,6 +53,7 @@ class _AnimeDetailPageState extends State<AnimeDetailPage> {
   @override
   void dispose() {
     _nestedScrollController.dispose();
+    Get.delete<AnimeInfoStore>();
     super.dispose();
   }
 
@@ -102,7 +110,6 @@ class _AnimeDetailPageState extends State<AnimeDetailPage> {
                     background: Padding(
                       padding: const EdgeInsets.only(bottom: 15),
                       child: InfoHeadView(
-                        subjectItem: subjectsInfo,
                         episodesItem: episodesFuture,
                         statusBarHeight: statusBarHeight,
                         contentHeight: _contentHeight,
@@ -152,19 +159,21 @@ class _AnimeDetailPageState extends State<AnimeDetailPage> {
                     color: Theme.of(context).colorScheme.primary),
               ),
             const SizedBox(height: 5),
+            Obx(() => userInfoStore.userInfo.value != null &&
+                    subjectsInfo != null &&
+                    subjectsInfo?.interest != null
+                ? FloatingActionButton(
+                    onPressed: () {
+                      Get.dialog(
+                          barrierDismissible: false, const EvaluateDialog());
+                    },
+                    child: Icon(
+                      Icons.messenger,
+                      color: Theme.of(context).colorScheme.primary,
+                    ),
+                  )
+                : const SizedBox.shrink()),
             if (subjectsInfo != null) ...[
-              FloatingActionButton(
-                onPressed: () {
-                  final subjectsInfo = this.subjectsInfo!;
-                  Get.dialog(
-                      barrierDismissible: false,
-                      EvaluateDialog(subjectsInfo: subjectsInfo));
-                },
-                child: Icon(
-                  Icons.messenger,
-                  color: Theme.of(context).colorScheme.primary,
-                ),
-              ),
               const SizedBox(height: 5),
               FloatingActionButton(
                 onPressed: () {

@@ -15,7 +15,6 @@ class RecommendPage extends StatefulWidget {
 
 class _RecommendPageState extends State<RecommendPage>
     with SingleTickerProviderStateMixin {
-  late MainPageState mainPageState;
   late ThemeController themeController;
   late TabController _tabController;
   final _animeKey = GlobalKey();
@@ -27,7 +26,6 @@ class _RecommendPageState extends State<RecommendPage>
   @override
   void initState() {
     super.initState();
-    mainPageState = Get.find<MainPageState>();
     themeController = Get.find<ThemeController>();
     _tabController = TabController(length: _tabs.length, vsync: this);
     _tabController.addListener(_handleTabChange);

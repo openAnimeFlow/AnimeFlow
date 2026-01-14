@@ -18,7 +18,6 @@ class MainPage extends StatefulWidget {
 }
 
 class _MainPageState extends State<MainPage> {
-  late MainPageState mainPageState;
   late UserInfoStore userInfoStore;
 
   // 使用 GlobalKey 保持 IndexedStack 的状态，防止在布局切换（Row <-> Column）时页面重构
@@ -66,9 +65,8 @@ class _MainPageState extends State<MainPage> {
   @override
   void initState() {
     super.initState();
-    mainPageState = Get.put(MainPageState());
-    CrawlConfig.initCrawlConfigs();
     userInfoStore = Get.put(UserInfoStore());
+    CrawlConfig.initCrawlConfigs();
 
     // 从参数中获取初始 index，默认为 0
     final initialIndex = Get.arguments as int? ?? 0;
@@ -77,6 +75,7 @@ class _MainPageState extends State<MainPage> {
     // 初始化对应的页面
     _initializePage(_currentIndex);
   }
+
 
   // 构建 NavigationRail
   List<NavigationRailDestination> _buildRailDestinations(
@@ -179,11 +178,16 @@ class _MainPageState extends State<MainPage> {
   }
 
   @override
+  void dispose() {
+    Get.delete<UserInfoStore>();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
     // 使用 MediaQuery 获取宽度，判断是否为桌面端（宽屏）
     final bool isDesktop = MediaQuery.of(context).size.width >= 640;
     final colorScheme = Theme.of(context).colorScheme;
-    mainPageState.changeIsDesktop(isDesktop);
     return Scaffold(
       body: Row(
         children: [

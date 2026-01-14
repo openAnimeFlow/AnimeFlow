@@ -95,19 +95,30 @@ class BgmRequest {
   static Future<SubjectItem> searchSubjectService(
       {required String keyword,
       required int limit,
-      required int offset}) async {
+      required int offset,
+      String? rank,
+      List<String>? tags}) async {
+    final data = <String, dynamic>{
+      'keyword': keyword,
+    };
+
+    final filter = <String, dynamic>{
+      'type': [2],
+    };
+
+    if (tags != null) filter['tags'] = tags;
+
+    data['filter'] = filter;
+
+    if (rank != null) data['rank'] = rank;
+
     final response = await dioRequest.post(
       _nextBaseUrl + BgmNextApi.search,
       queryParameters: {
         'limit': limit,
         'offset': offset,
       },
-      data: {
-        'filter': {
-          'type': [2]
-        },
-        'keyword': keyword,
-      },
+      data: data,
       options: Options(
         headers: {Constants.userAgentName: _getBangumiUserAgent},
       ),

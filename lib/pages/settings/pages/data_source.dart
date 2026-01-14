@@ -2,6 +2,7 @@ import 'package:anime_flow/models/item/crawler_config_item.dart';
 import 'package:anime_flow/pages/settings/setting_controller.dart';
 import 'package:anime_flow/routes/index.dart';
 import 'package:anime_flow/utils/crawl_config.dart';
+import 'package:anime_flow/utils/storage.dart';
 import 'package:anime_flow/widget/animation_network_image/animation_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -16,7 +17,7 @@ class DataSourcePage extends StatefulWidget {
 class _DataSourcePageState extends State<DataSourcePage> {
   late SettingController settingController;
   List<CrawlConfigItem> dataSources = [];
-
+  final settingConfig = Storage.crawlConfigs;
   @override
   void initState() {
     super.initState();
@@ -38,13 +39,11 @@ class _DataSourcePageState extends State<DataSourcePage> {
       middleText: "确定要删除数据源 \"$name\" 吗？此操作不可恢复。",
       textConfirm: "删除",
       textCancel: "取消",
-      confirmTextColor: Colors.white,
-      cancelTextColor: Colors.black,
       backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       buttonColor: Theme.of(context).colorScheme.error,
       onConfirm: () async {
         try {
-          await CrawlConfig.deleteCrawl(name);
+          await settingConfig.delete(name);
           setState(() {
             _initData();
           });

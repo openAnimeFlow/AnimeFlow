@@ -155,11 +155,10 @@ class _AddSourcePageState extends State<AddSourcePage> {
       
       // 如果是编辑模式且名称（key）改变了，先删除旧的key
       if (_originalKey != null && _originalKey != newName) {
-        await CrawlConfig.deleteCrawl(_originalKey!);
+        await crawlConfigs.delete(_originalKey);
       }
       
-      await CrawlConfig.saveCrawl(item);
-
+      crawlConfigs.put(item.name, item.toJson());
       Get.back(result: true);
     } catch (e) {
       if (mounted) {

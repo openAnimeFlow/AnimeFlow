@@ -206,6 +206,7 @@ class InfoHeadView extends StatelessWidget {
         subjectItem.collection.data.values.reduce((a, b) => a + b);
     const double fontSize = 12;
     const FontWeight fontWeight = FontWeight.w600;
+    const amberAccent = Colors.amberAccent;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -232,19 +233,32 @@ class InfoHeadView extends StatelessWidget {
             Text('全${subjectItem.eps}话',
                 style: const TextStyle(
                     fontSize: fontSize, fontWeight: fontWeight)),
-            Row(children: [
-              StarView(score: subjectItem.rating.score, iconSize: 20),
-              Text(
-                subjectItem.rating.score.toStringAsFixed(1),
-                style: TextStyle(fontWeight: fontWeight, color: themeColor),
-              ),
-              const SizedBox(width: 5),
-              Text('#${subjectItem.rating.rank}',
-                  style: TextStyle(
-                      fontSize: fontSize,
-                      fontWeight: fontWeight,
-                      color: themeColor))
-            ]),
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                if (subjectItem.interest != null &&
+                    subjectItem.interest!.rate > 0)
+                  Text(
+                    '你的评分:${subjectItem.interest!.rate}',
+                    style: const TextStyle(
+                        fontWeight: fontWeight, color: amberAccent),
+                  ),
+                Row(children: [
+                  StarView(score: subjectItem.rating.score, iconSize: 20),
+                  Text(
+                    subjectItem.rating.score.toStringAsFixed(1),
+                    style: const TextStyle(
+                        fontWeight: fontWeight, color: amberAccent),
+                  ),
+                  const SizedBox(width: 5),
+                  Text('#${subjectItem.rating.rank}',
+                      style: const TextStyle(
+                          fontSize: fontSize,
+                          fontWeight: fontWeight,
+                          color: amberAccent))
+                ]),
+              ],
+            ),
             Text(
               '(${subjectItem.rating.total})人评分',
               style:

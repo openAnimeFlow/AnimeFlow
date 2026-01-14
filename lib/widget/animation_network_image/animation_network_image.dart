@@ -63,7 +63,12 @@ class AnimationNetworkImage extends StatelessWidget {
           return const _ShimmerLoading();
         },
         errorWidget: (context, error, stackTrace) {
-          return const Text('.');
+          return const Center(
+            child: Icon(
+              Icons.broken_image_outlined,
+              size: 30,
+            )
+          );
         },
       ),
     );

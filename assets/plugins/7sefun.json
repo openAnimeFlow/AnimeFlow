@@ -1,9 +1,9 @@
 {
-    "version": "0.0.1",
+    "version": "0.0.2",
     "name": "七色动漫",
     "iconUrl": "https://www.7sefun.top//pc/img/favicon.ico",
-    "baseURL": "https://www.7sefun.top/",
-    "searchURL": "https://www.7sefun.top/vodsearch/-------------.html?wd={keyword}",
+    "baseUrl": "https://www.7sefun.top/",
+    "searchUrl": "https://www.7sefun.top/vodsearch/-------------.html?wd={keyword}",
     "searchList": "//div[2]/div[2]/div[2]/div[2]/div[@class='video anim']",
     "searchName": "/div[2] /text()",
     "searchLink": "/a",

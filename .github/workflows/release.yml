@@ -246,8 +246,8 @@ jobs:
       - name: Create TAR.GZ archive
         run: |
           cd build/linux/x64/release
-          tar -czf ../../../../AnimeFlow-${{ env.VERSION }}.tar.gz -C bundle .
-          echo "Created AnimeFlow-${{ env.VERSION }}.tar.gz"
+          tar -czf ../../../../AnimeFlow-linux-${{ env.VERSION }}.tar.gz -C bundle .
+          echo "Created AnimeFlow-linux-${{ env.VERSION }}.tar.gz"
 
       - name: Create DEB package
         run: |
@@ -315,7 +315,6 @@ jobs:
           if-no-files-found: ignore
 
   flutter-build-macos:
-    name: Build macOS
     runs-on: macos-14
     steps:
       - name: Checkout repository

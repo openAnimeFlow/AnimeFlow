@@ -114,7 +114,7 @@ class _IntroduceViewState extends State<IntroduceView>
           const VideoResourcesView(sourceTitle: sourceTitle),
           const DanmakuCard(),
           const SizedBox(height: 10),
-          const RecommendView()
+          // const RecommendView()
         ],
       ),
     ));

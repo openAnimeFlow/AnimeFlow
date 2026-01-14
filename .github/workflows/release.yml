@@ -384,14 +384,13 @@ jobs:
           # 读取 release-template.md 模板
           TEMPLATE=$(cat .github/workflows/release-template.md)
           
-          # 在两个 --- 之间插入 CHANGELOG 内容
+          # 在第一个 --- 之前插入 CHANGELOG 内容
           RELEASE_NOTES=$(echo "$TEMPLATE" | awk -v changelog="$CHANGELOG_CONTENT" '
             /^---$/ {
               if (found_first == 0) {
                 found_first = 1
-                print
                 print changelog
-                next
+                print ""
               }
             }
             { print }

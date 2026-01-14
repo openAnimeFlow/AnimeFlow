@@ -136,7 +136,11 @@ class BgmRequest {
             headers: {Constants.userAgentName: _getBangumiUserAgent},
           ),
         )
-        .then((value) => Calendar.fromJson(value.data));
+        .then((value) => Calendar.fromJson(value.data))
+        .catchError((error) {
+      _logger.e(error);
+      throw Exception('Failed to fetch calendar: $error');
+    });
   }
 
   ///剧集评论

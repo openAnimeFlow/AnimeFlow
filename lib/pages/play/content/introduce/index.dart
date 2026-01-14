@@ -4,6 +4,7 @@ import 'package:anime_flow/controllers/play/PlayPageController.dart';
 import 'package:anime_flow/controllers/subject/subject_state_controller.dart';
 import 'package:anime_flow/models/item/bangumi/episodes_item.dart';
 import 'package:anime_flow/pages/play/content/introduce/danmaku_card.dart';
+import 'package:anime_flow/pages/play/content/introduce/recommend.dart';
 import 'package:anime_flow/pages/play/content/introduce/video_resources.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -111,7 +112,9 @@ class _IntroduceViewState extends State<IntroduceView>
           ),
           //数据源
           const VideoResourcesView(sourceTitle: sourceTitle),
-          const DanmakuCard()
+          const DanmakuCard(),
+          const SizedBox(height: 10),
+          const RecommendView()
         ],
       ),
     ));

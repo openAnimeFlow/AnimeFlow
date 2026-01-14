@@ -1,4 +1,3 @@
-import 'package:anime_flow/controllers/subject/subject_state_controller.dart';
 import 'package:anime_flow/models/item/subject_basic_data_item.dart';
 import 'package:anime_flow/pages/anime_info/head.dart';
 import 'package:anime_flow/http/requests/bgm_request.dart';
@@ -18,9 +17,7 @@ class AnimeDetailPage extends StatefulWidget {
 }
 
 class _AnimeDetailPageState extends State<AnimeDetailPage> {
-  late SubjectStateController subjectStateController;
   late SubjectBasicData subjectBasicData;
-  late Future<SubjectsInfoItem?> _subjectsItem;
   SubjectsInfoItem? subjectsInfo;
   late Future<EpisodesItem> episodesFuture;
   final double _contentHeight = 200.0; // 内容区域的高度
@@ -31,9 +28,7 @@ class _AnimeDetailPageState extends State<AnimeDetailPage> {
   @override
   void initState() {
     super.initState();
-    subjectStateController = Get.put(SubjectStateController());
     subjectBasicData = Get.arguments;
-    _subjectsItem = BgmRequest.getSubjectByIdService(subjectBasicData.id);
     episodesFuture =
         BgmRequest.getSubjectEpisodesByIdService(subjectBasicData.id, 100, 0);
     _getSubjects();
@@ -50,7 +45,6 @@ class _AnimeDetailPageState extends State<AnimeDetailPage> {
   @override
   void dispose() {
     _nestedScrollController.dispose();
-    Get.delete<SubjectStateController>();
     super.dispose();
   }
 
@@ -157,18 +151,19 @@ class _AnimeDetailPageState extends State<AnimeDetailPage> {
                     color: Theme.of(context).colorScheme.primary),
               ),
             const SizedBox(height: 10),
-            FloatingActionButton(
-              onPressed: () {
-                Get.toNamed(RouteName.play, arguments: {
-                  'subjectBasicData': subjectBasicData,
-                  'episodes': episodesFuture
-                });
-              },
-              child: Icon(
-                Icons.play_arrow_rounded,
-                color: Theme.of(context).colorScheme.primary,
+            if (subjectsInfo != null)
+              FloatingActionButton(
+                onPressed: () {
+                  Get.toNamed(RouteName.play, arguments: {
+                    'subjectsInfo': subjectsInfo,
+                    'episodes': episodesFuture
+                  });
+                },
+                child: Icon(
+                  Icons.play_arrow_rounded,
+                  color: Theme.of(context).colorScheme.primary,
+                ),
               ),
-            ),
           ],
         ),
       ),

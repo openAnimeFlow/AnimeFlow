@@ -22,6 +22,11 @@ class SubjectItem {
       'total': total,
     };
   }
+
+  @override
+  String toString() {
+    return 'SubjectItem{data: $data, total: $total}';
+  }
 }
 
 class Subject {

@@ -1,14 +1,14 @@
 import 'dart:convert';
 
-import 'package:anime_flow/constants/constants.dart';
 import 'package:anime_flow/models/item/crawler_config_item.dart';
+import 'package:anime_flow/utils/storage.dart';
 import 'package:flutter/services.dart';
 import 'package:hive/hive.dart';
 import 'package:logger/logger.dart';
 
 class CrawlConfig {
   static final Logger logger = Logger();
-  static final box = Hive.box(Constants.crawlConfigs);
+  static Box<dynamic> get box => Storage.crawlConfigs;
 
   ///读取所有配置
   static Future<List<CrawlConfigItem>> loadAllCrawlConfigs() async {

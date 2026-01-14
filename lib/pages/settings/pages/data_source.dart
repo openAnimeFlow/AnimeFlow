@@ -84,6 +84,11 @@ class _DataSourcePageState extends State<DataSourcePage> {
                 // 如果返回成功标志，刷新数据
                 if (result == true) {
                   _initData();
+                  Get.snackbar(
+                    '保存成功',
+                    '数据源已保存',
+                    maxWidth: 400,
+                  );
                 }
               },
             )
@@ -97,11 +102,16 @@ class _DataSourcePageState extends State<DataSourcePage> {
               onTap: () async {
                 final result = await Get.toNamed(
                   RouteName.settingAddSource,
-                  arguments: data,
+                  arguments: data.name,
                 );
                 // 如果返回成功标志，刷新数据
                 if (result == true) {
                   _initData();
+                  Get.snackbar(
+                    '保存成功',
+                    '数据源已保存',
+                    maxWidth: 400,
+                  );
                 }
               },
               child: Container(

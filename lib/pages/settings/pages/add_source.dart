@@ -1,5 +1,6 @@
 import 'package:anime_flow/models/item/crawler_config_item.dart';
 import 'package:anime_flow/utils/crawl_config.dart';
+import 'package:anime_flow/utils/storage.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
@@ -72,27 +73,38 @@ class _AddSourcePageState extends State<AddSourcePage> {
 
   late final List<TextEditingController> _controllers;
   final Set<int> _errorFields = {};
+  final crawlConfigs = Storage.crawlConfigs;
+  String? _originalKey; // 保存原始key值，用于编辑模式下删除旧数据
 
   @override
   void initState() {
     super.initState();
     _controllers = _textFields.map((field) => TextEditingController()).toList();
 
-    final editConfig = Get.arguments as CrawlConfigItem?;
+    // 获取传递的key值（可能是null，表示添加新数据源）
+    final arguments = Get.arguments;
+    final key = arguments is String ? arguments : null;
+    _originalKey = key;
 
-    // 如果是编辑模式，填充表单数据
-    if (editConfig != null) {
-      _controllers[0].text = editConfig.version;
-      _controllers[1].text = editConfig.name;
-      _controllers[2].text = editConfig.iconUrl;
-      _controllers[3].text = editConfig.baseUrl;
-      _controllers[4].text = editConfig.searchUrl;
-      _controllers[5].text = editConfig.searchList;
-      _controllers[6].text = editConfig.searchName;
-      _controllers[7].text = editConfig.searchLink;
-      _controllers[8].text = editConfig.lineNames;
-      _controllers[9].text = editConfig.lineList;
-      _controllers[10].text = editConfig.episode;
+    // 如果有key，从持久化存储中查询数据并填充表单
+    if (key != null) {
+      final configData = crawlConfigs.get(key);
+      if (configData != null) {
+        final editConfig = CrawlConfigItem.fromJson(
+          Map<String, dynamic>.from(configData),
+        );
+        _controllers[0].text = editConfig.version;
+        _controllers[1].text = editConfig.name;
+        _controllers[2].text = editConfig.iconUrl;
+        _controllers[3].text = editConfig.baseUrl;
+        _controllers[4].text = editConfig.searchUrl;
+        _controllers[5].text = editConfig.searchList;
+        _controllers[6].text = editConfig.searchName;
+        _controllers[7].text = editConfig.searchLink;
+        _controllers[8].text = editConfig.lineNames;
+        _controllers[9].text = editConfig.lineList;
+        _controllers[10].text = editConfig.episode;
+      }
     }
 
     // 监听输入变化，清除错误状态
@@ -126,9 +138,10 @@ class _AddSourcePageState extends State<AddSourcePage> {
     }
 
     try {
+      final newName = _controllers[1].text.trim();
       final item = CrawlConfigItem(
         version: _controllers[0].text.trim(),
-        name: _controllers[1].text.trim(),
+        name: newName,
         iconUrl: _controllers[2].text.trim(),
         baseUrl: _controllers[3].text.trim(),
         searchUrl: _controllers[4].text.trim(),
@@ -139,17 +152,15 @@ class _AddSourcePageState extends State<AddSourcePage> {
         lineList: _controllers[9].text.trim(),
         episode: _controllers[10].text.trim(),
       );
-
+      
+      // 如果是编辑模式且名称（key）改变了，先删除旧的key
+      if (_originalKey != null && _originalKey != newName) {
+        await CrawlConfig.deleteCrawl(_originalKey!);
+      }
+      
       await CrawlConfig.saveCrawl(item);
 
-      if (mounted) {
-        Get.snackbar(
-          '保存成功',
-          '数据源已保存',
-          maxWidth: 400,
-        );
-        Get.back(result: true); // 返回 true 表示保存成功
-      }
+      Get.back(result: true);
     } catch (e) {
       if (mounted) {
         Get.snackbar(
@@ -173,7 +184,7 @@ class _AddSourcePageState extends State<AddSourcePage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text(Get.arguments != null ? '编辑数据源' : '添加数据源'),
+        title: Text(_originalKey != null ? '编辑数据源' : '添加数据源'),
       ),
       floatingActionButton: FloatingActionButton(
         heroTag: 'add_source_save',

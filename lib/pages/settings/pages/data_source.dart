@@ -134,7 +134,7 @@ class _DataSourcePageState extends State<DataSourcePage> {
                   trailing: IconButton(
                     icon: Icon(
                       Icons.delete_outline_outlined,
-                      color: Theme.of(context).colorScheme.primary,
+                      color: Theme.of(context).colorScheme.error,
                     ),
                     onPressed: () {
                       _deleteDataSource(data.name);

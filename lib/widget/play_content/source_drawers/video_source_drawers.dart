@@ -11,7 +11,7 @@ import 'package:logger/logger.dart';
 
 class VideoSourceDrawers extends StatefulWidget {
   final Function(String url)? onVideoUrlSelected;
-  
+
   const VideoSourceDrawers({super.key, this.onVideoUrlSelected});
 
   @override
@@ -47,8 +47,6 @@ class _VideoSourceDrawersState extends State<VideoSourceDrawers> {
       isShowEpisodes = false;
     });
   }
-
-
 
   void _performSearch() {
     String searchQuery = _searchController.text;
@@ -119,16 +117,17 @@ class _VideoSourceDrawersState extends State<VideoSourceDrawers> {
                     return const SizedBox.shrink();
                   }
                   // 确保索引有效，如果无效则使用 0
-                  final currentIndex = dataSourceController.selectedWebsiteIndex.value;
-                  int validIndex = currentIndex >= dataSource.length
-                      ? 0
-                      : currentIndex;
+                  final currentIndex =
+                      dataSourceController.selectedWebsiteIndex.value;
+                  int validIndex =
+                      currentIndex >= dataSource.length ? 0 : currentIndex;
 
                   // 如果索引不匹配，更新索引
                   if (validIndex != currentIndex) {
                     WidgetsBinding.instance.addPostFrameCallback((_) {
                       if (mounted) {
-                        dataSourceController.selectedWebsiteIndex.value = validIndex;
+                        dataSourceController.selectedWebsiteIndex.value =
+                            validIndex;
                       }
                     });
                   }
@@ -199,7 +198,9 @@ class _VideoSourceDrawersState extends State<VideoSourceDrawers> {
                     itemBuilder: (context, index) {
                       final data = dataSource[index];
                       return Obx(() {
-                        final isSelected = dataSourceController.selectedWebsiteIndex.value == index;
+                        final isSelected =
+                            dataSourceController.selectedWebsiteIndex.value ==
+                                index;
 
                         // final currentEpisodeCount = resource.episodeResources
                         //     .where((item) => item.episodes.any((ep) =>
@@ -256,12 +257,14 @@ class _VideoSourceDrawersState extends State<VideoSourceDrawers> {
                                     size: 14,
                                     color: Theme.of(context).colorScheme.error,
                                   ),
-                                ] else if (data.episodeResources.isNotEmpty) ...[
+                                ] else if (data
+                                    .episodeResources.isNotEmpty) ...[
                                   const SizedBox(width: 4),
                                   Icon(
                                     Icons.check_circle_outline,
                                     size: 14,
-                                    color: Theme.of(context).colorScheme.primary,
+                                    color:
+                                        Theme.of(context).colorScheme.primary,
                                   ),
                                 ],
                               ],
@@ -293,81 +296,79 @@ class _VideoSourceDrawersState extends State<VideoSourceDrawers> {
             final isLastItem =
                 index == selectedResource.episodeResources.length - 1;
 
-            return Obx(() {
-              // 当前选中剧集对应的剧集数据
-              final currentEpisode = resourceItem.episodes.firstWhereOrNull(
-                (ep) => ep.episodeSort == episodesController.episodeIndex.value,
-              );
+            // 当前选中剧集对应的剧集数据
+            final currentEpisode = resourceItem.episodes.firstWhereOrNull(
+              (ep) => ep.episodeSort == episodesController.episodeIndex.value,
+            );
 
-              final excludedEpisodesCount = selectedResource.episodeResources
-                  .expand((item) => item.episodes.where((ep) =>
-                      ep.episodeSort != episodesController.episodeIndex.value))
-                  .length;
+            final excludedEpisodesCount = selectedResource.episodeResources
+                .expand((item) => item.episodes.where((ep) =>
+                    ep.episodeSort != episodesController.episodeIndex.value))
+                .length;
 
-              // 如果当前资源组没有匹配的剧集，不渲染
-              if (currentEpisode == null) {
-                return const SizedBox.shrink();
-              }
+            // 如果当前资源组没有匹配的剧集，不渲染
+            if (currentEpisode == null) {
+              return const SizedBox.shrink();
+            }
 
-              // 只渲染当前选中的剧集
-              return Column(
-                children: [
-                  _buildSource(
-                    currentEpisode,
-                    resourceItem,
-                    baseUrl: selectedResource.baseUrl,
-                    websiteName: selectedResource.websiteName,
-                    websiteIcon: selectedResource.websiteIcon,
+            // 只渲染当前选中的剧集
+            return Column(
+              children: [
+                _buildSource(
+                  currentEpisode,
+                  resourceItem,
+                  baseUrl: selectedResource.baseUrl,
+                  websiteName: selectedResource.websiteName,
+                  websiteIcon: selectedResource.websiteIcon,
+                ),
+
+                // 在最后一项后显示开关按钮
+                if (isLastItem) ...[
+                  Padding(
+                    padding: const EdgeInsets.symmetric(vertical: 8),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.end,
+                      children: [
+                        Text(
+                          '显示已被排除的资源($excludedEpisodesCount)',
+                          style: const TextStyle(fontSize: 14),
+                        ),
+                        const SizedBox(width: 8),
+                        Switch(
+                          value: isShowEpisodes,
+                          onChanged: (value) {
+                            setShowEpisodes();
+                          },
+                        ),
+                      ],
+                    ),
                   ),
 
-                  // 在最后一项后显示开关按钮
-                  if (isLastItem) ...[
-                    Padding(
-                      padding: const EdgeInsets.symmetric(vertical: 8),
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.end,
-                        children: [
-                          Text(
-                            '显示已被排除的资源($excludedEpisodesCount)',
-                            style: const TextStyle(fontSize: 14),
-                          ),
-                          const SizedBox(width: 8),
-                          Switch(
-                            value: isShowEpisodes,
-                            onChanged: (value) {
-                              setShowEpisodes();
-                            },
-                          ),
-                        ],
-                      ),
-                    ),
-
-                    // 当开关打开时，显示所有资源的所有其他剧集
-                    if (isShowEpisodes)
-                      ...selectedResource.episodeResources.expand((item) {
-                        // 获取该资源的所有非当前集数的剧集
-                        final excludedEpisodes = item.episodes
-                            .where(
-                              (ep) =>
-                                  ep.episodeSort !=
-                                  episodesController.episodeIndex.value,
-                            )
-                            .toList();
-                        // 遍历所有其他剧集
-                        return excludedEpisodes.map(
-                          (excludedEpisode) => _buildSource(
-                            excludedEpisode,
-                            item,
-                            baseUrl: selectedResource.baseUrl,
-                            websiteName: selectedResource.websiteName,
-                            websiteIcon: selectedResource.websiteIcon,
-                          ),
-                        );
-                      }),
-                  ],
+                  // 当开关打开时，显示所有资源的所有其他剧集
+                  if (isShowEpisodes)
+                    ...selectedResource.episodeResources.expand((item) {
+                      // 获取该资源的所有非当前集数的剧集
+                      final excludedEpisodes = item.episodes
+                          .where(
+                            (ep) =>
+                                ep.episodeSort !=
+                                episodesController.episodeIndex.value,
+                          )
+                          .toList();
+                      // 遍历所有其他剧集
+                      return excludedEpisodes.map(
+                        (excludedEpisode) => _buildSource(
+                          excludedEpisode,
+                          item,
+                          baseUrl: selectedResource.baseUrl,
+                          websiteName: selectedResource.websiteName,
+                          websiteIcon: selectedResource.websiteIcon,
+                        ),
+                      );
+                    }),
                 ],
-              );
-            });
+              ],
+            );
           },
         ),
       );

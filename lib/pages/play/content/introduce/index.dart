@@ -1,4 +1,4 @@
-import 'package:anime_flow/pages/play/content/introduce/episodes_view.dart';
+import 'package:anime_flow/pages/play/content/introduce/episodes.dart';
 import 'package:anime_flow/controllers/play/PlayPageController.dart';
 import 'package:anime_flow/stores/subject_state.dart';
 import 'package:anime_flow/pages/play/content/introduce/danmaku_card.dart';
@@ -40,9 +40,9 @@ class _IntroduceViewState extends State<IntroduceView>
         Future.delayed(const Duration(milliseconds: 100), () {
           if (mounted) {
             if (isWide) {
-              EpisodesViewState.showSideDrawer(context);
+              EpisodesComponentsState.showSideDrawer(context);
             } else {
-              EpisodesViewState.showBottomSheet(context);
+              EpisodesComponentsState.showBottomSheet(context);
             }
           }
         });
@@ -74,7 +74,7 @@ class _IntroduceViewState extends State<IntroduceView>
           ),
           const SizedBox(height: 10),
           //章节
-          const EpisodesView(),
+          const EpisodesComponents(),
           //数据源
           const VideoResourcesView(),
           //弹幕

@@ -32,7 +32,7 @@ class EpisodesComponentsState extends State<EpisodesComponents> {
 
   //初始化剧集
   void _initEpisodes() async {
-    if(episodesState.episodes.value != null) return;
+    if (episodesState.episodes.value != null) return;
     try {
       if (!isLoading) {
         setState(() {
@@ -66,16 +66,16 @@ class EpisodesComponentsState extends State<EpisodesComponents> {
             const Text("选集"),
             Obx(() => episodesState.episodes.value != null
                 ? IconButton(
-                onPressed: () {
-                  if (playPageController.isWideScreen.value) {
-                    // 宽屏展示侧边抽屉
-                    showSideDrawer(context);
-                  } else {
-                    // 窄屏展示底部抽屉
-                    showBottomSheet(context);
-                  }
-                },
-                icon: const Icon(Icons.keyboard_arrow_down_rounded))
+                    onPressed: () {
+                      if (playPageController.isWideScreen.value) {
+                        // 宽屏展示侧边抽屉
+                        showSideDrawer(context);
+                      } else {
+                        // 窄屏展示底部抽屉
+                        showBottomSheet(context);
+                      }
+                    },
+                    icon: const Icon(Icons.keyboard_arrow_down_rounded))
                 : const SizedBox.shrink())
           ],
         ),
@@ -92,7 +92,7 @@ class EpisodesComponentsState extends State<EpisodesComponents> {
       return const CircularProgressIndicator();
     } else {
       return Obx(
-            () {
+        () {
           final episodesData = episodesState.episodes.value;
           if (episodesData == null) {
             return const Text('暂无章节数据');
@@ -112,7 +112,8 @@ class EpisodesComponentsState extends State<EpisodesComponents> {
                     sort: firstEpisode.sort,
                     episodeIndex: 1,
                     episodeId: firstEpisode.id);
-                episodesState.setEpisodeTitle(firstEpisode.nameCN);
+                episodesState
+                    .setEpisodeTitle(firstEpisode.nameCN ?? firstEpisode.name);
               }
             });
           }
@@ -122,7 +123,7 @@ class EpisodesComponentsState extends State<EpisodesComponents> {
             child: Row(
               children: List.generate(
                 episodeList.length,
-                    (index) {
+                (index) {
                   final episode = episodeList[index];
                   return Obx(() => Card(
                       elevation: 0,
@@ -136,7 +137,8 @@ class EpisodesComponentsState extends State<EpisodesComponents> {
                               episodeId: episode.id,
                               episodeIndex: episodeIndex,
                               sort: episode.sort);
-                          episodesState.setEpisodeTitle(episode.nameCN);
+                          episodesState
+                              .setEpisodeTitle(episode.nameCN ?? episode.name);
                           logger.i('选中剧集索引:$episodeIndex');
                         },
                         child: Container(
@@ -149,9 +151,7 @@ class EpisodesComponentsState extends State<EpisodesComponents> {
                               Text('第${episode.sort}话'),
                               const SizedBox(height: 5),
                               Text(
-                                episode.nameCN.isNotEmpty
-                                    ? episode.nameCN
-                                    : episode.name,
+                                episode.nameCN ?? episode.name,
                                 overflow: TextOverflow.ellipsis,
                                 maxLines: 1,
                               ),
@@ -295,7 +295,7 @@ class EpisodesComponentsState extends State<EpisodesComponents> {
         const double spacing = 8.0;
         // 动态计算列数，最小2列，最大6列
         final int crossAxisCount =
-        (constraints.maxWidth / 160).floor().clamp(2, 6);
+            (constraints.maxWidth / 160).floor().clamp(2, 6);
         final double itemWidth =
             (constraints.maxWidth - (crossAxisCount - 1) * spacing) /
                 crossAxisCount;
@@ -307,12 +307,12 @@ class EpisodesComponentsState extends State<EpisodesComponents> {
             runSpacing: spacing,
             children: List.generate(
               episodeList.length,
-                  (index) {
+              (index) {
                 final episode = episodeList[index];
                 return SizedBox(
                   width: itemWidth,
                   child: Obx(
-                        () => Card(
+                    () => Card(
                       color: episodesState.episodeSort.value == episode.sort
                           ? Theme.of(context).colorScheme.primaryContainer
                           : null,
@@ -324,7 +324,8 @@ class EpisodesComponentsState extends State<EpisodesComponents> {
                               episodeId: episode.id,
                               episodeIndex: episodeIndex,
                               sort: episode.sort);
-                          episodesState.setEpisodeTitle(episode.nameCN);
+                          episodesState
+                              .setEpisodeTitle(episode.nameCN ?? episode.name);
                         },
                         child: Padding(
                           padding: const EdgeInsets.all(12),
@@ -338,9 +339,7 @@ class EpisodesComponentsState extends State<EpisodesComponents> {
                               ),
                               const SizedBox(height: 6),
                               Text(
-                                episode.nameCN.isNotEmpty
-                                    ? episode.nameCN
-                                    : episode.name,
+                                episode.nameCN ?? episode.name,
                                 style: const TextStyle(
                                     fontSize: 12, color: Colors.grey),
                               ),

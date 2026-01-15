@@ -1,3 +1,4 @@
+import 'package:anime_flow/controllers/play/episode_controller.dart';
 import 'package:anime_flow/stores/subject_state.dart';
 import 'package:anime_flow/models/item/bangumi/subjects_info_item.dart';
 import 'package:anime_flow/models/item/subject_basic_data_item.dart';
@@ -35,6 +36,7 @@ class _PlayPageState extends State<PlayPage> {
     playController = Get.put(PlayController());
     Get.put(VideoSourceController());
     Get.put(EpisodesState());
+    Get.put(EpisodeController());
     subjectStateController = Get.put(SubjectState());
     Get.put<WebviewItemController>(
         WebviewItemControllerFactory.getController());

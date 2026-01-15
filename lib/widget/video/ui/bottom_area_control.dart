@@ -1,7 +1,9 @@
 import 'package:anime_flow/controllers/play/PlayPageController.dart';
+import 'package:anime_flow/controllers/play/episode_controller.dart';
 import 'package:anime_flow/controllers/video/video_state_controller.dart';
 import 'package:anime_flow/controllers/video/video_ui_state_controller.dart';
 import 'package:anime_flow/models/enums/video_controls_icon_type.dart';
+import 'package:anime_flow/stores/episodes_state.dart';
 import 'package:anime_flow/widget/play_content/episodes_view.dart';
 import 'package:anime_flow/widget/video/ui/danmaku/danmaku_setting.dart';
 import 'package:anime_flow/widget/video/ui/rate_button.dart';
@@ -19,6 +21,8 @@ class BottomAreaControl extends StatelessWidget {
     final videoUiStateController = Get.find<VideoUiStateController>();
     final videoStateController = Get.find<VideoStateController>();
     final playPageController = Get.find<PlayController>();
+    final episodesState = Get.find<EpisodesState>();
+    final episodeController = Get.find<EpisodeController>();
     final paddingLeft = MediaQuery.of(context).padding.left;
     return Obx(() {
       // 使用自定义全屏状态，
@@ -27,6 +31,7 @@ class BottomAreaControl extends StatelessWidget {
       final isWideScreen = playPageController.isWideScreen.value;
       final isShowControlsUi = videoUiStateController.isShowControlsUi.value;
       final isContentExpanded = playPageController.isContentExpanded.value;
+      final hasNextEpisode = episodeController.hasNextEpisode(episodesState);
 
       return AnimatedSwitcher(
         duration: const Duration(milliseconds: 200),
@@ -82,28 +87,31 @@ class BottomAreaControl extends StatelessWidget {
                                     ? Icons.pause_rounded
                                     : Icons.play_arrow_rounded,
                                 size: 33,
-                                color: Colors.white.withValues(alpha: 0.8),
+                                color: Colors.white70,
                               ),
                             ),
+                            if (hasNextEpisode)
+                              InkWell(
+                                onTap: () {
+                                  episodeController
+                                      .switchToNextEpisode(episodesState);
+                                },
+                                child: const Icon(
+                                  Icons.skip_next_rounded,
+                                  size: 33,
+                                  color: Colors.white70,
+                                ),
+                              ),
                             //弹幕开关
                             IconButton(
                               onPressed: () {
                                 playPageController.toggleDanmaku();
                               },
-                              // icon: SvgPicture.asset(
-                              //   danmakuOn
-                              //       ? 'assets/icons/danmaku_on.svg'
-                              //       : 'assets/icons/danmaku_off.svg',
-                              //   width: 25,
-                              //   height: 25,
-                              //   colorFilter: const ColorFilter.mode(
-                              //       Colors.white, BlendMode.srcIn),
-                              // ),
                               icon: Icon(
                                   danmakuOn
                                       ? Icons.subtitles_outlined
                                       : Icons.subtitles_off_outlined,
-                                  color: Colors.white),
+                                  color: Colors.white70),
                             ),
                             //弹幕设置
                             if (danmakuOn)
@@ -143,19 +151,19 @@ class BottomAreaControl extends StatelessWidget {
                                     ),
                             ),
                             //选集
-                            if(fullscreen || !isContentExpanded)
-                            TextButton(
-                                onPressed: () {
-                                  Get.generalDialog(
-                                      barrierColor: Colors.black54,
-                                      transitionDuration:
-                                          const Duration(milliseconds: 300),
-                                      pageBuilder: (context, animation,
-                                          secondaryAnimation) {
-                                        return const EpisodesView();
-                                      });
-                                },
-                                child: const Text("选集")),
+                            if (fullscreen || !isContentExpanded)
+                              TextButton(
+                                  onPressed: () {
+                                    Get.generalDialog(
+                                        barrierColor: Colors.black54,
+                                        transitionDuration:
+                                            const Duration(milliseconds: 300),
+                                        pageBuilder: (context, animation,
+                                            secondaryAnimation) {
+                                          return const EpisodesView();
+                                        });
+                                  },
+                                  child: const Text("选集")),
 
                             //倍速按钮
                             if (isWideScreen || fullscreen)

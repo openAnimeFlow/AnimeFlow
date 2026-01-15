@@ -202,7 +202,7 @@ class __CollectionTabViewState extends State<_CollectionTabView> {
                                   : collection.nameCN,
                               image: collection.images.large,
                             );
-                            return GestureDetector(
+                            return InkWell(
                               onTap: () {
                                 Get.toNamed(RouteName.animeInfo,
                                     arguments: subjectBasicData);

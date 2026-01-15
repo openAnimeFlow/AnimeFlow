@@ -7,14 +7,14 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:logger/logger.dart';
 
-class EpisodesView extends StatefulWidget {
-  const EpisodesView({super.key});
+class EpisodesComponents extends StatefulWidget {
+  const EpisodesComponents({super.key});
 
   @override
-  State<EpisodesView> createState() => EpisodesViewState();
+  State<EpisodesComponents> createState() => EpisodesComponentsState();
 }
 
-class EpisodesViewState extends State<EpisodesView> {
+class EpisodesComponentsState extends State<EpisodesComponents> {
   late PlayController playPageController;
   late SubjectState subjectState;
   late EpisodesState episodesState;
@@ -32,6 +32,7 @@ class EpisodesViewState extends State<EpisodesView> {
 
   //初始化剧集
   void _initEpisodes() async {
+    if(episodesState.episodes.value != null) return;
     try {
       if (!isLoading) {
         setState(() {
@@ -65,16 +66,16 @@ class EpisodesViewState extends State<EpisodesView> {
             const Text("选集"),
             Obx(() => episodesState.episodes.value != null
                 ? IconButton(
-                    onPressed: () {
-                      if (playPageController.isWideScreen.value) {
-                        // 宽屏展示侧边抽屉
-                        showSideDrawer(context);
-                      } else {
-                        // 窄屏展示底部抽屉
-                        showBottomSheet(context);
-                      }
-                    },
-                    icon: const Icon(Icons.keyboard_arrow_down_rounded))
+                onPressed: () {
+                  if (playPageController.isWideScreen.value) {
+                    // 宽屏展示侧边抽屉
+                    showSideDrawer(context);
+                  } else {
+                    // 窄屏展示底部抽屉
+                    showBottomSheet(context);
+                  }
+                },
+                icon: const Icon(Icons.keyboard_arrow_down_rounded))
                 : const SizedBox.shrink())
           ],
         ),
@@ -91,7 +92,7 @@ class EpisodesViewState extends State<EpisodesView> {
       return const CircularProgressIndicator();
     } else {
       return Obx(
-        () {
+            () {
           final episodesData = episodesState.episodes.value;
           if (episodesData == null) {
             return const Text('暂无章节数据');
@@ -121,7 +122,7 @@ class EpisodesViewState extends State<EpisodesView> {
             child: Row(
               children: List.generate(
                 episodeList.length,
-                (index) {
+                    (index) {
                   final episode = episodeList[index];
                   return Obx(() => Card(
                       elevation: 0,
@@ -294,7 +295,7 @@ class EpisodesViewState extends State<EpisodesView> {
         const double spacing = 8.0;
         // 动态计算列数，最小2列，最大6列
         final int crossAxisCount =
-            (constraints.maxWidth / 160).floor().clamp(2, 6);
+        (constraints.maxWidth / 160).floor().clamp(2, 6);
         final double itemWidth =
             (constraints.maxWidth - (crossAxisCount - 1) * spacing) /
                 crossAxisCount;
@@ -306,12 +307,12 @@ class EpisodesViewState extends State<EpisodesView> {
             runSpacing: spacing,
             children: List.generate(
               episodeList.length,
-              (index) {
+                  (index) {
                 final episode = episodeList[index];
                 return SizedBox(
                   width: itemWidth,
                   child: Obx(
-                    () => Card(
+                        () => Card(
                       color: episodesState.episodeSort.value == episode.sort
                           ? Theme.of(context).colorScheme.primaryContainer
                           : null,

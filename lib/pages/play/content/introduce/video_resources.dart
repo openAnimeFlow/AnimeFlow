@@ -23,20 +23,24 @@ class VideoResourcesView extends StatefulWidget {
 class _VideoResourcesViewState extends State<VideoResourcesView> {
   late VideoSourceController dataSourceController;
   late SubjectState subjectStateController;
-  late EpisodesState episodesController;
+  late EpisodesState episodesState;
   late VideoStateController videoStateController;
   late WebviewItemController webviewItemController;
   final Logger logger = Logger();
   bool _hasAutoSelected = false; // 标记是否已经自动选择过
+  int _lastEpisodeIndex = 0; // 记录上一次的剧集索引
 
   @override
   void initState() {
     super.initState();
     dataSourceController = Get.find<VideoSourceController>();
     subjectStateController = Get.find<SubjectState>();
-    episodesController = Get.find<EpisodesState>();
+    episodesState = Get.find<EpisodesState>();
     videoStateController = Get.find<VideoStateController>();
     webviewItemController = Get.find<WebviewItemController>();
+    
+    // 初始化上一次的剧集索引
+    _lastEpisodeIndex = episodesState.episodeIndex.value;
     
     // 检查资源是否已经为当前关键词初始化过，避免全屏切换时重复初始化
     final currentKeyword = subjectStateController.name;
@@ -54,6 +58,20 @@ class _VideoResourcesViewState extends State<VideoResourcesView> {
         _autoSelectFirstResource(resources);
       }
     });
+    
+    // 监听 episodeIndex 变化，当剧集索引变化时重新自动选择并加载视频
+    ever(episodesState.episodeIndex, (int newIndex) {
+      if (mounted && newIndex != _lastEpisodeIndex && newIndex > 0) {
+        _lastEpisodeIndex = newIndex;
+        // 重置自动选择标志，允许重新自动选择
+        _hasAutoSelected = false;
+        // 如果资源已经加载完成，强制重新自动选择
+        if (dataSourceController.isLoading.value) {
+          final resources = dataSourceController.videoResources.value;
+          _autoSelectFirstResource(resources, force: true);
+        }
+      }
+    });
   }
 
   /// 查找第一个有资源的网站索引
@@ -67,9 +85,10 @@ class _VideoResourcesViewState extends State<VideoResourcesView> {
   }
 
   /// 自动选择第一个有资源的网站并加载视频
-  void _autoSelectFirstResource(List<ResourcesItem> resources) {
-    // 如果已经自动选择过，或者已经有选中的资源，不再自动选择
-    if (_hasAutoSelected || dataSourceController.webSiteTitle.value.isNotEmpty) {
+  /// [force] 是否强制重新选择，即使已经有选中的资源
+  void _autoSelectFirstResource(List<ResourcesItem> resources, {bool force = false}) {
+    // 如果已经自动选择过，且不是强制重新选择，或者已经有选中的资源且不是强制重新选择，不再自动选择
+    if (!force && (_hasAutoSelected || dataSourceController.webSiteTitle.value.isNotEmpty)) {
       return;
     }
 
@@ -91,22 +110,23 @@ class _VideoResourcesViewState extends State<VideoResourcesView> {
     // 自动加载第一个匹配的资源
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (mounted) {
-        _autoLoadFirstResource(selectedResource);
+        _autoLoadFirstResource(selectedResource, force: force);
       }
     });
   }
 
   /// 自动加载第一个匹配当前剧集的资源
-  Future<void> _autoLoadFirstResource(ResourcesItem resource) async {
-    // 如果已经有选中的资源，不再自动加载
-    if (dataSourceController.webSiteTitle.value.isNotEmpty) {
+  /// [force] 是否强制重新加载，即使已经有选中的资源
+  Future<void> _autoLoadFirstResource(ResourcesItem resource, {bool force = false}) async {
+    // 如果不是强制重新加载，且已经有选中的资源，不再自动加载
+    if (!force && dataSourceController.webSiteTitle.value.isNotEmpty) {
       return;
     }
 
     // 遍历资源列表，找到第一个匹配当前剧集的资源
     for (var resourceItem in resource.episodeResources) {
       final matchingEpisodes = resourceItem.episodes.where(
-        (ep) => ep.episodeSort == episodesController.episodeIndex.value,
+        (ep) => ep.episodeSort == episodesState.episodeIndex.value,
       );
       if (matchingEpisodes.isNotEmpty) {
         final currentEpisode = matchingEpisodes.first;

@@ -13,7 +13,7 @@ class EpisodesView extends StatelessWidget {
       child: Container(
         width: PlayLayoutConstant.playContentWidth,
         height: double.infinity,
-        padding: const EdgeInsets.all(16),
+        padding: const EdgeInsets.only(top: 16, right: 16,left: 16),
         color: Theme.of(context).cardColor,
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -67,6 +67,7 @@ class EpisodesView extends StatelessWidget {
           return Obx(() {
             final isSelected = episodesState.episodeSort.value == episode.sort;
             return Card(
+              elevation: 0,
               color: isSelected
                   ? Theme.of(context).colorScheme.primaryContainer
                   : null,
@@ -99,6 +100,7 @@ class EpisodesView extends StatelessWidget {
                         style: const TextStyle(
                           fontSize: 12,
                           color: Colors.grey,
+                          fontWeight: FontWeight.bold,
                         ),
                         maxLines: 2,
                         overflow: TextOverflow.ellipsis,

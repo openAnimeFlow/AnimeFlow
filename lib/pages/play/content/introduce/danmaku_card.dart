@@ -110,6 +110,7 @@ class _DanmakuCardState extends State<DanmakuCard> {
                 Obx(() => Padding(
                   padding: const EdgeInsets.only(bottom: 8),
                   child: Wrap(
+                    alignment: WrapAlignment.start,
                     spacing: 8,
                     runSpacing: 4,
                     children: sortedPlatforms.map((entry) {

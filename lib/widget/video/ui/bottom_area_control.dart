@@ -26,6 +26,7 @@ class BottomAreaControl extends StatelessWidget {
       final danmakuOn = playPageController.danmakuOn.value;
       final isWideScreen = playPageController.isWideScreen.value;
       final isShowControlsUi = videoUiStateController.isShowControlsUi.value;
+      final isContentExpanded = playPageController.isContentExpanded.value;
 
       return AnimatedSwitcher(
         duration: const Duration(milliseconds: 200),
@@ -142,6 +143,7 @@ class BottomAreaControl extends StatelessWidget {
                                     ),
                             ),
                             //选集
+                            if(fullscreen || !isContentExpanded)
                             TextButton(
                                 onPressed: () {
                                   Get.generalDialog(

@@ -4,7 +4,6 @@ import 'package:anime_flow/controllers/play/PlayPageController.dart';
 import 'package:anime_flow/controllers/subject/subject_state_controller.dart';
 import 'package:anime_flow/models/item/bangumi/episodes_item.dart';
 import 'package:anime_flow/pages/play/content/introduce/danmaku_card.dart';
-import 'package:anime_flow/pages/play/content/introduce/recommend.dart';
 import 'package:anime_flow/pages/play/content/introduce/video_resources.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -14,8 +13,7 @@ class IntroduceView extends StatefulWidget {
   final Future<EpisodesItem> episodes;
   static const String drawerTitle = "章节列表";
 
-  const IntroduceView(this.episodes,
-      {super.key});
+  const IntroduceView(this.episodes, {super.key});
 
   @override
   State<IntroduceView> createState() => _IntroduceViewState();
@@ -30,7 +28,6 @@ class _IntroduceViewState extends State<IntroduceView>
   Worker? _screenWorker; // 屏幕宽高监听器
   bool isVideoSourceLoading = true;
 
-  // 保持页面状态，防止切换Tab时重新加载
   @override
   bool get wantKeepAlive => true;
 
@@ -228,7 +225,6 @@ class _IntroduceViewState extends State<IntroduceView>
 
   /// 通用章节网格
   Widget _buildEpisodesGrid() {
-    final Logger logger = Logger();
     return FutureBuilder<EpisodesItem>(
       future: widget.episodes,
       builder: (context, snapshot) {
@@ -253,40 +249,58 @@ class _IntroduceViewState extends State<IntroduceView>
               child: Wrap(
                 spacing: spacing,
                 runSpacing: spacing,
-                children: episodeList.map((episode) {
-                  return SizedBox(
-                    width: itemWidth,
-                    child: Card(
-                      margin: EdgeInsets.zero,
-                      child: InkWell(
-                        onTap: () {
-                          logger.i('第${episode.sort}话');
-                          //TODO 实现播放
-                        },
-                        child: Padding(
-                          padding: const EdgeInsets.all(12),
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                '第${episode.sort}话',
-                                style: const TextStyle(fontWeight: FontWeight.bold),
+                children: List.generate(
+                  episodeList.length,
+                  (index) {
+                    final episode = episodeList[index];
+                    return SizedBox(
+                      width: itemWidth,
+                      child: Obx(
+                        () => Card(
+                          color: episodesController.episodeSort.value ==
+                                  episode.sort
+                              ? Theme.of(context).colorScheme.primaryContainer
+                              : null,
+                          margin: EdgeInsets.zero,
+                          child: InkWell(
+                            onTap: () {
+                              if (mounted) {
+                                final episodeIndex = index + 1;
+                                episodesController.setEpisodeSort(
+                                    episodeId: episode.id,
+                                    episodeIndex: episodeIndex,
+                                    sort: episode.sort);
+                                episodesController
+                                    .setEpisodeTitle(episode.nameCN);
+                              }
+                            },
+                            child: Padding(
+                              padding: const EdgeInsets.all(12),
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    '第${episode.sort}话',
+                                    style: const TextStyle(
+                                        fontWeight: FontWeight.bold),
+                                  ),
+                                  const SizedBox(height: 6),
+                                  Text(
+                                    episode.nameCN.isNotEmpty
+                                        ? episode.nameCN
+                                        : episode.name,
+                                    style: const TextStyle(
+                                        fontSize: 12, color: Colors.grey),
+                                  ),
+                                ],
                               ),
-                              const SizedBox(height: 6),
-                              Text(
-                                episode.nameCN.isNotEmpty
-                                    ? episode.nameCN
-                                    : episode.name,
-                                style:
-                                    const TextStyle(fontSize: 12, color: Colors.grey),
-                              ),
-                            ],
+                            ),
                           ),
                         ),
                       ),
-                    ),
-                  );
-                }).toList(),
+                    );
+                  },
+                ),
               ),
             );
           });

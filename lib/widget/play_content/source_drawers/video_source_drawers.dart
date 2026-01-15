@@ -1,4 +1,3 @@
-import 'package:anime_flow/webview/webview_controller.dart';
 import 'package:anime_flow/widget/animation_network_image/animation_network_image.dart';
 import 'package:anime_flow/constants/play_layout_constant.dart';
 import 'package:anime_flow/stores/episodes_state.dart';
@@ -12,14 +11,15 @@ import 'package:get/get.dart';
 import 'package:logger/logger.dart';
 
 class VideoSourceDrawers extends StatefulWidget {
-  const VideoSourceDrawers({super.key});
+  final Function(String url)? onVideoUrlSelected;
+  
+  const VideoSourceDrawers({super.key, this.onVideoUrlSelected});
 
   @override
   State<VideoSourceDrawers> createState() => _VideoSourceDrawersState();
 }
 
 class _VideoSourceDrawersState extends State<VideoSourceDrawers> {
-  final webviewItemController = Get.find<WebviewItemController>();
   late VideoStateController videoStateController;
   late EpisodesState episodesController;
   late VideoSourceController dataSourceController;
@@ -53,15 +53,6 @@ class _VideoSourceDrawersState extends State<VideoSourceDrawers> {
   }
 
 
-  Future<void> _loadVideoPage(String url) async {
-    logger.d('加载视频页面: $url');
-    await webviewItemController.loadUrl(
-      url,
-      true, // useNativePlayer: 使用原生播放器
-      true, // useLegacyParser: 不使用旧解析器
-      offset: 0,
-    );
-  }
 
   void _performSearch() {
     String searchQuery = _searchController.text;
@@ -410,14 +401,14 @@ class _VideoSourceDrawersState extends State<VideoSourceDrawers> {
             onTap: () async {
               try {
                 Get.back();
+                final videoUrl = baseUrl + episode.like;
                 dataSourceController.setWebSite(
                     title: websiteName,
                     iconUrl: websiteIcon,
-                    videoUrl: baseUrl + episode.like);
+                    videoUrl: videoUrl);
 
                 videoStateController.disposeVideo();
-
-                await _loadVideoPage(baseUrl + episode.like);
+                widget.onVideoUrlSelected?.call(videoUrl);
               } catch (e) {
                 logger.e('获取视频源失败', error: e);
                 Get.snackbar(

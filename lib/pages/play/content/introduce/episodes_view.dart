@@ -63,17 +63,19 @@ class EpisodesViewState extends State<EpisodesView> {
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
             const Text("选集"),
-            IconButton(
-                onPressed: () {
-                  if (playPageController.isWideScreen.value) {
-                    // 宽屏展示侧边抽屉
-                    showSideDrawer(context);
-                  } else {
-                    // 窄屏展示底部抽屉
-                    showBottomSheet(context);
-                  }
-                },
-                icon: const Icon(Icons.keyboard_arrow_down_rounded))
+            Obx(() => episodesState.episodes.value != null
+                ? IconButton(
+                    onPressed: () {
+                      if (playPageController.isWideScreen.value) {
+                        // 宽屏展示侧边抽屉
+                        showSideDrawer(context);
+                      } else {
+                        // 窄屏展示底部抽屉
+                        showBottomSheet(context);
+                      }
+                    },
+                    icon: const Icon(Icons.keyboard_arrow_down_rounded))
+                : const SizedBox.shrink())
           ],
         ),
         //横向滚动卡片
@@ -90,7 +92,6 @@ class EpisodesViewState extends State<EpisodesView> {
     } else {
       return Obx(
         () {
-          // 获取剧集数据
           final episodesData = episodesState.episodes.value;
           if (episodesData == null) {
             return const Text('暂无章节数据');

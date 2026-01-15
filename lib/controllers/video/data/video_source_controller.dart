@@ -7,7 +7,7 @@ import 'package:anime_flow/utils/crawl_config.dart';
 import 'package:get/get.dart';
 
 class VideoSourceController extends GetxController {
-  late final Rx<List<ResourcesItem>> videoResources;
+  final RxList<ResourcesItem> videoResources = <ResourcesItem>[].obs;
   final RxString webSiteTitle = ''.obs;
   final RxString webSiteIcon = ''.obs;
   final RxString videoUrl = ''.obs;
@@ -16,10 +16,9 @@ class VideoSourceController extends GetxController {
   final RxInt selectedWebsiteIndex = 0.obs; // 当前选中的网站索引
 
   @override
-  void onInit() {
+  void onInit() async {
     super.onInit();
-    videoResources = Rx<List<ResourcesItem>>([]);
-    _initVideoResources();
+    await _initVideoResources();
   }
 
   //初始化
@@ -51,7 +50,7 @@ class VideoSourceController extends GetxController {
   }
 
   void _clearAllResources() {
-    final currentResources = videoResources.value;
+    final currentResources = videoResources;
     final clearedResources = currentResources.map((resource) {
       return ResourcesItem(
         websiteName: resource.websiteName,

@@ -253,7 +253,7 @@ class VideoSourceController extends GetxController {
             videoUrl: resource.baseUrl + currentEpisode.like,
           );
           _videoStateController.disposeVideo();
-          await _loadVideoPage(resource.baseUrl + currentEpisode.like);
+          await loadVideoPage(resource.baseUrl + currentEpisode.like);
         } catch (e) {
           _logger.e('自动加载视频源失败', error: e);
         }
@@ -263,7 +263,7 @@ class VideoSourceController extends GetxController {
   }
 
   /// 加载视频页面
-  Future<void> _loadVideoPage(String url) async {
+  Future<void> loadVideoPage(String url) async {
     _logger.d('加载视频页面: $url');
     await _webviewItemController.loadUrl(
       url,

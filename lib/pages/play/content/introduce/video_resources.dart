@@ -1,5 +1,4 @@
 import 'package:anime_flow/stores/subject_state.dart';
-import 'package:anime_flow/webview/webview_controller.dart';
 import 'package:anime_flow/widget/animation_network_image/animation_network_image.dart';
 import 'package:anime_flow/widget/play_content/source_drawers/video_source_drawers.dart';
 import 'package:anime_flow/controllers/video/data/video_source_controller.dart';
@@ -17,33 +16,22 @@ class VideoResourcesView extends StatefulWidget {
 }
 
 class _VideoResourcesViewState extends State<VideoResourcesView> {
-  late VideoSourceController dataSourceController;
+  late VideoSourceController videoSourceController;
   late SubjectState subjectStateController;
   final Logger logger = Logger();
 
   @override
   void initState() {
     super.initState();
-    dataSourceController = Get.find<VideoSourceController>();
+    videoSourceController = Get.find<VideoSourceController>();
     subjectStateController = Get.find<SubjectState>();
     
     // 检查资源是否已经为当前关键词初始化过，避免全屏切换时重复初始化
     final currentKeyword = subjectStateController.name;
-    if (dataSourceController.keyword.value != currentKeyword) {
+    if (videoSourceController.keyword.value != currentKeyword) {
       // 只有当关键词不同时才重新初始化
-      dataSourceController.initResources(currentKeyword);
+      videoSourceController.initResources(currentKeyword);
     }
-  }
-
-  Future<void> _loadVideoPage(String url) async {
-    logger.d('加载视频页面: $url');
-    final webviewItemController = Get.find<WebviewItemController>();
-    await webviewItemController.loadUrl(
-      url,
-      true, // useNativePlayer: 使用原生播放器
-      true, // useLegacyParser: 不使用旧解析器
-      offset: 0,
-    );
   }
 
   @override
@@ -68,7 +56,7 @@ class _VideoResourcesViewState extends State<VideoResourcesView> {
                         ),
                       ),
                       const SizedBox(height: 5),
-                      Obx(() => dataSourceController.isLoading.value
+                      Obx(() => videoSourceController.isLoading.value
                           ? Row(
                               children: [
                                 ClipRRect(
@@ -76,12 +64,12 @@ class _VideoResourcesViewState extends State<VideoResourcesView> {
                                   child: AnimationNetworkImage(
                                       height: 25,
                                       width: 25,
-                                      url: dataSourceController
+                                      url: videoSourceController
                                           .webSiteIcon.value),
                                 ),
                                 const SizedBox(width: 5),
                                 Text(
-                                  dataSourceController.webSiteTitle.value,
+                                  videoSourceController.webSiteTitle.value,
                                   maxLines: 3,
                                   overflow: TextOverflow.ellipsis,
                                   style: const TextStyle(
@@ -129,7 +117,7 @@ class _VideoResourcesViewState extends State<VideoResourcesView> {
                       pageBuilder: (context, animation, secondaryAnimation) {
                         return VideoSourceDrawers(
                           onVideoUrlSelected: (url) {
-                            _loadVideoPage(url);
+                            videoSourceController.loadVideoPage(url);
                           },
                         );
                       },

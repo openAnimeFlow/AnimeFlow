@@ -183,7 +183,6 @@ class Utils {
   }
 
   /// 退出全屏显示
-  ///
   static Future<void> exitFullScreen({bool lockOrientation = true}) async {
     if (Platform.isLinux || Platform.isMacOS || Platform.isWindows) {
       await windowManager.setFullScreen(false);

@@ -1,4 +1,4 @@
-import 'package:anime_flow/controllers/episodes/episodes_controller.dart';
+import 'package:anime_flow/stores/episodes_state.dart';
 import 'package:anime_flow/controllers/play/PlayPageController.dart';
 import 'package:anime_flow/http/requests/bgm_request.dart';
 import 'package:anime_flow/models/item/bangumi/episode_comments_item.dart';
@@ -11,9 +11,8 @@ import 'package:logger/logger.dart';
 import 'comments/index.dart';
 
 class ContentView extends StatefulWidget {
-  final Future<EpisodesItem> episodes;
 
-  const ContentView(this.episodes, {super.key});
+  const ContentView({super.key});
 
   @override
   State<ContentView> createState() => _ContentViewState();
@@ -21,7 +20,7 @@ class ContentView extends StatefulWidget {
 
 class _ContentViewState extends State<ContentView>
     with SingleTickerProviderStateMixin {
-  late EpisodesController episodesController;
+  late EpisodesState episodesController;
   late PlayController playPageController;
   final List<String> _tabs = ['简介', '吐槽'];
   late TabController _tabController;
@@ -35,7 +34,7 @@ class _ContentViewState extends State<ContentView>
   @override
   void initState() {
     super.initState();
-    episodesController = Get.find<EpisodesController>();
+    episodesController = Get.find<EpisodesState>();
     _tabController = TabController(length: _tabs.length, vsync: this);
     playPageController = Get.find<PlayController>();
     
@@ -152,7 +151,6 @@ class _ContentViewState extends State<ContentView>
               children: [
                 //简介
                 IntroduceView(
-                  widget.episodes,
                   key: _introduceKey),
                 //吐槽
                 CommentsView(

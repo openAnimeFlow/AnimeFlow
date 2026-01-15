@@ -1,8 +1,8 @@
 import 'package:anime_flow/webview/webview_controller.dart';
 import 'package:anime_flow/widget/animation_network_image/animation_network_image.dart';
 import 'package:anime_flow/constants/play_layout_constant.dart';
-import 'package:anime_flow/controllers/episodes/episodes_controller.dart';
-import 'package:anime_flow/controllers/video/data/data_source_controller.dart';
+import 'package:anime_flow/stores/episodes_state.dart';
+import 'package:anime_flow/controllers/video/data/video_source_controller.dart';
 import 'package:anime_flow/controllers/video/video_state_controller.dart';
 import 'package:anime_flow/controllers/video/video_ui_state_controller.dart';
 import 'package:anime_flow/models/item/video/episode_resources_item.dart';
@@ -21,8 +21,8 @@ class VideoSourceDrawers extends StatefulWidget {
 class _VideoSourceDrawersState extends State<VideoSourceDrawers> {
   final webviewItemController = Get.find<WebviewItemController>();
   late VideoStateController videoStateController;
-  late EpisodesController episodesController;
-  late DataSourceController dataSourceController;
+  late EpisodesState episodesController;
+  late VideoSourceController dataSourceController;
   late VideoUiStateController videoUiStateController;
   final logger = Logger();
   bool isShowEpisodes = false;
@@ -35,8 +35,8 @@ class _VideoSourceDrawersState extends State<VideoSourceDrawers> {
     super.initState();
     videoUiStateController = Get.find<VideoUiStateController>();
     videoStateController = Get.find<VideoStateController>();
-    episodesController = Get.find<EpisodesController>();
-    dataSourceController = Get.find<DataSourceController>();
+    episodesController = Get.find<EpisodesState>();
+    dataSourceController = Get.find<VideoSourceController>();
     _searchController.text = dataSourceController.keyword.value;
     // 初始化时标记需要自动选择（在资源加载完成后检查）
     _needAutoSelect = true;

@@ -4,10 +4,10 @@ import 'dart:io';
 import 'package:anime_flow/models/enums/video_controls_icon_type.dart';
 import 'package:anime_flow/webview/webview_controller.dart';
 import 'package:anime_flow/webview/webview_item.dart';
-import 'package:anime_flow/controllers/episodes/episodes_controller.dart';
+import 'package:anime_flow/stores/episodes_state.dart';
 import 'package:anime_flow/controllers/play/PlayPageController.dart';
-import 'package:anime_flow/controllers/subject/subject_state_controller.dart';
-import 'package:anime_flow/controllers/video/data/data_source_controller.dart';
+import 'package:anime_flow/stores/subject_state.dart';
+import 'package:anime_flow/controllers/video/data/video_source_controller.dart';
 import 'package:anime_flow/controllers/video/video_state_controller.dart';
 import 'package:anime_flow/controllers/video/video_ui_state_controller.dart';
 import 'package:anime_flow/http/requests/damaku.dart';
@@ -32,10 +32,10 @@ class _VideoViewState extends State<VideoView> with WindowListener {
   late final player = Player();
   late final controller = VideoController(player);
   late VideoUiStateController videoUiStateController;
-  late DataSourceController dataSourceController;
+  late VideoSourceController dataSourceController;
   late PlayController playController;
-  late EpisodesController episodesController;
-  late SubjectStateController subjectStateController;
+  late EpisodesState episodesController;
+  late SubjectState subjectStateController;
   final webviewItemController = Get.find<WebviewItemController>();
   final logger = Logger();
   final _danmuKey = GlobalKey();
@@ -58,11 +58,11 @@ class _VideoViewState extends State<VideoView> with WindowListener {
   void initState() {
     super.initState();
     Get.put(VideoStateController(player));
-    dataSourceController = Get.find<DataSourceController>();
+    dataSourceController = Get.find<VideoSourceController>();
     videoUiStateController = Get.put(VideoUiStateController(player));
     playController = Get.find<PlayController>();
-    episodesController = Get.find<EpisodesController>();
-    subjectStateController = Get.find<SubjectStateController>();
+    episodesController = Get.find<EpisodesState>();
+    subjectStateController = Get.find<SubjectState>();
     // 初始化屏幕亮度
     videoUiStateController.initializeBrightness();
 

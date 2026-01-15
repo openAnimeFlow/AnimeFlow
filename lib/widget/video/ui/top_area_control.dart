@@ -1,6 +1,6 @@
-import 'package:anime_flow/controllers/episodes/episodes_controller.dart';
+import 'package:anime_flow/stores/episodes_state.dart';
 import 'package:anime_flow/controllers/play/PlayPageController.dart';
-import 'package:anime_flow/controllers/subject/subject_state_controller.dart';
+import 'package:anime_flow/stores/subject_state.dart';
 import 'package:anime_flow/controllers/video/video_ui_state_controller.dart';
 import 'package:anime_flow/utils/utils.dart';
 import 'package:flutter/material.dart';
@@ -17,8 +17,8 @@ class TopAreaControl extends StatelessWidget {
   Widget build(BuildContext context) {
     final playPageController = Get.find<PlayController>();
     final videoUiStateController = Get.find<VideoUiStateController>();
-    final episodesController = Get.find<EpisodesController>();
-    final subjectStateController = Get.find<SubjectStateController>();
+    final episodesController = Get.find<EpisodesState>();
+    final subjectStateController = Get.find<SubjectState>();
     final leftPadding = MediaQuery.of(context).padding.left;
     return Obx(() {
       // 全屏状态

@@ -1,5 +1,5 @@
 import 'package:anime_flow/utils/utils.dart';
-import 'package:anime_flow/controllers/episodes/episodes_controller.dart';
+import 'package:anime_flow/stores/episodes_state.dart';
 import 'package:anime_flow/controllers/play/PlayPageController.dart';
 import 'package:anime_flow/controllers/video/video_state_controller.dart';
 import 'package:anime_flow/controllers/video/video_ui_state_controller.dart';
@@ -24,14 +24,14 @@ class _VideoUiState extends State<VideoUi> {
   late VideoUiStateController videoUiStateController;
   late PlayController playPageController;
   late VideoStateController videoStateController;
-  late EpisodesController episodesController;
+  late EpisodesState episodesController;
 
   @override
   void initState() {
     videoUiStateController = Get.find<VideoUiStateController>();
     playPageController = Get.find<PlayController>();
     videoStateController = Get.find<VideoStateController>();
-    episodesController = Get.find<EpisodesController>();
+    episodesController = Get.find<EpisodesState>();
     super.initState();
   }
 

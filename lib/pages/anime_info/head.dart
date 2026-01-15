@@ -14,7 +14,6 @@ import 'package:anime_flow/models/item/subject_basic_data_item.dart'
 
 class InfoHeadView extends StatelessWidget {
   final SubjectBasicData subjectBasicData;
-  final Future<EpisodesItem> episodesItem;
   final double statusBarHeight;
   final double contentHeight;
 
@@ -22,7 +21,6 @@ class InfoHeadView extends StatelessWidget {
     super.key,
     required this.statusBarHeight,
     required this.contentHeight,
-    required this.episodesItem,
     required this.subjectBasicData,
   });
 
@@ -110,7 +108,6 @@ class InfoHeadView extends StatelessWidget {
                                       ? Expanded(child: _skeletonView())
                                       : Expanded(
                                           child: _dataView(context,
-                                              episodes: episodesItem,
                                               themeColor: themeColor),
                                         ),
                                 )
@@ -199,9 +196,7 @@ class InfoHeadView extends StatelessWidget {
   }
 
   ///数据视图
-  Widget _dataView(BuildContext context,
-      {required Future<EpisodesItem> episodes,
-        required Color themeColor}) {
+  Widget _dataView(BuildContext context, {required Color themeColor}) {
     final animeInfoStore = Get.find<AnimeInfoStore>();
     const double fontSize = 12;
     const FontWeight fontWeight = FontWeight.w600;
@@ -229,7 +224,7 @@ class InfoHeadView extends StatelessWidget {
               Text(
                 '${subjectItem.airtime.date}(${subjectItem.platform.typeCN})',
                 style:
-                const TextStyle(fontSize: fontSize, fontWeight: fontWeight),
+                    const TextStyle(fontSize: fontSize, fontWeight: fontWeight),
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
               ),
@@ -265,7 +260,7 @@ class InfoHeadView extends StatelessWidget {
               Text(
                 '(${subjectItem.rating.total})人评分',
                 style:
-                const TextStyle(fontSize: fontSize, fontWeight: fontWeight),
+                    const TextStyle(fontSize: fontSize, fontWeight: fontWeight),
               ),
               Text('$collectionTotal收藏/',
                   style: const TextStyle(
@@ -279,23 +274,10 @@ class InfoHeadView extends StatelessWidget {
             ],
           ),
           const Spacer(),
-          Row(
-            children: [
-              IconButton(
-                onPressed: () {
-                  episodesDialog(context, episodes);
-                },
-                icon: const Icon(
-                  Icons.grid_view_rounded,
-                  size: 28,
-                ),
-              ),
-              CollectionButton(
-                subjectId: subjectBasicData.id,
-                subject: subjectItem,
-              ),
-            ],
-          )
+          CollectionButton(
+            subjectId: subjectBasicData.id,
+            subject: subjectItem,
+          ),
         ],
       );
     });

@@ -1,4 +1,4 @@
-import 'package:anime_flow/controllers/episodes/episodes_controller.dart';
+import 'package:anime_flow/stores/episodes_state.dart';
 import 'package:anime_flow/controllers/play/PlayPageController.dart';
 import 'package:anime_flow/models/item/danmaku/danmaku_module.dart';
 import 'package:anime_flow/utils/formatUtil.dart';
@@ -13,7 +13,7 @@ class DanmakuCard extends StatefulWidget {
 }
 
 class _DanmakuCardState extends State<DanmakuCard> {
-  late EpisodesController episodesController;
+  late EpisodesState episodesController;
   late PlayController playController;
   bool isExpanded = false;
   int _currentEpisode = 0; // 记录当前集数
@@ -21,7 +21,7 @@ class _DanmakuCardState extends State<DanmakuCard> {
   @override
   void initState() {
     super.initState();
-    episodesController = Get.find<EpisodesController>();
+    episodesController = Get.find<EpisodesState>();
     playController = Get.find<PlayController>();
 
     // 监听集数变化，当集数改变时重置弹幕加载状态

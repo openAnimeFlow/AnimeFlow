@@ -1,12 +1,12 @@
-import 'package:anime_flow/controllers/subject/subject_state_controller.dart';
+import 'package:anime_flow/stores/subject_state.dart';
 import 'package:anime_flow/models/item/bangumi/subjects_info_item.dart';
 import 'package:anime_flow/models/item/subject_basic_data_item.dart';
 import 'package:anime_flow/webview/webview_controller.dart';
 import 'package:anime_flow/widget/video/video.dart';
 import 'package:anime_flow/constants/play_layout_constant.dart';
-import 'package:anime_flow/controllers/episodes/episodes_controller.dart';
+import 'package:anime_flow/stores/episodes_state.dart';
 import 'package:anime_flow/controllers/play/PlayPageController.dart';
-import 'package:anime_flow/controllers/video/data/data_source_controller.dart';
+import 'package:anime_flow/controllers/video/data/video_source_controller.dart';
 import 'package:anime_flow/models/item/bangumi/episodes_item.dart';
 import 'package:anime_flow/utils/utils.dart';
 import 'package:flutter/material.dart';
@@ -25,8 +25,7 @@ class PlayPage extends StatefulWidget {
 class _PlayPageState extends State<PlayPage> {
   late SubjectsInfoItem subjectsInfo;
   late SubjectBasicData subjectBasicData;
-  late SubjectStateController subjectStateController;
-  late Future<EpisodesItem> episodes;
+  late SubjectState subjectStateController;
   late PlayController playController;
   final GlobalKey _videoKey = GlobalKey();
   final GlobalKey _contentKey = GlobalKey();
@@ -35,13 +34,12 @@ class _PlayPageState extends State<PlayPage> {
   void initState() {
     super.initState();
     playController = Get.put(PlayController());
-    Get.put(DataSourceController());
-    Get.put(EpisodesController());
-    subjectStateController = Get.put(SubjectStateController());
+    Get.put(VideoSourceController());
+    Get.put(EpisodesState());
+    subjectStateController = Get.put(SubjectState());
     Get.put<WebviewItemController>(
         WebviewItemControllerFactory.getController());
     var args = Get.arguments;
-    episodes = args['episodes'] as Future<EpisodesItem>;
     subjectsInfo = args['subjectsInfo'] as SubjectsInfoItem;
     subjectStateController.setSubject(
         subjectsInfo.nameCN.isEmpty ? subjectsInfo.name : subjectsInfo.nameCN,
@@ -53,9 +51,9 @@ class _PlayPageState extends State<PlayPage> {
   void dispose() {
     Get.delete<WebviewItemController>();
     Get.delete<PlayController>();
-    Get.delete<EpisodesController>();
-    Get.delete<DataSourceController>();
-    Get.delete<SubjectStateController>();
+    Get.delete<EpisodesState>();
+    Get.delete<VideoSourceController>();
+    Get.delete<SubjectState>();
     super.dispose();
   }
 
@@ -97,7 +95,7 @@ class _PlayPageState extends State<PlayPage> {
                         child: Opacity(
                           opacity:
                               playController.isContentExpanded.value ? 1 : 0,
-                          child: ContentView(episodes, key: _contentKey),
+                          child: ContentView(key: _contentKey),
                         ))
                   ],
                 ))
@@ -119,7 +117,7 @@ class _PlayPageState extends State<PlayPage> {
                           child: VideoView(key: _videoKey),
                         ),
                         Expanded(
-                          child: ContentView(episodes, key: _contentKey),
+                          child: ContentView(key: _contentKey),
                         ),
                       ],
                     ),

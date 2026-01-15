@@ -1,6 +1,8 @@
+import 'package:anime_flow/models/item/bangumi/episodes_item.dart';
 import 'package:get/get.dart';
 
-class EpisodesController extends GetxController {
+class EpisodesState extends GetxController {
+  final Rx<EpisodesItem?> episodes = Rx<EpisodesItem?>(null);
   final RxString episodeTitle = ''.obs;
   final RxDouble episodeSort = 0.0.obs;
   final RxInt episodeIndex = 0.obs;

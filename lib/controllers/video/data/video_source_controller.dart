@@ -6,7 +6,7 @@ import 'package:anime_flow/models/item/video/search_resources_item.dart';
 import 'package:anime_flow/utils/crawl_config.dart';
 import 'package:get/get.dart';
 
-class DataSourceController extends GetxController {
+class VideoSourceController extends GetxController {
   late final Rx<List<ResourcesItem>> videoResources;
   final RxString webSiteTitle = ''.obs;
   final RxString webSiteIcon = ''.obs;

@@ -1,4 +1,4 @@
-import 'package:anime_flow/controllers/subject/subject_state_controller.dart';
+import 'package:anime_flow/stores/subject_state.dart';
 import 'package:anime_flow/http/requests/bgm_request.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -11,12 +11,12 @@ class RecommendView extends StatefulWidget {
 }
 
 class _RecommendViewState extends State<RecommendView> {
-  late SubjectStateController subjectStateController;
+  late SubjectState subjectStateController;
 
   @override
   void initState() {
     super.initState();
-    subjectStateController = Get.find<SubjectStateController>();
+    subjectStateController = Get.find<SubjectState>();
     _searchRecommend();
   }
 

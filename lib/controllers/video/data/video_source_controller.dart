@@ -13,6 +13,7 @@ class VideoSourceController extends GetxController {
   final RxString videoUrl = ''.obs;
   final RxString keyword = ''.obs;
   final RxBool isLoading = false.obs;
+  final RxInt selectedWebsiteIndex = 0.obs; // 当前选中的网站索引
 
   @override
   void onInit() {

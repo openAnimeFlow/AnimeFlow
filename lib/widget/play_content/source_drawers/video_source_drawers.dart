@@ -3,7 +3,6 @@ import 'package:anime_flow/constants/play_layout_constant.dart';
 import 'package:anime_flow/stores/episodes_state.dart';
 import 'package:anime_flow/controllers/video/data/video_source_controller.dart';
 import 'package:anime_flow/controllers/video/video_state_controller.dart';
-import 'package:anime_flow/controllers/video/video_ui_state_controller.dart';
 import 'package:anime_flow/models/item/video/episode_resources_item.dart';
 import 'package:anime_flow/models/item/video/resources_item.dart';
 import 'package:flutter/material.dart';
@@ -23,16 +22,13 @@ class _VideoSourceDrawersState extends State<VideoSourceDrawers> {
   late VideoStateController videoStateController;
   late EpisodesState episodesController;
   late VideoSourceController dataSourceController;
-  late VideoUiStateController videoUiStateController;
   final logger = Logger();
   bool isShowEpisodes = false;
-  int selectedWebsiteIndex = 0; // 当前选中的网站索引
   final _searchController = TextEditingController();
 
   @override
   void initState() {
     super.initState();
-    videoUiStateController = Get.find<VideoUiStateController>();
     videoStateController = Get.find<VideoStateController>();
     episodesController = Get.find<EpisodesState>();
     dataSourceController = Get.find<VideoSourceController>();
@@ -46,8 +42,8 @@ class _VideoSourceDrawersState extends State<VideoSourceDrawers> {
   }
 
   void setSelectedWebsite(int index) {
+    dataSourceController.selectedWebsiteIndex.value = index;
     setState(() {
-      selectedWebsiteIndex = index;
       isShowEpisodes = false;
     });
   }
@@ -57,8 +53,8 @@ class _VideoSourceDrawersState extends State<VideoSourceDrawers> {
   void _performSearch() {
     String searchQuery = _searchController.text;
     if (searchQuery.isNotEmpty) {
+      dataSourceController.selectedWebsiteIndex.value = 0;
       setState(() {
-        selectedWebsiteIndex = 0;
         isShowEpisodes = false;
       });
       dataSourceController.initResources(searchQuery);
@@ -123,17 +119,16 @@ class _VideoSourceDrawersState extends State<VideoSourceDrawers> {
                     return const SizedBox.shrink();
                   }
                   // 确保索引有效，如果无效则使用 0
-                  int validIndex = selectedWebsiteIndex >= dataSource.length
+                  final currentIndex = dataSourceController.selectedWebsiteIndex.value;
+                  int validIndex = currentIndex >= dataSource.length
                       ? 0
-                      : selectedWebsiteIndex;
+                      : currentIndex;
 
                   // 如果索引不匹配，更新索引
-                  if (validIndex != selectedWebsiteIndex) {
+                  if (validIndex != currentIndex) {
                     WidgetsBinding.instance.addPostFrameCallback((_) {
                       if (mounted) {
-                        setState(() {
-                          selectedWebsiteIndex = validIndex;
-                        });
+                        dataSourceController.selectedWebsiteIndex.value = validIndex;
                       }
                     });
                   }
@@ -203,175 +198,180 @@ class _VideoSourceDrawersState extends State<VideoSourceDrawers> {
                     itemCount: dataSource.length,
                     itemBuilder: (context, index) {
                       final data = dataSource[index];
-                      final isSelected = selectedWebsiteIndex == index;
+                      return Obx(() {
+                        final isSelected = dataSourceController.selectedWebsiteIndex.value == index;
 
-                      // final currentEpisodeCount = resource.episodeResources
-                      //     .where((item) => item.episodes.any((ep) =>
-                      //         ep.episodeSort ==
-                      //         episodesController.episodeIndex.value))
-                      //     .length;
+                        // final currentEpisodeCount = resource.episodeResources
+                        //     .where((item) => item.episodes.any((ep) =>
+                        //         ep.episodeSort ==
+                        //         episodesController.episodeIndex.value))
+                        //     .length;
 
-                      return GestureDetector(
-                        onTap: () => setSelectedWebsite(index),
-                        child: Container(
-                          margin: const EdgeInsets.only(right: 12),
-                          padding: const EdgeInsets.all(8),
-                          decoration: BoxDecoration(
-                            color: isSelected
-                                ? Theme.of(context)
-                                    .colorScheme
-                                    .surfaceContainerHighest
-                                : Theme.of(context)
-                                    .colorScheme
-                                    .surfaceContainerHighest,
-                            borderRadius: BorderRadius.circular(12),
-                            border: Border.all(
+                        return GestureDetector(
+                          onTap: () => setSelectedWebsite(index),
+                          child: Container(
+                            margin: const EdgeInsets.only(right: 12),
+                            padding: const EdgeInsets.all(8),
+                            decoration: BoxDecoration(
                               color: isSelected
-                                  ? Theme.of(context).colorScheme.primary
-                                  : Colors.transparent,
-                              width: 2,
+                                  ? Theme.of(context)
+                                      .colorScheme
+                                      .surfaceContainerHighest
+                                  : Theme.of(context)
+                                      .colorScheme
+                                      .surfaceContainerHighest,
+                              borderRadius: BorderRadius.circular(12),
+                              border: Border.all(
+                                color: isSelected
+                                    ? Theme.of(context).colorScheme.primary
+                                    : Colors.transparent,
+                                width: 2,
+                              ),
+                            ),
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                ClipOval(
+                                  child: AnimationNetworkImage(
+                                      width: 24,
+                                      height: 24,
+                                      url: data.websiteIcon),
+                                ),
+                                // 显示解析状态
+                                if (data.isLoading) ...[
+                                  const SizedBox(width: 4),
+                                  SizedBox(
+                                    width: 12,
+                                    height: 12,
+                                    child: CircularProgressIndicator(
+                                      strokeWidth: 2,
+                                      color:
+                                          Theme.of(context).colorScheme.primary,
+                                    ),
+                                  ),
+                                ] else if (data.errorMessage != null) ...[
+                                  const SizedBox(width: 4),
+                                  Icon(
+                                    Icons.error_outline,
+                                    size: 14,
+                                    color: Theme.of(context).colorScheme.error,
+                                  ),
+                                ] else if (data.episodeResources.isNotEmpty) ...[
+                                  const SizedBox(width: 4),
+                                  Icon(
+                                    Icons.check_circle_outline,
+                                    size: 14,
+                                    color: Theme.of(context).colorScheme.primary,
+                                  ),
+                                ],
+                              ],
                             ),
                           ),
-                          child: Row(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              ClipOval(
-                                child: AnimationNetworkImage(
-                                    width: 24,
-                                    height: 24,
-                                    url: data.websiteIcon),
-                              ),
-                              // 显示解析状态
-                              if (data.isLoading) ...[
-                                const SizedBox(width: 4),
-                                SizedBox(
-                                  width: 12,
-                                  height: 12,
-                                  child: CircularProgressIndicator(
-                                    strokeWidth: 2,
-                                    color:
-                                        Theme.of(context).colorScheme.primary,
-                                  ),
-                                ),
-                              ] else if (data.errorMessage != null) ...[
-                                const SizedBox(width: 4),
-                                Icon(
-                                  Icons.error_outline,
-                                  size: 14,
-                                  color: Theme.of(context).colorScheme.error,
-                                ),
-                              ] else if (data.episodeResources.isNotEmpty) ...[
-                                const SizedBox(width: 4),
-                                Icon(
-                                  Icons.check_circle_outline,
-                                  size: 14,
-                                  color: Theme.of(context).colorScheme.primary,
-                                ),
-                              ],
-                            ],
-                          ),
-                        ),
-                      );
+                        );
+                      });
                     })),
           ],
         ));
   }
 
   Widget _buildVideoSource({required List<ResourcesItem> dataSource}) {
-    // 确保索引有效
-    if (selectedWebsiteIndex >= dataSource.length) {
-      return const SizedBox.shrink();
-    }
+    return Obx(() {
+      final selectedIndex = dataSourceController.selectedWebsiteIndex.value;
+      // 确保索引有效
+      if (selectedIndex >= dataSource.length) {
+        return const SizedBox.shrink();
+      }
 
-    final selectedResource = dataSource[selectedWebsiteIndex];
+      final selectedResource = dataSource[selectedIndex];
 
-    return Material(
-      child: ListView.builder(
-        padding: const EdgeInsets.symmetric(vertical: 0),
-        itemCount: selectedResource.episodeResources.length,
-        itemBuilder: (context, index) {
-          final resourceItem = selectedResource.episodeResources[index];
-          final isLastItem =
-              index == selectedResource.episodeResources.length - 1;
+      return Material(
+        child: ListView.builder(
+          padding: const EdgeInsets.symmetric(vertical: 0),
+          itemCount: selectedResource.episodeResources.length,
+          itemBuilder: (context, index) {
+            final resourceItem = selectedResource.episodeResources[index];
+            final isLastItem =
+                index == selectedResource.episodeResources.length - 1;
 
-          return Obx(() {
-            // 当前选中剧集对应的剧集数据
-            final currentEpisode = resourceItem.episodes.firstWhereOrNull(
-              (ep) => ep.episodeSort == episodesController.episodeIndex.value,
-            );
+            return Obx(() {
+              // 当前选中剧集对应的剧集数据
+              final currentEpisode = resourceItem.episodes.firstWhereOrNull(
+                (ep) => ep.episodeSort == episodesController.episodeIndex.value,
+              );
 
-            final excludedEpisodesCount = selectedResource.episodeResources
-                .expand((item) => item.episodes.where((ep) =>
-                    ep.episodeSort != episodesController.episodeIndex.value))
-                .length;
+              final excludedEpisodesCount = selectedResource.episodeResources
+                  .expand((item) => item.episodes.where((ep) =>
+                      ep.episodeSort != episodesController.episodeIndex.value))
+                  .length;
 
-            // 如果当前资源组没有匹配的剧集，不渲染
-            if (currentEpisode == null) {
-              return const SizedBox.shrink();
-            }
+              // 如果当前资源组没有匹配的剧集，不渲染
+              if (currentEpisode == null) {
+                return const SizedBox.shrink();
+              }
 
-            // 只渲染当前选中的剧集
-            return Column(
-              children: [
-                _buildSource(
-                  currentEpisode,
-                  resourceItem,
-                  baseUrl: selectedResource.baseUrl,
-                  websiteName: selectedResource.websiteName,
-                  websiteIcon: selectedResource.websiteIcon,
-                ),
-
-                // 在最后一项后显示开关按钮
-                if (isLastItem) ...[
-                  Padding(
-                    padding: const EdgeInsets.symmetric(vertical: 8),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.end,
-                      children: [
-                        Text(
-                          '显示已被排除的资源($excludedEpisodesCount)',
-                          style: const TextStyle(fontSize: 14),
-                        ),
-                        const SizedBox(width: 8),
-                        Switch(
-                          value: isShowEpisodes,
-                          onChanged: (value) {
-                            setShowEpisodes();
-                          },
-                        ),
-                      ],
-                    ),
+              // 只渲染当前选中的剧集
+              return Column(
+                children: [
+                  _buildSource(
+                    currentEpisode,
+                    resourceItem,
+                    baseUrl: selectedResource.baseUrl,
+                    websiteName: selectedResource.websiteName,
+                    websiteIcon: selectedResource.websiteIcon,
                   ),
 
-                  // 当开关打开时，显示所有资源的所有其他剧集
-                  if (isShowEpisodes)
-                    ...selectedResource.episodeResources.expand((item) {
-                      // 获取该资源的所有非当前集数的剧集
-                      final excludedEpisodes = item.episodes
-                          .where(
-                            (ep) =>
-                                ep.episodeSort !=
-                                episodesController.episodeIndex.value,
-                          )
-                          .toList();
-                      // 遍历所有其他剧集
-                      return excludedEpisodes.map(
-                        (excludedEpisode) => _buildSource(
-                          excludedEpisode,
-                          item,
-                          baseUrl: selectedResource.baseUrl,
-                          websiteName: selectedResource.websiteName,
-                          websiteIcon: selectedResource.websiteIcon,
-                        ),
-                      );
-                    }),
+                  // 在最后一项后显示开关按钮
+                  if (isLastItem) ...[
+                    Padding(
+                      padding: const EdgeInsets.symmetric(vertical: 8),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.end,
+                        children: [
+                          Text(
+                            '显示已被排除的资源($excludedEpisodesCount)',
+                            style: const TextStyle(fontSize: 14),
+                          ),
+                          const SizedBox(width: 8),
+                          Switch(
+                            value: isShowEpisodes,
+                            onChanged: (value) {
+                              setShowEpisodes();
+                            },
+                          ),
+                        ],
+                      ),
+                    ),
+
+                    // 当开关打开时，显示所有资源的所有其他剧集
+                    if (isShowEpisodes)
+                      ...selectedResource.episodeResources.expand((item) {
+                        // 获取该资源的所有非当前集数的剧集
+                        final excludedEpisodes = item.episodes
+                            .where(
+                              (ep) =>
+                                  ep.episodeSort !=
+                                  episodesController.episodeIndex.value,
+                            )
+                            .toList();
+                        // 遍历所有其他剧集
+                        return excludedEpisodes.map(
+                          (excludedEpisode) => _buildSource(
+                            excludedEpisode,
+                            item,
+                            baseUrl: selectedResource.baseUrl,
+                            websiteName: selectedResource.websiteName,
+                            websiteIcon: selectedResource.websiteIcon,
+                          ),
+                        );
+                      }),
+                  ],
                 ],
-              ],
-            );
-          });
-        },
-      ),
-    );
+              );
+            });
+          },
+        ),
+      );
+    });
   }
 
   Widget _buildSource(Episode episode, EpisodeResourcesItem item,

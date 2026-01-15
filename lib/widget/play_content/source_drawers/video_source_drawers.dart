@@ -27,7 +27,6 @@ class _VideoSourceDrawersState extends State<VideoSourceDrawers> {
   final logger = Logger();
   bool isShowEpisodes = false;
   int selectedWebsiteIndex = 0; // 当前选中的网站索引
-  bool _needAutoSelect = false; // 是否需要自动选择第一个有资源的网站
   final _searchController = TextEditingController();
 
   @override
@@ -38,8 +37,6 @@ class _VideoSourceDrawersState extends State<VideoSourceDrawers> {
     episodesController = Get.find<EpisodesState>();
     dataSourceController = Get.find<VideoSourceController>();
     _searchController.text = dataSourceController.keyword.value;
-    // 初始化时标记需要自动选择（在资源加载完成后检查）
-    _needAutoSelect = true;
   }
 
   void setShowEpisodes() {
@@ -55,49 +52,6 @@ class _VideoSourceDrawersState extends State<VideoSourceDrawers> {
     });
   }
 
-  /// 查找第一个有资源的网站索引
-  int _findFirstResourceIndex(List<ResourcesItem> dataSource) {
-    for (int i = 0; i < dataSource.length; i++) {
-      if (dataSource[i].episodeResources.isNotEmpty) {
-        return i;
-      }
-    }
-    return 0;
-  }
-
-  /// 自动加载第一个匹配当前剧集的资源
-  Future<void> _autoLoadFirstResource(ResourcesItem resource) async {
-    // 如果已经有选中的资源，不再自动加载
-    if (dataSourceController.webSiteTitle.value.isNotEmpty) {
-      return;
-    }
-
-    dataSourceController.updateLoading(true);
-    // 遍历资源列表，找到第一个匹配当前剧集的资源
-    for (var resourceItem in resource.episodeResources) {
-      final currentEpisode = resourceItem.episodes.firstWhereOrNull(
-        (ep) => ep.episodeSort == episodesController.episodeIndex.value,
-      );
-      if (currentEpisode != null) {
-        try {
-          dataSourceController.setWebSite(
-            title: resource.websiteName,
-            iconUrl: resource.websiteIcon,
-            videoUrl: resource.baseUrl + currentEpisode.like,
-          );
-          videoStateController.disposeVideo();
-          await _loadVideoPage(resource.baseUrl + currentEpisode.like);
-          dataSourceController.updateLoading(false);
-        } catch (e) {
-          dataSourceController.updateLoading(false);
-          logger.e('自动加载视频源失败', error: e);
-        } finally {
-          dataSourceController.updateLoading(false);
-        }
-        return;
-      }
-    }
-  }
 
   Future<void> _loadVideoPage(String url) async {
     logger.d('加载视频页面: $url');
@@ -115,7 +69,6 @@ class _VideoSourceDrawersState extends State<VideoSourceDrawers> {
       setState(() {
         selectedWebsiteIndex = 0;
         isShowEpisodes = false;
-        _needAutoSelect = true;
       });
       dataSourceController.initResources(searchQuery);
     }
@@ -183,40 +136,8 @@ class _VideoSourceDrawersState extends State<VideoSourceDrawers> {
                       ? 0
                       : selectedWebsiteIndex;
 
-                  // 资源初始化完成后，自动选择第一个有资源的网站
-                  if (_needAutoSelect) {
-                    final firstResourceIndex =
-                        _findFirstResourceIndex(dataSource);
-                    // 只有当找到有资源的网站且还没有选中资源时，才自动选择并加载
-                    final hasResource =
-                        dataSource.any((r) => r.episodeResources.isNotEmpty);
-                    if (hasResource &&
-                        dataSourceController.webSiteTitle.value.isEmpty) {
-                      validIndex = firstResourceIndex;
-                      final selectedResource = dataSource[firstResourceIndex];
-                      WidgetsBinding.instance.addPostFrameCallback((_) {
-                        if (mounted) {
-                          setState(() {
-                            selectedWebsiteIndex = validIndex;
-                            _needAutoSelect = false;
-                          });
-                          // 自动加载第一个匹配的资源
-                          _autoLoadFirstResource(selectedResource);
-                        }
-                      });
-                    } else if (hasResource) {
-                      // 已经有选中的资源，只更新选中索引，不自动加载
-                      validIndex = firstResourceIndex;
-                      WidgetsBinding.instance.addPostFrameCallback((_) {
-                        if (mounted) {
-                          setState(() {
-                            selectedWebsiteIndex = validIndex;
-                            _needAutoSelect = false;
-                          });
-                        }
-                      });
-                    }
-                  } else if (validIndex != selectedWebsiteIndex) {
+                  // 如果索引不匹配，更新索引
+                  if (validIndex != selectedWebsiteIndex) {
                     WidgetsBinding.instance.addPostFrameCallback((_) {
                       if (mounted) {
                         setState(() {

@@ -39,12 +39,14 @@ class VideoSourceController extends GetxController {
   Future<void> initResources(String keyword) async {
     _clearAllResources();
     this.keyword.value = keyword;
+    updateLoading(false); // 开始获取资源，设置为 false
     final configs = await CrawlConfig.loadAllCrawlConfigs();
 
     // 并发执行所有网站的资源获取
     await Future.wait(
       configs.map((config) => _getResources(keyword, config)),
     );
+    updateLoading(true); // 所有资源获取完成，设置为 true
   }
 
   void _clearAllResources() {

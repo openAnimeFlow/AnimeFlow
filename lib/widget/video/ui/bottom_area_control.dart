@@ -2,6 +2,7 @@ import 'package:anime_flow/controllers/play/PlayPageController.dart';
 import 'package:anime_flow/controllers/video/video_state_controller.dart';
 import 'package:anime_flow/controllers/video/video_ui_state_controller.dart';
 import 'package:anime_flow/models/enums/video_controls_icon_type.dart';
+import 'package:anime_flow/widget/play_content/episodes_view.dart';
 import 'package:anime_flow/widget/video/ui/danmaku/danmaku_setting.dart';
 import 'package:anime_flow/widget/video/ui/rate_button.dart';
 import 'package:anime_flow/widget/video/ui/video_ui_components.dart';
@@ -140,6 +141,19 @@ class BottomAreaControl extends StatelessWidget {
                                               videoUiStateController),
                                     ),
                             ),
+                            //选集
+                            TextButton(
+                                onPressed: () {
+                                  Get.generalDialog(
+                                      barrierColor: Colors.black54,
+                                      transitionDuration:
+                                          const Duration(milliseconds: 300),
+                                      pageBuilder: (context, animation,
+                                          secondaryAnimation) {
+                                        return const EpisodesView();
+                                      });
+                                },
+                                child: const Text("选集")),
 
                             //倍速按钮
                             if (isWideScreen || fullscreen)

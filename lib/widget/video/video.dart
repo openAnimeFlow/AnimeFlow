@@ -56,9 +56,6 @@ class _VideoViewState extends State<VideoView> with WindowListener {
   bool _hasReceivedVideoUrl = false;
   Timer? _parseTimeoutTimer;
 
-  // 自动切换下一集相关
-  bool _hasAutoSwitched = false; // 标记是否已经自动切换过，避免重复切换
-
   @override
   void initState() {
     super.initState();
@@ -72,19 +69,18 @@ class _VideoViewState extends State<VideoView> with WindowListener {
     // 初始化屏幕亮度
     videoUiStateController.initializeBrightness();
 
-    // 监听集数变化，当集数改变时重置弹幕加载状态和自动切换标记
+    // 监听集数变化
     ever(episodesState.episodeIndex, (int episode) {
       if (episode > 0) {
         _hasDanmakuLoaded = false;
-        _hasAutoSwitched = false; // 重置自动切换标记
         // 清空之前的弹幕
         playController.removeDanmaku();
       }
     });
 
     // 监听视频播放完成，自动切换到下一集
-    ever(videoStateController.completed, (bool completed) {
-      if (completed && !_hasAutoSwitched) {
+    player.stream.completed.listen((completed) {
+      if (completed) {
         _autoSwitchToNextEpisode();
       }
     });
@@ -263,14 +259,9 @@ class _VideoViewState extends State<VideoView> with WindowListener {
 
   /// 自动切换到下一集
   void _autoSwitchToNextEpisode() {
-    if (_hasAutoSwitched) {
-      return; // 已经切换过，避免重复切换
-    }
-
     try {
       // 检查是否有下一集
       if (episodeController.hasNextEpisode(episodesState)) {
-        _hasAutoSwitched = true;
         episodeController.switchToNextEpisode(episodesState);
       }
     } catch (e) {

@@ -8,7 +8,6 @@ class VideoStateController extends GetxController {
   final RxDouble volume = 100.0.obs; //音量 0-100
   final RxBool isVerticalDragging = false.obs; //是否正在垂直拖动调整音量
   final RxDouble rate = 1.0.obs;
-  final RxBool completed = false.obs;
 
   //记录原始倍速
   double _originalSpeed = 1.0;
@@ -42,13 +41,6 @@ class VideoStateController extends GetxController {
     // 监听播放器位置变化
     player.stream.position.listen((pos) {
       position.value = pos;
-    });
-
-    // 监听播放完成
-    player.stream.completed.listen((completed) {
-      if (completed) {
-        this.completed.value = completed;
-      }
     });
   }
 

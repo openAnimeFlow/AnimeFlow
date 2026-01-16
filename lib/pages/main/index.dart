@@ -5,9 +5,11 @@ import 'package:anime_flow/pages/ranking/index.dart';
 import 'package:anime_flow/routes/index.dart';
 import 'package:anime_flow/stores/user_info_store.dart';
 import 'package:anime_flow/utils/crawl_config.dart';
+import 'package:anime_flow/utils/utils.dart';
 import 'package:anime_flow/widget/animation_network_image/animation_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:anime_flow/pages/recommend/index.dart';
+import 'package:flutter_inappwebview_platform_interface/flutter_inappwebview_platform_interface.dart';
 import 'package:get/get.dart';
 
 class MainPage extends StatefulWidget {
@@ -19,6 +21,7 @@ class MainPage extends StatefulWidget {
 
 class _MainPageState extends State<MainPage> {
   late UserInfoStore userInfoStore;
+  late MainPageState mainPageState;
 
   // 使用 GlobalKey 保持 IndexedStack 的状态，防止在布局切换（Row <-> Column）时页面重构
   final GlobalKey _bodyKey = GlobalKey();
@@ -66,6 +69,7 @@ class _MainPageState extends State<MainPage> {
   void initState() {
     super.initState();
     userInfoStore = Get.put(UserInfoStore());
+    mainPageState = Get.put(MainPageState());
     CrawlConfig.initCrawlConfigs();
 
     // 从参数中获取初始 index，默认为 0
@@ -75,7 +79,6 @@ class _MainPageState extends State<MainPage> {
     // 初始化对应的页面
     _initializePage(_currentIndex);
   }
-
 
   // 构建 NavigationRail
   List<NavigationRailDestination> _buildRailDestinations(
@@ -180,14 +183,16 @@ class _MainPageState extends State<MainPage> {
   @override
   void dispose() {
     Get.delete<UserInfoStore>();
+    Get.delete<MainPageState>();
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
-    // 使用 MediaQuery 获取宽度，判断是否为桌面端（宽屏）
     final bool isDesktop = MediaQuery.of(context).size.width >= 640;
     final colorScheme = Theme.of(context).colorScheme;
+    mainPageState.changeIsDesktop(isDesktop);
+    final desktop = Utils.isDesktop;
     return Scaffold(
       body: Row(
         children: [
@@ -214,7 +219,8 @@ class _MainPageState extends State<MainPage> {
                 // 底部设置按钮
                 trailing: Padding(
                   padding: EdgeInsets.only(
-                      bottom: MediaQuery.of(context).padding.bottom + 5),
+                      bottom:
+                          desktop ? 16 : MediaQuery.of(context).padding.bottom),
                   child: IconButton(
                     icon: const Icon(Icons.settings_outlined),
                     iconSize: 28,

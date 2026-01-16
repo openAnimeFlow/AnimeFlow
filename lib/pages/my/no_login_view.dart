@@ -1,6 +1,8 @@
+import 'package:anime_flow/controllers/main_page/main_page_state.dart';
 import 'package:anime_flow/routes/index.dart';
 import 'package:anime_flow/widget/animation_network_image/animation_network_image.dart';
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 
 import 'my_controller.dart';
 
@@ -13,6 +15,13 @@ class NoLoginView extends StatefulWidget {
 
 class _NoNoLoginView extends State<NoLoginView> {
   bool _isAuthorizing = false;
+  late MainPageState mainPageState;
+
+  @override
+  void initState() {
+    super.initState();
+    mainPageState = Get.find<MainPageState>();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -23,10 +32,18 @@ class _NoNoLoginView extends State<NoLoginView> {
           child: Row(
             children: [
               const Spacer(),
-              IconButton(
-                  onPressed: () =>
-                      Navigator.of(context).pushNamed(RouteName.settings),
-                  icon: const Icon(Icons.settings_outlined,size: 30,))
+              Obx(
+                () => mainPageState.isDesktop.value
+                    ? const SizedBox.shrink()
+                    : IconButton(
+                        onPressed: () =>
+                            Get.toNamed(RouteName.settings),
+                        icon: const Icon(
+                          Icons.settings_outlined,
+                          size: 30,
+                        ),
+                      ),
+              )
             ],
           ),
         ),

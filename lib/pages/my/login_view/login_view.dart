@@ -1,5 +1,6 @@
 import 'dart:ui';
 
+import 'package:anime_flow/controllers/main_page/main_page_state.dart';
 import 'package:anime_flow/routes/index.dart';
 import 'package:anime_flow/widget/animation_network_image/animation_network_image.dart';
 import 'package:anime_flow/http/requests/bgm_request.dart';
@@ -25,8 +26,9 @@ class _LoginViewState extends State<LoginView>
     with SingleTickerProviderStateMixin {
   final double _contentHeight = 200.0; // 头部内容区域的高度
   late TabController _tabController;
-  bool isPinned = false;
   late UserInfoStore userInfoStore;
+  late MainPageState mainPageState;
+  bool isPinned = false;
 
   // 为每个 tab 类型缓存数据，key 是 type (1-5)
   final Map<int, CollectionsItem?> _collectionsCache = {};
@@ -58,7 +60,8 @@ class _LoginViewState extends State<LoginView>
     ];
   }
 
-  Future<void> _getCollections(int type, {bool loadMore = false, bool refresh = false}) async {
+  Future<void> _getCollections(int type,
+      {bool loadMore = false, bool refresh = false}) async {
     // 如果是刷新，允许重新加载
     if (!refresh) {
       // 如果正在加载，则不再加载
@@ -118,7 +121,7 @@ class _LoginViewState extends State<LoginView>
     super.initState();
     _tabController = TabController(length: _tabs.length, vsync: this);
     userInfoStore = Get.find<UserInfoStore>();
-
+    mainPageState = Get.find<MainPageState>();
     // 监听 tab 切换，自动加载对应类型的数据（如果缓存中没有）
     _tabController.addListener(() {
       if (!_tabController.indexIsChanging) {
@@ -262,13 +265,18 @@ class _LoginViewState extends State<LoginView>
                 ),
               ),
             ),
-            IconButton(
-                onPressed: () {
-                  setState(() {
-                    Navigator.of(context).pushNamed(RouteName.settings);
-                  });
-                },
-                icon: const Icon(Icons.settings_outlined))
+            Obx(
+              () => mainPageState.isDesktop.value
+                  ? const SizedBox.shrink()
+                  : IconButton(
+                      onPressed: () {
+                        setState(
+                          () => Get.toNamed(RouteName.settings),
+                        );
+                      },
+                      icon: const Icon(Icons.settings_outlined),
+                    ),
+            ),
           ],
         ));
   }
@@ -316,8 +324,7 @@ class _LoginViewState extends State<LoginView>
                     imageFilter: ImageFilter.blur(
                         sigmaX: bio != null ? 0 : 15,
                         sigmaY: bio != null ? 0 : 15),
-                    child:
-                    ShaderMask(
+                    child: ShaderMask(
                       shaderCallback: (Rect bounds) {
                         return const LinearGradient(
                           begin: Alignment.topCenter,
@@ -326,8 +333,7 @@ class _LoginViewState extends State<LoginView>
                           stops: [0.9, 1],
                         ).createShader(bounds);
                       },
-                      child:
-                      bio != null
+                      child: bio != null
                           ? BBCodeWidget(
                               bbcode: userInfo.bio ?? '',
                               fit: BoxFit.cover,

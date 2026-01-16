@@ -5,7 +5,9 @@ import 'package:get/get.dart';
 
 /// 评价对话框
 class EvaluateDialog extends StatefulWidget {
-  const EvaluateDialog({super.key});
+  final String storeTag;
+
+  const EvaluateDialog({super.key, required this.storeTag});
 
   @override
   State<EvaluateDialog> createState() => _EvaluateDialogState();
@@ -22,7 +24,7 @@ class _EvaluateDialogState extends State<EvaluateDialog> {
   @override
   void initState() {
     super.initState();
-    animeInfoStore = Get.find<AnimeInfoStore>();
+    animeInfoStore = Get.find<AnimeInfoStore>(tag: widget.storeTag);
     // 初始化已有数据
     final interest = animeInfoStore.animeInfo.value!.interest;
     if (interest != null) {

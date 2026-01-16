@@ -28,13 +28,16 @@ class _AnimeDetailPageState extends State<AnimeDetailPage> {
   bool topButton = false;
   final _nestedScrollController = ScrollController();
 
+  late String _storeTag;
+
   @override
   void initState() {
     super.initState();
     subjectBasicData = Get.arguments;
+    _storeTag = 'anime_info_${subjectBasicData.id}';
     _getSubjects();
     userInfoStore = Get.find<UserInfoStore>();
-    animeInfoStore = Get.put(AnimeInfoStore());
+    animeInfoStore = Get.put(AnimeInfoStore(), tag: _storeTag);
   }
 
   void _getSubjects() async {
@@ -49,7 +52,7 @@ class _AnimeDetailPageState extends State<AnimeDetailPage> {
   @override
   void dispose() {
     _nestedScrollController.dispose();
-    Get.delete<AnimeInfoStore>();
+    Get.delete<AnimeInfoStore>(tag: _storeTag);
     super.dispose();
   }
 
@@ -109,6 +112,7 @@ class _AnimeDetailPageState extends State<AnimeDetailPage> {
                         statusBarHeight: statusBarHeight,
                         contentHeight: _contentHeight,
                         subjectBasicData: subjectBasicData,
+                        storeTag: _storeTag,
                       ),
                     ),
                   ),
@@ -160,7 +164,8 @@ class _AnimeDetailPageState extends State<AnimeDetailPage> {
                 ? FloatingActionButton(
                     onPressed: () {
                       Get.dialog(
-                          barrierDismissible: false, const EvaluateDialog());
+                          barrierDismissible: false,
+                          EvaluateDialog(storeTag: _storeTag));
                     },
                     child: Icon(
                       Icons.messenger,

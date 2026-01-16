@@ -16,17 +16,19 @@ class InfoHeadView extends StatelessWidget {
   final SubjectBasicData subjectBasicData;
   final double statusBarHeight;
   final double contentHeight;
+  final String storeTag;
 
   const InfoHeadView({
     super.key,
     required this.statusBarHeight,
     required this.contentHeight,
     required this.subjectBasicData,
+    required this.storeTag,
   });
 
   @override
   Widget build(BuildContext context) {
-    final animeInfoStore = Get.find<AnimeInfoStore>();
+    final animeInfoStore = Get.find<AnimeInfoStore>(tag: storeTag);
     final themeColor = Theme.of(context).colorScheme.primary;
     return Stack(
       children: [
@@ -197,7 +199,7 @@ class InfoHeadView extends StatelessWidget {
 
   ///数据视图
   Widget _dataView(BuildContext context, {required Color themeColor}) {
-    final animeInfoStore = Get.find<AnimeInfoStore>();
+    final animeInfoStore = Get.find<AnimeInfoStore>(tag: storeTag);
     const double fontSize = 12;
     const FontWeight fontWeight = FontWeight.w600;
     const amberAccent = Colors.amberAccent;

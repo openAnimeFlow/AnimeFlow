@@ -13,8 +13,6 @@ class VideoUiStateController extends GetxController {
   final Rx<Duration> position = Duration.zero.obs;
   final Rx<Duration> duration = Duration.zero.obs;
   final Rx<Duration> buffer = Duration.zero.obs;
-  final RxBool _isBuffering = false.obs; // 是否正在缓冲
-  final RxDouble networkSpeed = 0.0.obs; // 网络速率 (MB/s)
   final RxBool isDragging = false.obs; // 是否正在拖拽进度条
   final RxBool isShowControlsUi = true.obs; //是否显示控件ui
   final RxBool isHorizontalDragging = false.obs; // 是否正在水平拖动
@@ -29,11 +27,6 @@ class VideoUiStateController extends GetxController {
   // 拖动相关
   double _dragStartX = 0;
   Duration _dragStartPosition = Duration.zero;
-
-  // 网速计算相关
-  Duration _lastBufferPosition = Duration.zero;
-  DateTime _lastBufferTime = DateTime.now();
-  static const double _estimatedBitrateMBps = 2.0; // 假设平均比特率 2 MB/s
 
   //指示器计时器
   Timer? _indicatorTimer;
@@ -76,7 +69,6 @@ class VideoUiStateController extends GetxController {
     // 监听缓冲进度
     player.stream.buffer.listen((buf) {
       buffer.value = buf;
-      _calculateNetworkSpeed(buf);
     });
 
     // 监听缓冲状态
@@ -99,37 +91,6 @@ class VideoUiStateController extends GetxController {
     //     }
     //   }
     // });
-  }
-
-  // 计算网络速率 (MB/s)
-  void _calculateNetworkSpeed(Duration currentBuffer) {
-    final now = DateTime.now();
-    final timeDiffMs = now.difference(_lastBufferTime).inMilliseconds;
-
-    // 每500毫秒更新一次网速
-    if (timeDiffMs >= 500 && _isBuffering.value) {
-      final bufferDiffMs =
-          currentBuffer.inMilliseconds - _lastBufferPosition.inMilliseconds;
-
-      if (bufferDiffMs > 0 && timeDiffMs > 0) {
-        // 计算缓冲速度倍率（缓冲进度增长 / 实际时间）
-        final bufferSpeedMultiplier = bufferDiffMs / timeDiffMs;
-
-        // 根据估计的比特率计算实际网速 (MB/s)
-        // 网速 = 比特率 × 缓冲速度倍率
-        networkSpeed.value = _estimatedBitrateMBps * bufferSpeedMultiplier;
-      }
-
-      _lastBufferPosition = currentBuffer;
-      _lastBufferTime = now;
-    }
-  }
-
-  // 重置网速计算
-  void _resetNetworkSpeed() {
-    _lastBufferPosition = buffer.value;
-    _lastBufferTime = DateTime.now();
-    networkSpeed.value = 0.0;
   }
 
   //设置解析标题

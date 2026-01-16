@@ -32,7 +32,7 @@ class _VideoViewState extends State<VideoView> with WindowListener {
   late final player = Player();
   late final controller = VideoController(player);
   late VideoUiStateController videoUiStateController;
-  late VideoSourceController dataSourceController;
+  late VideoSourceController videoSourceController;
   late PlayController playController;
   late EpisodesState episodesState;
   late EpisodeController episodeController;
@@ -56,11 +56,14 @@ class _VideoViewState extends State<VideoView> with WindowListener {
   bool _hasReceivedVideoUrl = false;
   Timer? _parseTimeoutTimer;
 
+  //剧集相关
+  int _lastEpisodeIndex = 0;
+
   @override
   void initState() {
     super.initState();
     videoStateController = Get.put(VideoStateController(player));
-    dataSourceController = Get.find<VideoSourceController>();
+    videoSourceController = Get.find<VideoSourceController>();
     videoUiStateController = Get.put(VideoUiStateController(player));
     playController = Get.find<PlayController>();
     episodesState = Get.find<EpisodesState>();
@@ -75,6 +78,10 @@ class _VideoViewState extends State<VideoView> with WindowListener {
         _hasDanmakuLoaded = false;
         // 清空之前的弹幕
         playController.removeDanmaku();
+        if(episode != _lastEpisodeIndex) {
+          final resources =  videoSourceController.videoResources.toList();
+          videoSourceController.autoSelectFirstResource(resources, force: true);
+        }
       }
     });
 
@@ -263,6 +270,7 @@ class _VideoViewState extends State<VideoView> with WindowListener {
       // 检查是否有下一集
       if (episodeController.hasNextEpisode(episodesState)) {
         episodeController.switchToNextEpisode(episodesState);
+        _lastEpisodeIndex = episodesState.episodeIndex.value;
       }
     } catch (e) {
       logger.e('自动切换到下一集失败: $e');

@@ -34,7 +34,6 @@ class VideoSourceController extends GetxController {
     super.onInit();
     await _initVideoResources();
     _initControllers();
-    _setupAutoSelectListeners();
   }
 
   @override
@@ -57,11 +56,11 @@ class VideoSourceController extends GetxController {
       if (isLoading) {
         // 当 isLoading 变为 true 时，说明所有网站的资源获取完成
         final resources = videoResources.toList();
-        _autoSelectFirstResource(resources);
+        autoSelectFirstResource(resources);
       }
     });
 
-    // 监听 episodeIndex 变化，当剧集索引变化时重新自动选择并加载视频
+    // 监听 episodeIndex 变化
     _episodeIndexWorker = ever(_episodesState.episodeIndex, (int newIndex) {
       if (newIndex != _lastEpisodeIndex && newIndex > 0) {
         _lastEpisodeIndex = newIndex;
@@ -70,7 +69,7 @@ class VideoSourceController extends GetxController {
         // 如果资源已经加载完成，强制重新自动选择
         if (isLoading.value) {
           final resources = videoResources.toList();
-          _autoSelectFirstResource(resources, force: true);
+          autoSelectFirstResource(resources, force: true);
         }
       }
     });
@@ -204,7 +203,7 @@ class VideoSourceController extends GetxController {
 
   /// 自动选择第一个有资源的网站并加载视频
   /// [force] 是否强制重新选择，即使已经有选中的资源
-  void _autoSelectFirstResource(List<ResourcesItem> resources, {bool force = false}) {
+  void autoSelectFirstResource(List<ResourcesItem> resources, {bool force = false}) {
     // 如果已经自动选择过，且不是强制重新选择，或者已经有选中的资源且不是强制重新选择，不再自动选择
     if (!force && (_hasAutoSelected || webSiteTitle.value.isNotEmpty)) {
       return;

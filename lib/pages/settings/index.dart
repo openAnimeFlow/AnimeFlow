@@ -155,48 +155,55 @@ class _SettingsPageState extends State<SettingsPage> {
                                           _allMenuItems.indexOf(item);
                                       final isSelected =
                                           globalIndex == _selectedIndex;
-                                      return InkWell(
-                                        onTap: () {
-                                          setState(() {
-                                            _selectedIndex = globalIndex;
-                                          });
-                                        },
-                                        child: Container(
-                                          margin: const EdgeInsets.symmetric(
-                                              vertical: 3, horizontal: 5),
-                                          padding: const EdgeInsets.symmetric(
-                                              vertical: 12, horizontal: 16),
-                                          decoration: BoxDecoration(
-                                            borderRadius:
-                                                BorderRadius.circular(50),
-                                            color: isSelected
-                                                ? Theme.of(context)
-                                                    .colorScheme
-                                                    .primaryContainer
-                                                : null,
-                                          ),
-                                          child: Row(
-                                            children: [
-                                              Icon(
-                                                item.icon,
-                                                color: isSelected
-                                                    ? Theme.of(context)
-                                                        .colorScheme
-                                                        .onPrimaryContainer
-                                                    : null,
-                                              ),
-                                              const SizedBox(width: 12),
-                                              Text(
-                                                item.title,
-                                                style: TextStyle(
+                                      return Material(
+                                        color: Colors.transparent,
+                                        child: InkWell(
+                                          onTap: () {
+                                            setState(() {
+                                              _selectedIndex = globalIndex;
+                                            });
+                                          },
+                                          borderRadius:
+                                              BorderRadius.circular(50),
+                                          child: AnimatedContainer(
+                                            duration:
+                                                const Duration(milliseconds: 300),
+                                            margin: const EdgeInsets.symmetric(
+                                                vertical: 3, horizontal: 3),
+                                            padding: const EdgeInsets.symmetric(
+                                                vertical: 12, horizontal: 12),
+                                            decoration: BoxDecoration(
+                                              borderRadius:
+                                                  BorderRadius.circular(50),
+                                              color: isSelected
+                                                  ? Theme.of(context)
+                                                      .colorScheme
+                                                      .primaryContainer
+                                                  : null,
+                                            ),
+                                            child: Row(
+                                              children: [
+                                                Icon(
+                                                  item.icon,
                                                   color: isSelected
                                                       ? Theme.of(context)
                                                           .colorScheme
                                                           .onPrimaryContainer
                                                       : null,
                                                 ),
-                                              ),
-                                            ],
+                                                const SizedBox(width: 12),
+                                                Text(
+                                                  item.title,
+                                                  style: TextStyle(
+                                                    color: isSelected
+                                                        ? Theme.of(context)
+                                                            .colorScheme
+                                                            .onPrimaryContainer
+                                                        : null,
+                                                  ),
+                                                ),
+                                              ],
+                                            ),
                                           ),
                                         ),
                                       );

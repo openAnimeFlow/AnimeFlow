@@ -10,7 +10,7 @@ class SubjectsInfoItem {
   final List<String> metaTags;
   final bool locked;
   final String name;
-  final String nameCN;
+  final String? nameCN;
   final bool nsfw;
   final Platform platform;
   final Rating rating;
@@ -34,7 +34,7 @@ class SubjectsInfoItem {
     required this.metaTags,
     required this.locked,
     required this.name,
-    required this.nameCN,
+    this.nameCN,
     required this.nsfw,
     required this.platform,
     required this.rating,
@@ -61,7 +61,7 @@ class SubjectsInfoItem {
         metaTags = List<String>.from(json['metaTags']),
         locked = json['locked'],
         name = json['name'],
-        nameCN = json['nameCN'],
+        nameCN = json['nameCN'] as String?,
         nsfw = json['nsfw'],
         platform = Platform.fromJson(json['platform']),
         rating = Rating.fromJson(json['rating']),
@@ -88,7 +88,7 @@ class SubjectsInfoItem {
       'metaTags': metaTags,
       'locked': locked,
       'name': name,
-      'nameCN': nameCN,
+      if (nameCN != null) 'nameCN': nameCN,
       'nsfw': nsfw,
       'platform': platform.toJson(),
       'rating': rating.toJson(),

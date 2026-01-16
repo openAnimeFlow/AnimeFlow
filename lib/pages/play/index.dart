@@ -43,10 +43,9 @@ class _PlayPageState extends State<PlayPage> {
     subjectState = Get.put(SubjectState());
     Get.put<WebviewItemController>(
         WebviewItemControllerFactory.getController());
-    var args = Get.arguments;
-    subjectsInfo = args['subjectsInfo'] as SubjectsInfoItem;
+    subjectsInfo = Get.arguments as SubjectsInfoItem;
     subjectState.setSubject(
-        subjectsInfo.nameCN.isEmpty ? subjectsInfo.name : subjectsInfo.nameCN,
+        subjectsInfo.nameCN??subjectsInfo.name,
         subjectsInfo.id,
         subjectsInfo.tags);
     _initEpisodes();

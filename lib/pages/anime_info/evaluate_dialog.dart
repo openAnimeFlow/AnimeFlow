@@ -3,8 +3,8 @@ import 'package:anime_flow/stores/anime_info_store.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
+/// 评价对话框
 class EvaluateDialog extends StatefulWidget {
-
   const EvaluateDialog({super.key});
 
   @override
@@ -65,7 +65,7 @@ class _EvaluateDialogState extends State<EvaluateDialog> {
           currentAnimeInfo.interest!.tags = tags;
         }
       }
-      
+
       await UserRequest.updateCollectionService(
         currentAnimeInfo.id,
         rate: rate,
@@ -97,7 +97,7 @@ class _EvaluateDialogState extends State<EvaluateDialog> {
     final theme = Theme.of(context);
     final primaryColor = theme.colorScheme.primary;
     final animeInfo = animeInfoStore.animeInfo.value!;
-    return  Dialog(
+    return Dialog(
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(20),
       ),
@@ -116,9 +116,7 @@ class _EvaluateDialogState extends State<EvaluateDialog> {
                 children: [
                   Expanded(
                     child: Text(
-                      animeInfo.nameCN.isNotEmpty
-                          ? animeInfo.nameCN
-                          : animeInfo.name,
+                      animeInfo.nameCN ?? animeInfo.name,
                       style: const TextStyle(
                         fontSize: 18,
                         fontWeight: FontWeight.bold,
@@ -242,7 +240,7 @@ class _EvaluateDialogState extends State<EvaluateDialog> {
                                   ),
                                 )
                               : const Text(
-                                  '保存评价',
+                                  '发表评价',
                                   style: TextStyle(
                                     fontSize: 16,
                                     fontWeight: FontWeight.w600,

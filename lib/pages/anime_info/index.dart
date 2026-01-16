@@ -171,11 +171,8 @@ class _AnimeDetailPageState extends State<AnimeDetailPage> {
             if (subjectsInfo != null) ...[
               const SizedBox(height: 5),
               FloatingActionButton(
-                onPressed: () {
-                  Get.toNamed(RouteName.play, arguments: {
-                    'subjectsInfo': subjectsInfo,
-                  });
-                },
+                onPressed: () =>
+                    Get.toNamed(RouteName.play, arguments: subjectsInfo),
                 child: Icon(
                   Icons.play_arrow_rounded,
                   color: Theme.of(context).colorScheme.primary,

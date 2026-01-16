@@ -1,4 +1,5 @@
 import 'package:anime_flow/controllers/play/episode_controller.dart';
+import 'package:anime_flow/http/requests/bgm_request.dart';
 import 'package:anime_flow/stores/subject_state.dart';
 import 'package:anime_flow/models/item/bangumi/subjects_info_item.dart';
 import 'package:anime_flow/models/item/subject_basic_data_item.dart';
@@ -12,6 +13,7 @@ import 'package:anime_flow/utils/utils.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:get/get.dart';
+import 'package:logger/logger.dart';
 
 import 'content/index.dart';
 
@@ -25,27 +27,61 @@ class PlayPage extends StatefulWidget {
 class _PlayPageState extends State<PlayPage> {
   late SubjectsInfoItem subjectsInfo;
   late SubjectBasicData subjectBasicData;
-  late SubjectState subjectStateController;
+  late SubjectState subjectState;
   late PlayController playController;
+  late EpisodesState episodesState;
   final GlobalKey _videoKey = GlobalKey();
   final GlobalKey _contentKey = GlobalKey();
 
   @override
   void initState() {
     super.initState();
-    playController = Get.put(PlayController());
     Get.put(VideoSourceController());
-    Get.put(EpisodesState());
     Get.put(EpisodeController());
-    subjectStateController = Get.put(SubjectState());
+    playController = Get.put(PlayController());
+    episodesState = Get.put(EpisodesState());
+    subjectState = Get.put(SubjectState());
     Get.put<WebviewItemController>(
         WebviewItemControllerFactory.getController());
     var args = Get.arguments;
     subjectsInfo = args['subjectsInfo'] as SubjectsInfoItem;
-    subjectStateController.setSubject(
+    subjectState.setSubject(
         subjectsInfo.nameCN.isEmpty ? subjectsInfo.name : subjectsInfo.nameCN,
         subjectsInfo.id,
         subjectsInfo.tags);
+    _initEpisodes();
+  }
+
+  void _initEpisodes() async {
+    if (episodesState.episodes.value != null) return;
+    try {
+      if (!episodesState.isLoading.value) {
+        episodesState.isLoading.value = true;
+      }
+      final episodes = await BgmRequest.getSubjectEpisodesByIdService(
+          subjectState.id, 100, 0);
+      episodesState.episodes.value = episodes;
+      episodesState.isLoading.value = false;
+
+      if (episodesState.episodeSort.value == 0 && episodes.data.isNotEmpty) {
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          if (mounted) {
+            final firstEpisode = episodes.data.first;
+            episodesState.setEpisodeSort(
+                sort: firstEpisode.sort,
+                episodeIndex: 1,
+                episodeId: firstEpisode.id);
+            episodesState
+                .setEpisodeTitle(firstEpisode.nameCN ?? firstEpisode.name);
+          }
+        });
+      }
+    } catch (e) {
+      Logger().e(e);
+      if (episodesState.isLoading.value) {
+        episodesState.isLoading.value = false;
+      }
+    }
   }
 
   @override
@@ -139,7 +175,6 @@ class _PlayPageState extends State<PlayPage> {
             child: content,
           );
         }
-
         return content;
       });
     });

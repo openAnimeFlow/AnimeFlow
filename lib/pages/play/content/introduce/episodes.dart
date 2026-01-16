@@ -87,44 +87,22 @@ class EpisodesComponentsState extends State<EpisodesComponents> {
 
   Widget _scrollTheCardHorizontally() {
     final Logger logger = Logger();
-
-    if (isLoading) {
-      return const CircularProgressIndicator();
-    } else {
-      return Obx(
-        () {
-          final episodesData = episodesState.episodes.value;
-          if (episodesData == null) {
-            return const Text('暂无章节数据');
-          }
-
-          final episodeList = episodesData.data;
-          if (episodeList.isEmpty) {
-            return const Text('暂无章节数据');
-          }
-
-          // TODO 暂时默认选择第一集
-          if (episodesState.episodeSort.value == 0 && episodeList.isNotEmpty) {
-            WidgetsBinding.instance.addPostFrameCallback((_) {
-              if (mounted) {
-                final firstEpisode = episodeList.first;
-                episodesState.setEpisodeSort(
-                    sort: firstEpisode.sort,
-                    episodeIndex: 1,
-                    episodeId: firstEpisode.id);
-                episodesState
-                    .setEpisodeTitle(firstEpisode.nameCN ?? firstEpisode.name);
-              }
-            });
-          }
-
+    return Obx(() {
+      if (episodesState.isLoading.value) {
+        return const CircularProgressIndicator();
+      } else {
+        final episodesItem = episodesState.episodes.value;
+        if (episodesItem == null || episodesItem.data.isEmpty) {
+          return const Text('暂无章节数据');
+        } else {
+          final episodes = episodesItem.data;
           return SingleChildScrollView(
             scrollDirection: Axis.horizontal,
             child: Row(
               children: List.generate(
-                episodeList.length,
+                episodes.length,
                 (index) {
-                  final episode = episodeList[index];
+                  final episode = episodes[index];
                   return Obx(() => Card(
                       elevation: 0,
                       color: episodesState.episodeSort.value == episode.sort
@@ -163,9 +141,9 @@ class EpisodesComponentsState extends State<EpisodesComponents> {
               ),
             ),
           );
-        },
-      );
-    }
+        }
+      }
+    });
   }
 
   /// 底部抽屉

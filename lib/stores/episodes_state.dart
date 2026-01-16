@@ -7,6 +7,7 @@ class EpisodesState extends GetxController {
   final RxDouble episodeSort = 0.0.obs;
   final RxInt episodeIndex = 0.obs;
   final RxInt episodeId = 0.obs;
+  final RxBool isLoading = false.obs;
 
   void setEpisodeTitle(String title) {
     episodeTitle.value = title;

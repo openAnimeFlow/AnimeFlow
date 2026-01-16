@@ -43,7 +43,7 @@ class EpisodeController extends GetxController{
     // 数组索引是 nextEpisodeIndex - 1（因为 episodeIndex 从1开始）
     final nextEpisode = episodesData.data[nextEpisodeIndex - 1];
 
-    // 切换到下一集
+    // 修改剧集状态
     episodesState.setEpisodeSort(
       episodeId: nextEpisode.id,
       episodeIndex: nextEpisodeIndex,

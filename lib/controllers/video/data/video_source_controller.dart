@@ -25,7 +25,6 @@ class VideoSourceController extends GetxController {
   final Logger _logger = Logger();
 
   bool _hasAutoSelected = false; // 标记是否已经自动选择过
-  int _lastEpisodeIndex = 0; // 记录上一次的剧集索引
   Worker? _isLoadingWorker;
   Worker? _episodeIndexWorker;
 
@@ -47,33 +46,32 @@ class VideoSourceController extends GetxController {
     _episodesState = Get.find<EpisodesState>();
     _videoStateController = Get.find<VideoStateController>();
     _webviewItemController = Get.find<WebviewItemController>();
-    _lastEpisodeIndex = _episodesState.episodeIndex.value;
   }
 
-  void _setupAutoSelectListeners() {
-    // 监听 isLoading 变化，当所有资源获取完成时（isLoading == true）自动选择第一个有资源的网站
-    _isLoadingWorker = ever(isLoading, (bool isLoading) {
-      if (isLoading) {
-        // 当 isLoading 变为 true 时，说明所有网站的资源获取完成
-        final resources = videoResources.toList();
-        autoSelectFirstResource(resources);
-      }
-    });
-
-    // 监听 episodeIndex 变化
-    _episodeIndexWorker = ever(_episodesState.episodeIndex, (int newIndex) {
-      if (newIndex != _lastEpisodeIndex && newIndex > 0) {
-        _lastEpisodeIndex = newIndex;
-        // 重置自动选择标志，允许重新自动选择
-        _hasAutoSelected = false;
-        // 如果资源已经加载完成，强制重新自动选择
-        if (isLoading.value) {
-          final resources = videoResources.toList();
-          autoSelectFirstResource(resources, force: true);
-        }
-      }
-    });
-  }
+  // void _setupAutoSelectListeners() {
+  //   // 监听 isLoading 变化，当所有资源获取完成时（isLoading == true）自动选择第一个有资源的网站
+  //   _isLoadingWorker = ever(isLoading, (bool isLoading) {
+  //     if (isLoading) {
+  //       // 当 isLoading 变为 true 时，说明所有网站的资源获取完成
+  //       final resources = videoResources.toList();
+  //       autoSelectFirstResource(resources);
+  //     }
+  //   });
+  //
+  //   // 监听 episodeIndex 变化
+  //   _episodeIndexWorker = ever(_episodesState.episodeIndex, (int newIndex) {
+  //     if (newIndex != _lastEpisodeIndex && newIndex > 0) {
+  //       _lastEpisodeIndex = newIndex;
+  //       // 重置自动选择标志，允许重新自动选择
+  //       _hasAutoSelected = false;
+  //       // 如果资源已经加载完成，强制重新自动选择
+  //       if (isLoading.value) {
+  //         final resources = videoResources.toList();
+  //         autoSelectFirstResource(resources, force: true);
+  //       }
+  //     }
+  //   });
+  // }
 
   //初始化
   Future<void> _initVideoResources() async {

@@ -3,9 +3,9 @@ import 'dart:math';
 
 import 'package:anime_flow/constants/constants.dart';
 import 'package:anime_flow/models/item/crawler_config_item.dart';
-import 'package:anime_flow/models/item/video/episode_resources_item.dart';
-import 'package:anime_flow/models/item/video/search_resources_item.dart';
 import 'package:anime_flow/http/dio/dio_request.dart';
+import 'package:anime_flow/models/item/play/video/episode_resources_item.dart';
+import 'package:anime_flow/models/item/play/video/search_resources_item.dart';
 import 'package:dio/dio.dart';
 import 'package:html/parser.dart';
 import 'package:html/dom.dart';

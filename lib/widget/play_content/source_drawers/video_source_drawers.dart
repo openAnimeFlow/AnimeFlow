@@ -1,10 +1,10 @@
+import 'package:anime_flow/models/item/play/video/episode_resources_item.dart';
+import 'package:anime_flow/models/item/play/video/resources_item.dart';
 import 'package:anime_flow/widget/animation_network_image/animation_network_image.dart';
 import 'package:anime_flow/constants/play_layout_constant.dart';
 import 'package:anime_flow/stores/episodes_state.dart';
 import 'package:anime_flow/controllers/video/data/video_source_controller.dart';
 import 'package:anime_flow/controllers/video/video_state_controller.dart';
-import 'package:anime_flow/models/item/video/episode_resources_item.dart';
-import 'package:anime_flow/models/item/video/resources_item.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:logger/logger.dart';
@@ -103,7 +103,7 @@ class _VideoSourceDrawersState extends State<VideoSourceDrawers> {
               _manualSearch(),
               const SizedBox(height: 16),
               Obx(() {
-                final dataSource = dataSourceController.videoResources.value;
+                final dataSource = dataSourceController.videoResources.toList();
                 if (dataSource.isEmpty) {
                   return const SizedBox.shrink();
                 }
@@ -112,7 +112,7 @@ class _VideoSourceDrawersState extends State<VideoSourceDrawers> {
               const SizedBox(height: 16),
               Expanded(
                 child: Obx(() {
-                  final dataSource = dataSourceController.videoResources.value;
+                  final dataSource = dataSourceController.videoResources.toList();
                   if (dataSource.isEmpty) {
                     return const SizedBox.shrink();
                   }

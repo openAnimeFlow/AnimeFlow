@@ -18,10 +18,8 @@ class VideoStateController extends GetxController {
 
   //初始话player
   VideoStateController(this.player) {
-    playing.value = player.state.playing;
     volume.value = player.state.volume;
     rate.value = player.state.rate;
-    position.value = player.state.position;
     _originalSpeed = rate.value;
 
     // 监听播放器播放状态变化
@@ -39,7 +37,7 @@ class VideoStateController extends GetxController {
       rate.value = r;
     });
 
-    // 监听播放器位置变化
+    // 监听播放进度
     player.stream.position.listen((pos) {
       position.value = pos;
     });

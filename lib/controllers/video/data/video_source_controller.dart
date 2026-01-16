@@ -1,8 +1,8 @@
 import 'package:anime_flow/data/crawler/html_request.dart';
 import 'package:anime_flow/models/item/crawler_config_item.dart';
-import 'package:anime_flow/models/item/video/episode_resources_item.dart';
-import 'package:anime_flow/models/item/video/resources_item.dart';
-import 'package:anime_flow/models/item/video/search_resources_item.dart';
+import 'package:anime_flow/models/item/play/video/episode_resources_item.dart';
+import 'package:anime_flow/models/item/play/video/resources_item.dart';
+import 'package:anime_flow/models/item/play/video/search_resources_item.dart';
 import 'package:anime_flow/utils/crawl_config.dart';
 import 'package:anime_flow/stores/episodes_state.dart';
 import 'package:anime_flow/controllers/video/video_state_controller.dart';

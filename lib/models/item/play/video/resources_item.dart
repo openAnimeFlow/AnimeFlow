@@ -1,4 +1,5 @@
-import 'package:anime_flow/models/item/video/episode_resources_item.dart';
+
+import 'episode_resources_item.dart';
 
 class ResourcesItem {
   final String websiteName;

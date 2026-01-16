@@ -258,7 +258,7 @@ class VideoSourceController extends GetxController {
             iconUrl: resource.websiteIcon,
             videoUrl: resource.baseUrl + currentEpisode.like,
           );
-          _videoStateController.disposeVideo();
+          // _videoStateController.disposeVideo();
           await loadVideoPage(resource.baseUrl + currentEpisode.like);
         } catch (e) {
           _logger.e('自动加载视频源失败', error: e);

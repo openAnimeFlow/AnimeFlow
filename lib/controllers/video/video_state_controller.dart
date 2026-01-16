@@ -56,14 +56,14 @@ class VideoStateController extends GetxController {
     player.playOrPause();
   }
 
-  /// 清理播放资源
-  void disposeVideo() {
-    player.open(
-      Media(
-        '',
-      ),
-    );
-  }
+  // /// 清理播放资源
+  // void disposeVideo() {
+  //   player.open(
+  //     Media(
+  //       '',
+  //     ),
+  //   );
+  // }
 
   ///设置播放倍数
   void startSpeedBoost(double speed) {

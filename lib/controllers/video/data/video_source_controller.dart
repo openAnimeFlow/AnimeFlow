@@ -3,6 +3,8 @@ import 'package:anime_flow/models/item/crawler_config_item.dart';
 import 'package:anime_flow/models/item/play/video/episode_resources_item.dart';
 import 'package:anime_flow/models/item/play/video/resources_item.dart';
 import 'package:anime_flow/models/item/play/video/search_resources_item.dart';
+import 'package:anime_flow/repository/play_repository.dart';
+import 'package:anime_flow/stores/subject_state.dart';
 import 'package:anime_flow/utils/crawl_config.dart';
 import 'package:anime_flow/stores/episodes_state.dart';
 import 'package:anime_flow/controllers/video/video_state_controller.dart';
@@ -20,6 +22,7 @@ class VideoSourceController extends GetxController {
   final RxInt selectedWebsiteIndex = 0.obs; // 当前选中的网站索引
 
   late EpisodesState _episodesState;
+  late SubjectState _subjectState;
   late VideoStateController _videoStateController;
   late WebviewItemController _webviewItemController;
   final Logger _logger = Logger();
@@ -43,6 +46,7 @@ class VideoSourceController extends GetxController {
   }
 
   void _initControllers() {
+    _subjectState = Get.find<SubjectState>();
     _episodesState = Get.find<EpisodesState>();
     _videoStateController = Get.find<VideoStateController>();
     _webviewItemController = Get.find<WebviewItemController>();
@@ -123,12 +127,12 @@ class VideoSourceController extends GetxController {
       _updateResourceStatus(config.name, isLoading: true, errorMessage: null);
 
       List<SearchResourcesItem> searchList =
-      await WebRequest.getSearchSubjectListService(keyword, config);
+          await WebRequest.getSearchSubjectListService(keyword, config);
       List<EpisodeResourcesItem> allEpisodesList = [];
 
       for (var search in searchList) {
         var crawlerEpisodeResources =
-        await WebRequest.getResourcesListService(search.link, config);
+            await WebRequest.getResourcesListService(search.link, config);
 
         // 转换 CrawlerEpisodeResourcesItem 到 EpisodeResourcesItem
         for (var crawlerResource in crawlerEpisodeResources) {
@@ -162,7 +166,8 @@ class VideoSourceController extends GetxController {
   }
 
   // 更新指定网站的状态
-  void _updateResourceStatus(String websiteName, {
+  void _updateResourceStatus(
+    String websiteName, {
     bool? isLoading,
     List<EpisodeResourcesItem>? episodeResources,
     String? errorMessage,
@@ -183,7 +188,9 @@ class VideoSourceController extends GetxController {
   }
 
   void setWebSite(
-      {required String title, required String iconUrl, required String videoUrl}) {
+      {required String title,
+      required String iconUrl,
+      required String videoUrl}) {
     webSiteTitle.value = title;
     webSiteIcon.value = iconUrl;
     this.videoUrl.value = videoUrl;
@@ -201,7 +208,8 @@ class VideoSourceController extends GetxController {
 
   /// 自动选择第一个有资源的网站并加载视频
   /// [force] 是否强制重新选择，即使已经有选中的资源
-  void autoSelectFirstResource(List<ResourcesItem> resources, {bool force = false}) {
+  void autoSelectFirstResource(List<ResourcesItem> resources,
+      {bool force = false}) {
     // 如果已经自动选择过，且不是强制重新选择，或者已经有选中的资源且不是强制重新选择，不再自动选择
     if (!force && (_hasAutoSelected || webSiteTitle.value.isNotEmpty)) {
       return;
@@ -230,7 +238,8 @@ class VideoSourceController extends GetxController {
 
   /// 自动加载第一个匹配当前剧集的资源
   /// [force] 是否强制重新加载，即使已经有选中的资源
-  Future<void> _autoLoadFirstResource(ResourcesItem resource, {bool force = false}) async {
+  Future<void> _autoLoadFirstResource(ResourcesItem resource,
+      {bool force = false}) async {
     // 如果不是强制重新加载，且已经有选中的资源，不再自动加载
     if (!force && webSiteTitle.value.isNotEmpty) {
       return;
@@ -239,7 +248,7 @@ class VideoSourceController extends GetxController {
     // 遍历资源列表，找到第一个匹配当前剧集的资源
     for (var resourceItem in resource.episodeResources) {
       final matchingEpisodes = resourceItem.episodes.where(
-            (ep) => ep.episodeSort == _episodesState.episodeIndex.value,
+        (ep) => ep.episodeSort == _episodesState.episodeIndex.value,
       );
       if (matchingEpisodes.isNotEmpty) {
         final currentEpisode = matchingEpisodes.first;
@@ -261,12 +270,19 @@ class VideoSourceController extends GetxController {
 
   /// 加载视频页面
   Future<void> loadVideoPage(String url) async {
-    _logger.d('加载视频页面: $url');
+    int offset = 0;
+    final subjectId = _subjectState.id;
+    final episodeId = _episodesState.episodeId.value;
+    final position =
+        await PlayRepository.getPlayPosition('$subjectId$episodeId');
+    if (position != null && position.position > 0) {
+      offset = position.position;
+    }
     await _webviewItemController.loadUrl(
       url,
       true, // useNativePlayer: 使用原生播放器
       true, // useLegacyParser: 不使用旧解析器
-      offset: 0,
+      offset: offset,
     );
   }
 }

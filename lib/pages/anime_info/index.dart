@@ -147,6 +147,7 @@ class _AnimeDetailPageState extends State<AnimeDetailPage> {
           children: [
             if (topButton)
               FloatingActionButton(
+                heroTag: 'top_${subjectBasicData.id}',
                 onPressed: () {
                   _nestedScrollController.animateTo(
                     0,
@@ -162,6 +163,7 @@ class _AnimeDetailPageState extends State<AnimeDetailPage> {
                     subjectsInfo != null &&
                     subjectsInfo?.interest != null
                 ? FloatingActionButton(
+                    heroTag: 'evaluate_${subjectBasicData.id}',
                     onPressed: () {
                       Get.dialog(
                           barrierDismissible: false,
@@ -176,6 +178,7 @@ class _AnimeDetailPageState extends State<AnimeDetailPage> {
             if (subjectsInfo != null) ...[
               const SizedBox(height: 5),
               FloatingActionButton(
+                heroTag: 'play_${subjectBasicData.id}',
                 onPressed: () =>
                     Get.toNamed(RouteName.play, arguments: subjectsInfo),
                 child: Icon(

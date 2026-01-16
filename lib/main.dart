@@ -1,5 +1,5 @@
 import 'dart:io';
-import 'package:anime_flow/utils/storage.dart';
+import 'package:anime_flow/repository/storage.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:get/get.dart';

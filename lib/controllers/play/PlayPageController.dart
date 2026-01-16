@@ -1,6 +1,6 @@
 import 'dart:async';
 import 'package:anime_flow/models/item/danmaku/danmaku_module.dart';
-import 'package:anime_flow/utils/storage.dart';
+import 'package:anime_flow/repository/storage.dart';
 import 'package:anime_flow/utils/utils.dart';
 import 'package:canvas_danmaku/canvas_danmaku.dart';
 import 'package:get/get.dart';

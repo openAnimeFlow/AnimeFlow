@@ -1,3 +1,6 @@
+import 'dart:async';
+
+import 'package:anime_flow/repository/play_repository.dart';
 import 'package:get/get.dart';
 import 'package:media_kit/media_kit.dart';
 
@@ -5,6 +8,7 @@ class VideoStateController extends GetxController {
   final Player player;
   final RxBool playing = false.obs; //视频播放状态
   final Rx<Duration> position = Duration.zero.obs;
+  final Rx<Duration> duration = Duration.zero.obs;
   final RxDouble volume = 100.0.obs; //音量 0-100
   final RxBool isVerticalDragging = false.obs; //是否正在垂直拖动调整音量
   final RxDouble rate = 1.0.obs;
@@ -22,7 +26,7 @@ class VideoStateController extends GetxController {
     rate.value = player.state.rate;
     _originalSpeed = rate.value;
 
-    // 监听播放器播放状态变化
+    // 监听播放器播放状态
     player.stream.playing.listen((playing) {
       this.playing.value = playing;
     });
@@ -42,14 +46,10 @@ class VideoStateController extends GetxController {
       position.value = pos;
     });
 
-    // 监听缓冲状态
-    // player.stream.buffering.listen((buffering) {
-    //   if (buffering) {
-    //     this.buffering.value = true;
-    //   } else {
-    //     this.buffering.value = false;
-    //   }
-    // });
+    // 监听视频时长
+    player.stream.duration.listen((dur) {
+      duration.value = dur;
+    });
   }
 
   ///暂停|播放

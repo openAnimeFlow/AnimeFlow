@@ -3,6 +3,7 @@ import 'dart:io';
 
 import 'package:anime_flow/controllers/play/episode_controller.dart';
 import 'package:anime_flow/models/enums/video_controls_icon_type.dart';
+import 'package:anime_flow/repository/play_repository.dart';
 import 'package:anime_flow/webview/webview_controller.dart';
 import 'package:anime_flow/webview/webview_item.dart';
 import 'package:anime_flow/stores/episodes_state.dart';
@@ -36,7 +37,7 @@ class _VideoViewState extends State<VideoView> with WindowListener {
   late PlayController playController;
   late EpisodesState episodesState;
   late EpisodeController episodeController;
-  late SubjectState subjectStateController;
+  late SubjectState subjectState;
   late VideoStateController videoStateController;
   final webviewItemController = Get.find<WebviewItemController>();
   final logger = Logger();
@@ -59,6 +60,9 @@ class _VideoViewState extends State<VideoView> with WindowListener {
   //剧集相关
   int _lastEpisodeIndex = 0;
 
+  //视频相关
+  Timer? _saveProgressTimer;
+
   @override
   void initState() {
     super.initState();
@@ -68,7 +72,7 @@ class _VideoViewState extends State<VideoView> with WindowListener {
     playController = Get.find<PlayController>();
     episodesState = Get.find<EpisodesState>();
     episodeController = Get.find<EpisodeController>();
-    subjectStateController = Get.find<SubjectState>();
+    subjectState = Get.find<SubjectState>();
     // 初始化屏幕亮度
     videoUiStateController.initializeBrightness();
 
@@ -78,7 +82,7 @@ class _VideoViewState extends State<VideoView> with WindowListener {
         _hasDanmakuLoaded = false;
         // 清空之前的弹幕
         playController.removeDanmaku();
-        if(episode != _lastEpisodeIndex) {
+        if (episode != _lastEpisodeIndex) {
           _selectResourceAfterInit();
         }
       }
@@ -88,10 +92,12 @@ class _VideoViewState extends State<VideoView> with WindowListener {
     player.stream.completed.listen((completed) {
       if (completed) {
         _autoSwitchToNextEpisode();
+        PlayRepository.deletePlayPosition(
+            '${subjectState.id}${episodesState.episodeId.value}');
       }
     });
 
-    //监听缓冲状态
+    // 监听缓冲状态
     player.stream.buffering.listen((buffering) {
       _updateBufferingState(buffering);
     });
@@ -108,7 +114,7 @@ class _VideoViewState extends State<VideoView> with WindowListener {
   }
 
   Future<void> _initWebview() async {
-    // 监听视频URL解析结果
+    // 监听解析结果
     _videoURLSubscription =
         webviewItemController.onVideoURLParser.listen((result) async {
       final (url, offset) = result;
@@ -118,19 +124,14 @@ class _VideoViewState extends State<VideoView> with WindowListener {
       _hasReceivedVideoUrl = true;
       _parseTimeoutTimer?.cancel();
 
-      // 播放解析出的视频
       if (url.isNotEmpty) {
-        player.open(Media(url));
-        // 如果有偏移量，跳转到指定位置
-        if (offset > 0) {
-          Future.delayed(const Duration(milliseconds: 500), () {
-            player.seek(Duration(seconds: offset));
-          });
-        }
+        await player.open(
+          Media(url, start: Duration(seconds: offset)),
+        );
       }
     });
 
-    // 监听视频加载状态
+    // 监听视频解析状态
     _videoLoadingSubscription =
         webviewItemController.onVideoLoading.listen((loading) {
       _isParsing = loading;
@@ -155,6 +156,10 @@ class _VideoViewState extends State<VideoView> with WindowListener {
         } else {
           // 解析成功
           _parsingState(false);
+          // 视频解析成功后加载弹幕
+          _loadDanmaku();
+          // 保存进度
+          _savePlaybackProgress();
         }
       }
 
@@ -224,8 +229,6 @@ class _VideoViewState extends State<VideoView> with WindowListener {
     } else {
       // 解析成功
       videoUiStateController.setParsingTitle('视频资源解析成功');
-      // 视频解析成功后加载弹幕
-      _loadDanmaku();
       Future.delayed(const Duration(seconds: 2), () {
         if (!mounted) return;
         videoUiStateController.hideIndicator();
@@ -254,7 +257,7 @@ class _VideoViewState extends State<VideoView> with WindowListener {
 
       final bgmBangumiId =
           await DanmakuRequest.getDanDanBangumiIDByBgmBangumiID(
-              subjectStateController.subjectId.value);
+              subjectState.subjectId.value);
       final danmaku = await DanmakuRequest.getDanDanmaku(bgmBangumiId, episode);
       playController.addDanmaku(danmaku);
       logger.i('弹幕数量为：${danmaku.length}');
@@ -271,14 +274,18 @@ class _VideoViewState extends State<VideoView> with WindowListener {
   ///更新缓冲状态
   void _updateBufferingState(bool buffering) {
     Get.log('缓冲状态: $buffering');
-    if (buffering){
-      videoUiStateController.updateIndicatorType(VideoControlsIndicatorType.bufferingIndicator);
-      videoUiStateController.updateMainAxisAlignmentType(MainAxisAlignment.center);
+    if (buffering) {
+      videoUiStateController
+          .updateIndicatorType(VideoControlsIndicatorType.bufferingIndicator);
+      videoUiStateController
+          .updateMainAxisAlignmentType(MainAxisAlignment.center);
       videoUiStateController.showIndicator();
-    }else {
-      if(videoUiStateController.indicatorType.value == VideoControlsIndicatorType.bufferingIndicator) {
+    } else {
+      if (videoUiStateController.indicatorType.value ==
+          VideoControlsIndicatorType.bufferingIndicator) {
         videoUiStateController.hideIndicator();
-        videoUiStateController.updateIndicatorType(VideoControlsIndicatorType.noIndicator);
+        videoUiStateController
+            .updateIndicatorType(VideoControlsIndicatorType.noIndicator);
       }
     }
   }
@@ -288,7 +295,7 @@ class _VideoViewState extends State<VideoView> with WindowListener {
     if (!videoSourceController.isLoading.value) {
       await _waitForResourcesLoaded();
     }
-    
+
     final resources = videoSourceController.videoResources.toList();
     videoSourceController.autoSelectFirstResource(resources, force: true);
   }
@@ -301,7 +308,7 @@ class _VideoViewState extends State<VideoView> with WindowListener {
 
     final completer = Completer<void>();
     late Worker worker;
-    
+
     worker = ever(videoSourceController.isLoading, (bool isLoading) {
       if (isLoading) {
         worker.dispose();
@@ -322,6 +329,28 @@ class _VideoViewState extends State<VideoView> with WindowListener {
     return completer.future;
   }
 
+  ///保存播放进度
+  void _savePlaybackProgress() {
+    _saveProgressTimer?.cancel();
+    _saveProgressTimer = null;
+    final subjectId = subjectState.id;
+    final episodeId = episodesState.episodeId.value;
+    try {
+      // 播放时，每5秒保存一次，使用实时获取的进度值
+      _saveProgressTimer = Timer.periodic(const Duration(seconds: 5), (_) {
+        final position = videoStateController.position.value;
+        final duration = videoStateController.duration.value;
+        if (position == Duration.zero || duration == Duration.zero) {
+          return;
+        }
+        if (subjectId <= 0 || episodeId <= 0) return;
+        final playId = '$subjectId$episodeId';
+        PlayRepository.savePlayPosition(playId, position, duration);
+      });
+    } catch (e) {
+      logger.e('保存播放进度失败: $e');
+    }
+  }
 
   /// 自动切换到下一集
   void _autoSwitchToNextEpisode() {
@@ -343,10 +372,12 @@ class _VideoViewState extends State<VideoView> with WindowListener {
     _videoURLSubscription?.cancel();
     _videoLoadingSubscription?.cancel();
     _logSubscription?.cancel();
+    _saveProgressTimer?.cancel();
     // 移除窗口监听器
     if (Platform.isWindows || Platform.isLinux || Platform.isMacOS) {
       windowManager.removeListener(this);
     }
+    _savePlaybackProgress();
     Get.delete<VideoUiStateController>();
     Get.delete<VideoStateController>();
     player.dispose();

@@ -2,7 +2,7 @@ import 'package:anime_flow/models/item/crawler_config_item.dart';
 import 'package:anime_flow/pages/settings/setting_controller.dart';
 import 'package:anime_flow/routes/index.dart';
 import 'package:anime_flow/utils/crawl_config.dart';
-import 'package:anime_flow/utils/storage.dart';
+import 'package:anime_flow/repository/storage.dart';
 import 'package:anime_flow/widget/animation_network_image/animation_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';

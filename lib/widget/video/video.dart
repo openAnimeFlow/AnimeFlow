@@ -357,8 +357,9 @@ class _VideoViewState extends State<VideoView> with WindowListener {
               currentIndex >= 0 &&
               currentIndex < episodes.data.length &&
               episodes.data[currentIndex].collection == null) {
-            UserRequest.updateEpisodeProgressService(episodeId,
+             UserRequest.updateEpisodeProgressService(episodeId,
                 batch: true, type: 2);
+             // TODO 同时更新本地剧集进度数据
             logger.i('章节进度已更新: episodeId=$episodeId');
           }
         }

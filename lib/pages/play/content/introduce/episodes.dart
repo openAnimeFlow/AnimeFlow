@@ -82,6 +82,7 @@ class EpisodesComponentsState extends State<EpisodesComponents> {
                           ? Theme.of(context).colorScheme.primaryContainer
                           : null,
                       child: InkWell(
+                          borderRadius: BorderRadius.circular(10),
                         onTap: () {
                           final episodeIndex = index + 1;
                           episodesState.setEpisodeSort(
@@ -93,6 +94,15 @@ class EpisodesComponentsState extends State<EpisodesComponents> {
                           logger.i('选中剧集索引:$episodeIndex');
                         },
                         child: Container(
+                          decoration: BoxDecoration(
+                            borderRadius: BorderRadius.circular(10),
+                            color: episode.collection != null
+                                ? Theme.of(context)
+                                    .colorScheme
+                                    .outlineVariant
+                                    .withValues(alpha: 0.3)
+                                : null,
+                          ),
                           width: 150,
                           padding: const EdgeInsets.all(8),
                           child: Column(

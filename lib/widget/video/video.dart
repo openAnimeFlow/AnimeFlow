@@ -12,6 +12,7 @@ import 'package:anime_flow/stores/subject_state.dart';
 import 'package:anime_flow/controllers/video/data/video_source_controller.dart';
 import 'package:anime_flow/controllers/video/video_state_controller.dart';
 import 'package:anime_flow/controllers/video/video_ui_state_controller.dart';
+import 'package:anime_flow/http/requests/bgm_request.dart';
 import 'package:anime_flow/http/requests/damaku.dart';
 import 'package:anime_flow/widget/video/ui/danmaku/danmaku_view.dart';
 import 'package:anime_flow/widget/video/ui/index.dart';
@@ -346,6 +347,21 @@ class _VideoViewState extends State<VideoView> with WindowListener {
         if (subjectId <= 0 || episodeId <= 0) return;
         final playId = '$subjectId$episodeId';
         PlayRepository.savePlayPosition(playId, position, duration);
+
+        // 播放进度大于90% && collection != null，更新章节进度
+        final progressPercent = position.inSeconds / duration.inSeconds * 100;
+        if (progressPercent > 90) {
+          final currentIndex = episodesState.episodeIndex.value - 1;
+          final episodes = episodesState.episodes.value;
+          if (episodes != null &&
+              currentIndex >= 0 &&
+              currentIndex < episodes.data.length &&
+              episodes.data[currentIndex].collection == null) {
+            UserRequest.updateEpisodeProgressService(episodeId,
+                batch: true, type: 2);
+            logger.i('章节进度已更新: episodeId=$episodeId');
+          }
+        }
       });
     } catch (e) {
       logger.e('保存播放进度失败: $e');

@@ -336,4 +336,16 @@ class UserRequest {
       rethrow;
     }
   }
+
+  ///更新章节进度
+  static Future<void> updateEpisodeProgressService(int episodeId,
+      {required bool batch, required int type}) async {
+    bgmDioRequest.put(
+      '$_nextBaseUrl${BgmUsersApi.collectionsEpisodes}/$episodeId',
+      data: {
+        'type': type,
+        'batch': batch,
+      },
+    );
+  }
 }

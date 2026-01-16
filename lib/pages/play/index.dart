@@ -65,13 +65,25 @@ class _PlayPageState extends State<PlayPage> {
       if (episodesState.episodeSort.value == 0 && episodes.data.isNotEmpty) {
         WidgetsBinding.instance.addPostFrameCallback((_) {
           if (mounted) {
-            final firstEpisode = episodes.data.first;
+            // 查找第一个未看过的剧集
+            int targetIndex = 0;
+            for (int i = 0; i < episodes.data.length; i++) {
+              if (episodes.data[i].collection == null) {
+                targetIndex = i;
+                break;
+              }
+              // 如果所有剧集都已看过，选择最后一集
+              if (i == episodes.data.length - 1) {
+                targetIndex = i;
+              }
+            }
+            final targetEpisode = episodes.data[targetIndex];
             episodesState.setEpisodeSort(
-                sort: firstEpisode.sort,
-                episodeIndex: 1,
-                episodeId: firstEpisode.id);
+                sort: targetEpisode.sort,
+                episodeIndex: targetIndex + 1,
+                episodeId: targetEpisode.id);
             episodesState
-                .setEpisodeTitle(firstEpisode.nameCN ?? firstEpisode.name);
+                .setEpisodeTitle(targetEpisode.nameCN ?? targetEpisode.name);
           }
         });
       }

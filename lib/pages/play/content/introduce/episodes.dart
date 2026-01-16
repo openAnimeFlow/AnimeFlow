@@ -2,7 +2,6 @@ import 'package:anime_flow/constants/play_layout_constant.dart';
 import 'package:anime_flow/stores/episodes_state.dart';
 import 'package:anime_flow/controllers/play/PlayPageController.dart';
 import 'package:anime_flow/stores/subject_state.dart';
-import 'package:anime_flow/http/requests/bgm_request.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:logger/logger.dart';
@@ -27,32 +26,6 @@ class EpisodesComponentsState extends State<EpisodesComponents> {
     playPageController = Get.find<PlayController>();
     episodesState = Get.find<EpisodesState>();
     subjectState = Get.find<SubjectState>();
-    _initEpisodes();
-  }
-
-  //初始化剧集
-  void _initEpisodes() async {
-    if (episodesState.episodes.value != null) return;
-    try {
-      if (!isLoading) {
-        setState(() {
-          isLoading = true;
-        });
-      }
-      final episodes = await BgmRequest.getSubjectEpisodesByIdService(
-          subjectState.id, 100, 0);
-      episodesState.episodes.value = episodes;
-      setState(() {
-        isLoading = false;
-      });
-    } catch (e) {
-      Logger().e(e);
-      if (isLoading) {
-        setState(() {
-          isLoading = false;
-        });
-      }
-    }
   }
 
   @override

@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:io';
 
+import 'package:anime_flow/controllers/play/episode_controller.dart';
 import 'package:anime_flow/models/enums/video_controls_icon_type.dart';
 import 'package:anime_flow/webview/webview_controller.dart';
 import 'package:anime_flow/webview/webview_item.dart';
@@ -21,7 +22,6 @@ import 'package:media_kit_video/media_kit_video.dart';
 import 'package:window_manager/window_manager.dart';
 
 class VideoView extends StatefulWidget {
-
   const VideoView({super.key});
 
   @override
@@ -34,8 +34,10 @@ class _VideoViewState extends State<VideoView> with WindowListener {
   late VideoUiStateController videoUiStateController;
   late VideoSourceController dataSourceController;
   late PlayController playController;
-  late EpisodesState episodesController;
+  late EpisodesState episodesState;
+  late EpisodeController episodeController;
   late SubjectState subjectStateController;
+  late VideoStateController videoStateController;
   final webviewItemController = Get.find<WebviewItemController>();
   final logger = Logger();
   final _danmuKey = GlobalKey();
@@ -54,24 +56,36 @@ class _VideoViewState extends State<VideoView> with WindowListener {
   bool _hasReceivedVideoUrl = false;
   Timer? _parseTimeoutTimer;
 
+  // 自动切换下一集相关
+  bool _hasAutoSwitched = false; // 标记是否已经自动切换过，避免重复切换
+
   @override
   void initState() {
     super.initState();
-    Get.put(VideoStateController(player));
+    videoStateController = Get.put(VideoStateController(player));
     dataSourceController = Get.find<VideoSourceController>();
     videoUiStateController = Get.put(VideoUiStateController(player));
     playController = Get.find<PlayController>();
-    episodesController = Get.find<EpisodesState>();
+    episodesState = Get.find<EpisodesState>();
+    episodeController = Get.find<EpisodeController>();
     subjectStateController = Get.find<SubjectState>();
     // 初始化屏幕亮度
     videoUiStateController.initializeBrightness();
 
-    // 监听集数变化，当集数改变时重置弹幕加载状态
-    ever(episodesController.episodeIndex, (int episode) {
+    // 监听集数变化，当集数改变时重置弹幕加载状态和自动切换标记
+    ever(episodesState.episodeIndex, (int episode) {
       if (episode > 0) {
         _hasDanmakuLoaded = false;
+        _hasAutoSwitched = false; // 重置自动切换标记
         // 清空之前的弹幕
         playController.removeDanmaku();
+      }
+    });
+
+    // 监听视频播放完成，自动切换到下一集
+    ever(videoStateController.completed, (bool completed) {
+      if (completed && !_hasAutoSwitched) {
+        _autoSwitchToNextEpisode();
       }
     });
 
@@ -225,7 +239,7 @@ class _VideoViewState extends State<VideoView> with WindowListener {
     _isLoadingDanmaku = true;
 
     try {
-      int episode = episodesController.episodeIndex.value;
+      int episode = episodesState.episodeIndex.value;
       if (episode == 0) {
         _isLoadingDanmaku = false;
         return;
@@ -244,6 +258,23 @@ class _VideoViewState extends State<VideoView> with WindowListener {
       logger.e('加载弹幕失败: $e');
     } finally {
       _isLoadingDanmaku = false;
+    }
+  }
+
+  /// 自动切换到下一集
+  void _autoSwitchToNextEpisode() {
+    if (_hasAutoSwitched) {
+      return; // 已经切换过，避免重复切换
+    }
+
+    try {
+      // 检查是否有下一集
+      if (episodeController.hasNextEpisode(episodesState)) {
+        _hasAutoSwitched = true;
+        episodeController.switchToNextEpisode(episodesState);
+      }
+    } catch (e) {
+      logger.e('自动切换到下一集失败: $e');
     }
   }
 

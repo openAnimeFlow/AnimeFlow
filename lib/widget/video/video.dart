@@ -79,13 +79,12 @@ class _VideoViewState extends State<VideoView> with WindowListener {
         // 清空之前的弹幕
         playController.removeDanmaku();
         if(episode != _lastEpisodeIndex) {
-          final resources =  videoSourceController.videoResources.toList();
-          videoSourceController.autoSelectFirstResource(resources, force: true);
+          _selectResourceAfterInit();
         }
       }
     });
 
-    // 监听视频播放完成，自动切换到下一集
+    // 监听视频播放完成
     player.stream.completed.listen((completed) {
       if (completed) {
         _autoSwitchToNextEpisode();
@@ -241,7 +240,7 @@ class _VideoViewState extends State<VideoView> with WindowListener {
   /// 加载弹幕
   Future<void> _loadDanmaku() async {
     if (_hasDanmakuLoaded || _isLoadingDanmaku) {
-      return; // 如果已经加载过或正在加载中，直接返回
+      return;
     }
 
     _isLoadingDanmaku = true;
@@ -282,6 +281,45 @@ class _VideoViewState extends State<VideoView> with WindowListener {
         videoUiStateController.updateIndicatorType(VideoControlsIndicatorType.noIndicator);
       }
     }
+  }
+
+  /// 等待资源初始化完成后选择资源
+  Future<void> _selectResourceAfterInit() async {
+    if (!videoSourceController.isLoading.value) {
+      await _waitForResourcesLoaded();
+    }
+    
+    final resources = videoSourceController.videoResources.toList();
+    videoSourceController.autoSelectFirstResource(resources, force: true);
+  }
+
+  /// 等待资源加载完成
+  Future<void> _waitForResourcesLoaded() async {
+    if (videoSourceController.isLoading.value) {
+      return;
+    }
+
+    final completer = Completer<void>();
+    late Worker worker;
+    
+    worker = ever(videoSourceController.isLoading, (bool isLoading) {
+      if (isLoading) {
+        worker.dispose();
+        if (!completer.isCompleted) {
+          completer.complete();
+        }
+      }
+    });
+
+    Future.delayed(const Duration(seconds: 30), () {
+      if (!completer.isCompleted) {
+        worker.dispose();
+        completer.complete();
+        logger.w('等待资源加载超时');
+      }
+    });
+
+    return completer.future;
   }
 
 

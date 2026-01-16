@@ -27,11 +27,12 @@ class _VideoResourcesViewState extends State<VideoResourcesView> {
     subjectStateController = Get.find<SubjectState>();
     
     // 检查资源是否已经为当前关键词初始化过，避免全屏切换时重复初始化
-    final currentKeyword = subjectStateController.name;
-    if (videoSourceController.keyword.value != currentKeyword) {
-      // 只有当关键词不同时才重新初始化
-      videoSourceController.initResources(currentKeyword);
-    }
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      final currentKeyword = subjectStateController.name;
+      if (videoSourceController.keyword.value != currentKeyword) {
+        videoSourceController.initResources(currentKeyword);
+      }
+    });
   }
 
   @override

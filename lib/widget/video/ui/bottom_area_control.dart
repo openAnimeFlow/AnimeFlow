@@ -90,6 +90,7 @@ class BottomAreaControl extends StatelessWidget {
                                 color: Colors.white70,
                               ),
                             ),
+                            // 下一集
                             if (hasNextEpisode)
                               InkWell(
                                 onTap: () {
@@ -103,11 +104,9 @@ class BottomAreaControl extends StatelessWidget {
                                 ),
                               ),
                             //弹幕开关
-                            IconButton(
-                              onPressed: () {
-                                playPageController.toggleDanmaku();
-                              },
-                              icon: Icon(
+                            InkWell(
+                              onTap: () => playPageController.toggleDanmaku(),
+                              child: Icon(
                                   danmakuOn
                                       ? Icons.subtitles_outlined
                                       : Icons.subtitles_off_outlined,
@@ -115,21 +114,23 @@ class BottomAreaControl extends StatelessWidget {
                             ),
                             //弹幕设置
                             if (danmakuOn)
-                              IconButton(
-                                onPressed: () {
-                                  Get.bottomSheet(
-                                    const DanmakuSetting(),
-                                    ignoreSafeArea: false,
-                                    isScrollControlled: true,
-                                    backgroundColor: Colors.transparent,
-                                  );
-                                },
-                                icon: SvgPicture.asset(
-                                  'assets/icons/danmaku_setting.svg',
-                                  width: 24,
-                                  height: 24,
-                                  colorFilter: const ColorFilter.mode(
-                                      Colors.white, BlendMode.srcIn),
+                              InkWell(
+                                onTap: () => Get.bottomSheet(
+                                  const DanmakuSetting(),
+                                  ignoreSafeArea: false,
+                                  isScrollControlled: true,
+                                  backgroundColor: Colors.transparent,
+                                ),
+                                child: Padding(
+                                  padding: const EdgeInsets.symmetric(horizontal: 8),
+                                  child: SvgPicture.asset(
+                                    'assets/icons/danmaku_setting.svg',
+                                    width: 24,
+                                    height: 24,
+                                    colorFilter: ColorFilter.mode(
+                                        Colors.white.withValues(alpha: 0.7),
+                                        BlendMode.srcIn),
+                                  ),
                                 ),
                               ),
                             Expanded(

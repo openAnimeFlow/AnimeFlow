@@ -92,6 +92,11 @@ class _VideoViewState extends State<VideoView> with WindowListener {
       }
     });
 
+    //监听缓冲状态
+    player.stream.buffering.listen((buffering) {
+      _updateBufferingState(buffering);
+    });
+
     // 初始化 WebView 并监听视频URL解析结果
     _initWebview();
 
@@ -209,14 +214,14 @@ class _VideoViewState extends State<VideoView> with WindowListener {
       );
 
       // 延迟隐藏指示器
-      Future.delayed(const Duration(seconds: 2), () {
-        if (!mounted) return;
-        videoUiStateController.hideIndicator();
-        videoUiStateController
-            .updateIndicatorType(VideoControlsIndicatorType.noIndicator);
-        videoUiStateController
-            .updateMainAxisAlignmentType(MainAxisAlignment.start);
-      });
+      // Future.delayed(const Duration(seconds: 2), () {
+      //   if (!mounted) return;
+      //   videoUiStateController.hideIndicator();
+      //   videoUiStateController
+      //       .updateIndicatorType(VideoControlsIndicatorType.noIndicator);
+      //   videoUiStateController
+      //       .updateMainAxisAlignmentType(MainAxisAlignment.start);
+      // });
     } else {
       // 解析成功
       videoUiStateController.setParsingTitle('视频资源解析成功');
@@ -263,6 +268,22 @@ class _VideoViewState extends State<VideoView> with WindowListener {
       _isLoadingDanmaku = false;
     }
   }
+
+  ///更新缓冲状态
+  void _updateBufferingState(bool buffering) {
+    Get.log('缓冲状态: $buffering');
+    if (buffering){
+      videoUiStateController.updateIndicatorType(VideoControlsIndicatorType.bufferingIndicator);
+      videoUiStateController.updateMainAxisAlignmentType(MainAxisAlignment.center);
+      videoUiStateController.showIndicator();
+    }else {
+      if(videoUiStateController.indicatorType.value == VideoControlsIndicatorType.bufferingIndicator) {
+        videoUiStateController.hideIndicator();
+        videoUiStateController.updateIndicatorType(VideoControlsIndicatorType.noIndicator);
+      }
+    }
+  }
+
 
   /// 自动切换到下一集
   void _autoSwitchToNextEpisode() {

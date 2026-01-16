@@ -30,6 +30,8 @@ class MiddleAreaControl extends StatelessWidget {
                   const SizedBox.shrink(),
 
                 //缓冲指示器
+
+                // TODO 指示器显示逻辑需要优化(多个地方可能会调用videoUiStateController.updateIndicatorType(VideoControlsIndicatorType.noIndicator)隐藏指示器,当前正在显示器的指示器可能会被其他地方条用隐藏方法导致当前指示器被提前关闭)
                 VideoControlsIndicatorType.bufferingIndicator => Column(
                     mainAxisSize: MainAxisSize.min,
                     children: [

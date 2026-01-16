@@ -80,27 +80,25 @@ class VideoUiStateController extends GetxController {
     });
 
     // 监听缓冲状态
-    player.stream.buffering.listen((buffering) {
-      _isBuffering.value = buffering;
-
-      // 只有当播放器有内容（duration > 0）并且正在播放时才显示缓冲指示器
-      if (duration.value > Duration.zero && playing.value) {
-        if (buffering) {
-          // 开始缓冲，重置网速计算
-          _resetNetworkSpeed();
-          updateIndicatorType(VideoControlsIndicatorType.bufferingIndicator);
-          updateMainAxisAlignmentType(MainAxisAlignment.center);
-          showIndicator();
-        } else {
-          // 缓冲结束
-          if (indicatorType.value ==
-              VideoControlsIndicatorType.bufferingIndicator) {
-            hideIndicator();
-            updateIndicatorType(VideoControlsIndicatorType.noIndicator);
-          }
-        }
-      }
-    });
+    // player.stream.buffering.listen((buffering) {
+    //   _isBuffering.value = buffering;
+    //
+    //   // 只有当播放器有内容（duration > 0）并且正在播放时才显示缓冲指示器
+    //   if (duration.value > Duration.zero && playing.value) {
+    //     if (buffering) {
+    //       updateIndicatorType(VideoControlsIndicatorType.bufferingIndicator);
+    //       updateMainAxisAlignmentType(MainAxisAlignment.center);
+    //       showIndicator();
+    //     } else {
+    //       // 缓冲结束
+    //       if (indicatorType.value ==
+    //           VideoControlsIndicatorType.bufferingIndicator) {
+    //         hideIndicator();
+    //         updateIndicatorType(VideoControlsIndicatorType.noIndicator);
+    //       }
+    //     }
+    //   }
+    // });
   }
 
   // 计算网络速率 (MB/s)

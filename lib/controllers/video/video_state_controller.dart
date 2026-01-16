@@ -8,6 +8,7 @@ class VideoStateController extends GetxController {
   final RxDouble volume = 100.0.obs; //音量 0-100
   final RxBool isVerticalDragging = false.obs; //是否正在垂直拖动调整音量
   final RxDouble rate = 1.0.obs;
+  final RxBool buffering = false.obs;
 
   //记录原始倍速
   double _originalSpeed = 1.0;
@@ -42,6 +43,15 @@ class VideoStateController extends GetxController {
     player.stream.position.listen((pos) {
       position.value = pos;
     });
+
+    // 监听缓冲状态
+    // player.stream.buffering.listen((buffering) {
+    //   if (buffering) {
+    //     this.buffering.value = true;
+    //   } else {
+    //     this.buffering.value = false;
+    //   }
+    // });
   }
 
   ///暂停|播放
@@ -60,11 +70,11 @@ class VideoStateController extends GetxController {
 
   ///设置播放倍数
   void startSpeedBoost(double speed) {
-      // 保存原始的倍速
-      _originalSpeed = rate.value;
-      // 设置新的倍速
-      rate.value = speed;
-      player.setRate(speed);
+    // 保存原始的倍速
+    _originalSpeed = rate.value;
+    // 设置新的倍速
+    rate.value = speed;
+    player.setRate(speed);
   }
 
   /// 结束速度提升

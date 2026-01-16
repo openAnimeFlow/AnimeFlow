@@ -110,7 +110,8 @@ class BottomAreaControl extends StatelessWidget {
                                   danmakuOn
                                       ? Icons.subtitles_outlined
                                       : Icons.subtitles_off_outlined,
-                                  color: Colors.white70),
+                                  color: Colors.white70,
+                                  size: 25),
                             ),
                             //弹幕设置
                             if (danmakuOn)
@@ -122,13 +123,14 @@ class BottomAreaControl extends StatelessWidget {
                                   backgroundColor: Colors.transparent,
                                 ),
                                 child: Padding(
-                                  padding: const EdgeInsets.symmetric(horizontal: 8),
+                                  padding:
+                                      const EdgeInsets.symmetric(horizontal: 8),
                                   child: SvgPicture.asset(
                                     'assets/icons/danmaku_setting.svg',
                                     width: 24,
                                     height: 24,
                                     colorFilter: ColorFilter.mode(
-                                        Colors.white.withValues(alpha: 0.7),
+                                        Colors.white.withValues(alpha: 0.8),
                                         BlendMode.srcIn),
                                   ),
                                 ),
@@ -176,25 +178,17 @@ class BottomAreaControl extends StatelessWidget {
                             AnimatedContainer(
                               duration: const Duration(milliseconds: 500),
                               child: IconButton(
-                                // 使用自定义全屏方法，
-                                onPressed: () {
-                                  playPageController.toggleFullScreen();
-                                },
-                                padding: const EdgeInsets.all(0),
-                                icon: fullscreen
-                                    ? Icon(
-                                        size: 33,
-                                        Icons.fullscreen_exit,
-                                        color:
-                                            Colors.white.withValues(alpha: 0.8),
-                                      )
-                                    : Icon(
-                                        size: 33,
-                                        Icons.fullscreen,
-                                        color:
-                                            Colors.white.withValues(alpha: 0.8),
-                                      ),
-                              ),
+                                  onPressed: () {
+                                    playPageController.toggleFullScreen();
+                                  },
+                                  padding: const EdgeInsets.all(0),
+                                  icon: Icon(
+                                    fullscreen
+                                        ? Icons.fullscreen_exit
+                                        : Icons.fullscreen,
+                                    size: 33,
+                                    color: Colors.white70,
+                                  )),
                             ),
                           ],
                         ),

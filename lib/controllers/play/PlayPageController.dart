@@ -198,3 +198,9 @@ class DanmakuKey {
       danmakuPlatformGamer = 'danmaku_platform_gamer',
       danmakuPlatformDanDanPlay = 'danmaku_platform_dandanplay';
 }
+
+class PlaybackKey {
+  static const String autoPlayNext = 'playback_auto_play_next',
+      saveProgress = 'playback_save_progress',
+      fastForwardSpeed = 'playback_fast_forward_speed';
+}

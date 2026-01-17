@@ -1,37 +1,182 @@
+import 'package:anime_flow/controllers/play/PlayPageController.dart';
 import 'package:anime_flow/pages/settings/setting_controller.dart';
+import 'package:anime_flow/repository/storage.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:hive/hive.dart';
 
-class PlaybackSettingsPage extends StatelessWidget {
+class PlaybackSettingsPage extends StatefulWidget {
   const PlaybackSettingsPage({super.key});
 
   @override
-  Widget build(BuildContext context) {
-    final settingController = Get.find<SettingController>();
+  State<PlaybackSettingsPage> createState() => _PlaybackSettingsPageState();
+}
 
-    return Obx(() => Scaffold(
-          appBar: AppBar(
-            title: const Text("播放设置(开发中)"),
-            automaticallyImplyLeading: !settingController.isWideScreen.value,
-          ),
-          body: ListView(
-            padding: const EdgeInsets.all(16),
-            children: const [
-              Center(
+class _PlaybackSettingsPageState extends State<PlaybackSettingsPage> {
+  late SettingController settingController;
+  Box setting = Storage.setting;
+
+  // 播放配置状态
+  late bool _autoPlayNext;
+  late bool _saveProgress;
+  late double _fastForwardSpeed;
+
+  @override
+  void initState() {
+    super.initState();
+    settingController = Get.find<SettingController>();
+    _loadSettings();
+  }
+
+  void _loadSettings() {
+    setState(() {
+      _autoPlayNext = setting.get(PlaybackKey.autoPlayNext, defaultValue: true);
+      _saveProgress = setting.get(PlaybackKey.saveProgress, defaultValue: true);
+      _fastForwardSpeed = setting.get(PlaybackKey.fastForwardSpeed, defaultValue: 2.0);
+    });
+  }
+
+  Widget _buildSectionTitle(String title) {
+    return Padding(
+      padding: const EdgeInsets.only(top: 16, bottom: 8),
+      child: Text(
+        title,
+        style: const TextStyle(
+          fontSize: 16,
+          fontWeight: FontWeight.bold,
+        ),
+      ),
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Obx(
+      () => Scaffold(
+        appBar: AppBar(
+          title: const Text("播放设置"),
+          automaticallyImplyLeading: !settingController.isWideScreen.value,
+        ),
+        body: Align(
+          alignment: Alignment.topCenter,
+          child: ConstrainedBox(
+            constraints: const BoxConstraints(maxWidth: 1200),
+            child: ScrollConfiguration(
+              behavior: const ScrollBehavior().copyWith(scrollbars: false),
+              child: SingleChildScrollView(
+                padding: const EdgeInsets.all(16),
                 child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Icon(Icons.construction, size: 200),
-                    Text(
-                      "施工中",
-                      style:
-                          TextStyle(fontSize: 30, fontWeight: FontWeight.bold),
-                    )
+                    // 自动播放设置
+                    _buildSectionTitle('自动播放'),
+                    SwitchListTile(
+                      title: const Text('自动跳转下一集'),
+                      subtitle: const Text('播放完成后自动切换到下一集'),
+                      value: _autoPlayNext,
+                      onChanged: (value) {
+                        setState(() {
+                          _autoPlayNext = value;
+                          setting.put(PlaybackKey.autoPlayNext, _autoPlayNext);
+                        });
+                      },
+                    ),
+                    const SizedBox(height: 16),
+
+                    // 进度设置
+                    _buildSectionTitle('播放进度'),
+                    SwitchListTile(
+                      title: const Text('保存剧集进度'),
+                      subtitle: const Text('自动保存当前播放进度，下次继续观看'),
+                      value: _saveProgress,
+                      onChanged: (value) {
+                        setState(() {
+                          _saveProgress = value;
+                          setting.put(PlaybackKey.saveProgress, _saveProgress);
+                        });
+                      },
+                    ),
+                    const SizedBox(height: 16),
+
+                    // 播放速度设置
+                    _buildSectionTitle('播放控制'),
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Padding(
+                          padding: const EdgeInsets.symmetric(horizontal: 16),
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              const Text(
+                                '长按快进速度',
+                                style: TextStyle(fontSize: 16),
+                              ),
+                              Text(
+                                '${_fastForwardSpeed.toStringAsFixed(1)}x',
+                                style: TextStyle(
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.bold,
+                                  color: Theme.of(context).colorScheme.primary,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                        SliderTheme(
+                          data: SliderTheme.of(context).copyWith(
+                            trackHeight: 15,
+                          ),
+                          child: Slider(
+                            value: _fastForwardSpeed,
+                            min: 1.0,
+                            max: 5.0,
+                            divisions: 16,
+                            label: '${_fastForwardSpeed.toStringAsFixed(1)}x',
+                            onChanged: (value) {
+                              setState(() {
+                                _fastForwardSpeed = value;
+                                setting.put(
+                                    PlaybackKey.fastForwardSpeed, _fastForwardSpeed);
+                              });
+                            },
+                          ),
+                        ),
+                        Padding(
+                          padding: const EdgeInsets.symmetric(horizontal: 16),
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              Text(
+                                '1.0x',
+                                style: TextStyle(
+                                  fontSize: 12,
+                                  color: Theme.of(context)
+                                      .colorScheme
+                                      .onSurfaceVariant,
+                                ),
+                              ),
+                              Text(
+                                '5.0x',
+                                style: TextStyle(
+                                  fontSize: 12,
+                                  color: Theme.of(context)
+                                      .colorScheme
+                                      .onSurfaceVariant,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ],
+                    ),
                   ],
                 ),
-              )
-            ],
+              ),
+            ),
           ),
-        ));
+        ),
+      ),
+    );
   }
 }

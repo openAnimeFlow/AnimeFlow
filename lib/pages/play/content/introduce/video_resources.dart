@@ -7,9 +7,7 @@ import 'package:get/get.dart';
 import 'package:logger/logger.dart';
 
 class VideoResourcesView extends StatefulWidget {
-
-  const VideoResourcesView(
-      {super.key});
+  const VideoResourcesView({super.key});
 
   @override
   State<VideoResourcesView> createState() => _VideoResourcesViewState();
@@ -25,7 +23,7 @@ class _VideoResourcesViewState extends State<VideoResourcesView> {
     super.initState();
     videoSourceController = Get.find<VideoSourceController>();
     subjectStateController = Get.find<SubjectState>();
-    
+
     // 检查资源是否已经为当前关键词初始化过，避免全屏切换时重复初始化
     WidgetsBinding.instance.addPostFrameCallback((_) {
       final currentKeyword = subjectStateController.name;
@@ -57,7 +55,9 @@ class _VideoResourcesViewState extends State<VideoResourcesView> {
                         ),
                       ),
                       const SizedBox(height: 5),
-                      Obx(() => videoSourceController.isLoading.value
+                      Obx(() => videoSourceController.isLoading.value ||
+                              videoSourceController
+                                  .webSiteTitle.value.isNotEmpty
                           ? Row(
                               children: [
                                 ClipRRect(
@@ -96,8 +96,7 @@ class _VideoResourcesViewState extends State<VideoResourcesView> {
                 const SizedBox(width: 8),
                 OutlinedButton.icon(
                   onPressed: () {
-                    showGeneralDialog(
-                      context: context,
+                    Get.generalDialog(
                       barrierDismissible: true,
                       barrierLabel: "SourceDrawer",
                       barrierColor: Colors.black54,

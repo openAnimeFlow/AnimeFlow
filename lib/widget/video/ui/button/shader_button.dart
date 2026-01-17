@@ -16,12 +16,6 @@ class ShaderButton extends StatelessWidget {
     return Obx(() {
       final currentType = playController.superResolutionType.value;
       final player = videoStateController.player;
-      String buttonText = '4k';
-      if (currentType == 2) {
-        buttonText = '效率';
-      } else if (currentType == 3) {
-        buttonText = '质量';
-      }
 
       return MenuAnchor(
         onOpen: () {
@@ -65,6 +59,7 @@ class ShaderButton extends StatelessWidget {
         ),
         builder:
             (BuildContext context, MenuController controller, Widget? child) {
+          final themePrimary = Theme.of(context).colorScheme.primary;
           return InkWell(
             onTap: () {
               if (controller.isOpen) {
@@ -78,15 +73,14 @@ class ShaderButton extends StatelessWidget {
               padding: const EdgeInsets.symmetric(horizontal: 15, vertical: 0),
               decoration: BoxDecoration(
                 borderRadius: BorderRadius.circular(10),
-                color: Theme.of(context)
-                    .colorScheme
-                    .primary
-                    .withValues(alpha: 0.5),
+                color: currentType == 2 || currentType == 3
+                    ? themePrimary.withValues(alpha: 0.5)
+                    : null,
               ),
               child: Text(
-                buttonText,
-                style: const TextStyle(
-                    color: Colors.white,
+                '4k',
+                style: TextStyle(
+                    color: themePrimary,
                     fontWeight: FontWeight.bold,
                     fontSize: 20),
               ),

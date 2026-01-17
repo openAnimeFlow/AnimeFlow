@@ -4,6 +4,7 @@ import 'package:anime_flow/controllers/video/video_state_controller.dart';
 import 'package:anime_flow/controllers/video/video_ui_state_controller.dart';
 import 'package:anime_flow/models/enums/video_controls_icon_type.dart';
 import 'package:anime_flow/stores/episodes_state.dart';
+import 'package:anime_flow/utils/utils.dart';
 import 'package:anime_flow/widget/play_content/episodes_view.dart';
 import 'package:anime_flow/widget/video/ui/danmaku/danmaku_setting.dart';
 import 'package:anime_flow/widget/video/ui/rate_button.dart';
@@ -20,17 +21,17 @@ class BottomAreaControl extends StatelessWidget {
   Widget build(BuildContext context) {
     final videoUiStateController = Get.find<VideoUiStateController>();
     final videoStateController = Get.find<VideoStateController>();
-    final playPageController = Get.find<PlayController>();
+    final playController = Get.find<PlayController>();
     final episodesState = Get.find<EpisodesState>();
     final episodeController = Get.find<EpisodeController>();
     final paddingLeft = MediaQuery.of(context).padding.left;
     return Obx(() {
       // 使用自定义全屏状态，
-      final fullscreen = playPageController.isFullscreen.value;
-      final danmakuOn = playPageController.danmakuOn.value;
-      final isWideScreen = playPageController.isWideScreen.value;
+      final fullscreen = playController.isFullscreen.value;
+      final danmakuOn = playController.danmakuOn.value;
+      final isWideScreen = playController.isWideScreen.value;
       final isShowControlsUi = videoUiStateController.isShowControlsUi.value;
-      final isContentExpanded = playPageController.isContentExpanded.value;
+      final isContentExpanded = playController.isContentExpanded.value;
       final hasNextEpisode = episodeController.hasNextEpisode(episodesState);
 
       return AnimatedSwitcher(
@@ -48,7 +49,13 @@ class BottomAreaControl extends StatelessWidget {
                 ),
                 child: Padding(
                   padding: EdgeInsets.only(
-                      left: MediaQuery.of(context).padding.left, right: 5),
+                      left: MediaQuery.of(context).padding.left,
+                      right: 5,
+                      bottom: Utils.isDesktop
+                          ? 10
+                          : isWideScreen
+                              ? MediaQuery.of(context).padding.bottom
+                              : 0),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
@@ -105,7 +112,7 @@ class BottomAreaControl extends StatelessWidget {
                               ),
                             //弹幕开关
                             InkWell(
-                              onTap: () => playPageController.toggleDanmaku(),
+                              onTap: () => playController.toggleDanmaku(),
                               child: Icon(
                                   danmakuOn
                                       ? Icons.subtitles_outlined
@@ -163,8 +170,8 @@ class BottomAreaControl extends StatelessWidget {
                                         barrierColor: Colors.black54,
                                         transitionDuration:
                                             const Duration(milliseconds: 300),
-                                        transitionBuilder:
-                                            (context, animation, secondaryAnimation, child) {
+                                        transitionBuilder: (context, animation,
+                                            secondaryAnimation, child) {
                                           return SlideTransition(
                                             position: Tween<Offset>(
                                               begin: const Offset(1, 0),
@@ -194,7 +201,7 @@ class BottomAreaControl extends StatelessWidget {
                               duration: const Duration(milliseconds: 500),
                               child: IconButton(
                                   onPressed: () {
-                                    playPageController.toggleFullScreen();
+                                    playController.toggleFullScreen();
                                   },
                                   padding: const EdgeInsets.all(0),
                                   icon: Icon(

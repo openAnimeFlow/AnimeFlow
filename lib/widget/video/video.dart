@@ -84,6 +84,7 @@ class _VideoViewState extends State<VideoView> with WindowListener {
         // 清空之前的弹幕
         playController.removeDanmaku();
         if (episode != _lastEpisodeIndex) {
+           player.stop();
           _selectResourceAfterInit();
         }
       }

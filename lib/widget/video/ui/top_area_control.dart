@@ -75,7 +75,9 @@ class TopAreaControl extends StatelessWidget {
                               Text(
                                 subjectStateController.name,
                                 style: const TextStyle(
-                                    fontSize: 16, fontWeight: FontWeight.bold),
+                                    color: Colors.white,
+                                    fontSize: 16,
+                                    fontWeight: FontWeight.bold),
                               ),
                               episodesController.episodeTitle.value != ''
                                   ? Row(
@@ -85,14 +87,14 @@ class TopAreaControl extends StatelessWidget {
                                               .toString()
                                               .padLeft(2, '0'),
                                           style: const TextStyle(
-                                              color: Colors.white70,
+                                              color: Colors.white,
                                               fontSize: 15),
                                         ),
                                         const SizedBox(width: 8),
                                         Text(
                                           episodesController.episodeTitle.value,
                                           style: const TextStyle(
-                                              color: Colors.white70,
+                                              color: Colors.white,
                                               fontSize: 15),
                                         )
                                       ],
@@ -111,9 +113,10 @@ class TopAreaControl extends StatelessWidget {
                                 barrierDismissible: true,
                                 barrierLabel: "SourceDrawer",
                                 barrierColor: Colors.black54,
-                                transitionDuration: const Duration(milliseconds: 300),
-                                transitionBuilder:
-                                    (context, animation, secondaryAnimation, child) {
+                                transitionDuration:
+                                    const Duration(milliseconds: 300),
+                                transitionBuilder: (context, animation,
+                                    secondaryAnimation, child) {
                                   return SlideTransition(
                                     position: Tween<Offset>(
                                       begin: const Offset(1, 0),
@@ -125,7 +128,8 @@ class TopAreaControl extends StatelessWidget {
                                     child: child,
                                   );
                                 },
-                                pageBuilder: (context, animation, secondaryAnimation) {
+                                pageBuilder:
+                                    (context, animation, secondaryAnimation) {
                                   return VideoSourceDrawers(
                                     onVideoUrlSelected: (url) {
                                       videoStateController.player.stop();
@@ -136,7 +140,7 @@ class TopAreaControl extends StatelessWidget {
                               );
                             },
                             icon: Icon(
-                            Icons.reset_tv_outlined,
+                              Icons.reset_tv_outlined,
                               color: Colors.white.withValues(alpha: 0.8),
                             ),
                           ),

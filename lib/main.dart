@@ -21,16 +21,16 @@ void main() async {
   await themeController.initTheme();
 
   // 桌面平台初始化窗口管理器
-  // if (Platform.isWindows || Platform.isLinux || Platform.isMacOS) {
-  //   await windowManager.ensureInitialized();
-  //   const windowOptions = WindowOptions(
-  //       // titleBarStyle: TitleBarStyle.hidden,
-  //       );
-  //   await windowManager.waitUntilReadyToShow(windowOptions, () async {
-  //     await windowManager.show();
-  //     await windowManager.focus();
-  //   });
-  // }
+  if (Platform.isWindows || Platform.isLinux || Platform.isMacOS) {
+    await windowManager.ensureInitialized();
+    const windowOptions = WindowOptions(
+        // titleBarStyle: TitleBarStyle.hidden,
+        );
+    await windowManager.waitUntilReadyToShow(windowOptions, () async {
+      await windowManager.show();
+      await windowManager.focus();
+    });
+  }
 
   runApp(const MyApp());
   Future.delayed(const Duration(seconds: 2), () {

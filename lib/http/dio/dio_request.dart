@@ -22,9 +22,7 @@ class DioRequest {
           // 在请求前添加token等操作
           // options.headers['Authorization'] = 'Bearer your_token';
           logger.i(
-            'HTTP Request: ${options.method} ${options.path}',
-            time: DateTime.now(),
-            stackTrace: StackTrace.current,
+            'HTTP Request: ${options.method} headers: ${options.headers} ${options.uri}',
           );
           return handler.next(options);
         },

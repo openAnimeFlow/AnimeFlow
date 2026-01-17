@@ -201,6 +201,6 @@ class DanmakuKey {
 
 class PlaybackKey {
   static const String autoPlayNext = 'playback_auto_play_next',
-      saveProgress = 'playback_save_progress',
+      episodesProgress = 'playback_episodes_progress',
       fastForwardSpeed = 'playback_fast_forward_speed';
 }

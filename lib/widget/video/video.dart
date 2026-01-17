@@ -4,6 +4,7 @@ import 'dart:io';
 import 'package:anime_flow/controllers/play/episode_controller.dart';
 import 'package:anime_flow/models/enums/video_controls_icon_type.dart';
 import 'package:anime_flow/repository/play_repository.dart';
+import 'package:anime_flow/repository/storage.dart';
 import 'package:anime_flow/webview/webview_controller.dart';
 import 'package:anime_flow/webview/webview_item.dart';
 import 'package:anime_flow/stores/episodes_state.dart';
@@ -40,9 +41,11 @@ class _VideoViewState extends State<VideoView> with WindowListener {
   late EpisodeController episodeController;
   late SubjectState subjectState;
   late VideoStateController videoStateController;
+  late bool _episodesProgress;
   final webviewItemController = Get.find<WebviewItemController>();
   final logger = Logger();
   final _danmuKey = GlobalKey();
+  final setting = Storage.setting;
 
   // 弹幕加载状态
   bool _isLoadingDanmaku = false;
@@ -73,7 +76,7 @@ class _VideoViewState extends State<VideoView> with WindowListener {
     episodesState = Get.find<EpisodesState>();
     episodeController = Get.find<EpisodeController>();
     subjectState = Get.find<SubjectState>();
-    // 初始化屏幕亮度
+    _episodesProgress = setting.get(PlaybackKey.episodesProgress, defaultValue: true);
     videoUiStateController.initializeBrightness();
 
     // 监听集数变化
@@ -354,18 +357,20 @@ class _VideoViewState extends State<VideoView> with WindowListener {
         PlayRepository.savePlayPosition(playId, position, duration);
 
         /// 播放进度大于90% && collection != null，更新章节进度
-        final progressPercent = position.inSeconds / duration.inSeconds * 100;
-        if (progressPercent > 90) {
-          final currentIndex = episodesState.episodeIndex.value - 1;
-          final episodes = episodesState.episodes.value;
-          if (episodes != null &&
-              currentIndex >= 0 &&
-              currentIndex < episodes.data.length &&
-              episodes.data[currentIndex].collection == null) {
-            UserRequest.updateEpisodeProgressService(episodeId,
-                batch: true, type: 2);
-            // TODO 同时更新本地剧集进度数据
-            logger.i('章节进度已更新: episodeId=$episodeId');
+        if(_episodesProgress) {
+          final progressPercent = position.inSeconds / duration.inSeconds * 100;
+          if (progressPercent > 90) {
+            final currentIndex = episodesState.episodeIndex.value - 1;
+            final episodes = episodesState.episodes.value;
+            if (episodes != null &&
+                currentIndex >= 0 &&
+                currentIndex < episodes.data.length &&
+                episodes.data[currentIndex].collection == null) {
+              UserRequest.updateEpisodeProgressService(episodeId,
+                  batch: true, type: 2);
+              // TODO 同时更新本地剧集进度数据
+              logger.i('章节进度已更新: episodeId=$episodeId');
+            }
           }
         }
       });

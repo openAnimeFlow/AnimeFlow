@@ -17,7 +17,7 @@ class _PlaybackSettingsPageState extends State<PlaybackSettingsPage> {
 
   // 播放配置状态
   late bool _autoPlayNext;
-  late bool _saveProgress;
+  late bool _episodesProgress;
   late double _fastForwardSpeed;
 
   @override
@@ -30,7 +30,7 @@ class _PlaybackSettingsPageState extends State<PlaybackSettingsPage> {
   void _loadSettings() {
     setState(() {
       _autoPlayNext = setting.get(PlaybackKey.autoPlayNext, defaultValue: true);
-      _saveProgress = setting.get(PlaybackKey.saveProgress, defaultValue: true);
+      _episodesProgress = setting.get(PlaybackKey.episodesProgress, defaultValue: true);
       _fastForwardSpeed = setting.get(PlaybackKey.fastForwardSpeed, defaultValue: 2.0);
     });
   }
@@ -86,12 +86,12 @@ class _PlaybackSettingsPageState extends State<PlaybackSettingsPage> {
                     _buildSectionTitle('播放进度'),
                     SwitchListTile(
                       title: const Text('保存剧集进度'),
-                      subtitle: const Text('自动保存当前播放进度，下次继续观看'),
-                      value: _saveProgress,
+                      subtitle: const Text('自动保存保存剧集进度,下次从未观看的剧集开始播放'),
+                      value: _episodesProgress,
                       onChanged: (value) {
                         setState(() {
-                          _saveProgress = value;
-                          setting.put(PlaybackKey.saveProgress, _saveProgress);
+                          _episodesProgress = value;
+                          setting.put(PlaybackKey.episodesProgress, _episodesProgress);
                         });
                       },
                     ),

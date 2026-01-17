@@ -1,6 +1,5 @@
 import 'dart:async';
 import 'dart:io';
-import 'dart:math';
 
 import 'package:anime_flow/controllers/play/episode_controller.dart';
 import 'package:anime_flow/models/enums/video_controls_icon_type.dart';
@@ -127,9 +126,14 @@ class _VideoViewState extends State<VideoView> with WindowListener {
       _parseTimeoutTimer?.cancel();
 
       if (url.isNotEmpty) {
-        await player.open(
-          Media(url, start: Duration(seconds: offset)),
+        await player.open(Media(url), play: false);
+        await player.stream.duration.firstWhere(
+          (d) => d > Duration.zero,
         );
+        await Future.delayed(const Duration(milliseconds: 700), () {
+          player.seek(Duration(seconds: offset));
+        });
+        await player.play();
       }
     });
 
@@ -160,8 +164,8 @@ class _VideoViewState extends State<VideoView> with WindowListener {
           _parsingState(false);
           // 视频解析成功后加载弹幕
           _loadDanmaku();
-          // 保存进度
-          _savePlaybackProgress();
+          // 更新进度
+          _startProgressTracking();
         }
       }
 
@@ -331,8 +335,8 @@ class _VideoViewState extends State<VideoView> with WindowListener {
     return completer.future;
   }
 
-  ///保存播放进度
-  void _savePlaybackProgress() {
+  /// 启动播放进度保存和章节进度更新定时器
+  void _startProgressTracking() {
     _saveProgressTimer?.cancel();
     _saveProgressTimer = null;
     final subjectId = subjectState.id;
@@ -349,7 +353,7 @@ class _VideoViewState extends State<VideoView> with WindowListener {
         final playId = '$subjectId$episodeId';
         PlayRepository.savePlayPosition(playId, position, duration);
 
-        // 播放进度大于90% && collection != null，更新章节进度
+        /// 播放进度大于90% && collection != null，更新章节进度
         final progressPercent = position.inSeconds / duration.inSeconds * 100;
         if (progressPercent > 90) {
           final currentIndex = episodesState.episodeIndex.value - 1;
@@ -394,7 +398,7 @@ class _VideoViewState extends State<VideoView> with WindowListener {
     if (Platform.isWindows || Platform.isLinux || Platform.isMacOS) {
       windowManager.removeListener(this);
     }
-    _savePlaybackProgress();
+    _startProgressTracking();
     Get.delete<VideoUiStateController>();
     Get.delete<VideoStateController>();
     player.dispose();

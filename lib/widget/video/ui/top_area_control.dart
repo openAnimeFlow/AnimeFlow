@@ -106,44 +106,46 @@ class TopAreaControl extends StatelessWidget {
                       //右侧
                       Row(
                         children: [
-                          IconButton(
-                            padding: const EdgeInsets.all(0),
-                            onPressed: () {
-                              Get.generalDialog(
-                                barrierDismissible: true,
-                                barrierLabel: "SourceDrawer",
-                                barrierColor: Colors.black54,
-                                transitionDuration:
-                                    const Duration(milliseconds: 300),
-                                transitionBuilder: (context, animation,
-                                    secondaryAnimation, child) {
-                                  return SlideTransition(
-                                    position: Tween<Offset>(
-                                      begin: const Offset(1, 0),
-                                      end: Offset.zero,
-                                    ).animate(CurvedAnimation(
-                                      parent: animation,
-                                      curve: Curves.easeOut,
-                                    )),
-                                    child: child,
-                                  );
-                                },
-                                pageBuilder:
-                                    (context, animation, secondaryAnimation) {
-                                  return VideoSourceDrawers(
-                                    onVideoUrlSelected: (url) {
-                                      videoStateController.player.stop();
-                                      videoSourceController.loadVideoPage(url);
-                                    },
-                                  );
-                                },
-                              );
-                            },
-                            icon: Icon(
-                              Icons.reset_tv_outlined,
-                              color: Colors.white.withValues(alpha: 0.8),
+                          if (fullscreen)
+                            IconButton(
+                              padding: const EdgeInsets.all(0),
+                              onPressed: () {
+                                Get.generalDialog(
+                                  barrierDismissible: true,
+                                  barrierLabel: "SourceDrawer",
+                                  barrierColor: Colors.black54,
+                                  transitionDuration:
+                                      const Duration(milliseconds: 300),
+                                  transitionBuilder: (context, animation,
+                                      secondaryAnimation, child) {
+                                    return SlideTransition(
+                                      position: Tween<Offset>(
+                                        begin: const Offset(1, 0),
+                                        end: Offset.zero,
+                                      ).animate(CurvedAnimation(
+                                        parent: animation,
+                                        curve: Curves.easeOut,
+                                      )),
+                                      child: child,
+                                    );
+                                  },
+                                  pageBuilder:
+                                      (context, animation, secondaryAnimation) {
+                                    return VideoSourceDrawers(
+                                      onVideoUrlSelected: (url) {
+                                        videoStateController.player.stop();
+                                        videoSourceController
+                                            .loadVideoPage(url);
+                                      },
+                                    );
+                                  },
+                                );
+                              },
+                              icon: Icon(
+                                Icons.reset_tv_outlined,
+                                color: Colors.white.withValues(alpha: 0.8),
+                              ),
                             ),
-                          ),
                           if (Utils.isDesktop)
                             Obx(() => playPageController.isWideScreen.value
                                 ? IconButton(

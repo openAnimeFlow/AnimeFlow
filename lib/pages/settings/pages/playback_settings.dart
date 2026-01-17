@@ -3,7 +3,6 @@ import 'package:anime_flow/pages/settings/setting_controller.dart';
 import 'package:anime_flow/repository/storage.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:hive/hive.dart';
 
 class PlaybackSettingsPage extends StatefulWidget {
   const PlaybackSettingsPage({super.key});
@@ -14,7 +13,7 @@ class PlaybackSettingsPage extends StatefulWidget {
 
 class _PlaybackSettingsPageState extends State<PlaybackSettingsPage> {
   late SettingController settingController;
-  Box setting = Storage.setting;
+  final setting = Storage.setting;
 
   // 播放配置状态
   late bool _autoPlayNext;

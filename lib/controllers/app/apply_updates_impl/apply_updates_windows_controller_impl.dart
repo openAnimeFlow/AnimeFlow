@@ -1,3 +1,4 @@
+import 'package:anime_flow/controllers/app/app_info_controller.dart';
 import 'package:anime_flow/controllers/app/apply_updates_controller.dart';
 import 'package:anime_flow/http/dio/dio_request.dart';
 import 'package:dio/dio.dart';
@@ -9,17 +10,16 @@ class ApplyUpdatesWindowsController implements ApplyUpdatesController {
   CancelToken? _cancelToken;
 
   @override
-  Future<void> applyUpdates(
-    String downloadUrl, {
-    String? fileName,
+  Future<void> applyUpdates({
+    required DownloadInfo downloadInfo,
     void Function(int received, int total)? onProgress,
   }) async {
     _cancelToken = CancelToken();
     try {
       final tempDir = await getDownloadsDirectory();
-      final savePath = path.join(tempDir!.path, fileName ?? 'AnimeFlow.zip');
+      final savePath = path.join(tempDir!.path, downloadInfo.fileName);
       await dioRequest.download(
-        downloadUrl,
+        downloadInfo.url,
         savePath,
         onReceiveProgress: (received, total) {
           onProgress?.call(received, total);

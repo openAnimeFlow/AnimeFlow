@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'package:anime_flow/controllers/app/app_info_controller.dart';
 import 'package:anime_flow/controllers/app/apply_updates_impl/apply_updates_android_controller_impl.dart';
 import 'package:anime_flow/controllers/app/apply_updates_impl/apply_updates_ios_controller_impl.dart';
 import 'package:anime_flow/controllers/app/apply_updates_impl/apply_updates_linux_controller_impl.dart';
@@ -9,9 +10,8 @@ abstract class ApplyUpdatesController {
   ///应用更新
   /// [downloadUrl] 下载地址
   /// [onProgress] 下载进度回调，参数为 (已下载字节数, 总字节数)
-  Future<void> applyUpdates(
-    String downloadUrl, {
-        String? fileName,
+  Future<void> applyUpdates({
+    required DownloadInfo downloadInfo,
     void Function(int received, int total)? onProgress,
   });
 

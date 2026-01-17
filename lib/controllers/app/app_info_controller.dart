@@ -78,6 +78,7 @@ class AppInfoController extends GetxController {
 
       if (comparison > 0) {
         final assets = release['assets'];
+        final htmlUrl = release['html_url']?.toString();
         if (assets == null || assets is! List) {
           Get.log('assets 数据格式错误');
           return VersionType.localNewer;
@@ -88,7 +89,7 @@ class AppInfoController extends GetxController {
             .map((e) => Map<String, dynamic>.from(e))
             .toList();
 
-        List<DownloadInfo> download = getDownloadInfo(downloadInfo);
+        List<DownloadInfo> download = getDownloadInfo(downloadInfo, htmlUrl ?? '');
 
         if (download.isEmpty) {
           Get.snackbar("检查更新", "未找到对应平台的下载地址", maxWidth: 500);
@@ -109,6 +110,11 @@ class AppInfoController extends GetxController {
             download: download,
             body: body,
             onStartDownload: (downloadUrl, fileName) async {
+              final downloadInfo = download.firstWhere(
+                (info) => info.url == downloadUrl && info.fileName == fileName,
+                orElse: () => download[0],
+              );
+
               // 开始下载
               isDownloading.value = true;
               downloadProgress.value = 0.0;
@@ -119,8 +125,7 @@ class AppInfoController extends GetxController {
 
               try {
                 await updateController!.applyUpdates(
-                  downloadUrl,
-                  fileName: fileName,
+                  downloadInfo: downloadInfo,
                   onProgress: (received, total) {
                     receivedBytes.value = received;
                     totalBytes.value = total;
@@ -129,14 +134,14 @@ class AppInfoController extends GetxController {
                     }
                   },
                 );
-                
+
                 // 关闭下载进度对话框
                 Get.back();
-                
+
                 // Windows 平台下载完成后显示完成对话框
                 if (Platform.isWindows) {
                   final tempDir = await getDownloadsDirectory();
-                  final savePath = path.join(tempDir!.path, fileName);
+                  final savePath = path.join(tempDir!.path, downloadInfo.fileName);
                   _showWindowsDownloadCompleteDialog(savePath);
                 }
               } catch (e) {
@@ -206,7 +211,7 @@ class AppInfoController extends GetxController {
   }
 
   ///根据平台获取下载地址
-  List<DownloadInfo> getDownloadInfo(List<Map<String, dynamic>> assets) {
+  List<DownloadInfo> getDownloadInfo(List<Map<String, dynamic>> assets, String htmlUrl) {
     final platform = Utils.getDevice();
     final List<DownloadInfo> urlList = [];
 
@@ -219,29 +224,29 @@ class AppInfoController extends GetxController {
       switch (platform) {
         case 'android':
           if (name.toLowerCase().contains('android')) {
-            urlList.add(DownloadInfo.fromJson(asset));
+            urlList.add(DownloadInfo.fromJson(asset, htmlUrl));
           }
           break;
         case 'ios':
           if (name.toLowerCase().contains('ios')) {
-            urlList.add(DownloadInfo.fromJson(asset));
+            urlList.add(DownloadInfo.fromJson(asset, htmlUrl));
           }
           break;
         case 'macos':
           if (name.toLowerCase().contains('macos') ||
               name.toLowerCase().contains('mac')) {
-            urlList.add(DownloadInfo.fromJson(asset));
+            urlList.add(DownloadInfo.fromJson(asset, htmlUrl));
           }
           break;
         case 'windows':
           if (name.toLowerCase().contains('windows') ||
               name.toLowerCase().contains('win')) {
-            urlList.add(DownloadInfo.fromJson(asset));
+            urlList.add(DownloadInfo.fromJson(asset, htmlUrl));
           }
           break;
         case 'linux':
           if (name.toLowerCase().contains('linux')) {
-            urlList.add(DownloadInfo.fromJson(asset));
+            urlList.add(DownloadInfo.fromJson(asset, htmlUrl));
           }
           break;
       }
@@ -249,7 +254,6 @@ class AppInfoController extends GetxController {
 
     return urlList;
   }
-
 
   /// 获取版本号
   String get version => appInfo.value?.version ?? '未知';
@@ -324,14 +328,16 @@ class DownloadInfo {
   final String url;
   final String fileName;
   final int size;
+  final String htmlUrl;
 
-  DownloadInfo(this.url, this.fileName, this.size);
+  DownloadInfo(this.url, this.fileName, this.size, this.htmlUrl);
 
-  factory DownloadInfo.fromJson(Map<String, dynamic> json) {
+  factory DownloadInfo.fromJson(Map<String, dynamic> json, String htmlUrl) {
     return DownloadInfo(
       json['browser_download_url'] as String,
       json['name'] as String,
       json['size'] as int,
+      htmlUrl,
     );
   }
 }

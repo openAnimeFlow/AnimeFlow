@@ -1,5 +1,6 @@
 import 'dart:io';
 
+import 'package:anime_flow/controllers/app/app_info_controller.dart';
 import 'package:anime_flow/controllers/app/apply_updates_controller.dart';
 import 'package:anime_flow/http/dio/dio_request.dart';
 import 'package:dio/dio.dart';
@@ -14,18 +15,17 @@ class ApplyUpdatesAndroidController implements ApplyUpdatesController {
   CancelToken? _cancelToken;
 
   @override
-  Future<void> applyUpdates(
-    String downloadUrl, {
-    String? fileName,
+  Future<void> applyUpdates({
+    required DownloadInfo downloadInfo,
     void Function(int received, int total)? onProgress,
   }) async {
     _cancelToken = CancelToken();
 
     try {
       final dir = await getExternalStorageDirectory();
-      final savePath = '${dir!.path}/${fileName ?? 'AnimeFlow.apk'}';
+      final savePath = '${dir!.path}/${downloadInfo.fileName}';
       Get.log(savePath);
-      await dioRequest.download(downloadUrl, savePath,
+      await dioRequest.download(downloadInfo.url, savePath,
           onReceiveProgress: (received, total) {
         // 调用进度回调
         onProgress?.call(received, total);

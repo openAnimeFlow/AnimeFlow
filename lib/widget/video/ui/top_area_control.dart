@@ -1,8 +1,11 @@
+import 'package:anime_flow/controllers/video/data/video_source_controller.dart';
+import 'package:anime_flow/controllers/video/video_state_controller.dart';
 import 'package:anime_flow/stores/episodes_state.dart';
 import 'package:anime_flow/controllers/play/PlayPageController.dart';
 import 'package:anime_flow/stores/subject_state.dart';
 import 'package:anime_flow/controllers/video/video_ui_state_controller.dart';
 import 'package:anime_flow/utils/utils.dart';
+import 'package:anime_flow/widget/play_content/source_drawers/video_source_drawers.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:get/get.dart';
@@ -15,6 +18,8 @@ class TopAreaControl extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final videoStateController = Get.find<VideoStateController>();
+    final videoSourceController = Get.find<VideoSourceController>();
     final playPageController = Get.find<PlayController>();
     final videoUiStateController = Get.find<VideoUiStateController>();
     final episodesController = Get.find<EpisodesState>();
@@ -101,9 +106,37 @@ class TopAreaControl extends StatelessWidget {
                         children: [
                           IconButton(
                             padding: const EdgeInsets.all(0),
-                            onPressed: () {},
+                            onPressed: () {
+                              Get.generalDialog(
+                                barrierDismissible: true,
+                                barrierLabel: "SourceDrawer",
+                                barrierColor: Colors.black54,
+                                transitionDuration: const Duration(milliseconds: 300),
+                                transitionBuilder:
+                                    (context, animation, secondaryAnimation, child) {
+                                  return SlideTransition(
+                                    position: Tween<Offset>(
+                                      begin: const Offset(1, 0),
+                                      end: Offset.zero,
+                                    ).animate(CurvedAnimation(
+                                      parent: animation,
+                                      curve: Curves.easeOut,
+                                    )),
+                                    child: child,
+                                  );
+                                },
+                                pageBuilder: (context, animation, secondaryAnimation) {
+                                  return VideoSourceDrawers(
+                                    onVideoUrlSelected: (url) {
+                                      videoStateController.player.stop();
+                                      videoSourceController.loadVideoPage(url);
+                                    },
+                                  );
+                                },
+                              );
+                            },
                             icon: Icon(
-                              Icons.settings,
+                            Icons.reset_tv_outlined,
                               color: Colors.white.withValues(alpha: 0.8),
                             ),
                           ),

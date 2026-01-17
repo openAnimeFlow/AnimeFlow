@@ -1,3 +1,4 @@
+import 'package:anime_flow/controllers/video/video_state_controller.dart';
 import 'package:anime_flow/stores/subject_state.dart';
 import 'package:anime_flow/widget/animation_network_image/animation_network_image.dart';
 import 'package:anime_flow/widget/play_content/source_drawers/video_source_drawers.dart';
@@ -16,6 +17,7 @@ class VideoResourcesView extends StatefulWidget {
 class _VideoResourcesViewState extends State<VideoResourcesView> {
   late VideoSourceController videoSourceController;
   late SubjectState subjectStateController;
+  late VideoStateController videoStateController;
   final Logger logger = Logger();
 
   @override
@@ -23,7 +25,7 @@ class _VideoResourcesViewState extends State<VideoResourcesView> {
     super.initState();
     videoSourceController = Get.find<VideoSourceController>();
     subjectStateController = Get.find<SubjectState>();
-
+    videoStateController = Get.find<VideoStateController>();
     // 检查资源是否已经为当前关键词初始化过，避免全屏切换时重复初始化
     WidgetsBinding.instance.addPostFrameCallback((_) {
       final currentKeyword = subjectStateController.name;
@@ -117,6 +119,7 @@ class _VideoResourcesViewState extends State<VideoResourcesView> {
                       pageBuilder: (context, animation, secondaryAnimation) {
                         return VideoSourceDrawers(
                           onVideoUrlSelected: (url) {
+                            videoStateController.player.stop();
                             videoSourceController.loadVideoPage(url);
                           },
                         );

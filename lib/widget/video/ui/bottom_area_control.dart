@@ -158,9 +158,24 @@ class BottomAreaControl extends StatelessWidget {
                               TextButton(
                                   onPressed: () {
                                     Get.generalDialog(
+                                        barrierDismissible: true,
+                                        barrierLabel: "episodesDrawer",
                                         barrierColor: Colors.black54,
                                         transitionDuration:
                                             const Duration(milliseconds: 300),
+                                        transitionBuilder:
+                                            (context, animation, secondaryAnimation, child) {
+                                          return SlideTransition(
+                                            position: Tween<Offset>(
+                                              begin: const Offset(1, 0),
+                                              end: Offset.zero,
+                                            ).animate(CurvedAnimation(
+                                              parent: animation,
+                                              curve: Curves.easeOut,
+                                            )),
+                                            child: child,
+                                          );
+                                        },
                                         pageBuilder: (context, animation,
                                             secondaryAnimation) {
                                           return const EpisodesView();

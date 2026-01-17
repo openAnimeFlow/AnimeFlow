@@ -130,7 +130,7 @@ class _VideoViewState extends State<VideoView> with WindowListener {
         await player.stream.duration.firstWhere(
           (d) => d > Duration.zero,
         );
-        await Future.delayed(const Duration(milliseconds: 700), () {
+        await Future.delayed(const Duration(milliseconds: 800), () {
           player.seek(Duration(seconds: offset));
         });
         await player.play();

@@ -164,6 +164,7 @@ class VideoUiStateController extends GetxController {
     isShowControlsUi.value = true;
   }
 
+
   ///隐藏控件ui
   void hideControlsUi({Duration? duration}) {
     _controlsUiTimer?.cancel();
@@ -187,6 +188,11 @@ class VideoUiStateController extends GetxController {
     showControlsUi();
 
     // 取消之前的自动隐藏UI计时器
+    cancelUiTimer();
+  }
+
+  ///取消ui计时器
+  void cancelUiTimer() {
     _controlsUiTimer?.cancel();
   }
 

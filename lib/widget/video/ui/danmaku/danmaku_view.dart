@@ -1,5 +1,5 @@
 import 'dart:async';
-import 'package:anime_flow/controllers/play/PlayPageController.dart';
+import 'package:anime_flow/controllers/play/play_controller.dart';
 import 'package:anime_flow/controllers/video/video_state_controller.dart';
 import 'package:anime_flow/repository/storage.dart';
 import 'package:canvas_danmaku/canvas_danmaku.dart';

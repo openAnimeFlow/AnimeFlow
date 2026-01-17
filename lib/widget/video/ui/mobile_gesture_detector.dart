@@ -1,4 +1,4 @@
-import 'package:anime_flow/controllers/play/PlayPageController.dart';
+import 'package:anime_flow/controllers/play/play_controller.dart';
 import 'package:anime_flow/controllers/video/video_state_controller.dart';
 import 'package:anime_flow/controllers/video/video_ui_state_controller.dart';
 import 'package:anime_flow/models/enums/video_controls_icon_type.dart';

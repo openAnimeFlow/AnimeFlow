@@ -8,6 +8,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_inappwebview_platform_interface/flutter_inappwebview_platform_interface.dart';
 import 'package:gal/gal.dart';
 import 'package:get/get.dart';
+import 'package:path/path.dart' as path;
 import 'package:path_provider/path_provider.dart'
     show getDownloadsDirectory, getTemporaryDirectory;
 import 'package:logger/logger.dart';
@@ -163,7 +164,6 @@ class Utils {
   }
 
   /// 进入全屏显示
-  /// 
   static Future<void> enterFullScreen({bool lockOrientation = true}) async {
     if (Platform.isLinux || Platform.isMacOS || Platform.isWindows) {
       await windowManager.setFullScreen(true);
@@ -206,5 +206,16 @@ class Utils {
       DeviceOrientation.landscapeLeft,
       DeviceOrientation.landscapeRight
     ]);
+  }
+
+  static String buildShadersAbsolutePath(
+      String baseDirectory, List<String> shaders) {
+    List<String> absolutePaths = shaders.map((shader) {
+      return path.join(baseDirectory, shader);
+    }).toList();
+    if (Platform.isWindows) {
+      return absolutePaths.join(';');
+    }
+    return absolutePaths.join(':');
   }
 }

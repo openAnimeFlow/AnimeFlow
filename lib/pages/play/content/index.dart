@@ -1,5 +1,5 @@
 import 'package:anime_flow/stores/episodes_state.dart';
-import 'package:anime_flow/controllers/play/PlayPageController.dart';
+import 'package:anime_flow/controllers/play/play_controller.dart';
 import 'package:anime_flow/http/requests/bgm_request.dart';
 import 'package:anime_flow/models/item/bangumi/episode_comments_item.dart';
 import 'package:anime_flow/models/item/bangumi/episodes_item.dart';

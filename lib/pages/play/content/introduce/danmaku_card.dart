@@ -1,5 +1,5 @@
 import 'package:anime_flow/stores/episodes_state.dart';
-import 'package:anime_flow/controllers/play/PlayPageController.dart';
+import 'package:anime_flow/controllers/play/play_controller.dart';
 import 'package:anime_flow/models/item/danmaku/danmaku_module.dart';
 import 'package:anime_flow/utils/formatUtil.dart';
 import 'package:flutter/material.dart';

@@ -1,4 +1,5 @@
 import 'package:anime_flow/controllers/main_page/main_page_state.dart';
+import 'package:anime_flow/controllers/shaders/shaders_controller.dart';
 import 'package:anime_flow/models/item/tab_item.dart';
 import 'package:anime_flow/pages/my/index.dart';
 import 'package:anime_flow/pages/ranking/index.dart';
@@ -21,6 +22,9 @@ class MainPage extends StatefulWidget {
 class _MainPageState extends State<MainPage> {
   late UserInfoStore userInfoStore;
   late MainPageState mainPageState;
+  late ShadersController shadersController;
+
+  int _currentIndex = 0;
 
   // 使用 GlobalKey 保持 IndexedStack 的状态，防止在布局切换（Row <-> Column）时页面重构
   final GlobalKey _bodyKey = GlobalKey();
@@ -46,8 +50,6 @@ class _MainPageState extends State<MainPage> {
   // 懒加载页面缓存
   final List<Widget?> _pageCache = List.filled(3, null);
 
-  int _currentIndex = 0;
-
   void _initializePage(int index) {
     if (_pageCache[index] == null) {
       switch (index) {
@@ -69,14 +71,24 @@ class _MainPageState extends State<MainPage> {
     super.initState();
     userInfoStore = Get.put(UserInfoStore());
     mainPageState = Get.put(MainPageState());
-    CrawlConfig.initCrawlConfigs();
-
-    // 从参数中获取初始 index，默认为 0
+    shadersController = Get.put(ShadersController());
+    // TODO 从配置中初始化对应的页面
     final initialIndex = Get.arguments as int? ?? 0;
-    _currentIndex = initialIndex.clamp(0, 2);
+    _currentIndex = initialIndex.clamp(0, _tabs.length - 1);
+    _initializeApp();
+  }
 
+  // 初始化应用程序
+  Future<void> _initializeApp() async {
     // 初始化对应的页面
     _initializePage(_currentIndex);
+    CrawlConfig.initCrawlConfigs();
+    _loadShaders();
+  }
+
+  // 加载着色器
+  Future<void> _loadShaders() async {
+    await shadersController.copyShadersToExternalDirectory();
   }
 
   // 构建 NavigationRail
@@ -183,6 +195,7 @@ class _MainPageState extends State<MainPage> {
   void dispose() {
     Get.delete<UserInfoStore>();
     Get.delete<MainPageState>();
+    Get.delete<ShadersController>();
     super.dispose();
   }
 

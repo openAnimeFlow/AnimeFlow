@@ -1,4 +1,4 @@
-import 'package:anime_flow/controllers/play/PlayPageController.dart';
+import 'package:anime_flow/controllers/play/play_controller.dart';
 import 'package:anime_flow/controllers/play/episode_controller.dart';
 import 'package:anime_flow/controllers/video/video_state_controller.dart';
 import 'package:anime_flow/controllers/video/video_ui_state_controller.dart';
@@ -7,11 +7,13 @@ import 'package:anime_flow/stores/episodes_state.dart';
 import 'package:anime_flow/utils/utils.dart';
 import 'package:anime_flow/widget/play_content/episodes_view.dart';
 import 'package:anime_flow/widget/video/ui/danmaku/danmaku_setting.dart';
-import 'package:anime_flow/widget/video/ui/rate_button.dart';
+import 'package:anime_flow/widget/video/ui/button/rate_button.dart';
 import 'package:anime_flow/widget/video/ui/video_ui_components.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:get/get.dart';
+
+import 'button/shader_button.dart';
 
 /// 底部区域控件
 class BottomAreaControl extends StatelessWidget {
@@ -190,11 +192,12 @@ class BottomAreaControl extends StatelessWidget {
                                   },
                                   child: const Text("选集")),
 
-                            //倍速按钮
+                            //超分辨率
                             if (isWideScreen || fullscreen)
-                              const Padding(
-                                  padding: EdgeInsets.symmetric(horizontal: 0),
-                                  child: RateButton()),
+                              const ShaderButton(),
+
+                            //倍速按钮
+                            if (isWideScreen || fullscreen) const RateButton(),
 
                             // 全屏按钮
                             AnimatedContainer(

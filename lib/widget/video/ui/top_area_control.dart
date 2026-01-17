@@ -1,7 +1,7 @@
 import 'package:anime_flow/controllers/video/data/video_source_controller.dart';
 import 'package:anime_flow/controllers/video/video_state_controller.dart';
 import 'package:anime_flow/stores/episodes_state.dart';
-import 'package:anime_flow/controllers/play/PlayPageController.dart';
+import 'package:anime_flow/controllers/play/play_controller.dart';
 import 'package:anime_flow/stores/subject_state.dart';
 import 'package:anime_flow/controllers/video/video_ui_state_controller.dart';
 import 'package:anime_flow/utils/utils.dart';

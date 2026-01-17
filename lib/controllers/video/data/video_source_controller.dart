@@ -252,17 +252,13 @@ class VideoSourceController extends GetxController {
       );
       if (matchingEpisodes.isNotEmpty) {
         final currentEpisode = matchingEpisodes.first;
-        try {
-          setWebSite(
-            title: resource.websiteName,
-            iconUrl: resource.websiteIcon,
-            videoUrl: resource.baseUrl + currentEpisode.like,
-          );
-          // _videoStateController.disposeVideo();
-          await loadVideoPage(resource.baseUrl + currentEpisode.like);
-        } catch (e) {
-          _logger.e('自动加载视频源失败', error: e);
-        }
+        setWebSite(
+          title: resource.websiteName,
+          iconUrl: resource.websiteIcon,
+          videoUrl: resource.baseUrl + currentEpisode.like,
+        );
+        // _videoStateController.disposeVideo();
+        await loadVideoPage(resource.baseUrl + currentEpisode.like);
         return;
       }
     }
@@ -278,11 +274,15 @@ class VideoSourceController extends GetxController {
     if (position != null && position.position > 0) {
       offset = position.position;
     }
-    await _webviewItemController.loadUrl(
-      url,
-      true, // useNativePlayer: 使用原生播放器
-      true, // useLegacyParser: 不使用旧解析器
-      offset: offset,
-    );
+    try {
+      await _webviewItemController.loadUrl(
+        url,
+        true, // useNativePlayer: 使用原生播放器
+        true, // useLegacyParser: 不使用旧解析器
+        offset: offset,
+      );
+    } catch (e) {
+      _logger.e('加载视频页面失败', error: e);
+    }
   }
 }

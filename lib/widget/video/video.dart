@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'dart:io';
+import 'dart:math';
 
 import 'package:anime_flow/controllers/play/episode_controller.dart';
 import 'package:anime_flow/models/enums/video_controls_icon_type.dart';
@@ -48,7 +49,6 @@ class _VideoViewState extends State<VideoView> with WindowListener {
   bool _isLoadingDanmaku = false;
   bool _hasDanmakuLoaded = false;
 
-  StreamSubscription<bool>? _initSubscription;
   StreamSubscription<(String, int)>? _videoURLSubscription;
   StreamSubscription<bool>? _videoLoadingSubscription;
   StreamSubscription<String>? _logSubscription;
@@ -84,7 +84,7 @@ class _VideoViewState extends State<VideoView> with WindowListener {
         // 清空之前的弹幕
         playController.removeDanmaku();
         if (episode != _lastEpisodeIndex) {
-           player.stop();
+          player.stop();
           _selectResourceAfterInit();
         }
       }
@@ -181,15 +181,15 @@ class _VideoViewState extends State<VideoView> with WindowListener {
       }
     });
     // 如果webview尚未初始化，则初始化
-    if (webviewItemController.webviewController == null) {
-      _initSubscription =
-          webviewItemController.onInitialized.listen((initialized) {
-        if (initialized) {
-          logger.i('WebView初始化完成');
-        }
-      });
-      await webviewItemController.init();
-    }
+    // if (webviewItemController.webviewController == null) {
+    //   _initSubscription =
+    //       webviewItemController.onInitialized.listen((initialized) {
+    //     if (initialized) {
+    //       logger.i('WebView初始化完成');
+    //     }
+    //   });
+    //   await webviewItemController.init();
+    // }
   }
 
   //解析状态
@@ -358,9 +358,9 @@ class _VideoViewState extends State<VideoView> with WindowListener {
               currentIndex >= 0 &&
               currentIndex < episodes.data.length &&
               episodes.data[currentIndex].collection == null) {
-             UserRequest.updateEpisodeProgressService(episodeId,
+            UserRequest.updateEpisodeProgressService(episodeId,
                 batch: true, type: 2);
-             // TODO 同时更新本地剧集进度数据
+            // TODO 同时更新本地剧集进度数据
             logger.i('章节进度已更新: episodeId=$episodeId');
           }
         }
@@ -386,7 +386,6 @@ class _VideoViewState extends State<VideoView> with WindowListener {
   @override
   void dispose() {
     _parseTimeoutTimer?.cancel();
-    _initSubscription?.cancel();
     _videoURLSubscription?.cancel();
     _videoLoadingSubscription?.cancel();
     _logSubscription?.cancel();
@@ -438,13 +437,12 @@ class _VideoViewState extends State<VideoView> with WindowListener {
 
         /// webview_windows 的窗口必须嵌入到 Widget 树中才能被控制
         /// 通过 SizedBox 的 height 为 0 来隐藏它，但保持其在 Widget 树中(Kazumi)
-        if (Platform.isWindows || Platform.isLinux)
-          const Positioned(
-            child: SizedBox(
-              height: 0,
-              child: WebviewItem(),
-            ),
+        const Positioned(
+          child: SizedBox(
+            height: 0,
+            child: WebviewItem(),
           ),
+        ),
       ],
     );
   }

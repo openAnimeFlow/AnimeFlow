@@ -73,16 +73,13 @@ class _VideoSourceDrawersState extends State<VideoSourceDrawers> {
         width: PlayLayoutConstant.playContentWidth,
         height: MediaQuery.of(context).size.height,
         child: Container(
-          padding: const EdgeInsets.all(16),
+          padding: EdgeInsets.only(
+              top: MediaQuery.of(context).padding.top, left: 16, right: 16),
           color: Theme.of(context).cardColor,
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Padding(
-                padding:
-                    EdgeInsets.only(top: MediaQuery.of(context).padding.top),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+               Row(
                   children: [
                     Text(
                       '数据源',
@@ -93,13 +90,13 @@ class _VideoSourceDrawersState extends State<VideoSourceDrawers> {
                         decoration: TextDecoration.none,
                       ),
                     ),
+                    const Spacer(),
                     IconButton(
                       onPressed: () => Navigator.of(context).pop(),
                       icon: const Icon(Icons.close_rounded),
                     ),
                   ],
                 ),
-              ),
               _manualSearch(),
               const SizedBox(height: 16),
               Obx(() {
@@ -112,7 +109,8 @@ class _VideoSourceDrawersState extends State<VideoSourceDrawers> {
               const SizedBox(height: 16),
               Expanded(
                 child: Obx(() {
-                  final dataSource = dataSourceController.videoResources.toList();
+                  final dataSource =
+                      dataSourceController.videoResources.toList();
                   if (dataSource.isEmpty) {
                     return const SizedBox.shrink();
                   }
@@ -289,7 +287,6 @@ class _VideoSourceDrawersState extends State<VideoSourceDrawers> {
 
       return Material(
         child: ListView.builder(
-          padding: const EdgeInsets.symmetric(vertical: 0),
           itemCount: selectedResource.episodeResources.length,
           itemBuilder: (context, index) {
             final resourceItem = selectedResource.episodeResources[index];

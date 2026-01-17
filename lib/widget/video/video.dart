@@ -400,9 +400,9 @@ class _VideoViewState extends State<VideoView> with WindowListener {
     _logSubscription?.cancel();
     _saveProgressTimer?.cancel();
     // 移除窗口监听器
-    if (Platform.isWindows || Platform.isLinux || Platform.isMacOS) {
-      windowManager.removeListener(this);
-    }
+    // if (Platform.isWindows || Platform.isLinux || Platform.isMacOS) {
+    //   windowManager.removeListener(this);
+    // }
     _startProgressTracking();
     Get.delete<VideoUiStateController>();
     Get.delete<VideoStateController>();

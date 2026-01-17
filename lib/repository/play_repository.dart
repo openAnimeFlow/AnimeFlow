@@ -7,7 +7,10 @@ class PlayRepository {
   /// playId = subjectId + episodeId
   static Future<void> savePlayPosition(
       String playId, Duration position, Duration duration) async {
-    if (duration - position < const Duration(seconds: 20)) return;
+    if (duration < const Duration(seconds: 2) ||
+        duration - position < const Duration(seconds: 20)) {
+      return;
+    }
 
     final data = PlayHistory(
       playId: playId,
@@ -34,6 +37,7 @@ class PlayRepository {
     return playHistory.delete(playId);
   }
 
+  /// 删除历史
   static Future<void> trimToLimit({int max = 50}) async {
     final list = playHistory.values.toList();
     if (list.length <= max) {

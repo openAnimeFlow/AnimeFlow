@@ -16,6 +16,7 @@ class ShaderButton extends StatelessWidget {
     return Obx(() {
       final currentType = playController.superResolutionType.value;
       final player = videoStateController.player;
+      final labels = ['关闭', '效率档', '质量档'];
 
       return MenuAnchor(
         onOpen: () {
@@ -26,15 +27,13 @@ class ShaderButton extends StatelessWidget {
               duration: const Duration(seconds: 2));
         },
         menuChildren: List<MenuItemButton>.generate(
-          3,
+          labels.length,
           (int index) {
             final type = index + 1;
-            final labels = ['关闭', '效率档', '质量档'];
             final isSelected = currentType == type;
 
             return MenuItemButton(
               onPressed: () {
-                Get.log('超分辨率型: $type');
                 playController.setShader(type, player: player);
               },
               child: Container(

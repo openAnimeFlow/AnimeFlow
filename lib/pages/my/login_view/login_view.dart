@@ -233,6 +233,25 @@ class _LoginViewState extends State<LoginView>
 
   Widget _buildAppBarTitle() {
     final userInfo = widget.userInfoItem;
+
+    // 菜单项数据
+    final menuItems = [
+      {
+        'title': '设置',
+        'icon': Icons.settings_outlined,
+        'action': () {
+          Get.toNamed(RouteName.settings);
+        },
+      },
+      {
+        'title': '退出登录',
+        'icon': Icons.logout_outlined,
+        'action': () {
+          userInfoStore.clearUserInfo();
+        },
+      },
+    ];
+
     return Container(
         padding: const EdgeInsets.symmetric(horizontal: 16),
         child: Row(
@@ -265,17 +284,43 @@ class _LoginViewState extends State<LoginView>
                 ),
               ),
             ),
-            Obx(
-              () => mainPageState.isDesktop.value
-                  ? const SizedBox.shrink()
-                  : IconButton(
-                      onPressed: () {
-                        setState(
-                          () => Get.toNamed(RouteName.settings),
-                        );
-                      },
-                      icon: const Icon(Icons.settings_outlined),
+            MenuAnchor(
+              alignmentOffset: const Offset(-100, 0),
+              crossAxisUnconstrained: false,
+              menuChildren: List<MenuItemButton>.generate(menuItems.length, (int index) {
+                final menuItem = menuItems[index];
+                return MenuItemButton(
+                  onPressed: menuItem['action'] as VoidCallback,
+                  child: SizedBox(
+                    width: 120,
+                    child: Row(
+                      children: [
+                        Icon(
+                          menuItem['icon'] as IconData,
+                          size: 20,
+                        ),
+                        const SizedBox(width: 8),
+                        Text(menuItem['title'] as String),
+                      ],
                     ),
+                  ),
+                );
+              }),
+              builder: (BuildContext context, MenuController controller, Widget? child) {
+                return InkWell(
+                  onTap: () {
+                    if (controller.isOpen) {
+                      controller.close();
+                    } else {
+                      controller.open();
+                    }
+                  },
+                  child: const Icon(
+                    Icons.notes_outlined,
+                    size: 30,
+                  ),
+                );
+              },
             ),
           ],
         ));

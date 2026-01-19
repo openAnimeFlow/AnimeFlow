@@ -81,7 +81,7 @@ class ShaderButton extends StatelessWidget {
                 style: TextStyle(
                     color: themePrimary,
                     fontWeight: FontWeight.bold,
-                    fontSize: 20),
+                    fontSize: 18),
               ),
             ),
           );

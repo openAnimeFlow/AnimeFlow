@@ -164,7 +164,7 @@ class Utils {
   }
 
   /// 进入全屏显示
-  static Future<void> enterFullScreen({bool lockOrientation = true}) async {
+  static Future<void> enterFullScreen() async {
     if (Platform.isLinux || Platform.isMacOS || Platform.isWindows) {
       await windowManager.setFullScreen(true);
       return;
@@ -172,18 +172,15 @@ class Utils {
     await SystemChrome.setEnabledSystemUIMode(
       SystemUiMode.immersiveSticky,
     );
-    if (!lockOrientation) {
-      return;
-    }
+
     // Android 多窗口模式下不锁定方向
     // 简化处理，如果需要可以添加 device_info_plus 来检测
     // 横屏
-    await SystemChrome.setPreferredOrientations(
-        [DeviceOrientation.landscapeLeft, DeviceOrientation.landscapeRight]);
+    await setLandscape();
   }
 
   /// 退出全屏显示
-  static Future<void> exitFullScreen({bool lockOrientation = true}) async {
+  static Future<void> exitFullScreen() async {
     if (Platform.isLinux || Platform.isMacOS || Platform.isWindows) {
       await windowManager.setFullScreen(false);
     }
@@ -196,16 +193,38 @@ class Utils {
       }
       await SystemChrome.setEnabledSystemUIMode(mode);
     } catch (_) {}
-    if (!lockOrientation) {
-      return;
+
+    await restorePortraitOrientation();
+  }
+
+  /// 恢复竖屏方向
+  static Future<void> restorePortraitOrientation() async {
+    if (isMobile) {
+      try {
+        await SystemChrome.setPreferredOrientations([
+          DeviceOrientation.portraitUp,
+          DeviceOrientation.portraitDown,
+          DeviceOrientation.landscapeLeft,
+          DeviceOrientation.landscapeRight
+        ]);
+      } catch (e) {
+        logger.e('恢复竖屏方向失败: $e');
+      }
     }
-    // 恢复方向
-    await SystemChrome.setPreferredOrientations([
-      DeviceOrientation.portraitUp,
-      DeviceOrientation.portraitDown,
-      DeviceOrientation.landscapeLeft,
-      DeviceOrientation.landscapeRight
-    ]);
+  }
+
+  ///设置横屏
+  static Future<void> setLandscape() async {
+    if (isMobile) {
+      try {
+        await SystemChrome.setPreferredOrientations([
+          DeviceOrientation.landscapeLeft,
+          DeviceOrientation.landscapeRight
+        ]);
+      } catch (e) {
+        logger.e('设置横屏方向失败: $e');
+      }
+    }
   }
 
   static String buildShadersAbsolutePath(

@@ -110,8 +110,8 @@ class PlayController extends GetxController {
   /// 进入全屏
   void enterFullScreen() {
     isFullscreen.value = true;
-    // 移动端全屏时自动横屏，桌面端不需要
-    Utils.enterFullScreen(lockOrientation: Utils.isMobile);
+    // 移动端全屏时自动横屏
+    Utils.enterFullScreen();
   }
 
   /// 退出全屏

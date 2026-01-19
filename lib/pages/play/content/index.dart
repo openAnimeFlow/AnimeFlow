@@ -20,7 +20,7 @@ class ContentView extends StatefulWidget {
 
 class _ContentViewState extends State<ContentView>
     with SingleTickerProviderStateMixin {
-  late EpisodesState episodesController;
+  late EpisodesState episodesState;
   late PlayController playPageController;
   final List<String> _tabs = ['简介', '吐槽'];
   late TabController _tabController;
@@ -34,7 +34,7 @@ class _ContentViewState extends State<ContentView>
   @override
   void initState() {
     super.initState();
-    episodesController = Get.find<EpisodesState>();
+    episodesState = Get.find<EpisodesState>();
     _tabController = TabController(length: _tabs.length, vsync: this);
     playPageController = Get.find<PlayController>();
     
@@ -42,7 +42,7 @@ class _ContentViewState extends State<ContentView>
     _tabController.addListener(_onTabChanged);
     
     // 监听 episodeId 变化
-    _episodeIdWorker = ever(episodesController.episodeId, (episodeId) {
+    _episodeIdWorker = ever(episodesState.episodeId, (episodeId) {
       // 当 episodeId 变化时，重置 comments 并重新获取
       if (episodeId > 0 && episodeId != _lastRequestedEpisodeId) {
         setState(() {
@@ -71,7 +71,7 @@ class _ContentViewState extends State<ContentView>
   }
 
   void _getComments() async {
-    final episodeId = episodesController.episodeId.value;
+    final episodeId = episodesState.episodeId.value;
 
     if (episodeId == _lastRequestedEpisodeId) {
       return;
@@ -90,7 +90,7 @@ class _ContentViewState extends State<ContentView>
         final commentsData =
             await BgmRequest.episodeCommentsService(episodeId: episodeId);
         // 再次检查 episodeId 是否仍然是当前值（防止请求期间 episodeId 变化）
-        if (mounted && episodesController.episodeId.value == episodeId) {
+        if (mounted && episodesState.episodeId.value == episodeId) {
           setState(() {
             comments = commentsData;
           });
@@ -98,7 +98,7 @@ class _ContentViewState extends State<ContentView>
       } catch (e) {
         Logger().e(e);
         // 请求失败时也要检查 episodeId 是否仍然是当前值
-        if (mounted && episodesController.episodeId.value == episodeId) {
+        if (mounted && episodesState.episodeId.value == episodeId) {
           setState(() {
             comments = [];
           });

@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'package:anime_flow/models/item/danmaku/danmaku_module.dart';
+import 'package:anime_flow/models/item/danmaku/danmaku_search_response.dart';
 import 'package:crypto/crypto.dart';
 import 'package:anime_flow/http/api_path.dart';
 import 'package:anime_flow/http/dio/dio_request.dart';
@@ -32,6 +33,23 @@ class DanmakuRequest {
     });
   }
 
+  static Future<DanmakuSearchResponse> getDanmakuSearchResponse(
+      String title) async {
+    var path = DamakuApi.dandanAPISearch;
+    var endPoint = DamakuApi.dandanAPIDomain + path;
+    Map<String, String> keywordMap = {
+      'keyword': title,
+    };
+
+    final res = await dioRequest.get(endPoint,
+        options: Options(headers: danDanPlayHeaders(path)),
+        queryParameters: keywordMap);
+    Map<String, dynamic> jsonData = res.data;
+    DanmakuSearchResponse danmakuSearchResponse =
+    DanmakuSearchResponse.fromJson(jsonData);
+    return danmakuSearchResponse;
+  }
+
   static Future<int> getDanDanBangumiIDByBgmBangumiID(int bgmBangumiID) async {
     var path = DamakuApi.dandanAPIInfoByBgmBangumiId
         .replaceFirst('{bgmtvSubjectId}', bgmBangumiID.toString());
@@ -48,7 +66,7 @@ class DanmakuRequest {
     if (bangumiID == 0) {
       return danmakus;
     }
-
+    // 这里猜测了弹弹Play的分集命名规则，例如上面的番剧ID为1758，第一集弹幕库ID大概率为17580001，但是此命名规则并没有体现在官方API文档里，保险的做法是请求 Api.dandanInfo（kazumi）
     final path = DamakuApi.dandanAPIComment + bangumiID.toString() + episode.toString().padLeft(4,'0');
     final endPoint = _danDanPlayMain + path;
     Map<String, String> withRelated = {

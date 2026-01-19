@@ -17,7 +17,6 @@ class IntroduceView extends StatefulWidget {
 class _IntroduceViewState extends State<IntroduceView>
     with AutomaticKeepAliveClientMixin {
   Logger logger = Logger();
-  static const String drawerTitle = "章节列表";
   late PlayController playPageController;
   late SubjectState subjectStateController;
   Worker? _screenWorker; // 屏幕宽高监听器

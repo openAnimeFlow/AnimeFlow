@@ -14,7 +14,7 @@ import 'package:anime_flow/controllers/video/data/video_source_controller.dart';
 import 'package:anime_flow/controllers/video/video_state_controller.dart';
 import 'package:anime_flow/controllers/video/video_ui_state_controller.dart';
 import 'package:anime_flow/http/requests/bgm_request.dart';
-import 'package:anime_flow/http/requests/damaku.dart';
+import 'package:anime_flow/http/requests/damaku_request.dart';
 import 'package:anime_flow/widget/video/ui/danmaku/danmaku_view.dart';
 import 'package:anime_flow/widget/video/ui/index.dart';
 import 'package:flutter/material.dart';
@@ -54,7 +54,7 @@ class _VideoViewState extends State<VideoView> with WindowListener {
   StreamSubscription<(String, int)>? _videoURLSubscription;
   StreamSubscription<bool>? _videoLoadingSubscription;
   StreamSubscription<String>? _logSubscription;
-
+  StreamSubscription<bool>? _initSubscription;
   // 解析状态跟踪
   bool _isParsing = false;
   bool _hasReceivedVideoUrl = false;
@@ -188,15 +188,15 @@ class _VideoViewState extends State<VideoView> with WindowListener {
       }
     });
     // 如果webview尚未初始化，则初始化
-    // if (webviewItemController.webviewController == null) {
-    //   _initSubscription =
-    //       webviewItemController.onInitialized.listen((initialized) {
-    //     if (initialized) {
-    //       logger.i('WebView初始化完成');
-    //     }
-    //   });
-    //   await webviewItemController.init();
-    // }
+    if (webviewItemController.webviewController == null) {
+      _initSubscription =
+          webviewItemController.onInitialized.listen((initialized) {
+        if (initialized) {
+          logger.i('WebView初始化完成');
+        }
+      });
+      await webviewItemController.init();
+    }
   }
 
   //解析状态
@@ -399,6 +399,7 @@ class _VideoViewState extends State<VideoView> with WindowListener {
     _videoLoadingSubscription?.cancel();
     _logSubscription?.cancel();
     _saveProgressTimer?.cancel();
+    _initSubscription?.cancel();
     // 移除窗口监听器
     if (Platform.isWindows || Platform.isLinux || Platform.isMacOS) {
       windowManager.removeListener(this);

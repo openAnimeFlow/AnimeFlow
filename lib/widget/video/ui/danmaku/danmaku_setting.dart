@@ -88,8 +88,6 @@ class _DanmakuSettingState extends State<DanmakuSetting> {
                                   danmakuController.option
                                       .copyWith(hideScroll: !hideScroll),
                                 );
-                                setting.put(
-                                    DanmakuKey.danmakuHideScroll, !hideScroll);
                               });
                             },
                             child: Container(
@@ -127,8 +125,6 @@ class _DanmakuSettingState extends State<DanmakuSetting> {
                                   danmakuController.option
                                       .copyWith(hideTop: !hideTop),
                                 );
-                                setting.put(
-                                    DanmakuKey.danmakuHideTop, !hideTop);
                               });
                             },
                             child: Container(
@@ -166,8 +162,6 @@ class _DanmakuSettingState extends State<DanmakuSetting> {
                                   danmakuController.option
                                       .copyWith(hideBottom: !hideBottom),
                                 );
-                                setting.put(
-                                    DanmakuKey.danmakuHideBottom, !hideBottom);
                               });
                             },
                             child: Container(

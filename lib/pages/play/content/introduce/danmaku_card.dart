@@ -1,3 +1,5 @@
+import 'package:anime_flow/http/requests/damaku_request.dart';
+import 'package:anime_flow/models/item/danmaku/danmaku_search_response.dart';
 import 'package:anime_flow/stores/episodes_state.dart';
 import 'package:anime_flow/controllers/play/play_controller.dart';
 import 'package:anime_flow/models/item/danmaku/danmaku_module.dart';
@@ -22,6 +24,7 @@ class _DanmakuCardState extends State<DanmakuCard> {
 
   bool isExpanded = false;
   int _currentEpisode = 0; // 记录当前集数
+  // DanmakuSearchResponse? danmakuSearchResponse;
 
   @override
   void initState() {
@@ -55,6 +58,25 @@ class _DanmakuCardState extends State<DanmakuCard> {
     }
     return counts;
   }
+
+  //搜索animes
+  // Future<void> _searchAnimes(String query, StateSetter setDialogState) async {
+  //   setDialogState(() {
+  //     isSearchLoading = true;
+  //     danmakuSearchResponse = null;
+  //   });
+  //   try {
+  //     final response = await DanmakuRequest.getDanmakuSearchResponse(query);
+  //     setDialogState(() {
+  //       danmakuSearchResponse = response;
+  //       isSearchLoading = false;
+  //     });
+  //   } catch (e) {
+  //     setDialogState(() {
+  //       isSearchLoading = false;
+  //     });
+  //   }
+  // }
 
   @override
   Widget build(BuildContext context) {
@@ -219,28 +241,93 @@ class _DanmakuCardState extends State<DanmakuCard> {
   }
 
   Widget get danmakuDialog {
-    return AlertDialog(
-        icon: const Icon(Icons.subtitles),
-        title: const Text('修改弹幕'),
-        titleTextStyle:
-            const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
-        content: TextField(
-          controller: danmakuFieldController,
-          decoration: const InputDecoration(
-            hintText: '请输入标题',
+    DanmakuSearchResponse? danmakuSearchResponse;
+    bool isSearchLoading = false;
+    return StatefulBuilder(
+      builder: (BuildContext context, StateSetter setDialogState) {
+        return AlertDialog(
+          icon: const Icon(Icons.subtitles),
+          title: const Text('修改弹幕'),
+          titleTextStyle:
+              const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+          content: ConstrainedBox(
+            constraints: const BoxConstraints(maxWidth: 500),
+            child: SizedBox(
+              width: double.maxFinite,
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  TextField(
+                    controller: danmakuFieldController,
+                    decoration: const InputDecoration(
+                      hintText: '请输入标题',
+                    ),
+                  ),
+                  const SizedBox(height: 16),
+                  if (isSearchLoading) ...[
+                    const Padding(
+                      padding: EdgeInsets.all(16.0),
+                      child: CircularProgressIndicator(),
+                    ),
+                  ] else if (danmakuSearchResponse == null) ...[
+                    const SizedBox.shrink()
+                  ] else ...[
+                    SizedBox(
+                      height: 200,
+                      child: ListView.builder(
+                        shrinkWrap: true,
+                        itemCount: danmakuSearchResponse!.animes.length,
+                        itemBuilder: (context, index) {
+                          final anime = danmakuSearchResponse!.animes[index];
+                          return ListTile(
+                            title: Text(anime.animeTitle),
+                            onTap: () {
+                              // TODO: 选择动漫后的处理逻辑
+                              Get.back();
+                            },
+                          );
+                        },
+                      ),
+                    ),
+                  ]
+                ],
+              ),
+            ),
           ),
-        ),
-        actions: [
-          TextButton(
-            onPressed: () {
-              Get.back();
-            },
-            child: const Text('取消'),
-          ),
-          TextButton(
-            onPressed: () {},
-            child: const Text('提交'),
-          )
-        ]);
+          actions: [
+            TextButton(
+              onPressed: () {
+                Get.back();
+              },
+              child: const Text('取消'),
+            ),
+            TextButton(
+              onPressed: () async {
+                if (danmakuFieldController.text.isNotEmpty) {
+                  setDialogState(() {
+                    isSearchLoading = true;
+                    danmakuSearchResponse = null;
+                  });
+                  try {
+                    final response =
+                        await DanmakuRequest.getDanmakuSearchResponse(
+                            danmakuFieldController.text);
+                    setDialogState(() {
+                      danmakuSearchResponse = response;
+                      isSearchLoading = false;
+                    });
+                  } catch (e) {
+                    setDialogState(() {
+                      isSearchLoading = false;
+                    });
+                  }
+                }
+              },
+              child: const Text('提交'),
+            )
+          ],
+        );
+      },
+    );
   }
 }

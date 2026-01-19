@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 ///评分星星图标
 class StarView extends StatelessWidget {
-  final double score;
+  final num score;
   final double? iconSize;
 
   const StarView({super.key, required this.score, this.iconSize = 16});

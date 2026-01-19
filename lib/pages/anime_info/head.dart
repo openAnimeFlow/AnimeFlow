@@ -242,18 +242,20 @@ class InfoHeadView extends StatelessWidget {
                           fontWeight: fontWeight, color: amberAccent),
                     ),
                   Row(children: [
-                    StarView(score: subjectItem.rating.score, iconSize: 20),
-                    Text(
-                      subjectItem.rating.score.toStringAsFixed(1),
-                      style: const TextStyle(
-                          fontWeight: fontWeight, color: amberAccent),
-                    ),
-                    const SizedBox(width: 5),
-                    Text('#${subjectItem.rating.rank}',
+                    if (subjectItem.rating.score > 0) ...[
+                      StarView(score: subjectItem.rating.score, iconSize: 20),
+                      Text(
+                        subjectItem.rating.score.toStringAsFixed(1),
                         style: const TextStyle(
-                            fontSize: fontSize,
-                            fontWeight: fontWeight,
-                            color: amberAccent))
+                            fontWeight: fontWeight, color: amberAccent),
+                      ),
+                      const SizedBox(width: 5),
+                      Text('#${subjectItem.rating.rank}',
+                          style: const TextStyle(
+                              fontSize: fontSize,
+                              fontWeight: fontWeight,
+                              color: amberAccent))
+                    ],
                   ]),
                 ],
               ),

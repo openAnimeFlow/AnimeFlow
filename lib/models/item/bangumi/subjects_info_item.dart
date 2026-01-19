@@ -223,7 +223,7 @@ class Platform {
 class Rating {
   final int rank;
   final List<int> count;
-  final double score;
+  final num score;
   final int total;
 
   Rating({
@@ -236,7 +236,7 @@ class Rating {
   Rating.fromJson(Map<String, dynamic> json)
       : rank = json['rank'],
         count = List<int>.from(json['count']),
-        score = json['score'],
+        score = json['score'] as num,
         total = json['total'];
 
   Map<String, dynamic> toJson() {

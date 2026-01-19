@@ -48,17 +48,19 @@ class _IntroduceViewState extends State<IntroduceView>
         children: [
           Text(
             subjectStateController.name,
-            style: const TextStyle(fontSize: 15, fontWeight: FontWeight.bold),
+            style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
             textAlign: TextAlign.left,
           ),
           const SizedBox(height: 10),
           //章节
           const EpisodesComponents(),
+          const SizedBox(height: 5),
           //数据源
           const VideoResourcesView(),
+          const SizedBox(height: 5),
           //弹幕
           const DanmakuCard(),
-          const SizedBox(height: 10),
+          const SizedBox(height: 5),
           // const RecommendView()
         ],
       ),

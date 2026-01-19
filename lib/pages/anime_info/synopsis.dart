@@ -48,139 +48,132 @@ class _InfoSynopsisViewState extends State<InfoSynopsisView> {
       builder: (BuildContext context) {
         return ScrollConfiguration(
           behavior: _NoScrollbarBehavior(),
-              child: NotificationListener<ScrollNotification>(
-                onNotification: (ScrollNotification scrollInfo) {
-                  // 只处理垂直滚动的更新事件
-                  if (scrollInfo.metrics.axis == Axis.vertical &&
-                      scrollInfo is ScrollUpdateNotification) {
-                    // 通知 CommentView 检查是否需要加载更多
-                    _commentViewKey.currentState
-                        ?.checkAndLoadMore(scrollInfo.metrics);
-                    
-                    // 监听页面滚动位置，通知父组件更新按钮显示状态
-                    final bool shouldShowButton = scrollInfo.metrics.pixels >= 300;
-                    widget.onScrollChanged?.call(shouldShowButton);
-                  }
-                  return false;
-                },
-                child: Builder(
-                  builder: (context) {
-                    final leftPadding = MediaQuery.of(context).padding.left;
+          child: NotificationListener<ScrollNotification>(
+            onNotification: (ScrollNotification scrollInfo) {
+              // 只处理垂直滚动的更新事件
+              if (scrollInfo.metrics.axis == Axis.vertical &&
+                  scrollInfo is ScrollUpdateNotification) {
+                // 通知 CommentView 检查是否需要加载更多
+                _commentViewKey.currentState
+                    ?.checkAndLoadMore(scrollInfo.metrics);
 
-                    return CustomScrollView(
-                      key: const PageStorageKey<String>(title),
-                      slivers: <Widget>[
-                        // 注入重叠区域，防止内容被 Header 遮挡
-                        SliverOverlapInjector(
-                          handle:
-                              NestedScrollView.sliverOverlapAbsorberHandleFor(
-                            context,
+                // 监听页面滚动位置，通知父组件更新按钮显示状态
+                final bool shouldShowButton = scrollInfo.metrics.pixels >= 300;
+                widget.onScrollChanged?.call(shouldShowButton);
+              }
+              return false;
+            },
+            child: Builder(
+              builder: (context) {
+                return CustomScrollView(
+                  key: const PageStorageKey<String>(title),
+                  slivers: <Widget>[
+                    // 注入重叠区域，防止内容被 Header 遮挡
+                    SliverOverlapInjector(
+                      handle: NestedScrollView.sliverOverlapAbsorberHandleFor(
+                        context,
+                      ),
+                    ),
+
+                    // 加载中状态
+                    if (widget.subjectsInfo == null)
+                      const SliverToBoxAdapter(
+                        child: Padding(
+                          padding: EdgeInsets.all(16),
+                          child: Text('加载中...'),
+                        ),
+                      )
+                    else ...[
+                      // 简介
+                      SliverToBoxAdapter(
+                        child: _buildContainer(
+                          ExpandableText(
+                            title: title,
+                            fontSizeTitle: fontSizeTitle,
+                            fontWeightTitle: fontWeightTitle,
+                            text: widget.subjectsInfo!.summary,
+                            fontWeight: fontWeight,
                           ),
                         ),
+                      ),
 
-                        // 加载中状态
-                        if (widget.subjectsInfo == null)
-                          const SliverToBoxAdapter(
-                            child: Padding(
-                              padding: EdgeInsets.all(16),
-                              child: Text('加载中...'),
-                            ),
-                          )
-                        else ...[
-                          // 简介
-                          SliverToBoxAdapter(
-                            child: _buildContainer(
-                              leftPadding,
-                              ExpandableText(
-                                title: title,
-                                fontSizeTitle: fontSizeTitle,
-                                fontWeightTitle: fontWeightTitle,
-                                text: widget.subjectsInfo!.summary,
-                                fontWeight: fontWeight,
-                              ),
-                            ),
+                      // 标签
+                      SliverToBoxAdapter(
+                        child: _buildContainer(
+                          topPadding: 25,
+                          alignment: Alignment.topLeft,
+                          TagView(
+                            title: '标签',
+                            fontSizeTitle: fontSizeTitle,
+                            fontWeightTitle: fontWeightTitle,
+                            tags: widget.subjectsInfo!.tags,
+                            fontSize: 12,
+                            fontWeight: FontWeight.w700,
+                            numbersSize: 10,
+                            numbersWeight: FontWeight.w600,
                           ),
+                        ),
+                      ),
 
-                          // 标签
-                          SliverToBoxAdapter(
-                            child: _buildContainer(
-                              leftPadding,
-                              topPadding: 25,
-                              TagView(
-                                title: '标签',
-                                fontSizeTitle: fontSizeTitle,
-                                fontWeightTitle: fontWeightTitle,
-                                tags: widget.subjectsInfo!.tags,
-                                fontSize: 12,
-                                fontWeight: FontWeight.w700,
-                                numbersSize: 10,
-                                numbersWeight: FontWeight.w600,
-                              ),
-                            ),
+                      // 详情
+                      SliverToBoxAdapter(
+                        child: _buildContainer(
+                          DetailsView(
+                            title: '详情',
+                            subject: widget.subjectsInfo!,
+                            textSize: 13,
+                            textFontWeight: FontWeight.w600,
                           ),
+                          topPadding: 25,
+                        ),
+                      ),
 
-                          // 详情
-                          SliverToBoxAdapter(
-                            child: _buildContainer(
-                              leftPadding,
-                              DetailsView(
-                                title: '详情',
-                                subject: widget.subjectsInfo!,
-                                textSize: 13,
-                                textFontWeight: FontWeight.w600,
-                              ),
-                              topPadding: 25,
-                            ),
+                      // 角色
+                      SliverToBoxAdapter(
+                        child: _buildContainer(
+                          CharactersView(
+                            title: '角色',
+                            subjectsId: widget.subjectsInfo!.id,
                           ),
+                        ),
+                      ),
 
-                          // 角色
-                          SliverToBoxAdapter(
-                            child: _buildContainer(
-                              leftPadding,
-                              CharactersView(
-                                title: '角色',
-                                subjectsId: widget.subjectsInfo!.id,
-                              ),
-                            ),
+                      // 关联条目
+                      SliverToBoxAdapter(
+                        child: _buildContainer(
+                          RelatedView(
+                            title: '关联条目',
+                            subjectId: widget.subjectsInfo!.id,
                           ),
+                        ),
+                      ),
 
-                          // 关联条目
-                          SliverToBoxAdapter(
-                            child: _buildContainer(
-                              leftPadding,
-                              RelatedView(
-                                title: '关联条目',
-                                subjectId: widget.subjectsInfo!.id,
-                              ),
-                            ),
+                      // 评论
+                      SliverToBoxAdapter(
+                        child: _buildContainer(
+                          CommentView(
+                            key: _commentViewKey,
+                            subjectId: widget.subjectsInfo!.id,
                           ),
-
-                          // 评论
-                          SliverToBoxAdapter(
-                            child: _buildContainer(
-                              leftPadding,
-                              CommentView(
-                                key: _commentViewKey,
-                                subjectId: widget.subjectsInfo!.id,
-                              ),
-                            ),
-                          ),
-                        ],
-                      ],
-                    );
-                  },
-                ),
-              ),
+                        ),
+                      ),
+                    ],
+                  ],
+                );
+              },
+            ),
+          ),
         );
       },
     );
   }
 
   /// 构建带约束的容器
-  Widget _buildContainer(double leftPadding, Widget child,
-      {double topPadding = 0}) {
+  Widget _buildContainer(Widget child,
+      {double topPadding = 0, AlignmentGeometry alignment = Alignment.center}) {
+    final leftPadding = MediaQuery.of(context).padding.left;
     return Align(
-      alignment: Alignment.center,
+      alignment: alignment,
       child: ConstrainedBox(
         constraints: const BoxConstraints(
           maxWidth: PlayLayoutConstant.maxWidth,

@@ -96,12 +96,6 @@ class PlayController extends GetxController {
     } catch (_) {}
   }
 
-  @override
-  void onClose() {
-    _saveSettingsTimer?.cancel();
-    super.onClose();
-  }
-
   void updateIsWideScreen(bool value) {
     if (isWideScreen.value != value) {
       isWideScreen.value = value;
@@ -230,6 +224,12 @@ class PlayController extends GetxController {
     }
     await pp.command(['change-list', 'glsl-shaders', 'clr', '']);
     superResolutionType.value = 1;
+  }
+
+  @override
+  void onClose() {
+    _saveSettingsTimer?.cancel();
+    super.onClose();
   }
 }
 

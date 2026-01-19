@@ -1,5 +1,6 @@
 import 'package:anime_flow/http/requests/damaku_request.dart';
 import 'package:anime_flow/models/item/danmaku/danmaku_search_response.dart';
+import 'package:anime_flow/models/item/danmaku/danmaku_episode_response.dart';
 import 'package:anime_flow/stores/episodes_state.dart';
 import 'package:anime_flow/controllers/play/play_controller.dart';
 import 'package:anime_flow/models/item/danmaku/danmaku_module.dart';
@@ -245,87 +246,154 @@ class _DanmakuCardState extends State<DanmakuCard> {
     bool isSearchLoading = false;
     return StatefulBuilder(
       builder: (BuildContext context, StateSetter setDialogState) {
-        return AlertDialog(
-          icon: const Icon(Icons.subtitles),
-          title: const Text('修改弹幕'),
-          titleTextStyle:
-              const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
-          content: ConstrainedBox(
-            constraints: const BoxConstraints(maxWidth: 500),
-            child: SizedBox(
+        return  AlertDialog(
+            icon: const Icon(Icons.subtitles),
+            title: const Text('修改弹幕'),
+            titleTextStyle:
+                const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+            content: ConstrainedBox(
+              constraints: const BoxConstraints(maxWidth: 500),
+              child: SizedBox(
+                width: double.maxFinite,
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    TextField(
+                      controller: danmakuFieldController,
+                      decoration: const InputDecoration(
+                        hintText: '请输入标题',
+                      ),
+                    ),
+                    const SizedBox(height: 16),
+                    if (isSearchLoading) ...[
+                      const Padding(
+                        padding: EdgeInsets.all(16.0),
+                        child: CircularProgressIndicator(),
+                      ),
+                    ] else if (danmakuSearchResponse == null) ...[
+                      const SizedBox.shrink()
+                    ] else ...[
+                      const Align(
+                        alignment: Alignment.centerLeft,
+                        child: Text('搜索结果:'),
+                      ),
+                      ConstrainedBox(
+                        constraints: const BoxConstraints(
+                          maxHeight: 300,
+                          minHeight: 100,
+                        ),
+                        child: ListView.builder(
+                          shrinkWrap: true,
+                          itemCount: danmakuSearchResponse!.animes.length,
+                          itemBuilder: (context, index) {
+                            final anime = danmakuSearchResponse!.animes[index];
+                            return ListTile(
+                              title: Text(anime.animeTitle,style: Theme.of(context).textTheme.bodyLarge,),
+                              onTap: () async {
+                                final episodes = await DanmakuRequest.getDanDanEpisodesByDanDanBangumiID(anime.animeId);
+                                 Get.back();
+                                if (context.mounted) {
+                                  _showEpisodesDialog(context, episodes, anime.animeTitle);
+                                }
+                              },
+                            );
+                          },
+                        ),
+                      ),
+                    ]
+                  ],
+                ),
+              ),
+            ),
+            actions: [
+              TextButton(
+                onPressed: () {
+                  Get.back();
+                },
+                child: const Text('取消'),
+              ),
+              TextButton(
+                onPressed: () async {
+                  if (danmakuFieldController.text.isNotEmpty) {
+                    setDialogState(() {
+                      isSearchLoading = true;
+                      danmakuSearchResponse = null;
+                    });
+                    try {
+                      final response =
+                          await DanmakuRequest.getDanmakuSearchResponse(
+                              danmakuFieldController.text);
+                      setDialogState(() {
+                        danmakuSearchResponse = response;
+                        isSearchLoading = false;
+                      });
+                    } catch (e) {
+                      setDialogState(() {
+                        isSearchLoading = false;
+                      });
+                    }
+                  }
+                },
+                child: const Text('提交'),
+              )
+            ],
+        );
+      },
+    );
+  }
+
+  /// 显示剧集选择弹窗
+  void _showEpisodesDialog(BuildContext context, DanmakuEpisodeResponse episodesResponse, String animeTitle) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return  AlertDialog(
+            title: Text(animeTitle),
+            content: ConstrainedBox(
+              constraints: const BoxConstraints(maxWidth: 500),
+              child: SizedBox(
               width: double.maxFinite,
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  TextField(
-                    controller: danmakuFieldController,
-                    decoration: const InputDecoration(
-                      hintText: '请输入标题',
-                    ),
-                  ),
-                  const SizedBox(height: 16),
-                  if (isSearchLoading) ...[
-                    const Padding(
-                      padding: EdgeInsets.all(16.0),
-                      child: CircularProgressIndicator(),
-                    ),
-                  ] else if (danmakuSearchResponse == null) ...[
-                    const SizedBox.shrink()
-                  ] else ...[
-                    SizedBox(
-                      height: 200,
+              child: episodesResponse.episodes.isEmpty
+                  ? const Center(
+                      child: Padding(
+                        padding: EdgeInsets.all(16.0),
+                        child: Text('暂无剧集数据'),
+                      ),
+                    )
+                  : ConstrainedBox(
+                      constraints: const BoxConstraints(
+                        maxHeight: 400,
+                        minHeight: 200,
+                      ),
                       child: ListView.builder(
                         shrinkWrap: true,
-                        itemCount: danmakuSearchResponse!.animes.length,
+                        itemCount: episodesResponse.episodes.length,
                         itemBuilder: (context, index) {
-                          final anime = danmakuSearchResponse!.animes[index];
+                          final episode = episodesResponse.episodes[index];
                           return ListTile(
-                            title: Text(anime.animeTitle),
-                            onTap: () {
-                              // TODO: 选择动漫后的处理逻辑
+                            title: Text(
+                              episode.episodeTitle,
+                              style: Theme.of(context).textTheme.bodyLarge,
+                            ),
+                            onTap: ()  async {
+                              final danmaku = await DanmakuRequest.getDanDanmakuByEpisodeID(episode.episodeId);
+                              playController.removeDanmaku();
+                              playController.addDanmaku(danmaku);
                               Get.back();
                             },
                           );
                         },
                       ),
                     ),
-                  ]
-                ],
+            ),),
+            actions: [
+              TextButton(
+                onPressed: () {
+                  Navigator.of(context).pop();
+                },
+                child: const Text('关闭'),
               ),
-            ),
-          ),
-          actions: [
-            TextButton(
-              onPressed: () {
-                Get.back();
-              },
-              child: const Text('取消'),
-            ),
-            TextButton(
-              onPressed: () async {
-                if (danmakuFieldController.text.isNotEmpty) {
-                  setDialogState(() {
-                    isSearchLoading = true;
-                    danmakuSearchResponse = null;
-                  });
-                  try {
-                    final response =
-                        await DanmakuRequest.getDanmakuSearchResponse(
-                            danmakuFieldController.text);
-                    setDialogState(() {
-                      danmakuSearchResponse = response;
-                      isSearchLoading = false;
-                    });
-                  } catch (e) {
-                    setDialogState(() {
-                      isSearchLoading = false;
-                    });
-                  }
-                }
-              },
-              child: const Text('提交'),
-            )
-          ],
+            ],
         );
       },
     );

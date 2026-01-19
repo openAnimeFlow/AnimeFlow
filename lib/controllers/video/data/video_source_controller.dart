@@ -7,7 +7,6 @@ import 'package:anime_flow/repository/play_repository.dart';
 import 'package:anime_flow/stores/subject_state.dart';
 import 'package:anime_flow/utils/crawl_config.dart';
 import 'package:anime_flow/stores/episodes_state.dart';
-import 'package:anime_flow/controllers/video/video_state_controller.dart';
 import 'package:anime_flow/webview/webview_controller.dart';
 import 'package:get/get.dart';
 import 'package:logger/logger.dart';
@@ -23,11 +22,10 @@ class VideoSourceController extends GetxController {
 
   late EpisodesState _episodesState;
   late SubjectState _subjectState;
-  late VideoStateController _videoStateController;
+  // late VideoStateController _videoStateController;
   late WebviewItemController _webviewItemController;
   final Logger _logger = Logger();
 
-  bool _hasAutoSelected = false; // 标记是否已经自动选择过
   Worker? _isLoadingWorker;
   Worker? _episodeIndexWorker;
 
@@ -48,7 +46,7 @@ class VideoSourceController extends GetxController {
   void _initControllers() {
     _subjectState = Get.find<SubjectState>();
     _episodesState = Get.find<EpisodesState>();
-    _videoStateController = Get.find<VideoStateController>();
+    // _videoStateController = Get.find<VideoStateController>();
     _webviewItemController = Get.find<WebviewItemController>();
   }
 
@@ -210,10 +208,6 @@ class VideoSourceController extends GetxController {
   /// [force] 是否强制重新选择，即使已经有选中的资源
   void autoSelectFirstResource(List<ResourcesItem> resources,
       {bool force = false}) {
-    // 如果已经自动选择过，且不是强制重新选择，或者已经有选中的资源且不是强制重新选择，不再自动选择
-    if (!force && (_hasAutoSelected || webSiteTitle.value.isNotEmpty)) {
-      return;
-    }
 
     // 检查是否有资源加载完成
     final hasResource = resources.any((r) => r.episodeResources.isNotEmpty);
@@ -228,7 +222,6 @@ class VideoSourceController extends GetxController {
       return; // 没有找到有资源的网站
     }
 
-    _hasAutoSelected = true;
 
     // 自动加载第一个匹配的资源
     Future.microtask(() {
@@ -241,25 +234,23 @@ class VideoSourceController extends GetxController {
   Future<void> _autoLoadFirstResource(ResourcesItem resource,
       {bool force = false}) async {
     // 如果不是强制重新加载，且已经有选中的资源，不再自动加载
-    if (!force && webSiteTitle.value.isNotEmpty) {
-      return;
-    }
-
-    // 遍历资源列表，找到第一个匹配当前剧集的资源
-    for (var resourceItem in resource.episodeResources) {
-      final matchingEpisodes = resourceItem.episodes.where(
-        (ep) => ep.episodeSort == _episodesState.episodeIndex.value,
-      );
-      if (matchingEpisodes.isNotEmpty) {
-        final currentEpisode = matchingEpisodes.first;
-        setWebSite(
-          title: resource.websiteName,
-          iconUrl: resource.websiteIcon,
-          videoUrl: resource.baseUrl + currentEpisode.like,
+    if(force && webSiteIcon.value.isEmpty && webSiteTitle.value.isEmpty) {
+      // 遍历资源列表，找到第一个匹配当前剧集的资源
+      for (var resourceItem in resource.episodeResources) {
+        final matchingEpisodes = resourceItem.episodes.where(
+              (ep) => ep.episodeSort == _episodesState.episodeIndex.value,
         );
-        // _videoStateController.disposeVideo();
-        await loadVideoPage(resource.baseUrl + currentEpisode.like);
-        return;
+        if (matchingEpisodes.isNotEmpty) {
+          final currentEpisode = matchingEpisodes.first;
+          setWebSite(
+            title: resource.websiteName,
+            iconUrl: resource.websiteIcon,
+            videoUrl: resource.baseUrl + currentEpisode.like,
+          );
+          // _videoStateController.disposeVideo();
+          await loadVideoPage(resource.baseUrl + currentEpisode.like);
+          return;
+        }
       }
     }
   }

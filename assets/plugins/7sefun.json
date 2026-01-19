@@ -1,0 +1,13 @@
+{
+  "version": "0.0.3",
+  "name": "七色动漫",
+  "iconUrl": "https://www.7sefun.top//pc/img/favicon.ico",
+  "baseUrl": "https://www.7sefun.top/",
+  "searchUrl": "https://www.7sefun.top/vodsearch/-------------.html?wd={keyword}",
+  "searchList": "//div[2]/div[2]/div[2]/div[2]/div[@class='video anim']",
+  "searchName": "/div[2] /text()",
+  "searchLink": "/a",
+  "lineNames": "//div[@class='chat'] //div[@class='chat-header anim'] /span /text()",
+  "lineList": "//div[@class='chat'] //div[@class='message-container vod-play-list-container']",
+  "episode": "/span /a"
+}

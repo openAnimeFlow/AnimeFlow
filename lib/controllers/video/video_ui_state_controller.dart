@@ -204,8 +204,9 @@ class VideoUiStateController extends GetxController {
     final dragDistance = currentX - _dragStartX;
 
     // 根据屏幕宽度计算时间偏移（滑动整个屏幕宽度 = 总时长）
+    // 添加系数 0.5 减小拖动敏感度，使拖动更精细
     final timeOffset =
-        (dragDistance / screenWidth) * duration.value.inMilliseconds;
+        (dragDistance / screenWidth) * duration.value.inMilliseconds * 0.5;
 
     // 计算新的播放位置
     var newPosition = _dragStartPosition.inMilliseconds + timeOffset.toInt();

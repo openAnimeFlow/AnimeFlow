@@ -27,7 +27,25 @@ class VideoProgressBar extends StatelessWidget {
         return Stack(
           alignment: Alignment.centerLeft,
           children: [
-            // 缓冲条
+            // 背景层
+            SliderTheme(
+              data: SliderThemeData(
+                trackHeight: 6,
+                thumbShape: SliderComponentShape.noThumb,
+                overlayShape: SliderComponentShape.noOverlay,
+                activeTrackColor: Colors.black.withValues(alpha: 0.3),
+                disabledActiveTrackColor: Colors.black.withValues(alpha: 0.3),
+                disabledThumbColor: Colors.transparent,
+                trackShape: _CustomTrackShape(),
+              ),
+              child: Slider(
+                value: max > 0 ? max : 1.0,
+                min: 0.0,
+                max: max > 0 ? max : 1.0,
+                onChanged: null, // 禁用交互
+              ),
+            ),
+            // 缓冲层
             SliderTheme(
               data: SliderThemeData(
                 trackHeight: 6,
@@ -129,6 +147,7 @@ class VideoTimeDisplay extends StatelessWidget {
   }
 }
 
+/// 弹幕输入框
 class DanmakuTextField extends StatelessWidget {
   final Color? iconColor;
   final Color? textColor;

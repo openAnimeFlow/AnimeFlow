@@ -59,28 +59,31 @@ class _ExpandableTextState extends State<ExpandableText> {
                     SizedBox(
                       width: double.infinity,
                       child: InkWell(
-                        onTap: () {
-                          setState(() {
-                            _isExpanded = false;
-                          });
-                        },
+                        onTap: showExpandButton
+                            ? () {
+                                setState(() {
+                                  _isExpanded = false;
+                                });
+                              }
+                            : null,
                         child: Text(
                           widget.text,
                           style: TextStyle(fontWeight: widget.fontWeight),
                         ),
                       ),
                     ),
-                    Align(
-                      alignment: Alignment.center,
-                      child: IconButton(
-                        onPressed: () {
-                          setState(() {
-                            _isExpanded = false;
-                          });
-                        },
-                        icon: const Icon(Icons.expand_less_rounded, size: 30),
+                    if (showExpandButton)
+                      Align(
+                        alignment: Alignment.center,
+                        child: IconButton(
+                          onPressed: () {
+                            setState(() {
+                              _isExpanded = false;
+                            });
+                          },
+                          icon: const Icon(Icons.expand_less_rounded, size: 30),
+                        ),
                       ),
-                    ),
                   ],
                 );
               }

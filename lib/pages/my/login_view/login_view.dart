@@ -119,7 +119,8 @@ class _LoginViewState extends State<LoginView>
   @override
   void initState() {
     super.initState();
-    _tabController = TabController(length: _tabs.length, vsync: this);
+    // TODO 暂时默认为再看tab索引，后续从设置中获取
+    _tabController = TabController(length: _tabs.length, vsync: this,initialIndex: 2);
     userInfoStore = Get.find<UserInfoStore>();
     mainPageState = Get.find<MainPageState>();
     // 监听 tab 切换，自动加载对应类型的数据（如果缓存中没有）

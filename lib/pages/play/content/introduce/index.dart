@@ -19,7 +19,6 @@ class _IntroduceViewState extends State<IntroduceView>
   Logger logger = Logger();
   late PlayController playPageController;
   late SubjectState subjectStateController;
-  Worker? _screenWorker; // 屏幕宽高监听器
   bool isVideoSourceLoading = true;
 
   @override
@@ -30,29 +29,10 @@ class _IntroduceViewState extends State<IntroduceView>
     super.initState();
     playPageController = Get.find<PlayController>();
     subjectStateController = Get.find<SubjectState>();
-    // 初始化监听器
-    _screenWorker = ever(playPageController.isWideScreen, (isWide) {
-      // 如果有任何弹窗打开（BottomSheet 或 GeneralDialog），则关闭
-      if (Get.isBottomSheetOpen == true || Get.isDialogOpen == true) {
-        Get.back();
-        // 延迟一点时间重新打开对应样式的弹窗
-        Future.delayed(const Duration(milliseconds: 100), () {
-          if (mounted) {
-            if (isWide) {
-              EpisodesComponentsState.showSideDrawer(context);
-            } else {
-              EpisodesComponentsState.showBottomSheet(context);
-            }
-          }
-        });
-      }
-    });
   }
 
   @override
   void dispose() {
-    // 清理监听器
-    _screenWorker?.dispose();
     super.dispose();
   }
 

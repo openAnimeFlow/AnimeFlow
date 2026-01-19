@@ -62,7 +62,7 @@ class EpisodesComponentsState extends State<EpisodesComponents> {
     final Logger logger = Logger();
     return Obx(() {
       if (episodesState.isLoading.value) {
-        return const CircularProgressIndicator();
+        return const SizedBox();
       } else {
         final episodesItem = episodesState.episodes.value;
         if (episodesItem == null || episodesItem.data.isEmpty) {

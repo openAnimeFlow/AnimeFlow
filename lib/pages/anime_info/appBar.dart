@@ -136,6 +136,7 @@ class InfoAppbarView extends StatelessWidget {
                   overflow: TextOverflow.ellipsis,
                   style: const TextStyle(fontSize: 15),
                 ),
+                if(data.rating.rank > 0)
                 Row(
                   mainAxisSize: MainAxisSize.min,
                   children: [

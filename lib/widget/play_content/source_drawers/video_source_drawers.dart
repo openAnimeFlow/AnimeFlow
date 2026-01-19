@@ -79,24 +79,24 @@ class _VideoSourceDrawersState extends State<VideoSourceDrawers> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-               Row(
-                  children: [
-                    Text(
-                      '数据源',
-                      style: TextStyle(
-                        fontSize: 20,
-                        fontWeight: FontWeight.bold,
-                        color: Theme.of(context).textTheme.titleLarge?.color,
-                        decoration: TextDecoration.none,
-                      ),
+              Row(
+                children: [
+                  Text(
+                    '数据源',
+                    style: TextStyle(
+                      fontSize: 20,
+                      fontWeight: FontWeight.bold,
+                      color: Theme.of(context).textTheme.titleLarge?.color,
+                      decoration: TextDecoration.none,
                     ),
-                    const Spacer(),
-                    IconButton(
-                      onPressed: () => Navigator.of(context).pop(),
-                      icon: const Icon(Icons.close_rounded),
-                    ),
-                  ],
-                ),
+                  ),
+                  const Spacer(),
+                  IconButton(
+                    onPressed: () => Navigator.of(context).pop(),
+                    icon: const Icon(Icons.close_rounded),
+                  ),
+                ],
+              ),
               _manualSearch(),
               const SizedBox(height: 16),
               Obx(() {
@@ -191,6 +191,7 @@ class _VideoSourceDrawersState extends State<VideoSourceDrawers> {
             const SizedBox(width: 8),
             Expanded(
                 child: ListView.builder(
+                    padding: EdgeInsets.zero,
                     scrollDirection: Axis.horizontal,
                     itemCount: dataSource.length,
                     itemBuilder: (context, index) {
@@ -287,6 +288,7 @@ class _VideoSourceDrawersState extends State<VideoSourceDrawers> {
 
       return Material(
         child: ListView.builder(
+          padding: EdgeInsets.zero,
           itemCount: selectedResource.episodeResources.length,
           itemBuilder: (context, index) {
             final resourceItem = selectedResource.episodeResources[index];

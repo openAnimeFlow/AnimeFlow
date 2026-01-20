@@ -1,5 +1,6 @@
 import 'package:anime_flow/controllers/app/app_info_controller.dart';
 import 'package:anime_flow/pages/settings/setting_controller.dart';
+import 'package:anime_flow/routes/index.dart';
 import 'package:anime_flow/widget/animation_network_image/animation_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -54,7 +55,7 @@ class AboutSettingsPage extends StatelessWidget {
               const Divider(),
               ListTile(
                 title: const Text("检查更新"),
-                trailing: const Icon(Icons.chevron_right),
+                trailing: const Icon(Icons.browser_updated_outlined),
                 onTap: () {
                   appInfoController.compareVersion();
                 },
@@ -62,7 +63,7 @@ class AboutSettingsPage extends StatelessWidget {
               const Divider(),
               ListTile(
                 title: const Text("开源地址"),
-                trailing: const Icon(Icons.chevron_right),
+                trailing: const Icon(Icons.open_in_new),
                 onTap: () async {
                   final uri =
                       Uri.parse('https://github.com/openAnimeFlow/AnimeFlow');
@@ -71,6 +72,14 @@ class AboutSettingsPage extends StatelessWidget {
                   } else {
                     Get.snackbar('无法打开网页', '你的设备可能不支持此功能');
                   }
+                },
+              ),
+              const Divider(),
+              ListTile(
+                title: const Text("鸣谢"),
+                trailing: const Icon(Icons.chevron_right),
+                onTap: () {
+                  Get.toNamed(RouteName.settingThanks);
                 },
               ),
               const Divider(),

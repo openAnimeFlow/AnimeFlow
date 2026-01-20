@@ -5,7 +5,7 @@ import 'package:anime_flow/pages/play/index.dart';
 import 'package:anime_flow/pages/search/index.dart';
 import 'package:anime_flow/pages/anime_info/index.dart';
 import 'package:anime_flow/pages/settings/index.dart';
-import 'package:anime_flow/pages/settings/pages/about/about_settings.dart';
+import 'package:anime_flow/pages/settings/pages/about/index.dart';
 import 'package:anime_flow/pages/settings/pages/about/thanks.dart';
 import 'package:anime_flow/pages/settings/pages/danmaku_setting_page.dart';
 import 'package:anime_flow/pages/settings/pages/general_settings.dart';

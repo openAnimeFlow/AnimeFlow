@@ -7,7 +7,7 @@ import 'package:anime_flow/utils/utils.dart';
 import 'package:flutter/material.dart';
 import 'package:anime_flow/pages/settings/pages/general_settings.dart';
 import 'package:anime_flow/pages/settings/pages/playback_settings.dart';
-import 'package:anime_flow/pages/settings/pages/about_settings.dart';
+import 'package:anime_flow/pages/settings/pages/about/index.dart';
 import 'package:get/get.dart';
 
 ///设置页面

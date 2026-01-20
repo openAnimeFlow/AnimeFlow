@@ -1,0 +1,13 @@
+{
+  "version": "1.0.0",
+  "name": "咕咕番",
+  "iconUrl": "https://www.gugu3.com/upload/site/20250105-1/392b1e1fa1fbe7b385e657eca0208ae5.png",
+  "baseUrl": "https://www.gugu3.com/",
+  "searchUrl": "https://www.gugu3.com/index.php/vod/search.html?wd={keyword}",
+  "searchList": "//div[@class='row mask2'] /div /div",
+  "searchName": "/div[2] /a /h3",
+  "searchLink": "/div[2] /a",
+  "lineNames": "//div[@class='swiper-wrapper'] /a",
+  "lineList": "//ul[@class='anthology-list-play size']",
+  "episode": "/li /a"
+}

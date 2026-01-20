@@ -28,8 +28,9 @@ class BottomAreaControl extends StatelessWidget {
     final episodeController = Get.find<EpisodeController>();
     final paddingLeft = MediaQuery.of(context).padding.left;
     return Obx(() {
-      // 使用自定义全屏状态，
+      // 全屏状态，
       final fullscreen = playController.isFullscreen.value;
+
       final danmakuOn = playController.danmakuOn.value;
       final isWideScreen = playController.isWideScreen.value;
       final isShowControlsUi = videoUiStateController.isShowControlsUi.value;

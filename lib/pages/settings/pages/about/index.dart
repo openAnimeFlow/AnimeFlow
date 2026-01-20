@@ -15,7 +15,7 @@ class AboutSettingsPage extends StatelessWidget {
     final appInfoController = Get.find<AppInfoController>();
     return Obx(() => Scaffold(
           appBar: AppBar(
-            title: const Text("关于(开发中)"),
+            title: const Text("关于"),
             automaticallyImplyLeading: !settingController.isWideScreen.value,
           ),
           body: ListView(
@@ -87,7 +87,7 @@ class AboutSettingsPage extends StatelessWidget {
                 title: const Text("隐私政策"),
                 trailing: const Icon(Icons.chevron_right),
                 onTap: () {
-                  // TODO: 显示隐私政策
+                  Get.toNamed(RouteName.settingAgreement);
                 },
               ),
             ],

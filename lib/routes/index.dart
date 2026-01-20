@@ -7,6 +7,7 @@ import 'package:anime_flow/pages/anime_info/index.dart';
 import 'package:anime_flow/pages/settings/index.dart';
 import 'package:anime_flow/pages/settings/pages/about/index.dart';
 import 'package:anime_flow/pages/settings/pages/about/thanks.dart';
+import 'package:anime_flow/pages/settings/pages/agreement/index.dart';
 import 'package:anime_flow/pages/settings/pages/danmaku_setting_page.dart';
 import 'package:anime_flow/pages/settings/pages/general_settings.dart';
 import 'package:anime_flow/pages/settings/pages/playback_settings.dart';
@@ -35,6 +36,7 @@ class RouteName {
   static const String settingDanmaku = "/settings/danmaku";
   static const String settingDownloadPlugins = "/settings/downloadPlugins";
   static const String settingThanks = "/settings/thanks";
+  static const String settingAgreement = "/settings/agreement";
 }
 
 Map<String, Widget Function(BuildContext)> getRootRoutes() {
@@ -63,5 +65,6 @@ Map<String, Widget Function(BuildContext)> settingsRoutes() {
     RouteName.settingAddPlugins: (context) => const AddPluginsPage(),
     RouteName.settingTheme: (context) => const ThemePage(),
     RouteName.settingThanks: (context) => const ThanksPage(),
+    RouteName.settingAgreement: (context) => const AgreementPage(),
   };
 }

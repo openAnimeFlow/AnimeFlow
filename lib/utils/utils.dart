@@ -237,4 +237,28 @@ class Utils {
     }
     return absolutePaths.join(':');
   }
+
+  /// 比较两个版本号字符串
+  /// 返回值: 1表示v1 > v2, -1表示v1 < v2, 0表示相等
+  static int compareVersionNumbers(String v1, String v2) {
+    List<int> parseVersion(String version) {
+      return version.split('.').map((part) => int.tryParse(part) ?? 0).toList();
+    }
+
+    List<int> version1 = parseVersion(v1);
+    List<int> version2 = parseVersion(v2);
+
+    // 比较主版本号、次版本号、修订号
+    for (int i = 0; i < 3; i++) {
+      if (i < version1.length && i < version2.length) {
+        if (version1[i] > version2[i]) return 1;
+        if (version1[i] < version2[i]) return -1;
+      } else if (i < version1.length) {
+        return version1[i] > 0 ? 1 : -1;
+      } else if (i < version2.length) {
+        return version2[i] > 0 ? -1 : 1;
+      }
+    }
+    return 0;
+  }
 }

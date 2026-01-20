@@ -7,17 +7,18 @@ import 'package:anime_flow/widget/animation_network_image/animation_network_imag
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
-class DataSourcePage extends StatefulWidget {
-  const DataSourcePage({super.key});
+class PluginsPage extends StatefulWidget {
+  const PluginsPage({super.key});
 
   @override
-  State<DataSourcePage> createState() => _DataSourcePageState();
+  State<PluginsPage> createState() => _PluginsPageState();
 }
 
-class _DataSourcePageState extends State<DataSourcePage> {
+class _PluginsPageState extends State<PluginsPage> {
   late SettingController settingController;
   List<CrawlConfigItem> dataSources = [];
   final settingConfig = Storage.crawlConfigs;
+
   @override
   void initState() {
     super.initState();
@@ -73,13 +74,23 @@ class _DataSourcePageState extends State<DataSourcePage> {
           title: const Text('数据源管理'),
           automaticallyImplyLeading: !settingController.isWideScreen.value,
           actions: [
+            //云下载
+            IconButton(
+                onPressed: () async {
+                  final result = await Get.toNamed(RouteName.settingDownloadPlugins);
+                  // 如果返回成功标志，刷新数据
+                  if (result == true) {
+                    _initData();
+                  }
+                },
+                icon: const Icon(Icons.cloud_download_outlined, size: 30)),
             IconButton(
               icon: const Icon(
                 Icons.save_as_outlined,
                 size: 30,
               ),
               onPressed: () async {
-                final result = await Get.toNamed(RouteName.settingAddSource);
+                final result = await Get.toNamed(RouteName.settingAddPlugins);
                 // 如果返回成功标志，刷新数据
                 if (result == true) {
                   _initData();
@@ -100,7 +111,7 @@ class _DataSourcePageState extends State<DataSourcePage> {
             return InkWell(
               onTap: () async {
                 final result = await Get.toNamed(
-                  RouteName.settingAddSource,
+                  RouteName.settingAddPlugins,
                   arguments: data.name,
                 );
                 // 如果返回成功标志，刷新数据
@@ -129,7 +140,8 @@ class _DataSourcePageState extends State<DataSourcePage> {
                   ),
                   title: Text(
                     data.name,
-                    style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                    style: const TextStyle(
+                        fontSize: 16, fontWeight: FontWeight.bold),
                   ),
                   trailing: IconButton(
                     icon: Icon(

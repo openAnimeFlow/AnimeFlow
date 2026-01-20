@@ -74,7 +74,7 @@ class AppInfoController extends GetxController {
           : remoteVersion;
 
       // 比较版本号
-      int comparison = _compareVersionNumbers(cleanRemoteVersion, localVersion);
+      int comparison = Utils.compareVersionNumbers(cleanRemoteVersion, localVersion);
 
       if (comparison > 0) {
         final assets = release['assets'];
@@ -111,7 +111,7 @@ class AppInfoController extends GetxController {
             body: body,
             onStartDownload: (downloadUrl, fileName) async {
               final downloadInfo = download.firstWhere(
-                (info) => info.url == downloadUrl && info.fileName == fileName,
+                    (info) => info.url == downloadUrl && info.fileName == fileName,
                 orElse: () => download[0],
               );
 
@@ -184,30 +184,6 @@ class AppInfoController extends GetxController {
       Logger().e('版本比较失败: $e');
       return VersionType.localNewer;
     }
-  }
-
-  /// 比较两个版本号字符串
-  /// 返回值: 1表示v1 > v2, -1表示v1 < v2, 0表示相等
-  int _compareVersionNumbers(String v1, String v2) {
-    List<int> parseVersion(String version) {
-      return version.split('.').map((part) => int.tryParse(part) ?? 0).toList();
-    }
-
-    List<int> version1 = parseVersion(v1);
-    List<int> version2 = parseVersion(v2);
-
-    // 比较主版本号、次版本号、修订号
-    for (int i = 0; i < 3; i++) {
-      if (i < version1.length && i < version2.length) {
-        if (version1[i] > version2[i]) return 1;
-        if (version1[i] < version2[i]) return -1;
-      } else if (i < version1.length) {
-        return version1[i] > 0 ? 1 : -1;
-      } else if (i < version2.length) {
-        return version2[i] > 0 ? -1 : 1;
-      }
-    }
-    return 0;
   }
 
   ///根据平台获取下载地址

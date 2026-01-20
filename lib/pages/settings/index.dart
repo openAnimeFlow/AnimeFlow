@@ -1,5 +1,5 @@
 import 'package:anime_flow/pages/settings/pages/danmaku_setting_page.dart';
-import 'package:anime_flow/pages/settings/pages/data_source.dart';
+import 'package:anime_flow/pages/settings/pages/plugins/plugins.dart';
 import 'package:anime_flow/pages/settings/pages/theme.dart';
 import 'package:anime_flow/pages/settings/setting_controller.dart';
 import 'package:anime_flow/routes/index.dart';
@@ -46,8 +46,8 @@ class _SettingsPageState extends State<SettingsPage> {
         _SettingsMenuItem(
           title: '数据源管理',
           icon: Icons.smart_display_rounded,
-          route: RouteName.settingDataSource,
-          page: const DataSourcePage(),
+          route: RouteName.settingPlugins,
+          page: const PluginsPage(),
         ),
       ],
     ),

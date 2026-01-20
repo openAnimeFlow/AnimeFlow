@@ -62,9 +62,14 @@ class CommonApi {
   static const String bangumiUserAgent =
       'AnimeFlow/{version} (https://github.com/openAnimeFlow/AnimeFlow.git)';
 
-  /// github版本信息
-  static const String githubReleases =
-      'https://api.github.com/repos/openAnimeFlow/AnimeFlow/releases/latest';
+  ///AnimeFLow版本信息
+  static const String animeFlowVersion = '/repos/openAnimeFlow/AnimeFlow/releases/latest';
+
+  ///GitHubApi
+  static const String githubApi = 'https://api.github.com';
+
+  ///插件仓库
+  static const String pluginRepo = '/repos/openAnimeFlow/animeFlow-assets/contents/plugins';
 }
 
 class AnimeFlowApi {

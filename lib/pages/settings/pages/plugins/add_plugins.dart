@@ -3,14 +3,14 @@ import 'package:anime_flow/repository/storage.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
-class AddSourcePage extends StatefulWidget {
-  const AddSourcePage({super.key});
+class AddPluginsPage extends StatefulWidget {
+  const AddPluginsPage({super.key});
 
   @override
-  State<AddSourcePage> createState() => _AddSourcePageState();
+  State<AddPluginsPage> createState() => _AddPluginsPageState();
 }
 
-class _AddSourcePageState extends State<AddSourcePage> {
+class _AddPluginsPageState extends State<AddPluginsPage> {
   final List<_Field> _textFields = [
     _Field(
       title: '版本号',

@@ -55,14 +55,6 @@ class _DownloadPluginsPageState extends State<DownloadPluginsPage> {
     }
   }
 
-  void _handleBack() {
-    if (hasChanged) {
-      Get.back(result: true);
-    } else {
-      Get.back();
-    }
-  }
-
   @override
   Widget build(BuildContext context) {
     return PopScope(
@@ -76,25 +68,26 @@ class _DownloadPluginsPageState extends State<DownloadPluginsPage> {
       child: Scaffold(
         appBar: AppBar(
           title: const Text('下载配置'),
-          automaticallyImplyLeading: !settingController.isWideScreen.value,
-          leading: settingController.isWideScreen.value
-              ? null
-              : IconButton(
-                  icon: const Icon(Icons.arrow_back),
-                  onPressed: _handleBack,
-                ),
         ),
         body: RefreshIndicator(
           onRefresh: () async {
             _getPlugins();
           },
           child: ListView(padding: EdgeInsets.zero, children: [
-            const ListTile(
-              title: Text(
+            ListTile(
+              title: const Text(
                 '下载数据源',
                 style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
               ),
-              subtitle: Text('当前会从Github仓库中下载数据源，注意网络环境,下拉刷新数据'),
+              subtitle: const Text('当前会从Github仓库中下载数据源，注意网络环境,下拉刷新数据'),
+              trailing: Utils.isDesktop
+                  ? IconButton(
+                onPressed: () {
+                  _getPlugins();
+                },
+                icon: const Icon(Icons.refresh),
+              )
+                  : null,
             ),
             if (isLoading)
               const Center(
@@ -130,8 +123,7 @@ class _DownloadPluginsPageState extends State<DownloadPluginsPage> {
                                         url: plugin.iconUrl),
                                     const SizedBox(width: 10),
                                     Column(
-                                      crossAxisAlignment:
-                                          CrossAxisAlignment.start,
+                                      crossAxisAlignment: CrossAxisAlignment.start,
                                       children: [
                                         Text(
                                           plugin.name,

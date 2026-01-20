@@ -39,43 +39,44 @@ class _ThanksPageState extends State<ThanksPage>
 
   // 鸣谢项目数据
   List<Map<String, dynamic>> get _thanksItems => [
-    {
-      'icon': const Icon(Icons.web),
-      'title': 'WebView',
-      'description': 'Kazumi项目提供的WebView技术支持',
-      'url': 'https://github.com/Predidit/Kazumi/tree/main/lib/pages/webview',
-    },
-    {
-      'icon': const Icon(Icons.play_circle),
-      'title': 'media-kit',
-      'description': '跨平台视频播放器，支持高质量视频播放',
-      'url': 'https://github.com/Predidit/media-kit',
-    },
-    {
-      'icon': const Icon(Icons.subtitles),
-      'title': 'canvas_danmaku',
-      'description': '弹幕插件，提供流畅的弹幕绘制',
-      'url': 'https://pub.dev/packages/canvas_danmaku',
-    },
-    {
-      'icon': const Icon(Icons.subtitles_outlined),
-      'title': '弹弹Play',
-      'description': '提供丰富的弹幕数据源',
-      'url': 'https://www.dandanplay.com/',
-    },
-    {
-      'icon': const Icon(Icons.live_tv_rounded),
-      'title': 'Bangumi',
-      'description': '提供番剧信息和用户数据同步服务',
-      'url': 'https://bangumi.tv',
-    },
-    {
-      'icon': const Icon(Icons.high_quality),
-      'title': 'Anime4K',
-      'description': '超分辨率技术，提升视频画质',
-      'url': 'https://github.com/bloc97/Anime4K',
-    },
-  ];
+        {
+          'icon': const Icon(Icons.web),
+          'title': 'WebView',
+          'description': 'Kazumi项目提供的WebView技术支持',
+          'url':
+              'https://github.com/Predidit/Kazumi/tree/main/lib/pages/webview',
+        },
+        {
+          'icon': const Icon(Icons.play_circle_outline_rounded),
+          'title': 'media-kit',
+          'description': '跨平台视频播放器，支持高质量视频播放',
+          'url': 'https://github.com/Predidit/media-kit',
+        },
+        {
+          'icon': const Icon(Icons.subtitles),
+          'title': 'canvas_danmaku',
+          'description': '弹幕插件，提供流畅的弹幕绘制',
+          'url': 'https://pub.dev/packages/canvas_danmaku',
+        },
+        {
+          'icon': const Icon(Icons.subtitles_outlined),
+          'title': '弹弹Play',
+          'description': '提供丰富的弹幕数据源',
+          'url': 'https://www.dandanplay.com/',
+        },
+        {
+          'icon': const Icon(Icons.live_tv_rounded),
+          'title': 'Bangumi',
+          'description': '提供番剧信息和用户数据同步服务',
+          'url': 'https://bangumi.tv',
+        },
+        {
+          'icon': const Icon(Icons.hd_outlined),
+          'title': 'Anime4K',
+          'description': '超分辨率技术，提升视频画质',
+          'url': 'https://github.com/bloc97/Anime4K',
+        },
+      ];
 
   @override
   Widget build(BuildContext context) {
@@ -116,7 +117,8 @@ class _ThanksPageState extends State<ThanksPage>
                                       .primary
                                       .withValues(
                                           alpha: _breathAnimation.value * 0.8),
-                                  blurRadius: 20 + (_breathAnimation.value * 20),
+                                  blurRadius:
+                                      20 + (_breathAnimation.value * 20),
                                   spreadRadius: _breathAnimation.value * 5,
                                 ),
                               ],
@@ -233,7 +235,7 @@ class _ThanksPageState extends State<ThanksPage>
             : null,
         borderRadius: BorderRadius.circular(16),
         child: Container(
-          padding: const EdgeInsets.all(18),
+          padding: const EdgeInsets.all(10),
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(16),
             border: Border.all(
@@ -293,33 +295,25 @@ class _ThanksPageState extends State<ThanksPage>
                           ),
                         ),
                         if (hasUrl)
-                          Container(
-                            padding: const EdgeInsets.all(4),
-                            decoration: BoxDecoration(
-                              color: Theme.of(context)
-                                  .colorScheme
-                                  .primary
-                                  .withValues(alpha: 0.1),
-                              borderRadius: BorderRadius.circular(6),
-                            ),
-                            child: Icon(
-                              Icons.open_in_new,
-                              size: 20,
-                              color: Theme.of(context).colorScheme.primary,
-                            ),
+                          Icon(
+                            Icons.open_in_new,
+                            size: 20,
+                            color: Theme.of(context).colorScheme.primary,
                           ),
                       ],
                     ),
-                    const SizedBox(height: 6),
-                    Text(
-                      description,
-                      style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                            color:
-                                Theme.of(context).colorScheme.onSurfaceVariant,
-                            height: 1.4,
-                          ),
-                      maxLines: 2,
-                      overflow: TextOverflow.ellipsis,
+                    Expanded(
+                      child: Text(
+                        description,
+                        style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                              color: Theme.of(context)
+                                  .colorScheme
+                                  .onSurfaceVariant,
+                              height: 1.4,
+                            ),
+                        maxLines: 2,
+                        overflow: TextOverflow.ellipsis,
+                      ),
                     ),
                   ],
                 ),

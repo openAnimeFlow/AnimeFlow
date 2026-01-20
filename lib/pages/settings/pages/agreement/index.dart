@@ -29,7 +29,7 @@ class _AgreementPageState extends State<AgreementPage> {
       final response = await dioRequest.get<String>(
         'https://raw.githubusercontent.com/openAnimeFlow/AnimeFlow/main/LICENSE.txt',
       );
-      
+
       setState(() {
         _licenseText = response.data ?? '';
         _isLoading = false;
@@ -104,12 +104,14 @@ class _AgreementPageState extends State<AgreementPage> {
 
     return SingleChildScrollView(
       padding: const EdgeInsets.all(16),
-      child: SelectableText(
-        _licenseText!,
-        style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-              fontFamily: 'monospace',
-              height: 1.6,
-            ),
+      child: Center(
+        child: SelectableText(
+          _licenseText!,
+          style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                fontFamily: 'monospace',
+                height: 1.6,
+              ),
+        ),
       ),
     );
   }

@@ -84,100 +84,68 @@ class _DownloadPluginsPageState extends State<DownloadPluginsPage> {
                   onPressed: _handleBack,
                 ),
         ),
-        body: ListView(padding: EdgeInsets.zero, children: [
-          const ListTile(
-            title: Text(
-              '下载数据源',
-              style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
-            ),
-            subtitle: Text('当前会从Github仓库中下载数据源，注意网络环境,下拉刷新数据'),
-          ),
-          if (isLoading)
-            const Center(
-              child: ListTile(
-                leading: CircularProgressIndicator(),
-                title: Text('加载中...'),
-              ),
-            ),
-          if (plugins == null && !isLoading)
+        body: RefreshIndicator(
+          onRefresh: () async {
+            _getPlugins();
+          },
+          child: ListView(padding: EdgeInsets.zero, children: [
             const ListTile(
-              title: Text('没有找到数据请刷新'),
+              title: Text(
+                '下载数据源',
+                style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+              ),
+              subtitle: Text('当前会从Github仓库中下载数据源，注意网络环境,下拉刷新数据'),
             ),
-          if (plugins != null && !isLoading)
-            ...plugins!.map((plugin) {
-              final localPlugin = storage.get(plugin.name);
-              return Padding(
-                padding: const EdgeInsets.only(left: 10, right: 10),
-                child: Card(
-                  elevation: 0.2,
-                  child: Row(
-                    children: [
-                      Expanded(
-                          child: Padding(
-                              padding: const EdgeInsets.symmetric(
-                                  horizontal: 10, vertical: 10),
-                              child: Row(
-                                children: [
-                                  AnimationNetworkImage(
-                                      height: 50,
-                                      width: 50,
-                                      borderRadius:
-                                          const BorderRadius.all(Radius.circular(10)),
-                                      url: plugin.iconUrl),
-                                  const SizedBox(width: 10),
-                                  Column(
-                                    crossAxisAlignment:
-                                        CrossAxisAlignment.start,
-                                    children: [
-                                      Text(
-                                        plugin.name,
-                                        style: const TextStyle(
-                                            fontSize: 16,
-                                            fontWeight: FontWeight.bold),
-                                      ),
-                                      Text('版本:${plugin.version}'),
-                                    ],
-                                  )
-                                ],
-                              ))),
-                      if (localPlugin == null)
-                        IconButton(
-                            onPressed: () {
-                              try {
-                                storage.put(plugin.name, plugin.toJson());
-                                setState(() {
-                                  hasChanged = true;
-                                });
-                                Get.snackbar(
-                                  '下载成功',
-                                  '插件 "${plugin.name}" 已下载',
-                                  snackPosition: SnackPosition.BOTTOM,
-                                  maxWidth: 400,
-                                );
-                              } catch (e) {
-                                Get.snackbar(
-                                  '下载失败',
-                                  '下载插件 "${plugin.name}" 时发生错误：$e',
-                                  snackPosition: SnackPosition.BOTTOM,
-                                  maxWidth: 400,
-                                );
-                              }
-                            },
-                            icon: const Icon(Icons.download))
-                      else
-                        Builder(builder: (context) {
-                          final config = CrawlConfigItem.fromJson(
-                            Map<String, dynamic>.from(localPlugin),
-                          );
-                          final isNew = Utils.compareVersionNumbers(
-                              plugin.version, config.version);
-                          if (isNew == 0 || isNew == -1) {
-                            return TextButton(
-                              onPressed: () {},
-                              child: const Text('已下载'),
-                            );
-                          } else {
-                            return TextButton(
+            if (isLoading)
+              const Center(
+                child: ListTile(
+                  leading: CircularProgressIndicator(),
+                  title: Text('加载中...'),
+                ),
+              ),
+            if (plugins == null && !isLoading)
+              const ListTile(
+                title: Text('没有找到数据请刷新'),
+              ),
+            if (plugins != null && !isLoading)
+              ...plugins!.map((plugin) {
+                final localPlugin = storage.get(plugin.name);
+                return Padding(
+                  padding: const EdgeInsets.only(left: 10, right: 10),
+                  child: Card(
+                    elevation: 0.2,
+                    child: Row(
+                      children: [
+                        Expanded(
+                            child: Padding(
+                                padding: const EdgeInsets.symmetric(
+                                    horizontal: 10, vertical: 10),
+                                child: Row(
+                                  children: [
+                                    AnimationNetworkImage(
+                                        height: 50,
+                                        width: 50,
+                                        borderRadius: const BorderRadius.all(
+                                            Radius.circular(10)),
+                                        url: plugin.iconUrl),
+                                    const SizedBox(width: 10),
+                                    Column(
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.start,
+                                      children: [
+                                        Text(
+                                          plugin.name,
+                                          style: const TextStyle(
+                                              fontSize: 16,
+                                              fontWeight: FontWeight.bold),
+                                        ),
+                                        Text('版本:${plugin.version}'),
+                                      ],
+                                    )
+                                  ],
+                                ))),
+                        if (localPlugin == null)
+                          IconButton(
                               onPressed: () {
                                 try {
                                   storage.put(plugin.name, plugin.toJson());
@@ -185,30 +153,67 @@ class _DownloadPluginsPageState extends State<DownloadPluginsPage> {
                                     hasChanged = true;
                                   });
                                   Get.snackbar(
-                                    '更新成功',
-                                    '插件 "${plugin.name}" 已更新到版本 ${plugin.version}',
+                                    '下载成功',
+                                    '插件 "${plugin.name}" 已下载',
                                     snackPosition: SnackPosition.BOTTOM,
                                     maxWidth: 400,
                                   );
                                 } catch (e) {
                                   Get.snackbar(
-                                    '更新失败',
-                                    '更新插件 "${plugin.name}" 时发生错误：$e',
+                                    '下载失败',
+                                    '下载插件 "${plugin.name}" 时发生错误：$e',
                                     snackPosition: SnackPosition.BOTTOM,
                                     maxWidth: 400,
                                   );
                                 }
                               },
-                              child: const Text('更新'),
+                              icon: const Icon(Icons.download))
+                        else
+                          Builder(builder: (context) {
+                            final config = CrawlConfigItem.fromJson(
+                              Map<String, dynamic>.from(localPlugin),
                             );
-                          }
-                        })
-                    ],
+                            final isNew = Utils.compareVersionNumbers(
+                                plugin.version, config.version);
+                            if (isNew == 0 || isNew == -1) {
+                              return TextButton(
+                                onPressed: () {},
+                                child: const Text('已下载'),
+                              );
+                            } else {
+                              return TextButton(
+                                onPressed: () {
+                                  try {
+                                    storage.put(plugin.name, plugin.toJson());
+                                    setState(() {
+                                      hasChanged = true;
+                                    });
+                                    Get.snackbar(
+                                      '更新成功',
+                                      '插件 "${plugin.name}" 已更新到版本 ${plugin.version}',
+                                      snackPosition: SnackPosition.BOTTOM,
+                                      maxWidth: 400,
+                                    );
+                                  } catch (e) {
+                                    Get.snackbar(
+                                      '更新失败',
+                                      '更新插件 "${plugin.name}" 时发生错误：$e',
+                                      snackPosition: SnackPosition.BOTTOM,
+                                      maxWidth: 400,
+                                    );
+                                  }
+                                },
+                                child: const Text('更新'),
+                              );
+                            }
+                          })
+                      ],
+                    ),
                   ),
-                ),
-              );
-            }),
-        ]),
+                );
+              }),
+          ]),
+        ),
       ),
     );
   }

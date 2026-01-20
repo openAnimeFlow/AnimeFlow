@@ -1,3 +1,4 @@
+import 'package:anime_flow/utils/utils.dart';
 import 'package:flutter/material.dart';
 import 'package:anime_flow/constants/play_layout_constant.dart';
 import 'package:anime_flow/pages/recommend/anime/calendar.dart';
@@ -7,6 +8,7 @@ import 'package:anime_flow/widget/subject_carf.dart';
 import 'package:anime_flow/models/item/bangumi/hot_item.dart';
 import 'package:anime_flow/models/item/bangumi/calendar_item.dart';
 import 'package:logger/logger.dart';
+import 'package:shimmer/shimmer.dart';
 
 class AnimePage extends StatefulWidget {
   final ValueChanged<bool>? onShowBackToTopChanged;
@@ -22,7 +24,8 @@ class AnimePage extends StatefulWidget {
   State<AnimePage> createState() => _AnimePageState();
 }
 
-class _AnimePageState extends State<AnimePage>  with AutomaticKeepAliveClientMixin{
+class _AnimePageState extends State<AnimePage>
+    with AutomaticKeepAliveClientMixin {
   final List<Data> _dataList = [];
   bool _isLoading = false;
   bool _hasMore = true;
@@ -74,7 +77,8 @@ class _AnimePageState extends State<AnimePage>  with AutomaticKeepAliveClientMix
 
   void scrollToTop() {
     if (_scrollController.hasClients) {
-      _scrollController.animateTo(0,
+      _scrollController.animateTo(
+        0,
         duration: const Duration(milliseconds: 300),
         curve: Curves.easeInOut,
       );
@@ -149,7 +153,7 @@ class _AnimePageState extends State<AnimePage>  with AutomaticKeepAliveClientMix
             Center(
               child: ConstrainedBox(
                 constraints:
-                const BoxConstraints(maxWidth: PlayLayoutConstant.maxWidth),
+                    const BoxConstraints(maxWidth: PlayLayoutConstant.maxWidth),
                 child: CustomScrollView(
                   controller: _scrollController,
                   slivers: [
@@ -182,34 +186,72 @@ class _AnimePageState extends State<AnimePage>  with AutomaticKeepAliveClientMix
                           ),
                           SliverGrid(
                             gridDelegate:
-                            SliverGridDelegateWithFixedCrossAxisCount(
+                                SliverGridDelegateWithFixedCrossAxisCount(
                               crossAxisCount:
-                              LayoutUtil.getCrossAxisCount(context),
+                                  LayoutUtil.getCrossAxisCount(context),
                               crossAxisSpacing: 5, // 横向间距
                               mainAxisSpacing: 5, // 纵向间距
                               childAspectRatio: 0.7, // 宽高比
                             ),
                             delegate: SliverChildBuilderDelegate(
-                                  (BuildContext context, int index) {
-                                if (index == _dataList.length) {
-                                  return _hasMore
-                                      ? const Center(
-                                      child: CircularProgressIndicator())
-                                      : const Center(
-                                      child: Padding(
-                                        padding: EdgeInsets.all(8.0),
-                                        child: Text('没有更多了'),
-                                      ));
+                              (BuildContext context, int index) {
+                                // 显示数据项
+                                if (index < _dataList.length) {
+                                  final subject = _dataList[index].subject;
+                                  return SubjectCarfView(subject: subject);
                                 }
-                                final subject = _dataList[index].subject;
-                                return SubjectCarfView(subject: subject);
+
+                                // 加载时显示骨架屏(3个)
+                                final skeletonCount =
+                                    _hasMore && _isLoading ? 3 : 0;
+                                if (index < _dataList.length + skeletonCount) {
+                                  return Center(
+                                    child: Padding(
+                                      padding: const EdgeInsets.all(5),
+                                      child: _buildSkeleton(context),
+                                    ),
+                                  );
+                                }
+
+                                return const SizedBox.shrink();
                               },
-                              childCount: _dataList.length + 1,
+                              childCount: _dataList.length +
+                                  (_hasMore && _isLoading ? 3 : 0),
                             ),
                           ),
                         ],
                       ),
                     ),
+                    // 没有更多数据提示
+                    if (!_hasMore)
+                      SliverToBoxAdapter(
+                        child: Padding(
+                          padding: const EdgeInsets.all(16.0),
+                          child: Center(
+                            child: Row(
+                              children: [
+                                Expanded(
+                                  child: _buildHorizontalRuleIcons(),
+                                ),
+                                Padding(
+                                  padding: const EdgeInsets.symmetric(horizontal: 8.0),
+                                  child: Text(
+                                    '没有更多了',
+                                    style: TextStyle(
+                                      color: Theme.of(context)
+                                          .colorScheme
+                                          .onSurfaceVariant,
+                                    ),
+                                  ),
+                                ),
+                                Expanded(
+                                  child: _buildHorizontalRuleIcons(),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ),
+                      ),
                   ],
                 ),
               ),
@@ -218,5 +260,73 @@ class _AnimePageState extends State<AnimePage>  with AutomaticKeepAliveClientMix
         );
       },
     );
+  }
+
+  // 构建横线图标（填充剩余空间）
+  Widget _buildHorizontalRuleIcons() {
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        const iconSize = 24.0; // 图标大小
+        const spacing = 4.0; // 图标间距
+        const iconWidth = iconSize + spacing;
+        final iconCount = (constraints.maxWidth / iconWidth).floor();
+        
+        return Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: List.generate(
+            iconCount > 0 ? iconCount : 1,
+            (index) => Padding(
+              padding: EdgeInsets.only(right: index < iconCount - 1 ? spacing : 0),
+              child: Icon(
+                Icons.horizontal_rule_rounded,
+                size: iconSize,
+                color: Theme.of(context).colorScheme.onSurfaceVariant.withValues(alpha: 0.5),
+              ),
+            ),
+          ),
+        );
+      },
+    );
+  }
+
+  //骨架屏
+  Widget _buildSkeleton(BuildContext context) {
+    final isDark = Utils.isDarkTheme(context);
+    final baseColor = isDark ? Colors.grey[400]! : Colors.grey[200]!;
+    final highlightColor = isDark ? Colors.grey[300]! : Colors.grey[100]!;
+    final containerColor = isDark
+        ? Theme.of(context).colorScheme.surfaceContainerHighest
+        : Theme.of(context).colorScheme.surface;
+    return Stack(children: [
+      Positioned.fill(
+        child: Shimmer.fromColors(
+          baseColor: baseColor,
+          highlightColor: highlightColor,
+          child: Container(
+            decoration: BoxDecoration(
+              color: containerColor,
+              borderRadius: BorderRadius.circular(8.0),
+            ),
+          ),
+        ),
+      ),
+      Positioned(
+        left: 0,
+        right: 0,
+        bottom: 0,
+        child: Shimmer.fromColors(
+          baseColor: baseColor,
+          highlightColor: highlightColor,
+          child: Container(
+            width: 100,
+            height: 20,
+            decoration: BoxDecoration(
+              color: containerColor,
+              borderRadius: BorderRadius.circular(8.0),
+            ),
+          ),
+        ),
+      )
+    ]);
   }
 }

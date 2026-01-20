@@ -83,18 +83,24 @@ class InfoHeadView extends StatelessWidget {
                       children: [
                         //封面
                         Flexible(
-                            flex: 2,
-                            child: AspectRatio(
-                                aspectRatio: 2 / 3,
-                                child: Container(
-                                  margin: const EdgeInsets.only(left: 6),
-                                  child: AnimationNetworkImage(
-                                    preview: true,
-                                    borderRadius: BorderRadius.circular(8),
-                                    url: subjectBasicData.image,
-                                    fit: BoxFit.cover,
-                                  ),
-                                ))),
+                          flex: 2,
+                          child: AspectRatio(
+                            aspectRatio: 2 / 3,
+                            child: Container(
+                              margin: const EdgeInsets.only(left: 6),
+                              child: Hero(
+                                tag: 'subject_image${subjectBasicData.id}',
+                                child: AnimationNetworkImage(
+                                  preview: true,
+                                  useExternalHero: true,
+                                  borderRadius: BorderRadius.circular(8),
+                                  url: subjectBasicData.image,
+                                  fit: BoxFit.cover,
+                                ),
+                              ),
+                            ),
+                          ),
+                        ),
                         const SizedBox(width: 5),
                         //信息
                         Flexible(

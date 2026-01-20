@@ -9,6 +9,7 @@ import 'animation_network_image/animation_network_image.dart';
 
 class SubjectCarfView extends StatelessWidget {
   final Subject subject;
+
   const SubjectCarfView({super.key, required this.subject});
 
   @override
@@ -31,14 +32,19 @@ class SubjectCarfView extends StatelessWidget {
         child: Stack(
           children: [
             Positioned(
-                top: 0,
-                left: 0,
-                bottom: 0,
-                right: 0,
+              top: 0,
+              left: 0,
+              bottom: 0,
+              right: 0,
+              child: Hero(
+                tag: 'subject_image${subject.id}',
                 child: AnimationNetworkImage(
                   url: subject.images.large,
                   fit: BoxFit.cover,
-                )),
+                  useExternalHero: true,
+                ),
+              ),
+            ),
             Positioned(
               bottom: 0,
               left: 0,

@@ -66,7 +66,62 @@ class _CommentsViewState extends State<CommentsView>
   @override
   Widget build(BuildContext context) {
     super.build(context);
-    return _buildComments();
+    return Column(
+      children: [
+        // 评论列表
+        Expanded(child: _buildComments()),
+        //评论输入框
+        _buildCommentInput(),
+      ],
+    );
+  }
+
+  Widget _buildCommentInput() {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    return Container(
+      padding: EdgeInsets.only(
+        left: 16,
+        right: 16,
+        bottom: MediaQuery.of(context).padding.bottom,
+        top: 8,
+      ),
+      decoration: BoxDecoration(
+        color: Theme.of(context).scaffoldBackgroundColor,
+        border: Border(
+          top: BorderSide(
+            color: Theme.of(context).dividerColor,
+          ),
+        ),
+      ),
+      child: TextField(
+        style: TextStyle(
+          color: Theme.of(context).colorScheme.onSurface,
+        ),
+        decoration: InputDecoration(
+          hintText: '发送评论施工中...',
+          hintStyle: TextStyle(
+            color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.5),
+          ),
+          filled: true,
+          fillColor: isDark 
+              ? Colors.grey[800]?.withValues(alpha: 0.6)
+              : Colors.grey[200]?.withValues(alpha: 0.8),
+          border: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(24),
+            borderSide: BorderSide.none,
+          ),
+          enabledBorder: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(24),
+            borderSide: BorderSide.none,
+          ),
+          focusedBorder: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(24),
+            borderSide: BorderSide.none,
+          ),
+          contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+        ),
+      ),
+    );
   }
 
   Widget _buildComments() {

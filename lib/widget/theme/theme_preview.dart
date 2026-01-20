@@ -236,6 +236,8 @@ class ThemeColorCard extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       margin: margin,
+      width: 100,
+      height: 140,
       padding: const EdgeInsets.all(8),
       decoration: BoxDecoration(
         border: Border.all(width: borderWidth, color: borderColor),
@@ -245,6 +247,7 @@ class ThemeColorCard extends StatelessWidget {
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
+        mainAxisSize: MainAxisSize.min,
         children: [
           // 顶部栏
           Container(

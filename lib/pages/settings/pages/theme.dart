@@ -54,8 +54,7 @@ class _ThemePageState extends State<ThemePage> {
                       const SizedBox(height: 12),
                       GetBuilder<ThemeController>(
                         builder: (controller) {
-                          return Center(
-                            child: IntrinsicWidth(
+                          return  IntrinsicWidth(
                               child: glassPanel(
                                 padding: const EdgeInsets.symmetric(
                                     horizontal: 8, vertical: 10),
@@ -130,7 +129,6 @@ class _ThemePageState extends State<ThemePage> {
                                   ],
                                 ),
                               ),
-                            ),
                           );
                         },
                       ),
@@ -152,8 +150,7 @@ class _ThemePageState extends State<ThemePage> {
                             physics: const NeverScrollableScrollPhysics(),
                             gridDelegate:
                                 SliverGridDelegateWithFixedCrossAxisCount(
-                              crossAxisCount:
-                                  LayoutUtil.getCrossAxisCount(context),
+                              crossAxisCount: LayoutUtil.getCrossAxisCount(context),
                               crossAxisSpacing: 5, // 横向间距
                               mainAxisSpacing: 10, // 纵向间距
                               childAspectRatio: 0.7, // 宽高比

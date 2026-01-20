@@ -77,7 +77,8 @@ class _PluginsPageState extends State<PluginsPage> {
             //云下载
             IconButton(
                 onPressed: () async {
-                  final result = await Get.toNamed(RouteName.settingDownloadPlugins);
+                  final result =
+                      await Get.toNamed(RouteName.settingDownloadPlugins);
                   // 如果返回成功标志，刷新数据
                   if (result == true) {
                     _initData();
@@ -131,27 +132,39 @@ class _PluginsPageState extends State<PluginsPage> {
                     borderRadius: BorderRadius.circular(10),
                     color:
                         Theme.of(context).disabledColor.withValues(alpha: 0.1)),
-                child: ListTile(
-                  leading: AnimationNetworkImage(
-                    borderRadius: BorderRadius.circular(50),
-                    width: 40,
-                    height: 40,
-                    url: data.iconUrl,
-                  ),
-                  title: Text(
-                    data.name,
-                    style: const TextStyle(
-                        fontSize: 16, fontWeight: FontWeight.bold),
-                  ),
-                  trailing: IconButton(
-                    icon: Icon(
-                      Icons.delete_outline_outlined,
-                      color: Theme.of(context).colorScheme.error,
+                child: Row(
+                  children: [
+                    Padding(
+                      padding: const EdgeInsets.symmetric(
+                          vertical: 5, horizontal: 5),
+                      child: AnimationNetworkImage(
+                          borderRadius: BorderRadius.circular(10),
+                          width: 50,
+                          height: 50,
+                          url: data.iconUrl),
                     ),
-                    onPressed: () {
-                      _deleteDataSource(data.name);
-                    },
-                  ),
+                    Expanded(
+                      child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              data.name,
+                              style:
+                                  const TextStyle(fontWeight: FontWeight.bold),
+                            ),
+                            Text(data.version)
+                          ]),
+                    ),
+                    IconButton(
+                      icon: Icon(
+                        Icons.delete_outline_outlined,
+                        color: Theme.of(context).colorScheme.error,
+                      ),
+                      onPressed: () {
+                        _deleteDataSource(data.name);
+                      },
+                    ),
+                  ],
                 ),
               ),
             );

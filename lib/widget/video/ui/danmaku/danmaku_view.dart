@@ -50,7 +50,7 @@ class _DanmakuViewState extends State<DanmakuView>
     _border = setting.get(DanmakuKey.danmakuBorder, defaultValue: true);
     _opacity = setting.get(DanmakuKey.danmakuOpacity, defaultValue: 1.0);
     _fontSize = setting.get(DanmakuKey.danmakuFontSize, defaultValue: 16.0);
-    _danmakuArea = setting.get(DanmakuKey.danmakuArea, defaultValue: 1.0);
+    _danmakuArea = setting.get(DanmakuKey.danmakuArea, defaultValue: 0.25);
     _hideTop = setting.get(DanmakuKey.danmakuHideTop, defaultValue: false);
     _hideBottom = setting.get(DanmakuKey.danmakuHideBottom, defaultValue: false);
     _hideScroll = setting.get(DanmakuKey.danmakuHideScroll, defaultValue: false);

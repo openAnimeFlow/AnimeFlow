@@ -42,26 +42,18 @@ class _DanmakuSettingPageState extends State<DanmakuSettingPage> {
   void _loadSettings() {
     setState(() {
       _opacity = setting.get(DanmakuKey.danmakuOpacity, defaultValue: 1.0);
-      _fontSize = setting.get(DanmakuKey.danmakuFontSize,
-          defaultValue: Utils.isMobile ? 16.0 : 25.0);
-      _danmakuArea = setting.get(DanmakuKey.danmakuArea, defaultValue: 1.0);
-      _danmakuDuration =
-          setting.get(DanmakuKey.danmakuDuration, defaultValue: 8.0);
-      _massiveMode =
-          setting.get(DanmakuKey.danmakuMassiveMode, defaultValue: false);
+      _fontSize = setting.get(DanmakuKey.danmakuFontSize, defaultValue: Utils.isMobile ? 16.0 : 25.0);
+      _danmakuArea = setting.get(DanmakuKey.danmakuArea, defaultValue: 0.25);
+      _danmakuDuration = setting.get(DanmakuKey.danmakuDuration, defaultValue: 8.0);
+      _massiveMode = setting.get(DanmakuKey.danmakuMassiveMode, defaultValue: false);
       _border = setting.get(DanmakuKey.danmakuBorder, defaultValue: true);
       _danmakuColor = setting.get(DanmakuKey.danmakuColor, defaultValue: true);
       _hideTop = setting.get(DanmakuKey.danmakuHideTop, defaultValue: false);
-      _hideBottom =
-          setting.get(DanmakuKey.danmakuHideBottom, defaultValue: false);
-      _hideScroll =
-          setting.get(DanmakuKey.danmakuHideScroll, defaultValue: false);
-      _platformBilibili =
-          setting.get(DanmakuKey.danmakuPlatformBilibili, defaultValue: true);
-      _platformGamer =
-          setting.get(DanmakuKey.danmakuPlatformGamer, defaultValue: true);
-      _platformDanDanPlay =
-          setting.get(DanmakuKey.danmakuPlatformDanDanPlay, defaultValue: true);
+      _hideBottom = setting.get(DanmakuKey.danmakuHideBottom, defaultValue: false);
+      _hideScroll = setting.get(DanmakuKey.danmakuHideScroll, defaultValue: false);
+      _platformBilibili = setting.get(DanmakuKey.danmakuPlatformBilibili, defaultValue: true);
+      _platformGamer = setting.get(DanmakuKey.danmakuPlatformGamer, defaultValue: true);
+      _platformDanDanPlay = setting.get(DanmakuKey.danmakuPlatformDanDanPlay, defaultValue: true);
     });
   }
 

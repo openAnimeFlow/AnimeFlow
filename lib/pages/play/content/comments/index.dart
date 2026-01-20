@@ -1,8 +1,10 @@
 import 'package:anime_flow/models/item/bangumi/episode_comments_item.dart';
 import 'package:anime_flow/utils/formatUtil.dart';
+import 'package:anime_flow/utils/utils.dart';
 import 'package:anime_flow/widget/bbcode/bbcode_widget.dart';
 import 'package:anime_flow/widget/animation_network_image/animation_network_image.dart';
 import 'package:flutter/material.dart';
+import 'package:shimmer/shimmer.dart';
 
 class CommentsView extends StatefulWidget {
   final List<EpisodeComment>? comments;
@@ -100,10 +102,11 @@ class _CommentsViewState extends State<CommentsView>
         decoration: InputDecoration(
           hintText: '发送评论施工中...',
           hintStyle: TextStyle(
-            color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.5),
+            color:
+                Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.5),
           ),
           filled: true,
-          fillColor: isDark 
+          fillColor: isDark
               ? Colors.grey[800]?.withValues(alpha: 0.6)
               : Colors.grey[200]?.withValues(alpha: 0.8),
           border: OutlineInputBorder(
@@ -118,7 +121,8 @@ class _CommentsViewState extends State<CommentsView>
             borderRadius: BorderRadius.circular(24),
             borderSide: BorderSide.none,
           ),
-          contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+          contentPadding:
+              const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
         ),
       ),
     );
@@ -126,8 +130,19 @@ class _CommentsViewState extends State<CommentsView>
 
   Widget _buildComments() {
     if (widget.comments == null) {
-      return const Center(
-        child: CircularProgressIndicator(),
+      return Padding(
+        padding: const EdgeInsets.all(10),
+        child: Column(
+          children: List.generate(5, (index) {
+              return Column(
+                children: [
+                  _skeleton(context),
+                  const SizedBox(height: 10),
+                ],
+              );
+            },
+          ),
+        ),
       );
     } else {
       final comments = _sortedComments ?? widget.comments!;
@@ -365,6 +380,66 @@ class _CommentsViewState extends State<CommentsView>
           );
         }).toList(),
       ),
+    );
+  }
+
+  ///骨架屏
+  Widget _skeleton(BuildContext context) {
+    final isDark = Utils.isDarkTheme(context);
+    final baseColor = isDark ? Colors.grey[400]! : Colors.grey[200]!;
+    final highlightColor = isDark ? Colors.grey[300]! : Colors.grey[100]!;
+    final containerColor = isDark
+        ? Theme.of(context).colorScheme.surfaceContainerHighest
+        : Theme.of(context).colorScheme.surface;
+    return Row(
+      children: [
+        Shimmer.fromColors(
+          baseColor: baseColor,
+          highlightColor: highlightColor,
+          child: Container(
+            height: 50,
+            width: 50,
+            decoration: BoxDecoration(
+              color: containerColor,
+              borderRadius: BorderRadius.circular(8.0),
+            ),
+          ),
+        ),
+        const SizedBox(width: 5),
+        Expanded(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.start,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Shimmer.fromColors(
+                baseColor: baseColor,
+                highlightColor: highlightColor,
+                child: Container(
+                  height: 25,
+                  width: 100,
+                  decoration: BoxDecoration(
+                    color: containerColor,
+                    borderRadius: BorderRadius.circular(8.0),
+                  ),
+                ),
+              ),
+              const SizedBox(height: 3),
+              Shimmer.fromColors(
+                baseColor: baseColor,
+                highlightColor: highlightColor,
+                child: Container(
+                  height: 20,
+                  width: 200,
+                  decoration: BoxDecoration(
+                    color: containerColor,
+                    borderRadius: BorderRadius.circular(8.0),
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ],
     );
   }
 }

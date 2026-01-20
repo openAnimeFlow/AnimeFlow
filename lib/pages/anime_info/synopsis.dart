@@ -172,8 +172,8 @@ class _InfoSynopsisViewState extends State<InfoSynopsisView> {
   ///骨架屏
   Widget _skeleton(BuildContext context) {
     final isDark = Utils.isDarkTheme(context);
-    final baseColor = isDark ? Colors.grey[400]! : Colors.grey[300]!;
-    final highlightColor = isDark ? Colors.grey[300]! : Colors.grey[100]!;
+    final baseColor = isDark ? Colors.grey[400]! : Colors.grey[100]!;
+    final highlightColor = isDark ? Colors.grey[300]! : Colors.grey[50]!;
     final containerColor = isDark
         ? Theme.of(context).colorScheme.surfaceContainerHighest
         : Theme.of(context).colorScheme.surface;

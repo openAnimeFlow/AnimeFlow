@@ -65,40 +65,47 @@ class _RelatedViewState extends State<RelatedView> {
             ],
           ),
           SizedBox(
-            height: 180,
+            height: 200,
             child: ListView.builder(
               scrollDirection: Axis.horizontal,
               itemCount: relation.data.length,
-              cacheExtent: 200, // 缓存范围，优化滚动性能
-              addAutomaticKeepAlives: false, // 不自动保持item状态，节省内存
-              addRepaintBoundaries: true, // 添加重绘边界，优化性能
+              cacheExtent: 200,
+              // 缓存范围，优化滚动性能
+              addAutomaticKeepAlives: false,
+              // 不自动保持item状态，节省内存
+              addRepaintBoundaries: true,
+              // 添加重绘边界，优化性能
               itemBuilder: (context, index) {
                 final item = relation.data[index];
                 final subjectBasicData = SubjectBasicData(
                   id: item.subject.id,
-                  name: item.subject.nameCN?? item.subject.name,
+                  name: item.subject.nameCN ?? item.subject.name,
                   image: item.subject.images.large,
                 );
                 return Container(
-                    width: 100,
-                    margin: const EdgeInsets.all(5),
-                    child: InkWell(
-                        onTap: () {
-                          Navigator.of(context).pushNamed(RouteName.animeInfo,
-                              arguments: subjectBasicData);
-                        },
-                        child: Column(
-                          children: [
-                            AnimationNetworkImage(
-                                borderRadius: BorderRadius.circular(10),
-                                url: item.subject.images.large),
-                            Text(
-                              item.subject.nameCN?? item.subject.name,
-                              maxLines: 1,
-                              overflow: TextOverflow.ellipsis,
-                            )
-                          ],
-                        )));
+                  width: 100,
+                  margin: const EdgeInsets.all(5),
+                  child: InkWell(
+                    onTap: () {
+                      Navigator.of(context).pushNamed(RouteName.animeInfo,
+                          arguments: subjectBasicData);
+                    },
+                    child: Column(
+                      children: [
+                        AnimationNetworkImage(
+                            borderRadius: BorderRadius.circular(10),
+                            url: item.subject.images.large),
+                        Expanded(
+                          child: Text(
+                            item.subject.nameCN ?? item.subject.name,
+                            maxLines: 2,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                );
               },
             ),
           )

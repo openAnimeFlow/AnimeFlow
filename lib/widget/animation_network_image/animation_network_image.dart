@@ -12,6 +12,7 @@ class AnimationNetworkImage extends StatelessWidget {
   final double? width;
   final double? height;
   final bool preview;
+  final bool useExternalHero;
   final Duration fadeInDuration;
   final Duration fadeOutDuration;
   final BorderRadiusGeometry borderRadius;
@@ -24,6 +25,7 @@ class AnimationNetworkImage extends StatelessWidget {
     this.width,
     this.height,
     this.preview = false,
+    this.useExternalHero = false,
     this.borderRadius = BorderRadius.zero,
     this.fadeInDuration = const Duration(milliseconds: 500),
     this.fadeOutDuration = const Duration(milliseconds: 300),
@@ -33,7 +35,7 @@ class AnimationNetworkImage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    if (preview) {
+    if (preview && !useExternalHero) {
       final heroTag = 'emoji_${url.hashCode}_${Random().nextInt(10000)}';
       return GestureDetector(
         onTap: () {
@@ -41,6 +43,15 @@ class AnimationNetworkImage extends StatelessWidget {
               heroTag: heroTag, borderRadius: borderRadius);
         },
         child: Hero(tag: heroTag, child: _buildImage()),
+      );
+    } else if (preview && useExternalHero) {
+      // 如果有外层 Hero，只添加点击手势，不创建内部的 Hero
+      return GestureDetector(
+        onTap: () {
+          // 如果没有 Hero tag，预览功能可能不工作
+          ImageViewer.show(context, url, borderRadius: borderRadius);
+        },
+        child: _buildImage(),
       );
     } else {
       return _buildImage();

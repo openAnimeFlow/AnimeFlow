@@ -3,8 +3,10 @@ import 'package:anime_flow/models/item/bangumi/subjects_info_item.dart';
 import 'package:anime_flow/pages/anime_info/characters.dart';
 import 'package:anime_flow/pages/anime_info/related.dart';
 import 'package:anime_flow/pages/anime_info/tags.dart';
+import 'package:anime_flow/utils/utils.dart';
 import 'package:anime_flow/widget/text/expandable_text.dart';
 import 'package:flutter/material.dart';
+import 'package:shimmer/shimmer.dart';
 
 import 'details.dart';
 import 'comment.dart';
@@ -75,13 +77,12 @@ class _InfoSynopsisViewState extends State<InfoSynopsisView> {
                       ),
                     ),
 
-                    // 加载中状态
+                    // 加载中骨架屏
                     if (widget.subjectsInfo == null)
-                      const SliverToBoxAdapter(
+                      SliverToBoxAdapter(
                         child: Padding(
-                          padding: EdgeInsets.all(16),
-                          child: Text('加载中...'),
-                        ),
+                            padding: const EdgeInsets.all(16),
+                            child: _skeleton(context)),
                       )
                     else ...[
                       // 简介
@@ -165,6 +166,85 @@ class _InfoSynopsisViewState extends State<InfoSynopsisView> {
           ),
         );
       },
+    );
+  }
+
+  ///骨架屏
+  Widget _skeleton(BuildContext context) {
+    final isDark = Utils.isDarkTheme(context);
+    final baseColor = isDark ? Colors.grey[400]! : Colors.grey[300]!;
+    final highlightColor = isDark ? Colors.grey[300]! : Colors.grey[100]!;
+    final containerColor = isDark
+        ? Theme.of(context).colorScheme.surfaceContainerHighest
+        : Theme.of(context).colorScheme.surface;
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Shimmer.fromColors(
+          baseColor: baseColor,
+          highlightColor: highlightColor,
+          child: Container(
+            height: 30,
+            width: 150,
+            decoration: BoxDecoration(
+              color: containerColor,
+              borderRadius: BorderRadius.circular(8.0),
+            ),
+          ),
+        ),
+        const SizedBox(height: 10),
+        Shimmer.fromColors(
+          baseColor: baseColor,
+          highlightColor: highlightColor,
+          child: Container(
+            height: 25,
+            width: 400,
+            decoration: BoxDecoration(
+              color: containerColor,
+              borderRadius: BorderRadius.circular(8.0),
+            ),
+          ),
+        ),
+        const SizedBox(height: 10),
+        Shimmer.fromColors(
+          baseColor: baseColor,
+          highlightColor: highlightColor,
+          child: Container(
+            height: 25,
+            width: 400,
+            decoration: BoxDecoration(
+              color: containerColor,
+              borderRadius: BorderRadius.circular(8.0),
+            ),
+          ),
+        ),
+        const SizedBox(height: 10),
+        Shimmer.fromColors(
+          baseColor: baseColor,
+          highlightColor: highlightColor,
+          child: Container(
+            height: 25,
+            width: 400,
+            decoration: BoxDecoration(
+              color: containerColor,
+              borderRadius: BorderRadius.circular(8.0),
+            ),
+          ),
+        ),
+        const SizedBox(height: 10),
+        Shimmer.fromColors(
+          baseColor: baseColor,
+          highlightColor: highlightColor,
+          child: Container(
+            height: 25,
+            width: 400,
+            decoration: BoxDecoration(
+              color: containerColor,
+              borderRadius: BorderRadius.circular(8.0),
+            ),
+          ),
+        ),
+      ],
     );
   }
 

@@ -3,6 +3,7 @@ import 'dart:ui';
 import 'package:anime_flow/controllers/theme_controller.dart';
 import 'package:anime_flow/pages/settings/setting_controller.dart';
 import 'package:anime_flow/utils/layout_util.dart';
+import 'package:anime_flow/utils/utils.dart';
 import 'package:anime_flow/widget/theme/theme_preview.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -194,7 +195,6 @@ class _ThemePageState extends State<ThemePage> {
       {required Widget child,
       EdgeInsetsGeometry? padding,
       BorderRadiusGeometry? borderRadius}) {
-    final themeMode = themeController.themeMode;
     borderRadius ??= BorderRadius.circular(24);
     return ClipRRect(
       borderRadius: borderRadius,
@@ -203,12 +203,12 @@ class _ThemePageState extends State<ThemePage> {
         child: Container(
           padding: padding,
           decoration: BoxDecoration(
-            color: themeMode == ThemeMode.dark
+            color: Utils.isDarkTheme(context)
                 ? Colors.white.withValues(alpha: 0.08)
                 : Colors.black.withValues(alpha: 0.08),
             borderRadius: borderRadius,
             border: Border.all(
-              color: themeMode == ThemeMode.dark
+              color: Utils.isDarkTheme(context)
                   ? Colors.white.withValues(alpha: 0.15)
                   : Colors.black.withValues(alpha: 0.15),
             ),

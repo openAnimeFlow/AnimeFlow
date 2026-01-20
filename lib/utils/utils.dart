@@ -4,6 +4,7 @@ import 'package:anime_flow/constants/constants.dart';
 import 'package:anime_flow/http/dio/dio_request.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_inappwebview_platform_interface/flutter_inappwebview_platform_interface.dart';
 import 'package:gal/gal.dart';
@@ -76,6 +77,11 @@ class Utils {
   static bool get isMobile {
     return defaultTargetPlatform == TargetPlatform.android ||
         defaultTargetPlatform == TargetPlatform.iOS;
+  }
+
+  ///判断是否深色主题
+  static bool isDarkTheme(BuildContext context) {
+    return Theme.of(context).brightness == Brightness.dark;
   }
 
   // 根据屏幕宽度确定设计稿尺寸

@@ -1,6 +1,7 @@
 import 'dart:ui';
 import 'package:anime_flow/constants/play_layout_constant.dart';
 import 'package:anime_flow/stores/anime_info_store.dart';
+import 'package:anime_flow/utils/utils.dart';
 import 'package:anime_flow/widget/animation_network_image/animation_network_image.dart';
 import 'package:anime_flow/widget/collection/collection_button.dart';
 import 'package:anime_flow/widget/star.dart';
@@ -111,7 +112,7 @@ class InfoHeadView extends StatelessWidget {
                               children: [
                                 Obx(
                                   () => animeInfoStore.animeInfo.value == null
-                                      ? Expanded(child: _skeletonView())
+                                      ? Expanded(child: _skeletonView(context))
                                       : Expanded(
                                           child: _dataView(context,
                                               themeColor: themeColor),
@@ -130,9 +131,13 @@ class InfoHeadView extends StatelessWidget {
   }
 
   ///骨架屏
-  Widget _skeletonView() {
-    const baseColor = Colors.white38;
-    const highlightColor = Colors.white24;
+  Widget _skeletonView(BuildContext context) {
+    final isDark = Utils.isDarkTheme(context);
+    final baseColor = isDark ? Colors.grey[400]! : Colors.grey[100]!;
+    final highlightColor = isDark ? Colors.grey[300]! : Colors.grey[50]!;
+    final containerColor = isDark
+        ? Theme.of(context).colorScheme.surfaceContainerHighest
+        : Theme.of(context).colorScheme.surface;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       mainAxisSize: MainAxisSize.max,
@@ -142,9 +147,9 @@ class InfoHeadView extends StatelessWidget {
           highlightColor: highlightColor,
           child: Container(
             height: 30,
-            width: double.infinity,
+            width: 250,
             decoration: BoxDecoration(
-              color: Colors.white,
+              color: containerColor,
               borderRadius: BorderRadius.circular(8.0),
             ),
           ),
@@ -160,7 +165,7 @@ class InfoHeadView extends StatelessWidget {
                 height: 20,
                 width: 180,
                 decoration: BoxDecoration(
-                  color: Colors.white,
+                  color: containerColor,
                   borderRadius: BorderRadius.circular(8.0),
                 ),
               );
@@ -175,7 +180,7 @@ class InfoHeadView extends StatelessWidget {
             height: 30,
             width: 100,
             decoration: BoxDecoration(
-              color: Colors.white,
+              color: containerColor,
               borderRadius: BorderRadius.circular(8.0),
             ),
           ),

@@ -121,10 +121,11 @@ class _ContentViewState extends State<ContentView>
       preferredSize: const Size.fromHeight(100),
       child: Column(
         children: [
-          Row(
+           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               TabBar(
+                padding: EdgeInsets.only(top: MediaQuery.of(context).padding.top),
                 dividerHeight: 0,
                 controller: _tabController,
                 tabAlignment: TabAlignment.start,
@@ -132,18 +133,19 @@ class _ContentViewState extends State<ContentView>
                 tabs: _tabs.map((name) => Tab(text: name)).toList(),
               ),
               Obx(
-                () => playPageController.isWideScreen.value
+                    () => playPageController.isWideScreen.value
                     ? const Spacer()
                     : const SizedBox(
-                        width: 200,
-                        child: Padding(
-                          padding: EdgeInsets.symmetric(horizontal: 8),
-                          child: DanmakuTextField(),
-                        ),
-                      ),
+                  width: 200,
+                  child: Padding(
+                    padding: EdgeInsets.symmetric(horizontal: 8),
+                    child: DanmakuTextField(),
+                  ),
+                ),
               )
             ],
           ),
+
           const Divider(height: 1),
           Expanded(
             child: TabBarView(

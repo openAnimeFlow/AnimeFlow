@@ -132,15 +132,19 @@ class _CommentsViewState extends State<CommentsView>
     if (widget.comments == null) {
       return Padding(
         padding: const EdgeInsets.all(10),
-        child: Column(
-          children: List.generate(5, (index) {
-              return Column(
-                children: [
-                  _skeleton(context),
-                  const SizedBox(height: 10),
-                ],
-              );
-            },
+        child: SingleChildScrollView(
+          child: Column(
+            children: List.generate(
+              5,
+              (index) {
+                return Column(
+                  children: [
+                    _skeleton(context),
+                    const SizedBox(height: 10),
+                  ],
+                );
+              },
+            ),
           ),
         ),
       );

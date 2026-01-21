@@ -1,7 +1,7 @@
 import 'package:anime_flow/pages/settings/pages/danmaku_setting_page.dart';
 import 'package:anime_flow/pages/settings/pages/plugins/plugins.dart';
 import 'package:anime_flow/pages/settings/pages/theme.dart';
-import 'package:anime_flow/pages/settings/setting_controller.dart';
+import 'package:anime_flow/controllers/setting_controller.dart';
 import 'package:anime_flow/routes/index.dart';
 import 'package:anime_flow/utils/utils.dart';
 import 'package:flutter/material.dart';

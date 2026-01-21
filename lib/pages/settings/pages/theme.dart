@@ -1,7 +1,7 @@
 import 'dart:ui';
 
 import 'package:anime_flow/controllers/theme_controller.dart';
-import 'package:anime_flow/pages/settings/setting_controller.dart';
+import 'package:anime_flow/controllers/setting_controller.dart';
 import 'package:anime_flow/utils/layout_util.dart';
 import 'package:anime_flow/utils/utils.dart';
 import 'package:anime_flow/widget/theme/theme_preview.dart';

@@ -1,5 +1,5 @@
 import 'package:anime_flow/controllers/app/app_info_controller.dart';
-import 'package:anime_flow/pages/settings/setting_controller.dart';
+import 'package:anime_flow/controllers/setting_controller.dart';
 import 'package:anime_flow/routes/index.dart';
 import 'package:anime_flow/widget/animation_network_image/animation_network_image.dart';
 import 'package:flutter/material.dart';

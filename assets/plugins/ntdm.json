@@ -1,0 +1,13 @@
+{
+  "version": "1.0.1",
+  "name": "NT动漫",
+  "iconUrl": "https://cdn.yinghuazy.xyz/webjs/ntdm8/image/favicon.ico",
+  "baseUrl": "https://www.ntdm8.com/",
+  "searchUrl": "https://www.ntdm8.com/search/-------------.html?wd={keyword}",
+  "searchList": "//div[@class='blockcontent1'] /div",
+  "searchName": "/div /div[1] /a",
+  "searchLink": "/div /div[1] /a",
+  "lineNames": "//*[@id=\"menu0\"] /li",
+  "lineList": "//*[@id=\"content\"] //div[@class='movurl mod']",
+  "episode": "//li /a"
+}

@@ -1,7 +1,9 @@
+import 'package:anime_flow/http/api_path.dart';
 import 'package:anime_flow/http/requests/request.dart';
 import 'package:anime_flow/models/item/crawler_config_item.dart';
 import 'package:anime_flow/controllers/setting_controller.dart';
 import 'package:anime_flow/repository/storage.dart';
+import 'package:anime_flow/utils/formatUtil.dart';
 import 'package:anime_flow/utils/utils.dart';
 import 'package:anime_flow/widget/animation_network_image/animation_network_image.dart';
 import 'package:flutter/material.dart';
@@ -19,7 +21,8 @@ class _DownloadPluginsPageState extends State<DownloadPluginsPage> {
   late SettingController settingController;
   final storage = Storage.crawlConfigs;
   bool isLoading = false;
-  List<CrawlConfigItem>? plugins;
+  // List<CrawlConfigItem>? plugins;
+  List<dynamic>? pluginRepo;
   bool hasChanged = false; // 跟踪是否有插件被下载或更新
 
   @override
@@ -30,27 +33,26 @@ class _DownloadPluginsPageState extends State<DownloadPluginsPage> {
   }
 
   void _getPlugins() async {
-    if (!isLoading) {
+    if (!isLoading && mounted) {
       setState(() {
         isLoading = true;
       });
     }
     try {
-      List<CrawlConfigItem> crawlConfig = [];
       final plugins = await Request.getPluginRepo();
-      for (var plugin in plugins) {
-        final downloadUrl = plugin['download_url'] as String;
-        final data = await Request.getPlugin(downloadUrl);
-        crawlConfig.add(data);
+      Get.log('获取$plugins');
+      if (mounted) {
+        setState(() {
+          isLoading = false;
+          pluginRepo = plugins;
+        });
       }
-      setState(() {
-        isLoading = false;
-        this.plugins = crawlConfig;
-      });
     } catch (e) {
-      setState(() {
-        isLoading = false;
-      });
+      if (mounted) {
+        setState(() {
+          isLoading = false;
+        });
+      }
       Logger().e(e);
     }
   }
@@ -96,13 +98,13 @@ class _DownloadPluginsPageState extends State<DownloadPluginsPage> {
                   title: Text('加载中...'),
                 ),
               ),
-            if (plugins == null && !isLoading)
+            if (pluginRepo == null && !isLoading)
               const ListTile(
                 title: Text('没有找到数据请刷新'),
               ),
-            if (plugins != null && !isLoading)
-              ...plugins!.map((plugin) {
-                final localPlugin = storage.get(plugin.name);
+            if (pluginRepo != null && !isLoading)
+              ...pluginRepo!.map((plugin) {
+                final localPlugin = storage.get(plugin['name']);
                 return Padding(
                   padding: const EdgeInsets.only(left: 10, right: 10),
                   child: Card(
@@ -120,40 +122,46 @@ class _DownloadPluginsPageState extends State<DownloadPluginsPage> {
                                         width: 50,
                                         borderRadius: const BorderRadius.all(
                                             Radius.circular(10)),
-                                        url: plugin.iconUrl),
+                                        url: plugin['icon']),
                                     const SizedBox(width: 10),
                                     Column(
                                       crossAxisAlignment: CrossAxisAlignment.start,
                                       children: [
                                         Text(
-                                          plugin.name,
+                                          plugin['name'],
                                           style: const TextStyle(
                                               fontSize: 16,
                                               fontWeight: FontWeight.bold),
                                         ),
-                                        Text('版本:${plugin.version}'),
+                                        Text('版本:${plugin['version']}-更新时间:${FormatUtil.formatUpdateTime(plugin['updateTime'])}'),
                                       ],
                                     )
                                   ],
                                 ))),
                         if (localPlugin == null)
                           IconButton(
-                              onPressed: () {
+                              onPressed: () async {
                                 try {
-                                  storage.put(plugin.name, plugin.toJson());
-                                  setState(() {
-                                    hasChanged = true;
-                                  });
+                                  final pluginName = plugin['name'] as String;
+                                  final pluginPath = plugin['path'] as String;
+                                  final downloadUrl = '${CommonApi.pluginRepo}/$pluginPath';
+                                  final pluginData = await Request.getPlugin(downloadUrl);
+                                  storage.put(pluginName, pluginData.toJson());
+                                  if (mounted) {
+                                    setState(() {
+                                      hasChanged = true;
+                                    });
+                                  }
                                   Get.snackbar(
                                     '下载成功',
-                                    '插件 "${plugin.name}" 已下载',
+                                    '插件 "$pluginName" 已下载',
                                     snackPosition: SnackPosition.BOTTOM,
                                     maxWidth: 400,
                                   );
                                 } catch (e) {
                                   Get.snackbar(
                                     '下载失败',
-                                    '下载插件 "${plugin.name}" 时发生错误：$e',
+                                    '下载插件 "${plugin['name']}" 时发生错误：$e',
                                     snackPosition: SnackPosition.BOTTOM,
                                     maxWidth: 400,
                                   );
@@ -165,8 +173,9 @@ class _DownloadPluginsPageState extends State<DownloadPluginsPage> {
                             final config = CrawlConfigItem.fromJson(
                               Map<String, dynamic>.from(localPlugin),
                             );
+                            final pluginVersion = plugin['version'] as String;
                             final isNew = Utils.compareVersionNumbers(
-                                plugin.version, config.version);
+                                pluginVersion, config.version);
                             if (isNew == 0 || isNew == -1) {
                               return TextButton(
                                 onPressed: () {},
@@ -174,22 +183,28 @@ class _DownloadPluginsPageState extends State<DownloadPluginsPage> {
                               );
                             } else {
                               return TextButton(
-                                onPressed: () {
+                                onPressed: () async {
                                   try {
-                                    storage.put(plugin.name, plugin.toJson());
-                                    setState(() {
-                                      hasChanged = true;
-                                    });
+                                    final pluginName = plugin['name'] as String;
+                                    final pluginPath = plugin['path'] as String;
+                                    final downloadUrl = '${CommonApi.pluginRepo}/$pluginPath';
+                                    final pluginData = await Request.getPlugin(downloadUrl);
+                                    storage.put(pluginName, pluginData.toJson());
+                                    if (mounted) {
+                                      setState(() {
+                                        hasChanged = true;
+                                      });
+                                    }
                                     Get.snackbar(
                                       '更新成功',
-                                      '插件 "${plugin.name}" 已更新到版本 ${plugin.version}',
+                                      '插件 "$pluginName" 已更新到版本 $pluginVersion',
                                       snackPosition: SnackPosition.BOTTOM,
                                       maxWidth: 400,
                                     );
                                   } catch (e) {
                                     Get.snackbar(
                                       '更新失败',
-                                      '更新插件 "${plugin.name}" 时发生错误：$e',
+                                      '更新插件 "${plugin['name']}" 时发生错误：$e',
                                       snackPosition: SnackPosition.BOTTOM,
                                       maxWidth: 400,
                                     );

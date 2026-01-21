@@ -69,7 +69,7 @@ class CommonApi {
   static const String githubApi = 'https://api.github.com';
 
   ///插件仓库
-  static const String pluginRepo = '/repos/openAnimeFlow/animeFlow-assets/contents/plugins';
+  static const String pluginRepo = 'https://raw.githubusercontent.com/openAnimeFlow/animeFlow-assets/main/plugins';
 }
 
 class AnimeFlowApi {

@@ -34,7 +34,7 @@ class BgmDioRequest {
                 '${token.tokenType} ${token.accessToken}';
           }
           logger.i(
-            'HTTP Request: ${options.method} headers: ${options.headers} ${options.uri}',
+            'HTTP Request: ${options.method} ${options.uri}',
           );
           return handler.next(options);
         },

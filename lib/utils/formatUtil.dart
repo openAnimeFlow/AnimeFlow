@@ -68,4 +68,32 @@ class FormatUtil {
     final duration = Duration(milliseconds: (seconds * 1000).round());
     return formatDuration(duration);
   }
+
+  /// 格式化毫秒级时间戳字符串
+  /// [timestampStr] 毫秒级时间戳字符串，如 "1769011771000"
+  /// 返回相对时间，如 "3天前"、"2小时前" 等
+  static String formatUpdateTime(String timestampStr) {
+    try {
+      final timestamp = int.parse(timestampStr);
+      final dateTime = DateTime.fromMillisecondsSinceEpoch(timestamp);
+      final now = DateTime.now();
+      final difference = now.difference(dateTime);
+
+      if (difference.inDays > 365) {
+        return '${(difference.inDays / 365).floor()}年前';
+      } else if (difference.inDays > 30) {
+        return '${(difference.inDays / 30).floor()}个月前';
+      } else if (difference.inDays > 0) {
+        return '${difference.inDays}天前';
+      } else if (difference.inHours > 0) {
+        return '${difference.inHours}小时前';
+      } else if (difference.inMinutes > 0) {
+        return '${difference.inMinutes}分钟前';
+      } else {
+        return '刚刚';
+      }
+    } catch (e) {
+      return '未知';
+    }
+  }
 }

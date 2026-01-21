@@ -126,9 +126,11 @@ flutter_launcher_icons:
   adaptive_icon_background: "#FFFFFF"
 
 flutter_native_splash:
+  color: "#0F172A"
   image: assets/logo/startLogo.png
   android_12:
     image: assets/logo/startLogo.png
+    color: "#0F172A"
   android: true
   ios: true
 
@@ -204,7 +206,6 @@ flutter:
     - assets/plugins/
     - assets/shaders/
     - assets/logo/startLogo.png
-    - assets/logo/startLogo.svg
     - .env
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/to/resolution-aware-images

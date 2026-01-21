@@ -218,14 +218,13 @@ class _VideoViewState extends State<VideoView> with WindowListener {
 
       videoUiStateController.setParsingTitle('解析失败：$failureReason');
 
-      // 显示错误提示
-      Get.snackbar(
-        '解析失败',
-        failureReason,
-        duration: const Duration(seconds: 3),
-        backgroundColor: Colors.red.shade100,
-        colorText: Colors.red.shade900,
-      );
+      // Get.snackbar(
+      //   '解析失败',
+      //   failureReason,
+      //   duration: const Duration(seconds: 3),
+      //   backgroundColor: Colors.red.shade100,
+      //   colorText: Colors.red.shade900,
+      // );
 
       // 延迟隐藏指示器
       // Future.delayed(const Duration(seconds: 2), () {
@@ -239,14 +238,14 @@ class _VideoViewState extends State<VideoView> with WindowListener {
     } else {
       // 解析成功
       videoUiStateController.setParsingTitle('视频资源解析成功');
-      Future.delayed(const Duration(seconds: 2), () {
-        if (!mounted) return;
-        videoUiStateController.hideIndicator();
-        videoUiStateController
-            .updateIndicatorType(VideoControlsIndicatorType.noIndicator);
-        videoUiStateController
-            .updateMainAxisAlignmentType(MainAxisAlignment.start);
-      });
+      // Future.delayed(const Duration(seconds: 2), () {
+      //   if (!mounted) return;
+      //   videoUiStateController.hideIndicator();
+      //   videoUiStateController
+      //       .updateIndicatorType(VideoControlsIndicatorType.noIndicator);
+      //   videoUiStateController
+      //       .updateMainAxisAlignmentType(MainAxisAlignment.start);
+      // });
     }
   }
 

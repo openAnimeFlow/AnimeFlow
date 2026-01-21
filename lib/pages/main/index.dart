@@ -1,3 +1,4 @@
+import 'package:anime_flow/controllers/app/app_info_controller.dart';
 import 'package:anime_flow/controllers/main_page/main_page_state.dart';
 import 'package:anime_flow/controllers/shaders/shaders_controller.dart';
 import 'package:anime_flow/models/item/tab_item.dart';
@@ -23,6 +24,7 @@ class _MainPageState extends State<MainPage> {
   late UserInfoStore userInfoStore;
   late MainPageState mainPageState;
   late ShadersController shadersController;
+  late AppInfoController appInfoController;
 
   int _currentIndex = 0;
 
@@ -71,6 +73,7 @@ class _MainPageState extends State<MainPage> {
     super.initState();
     userInfoStore = Get.put(UserInfoStore());
     mainPageState = Get.put(MainPageState());
+    appInfoController = Get.put(AppInfoController());
     shadersController = Get.put(ShadersController());
     // TODO 从配置中初始化对应的页面
     final initialIndex = Get.arguments as int? ?? 0;
@@ -78,17 +81,16 @@ class _MainPageState extends State<MainPage> {
     _initializeApp();
   }
 
-  // 初始化应用程序
+  /// 初始化应用程序
   Future<void> _initializeApp() async {
     // 初始化对应的页面
     _initializePage(_currentIndex);
+    // 初始化爬虫配置
     CrawlConfig.initCrawlConfigs();
-    _loadShaders();
-  }
-
-  // 加载着色器
-  Future<void> _loadShaders() async {
-    await shadersController.copyShadersToExternalDirectory();
+    // 检查新版本
+    appInfoController.compareVersion();
+    // 加载着色器
+    shadersController.copyShadersToExternalDirectory();
   }
 
   // 构建 NavigationRail
@@ -196,6 +198,7 @@ class _MainPageState extends State<MainPage> {
     Get.delete<UserInfoStore>();
     Get.delete<MainPageState>();
     Get.delete<ShadersController>();
+    Get.delete<AppInfoController>();
     super.dispose();
   }
 

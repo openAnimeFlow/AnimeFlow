@@ -1,5 +1,4 @@
 import 'dart:convert';
-import 'dart:nativewrappers/_internal/vm/lib/math_patch.dart';
 
 import 'package:anime_flow/constants/constants.dart';
 import 'package:anime_flow/http/api_path.dart';
@@ -17,7 +16,9 @@ class Request {
 
   ///获取插件列表
   static Future<List<dynamic>> getPluginRepo() async {
+    final userAgent = Utils.getRandomUA();
     return await dioRequest.get('${CommonApi.pluginRepo}/index.json',options: Options(headers: {
+      Constants.userAgentName : userAgent,
     })).then((onValue) {
       if (onValue.data is String) {
         return jsonDecode(onValue.data as String) as List<dynamic>;

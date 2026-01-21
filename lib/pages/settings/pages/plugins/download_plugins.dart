@@ -21,6 +21,7 @@ class _DownloadPluginsPageState extends State<DownloadPluginsPage> {
   late SettingController settingController;
   final storage = Storage.crawlConfigs;
   bool isLoading = false;
+
   // List<CrawlConfigItem>? plugins;
   List<dynamic>? pluginRepo;
   bool hasChanged = false; // 跟踪是否有插件被下载或更新
@@ -84,11 +85,11 @@ class _DownloadPluginsPageState extends State<DownloadPluginsPage> {
               subtitle: const Text('当前会从Github仓库中下载数据源，注意网络环境,下拉刷新数据'),
               trailing: Utils.isDesktop
                   ? IconButton(
-                onPressed: () {
-                  _getPlugins();
-                },
-                icon: const Icon(Icons.refresh),
-              )
+                      onPressed: () {
+                        _getPlugins();
+                      },
+                      icon: const Icon(Icons.refresh),
+                    )
                   : null,
             ),
             if (isLoading)
@@ -124,18 +125,22 @@ class _DownloadPluginsPageState extends State<DownloadPluginsPage> {
                                             Radius.circular(10)),
                                         url: plugin['icon']),
                                     const SizedBox(width: 10),
-                                    Column(
-                                      crossAxisAlignment: CrossAxisAlignment.start,
-                                      children: [
-                                        Text(
-                                          plugin['name'],
-                                          style: const TextStyle(
-                                              fontSize: 16,
-                                              fontWeight: FontWeight.bold),
-                                        ),
-                                        Text('版本:${plugin['version']}-更新时间:${FormatUtil.formatUpdateTime(plugin['updateTime'])}'),
-                                      ],
-                                    )
+                                    Expanded(
+                                      child: Column(
+                                        crossAxisAlignment:
+                                            CrossAxisAlignment.start,
+                                        children: [
+                                          Text(
+                                            '${plugin['name']}',
+                                            style: const TextStyle(
+                                                fontSize: 16,
+                                                fontWeight: FontWeight.bold),
+                                          ),
+                                          Text(
+                                              '版本:${plugin['version']} - ${FormatUtil.formatUpdateTime(plugin['updateTime'])}'),
+                                        ],
+                                      ),
+                                    ),
                                   ],
                                 ))),
                         if (localPlugin == null)
@@ -144,8 +149,10 @@ class _DownloadPluginsPageState extends State<DownloadPluginsPage> {
                                 try {
                                   final pluginName = plugin['name'] as String;
                                   final pluginPath = plugin['path'] as String;
-                                  final downloadUrl = '${CommonApi.pluginRepo}/$pluginPath';
-                                  final pluginData = await Request.getPlugin(downloadUrl);
+                                  final downloadUrl =
+                                      '${CommonApi.pluginRepo}/$pluginPath';
+                                  final pluginData =
+                                      await Request.getPlugin(downloadUrl);
                                   storage.put(pluginName, pluginData.toJson());
                                   if (mounted) {
                                     setState(() {
@@ -187,9 +194,12 @@ class _DownloadPluginsPageState extends State<DownloadPluginsPage> {
                                   try {
                                     final pluginName = plugin['name'] as String;
                                     final pluginPath = plugin['path'] as String;
-                                    final downloadUrl = '${CommonApi.pluginRepo}/$pluginPath';
-                                    final pluginData = await Request.getPlugin(downloadUrl);
-                                    storage.put(pluginName, pluginData.toJson());
+                                    final downloadUrl =
+                                        '${CommonApi.pluginRepo}/$pluginPath';
+                                    final pluginData =
+                                        await Request.getPlugin(downloadUrl);
+                                    storage.put(
+                                        pluginName, pluginData.toJson());
                                     if (mounted) {
                                       setState(() {
                                         hasChanged = true;

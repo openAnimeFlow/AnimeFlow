@@ -43,7 +43,7 @@ Map<String, Widget Function(BuildContext)> getRootRoutes() {
   return {
     RouteName.main: (context) => const MainPage(),
     RouteName.login: (context) => const MyPage(),
-    RouteName.animeInfo: (context) => const AnimeDetailPage(),
+    RouteName.animeInfo: (context) => const AnimeInfoPage(),
     RouteName.play: (context) => const PlayPage(),
     RouteName.search: (context) => const SearchPage(),
     RouteName.calendar: (context) => const CalendarPage(),

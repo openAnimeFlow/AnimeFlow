@@ -1,8 +1,6 @@
 import 'dart:math';
-
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
-
 import 'image_preview_page.dart';
 
 class AnimationNetworkImage extends StatelessWidget {
@@ -15,6 +13,7 @@ class AnimationNetworkImage extends StatelessWidget {
   final bool useExternalHero;
   final Duration fadeInDuration;
   final Duration fadeOutDuration;
+  final FilterQuality filterQuality;
   final BorderRadiusGeometry borderRadius;
   final Alignment alignment;
 
@@ -30,6 +29,7 @@ class AnimationNetworkImage extends StatelessWidget {
     this.fadeInDuration = const Duration(milliseconds: 500),
     this.fadeOutDuration = const Duration(milliseconds: 300),
     this.alignment = Alignment.center,
+    this.filterQuality = FilterQuality.low,
     this.color,
   });
 
@@ -68,19 +68,15 @@ class AnimationNetworkImage extends StatelessWidget {
         height: height,
         color: color,
         alignment: alignment,
+        filterQuality: filterQuality,
         fadeInDuration: fadeInDuration,
         fadeOutDuration: fadeOutDuration,
         placeholder: (context, url) {
           return const _ShimmerLoading();
         },
         errorWidget: (context, error, stackTrace) {
-          return  Center(
-            child: Icon(
-              Icons.broken_image_outlined,
-              size: 30,
-              color: Theme.of(context).colorScheme.error,
-            )
-          );
+          return const Center(
+              child: SizedBox.shrink());
         },
       ),
     );

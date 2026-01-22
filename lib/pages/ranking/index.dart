@@ -2,9 +2,12 @@ import 'package:anime_flow/constants/play_layout_constant.dart';
 import 'package:anime_flow/http/requests/bgm_request.dart';
 import 'package:anime_flow/models/enums/sort_type.dart';
 import 'package:anime_flow/models/item/bangumi/subject_item.dart';
+import 'package:anime_flow/models/item/subject_basic_data_item.dart';
+import 'package:anime_flow/routes/index.dart';
 import 'package:anime_flow/utils/layout_util.dart';
-import 'package:anime_flow/widget/subject_carf.dart';
+import 'package:anime_flow/widget/subject_card.dart';
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 import 'package:logger/logger.dart';
 
 class RankingPage extends StatefulWidget {
@@ -351,7 +354,18 @@ class _RankingPageState extends State<RankingPage> {
                                         );
                                 }
                                 final data = subject!.data[index];
-                                return SubjectCarfView(subject: data);
+                                final subjectBasicData = SubjectBasicData(
+                                  id: data.id,
+                                  name: data.nameCN ?? data.name,
+                                  image: data.images.large,
+                                );
+                                return InkWell(
+                                  onTap: () => Get.toNamed(RouteName.animeInfo,
+                                      arguments: subjectBasicData),
+                                  child: SubjectCard(
+                                      image: data.images.large,
+                                      title: data.nameCN ?? data.name),
+                                );
                               },
                             ),
                           )

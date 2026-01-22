@@ -11,7 +11,7 @@ import 'package:anime_flow/webview/webview_item.dart';
 import 'package:anime_flow/stores/episodes_state.dart';
 import 'package:anime_flow/controllers/play/play_controller.dart';
 import 'package:anime_flow/stores/subject_state.dart';
-import 'package:anime_flow/controllers/video/data/video_source_controller.dart';
+import 'package:anime_flow/controllers/video/source/video_source_controller.dart';
 import 'package:anime_flow/controllers/video/video_state_controller.dart';
 import 'package:anime_flow/controllers/video/video_ui_state_controller.dart';
 import 'package:anime_flow/http/requests/bgm_request.dart';
@@ -72,7 +72,7 @@ class _VideoViewState extends State<VideoView> with WindowListener {
     super.initState();
     videoStateController = Get.put(VideoStateController(player));
     videoSourceController = Get.find<VideoSourceController>();
-    videoUiStateController = Get.put(VideoUiStateController(player));
+    videoUiStateController = Get.put(VideoUiStateController(videoStateController.player));
     playController = Get.find<PlayController>();
     episodesState = Get.find<EpisodesState>();
     episodeController = Get.find<EpisodeController>();

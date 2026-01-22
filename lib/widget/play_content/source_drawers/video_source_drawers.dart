@@ -3,7 +3,7 @@ import 'package:anime_flow/models/item/play/video/resources_item.dart';
 import 'package:anime_flow/widget/animation_network_image/animation_network_image.dart';
 import 'package:anime_flow/constants/play_layout_constant.dart';
 import 'package:anime_flow/stores/episodes_state.dart';
-import 'package:anime_flow/controllers/video/data/video_source_controller.dart';
+import 'package:anime_flow/controllers/video/source/video_source_controller.dart';
 import 'package:anime_flow/controllers/video/video_state_controller.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';

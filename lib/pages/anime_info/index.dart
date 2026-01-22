@@ -11,14 +11,14 @@ import 'package:get/get.dart';
 import 'appBar.dart';
 import 'synopsis.dart';
 
-class AnimeDetailPage extends StatefulWidget {
-  const AnimeDetailPage({super.key});
+class AnimeInfoPage extends StatefulWidget {
+  const AnimeInfoPage({super.key});
 
   @override
-  State<AnimeDetailPage> createState() => _AnimeDetailPageState();
+  State<AnimeInfoPage> createState() => _AnimeInfoPageState();
 }
 
-class _AnimeDetailPageState extends State<AnimeDetailPage> {
+class _AnimeInfoPageState extends State<AnimeInfoPage> {
   late SubjectBasicData subjectBasicData;
   late UserInfoStore userInfoStore;
   late AnimeInfoStore animeInfoStore;
@@ -43,10 +43,12 @@ class _AnimeDetailPageState extends State<AnimeDetailPage> {
   void _getSubjects() async {
     final response =
         await BgmRequest.getSubjectByIdService(subjectBasicData.id);
-    setState(() {
-      animeInfoStore.setAnimeInfo(response);
-      subjectsInfo = response;
-    });
+    if (mounted) {
+      setState(() {
+        animeInfoStore.setAnimeInfo(response);
+        subjectsInfo = response;
+      });
+    }
   }
 
   @override

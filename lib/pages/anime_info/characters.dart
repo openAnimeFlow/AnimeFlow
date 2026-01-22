@@ -29,9 +29,11 @@ class _CharactersViewState extends State<CharactersView> {
   void _getCharacters() async {
     final characters = await BgmRequest.charactersService(widget.subjectsId,
         limit: 10, offset: 0);
-    setState(() {
-      this.characters = characters;
-    });
+    if (mounted) {
+      setState(() {
+        this.characters = characters;
+      });
+    }
   }
 
   @override

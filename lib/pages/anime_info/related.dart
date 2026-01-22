@@ -31,9 +31,11 @@ class _RelatedViewState extends State<RelatedView> {
         widget.subjectId,
         limit: 20,
         offset: 0);
-    setState(() {
-      this.subjectRelation = subjectRelation;
-    });
+    if (mounted) {
+      setState(() {
+        this.subjectRelation = subjectRelation;
+      });
+    }
   }
 
   @override

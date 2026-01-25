@@ -4,7 +4,7 @@ import 'package:anime_flow/models/item/play/video/episode_resources_item.dart';
 import 'package:anime_flow/models/item/play/video/resources_item.dart';
 import 'package:anime_flow/models/item/play/video/search_resources_item.dart';
 import 'package:anime_flow/repository/play_repository.dart';
-import 'package:anime_flow/stores/subject_state.dart';
+import 'package:anime_flow/stores/play_subject_state.dart';
 import 'package:anime_flow/utils/crawl_config.dart';
 import 'package:anime_flow/stores/episodes_state.dart';
 import 'package:anime_flow/webview/webview_controller.dart';
@@ -24,7 +24,7 @@ class VideoSourceController extends GetxController {
   final RxBool isInitWebView = false.obs;
 
   late EpisodesState _episodesState;
-  late SubjectState _subjectState;
+  late PlaySubjectState _subjectState;
   late WebviewItemController _webviewItemController;
   final Logger _logger = Logger();
 
@@ -48,7 +48,7 @@ class VideoSourceController extends GetxController {
   }
 
   void _initControllers() {
-    _subjectState = Get.find<SubjectState>();
+    _subjectState = Get.find<PlaySubjectState>();
     _episodesState = Get.find<EpisodesState>();
     // _videoStateController = Get.find<VideoStateController>();
     _webviewItemController = Get.find<WebviewItemController>();

@@ -2,7 +2,7 @@ import 'package:anime_flow/controllers/video/source/video_source_controller.dart
 import 'package:anime_flow/controllers/video/video_state_controller.dart';
 import 'package:anime_flow/stores/episodes_state.dart';
 import 'package:anime_flow/controllers/play/play_controller.dart';
-import 'package:anime_flow/stores/subject_state.dart';
+import 'package:anime_flow/stores/play_subject_state.dart';
 import 'package:anime_flow/controllers/video/video_ui_controller.dart';
 import 'package:anime_flow/utils/utils.dart';
 import 'package:anime_flow/widget/play_content/source_drawers/video_source_drawers.dart';
@@ -24,7 +24,7 @@ class _TopAreaControlState extends State<TopAreaControl> {
   late PlayController playPageController;
   late VideoUiStateController videoUiStateController;
   late EpisodesState episodesController;
-  late SubjectState subjectStateController ;
+  late PlaySubjectState subjectStateController ;
 
 
   @override
@@ -35,7 +35,7 @@ class _TopAreaControlState extends State<TopAreaControl> {
     playPageController = Get.find<PlayController>();
     videoUiStateController = Get.find<VideoUiStateController>();
     episodesController = Get.find<EpisodesState>();
-    subjectStateController = Get.find<SubjectState>();
+    subjectStateController = Get.find<PlaySubjectState>();
   }
 
   @override

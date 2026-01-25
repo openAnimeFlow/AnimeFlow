@@ -1,7 +1,7 @@
 import 'package:get/get.dart';
 import 'package:anime_flow/models/item/bangumi/subjects_info_item.dart';
 
-class SubjectState extends GetxController {
+class PlaySubjectState extends GetxController {
   final RxString subjectName = ''.obs;
   final RxInt subjectId = 0.obs;
   final RxList<Tags> tags = <Tags>[].obs;

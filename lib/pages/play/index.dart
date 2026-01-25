@@ -2,7 +2,7 @@ import 'package:anime_flow/controllers/play/episode_controller.dart';
 import 'package:anime_flow/controllers/video/video_state_controller.dart';
 import 'package:anime_flow/controllers/video/video_ui_controller.dart';
 import 'package:anime_flow/http/requests/bgm_request.dart';
-import 'package:anime_flow/stores/subject_state.dart';
+import 'package:anime_flow/stores/play_subject_state.dart';
 import 'package:anime_flow/models/item/bangumi/subjects_info_item.dart';
 import 'package:anime_flow/models/item/subject_basic_data_item.dart';
 import 'package:anime_flow/webview/webview_controller.dart';
@@ -30,7 +30,7 @@ class _PlayPageState extends State<PlayPage> {
   late SubjectsInfoItem subjectsInfo;
   late SubjectBasicData subjectBasicData;
   late VideoSourceController videoSourceController;
-  late SubjectState subjectState;
+  late PlaySubjectState subjectState;
   late PlayController playController;
   late EpisodesState episodesState;
   final GlobalKey _videoKey = GlobalKey();
@@ -48,7 +48,7 @@ class _PlayPageState extends State<PlayPage> {
     Get.put(VideoUiStateController());
     playController = Get.put(PlayController());
     episodesState = Get.put(EpisodesState());
-    subjectState = Get.put(SubjectState());
+    subjectState = Get.put(PlaySubjectState());
     Get.put<WebviewItemController>(
         WebviewItemControllerFactory.getController());
     subjectsInfo = Get.arguments as SubjectsInfoItem;
@@ -128,7 +128,7 @@ class _PlayPageState extends State<PlayPage> {
     Get.delete<PlayController>();
     Get.delete<EpisodesState>();
     Get.delete<VideoSourceController>();
-    Get.delete<SubjectState>();
+    Get.delete<PlaySubjectState>();
     Get.delete<VideoUiStateController>();
     super.dispose();
   }

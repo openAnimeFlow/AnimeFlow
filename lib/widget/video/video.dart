@@ -10,7 +10,7 @@ import 'package:anime_flow/webview/webview_controller.dart';
 import 'package:anime_flow/webview/webview_item.dart';
 import 'package:anime_flow/stores/episodes_state.dart';
 import 'package:anime_flow/controllers/play/play_controller.dart';
-import 'package:anime_flow/stores/subject_state.dart';
+import 'package:anime_flow/stores/play_subject_state.dart';
 import 'package:anime_flow/controllers/video/source/video_source_controller.dart';
 import 'package:anime_flow/controllers/video/video_state_controller.dart';
 import 'package:anime_flow/controllers/video/video_ui_controller.dart';
@@ -40,7 +40,7 @@ class _VideoViewState extends State<VideoView> with WindowListener {
   late EpisodeController episodeController;
   late PlayController playController;
   late EpisodesState episodesState;
-  late SubjectState subjectState;
+  late PlaySubjectState subjectState;
   late bool _episodesProgress;
   final logger = Logger();
   final _danmuKey = GlobalKey();
@@ -78,7 +78,7 @@ class _VideoViewState extends State<VideoView> with WindowListener {
     playController = Get.find<PlayController>();
     episodesState = Get.find<EpisodesState>();
     episodeController = Get.find<EpisodeController>();
-    subjectState = Get.find<SubjectState>();
+    subjectState = Get.find<PlaySubjectState>();
     _episodesProgress =
         setting.get(PlaybackKey.episodesProgress, defaultValue: true);
 

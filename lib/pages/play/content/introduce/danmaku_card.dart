@@ -4,7 +4,7 @@ import 'package:anime_flow/models/item/danmaku/danmaku_episode_response.dart';
 import 'package:anime_flow/stores/episodes_state.dart';
 import 'package:anime_flow/controllers/play/play_controller.dart';
 import 'package:anime_flow/models/item/danmaku/danmaku_module.dart';
-import 'package:anime_flow/stores/subject_state.dart';
+import 'package:anime_flow/stores/play_subject_state.dart';
 import 'package:anime_flow/utils/formatUtil.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -19,7 +19,7 @@ class DanmakuCard extends StatefulWidget {
 class _DanmakuCardState extends State<DanmakuCard> {
   late EpisodesState episodesController;
   late PlayController playController;
-  late SubjectState subjectState;
+  late PlaySubjectState subjectState;
 
   final danmakuFieldController = TextEditingController();
 
@@ -32,7 +32,7 @@ class _DanmakuCardState extends State<DanmakuCard> {
     super.initState();
     episodesController = Get.find<EpisodesState>();
     playController = Get.find<PlayController>();
-    subjectState = Get.find<SubjectState>();
+    subjectState = Get.find<PlaySubjectState>();
     // 监听集数变化，当集数改变时重置弹幕加载状态
     ever(episodesController.episodeIndex, (int episode) {
       if (_currentEpisode != episode) {

@@ -1,7 +1,7 @@
 import 'package:anime_flow/constants/play_layout_constant.dart';
 import 'package:anime_flow/stores/episodes_state.dart';
 import 'package:anime_flow/controllers/play/play_controller.dart';
-import 'package:anime_flow/stores/subject_state.dart';
+import 'package:anime_flow/stores/play_subject_state.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:logger/logger.dart';
@@ -15,7 +15,7 @@ class EpisodesComponents extends StatefulWidget {
 
 class EpisodesComponentsState extends State<EpisodesComponents> {
   late PlayController playPageController;
-  late SubjectState subjectState;
+  late PlaySubjectState subjectState;
   late EpisodesState episodesState;
   static const String drawerTitle = "章节列表";
   bool isLoading = false;
@@ -26,7 +26,7 @@ class EpisodesComponentsState extends State<EpisodesComponents> {
     super.initState();
     playPageController = Get.find<PlayController>();
     episodesState = Get.find<EpisodesState>();
-    subjectState = Get.find<SubjectState>();
+    subjectState = Get.find<PlaySubjectState>();
   }
 
   @override

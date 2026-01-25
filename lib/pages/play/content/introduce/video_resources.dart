@@ -26,13 +26,6 @@ class _VideoResourcesViewState extends State<VideoResourcesView> {
     videoSourceController = Get.find<VideoSourceController>();
     subjectStateController = Get.find<SubjectState>();
     videoStateController = Get.find<VideoStateController>();
-    // 检查资源是否已经为当前关键词初始化过，避免全屏切换时重复初始化
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      final currentKeyword = subjectStateController.name;
-      if (videoSourceController.keyword.value != currentKeyword) {
-        videoSourceController.initResources(currentKeyword);
-      }
-    });
   }
 
   @override

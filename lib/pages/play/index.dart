@@ -29,17 +29,21 @@ class PlayPage extends StatefulWidget {
 class _PlayPageState extends State<PlayPage> {
   late SubjectsInfoItem subjectsInfo;
   late SubjectBasicData subjectBasicData;
+  late VideoSourceController videoSourceController;
   late SubjectState subjectState;
   late PlayController playController;
   late EpisodesState episodesState;
   final GlobalKey _videoKey = GlobalKey();
   final GlobalKey _contentKey = GlobalKey();
+  Worker? _webViewInitWorker;
+  // 标记是否已经初始化过资源
+  bool _hasInitResources = false;
 
   @override
   void initState() {
     super.initState();
     Get.put(VideoStateController());
-    Get.put(VideoSourceController());
+    videoSourceController = Get.put(VideoSourceController());
     Get.put(EpisodeController());
     Get.put(VideoUiStateController());
     playController = Get.put(PlayController());
@@ -48,11 +52,28 @@ class _PlayPageState extends State<PlayPage> {
     Get.put<WebviewItemController>(
         WebviewItemControllerFactory.getController());
     subjectsInfo = Get.arguments as SubjectsInfoItem;
-    subjectState.setSubject(
-        subjectsInfo.nameCN??subjectsInfo.name,
-        subjectsInfo.id,
-        subjectsInfo.tags);
+    subjectState.setSubject(subjectsInfo.nameCN ?? subjectsInfo.name,
+        subjectsInfo.id, subjectsInfo.tags);
     _initEpisodes();
+    _initResources();
+  }
+
+  /// 初始化资源
+  void _initResources() {
+    if (_hasInitResources) {
+      return;
+    } else {
+      _webViewInitWorker =
+          ever(videoSourceController.isInitWebView, (bool initialized) {
+        if (initialized) {
+          final subjectName = subjectState.name;
+          if (subjectName.isNotEmpty) {
+            _hasInitResources = true;
+            videoSourceController.initResources(subjectName);
+          }
+        }
+      });
+    }
   }
 
   void _initEpisodes() async {
@@ -101,6 +122,7 @@ class _PlayPageState extends State<PlayPage> {
 
   @override
   void dispose() {
+    _webViewInitWorker?.dispose();
     Get.delete<WebviewItemController>();
     Get.delete<VideoStateController>();
     Get.delete<PlayController>();

@@ -18,11 +18,13 @@ class VideoSourceController extends GetxController {
   final RxString videoUrl = ''.obs;
   final RxString keyword = ''.obs;
   final RxBool isLoading = false.obs;
-  final RxInt selectedWebsiteIndex = 0.obs; // 当前选中的网站索引
+
+  /// 当前选中的网站索引
+  final RxInt selectedWebsiteIndex = 0.obs;
+  final RxBool isInitWebView = false.obs;
 
   late EpisodesState _episodesState;
   late SubjectState _subjectState;
-  // late VideoStateController _videoStateController;
   late WebviewItemController _webviewItemController;
   final Logger _logger = Logger();
 
@@ -227,7 +229,6 @@ class VideoSourceController extends GetxController {
       return; // 没有找到有资源的网站
     }
 
-
     // 自动加载第一个匹配的资源
     Future.microtask(() {
       _autoLoadFirstResource(selectedResource, force: force);
@@ -246,7 +247,7 @@ class VideoSourceController extends GetxController {
     // 遍历资源列表，找到第一个匹配当前剧集的资源
     for (var resourceItem in resource.episodeResources) {
       final matchingEpisodes = resourceItem.episodes.where(
-            (ep) => ep.episodeSort == _episodesState.episodeIndex.value,
+        (ep) => ep.episodeSort == _episodesState.episodeIndex.value,
       );
       if (matchingEpisodes.isNotEmpty) {
         final currentEpisode = matchingEpisodes.first;

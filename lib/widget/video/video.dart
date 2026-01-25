@@ -194,7 +194,8 @@ class _VideoViewState extends State<VideoView> with WindowListener {
     _initSubscription =
         webviewItemController.onInitialized.listen((initialized) {
       if (initialized) {
-        logger.i('WebView初始化完成');
+        Get.log('WebView初始化完成');
+        videoSourceController.isInitWebView.value = initialized;
       }
     });
   }

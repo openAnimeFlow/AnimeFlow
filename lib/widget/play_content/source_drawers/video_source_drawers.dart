@@ -1,5 +1,6 @@
 import 'package:anime_flow/models/item/play/video/episode_resources_item.dart';
 import 'package:anime_flow/models/item/play/video/resources_item.dart';
+import 'package:anime_flow/stores/subject_state.dart';
 import 'package:anime_flow/widget/animation_network_image/animation_network_image.dart';
 import 'package:anime_flow/constants/play_layout_constant.dart';
 import 'package:anime_flow/stores/episodes_state.dart';
@@ -21,6 +22,7 @@ class VideoSourceDrawers extends StatefulWidget {
 class _VideoSourceDrawersState extends State<VideoSourceDrawers> {
   late VideoStateController videoStateController;
   late EpisodesState episodesController;
+  late SubjectState subjectState;
   late VideoSourceController dataSourceController;
   final logger = Logger();
   bool isShowEpisodes = false;
@@ -29,10 +31,11 @@ class _VideoSourceDrawersState extends State<VideoSourceDrawers> {
   @override
   void initState() {
     super.initState();
+    subjectState = Get.find<SubjectState>();
     videoStateController = Get.find<VideoStateController>();
     episodesController = Get.find<EpisodesState>();
     dataSourceController = Get.find<VideoSourceController>();
-    _searchController.text = dataSourceController.keyword.value;
+    _searchController.text = subjectState.name;
   }
 
   void setShowEpisodes() {

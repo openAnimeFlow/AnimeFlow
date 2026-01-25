@@ -53,7 +53,7 @@ class VideoStateController extends GetxController {
   }
 
   @override
-  void dispose() {
+  void onClose() {
     player.dispose();
     super.dispose();
   }

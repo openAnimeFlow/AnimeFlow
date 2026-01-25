@@ -34,6 +34,7 @@ class VideoView extends StatefulWidget {
 
 class _VideoViewState extends State<VideoView> with WindowListener {
   late VideoUiStateController videoUiStateController;
+  late WebviewItemController webviewItemController;
   late VideoSourceController videoSourceController;
   late VideoStateController videoStateController;
   late EpisodeController episodeController;
@@ -41,7 +42,6 @@ class _VideoViewState extends State<VideoView> with WindowListener {
   late EpisodesState episodesState;
   late SubjectState subjectState;
   late bool _episodesProgress;
-  final webviewItemController = Get.find<WebviewItemController>();
   final logger = Logger();
   final _danmuKey = GlobalKey();
   final setting = Storage.setting;
@@ -50,10 +50,13 @@ class _VideoViewState extends State<VideoView> with WindowListener {
   bool _isLoadingDanmaku = false;
   bool _hasDanmakuLoaded = false;
 
+  /// 解析结果
   StreamSubscription<(String, int)>? _videoURLSubscription;
+
   StreamSubscription<bool>? _videoLoadingSubscription;
   StreamSubscription<String>? _logSubscription;
   StreamSubscription<bool>? _initSubscription;
+
   // 解析状态跟踪
   bool _isParsing = false;
   bool _hasReceivedVideoUrl = false;
@@ -68,6 +71,7 @@ class _VideoViewState extends State<VideoView> with WindowListener {
   @override
   void initState() {
     super.initState();
+    webviewItemController = Get.find<WebviewItemController>();
     videoStateController = Get.find<VideoStateController>();
     videoUiStateController = Get.find<VideoUiStateController>();
     videoSourceController = Get.find<VideoSourceController>();
@@ -75,8 +79,8 @@ class _VideoViewState extends State<VideoView> with WindowListener {
     episodesState = Get.find<EpisodesState>();
     episodeController = Get.find<EpisodeController>();
     subjectState = Get.find<SubjectState>();
-    _episodesProgress = setting.get(PlaybackKey.episodesProgress, defaultValue: true);
-
+    _episodesProgress =
+        setting.get(PlaybackKey.episodesProgress, defaultValue: true);
 
     // 监听集数变化
     ever(episodesState.episodeIndex, (int episode) {
@@ -186,16 +190,13 @@ class _VideoViewState extends State<VideoView> with WindowListener {
         logger.w('解析失败提示: $logMessage');
       }
     });
-    // 如果webview尚未初始化，则初始化
-    if (webviewItemController.webviewController == null) {
-      _initSubscription =
-          webviewItemController.onInitialized.listen((initialized) {
-        if (initialized) {
-          logger.i('WebView初始化完成');
-        }
-      });
-      await webviewItemController.init();
-    }
+    // 初始化
+    _initSubscription =
+        webviewItemController.onInitialized.listen((initialized) {
+      if (initialized) {
+        logger.i('WebView初始化完成');
+      }
+    });
   }
 
   //解析状态
@@ -355,7 +356,7 @@ class _VideoViewState extends State<VideoView> with WindowListener {
         PlayRepository.savePlayPosition(playId, position, duration);
 
         /// 播放进度大于90% && collection != null，更新章节进度
-        if(_episodesProgress) {
+        if (_episodesProgress) {
           final progressPercent = position.inSeconds / duration.inSeconds * 100;
           if (progressPercent > 90) {
             final currentIndex = episodesState.episodeIndex.value - 1;

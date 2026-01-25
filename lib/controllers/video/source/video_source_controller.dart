@@ -28,7 +28,8 @@ class VideoSourceController extends GetxController {
   late WebviewItemController _webviewItemController;
   final Logger _logger = Logger();
 
-  bool _hasAutoSelected = false; // 标记是否已经自动选择过
+  /// 标记用户是否手动选择了资源
+  bool _userManuallySelected = false;
 
   Worker? _isLoadingWorker;
   Worker? _episodeIndexWorker;
@@ -97,6 +98,8 @@ class VideoSourceController extends GetxController {
   Future<void> initResources(String keyword) async {
     _clearAllResources();
     this.keyword.value = keyword;
+    // 重置手动选择标志，允许重新自动选择
+    _userManuallySelected = false;
     updateLoading(false);
     final configs = await CrawlConfig.loadAllCrawlConfigs();
 
@@ -189,10 +192,16 @@ class VideoSourceController extends GetxController {
     videoResources.value = updatedResources;
   }
 
-  void setWebSite(
-      {required String title,
-      required String iconUrl,
-      required String videoUrl}) {
+  /// 设置当前选中的网站
+  void setWebSite({
+    required String title,
+    required String iconUrl,
+    required String videoUrl,
+    bool isManual = false,
+  }) {
+    if (isManual) {
+      _userManuallySelected = true;
+    }
     webSiteTitle.value = title;
     webSiteIcon.value = iconUrl;
     this.videoUrl.value = videoUrl;
@@ -212,8 +221,12 @@ class VideoSourceController extends GetxController {
   /// [force] 是否强制重新选择，即使已经有选中的资源
   void autoSelectFirstResource(List<ResourcesItem> resources,
       {bool force = false}) {
+    // 如果用户手动选择了资源，不再自动选择
+    if (_userManuallySelected) {
+      return;
+    }
     // 如果已经自动选择过，且不是强制重新选择，或者已经有选中的资源且不是强制重新选择，不再自动选择
-    if (!force && (_hasAutoSelected || webSiteTitle.value.isNotEmpty)) {
+    if (!force && (webSiteTitle.value.isNotEmpty)) {
       return;
     }
     // 检查是否有资源加载完成
@@ -239,6 +252,10 @@ class VideoSourceController extends GetxController {
   /// [force] 是否强制重新加载，即使已经有选中的资源
   Future<void> _autoLoadFirstResource(ResourcesItem resource,
       {bool force = false}) async {
+    // 如果用户手动选择了资源，不再自动加载
+    if (_userManuallySelected) {
+      return;
+    }
     // 如果不是强制重新加载，且已经有选中的资源，不再自动加载
     if (!force && webSiteTitle.value.isNotEmpty) {
       return;

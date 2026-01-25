@@ -54,8 +54,8 @@ class VideoStateController extends GetxController {
 
   @override
   void dispose() {
-    super.dispose();
     player.dispose();
+    super.dispose();
   }
 
   ///暂停|播放

@@ -16,7 +16,7 @@ class VideoResourcesView extends StatefulWidget {
 
 class _VideoResourcesViewState extends State<VideoResourcesView> {
   late VideoSourceController videoSourceController;
-  late PlaySubjectState subjectStateController;
+  late PlaySubjectState playSubjectState;
   late VideoStateController videoStateController;
   final Logger logger = Logger();
 
@@ -24,7 +24,7 @@ class _VideoResourcesViewState extends State<VideoResourcesView> {
   void initState() {
     super.initState();
     videoSourceController = Get.find<VideoSourceController>();
-    subjectStateController = Get.find<PlaySubjectState>();
+    playSubjectState = Get.find<PlaySubjectState>();
     videoStateController = Get.find<VideoStateController>();
   }
 

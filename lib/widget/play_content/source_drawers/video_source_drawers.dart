@@ -408,9 +408,8 @@ class _VideoSourceDrawersState extends State<VideoSourceDrawers> {
                 dataSourceController.setWebSite(
                     title: websiteName,
                     iconUrl: websiteIcon,
-                    videoUrl: videoUrl);
-
-                // videoStateController.disposeVideo();
+                    videoUrl: videoUrl,
+                    isManual: true);
                 widget.onVideoUrlSelected?.call(videoUrl);
               } catch (e) {
                 logger.e('获取视频源失败', error: e);

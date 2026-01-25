@@ -153,6 +153,7 @@ class _TopAreaControlState extends State<TopAreaControl> {
                                   videoSourceController
                                       .loadVideoPage(url);
                                 },
+                                isBottomSheet:  false,
                               );
                             },
                           );

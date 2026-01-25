@@ -2,7 +2,7 @@ import 'package:anime_flow/pages/play/content/introduce/episodes.dart';
 import 'package:anime_flow/controllers/play/play_controller.dart';
 import 'package:anime_flow/stores/play_subject_state.dart';
 import 'package:anime_flow/pages/play/content/introduce/danmaku_card.dart';
-import 'package:anime_flow/pages/play/content/introduce/video_resources.dart';
+import 'package:anime_flow/pages/play/content/introduce/resources.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:logger/logger.dart';

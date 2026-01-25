@@ -1,3 +1,4 @@
+import 'package:anime_flow/controllers/play/play_controller.dart';
 import 'package:anime_flow/controllers/video/source/video_source_controller.dart';
 import 'package:anime_flow/controllers/video/video_state_controller.dart';
 import 'package:anime_flow/stores/play_subject_state.dart';
@@ -17,6 +18,7 @@ class VideoResourcesView extends StatefulWidget {
 class _VideoResourcesViewState extends State<VideoResourcesView> {
   late VideoSourceController videoSourceController;
   late PlaySubjectState playSubjectState;
+  late PlayController playController;
   late VideoStateController videoStateController;
   final Logger logger = Logger();
 
@@ -26,6 +28,55 @@ class _VideoResourcesViewState extends State<VideoResourcesView> {
     videoSourceController = Get.find<VideoSourceController>();
     playSubjectState = Get.find<PlaySubjectState>();
     videoStateController = Get.find<VideoStateController>();
+    playController = Get.find<PlayController>();
+  }
+
+  /// 显示数据源抽屉
+  void _showSourceDrawer() {
+    void onVideoUrlSelected(String url) {
+      videoStateController.player.stop();
+      videoSourceController.loadVideoPage(url);
+    }
+
+    if (playController.isWideScreen.value) {
+      // 宽屏模式：使用侧边抽屉
+      Get.generalDialog(
+        barrierDismissible: true,
+        barrierLabel: "SourceDrawer",
+        barrierColor: Colors.black54,
+        transitionDuration: const Duration(milliseconds: 300),
+        transitionBuilder: (context, animation, secondaryAnimation, child) {
+          return SlideTransition(
+            position: Tween<Offset>(
+              begin: const Offset(1, 0),
+              end: Offset.zero,
+            ).animate(CurvedAnimation(
+              parent: animation,
+              curve: Curves.easeOut,
+            )),
+            child: child,
+          );
+        },
+        pageBuilder: (context, animation, secondaryAnimation) {
+          return VideoSourceDrawers(
+            isBottomSheet: false,
+            onVideoUrlSelected: onVideoUrlSelected,
+          );
+        },
+      );
+    } else {
+      // 窄屏模式：使用底部抽屉
+      Get.bottomSheet(
+        VideoSourceDrawers(
+          isBottomSheet: true,
+          onVideoUrlSelected: onVideoUrlSelected,
+        ),
+        isScrollControlled: true,
+        backgroundColor: Colors.transparent,
+        enterBottomSheetDuration: const Duration(milliseconds: 300),
+        exitBottomSheetDuration: const Duration(milliseconds: 200),
+      );
+    }
   }
 
   @override
@@ -91,33 +142,7 @@ class _VideoResourcesViewState extends State<VideoResourcesView> {
                 const SizedBox(width: 8),
                 OutlinedButton.icon(
                   onPressed: () {
-                    Get.generalDialog(
-                      barrierDismissible: true,
-                      barrierLabel: "SourceDrawer",
-                      barrierColor: Colors.black54,
-                      transitionDuration: const Duration(milliseconds: 300),
-                      transitionBuilder:
-                          (context, animation, secondaryAnimation, child) {
-                        return SlideTransition(
-                          position: Tween<Offset>(
-                            begin: const Offset(1, 0),
-                            end: Offset.zero,
-                          ).animate(CurvedAnimation(
-                            parent: animation,
-                            curve: Curves.easeOut,
-                          )),
-                          child: child,
-                        );
-                      },
-                      pageBuilder: (context, animation, secondaryAnimation) {
-                        return VideoSourceDrawers(
-                          onVideoUrlSelected: (url) {
-                            videoStateController.player.stop();
-                            videoSourceController.loadVideoPage(url);
-                          },
-                        );
-                      },
-                    );
+                    _showSourceDrawer();
                   },
                   style: OutlinedButton.styleFrom(
                     side: BorderSide(

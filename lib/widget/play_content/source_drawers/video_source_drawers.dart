@@ -13,7 +13,13 @@ import 'package:logger/logger.dart';
 class VideoSourceDrawers extends StatefulWidget {
   final Function(String url)? onVideoUrlSelected;
 
-  const VideoSourceDrawers({super.key, this.onVideoUrlSelected});
+  final bool isBottomSheet;
+
+  const VideoSourceDrawers({
+    super.key,
+    this.onVideoUrlSelected,
+    this.isBottomSheet = false,
+  });
 
   @override
   State<VideoSourceDrawers> createState() => _VideoSourceDrawersState();
@@ -70,6 +76,90 @@ class _VideoSourceDrawersState extends State<VideoSourceDrawers> {
 
   @override
   Widget build(BuildContext context) {
+    if (widget.isBottomSheet) {
+      return _buildBottomSheetContent(context);
+    }
+    return _buildSideDrawerContent(context);
+  }
+
+  /// 底部抽屉内容
+  Widget _buildBottomSheetContent(BuildContext context) {
+    return Container(
+      constraints: BoxConstraints(
+        maxHeight: MediaQuery.of(context).size.height * 0.75,
+      ),
+      decoration: BoxDecoration(
+        color: Theme.of(context).cardColor,
+        borderRadius: const BorderRadius.vertical(top: Radius.circular(16)),
+      ),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // 拖动指示器
+          Center(
+            child: Container(
+              margin: const EdgeInsets.only(top: 12, bottom: 8),
+              width: 40,
+              height: 4,
+              decoration: BoxDecoration(
+                color: Theme.of(context).colorScheme.onSurfaceVariant.withValues(alpha: 0.4),
+                borderRadius: BorderRadius.circular(2),
+              ),
+            ),
+          ),
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 16),
+            child: _buildHeader(),
+          ),
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 16),
+            child: _manualSearch(),
+          ),
+          const SizedBox(height: 16),
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 16),
+            child: Obx(() {
+              final dataSource = dataSourceController.videoResources.toList();
+              if (dataSource.isEmpty) {
+                return const SizedBox.shrink();
+              }
+              return _buildWebsiteSelector(dataSource: dataSource);
+            }),
+          ),
+          const SizedBox(height: 16),
+          Expanded(
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 16),
+              child: Obx(() {
+                final dataSource = dataSourceController.videoResources.toList();
+                if (dataSource.isEmpty) {
+                  return const SizedBox.shrink();
+                }
+                final currentIndex =
+                    dataSourceController.selectedWebsiteIndex.value;
+                int validIndex =
+                    currentIndex >= dataSource.length ? 0 : currentIndex;
+
+                if (validIndex != currentIndex) {
+                  WidgetsBinding.instance.addPostFrameCallback((_) {
+                    if (mounted) {
+                      dataSourceController.selectedWebsiteIndex.value =
+                          validIndex;
+                    }
+                  });
+                }
+                return _buildVideoSource(dataSource: dataSource);
+              }),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  /// 侧边抽屉内容
+  Widget _buildSideDrawerContent(BuildContext context) {
     return Align(
       alignment: Alignment.centerRight,
       child: SizedBox(
@@ -82,24 +172,7 @@ class _VideoSourceDrawersState extends State<VideoSourceDrawers> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Row(
-                children: [
-                  Text(
-                    '数据源',
-                    style: TextStyle(
-                      fontSize: 20,
-                      fontWeight: FontWeight.bold,
-                      color: Theme.of(context).textTheme.titleLarge?.color,
-                      decoration: TextDecoration.none,
-                    ),
-                  ),
-                  const Spacer(),
-                  IconButton(
-                    onPressed: () => Navigator.of(context).pop(),
-                    icon: const Icon(Icons.close_rounded),
-                  ),
-                ],
-              ),
+              _buildHeader(),
               _manualSearch(),
               const SizedBox(height: 16),
               Obx(() {
@@ -139,6 +212,28 @@ class _VideoSourceDrawersState extends State<VideoSourceDrawers> {
           ),
         ),
       ),
+    );
+  }
+
+  /// 标题行
+  Widget _buildHeader() {
+    return Row(
+      children: [
+        Text(
+          '数据源',
+          style: TextStyle(
+            fontSize: 20,
+            fontWeight: FontWeight.bold,
+            color: Theme.of(context).textTheme.titleLarge?.color,
+            decoration: TextDecoration.none,
+          ),
+        ),
+        const Spacer(),
+        IconButton(
+          onPressed: () => Navigator.of(context).pop(),
+          icon: const Icon(Icons.close_rounded),
+        ),
+      ],
     );
   }
 

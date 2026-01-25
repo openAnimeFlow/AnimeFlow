@@ -4,93 +4,65 @@ import 'package:anime_flow/models/enums/video_controls_icon_type.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/widgets.dart';
 import 'package:get/get.dart';
-import 'package:media_kit/media_kit.dart';
 import 'package:screen_brightness_platform_interface/screen_brightness_platform_interface.dart';
 
 class VideoUiStateController extends GetxController {
-  final Player player;
-  final RxBool playing = false.obs;
-  final Rx<Duration> position = Duration.zero.obs;
-  final Rx<Duration> duration = Duration.zero.obs;
-  final Rx<Duration> buffer = Duration.zero.obs;
-  final RxBool isDragging = false.obs; // 是否正在拖拽进度条
-  final RxBool isShowControlsUi = true.obs; //是否显示控件ui
-  final RxBool isHorizontalDragging = false.obs; // 是否正在水平拖动
-  final RxString parsingTitle = ''.obs; // 正在解析的标题
-  final Rx<Duration> dragPosition = Duration.zero.obs; // 拖动时的临时进度
-  final RxBool isShowIndicatorUi = false.obs; // 是否显示指示器ui
-  final Rx<VideoControlsIndicatorType> indicatorType =
-      VideoControlsIndicatorType.noIndicator.obs; // 指示器类型
-  final Rx<MainAxisAlignment> mainAxisAlignmentType =
-      MainAxisAlignment.start.obs; // 主轴对齐类型
+  /// 是否正在拖拽进度条
+  final RxBool isDragging = false.obs;
 
-  // 拖动相关
+  ///是否显示控件ui
+  final RxBool isShowControlsUi = true.obs;
+
+  /// 是否正在水平拖动
+  final RxBool isHorizontalDragging = false.obs;
+
+  /// 正在解析的标题
+  final RxString parsingTitle = ''.obs;
+
+  /// 拖动时的临时进度
+  final Rx<Duration> dragPosition = Duration.zero.obs;
+
+  /// 是否显示指示器ui
+  final RxBool isShowIndicatorUi = false.obs;
+
+  /// 指示器类型
+  final Rx<VideoControlsIndicatorType> indicatorType =
+      VideoControlsIndicatorType.noIndicator.obs;
+
+  /// 主轴对齐类型
+  final Rx<MainAxisAlignment> mainAxisAlignmentType =
+      MainAxisAlignment.start.obs;
+
+  /// 拖动相关
   double _dragStartX = 0;
   Duration _dragStartPosition = Duration.zero;
 
-  //指示器计时器
+  /// 指示器计时器
   Timer? _indicatorTimer;
 
-  //控件ui计时器
+  /// 控件ui计时器
   Timer? _controlsUiTimer;
 
-  // 屏幕亮度相关
+  /// 屏幕亮度相关
   final ScreenBrightnessPlatform _screenBrightness =
       ScreenBrightnessPlatform.instance;
-  double _originalBrightness = 0.5; // 保存原始亮度
-  final RxDouble currentBrightness = 0.5.obs; // 当前亮度 0.0-1.0
-  final RxBool isBrightnessDragging = false.obs; // 是否正在拖动调整亮度
-  double _dragStartBrightness = 0.5; // 拖动开始时的亮度
 
-  VideoUiStateController(this.player) {
-    // 初始化状态
-    duration.value = player.state.duration;
-    position.value = player.state.position;
-    playing.value = player.state.playing;
-    buffer.value = player.state.buffer;
+  /// 保存原始亮度
+  double _originalBrightness = 0.5;
 
-    // 监听播放器播放状态变化
-    player.stream.playing.listen((playing) {
-      this.playing.value = playing;
-    });
+  /// 当前亮度 0.0-1.0
+  final RxDouble currentBrightness = 0.5.obs;
 
-    // 监听进度
-    player.stream.position.listen((pos) {
-      if (!isDragging.value) {
-        position.value = pos;
-      }
-    });
+  /// 是否正在拖动调整亮度
+  final RxBool isBrightnessDragging = false.obs;
 
-    // 监听总时长
-    player.stream.duration.listen((dur) {
-      duration.value = dur;
-    });
+  /// 拖动开始时的亮度
+  double _dragStartBrightness = 0.5;
 
-    // 监听缓冲进度
-    player.stream.buffer.listen((buf) {
-      buffer.value = buf;
-    });
-
-    // 监听缓冲状态
-    // player.stream.buffering.listen((buffering) {
-    //   _isBuffering.value = buffering;
-    //
-    //   // 只有当播放器有内容（duration > 0）并且正在播放时才显示缓冲指示器
-    //   if (duration.value > Duration.zero && playing.value) {
-    //     if (buffering) {
-    //       updateIndicatorType(VideoControlsIndicatorType.bufferingIndicator);
-    //       updateMainAxisAlignmentType(MainAxisAlignment.center);
-    //       showIndicator();
-    //     } else {
-    //       // 缓冲结束
-    //       if (indicatorType.value ==
-    //           VideoControlsIndicatorType.bufferingIndicator) {
-    //         hideIndicator();
-    //         updateIndicatorType(VideoControlsIndicatorType.noIndicator);
-    //       }
-    //     }
-    //   }
-    // });
+  @override
+  void onInit() {
+    super.onInit();
+    _initializeBrightness();
   }
 
   //设置解析标题
@@ -138,20 +110,14 @@ class VideoUiStateController extends GetxController {
     });
   }
 
-  // 跳转到指定位置
-  void seekTo(Duration pos) {
-    player.seek(pos);
-  }
-
   // 开始拖拽
   void startDrag() {
     isDragging.value = true;
   }
 
-  // 结束拖拽
+  //  结束拖拽
   void endDrag(Duration pos) {
     isDragging.value = false;
-    seekTo(pos);
   }
 
   ///显示获|隐藏控件ui
@@ -163,7 +129,6 @@ class VideoUiStateController extends GetxController {
   void showControlsUi() {
     isShowControlsUi.value = true;
   }
-
 
   ///隐藏控件ui
   void hideControlsUi({Duration? duration}) {
@@ -178,9 +143,9 @@ class VideoUiStateController extends GetxController {
   }
 
   // 开始水平拖动
-  void startHorizontalDrag(double startX) {
+  void startHorizontalDrag(double startX, Duration position) {
     _dragStartX = startX;
-    _dragStartPosition = position.value;
+    _dragStartPosition = position;
     isHorizontalDragging.value = true;
     isDragging.value = true;
 
@@ -197,8 +162,9 @@ class VideoUiStateController extends GetxController {
   }
 
   // 更新水平拖动进度
-  void updateHorizontalDrag(double currentX, double screenWidth) {
-    if (duration.value <= Duration.zero) return;
+  void updateHorizontalDrag(
+      double currentX, double screenWidth, Duration duration) {
+    if (duration <= Duration.zero) return;
 
     // 计算拖动距离
     final dragDistance = currentX - _dragStartX;
@@ -206,13 +172,13 @@ class VideoUiStateController extends GetxController {
     // 根据屏幕宽度计算时间偏移（滑动整个屏幕宽度 = 总时长）
     // 添加系数 0.5 减小拖动敏感度，使拖动更精细
     final timeOffset =
-        (dragDistance / screenWidth) * duration.value.inMilliseconds * 0.5;
+        (dragDistance / screenWidth) * duration.inMilliseconds * 0.5;
 
     // 计算新的播放位置
     var newPosition = _dragStartPosition.inMilliseconds + timeOffset.toInt();
 
     // 限制在有效范围内
-    newPosition = newPosition.clamp(0, duration.value.inMilliseconds);
+    newPosition = newPosition.clamp(0, duration.inMilliseconds);
 
     dragPosition.value = Duration(milliseconds: newPosition);
   }
@@ -221,7 +187,6 @@ class VideoUiStateController extends GetxController {
   void endHorizontalDrag() {
     if (isHorizontalDragging.value) {
       // 更新视频进度
-      seekTo(dragPosition.value);
       isHorizontalDragging.value = false;
       isDragging.value = false;
 
@@ -243,7 +208,7 @@ class VideoUiStateController extends GetxController {
   }
 
   // 初始化并保存原始亮度
-  Future<void> initializeBrightness() async {
+  Future<void> _initializeBrightness() async {
     WidgetsBinding.instance.addPostFrameCallback((_) async {
       try {
         final brightness = await _screenBrightness.application;

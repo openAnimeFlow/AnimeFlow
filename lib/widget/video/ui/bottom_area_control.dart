@@ -1,7 +1,7 @@
 import 'package:anime_flow/controllers/play/play_controller.dart';
 import 'package:anime_flow/controllers/play/episode_controller.dart';
 import 'package:anime_flow/controllers/video/video_state_controller.dart';
-import 'package:anime_flow/controllers/video/video_ui_state_controller.dart';
+import 'package:anime_flow/controllers/video/video_ui_controller.dart';
 import 'package:anime_flow/models/enums/video_controls_icon_type.dart';
 import 'package:anime_flow/stores/episodes_state.dart';
 import 'package:anime_flow/utils/utils.dart';
@@ -62,19 +62,21 @@ class BottomAreaControl extends StatelessWidget {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      // 时间显示组件
+                      // 时间显示
                       Padding(
                         padding: const EdgeInsets.symmetric(horizontal: 5),
                         child: VideoTimeDisplay(
-                            videoController: videoUiStateController),
+                          videoUiStateController: videoUiStateController,
+                          videoStateController: videoStateController,
+                        ),
                       ),
+                      // 进度条
                       if (fullscreen || isWideScreen)
                         Padding(
                           padding: EdgeInsets.symmetric(
                               horizontal: paddingLeft == 0 ? 10 : 0,
                               vertical: 5),
-                          child: VideoProgressBar(
-                              videoUiStateController: videoUiStateController),
+                          child: const VideoProgressBar(),
                         ),
                       SizedBox(
                         child: Row(
@@ -155,12 +157,10 @@ class BottomAreaControl extends StatelessWidget {
                                         )
                                       : const SizedBox.shrink()
                                   // 进度条
-                                  : Padding(
-                                      padding: const EdgeInsets.symmetric(
+                                  : const Padding(
+                                      padding: EdgeInsets.symmetric(
                                           horizontal: 5),
-                                      child: VideoProgressBar(
-                                          videoUiStateController:
-                                              videoUiStateController),
+                                      child: VideoProgressBar(),
                                     ),
                             ),
                             //选集

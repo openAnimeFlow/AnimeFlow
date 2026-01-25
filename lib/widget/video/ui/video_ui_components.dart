@@ -1,100 +1,120 @@
-import 'package:anime_flow/controllers/video/video_ui_state_controller.dart';
+import 'package:anime_flow/controllers/video/video_state_controller.dart';
+import 'package:anime_flow/controllers/video/video_ui_controller.dart';
 import 'package:anime_flow/utils/formatUtil.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
 /// 视频播放进度条组件
-class VideoProgressBar extends StatelessWidget {
-  final VideoUiStateController videoUiStateController;
+class VideoProgressBar extends StatefulWidget {
+  const VideoProgressBar({super.key});
 
-  const VideoProgressBar({super.key, required this.videoUiStateController});
+  @override
+  State<VideoProgressBar> createState() => _VideoProgressBarState();
+}
+
+class _VideoProgressBarState extends State<VideoProgressBar> {
+  late VideoUiStateController videoUiStateController;
+  late VideoStateController videoStateController;
+
+  @override
+  void initState() {
+    super.initState();
+    videoUiStateController = Get.find<VideoUiStateController>();
+    videoStateController = Get.find<VideoStateController>();
+  }
 
   @override
   Widget build(BuildContext context) {
     return SizedBox(
       height: 20,
-      child: Obx(() {
-        final max =
-            videoUiStateController.duration.value.inMilliseconds.toDouble();
-        // 如果正在水平拖动，使用拖动位置；否则使用当前播放位置
-        final value = videoUiStateController.isHorizontalDragging.value
-            ? videoUiStateController.dragPosition.value.inMilliseconds
-                .toDouble()
-            : videoUiStateController.position.value.inMilliseconds.toDouble();
-        final buffer =
-            videoUiStateController.buffer.value.inMilliseconds.toDouble();
+      child: Obx(
+        () {
+          final max =
+              videoStateController.duration.value.inMilliseconds.toDouble();
+          // 如果正在水平拖动，使用拖动位置；否则使用当前播放位置
+          final value = videoUiStateController.isHorizontalDragging.value
+              ? videoUiStateController.dragPosition.value.inMilliseconds
+                  .toDouble()
+              : videoStateController.position.value.inMilliseconds.toDouble();
+          final buffer = Duration.zero.inMilliseconds.toDouble(); // TODO: 从 videoStateController 获取 buffer
 
-        return Stack(
-          alignment: Alignment.centerLeft,
-          children: [
-            // 背景层
-            SliderTheme(
-              data: SliderThemeData(
-                trackHeight: 6,
-                thumbShape: SliderComponentShape.noThumb,
-                overlayShape: SliderComponentShape.noOverlay,
-                activeTrackColor: Colors.black.withValues(alpha: 0.3),
-                disabledActiveTrackColor: Colors.black.withValues(alpha: 0.3),
-                disabledThumbColor: Colors.transparent,
-                trackShape: _CustomTrackShape(),
+          return Stack(
+            alignment: Alignment.centerLeft,
+            children: [
+              // 背景层
+              SliderTheme(
+                data: SliderThemeData(
+                  trackHeight: 6,
+                  thumbShape: SliderComponentShape.noThumb,
+                  overlayShape: SliderComponentShape.noOverlay,
+                  activeTrackColor: Colors.black.withValues(alpha: 0.3),
+                  disabledActiveTrackColor: Colors.black.withValues(alpha: 0.3),
+                  disabledThumbColor: Colors.transparent,
+                  trackShape: _CustomTrackShape(),
+                ),
+                child: Slider(
+                  value: max > 0 ? max : 1.0,
+                  min: 0.0,
+                  max: max > 0 ? max : 1.0,
+                  onChanged: null, // 禁用交互
+                ),
               ),
-              child: Slider(
-                value: max > 0 ? max : 1.0,
-                min: 0.0,
-                max: max > 0 ? max : 1.0,
-                onChanged: null, // 禁用交互
+              // 缓冲层
+              SliderTheme(
+                data: SliderThemeData(
+                  trackHeight: 6,
+                  thumbShape: SliderComponentShape.noThumb,
+                  // 隐藏滑块
+                  overlayShape: SliderComponentShape.noOverlay,
+                  activeTrackColor: Colors.white.withValues(alpha: 0.4),
+                  // 缓冲颜色
+                  disabledActiveTrackColor: Colors.white.withValues(alpha: 0.4),
+                  disabledThumbColor: Colors.transparent,
+                  trackShape: _CustomTrackShape(),
+                ),
+                child: Slider(
+                  value: buffer.clamp(0.0, max > 0 ? max : 1.0),
+                  min: 0.0,
+                  max: max > 0 ? max : 1.0,
+                  onChanged: null, // 禁用交互
+                ),
               ),
-            ),
-            // 缓冲层
-            SliderTheme(
-              data: SliderThemeData(
-                trackHeight: 6,
-                thumbShape: SliderComponentShape.noThumb,
-                // 隐藏滑块
-                overlayShape: SliderComponentShape.noOverlay,
-                activeTrackColor: Colors.white.withValues(alpha: 0.4),
-                // 缓冲颜色
-                disabledActiveTrackColor: Colors.white.withValues(alpha: 0.4),
-                disabledThumbColor: Colors.transparent,
-                trackShape: _CustomTrackShape(),
+              // 播放进度条
+              SliderTheme(
+                data: SliderThemeData(
+                  trackHeight: 6,
+                  thumbShape:
+                      const RoundSliderThumbShape(enabledThumbRadius: 8),
+                  overlayShape:
+                      const RoundSliderOverlayShape(overlayRadius: 16),
+                  activeTrackColor: Theme.of(context).colorScheme.primary,
+                  inactiveTrackColor: Colors.transparent,
+                  thumbColor: Theme.of(context).colorScheme.primary,
+                  trackShape: _CustomTrackShape(),
+                ),
+                child: Slider(
+                  value: value.clamp(0.0, max > 0 ? max : 1.0),
+                  min: 0.0,
+                  max: max > 0 ? max : 1.0,
+                  // 进度条开始拖动
+                  onChangeStart: (_) => videoUiStateController.startDrag(),
+                  // 进度条正在拖动
+                  onChanged: (v) {
+                    // 更新拖动位置，但不更新实际播放位置
+                    videoUiStateController.dragPosition.value =
+                        Duration(milliseconds: v.toInt());
+                  },
+                  // 进度条结束拖动
+                  onChangeEnd: (v) {
+                    videoStateController.seekTo(Duration(milliseconds: v.toInt()));
+                    videoUiStateController.endDrag(Duration(milliseconds: v.toInt()));
+                  },
+                ),
               ),
-              child: Slider(
-                value: buffer.clamp(0.0, max > 0 ? max : 1.0),
-                min: 0.0,
-                max: max > 0 ? max : 1.0,
-                onChanged: null, // 禁用交互
-              ),
-            ),
-            // 播放进度条
-            SliderTheme(
-              data: SliderThemeData(
-                trackHeight: 6,
-                thumbShape: const RoundSliderThumbShape(enabledThumbRadius: 8),
-                overlayShape: const RoundSliderOverlayShape(overlayRadius: 16),
-                activeTrackColor: Theme.of(context).colorScheme.primary,
-                inactiveTrackColor: Colors.transparent,
-                thumbColor: Theme.of(context).colorScheme.primary,
-                trackShape: _CustomTrackShape(),
-              ),
-              child: Slider(
-                value: value.clamp(0.0, max > 0 ? max : 1.0),
-                min: 0.0,
-                max: max > 0 ? max : 1.0,
-                // 进度条开始拖动
-                onChangeStart: (_) => videoUiStateController.startDrag(),
-                // 进度条正在拖动
-                onChanged: (v) {
-                  videoUiStateController.position.value =
-                      Duration(milliseconds: v.toInt());
-                },
-                // 进度条结束拖动
-                onChangeEnd: (v) => videoUiStateController
-                    .endDrag(Duration(milliseconds: v.toInt())),
-              ),
-            ),
-          ],
-        );
-      }),
+            ],
+          );
+        },
+      ),
     );
   }
 }
@@ -122,18 +142,23 @@ class _CustomTrackShape extends RoundedRectSliderTrackShape {
 
 /// 视频时间显示组件
 class VideoTimeDisplay extends StatelessWidget {
-  final VideoUiStateController videoController;
+  final VideoUiStateController videoUiStateController;
+  final VideoStateController videoStateController;
 
-  const VideoTimeDisplay({super.key, required this.videoController});
+  const VideoTimeDisplay({
+    super.key,
+    required this.videoUiStateController,
+    required this.videoStateController,
+  });
 
   @override
   Widget build(BuildContext context) {
     return Obx(() {
       // 如果正在水平拖动，使用拖动位置；否则使用当前播放位置
-      final position = videoController.isHorizontalDragging.value
-          ? videoController.dragPosition.value
-          : videoController.position.value;
-      final duration = videoController.duration.value;
+      final position = videoUiStateController.isHorizontalDragging.value
+          ? videoUiStateController.dragPosition.value
+          : videoStateController.position.value;
+      final duration = videoStateController.duration.value;
 
       return Text(
         "${FormatUtil.formatDuration(position)} / ${FormatUtil.formatDuration(duration)}",
@@ -160,7 +185,8 @@ class DanmakuTextField extends StatelessWidget {
       this.iconColor,
       this.textColor,
       this.leftIcon = true,
-      this.rightIcon = true, this.backgroundColor});
+      this.rightIcon = true,
+      this.backgroundColor});
 
   @override
   Widget build(BuildContext context) {

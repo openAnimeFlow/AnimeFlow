@@ -1,5 +1,5 @@
 import 'package:anime_flow/controllers/video/video_state_controller.dart';
-import 'package:anime_flow/controllers/video/video_ui_state_controller.dart';
+import 'package:anime_flow/controllers/video/video_ui_controller.dart';
 import 'package:anime_flow/models/enums/video_controls_icon_type.dart';
 import 'package:anime_flow/utils/formatUtil.dart';
 import 'package:flutter/material.dart';
@@ -117,7 +117,7 @@ class MiddleAreaControl extends StatelessWidget {
                       borderRadius: BorderRadius.circular(8),
                     ),
                     child: Text(
-                      '${FormatUtil.formatDuration(videoUiStateController.dragPosition.value)} / ${FormatUtil.formatDuration(videoUiStateController.duration.value)}',
+                      '${FormatUtil.formatDuration(videoUiStateController.dragPosition.value)} / ${FormatUtil.formatDuration(videoStateController.duration.value)}',
                       style: const TextStyle(
                         color: Colors.white,
                         fontSize: 16,

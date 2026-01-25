@@ -2,9 +2,11 @@ import 'dart:async';
 
 import 'package:get/get.dart';
 import 'package:media_kit/media_kit.dart';
+import 'package:media_kit_video/media_kit_video.dart';
 
 class VideoStateController extends GetxController {
-  final Player player;
+  late Player player;
+  late VideoController videoController;
   final RxBool playing = false.obs; //视频播放状态
   final Rx<Duration> position = Duration.zero.obs;
   final Rx<Duration> duration = Duration.zero.obs;
@@ -19,12 +21,11 @@ class VideoStateController extends GetxController {
   // 垂直拖动相关
   double _dragStartVolume = 100.0;
 
-  //初始话player
-  VideoStateController(this.player) {
-    volume.value = player.state.volume;
-    rate.value = player.state.rate;
-    _originalSpeed = rate.value;
-
+  @override
+  void onInit() {
+    super.onInit();
+    player = Player();
+    videoController = VideoController(player);
     // 监听播放器播放状态
     player.stream.playing.listen((playing) {
       this.playing.value = playing;
@@ -51,6 +52,12 @@ class VideoStateController extends GetxController {
     });
   }
 
+  @override
+  void dispose() {
+    super.dispose();
+    player.dispose();
+  }
+
   ///暂停|播放
   void playOrPauseVideo() {
     player.playOrPause();
@@ -72,6 +79,11 @@ class VideoStateController extends GetxController {
     // 设置新的倍速
     rate.value = speed;
     player.setRate(speed);
+  }
+
+  /// 跳转到指定位置
+  void seekTo(Duration pos) {
+    player.seek(pos);
   }
 
   /// 结束速度提升

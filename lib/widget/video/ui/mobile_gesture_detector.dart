@@ -1,7 +1,6 @@
 import 'package:anime_flow/constants/storage_key.dart';
-import 'package:anime_flow/controllers/play/play_controller.dart';
 import 'package:anime_flow/controllers/video/video_state_controller.dart';
-import 'package:anime_flow/controllers/video/video_ui_state_controller.dart';
+import 'package:anime_flow/controllers/video/video_ui_controller.dart';
 import 'package:anime_flow/models/enums/video_controls_icon_type.dart';
 import 'package:anime_flow/repository/storage.dart';
 import 'package:flutter/material.dart';
@@ -23,19 +22,20 @@ class _MobileGestureDetectorState extends State<MobileGestureDetector> {
   double _verticalDragStartY = 0; // 垂直拖动开始时的Y坐标
   bool _isRightSide = false; // 是否在屏幕右半侧开始垂直拖动
   late double _fastForwardSpeed;
+  late VideoStateController videoStateController;
+  late VideoUiStateController videoUiStateController;
 
   @override
   void initState() {
     super.initState();
     _fastForwardSpeed =
         setting.get(PlaybackKey.fastForwardSpeed, defaultValue: 2.0);
+    videoStateController = Get.find<VideoStateController>();
+    videoUiStateController = Get.find<VideoUiStateController>();
   }
 
   @override
   Widget build(BuildContext context) {
-    final videoStateController = Get.find<VideoStateController>();
-    final videoUiStateController = Get.find<VideoUiStateController>();
-
     final screenWidth = MediaQuery.of(context).size.width;
     final screenHeight = MediaQuery.of(context).size.height;
 
@@ -75,7 +75,10 @@ class _MobileGestureDetectorState extends State<MobileGestureDetector> {
 
       // 水平拖动开始：调整播放进度
       onHorizontalDragStart: (DragStartDetails details) {
-        videoUiStateController.startHorizontalDrag(details.globalPosition.dx);
+        videoUiStateController.startHorizontalDrag(
+          details.globalPosition.dx,
+          videoStateController.position.value,
+        );
       },
 
       // 水平拖动更新：更新播放进度
@@ -83,11 +86,13 @@ class _MobileGestureDetectorState extends State<MobileGestureDetector> {
         videoUiStateController.updateHorizontalDrag(
           details.globalPosition.dx,
           screenWidth,
+          videoStateController.duration.value,
         );
       },
 
       // 水平拖动结束：应用新的播放进度
       onHorizontalDragEnd: (DragEndDetails details) {
+        videoStateController.seekTo(videoUiStateController.dragPosition.value);
         videoUiStateController.endHorizontalDrag();
       },
 
@@ -108,12 +113,14 @@ class _MobileGestureDetectorState extends State<MobileGestureDetector> {
         if (_isRightSide) {
           // 右半屏：调整音量
           videoStateController.startVerticalDrag();
+          videoUiStateController.updateMainAxisAlignmentType(MainAxisAlignment.start);
           videoUiStateController
               .updateIndicatorType(VideoControlsIndicatorType.volumeIndicator);
           videoUiStateController.showIndicator();
         } else {
           // 左半屏：调整屏幕亮度
           videoUiStateController.startBrightnessDragWithoutAutoHide();
+          videoUiStateController.updateMainAxisAlignmentType(MainAxisAlignment.start);
           videoUiStateController.updateIndicatorType(
               VideoControlsIndicatorType.brightnessIndicator);
           videoUiStateController.showIndicator();

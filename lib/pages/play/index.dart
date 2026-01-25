@@ -1,4 +1,6 @@
 import 'package:anime_flow/controllers/play/episode_controller.dart';
+import 'package:anime_flow/controllers/video/video_state_controller.dart';
+import 'package:anime_flow/controllers/video/video_ui_controller.dart';
 import 'package:anime_flow/http/requests/bgm_request.dart';
 import 'package:anime_flow/stores/subject_state.dart';
 import 'package:anime_flow/models/item/bangumi/subjects_info_item.dart';
@@ -36,8 +38,10 @@ class _PlayPageState extends State<PlayPage> {
   @override
   void initState() {
     super.initState();
+    Get.put(VideoStateController());
     Get.put(VideoSourceController());
     Get.put(EpisodeController());
+    Get.put(VideoUiStateController());
     playController = Get.put(PlayController());
     episodesState = Get.put(EpisodesState());
     subjectState = Get.put(SubjectState());
@@ -98,10 +102,12 @@ class _PlayPageState extends State<PlayPage> {
   @override
   void dispose() {
     Get.delete<WebviewItemController>();
+    Get.delete<VideoStateController>();
     Get.delete<PlayController>();
     Get.delete<EpisodesState>();
     Get.delete<VideoSourceController>();
     Get.delete<SubjectState>();
+    Get.delete<VideoUiStateController>();
     super.dispose();
   }
 

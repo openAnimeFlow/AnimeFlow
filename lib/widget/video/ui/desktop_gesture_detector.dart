@@ -2,7 +2,7 @@ import 'dart:async';
 
 import 'package:anime_flow/controllers/play/play_controller.dart';
 import 'package:anime_flow/controllers/video/video_state_controller.dart';
-import 'package:anime_flow/controllers/video/video_ui_state_controller.dart';
+import 'package:anime_flow/controllers/video/video_ui_controller.dart';
 import 'package:anime_flow/models/enums/video_controls_icon_type.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
@@ -10,17 +10,31 @@ import 'package:flutter/services.dart';
 import 'package:get/get.dart';
 
 /// 桌面端手势检测器
-class DesktopGestureDetector extends StatelessWidget {
+class DesktopGestureDetector extends StatefulWidget {
   final Widget child;
-  static Timer? _hoverTimer;
 
   const DesktopGestureDetector({super.key, required this.child});
 
   @override
+  State<DesktopGestureDetector> createState() => _DesktopGestureDetectorState();
+}
+
+class _DesktopGestureDetectorState extends State<DesktopGestureDetector> {
+  static Timer? _hoverTimer;
+  late VideoStateController videoStateController;
+  late VideoUiStateController videoUiStateController;
+  late PlayController playPageController;
+
+  @override
+  void initState() {
+    super.initState();
+    videoStateController = Get.find<VideoStateController>();
+    videoUiStateController = Get.find<VideoUiStateController>();
+    playPageController = Get.find<PlayController>();
+  }
+
+  @override
   Widget build(BuildContext context) {
-    final videoStateController = Get.find<VideoStateController>();
-    final videoUiStateController = Get.find<VideoUiStateController>();
-    final playPageController = Get.find<PlayController>();
     return Focus(
       autofocus: true,
       onKeyEvent: (node, event) {
@@ -34,22 +48,22 @@ class DesktopGestureDetector extends StatelessWidget {
           }
           // 左方向键：快退10秒
           if (event.logicalKey == LogicalKeyboardKey.arrowLeft) {
-            final currentPosition = videoUiStateController.position.value;
-            final duration = videoUiStateController.duration.value;
+            final currentPosition = videoStateController.position.value;
+            final duration = videoStateController.duration.value;
             final newPositionMs = (currentPosition - const Duration(seconds: 10)).inMilliseconds;
             final clampedMs = newPositionMs.clamp(0, duration.inMilliseconds);
-            videoUiStateController.seekTo(Duration(milliseconds: clampedMs));
+            videoStateController.seekTo(Duration(milliseconds: clampedMs));
             videoUiStateController.updateIndicatorTypeAndShowIndicator(
                 VideoControlsIndicatorType.horizontalDraggingIndicator);
             return KeyEventResult.handled;
           }
           // 右方向键：快进10秒
           if (event.logicalKey == LogicalKeyboardKey.arrowRight) {
-            final currentPosition = videoUiStateController.position.value;
-            final duration = videoUiStateController.duration.value;
+            final currentPosition = videoStateController.position.value;
+            final duration = videoStateController.duration.value;
             final newPositionMs = (currentPosition + const Duration(seconds: 10)).inMilliseconds;
             final clampedMs = newPositionMs.clamp(0, duration.inMilliseconds);
-            videoUiStateController.seekTo(Duration(milliseconds: clampedMs));
+            videoStateController.seekTo(Duration(milliseconds: clampedMs));
             videoUiStateController.updateIndicatorTypeAndShowIndicator(
                 VideoControlsIndicatorType.horizontalDraggingIndicator);
             return KeyEventResult.handled;
@@ -124,7 +138,7 @@ class DesktopGestureDetector extends StatelessWidget {
               videoUiStateController.updateIndicatorTypeAndShowIndicator(
                   VideoControlsIndicatorType.playStatusIndicator);
             },
-            child: child,
+            child: widget.child,
           ),
         ),
       ),

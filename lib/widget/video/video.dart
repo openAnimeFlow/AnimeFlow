@@ -13,7 +13,7 @@ import 'package:anime_flow/controllers/play/play_controller.dart';
 import 'package:anime_flow/stores/subject_state.dart';
 import 'package:anime_flow/controllers/video/source/video_source_controller.dart';
 import 'package:anime_flow/controllers/video/video_state_controller.dart';
-import 'package:anime_flow/controllers/video/video_ui_state_controller.dart';
+import 'package:anime_flow/controllers/video/video_ui_controller.dart';
 import 'package:anime_flow/http/requests/bgm_request.dart';
 import 'package:anime_flow/http/requests/damaku_request.dart';
 import 'package:anime_flow/widget/video/ui/danmaku/danmaku_view.dart';
@@ -33,15 +33,13 @@ class VideoView extends StatefulWidget {
 }
 
 class _VideoViewState extends State<VideoView> with WindowListener {
-  late final player = Player();
-  late final controller = VideoController(player);
   late VideoUiStateController videoUiStateController;
   late VideoSourceController videoSourceController;
+  late VideoStateController videoStateController;
+  late EpisodeController episodeController;
   late PlayController playController;
   late EpisodesState episodesState;
-  late EpisodeController episodeController;
   late SubjectState subjectState;
-  late VideoStateController videoStateController;
   late bool _episodesProgress;
   final webviewItemController = Get.find<WebviewItemController>();
   final logger = Logger();
@@ -70,15 +68,15 @@ class _VideoViewState extends State<VideoView> with WindowListener {
   @override
   void initState() {
     super.initState();
-    videoStateController = Get.put(VideoStateController(player));
+    videoStateController = Get.find<VideoStateController>();
+    videoUiStateController = Get.find<VideoUiStateController>();
     videoSourceController = Get.find<VideoSourceController>();
-    videoUiStateController = Get.put(VideoUiStateController(videoStateController.player));
     playController = Get.find<PlayController>();
     episodesState = Get.find<EpisodesState>();
     episodeController = Get.find<EpisodeController>();
     subjectState = Get.find<SubjectState>();
     _episodesProgress = setting.get(PlaybackKey.episodesProgress, defaultValue: true);
-    videoUiStateController.initializeBrightness();
+
 
     // 监听集数变化
     ever(episodesState.episodeIndex, (int episode) {
@@ -87,14 +85,14 @@ class _VideoViewState extends State<VideoView> with WindowListener {
         // 清空之前的弹幕
         playController.removeDanmaku();
         if (episode != _lastEpisodeIndex) {
-          player.stop();
+          videoStateController.player.stop();
           _selectResourceAfterInit();
         }
       }
     });
 
     // 监听视频播放完成
-    player.stream.completed.listen((completed) {
+    videoStateController.player.stream.completed.listen((completed) {
       if (completed) {
         _autoSwitchToNextEpisode();
         PlayRepository.deletePlayPosition(
@@ -103,7 +101,7 @@ class _VideoViewState extends State<VideoView> with WindowListener {
     });
 
     // 监听缓冲状态
-    player.stream.buffering.listen((buffering) {
+    videoStateController.player.stream.buffering.listen((buffering) {
       _updateBufferingState(buffering);
     });
 
@@ -130,14 +128,14 @@ class _VideoViewState extends State<VideoView> with WindowListener {
       _parseTimeoutTimer?.cancel();
 
       if (url.isNotEmpty) {
-        await player.open(Media(url), play: false);
-        await player.stream.duration.firstWhere(
+        await videoStateController.player.open(Media(url), play: false);
+        await videoStateController.player.stream.duration.firstWhere(
           (d) => d > Duration.zero,
         );
         await Future.delayed(const Duration(milliseconds: 800), () {
-          player.seek(Duration(seconds: offset));
+          videoStateController.player.seek(Duration(seconds: offset));
         });
-        await player.play();
+        await videoStateController.player.play();
       }
     });
 
@@ -405,9 +403,6 @@ class _VideoViewState extends State<VideoView> with WindowListener {
       windowManager.removeListener(this);
     }
     _startProgressTracking();
-    Get.delete<VideoUiStateController>();
-    Get.delete<VideoStateController>();
-    player.dispose();
     super.dispose();
   }
 
@@ -434,7 +429,7 @@ class _VideoViewState extends State<VideoView> with WindowListener {
     return Stack(
       children: [
         Video(
-          controller: controller,
+          controller: videoStateController.videoController,
           controls: NoVideoControls,
         ),
 

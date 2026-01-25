@@ -15,7 +15,7 @@ import 'package:anime_flow/pages/settings/pages/plugins/add_plugins.dart';
 import 'package:anime_flow/pages/settings/pages/plugins/download_plugins.dart';
 import 'package:anime_flow/pages/settings/pages/plugins/plugins.dart';
 import 'package:anime_flow/pages/settings/pages/theme.dart';
-import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 
 class RouteName {
   static const String main = "/";
@@ -24,7 +24,7 @@ class RouteName {
   static const String play = "/play";
   static const String search = "/search";
   static const String calendar = "/calendar";
-  
+
   // 设置页面路由
   static const String settings = "/settings";
   static const String settingGeneral = "/settings/general";
@@ -39,32 +39,82 @@ class RouteName {
   static const String settingAgreement = "/settings/agreement";
 }
 
-Map<String, Widget Function(BuildContext)> getRootRoutes() {
-  return {
-    RouteName.main: (context) => const MainPage(),
-    RouteName.login: (context) => const MyPage(),
-    RouteName.animeInfo: (context) => const AnimeInfoPage(),
-    RouteName.play: (context) => const PlayPage(),
-    RouteName.search: (context) => const SearchPage(),
-    RouteName.calendar: (context) => const CalendarPage(),
-    ...settingsRoutes(),
-  };
+List<GetPage> getPages() {
+  return [
+    GetPage(
+      name: RouteName.main,
+      page: () => const MainPage(),
+    ),
+    GetPage(
+      name: RouteName.login,
+      page: () => const MyPage(),
+    ),
+    GetPage(
+      name: RouteName.animeInfo,
+      page: () => const AnimeInfoPage(),
+    ),
+    GetPage(
+      name: RouteName.play,
+      page: () => const PlayPage(),
+    ),
+    GetPage(
+      name: RouteName.search,
+      page: () => const SearchPage(),
+    ),
+    GetPage(
+      name: RouteName.calendar,
+      page: () => const CalendarPage(),
+    ),
+    ...settingsPages(),
+  ];
 }
 
-
 /// 设置页面路由
-Map<String, Widget Function(BuildContext)> settingsRoutes() {
-  return {
-    RouteName.settings: (context) => const SettingsPage(),
-    RouteName.settingGeneral: (context) => const GeneralSettingsPage(),
-    RouteName.settingPlayback: (context) => const PlaybackSettingsPage(),
-    RouteName.settingDownloadPlugins: (context) => const DownloadPluginsPage(),
-    RouteName.settingDanmaku: (context) => const DanmakuSettingPage(),
-    RouteName.settingAbout: (context) => const AboutSettingsPage(),
-    RouteName.settingPlugins: (context) => const PluginsPage(),
-    RouteName.settingAddPlugins: (context) => const AddPluginsPage(),
-    RouteName.settingTheme: (context) => const ThemePage(),
-    RouteName.settingThanks: (context) => const ThanksPage(),
-    RouteName.settingAgreement: (context) => const AgreementPage(),
-  };
+List<GetPage> settingsPages() {
+  return [
+    GetPage(
+      name: RouteName.settings,
+      page: () => const SettingsPage(),
+    ),
+    GetPage(
+      name: RouteName.settingGeneral,
+      page: () => const GeneralSettingsPage(),
+    ),
+    GetPage(
+      name: RouteName.settingPlayback,
+      page: () => const PlaybackSettingsPage(),
+    ),
+    GetPage(
+      name: RouteName.settingDownloadPlugins,
+      page: () => const DownloadPluginsPage(),
+    ),
+    GetPage(
+      name: RouteName.settingDanmaku,
+      page: () => const DanmakuSettingPage(),
+    ),
+    GetPage(
+      name: RouteName.settingAbout,
+      page: () => const AboutSettingsPage(),
+    ),
+    GetPage(
+      name: RouteName.settingPlugins,
+      page: () => const PluginsPage(),
+    ),
+    GetPage(
+      name: RouteName.settingAddPlugins,
+      page: () => const AddPluginsPage(),
+    ),
+    GetPage(
+      name: RouteName.settingTheme,
+      page: () => const ThemePage(),
+    ),
+    GetPage(
+      name: RouteName.settingThanks,
+      page: () => const ThanksPage(),
+    ),
+    GetPage(
+      name: RouteName.settingAgreement,
+      page: () => const AgreementPage(),
+    ),
+  ];
 }

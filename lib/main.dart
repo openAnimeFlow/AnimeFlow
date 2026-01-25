@@ -48,7 +48,7 @@ class MyApp extends StatelessWidget {
           darkTheme: controller.darkTheme,
           themeMode: controller.themeMode,
           initialRoute: RouteName.main,
-          routes: getRootRoutes(),
+          getPages: getPages(),
           // builder: (context, child) {
           //   if (Utils.isDesktop) {
           //     return WindowsTitleBar(

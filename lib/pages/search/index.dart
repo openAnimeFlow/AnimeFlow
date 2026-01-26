@@ -188,7 +188,6 @@ class _SearchPageState extends State<SearchPage> {
               topPadding: topPadding,
             ),
           ),
-          // 只在首次搜索时（没有搜索结果且正在加载）显示全屏加载动画
           if (_isSearching && searchItem == null)
             const SliverFillRemaining(
               child: Center(child: CircularProgressIndicator()),
@@ -259,7 +258,7 @@ class _SearchPageState extends State<SearchPage> {
                                 crossAxisCount: crossAxisCount,
                                 crossAxisSpacing: 8,
                                 mainAxisSpacing: 8,
-                                childAspectRatio: 2 / 3, // 海报比例
+                                childAspectRatio: 2 / 3,
                               ),
                         itemCount: searchItem!.data.length + 1,
                         itemBuilder: (context, index) {

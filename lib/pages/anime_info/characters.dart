@@ -2,14 +2,15 @@ import 'dart:math';
 
 import 'package:anime_flow/http/requests/bgm_request.dart';
 import 'package:anime_flow/models/item/bangumi/actor_ite.dart';
+import 'package:anime_flow/routes/index.dart';
 import 'package:anime_flow/widget/animation_network_image/animation_network_image.dart';
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 
 class CharactersView extends StatefulWidget {
   final int subjectsId;
 
-  const CharactersView(
-      {super.key, required this.subjectsId});
+  const CharactersView({super.key, required this.subjectsId});
 
   @override
   State<CharactersView> createState() => _CharactersViewState();
@@ -59,27 +60,31 @@ class _CharactersViewState extends State<CharactersView> {
                 children: [
                   const Text(
                     '角色',
-                    style: TextStyle(
-                        fontSize: 20, fontWeight: FontWeight.w600),
+                    style: TextStyle(fontSize: 20, fontWeight: FontWeight.w600),
                   ),
-                  if (characters!.total > 10)
-                    Row(
+                  InkWell(
+                    onTap: () => Get.toNamed(RouteName.character,
+                        arguments: widget.subjectsId),
+                    child: Row(
                       children: [
-                        const Text(
-                          '查看更多',
+                        Text(
+                          '查看详情',
                           style: TextStyle(
-                              fontSize: 16, fontWeight: FontWeight.w600),
+                              fontSize: 16,
+                              fontWeight: FontWeight.w600,
+                              color: Theme.of(context).disabledColor),
                         ),
                         Transform.rotate(
                           angle: 3 * pi / 2,
                           child: Icon(
                             Icons.keyboard_double_arrow_down_rounded,
                             color: Theme.of(context).disabledColor,
-                            size: 20,
+                            size: 25,
                           ),
-                        )
+                        ),
                       ],
                     ),
+                  ),
                 ],
               ),
               const SizedBox(height: 8),
@@ -88,9 +93,12 @@ class _CharactersViewState extends State<CharactersView> {
                 child: ListView.builder(
                   scrollDirection: Axis.horizontal,
                   itemCount: characters!.data.length,
-                  cacheExtent: 200, // 缓存范围，优化滚动性能
-                  addAutomaticKeepAlives: false, // 不自动保持item状态，节省内存
-                  addRepaintBoundaries: true, // 添加重绘边界，优化性能
+                  cacheExtent: 200,
+                  // 缓存范围，优化滚动性能
+                  addAutomaticKeepAlives: false,
+                  // 不自动保持item状态，节省内存
+                  addRepaintBoundaries: true,
+                  // 添加重绘边界，优化性能
                   itemBuilder: (context, index) {
                     final actor = characters!.data[index];
                     return Container(
@@ -113,9 +121,7 @@ class _CharactersViewState extends State<CharactersView> {
                           const SizedBox(height: 8),
                           // 角色名称
                           Text(
-                            actor.character.nameCN.isEmpty
-                                ? actor.character.name
-                                : actor.character.nameCN,
+                            actor.character.nameCN??actor.character.name,
                             style: const TextStyle(
                               fontSize: 12,
                               fontWeight: FontWeight.bold,
@@ -128,9 +134,7 @@ class _CharactersViewState extends State<CharactersView> {
                           // 声优名称
                           if (actor.actors.isNotEmpty)
                             Text(
-                              actor.actors[0].nameCN.isEmpty
-                                  ? actor.actors[0].name
-                                  : actor.actors[0].nameCN,
+                              actor.actors[0].nameCN??actor.actors[0].name,
                               style: TextStyle(
                                 fontSize: 10,
                                 color: Theme.of(context).disabledColor,

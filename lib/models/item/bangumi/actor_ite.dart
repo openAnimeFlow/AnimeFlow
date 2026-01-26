@@ -44,7 +44,7 @@ class CharacterActorData {
           : Character(
               id: 0,
               name: '',
-              nameCN: '',
+              nameCN: null,
               role: 0,
               info: '',
               comment: 0,
@@ -73,7 +73,7 @@ class CharacterActorData {
 class Character {
   final int id;
   final String name;
-  final String nameCN;
+  final String? nameCN;
   final int role;
   final String info;
   final int comment;
@@ -84,7 +84,7 @@ class Character {
   Character({
     required this.id,
     required this.name,
-    required this.nameCN,
+    this.nameCN,
     required this.role,
     required this.info,
     required this.comment,
@@ -97,7 +97,7 @@ class Character {
     return Character(
       id: json['id'] as int,
       name: json['name'] as String,
-      nameCN: json['nameCN'] as String,
+      nameCN: json['nameCN'] as String?,
       role: json['role'] as int,
       info: json['info'] as String,
       comment: json['comment'] as int,
@@ -132,7 +132,7 @@ class Character {
 class Actor {
   final int id;
   final String name;
-  final String nameCN;
+  final String? nameCN;
   final int type;
   final String info;
   final List<String> career;
@@ -144,7 +144,7 @@ class Actor {
   Actor({
     required this.id,
     required this.name,
-    required this.nameCN,
+    this.nameCN,
     required this.type,
     required this.info,
     required this.career,
@@ -158,10 +158,12 @@ class Actor {
     return Actor(
       id: json['id'] as int,
       name: json['name'] as String,
-      nameCN: json['nameCN'] as String,
+      nameCN: json['nameCN'] as String?,
       type: json['type'] as int,
       info: json['info'] as String,
-      career: (json['career'] as List).map((item) => item as String).toList(),
+      career: json['career'] != null
+          ? (json['career'] as List).map((item) => item as String).toList()
+          : <String>[],
       comment: json['comment'] as int,
       lock: json['lock'] as bool,
       nsfw: json['nsfw'] as bool,

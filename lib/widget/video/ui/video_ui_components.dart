@@ -36,7 +36,7 @@ class _VideoProgressBarState extends State<VideoProgressBar> {
               ? videoUiStateController.dragPosition.value.inMilliseconds
                   .toDouble()
               : videoStateController.position.value.inMilliseconds.toDouble();
-          final buffer = Duration.zero.inMilliseconds.toDouble(); // TODO: 从 videoStateController 获取 buffer
+          final buffer = videoStateController.buffered.value.inMilliseconds.toDouble();
 
           return Stack(
             alignment: Alignment.centerLeft,

@@ -7,10 +7,21 @@ import 'package:media_kit_video/media_kit_video.dart';
 class VideoStateController extends GetxController {
   late Player player;
   late VideoController videoController;
-  final RxBool playing = false.obs; //视频播放状态
+
+  ///视频播放状态
+  final RxBool playing = false.obs;
+
+  ///视频播放进度
   final Rx<Duration> position = Duration.zero.obs;
+
+  ///视频总时长
   final Rx<Duration> duration = Duration.zero.obs;
-  final RxDouble volume = 100.0.obs; //音量 0-100
+
+  ///视频缓冲
+  final Rx<Duration> buffered = Duration.zero.obs;
+
+  ///音量
+  final RxDouble volume = 100.0.obs;
   final RxBool isVerticalDragging = false.obs; //是否正在垂直拖动调整音量
   final RxDouble rate = 1.0.obs;
   final RxBool buffering = false.obs;
@@ -34,6 +45,11 @@ class VideoStateController extends GetxController {
     // 监听播放器音量变化
     player.stream.volume.listen((vol) {
       volume.value = vol;
+    });
+
+    // 监听播放器缓冲进度
+    player.stream.buffer.listen((buffered) {
+      this.buffered.value = buffered;
     });
 
     // 监听播放器倍速变化

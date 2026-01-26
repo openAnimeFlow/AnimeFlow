@@ -1,3 +1,5 @@
+import 'package:anime_flow/models/item/bangumi/image_item.dart';
+
 class SubjectItem {
   final List<Subject> data;
   final int total;
@@ -38,7 +40,7 @@ class Subject {
   final Rating rating;
   final bool locked;
   final bool nsfw;
-  final Images images;
+  final ImageItem images;
 
   Subject({
     required this.id,
@@ -62,7 +64,7 @@ class Subject {
       rating: Rating.fromJson(json['rating'] as Map<String, dynamic>),
       locked: json['locked'] as bool,
       nsfw: json['nsfw'] as bool,
-      images: Images.fromJson(json['images'] as Map<String, dynamic>),
+      images: ImageItem.fromJson(json['images'] as Map<String, dynamic>),
     );
   }
 
@@ -109,42 +111,6 @@ class Rating {
       'count': count,
       'score': score,
       'total': total,
-    };
-  }
-}
-
-class Images {
-  final String large;
-  final String common;
-  final String medium;
-  final String small;
-  final String grid;
-
-  Images({
-    required this.large,
-    required this.common,
-    required this.medium,
-    required this.small,
-    required this.grid,
-  });
-
-  factory Images.fromJson(Map<String, dynamic> json) {
-    return Images(
-      large: json['large'] as String,
-      common: json['common'] as String,
-      medium: json['medium'] as String,
-      small: json['small'] as String,
-      grid: json['grid'] as String,
-    );
-  }
-
-  Map<String, dynamic> toJson() {
-    return {
-      'large': large,
-      'common': common,
-      'medium': medium,
-      'small': small,
-      'grid': grid,
     };
   }
 }

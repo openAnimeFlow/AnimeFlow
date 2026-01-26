@@ -123,6 +123,7 @@ class _AnimeInfoPageState extends State<AnimeInfoPage> {
             ];
           },
           body: InfoSynopsisView(
+            subjectsId: subjectBasicData.id,
             subjectsInfo: subjectsInfo,
             onScrollChanged: (bool showButton) {
               if (topButton != showButton) {

@@ -8,10 +8,9 @@ import 'package:flutter/material.dart';
 
 ///相关条目
 class RelatedView extends StatefulWidget {
-  final String title;
   final int subjectId;
 
-  const RelatedView({super.key, required this.subjectId, required this.title});
+  const RelatedView({super.key, required this.subjectId});
 
   @override
   State<RelatedView> createState() => _RelatedViewState();
@@ -54,10 +53,10 @@ class _RelatedViewState extends State<RelatedView> {
         children: [
           Row(
             children: [
-              Text(
-                widget.title,
-                style: const TextStyle(
-                  fontSize: 16,
+              const Text(
+                '关联条目',
+                style: TextStyle(
+                  fontSize: 20,
                   fontWeight: FontWeight.bold,
                 ),
               ),

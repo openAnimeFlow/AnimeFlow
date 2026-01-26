@@ -30,6 +30,9 @@ class BgmNextApi {
 
   ///时间线
   static const String timeline = '/p1/timeline';
+
+  ///条目制作人
+  static const String staffs = '/p1/subjects/{subjectId}/staffs/persons';
 }
 
 class BgmUsersApi {

@@ -1,6 +1,7 @@
 import 'package:anime_flow/constants/play_layout_constant.dart';
 import 'package:anime_flow/models/item/bangumi/subjects_info_item.dart';
 import 'package:anime_flow/pages/anime_info/characters.dart';
+import 'package:anime_flow/pages/anime_info/producers.dart';
 import 'package:anime_flow/pages/anime_info/related.dart';
 import 'package:anime_flow/pages/anime_info/tags.dart';
 import 'package:anime_flow/utils/utils.dart';
@@ -20,8 +21,9 @@ class _NoScrollbarBehavior extends ScrollBehavior {
   }
 }
 
-/// 简介页面
+/// 条目详情信息展示ui
 class InfoSynopsisView extends StatefulWidget {
+  final int subjectsId;
   final SubjectsInfoItem? subjectsInfo;
   final ValueChanged<bool>? onScrollChanged;
 
@@ -29,6 +31,7 @@ class InfoSynopsisView extends StatefulWidget {
     super.key,
     this.subjectsInfo,
     this.onScrollChanged,
+    required this.subjectsId,
   });
 
   @override
@@ -132,20 +135,21 @@ class _InfoSynopsisViewState extends State<InfoSynopsisView> {
                       // 角色
                       SliverToBoxAdapter(
                         child: _buildContainer(
-                          CharactersView(
-                            title: '角色',
-                            subjectsId: widget.subjectsInfo!.id,
-                          ),
+                          CharactersView(subjectsId: widget.subjectsId),
+                        ),
+                      ),
+
+                      //制作人
+                      SliverToBoxAdapter(
+                        child: _buildContainer(
+                          ProducersView(subjectId: widget.subjectsId),
                         ),
                       ),
 
                       // 关联条目
                       SliverToBoxAdapter(
                         child: _buildContainer(
-                          RelatedView(
-                            title: '关联条目',
-                            subjectId: widget.subjectsInfo!.id,
-                          ),
+                          RelatedView(subjectId: widget.subjectsId),
                         ),
                       ),
 
@@ -154,7 +158,7 @@ class _InfoSynopsisViewState extends State<InfoSynopsisView> {
                         child: _buildContainer(
                           CommentView(
                             key: _commentViewKey,
-                            subjectId: widget.subjectsInfo!.id,
+                            subjectId: widget.subjectsId,
                           ),
                         ),
                       ),

@@ -9,6 +9,7 @@ import 'package:anime_flow/models/item/bangumi/episode_comments_item.dart';
 import 'package:anime_flow/models/item/bangumi/episodes_item.dart';
 import 'package:anime_flow/models/item/bangumi/hot_item.dart';
 import 'package:anime_flow/models/item/bangumi/related_subjects_item.dart';
+import 'package:anime_flow/models/item/bangumi/staff_item.dart';
 import 'package:anime_flow/models/item/bangumi/subject_item.dart';
 import 'package:anime_flow/models/item/bangumi/subject_comments_item.dart';
 import 'package:anime_flow/models/item/bangumi/subjects_info_item.dart';
@@ -261,6 +262,23 @@ class BgmRequest {
       _logger.e(e);
       throw Exception('Failed to fetch timeline: $e');
     }
+  }
+
+  ///获取条目制作人
+  static Future<StaffItem> getProducersService(int subjectId,
+      {required int limit, required int offset}) async {
+    final response = await dioRequest.get(
+      _nextBaseUrl +
+          BgmNextApi.staffs.replaceFirst('{subjectId}', subjectId.toString()),
+      queryParameters: {
+        'limit': limit,
+        'offset': offset,
+      },
+      options: Options(
+        headers: {Constants.userAgentName: _getBangumiUserAgent},
+      ),
+    );
+    return StaffItem.fromJson(response.data);
   }
 }
 

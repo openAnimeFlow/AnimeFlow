@@ -6,11 +6,10 @@ import 'package:anime_flow/widget/animation_network_image/animation_network_imag
 import 'package:flutter/material.dart';
 
 class CharactersView extends StatefulWidget {
-  final String title;
   final int subjectsId;
 
   const CharactersView(
-      {super.key, required this.title, required this.subjectsId});
+      {super.key, required this.subjectsId});
 
   @override
   State<CharactersView> createState() => _CharactersViewState();
@@ -58,9 +57,9 @@ class _CharactersViewState extends State<CharactersView> {
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  Text(
-                    widget.title,
-                    style: const TextStyle(
+                  const Text(
+                    '角色',
+                    style: TextStyle(
                         fontSize: 20, fontWeight: FontWeight.w600),
                   ),
                   if (characters!.total > 10)
@@ -95,9 +94,10 @@ class _CharactersViewState extends State<CharactersView> {
                   itemBuilder: (context, index) {
                     final actor = characters!.data[index];
                     return Container(
-                      width: 100,
+                      width: 90,
                       margin: const EdgeInsets.only(right: 16),
                       child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
                         mainAxisSize: MainAxisSize.min,
                         children: [
                           // 角色头像
@@ -139,7 +139,6 @@ class _CharactersViewState extends State<CharactersView> {
                               overflow: TextOverflow.ellipsis,
                               textAlign: TextAlign.center,
                             ),
-                          const SizedBox(height: 4),
                           // 评论数
                           Text(
                             '+${actor.character.comment}',

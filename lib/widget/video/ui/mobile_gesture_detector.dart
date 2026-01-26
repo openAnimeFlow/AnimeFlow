@@ -135,13 +135,13 @@ class _MobileGestureDetectorState extends State<MobileGestureDetector> {
           // 垂直拖动（右半屏）：更新音量
           videoStateController.updateVerticalDrag(
             dragDistance, // 拖动的垂直距离
-            screenHeight, // 屏幕高度（用于计算音量变化百分比）
+            screenHeight, // 屏幕高度
           );
         } else {
           // 垂直拖动（左半屏）：更新屏幕亮度
           videoUiStateController.updateBrightnessDrag(
             dragDistance, // 拖动的垂直距离
-            screenHeight, // 屏幕高度（用于计算亮度变化百分比）
+            screenHeight, // 屏幕高度
           );
         }
       },

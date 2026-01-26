@@ -209,17 +209,16 @@ class VideoUiStateController extends GetxController {
 
   // 初始化并保存原始亮度
   Future<void> _initializeBrightness() async {
-    WidgetsBinding.instance.addPostFrameCallback((_) async {
-      try {
-        final brightness = await _screenBrightness.application;
-        _originalBrightness = brightness;
-        currentBrightness.value = brightness;
-      } catch (e) {
-        // 如果获取失败，使用默认值
-        _originalBrightness = 0.5;
-        currentBrightness.value = 0.5;
-      }
-    });
+    try {
+      // 获取当前应用屏幕亮度
+      final brightness = await _screenBrightness.application;
+      _originalBrightness = brightness;
+      currentBrightness.value = brightness;
+    } catch (e) {
+      // 如果获取失败，使用默认值
+      _originalBrightness = 0.5;
+      currentBrightness.value = 0.5;
+    }
   }
 
   // 开始垂直拖动调整亮度
@@ -253,12 +252,7 @@ class VideoUiStateController extends GetxController {
 
     currentBrightness.value = newBrightness;
 
-    // 更新屏幕亮度
-    WidgetsBinding.instance.addPostFrameCallback((_) async {
-      try {
-        await _screenBrightness.setApplicationScreenBrightness(newBrightness);
-      } catch (_) {}
-    });
+    _screenBrightness.setApplicationScreenBrightness(newBrightness);
   }
 
   // 结束垂直拖动亮度

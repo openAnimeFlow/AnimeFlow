@@ -1,3 +1,4 @@
+import 'package:anime_flow/controllers/play/episode_controller.dart';
 import 'package:anime_flow/utils/utils.dart';
 import 'package:anime_flow/stores/episodes_state.dart';
 import 'package:anime_flow/controllers/play/play_controller.dart';
@@ -24,14 +25,16 @@ class _VideoUiState extends State<VideoUi> {
   late VideoUiStateController videoUiStateController;
   late PlayController playPageController;
   late VideoStateController videoStateController;
-  late EpisodesState episodesController;
+  late EpisodesState episodesState;
+  late EpisodeController episodeController;
 
   @override
   void initState() {
     videoUiStateController = Get.find<VideoUiStateController>();
     playPageController = Get.find<PlayController>();
     videoStateController = Get.find<VideoStateController>();
-    episodesController = Get.find<EpisodesState>();
+    episodeController = Get.find<EpisodeController>();
+    episodesState = Get.find<EpisodesState>();
     super.initState();
   }
 
@@ -56,7 +59,11 @@ class _VideoUiState extends State<VideoUi> {
       const Positioned(top: 0, left: 0, right: 0, child: TopAreaControl()),
 
       ///底部
-      const Positioned(bottom: 0, left: 0, right: 0, child: BottomAreaControl())
+      const Positioned(
+          bottom: 0,
+          left: 0,
+          right: 0,
+          child: BottomAreaControl())
     ]);
   }
 }

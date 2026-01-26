@@ -12,20 +12,34 @@ import 'package:anime_flow/widget/video/ui/video_ui_components.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:get/get.dart';
-
 import 'button/shader_button.dart';
 
 /// 底部区域控件
-class BottomAreaControl extends StatelessWidget {
+class BottomAreaControl extends StatefulWidget {
   const BottomAreaControl({super.key});
 
   @override
+  State<BottomAreaControl> createState() => _BottomAreaControlState();
+}
+
+class _BottomAreaControlState extends State<BottomAreaControl> {
+  late VideoUiStateController videoUiStateController;
+  late VideoStateController videoStateController;
+  late PlayController playController;
+  late EpisodesState episodesState;
+  late EpisodeController episodeController;
+  @override
+  void initState() {
+    super.initState();
+     videoUiStateController = Get.find<VideoUiStateController>();
+     videoStateController = Get.find<VideoStateController>();
+   playController = Get.find<PlayController>();
+    episodesState = Get.find<EpisodesState>();
+     episodeController = Get.find<EpisodeController>();
+  }
+
+  @override
   Widget build(BuildContext context) {
-    final videoUiStateController = Get.find<VideoUiStateController>();
-    final videoStateController = Get.find<VideoStateController>();
-    final playController = Get.find<PlayController>();
-    final episodesState = Get.find<EpisodesState>();
-    final episodeController = Get.find<EpisodeController>();
     final paddingLeft = MediaQuery.of(context).padding.left;
     return Obx(() {
       // 全屏状态，
@@ -43,190 +57,191 @@ class BottomAreaControl extends StatelessWidget {
             FadeTransition(opacity: animation, child: child),
         child: isShowControlsUi
             ? Container(
-                key: ValueKey<bool>(isShowControlsUi),
-                decoration: const BoxDecoration(
-                  gradient: LinearGradient(colors: [
-                    Colors.black38,
-                    Colors.transparent,
-                  ], begin: Alignment.bottomCenter, end: Alignment.topCenter),
+          key: ValueKey<bool>(isShowControlsUi),
+          decoration: const BoxDecoration(
+            gradient: LinearGradient(colors: [
+              Colors.black38,
+              Colors.transparent,
+            ], begin: Alignment.bottomCenter, end: Alignment.topCenter),
+          ),
+          child: Padding(
+            padding: EdgeInsets.only(
+                left: MediaQuery.of(context).padding.left,
+                right: 5,
+                bottom: Utils.isDesktop
+                    ? 10
+                    : isWideScreen
+                    ? MediaQuery.of(context).padding.bottom
+                    : 0),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                // 时间显示
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 5),
+                  child: VideoTimeDisplay(
+                    videoUiStateController: videoUiStateController,
+                    videoStateController: videoStateController,
+                  ),
                 ),
-                child: Padding(
-                  padding: EdgeInsets.only(
-                      left: MediaQuery.of(context).padding.left,
-                      right: 5,
-                      bottom: Utils.isDesktop
-                          ? 10
-                          : isWideScreen
-                              ? MediaQuery.of(context).padding.bottom
-                              : 0),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
+                // 进度条
+                if (fullscreen || isWideScreen)
+                  Padding(
+                    padding: EdgeInsets.symmetric(
+                        horizontal: paddingLeft == 0 ? 10 : 0,
+                        vertical: 5),
+                    child: const VideoProgressBar(),
+                  ),
+                SizedBox(
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    crossAxisAlignment: CrossAxisAlignment.center,
                     children: [
-                      // 时间显示
-                      Padding(
-                        padding: const EdgeInsets.symmetric(horizontal: 5),
-                        child: VideoTimeDisplay(
-                          videoUiStateController: videoUiStateController,
-                          videoStateController: videoStateController,
+                      // 播放按钮
+                      InkWell(
+                        key: ValueKey<bool>(
+                            videoStateController.playing.value),
+                        onTap: () => {
+                          videoStateController.playOrPauseVideo(),
+                          videoUiStateController
+                              .updateIndicatorTypeAndShowIndicator(
+                              VideoControlsIndicatorType
+                                  .playStatusIndicator),
+                        },
+                        child: Icon(
+                          videoStateController.playing.value
+                              ? Icons.pause_rounded
+                              : Icons.play_arrow_rounded,
+                          size: 33,
+                          color: Colors.white70,
                         ),
                       ),
-                      // 进度条
-                      if (fullscreen || isWideScreen)
-                        Padding(
-                          padding: EdgeInsets.symmetric(
-                              horizontal: paddingLeft == 0 ? 10 : 0,
-                              vertical: 5),
-                          child: const VideoProgressBar(),
+                      // 下一集
+                      if (hasNextEpisode)
+                        InkWell(
+                          onTap: () {
+                            episodeController
+                                .switchToNextEpisode(episodesState);
+                          },
+                          child: const Icon(
+                            Icons.skip_next_rounded,
+                            size: 33,
+                            color: Colors.white70,
+                          ),
                         ),
-                      SizedBox(
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          crossAxisAlignment: CrossAxisAlignment.center,
-                          children: [
-                            // 播放按钮
-                            InkWell(
-                              key: ValueKey<bool>(
-                                  videoStateController.playing.value),
-                              onTap: () => {
-                                videoStateController.playOrPauseVideo(),
-                                videoUiStateController
-                                    .updateIndicatorTypeAndShowIndicator(
-                                        VideoControlsIndicatorType
-                                            .playStatusIndicator),
-                              },
-                              child: Icon(
-                                videoStateController.playing.value
-                                    ? Icons.pause_rounded
-                                    : Icons.play_arrow_rounded,
-                                size: 33,
-                                color: Colors.white70,
-                              ),
+                      //弹幕开关
+                      InkWell(
+                        onTap: () => playController.toggleDanmaku(),
+                        child: Icon(
+                            danmakuOn
+                                ? Icons.subtitles_outlined
+                                : Icons.subtitles_off_outlined,
+                            color: Colors.white70,
+                            size: 25),
+                      ),
+                      //弹幕设置
+                      if (danmakuOn)
+                        InkWell(
+                          onTap: () => Get.bottomSheet(
+                            const DanmakuSetting(),
+                            ignoreSafeArea: false,
+                            isScrollControlled: true,
+                            backgroundColor: Colors.transparent,
+                          ),
+                          child: Padding(
+                            padding:
+                            const EdgeInsets.symmetric(horizontal: 8),
+                            child: SvgPicture.asset(
+                              'assets/icons/danmaku_setting.svg',
+                              width: 24,
+                              height: 24,
+                              colorFilter: ColorFilter.mode(
+                                  Colors.white.withValues(alpha: 0.8),
+                                  BlendMode.srcIn),
                             ),
-                            // 下一集
-                            if (hasNextEpisode)
-                              InkWell(
-                                onTap: () {
-                                  episodeController
-                                      .switchToNextEpisode(episodesState);
-                                },
-                                child: const Icon(
-                                  Icons.skip_next_rounded,
-                                  size: 33,
-                                  color: Colors.white70,
-                                ),
-                              ),
-                            //弹幕开关
-                            InkWell(
-                              onTap: () => playController.toggleDanmaku(),
-                              child: Icon(
-                                  danmakuOn
-                                      ? Icons.subtitles_outlined
-                                      : Icons.subtitles_off_outlined,
-                                  color: Colors.white70,
-                                  size: 25),
-                            ),
-                            //弹幕设置
-                            if (danmakuOn)
-                              InkWell(
-                                onTap: () => Get.bottomSheet(
-                                  const DanmakuSetting(),
-                                  ignoreSafeArea: false,
-                                  isScrollControlled: true,
-                                  backgroundColor: Colors.transparent,
-                                ),
-                                child: Padding(
-                                  padding:
-                                      const EdgeInsets.symmetric(horizontal: 8),
-                                  child: SvgPicture.asset(
-                                    'assets/icons/danmaku_setting.svg',
-                                    width: 24,
-                                    height: 24,
-                                    colorFilter: ColorFilter.mode(
-                                        Colors.white.withValues(alpha: 0.8),
-                                        BlendMode.srcIn),
-                                  ),
-                                ),
-                              ),
-                            Expanded(
-                              child: fullscreen || isWideScreen
-                                  ? danmakuOn
-                                      // 弹幕输入框
-                                      ? const DanmakuTextField(
-                                          iconColor: Colors.white,
-                                          textColor: Colors.white,
-                                        )
-                                      : const SizedBox.shrink()
-                                  // 进度条
-                                  : const Padding(
-                                      padding: EdgeInsets.symmetric(
-                                          horizontal: 5),
-                                      child: VideoProgressBar(),
-                                    ),
-                            ),
-                            //选集
-                            if (fullscreen || !isContentExpanded)
-                              TextButton(
-                                  onPressed: () {
-                                    Get.generalDialog(
-                                        barrierDismissible: true,
-                                        barrierLabel: "episodesDrawer",
-                                        barrierColor: Colors.black54,
-                                        transitionDuration:
-                                            const Duration(milliseconds: 300),
-                                        transitionBuilder: (context, animation,
-                                            secondaryAnimation, child) {
-                                          return SlideTransition(
-                                            position: Tween<Offset>(
-                                              begin: const Offset(1, 0),
-                                              end: Offset.zero,
-                                            ).animate(CurvedAnimation(
-                                              parent: animation,
-                                              curve: Curves.easeOut,
-                                            )),
-                                            child: child,
-                                          );
-                                        },
-                                        pageBuilder: (context, animation,
-                                            secondaryAnimation) {
-                                          return const EpisodesView();
-                                        });
-                                  },
-                                  child: const Text("选集")),
-
-                            //超分辨率
-                            if (isWideScreen || fullscreen)
-                              const ShaderButton(),
-
-                            //倍速按钮
-                            if (isWideScreen || fullscreen) const RateButton(),
-
-                            // 全屏按钮
-                            AnimatedContainer(
-                              duration: const Duration(milliseconds: 500),
-                              child: IconButton(
-                                  onPressed: () {
-                                    playController.toggleFullScreen();
-                                  },
-                                  padding: const EdgeInsets.all(0),
-                                  icon: Icon(
-                                    fullscreen
-                                        ? Icons.fullscreen_exit
-                                        : Icons.fullscreen,
-                                    size: 33,
-                                    color: Colors.white70,
-                                  )),
-                            ),
-                          ],
+                          ),
                         ),
+                      Expanded(
+                        child: fullscreen || isWideScreen
+                            ? danmakuOn
+                        // 弹幕输入框
+                            ? const DanmakuTextField(
+                          iconColor: Colors.white,
+                          textColor: Colors.white,
+                        )
+                            : const SizedBox.shrink()
+                        // 进度条
+                            : const Padding(
+                          padding:
+                          EdgeInsets.symmetric(horizontal: 5),
+                          child: VideoProgressBar(),
+                        ),
+                      ),
+                      //选集
+                      if (fullscreen || !isContentExpanded)
+                        TextButton(
+                            onPressed: () {
+                              Get.generalDialog(
+                                  barrierDismissible: true,
+                                  barrierLabel: "episodesDrawer",
+                                  barrierColor: Colors.black54,
+                                  transitionDuration:
+                                  const Duration(milliseconds: 300),
+                                  transitionBuilder: (context, animation,
+                                      secondaryAnimation, child) {
+                                    return SlideTransition(
+                                      position: Tween<Offset>(
+                                        begin: const Offset(1, 0),
+                                        end: Offset.zero,
+                                      ).animate(CurvedAnimation(
+                                        parent: animation,
+                                        curve: Curves.easeOut,
+                                      )),
+                                      child: child,
+                                    );
+                                  },
+                                  pageBuilder: (context, animation,
+                                      secondaryAnimation) {
+                                    return const EpisodesView();
+                                  });
+                            },
+                            child: const Text("选集")),
+
+                      //超分辨率
+                      if (isWideScreen || fullscreen)
+                        const ShaderButton(),
+
+                      //倍速按钮
+                      if (isWideScreen || fullscreen) const RateButton(),
+
+                      // 全屏按钮
+                      AnimatedContainer(
+                        duration: const Duration(milliseconds: 500),
+                        child: IconButton(
+                            onPressed: () {
+                              playController.toggleFullScreen();
+                            },
+                            padding: const EdgeInsets.all(0),
+                            icon: Icon(
+                              fullscreen
+                                  ? Icons.fullscreen_exit
+                                  : Icons.fullscreen,
+                              size: 33,
+                              color: Colors.white70,
+                            )),
                       ),
                     ],
                   ),
                 ),
-              )
+              ],
+            ),
+          ),
+        )
             : SizedBox.shrink(
-                key: ValueKey<bool>(isShowControlsUi),
-              ),
+          key: ValueKey<bool>(isShowControlsUi),
+        ),
       );
     });
   }
 }
+

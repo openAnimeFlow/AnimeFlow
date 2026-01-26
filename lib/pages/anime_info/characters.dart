@@ -109,19 +109,33 @@ class _CharactersViewState extends State<CharactersView> {
                         mainAxisSize: MainAxisSize.min,
                         children: [
                           // 角色头像
-                          AspectRatio(
-                            aspectRatio: 1,
-                            child: AnimationNetworkImage(
-                              borderRadius: BorderRadius.circular(10),
-                              url: actor.character.images.large,
-                              fit: BoxFit.cover,
-                              alignment: Alignment.topCenter,
+                          InkWell(
+                            onTap: () => Get.toNamed(RouteName.characterInfo,
+                                arguments: {
+                                  'characterId': actor.character.id,
+                                  'characterName': actor.character.nameCN ??
+                                      actor.character.name,
+                                  'characterImage':
+                                      actor.character.images.large,
+                                }),
+                            child: AspectRatio(
+                              aspectRatio: 1,
+                              child: Hero(
+                                tag:
+                                    'character:${actor.character.images.large}',
+                                child: AnimationNetworkImage(
+                                  borderRadius: BorderRadius.circular(10),
+                                  url: actor.character.images.large,
+                                  fit: BoxFit.cover,
+                                  alignment: Alignment.topCenter,
+                                ),
+                              ),
                             ),
                           ),
                           const SizedBox(height: 8),
                           // 角色名称
                           Text(
-                            actor.character.nameCN??actor.character.name,
+                            actor.character.nameCN ?? actor.character.name,
                             style: const TextStyle(
                               fontSize: 12,
                               fontWeight: FontWeight.bold,
@@ -134,7 +148,7 @@ class _CharactersViewState extends State<CharactersView> {
                           // 声优名称
                           if (actor.actors.isNotEmpty)
                             Text(
-                              actor.actors[0].nameCN??actor.actors[0].name,
+                              actor.actors[0].nameCN ?? actor.actors[0].name,
                               style: TextStyle(
                                 fontSize: 10,
                                 color: Theme.of(context).disabledColor,

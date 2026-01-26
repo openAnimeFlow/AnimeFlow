@@ -127,15 +127,15 @@ class _CharacterInfoState extends State<CharacterInfo> {
                   ),
                 ),
                 // 出演作品标题
-                SliverPadding(
-                  padding: const EdgeInsets.only(
+                const SliverPadding(
+                  padding: EdgeInsets.only(
                     left: 20,
                     right: 20,
                     top: 20,
                     bottom: 8,
                   ),
                   sliver: SliverToBoxAdapter(
-                    child: const Text(
+                    child: Text(
                       '出演',
                       style: TextStyle(
                         fontSize: 20,

@@ -127,7 +127,7 @@ class _CharacterWorksViewState extends State<CharacterWorksView> {
               child: AnimationNetworkImage(
                 alignment: Alignment.topCenter,
                 borderRadius: BorderRadius.circular(10),
-                url: work.subject.images.medium,
+                url: work.subject.images.large,
                 fit: BoxFit.cover,
               ),
             ),

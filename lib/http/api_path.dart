@@ -31,6 +31,9 @@ class BgmNextApi {
   ///角色出演作品
   static const String characterCasts = '/p1/characters/{characterId}/casts';
 
+  ///角色吐槽
+  static const String characterComments = '/p1/characters/{characterId}/comments';
+
   ///关联条目
   static const String relations = '/p1/subjects/{subjectId}/relations';
 

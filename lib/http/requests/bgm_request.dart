@@ -4,6 +4,7 @@ import 'package:anime_flow/http/api_path.dart';
 import 'package:anime_flow/models/enums/sort_type.dart';
 import 'package:anime_flow/models/item/bangumi/actor_ite.dart';
 import 'package:anime_flow/models/item/bangumi/calendar_item.dart';
+import 'package:anime_flow/models/item/bangumi/character_comments_item.dart';
 import 'package:anime_flow/models/item/bangumi/character_detail_item.dart';
 import 'package:anime_flow/models/item/bangumi/character_subjects_item.dart';
 import 'package:anime_flow/models/item/bangumi/collections_item.dart';
@@ -153,8 +154,7 @@ class BgmRequest {
     final response = await dioRequest.get(_nextBaseUrl +
         BgmNextApi.episodeComments
             .replaceFirst('{episodeId}', episodeId.toString()));
-    final data = response.data as List<dynamic>;
-    return data
+    return (response.data as List<dynamic>)
         .map((item) => EpisodeComment.fromJson(item as Map<String, dynamic>))
         .toList();
   }
@@ -192,17 +192,30 @@ class BgmRequest {
   }
 
   ///角色出演作品
-  static Future<CharacterCastsItem> characterWorksService(
-      int characterId,{required int limit, required int offset, int subjectType = 2}) async {
-    final response = await dioRequest.get(_nextBaseUrl +
-        BgmNextApi.characterCasts
-            .replaceFirst('{characterId}', characterId.toString()),
-    queryParameters:  {
-      'subjectType': subjectType,
-      'limit': limit,
-      'offset': offset,
-    });
+  static Future<CharacterCastsItem> characterWorksService(int characterId,
+      {required int limit, required int offset, int subjectType = 2}) async {
+    final response = await dioRequest.get(
+        _nextBaseUrl +
+            BgmNextApi.characterCasts
+                .replaceFirst('{characterId}', characterId.toString()),
+        queryParameters: {
+          'subjectType': subjectType,
+          'limit': limit,
+          'offset': offset,
+        });
     return CharacterCastsItem.fromJson(response.data);
+  }
+
+  ///角色吐槽
+  static Future<List<CharacterCommentItem>> characterCommentsService(
+      int characterId) async {
+    final response = await dioRequest.get(_nextBaseUrl +
+        BgmNextApi.characterComments
+            .replaceFirst('{characterId}', characterId.toString()));
+    return (response.data as List<dynamic>)
+        .map((item) =>
+            CharacterCommentItem.fromJson(item as Map<String, dynamic>))
+        .toList();
   }
 
   ///相关条目

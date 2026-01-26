@@ -16,18 +16,17 @@ class InfoHeadView extends StatelessWidget {
   final double statusBarHeight;
   final double contentHeight;
   final String storeTag;
-
+  final AnimeInfoStore animeInfoStore;
   const InfoHeadView({
     super.key,
     required this.statusBarHeight,
     required this.contentHeight,
     required this.subjectBasicData,
-    required this.storeTag,
+    required this.storeTag, required this.animeInfoStore,
   });
 
   @override
   Widget build(BuildContext context) {
-    final animeInfoStore = Get.find<AnimeInfoStore>(tag: storeTag);
     final themeColor = Theme.of(context).colorScheme.primary;
     return Stack(
       children: [

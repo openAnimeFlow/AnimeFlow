@@ -5,6 +5,8 @@ import 'package:anime_flow/widget/animation_network_image/animation_network_imag
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
+import 'character_comments.dart';
+
 class CharacterInfo extends StatefulWidget {
   const CharacterInfo({super.key});
 
@@ -17,6 +19,8 @@ class _CharacterInfoState extends State<CharacterInfo> {
   late int characterId;
   late String characterImage;
   CharacterDetailItem? characterDetail;
+  final ScrollController _scrollController = ScrollController();
+  bool _showBackToTop = false;
 
   @override
   void initState() {
@@ -26,6 +30,35 @@ class _CharacterInfoState extends State<CharacterInfo> {
     characterId = arguments['characterId'] as int;
     characterImage = arguments['characterImage'] as String;
     _getCharacterInfo();
+    _scrollController.addListener(_onScroll);
+  }
+
+  @override
+  void dispose() {
+    _scrollController.removeListener(_onScroll);
+    _scrollController.dispose();
+    super.dispose();
+  }
+
+  void _onScroll() {
+    if (_scrollController.hasClients) {
+      final show = _scrollController.offset > 300;
+      if (show != _showBackToTop) {
+        setState(() {
+          _showBackToTop = show;
+        });
+      }
+    }
+  }
+
+  void _scrollToTop() {
+    if (_scrollController.hasClients) {
+      _scrollController.animateTo(
+        0,
+        duration: const Duration(milliseconds: 300),
+        curve: Curves.easeOut,
+      );
+    }
   }
 
   void _getCharacterInfo() async {
@@ -47,6 +80,7 @@ class _CharacterInfoState extends State<CharacterInfo> {
         child: ConstrainedBox(
           constraints: const BoxConstraints(maxWidth: maxWidth),
           child: CustomScrollView(
+            controller: _scrollController,
             slivers: [
               // 角色基本信息
               SliverPadding(
@@ -146,11 +180,38 @@ class _CharacterInfoState extends State<CharacterInfo> {
                 ),
                 // 角色出演作品（网格布局）
                 CharacterWorksView(characterId: characterDetail!.id),
+                // 吐槽标题
+                const SliverPadding(
+                  padding: EdgeInsets.only(
+                    left: 20,
+                    right: 20,
+                    top: 20,
+                    bottom: 8,
+                  ),
+                  sliver: SliverToBoxAdapter(
+                    child: Text(
+                      '吐槽',
+                      style: TextStyle(
+                        fontSize: 20,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ),
+                ),
+                // 吐槽列表
+                CharacterCommentsView(characterId: characterDetail!.id)
               ],
             ],
           ),
         ),
       ),
+      floatingActionButton: _showBackToTop
+          ? FloatingActionButton(
+              onPressed: _scrollToTop,
+              tooltip: '返回顶部',
+              child: const Icon(Icons.arrow_upward),
+            )
+          : null,
     );
   }
 }

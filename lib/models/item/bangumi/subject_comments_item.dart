@@ -1,3 +1,5 @@
+import 'package:anime_flow/models/item/bangumi/user_comments_item.dart';
+
 class SubjectCommentItem {
   final List<DataItem> data;
   final int total;
@@ -24,7 +26,7 @@ class SubjectCommentItem {
 // 数据项类
 class DataItem {
   final int id;
-  final User user;
+  final UserCommentsItem user;
   final int type;
   final int rate;
   final String comment;
@@ -42,7 +44,7 @@ class DataItem {
   factory DataItem.fromJson(Map<String, dynamic> json) {
     return DataItem(
       id: json['id'],
-      user: User.fromJson(json['user']),
+      user: UserCommentsItem.fromJson(json['user']),
       type: json['type'],
       rate: json['rate'],
       comment: json['comment'],
@@ -58,80 +60,6 @@ class DataItem {
       'rate': rate,
       'comment': comment,
       'updatedAt': updatedAt,
-    };
-  }
-}
-
-// 用户信息类
-class User {
-  final int id;
-  final String username;
-  final String nickname;
-  final Avatar avatar;
-  final int group;
-  final String sign;
-  final int joinedAt;
-
-  User({
-    required this.id,
-    required this.username,
-    required this.nickname,
-    required this.avatar,
-    required this.group,
-    required this.sign,
-    required this.joinedAt,
-  });
-
-  factory User.fromJson(Map<String, dynamic> json) {
-    return User(
-      id: json['id'],
-      username: json['username'],
-      nickname: json['nickname'],
-      avatar: Avatar.fromJson(json['avatar']),
-      group: json['group'],
-      sign: json['sign'] ?? '',
-      joinedAt: json['joinedAt'],
-    );
-  }
-
-  Map<String, dynamic> toJson() {
-    return {
-      'id': id,
-      'username': username,
-      'nickname': nickname,
-      'avatar': avatar.toJson(),
-      'group': group,
-      'sign': sign,
-      'joinedAt': joinedAt,
-    };
-  }
-}
-
-// 头像信息类
-class Avatar {
-  final String small;
-  final String medium;
-  final String large;
-
-  Avatar({
-    required this.small,
-    required this.medium,
-    required this.large,
-  });
-
-  factory Avatar.fromJson(Map<String, dynamic> json) {
-    return Avatar(
-      small: json['small'],
-      medium: json['medium'],
-      large: json['large'],
-    );
-  }
-
-  Map<String, dynamic> toJson() {
-    return {
-      'small': small,
-      'medium': medium,
-      'large': large,
     };
   }
 }

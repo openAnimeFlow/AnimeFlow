@@ -111,6 +111,7 @@ class _AnimeInfoPageState extends State<AnimeInfoPage> {
                     background: Padding(
                       padding: const EdgeInsets.only(bottom: 15),
                       child: InfoHeadView(
+                        animeInfoStore: animeInfoStore,
                         statusBarHeight: statusBarHeight,
                         contentHeight: _contentHeight,
                         subjectBasicData: subjectBasicData,

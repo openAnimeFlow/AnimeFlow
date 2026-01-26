@@ -71,9 +71,9 @@ class _MainPageState extends State<MainPage> {
   @override
   void initState() {
     super.initState();
-    userInfoStore = Get.put(UserInfoStore());
-    mainPageState = Get.put(MainPageState());
-    appInfoController = Get.put(AppInfoController());
+    userInfoStore = Get.put(UserInfoStore(), permanent: true);
+    mainPageState = Get.put(MainPageState(), permanent: true);
+    appInfoController = Get.put(AppInfoController(), permanent: true);
     shadersController = Get.put(ShadersController());
     // TODO 从配置中初始化对应的页面
     final initialIndex = Get.arguments as int? ?? 0;
@@ -195,10 +195,7 @@ class _MainPageState extends State<MainPage> {
 
   @override
   void dispose() {
-    Get.delete<UserInfoStore>();
-    Get.delete<MainPageState>();
     Get.delete<ShadersController>();
-    Get.delete<AppInfoController>();
     super.dispose();
   }
 

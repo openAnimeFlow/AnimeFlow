@@ -282,7 +282,6 @@ class _VideoViewState extends State<VideoView> with WindowListener {
 
   ///更新缓冲状态
   void _updateBufferingState(bool buffering) {
-    Get.log('缓冲状态: $buffering');
     if (buffering) {
       videoUiStateController
           .updateIndicatorType(VideoControlsIndicatorType.bufferingIndicator);

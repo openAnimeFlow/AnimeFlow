@@ -183,25 +183,24 @@ class _CharacterWorksViewState extends State<CharacterWorksView> {
                     ),
                   ),
                   const Spacer(),
-                  // 声优信息（水平布局）
+                  // 声优信息
                   if (work.actors.isNotEmpty)
                     Wrap(
                       spacing: 8,
                       runSpacing: 4,
                       children: work.actors.take(2).map((actor) {
                         return Row(
+                          crossAxisAlignment: CrossAxisAlignment.start,
                           mainAxisSize: MainAxisSize.min,
                           children: [
                             if (actor.images.medium.isNotEmpty) ...[
-                              ClipRRect(
-                                borderRadius: BorderRadius.circular(6),
-                                child: SizedBox(
-                                  width: 32,
-                                  height: 32,
-                                  child: AnimationNetworkImage(
-                                    url: actor.images.medium,
-                                    fit: BoxFit.cover,
-                                  ),
+                              SizedBox(
+                                width: 32,
+                                height: 32,
+                                child: AnimationNetworkImage(
+                                  borderRadius: BorderRadius.circular(6),
+                                  url: actor.images.medium,
+                                  fit: BoxFit.cover,
                                 ),
                               ),
                               const SizedBox(width: 4),

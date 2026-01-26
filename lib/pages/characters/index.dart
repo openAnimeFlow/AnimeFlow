@@ -293,62 +293,43 @@ class _CharacterPageState extends State<CharacterPage> {
                     ),
                   ],
                   const Spacer(),
-                  // 声优信息
-                  if (characterData.actors.isNotEmpty) ...[
-                    ...characterData.actors.take(2).map((actor) {
-                      return Padding(
-                        padding: const EdgeInsets.only(bottom: 4),
-                        child: Row(
+                  // 声优信息（水平布局）
+                  if (characterData.actors.isNotEmpty)
+                    Wrap(
+                      spacing: 8,
+                      runSpacing: 4,
+                      children: characterData.actors.take(2).map((actor) {
+                        return Row(
                           crossAxisAlignment: CrossAxisAlignment.start,
+                          mainAxisSize: MainAxisSize.min,
                           children: [
                             if (actor.images.medium.isNotEmpty) ...[
-                              ClipRRect(
-                                borderRadius: BorderRadius.circular(10),
-                                child: SizedBox(
-                                  width: 45,
-                                  height: 45,
+                               SizedBox(
+                                  width: 32,
+                                  height: 32,
                                   child: AnimationNetworkImage(
+                                    borderRadius: BorderRadius.circular(6),
                                     url: actor.images.medium,
                                     fit: BoxFit.cover,
                                   ),
-                                ),
                               ),
-                              const SizedBox(width: 6),
+                              const SizedBox(width: 4),
                             ],
-                            Expanded(
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                mainAxisSize: MainAxisSize.min,
-                                children: [
-                                  Text(
-                                    actor.nameCN ?? actor.name,
-                                    style: const TextStyle(
-                                      fontSize: 10,
-                                      fontWeight: textFontWeight,
-                                    ),
-                                    maxLines: 1,
-                                    overflow: TextOverflow.ellipsis,
-                                  ),
-                                  if (actor.nameCN != null &&
-                                      actor.nameCN != actor.name)
-                                    Text(
-                                      actor.name,
-                                      style: TextStyle(
-                                        fontSize: 8,
-                                        fontWeight: textFontWeight,
-                                        color: disabledColor,
-                                      ),
-                                      maxLines: 1,
-                                      overflow: TextOverflow.ellipsis,
-                                    ),
-                                ],
+                            Flexible(
+                              child: Text(
+                                actor.nameCN ?? actor.name,
+                                style: const TextStyle(
+                                  fontSize: 10,
+                                  fontWeight: textFontWeight,
+                                ),
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
                               ),
                             ),
                           ],
-                        ),
-                      );
-                    }),
-                  ],
+                        );
+                      }).toList(),
+                    ),
                 ],
               ),
             ),

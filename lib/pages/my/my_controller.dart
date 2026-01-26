@@ -43,7 +43,7 @@ class MyController {
     }
   }
 
-  // 桌面端轮询 token（异步执行，不阻塞）
+  // 桌面端轮询 token
   static Future<void> _pollTokenAfterAuth(String sessionId) async {
     try {
       Logger().d('开始轮询 token，sessionId: $sessionId');

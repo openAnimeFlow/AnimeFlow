@@ -1,4 +1,4 @@
-import 'package:anime_flow/models/item/bangumi/actor_ite.dart';
+import 'package:anime_flow/models/item/bangumi/image_four_item.dart';
 
 /// 角色详情数据类
 class CharacterDetailItem {
@@ -14,7 +14,7 @@ class CharacterDetailItem {
   final bool lock;
   final int redirect;
   final bool nsfw;
-  final Images images;
+  final ImageFourItem images;
 
   CharacterDetailItem({
     required this.id,
@@ -51,8 +51,8 @@ class CharacterDetailItem {
       redirect: json['redirect'] as int? ?? 0,
       nsfw: json['nsfw'] as bool? ?? false,
       images: json['images'] != null
-          ? Images.fromJson(json['images'] as Map<String, dynamic>)
-          : Images(
+          ? ImageFourItem.fromJson(json['images'] as Map<String, dynamic>)
+          : ImageFourItem(
               large: '',
               medium: '',
               small: '',

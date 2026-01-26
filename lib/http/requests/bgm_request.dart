@@ -5,6 +5,7 @@ import 'package:anime_flow/models/enums/sort_type.dart';
 import 'package:anime_flow/models/item/bangumi/actor_ite.dart';
 import 'package:anime_flow/models/item/bangumi/calendar_item.dart';
 import 'package:anime_flow/models/item/bangumi/character_detail_item.dart';
+import 'package:anime_flow/models/item/bangumi/character_subjects_item.dart';
 import 'package:anime_flow/models/item/bangumi/collections_item.dart';
 import 'package:anime_flow/models/item/bangumi/episode_comments_item.dart';
 import 'package:anime_flow/models/item/bangumi/episodes_item.dart';
@@ -188,6 +189,20 @@ class BgmRequest {
         BgmNextApi.character
             .replaceFirst('{characterId}', characterId.toString()));
     return CharacterDetailItem.fromJson(response.data);
+  }
+
+  ///角色出演作品
+  static Future<CharacterCastsItem> characterWorksService(
+      int characterId,{required int limit, required int offset, int subjectType = 2}) async {
+    final response = await dioRequest.get(_nextBaseUrl +
+        BgmNextApi.characterCasts
+            .replaceFirst('{characterId}', characterId.toString()),
+    queryParameters:  {
+      'subjectType': subjectType,
+      'limit': limit,
+      'offset': offset,
+    });
+    return CharacterCastsItem.fromJson(response.data);
   }
 
   ///相关条目

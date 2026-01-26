@@ -1,3 +1,5 @@
+import 'package:anime_flow/models/item/bangumi/image_four_item.dart';
+
 class CharactersItem {
   final List<CharacterActorData> data;
   final int total;
@@ -50,7 +52,7 @@ class CharacterActorData {
               comment: 0,
               lock: false,
               nsfw: false,
-              images: Images(large: '', medium: '', small: '', grid: ''),
+              images: ImageFourItem(large: '', medium: '', small: '', grid: ''),
             ),
       actors: json['actors'] != null
           ? (json['actors'] as List).map((item) => Actor.fromJson(item as Map<String, dynamic>)).toList()
@@ -79,7 +81,7 @@ class Character {
   final int comment;
   final bool lock;
   final bool nsfw;
-  final Images images;
+  final ImageFourItem images;
 
   Character({
     required this.id,
@@ -104,8 +106,8 @@ class Character {
       lock: json['lock'] as bool,
       nsfw: json['nsfw'] as bool,
       images: json['images'] != null
-          ? Images.fromJson(json['images'] as Map<String, dynamic>)
-          : Images(
+          ? ImageFourItem.fromJson(json['images'] as Map<String, dynamic>)
+          : ImageFourItem(
               large: '',
               medium: '',
               small: '',
@@ -139,7 +141,7 @@ class Actor {
   final int comment;
   final bool lock;
   final bool nsfw;
-  final Images images;
+  final ImageFourItem images;
 
   Actor({
     required this.id,
@@ -168,8 +170,8 @@ class Actor {
       lock: json['lock'] as bool,
       nsfw: json['nsfw'] as bool,
       images: json['images'] != null
-          ? Images.fromJson(json['images'] as Map<String, dynamic>)
-          : Images(
+          ? ImageFourItem.fromJson(json['images'] as Map<String, dynamic>)
+          : ImageFourItem(
               large: '',
               medium: '',
               small: '',
@@ -190,38 +192,6 @@ class Actor {
       'lock': lock,
       'nsfw': nsfw,
       'images': images.toJson(),
-    };
-  }
-}
-
-class Images {
-  final String large;
-  final String medium;
-  final String small;
-  final String grid;
-
-  Images({
-    required this.large,
-    required this.medium,
-    required this.small,
-    required this.grid,
-  });
-
-  factory Images.fromJson(Map<String, dynamic> json) {
-    return Images(
-      large: json['large'] as String,
-      medium: json['medium'] as String,
-      small: json['small'] as String,
-      grid: json['grid'] as String,
-    );
-  }
-
-  Map<String, dynamic> toJson() {
-    return {
-      'large': large,
-      'medium': medium,
-      'small': small,
-      'grid': grid,
     };
   }
 }

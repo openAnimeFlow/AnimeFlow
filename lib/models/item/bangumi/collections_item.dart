@@ -1,4 +1,4 @@
-import 'package:anime_flow/models/item/bangumi/image_item.dart';
+import 'package:anime_flow/models/item/bangumi/image_five_item.dart';
 import 'package:anime_flow/models/item/bangumi/subject_item.dart';
 
 class CollectionsItem {
@@ -38,7 +38,7 @@ class Data {
   int type;
   int volumes;
   List<Tags> tags;
-  ImageItem images;
+  ImageFiveItem images;
   Interest interest;
 
   Data({
@@ -87,7 +87,7 @@ class Data {
         type = json['type'],
         volumes = json['volumes'],
         tags = (json['tags'] as List).map((e) => Tags.fromJson(e)).toList(),
-        images = ImageItem.fromJson(json['images']),
+        images = ImageFiveItem.fromJson(json['images']),
         interest = Interest.fromJson(json['interest']);
 
   Map<String, dynamic> toJson() => {

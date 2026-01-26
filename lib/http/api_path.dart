@@ -28,6 +28,9 @@ class BgmNextApi {
   ///角色信息
   static const String character = '/p1/characters/{characterId}';
 
+  ///角色出演作品
+  static const String characterCasts = '/p1/characters/{characterId}/casts';
+
   ///关联条目
   static const String relations = '/p1/subjects/{subjectId}/relations';
 

@@ -1,4 +1,5 @@
-import 'package:anime_flow/models/item/bangumi/image_item.dart';
+import 'package:anime_flow/models/item/bangumi/image_five_item.dart';
+import 'package:anime_flow/models/item/bangumi/image_four_item.dart';
 
 /// Staff item data class
 class StaffItem {
@@ -71,7 +72,7 @@ class Staff {
   final int comment;
   final bool lock;
   final bool nsfw;
-  final ImageItem? images;
+  final ImageFourItem? images;
 
   Staff({
     required this.id,
@@ -87,13 +88,12 @@ class Staff {
   });
 
   factory Staff.fromJson(Map<String, dynamic> json) {
-    ImageItem? images;
+    ImageFourItem? images;
     if (json['images'] != null) {
       final imagesJson = json['images'] as Map<String, dynamic>;
       // ImageItem 需要 common 字段，但 JSON 中没有，使用 medium 作为默认值
-      images = ImageItem(
+      images = ImageFourItem(
         large: imagesJson['large'] as String? ?? '',
-        common: imagesJson['common'] as String? ?? imagesJson['medium'] as String? ?? '',
         medium: imagesJson['medium'] as String? ?? '',
         small: imagesJson['small'] as String? ?? '',
         grid: imagesJson['grid'] as String? ?? '',

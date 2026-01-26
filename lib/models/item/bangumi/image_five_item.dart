@@ -1,11 +1,11 @@
-class ImageItem {
+class ImageFiveItem {
   final String large;
   final String common;
   final String medium;
   final String small;
   final String grid;
 
-  ImageItem({
+  ImageFiveItem({
     required this.large,
     required this.common,
     required this.medium,
@@ -13,8 +13,8 @@ class ImageItem {
     required this.grid,
   });
 
-  factory ImageItem.fromJson(Map<String, dynamic> json) {
-    return ImageItem(
+  factory ImageFiveItem.fromJson(Map<String, dynamic> json) {
+    return ImageFiveItem(
       large: json['large'] as String,
       common: json['common'] as String,
       medium: json['medium'] as String,

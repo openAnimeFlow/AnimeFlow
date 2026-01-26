@@ -1,4 +1,4 @@
-import 'package:anime_flow/models/item/bangumi/image_item.dart';
+import 'package:anime_flow/models/item/bangumi/image_five_item.dart';
 class TimelineItem {
   final int id;
   final int uid;
@@ -188,7 +188,7 @@ class TimelineSubject {
   final Rating rating;
   final bool locked;
   final bool nsfw;
-  final ImageItem images;
+  final ImageFiveItem images;
 
   TimelineSubject({
     required this.id,
@@ -212,7 +212,7 @@ class TimelineSubject {
       rating: Rating.fromJson(json['rating'] as Map<String, dynamic>),
       locked: json['locked'] as bool,
       nsfw: json['nsfw'] as bool,
-      images: ImageItem.fromJson(json['images'] as Map<String, dynamic>),
+      images: ImageFiveItem.fromJson(json['images'] as Map<String, dynamic>),
     );
   }
 

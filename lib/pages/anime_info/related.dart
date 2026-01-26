@@ -65,17 +65,18 @@ class _RelatedViewState extends State<RelatedView> {
                   : const SizedBox.shrink(),
             ],
           ),
+          const SizedBox(height: 10),
           SizedBox(
             height: 200,
             child: ListView.builder(
               scrollDirection: Axis.horizontal,
               itemCount: relation.data.length,
-              cacheExtent: 200,
               // 缓存范围，优化滚动性能
-              addAutomaticKeepAlives: false,
+              cacheExtent: 200,
               // 不自动保持item状态，节省内存
-              addRepaintBoundaries: true,
+              addAutomaticKeepAlives: false,
               // 添加重绘边界，优化性能
+              addRepaintBoundaries: true,
               itemBuilder: (context, index) {
                 final item = relation.data[index];
                 final subjectBasicData = SubjectBasicData(
@@ -85,7 +86,7 @@ class _RelatedViewState extends State<RelatedView> {
                 );
                 return Container(
                   width: 100,
-                  margin: const EdgeInsets.all(5),
+                  margin: const EdgeInsets.only(right: 5),
                   child: InkWell(
                     onTap: () {
                       Navigator.of(context).pushNamed(RouteName.animeInfo,
@@ -96,6 +97,7 @@ class _RelatedViewState extends State<RelatedView> {
                         AnimationNetworkImage(
                             borderRadius: BorderRadius.circular(10),
                             url: item.subject.images.large),
+                        const SizedBox(height: 10),
                         Expanded(
                           child: Text(
                             item.subject.nameCN ?? item.subject.name,

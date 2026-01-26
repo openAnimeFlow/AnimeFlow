@@ -1,6 +1,7 @@
 import 'package:anime_flow/http/requests/bgm_request.dart';
 import 'package:anime_flow/models/item/bangumi/actor_ite.dart';
 import 'package:anime_flow/routes/index.dart';
+import 'package:anime_flow/utils/bgm_utils.dart';
 import 'package:anime_flow/widget/animation_network_image/animation_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -35,24 +36,6 @@ class _CharacterPageState extends State<CharacterPage> {
         _loadMore();
       }
     });
-  }
-
-  ///角色类型
-  String _getCharacterType(int type) {
-    switch (type) {
-      case 1:
-        return '主角';
-      case 2:
-        return '配角';
-      case 3:
-        return '客串';
-      case 4:
-        return '闲角';
-      case 5:
-        return '旁白';
-      default:
-        return '未知';
-    }
   }
 
   ///获取角色信息
@@ -288,7 +271,7 @@ class _CharacterPageState extends State<CharacterPage> {
                           Theme.of(context).colorScheme.surfaceContainerHighest,
                     ),
                     child: Text(
-                      _getCharacterType(characterData.type),
+                      BgmUtils.getCharacterType(characterData.type),
                       style: TextStyle(
                           fontSize: 10,
                           fontWeight: textFontWeight,

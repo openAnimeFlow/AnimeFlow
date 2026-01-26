@@ -171,14 +171,12 @@ class _CommentItem extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               // 头像
-              ClipRRect(
-                borderRadius: BorderRadius.circular(20),
-                child: AnimationNetworkImage(
+               AnimationNetworkImage(
+                  borderRadius: BorderRadius.circular(10),
                   url: comment.user.avatar.medium,
                   width: 40,
                   height: 40,
                   fit: BoxFit.cover,
-                ),
               ),
               const SizedBox(width: 12),
               Expanded(

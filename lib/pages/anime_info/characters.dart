@@ -103,7 +103,7 @@ class _CharactersViewState extends State<CharactersView> {
                     final actor = characters!.data[index];
                     return Container(
                       width: 90,
-                      margin: const EdgeInsets.only(right: 16),
+                      margin: const EdgeInsets.only(right: 10),
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         mainAxisSize: MainAxisSize.min,

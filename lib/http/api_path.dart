@@ -22,8 +22,11 @@ class BgmNextApi {
   ///剧集评论
   static const String episodeComments = '/p1/episodes/{episodeId}/comments';
 
-  ///角色
+  ///角色列表
   static const String characters = '/p1/subjects/{subjectId}/characters';
+
+  ///角色信息
+  static const String character = '/p1/characters/{characterId}';
 
   ///关联条目
   static const String relations = '/p1/subjects/{subjectId}/relations';

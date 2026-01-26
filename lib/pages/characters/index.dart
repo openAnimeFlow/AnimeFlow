@@ -1,5 +1,6 @@
 import 'package:anime_flow/http/requests/bgm_request.dart';
 import 'package:anime_flow/models/item/bangumi/actor_ite.dart';
+import 'package:anime_flow/routes/index.dart';
 import 'package:anime_flow/widget/animation_network_image/animation_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -26,7 +27,7 @@ class _CharacterPageState extends State<CharacterPage> {
     super.initState();
     subjectsId = Get.arguments as int;
     _getCharacters();
-    
+
     // 监听滚动，触发加载更多
     _scrollController.addListener(() {
       if (_scrollController.position.pixels >=
@@ -51,7 +52,6 @@ class _CharacterPageState extends State<CharacterPage> {
         return '旁白';
       default:
         return '未知';
-
     }
   }
 
@@ -59,7 +59,7 @@ class _CharacterPageState extends State<CharacterPage> {
   void _getCharacters({bool loadMore = false}) async {
     // 如果正在加载，则不再加载
     if (_isLoading) return;
-    
+
     // 如果是加载更多，但没有更多数据，则不加载
     if (loadMore && !_hasMore) return;
 
@@ -133,8 +133,9 @@ class _CharacterPageState extends State<CharacterPage> {
 
     return Scaffold(
       appBar: AppBar(
-        title: Text('角色${characters != null ? '(${characters!.total})' : ''}',
-        style:  const TextStyle(fontSize: 25,fontWeight: FontWeight.bold),
+        title: Text(
+          '角色${characters != null ? '(${characters!.total})' : ''}',
+          style: const TextStyle(fontSize: 25, fontWeight: FontWeight.bold),
         ),
       ),
       body: Center(
@@ -219,21 +220,29 @@ class _CharacterPageState extends State<CharacterPage> {
       child: InkWell(
         borderRadius: BorderRadius.circular(10),
         onTap: () {
-          // TODO添加点击跳转到角色详情
+          Get.toNamed(RouteName.characterInfo, arguments: {
+            'characterId': characterData.character.id,
+            'characterName':
+                characterData.character.nameCN ?? characterData.character.name,
+            'characterImage': characterData.character.images.large,
+          });
         },
         child: Row(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             // 左侧：角色封面
-             SizedBox(
-                height: itemHeight,
-                width: 110,
+            SizedBox(
+              height: itemHeight,
+              width: 110,
+              child: Hero(
+                tag: 'character:${characterData.character.images.large}',
                 child: AnimationNetworkImage(
                   alignment: Alignment.topCenter,
                   borderRadius: BorderRadius.circular(10),
                   url: characterData.character.images.medium,
                   fit: BoxFit.cover,
                 ),
+              ),
             ),
             const SizedBox(width: 12),
             // 右侧：角色信息
@@ -271,16 +280,20 @@ class _CharacterPageState extends State<CharacterPage> {
                   ],
                   // 角色类型
                   Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 2),
+                    padding:
+                        const EdgeInsets.symmetric(horizontal: 4, vertical: 2),
                     decoration: BoxDecoration(
                       borderRadius: BorderRadius.circular(4),
-                      color: Theme.of(context).colorScheme.surfaceContainerHighest,
+                      color:
+                          Theme.of(context).colorScheme.surfaceContainerHighest,
                     ),
-                    child: Text(_getCharacterType(characterData.type),style: TextStyle(
-                      fontSize: 10,
-                      fontWeight: textFontWeight,
-                      color: primary
-                    ),),
+                    child: Text(
+                      _getCharacterType(characterData.type),
+                      style: TextStyle(
+                          fontSize: 10,
+                          fontWeight: textFontWeight,
+                          color: primary),
+                    ),
                   ),
 
                   // 角色信息

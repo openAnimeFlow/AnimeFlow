@@ -1,3 +1,4 @@
+import 'package:anime_flow/pages/character_info/index.dart';
 import 'package:anime_flow/pages/characters/index.dart';
 import 'package:anime_flow/pages/main/index.dart';
 import 'package:anime_flow/pages/calendar/index.dart';
@@ -25,7 +26,8 @@ class RouteName {
   static const String play = "/play";
   static const String search = "/search";
   static const String calendar = "/calendar";
-  static const String character = "/character";
+  static const String characters = "/characters";
+  static const String characterInfo = "/character_info";
 
   // 设置页面路由
   static const String settings = "/settings";
@@ -68,9 +70,10 @@ List<GetPage> getPages() {
       page: () => const CalendarPage(),
     ),
     GetPage(
-      name: RouteName.character,
+      name: RouteName.characters,
       page: () => const CharacterPage(),
     ),
+    GetPage(name: RouteName.characterInfo, page: () => const CharacterInfo()),
     ...settingsPages(),
   ];
 }

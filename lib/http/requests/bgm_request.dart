@@ -4,6 +4,7 @@ import 'package:anime_flow/http/api_path.dart';
 import 'package:anime_flow/models/enums/sort_type.dart';
 import 'package:anime_flow/models/item/bangumi/actor_ite.dart';
 import 'package:anime_flow/models/item/bangumi/calendar_item.dart';
+import 'package:anime_flow/models/item/bangumi/character_detail_item.dart';
 import 'package:anime_flow/models/item/bangumi/collections_item.dart';
 import 'package:anime_flow/models/item/bangumi/episode_comments_item.dart';
 import 'package:anime_flow/models/item/bangumi/episodes_item.dart';
@@ -157,7 +158,7 @@ class BgmRequest {
         .toList();
   }
 
-  ///角色信息
+  ///角色列表
   static Future<CharactersItem> charactersService(int subjectId,
       {required int limit, required int offset, int? type}) async {
     final queryParameters = <String, dynamic>{
@@ -178,6 +179,15 @@ class BgmRequest {
           ),
         )
         .then((response) => (CharactersItem.fromJson(response.data)));
+  }
+
+  ///角色信息
+  static Future<CharacterDetailItem> characterInfoService(
+      int characterId) async {
+    final response = await dioRequest.get(_nextBaseUrl +
+        BgmNextApi.character
+            .replaceFirst('{characterId}', characterId.toString()));
+    return CharacterDetailItem.fromJson(response.data);
   }
 
   ///相关条目

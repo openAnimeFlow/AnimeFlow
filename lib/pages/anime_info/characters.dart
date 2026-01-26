@@ -63,7 +63,7 @@ class _CharactersViewState extends State<CharactersView> {
                     style: TextStyle(fontSize: 20, fontWeight: FontWeight.w600),
                   ),
                   InkWell(
-                    onTap: () => Get.toNamed(RouteName.character,
+                    onTap: () => Get.toNamed(RouteName.characters,
                         arguments: widget.subjectsId),
                     child: Row(
                       children: [

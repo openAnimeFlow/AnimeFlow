@@ -6,7 +6,7 @@ import 'package:anime_flow/widget/animation_network_image/animation_network_imag
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
-///角色页面
+///角色列表页面
 class CharacterPage extends StatefulWidget {
   const CharacterPage({super.key});
 
@@ -78,6 +78,9 @@ class _CharacterPageState extends State<CharacterPage> {
               characters!.data.length < value.total;
           _isLoading = false;
         });
+
+        // 宽屏设备可能无法滚动，需要检查并自动加载更多
+        _checkAndLoadMoreIfNeeded();
       }
     } catch (e) {
       if (mounted) {
@@ -93,6 +96,20 @@ class _CharacterPageState extends State<CharacterPage> {
     if (!_isLoading && _hasMore) {
       _getCharacters(loadMore: true);
     }
+  }
+
+  // 检查内容是否可滚动，如果不可滚动且还有更多数据，则自动加载更多
+  void _checkAndLoadMoreIfNeeded() {
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted || !_hasMore || _isLoading) return;
+
+      // 检查是否可以滚动
+      if (_scrollController.hasClients &&
+          _scrollController.position.maxScrollExtent <= 0) {
+        // 内容不足以滚动，自动加载更多
+        _loadMore();
+      }
+    });
   }
 
   @override

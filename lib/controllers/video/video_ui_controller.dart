@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:anime_flow/models/enums/video_controls_icon_type.dart';
+import 'package:anime_flow/utils/vibrate.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/widgets.dart';
 import 'package:get/get.dart';
@@ -250,6 +251,11 @@ class VideoUiStateController extends GetxController {
     double newBrightness =
         (_dragStartBrightness + brightnessChange).clamp(0.0, 1.0);
 
+    if (newBrightness >= 1.0 && currentBrightness.value < 1.0) {
+      vibrateHeavy();
+    } else if (newBrightness <= 0.0 && currentBrightness.value > 0.0) {
+      vibrateHeavy();
+    }
     currentBrightness.value = newBrightness;
 
     _screenBrightness.setApplicationScreenBrightness(newBrightness);

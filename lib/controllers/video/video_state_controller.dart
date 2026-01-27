@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:anime_flow/utils/vibrate.dart';
 import 'package:get/get.dart';
 import 'package:media_kit/media_kit.dart';
 import 'package:media_kit_video/media_kit_video.dart';
@@ -122,6 +123,11 @@ class VideoStateController extends GetxController {
   void updateVerticalDrag(double dragDistance, double screenHeight) {
     final volumeChange = -(dragDistance / screenHeight) * 100;
     double newVolume = _dragStartVolume + volumeChange;
+    if (newVolume >= 100 && volume.value < 100) {
+      vibrateHeavy();
+    } else if (newVolume <= 0 && volume.value > 0) {
+      vibrateHeavy();
+    }
     setVolume(newVolume);
   }
 

@@ -20,12 +20,12 @@ class TopAreaControl extends StatefulWidget {
 
 class _TopAreaControlState extends State<TopAreaControl> {
   late VideoStateController videoStateController;
-  late VideoSourceController videoSourceController ;
+  late VideoSourceController videoSourceController;
+
   late PlayController playPageController;
   late VideoUiStateController videoUiStateController;
   late EpisodesState episodesController;
-  late PlaySubjectState subjectStateController ;
-
+  late PlaySubjectState subjectStateController;
 
   @override
   void initState() {
@@ -51,147 +51,175 @@ class _TopAreaControlState extends State<TopAreaControl> {
         },
         child: videoUiStateController.isShowControlsUi.value
             ? Container(
-          key: ValueKey<bool>(
-              videoUiStateController.isShowControlsUi.value),
-          padding:
-          EdgeInsets.only(top: MediaQuery.of(context).padding.top),
-          decoration: const BoxDecoration(
-              gradient: LinearGradient(
-                  colors: [Colors.black45, Colors.transparent],
-                  begin: Alignment.topCenter,
-                  end: Alignment.bottomCenter)),
-          child: Padding(
-            padding: EdgeInsets.only(
-                left: leftPadding != 0 ? leftPadding : 5,
-                right: 5,
-                top: 2),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Row(children: [
-                  InkWell(
-                    onTap: () {
-                      if (fullscreen) {
-                        playPageController.exitFullScreen();
-                      } else {
-                        Get.back();
-                      }
-                    },
-                    child: const Icon(
-                      Icons.arrow_back_ios_new,
-                      color: Colors.white,
-                    ),
-                  ),
-                  const SizedBox(width: 5),
-                  if (Utils.isDesktop || fullscreen)
-                    Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          subjectStateController.name,
-                          style: const TextStyle(
-                              color: Colors.white,
-                              fontSize: 16,
-                              fontWeight: FontWeight.bold),
-                        ),
-                        episodesController.episodeTitle.value != ''
-                            ? Row(
-                          children: [
-                            Text(
-                              episodesController.episodeSort.value
-                                  .toString()
-                                  .padLeft(2, '0'),
-                              style: const TextStyle(
-                                  color: Colors.white,
-                                  fontSize: 15),
-                            ),
-                            const SizedBox(width: 8),
-                            Text(
-                              episodesController.episodeTitle.value,
-                              style: const TextStyle(
-                                  color: Colors.white,
-                                  fontSize: 15),
-                            )
-                          ],
-                        )
-                            : const SizedBox.shrink()
+                key: ValueKey<bool>(
+                    videoUiStateController.isShowControlsUi.value),
+                padding:
+                    EdgeInsets.only(top: MediaQuery.of(context).padding.top),
+                decoration: const BoxDecoration(
+                    gradient: LinearGradient(
+                        colors: [Colors.black45, Colors.transparent],
+                        begin: Alignment.topCenter,
+                        end: Alignment.bottomCenter)),
+                child: Padding(
+                  padding: EdgeInsets.only(
+                      left: leftPadding != 0 ? leftPadding : 5,
+                      right: 5,
+                      top: 2),
+                  child: Column(
+                    children: [
+                      if (fullscreen) ...[
+                        Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              //Obx细粒度更新机制,只有直接访问了响应式变量的Obx才会被触发重建。
+                              Obx(() => Text(
+                                    videoUiStateController.currentTime.value,
+                                    style: const TextStyle(
+                                      color: Colors.white,
+                                      fontSize: 12,
+                                      fontWeight: FontWeight.w600,
+                                    ),
+                                  ))
+                            ]),
                       ],
-                    )
-                ]),
-                //右侧
-                Row(
-                  children: [
-                    if (fullscreen)
-                      IconButton(
-                        padding: const EdgeInsets.all(0),
-                        onPressed: () {
-                          Get.generalDialog(
-                            barrierDismissible: true,
-                            barrierLabel: "SourceDrawer",
-                            barrierColor: Colors.black54,
-                            transitionDuration:
-                            const Duration(milliseconds: 300),
-                            transitionBuilder: (context, animation,
-                                secondaryAnimation, child) {
-                              return SlideTransition(
-                                position: Tween<Offset>(
-                                  begin: const Offset(1, 0),
-                                  end: Offset.zero,
-                                ).animate(CurvedAnimation(
-                                  parent: animation,
-                                  curve: Curves.easeOut,
-                                )),
-                                child: child,
-                              );
-                            },
-                            pageBuilder:
-                                (context, animation, secondaryAnimation) {
-                              return VideoSourceDrawers(
-                                onVideoUrlSelected: (url) {
-                                  videoStateController.player.stop();
-                                  videoSourceController
-                                      .loadVideoPage(url);
-                                },
-                                isBottomSheet:  false,
-                              );
-                            },
-                          );
-                        },
-                        icon: Icon(
-                          Icons.reset_tv_outlined,
-                          color: Colors.white.withValues(alpha: 0.8),
-                        ),
-                      ),
-                    if (Utils.isDesktop)
-                      Obx(() => playPageController.isWideScreen.value
-                          ? IconButton(
-                        onPressed: () => playPageController
-                            .toggleContentExpanded(),
-                        padding: const EdgeInsets.all(0),
-                        icon: SvgPicture.asset(
-                          playPageController.isContentExpanded.value
-                              ? "assets/icons/right_panel_close.svg"
-                              : "assets/icons/left_panel_close.svg",
-                          width: 30,
-                          height: 30,
-                          colorFilter: const ColorFilter.mode(
-                            Colors.white70,
-                            BlendMode.srcIn,
+                      Row(
+                        children: [
+                          //左侧
+                          Expanded(
+                            child: Row(
+                              children: [
+                                InkWell(
+                                  onTap: () {
+                                    if (fullscreen) {
+                                      playPageController.exitFullScreen();
+                                    } else {
+                                      Get.back();
+                                    }
+                                  },
+                                  child: const Icon(
+                                    Icons.arrow_back_ios_new,
+                                    color: Colors.white,
+                                  ),
+                                ),
+                                const SizedBox(width: 5),
+                                if (Utils.isDesktop || fullscreen)
+                                  Column(
+                                    mainAxisAlignment: MainAxisAlignment.center,
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
+                                    children: [
+                                      Text(
+                                        subjectStateController.name,
+                                        style: const TextStyle(
+                                            color: Colors.white,
+                                            fontSize: 16,
+                                            fontWeight: FontWeight.bold),
+                                      ),
+                                      episodesController.episodeTitle.value !=
+                                              ''
+                                          ? Row(
+                                              children: [
+                                                Text(
+                                                  episodesController
+                                                      .episodeSort.value
+                                                      .toString()
+                                                      .padLeft(2, '0'),
+                                                  style: const TextStyle(
+                                                      color: Colors.white,
+                                                      fontSize: 15),
+                                                ),
+                                                const SizedBox(width: 8),
+                                                Text(
+                                                  episodesController
+                                                      .episodeTitle.value,
+                                                  style: const TextStyle(
+                                                      color: Colors.white,
+                                                      fontSize: 15),
+                                                )
+                                              ],
+                                            )
+                                          : const SizedBox.shrink()
+                                    ],
+                                  )
+                              ],
+                            ),
                           ),
-                        ),
-                      )
-                          : const SizedBox.shrink())
-                  ],
-                )
-              ],
-            ),
-          ),
-        )
+                          //右侧
+                          Row(
+                            children: [
+                              if (fullscreen)
+                                IconButton(
+                                  padding: const EdgeInsets.all(0),
+                                  onPressed: () {
+                                    Get.generalDialog(
+                                      barrierDismissible: true,
+                                      barrierLabel: "SourceDrawer",
+                                      barrierColor: Colors.black54,
+                                      transitionDuration:
+                                          const Duration(milliseconds: 300),
+                                      transitionBuilder: (context, animation,
+                                          secondaryAnimation, child) {
+                                        return SlideTransition(
+                                          position: Tween<Offset>(
+                                            begin: const Offset(1, 0),
+                                            end: Offset.zero,
+                                          ).animate(CurvedAnimation(
+                                            parent: animation,
+                                            curve: Curves.easeOut,
+                                          )),
+                                          child: child,
+                                        );
+                                      },
+                                      pageBuilder: (context, animation,
+                                          secondaryAnimation) {
+                                        return VideoSourceDrawers(
+                                          onVideoUrlSelected: (url) {
+                                            videoStateController.player.stop();
+                                            videoSourceController
+                                                .loadVideoPage(url);
+                                          },
+                                          isBottomSheet: false,
+                                        );
+                                      },
+                                    );
+                                  },
+                                  icon: Icon(
+                                    Icons.reset_tv_outlined,
+                                    color: Colors.white.withValues(alpha: 0.8),
+                                  ),
+                                ),
+                              if (Utils.isDesktop)
+                                Obx(() => playPageController.isWideScreen.value
+                                    ? IconButton(
+                                        onPressed: () => playPageController
+                                            .toggleContentExpanded(),
+                                        padding: const EdgeInsets.all(0),
+                                        icon: SvgPicture.asset(
+                                          playPageController
+                                                  .isContentExpanded.value
+                                              ? "assets/icons/right_panel_close.svg"
+                                              : "assets/icons/left_panel_close.svg",
+                                          width: 30,
+                                          height: 30,
+                                          colorFilter: const ColorFilter.mode(
+                                            Colors.white70,
+                                            BlendMode.srcIn,
+                                          ),
+                                        ),
+                                      )
+                                    : const SizedBox.shrink())
+                            ],
+                          )
+                        ],
+                      ),
+                    ],
+                  ),
+                ),
+              )
             : SizedBox.shrink(
-          key: ValueKey<bool>(
-              videoUiStateController.isShowControlsUi.value),
-        ),
+                key: ValueKey<bool>(
+                    videoUiStateController.isShowControlsUi.value),
+              ),
       );
     });
   }

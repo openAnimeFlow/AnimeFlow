@@ -1,4 +1,4 @@
-class FormatUtil {
+class TimeUtil {
   // 格式化时间显示
   static String formatDuration(Duration duration) {
     final hours = duration.inHours;
@@ -95,5 +95,19 @@ class FormatUtil {
     } catch (e) {
       return '未知';
     }
+  }
+
+  /// 获取当前时间字符串
+  /// 返回格式：HH:MM:SS
+  static String getCurrentTime() {
+    final now = DateTime.now();
+    return '${now.hour.toString().padLeft(2, '0')}:${now.minute.toString().padLeft(2, '0')}:${now.second.toString().padLeft(2, '0')}';
+  }
+
+  /// 获取当前时间字符串
+  /// 返回格式：HH:MM
+  static String getCurrentTimeWithoutSeconds() {
+    DateTime now = DateTime.now();
+    return "${now.hour.toString().padLeft(2, '0')}:${now.minute.toString().padLeft(2, '0')}";
   }
 }

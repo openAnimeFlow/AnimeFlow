@@ -3,7 +3,7 @@ import 'package:anime_flow/http/requests/request.dart';
 import 'package:anime_flow/models/item/crawler_config_item.dart';
 import 'package:anime_flow/controllers/setting_controller.dart';
 import 'package:anime_flow/repository/storage.dart';
-import 'package:anime_flow/utils/formatUtil.dart';
+import 'package:anime_flow/utils/timeUtil.dart';
 import 'package:anime_flow/utils/utils.dart';
 import 'package:anime_flow/widget/animation_network_image/animation_network_image.dart';
 import 'package:flutter/material.dart';
@@ -137,7 +137,7 @@ class _DownloadPluginsPageState extends State<DownloadPluginsPage> {
                                                 fontWeight: FontWeight.bold),
                                           ),
                                           Text(
-                                              '版本:${plugin['version']} - ${FormatUtil.formatUpdateTime(plugin['updateTime'])}'),
+                                              '版本:${plugin['version']} - ${TimeUtil.formatUpdateTime(plugin['updateTime'])}'),
                                         ],
                                       ),
                                     ),

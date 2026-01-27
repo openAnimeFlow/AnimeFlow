@@ -1,6 +1,6 @@
 import 'package:anime_flow/controllers/video/video_state_controller.dart';
 import 'package:anime_flow/controllers/video/video_ui_controller.dart';
-import 'package:anime_flow/utils/formatUtil.dart';
+import 'package:anime_flow/utils/timeUtil.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
@@ -161,7 +161,7 @@ class VideoTimeDisplay extends StatelessWidget {
       final duration = videoStateController.duration.value;
 
       return Text(
-        "${FormatUtil.formatDuration(position)} / ${FormatUtil.formatDuration(duration)}",
+        "${TimeUtil.formatDuration(position)} / ${TimeUtil.formatDuration(duration)}",
         style: const TextStyle(
           color: Colors.white,
           fontSize: 12,

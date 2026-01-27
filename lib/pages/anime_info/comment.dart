@@ -1,6 +1,6 @@
 import 'package:anime_flow/http/requests/bgm_request.dart';
 import 'package:anime_flow/models/item/bangumi/subject_comments_item.dart';
-import 'package:anime_flow/utils/formatUtil.dart';
+import 'package:anime_flow/utils/timeUtil.dart';
 import 'package:anime_flow/widget/star.dart';
 import 'package:anime_flow/widget/animation_network_image/animation_network_image.dart';
 import 'package:flutter/material.dart';
@@ -199,7 +199,7 @@ class _CommentItem extends StatelessWidget {
                         // 时间
                         if (comment.rate > 0)
                           Text(
-                            FormatUtil.formatTime(comment.updatedAt),
+                            TimeUtil.formatTime(comment.updatedAt),
                             style: TextStyle(
                               fontSize: 12,
                               color:
@@ -228,7 +228,7 @@ class _CommentItem extends StatelessWidget {
                       ),
                     ] else
                       Text(
-                        FormatUtil.formatTime(comment.updatedAt),
+                        TimeUtil.formatTime(comment.updatedAt),
                         style: TextStyle(
                           fontSize: 12,
                           color: Theme.of(context).textTheme.bodySmall?.color,

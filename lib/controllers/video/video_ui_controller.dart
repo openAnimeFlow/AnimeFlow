@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:anime_flow/models/enums/video_controls_icon_type.dart';
+import 'package:anime_flow/utils/timeUtil.dart';
 import 'package:anime_flow/utils/vibrate.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/widgets.dart';
@@ -60,10 +61,25 @@ class VideoUiStateController extends GetxController {
   /// 拖动开始时的亮度
   double _dragStartBrightness = 0.5;
 
+  /// 当前时间
+  final RxString currentTime = TimeUtil.getCurrentTimeWithoutSeconds().obs;
+
+  /// 时间更新计时器
+  Timer? _timeUpdateTimer;
+
   @override
   void onInit() {
     super.onInit();
     _initializeBrightness();
+    _startTimeUpdate();
+  }
+
+  /// 时间更新
+  void _startTimeUpdate() {
+    _timeUpdateTimer?.cancel();
+    _timeUpdateTimer = Timer.periodic(const Duration(seconds: 1), (_) {
+      currentTime.value = TimeUtil.getCurrentTimeWithoutSeconds();
+    });
   }
 
   //设置解析标题
@@ -295,6 +311,7 @@ class VideoUiStateController extends GetxController {
   void onClose() {
     _indicatorTimer?.cancel();
     _controlsUiTimer?.cancel();
+    _timeUpdateTimer?.cancel();
     _resetBrightness();
     super.onClose();
   }

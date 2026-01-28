@@ -413,8 +413,8 @@ class _AnimePageState extends State<AnimePage>
   //骨架屏
   Widget _buildSkeleton(BuildContext context) {
     final isDark = SystemUtil.isDarkTheme(context);
-    final baseColor = isDark ? Colors.grey[400]! : Colors.grey[200]!;
-    final highlightColor = isDark ? Colors.grey[300]! : Colors.grey[100]!;
+    final baseColor = isDark ? Colors.grey[850]! : Colors.grey[300]!;
+    final highlightColor = isDark ? Colors.grey[700]! : Colors.grey[100]!;
     final containerColor = isDark
         ? Theme.of(context).colorScheme.surfaceContainerHighest
         : Theme.of(context).colorScheme.surface;
@@ -431,23 +431,6 @@ class _AnimePageState extends State<AnimePage>
           ),
         ),
       ),
-      Positioned(
-        left: 0,
-        right: 0,
-        bottom: 0,
-        child: Shimmer.fromColors(
-          baseColor: baseColor,
-          highlightColor: highlightColor,
-          child: Container(
-            width: 100,
-            height: 20,
-            decoration: BoxDecoration(
-              color: containerColor,
-              borderRadius: BorderRadius.circular(8.0),
-            ),
-          ),
-        ),
-      )
     ]);
   }
 }

@@ -61,26 +61,24 @@ class _TopAreaControlState extends State<TopAreaControl> {
                         begin: Alignment.topCenter,
                         end: Alignment.bottomCenter)),
                 child: Padding(
-                  padding: const EdgeInsets.only(
-                      left:  5,
-                      right: 5,
-                      top: 2),
+                  padding: const EdgeInsets.only(left: 5, right: 5, top: 2),
                   child: Column(
                     children: [
-                      if (fullscreen) ...[
+                      //全屏时顶部信息展示
+                      //Obx细粒度更新机制,只有直接访问了响应式变量的Obx才会被触发重建。
+                      if (fullscreen)
                         Container(
                           padding: const EdgeInsets.symmetric(horizontal: 10),
                           height: 16,
                           child: Row(
                             children: [
-                              //Obx细粒度更新机制,只有直接访问了响应式变量的Obx才会被触发重建。
-                              const Expanded(child: Row(
+                              //网络图标
+                              const Expanded(
+                                  child: Row(
                                 mainAxisAlignment: MainAxisAlignment.start,
-                                children: [
-                                  NetworkIcon()
-                                ],
+                                children: [NetworkIcon()],
                               )),
-                              const SizedBox(width: 12),
+                              //系统时间
                               Obx(
                                 () => Text(
                                   videoUiStateController.currentTime.value,
@@ -91,45 +89,48 @@ class _TopAreaControlState extends State<TopAreaControl> {
                                   ),
                                 ),
                               ),
-                              Expanded(
-                                child:  Obx(
-                                  () {
-                                    final battery = videoUiStateController
-                                        .batteryLevel.value;
-                                    final batteryState = videoUiStateController
-                                        .batteryState.value;
+                              //电池图标
+                              if (SystemUtil.isMobile)
+                                Expanded(
+                                  child: Obx(
+                                    () {
+                                      final battery = videoUiStateController
+                                          .batteryLevel.value;
+                                      final batteryState =
+                                          videoUiStateController
+                                              .batteryState.value;
 
-                                    return Row(
-
-                                      crossAxisAlignment:
-                                          CrossAxisAlignment.center,
-                                      mainAxisAlignment:
-                                          MainAxisAlignment.end,
-                                      children: [
-                                        Text(
-                                          '${videoUiStateController.batteryLevel.value}%',
-                                          style: const TextStyle(
-                                            color: Colors.white,
-                                            fontSize: 10,
-                                            fontWeight: FontWeight.w600,
+                                      return Row(
+                                        crossAxisAlignment:
+                                            CrossAxisAlignment.center,
+                                        mainAxisAlignment:
+                                            MainAxisAlignment.end,
+                                        children: [
+                                          Text(
+                                            '${videoUiStateController.batteryLevel.value}%',
+                                            style: const TextStyle(
+                                              color: Colors.white,
+                                              fontSize: 10,
+                                              fontWeight: FontWeight.w600,
+                                            ),
                                           ),
-                                        ),
-                                        const SizedBox(width: 4),
-                                        BatteryIcon(
-                                          size: 25,
-                                          battery: battery,
-                                          batteryState: batteryState,
-                                          angle: 90,
-                                        ),
-                                      ],
-                                    );
-                                  },
-                                ),
-                              )
+                                          const SizedBox(width: 4),
+                                          BatteryIcon(
+                                            size: 25,
+                                            battery: battery,
+                                            batteryState: batteryState,
+                                            angle: 90,
+                                          ),
+                                        ],
+                                      );
+                                    },
+                                  ),
+                                )
+                              else
+                                const Spacer()
                             ],
                           ),
                         ),
-                      ],
                       Row(
                         children: [
                           //左侧
@@ -243,8 +244,7 @@ class _TopAreaControlState extends State<TopAreaControl> {
                                             .toggleContentExpanded(),
                                         padding: const EdgeInsets.all(0),
                                         icon: SvgPicture.asset(
-                                          playController
-                                                  .isContentExpanded.value
+                                          playController.isContentExpanded.value
                                               ? "assets/icons/right_panel_close.svg"
                                               : "assets/icons/left_panel_close.svg",
                                           width: 30,

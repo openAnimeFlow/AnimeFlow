@@ -365,6 +365,7 @@ class _VideoViewState extends State<VideoView> with WindowListener {
                 currentIndex >= 0 &&
                 currentIndex < episodes.data.length &&
                 episodes.data[currentIndex].collection == null) {
+              // TODO需要只有登录后才更新
               UserRequest.updateEpisodeProgressService(episodeId,
                   batch: true, type: 2);
               // TODO 同时更新本地剧集进度数据

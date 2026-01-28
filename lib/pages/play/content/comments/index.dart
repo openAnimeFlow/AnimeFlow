@@ -154,11 +154,9 @@ class _CommentsViewState extends State<CommentsView>
         slivers: [
           // 标题行
           SliverPadding(
-            padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 10),
+            padding: const EdgeInsets.symmetric(horizontal: 10),
             sliver: SliverToBoxAdapter(
-              child: Padding(
-                padding: const EdgeInsets.only(bottom: 10),
-                child: Row(
+              child:  Row(
                   children: [
                     const Text(
                       '吐槽',
@@ -202,7 +200,6 @@ class _CommentsViewState extends State<CommentsView>
                   ],
                 ),
               ),
-            ),
           ),
 
           // 评论列表或空状态
@@ -233,8 +230,7 @@ class _CommentsViewState extends State<CommentsView>
             SliverPadding(
               padding: EdgeInsets.only(
                   left: 10,
-                  right: 10,
-                  bottom: MediaQuery.of(context).padding.bottom),
+                  right: 10),
               sliver: SliverList.builder(
                 itemCount: comments.length,
                 itemBuilder: (BuildContext context, int index) {

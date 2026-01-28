@@ -1,11 +1,16 @@
 import 'dart:io';
+import 'dart:typed_data';
 
 import 'package:battery_plus/battery_plus.dart';
 import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:gal/gal.dart';
+import 'package:get/get.dart';
 import 'package:logger/logger.dart';
+import 'package:path_provider/path_provider.dart'
+    show getDownloadsDirectory;
 import 'package:window_manager/window_manager.dart';
 
 /// 系统信息工具类
@@ -197,6 +202,42 @@ class SystemUtil {
       } catch (e) {
         Logger().e('设置横屏方向失败: $e');
       }
+    }
+  }
+
+  /// 保存图片字节数据
+  /// [bytes] 图片字节数据
+  /// [name] 图片名称（不含扩展名）
+  static Future<void> saveImageBytes(Uint8List bytes, {String name = 'screenshot'}) async {
+    try {
+      final String time = DateTime.now().millisecondsSinceEpoch.toString();
+      
+      if (isMobile) {
+        // 移动端(保存到相册)
+        // 检查并申请存储权限
+        final hasAccess = await Gal.hasAccess();
+        if (!hasAccess) {
+          bool granted = await Gal.requestAccess();
+          if (!granted) {
+            Get.snackbar('提示', '存储权限被拒绝，无法保存图片', maxWidth: 500);
+            throw Exception('存储权限被拒绝，无法保存图片');
+          }
+        }
+        
+        await Gal.putImageBytes(bytes, name: '${name}_$time');
+        Get.snackbar('提示', '图片已保存到相册', maxWidth: 500);
+      } else {
+        // 桌面端(保存到下载目录)
+        final dir = await getDownloadsDirectory();
+        final filePath = '${dir?.path}/${name}_$time.png';
+        final file = File(filePath);
+        await file.writeAsBytes(bytes);
+        Logger().i('图片已保存到:$filePath');
+        Get.snackbar('提示', '图片已保存到:$filePath', maxWidth: 500);
+      }
+    } catch (e) {
+      Get.snackbar('提示', '保存图片失败:$e', maxWidth: 500);
+      Logger().e('保存图片失败:$e');
     }
   }
 

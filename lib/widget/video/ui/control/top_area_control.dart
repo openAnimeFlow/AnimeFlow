@@ -23,8 +23,7 @@ class TopAreaControl extends StatefulWidget {
 class _TopAreaControlState extends State<TopAreaControl> {
   late VideoStateController videoStateController;
   late VideoSourceController videoSourceController;
-
-  late PlayController playPageController;
+  late PlayController playController;
   late VideoUiStateController videoUiStateController;
   late EpisodesState episodesController;
   late PlaySubjectState subjectStateController;
@@ -34,7 +33,7 @@ class _TopAreaControlState extends State<TopAreaControl> {
     super.initState();
     videoStateController = Get.find<VideoStateController>();
     videoSourceController = Get.find<VideoSourceController>();
-    playPageController = Get.find<PlayController>();
+    playController = Get.find<PlayController>();
     videoUiStateController = Get.find<VideoUiStateController>();
     episodesController = Get.find<EpisodesState>();
     subjectStateController = Get.find<PlaySubjectState>();
@@ -44,7 +43,7 @@ class _TopAreaControlState extends State<TopAreaControl> {
   Widget build(BuildContext context) {
     return Obx(() {
       // 全屏状态
-      final fullscreen = playPageController.isFullscreen.value;
+      final fullscreen = playController.isFullscreen.value;
       return AnimatedSwitcher(
         duration: const Duration(milliseconds: 200),
         transitionBuilder: (child, animation) {
@@ -140,7 +139,7 @@ class _TopAreaControlState extends State<TopAreaControl> {
                                 InkWell(
                                   onTap: () {
                                     if (fullscreen) {
-                                      playPageController.exitFullScreen();
+                                      playController.exitFullScreen();
                                     } else {
                                       Get.back();
                                     }
@@ -238,13 +237,13 @@ class _TopAreaControlState extends State<TopAreaControl> {
                                   ),
                                 ),
                               if (SystemUtil.isDesktop)
-                                Obx(() => playPageController.isWideScreen.value
+                                Obx(() => playController.isWideScreen.value
                                     ? IconButton(
-                                        onPressed: () => playPageController
+                                        onPressed: () => playController
                                             .toggleContentExpanded(),
                                         padding: const EdgeInsets.all(0),
                                         icon: SvgPicture.asset(
-                                          playPageController
+                                          playController
                                                   .isContentExpanded.value
                                               ? "assets/icons/right_panel_close.svg"
                                               : "assets/icons/left_panel_close.svg",

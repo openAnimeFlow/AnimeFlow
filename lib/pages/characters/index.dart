@@ -78,6 +78,21 @@ class _CharacterPageState extends State<CharacterPage> {
               characters!.data.length < value.total;
           _isLoading = false;
         });
+        
+        // 数据加载完成后，检查是否需要自动加载更多（宽屏情况）
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          if (!mounted || _isLoading || !_hasMore) return;
+
+          if (!_scrollController.hasClients) return;
+
+          // 如果内容高度小于等于视口高度（无法滚动），且还有更多数据，则自动加载更多
+          final position = _scrollController.position;
+          // maxScrollExtent <= 0 表示内容可以完全显示，无需滚动
+          // 或者 maxScrollExtent 很小（接近0），表示内容几乎填满屏幕
+          if (position.maxScrollExtent <= 50 && _hasMore) {
+            _loadMore();
+          }
+        });
       }
     } catch (e) {
       if (mounted) {

@@ -37,6 +37,7 @@ class _AnimePageState extends State<AnimePage>
   final _scrollController = ScrollController();
   Calendar? _calendar;
   bool _isCalendarLoading = false;
+  String? _errorMessage;
 
   static const _contentPadding = EdgeInsets.all(10);
 
@@ -93,24 +94,45 @@ class _AnimePageState extends State<AnimePage>
   }
 
   // 加载数据
-  Future<void> _loadData() async {
-    if (_isLoading || !_hasMore) return;
+  Future<void> _loadData({bool isRefresh = false}) async {
+    if (_isLoading || (!isRefresh && !_hasMore)) return;
 
     setState(() {
       _isLoading = true;
+      if (isRefresh) {
+        _errorMessage = null;
+        _offset = 0;
+        _hasMore = true;
+      }
     });
 
-    final hotItem = await BgmRequest.getHotService(_limit, _offset);
+    try {
+      final offset = isRefresh ? 0 : _offset;
+      final hotItem = await BgmRequest.getHotService(_limit, offset);
 
-    if (mounted) {
-      setState(() {
-        _dataList.addAll(hotItem.data);
-        _offset += hotItem.data.length;
-        if (hotItem.data.length < _limit) {
-          _hasMore = false;
-        }
-        _isLoading = false;
-      });
+      if (mounted) {
+        setState(() {
+          if (isRefresh) {
+            _dataList.clear();
+            _offset = 0;
+          }
+          _dataList.addAll(hotItem.data);
+          _offset += hotItem.data.length;
+          if (hotItem.data.length < _limit) {
+            _hasMore = false;
+          }
+          _isLoading = false;
+          _errorMessage = null;
+        });
+      }
+    } catch (e) {
+      Logger().e(e);
+      if (mounted) {
+        setState(() {
+          _isLoading = false;
+          _errorMessage = e.toString();
+        });
+      }
     }
   }
 
@@ -143,8 +165,13 @@ class _AnimePageState extends State<AnimePage>
   @override
   Widget build(BuildContext context) {
     super.build(context);
+    // 首次加载中
     if (_dataList.isEmpty && _isLoading) {
       return const Center(child: CircularProgressIndicator());
+    }
+    // 首次加载失败，显示错误视图
+    if (_dataList.isEmpty && _errorMessage != null) {
+      return _buildErrorView(context);
     }
     return LayoutBuilder(
       builder: (context, constraints) {
@@ -234,8 +261,34 @@ class _AnimePageState extends State<AnimePage>
                         ],
                       ),
                     ),
+                    // 加载更多失败提示
+                    if (_errorMessage != null && _dataList.isNotEmpty)
+                      SliverToBoxAdapter(
+                        child: Padding(
+                          padding: const EdgeInsets.all(16.0),
+                          child: Column(
+                            children: [
+                              Text(
+                                '加载失败',
+                                style: TextStyle(
+                                  color: Theme.of(context)
+                                      .colorScheme
+                                      .error,
+                                  fontSize: 14,
+                                ),
+                              ),
+                              const SizedBox(height: 8),
+                              ElevatedButton.icon(
+                                onPressed: () => _loadData(),
+                                icon: const Icon(Icons.refresh),
+                                label: const Text('重试'),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
                     // 没有更多数据提示
-                    if (!_hasMore)
+                    if (!_hasMore && _errorMessage == null)
                       SliverToBoxAdapter(
                         child: Padding(
                           padding: const EdgeInsets.all(16.0),
@@ -303,6 +356,57 @@ class _AnimePageState extends State<AnimePage>
           ),
         );
       },
+    );
+  }
+
+  // 构建错误视图
+  Widget _buildErrorView(BuildContext context) {
+    return Center(
+      child: Padding(
+        padding: const EdgeInsets.all(32.0),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(
+              Icons.error_outline,
+              size: 64,
+              color: Theme.of(context).colorScheme.error,
+            ),
+            const SizedBox(height: 16),
+            Text(
+              '加载失败',
+              style: TextStyle(
+                fontSize: 20,
+                fontWeight: FontWeight.bold,
+                color: Theme.of(context).colorScheme.onSurface,
+              ),
+            ),
+            const SizedBox(height: 8),
+            Text(
+              _errorMessage ?? '未知错误',
+              style: TextStyle(
+                fontSize: 14,
+                color: Theme.of(context).colorScheme.onSurfaceVariant,
+              ),
+              textAlign: TextAlign.center,
+              maxLines: 3,
+              overflow: TextOverflow.ellipsis,
+            ),
+            const SizedBox(height: 24),
+            ElevatedButton.icon(
+              onPressed: () => _loadData(isRefresh: true),
+              icon: const Icon(Icons.refresh),
+              label: const Text('重新加载'),
+              style: ElevatedButton.styleFrom(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 24,
+                  vertical: 12,
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
     );
   }
 

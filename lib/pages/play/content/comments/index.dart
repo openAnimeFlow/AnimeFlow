@@ -156,50 +156,49 @@ class _CommentsViewState extends State<CommentsView>
           SliverPadding(
             padding: const EdgeInsets.symmetric(horizontal: 10),
             sliver: SliverToBoxAdapter(
-              child:  Row(
-                  children: [
-                    const Text(
-                      '吐槽',
-                      style:
-                          TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+              child: Row(
+                children: [
+                  const Text(
+                    '吐槽',
+                    style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+                  ),
+                  const Spacer(),
+                  Text(
+                    comments.isNotEmpty ? "评论数 ${comments.length}" : "评论数",
+                    style: TextStyle(
+                      color: Theme.of(context).colorScheme.outline,
                     ),
-                    const Spacer(),
-                    Text(
-                      comments.isNotEmpty ? "评论数 ${comments.length}" : "评论数",
-                      style: TextStyle(
-                        color: Theme.of(context).colorScheme.outline,
-                      ),
-                    ),
-                    //排序
-                    PopupMenuButton<String>(
-                      icon: const Icon(Icons.sort_rounded),
-                      offset: const Offset(0, 40),
-                      itemBuilder: (BuildContext context) {
-                        return [
-                          CheckedPopupMenuItem<String>(
-                            padding: const EdgeInsets.symmetric(vertical: 5),
-                            checked: _sortOrder == 'default',
-                            value: 'default',
-                            child: const Text('默认'),
-                          ),
-                          CheckedPopupMenuItem<String>(
-                            padding: const EdgeInsets.symmetric(vertical: 5),
-                            value: 'newest',
-                            checked: _sortOrder == 'newest',
-                            child: const Text('最新'),
-                          ),
-                        ];
-                      },
-                      onSelected: (value) {
-                        setState(() {
-                          _sortOrder = value;
-                        });
-                        _sortComments();
-                      },
-                    )
-                  ],
-                ),
+                  ),
+                  //排序
+                  PopupMenuButton<String>(
+                    icon: const Icon(Icons.sort_rounded),
+                    offset: const Offset(0, 40),
+                    itemBuilder: (BuildContext context) {
+                      return [
+                        CheckedPopupMenuItem<String>(
+                          padding: const EdgeInsets.symmetric(vertical: 5),
+                          checked: _sortOrder == 'default',
+                          value: 'default',
+                          child: const Text('默认'),
+                        ),
+                        CheckedPopupMenuItem<String>(
+                          padding: const EdgeInsets.symmetric(vertical: 5),
+                          value: 'newest',
+                          checked: _sortOrder == 'newest',
+                          child: const Text('最新'),
+                        ),
+                      ];
+                    },
+                    onSelected: (value) {
+                      setState(() {
+                        _sortOrder = value;
+                      });
+                      _sortComments();
+                    },
+                  )
+                ],
               ),
+            ),
           ),
 
           // 评论列表或空状态
@@ -228,9 +227,7 @@ class _CommentsViewState extends State<CommentsView>
             )
           else
             SliverPadding(
-              padding: EdgeInsets.only(
-                  left: 10,
-                  right: 10),
+              padding: const EdgeInsets.only(left: 10, right: 10),
               sliver: SliverList.builder(
                 itemCount: comments.length,
                 itemBuilder: (BuildContext context, int index) {

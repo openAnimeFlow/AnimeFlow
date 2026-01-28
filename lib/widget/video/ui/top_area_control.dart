@@ -5,9 +5,9 @@ import 'package:anime_flow/controllers/play/play_controller.dart';
 import 'package:anime_flow/stores/play_subject_state.dart';
 import 'package:anime_flow/controllers/video/video_ui_controller.dart';
 import 'package:anime_flow/utils/systemUtil.dart';
+import 'package:anime_flow/widget/battery_icon.dart';
 import 'package:anime_flow/widget/network_icon.dart';
 import 'package:anime_flow/widget/play_content/source_drawers/video_source_drawers.dart';
-import 'package:anime_flow/widget/video/ui/video_ui_components.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:get/get.dart';
@@ -69,8 +69,9 @@ class _TopAreaControlState extends State<TopAreaControl> {
                   child: Column(
                     children: [
                       if (fullscreen) ...[
-                        SizedBox(
-                          height: 18,
+                        Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 10),
+                          height: 16,
                           child: Row(
                             children: [
                               //Obx细粒度更新机制,只有直接访问了响应式变量的Obx才会被触发重建。

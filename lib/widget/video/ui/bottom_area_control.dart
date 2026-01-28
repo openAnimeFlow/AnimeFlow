@@ -67,7 +67,7 @@ class _BottomAreaControlState extends State<BottomAreaControl> {
           ),
           child: Padding(
             padding: EdgeInsets.only(
-                left: MediaQuery.of(context).padding.left,
+                left: 5,
                 right: 5,
                 bottom: SystemUtil.isDesktop
                     ? 10

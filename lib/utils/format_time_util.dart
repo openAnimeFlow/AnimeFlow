@@ -96,4 +96,18 @@ class FormatTimeUtil {
       return '未知';
     }
   }
+
+  /// 从秒数转换为小时和分钟
+  static String formatScheduledTime(int totalSeconds) {
+    final hours = totalSeconds ~/ 3600;
+    final minutes = (totalSeconds % 3600) ~/ 60;
+
+    if (hours == 0) {
+      return '00:${minutes.toString().padLeft(2, '0')}';
+    }
+    if (minutes == 0) {
+      return '${hours.toString().padLeft(2, '0')}:00';
+    }
+    return '${hours.toString().padLeft(2, '0')}:${minutes.toString().padLeft(2, '0')}';
+  }
 }

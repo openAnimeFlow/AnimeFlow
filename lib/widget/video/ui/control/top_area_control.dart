@@ -8,6 +8,7 @@ import 'package:anime_flow/utils/systemUtil.dart';
 import 'package:anime_flow/widget/battery_icon.dart';
 import 'package:anime_flow/widget/network_icon.dart';
 import 'package:anime_flow/widget/play_content/source_drawers/video_source_drawers.dart';
+import 'package:anime_flow/widget/video/ui/setting/video_setting.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:get/get.dart';
@@ -196,6 +197,40 @@ class _TopAreaControlState extends State<TopAreaControl> {
                           //右侧
                           Row(
                             children: [
+                              if (videoStateController.position.value >
+                                      Duration.zero &&
+                                  (playController.isWideScreen.value ||
+                                      fullscreen))
+                                IconButton(
+                                  onPressed: () {
+                                    Get.generalDialog(
+                                        barrierLabel: "VideoSetting",
+                                        barrierColor: Colors.black54,
+                                        transitionDuration:
+                                            const Duration(milliseconds: 300),
+                                        transitionBuilder: (context, animation,
+                                            secondaryAnimation, child) {
+                                          return SlideTransition(
+                                            position: Tween<Offset>(
+                                              begin: const Offset(1, 0),
+                                              end: Offset.zero,
+                                            ).animate(CurvedAnimation(
+                                              parent: animation,
+                                              curve: Curves.easeOut,
+                                            )),
+                                            child: child,
+                                          );
+                                        },
+                                        pageBuilder: (context, animation,
+                                            secondaryAnimation) {
+                                          return const VideoSetting();
+                                        });
+                                  },
+                                  icon: const Icon(
+                                      size: 29,
+                                      color: Colors.white70,
+                                      Icons.settings_outlined),
+                                ),
                               if (fullscreen)
                                 IconButton(
                                   padding: const EdgeInsets.all(0),
@@ -232,9 +267,10 @@ class _TopAreaControlState extends State<TopAreaControl> {
                                       },
                                     );
                                   },
-                                  icon: Icon(
+                                  icon: const Icon(
                                     Icons.reset_tv_outlined,
-                                    color: Colors.white.withValues(alpha: 0.8),
+                                    size: 29,
+                                    color: Colors.white70,
                                   ),
                                 ),
                               if (SystemUtil.isDesktop)

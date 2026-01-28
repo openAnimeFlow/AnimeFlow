@@ -4,6 +4,7 @@ import 'package:anime_flow/controllers/video/video_state_controller.dart';
 import 'package:anime_flow/controllers/video/video_ui_controller.dart';
 import 'package:anime_flow/models/enums/video_controls_icon_type.dart';
 import 'package:anime_flow/stores/episodes_state.dart';
+import 'package:anime_flow/utils/systemUtil.dart';
 import 'package:anime_flow/utils/utils.dart';
 import 'package:anime_flow/widget/play_content/episodes_view.dart';
 import 'package:anime_flow/widget/video/ui/danmaku/danmaku_setting.dart';
@@ -68,7 +69,7 @@ class _BottomAreaControlState extends State<BottomAreaControl> {
             padding: EdgeInsets.only(
                 left: MediaQuery.of(context).padding.left,
                 right: 5,
-                bottom: Utils.isDesktop
+                bottom: SystemUtil.isDesktop
                     ? 10
                     : isWideScreen
                     ? MediaQuery.of(context).padding.bottom

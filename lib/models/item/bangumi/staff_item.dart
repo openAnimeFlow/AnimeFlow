@@ -1,4 +1,3 @@
-import 'package:anime_flow/models/item/bangumi/image_five_item.dart';
 import 'package:anime_flow/models/item/bangumi/image_four_item.dart';
 
 /// Staff item data class

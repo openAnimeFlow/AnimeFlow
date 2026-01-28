@@ -2,6 +2,7 @@ import 'dart:io';
 
 import 'package:anime_flow/http/requests/request.dart';
 import 'package:anime_flow/models/enums/version_type.dart';
+import 'package:anime_flow/utils/systemUtil.dart';
 import 'package:anime_flow/utils/utils.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -188,7 +189,7 @@ class AppInfoController extends GetxController {
 
   ///根据平台获取下载地址
   List<DownloadInfo> getDownloadInfo(List<Map<String, dynamic>> assets, String htmlUrl) {
-    final platform = Utils.getDevice();
+    final platform = SystemUtil.getDevice();
     final List<DownloadInfo> urlList = [];
 
     for (var asset in assets) {

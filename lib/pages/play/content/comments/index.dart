@@ -1,6 +1,6 @@
 import 'package:anime_flow/models/item/bangumi/episode_comments_item.dart';
 import 'package:anime_flow/utils/format_time_util.dart';
-import 'package:anime_flow/utils/utils.dart';
+import 'package:anime_flow/utils/systemUtil.dart';
 import 'package:anime_flow/widget/bbcode/bbcode_widget.dart';
 import 'package:anime_flow/widget/animation_network_image/animation_network_image.dart';
 import 'package:flutter/material.dart';
@@ -389,7 +389,7 @@ class _CommentsViewState extends State<CommentsView>
 
   ///骨架屏
   Widget _skeleton(BuildContext context) {
-    final isDark = Utils.isDarkTheme(context);
+    final isDark = SystemUtil.isDarkTheme(context);
     final baseColor = isDark ? Colors.grey[400]! : Colors.grey[200]!;
     final highlightColor = isDark ? Colors.grey[300]! : Colors.grey[100]!;
     final containerColor = isDark

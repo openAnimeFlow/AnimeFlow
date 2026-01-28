@@ -1,5 +1,5 @@
 import 'package:anime_flow/controllers/play/episode_controller.dart';
-import 'package:anime_flow/utils/utils.dart';
+import 'package:anime_flow/utils/systemUtil.dart';
 import 'package:anime_flow/stores/episodes_state.dart';
 import 'package:anime_flow/controllers/play/play_controller.dart';
 import 'package:anime_flow/controllers/video/video_state_controller.dart';
@@ -44,7 +44,7 @@ class _VideoUiState extends State<VideoUi> {
 
   @override
   Widget build(BuildContext context) {
-    final isMobile = Utils.isMobile;
+    final isMobile = SystemUtil.isMobile;
     return Stack(children: [
       /// 控件事件
       Positioned.fill(

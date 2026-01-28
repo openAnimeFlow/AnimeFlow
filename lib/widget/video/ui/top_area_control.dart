@@ -4,7 +4,8 @@ import 'package:anime_flow/stores/episodes_state.dart';
 import 'package:anime_flow/controllers/play/play_controller.dart';
 import 'package:anime_flow/stores/play_subject_state.dart';
 import 'package:anime_flow/controllers/video/video_ui_controller.dart';
-import 'package:anime_flow/utils/utils.dart';
+import 'package:anime_flow/utils/systemUtil.dart';
+import 'package:anime_flow/widget/network_icon.dart';
 import 'package:anime_flow/widget/play_content/source_drawers/video_source_drawers.dart';
 import 'package:anime_flow/widget/video/ui/video_ui_components.dart';
 import 'package:flutter/material.dart';
@@ -41,7 +42,6 @@ class _TopAreaControlState extends State<TopAreaControl> {
 
   @override
   Widget build(BuildContext context) {
-    final leftPadding = MediaQuery.of(context).padding.left;
     return Obx(() {
       // 全屏状态
       final fullscreen = playPageController.isFullscreen.value;
@@ -74,7 +74,12 @@ class _TopAreaControlState extends State<TopAreaControl> {
                           child: Row(
                             children: [
                               //Obx细粒度更新机制,只有直接访问了响应式变量的Obx才会被触发重建。
-                              const Spacer(),
+                              const Expanded(child: Row(
+                                mainAxisAlignment: MainAxisAlignment.start,
+                                children: [
+                                  NetworkIcon()
+                                ],
+                              )),
                               const SizedBox(width: 12),
                               Obx(
                                 () => Text(
@@ -87,7 +92,7 @@ class _TopAreaControlState extends State<TopAreaControl> {
                                 ),
                               ),
                               Expanded(
-                                child: Obx(
+                                child:  Obx(
                                   () {
                                     final battery = videoUiStateController
                                         .batteryLevel.value;
@@ -145,7 +150,7 @@ class _TopAreaControlState extends State<TopAreaControl> {
                                   ),
                                 ),
                                 const SizedBox(width: 5),
-                                if (Utils.isDesktop || fullscreen)
+                                if (SystemUtil.isDesktop || fullscreen)
                                   Column(
                                     mainAxisAlignment: MainAxisAlignment.center,
                                     crossAxisAlignment:
@@ -231,7 +236,7 @@ class _TopAreaControlState extends State<TopAreaControl> {
                                     color: Colors.white.withValues(alpha: 0.8),
                                   ),
                                 ),
-                              if (Utils.isDesktop)
+                              if (SystemUtil.isDesktop)
                                 Obx(() => playPageController.isWideScreen.value
                                     ? IconButton(
                                         onPressed: () => playPageController

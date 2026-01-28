@@ -3,7 +3,7 @@ import 'package:anime_flow/pages/settings/pages/plugins/plugins.dart';
 import 'package:anime_flow/pages/settings/pages/theme.dart';
 import 'package:anime_flow/controllers/setting_controller.dart';
 import 'package:anime_flow/routes/index.dart';
-import 'package:anime_flow/utils/utils.dart';
+import 'package:anime_flow/utils/systemUtil.dart';
 import 'package:flutter/material.dart';
 import 'package:anime_flow/pages/settings/pages/general_settings.dart';
 import 'package:anime_flow/pages/settings/pages/playback_settings.dart';
@@ -128,7 +128,7 @@ class _SettingsPageState extends State<SettingsPage> {
                         child: ListView(
                             padding: EdgeInsets.only(
                                 left: MediaQuery.of(context).padding.left +
-                                    (Utils.isDesktop ? 15 : 0),
+                                    (SystemUtil.isDesktop ? 15 : 0),
                                 right: 15),
                             children: [
                               ..._categories.map((category) {

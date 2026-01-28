@@ -3,7 +3,7 @@ import 'dart:ui';
 import 'package:anime_flow/controllers/theme_controller.dart';
 import 'package:anime_flow/controllers/setting_controller.dart';
 import 'package:anime_flow/utils/layout_util.dart';
-import 'package:anime_flow/utils/utils.dart';
+import 'package:anime_flow/utils/systemUtil.dart';
 import 'package:anime_flow/widget/theme/theme_preview.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -203,12 +203,12 @@ class _ThemePageState extends State<ThemePage> {
         child: Container(
           padding: padding,
           decoration: BoxDecoration(
-            color: Utils.isDarkTheme(context)
+            color: SystemUtil.isDarkTheme(context)
                 ? Colors.white.withValues(alpha: 0.08)
                 : Colors.black.withValues(alpha: 0.08),
             borderRadius: borderRadius,
             border: Border.all(
-              color: Utils.isDarkTheme(context)
+              color: SystemUtil.isDarkTheme(context)
                   ? Colors.white.withValues(alpha: 0.15)
                   : Colors.black.withValues(alpha: 0.15),
             ),

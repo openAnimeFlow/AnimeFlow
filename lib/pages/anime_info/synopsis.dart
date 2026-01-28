@@ -4,7 +4,7 @@ import 'package:anime_flow/pages/anime_info/characters.dart';
 import 'package:anime_flow/pages/anime_info/producers.dart';
 import 'package:anime_flow/pages/anime_info/related.dart';
 import 'package:anime_flow/pages/anime_info/tags.dart';
-import 'package:anime_flow/utils/utils.dart';
+import 'package:anime_flow/utils/systemUtil.dart';
 import 'package:anime_flow/widget/text/expandable_text.dart';
 import 'package:flutter/material.dart';
 import 'package:shimmer/shimmer.dart';
@@ -175,7 +175,7 @@ class _InfoSynopsisViewState extends State<InfoSynopsisView> {
 
   ///骨架屏
   Widget _skeleton(BuildContext context) {
-    final isDark = Utils.isDarkTheme(context);
+    final isDark = SystemUtil.isDarkTheme(context);
     final baseColor = isDark ? Colors.grey[400]! : Colors.grey[100]!;
     final highlightColor = isDark ? Colors.grey[300]! : Colors.grey[50]!;
     final containerColor = isDark

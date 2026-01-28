@@ -4,6 +4,7 @@ import 'package:anime_flow/constants/storage_key.dart';
 import 'package:anime_flow/controllers/shaders/shaders_controller.dart';
 import 'package:anime_flow/models/item/danmaku/danmaku_module.dart';
 import 'package:anime_flow/repository/storage.dart';
+import 'package:anime_flow/utils/systemUtil.dart';
 import 'package:anime_flow/utils/utils.dart';
 import 'package:canvas_danmaku/canvas_danmaku.dart';
 import 'package:get/get.dart';
@@ -112,13 +113,13 @@ class PlayController extends GetxController {
   void enterFullScreen() {
     isFullscreen.value = true;
     // 移动端全屏时自动横屏
-    Utils.enterFullScreen();
+    SystemUtil.enterFullScreen();
   }
 
   /// 退出全屏
   void exitFullScreen() {
     isFullscreen.value = false;
-    Utils.exitFullScreen();
+    SystemUtil.exitFullScreen();
   }
 
   /// 切换全屏状态
@@ -131,9 +132,8 @@ class PlayController extends GetxController {
   }
 
   /// 检测桌面端全屏状态
-  ///
   Future<void> checkDesktopFullscreen() async {
-    if (Utils.isDesktop) {
+    if (SystemUtil.isDesktop) {
       isFullscreen.value = await windowManager.isFullScreen();
     }
   }

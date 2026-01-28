@@ -4,6 +4,7 @@ import 'package:anime_flow/models/item/crawler_config_item.dart';
 import 'package:anime_flow/controllers/setting_controller.dart';
 import 'package:anime_flow/repository/storage.dart';
 import 'package:anime_flow/utils/format_time_util.dart';
+import 'package:anime_flow/utils/systemUtil.dart';
 import 'package:anime_flow/utils/utils.dart';
 import 'package:anime_flow/widget/animation_network_image/animation_network_image.dart';
 import 'package:flutter/material.dart';
@@ -83,7 +84,7 @@ class _DownloadPluginsPageState extends State<DownloadPluginsPage> {
                 style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
               ),
               subtitle: const Text('当前会从Github仓库中下载数据源，注意网络环境,下拉刷新数据'),
-              trailing: Utils.isDesktop
+              trailing: SystemUtil.isDesktop
                   ? IconButton(
                       onPressed: () {
                         _getPlugins();

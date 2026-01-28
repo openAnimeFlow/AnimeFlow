@@ -2,7 +2,7 @@ import 'package:anime_flow/constants/storage_key.dart';
 import 'package:anime_flow/controllers/play/play_controller.dart';
 import 'package:anime_flow/controllers/setting_controller.dart';
 import 'package:anime_flow/repository/storage.dart';
-import 'package:anime_flow/utils/utils.dart';
+import 'package:anime_flow/utils/systemUtil.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:hive/hive.dart';
@@ -43,7 +43,7 @@ class _DanmakuSettingPageState extends State<DanmakuSettingPage> {
   void _loadSettings() {
     setState(() {
       _opacity = setting.get(DanmakuKey.danmakuOpacity, defaultValue: 1.0);
-      _fontSize = setting.get(DanmakuKey.danmakuFontSize, defaultValue: Utils.isMobile ? 16.0 : 25.0);
+      _fontSize = setting.get(DanmakuKey.danmakuFontSize, defaultValue: SystemUtil.isMobile ? 16.0 : 25.0);
       _danmakuArea = setting.get(DanmakuKey.danmakuArea, defaultValue: 0.25);
       _danmakuDuration = setting.get(DanmakuKey.danmakuDuration, defaultValue: 8.0);
       _massiveMode = setting.get(DanmakuKey.danmakuMassiveMode, defaultValue: false);

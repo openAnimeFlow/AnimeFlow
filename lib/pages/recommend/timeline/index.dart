@@ -1,6 +1,5 @@
 import 'package:anime_flow/http/requests/bgm_request.dart';
 import 'package:anime_flow/models/item/bangumi/timeline_item.dart';
-import 'package:anime_flow/widget/animation_network_image/animation_network_image.dart';
 import 'package:flutter/material.dart';
 
 class TimelinePage extends StatefulWidget {

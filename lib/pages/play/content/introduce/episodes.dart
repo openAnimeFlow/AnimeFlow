@@ -1,4 +1,3 @@
-import 'package:anime_flow/constants/play_layout_constant.dart';
 import 'package:anime_flow/stores/episodes_state.dart';
 import 'package:anime_flow/controllers/play/play_controller.dart';
 import 'package:anime_flow/stores/play_subject_state.dart';

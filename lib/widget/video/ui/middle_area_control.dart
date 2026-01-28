@@ -1,7 +1,7 @@
 import 'package:anime_flow/controllers/video/video_state_controller.dart';
 import 'package:anime_flow/controllers/video/video_ui_controller.dart';
 import 'package:anime_flow/models/enums/video_controls_icon_type.dart';
-import 'package:anime_flow/utils/timeUtil.dart';
+import 'package:anime_flow/utils/format_time_util.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
@@ -129,7 +129,7 @@ class _MiddleAreaControlState extends State<MiddleAreaControl> {
                     borderRadius: BorderRadius.circular(8),
                   ),
                   child: Text(
-                    '${TimeUtil.formatDuration(videoUiStateController.dragPosition.value)} / ${TimeUtil.formatDuration(videoStateController.duration.value)}',
+                    '${FormatTimeUtil.formatDuration(videoUiStateController.dragPosition.value)} / ${FormatTimeUtil.formatDuration(videoStateController.duration.value)}',
                     style: const TextStyle(
                       color: Colors.white,
                       fontSize: 16,

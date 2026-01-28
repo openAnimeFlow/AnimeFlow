@@ -1,5 +1,5 @@
 import 'package:anime_flow/controllers/app/app_info_controller.dart';
-import 'package:anime_flow/utils/timeUtil.dart';
+import 'package:anime_flow/utils/format_time_util.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_markdown_plus/flutter_markdown_plus.dart';
 import 'package:get/get.dart';
@@ -123,7 +123,7 @@ class _ApplyUpdatesViewState extends State<ApplyUpdatesView> {
                     const SizedBox(height: 4),
                     if (appInfoController.totalBytes.value > 0)
                       Text(
-                        '${TimeUtil.formatBytes(appInfoController.receivedBytes.value)} / ${TimeUtil.formatBytes(appInfoController.totalBytes.value)}',
+                        '${FormatTimeUtil.formatBytes(appInfoController.receivedBytes.value)} / ${FormatTimeUtil.formatBytes(appInfoController.totalBytes.value)}',
                         style: TextStyle(
                           fontSize: 12,
                           color: Theme.of(context).colorScheme.onSurfaceVariant,
@@ -207,7 +207,7 @@ class _ApplyUpdatesViewState extends State<ApplyUpdatesView> {
                                     overflow: TextOverflow.ellipsis,
                                   ),
                                   Text(
-                                    TimeUtil.formatBytes(data.size),
+                                    FormatTimeUtil.formatBytes(data.size),
                                     style: const TextStyle(
                                       fontSize: 12,
                                       fontWeight: FontWeight.w500,

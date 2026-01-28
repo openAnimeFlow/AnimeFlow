@@ -6,6 +6,7 @@ import 'package:anime_flow/stores/play_subject_state.dart';
 import 'package:anime_flow/controllers/video/video_ui_controller.dart';
 import 'package:anime_flow/utils/utils.dart';
 import 'package:anime_flow/widget/play_content/source_drawers/video_source_drawers.dart';
+import 'package:anime_flow/widget/video/ui/video_ui_components.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:get/get.dart';
@@ -61,26 +62,68 @@ class _TopAreaControlState extends State<TopAreaControl> {
                         begin: Alignment.topCenter,
                         end: Alignment.bottomCenter)),
                 child: Padding(
-                  padding: EdgeInsets.only(
-                      left: leftPadding != 0 ? leftPadding : 5,
+                  padding: const EdgeInsets.only(
+                      left:  5,
                       right: 5,
                       top: 2),
                   child: Column(
                     children: [
                       if (fullscreen) ...[
-                        Row(
-                            mainAxisAlignment: MainAxisAlignment.center,
+                        SizedBox(
+                          height: 18,
+                          child: Row(
                             children: [
                               //Obx细粒度更新机制,只有直接访问了响应式变量的Obx才会被触发重建。
-                              Obx(() => Text(
-                                    videoUiStateController.currentTime.value,
-                                    style: const TextStyle(
-                                      color: Colors.white,
-                                      fontSize: 12,
-                                      fontWeight: FontWeight.w600,
-                                    ),
-                                  ))
-                            ]),
+                              const Spacer(),
+                              const SizedBox(width: 12),
+                              Obx(
+                                () => Text(
+                                  videoUiStateController.currentTime.value,
+                                  style: const TextStyle(
+                                    color: Colors.white,
+                                    fontSize: 12,
+                                    fontWeight: FontWeight.w600,
+                                  ),
+                                ),
+                              ),
+                              Expanded(
+                                child: Obx(
+                                  () {
+                                    final battery = videoUiStateController
+                                        .batteryLevel.value;
+                                    final batteryState = videoUiStateController
+                                        .batteryState.value;
+
+                                    return Row(
+
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.center,
+                                      mainAxisAlignment:
+                                          MainAxisAlignment.end,
+                                      children: [
+                                        Text(
+                                          '${videoUiStateController.batteryLevel.value}%',
+                                          style: const TextStyle(
+                                            color: Colors.white,
+                                            fontSize: 10,
+                                            fontWeight: FontWeight.w600,
+                                          ),
+                                        ),
+                                        const SizedBox(width: 4),
+                                        BatteryIcon(
+                                          size: 25,
+                                          battery: battery,
+                                          batteryState: batteryState,
+                                          angle: 90,
+                                        ),
+                                      ],
+                                    );
+                                  },
+                                ),
+                              )
+                            ],
+                          ),
+                        ),
                       ],
                       Row(
                         children: [

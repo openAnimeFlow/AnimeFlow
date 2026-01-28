@@ -1,5 +1,5 @@
 import 'package:anime_flow/models/item/bangumi/episode_comments_item.dart';
-import 'package:anime_flow/utils/timeUtil.dart';
+import 'package:anime_flow/utils/format_time_util.dart';
 import 'package:anime_flow/utils/utils.dart';
 import 'package:anime_flow/widget/bbcode/bbcode_widget.dart';
 import 'package:anime_flow/widget/animation_network_image/animation_network_image.dart';
@@ -283,7 +283,7 @@ class _CommentsViewState extends State<CommentsView>
                         ),
                         const SizedBox(width: 8),
                         Text(
-                          TimeUtil.formatTimestamp(comment.createdAt),
+                          FormatTimeUtil.formatTimestamp(comment.createdAt),
                           style: TextStyle(
                             fontSize: 12,
                             color: Theme.of(context).colorScheme.outline,
@@ -353,7 +353,7 @@ class _CommentsViewState extends State<CommentsView>
                               ),
                               const SizedBox(width: 8),
                               Text(
-                                TimeUtil.formatTimestamp(reply.createdAt),
+                                FormatTimeUtil.formatTimestamp(reply.createdAt),
                                 style: TextStyle(
                                   fontSize: 11,
                                   color: Theme.of(context).colorScheme.outline,

@@ -5,7 +5,7 @@ import 'package:anime_flow/stores/episodes_state.dart';
 import 'package:anime_flow/controllers/play/play_controller.dart';
 import 'package:anime_flow/models/item/danmaku/danmaku_module.dart';
 import 'package:anime_flow/stores/play_subject_state.dart';
-import 'package:anime_flow/utils/timeUtil.dart';
+import 'package:anime_flow/utils/format_time_util.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
@@ -223,7 +223,7 @@ class _DanmakuCardState extends State<DanmakuCard> {
                                 ),
                               ),
                               Text(
-                                '${TimeUtil.formatDanmakuTime(danmaku.time)} · ${_extractPlatform(danmaku.source)}',
+                                '${FormatTimeUtil.formatDanmakuTime(danmaku.time)} · ${_extractPlatform(danmaku.source)}',
                                 style: Theme.of(context).textTheme.bodySmall,
                               )
                             ],

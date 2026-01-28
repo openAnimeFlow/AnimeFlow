@@ -4,14 +4,13 @@ import 'package:anime_flow/stores/episodes_state.dart';
 import 'package:anime_flow/controllers/play/play_controller.dart';
 import 'package:anime_flow/controllers/video/video_state_controller.dart';
 import 'package:anime_flow/controllers/video/video_ui_controller.dart';
+import 'package:anime_flow/widget/video/gesture/desktop_gesture_detector.dart';
+import 'package:anime_flow/widget/video/gesture/mobile_gesture_detector.dart';
 import 'package:anime_flow/widget/video/ui/middle_area_control.dart';
 import 'package:anime_flow/widget/video/ui/top_area_control.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-
 import 'bottom_area_control.dart';
-import 'desktop_gesture_detector.dart';
-import 'mobile_gesture_detector.dart';
 
 ///播放器ui
 class VideoUi extends StatefulWidget {

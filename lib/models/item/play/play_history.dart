@@ -2,28 +2,37 @@ import 'package:hive/hive.dart';
 
 part 'play_history.g.dart';
 
-@HiveType(typeId: 1)
+@HiveType(typeId: 2)
 class PlayHistory extends HiveObject {
   @HiveField(0)
-  String playId;
+  int subjectId;
 
   @HiveField(1)
-  int position;
+  int episodeId;
 
   @HiveField(2)
-  int duration;
+  int episodeSort;
 
   @HiveField(3)
-  int updateAt;
+  String subjectName;
 
-  PlayHistory(
-      {required this.playId,
-      required this.position,
-      required this.duration,
-      required this.updateAt});
+  @HiveField(4)
+  String image;
+
+  @HiveField(5)
+  DateTime playTime;
+
+  PlayHistory({
+    required this.subjectId,
+    required this.episodeId,
+    required this.episodeSort,
+    required this.subjectName,
+    required this.image,
+    required this.playTime,
+  });
 
   @override
   String toString() {
-    return 'PlayHistory{playId: $playId, position: $position, duration: $duration, updateAt: $updateAt}';
+    return 'PlayHistory{subjectId: $subjectId, episodeId: $episodeId, episodeSort: $episodeSort, subjectName: $subjectName, image: $image, playTime: $playTime}';
   }
 }

@@ -1,47 +1,41 @@
 // GENERATED CODE - DO NOT MODIFY BY HAND
 
-part of 'play_history.dart';
+part of 'play_position.dart';
 
 // **************************************************************************
 // TypeAdapterGenerator
 // **************************************************************************
 
-class PlayHistoryAdapter extends TypeAdapter<PlayHistory> {
+class PlayPositionAdapter extends TypeAdapter<PlayPosition> {
   @override
-  final int typeId = 2;
+  final int typeId = 1;
 
   @override
-  PlayHistory read(BinaryReader reader) {
+  PlayPosition read(BinaryReader reader) {
     final numOfFields = reader.readByte();
     final fields = <int, dynamic>{
       for (int i = 0; i < numOfFields; i++) reader.readByte(): reader.read(),
     };
-    return PlayHistory(
-      subjectId: fields[0] as int,
-      episodeId: fields[1] as int,
-      episodeSort: fields[2] as int,
-      subjectName: fields[3] as String,
-      image: fields[4] as String,
-      playTime: fields[5] as DateTime,
+    return PlayPosition(
+      playId: fields[0] as String,
+      position: fields[1] as int,
+      duration: fields[2] as int,
+      updateAt: fields[3] as int,
     );
   }
 
   @override
-  void write(BinaryWriter writer, PlayHistory obj) {
+  void write(BinaryWriter writer, PlayPosition obj) {
     writer
-      ..writeByte(6)
-      ..writeByte(0)
-      ..write(obj.subjectId)
-      ..writeByte(1)
-      ..write(obj.episodeId)
-      ..writeByte(2)
-      ..write(obj.episodeSort)
-      ..writeByte(3)
-      ..write(obj.subjectName)
       ..writeByte(4)
-      ..write(obj.image)
-      ..writeByte(5)
-      ..write(obj.playTime);
+      ..writeByte(0)
+      ..write(obj.playId)
+      ..writeByte(1)
+      ..write(obj.position)
+      ..writeByte(2)
+      ..write(obj.duration)
+      ..writeByte(3)
+      ..write(obj.updateAt);
   }
 
   @override
@@ -50,7 +44,7 @@ class PlayHistoryAdapter extends TypeAdapter<PlayHistory> {
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
-      other is PlayHistoryAdapter &&
+      other is PlayPositionAdapter &&
           runtimeType == other.runtimeType &&
           typeId == other.typeId;
 }

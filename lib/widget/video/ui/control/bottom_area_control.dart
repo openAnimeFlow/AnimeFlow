@@ -4,15 +4,15 @@ import 'package:anime_flow/controllers/video/video_state_controller.dart';
 import 'package:anime_flow/controllers/video/video_ui_controller.dart';
 import 'package:anime_flow/models/enums/video_controls_icon_type.dart';
 import 'package:anime_flow/stores/episodes_state.dart';
-import 'package:anime_flow/utils/utils.dart';
+import 'package:anime_flow/utils/systemUtil.dart';
 import 'package:anime_flow/widget/play_content/episodes_view.dart';
+import 'package:anime_flow/widget/video/ui/button/shader_button.dart';
 import 'package:anime_flow/widget/video/ui/danmaku/danmaku_setting.dart';
 import 'package:anime_flow/widget/video/ui/button/rate_button.dart';
 import 'package:anime_flow/widget/video/ui/video_ui_components.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:get/get.dart';
-import 'button/shader_button.dart';
 
 /// 底部区域控件
 class BottomAreaControl extends StatefulWidget {
@@ -40,7 +40,6 @@ class _BottomAreaControlState extends State<BottomAreaControl> {
 
   @override
   Widget build(BuildContext context) {
-    final paddingLeft = MediaQuery.of(context).padding.left;
     return Obx(() {
       // 全屏状态，
       final fullscreen = playController.isFullscreen.value;
@@ -66,9 +65,9 @@ class _BottomAreaControlState extends State<BottomAreaControl> {
           ),
           child: Padding(
             padding: EdgeInsets.only(
-                left: MediaQuery.of(context).padding.left,
+                left: 5,
                 right: 5,
-                bottom: Utils.isDesktop
+                bottom: SystemUtil.isDesktop
                     ? 10
                     : isWideScreen
                     ? MediaQuery.of(context).padding.bottom
@@ -86,11 +85,11 @@ class _BottomAreaControlState extends State<BottomAreaControl> {
                 ),
                 // 进度条
                 if (fullscreen || isWideScreen)
-                  Padding(
+                  const Padding(
                     padding: EdgeInsets.symmetric(
-                        horizontal: paddingLeft == 0 ? 10 : 0,
+                        horizontal: 10,
                         vertical: 5),
-                    child: const VideoProgressBar(),
+                    child: VideoProgressBar(),
                   ),
                 SizedBox(
                   child: Row(

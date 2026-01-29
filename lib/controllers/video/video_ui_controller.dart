@@ -1,7 +1,11 @@
 import 'dart:async';
 
 import 'package:anime_flow/models/enums/video_controls_icon_type.dart';
+import 'package:anime_flow/utils/systemUtil.dart';
+import 'package:anime_flow/utils/vibrate.dart';
+import 'package:battery_plus/battery_plus.dart';
 import 'package:flutter/cupertino.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:get/get.dart';
 import 'package:screen_brightness_platform_interface/screen_brightness_platform_interface.dart';
@@ -59,10 +63,63 @@ class VideoUiStateController extends GetxController {
   /// 拖动开始时的亮度
   double _dragStartBrightness = 0.5;
 
+  /// 当前时间
+  final RxString currentTime = SystemUtil.getCurrentTimeWithoutSeconds().obs;
+
+  /// 时间更新计时器
+  Timer? _timeUpdateTimer;
+
+  /// 电池电量（0-100）
+  final RxInt batteryLevel = 0.obs;
+
+  /// 电池充电状态
+  final Rx<BatteryState> batteryState = BatteryState.unknown.obs;
+
+  /// 电池状态监听流订阅
+  StreamSubscription<BatteryState>? _batteryStateSubscription;
+
+  /// 电池更新计时器
+  Timer? _batteryUpdateTimer;
+
   @override
   void onInit() {
     super.onInit();
     _initializeBrightness();
+    _startTimeUpdate();
+    _initializeBattery();
+  }
+
+  /// 时间更新
+  void _startTimeUpdate() {
+    _timeUpdateTimer?.cancel();
+    _timeUpdateTimer = Timer.periodic(const Duration(seconds: 1), (_) {
+      currentTime.value = SystemUtil.getCurrentTimeWithoutSeconds();
+    });
+  }
+
+  /// 初始化电池信息
+  Future<void> _initializeBattery() async {
+    // 获取初始电池信息
+    await _updateBatteryInfo();
+
+    // 监听电池状态变化
+    _batteryStateSubscription = SystemUtil.batteryStateStream.listen((state) {
+      batteryState.value = state;
+      _updateBatteryInfo();
+    });
+
+    // 定期更新电池电量（每30秒更新一次）
+    _batteryUpdateTimer = Timer.periodic(const Duration(seconds: 30), (_) {
+      _updateBatteryInfo();
+    });
+  }
+
+  /// 更新电池信息
+  Future<void> _updateBatteryInfo() async {
+    try {
+      batteryLevel.value = await SystemUtil.getBatteryLevel();
+      batteryState.value = await SystemUtil.getBatteryState();
+    } catch (_) {}
   }
 
   //设置解析标题
@@ -250,6 +307,11 @@ class VideoUiStateController extends GetxController {
     double newBrightness =
         (_dragStartBrightness + brightnessChange).clamp(0.0, 1.0);
 
+    if (newBrightness >= 1.0 && currentBrightness.value < 1.0) {
+      vibrateHeavy();
+    } else if (newBrightness <= 0.0 && currentBrightness.value > 0.0) {
+      vibrateHeavy();
+    }
     currentBrightness.value = newBrightness;
 
     _screenBrightness.setApplicationScreenBrightness(newBrightness);
@@ -289,6 +351,9 @@ class VideoUiStateController extends GetxController {
   void onClose() {
     _indicatorTimer?.cancel();
     _controlsUiTimer?.cancel();
+    _timeUpdateTimer?.cancel();
+    _batteryUpdateTimer?.cancel();
+    _batteryStateSubscription?.cancel();
     _resetBrightness();
     super.onClose();
   }

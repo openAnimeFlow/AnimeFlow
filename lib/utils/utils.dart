@@ -2,8 +2,8 @@ import 'dart:io';
 import 'dart:math';
 import 'package:anime_flow/constants/constants.dart';
 import 'package:anime_flow/http/dio/dio_request.dart';
+import 'package:anime_flow/utils/systemUtil.dart';
 import 'package:flutter/cupertino.dart';
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_inappwebview_platform_interface/flutter_inappwebview_platform_interface.dart';
@@ -13,7 +13,6 @@ import 'package:path/path.dart' as path;
 import 'package:path_provider/path_provider.dart'
     show getDownloadsDirectory, getTemporaryDirectory;
 import 'package:logger/logger.dart';
-import 'package:window_manager/window_manager.dart';
 
 class Utils {
   static Logger logger = Logger();
@@ -66,66 +65,32 @@ class Utils {
   static bool get isDocumentStartScriptSupported =>
       _isDocumentStartScriptSupported ?? false;
 
-  /// 判断是否为桌面端
-  static bool get isDesktop {
-    return defaultTargetPlatform == TargetPlatform.linux ||
-        defaultTargetPlatform == TargetPlatform.windows ||
-        defaultTargetPlatform == TargetPlatform.macOS;
-  }
-
-  ///判断是否为移动端
-  static bool get isMobile {
-    return defaultTargetPlatform == TargetPlatform.android ||
-        defaultTargetPlatform == TargetPlatform.iOS;
-  }
-
-  ///判断是否深色主题
-  static bool isDarkTheme(BuildContext context) {
-    return Theme.of(context).brightness == Brightness.dark;
-  }
 
   // 根据屏幕宽度确定设计稿尺寸
-  static Size getDesignSize(BuildContext context) {
-    double width = MediaQuery.of(context).size.width;
+  // static Size getDesignSize(BuildContext context) {
+  //   double width = MediaQuery.of(context).size.width;
+  //
+  //   // 1. 桌面端 (Windows, MacOS, Web)
+  //   if (kIsWeb || isDesktop) {
+  //     // 如果窗口被用户拉得非常小，则回退到平板设计稿，避免字体缩到看不见
+  //     if (width < kMobileBreakpoint) return kMobileDesignSize;
+  //     if (width < kTabletBreakpoint) return kTabletDesignSize;
+  //     return kDesktopDesignSize;
+  //   }
+  //
+  //   // 2. 移动端 (iOS, Android)
+  //   if (width <= kMobileBreakpoint) {
+  //     return kMobileDesignSize;
+  //   } else {
+  //     return kTabletDesignSize;
+  //   }
+  // }
 
-    // 1. 桌面端 (Windows, MacOS, Web)
-    if (kIsWeb || isDesktop) {
-      // 如果窗口被用户拉得非常小，则回退到平板设计稿，避免字体缩到看不见
-      if (width < kMobileBreakpoint) return kMobileDesignSize;
-      if (width < kTabletBreakpoint) return kTabletDesignSize;
-      return kDesktopDesignSize;
-    }
-
-    // 2. 移动端 (iOS, Android)
-    if (width <= kMobileBreakpoint) {
-      return kMobileDesignSize;
-    } else {
-      return kTabletDesignSize;
-    }
-  }
-
-  static String getDevice() {
-    if (kIsWeb) {
-      return 'web';
-    } else if (Platform.isAndroid) {
-      return 'android';
-    } else if (Platform.isIOS) {
-      return 'ios';
-    } else if (Platform.isMacOS) {
-      return 'macos';
-    } else if (Platform.isLinux) {
-      return 'linux';
-    } else if (Platform.isWindows) {
-      return 'windows';
-    } else {
-      return 'unknown';
-    }
-  }
 
   static Future<void> downloadImage(String url, String name) async {
     try {
       final String time = DateTime.now().millisecondsSinceEpoch.toString();
-      if (isMobile) {
+      if (SystemUtil.isMobile) {
         /*
           移动端(保持到相册)
           检查并申请存储权限
@@ -169,69 +134,6 @@ class Utils {
     return color;
   }
 
-  /// 进入全屏显示
-  static Future<void> enterFullScreen() async {
-    if (Platform.isLinux || Platform.isMacOS || Platform.isWindows) {
-      await windowManager.setFullScreen(true);
-      return;
-    }
-    await SystemChrome.setEnabledSystemUIMode(
-      SystemUiMode.immersiveSticky,
-    );
-
-    // Android 多窗口模式下不锁定方向
-    // 简化处理，如果需要可以添加 device_info_plus 来检测
-    // 横屏
-    await setLandscape();
-  }
-
-  /// 退出全屏显示
-  static Future<void> exitFullScreen() async {
-    if (Platform.isLinux || Platform.isMacOS || Platform.isWindows) {
-      await windowManager.setFullScreen(false);
-    }
-    late SystemUiMode mode = SystemUiMode.edgeToEdge;
-    try {
-      if (Platform.isAndroid || Platform.isIOS) {
-        // 简化处理，直接使用 edgeToEdge
-        // 如果需要更精确的控制，可以添加 device_info_plus 来检测 Android 版本
-        mode = SystemUiMode.edgeToEdge;
-      }
-      await SystemChrome.setEnabledSystemUIMode(mode);
-    } catch (_) {}
-
-    await restorePortraitOrientation();
-  }
-
-  /// 恢复竖屏方向
-  static Future<void> restorePortraitOrientation() async {
-    if (isMobile) {
-      try {
-        await SystemChrome.setPreferredOrientations([
-          DeviceOrientation.portraitUp,
-          DeviceOrientation.portraitDown,
-          DeviceOrientation.landscapeLeft,
-          DeviceOrientation.landscapeRight
-        ]);
-      } catch (e) {
-        logger.e('恢复竖屏方向失败: $e');
-      }
-    }
-  }
-
-  ///设置横屏
-  static Future<void> setLandscape() async {
-    if (isMobile) {
-      try {
-        await SystemChrome.setPreferredOrientations([
-          DeviceOrientation.landscapeLeft,
-          DeviceOrientation.landscapeRight
-        ]);
-      } catch (e) {
-        logger.e('设置横屏方向失败: $e');
-      }
-    }
-  }
 
   static String buildShadersAbsolutePath(
       String baseDirectory, List<String> shaders) {

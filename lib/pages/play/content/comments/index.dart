@@ -1,6 +1,6 @@
 import 'package:anime_flow/models/item/bangumi/episode_comments_item.dart';
-import 'package:anime_flow/utils/formatUtil.dart';
-import 'package:anime_flow/utils/utils.dart';
+import 'package:anime_flow/utils/format_time_util.dart';
+import 'package:anime_flow/utils/systemUtil.dart';
 import 'package:anime_flow/widget/bbcode/bbcode_widget.dart';
 import 'package:anime_flow/widget/animation_network_image/animation_network_image.dart';
 import 'package:flutter/material.dart';
@@ -154,53 +154,49 @@ class _CommentsViewState extends State<CommentsView>
         slivers: [
           // 标题行
           SliverPadding(
-            padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 10),
+            padding: const EdgeInsets.symmetric(horizontal: 10),
             sliver: SliverToBoxAdapter(
-              child: Padding(
-                padding: const EdgeInsets.only(bottom: 10),
-                child: Row(
-                  children: [
-                    const Text(
-                      '吐槽',
-                      style:
-                          TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+              child: Row(
+                children: [
+                  const Text(
+                    '吐槽',
+                    style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+                  ),
+                  const Spacer(),
+                  Text(
+                    comments.isNotEmpty ? "评论数 ${comments.length}" : "评论数",
+                    style: TextStyle(
+                      color: Theme.of(context).colorScheme.outline,
                     ),
-                    const Spacer(),
-                    Text(
-                      comments.isNotEmpty ? "评论数 ${comments.length}" : "评论数",
-                      style: TextStyle(
-                        color: Theme.of(context).colorScheme.outline,
-                      ),
-                    ),
-                    //排序
-                    PopupMenuButton<String>(
-                      icon: const Icon(Icons.sort_rounded),
-                      offset: const Offset(0, 40),
-                      itemBuilder: (BuildContext context) {
-                        return [
-                          CheckedPopupMenuItem<String>(
-                            padding: const EdgeInsets.symmetric(vertical: 5),
-                            checked: _sortOrder == 'default',
-                            value: 'default',
-                            child: const Text('默认'),
-                          ),
-                          CheckedPopupMenuItem<String>(
-                            padding: const EdgeInsets.symmetric(vertical: 5),
-                            value: 'newest',
-                            checked: _sortOrder == 'newest',
-                            child: const Text('最新'),
-                          ),
-                        ];
-                      },
-                      onSelected: (value) {
-                        setState(() {
-                          _sortOrder = value;
-                        });
-                        _sortComments();
-                      },
-                    )
-                  ],
-                ),
+                  ),
+                  //排序
+                  PopupMenuButton<String>(
+                    icon: const Icon(Icons.sort_rounded),
+                    offset: const Offset(0, 40),
+                    itemBuilder: (BuildContext context) {
+                      return [
+                        CheckedPopupMenuItem<String>(
+                          padding: const EdgeInsets.symmetric(vertical: 5),
+                          checked: _sortOrder == 'default',
+                          value: 'default',
+                          child: const Text('默认'),
+                        ),
+                        CheckedPopupMenuItem<String>(
+                          padding: const EdgeInsets.symmetric(vertical: 5),
+                          value: 'newest',
+                          checked: _sortOrder == 'newest',
+                          child: const Text('最新'),
+                        ),
+                      ];
+                    },
+                    onSelected: (value) {
+                      setState(() {
+                        _sortOrder = value;
+                      });
+                      _sortComments();
+                    },
+                  )
+                ],
               ),
             ),
           ),
@@ -231,10 +227,7 @@ class _CommentsViewState extends State<CommentsView>
             )
           else
             SliverPadding(
-              padding: EdgeInsets.only(
-                  left: 10,
-                  right: 10,
-                  bottom: MediaQuery.of(context).padding.bottom),
+              padding: const EdgeInsets.only(left: 10, right: 10),
               sliver: SliverList.builder(
                 itemCount: comments.length,
                 itemBuilder: (BuildContext context, int index) {
@@ -283,7 +276,7 @@ class _CommentsViewState extends State<CommentsView>
                         ),
                         const SizedBox(width: 8),
                         Text(
-                          FormatUtil.formatTimestamp(comment.createdAt),
+                          FormatTimeUtil.formatTimestamp(comment.createdAt),
                           style: TextStyle(
                             fontSize: 12,
                             color: Theme.of(context).colorScheme.outline,
@@ -353,7 +346,7 @@ class _CommentsViewState extends State<CommentsView>
                               ),
                               const SizedBox(width: 8),
                               Text(
-                                FormatUtil.formatTimestamp(reply.createdAt),
+                                FormatTimeUtil.formatTimestamp(reply.createdAt),
                                 style: TextStyle(
                                   fontSize: 11,
                                   color: Theme.of(context).colorScheme.outline,
@@ -364,6 +357,7 @@ class _CommentsViewState extends State<CommentsView>
                           if (reply.content.isNotEmpty) ...[
                             const SizedBox(height: 4),
                             BBCodeWidget(
+                              imagPreview: true,
                               borderRadius: BorderRadius.circular(8),
                               bbcode: reply.content,
                             )
@@ -389,7 +383,7 @@ class _CommentsViewState extends State<CommentsView>
 
   ///骨架屏
   Widget _skeleton(BuildContext context) {
-    final isDark = Utils.isDarkTheme(context);
+    final isDark = SystemUtil.isDarkTheme(context);
     final baseColor = isDark ? Colors.grey[400]! : Colors.grey[200]!;
     final highlightColor = isDark ? Colors.grey[300]! : Colors.grey[100]!;
     final containerColor = isDark

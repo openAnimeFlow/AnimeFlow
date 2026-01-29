@@ -8,7 +8,7 @@ import 'package:logger/logger.dart';
 
 import 'login_view/login_view.dart';
 import 'my_controller.dart';
-import 'no_login_view.dart';
+import 'no_logo/no_login_view.dart';
 
 class MyPage extends StatefulWidget {
   const MyPage({super.key});

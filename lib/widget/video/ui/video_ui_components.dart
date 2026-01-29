@@ -1,6 +1,7 @@
 import 'package:anime_flow/controllers/video/video_state_controller.dart';
 import 'package:anime_flow/controllers/video/video_ui_controller.dart';
-import 'package:anime_flow/utils/formatUtil.dart';
+import 'package:anime_flow/utils/format_time_util.dart';
+import 'package:battery_plus/battery_plus.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
@@ -36,7 +37,8 @@ class _VideoProgressBarState extends State<VideoProgressBar> {
               ? videoUiStateController.dragPosition.value.inMilliseconds
                   .toDouble()
               : videoStateController.position.value.inMilliseconds.toDouble();
-          final buffer = videoStateController.buffered.value.inMilliseconds.toDouble();
+          final buffer =
+              videoStateController.buffered.value.inMilliseconds.toDouble();
 
           return Stack(
             alignment: Alignment.centerLeft,
@@ -106,8 +108,10 @@ class _VideoProgressBarState extends State<VideoProgressBar> {
                   },
                   // 进度条结束拖动
                   onChangeEnd: (v) {
-                    videoStateController.seekTo(Duration(milliseconds: v.toInt()));
-                    videoUiStateController.endDrag(Duration(milliseconds: v.toInt()));
+                    videoStateController
+                        .seekTo(Duration(milliseconds: v.toInt()));
+                    videoUiStateController
+                        .endDrag(Duration(milliseconds: v.toInt()));
                   },
                 ),
               ),
@@ -161,7 +165,7 @@ class VideoTimeDisplay extends StatelessWidget {
       final duration = videoStateController.duration.value;
 
       return Text(
-        "${FormatUtil.formatDuration(position)} / ${FormatUtil.formatDuration(duration)}",
+        "${FormatTimeUtil.formatDuration(position)} / ${FormatTimeUtil.formatDuration(duration)}",
         style: const TextStyle(
           color: Colors.white,
           fontSize: 12,

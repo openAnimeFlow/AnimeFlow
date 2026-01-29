@@ -8,7 +8,7 @@ part of 'play_history.dart';
 
 class PlayHistoryAdapter extends TypeAdapter<PlayHistory> {
   @override
-  final typeId = 1;
+  final int typeId = 2;
 
   @override
   PlayHistory read(BinaryReader reader) {
@@ -16,30 +16,38 @@ class PlayHistoryAdapter extends TypeAdapter<PlayHistory> {
     final fields = <int, dynamic>{
       for (int i = 0; i < numOfFields; i++) reader.readByte(): reader.read(),
     };
-    final playIdValue = fields[0];
-    final playId = playIdValue is int 
-        ? playIdValue.toString() 
-        : playIdValue as String;
     return PlayHistory(
-      playId: playId,
-      position: fields[1] as int,
-      duration: fields[2] as int,
-      updateAt: fields[3] as int,
+      subjectId: fields[0] as int,
+      episodeId: fields[1] as int,
+      episodeSort: fields[2] as int,
+      subjectName: fields[3] as String,
+      cover: fields[4] as String,
+      updateAt: fields[5] as DateTime,
+      position: fields[6] as int,
+      duration: fields[7] as int,
     );
   }
 
   @override
   void write(BinaryWriter writer, PlayHistory obj) {
     writer
-      ..writeByte(4)
+      ..writeByte(8)
       ..writeByte(0)
-      ..write(obj.playId)
+      ..write(obj.subjectId)
       ..writeByte(1)
-      ..write(obj.position)
+      ..write(obj.episodeId)
       ..writeByte(2)
-      ..write(obj.duration)
+      ..write(obj.episodeSort)
       ..writeByte(3)
-      ..write(obj.updateAt);
+      ..write(obj.subjectName)
+      ..writeByte(4)
+      ..write(obj.cover)
+      ..writeByte(5)
+      ..write(obj.updateAt)
+      ..writeByte(6)
+      ..write(obj.position)
+      ..writeByte(7)
+      ..write(obj.duration);
   }
 
   @override
@@ -48,7 +56,7 @@ class PlayHistoryAdapter extends TypeAdapter<PlayHistory> {
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
-          other is PlayHistoryAdapter &&
-              runtimeType == other.runtimeType &&
-              typeId == other.typeId;
+      other is PlayHistoryAdapter &&
+          runtimeType == other.runtimeType &&
+          typeId == other.typeId;
 }

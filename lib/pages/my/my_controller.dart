@@ -3,7 +3,7 @@ import 'package:anime_flow/http/requests/bgm_request.dart';
 import 'package:anime_flow/http/requests/oauth_request.dart';
 import 'package:anime_flow/stores/TokenStorage.dart';
 import 'package:anime_flow/stores/user_info_store.dart';
-import 'package:anime_flow/utils/utils.dart';
+import 'package:anime_flow/utils/systemUtil.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:get/get.dart';
 import 'package:logger/logger.dart';
@@ -35,7 +35,7 @@ class MyController {
       await launchUrl(authUrl);
 
       // 桌面端：打开授权页面后，启动轮询任务等待用户完成授权
-      if (Utils.isDesktop) {
+      if (SystemUtil.isDesktop) {
         _pollTokenAfterAuth(sessionId);
       }
     } else {

@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:anime_flow/utils/vibrate.dart';
 import 'package:get/get.dart';
 import 'package:media_kit/media_kit.dart';
 import 'package:media_kit_video/media_kit_video.dart';
@@ -31,6 +32,12 @@ class VideoStateController extends GetxController {
 
   // 垂直拖动相关
   double _dragStartVolume = 100.0;
+
+  // 定时停止播放的计时器
+  Timer? _stopTimer;
+
+ /// 定时停止的时间（秒）
+  final RxInt scheduledStopDuration = 0.obs;
 
   @override
   void onInit() {
@@ -66,12 +73,6 @@ class VideoStateController extends GetxController {
     player.stream.duration.listen((dur) {
       duration.value = dur;
     });
-  }
-
-  @override
-  void onClose() {
-    player.dispose();
-    super.dispose();
   }
 
   ///暂停|播放
@@ -122,6 +123,11 @@ class VideoStateController extends GetxController {
   void updateVerticalDrag(double dragDistance, double screenHeight) {
     final volumeChange = -(dragDistance / screenHeight) * 100;
     double newVolume = _dragStartVolume + volumeChange;
+    if (newVolume >= 100 && volume.value < 100) {
+      vibrateHeavy();
+    } else if (newVolume <= 0 && volume.value > 0) {
+      vibrateHeavy();
+    }
     setVolume(newVolume);
   }
 
@@ -132,5 +138,43 @@ class VideoStateController extends GetxController {
     Future.delayed(const Duration(seconds: 2), () {
       if (!isVerticalDragging.value) {}
     });
+  }
+
+  ///停止播放
+  /// [duration] 可选参数，如果提供则会在指定时间后停止播放
+  void stopPlaying({Duration? duration}) {
+    _stopTimer?.cancel();
+    
+    if (duration != null && duration > Duration.zero) {
+      final totalSeconds = duration.inSeconds;
+      scheduledStopDuration.value = totalSeconds;
+      
+      _stopTimer = Timer.periodic(const Duration(seconds: 1), (timer) {
+        if (scheduledStopDuration.value > 0) {
+          scheduledStopDuration.value--;
+        } else {
+          player.pause();
+          timer.cancel();
+          _stopTimer = null;
+        }
+      });
+    } else {
+      scheduledStopDuration.value = 0;
+      player.pause();
+    }
+  }
+
+  /// 取消定时停止
+  void cancelScheduledStop() {
+    _stopTimer?.cancel();
+    _stopTimer = null;
+    scheduledStopDuration.value = 0;
+  }
+
+  @override
+  void onClose() {
+    _stopTimer?.cancel();
+    player.dispose();
+    super.dispose();
   }
 }

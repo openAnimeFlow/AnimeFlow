@@ -1,4 +1,4 @@
-import 'package:anime_flow/utils/utils.dart';
+import 'package:anime_flow/utils/systemUtil.dart';
 import 'package:anime_flow/controllers/play/play_controller.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -20,7 +20,7 @@ class WindowsTitleBar extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
-    if (!Utils.isDesktop) {
+    if (!SystemUtil.isDesktop) {
       return child ?? const SizedBox.shrink();
     }
 
@@ -121,7 +121,7 @@ class WindowControlButtons extends StatelessWidget {
     return Row(
       mainAxisSize: MainAxisSize.min,
       children: [
-        if (Utils.isDesktop) ...[
+        if (SystemUtil.isDesktop) ...[
           const WindowMinimizeButton(),
           const WindowMaximizeButton(),
           const WindowCloseButton(),

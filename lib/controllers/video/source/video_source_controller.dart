@@ -282,12 +282,14 @@ class VideoSourceController extends GetxController {
 
   /// 加载视频页面
   Future<void> loadVideoPage(String url) async {
+    if (!isInitWebView.value) {
+      await isInitWebView.stream.firstWhere((v) => v);
+    }
     int offset = 0;
-    final subjectId = _subjectState.id;
-    final episodeId = _episodesState.episodeId.value;
-    final position =
-        await PlayRepository.getPlayPosition('$subjectId$episodeId');
-    if (position != null && position.position > 0) {
+    final subjectId = _subjectState.subject.value.id;
+    final episodeIndex = _episodesState.episodeIndex.value;
+    final position = await PlayRepository.getPlayHistory(subjectId);
+    if (position != null && position.position > 0 && position.episodeSort == episodeIndex) {
       offset = position.position;
     }
     try {

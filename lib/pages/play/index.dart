@@ -3,15 +3,14 @@ import 'package:anime_flow/controllers/video/video_state_controller.dart';
 import 'package:anime_flow/controllers/video/video_ui_controller.dart';
 import 'package:anime_flow/http/requests/bgm_request.dart';
 import 'package:anime_flow/stores/play_subject_state.dart';
-import 'package:anime_flow/models/item/bangumi/subjects_info_item.dart';
 import 'package:anime_flow/models/item/subject_basic_data_item.dart';
+import 'package:anime_flow/utils/systemUtil.dart';
 import 'package:anime_flow/webview/webview_controller.dart';
 import 'package:anime_flow/widget/video/video.dart';
 import 'package:anime_flow/constants/play_layout_constant.dart';
 import 'package:anime_flow/stores/episodes_state.dart';
 import 'package:anime_flow/controllers/play/play_controller.dart';
 import 'package:anime_flow/controllers/video/source/video_source_controller.dart';
-import 'package:anime_flow/utils/utils.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:get/get.dart';
@@ -27,8 +26,7 @@ class PlayPage extends StatefulWidget {
 }
 
 class _PlayPageState extends State<PlayPage> {
-  late SubjectsInfoItem subjectsInfo;
-  late SubjectBasicData subjectBasicData;
+  late VideoStateController videoStateController;
   late VideoSourceController videoSourceController;
   late PlaySubjectState subjectState;
   late PlayController playController;
@@ -36,24 +34,27 @@ class _PlayPageState extends State<PlayPage> {
   final GlobalKey _videoKey = GlobalKey();
   final GlobalKey _contentKey = GlobalKey();
   Worker? _webViewInitWorker;
+
   // 标记是否已经初始化过资源
   bool _hasInitResources = false;
 
   @override
   void initState() {
     super.initState();
-    Get.put(VideoStateController());
+    videoStateController = Get.put(VideoStateController());
     videoSourceController = Get.put(VideoSourceController());
     Get.put(EpisodeController());
     Get.put(VideoUiStateController());
     playController = Get.put(PlayController());
     episodesState = Get.put(EpisodesState());
-    subjectState = Get.put(PlaySubjectState());
     Get.put<WebviewItemController>(
         WebviewItemControllerFactory.getController());
-    subjectsInfo = Get.arguments as SubjectsInfoItem;
-    subjectState.setSubject(subjectsInfo.nameCN ?? subjectsInfo.name,
-        subjectsInfo.id, subjectsInfo.tags);
+    final subject = Get.arguments as Map;
+    subjectState = Get.put(
+        PlaySubjectState(subject['subjectBasicData'] as SubjectBasicData));
+    if (subject['continueEpisode'] != null) {
+      subjectState.setContinueEpisode(subject['continueEpisode'] as int);
+    }
     _initEpisodes();
     _initResources();
   }
@@ -66,7 +67,7 @@ class _PlayPageState extends State<PlayPage> {
       _webViewInitWorker =
           ever(videoSourceController.isInitWebView, (bool initialized) {
         if (initialized) {
-          final subjectName = subjectState.name;
+          final subjectName = subjectState.subject.value.name;
           if (subjectName.isNotEmpty) {
             _hasInitResources = true;
             videoSourceController.initResources(subjectName);
@@ -76,6 +77,7 @@ class _PlayPageState extends State<PlayPage> {
     }
   }
 
+  /// 初始化剧集
   void _initEpisodes() async {
     if (episodesState.episodes.value != null) return;
     try {
@@ -83,34 +85,43 @@ class _PlayPageState extends State<PlayPage> {
         episodesState.isLoading.value = true;
       }
       final episodes = await BgmRequest.getSubjectEpisodesByIdService(
-          subjectState.id, 100, 0);
+          subjectState.subject.value.id, 100, 0);
       episodesState.episodes.value = episodes;
       episodesState.isLoading.value = false;
-
-      if (episodesState.episodeSort.value == 0 && episodes.data.isNotEmpty) {
-        WidgetsBinding.instance.addPostFrameCallback((_) {
-          if (mounted) {
-            // 查找第一个未看过的剧集
-            int targetIndex = 0;
-            for (int i = 0; i < episodes.data.length; i++) {
-              if (episodes.data[i].collection == null) {
-                targetIndex = i;
-                break;
+      //如果有路由传递剧集号有限根据传递的剧集设置剧集状态
+      if (subjectState.continueEpisode.value > 0) {
+        final episodeIndex = subjectState.continueEpisode.value;
+        final episode = episodes.data[episodeIndex - 1];
+        episodesState.setEpisodeSort(
+            sort: episode.sort,
+            episodeIndex: episodeIndex,
+            episodeId: episode.id);
+      } else {
+        if (episodesState.episodeSort.value == 0 && episodes.data.isNotEmpty) {
+          WidgetsBinding.instance.addPostFrameCallback((_) {
+            if (mounted) {
+              // 查找第一个未看过的剧集
+              int targetIndex = 0;
+              for (int i = 0; i < episodes.data.length; i++) {
+                if (episodes.data[i].collection == null) {
+                  targetIndex = i;
+                  break;
+                }
+                // 如果所有剧集都已看过，选择最后一集
+                if (i == episodes.data.length - 1) {
+                  targetIndex = i;
+                }
               }
-              // 如果所有剧集都已看过，选择最后一集
-              if (i == episodes.data.length - 1) {
-                targetIndex = i;
-              }
+              final targetEpisode = episodes.data[targetIndex];
+              episodesState.setEpisodeSort(
+                  sort: targetEpisode.sort,
+                  episodeIndex: targetIndex + 1,
+                  episodeId: targetEpisode.id);
+              episodesState
+                  .setEpisodeTitle(targetEpisode.nameCN ?? targetEpisode.name);
             }
-            final targetEpisode = episodes.data[targetIndex];
-            episodesState.setEpisodeSort(
-                sort: targetEpisode.sort,
-                episodeIndex: targetIndex + 1,
-                episodeId: targetEpisode.id);
-            episodesState
-                .setEpisodeTitle(targetEpisode.nameCN ?? targetEpisode.name);
-          }
-        });
+          });
+        }
       }
     } catch (e) {
       Logger().e(e);
@@ -119,6 +130,28 @@ class _PlayPageState extends State<PlayPage> {
       }
     }
   }
+
+  ///保存播放记录
+  // void _savePlayRecord() async {
+  //   final subjectId = subjectState.subject.value.id;
+  //   final subjectName = subjectState.subject.value.name;
+  //   final subjectImage = subjectState.subject.value.image;
+  //   // 这里需要使用剧集索引作为剧集号,方便后续使用
+  //   final episodeSort = episodesState.episodeIndex.value;
+  //   final episodeId = episodesState.episodeId.value;
+  //   final timestamp = DateTime.now();
+  //
+  //   final playHistory = PlayHistory(
+  //     subjectId: subjectId,
+  //     subjectName: subjectName,
+  //     image: subjectImage,
+  //     episodeSort: episodeSort,
+  //     playTime: timestamp,
+  //     episodeId: episodeId,
+  //   );
+  //   Logger().i('开始保存播放记录: $playHistory');
+  //   PlayRepository.savePlayHistory(playHistory);
+  // }
 
   @override
   void dispose() {
@@ -202,7 +235,7 @@ class _PlayPageState extends State<PlayPage> {
         }
 
         // 手机端监听系统返回事件
-        if (Utils.isMobile) {
+        if (SystemUtil.isMobile) {
           return PopScope(
             canPop: !isFullscreen, // 全屏时不允许返回
             onPopInvokedWithResult: (bool didPop, dynamic result) {

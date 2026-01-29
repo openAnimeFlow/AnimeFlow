@@ -1,7 +1,7 @@
 import 'dart:ui';
 import 'package:anime_flow/constants/play_layout_constant.dart';
 import 'package:anime_flow/stores/anime_info_store.dart';
-import 'package:anime_flow/utils/utils.dart';
+import 'package:anime_flow/utils/systemUtil.dart';
 import 'package:anime_flow/widget/animation_network_image/animation_network_image.dart';
 import 'package:anime_flow/widget/collection/collection_button.dart';
 import 'package:anime_flow/widget/star.dart';
@@ -131,7 +131,7 @@ class InfoHeadView extends StatelessWidget {
 
   ///骨架屏
   Widget _skeletonView(BuildContext context) {
-    final isDark = Utils.isDarkTheme(context);
+    final isDark = SystemUtil.isDarkTheme(context);
     final baseColor = isDark ? Colors.grey[400]! : Colors.grey[100]!;
     final highlightColor = isDark ? Colors.grey[300]! : Colors.grey[50]!;
     final containerColor = isDark

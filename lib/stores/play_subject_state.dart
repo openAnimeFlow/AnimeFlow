@@ -1,17 +1,17 @@
+import 'package:anime_flow/models/item/subject_basic_data_item.dart';
 import 'package:get/get.dart';
-import 'package:anime_flow/models/item/bangumi/subjects_info_item.dart';
 
 class PlaySubjectState extends GetxController {
-  final RxString subjectName = ''.obs;
-  final RxInt subjectId = 0.obs;
-  final RxList<Tags> tags = <Tags>[].obs;
+  late Rx<SubjectBasicData> subject;
 
-  int get id => subjectId.value;
-  String get name => subjectName.value;
+  ///继续观看的剧集号
+  final RxInt continueEpisode = 0.obs;
 
-  void setSubject(String name, int subjectId, List<Tags> tags) {
-    subjectName.value = name;
-    this.tags.value = tags;
-    this.subjectId.value = subjectId;
+  PlaySubjectState(SubjectBasicData subject) {
+    this.subject = subject.obs;
+  }
+
+  void setContinueEpisode(int episode) {
+    continueEpisode.value = episode;
   }
 }

@@ -3,6 +3,7 @@ import 'package:anime_flow/pages/characters/index.dart';
 import 'package:anime_flow/pages/main/index.dart';
 import 'package:anime_flow/pages/calendar/index.dart';
 import 'package:anime_flow/pages/my/index.dart';
+import 'package:anime_flow/pages/my/play_record/index.dart';
 import 'package:anime_flow/pages/play/index.dart';
 import 'package:anime_flow/pages/search/index.dart';
 import 'package:anime_flow/pages/anime_info/index.dart';
@@ -28,6 +29,7 @@ class RouteName {
   static const String calendar = "/calendar";
   static const String characters = "/characters";
   static const String characterInfo = "/character_info";
+  static const String playRecord = "/play_record";
 
   // 设置页面路由
   static const String settings = "/settings";
@@ -45,35 +47,15 @@ class RouteName {
 
 List<GetPage> getPages() {
   return [
-    GetPage(
-      name: RouteName.main,
-      page: () => const MainPage(),
-    ),
-    GetPage(
-      name: RouteName.login,
-      page: () => const MyPage(),
-    ),
-    GetPage(
-      name: RouteName.animeInfo,
-      page: () => const AnimeInfoPage(),
-    ),
-    GetPage(
-      name: RouteName.play,
-      page: () => const PlayPage(),
-    ),
-    GetPage(
-      name: RouteName.search,
-      page: () => const SearchPage(),
-    ),
-    GetPage(
-      name: RouteName.calendar,
-      page: () => const CalendarPage(),
-    ),
-    GetPage(
-      name: RouteName.characters,
-      page: () => const CharacterPage(),
-    ),
+    GetPage(name: RouteName.main, page: () => const MainPage()),
+    GetPage(name: RouteName.login, page: () => const MyPage()),
+    GetPage(name: RouteName.animeInfo, page: () => const AnimeInfoPage()),
+    GetPage(name: RouteName.play, page: () => const PlayPage()),
+    GetPage(name: RouteName.search, page: () => const SearchPage()),
+    GetPage(name: RouteName.calendar, page: () => const CalendarPage()),
+    GetPage(name: RouteName.characters, page: () => const CharacterPage()),
     GetPage(name: RouteName.characterInfo, page: () => const CharacterInfo()),
+    GetPage(name: RouteName.playRecord, page: () => const PlayRecordPage()),
     ...settingsPages(),
   ];
 }

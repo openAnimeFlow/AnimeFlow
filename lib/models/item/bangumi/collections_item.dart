@@ -1,5 +1,4 @@
 import 'package:anime_flow/models/item/bangumi/image_five_item.dart';
-import 'package:anime_flow/models/item/bangumi/subject_item.dart';
 
 class CollectionsItem {
   List<Data> data;

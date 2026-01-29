@@ -5,7 +5,7 @@ import 'package:anime_flow/stores/episodes_state.dart';
 import 'package:anime_flow/controllers/play/play_controller.dart';
 import 'package:anime_flow/models/item/danmaku/danmaku_module.dart';
 import 'package:anime_flow/stores/play_subject_state.dart';
-import 'package:anime_flow/utils/formatUtil.dart';
+import 'package:anime_flow/utils/format_time_util.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
@@ -83,6 +83,7 @@ class _DanmakuCardState extends State<DanmakuCard> {
   Widget build(BuildContext context) {
     return Obx(() {
       final allDanmakus = <Danmaku>[];
+      final subjectName = subjectState.subject.value.name;
       playController.danDanmakus.forEach((time, danmakus) {
         allDanmakus.addAll(danmakus);
       });
@@ -144,14 +145,14 @@ class _DanmakuCardState extends State<DanmakuCard> {
                           Expanded(
                             child: Padding(
                               padding: const EdgeInsets.symmetric(vertical: 10),
-                              child: Text(subjectState.name,
+                              child: Text(subjectName,
                                   style: const TextStyle(
                                       fontWeight: FontWeight.bold)),
                             ),
                           ),
                           TextButton(
                             onPressed: () {
-                              danmakuFieldController.text = subjectState.name;
+                              danmakuFieldController.text = subjectName;
                               Get.dialog(danmakuDialog);
                             },
                             child: const Text('切换弹幕'),
@@ -223,7 +224,7 @@ class _DanmakuCardState extends State<DanmakuCard> {
                                 ),
                               ),
                               Text(
-                                '${FormatUtil.formatDanmakuTime(danmaku.time)} · ${_extractPlatform(danmaku.source)}',
+                                '${FormatTimeUtil.formatDanmakuTime(danmaku.time)} · ${_extractPlatform(danmaku.source)}',
                                 style: Theme.of(context).textTheme.bodySmall,
                               )
                             ],

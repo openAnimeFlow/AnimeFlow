@@ -7,7 +7,7 @@ import 'package:anime_flow/pages/ranking/index.dart';
 import 'package:anime_flow/routes/index.dart';
 import 'package:anime_flow/stores/user_info_store.dart';
 import 'package:anime_flow/utils/crawl_config.dart';
-import 'package:anime_flow/utils/utils.dart';
+import 'package:anime_flow/utils/systemUtil.dart';
 import 'package:anime_flow/widget/animation_network_image/animation_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:anime_flow/pages/recommend/index.dart';
@@ -204,7 +204,7 @@ class _MainPageState extends State<MainPage> {
     final bool isDesktop = MediaQuery.of(context).size.width >= 640;
     final colorScheme = Theme.of(context).colorScheme;
     mainPageState.changeIsDesktop(isDesktop);
-    final desktop = Utils.isDesktop;
+    final desktop = SystemUtil.isDesktop;
     return Scaffold(
       body: Row(
         children: [

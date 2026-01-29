@@ -2,7 +2,7 @@ import 'package:anime_flow/http/api_path.dart';
 import 'package:anime_flow/http/dio/bgm_dio_request.dart';
 import 'package:anime_flow/http/dio/dio_request.dart';
 import 'package:anime_flow/models/item/token_item.dart';
-import 'package:anime_flow/utils/utils.dart';
+import 'package:anime_flow/utils/systemUtil.dart';
 
 class OAuthRequest {
   static const String _animeFlowApi = AnimeFlowApi.animeFlowApi;
@@ -34,7 +34,7 @@ class OAuthRequest {
 
   //获取session
   static Future<Map<String, dynamic>> getSessionService() async {
-    String deviceName = Utils.getDevice().toUpperCase();
+    String deviceName = SystemUtil.getDevice().toUpperCase();
     return await dioRequest.get(_animeFlowApi + AnimeFlowApi.session,
         queryParameters: {'platform': deviceName}).then((value) => value.data);
   }

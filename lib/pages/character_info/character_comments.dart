@@ -1,6 +1,6 @@
 import 'package:anime_flow/http/requests/bgm_request.dart';
 import 'package:anime_flow/models/item/bangumi/character_comments_item.dart';
-import 'package:anime_flow/utils/formatUtil.dart';
+import 'package:anime_flow/utils/format_time_util.dart';
 import 'package:anime_flow/widget/bbcode/bbcode_widget.dart';
 import 'package:anime_flow/widget/animation_network_image/animation_network_image.dart';
 import 'package:flutter/material.dart';
@@ -127,7 +127,7 @@ class _CharacterCommentsViewState extends State<CharacterCommentsView> {
                         ),
                         const SizedBox(width: 8),
                         Text(
-                          FormatUtil.formatTimestamp(comment.createdAt),
+                          FormatTimeUtil.formatTimestamp(comment.createdAt),
                           style: TextStyle(
                             fontSize: 12,
                             color: Theme.of(context).colorScheme.outline,
@@ -197,7 +197,7 @@ class _CharacterCommentsViewState extends State<CharacterCommentsView> {
                               ),
                               const SizedBox(width: 8),
                               Text(
-                                FormatUtil.formatTimestamp(reply.createdAt),
+                                FormatTimeUtil.formatTimestamp(reply.createdAt),
                                 style: TextStyle(
                                   fontSize: 11,
                                   color: Theme.of(context).colorScheme.outline,

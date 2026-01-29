@@ -4,7 +4,7 @@ import 'package:anime_flow/widget/animation_network_image/animation_network_imag
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
-import 'my_controller.dart';
+import '../my_controller.dart';
 
 class NoLoginView extends StatefulWidget {
   const NoLoginView({super.key});

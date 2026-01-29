@@ -3,6 +3,7 @@ import 'package:anime_flow/controllers/video/video_state_controller.dart';
 import 'package:anime_flow/controllers/video/video_ui_controller.dart';
 import 'package:anime_flow/models/enums/video_controls_icon_type.dart';
 import 'package:anime_flow/repository/storage.dart';
+import 'package:anime_flow/utils/vibrate.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get_core/src/get_main.dart';
 import 'package:get/get_instance/src/extension_instance.dart';
@@ -59,6 +60,7 @@ class _MobileGestureDetectorState extends State<MobileGestureDetector> {
       //长按开始
       onLongPressStart: (LongPressStartDetails details) {
         if (videoStateController.playing.value) {
+          vibrateMedium();
           videoStateController.startSpeedBoost(_fastForwardSpeed);
           videoUiStateController.updateIndicatorTypeAndShowIndicator(
               VideoControlsIndicatorType.speedIndicator);

@@ -1,4 +1,5 @@
 import 'dart:math';
+import 'package:anime_flow/utils/systemUtil.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'image_preview_page.dart';
@@ -117,7 +118,7 @@ class _ShimmerLoadingState extends State<_ShimmerLoading>
 
   @override
   Widget build(BuildContext context) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final isDark = SystemUtil.isDarkTheme(context);
 
     return AnimatedBuilder(
       animation: _animation,

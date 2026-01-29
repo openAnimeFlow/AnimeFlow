@@ -79,8 +79,20 @@ class _CharacterPageState extends State<CharacterPage> {
           _isLoading = false;
         });
 
-        // 宽屏设备可能无法滚动，需要检查并自动加载更多
-        _checkAndLoadMoreIfNeeded();
+        // 数据加载完成后，检查是否需要自动加载更多（宽屏情况）
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          if (!mounted || _isLoading || !_hasMore) return;
+
+          if (!_scrollController.hasClients) return;
+
+          // 如果内容高度小于等于视口高度（无法滚动），且还有更多数据，则自动加载更多
+          final position = _scrollController.position;
+          // maxScrollExtent <= 0 表示内容可以完全显示，无需滚动
+          // 或者 maxScrollExtent 很小（接近0），表示内容几乎填满屏幕
+          if (position.maxScrollExtent <= 50 && _hasMore) {
+            _loadMore();
+          }
+        });
       }
     } catch (e) {
       if (mounted) {
@@ -96,20 +108,6 @@ class _CharacterPageState extends State<CharacterPage> {
     if (!_isLoading && _hasMore) {
       _getCharacters(loadMore: true);
     }
-  }
-
-  // 检查内容是否可滚动，如果不可滚动且还有更多数据，则自动加载更多
-  void _checkAndLoadMoreIfNeeded() {
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (!mounted || !_hasMore || _isLoading) return;
-
-      // 检查是否可以滚动
-      if (_scrollController.hasClients &&
-          _scrollController.position.maxScrollExtent <= 0) {
-        // 内容不足以滚动，自动加载更多
-        _loadMore();
-      }
-    });
   }
 
   @override

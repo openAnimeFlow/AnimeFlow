@@ -283,7 +283,7 @@ class VideoSourceController extends GetxController {
   /// 加载视频页面
   Future<void> loadVideoPage(String url) async {
     int offset = 0;
-    final subjectId = _subjectState.id;
+    final subjectId = _subjectState.subject.value.id;
     final episodeId = _episodesState.episodeId.value;
     final position =
         await PlayRepository.getPlayPosition('$subjectId$episodeId');

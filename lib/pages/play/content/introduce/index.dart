@@ -18,7 +18,7 @@ class _IntroduceViewState extends State<IntroduceView>
     with AutomaticKeepAliveClientMixin {
   Logger logger = Logger();
   late PlayController playPageController;
-  late PlaySubjectState subjectStateController;
+  late PlaySubjectState playSubjectState;
   bool isVideoSourceLoading = true;
 
   @override
@@ -28,7 +28,7 @@ class _IntroduceViewState extends State<IntroduceView>
   void initState() {
     super.initState();
     playPageController = Get.find<PlayController>();
-    subjectStateController = Get.find<PlaySubjectState>();
+    playSubjectState = Get.find<PlaySubjectState>();
   }
 
   @override
@@ -47,7 +47,7 @@ class _IntroduceViewState extends State<IntroduceView>
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
-            subjectStateController.name,
+            playSubjectState.subject.value.name,
             style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
             textAlign: TextAlign.left,
           ),

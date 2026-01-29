@@ -182,10 +182,7 @@ class _AnimeInfoPageState extends State<AnimeInfoPage> {
             const SizedBox(height: 5),
             FloatingActionButton(
               heroTag: 'play_${subjectBasicData.id}',
-              onPressed: () => Get.toNamed(RouteName.play, arguments: {
-                'subjectsId': subjectBasicData.id,
-                'subjectsName': subjectBasicData.name,
-              }),
+              onPressed: () => Get.toNamed(RouteName.play, arguments: subjectBasicData),
               child: Icon(
                 Icons.play_arrow_rounded,
                 color: Theme.of(context).colorScheme.primary,

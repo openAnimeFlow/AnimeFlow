@@ -4,6 +4,8 @@ class StorageKey {
 
   static const String settingsKey = 'settings_key';
 
+  static const String playPositionKey = 'play_position_key';
+
   static const String playHistoryKey = 'play_history_key';
 }
 

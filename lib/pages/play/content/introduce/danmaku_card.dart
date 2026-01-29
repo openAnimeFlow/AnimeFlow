@@ -83,6 +83,7 @@ class _DanmakuCardState extends State<DanmakuCard> {
   Widget build(BuildContext context) {
     return Obx(() {
       final allDanmakus = <Danmaku>[];
+      final subjectName = subjectState.subject.value.name;
       playController.danDanmakus.forEach((time, danmakus) {
         allDanmakus.addAll(danmakus);
       });
@@ -144,14 +145,14 @@ class _DanmakuCardState extends State<DanmakuCard> {
                           Expanded(
                             child: Padding(
                               padding: const EdgeInsets.symmetric(vertical: 10),
-                              child: Text(subjectState.name,
+                              child: Text(subjectName,
                                   style: const TextStyle(
                                       fontWeight: FontWeight.bold)),
                             ),
                           ),
                           TextButton(
                             onPressed: () {
-                              danmakuFieldController.text = subjectState.name;
+                              danmakuFieldController.text = subjectName;
                               Get.dialog(danmakuDialog);
                             },
                             child: const Text('切换弹幕'),

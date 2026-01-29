@@ -41,7 +41,7 @@ class _VideoSourceDrawersState extends State<VideoSourceDrawers> {
     videoStateController = Get.find<VideoStateController>();
     episodesController = Get.find<EpisodesState>();
     dataSourceController = Get.find<VideoSourceController>();
-    _searchController.text = subjectState.name;
+    _searchController.text = subjectState.subject.value.name;
   }
 
   void setShowEpisodes() {

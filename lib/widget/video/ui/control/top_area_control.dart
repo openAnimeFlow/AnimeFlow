@@ -27,7 +27,7 @@ class _TopAreaControlState extends State<TopAreaControl> {
   late PlayController playController;
   late VideoUiStateController videoUiStateController;
   late EpisodesState episodesController;
-  late PlaySubjectState subjectStateController;
+  late PlaySubjectState playSubjectState;
 
   @override
   void initState() {
@@ -37,7 +37,7 @@ class _TopAreaControlState extends State<TopAreaControl> {
     playController = Get.find<PlayController>();
     videoUiStateController = Get.find<VideoUiStateController>();
     episodesController = Get.find<EpisodesState>();
-    subjectStateController = Get.find<PlaySubjectState>();
+    playSubjectState = Get.find<PlaySubjectState>();
   }
 
   @override
@@ -159,7 +159,7 @@ class _TopAreaControlState extends State<TopAreaControl> {
                                         CrossAxisAlignment.start,
                                     children: [
                                       Text(
-                                        subjectStateController.name,
+                                        playSubjectState.subject.value.name,
                                         style: const TextStyle(
                                             color: Colors.white,
                                             fontSize: 16,

@@ -100,7 +100,7 @@ class _VideoViewState extends State<VideoView> with WindowListener {
       if (completed) {
         _autoSwitchToNextEpisode();
         PlayRepository.deletePlayPosition(
-            '${subjectState.id}${episodesState.episodeId.value}');
+            '${subjectState.subject.value.id}${episodesState.episodeId.value}');
       }
     });
 
@@ -266,7 +266,7 @@ class _VideoViewState extends State<VideoView> with WindowListener {
 
       final bgmBangumiId =
           await DanmakuRequest.getDanDanBangumiIDByBgmBangumiID(
-              subjectState.subjectId.value);
+              subjectState.subject.value.id);
       final danmaku = await DanmakuRequest.getDanDanmaku(bgmBangumiId, episode);
       playController.addDanmaku(danmaku);
       logger.i('弹幕数量为：${danmaku.length}');
@@ -341,7 +341,7 @@ class _VideoViewState extends State<VideoView> with WindowListener {
   void _startProgressTracking() {
     _saveProgressTimer?.cancel();
     _saveProgressTimer = null;
-    final subjectId = subjectState.id;
+    final subjectId = subjectState.subject.value.id;
     final episodeId = episodesState.episodeId.value;
     try {
       // 播放时，每5秒保存一次，使用实时获取的进度值

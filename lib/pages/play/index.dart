@@ -2,6 +2,8 @@ import 'package:anime_flow/controllers/play/episode_controller.dart';
 import 'package:anime_flow/controllers/video/video_state_controller.dart';
 import 'package:anime_flow/controllers/video/video_ui_controller.dart';
 import 'package:anime_flow/http/requests/bgm_request.dart';
+import 'package:anime_flow/models/item/play/play_history.dart';
+import 'package:anime_flow/repository/play_repository.dart';
 import 'package:anime_flow/stores/play_subject_state.dart';
 import 'package:anime_flow/models/item/bangumi/subjects_info_item.dart';
 import 'package:anime_flow/models/item/subject_basic_data_item.dart';
@@ -27,8 +29,8 @@ class PlayPage extends StatefulWidget {
 }
 
 class _PlayPageState extends State<PlayPage> {
+  late VideoStateController videoStateController;
   late SubjectsInfoItem subjectsInfo;
-  late SubjectBasicData subjectBasicData;
   late VideoSourceController videoSourceController;
   late PlaySubjectState subjectState;
   late PlayController playController;
@@ -43,20 +45,20 @@ class _PlayPageState extends State<PlayPage> {
   @override
   void initState() {
     super.initState();
-    Get.put(VideoStateController());
+    videoStateController = Get.put(VideoStateController());
     videoSourceController = Get.put(VideoSourceController());
     Get.put(EpisodeController());
     Get.put(VideoUiStateController());
     playController = Get.put(PlayController());
     episodesState = Get.put(EpisodesState());
-    subjectState = Get.put(PlaySubjectState());
     Get.put<WebviewItemController>(
         WebviewItemControllerFactory.getController());
-    final subjects = Get.arguments as Map<String, dynamic>;
-    subjectState.setSubject(
-        subjects['subjectsName'] as String, subjects['subjectsId'] as int);
+    subjectState = Get.put(PlaySubjectState(Get.arguments as SubjectBasicData));
     _initEpisodes();
     _initResources();
+    if(videoStateController.position.value > Duration.zero) {
+      _savePlayRecord();
+    }
   }
 
   /// 初始化资源
@@ -67,7 +69,7 @@ class _PlayPageState extends State<PlayPage> {
       _webViewInitWorker =
           ever(videoSourceController.isInitWebView, (bool initialized) {
         if (initialized) {
-          final subjectName = subjectState.name;
+          final subjectName = subjectState.subject.value.name;
           if (subjectName.isNotEmpty) {
             _hasInitResources = true;
             videoSourceController.initResources(subjectName);
@@ -84,7 +86,7 @@ class _PlayPageState extends State<PlayPage> {
         episodesState.isLoading.value = true;
       }
       final episodes = await BgmRequest.getSubjectEpisodesByIdService(
-          subjectState.id, 100, 0);
+          subjectState.subject.value.id, 100, 0);
       episodesState.episodes.value = episodes;
       episodesState.isLoading.value = false;
 
@@ -119,6 +121,28 @@ class _PlayPageState extends State<PlayPage> {
         episodesState.isLoading.value = false;
       }
     }
+  }
+
+  ///保存播放记录
+  void _savePlayRecord() async {
+    final subjectId = subjectsInfo.id;
+    final subjectName = subjectState.subject.value.name;
+    final subjectImage = subjectState.subject.value.image;
+    // 这里需要使用剧集索引作为剧集号,方便后续使用
+    final episodeSort = episodesState.episodeIndex.value;
+    final episodeId = episodesState.episodeId.value;
+    final timestamp = DateTime.now();
+
+    final playHistory = PlayHistory(
+      subjectId: subjectId,
+      subjectName: subjectName,
+      image: subjectImage,
+      episodeSort: episodeSort,
+      playTime: timestamp,
+      episodeId: episodeId,
+    );
+    Logger().i('开始保存播放记录: $playHistory');
+    PlayRepository.savePlayHistory(playHistory);
   }
 
   @override

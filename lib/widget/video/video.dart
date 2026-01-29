@@ -341,34 +341,16 @@ class _VideoViewState extends State<VideoView> with WindowListener {
   void _startProgressTracking() {
     _saveProgressTimer?.cancel();
     _saveProgressTimer = null;
-    final subjectId = subjectState.subject.value.id;
-    final subjectName = subjectState.subject.value.name;
-    final subjectImage = subjectState.subject.value.image;
-    final episodeIndex = episodesState.episodeIndex.value;
-    final episodeId = episodesState.episodeId.value;
     try {
       // 播放时，每5秒保存一次，使用实时获取的进度值
       _saveProgressTimer = Timer.periodic(const Duration(seconds: 5), (_) {
-        final position = videoStateController.position.value;
-        final duration = videoStateController.duration.value;
-        if (position == Duration.zero || duration == Duration.zero) {
-          return;
-        }
-        if (subjectId <= 0 || episodeId <= 0) return;
-        final newDate = DateTime.now();
-        final playHistory = PlayHistory(
-          subjectId: subjectId,
-          subjectName: subjectName,
-          episodeId: episodeId,
-          episodeSort: episodeIndex,
-          cover: subjectImage,
-          updateAt: newDate,
-          position: position.inSeconds,
-          duration: duration.inSeconds,
-        );
-        PlayRepository.savePlayHistory(playHistory);
+        _savePlayHistory();
         /// 播放进度大于90% && collection != null，更新章节进度
         if (_episodesProgress) {
+          final position = videoStateController.position.value;
+          final duration = videoStateController.duration.value;
+          final episodeIndex = episodesState.episodeIndex.value;
+          final episodeId = episodesState.episodeId.value;
           final progressPercent = position.inSeconds / duration.inSeconds * 100;
           if (progressPercent > 90) {
             final currentIndex = episodeIndex - 1;
@@ -404,6 +386,30 @@ class _VideoViewState extends State<VideoView> with WindowListener {
     }
   }
 
+  /// 保存播放记录
+  void _savePlayHistory() {
+    final position = videoStateController.position.value;
+    final duration = videoStateController.duration.value;
+    if (position == Duration.zero || duration == Duration.zero) return;
+
+    final subjectId = subjectState.subject.value.id;
+    final episodeId = episodesState.episodeId.value;
+    if (subjectId <= 0 || episodeId <= 0) return;
+
+    final playHistory = PlayHistory(
+      subjectId: subjectId,
+      subjectName: subjectState.subject.value.name,
+      episodeId: episodeId,
+      episodeSort: episodesState.episodeIndex.value,
+      cover: subjectState.subject.value.image,
+      updateAt: DateTime.now(),
+      position: position.inSeconds,
+      duration: duration.inSeconds,
+    );
+    logger.i('保存播放记录: $playHistory');
+    PlayRepository.savePlayHistory(playHistory);
+  }
+
   @override
   void dispose() {
     _parseTimeoutTimer?.cancel();
@@ -412,11 +418,11 @@ class _VideoViewState extends State<VideoView> with WindowListener {
     _logSubscription?.cancel();
     _saveProgressTimer?.cancel();
     _initSubscription?.cancel();
+    _savePlayHistory();
     // 移除窗口监听器
     if (Platform.isWindows || Platform.isLinux || Platform.isMacOS) {
       windowManager.removeListener(this);
     }
-    _startProgressTracking();
     super.dispose();
   }
 

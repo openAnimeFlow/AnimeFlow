@@ -1,9 +1,12 @@
 import 'package:anime_flow/models/item/play/play_history.dart';
+import 'package:anime_flow/models/item/subject_basic_data_item.dart';
 import 'package:anime_flow/repository/play_repository.dart';
 import 'package:anime_flow/repository/storage.dart';
+import 'package:anime_flow/routes/index.dart';
 import 'package:anime_flow/utils/format_time_util.dart';
 import 'package:anime_flow/widget/animation_network_image/animation_network_image.dart';
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 import 'package:logger/logger.dart';
 
 class PlayRecordPage extends StatefulWidget {
@@ -96,7 +99,7 @@ class _PlayRecordPageState extends State<PlayRecordPage> {
               );
             } else {
               return ConstrainedBox(
-                constraints: const BoxConstraints(maxWidth: 1400),
+                constraints: const BoxConstraints(maxWidth: 1800),
                 child: GridView.builder(
                   padding: const EdgeInsets.symmetric(horizontal: 16),
                   itemCount: playHistoryList!.length,
@@ -112,6 +115,7 @@ class _PlayRecordPageState extends State<PlayRecordPage> {
                       child: Row(
                         children: [
                           AnimationNetworkImage(
+                              filterQuality: FilterQuality.high,
                               borderRadius: BorderRadius.circular(8),
                               url: playHistory.cover),
                           const SizedBox(width: 8),
@@ -121,7 +125,7 @@ class _PlayRecordPageState extends State<PlayRecordPage> {
                             children: [
                               Text(
                                 playHistory.subjectName,
-                                style: TextStyle(
+                                style: const TextStyle(
                                     fontSize: 16, fontWeight: FontWeight.bold),
                               ),
                               Row(
@@ -129,9 +133,37 @@ class _PlayRecordPageState extends State<PlayRecordPage> {
                                   Text(FormatTimeUtil.formatDateTime(
                                       playHistory.updateAt)),
                                   Text(
-                                      '-观看${_calculateWatchPercentage(playHistory.position, playHistory.duration)}'),
+                                    '-观看${_calculateWatchPercentage(playHistory.position, playHistory.duration)}',
+                                    style: const TextStyle(
+                                        fontWeight: FontWeight.bold),
+                                  ),
                                 ],
-                              )
+                              ),
+                              Expanded(
+                                  child: Row(
+                                crossAxisAlignment: CrossAxisAlignment.end,
+                                children: [
+                                  const Spacer(),
+                                  ElevatedButton(
+                                      onPressed: () {
+                                        final subjectBasicData =
+                                            SubjectBasicData(
+                                                id: playHistory.subjectId,
+                                                name: playHistory.subjectName,
+                                                image: playHistory.cover);
+                                        final episodeSort = playHistory.episodeSort;
+                                        Get.toNamed(RouteName.play,arguments: {
+                                          'subjectBasicData': subjectBasicData,
+                                          'continueEpisode': episodeSort,
+                                        });
+                                      },
+                                      child: Text(
+                                        '播放(${playHistory.episodeSort.toString().padLeft(2, '0')})',
+                                        style: const TextStyle(
+                                            fontWeight: FontWeight.bold),
+                                      ))
+                                ],
+                              ))
                             ],
                           ))
                         ],

@@ -3,8 +3,6 @@ import 'package:anime_flow/models/item/bangumi/calendar_item.dart';
 import 'package:anime_flow/models/item/subject_basic_data_item.dart';
 import 'package:anime_flow/routes/index.dart';
 import 'package:anime_flow/utils/layout_util.dart';
-import 'package:anime_flow/widget/animation_network_image/animation_network_image.dart';
-import 'package:anime_flow/widget/ranking.dart';
 import 'package:anime_flow/widget/subject_card.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';

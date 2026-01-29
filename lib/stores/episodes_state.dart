@@ -14,7 +14,6 @@ class EpisodesState extends GetxController {
   }
 
   void setEpisodeSort({required num sort, required int episodeIndex, required int episodeId}) {
-    // 只有当值真的变化时才更新，避免不必要的通知触发
     if (episodeSort.value != sort) {
       episodeSort.value = sort.toDouble();
     }

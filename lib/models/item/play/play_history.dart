@@ -46,4 +46,9 @@ class PlayHistory extends HiveObject {
     required this.position,
     required this.duration,
   });
+
+  @override
+  String toString() {
+    return 'PlayHistory{subjectId: $subjectId, episodeId: $episodeId, episodeSort: $episodeSort, subjectName: $subjectName, cover: $cover, updateAt: $updateAt, position: $position, duration: $duration}';
+  }
 }

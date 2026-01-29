@@ -2,8 +2,6 @@ import 'package:anime_flow/controllers/play/episode_controller.dart';
 import 'package:anime_flow/controllers/video/video_state_controller.dart';
 import 'package:anime_flow/controllers/video/video_ui_controller.dart';
 import 'package:anime_flow/http/requests/bgm_request.dart';
-import 'package:anime_flow/models/item/play/play_history.dart';
-import 'package:anime_flow/repository/play_repository.dart';
 import 'package:anime_flow/stores/play_subject_state.dart';
 import 'package:anime_flow/models/item/subject_basic_data_item.dart';
 import 'package:anime_flow/utils/systemUtil.dart';
@@ -51,10 +49,14 @@ class _PlayPageState extends State<PlayPage> {
     episodesState = Get.put(EpisodesState());
     Get.put<WebviewItemController>(
         WebviewItemControllerFactory.getController());
-    subjectState = Get.put(PlaySubjectState(Get.arguments as SubjectBasicData));
+    final subject = Get.arguments as Map;
+    subjectState = Get.put(
+        PlaySubjectState(subject['subjectBasicData'] as SubjectBasicData));
+    if (subject['continueEpisode'] != null) {
+      subjectState.setContinueEpisode(subject['continueEpisode'] as int);
+    }
     _initEpisodes();
     _initResources();
-
   }
 
   /// 初始化资源
@@ -75,6 +77,7 @@ class _PlayPageState extends State<PlayPage> {
     }
   }
 
+  /// 初始化剧集
   void _initEpisodes() async {
     if (episodesState.episodes.value != null) return;
     try {
@@ -85,31 +88,40 @@ class _PlayPageState extends State<PlayPage> {
           subjectState.subject.value.id, 100, 0);
       episodesState.episodes.value = episodes;
       episodesState.isLoading.value = false;
-
-      if (episodesState.episodeSort.value == 0 && episodes.data.isNotEmpty) {
-        WidgetsBinding.instance.addPostFrameCallback((_) {
-          if (mounted) {
-            // 查找第一个未看过的剧集
-            int targetIndex = 0;
-            for (int i = 0; i < episodes.data.length; i++) {
-              if (episodes.data[i].collection == null) {
-                targetIndex = i;
-                break;
+      //如果有路由传递剧集号有限根据传递的剧集设置剧集状态
+      if (subjectState.continueEpisode.value > 0) {
+        final episodeIndex = subjectState.continueEpisode.value;
+        final episode = episodes.data[episodeIndex - 1];
+        episodesState.setEpisodeSort(
+            sort: episode.sort,
+            episodeIndex: episodeIndex,
+            episodeId: episode.id);
+      } else {
+        if (episodesState.episodeSort.value == 0 && episodes.data.isNotEmpty) {
+          WidgetsBinding.instance.addPostFrameCallback((_) {
+            if (mounted) {
+              // 查找第一个未看过的剧集
+              int targetIndex = 0;
+              for (int i = 0; i < episodes.data.length; i++) {
+                if (episodes.data[i].collection == null) {
+                  targetIndex = i;
+                  break;
+                }
+                // 如果所有剧集都已看过，选择最后一集
+                if (i == episodes.data.length - 1) {
+                  targetIndex = i;
+                }
               }
-              // 如果所有剧集都已看过，选择最后一集
-              if (i == episodes.data.length - 1) {
-                targetIndex = i;
-              }
+              final targetEpisode = episodes.data[targetIndex];
+              episodesState.setEpisodeSort(
+                  sort: targetEpisode.sort,
+                  episodeIndex: targetIndex + 1,
+                  episodeId: targetEpisode.id);
+              episodesState
+                  .setEpisodeTitle(targetEpisode.nameCN ?? targetEpisode.name);
             }
-            final targetEpisode = episodes.data[targetIndex];
-            episodesState.setEpisodeSort(
-                sort: targetEpisode.sort,
-                episodeIndex: targetIndex + 1,
-                episodeId: targetEpisode.id);
-            episodesState
-                .setEpisodeTitle(targetEpisode.nameCN ?? targetEpisode.name);
-          }
-        });
+          });
+        }
       }
     } catch (e) {
       Logger().e(e);

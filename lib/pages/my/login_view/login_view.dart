@@ -248,7 +248,25 @@ class _LoginViewState extends State<LoginView>
         'title': '退出登录',
         'icon': Icons.logout_outlined,
         'action': () {
-          userInfoStore.clearUserInfo();
+          Get.dialog(
+            AlertDialog(
+              title: const Text('确认退出'),
+              content: const Text('确定要退出登录吗？'),
+              actions: [
+                TextButton(
+                  onPressed: () => Get.back(),
+                  child: const Text('取消'),
+                ),
+                TextButton(
+                  onPressed: () {
+                    Get.back();
+                    userInfoStore.clearUserInfo();
+                  },
+                  child: const Text('确定'),
+                ),
+              ],
+            ),
+          );
         },
       },
     ];

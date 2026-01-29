@@ -216,8 +216,8 @@ class _AnimePageState extends State<AnimePage>
                                 SliverGridDelegateWithFixedCrossAxisCount(
                               crossAxisCount:
                                   LayoutUtil.getCrossAxisCount(context),
-                              crossAxisSpacing: 5, // 横向间距
-                              mainAxisSpacing: 5, // 纵向间距
+                              crossAxisSpacing: 10, // 横向间距
+                              mainAxisSpacing: 10, // 纵向间距
                               childAspectRatio: 0.7, // 宽高比
                             ),
                             delegate: SliverChildBuilderDelegate(

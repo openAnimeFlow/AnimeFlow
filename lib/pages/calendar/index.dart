@@ -5,6 +5,7 @@ import 'package:anime_flow/routes/index.dart';
 import 'package:anime_flow/utils/layout_util.dart';
 import 'package:anime_flow/widget/animation_network_image/animation_network_image.dart';
 import 'package:anime_flow/widget/ranking.dart';
+import 'package:anime_flow/widget/subject_card.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:anime_flow/models/item/bangumi/subject_item.dart';
@@ -125,7 +126,8 @@ class _CalendarPageState extends State<CalendarPage>
 
     return Center(
       child: ConstrainedBox(
-        constraints: const BoxConstraints(maxWidth: PlayLayoutConstant.maxWidth),
+        constraints:
+            const BoxConstraints(maxWidth: PlayLayoutConstant.maxWidth),
         child: CustomScrollView(
           slivers: [
             // 统计信息
@@ -206,68 +208,19 @@ class _CalendarPageState extends State<CalendarPage>
   Widget _buildCard(Subject itemData, int watchers) {
     final subjectBasicData = SubjectBasicData(
       id: itemData.id,
-      name: itemData.nameCN?? itemData.name,
+      name: itemData.nameCN ?? itemData.name,
       image: itemData.images.large,
     );
 
-    return Card(
-      clipBehavior: Clip.hardEdge,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(12),
-      ),
-      child: InkWell(
-        onTap: () {
-          Get.toNamed(RouteName.animeInfo, arguments: subjectBasicData);
-        },
-        child: Stack(
-          children: [
-            Positioned.fill(
-              child: AnimationNetworkImage(
-                url: itemData.images.large,
-                fit: BoxFit.cover,
-              ),
-            ),
-            // 底部渐变遮罩和标题
-            Positioned(
-              left: 0,
-              right: 0,
-              bottom: 0,
-              child: Container(
-                padding: const EdgeInsets.all(5),
-                decoration: const BoxDecoration(
-                  gradient: LinearGradient(
-                    begin: Alignment.bottomCenter,
-                    end: Alignment.topCenter,
-                    colors: [
-                      Colors.black38,
-                      Colors.transparent,
-                    ],
-                  ),
-                ),
-                child: Text(
-                  itemData.nameCN ?? itemData.name,
-                  style: const TextStyle(
-                    color: Colors.white,
-                    fontSize: 14,
-                    fontWeight: FontWeight.bold,
-                  ),
-                  maxLines: 2,
-                  overflow: TextOverflow.ellipsis,
-                ),
-              ),
-            ),
-            // 排名
-            if (itemData.rating.rank > 0)
-              Positioned(
-                top: 0,
-                left: 0,
-                child: Padding(
-                  padding: const EdgeInsets.all(5),
-                  child: RankingView(ranking: itemData.rating.rank),
-                ),
-              ),
-          ],
-        ),
+    return InkWell(
+      onTap: () {
+        Get.toNamed(RouteName.animeInfo, arguments: subjectBasicData);
+      },
+      child: SubjectCard(
+        image: itemData.images.large,
+        title: itemData.nameCN ?? itemData.name,
+        rating: itemData.rating.rank,
+        isCoverAnimation: false,
       ),
     );
   }

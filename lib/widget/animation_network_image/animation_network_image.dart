@@ -1,6 +1,5 @@
 import 'dart:math';
 import 'package:anime_flow/utils/systemUtil.dart';
-import 'package:anime_flow/utils/utils.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'image_preview_page.dart';

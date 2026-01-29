@@ -17,18 +17,18 @@ class _RecommendViewState extends State<RecommendView> {
   void initState() {
     super.initState();
     subjectStateController = Get.find<PlaySubjectState>();
-    _searchRecommend();
+    // _searchRecommend();
   }
 
-  void _searchRecommend() async {
-    final tags = subjectStateController.tags;
-    final result = await BgmRequest.searchSubjectService(
-        keyword: '',
-        limit: 25,
-        offset: 0,
-        tags: tags.take(6).map((value) => value.name).toList());
-    Get.log('$result');
-  }
+  // void _searchRecommend() async {
+  //   final tags = subjectStateController.tags;
+  //   final result = await BgmRequest.searchSubjectService(
+  //       keyword: '',
+  //       limit: 25,
+  //       offset: 0,
+  //       tags: tags.take(6).map((value) => value.name).toList());
+  //   Get.log('$result');
+  // }
 
   @override
   Widget build(BuildContext context) {

@@ -36,6 +36,7 @@ class _PlayPageState extends State<PlayPage> {
   final GlobalKey _videoKey = GlobalKey();
   final GlobalKey _contentKey = GlobalKey();
   Worker? _webViewInitWorker;
+
   // 标记是否已经初始化过资源
   bool _hasInitResources = false;
 
@@ -51,9 +52,9 @@ class _PlayPageState extends State<PlayPage> {
     subjectState = Get.put(PlaySubjectState());
     Get.put<WebviewItemController>(
         WebviewItemControllerFactory.getController());
-    subjectsInfo = Get.arguments as SubjectsInfoItem;
-    subjectState.setSubject(subjectsInfo.nameCN ?? subjectsInfo.name,
-        subjectsInfo.id, subjectsInfo.tags);
+    final subjects = Get.arguments as Map<String, dynamic>;
+    subjectState.setSubject(
+        subjects['subjectsName'] as String, subjects['subjectsId'] as int);
     _initEpisodes();
     _initResources();
   }

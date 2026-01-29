@@ -179,18 +179,18 @@ class _AnimeInfoPageState extends State<AnimeInfoPage> {
                     ),
                   )
                 : const SizedBox.shrink()),
-            if (subjectsInfo != null) ...[
-              const SizedBox(height: 5),
-              FloatingActionButton(
-                heroTag: 'play_${subjectBasicData.id}',
-                onPressed: () =>
-                    Get.toNamed(RouteName.play, arguments: subjectsInfo),
-                child: Icon(
-                  Icons.play_arrow_rounded,
-                  color: Theme.of(context).colorScheme.primary,
-                ),
+            const SizedBox(height: 5),
+            FloatingActionButton(
+              heroTag: 'play_${subjectBasicData.id}',
+              onPressed: () => Get.toNamed(RouteName.play, arguments: {
+                'subjectsId': subjectBasicData.id,
+                'subjectsName': subjectBasicData.name,
+              }),
+              child: Icon(
+                Icons.play_arrow_rounded,
+                color: Theme.of(context).colorScheme.primary,
               ),
-            ],
+            ),
           ],
         ),
       ),

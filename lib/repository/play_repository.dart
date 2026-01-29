@@ -1,10 +1,11 @@
-import 'package:anime_flow/models/item/play/play_history.dart';
+import 'package:anime_flow/models/item/play/play_position.dart';
 import 'package:anime_flow/repository/storage.dart';
 
 class PlayRepository {
   static final playHistory = Storage.playHistory;
 
   /// playId = subjectId + episodeId
+  /// 保存播放进度
   static Future<void> savePlayPosition(
       String playId, Duration position, Duration duration) async {
     if (duration < const Duration(seconds: 2) ||
@@ -12,7 +13,7 @@ class PlayRepository {
       return;
     }
 
-    final data = PlayHistory(
+    final data = PlayPosition(
       playId: playId,
       position: position.inSeconds,
       duration: duration.inSeconds,
@@ -28,7 +29,7 @@ class PlayRepository {
   }
 
   ///读取进度
-  static Future<PlayHistory?> getPlayPosition(String playId) async {
+  static Future<PlayPosition?> getPlayPosition(String playId) async {
     return playHistory.get(playId);
   }
 

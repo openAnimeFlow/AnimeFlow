@@ -102,7 +102,10 @@ class _PlayRecordPageState extends State<PlayRecordPage> {
               return ConstrainedBox(
                 constraints: const BoxConstraints(maxWidth: 1800),
                 child: GridView.builder(
-                  padding: const EdgeInsets.symmetric(horizontal: 16),
+                  padding: EdgeInsets.only(
+                      left: 16,
+                      right: 16,
+                      bottom: MediaQuery.of(context).padding.bottom),
                   itemCount: playHistoryList!.length,
                   gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
                     crossAxisCount: _calculateCrossAxisCount(context),

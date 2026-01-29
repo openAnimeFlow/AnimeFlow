@@ -48,6 +48,24 @@ class FormatTimeUtil {
     }
   }
 
+  /// 格式化 DateTime 类型的时间戳
+  /// [dateTime] DateTime 对象
+  /// 返回相对时间，如 "3天前"、"2小时前" 或 "MM-DD HH:mm" 格式
+  static String formatDateTime(DateTime dateTime) {
+    final now = DateTime.now();
+    final difference = now.difference(dateTime);
+
+    if (difference.inDays > 0) {
+      return '${dateTime.month}-${dateTime.day.toString().padLeft(2, '0')} ${dateTime.hour.toString().padLeft(2, '0')}:${dateTime.minute.toString().padLeft(2, '0')}';
+    } else if (difference.inHours > 0) {
+      return '${difference.inHours}小时前';
+    } else if (difference.inMinutes > 0) {
+      return '${difference.inMinutes}分钟前';
+    } else {
+      return '刚刚';
+    }
+  }
+
   /// 格式化字节数
   static String formatBytes(int bytes) {
     if (bytes < 1024) {

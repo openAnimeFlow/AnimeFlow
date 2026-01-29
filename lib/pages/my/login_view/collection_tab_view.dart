@@ -141,7 +141,6 @@ class __CollectionTabViewState extends State<_CollectionTabView> {
       );
     }
 
-    final crossAxisCount = _calculateCrossAxisCount(context);
     final collections = widget.collectionsItem!.data;
     return Builder(
       builder: (context) {
@@ -172,7 +171,7 @@ class __CollectionTabViewState extends State<_CollectionTabView> {
                     slivers: [
                       SliverGrid(
                         gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                          crossAxisCount: crossAxisCount,
+                          crossAxisCount: _calculateCrossAxisCount(context),
                           crossAxisSpacing: 12,
                           mainAxisSpacing: 12,
                           childAspectRatio: 2.5,

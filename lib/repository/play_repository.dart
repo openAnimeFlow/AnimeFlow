@@ -3,7 +3,6 @@ import 'package:anime_flow/repository/storage.dart';
 import 'package:hive/hive.dart';
 
 class PlayRepository {
-  static final playPositionStorage = Storage.playPosition;
   static final playHistoryStorage = Storage.playHistory;
 
   /// 保存播放记录
@@ -13,6 +12,11 @@ class PlayRepository {
       playHistoryStorage,
           (a, b) => b.updateAt.compareTo(a.updateAt),
     );
+  }
+
+  ///获取播放记录列表
+  static Future<List<PlayHistory>> getPlayHistoryList() async {
+    return playHistoryStorage.values.toList();
   }
 
   /// 读取播放记录

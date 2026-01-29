@@ -371,7 +371,7 @@ class _VideoViewState extends State<VideoView> with WindowListener {
         if (_episodesProgress) {
           final progressPercent = position.inSeconds / duration.inSeconds * 100;
           if (progressPercent > 90) {
-            final currentIndex = episodesState.episodeIndex.value - 1;
+            final currentIndex = episodeIndex - 1;
             final episodes = episodesState.episodes.value;
             if (episodes != null &&
                 currentIndex >= 0 &&

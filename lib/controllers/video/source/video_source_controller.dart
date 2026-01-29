@@ -284,8 +284,9 @@ class VideoSourceController extends GetxController {
   Future<void> loadVideoPage(String url) async {
     int offset = 0;
     final subjectId = _subjectState.subject.value.id;
+    final episodeIndex = _episodesState.episodeIndex.value;
     final position = await PlayRepository.getPlayHistory(subjectId);
-    if (position != null && position.position > 0) {
+    if (position != null && position.position > 0 && position.episodeSort == episodeIndex) {
       offset = position.position;
     }
     try {

@@ -243,7 +243,14 @@ class _LoginViewState extends State<LoginView>
         'action': () {
           Get.toNamed(RouteName.settings);
         },
+      },{
+        'title': '播放记录',
+        'icon': Icons.smart_display_outlined,
+        'action': () {
+          Get.toNamed(RouteName.playRecord);
+        },
       },
+
       {
         'title': '退出登录',
         'icon': Icons.logout_outlined,

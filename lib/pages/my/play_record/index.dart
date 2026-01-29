@@ -112,68 +112,76 @@ class _PlayRecordPageState extends State<PlayRecordPage> {
                   ),
                   itemBuilder: (context, index) {
                     final playHistory = playHistoryList![index];
+                    final subjectBasicData = SubjectBasicData(
+                        id: playHistory.subjectId,
+                        name: playHistory.subjectName,
+                        image: playHistory.cover);
                     return InkWell(
+                      borderRadius: BorderRadius.circular(8),
+                      onTap: () => Get.toNamed(RouteName.animeInfo,
+                          arguments: subjectBasicData),
                       child: Row(
                         children: [
                           AnimationNetworkImage(
                               filterQuality: FilterQuality.high,
                               borderRadius: BorderRadius.circular(8),
                               url: playHistory.cover),
-                          const SizedBox(width: 8),
                           Expanded(
+                            child: Padding(
+                              padding: const EdgeInsets.symmetric(
+                                  horizontal: 5, vertical: 5),
                               child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                playHistory.subjectName,
-                                style: const TextStyle(
-                                    fontSize: 16, fontWeight: FontWeight.bold),
-                              ),
-                              Row(
+                                crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
-                                  Text(FormatTimeUtil.formatDateTime(
-                                      playHistory.updateAt)),
                                   Text(
-                                    '-观看${_calculateWatchPercentage(playHistory.position, playHistory.duration)}',
+                                    playHistory.subjectName,
                                     style: const TextStyle(
+                                        fontSize: 16,
                                         fontWeight: FontWeight.bold),
                                   ),
-                                ],
-                              ),
-                              Expanded(
-                                  child: Row(
-                                crossAxisAlignment: CrossAxisAlignment.end,
-                                children: [
-                                  const Spacer(),
-                                  ElevatedButton(
-                                      onPressed: () async {
-                                        final subjectBasicData =
-                                            SubjectBasicData(
-                                                id: playHistory.subjectId,
-                                                name: playHistory.subjectName,
-                                                image: playHistory.cover);
-                                        final episodeSort =
-                                            playHistory.episodeSort;
-                                        await Get.toNamed(RouteName.play,
-                                            arguments: {
-                                              'subjectBasicData':
-                                                  subjectBasicData,
-                                              'continueEpisode': episodeSort,
-                                            });
-                                        // 从播放页面返回后刷新数据
-                                        if (mounted) {
-                                          _getPlayHistoryList();
-                                        }
-                                      },
-                                      child: Text(
-                                        '播放(${playHistory.episodeSort.toString().padLeft(2, '0')})',
+                                  Row(
+                                    children: [
+                                      Text(FormatTimeUtil.formatDateTime(
+                                          playHistory.updateAt)),
+                                      Text(
+                                        '-观看${_calculateWatchPercentage(playHistory.position, playHistory.duration)}',
                                         style: const TextStyle(
                                             fontWeight: FontWeight.bold),
-                                      ))
+                                      ),
+                                    ],
+                                  ),
+                                  Expanded(
+                                      child: Row(
+                                    crossAxisAlignment: CrossAxisAlignment.end,
+                                    children: [
+                                      const Spacer(),
+                                      ElevatedButton(
+                                          onPressed: () async {
+                                            final episodeSort =
+                                                playHistory.episodeSort;
+                                            await Get.toNamed(RouteName.play,
+                                                arguments: {
+                                                  'subjectBasicData':
+                                                      subjectBasicData,
+                                                  'continueEpisode':
+                                                      episodeSort,
+                                                });
+                                            // 从播放页面返回后刷新数据
+                                            if (mounted) {
+                                              _getPlayHistoryList();
+                                            }
+                                          },
+                                          child: Text(
+                                            '播放(${playHistory.episodeSort.toString().padLeft(2, '0')})',
+                                            style: const TextStyle(
+                                                fontWeight: FontWeight.bold),
+                                          ))
+                                    ],
+                                  ))
                                 ],
-                              ))
-                            ],
-                          ))
+                              ),
+                            ),
+                          ),
                         ],
                       ),
                     );

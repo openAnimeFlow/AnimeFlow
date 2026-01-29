@@ -145,17 +145,21 @@ class _PlayRecordPageState extends State<PlayRecordPage> {
                                 children: [
                                   const Spacer(),
                                   ElevatedButton(
-                                      onPressed: () {
+                                      onPressed: () async {
                                         final subjectBasicData =
                                             SubjectBasicData(
                                                 id: playHistory.subjectId,
                                                 name: playHistory.subjectName,
                                                 image: playHistory.cover);
                                         final episodeSort = playHistory.episodeSort;
-                                        Get.toNamed(RouteName.play,arguments: {
+                                        await Get.toNamed(RouteName.play,arguments: {
                                           'subjectBasicData': subjectBasicData,
                                           'continueEpisode': episodeSort,
                                         });
+                                        // 从播放页面返回后刷新数据
+                                        if (mounted) {
+                                          _getPlayHistoryList();
+                                        }
                                       },
                                       child: Text(
                                         '播放(${playHistory.episodeSort.toString().padLeft(2, '0')})',

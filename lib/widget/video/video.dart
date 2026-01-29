@@ -4,6 +4,7 @@ import 'dart:io';
 import 'package:anime_flow/constants/storage_key.dart';
 import 'package:anime_flow/controllers/play/episode_controller.dart';
 import 'package:anime_flow/models/enums/video_controls_icon_type.dart';
+import 'package:anime_flow/models/item/play/play_history.dart';
 import 'package:anime_flow/repository/play_repository.dart';
 import 'package:anime_flow/repository/storage.dart';
 import 'package:anime_flow/webview/webview_controller.dart';
@@ -99,8 +100,7 @@ class _VideoViewState extends State<VideoView> with WindowListener {
     videoStateController.player.stream.completed.listen((completed) {
       if (completed) {
         _autoSwitchToNextEpisode();
-        PlayRepository.deletePlayPosition(
-            '${subjectState.subject.value.id}${episodesState.episodeId.value}');
+        PlayRepository.deletePlayHistoryByPosition(subjectState.subject.value.id);
       }
     });
 
@@ -124,62 +124,62 @@ class _VideoViewState extends State<VideoView> with WindowListener {
     // 监听解析结果
     _videoURLSubscription =
         webviewItemController.onVideoURLParser.listen((result) async {
-      final (url, offset) = result;
-      logger.i('WebView解析到视频URL: $url, 偏移: $offset');
+          final (url, offset) = result;
+          logger.i('WebView解析到视频URL: $url, 偏移: $offset');
 
-      // 标记已收到视频URL
-      _hasReceivedVideoUrl = true;
-      _parseTimeoutTimer?.cancel();
+          // 标记已收到视频URL
+          _hasReceivedVideoUrl = true;
+          _parseTimeoutTimer?.cancel();
 
-      if (url.isNotEmpty) {
-        await videoStateController.player.open(Media(url), play: false);
-        await videoStateController.player.stream.duration.firstWhere(
-          (d) => d > Duration.zero,
-        );
-        await Future.delayed(const Duration(milliseconds: 800), () {
-          videoStateController.player.seek(Duration(seconds: offset));
+          if (url.isNotEmpty) {
+            await videoStateController.player.open(Media(url), play: false);
+            await videoStateController.player.stream.duration.firstWhere(
+                  (d) => d > Duration.zero,
+            );
+            await Future.delayed(const Duration(milliseconds: 800), () {
+              videoStateController.player.seek(Duration(seconds: offset));
+            });
+            await videoStateController.player.play();
+          }
         });
-        await videoStateController.player.play();
-      }
-    });
 
     // 监听视频解析状态
     _videoLoadingSubscription =
         webviewItemController.onVideoLoading.listen((loading) {
-      _isParsing = loading;
+          _isParsing = loading;
 
-      if (loading) {
-        // 开始解析，重置状态并启动超时计时器
-        _hasReceivedVideoUrl = false;
-        _parseTimeoutTimer?.cancel();
-        _parseTimeoutTimer = Timer(const Duration(seconds: 16), () {
-          // 16秒超时（比WebView内部的15秒稍长，确保能收到日志）
-          if (!_hasReceivedVideoUrl && _isParsing) {
-            _parsingState(false, failureReason: '解析超时');
+          if (loading) {
+            // 开始解析，重置状态并启动超时计时器
+            _hasReceivedVideoUrl = false;
+            _parseTimeoutTimer?.cancel();
+            _parseTimeoutTimer = Timer(const Duration(seconds: 16), () {
+              // 16秒超时（比WebView内部的15秒稍长，确保能收到日志）
+              if (!_hasReceivedVideoUrl && _isParsing) {
+                _parsingState(false, failureReason: '解析超时');
+              }
+            });
+          } else {
+            // 解析结束，取消超时计时器
+            _parseTimeoutTimer?.cancel();
+
+            // 如果解析结束但没有收到视频URL，说明解析失败
+            if (!_hasReceivedVideoUrl && _isParsing) {
+              _parsingState(false, failureReason: '未获取到有效的视频URL');
+            } else {
+              // 解析成功
+              _parsingState(false);
+              // 视频解析成功后加载弹幕
+              _loadDanmaku();
+              // 更新进度
+              _startProgressTracking();
+            }
+          }
+
+          // 只在开始解析时调用，结束时的处理在上面已经完成
+          if (loading) {
+            _parsingState(true);
           }
         });
-      } else {
-        // 解析结束，取消超时计时器
-        _parseTimeoutTimer?.cancel();
-
-        // 如果解析结束但没有收到视频URL，说明解析失败
-        if (!_hasReceivedVideoUrl && _isParsing) {
-          _parsingState(false, failureReason: '未获取到有效的视频URL');
-        } else {
-          // 解析成功
-          _parsingState(false);
-          // 视频解析成功后加载弹幕
-          _loadDanmaku();
-          // 更新进度
-          _startProgressTracking();
-        }
-      }
-
-      // 只在开始解析时调用，结束时的处理在上面已经完成
-      if (loading) {
-        _parsingState(true);
-      }
-    });
 
     // 监听日志消息（检测解析超时）
     _logSubscription = webviewItemController.onLog.listen((logMessage) {
@@ -193,11 +193,11 @@ class _VideoViewState extends State<VideoView> with WindowListener {
     // 初始化
     _initSubscription =
         webviewItemController.onInitialized.listen((initialized) {
-      if (initialized) {
-        Get.log('WebView初始化完成');
-        videoSourceController.isInitWebView.value = initialized;
-      }
-    });
+          if (initialized) {
+            Get.log('WebView初始化完成');
+            videoSourceController.isInitWebView.value = initialized;
+          }
+        });
   }
 
   //解析状态
@@ -265,8 +265,8 @@ class _VideoViewState extends State<VideoView> with WindowListener {
       }
 
       final bgmBangumiId =
-          await DanmakuRequest.getDanDanBangumiIDByBgmBangumiID(
-              subjectState.subject.value.id);
+      await DanmakuRequest.getDanDanBangumiIDByBgmBangumiID(
+          subjectState.subject.value.id);
       final danmaku = await DanmakuRequest.getDanDanmaku(bgmBangumiId, episode);
       playController.addDanmaku(danmaku);
       logger.i('弹幕数量为：${danmaku.length}');
@@ -337,11 +337,14 @@ class _VideoViewState extends State<VideoView> with WindowListener {
     return completer.future;
   }
 
-  /// 启动播放进度保存和章节进度更新定时器
+  /// 播放记录保存和章节进度更新
   void _startProgressTracking() {
     _saveProgressTimer?.cancel();
     _saveProgressTimer = null;
     final subjectId = subjectState.subject.value.id;
+    final subjectName = subjectState.subject.value.name;
+    final subjectImage = subjectState.subject.value.image;
+    final episodeIndex = episodesState.episodeIndex.value;
     final episodeId = episodesState.episodeId.value;
     try {
       // 播放时，每5秒保存一次，使用实时获取的进度值
@@ -352,9 +355,18 @@ class _VideoViewState extends State<VideoView> with WindowListener {
           return;
         }
         if (subjectId <= 0 || episodeId <= 0) return;
-        final playId = '$subjectId$episodeId';
-        PlayRepository.savePlayPosition(playId, position, duration);
-
+        final newDate = DateTime.now();
+        final playHistory = PlayHistory(
+          subjectId: subjectId,
+          subjectName: subjectName,
+          episodeId: episodeId,
+          episodeSort: episodeIndex,
+          cover: subjectImage,
+          updateAt: newDate,
+          position: position.inSeconds,
+          duration: duration.inSeconds,
+        );
+        PlayRepository.savePlayHistory(playHistory);
         /// 播放进度大于90% && collection != null，更新章节进度
         if (_episodesProgress) {
           final progressPercent = position.inSeconds / duration.inSeconds * 100;

@@ -21,15 +21,17 @@ class PlayHistoryAdapter extends TypeAdapter<PlayHistory> {
       episodeId: fields[1] as int,
       episodeSort: fields[2] as int,
       subjectName: fields[3] as String,
-      image: fields[4] as String,
-      playTime: fields[5] as DateTime,
+      cover: fields[4] as String,
+      updateAt: fields[5] as DateTime,
+      position: fields[6] as int,
+      duration: fields[7] as int,
     );
   }
 
   @override
   void write(BinaryWriter writer, PlayHistory obj) {
     writer
-      ..writeByte(6)
+      ..writeByte(8)
       ..writeByte(0)
       ..write(obj.subjectId)
       ..writeByte(1)
@@ -39,9 +41,13 @@ class PlayHistoryAdapter extends TypeAdapter<PlayHistory> {
       ..writeByte(3)
       ..write(obj.subjectName)
       ..writeByte(4)
-      ..write(obj.image)
+      ..write(obj.cover)
       ..writeByte(5)
-      ..write(obj.playTime);
+      ..write(obj.updateAt)
+      ..writeByte(6)
+      ..write(obj.position)
+      ..writeByte(7)
+      ..write(obj.duration);
   }
 
   @override

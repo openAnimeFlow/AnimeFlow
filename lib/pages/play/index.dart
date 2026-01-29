@@ -5,7 +5,6 @@ import 'package:anime_flow/http/requests/bgm_request.dart';
 import 'package:anime_flow/models/item/play/play_history.dart';
 import 'package:anime_flow/repository/play_repository.dart';
 import 'package:anime_flow/stores/play_subject_state.dart';
-import 'package:anime_flow/models/item/bangumi/subjects_info_item.dart';
 import 'package:anime_flow/models/item/subject_basic_data_item.dart';
 import 'package:anime_flow/utils/systemUtil.dart';
 import 'package:anime_flow/webview/webview_controller.dart';
@@ -30,7 +29,6 @@ class PlayPage extends StatefulWidget {
 
 class _PlayPageState extends State<PlayPage> {
   late VideoStateController videoStateController;
-  late SubjectsInfoItem subjectsInfo;
   late VideoSourceController videoSourceController;
   late PlaySubjectState subjectState;
   late PlayController playController;
@@ -56,9 +54,7 @@ class _PlayPageState extends State<PlayPage> {
     subjectState = Get.put(PlaySubjectState(Get.arguments as SubjectBasicData));
     _initEpisodes();
     _initResources();
-    if(videoStateController.position.value > Duration.zero) {
-      _savePlayRecord();
-    }
+
   }
 
   /// 初始化资源
@@ -124,26 +120,26 @@ class _PlayPageState extends State<PlayPage> {
   }
 
   ///保存播放记录
-  void _savePlayRecord() async {
-    final subjectId = subjectsInfo.id;
-    final subjectName = subjectState.subject.value.name;
-    final subjectImage = subjectState.subject.value.image;
-    // 这里需要使用剧集索引作为剧集号,方便后续使用
-    final episodeSort = episodesState.episodeIndex.value;
-    final episodeId = episodesState.episodeId.value;
-    final timestamp = DateTime.now();
-
-    final playHistory = PlayHistory(
-      subjectId: subjectId,
-      subjectName: subjectName,
-      image: subjectImage,
-      episodeSort: episodeSort,
-      playTime: timestamp,
-      episodeId: episodeId,
-    );
-    Logger().i('开始保存播放记录: $playHistory');
-    PlayRepository.savePlayHistory(playHistory);
-  }
+  // void _savePlayRecord() async {
+  //   final subjectId = subjectState.subject.value.id;
+  //   final subjectName = subjectState.subject.value.name;
+  //   final subjectImage = subjectState.subject.value.image;
+  //   // 这里需要使用剧集索引作为剧集号,方便后续使用
+  //   final episodeSort = episodesState.episodeIndex.value;
+  //   final episodeId = episodesState.episodeId.value;
+  //   final timestamp = DateTime.now();
+  //
+  //   final playHistory = PlayHistory(
+  //     subjectId: subjectId,
+  //     subjectName: subjectName,
+  //     image: subjectImage,
+  //     episodeSort: episodeSort,
+  //     playTime: timestamp,
+  //     episodeId: episodeId,
+  //   );
+  //   Logger().i('开始保存播放记录: $playHistory');
+  //   PlayRepository.savePlayHistory(playHistory);
+  // }
 
   @override
   void dispose() {

@@ -141,8 +141,11 @@ class _PlayRecordPageState extends State<PlayRecordPage> {
                                   ),
                                   Row(
                                     children: [
-                                      Text(FormatTimeUtil.formatDateTime(
-                                          playHistory.updateAt)),
+                                      Text(
+                                          FormatTimeUtil.formatDateTime(
+                                              playHistory.updateAt),
+                                          style: const TextStyle(
+                                              fontWeight: FontWeight.bold)),
                                       Text(
                                         '-观看${_calculateWatchPercentage(playHistory.position, playHistory.duration)}',
                                         style: const TextStyle(
@@ -156,6 +159,8 @@ class _PlayRecordPageState extends State<PlayRecordPage> {
                                     children: [
                                       const Spacer(),
                                       ElevatedButton(
+                                          style: ElevatedButton.styleFrom(
+                                              elevation: 0),
                                           onPressed: () async {
                                             final episodeSort =
                                                 playHistory.episodeSort;

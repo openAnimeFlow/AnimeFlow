@@ -190,7 +190,6 @@ class _VideoViewState extends State<VideoView> with WindowListener {
         logger.w('解析失败提示: $logMessage');
       }
     });
-    // 初始化
     _initSubscription =
         webviewItemController.onInitialized.listen((initialized) {
           if (initialized) {

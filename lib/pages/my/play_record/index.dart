@@ -35,6 +35,7 @@ class _PlayRecordPageState extends State<PlayRecordPage> {
     }
     try {
       final playHistoryList = await PlayRepository.getPlayHistoryList();
+      playHistoryList.sort((a, b) => b.updateAt.compareTo(a.updateAt));
       if (mounted) {
         setState(() {
           this.playHistoryList = playHistoryList;
@@ -151,11 +152,14 @@ class _PlayRecordPageState extends State<PlayRecordPage> {
                                                 id: playHistory.subjectId,
                                                 name: playHistory.subjectName,
                                                 image: playHistory.cover);
-                                        final episodeSort = playHistory.episodeSort;
-                                        await Get.toNamed(RouteName.play,arguments: {
-                                          'subjectBasicData': subjectBasicData,
-                                          'continueEpisode': episodeSort,
-                                        });
+                                        final episodeSort =
+                                            playHistory.episodeSort;
+                                        await Get.toNamed(RouteName.play,
+                                            arguments: {
+                                              'subjectBasicData':
+                                                  subjectBasicData,
+                                              'continueEpisode': episodeSort,
+                                            });
                                         // 从播放页面返回后刷新数据
                                         if (mounted) {
                                           _getPlayHistoryList();

@@ -32,17 +32,39 @@ class _NoNoLoginView extends State<NoLoginView> {
           child: Row(
             children: [
               const Spacer(),
-              Obx(
-                () => mainPageState.isDesktop.value
-                    ? const SizedBox.shrink()
-                    : IconButton(
-                        onPressed: () =>
-                            Get.toNamed(RouteName.settings),
-                        icon: const Icon(
-                          Icons.settings_outlined,
-                          size: 30,
-                        ),
-                      ),
+              MenuAnchor(
+                alignmentOffset: const Offset(-80, 0),
+                crossAxisUnconstrained: false,
+                menuChildren: [
+                  MenuItemButton(
+                    onPressed: () => Get.toNamed(RouteName.settings),
+                    child: const Row(
+                      children: [Icon(Icons.settings_outlined), Text('设置')],
+                    ),
+                  ),
+                  MenuItemButton(
+                    onPressed: () => Get.toNamed(RouteName.playRecord),
+                    child: const Row(
+                      children: [Icon(Icons.smart_display_outlined), Text('播放记录')],
+                    ),
+                  )
+                ],
+                builder: (BuildContext context, MenuController controller,
+                    Widget? child) {
+                  return InkWell(
+                    onTap: () {
+                      if (controller.isOpen) {
+                        controller.close();
+                      } else {
+                        controller.open();
+                      }
+                    },
+                    child: const Icon(
+                      Icons.notes_outlined,
+                      size: 30,
+                    ),
+                  );
+                },
               )
             ],
           ),

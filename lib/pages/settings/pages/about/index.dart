@@ -92,54 +92,54 @@ class AboutSettingsPage extends StatelessWidget {
               },
             ),
             const Divider(),
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 10),
-              child: Align(
-                alignment: Alignment.topLeft,
-                child: Row(
-                  children: [
-                    const Text(
-                      '交流群:',
-                      style:
-                          TextStyle(fontWeight: FontWeight.w500, fontSize: 20),
-                    ),
-                    Card(
-                      elevation: 0,
-                      child: IntrinsicWidth(
-                        child: InkWell(
-                          borderRadius: BorderRadius.circular(10),
-                          onTap: () async {
-                            final uri = Uri.parse(
-                                'https://t.me/+8Sc45kSCIlkzODNl');
-                            if (await canLaunchUrl(uri)) {
-                              await launchUrl(uri);
-                            } else {
-                              Get.snackbar('无法打开网页', '你的设备可能不支持此功能');
-                            }
-                          },
-                          child: const Padding(
-                            padding: EdgeInsets.symmetric(horizontal: 5),
-                            child: Row(
-                              mainAxisSize: MainAxisSize.min,
-                              children: [
-                                Icon(
-                                  Icons.telegram_sharp,
-                                  size: 40,
-                                  color: Colors.blue,
-                                ),
-                                Text('telegram',
-                                    style:
-                                        TextStyle(fontWeight: FontWeight.bold)),
-                              ],
-                            ),
-                          ),
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ),
+            // Padding(
+            //   padding: const EdgeInsets.symmetric(horizontal: 10),
+            //   child: Align(
+            //     alignment: Alignment.topLeft,
+            //     child: Row(
+            //       children: [
+            //         const Text(
+            //           '交流群:',
+            //           style:
+            //               TextStyle(fontWeight: FontWeight.w500, fontSize: 20),
+            //         ),
+            //         Card(
+            //           elevation: 0,
+            //           child: IntrinsicWidth(
+            //             child: InkWell(
+            //               borderRadius: BorderRadius.circular(10),
+            //               onTap: () async {
+            //                 final uri = Uri.parse(
+            //                     'https://t.me/+8Sc45kSCIlkzODNl');
+            //                 if (await canLaunchUrl(uri)) {
+            //                   await launchUrl(uri);
+            //                 } else {
+            //                   Get.snackbar('无法打开网页', '你的设备可能不支持此功能');
+            //                 }
+            //               },
+            //               child: const Padding(
+            //                 padding: EdgeInsets.symmetric(horizontal: 5),
+            //                 child: Row(
+            //                   mainAxisSize: MainAxisSize.min,
+            //                   children: [
+            //                     Icon(
+            //                       Icons.telegram_sharp,
+            //                       size: 40,
+            //                       color: Colors.blue,
+            //                     ),
+            //                     Text('telegram',
+            //                         style:
+            //                             TextStyle(fontWeight: FontWeight.bold)),
+            //                   ],
+            //                 ),
+            //               ),
+            //             ),
+            //           ),
+            //         ),
+            //       ],
+            //     ),
+            //   ),
+            // ),
           ],
         ),
       ),

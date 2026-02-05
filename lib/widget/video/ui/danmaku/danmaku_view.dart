@@ -3,6 +3,7 @@ import 'package:anime_flow/constants/storage_key.dart';
 import 'package:anime_flow/controllers/play/play_controller.dart';
 import 'package:anime_flow/controllers/video/video_state_controller.dart';
 import 'package:anime_flow/repository/storage.dart';
+import 'package:anime_flow/stores/episodes_state.dart';
 import 'package:canvas_danmaku/canvas_danmaku.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -19,7 +20,8 @@ class _DanmakuViewState extends State<DanmakuView>
     with AutomaticKeepAliveClientMixin {
   Box setting = Storage.setting;
   late VideoStateController videoStateController;
-  late PlayController playPageController;
+  late PlayController playController;
+  late EpisodesState episodesState;
   Timer? _danmakuTimer;
   Worker? _playingWorker;
 
@@ -45,7 +47,8 @@ class _DanmakuViewState extends State<DanmakuView>
   void initState() {
     super.initState();
     videoStateController = Get.find<VideoStateController>();
-    playPageController = Get.find<PlayController>();
+    playController = Get.find<PlayController>();
+    episodesState = Get.find<EpisodesState>();
 
     // 初始化弹幕配置
     _border = setting.get(DanmakuKey.danmakuBorder, defaultValue: true);
@@ -71,14 +74,22 @@ class _DanmakuViewState extends State<DanmakuView>
       setState(() {});
     });
 
+    //监听集数切换
+    ever(episodesState.episodeIndex, (int episode) {
+      if (episode > 0) {
+        // 清空之前的弹幕
+        playController.removeDanmaku();
+      }
+    });
+
     // 监听播放状态变化，控制弹幕暂停/恢复
     _playingWorker = ever(videoStateController.playing, (playing) {
       if (mounted) {
         try {
           if (playing) {
-            playPageController.danmakuController.resume();
+            playController.danmakuController.resume();
           } else {
-            playPageController.danmakuController.pause();
+            playController.danmakuController.pause();
           }
         } catch (_) {}
       }
@@ -96,9 +107,9 @@ class _DanmakuViewState extends State<DanmakuView>
       // 只有在播放时才添加弹幕
       if (currentPosition.inMicroseconds != 0 &&
           playing &&
-          playPageController.danmakuOn.value) {
+          playController.danmakuOn.value) {
         final currentSecond = currentPosition.inSeconds;
-        final danmakus = playPageController.danDanmakus[currentSecond];
+        final danmakus = playController.danDanmakus[currentSecond];
 
         if (danmakus != null && danmakus.isNotEmpty) {
           // 按索引延迟添加弹幕
@@ -110,7 +121,7 @@ class _DanmakuViewState extends State<DanmakuView>
               () {
                 if (!mounted ||
                     !videoStateController.playing.value ||
-                    !playPageController.danmakuOn.value) {
+                    !playController.danmakuOn.value) {
                   return;
                 }
 
@@ -118,7 +129,7 @@ class _DanmakuViewState extends State<DanmakuView>
                 final regex = RegExp(r'\[([^\]]+)\]');
                 final match = regex.firstMatch(danmaku.source);
                 final platform = match?.group(1) ?? '弹弹Play';
-                if (playPageController.isPlatformHidden(platform)) {
+                if (playController.isPlatformHidden(platform)) {
                   return; // 如果平台被隐藏，不添加弹幕
                 }
 
@@ -139,7 +150,7 @@ class _DanmakuViewState extends State<DanmakuView>
                 }
 
                 // 添加弹幕
-                playPageController.danmakuController.addDanmaku(
+                playController.danmakuController.addDanmaku(
                   DanmakuContentItem(
                     danmaku.message,
                     color: danmakuColor,
@@ -170,7 +181,7 @@ class _DanmakuViewState extends State<DanmakuView>
       child: DanmakuScreen(
         createdController: (DanmakuController controller) {
           // 更新全局控制器引用
-          playPageController.danmakuController = controller;
+          playController.danmakuController = controller;
           // 应用保存的设置
           WidgetsBinding.instance.addPostFrameCallback((_) {
             try {

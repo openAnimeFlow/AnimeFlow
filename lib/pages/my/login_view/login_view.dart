@@ -120,7 +120,8 @@ class _LoginViewState extends State<LoginView>
   void initState() {
     super.initState();
     // TODO 暂时默认为再看tab索引，后续从设置中获取
-    _tabController = TabController(length: _tabs.length, vsync: this,initialIndex: 2);
+    _tabController =
+        TabController(length: _tabs.length, vsync: this, initialIndex: 2);
     userInfoStore = Get.find<UserInfoStore>();
     mainPageState = Get.find<MainPageState>();
     // 监听 tab 切换，自动加载对应类型的数据（如果缓存中没有）
@@ -243,14 +244,14 @@ class _LoginViewState extends State<LoginView>
         'action': () {
           Get.toNamed(RouteName.settings);
         },
-      },{
+      },
+      {
         'title': '播放记录',
         'icon': Icons.smart_display_outlined,
         'action': () {
           Get.toNamed(RouteName.playRecord);
         },
       },
-
       {
         'title': '退出登录',
         'icon': Icons.logout_outlined,
@@ -282,9 +283,19 @@ class _LoginViewState extends State<LoginView>
         padding: const EdgeInsets.symmetric(horizontal: 16),
         child: Row(
           children: [
-            const Text(
-              '我的',
-              style: TextStyle(fontWeight: FontWeight.bold),
+            InkWell(
+              onTap: () {
+                Get.toNamed(RouteName.userSpace,arguments: userInfo.id);
+              },
+              child: const Row(
+                children: [
+                  Text(
+                    '我的空间',
+                    style: TextStyle(fontWeight: FontWeight.bold),
+                  ),
+                  Icon(Icons.import_contacts)
+                ],
+              ),
             ),
             Expanded(
               child: AnimatedOpacity(
@@ -313,7 +324,8 @@ class _LoginViewState extends State<LoginView>
             MenuAnchor(
               alignmentOffset: const Offset(-100, 0),
               crossAxisUnconstrained: false,
-              menuChildren: List<MenuItemButton>.generate(menuItems.length, (int index) {
+              menuChildren:
+                  List<MenuItemButton>.generate(menuItems.length, (int index) {
                 final menuItem = menuItems[index];
                 return MenuItemButton(
                   onPressed: menuItem['action'] as VoidCallback,
@@ -332,7 +344,8 @@ class _LoginViewState extends State<LoginView>
                   ),
                 );
               }),
-              builder: (BuildContext context, MenuController controller, Widget? child) {
+              builder: (BuildContext context, MenuController controller,
+                  Widget? child) {
                 return InkWell(
                   onTap: () {
                     if (controller.isOpen) {

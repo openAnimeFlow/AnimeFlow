@@ -7,6 +7,7 @@ import 'package:anime_flow/models/enums/video_controls_icon_type.dart';
 import 'package:anime_flow/models/item/play/play_history.dart';
 import 'package:anime_flow/repository/play_repository.dart';
 import 'package:anime_flow/repository/storage.dart';
+import 'package:anime_flow/stores/user_info_store.dart';
 import 'package:anime_flow/webview/webview_controller.dart';
 import 'package:anime_flow/webview/webview_item.dart';
 import 'package:anime_flow/stores/episodes_state.dart';
@@ -42,6 +43,7 @@ class _VideoViewState extends State<VideoView> with WindowListener {
   late PlayController playController;
   late EpisodesState episodesState;
   late PlaySubjectState subjectState;
+  late UserInfoStore userInfoStore;
   late bool _episodesProgress;
   final logger = Logger();
   final _danmuKey = GlobalKey();
@@ -80,15 +82,13 @@ class _VideoViewState extends State<VideoView> with WindowListener {
     episodesState = Get.find<EpisodesState>();
     episodeController = Get.find<EpisodeController>();
     subjectState = Get.find<PlaySubjectState>();
+    userInfoStore = Get.find<UserInfoStore>();
     _episodesProgress =
         setting.get(PlaybackKey.episodesProgress, defaultValue: true);
 
     // 监听集数变化
     ever(episodesState.episodeIndex, (int episode) {
       if (episode > 0) {
-        _hasDanmakuLoaded = false;
-        // 清空之前的弹幕
-        playController.removeDanmaku();
         if (episode != _lastEpisodeIndex) {
           videoStateController.player.stop();
           _selectResourceAfterInit();
@@ -350,19 +350,21 @@ class _VideoViewState extends State<VideoView> with WindowListener {
           final duration = videoStateController.duration.value;
           final episodeIndex = episodesState.episodeIndex.value;
           final episodeId = episodesState.episodeId.value;
-          final progressPercent = position.inSeconds / duration.inSeconds * 100;
-          if (progressPercent > 90) {
-            final currentIndex = episodeIndex - 1;
-            final episodes = episodesState.episodes.value;
-            if (episodes != null &&
-                currentIndex >= 0 &&
-                currentIndex < episodes.data.length &&
-                episodes.data[currentIndex].collection == null) {
-              // TODO需要只有登录后才更新
-              UserRequest.updateEpisodeProgressService(episodeId,
-                  batch: true, type: 2);
-              // TODO 同时更新本地剧集进度数据
-              logger.i('章节进度已更新: episodeId=$episodeId');
+          if(userInfoStore.userInfo.value != null) {
+            final progressPercent = position.inSeconds / duration.inSeconds * 100;
+            if (progressPercent > 90) {
+              final currentIndex = episodeIndex - 1;
+              final episodes = episodesState.episodes.value;
+              if (episodes != null &&
+                  currentIndex >= 0 &&
+                  currentIndex < episodes.data.length &&
+                  episodes.data[currentIndex].collection == null) {
+                // TODO需要只有登录后才更新
+                UserRequest.updateEpisodeProgressService(episodeId,
+                    batch: true, type: 2);
+                // TODO 同时更新本地剧集进度数据
+                logger.i('章节进度已更新: episodeId=$episodeId');
+              }
             }
           }
         }

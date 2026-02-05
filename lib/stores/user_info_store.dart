@@ -11,8 +11,8 @@ class UserInfoStore extends GetxController {
   void _init() async {
     final token = await tokenStorage.getToken();
     if (token != null) {
-      userInfo.value =
-          await UserRequest.queryUserInfoService(token.userId.toString());
+      final me = await UserRequest.userInfoService();
+      userInfo.value = await UserRequest.queryUserInfoService(me.username);
     }
   }
 

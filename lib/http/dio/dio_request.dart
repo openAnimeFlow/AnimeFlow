@@ -19,10 +19,8 @@ class DioRequest {
     _dio!.interceptors.add(
       InterceptorsWrapper(
         onRequest: (options, handler) {
-          // 在请求前添加token等操作
-          // options.headers['Authorization'] = 'Bearer your_token';
           logger.i(
-            'HTTP Request: ${options.method} headers: ${options.headers} ${options.uri}',
+            'HTTP Request: ${options.method} ${options.uri}',
           );
           return handler.next(options);
         },
@@ -196,16 +194,6 @@ class DioRequest {
       default:
         return '网络错误';
     }
-  }
-
-  /// 设置认证token
-  void setAuthorization(String token) {
-    _dio!.options.headers['Authorization'] = 'Bearer $token';
-  }
-
-  /// 清除认证信息
-  void clearAuthorization() {
-    _dio!.options.headers.remove('Authorization');
   }
 }
 

@@ -1,5 +1,6 @@
 import 'package:anime_flow/http/requests/bgm_request.dart';
 import 'package:anime_flow/models/item/bangumi/subject_comments_item.dart';
+import 'package:anime_flow/routes/index.dart';
 import 'package:anime_flow/utils/format_time_util.dart';
 import 'package:anime_flow/widget/star.dart';
 import 'package:anime_flow/widget/animation_network_image/animation_network_image.dart';
@@ -159,12 +160,16 @@ class CommentViewState extends State<CommentView> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               // 头像
-              AnimationNetworkImage(
-                borderRadius: BorderRadius.circular(10),
-                url: comment.user.avatar.medium,
-                width: 40,
-                height: 40,
-                fit: BoxFit.cover,
+              InkWell(
+                onTap: () => Get.toNamed(RouteName.userSpace,
+                    arguments: comment.user.username),
+                child: AnimationNetworkImage(
+                  borderRadius: BorderRadius.circular(10),
+                  url: comment.user.avatar.medium,
+                  width: 40,
+                  height: 40,
+                  fit: BoxFit.cover,
+                ),
               ),
               const SizedBox(width: 12),
               Expanded(

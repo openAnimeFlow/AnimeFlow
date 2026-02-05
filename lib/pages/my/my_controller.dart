@@ -54,8 +54,9 @@ class MyController {
 
         // 获取用户信息并更新 store
         final userInfoStore = Get.find<UserInfoStore>();
-        UserRequest.queryUserInfoService(token.userId.toString())
-            .then((userInfo) => {userInfoStore.userInfo.value = userInfo});
+        final me = await UserRequest.userInfoService();
+        final userInfo = await UserRequest.queryUserInfoService(me.username);
+        userInfoStore.userInfo.value = userInfo;
       } else {
         Logger().w('轮询超时，未获取到 token');
       }

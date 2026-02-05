@@ -2,7 +2,7 @@ import 'package:anime_flow/constants/constants.dart';
 import 'package:anime_flow/controllers/app/app_info_controller.dart';
 import 'package:anime_flow/http/api_path.dart';
 import 'package:anime_flow/models/enums/sort_type.dart';
-import 'package:anime_flow/models/item/bangumi/actor_ite.dart';
+import 'package:anime_flow/models/item/bangumi/actor_item.dart';
 import 'package:anime_flow/models/item/bangumi/calendar_item.dart';
 import 'package:anime_flow/models/item/bangumi/character_comments_item.dart';
 import 'package:anime_flow/models/item/bangumi/character_detail_item.dart';
@@ -11,6 +11,7 @@ import 'package:anime_flow/models/item/bangumi/collections_item.dart';
 import 'package:anime_flow/models/item/bangumi/episode_comments_item.dart';
 import 'package:anime_flow/models/item/bangumi/episodes_item.dart';
 import 'package:anime_flow/models/item/bangumi/hot_item.dart';
+import 'package:anime_flow/models/item/bangumi/me_item.dart';
 import 'package:anime_flow/models/item/bangumi/related_subjects_item.dart';
 import 'package:anime_flow/models/item/bangumi/staff_item.dart';
 import 'package:anime_flow/models/item/bangumi/subject_item.dart';
@@ -323,9 +324,21 @@ class BgmRequest {
 class UserRequest {
   static const String _nextBaseUrl = BgmNextApi.baseUrl;
 
+  ///获取当前用户信息
+  static Future<MeItem> userInfoService() async {
+    return await bgmDioRequest
+        .get(_nextBaseUrl + BgmUsersApi.me,
+            options: Options(
+              headers: {
+                Constants.userAgentName: BgmRequest._getBangumiUserAgent()
+              },
+            ))
+        .then((onValue) => (MeItem.fromJson(onValue.data)));
+  }
+
   /// 查询用户信息
   static Future<UserInfoItem> queryUserInfoService(String username) async {
-    return await dioRequest
+    return await bgmDioRequest
         .get(
           _nextBaseUrl +
               BgmUsersApi.userInfo.replaceFirst('{username}', username),

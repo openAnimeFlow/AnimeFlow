@@ -45,6 +45,10 @@ class BgmNextApi {
 }
 
 class BgmUsersApi {
+
+  ///获取当前用户信息
+  static const String me = '/p1/me';
+
   ///条目收藏
   static const String collections = '/p1/collections/subjects';
 

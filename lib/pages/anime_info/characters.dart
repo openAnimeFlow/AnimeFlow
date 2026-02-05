@@ -1,7 +1,7 @@
 import 'dart:math';
 
 import 'package:anime_flow/http/requests/bgm_request.dart';
-import 'package:anime_flow/models/item/bangumi/actor_ite.dart';
+import 'package:anime_flow/models/item/bangumi/actor_item.dart';
 import 'package:anime_flow/routes/index.dart';
 import 'package:anime_flow/widget/animation_network_image/animation_network_image.dart';
 import 'package:flutter/material.dart';

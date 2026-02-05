@@ -55,9 +55,9 @@ class _MyPageState extends State<MyPage> with SingleTickerProviderStateMixin {
   Future<void> _fetchUserInfo() async {
     try {
       final token = await tokenStorage.getToken();
-      if(token != null) {
-        final userInfo =
-        await UserRequest.queryUserInfoService(token.userId.toString());
+      if (token != null) {
+        final me = await UserRequest.userInfoService();
+        final userInfo = await UserRequest.queryUserInfoService(me.username);
         if (mounted) {
           userInfoStore.userInfo.value = userInfo;
         }
@@ -66,7 +66,6 @@ class _MyPageState extends State<MyPage> with SingleTickerProviderStateMixin {
       Logger().e("Error fetching user info: $e");
     }
   }
-
 
   @override
   Widget build(BuildContext context) {

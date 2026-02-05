@@ -1,8 +1,10 @@
+import 'avatar_item.dart';
+
 class UserInfoItem {
   final int id;
   final String username;
   final String nickname;
-  final Avatar avatar;
+  final AvatarItem avatar;
   final int group;
   final int joinedAt;
   final String sign;
@@ -34,7 +36,7 @@ class UserInfoItem {
       id: json['id'],
       username: json['username'],
       nickname: json['nickname'],
-      avatar: Avatar.fromJson(json['avatar']),
+      avatar: AvatarItem.fromJson(json['avatar']),
       group: json['group'],
       joinedAt: json['joinedAt'],
       sign: json['sign'],
@@ -62,34 +64,6 @@ class UserInfoItem {
       'networkServices': networkServices,
       'homepage': homepage.toJson(),
       'stats': stats.toJson(),
-    };
-  }
-}
-
-class Avatar {
-  final String small;
-  final String medium;
-  final String large;
-
-  Avatar({
-    required this.small,
-    required this.medium,
-    required this.large,
-  });
-
-  factory Avatar.fromJson(Map<String, dynamic> json) {
-    return Avatar(
-      small: json['small'],
-      medium: json['medium'],
-      large: json['large'],
-    );
-  }
-
-  Map<String, dynamic> toJson() {
-    return {
-      'small': small,
-      'medium': medium,
-      'large': large,
     };
   }
 }

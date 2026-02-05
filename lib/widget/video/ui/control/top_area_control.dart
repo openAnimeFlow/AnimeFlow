@@ -147,7 +147,7 @@ class _TopAreaControlState extends State<TopAreaControl> {
                                     }
                                   },
                                   child: const Icon(
-                                    Icons.arrow_back_ios_new,
+                                    Icons.arrow_back_outlined,
                                     color: Colors.white,
                                   ),
                                 ),

@@ -128,4 +128,15 @@ class FormatTimeUtil {
     }
     return '${hours.toString().padLeft(2, '0')}:${minutes.toString().padLeft(2, '0')}';
   }
+
+  /// [timestamp] 秒级时间戳
+  /// 返回格式：YYYY-MM-DD HH:mm:ss
+  static String formatDateTimeFull(int timestamp) {
+    final dateTime = DateTime.fromMillisecondsSinceEpoch(timestamp * 1000);
+    return '${dateTime.year}-'
+        '${dateTime.month.toString().padLeft(2, '0')}-'
+        '${dateTime.day.toString().padLeft(2, '0')} '
+        '${dateTime.hour.toString().padLeft(2, '0')}:'
+        '${dateTime.minute.toString().padLeft(2, '0')}';
+  }
 }

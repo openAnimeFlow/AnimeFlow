@@ -18,6 +18,7 @@ import 'package:anime_flow/pages/settings/pages/plugins/add_plugins.dart';
 import 'package:anime_flow/pages/settings/pages/plugins/download_plugins.dart';
 import 'package:anime_flow/pages/settings/pages/plugins/plugins.dart';
 import 'package:anime_flow/pages/settings/pages/theme.dart';
+import 'package:anime_flow/pages/user_space/index.dart';
 import 'package:get/get.dart';
 
 class RouteName {
@@ -30,6 +31,7 @@ class RouteName {
   static const String characters = "/characters";
   static const String characterInfo = "/character_info";
   static const String playRecord = "/play_record";
+  static const String userSpace = "/user_space";
 
   // 设置页面路由
   static const String settings = "/settings";
@@ -56,6 +58,7 @@ List<GetPage> getPages() {
     GetPage(name: RouteName.characters, page: () => const CharacterPage()),
     GetPage(name: RouteName.characterInfo, page: () => const CharacterInfo()),
     GetPage(name: RouteName.playRecord, page: () => const PlayRecordPage()),
+    GetPage(name: RouteName.userSpace, page: () => const UserSpacePage()),
     ...settingsPages(),
   ];
 }

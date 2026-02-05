@@ -167,7 +167,6 @@ class _UserSpacePageState extends State<UserSpacePage>
   Widget _buildStatsTab(BuildContext context) {
     final userInfo = this.userInfo!;
     final handle = NestedScrollView.sliverOverlapAbsorberHandleFor(context);
-    final stats = userInfo.stats;
 
     return CustomScrollView(
       slivers: <Widget>[
@@ -178,31 +177,6 @@ class _UserSpacePageState extends State<UserSpacePage>
           ),
         ),
       ],
-    );
-  }
-
-  Widget _buildStatCard(String title, List<String> items) {
-    return Card(
-      child: Padding(
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              title,
-              style: const TextStyle(
-                fontSize: 16,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-            const SizedBox(height: 8),
-            ...items.map((item) => Padding(
-                  padding: const EdgeInsets.only(bottom: 4),
-                  child: Text(item),
-                )),
-          ],
-        ),
-      ),
     );
   }
 

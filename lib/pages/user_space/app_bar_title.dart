@@ -9,7 +9,7 @@ class AppBarTitleView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
+    return Padding(
         padding: const EdgeInsets.symmetric(horizontal: 16),
         child: Row(
           children: [
@@ -17,12 +17,12 @@ class AppBarTitleView extends StatelessWidget {
               onTap: () => Get.back(),
               child: const Icon(Icons.arrow_back),
             ),
+            const SizedBox(width: 5),
             Expanded(
               child: AnimatedOpacity(
                 opacity: isPinned ? 1 : 0,
                 duration: const Duration(milliseconds: 500),
                 child: Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
                   children: [
                     ClipRRect(
                       borderRadius: BorderRadius.circular(5),
@@ -39,7 +39,6 @@ class AppBarTitleView extends StatelessWidget {
                 ),
               ),
             ),
-            const SizedBox(width: 48),
           ],
         ));
   }

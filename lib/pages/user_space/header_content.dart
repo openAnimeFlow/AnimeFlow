@@ -49,7 +49,7 @@ class HeaderContent extends StatelessWidget {
                   shape: BoxShape.circle,
                   border: Border.all(
                     color: Colors.white,
-                    width: 3,
+                    width: 2,
                   ),
                 ),
                 child: ClipOval(

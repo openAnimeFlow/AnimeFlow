@@ -69,7 +69,7 @@ class _TopAreaControlState extends State<TopAreaControl> {
                       //Obx细粒度更新机制,只有直接访问了响应式变量的Obx才会被触发重建。
                       if (fullscreen)
                         Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 10),
+                          padding: const EdgeInsets.symmetric(horizontal: 15),
                           height: 16,
                           child: Row(
                             children: [

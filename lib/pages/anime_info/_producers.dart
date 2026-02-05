@@ -1,20 +1,15 @@
-import 'package:anime_flow/constants/constants.dart';
-import 'package:anime_flow/http/requests/bgm_request.dart';
-import 'package:anime_flow/models/item/bangumi/staff_item.dart';
-import 'package:anime_flow/widget/animation_network_image/animation_network_image.dart';
-import 'package:flutter/material.dart';
-import 'package:logger/logger.dart';
+part of 'synopsis.dart';
 
-class ProducersView extends StatefulWidget {
+class _ProducersView extends StatefulWidget {
   final int subjectId;
 
-  const ProducersView({super.key, required this.subjectId});
+  const _ProducersView({ required this.subjectId});
 
   @override
-  State<ProducersView> createState() => _ProducersViewState();
+  State<_ProducersView> createState() => _ProducersViewState();
 }
 
-class _ProducersViewState extends State<ProducersView> {
+class _ProducersViewState extends State<_ProducersView> {
   StaffItem? staff;
   bool isLoading = false;
 

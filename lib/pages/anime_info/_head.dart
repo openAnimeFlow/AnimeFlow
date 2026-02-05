@@ -1,24 +1,12 @@
-import 'dart:ui';
-import 'package:anime_flow/constants/play_layout_constant.dart';
-import 'package:anime_flow/stores/anime_info_store.dart';
-import 'package:anime_flow/utils/systemUtil.dart';
-import 'package:anime_flow/widget/animation_network_image/animation_network_image.dart';
-import 'package:anime_flow/widget/collection/collection_button.dart';
-import 'package:anime_flow/widget/star.dart';
-import 'package:flutter/material.dart';
-import 'package:get/get.dart';
-import 'package:shimmer/shimmer.dart';
-import 'package:anime_flow/models/item/subject_basic_data_item.dart'
-    show SubjectBasicData;
+part of 'index.dart';
 
-class InfoHeadView extends StatelessWidget {
+class _HeadView extends StatelessWidget {
   final SubjectBasicData subjectBasicData;
   final double statusBarHeight;
   final double contentHeight;
   final String storeTag;
   final AnimeInfoStore animeInfoStore;
-  const InfoHeadView({
-    super.key,
+  const _HeadView({
     required this.statusBarHeight,
     required this.contentHeight,
     required this.subjectBasicData,

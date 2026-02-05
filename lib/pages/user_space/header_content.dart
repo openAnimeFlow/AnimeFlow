@@ -1,9 +1,9 @@
 part of 'index.dart';
 
-class HeaderContent extends StatelessWidget {
+class _HeaderContent extends StatelessWidget {
   final UserInfoItem userInfo;
 
-  const HeaderContent({super.key, required this.userInfo});
+  const _HeaderContent({super.key, required this.userInfo});
 
   @override
   Widget build(BuildContext context) {

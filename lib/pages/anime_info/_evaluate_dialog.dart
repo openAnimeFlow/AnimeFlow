@@ -1,19 +1,16 @@
-import 'package:anime_flow/http/requests/bgm_request.dart';
-import 'package:anime_flow/stores/anime_info_store.dart';
-import 'package:flutter/material.dart';
-import 'package:get/get.dart';
+part of 'index.dart';
 
 /// 评价对话框
-class EvaluateDialog extends StatefulWidget {
+class _EvaluateDialog extends StatefulWidget {
   final String storeTag;
 
-  const EvaluateDialog({super.key, required this.storeTag});
+  const _EvaluateDialog({required this.storeTag});
 
   @override
-  State<EvaluateDialog> createState() => _EvaluateDialogState();
+  State<_EvaluateDialog> createState() => _EvaluateDialogState();
 }
 
-class _EvaluateDialogState extends State<EvaluateDialog> {
+class _EvaluateDialogState extends State<_EvaluateDialog> {
   late TextEditingController _commentController;
   late TextEditingController _tagsController;
   late AnimeInfoStore animeInfoStore;

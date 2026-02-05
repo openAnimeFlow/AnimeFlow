@@ -1,8 +1,8 @@
 part of 'index.dart';
 
-class IntroView extends StatelessWidget {
+class _IntroView extends StatelessWidget {
   final UserInfoItem userInfo;
-  const IntroView({super.key, required this.userInfo});
+  const _IntroView({super.key, required this.userInfo});
 
   @override
   Widget build(BuildContext context) {

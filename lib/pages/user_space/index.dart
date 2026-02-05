@@ -95,7 +95,7 @@ class _UserSpacePageState extends State<UserSpacePage>
                     sliver: SliverAppBar(
                       automaticallyImplyLeading: false,
                       titleSpacing: 0,
-                      title: AppBarTitleView(
+                      title: _AppBarTitleView(
                           userInfo: userInfo!, isPinned: isPinned),
                       pinned: true,
                       floating: false,
@@ -111,7 +111,7 @@ class _UserSpacePageState extends State<UserSpacePage>
                         background: Padding(
                           padding:
                               const EdgeInsets.only(bottom: kTextTabBarHeight),
-                          child: HeaderContent(userInfo: userInfo!,),
+                          child: _HeaderContent(userInfo: userInfo!,),
                         ),
                       ),
                       bottom: TabBar(
@@ -135,7 +135,7 @@ class _UserSpacePageState extends State<UserSpacePage>
               body: TabBarView(
                 controller: _tabController,
                 children: [
-                  Builder(builder: (context) => IntroView(userInfo: userInfo!)),
+                  Builder(builder: (context) => _IntroView(userInfo: userInfo!)),
                   Builder(builder: (context) => _buildCollectionsTab(context)),
                   Builder(builder: (context) => _buildStatsTab(context)),
                   Builder(builder: (context) => _buildTimelineTab(context)),
@@ -165,7 +165,6 @@ class _UserSpacePageState extends State<UserSpacePage>
   }
 
   Widget _buildStatsTab(BuildContext context) {
-    final userInfo = this.userInfo!;
     final handle = NestedScrollView.sliverOverlapAbsorberHandleFor(context);
 
     return CustomScrollView(

@@ -1,17 +1,14 @@
-import 'package:anime_flow/models/item/bangumi/subjects_info_item.dart';
-import 'package:flutter/material.dart';
-import 'package:url_launcher/url_launcher.dart';
+part of 'synopsis.dart';
 
 ///详情信息
-class DetailsView extends StatelessWidget {
+class _DetailsView extends StatelessWidget {
   final String title;
   final double? textSize;
   final FontWeight? textFontWeight;
   final SubjectsInfoItem subject;
 
-  const DetailsView(
-      {super.key,
-      required this.subject,
+  const _DetailsView(
+      {required this.subject,
       required this.title,
       this.textSize,
       this.textFontWeight});
@@ -159,13 +156,12 @@ class _ExpandableTextListState extends State<_ExpandableTextList> {
   }
 }
 
-
 //检查是否为URL
 bool _isUrl(String text) {
   final trimmedText = text.trim();
   // 更完善的URL匹配正则表达式
   return RegExp(
-      r'^https?:\/\/(www\.)?[-a-zA-Z0-9@:%._\+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b([-a-zA-Z0-9()@:%_\+.~#?&//=]*)')
+          r'^https?:\/\/(www\.)?[-a-zA-Z0-9@:%._\+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b([-a-zA-Z0-9()@:%_\+.~#?&//=]*)')
       .hasMatch(trimmedText);
 }
 

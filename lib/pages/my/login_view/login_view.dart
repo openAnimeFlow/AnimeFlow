@@ -1,6 +1,7 @@
 import 'dart:ui';
 
 import 'package:anime_flow/controllers/main_page/main_page_state.dart';
+import 'package:anime_flow/pages/anime_info/synopsis.dart';
 import 'package:anime_flow/routes/index.dart';
 import 'package:anime_flow/widget/animation_network_image/animation_network_image.dart';
 import 'package:anime_flow/http/requests/bgm_request.dart';

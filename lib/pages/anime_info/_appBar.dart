@@ -1,24 +1,11 @@
-import 'package:anime_flow/http/api_path.dart';
-import 'package:anime_flow/utils/utils.dart';
-import 'package:anime_flow/widget/animation_network_image/animation_network_image.dart';
-import 'package:anime_flow/models/item/bangumi/subjects_info_item.dart';
-import 'package:anime_flow/widget/ranking.dart';
-import 'package:anime_flow/widget/star.dart';
-import 'package:anime_flow/widget/drop_down_menu.dart';
-import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
-import 'package:get/get.dart';
-import 'package:url_launcher/url_launcher.dart';
-import 'package:anime_flow/models/item/subject_basic_data_item.dart'
-    show SubjectBasicData;
+part of 'index.dart';
 
-class InfoAppbarView extends StatelessWidget {
+class _Appbar extends StatelessWidget {
   final bool isPinned;
   final SubjectBasicData subjectBasicData;
   final SubjectsInfoItem? subjectsItem;
 
-  const InfoAppbarView({
-    super.key,
+  const _Appbar({
     required this.subjectsItem,
     required this.isPinned,
     required this.subjectBasicData,

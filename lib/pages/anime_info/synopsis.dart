@@ -1,16 +1,33 @@
-import 'package:anime_flow/constants/play_layout_constant.dart';
-import 'package:anime_flow/models/item/bangumi/subjects_info_item.dart';
-import 'package:anime_flow/pages/anime_info/characters.dart';
-import 'package:anime_flow/pages/anime_info/producers.dart';
-import 'package:anime_flow/pages/anime_info/related.dart';
-import 'package:anime_flow/pages/anime_info/tags.dart';
-import 'package:anime_flow/utils/systemUtil.dart';
-import 'package:anime_flow/widget/text/expandable_text.dart';
-import 'package:flutter/material.dart';
-import 'package:shimmer/shimmer.dart';
+import 'dart:math';
 
-import 'details.dart';
-import 'comment.dart';
+import 'package:anime_flow/constants/constants.dart';
+import 'package:anime_flow/constants/play_layout_constant.dart';
+import 'package:anime_flow/http/requests/bgm_request.dart';
+import 'package:anime_flow/models/item/bangumi/actor_item.dart';
+import 'package:anime_flow/models/item/bangumi/related_subjects_item.dart';
+import 'package:anime_flow/models/item/bangumi/staff_item.dart';
+import 'package:anime_flow/models/item/bangumi/subject_comments_item.dart';
+import 'package:anime_flow/models/item/bangumi/subjects_info_item.dart';
+import 'package:anime_flow/models/item/subject_basic_data_item.dart';
+import 'package:anime_flow/routes/index.dart';
+import 'package:anime_flow/utils/format_time_util.dart';
+import 'package:anime_flow/utils/systemUtil.dart';
+import 'package:anime_flow/widget/animation_network_image/animation_network_image.dart';
+import 'package:anime_flow/widget/star.dart';
+import 'package:anime_flow/widget/text/expandable_text.dart';
+import 'package:flutter/cupertino.dart';
+import 'package:flutter/material.dart';
+import 'package:flutter/scheduler.dart';
+import 'package:get/get.dart';
+import 'package:logger/logger.dart';
+import 'package:shimmer/shimmer.dart';
+import 'package:url_launcher/url_launcher.dart';
+part '_comment.dart';
+part '_related.dart';
+part '_producers.dart';
+part '_characters.dart';
+part '_details.dart';
+part '_tags.dart';
 
 /// 隐藏滚动条的ScrollBehavior
 class _NoScrollbarBehavior extends ScrollBehavior {
@@ -39,8 +56,8 @@ class InfoSynopsisView extends StatefulWidget {
 }
 
 class _InfoSynopsisViewState extends State<InfoSynopsisView> {
-  final GlobalKey<CommentViewState> _commentViewKey =
-      GlobalKey<CommentViewState>();
+  final GlobalKey<_CommentViewState> _commentViewKey =
+      GlobalKey<_CommentViewState>();
 
   @override
   Widget build(BuildContext context) {
@@ -106,7 +123,7 @@ class _InfoSynopsisViewState extends State<InfoSynopsisView> {
                         child: _buildContainer(
                           topPadding: 25,
                           alignment: Alignment.topLeft,
-                          TagView(
+                          _TagView(
                             title: '标签',
                             fontSizeTitle: fontSizeTitle,
                             fontWeightTitle: fontWeightTitle,
@@ -122,7 +139,7 @@ class _InfoSynopsisViewState extends State<InfoSynopsisView> {
                       // 详情
                       SliverToBoxAdapter(
                         child: _buildContainer(
-                          DetailsView(
+                          _DetailsView(
                             title: '详情',
                             subject: widget.subjectsInfo!,
                             textSize: 13,
@@ -135,28 +152,28 @@ class _InfoSynopsisViewState extends State<InfoSynopsisView> {
                       // 角色
                       SliverToBoxAdapter(
                         child: _buildContainer(
-                          CharactersView(subjectsId: widget.subjectsId),
+                          _CharactersView(subjectsId: widget.subjectsId),
                         ),
                       ),
 
                       //制作人
                       SliverToBoxAdapter(
                         child: _buildContainer(
-                          ProducersView(subjectId: widget.subjectsId),
+                          _ProducersView(subjectId: widget.subjectsId),
                         ),
                       ),
 
                       // 关联条目
                       SliverToBoxAdapter(
                         child: _buildContainer(
-                          RelatedView(subjectId: widget.subjectsId),
+                          _RelatedView(subjectId: widget.subjectsId),
                         ),
                       ),
 
                       // 评论
                       SliverToBoxAdapter(
                         child: _buildContainer(
-                          CommentView(
+                          _CommentView(
                             key: _commentViewKey,
                             subjectId: widget.subjectsId,
                           ),

@@ -1,10 +1,10 @@
 part of 'index.dart';
 
-class AppBarTitleView extends StatelessWidget {
+class _AppBarTitleView extends StatelessWidget {
   final UserInfoItem userInfo;
   final bool isPinned;
 
-  const AppBarTitleView(
+  const _AppBarTitleView(
       {super.key, required this.userInfo, required this.isPinned});
 
   @override

@@ -1,28 +1,18 @@
-import 'package:anime_flow/http/requests/bgm_request.dart';
-import 'package:anime_flow/models/item/bangumi/subject_comments_item.dart';
-import 'package:anime_flow/routes/index.dart';
-import 'package:anime_flow/utils/format_time_util.dart';
-import 'package:anime_flow/widget/star.dart';
-import 'package:anime_flow/widget/animation_network_image/animation_network_image.dart';
-import 'package:flutter/material.dart';
-import 'package:flutter/scheduler.dart';
-import 'package:get/get.dart';
+part of 'synopsis.dart';
 
-class CommentView extends StatefulWidget {
+class _CommentView extends StatefulWidget {
   final int subjectId;
-  final VoidCallback? onScrollToBottom;
 
-  const CommentView({
+  const _CommentView({
     super.key,
     required this.subjectId,
-    this.onScrollToBottom,
   });
 
   @override
-  State<CommentView> createState() => CommentViewState();
+  State<_CommentView> createState() => _CommentViewState();
 }
 
-class CommentViewState extends State<CommentView> {
+class _CommentViewState extends State<_CommentView> {
   SubjectCommentItem? subjectCommentItem;
   int _commentOffset = 0;
   bool _isLoadingComments = false;
@@ -177,19 +167,22 @@ class CommentViewState extends State<CommentView> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
                         //用户昵称
-                        Expanded(
-                          child: Text(
-                            comment.user.nickname.isNotEmpty
-                                ? comment.user.nickname
-                                : comment.user.username,
-                            style: const TextStyle(
-                              fontSize: 14,
-                              fontWeight: FontWeight.w600,
+                         InkWell(
+                            onTap: () => Get.toNamed(RouteName.userSpace,
+                                arguments: comment.user.username),
+                            child: Text(
+                              comment.user.nickname.isNotEmpty
+                                  ? comment.user.nickname
+                                  : comment.user.username,
+                              style: const TextStyle(
+                                fontSize: 14,
+                                fontWeight: FontWeight.w600,
+                              ),
                             ),
                           ),
-                        ),
                         // 时间
                         Text(
                           FormatTimeUtil.formatTime(comment.updatedAt),

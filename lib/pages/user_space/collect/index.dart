@@ -192,62 +192,64 @@ class _CollectViewState extends State<CollectView>
         slivers: <Widget>[
           SliverOverlapInjector(handle: handle),
           SliverPadding(
-            padding: const EdgeInsets.only(top: 10, bottom: 10),
+            padding: const EdgeInsets.symmetric(horizontal: 10,vertical: 10),
             sliver: SliverToBoxAdapter(
-              child: Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 10),
-                child: Row(
-                  children: List.generate(_tabs.length, (index) {
-                    final tab = _tabs[index];
-                    final parts = tab.split('\n');
-                    final collectionType = index + 1;
-                    final isSelected =
-                        _selectedCollectionType == collectionType;
-                    final textStyle = TextStyle(
-                        fontSize: _fontSize, fontWeight: FontWeight.w600);
-                    return InkWell(
-                      onTap: () {
-                        _queryUserCollection(collectionType: collectionType);
-                      },
-                      borderRadius: BorderRadius.circular(5),
-                      child: Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 3),
-                        margin: const EdgeInsets.only(right: 5),
-                        decoration: BoxDecoration(
-                          color: isSelected
-                              ? Theme.of(context).colorScheme.primaryContainer
-                              : Theme.of(context)
-                                  .colorScheme
-                                  .surfaceContainerHighest,
-                          borderRadius: BorderRadius.circular(5),
-                        ),
-                        child: Row(
-                          children: [
-                            Text(
-                              parts[0],
-                              style: textStyle.copyWith(
-                                color: isSelected
-                                    ? Theme.of(context)
-                                        .colorScheme
-                                        .onPrimaryContainer
-                                    : null,
+              child: Center(
+                child: ConstrainedBox(
+                  constraints: const BoxConstraints(maxWidth: 1400),
+                  child: Row(
+                    children: List.generate(_tabs.length, (index) {
+                      final tab = _tabs[index];
+                      final parts = tab.split('\n');
+                      final collectionType = index + 1;
+                      final isSelected =
+                          _selectedCollectionType == collectionType;
+                      final textStyle = TextStyle(
+                          fontSize: _fontSize, fontWeight: FontWeight.w600);
+                      return InkWell(
+                        onTap: () {
+                          _queryUserCollection(collectionType: collectionType);
+                        },
+                        borderRadius: BorderRadius.circular(5),
+                        child: Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 3),
+                          margin: const EdgeInsets.only(right: 5),
+                          decoration: BoxDecoration(
+                            color: isSelected
+                                ? Theme.of(context).colorScheme.primaryContainer
+                                : Theme.of(context)
+                                    .colorScheme
+                                    .surfaceContainerHighest,
+                            borderRadius: BorderRadius.circular(5),
+                          ),
+                          child: Row(
+                            children: [
+                              Text(
+                                parts[0],
+                                style: textStyle.copyWith(
+                                  color: isSelected
+                                      ? Theme.of(context)
+                                          .colorScheme
+                                          .onPrimaryContainer
+                                      : null,
+                                ),
                               ),
-                            ),
-                            Text(
-                              parts[1],
-                              style: textStyle.copyWith(
-                                color: isSelected
-                                    ? Theme.of(context)
-                                        .colorScheme
-                                        .onPrimaryContainer
-                                    : null,
-                              ),
-                            )
-                          ],
+                              Text(
+                                parts[1],
+                                style: textStyle.copyWith(
+                                  color: isSelected
+                                      ? Theme.of(context)
+                                          .colorScheme
+                                          .onPrimaryContainer
+                                      : null,
+                                ),
+                              )
+                            ],
+                          ),
                         ),
-                      ),
-                    );
-                  }),
+                      );
+                    }),
+                  ),
                 ),
               ),
             ),
@@ -265,34 +267,43 @@ class _CollectViewState extends State<CollectView>
           else
             SliverPadding(
               padding: EdgeInsets.only(
-                  left: 8,
-                  right: 8,
                   bottom: MediaQuery.of(context).padding.bottom),
-              sliver: SliverGrid(
-                gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                  crossAxisCount: LayoutUtil.getCrossAxisCount(context),
-                  childAspectRatio: 0.7,
-                  mainAxisSpacing: 8,
-                  crossAxisSpacing: 8,
-                ),
-                delegate: SliverChildBuilderDelegate(
-                  (context, index) {
-                    final collection = userCollections!.data[index];
-                    return InkWell(
-                      onTap: () {
-                        final subject = SubjectBasicData(
-                            id: collection.id,
-                            name: collection.nameCN ?? collection.name,
-                            image: collection.images.large);
-                        Get.toNamed(RouteName.animeInfo, arguments: subject);
-                      },
-                      child: SubjectCard(
-                        image: collection.images.large,
-                        title: collection.nameCN ?? collection.name,
+              sliver: SliverToBoxAdapter(
+                child: Center(
+                  child: ConstrainedBox(
+                    constraints: const BoxConstraints(maxWidth: 1400),
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 8),
+                      child: GridView.builder(
+                        shrinkWrap: true,
+                        physics: const NeverScrollableScrollPhysics(),
+                        gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                          crossAxisCount: LayoutUtil.getCrossAxisCount(context),
+                          childAspectRatio: 0.7,
+                          mainAxisSpacing: 8,
+                          crossAxisSpacing: 8,
+                        ),
+                        itemCount: userCollections!.data.length,
+                        itemBuilder: (context, index) {
+                          final collection = userCollections!.data[index];
+                          return InkWell(
+                            onTap: () {
+                              final subject = SubjectBasicData(
+                                  id: collection.id,
+                                  name: collection.nameCN ?? collection.name,
+                                  image: collection.images.large);
+                              Get.toNamed(RouteName.animeInfo,
+                                  arguments: subject);
+                            },
+                            child: SubjectCard(
+                              image: collection.images.large,
+                              title: collection.nameCN ?? collection.name,
+                            ),
+                          );
+                        },
                       ),
-                    );
-                  },
-                  childCount: userCollections!.data.length,
+                    ),
+                  ),
                 ),
               ),
             ),

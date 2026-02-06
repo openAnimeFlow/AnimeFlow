@@ -363,6 +363,7 @@ class _RankingPageState extends State<RankingPage> {
                                   onTap: () => Get.toNamed(RouteName.animeInfo,
                                       arguments: subjectBasicData),
                                   child: SubjectCard(
+                                      rating: data.rating.rank,
                                       image: data.images.large,
                                       title: data.nameCN ?? data.name),
                                 );

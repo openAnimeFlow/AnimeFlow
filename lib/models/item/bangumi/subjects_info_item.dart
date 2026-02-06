@@ -1,4 +1,6 @@
-import 'package:anime_flow/models/item/bangumi/collections_item.dart';
+import 'image_five_item.dart';
+import 'interest_item.dart';
+import 'rating_item.dart';
 
 class SubjectsInfoItem {
   final Airtime airtime;
@@ -13,7 +15,7 @@ class SubjectsInfoItem {
   final String? nameCN;
   final bool nsfw;
   final Platform platform;
-  final Rating rating;
+  final RatingItem rating;
   final int redirect;
   final bool series;
   final int seriesEntry;
@@ -21,8 +23,8 @@ class SubjectsInfoItem {
   final int type;
   final int volumes;
   final List<Tags> tags;
-  final Images images;
-  final Interest? interest;
+  final ImageFiveItem images;
+  final InterestItem? interest;
 
   SubjectsInfoItem({
     required this.airtime,
@@ -64,7 +66,7 @@ class SubjectsInfoItem {
         nameCN = json['nameCN'] as String?,
         nsfw = json['nsfw'],
         platform = Platform.fromJson(json['platform']),
-        rating = Rating.fromJson(json['rating']),
+        rating = RatingItem.fromJson(json['rating']),
         redirect = json['redirect'],
         series = json['series'],
         seriesEntry = json['seriesEntry'],
@@ -72,9 +74,9 @@ class SubjectsInfoItem {
         type = json['type'],
         volumes = json['volumes'],
         tags = (json['tags'] as List).map((e) => Tags.fromJson(e)).toList(),
-        images = Images.fromJson(json['images']),
+        images = ImageFiveItem.fromJson(json['images']),
         interest = json['interest'] != null
-            ? Interest.fromJson(json['interest'])
+            ? InterestItem.fromJson(json['interest'])
             : null;
 
   Map<String, dynamic> toJson() {
@@ -220,35 +222,6 @@ class Platform {
   }
 }
 
-class Rating {
-  final int rank;
-  final List<int> count;
-  final num score;
-  final int total;
-
-  Rating({
-    required this.rank,
-    required this.count,
-    required this.score,
-    required this.total,
-  });
-
-  Rating.fromJson(Map<String, dynamic> json)
-      : rank = json['rank'],
-        count = List<int>.from(json['count']),
-        score = json['score'] as num,
-        total = json['total'];
-
-  Map<String, dynamic> toJson() {
-    return {
-      'rank': rank,
-      'count': count,
-      'score': score,
-      'total': total,
-    };
-  }
-}
-
 class Tags {
   final String name;
   final int count;
@@ -266,39 +239,6 @@ class Tags {
     return {
       'name': name,
       'count': count,
-    };
-  }
-}
-
-class Images {
-  final String large;
-  final String common;
-  final String medium;
-  final String small;
-  final String grid;
-
-  Images({
-    required this.large,
-    required this.common,
-    required this.medium,
-    required this.small,
-    required this.grid,
-  });
-
-  Images.fromJson(Map<String, dynamic> json)
-      : large = json['large'],
-        common = json['common'],
-        medium = json['medium'],
-        small = json['small'],
-        grid = json['grid'];
-
-  Map<String, dynamic> toJson() {
-    return {
-      'large': large,
-      'common': common,
-      'medium': medium,
-      'small': small,
-      'grid': grid,
     };
   }
 }

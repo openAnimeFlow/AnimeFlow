@@ -1,4 +1,6 @@
-import 'package:anime_flow/models/item/bangumi/image_five_item.dart';
+import 'image_five_item.dart';
+import 'interest_item.dart';
+import 'rating_item.dart';
 
 class CollectionsItem {
   List<Data> data;
@@ -29,7 +31,7 @@ class Data {
   String nameCN;
   bool nsfw;
   Platform platform;
-  Rating rating;
+  RatingItem rating;
   int redirect;
   bool series;
   int seriesEntry;
@@ -38,7 +40,7 @@ class Data {
   int volumes;
   List<Tags> tags;
   ImageFiveItem images;
-  Interest interest;
+  InterestItem interest;
 
   Data({
     required this.airtime,
@@ -78,7 +80,7 @@ class Data {
         nameCN = json['nameCN'],
         nsfw = json['nsfw'] ?? false,
         platform = Platform.fromJson(json['platform']),
-        rating = Rating.fromJson(json['rating']),
+        rating = RatingItem.fromJson(json['rating']),
         redirect = json['redirect'],
         series = json['series'] ?? false,
         seriesEntry = json['seriesEntry'],
@@ -87,7 +89,7 @@ class Data {
         volumes = json['volumes'],
         tags = (json['tags'] as List).map((e) => Tags.fromJson(e)).toList(),
         images = ImageFiveItem.fromJson(json['images']),
-        interest = Interest.fromJson(json['interest']);
+        interest = InterestItem.fromJson(json['interest']);
 
   Map<String, dynamic> toJson() => {
     'airtime': airtime.toJson(),
@@ -207,32 +209,6 @@ class Platform {
   };
 }
 
-class Rating {
-  int rank;
-  List<int> count;
-  double score;
-  int total;
-
-  Rating({
-    required this.rank,
-    required this.count,
-    required this.score,
-    required this.total,
-  });
-
-  Rating.fromJson(Map<String, dynamic> json) :
-        rank = json['rank'],
-        count = List<int>.from(json['count']),
-        score = json['score'].toDouble(),
-        total = json['total'];
-
-  Map<String, dynamic> toJson() => {
-    'rank': rank,
-    'count': count,
-    'score': score,
-    'total': total,
-  };
-}
 
 class Tags {
   String name;
@@ -247,52 +223,5 @@ class Tags {
   Map<String, dynamic> toJson() => {
     'name': name,
     'count': count,
-  };
-}
-
-class Interest {
-  int id;
-  int rate;
-  int type;
-  String comment;
-  List<dynamic> tags;
-  int epStatus;
-  int volStatus;
-  bool private;
-  int updatedAt;
-
-  Interest({
-    required this.id,
-    required this.rate,
-    required this.type,
-    required this.comment,
-    required this.tags,
-    required this.epStatus,
-    required this.volStatus,
-    required this.private,
-    required this.updatedAt,
-  });
-
-  Interest.fromJson(Map<String, dynamic> json) :
-        id = json['id'],
-        rate = json['rate'],
-        type = json['type'],
-        comment = json['comment'],
-        tags = json['tags'],
-        epStatus = json['epStatus'],
-        volStatus = json['volStatus'],
-        private = json['private'] ?? false,
-        updatedAt = json['updatedAt'];
-
-  Map<String, dynamic> toJson() => {
-    'id': id,
-    'rate': rate,
-    'type': type,
-    'comment': comment,
-    'tags': tags,
-    'epStatus': epStatus,
-    'volStatus': volStatus,
-    'private': private,
-    'updatedAt': updatedAt,
   };
 }

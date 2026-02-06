@@ -2,14 +2,18 @@ import 'dart:ui';
 
 import 'package:anime_flow/http/requests/bgm_request.dart';
 import 'package:anime_flow/models/item/bangumi/user_info_item.dart';
+import 'package:anime_flow/pages/user_space/user_stores.dart';
 import 'package:anime_flow/utils/format_time_util.dart';
 import 'package:anime_flow/widget/animation_network_image/animation_network_image.dart';
 import 'package:anime_flow/widget/bbcode/bbcode_widget.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'collect/index.dart';
 
 part 'app_bar_title.dart';
+
 part 'header_content.dart';
+
 part 'intro.dart';
 
 class UserSpacePage extends StatefulWidget {
@@ -44,6 +48,7 @@ class _UserSpacePageState extends State<UserSpacePage>
       isLoading = true;
     });
     final userInfo = await UserRequest.queryUserInfoService(username);
+    Get.put(UserSpaceStores(userInfo));
     setState(() {
       this.userInfo = userInfo;
       isLoading = false;
@@ -53,6 +58,7 @@ class _UserSpacePageState extends State<UserSpacePage>
   @override
   void dispose() {
     _tabController.dispose();
+    Get.delete<UserSpaceStores>();
     super.dispose();
   }
 
@@ -111,7 +117,9 @@ class _UserSpacePageState extends State<UserSpacePage>
                         background: Padding(
                           padding:
                               const EdgeInsets.only(bottom: kTextTabBarHeight),
-                          child: _HeaderContent(userInfo: userInfo!,),
+                          child: _HeaderContent(
+                            userInfo: userInfo!,
+                          ),
                         ),
                       ),
                       bottom: TabBar(
@@ -135,8 +143,9 @@ class _UserSpacePageState extends State<UserSpacePage>
               body: TabBarView(
                 controller: _tabController,
                 children: [
-                  Builder(builder: (context) => _IntroView(userInfo: userInfo!)),
-                  Builder(builder: (context) => _buildCollectionsTab(context)),
+                  Builder(
+                      builder: (context) => _IntroView(userInfo: userInfo!)),
+                  const CollectView(),
                   Builder(builder: (context) => _buildStatsTab(context)),
                   Builder(builder: (context) => _buildTimelineTab(context)),
                 ],
@@ -145,22 +154,6 @@ class _UserSpacePageState extends State<UserSpacePage>
           );
         }
       }),
-    );
-  }
-
-
-  Widget _buildCollectionsTab(BuildContext context) {
-    final handle = NestedScrollView.sliverOverlapAbsorberHandleFor(context);
-
-    return CustomScrollView(
-      slivers: <Widget>[
-        SliverOverlapInjector(handle: handle),
-        const SliverFillRemaining(
-          child: Center(
-            child: Text('收藏功能待实现'),
-          ),
-        ),
-      ],
     );
   }
 

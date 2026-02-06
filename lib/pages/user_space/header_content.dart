@@ -68,7 +68,7 @@ class _HeaderContent extends StatelessWidget {
                     : userInfo.username,
                 children: [
                   TextSpan(
-                      text: '@${userInfo.id}',
+                      text: '@${userInfo.username}',
                       style: TextStyle(
                           fontSize: 16, color: Theme.of(context).disabledColor))
                 ],

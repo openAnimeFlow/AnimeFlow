@@ -52,15 +52,14 @@ class BgmUsersApi {
   ///条目收藏
   static const String collections = '/p1/collections/subjects';
 
+  ///用户收藏
+  static const String userCollections = '/p1/users/{username}/collections/subjects';
+
   ///剧集收藏
   static const String collectionsEpisodes = '/p1/collections/episodes';
 
   ///用户信息
   static const String userInfo = '/p1/users/{username}';
-
-  ///用户收藏
-  static const String userCollections =
-      '/p1/users/{username}/collections/subjects';
 }
 
 class BgmApi {

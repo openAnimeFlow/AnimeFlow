@@ -89,7 +89,7 @@ class _LoginViewState extends State<LoginView>
       final offset = loadMore && !refresh
           ? (_offsets[type] ?? _collectionsCache[type]?.data.length ?? 0)
           : 0;
-      final collections = await UserRequest.queryUserCollectionsService(
+      final collections = await UserRequest.userCollectionsService(
           type: type, limit: 20, offset: offset);
 
       setState(() {

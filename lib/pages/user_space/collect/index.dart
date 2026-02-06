@@ -1,6 +1,8 @@
 import 'package:anime_flow/http/requests/bgm_request.dart';
 import 'package:anime_flow/models/item/bangumi/user_collections_item.dart';
+import 'package:anime_flow/models/item/subject_basic_data_item.dart';
 import 'package:anime_flow/pages/user_space/user_stores.dart';
+import 'package:anime_flow/routes/index.dart';
 import 'package:anime_flow/utils/layout_util.dart';
 import 'package:anime_flow/widget/subject_card.dart';
 import 'package:flutter/material.dart';
@@ -201,8 +203,8 @@ class _CollectViewState extends State<CollectView>
                     final collectionType = index + 1;
                     final isSelected =
                         _selectedCollectionType == collectionType;
-                    final textStyle =
-                        TextStyle(fontSize: _fontSize, fontWeight: FontWeight.w600);
+                    final textStyle = TextStyle(
+                        fontSize: _fontSize, fontWeight: FontWeight.w600);
                     return InkWell(
                       onTap: () {
                         _queryUserCollection(collectionType: collectionType);
@@ -276,9 +278,18 @@ class _CollectViewState extends State<CollectView>
                 delegate: SliverChildBuilderDelegate(
                   (context, index) {
                     final collection = userCollections!.data[index];
-                    return SubjectCard(
-                      image: collection.images.large,
-                      title: collection.nameCN ?? collection.name,
+                    return InkWell(
+                      onTap: () {
+                        final subject = SubjectBasicData(
+                            id: collection.id,
+                            name: collection.nameCN ?? collection.name,
+                            image: collection.images.large);
+                        Get.toNamed(RouteName.animeInfo, arguments: subject);
+                      },
+                      child: SubjectCard(
+                        image: collection.images.large,
+                        title: collection.nameCN ?? collection.name,
+                      ),
                     );
                   },
                   childCount: userCollections!.data.length,

@@ -1,9 +1,11 @@
 import 'package:anime_flow/http/requests/bgm_request.dart';
 import 'package:anime_flow/models/item/bangumi/character_comments_item.dart';
+import 'package:anime_flow/routes/index.dart';
 import 'package:anime_flow/utils/format_time_util.dart';
 import 'package:anime_flow/widget/bbcode/bbcode_widget.dart';
 import 'package:anime_flow/widget/animation_network_image/animation_network_image.dart';
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 
 class CharacterCommentsView extends StatefulWidget {
   final int characterId;
@@ -105,10 +107,14 @@ class _CharacterCommentsViewState extends State<CharacterCommentsView> {
             children: [
               ClipRRect(
                 borderRadius: BorderRadius.circular(8),
-                child: AnimationNetworkImage(
-                  height: 48,
-                  width: 48,
-                  url: comment.user.avatar.large,
+                child: InkWell(
+                  onTap: () => Get.toNamed(RouteName.userSpace,
+                      arguments: comment.user.username),
+                  child: AnimationNetworkImage(
+                    height: 48,
+                    width: 48,
+                    url: comment.user.avatar.large,
+                  ),
                 ),
               ),
               const SizedBox(width: 8),
@@ -118,11 +124,15 @@ class _CharacterCommentsViewState extends State<CharacterCommentsView> {
                   children: [
                     Row(
                       children: [
-                        Text(
-                          comment.user.nickname,
-                          style: const TextStyle(
-                            fontSize: 16,
-                            fontWeight: FontWeight.bold,
+                        InkWell(
+                          onTap: () => Get.toNamed(RouteName.userSpace,
+                              arguments: comment.user.username),
+                          child: Text(
+                            comment.user.nickname,
+                            style: const TextStyle(
+                              fontSize: 16,
+                              fontWeight: FontWeight.bold,
+                            ),
                           ),
                         ),
                         const SizedBox(width: 8),
@@ -173,11 +183,15 @@ class _CharacterCommentsViewState extends State<CharacterCommentsView> {
                 child: Row(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    AnimationNetworkImage(
-                      borderRadius: BorderRadius.circular(8),
-                      height: 32,
-                      width: 32,
-                      url: reply.user.avatar.large,
+                    InkWell(
+                      onTap: () => Get.toNamed(RouteName.userSpace,
+                          arguments: reply.user.username),
+                      child: AnimationNetworkImage(
+                        borderRadius: BorderRadius.circular(8),
+                        height: 32,
+                        width: 32,
+                        url: reply.user.avatar.large,
+                      ),
                     ),
                     const SizedBox(width: 8),
                     Expanded(
@@ -186,13 +200,17 @@ class _CharacterCommentsViewState extends State<CharacterCommentsView> {
                         children: [
                           Row(
                             children: [
-                              Text(
-                                reply.user.nickname,
-                                style: TextStyle(
-                                  fontSize: 14,
-                                  fontWeight: FontWeight.bold,
-                                  color:
-                                      Theme.of(context).colorScheme.onSurface,
+                              InkWell(
+                                onTap: () => Get.toNamed(RouteName.userSpace,
+                                    arguments: reply.user.username),
+                                child: Text(
+                                  reply.user.nickname,
+                                  style: TextStyle(
+                                    fontSize: 14,
+                                    fontWeight: FontWeight.bold,
+                                    color:
+                                        Theme.of(context).colorScheme.onSurface,
+                                  ),
                                 ),
                               ),
                               const SizedBox(width: 8),

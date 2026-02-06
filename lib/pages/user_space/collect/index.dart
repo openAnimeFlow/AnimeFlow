@@ -276,6 +276,7 @@ class _CollectViewState extends State<CollectView>
                     child: Padding(
                       padding: const EdgeInsets.symmetric(horizontal: 8),
                       child: GridView.builder(
+                        padding: EdgeInsets.zero,
                         shrinkWrap: true,
                         physics: const NeverScrollableScrollPhysics(),
                         gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(

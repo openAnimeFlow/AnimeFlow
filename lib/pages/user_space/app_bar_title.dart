@@ -23,6 +23,7 @@ class _AppBarTitleView extends StatelessWidget {
                 opacity: isPinned ? 1 : 0,
                 duration: const Duration(milliseconds: 500),
                 child: Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     ClipRRect(
                       borderRadius: BorderRadius.circular(5),
@@ -30,11 +31,23 @@ class _AppBarTitleView extends StatelessWidget {
                           width: 30, height: 30, url: userInfo.avatar.large),
                     ),
                     const SizedBox(width: 5),
-                    Text(
-                      userInfo.nickname,
-                      style: const TextStyle(
-                          fontSize: 12, fontWeight: FontWeight.bold),
-                    )
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            userInfo.nickname,
+                            style: const TextStyle(
+                                fontSize: 12, fontWeight: FontWeight.bold),
+                          ),
+                          if (userInfo.sign.isNotEmpty)
+                            Text(
+                              userInfo.sign,
+                              style: const TextStyle(fontSize: 10),
+                            ),
+                        ],
+                      ),
+                    ),
                   ],
                 ),
               ),

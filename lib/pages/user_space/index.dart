@@ -2,6 +2,7 @@ import 'dart:ui';
 
 import 'package:anime_flow/http/requests/bgm_request.dart';
 import 'package:anime_flow/models/item/bangumi/user_info_item.dart';
+import 'package:anime_flow/pages/user_space/statistics/index.dart';
 import 'package:anime_flow/pages/user_space/user_stores.dart';
 import 'package:anime_flow/utils/format_time_util.dart';
 import 'package:anime_flow/widget/animation_network_image/animation_network_image.dart';
@@ -145,7 +146,7 @@ class _UserSpacePageState extends State<UserSpacePage>
                 children: [
                   _IntroView(userInfo: userInfo!),
                   const CollectView(),
-                  Builder(builder: (context) => _buildStatsTab(context)),
+                  const StatisticsView(),
                   Builder(builder: (context) => _buildTimelineTab(context)),
                 ],
               ),

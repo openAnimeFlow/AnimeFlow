@@ -63,15 +63,14 @@ class BgmUsersApi {
 }
 
 class BgmApi {
-  static const String baseUrl = 'https://bgm.tv';
-
   // 授权
   static const String oauth = '/oauth/authorize';
 }
 
 class CommonApi {
-  //bangumi.tv动漫页
-  static const String bangumiTV = 'https://bangumi.tv/anime/browser';
+  static const String bgmTV = 'https://bgm.tv';
+
+  static const String bangumiTV = 'https://bangumi.tv';
 
   // bangumi请求头
   static const String bangumiUserAgent =

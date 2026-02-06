@@ -29,7 +29,7 @@ class MyController {
     final session = await OAuthRequest.getSessionService();
     final sessionId = session['data']['sessionId'];
     final authUrl = Uri.parse(
-        '${BgmApi.baseUrl}${BgmApi.oauth}?response_type=code&client_id=$clientId&redirect_uri=$redirectUri&state=$sessionId');
+        '${CommonApi.bgmTV}${BgmApi.oauth}?response_type=code&client_id=$clientId&redirect_uri=$redirectUri&state=$sessionId');
     Logger().d('authUrl: $authUrl');
     if (await canLaunchUrl(authUrl)) {
       await launchUrl(authUrl);

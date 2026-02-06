@@ -13,7 +13,7 @@ class _Appbar extends StatelessWidget {
 
   void _handleMenuAction(BuildContext context, MoreMenuAction action) {
     final subjectId = subjectsItem?.id ?? subjectBasicData.id;
-    final url = '${BgmApi.baseUrl}/subject/$subjectId';
+    final url = '${CommonApi.bgmTV}/subject/$subjectId';
 
     switch (action) {
       case MoreMenuAction.openInBrowser:

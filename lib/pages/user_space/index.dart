@@ -143,8 +143,7 @@ class _UserSpacePageState extends State<UserSpacePage>
               body: TabBarView(
                 controller: _tabController,
                 children: [
-                  Builder(
-                      builder: (context) => _IntroView(userInfo: userInfo!)),
+                  _IntroView(userInfo: userInfo!),
                   const CollectView(),
                   Builder(builder: (context) => _buildStatsTab(context)),
                   Builder(builder: (context) => _buildTimelineTab(context)),

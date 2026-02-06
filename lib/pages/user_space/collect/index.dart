@@ -168,6 +168,18 @@ class _CollectViewState extends State<CollectView>
     }
   }
 
+  ///字体大小
+  double get _fontSize {
+    final width = MediaQuery.of(context).size.width;
+    if (width < 600) {
+      return 12;
+    } else if (width < 800) {
+      return 15;
+    } else {
+      return 18;
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     super.build(context);
@@ -189,8 +201,8 @@ class _CollectViewState extends State<CollectView>
                     final collectionType = index + 1;
                     final isSelected =
                         _selectedCollectionType == collectionType;
-                    const textStyle =
-                        TextStyle(fontSize: 12, fontWeight: FontWeight.w600);
+                    final textStyle =
+                        TextStyle(fontSize: _fontSize, fontWeight: FontWeight.w600);
                     return InkWell(
                       onTap: () {
                         _queryUserCollection(collectionType: collectionType);

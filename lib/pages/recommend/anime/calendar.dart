@@ -3,11 +3,12 @@ import 'package:anime_flow/models/item/subject_basic_data_item.dart';
 import 'package:anime_flow/routes/index.dart';
 import 'package:anime_flow/widget/animation_network_image/animation_network_image.dart';
 import 'package:anime_flow/widget/ranking.dart';
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:anime_flow/models/item/bangumi/subject_item.dart';
 
-class CalendarView extends StatelessWidget {
+class CalendarView extends StatefulWidget {
   final Calendar? calendar;
   final bool isLoading;
   final VoidCallback? onRefresh;
@@ -20,55 +21,68 @@ class CalendarView extends StatelessWidget {
   });
 
   @override
+  State<CalendarView> createState() => _CalendarViewState();
+}
+
+class _CalendarViewState extends State<CalendarView> {
+  final ScrollController _scrollController = ScrollController();
+  final weekday = DateTime.now().weekday;
+
+  @override
+  void dispose() {
+    _scrollController.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
-    final weekday = DateTime.now().weekday;
     final numberOfReleases =
-        calendar?.calendarData[weekday.toString()]?.length ?? 0;
-    final numberOfViewers = calendar?.calendarData[weekday.toString()]
+        widget.calendar?.calendarData[weekday.toString()]?.length ?? 0;
+    final numberOfViewers = widget.calendar?.calendarData[weekday.toString()]
             ?.fold(0, (sum, item) => sum + item.subject.rating.total) ??
         0;
     return SliverMainAxisGroup(
       slivers: [
-         SliverToBoxAdapter(
-            child: Row(
-              crossAxisAlignment: CrossAxisAlignment.end,
-              children: [
-                const Expanded(
-                  child: Text(
-                    "今日放送",
-                    style: TextStyle(fontSize: 25, fontWeight: FontWeight.bold),
-                  ),
+        SliverToBoxAdapter(
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.end,
+            children: [
+              const Expanded(
+                child: Text(
+                  "今日放送",
+                  style: TextStyle(fontSize: 25, fontWeight: FontWeight.bold),
                 ),
-                Column(
-                  crossAxisAlignment: CrossAxisAlignment.end,
-                  children: [
-                    if (calendar != null)
-                      InkWell(
-                          onTap: () {
-                            Get.toNamed(RouteName.calendar,
-                                arguments: calendar);
-                          },
-                          child: const Row(
-                            children: [
-                              Text(
-                                '查看更多',
-                                style:
-                                    TextStyle(fontSize: 10, color: Colors.grey),
-                              ),
-                              Icon(
-                                Icons.keyboard_double_arrow_right_rounded,
-                                color: Colors.grey,
-                              ),
-                            ],
-                          )),
-                    Text(
-                      '周$weekday上映$numberOfReleases部,总$numberOfViewers人收看',
-                      style: const TextStyle(fontSize: 10, color: Colors.grey),
-                    )
-                  ],
-                )
-              ],
-            ),
+              ),
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.end,
+                children: [
+                  if (widget.calendar != null)
+                    InkWell(
+                        onTap: () {
+                          Get.toNamed(RouteName.calendar,
+                              arguments: widget.calendar);
+                        },
+                        child: const Row(
+                          children: [
+                            Text(
+                              '查看更多',
+                              style:
+                                  TextStyle(fontSize: 10, color: Colors.grey),
+                            ),
+                            Icon(
+                              Icons.keyboard_double_arrow_right_rounded,
+                              color: Colors.grey,
+                            ),
+                          ],
+                        )),
+                  Text(
+                    '周$weekday上映$numberOfReleases部,总$numberOfViewers人收看',
+                    style: const TextStyle(fontSize: 10, color: Colors.grey),
+                  )
+                ],
+              )
+            ],
+          ),
         ),
         SliverToBoxAdapter(
           child: SizedBox(
@@ -81,40 +95,54 @@ class CalendarView extends StatelessWidget {
   }
 
   Widget _buildContent(int weekday) {
-    if (isLoading) {
+    if (widget.isLoading) {
       return const Center(
         child: CircularProgressIndicator(),
       );
     }
-    if (calendar == null) {
+    if (widget.calendar == null) {
       return Center(
           child: Row(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
           const Text('获取数据失败'),
-          if (onRefresh != null)
+          if (widget.onRefresh != null)
             IconButton(
-                onPressed: onRefresh,
-                icon: const Icon(Icons.refresh))
+                onPressed: widget.onRefresh, icon: const Icon(Icons.refresh))
         ],
       ));
     } else {
-      final items = calendar!.calendarData[weekday.toString()];
+      final items = widget.calendar!.calendarData[weekday.toString()];
 
       if (items == null || items.isEmpty) {
         return const Center(
           child: Text('今日无番剧更新'),
         );
       } else {
-        return ListView.builder(
-          itemCount: items.length,
-          scrollDirection: Axis.horizontal,
-          padding: EdgeInsets.zero,
-          itemBuilder: (BuildContext context, int index) {
-            final itemData = items[index].subject;
-            return _buildCard(itemData);
-          },
-        );
+        return Listener(
+            onPointerSignal: (event) {
+              if (event is PointerScrollEvent) {
+                GestureBinding.instance.pointerSignalResolver.register(event,
+                    (event) {
+                  final delta = (event as PointerScrollEvent).scrollDelta.dy;
+                  final newOffset = (_scrollController.offset + delta).clamp(
+                    _scrollController.position.minScrollExtent,
+                    _scrollController.position.maxScrollExtent,
+                  );
+                  _scrollController.jumpTo(newOffset);
+                });
+              }
+            },
+            child: ListView.builder(
+              controller: _scrollController,
+              itemCount: items.length,
+              scrollDirection: Axis.horizontal,
+              padding: EdgeInsets.zero,
+              itemBuilder: (BuildContext context, int index) {
+                final itemData = items[index].subject;
+                return _buildCard(itemData);
+              },
+            ));
       }
     }
   }

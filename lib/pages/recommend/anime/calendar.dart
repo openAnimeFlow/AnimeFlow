@@ -58,10 +58,9 @@ class _CalendarViewState extends State<CalendarView> {
                 children: [
                   if (widget.calendar != null)
                     InkWell(
-                        onTap: () {
+                        onTap: () =>
                           Get.toNamed(RouteName.calendar,
-                              arguments: widget.calendar);
-                        },
+                              arguments: widget.calendar),
                         child: const Row(
                           children: [
                             Text(

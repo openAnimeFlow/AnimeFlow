@@ -39,10 +39,6 @@ class _PlayRecordPageState extends State<PlayRecordPage> {
       if (mounted) {
         setState(() {
           this.playHistoryList = playHistoryList;
-        });
-      }
-      if (mounted) {
-        setState(() {
           isLoading = false;
         });
       }

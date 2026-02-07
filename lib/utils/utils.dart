@@ -65,7 +65,6 @@ class Utils {
   static bool get isDocumentStartScriptSupported =>
       _isDocumentStartScriptSupported ?? false;
 
-
   // 根据屏幕宽度确定设计稿尺寸
   // static Size getDesignSize(BuildContext context) {
   //   double width = MediaQuery.of(context).size.width;
@@ -85,7 +84,6 @@ class Utils {
   //     return kTabletDesignSize;
   //   }
   // }
-
 
   static Future<void> downloadImage(String url, String name) async {
     try {
@@ -134,6 +132,21 @@ class Utils {
     return color;
   }
 
+  ///计算百分率
+  static String calculatePercentage(int value, int total) {
+    if (total <= 0) {
+      return '0%';
+    }
+    final percentage = (value / total) * 100;
+    if (percentage >= 100) {
+      return '100%';
+    }
+    // 保留1位小数，如果小数部分为0则显示整数
+    if (percentage % 1 == 0) {
+      return '${percentage.toInt()}%';
+    }
+    return '${percentage.toStringAsFixed(1)}%';
+  }
 
   static String buildShadersAbsolutePath(
       String baseDirectory, List<String> shaders) {

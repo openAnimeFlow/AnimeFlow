@@ -4,6 +4,7 @@ import 'package:anime_flow/repository/play_repository.dart';
 import 'package:anime_flow/repository/storage.dart';
 import 'package:anime_flow/routes/index.dart';
 import 'package:anime_flow/utils/format_time_util.dart';
+import 'package:anime_flow/utils/utils.dart';
 import 'package:anime_flow/widget/animation_network_image/animation_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -57,24 +58,6 @@ class _PlayRecordPageState extends State<PlayRecordPage> {
     const minItemWidth = 320.0;
     if (width < 450) return 1;
     return (width / minItemWidth).floor().clamp(1, 4);
-  }
-
-  /// 计算观看百分比
-  /// [position] 播放进度（秒）
-  /// [duration] 视频总时长（秒）
-  String _calculateWatchPercentage(int position, int duration) {
-    if (duration <= 0) {
-      return '0%';
-    }
-    final percentage = (position / duration) * 100;
-    if (percentage >= 100) {
-      return '100%';
-    }
-    // 保留1位小数，如果小数部分为0则显示整数
-    if (percentage % 1 == 0) {
-      return '${percentage.toInt()}%';
-    }
-    return '${percentage.toStringAsFixed(1)}%';
   }
 
   @override
@@ -146,7 +129,7 @@ class _PlayRecordPageState extends State<PlayRecordPage> {
                                           style: const TextStyle(
                                               fontWeight: FontWeight.bold)),
                                       Text(
-                                        '-观看${_calculateWatchPercentage(playHistory.position, playHistory.duration)}',
+                                        '-观看${Utils.calculatePercentage(playHistory.position, playHistory.duration)}',
                                         style: const TextStyle(
                                             fontWeight: FontWeight.bold),
                                       ),

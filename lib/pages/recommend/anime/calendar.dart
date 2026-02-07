@@ -29,9 +29,7 @@ class CalendarView extends StatelessWidget {
         0;
     return SliverMainAxisGroup(
       slivers: [
-        SliverPadding(
-          padding: const EdgeInsets.all(10),
-          sliver: SliverToBoxAdapter(
+         SliverToBoxAdapter(
             child: Row(
               crossAxisAlignment: CrossAxisAlignment.end,
               children: [
@@ -71,7 +69,6 @@ class CalendarView extends StatelessWidget {
                 )
               ],
             ),
-          ),
         ),
         SliverToBoxAdapter(
           child: SizedBox(
@@ -112,7 +109,7 @@ class CalendarView extends StatelessWidget {
         return ListView.builder(
           itemCount: items.length,
           scrollDirection: Axis.horizontal,
-          padding: const EdgeInsets.symmetric(horizontal: 10),
+          padding: EdgeInsets.zero,
           itemBuilder: (BuildContext context, int index) {
             final itemData = items[index].subject;
             return _buildCard(itemData);

@@ -13,6 +13,8 @@ import 'package:get/get.dart';
 import 'package:logger/logger.dart';
 import 'package:shimmer/shimmer.dart';
 
+import 'play_record.dart';
+
 class AnimePage extends StatefulWidget {
   final ValueChanged<bool>? onShowBackToTopChanged;
   final ValueChanged<VoidCallback>? onScrollToTopCallback;
@@ -186,80 +188,86 @@ class _AnimePageState extends State<AnimePage>
                   child: CustomScrollView(
                     controller: _scrollController,
                     slivers: [
+                      ///今日放送
                       CalendarView(
                         calendar: _calendar,
                         isLoading: _isCalendarLoading,
                         onRefresh: _fetchCalendar,
                       ),
                       const SliverToBoxAdapter(
-                        child: SizedBox(height: 20),
+                        child: SizedBox(height: 10),
                       ),
-                       SliverMainAxisGroup(
-                          slivers: [
-                            const SliverToBoxAdapter(
-                              child: Row(
-                                children: [
-                                  Text(
-                                    '热门动画',
-                                    style: TextStyle(
-                                        fontSize: 25,
-                                        fontWeight: FontWeight.bold),
-                                  )
-                                ],
-                              ),
-                            ),
-                            const SliverToBoxAdapter(
-                              child: SizedBox(height: 5),
-                            ),
-                            SliverGrid(
-                              gridDelegate:
-                                  SliverGridDelegateWithFixedCrossAxisCount(
-                                crossAxisCount:
-                                    LayoutUtil.getCrossAxisCount(context),
-                                crossAxisSpacing: 10, // 横向间距
-                                mainAxisSpacing: 10, // 纵向间距
-                                childAspectRatio: 0.7, // 宽高比
-                              ),
-                              delegate: SliverChildBuilderDelegate(
-                                (BuildContext context, int index) {
-                                  // 显示数据项
-                                  if (index < _dataList.length) {
-                                    final subject = _dataList[index].subject;
-                                    final subjectBasicData = SubjectBasicData(
-                                        id: subject.id,
-                                        name: subject.nameCN ?? subject.name,
-                                        image: subject.images.large);
-                                    return InkWell(
-                                      onTap: () => Get.toNamed(
-                                          RouteName.animeInfo,
-                                          arguments: subjectBasicData),
-                                      child: SubjectCard(
-                                        image: subject.images.large,
-                                        title: subject.nameCN ?? subject.name,
-                                      ),
-                                    );
-                                  }
 
-                                  // 加载时显示骨架屏(3个)
-                                  final skeletonCount =
-                                      _hasMore && _isLoading ? 3 : 0;
-                                  if (index <
-                                      _dataList.length + skeletonCount) {
-                                    return Center(
-                                      child: Padding(
-                                        padding: const EdgeInsets.all(5),
-                                        child: _buildSkeleton(context),
-                                      ),
-                                    );
-                                  }
-
-                                  return const SizedBox.shrink();
-                                },
-                                childCount: _dataList.length +
-                                    (_hasMore && _isLoading ? 3 : 0),
-                              ),
+                      ///播放记录
+                      const PlayRecordView(),
+                      const SliverToBoxAdapter(
+                        child: SizedBox(height: 10),
+                      ),
+                      SliverMainAxisGroup(
+                        slivers: [
+                          const SliverToBoxAdapter(
+                            child: Row(
+                              children: [
+                                Text(
+                                  '热门动画',
+                                  style: TextStyle(
+                                      fontSize: 25,
+                                      fontWeight: FontWeight.bold),
+                                )
+                              ],
                             ),
-                          ],
+                          ),
+                          const SliverToBoxAdapter(
+                            child: SizedBox(height: 5),
+                          ),
+                          SliverGrid(
+                            gridDelegate:
+                                SliverGridDelegateWithFixedCrossAxisCount(
+                              crossAxisCount:
+                                  LayoutUtil.getCrossAxisCount(context),
+                              crossAxisSpacing: 10, // 横向间距
+                              mainAxisSpacing: 10, // 纵向间距
+                              childAspectRatio: 0.7, // 宽高比
+                            ),
+                            delegate: SliverChildBuilderDelegate(
+                              (BuildContext context, int index) {
+                                // 显示数据项
+                                if (index < _dataList.length) {
+                                  final subject = _dataList[index].subject;
+                                  final subjectBasicData = SubjectBasicData(
+                                      id: subject.id,
+                                      name: subject.nameCN ?? subject.name,
+                                      image: subject.images.large);
+                                  return InkWell(
+                                    onTap: () => Get.toNamed(
+                                        RouteName.animeInfo,
+                                        arguments: subjectBasicData),
+                                    child: SubjectCard(
+                                      image: subject.images.large,
+                                      title: subject.nameCN ?? subject.name,
+                                    ),
+                                  );
+                                }
+
+                                // 加载时显示骨架屏(3个)
+                                final skeletonCount =
+                                    _hasMore && _isLoading ? 3 : 0;
+                                if (index < _dataList.length + skeletonCount) {
+                                  return Center(
+                                    child: Padding(
+                                      padding: const EdgeInsets.all(5),
+                                      child: _buildSkeleton(context),
+                                    ),
+                                  );
+                                }
+
+                                return const SizedBox.shrink();
+                              },
+                              childCount: _dataList.length +
+                                  (_hasMore && _isLoading ? 3 : 0),
+                            ),
+                          ),
+                        ],
                       ),
                       // 加载更多失败提示
                       if (_errorMessage != null && _dataList.isNotEmpty)

@@ -407,7 +407,6 @@ class _VideoViewState extends State<VideoView> with WindowListener {
       position: position.inSeconds,
       duration: duration.inSeconds,
     );
-    logger.i('保存播放记录: $playHistory');
     PlayRepository.savePlayHistory(playHistory);
   }
 

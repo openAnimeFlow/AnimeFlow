@@ -57,7 +57,7 @@ class _PlayRecordViewState extends State<PlayRecordView> {
       return const SliverToBoxAdapter(child: SizedBox.shrink());
     } else {
       final playHistory = playHistoryList!;
-      final filterHistory = playHistory.take(10).toList();
+      final filterHistory = playHistory.take(6).toList();
       return SliverMainAxisGroup(
         slivers: [
           SliverToBoxAdapter(
@@ -71,7 +71,7 @@ class _PlayRecordViewState extends State<PlayRecordView> {
                     fontWeight: FontWeight.bold,
                   ),
                 ),
-                if (playHistory.length > 10)
+                if (playHistory.length > 6)
                   TextButton(
                     onPressed: () => Get.toNamed(RouteName.playRecord),
                     child: const Row(

@@ -6,6 +6,7 @@ import 'package:anime_flow/repository/storage.dart';
 import 'package:anime_flow/widget/animation_network_image/animation_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:hive_flutter/adapters.dart';
 
 class PluginsPage extends StatefulWidget {
   const PluginsPage({super.key});
@@ -23,7 +24,14 @@ class _PluginsPageState extends State<PluginsPage> {
   void initState() {
     super.initState();
     settingController = Get.find<SettingController>();
+    settingConfig.listenable().addListener(_initData);
     _initData();
+  }
+
+  @override
+  void deactivate() {
+    settingConfig.listenable().removeListener(_initData);
+    super.deactivate();
   }
 
   void _initData() async {
@@ -45,9 +53,6 @@ class _PluginsPageState extends State<PluginsPage> {
       onConfirm: () async {
         try {
           await settingConfig.delete(name);
-          setState(() {
-            _initData();
-          });
           Get.back();
           Get.snackbar(
             "删除成功",
@@ -76,13 +81,8 @@ class _PluginsPageState extends State<PluginsPage> {
           actions: [
             //云下载
             IconButton(
-                onPressed: () async {
-                  final result =
-                      await Get.toNamed(RouteName.settingDownloadPlugins);
-                  // 如果返回成功标志，刷新数据
-                  if (result == true) {
-                    _initData();
-                  }
+                onPressed: ()  {
+                   Get.toNamed(RouteName.settingDownloadPlugins);
                 },
                 icon: const Icon(Icons.cloud_download_outlined, size: 30)),
             IconButton(
@@ -90,17 +90,8 @@ class _PluginsPageState extends State<PluginsPage> {
                 Icons.save_as_outlined,
                 size: 30,
               ),
-              onPressed: () async {
-                final result = await Get.toNamed(RouteName.settingAddPlugins);
-                // 如果返回成功标志，刷新数据
-                if (result == true) {
-                  _initData();
-                  Get.snackbar(
-                    '保存成功',
-                    '数据源已保存',
-                    maxWidth: 400,
-                  );
-                }
+              onPressed: ()  {
+                 Get.toNamed(RouteName.settingAddPlugins);
               },
             )
           ],
@@ -110,21 +101,11 @@ class _PluginsPageState extends State<PluginsPage> {
           children: List.generate(dataSources.length, (index) {
             final data = dataSources[index];
             return InkWell(
-              onTap: () async {
-                final result = await Get.toNamed(
+              onTap: () =>
+                Get.toNamed(
                   RouteName.settingAddPlugins,
                   arguments: data.name,
-                );
-                // 如果返回成功标志，刷新数据
-                if (result == true) {
-                  _initData();
-                  Get.snackbar(
-                    '保存成功',
-                    '数据源已保存',
-                    maxWidth: 400,
-                  );
-                }
-              },
+                ),
               child: Container(
                 margin: const EdgeInsets.symmetric(vertical: 2),
                 padding: const EdgeInsets.symmetric(vertical: 5),

@@ -158,7 +158,7 @@ class _AddPluginsPageState extends State<AddPluginsPage> {
       }
       
       crawlConfigs.put(item.name, item.toJson());
-      Get.back(result: true);
+      Get.back();
     } catch (e) {
       if (mounted) {
         Get.snackbar(

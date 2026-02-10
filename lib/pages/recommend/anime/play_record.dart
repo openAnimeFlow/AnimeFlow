@@ -81,7 +81,7 @@ class _PlayRecordViewState extends State<PlayRecordView> {
                           style: TextStyle(color: Colors.grey),
                         ),
                         Icon(Icons.keyboard_double_arrow_right_rounded,
-                        color: Colors.grey)
+                            color: Colors.grey)
                       ],
                     ),
                   )
@@ -150,35 +150,50 @@ class _PlayRecordViewState extends State<PlayRecordView> {
                                             Colors.black87,
                                             Colors.transparent,
                                           ])),
-                                      child: Column(
-                                        crossAxisAlignment:
-                                            CrossAxisAlignment.start,
-                                        mainAxisSize: MainAxisSize.min,
+                                      child: Row(
+                                        crossAxisAlignment: CrossAxisAlignment.center,
                                         children: [
-                                          Text(
-                                            '看到${history.episodeSort}话 ${Utils.calculatePercentage(history.position, history.duration)}',
-                                            style: const TextStyle(
-                                              color: Colors.white,
-                                              fontSize: 15,
-                                              fontWeight: FontWeight.bold,
+                                          Expanded(
+                                            child: Column(
+                                              crossAxisAlignment:
+                                                  CrossAxisAlignment.start,
+                                              mainAxisSize: MainAxisSize.min,
+                                              children: [
+                                                Text(
+                                                  '看到${history.episodeSort}话 ${Utils.calculatePercentage(history.position, history.duration)}',
+                                                  style: const TextStyle(
+                                                    color: Colors.white,
+                                                    fontSize: 15,
+                                                    fontWeight: FontWeight.bold,
+                                                  ),
+                                                ),
+                                                const SizedBox(height: 8),
+                                                ClipRRect(
+                                                  borderRadius:
+                                                      BorderRadius.circular(2),
+                                                  child:
+                                                      LinearProgressIndicator(
+                                                    value: history.duration > 0
+                                                        ? history.position /
+                                                            history.duration
+                                                        : 0,
+                                                    minHeight: 4,
+                                                    backgroundColor: Colors
+                                                        .white
+                                                        .withValues(alpha: 0.3),
+                                                    valueColor:
+                                                        const AlwaysStoppedAnimation<
+                                                                Color>(
+                                                            Colors.white),
+                                                  ),
+                                                ),
+                                              ],
                                             ),
                                           ),
-                                          const SizedBox(height: 8),
-                                          ClipRRect(
-                                            borderRadius:
-                                                BorderRadius.circular(2),
-                                            child: LinearProgressIndicator(
-                                              value: history.duration > 0
-                                                  ? history.position /
-                                                      history.duration
-                                                  : 0,
-                                              minHeight: 4,
-                                              backgroundColor: Colors.white
-                                                  .withValues(alpha: 0.3),
-                                              valueColor:
-                                                  const AlwaysStoppedAnimation<
-                                                      Color>(Colors.white),
-                                            ),
+                                          const Icon(
+                                            Icons.play_circle,
+                                            color: Colors.white70,
+                                            size: 40,
                                           ),
                                         ],
                                       ),

@@ -41,8 +41,6 @@ class _AnimePageState extends State<AnimePage>
   bool _isCalendarLoading = false;
   String? _errorMessage;
 
-  static const _contentPadding = EdgeInsets.all(10);
-
   @override
   void initState() {
     super.initState();
@@ -181,7 +179,7 @@ class _AnimePageState extends State<AnimePage>
           children: [
             Center(
               child: Padding(
-                padding: _contentPadding,
+                padding: const EdgeInsets.symmetric(horizontal: 10),
                 child: ConstrainedBox(
                   constraints: const BoxConstraints(
                       maxWidth: PlayLayoutConstant.maxWidth),

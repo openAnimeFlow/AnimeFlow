@@ -1,4 +1,5 @@
 import 'package:anime_flow/models/item/play/play_history.dart';
+import 'package:anime_flow/models/item/subject_basic_data_item.dart';
 import 'package:anime_flow/repository/play_repository.dart';
 import 'package:anime_flow/repository/storage.dart';
 import 'package:anime_flow/routes/index.dart';
@@ -114,104 +115,129 @@ class _PlayRecordViewState extends State<PlayRecordView> {
                   itemCount: filterHistory.length,
                   itemBuilder: (context, index) {
                     final history = filterHistory[index];
+                    final subjectBasicData = SubjectBasicData(
+                        id: history.subjectId,
+                        name: history.subjectName,
+                        image: history.cover);
                     return Container(
                       width: 300,
                       padding: const EdgeInsets.only(right: 8),
-                      child: Column(
-                        mainAxisSize: MainAxisSize.min,
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Expanded(
-                            child: ClipRRect(
-                              borderRadius: BorderRadius.circular(8),
-                              child: Stack(
-                                children: [
-                                  Positioned.fill(
-                                    child: AspectRatio(
-                                      aspectRatio: 16 / 9,
-                                      child: AnimationNetworkImage(
-                                        alignment: Alignment.topCenter,
-                                        fit: BoxFit.cover,
-                                        url: history.cover,
+                      child: InkWell(
+                        borderRadius: BorderRadius.circular(8),
+                        onTap: () {
+                          Get.toNamed(RouteName.animeInfo,
+                              arguments: subjectBasicData);
+                        },
+                        child: Column(
+                          mainAxisSize: MainAxisSize.min,
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Expanded(
+                              child: ClipRRect(
+                                borderRadius: BorderRadius.circular(8),
+                                child: Stack(
+                                  children: [
+                                    Positioned.fill(
+                                      child: AspectRatio(
+                                        aspectRatio: 16 / 9,
+                                        child: AnimationNetworkImage(
+                                          alignment: Alignment.topCenter,
+                                          fit: BoxFit.cover,
+                                          url: history.cover,
+                                        ),
                                       ),
                                     ),
-                                  ),
-                                  Positioned(
-                                    bottom: 0,
-                                    left: 0,
-                                    right: 0,
-                                    child: Container(
-                                      padding: const EdgeInsets.all(8),
-                                      decoration: const BoxDecoration(
-                                          gradient: LinearGradient(
-                                              begin: Alignment.bottomCenter,
-                                              end: Alignment.topCenter,
-                                              colors: [
-                                            Colors.black87,
-                                            Colors.transparent,
-                                          ])),
-                                      child: Row(
-                                        crossAxisAlignment: CrossAxisAlignment.center,
-                                        children: [
-                                          Expanded(
-                                            child: Column(
-                                              crossAxisAlignment:
-                                                  CrossAxisAlignment.start,
-                                              mainAxisSize: MainAxisSize.min,
-                                              children: [
-                                                Text(
-                                                  '看到${history.episodeSort}话 ${Utils.calculatePercentage(history.position, history.duration)}',
-                                                  style: const TextStyle(
-                                                    color: Colors.white,
-                                                    fontSize: 15,
-                                                    fontWeight: FontWeight.bold,
+                                    Positioned(
+                                      bottom: 0,
+                                      left: 0,
+                                      right: 0,
+                                      child: Container(
+                                        padding: const EdgeInsets.all(8),
+                                        decoration: const BoxDecoration(
+                                            gradient: LinearGradient(
+                                                begin: Alignment.bottomCenter,
+                                                end: Alignment.topCenter,
+                                                colors: [
+                                              Colors.black87,
+                                              Colors.transparent,
+                                            ])),
+                                        child: Row(
+                                          crossAxisAlignment:
+                                              CrossAxisAlignment.center,
+                                          children: [
+                                            Expanded(
+                                              child: Column(
+                                                crossAxisAlignment:
+                                                    CrossAxisAlignment.start,
+                                                mainAxisSize: MainAxisSize.min,
+                                                children: [
+                                                  Text(
+                                                    '看到${history.episodeSort}话 ${Utils.calculatePercentage(history.position, history.duration)}',
+                                                    style: const TextStyle(
+                                                      color: Colors.white,
+                                                      fontSize: 15,
+                                                      fontWeight:
+                                                          FontWeight.bold,
+                                                    ),
                                                   ),
-                                                ),
-                                                const SizedBox(height: 8),
-                                                ClipRRect(
-                                                  borderRadius:
-                                                      BorderRadius.circular(2),
-                                                  child:
-                                                      LinearProgressIndicator(
-                                                    value: history.duration > 0
-                                                        ? history.position /
-                                                            history.duration
-                                                        : 0,
-                                                    minHeight: 4,
-                                                    backgroundColor: Colors
-                                                        .white
-                                                        .withValues(alpha: 0.3),
-                                                    valueColor:
-                                                        const AlwaysStoppedAnimation<
-                                                                Color>(
-                                                            Colors.white),
+                                                  const SizedBox(height: 8),
+                                                  ClipRRect(
+                                                    borderRadius:
+                                                        BorderRadius.circular(
+                                                            2),
+                                                    child:
+                                                        LinearProgressIndicator(
+                                                      value: history.duration >
+                                                              0
+                                                          ? history.position /
+                                                              history.duration
+                                                          : 0,
+                                                      minHeight: 4,
+                                                      backgroundColor: Colors
+                                                          .white
+                                                          .withValues(
+                                                              alpha: 0.3),
+                                                      valueColor:
+                                                          const AlwaysStoppedAnimation<
+                                                                  Color>(
+                                                              Colors.white),
+                                                    ),
                                                   ),
-                                                ),
-                                              ],
+                                                ],
+                                              ),
                                             ),
-                                          ),
-                                          const Icon(
-                                            Icons.play_circle,
-                                            color: Colors.white70,
-                                            size: 40,
-                                          ),
-                                        ],
+                                            InkWell(
+                                              onTap: () {
+                                                Get.toNamed(RouteName.play,
+                                                    arguments: {
+                                                      'subjectBasicData': subjectBasicData,
+                                                      'continueEpisode': history.episodeSort,
+                                                    });
+                                              },
+                                              child: const Icon(
+                                                Icons.play_circle,
+                                                color: Colors.white70,
+                                                size: 40,
+                                              ),
+                                            ),
+                                          ],
+                                        ),
                                       ),
                                     ),
-                                  ),
-                                ],
+                                  ],
+                                ),
                               ),
                             ),
-                          ),
-                          const SizedBox(height: 4),
-                          Text(
-                            history.subjectName,
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
-                            style: const TextStyle(
-                                fontSize: 15, fontWeight: FontWeight.bold),
-                          ),
-                        ],
+                            const SizedBox(height: 4),
+                            Text(
+                              history.subjectName,
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                              style: const TextStyle(
+                                  fontSize: 15, fontWeight: FontWeight.bold),
+                            ),
+                          ],
+                        ),
                       ),
                     );
                   },

@@ -281,89 +281,92 @@ class _LoginViewState extends State<LoginView>
     ];
 
     return Container(
-        padding: const EdgeInsets.symmetric(horizontal: 16),
-        child: Row(
-          children: [
-            InkWell(
-              onTap: () {
-                Get.toNamed(RouteName.userSpace,arguments: userInfo.username);
-              },
-              child: const Row(
-                children: [
-                  Text(
-                    '我的空间',
-                    style: TextStyle(fontWeight: FontWeight.bold),
-                  ),
-                  Icon(Icons.import_contacts)
-                ],
-              ),
-            ),
-            Expanded(
-              child: AnimatedOpacity(
-                opacity: isPinned ? 1 : 0,
-                duration: const Duration(milliseconds: 500),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    ClipRRect(
-                      borderRadius: BorderRadius.circular(5),
-                      child: AnimationNetworkImage(
-                          width: 30, height: 30, url: userInfo.avatar.large),
-                    ),
-                    const SizedBox(width: 5),
-                    Text(
-                      userInfo.nickname != ''
-                          ? userInfo.nickname
-                          : userInfo.username,
-                      style: const TextStyle(
-                          fontSize: 12, fontWeight: FontWeight.bold),
-                    )
-                  ],
+      padding: const EdgeInsets.symmetric(horizontal: 16),
+      child: Row(
+        children: [
+          InkWell(
+            borderRadius: BorderRadius.circular(8),
+            onTap: () {
+              Get.toNamed(RouteName.userSpace, arguments: userInfo.username);
+            },
+            child: const Row(
+              children: [
+                Text(
+                  '我的空间',
+                  style: TextStyle(fontWeight: FontWeight.bold),
                 ),
-              ),
+                Icon(Icons.import_contacts)
+              ],
             ),
-            MenuAnchor(
-              alignmentOffset: const Offset(-100, 0),
-              crossAxisUnconstrained: false,
-              menuChildren:
-                  List<MenuItemButton>.generate(menuItems.length, (int index) {
-                final menuItem = menuItems[index];
-                return MenuItemButton(
-                  onPressed: menuItem['action'] as VoidCallback,
-                  child: SizedBox(
-                    width: 120,
-                    child: Row(
-                      children: [
-                        Icon(
-                          menuItem['icon'] as IconData,
-                          size: 20,
-                        ),
-                        const SizedBox(width: 8),
-                        Text(menuItem['title'] as String),
-                      ],
-                    ),
-                  ),
-                );
-              }),
-              builder: (BuildContext context, MenuController controller,
-                  Widget? child) {
-                return InkWell(
-                  onTap: () {
-                    if (controller.isOpen) {
-                      controller.close();
-                    } else {
-                      controller.open();
-                    }
-                  },
-                  child: const Icon(
-                    Icons.notes_outlined,
-                    size: 30,
-                  ),
-                );
-              },
+          ),
+          const Spacer(),
+          AnimatedOpacity(
+            opacity: isPinned ? 1 : 0,
+            duration: const Duration(milliseconds: 500),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                ClipRRect(
+                  borderRadius: BorderRadius.circular(5),
+                  child: AnimationNetworkImage(
+                      width: 30, height: 30, url: userInfo.avatar.large),
+                ),
+                const SizedBox(width: 5),
+                Text(
+                  userInfo.nickname != ''
+                      ? userInfo.nickname
+                      : userInfo.username,
+                  style: const TextStyle(
+                      fontSize: 12, fontWeight: FontWeight.bold),
+                )
+              ],
             ),
-          ],
-        ));
+          ),
+          const Spacer(),
+          MenuAnchor(
+            alignmentOffset: const Offset(-100, 0),
+            crossAxisUnconstrained: false,
+            menuChildren:
+                List<MenuItemButton>.generate(menuItems.length, (int index) {
+              final menuItem = menuItems[index];
+              return MenuItemButton(
+                onPressed: menuItem['action'] as VoidCallback,
+                child: SizedBox(
+                  width: 120,
+                  child: Row(
+                    children: [
+                      Icon(
+                        menuItem['icon'] as IconData,
+                        size: 20,
+                      ),
+                      const SizedBox(width: 8),
+                      Text(menuItem['title'] as String),
+                    ],
+                  ),
+                ),
+              );
+            }),
+            builder: (BuildContext context, MenuController controller,
+                Widget? child) {
+              return InkWell(
+                borderRadius: BorderRadius.circular(8),
+                onTap: () {
+                  if (controller.isOpen) {
+                    controller.close();
+                  } else {
+                    controller.open();
+                  }
+                },
+                child: const Icon(
+                  Icons.notes_outlined,
+                  size: 30,
+                ),
+              );
+            },
+          ),
+        ],
+      ),
+    );
   }
 
   Widget _buildHeaderContent(double statusBarHeight) {

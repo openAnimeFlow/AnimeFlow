@@ -211,17 +211,18 @@ class __CollectionTabViewState extends State<_CollectionTabView> {
                                 children: [
                                   // 左侧封面
                                   AspectRatio(
-                                      aspectRatio: 2 / 3,
-                                      child: ClipRRect(
-                                        borderRadius: const BorderRadius.all(
-                                            Radius.circular(12)),
-                                        child: SizedBox(
-                                          child: AnimationNetworkImage(
-                                            url: collection.images.large,
-                                            fit: BoxFit.cover,
-                                          ),
+                                    aspectRatio: 2 / 3,
+                                    child: ClipRRect(
+                                      borderRadius: const BorderRadius.all(
+                                          Radius.circular(12)),
+                                      child: SizedBox(
+                                        child: AnimationNetworkImage(
+                                          url: collection.images.large,
+                                          fit: BoxFit.cover,
                                         ),
-                                      )),
+                                      ),
+                                    ),
+                                  ),
 
                                   // 右侧信息
                                   Expanded(
@@ -233,16 +234,29 @@ class __CollectionTabViewState extends State<_CollectionTabView> {
                                         mainAxisAlignment:
                                             MainAxisAlignment.start,
                                         children: [
-                                          Text(
-                                            collection.nameCN.isEmpty
-                                                ? collection.name
-                                                : collection.nameCN,
-                                            style: const TextStyle(
-                                              fontWeight: FontWeight.bold,
-                                              fontSize: 14,
-                                            ),
-                                            maxLines: 2,
-                                            overflow: TextOverflow.ellipsis,
+                                          Row(
+                                            crossAxisAlignment:
+                                                CrossAxisAlignment.start,
+                                            children: [
+                                              Expanded(
+                                                child: Text(
+                                                  collection.nameCN.isEmpty
+                                                      ? collection.name
+                                                      : collection.nameCN,
+                                                  style: const TextStyle(
+                                                    fontWeight: FontWeight.bold,
+                                                    fontSize: 14,
+                                                  ),
+                                                  maxLines: 2,
+                                                  overflow:
+                                                      TextOverflow.ellipsis,
+                                                ),
+                                              ),
+                                              const InkWell(
+                                                child: Icon(
+                                                    Icons.expand_more_outlined),
+                                              ),
+                                            ],
                                           ),
                                           if (collection
                                               .summary.isNotEmpty) ...[

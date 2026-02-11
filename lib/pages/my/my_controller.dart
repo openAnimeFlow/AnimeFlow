@@ -25,7 +25,7 @@ class MyController {
 
   static void openOAuthPage() async {
     final clientId = dotenv.env['CLIENT_ID'];
-    final redirectUri = dotenv.env['REDIRECT_URI'];
+    const redirectUri = '${AnimeFlowApi.animeFlowApi}/oauth/callback';
     final session = await OAuthRequest.getSessionService();
     final sessionId = session['data']['sessionId'];
     final authUrl = Uri.parse(

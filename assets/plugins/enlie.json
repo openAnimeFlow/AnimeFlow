@@ -1,0 +1,13 @@
+{
+  "version": "1.0.0",
+  "name": "enlie",
+  "iconUrl": "https://enlienli.link/template/mxpro/mxtheme/images/favicon.png",
+  "baseUrl": "https://enlienli.link/",
+  "searchUrl": "https://enlienli.link/vod/search.html?wd={keyword}",
+  "searchList": "//div[@class='module-main module-page'] /div[1] /div",
+  "searchName": "/div[2] /div[1]/a",
+  "searchLink": "/div[2] /div[1]/a",
+  "lineNames": "//div[@class='module-tab-items-box hisSwiper'] /div /span",
+  "lineList": "//div[@class='module'] //div[@class='module-play-list']/div",
+  "episode": "/a"
+}

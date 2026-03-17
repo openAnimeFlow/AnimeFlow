@@ -28,7 +28,7 @@ class _NoNoLoginView extends State<NoLoginView> {
     return Column(
       children: [
         Padding(
-          padding: EdgeInsets.only(top: MediaQuery.of(context).padding.top),
+          padding: EdgeInsets.only(top: MediaQuery.of(context).padding.top,left: 16,right: 16),
           child: Row(
             children: [
               const Spacer(),

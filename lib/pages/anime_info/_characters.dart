@@ -3,7 +3,7 @@ part of 'synopsis.dart';
 class _CharactersView extends StatefulWidget {
   final int subjectsId;
 
-  const _CharactersView({ required this.subjectsId});
+  const _CharactersView({required this.subjectsId});
 
   @override
   State<_CharactersView> createState() => _CharactersViewState();
@@ -27,6 +27,10 @@ class _CharactersViewState extends State<_CharactersView> {
         this.characters = characters;
       });
     }
+  }
+
+  double _getWindowsWidth(BuildContext context) {
+    return MediaQuery.of(context).size.width;
   }
 
   @override
@@ -82,11 +86,10 @@ class _CharactersViewState extends State<_CharactersView> {
               ),
               const SizedBox(height: 8),
               SizedBox(
-                height: 180,
+                height: _getWindowsWidth(context) > 600 ? 130 : 100,
                 child: ListView.builder(
                   scrollDirection: Axis.horizontal,
                   itemCount: characters!.data.length,
-                  cacheExtent: 200,
                   // 缓存范围，优化滚动性能
                   addAutomaticKeepAlives: false,
                   // 不自动保持item状态，节省内存
@@ -95,8 +98,9 @@ class _CharactersViewState extends State<_CharactersView> {
                   itemBuilder: (context, index) {
                     final actor = characters!.data[index];
                     return Container(
-                      width: 90,
-                      margin: const EdgeInsets.only(right: 10),
+                      width: _getWindowsWidth(context) > 600 ? 80 : 50,
+                      margin: EdgeInsets.only(
+                          right: index == characters!.data.length - 1 ? 0 : 8),
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         mainAxisSize: MainAxisSize.min,

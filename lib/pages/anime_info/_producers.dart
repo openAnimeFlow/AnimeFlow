@@ -3,7 +3,7 @@ part of 'synopsis.dart';
 class _ProducersView extends StatefulWidget {
   final int subjectId;
 
-  const _ProducersView({ required this.subjectId});
+  const _ProducersView({required this.subjectId});
 
   @override
   State<_ProducersView> createState() => _ProducersViewState();
@@ -42,6 +42,11 @@ class _ProducersViewState extends State<_ProducersView> {
     }
   }
 
+  //获取当前窗口宽度
+  double _getWindowsWidth(BuildContext context) {
+    return MediaQuery.of(context).size.width;
+  }
+
   @override
   Widget build(BuildContext context) {
     if (isLoading) {
@@ -67,14 +72,14 @@ class _ProducersViewState extends State<_ProducersView> {
         ),
         const SizedBox(height: 10),
         SizedBox(
-          height: 180,
+          height: _getWindowsWidth(context) > 600 ? 180 : 100,
           child: ListView.builder(
             scrollDirection: Axis.horizontal,
             itemCount: staffData.data.length,
             itemBuilder: (BuildContext context, int index) {
               final staffItem = staffData.data[index];
               return SizedBox(
-                width: 90,
+                width: _getWindowsWidth(context) > 600 ? 90 : 50,
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -105,8 +110,7 @@ class _ProducersViewState extends State<_ProducersView> {
                           ? staffItem.positions[0].type.cn
                           : '',
                       style: TextStyle(
-                          fontSize: 12,
-                          color: Theme.of(context).disabledColor),
+                          fontSize: 12, color: Theme.of(context).disabledColor),
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                     )

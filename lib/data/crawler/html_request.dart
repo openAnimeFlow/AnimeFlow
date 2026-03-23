@@ -20,10 +20,10 @@ class WebRequest {
         .userAgentList[Random().nextInt(Constants.userAgentList.length)];
 
     final response =
-    await dioRequest.get(searchURL.replaceFirst("{keyword}", keyword),
-        options: Options(headers: {
-          Constants.userAgentName: userAgent,
-        }));
+        await dioRequest.get(searchURL.replaceFirst("{keyword}", keyword),
+            options: Options(headers: {
+              Constants.userAgentName: userAgent,
+            }));
     return HtmlCrawler.parseSearchHtml(response.data, crawlConfig);
   }
 
@@ -35,7 +35,14 @@ class WebRequest {
     final userAgent = Constants
         .userAgentList[Random().nextInt(Constants.userAgentName.length)];
 
-    final response = await dioRequest.get(baseURL + link,
+    String linkUrl;
+    if (link.startsWith("http")) {
+      linkUrl = link;
+    } else {
+      linkUrl = baseURL + link;
+    }
+
+    final response = await dioRequest.get(linkUrl,
         options: Options(headers: {
           Constants.userAgentName: userAgent,
         }));
@@ -43,12 +50,12 @@ class WebRequest {
   }
 
   /// 获取视频源
-  // static Future<String> getVideoSourceService(
-  //     String link, VideoConfig videoConfig) async {
-  //   final String baseUrl = videoConfig.baseURL;
-  //   final url = baseUrl + link;
-  //
-  //   // 根据平台选择不同的实现方式
-  //   return HtmlCrawler.getVideoSourceWithInAppWebView(url, videoConfig);
-  // }
+// static Future<String> getVideoSourceService(
+//     String link, VideoConfig videoConfig) async {
+//   final String baseUrl = videoConfig.baseURL;
+//   final url = baseUrl + link;
+//
+//   // 根据平台选择不同的实现方式
+//   return HtmlCrawler.getVideoSourceWithInAppWebView(url, videoConfig);
+// }
 }

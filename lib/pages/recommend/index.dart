@@ -18,8 +18,6 @@ class _RecommendPageState extends State<RecommendPage>
   late TabController _tabController;
   final _animeKey = GlobalKey();
   final _timelineKey = GlobalKey();
-  bool _showBackToTopButton = false;
-  VoidCallback? _scrollToTopCallback;
   final List<String> _tabs = ['动漫', '时间胶囊'];
 
   @override
@@ -27,36 +25,10 @@ class _RecommendPageState extends State<RecommendPage>
     super.initState();
     themeController = Get.find<ThemeController>();
     _tabController = TabController(length: _tabs.length, vsync: this);
-    _tabController.addListener(_handleTabChange);
-  }
-
-  //返回顶部
-  void _scrollToTop() {
-    _scrollToTopCallback?.call();
-  }
-
-  void _handleShowBackToTopChanged(bool show) {
-    if (mounted && _showBackToTopButton != show) {
-      setState(() {
-        _showBackToTopButton = show;
-      });
-    }
-  }
-
-  void _handleTabChange() {
-    // 切换标签页时，重置返回顶部按钮状态
-    if (mounted) {
-      setState(() {
-        if (_tabController.index != 0) {
-          _showBackToTopButton = false;
-        }
-      });
-    }
   }
 
   @override
   void dispose() {
-    _tabController.removeListener(_handleTabChange);
     _tabController.dispose();
     super.dispose();
   }
@@ -123,23 +95,10 @@ class _RecommendPageState extends State<RecommendPage>
       body: TabBarView(
         controller: _tabController,
         children: [
-          AnimePage(
-            key: _animeKey,
-            onShowBackToTopChanged: _handleShowBackToTopChanged,
-            onScrollToTopCallback: (callback) {
-              _scrollToTopCallback = callback;
-            },
-          ),
+          AnimePage(key: _animeKey),
           TimelinePage(key: _timelineKey),
         ],
       ),
-      // TODO 应该在灭个页面中实现返回顶部按钮,不需要通知父组件返回顶部按钮显示状态
-      floatingActionButton: _tabController.index == 0 && _showBackToTopButton
-          ? FloatingActionButton(
-        onPressed: _scrollToTop,
-        child: const Icon(Icons.arrow_upward),
-      )
-          : null,
     );
   }
 }

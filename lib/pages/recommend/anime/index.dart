@@ -16,14 +16,7 @@ import 'package:shimmer/shimmer.dart';
 import 'play_record.dart';
 
 class AnimePage extends StatefulWidget {
-  final ValueChanged<bool>? onShowBackToTopChanged;
-  final ValueChanged<VoidCallback>? onScrollToTopCallback;
-
-  const AnimePage({
-    super.key,
-    this.onShowBackToTopChanged,
-    this.onScrollToTopCallback,
-  });
+  const AnimePage({super.key});
 
   @override
   State<AnimePage> createState() => _AnimePageState();
@@ -40,6 +33,7 @@ class _AnimePageState extends State<AnimePage>
   Calendar? _calendar;
   bool _isCalendarLoading = false;
   String? _errorMessage;
+  bool _showBackToTopButton = false;
 
   @override
   void initState() {
@@ -47,22 +41,6 @@ class _AnimePageState extends State<AnimePage>
     _loadData();
     _fetchCalendar();
     _scrollController.addListener(_scrollListener);
-    // 将 scrollToTop 方法传递给父组件
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (widget.onScrollToTopCallback != null && mounted) {
-        widget.onScrollToTopCallback!(scrollToTop);
-      }
-    });
-  }
-
-  @override
-  void didUpdateWidget(AnimePage oldWidget) {
-    super.didUpdateWidget(oldWidget);
-    // 如果回调发生变化，更新它
-    if (widget.onScrollToTopCallback != oldWidget.onScrollToTopCallback &&
-        widget.onScrollToTopCallback != null) {
-      widget.onScrollToTopCallback!(scrollToTop);
-    }
   }
 
   void _scrollListener() {
@@ -72,10 +50,11 @@ class _AnimePageState extends State<AnimePage>
       _loadData();
     }
 
-    // 监听滚动位置，通知父组件返回顶部按钮显示状态
     final shouldShow = _scrollController.position.pixels > 300;
-    if (widget.onShowBackToTopChanged != null) {
-      widget.onShowBackToTopChanged!(shouldShow);
+    if (shouldShow != _showBackToTopButton && mounted) {
+      setState(() {
+        _showBackToTopButton = shouldShow;
+      });
     }
   }
 
@@ -173,165 +152,160 @@ class _AnimePageState extends State<AnimePage>
     if (_dataList.isEmpty && _errorMessage != null) {
       return _buildErrorView(context);
     }
-    return LayoutBuilder(
-      builder: (context, constraints) {
-        return Stack(
-          children: [
-            Center(
-              child: Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 10),
-                child: ConstrainedBox(
-                  constraints: const BoxConstraints(
-                      maxWidth: PlayLayoutConstant.maxWidth),
-                  child: CustomScrollView(
-                    controller: _scrollController,
-                    slivers: [
-                      ///今日放送
-                      CalendarView(
-                        calendar: _calendar,
-                        isLoading: _isCalendarLoading,
-                        onRefresh: _fetchCalendar,
-                      ),
-                      const SliverToBoxAdapter(
-                        child: SizedBox(height: 10),
-                      ),
+    return Scaffold(
+      body: Center(
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 10),
+          child: ConstrainedBox(
+            constraints:
+                const BoxConstraints(maxWidth: PlayLayoutConstant.maxWidth),
+            child: CustomScrollView(
+              controller: _scrollController,
+              slivers: [
+                ///今日放送
+                CalendarView(
+                  calendar: _calendar,
+                  isLoading: _isCalendarLoading,
+                  onRefresh: _fetchCalendar,
+                ),
+                const SliverToBoxAdapter(
+                  child: SizedBox(height: 10),
+                ),
 
-                      ///播放记录
-                      const PlayRecordView(),
-                      const SliverToBoxAdapter(
-                        child: SizedBox(height: 10),
-                      ),
+                ///播放记录
+                const PlayRecordView(),
+                const SliverToBoxAdapter(
+                  child: SizedBox(height: 10),
+                ),
 
-                      ///热门动画
-                      SliverMainAxisGroup(
-                        slivers: [
-                          const SliverToBoxAdapter(
-                            child: Row(
-                              children: [
-                                Text(
-                                  '热门动画',
-                                  style: TextStyle(
-                                      fontSize: 25,
-                                      fontWeight: FontWeight.bold),
-                                )
-                              ],
+                ///热门动画
+                SliverMainAxisGroup(
+                  slivers: [
+                    const SliverToBoxAdapter(
+                      child: Row(
+                        children: [
+                          Text(
+                            '热门动画',
+                            style: TextStyle(
+                                fontSize: 25, fontWeight: FontWeight.bold),
+                          )
+                        ],
+                      ),
+                    ),
+                    const SliverToBoxAdapter(
+                      child: SizedBox(height: 5),
+                    ),
+                    SliverGrid(
+                      gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                        crossAxisCount: LayoutUtil.getCrossAxisCount(context),
+                        crossAxisSpacing: 10, // 横向间距
+                        mainAxisSpacing: 10, // 纵向间距
+                        childAspectRatio: 0.7, // 宽高比
+                      ),
+                      delegate: SliverChildBuilderDelegate(
+                        (BuildContext context, int index) {
+                          // 显示数据项
+                          if (index < _dataList.length) {
+                            final subject = _dataList[index].subject;
+                            final subjectBasicData = SubjectBasicData(
+                                id: subject.id,
+                                name: subject.nameCN ?? subject.name,
+                                image: subject.images.large);
+                            return InkWell(
+                              onTap: () => Get.toNamed(RouteName.animeInfo,
+                                  arguments: subjectBasicData),
+                              child: SubjectCard(
+                                image: subject.images.large,
+                                title: subject.nameCN ?? subject.name,
+                              ),
+                            );
+                          }
+
+                          // 加载时显示骨架屏(3个)
+                          final skeletonCount = _hasMore && _isLoading ? 3 : 0;
+                          if (index < _dataList.length + skeletonCount) {
+                            return Center(
+                              child: Padding(
+                                padding: const EdgeInsets.all(5),
+                                child: _buildSkeleton(context),
+                              ),
+                            );
+                          }
+
+                          return const SizedBox.shrink();
+                        },
+                        childCount:
+                            _dataList.length + (_hasMore && _isLoading ? 3 : 0),
+                      ),
+                    ),
+                  ],
+                ),
+                // 加载更多失败提示
+                if (_errorMessage != null && _dataList.isNotEmpty)
+                  SliverToBoxAdapter(
+                    child: Padding(
+                      padding: const EdgeInsets.all(16.0),
+                      child: Column(
+                        children: [
+                          Text(
+                            '加载失败',
+                            style: TextStyle(
+                              color: Theme.of(context).colorScheme.error,
+                              fontSize: 14,
                             ),
                           ),
-                          const SliverToBoxAdapter(
-                            child: SizedBox(height: 5),
-                          ),
-                          SliverGrid(
-                            gridDelegate:
-                                SliverGridDelegateWithFixedCrossAxisCount(
-                              crossAxisCount:
-                                  LayoutUtil.getCrossAxisCount(context),
-                              crossAxisSpacing: 10, // 横向间距
-                              mainAxisSpacing: 10, // 纵向间距
-                              childAspectRatio: 0.7, // 宽高比
-                            ),
-                            delegate: SliverChildBuilderDelegate(
-                              (BuildContext context, int index) {
-                                // 显示数据项
-                                if (index < _dataList.length) {
-                                  final subject = _dataList[index].subject;
-                                  final subjectBasicData = SubjectBasicData(
-                                      id: subject.id,
-                                      name: subject.nameCN ?? subject.name,
-                                      image: subject.images.large);
-                                  return InkWell(
-                                    onTap: () => Get.toNamed(
-                                        RouteName.animeInfo,
-                                        arguments: subjectBasicData),
-                                    child: SubjectCard(
-                                      image: subject.images.large,
-                                      title: subject.nameCN ?? subject.name,
-                                    ),
-                                  );
-                                }
-
-                                // 加载时显示骨架屏(3个)
-                                final skeletonCount =
-                                    _hasMore && _isLoading ? 3 : 0;
-                                if (index < _dataList.length + skeletonCount) {
-                                  return Center(
-                                    child: Padding(
-                                      padding: const EdgeInsets.all(5),
-                                      child: _buildSkeleton(context),
-                                    ),
-                                  );
-                                }
-
-                                return const SizedBox.shrink();
-                              },
-                              childCount: _dataList.length +
-                                  (_hasMore && _isLoading ? 3 : 0),
-                            ),
+                          const SizedBox(height: 8),
+                          ElevatedButton.icon(
+                            onPressed: () => _loadData(),
+                            icon: const Icon(Icons.refresh),
+                            label: const Text('重试'),
                           ),
                         ],
                       ),
-                      // 加载更多失败提示
-                      if (_errorMessage != null && _dataList.isNotEmpty)
-                        SliverToBoxAdapter(
-                          child: Padding(
-                            padding: const EdgeInsets.all(16.0),
-                            child: Column(
-                              children: [
-                                Text(
-                                  '加载失败',
-                                  style: TextStyle(
-                                    color: Theme.of(context).colorScheme.error,
-                                    fontSize: 14,
-                                  ),
-                                ),
-                                const SizedBox(height: 8),
-                                ElevatedButton.icon(
-                                  onPressed: () => _loadData(),
-                                  icon: const Icon(Icons.refresh),
-                                  label: const Text('重试'),
-                                ),
-                              ],
+                    ),
+                  ),
+                // 没有更多数据提示
+                if (!_hasMore && _errorMessage == null)
+                  SliverToBoxAdapter(
+                    child: Padding(
+                      padding: const EdgeInsets.all(16.0),
+                      child: Center(
+                        child: Row(
+                          children: [
+                            Expanded(
+                              child: _buildHorizontalRuleIcons(),
                             ),
-                          ),
-                        ),
-                      // 没有更多数据提示
-                      if (!_hasMore && _errorMessage == null)
-                        SliverToBoxAdapter(
-                          child: Padding(
-                            padding: const EdgeInsets.all(16.0),
-                            child: Center(
-                              child: Row(
-                                children: [
-                                  Expanded(
-                                    child: _buildHorizontalRuleIcons(),
-                                  ),
-                                  Padding(
-                                    padding: const EdgeInsets.symmetric(
-                                        horizontal: 8.0),
-                                    child: Text(
-                                      '没有更多了',
-                                      style: TextStyle(
-                                        color: Theme.of(context)
-                                            .colorScheme
-                                            .onSurfaceVariant,
-                                      ),
-                                    ),
-                                  ),
-                                  Expanded(
-                                    child: _buildHorizontalRuleIcons(),
-                                  ),
-                                ],
+                            Padding(
+                              padding:
+                                  const EdgeInsets.symmetric(horizontal: 8.0),
+                              child: Text(
+                                '没有更多了',
+                                style: TextStyle(
+                                  color: Theme.of(context)
+                                      .colorScheme
+                                      .onSurfaceVariant,
+                                ),
                               ),
                             ),
-                          ),
+                            Expanded(
+                              child: _buildHorizontalRuleIcons(),
+                            ),
+                          ],
                         ),
-                    ],
+                      ),
+                    ),
                   ),
-                ),
-              ),
+              ],
             ),
-          ],
-        );
-      },
+          ),
+        ),
+      ),
+      floatingActionButton: _showBackToTopButton
+          ? FloatingActionButton.small(
+              onPressed: scrollToTop,
+              child: const Icon(Icons.keyboard_arrow_up_rounded),
+            )
+          : null,
     );
   }
 

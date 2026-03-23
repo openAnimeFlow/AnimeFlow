@@ -139,26 +139,26 @@ class _DanmakuCardState extends State<DanmakuCard> {
                 height: isExpanded ? 300 : 0,
                 child: Column(
                   children: [
-                    if (sortedPlatforms.isNotEmpty) ...[
-                      Row(
-                        children: [
-                          Expanded(
-                            child: Padding(
-                              padding: const EdgeInsets.symmetric(vertical: 10),
-                              child: Text(subjectName,
-                                  style: const TextStyle(
-                                      fontWeight: FontWeight.bold)),
-                            ),
+                    Row(
+                      children: [
+                        Expanded(
+                          child: Padding(
+                            padding: const EdgeInsets.symmetric(vertical: 10),
+                            child: Text(subjectName,
+                                style: const TextStyle(
+                                    fontWeight: FontWeight.bold)),
                           ),
-                          TextButton(
-                            onPressed: () {
-                              danmakuFieldController.text = subjectName;
-                              Get.dialog(danmakuDialog);
-                            },
-                            child: const Text('切换弹幕'),
-                          )
-                        ],
-                      ),
+                        ),
+                        TextButton(
+                          onPressed: () {
+                            danmakuFieldController.text = subjectName;
+                            Get.dialog(danmakuDialog);
+                          },
+                          child: const Text('切换弹幕'),
+                        )
+                      ],
+                    ),
+                    if (sortedPlatforms.isNotEmpty) ...[
                       Align(
                         alignment: Alignment.topLeft,
                         child: Wrap(
@@ -247,112 +247,119 @@ class _DanmakuCardState extends State<DanmakuCard> {
     bool isSearchLoading = false;
     return StatefulBuilder(
       builder: (BuildContext context, StateSetter setDialogState) {
-        return  AlertDialog(
-            icon: const Icon(Icons.subtitles),
-            title: const Text('修改弹幕'),
-            titleTextStyle:
-                const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
-            content: ConstrainedBox(
-              constraints: const BoxConstraints(maxWidth: 500),
-              child: SizedBox(
-                width: double.maxFinite,
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    TextField(
-                      controller: danmakuFieldController,
-                      decoration: const InputDecoration(
-                        hintText: '请输入标题',
+        return AlertDialog(
+          icon: const Icon(Icons.subtitles),
+          title: const Text('修改弹幕'),
+          titleTextStyle:
+              const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+          content: ConstrainedBox(
+            constraints: const BoxConstraints(maxWidth: 500),
+            child: SizedBox(
+              width: double.maxFinite,
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  TextField(
+                    controller: danmakuFieldController,
+                    decoration: const InputDecoration(
+                      hintText: '请输入标题',
+                    ),
+                  ),
+                  const SizedBox(height: 16),
+                  if (isSearchLoading) ...[
+                    const Padding(
+                      padding: EdgeInsets.all(16.0),
+                      child: CircularProgressIndicator(),
+                    ),
+                  ] else if (danmakuSearchResponse == null) ...[
+                    const SizedBox.shrink()
+                  ] else ...[
+                    const Align(
+                      alignment: Alignment.centerLeft,
+                      child: Text('搜索结果:'),
+                    ),
+                    ConstrainedBox(
+                      constraints: const BoxConstraints(
+                        maxHeight: 300,
+                        minHeight: 100,
+                      ),
+                      child: ListView.builder(
+                        shrinkWrap: true,
+                        itemCount: danmakuSearchResponse!.animes.length,
+                        itemBuilder: (context, index) {
+                          final anime = danmakuSearchResponse!.animes[index];
+                          return ListTile(
+                            title: Text(
+                              anime.animeTitle,
+                              style: Theme.of(context).textTheme.bodyLarge,
+                            ),
+                            onTap: () async {
+                              final episodes = await DanmakuRequest
+                                  .getDanDanEpisodesByDanDanBangumiID(
+                                      anime.animeId);
+                              Get.back();
+                              if (context.mounted) {
+                                _showEpisodesDialog(
+                                    context, episodes, anime.animeTitle);
+                              }
+                            },
+                          );
+                        },
                       ),
                     ),
-                    const SizedBox(height: 16),
-                    if (isSearchLoading) ...[
-                      const Padding(
-                        padding: EdgeInsets.all(16.0),
-                        child: CircularProgressIndicator(),
-                      ),
-                    ] else if (danmakuSearchResponse == null) ...[
-                      const SizedBox.shrink()
-                    ] else ...[
-                      const Align(
-                        alignment: Alignment.centerLeft,
-                        child: Text('搜索结果:'),
-                      ),
-                      ConstrainedBox(
-                        constraints: const BoxConstraints(
-                          maxHeight: 300,
-                          minHeight: 100,
-                        ),
-                        child: ListView.builder(
-                          shrinkWrap: true,
-                          itemCount: danmakuSearchResponse!.animes.length,
-                          itemBuilder: (context, index) {
-                            final anime = danmakuSearchResponse!.animes[index];
-                            return ListTile(
-                              title: Text(anime.animeTitle,style: Theme.of(context).textTheme.bodyLarge,),
-                              onTap: () async {
-                                final episodes = await DanmakuRequest.getDanDanEpisodesByDanDanBangumiID(anime.animeId);
-                                 Get.back();
-                                if (context.mounted) {
-                                  _showEpisodesDialog(context, episodes, anime.animeTitle);
-                                }
-                              },
-                            );
-                          },
-                        ),
-                      ),
-                    ]
-                  ],
-                ),
+                  ]
+                ],
               ),
             ),
-            actions: [
-              TextButton(
-                onPressed: () {
-                  Get.back();
-                },
-                child: const Text('取消'),
-              ),
-              TextButton(
-                onPressed: () async {
-                  if (danmakuFieldController.text.isNotEmpty) {
+          ),
+          actions: [
+            TextButton(
+              onPressed: () {
+                Get.back();
+              },
+              child: const Text('取消'),
+            ),
+            TextButton(
+              onPressed: () async {
+                if (danmakuFieldController.text.isNotEmpty) {
+                  setDialogState(() {
+                    isSearchLoading = true;
+                    danmakuSearchResponse = null;
+                  });
+                  try {
+                    final response =
+                        await DanmakuRequest.getDanmakuSearchResponse(
+                            danmakuFieldController.text);
                     setDialogState(() {
-                      isSearchLoading = true;
-                      danmakuSearchResponse = null;
+                      danmakuSearchResponse = response;
+                      isSearchLoading = false;
                     });
-                    try {
-                      final response =
-                          await DanmakuRequest.getDanmakuSearchResponse(
-                              danmakuFieldController.text);
-                      setDialogState(() {
-                        danmakuSearchResponse = response;
-                        isSearchLoading = false;
-                      });
-                    } catch (e) {
-                      setDialogState(() {
-                        isSearchLoading = false;
-                      });
-                    }
+                  } catch (e) {
+                    setDialogState(() {
+                      isSearchLoading = false;
+                    });
                   }
-                },
-                child: const Text('提交'),
-              )
-            ],
+                }
+              },
+              child: const Text('提交'),
+            )
+          ],
         );
       },
     );
   }
 
   /// 显示剧集选择弹窗
-  void _showEpisodesDialog(BuildContext context, DanmakuEpisodeResponse episodesResponse, String animeTitle) {
+  void _showEpisodesDialog(BuildContext context,
+      DanmakuEpisodeResponse episodesResponse, String animeTitle) {
     showDialog(
       context: context,
       builder: (BuildContext context) {
-        return  AlertDialog(
-            title: Text(animeTitle),
-            content: ConstrainedBox(
-              constraints: const BoxConstraints(maxWidth: 500),
-              child: SizedBox(
+        return AlertDialog(
+          title: Text(animeTitle),
+          content: ConstrainedBox(
+            constraints: const BoxConstraints(maxWidth: 500),
+            child: SizedBox(
               width: double.maxFinite,
               child: episodesResponse.episodes.isEmpty
                   ? const Center(
@@ -376,8 +383,10 @@ class _DanmakuCardState extends State<DanmakuCard> {
                               episode.episodeTitle,
                               style: Theme.of(context).textTheme.bodyLarge,
                             ),
-                            onTap: ()  async {
-                              final danmaku = await DanmakuRequest.getDanDanmakuByEpisodeID(episode.episodeId);
+                            onTap: () async {
+                              final danmaku =
+                                  await DanmakuRequest.getDanDanmakuByEpisodeID(
+                                      episode.episodeId);
                               playController.removeDanmaku();
                               playController.addDanmaku(danmaku);
                               Get.back();
@@ -386,15 +395,16 @@ class _DanmakuCardState extends State<DanmakuCard> {
                         },
                       ),
                     ),
-            ),),
-            actions: [
-              TextButton(
-                onPressed: () {
-                  Navigator.of(context).pop();
-                },
-                child: const Text('关闭'),
-              ),
-            ],
+            ),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+              child: const Text('关闭'),
+            ),
+          ],
         );
       },
     );

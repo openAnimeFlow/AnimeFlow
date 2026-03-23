@@ -1,9 +1,11 @@
 import 'package:anime_flow/models/item/bangumi/episode_comments_item.dart';
+import 'package:anime_flow/routes/index.dart';
 import 'package:anime_flow/utils/format_time_util.dart';
 import 'package:anime_flow/utils/systemUtil.dart';
 import 'package:anime_flow/widget/bbcode/bbcode_widget.dart';
 import 'package:anime_flow/widget/animation_network_image/animation_network_image.dart';
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 import 'package:shimmer/shimmer.dart';
 
 class CommentsView extends StatefulWidget {
@@ -251,9 +253,11 @@ class _CommentsViewState extends State<CommentsView>
           Row(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              ClipRRect(
-                borderRadius: BorderRadius.circular(8),
+              InkWell(
+                onTap: () => Get.toNamed(RouteName.userSpace,
+                    arguments: comment.user.username),
                 child: AnimationNetworkImage(
+                  borderRadius: BorderRadius.circular(8),
                   height: 48,
                   width: 48,
                   url: comment.user.avatar.large,
@@ -267,11 +271,15 @@ class _CommentsViewState extends State<CommentsView>
                     Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Text(
-                          comment.user.nickname,
-                          style: const TextStyle(
-                            fontSize: 16,
-                            fontWeight: FontWeight.bold,
+                        InkWell(
+                          onTap: () => Get.toNamed(RouteName.userSpace,
+                              arguments: comment.user.username),
+                          child: Text(
+                            comment.user.nickname,
+                            style: const TextStyle(
+                              fontSize: 16,
+                              fontWeight: FontWeight.bold,
+                            ),
                           ),
                         ),
                         const SizedBox(width: 8),

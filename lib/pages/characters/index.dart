@@ -157,15 +157,13 @@ class _CharacterPageState extends State<CharacterPage> {
             final effectiveWidth = screenWidth.clamp(0.0, maxWidth - 32);
             final crossAxisCount = _calculateCrossAxisCount(effectiveWidth);
 
-            return Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-              child: GridView.builder(
+            return  GridView.builder(
                 controller: _scrollController,
-                padding: const EdgeInsets.only(bottom: 16),
+                padding: const EdgeInsets.symmetric(horizontal: 10,vertical: 10),
                 gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
                   crossAxisCount: crossAxisCount,
-                  crossAxisSpacing: 16,
-                  mainAxisSpacing: 16,
+                  crossAxisSpacing: 10,
+                  mainAxisSpacing: 10,
                   mainAxisExtent: itemHeight,
                 ),
                 itemCount: charactersData.data.length + 1,
@@ -196,7 +194,6 @@ class _CharacterPageState extends State<CharacterPage> {
                     itemHeight,
                   );
                 },
-              ),
             );
           }),
         ),

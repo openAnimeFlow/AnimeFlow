@@ -21,6 +21,7 @@ class _CommentsViewState extends State<CommentsView>
     with AutomaticKeepAliveClientMixin {
   String _sortOrder = 'default';
   List<EpisodeComment>? _sortedComments; // 排序后的评论列表
+  final _scrollController = ScrollController();
 
   @override
   bool get wantKeepAlive => true;
@@ -70,65 +71,19 @@ class _CommentsViewState extends State<CommentsView>
   @override
   Widget build(BuildContext context) {
     super.build(context);
-    return Column(
-      children: [
-        // 评论列表
-        Expanded(child: _buildComments()),
-        //评论输入框
-        _buildCommentInput(),
-      ],
+    return Scaffold(
+      body: Column(
+        children: [
+          // 评论列表
+          Expanded(child: _buildComments()),
+        ],
+      ),
+      floatingActionButton: widget.comments != null
+          ? _CommentButton(scrollController: _scrollController)
+          : null,
     );
   }
 
-  Widget _buildCommentInput() {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
-    return Container(
-      padding: EdgeInsets.only(
-        left: 16,
-        right: 16,
-        bottom: MediaQuery.of(context).padding.bottom,
-        top: 8,
-      ),
-      decoration: BoxDecoration(
-        color: Theme.of(context).scaffoldBackgroundColor,
-        border: Border(
-          top: BorderSide(
-            color: Theme.of(context).dividerColor,
-          ),
-        ),
-      ),
-      child: TextField(
-        style: TextStyle(
-          color: Theme.of(context).colorScheme.onSurface,
-        ),
-        decoration: InputDecoration(
-          hintText: '发送评论施工中...',
-          hintStyle: TextStyle(
-            color:
-                Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.5),
-          ),
-          filled: true,
-          fillColor: isDark
-              ? Colors.grey[800]?.withValues(alpha: 0.6)
-              : Colors.grey[200]?.withValues(alpha: 0.8),
-          border: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(24),
-            borderSide: BorderSide.none,
-          ),
-          enabledBorder: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(24),
-            borderSide: BorderSide.none,
-          ),
-          focusedBorder: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(24),
-            borderSide: BorderSide.none,
-          ),
-          contentPadding:
-              const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-        ),
-      ),
-    );
-  }
 
   Widget _buildComments() {
     if (widget.comments == null) {
@@ -153,6 +108,7 @@ class _CommentsViewState extends State<CommentsView>
     } else {
       final comments = _sortedComments ?? widget.comments!;
       return CustomScrollView(
+        controller: _scrollController,
         slivers: [
           // 标题行
           SliverPadding(
@@ -230,11 +186,14 @@ class _CommentsViewState extends State<CommentsView>
           else
             SliverPadding(
               padding: const EdgeInsets.only(left: 10, right: 10),
-              sliver: SliverList.builder(
+              sliver: SliverList.separated(
                 itemCount: comments.length,
                 itemBuilder: (BuildContext context, int index) {
                   final comment = comments[index];
                   return _buildCommentItem(comment);
+                },
+                separatorBuilder: (BuildContext context, int index) {
+                  return const Divider();
                 },
               ),
             )
@@ -446,6 +405,94 @@ class _CommentsViewState extends State<CommentsView>
           ),
         ),
       ],
+    );
+  }
+}
+
+class _CommentButton extends StatefulWidget {
+  final ScrollController scrollController;
+
+  const _CommentButton({required this.scrollController});
+
+  @override
+  State<_CommentButton> createState() => _CommentButtonState();
+}
+
+class _CommentButtonState extends State<_CommentButton> {
+  static const double _hideLabelAfterPixels = 300;
+
+  bool _hideLabel = false;
+
+  @override
+  void initState() {
+    super.initState();
+    widget.scrollController.addListener(_onScroll);
+    WidgetsBinding.instance.addPostFrameCallback((_) => _syncLabelFromScroll());
+  }
+
+  @override
+  void didUpdateWidget(_CommentButton oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.scrollController != widget.scrollController) {
+      oldWidget.scrollController.removeListener(_onScroll);
+      widget.scrollController.addListener(_onScroll);
+      WidgetsBinding.instance.addPostFrameCallback((_) => _syncLabelFromScroll());
+    }
+  }
+
+  void _onScroll() {
+    if (!mounted) return;
+    if (!widget.scrollController.hasClients) {
+      if (_hideLabel) setState(() => _hideLabel = false);
+      return;
+    }
+    final hide = widget.scrollController.position.pixels > _hideLabelAfterPixels;
+    if (hide != _hideLabel) {
+      setState(() => _hideLabel = hide);
+    }
+  }
+
+  void _syncLabelFromScroll() {
+    if (!mounted) return;
+    if (!widget.scrollController.hasClients) return;
+    final hide = widget.scrollController.position.pixels > _hideLabelAfterPixels;
+    if (hide != _hideLabel) {
+      setState(() => _hideLabel = hide);
+    }
+  }
+
+  @override
+  void dispose() {
+    widget.scrollController.removeListener(_onScroll);
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    const labelStyle =
+        TextStyle(fontSize: 16, fontWeight: FontWeight.bold);
+    return FloatingActionButton.extended(
+      onPressed: () {},
+      label: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          const Icon(Icons.comment_outlined, size: 20),
+          AnimatedCrossFade(
+            firstCurve: Curves.easeInOut,
+            secondCurve: Curves.easeInOut,
+            sizeCurve: Curves.easeInOut,
+            duration: const Duration(milliseconds: 260),
+            crossFadeState: _hideLabel
+                ? CrossFadeState.showFirst
+                : CrossFadeState.showSecond,
+            firstChild: const SizedBox.shrink(),
+            secondChild: const Padding(
+              padding: EdgeInsets.only(left: 8),
+              child: Text('评论', style: labelStyle),
+            ),
+          ),
+        ],
+      ),
     );
   }
 }

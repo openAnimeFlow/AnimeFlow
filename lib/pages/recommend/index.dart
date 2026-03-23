@@ -41,56 +41,61 @@ class _RecommendPageState extends State<RecommendPage>
           children: [
             Expanded(
                 child: Row(
-                  children: [
-                    const Text("推荐"),
-                    const SizedBox(width: 10),
-                    Container(
-                      width: 200,
-                      height: 35,
-                      decoration: BoxDecoration(
-                        borderRadius: BorderRadius.circular(20),
-                        border: Border.all(
-                          color: Theme.of(context).colorScheme.primary,
-                          width: 1,
-                        ),
+              children: [
+                const Text("推荐"),
+                const SizedBox(width: 10),
+                Container(
+                  width: 200,
+                  height: 35,
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(20),
+                    border: Border.all(
+                      color: Theme.of(context).colorScheme.primary,
+                      width: 1,
+                    ),
+                  ),
+                  child: TextField(
+                    decoration: InputDecoration(
+                      hintText: "搜索动漫番剧...",
+                      hintStyle: TextStyle(
+                        color: Colors.grey.shade600,
+                        fontSize: 14,
                       ),
-                      child: TextField(
-                        decoration: InputDecoration(
-                          hintText: "搜索动漫番剧...",
-                          hintStyle: TextStyle(
-                            color: Colors.grey.shade600,
-                            fontSize: 14,
-                          ),
-                          prefixIcon: const Icon(
-                            Icons.search,
-                            size: 25,
-                          ),
-                          filled: false,
-                          border: const OutlineInputBorder(
-                            borderSide: BorderSide.none,
-                          ),
-                          contentPadding: const EdgeInsets.symmetric(
-                            horizontal: 12,
-                          ),
-                        ),
-                        onTap: () {
-                          Get.toNamed(RouteName.search);
-                        },
-                        readOnly: true,
+                      prefixIcon: const Icon(
+                        Icons.search,
+                        size: 25,
+                      ),
+                      filled: false,
+                      border: const OutlineInputBorder(
+                        borderSide: BorderSide.none,
+                      ),
+                      contentPadding: const EdgeInsets.symmetric(
+                        horizontal: 12,
                       ),
                     ),
-                  ],
-                )),
+                    onTap: () {
+                      Get.toNamed(RouteName.search);
+                    },
+                    readOnly: true,
+                  ),
+                ),
+                const Spacer(),
+                IconButton(
+                  padding: EdgeInsets.zero,
+                  onPressed: () => Get.toNamed(RouteName.playRecord),
+                  icon: const Icon(Icons.access_time_outlined),
+                )
+              ],
+            )),
           ],
         ),
         bottom: TabBar(
-          controller: _tabController,
-          tabs: List.generate(_tabs.length, (index) {
-            return Tab(
-              text: _tabs[index],
-            );
-          })
-        ),
+            controller: _tabController,
+            tabs: List.generate(_tabs.length, (index) {
+              return Tab(
+                text: _tabs[index],
+              );
+            })),
       ),
       body: TabBarView(
         controller: _tabController,

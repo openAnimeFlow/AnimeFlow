@@ -47,21 +47,9 @@ dependencies:
   #构建每个架构一个APK
   #flutter build apk --split-per-abi
 
-  media_kit:
-    git:
-      url: https://github.com/Predidit/media-kit.git
-      ref: main
-      path: ./media_kit
-  media_kit_video:
-    git:
-      url: https://github.com/Predidit/media-kit.git
-      ref: main
-      path: ./media_kit_video
-  media_kit_libs_video:
-    git:
-      url: https://github.com/Predidit/media-kit.git
-      ref: main
-      path: ./libs/universal/media_kit_libs_video
+  media_kit: ^1.2.6 # 主要包装.
+  media_kit_video: ^2.0.1 # 用于视频渲染.
+  media_kit_libs_video: ^1.0.7 # 原生视频依赖项.
   carousel_slider: ^5.1.1
   dio: ^5.9.0
   get: ^4.7.3
@@ -136,48 +124,6 @@ flutter_native_splash:
     color: "#0F172A"
   android: true
   ios: true
-
-dependency_overrides:
-  media_kit:
-    git:
-      url: https://github.com/Predidit/media-kit.git
-      ref: main
-      path: ./media_kit
-  media_kit_video:
-    git:
-      url: https://github.com/Predidit/media-kit.git
-      ref: main
-      path: ./media_kit_video
-  media_kit_libs_video:
-    git:
-      url: https://github.com/Predidit/media-kit.git
-      ref: main
-      path: ./libs/universal/media_kit_libs_video
-  media_kit_libs_linux:
-    git:
-      url: https://github.com/Predidit/media-kit.git
-      ref: main
-      path: ./libs/linux/media_kit_libs_linux
-  media_kit_libs_ios_video:
-    git:
-      url: https://github.com/Predidit/media-kit.git
-      ref: main
-      path: ./libs/ios/media_kit_libs_ios_video
-  media_kit_libs_android_video:
-    git:
-      url: https://github.com/Predidit/media-kit.git
-      ref: main
-      path: ./libs/android/media_kit_libs_android_video
-  media_kit_libs_windows_video:
-    git:
-      url: https://github.com/Predidit/media-kit.git
-      ref: main
-      path: ./libs/windows/media_kit_libs_windows_video
-  media_kit_libs_macos_video:
-    git:
-      url: https://github.com/Predidit/media-kit.git
-      ref: main
-      path: ./libs/macos/media_kit_libs_macos_video
 
 dev_dependencies:
   flutter_test:

@@ -1,6 +1,6 @@
 import 'package:anime_flow/constants/storage_key.dart';
+import 'package:anime_flow/hive_registrar.g.dart';
 import 'package:anime_flow/models/item/play/play_history.dart';
-import 'package:anime_flow/models/item/play/play_position.dart';
 import 'package:hive_ce/hive.dart';
 
 class Storage {
@@ -9,8 +9,8 @@ class Storage {
   static late final Box<PlayHistory> playHistory;
 
   static Future init() async {
-    Hive.registerAdapter(PlayPositionAdapter());
-    Hive.registerAdapter(PlayHistoryAdapter());
+    /// 通过 hive_registrar.g.dart 统一注册所有已生成的 Hive TypeAdapter。
+    Hive.registerAdapters();
     crawlConfigs = await Hive.openBox(StorageKey.crawlConfigs);
     setting = await Hive.openBox(StorageKey.settingsKey);
     playHistory = await _openBoxWithFallback<PlayHistory>(StorageKey.playHistoryKey);

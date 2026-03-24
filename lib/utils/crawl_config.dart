@@ -3,7 +3,7 @@ import 'dart:convert';
 import 'package:anime_flow/models/item/crawler_config_item.dart';
 import 'package:anime_flow/repository/storage.dart';
 import 'package:flutter/services.dart';
-import 'package:hive/hive.dart';
+import 'package:hive_ce/hive.dart';
 import 'package:logger/logger.dart';
 
 class CrawlConfig {

@@ -1,7 +1,7 @@
 import 'package:anime_flow/constants/storage_key.dart';
 import 'package:anime_flow/models/item/play/play_history.dart';
 import 'package:anime_flow/models/item/play/play_position.dart';
-import 'package:hive/hive.dart';
+import 'package:hive_ce/hive.dart';
 
 class Storage {
   static late final Box<dynamic> setting;

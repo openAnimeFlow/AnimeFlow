@@ -8,7 +8,7 @@ part of 'play_history.dart';
 
 class PlayHistoryAdapter extends TypeAdapter<PlayHistory> {
   @override
-  final int typeId = 2;
+  final typeId = 2;
 
   @override
   PlayHistory read(BinaryReader reader) {
@@ -17,14 +17,14 @@ class PlayHistoryAdapter extends TypeAdapter<PlayHistory> {
       for (int i = 0; i < numOfFields; i++) reader.readByte(): reader.read(),
     };
     return PlayHistory(
-      subjectId: fields[0] as int,
-      episodeId: fields[1] as int,
-      episodeSort: fields[2] as int,
+      subjectId: (fields[0] as num).toInt(),
+      episodeId: (fields[1] as num).toInt(),
+      episodeSort: (fields[2] as num).toInt(),
       subjectName: fields[3] as String,
       cover: fields[4] as String,
       updateAt: fields[5] as DateTime,
-      position: fields[6] as int,
-      duration: fields[7] as int,
+      position: (fields[6] as num).toInt(),
+      duration: (fields[7] as num).toInt(),
     );
   }
 

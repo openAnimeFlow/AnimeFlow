@@ -8,7 +8,7 @@ part of 'play_position.dart';
 
 class PlayPositionAdapter extends TypeAdapter<PlayPosition> {
   @override
-  final int typeId = 1;
+  final typeId = 1;
 
   @override
   PlayPosition read(BinaryReader reader) {
@@ -18,9 +18,9 @@ class PlayPositionAdapter extends TypeAdapter<PlayPosition> {
     };
     return PlayPosition(
       playId: fields[0] as String,
-      position: fields[1] as int,
-      duration: fields[2] as int,
-      updateAt: fields[3] as int,
+      position: (fields[1] as num).toInt(),
+      duration: (fields[2] as num).toInt(),
+      updateAt: (fields[3] as num).toInt(),
     );
   }
 

@@ -4,7 +4,7 @@ import 'package:anime_flow/repository/storage.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:get/get.dart';
-import 'package:hive/hive.dart';
+import 'package:hive_ce/hive.dart';
 
 /// 弹幕设置弹窗
 class DanmakuSetting extends StatefulWidget {

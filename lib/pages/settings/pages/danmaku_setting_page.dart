@@ -5,7 +5,7 @@ import 'package:anime_flow/repository/storage.dart';
 import 'package:anime_flow/utils/systemUtil.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:hive/hive.dart';
+import 'package:hive_ce/hive.dart';
 
 class DanmakuSettingPage extends StatefulWidget {
   const DanmakuSettingPage({super.key});

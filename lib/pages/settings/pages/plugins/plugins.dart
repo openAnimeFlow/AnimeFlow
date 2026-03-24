@@ -6,7 +6,7 @@ import 'package:anime_flow/repository/storage.dart';
 import 'package:anime_flow/widget/animation_network_image/animation_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:hive_flutter/adapters.dart';
+import 'package:hive_ce_flutter/adapters.dart';
 
 class PluginsPage extends StatefulWidget {
   const PluginsPage({super.key});

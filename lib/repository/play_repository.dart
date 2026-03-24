@@ -1,6 +1,6 @@
 import 'package:anime_flow/models/item/play/play_history.dart';
 import 'package:anime_flow/repository/storage.dart';
-import 'package:hive/hive.dart';
+import 'package:hive_ce/hive.dart';
 
 class PlayRepository {
   static final playHistoryStorage = Storage.playHistory;

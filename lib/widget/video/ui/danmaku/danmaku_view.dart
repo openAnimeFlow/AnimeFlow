@@ -7,7 +7,7 @@ import 'package:anime_flow/stores/episodes_state.dart';
 import 'package:canvas_danmaku/canvas_danmaku.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:hive/hive.dart';
+import 'package:hive_ce/hive.dart';
 
 class DanmakuView extends StatefulWidget {
   const DanmakuView({super.key});

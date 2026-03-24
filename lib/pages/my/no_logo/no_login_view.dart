@@ -28,7 +28,8 @@ class _NoNoLoginView extends State<NoLoginView> {
     return Column(
       children: [
         Padding(
-          padding: EdgeInsets.only(top: MediaQuery.of(context).padding.top,left: 16,right: 16),
+          padding: EdgeInsets.only(
+              top: MediaQuery.of(context).padding.top, left: 16, right: 16),
           child: Row(
             children: [
               const Spacer(),
@@ -45,7 +46,10 @@ class _NoNoLoginView extends State<NoLoginView> {
                   MenuItemButton(
                     onPressed: () => Get.toNamed(RouteName.playRecord),
                     child: const Row(
-                      children: [Icon(Icons.smart_display_outlined), Text('播放记录')],
+                      children: [
+                        Icon(Icons.smart_display_outlined),
+                        Text('播放记录')
+                      ],
                     ),
                   )
                 ],
@@ -72,6 +76,7 @@ class _NoNoLoginView extends State<NoLoginView> {
         Expanded(
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
+            spacing: 8,
             children: [
               const CircleAvatar(
                   radius: 100,
@@ -86,7 +91,6 @@ class _NoNoLoginView extends State<NoLoginView> {
                   fontWeight: FontWeight.bold,
                 ),
               ),
-              const SizedBox(height: 8),
               AnimatedSwitcher(
                 duration: const Duration(milliseconds: 300),
                 child: _isAuthorizing
@@ -182,6 +186,11 @@ class _NoNoLoginView extends State<NoLoginView> {
                         child: const Text('登录授权'),
                       ),
               ),
+              if (_isAuthorizing)
+                const Text(
+                  '服务器已过期没💴续费了，所有登录功能暂时无法使用，如果项目用的人多了或者有人赞助在恢复登录功能吧',
+                  style: TextStyle(fontWeight: FontWeight.bold),
+                )
             ],
           ),
         )

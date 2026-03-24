@@ -86,7 +86,7 @@ class _CharactersViewState extends State<_CharactersView> {
               ),
               const SizedBox(height: 8),
               SizedBox(
-                height: _getWindowsWidth(context) > 600 ? 130 : 100,
+                height: _getWindowsWidth(context) > 600 ? 130 : 120,
                 child: ListView.builder(
                   scrollDirection: Axis.horizontal,
                   itemCount: characters!.data.length,
@@ -98,12 +98,13 @@ class _CharactersViewState extends State<_CharactersView> {
                   itemBuilder: (context, index) {
                     final actor = characters!.data[index];
                     return Container(
-                      width: _getWindowsWidth(context) > 600 ? 80 : 50,
+                      width: _getWindowsWidth(context) > 600 ? 80 : 60,
                       margin: EdgeInsets.only(
                           right: index == characters!.data.length - 1 ? 0 : 8),
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         mainAxisSize: MainAxisSize.min,
+                        spacing: 3,
                         children: [
                           // 角色头像
                           InkWell(
@@ -129,19 +130,17 @@ class _CharactersViewState extends State<_CharactersView> {
                               ),
                             ),
                           ),
-                          const SizedBox(height: 8),
                           // 角色名称
                           Text(
                             actor.character.nameCN ?? actor.character.name,
                             style: const TextStyle(
-                              fontSize: 12,
-                              fontWeight: FontWeight.bold,
+                              fontSize: 10,
+                              fontWeight: FontWeight.w600,
                             ),
                             maxLines: 1,
                             overflow: TextOverflow.ellipsis,
                             textAlign: TextAlign.center,
                           ),
-                          const SizedBox(height: 4),
                           // 声优名称
                           if (actor.actors.isNotEmpty)
                             Text(

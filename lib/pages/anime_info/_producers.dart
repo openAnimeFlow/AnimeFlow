@@ -79,10 +79,11 @@ class _ProducersViewState extends State<_ProducersView> {
             itemBuilder: (BuildContext context, int index) {
               final staffItem = staffData.data[index];
               return SizedBox(
-                width: _getWindowsWidth(context) > 600 ? 90 : 50,
+                width: _getWindowsWidth(context) > 600 ? 90 : 60,
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
                   crossAxisAlignment: CrossAxisAlignment.start,
+                  spacing: 3,
                   children: [
                     Container(
                       margin: const EdgeInsets.only(right: 10),
@@ -97,7 +98,6 @@ class _ProducersViewState extends State<_ProducersView> {
                         ),
                       ),
                     ),
-                    const SizedBox(height: 5),
                     Text(
                       staffItem.staff.nameCN ?? staffItem.staff.name,
                       style: const TextStyle(

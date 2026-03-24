@@ -1,19 +1,18 @@
 part of 'index.dart';
 
 /// 评价对话框
-class _EvaluateDialog extends StatefulWidget {
-  final String storeTag;
+class _EvaluateDialog extends ConsumerStatefulWidget {
+  final int subjectId;
 
-  const _EvaluateDialog({required this.storeTag});
+  const _EvaluateDialog({required this.subjectId});
 
   @override
-  State<_EvaluateDialog> createState() => _EvaluateDialogState();
+  ConsumerState<_EvaluateDialog> createState() => _EvaluateDialogState();
 }
 
-class _EvaluateDialogState extends State<_EvaluateDialog> {
+class _EvaluateDialogState extends ConsumerState<_EvaluateDialog> {
   late TextEditingController _commentController;
   late TextEditingController _tagsController;
-  late AnimeInfoStore animeInfoStore;
   int _selectedRate = 0; // 0-10分，0表示未评分
   bool _isSubmitting = false;
   final Set<String> _selectedTags = {}; // 选中的标签集合
@@ -21,9 +20,10 @@ class _EvaluateDialogState extends State<_EvaluateDialog> {
   @override
   void initState() {
     super.initState();
-    animeInfoStore = Get.find<AnimeInfoStore>(tag: widget.storeTag);
+    final animeInfo =
+        ref.read(animeInfoProvider(widget.subjectId)).asData?.value;
+    final interest = animeInfo?.interest;
     // 初始化已有数据
-    final interest = animeInfoStore.animeInfo.value!.interest;
     if (interest != null) {
       _selectedRate = interest.rate;
       _commentController = TextEditingController(text: interest.comment);
@@ -52,7 +52,11 @@ class _EvaluateDialogState extends State<_EvaluateDialog> {
       final rate = _selectedRate > 0 ? _selectedRate : null;
       final tags = _selectedTags.isNotEmpty ? _selectedTags.toList() : null;
 
-      final currentAnimeInfo = animeInfoStore.animeInfo.value!;
+      final currentAnimeInfo =
+          ref.read(animeInfoProvider(widget.subjectId)).asData?.value;
+      if (currentAnimeInfo == null) {
+        throw Exception('番剧数据加载失败，请稍后重试');
+      }
       if (currentAnimeInfo.interest != null) {
         if (rate != null) {
           currentAnimeInfo.interest!.rate = rate;
@@ -72,7 +76,9 @@ class _EvaluateDialogState extends State<_EvaluateDialog> {
         comment: comment.isNotEmpty ? comment : null,
       );
 
-      animeInfoStore.animeInfo.refresh();
+      ref
+          .read(animeInfoProvider(widget.subjectId).notifier)
+          .setAnimeInfo(currentAnimeInfo);
 
       if (mounted) {
         Get.back();
@@ -95,7 +101,11 @@ class _EvaluateDialogState extends State<_EvaluateDialog> {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final primaryColor = theme.colorScheme.primary;
-    final animeInfo = animeInfoStore.animeInfo.value!;
+    final animeInfo =
+        ref.watch(animeInfoProvider(widget.subjectId)).asData?.value;
+    if (animeInfo == null) {
+      return const SizedBox.shrink();
+    }
     return Dialog(
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(20),
@@ -335,7 +345,11 @@ class _EvaluateDialogState extends State<_EvaluateDialog> {
   Widget get _buildTags {
     final theme = Theme.of(context);
     final primaryColor = theme.colorScheme.primary;
-    final animeInfo = animeInfoStore.animeInfo.value!;
+    final animeInfo =
+        ref.watch(animeInfoProvider(widget.subjectId)).asData?.value;
+    if (animeInfo == null) {
+      return const SizedBox.shrink();
+    }
 
     return ScrollConfiguration(
       behavior: ScrollConfiguration.of(context).copyWith(

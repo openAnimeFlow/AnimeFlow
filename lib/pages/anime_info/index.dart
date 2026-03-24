@@ -2,8 +2,8 @@ import 'dart:ui';
 
 import 'package:anime_flow/constants/play_layout_constant.dart';
 import 'package:anime_flow/http/api_path.dart';
-import 'package:anime_flow/models/item/subject_basic_data_item.dart';
 import 'package:anime_flow/http/requests/bgm_request.dart';
+import 'package:anime_flow/models/item/subject_basic_data_item.dart';
 import 'package:anime_flow/models/item/bangumi/subjects_info_item.dart';
 import 'package:anime_flow/routes/index.dart';
 import 'package:anime_flow/stores/anime_info_store.dart';
@@ -17,6 +17,7 @@ import 'package:anime_flow/widget/ranking.dart';
 import 'package:anime_flow/widget/star.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:get/get.dart';
 import 'package:shimmer/shimmer.dart';
 import 'package:url_launcher/url_launcher.dart';
@@ -26,55 +27,39 @@ part '_evaluate_dialog.dart';
 part '_appBar.dart';
 part '_head.dart';
 
-class AnimeInfoPage extends StatefulWidget {
+class AnimeInfoPage extends ConsumerStatefulWidget {
   const AnimeInfoPage({super.key});
 
   @override
-  State<AnimeInfoPage> createState() => _AnimeInfoPageState();
+  ConsumerState<AnimeInfoPage> createState() => _AnimeInfoPageState();
 }
 
-class _AnimeInfoPageState extends State<AnimeInfoPage> {
+class _AnimeInfoPageState extends ConsumerState<AnimeInfoPage> {
   late SubjectBasicData subjectBasicData;
   late UserInfoStore userInfoStore;
-  late AnimeInfoStore animeInfoStore;
-  SubjectsInfoItem? subjectsInfo;
   final double _contentHeight = 200.0; // 内容区域的高度
   bool isPinned = false;
   bool topButton = false;
   final _nestedScrollController = ScrollController();
 
-  late String _storeTag;
-
   @override
   void initState() {
     super.initState();
     subjectBasicData = Get.arguments;
-    _storeTag = 'anime_info_${subjectBasicData.id}';
-    _getSubjects();
     userInfoStore = Get.find<UserInfoStore>();
-    animeInfoStore = Get.put(AnimeInfoStore(), tag: _storeTag);
-  }
-
-  void _getSubjects() async {
-    final response =
-        await BgmRequest.getSubjectByIdService(subjectBasicData.id);
-    if (mounted) {
-      setState(() {
-        animeInfoStore.setAnimeInfo(response);
-        subjectsInfo = response;
-      });
-    }
   }
 
   @override
   void dispose() {
     _nestedScrollController.dispose();
-    Get.delete<AnimeInfoStore>(tag: _storeTag);
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
+    final animeInfoAsync = ref.watch(animeInfoProvider(subjectBasicData.id));
+    final subjectsInfo = animeInfoAsync.asData?.value;
+
     // 状态栏高度
     final double statusBarHeight = MediaQuery.of(context).padding.top;
 
@@ -126,11 +111,9 @@ class _AnimeInfoPageState extends State<AnimeInfoPage> {
                     background: Padding(
                       padding: const EdgeInsets.only(bottom: 15),
                       child: _HeadView(
-                        animeInfoStore: animeInfoStore,
                         statusBarHeight: statusBarHeight,
                         contentHeight: _contentHeight,
                         subjectBasicData: subjectBasicData,
-                        storeTag: _storeTag,
                       ),
                     ),
                   ),
@@ -180,13 +163,13 @@ class _AnimeInfoPageState extends State<AnimeInfoPage> {
             const SizedBox(height: 5),
             Obx(() => userInfoStore.userInfo.value != null &&
                     subjectsInfo != null &&
-                    subjectsInfo?.interest != null
+                    subjectsInfo.interest != null
                 ? FloatingActionButton(
                     heroTag: 'evaluate_${subjectBasicData.id}',
                     onPressed: () {
                       Get.dialog(
                           barrierDismissible: false,
-                          _EvaluateDialog(storeTag: _storeTag));
+                          _EvaluateDialog(subjectId: subjectBasicData.id));
                     },
                     child: Icon(
                       Icons.messenger,

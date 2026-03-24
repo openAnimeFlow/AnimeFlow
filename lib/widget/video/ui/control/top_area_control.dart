@@ -45,6 +45,7 @@ class _TopAreaControlState extends State<TopAreaControl> {
     return Obx(() {
       // 全屏状态
       final fullscreen = playController.isFullscreen.value;
+      final leftPadding = MediaQuery.of(context).padding.left;
       return AnimatedSwitcher(
         duration: const Duration(milliseconds: 200),
         transitionBuilder: (child, animation) {
@@ -62,7 +63,10 @@ class _TopAreaControlState extends State<TopAreaControl> {
                         begin: Alignment.topCenter,
                         end: Alignment.bottomCenter)),
                 child: Padding(
-                  padding: const EdgeInsets.only(left: 5, right: 5, top: 2),
+                  padding: EdgeInsets.only(
+                      left: leftPadding <= 0 ? 5 : leftPadding,
+                      right: 5,
+                      top: 2),
                   child: Column(
                     children: [
                       //全屏时顶部信息展示

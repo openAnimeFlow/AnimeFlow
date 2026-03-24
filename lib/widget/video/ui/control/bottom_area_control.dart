@@ -88,7 +88,7 @@ class _BottomAreaControlState extends State<BottomAreaControl> {
                       if (fullscreen || isWideScreen)
                         const Padding(
                           padding:
-                              EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+                              EdgeInsets.symmetric(horizontal: 10, vertical: 0),
                           child: VideoProgressBar(),
                         ),
                       Row(

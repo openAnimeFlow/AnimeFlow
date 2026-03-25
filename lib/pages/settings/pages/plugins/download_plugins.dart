@@ -1,6 +1,6 @@
 import 'package:anime_flow/http/api_path.dart';
 import 'package:anime_flow/http/requests/request.dart';
-import 'package:anime_flow/models/item/crawler_config_item.dart';
+import 'package:anime_flow/crawler/itme/crawler_config_item.dart';
 import 'package:anime_flow/controllers/setting_controller.dart';
 import 'package:anime_flow/repository/storage.dart';
 import 'package:anime_flow/utils/format_time_util.dart';

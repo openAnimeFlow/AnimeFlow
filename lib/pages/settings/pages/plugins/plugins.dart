@@ -1,4 +1,4 @@
-import 'package:anime_flow/models/item/crawler_config_item.dart';
+import 'package:anime_flow/crawler/itme/crawler_config_item.dart';
 import 'package:anime_flow/controllers/setting_controller.dart';
 import 'package:anime_flow/routes/index.dart';
 import 'package:anime_flow/utils/crawl_config.dart';

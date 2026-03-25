@@ -3,7 +3,7 @@ import 'dart:convert';
 import 'package:anime_flow/constants/constants.dart';
 import 'package:anime_flow/http/api_path.dart';
 import 'package:anime_flow/http/dio/dio_request.dart';
-import 'package:anime_flow/models/item/crawler_config_item.dart';
+import 'package:anime_flow/crawler/itme/crawler_config_item.dart';
 import 'package:anime_flow/utils/utils.dart';
 import 'package:dio/dio.dart';
 

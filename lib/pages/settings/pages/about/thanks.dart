@@ -43,14 +43,13 @@ class _ThanksPageState extends State<ThanksPage>
           'icon': const Icon(Icons.web),
           'title': 'WebView',
           'description': 'Kazumi项目提供的WebView技术支持',
-          'url':
-              'https://github.com/Predidit/Kazumi/tree/main/lib/pages/webview',
+          'url': 'https://github.com/Predidit/Kazumi/tree/main/lib/pages/webview',
         },
         {
           'icon': const Icon(Icons.play_circle_outline_rounded),
           'title': 'media-kit',
           'description': '跨平台视频播放器，支持高质量视频播放',
-          'url': 'https://github.com/Predidit/media-kit',
+          'url': 'https://github.com/media-kit/media-kit',
         },
         {
           'icon': const Icon(Icons.subtitles),

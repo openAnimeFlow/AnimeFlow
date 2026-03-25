@@ -1,5 +1,9 @@
+import 'dart:async';
+import 'dart:convert';
+import 'package:anime_flow/crawler/itme/anti_crawler_config.dart';
 import 'package:anime_flow/models/item/play/video/episode_resources_item.dart';
 import 'package:anime_flow/models/item/play/video/resources_item.dart';
+import 'package:anime_flow/providers/captcha/captcha_provider.dart';
 import 'package:anime_flow/stores/play_subject_state.dart';
 import 'package:anime_flow/widget/animation_network_image/animation_network_image.dart';
 import 'package:anime_flow/constants/play_layout_constant.dart';
@@ -33,6 +37,9 @@ class _VideoSourceDrawersState extends State<VideoSourceDrawers> {
   final logger = Logger();
   bool isShowEpisodes = false;
   final _searchController = TextEditingController();
+
+  CaptchaProvider? _captchaProvider;
+  Timer? _captchaVerifyTimer;
 
   @override
   void initState() {
@@ -71,7 +78,281 @@ class _VideoSourceDrawersState extends State<VideoSourceDrawers> {
   @override
   void dispose() {
     _searchController.dispose();
+    _captchaProvider?.dispose();
+    _captchaProvider = null;
+    _captchaVerifyTimer?.cancel();
+    _captchaVerifyTimer = null;
     super.dispose();
+  }
+
+  /// 根据验证类型分发到对应的验证对话框
+  void _showAntiCrawlerDialog(ResourcesItem resource) {
+    final config = resource.antiCrawlerConfig;
+    if (config == null) return;
+    switch (config.captchaType) {
+      case CaptchaType.autoClickButton:
+        _showButtonClickDialog(resource, config);
+        break;
+      default:
+        _showCaptchaDialog(resource, config);
+    }
+  }
+
+  /// 类型1：图片验证码对话框
+  void _showCaptchaDialog(ResourcesItem resource, AntiCrawlerConfig config) {
+    final captchaImageNotifier = ValueNotifier<String?>(null);
+    final submittingNotifier = ValueNotifier<bool>(false);
+    final TextEditingController codeController = TextEditingController();
+    bool verified = false;
+
+    _captchaProvider?.dispose();
+    _captchaProvider = CaptchaProvider();
+
+    final searchPageUrl = _buildSearchUrl(resource);
+
+    _captchaProvider!.loadForCaptcha(
+      searchPageUrl,
+      config.captchaImage,
+      inputXpath: config.captchaInput,
+    );
+
+    final imageSub = _captchaProvider!.onCaptchaImageUrl.listen((url) {
+      if (url != null) captchaImageNotifier.value = url;
+    });
+
+    Future<void> doSubmit() async {
+      if (submittingNotifier.value) return;
+      if (codeController.text.trim().isEmpty) {
+        Get.snackbar('提示', '请输入验证码',
+            snackPosition: SnackPosition.BOTTOM,
+            maxWidth: 300);
+        return;
+      }
+      submittingNotifier.value = true;
+      await _captchaProvider?.submitCaptcha(
+        captchaCode: codeController.text.trim(),
+        inputXpath: config.captchaInput,
+        buttonXpath: config.captchaButton,
+        pluginName: resource.websiteName,
+        onVerified: () {
+          _captchaVerifyTimer?.cancel();
+          _captchaVerifyTimer = null;
+          verified = true;
+          Get.back();
+          Get.snackbar('验证成功', '正在重新检索，请稍候…',
+              snackPosition: SnackPosition.BOTTOM,
+              maxWidth: 300);
+          Future.delayed(const Duration(seconds: 3), () {
+            dataSourceController.retryResources(resource.websiteName);
+          });
+        },
+      );
+      if (!verified) {
+        _captchaVerifyTimer?.cancel();
+        _captchaVerifyTimer = Timer(const Duration(seconds: 8), () {
+          if (!verified) Get.back();
+        });
+      }
+    }
+
+    Get.dialog(
+      Dialog(
+        clipBehavior: Clip.antiAlias,
+        child: Padding(
+          padding: const EdgeInsets.all(24),
+          child: SizedBox(
+            width: 400,
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: [
+                Text('验证码验证',
+                    style: Theme.of(context).textTheme.titleLarge),
+                const SizedBox(height: 4),
+                Text('${resource.websiteName} 需要验证码验证',
+                    style: Theme.of(context).textTheme.bodySmall),
+                const SizedBox(height: 20),
+                ValueListenableBuilder<String?>(
+                  valueListenable: captchaImageNotifier,
+                  builder: (context, imageUrl, _) {
+                    if (imageUrl == null) {
+                      return const Column(children: [
+                        CircularProgressIndicator(),
+                        SizedBox(height: 12),
+                        Text('正在加载验证码图片...'),
+                      ]);
+                    }
+                    return ValueListenableBuilder<bool>(
+                      valueListenable: submittingNotifier,
+                      builder: (context, isSubmitting, _) {
+                        return Column(children: [
+                          ClipRRect(
+                            borderRadius: BorderRadius.circular(8),
+                            child: Image.memory(
+                              base64Decode(imageUrl.split(',').last),
+                              height: 80,
+                              fit: BoxFit.contain,
+                              errorBuilder: (ctx, err, _) =>
+                                  const Text('图片解码失败'),
+                            ),
+                          ),
+                          const SizedBox(height: 16),
+                          TextField(
+                            controller: codeController,
+                            autofocus: true,
+                            enabled: !isSubmitting,
+                            decoration: const InputDecoration(
+                              labelText: '请输入验证码',
+                              border: OutlineInputBorder(),
+                            ),
+                            onSubmitted:
+                                isSubmitting ? null : (_) => doSubmit(),
+                          ),
+                        ]);
+                      },
+                    );
+                  },
+                ),
+                const SizedBox(height: 20),
+                ListenableBuilder(
+                  listenable: Listenable.merge(
+                      [captchaImageNotifier, submittingNotifier]),
+                  builder: (context, _) {
+                    final isDisabled = captchaImageNotifier.value == null ||
+                        submittingNotifier.value;
+                    return Row(
+                      mainAxisAlignment: MainAxisAlignment.end,
+                      children: [
+                        TextButton(
+                          onPressed: () => Get.back(),
+                          child: Text('取消',
+                              style: TextStyle(
+                                  color:
+                                      Theme.of(context).colorScheme.outline)),
+                        ),
+                        const SizedBox(width: 8),
+                        FilledButton(
+                          onPressed: isDisabled ? null : doSubmit,
+                          child: submittingNotifier.value
+                              ? const SizedBox(
+                                  width: 18,
+                                  height: 18,
+                                  child: CircularProgressIndicator(
+                                      strokeWidth: 2))
+                              : const Text('提交'),
+                        ),
+                      ],
+                    );
+                  },
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    ).then((_) {
+      _captchaVerifyTimer?.cancel();
+      _captchaVerifyTimer = null;
+      imageSub.cancel();
+      codeController.dispose();
+      captchaImageNotifier.dispose();
+      submittingNotifier.dispose();
+
+      final provider = _captchaProvider;
+      _captchaProvider = null;
+      if (!verified) {
+        provider?.saveAndUnload(resource.websiteName).then((_) {
+          provider.dispose();
+          dataSourceController.retryResources(resource.websiteName);
+        });
+      } else {
+        provider?.dispose();
+      }
+    });
+  }
+
+  /// 类型2：自动点击验证按钮对话框
+  void _showButtonClickDialog(
+      ResourcesItem resource, AntiCrawlerConfig config) {
+    bool autoVerified = false;
+
+    _captchaProvider?.dispose();
+    _captchaProvider = CaptchaProvider();
+
+    final searchPageUrl = _buildSearchUrl(resource);
+
+    void onVerified() {
+      if (autoVerified) return;
+      autoVerified = true;
+      Get.back();
+      Get.snackbar('验证成功', '正在重新检索，请稍候…',
+          snackPosition: SnackPosition.BOTTOM, maxWidth: 300);
+      Future.delayed(const Duration(seconds: 2), () {
+        dataSourceController.retryResources(resource.websiteName);
+      });
+    }
+
+    _captchaProvider!.loadForButtonClick(
+      url: searchPageUrl,
+      buttonXpath: config.captchaButton,
+      pluginName: resource.websiteName,
+      onVerified: onVerified,
+    );
+
+    Get.dialog(
+      Dialog(
+        clipBehavior: Clip.antiAlias,
+        child: Padding(
+          padding: const EdgeInsets.all(24),
+          child: SizedBox(
+            width: 400,
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: [
+                Text('自动验证中',
+                    style: Theme.of(context).textTheme.titleLarge),
+                const SizedBox(height: 4),
+                Text('${resource.websiteName} 正在自动完成验证，请稍候',
+                    style: Theme.of(context).textTheme.bodySmall),
+                const SizedBox(height: 24),
+                const CircularProgressIndicator(),
+                const SizedBox(height: 12),
+                Text('已检测到验证按钮并模拟点击，等待验证通过…',
+                    style: Theme.of(context).textTheme.bodyMedium,
+                    textAlign: TextAlign.center),
+                const SizedBox(height: 20),
+                Align(
+                  alignment: Alignment.centerRight,
+                  child: TextButton(
+                    onPressed: () => Get.back(),
+                    child: Text('取消',
+                        style: TextStyle(
+                            color: Theme.of(context).colorScheme.outline)),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    ).then((_) {
+      final provider = _captchaProvider;
+      _captchaProvider = null;
+      if (autoVerified) {
+        provider?.dispose();
+      } else {
+        provider?.saveAndUnload(resource.websiteName).then((_) {
+          provider.dispose();
+          dataSourceController.retryResources(resource.websiteName);
+        });
+      }
+    });
+  }
+
+  String _buildSearchUrl(ResourcesItem resource) {
+    final keyword = dataSourceController.keyword.value;
+    return resource.searchUrl.replaceFirst('{keyword}', keyword);
   }
 
   @override
@@ -335,7 +616,6 @@ class _VideoSourceDrawersState extends State<VideoSourceDrawers> {
                                       height: 24,
                                       url: data.websiteIcon),
                                 ),
-                                // 显示解析状态
                                 if (data.isLoading) ...[
                                   const SizedBox(width: 4),
                                   SizedBox(
@@ -346,6 +626,13 @@ class _VideoSourceDrawersState extends State<VideoSourceDrawers> {
                                       color:
                                           Theme.of(context).colorScheme.primary,
                                     ),
+                                  ),
+                                ] else if (data.needsCaptcha) ...[
+                                  const SizedBox(width: 4),
+                                  Icon(
+                                    Icons.shield_outlined,
+                                    size: 14,
+                                    color: Colors.blue,
                                   ),
                                 ] else if (data.errorMessage != null) ...[
                                   const SizedBox(width: 4),
@@ -377,12 +664,15 @@ class _VideoSourceDrawersState extends State<VideoSourceDrawers> {
   Widget _buildVideoSource({required List<ResourcesItem> dataSource}) {
     return Obx(() {
       final selectedIndex = dataSourceController.selectedWebsiteIndex.value;
-      // 确保索引有效
       if (selectedIndex >= dataSource.length) {
         return const SizedBox.shrink();
       }
 
       final selectedResource = dataSource[selectedIndex];
+
+      if (selectedResource.needsCaptcha) {
+        return _buildCaptchaRequired(selectedResource);
+      }
 
       return Material(
         child: ListView.builder(
@@ -470,6 +760,39 @@ class _VideoSourceDrawersState extends State<VideoSourceDrawers> {
         ),
       );
     });
+  }
+
+  Widget _buildCaptchaRequired(ResourcesItem resource) {
+    return Center(
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Icon(Icons.shield_outlined,
+              size: 48, color: Theme.of(context).colorScheme.primary),
+          const SizedBox(height: 16),
+          Text('${resource.websiteName} 需要验证码验证',
+              style: Theme.of(context).textTheme.bodyMedium),
+          const SizedBox(height: 16),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              FilledButton.icon(
+                onPressed: () => _showAntiCrawlerDialog(resource),
+                icon: const Icon(Icons.verified_user_outlined, size: 18),
+                label: const Text('进行验证'),
+              ),
+              const SizedBox(width: 12),
+              OutlinedButton.icon(
+                onPressed: () =>
+                    dataSourceController.retryResources(resource.websiteName),
+                icon: const Icon(Icons.refresh, size: 18),
+                label: const Text('重试'),
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
   }
 
   Widget _buildSource(Episode episode, EpisodeResourcesItem item,

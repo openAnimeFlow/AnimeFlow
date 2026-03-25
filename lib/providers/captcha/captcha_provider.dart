@@ -169,6 +169,7 @@ class CaptchaProvider {
     Logger().i('[CaptchaProvider] (type2) Page loading for button click: $url');
   }
 
+  /// 保存 Cookie 并取消加载页面
   Future<void> saveAndUnload(String pluginName) async {
     _disappearedSub?.cancel();
     _disappearedSub = null;

@@ -1,4 +1,5 @@
 import 'package:anime_flow/crawler/html_request.dart';
+import 'package:anime_flow/crawler/itme/anti_crawler_config.dart';
 import 'package:anime_flow/crawler/itme/crawler_config_item.dart';
 import 'package:anime_flow/models/item/play/video/episode_resources_item.dart';
 import 'package:anime_flow/models/item/play/video/resources_item.dart';
@@ -10,6 +11,9 @@ import 'package:anime_flow/stores/episodes_state.dart';
 import 'package:anime_flow/webview/webview_controller.dart';
 import 'package:get/get.dart';
 import 'package:logger/logger.dart';
+
+typedef CaptchaRequiredCallback = void Function(
+    String websiteName, CrawlConfigItem config);
 
 class VideoSourceController extends GetxController {
   final RxList<ResourcesItem> videoResources = <ResourcesItem>[].obs;
@@ -88,6 +92,8 @@ class VideoSourceController extends GetxController {
         websiteName: config.name,
         websiteIcon: config.iconUrl,
         baseUrl: config.baseUrl,
+        searchUrl: config.searchUrl,
+        needsCaptcha: config.antiCrawlerConfig.enabled,
         episodeResources: [],
       );
     }).toList();
@@ -122,18 +128,27 @@ class VideoSourceController extends GetxController {
         websiteName: resource.websiteName,
         websiteIcon: resource.websiteIcon,
         baseUrl: resource.baseUrl,
+        searchUrl: resource.searchUrl,
         episodeResources: [],
         isLoading: false,
         errorMessage: null,
+        needsCaptcha: false,
       );
     }).toList();
 
     videoResources.value = clearedResources;
   }
 
+  /// 重新请求指定站点的资源（验证通过后调用）
+  Future<void> retryResources(String websiteName) async {
+    final configs = await CrawlConfig.loadAllCrawlConfigs();
+    final config = configs.firstWhereOrNull((c) => c.name == websiteName);
+    if (config == null) return;
+    await _getResources(keyword.value, config);
+  }
+
   Future<void> _getResources(String keyword, CrawlConfigItem config) async {
     try {
-      // 设置解析中状态
       _updateResourceStatus(config.name, isLoading: true, errorMessage: null);
 
       List<SearchResourcesItem> searchList =
@@ -144,7 +159,6 @@ class VideoSourceController extends GetxController {
         var crawlerEpisodeResources =
             await WebRequest.getResourcesListService(search.link, config);
 
-        // 转换 CrawlerEpisodeResourcesItem 到 EpisodeResourcesItem
         for (var crawlerResource in crawlerEpisodeResources) {
           var episodeResource = EpisodeResourcesItem(
             lineNames: crawlerResource.lineNames,
@@ -155,14 +169,21 @@ class VideoSourceController extends GetxController {
         }
       }
 
-      // 更新资源并设置完成状态
       _updateResourceStatus(
         config.name,
         isLoading: false,
         episodeResources: allEpisodesList,
+        needsCaptcha: false,
+      );
+    } on CaptchaRequiredException {
+      _updateResourceStatus(
+        config.name,
+        isLoading: false,
+        needsCaptcha: true,
+        antiCrawlerConfig: config.antiCrawlerConfig,
+        errorMessage: null,
       );
     } catch (e) {
-      // 解析失败，设置错误状态
       _updateResourceStatus(
         config.name,
         isLoading: false,
@@ -175,12 +196,13 @@ class VideoSourceController extends GetxController {
     this.isLoading.value = isLoading;
   }
 
-  // 更新指定网站的状态
   void _updateResourceStatus(
     String websiteName, {
     bool? isLoading,
     List<EpisodeResourcesItem>? episodeResources,
     String? errorMessage,
+    bool? needsCaptcha,
+    AntiCrawlerConfig? antiCrawlerConfig,
   }) {
     final currentResources = videoResources.toList();
     final updatedResources = currentResources.map((resource) {
@@ -189,6 +211,8 @@ class VideoSourceController extends GetxController {
           isLoading: isLoading,
           episodeResources: episodeResources,
           errorMessage: errorMessage,
+          needsCaptcha: needsCaptcha,
+          antiCrawlerConfig: antiCrawlerConfig,
         );
       }
       return resource;

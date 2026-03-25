@@ -6,9 +6,21 @@ import 'package:anime_flow/models/item/play/video/episode_resources_item.dart';
 import 'package:anime_flow/models/item/play/video/search_resources_item.dart';
 import 'package:dio/dio.dart';
 import 'package:anime_flow/constants/constants.dart';
+import 'package:html/parser.dart' as html_parser;
+import 'package:xpath_selector_html_parser/xpath_selector_html_parser.dart';
 import 'package:logger/logger.dart';
 
+import 'cookie_manager.dart';
 import 'html_crawler.dart';
+
+/// 搜索响应中检测到验证码质询时抛出
+class CaptchaRequiredException implements Exception {
+  final String configName;
+  const CaptchaRequiredException(this.configName);
+  @override
+  String toString() =>
+      'CaptchaRequiredException: $configName requires captcha verification';
+}
 
 class WebRequest {
   static Logger logger = Logger();
@@ -19,12 +31,35 @@ class WebRequest {
     final String searchURL = crawlConfig.searchUrl;
     final userAgent = Constants
         .userAgentList[Random().nextInt(Constants.userAgentList.length)];
+    final requestUrl = searchURL.replaceFirst("{keyword}", keyword);
+    final cookie = await _cookieHeaderFor(requestUrl, crawlConfig.name);
 
-    final response =
-        await dioRequest.get(searchURL.replaceFirst("{keyword}", keyword),
-            options: Options(headers: {
-              Constants.userAgentName: userAgent,
-            }));
+    final httpHeaders = {
+      'referer': '$searchURL/',
+      'Content-Type': 'application/x-www-form-urlencoded',
+      'Connection': 'keep-alive',
+      Constants.userAgentName: userAgent,
+      if (cookie.isNotEmpty) 'Cookie': cookie
+    };
+    final response = await dioRequest.get(requestUrl,
+        options: Options(headers: httpHeaders));
+
+    final antiCrawler = crawlConfig.antiCrawlerConfig;
+    if (antiCrawler.enabled) {
+      final htmlElement =
+          html_parser.parse(response.data.toString()).documentElement!;
+      final detectionXpaths = [
+        antiCrawler.captchaImage,
+        antiCrawler.captchaButton,
+      ].where((x) => x.isNotEmpty).toList();
+      final captchaDetected = detectionXpaths
+          .any((xpath) => htmlElement.queryXPath(xpath).node != null);
+      if (captchaDetected) {
+        logger.w('WebRequest: ${crawlConfig.name} detected captcha challenge');
+        throw CaptchaRequiredException(crawlConfig.name);
+      }
+    }
+
     return HtmlCrawler.parseSearchHtml(response.data, crawlConfig);
   }
 
@@ -50,13 +85,17 @@ class WebRequest {
     return HtmlCrawler.parseResourcesHtml(response.data, crawlConfig);
   }
 
-  /// 获取视频源
-// static Future<String> getVideoSourceService(
-//     String link, VideoConfig videoConfig) async {
-//   final String baseUrl = videoConfig.baseURL;
-//   final url = baseUrl + link;
-//
-//   // 根据平台选择不同的实现方式
-//   return HtmlCrawler.getVideoSourceWithInAppWebView(url, videoConfig);
-// }
+  static Future<String> _cookieHeaderFor(String url, String name) async {
+    if (!CookieManager.instance.hasCookies(name)) return '';
+    final uri = Uri.tryParse(url);
+    if (uri == null) return '';
+    try {
+      final cookies =
+      await CookieManager.instance.getJar(name).loadForRequest(uri);
+      if (cookies.isEmpty) return '';
+      return cookies.map((c) => '${c.name}=${c.value}').join('; ');
+    } catch (_) {
+      return '';
+    }
+  }
 }

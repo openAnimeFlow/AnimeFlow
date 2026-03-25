@@ -1,0 +1,20 @@
+{
+  "version": "1.2.0",
+  "name": "稀饭动漫",
+  "iconUrl": "https://dm.xifanacg.com/upload/site/20240308-1/813e41f81d6f85bfd7a44bf8a813f9e5.png",
+  "baseUrl": "https://dm.xifanacg.com",
+  "searchUrl": "https://dm.xifanacg.com/search.html?wd={keyword}",
+  "searchList": "//div[@class='flex rel overflow']",
+  "searchName": " //h3",
+  "searchLink": "//div[@class='detail-info rel flex-auto lightSpeedIn'] /a",
+  "lineNames": "//div[@class='swiper-wrapper'] /a",
+  "lineList": "//ul[@class='anthology-list-play size']",
+  "episode": "/li /a",
+  "antiCrawlerConfig": {
+    "enabled": true,
+    "captchaType": 1,
+    "captchaImage": "//img[@class='ds-verify-img']",
+    "captchaInput": "//div[4]/div[2]/div/div/input",
+    "captchaButton": "//div[4]/div[2]/button"
+  }
+}

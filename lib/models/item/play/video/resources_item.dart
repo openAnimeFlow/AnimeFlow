@@ -1,3 +1,4 @@
+import 'package:anime_flow/crawler/itme/anti_crawler_config.dart';
 
 import 'episode_resources_item.dart';
 
@@ -5,9 +6,12 @@ class ResourcesItem {
   final String websiteName;
   final String websiteIcon;
   final String baseUrl;
+  final String searchUrl;
   final List<EpisodeResourcesItem> episodeResources;
-  final bool isLoading; // 是否正在解析中
-  final String? errorMessage; // 解析失败时的错误信息
+  final bool isLoading;
+  final String? errorMessage;
+  final bool needsCaptcha;
+  final AntiCrawlerConfig? antiCrawlerConfig;
 
   ResourcesItem({
     required this.websiteName,
@@ -15,17 +19,22 @@ class ResourcesItem {
     required this.episodeResources,
     this.errorMessage,
     required this.baseUrl,
+    this.searchUrl = '',
     this.isLoading = false,
+    this.needsCaptcha = false,
+    this.antiCrawlerConfig,
   });
 
-  // 创建一个副本并更新指定字段
   ResourcesItem copyWith({
     String? websiteName,
     String? websiteIcon,
     String? baseUrl,
+    String? searchUrl,
     List<EpisodeResourcesItem>? episodeResources,
     bool? isLoading,
     String? errorMessage,
+    bool? needsCaptcha,
+    AntiCrawlerConfig? antiCrawlerConfig,
   }) {
     return ResourcesItem(
       websiteName: websiteName ?? this.websiteName,
@@ -34,6 +43,9 @@ class ResourcesItem {
       isLoading: isLoading ?? this.isLoading,
       errorMessage: errorMessage ?? this.errorMessage,
       baseUrl: baseUrl ?? this.baseUrl,
+      searchUrl: searchUrl ?? this.searchUrl,
+      needsCaptcha: needsCaptcha ?? this.needsCaptcha,
+      antiCrawlerConfig: antiCrawlerConfig ?? this.antiCrawlerConfig,
     );
   }
 }

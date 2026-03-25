@@ -103,10 +103,15 @@ class VideoSourceController extends GetxController {
     updateLoading(false);
     final configs = await CrawlConfig.loadAllCrawlConfigs();
 
-    // 并发执行所有网站的资源获取
-    await Future.wait(
-      configs.map((config) => _getResources(keyword, config)),
-    );
+    // 错开发起时间（相邻间隔 0.5 秒），不串行等待每个请求；全部完成后再结束加载态
+    final futures = <Future<void>>[];
+    for (var i = 0; i < configs.length; i++) {
+      if (i > 0) {
+        await Future.delayed(const Duration(milliseconds: 500));
+      }
+      futures.add(_getResources(keyword, configs[i]));
+    }
+    await Future.wait(futures);
     updateLoading(true);
   }
 

@@ -1,6 +1,6 @@
 import 'package:anime_flow/constants/constants.dart';
 import 'package:anime_flow/controllers/app/app_info_controller.dart';
-import 'package:anime_flow/data/crawler/user_page_crawler.dart';
+import 'package:anime_flow/crawler/user_page_crawler.dart';
 import 'package:anime_flow/http/api_path.dart';
 import 'package:anime_flow/models/enums/sort_type.dart';
 import 'package:anime_flow/models/item/bangumi/actor_item.dart';

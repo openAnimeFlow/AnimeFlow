@@ -206,6 +206,7 @@ class _MainPageState extends State<MainPage> {
     mainPageState.changeIsDesktop(isDesktop);
     final desktop = SystemUtil.isDesktop;
     return Scaffold(
+      extendBody: true,
       body: Row(
         children: [
           if (isDesktop)

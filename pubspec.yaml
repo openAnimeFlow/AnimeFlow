@@ -101,6 +101,7 @@ dependencies:
   connectivity_plus: ^7.0.0
   hive_ce: ^2.19.3
   hive_ce_flutter: ^2.3.4
+  cookie_jar: ^4.0.9
 
 # logo图标生成生成命令:dart run flutter_launcher_icons
 flutter_launcher_icons:

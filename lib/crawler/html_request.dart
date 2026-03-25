@@ -1,6 +1,5 @@
 import 'dart:async';
 import 'dart:math';
-import 'package:anime_flow/data/crawler/html_crawler.dart';
 import 'package:anime_flow/models/item/crawler_config_item.dart';
 import 'package:anime_flow/http/dio/dio_request.dart';
 import 'package:anime_flow/models/item/play/video/episode_resources_item.dart';
@@ -8,6 +7,8 @@ import 'package:anime_flow/models/item/play/video/search_resources_item.dart';
 import 'package:dio/dio.dart';
 import 'package:anime_flow/constants/constants.dart';
 import 'package:logger/logger.dart';
+
+import 'html_crawler.dart';
 
 class WebRequest {
   static Logger logger = Logger();

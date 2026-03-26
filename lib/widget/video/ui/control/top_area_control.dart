@@ -4,6 +4,7 @@ import 'package:anime_flow/stores/episodes_state.dart';
 import 'package:anime_flow/controllers/play/play_controller.dart';
 import 'package:anime_flow/stores/play_subject_state.dart';
 import 'package:anime_flow/controllers/video/video_ui_controller.dart';
+import 'package:anime_flow/utils/network_speed_service.dart';
 import 'package:anime_flow/utils/systemUtil.dart';
 import 'package:anime_flow/widget/battery_icon.dart';
 import 'package:anime_flow/widget/network_icon.dart';
@@ -28,6 +29,7 @@ class _TopAreaControlState extends State<TopAreaControl> {
   late VideoUiStateController videoUiStateController;
   late EpisodesState episodesController;
   late PlaySubjectState playSubjectState;
+  late final Stream<NetworkSpeed> _networkStream;
 
   @override
   void initState() {
@@ -38,6 +40,20 @@ class _TopAreaControlState extends State<TopAreaControl> {
     videoUiStateController = Get.find<VideoUiStateController>();
     episodesController = Get.find<EpisodesState>();
     playSubjectState = Get.find<PlaySubjectState>();
+    _networkStream = NetworkSpeedService.start(interval: 2000);
+  }
+
+  @override
+  void dispose() {
+    NetworkSpeedService.stop();
+    super.dispose();
+  }
+
+  String _formatBytesPerSec(num bps) {
+    final kb = bps / 1024.0;
+    if (kb < 1024) return '${kb.toStringAsFixed(1)}KB/s';
+    final mb = kb / 1024.0;
+    return '${mb.toStringAsFixed(1)}MB/s';
   }
 
   @override
@@ -75,66 +91,7 @@ class _TopAreaControlState extends State<TopAreaControl> {
                         Container(
                           padding: const EdgeInsets.symmetric(horizontal: 15),
                           height: 16,
-                          child: Row(
-                            children: [
-                              //网络图标
-                              const Expanded(
-                                  child: Row(
-                                mainAxisAlignment: MainAxisAlignment.start,
-                                children: [NetworkIcon()],
-                              )),
-                              //系统时间
-                              Obx(
-                                () => Text(
-                                  videoUiStateController.currentTime.value,
-                                  style: const TextStyle(
-                                    color: Colors.white,
-                                    fontSize: 12,
-                                    fontWeight: FontWeight.w600,
-                                  ),
-                                ),
-                              ),
-                              //电池图标
-                              if (SystemUtil.isMobile)
-                                Expanded(
-                                  child: Obx(
-                                    () {
-                                      final battery = videoUiStateController
-                                          .batteryLevel.value;
-                                      final batteryState =
-                                          videoUiStateController
-                                              .batteryState.value;
-
-                                      return Row(
-                                        crossAxisAlignment:
-                                            CrossAxisAlignment.center,
-                                        mainAxisAlignment:
-                                            MainAxisAlignment.end,
-                                        children: [
-                                          Text(
-                                            '${videoUiStateController.batteryLevel.value}%',
-                                            style: const TextStyle(
-                                              color: Colors.white,
-                                              fontSize: 10,
-                                              fontWeight: FontWeight.w600,
-                                            ),
-                                          ),
-                                          const SizedBox(width: 4),
-                                          BatteryIcon(
-                                            size: 25,
-                                            battery: battery,
-                                            batteryState: batteryState,
-                                            angle: 90,
-                                          ),
-                                        ],
-                                      );
-                                    },
-                                  ),
-                                )
-                              else
-                                const Spacer()
-                            ],
-                          ),
+                          child: _buildTopInfoBar()
                         ),
                       Row(
                         children: [
@@ -311,4 +268,110 @@ class _TopAreaControlState extends State<TopAreaControl> {
       );
     });
   }
+
+  ///顶部信息栏
+ Widget _buildTopInfoBar() {
+    return Row(
+      children: [
+        //网络图标
+        Expanded(
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.start,
+              spacing: 5,
+              children: [
+                const NetworkIcon(),
+                StreamBuilder<NetworkSpeed>(
+                    stream: _networkStream,
+                    builder: (context, snapshot) {
+                      final data = snapshot.data;
+
+                      final download = data?.download ?? 0;
+                      final upload = data?.upload ?? 0;
+                      return Row(
+                        crossAxisAlignment: CrossAxisAlignment.center,
+                        children: [
+                          const RotatedBox(
+                            quarterTurns: 1,
+                            child: Icon(
+                                Icons
+                                    .arrow_right_alt_outlined,
+                                size: 15,
+                                fontWeight: FontWeight.bold),
+                          ),
+                          Text(
+                            _formatBytesPerSec(download),
+                            style: const TextStyle(
+                                fontSize: 10,
+                                color: Colors.white),
+                          ),
+                          const SizedBox(width: 5),
+                          const RotatedBox(
+                            quarterTurns: 3,
+                            child: Icon(
+                                Icons
+                                    .arrow_right_alt_outlined,
+                                size: 15,
+                                fontWeight: FontWeight.bold),
+                          ),
+                          Text(_formatBytesPerSec(upload),
+                              style: const TextStyle(
+                                  fontSize: 10)),
+                        ],
+                      );
+                    })
+              ],
+            )),
+        //系统时间
+        Obx(
+              () => Text(
+            videoUiStateController.currentTime.value,
+            style: const TextStyle(
+              color: Colors.white,
+              fontSize: 12,
+              fontWeight: FontWeight.w600,
+            ),
+          ),
+        ),
+        //电池图标
+        if (SystemUtil.isMobile)
+          Expanded(
+            child: Obx(
+                  () {
+                final battery = videoUiStateController
+                    .batteryLevel.value;
+                final batteryState =
+                    videoUiStateController
+                        .batteryState.value;
+
+                return Row(
+                  crossAxisAlignment:
+                  CrossAxisAlignment.center,
+                  mainAxisAlignment:
+                  MainAxisAlignment.end,
+                  children: [
+                    Text(
+                      '${videoUiStateController.batteryLevel.value}%',
+                      style: const TextStyle(
+                        color: Colors.white,
+                        fontSize: 10,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                    const SizedBox(width: 4),
+                    BatteryIcon(
+                      size: 25,
+                      battery: battery,
+                      batteryState: batteryState,
+                      angle: 90,
+                    ),
+                  ],
+                );
+              },
+            ),
+          )
+        else
+          const Spacer()
+      ],
+    );
+ }
 }

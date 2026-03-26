@@ -81,6 +81,16 @@ class CaptchaProvider {
     Logger().i('[CaptchaProvider] Page loading: $url');
   }
 
+  /// 验证码提交错误后重新加载当前搜索页，以获取新图片
+  /// 会取消 [submitCaptcha] 期间注册的「验证码消失」监听，避免重载过程中误触发成功回调。
+  Future<void> reloadCaptchaImage(String captchaXpath, {String? inputXpath}) async {
+    if (_disposed || _controller == null || _pageUrl.isEmpty) return;
+    _disappearedSub?.cancel();
+    _disappearedSub = null;
+    await loadForCaptcha(_pageUrl, captchaXpath, inputXpath: inputXpath);
+    Logger().i('[CaptchaProvider] Reloaded captcha page: $_pageUrl');
+  }
+
   /// 提交验证码
   ///
   /// [captchaCode] 用户输入的验证码文本

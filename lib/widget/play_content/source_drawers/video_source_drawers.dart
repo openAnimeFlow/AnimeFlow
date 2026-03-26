@@ -38,9 +38,6 @@ class _VideoSourceDrawersState extends State<VideoSourceDrawers> {
   bool isShowEpisodes = false;
   final _searchController = TextEditingController();
 
-  CaptchaProvider? _captchaProvider;
-  Timer? _captchaVerifyTimer;
-
   @override
   void initState() {
     super.initState();
@@ -78,281 +75,7 @@ class _VideoSourceDrawersState extends State<VideoSourceDrawers> {
   @override
   void dispose() {
     _searchController.dispose();
-    _captchaProvider?.dispose();
-    _captchaProvider = null;
-    _captchaVerifyTimer?.cancel();
-    _captchaVerifyTimer = null;
     super.dispose();
-  }
-
-  /// 根据验证类型分发到对应的验证对话框
-  void _showAntiCrawlerDialog(ResourcesItem resource) {
-    final config = resource.antiCrawlerConfig;
-    if (config == null) return;
-    switch (config.captchaType) {
-      case CaptchaType.autoClickButton:
-        _showButtonClickDialog(resource, config);
-        break;
-      default:
-        _showCaptchaDialog(resource, config);
-    }
-  }
-
-  /// 类型1：图片验证码对话框
-  void _showCaptchaDialog(ResourcesItem resource, AntiCrawlerConfig config) {
-    final captchaImageNotifier = ValueNotifier<String?>(null);
-    final submittingNotifier = ValueNotifier<bool>(false);
-    final TextEditingController codeController = TextEditingController();
-    bool verified = false;
-
-    _captchaProvider?.dispose();
-    _captchaProvider = CaptchaProvider();
-
-    final searchPageUrl = _buildSearchUrl(resource);
-
-    _captchaProvider!.loadForCaptcha(
-      searchPageUrl,
-      config.captchaImage,
-      inputXpath: config.captchaInput,
-    );
-
-    final imageSub = _captchaProvider!.onCaptchaImageUrl.listen((url) {
-      if (url != null) captchaImageNotifier.value = url;
-    });
-
-    Future<void> doSubmit() async {
-      if (submittingNotifier.value) return;
-      if (codeController.text.trim().isEmpty) {
-        Get.snackbar('提示', '请输入验证码',
-            snackPosition: SnackPosition.BOTTOM,
-            maxWidth: 300);
-        return;
-      }
-      submittingNotifier.value = true;
-      await _captchaProvider?.submitCaptcha(
-        captchaCode: codeController.text.trim(),
-        inputXpath: config.captchaInput,
-        buttonXpath: config.captchaButton,
-        pluginName: resource.websiteName,
-        onVerified: () {
-          _captchaVerifyTimer?.cancel();
-          _captchaVerifyTimer = null;
-          verified = true;
-          Get.back();
-          Get.snackbar('验证成功', '正在重新检索，请稍候…',
-              snackPosition: SnackPosition.BOTTOM,
-              maxWidth: 300);
-          Future.delayed(const Duration(seconds: 3), () {
-            dataSourceController.retryResources(resource.websiteName);
-          });
-        },
-      );
-      if (!verified) {
-        _captchaVerifyTimer?.cancel();
-        _captchaVerifyTimer = Timer(const Duration(seconds: 8), () {
-          if (!verified) Get.back();
-        });
-      }
-    }
-
-    Get.dialog(
-      Dialog(
-        clipBehavior: Clip.antiAlias,
-        child: Padding(
-          padding: const EdgeInsets.all(24),
-          child: SizedBox(
-            width: 400,
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.center,
-              children: [
-                Text('验证码验证',
-                    style: Theme.of(context).textTheme.titleLarge),
-                const SizedBox(height: 4),
-                Text('${resource.websiteName} 需要验证码验证',
-                    style: Theme.of(context).textTheme.bodySmall),
-                const SizedBox(height: 20),
-                ValueListenableBuilder<String?>(
-                  valueListenable: captchaImageNotifier,
-                  builder: (context, imageUrl, _) {
-                    if (imageUrl == null) {
-                      return const Column(children: [
-                        CircularProgressIndicator(),
-                        SizedBox(height: 12),
-                        Text('正在加载验证码图片...'),
-                      ]);
-                    }
-                    return ValueListenableBuilder<bool>(
-                      valueListenable: submittingNotifier,
-                      builder: (context, isSubmitting, _) {
-                        return Column(children: [
-                          ClipRRect(
-                            borderRadius: BorderRadius.circular(8),
-                            child: Image.memory(
-                              base64Decode(imageUrl.split(',').last),
-                              height: 80,
-                              fit: BoxFit.contain,
-                              errorBuilder: (ctx, err, _) =>
-                                  const Text('图片解码失败'),
-                            ),
-                          ),
-                          const SizedBox(height: 16),
-                          TextField(
-                            controller: codeController,
-                            autofocus: true,
-                            enabled: !isSubmitting,
-                            decoration: const InputDecoration(
-                              labelText: '请输入验证码',
-                              border: OutlineInputBorder(),
-                            ),
-                            onSubmitted:
-                                isSubmitting ? null : (_) => doSubmit(),
-                          ),
-                        ]);
-                      },
-                    );
-                  },
-                ),
-                const SizedBox(height: 20),
-                ListenableBuilder(
-                  listenable: Listenable.merge(
-                      [captchaImageNotifier, submittingNotifier]),
-                  builder: (context, _) {
-                    final isDisabled = captchaImageNotifier.value == null ||
-                        submittingNotifier.value;
-                    return Row(
-                      mainAxisAlignment: MainAxisAlignment.end,
-                      children: [
-                        TextButton(
-                          onPressed: () => Get.back(),
-                          child: Text('取消',
-                              style: TextStyle(
-                                  color:
-                                      Theme.of(context).colorScheme.outline)),
-                        ),
-                        const SizedBox(width: 8),
-                        FilledButton(
-                          onPressed: isDisabled ? null : doSubmit,
-                          child: submittingNotifier.value
-                              ? const SizedBox(
-                                  width: 18,
-                                  height: 18,
-                                  child: CircularProgressIndicator(
-                                      strokeWidth: 2))
-                              : const Text('提交'),
-                        ),
-                      ],
-                    );
-                  },
-                ),
-              ],
-            ),
-          ),
-        ),
-      ),
-    ).then((_) {
-      _captchaVerifyTimer?.cancel();
-      _captchaVerifyTimer = null;
-      imageSub.cancel();
-      codeController.dispose();
-      captchaImageNotifier.dispose();
-      submittingNotifier.dispose();
-
-      final provider = _captchaProvider;
-      _captchaProvider = null;
-      if (!verified) {
-        provider?.saveAndUnload(resource.websiteName).then((_) {
-          provider.dispose();
-          dataSourceController.retryResources(resource.websiteName);
-        });
-      } else {
-        provider?.dispose();
-      }
-    });
-  }
-
-  /// 类型2：自动点击验证按钮对话框
-  void _showButtonClickDialog(
-      ResourcesItem resource, AntiCrawlerConfig config) {
-    bool autoVerified = false;
-
-    _captchaProvider?.dispose();
-    _captchaProvider = CaptchaProvider();
-
-    final searchPageUrl = _buildSearchUrl(resource);
-
-    void onVerified() {
-      if (autoVerified) return;
-      autoVerified = true;
-      Get.back();
-      Get.snackbar('验证成功', '正在重新检索，请稍候…',
-          snackPosition: SnackPosition.BOTTOM, maxWidth: 300);
-      Future.delayed(const Duration(seconds: 2), () {
-        dataSourceController.retryResources(resource.websiteName);
-      });
-    }
-
-    _captchaProvider!.loadForButtonClick(
-      url: searchPageUrl,
-      buttonXpath: config.captchaButton,
-      pluginName: resource.websiteName,
-      onVerified: onVerified,
-    );
-
-    Get.dialog(
-      Dialog(
-        clipBehavior: Clip.antiAlias,
-        child: Padding(
-          padding: const EdgeInsets.all(24),
-          child: SizedBox(
-            width: 400,
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.center,
-              children: [
-                Text('自动验证中',
-                    style: Theme.of(context).textTheme.titleLarge),
-                const SizedBox(height: 4),
-                Text('${resource.websiteName} 正在自动完成验证，请稍候',
-                    style: Theme.of(context).textTheme.bodySmall),
-                const SizedBox(height: 24),
-                const CircularProgressIndicator(),
-                const SizedBox(height: 12),
-                Text('已检测到验证按钮并模拟点击，等待验证通过…',
-                    style: Theme.of(context).textTheme.bodyMedium,
-                    textAlign: TextAlign.center),
-                const SizedBox(height: 20),
-                Align(
-                  alignment: Alignment.centerRight,
-                  child: TextButton(
-                    onPressed: () => Get.back(),
-                    child: Text('取消',
-                        style: TextStyle(
-                            color: Theme.of(context).colorScheme.outline)),
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ),
-      ),
-    ).then((_) {
-      final provider = _captchaProvider;
-      _captchaProvider = null;
-      if (autoVerified) {
-        provider?.dispose();
-      } else {
-        provider?.saveAndUnload(resource.websiteName).then((_) {
-          provider.dispose();
-          dataSourceController.retryResources(resource.websiteName);
-        });
-      }
-    });
-  }
-
-  String _buildSearchUrl(ResourcesItem resource) {
-    final keyword = dataSourceController.keyword.value;
-    return resource.searchUrl.replaceFirst('{keyword}', keyword);
   }
 
   @override
@@ -384,7 +107,10 @@ class _VideoSourceDrawersState extends State<VideoSourceDrawers> {
               width: 40,
               height: 4,
               decoration: BoxDecoration(
-                color: Theme.of(context).colorScheme.onSurfaceVariant.withValues(alpha: 0.4),
+                color: Theme.of(context)
+                    .colorScheme
+                    .onSurfaceVariant
+                    .withValues(alpha: 0.4),
                 borderRadius: BorderRadius.circular(2),
               ),
             ),
@@ -763,35 +489,10 @@ class _VideoSourceDrawersState extends State<VideoSourceDrawers> {
   }
 
   Widget _buildCaptchaRequired(ResourcesItem resource) {
-    return Center(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Icon(Icons.shield_outlined,
-              size: 48, color: Theme.of(context).colorScheme.primary),
-          const SizedBox(height: 16),
-          Text('${resource.websiteName} 需要验证码验证',
-              style: Theme.of(context).textTheme.bodyMedium),
-          const SizedBox(height: 16),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              FilledButton.icon(
-                onPressed: () => _showAntiCrawlerDialog(resource),
-                icon: const Icon(Icons.verified_user_outlined, size: 18),
-                label: const Text('进行验证'),
-              ),
-              const SizedBox(width: 12),
-              OutlinedButton.icon(
-                onPressed: () =>
-                    dataSourceController.retryResources(resource.websiteName),
-                icon: const Icon(Icons.refresh, size: 18),
-                label: const Text('重试'),
-              ),
-            ],
-          ),
-        ],
-      ),
+    return CaptchaView(
+      key: ValueKey(resource.websiteName),
+      resource: resource,
+      dataSourceController: dataSourceController,
     );
   }
 
@@ -900,6 +601,335 @@ class _VideoSourceDrawersState extends State<VideoSourceDrawers> {
                 ],
               ),
             )),
+      ),
+    );
+  }
+}
+
+/// 验证ui
+class CaptchaView extends StatefulWidget {
+  const CaptchaView({
+    super.key,
+    required this.resource,
+    required this.dataSourceController,
+  });
+
+  final ResourcesItem resource;
+  final VideoSourceController dataSourceController;
+
+  @override
+  State<CaptchaView> createState() => _CaptchaViewState();
+}
+
+class _CaptchaViewState extends State<CaptchaView> {
+  CaptchaProvider? _provider;
+  Timer? _verifyTimer;
+  StreamSubscription? _imageSub;
+  final _codeController = TextEditingController();
+  String? _imageData;
+  bool _sessionActive = false;
+  bool _isSubmitting = false;
+  bool _isAutoVerifying = false;
+
+  @override
+  void dispose() {
+    _codeController.dispose();
+    _disposeSession();
+    super.dispose();
+  }
+
+  void _disposeSession() {
+    _imageSub?.cancel();
+    _imageSub = null;
+    _verifyTimer?.cancel();
+    _verifyTimer = null;
+    _provider?.dispose();
+    _provider = null;
+    _sessionActive = false;
+    _isSubmitting = false;
+    _isAutoVerifying = false;
+    _imageData = null;
+  }
+
+  String _searchPageUrl() {
+    final keyword = widget.dataSourceController.keyword.value;
+    return widget.resource.searchUrl.replaceFirst('{keyword}', keyword);
+  }
+
+  void _startVerification() {
+    final config = widget.resource.antiCrawlerConfig;
+    if (config == null) return;
+
+    _disposeSession();
+    _provider = CaptchaProvider();
+    final name = widget.resource.websiteName;
+    final url = _searchPageUrl();
+
+    if (config.captchaType == CaptchaType.autoClickButton) {
+      setState(() {
+        _sessionActive = true;
+        _isAutoVerifying = true;
+      });
+      _provider!.loadForButtonClick(
+        url: url,
+        buttonXpath: config.captchaButton,
+        pluginName: name,
+        onVerified: () => _onVerified(name),
+      );
+    } else {
+      setState(() {
+        _sessionActive = true;
+        _imageData = null;
+        _isSubmitting = false;
+      });
+
+      _imageSub = _provider!.onCaptchaImageUrl.listen((imageUrl) {
+        if (imageUrl != null && mounted) {
+          setState(() {
+            _imageData = imageUrl;
+            if (_isSubmitting) {
+              _isSubmitting = false;
+              _codeController.clear();
+              _verifyTimer?.cancel();
+              _verifyTimer = null;
+            }
+          });
+        }
+      });
+
+      _provider!.loadForCaptcha(
+        url,
+        config.captchaImage,
+        inputXpath: config.captchaInput,
+      );
+    }
+  }
+
+  void _onVerified(String websiteName) {
+    if (!mounted) return;
+    _disposeSession();
+    setState(() {});
+    Get.snackbar('验证成功', '正在重新检索，请稍候…',
+        snackPosition: SnackPosition.BOTTOM, maxWidth: 300);
+    Future.delayed(const Duration(seconds: 2), () {
+      widget.dataSourceController.retryResources(websiteName);
+    });
+  }
+
+  Future<void> _submit() async {
+    final config = widget.resource.antiCrawlerConfig;
+    if (config == null || _isSubmitting) return;
+    if (_codeController.text.trim().isEmpty) {
+      Get.snackbar('提示', '请输入验证码',
+          snackPosition: SnackPosition.BOTTOM, maxWidth: 300);
+      return;
+    }
+    setState(() => _isSubmitting = true);
+    final name = widget.resource.websiteName;
+
+    await _provider?.submitCaptcha(
+      captchaCode: _codeController.text.trim(),
+      inputXpath: config.captchaInput,
+      buttonXpath: config.captchaButton,
+      pluginName: name,
+      onVerified: () => _onVerified(name),
+    );
+
+    if (_sessionActive && mounted) {
+      _verifyTimer?.cancel();
+      _verifyTimer = Timer(const Duration(seconds: 8), () async {
+        if (!_sessionActive || !mounted) return;
+        setState(() {
+          _isSubmitting = false;
+          _codeController.clear();
+        });
+        Get.snackbar('提示', '验证码可能有误，请重新输入',
+            snackPosition: SnackPosition.BOTTOM, maxWidth: 300);
+        await _reloadCaptchaImage();
+      });
+    }
+  }
+
+  /// 重新拉取验证码图
+  Future<void> _reloadCaptchaImage() async {
+    final config = widget.resource.antiCrawlerConfig;
+    final p = _provider;
+    if (config == null || p == null || !_sessionActive || _isAutoVerifying) {
+      return;
+    }
+    _verifyTimer?.cancel();
+    _verifyTimer = null;
+    if (!mounted) return;
+    setState(() {
+      _imageData = null;
+      _isSubmitting = false;
+    });
+    await p.reloadCaptchaImage(config.captchaImage,
+        inputXpath: config.captchaInput);
+  }
+
+  void _cancel() {
+    final name = widget.resource.websiteName;
+    final provider = _provider;
+    _provider = null;
+    _imageSub?.cancel();
+    _imageSub = null;
+    _verifyTimer?.cancel();
+    _verifyTimer = null;
+    setState(() {
+      _sessionActive = false;
+      _isSubmitting = false;
+      _isAutoVerifying = false;
+      _imageData = null;
+      _codeController.clear();
+    });
+    provider?.saveAndUnload(name).then((_) {
+      provider.dispose();
+      widget.dataSourceController.retryResources(name);
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final r = widget.resource;
+
+    if (!_sessionActive) {
+      return Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(Icons.shield_outlined,
+                size: 48, color: Theme.of(context).colorScheme.primary),
+            const SizedBox(height: 16),
+            Text('${r.websiteName} 需要验证码验证',
+                style: Theme.of(context).textTheme.bodyMedium),
+            const SizedBox(height: 16),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                FilledButton.icon(
+                  onPressed: _startVerification,
+                  icon: const Icon(Icons.verified_user_outlined, size: 18),
+                  label: const Text('进行验证'),
+                ),
+                const SizedBox(width: 12),
+                OutlinedButton.icon(
+                  onPressed: () =>
+                      widget.dataSourceController.retryResources(r.websiteName),
+                  icon: const Icon(Icons.refresh, size: 18),
+                  label: const Text('重试'),
+                ),
+              ],
+            ),
+          ],
+        ),
+      );
+    }
+
+    if (_isAutoVerifying) {
+      return Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            const CircularProgressIndicator(),
+            const SizedBox(height: 16),
+            Text('${r.websiteName} 正在自动完成验证，请稍候',
+                style: Theme.of(context).textTheme.bodyMedium,
+                textAlign: TextAlign.center),
+            const SizedBox(height: 16),
+            TextButton(
+              onPressed: _cancel,
+              child: Text('取消',
+                  style:
+                      TextStyle(color: Theme.of(context).colorScheme.outline)),
+            ),
+          ],
+        ),
+      );
+    }
+
+    return Material(
+      color: Colors.transparent,
+      child: Center(
+        child: SingleChildScrollView(
+          child: Padding(
+            padding: EdgeInsets.symmetric(horizontal: 16),
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Icon(Icons.shield_outlined,
+                    size: 36, color: Theme.of(context).colorScheme.primary),
+                const SizedBox(height: 8),
+                Text('${r.websiteName} 验证码验证',
+                    style: Theme.of(context).textTheme.titleSmall),
+                const SizedBox(height: 16),
+                if (_imageData == null) ...[
+                  const CircularProgressIndicator(),
+                  const SizedBox(height: 12),
+                  const Text('正在加载验证码图片...'),
+                ] else ...[
+                  ClipRRect(
+                    borderRadius: BorderRadius.circular(8),
+                    child: GestureDetector(
+                      onTap: (_isSubmitting || _imageData == null)
+                          ? null
+                          : () {
+                              _codeController.clear();
+                              _reloadCaptchaImage();
+                            },
+                      child: Image.memory(
+                        width: double.infinity,
+                        base64Decode(_imageData!.split(',').last),
+                        fit: BoxFit.contain,
+                        errorBuilder: (ctx, err, _) => const Text('图片解码失败'),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 20),
+                  SizedBox(
+                    child: TextField(
+                      controller: _codeController,
+                      autofocus: true,
+                      enabled: !_isSubmitting,
+                      decoration: const InputDecoration(
+                        labelText: '请输入验证码',
+                        border: OutlineInputBorder(),
+                        contentPadding:
+                            EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+                      ),
+                      onSubmitted: _isSubmitting ? null : (_) => _submit(),
+                    ),
+                  ),
+                  const SizedBox(height: 12),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.end,
+                    children: [
+                      TextButton(
+                        onPressed: _cancel,
+                        child: Text('取消',
+                            style: TextStyle(
+                                color: Theme.of(context).colorScheme.outline)),
+                      ),
+                      const SizedBox(width: 12),
+                      FilledButton(
+                        onPressed: (_imageData == null || _isSubmitting)
+                            ? null
+                            : _submit,
+                        child: _isSubmitting
+                            ? const SizedBox(
+                                width: 18,
+                                height: 18,
+                                child:
+                                    CircularProgressIndicator(strokeWidth: 2))
+                            : const Text('提交'),
+                      ),
+                    ],
+                  ),
+                ],
+              ],
+            ),
+          ),
+        ),
       ),
     );
   }

@@ -12,9 +12,6 @@ import 'package:anime_flow/webview/webview_controller.dart';
 import 'package:get/get.dart';
 import 'package:logger/logger.dart';
 
-typedef CaptchaRequiredCallback = void Function(
-    String websiteName, CrawlConfigItem config);
-
 class VideoSourceController extends GetxController {
   final RxList<ResourcesItem> videoResources = <ResourcesItem>[].obs;
   final RxString webSiteTitle = ''.obs;

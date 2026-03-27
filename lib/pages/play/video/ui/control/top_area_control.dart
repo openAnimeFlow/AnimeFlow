@@ -7,6 +7,7 @@ import 'package:anime_flow/stores/play_subject_state.dart';
 import 'package:anime_flow/controllers/video/video_ui_controller.dart';
 import 'package:anime_flow/features/network_speed/presentation/network_speed_provider.dart';
 import 'package:anime_flow/utils/systemUtil.dart';
+import 'package:anime_flow/utils/utils.dart';
 import 'package:anime_flow/widget/battery_icon.dart';
 import 'package:anime_flow/widget/network_icon.dart';
 import 'package:anime_flow/widget/play_content/source_drawers/video_source_drawers.dart';
@@ -14,8 +15,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:get/get.dart';
-
-import '../../../../../utils/utils.dart' show Utils;
 
 /// 顶部区域空间
 class TopAreaControl extends ConsumerStatefulWidget {

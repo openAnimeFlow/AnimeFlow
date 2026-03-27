@@ -1,5 +1,6 @@
 import 'package:anime_flow/controllers/video/source/video_source_controller.dart';
 import 'package:anime_flow/controllers/video/video_state_controller.dart';
+import 'package:anime_flow/pages/play/video/ui/setting/video_setting.dart';
 import 'package:anime_flow/stores/episodes_state.dart';
 import 'package:anime_flow/controllers/play/play_controller.dart';
 import 'package:anime_flow/stores/play_subject_state.dart';
@@ -9,28 +10,26 @@ import 'package:anime_flow/utils/systemUtil.dart';
 import 'package:anime_flow/widget/battery_icon.dart';
 import 'package:anime_flow/widget/network_icon.dart';
 import 'package:anime_flow/widget/play_content/source_drawers/video_source_drawers.dart';
-import 'package:anime_flow/widget/video/ui/setting/video_setting.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:get/get.dart';
 
 /// 顶部区域空间
-class TopAreaControl extends StatefulWidget {
+class TopAreaControl extends ConsumerStatefulWidget {
   const TopAreaControl({super.key});
 
   @override
-  State<TopAreaControl> createState() => _TopAreaControlState();
+  ConsumerState<TopAreaControl> createState() => _TopAreaControlState();
 }
 
-class _TopAreaControlState extends State<TopAreaControl> {
+class _TopAreaControlState extends ConsumerState<TopAreaControl> {
   late VideoStateController videoStateController;
   late VideoSourceController videoSourceController;
   late PlayController playController;
   late VideoUiStateController videoUiStateController;
   late EpisodesState episodesController;
   late PlaySubjectState playSubjectState;
-  late final Stream<NetworkSpeed> _networkStream;
-
   @override
   void initState() {
     super.initState();
@@ -40,13 +39,6 @@ class _TopAreaControlState extends State<TopAreaControl> {
     videoUiStateController = Get.find<VideoUiStateController>();
     episodesController = Get.find<EpisodesState>();
     playSubjectState = Get.find<PlaySubjectState>();
-    _networkStream = NetworkSpeedService.start(interval: 2000);
-  }
-
-  @override
-  void dispose() {
-    NetworkSpeedService.stop();
-    super.dispose();
   }
 
   String _formatBytesPerSec(num bps) {
@@ -280,45 +272,46 @@ class _TopAreaControlState extends State<TopAreaControl> {
               spacing: 5,
               children: [
                 const NetworkIcon(),
-                StreamBuilder<NetworkSpeed>(
-                    stream: _networkStream,
-                    builder: (context, snapshot) {
-                      final data = snapshot.data;
+                Builder(
+                  builder: (context) {
+                    final speedAsync = ref.watch(networkSpeedStreamProvider(2000));
+                    final data = speedAsync.asData?.value;
+                    final download = data?.download ?? 0;
+                    final upload = data?.upload ?? 0;
 
-                      final download = data?.download ?? 0;
-                      final upload = data?.upload ?? 0;
-                      return Row(
-                        crossAxisAlignment: CrossAxisAlignment.center,
-                        children: [
-                          const RotatedBox(
-                            quarterTurns: 1,
-                            child: Icon(
-                                Icons
-                                    .arrow_right_alt_outlined,
-                                size: 15,
-                                fontWeight: FontWeight.bold),
-                          ),
-                          Text(
-                            _formatBytesPerSec(download),
+                    return Row(
+                      crossAxisAlignment: CrossAxisAlignment.center,
+                      children: [
+                        const RotatedBox(
+                          quarterTurns: 1,
+                          child: Icon(
+                              Icons
+                                  .arrow_right_alt_outlined,
+                              size: 15,
+                              fontWeight: FontWeight.bold),
+                        ),
+                        Text(
+                          _formatBytesPerSec(download),
+                          style: const TextStyle(
+                              fontSize: 10,
+                              color: Colors.white),
+                        ),
+                        const SizedBox(width: 5),
+                        const RotatedBox(
+                          quarterTurns: 3,
+                          child: Icon(
+                              Icons
+                                  .arrow_right_alt_outlined,
+                              size: 15,
+                              fontWeight: FontWeight.bold),
+                        ),
+                        Text(_formatBytesPerSec(upload),
                             style: const TextStyle(
-                                fontSize: 10,
-                                color: Colors.white),
-                          ),
-                          const SizedBox(width: 5),
-                          const RotatedBox(
-                            quarterTurns: 3,
-                            child: Icon(
-                                Icons
-                                    .arrow_right_alt_outlined,
-                                size: 15,
-                                fontWeight: FontWeight.bold),
-                          ),
-                          Text(_formatBytesPerSec(upload),
-                              style: const TextStyle(
-                                  fontSize: 10)),
-                        ],
-                      );
-                    })
+                                fontSize: 10)),
+                      ],
+                    );
+                  },
+                )
               ],
             )),
         //系统时间

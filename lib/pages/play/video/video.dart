@@ -18,14 +18,15 @@ import 'package:anime_flow/controllers/video/video_state_controller.dart';
 import 'package:anime_flow/controllers/video/video_ui_controller.dart';
 import 'package:anime_flow/http/requests/bgm_request.dart';
 import 'package:anime_flow/http/requests/damaku_request.dart';
-import 'package:anime_flow/widget/video/ui/danmaku/danmaku_view.dart';
-import 'package:anime_flow/widget/video/ui/index.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:logger/logger.dart';
 import 'package:media_kit/media_kit.dart';
 import 'package:media_kit_video/media_kit_video.dart';
 import 'package:window_manager/window_manager.dart';
+
+import 'ui/danmaku/danmaku_view.dart';
+import 'ui/index.dart';
 
 class VideoView extends StatefulWidget {
   const VideoView({super.key});

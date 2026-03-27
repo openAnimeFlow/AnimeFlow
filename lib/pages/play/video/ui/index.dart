@@ -1,17 +1,18 @@
 import 'package:anime_flow/controllers/play/episode_controller.dart';
+import 'package:anime_flow/pages/play/video/gesture/desktop_gesture_detector.dart';
+import 'package:anime_flow/pages/play/video/gesture/mobile_gesture_detector.dart';
 import 'package:anime_flow/utils/systemUtil.dart';
 import 'package:anime_flow/stores/episodes_state.dart';
 import 'package:anime_flow/controllers/play/play_controller.dart';
 import 'package:anime_flow/controllers/video/video_state_controller.dart';
 import 'package:anime_flow/controllers/video/video_ui_controller.dart';
-import 'package:anime_flow/widget/video/gesture/desktop_gesture_detector.dart';
-import 'package:anime_flow/widget/video/gesture/mobile_gesture_detector.dart';
-import 'package:anime_flow/widget/video/ui/control/bottom_area_control.dart';
-import 'package:anime_flow/widget/video/ui/control/middle_area_control.dart';
-import 'package:anime_flow/widget/video/ui/control/right_area_control.dart';
-import 'package:anime_flow/widget/video/ui/control/top_area_control.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+
+import 'control/bottom_area_control.dart';
+import 'control/middle_area_control.dart';
+import 'control/right_area_control.dart';
+import 'control/top_area_control.dart';
 
 ///播放器ui
 class VideoUi extends StatefulWidget {

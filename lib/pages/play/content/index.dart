@@ -3,7 +3,7 @@ import 'package:anime_flow/controllers/play/play_controller.dart';
 import 'package:anime_flow/http/requests/bgm_request.dart';
 import 'package:anime_flow/models/item/bangumi/episode_comments_item.dart';
 import 'package:anime_flow/pages/play/content/introduce/index.dart';
-import 'package:anime_flow/widget/video/ui/video_ui_components.dart';
+import 'package:anime_flow/widget/danmaku_text_field.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:logger/logger.dart';

@@ -159,6 +159,14 @@ class Utils {
     return absolutePaths.join(':');
   }
 
+  /// 网速格式化
+  static String formatBytesPerSec(num bps) {
+    final kb = bps / 1024.0;
+    if (kb < 1024) return '${kb.toStringAsFixed(1)}KB/s';
+    final mb = kb / 1024.0;
+    return '${mb.toStringAsFixed(1)}MB/s';
+  }
+
   /// 比较两个版本号字符串
   /// 返回值: 1表示v1 > v2, -1表示v1 < v2, 0表示相等
   static int compareVersionNumbers(String v1, String v2) {

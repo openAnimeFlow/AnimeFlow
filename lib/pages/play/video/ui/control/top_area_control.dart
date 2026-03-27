@@ -15,6 +15,8 @@ import 'package:flutter_svg/svg.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:get/get.dart';
 
+import '../../../../../utils/utils.dart' show Utils;
+
 /// 顶部区域空间
 class TopAreaControl extends ConsumerStatefulWidget {
   const TopAreaControl({super.key});
@@ -30,6 +32,7 @@ class _TopAreaControlState extends ConsumerState<TopAreaControl> {
   late VideoUiStateController videoUiStateController;
   late EpisodesState episodesController;
   late PlaySubjectState playSubjectState;
+
   @override
   void initState() {
     super.initState();
@@ -39,13 +42,6 @@ class _TopAreaControlState extends ConsumerState<TopAreaControl> {
     videoUiStateController = Get.find<VideoUiStateController>();
     episodesController = Get.find<EpisodesState>();
     playSubjectState = Get.find<PlaySubjectState>();
-  }
-
-  String _formatBytesPerSec(num bps) {
-    final kb = bps / 1024.0;
-    if (kb < 1024) return '${kb.toStringAsFixed(1)}KB/s';
-    final mb = kb / 1024.0;
-    return '${mb.toStringAsFixed(1)}MB/s';
   }
 
   @override
@@ -291,7 +287,7 @@ class _TopAreaControlState extends ConsumerState<TopAreaControl> {
                               fontWeight: FontWeight.bold),
                         ),
                         Text(
-                          _formatBytesPerSec(download),
+                          Utils.formatBytesPerSec(download),
                           style: const TextStyle(
                               fontSize: 10,
                               color: Colors.white),
@@ -305,7 +301,7 @@ class _TopAreaControlState extends ConsumerState<TopAreaControl> {
                               size: 15,
                               fontWeight: FontWeight.bold),
                         ),
-                        Text(_formatBytesPerSec(upload),
+                        Text(Utils.formatBytesPerSec(upload),
                             style: const TextStyle(
                                 fontSize: 10)),
                       ],

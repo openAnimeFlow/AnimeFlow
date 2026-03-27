@@ -1,19 +1,22 @@
 import 'package:anime_flow/controllers/video/video_state_controller.dart';
 import 'package:anime_flow/controllers/video/video_ui_controller.dart';
+import 'package:anime_flow/features/network_speed/presentation/network_speed_provider.dart';
 import 'package:anime_flow/models/enums/video_controls_icon_type.dart';
 import 'package:anime_flow/utils/format_time_util.dart';
+import 'package:anime_flow/utils/utils.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:get/get.dart';
 
 /// 中间区域控件
-class MiddleAreaControl extends StatefulWidget {
+class MiddleAreaControl extends ConsumerStatefulWidget {
   const MiddleAreaControl({super.key});
 
   @override
-  State<MiddleAreaControl> createState() => _MiddleAreaControlState();
+  ConsumerState<MiddleAreaControl> createState() => _MiddleAreaControlState();
 }
 
-class _MiddleAreaControlState extends State<MiddleAreaControl> {
+class _MiddleAreaControlState extends ConsumerState<MiddleAreaControl> {
   late VideoStateController videoStateController;
 
   late VideoUiStateController videoUiStateController;
@@ -28,6 +31,16 @@ class _MiddleAreaControlState extends State<MiddleAreaControl> {
   @override
   Widget build(BuildContext context) {
     const double topAreaHeight = 50.0;
+    final speedAsync = ref.watch(networkSpeedStreamProvider(2000));
+    final speed = speedAsync.asData?.value;
+    const textStyle = TextStyle(
+      shadows: [
+        Shadow(color: Colors.black, offset: Offset(0, 0), blurRadius: 3)
+      ],
+      color: Colors.white,
+      fontSize: 14,
+      fontWeight: FontWeight.w500,
+    );
 
     return Obx(
       () => Container(
@@ -52,14 +65,17 @@ class _MiddleAreaControlState extends State<MiddleAreaControl> {
                       strokeWidth: 5,
                     ),
                     const SizedBox(height: 8),
-                    const Text(
-                      '正在缓冲...',
-                      style: TextStyle(
-                        color: Colors.white,
-                        fontSize: 14,
-                        fontWeight: FontWeight.w500,
+                    Row(mainAxisSize: MainAxisSize.min, children: [
+                      Text(
+                        ' ${Utils.formatBytesPerSec(speed?.download ?? 0)}',
+                        style: textStyle,
                       ),
-                    ),
+                      const SizedBox(width: 5),
+                      const Text(
+                        '正在缓冲...',
+                        style: textStyle,
+                      ),
+                    ]),
                   ],
                 ),
 

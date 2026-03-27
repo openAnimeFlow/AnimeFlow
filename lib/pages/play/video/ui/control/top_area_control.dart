@@ -5,7 +5,7 @@ import 'package:anime_flow/stores/episodes_state.dart';
 import 'package:anime_flow/controllers/play/play_controller.dart';
 import 'package:anime_flow/stores/play_subject_state.dart';
 import 'package:anime_flow/controllers/video/video_ui_controller.dart';
-import 'package:anime_flow/utils/network_speed_service.dart';
+import 'package:anime_flow/features/network_speed/presentation/network_speed_provider.dart';
 import 'package:anime_flow/utils/systemUtil.dart';
 import 'package:anime_flow/widget/battery_icon.dart';
 import 'package:anime_flow/widget/network_icon.dart';

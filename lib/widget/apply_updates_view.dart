@@ -1,20 +1,25 @@
+import 'package:anime_flow/constants/storage_key.dart';
 import 'package:anime_flow/controllers/app/app_info_controller.dart';
 import 'package:anime_flow/utils/format_time_util.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_markdown_plus/flutter_markdown_plus.dart';
 import 'package:get/get.dart';
+import 'package:hive_ce/hive.dart';
 
 class ApplyUpdatesView extends StatefulWidget {
   final List<DownloadInfo> download;
   final String body;
   final Future<void> Function(String url, String fileName) onStartDownload;
   final void Function() onCancelDownload;
+  final Box setting;
 
   const ApplyUpdatesView({
     super.key,
     required this.onStartDownload,
     required this.onCancelDownload,
-    required this.download, required this.body,
+    required this.download,
+    required this.body,
+    required this.setting,
   });
 
   @override
@@ -63,14 +68,12 @@ class _ApplyUpdatesViewState extends State<ApplyUpdatesView> {
                     fontSize: 12,
                     fontFamily: 'monospace',
                     color: Theme.of(context).colorScheme.onSurfaceVariant,
-                    backgroundColor: Theme.of(context)
-                        .colorScheme
-                        .surfaceContainerHighest,
+                    backgroundColor:
+                        Theme.of(context).colorScheme.surfaceContainerHighest,
                   ),
                   codeblockDecoration: BoxDecoration(
-                    color: Theme.of(context)
-                        .colorScheme
-                        .surfaceContainerHighest,
+                    color:
+                        Theme.of(context).colorScheme.surfaceContainerHighest,
                     borderRadius: BorderRadius.circular(4),
                   ),
                 ),
@@ -228,6 +231,10 @@ class _ApplyUpdatesViewState extends State<ApplyUpdatesView> {
         );
       }),
       actions: [
+        TextButton(
+          onPressed: () => widget.setting.put(StorageKey.autoUpdateKey, true),
+          child: const Text('取消自动更新'),
+        ),
         Obx(() => TextButton(
               onPressed: appInfoController.isDownloading.value
                   ? null

@@ -7,6 +7,8 @@ class StorageKey {
   static const String playPositionKey = 'play_position_key';
 
   static const String playHistoryKey = 'play_history_key';
+
+  static const String autoUpdateKey = 'auto_update_key';
 }
 
 class DanmakuKey {

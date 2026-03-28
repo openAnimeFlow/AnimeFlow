@@ -1,9 +1,11 @@
+import 'package:anime_flow/constants/storage_key.dart';
 import 'package:anime_flow/controllers/app/app_info_controller.dart';
 import 'package:anime_flow/controllers/main_page/main_page_state.dart';
 import 'package:anime_flow/controllers/shaders/shaders_controller.dart';
 import 'package:anime_flow/models/item/tab_item.dart';
 import 'package:anime_flow/pages/my/index.dart';
 import 'package:anime_flow/pages/ranking/index.dart';
+import 'package:anime_flow/repository/storage.dart';
 import 'package:anime_flow/routes/index.dart';
 import 'package:anime_flow/stores/user_info_store.dart';
 import 'package:anime_flow/utils/crawl_config.dart';
@@ -25,8 +27,9 @@ class _MainPageState extends State<MainPage> {
   late MainPageState mainPageState;
   late ShadersController shadersController;
   late AppInfoController appInfoController;
-
+  final setting = Storage.setting;
   int _currentIndex = 0;
+  late bool autoUpdate;
 
   // 使用 GlobalKey 保持 IndexedStack 的状态，防止在布局切换（Row <-> Column）时页面重构
   final GlobalKey _bodyKey = GlobalKey();
@@ -71,6 +74,7 @@ class _MainPageState extends State<MainPage> {
   @override
   void initState() {
     super.initState();
+    autoUpdate = setting.get(StorageKey.autoUpdateKey, defaultValue: true);
     userInfoStore = Get.put(UserInfoStore(), permanent: true);
     mainPageState = Get.put(MainPageState(), permanent: true);
     appInfoController = Get.put(AppInfoController(), permanent: true);
@@ -88,7 +92,9 @@ class _MainPageState extends State<MainPage> {
     // 初始化爬虫配置
     CrawlConfig.initCrawlConfigs();
     // 检查新版本
-    appInfoController.compareVersion();
+    if (autoUpdate) {
+      appInfoController.compareVersion();
+    }
     // 加载着色器
     shadersController.copyShadersToExternalDirectory();
   }

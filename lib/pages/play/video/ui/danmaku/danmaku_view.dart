@@ -7,7 +7,6 @@ import 'package:anime_flow/stores/episodes_state.dart';
 import 'package:canvas_danmaku/canvas_danmaku.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:hive_ce/hive.dart';
 
 class DanmakuView extends StatefulWidget {
   const DanmakuView({super.key});
@@ -18,7 +17,7 @@ class DanmakuView extends StatefulWidget {
 
 class _DanmakuViewState extends State<DanmakuView>
     with AutomaticKeepAliveClientMixin {
-  Box setting = Storage.setting;
+  final setting = Storage.setting;
   late VideoStateController videoStateController;
   late PlayController playController;
   late EpisodesState episodesState;

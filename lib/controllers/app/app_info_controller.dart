@@ -2,8 +2,10 @@ import 'dart:io';
 
 import 'package:anime_flow/http/requests/request.dart';
 import 'package:anime_flow/models/enums/version_type.dart';
+import 'package:anime_flow/repository/storage.dart';
 import 'package:anime_flow/utils/systemUtil.dart';
 import 'package:anime_flow/utils/utils.dart';
+import 'package:anime_flow/widget/apply_updates_view.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:logger/logger.dart';
@@ -12,7 +14,6 @@ import 'package:path_provider/path_provider.dart' show getDownloadsDirectory;
 import 'package:path/path.dart' as path;
 
 import 'apply_updates_controller.dart';
-import 'apply_updates_view.dart';
 
 class AppInfoController extends GetxController {
   // 应用信息
@@ -29,6 +30,7 @@ class AppInfoController extends GetxController {
   final RxInt receivedBytes = 0.obs;
   final RxInt totalBytes = 0.obs;
   final RxBool isDownloading = false.obs;
+  final setting = Storage.setting;
 
   @override
   void onInit() {
@@ -75,7 +77,8 @@ class AppInfoController extends GetxController {
           : remoteVersion;
 
       // 比较版本号
-      int comparison = Utils.compareVersionNumbers(cleanRemoteVersion, localVersion);
+      int comparison =
+          Utils.compareVersionNumbers(cleanRemoteVersion, localVersion);
 
       if (comparison > 0) {
         final assets = release['assets'];
@@ -90,7 +93,8 @@ class AppInfoController extends GetxController {
             .map((e) => Map<String, dynamic>.from(e))
             .toList();
 
-        List<DownloadInfo> download = getDownloadInfo(downloadInfo, htmlUrl ?? '');
+        List<DownloadInfo> download =
+            getDownloadInfo(downloadInfo, htmlUrl ?? '');
 
         if (download.isEmpty) {
           Get.snackbar("检查更新", "未找到对应平台的下载地址", maxWidth: 500);
@@ -108,11 +112,12 @@ class AppInfoController extends GetxController {
         Get.dialog(
           barrierDismissible: false,
           ApplyUpdatesView(
+            setting: setting,
             download: download,
             body: body,
             onStartDownload: (downloadUrl, fileName) async {
               final downloadInfo = download.firstWhere(
-                    (info) => info.url == downloadUrl && info.fileName == fileName,
+                (info) => info.url == downloadUrl && info.fileName == fileName,
                 orElse: () => download[0],
               );
 
@@ -142,7 +147,8 @@ class AppInfoController extends GetxController {
                 // Windows 平台下载完成后显示完成对话框
                 if (Platform.isWindows) {
                   final tempDir = await getDownloadsDirectory();
-                  final savePath = path.join(tempDir!.path, downloadInfo.fileName);
+                  final savePath =
+                      path.join(tempDir!.path, downloadInfo.fileName);
                   _showWindowsDownloadCompleteDialog(savePath);
                 }
               } catch (e) {
@@ -188,7 +194,8 @@ class AppInfoController extends GetxController {
   }
 
   ///根据平台获取下载地址
-  List<DownloadInfo> getDownloadInfo(List<Map<String, dynamic>> assets, String htmlUrl) {
+  List<DownloadInfo> getDownloadInfo(
+      List<Map<String, dynamic>> assets, String htmlUrl) {
     final platform = SystemUtil.getDevice();
     final List<DownloadInfo> urlList = [];
 

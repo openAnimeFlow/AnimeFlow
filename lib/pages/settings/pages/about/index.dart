@@ -1,18 +1,36 @@
+import 'package:anime_flow/constants/storage_key.dart';
 import 'package:anime_flow/controllers/app/app_info_controller.dart';
 import 'package:anime_flow/controllers/setting_controller.dart';
+import 'package:anime_flow/repository/storage.dart';
 import 'package:anime_flow/routes/index.dart';
 import 'package:anime_flow/widget/animation_network_image/animation_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:url_launcher/url_launcher.dart';
 
-class AboutSettingsPage extends StatelessWidget {
+class AboutSettingsPage extends StatefulWidget {
   const AboutSettingsPage({super.key});
 
   @override
+  State<AboutSettingsPage> createState() => _AboutSettingsPageState();
+}
+
+class _AboutSettingsPageState extends State<AboutSettingsPage> {
+  final setting = Storage.setting;
+  late SettingController settingController;
+  late AppInfoController appInfoController;
+  late bool autoUpdate;
+
+  @override
+  void initState() {
+    super.initState();
+    settingController = Get.find<SettingController>();
+    appInfoController = Get.find<AppInfoController>();
+    autoUpdate = setting.get(StorageKey.autoUpdateKey, defaultValue: true);
+  }
+
+  @override
   Widget build(BuildContext context) {
-    final settingController = Get.find<SettingController>();
-    final appInfoController = Get.find<AppInfoController>();
     return Obx(
       () => Scaffold(
         appBar: AppBar(
@@ -53,6 +71,24 @@ class AboutSettingsPage extends StatelessWidget {
               ),
             ),
             const SizedBox(height: 32),
+            const Divider(),
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 15),
+              child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                const Text("自动更新"),
+                Switch(
+                  value: autoUpdate,
+                  onChanged: (bool value) {
+                    setState(() {
+                      setting.put(StorageKey.autoUpdateKey, value);
+                      autoUpdate = value;
+                    });
+                  },
+                ),
+              ]),
+            ),
             const Divider(),
             ListTile(
               title: const Text("检查更新"),

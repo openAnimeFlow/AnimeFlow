@@ -1,7 +1,8 @@
 import 'package:anime_flow/constants/storage_key.dart';
 import 'package:anime_flow/controllers/app/app_info_controller.dart';
 import 'package:anime_flow/controllers/main_page/main_page_state.dart';
-import 'package:anime_flow/controllers/shaders/shaders_controller.dart';
+import 'package:anime_flow/controllers/shaders/shaders_provider.dart';
+import 'package:anime_flow/providers/global_provider_container.dart';
 import 'package:anime_flow/models/item/tab_item.dart';
 import 'package:anime_flow/pages/my/index.dart';
 import 'package:anime_flow/pages/ranking/index.dart';
@@ -25,7 +26,6 @@ class MainPage extends StatefulWidget {
 class _MainPageState extends State<MainPage> {
   late UserInfoStore userInfoStore;
   late MainPageState mainPageState;
-  late ShadersController shadersController;
   late AppInfoController appInfoController;
   final setting = Storage.setting;
   int _currentIndex = 0;
@@ -78,7 +78,7 @@ class _MainPageState extends State<MainPage> {
     userInfoStore = Get.put(UserInfoStore(), permanent: true);
     mainPageState = Get.put(MainPageState(), permanent: true);
     appInfoController = Get.put(AppInfoController(), permanent: true);
-    shadersController = Get.put(ShadersController());
+    globalProviderContainer.read(shadersControllerProvider.future);
     // TODO 从配置中初始化对应的页面
     final initialIndex = Get.arguments as int? ?? 0;
     _currentIndex = initialIndex.clamp(0, _tabs.length - 1);
@@ -95,8 +95,6 @@ class _MainPageState extends State<MainPage> {
     if (autoUpdate) {
       appInfoController.compareVersion();
     }
-    // 加载着色器
-    shadersController.copyShadersToExternalDirectory();
   }
 
   // 构建 NavigationRail
@@ -197,12 +195,6 @@ class _MainPageState extends State<MainPage> {
       _currentIndex = index;
       _initializePage(index);
     });
-  }
-
-  @override
-  void dispose() {
-    Get.delete<ShadersController>();
-    super.dispose();
   }
 
   @override

@@ -4,7 +4,12 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
 class EpisodesView extends StatelessWidget {
-  const EpisodesView({super.key});
+  final void Function(int listIndex)? onEpisodeSelected;
+
+  const EpisodesView({
+    super.key,
+    this.onEpisodeSelected,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -13,7 +18,7 @@ class EpisodesView extends StatelessWidget {
       child: Container(
         width: PlayLayoutConstant.playContentWidth,
         height: double.infinity,
-        padding: const EdgeInsets.only(top: 16, right: 16,left: 16),
+        padding: const EdgeInsets.only(top: 16, right: 16, left: 16),
         color: Theme.of(context).cardColor,
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -50,7 +55,7 @@ class EpisodesView extends StatelessWidget {
     final episodesState = Get.find<EpisodesState>();
     return Obx(() {
       final episodesData = episodesState.episodes.value;
-      
+
       if (episodesData == null) {
         return const Center(child: CircularProgressIndicator());
       }
@@ -81,6 +86,7 @@ class EpisodesView extends StatelessWidget {
                     sort: episode.sort,
                   );
                   episodesState.setEpisodeTitle(episode.nameCN ?? episode.name);
+                  onEpisodeSelected?.call(episodeIndex);
                   Get.back();
                 },
                 child: Padding(
@@ -96,7 +102,7 @@ class EpisodesView extends StatelessWidget {
                       ),
                       const SizedBox(height: 6),
                       Text(
-                        episode.nameCN??episode.name,
+                        episode.nameCN ?? episode.name,
                         style: const TextStyle(
                           fontSize: 12,
                           color: Colors.grey,

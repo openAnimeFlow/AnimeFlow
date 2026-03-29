@@ -1,3 +1,4 @@
+import 'package:anime_flow/controllers/video/source/video_source_controller.dart';
 import 'package:anime_flow/stores/episodes_state.dart';
 import 'package:anime_flow/controllers/play/play_controller.dart';
 import 'package:anime_flow/stores/play_subject_state.dart';
@@ -16,6 +17,7 @@ class EpisodesComponentsState extends State<EpisodesComponents> {
   late PlayController playPageController;
   late PlaySubjectState subjectState;
   late EpisodesState episodesState;
+  late VideoSourceController videoSourceController;
   static const String drawerTitle = "章节列表";
   bool isLoading = false;
   bool _isGridView = false; // 布局模式：false=列表，true=网格
@@ -26,6 +28,7 @@ class EpisodesComponentsState extends State<EpisodesComponents> {
     playPageController = Get.find<PlayController>();
     episodesState = Get.find<EpisodesState>();
     subjectState = Get.find<PlaySubjectState>();
+    videoSourceController = Get.find<VideoSourceController>();
   }
 
   @override
@@ -90,6 +93,7 @@ class EpisodesComponentsState extends State<EpisodesComponents> {
                         borderRadius: BorderRadius.circular(10),
                         onTap: () {
                           final episodeIndex = index + 1;
+                          videoSourceController.userManuallySelected = false;
                           episodesState.setEpisodeSort(
                               episodeId: episode.id,
                               episodeIndex: episodeIndex,
@@ -177,6 +181,7 @@ class EpisodesComponentsState extends State<EpisodesComponents> {
                       borderRadius: BorderRadius.circular(10),
                       onTap: () {
                         final episodeIndex = index + 1;
+                        videoSourceController.userManuallySelected = false;
                         episodesState.setEpisodeSort(
                             episodeId: episode.id,
                             episodeIndex: episodeIndex,

@@ -30,7 +30,7 @@ class VideoSourceController extends GetxController {
   final Logger _logger = Logger();
 
   /// 标记用户是否手动选择了资源
-  bool _userManuallySelected = false;
+  bool userManuallySelected = false;
 
   Worker? _isLoadingWorker;
   Worker? _episodeIndexWorker;
@@ -102,7 +102,7 @@ class VideoSourceController extends GetxController {
     _clearAllResources();
     this.keyword.value = keyword;
     // 重置手动选择标志，允许重新自动选择
-    _userManuallySelected = false;
+    userManuallySelected = false;
     updateLoading(false);
     final configs = await CrawlConfig.loadAllCrawlConfigs();
 
@@ -226,7 +226,7 @@ class VideoSourceController extends GetxController {
     bool isManual = false,
   }) {
     if (isManual) {
-      _userManuallySelected = true;
+      userManuallySelected = true;
     }
     webSiteTitle.value = title;
     webSiteIcon.value = iconUrl;
@@ -248,7 +248,7 @@ class VideoSourceController extends GetxController {
   void autoSelectFirstResource(List<ResourcesItem> resources,
       {bool force = false}) {
     // 如果用户手动选择了资源，不再自动选择
-    if (_userManuallySelected) {
+    if (userManuallySelected) {
       return;
     }
     // 如果已经自动选择过，且不是强制重新选择，或者已经有选中的资源且不是强制重新选择，不再自动选择
@@ -279,7 +279,7 @@ class VideoSourceController extends GetxController {
   Future<void> _autoLoadFirstResource(ResourcesItem resource,
       {bool force = false}) async {
     // 如果用户手动选择了资源，不再自动加载
-    if (_userManuallySelected) {
+    if (userManuallySelected) {
       return;
     }
     // 如果不是强制重新加载，且已经有选中的资源，不再自动加载

@@ -1,5 +1,6 @@
 import 'package:anime_flow/controllers/play/play_controller.dart';
 import 'package:anime_flow/controllers/play/episode_controller.dart';
+import 'package:anime_flow/controllers/video/source/video_source_controller.dart';
 import 'package:anime_flow/controllers/video/video_state_controller.dart';
 import 'package:anime_flow/controllers/video/video_ui_controller.dart';
 import 'package:anime_flow/models/enums/video_controls_icon_type.dart';
@@ -29,7 +30,7 @@ class _BottomAreaControlState extends State<BottomAreaControl> {
   late PlayController playController;
   late EpisodesState episodesState;
   late EpisodeController episodeController;
-
+  late VideoSourceController videoSourceController;
   @override
   void initState() {
     super.initState();
@@ -38,6 +39,7 @@ class _BottomAreaControlState extends State<BottomAreaControl> {
     playController = Get.find<PlayController>();
     episodesState = Get.find<EpisodesState>();
     episodeController = Get.find<EpisodeController>();
+    videoSourceController = Get.find<VideoSourceController>();
   }
 
   @override
@@ -119,6 +121,7 @@ class _BottomAreaControlState extends State<BottomAreaControl> {
                           if (hasNextEpisode)
                             InkWell(
                               onTap: () {
+                                videoSourceController.userManuallySelected = false;
                                 episodeController
                                     .switchToNextEpisode(episodesState);
                               },
@@ -201,7 +204,11 @@ class _BottomAreaControlState extends State<BottomAreaControl> {
                                       },
                                       pageBuilder: (context, animation,
                                           secondaryAnimation) {
-                                        return const EpisodesView();
+                                        return EpisodesView(
+                                          onEpisodeSelected: (episodeIndex) {
+                                            videoSourceController.userManuallySelected = false;
+                                          },
+                                        );
                                       });
                                 },
                                 child: const Text("选集")),

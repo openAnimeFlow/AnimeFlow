@@ -20,7 +20,7 @@ on:
 jobs:
   flutter-build_ios:
     if: ${{ !github.event.inputs.platform || github.event.inputs.platform == 'ios' || github.event.inputs.platform == 'all'}}
-    runs-on: macos-14
+    runs-on: macos-15
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4

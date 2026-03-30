@@ -79,7 +79,7 @@ class _DanmakuViewState extends ConsumerState<DanmakuView>
 
     _playingWorker = ever(videoStateController.playing, (playing) {
       if (!mounted) return;
-      final dc = ref.read(playController.notifier).danmakuController;
+      final dc = ref.read(playController.notifier).readDanmakuController();
       if (dc == null) return;
       try {
         if (playing) {
@@ -141,7 +141,7 @@ class _DanmakuViewState extends ConsumerState<DanmakuView>
                   danmakuColor = Colors.white;
                 }
 
-                final dc = n.danmakuController;
+                final dc = n.readDanmakuController();
                 if (dc == null) return;
                 dc.addDanmaku(
                   DanmakuContentItem(

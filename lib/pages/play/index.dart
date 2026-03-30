@@ -10,7 +10,6 @@ import 'package:anime_flow/utils/systemUtil.dart';
 import 'package:anime_flow/webview/webview_controller.dart';
 import 'package:anime_flow/constants/play_layout_constant.dart';
 import 'package:anime_flow/stores/episodes_state.dart';
-import 'package:anime_flow/controllers/play/play_controller.dart';
 import 'package:anime_flow/controllers/video/source/video_source_controller.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -31,7 +30,6 @@ class _PlayPageState extends ConsumerState<PlayPage> {
   late VideoStateController videoStateController;
   late VideoSourceController videoSourceController;
   late PlaySubjectState subjectState;
-  late PlayController playController;
   late EpisodesState episodesState;
   final GlobalKey _videoKey = GlobalKey();
   final GlobalKey _contentKey = GlobalKey();
@@ -47,7 +45,6 @@ class _PlayPageState extends ConsumerState<PlayPage> {
     videoSourceController = Get.put(VideoSourceController());
     Get.put(EpisodeController());
     Get.put(VideoUiStateController());
-    playController = Get.put(PlayController());
     episodesState = Get.put(EpisodesState());
     Get.put<WebviewItemController>(
         WebviewItemControllerFactory.getController());
@@ -59,6 +56,18 @@ class _PlayPageState extends ConsumerState<PlayPage> {
     }
     _initEpisodes();
     _initResources();
+  }
+
+  @override
+  void dispose() {
+    _webViewInitWorker?.dispose();
+    Get.delete<WebviewItemController>();
+    Get.delete<VideoStateController>();
+    Get.delete<EpisodesState>();
+    Get.delete<VideoSourceController>();
+    Get.delete<PlaySubjectState>();
+    Get.delete<VideoUiStateController>();
+    super.dispose();
   }
 
   /// 初始化资源
@@ -154,19 +163,6 @@ class _PlayPageState extends ConsumerState<PlayPage> {
   //   Logger().i('开始保存播放记录: $playHistory');
   //   PlayRepository.savePlayHistory(playHistory);
   // }
-
-  @override
-  void dispose() {
-    _webViewInitWorker?.dispose();
-    Get.delete<WebviewItemController>();
-    Get.delete<VideoStateController>();
-    Get.delete<PlayController>();
-    Get.delete<EpisodesState>();
-    Get.delete<VideoSourceController>();
-    Get.delete<PlaySubjectState>();
-    Get.delete<VideoUiStateController>();
-    super.dispose();
-  }
 
   @override
   Widget build(BuildContext context) {

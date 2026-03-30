@@ -108,7 +108,7 @@ class PlayNotifier extends Notifier<PlayState> {
     return PlayState(hiddenPlatforms: _hiddenPlatformsFromStorage());
   }
 
-  /// 从存储同步平台显示/隐藏（与 GetX 版一致）
+  /// 从存储同步平台显示/隐藏
   void syncPlatformVisibilityFromStorage() {
     state = state.copyWith(hiddenPlatforms: _hiddenPlatformsFromStorage());
     try {

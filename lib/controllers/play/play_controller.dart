@@ -15,7 +15,6 @@ import 'package:window_manager/window_manager.dart';
 
 part 'play_controller.g.dart';
 
-/// 播放器 UI / 弹幕相关状态（与 [PlayController] 字段对齐，供 Riverpod 使用）
 class PlayState {
   const PlayState({
     this.superResolutionType = 0,
@@ -27,7 +26,7 @@ class PlayState {
     this.hiddenPlatforms = const <String>{},
   });
 
-  /// 超分：0 初始；1 关；2 效率；3 质量（与 [PlayNotifier.setShader] 一致）
+  /// 超分：0 初始；1 关；2 效率；3 质量
   final int superResolutionType;
 
   /// 播放页宽屏状态

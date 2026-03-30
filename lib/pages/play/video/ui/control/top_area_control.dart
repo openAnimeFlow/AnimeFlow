@@ -3,7 +3,6 @@ import 'package:anime_flow/controllers/video/source/video_source_controller.dart
 import 'package:anime_flow/controllers/video/video_state_controller.dart';
 import 'package:anime_flow/pages/play/video/ui/setting/video_setting.dart';
 import 'package:anime_flow/stores/episodes_state.dart';
-import 'package:anime_flow/controllers/play/play_controller.dart';
 import 'package:anime_flow/stores/play_subject_state.dart';
 import 'package:anime_flow/controllers/video/video_ui_controller.dart';
 import 'package:anime_flow/features/network_speed/presentation/network_speed_provider.dart';
@@ -28,7 +27,6 @@ class TopAreaControl extends ConsumerStatefulWidget {
 class _TopAreaControlState extends ConsumerState<TopAreaControl> {
   late VideoStateController videoStateController;
   late VideoSourceController videoSourceController;
-  late PlayController playController;
   late VideoUiStateController videoUiStateController;
   late EpisodesState episodesController;
   late PlaySubjectState playSubjectState;
@@ -38,7 +36,6 @@ class _TopAreaControlState extends ConsumerState<TopAreaControl> {
     super.initState();
     videoStateController = Get.find<VideoStateController>();
     videoSourceController = Get.find<VideoSourceController>();
-    playController = Get.find<PlayController>();
     videoUiStateController = Get.find<VideoUiStateController>();
     episodesController = Get.find<EpisodesState>();
     playSubjectState = Get.find<PlaySubjectState>();
@@ -48,9 +45,12 @@ class _TopAreaControlState extends ConsumerState<TopAreaControl> {
   Widget build(BuildContext context) {
     return Obx(() {
       // 全屏状态
-      final fullscreen = playController.isFullscreen.value;
+      final fullscreen = ref.watch(playProvider.select((s) => s.isFullscreen));
       final leftPadding = MediaQuery.of(context).padding.left;
-      final isWideScreen = ref.watch(playProvider.select((s) => s.isWideScreen));
+      final isWideScreen =
+          ref.watch(playProvider.select((s) => s.isWideScreen));
+      final isContentExpanded =
+          ref.watch(playProvider.select((s) => s.isContentExpanded));
       return AnimatedSwitcher(
         duration: const Duration(milliseconds: 200),
         transitionBuilder: (child, animation) {
@@ -78,10 +78,9 @@ class _TopAreaControlState extends ConsumerState<TopAreaControl> {
                       //Obx细粒度更新机制,只有直接访问了响应式变量的Obx才会被触发重建。
                       if (fullscreen)
                         Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 15),
-                          height: 16,
-                          child: _buildTopInfoBar()
-                        ),
+                            padding: const EdgeInsets.symmetric(horizontal: 15),
+                            height: 16,
+                            child: _buildTopInfoBar()),
                       Row(
                         children: [
                           //左侧
@@ -91,7 +90,9 @@ class _TopAreaControlState extends ConsumerState<TopAreaControl> {
                                 InkWell(
                                   onTap: () {
                                     if (fullscreen) {
-                                      playController.exitFullScreen();
+                                      ref
+                                          .read(playProvider.notifier)
+                                          .exitFullScreen();
                                     } else {
                                       Get.back();
                                     }
@@ -223,13 +224,14 @@ class _TopAreaControlState extends ConsumerState<TopAreaControl> {
                                   ),
                                 ),
                               if (SystemUtil.isDesktop)
-                                Obx(() => isWideScreen
+                                isWideScreen
                                     ? IconButton(
-                                        onPressed: () => playController
+                                        onPressed: () => ref
+                                            .read(playProvider.notifier)
                                             .toggleContentExpanded(),
                                         padding: const EdgeInsets.all(0),
                                         icon: SvgPicture.asset(
-                                          playController.isContentExpanded.value
+                                          isContentExpanded
                                               ? "assets/icons/right_panel_close.svg"
                                               : "assets/icons/left_panel_close.svg",
                                           width: 30,
@@ -240,7 +242,7 @@ class _TopAreaControlState extends ConsumerState<TopAreaControl> {
                                           ),
                                         ),
                                       )
-                                    : const SizedBox.shrink())
+                                    : const SizedBox.shrink()
                             ],
                           )
                         ],
@@ -258,61 +260,52 @@ class _TopAreaControlState extends ConsumerState<TopAreaControl> {
   }
 
   ///顶部信息栏
- Widget _buildTopInfoBar() {
+  Widget _buildTopInfoBar() {
     return Row(
       children: [
         //网络图标
         Expanded(
             child: Row(
-              mainAxisAlignment: MainAxisAlignment.start,
-              spacing: 5,
-              children: [
-                const NetworkIcon(),
-                Builder(
-                  builder: (context) {
-                    final speedAsync = ref.watch(networkSpeedStreamProvider(2000));
-                    final data = speedAsync.asData?.value;
-                    final download = data?.download ?? 0;
-                    final upload = data?.upload ?? 0;
+          mainAxisAlignment: MainAxisAlignment.start,
+          spacing: 5,
+          children: [
+            const NetworkIcon(),
+            Builder(
+              builder: (context) {
+                final speedAsync = ref.watch(networkSpeedStreamProvider(2000));
+                final data = speedAsync.asData?.value;
+                final download = data?.download ?? 0;
+                final upload = data?.upload ?? 0;
 
-                    return Row(
-                      crossAxisAlignment: CrossAxisAlignment.center,
-                      children: [
-                        const RotatedBox(
-                          quarterTurns: 1,
-                          child: Icon(
-                              Icons
-                                  .arrow_right_alt_outlined,
-                              size: 15,
-                              fontWeight: FontWeight.bold),
-                        ),
-                        Text(
-                          Utils.formatBytesPerSec(download),
-                          style: const TextStyle(
-                              fontSize: 10,
-                              color: Colors.white),
-                        ),
-                        const SizedBox(width: 5),
-                        const RotatedBox(
-                          quarterTurns: 3,
-                          child: Icon(
-                              Icons
-                                  .arrow_right_alt_outlined,
-                              size: 15,
-                              fontWeight: FontWeight.bold),
-                        ),
-                        Text(Utils.formatBytesPerSec(upload),
-                            style: const TextStyle(
-                                fontSize: 10)),
-                      ],
-                    );
-                  },
-                )
-              ],
-            )),
+                return Row(
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  children: [
+                    const RotatedBox(
+                      quarterTurns: 1,
+                      child: Icon(Icons.arrow_right_alt_outlined,
+                          size: 15, fontWeight: FontWeight.bold),
+                    ),
+                    Text(
+                      Utils.formatBytesPerSec(download),
+                      style: const TextStyle(fontSize: 10, color: Colors.white),
+                    ),
+                    const SizedBox(width: 5),
+                    const RotatedBox(
+                      quarterTurns: 3,
+                      child: Icon(Icons.arrow_right_alt_outlined,
+                          size: 15, fontWeight: FontWeight.bold),
+                    ),
+                    Text(Utils.formatBytesPerSec(upload),
+                        style: const TextStyle(fontSize: 10)),
+                  ],
+                );
+              },
+            )
+          ],
+        )),
         //系统时间
         Obx(
-              () => Text(
+          () => Text(
             videoUiStateController.currentTime.value,
             style: const TextStyle(
               color: Colors.white,
@@ -325,18 +318,12 @@ class _TopAreaControlState extends ConsumerState<TopAreaControl> {
         if (SystemUtil.isMobile)
           Expanded(
             child: Obx(
-                  () {
-                final battery = videoUiStateController
-                    .batteryLevel.value;
-                final batteryState =
-                    videoUiStateController
-                        .batteryState.value;
-
+              () {
+                final battery = videoUiStateController.batteryLevel.value;
+                final batteryState = videoUiStateController.batteryState.value;
                 return Row(
-                  crossAxisAlignment:
-                  CrossAxisAlignment.center,
-                  mainAxisAlignment:
-                  MainAxisAlignment.end,
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  mainAxisAlignment: MainAxisAlignment.end,
                   children: [
                     Text(
                       '${videoUiStateController.batteryLevel.value}%',
@@ -362,5 +349,5 @@ class _TopAreaControlState extends ConsumerState<TopAreaControl> {
           const Spacer()
       ],
     );
- }
+  }
 }

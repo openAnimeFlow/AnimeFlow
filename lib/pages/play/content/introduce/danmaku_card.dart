@@ -2,43 +2,39 @@ import 'package:anime_flow/http/requests/damaku_request.dart';
 import 'package:anime_flow/models/item/danmaku/danmaku_search_response.dart';
 import 'package:anime_flow/models/item/danmaku/danmaku_episode_response.dart';
 import 'package:anime_flow/stores/episodes_state.dart';
-import 'package:anime_flow/controllers/play/play_controller.dart';
+import 'package:anime_flow/controllers/play/play_provider.dart';
 import 'package:anime_flow/models/item/danmaku/danmaku_module.dart';
 import 'package:anime_flow/stores/play_subject_state.dart';
 import 'package:anime_flow/utils/format_time_util.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:get/get.dart';
 
-class DanmakuCard extends StatefulWidget {
+class DanmakuCard extends ConsumerStatefulWidget {
   const DanmakuCard({super.key});
 
   @override
-  State<DanmakuCard> createState() => _DanmakuCardState();
+  ConsumerState<DanmakuCard> createState() => _DanmakuCardState();
 }
 
-class _DanmakuCardState extends State<DanmakuCard> {
+class _DanmakuCardState extends ConsumerState<DanmakuCard> {
   late EpisodesState episodesController;
-  late PlayController playController;
   late PlaySubjectState subjectState;
 
   final danmakuFieldController = TextEditingController();
 
   bool isExpanded = false;
-  int _currentEpisode = 0; // 记录当前集数
-  // DanmakuSearchResponse? danmakuSearchResponse;
+  int _currentEpisode = 0;
 
   @override
   void initState() {
     super.initState();
     episodesController = Get.find<EpisodesState>();
-    playController = Get.find<PlayController>();
     subjectState = Get.find<PlaySubjectState>();
-    // 监听集数变化，当集数改变时重置弹幕加载状态
     ever(episodesController.episodeIndex, (int episode) {
       if (_currentEpisode != episode) {
         _currentEpisode = episode;
-        // 清空之前的弹幕
-        playController.removeDanmaku();
+        ref.read(playProvider.notifier).removeDanmaku();
       }
     });
   }
@@ -60,186 +56,166 @@ class _DanmakuCardState extends State<DanmakuCard> {
     return counts;
   }
 
-  //搜索animes
-  // Future<void> _searchAnimes(String query, StateSetter setDialogState) async {
-  //   setDialogState(() {
-  //     isSearchLoading = true;
-  //     danmakuSearchResponse = null;
-  //   });
-  //   try {
-  //     final response = await DanmakuRequest.getDanmakuSearchResponse(query);
-  //     setDialogState(() {
-  //       danmakuSearchResponse = response;
-  //       isSearchLoading = false;
-  //     });
-  //   } catch (e) {
-  //     setDialogState(() {
-  //       isSearchLoading = false;
-  //     });
-  //   }
-  // }
-
   @override
   Widget build(BuildContext context) {
-    return Obx(() {
-      final allDanmakus = <Danmaku>[];
-      final subjectName = subjectState.subject.value.name;
-      playController.danDanmakus.forEach((time, danmakus) {
-        allDanmakus.addAll(danmakus);
-      });
+    final slice = ref.watch(
+      playProvider.select((s) => (s.danDanmakus, s.hiddenPlatforms)),
+    );
+    final danDanmakus = slice.$1;
+    final hiddenPlatforms = slice.$2;
 
-      // 过滤掉被隐藏平台的弹幕
-      final filteredDanmakus = allDanmakus.where((danmaku) {
-        final platform = _extractPlatform(danmaku.source);
-        return !playController.isPlatformHidden(platform);
-      }).toList();
+    final allDanmakus = <Danmaku>[];
+    danDanmakus.forEach((time, danmakus) {
+      allDanmakus.addAll(danmakus);
+    });
 
-      // 按时间排序
-      filteredDanmakus.sort((a, b) => a.time.compareTo(b.time));
+    final filteredDanmakus = allDanmakus.where((danmaku) {
+      final platform = _extractPlatform(danmaku.source);
+      return !hiddenPlatforms.contains(platform);
+    }).toList();
 
-      // 统计各平台弹幕数量
-      final platformCounts = _countByPlatform(allDanmakus);
-      final sortedPlatforms = platformCounts.entries.toList()
-        ..sort((a, b) => b.value.compareTo(a.value)); // 按数量降序排列
+    filteredDanmakus.sort((a, b) => a.time.compareTo(b.time));
 
-      return Card(
-        elevation: 0,
-        child: Padding(
-          padding: const EdgeInsets.all(8),
-          child: Column(
-            children: [
-              Row(
+    final platformCounts = _countByPlatform(allDanmakus);
+    final sortedPlatforms = platformCounts.entries.toList()
+      ..sort((a, b) => b.value.compareTo(a.value));
+
+    final subjectName = subjectState.subject.value.name;
+
+    return Card(
+      elevation: 0,
+      child: Padding(
+        padding: const EdgeInsets.all(8),
+        child: Column(
+          children: [
+            Row(
+              children: [
+                const Text(
+                  '弹幕源:',
+                  style: TextStyle(fontWeight: FontWeight.bold),
+                ),
+                if (allDanmakus.isNotEmpty) ...[
+                  const SizedBox(width: 5),
+                  Text('总装填(${allDanmakus.length})条弹幕',
+                      style: Theme.of(context).textTheme.bodySmall),
+                  const Spacer(),
+                ] else ...[
+                  const Spacer(),
+                ],
+                IconButton(
+                  onPressed: () {
+                    setState(() {
+                      isExpanded = !isExpanded;
+                    });
+                  },
+                  icon:
+                      Icon(isExpanded ? Icons.expand_less : Icons.expand_more),
+                )
+              ],
+            ),
+            AnimatedContainer(
+              duration: const Duration(milliseconds: 300),
+              height: isExpanded ? 300 : 0,
+              child: Column(
                 children: [
-                  const Text(
-                    '弹幕源:',
-                    style: TextStyle(fontWeight: FontWeight.bold),
+                  Row(
+                    children: [
+                      Expanded(
+                        child: Padding(
+                          padding: const EdgeInsets.symmetric(vertical: 10),
+                          child: Text(subjectName,
+                              style: const TextStyle(
+                                  fontWeight: FontWeight.bold)),
+                        ),
+                      ),
+                      TextButton(
+                        onPressed: () {
+                          danmakuFieldController.text = subjectName;
+                          Get.dialog(danmakuDialog);
+                        },
+                        child: const Text('切换弹幕'),
+                      )
+                    ],
                   ),
-                  if (allDanmakus.isNotEmpty) ...[
-                    const SizedBox(width: 5),
-                    Text('总装填(${allDanmakus.length})条弹幕',
-                        style: Theme.of(context).textTheme.bodySmall),
-                    const Spacer(),
-                  ] else ...[
-                    const Spacer(),
+                  if (sortedPlatforms.isNotEmpty) ...[
+                    Align(
+                      alignment: Alignment.topLeft,
+                      child: Wrap(
+                        spacing: 8,
+                        runSpacing: 4,
+                        children: sortedPlatforms.map((entry) {
+                          final platform = entry.key;
+                          final isHidden = hiddenPlatforms.contains(platform);
+                          return ActionChip(
+                            label: Text('${entry.key}: ${entry.value}'),
+                            labelStyle: Theme.of(context)
+                                .textTheme
+                                .bodySmall
+                                ?.copyWith(
+                                  decoration: isHidden
+                                      ? TextDecoration.lineThrough
+                                      : null,
+                                  color: isHidden
+                                      ? Theme.of(context)
+                                          .textTheme
+                                          .bodySmall
+                                          ?.color
+                                          ?.withValues(alpha: 0.5)
+                                      : null,
+                                ),
+                            materialTapTargetSize:
+                                MaterialTapTargetSize.shrinkWrap,
+                            visualDensity: VisualDensity.compact,
+                            backgroundColor: isHidden
+                                ? Theme.of(context)
+                                    .colorScheme
+                                    .surfaceContainerHighest
+                                : null,
+                            onPressed: () {
+                              ref
+                                  .read(playProvider.notifier)
+                                  .togglePlatformVisibility(platform);
+                            },
+                          );
+                        }).toList(),
+                      ),
+                    ),
                   ],
-                  IconButton(
-                    onPressed: () {
-                      setState(() {
-                        isExpanded = !isExpanded;
-                      });
-                    },
-                    icon: Icon(
-                        isExpanded ? Icons.expand_less : Icons.expand_more),
-                  )
+                  Expanded(
+                    child: ListView.builder(
+                      padding: const EdgeInsets.all(0),
+                      itemCount: filteredDanmakus.length,
+                      itemExtent: 30.0,
+                      cacheExtent: 200.0,
+                      physics: const ClampingScrollPhysics(),
+                      itemBuilder: (context, index) {
+                        final danmaku = filteredDanmakus[index];
+                        return Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            Expanded(
+                              child: Text(
+                                danmaku.message,
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                              ),
+                            ),
+                            Text(
+                              '${FormatTimeUtil.formatDanmakuTime(danmaku.time)} · ${_extractPlatform(danmaku.source)}',
+                              style: Theme.of(context).textTheme.bodySmall,
+                            )
+                          ],
+                        );
+                      },
+                    ),
+                  ),
                 ],
               ),
-              // 平台统计信息
-              AnimatedContainer(
-                duration: const Duration(milliseconds: 300),
-                height: isExpanded ? 300 : 0,
-                child: Column(
-                  children: [
-                    Row(
-                      children: [
-                        Expanded(
-                          child: Padding(
-                            padding: const EdgeInsets.symmetric(vertical: 10),
-                            child: Text(subjectName,
-                                style: const TextStyle(
-                                    fontWeight: FontWeight.bold)),
-                          ),
-                        ),
-                        TextButton(
-                          onPressed: () {
-                            danmakuFieldController.text = subjectName;
-                            Get.dialog(danmakuDialog);
-                          },
-                          child: const Text('切换弹幕'),
-                        )
-                      ],
-                    ),
-                    if (sortedPlatforms.isNotEmpty) ...[
-                      Align(
-                        alignment: Alignment.topLeft,
-                        child: Wrap(
-                          spacing: 8,
-                          runSpacing: 4,
-                          children: sortedPlatforms.map((entry) {
-                            final platform = entry.key;
-                            final isHidden =
-                                playController.isPlatformHidden(platform);
-                            return ActionChip(
-                              label: Text('${entry.key}: ${entry.value}'),
-                              labelStyle: Theme.of(context)
-                                  .textTheme
-                                  .bodySmall
-                                  ?.copyWith(
-                                    decoration: isHidden
-                                        ? TextDecoration.lineThrough
-                                        : null,
-                                    color: isHidden
-                                        ? Theme.of(context)
-                                            .textTheme
-                                            .bodySmall
-                                            ?.color
-                                            ?.withValues(alpha: 0.5)
-                                        : null,
-                                  ),
-                              materialTapTargetSize:
-                                  MaterialTapTargetSize.shrinkWrap,
-                              visualDensity: VisualDensity.compact,
-                              backgroundColor: isHidden
-                                  ? Theme.of(context)
-                                      .colorScheme
-                                      .surfaceContainerHighest
-                                  : null,
-                              onPressed: () {
-                                playController
-                                    .togglePlatformVisibility(platform);
-                              },
-                            );
-                          }).toList(),
-                        ),
-                      ),
-                    ],
-                    Expanded(
-                      child: ListView.builder(
-                        padding: const EdgeInsets.all(0),
-                        itemCount: filteredDanmakus.length,
-                        // 固定item高度，提升滚动性能
-                        itemExtent: 30.0,
-                        // 缓存范围
-                        cacheExtent: 200.0,
-                        physics: const ClampingScrollPhysics(),
-                        itemBuilder: (context, index) {
-                          final danmaku = filteredDanmakus[index];
-                          return Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            children: [
-                              Expanded(
-                                child: Text(
-                                  danmaku.message,
-                                  maxLines: 1,
-                                  overflow: TextOverflow.ellipsis,
-                                ),
-                              ),
-                              Text(
-                                '${FormatTimeUtil.formatDanmakuTime(danmaku.time)} · ${_extractPlatform(danmaku.source)}',
-                                style: Theme.of(context).textTheme.bodySmall,
-                              )
-                            ],
-                          );
-                        },
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ],
-          ),
+            ),
+          ],
         ),
-      );
-    });
+      ),
+    );
   }
 
   Widget get danmakuDialog {
@@ -349,7 +325,6 @@ class _DanmakuCardState extends State<DanmakuCard> {
     );
   }
 
-  /// 显示剧集选择弹窗
   void _showEpisodesDialog(BuildContext context,
       DanmakuEpisodeResponse episodesResponse, String animeTitle) {
     showDialog(
@@ -387,8 +362,8 @@ class _DanmakuCardState extends State<DanmakuCard> {
                               final danmaku =
                                   await DanmakuRequest.getDanDanmakuByEpisodeID(
                                       episode.episodeId);
-                              playController.removeDanmaku();
-                              playController.addDanmaku(danmaku);
+                              ref.read(playProvider.notifier).removeDanmaku();
+                              ref.read(playProvider.notifier).addDanmaku(danmaku);
                               Get.back();
                             },
                           );

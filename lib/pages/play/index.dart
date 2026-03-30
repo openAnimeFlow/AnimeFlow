@@ -196,18 +196,22 @@ class _PlayPageState extends ConsumerState<PlayPage> {
                         ),
                       ),
                     ),
-                    Obx(
-                      () => AnimatedContainer(
-                        duration: const Duration(milliseconds: 100),
-                        width: playController.isContentExpanded.value
-                            ? PlayLayoutConstant.playContentWidth
-                            : 0,
-                        child: Opacity(
-                          opacity:
-                              playController.isContentExpanded.value ? 1 : 0,
-                          child: ContentView(key: _contentKey),
-                        ),
-                      ),
+                    Consumer(
+                      builder: (context, ref, _) {
+                        final isContentExpanded = ref.watch(
+                          playProvider.select((s) => s.isContentExpanded),
+                        );
+                        return AnimatedContainer(
+                          duration: const Duration(milliseconds: 100),
+                          width: isContentExpanded
+                              ? PlayLayoutConstant.playContentWidth
+                              : 0,
+                          child: Opacity(
+                            opacity: isContentExpanded ? 1 : 0,
+                            child: ContentView(key: _contentKey),
+                          ),
+                        );
+                      },
                     ),
                   ],
                 ),

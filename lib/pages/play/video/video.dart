@@ -11,7 +11,6 @@ import 'package:anime_flow/stores/user_info_store.dart';
 import 'package:anime_flow/webview/webview_controller.dart';
 import 'package:anime_flow/webview/webview_item.dart';
 import 'package:anime_flow/stores/episodes_state.dart';
-import 'package:anime_flow/controllers/play/play_controller.dart';
 import 'package:anime_flow/controllers/play/play_provider.dart';
 import 'package:anime_flow/stores/play_subject_state.dart';
 import 'package:anime_flow/controllers/video/source/video_source_controller.dart';
@@ -43,7 +42,6 @@ class _VideoViewState extends ConsumerState<VideoView> with WindowListener {
   late VideoSourceController videoSourceController;
   late VideoStateController videoStateController;
   late EpisodeController episodeController;
-  late PlayController playController;
   late EpisodesState episodesState;
   late PlaySubjectState subjectState;
   late UserInfoStore userInfoStore;
@@ -81,7 +79,6 @@ class _VideoViewState extends ConsumerState<VideoView> with WindowListener {
     videoStateController = Get.find<VideoStateController>();
     videoUiStateController = Get.find<VideoUiStateController>();
     videoSourceController = Get.find<VideoSourceController>();
-    playController = Get.find<PlayController>();
     episodesState = Get.find<EpisodesState>();
     episodeController = Get.find<EpisodeController>();
     subjectState = Get.find<PlaySubjectState>();
@@ -119,8 +116,7 @@ class _VideoViewState extends ConsumerState<VideoView> with WindowListener {
     // 监听窗口状态变化，
     if (Platform.isWindows || Platform.isLinux || Platform.isMacOS) {
       windowManager.addListener(this);
-      // 检测桌面端全屏状态
-      playController.checkDesktopFullscreen();
+      ref.read(playProvider.notifier).checkDesktopFullscreen();
     }
   }
 
@@ -271,7 +267,7 @@ class _VideoViewState extends ConsumerState<VideoView> with WindowListener {
       await DanmakuRequest.getDanDanBangumiIDByBgmBangumiID(
           subjectState.subject.value.id);
       final danmaku = await DanmakuRequest.getDanDanmaku(bgmBangumiId, episode);
-      playController.addDanmaku(danmaku);
+      ref.read(playProvider.notifier).addDanmaku(danmaku);
       logger.i('弹幕数量为：${danmaku.length}');
 
       // 标记弹幕已加载
@@ -433,7 +429,7 @@ class _VideoViewState extends ConsumerState<VideoView> with WindowListener {
   /// 窗口恢复时处理
   @override
   void onWindowRestore() {
-    playController.checkDesktopFullscreen();
+    ref.read(playProvider.notifier).checkDesktopFullscreen();
   }
 
   /// 窗口进入全屏时处理

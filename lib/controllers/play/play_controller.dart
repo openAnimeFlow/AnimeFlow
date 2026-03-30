@@ -101,7 +101,7 @@ class PlayController extends GetxController {
     }
   }
 
-  // 切换内容区域展开状态
+  /// 切换内容区域展开状态
   void toggleContentExpanded() {
     isContentExpanded.value = !isContentExpanded.value;
   }

@@ -1,6 +1,5 @@
 import 'package:anime_flow/controllers/video/source/video_source_controller.dart';
 import 'package:anime_flow/stores/episodes_state.dart';
-import 'package:anime_flow/controllers/play/play_controller.dart';
 import 'package:anime_flow/stores/play_subject_state.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -14,7 +13,6 @@ class EpisodesComponents extends StatefulWidget {
 }
 
 class EpisodesComponentsState extends State<EpisodesComponents> {
-  late PlayController playPageController;
   late PlaySubjectState subjectState;
   late EpisodesState episodesState;
   late VideoSourceController videoSourceController;
@@ -25,7 +23,6 @@ class EpisodesComponentsState extends State<EpisodesComponents> {
   @override
   void initState() {
     super.initState();
-    playPageController = Get.find<PlayController>();
     episodesState = Get.find<EpisodesState>();
     subjectState = Get.find<PlaySubjectState>();
     videoSourceController = Get.find<VideoSourceController>();

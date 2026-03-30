@@ -1,12 +1,13 @@
 import 'dart:async';
 
-import 'package:anime_flow/controllers/play/play_controller.dart';
+import 'package:anime_flow/controllers/play/play_provider.dart';
 import 'package:anime_flow/controllers/video/video_state_controller.dart';
 import 'package:anime_flow/controllers/video/video_ui_controller.dart';
 import 'package:anime_flow/models/enums/video_controls_icon_type.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:get/get.dart';
 
 /// 桌面端手势检测器
@@ -23,14 +24,12 @@ class _DesktopGestureDetectorState extends State<DesktopGestureDetector> {
   static Timer? _hoverTimer;
   late VideoStateController videoStateController;
   late VideoUiStateController videoUiStateController;
-  late PlayController playPageController;
 
   @override
   void initState() {
     super.initState();
     videoStateController = Get.find<VideoStateController>();
     videoUiStateController = Get.find<VideoUiStateController>();
-    playPageController = Get.find<PlayController>();
   }
 
   @override
@@ -50,7 +49,8 @@ class _DesktopGestureDetectorState extends State<DesktopGestureDetector> {
           if (event.logicalKey == LogicalKeyboardKey.arrowLeft) {
             final currentPosition = videoStateController.position.value;
             final duration = videoStateController.duration.value;
-            final newPositionMs = (currentPosition - const Duration(seconds: 10)).inMilliseconds;
+            final newPositionMs =
+                (currentPosition - const Duration(seconds: 10)).inMilliseconds;
             final clampedMs = newPositionMs.clamp(0, duration.inMilliseconds);
             videoStateController.seekTo(Duration(milliseconds: clampedMs));
             videoUiStateController.updateIndicatorTypeAndShowIndicator(
@@ -61,7 +61,8 @@ class _DesktopGestureDetectorState extends State<DesktopGestureDetector> {
           if (event.logicalKey == LogicalKeyboardKey.arrowRight) {
             final currentPosition = videoStateController.position.value;
             final duration = videoStateController.duration.value;
-            final newPositionMs = (currentPosition + const Duration(seconds: 10)).inMilliseconds;
+            final newPositionMs =
+                (currentPosition + const Duration(seconds: 10)).inMilliseconds;
             final clampedMs = newPositionMs.clamp(0, duration.inMilliseconds);
             videoStateController.seekTo(Duration(milliseconds: clampedMs));
             videoUiStateController.updateIndicatorTypeAndShowIndicator(
@@ -70,7 +71,8 @@ class _DesktopGestureDetectorState extends State<DesktopGestureDetector> {
           }
           // 上方向键：增加音量
           if (event.logicalKey == LogicalKeyboardKey.arrowUp) {
-            videoUiStateController.updateMainAxisAlignmentType(MainAxisAlignment.start);
+            videoUiStateController
+                .updateMainAxisAlignmentType(MainAxisAlignment.start);
             videoUiStateController.updateIndicatorTypeAndShowIndicator(
                 VideoControlsIndicatorType.volumeIndicator);
             videoStateController.adjustVolumeByWheel(5.0); // 每次增加5%
@@ -78,7 +80,8 @@ class _DesktopGestureDetectorState extends State<DesktopGestureDetector> {
           }
           // 下方向键：减少音量
           if (event.logicalKey == LogicalKeyboardKey.arrowDown) {
-            videoUiStateController.updateMainAxisAlignmentType(MainAxisAlignment.start);
+            videoUiStateController
+                .updateMainAxisAlignmentType(MainAxisAlignment.start);
             videoUiStateController.updateIndicatorTypeAndShowIndicator(
                 VideoControlsIndicatorType.volumeIndicator);
             videoStateController.adjustVolumeByWheel(-5.0); // 每次减少5%
@@ -125,20 +128,21 @@ class _DesktopGestureDetectorState extends State<DesktopGestureDetector> {
                 duration: const Duration(seconds: 3));
           },
 
-          child: GestureDetector(
-            // 双击事件
-            // 使用自定义全屏方法，
-            onDoubleTap: () {
-              playPageController.toggleFullScreen();
-            },
+          child: Consumer(
+            builder: (context, ref, child) => GestureDetector(
+              // 双击事件
+              onDoubleTap: () {
+                ref.read(playProvider.notifier).toggleFullScreen();
+              },
 
-            // 单击事件
-            onTap: () {
-              videoStateController.playOrPauseVideo();
-              videoUiStateController.updateIndicatorTypeAndShowIndicator(
-                  VideoControlsIndicatorType.playStatusIndicator);
-            },
-            child: widget.child,
+              // 单击事件
+              onTap: () {
+                videoStateController.playOrPauseVideo();
+                videoUiStateController.updateIndicatorTypeAndShowIndicator(
+                    VideoControlsIndicatorType.playStatusIndicator);
+              },
+              child: widget.child,
+            ),
           ),
         ),
       ),

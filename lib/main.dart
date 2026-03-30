@@ -6,6 +6,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:get/get.dart';
 import 'package:hive_ce_flutter/hive_flutter.dart';
 import 'package:media_kit/media_kit.dart';
+import 'package:anime_flow/providers/global_provider_container.dart';
 import 'package:anime_flow/routes/index.dart';
 import 'package:anime_flow/controllers/theme_controller.dart';
 import 'package:window_manager/window_manager.dart';
@@ -31,7 +32,10 @@ void main() async {
     });
   }
 
-  runApp(const ProviderScope(child: MyApp()));
+  runApp(UncontrolledProviderScope(
+    container: globalProviderContainer,
+    child: const MyApp(),
+  ));
 }
 
 class MyApp extends StatelessWidget {
@@ -44,7 +48,7 @@ class MyApp extends StatelessWidget {
     return GetBuilder<ThemeController>(
       builder: (controller) {
         return GetMaterialApp(
-          debugShowCheckedModeBanner: false,
+          // debugShowCheckedModeBanner: false,
           theme: controller.lightTheme,
           darkTheme: controller.darkTheme,
           themeMode: controller.themeMode,

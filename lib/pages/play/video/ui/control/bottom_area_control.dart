@@ -1,5 +1,5 @@
-import 'package:anime_flow/controllers/play/play_controller.dart';
 import 'package:anime_flow/controllers/play/episode_controller.dart';
+import 'package:anime_flow/controllers/play/play_controller.dart';
 import 'package:anime_flow/controllers/video/source/video_source_controller.dart';
 import 'package:anime_flow/controllers/video/video_state_controller.dart';
 import 'package:anime_flow/controllers/video/video_ui_controller.dart';
@@ -13,21 +13,21 @@ import 'package:anime_flow/utils/systemUtil.dart';
 import 'package:anime_flow/widget/danmaku_text_field.dart';
 import 'package:anime_flow/widget/play_content/episodes_view.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:get/get.dart';
 
 /// 底部区域控件
-class BottomAreaControl extends StatefulWidget {
+class BottomAreaControl extends ConsumerStatefulWidget {
   const BottomAreaControl({super.key});
 
   @override
-  State<BottomAreaControl> createState() => _BottomAreaControlState();
+  ConsumerState<BottomAreaControl> createState() => _BottomAreaControlState();
 }
 
-class _BottomAreaControlState extends State<BottomAreaControl> {
+class _BottomAreaControlState extends ConsumerState<BottomAreaControl> {
   late VideoUiStateController videoUiStateController;
   late VideoStateController videoStateController;
-  late PlayController playController;
   late EpisodesState episodesState;
   late EpisodeController episodeController;
   late VideoSourceController videoSourceController;
@@ -36,7 +36,6 @@ class _BottomAreaControlState extends State<BottomAreaControl> {
     super.initState();
     videoUiStateController = Get.find<VideoUiStateController>();
     videoStateController = Get.find<VideoStateController>();
-    playController = Get.find<PlayController>();
     episodesState = Get.find<EpisodesState>();
     episodeController = Get.find<EpisodeController>();
     videoSourceController = Get.find<VideoSourceController>();
@@ -45,13 +44,11 @@ class _BottomAreaControlState extends State<BottomAreaControl> {
   @override
   Widget build(BuildContext context) {
     return Obx(() {
-      // 全屏状态，
-      final fullscreen = playController.isFullscreen.value;
-
-      final danmakuOn = playController.danmakuOn.value;
-      final isWideScreen = playController.isWideScreen.value;
+      final danmakuOn = ref.watch(playController.select((s) => s.danmakuOn));
       final isShowControlsUi = videoUiStateController.isShowControlsUi.value;
-      final isContentExpanded = playController.isContentExpanded.value;
+      final fullscreen = ref.watch(playController.select((s) => s.isFullscreen));
+      final isWideScreen = ref.watch(playController.select((s) => s.isWideScreen));
+      final isContentExpanded = ref.watch(playController.select((s) => s.isContentExpanded));
       final hasNextEpisode = episodeController.hasNextEpisode(episodesState);
       final leftPadding = MediaQuery.of(context).padding.left;
       return AnimatedSwitcher(
@@ -133,7 +130,9 @@ class _BottomAreaControlState extends State<BottomAreaControl> {
                             ),
                           //弹幕开关
                           InkWell(
-                            onTap: () => playController.toggleDanmaku(),
+                            onTap: () => ref
+                                .read(playController.notifier)
+                                .toggleDanmaku(),
                             child: Icon(
                                 danmakuOn
                                     ? Icons.subtitles_outlined
@@ -145,7 +144,7 @@ class _BottomAreaControlState extends State<BottomAreaControl> {
                           if (danmakuOn)
                             InkWell(
                               onTap: () => Get.bottomSheet(
-                                const DanmakuSetting(),
+                                 DanmakuSetting(),
                                 ignoreSafeArea: false,
                                 isScrollControlled: true,
                                 backgroundColor: Colors.transparent,
@@ -224,7 +223,7 @@ class _BottomAreaControlState extends State<BottomAreaControl> {
                             duration: const Duration(milliseconds: 500),
                             child: IconButton(
                                 onPressed: () {
-                                  playController.toggleFullScreen();
+                                  ref.read(playController.notifier).toggleFullScreen();
                                 },
                                 padding: const EdgeInsets.all(0),
                                 icon: Icon(

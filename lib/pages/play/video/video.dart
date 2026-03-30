@@ -19,6 +19,7 @@ import 'package:anime_flow/controllers/video/video_ui_controller.dart';
 import 'package:anime_flow/http/requests/bgm_request.dart';
 import 'package:anime_flow/http/requests/damaku_request.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:get/get.dart';
 import 'package:logger/logger.dart';
 import 'package:media_kit/media_kit.dart';
@@ -28,20 +29,19 @@ import 'package:window_manager/window_manager.dart';
 import 'ui/danmaku/danmaku_view.dart';
 import 'ui/index.dart';
 
-class VideoView extends StatefulWidget {
+class VideoView extends ConsumerStatefulWidget {
   const VideoView({super.key});
 
   @override
-  State<VideoView> createState() => _VideoViewState();
+  ConsumerState<VideoView> createState() => _VideoViewState();
 }
 
-class _VideoViewState extends State<VideoView> with WindowListener {
+class _VideoViewState extends ConsumerState<VideoView> with WindowListener {
   late VideoUiStateController videoUiStateController;
   late WebviewItemController webviewItemController;
   late VideoSourceController videoSourceController;
   late VideoStateController videoStateController;
   late EpisodeController episodeController;
-  late PlayController playController;
   late EpisodesState episodesState;
   late PlaySubjectState subjectState;
   late UserInfoStore userInfoStore;
@@ -79,7 +79,6 @@ class _VideoViewState extends State<VideoView> with WindowListener {
     videoStateController = Get.find<VideoStateController>();
     videoUiStateController = Get.find<VideoUiStateController>();
     videoSourceController = Get.find<VideoSourceController>();
-    playController = Get.find<PlayController>();
     episodesState = Get.find<EpisodesState>();
     episodeController = Get.find<EpisodeController>();
     subjectState = Get.find<PlaySubjectState>();
@@ -117,8 +116,7 @@ class _VideoViewState extends State<VideoView> with WindowListener {
     // 监听窗口状态变化，
     if (Platform.isWindows || Platform.isLinux || Platform.isMacOS) {
       windowManager.addListener(this);
-      // 检测桌面端全屏状态
-      playController.checkDesktopFullscreen();
+      ref.read(playController.notifier).checkDesktopFullscreen();
     }
   }
 
@@ -269,7 +267,7 @@ class _VideoViewState extends State<VideoView> with WindowListener {
       await DanmakuRequest.getDanDanBangumiIDByBgmBangumiID(
           subjectState.subject.value.id);
       final danmaku = await DanmakuRequest.getDanDanmaku(bgmBangumiId, episode);
-      playController.addDanmaku(danmaku);
+      ref.read(playController.notifier).addDanmaku(danmaku);
       logger.i('弹幕数量为：${danmaku.length}');
 
       // 标记弹幕已加载
@@ -431,19 +429,19 @@ class _VideoViewState extends State<VideoView> with WindowListener {
   /// 窗口恢复时处理
   @override
   void onWindowRestore() {
-    playController.checkDesktopFullscreen();
+    ref.read(playController.notifier).checkDesktopFullscreen();
   }
 
   /// 窗口进入全屏时处理
   @override
   void onWindowEnterFullScreen() {
-    playController.isFullscreen.value = true;
+    ref.read(playController.notifier).updateIsWideScreen(true);
   }
 
   /// 窗口退出全屏时处理
   @override
   void onWindowLeaveFullScreen() {
-    playController.isFullscreen.value = false;
+    ref.read(playController.notifier).updateIsWideScreen(false);
   }
 
   @override

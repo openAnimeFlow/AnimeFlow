@@ -11,7 +11,7 @@ import 'package:anime_flow/stores/user_info_store.dart';
 import 'package:anime_flow/webview/webview_controller.dart';
 import 'package:anime_flow/webview/webview_item.dart';
 import 'package:anime_flow/stores/episodes_state.dart';
-import 'package:anime_flow/controllers/play/play_provider.dart';
+import 'package:anime_flow/controllers/play/play_controller.dart';
 import 'package:anime_flow/stores/play_subject_state.dart';
 import 'package:anime_flow/controllers/video/source/video_source_controller.dart';
 import 'package:anime_flow/controllers/video/video_state_controller.dart';
@@ -116,7 +116,7 @@ class _VideoViewState extends ConsumerState<VideoView> with WindowListener {
     // 监听窗口状态变化，
     if (Platform.isWindows || Platform.isLinux || Platform.isMacOS) {
       windowManager.addListener(this);
-      ref.read(playProvider.notifier).checkDesktopFullscreen();
+      ref.read(playController.notifier).checkDesktopFullscreen();
     }
   }
 
@@ -267,7 +267,7 @@ class _VideoViewState extends ConsumerState<VideoView> with WindowListener {
       await DanmakuRequest.getDanDanBangumiIDByBgmBangumiID(
           subjectState.subject.value.id);
       final danmaku = await DanmakuRequest.getDanDanmaku(bgmBangumiId, episode);
-      ref.read(playProvider.notifier).addDanmaku(danmaku);
+      ref.read(playController.notifier).addDanmaku(danmaku);
       logger.i('弹幕数量为：${danmaku.length}');
 
       // 标记弹幕已加载
@@ -429,19 +429,19 @@ class _VideoViewState extends ConsumerState<VideoView> with WindowListener {
   /// 窗口恢复时处理
   @override
   void onWindowRestore() {
-    ref.read(playProvider.notifier).checkDesktopFullscreen();
+    ref.read(playController.notifier).checkDesktopFullscreen();
   }
 
   /// 窗口进入全屏时处理
   @override
   void onWindowEnterFullScreen() {
-    ref.read(playProvider.notifier).updateIsWideScreen(true);
+    ref.read(playController.notifier).updateIsWideScreen(true);
   }
 
   /// 窗口退出全屏时处理
   @override
   void onWindowLeaveFullScreen() {
-    ref.read(playProvider.notifier).updateIsWideScreen(false);
+    ref.read(playController.notifier).updateIsWideScreen(false);
   }
 
   @override

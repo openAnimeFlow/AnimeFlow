@@ -1,7 +1,7 @@
 import 'dart:async';
 
 import 'package:anime_flow/constants/storage_key.dart';
-import 'package:anime_flow/controllers/play/play_provider.dart';
+import 'package:anime_flow/controllers/play/play_controller.dart';
 import 'package:anime_flow/controllers/video/video_state_controller.dart';
 import 'package:anime_flow/repository/storage.dart';
 import 'package:anime_flow/stores/episodes_state.dart';
@@ -73,13 +73,13 @@ class _DanmakuViewState extends ConsumerState<DanmakuView>
 
     ever(episodesState.episodeIndex, (int episode) {
       if (episode > 0) {
-        ref.read(playProvider.notifier).removeDanmaku();
+        ref.read(playController.notifier).removeDanmaku();
       }
     });
 
     _playingWorker = ever(videoStateController.playing, (playing) {
       if (!mounted) return;
-      final dc = ref.read(playProvider.notifier).danmakuController;
+      final dc = ref.read(playController.notifier).danmakuController;
       if (dc == null) return;
       try {
         if (playing) {
@@ -96,7 +96,7 @@ class _DanmakuViewState extends ConsumerState<DanmakuView>
     _danmakuTimer = Timer.periodic(const Duration(seconds: 1), (timer) {
       if (!mounted) return;
 
-      final play = ref.read(playProvider);
+      final play = ref.read(playController);
       final currentPosition = videoStateController.position.value;
       final playing = videoStateController.playing.value;
 
@@ -114,8 +114,8 @@ class _DanmakuViewState extends ConsumerState<DanmakuView>
               ),
               () {
                 if (!mounted) return;
-                final p = ref.read(playProvider);
-                final n = ref.read(playProvider.notifier);
+                final p = ref.read(playController);
+                final n = ref.read(playController.notifier);
                 if (!videoStateController.playing.value || !p.danmakuOn) {
                   return;
                 }
@@ -172,7 +172,7 @@ class _DanmakuViewState extends ConsumerState<DanmakuView>
       ignoring: true,
       child: DanmakuScreen(
         createdController: (DanmakuController controller) {
-          ref.read(playProvider.notifier).attachDanmakuController(controller);
+          ref.read(playController.notifier).attachDanmakuController(controller);
           WidgetsBinding.instance.addPostFrameCallback((_) {
             try {
               controller.updateOption(

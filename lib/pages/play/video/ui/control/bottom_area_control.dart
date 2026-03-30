@@ -1,5 +1,5 @@
 import 'package:anime_flow/controllers/play/episode_controller.dart';
-import 'package:anime_flow/controllers/play/play_provider.dart';
+import 'package:anime_flow/controllers/play/play_controller.dart';
 import 'package:anime_flow/controllers/video/source/video_source_controller.dart';
 import 'package:anime_flow/controllers/video/video_state_controller.dart';
 import 'package:anime_flow/controllers/video/video_ui_controller.dart';
@@ -44,11 +44,11 @@ class _BottomAreaControlState extends ConsumerState<BottomAreaControl> {
   @override
   Widget build(BuildContext context) {
     return Obx(() {
-      final danmakuOn = ref.watch(playProvider.select((s) => s.danmakuOn));
+      final danmakuOn = ref.watch(playController.select((s) => s.danmakuOn));
       final isShowControlsUi = videoUiStateController.isShowControlsUi.value;
-      final fullscreen = ref.watch(playProvider.select((s) => s.isFullscreen));
-      final isWideScreen = ref.watch(playProvider.select((s) => s.isWideScreen));
-      final isContentExpanded = ref.watch(playProvider.select((s) => s.isContentExpanded));
+      final fullscreen = ref.watch(playController.select((s) => s.isFullscreen));
+      final isWideScreen = ref.watch(playController.select((s) => s.isWideScreen));
+      final isContentExpanded = ref.watch(playController.select((s) => s.isContentExpanded));
       final hasNextEpisode = episodeController.hasNextEpisode(episodesState);
       final leftPadding = MediaQuery.of(context).padding.left;
       return AnimatedSwitcher(
@@ -131,7 +131,7 @@ class _BottomAreaControlState extends ConsumerState<BottomAreaControl> {
                           //弹幕开关
                           InkWell(
                             onTap: () => ref
-                                .read(playProvider.notifier)
+                                .read(playController.notifier)
                                 .toggleDanmaku(),
                             child: Icon(
                                 danmakuOn
@@ -223,7 +223,7 @@ class _BottomAreaControlState extends ConsumerState<BottomAreaControl> {
                             duration: const Duration(milliseconds: 500),
                             child: IconButton(
                                 onPressed: () {
-                                  ref.read(playProvider.notifier).toggleFullScreen();
+                                  ref.read(playController.notifier).toggleFullScreen();
                                 },
                                 padding: const EdgeInsets.all(0),
                                 icon: Icon(

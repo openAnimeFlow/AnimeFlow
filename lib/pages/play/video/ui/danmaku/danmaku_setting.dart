@@ -1,5 +1,5 @@
 import 'package:anime_flow/constants/storage_key.dart';
-import 'package:anime_flow/controllers/play/play_provider.dart';
+import 'package:anime_flow/controllers/play/play_controller.dart';
 import 'package:anime_flow/repository/storage.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -19,7 +19,7 @@ class _DanmakuSettingState extends ConsumerState<DanmakuSetting> {
   @override
   Widget build(BuildContext context) {
     final danmakuController =
-        ref.read(playProvider.notifier).danmakuController;
+        ref.read(playController.notifier).danmakuController;
     if (danmakuController == null) {
       // 弹幕控制器通常在 `DanmakuView` 初始化后才会 attach。
       // 若弹窗过早打开，则先不渲染，避免空指针。

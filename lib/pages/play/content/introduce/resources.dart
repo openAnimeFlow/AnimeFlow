@@ -1,4 +1,4 @@
-import 'package:anime_flow/controllers/play/play_provider.dart';
+import 'package:anime_flow/controllers/play/play_controller.dart';
 import 'package:anime_flow/controllers/video/source/video_source_controller.dart';
 import 'package:anime_flow/controllers/video/video_state_controller.dart';
 import 'package:anime_flow/stores/play_subject_state.dart';
@@ -36,7 +36,7 @@ class _VideoResourcesViewState extends ConsumerState<VideoResourcesView> {
       videoStateController.player.stop();
       videoSourceController.loadVideoPage(url);
     }
-    final isWideScreen = ref.read(playProvider).isWideScreen;
+    final isWideScreen = ref.read(playController).isWideScreen;
     if (isWideScreen) {
       // 宽屏模式：使用侧边抽屉
       Get.generalDialog(

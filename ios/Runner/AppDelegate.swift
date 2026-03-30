@@ -104,13 +104,22 @@ import Darwin
     var ptr = ifaddr
     while let p = ptr?.pointee {
       let name = String(cString: p.ifa_name)
-      // 跳过回环接口
-      if name != "lo0",
-         (p.ifa_flags & UInt32(IFF_UP)) != 0,
+
+      // iOS 上 ifa_data 的网络统计只在 AF_LINK 下有效。
+      // 仅统计活跃且非回环接口，避免拿到 0 或无效计数。
+      let isUp = (p.ifa_flags & UInt32(IFF_UP)) != 0
+      let isLoopback = (p.ifa_flags & UInt32(IFF_LOOPBACK)) != 0
+      let family = p.ifa_addr?.pointee.sa_family
+      let isRelevantInterface = name.hasPrefix("en") || name.hasPrefix("pdp_ip")
+
+      if isUp,
+         !isLoopback,
+         family == UInt8(AF_LINK),
+         isRelevantInterface,
          let data = p.ifa_data {
-        let ifData = data.assumingMemoryBound(to: if_data.self).pointee
-        rx += UInt64(ifData.ifi_ibytes)
-        tx += UInt64(ifData.ifi_obytes)
+        let ifData = data.assumingMemoryBound(to: if_data64.self).pointee
+        rx += ifData.ifi_ibytes
+        tx += ifData.ifi_obytes
       }
       ptr = p.ifa_next
     }

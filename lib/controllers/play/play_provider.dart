@@ -86,7 +86,6 @@ class PlayNotifier extends Notifier<PlayState> {
   DanmakuController? _danmakuController;
   Timer? _saveSettingsTimer;
 
-  /// 与 GetX 版 [PlayController.danmakuController] 相同，供外部赋值/读取
   DanmakuController? get danmakuController => _danmakuController;
 
   set danmakuController(DanmakuController? value) => _danmakuController = value;
@@ -111,6 +110,7 @@ class PlayNotifier extends Notifier<PlayState> {
     } catch (_) {}
   }
 
+  /// 宽屏切换
   void updateIsWideScreen(bool value) {
     if (state.isWideScreen != value) {
       state = state.copyWith(isWideScreen: value);
@@ -139,6 +139,7 @@ class PlayNotifier extends Notifier<PlayState> {
     }
   }
 
+  /// 检测桌面端全屏状态
   Future<void> checkDesktopFullscreen() async {
     if (SystemUtil.isDesktop) {
       state = state.copyWith(isFullscreen: await windowManager.isFullScreen());

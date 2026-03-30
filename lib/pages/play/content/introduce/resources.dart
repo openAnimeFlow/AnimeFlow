@@ -1,21 +1,23 @@
 import 'package:anime_flow/controllers/play/play_controller.dart';
+import 'package:anime_flow/controllers/play/play_provider.dart';
 import 'package:anime_flow/controllers/video/source/video_source_controller.dart';
 import 'package:anime_flow/controllers/video/video_state_controller.dart';
 import 'package:anime_flow/stores/play_subject_state.dart';
 import 'package:anime_flow/widget/animation_network_image/animation_network_image.dart';
 import 'package:anime_flow/widget/play_content/source_drawers/video_source_drawers.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:get/get.dart';
 import 'package:logger/logger.dart';
 
-class VideoResourcesView extends StatefulWidget {
+class VideoResourcesView extends ConsumerStatefulWidget {
   const VideoResourcesView({super.key});
 
   @override
-  State<VideoResourcesView> createState() => _VideoResourcesViewState();
+  ConsumerState<VideoResourcesView> createState() => _VideoResourcesViewState();
 }
 
-class _VideoResourcesViewState extends State<VideoResourcesView> {
+class _VideoResourcesViewState extends ConsumerState<VideoResourcesView> {
   late VideoSourceController videoSourceController;
   late PlaySubjectState playSubjectState;
   late PlayController playController;
@@ -37,8 +39,8 @@ class _VideoResourcesViewState extends State<VideoResourcesView> {
       videoStateController.player.stop();
       videoSourceController.loadVideoPage(url);
     }
-
-    if (playController.isWideScreen.value) {
+    final isWideScreen = ref.read(playProvider).isWideScreen;
+    if (isWideScreen) {
       // 宽屏模式：使用侧边抽屉
       Get.generalDialog(
         barrierDismissible: true,

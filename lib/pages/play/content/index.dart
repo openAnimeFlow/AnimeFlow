@@ -1,26 +1,25 @@
+import 'package:anime_flow/controllers/play/play_provider.dart';
 import 'package:anime_flow/stores/episodes_state.dart';
-import 'package:anime_flow/controllers/play/play_controller.dart';
 import 'package:anime_flow/http/requests/bgm_request.dart';
 import 'package:anime_flow/models/item/bangumi/episode_comments_item.dart';
 import 'package:anime_flow/pages/play/content/introduce/index.dart';
 import 'package:anime_flow/widget/danmaku_text_field.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:get/get.dart';
 import 'package:logger/logger.dart';
 import 'comments/index.dart';
 
-class ContentView extends StatefulWidget {
-
+class ContentView extends ConsumerStatefulWidget {
   const ContentView({super.key});
 
   @override
-  State<ContentView> createState() => _ContentViewState();
+  ConsumerState<ContentView> createState() => _ContentViewState();
 }
 
-class _ContentViewState extends State<ContentView>
+class _ContentViewState extends ConsumerState<ContentView>
     with SingleTickerProviderStateMixin {
   late EpisodesState episodesState;
-  late PlayController playPageController;
   final List<String> _tabs = ['简介', '吐槽'];
   late TabController _tabController;
   final GlobalKey _introduceKey = GlobalKey();
@@ -35,11 +34,10 @@ class _ContentViewState extends State<ContentView>
     super.initState();
     episodesState = Get.find<EpisodesState>();
     _tabController = TabController(length: _tabs.length, vsync: this);
-    playPageController = Get.find<PlayController>();
-    
+
     // 监听 Tab 切换
     _tabController.addListener(_onTabChanged);
-    
+
     // 监听 episodeId 变化
     _episodeIdWorker = ever(episodesState.episodeId, (episodeId) {
       // 当 episodeId 变化时，重置 comments 并重新获取
@@ -114,45 +112,35 @@ class _ContentViewState extends State<ContentView>
       }
     }
   }
+
   @override
   Widget build(BuildContext context) {
     return PreferredSize(
       preferredSize: const Size.fromHeight(100),
       child: Column(
         children: [
-           Row(
+          Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               TabBar(
-                padding: EdgeInsets.only(top: MediaQuery.of(context).padding.top),
+                padding:
+                    EdgeInsets.only(top: MediaQuery.of(context).padding.top),
                 dividerHeight: 0,
                 controller: _tabController,
                 tabAlignment: TabAlignment.start,
                 isScrollable: true,
                 tabs: _tabs.map((name) => Tab(text: name)).toList(),
               ),
-              Obx(
-                    () => playPageController.isWideScreen.value
-                    ? const Spacer()
-                    : const SizedBox(
-                  width: 200,
-                  child: Padding(
-                    padding: EdgeInsets.symmetric(horizontal: 8),
-                    child: DanmakuTextField(),
-                  ),
-                ),
-              )
+              const _PlayWideScreenDanmakuSlot(),
             ],
           ),
-
           const Divider(height: 1),
           Expanded(
             child: TabBarView(
               controller: _tabController,
               children: [
                 //简介
-                IntroduceView(
-                  key: _introduceKey),
+                IntroduceView(key: _introduceKey),
                 //吐槽
                 CommentsView(
                   key: _commentKey,
@@ -162,6 +150,28 @@ class _ContentViewState extends State<ContentView>
             ),
           ),
         ],
+      ),
+    );
+  }
+}
+
+
+/// 弹幕输入框
+/// 仅监听 [PlayState.isWideScreen]，避免整页 [ContentView] 随宽屏状态重建。
+class _PlayWideScreenDanmakuSlot extends ConsumerWidget {
+  const _PlayWideScreenDanmakuSlot();
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final isWideScreen =
+    ref.watch(playProvider.select((s) => s.isWideScreen));
+    return isWideScreen
+        ? const Spacer()
+        : const SizedBox(
+      width: 200,
+      child: Padding(
+        padding: EdgeInsets.symmetric(horizontal: 8),
+        child: DanmakuTextField(),
       ),
     );
   }

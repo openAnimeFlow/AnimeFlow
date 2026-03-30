@@ -1,3 +1,4 @@
+import 'package:anime_flow/controllers/play/play_provider.dart';
 import 'package:anime_flow/controllers/video/source/video_source_controller.dart';
 import 'package:anime_flow/controllers/video/video_state_controller.dart';
 import 'package:anime_flow/pages/play/video/ui/setting/video_setting.dart';
@@ -49,6 +50,7 @@ class _TopAreaControlState extends ConsumerState<TopAreaControl> {
       // 全屏状态
       final fullscreen = playController.isFullscreen.value;
       final leftPadding = MediaQuery.of(context).padding.left;
+      final isWideScreen = ref.watch(playProvider.select((s) => s.isWideScreen));
       return AnimatedSwitcher(
         duration: const Duration(milliseconds: 200),
         transitionBuilder: (child, animation) {
@@ -147,8 +149,7 @@ class _TopAreaControlState extends ConsumerState<TopAreaControl> {
                             children: [
                               if (videoStateController.position.value >
                                       Duration.zero &&
-                                  (playController.isWideScreen.value ||
-                                      fullscreen))
+                                  (isWideScreen || fullscreen))
                                 IconButton(
                                   onPressed: () {
                                     Get.generalDialog(
@@ -222,7 +223,7 @@ class _TopAreaControlState extends ConsumerState<TopAreaControl> {
                                   ),
                                 ),
                               if (SystemUtil.isDesktop)
-                                Obx(() => playController.isWideScreen.value
+                                Obx(() => isWideScreen
                                     ? IconButton(
                                         onPressed: () => playController
                                             .toggleContentExpanded(),

@@ -25,6 +25,10 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
+      - uses: maxim-lobanov/setup-xcode@v1
+        with:
+            xcode-version: 15.4
+
       - name: Extract version
         run: |
           VERSION=$(grep '^version:' pubspec.yaml | sed 's/version: //')

@@ -7,8 +7,8 @@ import 'package:get/get.dart';
 import 'package:hive_ce_flutter/hive_flutter.dart';
 import 'package:media_kit/media_kit.dart';
 import 'package:anime_flow/providers/global_provider_container.dart';
+import 'package:anime_flow/providers/theme_provider.dart';
 import 'package:anime_flow/routes/index.dart';
-import 'package:anime_flow/controllers/theme_controller.dart';
 import 'package:window_manager/window_manager.dart';
 
 void main() async {
@@ -17,8 +17,7 @@ void main() async {
   await dotenv.load(fileName: ".env");
   await Hive.initFlutter();
   await Storage.init();
-  final themeController = Get.put(ThemeController());
-  await themeController.initTheme();
+  await globalProviderContainer.read(themeProvider.notifier).loadFromPrefs();
 
   // 桌面平台初始化窗口管理器
   if (Platform.isWindows || Platform.isLinux || Platform.isMacOS) {
@@ -38,33 +37,19 @@ void main() async {
   ));
 }
 
-class MyApp extends StatelessWidget {
+class MyApp extends ConsumerWidget {
   const MyApp({super.key});
 
-  ThemeController get themeController => Get.find<ThemeController>();
-
   @override
-  Widget build(BuildContext context) {
-    return GetBuilder<ThemeController>(
-      builder: (controller) {
-        return GetMaterialApp(
-          // debugShowCheckedModeBanner: false,
-          theme: controller.lightTheme,
-          darkTheme: controller.darkTheme,
-          themeMode: controller.themeMode,
-          initialRoute: RouteName.main,
-          getPages: getPages(),
-          // builder: (context, child) {
-          //   if (Utils.isDesktop) {
-          //     return WindowsTitleBar(
-          //       child: child,
-          //     );
-          //   } else {
-          //     return child ?? const SizedBox.shrink();
-          //   }
-          // },
-        );
-      },
+  Widget build(BuildContext context, WidgetRef ref) {
+    final themeState = ref.watch(themeProvider);
+    return GetMaterialApp(
+      // debugShowCheckedModeBanner: false,
+      theme: buildLightTheme(themeState.seedColor),
+      darkTheme: buildDarkTheme(themeState.seedColor),
+      themeMode: themeState.themeMode,
+      initialRoute: RouteName.main,
+      getPages: getPages(),
     );
   }
 }

@@ -3,7 +3,6 @@ import 'package:anime_flow/pages/recommend/timeline/index.dart';
 import 'package:anime_flow/routes/index.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:anime_flow/controllers/theme_controller.dart';
 
 class RecommendPage extends StatefulWidget {
   const RecommendPage({super.key});
@@ -14,7 +13,6 @@ class RecommendPage extends StatefulWidget {
 
 class _RecommendPageState extends State<RecommendPage>
     with SingleTickerProviderStateMixin {
-  late ThemeController themeController;
   late TabController _tabController;
   final _animeKey = GlobalKey();
   final _timelineKey = GlobalKey();
@@ -23,7 +21,6 @@ class _RecommendPageState extends State<RecommendPage>
   @override
   void initState() {
     super.initState();
-    themeController = Get.find<ThemeController>();
     _tabController = TabController(length: _tabs.length, vsync: this);
   }
 

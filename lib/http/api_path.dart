@@ -87,7 +87,7 @@ class CommonApi {
 }
 
 class AnimeFlowApi {
-  static const String animeFlowApi = 'https://www.ligg.top';
+  static const String animeFlowApi = 'https://ligg.top';
 
   static const String token = '/oauth/token';
 

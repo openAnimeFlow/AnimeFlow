@@ -186,11 +186,6 @@ class _NoNoLoginView extends State<NoLoginView> {
                         child: const Text('登录授权'),
                       ),
               ),
-              if (_isAuthorizing)
-                const Text(
-                  '服务器已过期没💴续费了，所有登录功能暂时无法使用，如果项目用的人多了或者有人赞助在恢复登录功能吧',
-                  style: TextStyle(fontWeight: FontWeight.bold),
-                )
             ],
           ),
         )

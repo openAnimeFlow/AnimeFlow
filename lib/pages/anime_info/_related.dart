@@ -1,4 +1,5 @@
 part of 'synopsis.dart';
+
 ///相关条目
 class _RelatedView extends StatefulWidget {
   final int subjectId;
@@ -79,7 +80,8 @@ class _RelatedViewState extends State<_RelatedView> {
                 );
                 return Container(
                   width: 100,
-                  margin: const EdgeInsets.only(right: 5),
+                  margin: EdgeInsets.only(
+                      right: index == relation.data.length - 1 ? 0 : 5),
                   child: InkWell(
                     onTap: () {
                       Navigator.of(context).pushNamed(RouteName.animeInfo,

@@ -86,7 +86,9 @@ class _ProducersViewState extends State<_ProducersView> {
                   spacing: 3,
                   children: [
                     Container(
-                      margin: const EdgeInsets.only(right: 10),
+                      //获取最后一项
+                      margin: EdgeInsets.only(
+                          right: index == staffData.data.length - 1 ? 0 : 8),
                       child: AspectRatio(
                         aspectRatio: 1,
                         child: AnimationNetworkImage(

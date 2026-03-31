@@ -301,7 +301,7 @@ class _AnimePageState extends State<AnimePage>
         ),
       ),
       floatingActionButton: _showBackToTopButton
-          ? FloatingActionButton.small(
+          ? FloatingActionButton(
               onPressed: scrollToTop,
               child: const Icon(Icons.keyboard_arrow_up_rounded),
             )

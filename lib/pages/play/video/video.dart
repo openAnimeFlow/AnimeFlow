@@ -90,6 +90,8 @@ class _VideoViewState extends ConsumerState<VideoView> with WindowListener {
     ever(episodesState.episodeIndex, (int episode) {
       if (episode > 0) {
         if (episode != _lastEpisodeIndex) {
+          _hasDanmakuLoaded = false;
+          videoSourceController.userManuallySelected = false;
           videoStateController.player.stop();
           _selectResourceAfterInit();
         }
@@ -99,7 +101,6 @@ class _VideoViewState extends ConsumerState<VideoView> with WindowListener {
     // 监听视频播放完成
     videoStateController.player.stream.completed.listen((completed) {
       if (completed) {
-        videoSourceController.userManuallySelected = false;
         _autoSwitchToNextEpisode();
         PlayRepository.deletePlayHistoryByPosition(subjectState.subject.value.id);
       }

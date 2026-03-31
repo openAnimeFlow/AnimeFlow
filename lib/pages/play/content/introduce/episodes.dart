@@ -90,7 +90,6 @@ class EpisodesComponentsState extends State<EpisodesComponents> {
                         borderRadius: BorderRadius.circular(10),
                         onTap: () {
                           final episodeIndex = index + 1;
-                          videoSourceController.userManuallySelected = false;
                           episodesState.setEpisodeSort(
                               episodeId: episode.id,
                               episodeIndex: episodeIndex,
@@ -178,7 +177,6 @@ class EpisodesComponentsState extends State<EpisodesComponents> {
                       borderRadius: BorderRadius.circular(10),
                       onTap: () {
                         final episodeIndex = index + 1;
-                        videoSourceController.userManuallySelected = false;
                         episodesState.setEpisodeSort(
                             episodeId: episode.id,
                             episodeIndex: episodeIndex,

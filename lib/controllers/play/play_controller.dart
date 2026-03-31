@@ -37,8 +37,12 @@ class PlayState {
 
   /// 全屏状态
   final bool isFullscreen;
+
+  /// 弹幕数据
   final Map<int, List<Danmaku>> danDanmakus;
   final bool danmakuOn;
+
+  /// 隐藏的弹幕平台
   final Set<String> hiddenPlatforms;
 
   PlayState copyWith({

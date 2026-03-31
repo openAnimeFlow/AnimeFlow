@@ -118,7 +118,6 @@ class _BottomAreaControlState extends ConsumerState<BottomAreaControl> {
                           if (hasNextEpisode)
                             InkWell(
                               onTap: () {
-                                videoSourceController.userManuallySelected = false;
                                 episodeController
                                     .switchToNextEpisode(episodesState);
                               },
@@ -203,11 +202,7 @@ class _BottomAreaControlState extends ConsumerState<BottomAreaControl> {
                                       },
                                       pageBuilder: (context, animation,
                                           secondaryAnimation) {
-                                        return EpisodesView(
-                                          onEpisodeSelected: (episodeIndex) {
-                                            videoSourceController.userManuallySelected = false;
-                                          },
-                                        );
+                                        return const EpisodesView();
                                       });
                                 },
                                 child: const Text("选集")),

@@ -11,8 +11,8 @@ class Storage {
   static Future init() async {
     /// 通过 hive_registrar.g.dart 统一注册所有已生成的 Hive TypeAdapter。
     Hive.registerAdapters();
-    crawlConfigs = await Hive.openBox(StorageKey.crawlConfigs);
-    setting = await Hive.openBox(StorageKey.settingsKey);
+    crawlConfigs = await _openBoxWithFallback<dynamic>(StorageKey.crawlConfigs);
+    setting = await _openBoxWithFallback<dynamic>(StorageKey.settingsKey);
     playHistory = await _openBoxWithFallback<PlayHistory>(StorageKey.playHistoryKey);
   }
 

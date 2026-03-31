@@ -166,7 +166,7 @@ jobs:
           Add-Content -Path .env -Value "DANDANPLAY_SECRET=${{ secrets.DANDANPLAY_SECRET }}"
 
       - name: Setup Flutter
-        uses: subosito/flutter-action@v2
+        uses: subosito/flutter-action@v2.23.0
         with:
           channel: stable
           flutter-version-file: pubspec.yaml

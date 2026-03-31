@@ -180,7 +180,7 @@ jobs:
           echo "DANDANPLAY_SECRET=${{ secrets.DANDANPLAY_SECRET }}" >> .env
 
       - name: Setup Flutter
-        uses: subosito/flutter-action@v2
+        uses: subosito/flutter-action@v2.23.0
         with:
           channel: stable
           flutter-version-file: pubspec.yaml

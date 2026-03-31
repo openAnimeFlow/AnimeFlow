@@ -853,9 +853,12 @@ class _CaptchaViewState extends State<CaptchaView> {
       child: Center(
         child: SingleChildScrollView(
           child: Padding(
-            padding: EdgeInsets.symmetric(horizontal: 16),
+            padding: EdgeInsets.only(
+                left: 16,
+                right: 16,
+                bottom: View.of(context).viewInsets.bottom),
             child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
+              mainAxisAlignment: MainAxisAlignment.start,
               children: [
                 Icon(Icons.shield_outlined,
                     size: 36, color: Theme.of(context).colorScheme.primary),

@@ -36,6 +36,7 @@ class _VideoResourcesViewState extends ConsumerState<VideoResourcesView> {
       videoStateController.player.stop();
       videoSourceController.loadVideoPage(url);
     }
+
     final isWideScreen = ref.read(playController).isWideScreen;
     if (isWideScreen) {
       // 宽屏模式：使用侧边抽屉
@@ -87,10 +88,12 @@ class _VideoResourcesViewState extends ConsumerState<VideoResourcesView> {
           child: Padding(
             padding: const EdgeInsets.all(10),
             child: Row(
+              spacing: 8,
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 Expanded(
                   child: Column(
+                    spacing: 5,
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       const Text(
@@ -99,11 +102,11 @@ class _VideoResourcesViewState extends ConsumerState<VideoResourcesView> {
                           fontSize: 15,
                         ),
                       ),
-                      const SizedBox(height: 5),
                       Obx(() => videoSourceController.isLoading.value ||
                               videoSourceController
                                   .webSiteTitle.value.isNotEmpty
                           ? Row(
+                              spacing: 5,
                               children: [
                                 ClipRRect(
                                   borderRadius: BorderRadius.circular(5),
@@ -113,15 +116,15 @@ class _VideoResourcesViewState extends ConsumerState<VideoResourcesView> {
                                       url: videoSourceController
                                           .webSiteIcon.value),
                                 ),
-                                const SizedBox(width: 5),
-                                Text(
+                                Expanded(
+                                    child: Text(
                                   videoSourceController.webSiteTitle.value,
-                                  maxLines: 3,
+                                  maxLines: 1,
                                   overflow: TextOverflow.ellipsis,
                                   style: const TextStyle(
                                       fontSize: 20,
                                       fontWeight: FontWeight.bold),
-                                )
+                                ))
                               ],
                             )
                           : const Row(
@@ -138,7 +141,6 @@ class _VideoResourcesViewState extends ConsumerState<VideoResourcesView> {
                     ],
                   ),
                 ),
-                const SizedBox(width: 8),
                 OutlinedButton.icon(
                   onPressed: () {
                     _showSourceDrawer();

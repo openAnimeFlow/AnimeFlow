@@ -355,7 +355,7 @@ class _VideoSourceDrawersState extends State<VideoSourceDrawers> {
                                   ),
                                 ] else if (data.needsCaptcha) ...[
                                   const SizedBox(width: 4),
-                                  Icon(
+                                  const Icon(
                                     Icons.shield_outlined,
                                     size: 14,
                                     color: Colors.blue,
@@ -395,26 +395,42 @@ class _VideoSourceDrawersState extends State<VideoSourceDrawers> {
       }
 
       final selectedResource = dataSource[selectedIndex];
+      final episodeResources = selectedResource.episodeResources;
 
       if (selectedResource.needsCaptcha) {
         return _buildCaptchaRequired(selectedResource);
       }
 
+      if (episodeResources.isEmpty) {
+        return Material(
+          child: Center(
+            child: Column(
+              spacing: 8,
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                const Text('未找到播放源'),
+                ElevatedButton(
+                    onPressed: () => _performSearch(),
+                    child: const Text('重新搜索'))
+              ],
+            ),
+          ),
+        );
+      }
       return Material(
         child: ListView.builder(
           padding: EdgeInsets.zero,
-          itemCount: selectedResource.episodeResources.length,
+          itemCount: episodeResources.length,
           itemBuilder: (context, index) {
-            final resourceItem = selectedResource.episodeResources[index];
-            final isLastItem =
-                index == selectedResource.episodeResources.length - 1;
+            final resourceItem = episodeResources[index];
+            final isLastItem = index == episodeResources.length - 1;
 
             // 当前选中剧集对应的剧集数据
             final currentEpisode = resourceItem.episodes.firstWhereOrNull(
               (ep) => ep.episodeSort == episodesController.episodeIndex.value,
             );
 
-            final excludedEpisodesCount = selectedResource.episodeResources
+            final excludedEpisodesCount = episodeResources
                 .expand((item) => item.episodes.where((ep) =>
                     ep.episodeSort != episodesController.episodeIndex.value))
                 .length;
@@ -459,7 +475,7 @@ class _VideoSourceDrawersState extends State<VideoSourceDrawers> {
 
                   // 当开关打开时，显示所有资源的所有其他剧集
                   if (isShowEpisodes)
-                    ...selectedResource.episodeResources.expand((item) {
+                    ...episodeResources.expand((item) {
                       // 获取该资源的所有非当前集数的剧集
                       final excludedEpisodes = item.episodes
                           .where(

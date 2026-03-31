@@ -1,6 +1,5 @@
 import 'package:anime_flow/constants/storage_key.dart';
 import 'package:anime_flow/controllers/app/app_info_controller.dart';
-import 'package:anime_flow/controllers/main_page/main_page_state.dart';
 import 'package:anime_flow/controllers/shaders/shaders_provider.dart';
 import 'package:anime_flow/providers/global_provider_container.dart';
 import 'package:anime_flow/models/item/tab_item.dart';
@@ -25,7 +24,6 @@ class MainPage extends StatefulWidget {
 
 class _MainPageState extends State<MainPage> {
   late UserInfoStore userInfoStore;
-  late MainPageState mainPageState;
   late AppInfoController appInfoController;
   final setting = Storage.setting;
   int _currentIndex = 0;
@@ -76,7 +74,6 @@ class _MainPageState extends State<MainPage> {
     super.initState();
     autoUpdate = setting.get(StorageKey.autoUpdateKey, defaultValue: true);
     userInfoStore = Get.put(UserInfoStore(), permanent: true);
-    mainPageState = Get.put(MainPageState(), permanent: true);
     appInfoController = Get.put(AppInfoController(), permanent: true);
     globalProviderContainer.read(shadersControllerProvider.future);
     // TODO 从配置中初始化对应的页面
@@ -201,7 +198,6 @@ class _MainPageState extends State<MainPage> {
   Widget build(BuildContext context) {
     final bool isDesktop = MediaQuery.of(context).size.width >= 640;
     final colorScheme = Theme.of(context).colorScheme;
-    mainPageState.changeIsDesktop(isDesktop);
     final desktop = SystemUtil.isDesktop;
     return Scaffold(
       extendBody: true,

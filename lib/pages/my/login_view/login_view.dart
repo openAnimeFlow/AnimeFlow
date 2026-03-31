@@ -1,6 +1,5 @@
 import 'dart:ui';
 
-import 'package:anime_flow/controllers/main_page/main_page_state.dart';
 import 'package:anime_flow/routes/index.dart';
 import 'package:anime_flow/widget/animation_network_image/animation_network_image.dart';
 import 'package:anime_flow/http/requests/bgm_request.dart';
@@ -27,7 +26,6 @@ class _LoginViewState extends State<LoginView>
   final double _contentHeight = 200.0; // 头部内容区域的高度
   late TabController _tabController;
   late UserInfoStore userInfoStore;
-  late MainPageState mainPageState;
   bool isPinned = false;
 
   // 为每个 tab 类型缓存数据，key 是 type (1-5)
@@ -123,7 +121,6 @@ class _LoginViewState extends State<LoginView>
     _tabController =
         TabController(length: _tabs.length, vsync: this, initialIndex: 2);
     userInfoStore = Get.find<UserInfoStore>();
-    mainPageState = Get.find<MainPageState>();
     // 监听 tab 切换，自动加载对应类型的数据（如果缓存中没有）
     _tabController.addListener(() {
       if (!_tabController.indexIsChanging) {

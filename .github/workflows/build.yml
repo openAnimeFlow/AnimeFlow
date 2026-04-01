@@ -168,8 +168,10 @@ jobs:
       - name: Extract version
         shell: pwsh
         run: |
-          $version = (Select-String -Path pubspec.yaml -Pattern '^version:' | ForEach-Object { $_.Line -replace 'version: ', '' })
+          $version = (Select-String -Path pubspec.yaml -Pattern '^version:' | ForEach-Object { $_.Line -replace 'version: ', '' }).Trim()
+          $semver = ($version -split '\+')[0].Trim()
           echo "VERSION=$version" >> $env:GITHUB_ENV
+          echo "INSTALLER_VERSION=$semver" >> $env:GITHUB_ENV
 
       - name: Create .env file
         shell: pwsh
@@ -190,7 +192,7 @@ jobs:
 
       - name: Build Windows
         run: |
-          flutter build windows
+          flutter build windows --release
           echo "Windows build completed"
 
       - name: Create ZIP archive
@@ -199,11 +201,53 @@ jobs:
           Compress-Archive -Path "build/windows/x64/runner/Release/*" -DestinationPath "AnimeFlow-windows-${{ env.VERSION }}.zip" -Force
           echo "Created AnimeFlow-windows-${{ env.VERSION }}.zip"
 
+      - name: Install Inno Setup 6
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = 'Stop'
+          $dst = Join-Path $env:TEMP 'innosetup-install.exe'
+          Invoke-WebRequest -Uri 'https://jrsoftware.org/download.php/is.exe' -OutFile $dst -UseBasicParsing
+          Start-Process -FilePath $dst -ArgumentList '/VERYSILENT','/SUPPRESSMSGBOXES','/NORESTART' -Wait
+          $iscc = Join-Path ${env:ProgramFiles(x86)} 'Inno Setup 6\ISCC.exe'
+          if (-not (Test-Path $iscc)) { $iscc = Join-Path $env:ProgramFiles 'Inno Setup 6\ISCC.exe' }
+          if (-not (Test-Path $iscc)) { throw "ISCC.exe not found after Inno Setup install" }
+          echo "ISCC_PATH=$iscc" >> $env:GITHUB_ENV
+          $innoDir = Split-Path $iscc -Parent
+          $langDir = Join-Path $innoDir 'Languages'
+          if (-not (Test-Path $langDir)) { throw "Inno Setup Languages folder not found: $langDir" }
+          $srcIsl = Join-Path $PWD 'assets\inno-setup\Chinese.isl'
+          if (-not (Test-Path $srcIsl)) { throw "Missing repo file: $srcIsl" }
+          Copy-Item -LiteralPath $srcIsl -Destination (Join-Path $langDir 'Chinese.isl') -Force
+
+      - name: Patch installer.iss version and compile setup
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = 'Stop'
+          $v = $env:INSTALLER_VERSION
+          if ([string]::IsNullOrWhiteSpace($v)) { throw 'INSTALLER_VERSION is empty; check pubspec version line.' }
+          $path = Join-Path $PWD 'installer.iss'
+          $c = [System.IO.File]::ReadAllText($path, [System.Text.UTF8Encoding]::new($false))
+          $defLine = [regex]::Match($c, '(?m)^\s*#define\s+MyAppVersion\s+"[^"]*"')
+          if (-not $defLine.Success) {
+            throw 'installer.iss: no line matching #define MyAppVersion "..."; cannot patch.'
+          }
+          $c = $c -replace '(?m)^\s*#define\s+MyAppVersion\s+"[^"]*"', "#define MyAppVersion    `"$v`""
+          $mavLine = ($c -split "`r?`n" | Where-Object { $_ -match '^\s*#define\s+MyAppVersion\s+' } | Select-Object -First 1)
+          if ($mavLine -notmatch [regex]::Escape($v)) {
+            throw "installer.iss: MyAppVersion not updated to $v. Line: $mavLine"
+          }
+          [System.IO.File]::WriteAllText($path, $c, [System.Text.UTF8Encoding]::new($false))
+          Start-Process -FilePath $env:ISCC_PATH -ArgumentList "`"$path`"" -Wait -NoNewWindow
+          $exe = "AnimeFlow-Setup-$v-x64.exe"
+          if (-not (Test-Path $exe)) { throw "Expected installer not found: $exe" }
+
       - name: Archive artifacts
         uses: actions/upload-artifact@v4
         with:
           name: windows
-          path: AnimeFlow-windows-${{ env.VERSION }}.zip
+          path: |
+            AnimeFlow-windows-${{ env.VERSION }}.zip
+            AnimeFlow-Setup-${{ env.INSTALLER_VERSION }}-x64.exe
           if-no-files-found: ignore
 
   flutter-build-linux:

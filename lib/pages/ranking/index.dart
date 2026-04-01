@@ -3,11 +3,11 @@ import 'package:anime_flow/http/requests/bgm_request.dart';
 import 'package:anime_flow/models/enums/sort_type.dart';
 import 'package:anime_flow/models/item/bangumi/subject_item.dart';
 import 'package:anime_flow/models/item/subject_basic_data_item.dart';
-import 'package:anime_flow/routes/index.dart';
+import 'package:anime_flow/routes/routes.dart';
 import 'package:anime_flow/utils/layout_util.dart';
 import 'package:anime_flow/widget/subject_card.dart';
 import 'package:flutter/material.dart';
-import 'package:get/get.dart';
+import 'package:go_router/go_router.dart';
 import 'package:logger/logger.dart';
 
 class RankingPage extends StatefulWidget {
@@ -360,8 +360,8 @@ class _RankingPageState extends State<RankingPage> {
                                   image: data.images.large,
                                 );
                                 return InkWell(
-                                  onTap: () => Get.toNamed(RouteName.animeInfo,
-                                      arguments: subjectBasicData),
+                                  onTap: () => context.push(RouteName.animeInfo,
+                                      extra: subjectBasicData),
                                   child: SubjectCard(
                                       rating: data.rating.rank,
                                       image: data.images.large,

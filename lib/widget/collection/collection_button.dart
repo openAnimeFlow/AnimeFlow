@@ -1,10 +1,11 @@
 import 'package:anime_flow/http/requests/bgm_request.dart';
 import 'package:anime_flow/models/enums/collect_type.dart';
 import 'package:anime_flow/models/item/bangumi/subjects_info_item.dart';
-import 'package:anime_flow/routes/index.dart';
+import 'package:anime_flow/routes/routes.dart';
 import 'package:anime_flow/stores/user_info_store.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:go_router/go_router.dart';
 
 class CollectionButton extends StatefulWidget {
   final int subjectId;
@@ -51,10 +52,7 @@ class _CollectionButtonState extends State<CollectionButton> {
 
     return Obx(() => userInfoStore.userInfo.value == null
         ? OutlinedButton(
-            onPressed: () => Get.offAllNamed(
-              RouteName.main,
-              arguments: 2,
-            ),
+            onPressed: () => context.go(RouteName.main, extra: 2),
             style: OutlinedButton.styleFrom(
               side: BorderSide(color: Theme.of(context).colorScheme.primary),
               shape: RoundedRectangleBorder(

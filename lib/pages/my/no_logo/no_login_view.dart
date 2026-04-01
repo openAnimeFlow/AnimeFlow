@@ -1,7 +1,7 @@
-import 'package:anime_flow/routes/index.dart';
+import 'package:anime_flow/routes/routes.dart';
 import 'package:anime_flow/widget/animation_network_image/animation_network_image.dart';
 import 'package:flutter/material.dart';
-import 'package:get/get.dart';
+import 'package:go_router/go_router.dart';
 
 import '../my_controller.dart';
 
@@ -30,13 +30,13 @@ class _NoNoLoginView extends State<NoLoginView> {
                 crossAxisUnconstrained: false,
                 menuChildren: [
                   MenuItemButton(
-                    onPressed: () => Get.toNamed(RouteName.settings),
+                    onPressed: () => context.push(RouteName.settings),
                     child: const Row(
                       children: [Icon(Icons.settings_outlined), Text('设置')],
                     ),
                   ),
                   MenuItemButton(
-                    onPressed: () => Get.toNamed(RouteName.playRecord),
+                    onPressed: () => context.push(RouteName.playRecord),
                     child: const Row(
                       children: [
                         Icon(Icons.smart_display_outlined),

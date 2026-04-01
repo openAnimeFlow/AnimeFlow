@@ -6,7 +6,7 @@ import 'package:anime_flow/models/item/tab_item.dart';
 import 'package:anime_flow/pages/my/index.dart';
 import 'package:anime_flow/pages/ranking/index.dart';
 import 'package:anime_flow/repository/storage.dart';
-import 'package:anime_flow/routes/index.dart';
+import 'package:anime_flow/routes/routes.dart';
 import 'package:anime_flow/stores/user_info_store.dart';
 import 'package:anime_flow/utils/crawl_config.dart';
 import 'package:anime_flow/utils/systemUtil.dart';
@@ -14,9 +14,12 @@ import 'package:anime_flow/widget/animation_network_image/animation_network_imag
 import 'package:flutter/material.dart';
 import 'package:anime_flow/pages/recommend/index.dart';
 import 'package:get/get.dart';
+import 'package:go_router/go_router.dart';
 
 class MainPage extends StatefulWidget {
-  const MainPage({super.key});
+  final int initialTabIndex;
+
+  const MainPage({super.key, this.initialTabIndex = 0});
 
   @override
   State<MainPage> createState() => _MainPageState();
@@ -77,8 +80,8 @@ class _MainPageState extends State<MainPage> {
     appInfoController = Get.put(AppInfoController(), permanent: true);
     globalProviderContainer.read(shadersControllerProvider.future);
     // TODO 从配置中初始化对应的页面
-    final initialIndex = Get.arguments as int? ?? 0;
-    _currentIndex = initialIndex.clamp(0, _tabs.length - 1);
+    _currentIndex =
+        widget.initialTabIndex.clamp(0, _tabs.length - 1);
     _initializeApp();
   }
 
@@ -218,7 +221,7 @@ class _MainPageState extends State<MainPage> {
                     heroTag: 'main_search',
                     elevation: 0,
                     onPressed: () {
-                      Get.toNamed(RouteName.search);
+                      context.push(RouteName.search);
                     },
                     child: const Icon(Icons.search),
                   ),
@@ -232,7 +235,7 @@ class _MainPageState extends State<MainPage> {
                     icon: const Icon(Icons.settings_outlined),
                     iconSize: 28,
                     tooltip: '设置',
-                    onPressed: () => Get.toNamed(RouteName.settings),
+                    onPressed: () => context.push(RouteName.settings),
                   ),
                 ),
                 destinations: _buildRailDestinations(colorScheme),

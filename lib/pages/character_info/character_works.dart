@@ -1,11 +1,12 @@
 import 'package:anime_flow/http/requests/bgm_request.dart';
 import 'package:anime_flow/models/item/bangumi/character_subjects_item.dart';
 import 'package:anime_flow/models/item/subject_basic_data_item.dart';
-import 'package:anime_flow/routes/index.dart';
+import 'package:anime_flow/routes/routes.dart';
 import 'package:anime_flow/utils/bgm_utils.dart';
 import 'package:anime_flow/widget/animation_network_image/animation_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:go_router/go_router.dart';
 
 class CharacterWorksView extends StatefulWidget {
   final int characterId;
@@ -115,7 +116,7 @@ class _CharacterWorksViewState extends State<CharacterWorksView> {
             name: work.subject.nameCN ?? work.subject.name,
             image: work.subject.images.large,
           );
-          Get.toNamed(RouteName.animeInfo, arguments: subjectBasicData);
+          context.push(RouteName.animeInfo, extra: subjectBasicData);
         },
         child: Row(
           crossAxisAlignment: CrossAxisAlignment.start,

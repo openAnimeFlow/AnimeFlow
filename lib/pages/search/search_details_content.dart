@@ -1,11 +1,12 @@
 import 'package:anime_flow/models/item/bangumi/subject_item.dart';
 import 'package:anime_flow/models/item/subject_basic_data_item.dart';
-import 'package:anime_flow/routes/index.dart';
+import 'package:anime_flow/routes/routes.dart';
 import 'package:anime_flow/widget/animation_network_image/animation_network_image.dart';
 import 'package:anime_flow/widget/ranking.dart';
 import 'package:anime_flow/widget/star.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:go_router/go_router.dart';
 
 ///详情View
 class SearchDetailsContentView extends StatelessWidget {
@@ -33,7 +34,7 @@ class SearchDetailsContentView extends StatelessWidget {
         height: itemHeight,
         child: InkWell(
             onTap: () {
-              Get.toNamed(RouteName.animeInfo, arguments: subjectBasicData);
+              context.push(RouteName.animeInfo, extra: subjectBasicData);
             },
             child: Row(
               crossAxisAlignment: CrossAxisAlignment.start,

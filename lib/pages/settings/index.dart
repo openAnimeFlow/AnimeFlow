@@ -2,9 +2,10 @@ import 'package:anime_flow/pages/settings/pages/danmaku_setting_page.dart';
 import 'package:anime_flow/pages/settings/pages/plugins/plugins.dart';
 import 'package:anime_flow/pages/settings/pages/theme.dart';
 import 'package:anime_flow/controllers/setting_controller.dart';
-import 'package:anime_flow/routes/index.dart';
+import 'package:anime_flow/routes/routes.dart';
 import 'package:anime_flow/utils/systemUtil.dart';
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import 'package:anime_flow/pages/settings/pages/general_settings.dart';
 import 'package:anime_flow/pages/settings/pages/playback_settings.dart';
 import 'package:anime_flow/pages/settings/pages/about/index.dart';
@@ -120,7 +121,7 @@ class _SettingsPageState extends State<SettingsPage> {
                         child: ListTile(
                             leading: const Icon(Icons.arrow_back),
                             title: const Text("设置"),
-                            onTap: () => Get.back()),
+                            onTap: () => context.pop()),
                       ),
                       const Divider(height: 1),
                       // 菜单列表
@@ -254,7 +255,7 @@ class _SettingsPageState extends State<SettingsPage> {
                         title: Text(item.title),
                         trailing: const Icon(Icons.chevron_right),
                         onTap: () {
-                          Navigator.of(context).pushNamed(item.route);
+                          context.push(item.route);
                         },
                       );
                     }),

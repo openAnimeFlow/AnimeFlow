@@ -1,11 +1,11 @@
 import 'package:anime_flow/models/item/bangumi/calendar_item.dart';
 import 'package:anime_flow/models/item/subject_basic_data_item.dart';
-import 'package:anime_flow/routes/index.dart';
+import 'package:anime_flow/routes/routes.dart';
 import 'package:anime_flow/widget/animation_network_image/animation_network_image.dart';
 import 'package:anime_flow/widget/ranking.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
-import 'package:get/get.dart';
+import 'package:go_router/go_router.dart';
 import 'package:anime_flow/models/item/bangumi/subject_item.dart';
 
 class CalendarView extends StatefulWidget {
@@ -58,9 +58,8 @@ class _CalendarViewState extends State<CalendarView> {
                 children: [
                   if (widget.calendar != null)
                     InkWell(
-                        onTap: () =>
-                          Get.toNamed(RouteName.calendar,
-                              arguments: widget.calendar),
+                        onTap: () => context.push(RouteName.calendar,
+                            extra: widget.calendar!),
                         child: const Row(
                           children: [
                             Text(
@@ -139,14 +138,14 @@ class _CalendarViewState extends State<CalendarView> {
               padding: EdgeInsets.zero,
               itemBuilder: (BuildContext context, int index) {
                 final itemData = items[index].subject;
-                return _buildCard(itemData);
+                return _buildCard(context, itemData);
               },
             ));
       }
     }
   }
 
-  Widget _buildCard(Subject itemData) {
+  Widget _buildCard(BuildContext context, Subject itemData) {
     final subjectBasicData = SubjectBasicData(
       id: itemData.id,
       name: itemData.nameCN ?? itemData.name,
@@ -159,7 +158,7 @@ class _CalendarViewState extends State<CalendarView> {
           borderRadius: BorderRadius.circular(10),
           child: InkWell(
               onTap: () {
-                Get.toNamed(RouteName.animeInfo, arguments: subjectBasicData);
+                context.push(RouteName.animeInfo, extra: subjectBasicData);
               },
               child: Stack(
                 children: [

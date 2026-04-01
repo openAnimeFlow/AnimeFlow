@@ -1,22 +1,26 @@
 import 'package:anime_flow/http/requests/bgm_request.dart';
 import 'package:anime_flow/models/item/bangumi/actor_item.dart';
-import 'package:anime_flow/routes/index.dart';
+import 'package:anime_flow/routes/routes.dart';
 import 'package:anime_flow/utils/bgm_utils.dart';
 import 'package:anime_flow/widget/animation_network_image/animation_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:go_router/go_router.dart';
 
 ///角色列表页面
 class CharacterPage extends StatefulWidget {
-  const CharacterPage({super.key});
+  final int subjectsId;
+
+  const CharacterPage({super.key, required this.subjectsId});
 
   @override
   State<CharacterPage> createState() => _CharacterPageState();
 }
 
 class _CharacterPageState extends State<CharacterPage> {
-  late int subjectsId;
   CharactersItem? characters;
+
+  int get subjectsId => widget.subjectsId;
   final ScrollController _scrollController = ScrollController();
   bool _isLoading = false;
   int _offset = 0;
@@ -26,7 +30,6 @@ class _CharacterPageState extends State<CharacterPage> {
   @override
   void initState() {
     super.initState();
-    subjectsId = Get.arguments as int;
     _getCharacters();
 
     // 监听滚动，触发加载更多
@@ -215,12 +218,15 @@ class _CharacterPageState extends State<CharacterPage> {
       child: InkWell(
         borderRadius: BorderRadius.circular(10),
         onTap: () {
-          Get.toNamed(RouteName.characterInfo, arguments: {
-            'characterId': characterData.character.id,
-            'characterName':
-                characterData.character.nameCN ?? characterData.character.name,
-            'characterImage': characterData.character.images.large,
-          });
+          context.push(
+            RouteName.characterInfo,
+            extra: CharacterInfoExtra(
+              characterId: characterData.character.id,
+              characterName: characterData.character.nameCN ??
+                  characterData.character.name,
+              characterImage: characterData.character.images.large,
+            ),
+          );
         },
         child: Row(
           crossAxisAlignment: CrossAxisAlignment.start,

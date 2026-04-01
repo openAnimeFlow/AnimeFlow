@@ -18,7 +18,9 @@ part 'header_content.dart';
 part 'intro.dart';
 
 class UserSpacePage extends StatefulWidget {
-  const UserSpacePage({super.key});
+  final String username;
+
+  const UserSpacePage({super.key, required this.username});
 
   @override
   State<UserSpacePage> createState() => _UserSpacePageState();
@@ -27,8 +29,9 @@ class UserSpacePage extends StatefulWidget {
 class _UserSpacePageState extends State<UserSpacePage>
     with SingleTickerProviderStateMixin {
   final double _contentHeight = 200.0; // 头部内容区域的高度
-  late final String username;
   late TabController _tabController;
+
+  String get username => widget.username;
   bool isLoading = false;
   UserInfoItem? userInfo;
   bool isPinned = false;
@@ -38,7 +41,6 @@ class _UserSpacePageState extends State<UserSpacePage>
   @override
   void initState() {
     super.initState();
-    username = Get.arguments as String;
     _tabController = TabController(length: _tabs.length, vsync: this);
     _getUserInfo();
   }

@@ -151,8 +151,8 @@ class _CommentViewState extends State<_CommentView> {
             children: [
               // 头像
               InkWell(
-                onTap: () => Get.toNamed(RouteName.userSpace,
-                    arguments: comment.user.username),
+                onTap: () => context.push(RouteName.userSpace,
+                    extra: comment.user.username),
                 child: AnimationNetworkImage(
                   borderRadius: BorderRadius.circular(10),
                   url: comment.user.avatar.medium,
@@ -171,8 +171,8 @@ class _CommentViewState extends State<_CommentView> {
                       children: [
                         //用户昵称
                          InkWell(
-                            onTap: () => Get.toNamed(RouteName.userSpace,
-                                arguments: comment.user.username),
+                            onTap: () => context.push(RouteName.userSpace,
+                                extra: comment.user.username),
                             child: Text(
                               comment.user.nickname.isNotEmpty
                                   ? comment.user.nickname

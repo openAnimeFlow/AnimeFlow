@@ -2,12 +2,12 @@ import 'package:anime_flow/models/item/play/play_history.dart';
 import 'package:anime_flow/models/item/subject_basic_data_item.dart';
 import 'package:anime_flow/repository/play_repository.dart';
 import 'package:anime_flow/repository/storage.dart';
-import 'package:anime_flow/routes/index.dart';
+import 'package:anime_flow/routes/routes.dart';
 import 'package:anime_flow/utils/utils.dart';
 import 'package:anime_flow/widget/animation_network_image/animation_network_image.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
-import 'package:get/get.dart';
+import 'package:go_router/go_router.dart';
 import 'package:hive_ce_flutter/hive_flutter.dart';
 import 'package:logger/logger.dart';
 
@@ -74,7 +74,7 @@ class _PlayRecordViewState extends State<PlayRecordView> {
                 ),
                 if (playHistory.length > 6)
                   TextButton(
-                    onPressed: () => Get.toNamed(RouteName.playRecord),
+                    onPressed: () => context.push(RouteName.playRecord),
                     child: const Row(
                       children: [
                         Text(
@@ -125,8 +125,8 @@ class _PlayRecordViewState extends State<PlayRecordView> {
                       child: InkWell(
                         borderRadius: BorderRadius.circular(8),
                         onTap: () {
-                          Get.toNamed(RouteName.animeInfo,
-                              arguments: subjectBasicData);
+                          context.push(RouteName.animeInfo,
+                              extra: subjectBasicData);
                         },
                         child: Column(
                           mainAxisSize: MainAxisSize.min,
@@ -208,11 +208,13 @@ class _PlayRecordViewState extends State<PlayRecordView> {
                                             ),
                                             InkWell(
                                               onTap: () {
-                                                Get.toNamed(RouteName.play,
-                                                    arguments: {
-                                                      'subjectBasicData': subjectBasicData,
-                                                      'continueEpisode': history.episodeSort,
-                                                    });
+                                                context.push(RouteName.play,
+                                                    extra: PlayRouteExtra(
+                                                      subjectBasicData:
+                                                          subjectBasicData,
+                                                      continueEpisode:
+                                                          history.episodeSort,
+                                                    ));
                                               },
                                               child: const Icon(
                                                 Icons.play_circle,

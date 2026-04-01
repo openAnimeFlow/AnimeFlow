@@ -60,8 +60,8 @@ class _CharactersViewState extends State<_CharactersView> {
                     style: TextStyle(fontSize: 20, fontWeight: FontWeight.w600),
                   ),
                   InkWell(
-                    onTap: () => Get.toNamed(RouteName.characters,
-                        arguments: widget.subjectsId),
+                    onTap: () => context.push(RouteName.characters,
+                        extra: widget.subjectsId),
                     child: Row(
                       children: [
                         Text(
@@ -108,14 +108,15 @@ class _CharactersViewState extends State<_CharactersView> {
                         children: [
                           // 角色头像
                           InkWell(
-                            onTap: () => Get.toNamed(RouteName.characterInfo,
-                                arguments: {
-                                  'characterId': actor.character.id,
-                                  'characterName': actor.character.nameCN ??
+                            onTap: () => context.push(
+                                RouteName.characterInfo,
+                                extra: CharacterInfoExtra(
+                                  characterId: actor.character.id,
+                                  characterName: actor.character.nameCN ??
                                       actor.character.name,
-                                  'characterImage':
+                                  characterImage:
                                       actor.character.images.large,
-                                }),
+                                )),
                             child: AspectRatio(
                               aspectRatio: 1,
                               child: Hero(

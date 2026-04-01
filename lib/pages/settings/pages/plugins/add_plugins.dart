@@ -4,7 +4,9 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
 class AddPluginsPage extends StatefulWidget {
-  const AddPluginsPage({super.key});
+  final String? editPluginKey;
+
+  const AddPluginsPage({super.key, this.editPluginKey});
 
   @override
   State<AddPluginsPage> createState() => _AddPluginsPageState();
@@ -80,14 +82,11 @@ class _AddPluginsPageState extends State<AddPluginsPage> {
     super.initState();
     _controllers = _textFields.map((field) => TextEditingController()).toList();
 
-    // 获取传递的key值（可能是null，表示添加新数据源）
-    final arguments = Get.arguments;
-    final key = arguments is String ? arguments : null;
-    _originalKey = key;
+    _originalKey = widget.editPluginKey;
 
     // 如果有key，从持久化存储中查询数据并填充表单
-    if (key != null) {
-      final configData = crawlConfigs.get(key);
+    if (_originalKey != null) {
+      final configData = crawlConfigs.get(_originalKey!);
       if (configData != null) {
         final editConfig = CrawlConfigItem.fromJson(
           Map<String, dynamic>.from(configData),

@@ -1,6 +1,6 @@
 import 'dart:ui';
 
-import 'package:anime_flow/routes/index.dart';
+import 'package:anime_flow/routes/routes.dart';
 import 'package:anime_flow/widget/animation_network_image/animation_network_image.dart';
 import 'package:anime_flow/http/requests/bgm_request.dart';
 import 'package:anime_flow/models/item/bangumi/collections_item.dart';
@@ -9,6 +9,7 @@ import 'package:anime_flow/stores/user_info_store.dart';
 import 'package:anime_flow/widget/bbcode/bbcode_widget.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:go_router/go_router.dart';
 
 import 'collection_tab_view.dart';
 
@@ -162,7 +163,7 @@ class _LoginViewState extends State<LoginView>
               sliver: SliverAppBar(
                 automaticallyImplyLeading: false,
                 titleSpacing: 0,
-                title: _buildAppBarTitle(),
+                title: _buildAppBarTitle(context),
                 pinned: true,
                 floating: false,
                 snap: false,
@@ -230,7 +231,7 @@ class _LoginViewState extends State<LoginView>
     );
   }
 
-  Widget _buildAppBarTitle() {
+  Widget _buildAppBarTitle(BuildContext context) {
     final userInfo = widget.userInfoItem;
 
     // 菜单项数据
@@ -239,14 +240,14 @@ class _LoginViewState extends State<LoginView>
         'title': '设置',
         'icon': Icons.settings_outlined,
         'action': () {
-          Get.toNamed(RouteName.settings);
+          context.push(RouteName.settings);
         },
       },
       {
         'title': '播放记录',
         'icon': Icons.smart_display_outlined,
         'action': () {
-          Get.toNamed(RouteName.playRecord);
+          context.push(RouteName.playRecord);
         },
       },
       {
@@ -283,7 +284,7 @@ class _LoginViewState extends State<LoginView>
           InkWell(
             borderRadius: BorderRadius.circular(8),
             onTap: () {
-              Get.toNamed(RouteName.userSpace, arguments: userInfo.username);
+              context.push(RouteName.userSpace, extra: userInfo.username);
             },
             child: const Row(
               children: [

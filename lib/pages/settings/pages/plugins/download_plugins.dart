@@ -9,6 +9,7 @@ import 'package:anime_flow/utils/utils.dart';
 import 'package:anime_flow/widget/animation_network_image/animation_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:go_router/go_router.dart';
 import 'package:logger/logger.dart';
 
 class DownloadPluginsPage extends StatefulWidget {
@@ -66,7 +67,7 @@ class _DownloadPluginsPageState extends State<DownloadPluginsPage> {
       onPopInvokedWithResult: (didPop, result) {
         // 如果被调用但没有弹出（因为我们阻止了），手动调用返回并传递结果
         if (hasChanged && !didPop) {
-          Get.back(result: true);
+          context.pop(true);
         }
       },
       child: Scaffold(

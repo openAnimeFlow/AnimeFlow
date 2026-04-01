@@ -8,7 +8,7 @@ import 'package:hive_ce_flutter/hive_flutter.dart';
 import 'package:media_kit/media_kit.dart';
 import 'package:anime_flow/providers/global_provider_container.dart';
 import 'package:anime_flow/providers/theme_provider.dart';
-import 'package:anime_flow/routes/index.dart';
+import 'package:anime_flow/routes/routes.dart';
 import 'package:window_manager/window_manager.dart';
 
 void main() async {
@@ -43,13 +43,14 @@ class MyApp extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final themeState = ref.watch(themeProvider);
-    return GetMaterialApp(
-      // debugShowCheckedModeBanner: false,
+    return GetMaterialApp.router(
+      routeInformationProvider: appRouter.routeInformationProvider,
+      routeInformationParser: appRouter.routeInformationParser,
+      routerDelegate: appRouter.routerDelegate,
+      backButtonDispatcher: appRouter.backButtonDispatcher,
       theme: buildLightTheme(themeState.seedColor),
       darkTheme: buildDarkTheme(themeState.seedColor),
       themeMode: themeState.themeMode,
-      initialRoute: RouteName.main,
-      getPages: getPages(),
     );
   }
 }

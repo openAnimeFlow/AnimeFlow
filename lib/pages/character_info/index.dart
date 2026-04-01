@@ -1,14 +1,16 @@
 import 'package:anime_flow/http/requests/bgm_request.dart';
+import 'package:anime_flow/routes/routes.dart';
 import 'package:anime_flow/models/item/bangumi/character_detail_item.dart';
 import 'package:anime_flow/pages/character_info/character_works.dart';
 import 'package:anime_flow/widget/animation_network_image/animation_network_image.dart';
 import 'package:flutter/material.dart';
-import 'package:get/get.dart';
 
 import 'character_comments.dart';
 
 class CharacterInfo extends StatefulWidget {
-  const CharacterInfo({super.key});
+  final CharacterInfoExtra extra;
+
+  const CharacterInfo({super.key, required this.extra});
 
   @override
   State<CharacterInfo> createState() => _CharacterInfoState();
@@ -25,10 +27,9 @@ class _CharacterInfoState extends State<CharacterInfo> {
   @override
   void initState() {
     super.initState();
-    final arguments = Get.arguments as Map<String, dynamic>;
-    characterName = arguments['characterName'] as String;
-    characterId = arguments['characterId'] as int;
-    characterImage = arguments['characterImage'] as String;
+    characterName = widget.extra.characterName;
+    characterId = widget.extra.characterId;
+    characterImage = widget.extra.characterImage;
     _getCharacterInfo();
     _scrollController.addListener(_onScroll);
   }

@@ -1,11 +1,12 @@
 import 'package:anime_flow/crawler/itme/crawler_config_item.dart';
 import 'package:anime_flow/controllers/setting_controller.dart';
-import 'package:anime_flow/routes/index.dart';
+import 'package:anime_flow/routes/routes.dart';
 import 'package:anime_flow/utils/crawl_config.dart';
 import 'package:anime_flow/repository/storage.dart';
 import 'package:anime_flow/widget/animation_network_image/animation_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:go_router/go_router.dart';
 import 'package:hive_ce_flutter/adapters.dart';
 
 class PluginsPage extends StatefulWidget {
@@ -81,8 +82,8 @@ class _PluginsPageState extends State<PluginsPage> {
           actions: [
             //云下载
             IconButton(
-                onPressed: ()  {
-                   Get.toNamed(RouteName.settingDownloadPlugins);
+                onPressed: () {
+                   context.push(RouteName.settingDownloadPlugins);
                 },
                 icon: const Icon(Icons.cloud_download_outlined, size: 30)),
             IconButton(
@@ -90,8 +91,8 @@ class _PluginsPageState extends State<PluginsPage> {
                 Icons.save_as_outlined,
                 size: 30,
               ),
-              onPressed: ()  {
-                 Get.toNamed(RouteName.settingAddPlugins);
+              onPressed: () {
+                 context.push(RouteName.settingAddPlugins);
               },
             )
           ],
@@ -101,10 +102,9 @@ class _PluginsPageState extends State<PluginsPage> {
           children: List.generate(dataSources.length, (index) {
             final data = dataSources[index];
             return InkWell(
-              onTap: () =>
-                Get.toNamed(
+              onTap: () => context.push(
                   RouteName.settingAddPlugins,
-                  arguments: data.name,
+                  extra: data.name,
                 ),
               child: Container(
                 margin: const EdgeInsets.symmetric(vertical: 2),

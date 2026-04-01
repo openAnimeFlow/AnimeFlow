@@ -5,7 +5,7 @@ import 'package:anime_flow/http/api_path.dart';
 import 'package:anime_flow/http/requests/bgm_request.dart';
 import 'package:anime_flow/models/item/subject_basic_data_item.dart';
 import 'package:anime_flow/models/item/bangumi/subjects_info_item.dart';
-import 'package:anime_flow/routes/index.dart';
+import 'package:anime_flow/routes/routes.dart';
 import 'package:anime_flow/stores/anime_info_store.dart';
 import 'package:anime_flow/stores/user_info_store.dart';
 import 'package:anime_flow/utils/systemUtil.dart';
@@ -19,6 +19,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:get/get.dart';
+import 'package:go_router/go_router.dart';
 import 'package:shimmer/shimmer.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'synopsis.dart';
@@ -28,14 +29,15 @@ part '_appBar.dart';
 part '_head.dart';
 
 class AnimeInfoPage extends ConsumerStatefulWidget {
-  const AnimeInfoPage({super.key});
+  final SubjectBasicData animeInfoExtra;
+
+  const AnimeInfoPage({super.key, required this.animeInfoExtra});
 
   @override
   ConsumerState<AnimeInfoPage> createState() => _AnimeInfoPageState();
 }
 
 class _AnimeInfoPageState extends ConsumerState<AnimeInfoPage> {
-  late SubjectBasicData subjectBasicData;
   late UserInfoStore userInfoStore;
   final double _contentHeight = 200.0; // 内容区域的高度
   bool isPinned = false;
@@ -45,9 +47,10 @@ class _AnimeInfoPageState extends ConsumerState<AnimeInfoPage> {
   @override
   void initState() {
     super.initState();
-    subjectBasicData = Get.arguments;
     userInfoStore = Get.find<UserInfoStore>();
   }
+
+  SubjectBasicData get subjectBasicData => widget.animeInfoExtra;
 
   @override
   void dispose() {
@@ -180,8 +183,9 @@ class _AnimeInfoPageState extends ConsumerState<AnimeInfoPage> {
             const SizedBox(height: 5),
             FloatingActionButton(
               heroTag: 'play_${subjectBasicData.id}',
-              onPressed: () => Get.toNamed(RouteName.play,
-                  arguments: {'subjectBasicData': subjectBasicData}),
+              onPressed: () => context.push(
+                  RouteName.play,
+                  extra: PlayRouteExtra(subjectBasicData: subjectBasicData)),
               child: Icon(
                 Icons.play_arrow_rounded,
                 color: Theme.of(context).colorScheme.primary,

@@ -1,10 +1,9 @@
 import 'package:anime_flow/models/item/bangumi/subject_item.dart';
 import 'package:anime_flow/models/item/subject_basic_data_item.dart';
-import 'package:anime_flow/routes/index.dart';
+import 'package:anime_flow/routes/routes.dart';
 import 'package:anime_flow/widget/subject_card.dart';
 import 'package:flutter/material.dart';
-import 'package:get/get_core/src/get_main.dart';
-import 'package:get/get_navigation/src/extension_navigation.dart';
+import 'package:go_router/go_router.dart';
 
 /// 简洁View（海报卡片）
 class SearchOmittedContent extends StatelessWidget {
@@ -26,7 +25,7 @@ class SearchOmittedContent extends StatelessWidget {
         borderRadius: BorderRadius.circular(10),
         child: InkWell(
             onTap: () {
-              Get.toNamed(RouteName.animeInfo, arguments: subjectBasicData);
+              context.push(RouteName.animeInfo, extra: subjectBasicData);
             },
             child: SubjectCard(
               image: searchData.images.large,

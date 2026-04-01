@@ -29,7 +29,6 @@ class PlayPage extends ConsumerStatefulWidget {
 
 class _PlayPageState extends ConsumerState<PlayPage> {
   late VideoStateController videoStateController;
-  late VideoSourceController videoSourceController;
   late PlaySubjectState subjectState;
   late EpisodesState episodesState;
   final GlobalKey _videoKey = GlobalKey();
@@ -42,8 +41,6 @@ class _PlayPageState extends ConsumerState<PlayPage> {
   void initState() {
     super.initState();
     videoStateController = Get.put(VideoStateController());
-    videoSourceController = Get.put(VideoSourceController());
-    videoSourceController.attachPlayController(ref.read(playController.notifier));
     Get.put(EpisodeController());
     Get.put(VideoUiStateController());
     episodesState = Get.put(EpisodesState());
@@ -61,7 +58,6 @@ class _PlayPageState extends ConsumerState<PlayPage> {
   void dispose() {
     Get.delete<VideoStateController>();
     Get.delete<EpisodesState>();
-    Get.delete<VideoSourceController>();
     Get.delete<PlaySubjectState>();
     Get.delete<VideoUiStateController>();
     super.dispose();
@@ -75,7 +71,7 @@ class _PlayPageState extends ConsumerState<PlayPage> {
       final subjectName = subjectState.subject.value.name;
       if (subjectName.isEmpty) return;
       _hasInitResources = true;
-      videoSourceController.initResources(subjectName);
+      ref.read(videoSourceController.notifier).initResources(subjectName);
     });
   }
 
@@ -157,6 +153,7 @@ class _PlayPageState extends ConsumerState<PlayPage> {
 
   @override
   Widget build(BuildContext context) {
+    ref.watch(videoSourceController);
     return LayoutBuilder(builder: (context, constraints) {
       final bool isWideScreen = constraints.maxWidth > 600;
       WidgetsBinding.instance.addPostFrameCallback((_) {

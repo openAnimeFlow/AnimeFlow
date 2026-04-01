@@ -1,6 +1,5 @@
 import 'package:anime_flow/controllers/play/episode_controller.dart';
 import 'package:anime_flow/controllers/play/play_controller.dart';
-import 'package:anime_flow/controllers/video/source/video_source_controller.dart';
 import 'package:anime_flow/controllers/video/video_state_controller.dart';
 import 'package:anime_flow/controllers/video/video_ui_controller.dart';
 import 'package:anime_flow/models/enums/video_controls_icon_type.dart';
@@ -30,7 +29,6 @@ class _BottomAreaControlState extends ConsumerState<BottomAreaControl> {
   late VideoStateController videoStateController;
   late EpisodesState episodesState;
   late EpisodeController episodeController;
-  late VideoSourceController videoSourceController;
   @override
   void initState() {
     super.initState();
@@ -38,7 +36,6 @@ class _BottomAreaControlState extends ConsumerState<BottomAreaControl> {
     videoStateController = Get.find<VideoStateController>();
     episodesState = Get.find<EpisodesState>();
     episodeController = Get.find<EpisodeController>();
-    videoSourceController = Get.find<VideoSourceController>();
   }
 
   @override

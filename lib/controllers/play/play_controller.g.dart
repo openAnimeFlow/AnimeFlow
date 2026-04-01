@@ -47,7 +47,7 @@ final class PlayControllerProvider
   }
 }
 
-String _$playControllerHash() => r'3c678ceb2dbaad198e010010e4d4375a49247b7f';
+String _$playControllerHash() => r'a763610606d5347347ae86fca261b85b6684c5fa';
 
 /// 使用方式：`ref.watch(playProvider)` / `ref.read(playProvider.notifier)`。
 /// [DanmakuController] 由弹幕组件创建后调用 [attachDanmakuController]。

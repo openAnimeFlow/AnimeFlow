@@ -36,7 +36,6 @@ class VideoView extends ConsumerStatefulWidget {
 
 class _VideoViewState extends ConsumerState<VideoView> with WindowListener {
   late VideoUiStateController videoUiStateController;
-  late VideoSourceController videoSourceController;
   late VideoStateController videoStateController;
   late EpisodeController episodeController;
   late EpisodesState episodesState;
@@ -62,7 +61,6 @@ class _VideoViewState extends ConsumerState<VideoView> with WindowListener {
     super.initState();
     videoStateController = Get.find<VideoStateController>();
     videoUiStateController = Get.find<VideoUiStateController>();
-    videoSourceController = Get.find<VideoSourceController>();
     episodesState = Get.find<EpisodesState>();
     episodeController = Get.find<EpisodeController>();
     subjectState = Get.find<PlaySubjectState>();
@@ -75,10 +73,10 @@ class _VideoViewState extends ConsumerState<VideoView> with WindowListener {
       if (episode > 0) {
         if (episode != _lastEpisodeIndex) {
           _hasDanmakuLoaded = false;
-          videoSourceController.userManuallySelected = false;
+          ref.read(videoSourceController.notifier).setUserManuallySelected(false);
           videoStateController.player.stop();
-          // ref.read(playController.notifier).clearPlaybackSource();
-          // _parsingState(true);
+          ref.read(playController.notifier).clearPlaybackSource();
+          _parsingState(true);
           _selectResourceAfterInit();
         }
       }
@@ -108,7 +106,6 @@ class _VideoViewState extends ConsumerState<VideoView> with WindowListener {
   @override
   void dispose() {
     _saveProgressTimer?.cancel();
-    videoSourceController.cancelVideoSource();
     _savePlayHistory();
     // 移除窗口监听器
     if (Platform.isWindows || Platform.isLinux || Platform.isMacOS) {
@@ -241,41 +238,30 @@ class _VideoViewState extends ConsumerState<VideoView> with WindowListener {
 
   /// 等待资源初始化完成后选择资源
   Future<void> _selectResourceAfterInit() async {
-    if (!videoSourceController.isLoading.value) {
+    if (!ref.read(videoSourceController).isLoading) {
       await _waitForResourcesLoaded();
     }
 
-    final resources = videoSourceController.videoResources.toList();
-    videoSourceController.autoSelectFirstResource(resources, force: true);
+    final resources = ref.read(videoSourceController).videoResources;
+    ref.read(videoSourceController.notifier).autoSelectFirstResource(
+          resources,
+          force: true,
+        );
   }
 
-  /// 等待资源加载完成
+  /// 等待资源加载完成（[VideoSourceState.isLoading] 为 true 表示各站列表已就绪）
   Future<void> _waitForResourcesLoaded() async {
-    if (videoSourceController.isLoading.value) {
+    if (ref.read(videoSourceController).isLoading) {
       return;
     }
-
-    final completer = Completer<void>();
-    late Worker worker;
-
-    worker = ever(videoSourceController.isLoading, (bool isLoading) {
-      if (isLoading) {
-        worker.dispose();
-        if (!completer.isCompleted) {
-          completer.complete();
-        }
+    final deadline = DateTime.now().add(const Duration(seconds: 30));
+    while (mounted && DateTime.now().isBefore(deadline)) {
+      await Future<void>.delayed(const Duration(milliseconds: 50));
+      if (ref.read(videoSourceController).isLoading) {
+        return;
       }
-    });
-
-    Future.delayed(const Duration(seconds: 30), () {
-      if (!completer.isCompleted) {
-        worker.dispose();
-        completer.complete();
-        logger.w('等待资源加载超时');
-      }
-    });
-
-    return completer.future;
+    }
+    logger.w('等待资源加载超时');
   }
 
   /// 播放记录保存和章节进度更新

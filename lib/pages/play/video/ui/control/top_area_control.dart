@@ -26,7 +26,6 @@ class TopAreaControl extends ConsumerStatefulWidget {
 
 class _TopAreaControlState extends ConsumerState<TopAreaControl> {
   late VideoStateController videoStateController;
-  late VideoSourceController videoSourceController;
   late VideoUiStateController videoUiStateController;
   late EpisodesState episodesController;
   late PlaySubjectState playSubjectState;
@@ -35,7 +34,6 @@ class _TopAreaControlState extends ConsumerState<TopAreaControl> {
   void initState() {
     super.initState();
     videoStateController = Get.find<VideoStateController>();
-    videoSourceController = Get.find<VideoSourceController>();
     videoUiStateController = Get.find<VideoUiStateController>();
     episodesController = Get.find<EpisodesState>();
     playSubjectState = Get.find<PlaySubjectState>();
@@ -211,7 +209,9 @@ class _TopAreaControlState extends ConsumerState<TopAreaControl> {
                                         return VideoSourceDrawers(
                                           onVideoUrlSelected: (url) {
                                             videoStateController.player.stop();
-                                            videoSourceController
+                                            ref
+                                                .read(videoSourceController
+                                                    .notifier)
                                                 .loadVideoPage(url);
                                           },
                                           isBottomSheet: false,

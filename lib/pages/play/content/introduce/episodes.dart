@@ -1,4 +1,3 @@
-import 'package:anime_flow/controllers/video/source/video_source_controller.dart';
 import 'package:anime_flow/stores/episodes_state.dart';
 import 'package:anime_flow/stores/play_subject_state.dart';
 import 'package:flutter/material.dart';
@@ -15,7 +14,6 @@ class EpisodesComponents extends StatefulWidget {
 class EpisodesComponentsState extends State<EpisodesComponents> {
   late PlaySubjectState subjectState;
   late EpisodesState episodesState;
-  late VideoSourceController videoSourceController;
   static const String drawerTitle = "章节列表";
   bool isLoading = false;
   bool _isGridView = false; // 布局模式：false=列表，true=网格
@@ -25,7 +23,6 @@ class EpisodesComponentsState extends State<EpisodesComponents> {
     super.initState();
     episodesState = Get.find<EpisodesState>();
     subjectState = Get.find<PlaySubjectState>();
-    videoSourceController = Get.find<VideoSourceController>();
   }
 
   @override

@@ -6,154 +6,189 @@ import 'package:anime_flow/crawler/itme/anti_crawler_config.dart';
 import 'package:anime_flow/crawler/itme/crawler_config_item.dart';
 import 'package:anime_flow/models/item/play/video/episode_resources_item.dart';
 import 'package:anime_flow/models/item/play/video/resources_item.dart';
-import 'package:anime_flow/models/item/play/video/search_resources_item.dart';
 import 'package:anime_flow/providers/video/webview_video_source_provider.dart';
 import 'package:anime_flow/repository/play_repository.dart';
+import 'package:anime_flow/stores/episodes_state.dart';
 import 'package:anime_flow/stores/play_subject_state.dart';
 import 'package:anime_flow/utils/crawl_config.dart';
-import 'package:anime_flow/stores/episodes_state.dart';
 import 'package:get/get.dart';
 import 'package:logger/logger.dart';
+import 'package:riverpod_annotation/riverpod_annotation.dart';
 
-///todo 需要实现一个消息中间层给其他类消费
-class VideoSourceController extends GetxController {
-  final RxList<ResourcesItem> videoResources = <ResourcesItem>[].obs;
-  final RxString webSiteTitle = ''.obs;
-  final RxString webSiteIcon = ''.obs;
-  final RxString videoUrl = ''.obs;
-  final RxString keyword = ''.obs;
-  final RxBool isLoading = false.obs;
+part 'video_source_controller.g.dart';
 
-  /// 当前选中的网站索引
-  final RxInt selectedWebsiteIndex = 0.obs;
+/// 播放页数据源与解析状态（原 GetX 控制器字段，现合并为不可变状态）。
+class VideoSourceState {
+  const VideoSourceState({
+    this.videoResources = const [],
+    this.webSiteTitle = '',
+    this.webSiteIcon = '',
+    this.videoUrl = '',
+    this.keyword = '',
+    this.isLoading = false,
+    this.selectedWebsiteIndex = 0,
+    this.userManuallySelected = false,
+  });
 
-  late EpisodesState _episodesState;
-  late PlaySubjectState _subjectState;
-  final Logger _logger = Logger();
+  final List<ResourcesItem> videoResources;
+  final String webSiteTitle;
+  final String webSiteIcon;
 
-  /// 由播放页 [PlayPage] 注入，用于同步解析后的真实播放地址到 Riverpod [PlayController]。
-  late PlayController _playController;
+  /// 当前选中的剧集页 URL（非真实流媒体地址；真实地址在 [PlayState.videoUrl]）。
+  final String videoUrl;
+  final String keyword;
 
-  /// TODO临时注入,迁移riverpod后需要优化
-  void attachPlayController(PlayController controller) {
-    _playController = controller;
+  /// `true` 表示各站点资源列表已拉取完毕（沿用原字段名，勿与「正在请求」字面混淆）。
+  final bool isLoading;
+  final int selectedWebsiteIndex;
+  final bool userManuallySelected;
+
+  VideoSourceState copyWith({
+    List<ResourcesItem>? videoResources,
+    String? webSiteTitle,
+    String? webSiteIcon,
+    String? videoUrl,
+    String? keyword,
+    bool? isLoading,
+    int? selectedWebsiteIndex,
+    bool? userManuallySelected,
+  }) {
+    return VideoSourceState(
+      videoResources: videoResources ?? this.videoResources,
+      webSiteTitle: webSiteTitle ?? this.webSiteTitle,
+      webSiteIcon: webSiteIcon ?? this.webSiteIcon,
+      videoUrl: videoUrl ?? this.videoUrl,
+      keyword: keyword ?? this.keyword,
+      isLoading: isLoading ?? this.isLoading,
+      selectedWebsiteIndex: selectedWebsiteIndex ?? this.selectedWebsiteIndex,
+      userManuallySelected: userManuallySelected ?? this.userManuallySelected,
+    );
   }
+}
 
+/// 数据源爬取、选源与 WebView 解析；依赖 [EpisodesState]、[PlaySubjectState]（仍为 GetX，在播放页注册）。
+@riverpod
+class VideoSourceController extends _$VideoSourceController {
+  final Logger _logger = Logger();
   WebViewVideoSourceProvider? _videoSourceProvider;
   StreamSubscription<String>? _logSubscription;
-
-  /// 视频提供者日志流控制器
   final StreamController<String> _logStreamController =
       StreamController<String>.broadcast();
 
-  /// 标记用户是否手动选择了资源
-  bool userManuallySelected = false;
-
-  Worker? _isLoadingWorker;
-  Worker? _episodeIndexWorker;
+  EpisodesState get _episodesState => Get.find<EpisodesState>();
+  PlaySubjectState get _subjectState => Get.find<PlaySubjectState>();
 
   @override
-  void onInit() async {
-    super.onInit();
-    await _initVideoResources();
-    _initControllers();
+  VideoSourceState build() {
+    ref.onDispose(() {
+      cancelVideoSource();
+      if (!_logStreamController.isClosed) {
+        _logStreamController.close();
+      }
+    });
+    Future.microtask(_initVideoResources);
+    return const VideoSourceState();
   }
 
-  @override
-  void onClose() {
-    _isLoadingWorker?.dispose();
-    _episodeIndexWorker?.dispose();
-    super.onClose();
+  /// 页面退出时释放解析用 WebView，Notifier 仍可能存活至路由卸载。
+  void cancelVideoSource() {
+    _logSubscription?.cancel();
+    _logSubscription = null;
+    _videoSourceProvider?.dispose();
+    _videoSourceProvider = null;
+    _logger.i('清理完毕播放资源');
   }
 
-  void _initControllers() {
-    _subjectState = Get.find<PlaySubjectState>();
-    _episodesState = Get.find<EpisodesState>();
-  }
-
-
-  //初始化
   Future<void> _initVideoResources() async {
     final configs = await CrawlConfig.loadAllCrawlConfigs();
-    final resources = configs.map((config) {
-      return ResourcesItem(
-        websiteName: config.name,
-        websiteIcon: config.iconUrl,
-        baseUrl: config.baseUrl,
-        searchUrl: config.searchUrl,
-        needsCaptcha: config.antiCrawlerConfig.enabled,
-        episodeResources: [],
-      );
-    }).toList();
-    videoResources.value = resources;
+    final resources = configs
+        .map(
+          (config) => ResourcesItem(
+            websiteName: config.name,
+            websiteIcon: config.iconUrl,
+            baseUrl: config.baseUrl,
+            searchUrl: config.searchUrl,
+            needsCaptcha: config.antiCrawlerConfig.enabled,
+            episodeResources: [],
+          ),
+        )
+        .toList();
+    state = state.copyWith(videoResources: resources);
   }
 
   //初始化资源
   Future<void> initResources(String keyword) async {
     _clearAllResources();
-    this.keyword.value = keyword;
-    // 重置手动选择标志，允许重新自动选择
-    userManuallySelected = false;
-    updateLoading(false);
+    state = state.copyWith(
+      keyword: keyword,
+      userManuallySelected: false,
+      isLoading: false,
+    );
     final configs = await CrawlConfig.loadAllCrawlConfigs();
 
-    // 错开发起时间（相邻间隔 0.5 秒），不串行等待每个请求；全部完成后再结束加载态
     final futures = <Future<void>>[];
     for (var i = 0; i < configs.length; i++) {
       if (i > 0) {
-        await Future.delayed(const Duration(milliseconds: 500));
+        await Future<void>.delayed(const Duration(milliseconds: 500));
       }
       futures.add(_getResources(keyword, configs[i]));
     }
     await Future.wait(futures);
-    updateLoading(true);
+    state = state.copyWith(isLoading: true);
   }
 
   void _clearAllResources() {
-    final currentResources = videoResources;
-    final clearedResources = currentResources.map((resource) {
-      return ResourcesItem(
-        websiteName: resource.websiteName,
-        websiteIcon: resource.websiteIcon,
-        baseUrl: resource.baseUrl,
-        searchUrl: resource.searchUrl,
-        episodeResources: [],
-        isLoading: false,
-        errorMessage: null,
-        needsCaptcha: false,
-      );
-    }).toList();
+    final clearedResources = state.videoResources
+        .map(
+          (resource) => ResourcesItem(
+            websiteName: resource.websiteName,
+            websiteIcon: resource.websiteIcon,
+            baseUrl: resource.baseUrl,
+            searchUrl: resource.searchUrl,
+            episodeResources: [],
+            isLoading: false,
+            errorMessage: null,
+            needsCaptcha: false,
+          ),
+        )
+        .toList();
 
-    videoResources.value = clearedResources;
+    state = state.copyWith(videoResources: clearedResources);
   }
 
-  /// 重新请求指定站点的资源（验证通过后调用）
   Future<void> retryResources(String websiteName) async {
     final configs = await CrawlConfig.loadAllCrawlConfigs();
-    final config = configs.firstWhereOrNull((c) => c.name == websiteName);
+    CrawlConfigItem? config;
+    for (final c in configs) {
+      if (c.name == websiteName) {
+        config = c;
+        break;
+      }
+    }
     if (config == null) return;
-    await _getResources(keyword.value, config);
+    await _getResources(state.keyword, config);
   }
 
   Future<void> _getResources(String keyword, CrawlConfigItem config) async {
     try {
       _updateResourceStatus(config.name, isLoading: true, errorMessage: null);
 
-      List<SearchResourcesItem> searchList =
+      final searchList =
           await WebRequest.getSearchSubjectListService(keyword, config);
-      List<EpisodeResourcesItem> allEpisodesList = [];
+      final allEpisodesList = <EpisodeResourcesItem>[];
 
-      for (var search in searchList) {
-        var crawlerEpisodeResources =
+      for (final search in searchList) {
+        final crawlerEpisodeResources =
             await WebRequest.getResourcesListService(search.link, config);
 
-        for (var crawlerResource in crawlerEpisodeResources) {
-          var episodeResource = EpisodeResourcesItem(
-            lineNames: crawlerResource.lineNames,
-            episodes: crawlerResource.episodes,
-            subjectsTitle: search.name,
+        for (final crawlerResource in crawlerEpisodeResources) {
+          allEpisodesList.add(
+            EpisodeResourcesItem(
+              lineNames: crawlerResource.lineNames,
+              episodes: crawlerResource.episodes,
+              subjectsTitle: search.name,
+            ),
           );
-          allEpisodesList.add(episodeResource);
         }
       }
 
@@ -180,10 +215,6 @@ class VideoSourceController extends GetxController {
     }
   }
 
-  void updateLoading(bool isLoading) {
-    this.isLoading.value = isLoading;
-  }
-
   void _updateResourceStatus(
     String websiteName, {
     bool? isLoading,
@@ -192,8 +223,7 @@ class VideoSourceController extends GetxController {
     bool? needsCaptcha,
     AntiCrawlerConfig? antiCrawlerConfig,
   }) {
-    final currentResources = videoResources.toList();
-    final updatedResources = currentResources.map((resource) {
+    final updatedResources = state.videoResources.map((resource) {
       if (resource.websiteName == websiteName) {
         return resource.copyWith(
           isLoading: isLoading,
@@ -206,27 +236,33 @@ class VideoSourceController extends GetxController {
       return resource;
     }).toList();
 
-    videoResources.value = updatedResources;
+    state = state.copyWith(videoResources: updatedResources);
   }
 
-  /// 设置当前选中的网站
   void setWebSite({
     required String title,
     required String iconUrl,
     required String videoUrl,
     bool isManual = false,
   }) {
-    if (isManual) {
-      userManuallySelected = true;
-    }
-    webSiteTitle.value = title;
-    webSiteIcon.value = iconUrl;
-    this.videoUrl.value = videoUrl;
+    state = state.copyWith(
+      webSiteTitle: title,
+      webSiteIcon: iconUrl,
+      videoUrl: videoUrl,
+      userManuallySelected: isManual ? true : state.userManuallySelected,
+    );
   }
 
-  /// 查找第一个有资源的网站索引
+  void setSelectedWebsiteIndex(int index) {
+    state = state.copyWith(selectedWebsiteIndex: index);
+  }
+
+  void setUserManuallySelected(bool value) {
+    state = state.copyWith(userManuallySelected: value);
+  }
+
   int _findFirstResourceIndex(List<ResourcesItem> dataSource) {
-    for (int i = 0; i < dataSource.length; i++) {
+    for (var i = 0; i < dataSource.length; i++) {
       if (dataSource[i].episodeResources.isNotEmpty) {
         return i;
       }
@@ -234,19 +270,16 @@ class VideoSourceController extends GetxController {
     return 0;
   }
 
-  /// 自动选择第一个有资源的网站并加载视频
-  /// [force] 是否强制重新选择，即使已经有选中的资源
-  void autoSelectFirstResource(List<ResourcesItem> resources,
-      {bool force = false}) {
-    // 如果用户手动选择了资源，不再自动选择
-    if (userManuallySelected) {
+  void autoSelectFirstResource(
+    List<ResourcesItem> resources, {
+    bool force = false,
+  }) {
+    if (state.userManuallySelected) {
       return;
     }
-    // 如果已经自动选择过，且不是强制重新选择，或者已经有选中的资源且不是强制重新选择，不再自动选择
-    if (!force && (webSiteTitle.value.isNotEmpty)) {
+    if (!force && state.webSiteTitle.isNotEmpty) {
       return;
     }
-    // 检查是否有资源加载完成
     final hasResource = resources.any((r) => r.episodeResources.isNotEmpty);
     if (!hasResource) {
       return;
@@ -256,32 +289,29 @@ class VideoSourceController extends GetxController {
     final selectedResource = resources[firstResourceIndex];
 
     if (selectedResource.episodeResources.isEmpty) {
-      return; // 没有找到有资源的网站
+      return;
     }
 
-    // 自动加载第一个匹配的资源
-    Future.microtask(() {
+    Future<void>.microtask(() {
       _autoLoadFirstResource(selectedResource, force: force);
     });
   }
 
-  /// 自动加载第一个匹配当前剧集的资源
-  /// [force] 是否强制重新加载，即使已经有选中的资源
-  Future<void> _autoLoadFirstResource(ResourcesItem resource,
-      {bool force = false}) async {
-    // 如果用户手动选择了资源，不再自动加载
-    if (userManuallySelected) {
+  Future<void> _autoLoadFirstResource(
+    ResourcesItem resource, {
+    bool force = false,
+  }) async {
+    if (state.userManuallySelected) {
       return;
     }
-    // 如果不是强制重新加载，且已经有选中的资源，不再自动加载
-    if (!force && webSiteTitle.value.isNotEmpty) {
+    if (!force && state.webSiteTitle.isNotEmpty) {
       return;
     }
 
-    // 遍历资源列表，找到第一个匹配当前剧集的资源
-    for (var resourceItem in resource.episodeResources) {
+    final episodeIndex = _episodesState.episodeIndex.value;
+    for (final resourceItem in resource.episodeResources) {
       final matchingEpisodes = resourceItem.episodes.where(
-        (ep) => ep.episodeSort == _episodesState.episodeIndex.value,
+        (ep) => ep.episodeSort == episodeIndex,
       );
       if (matchingEpisodes.isNotEmpty) {
         final currentEpisode = matchingEpisodes.first;
@@ -290,26 +320,23 @@ class VideoSourceController extends GetxController {
           iconUrl: resource.websiteIcon,
           videoUrl: resource.baseUrl + currentEpisode.like,
         );
-        // _videoStateController.disposeVideo();
         await loadVideoPage(resource.baseUrl + currentEpisode.like);
         return;
       }
     }
   }
 
-  /// 加载视频页面
   Future<void> loadVideoPage(String url) async {
     _videoSourceProvider?.cancel();
     _videoSourceProvider ??= WebViewVideoSourceProvider();
 
-    // 监听日志
     await _logSubscription?.cancel();
     _logSubscription = _videoSourceProvider!.onLog.listen((log) {
       if (!_logStreamController.isClosed) {
         _logStreamController.add(log);
       }
     });
-    int offset = 0;
+    var offset = 0;
     final subjectId = _subjectState.subject.value.id;
     final episodeIndex = _episodesState.episodeIndex.value;
     final position = await PlayRepository.getPlayHistory(subjectId);
@@ -325,23 +352,14 @@ class VideoSourceController extends GetxController {
         offset: offset,
       );
 
-      await _playController.init(
-        PlayInitParams(videoRrl: source.url, offset: source.offset),
-      );
+      await ref.read(playController.notifier).init(
+            PlayInitParams(videoRrl: source.url, offset: source.offset),
+          );
     } catch (e) {
       _logger.e('加载视频页面失败', error: e);
     }
   }
-
-  /// 取消当前视频源解析并销毁 Provider（页面退出时调用）
-  void cancelVideoSource() {
-    _logSubscription?.cancel();
-
-    if (!_logStreamController.isClosed) {
-      _logStreamController.close();
-    }
-    _videoSourceProvider?.dispose();
-    _videoSourceProvider = null;
-    Logger().i('清理完毕播放资源');
-  }
 }
+
+/// 与 [PlayController] 一致：便于 `ref.watch(videoSourceController)`。
+final videoSourceController = videoSourceControllerProvider;

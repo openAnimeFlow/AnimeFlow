@@ -17,7 +17,6 @@ class VideoResourcesView extends ConsumerStatefulWidget {
 }
 
 class _VideoResourcesViewState extends ConsumerState<VideoResourcesView> {
-  late VideoSourceController videoSourceController;
   late PlaySubjectState playSubjectState;
   late VideoStateController videoStateController;
   final Logger logger = Logger();
@@ -25,7 +24,6 @@ class _VideoResourcesViewState extends ConsumerState<VideoResourcesView> {
   @override
   void initState() {
     super.initState();
-    videoSourceController = Get.find<VideoSourceController>();
     playSubjectState = Get.find<PlaySubjectState>();
     videoStateController = Get.find<VideoStateController>();
   }
@@ -34,7 +32,7 @@ class _VideoResourcesViewState extends ConsumerState<VideoResourcesView> {
   void _showSourceDrawer() {
     void onVideoUrlSelected(String url) {
       videoStateController.player.stop();
-      videoSourceController.loadVideoPage(url);
+      ref.read(videoSourceController.notifier).loadVideoPage(url);
     }
 
     final isWideScreen = ref.read(playController).isWideScreen;
@@ -102,10 +100,11 @@ class _VideoResourcesViewState extends ConsumerState<VideoResourcesView> {
                           fontSize: 15,
                         ),
                       ),
-                      Obx(() => videoSourceController.isLoading.value ||
-                              videoSourceController
-                                  .webSiteTitle.value.isNotEmpty
-                          ? Row(
+                      Consumer(builder: ( context, ref, child) {
+                        final isLoading = ref.watch(videoSourceController.select((s) => s.isLoading));
+                        final webSiteTitle = ref.watch(videoSourceController.select((s) => s.webSiteTitle));
+                        final webSiteIcon = ref.watch(videoSourceController.select((s) => s.webSiteIcon));
+                        return isLoading || webSiteTitle.isNotEmpty ? Row(
                               spacing: 5,
                               children: [
                                 ClipRRect(
@@ -113,12 +112,11 @@ class _VideoResourcesViewState extends ConsumerState<VideoResourcesView> {
                                   child: AnimationNetworkImage(
                                       height: 25,
                                       width: 25,
-                                      url: videoSourceController
-                                          .webSiteIcon.value),
+                                      url: webSiteIcon),
                                 ),
                                 Expanded(
                                     child: Text(
-                                  videoSourceController.webSiteTitle.value,
+                                      webSiteTitle,
                                   maxLines: 1,
                                   overflow: TextOverflow.ellipsis,
                                   style: const TextStyle(
@@ -137,7 +135,9 @@ class _VideoResourcesViewState extends ConsumerState<VideoResourcesView> {
                                   child: CircularProgressIndicator(),
                                 )
                               ],
-                            )),
+                            );
+                      })
+                          
                     ],
                   ),
                 ),

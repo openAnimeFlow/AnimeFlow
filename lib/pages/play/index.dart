@@ -6,7 +6,6 @@ import 'package:anime_flow/http/requests/bgm_request.dart';
 import 'package:anime_flow/pages/play/video/video.dart';
 import 'package:anime_flow/stores/play_subject_state.dart';
 import 'package:anime_flow/utils/systemUtil.dart';
-import 'package:anime_flow/webview/webview_controller.dart';
 import 'package:anime_flow/constants/play_layout_constant.dart';
 import 'package:anime_flow/routes/routes.dart';
 import 'package:anime_flow/stores/episodes_state.dart';
@@ -35,7 +34,6 @@ class _PlayPageState extends ConsumerState<PlayPage> {
   late EpisodesState episodesState;
   final GlobalKey _videoKey = GlobalKey();
   final GlobalKey _contentKey = GlobalKey();
-  Worker? _webViewInitWorker;
 
   // 标记是否已经初始化过资源
   bool _hasInitResources = false;
@@ -45,11 +43,10 @@ class _PlayPageState extends ConsumerState<PlayPage> {
     super.initState();
     videoStateController = Get.put(VideoStateController());
     videoSourceController = Get.put(VideoSourceController());
+    videoSourceController.attachPlayController(ref.read(playController.notifier));
     Get.put(EpisodeController());
     Get.put(VideoUiStateController());
     episodesState = Get.put(EpisodesState());
-    Get.put<WebviewItemController>(
-        WebviewItemControllerFactory.getController());
     final subject = widget.extra;
     subjectState =
         Get.put(PlaySubjectState(subject.subjectBasicData));
@@ -62,8 +59,6 @@ class _PlayPageState extends ConsumerState<PlayPage> {
 
   @override
   void dispose() {
-    _webViewInitWorker?.dispose();
-    Get.delete<WebviewItemController>();
     Get.delete<VideoStateController>();
     Get.delete<EpisodesState>();
     Get.delete<VideoSourceController>();
@@ -72,22 +67,16 @@ class _PlayPageState extends ConsumerState<PlayPage> {
     super.dispose();
   }
 
-  /// 初始化资源
+  /// 首帧后按番剧名拉取站点资源列表；真实播放地址由 [VideoSourceController.loadVideoPage] 解析并写入 [PlayController]。
   void _initResources() {
-    if (_hasInitResources) {
-      return;
-    } else {
-      _webViewInitWorker =
-          ever(videoSourceController.isInitWebView, (bool initialized) {
-        if (initialized) {
-          final subjectName = subjectState.subject.value.name;
-          if (subjectName.isNotEmpty) {
-            _hasInitResources = true;
-            videoSourceController.initResources(subjectName);
-          }
-        }
-      });
-    }
+    if (_hasInitResources) return;
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted || _hasInitResources) return;
+      final subjectName = subjectState.subject.value.name;
+      if (subjectName.isEmpty) return;
+      _hasInitResources = true;
+      videoSourceController.initResources(subjectName);
+    });
   }
 
   /// 初始化剧集

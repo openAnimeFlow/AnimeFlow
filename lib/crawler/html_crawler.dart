@@ -94,7 +94,6 @@ class HtmlCrawler {
       episodeResourcesList.add(episodeResource);
     }
 
-    logger.i("线路资源:${episodeResourcesList.toString()}");
     return episodeResourcesList;
   }
 }

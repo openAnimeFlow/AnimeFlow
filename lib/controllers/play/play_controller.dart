@@ -16,15 +16,11 @@ import 'package:window_manager/window_manager.dart';
 part 'play_controller.g.dart';
 
 class PlayState {
-  const PlayState({
-    this.superResolutionType = 0,
-    this.isWideScreen = false,
-    this.isContentExpanded = true,
-    this.isFullscreen = false,
-    this.danDanmakus = const <int, List<Danmaku>>{},
-    this.danmakuOn = true,
-    this.hiddenPlatforms = const <String>{},
-  });
+  ///播放地址
+  final String videoUrl;
+
+  /// 播放地址偏移量
+  final int offset;
 
   /// 超分：0 初始；1 关；2 效率；3 质量
   final int superResolutionType;
@@ -45,7 +41,21 @@ class PlayState {
   /// 隐藏的弹幕平台
   final Set<String> hiddenPlatforms;
 
+  const PlayState({
+    this.superResolutionType = 0,
+    this.isWideScreen = false,
+    this.isContentExpanded = true,
+    this.isFullscreen = false,
+    this.danDanmakus = const <int, List<Danmaku>>{},
+    this.danmakuOn = true,
+    this.hiddenPlatforms = const <String>{},
+    this.videoUrl = '',
+    this.offset = 0,
+  });
+
   PlayState copyWith({
+    String? videoUrl,
+    int? offset,
     int? superResolutionType,
     bool? isWideScreen,
     bool? isContentExpanded,
@@ -62,8 +72,21 @@ class PlayState {
       danDanmakus: danDanmakus ?? this.danDanmakus,
       danmakuOn: danmakuOn ?? this.danmakuOn,
       hiddenPlatforms: hiddenPlatforms ?? this.hiddenPlatforms,
+      videoUrl: videoUrl ?? this.videoUrl,
+      offset: offset ?? this.offset,
     );
   }
+}
+
+/// 播放初始化参数
+class PlayInitParams {
+  final String videoRrl;
+  final int offset;
+
+  const PlayInitParams({
+    required this.videoRrl,
+    required this.offset,
+  });
 }
 
 Set<String> _hiddenPlatformsFromStorage() {
@@ -105,6 +128,17 @@ class PlayController extends _$PlayController {
       _saveSettingsTimer?.cancel();
     });
     return PlayState(hiddenPlatforms: _hiddenPlatformsFromStorage());
+  }
+
+  ///初始化播放资源
+  /// TODO 以后需要将剧集名称、番剧名称、剧集号在这初始化
+  Future<void> init(PlayInitParams params) async {
+    state = state.copyWith(videoUrl: params.videoRrl, offset: params.offset);
+  }
+
+  /// 换集或停止时清空，避免 [VideoView] 仍按旧 URL 认为可播。
+  void clearPlaybackSource() {
+    state = state.copyWith(videoUrl: '', offset: 0);
   }
 
   /// 从存储同步平台显示/隐藏

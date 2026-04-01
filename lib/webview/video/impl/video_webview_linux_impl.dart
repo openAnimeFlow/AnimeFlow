@@ -1,44 +1,68 @@
-import 'dart:async';
 import 'package:anime_flow/utils/utils.dart';
-import 'package:anime_flow/webview/webview_controller.dart';
+import 'package:anime_flow/webview/video/video_webview_controller.dart';
 import 'package:desktop_webview_window/desktop_webview_window.dart';
 
-class WebviewLinuxItemControllerImpel extends WebviewItemController<Webview> {
+class VideoWebviewLinuxImpl extends VideoWebviewController<Webview> {
   bool bridgeInited = false;
 
   @override
   Future<void> init() async {
+    // final proxyConfig = _getProxyConfiguration();
     webviewController ??= await WebviewWindow.create(
-      configuration: const CreateConfiguration(headless: true, userScripts: [
-        UserScript(
-            source: blobScript,
-            injectionTime: UserScriptInjectionTime.documentStart,
-            forAllFrames: true),
-        UserScript(
-            source: iframeScript,
-            injectionTime: UserScriptInjectionTime.documentEnd,
-            forAllFrames: true),
-        UserScript(
-            source: videoScript,
-            injectionTime: UserScriptInjectionTime.documentEnd,
-            forAllFrames: true)
-      ]),
+      configuration: CreateConfiguration(
+        headless: true,
+        // proxy: proxyConfig,
+        userScripts: const [
+          UserScript(
+              source: blobScript,
+              injectionTime: UserScriptInjectionTime.documentStart,
+              forAllFrames: true),
+          UserScript(
+              source: iframeScript,
+              injectionTime: UserScriptInjectionTime.documentEnd,
+              forAllFrames: true),
+          UserScript(
+              source: videoScript,
+              injectionTime: UserScriptInjectionTime.documentEnd,
+              forAllFrames: true)
+        ],
+      ),
     );
     bridgeInited = false;
     initEventController.add(true);
   }
 
-  Future<void> initBridge(bool useNativePlayer, bool useLegacyParser) async {
-    await initJSBridge(useNativePlayer, useLegacyParser);
+  // ProxyConfiguration? _getProxyConfiguration() {
+  //   final setting = GStorage.setting;
+  //   final bool proxyEnable =
+  //       setting.get(SettingBoxKey.proxyEnable, defaultValue: false);
+  //   if (!proxyEnable) {
+  //     return null;
+  //   }
+  //
+  //   final String proxyUrl =
+  //       setting.get(SettingBoxKey.proxyUrl, defaultValue: '');
+  //   final parsed = ProxyUtils.parseProxyUrl(proxyUrl);
+  //   if (parsed == null) {
+  //     return null;
+  //   }
+  //
+  //   final (host, port) = parsed;
+  //   KazumiLogger().i('WebView: 代理设置成功 $host:$port');
+  //   return ProxyConfiguration(host: host, port: port);
+  // }
+
+  Future<void> initBridge(bool useLegacyParser) async {
+    await initJSBridge(useLegacyParser);
     bridgeInited = true;
   }
 
   @override
-  Future<void> loadUrl(String url, bool useNativePlayer, bool useLegacyParser,
+  Future<void> loadUrl(String url, bool useLegacyParser,
       {int offset = 0}) async {
     await unloadPage();
     if (!bridgeInited) {
-      await initBridge(useNativePlayer, useLegacyParser);
+      await initBridge(useLegacyParser);
     }
     count = 0;
     this.offset = offset;
@@ -59,7 +83,7 @@ class WebviewLinuxItemControllerImpel extends WebviewItemController<Webview> {
     bridgeInited = false;
   }
 
-  Future<void> initJSBridge(bool useNativePlayer, bool useLegacyParser) async {
+  Future<void> initJSBridge(bool useLegacyParser) async {
     webviewController!.addOnWebMessageReceivedCallback((message) async {
       if (message.contains('iframeMessage:')) {
         String messageItem =
@@ -74,7 +98,6 @@ class WebviewLinuxItemControllerImpel extends WebviewItemController<Webview> {
             !messageItem.contains('adtrafficquality')) {
           if (Utils.decodeVideoSource(messageItem) !=
                   Uri.encodeFull(messageItem) &&
-              useNativePlayer &&
               useLegacyParser) {
             logEventController.add('Parsing video source $messageItem');
             isIframeLoaded = true;
@@ -99,10 +122,8 @@ class WebviewLinuxItemControllerImpel extends WebviewItemController<Webview> {
           isIframeLoaded = true;
           isVideoSourceLoaded = true;
           videoLoadingEventController.add(false);
-          if (useNativePlayer) {
-            unloadPage();
-            videoParserEventController.add((videoUrl, offset));
-          }
+          unloadPage();
+          videoParserEventController.add((videoUrl, offset));
         }
       }
     });

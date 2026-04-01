@@ -3,7 +3,9 @@ import 'package:anime_flow/widget/animation_network_image/animation_network_imag
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
-import '../my_controller.dart';
+import '../../../controllers/my_controller.dart';
+
+enum _NoLoginOverflowAction { settings, playRecord }
 
 class NoLoginView extends StatefulWidget {
   const NoLoginView({super.key});
@@ -17,6 +19,9 @@ class _NoNoLoginView extends State<NoLoginView> {
 
   @override
   Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
+    final textStyle = Theme.of(context).textTheme.bodyLarge;
+
     return Column(
       children: [
         Padding(
@@ -25,43 +30,58 @@ class _NoNoLoginView extends State<NoLoginView> {
           child: Row(
             children: [
               const Spacer(),
-              MenuAnchor(
-                alignmentOffset: const Offset(-80, 0),
-                crossAxisUnconstrained: false,
-                menuChildren: [
-                  MenuItemButton(
-                    onPressed: () => context.push(RouteName.settings),
-                    child: const Row(
-                      children: [Icon(Icons.settings_outlined), Text('设置')],
-                    ),
-                  ),
-                  MenuItemButton(
-                    onPressed: () => context.push(RouteName.playRecord),
-                    child: const Row(
+              PopupMenuButton<_NoLoginOverflowAction>(
+                tooltip: '更多',
+                position: PopupMenuPosition.under,
+                offset: const Offset(0, 4),
+                icon: Icon(
+                  Icons.more_vert_rounded,
+                  size: 28,
+                  color: colorScheme.onSurface,
+                ),
+                onSelected: (action) {
+                  switch (action) {
+                    case _NoLoginOverflowAction.settings:
+                      context.push(RouteName.settings);
+                    case _NoLoginOverflowAction.playRecord:
+                      context.push(RouteName.playRecord);
+                  }
+                },
+                itemBuilder: (context) => [
+                  PopupMenuItem<_NoLoginOverflowAction>(
+                    value: _NoLoginOverflowAction.settings,
+                    height: 48,
+                    padding: const EdgeInsets.symmetric(horizontal: 16),
+                    child: Row(
                       children: [
-                        Icon(Icons.smart_display_outlined),
-                        Text('播放记录')
+                        Icon(
+                          Icons.settings_outlined,
+                          size: 20,
+                          color: colorScheme.onSurfaceVariant,
+                        ),
+                        const SizedBox(width: 12),
+                        Text('设置', style: textStyle),
                       ],
                     ),
-                  )
-                ],
-                builder: (BuildContext context, MenuController controller,
-                    Widget? child) {
-                  return InkWell(
-                    onTap: () {
-                      if (controller.isOpen) {
-                        controller.close();
-                      } else {
-                        controller.open();
-                      }
-                    },
-                    child: const Icon(
-                      Icons.notes_outlined,
-                      size: 30,
+                  ),
+                  PopupMenuItem<_NoLoginOverflowAction>(
+                    value: _NoLoginOverflowAction.playRecord,
+                    height: 48,
+                    padding: const EdgeInsets.symmetric(horizontal: 16),
+                    child: Row(
+                      children: [
+                        Icon(
+                          Icons.smart_display_outlined,
+                          size: 20,
+                          color: colorScheme.onSurfaceVariant,
+                        ),
+                        const SizedBox(width: 12),
+                        Text('播放记录', style: textStyle),
+                      ],
                     ),
-                  );
-                },
-              )
+                  ),
+                ],
+              ),
             ],
           ),
         ),

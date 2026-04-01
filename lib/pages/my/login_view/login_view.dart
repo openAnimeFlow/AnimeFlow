@@ -13,6 +13,8 @@ import 'package:go_router/go_router.dart';
 
 import 'collection_tab_view.dart';
 
+enum _ProfileMenuAction { settings, playRecord, logout }
+
 class LoginView extends StatefulWidget {
   final UserInfoItem userInfoItem;
 
@@ -233,49 +235,8 @@ class _LoginViewState extends State<LoginView>
 
   Widget _buildAppBarTitle(BuildContext context) {
     final userInfo = widget.userInfoItem;
-
-    // 菜单项数据
-    final menuItems = [
-      {
-        'title': '设置',
-        'icon': Icons.settings_outlined,
-        'action': () {
-          context.push(RouteName.settings);
-        },
-      },
-      {
-        'title': '播放记录',
-        'icon': Icons.smart_display_outlined,
-        'action': () {
-          context.push(RouteName.playRecord);
-        },
-      },
-      {
-        'title': '退出登录',
-        'icon': Icons.logout_outlined,
-        'action': () {
-          Get.dialog(
-            AlertDialog(
-              title: const Text('确认退出'),
-              content: const Text('确定要退出登录吗？'),
-              actions: [
-                TextButton(
-                  onPressed: () => Get.back(),
-                  child: const Text('取消'),
-                ),
-                TextButton(
-                  onPressed: () {
-                    Get.back();
-                    userInfoStore.clearUserInfo();
-                  },
-                  child: const Text('确定'),
-                ),
-              ],
-            ),
-          );
-        },
-      },
-    ];
+    final colorScheme = Theme.of(context).colorScheme;
+    final textStyle = Theme.of(context).textTheme.bodyLarge;
 
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 16),
@@ -320,46 +281,97 @@ class _LoginViewState extends State<LoginView>
             ),
           ),
           const Spacer(),
-          MenuAnchor(
-            alignmentOffset: const Offset(-100, 0),
-            crossAxisUnconstrained: false,
-            menuChildren:
-                List<MenuItemButton>.generate(menuItems.length, (int index) {
-              final menuItem = menuItems[index];
-              return MenuItemButton(
-                onPressed: menuItem['action'] as VoidCallback,
-                child: SizedBox(
-                  width: 120,
-                  child: Row(
-                    children: [
-                      Icon(
-                        menuItem['icon'] as IconData,
-                        size: 20,
-                      ),
-                      const SizedBox(width: 8),
-                      Text(menuItem['title'] as String),
-                    ],
-                  ),
-                ),
-              );
-            }),
-            builder: (BuildContext context, MenuController controller,
-                Widget? child) {
-              return InkWell(
-                borderRadius: BorderRadius.circular(8),
-                onTap: () {
-                  if (controller.isOpen) {
-                    controller.close();
-                  } else {
-                    controller.open();
-                  }
-                },
-                child: const Icon(
-                  Icons.notes_outlined,
-                  size: 30,
-                ),
-              );
+          PopupMenuButton<_ProfileMenuAction>(
+            tooltip: '更多',
+            position: PopupMenuPosition.under,
+            offset: const Offset(0, 4),
+            icon: Icon(
+              Icons.more_vert_rounded,
+              size: 28,
+              color: colorScheme.onSurface,
+            ),
+            onSelected: (action) {
+              switch (action) {
+                case _ProfileMenuAction.settings:
+                  context.push(RouteName.settings);
+                case _ProfileMenuAction.playRecord:
+                  context.push(RouteName.playRecord);
+                case _ProfileMenuAction.logout:
+                  Get.dialog(
+                    AlertDialog(
+                      title: const Text('确认退出'),
+                      content: const Text('确定要退出登录吗？'),
+                      actions: [
+                        TextButton(
+                          onPressed: () => Get.back(),
+                          child: const Text('取消'),
+                        ),
+                        TextButton(
+                          onPressed: () {
+                            Get.back();
+                            userInfoStore.clearUserInfo();
+                          },
+                          child: const Text('确定'),
+                        ),
+                      ],
+                    ),
+                  );
+              }
             },
+            itemBuilder: (context) => [
+              PopupMenuItem<_ProfileMenuAction>(
+                value: _ProfileMenuAction.settings,
+                height: 48,
+                padding: const EdgeInsets.symmetric(horizontal: 16),
+                child: Row(
+                  children: [
+                    Icon(
+                      Icons.settings_outlined,
+                      size: 20,
+                      color: colorScheme.onSurfaceVariant,
+                    ),
+                    const SizedBox(width: 12),
+                    Text('设置', style: textStyle),
+                  ],
+                ),
+              ),
+              PopupMenuItem<_ProfileMenuAction>(
+                value: _ProfileMenuAction.playRecord,
+                height: 48,
+                padding: const EdgeInsets.symmetric(horizontal: 16),
+                child: Row(
+                  children: [
+                    Icon(
+                      Icons.smart_display_outlined,
+                      size: 20,
+                      color: colorScheme.onSurfaceVariant,
+                    ),
+                    const SizedBox(width: 12),
+                    Text('播放记录', style: textStyle),
+                  ],
+                ),
+              ),
+              const PopupMenuDivider(),
+              PopupMenuItem<_ProfileMenuAction>(
+                value: _ProfileMenuAction.logout,
+                height: 48,
+                padding: const EdgeInsets.symmetric(horizontal: 16),
+                child: Row(
+                  children: [
+                    Icon(
+                      Icons.logout_outlined,
+                      size: 20,
+                      color: colorScheme.error,
+                    ),
+                    const SizedBox(width: 12),
+                    Text(
+                      '退出登录',
+                      style: textStyle?.copyWith(color: colorScheme.error),
+                    ),
+                  ],
+                ),
+              ),
+            ],
           ),
         ],
       ),

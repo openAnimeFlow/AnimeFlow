@@ -52,6 +52,8 @@ class _PlayRecordViewState extends State<PlayRecordView> {
     }
   }
 
+  double windowWidth(BuildContext context) => MediaQuery.of(context).size.width;
+
   @override
   Widget build(BuildContext context) {
     if (playHistoryList == null || playHistoryList!.isEmpty) {
@@ -75,13 +77,15 @@ class _PlayRecordViewState extends State<PlayRecordView> {
                 if (playHistory.length > 6)
                   TextButton(
                     onPressed: () => context.push(RouteName.playRecord),
-                    child: const Row(
+                    child: Row(
                       children: [
                         Text(
                           '查看更多',
-                          style: TextStyle(color: Colors.grey),
+                          style: TextStyle(
+                              fontSize: windowWidth(context) > 600 ? 16 : 14,
+                              color: Colors.grey),
                         ),
-                        Icon(Icons.keyboard_double_arrow_right_rounded,
+                        const Icon(Icons.keyboard_double_arrow_right_rounded,
                             color: Colors.grey)
                       ],
                     ),
@@ -121,7 +125,8 @@ class _PlayRecordViewState extends State<PlayRecordView> {
                         image: history.cover);
                     return Container(
                       width: 300,
-                      padding: const EdgeInsets.only(right: 8),
+                      padding: EdgeInsets.only(
+                          right: index == filterHistory.length - 1 ? 0 : 10),
                       child: InkWell(
                         borderRadius: BorderRadius.circular(8),
                         onTap: () {

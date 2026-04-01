@@ -169,13 +169,13 @@ class _AnimePageState extends State<AnimePage>
                   onRefresh: _fetchCalendar,
                 ),
                 const SliverToBoxAdapter(
-                  child: SizedBox(height: 10),
+                  child: SizedBox(height: 15),
                 ),
 
                 ///播放记录
                 const PlayRecordView(),
                 const SliverToBoxAdapter(
-                  child: SizedBox(height: 10),
+                  child: SizedBox(height: 15),
                 ),
 
                 ///热门动画

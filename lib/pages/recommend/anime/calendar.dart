@@ -6,7 +6,6 @@ import 'package:anime_flow/widget/ranking.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
-import 'package:anime_flow/models/item/bangumi/subject_item.dart';
 
 class CalendarView extends StatefulWidget {
   final Calendar? calendar;
@@ -79,14 +78,16 @@ class _CalendarViewState extends State<CalendarView> {
                     InkWell(
                         onTap: () => context.push(RouteName.calendar,
                             extra: widget.calendar!),
-                        child: const Row(
+                        child:  Row(
                           children: [
                             Text(
                               '查看更多',
-                              style:
-                                  TextStyle(fontSize: 10, color: Colors.grey),
+                              style: TextStyle(
+                                  fontSize:
+                                      windowWidth(context) > 600 ? 15 : 12,
+                                  color: Colors.grey),
                             ),
-                            Icon(
+                            const Icon(
                               Icons.keyboard_double_arrow_right_rounded,
                               color: Colors.grey,
                             ),
@@ -94,7 +95,7 @@ class _CalendarViewState extends State<CalendarView> {
                         )),
                   Text(
                     '周$weekday上映$numberOfReleases部,总$numberOfViewers人收看',
-                    style: const TextStyle(fontSize: 10, color: Colors.grey),
+                    style:  TextStyle(fontSize: windowWidth(context) > 600 ? 15 : 10, color: Colors.grey),
                   )
                 ],
               )
@@ -137,96 +138,98 @@ class _CalendarViewState extends State<CalendarView> {
         );
       } else {
         return Listener(
-            onPointerSignal: (event) {
-              if (event is PointerScrollEvent) {
-                GestureBinding.instance.pointerSignalResolver.register(event,
-                    (event) {
-                  final delta = (event as PointerScrollEvent).scrollDelta.dy;
-                  final newOffset = (_scrollController.offset + delta).clamp(
-                    _scrollController.position.minScrollExtent,
-                    _scrollController.position.maxScrollExtent,
-                  );
-                  _scrollController.jumpTo(newOffset);
-                });
-              }
+          onPointerSignal: (event) {
+            if (event is PointerScrollEvent) {
+              GestureBinding.instance.pointerSignalResolver.register(event,
+                  (event) {
+                final delta = (event as PointerScrollEvent).scrollDelta.dy;
+                final newOffset = (_scrollController.offset + delta).clamp(
+                  _scrollController.position.minScrollExtent,
+                  _scrollController.position.maxScrollExtent,
+                );
+                _scrollController.jumpTo(newOffset);
+              });
+            }
+          },
+          child: ListView.builder(
+            controller: _scrollController,
+            itemCount: items.length,
+            scrollDirection: Axis.horizontal,
+            padding: EdgeInsets.zero,
+            itemBuilder: (BuildContext context, int index) {
+              final itemData = items[index].subject;
+              final subjectBasicData = SubjectBasicData(
+                id: itemData.id,
+                name: itemData.nameCN ?? itemData.name,
+                image: itemData.images.large,
+              );
+              return Container(
+                width: _cardWidth(windowWidth(context)),
+                margin:
+                    EdgeInsets.only(right: index == items.length - 1 ? 0 : 10),
+                child: ClipRRect(
+                  borderRadius: BorderRadius.circular(10),
+                  child: InkWell(
+                    onTap: () {
+                      context.push(RouteName.animeInfo,
+                          extra: subjectBasicData);
+                    },
+                    child: Stack(
+                      children: [
+                        Positioned.fill(
+                          child: AnimationNetworkImage(
+                            url: itemData.images.large,
+                            fit: BoxFit.cover,
+                          ),
+                        ),
+                        Positioned(
+                          left: 0,
+                          right: 0,
+                          bottom: 0,
+                          child: Container(
+                            padding: const EdgeInsets.all(5),
+                            decoration: const BoxDecoration(
+                              gradient: LinearGradient(
+                                begin: Alignment.bottomCenter,
+                                end: Alignment.topCenter,
+                                colors: [
+                                  Colors.black38,
+                                  Colors.transparent,
+                                ],
+                              ),
+                            ),
+                            child: Padding(
+                              padding: const EdgeInsets.all(5),
+                              child: Text(itemData.nameCN ?? itemData.name,
+                                  style: const TextStyle(
+                                      color: Colors.white,
+                                      fontWeight: FontWeight.bold),
+                                  maxLines: 2,
+                                  overflow: TextOverflow.ellipsis,
+                                  textAlign: TextAlign.left),
+                            ),
+                          ),
+                        ),
+                        if (itemData.rating.rank > 0)
+                          Positioned(
+                            top: 0,
+                            left: 0,
+                            child: Padding(
+                              padding: const EdgeInsets.all(5),
+                              child: RankingView(
+                                ranking: itemData.rating.rank,
+                              ),
+                            ),
+                          ),
+                      ],
+                    ),
+                  ),
+                ),
+              );
             },
-            child: ListView.builder(
-              controller: _scrollController,
-              itemCount: items.length,
-              scrollDirection: Axis.horizontal,
-              padding: EdgeInsets.zero,
-              itemBuilder: (BuildContext context, int index) {
-                final itemData = items[index].subject;
-                return _buildCard(context, itemData);
-              },
-            ));
+          ),
+        );
       }
     }
-  }
-
-  Widget _buildCard(BuildContext context, Subject itemData) {
-    final subjectBasicData = SubjectBasicData(
-      id: itemData.id,
-      name: itemData.nameCN ?? itemData.name,
-      image: itemData.images.large,
-    );
-    return Container(
-      width: _cardWidth(windowWidth(context)),
-      margin: const EdgeInsets.only(right: 10),
-      child: ClipRRect(
-          borderRadius: BorderRadius.circular(10),
-          child: InkWell(
-              onTap: () {
-                context.push(RouteName.animeInfo, extra: subjectBasicData);
-              },
-              child: Stack(
-                children: [
-                  Positioned.fill(
-                    child: AnimationNetworkImage(
-                      url: itemData.images.large,
-                      fit: BoxFit.cover,
-                    ),
-                  ),
-                  Positioned(
-                    left: 0,
-                    right: 0,
-                    bottom: 0,
-                    child: Container(
-                      padding: const EdgeInsets.all(5),
-                      decoration: const BoxDecoration(
-                        gradient: LinearGradient(
-                          begin: Alignment.bottomCenter,
-                          end: Alignment.topCenter,
-                          colors: [
-                            Colors.black38,
-                            Colors.transparent,
-                          ],
-                        ),
-                      ),
-                      child: Padding(
-                        padding: const EdgeInsets.all(5),
-                        child: Text(itemData.nameCN ?? itemData.name,
-                            style: const TextStyle(
-                                color: Colors.white,
-                                fontWeight: FontWeight.bold),
-                            maxLines: 2,
-                            overflow: TextOverflow.ellipsis,
-                            textAlign: TextAlign.left),
-                      ),
-                    ),
-                  ),
-                  if (itemData.rating.rank > 0)
-                    Positioned(
-                        top: 0,
-                        left: 0,
-                        child: Padding(
-                          padding: const EdgeInsets.all(5),
-                          child: RankingView(
-                            ranking: itemData.rating.rank,
-                          ),
-                        ))
-                ],
-              ))),
-    );
   }
 }

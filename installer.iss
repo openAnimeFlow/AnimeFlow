@@ -22,7 +22,7 @@
 ; Flutter Windows x64 构建输出目录（相对本 .iss 所在目录，即项目根目录）
 #define BuildSourceDir  "build\windows\x64\runner\Release"
 
-#define OutputBaseName  "AnimeFlow-Setup-" + MyAppVersion + "-x64"
+#define OutputBaseName  "AnimeFlow-Setup-" + MyAppVersion
 #define OutputDir       "."
 
 ; 固定 AppId（GUID 本体，不含花括号）以便覆盖安装与干净卸载；勿随意更改

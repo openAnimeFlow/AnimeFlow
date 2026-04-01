@@ -203,7 +203,7 @@ class _MainPageState extends State<MainPage> {
     final colorScheme = Theme.of(context).colorScheme;
     final desktop = SystemUtil.isDesktop;
     return Scaffold(
-      extendBody: true,
+      // extendBody: true,
       body: Row(
         children: [
           if (isDesktop)

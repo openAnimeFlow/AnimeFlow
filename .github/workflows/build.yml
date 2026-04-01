@@ -71,7 +71,7 @@ jobs:
           name: ios
           path: AnimeFlow-ios-${{ env.VERSION }}.ipa
 
-  build-android:
+  flutter-build-android:
     if: ${{ !github.event.inputs.platform || github.event.inputs.platform == 'android' || github.event.inputs.platform == 'all'}}
     runs-on: ubuntu-latest
     steps:

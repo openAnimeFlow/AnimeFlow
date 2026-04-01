@@ -3,14 +3,11 @@
 ; =============================================================================
 ; 1. 构建 Release：
 ;      flutter build windows --release
-; 2. 用 Inno Setup Compiler 打开本文件并编译（Ctrl+F9）
+; 2. 用 Inno Setup Compiler 打开本文件并编译
 ;
 ; 本地发布前：把下一行占位符 "version" 改成与 pubspec.yaml 一致的 x.y.z。
-; CI（build.yml）会在编译安装包前自动将 "version" 替换为 pubspec 的 x.y.z（忽略 +build）。
+; CI（build.yml）会在编译安装包前自动将 "version" 替换为 pubspec 的 x.y.z。
 ; 覆盖升级：勿修改 MyAppGuid / AppId；仅提高版本号。检测到旧版时会默认沿用原安装目录并覆盖文件。
-;
-; 简体中文语言包：Inno Setup 6 一般为 compiler:Languages\ChineseSimplified.isl
-; 若编译提示找不到，可改为 Chinese.isl 或从 Inno 安装目录核对文件名。
 ; =============================================================================
 
 #define MyAppName       "AnimeFlow"
@@ -43,7 +40,6 @@ DefaultGroupName={#MyAppName}
 AllowNoIcons=yes
 OutputDir={#OutputDir}
 OutputBaseFilename={#OutputBaseName}
-; 存在 windows\runner\resources\app_icon.ico 时可取消注释：
 SetupIconFile=windows\runner\resources\app_icon.ico
 UninstallDisplayIcon={app}\{#MyAppExeName}
 UninstallDisplayName={#MyAppName}
@@ -71,7 +67,7 @@ MinVersion=10.0
 UsedUserAreasWarning=no
 VersionInfoVersion={#MyAppVersion}.0
 VersionInfoCompany={#MyAppPublisher}
-VersionInfoDescription={#MyAppName} 安装程序
+VersionInfoDescription={#MyAppName} 
 VersionInfoProductName={#MyAppName}
 VersionInfoProductVersion={#MyAppVersion}
 

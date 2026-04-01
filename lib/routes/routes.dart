@@ -20,9 +20,12 @@ import 'package:anime_flow/pages/settings/pages/plugins/download_plugins.dart';
 import 'package:anime_flow/pages/settings/pages/plugins/plugins.dart';
 import 'package:anime_flow/pages/settings/pages/theme.dart';
 import 'package:anime_flow/pages/user_space/index.dart';
+import 'package:anime_flow/pages/my/my_controller.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/scheduler.dart';
 import 'package:get/get.dart';
 import 'package:go_router/go_router.dart';
+import 'package:logger/logger.dart';
 
 import '../models/item/subject_basic_data_item.dart';
 
@@ -94,6 +97,20 @@ Widget _invalidArgs([String message = '路由参数无效']) {
 final GoRouter appRouter = GoRouter(
   navigatorKey: Get.key,
   initialLocation: RouteName.main,
+  redirect: (context, state) {
+    final uri = state.uri;
+    if (MyController.isOAuthAppCallback(uri)) {
+      final link = uri.toString();
+      SchedulerBinding.instance.addPostFrameCallback((_) {
+        MyController.handleDeepLink(link).catchError(
+          (Object e, StackTrace st) =>
+              Logger().e('OAuth 回调处理失败', error: e, stackTrace: st),
+        );
+      });
+      return RouteName.main;
+    }
+    return null;
+  },
   routes: [
     GoRoute(
       path: RouteName.main,

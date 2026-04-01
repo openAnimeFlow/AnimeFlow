@@ -87,7 +87,7 @@ dependencies:
   screen_brightness_ios: ^2.1.2
   antlr4: ^4.13.2
   photo_view: ^0.15.0
-  app_links: ^7.0.0
+#  app_links: ^7.0.0
   flutter_dotenv: ^6.0.0
   flutter_secure_storage: ^10.0.0
   gal: ^2.3.2

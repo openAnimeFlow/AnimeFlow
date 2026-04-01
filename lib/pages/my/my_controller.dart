@@ -10,16 +10,31 @@ import 'package:logger/logger.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 class MyController {
+  /// Bangumi OAuth 应用回调（自定义 scheme），与路由 path 无关。
+  static bool isOAuthAppCallback(Uri uri) {
+    return uri.scheme == 'flow' &&
+        uri.host == 'auth' &&
+        uri.path == '/callback';
+  }
+
   // 处理深度链接
   static Future<void> handleDeepLink(String deepLink) async {
     final uri = Uri.parse(deepLink);
-    String code = uri.queryParameters['code']!;
-    if (code.isNotEmpty) {
-      Logger().d('获取code:$code');
-      // final token = await OAuthRequest.callbackService(code, state);
-      final token = await OAuthRequest.getTokenService(code: code);
-      Logger().d('获取token:$token');
-      await tokenStorage.saveToken(token);
+    final code = uri.queryParameters['code'];
+    if (code == null || code.isEmpty) return;
+    Logger().d('获取code:$code');
+    final token = await OAuthRequest.getTokenService(code: code);
+    Logger().d('获取token:$token');
+    await tokenStorage.saveToken(token);
+    try {
+      if (Get.isRegistered<UserInfoStore>()) {
+        final store = Get.find<UserInfoStore>();
+        final me = await UserRequest.userInfoService();
+        store.userInfo.value =
+            await UserRequest.queryUserInfoService(me.username);
+      }
+    } catch (e) {
+      Logger().e('登录后拉取用户信息失败: $e');
     }
   }
 

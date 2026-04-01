@@ -1,13 +1,7 @@
-import 'package:anime_flow/http/requests/bgm_request.dart';
-import 'package:anime_flow/stores/TokenStorage.dart';
 import 'package:anime_flow/stores/user_info_store.dart';
-import 'package:app_links/app_links.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:logger/logger.dart';
-
 import 'login_view/login_view.dart';
-import 'my_controller.dart';
 import 'no_logo/no_login_view.dart';
 
 class MyPage extends StatefulWidget {
@@ -18,7 +12,6 @@ class MyPage extends StatefulWidget {
 }
 
 class _MyPageState extends State<MyPage> with SingleTickerProviderStateMixin {
-  late AppLinks _appLinks;
   bool isPinned = false;
   late UserInfoStore userInfoStore;
 
@@ -30,42 +23,20 @@ class _MyPageState extends State<MyPage> with SingleTickerProviderStateMixin {
   }
 
   void _initialize() async {
-    _appLinks = AppLinks();
-    _listenForDeepLink(_appLinks);
+    // _appLinks = AppLinks();
+    // _listenForDeepLink(_appLinks);
   }
 
-  Future<void> _listenForDeepLink(AppLinks appLinks) async {
-    try {
-      // final initialLink = await appLinks.getInitialLink();
-      // if (initialLink != null) {
-      //   await MyController.handleDeepLink(initialLink.toString());
-      //   _getUserInfo();
-      // }
-
-      // 监听深度链接
-      appLinks.uriLinkStream.listen((Uri uri) async {
-        await MyController.handleDeepLink(uri.toString());
-        _fetchUserInfo();
-      });
-    } catch (e) {
-      Logger().e("Error in deep link listener: $e");
-    }
-  }
-
-  Future<void> _fetchUserInfo() async {
-    try {
-      final token = await tokenStorage.getToken();
-      if (token != null) {
-        final me = await UserRequest.userInfoService();
-        final userInfo = await UserRequest.queryUserInfoService(me.username);
-        if (mounted) {
-          userInfoStore.userInfo.value = userInfo;
-        }
-      }
-    } catch (e) {
-      Logger().e("Error fetching user info: $e");
-    }
-  }
+  /// 冷启动 OAuth 回调由 [GoRouter.redirect] 处理；此处监听应用在**已运行**时
+  // Future<void> _listenForDeepLink(AppLinks appLinks) async {
+  //   try {
+  //     appLinks.uriLinkStream.listen((Uri uri) async {
+  //       await MyController.handleDeepLink(uri.toString());
+  //     });
+  //   } catch (e) {
+  //     Logger().e("Error in deep link listener: $e");
+  //   }
+  // }
 
   @override
   Widget build(BuildContext context) {

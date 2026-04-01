@@ -1,5 +1,6 @@
 import 'dart:io';
 import 'package:anime_flow/repository/storage.dart';
+import 'package:anime_flow/utils/utils.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -30,7 +31,9 @@ void main() async {
       await windowManager.focus();
     });
   }
-
+  if (Platform.isAndroid) {
+    await Utils.checkWebViewFeatureSupport();
+  }
   runApp(UncontrolledProviderScope(
     container: globalProviderContainer,
     child: const MyApp(),

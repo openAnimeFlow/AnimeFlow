@@ -13,6 +13,14 @@ class ImageFiveItem {
     required this.grid,
   });
 
+  static final ImageFiveItem empty = ImageFiveItem(
+    large: '',
+    common: '',
+    medium: '',
+    small: '',
+    grid: '',
+  );
+
   factory ImageFiveItem.fromJson(Map<String, dynamic> json) {
     return ImageFiveItem(
       large: json['large'] as String,

@@ -28,10 +28,28 @@ class _CalendarViewState extends State<CalendarView> {
   final ScrollController _scrollController = ScrollController();
   final weekday = DateTime.now().weekday;
 
+  /// 与常见平板/桌面分界一致：窄 / 中 / 宽 三档。
+  static const double _bpMedium = 600;
+  static const double _bpExpanded = 900;
+
   @override
   void dispose() {
     _scrollController.dispose();
     super.dispose();
+  }
+
+  double windowWidth(BuildContext context) => MediaQuery.of(context).size.width;
+
+  double _carouselHeight(double width) {
+    if (width >= _bpExpanded) return 300;
+    if (width >= _bpMedium) return 250;
+    return 200;
+  }
+
+  double _cardWidth(double width) {
+    if (width >= _bpExpanded) return 200;
+    if (width >= _bpMedium) return 170;
+    return 140;
   }
 
   @override
@@ -41,6 +59,7 @@ class _CalendarViewState extends State<CalendarView> {
     final numberOfViewers = widget.calendar?.calendarData[weekday.toString()]
             ?.fold(0, (sum, item) => sum + item.subject.rating.total) ??
         0;
+
     return SliverMainAxisGroup(
       slivers: [
         SliverToBoxAdapter(
@@ -84,7 +103,7 @@ class _CalendarViewState extends State<CalendarView> {
         ),
         SliverToBoxAdapter(
           child: SizedBox(
-            height: 200,
+            height: _carouselHeight(windowWidth(context)),
             child: _buildContent(weekday),
           ),
         ),
@@ -152,7 +171,7 @@ class _CalendarViewState extends State<CalendarView> {
       image: itemData.images.large,
     );
     return Container(
-      width: 140,
+      width: _cardWidth(windowWidth(context)),
       margin: const EdgeInsets.only(right: 10),
       child: ClipRRect(
           borderRadius: BorderRadius.circular(10),

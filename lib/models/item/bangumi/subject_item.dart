@@ -55,6 +55,7 @@ class Subject {
   });
 
   factory Subject.fromJson(Map<String, dynamic> json) {
+    final imagesRaw = json['images'];
     return Subject(
       id: json['id'] as int,
       name: json['name'] as String,
@@ -64,7 +65,9 @@ class Subject {
       rating: Rating.fromJson(json['rating'] as Map<String, dynamic>),
       locked: json['locked'] as bool,
       nsfw: json['nsfw'] as bool,
-      images: ImageFiveItem.fromJson(json['images'] as Map<String, dynamic>),
+      images: imagesRaw is Map<String, dynamic>
+          ? ImageFiveItem.fromJson(imagesRaw)
+          : ImageFiveItem.empty,
     );
   }
 

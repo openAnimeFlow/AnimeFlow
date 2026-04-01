@@ -1,18 +1,4 @@
 ; *** Inno Setup version 6.1.0+ Chinese Simplified messages ***
-;
-; To download user-contributed translations of this file, go to:
-;   https://jrsoftware.org/files/istrans/
-;
-; Note: When translating this text, do not add periods (.) to the end of
-; messages that didn't have them already, because on those messages Inno
-; Setup adds the periods automatically (appending a period would result in
-; two periods being displayed).
-;
-; Maintained by Zhenghan Yang
-; Email: 847320916@QQ.com
-; Translation based on network resource
-; The latest Translation is on https://github.com/kira-96/Inno-Setup-Chinese-Simplified-Translation
-;
 
 [LangOptions]
 ; The following three entries are very important. Be sure to read and

@@ -34,9 +34,11 @@ class _VideoSourceDrawersState extends ConsumerState<VideoSourceDrawers> {
   late VideoStateController videoStateController;
   late EpisodesState episodesController;
   late PlaySubjectState subjectState;
+  late String keyword;
   final logger = Logger();
   bool isShowEpisodes = false;
-  final _searchController = TextEditingController();
+  final searchController = TextEditingController();
+  final manualSearchController = TextEditingController();
 
   @override
   void initState() {
@@ -44,7 +46,17 @@ class _VideoSourceDrawersState extends ConsumerState<VideoSourceDrawers> {
     subjectState = Get.find<PlaySubjectState>();
     videoStateController = Get.find<VideoStateController>();
     episodesController = Get.find<EpisodesState>();
-    _searchController.text = subjectState.subject.value.name;
+    final keyword = subjectState.subject.value.name;
+    this.keyword = keyword;
+    searchController.text = keyword;
+    manualSearchController.text = keyword;
+  }
+
+  @override
+  void dispose() {
+    searchController.dispose();
+    manualSearchController.dispose();
+    super.dispose();
   }
 
   void setShowEpisodes() {
@@ -61,7 +73,7 @@ class _VideoSourceDrawersState extends ConsumerState<VideoSourceDrawers> {
   }
 
   void _performSearch() {
-    String searchQuery = _searchController.text;
+    String searchQuery = searchController.text;
     if (searchQuery.isNotEmpty) {
       ref.read(videoSourceController.notifier).setSelectedWebsiteIndex(0);
       setState(() {
@@ -69,12 +81,6 @@ class _VideoSourceDrawersState extends ConsumerState<VideoSourceDrawers> {
       });
       ref.read(videoSourceController.notifier).initResources(searchQuery);
     }
-  }
-
-  @override
-  void dispose() {
-    _searchController.dispose();
-    super.dispose();
   }
 
   @override
@@ -270,7 +276,7 @@ class _VideoSourceDrawersState extends ConsumerState<VideoSourceDrawers> {
           Expanded(
               child: Material(
             child: TextField(
-              controller: _searchController,
+              controller: searchController,
               decoration: InputDecoration(
                 hintText: '手动搜索资源',
                 border: OutlineInputBorder(
@@ -292,8 +298,8 @@ class _VideoSourceDrawersState extends ConsumerState<VideoSourceDrawers> {
 
   // 数据源选择器
   Widget _buildWebsiteSelector({required List<ResourcesItem> dataSource}) {
-    final selectedIndex = ref
-        .watch(videoSourceController.select((s) => s.selectedWebsiteIndex));
+    final selectedIndex =
+        ref.watch(videoSourceController.select((s) => s.selectedWebsiteIndex));
     return SizedBox(
         height: 40,
         child: Row(
@@ -314,82 +320,85 @@ class _VideoSourceDrawersState extends ConsumerState<VideoSourceDrawers> {
                       final isSelected = selectedIndex == index;
 
                       return GestureDetector(
-                          onTap: () => setSelectedWebsite(index),
-                          child: Container(
-                            margin: const EdgeInsets.only(right: 12),
-                            padding: const EdgeInsets.all(8),
-                            decoration: BoxDecoration(
+                        onTap: () {
+                          setSelectedWebsite(index);
+                          if (data.episodeResources.isEmpty) {
+                            manualSearchController.text = keyword;
+                          }
+                        },
+                        child: Container(
+                          margin: const EdgeInsets.only(right: 12),
+                          padding: const EdgeInsets.all(8),
+                          decoration: BoxDecoration(
+                            color: isSelected
+                                ? Theme.of(context)
+                                    .colorScheme
+                                    .surfaceContainerHighest
+                                : Theme.of(context)
+                                    .colorScheme
+                                    .surfaceContainerHighest,
+                            borderRadius: BorderRadius.circular(12),
+                            border: Border.all(
                               color: isSelected
-                                  ? Theme.of(context)
-                                      .colorScheme
-                                      .surfaceContainerHighest
-                                  : Theme.of(context)
-                                      .colorScheme
-                                      .surfaceContainerHighest,
-                              borderRadius: BorderRadius.circular(12),
-                              border: Border.all(
-                                color: isSelected
-                                    ? Theme.of(context).colorScheme.primary
-                                    : Colors.transparent,
-                                width: 2,
-                              ),
+                                  ? Theme.of(context).colorScheme.primary
+                                  : Colors.transparent,
+                              width: 2,
                             ),
-                            child: Row(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              children: [
-                                ClipOval(
-                                  child: AnimationNetworkImage(
-                                      width: 24,
-                                      height: 24,
-                                      url: data.websiteIcon),
-                                ),
-                                if (data.isLoading) ...[
-                                  const SizedBox(width: 4),
-                                  SizedBox(
-                                    width: 12,
-                                    height: 12,
-                                    child: CircularProgressIndicator(
-                                      strokeWidth: 2,
-                                      color:
-                                          Theme.of(context).colorScheme.primary,
-                                    ),
-                                  ),
-                                ] else if (data.needsCaptcha) ...[
-                                  const SizedBox(width: 4),
-                                  const Icon(
-                                    Icons.shield_outlined,
-                                    size: 14,
-                                    color: Colors.blue,
-                                  ),
-                                ] else if (data.errorMessage != null) ...[
-                                  const SizedBox(width: 4),
-                                  Icon(
-                                    Icons.error_outline,
-                                    size: 14,
-                                    color: Theme.of(context).colorScheme.error,
-                                  ),
-                                ] else if (data
-                                    .episodeResources.isNotEmpty) ...[
-                                  const SizedBox(width: 4),
-                                  Icon(
-                                    Icons.check_circle_outline,
-                                    size: 14,
+                          ),
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              ClipOval(
+                                child: AnimationNetworkImage(
+                                    width: 24,
+                                    height: 24,
+                                    url: data.websiteIcon),
+                              ),
+                              if (data.isLoading) ...[
+                                const SizedBox(width: 4),
+                                SizedBox(
+                                  width: 12,
+                                  height: 12,
+                                  child: CircularProgressIndicator(
+                                    strokeWidth: 2,
                                     color:
                                         Theme.of(context).colorScheme.primary,
                                   ),
-                                ],
+                                ),
+                              ] else if (data.needsCaptcha) ...[
+                                const SizedBox(width: 4),
+                                const Icon(
+                                  Icons.shield_outlined,
+                                  size: 14,
+                                  color: Colors.blue,
+                                ),
+                              ] else if (data.errorMessage != null) ...[
+                                const SizedBox(width: 4),
+                                Icon(
+                                  Icons.error_outline,
+                                  size: 14,
+                                  color: Theme.of(context).colorScheme.error,
+                                ),
+                              ] else if (data.episodeResources.isNotEmpty) ...[
+                                const SizedBox(width: 4),
+                                Icon(
+                                  Icons.check_circle_outline,
+                                  size: 14,
+                                  color: Theme.of(context).colorScheme.primary,
+                                ),
                               ],
-                            ),
+                            ],
                           ),
-                        );
+                        ),
+                      );
                     })),
           ],
         ));
   }
 
   Widget _buildVideoSource({required List<ResourcesItem> dataSource}) {
-    final selectedIndex = ref
-        .watch(videoSourceController.select((s) => s.selectedWebsiteIndex));
+    final selectedIndex =
+        ref.watch(videoSourceController.select((s) => s.selectedWebsiteIndex));
     if (selectedIndex >= dataSource.length) {
       return const SizedBox.shrink();
     }
@@ -408,9 +417,22 @@ class _VideoSourceDrawersState extends ConsumerState<VideoSourceDrawers> {
             spacing: 8,
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              const Text('未找到播放源'),
+              const Text('未找到播放源',
+                  style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+              TextField(
+                controller: manualSearchController,
+                decoration: const InputDecoration(
+                  hintText: '手动搜索资源',
+                  contentPadding:
+                      EdgeInsets.symmetric(horizontal: 12, vertical: 5),
+                  floatingLabelBehavior: FloatingLabelBehavior.always,
+                ),
+              ),
               ElevatedButton(
-                  onPressed: () => _performSearch(),
+                  onPressed: () => ref
+                      .read(videoSourceController.notifier)
+                      .retryResources(selectedResource.websiteName,
+                          keyword: manualSearchController.text),
                   child: const Text('重新搜索'))
             ],
           ),
@@ -435,8 +457,8 @@ class _VideoSourceDrawersState extends ConsumerState<VideoSourceDrawers> {
           }
 
           final excludedEpisodesCount = episodeResources
-              .expand((item) => item.episodes
-                  .where((ep) => ep.episodeSort != epIndex))
+              .expand((item) =>
+                  item.episodes.where((ep) => ep.episodeSort != epIndex))
               .length;
 
           if (currentEpisode == null) {
@@ -502,8 +524,9 @@ class _VideoSourceDrawersState extends ConsumerState<VideoSourceDrawers> {
       key: ValueKey(resource.websiteName),
       resource: resource,
       searchKeyword: ref.watch(videoSourceController.select((s) => s.keyword)),
-      onRetryResources: (name) =>
-          ref.read(videoSourceController.notifier).retryResources(name),
+      onRetryResources: (name) => ref
+          .read(videoSourceController.notifier)
+          .retryResources(name, keyword: subjectState.subject.value.name),
     );
   }
 
@@ -511,8 +534,7 @@ class _VideoSourceDrawersState extends ConsumerState<VideoSourceDrawers> {
       {required String websiteName,
       required String websiteIcon,
       required String baseUrl}) {
-    final pageUrl =
-        ref.watch(videoSourceController.select((s) => s.videoUrl));
+    final pageUrl = ref.watch(videoSourceController.select((s) => s.videoUrl));
     final isSelected = baseUrl + episode.like == pageUrl;
 
     return Container(

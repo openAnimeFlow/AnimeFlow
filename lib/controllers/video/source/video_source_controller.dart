@@ -156,7 +156,8 @@ class VideoSourceController extends _$VideoSourceController {
     state = state.copyWith(videoResources: clearedResources);
   }
 
-  Future<void> retryResources(String websiteName) async {
+  /// 重新请求指定站点的资源
+  Future<void> retryResources(String websiteName,{required String keyword}) async {
     final configs = await CrawlConfig.loadAllCrawlConfigs();
     CrawlConfigItem? config;
     for (final c in configs) {
@@ -166,7 +167,7 @@ class VideoSourceController extends _$VideoSourceController {
       }
     }
     if (config == null) return;
-    await _getResources(state.keyword, config);
+    await _getResources(keyword, config);
   }
 
   Future<void> _getResources(String keyword, CrawlConfigItem config) async {

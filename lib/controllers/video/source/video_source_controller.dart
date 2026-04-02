@@ -349,10 +349,10 @@ class VideoSourceController extends _$VideoSourceController {
     try {
       final source = await _videoSourceProvider!.resolve(
         url,
-        useLegacyParser: true,
+        useLegacyParser: false,
         offset: offset,
       );
-
+      _logger.i('$source');
       await ref.read(playController.notifier).init(
             PlayInitParams(videoRrl: source.url, offset: source.offset),
           );

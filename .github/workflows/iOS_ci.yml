@@ -1,0 +1,55 @@
+name: Flutter iOS CI
+
+on:
+  push:
+    branches: [ main ]
+  workflow_dispatch:
+
+jobs:
+  ios-debug-run:
+    runs-on: macos-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          flutter-version: '3.22.0'
+
+      - name: Install dependencies
+        run: flutter pub get
+
+      - name: Boot iOS Simulator
+        run: |
+          xcrun simctl shutdown all || true
+          xcrun simctl boot "iPhone 14" || true
+          open -a Simulator
+          xcrun simctl bootstatus "iPhone 14" -b
+          xcrun simctl list devices | rg "iPhone 14"
+
+      - name: Run Flutter App (Debug) and Capture Logs
+        id: debug_run
+        run: |
+          set -euxo pipefail
+          flutter devices
+          nohup flutter run -d "iPhone 14" --debug --verbose > flutter_run.log 2>&1 &
+          echo $! > flutter_run.pid
+          sleep 90
+          flutter logs -d "iPhone 14" --verbose > flutter_logs.log 2>&1 &
+          echo $! > flutter_logs.pid
+          sleep 30
+
+      - name: Print Logs
+        if: always()
+        run: |
+          echo "===== flutter_run.log ====="
+          [ -f flutter_run.log ] && sed -n '1,300p' flutter_run.log || echo "flutter_run.log not found"
+          echo "===== flutter_logs.log ====="
+          [ -f flutter_logs.log ] && sed -n '1,300p' flutter_logs.log || echo "flutter_logs.log not found"
+
+      - name: Stop Background Processes
+        if: always()
+        run: |
+          [ -f flutter_logs.pid ] && kill "$(cat flutter_logs.pid)" || true
+          [ -f flutter_run.pid ] && kill "$(cat flutter_run.pid)" || true

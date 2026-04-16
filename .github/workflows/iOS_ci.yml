@@ -51,9 +51,8 @@ jobs:
               out.write(f"IOS_SIM_NAME={name}\n")
               out.write(f"IOS_SIM_UDID={udid}\n")
           PY
-          set -a
-          source sim_selected.env
-          set +a
+          IOS_SIM_NAME="$(sed -n 's/^IOS_SIM_NAME=//p' sim_selected.env)"
+          IOS_SIM_UDID="$(sed -n 's/^IOS_SIM_UDID=//p' sim_selected.env)"
           cat sim_selected.env >> "$GITHUB_ENV"
           xcrun simctl boot "$IOS_SIM_UDID" || true
           open -a Simulator

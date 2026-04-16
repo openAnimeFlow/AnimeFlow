@@ -57,7 +57,7 @@ jobs:
           xcrun simctl boot "$IOS_SIM_UDID" || true
           open -a Simulator
           xcrun simctl bootstatus "$IOS_SIM_UDID" -b
-          xcrun simctl list devices | rg "$IOS_SIM_UDID|$IOS_SIM_NAME"
+          xcrun simctl list devices | grep -E "$IOS_SIM_UDID|$IOS_SIM_NAME"
 
       - name: Run Flutter App (Debug) and Capture Logs
         id: debug_run

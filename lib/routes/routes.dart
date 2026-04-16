@@ -1,4 +1,5 @@
 import 'package:anime_flow/models/item/bangumi/calendar_item.dart';
+import 'package:anime_flow/models/item/subject_basic_data_item.dart';
 import 'package:anime_flow/pages/anime_info/index.dart';
 import 'package:anime_flow/pages/calendar/index.dart';
 import 'package:anime_flow/pages/character_info/index.dart';
@@ -27,7 +28,6 @@ import 'package:get/get.dart';
 import 'package:go_router/go_router.dart';
 import 'package:logger/logger.dart';
 
-import '../models/item/subject_basic_data_item.dart';
 
 class RouteName {
   static const String main = "/";

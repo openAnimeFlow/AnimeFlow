@@ -20,21 +20,52 @@ jobs:
 
       - name: Boot iOS Simulator
         run: |
+          set -euxo pipefail
           xcrun simctl shutdown all || true
-          xcrun simctl boot "iPhone 14" || true
+          xcrun simctl list devices available > sim_devices.txt
+          python3 - <<'PY'
+          import re
+          import sys
+
+          with open("sim_devices.txt", "r", encoding="utf-8") as f:
+              lines = f.readlines()
+
+          # Prefer iPhone 16 family, fallback to any iPhone.
+          candidates = []
+          for line in lines:
+              m = re.search(r'^\s*(iPhone[^()]+)\s+\(([0-9A-F-]{36})\)\s+\(([^)]+)\)', line.strip())
+              if m:
+                  name, udid, state = m.groups()
+                  candidates.append((name.strip(), udid, state.strip()))
+
+          preferred = [c for c in candidates if c[0].startswith("iPhone 16")]
+          selected = (preferred or candidates)[0] if (preferred or candidates) else None
+
+          if not selected:
+              print("No available iPhone simulator found.", file=sys.stderr)
+              sys.exit(1)
+
+          name, udid, _ = selected
+          print(f"Selected simulator: {name} ({udid})")
+          with open("sim_selected.env", "w", encoding="utf-8") as out:
+              out.write(f"IOS_SIM_NAME={name}\n")
+              out.write(f"IOS_SIM_UDID={udid}\n")
+          PY
+          cat sim_selected.env >> "$GITHUB_ENV"
+          xcrun simctl boot "$IOS_SIM_UDID" || true
           open -a Simulator
-          xcrun simctl bootstatus "iPhone 14" -b
-          xcrun simctl list devices | rg "iPhone 14"
+          xcrun simctl bootstatus "$IOS_SIM_UDID" -b
+          xcrun simctl list devices | rg "$IOS_SIM_UDID|$IOS_SIM_NAME"
 
       - name: Run Flutter App (Debug) and Capture Logs
         id: debug_run
         run: |
           set -euxo pipefail
           flutter devices
-          nohup flutter run -d "iPhone 14" --debug --verbose > flutter_run.log 2>&1 &
+          nohup flutter run -d "$IOS_SIM_UDID" --debug --verbose > flutter_run.log 2>&1 &
           echo $! > flutter_run.pid
           sleep 90
-          flutter logs -d "iPhone 14" --verbose > flutter_logs.log 2>&1 &
+          flutter logs -d "$IOS_SIM_UDID" --verbose > flutter_logs.log 2>&1 &
           echo $! > flutter_logs.pid
           sleep 30
 

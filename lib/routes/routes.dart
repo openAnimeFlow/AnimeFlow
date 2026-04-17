@@ -103,7 +103,7 @@ final GoRouter appRouter = GoRouter(
       final link = uri.toString();
       SchedulerBinding.instance.addPostFrameCallback((_) {
         MyController.handleDeepLink(link).catchError(
-          (Object e, StackTrace st) =>
+              (Object e, StackTrace st) =>
               Logger().e('OAuth 回调处理失败', error: e, stackTrace: st),
         );
       });

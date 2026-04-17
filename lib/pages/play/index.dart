@@ -4,13 +4,13 @@ import 'package:anime_flow/controllers/video/video_ui_controller.dart';
 import 'package:anime_flow/http/requests/bgm_request.dart';
 import 'package:anime_flow/pages/play/video/video.dart';
 import 'package:anime_flow/stores/play_subject_state.dart';
-import 'package:anime_flow/models/item/subject_basic_data_item.dart';
 import 'package:anime_flow/utils/systemUtil.dart';
 import 'package:anime_flow/webview/webview_controller.dart';
 import 'package:anime_flow/constants/play_layout_constant.dart';
 import 'package:anime_flow/stores/episodes_state.dart';
 import 'package:anime_flow/controllers/play/play_controller.dart';
 import 'package:anime_flow/controllers/video/source/video_source_controller.dart';
+import 'package:anime_flow/routes/routes.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:get/get.dart';
@@ -19,7 +19,9 @@ import 'package:logger/logger.dart';
 import 'content/index.dart';
 
 class PlayPage extends StatefulWidget {
-  const PlayPage({super.key});
+  final PlayRouteExtra extra;
+
+  const PlayPage({super.key, required this.extra});
 
   @override
   State<PlayPage> createState() => _PlayPageState();
@@ -49,11 +51,10 @@ class _PlayPageState extends State<PlayPage> {
     episodesState = Get.put(EpisodesState());
     Get.put<WebviewItemController>(
         WebviewItemControllerFactory.getController());
-    final subject = Get.arguments as Map;
-    subjectState = Get.put(
-        PlaySubjectState(subject['subjectBasicData'] as SubjectBasicData));
-    if (subject['continueEpisode'] != null) {
-      subjectState.setContinueEpisode(subject['continueEpisode'] as int);
+    subjectState = Get.put(PlaySubjectState(widget.extra.subjectBasicData));
+    final continueEp = widget.extra.continueEpisode;
+    if (continueEp != null) {
+      subjectState.setContinueEpisode(continueEp);
     }
     _initEpisodes();
     _initResources();

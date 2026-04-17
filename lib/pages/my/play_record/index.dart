@@ -154,7 +154,7 @@ class _PlayRecordPageState extends State<PlayRecordPage> {
                                                   continueEpisode:
                                                       episodeSort,
                                                 ));
-                                            // 从播放页面返回后刷新数据
+                                            /// 使用hive数据变化监听刷新数据
                                             if (mounted) {
                                               _getPlayHistoryList();
                                             }

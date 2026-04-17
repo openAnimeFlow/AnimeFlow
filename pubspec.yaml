@@ -47,10 +47,10 @@ dependencies:
   #构建每个架构一个APK
   #flutter build apk --split-per-abi
 
-  carousel_slider: ^5.1.1
   media_kit: ^1.2.6 # 主要包装.
   media_kit_video: ^2.0.1 # 用于视频渲染.
   media_kit_libs_video: ^1.0.7 # 原生视频依赖项.
+  carousel_slider: ^5.1.1
   dio: ^5.9.0
   get: ^4.7.3
   flutter_riverpod: ^3.2.1
@@ -98,7 +98,7 @@ dependencies:
   canvas_danmaku: ^0.3.1
   flutter_native_splash: ^2.4.7
   battery_plus: ^7.0.0
-  connectivity_plus: ^6.0.5
+  connectivity_plus: ^7.0.0
   hive_ce: ^2.19.3
   hive_ce_flutter: ^2.3.4
   cookie_jar: ^4.0.9
@@ -139,10 +139,10 @@ dev_dependencies:
   # package. See that file for information about deactivating specific lint
   # rules and activating additional ones.
   flutter_lints: ^6.0.0
-  build_runner: ^2.4.13
+  build_runner: ^2.13.1
   # 生成Hive Type
   # dart run build_runner build --delete-conflicting-outputs
-  hive_ce_generator: ^1.10.0
+  hive_ce_generator: ^1.11.1
 
   #riverpod代码生成
   riverpod_generator: ^4.0.3

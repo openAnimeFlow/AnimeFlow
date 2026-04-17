@@ -1,3 +1,4 @@
+import 'package:anime_flow/controllers/play/play_controller.dart';
 import 'package:anime_flow/controllers/play/play_provider.dart';
 import 'package:anime_flow/controllers/video/video_state_controller.dart';
 import 'package:anime_flow/controllers/video/video_ui_controller.dart';
@@ -17,19 +18,21 @@ class RightAreaControl extends ConsumerStatefulWidget {
 class _RightAreaControlState extends ConsumerState<RightAreaControl> {
   late VideoStateController videoStateController;
   late VideoUiStateController videoUiStateController;
+  late PlayController playController;
 
   @override
   void initState() {
     super.initState();
     videoStateController = Get.find<VideoStateController>();
     videoUiStateController = Get.find<VideoUiStateController>();
+    playController = Get.find<PlayController>();
   }
 
   @override
   Widget build(BuildContext context) {
     return Obx(
       () {
-        final fullscreen = ref.watch(playProvider.select((s) => s.isFullscreen));
+        final fullscreen = playController.isFullscreen.value;
         final isWideScreen = ref.watch(playProvider.select((s) => s.isWideScreen));
         return AnimatedSwitcher(
           duration: const Duration(milliseconds: 200),

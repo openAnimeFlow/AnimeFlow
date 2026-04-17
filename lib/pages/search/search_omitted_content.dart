@@ -1,5 +1,4 @@
 import 'package:anime_flow/models/item/bangumi/subject_item.dart';
-import 'package:anime_flow/models/item/subject_basic_data_item.dart';
 import 'package:anime_flow/routes/routes.dart';
 import 'package:anime_flow/widget/subject_card.dart';
 import 'package:flutter/material.dart';
@@ -16,16 +15,11 @@ class SearchOmittedContent extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final subjectBasicData = SubjectBasicData(
-      id: searchData.id,
-      name: searchData.nameCN ?? searchData.name,
-      image: searchData.images.large,
-    );
     return ClipRRect(
         borderRadius: BorderRadius.circular(10),
         child: InkWell(
             onTap: () {
-              context.push(RouteName.animeInfo, extra: subjectBasicData);
+              context.push(RouteName.animeInfo);
             },
             child: SubjectCard(
               image: searchData.images.large,

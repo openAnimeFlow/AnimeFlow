@@ -1,3 +1,4 @@
+import 'package:anime_flow/controllers/play/play_controller.dart';
 import 'package:anime_flow/controllers/play/play_provider.dart';
 import 'package:anime_flow/controllers/video/source/video_source_controller.dart';
 import 'package:anime_flow/controllers/video/video_state_controller.dart';
@@ -19,6 +20,7 @@ class VideoResourcesView extends ConsumerStatefulWidget {
 class _VideoResourcesViewState extends ConsumerState<VideoResourcesView> {
   late VideoSourceController videoSourceController;
   late PlaySubjectState playSubjectState;
+  late PlayController playController;
   late VideoStateController videoStateController;
   final Logger logger = Logger();
 
@@ -28,6 +30,7 @@ class _VideoResourcesViewState extends ConsumerState<VideoResourcesView> {
     videoSourceController = Get.find<VideoSourceController>();
     playSubjectState = Get.find<PlaySubjectState>();
     videoStateController = Get.find<VideoStateController>();
+    playController = Get.find<PlayController>();
   }
 
   /// 显示数据源抽屉

@@ -1,4 +1,5 @@
 import 'package:anime_flow/pages/play/content/introduce/episodes.dart';
+import 'package:anime_flow/controllers/play/play_controller.dart';
 import 'package:anime_flow/stores/play_subject_state.dart';
 import 'package:anime_flow/pages/play/content/introduce/danmaku_card.dart';
 import 'package:anime_flow/pages/play/content/introduce/resources.dart';
@@ -16,6 +17,7 @@ class IntroduceView extends StatefulWidget {
 class _IntroduceViewState extends State<IntroduceView>
     with AutomaticKeepAliveClientMixin {
   Logger logger = Logger();
+  late PlayController playPageController;
   late PlaySubjectState playSubjectState;
   bool isVideoSourceLoading = true;
 
@@ -25,6 +27,7 @@ class _IntroduceViewState extends State<IntroduceView>
   @override
   void initState() {
     super.initState();
+    playPageController = Get.find<PlayController>();
     playSubjectState = Get.find<PlaySubjectState>();
   }
 

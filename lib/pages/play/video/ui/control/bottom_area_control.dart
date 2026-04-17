@@ -1,3 +1,4 @@
+import 'package:anime_flow/controllers/play/play_controller.dart';
 import 'package:anime_flow/controllers/play/episode_controller.dart';
 import 'package:anime_flow/controllers/play/play_provider.dart';
 import 'package:anime_flow/controllers/video/source/video_source_controller.dart';
@@ -28,6 +29,7 @@ class BottomAreaControl extends ConsumerStatefulWidget {
 class _BottomAreaControlState extends ConsumerState<BottomAreaControl> {
   late VideoUiStateController videoUiStateController;
   late VideoStateController videoStateController;
+  late PlayController playController;
   late EpisodesState episodesState;
   late EpisodeController episodeController;
   late VideoSourceController videoSourceController;
@@ -36,6 +38,7 @@ class _BottomAreaControlState extends ConsumerState<BottomAreaControl> {
     super.initState();
     videoUiStateController = Get.find<VideoUiStateController>();
     videoStateController = Get.find<VideoStateController>();
+    playController = Get.find<PlayController>();
     episodesState = Get.find<EpisodesState>();
     episodeController = Get.find<EpisodeController>();
     videoSourceController = Get.find<VideoSourceController>();
@@ -44,11 +47,12 @@ class _BottomAreaControlState extends ConsumerState<BottomAreaControl> {
   @override
   Widget build(BuildContext context) {
     return Obx(() {
-      final danmakuOn = ref.watch(playProvider.select((s) => s.danmakuOn));
-      final isShowControlsUi = videoUiStateController.isShowControlsUi.value;
-      final fullscreen = ref.watch(playProvider.select((s) => s.isFullscreen));
+      // 全屏状态，
+      final fullscreen = playController.isFullscreen.value;
+      final danmakuOn = playController.danmakuOn.value;
       final isWideScreen = ref.watch(playProvider.select((s) => s.isWideScreen));
-      final isContentExpanded = ref.watch(playProvider.select((s) => s.isContentExpanded));
+      final isShowControlsUi = videoUiStateController.isShowControlsUi.value;
+      final isContentExpanded = playController.isContentExpanded.value;
       final hasNextEpisode = episodeController.hasNextEpisode(episodesState);
       final leftPadding = MediaQuery.of(context).padding.left;
       return AnimatedSwitcher(
@@ -129,9 +133,7 @@ class _BottomAreaControlState extends ConsumerState<BottomAreaControl> {
                             ),
                           //弹幕开关
                           InkWell(
-                            onTap: () => ref
-                                .read(playProvider.notifier)
-                                .toggleDanmaku(),
+                            onTap: () => playController.toggleDanmaku(),
                             child: Icon(
                                 danmakuOn
                                     ? Icons.subtitles_outlined
@@ -143,7 +145,7 @@ class _BottomAreaControlState extends ConsumerState<BottomAreaControl> {
                           if (danmakuOn)
                             InkWell(
                               onTap: () => Get.bottomSheet(
-                                 DanmakuSetting(),
+                                const DanmakuSetting(),
                                 ignoreSafeArea: false,
                                 isScrollControlled: true,
                                 backgroundColor: Colors.transparent,
@@ -218,7 +220,7 @@ class _BottomAreaControlState extends ConsumerState<BottomAreaControl> {
                             duration: const Duration(milliseconds: 500),
                             child: IconButton(
                                 onPressed: () {
-                                  ref.read(playProvider.notifier).toggleFullScreen();
+                                  playController.toggleFullScreen();
                                 },
                                 padding: const EdgeInsets.all(0),
                                 icon: Icon(

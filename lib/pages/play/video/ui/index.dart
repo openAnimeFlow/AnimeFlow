@@ -3,6 +3,7 @@ import 'package:anime_flow/pages/play/video/gesture/desktop_gesture_detector.dar
 import 'package:anime_flow/pages/play/video/gesture/mobile_gesture_detector.dart';
 import 'package:anime_flow/utils/systemUtil.dart';
 import 'package:anime_flow/stores/episodes_state.dart';
+import 'package:anime_flow/controllers/play/play_controller.dart';
 import 'package:anime_flow/controllers/video/video_state_controller.dart';
 import 'package:anime_flow/controllers/video/video_ui_controller.dart';
 import 'package:flutter/material.dart';
@@ -23,6 +24,7 @@ class VideoUi extends StatefulWidget {
 
 class _VideoUiState extends State<VideoUi> {
   late VideoUiStateController videoUiStateController;
+  late PlayController playPageController;
   late VideoStateController videoStateController;
   late EpisodesState episodesState;
   late EpisodeController episodeController;
@@ -30,6 +32,7 @@ class _VideoUiState extends State<VideoUi> {
   @override
   void initState() {
     videoUiStateController = Get.find<VideoUiStateController>();
+    playPageController = Get.find<PlayController>();
     videoStateController = Get.find<VideoStateController>();
     episodeController = Get.find<EpisodeController>();
     episodesState = Get.find<EpisodesState>();

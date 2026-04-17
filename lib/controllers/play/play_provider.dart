@@ -27,14 +27,8 @@ class PlayState {
 
   /// 超分：0 初始；1 关；2 效率；3 质量（与 [PlayNotifier.setShader] 一致）
   final int superResolutionType;
-
-  /// 播放页宽屏状态
   final bool isWideScreen;
-
-  /// 播放页内容展开状态
   final bool isContentExpanded;
-
-  /// 全屏状态
   final bool isFullscreen;
   final Map<int, List<Danmaku>> danDanmakus;
   final bool danmakuOn;
@@ -63,12 +57,13 @@ class PlayState {
 
 Set<String> _hiddenPlatformsFromStorage() {
   final Box setting = Storage.setting;
-  final platformBilibili = setting.get(DanmakuKey.danmakuPlatformBilibili,
-      defaultValue: true) as bool;
+  final platformBilibili =
+      setting.get(DanmakuKey.danmakuPlatformBilibili, defaultValue: true) as bool;
   final platformGamer =
       setting.get(DanmakuKey.danmakuPlatformGamer, defaultValue: true) as bool;
-  final platformDanDanPlay = setting.get(DanmakuKey.danmakuPlatformDanDanPlay,
-      defaultValue: true) as bool;
+  final platformDanDanPlay =
+      setting.get(DanmakuKey.danmakuPlatformDanDanPlay, defaultValue: true)
+          as bool;
 
   const platformNameBilibili = 'BiliBili';
   const platformNameGamer = 'Gamer';
@@ -85,8 +80,7 @@ Set<String> _hiddenPlatformsFromStorage() {
 ///
 /// 使用方式：`ref.watch(playProvider)` / `ref.read(playProvider.notifier)`。
 /// [DanmakuController] 由弹幕组件创建后调用 [attachDanmakuController]。
-final playProvider =
-    NotifierProvider<PlayNotifier, PlayState>(PlayNotifier.new);
+final playProvider = NotifierProvider<PlayNotifier, PlayState>(PlayNotifier.new);
 
 class PlayNotifier extends Notifier<PlayState> {
   DanmakuController? _danmakuController;
@@ -123,24 +117,20 @@ class PlayNotifier extends Notifier<PlayState> {
     }
   }
 
-  /// 切换内容区域展开状态
   void toggleContentExpanded() {
     state = state.copyWith(isContentExpanded: !state.isContentExpanded);
   }
 
-  /// 进入全屏
   void enterFullScreen() {
     state = state.copyWith(isFullscreen: true);
     SystemUtil.enterFullScreen();
   }
 
-  /// 退出全屏
   void exitFullScreen() {
     state = state.copyWith(isFullscreen: false);
     SystemUtil.exitFullScreen();
   }
 
-  /// 切换全屏状态
   void toggleFullScreen() {
     if (state.isFullscreen) {
       exitFullScreen();
@@ -209,7 +199,8 @@ class PlayNotifier extends Notifier<PlayState> {
     required Player player,
     bool synchronized = true,
   }) async {
-    final shadersController = await ref.read(shadersControllerProvider.future);
+    final shadersController =
+        await ref.read(shadersControllerProvider.future);
     final pp = player.platform as NativePlayer;
     await pp.waitForPlayerInitialization;
     await pp.waitForVideoControllerInitializationIfAttached;

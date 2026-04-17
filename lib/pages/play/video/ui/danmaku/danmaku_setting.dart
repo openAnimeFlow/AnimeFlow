@@ -1,30 +1,32 @@
 import 'package:anime_flow/constants/storage_key.dart';
-import 'package:anime_flow/controllers/play/play_provider.dart';
+import 'package:anime_flow/controllers/play/play_controller.dart';
 import 'package:anime_flow/repository/storage.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_svg/svg.dart';
+import 'package:get/get.dart';
 import 'package:hive_ce/hive.dart';
 
-class DanmakuSetting extends ConsumerStatefulWidget {
+/// 弹幕设置弹窗
+class DanmakuSetting extends StatefulWidget {
   const DanmakuSetting({super.key});
 
   @override
-  ConsumerState<DanmakuSetting> createState() => _DanmakuSettingState();
+  State<DanmakuSetting> createState() => _DanmakuSettingState();
 }
 
-class _DanmakuSettingState extends ConsumerState<DanmakuSetting> {
+class _DanmakuSettingState extends State<DanmakuSetting> {
+  late PlayController playController;
   Box setting = Storage.setting;
 
   @override
+  void initState() {
+    super.initState();
+    playController = Get.find<PlayController>();
+  }
+
+  @override
   Widget build(BuildContext context) {
-    final danmakuController =
-        ref.read(playProvider.notifier).danmakuController;
-    if (danmakuController == null) {
-      // 弹幕控制器通常在 `DanmakuView` 初始化后才会 attach。
-      // 若弹窗过早打开，则先不渲染，避免空指针。
-      return const SizedBox.shrink();
-    }
+    final danmakuController = playController.danmakuController;
     final hideScroll = danmakuController.option.hideScroll;
     final hideTop = danmakuController.option.hideTop;
     final hideBottom = danmakuController.option.hideBottom;

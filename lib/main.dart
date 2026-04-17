@@ -47,6 +47,7 @@ class MyApp extends StatelessWidget {
           routeInformationParser: appRouter.routeInformationParser,
           routerDelegate: appRouter.routerDelegate,
           backButtonDispatcher: appRouter.backButtonDispatcher,
+          theme: controller.lightTheme,
           darkTheme: controller.darkTheme,
           themeMode: controller.themeMode,
         );

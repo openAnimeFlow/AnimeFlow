@@ -142,7 +142,7 @@ dev_dependencies:
   build_runner: ^2.13.1
   # 生成Hive Type
   # dart run build_runner build --delete-conflicting-outputs
-  hive_ce_generator: ^1.11.1
+  hive_ce_generator: 1.11.0
 
   #riverpod代码生成
   riverpod_generator: ^4.0.3

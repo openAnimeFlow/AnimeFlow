@@ -10,7 +10,7 @@ class ThemeController extends GetxController {
   @override
   void onInit() {
     super.onInit();
-    initTheme();
+    _initTheme();
   }
 
   static const String _themeModeKey = 'themeMode';
@@ -72,7 +72,7 @@ class ThemeController extends GetxController {
   }
 
   // 初始化主题设置
-  Future<void> initTheme() async {
+  Future<void> _initTheme() async {
     final prefs = await SharedPreferences.getInstance();
 
     // 读取主题模式

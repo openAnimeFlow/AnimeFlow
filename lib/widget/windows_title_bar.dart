@@ -1,11 +1,11 @@
-import 'package:anime_flow/controllers/play/play_provider.dart';
 import 'package:anime_flow/utils/systemUtil.dart';
+import 'package:anime_flow/controllers/play/play_controller.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:get/get.dart';
 import 'package:window_manager/window_manager.dart';
 
 /// Windows 自定义标题栏组件
-class WindowsTitleBar extends ConsumerWidget {
+class WindowsTitleBar extends StatelessWidget {
   final Widget? child;
   final Color? backgroundColor;
   final double height;
@@ -18,23 +18,31 @@ class WindowsTitleBar extends ConsumerWidget {
   });
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
     if (!SystemUtil.isDesktop) {
       return child ?? const SizedBox.shrink();
     }
 
-    // 仅在播放页注册过 PlayController 时根据 Riverpod 全屏状态隐藏标题栏（勿用无 Rx 的 Obx）
+    // 检测是否处于全屏状态
+    // 通过 PlayController 来获取全屏状态，
+    // 如果控制器不存在（不在播放器页面），则显示标题栏
     try {
-      final fullscreen =
-          ref.watch(playProvider.select((s) => s.isFullscreen));
-      if (fullscreen) {
-        return child ?? const SizedBox.shrink();
-      }
-    } catch (_) {
-      // 不在播放页：始终显示标题栏
+      final playController = Get.find<PlayController>();
+      // 如果控制器存在，使用 Obx 监听全屏状态变化
+      return Obx(() {
+        // 如果处于全屏状态，隐藏标题栏
+        if (playController.isFullscreen.value) {
+          return child ?? const SizedBox.shrink();
+        }
+        // 非全屏状态，显示标题栏
+        return _buildTitleBar(context, colorScheme);
+      });
+    } catch (e) {
+      // 如果 PlayController 不存在（不在播放器页面），显示标题栏
+      // 这是正常的行为
+      return _buildTitleBar(context, colorScheme);
     }
-    return _buildTitleBar(context, colorScheme);
   }
 
   Widget _buildTitleBar(BuildContext context, ColorScheme colorScheme) {

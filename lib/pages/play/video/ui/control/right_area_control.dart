@@ -1,21 +1,19 @@
 import 'package:anime_flow/controllers/play/play_controller.dart';
-import 'package:anime_flow/controllers/play/play_provider.dart';
 import 'package:anime_flow/controllers/video/video_state_controller.dart';
 import 'package:anime_flow/controllers/video/video_ui_controller.dart';
 import 'package:anime_flow/utils/systemUtil.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:get/get.dart';
 import 'package:logger/logger.dart';
 
-class RightAreaControl extends ConsumerStatefulWidget {
+class RightAreaControl extends StatefulWidget {
   const RightAreaControl({super.key});
 
   @override
-  ConsumerState<RightAreaControl> createState() => _RightAreaControlState();
+  State<RightAreaControl> createState() => _RightAreaControlState();
 }
 
-class _RightAreaControlState extends ConsumerState<RightAreaControl> {
+class _RightAreaControlState extends State<RightAreaControl> {
   late VideoStateController videoStateController;
   late VideoUiStateController videoUiStateController;
   late PlayController playController;
@@ -33,7 +31,6 @@ class _RightAreaControlState extends ConsumerState<RightAreaControl> {
     return Obx(
       () {
         final fullscreen = playController.isFullscreen.value;
-        final isWideScreen = ref.watch(playProvider.select((s) => s.isWideScreen));
         return AnimatedSwitcher(
           duration: const Duration(milliseconds: 200),
           transitionBuilder: (child, animation) {
@@ -50,7 +47,8 @@ class _RightAreaControlState extends ConsumerState<RightAreaControl> {
                       Obx(
                         () => videoStateController.position.value >
                                     Duration.zero &&
-                                (isWideScreen || fullscreen)
+                                (playController.isWideScreen.value ||
+                                    fullscreen)
                             ? InkWell(
                                 onTap: () async {
                                   try {

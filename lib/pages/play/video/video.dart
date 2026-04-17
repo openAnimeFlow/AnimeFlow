@@ -12,7 +12,6 @@ import 'package:anime_flow/webview/webview_controller.dart';
 import 'package:anime_flow/webview/webview_item.dart';
 import 'package:anime_flow/stores/episodes_state.dart';
 import 'package:anime_flow/controllers/play/play_controller.dart';
-import 'package:anime_flow/controllers/play/play_provider.dart';
 import 'package:anime_flow/stores/play_subject_state.dart';
 import 'package:anime_flow/controllers/video/source/video_source_controller.dart';
 import 'package:anime_flow/controllers/video/video_state_controller.dart';
@@ -20,7 +19,6 @@ import 'package:anime_flow/controllers/video/video_ui_controller.dart';
 import 'package:anime_flow/http/requests/bgm_request.dart';
 import 'package:anime_flow/http/requests/damaku_request.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:get/get.dart';
 import 'package:logger/logger.dart';
 import 'package:media_kit/media_kit.dart';
@@ -30,14 +28,14 @@ import 'package:window_manager/window_manager.dart';
 import 'ui/danmaku/danmaku_view.dart';
 import 'ui/index.dart';
 
-class VideoView extends ConsumerStatefulWidget {
+class VideoView extends StatefulWidget {
   const VideoView({super.key});
 
   @override
-  ConsumerState<VideoView> createState() => _VideoViewState();
+  State<VideoView> createState() => _VideoViewState();
 }
 
-class _VideoViewState extends ConsumerState<VideoView> with WindowListener {
+class _VideoViewState extends State<VideoView> with WindowListener {
   late VideoUiStateController videoUiStateController;
   late WebviewItemController webviewItemController;
   late VideoSourceController videoSourceController;
@@ -440,13 +438,13 @@ class _VideoViewState extends ConsumerState<VideoView> with WindowListener {
   /// 窗口进入全屏时处理
   @override
   void onWindowEnterFullScreen() {
-    ref.read(playProvider.notifier).updateIsWideScreen(true);
+    playController.isFullscreen.value = true;
   }
 
   /// 窗口退出全屏时处理
   @override
   void onWindowLeaveFullScreen() {
-    ref.read(playProvider.notifier).updateIsWideScreen(false);
+    playController.isFullscreen.value = false;
   }
 
   @override

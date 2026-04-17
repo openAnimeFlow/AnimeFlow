@@ -1,6 +1,5 @@
 import 'package:anime_flow/controllers/play/play_controller.dart';
 import 'package:anime_flow/controllers/play/episode_controller.dart';
-import 'package:anime_flow/controllers/play/play_provider.dart';
 import 'package:anime_flow/controllers/video/source/video_source_controller.dart';
 import 'package:anime_flow/controllers/video/video_state_controller.dart';
 import 'package:anime_flow/controllers/video/video_ui_controller.dart';
@@ -14,19 +13,18 @@ import 'package:anime_flow/utils/systemUtil.dart';
 import 'package:anime_flow/widget/danmaku_text_field.dart';
 import 'package:anime_flow/widget/play_content/episodes_view.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:get/get.dart';
 
 /// 底部区域控件
-class BottomAreaControl extends ConsumerStatefulWidget {
+class BottomAreaControl extends StatefulWidget {
   const BottomAreaControl({super.key});
 
   @override
-  ConsumerState<BottomAreaControl> createState() => _BottomAreaControlState();
+  State<BottomAreaControl> createState() => _BottomAreaControlState();
 }
 
-class _BottomAreaControlState extends ConsumerState<BottomAreaControl> {
+class _BottomAreaControlState extends State<BottomAreaControl> {
   late VideoUiStateController videoUiStateController;
   late VideoStateController videoStateController;
   late PlayController playController;
@@ -49,8 +47,9 @@ class _BottomAreaControlState extends ConsumerState<BottomAreaControl> {
     return Obx(() {
       // 全屏状态，
       final fullscreen = playController.isFullscreen.value;
+
       final danmakuOn = playController.danmakuOn.value;
-      final isWideScreen = ref.watch(playProvider.select((s) => s.isWideScreen));
+      final isWideScreen = playController.isWideScreen.value;
       final isShowControlsUi = videoUiStateController.isShowControlsUi.value;
       final isContentExpanded = playController.isContentExpanded.value;
       final hasNextEpisode = episodeController.hasNextEpisode(episodesState);

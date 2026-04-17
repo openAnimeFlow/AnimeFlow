@@ -8,13 +8,12 @@ import 'package:anime_flow/repository/storage.dart';
 import 'package:anime_flow/utils/systemUtil.dart';
 import 'package:anime_flow/utils/utils.dart';
 import 'package:canvas_danmaku/canvas_danmaku.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:hive_ce/hive.dart';
 import 'package:media_kit/media_kit.dart';
-import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:window_manager/window_manager.dart';
 
-part 'play_controller.g.dart';
-
+/// 播放器 UI / 弹幕相关状态（与 [PlayController] 字段对齐，供 Riverpod 使用）
 class PlayState {
   const PlayState({
     this.superResolutionType = 0,
@@ -26,7 +25,7 @@ class PlayState {
     this.hiddenPlatforms = const <String>{},
   });
 
-  /// 超分：0 初始；1 关；2 效率；3 质量
+  /// 超分：0 初始；1 关；2 效率；3 质量（与 [PlayNotifier.setShader] 一致）
   final int superResolutionType;
 
   /// 播放页宽屏状态
@@ -37,12 +36,8 @@ class PlayState {
 
   /// 全屏状态
   final bool isFullscreen;
-
-  /// 弹幕数据
   final Map<int, List<Danmaku>> danDanmakus;
   final bool danmakuOn;
-
-  /// 隐藏的弹幕平台
   final Set<String> hiddenPlatforms;
 
   PlayState copyWith({
@@ -86,14 +81,20 @@ Set<String> _hiddenPlatformsFromStorage() {
   return hidden;
 }
 
+/// Riverpod 版播放控制逻辑，与 [PlayController] 行为对齐。
+///
 /// 使用方式：`ref.watch(playProvider)` / `ref.read(playProvider.notifier)`。
 /// [DanmakuController] 由弹幕组件创建后调用 [attachDanmakuController]。
-@riverpod
-class PlayController extends _$PlayController {
+final playController =
+    NotifierProvider<PlayNotifier, PlayState>(PlayNotifier.new);
+
+class PlayNotifier extends Notifier<PlayState> {
   DanmakuController? _danmakuController;
   Timer? _saveSettingsTimer;
 
-  DanmakuController? readDanmakuController() => _danmakuController;
+  DanmakuController? get danmakuController => _danmakuController;
+
+  set danmakuController(DanmakuController? value) => _danmakuController = value;
 
   void attachDanmakuController(DanmakuController controller) {
     _danmakuController = controller;
@@ -242,6 +243,3 @@ class PlayController extends _$PlayController {
     state = state.copyWith(superResolutionType: 1);
   }
 }
-
-// 兼容旧调用点：ref.watch(playController) / ref.read(playController.notifier)
-final playController = playControllerProvider;

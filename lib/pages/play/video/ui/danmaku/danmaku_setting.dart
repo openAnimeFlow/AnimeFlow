@@ -19,7 +19,7 @@ class _DanmakuSettingState extends ConsumerState<DanmakuSetting> {
   @override
   Widget build(BuildContext context) {
     final danmakuController =
-        ref.read(playController.notifier).readDanmakuController();
+        ref.read(playController.notifier).danmakuController;
     if (danmakuController == null) {
       // 弹幕控制器通常在 `DanmakuView` 初始化后才会 attach。
       // 若弹窗过早打开，则先不渲染，避免空指针。

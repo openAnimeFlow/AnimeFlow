@@ -1,4 +1,4 @@
-import 'package:anime_flow/controllers/play/play_controller.dart';
+import 'package:anime_flow/controllers/play/play_provider.dart';
 import 'package:anime_flow/controllers/video/source/video_source_controller.dart';
 import 'package:anime_flow/controllers/video/video_state_controller.dart';
 import 'package:anime_flow/stores/play_subject_state.dart';
@@ -36,8 +36,7 @@ class _VideoResourcesViewState extends ConsumerState<VideoResourcesView> {
       videoStateController.player.stop();
       videoSourceController.loadVideoPage(url);
     }
-
-    final isWideScreen = ref.read(playController).isWideScreen;
+    final isWideScreen = ref.read(playProvider).isWideScreen;
     if (isWideScreen) {
       // 宽屏模式：使用侧边抽屉
       Get.generalDialog(
@@ -88,12 +87,10 @@ class _VideoResourcesViewState extends ConsumerState<VideoResourcesView> {
           child: Padding(
             padding: const EdgeInsets.all(10),
             child: Row(
-              spacing: 8,
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 Expanded(
                   child: Column(
-                    spacing: 5,
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       const Text(
@@ -102,11 +99,11 @@ class _VideoResourcesViewState extends ConsumerState<VideoResourcesView> {
                           fontSize: 15,
                         ),
                       ),
+                      const SizedBox(height: 5),
                       Obx(() => videoSourceController.isLoading.value ||
                               videoSourceController
                                   .webSiteTitle.value.isNotEmpty
                           ? Row(
-                              spacing: 5,
                               children: [
                                 ClipRRect(
                                   borderRadius: BorderRadius.circular(5),
@@ -116,15 +113,15 @@ class _VideoResourcesViewState extends ConsumerState<VideoResourcesView> {
                                       url: videoSourceController
                                           .webSiteIcon.value),
                                 ),
-                                Expanded(
-                                    child: Text(
+                                const SizedBox(width: 5),
+                                Text(
                                   videoSourceController.webSiteTitle.value,
-                                  maxLines: 1,
+                                  maxLines: 3,
                                   overflow: TextOverflow.ellipsis,
                                   style: const TextStyle(
                                       fontSize: 20,
                                       fontWeight: FontWeight.bold),
-                                ))
+                                )
                               ],
                             )
                           : const Row(
@@ -141,6 +138,7 @@ class _VideoResourcesViewState extends ConsumerState<VideoResourcesView> {
                     ],
                   ),
                 ),
+                const SizedBox(width: 8),
                 OutlinedButton.icon(
                   onPressed: () {
                     _showSourceDrawer();

@@ -1,4 +1,4 @@
-import 'package:anime_flow/controllers/play/play_controller.dart';
+import 'package:anime_flow/controllers/play/play_provider.dart';
 import 'package:anime_flow/controllers/video/video_state_controller.dart';
 import 'package:anime_flow/controllers/video/video_ui_controller.dart';
 import 'package:flutter/material.dart';
@@ -10,7 +10,7 @@ class ShaderButton extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final playState = ref.watch(playController);
+    final playState = ref.watch(playProvider);
     final currentType = playState.superResolutionType;
 
     final videoUiStateController = Get.find<VideoUiStateController>();
@@ -34,7 +34,7 @@ class ShaderButton extends ConsumerWidget {
 
           return MenuItemButton(
             onPressed: () {
-              ref.read(playController.notifier).setShader(type, player: player);
+              ref.read(playProvider.notifier).setShader(type, player: player);
             },
             child: Container(
               height: 48,

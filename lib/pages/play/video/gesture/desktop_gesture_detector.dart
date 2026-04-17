@@ -1,6 +1,6 @@
 import 'dart:async';
 
-import 'package:anime_flow/controllers/play/play_controller.dart';
+import 'package:anime_flow/controllers/play/play_provider.dart';
 import 'package:anime_flow/controllers/video/video_state_controller.dart';
 import 'package:anime_flow/controllers/video/video_ui_controller.dart';
 import 'package:anime_flow/models/enums/video_controls_icon_type.dart';
@@ -132,7 +132,7 @@ class _DesktopGestureDetectorState extends State<DesktopGestureDetector> {
             builder: (context, ref, child) => GestureDetector(
               // 双击事件
               onDoubleTap: () {
-                ref.read(playController.notifier).toggleFullScreen();
+                ref.read(playProvider.notifier).toggleFullScreen();
               },
 
               // 单击事件

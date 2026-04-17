@@ -1,5 +1,5 @@
 import 'package:anime_flow/constants/storage_key.dart';
-import 'package:anime_flow/controllers/play/play_controller.dart';
+import 'package:anime_flow/controllers/play/play_provider.dart';
 import 'package:anime_flow/controllers/setting_controller.dart';
 import 'package:anime_flow/repository/storage.dart';
 import 'package:anime_flow/utils/systemUtil.dart';
@@ -136,9 +136,9 @@ class _DanmakuSettingPageState extends State<DanmakuSettingPage> {
                           });
                           // 同步更新 PlayController 的平台隐藏状态
                           try {
-                            final controller =
-                                ref.read(playController.notifier);
-                            controller.syncPlatformVisibilityFromStorage();
+                            final playController =
+                                ref.read(playProvider.notifier);
+                            playController.syncPlatformVisibilityFromStorage();
                           } catch (_) {
                             // PlayController 可能未初始化，忽略错误
                           }
@@ -156,9 +156,9 @@ class _DanmakuSettingPageState extends State<DanmakuSettingPage> {
                           });
                           // 同步更新 PlayController 的平台隐藏状态
                           try {
-                            final controller =
-                                ref.read(playController.notifier);
-                            controller.syncPlatformVisibilityFromStorage();
+                            final playController =
+                                ref.read(playProvider.notifier);
+                            playController.syncPlatformVisibilityFromStorage();
                           } catch (_) {
                             // PlayController 可能未初始化，忽略错误
                           }
@@ -177,9 +177,9 @@ class _DanmakuSettingPageState extends State<DanmakuSettingPage> {
                           });
                           // 同步更新 PlayController 的平台隐藏状态
                           try {
-                            final controller =
-                                ref.read(playController.notifier);
-                            controller.syncPlatformVisibilityFromStorage();
+                            final playController =
+                                ref.read(playProvider.notifier);
+                            playController.syncPlatformVisibilityFromStorage();
                           } catch (_) {
                             // PlayController 可能未初始化，忽略错误
                           }

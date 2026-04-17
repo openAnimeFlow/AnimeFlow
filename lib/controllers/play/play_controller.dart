@@ -1,148 +1,127 @@
 import 'dart:async';
-
 import 'package:anime_flow/constants/constants.dart';
 import 'package:anime_flow/constants/storage_key.dart';
 import 'package:anime_flow/controllers/shaders/shaders_provider.dart';
+import 'package:anime_flow/providers/global_provider_container.dart';
 import 'package:anime_flow/models/item/danmaku/danmaku_module.dart';
 import 'package:anime_flow/repository/storage.dart';
 import 'package:anime_flow/utils/systemUtil.dart';
 import 'package:anime_flow/utils/utils.dart';
 import 'package:canvas_danmaku/canvas_danmaku.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:get/get.dart';
 import 'package:hive_ce/hive.dart';
 import 'package:media_kit/media_kit.dart';
 import 'package:window_manager/window_manager.dart';
 
-/// 播放器 UI / 弹幕相关状态（与 [PlayController] 字段对齐，供 Riverpod 使用）
-class PlayState {
-  const PlayState({
-    this.superResolutionType = 0,
-    this.isWideScreen = false,
-    this.isContentExpanded = true,
-    this.isFullscreen = false,
-    this.danDanmakus = const <int, List<Danmaku>>{},
-    this.danmakuOn = true,
-    this.hiddenPlatforms = const <String>{},
-  });
+class PlayController extends GetxController {
+  /// 视频超分
+  /// 1. 关闭
+  /// 2. 效率档
+  /// 3. 质量档
+  final superResolutionType = 0.obs;
 
-  /// 超分：0 初始；1 关；2 效率；3 质量（与 [PlayNotifier.setShader] 一致）
-  final int superResolutionType;
+  /// 宽屏状态
+  final isWideScreen = false.obs;
 
-  /// 播放页宽屏状态
-  final bool isWideScreen;
-
-  /// 播放页内容展开状态
-  final bool isContentExpanded;
+  /// 内容区域展开状态
+  final isContentExpanded = true.obs;
 
   /// 全屏状态
-  final bool isFullscreen;
-  final Map<int, List<Danmaku>> danDanmakus;
-  final bool danmakuOn;
-  final Set<String> hiddenPlatforms;
+  final isFullscreen = false.obs;
 
-  PlayState copyWith({
-    int? superResolutionType,
-    bool? isWideScreen,
-    bool? isContentExpanded,
-    bool? isFullscreen,
-    Map<int, List<Danmaku>>? danDanmakus,
-    bool? danmakuOn,
-    Set<String>? hiddenPlatforms,
-  }) {
-    return PlayState(
-      superResolutionType: superResolutionType ?? this.superResolutionType,
-      isWideScreen: isWideScreen ?? this.isWideScreen,
-      isContentExpanded: isContentExpanded ?? this.isContentExpanded,
-      isFullscreen: isFullscreen ?? this.isFullscreen,
-      danDanmakus: danDanmakus ?? this.danDanmakus,
-      danmakuOn: danmakuOn ?? this.danmakuOn,
-      hiddenPlatforms: hiddenPlatforms ?? this.hiddenPlatforms,
-    );
-  }
-}
-
-Set<String> _hiddenPlatformsFromStorage() {
-  final Box setting = Storage.setting;
-  final platformBilibili = setting.get(DanmakuKey.danmakuPlatformBilibili,
-      defaultValue: true) as bool;
-  final platformGamer =
-      setting.get(DanmakuKey.danmakuPlatformGamer, defaultValue: true) as bool;
-  final platformDanDanPlay = setting.get(DanmakuKey.danmakuPlatformDanDanPlay,
-      defaultValue: true) as bool;
-
-  const platformNameBilibili = 'BiliBili';
-  const platformNameGamer = 'Gamer';
-  const platformNameDanDanPlay = '弹弹Play';
-
-  final hidden = <String>{};
-  if (!platformBilibili) hidden.add(platformNameBilibili);
-  if (!platformGamer) hidden.add(platformNameGamer);
-  if (!platformDanDanPlay) hidden.add(platformNameDanDanPlay);
-  return hidden;
-}
-
-/// Riverpod 版播放控制逻辑，与 [PlayController] 行为对齐。
-///
-/// 使用方式：`ref.watch(playProvider)` / `ref.read(playProvider.notifier)`。
-/// [DanmakuController] 由弹幕组件创建后调用 [attachDanmakuController]。
-final playController =
-    NotifierProvider<PlayNotifier, PlayState>(PlayNotifier.new);
-
-class PlayNotifier extends Notifier<PlayState> {
-  DanmakuController? _danmakuController;
+  ///弹幕相关
+  final RxMap<int, List<Danmaku>> danDanmakus = <int, List<Danmaku>>{}.obs;
+  late DanmakuController danmakuController;
+  final RxBool danmakuOn = true.obs;
+  final RxSet<String> hiddenPlatforms = <String>{}.obs;
   Timer? _saveSettingsTimer;
 
-  DanmakuController? get danmakuController => _danmakuController;
-
-  set danmakuController(DanmakuController? value) => _danmakuController = value;
-
-  void attachDanmakuController(DanmakuController controller) {
-    _danmakuController = controller;
-  }
-
   @override
-  PlayState build() {
-    ref.onDispose(() {
-      _saveSettingsTimer?.cancel();
-    });
-    return PlayState(hiddenPlatforms: _hiddenPlatformsFromStorage());
+  void onInit() {
+    super.onInit();
+    _initPlatformVisibility();
   }
 
-  /// 从存储同步平台显示/隐藏
+  /// 初始化平台显示/隐藏状态（从持久化设置读取）
+  void _initPlatformVisibility() {
+    syncPlatformVisibilityFromStorage();
+  }
+
+  /// 从存储同步平台显示/隐藏状态
   void syncPlatformVisibilityFromStorage() {
-    state = state.copyWith(hiddenPlatforms: _hiddenPlatformsFromStorage());
+    final Box setting = Storage.setting;
+
+    // 读取各平台的显示设置
+    final platformBilibili =
+        setting.get(DanmakuKey.danmakuPlatformBilibili, defaultValue: true);
+    final platformGamer =
+        setting.get(DanmakuKey.danmakuPlatformGamer, defaultValue: true);
+    final platformDanDanPlay =
+        setting.get(DanmakuKey.danmakuPlatformDanDanPlay, defaultValue: true);
+
+    // 平台名称映射（从 source 字段中提取的实际名称，如 [BiliBili]、[Gamer]）
+    const String platformNameBilibili = 'BiliBili';
+    const String platformNameGamer = 'Gamer';
+    const String platformNameDanDanPlay = '弹弹Play';
+
+    // 根据设置更新 hiddenPlatforms
+    if (!platformBilibili) {
+      if (!hiddenPlatforms.contains(platformNameBilibili)) {
+        hiddenPlatforms.add(platformNameBilibili);
+      }
+    } else {
+      hiddenPlatforms.remove(platformNameBilibili);
+    }
+
+    if (!platformGamer) {
+      if (!hiddenPlatforms.contains(platformNameGamer)) {
+        hiddenPlatforms.add(platformNameGamer);
+      }
+    } else {
+      hiddenPlatforms.remove(platformNameGamer);
+    }
+
+    if (!platformDanDanPlay) {
+      if (!hiddenPlatforms.contains(platformNameDanDanPlay)) {
+        hiddenPlatforms.add(platformNameDanDanPlay);
+      }
+    } else {
+      hiddenPlatforms.remove(platformNameDanDanPlay);
+    }
+
+    // 同步后清空屏幕弹幕，让新设置生效
     try {
-      _danmakuController?.clear();
+      danmakuController.clear();
     } catch (_) {}
   }
 
-  /// 宽屏切换
   void updateIsWideScreen(bool value) {
-    if (state.isWideScreen != value) {
-      state = state.copyWith(isWideScreen: value);
+    if (isWideScreen.value != value) {
+      isWideScreen.value = value;
     }
   }
 
   /// 切换内容区域展开状态
   void toggleContentExpanded() {
-    state = state.copyWith(isContentExpanded: !state.isContentExpanded);
+    isContentExpanded.value = !isContentExpanded.value;
   }
 
   /// 进入全屏
   void enterFullScreen() {
-    state = state.copyWith(isFullscreen: true);
+    isFullscreen.value = true;
+    // 移动端全屏时自动横屏
     SystemUtil.enterFullScreen();
   }
 
   /// 退出全屏
   void exitFullScreen() {
-    state = state.copyWith(isFullscreen: false);
+    isFullscreen.value = false;
     SystemUtil.exitFullScreen();
   }
 
   /// 切换全屏状态
   void toggleFullScreen() {
-    if (state.isFullscreen) {
+    if (isFullscreen.value) {
       exitFullScreen();
     } else {
       enterFullScreen();
@@ -152,65 +131,73 @@ class PlayNotifier extends Notifier<PlayState> {
   /// 检测桌面端全屏状态
   Future<void> checkDesktopFullscreen() async {
     if (SystemUtil.isDesktop) {
-      state = state.copyWith(isFullscreen: await windowManager.isFullScreen());
+      isFullscreen.value = await windowManager.isFullScreen();
     }
   }
 
+  /// 处理全屏变化
+  /// 在全屏切换时清空弹幕
   void handleFullscreenChange() {
     try {
-      _danmakuController?.clear();
-    } catch (_) {}
+      danmakuController.clear();
+    } catch (_) {
+      // 如果控制器未初始化，忽略错误
+    }
   }
 
   void addDanmaku(List<Danmaku> danmaku) {
-    final map = <int, List<Danmaku>>{};
-    for (final item in danmaku) {
-      final second = item.time.toInt();
-      map.putIfAbsent(second, () => []).add(item);
+    // 按时间分组
+    danDanmakus.clear();
+    for (var item in danmaku) {
+      int second = item.time.toInt();
+      if (!danDanmakus.containsKey(second)) {
+        danDanmakus[second] = [];
+      }
+      danDanmakus[second]!.add(item);
     }
-    state = state.copyWith(danDanmakus: map);
   }
 
   void removeDanmaku() {
-    _danmakuController?.clear();
-    state = state.copyWith(danDanmakus: {});
+    danmakuController.clear();
+    danDanmakus.clear();
   }
 
+  /// 切换弹幕开关
   void toggleDanmaku() {
-    final next = !state.danmakuOn;
-    state = state.copyWith(danmakuOn: next);
-    Storage.setting.put(DanmakuKey.danmakuOn, next);
-    if (!next) {
+    danmakuOn.value = !danmakuOn.value;
+    Storage.setting.put(DanmakuKey.danmakuOn, danmakuOn.value);
+    if (!danmakuOn.value) {
       try {
-        _danmakuController?.clear();
+        danmakuController.clear();
       } catch (_) {}
     }
   }
 
+  /// 切换平台显示/隐藏状态
   void togglePlatformVisibility(String platform) {
-    final next = Set<String>.from(state.hiddenPlatforms);
-    if (next.contains(platform)) {
-      next.remove(platform);
+    if (hiddenPlatforms.contains(platform)) {
+      hiddenPlatforms.remove(platform);
     } else {
-      next.add(platform);
+      hiddenPlatforms.add(platform);
     }
-    state = state.copyWith(hiddenPlatforms: next);
+    // 清空屏幕上的弹幕，新弹幕会按照新的隐藏状态过滤
     try {
-      _danmakuController?.clear();
+      danmakuController.clear();
     } catch (_) {}
   }
 
+  /// 检查平台是否被隐藏
   bool isPlatformHidden(String platform) {
-    return state.hiddenPlatforms.contains(platform);
+    return hiddenPlatforms.contains(platform);
   }
 
-  Future<void> setShader(
-    int type, {
-    required Player player,
-    bool synchronized = true,
-  }) async {
-    final shadersController = await ref.read(shadersControllerProvider.future);
-    final pp = player.platform as NativePlayer;
+  ///设置超分辨率
+  /// type 1 关闭 2 效率档 3 质量档
+  Future<void> setShader(int type,
+      {required Player player, bool synchronized = true}) async {
+    final shadersController =
+        await globalProviderContainer.read(shadersControllerProvider.future);
+    var pp = player.platform as NativePlayer;
     await pp.waitForPlayerInitialization;
     await pp.waitForVideoControllerInitializationIfAttached;
     if (type == 2) {
@@ -218,12 +205,10 @@ class PlayNotifier extends Notifier<PlayState> {
         'change-list',
         'glsl-shaders',
         'set',
-        Utils.buildShadersAbsolutePath(
-          shadersController.shadersDirectory.path,
-          Constants.mpvAnime4KShadersLite,
-        ),
+        Utils.buildShadersAbsolutePath(shadersController.shadersDirectory.path,
+            Constants.mpvAnime4KShadersLite),
       ]);
-      state = state.copyWith(superResolutionType: 2);
+      superResolutionType.value = 2;
       return;
     }
     if (type == 3) {
@@ -231,15 +216,19 @@ class PlayNotifier extends Notifier<PlayState> {
         'change-list',
         'glsl-shaders',
         'set',
-        Utils.buildShadersAbsolutePath(
-          shadersController.shadersDirectory.path,
-          Constants.mpvAnime4KShaders,
-        ),
+        Utils.buildShadersAbsolutePath(shadersController.shadersDirectory.path,
+            Constants.mpvAnime4KShaders),
       ]);
-      state = state.copyWith(superResolutionType: 3);
+      superResolutionType.value = 3;
       return;
     }
     await pp.command(['change-list', 'glsl-shaders', 'clr', '']);
-    state = state.copyWith(superResolutionType: 1);
+    superResolutionType.value = 1;
+  }
+
+  @override
+  void onClose() {
+    _saveSettingsTimer?.cancel();
+    super.onClose();
   }
 }

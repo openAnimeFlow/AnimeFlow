@@ -1,4 +1,4 @@
-import 'package:anime_flow/controllers/play/play_controller.dart';
+import 'package:anime_flow/controllers/play/play_provider.dart';
 import 'package:anime_flow/controllers/video/video_state_controller.dart';
 import 'package:anime_flow/controllers/video/video_ui_controller.dart';
 import 'package:anime_flow/utils/systemUtil.dart';
@@ -29,8 +29,8 @@ class _RightAreaControlState extends ConsumerState<RightAreaControl> {
   Widget build(BuildContext context) {
     return Obx(
       () {
-        final fullscreen = ref.watch(playController.select((s) => s.isFullscreen));
-        final isWideScreen = ref.watch(playController.select((s) => s.isWideScreen));
+        final fullscreen = ref.watch(playProvider.select((s) => s.isFullscreen));
+        final isWideScreen = ref.watch(playProvider.select((s) => s.isWideScreen));
         return AnimatedSwitcher(
           duration: const Duration(milliseconds: 200),
           transitionBuilder: (child, animation) {

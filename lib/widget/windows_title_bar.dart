@@ -1,4 +1,4 @@
-import 'package:anime_flow/controllers/play/play_controller.dart';
+import 'package:anime_flow/controllers/play/play_provider.dart';
 import 'package:anime_flow/utils/systemUtil.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -27,7 +27,7 @@ class WindowsTitleBar extends ConsumerWidget {
     // 仅在播放页注册过 PlayController 时根据 Riverpod 全屏状态隐藏标题栏（勿用无 Rx 的 Obx）
     try {
       final fullscreen =
-          ref.watch(playController.select((s) => s.isFullscreen));
+          ref.watch(playProvider.select((s) => s.isFullscreen));
       if (fullscreen) {
         return child ?? const SizedBox.shrink();
       }

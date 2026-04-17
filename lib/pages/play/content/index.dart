@@ -1,4 +1,4 @@
-import 'package:anime_flow/controllers/play/play_controller.dart';
+import 'package:anime_flow/controllers/play/play_provider.dart';
 import 'package:anime_flow/stores/episodes_state.dart';
 import 'package:anime_flow/http/requests/bgm_request.dart';
 import 'package:anime_flow/models/item/bangumi/episode_comments_item.dart';
@@ -164,7 +164,7 @@ class _PlayWideScreenDanmakuSlot extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final isWideScreen =
-    ref.watch(playController.select((s) => s.isWideScreen));
+    ref.watch(playProvider.select((s) => s.isWideScreen));
     return isWideScreen
         ? const Spacer()
         : const SizedBox(

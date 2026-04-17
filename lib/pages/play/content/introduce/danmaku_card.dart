@@ -2,7 +2,7 @@ import 'package:anime_flow/http/requests/damaku_request.dart';
 import 'package:anime_flow/models/item/danmaku/danmaku_search_response.dart';
 import 'package:anime_flow/models/item/danmaku/danmaku_episode_response.dart';
 import 'package:anime_flow/stores/episodes_state.dart';
-import 'package:anime_flow/controllers/play/play_controller.dart';
+import 'package:anime_flow/controllers/play/play_provider.dart';
 import 'package:anime_flow/models/item/danmaku/danmaku_module.dart';
 import 'package:anime_flow/stores/play_subject_state.dart';
 import 'package:anime_flow/utils/format_time_util.dart';
@@ -34,7 +34,7 @@ class _DanmakuCardState extends ConsumerState<DanmakuCard> {
     ever(episodesController.episodeIndex, (int episode) {
       if (_currentEpisode != episode) {
         _currentEpisode = episode;
-        ref.read(playController.notifier).removeDanmaku();
+        ref.read(playProvider.notifier).removeDanmaku();
       }
     });
   }
@@ -59,7 +59,7 @@ class _DanmakuCardState extends ConsumerState<DanmakuCard> {
   @override
   Widget build(BuildContext context) {
     final slice = ref.watch(
-      playController.select((s) => (s.danDanmakus, s.hiddenPlatforms)),
+      playProvider.select((s) => (s.danDanmakus, s.hiddenPlatforms)),
     );
     final danDanmakus = slice.$1;
     final hiddenPlatforms = slice.$2;
@@ -173,7 +173,7 @@ class _DanmakuCardState extends ConsumerState<DanmakuCard> {
                                 : null,
                             onPressed: () {
                               ref
-                                  .read(playController.notifier)
+                                  .read(playProvider.notifier)
                                   .togglePlatformVisibility(platform);
                             },
                           );
@@ -362,8 +362,8 @@ class _DanmakuCardState extends ConsumerState<DanmakuCard> {
                               final danmaku =
                                   await DanmakuRequest.getDanDanmakuByEpisodeID(
                                       episode.episodeId);
-                              ref.read(playController.notifier).removeDanmaku();
-                              ref.read(playController.notifier).addDanmaku(danmaku);
+                              ref.read(playProvider.notifier).removeDanmaku();
+                              ref.read(playProvider.notifier).addDanmaku(danmaku);
                               Get.back();
                             },
                           );

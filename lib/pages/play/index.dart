@@ -1,5 +1,5 @@
 import 'package:anime_flow/controllers/play/episode_controller.dart';
-import 'package:anime_flow/controllers/play/play_controller.dart';
+import 'package:anime_flow/controllers/play/play_provider.dart';
 import 'package:anime_flow/controllers/video/video_state_controller.dart';
 import 'package:anime_flow/controllers/video/video_ui_controller.dart';
 import 'package:anime_flow/http/requests/bgm_request.dart';
@@ -172,9 +172,9 @@ class _PlayPageState extends ConsumerState<PlayPage> {
       final bool isWideScreen = constraints.maxWidth > 600;
       WidgetsBinding.instance.addPostFrameCallback((_) {
         if (!mounted) return;
-        ref.read(playController.notifier).updateIsWideScreen(isWideScreen);
+        ref.read(playProvider.notifier).updateIsWideScreen(isWideScreen);
       });
-      final isFullscreen = ref.watch(playController.select((s) => s.isFullscreen));
+      final isFullscreen = ref.watch(playProvider.select((s) => s.isFullscreen));
       late final Widget content;
       if (isFullscreen) {
         content = Scaffold(
@@ -197,7 +197,7 @@ class _PlayPageState extends ConsumerState<PlayPage> {
                     Consumer(
                       builder: (context, ref, _) {
                         final isContentExpanded = ref.watch(
-                          playController.select((s) => s.isContentExpanded),
+                          playProvider.select((s) => s.isContentExpanded),
                         );
                         return AnimatedContainer(
                           duration: const Duration(milliseconds: 100),
@@ -245,7 +245,7 @@ class _PlayPageState extends ConsumerState<PlayPage> {
           canPop: !isFullscreen,
           onPopInvokedWithResult: (bool didPop, dynamic result) {
             if (!didPop && isFullscreen) {
-              ref.read(playController.notifier).exitFullScreen();
+              ref.read(playProvider.notifier).exitFullScreen();
             }
           },
           child: content,

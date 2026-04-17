@@ -1,5 +1,6 @@
 import 'dart:io';
 import 'package:anime_flow/repository/storage.dart';
+import 'package:anime_flow/routes/routes.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -7,9 +8,9 @@ import 'package:get/get.dart';
 import 'package:hive_ce_flutter/hive_flutter.dart';
 import 'package:media_kit/media_kit.dart';
 import 'package:anime_flow/providers/global_provider_container.dart';
-import 'package:anime_flow/providers/theme_provider.dart';
-import 'package:anime_flow/routes/routes.dart';
 import 'package:window_manager/window_manager.dart';
+
+import 'controllers/theme_controller.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -17,7 +18,6 @@ void main() async {
   await dotenv.load(fileName: ".env");
   await Hive.initFlutter();
   await Storage.init();
-  await globalProviderContainer.read(themeProvider.notifier).loadFromPrefs();
 
   // 桌面平台初始化窗口管理器
   if (Platform.isWindows || Platform.isLinux || Platform.isMacOS) {
@@ -37,20 +37,25 @@ void main() async {
   ));
 }
 
-class MyApp extends ConsumerWidget {
+class MyApp extends StatelessWidget {
   const MyApp({super.key});
 
+  ThemeController get themeController => Get.find<ThemeController>();
+
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final themeState = ref.watch(themeProvider);
-    return GetMaterialApp.router(
-      routeInformationProvider: appRouter.routeInformationProvider,
-      routeInformationParser: appRouter.routeInformationParser,
-      routerDelegate: appRouter.routerDelegate,
-      backButtonDispatcher: appRouter.backButtonDispatcher,
-      theme: buildLightTheme(themeState.seedColor),
-      darkTheme: buildDarkTheme(themeState.seedColor),
-      themeMode: themeState.themeMode,
+  Widget build(BuildContext context) {
+    return GetBuilder<ThemeController>(
+      builder: (controller) {
+        controller.initTheme();
+        return GetMaterialApp.router(
+          routeInformationProvider: appRouter.routeInformationProvider,
+          routeInformationParser: appRouter.routeInformationParser,
+          routerDelegate: appRouter.routerDelegate,
+          backButtonDispatcher: appRouter.backButtonDispatcher,
+          darkTheme: controller.darkTheme,
+          themeMode: controller.themeMode,
+        );
+      },
     );
   }
 }

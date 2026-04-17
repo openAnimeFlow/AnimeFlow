@@ -14,10 +14,14 @@ part of 'play_controller.dart';
 @ProviderFor(PlayController)
 final playControllerProvider = PlayControllerProvider._();
 
+/// Riverpod 版播放控制逻辑。
+///
 /// 使用方式：`ref.watch(playProvider)` / `ref.read(playProvider.notifier)`。
 /// [DanmakuController] 由弹幕组件创建后调用 [attachDanmakuController]。
 final class PlayControllerProvider
     extends $NotifierProvider<PlayController, PlayState> {
+  /// Riverpod 版播放控制逻辑。
+  ///
   /// 使用方式：`ref.watch(playProvider)` / `ref.read(playProvider.notifier)`。
   /// [DanmakuController] 由弹幕组件创建后调用 [attachDanmakuController]。
   PlayControllerProvider._()
@@ -47,8 +51,10 @@ final class PlayControllerProvider
   }
 }
 
-String _$playControllerHash() => r'3c678ceb2dbaad198e010010e4d4375a49247b7f';
+String _$playControllerHash() => r'b2a349ac36abbae803101b8b47617aff10f98d40';
 
+/// Riverpod 版播放控制逻辑。
+///
 /// 使用方式：`ref.watch(playProvider)` / `ref.read(playProvider.notifier)`。
 /// [DanmakuController] 由弹幕组件创建后调用 [attachDanmakuController]。
 

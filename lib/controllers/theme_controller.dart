@@ -7,6 +7,12 @@ class ThemeController extends GetxController {
   ThemeMode _themeMode = ThemeMode.system;
   Color _seedColor = themeColors[0].color;
 
+  @override
+  void onInit() {
+    super.onInit();
+    initTheme();
+  }
+
   static const String _themeModeKey = 'themeMode';
   static const String _seedColorKey = 'seedColor';
 

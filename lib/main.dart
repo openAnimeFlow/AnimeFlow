@@ -18,6 +18,7 @@ void main() async {
   await dotenv.load(fileName: ".env");
   await Hive.initFlutter();
   await Storage.init();
+  Get.put(ThemeController());
 
   // 桌面平台初始化窗口管理器
   if (Platform.isWindows || Platform.isLinux || Platform.isMacOS) {
@@ -31,6 +32,7 @@ void main() async {
     });
   }
 
+
   runApp(UncontrolledProviderScope(
     container: globalProviderContainer,
     child: const MyApp(),
@@ -40,13 +42,10 @@ void main() async {
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
 
-  ThemeController get themeController => Get.find<ThemeController>();
-
   @override
   Widget build(BuildContext context) {
     return GetBuilder<ThemeController>(
       builder: (controller) {
-        controller.initTheme();
         return GetMaterialApp.router(
           routeInformationProvider: appRouter.routeInformationProvider,
           routeInformationParser: appRouter.routeInformationParser,

@@ -1,10 +1,9 @@
 import 'package:anime_flow/constants/storage_key.dart';
-import 'package:anime_flow/controllers/play/play_provider.dart';
+import 'package:anime_flow/controllers/play/play_controller.dart';
 import 'package:anime_flow/controllers/setting_controller.dart';
 import 'package:anime_flow/repository/storage.dart';
 import 'package:anime_flow/utils/systemUtil.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:get/get.dart';
 import 'package:hive_ce/hive.dart';
 
@@ -44,26 +43,18 @@ class _DanmakuSettingPageState extends State<DanmakuSettingPage> {
   void _loadSettings() {
     setState(() {
       _opacity = setting.get(DanmakuKey.danmakuOpacity, defaultValue: 1.0);
-      _fontSize = setting.get(DanmakuKey.danmakuFontSize,
-          defaultValue: SystemUtil.isMobile ? 16.0 : 25.0);
+      _fontSize = setting.get(DanmakuKey.danmakuFontSize, defaultValue: SystemUtil.isMobile ? 16.0 : 25.0);
       _danmakuArea = setting.get(DanmakuKey.danmakuArea, defaultValue: 0.25);
-      _danmakuDuration =
-          setting.get(DanmakuKey.danmakuDuration, defaultValue: 8.0);
-      _massiveMode =
-          setting.get(DanmakuKey.danmakuMassiveMode, defaultValue: false);
+      _danmakuDuration = setting.get(DanmakuKey.danmakuDuration, defaultValue: 8.0);
+      _massiveMode = setting.get(DanmakuKey.danmakuMassiveMode, defaultValue: false);
       _border = setting.get(DanmakuKey.danmakuBorder, defaultValue: true);
       _danmakuColor = setting.get(DanmakuKey.danmakuColor, defaultValue: true);
       _hideTop = setting.get(DanmakuKey.danmakuHideTop, defaultValue: false);
-      _hideBottom =
-          setting.get(DanmakuKey.danmakuHideBottom, defaultValue: false);
-      _hideScroll =
-          setting.get(DanmakuKey.danmakuHideScroll, defaultValue: false);
-      _platformBilibili =
-          setting.get(DanmakuKey.danmakuPlatformBilibili, defaultValue: true);
-      _platformGamer =
-          setting.get(DanmakuKey.danmakuPlatformGamer, defaultValue: true);
-      _platformDanDanPlay =
-          setting.get(DanmakuKey.danmakuPlatformDanDanPlay, defaultValue: true);
+      _hideBottom = setting.get(DanmakuKey.danmakuHideBottom, defaultValue: false);
+      _hideScroll = setting.get(DanmakuKey.danmakuHideScroll, defaultValue: false);
+      _platformBilibili = setting.get(DanmakuKey.danmakuPlatformBilibili, defaultValue: true);
+      _platformGamer = setting.get(DanmakuKey.danmakuPlatformGamer, defaultValue: true);
+      _platformDanDanPlay = setting.get(DanmakuKey.danmakuPlatformDanDanPlay, defaultValue: true);
     });
   }
 
@@ -79,7 +70,7 @@ class _DanmakuSettingPageState extends State<DanmakuSettingPage> {
           child: ConstrainedBox(
             constraints: const BoxConstraints(maxWidth: 1200),
             child: ScrollConfiguration(
-              behavior: const ScrollBehavior().copyWith(scrollbars: false),
+              behavior: ScrollBehavior().copyWith(scrollbars: false),
               // 隐藏滚动条
               child: SingleChildScrollView(
                 padding: const EdgeInsets.all(16),
@@ -124,67 +115,58 @@ class _DanmakuSettingPageState extends State<DanmakuSettingPage> {
 
                     // 弹幕来源平台
                     _buildSectionTitle('弹幕来源平台'),
-                    Consumer(
-                      builder: (context, ref, child) => SwitchListTile(
-                        title: const Text('Bilibili'),
-                        value: _platformBilibili,
-                        onChanged: (value) {
-                          setState(() {
-                            _platformBilibili = value;
-                            setting.put(
-                                DanmakuKey.danmakuPlatformBilibili, value);
-                          });
-                          // 同步更新 PlayController 的平台隐藏状态
-                          try {
-                            final playController =
-                                ref.read(playProvider.notifier);
-                            playController.syncPlatformVisibilityFromStorage();
-                          } catch (_) {
-                            // PlayController 可能未初始化，忽略错误
-                          }
-                        },
-                      ),
+                    SwitchListTile(
+                      title: const Text('Bilibili'),
+                      value: _platformBilibili,
+                      onChanged: (value) {
+                        setState(() {
+                          _platformBilibili = value;
+                          setting.put(
+                              DanmakuKey.danmakuPlatformBilibili, value);
+                        });
+                        // 同步更新 PlayController 的平台隐藏状态
+                        try {
+                          final playController = Get.find<PlayController>();
+                          playController.syncPlatformVisibilityFromStorage();
+                        } catch (_) {
+                          // PlayController 可能未初始化，忽略错误
+                        }
+                      },
                     ),
-                    Consumer(
-                      builder: (context, ref, child) => SwitchListTile(
-                        title: const Text('Gamer'),
-                        value: _platformGamer,
-                        onChanged: (value) {
-                          setState(() {
-                            _platformGamer = value;
-                            setting.put(DanmakuKey.danmakuPlatformGamer, value);
-                          });
-                          // 同步更新 PlayController 的平台隐藏状态
-                          try {
-                            final playController =
-                                ref.read(playProvider.notifier);
-                            playController.syncPlatformVisibilityFromStorage();
-                          } catch (_) {
-                            // PlayController 可能未初始化，忽略错误
-                          }
-                        },
-                      ),
+                    SwitchListTile(
+                      title: const Text('Gamer'),
+                      value: _platformGamer,
+                      onChanged: (value) {
+                        setState(() {
+                          _platformGamer = value;
+                          setting.put(DanmakuKey.danmakuPlatformGamer, value);
+                        });
+                        // 同步更新 PlayController 的平台隐藏状态
+                        try {
+                          final playController = Get.find<PlayController>();
+                          playController.syncPlatformVisibilityFromStorage();
+                        } catch (_) {
+                          // PlayController 可能未初始化，忽略错误
+                        }
+                      },
                     ),
-                    Consumer(
-                      builder: (context, ref, child) => SwitchListTile(
-                        title: const Text('弹弹Play'),
-                        value: _platformDanDanPlay,
-                        onChanged: (value) {
-                          setState(() {
-                            _platformDanDanPlay = value;
-                            setting.put(
-                                DanmakuKey.danmakuPlatformDanDanPlay, value);
-                          });
-                          // 同步更新 PlayController 的平台隐藏状态
-                          try {
-                            final playController =
-                                ref.read(playProvider.notifier);
-                            playController.syncPlatformVisibilityFromStorage();
-                          } catch (_) {
-                            // PlayController 可能未初始化，忽略错误
-                          }
-                        },
-                      ),
+                    SwitchListTile(
+                      title: const Text('弹弹Play'),
+                      value: _platformDanDanPlay,
+                      onChanged: (value) {
+                        setState(() {
+                          _platformDanDanPlay = value;
+                          setting.put(
+                              DanmakuKey.danmakuPlatformDanDanPlay, value);
+                        });
+                        // 同步更新 PlayController 的平台隐藏状态
+                        try {
+                          final playController = Get.find<PlayController>();
+                          playController.syncPlatformVisibilityFromStorage();
+                        } catch (_) {
+                          // PlayController 可能未初始化，忽略错误
+                        }
+                      },
                     ),
                     const SizedBox(height: 16),
 

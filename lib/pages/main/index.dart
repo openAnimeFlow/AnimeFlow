@@ -1,7 +1,6 @@
 import 'package:anime_flow/constants/storage_key.dart';
 import 'package:anime_flow/controllers/app/app_info_controller.dart';
-import 'package:anime_flow/controllers/shaders/shaders_provider.dart';
-import 'package:anime_flow/providers/global_provider_container.dart';
+import 'package:anime_flow/controllers/shaders/shaders_controller.dart';
 import 'package:anime_flow/models/item/tab_item.dart';
 import 'package:anime_flow/pages/my/index.dart';
 import 'package:anime_flow/pages/ranking/index.dart';
@@ -78,7 +77,6 @@ class _MainPageState extends State<MainPage> {
     autoUpdate = setting.get(StorageKey.autoUpdateKey, defaultValue: true);
     userInfoStore = Get.put(UserInfoStore(), permanent: true);
     appInfoController = Get.put(AppInfoController(), permanent: true);
-    globalProviderContainer.read(shadersControllerProvider.future);
     // TODO 从配置中初始化对应的页面
     _currentIndex =
         widget.initialTabIndex.clamp(0, _tabs.length - 1);
@@ -95,6 +93,9 @@ class _MainPageState extends State<MainPage> {
     if (autoUpdate) {
       appInfoController.compareVersion();
     }
+    final shadersController =
+        Get.put(ShadersController(), permanent: true);
+    await shadersController.copyShadersToExternalDirectory();
   }
 
   // 构建 NavigationRail

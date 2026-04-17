@@ -1,91 +1,92 @@
-import 'package:anime_flow/controllers/play/play_provider.dart';
+import 'package:anime_flow/controllers/play/play_controller.dart';
 import 'package:anime_flow/controllers/video/video_state_controller.dart';
 import 'package:anime_flow/controllers/video/video_ui_controller.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:get/get.dart';
 
-class ShaderButton extends ConsumerWidget {
+class ShaderButton extends StatelessWidget {
   const ShaderButton({super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final playState = ref.watch(playProvider);
-    final currentType = playState.superResolutionType;
-
+  Widget build(BuildContext context) {
+    final playController = Get.find<PlayController>();
     final videoUiStateController = Get.find<VideoUiStateController>();
     final videoStateController = Get.find<VideoStateController>();
-    final player = videoStateController.player;
-    final labels = ['关闭', '效率档', '质量档'];
 
-    return MenuAnchor(
-      onOpen: () {
-        videoUiStateController.cancelUiTimer();
-      },
-      onClose: () {
-        videoUiStateController.hideControlsUi(
-            duration: const Duration(seconds: 2));
-      },
-      menuChildren: List<MenuItemButton>.generate(
-        labels.length,
-        (int index) {
-          final type = index + 1;
-          final isSelected = currentType == type;
+    return Obx(() {
+      final currentType = playController.superResolutionType.value;
+      final player = videoStateController.player;
+      final labels = ['关闭', '效率档', '质量档'];
 
-          return MenuItemButton(
-            onPressed: () {
-              ref.read(playProvider.notifier).setShader(type, player: player);
-            },
-            child: Container(
-              height: 48,
-              constraints: const BoxConstraints(minWidth: 112),
-              child: Align(
-                alignment: Alignment.centerLeft,
-                child: Text(
-                  labels[index],
-                  style: TextStyle(
-                    color: isSelected
-                        ? Theme.of(context).colorScheme.primary
-                        : null,
-                    fontWeight:
-                        isSelected ? FontWeight.bold : FontWeight.normal,
+      return MenuAnchor(
+        onOpen: () {
+          videoUiStateController.cancelUiTimer();
+        },
+        onClose: () {
+          videoUiStateController.hideControlsUi(
+              duration: const Duration(seconds: 2));
+        },
+        menuChildren: List<MenuItemButton>.generate(
+          labels.length,
+          (int index) {
+            final type = index + 1;
+            final isSelected = currentType == type;
+
+            return MenuItemButton(
+              onPressed: () {
+                playController.setShader(type, player: player);
+              },
+              child: Container(
+                height: 48,
+                constraints: const BoxConstraints(minWidth: 112),
+                child: Align(
+                  alignment: Alignment.centerLeft,
+                  child: Text(
+                    labels[index],
+                    style: TextStyle(
+                      color: isSelected
+                          ? Theme.of(context).colorScheme.primary
+                          : null,
+                      fontWeight:
+                          isSelected ? FontWeight.bold : FontWeight.normal,
+                    ),
                   ),
                 ),
+              ),
+            );
+          },
+        ),
+        builder:
+            (BuildContext context, MenuController controller, Widget? child) {
+          final themePrimary = Theme.of(context).colorScheme.primary;
+          return InkWell(
+            onTap: () {
+              if (controller.isOpen) {
+                controller.close();
+              } else {
+                controller.open();
+              }
+            },
+            child: Container(
+              alignment: Alignment.center,
+              padding: const EdgeInsets.symmetric(horizontal: 15, vertical: 0),
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(10),
+                color: currentType == 2 || currentType == 3
+                    ? themePrimary.withValues(alpha: 0.5)
+                    : null,
+              ),
+              child: Text(
+                '4k',
+                style: TextStyle(
+                    color: themePrimary,
+                    fontWeight: FontWeight.bold,
+                    fontSize: 18),
               ),
             ),
           );
         },
-      ),
-      builder:
-          (BuildContext context, MenuController controller, Widget? child) {
-        final themePrimary = Theme.of(context).colorScheme.primary;
-        return InkWell(
-          onTap: () {
-            if (controller.isOpen) {
-              controller.close();
-            } else {
-              controller.open();
-            }
-          },
-          child: Container(
-            alignment: Alignment.center,
-            padding: const EdgeInsets.symmetric(horizontal: 15, vertical: 0),
-            decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(10),
-              color: currentType == 2 || currentType == 3
-                  ? themePrimary.withValues(alpha: 0.5)
-                  : null,
-            ),
-            child: Text(
-              '4k',
-              style: TextStyle(
-                  color: themePrimary,
-                  fontWeight: FontWeight.bold,
-                  fontSize: 18),
-            ),
-          ),
-        );
-      },
-    );
+      );
+    });
   }
 }

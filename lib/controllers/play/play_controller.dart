@@ -1,8 +1,7 @@
 import 'dart:async';
 import 'package:anime_flow/constants/constants.dart';
 import 'package:anime_flow/constants/storage_key.dart';
-import 'package:anime_flow/controllers/shaders/shaders_provider.dart';
-import 'package:anime_flow/providers/global_provider_container.dart';
+import 'package:anime_flow/controllers/shaders/shaders_controller.dart';
 import 'package:anime_flow/models/item/danmaku/danmaku_module.dart';
 import 'package:anime_flow/repository/storage.dart';
 import 'package:anime_flow/utils/systemUtil.dart';
@@ -36,10 +35,14 @@ class PlayController extends GetxController {
   final RxSet<String> hiddenPlatforms = <String>{}.obs;
   Timer? _saveSettingsTimer;
 
+  ///着色器
+  late ShadersController shadersController;
+
   @override
   void onInit() {
     super.onInit();
     _initPlatformVisibility();
+    shadersController = Get.find<ShadersController>();
   }
 
   /// 初始化平台显示/隐藏状态（从持久化设置读取）
@@ -195,8 +198,6 @@ class PlayController extends GetxController {
   /// type 1 关闭 2 效率档 3 质量档
   Future<void> setShader(int type,
       {required Player player, bool synchronized = true}) async {
-    final shadersController =
-        await globalProviderContainer.read(shadersControllerProvider.future);
     var pp = player.platform as NativePlayer;
     await pp.waitForPlayerInitialization;
     await pp.waitForVideoControllerInitializationIfAttached;

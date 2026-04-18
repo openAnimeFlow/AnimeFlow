@@ -224,7 +224,7 @@ jobs:
           }
           [System.IO.File]::WriteAllText($path, $c, [System.Text.UTF8Encoding]::new($false))
           Start-Process -FilePath $env:ISCC_PATH -ArgumentList "`"$path`"" -Wait -NoNewWindow
-          $exe = "AnimeFlow-Setup-$v.exe"
+          $exe = "AnimeFlow-windows-setup-$v.exe"
           if (-not (Test-Path $exe)) { throw "Expected installer not found: $exe" }
 
       - name: Archive artifacts
@@ -233,7 +233,7 @@ jobs:
           name: windows
           path: |
             AnimeFlow-windows-${{ env.VERSION }}.zip
-            AnimeFlow-Setup-${{ env.INSTALLER_VERSION }}.exe
+            AnimeFlow-windows-setup-${{ env.INSTALLER_VERSION }}.exe
           if-no-files-found: ignore
 
   flutter-build-linux:

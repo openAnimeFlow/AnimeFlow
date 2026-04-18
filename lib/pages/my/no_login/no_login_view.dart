@@ -1,3 +1,4 @@
+import 'package:anime_flow/constants/image_path_constants.dart';
 import 'package:anime_flow/routes/routes.dart';
 import 'package:anime_flow/widget/animation_network_image/animation_network_image.dart';
 import 'package:flutter/material.dart';
@@ -90,12 +91,10 @@ class _NoNoLoginView extends State<NoLoginView> {
             mainAxisAlignment: MainAxisAlignment.center,
             spacing: 8,
             children: [
-              const CircleAvatar(
+              CircleAvatar(
                   radius: 100,
                   backgroundColor: Colors.transparent,
-                  child: AnimationNetworkImage(
-                      url:
-                          'https://gitee.com/anime-flow/anime-flow-assets/raw/master/logo.png')),
+                  child: Image.asset(ImagePathConstants.logo)),
               const Text(
                 '未登录',
                 style: TextStyle(

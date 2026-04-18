@@ -1,3 +1,4 @@
+import 'package:anime_flow/constants/image_path_constants.dart';
 import 'package:anime_flow/constants/storage_key.dart';
 import 'package:anime_flow/controllers/app/app_info_controller.dart';
 import 'package:anime_flow/controllers/setting_controller.dart';
@@ -45,12 +46,11 @@ class _AboutSettingsPageState extends State<AboutSettingsPage> {
               () => Center(
                 child: Column(
                   children: [
-                    const CircleAvatar(
+                    CircleAvatar(
                       radius: 80,
                       backgroundColor: Colors.transparent,
-                      child: AnimationNetworkImage(
-                        url:
-                            'https://gitee.com/anime-flow/anime-flow-assets/raw/master/logo.png',
+                      child: Image.asset(
+                        ImagePathConstants.logo,
                       ),
                     ),
                     Text(
@@ -78,17 +78,17 @@ class _AboutSettingsPageState extends State<AboutSettingsPage> {
               child: Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                const Text("自动更新"),
-                Switch(
-                  value: autoUpdate,
-                  onChanged: (bool value) {
-                    setState(() {
-                      setting.put(StorageKey.autoUpdateKey, value);
-                      autoUpdate = value;
-                    });
-                  },
-                ),
-              ]),
+                    const Text("自动更新"),
+                    Switch(
+                      value: autoUpdate,
+                      onChanged: (bool value) {
+                        setState(() {
+                          setting.put(StorageKey.autoUpdateKey, value);
+                          autoUpdate = value;
+                        });
+                      },
+                    ),
+                  ]),
             ),
             const Divider(),
             ListTile(

@@ -1,3 +1,4 @@
+import 'package:anime_flow/constants/image_path_constants.dart';
 import 'package:anime_flow/widget/animation_network_image/animation_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -43,7 +44,8 @@ class _ThanksPageState extends State<ThanksPage>
           'icon': const Icon(Icons.web),
           'title': 'WebView',
           'description': 'Kazumi项目提供的WebView技术支持',
-          'url': 'https://github.com/Predidit/Kazumi/tree/main/lib/pages/webview',
+          'url':
+              'https://github.com/Predidit/Kazumi/tree/main/lib/pages/webview',
         },
         {
           'icon': const Icon(Icons.play_circle_outline_rounded),
@@ -125,11 +127,11 @@ class _ThanksPageState extends State<ThanksPage>
                             child: child,
                           );
                         },
-                        child: const AnimationNetworkImage(
-                            height: 150,
-                            width: 150,
-                            url:
-                                'https://gitee.com/anime-flow/anime-flow-assets/raw/master/logo.png'),
+                        child: Image.asset(
+                          ImagePathConstants.logo,
+                          height: 160,
+                          width: 160,
+                        ),
                       ),
                       const SizedBox(height: 24),
                       Row(

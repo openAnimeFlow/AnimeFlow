@@ -2,7 +2,7 @@ import 'package:anime_flow/stores/user_info_store.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'login_view/login_view.dart';
-import 'no_logo/no_login_view.dart';
+import 'no_login/no_login_view.dart';
 
 class MyPage extends StatefulWidget {
   const MyPage({super.key});

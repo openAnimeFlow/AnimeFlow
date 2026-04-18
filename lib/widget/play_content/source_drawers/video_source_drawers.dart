@@ -9,7 +9,6 @@ import 'package:anime_flow/widget/animation_network_image/animation_network_imag
 import 'package:anime_flow/constants/play_layout_constant.dart';
 import 'package:anime_flow/stores/episodes_state.dart';
 import 'package:anime_flow/controllers/video/source/video_source_controller.dart';
-import 'package:anime_flow/controllers/video/video_state_controller.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:logger/logger.dart';
@@ -30,7 +29,6 @@ class VideoSourceDrawers extends StatefulWidget {
 }
 
 class _VideoSourceDrawersState extends State<VideoSourceDrawers> {
-  late VideoStateController videoStateController;
   late EpisodesState episodesController;
   late PlaySubjectState subjectState;
   late VideoSourceController dataSourceController;
@@ -42,7 +40,6 @@ class _VideoSourceDrawersState extends State<VideoSourceDrawers> {
   void initState() {
     super.initState();
     subjectState = Get.find<PlaySubjectState>();
-    videoStateController = Get.find<VideoStateController>();
     episodesController = Get.find<EpisodesState>();
     dataSourceController = Get.find<VideoSourceController>();
     _searchController.text = subjectState.subject.value.name;

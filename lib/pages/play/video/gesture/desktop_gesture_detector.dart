@@ -1,7 +1,6 @@
 import 'dart:async';
 
 import 'package:anime_flow/controllers/play/play_controller.dart';
-import 'package:anime_flow/controllers/video/video_state_controller.dart';
 import 'package:anime_flow/controllers/video/video_ui_controller.dart';
 import 'package:anime_flow/models/enums/video_controls_icon_type.dart';
 import 'package:flutter/gestures.dart';
@@ -21,14 +20,12 @@ class DesktopGestureDetector extends StatefulWidget {
 
 class _DesktopGestureDetectorState extends State<DesktopGestureDetector> {
   static Timer? _hoverTimer;
-  late VideoStateController videoStateController;
   late VideoUiStateController videoUiStateController;
   late PlayController playPageController;
 
   @override
   void initState() {
     super.initState();
-    videoStateController = Get.find<VideoStateController>();
     videoUiStateController = Get.find<VideoUiStateController>();
     playPageController = Get.find<PlayController>();
   }
@@ -41,29 +38,29 @@ class _DesktopGestureDetectorState extends State<DesktopGestureDetector> {
         if (event is KeyDownEvent) {
           // 空格键：暂停/播放
           if (event.logicalKey == LogicalKeyboardKey.space) {
-            videoStateController.playOrPauseVideo();
+            playPageController.playOrPauseVideo();
             videoUiStateController.updateIndicatorTypeAndShowIndicator(
                 VideoControlsIndicatorType.playStatusIndicator);
             return KeyEventResult.handled;
           }
           // 左方向键：快退10秒
           if (event.logicalKey == LogicalKeyboardKey.arrowLeft) {
-            final currentPosition = videoStateController.position.value;
-            final duration = videoStateController.duration.value;
+            final currentPosition = playPageController.position.value;
+            final duration = playPageController.duration.value;
             final newPositionMs = (currentPosition - const Duration(seconds: 10)).inMilliseconds;
             final clampedMs = newPositionMs.clamp(0, duration.inMilliseconds);
-            videoStateController.seekTo(Duration(milliseconds: clampedMs));
+            playPageController.seekTo(Duration(milliseconds: clampedMs));
             videoUiStateController.updateIndicatorTypeAndShowIndicator(
                 VideoControlsIndicatorType.horizontalDraggingIndicator);
             return KeyEventResult.handled;
           }
           // 右方向键：快进10秒
           if (event.logicalKey == LogicalKeyboardKey.arrowRight) {
-            final currentPosition = videoStateController.position.value;
-            final duration = videoStateController.duration.value;
+            final currentPosition = playPageController.position.value;
+            final duration = playPageController.duration.value;
             final newPositionMs = (currentPosition + const Duration(seconds: 10)).inMilliseconds;
             final clampedMs = newPositionMs.clamp(0, duration.inMilliseconds);
-            videoStateController.seekTo(Duration(milliseconds: clampedMs));
+            playPageController.seekTo(Duration(milliseconds: clampedMs));
             videoUiStateController.updateIndicatorTypeAndShowIndicator(
                 VideoControlsIndicatorType.horizontalDraggingIndicator);
             return KeyEventResult.handled;
@@ -73,7 +70,7 @@ class _DesktopGestureDetectorState extends State<DesktopGestureDetector> {
             videoUiStateController.updateMainAxisAlignmentType(MainAxisAlignment.start);
             videoUiStateController.updateIndicatorTypeAndShowIndicator(
                 VideoControlsIndicatorType.volumeIndicator);
-            videoStateController.adjustVolumeByWheel(5.0); // 每次增加5%
+            playPageController.adjustVolumeByWheel(5.0); // 每次增加5%
             return KeyEventResult.handled;
           }
           // 下方向键：减少音量
@@ -81,7 +78,7 @@ class _DesktopGestureDetectorState extends State<DesktopGestureDetector> {
             videoUiStateController.updateMainAxisAlignmentType(MainAxisAlignment.start);
             videoUiStateController.updateIndicatorTypeAndShowIndicator(
                 VideoControlsIndicatorType.volumeIndicator);
-            videoStateController.adjustVolumeByWheel(-5.0); // 每次减少5%
+            playPageController.adjustVolumeByWheel(-5.0); // 每次减少5%
             return KeyEventResult.handled;
           }
         }
@@ -100,7 +97,7 @@ class _DesktopGestureDetectorState extends State<DesktopGestureDetector> {
             // 向上滚动增加音量，向下滚动减少音量
             // 除以20是为了控制调整幅度（每次约5%）
             var scrollDelta = -event.scrollDelta.dy / 20;
-            videoStateController.adjustVolumeByWheel(scrollDelta);
+            playPageController.adjustVolumeByWheel(scrollDelta);
           }
         },
         child: MouseRegion(
@@ -134,7 +131,7 @@ class _DesktopGestureDetectorState extends State<DesktopGestureDetector> {
 
             // 单击事件
             onTap: () {
-              videoStateController.playOrPauseVideo();
+              playPageController.playOrPauseVideo();
               videoUiStateController.updateIndicatorTypeAndShowIndicator(
                   VideoControlsIndicatorType.playStatusIndicator);
             },

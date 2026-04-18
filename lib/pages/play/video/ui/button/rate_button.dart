@@ -1,4 +1,4 @@
-import 'package:anime_flow/controllers/video/video_state_controller.dart';
+import 'package:anime_flow/controllers/play/play_controller.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
@@ -7,14 +7,14 @@ class RateButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final videoStateController = Get.find<VideoStateController>();
+    final playController = Get.find<PlayController>();
 
     /// 构建倍速选项列表
     List<Widget> buildSpeedOptions(BuildContext context) {
       final speeds = [0.5, 0.75, 1.0, 1.25, 1.5, 2.0, 3.0, 4.0];
       return speeds.map((speed) {
         return Obx(() {
-          final isSelected = videoStateController.rate.value == speed;
+          final isSelected = playController.rate.value == speed;
           return ListTile(
             title: Text(
               '${speed}x',
@@ -32,7 +32,7 @@ class RateButton extends StatelessWidget {
                   )
                 : null,
             onTap: () {
-              videoStateController.startSpeedBoost(speed);
+              playController.startSpeedBoost(speed);
               Navigator.of(context).pop();
             },
           );
@@ -136,9 +136,9 @@ class RateButton extends StatelessWidget {
           showSpeedDrawer(context);
         },
         child: Obx(
-          () => Text(videoStateController.rate.value == 1.0
+          () => Text(playController.rate.value == 1.0
               ? '倍速'
-              : '${videoStateController.rate.value}x'),
+              : '${playController.rate.value}x'),
         ));
   }
 }

@@ -1,7 +1,6 @@
 import 'package:anime_flow/controllers/play/play_controller.dart';
 import 'package:anime_flow/controllers/play/episode_controller.dart';
 import 'package:anime_flow/controllers/video/source/video_source_controller.dart';
-import 'package:anime_flow/controllers/video/video_state_controller.dart';
 import 'package:anime_flow/controllers/video/video_ui_controller.dart';
 import 'package:anime_flow/models/enums/video_controls_icon_type.dart';
 import 'package:anime_flow/pages/play/video/ui/button/rate_button.dart';
@@ -26,7 +25,6 @@ class BottomAreaControl extends StatefulWidget {
 
 class _BottomAreaControlState extends State<BottomAreaControl> {
   late VideoUiStateController videoUiStateController;
-  late VideoStateController videoStateController;
   late PlayController playController;
   late EpisodesState episodesState;
   late EpisodeController episodeController;
@@ -35,7 +33,6 @@ class _BottomAreaControlState extends State<BottomAreaControl> {
   void initState() {
     super.initState();
     videoUiStateController = Get.find<VideoUiStateController>();
-    videoStateController = Get.find<VideoStateController>();
     playController = Get.find<PlayController>();
     episodesState = Get.find<EpisodesState>();
     episodeController = Get.find<EpisodeController>();
@@ -84,7 +81,7 @@ class _BottomAreaControlState extends State<BottomAreaControl> {
                         padding: const EdgeInsets.symmetric(horizontal: 5),
                         child: VideoTimeDisplay(
                           videoUiStateController: videoUiStateController,
-                          videoStateController: videoStateController,
+                          playController: playController,
                         ),
                       ),
                       // 进度条
@@ -101,16 +98,16 @@ class _BottomAreaControlState extends State<BottomAreaControl> {
                           // 播放按钮
                           InkWell(
                             key: ValueKey<bool>(
-                                videoStateController.playing.value),
+                                playController.playing.value),
                             onTap: () => {
-                              videoStateController.playOrPauseVideo(),
+                              playController.playOrPauseVideo(),
                               videoUiStateController
                                   .updateIndicatorTypeAndShowIndicator(
                                       VideoControlsIndicatorType
                                           .playStatusIndicator),
                             },
                             child: Icon(
-                              videoStateController.playing.value
+                              playController.playing.value
                                   ? Icons.pause_rounded
                                   : Icons.play_arrow_rounded,
                               size: 33,

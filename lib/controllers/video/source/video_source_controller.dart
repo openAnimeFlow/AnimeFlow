@@ -1,17 +1,22 @@
+import 'package:anime_flow/controllers/play/play_controller.dart';
+import 'package:anime_flow/controllers/video/video_ui_controller.dart';
 import 'package:anime_flow/crawler/html_request.dart';
 import 'package:anime_flow/crawler/itme/anti_crawler_config.dart';
 import 'package:anime_flow/crawler/itme/crawler_config_item.dart';
+import 'package:anime_flow/models/enums/video_controls_icon_type.dart';
 import 'package:anime_flow/models/item/play/video/episode_resources_item.dart';
 import 'package:anime_flow/models/item/play/video/resources_item.dart';
 import 'package:anime_flow/models/item/play/video/search_resources_item.dart';
+import 'package:anime_flow/providers/video/video_source_provider.dart';
+import 'package:anime_flow/providers/video/webview_video_source_provider.dart';
 import 'package:anime_flow/repository/play_repository.dart';
 import 'package:anime_flow/stores/play_subject_state.dart';
 import 'package:anime_flow/utils/crawl_config.dart';
 import 'package:anime_flow/stores/episodes_state.dart';
-import 'package:anime_flow/webview/webview_controller.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:get/get.dart';
 import 'package:logger/logger.dart';
-///todo 需要实现一个消息中间层给其他类消费
+
 class VideoSourceController extends GetxController {
   final RxList<ResourcesItem> videoResources = <ResourcesItem>[].obs;
   final RxString webSiteTitle = ''.obs;
@@ -26,7 +31,6 @@ class VideoSourceController extends GetxController {
 
   late EpisodesState _episodesState;
   late PlaySubjectState _subjectState;
-  late WebviewItemController _webviewItemController;
   final Logger _logger = Logger();
 
   /// 标记用户是否手动选择了资源
@@ -34,6 +38,8 @@ class VideoSourceController extends GetxController {
 
   Worker? _isLoadingWorker;
   Worker? _episodeIndexWorker;
+
+  WebViewVideoSourceProvider? _videoSourceProvider;
 
   @override
   void onInit() async {
@@ -52,34 +58,7 @@ class VideoSourceController extends GetxController {
   void _initControllers() {
     _subjectState = Get.find<PlaySubjectState>();
     _episodesState = Get.find<EpisodesState>();
-    // _videoStateController = Get.find<VideoStateController>();
-    _webviewItemController = Get.find<WebviewItemController>();
   }
-
-  // void _setupAutoSelectListeners() {
-  //   // 监听 isLoading 变化，当所有资源获取完成时（isLoading == true）自动选择第一个有资源的网站
-  //   _isLoadingWorker = ever(isLoading, (bool isLoading) {
-  //     if (isLoading) {
-  //       // 当 isLoading 变为 true 时，说明所有网站的资源获取完成
-  //       final resources = videoResources.toList();
-  //       autoSelectFirstResource(resources);
-  //     }
-  //   });
-  //
-  //   // 监听 episodeIndex 变化
-  //   _episodeIndexWorker = ever(_episodesState.episodeIndex, (int newIndex) {
-  //     if (newIndex != _lastEpisodeIndex && newIndex > 0) {
-  //       _lastEpisodeIndex = newIndex;
-  //       // 重置自动选择标志，允许重新自动选择
-  //       _hasAutoSelected = false;
-  //       // 如果资源已经加载完成，强制重新自动选择
-  //       if (isLoading.value) {
-  //         final resources = videoResources.toList();
-  //         autoSelectFirstResource(resources, force: true);
-  //       }
-  //     }
-  //   });
-  // }
 
   //初始化
   Future<void> _initVideoResources() async {
@@ -308,25 +287,61 @@ class VideoSourceController extends GetxController {
 
   /// 加载视频页面
   Future<void> loadVideoPage(String url) async {
-    if (!isInitWebView.value) {
-      await isInitWebView.stream.firstWhere((v) => v);
-    }
+    _videoSourceProvider?.cancel();
+
+    final playController = Get.find<PlayController>();
+    playController.isParsing.value = true;
+
+    _videoSourceProvider ??= WebViewVideoSourceProvider();
+
     int offset = 0;
     final subjectId = _subjectState.subject.value.id;
     final episodeIndex = _episodesState.episodeIndex.value;
+    final subjectName = _subjectState.subject.value.name;
+    final subjectCover = _subjectState.subject.value.image;
     final position = await PlayRepository.getPlayHistory(subjectId);
-    if (position != null && position.position > 0 && position.episodeSort == episodeIndex) {
+    if (position != null &&
+        position.position > 0 &&
+        position.episodeSort == episodeIndex) {
       offset = position.position;
     }
     try {
-      await _webviewItemController.loadUrl(
-        url,
-        true, // useNativePlayer: 使用原生播放器
-        true, // useLegacyParser: 不使用旧解析器
-        offset: offset,
-      );
+      final videoUiStateController = Get.find<VideoUiStateController>();
+
+      videoUiStateController
+          .updateIndicatorType(VideoControlsIndicatorType.parsingIndicator);
+      videoUiStateController.updateMainAxisAlignmentType(MainAxisAlignment.center);
+      videoUiStateController.showIndicator();
+      playController.parseResult.value = '正在解析视频源...';
+      final source = await _videoSourceProvider!
+          .resolve(url, useLegacyParser: false, offset: offset);
+      playController.isParsing.value = false;
+      playController.parseResult.value = '视频解析成功';
+      await playController.initPlayState(PlayState(
+        videoUrl: source.url,
+        offset: source.offset,
+        subjectId: subjectId,
+        subjectName: subjectName,
+        subjectCover: subjectCover,
+        episodeIndex: episodeIndex,
+        episodeId: _episodesState.episodeId.value,
+      ));
+    } on VideoSourceTimeoutException {
+      playController.isParsing.value = false;
+      playController.parseResult.value = '视频解析超时，请重试';
+    } on VideoSourceNotFoundException {
+      playController.isParsing.value = false;
+      playController.parseResult.value = '为找到视频资源，请切换数据源重试';
     } catch (e) {
-      _logger.e('加载视频页面失败', error: e);
+      playController.isParsing.value = false;
+      playController.parseResult.value = '视频解析失败：${e.toString()}';
+      _logger.e( e);
     }
+  }
+
+  /// 取消当前视频源解析并销毁 Provider
+  void cancelVideoSourceResolution() {
+    _videoSourceProvider?.dispose();
+    _videoSourceProvider = null;
   }
 }

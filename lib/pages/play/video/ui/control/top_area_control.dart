@@ -1,5 +1,4 @@
 import 'package:anime_flow/controllers/video/source/video_source_controller.dart';
-import 'package:anime_flow/controllers/video/video_state_controller.dart';
 import 'package:anime_flow/pages/play/video/ui/setting/video_setting.dart';
 import 'package:anime_flow/stores/episodes_state.dart';
 import 'package:anime_flow/controllers/play/play_controller.dart';
@@ -25,7 +24,6 @@ class TopAreaControl extends ConsumerStatefulWidget {
 }
 
 class _TopAreaControlState extends ConsumerState<TopAreaControl> {
-  late VideoStateController videoStateController;
   late VideoSourceController videoSourceController;
   late PlayController playController;
   late VideoUiStateController videoUiStateController;
@@ -35,7 +33,6 @@ class _TopAreaControlState extends ConsumerState<TopAreaControl> {
   @override
   void initState() {
     super.initState();
-    videoStateController = Get.find<VideoStateController>();
     videoSourceController = Get.find<VideoSourceController>();
     playController = Get.find<PlayController>();
     videoUiStateController = Get.find<VideoUiStateController>();
@@ -145,7 +142,7 @@ class _TopAreaControlState extends ConsumerState<TopAreaControl> {
                           //右侧
                           Row(
                             children: [
-                              if (videoStateController.position.value >
+                              if (playController.position.value >
                                       Duration.zero &&
                                   (playController.isWideScreen.value ||
                                       fullscreen))
@@ -206,7 +203,7 @@ class _TopAreaControlState extends ConsumerState<TopAreaControl> {
                                           secondaryAnimation) {
                                         return VideoSourceDrawers(
                                           onVideoUrlSelected: (url) {
-                                            videoStateController.player.stop();
+                                            playController.player.stop();
                                             videoSourceController
                                                 .loadVideoPage(url);
                                           },

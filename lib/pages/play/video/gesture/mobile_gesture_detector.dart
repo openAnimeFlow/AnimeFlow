@@ -1,5 +1,5 @@
 import 'package:anime_flow/constants/storage_key.dart';
-import 'package:anime_flow/controllers/video/video_state_controller.dart';
+import 'package:anime_flow/controllers/play/play_controller.dart';
 import 'package:anime_flow/controllers/video/video_ui_controller.dart';
 import 'package:anime_flow/models/enums/video_controls_icon_type.dart';
 import 'package:anime_flow/repository/storage.dart';
@@ -23,7 +23,7 @@ class _MobileGestureDetectorState extends State<MobileGestureDetector> {
   double _verticalDragStartY = 0; // 垂直拖动开始时的Y坐标
   bool _isRightSide = false; // 是否在屏幕右半侧开始垂直拖动
   late double _fastForwardSpeed;
-  late VideoStateController videoStateController;
+  late PlayController playController;
   late VideoUiStateController videoUiStateController;
 
   @override
@@ -31,7 +31,7 @@ class _MobileGestureDetectorState extends State<MobileGestureDetector> {
     super.initState();
     _fastForwardSpeed =
         setting.get(PlaybackKey.fastForwardSpeed, defaultValue: 2.0);
-    videoStateController = Get.find<VideoStateController>();
+    playController = Get.find<PlayController>();
     videoUiStateController = Get.find<VideoUiStateController>();
   }
 
@@ -50,7 +50,7 @@ class _MobileGestureDetectorState extends State<MobileGestureDetector> {
 
       //双击事件
       onDoubleTap: () {
-        videoStateController.playOrPauseVideo();
+        playController.playOrPauseVideo();
         videoUiStateController
             .updateMainAxisAlignmentType(MainAxisAlignment.start);
         videoUiStateController.updateIndicatorTypeAndShowIndicator(
@@ -59,9 +59,9 @@ class _MobileGestureDetectorState extends State<MobileGestureDetector> {
 
       //长按开始
       onLongPressStart: (LongPressStartDetails details) {
-        if (videoStateController.playing.value) {
+        if (playController.playing.value) {
           vibrateMedium();
-          videoStateController.startSpeedBoost(_fastForwardSpeed);
+          playController.startSpeedBoost(_fastForwardSpeed);
           videoUiStateController.updateIndicatorTypeAndShowIndicator(
               VideoControlsIndicatorType.speedIndicator);
         }
@@ -69,7 +69,7 @@ class _MobileGestureDetectorState extends State<MobileGestureDetector> {
 
       //长按结束
       onLongPressEnd: (LongPressEndDetails details) {
-        videoStateController.endSpeedBoost();
+        playController.endSpeedBoost();
         videoUiStateController.hideIndicator();
         videoUiStateController
             .updateIndicatorType(VideoControlsIndicatorType.noIndicator);
@@ -79,7 +79,7 @@ class _MobileGestureDetectorState extends State<MobileGestureDetector> {
       onHorizontalDragStart: (DragStartDetails details) {
         videoUiStateController.startHorizontalDrag(
           details.globalPosition.dx,
-          videoStateController.position.value,
+          playController.position.value,
         );
       },
 
@@ -88,13 +88,13 @@ class _MobileGestureDetectorState extends State<MobileGestureDetector> {
         videoUiStateController.updateHorizontalDrag(
           details.globalPosition.dx,
           screenWidth,
-          videoStateController.duration.value,
+          playController.duration.value,
         );
       },
 
       // 水平拖动结束：应用新的播放进度
       onHorizontalDragEnd: (DragEndDetails details) {
-        videoStateController.seekTo(videoUiStateController.dragPosition.value);
+        playController.seekTo(videoUiStateController.dragPosition.value);
         videoUiStateController.endHorizontalDrag();
       },
 
@@ -114,7 +114,7 @@ class _MobileGestureDetectorState extends State<MobileGestureDetector> {
             .updateMainAxisAlignmentType(MainAxisAlignment.start);
         if (_isRightSide) {
           // 右半屏：调整音量
-          videoStateController.startVerticalDrag();
+          playController.startVerticalDrag();
           videoUiStateController.updateMainAxisAlignmentType(MainAxisAlignment.start);
           videoUiStateController
               .updateIndicatorType(VideoControlsIndicatorType.volumeIndicator);
@@ -135,7 +135,7 @@ class _MobileGestureDetectorState extends State<MobileGestureDetector> {
 
         if (_isRightSide) {
           // 垂直拖动（右半屏）：更新音量
-          videoStateController.updateVerticalDrag(
+          playController.updateVerticalDrag(
             dragDistance, // 拖动的垂直距离
             screenHeight, // 屏幕高度
           );
@@ -152,11 +152,11 @@ class _MobileGestureDetectorState extends State<MobileGestureDetector> {
       onVerticalDragEnd: (DragEndDetails details) {
         if (_isRightSide) {
           // 垂直拖动结束（右半屏）：应用新的音量
-          videoStateController.endVerticalDrag();
+          playController.endVerticalDrag();
           // 保持指示器显示，2秒后自动隐藏
           videoUiStateController.showIndicator();
           Future.delayed(const Duration(seconds: 2), () {
-            if (!videoStateController.isVerticalDragging.value) {
+            if (!playController.isVerticalDragging.value) {
               videoUiStateController.hideIndicator();
               videoUiStateController
                   .updateIndicatorType(VideoControlsIndicatorType.noIndicator);
@@ -181,7 +181,7 @@ class _MobileGestureDetectorState extends State<MobileGestureDetector> {
       onVerticalDragCancel: () {
         if (_isRightSide) {
           // 垂直拖动取消（右半屏）：结束音量调整并隐藏指示器
-          videoStateController.endVerticalDrag();
+          playController.endVerticalDrag();
         } else {
           // 垂直拖动取消（左半屏）：结束亮度调整
           videoUiStateController.endBrightnessDrag();

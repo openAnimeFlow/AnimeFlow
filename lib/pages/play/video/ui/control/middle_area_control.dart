@@ -1,4 +1,4 @@
-import 'package:anime_flow/controllers/video/video_state_controller.dart';
+import 'package:anime_flow/controllers/play/play_controller.dart';
 import 'package:anime_flow/controllers/video/video_ui_controller.dart';
 import 'package:anime_flow/features/network_speed/presentation/network_speed_provider.dart';
 import 'package:anime_flow/models/enums/video_controls_icon_type.dart';
@@ -17,14 +17,14 @@ class MiddleAreaControl extends ConsumerStatefulWidget {
 }
 
 class _MiddleAreaControlState extends ConsumerState<MiddleAreaControl> {
-  late VideoStateController videoStateController;
+  late PlayController playController;
 
   late VideoUiStateController videoUiStateController;
 
   @override
   void initState() {
     super.initState();
-    videoStateController = Get.find<VideoStateController>();
+    playController = Get.find<PlayController>();
     videoUiStateController = Get.find<VideoUiStateController>();
   }
 
@@ -93,7 +93,7 @@ class _MiddleAreaControlState extends ConsumerState<MiddleAreaControl> {
                     children: [
                       Positioned.fill(
                         child: LinearProgressIndicator(
-                          value: videoStateController.volume.value / 100,
+                          value: playController.volume.value / 100,
                           backgroundColor: Colors.white30,
                           valueColor: AlwaysStoppedAnimation<Color>(
                               Theme.of(context).colorScheme.primary),
@@ -104,9 +104,9 @@ class _MiddleAreaControlState extends ConsumerState<MiddleAreaControl> {
                           padding: const EdgeInsets.symmetric(
                               vertical: 5, horizontal: 5),
                           child: Icon(
-                            videoStateController.volume.value == 0
+                            playController.volume.value == 0
                                 ? Icons.volume_off
-                                : videoStateController.volume.value < 50
+                                : playController.volume.value < 50
                                     ? Icons.volume_down
                                     : Icons.volume_up,
                             color: Colors.white,
@@ -128,7 +128,7 @@ class _MiddleAreaControlState extends ConsumerState<MiddleAreaControl> {
                     borderRadius: BorderRadius.circular(10),
                   ),
                   child: Icon(
-                    videoStateController.playing.value
+                    playController.playing.value
                         ? Icons.pause_rounded
                         : Icons.play_arrow_rounded,
                     size: 33,
@@ -146,7 +146,7 @@ class _MiddleAreaControlState extends ConsumerState<MiddleAreaControl> {
                     borderRadius: BorderRadius.circular(8),
                   ),
                   child: Text(
-                    '${FormatTimeUtil.formatDuration(videoUiStateController.dragPosition.value)} / ${FormatTimeUtil.formatDuration(videoStateController.duration.value)}',
+                    '${FormatTimeUtil.formatDuration(videoUiStateController.dragPosition.value)} / ${FormatTimeUtil.formatDuration(playController.duration.value)}',
                     style: const TextStyle(
                       color: Colors.white,
                       fontSize: 16,
@@ -163,7 +163,7 @@ class _MiddleAreaControlState extends ConsumerState<MiddleAreaControl> {
                     ),
                     const SizedBox(height: 5),
                     Text(
-                      videoUiStateController.parsingTitle.value,
+                      playController.parseResult.value,
                       style: const TextStyle(
                           color: Colors.white,
                           fontWeight: FontWeight.bold,
@@ -229,7 +229,7 @@ class _MiddleAreaControlState extends ConsumerState<MiddleAreaControl> {
                       ),
                       const SizedBox(width: 8),
                       Text(
-                        '${videoStateController.rate.value.toStringAsFixed(1)}x',
+                        '${playController.rate.value.toStringAsFixed(1)}x',
                         style: const TextStyle(
                           color: Colors.white,
                           fontSize: 16,

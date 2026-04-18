@@ -1,11 +1,9 @@
 import 'package:anime_flow/controllers/play/episode_controller.dart';
-import 'package:anime_flow/controllers/video/video_state_controller.dart';
 import 'package:anime_flow/controllers/video/video_ui_controller.dart';
 import 'package:anime_flow/http/requests/bgm_request.dart';
 import 'package:anime_flow/pages/play/video/video.dart';
 import 'package:anime_flow/stores/play_subject_state.dart';
 import 'package:anime_flow/utils/systemUtil.dart';
-import 'package:anime_flow/webview/webview_controller.dart';
 import 'package:anime_flow/constants/play_layout_constant.dart';
 import 'package:anime_flow/stores/episodes_state.dart';
 import 'package:anime_flow/controllers/play/play_controller.dart';
@@ -28,14 +26,12 @@ class PlayPage extends StatefulWidget {
 }
 
 class _PlayPageState extends State<PlayPage> {
-  late VideoStateController videoStateController;
   late VideoSourceController videoSourceController;
   late PlaySubjectState subjectState;
   late PlayController playController;
   late EpisodesState episodesState;
   final GlobalKey _videoKey = GlobalKey();
   final GlobalKey _contentKey = GlobalKey();
-  Worker? _webViewInitWorker;
 
   // 标记是否已经初始化过资源
   bool _hasInitResources = false;
@@ -43,14 +39,11 @@ class _PlayPageState extends State<PlayPage> {
   @override
   void initState() {
     super.initState();
-    videoStateController = Get.put(VideoStateController());
+    playController = Get.put(PlayController());
     videoSourceController = Get.put(VideoSourceController());
     Get.put(EpisodeController());
     Get.put(VideoUiStateController());
-    playController = Get.put(PlayController());
     episodesState = Get.put(EpisodesState());
-    Get.put<WebviewItemController>(
-        WebviewItemControllerFactory.getController());
     subjectState = Get.put(PlaySubjectState(widget.extra.subjectBasicData));
     final continueEp = widget.extra.continueEpisode;
     if (continueEp != null) {
@@ -61,20 +54,16 @@ class _PlayPageState extends State<PlayPage> {
   }
 
   /// 初始化资源
+  /// TODO 不应该在这调用
   void _initResources() {
     if (_hasInitResources) {
       return;
     } else {
-      _webViewInitWorker =
-          ever(videoSourceController.isInitWebView, (bool initialized) {
-        if (initialized) {
-          final subjectName = subjectState.subject.value.name;
-          if (subjectName.isNotEmpty) {
-            _hasInitResources = true;
-            videoSourceController.initResources(subjectName);
-          }
-        }
-      });
+      final subjectName = subjectState.subject.value.name;
+      if (subjectName.isNotEmpty) {
+        _hasInitResources = true;
+        videoSourceController.initResources(subjectName);
+      }
     }
   }
 
@@ -156,9 +145,6 @@ class _PlayPageState extends State<PlayPage> {
 
   @override
   void dispose() {
-    _webViewInitWorker?.dispose();
-    Get.delete<WebviewItemController>();
-    Get.delete<VideoStateController>();
     Get.delete<PlayController>();
     Get.delete<EpisodesState>();
     Get.delete<VideoSourceController>();

@@ -1,5 +1,4 @@
 import 'package:anime_flow/controllers/play/play_controller.dart';
-import 'package:anime_flow/controllers/video/video_state_controller.dart';
 import 'package:anime_flow/controllers/video/video_ui_controller.dart';
 import 'package:anime_flow/utils/systemUtil.dart';
 import 'package:flutter/material.dart';
@@ -14,14 +13,12 @@ class RightAreaControl extends StatefulWidget {
 }
 
 class _RightAreaControlState extends State<RightAreaControl> {
-  late VideoStateController videoStateController;
   late VideoUiStateController videoUiStateController;
   late PlayController playController;
 
   @override
   void initState() {
     super.initState();
-    videoStateController = Get.find<VideoStateController>();
     videoUiStateController = Get.find<VideoUiStateController>();
     playController = Get.find<PlayController>();
   }
@@ -45,14 +42,14 @@ class _RightAreaControlState extends State<RightAreaControl> {
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
                       Obx(
-                        () => videoStateController.position.value >
+                        () => playController.position.value >
                                     Duration.zero &&
                                 (playController.isWideScreen.value ||
                                     fullscreen)
                             ? InkWell(
                                 onTap: () async {
                                   try {
-                                    final uint8List = await videoStateController
+                                    final uint8List = await playController
                                         .player
                                         .screenshot();
                                     if (uint8List != null) {

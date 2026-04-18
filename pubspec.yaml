@@ -69,11 +69,11 @@ dependencies:
   webview_windows:
     git:
       url: https://github.com/Predidit/flutter-webview-windows.git
-      ref: 9962cb9416f867d9ce9f409ccd6784e78c5f72ca
+      ref: d9bbeabe51562e727850fe3f60407cf0f6239a8e
   desktop_webview_window:
     git:
       url: https://github.com/Predidit/linux_webview_window.git
-      ref: 5a07358
+      ref: b429f8ba6b8a99cd0f7eb5fe8d1621f325635c3d
   #  animation_network_image:
   #    git:
   #      url: https://github.com/openAnimeFlow/AnimationNetworkImage.git

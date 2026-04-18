@@ -1,22 +1,25 @@
 import 'dart:async';
-import 'package:anime_flow/webview/webview_controller.dart';
+import 'package:anime_flow/webview/video/video_webview_controller.dart';
+import 'package:logger/logger.dart';
 import 'package:webview_windows/webview_windows.dart';
 
-class WebviewWindowsItemControllerImpel
-    extends WebviewItemController<WebviewController> {
+class VideoWebviewWindowsImpl
+    extends VideoWebviewController<WebviewController> {
   final List<StreamSubscription> subscriptions = [];
+
+  HeadlessWebview? headlessWebview;
 
   @override
   Future<void> init() async {
-    webviewController ??= WebviewController();
-    await webviewController!.initialize();
-    await webviewController!
-        .setPopupWindowPolicy(WebviewPopupWindowPolicy.deny);
+    headlessWebview ??= HeadlessWebview();
+    await headlessWebview!.run();
+    await headlessWebview!.setPopupWindowPolicy(WebviewPopupWindowPolicy.deny);
     initEventController.add(true);
   }
 
+
   @override
-  Future<void> loadUrl(String url, bool useNativePlayer, bool useLegacyParser,
+  Future<void> loadUrl(String url, bool useLegacyParser,
       {int offset = 0}) async {
     await unloadPage();
     count = 0;
@@ -24,7 +27,8 @@ class WebviewWindowsItemControllerImpel
     isIframeLoaded = false;
     isVideoSourceLoaded = false;
     videoLoadingEventController.add(true);
-    subscriptions.add(webviewController!.onM3USourceLoaded.listen((data) {
+    subscriptions.add(headlessWebview!.onM3USourceLoaded.listen((data) {
+      if (headlessWebview == null) return;
       String url = data['url'] ?? '';
       if (url.isEmpty) {
         return;
@@ -36,7 +40,8 @@ class WebviewWindowsItemControllerImpel
       logEventController.add('Loading m3u8 source: $url');
       videoParserEventController.add((url, offset));
     }));
-    subscriptions.add(webviewController!.onVideoSourceLoaded.listen((data) {
+    subscriptions.add(headlessWebview!.onVideoSourceLoaded.listen((data) {
+      if (headlessWebview == null) return;
       String url = data['url'] ?? '';
       if (url.isEmpty) {
         return;
@@ -48,7 +53,7 @@ class WebviewWindowsItemControllerImpel
       logEventController.add('Loading video source: $url');
       videoParserEventController.add((url, offset));
     }));
-    await webviewController!.loadUrl(url);
+    await headlessWebview!.loadUrl(url);
   }
 
   @override
@@ -58,6 +63,7 @@ class WebviewWindowsItemControllerImpel
         s.cancel();
       } catch (_) {}
     });
+    subscriptions.clear();
     await redirect2Blank();
   }
 
@@ -68,15 +74,9 @@ class WebviewWindowsItemControllerImpel
         s.cancel();
       } catch (_) {}
     });
-    // It's a custom function to dispose the whole webview environment in Predidit's flutter-webview-windows fork.
-    // which allow re-initialization webview environment with different proxy settings.
-    // It's difficult to get a dispose finish callback from Microsoft Edge WebView2 SDK,
-    // so don't call webviewController.dispose() when we call WebviewController.disposeEnvironment(), WebViewController.disposeEnvironment() already do any necessary clean up internally.
-    // ohtherwise, app will crash due to resource conflict.
-    if (webviewController != null) {
-      WebviewController.disposeEnvironment();
-      webviewController = null;
-    }
+    subscriptions.clear();
+    headlessWebview?.dispose();
+    headlessWebview = null;
   }
 
   // The webview_windows package does not have a method to unload the current page.
@@ -84,8 +84,13 @@ class WebviewWindowsItemControllerImpel
   // Directly disposing of the webview controller would require reinitialization when switching episodes, which is costly.
   // Therefore, this method is used to redirect to a blank page instead.
   Future<void> redirect2Blank() async {
-    await webviewController!.executeScript('''
-      window.location.href = 'about:blank';
-    ''');
+    if (headlessWebview == null) return;
+    try {
+      await headlessWebview!.executeScript('''
+        window.location.href = 'about:blank';
+      ''');
+    } catch (e) {
+      Logger().d('WebView: redirect2Blank skipped (likely disposed): $e');
+    }
   }
 }

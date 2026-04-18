@@ -2,14 +2,15 @@ import 'dart:io';
 import 'dart:async';
 
 import 'package:anime_flow/utils/utils.dart';
-import 'package:anime_flow/webview/webview_controller_impel/webview_android_controller_impel.dart';
-import 'package:anime_flow/webview/webview_controller_impel/webview_apple_controller_impel.dart';
-import 'package:anime_flow/webview/webview_controller_impel/webview_controller_impel.dart';
-import 'package:anime_flow/webview/webview_controller_impel/webview_linux_controller_impel.dart';
-import 'package:anime_flow/webview/webview_controller_impel/webview_windows_controller_impel.dart';
+
+import 'impl/video_webview_android_impl.dart';
+import 'impl/video_webview_apple_impl.dart';
+import 'impl/video_webview_impl.dart';
+import 'impl/video_webview_linux_impl.dart';
+import 'impl/video_webview_windows_impl.dart';
 
 
-abstract class WebviewItemController<T> {
+abstract class VideoWebviewController<T> {
   // Webview controller
   T? webviewController;
 
@@ -49,7 +50,7 @@ abstract class WebviewItemController<T> {
   Stream<(String, int)> get onVideoURLParser => videoParserEventController.stream;
 
   /// Webview load URL method
-  Future<void> loadUrl(String url, bool useNativePlayer, bool useLegacyParser,
+  Future<void> loadUrl(String url, bool useLegacyParser,
       {int offset = 0});
 
   /// Webview unload page method
@@ -59,20 +60,20 @@ abstract class WebviewItemController<T> {
   void dispose();
 }
 
-class WebviewItemControllerFactory {
-  static WebviewItemController getController() {
+class VideoWebviewControllerFactory {
+  static VideoWebviewController getController() {
     if (Platform.isWindows) {
-      return WebviewWindowsItemControllerImpel();
+      return VideoWebviewWindowsImpl();
     }
     if (Platform.isLinux) {
-      return WebviewLinuxItemControllerImpel();
+      return VideoWebviewLinuxImpl();
     }
     if (Platform.isMacOS || Platform.isIOS) {
-      return WebviewAppleItemControllerImpel();
+      return VideoWebviewAppleImpl();
     }
     if (Platform.isAndroid && Utils.isDocumentStartScriptSupported) {
-      return WebviewAndroidItemControllerImpel();
+      return VideoWebviewAndroidImpl();
     }
-    return WebviewItemControllerImpel();
+    return VideoWebviewImpl();
   }
 }

@@ -1,4 +1,4 @@
-import 'package:anime_flow/controllers/video/video_state_controller.dart';
+import 'package:anime_flow/controllers/play/play_controller.dart';
 import 'package:anime_flow/controllers/video/video_ui_controller.dart';
 import 'package:anime_flow/utils/format_time_util.dart';
 import 'package:flutter/material.dart';
@@ -14,13 +14,13 @@ class VideoProgressBar extends StatefulWidget {
 
 class _VideoProgressBarState extends State<VideoProgressBar> {
   late VideoUiStateController videoUiStateController;
-  late VideoStateController videoStateController;
+  late PlayController playController;
 
   @override
   void initState() {
     super.initState();
     videoUiStateController = Get.find<VideoUiStateController>();
-    videoStateController = Get.find<VideoStateController>();
+    playController = Get.find<PlayController>();
   }
 
   @override
@@ -30,14 +30,14 @@ class _VideoProgressBarState extends State<VideoProgressBar> {
       child: Obx(
         () {
           final max =
-              videoStateController.duration.value.inMilliseconds.toDouble();
+              playController.duration.value.inMilliseconds.toDouble();
           // 如果正在水平拖动，使用拖动位置；否则使用当前播放位置
           final value = videoUiStateController.isHorizontalDragging.value
               ? videoUiStateController.dragPosition.value.inMilliseconds
                   .toDouble()
-              : videoStateController.position.value.inMilliseconds.toDouble();
+              : playController.position.value.inMilliseconds.toDouble();
           final buffer =
-              videoStateController.buffered.value.inMilliseconds.toDouble();
+              playController.buffered.value.inMilliseconds.toDouble();
 
           return Stack(
             alignment: Alignment.centerLeft,
@@ -107,7 +107,7 @@ class _VideoProgressBarState extends State<VideoProgressBar> {
                   },
                   // 进度条结束拖动
                   onChangeEnd: (v) {
-                    videoStateController
+                    playController
                         .seekTo(Duration(milliseconds: v.toInt()));
                     videoUiStateController
                         .endDrag(Duration(milliseconds: v.toInt()));
@@ -146,12 +146,12 @@ class _CustomTrackShape extends RoundedRectSliderTrackShape {
 /// 视频时间显示组件
 class VideoTimeDisplay extends StatelessWidget {
   final VideoUiStateController videoUiStateController;
-  final VideoStateController videoStateController;
+  final PlayController playController;
 
   const VideoTimeDisplay({
     super.key,
     required this.videoUiStateController,
-    required this.videoStateController,
+    required this.playController,
   });
 
   @override
@@ -160,8 +160,8 @@ class VideoTimeDisplay extends StatelessWidget {
       // 如果正在水平拖动，使用拖动位置；否则使用当前播放位置
       final position = videoUiStateController.isHorizontalDragging.value
           ? videoUiStateController.dragPosition.value
-          : videoStateController.position.value;
-      final duration = videoStateController.duration.value;
+          : playController.position.value;
+      final duration = playController.duration.value;
 
       return Text(
         "${FormatTimeUtil.formatDuration(position)} / ${FormatTimeUtil.formatDuration(duration)}",

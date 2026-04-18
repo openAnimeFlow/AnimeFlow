@@ -1,6 +1,5 @@
 import 'package:anime_flow/controllers/play/play_controller.dart';
 import 'package:anime_flow/controllers/video/source/video_source_controller.dart';
-import 'package:anime_flow/controllers/video/video_state_controller.dart';
 import 'package:anime_flow/stores/play_subject_state.dart';
 import 'package:anime_flow/widget/animation_network_image/animation_network_image.dart';
 import 'package:anime_flow/widget/play_content/source_drawers/video_source_drawers.dart';
@@ -19,7 +18,6 @@ class _VideoResourcesViewState extends State<VideoResourcesView> {
   late VideoSourceController videoSourceController;
   late PlaySubjectState playSubjectState;
   late PlayController playController;
-  late VideoStateController videoStateController;
   final Logger logger = Logger();
 
   @override
@@ -27,14 +25,13 @@ class _VideoResourcesViewState extends State<VideoResourcesView> {
     super.initState();
     videoSourceController = Get.find<VideoSourceController>();
     playSubjectState = Get.find<PlaySubjectState>();
-    videoStateController = Get.find<VideoStateController>();
     playController = Get.find<PlayController>();
   }
 
   /// 显示数据源抽屉
   void _showSourceDrawer() {
     void onVideoUrlSelected(String url) {
-      videoStateController.player.stop();
+      playController.player.stop();
       videoSourceController.loadVideoPage(url);
     }
 

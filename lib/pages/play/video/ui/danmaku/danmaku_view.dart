@@ -1,7 +1,6 @@
 import 'dart:async';
 import 'package:anime_flow/constants/storage_key.dart';
 import 'package:anime_flow/controllers/play/play_controller.dart';
-import 'package:anime_flow/controllers/video/video_state_controller.dart';
 import 'package:anime_flow/repository/storage.dart';
 import 'package:anime_flow/stores/episodes_state.dart';
 import 'package:canvas_danmaku/canvas_danmaku.dart';
@@ -18,7 +17,6 @@ class DanmakuView extends StatefulWidget {
 class _DanmakuViewState extends State<DanmakuView>
     with AutomaticKeepAliveClientMixin {
   final setting = Storage.setting;
-  late VideoStateController videoStateController;
   late PlayController playController;
   late EpisodesState episodesState;
   Timer? _danmakuTimer;
@@ -45,7 +43,6 @@ class _DanmakuViewState extends State<DanmakuView>
   @override
   void initState() {
     super.initState();
-    videoStateController = Get.find<VideoStateController>();
     playController = Get.find<PlayController>();
     episodesState = Get.find<EpisodesState>();
 
@@ -68,7 +65,7 @@ class _DanmakuViewState extends State<DanmakuView>
     _startDanmakuTimer();
 
     // 监听倍速变化，更新弹幕速度
-    ever(videoStateController.rate, (rate) {
+    ever(playController.rate, (rate) {
       // 倍速变化时，更新弹幕速度需要在 DanmakuScreen 重建时更新
       setState(() {});
     });
@@ -82,7 +79,7 @@ class _DanmakuViewState extends State<DanmakuView>
     });
 
     // 监听播放状态变化，控制弹幕暂停/恢复
-    _playingWorker = ever(videoStateController.playing, (playing) {
+    _playingWorker = ever(playController.playing, (playing) {
       if (mounted) {
         try {
           if (playing) {
@@ -100,8 +97,8 @@ class _DanmakuViewState extends State<DanmakuView>
     _danmakuTimer = Timer.periodic(const Duration(seconds: 1), (timer) {
       if (!mounted) return;
 
-      final currentPosition = videoStateController.position.value;
-      final playing = videoStateController.playing.value;
+      final currentPosition = playController.position.value;
+      final playing = playController.playing.value;
 
       // 只有在播放时才添加弹幕
       if (currentPosition.inMicroseconds != 0 &&
@@ -119,7 +116,7 @@ class _DanmakuViewState extends State<DanmakuView>
               ),
               () {
                 if (!mounted ||
-                    !videoStateController.playing.value ||
+                    !playController.playing.value ||
                     !playController.danmakuOn.value) {
                   return;
                 }
@@ -192,7 +189,7 @@ class _DanmakuViewState extends State<DanmakuView>
                   hideScroll: _hideScroll,
                   hideTop: _hideTop,
                   hideBottom: _hideBottom,
-                  duration: _danmakuDuration / videoStateController.rate.value,
+                  duration: _danmakuDuration / playController.rate.value,
                   massiveMode: _massiveMode,
                 ),
               );
@@ -208,7 +205,7 @@ class _DanmakuViewState extends State<DanmakuView>
           area: _danmakuArea,
           opacity: _opacity,
           fontSize: _fontSize,
-          duration: _danmakuDuration / videoStateController.rate.value,
+          duration: _danmakuDuration / playController.rate.value,
           lineHeight: _danmakuLineHeight,
           strokeWidth: _border ? 1.5 : 0.0,
           fontWeight: _danmakuFontWeight,

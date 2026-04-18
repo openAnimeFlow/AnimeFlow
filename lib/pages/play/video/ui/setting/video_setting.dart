@@ -1,5 +1,5 @@
 import 'package:anime_flow/constants/play_layout_constant.dart';
-import 'package:anime_flow/controllers/video/video_state_controller.dart';
+import 'package:anime_flow/controllers/play/play_controller.dart';
 import 'package:anime_flow/utils/format_time_util.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -16,7 +16,7 @@ class _VideoSettingState extends State<VideoSetting> {
   int selectedHours = 0; // 选中的小时
   int selectedMinutes = 0; // 选中的分钟
 
-  late VideoStateController videoStateController;
+  late PlayController playController;
 
   // 小时列表 (0-23)
   final List<int> _hours = List.generate(24, (index) => index);
@@ -33,7 +33,7 @@ class _VideoSettingState extends State<VideoSetting> {
   @override
   void initState() {
     super.initState();
-    videoStateController = Get.find<VideoStateController>();
+    playController = Get.find<PlayController>();
     // 延迟设置初始位置，确保列表已构建
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _hoursController.jumpToItem(selectedHours);
@@ -120,11 +120,11 @@ class _VideoSettingState extends State<VideoSetting> {
                           const SizedBox(height: 5),
                           Obx(
                                 () => Text(
-                              videoStateController
+                              playController
                                   .scheduledStopDuration.value ==
                                   0
                                   ? '定时关闭'
-                                  : FormatTimeUtil.formatScheduledTime(videoStateController
+                                  : FormatTimeUtil.formatScheduledTime(playController
                                   .scheduledStopDuration.value),
                               style: TextStyle(
                                 fontSize: 12,
@@ -189,13 +189,13 @@ class _VideoSettingState extends State<VideoSetting> {
                                           selectedMinutes * 60;
 
                                   if (totalSeconds > 0) {
-                                    videoStateController.stopPlaying(
+                                    playController.stopPlaying(
                                       duration:
                                       Duration(seconds: totalSeconds),
                                     );
                                   } else {
                                     // 如果选择的是0，取消定时停止
-                                    videoStateController
+                                    playController
                                         .cancelScheduledStop();
                                   }
 

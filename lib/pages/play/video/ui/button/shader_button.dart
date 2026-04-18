@@ -1,5 +1,4 @@
 import 'package:anime_flow/controllers/play/play_controller.dart';
-import 'package:anime_flow/controllers/video/video_state_controller.dart';
 import 'package:anime_flow/controllers/video/video_ui_controller.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -11,11 +10,9 @@ class ShaderButton extends StatelessWidget {
   Widget build(BuildContext context) {
     final playController = Get.find<PlayController>();
     final videoUiStateController = Get.find<VideoUiStateController>();
-    final videoStateController = Get.find<VideoStateController>();
 
     return Obx(() {
       final currentType = playController.superResolutionType.value;
-      final player = videoStateController.player;
       final labels = ['关闭', '效率档', '质量档'];
 
       return MenuAnchor(
@@ -34,7 +31,7 @@ class ShaderButton extends StatelessWidget {
 
             return MenuItemButton(
               onPressed: () {
-                playController.setShader(type, player: player);
+                playController.setShader(type);
               },
               child: Container(
                 height: 48,

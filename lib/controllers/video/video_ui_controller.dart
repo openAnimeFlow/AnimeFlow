@@ -20,9 +20,6 @@ class VideoUiStateController extends GetxController {
   /// 是否正在水平拖动
   final RxBool isHorizontalDragging = false.obs;
 
-  /// 正在解析的标题
-  final RxString parsingTitle = ''.obs;
-
   /// 拖动时的临时进度
   final Rx<Duration> dragPosition = Duration.zero.obs;
 
@@ -122,10 +119,6 @@ class VideoUiStateController extends GetxController {
     } catch (_) {}
   }
 
-  //设置解析标题
-  void setParsingTitle(String title) {
-    parsingTitle.value = title;
-  }
 
   //修改主轴类型
   void updateMainAxisAlignmentType(MainAxisAlignment type) {

@@ -73,10 +73,9 @@ class _TopAreaControlState extends ConsumerState<TopAreaControl> {
                       //Obx细粒度更新机制,只有直接访问了响应式变量的Obx才会被触发重建。
                       if (fullscreen)
                         Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 15),
-                          height: 16,
-                          child: _buildTopInfoBar()
-                        ),
+                            padding: const EdgeInsets.symmetric(horizontal: 15),
+                            height: 16,
+                            child: _buildTopInfoBar()),
                       Row(
                         children: [
                           //左侧
@@ -254,61 +253,57 @@ class _TopAreaControlState extends ConsumerState<TopAreaControl> {
   }
 
   ///顶部信息栏
- Widget _buildTopInfoBar() {
+  Widget _buildTopInfoBar() {
     return Row(
       children: [
         //网络图标
         Expanded(
             child: Row(
-              mainAxisAlignment: MainAxisAlignment.start,
-              spacing: 5,
-              children: [
-                const NetworkIcon(),
-                Builder(
-                  builder: (context) {
-                    final speedAsync = ref.watch(networkSpeedStreamProvider(2000));
-                    final data = speedAsync.asData?.value;
-                    final download = data?.download ?? 0;
-                    final upload = data?.upload ?? 0;
+          mainAxisAlignment: MainAxisAlignment.start,
+          spacing: 5,
+          children: [
+            const NetworkIcon(),
+            Builder(
+              builder: (context) {
+                final speedAsync = ref.watch(networkSpeedStreamProvider(2000));
+                final data = speedAsync.asData?.value;
+                final download = data?.download ?? 0;
+                final upload = data?.upload ?? 0;
 
-                    return Row(
-                      crossAxisAlignment: CrossAxisAlignment.center,
-                      children: [
-                        const RotatedBox(
-                          quarterTurns: 1,
-                          child: Icon(
-                              Icons
-                                  .arrow_right_alt_outlined,
-                              size: 15,
-                              fontWeight: FontWeight.bold),
-                        ),
-                        Text(
-                          Utils.formatBytesPerSec(download),
-                          style: const TextStyle(
-                              fontSize: 10,
-                              color: Colors.white),
-                        ),
-                        const SizedBox(width: 5),
-                        const RotatedBox(
-                          quarterTurns: 3,
-                          child: Icon(
-                              Icons
-                                  .arrow_right_alt_outlined,
-                              size: 15,
-                              fontWeight: FontWeight.bold),
-                        ),
-                        Text(Utils.formatBytesPerSec(upload),
-                            style: const TextStyle(
-                                fontSize: 10)),
-                      ],
-                    );
-                  },
-                )
-              ],
-            )),
+                return Row(
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  children: [
+                    if (download > 0) ...[
+                      const RotatedBox(
+                        quarterTurns: 1,
+                        child: Icon(Icons.arrow_right_alt_outlined,
+                            size: 15, fontWeight: FontWeight.bold),
+                      ),
+                      Text(
+                        Utils.formatBytesPerSec(download),
+                        style:
+                            const TextStyle(fontSize: 10, color: Colors.white),
+                      ),
+                      const SizedBox(width: 5),
+                    ],
+                    if (upload > 0) ...[
+                      const RotatedBox(
+                        quarterTurns: 3,
+                        child: Icon(Icons.arrow_right_alt_outlined,
+                            size: 15, fontWeight: FontWeight.bold),
+                      ),
+                      Text(Utils.formatBytesPerSec(upload),
+                          style: const TextStyle(fontSize: 10))
+                    ],
+                  ],
+                );
+              },
+            )
+          ],
+        )),
         //系统时间
         Obx(
-              () => Text(
+          () => Text(
             videoUiStateController.currentTime.value,
             style: const TextStyle(
               color: Colors.white,
@@ -321,18 +316,13 @@ class _TopAreaControlState extends ConsumerState<TopAreaControl> {
         if (SystemUtil.isMobile)
           Expanded(
             child: Obx(
-                  () {
-                final battery = videoUiStateController
-                    .batteryLevel.value;
-                final batteryState =
-                    videoUiStateController
-                        .batteryState.value;
+              () {
+                final battery = videoUiStateController.batteryLevel.value;
+                final batteryState = videoUiStateController.batteryState.value;
 
                 return Row(
-                  crossAxisAlignment:
-                  CrossAxisAlignment.center,
-                  mainAxisAlignment:
-                  MainAxisAlignment.end,
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  mainAxisAlignment: MainAxisAlignment.end,
                   children: [
                     Text(
                       '${videoUiStateController.batteryLevel.value}%',
@@ -358,5 +348,5 @@ class _TopAreaControlState extends ConsumerState<TopAreaControl> {
           const Spacer()
       ],
     );
- }
+  }
 }

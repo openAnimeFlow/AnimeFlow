@@ -1,10 +1,9 @@
 import 'package:anime_flow/constants/image_path_constants.dart';
+import 'package:anime_flow/controllers/my_controller.dart';
 import 'package:anime_flow/routes/routes.dart';
-import 'package:anime_flow/widget/animation_network_image/animation_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
-import '../../../controllers/my_controller.dart';
 
 enum _NoLoginOverflowAction { settings, playRecord }
 

@@ -1,3 +1,4 @@
+import 'package:anime_flow/constants/constants.dart';
 import 'package:anime_flow/http/api_path.dart';
 import 'package:anime_flow/http/requests/bgm_request.dart';
 import 'package:anime_flow/http/requests/oauth_request.dart';
@@ -39,7 +40,7 @@ class MyController {
   }
 
   static void openOAuthPage() async {
-    final clientId = dotenv.env['CLIENT_ID'];
+    const clientId = Constants.bgmClientId;
     const redirectUri = '${AnimeFlowApi.animeFlowApi}/oauth/callback';
     final session = await OAuthRequest.getSessionService();
     final sessionId = session['data']['sessionId'];

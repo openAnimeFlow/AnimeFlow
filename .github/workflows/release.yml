@@ -24,7 +24,6 @@ jobs:
 
       - name: Create .env file
         run: |
-          echo "CLIENT_ID=${{ secrets.CLIENT_ID }}" >> .env
           echo "REDIRECT_URI=${{ secrets.REDIRECT_URI }}" >> .env
           echo "DANDANPLAY_ID=${{ secrets.DANDANPLAY_ID }}" >> .env
           echo "DANDANPLAY_SECRET=${{ secrets.DANDANPLAY_SECRET }}" >> .env
@@ -72,7 +71,6 @@ jobs:
 
       - name: Create .env file
         run: |
-          echo "CLIENT_ID=${{ secrets.CLIENT_ID }}" >> .env
           echo "REDIRECT_URI=${{ secrets.REDIRECT_URI }}" >> .env
           echo "DANDANPLAY_ID=${{ secrets.DANDANPLAY_ID }}" >> .env
           echo "DANDANPLAY_SECRET=${{ secrets.DANDANPLAY_SECRET }}" >> .env
@@ -162,7 +160,6 @@ jobs:
       - name: Create .env file
         shell: pwsh
         run: |
-          Add-Content -Path .env -Value "CLIENT_ID=${{ secrets.CLIENT_ID }}"
           Add-Content -Path .env -Value "REDIRECT_URI=${{ secrets.REDIRECT_URI }}"
           Add-Content -Path .env -Value "DANDANPLAY_ID=${{ secrets.DANDANPLAY_ID }}" 
           Add-Content -Path .env -Value "DANDANPLAY_SECRET=${{ secrets.DANDANPLAY_SECRET }}"
@@ -249,7 +246,6 @@ jobs:
 
       - name: Create .env file
         run: |
-          echo "CLIENT_ID=${{ secrets.CLIENT_ID }}" >> .env
           echo "REDIRECT_URI=${{ secrets.REDIRECT_URI }}" >> .env
           echo "DANDANPLAY_ID=${{ secrets.DANDANPLAY_ID }}" >> .env
           echo "DANDANPLAY_SECRET=${{ secrets.DANDANPLAY_SECRET }}" >> .env
@@ -371,7 +367,6 @@ jobs:
 
       - name: Create .env file
         run: |
-          echo "CLIENT_ID=${{ secrets.CLIENT_ID }}" >> .env
           echo "REDIRECT_URI=${{ secrets.REDIRECT_URI }}" >> .env          
           echo "DANDANPLAY_ID=${{ secrets.DANDANPLAY_ID }}" >> .env
           echo "DANDANPLAY_SECRET=${{ secrets.DANDANPLAY_SECRET }}" >> .env

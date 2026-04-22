@@ -47,22 +47,36 @@ class Request {
     });
   }
 
-  /// 图片识别番剧
+  /// 图片识别番剧 [file]
   static Future<AnimeImageSearchResultItem> getAnimeInfoByImageFile(
-      File imageFile,{int anilistInfo = 2}) async {
+      File imageFile,
+      {int anilistInfo = 2}) async {
     final bytes = await imageFile.readAsBytes();
 
-    return await dioRequest.post(
+    return await dioRequest
+        .post(
       CommonApi.traceApi,
-      queryParameters: {
-        "anilistInfo": anilistInfo
-      },
+      queryParameters: {"anilistInfo": anilistInfo},
       data: bytes,
       options: Options(
         headers: {
           'Content-Type': 'image/jpeg',
         },
       ),
+    )
+        .then((onValue) {
+      return AnimeImageSearchResultItem.fromJson(
+          onValue.data as Map<String, dynamic>);
+    });
+  }
+
+  /// 图片识别番剧 [url]
+  static Future<AnimeImageSearchResultItem> getAnimeInfoByImageUrl(
+      String imageUrl,
+      {int anilistInfo = 2}) async {
+    return await dioRequest.post(
+      CommonApi.traceApi,
+      queryParameters: {"anilistInfo": anilistInfo, "url": imageUrl},
     ).then((onValue) {
       return AnimeImageSearchResultItem.fromJson(
           onValue.data as Map<String, dynamic>);

@@ -38,7 +38,6 @@ class _SearchPageState extends State<SearchPage> {
       _loadSearchHistory();
       final routeKeywords = GoRouterState.of(context).uri.queryParameters['keywords'];
       final keywords = (widget.keywords ?? routeKeywords)?.trim();
-      print('keywords$keywords');
       if (keywords != null && keywords.isNotEmpty) {
         _searchController.text = keywords;
         _onSearch(keywords);

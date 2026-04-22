@@ -5,25 +5,24 @@ library;
 
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
+import 'package:photo_view/photo_view.dart';
 
 class ImageViewer extends StatelessWidget {
   final String imageUrl;
   final String? heroTag;
-  final BorderRadiusGeometry borderRadius;
 
   const ImageViewer(
-      {super.key, required this.imageUrl, this.heroTag, required this.borderRadius});
+      {super.key, required this.imageUrl, this.heroTag});
 
   /// 显示图片查看器
   static void show(BuildContext context, String imageUrl,
-      {String? heroTag, required BorderRadiusGeometry borderRadius}) {
+      {String? heroTag}) {
     Navigator.of(context).push(
       PageRouteBuilder(
         opaque: false,
         barrierColor: Colors.black.withValues(alpha: 0.8),
         pageBuilder: (context, animation, secondaryAnimation) {
-          return ImageViewer(
-              imageUrl: imageUrl, heroTag: heroTag, borderRadius: borderRadius);
+          return ImageViewer(imageUrl: imageUrl, heroTag: heroTag);
         },
         transitionDuration: const Duration(milliseconds: 300),
         transitionsBuilder: (context, animation, secondaryAnimation, child) {
@@ -47,62 +46,36 @@ class ImageViewer extends StatelessWidget {
       backgroundColor: Colors.transparent,
       body: Stack(
         children: [
-          InteractiveViewer(
-            minScale: 0.5,
-            maxScale: 4.0,
-            boundaryMargin: const EdgeInsets.all(double.infinity),
-            child: Center(
-              child: Hero(
-                tag: heroTag ?? imageUrl,
-                child: GestureDetector(
-                  onTap: () => Navigator.of(context).pop(),
-                  child: ClipRRect(
-                    borderRadius: borderRadius,
-                    child: CachedNetworkImage(
-                      imageUrl: imageUrl,
-                      fit: BoxFit.contain,
-                      placeholder: (context, url) => Container(
-                        width: 200,
-                        height: 200,
-                        decoration: BoxDecoration(
-                          color: Theme.of(
-                            context,
-                          ).colorScheme.surfaceContainerHighest,
-                          borderRadius: BorderRadius.circular(12),
-                        ),
-                        child: const Center(
-                          child: CircularProgressIndicator(),
-                        ),
-                      ),
-                      errorWidget: (context, url, error) => Container(
-                        decoration: BoxDecoration(
-                          color: Theme.of(context).colorScheme.errorContainer,
-                          borderRadius: BorderRadius.circular(12),
-                        ),
-                        child: Column(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            Icon(
-                              Icons.broken_image,
-                              size: 48,
-                              color: Theme.of(
-                                context,
-                              ).colorScheme.onErrorContainer,
-                            ),
-                            const SizedBox(height: 8),
-                            Text(
-                              '图片加载失败',
-                              style: TextStyle(
-                                color: Theme.of(
-                                  context,
-                                ).colorScheme.onErrorContainer,
-                              ),
-                            ),
-                          ],
-                        ),
+          GestureDetector(
+            onTap: () => Navigator.of(context).pop(),
+            child: PhotoView(
+              imageProvider: CachedNetworkImageProvider(imageUrl),
+              minScale: PhotoViewComputedScale.contained,
+              maxScale: PhotoViewComputedScale.covered * 3,
+              backgroundDecoration: const BoxDecoration(
+                color: Colors.transparent,
+              ),
+              heroAttributes: PhotoViewHeroAttributes(tag: heroTag ?? imageUrl),
+              loadingBuilder: (context, event) => const Center(
+                child: CircularProgressIndicator(),
+              ),
+              errorBuilder: (context, error, stackTrace) => Center(
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Icon(
+                      Icons.broken_image,
+                      size: 48,
+                      color: Theme.of(context).colorScheme.onErrorContainer,
+                    ),
+                    const SizedBox(height: 8),
+                    Text(
+                      '图片加载失败',
+                      style: TextStyle(
+                        color: Theme.of(context).colorScheme.onErrorContainer,
                       ),
                     ),
-                  ),
+                  ],
                 ),
               ),
             ),

@@ -40,8 +40,7 @@ class AnimationNetworkImage extends StatelessWidget {
       final heroTag = 'emoji_${url.hashCode}_${Random().nextInt(10000)}';
       return GestureDetector(
         onTap: () {
-          ImageViewer.show(context, url,
-              heroTag: heroTag, borderRadius: borderRadius);
+          ImageViewer.show(context, url, heroTag: heroTag);
         },
         child: Hero(tag: heroTag, child: _buildImage()),
       );
@@ -50,7 +49,7 @@ class AnimationNetworkImage extends StatelessWidget {
       return GestureDetector(
         onTap: () {
           // 如果没有 Hero tag，预览功能可能不工作
-          ImageViewer.show(context, url, borderRadius: borderRadius);
+          ImageViewer.show(context, url);
         },
         child: _buildImage(),
       );

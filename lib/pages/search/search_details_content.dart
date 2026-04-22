@@ -31,85 +31,90 @@ class SearchDetailsContentView extends StatelessWidget {
     const textFontWeight = FontWeight.w600;
 
     return SizedBox(
-        height: itemHeight,
-        child: InkWell(
-            onTap: () {
-              context.push(RouteName.animeInfo, extra: subjectBasicData);
-            },
-            child: Row(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                ClipRRect(
-                  borderRadius: BorderRadius.circular(10),
-                  child: SizedBox(
-                    height: itemHeight,
-                    width: 110,
-                    child: AnimationNetworkImage(
-                      url: searchData.images.large,
-                      fit: BoxFit.cover,
+      height: itemHeight,
+      child: InkWell(
+        onTap: () {
+          context.push(RouteName.animeInfo, extra: subjectBasicData);
+        },
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            ClipRRect(
+              borderRadius: BorderRadius.circular(10),
+              child: SizedBox(
+                height: itemHeight,
+                width: 110,
+                child: AnimationNetworkImage(
+                  url: searchData.images.large,
+                  fit: BoxFit.cover,
+                ),
+              ),
+            ),
+            const SizedBox(width: 12),
+            Expanded(
+              child: Padding(
+                padding: const EdgeInsets.symmetric(vertical: 5),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      searchData.nameCN ?? searchData.name,
+                      style: const TextStyle(
+                          fontSize: 16, fontWeight: FontWeight.bold),
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
                     ),
-                  ),
-                ),
-                const SizedBox(width: 12),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        searchData.nameCN ?? searchData.name,
-                        style: const TextStyle(
-                            fontSize: 16, fontWeight: FontWeight.bold),
-                        maxLines: 2,
-                        overflow: TextOverflow.ellipsis,
+                    const SizedBox(height: 2),
+                    Text(
+                      searchData.name,
+                      style: TextStyle(
+                        fontSize: 10,
+                        fontWeight: textFontWeight,
+                        color: disabledColor,
                       ),
-                      const SizedBox(height: 2),
-                      Text(
-                        searchData.name,
-                        style: TextStyle(
-                          fontSize: 10,
-                          fontWeight: textFontWeight,
-                          color: disabledColor,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                    Text(
+                      searchData.info,
+                      style: const TextStyle(
+                          fontSize: 10, fontWeight: textFontWeight),
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                    const Spacer(),
+                    Row(
+                      children: [
+                        RankingView(
+                            ranking: searchData.rating.total,
+                            fontWeight: textFontWeight,
+                            fontSize: 8),
+                        StarView(score: searchData.rating.score),
+                        Text(
+                          searchData.rating.score.toStringAsFixed(1),
+                          style: TextStyle(
+                            fontSize: 10,
+                            fontWeight: textFontWeight,
+                            color: disabledColor,
+                          ),
                         ),
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                      ),
-                      Text(
-                        searchData.info,
-                        style: const TextStyle(
-                            fontSize: 10, fontWeight: textFontWeight),
-                        maxLines: 2,
-                        overflow: TextOverflow.ellipsis,
-                      ),
-                      const Spacer(),
-                      Row(
-                        children: [
-                          RankingView(
-                              ranking: searchData.rating.total,
-                              fontWeight: textFontWeight,
-                              fontSize: 8),
-                          StarView(score: searchData.rating.score),
-                          Text(
-                            searchData.rating.score.toStringAsFixed(1),
-                            style: TextStyle(
-                              fontSize: 10,
-                              fontWeight: textFontWeight,
-                              color: disabledColor,
-                            ),
+                        Text(
+                          '(${searchData.rating.total}人评分)',
+                          style: TextStyle(
+                            fontSize: 8,
+                            fontWeight: textFontWeight,
+                            color: disabledColor,
                           ),
-                          Text(
-                            '(${searchData.rating.total}人评分)',
-                            style: TextStyle(
-                              fontSize: 8,
-                              fontWeight: textFontWeight,
-                              color: disabledColor,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ],
-                  ),
+                        ),
+                      ],
+                    ),
+                  ],
                 ),
-              ],
-            )));
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
   }
 }

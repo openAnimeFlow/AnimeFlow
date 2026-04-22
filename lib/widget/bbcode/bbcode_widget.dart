@@ -173,7 +173,6 @@ class _BBCodeWidgetState extends State<BBCodeWidget> {
                 return WidgetSpan(
                   child: AnimationNetworkImage(
                     preview: widget.imagPreview,
-                    borderRadius: widget.borderRadius,
                     url: url,
                     fit: widget.fit,
                   ),
@@ -182,7 +181,6 @@ class _BBCodeWidgetState extends State<BBCodeWidget> {
                 return WidgetSpan(
                   child: AnimationNetworkImage(
                     preview: widget.imagPreview,
-                    borderRadius: widget.borderRadius,
                     url: 'https://bangumi.tv/img/smiles/${e.id}.gif',
                     fit: widget.fit,
                   ),

@@ -96,7 +96,7 @@ class _HeadContent extends ConsumerWidget {
                             child: Container(
                               margin: const EdgeInsets.only(left: 6),
                               child: Hero(
-                                tag: 'subject_image${subjectBasicData.image}',
+                                tag: subjectBasicData.image,
                                 child: AnimationNetworkImage(
                                   preview: true,
                                   useExternalHero: true,

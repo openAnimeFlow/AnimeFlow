@@ -79,6 +79,11 @@ class _RecommendPageState extends State<RecommendPage>
                     const Spacer(),
                     IconButton(
                       padding: EdgeInsets.zero,
+                      onPressed: () => context.push(RouteName.animeImageSearch),
+                      icon: const Icon(Icons.image_search_outlined),
+                    ),
+                    IconButton(
+                      padding: EdgeInsets.zero,
                       onPressed: () => context.push(RouteName.playRecord),
                       icon: const Icon(Icons.access_time_outlined),
                     )

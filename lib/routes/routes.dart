@@ -1,5 +1,6 @@
 import 'package:anime_flow/models/item/bangumi/calendar_item.dart';
 import 'package:anime_flow/models/item/subject_basic_data_item.dart';
+import 'package:anime_flow/pages/anime_image_search/index.dart';
 import 'package:anime_flow/pages/anime_info/index.dart';
 import 'package:anime_flow/pages/calendar/index.dart';
 import 'package:anime_flow/pages/character_info/index.dart';
@@ -28,7 +29,6 @@ import 'package:get/get.dart';
 import 'package:go_router/go_router.dart';
 import 'package:logger/logger.dart';
 
-
 class RouteName {
   static const String main = "/";
   static const String login = "/login";
@@ -40,6 +40,7 @@ class RouteName {
   static const String characterInfo = "/character_info";
   static const String playRecord = "/play_record";
   static const String userSpace = "/user_space";
+  static const String animeImageSearch = "/anime_image_search";
 
   static const String settings = "/settings";
   static const String settingGeneral = "/settings/general";
@@ -71,8 +72,7 @@ class AnimeInfoExtra {
   final String name;
   final String image;
 
-  AnimeInfoExtra(
-      {required this.id, required this.name, required this.image});
+  AnimeInfoExtra({required this.id, required this.name, required this.image});
 }
 
 /// 角色详情页路由参数
@@ -103,7 +103,7 @@ final GoRouter appRouter = GoRouter(
       final link = uri.toString();
       SchedulerBinding.instance.addPostFrameCallback((_) {
         MyController.handleDeepLink(link).catchError(
-              (Object e, StackTrace st) =>
+          (Object e, StackTrace st) =>
               Logger().e('OAuth 回调处理失败', error: e, stackTrace: st),
         );
       });
@@ -141,7 +141,11 @@ final GoRouter appRouter = GoRouter(
     ),
     GoRoute(
       path: RouteName.search,
-      builder: (context, state) => const SearchPage(),
+      builder: (context, state) {
+        final queryKeywords = state.uri.queryParameters['keywords'];
+        final extraKeywords = state.extra is String ? state.extra as String : null;
+        return SearchPage(keywords: queryKeywords ?? extraKeywords);
+      },
     ),
     GoRoute(
       path: RouteName.calendar,
@@ -179,6 +183,9 @@ final GoRouter appRouter = GoRouter(
         return UserSpacePage(username: name);
       },
     ),
+    GoRoute(
+        path: RouteName.animeImageSearch,
+        builder: (context, state) => const AnimeImageSearchPage()),
     GoRoute(
       path: RouteName.settings,
       builder: (context, state) => const SettingsPage(),

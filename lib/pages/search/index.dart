@@ -5,10 +5,13 @@ import 'package:anime_flow/pages/search/search_omitted_content.dart';
 import 'package:anime_flow/stores/search/search_history_manager.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:go_router/go_router.dart';
 
 /// 搜索页
 class SearchPage extends StatefulWidget {
-  const SearchPage({super.key});
+  final String? keywords;
+
+  const SearchPage({super.key, this.keywords});
 
   @override
   State<SearchPage> createState() => _SearchPageState();
@@ -33,6 +36,13 @@ class _SearchPageState extends State<SearchPage> {
     WidgetsBinding.instance.addPostFrameCallback((_) {
       FocusScope.of(context).requestFocus(_searchFocusNode);
       _loadSearchHistory();
+      final routeKeywords = GoRouterState.of(context).uri.queryParameters['keywords'];
+      final keywords = (widget.keywords ?? routeKeywords)?.trim();
+      print('keywords$keywords');
+      if (keywords != null && keywords.isNotEmpty) {
+        _searchController.text = keywords;
+        _onSearch(keywords);
+      }
     });
 
     // 监听滚动，触发加载更多

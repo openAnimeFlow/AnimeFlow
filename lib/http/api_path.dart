@@ -84,6 +84,9 @@ class CommonApi {
 
   ///插件仓库
   static const String pluginRepo = 'https://raw.githubusercontent.com/openAnimeFlow/animeFlow-assets/main/plugins';
+
+  /// 图片识别番剧
+  static const String traceApi = 'https://api.trace.moe/search';
 }
 
 class AnimeFlowApi {

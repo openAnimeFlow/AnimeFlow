@@ -26,12 +26,22 @@ class _AnimeImageSearchPageState extends State<AnimeImageSearchPage> {
     try {
       final XFile? image = await _picker.pickImage(source: ImageSource.gallery);
       if (image == null) return;
+      const int maxImageBytes = 25 * 1024 * 1024;
+      final imageFile = File(image.path);
+      final imageBytes = await imageFile.length();
+      if (imageBytes > maxImageBytes) {
+        if (!mounted) return;
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('图片大小不能超过 25MB')),
+        );
+        return;
+      }
 
       setState(() {
         isSearching = true;
         animeImageSearchResultItem = null;
       });
-      final result = await Request.getAnimeInfoByImageFile(File(image.path));
+      final result = await Request.getAnimeInfoByImageFile(imageFile);
 
       if (!mounted) return;
       setState(() {
@@ -127,17 +137,6 @@ class _AnimeImageSearchPageState extends State<AnimeImageSearchPage> {
                         ),
                       ),
                     ),
-                    // IconButton(
-                    //   onPressed: isSearching ? null : _searchByImageUrl,
-                    //   tooltip: '通过链接搜索',
-                    //   icon: isSearching
-                    //       ? const SizedBox(
-                    //           width: 20,
-                    //           height: 20,
-                    //           child: CircularProgressIndicator(strokeWidth: 2),
-                    //         )
-                    //       : const Icon(Icons.search),
-                    // ),
                     TextButton(
                       onPressed: isSearching ? null : _pickAndSearchImage,
                       child: const Icon(
@@ -164,7 +163,7 @@ class _AnimeImageSearchPageState extends State<AnimeImageSearchPage> {
                                 children: [
                                   const Icon(Icons.image_search_outlined,
                                       size: 100),
-                                  const Text("上传截图搜索出处"),
+                                  const Text("上传截图(小于25MB)搜索出处"),
                                   Text(
                                     "上传原始比例的截图以提高搜索准确度",
                                     style: TextStyle(
@@ -180,20 +179,48 @@ class _AnimeImageSearchPageState extends State<AnimeImageSearchPage> {
                                   child: Text(result.error.isNotEmpty
                                       ? result.error
                                       : '未找到匹配结果'))
-                              : ListView.builder(
-                                  padding: const EdgeInsets.symmetric(
-                                      horizontal: 16),
-                                  itemCount: result.result.length,
-                                  itemBuilder: (context, index) {
-                                    final match = result.result[index];
-                                    return InkWell(
-                                      onTap: () {
-                                        context.push(RouteName.search,
-                                            extra:
-                                                match.anilist?.title.native ??
-                                                    match.filename);
-                                      },
-                                      child: _SearchResultCard(match: match),
+                              : LayoutBuilder(
+                                  builder: (context, constraints) {
+                                    const maxGridWidth = 1800.0;
+                                    const minItemWidth = 420.0;
+                                    final effectiveWidth = constraints.maxWidth
+                                        .clamp(0.0, maxGridWidth);
+                                    final crossAxisCount =
+                                        (effectiveWidth / minItemWidth)
+                                            .floor()
+                                            .clamp(1, 6);
+                                    return Center(
+                                      child: ConstrainedBox(
+                                        constraints: const BoxConstraints(
+                                            maxWidth: maxGridWidth),
+                                        child: GridView.builder(
+                                          padding: const EdgeInsets.symmetric(
+                                              horizontal: 16),
+                                          gridDelegate:
+                                              SliverGridDelegateWithFixedCrossAxisCount(
+                                            crossAxisCount: crossAxisCount,
+                                            crossAxisSpacing: 12,
+                                            mainAxisSpacing: 12,
+                                            childAspectRatio: 2.5,
+                                          ),
+                                          itemCount: result.result.length,
+                                          itemBuilder: (context, index) {
+                                            final match = result.result[index];
+                                            return InkWell(
+                                              onTap: () {
+                                                context.push(RouteName.search,
+                                                    extra: match
+                                                            .anilist
+                                                            ?.title
+                                                            .native ??
+                                                        match.filename);
+                                              },
+                                              child: _SearchResultCard(
+                                                  match: match),
+                                            );
+                                          },
+                                        ),
+                                      ),
                                     );
                                   },
                                 ))
@@ -208,13 +235,28 @@ class _SearchResultCard extends StatelessWidget {
 
   const _SearchResultCard({required this.match});
 
+  String _formatTime(double seconds) {
+    final m = (seconds / 60).floor();
+    final s = (seconds % 60).floor();
+    return '$m:${s.toString().padLeft(2, '0')}';
+  }
+
+  String? _buildEpisodeText(List<double> episodes) {
+    if (episodes.isEmpty) return null;
+    final episodeLabel = episodes.map((item) {
+      if (item % 1 == 0) return item.toInt().toString();
+      return item.toStringAsFixed(1);
+    }).join(', ');
+    return '第 $episodeLabel 集';
+  }
+
   @override
   Widget build(BuildContext context) {
     final similarityPercent = (match.similarity * 100).toStringAsFixed(1);
     final episodeText = _buildEpisodeText(match.episodes);
 
     return Card(
-      margin: const EdgeInsets.symmetric(vertical: 8),
+      margin: EdgeInsets.zero,
       child: Padding(
         padding: const EdgeInsets.all(8),
         child: Column(
@@ -227,6 +269,7 @@ class _SearchResultCard extends StatelessWidget {
               maxLines: 1,
               overflow: TextOverflow.ellipsis,
             ),
+            const Spacer(),
             Row(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
@@ -234,7 +277,7 @@ class _SearchResultCard extends StatelessWidget {
                   child: AspectRatio(
                     aspectRatio: 16 / 9,
                     child: AnimationNetworkImage(
-                      borderRadius: BorderRadius.circular(8),
+                      borderRadius: BorderRadius.circular(10),
                       url: match.image,
                       fit: BoxFit.cover,
                     ),
@@ -261,20 +304,5 @@ class _SearchResultCard extends StatelessWidget {
         ),
       ),
     );
-  }
-
-  String _formatTime(double seconds) {
-    final m = (seconds / 60).floor();
-    final s = (seconds % 60).floor();
-    return '$m:${s.toString().padLeft(2, '0')}';
-  }
-
-  String? _buildEpisodeText(List<double> episodes) {
-    if (episodes.isEmpty) return null;
-    final episodeLabel = episodes.map((item) {
-      if (item % 1 == 0) return item.toInt().toString();
-      return item.toStringAsFixed(1);
-    }).join(', ');
-    return '第 $episodeLabel 集';
   }
 }

@@ -8,7 +8,6 @@ import 'package:anime_flow/models/item/anime_image_search_result_item.dart';
 import 'package:anime_flow/crawler/itme/crawler_config_item.dart';
 import 'package:anime_flow/utils/utils.dart';
 import 'package:dio/dio.dart';
-import 'package:logger/logger.dart';
 
 class Request {
   static Future<Map<String, dynamic>> getReleases() async {

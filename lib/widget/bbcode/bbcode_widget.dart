@@ -172,15 +172,20 @@ class _BBCodeWidgetState extends State<BBCodeWidget> {
                 url = 'https://bangumi.tv/img/smiles/tv/${e.id - 23}.gif';
                 return WidgetSpan(
                   child: AnimationNetworkImage(
-                    preview: widget.imagPreview,
                     url: url,
+                    fit: widget.fit,
+                  ),
+                );
+              } else if (e is BBCodeMusume) {
+                return WidgetSpan(
+                  child: AnimationNetworkImage(
+                    url: 'https://lain.bgm.tv/img/smiles/musume/musume_${e.id}.gif',
                     fit: widget.fit,
                   ),
                 );
               } else if (e is BBCodeSticker) {
                 return WidgetSpan(
                   child: AnimationNetworkImage(
-                    preview: widget.imagPreview,
                     url: 'https://bangumi.tv/img/smiles/${e.id}.gif',
                     fit: widget.fit,
                   ),

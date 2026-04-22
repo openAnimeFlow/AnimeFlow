@@ -2,7 +2,7 @@ import 'dart:math';
 import 'package:anime_flow/utils/systemUtil.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
-import 'image_preview_page.dart';
+import 'image_preview.dart';
 
 class AnimationNetworkImage extends StatelessWidget {
   final String url;

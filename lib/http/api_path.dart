@@ -73,8 +73,7 @@ class CommonApi {
   static const String bangumiTV = 'https://bangumi.tv';
 
   // bangumi请求头
-  static const String bangumiUserAgent =
-      'AnimeFlow/{version} (https://github.com/openAnimeFlow/AnimeFlow.git)';
+  static const String bangumiUserAgent = 'AnimeFlow/{version} (https://github.com/openAnimeFlow/AnimeFlow.git)';
 
   ///AnimeFLow版本信息
   static const String animeFlowVersion = '/repos/openAnimeFlow/AnimeFlow/releases/latest';

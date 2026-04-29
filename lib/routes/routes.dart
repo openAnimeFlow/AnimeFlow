@@ -1,6 +1,5 @@
 import 'package:anime_flow/models/item/bangumi/calendar_item.dart';
 import 'package:anime_flow/models/item/subject_basic_data_item.dart';
-import 'package:anime_flow/pages/anime_image_search/index.dart';
 import 'package:anime_flow/pages/anime_info/index.dart';
 import 'package:anime_flow/pages/calendar/index.dart';
 import 'package:anime_flow/pages/character_info/index.dart';
@@ -9,6 +8,7 @@ import 'package:anime_flow/pages/main/index.dart';
 import 'package:anime_flow/pages/my/index.dart';
 import 'package:anime_flow/pages/my/play_record/index.dart';
 import 'package:anime_flow/pages/play/index.dart';
+import 'package:anime_flow/pages/search/image_search_page.dart';
 import 'package:anime_flow/pages/search/index.dart';
 import 'package:anime_flow/pages/settings/index.dart';
 import 'package:anime_flow/pages/settings/pages/about/index.dart';
@@ -40,7 +40,7 @@ class RouteName {
   static const String characterInfo = "/character_info";
   static const String playRecord = "/play_record";
   static const String userSpace = "/user_space";
-  static const String animeImageSearch = "/anime_image_search";
+  static const String imageSearch = "/image_search";
 
   static const String settings = "/settings";
   static const String settingGeneral = "/settings/general";
@@ -184,8 +184,8 @@ final GoRouter appRouter = GoRouter(
       },
     ),
     GoRoute(
-        path: RouteName.animeImageSearch,
-        builder: (context, state) => const AnimeImageSearchPage()),
+        path: RouteName.imageSearch,
+        builder: (context, state) => const ImageSearchPage()),
     GoRoute(
       path: RouteName.settings,
       builder: (context, state) => const SettingsPage(),

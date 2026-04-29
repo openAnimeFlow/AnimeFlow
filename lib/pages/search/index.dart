@@ -1,7 +1,7 @@
-import 'package:anime_flow/pages/search/search_controller.dart'
-    as search_page_controller;
+import 'package:anime_flow/pages/search/search_controller.dart';
 import 'package:anime_flow/pages/search/search_details_content.dart';
 import 'package:anime_flow/pages/search/search_omitted_content.dart';
+import 'package:anime_flow/routes/routes.dart';
 import 'package:anime_flow/stores/search/search_history_manager.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -21,8 +21,7 @@ class _SearchPageState extends State<SearchPage> {
   final TextEditingController searchController = TextEditingController();
   final ScrollController scrollController = ScrollController();
   final FocusNode searchFocusNode = FocusNode();
-  final search_page_controller.SearchController _searchStateController =
-      Get.put(search_page_controller.SearchController());
+  final SearchPageController searchPageController = Get.put(SearchPageController());
   bool _isDetailsContent = true;
   List<String> _searchHistory = [];
 
@@ -45,7 +44,7 @@ class _SearchPageState extends State<SearchPage> {
     scrollController.addListener(() {
       if (scrollController.position.pixels >=
           scrollController.position.maxScrollExtent - 200) {
-        _searchStateController.loadMore();
+        searchPageController.loadMore();
       }
     });
   }
@@ -61,7 +60,7 @@ class _SearchPageState extends State<SearchPage> {
   }
 
   Future<void> _onSearch(String query) {
-    return _searchStateController.search(
+    return searchPageController.search(
       query,
       onHistoryChanged: _loadSearchHistory,
     );
@@ -97,7 +96,7 @@ class _SearchPageState extends State<SearchPage> {
     searchController.dispose();
     scrollController.dispose();
     searchFocusNode.dispose();
-    Get.delete<search_page_controller.SearchController>();
+    Get.delete<SearchPageController>();
     super.dispose();
   }
 
@@ -127,15 +126,15 @@ class _SearchPageState extends State<SearchPage> {
               onSearch: _onSearch,
               maxWidth: maxWidth,
               onClear: () {
-                _searchStateController.clearResults();
+                searchPageController.clearResults();
               },
               topPadding: topPadding,
             ),
           ),
           Obx(() {
-            final searchItem = _searchStateController.searchResults.value;
-            final isSearching = _searchStateController.isSearching.value;
-            final hasMore = _searchStateController.hasMore.value;
+            final searchItem = searchPageController.searchResults.value;
+            final isSearching = searchPageController.isSearching.value;
+            final hasMore = searchPageController.hasMore.value;
 
             if (isSearching && searchItem == null) {
               return const SliverFillRemaining(
@@ -475,13 +474,24 @@ class _StickySearchHeaderDelegate extends SliverPersistentHeaderDelegate {
                           prefixIcon: const Icon(Icons.search),
                           suffixIcon: value.text.isNotEmpty
                               ? IconButton(
+                                  padding: const EdgeInsets.symmetric(horizontal: 10),
                                   icon: const Icon(Icons.clear),
                                   onPressed: () {
                                     searchController.clear();
                                     onClear();
                                   },
                                 )
-                              : null,
+                              : IconButton(
+                                  padding: const EdgeInsets.symmetric(horizontal: 10),
+                                  onPressed: () async {
+                                    final keyword = await context.push(RouteName.imageSearch);
+                                    if (keyword != null && keyword is String) {
+                                      searchController.text = keyword;
+                                      onSearch(keyword);
+                                    }
+                                  },
+                                  icon:
+                                      const Icon(Icons.image_search_outlined)),
                           filled: true,
                           fillColor: Theme.of(context)
                               .colorScheme

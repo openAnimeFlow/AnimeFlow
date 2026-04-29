@@ -139,4 +139,16 @@ class FormatTimeUtil {
         '${dateTime.hour.toString().padLeft(2, '0')}:'
         '${dateTime.minute.toString().padLeft(2, '0')}';
   }
+
+  static String durationToString(Duration duration) {
+    String pad(int n) => n.toString().padLeft(2, '0');
+    var hours = pad(duration.inHours % 24);
+    var minutes = pad(duration.inMinutes % 60);
+    var seconds = pad(duration.inSeconds % 60);
+    if (hours == "00") {
+      return "$minutes:$seconds";
+    } else {
+      return "$hours:$minutes:$seconds";
+    }
+  }
 }

@@ -4,8 +4,8 @@ import 'dart:io';
 import 'package:anime_flow/constants/constants.dart';
 import 'package:anime_flow/http/api_path.dart';
 import 'package:anime_flow/http/dio/dio_request.dart';
-import 'package:anime_flow/models/item/anime_image_search_result_item.dart';
 import 'package:anime_flow/crawler/itme/crawler_config_item.dart';
+import 'package:anime_flow/models/item/image_search_item.dart';
 import 'package:anime_flow/utils/utils.dart';
 import 'package:dio/dio.dart';
 
@@ -21,9 +21,9 @@ class Request {
     final userAgent = Utils.getRandomUA();
     return await dioRequest
         .get('${CommonApi.pluginRepo}/index.json',
-            options: Options(headers: {
-              Constants.userAgentName: userAgent,
-            }))
+        options: Options(headers: {
+          Constants.userAgentName: userAgent,
+        }))
         .then((onValue) {
       if (onValue.data is String) {
         return jsonDecode(onValue.data as String) as List<dynamic>;
@@ -47,7 +47,7 @@ class Request {
   }
 
   /// 图片识别番剧 [file]
-  static Future<AnimeImageSearchResultItem> getAnimeInfoByImageFile(
+  static Future<ImageSearchItem> getAnimeInfoByImageFile(
       File imageFile,
       {int anilistInfo = 2}) async {
     final bytes = await imageFile.readAsBytes();
@@ -64,20 +64,20 @@ class Request {
       ),
     )
         .then((onValue) {
-      return AnimeImageSearchResultItem.fromJson(
+      return ImageSearchItem.fromJson(
           onValue.data as Map<String, dynamic>);
     });
   }
 
   /// 图片识别番剧 [url]
-  static Future<AnimeImageSearchResultItem> getAnimeInfoByImageUrl(
+  static Future<ImageSearchItem> getAnimeInfoByImageUrl(
       String imageUrl,
       {int anilistInfo = 2}) async {
     return await dioRequest.post(
       CommonApi.traceApi,
       queryParameters: {"anilistInfo": anilistInfo, "url": imageUrl},
     ).then((onValue) {
-      return AnimeImageSearchResultItem.fromJson(
+      return ImageSearchItem.fromJson(
           onValue.data as Map<String, dynamic>);
     });
   }

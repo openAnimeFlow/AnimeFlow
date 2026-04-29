@@ -1,5 +1,5 @@
-import 'package:anime_flow/http/requests/bgm_request.dart';
-import 'package:anime_flow/models/item/bangumi/subject_item.dart';
+import 'package:anime_flow/pages/search/search_controller.dart'
+    as search_page_controller;
 import 'package:anime_flow/pages/search/search_details_content.dart';
 import 'package:anime_flow/pages/search/search_omitted_content.dart';
 import 'package:anime_flow/stores/search/search_history_manager.dart';
@@ -18,43 +18,40 @@ class SearchPage extends StatefulWidget {
 }
 
 class _SearchPageState extends State<SearchPage> {
-  final TextEditingController _searchController = TextEditingController();
-  final ScrollController _scrollController = ScrollController();
-  final FocusNode _searchFocusNode = FocusNode();
-  bool _isSearching = false;
-  SubjectItem? searchItem;
+  final TextEditingController searchController = TextEditingController();
+  final ScrollController scrollController = ScrollController();
+  final FocusNode searchFocusNode = FocusNode();
+  final search_page_controller.SearchController _searchStateController =
+      Get.put(search_page_controller.SearchController());
   bool _isDetailsContent = true;
   List<String> _searchHistory = [];
-  String _currentKeyword = '';
-  int _offset = 0;
-  final int _limit = 10;
-  bool _hasMore = true;
 
   @override
   void initState() {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      FocusScope.of(context).requestFocus(_searchFocusNode);
+      FocusScope.of(context).requestFocus(searchFocusNode);
       _loadSearchHistory();
-      final routeKeywords = GoRouterState.of(context).uri.queryParameters['keywords'];
+      final routeKeywords =
+          GoRouterState.of(context).uri.queryParameters['keywords'];
       final keywords = (widget.keywords ?? routeKeywords)?.trim();
       if (keywords != null && keywords.isNotEmpty) {
-        _searchController.text = keywords;
+        searchController.text = keywords;
         _onSearch(keywords);
       }
     });
 
     // 监听滚动，触发加载更多
-    _scrollController.addListener(() {
-      if (_scrollController.position.pixels >=
-          _scrollController.position.maxScrollExtent - 200) {
-        _loadMore();
+    scrollController.addListener(() {
+      if (scrollController.position.pixels >=
+          scrollController.position.maxScrollExtent - 200) {
+        _searchStateController.loadMore();
       }
     });
   }
 
   // 加载搜索历史
-  void _loadSearchHistory() async {
+  Future<void> _loadSearchHistory() async {
     final history = await searchHistoryManager.getSearchHistory();
     if (mounted) {
       setState(() {
@@ -63,81 +60,23 @@ class _SearchPageState extends State<SearchPage> {
     }
   }
 
-  void _onSearch(String query, {bool loadMore = false}) async {
-    if (query.isEmpty) return;
-
-    // 如果是首次搜索，保存搜索记录
-    if (!loadMore) {
-      await searchHistoryManager.saveSearchHistory(query);
-      _loadSearchHistory();
-    }
-
-    // 如果正在加载，则不再加载
-    if (_isSearching) return;
-
-    // 如果是加载更多，但没有更多数据，则不加载
-    if (loadMore && !_hasMore) return;
-
-    setState(() {
-      _isSearching = true;
-      if (!loadMore) {
-        _currentKeyword = query;
-        _offset = 0;
-        _hasMore = true;
-      }
-    });
-
-    try {
-      final offset = loadMore ? _offset : 0;
-      final value = await BgmRequest.searchSubjectService(
-        keyword: _currentKeyword,
-        limit: _limit,
-        offset: offset,
-      );
-      if (mounted) {
-        setState(() {
-          if (loadMore && searchItem != null) {
-            // 追加数据
-            searchItem = SubjectItem(
-              data: [...searchItem!.data, ...value.data],
-              total: value.total,
-            );
-          } else {
-            // 首次加载
-            searchItem = value;
-          }
-          _offset = offset + value.data.length;
-          _hasMore = value.data.length == _limit &&
-              searchItem!.data.length < value.total;
-          _isSearching = false;
-        });
-      }
-    } catch (e) {
-      if (mounted) {
-        setState(() {
-          _isSearching = false;
-        });
-      }
-    }
-  }
-
-  // 加载更多
-  void _loadMore() {
-    if (_currentKeyword.isNotEmpty && !_isSearching && _hasMore) {
-      _onSearch(_currentKeyword, loadMore: true);
-    }
+  Future<void> _onSearch(String query) {
+    return _searchStateController.search(
+      query,
+      onHistoryChanged: _loadSearchHistory,
+    );
   }
 
   // 清除搜索历史
   void _clearSearchHistory() async {
     await searchHistoryManager.clearSearchHistory();
-    _loadSearchHistory();
+    await _loadSearchHistory();
   }
 
   // 删除单个搜索历史项
   void _removeSearchHistoryItem(String keyword) async {
     await searchHistoryManager.removeSearchHistoryItem(keyword);
-    _loadSearchHistory();
+    await _loadSearchHistory();
   }
 
   // 详情视图列数
@@ -155,9 +94,10 @@ class _SearchPageState extends State<SearchPage> {
 
   @override
   void dispose() {
-    _searchController.dispose();
-    _scrollController.dispose();
-    _searchFocusNode.dispose();
+    searchController.dispose();
+    scrollController.dispose();
+    searchFocusNode.dispose();
+    Get.delete<search_page_controller.SearchController>();
     super.dispose();
   }
 
@@ -176,129 +116,138 @@ class _SearchPageState extends State<SearchPage> {
 
     return Scaffold(
       body: CustomScrollView(
-        controller: _scrollController,
+        controller: scrollController,
         slivers: [
           // 可折叠的 AppBar + 吸顶搜索框
           SliverPersistentHeader(
             pinned: true,
             delegate: _StickySearchHeaderDelegate(
-              searchController: _searchController,
-              focusNode: _searchFocusNode,
+              searchController: searchController,
+              focusNode: searchFocusNode,
               onSearch: _onSearch,
               maxWidth: maxWidth,
               onClear: () {
-                setState(() {
-                  searchItem = null;
-                  _currentKeyword = '';
-                  _offset = 0;
-                  _hasMore = true;
-                });
+                _searchStateController.clearResults();
               },
               topPadding: topPadding,
             ),
           ),
-          if (_isSearching && searchItem == null)
-            const SliverFillRemaining(
-              child: Center(child: CircularProgressIndicator()),
-            )
-          else if (searchItem == null)
-            _buildSearchHistory()
-          else ...[
-            // 搜索结果列表
-            SliverPadding(
-              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-              sliver: SliverToBoxAdapter(
-                child: ConstrainedBox(
-                  constraints: const BoxConstraints(maxWidth: maxWidth),
-                  child: Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Text(
-                          '搜索到 ${searchItem!.total} 条内容',
-                          style: TextStyle(
-                            color: Theme.of(context).colorScheme.outline,
+          Obx(() {
+            final searchItem = _searchStateController.searchResults.value;
+            final isSearching = _searchStateController.isSearching.value;
+            final hasMore = _searchStateController.hasMore.value;
+
+            if (isSearching && searchItem == null) {
+              return const SliverFillRemaining(
+                child: Center(child: CircularProgressIndicator()),
+              );
+            }
+
+            if (searchItem == null) {
+              return _buildSearchHistory();
+            }
+
+            return SliverMainAxisGroup(
+              slivers: [
+                // 搜索结果列表
+                SliverPadding(
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                  sliver: SliverToBoxAdapter(
+                    child: ConstrainedBox(
+                      constraints: const BoxConstraints(maxWidth: maxWidth),
+                      child: Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            Text(
+                              '搜索到 ${searchItem.total} 条内容',
+                              style: TextStyle(
+                                color: Theme.of(context).colorScheme.outline,
+                              ),
+                            ),
+                            IconButton(
+                                padding: EdgeInsets.zero,
+                                onPressed: () {
+                                  setState(() {
+                                    _isDetailsContent = !_isDetailsContent;
+                                  });
+                                },
+                                icon: Icon(
+                                  _isDetailsContent
+                                      ? Icons.image_outlined
+                                      : Icons.art_track_rounded,
+                                  size: 35,
+                                ))
+                          ]),
+                    ),
+                  ),
+                ),
+                // 搜索结果列表
+                SliverToBoxAdapter(
+                  child: Center(
+                    child: ConstrainedBox(
+                      constraints: const BoxConstraints(maxWidth: maxWidth),
+                      child: Padding(
+                        padding: const EdgeInsets.only(
+                          left: 16,
+                          right: 16,
+                          bottom: 16,
+                        ),
+                        child: AnimatedSwitcher(
+                          duration: const Duration(milliseconds: 300),
+                          switchInCurve: Curves.easeInOut,
+                          switchOutCurve: Curves.easeInOut,
+                          child: GridView.builder(
+                            key: ValueKey(_isDetailsContent),
+                            padding: EdgeInsets.zero,
+                            shrinkWrap: true,
+                            physics: const NeverScrollableScrollPhysics(),
+                            gridDelegate: _isDetailsContent
+                                ? SliverGridDelegateWithFixedCrossAxisCount(
+                                    crossAxisCount: crossAxisCount,
+                                    crossAxisSpacing: 16,
+                                    mainAxisSpacing: 16,
+                                    mainAxisExtent: detailsItemHeight,
+                                  )
+                                : SliverGridDelegateWithFixedCrossAxisCount(
+                                    crossAxisCount: crossAxisCount,
+                                    crossAxisSpacing: 8,
+                                    mainAxisSpacing: 8,
+                                    childAspectRatio: 2 / 3,
+                                  ),
+                            itemCount: searchItem.data.length + 1,
+                            itemBuilder: (context, index) {
+                              // 如果是最后一项，显示加载指示器或"没有更多了"
+                              if (index == searchItem.data.length) {
+                                return hasMore
+                                    ? isSearching
+                                        ? const Center(
+                                            child: CircularProgressIndicator())
+                                        : const SizedBox.shrink()
+                                    : const Center(
+                                        child: Padding(
+                                        padding: EdgeInsets.all(8.0),
+                                        child: Text("没有更多了"),
+                                      ));
+                              }
+
+                              final searchData = searchItem.data[index];
+                              return _isDetailsContent
+                                  ? SearchDetailsContentView(
+                                      searchData: searchData,
+                                      itemHeight: detailsItemHeight)
+                                  : SearchOmittedContent(
+                                      searchData: searchData);
+                            },
                           ),
                         ),
-                        IconButton(
-                            padding: EdgeInsets.zero,
-                            onPressed: () {
-                              setState(() {
-                                _isDetailsContent = !_isDetailsContent;
-                              });
-                            },
-                            icon: Icon(
-                              _isDetailsContent
-                                  ? Icons.image_outlined
-                                  : Icons.art_track_rounded,
-                              size: 35,
-                            ))
-                      ]),
-                ),
-              ),
-            ),
-            // 搜索结果列表
-            SliverToBoxAdapter(
-              child: Center(
-                child: ConstrainedBox(
-                  constraints: const BoxConstraints(maxWidth: maxWidth),
-                  child: Padding(
-                    padding: const EdgeInsets.only(
-                      left: 16,
-                      right: 16,
-                      bottom: 16,
-                    ),
-                    child: AnimatedSwitcher(
-                      duration: const Duration(milliseconds: 300),
-                      switchInCurve: Curves.easeInOut,
-                      switchOutCurve: Curves.easeInOut,
-                      child: GridView.builder(
-                        key: ValueKey(_isDetailsContent),
-                        padding: EdgeInsets.zero,
-                        shrinkWrap: true,
-                        physics: const NeverScrollableScrollPhysics(),
-                        gridDelegate: _isDetailsContent
-                            ? SliverGridDelegateWithFixedCrossAxisCount(
-                                crossAxisCount: crossAxisCount,
-                                crossAxisSpacing: 16,
-                                mainAxisSpacing: 16,
-                                mainAxisExtent: detailsItemHeight,
-                              )
-                            : SliverGridDelegateWithFixedCrossAxisCount(
-                                crossAxisCount: crossAxisCount,
-                                crossAxisSpacing: 8,
-                                mainAxisSpacing: 8,
-                                childAspectRatio: 2 / 3,
-                              ),
-                        itemCount: searchItem!.data.length + 1,
-                        itemBuilder: (context, index) {
-                          // 如果是最后一项，显示加载指示器或"没有更多了"
-                          if (index == searchItem!.data.length) {
-                            return _hasMore
-                                ? _isSearching
-                                    ? const Center(
-                                        child: CircularProgressIndicator())
-                                    : const SizedBox.shrink()
-                                : const Center(
-                                    child: Padding(
-                                    padding: EdgeInsets.all(8.0),
-                                    child: Text("没有更多了"),
-                                  ));
-                          }
-
-                          final searchData = searchItem!.data[index];
-                          return _isDetailsContent
-                              ? SearchDetailsContentView(
-                                  searchData: searchData,
-                                  itemHeight: detailsItemHeight)
-                              : SearchOmittedContent(searchData: searchData);
-                        },
                       ),
                     ),
                   ),
                 ),
-              ),
-            ),
-          ]
+              ],
+            );
+          })
         ],
       ),
     );
@@ -394,7 +343,7 @@ class _SearchPageState extends State<SearchPage> {
                             tooltip: '删除',
                           ),
                           onTap: () {
-                            _searchController.text = keyword;
+                            searchController.text = keyword;
                             _onSearch(keyword);
                           },
                         ),

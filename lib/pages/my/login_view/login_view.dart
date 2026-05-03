@@ -283,9 +283,7 @@ class _LoginViewState extends State<LoginView>
         children: [
           InkWell(
             borderRadius: BorderRadius.circular(8),
-            onTap: () {
-              Get.toNamed(RouteName.userSpace, arguments: userInfo.username);
-            },
+            onTap: () => context.push(RouteName.userSpace, extra: userInfo.username),
             child: const Row(
               children: [
                 Text(

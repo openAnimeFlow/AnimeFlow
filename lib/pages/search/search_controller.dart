@@ -38,12 +38,15 @@ class SearchPageController extends GetxController {
   @override
   void onInit() {
     super.onInit();
-
     /// 加载搜索历史
     _loadSearchHistory();
-    searchHistoryManager.searchHistoryBox
-        .listenable()
-        .addListener(_loadSearchHistory);
+    searchHistoryManager.searchHistoryBox.listenable().addListener(_loadSearchHistory);
+  }
+
+  @override
+  void onClose () {
+    searchHistoryManager.searchHistoryBox.listenable().removeListener(_loadSearchHistory);
+    super.onClose();
   }
 
   /// 搜索番剧

@@ -4,8 +4,10 @@ import 'package:anime_flow/http/requests/bgm_request.dart';
 import 'package:anime_flow/http/requests/request.dart';
 import 'package:anime_flow/models/item/bangumi/subject_item.dart';
 import 'package:anime_flow/models/item/image_search_item.dart';
+import 'package:anime_flow/models/search/search_history_module.dart';
 import 'package:anime_flow/repository/search/search_history_manager.dart';
 import 'package:get/get.dart';
+import 'package:hive_ce_flutter/adapters.dart';
 
 class SearchPageController extends GetxController {
   /// 搜索结果
@@ -18,7 +20,7 @@ class SearchPageController extends GetxController {
   final searchHistoryManager = SearchHistoryManager();
 
   /// 搜索历史列表
-  final searchHistory = RxList<String>();
+  final searchHistory = RxList<SearchHistory>();
 
   /// 图片搜索结果
   final imageSearchResults = RxList<ResultItem>();
@@ -31,30 +33,30 @@ class SearchPageController extends GetxController {
 
   static const int _limit = 10;
   int _offset = 0;
+  int _suggestionRequestId = 0;
 
   @override
   void onInit() {
     super.onInit();
-    _loadSearchHistory();
-  }
 
-  /// 加载搜索历史
-  Future<void> _loadSearchHistory() async {
-    searchHistory.addAll(await searchHistoryManager.getSearchHistory());
+    /// 加载搜索历史
+    _loadSearchHistory();
+    searchHistoryManager.searchHistoryBox
+        .listenable()
+        .addListener(_loadSearchHistory);
   }
 
   /// 搜索番剧
   Future<void> search(
     String query, {
     bool loadMore = false,
-    Future<void> Function()? onHistoryChanged,
   }) async {
     final keyword = query.trim();
     if (keyword.isEmpty) return;
 
     if (!loadMore) {
-      await searchHistoryManager.saveSearchHistory(keyword);
-      await onHistoryChanged?.call();
+      clearSearchSuggestions();
+      await searchHistoryManager.saveHistory(keyword);
     }
 
     if (isSearching.value || (loadMore && !hasMore.value)) return;
@@ -94,24 +96,38 @@ class SearchPageController extends GetxController {
     }
   }
 
+  void _loadSearchHistory() {
+    searchHistory.clear();
+    searchHistory.addAll(searchHistoryManager.getSearchHistory());
+  }
+
   /// 搜索建议
   Future<void> fetchSearchSuggestions(String query) async {
     final keyword = query.trim();
     if (keyword.isEmpty) {
-      searchSuggestions.clear();
+      clearSearchSuggestions();
       return;
     }
 
+    final requestId = ++_suggestionRequestId;
     try {
       searchSuggestions.clear();
       final searchRequest =
           await BgmRequest.searchSubjectService(keyword, limit: 20, offset: 0);
+      if (requestId != _suggestionRequestId) return;
+
       searchSuggestions.addAll(searchRequest.data
           .map((item) => item.nameCN ?? item.name)
           .where((name) => name.isNotEmpty));
     } catch (_) {
+      if (requestId != _suggestionRequestId) return;
       searchSuggestions.clear();
     }
+  }
+
+  void clearSearchSuggestions() {
+    _suggestionRequestId++;
+    searchSuggestions.clear();
   }
 
   Future<void> searchImageByFile(File imageFile) async {

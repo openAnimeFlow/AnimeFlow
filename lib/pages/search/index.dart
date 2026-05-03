@@ -3,7 +3,6 @@ import 'dart:async';
 import 'package:anime_flow/pages/search/search_controller.dart';
 import 'package:anime_flow/pages/search/search_details_content.dart';
 import 'package:anime_flow/pages/search/search_omitted_content.dart';
-import 'package:anime_flow/repository/search/search_history_manager.dart';
 import 'package:anime_flow/routes/routes.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -26,7 +25,6 @@ class _SearchPageState extends State<SearchPage> {
   final SearchPageController searchPageController =
       Get.put(SearchPageController());
   bool _isDetailsContent = true;
-  List<String> _searchHistory = [];
 
   /// 搜索建议防抖用
   Timer? suggestionDebounce;
@@ -37,13 +35,12 @@ class _SearchPageState extends State<SearchPage> {
     searchController.addListener(fetchSearchSuggestions);
     WidgetsBinding.instance.addPostFrameCallback((_) {
       FocusScope.of(context).requestFocus(searchFocusNode);
-      _loadSearchHistory();
       final routeKeywords =
           GoRouterState.of(context).uri.queryParameters['keywords'];
       final keywords = (widget.keywords ?? routeKeywords)?.trim();
       if (keywords != null && keywords.isNotEmpty) {
         searchController.text = keywords;
-        _onSearch(keywords);
+        _submitSearch(keywords);
       }
     });
 
@@ -72,40 +69,22 @@ class _SearchPageState extends State<SearchPage> {
     final keyword = searchController.text;
     suggestionDebounce = Timer(const Duration(seconds: 2), () {
       if (keyword.trim().isEmpty) {
-        searchPageController.searchSuggestions.clear();
+        searchPageController.clearSearchSuggestions();
         return;
       }
       searchPageController.fetchSearchSuggestions(keyword);
     });
   }
 
-  // 加载搜索历史
-  Future<void> _loadSearchHistory() async {
-    final history = await searchHistoryManager.getSearchHistory();
-    if (mounted) {
-      setState(() {
-        _searchHistory = history;
-      });
-    }
+  void _cancelSearchSuggestions() {
+    suggestionDebounce?.cancel();
+    suggestionDebounce = null;
+    searchPageController.clearSearchSuggestions();
   }
 
-  Future<void> _onSearch(String query) {
-    return searchPageController.search(
-      query,
-      onHistoryChanged: _loadSearchHistory,
-    );
-  }
-
-  // 清除搜索历史
-  void _clearSearchHistory() async {
-    await searchHistoryManager.clearSearchHistory();
-    await _loadSearchHistory();
-  }
-
-  // 删除单个搜索历史项
-  void _removeSearchHistoryItem(String keyword) async {
-    await searchHistoryManager.removeSearchHistoryItem(keyword);
-    await _loadSearchHistory();
+  Future<void> _submitSearch(String keyword) async {
+    _cancelSearchSuggestions();
+    await searchPageController.search(keyword);
   }
 
   // 详情视图列数
@@ -144,12 +123,12 @@ class _SearchPageState extends State<SearchPage> {
             delegate: _StickySearchHeaderDelegate(
               searchController: searchController,
               focusNode: searchFocusNode,
-              onSearch: _onSearch,
+              onSearch: _submitSearch,
               maxWidth: maxWidth,
               onClear: () {
                 searchPageController.clearResults();
-                searchPageController.searchSuggestions.clear();
                 searchController.clear();
+                _cancelSearchSuggestions();
               },
               topPadding: topPadding,
             ),
@@ -191,7 +170,7 @@ class _SearchPageState extends State<SearchPage> {
                                 title: Text(suggestion),
                                 onTap: () {
                                   searchController.text = suggestion;
-                                  _onSearch(suggestion);
+                                  unawaited(_submitSearch(suggestion));
                                 },
                               )
                           ],
@@ -312,108 +291,116 @@ class _SearchPageState extends State<SearchPage> {
 
   // 搜索历史
   Widget _buildSearchHistory() {
-    if (_searchHistory.isEmpty) {
-      return SliverFillRemaining(
-        child: Center(
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Icon(
-                Icons.search,
-                size: 80,
-                color: Theme.of(context).colorScheme.outline,
-              ),
-              const SizedBox(height: 16),
-              Text(
-                '输入关键词开始搜索',
-                style: TextStyle(
-                  fontSize: 16,
+    return Obx(() {
+      final searchHistory = searchPageController.searchHistory;
+      if (searchHistory.isEmpty) {
+        return SliverFillRemaining(
+          child: Center(
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Icon(
+                  Icons.search,
+                  size: 80,
                   color: Theme.of(context).colorScheme.outline,
                 ),
-              ),
-            ],
-          ),
-        ),
-      );
-    }
-
-    return SliverMainAxisGroup(
-      slivers: [
-        // 标题和清除按钮
-        SliverToBoxAdapter(
-          child: Center(
-            child: ConstrainedBox(
-              constraints: const BoxConstraints(maxWidth: 1400),
-              child: Padding(
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Text(
-                      '搜索历史',
-                      style: TextStyle(
-                        fontSize: 18,
-                        fontWeight: FontWeight.bold,
-                        color: Theme.of(context).colorScheme.onSurface,
-                      ),
-                    ),
-                    TextButton.icon(
-                      onPressed: _clearSearchHistory,
-                      icon: const Icon(Icons.delete_outline, size: 18),
-                      label: const Text('清除全部'),
-                      style: TextButton.styleFrom(
-                        foregroundColor: Theme.of(context).colorScheme.error,
-                      ),
-                    ),
-                  ],
+                const SizedBox(height: 16),
+                Text(
+                  '输入关键词开始搜索',
+                  style: TextStyle(
+                    fontSize: 16,
+                    color: Theme.of(context).colorScheme.outline,
+                  ),
                 ),
-              ),
+              ],
             ),
           ),
-        ),
-        // 历史列表
-        SliverPadding(
-          padding: EdgeInsets.only(
-            left: 16,
-            right: 16,
-            bottom: MediaQuery.of(context).padding.bottom,
-          ),
-          sliver: SliverToBoxAdapter(
-            child: Center(
-              child: ConstrainedBox(
-                constraints: const BoxConstraints(maxWidth: 1400),
-                child: Column(
-                  children: List.generate(
-                    _searchHistory.length,
-                    (index) {
-                      final keyword = _searchHistory[index];
-                      return Card(
-                        elevation: 0,
-                        margin: const EdgeInsets.only(bottom: 8),
-                        child: ListTile(
-                          leading: const Icon(Icons.history),
-                          title: Text(keyword),
-                          trailing: IconButton(
-                            icon: const Icon(Icons.close, size: 20),
-                            onPressed: () => _removeSearchHistoryItem(keyword),
-                            tooltip: '删除',
+        );
+      } else {
+        return SliverMainAxisGroup(
+          slivers: [
+            // 标题和清除按钮
+            SliverToBoxAdapter(
+              child: Center(
+                child: ConstrainedBox(
+                  constraints: const BoxConstraints(maxWidth: 1400),
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(
+                        horizontal: 16, vertical: 16),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Text(
+                          '搜索历史',
+                          style: TextStyle(
+                            fontSize: 18,
+                            fontWeight: FontWeight.bold,
+                            color: Theme.of(context).colorScheme.onSurface,
                           ),
-                          onTap: () {
-                            searchController.text = keyword;
-                            _onSearch(keyword);
-                          },
                         ),
-                      );
-                    },
+                        TextButton.icon(
+                          onPressed: () => searchPageController
+                              .searchHistoryManager
+                              .clearAllHistory(),
+                          icon: const Icon(Icons.delete_outline, size: 18),
+                          label: const Text('清除全部'),
+                          style: TextButton.styleFrom(
+                            foregroundColor:
+                                Theme.of(context).colorScheme.error,
+                          ),
+                        ),
+                      ],
+                    ),
                   ),
                 ),
               ),
             ),
-          ),
-        ),
-      ],
-    );
+            // 历史列表
+            SliverPadding(
+              padding: EdgeInsets.only(
+                left: 16,
+                right: 16,
+                bottom: MediaQuery.of(context).padding.bottom,
+              ),
+              sliver: SliverToBoxAdapter(
+                child: Center(
+                  child: ConstrainedBox(
+                    constraints: const BoxConstraints(maxWidth: 1400),
+                    child: Column(
+                      children: List.generate(
+                        searchHistory.length,
+                        (index) {
+                          final history = searchHistory[index];
+                          return Card(
+                            elevation: 0,
+                            margin: const EdgeInsets.only(bottom: 8),
+                            child: ListTile(
+                              leading: const Icon(Icons.history),
+                              title: Text(history.keyword),
+                              trailing: IconButton(
+                                icon: const Icon(Icons.close, size: 20),
+                                onPressed: () => searchPageController
+                                    .searchHistoryManager
+                                    .removeSearchHistory(history.keyword),
+                                tooltip: '删除',
+                              ),
+                              onTap: () {
+                                searchController.text = history.keyword;
+                                searchPageController.search(history.keyword);
+                              },
+                            ),
+                          );
+                        },
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+            ),
+          ],
+        );
+      }
+    });
   }
 }
 
@@ -421,7 +408,7 @@ class _SearchPageState extends State<SearchPage> {
 class _StickySearchHeaderDelegate extends SliverPersistentHeaderDelegate {
   final TextEditingController searchController;
   final FocusNode focusNode;
-  final Function(String) onSearch;
+  final Future<void> Function(String) onSearch;
   final VoidCallback onClear;
   final double topPadding;
   final double maxWidth;
@@ -521,7 +508,9 @@ class _StickySearchHeaderDelegate extends SliverPersistentHeaderDelegate {
                         controller: searchController,
                         focusNode: focusNode,
                         textInputAction: TextInputAction.search,
-                        onSubmitted: onSearch,
+                        onSubmitted: (keyword) {
+                          unawaited(onSearch(keyword));
+                        },
                         onChanged: (text) {
                           if (text.isEmpty) {
                             onClear();
@@ -547,7 +536,7 @@ class _StickySearchHeaderDelegate extends SliverPersistentHeaderDelegate {
                                         .push(RouteName.imageSearch);
                                     if (keyword != null && keyword is String) {
                                       searchController.text = keyword;
-                                      onSearch(keyword);
+                                      await onSearch(keyword);
                                     }
                                   },
                                   icon:

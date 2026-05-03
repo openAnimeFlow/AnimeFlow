@@ -114,128 +114,130 @@ class _SearchPageState extends State<SearchPage> {
     const double detailsItemHeight = 160.0;
 
     return Scaffold(
-      body: CustomScrollView(
-        controller: scrollController,
-        slivers: [
-          // 可折叠的 AppBar + 吸顶搜索框
-          SliverPersistentHeader(
-            pinned: true,
-            delegate: _StickySearchHeaderDelegate(
-              searchController: searchController,
-              focusNode: searchFocusNode,
-              onSearch: _submitSearch,
-              maxWidth: maxWidth,
-              onClear: () {
-                searchPageController.clearResults();
-                searchController.clear();
-                _cancelSearchSuggestions();
-              },
-              topPadding: topPadding,
+      body: SafeArea(
+        top: false,
+        bottom: false,
+        child: CustomScrollView(
+          controller: scrollController,
+          slivers: [
+            // 可折叠的 AppBar + 吸顶搜索框
+            SliverPersistentHeader(
+              pinned: true,
+              delegate: _StickySearchHeaderDelegate(
+                searchController: searchController,
+                focusNode: searchFocusNode,
+                onSearch: _submitSearch,
+                maxWidth: maxWidth,
+                onClear: () {
+                  searchPageController.clearResults();
+                  searchController.clear();
+                  _cancelSearchSuggestions();
+                },
+                topPadding: topPadding,
+              ),
             ),
-          ),
-          Obx(() {
-            final searchItem = searchPageController.searchResults.value;
-            final isSearching = searchPageController.isSearching.value;
-            final hasMore = searchPageController.hasMore.value;
-            final searchSuggestions = searchPageController.searchSuggestions;
-            if (isSearching && searchItem == null) {
-              return const SliverFillRemaining(
-                child: Center(child: CircularProgressIndicator()),
-              );
-            }
+            Obx(() {
+              final searchItem = searchPageController.searchResults.value;
+              final isSearching = searchPageController.isSearching.value;
+              final hasMore = searchPageController.hasMore.value;
+              final searchSuggestions = searchPageController.searchSuggestions;
+              if (isSearching && searchItem == null) {
+                return const SliverFillRemaining(
+                  child: Center(child: CircularProgressIndicator()),
+                );
+              }
 
-            if (searchItem == null) {
-              if (searchSuggestions.isNotEmpty) {
-                return SliverToBoxAdapter(
-                  child: Center(
-                    child: ConstrainedBox(
-                      constraints: const BoxConstraints(maxWidth: maxWidth),
-                      child: Padding(
-                        padding: const EdgeInsets.symmetric(
-                            horizontal: 16, vertical: 8),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              '搜索建议',
-                              style: TextStyle(
-                                fontSize: 18,
-                                fontWeight: FontWeight.bold,
-                                color: Theme.of(context).colorScheme.onSurface,
+              if (searchItem == null) {
+                if (searchSuggestions.isNotEmpty) {
+                  return SliverToBoxAdapter(
+                    child: Center(
+                      child: ConstrainedBox(
+                        constraints: const BoxConstraints(maxWidth: maxWidth),
+                        child: Padding(
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: 16, vertical: 8),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                '搜索建议',
+                                style: TextStyle(
+                                  fontSize: 18,
+                                  fontWeight: FontWeight.bold,
+                                  color:
+                                      Theme.of(context).colorScheme.onSurface,
+                                ),
                               ),
-                            ),
-                            const SizedBox(height: 8),
-                            for (var suggestion in searchSuggestions)
-                              ListTile(
-                                title: Text(suggestion),
-                                onTap: () {
-                                  searchController.text = suggestion;
-                                  unawaited(_submitSearch(suggestion));
-                                },
-                              )
-                          ],
+                              const SizedBox(height: 8),
+                              for (var suggestion in searchSuggestions)
+                                ListTile(
+                                  title: Text(suggestion),
+                                  onTap: () {
+                                    searchController.text = suggestion;
+                                    unawaited(_submitSearch(suggestion));
+                                  },
+                                )
+                            ],
+                          ),
                         ),
                       ),
                     ),
-                  ),
-                );
+                  );
+                }
+                return _buildSearchHistory();
               }
-              return _buildSearchHistory();
-            }
 
-            return SliverMainAxisGroup(
-              slivers: [
-                // 搜索结果列表
-                SliverPadding(
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                  sliver: SliverToBoxAdapter(
-                    child: ConstrainedBox(
-                      constraints: const BoxConstraints(maxWidth: maxWidth),
-                      child: Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            Text(
-                              '搜索到 ${searchItem.total} 条内容',
-                              style: TextStyle(
-                                color: Theme.of(context).colorScheme.outline,
+              return SliverMainAxisGroup(
+                slivers: [
+                  // 搜索结果列表
+                  SliverPadding(
+                    padding:
+                        const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                    sliver: SliverToBoxAdapter(
+                      child: Center(
+                          child: ConstrainedBox(
+                        constraints: const BoxConstraints(maxWidth: maxWidth),
+                        child: Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              Text(
+                                '搜索到 ${searchItem.total} 条内容',
+                                style: TextStyle(
+                                  color: Theme.of(context).colorScheme.outline,
+                                ),
                               ),
-                            ),
-                            IconButton(
-                                padding: EdgeInsets.zero,
-                                onPressed: () {
-                                  setState(() {
-                                    _isDetailsContent = !_isDetailsContent;
-                                  });
-                                },
-                                icon: Icon(
-                                  _isDetailsContent
-                                      ? Icons.image_outlined
-                                      : Icons.art_track_rounded,
-                                  size: 35,
-                                ))
-                          ]),
+                              IconButton(
+                                  padding: EdgeInsets.zero,
+                                  onPressed: () {
+                                    setState(() {
+                                      _isDetailsContent = !_isDetailsContent;
+                                    });
+                                  },
+                                  icon: Icon(
+                                    _isDetailsContent
+                                        ? Icons.image_outlined
+                                        : Icons.art_track_rounded,
+                                    size: 35,
+                                  ))
+                            ]),
+                      )),
                     ),
                   ),
-                ),
-                // 搜索结果列表
-                SliverToBoxAdapter(
-                  child: Center(
-                    child: ConstrainedBox(
-                      constraints: const BoxConstraints(maxWidth: maxWidth),
-                      child: Padding(
-                        padding: const EdgeInsets.only(
-                          left: 16,
-                          right: 16,
-                          bottom: 16,
-                        ),
+                  // 搜索结果列表
+                  SliverToBoxAdapter(
+                    child: Center(
+                      child: ConstrainedBox(
+                        constraints: const BoxConstraints(maxWidth: maxWidth),
                         child: AnimatedSwitcher(
                           duration: const Duration(milliseconds: 300),
                           switchInCurve: Curves.easeInOut,
                           switchOutCurve: Curves.easeInOut,
                           child: GridView.builder(
                             key: ValueKey(_isDetailsContent),
-                            padding: EdgeInsets.zero,
+                            padding: EdgeInsets.only(
+                                left: 10,
+                                right: 10,
+                                bottom: MediaQuery.of(context).padding.bottom),
                             shrinkWrap: true,
                             physics: const NeverScrollableScrollPhysics(),
                             gridDelegate: _isDetailsContent
@@ -247,8 +249,8 @@ class _SearchPageState extends State<SearchPage> {
                                   )
                                 : SliverGridDelegateWithFixedCrossAxisCount(
                                     crossAxisCount: crossAxisCount,
-                                    crossAxisSpacing: 8,
-                                    mainAxisSpacing: 8,
+                                    crossAxisSpacing: 16,
+                                    mainAxisSpacing: 16,
                                     childAspectRatio: 2 / 3,
                                   ),
                             itemCount: searchItem.data.length + 1,
@@ -280,11 +282,11 @@ class _SearchPageState extends State<SearchPage> {
                       ),
                     ),
                   ),
-                ),
-              ],
-            );
-          })
-        ],
+                ],
+              );
+            })
+          ],
+        ),
       ),
     );
   }
@@ -414,10 +416,12 @@ class _StickySearchHeaderDelegate extends SliverPersistentHeaderDelegate {
   final double maxWidth;
 
   // AppBar 高度
-  static const double _appBarHeight = 56;
+  static const double _appBarHeight = 60;
 
   // 搜索框区域高度
   static const double _searchBarHeight = 64;
+  static const double _horizontalPadding = 16;
+  static const double _collapsedSearchLeft = 104;
 
   _StickySearchHeaderDelegate({
     required this.searchController,
@@ -429,7 +433,7 @@ class _StickySearchHeaderDelegate extends SliverPersistentHeaderDelegate {
   });
 
   @override
-  double get minExtent => _searchBarHeight + topPadding;
+  double get minExtent => _appBarHeight + topPadding;
 
   @override
   double get maxExtent => _appBarHeight + _searchBarHeight + topPadding;
@@ -440,132 +444,133 @@ class _StickySearchHeaderDelegate extends SliverPersistentHeaderDelegate {
     double shrinkOffset,
     bool overlapsContent,
   ) {
-    // 计算 AppBar 的显示比例 (1.0 完全显示, 0.0 完全隐藏)
-    final appBarVisibility = (1 - shrinkOffset / _appBarHeight).clamp(0.0, 1.0);
-    final isCollapsed = appBarVisibility < 0.5;
+    final collapseProgress =
+        (shrinkOffset / (maxExtent - minExtent)).clamp(0.0, 1.0);
+    final isCollapsed = collapseProgress > 0.5;
 
-    return Container(
-      height: maxExtent - shrinkOffset.clamp(0.0, _appBarHeight),
-      decoration: BoxDecoration(
-        color: Theme.of(context).scaffoldBackgroundColor,
-        boxShadow: isCollapsed
-            ? [
-                BoxShadow(
-                  color: Colors.black.withValues(alpha: 0.08),
-                  blurRadius: 4,
-                  offset: const Offset(0, 2),
-                ),
-              ]
-            : null,
-      ),
-      child: Column(
-        children: [
-          // 顶部安全区域
-          SizedBox(height: topPadding),
-          // AppBar（可折叠）
-          ClipRect(
-            child: Align(
-              alignment: Alignment.topCenter,
-              heightFactor: appBarVisibility,
-              child: Opacity(
-                opacity: appBarVisibility,
-                child: SizedBox(
-                  height: _appBarHeight,
-                  child: Row(
-                    children: [
-                      IconButton(
-                        icon: const Icon(Icons.arrow_back),
-                        onPressed: () => Get.back(),
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final horizontalInset =
+            ((constraints.maxWidth - maxWidth) / 2).clamp(0.0, double.infinity);
+        final expandedLeft = horizontalInset + _horizontalPadding;
+        final expandedRight = horizontalInset + _horizontalPadding;
+        final collapsedLeft = horizontalInset + _collapsedSearchLeft;
+        final searchLeft =
+            expandedLeft + (collapsedLeft - expandedLeft) * collapseProgress;
+        final searchTop =
+            topPadding + _appBarHeight + 8 - (_appBarHeight * collapseProgress);
+
+        return Container(
+          decoration: BoxDecoration(
+            color: Theme.of(context).scaffoldBackgroundColor,
+            boxShadow: isCollapsed
+                ? [
+                    BoxShadow(
+                      color: Colors.black.withValues(alpha: 0.08),
+                      blurRadius: 4,
+                      offset: const Offset(0, 2),
+                    ),
+                  ]
+                : null,
+          ),
+          child: Stack(
+            children: [
+              Positioned(
+                top: topPadding,
+                left: 0,
+                right: 0,
+                height: _appBarHeight,
+                child: Row(
+                  children: [
+                    IconButton(
+                      icon: const Icon(Icons.arrow_back),
+                      onPressed: () => Get.back(),
+                    ),
+                    const Text(
+                      '搜索',
+                      style: TextStyle(
+                        fontSize: 20,
+                        fontWeight: FontWeight.w500,
                       ),
-                      const Expanded(
-                        child: Text(
-                          '搜索',
-                          style: TextStyle(
-                            fontSize: 20,
-                            fontWeight: FontWeight.w500,
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
+                    ),
+                  ],
                 ),
               ),
-            ),
-          ),
-          // 搜索框
-          Expanded(
-            child: Padding(
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                child: ConstrainedBox(
-                  constraints: BoxConstraints(maxWidth: maxWidth),
-                  child: ValueListenableBuilder<TextEditingValue>(
-                    valueListenable: searchController,
-                    builder: (context, value, child) {
-                      return TextField(
-                        scrollPadding:
-                            const EdgeInsets.symmetric(horizontal: 50),
-                        controller: searchController,
-                        focusNode: focusNode,
-                        textInputAction: TextInputAction.search,
-                        onSubmitted: (keyword) {
-                          unawaited(onSearch(keyword));
-                        },
-                        onChanged: (text) {
-                          if (text.isEmpty) {
-                            onClear();
-                          }
-                        },
-                        decoration: InputDecoration(
-                          hintText: '搜索动漫...',
-                          prefixIcon: const Icon(Icons.search),
-                          suffixIcon: value.text.isNotEmpty
-                              ? IconButton(
-                                  padding: const EdgeInsets.symmetric(
-                                      horizontal: 10),
-                                  icon: const Icon(Icons.clear),
-                                  onPressed: () {
-                                    onClear();
-                                  },
-                                )
-                              : IconButton(
-                                  padding: const EdgeInsets.symmetric(
-                                      horizontal: 10),
-                                  onPressed: () async {
-                                    final keyword = await context
-                                        .push(RouteName.imageSearch);
-                                    if (keyword != null && keyword is String) {
-                                      searchController.text = keyword;
-                                      await onSearch(keyword);
-                                    }
-                                  },
-                                  icon:
-                                      const Icon(Icons.image_search_outlined)),
-                          filled: true,
-                          fillColor: Theme.of(context)
-                              .colorScheme
-                              .surfaceContainerHighest,
-                          border: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(28),
-                            borderSide: BorderSide.none,
-                          ),
-                          contentPadding: const EdgeInsets.symmetric(
-                            horizontal: 20,
-                            vertical: 12,
-                          ),
+              Positioned(
+                top: searchTop,
+                left: searchLeft,
+                right: expandedRight,
+                height: _searchBarHeight - 16,
+                child: ValueListenableBuilder<TextEditingValue>(
+                  valueListenable: searchController,
+                  builder: (context, value, child) {
+                    return TextField(
+                      scrollPadding: const EdgeInsets.symmetric(horizontal: 50),
+                      controller: searchController,
+                      focusNode: focusNode,
+                      textInputAction: TextInputAction.search,
+                      onSubmitted: (keyword) {
+                        unawaited(onSearch(keyword));
+                      },
+                      onChanged: (text) {
+                        if (text.isEmpty) {
+                          onClear();
+                        }
+                      },
+                      decoration: InputDecoration(
+                        hintText: '搜索动漫...',
+                        prefixIcon: const Icon(Icons.search),
+                        suffixIcon: value.text.isNotEmpty
+                            ? IconButton(
+                                padding:
+                                    const EdgeInsets.symmetric(horizontal: 10),
+                                icon: const Icon(Icons.clear),
+                                onPressed: () {
+                                  onClear();
+                                },
+                              )
+                            : IconButton(
+                                padding:
+                                    const EdgeInsets.symmetric(horizontal: 10),
+                                onPressed: () async {
+                                  final keyword =
+                                      await context.push(RouteName.imageSearch);
+                                  if (keyword != null && keyword is String) {
+                                    searchController.text = keyword;
+                                    await onSearch(keyword);
+                                  }
+                                },
+                                icon: const Icon(Icons.image_search_outlined),
+                              ),
+                        filled: true,
+                        fillColor: Theme.of(context)
+                            .colorScheme
+                            .surfaceContainerHighest,
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(28),
+                          borderSide: BorderSide.none,
                         ),
-                      );
-                    },
-                  ),
-                )),
+                        contentPadding: const EdgeInsets.symmetric(
+                          horizontal: 20,
+                          vertical: 12,
+                        ),
+                      ),
+                    );
+                  },
+                ),
+              ),
+            ],
           ),
-        ],
-      ),
+        );
+      },
     );
   }
 
   @override
   bool shouldRebuild(covariant _StickySearchHeaderDelegate oldDelegate) {
-    return oldDelegate.topPadding != topPadding;
+    return oldDelegate.topPadding != topPadding ||
+        oldDelegate.maxWidth != maxWidth ||
+        oldDelegate.searchController != searchController ||
+        oldDelegate.focusNode != focusNode;
   }
 }

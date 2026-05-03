@@ -11,6 +11,9 @@ class SearchPageController extends GetxController {
   /// 搜索结果
   final searchResults = Rxn<SubjectItem>();
 
+  /// 搜索建议结果
+  final searchSuggestions = RxList<String>();
+
   /// 图片搜索结果
   final imageSearchResults = RxList<ResultItem>();
 
@@ -24,10 +27,10 @@ class SearchPageController extends GetxController {
   int _offset = 0;
 
   Future<void> search(
-      String query, {
-        bool loadMore = false,
-        Future<void> Function()? onHistoryChanged,
-      }) async {
+    String query, {
+    bool loadMore = false,
+    Future<void> Function()? onHistoryChanged,
+  }) async {
     final keyword = query.trim();
     if (keyword.isEmpty) return;
 
@@ -49,7 +52,7 @@ class SearchPageController extends GetxController {
     try {
       final offset = loadMore ? _offset : 0;
       final value = await BgmRequest.searchSubjectService(
-        keyword: currentKeyword.value,
+        currentKeyword.value,
         limit: _limit,
         offset: offset,
       );
@@ -70,6 +73,26 @@ class SearchPageController extends GetxController {
     } catch (_) {
     } finally {
       isSearching.value = false;
+    }
+  }
+
+  /// 搜索建议
+  Future<void> fetchSearchSuggestions(String query) async {
+    final keyword = query.trim();
+    if (keyword.isEmpty) {
+      searchSuggestions.clear();
+      return;
+    }
+
+    try {
+      searchSuggestions.clear();
+      final searchRequest =
+          await BgmRequest.searchSubjectService(keyword, limit: 20, offset: 0);
+      searchSuggestions.addAll(searchRequest.data
+          .map((item) => item.nameCN ?? item.name)
+          .where((name) => name.isNotEmpty));
+    } catch (_) {
+      searchSuggestions.clear();
     }
   }
 

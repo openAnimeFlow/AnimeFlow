@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:anime_flow/pages/search/search_controller.dart';
 import 'package:anime_flow/pages/search/search_details_content.dart';
 import 'package:anime_flow/pages/search/search_omitted_content.dart';
@@ -21,13 +23,18 @@ class _SearchPageState extends State<SearchPage> {
   final TextEditingController searchController = TextEditingController();
   final ScrollController scrollController = ScrollController();
   final FocusNode searchFocusNode = FocusNode();
-  final SearchPageController searchPageController = Get.put(SearchPageController());
+  final SearchPageController searchPageController =
+      Get.put(SearchPageController());
   bool _isDetailsContent = true;
   List<String> _searchHistory = [];
+
+  /// 搜索建议防抖用
+  Timer? suggestionDebounce;
 
   @override
   void initState() {
     super.initState();
+    searchController.addListener(fetchSearchSuggestions);
     WidgetsBinding.instance.addPostFrameCallback((_) {
       FocusScope.of(context).requestFocus(searchFocusNode);
       _loadSearchHistory();
@@ -46,6 +53,29 @@ class _SearchPageState extends State<SearchPage> {
           scrollController.position.maxScrollExtent - 200) {
         searchPageController.loadMore();
       }
+    });
+  }
+
+  @override
+  void dispose() {
+    searchController.dispose();
+    scrollController.dispose();
+    searchFocusNode.dispose();
+    suggestionDebounce?.cancel();
+    Get.delete<SearchPageController>();
+    super.dispose();
+  }
+
+  /// 搜索建议
+  void fetchSearchSuggestions() {
+    suggestionDebounce?.cancel();
+    final keyword = searchController.text;
+    suggestionDebounce = Timer(const Duration(seconds: 2), () {
+      if (keyword.trim().isEmpty) {
+        searchPageController.searchSuggestions.clear();
+        return;
+      }
+      searchPageController.fetchSearchSuggestions(keyword);
     });
   }
 
@@ -92,15 +122,6 @@ class _SearchPageState extends State<SearchPage> {
   }
 
   @override
-  void dispose() {
-    searchController.dispose();
-    scrollController.dispose();
-    searchFocusNode.dispose();
-    Get.delete<SearchPageController>();
-    super.dispose();
-  }
-
-  @override
   Widget build(BuildContext context) {
     final topPadding = MediaQuery.of(context).padding.top;
     final screenWidth = MediaQuery.of(context).size.width - 32; // 减去左右 padding
@@ -127,6 +148,8 @@ class _SearchPageState extends State<SearchPage> {
               maxWidth: maxWidth,
               onClear: () {
                 searchPageController.clearResults();
+                searchPageController.searchSuggestions.clear();
+                searchController.clear();
               },
               topPadding: topPadding,
             ),
@@ -135,7 +158,7 @@ class _SearchPageState extends State<SearchPage> {
             final searchItem = searchPageController.searchResults.value;
             final isSearching = searchPageController.isSearching.value;
             final hasMore = searchPageController.hasMore.value;
-
+            final searchSuggestions = searchPageController.searchSuggestions;
             if (isSearching && searchItem == null) {
               return const SliverFillRemaining(
                 child: Center(child: CircularProgressIndicator()),
@@ -143,6 +166,41 @@ class _SearchPageState extends State<SearchPage> {
             }
 
             if (searchItem == null) {
+              if (searchSuggestions.isNotEmpty) {
+                return SliverToBoxAdapter(
+                  child: Center(
+                    child: ConstrainedBox(
+                      constraints: const BoxConstraints(maxWidth: maxWidth),
+                      child: Padding(
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 16, vertical: 8),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              '搜索建议',
+                              style: TextStyle(
+                                fontSize: 18,
+                                fontWeight: FontWeight.bold,
+                                color: Theme.of(context).colorScheme.onSurface,
+                              ),
+                            ),
+                            const SizedBox(height: 8),
+                            for (var suggestion in searchSuggestions)
+                              ListTile(
+                                title: Text(suggestion),
+                                onTap: () {
+                                  searchController.text = suggestion;
+                                  _onSearch(suggestion);
+                                },
+                              )
+                          ],
+                        ),
+                      ),
+                    ),
+                  ),
+                );
+              }
               return _buildSearchHistory();
             }
 
@@ -474,17 +532,19 @@ class _StickySearchHeaderDelegate extends SliverPersistentHeaderDelegate {
                           prefixIcon: const Icon(Icons.search),
                           suffixIcon: value.text.isNotEmpty
                               ? IconButton(
-                                  padding: const EdgeInsets.symmetric(horizontal: 10),
+                                  padding: const EdgeInsets.symmetric(
+                                      horizontal: 10),
                                   icon: const Icon(Icons.clear),
                                   onPressed: () {
-                                    searchController.clear();
                                     onClear();
                                   },
                                 )
                               : IconButton(
-                                  padding: const EdgeInsets.symmetric(horizontal: 10),
+                                  padding: const EdgeInsets.symmetric(
+                                      horizontal: 10),
                                   onPressed: () async {
-                                    final keyword = await context.push(RouteName.imageSearch);
+                                    final keyword = await context
+                                        .push(RouteName.imageSearch);
                                     if (keyword != null && keyword is String) {
                                       searchController.text = keyword;
                                       onSearch(keyword);

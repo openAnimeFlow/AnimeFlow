@@ -101,9 +101,8 @@ class BgmRequest {
   }
 
   ///条目搜索
-  static Future<SubjectItem> searchSubjectService(
-      {required String keyword,
-      required int limit,
+  static Future<SubjectItem> searchSubjectService(String keyword,
+      {required int limit,
       required int offset,
       String? rank,
       List<String>? tags}) async {

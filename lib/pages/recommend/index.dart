@@ -1,5 +1,5 @@
 import 'package:anime_flow/pages/recommend/anime/index.dart';
-import 'package:anime_flow/pages/recommend/timeline/index.dart';
+import 'package:anime_flow/pages/recommend/forum/index.dart';
 import 'package:anime_flow/routes/routes.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
@@ -16,7 +16,7 @@ class _RecommendPageState extends State<RecommendPage>
   late TabController _tabController;
   final _animeKey = GlobalKey();
   final _timelineKey = GlobalKey();
-  final List<String> _tabs = ['动漫', '时间胶囊'];
+  final List<String> _tabs = ['动漫', '论坛'];
 
   @override
   void initState() {
@@ -98,7 +98,7 @@ class _RecommendPageState extends State<RecommendPage>
         controller: _tabController,
         children: [
           AnimePage(key: _animeKey),
-          TimelinePage(key: _timelineKey),
+          ForumPage(key: _timelineKey),
         ],
       ),
     );

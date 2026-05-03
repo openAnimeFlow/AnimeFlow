@@ -2,14 +2,14 @@ import 'package:anime_flow/http/requests/bgm_request.dart';
 import 'package:anime_flow/models/item/bangumi/timeline_item.dart';
 import 'package:flutter/material.dart';
 
-class TimelinePage extends StatefulWidget {
-  const TimelinePage({super.key});
+class ForumPage extends StatefulWidget {
+  const ForumPage({super.key});
 
   @override
-  State<TimelinePage> createState() => _TimelinePageState();
+  State<ForumPage> createState() => _ForumPageState();
 }
 
-class _TimelinePageState extends State<TimelinePage>
+class _ForumPageState extends State<ForumPage>
     with AutomaticKeepAliveClientMixin {
   List<TimelineItem> timelineData = [];
   bool isLoading = false;

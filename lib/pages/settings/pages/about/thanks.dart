@@ -1,5 +1,4 @@
 import 'package:anime_flow/constants/image_path_constants.dart';
-import 'package:anime_flow/widget/animation_network_image/animation_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:url_launcher/url_launcher.dart';

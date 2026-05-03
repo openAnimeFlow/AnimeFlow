@@ -24,21 +24,11 @@ class TopAreaControl extends ConsumerStatefulWidget {
 }
 
 class _TopAreaControlState extends ConsumerState<TopAreaControl> {
-  late VideoSourceController videoSourceController;
-  late PlayController playController;
-  late VideoUiStateController videoUiStateController;
-  late EpisodesState episodesController;
-  late PlaySubjectState playSubjectState;
-
-  @override
-  void initState() {
-    super.initState();
-    videoSourceController = Get.find<VideoSourceController>();
-    playController = Get.find<PlayController>();
-    videoUiStateController = Get.find<VideoUiStateController>();
-    episodesController = Get.find<EpisodesState>();
-    playSubjectState = Get.find<PlaySubjectState>();
-  }
+  final VideoSourceController videoSourceController = Get.find<VideoSourceController>();
+  final PlayController playController = Get.find<PlayController>();
+  final VideoUiStateController videoUiStateController = Get.find<VideoUiStateController>();
+  final EpisodesState episodesController = Get.find<EpisodesState>();
+  final PlaySubjectState playSubjectState = Get.find<PlaySubjectState>();
 
   @override
   Widget build(BuildContext context) {

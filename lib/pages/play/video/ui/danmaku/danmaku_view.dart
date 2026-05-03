@@ -17,8 +17,8 @@ class DanmakuView extends StatefulWidget {
 class _DanmakuViewState extends State<DanmakuView>
     with AutomaticKeepAliveClientMixin {
   final setting = Storage.setting;
-  late PlayController playController;
-  late EpisodesState episodesState;
+  final PlayController playController = Get.find<PlayController>();
+  final EpisodesState episodesState = Get.find<EpisodesState>();
   Timer? _danmakuTimer;
   Worker? _playingWorker;
 
@@ -43,8 +43,6 @@ class _DanmakuViewState extends State<DanmakuView>
   @override
   void initState() {
     super.initState();
-    playController = Get.find<PlayController>();
-    episodesState = Get.find<EpisodesState>();
 
     // 初始化弹幕配置
     _border = setting.get(DanmakuKey.danmakuBorder, defaultValue: true);

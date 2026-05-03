@@ -17,19 +17,12 @@ class IntroduceView extends StatefulWidget {
 class _IntroduceViewState extends State<IntroduceView>
     with AutomaticKeepAliveClientMixin {
   Logger logger = Logger();
-  late PlayController playPageController;
-  late PlaySubjectState playSubjectState;
+  final PlayController playPageController = Get.find<PlayController>();
+  final PlaySubjectState playSubjectState = Get.find<PlaySubjectState>();
   bool isVideoSourceLoading = true;
 
   @override
   bool get wantKeepAlive => true;
-
-  @override
-  void initState() {
-    super.initState();
-    playPageController = Get.find<PlayController>();
-    playSubjectState = Get.find<PlaySubjectState>();
-  }
 
   @override
   void dispose() {

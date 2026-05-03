@@ -17,9 +17,9 @@ class DanmakuCard extends StatefulWidget {
 }
 
 class _DanmakuCardState extends State<DanmakuCard> {
-  late EpisodesState episodesController;
-  late PlayController playController;
-  late PlaySubjectState subjectState;
+  final EpisodesState episodesController = Get.find<EpisodesState>();
+  final PlayController playController = Get.find<PlayController>();
+  final PlaySubjectState subjectState = Get.find<PlaySubjectState>();
 
   final danmakuFieldController = TextEditingController();
 
@@ -30,9 +30,6 @@ class _DanmakuCardState extends State<DanmakuCard> {
   @override
   void initState() {
     super.initState();
-    episodesController = Get.find<EpisodesState>();
-    playController = Get.find<PlayController>();
-    subjectState = Get.find<PlaySubjectState>();
     // 监听集数变化，当集数改变时重置弹幕加载状态
     ever(episodesController.episodeIndex, (int episode) {
       if (_currentEpisode != episode) {

@@ -16,7 +16,7 @@ class _VideoSettingState extends State<VideoSetting> {
   int selectedHours = 0; // 选中的小时
   int selectedMinutes = 0; // 选中的分钟
 
-  late PlayController playController;
+  final PlayController playController = Get.find<PlayController>();
 
   // 小时列表 (0-23)
   final List<int> _hours = List.generate(24, (index) => index);
@@ -33,7 +33,6 @@ class _VideoSettingState extends State<VideoSetting> {
   @override
   void initState() {
     super.initState();
-    playController = Get.find<PlayController>();
     // 延迟设置初始位置，确保列表已构建
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _hoursController.jumpToItem(selectedHours);

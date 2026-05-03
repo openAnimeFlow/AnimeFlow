@@ -4,12 +4,16 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
 class ShaderButton extends StatelessWidget {
-  const ShaderButton({super.key});
+  final PlayController playController;
+  final VideoUiStateController videoUiStateController;
+
+  const ShaderButton(
+      {super.key,
+      required this.playController,
+      required this.videoUiStateController});
 
   @override
   Widget build(BuildContext context) {
-    final playController = Get.find<PlayController>();
-    final videoUiStateController = Get.find<VideoUiStateController>();
 
     return Obx(() {
       final currentType = playController.superResolutionType.value;

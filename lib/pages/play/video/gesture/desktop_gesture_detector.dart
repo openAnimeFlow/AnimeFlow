@@ -20,15 +20,8 @@ class DesktopGestureDetector extends StatefulWidget {
 
 class _DesktopGestureDetectorState extends State<DesktopGestureDetector> {
   static Timer? _hoverTimer;
-  late VideoUiStateController videoUiStateController;
-  late PlayController playPageController;
-
-  @override
-  void initState() {
-    super.initState();
-    videoUiStateController = Get.find<VideoUiStateController>();
-    playPageController = Get.find<PlayController>();
-  }
+  final VideoUiStateController videoUiStateController = Get.find<VideoUiStateController>();
+  final PlayController playPageController = Get.find<PlayController>();
 
   @override
   Widget build(BuildContext context) {

@@ -22,19 +22,11 @@ class VideoUi extends StatefulWidget {
 }
 
 class _VideoUiState extends State<VideoUi> {
-  late VideoUiStateController videoUiStateController;
-  late PlayController playPageController;
-  late EpisodesState episodesState;
-  late EpisodeController episodeController;
+  final VideoUiStateController videoUiStateController = Get.find<VideoUiStateController>();
+  final PlayController playPageController = Get.find<PlayController>();
+  final EpisodesState episodesState = Get.find<EpisodesState>();
+  final EpisodeController episodeController = Get.find<EpisodeController>();
 
-  @override
-  void initState() {
-    videoUiStateController = Get.find<VideoUiStateController>();
-    playPageController = Get.find<PlayController>();
-    episodeController = Get.find<EpisodeController>();
-    episodesState = Get.find<EpisodesState>();
-    super.initState();
-  }
 
   @override
   void dispose() {

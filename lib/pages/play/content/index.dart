@@ -19,8 +19,8 @@ class ContentView extends StatefulWidget {
 
 class _ContentViewState extends State<ContentView>
     with SingleTickerProviderStateMixin {
-  late EpisodesState episodesState;
-  late PlayController playPageController;
+  final EpisodesState episodesState = Get.find<EpisodesState>();
+  final PlayController playPageController = Get.find<PlayController>();
   final List<String> _tabs = ['简介', '吐槽'];
   late TabController _tabController;
   final GlobalKey _introduceKey = GlobalKey();
@@ -33,10 +33,8 @@ class _ContentViewState extends State<ContentView>
   @override
   void initState() {
     super.initState();
-    episodesState = Get.find<EpisodesState>();
     _tabController = TabController(length: _tabs.length, vsync: this);
-    playPageController = Get.find<PlayController>();
-    
+
     // 监听 Tab 切换
     _tabController.addListener(_onTabChanged);
     

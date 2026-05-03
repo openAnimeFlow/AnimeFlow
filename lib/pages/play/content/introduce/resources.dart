@@ -15,18 +15,10 @@ class VideoResourcesView extends StatefulWidget {
 }
 
 class _VideoResourcesViewState extends State<VideoResourcesView> {
-  late VideoSourceController videoSourceController;
-  late PlaySubjectState playSubjectState;
-  late PlayController playController;
+  final VideoSourceController videoSourceController = Get.find<VideoSourceController>();
+  final PlaySubjectState playSubjectState = Get.find<PlaySubjectState>();
+  final PlayController playController = Get.find<PlayController>();
   final Logger logger = Logger();
-
-  @override
-  void initState() {
-    super.initState();
-    videoSourceController = Get.find<VideoSourceController>();
-    playSubjectState = Get.find<PlaySubjectState>();
-    playController = Get.find<PlayController>();
-  }
 
   /// 显示数据源抽屉
   void _showSourceDrawer() {

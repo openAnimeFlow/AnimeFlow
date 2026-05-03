@@ -28,13 +28,13 @@ class VideoView extends StatefulWidget {
 }
 
 class _VideoViewState extends State<VideoView> with WindowListener {
-  late VideoUiStateController videoUiStateController;
-  late VideoSourceController videoSourceController;
-  late EpisodeController episodeController;
-  late PlayController playController;
-  late EpisodesState episodesState;
-  late PlaySubjectState subjectState;
-  late UserInfoStore userInfoStore;
+  final VideoUiStateController videoUiStateController = Get.find<VideoUiStateController>();
+  final VideoSourceController videoSourceController = Get.find<VideoSourceController>();
+  final EpisodeController episodeController = Get.find<EpisodeController>();
+  final PlayController playController = Get.find<PlayController>();
+  final EpisodesState episodesState = Get.find<EpisodesState>();
+  final PlaySubjectState subjectState = Get.find<PlaySubjectState>();
+  final UserInfoStore userInfoStore = Get.find<UserInfoStore>();
   final logger = Logger();
   final _danmuKey = GlobalKey();
   final setting = Storage.setting;
@@ -57,13 +57,6 @@ class _VideoViewState extends State<VideoView> with WindowListener {
   @override
   void initState() {
     super.initState();
-    videoUiStateController = Get.find<VideoUiStateController>();
-    videoSourceController = Get.find<VideoSourceController>();
-    playController = Get.find<PlayController>();
-    episodesState = Get.find<EpisodesState>();
-    episodeController = Get.find<EpisodeController>();
-    subjectState = Get.find<PlaySubjectState>();
-    userInfoStore = Get.find<UserInfoStore>();
 
     // 监听集数变化
     ever(episodesState.episodeIndex, (int episode) {

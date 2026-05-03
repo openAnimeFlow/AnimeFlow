@@ -22,17 +22,15 @@ class _MobileGestureDetectorState extends State<MobileGestureDetector> {
   final setting = Storage.setting;
   double _verticalDragStartY = 0; // 垂直拖动开始时的Y坐标
   bool _isRightSide = false; // 是否在屏幕右半侧开始垂直拖动
-  late double _fastForwardSpeed;
-  late PlayController playController;
-  late VideoUiStateController videoUiStateController;
+  late double fastForwardSpeed;
+  final PlayController playController = Get.find<PlayController>();
+  final VideoUiStateController videoUiStateController = Get.find<VideoUiStateController>();
 
   @override
   void initState() {
     super.initState();
-    _fastForwardSpeed =
+    fastForwardSpeed =
         setting.get(PlaybackKey.fastForwardSpeed, defaultValue: 2.0);
-    playController = Get.find<PlayController>();
-    videoUiStateController = Get.find<VideoUiStateController>();
   }
 
   @override
@@ -61,7 +59,7 @@ class _MobileGestureDetectorState extends State<MobileGestureDetector> {
       onLongPressStart: (LongPressStartDetails details) {
         if (playController.playing.value) {
           vibrateMedium();
-          playController.startSpeedBoost(_fastForwardSpeed);
+          playController.startSpeedBoost(fastForwardSpeed);
           videoUiStateController.updateIndicatorTypeAndShowIndicator(
               VideoControlsIndicatorType.speedIndicator);
         }

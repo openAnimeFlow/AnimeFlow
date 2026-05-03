@@ -24,20 +24,13 @@ class BottomAreaControl extends StatefulWidget {
 }
 
 class _BottomAreaControlState extends State<BottomAreaControl> {
-  late VideoUiStateController videoUiStateController;
-  late PlayController playController;
-  late EpisodesState episodesState;
-  late EpisodeController episodeController;
-  late VideoSourceController videoSourceController;
-  @override
-  void initState() {
-    super.initState();
-    videoUiStateController = Get.find<VideoUiStateController>();
-    playController = Get.find<PlayController>();
-    episodesState = Get.find<EpisodesState>();
-    episodeController = Get.find<EpisodeController>();
-    videoSourceController = Get.find<VideoSourceController>();
-  }
+  final VideoUiStateController videoUiStateController =
+      Get.find<VideoUiStateController>();
+  final PlayController playController = Get.find<PlayController>();
+  final EpisodesState episodesState = Get.find<EpisodesState>();
+  final EpisodeController episodeController = Get.find<EpisodeController>();
+  final VideoSourceController videoSourceController =
+      Get.find<VideoSourceController>();
 
   @override
   Widget build(BuildContext context) {
@@ -97,8 +90,7 @@ class _BottomAreaControlState extends State<BottomAreaControl> {
                         children: [
                           // 播放按钮
                           InkWell(
-                            key: ValueKey<bool>(
-                                playController.playing.value),
+                            key: ValueKey<bool>(playController.playing.value),
                             onTap: () => {
                               playController.playOrPauseVideo(),
                               videoUiStateController
@@ -206,10 +198,18 @@ class _BottomAreaControlState extends State<BottomAreaControl> {
                                 child: const Text("选集")),
 
                           //超分辨率
-                          if (isWideScreen || fullscreen) const ShaderButton(),
+                          if (isWideScreen || fullscreen)
+                            ShaderButton(
+                              playController: playController,
+                              videoUiStateController: videoUiStateController,
+                            ),
 
                           //倍速按钮
-                          if (isWideScreen || fullscreen) const RateButton(),
+                          if (isWideScreen || fullscreen)
+                            RateButton(
+                              playController: playController,
+                              videoUiStateController: videoUiStateController,
+                            ),
 
                           // 全屏按钮
                           AnimatedContainer(

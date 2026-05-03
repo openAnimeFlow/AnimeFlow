@@ -13,15 +13,8 @@ class VideoProgressBar extends StatefulWidget {
 }
 
 class _VideoProgressBarState extends State<VideoProgressBar> {
-  late VideoUiStateController videoUiStateController;
-  late PlayController playController;
-
-  @override
-  void initState() {
-    super.initState();
-    videoUiStateController = Get.find<VideoUiStateController>();
-    playController = Get.find<PlayController>();
-  }
+  final VideoUiStateController videoUiStateController = Get.find<VideoUiStateController>();
+  final PlayController playController = Get.find<PlayController>();
 
   @override
   Widget build(BuildContext context) {

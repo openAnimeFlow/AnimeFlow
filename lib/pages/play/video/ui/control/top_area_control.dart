@@ -267,7 +267,7 @@ class _TopAreaControlState extends ConsumerState<TopAreaControl> {
                       const RotatedBox(
                         quarterTurns: 1,
                         child: Icon(Icons.arrow_right_alt_outlined,
-                            size: 15, fontWeight: FontWeight.bold),
+                            size: 15, fontWeight: FontWeight.bold,color: Colors.white),
                       ),
                       Text(
                         Utils.formatBytesPerSec(download),
@@ -280,10 +280,10 @@ class _TopAreaControlState extends ConsumerState<TopAreaControl> {
                       const RotatedBox(
                         quarterTurns: 3,
                         child: Icon(Icons.arrow_right_alt_outlined,
-                            size: 15, fontWeight: FontWeight.bold),
+                            size: 15, fontWeight: FontWeight.bold,color: Colors.white),
                       ),
                       Text(Utils.formatBytesPerSec(upload),
-                          style: const TextStyle(fontSize: 10))
+                          style: const TextStyle(fontSize: 10, color: Colors.white))
                     ],
                   ],
                 );

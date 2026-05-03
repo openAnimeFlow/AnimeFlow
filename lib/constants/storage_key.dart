@@ -9,6 +9,8 @@ class StorageKey {
   static const String playHistoryKey = 'play_history_key';
 
   static const String autoUpdateKey = 'auto_update_key';
+
+  static const String searchHistoryKey = 'search_history_key';
 }
 
 class DanmakuKey {

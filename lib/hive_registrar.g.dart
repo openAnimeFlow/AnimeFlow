@@ -2,9 +2,9 @@
 // Do not modify
 // Check in to version control
 
+import 'package:anime_flow/models/play/play_history.dart';
+import 'package:anime_flow/models/play/play_position.dart';
 import 'package:hive_ce/hive_ce.dart';
-import 'package:anime_flow/models/item/play/play_history.dart';
-import 'package:anime_flow/models/item/play/play_position.dart';
 
 extension HiveRegistrar on HiveInterface {
   void registerAdapters() {

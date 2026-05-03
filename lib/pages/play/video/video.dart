@@ -2,7 +2,7 @@ import 'dart:async';
 import 'dart:io';
 
 import 'package:anime_flow/controllers/play/episode_controller.dart';
-import 'package:anime_flow/models/item/play/play_history.dart';
+import 'package:anime_flow/models/play/play_history.dart';
 import 'package:anime_flow/repository/play_repository.dart';
 import 'package:anime_flow/repository/storage.dart';
 import 'package:anime_flow/stores/user_info_store.dart';

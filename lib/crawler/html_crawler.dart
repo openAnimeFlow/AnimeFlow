@@ -1,9 +1,8 @@
 import 'dart:async';
 
 import 'package:anime_flow/crawler/itme/crawler_config_item.dart';
-import 'package:anime_flow/models/item/play/video/episode_resources_item.dart';
-import 'package:anime_flow/models/item/play/video/search_resources_item.dart';
-import 'package:html/parser.dart';
+import 'package:anime_flow/models/play/video/episode_resources_item.dart';
+import 'package:anime_flow/models/play/video/search_resources_item.dart';import 'package:html/parser.dart';
 import 'package:html/dom.dart';
 import 'package:logger/logger.dart';
 import 'package:xpath_selector_html_parser/xpath_selector_html_parser.dart';

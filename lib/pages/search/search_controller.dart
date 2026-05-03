@@ -4,7 +4,7 @@ import 'package:anime_flow/http/requests/bgm_request.dart';
 import 'package:anime_flow/http/requests/request.dart';
 import 'package:anime_flow/models/item/bangumi/subject_item.dart';
 import 'package:anime_flow/models/item/image_search_item.dart';
-import 'package:anime_flow/stores/search/search_history_manager.dart';
+import 'package:anime_flow/repository/search/search_history_manager.dart';
 import 'package:get/get.dart';
 
 class SearchPageController extends GetxController {
@@ -13,6 +13,12 @@ class SearchPageController extends GetxController {
 
   /// 搜索建议结果
   final searchSuggestions = RxList<String>();
+
+  /// 搜索历史
+  final searchHistoryManager = SearchHistoryManager();
+
+  /// 搜索历史列表
+  final searchHistory = RxList<String>();
 
   /// 图片搜索结果
   final imageSearchResults = RxList<ResultItem>();
@@ -26,6 +32,18 @@ class SearchPageController extends GetxController {
   static const int _limit = 10;
   int _offset = 0;
 
+  @override
+  void onInit() {
+    super.onInit();
+    _loadSearchHistory();
+  }
+
+  /// 加载搜索历史
+  Future<void> _loadSearchHistory() async {
+    searchHistory.addAll(await searchHistoryManager.getSearchHistory());
+  }
+
+  /// 搜索番剧
   Future<void> search(
     String query, {
     bool loadMore = false,

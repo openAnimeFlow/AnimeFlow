@@ -6,6 +6,8 @@ class SearchHistoryManager {
   static const String _searchHistoryKey = 'search_history';
   static const int _maxHistoryCount = 20;
 
+
+
   /// 保存搜索记录
   Future<void> saveSearchHistory(String keyword) async {
     if (keyword.trim().isEmpty) return;

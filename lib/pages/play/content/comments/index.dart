@@ -179,7 +179,7 @@ class _CommentsViewState extends State<CommentsView>
             )
           else
             SliverPadding(
-              padding: const EdgeInsets.only(left: 10, right: 10),
+              padding: const EdgeInsets.symmetric(horizontal: 10),
               sliver: SliverList.separated(
                 itemCount: comments.length,
                 itemBuilder: (BuildContext context, int index) {
@@ -200,67 +200,63 @@ class _CommentsViewState extends State<CommentsView>
   Widget _buildCommentItem(EpisodeComment comment) {
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 10),
-      child: Column(
+      child: Row(
+        spacing: 8,
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              InkWell(
-                onTap: () => context.push(RouteName.userSpace,
-                    extra: comment.user.username),
-                child: AnimationNetworkImage(
-                  borderRadius: BorderRadius.circular(8),
-                  height: 48,
-                  width: 48,
-                  url: comment.user.avatar.large,
-                ),
-              ),
-              const SizedBox(width: 8),
-              Expanded(
-                child: Column(
+          InkWell(
+            onTap: () =>
+                context.push(RouteName.userSpace, extra: comment.user.username),
+            child: AnimationNetworkImage(
+              borderRadius: BorderRadius.circular(8),
+              height: 48,
+              width: 48,
+              url: comment.user.avatar.large,
+            ),
+          ),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        InkWell(
-                          onTap: () => context.push(RouteName.userSpace,
-                              extra: comment.user.username),
-                          child: Text(
-                            comment.user.nickname,
-                            style: const TextStyle(
-                              fontSize: 16,
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
+                    InkWell(
+                      onTap: () => context.push(RouteName.userSpace,
+                          extra: comment.user.username),
+                      child: Text(
+                        comment.user.nickname,
+                        style: const TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.bold,
                         ),
-                        const SizedBox(width: 8),
-                        Text(
-                          FormatTimeUtil.formatTimestamp(comment.createdAt),
-                          style: TextStyle(
-                            fontSize: 12,
-                            color: Theme.of(context).colorScheme.outline,
-                          ),
-                        ),
-                      ],
+                      ),
                     ),
-                    const SizedBox(height: 4),
-                    BBCodeWidget(
-                      imagPreview: true,
-                      borderRadius: BorderRadius.circular(8),
-                      bbcode: comment.content,
+                    const SizedBox(width: 8),
+                    Text(
+                      FormatTimeUtil.formatTimestamp(comment.createdAt),
+                      style: TextStyle(
+                        fontSize: 12,
+                        fontWeight: FontWeight.bold,
+                        color: Theme.of(context).colorScheme.outline,
+                      ),
                     ),
-                    // 回复列表
-                    if (comment.replies.isNotEmpty) ...[
-                      const SizedBox(height: 8),
-                      _buildReplies(comment.replies),
-                    ],
                   ],
                 ),
-              )
-            ],
-          ),
+                const SizedBox(height: 4),
+                BBCodeWidget(
+                  imagPreview: true,
+                  borderRadius: BorderRadius.circular(8),
+                  bbcode: comment.content,
+                ),
+                // 回复列表
+                if (comment.replies.isNotEmpty) ...[
+                  const SizedBox(height: 8),
+                  _buildReplies(comment.replies),
+                ],
+              ],
+            ),
+          )
         ],
       ),
     );
@@ -302,6 +298,7 @@ class _CommentsViewState extends State<CommentsView>
                         Text(
                           FormatTimeUtil.formatTimestamp(reply.createdAt),
                           style: TextStyle(
+                            fontWeight: FontWeight.bold,
                             fontSize: 11,
                             color: Theme.of(context).colorScheme.outline,
                           ),

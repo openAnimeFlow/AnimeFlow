@@ -16,8 +16,8 @@ class ThemePage extends StatefulWidget {
 }
 
 class _ThemePageState extends State<ThemePage> {
-  late SettingController settingController;
-  late ThemeController themeController;
+  late final SettingController settingController;
+  late final ThemeController themeController;
 
   @override
   void initState() {

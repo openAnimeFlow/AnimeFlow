@@ -29,7 +29,7 @@ class _PlayPageState extends State<PlayPage> {
   final VideoSourceController videoSourceController = Get.put(VideoSourceController());
   final PlayController playController = Get.put(PlayController());
   final EpisodesState episodesState = Get.put(EpisodesState());
-  late PlaySubjectState subjectState ;
+  late final PlaySubjectState subjectState ;
   final GlobalKey _videoKey = GlobalKey();
   final GlobalKey _contentKey = GlobalKey();
 

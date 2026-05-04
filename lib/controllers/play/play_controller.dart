@@ -114,7 +114,7 @@ class PlayController extends GetxController {
   Timer? _saveSettingsTimer;
 
   ///着色器
-  late ShadersController shadersController;
+  late final ShadersController shadersController;
 
   ///视频播放状态
   final RxBool playing = false.obs;

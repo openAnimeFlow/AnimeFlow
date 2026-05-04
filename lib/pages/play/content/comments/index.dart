@@ -72,20 +72,14 @@ class _CommentsViewState extends State<CommentsView>
   Widget build(BuildContext context) {
     super.build(context);
     return Scaffold(
-      body: Column(
-        children: [
-          // 评论列表
-          Expanded(child: _buildComments()),
-        ],
-      ),
+      body: buildComments(),
       floatingActionButton: widget.comments != null
           ? _CommentButton(scrollController: _scrollController)
           : null,
     );
   }
 
-
-  Widget _buildComments() {
+  Widget buildComments() {
     if (widget.comments == null) {
       return Padding(
         padding: const EdgeInsets.all(10),
@@ -257,37 +251,34 @@ class _CommentsViewState extends State<CommentsView>
                       borderRadius: BorderRadius.circular(8),
                       bbcode: comment.content,
                     ),
+                    // 回复列表
+                    if (comment.replies.isNotEmpty) ...[
+                      const SizedBox(height: 8),
+                      _buildReplies(comment.replies),
+                    ],
                   ],
                 ),
               )
             ],
           ),
-          // 回复列表
-          if (comment.replies.isNotEmpty) ...[
-            const SizedBox(height: 8),
-            _buildReplies(comment.replies),
-          ],
         ],
       ),
     );
   }
 
+  /// 回复列表
   Widget _buildReplies(List<Reply> replies) {
-    return Container(
-      margin: const EdgeInsets.only(left: 56),
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(8),
-      ),
-      child: Column(
-        children: replies.asMap().entries.map((entry) {
-          final index = entry.key;
-          final reply = entry.value;
-          return Column(
-            children: [
-              Padding(
-                padding: const EdgeInsets.all(8),
-                child: Row(
-                  crossAxisAlignment: CrossAxisAlignment.start,
+    return Column(
+      children: replies.asMap().entries.map((entry) {
+        final index = entry.key;
+        final reply = entry.value;
+        return Column(
+          children: [
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  spacing: 8,
                   children: [
                     AnimationNetworkImage(
                       borderRadius: BorderRadius.circular(8),
@@ -295,56 +286,49 @@ class _CommentsViewState extends State<CommentsView>
                       width: 32,
                       url: reply.user.avatar.large,
                     ),
-                    const SizedBox(width: 8),
                     Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Row(
-                            children: [
-                              Text(
-                                reply.user.nickname,
-                                style: TextStyle(
-                                  fontSize: 14,
-                                  fontWeight: FontWeight.bold,
-                                  color:
-                                      Theme.of(context).colorScheme.onSurface,
-                                ),
-                              ),
-                              const SizedBox(width: 8),
-                              Text(
-                                FormatTimeUtil.formatTimestamp(reply.createdAt),
-                                style: TextStyle(
-                                  fontSize: 11,
-                                  color: Theme.of(context).colorScheme.outline,
-                                ),
-                              ),
-                            ],
+                        child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          reply.user.nickname,
+                          style: TextStyle(
+                            fontSize: 14,
+                            fontWeight: FontWeight.bold,
+                            color: Theme.of(context).colorScheme.onSurface,
                           ),
-                          if (reply.content.isNotEmpty) ...[
-                            const SizedBox(height: 4),
-                            BBCodeWidget(
-                              imagPreview: true,
-                              borderRadius: BorderRadius.circular(8),
-                              bbcode: reply.content,
-                            )
-                          ],
-                        ],
-                      ),
-                    )
+                        ),
+                        const SizedBox(width: 8),
+                        Text(
+                          FormatTimeUtil.formatTimestamp(reply.createdAt),
+                          style: TextStyle(
+                            fontSize: 11,
+                            color: Theme.of(context).colorScheme.outline,
+                          ),
+                        ),
+                      ],
+                    ))
                   ],
                 ),
+                if (reply.content.isNotEmpty) ...[
+                  const SizedBox(height: 4),
+                  BBCodeWidget(
+                    imagPreview: true,
+                    borderRadius: BorderRadius.circular(8),
+                    bbcode: reply.content,
+                  )
+                ],
+              ],
+            ),
+            if (index < replies.length - 1)
+              Divider(
+                height: 1,
+                thickness: 1,
+                color: Theme.of(context).dividerColor.withValues(alpha: 0.1),
               ),
-              if (index < replies.length - 1)
-                Divider(
-                  height: 1,
-                  thickness: 1,
-                  color: Theme.of(context).dividerColor.withValues(alpha: 0.1),
-                ),
-            ],
-          );
-        }).toList(),
-      ),
+          ],
+        );
+      }).toList(),
     );
   }
 
@@ -436,7 +420,8 @@ class _CommentButtonState extends State<_CommentButton> {
     if (oldWidget.scrollController != widget.scrollController) {
       oldWidget.scrollController.removeListener(_onScroll);
       widget.scrollController.addListener(_onScroll);
-      WidgetsBinding.instance.addPostFrameCallback((_) => _syncLabelFromScroll());
+      WidgetsBinding.instance
+          .addPostFrameCallback((_) => _syncLabelFromScroll());
     }
   }
 
@@ -446,7 +431,8 @@ class _CommentButtonState extends State<_CommentButton> {
       if (_hideLabel) setState(() => _hideLabel = false);
       return;
     }
-    final hide = widget.scrollController.position.pixels > _hideLabelAfterPixels;
+    final hide =
+        widget.scrollController.position.pixels > _hideLabelAfterPixels;
     if (hide != _hideLabel) {
       setState(() => _hideLabel = hide);
     }
@@ -455,7 +441,8 @@ class _CommentButtonState extends State<_CommentButton> {
   void _syncLabelFromScroll() {
     if (!mounted) return;
     if (!widget.scrollController.hasClients) return;
-    final hide = widget.scrollController.position.pixels > _hideLabelAfterPixels;
+    final hide =
+        widget.scrollController.position.pixels > _hideLabelAfterPixels;
     if (hide != _hideLabel) {
       setState(() => _hideLabel = hide);
     }
@@ -469,8 +456,7 @@ class _CommentButtonState extends State<_CommentButton> {
 
   @override
   Widget build(BuildContext context) {
-    const labelStyle =
-        TextStyle(fontSize: 16, fontWeight: FontWeight.bold);
+    const labelStyle = TextStyle(fontSize: 16, fontWeight: FontWeight.bold);
     return FloatingActionButton.extended(
       onPressed: () {},
       label: Row(

@@ -127,7 +127,7 @@ class _ThanksPageState extends State<ThanksPage>
                           );
                         },
                         child: Image.asset(
-                          ImagePathConstants.logo,
+                          AssetsPathConstants.logo,
                           height: 160,
                           width: 160,
                         ),

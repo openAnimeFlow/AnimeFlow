@@ -93,7 +93,7 @@ class _NoNoLoginView extends State<NoLoginView> {
               CircleAvatar(
                   radius: 100,
                   backgroundColor: Colors.transparent,
-                  child: Image.asset(ImagePathConstants.logo)),
+                  child: Image.asset(AssetsPathConstants.logo)),
               const Text(
                 '未登录',
                 style: TextStyle(

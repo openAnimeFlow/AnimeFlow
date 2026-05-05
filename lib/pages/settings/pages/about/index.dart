@@ -49,7 +49,7 @@ class _AboutSettingsPageState extends State<AboutSettingsPage> {
                       radius: 80,
                       backgroundColor: Colors.transparent,
                       child: Image.asset(
-                        ImagePathConstants.logo,
+                        AssetsPathConstants.logo,
                       ),
                     ),
                     Text(

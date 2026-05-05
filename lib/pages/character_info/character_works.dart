@@ -6,7 +6,6 @@ import 'package:anime_flow/utils/bgm_utils.dart';
 import 'package:anime_flow/widget/animation_network_image/animation_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:go_router/go_router.dart';
 
 class CharacterWorksView extends StatefulWidget {
   final int characterId;
@@ -116,7 +115,7 @@ class _CharacterWorksViewState extends State<CharacterWorksView> {
             name: work.subject.nameCN ?? work.subject.name,
             image: work.subject.images.large,
           );
-          context.push(RouteName.animeInfo, extra: subjectBasicData);
+          AnimeInfoRoute.fromData(subjectBasicData).push(context);
         },
         child: Row(
           crossAxisAlignment: CrossAxisAlignment.start,

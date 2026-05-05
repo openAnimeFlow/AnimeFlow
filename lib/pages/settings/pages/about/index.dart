@@ -6,7 +6,6 @@ import 'package:anime_flow/repository/storage.dart';
 import 'package:anime_flow/routes/routes.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:go_router/go_router.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 class AboutSettingsPage extends StatefulWidget {
@@ -116,7 +115,7 @@ class _AboutSettingsPageState extends State<AboutSettingsPage> {
               title: const Text("鸣谢"),
               trailing: const Icon(Icons.chevron_right),
               onTap: () {
-                context.push(RouteName.settingThanks);
+                const SettingThanksRoute().push(context);
               },
             ),
             const Divider(),
@@ -124,7 +123,7 @@ class _AboutSettingsPageState extends State<AboutSettingsPage> {
               title: const Text("隐私政策"),
               trailing: const Icon(Icons.chevron_right),
               onTap: () {
-                context.push(RouteName.settingAgreement);
+                const SettingAgreementRoute().push(context);
               },
             ),
             const Divider(),

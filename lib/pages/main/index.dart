@@ -13,7 +13,6 @@ import 'package:anime_flow/widget/animation_network_image/animation_network_imag
 import 'package:flutter/material.dart';
 import 'package:anime_flow/pages/recommend/index.dart';
 import 'package:get/get.dart';
-import 'package:go_router/go_router.dart';
 
 class MainPage extends StatefulWidget {
   final int initialTabIndex;
@@ -222,7 +221,7 @@ class _MainPageState extends State<MainPage> {
                     heroTag: 'main_search',
                     elevation: 0,
                     onPressed: () {
-                      context.push(RouteName.search);
+                      const SearchRoute().push(context);
                     },
                     child: const Icon(Icons.search),
                   ),
@@ -236,7 +235,7 @@ class _MainPageState extends State<MainPage> {
                     icon: const Icon(Icons.settings_outlined),
                     iconSize: 28,
                     tooltip: '设置',
-                    onPressed: () => context.push(RouteName.settings),
+                    onPressed: () => const SettingsRoute().push(context),
                   ),
                 ),
                 destinations: _buildRailDestinations(colorScheme),

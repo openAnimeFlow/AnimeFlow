@@ -534,7 +534,8 @@ class _StickySearchHeaderDelegate extends SliverPersistentHeaderDelegate {
                                     const EdgeInsets.symmetric(horizontal: 10),
                                 onPressed: () async {
                                   final keyword =
-                                      await context.push(RouteName.imageSearch);
+                                      await const ImageSearchRoute()
+                                          .push(context);
                                   if (keyword != null && keyword is String) {
                                     searchController.text = keyword;
                                     await onSearch(keyword);

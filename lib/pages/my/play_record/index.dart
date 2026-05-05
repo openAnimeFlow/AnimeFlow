@@ -7,7 +7,6 @@ import 'package:anime_flow/utils/format_time_util.dart';
 import 'package:anime_flow/utils/utils.dart';
 import 'package:anime_flow/widget/animation_network_image/animation_network_image.dart';
 import 'package:flutter/material.dart';
-import 'package:go_router/go_router.dart';
 import 'package:logger/logger.dart';
 
 class PlayRecordPage extends StatefulWidget {
@@ -100,8 +99,9 @@ class _PlayRecordPageState extends State<PlayRecordPage> {
                         image: playHistory.cover);
                     return InkWell(
                       borderRadius: BorderRadius.circular(8),
-                      onTap: () => context.push(RouteName.animeInfo,
-                          extra: subjectBasicData),
+                      onTap: () =>
+                          AnimeInfoRoute.fromData(subjectBasicData)
+                              .push(context),
                       child: Row(
                         children: [
                           AnimationNetworkImage(
@@ -146,15 +146,11 @@ class _PlayRecordPageState extends State<PlayRecordPage> {
                                           onPressed: () async {
                                             final episodeSort =
                                                 playHistory.episodeSort;
-                                            await context.push(
-                                                RouteName.play,
-                                                extra: PlayRouteExtra(
-                                                  subjectBasicData:
-                                                      subjectBasicData,
-                                                  continueEpisode:
-                                                      episodeSort,
-                                                ));
-                                            /// 使用hive数据变化监听刷新数据
+                                            await PlayRoute.fromData(
+                                              subjectBasicData,
+                                              continueEpisode: episodeSort,
+                                            ).push(context);
+                                            /// TODO 使用hive数据变化监听刷新数据
                                             if (mounted) {
                                               _getPlayHistoryList();
                                             }

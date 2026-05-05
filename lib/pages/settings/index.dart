@@ -30,13 +30,13 @@ class _SettingsPageState extends State<SettingsPage> {
         _SettingsMenuItem(
           title: '通用',
           icon: Icons.settings_outlined,
-          route: RouteName.settingGeneral,
+          route: const SettingGeneralRoute(),
           page: const GeneralSettingsPage(),
         ),
         _SettingsMenuItem(
           title: '主题',
           icon: Icons.color_lens_outlined,
-          route: RouteName.settingTheme,
+          route: const SettingThemeRoute(),
           page: const ThemePage(),
         ),
       ],
@@ -47,7 +47,7 @@ class _SettingsPageState extends State<SettingsPage> {
         _SettingsMenuItem(
           title: '数据源管理',
           icon: Icons.smart_display_rounded,
-          route: RouteName.settingPlugins,
+          route: const SettingPluginsRoute(),
           page: const PluginsPage(),
         ),
       ],
@@ -58,13 +58,13 @@ class _SettingsPageState extends State<SettingsPage> {
         _SettingsMenuItem(
           title: '播放',
           icon: Icons.play_circle_outline,
-          route: RouteName.settingPlayback,
+          route: const SettingPlaybackRoute(),
           page: const PlaybackSettingsPage(),
         ),
         _SettingsMenuItem(
           title: '弹幕设置',
           icon: Icons.subtitles_outlined,
-          route: RouteName.settingDanmaku,
+          route: const SettingDanmakuRoute(),
           page: const DanmakuSettingPage(),
         ),
       ],
@@ -75,7 +75,7 @@ class _SettingsPageState extends State<SettingsPage> {
         _SettingsMenuItem(
           title: '关于',
           icon: Icons.info_outline,
-          route: RouteName.settingAbout,
+          route: const SettingAboutRoute(),
           page: const AboutSettingsPage(),
         ),
       ],
@@ -255,7 +255,7 @@ class _SettingsPageState extends State<SettingsPage> {
                         title: Text(item.title),
                         trailing: const Icon(Icons.chevron_right),
                         onTap: () {
-                          context.push(item.route);
+                          item.route.push(context);
                         },
                       );
                     }),
@@ -284,7 +284,7 @@ class _SettingsCategory {
 class _SettingsMenuItem {
   final String title;
   final IconData icon;
-  final String route;
+  final GoRouteData route;
   final Widget page;
 
   _SettingsMenuItem({

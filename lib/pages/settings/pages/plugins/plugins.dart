@@ -6,7 +6,6 @@ import 'package:anime_flow/repository/storage.dart';
 import 'package:anime_flow/widget/animation_network_image/animation_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:go_router/go_router.dart';
 import 'package:hive_ce_flutter/adapters.dart';
 
 class PluginsPage extends StatefulWidget {
@@ -83,7 +82,7 @@ class _PluginsPageState extends State<PluginsPage> {
             //云下载
             IconButton(
                 onPressed: () {
-                   context.push(RouteName.settingDownloadPlugins);
+                  const SettingDownloadPluginsRoute().push(context);
                 },
                 icon: const Icon(Icons.cloud_download_outlined, size: 30)),
             IconButton(
@@ -92,7 +91,7 @@ class _PluginsPageState extends State<PluginsPage> {
                 size: 30,
               ),
               onPressed: () {
-                 context.push(RouteName.settingAddPlugins);
+                const SettingAddPluginsRoute().push(context);
               },
             )
           ],
@@ -102,10 +101,8 @@ class _PluginsPageState extends State<PluginsPage> {
           children: List.generate(dataSources.length, (index) {
             final data = dataSources[index];
             return InkWell(
-              onTap: () => context.push(
-                  RouteName.settingAddPlugins,
-                  extra: data.name,
-                ),
+              onTap: () => SettingAddPluginsRoute(editPluginKey: data.name)
+                  .push(context),
               child: Container(
                 margin: const EdgeInsets.symmetric(vertical: 2),
                 padding: const EdgeInsets.symmetric(vertical: 5),

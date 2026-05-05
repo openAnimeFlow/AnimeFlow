@@ -84,8 +84,7 @@ class _RelatedViewState extends State<_RelatedView> {
                       right: index == relation.data.length - 1 ? 0 : 5),
                   child: InkWell(
                     onTap: () {
-                      context.push(RouteName.animeInfo,
-                          extra: subjectBasicData);
+                      AnimeInfoRoute.fromData(subjectBasicData).push(context);
                     },
                     child: Column(
                       children: [

@@ -2,7 +2,6 @@ import 'package:anime_flow/pages/recommend/anime/index.dart';
 import 'package:anime_flow/pages/recommend/forum/index.dart';
 import 'package:anime_flow/routes/routes.dart';
 import 'package:flutter/material.dart';
-import 'package:go_router/go_router.dart';
 
 class RecommendPage extends StatefulWidget {
   const RecommendPage({super.key});
@@ -71,7 +70,7 @@ class _RecommendPageState extends State<RecommendPage>
                           ),
                         ),
                         onTap: () {
-                          context.push(RouteName.search);
+                          const SearchRoute().push(context);
                         },
                         readOnly: true,
                       ),
@@ -79,7 +78,7 @@ class _RecommendPageState extends State<RecommendPage>
                     const Spacer(),
                     IconButton(
                       padding: EdgeInsets.zero,
-                      onPressed: () => context.push(RouteName.playRecord),
+                      onPressed: () => const PlayRecordRoute().push(context),
                       icon: const Icon(Icons.access_time_outlined),
                     )
                   ],

@@ -5,7 +5,6 @@ import 'package:anime_flow/routes/routes.dart';
 import 'package:anime_flow/utils/layout_util.dart';
 import 'package:anime_flow/widget/subject_card.dart';
 import 'package:flutter/material.dart';
-import 'package:go_router/go_router.dart';
 import 'package:anime_flow/models/item/bangumi/subject_item.dart';
 
 // 每日放送页面
@@ -214,7 +213,7 @@ class _CalendarPageState extends State<CalendarPage>
 
     return InkWell(
       onTap: () {
-        context.push(RouteName.animeInfo, extra: subjectBasicData);
+        AnimeInfoRoute.fromData(subjectBasicData).push(context);
       },
       child: SubjectCard(
         image: itemData.images.large,

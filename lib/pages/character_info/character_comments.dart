@@ -5,7 +5,6 @@ import 'package:anime_flow/utils/format_time_util.dart';
 import 'package:anime_flow/widget/bbcode/bbcode_widget.dart';
 import 'package:anime_flow/widget/animation_network_image/animation_network_image.dart';
 import 'package:flutter/material.dart';
-import 'package:go_router/go_router.dart';
 
 class CharacterCommentsView extends StatefulWidget {
   final int characterId;
@@ -108,8 +107,8 @@ class _CharacterCommentsViewState extends State<CharacterCommentsView> {
               ClipRRect(
                 borderRadius: BorderRadius.circular(8),
                 child: InkWell(
-                  onTap: () => context.push(RouteName.userSpace,
-                      extra: comment.user.username),
+                  onTap: () =>
+                      UserSpaceRoute(name: comment.user.username).push(context),
                   child: AnimationNetworkImage(
                     height: 48,
                     width: 48,
@@ -125,8 +124,9 @@ class _CharacterCommentsViewState extends State<CharacterCommentsView> {
                     Row(
                       children: [
                         InkWell(
-                          onTap: () => context.push(RouteName.userSpace,
-                              extra: comment.user.username),
+                          onTap: () =>
+                              UserSpaceRoute(name: comment.user.username)
+                                  .push(context),
                           child: Text(
                             comment.user.nickname,
                             style: const TextStyle(
@@ -184,8 +184,8 @@ class _CharacterCommentsViewState extends State<CharacterCommentsView> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     InkWell(
-                      onTap: () => context.push(RouteName.userSpace,
-                          extra: reply.user.username),
+                      onTap: () =>
+                          UserSpaceRoute(name: reply.user.username).push(context),
                       child: AnimationNetworkImage(
                         borderRadius: BorderRadius.circular(8),
                         height: 32,
@@ -201,8 +201,9 @@ class _CharacterCommentsViewState extends State<CharacterCommentsView> {
                           Row(
                             children: [
                               InkWell(
-                                onTap: () => context.push(RouteName.userSpace,
-                                    extra: reply.user.username),
+                                onTap: () =>
+                                    UserSpaceRoute(name: reply.user.username)
+                                        .push(context),
                                 child: Text(
                                   reply.user.nickname,
                                   style: TextStyle(

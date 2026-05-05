@@ -9,7 +9,6 @@ import 'package:anime_flow/utils/layout_util.dart';
 import 'package:anime_flow/widget/subject_card.dart';
 import 'package:anime_flow/models/item/bangumi/hot_item.dart';
 import 'package:anime_flow/models/item/bangumi/calendar_item.dart';
-import 'package:go_router/go_router.dart';
 import 'package:logger/logger.dart';
 import 'package:shimmer/shimmer.dart';
 
@@ -212,8 +211,9 @@ class _AnimePageState extends State<AnimePage>
                                 name: subject.nameCN ?? subject.name,
                                 image: subject.images.large);
                             return InkWell(
-                              onTap: () => context.push(RouteName.animeInfo,
-                                  extra: subjectBasicData),
+                              onTap: () =>
+                                  AnimeInfoRoute.fromData(subjectBasicData)
+                                      .push(context),
                               child: SubjectCard(
                                 image: subject.images.large,
                                 title: subject.nameCN ?? subject.name,

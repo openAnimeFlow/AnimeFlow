@@ -240,14 +240,14 @@ class _LoginViewState extends State<LoginView>
         'title': '设置',
         'icon': Icons.settings_outlined,
         'action': () {
-          context.push(RouteName.settings);
+          const SettingsRoute().push(context);
         },
       },
       {
         'title': '播放记录',
         'icon': Icons.smart_display_outlined,
         'action': () {
-          context.push(RouteName.playRecord);
+          const PlayRecordRoute().push(context);
         },
       },
       {
@@ -283,7 +283,8 @@ class _LoginViewState extends State<LoginView>
         children: [
           InkWell(
             borderRadius: BorderRadius.circular(8),
-            onTap: () => context.push(RouteName.userSpace, extra: userInfo.username),
+            onTap: () =>
+                UserSpaceRoute(name: userInfo.username).push(context),
             child: const Row(
               children: [
                 Text(

@@ -8,7 +8,6 @@ import 'package:anime_flow/utils/layout_util.dart';
 import 'package:anime_flow/widget/subject_card.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:go_router/go_router.dart';
 
 ///空间收藏页面
 class CollectView extends StatefulWidget {
@@ -295,7 +294,7 @@ class _CollectViewState extends State<CollectView>
                                   id: collection.id,
                                   name: collection.nameCN ?? collection.name,
                                   image: collection.images.large);
-                              context.push(RouteName.animeInfo, extra: subject);
+                              AnimeInfoRoute.fromData(subject).push(context);
                             },
                             child: SubjectCard(
                               image: collection.images.large,

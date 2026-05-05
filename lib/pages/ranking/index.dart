@@ -7,7 +7,6 @@ import 'package:anime_flow/routes/routes.dart';
 import 'package:anime_flow/utils/layout_util.dart';
 import 'package:anime_flow/widget/subject_card.dart';
 import 'package:flutter/material.dart';
-import 'package:go_router/go_router.dart';
 import 'package:logger/logger.dart';
 
 class RankingPage extends StatefulWidget {
@@ -360,8 +359,9 @@ class _RankingPageState extends State<RankingPage> {
                                   image: data.images.large,
                                 );
                                 return InkWell(
-                                  onTap: () => context.push(RouteName.animeInfo,
-                                      extra: subjectBasicData),
+                                  onTap: () =>
+                                      AnimeInfoRoute.fromData(subjectBasicData)
+                                          .push(context),
                                   child: SubjectCard(
                                       rating: data.rating.rank,
                                       image: data.images.large,

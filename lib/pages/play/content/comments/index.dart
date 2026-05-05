@@ -5,7 +5,6 @@ import 'package:anime_flow/utils/systemUtil.dart';
 import 'package:anime_flow/widget/bbcode/bbcode_widget.dart';
 import 'package:anime_flow/widget/animation_network_image/animation_network_image.dart';
 import 'package:flutter/material.dart';
-import 'package:go_router/go_router.dart';
 import 'package:shimmer/shimmer.dart';
 
 class CommentsView extends StatefulWidget {
@@ -206,7 +205,7 @@ class _CommentsViewState extends State<CommentsView>
         children: [
           InkWell(
             onTap: () =>
-                context.push(RouteName.userSpace, extra: comment.user.username),
+                UserSpaceRoute(name: comment.user.username).push(context),
             child: AnimationNetworkImage(
               borderRadius: BorderRadius.circular(8),
               height: 48,
@@ -222,8 +221,9 @@ class _CommentsViewState extends State<CommentsView>
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     InkWell(
-                      onTap: () => context.push(RouteName.userSpace,
-                          extra: comment.user.username),
+                      onTap: () =>
+                          UserSpaceRoute(name: comment.user.username)
+                              .push(context),
                       child: Text(
                         comment.user.nickname,
                         style: const TextStyle(

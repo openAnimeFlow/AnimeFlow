@@ -19,7 +19,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:get/get.dart';
-import 'package:go_router/go_router.dart';
 import 'package:shimmer/shimmer.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'synopsis.dart';
@@ -183,9 +182,8 @@ class _AnimeInfoPageState extends ConsumerState<AnimeInfoPage> {
             const SizedBox(height: 5),
             FloatingActionButton(
               heroTag: 'play_${subjectBasicData.id}',
-              onPressed: () => context.push(
-                  RouteName.play,
-                  extra: PlayRouteExtra(subjectBasicData: subjectBasicData)),
+              onPressed: () =>
+                  PlayRoute.fromData(subjectBasicData).push(context),
               child: Icon(
                 Icons.play_arrow_rounded,
                 color: Theme.of(context).colorScheme.primary,

@@ -2,7 +2,6 @@ import 'package:anime_flow/constants/image_path_constants.dart';
 import 'package:anime_flow/controllers/my_controller.dart';
 import 'package:anime_flow/routes/routes.dart';
 import 'package:flutter/material.dart';
-import 'package:go_router/go_router.dart';
 
 
 enum _NoLoginOverflowAction { settings, playRecord }
@@ -42,9 +41,9 @@ class _NoNoLoginView extends State<NoLoginView> {
                 onSelected: (action) {
                   switch (action) {
                     case _NoLoginOverflowAction.settings:
-                      context.push(RouteName.settings);
+                      const SettingsRoute().push(context);
                     case _NoLoginOverflowAction.playRecord:
-                      context.push(RouteName.playRecord);
+                      const PlayRecordRoute().push(context);
                   }
                 },
                 itemBuilder: (context) => [

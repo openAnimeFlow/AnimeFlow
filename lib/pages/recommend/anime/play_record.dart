@@ -7,7 +7,6 @@ import 'package:anime_flow/utils/utils.dart';
 import 'package:anime_flow/widget/animation_network_image/animation_network_image.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
-import 'package:go_router/go_router.dart';
 import 'package:hive_ce_flutter/hive_flutter.dart';
 import 'package:logger/logger.dart';
 
@@ -76,7 +75,7 @@ class _PlayRecordViewState extends State<PlayRecordView> {
                 ),
                 if (playHistory.length > 6)
                   TextButton(
-                    onPressed: () => context.push(RouteName.playRecord),
+                    onPressed: () => const PlayRecordRoute().push(context),
                     child: Row(
                       children: [
                         Text(
@@ -130,8 +129,7 @@ class _PlayRecordViewState extends State<PlayRecordView> {
                       child: InkWell(
                         borderRadius: BorderRadius.circular(8),
                         onTap: () {
-                          context.push(RouteName.animeInfo,
-                              extra: subjectBasicData);
+                          AnimeInfoRoute.fromData(subjectBasicData).push(context);
                         },
                         child: Column(
                           mainAxisSize: MainAxisSize.min,
@@ -213,13 +211,11 @@ class _PlayRecordViewState extends State<PlayRecordView> {
                                             ),
                                             InkWell(
                                               onTap: () {
-                                                context.push(RouteName.play,
-                                                    extra: PlayRouteExtra(
-                                                      subjectBasicData:
-                                                          subjectBasicData,
-                                                      continueEpisode:
-                                                          history.episodeSort,
-                                                    ));
+                                                PlayRoute.fromData(
+                                                  subjectBasicData,
+                                                  continueEpisode:
+                                                      history.episodeSort,
+                                                ).push(context);
                                               },
                                               child: const Icon(
                                                 Icons.play_circle,

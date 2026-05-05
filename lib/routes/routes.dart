@@ -1,3 +1,4 @@
+import 'package:anime_flow/controllers/my_controller.dart';
 import 'package:anime_flow/models/item/bangumi/calendar_item.dart';
 import 'package:anime_flow/models/item/subject_basic_data_item.dart';
 import 'package:anime_flow/pages/anime_info/index.dart';
@@ -22,40 +23,19 @@ import 'package:anime_flow/pages/settings/pages/plugins/download_plugins.dart';
 import 'package:anime_flow/pages/settings/pages/plugins/plugins.dart';
 import 'package:anime_flow/pages/settings/pages/theme.dart';
 import 'package:anime_flow/pages/user_space/index.dart';
-import 'package:anime_flow/controllers/my_controller.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:get/get.dart';
 import 'package:go_router/go_router.dart';
 import 'package:logger/logger.dart';
 
-class RouteName {
-  static const String main = "/";
-  static const String login = "/login";
-  static const String animeInfo = "/anime_info";
-  static const String play = "/play";
-  static const String search = "/search";
-  static const String calendar = "/calendar";
-  static const String characters = "/characters";
-  static const String characterInfo = "/character_info";
-  static const String playRecord = "/play_record";
-  static const String userSpace = "/user_space";
-  static const String imageSearch = "/image_search";
+part 'routes.g.dart';
 
-  static const String settings = "/settings";
-  static const String settingGeneral = "/settings/general";
-  static const String settingPlayback = "/settings/playback";
-  static const String settingAbout = "/settings/about";
-  static const String settingPlugins = "/settings/Plugins";
-  static const String settingAddPlugins = "/settings/addPlugins";
-  static const String settingTheme = "/settings/theme";
-  static const String settingDanmaku = "/settings/danmaku";
-  static const String settingDownloadPlugins = "/settings/downloadPlugins";
-  static const String settingThanks = "/settings/thanks";
-  static const String settingAgreement = "/settings/agreement";
-}
+// =====================================================================
+// 页面构造时仍在使用的复合参数对象（非路由数据本身）。
+// =====================================================================
 
-/// 播放页路由参数
+/// 播放页传给 [PlayPage] 的参数集。
 class PlayRouteExtra {
   final SubjectBasicData subjectBasicData;
   final int? continueEpisode;
@@ -66,16 +46,7 @@ class PlayRouteExtra {
   });
 }
 
-/// 动漫详情页路由参数
-class AnimeInfoExtra {
-  final int id;
-  final String name;
-  final String image;
-
-  AnimeInfoExtra({required this.id, required this.name, required this.image});
-}
-
-/// 角色详情页路由参数
+/// 角色详情页传给 [CharacterInfo] 的参数集。
 class CharacterInfoExtra {
   final int characterId;
   final String characterName;
@@ -88,15 +59,294 @@ class CharacterInfoExtra {
   });
 }
 
-Widget _invalidArgs([String message = '路由参数无效']) {
-  return Scaffold(
-    body: Center(child: Text(message)),
-  );
+// =====================================================================
+// 路由定义（go_router_builder typed routes）。
+// 关键参数走 query parameters，确保 Hot Restart / Inspector / 深链接
+// 重建时能够从 URL 完全还原；复杂对象则使用 $extra。
+// =====================================================================
+
+@TypedGoRoute<MainRoute>(path: '/')
+class MainRoute extends GoRouteData with $MainRoute {
+  const MainRoute({this.tab = 0});
+
+  final int tab;
+
+  @override
+  Widget build(BuildContext context, GoRouterState state) =>
+      MainPage(initialTabIndex: tab);
 }
+
+@TypedGoRoute<LoginRoute>(path: '/login')
+class LoginRoute extends GoRouteData with $LoginRoute {
+  const LoginRoute();
+
+  @override
+  Widget build(BuildContext context, GoRouterState state) => const MyPage();
+}
+
+@TypedGoRoute<AnimeInfoRoute>(path: '/anime_info')
+class AnimeInfoRoute extends GoRouteData with $AnimeInfoRoute {
+  const AnimeInfoRoute({
+    required this.id,
+    required this.name,
+    required this.image,
+  });
+
+  factory AnimeInfoRoute.fromData(SubjectBasicData data) => AnimeInfoRoute(
+        id: data.id,
+        name: data.name,
+        image: data.image,
+      );
+
+  final int id;
+  final String name;
+  final String image;
+
+  @override
+  Widget build(BuildContext context, GoRouterState state) => AnimeInfoPage(
+        animeInfoExtra: SubjectBasicData(id: id, name: name, image: image),
+      );
+}
+
+@TypedGoRoute<PlayRoute>(path: '/play')
+class PlayRoute extends GoRouteData with $PlayRoute {
+  const PlayRoute({
+    required this.id,
+    required this.name,
+    required this.image,
+    this.continueEpisode,
+  });
+
+  factory PlayRoute.fromData(
+    SubjectBasicData data, {
+    int? continueEpisode,
+  }) =>
+      PlayRoute(
+        id: data.id,
+        name: data.name,
+        image: data.image,
+        continueEpisode: continueEpisode,
+      );
+
+  final int id;
+  final String name;
+  final String image;
+  final int? continueEpisode;
+
+  @override
+  Widget build(BuildContext context, GoRouterState state) => PlayPage(
+        extra: PlayRouteExtra(
+          subjectBasicData: SubjectBasicData(id: id, name: name, image: image),
+          continueEpisode: continueEpisode,
+        ),
+      );
+}
+
+@TypedGoRoute<SearchRoute>(path: '/search')
+class SearchRoute extends GoRouteData with $SearchRoute {
+  const SearchRoute({this.keywords});
+
+  final String? keywords;
+
+  @override
+  Widget build(BuildContext context, GoRouterState state) =>
+      SearchPage(keywords: keywords);
+}
+
+@TypedGoRoute<CalendarRoute>(path: '/calendar')
+class CalendarRoute extends GoRouteData with $CalendarRoute {
+  const CalendarRoute(this.$extra);
+
+  // Calendar 字段较多，无法用 query 完整序列化，因此通过 $extra 传递。
+  // 代价：Inspector / Hot Restart 后该路由会丢失参数。
+  final Calendar? $extra;
+
+  @override
+  Widget build(BuildContext context, GoRouterState state) {
+    final data = $extra;
+    if (data == null) {
+      return const Scaffold(body: Center(child: Text('路由参数无效')));
+    }
+    return CalendarPage(calendar: data);
+  }
+}
+
+@TypedGoRoute<CharactersRoute>(path: '/characters')
+class CharactersRoute extends GoRouteData with $CharactersRoute {
+  const CharactersRoute({required this.subjectsId});
+
+  final int subjectsId;
+
+  @override
+  Widget build(BuildContext context, GoRouterState state) =>
+      CharacterPage(subjectsId: subjectsId);
+}
+
+@TypedGoRoute<CharacterInfoRoute>(path: '/character_info')
+class CharacterInfoRoute extends GoRouteData with $CharacterInfoRoute {
+  const CharacterInfoRoute({
+    required this.id,
+    required this.name,
+    required this.image,
+  });
+
+  factory CharacterInfoRoute.fromExtra(CharacterInfoExtra extra) =>
+      CharacterInfoRoute(
+        id: extra.characterId,
+        name: extra.characterName,
+        image: extra.characterImage,
+      );
+
+  final int id;
+  final String name;
+  final String image;
+
+  @override
+  Widget build(BuildContext context, GoRouterState state) => CharacterInfo(
+        extra: CharacterInfoExtra(
+          characterId: id,
+          characterName: name,
+          characterImage: image,
+        ),
+      );
+}
+
+@TypedGoRoute<PlayRecordRoute>(path: '/play_record')
+class PlayRecordRoute extends GoRouteData with $PlayRecordRoute {
+  const PlayRecordRoute();
+
+  @override
+  Widget build(BuildContext context, GoRouterState state) =>
+      const PlayRecordPage();
+}
+
+@TypedGoRoute<UserSpaceRoute>(path: '/user_space')
+class UserSpaceRoute extends GoRouteData with $UserSpaceRoute {
+  const UserSpaceRoute({required this.name});
+
+  final String name;
+
+  @override
+  Widget build(BuildContext context, GoRouterState state) =>
+      UserSpacePage(username: name);
+}
+
+@TypedGoRoute<ImageSearchRoute>(path: '/image_search')
+class ImageSearchRoute extends GoRouteData with $ImageSearchRoute {
+  const ImageSearchRoute();
+
+  @override
+  Widget build(BuildContext context, GoRouterState state) =>
+      const ImageSearchPage();
+}
+
+@TypedGoRoute<SettingsRoute>(path: '/settings')
+class SettingsRoute extends GoRouteData with $SettingsRoute {
+  const SettingsRoute();
+
+  @override
+  Widget build(BuildContext context, GoRouterState state) =>
+      const SettingsPage();
+}
+
+@TypedGoRoute<SettingGeneralRoute>(path: '/settings/general')
+class SettingGeneralRoute extends GoRouteData with $SettingGeneralRoute {
+  const SettingGeneralRoute();
+
+  @override
+  Widget build(BuildContext context, GoRouterState state) =>
+      const GeneralSettingsPage();
+}
+
+@TypedGoRoute<SettingPlaybackRoute>(path: '/settings/playback')
+class SettingPlaybackRoute extends GoRouteData with $SettingPlaybackRoute {
+  const SettingPlaybackRoute();
+
+  @override
+  Widget build(BuildContext context, GoRouterState state) =>
+      const PlaybackSettingsPage();
+}
+
+@TypedGoRoute<SettingDownloadPluginsRoute>(path: '/settings/downloadPlugins')
+class SettingDownloadPluginsRoute extends GoRouteData
+    with $SettingDownloadPluginsRoute {
+  const SettingDownloadPluginsRoute();
+
+  @override
+  Widget build(BuildContext context, GoRouterState state) =>
+      const DownloadPluginsPage();
+}
+
+@TypedGoRoute<SettingDanmakuRoute>(path: '/settings/danmaku')
+class SettingDanmakuRoute extends GoRouteData with $SettingDanmakuRoute {
+  const SettingDanmakuRoute();
+
+  @override
+  Widget build(BuildContext context, GoRouterState state) =>
+      const DanmakuSettingPage();
+}
+
+@TypedGoRoute<SettingAboutRoute>(path: '/settings/about')
+class SettingAboutRoute extends GoRouteData with $SettingAboutRoute {
+  const SettingAboutRoute();
+
+  @override
+  Widget build(BuildContext context, GoRouterState state) =>
+      const AboutSettingsPage();
+}
+
+@TypedGoRoute<SettingPluginsRoute>(path: '/settings/Plugins')
+class SettingPluginsRoute extends GoRouteData with $SettingPluginsRoute {
+  const SettingPluginsRoute();
+
+  @override
+  Widget build(BuildContext context, GoRouterState state) =>
+      const PluginsPage();
+}
+
+@TypedGoRoute<SettingAddPluginsRoute>(path: '/settings/addPlugins')
+class SettingAddPluginsRoute extends GoRouteData with $SettingAddPluginsRoute {
+  const SettingAddPluginsRoute({this.editPluginKey});
+
+  final String? editPluginKey;
+
+  @override
+  Widget build(BuildContext context, GoRouterState state) =>
+      AddPluginsPage(editPluginKey: editPluginKey);
+}
+
+@TypedGoRoute<SettingThemeRoute>(path: '/settings/theme')
+class SettingThemeRoute extends GoRouteData with $SettingThemeRoute {
+  const SettingThemeRoute();
+
+  @override
+  Widget build(BuildContext context, GoRouterState state) => const ThemePage();
+}
+
+@TypedGoRoute<SettingThanksRoute>(path: '/settings/thanks')
+class SettingThanksRoute extends GoRouteData with $SettingThanksRoute {
+  const SettingThanksRoute();
+
+  @override
+  Widget build(BuildContext context, GoRouterState state) => const ThanksPage();
+}
+
+@TypedGoRoute<SettingAgreementRoute>(path: '/settings/agreement')
+class SettingAgreementRoute extends GoRouteData with $SettingAgreementRoute {
+  const SettingAgreementRoute();
+
+  @override
+  Widget build(BuildContext context, GoRouterState state) =>
+      const AgreementPage();
+}
+
+// =====================================================================
+// GoRouter 实例
+// =====================================================================
 
 final GoRouter appRouter = GoRouter(
   navigatorKey: Get.key,
-  initialLocation: RouteName.main,
+  initialLocation: const MainRoute().location,
   redirect: (context, state) {
     final uri = state.uri;
     if (MyController.isOAuthAppCallback(uri)) {
@@ -107,130 +357,9 @@ final GoRouter appRouter = GoRouter(
               Logger().e('OAuth 回调处理失败', error: e, stackTrace: st),
         );
       });
-      return RouteName.main;
+      return const MainRoute().location;
     }
     return null;
   },
-  routes: [
-    GoRoute(
-      path: RouteName.main,
-      builder: (context, state) {
-        final tab = state.extra is int ? state.extra as int : 0;
-        return MainPage(initialTabIndex: tab);
-      },
-    ),
-    GoRoute(
-      path: RouteName.login,
-      builder: (context, state) => const MyPage(),
-    ),
-    GoRoute(
-      path: RouteName.animeInfo,
-      builder: (context, state) {
-        final data = state.extra;
-        if (data is! SubjectBasicData) return _invalidArgs();
-        return AnimeInfoPage(animeInfoExtra: data);
-      },
-    ),
-    GoRoute(
-      path: RouteName.play,
-      builder: (context, state) {
-        final data = state.extra;
-        if (data is! PlayRouteExtra) return _invalidArgs();
-        return PlayPage(extra: data);
-      },
-    ),
-    GoRoute(
-      path: RouteName.search,
-      builder: (context, state) {
-        final queryKeywords = state.uri.queryParameters['keywords'];
-        final extraKeywords = state.extra is String ? state.extra as String : null;
-        return SearchPage(keywords: queryKeywords ?? extraKeywords);
-      },
-    ),
-    GoRoute(
-      path: RouteName.calendar,
-      builder: (context, state) {
-        final data = state.extra;
-        if (data is! Calendar) return _invalidArgs();
-        return CalendarPage(calendar: data);
-      },
-    ),
-    GoRoute(
-      path: RouteName.characters,
-      builder: (context, state) {
-        final id = state.extra;
-        if (id is! int) return _invalidArgs();
-        return CharacterPage(subjectsId: id);
-      },
-    ),
-    GoRoute(
-      path: RouteName.characterInfo,
-      builder: (context, state) {
-        final data = state.extra;
-        if (data is! CharacterInfoExtra) return _invalidArgs();
-        return CharacterInfo(extra: data);
-      },
-    ),
-    GoRoute(
-      path: RouteName.playRecord,
-      builder: (context, state) => const PlayRecordPage(),
-    ),
-    GoRoute(
-      path: RouteName.userSpace,
-      builder: (context, state) {
-        final name = state.extra;
-        if (name is! String) return _invalidArgs();
-        return UserSpacePage(username: name);
-      },
-    ),
-    GoRoute(
-        path: RouteName.imageSearch,
-        builder: (context, state) => const ImageSearchPage()),
-    GoRoute(
-      path: RouteName.settings,
-      builder: (context, state) => const SettingsPage(),
-    ),
-    GoRoute(
-      path: RouteName.settingGeneral,
-      builder: (context, state) => const GeneralSettingsPage(),
-    ),
-    GoRoute(
-      path: RouteName.settingPlayback,
-      builder: (context, state) => const PlaybackSettingsPage(),
-    ),
-    GoRoute(
-      path: RouteName.settingDownloadPlugins,
-      builder: (context, state) => const DownloadPluginsPage(),
-    ),
-    GoRoute(
-      path: RouteName.settingDanmaku,
-      builder: (context, state) => const DanmakuSettingPage(),
-    ),
-    GoRoute(
-      path: RouteName.settingAbout,
-      builder: (context, state) => const AboutSettingsPage(),
-    ),
-    GoRoute(
-      path: RouteName.settingPlugins,
-      builder: (context, state) => const PluginsPage(),
-    ),
-    GoRoute(
-      path: RouteName.settingAddPlugins,
-      builder: (context, state) => AddPluginsPage(
-        editPluginKey: state.extra is String ? state.extra as String : null,
-      ),
-    ),
-    GoRoute(
-      path: RouteName.settingTheme,
-      builder: (context, state) => const ThemePage(),
-    ),
-    GoRoute(
-      path: RouteName.settingThanks,
-      builder: (context, state) => const ThanksPage(),
-    ),
-    GoRoute(
-      path: RouteName.settingAgreement,
-      builder: (context, state) => const AgreementPage(),
-    ),
-  ],
+  routes: $appRoutes,
 );

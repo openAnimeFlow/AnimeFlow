@@ -5,7 +5,6 @@ import 'package:anime_flow/widget/animation_network_image/animation_network_imag
 import 'package:anime_flow/widget/ranking.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
-import 'package:go_router/go_router.dart';
 
 class CalendarView extends StatefulWidget {
   final Calendar? calendar;
@@ -76,8 +75,8 @@ class _CalendarViewState extends State<CalendarView> {
                 children: [
                   if (widget.calendar != null)
                     InkWell(
-                        onTap: () => context.push(RouteName.calendar,
-                            extra: widget.calendar!),
+                        onTap: () =>
+                            CalendarRoute(widget.calendar!).push(context),
                         child:  Row(
                           children: [
                             Text(
@@ -171,8 +170,7 @@ class _CalendarViewState extends State<CalendarView> {
                   borderRadius: BorderRadius.circular(10),
                   child: InkWell(
                     onTap: () {
-                      context.push(RouteName.animeInfo,
-                          extra: subjectBasicData);
+                      AnimeInfoRoute.fromData(subjectBasicData).push(context);
                     },
                     child: Stack(
                       children: [

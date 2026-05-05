@@ -5,7 +5,6 @@ import 'package:anime_flow/utils/bgm_utils.dart';
 import 'package:anime_flow/widget/animation_network_image/animation_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:go_router/go_router.dart';
 
 ///角色列表页面
 class CharacterPage extends StatefulWidget {
@@ -218,15 +217,12 @@ class _CharacterPageState extends State<CharacterPage> {
       child: InkWell(
         borderRadius: BorderRadius.circular(10),
         onTap: () {
-          context.push(
-            RouteName.characterInfo,
-            extra: CharacterInfoExtra(
-              characterId: characterData.character.id,
-              characterName: characterData.character.nameCN ??
-                  characterData.character.name,
-              characterImage: characterData.character.images.large,
-            ),
-          );
+          CharacterInfoRoute(
+            id: characterData.character.id,
+            name: characterData.character.nameCN ??
+                characterData.character.name,
+            image: characterData.character.images.large,
+          ).push(context);
         },
         child: Row(
           crossAxisAlignment: CrossAxisAlignment.start,

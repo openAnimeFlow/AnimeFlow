@@ -1,10 +1,12 @@
+import 'package:anime_flow/constants/image_path_constants.dart';
 import 'package:anime_flow/controllers/video/source/video_source_controller.dart';
+import 'package:anime_flow/models/item/bangumi/episodes_item.dart';
 import 'package:anime_flow/stores/episodes_state.dart';
 import 'package:anime_flow/controllers/play/play_controller.dart';
 import 'package:anime_flow/stores/play_subject_state.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:logger/logger.dart';
+import 'package:lottie/lottie.dart';
 
 class EpisodesComponents extends StatefulWidget {
   const EpisodesComponents({super.key});
@@ -18,9 +20,40 @@ class EpisodesComponentsState extends State<EpisodesComponents> {
   final PlaySubjectState subjectState = Get.find<PlaySubjectState>();
   final EpisodesState episodesState = Get.find<EpisodesState>();
   final VideoSourceController videoSourceController = Get.find<VideoSourceController>();
+  final ScrollController controller = ScrollController();
   static const String drawerTitle = "章节列表";
   bool isLoading = false;
-  bool _isGridView = false; // 布局模式：false=列表，true=网格
+
+  /// 布局模式：false=列表，true=网格
+  bool _isGridView = false;
+
+  /// 剧集列表每行固定高度
+  final double itemHeight = 80;
+
+  @override
+  void dispose() {
+    controller.dispose();
+    super.dispose();
+  }
+
+  /// 将列表滚动到当前选集对应行（需在布局完成、`controller` 已 attach 后调用）。
+  void _scrollListToSelectedEpisode(
+    List<EpisodeData> episodes,
+    double selectedSort,
+  ) {
+    if (!mounted || _isGridView || !controller.hasClients) return;
+    final index = episodes.indexWhere(
+      (e) => e.sort.toDouble() == selectedSort,
+    );
+    if (index < 0) return;
+    final maxExtent = controller.position.maxScrollExtent;
+    final offset = (index * itemHeight).clamp(0.0, maxExtent);
+    controller.animateTo(
+      offset,
+      duration: const Duration(milliseconds: 280),
+      curve: Curves.easeOutCubic,
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -59,6 +92,10 @@ class EpisodesComponentsState extends State<EpisodesComponents> {
           return const Text('暂无章节数据');
         } else {
           final episodes = episodesItem.data;
+          final selectedSort = episodesState.episodeSort.value;
+          WidgetsBinding.instance.addPostFrameCallback((_) {
+            _scrollListToSelectedEpisode(episodes, selectedSort);
+          });
           return Container(
             height: 250,
             padding: const EdgeInsets.symmetric(vertical: 5, horizontal: 3),
@@ -70,8 +107,10 @@ class EpisodesComponentsState extends State<EpisodesComponents> {
                   .withValues(alpha: 0.8),
             ),
             child: ListView.builder(
+                controller: controller,
                 itemCount: episodes.length,
                 padding: EdgeInsets.zero,
+                itemExtent: itemHeight,
                 itemBuilder: (context, index) {
                   final episode = episodes[index];
                   return Obx(
@@ -90,7 +129,6 @@ class EpisodesComponentsState extends State<EpisodesComponents> {
                               sort: episode.sort);
                           episodesState
                               .setEpisodeTitle(episode.nameCN ?? episode.name);
-                          Logger().i('选中剧集索引:$episodeIndex');
                         },
                         child: Container(
                           decoration: BoxDecoration(
@@ -102,19 +140,39 @@ class EpisodesComponentsState extends State<EpisodesComponents> {
                                     .withValues(alpha: 0.3)
                                 : null,
                           ),
-                          width: 150,
                           padding: const EdgeInsets.all(8),
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            mainAxisSize: MainAxisSize.min,
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
                             children: [
-                              Text('第${episode.sort}话'),
-                              const SizedBox(height: 5),
-                              Text(
-                                episode.nameCN ?? episode.name,
-                                overflow: TextOverflow.ellipsis,
-                                maxLines: 1,
+                              Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  Text('第${episode.sort}话'),
+                                  const SizedBox(height: 5),
+                                  Text(
+                                    episode.nameCN ?? episode.name,
+                                    overflow: TextOverflow.ellipsis,
+                                    maxLines: 1,
+                                  ),
+                                ],
                               ),
+                              if (episodesState.episodeSort.value ==
+                                  episode.sort)
+                                Lottie.asset(
+                                  AssetsPathConstants.playJsonIng,
+                                  width: 30,
+                                  height: 30,
+                                  frameBuilder: (context, child, composition) {
+                                    return ColorFiltered(
+                                      colorFilter: ColorFilter.mode(
+                                        Theme.of(context).colorScheme.primary,
+                                        BlendMode.srcIn,
+                                      ),
+                                      child: child,
+                                    );
+                                  },
+                                )
                             ],
                           ),
                         ),
@@ -177,28 +235,16 @@ class EpisodesComponentsState extends State<EpisodesComponents> {
                             sort: episode.sort);
                         episodesState
                             .setEpisodeTitle(episode.nameCN ?? episode.name);
-                        Logger().i('选中剧集索引:$episodeIndex');
                       },
-                      child: Container(
-                        decoration: BoxDecoration(
-                          borderRadius: BorderRadius.circular(10),
-                          color: episode.collection != null
-                              ? Theme.of(context)
-                                  .colorScheme
-                                  .outlineVariant
-                                  .withValues(alpha: 0.3)
-                              : null,
-                        ),
-                        child: Center(
-                          child: Text(
-                            '${episode.sort}',
-                            style: TextStyle(
-                              fontSize: 16,
-                              fontWeight: episodesState.episodeSort.value ==
-                                      episode.sort
-                                  ? FontWeight.bold
-                                  : FontWeight.normal,
-                            ),
+                      child: Center(
+                        child: Text(
+                          '${episode.sort}',
+                          style: TextStyle(
+                            fontSize: 16,
+                            fontWeight:
+                                episodesState.episodeSort.value == episode.sort
+                                    ? FontWeight.bold
+                                    : FontWeight.normal,
                           ),
                         ),
                       ),

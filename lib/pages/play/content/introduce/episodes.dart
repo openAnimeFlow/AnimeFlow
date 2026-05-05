@@ -21,7 +21,6 @@ class EpisodesComponentsState extends State<EpisodesComponents> {
   final EpisodesState episodesState = Get.find<EpisodesState>();
   final VideoSourceController videoSourceController = Get.find<VideoSourceController>();
   final ScrollController controller = ScrollController();
-  static const String drawerTitle = "章节列表";
   bool isLoading = false;
 
   /// 布局模式：false=列表，true=网格

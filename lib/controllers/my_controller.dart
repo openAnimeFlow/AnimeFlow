@@ -40,7 +40,7 @@ class MyController {
 
   static void openOAuthPage() async {
     const clientId = Constants.bgmClientId;
-    const redirectUri = '${AnimeFlowApi.animeFlowApi}/oauth/callback';
+    const redirectUri = AnimeFlowApi.animeFlowApi + AnimeFlowApi.callback;
     final session = await OAuthRequest.getSessionService();
     final sessionId = session['data']['sessionId'];
     final authUrl = Uri.parse(

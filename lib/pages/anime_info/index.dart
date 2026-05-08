@@ -37,7 +37,7 @@ class AnimeInfoPage extends ConsumerStatefulWidget {
 }
 
 class _AnimeInfoPageState extends ConsumerState<AnimeInfoPage> {
-  late UserInfoStore userInfoStore;
+  late final UserInfoStore userInfoStore;
   final double _contentHeight = 200.0; // 内容区域的高度
   bool isPinned = false;
   bool topButton = false;

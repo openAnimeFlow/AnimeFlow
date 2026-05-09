@@ -1,3 +1,4 @@
+import 'package:anime_flow/constants/storage_key.dart';
 import 'package:anime_flow/http/api_path.dart';
 import 'package:anime_flow/http/requests/request.dart';
 import 'package:anime_flow/crawler/itme/crawler_config_item.dart';
@@ -22,8 +23,9 @@ class DownloadPluginsPage extends StatefulWidget {
 class _DownloadPluginsPageState extends State<DownloadPluginsPage> {
   late SettingController settingController;
   final storage = Storage.crawlConfigs;
+  final setting = Storage.setting;
   bool isLoading = false;
-  bool isMirror = false;
+  late bool isMirror;
 
   // List<CrawlConfigItem>? plugins;
   List<dynamic>? pluginRepo;
@@ -35,6 +37,7 @@ class _DownloadPluginsPageState extends State<DownloadPluginsPage> {
   @override
   void initState() {
     super.initState();
+    isMirror = setting.get(SettingKey.isMirror, defaultValue: false);
     settingController = Get.find<SettingController>();
     _getPlugins();
   }
@@ -91,11 +94,11 @@ class _DownloadPluginsPageState extends State<DownloadPluginsPage> {
               subtitle: const Text('当前会从Github仓库中下载数据源，注意网络环境,下拉刷新数据'),
               trailing: SystemUtil.isDesktop
                   ? IconButton(
-                onPressed: () {
-                  _getPlugins();
-                },
-                icon: const Icon(Icons.refresh),
-              )
+                      onPressed: () {
+                        _getPlugins();
+                      },
+                      icon: const Icon(Icons.refresh),
+                    )
                   : null,
             ),
             SwitchListTile(
@@ -104,9 +107,11 @@ class _DownloadPluginsPageState extends State<DownloadPluginsPage> {
               value: isMirror,
               onChanged: (v) {
                 setState(() {
+                  setting.put(SettingKey.isMirror, v);
                   isMirror = v;
                 });
-                _getPlugins();},
+                _getPlugins();
+              },
             ),
             if (isLoading)
               const Center(
@@ -146,7 +151,7 @@ class _DownloadPluginsPageState extends State<DownloadPluginsPage> {
                                     Expanded(
                                       child: Column(
                                         crossAxisAlignment:
-                                        CrossAxisAlignment.start,
+                                            CrossAxisAlignment.start,
                                         children: [
                                           Text(
                                             pluginName,
@@ -176,8 +181,8 @@ class _DownloadPluginsPageState extends State<DownloadPluginsPage> {
                                             plugin['path'] as String;
                                         final downloadUrl =
                                             '${CommonApi.pluginRepo}/$pluginPath';
-                                        final pluginData = await Request
-                                            .getPlugin(downloadUrl,
+                                        final pluginData =
+                                            await Request.getPlugin(downloadUrl,
                                                 isMirror: isMirror);
                                         storage.put(
                                             pluginName, pluginData.toJson());
@@ -203,8 +208,7 @@ class _DownloadPluginsPageState extends State<DownloadPluginsPage> {
                                       } finally {
                                         if (mounted) {
                                           setState(() {
-                                            _busyPluginNames
-                                                .remove(pluginName);
+                                            _busyPluginNames.remove(pluginName);
                                           });
                                         }
                                       }
@@ -244,8 +248,9 @@ class _DownloadPluginsPageState extends State<DownloadPluginsPage> {
                                               plugin['path'] as String;
                                           final downloadUrl =
                                               '${CommonApi.pluginRepo}/$pluginPath';
-                                          final pluginData = await Request
-                                              .getPlugin(downloadUrl,
+                                          final pluginData =
+                                              await Request.getPlugin(
+                                                  downloadUrl,
                                                   isMirror: isMirror);
                                           storage.put(
                                               pluginName, pluginData.toJson());
@@ -256,16 +261,14 @@ class _DownloadPluginsPageState extends State<DownloadPluginsPage> {
                                           Get.snackbar(
                                             '更新成功',
                                             '插件 "$pluginName" 已更新到版本 $pluginVersion',
-                                            snackPosition:
-                                                SnackPosition.BOTTOM,
+                                            snackPosition: SnackPosition.BOTTOM,
                                             maxWidth: 400,
                                           );
                                         } catch (e) {
                                           Get.snackbar(
                                             '更新失败',
                                             '更新插件 "$pluginName" 时发生错误：$e',
-                                            snackPosition:
-                                                SnackPosition.BOTTOM,
+                                            snackPosition: SnackPosition.BOTTOM,
                                             maxWidth: 400,
                                           );
                                         } finally {

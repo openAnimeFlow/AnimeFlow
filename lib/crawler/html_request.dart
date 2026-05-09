@@ -29,7 +29,6 @@ class WebRequest {
   static Future<List<SearchResourcesItem>> getSearchSubjectListService(
       String keyword, CrawlConfigItem crawlConfig) async {
     final String searchURL = crawlConfig.searchUrl;
-    final userAgent = Utils.getRandomUA();
     final requestUrl = searchURL.replaceFirst("{keyword}", keyword);
     final cookie = await _cookieHeaderFor(requestUrl, crawlConfig.name);
 
@@ -38,7 +37,7 @@ class WebRequest {
       'Content-Type': 'application/x-www-form-urlencoded',
       'Accept-Language':Utils.getRandomAcceptedLanguage(),
       'Connection': 'keep-alive',
-      Constants.userAgentName: userAgent,
+      Constants.userAgentName: Utils.getRandomUA(),
       if (cookie.isNotEmpty) 'Cookie': cookie
     };
     final response = await dioRequest.get(requestUrl,
@@ -67,6 +66,7 @@ class WebRequest {
   static Future<List<CrawlerEpisodeResourcesItem>> getResourcesListService(
       String link, CrawlConfigItem crawlConfig) async {
     final String baseURL = crawlConfig.baseUrl;
+    final String searchURL = crawlConfig.searchUrl;
 
     String linkUrl;
     if (link.startsWith("http")) {
@@ -74,11 +74,15 @@ class WebRequest {
     } else {
       linkUrl = baseURL + link;
     }
+    final httpHeaders = {
+      'referer': '$searchURL/',
+      'Content-Type': 'application/x-www-form-urlencoded',
+      'Accept-Language':Utils.getRandomAcceptedLanguage(),
+      'Connection': 'keep-alive',
+      Constants.userAgentName: Utils.getRandomUA(),
+    };
 
-    final response = await dioRequest.get(linkUrl,
-        options: Options(headers: {
-          Constants.userAgentName: Utils.getRandomUA(),
-        }));
+    final response = await dioRequest.get(linkUrl, options: Options(headers: httpHeaders));
     return HtmlCrawler.parseResourcesHtml(response.data, crawlConfig);
   }
 

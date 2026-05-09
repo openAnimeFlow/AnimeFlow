@@ -4,7 +4,6 @@ import 'dart:io';
 import 'package:anime_flow/controllers/play/episode_controller.dart';
 import 'package:anime_flow/models/play/play_history.dart';
 import 'package:anime_flow/repository/play_repository.dart';
-import 'package:anime_flow/repository/storage.dart';
 import 'package:anime_flow/stores/user_info_store.dart';
 import 'package:anime_flow/stores/episodes_state.dart';
 import 'package:anime_flow/controllers/play/play_controller.dart';
@@ -37,7 +36,6 @@ class _VideoViewState extends State<VideoView> with WindowListener {
   final UserInfoStore userInfoStore = Get.find<UserInfoStore>();
   final logger = Logger();
   final _danmuKey = GlobalKey();
-  final setting = Storage.setting;
 
   /// 解析结果
   StreamSubscription<(String, int)>? _videoURLSubscription;
@@ -45,6 +43,9 @@ class _VideoViewState extends State<VideoView> with WindowListener {
   StreamSubscription<bool>? _videoLoadingSubscription;
   StreamSubscription<String>? _logSubscription;
   StreamSubscription<bool>? _initSubscription;
+
+  Worker? _episodeIndexWorker;
+  StreamSubscription<bool>? _playbackCompletedSubscription;
 
   Timer? _parseTimeoutTimer;
 
@@ -59,7 +60,7 @@ class _VideoViewState extends State<VideoView> with WindowListener {
     super.initState();
 
     // 监听集数变化
-    ever(episodesState.episodeIndex, (int episode) {
+    _episodeIndexWorker = ever(episodesState.episodeIndex, (int episode) {
       if (episode > 0) {
         if (episode != _lastEpisodeIndex) {
           videoSourceController.userManuallySelected = false;
@@ -70,7 +71,8 @@ class _VideoViewState extends State<VideoView> with WindowListener {
     });
 
     // 监听视频播放完成
-    playController.player.stream.completed.listen((completed) {
+    _playbackCompletedSubscription =
+        playController.player.stream.completed.listen((completed) {
       if (completed) {
         _autoSwitchToNextEpisode();
         PlayRepository.deletePlayHistoryByPosition(subjectState.subject.value.id);
@@ -168,6 +170,8 @@ class _VideoViewState extends State<VideoView> with WindowListener {
     _logSubscription?.cancel();
     _saveProgressTimer?.cancel();
     _initSubscription?.cancel();
+    _episodeIndexWorker?.dispose();
+    _playbackCompletedSubscription?.cancel();
     videoSourceController.cancelVideoSourceResolution();
     _savePlayHistory();
     // 移除窗口监听器

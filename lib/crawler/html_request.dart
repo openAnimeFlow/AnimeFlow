@@ -1,9 +1,9 @@
 import 'dart:async';
-import 'dart:math';
 import 'package:anime_flow/crawler/itme/crawler_config_item.dart';
 import 'package:anime_flow/http/dio/dio_request.dart';
 import 'package:anime_flow/models/play/video/episode_resources_item.dart';
 import 'package:anime_flow/models/play/video/search_resources_item.dart';
+import 'package:anime_flow/utils/utils.dart';
 import 'package:dio/dio.dart';
 import 'package:anime_flow/constants/constants.dart';
 import 'package:html/parser.dart' as html_parser;
@@ -29,8 +29,7 @@ class WebRequest {
   static Future<List<SearchResourcesItem>> getSearchSubjectListService(
       String keyword, CrawlConfigItem crawlConfig) async {
     final String searchURL = crawlConfig.searchUrl;
-    final userAgent = Constants
-        .userAgentList[Random().nextInt(Constants.userAgentList.length)];
+    final userAgent = Utils.getRandomUA();
     final requestUrl = searchURL.replaceFirst("{keyword}", keyword);
     final cookie = await _cookieHeaderFor(requestUrl, crawlConfig.name);
 
@@ -68,9 +67,6 @@ class WebRequest {
       String link, CrawlConfigItem crawlConfig) async {
     final String baseURL = crawlConfig.baseUrl;
 
-    final userAgent = Constants
-        .userAgentList[Random().nextInt(Constants.userAgentName.length)];
-
     String linkUrl;
     if (link.startsWith("http")) {
       linkUrl = link;
@@ -80,7 +76,7 @@ class WebRequest {
 
     final response = await dioRequest.get(linkUrl,
         options: Options(headers: {
-          Constants.userAgentName: userAgent,
+          Constants.userAgentName: Utils.getRandomUA(),
         }));
     return HtmlCrawler.parseResourcesHtml(response.data, crawlConfig);
   }

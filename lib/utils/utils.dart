@@ -44,12 +44,16 @@ class Utils {
     return Uri.encodeFull(matchedUrl);
   }
 
-  // 获取随机UA
+  /// 获取随机UA
   static String getRandomUA() {
     final random = Random();
-    String randomElement =
-        Constants.userAgentList[random.nextInt(Constants.userAgentList.length)];
-    return randomElement;
+    return userAgentList[random.nextInt(userAgentList.length)];
+  }
+
+  /// 获取随机Accept-Language
+  static String getRandomAcceptedLanguage() {
+    final random = Random();
+    return acceptLanguageList[random.nextInt(acceptLanguageList.length)];
   }
 
   static bool? _isDocumentStartScriptSupported;

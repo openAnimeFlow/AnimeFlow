@@ -558,8 +558,7 @@ class PlayController extends GetxController {
         'change-list',
         'glsl-shaders',
         'set',
-        Utils.buildShadersAbsolutePath(shadersController.shadersDirectory.path,
-            Constants.mpvAnime4KShadersLite),
+        Utils.buildShadersAbsolutePath(shadersController.shadersDirectory.path, mpvAnime4KShadersLite),
       ]);
       superResolutionType.value = 2;
       return;
@@ -569,8 +568,7 @@ class PlayController extends GetxController {
         'change-list',
         'glsl-shaders',
         'set',
-        Utils.buildShadersAbsolutePath(shadersController.shadersDirectory.path,
-            Constants.mpvAnime4KShaders),
+        Utils.buildShadersAbsolutePath(shadersController.shadersDirectory.path, mpvAnime4KShaders),
       ]);
       superResolutionType.value = 3;
       return;

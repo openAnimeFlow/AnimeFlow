@@ -82,7 +82,7 @@ class VideoSourceController extends GetxController {
     this.keyword.value = keyword;
     // 重置手动选择标志，允许重新自动选择
     userManuallySelected = false;
-    updateLoading(false);
+    isLoading.value = false;
     final configs = await CrawlConfig.loadAllCrawlConfigs();
 
     // 错开发起时间（相邻间隔 0.5 秒），不串行等待每个请求；全部完成后再结束加载态
@@ -91,10 +91,21 @@ class VideoSourceController extends GetxController {
       if (i > 0) {
         await Future.delayed(const Duration(milliseconds: 500));
       }
-      futures.add(_getResources(keyword, configs[i]));
+      final config = configs[i];
+
+      if(config.antiCrawlerConfig.enabled) {
+        // 如果启用了反爬虫，先设置为需要验证码，等待用户验证后再请求资源
+        _updateResourceStatus(
+          config.name,
+          needsCaptcha: true,
+          antiCrawlerConfig: config.antiCrawlerConfig,
+        );
+        continue;
+      }
+      futures.add(_getResources(keyword, config));
     }
     await Future.wait(futures);
-    updateLoading(true);
+    isLoading.value = true;
   }
 
   void _clearAllResources() {
@@ -127,8 +138,7 @@ class VideoSourceController extends GetxController {
     try {
       _updateResourceStatus(config.name, isLoading: true, errorMessage: null);
 
-      List<SearchResourcesItem> searchList =
-          await WebRequest.getSearchSubjectListService(keyword, config);
+      List<SearchResourcesItem> searchList = await WebRequest.getSearchSubjectListService(keyword, config);
       List<EpisodeResourcesItem> allEpisodesList = [];
 
       for (var search in searchList) {

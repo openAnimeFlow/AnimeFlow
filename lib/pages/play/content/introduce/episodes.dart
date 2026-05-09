@@ -143,7 +143,8 @@ class EpisodesComponentsState extends State<EpisodesComponents> {
                           child: Row(
                             mainAxisAlignment: MainAxisAlignment.spaceBetween,
                             children: [
-                              Column(
+                              Expanded(
+                                  child: Column(
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 mainAxisSize: MainAxisSize.min,
                                 children: [
@@ -155,7 +156,7 @@ class EpisodesComponentsState extends State<EpisodesComponents> {
                                     maxLines: 1,
                                   ),
                                 ],
-                              ),
+                              )),
                               if (episodesState.episodeSort.value ==
                                   episode.sort)
                                 Lottie.asset(

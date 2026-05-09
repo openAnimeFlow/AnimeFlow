@@ -1,0 +1,13 @@
+{
+  "version": "1.0.0",
+  "name": "萌道动漫",
+  "iconUrl": "https://www.gpjda.com//statics/img/favicon.ico",
+  "baseUrl": "https://www.gpjda.com/",
+  "searchUrl": "https://www.gpjda.com/search.php?searchword={keyword}",
+  "searchList": "//div[1]/div/div[2]/ul[1]/li",
+  "searchName": "//h4/a",
+  "searchLink": "//h4/a",
+  "lineNames": "//ul[@class='dropdown-menu'] //a",
+  "lineList": "//ul[@class='stui-content__playlist playlink clearfix']",
+  "episode": "//li /a"
+}

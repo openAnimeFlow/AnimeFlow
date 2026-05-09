@@ -407,7 +407,7 @@ class _VideoSourceDrawersState extends State<VideoSourceDrawers> {
               children: [
                 const Text('未找到播放源'),
                 ElevatedButton(
-                    onPressed: () => _performSearch(),
+                    onPressed: () => dataSourceController.retryResources(selectedResource.websiteName),
                     child: const Text('重新搜索'))
               ],
             ),

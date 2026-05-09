@@ -36,6 +36,7 @@ class WebRequest {
     final httpHeaders = {
       'referer': '$searchURL/',
       'Content-Type': 'application/x-www-form-urlencoded',
+      'Accept-Language':Utils.getRandomAcceptedLanguage(),
       'Connection': 'keep-alive',
       Constants.userAgentName: userAgent,
       if (cookie.isNotEmpty) 'Cookie': cookie

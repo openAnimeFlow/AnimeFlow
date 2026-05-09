@@ -1,8 +1,10 @@
 import 'dart:async';
+import 'dart:math' show min;
 
 import 'package:anime_flow/crawler/itme/crawler_config_item.dart';
 import 'package:anime_flow/models/play/video/episode_resources_item.dart';
-import 'package:anime_flow/models/play/video/search_resources_item.dart';import 'package:html/parser.dart';
+import 'package:anime_flow/models/play/video/search_resources_item.dart';
+import 'package:html/parser.dart';
 import 'package:html/dom.dart';
 import 'package:logger/logger.dart';
 import 'package:xpath_selector_html_parser/xpath_selector_html_parser.dart';
@@ -23,16 +25,29 @@ class HtmlCrawler {
     final searchNameElement = parser.queryXPath('$searchList$searchName');
     final searchLinkElement = parser.queryXPath('$searchList$searchLink');
 
-    final List<SearchResourcesItem> resourcesItems = List.generate(
-      searchListElement.nodes.length,
-      (i) => SearchResourcesItem(
-        name: searchNameElement.nodes[i].text?.trim() ?? '',
-        link: searchLinkElement.nodes[i].attributes['href'] ?? '',
-      ),
-    );
+    try {
+      final listNodes = searchListElement.nodes;
+      final nameNodes = searchNameElement.nodes;
+      final linkNodes = searchLinkElement.nodes;
+      // searchList / name / link 的 XPath 命中数可能不一致，取最短长度避免 RangeError
+      final rowCount = min(
+        min(listNodes.length, nameNodes.length),
+        linkNodes.length,
+      );
+      final List<SearchResourcesItem> resourcesItems = List.generate(
+        rowCount,
+        (i) => SearchResourcesItem(
+          name: nameNodes[i].text?.trim() ?? '',
+          link: linkNodes[i].attributes['href'] ?? '',
+        ),
+      );
 
-    logger.i("搜索结果:${resourcesItems.toString()}");
-    return resourcesItems;
+      logger.i("搜索结果:${resourcesItems.toString()}");
+      return resourcesItems;
+    } catch (e) {
+      logger.e("解析搜索结果出错:$e");
+      return [];
+    }
   }
 
   ///解析html资源页面

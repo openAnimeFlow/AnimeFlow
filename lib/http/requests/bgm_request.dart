@@ -1,6 +1,6 @@
 import 'package:anime_flow/constants/constants.dart';
 import 'package:anime_flow/controllers/app/app_info_controller.dart';
-import 'package:anime_flow/crawler/user_page_crawler.dart';
+import 'package:anime_flow/crawler/html_crawler.dart';
 import 'package:anime_flow/http/api_path.dart';
 import 'package:anime_flow/models/enums/sort_type.dart';
 import 'package:anime_flow/models/item/bangumi/actor_item.dart';
@@ -23,7 +23,7 @@ import 'package:anime_flow/http/dio/dio_request.dart';
 import 'package:anime_flow/models/item/bangumi/timeline_item.dart';
 import 'package:anime_flow/models/item/bangumi/user_collections_item.dart';
 import 'package:anime_flow/models/item/bangumi/user_info_item.dart';
-import 'package:anime_flow/models/item/bgm_user_page_item.dart';
+import 'package:anime_flow/crawler/itme/bgm_user_page_item.dart';
 import 'package:anime_flow/utils/utils.dart';
 import 'package:dio/dio.dart';
 import 'package:get/get.dart';
@@ -455,6 +455,6 @@ class UserRequest {
         headers: {Constants.userAgentName: Utils.getRandomUA()},
       ),
     );
-    return await UserPageCrawler.parseUserPage(response.data);
+    return await HtmlCrawler.parseUserPage(response.data);
   }
 }

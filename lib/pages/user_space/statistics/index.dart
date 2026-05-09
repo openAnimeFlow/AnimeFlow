@@ -1,5 +1,5 @@
 import 'package:anime_flow/http/requests/bgm_request.dart';
-import 'package:anime_flow/models/item/bgm_user_page_item.dart';
+import 'package:anime_flow/crawler/itme/bgm_user_page_item.dart';
 import 'package:anime_flow/pages/user_space/user_stores.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';

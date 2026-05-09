@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:math' show min;
 
 import 'package:anime_flow/crawler/itme/crawler_config_item.dart';
+import 'package:anime_flow/crawler/itme/bgm_user_page_item.dart' show BgmUserPageItem, Statistic;
 import 'package:anime_flow/models/play/video/episode_resources_item.dart';
 import 'package:anime_flow/models/play/video/search_resources_item.dart';
 import 'package:html/parser.dart';
@@ -110,5 +111,39 @@ class HtmlCrawler {
 
     // logger.i("线路资源:${episodeResourcesList.toString()}");
     return episodeResourcesList;
+  }
+
+  ///解析用户页面数据
+  static Future<BgmUserPageItem> parseUserPage(String userPageHtml) async {
+    const String statisticsDocument = '//*[@id="userStatsContainers"] /div[1]';
+    final parser = parse(userPageHtml).documentElement!;
+
+    final statisticsElement = parser.queryXPath(statisticsDocument);
+    final List<Statistic> statistics = [];
+
+    for (int i = 1; i <= 6; i++) {
+      final statisticsValueDocument = '/div[1] /div[$i] /span[1]';
+      final statisticsNameDocument = '/div[1] /div[$i] /span[2]';
+
+      final statisticsValueElement =
+      statisticsElement.node!.queryXPath(statisticsValueDocument);
+      final statisticsNameElement =
+      statisticsElement.node!.queryXPath(statisticsNameDocument);
+
+      String value = '';
+      String name = '';
+
+      if (statisticsValueElement.nodes.isNotEmpty) {
+        value = statisticsValueElement.nodes[0].text?.trim() ?? '';
+      }
+
+      if (statisticsNameElement.nodes.isNotEmpty) {
+        name = statisticsNameElement.nodes[0].text?.trim() ?? '';
+      }
+
+      statistics.add(Statistic(value: value, name: name));
+    }
+
+    return BgmUserPageItem(statistics: statistics);
   }
 }

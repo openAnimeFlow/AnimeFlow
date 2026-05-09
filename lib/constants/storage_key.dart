@@ -1,16 +1,11 @@
 class StorageKey {
   /// 爬虫配置表
-  static const String crawlConfigs = 'crawl_configs_key';
-
-  static const String settingsKey = 'settings_key';
-
-  static const String playPositionKey = 'play_position_key';
-
-  static const String playHistoryKey = 'play_history_key';
-
-  static const String autoUpdateKey = 'auto_update_key';
-
-  static const String searchHistoryKey = 'search_history_key';
+  static const String crawlConfigs = 'crawl_configs_key',
+      settingsKey = 'settings_key',
+      playPositionKey = 'play_position_key',
+      playHistoryKey = 'play_history_key',
+      autoUpdateKey = 'auto_update_key',
+      searchHistoryKey = 'search_history_key';
 }
 
 class DanmakuKey {
@@ -37,4 +32,8 @@ class PlaybackKey {
   static const String autoPlayNext = 'playback_auto_play_next',
       episodesProgress = 'playback_episodes_progress',
       fastForwardSpeed = 'playback_fast_forward_speed';
+}
+
+class SettingKey {
+  static const String isMirror = 'setting_is_mirror';
 }

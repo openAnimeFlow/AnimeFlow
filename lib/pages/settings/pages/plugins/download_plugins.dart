@@ -23,10 +23,14 @@ class _DownloadPluginsPageState extends State<DownloadPluginsPage> {
   late SettingController settingController;
   final storage = Storage.crawlConfigs;
   bool isLoading = false;
+  bool isMirror = false;
 
   // List<CrawlConfigItem>? plugins;
   List<dynamic>? pluginRepo;
   bool hasChanged = false; // 跟踪是否有插件被下载或更新
+
+  /// 正在下载或更新中的插件名
+  final Set<String> _busyPluginNames = {};
 
   @override
   void initState() {
@@ -42,7 +46,7 @@ class _DownloadPluginsPageState extends State<DownloadPluginsPage> {
       });
     }
     try {
-      final plugins = await Request.getPluginRepo();
+      final plugins = await Request.getPluginRepo(isMirror: isMirror);
       Get.log('获取$plugins');
       if (mounted) {
         setState(() {
@@ -87,12 +91,22 @@ class _DownloadPluginsPageState extends State<DownloadPluginsPage> {
               subtitle: const Text('当前会从Github仓库中下载数据源，注意网络环境,下拉刷新数据'),
               trailing: SystemUtil.isDesktop
                   ? IconButton(
-                      onPressed: () {
-                        _getPlugins();
-                      },
-                      icon: const Icon(Icons.refresh),
-                    )
+                onPressed: () {
+                  _getPlugins();
+                },
+                icon: const Icon(Icons.refresh),
+              )
                   : null,
+            ),
+            SwitchListTile(
+              title: const Text('使用镜像'),
+              subtitle: const Text('无法直连 GitHub 时开启，通过镜像拉取插件列表'),
+              value: isMirror,
+              onChanged: (v) {
+                setState(() {
+                  isMirror = v;
+                });
+                _getPlugins();},
             ),
             if (isLoading)
               const Center(
@@ -107,7 +121,9 @@ class _DownloadPluginsPageState extends State<DownloadPluginsPage> {
               ),
             if (pluginRepo != null && !isLoading)
               ...pluginRepo!.map((plugin) {
-                final localPlugin = storage.get(plugin['name']);
+                final pluginName = plugin['name'] as String;
+                final localPlugin = storage.get(pluginName);
+                final isPluginBusy = _busyPluginNames.contains(pluginName);
                 return Padding(
                   padding: const EdgeInsets.only(left: 10, right: 10),
                   child: Card(
@@ -130,10 +146,10 @@ class _DownloadPluginsPageState extends State<DownloadPluginsPage> {
                                     Expanded(
                                       child: Column(
                                         crossAxisAlignment:
-                                            CrossAxisAlignment.start,
+                                        CrossAxisAlignment.start,
                                         children: [
                                           Text(
-                                            '${plugin['name']}',
+                                            pluginName,
                                             style: const TextStyle(
                                                 fontSize: 16,
                                                 fontWeight: FontWeight.bold),
@@ -147,36 +163,61 @@ class _DownloadPluginsPageState extends State<DownloadPluginsPage> {
                                 ))),
                         if (localPlugin == null)
                           IconButton(
-                              onPressed: () async {
-                                try {
-                                  final pluginName = plugin['name'] as String;
-                                  final pluginPath = plugin['path'] as String;
-                                  final downloadUrl =
-                                      '${CommonApi.pluginRepo}/$pluginPath';
-                                  final pluginData =
-                                      await Request.getPlugin(downloadUrl);
-                                  storage.put(pluginName, pluginData.toJson());
-                                  if (mounted) {
-                                    setState(() {
-                                      hasChanged = true;
-                                    });
-                                  }
-                                  Get.snackbar(
-                                    '下载成功',
-                                    '插件 "$pluginName" 已下载',
-                                    snackPosition: SnackPosition.BOTTOM,
-                                    maxWidth: 400,
-                                  );
-                                } catch (e) {
-                                  Get.snackbar(
-                                    '下载失败',
-                                    '下载插件 "${plugin['name']}" 时发生错误：$e',
-                                    snackPosition: SnackPosition.BOTTOM,
-                                    maxWidth: 400,
-                                  );
-                                }
-                              },
-                              icon: const Icon(Icons.download))
+                              onPressed: isPluginBusy
+                                  ? null
+                                  : () async {
+                                      final messenger =
+                                          ScaffoldMessenger.of(context);
+                                      setState(() {
+                                        _busyPluginNames.add(pluginName);
+                                      });
+                                      try {
+                                        final pluginPath =
+                                            plugin['path'] as String;
+                                        final downloadUrl =
+                                            '${CommonApi.pluginRepo}/$pluginPath';
+                                        final pluginData = await Request
+                                            .getPlugin(downloadUrl,
+                                                isMirror: isMirror);
+                                        storage.put(
+                                            pluginName, pluginData.toJson());
+                                        if (!mounted) return;
+                                        setState(() {
+                                          hasChanged = true;
+                                        });
+                                        messenger.showSnackBar(
+                                          const SnackBar(
+                                            content: Text('下载成功'),
+                                            duration: Duration(seconds: 1),
+                                          ),
+                                        );
+                                      } catch (e) {
+                                        if (mounted) {
+                                          messenger.showSnackBar(
+                                            const SnackBar(
+                                              content: Text('下载失败'),
+                                              duration: Duration(seconds: 1),
+                                            ),
+                                          );
+                                        }
+                                      } finally {
+                                        if (mounted) {
+                                          setState(() {
+                                            _busyPluginNames
+                                                .remove(pluginName);
+                                          });
+                                        }
+                                      }
+                                    },
+                              icon: isPluginBusy
+                                  ? const SizedBox(
+                                      width: 24,
+                                      height: 24,
+                                      child: CircularProgressIndicator(
+                                        strokeWidth: 2,
+                                      ),
+                                    )
+                                  : const Icon(Icons.download))
                         else
                           Builder(builder: (context) {
                             final config = CrawlConfigItem.fromJson(
@@ -192,37 +233,66 @@ class _DownloadPluginsPageState extends State<DownloadPluginsPage> {
                               );
                             } else {
                               return TextButton(
-                                onPressed: () async {
-                                  try {
-                                    final pluginName = plugin['name'] as String;
-                                    final pluginPath = plugin['path'] as String;
-                                    final downloadUrl =
-                                        '${CommonApi.pluginRepo}/$pluginPath';
-                                    final pluginData =
-                                        await Request.getPlugin(downloadUrl);
-                                    storage.put(
-                                        pluginName, pluginData.toJson());
-                                    if (mounted) {
-                                      setState(() {
-                                        hasChanged = true;
-                                      });
-                                    }
-                                    Get.snackbar(
-                                      '更新成功',
-                                      '插件 "$pluginName" 已更新到版本 $pluginVersion',
-                                      snackPosition: SnackPosition.BOTTOM,
-                                      maxWidth: 400,
-                                    );
-                                  } catch (e) {
-                                    Get.snackbar(
-                                      '更新失败',
-                                      '更新插件 "${plugin['name']}" 时发生错误：$e',
-                                      snackPosition: SnackPosition.BOTTOM,
-                                      maxWidth: 400,
-                                    );
-                                  }
-                                },
-                                child: const Text('更新'),
+                                onPressed: isPluginBusy
+                                    ? null
+                                    : () async {
+                                        setState(() {
+                                          _busyPluginNames.add(pluginName);
+                                        });
+                                        try {
+                                          final pluginPath =
+                                              plugin['path'] as String;
+                                          final downloadUrl =
+                                              '${CommonApi.pluginRepo}/$pluginPath';
+                                          final pluginData = await Request
+                                              .getPlugin(downloadUrl,
+                                                  isMirror: isMirror);
+                                          storage.put(
+                                              pluginName, pluginData.toJson());
+                                          if (!mounted) return;
+                                          setState(() {
+                                            hasChanged = true;
+                                          });
+                                          Get.snackbar(
+                                            '更新成功',
+                                            '插件 "$pluginName" 已更新到版本 $pluginVersion',
+                                            snackPosition:
+                                                SnackPosition.BOTTOM,
+                                            maxWidth: 400,
+                                          );
+                                        } catch (e) {
+                                          Get.snackbar(
+                                            '更新失败',
+                                            '更新插件 "$pluginName" 时发生错误：$e',
+                                            snackPosition:
+                                                SnackPosition.BOTTOM,
+                                            maxWidth: 400,
+                                          );
+                                        } finally {
+                                          if (mounted) {
+                                            setState(() {
+                                              _busyPluginNames
+                                                  .remove(pluginName);
+                                            });
+                                          }
+                                        }
+                                      },
+                                child: isPluginBusy
+                                    ? const Row(
+                                        mainAxisSize: MainAxisSize.min,
+                                        children: [
+                                          SizedBox(
+                                            width: 16,
+                                            height: 16,
+                                            child: CircularProgressIndicator(
+                                              strokeWidth: 2,
+                                            ),
+                                          ),
+                                          SizedBox(width: 8),
+                                          Text('更新中…'),
+                                        ],
+                                      )
+                                    : const Text('更新'),
                               );
                             }
                           })

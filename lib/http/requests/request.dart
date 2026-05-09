@@ -17,12 +17,16 @@ class Request {
   }
 
   ///获取插件列表
-  static Future<List<dynamic>> getPluginRepo() async {
-    final userAgent = Utils.getRandomUA();
+  static Future<List<dynamic>> getPluginRepo({bool isMirror = false}) async {
+    var pluginRepo = '${CommonApi.pluginRepo}/index.json';
+    if (isMirror) {
+      pluginRepo = '${CommonApi.gitMirror}$pluginRepo';
+    }
+
     return await dioRequest
-        .get('${CommonApi.pluginRepo}/index.json',
+        .get(pluginRepo,
         options: Options(headers: {
-          Constants.userAgentName: userAgent,
+          Constants.userAgentName: Utils.getRandomUA(),
         }))
         .then((onValue) {
       if (onValue.data is String) {
@@ -34,7 +38,9 @@ class Request {
   }
 
   ///获取插件数据
-  static Future<CrawlConfigItem> getPlugin(String downloadUrl) async {
+  static Future<CrawlConfigItem> getPlugin(String downloadUrl,{bool isMirror = false}) async {
+    if (isMirror) downloadUrl = '${CommonApi.gitMirror}$downloadUrl';
+
     return await dioRequest.get(downloadUrl).then((onValue) {
       Map<String, dynamic> jsonData;
       if (onValue.data is String) {

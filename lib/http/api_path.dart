@@ -81,6 +81,9 @@ class CommonApi {
   ///GitHubApi
   static const String githubApi = 'https://api.github.com';
 
+  /// Github镜像
+  static const String gitMirror = 'https://ghfast.top/';
+
   ///插件仓库
   static const String pluginRepo = 'https://raw.githubusercontent.com/openAnimeFlow/animeFlow-assets/main/plugins';
 

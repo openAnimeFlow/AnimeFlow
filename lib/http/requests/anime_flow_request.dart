@@ -138,6 +138,13 @@ class AnimeFlowRequest {
     return DanmakuSearchResponse.fromJson(response.data);
   }
 
+  static Future<int> getDanDanBangumiIDByBgmBangumiID(int bgmBangumiID) async {
+    var path = '$_animeFlowApi${AnimeFlowApi.animeDetailByBgmId}/$bgmBangumiID';
+    final res = await _client.get(path);
+    final response = AnimeFlowResponse.fromJson(Map<String, dynamic>.from(res));
+    return DanmakuEpisodeResponse.fromJson(response.data).bangumiId;
+  }
+
   /// 通过番剧ID获取番剧元素
   static Future<DanmakuEpisodeResponse> getDanDanEpisodesByDanDanBangumiID(
       int bangumiID) async {

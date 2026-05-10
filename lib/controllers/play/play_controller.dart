@@ -227,7 +227,7 @@ class PlayController extends GetxController {
     try {
       if (!_isLoadingDanmaku && episode != 0) {
         _isLoadingDanmaku = true;
-        final bgmBangumiId = await DanmakuRequest.getDanDanBangumiIDByBgmBangumiID(subjectId);
+        final bgmBangumiId = await AnimeFlowRequest.getDanDanBangumiIDByBgmBangumiID(subjectId);
         final danmaku = await AnimeFlowRequest.getDanDanmaku(bgmBangumiId, episode);
         addDanmaku(danmaku);
         _isLoadingDanmaku = false;

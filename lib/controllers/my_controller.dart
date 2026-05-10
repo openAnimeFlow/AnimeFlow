@@ -2,7 +2,7 @@ import 'package:anime_flow/constants/constants.dart';
 import 'package:anime_flow/http/api_path.dart';
 import 'package:anime_flow/http/requests/bgm_request.dart';
 import 'package:anime_flow/http/requests/oauth_request.dart';
-import 'package:anime_flow/stores/TokenStorage.dart';
+import 'package:anime_flow/stores/BangumiToken.dart';
 import 'package:anime_flow/stores/user_info_store.dart';
 import 'package:anime_flow/utils/systemUtil.dart';
 import 'package:get/get.dart';
@@ -25,7 +25,7 @@ class MyController {
     Logger().d('获取code:$code');
     final token = await OAuthRequest.getTokenService(code: code);
     Logger().d('获取token:$token');
-    await tokenStorage.saveToken(token);
+    await BangumiToken().saveToken(token);
     try {
       if (Get.isRegistered<UserInfoStore>()) {
         final store = Get.find<UserInfoStore>();
@@ -65,7 +65,7 @@ class MyController {
       final token = await OAuthRequest.pollTokenService(state: sessionId);
       if (token != null) {
         Logger().d('轮询获取到 token: $token');
-        await tokenStorage.saveToken(token);
+        await BangumiToken().saveToken(token);
 
         // 获取用户信息并更新 store
         final userInfoStore = Get.find<UserInfoStore>();

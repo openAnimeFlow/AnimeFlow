@@ -1,6 +1,6 @@
 import 'dart:convert';
 import 'dart:ui';
-import 'package:anime_flow/http/dio/dio_request.dart';
+import 'package:anime_flow/http/clients/dio_request.dart';
 import 'package:anime_flow/http/requests/damaku_request.dart';
 import 'package:anime_flow/utils/utils.dart';
 import 'package:crypto/crypto.dart';

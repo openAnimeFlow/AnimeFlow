@@ -1,6 +1,6 @@
 import 'package:anime_flow/http/api_path.dart';
-import 'package:anime_flow/http/dio/bgm_dio_request.dart';
-import 'package:anime_flow/http/dio/dio_request.dart';
+import 'package:anime_flow/http/clients/bgm_client.dart';
+import 'package:anime_flow/http/clients/dio_request.dart';
 import 'package:anime_flow/models/item/token_item.dart';
 import 'package:anime_flow/utils/systemUtil.dart';
 
@@ -8,7 +8,7 @@ class OAuthRequest {
   static const String _animeFlowApi = AnimeFlowApi.animeFlowApi;
 
   static Future<TokenItem> getTokenService({required String code}) async {
-    final response = await bgmDioRequest.post(
+    final response = await BangumiClient.instance.post(
         _animeFlowApi + AnimeFlowApi.token,
         queryParameters: {'code': code});
     return TokenItem.fromJson(response.data['data']);

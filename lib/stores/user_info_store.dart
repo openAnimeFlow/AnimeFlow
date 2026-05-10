@@ -2,14 +2,14 @@ import 'package:anime_flow/http/requests/bgm_request.dart';
 import 'package:anime_flow/models/item/bangumi/user_info_item.dart';
 import 'package:get/get.dart';
 
-import 'TokenStorage.dart';
+import 'BangumiToken.dart';
 
 class UserInfoStore extends GetxController {
   Rx<UserInfoItem?> userInfo = Rx<UserInfoItem?>(null);
 
   ///初始化
   void _init() async {
-    final token = await tokenStorage.getToken();
+    final token = await BangumiToken().getToken();
     if (token != null) {
       final me = await UserRequest.userInfoService();
       userInfo.value = await UserRequest.queryUserInfoService(me.username);
@@ -19,7 +19,7 @@ class UserInfoStore extends GetxController {
   ///清理userInfo
   void clearUserInfo() {
     userInfo.value = null;
-    tokenStorage.deleteToken();
+    BangumiToken().deleteToken();
   }
 
   @override

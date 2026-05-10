@@ -1,6 +1,6 @@
 import 'dart:async';
 import 'package:anime_flow/crawler/itme/crawler_config_item.dart';
-import 'package:anime_flow/http/dio/dio_request.dart';
+import 'package:anime_flow/http/clients/dio_request.dart';
 import 'package:anime_flow/models/play/video/episode_resources_item.dart';
 import 'package:anime_flow/models/play/video/search_resources_item.dart';
 import 'package:anime_flow/utils/utils.dart';

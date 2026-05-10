@@ -1,9 +1,9 @@
 import 'dart:convert';
+import 'package:anime_flow/http/clients/dio_request.dart';
 import 'package:anime_flow/models/item/danmaku/danmaku_module.dart';
 import 'package:anime_flow/models/item/danmaku/danmaku_search_response.dart';
 import 'package:crypto/crypto.dart';
 import 'package:anime_flow/http/api_path.dart';
-import 'package:anime_flow/http/dio/dio_request.dart';
 import 'package:anime_flow/models/item/danmaku/danmaku_episode_response.dart';
 import 'package:anime_flow/utils/utils.dart';
 import 'package:dio/dio.dart';

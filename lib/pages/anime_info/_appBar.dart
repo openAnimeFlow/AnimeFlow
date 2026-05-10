@@ -20,7 +20,7 @@ class _Appbar extends StatelessWidget {
         _openInBrowser(url);
         break;
       case MoreMenuAction.downloadCover:
-        Utils.downloadImage(subjectBasicData.image, subjectBasicData.name);
+        Request.downloadImage(subjectBasicData.image, subjectBasicData.name);
         break;
       case MoreMenuAction.copyUrl:
         _copyUrl(context, url);

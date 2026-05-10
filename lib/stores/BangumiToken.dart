@@ -3,7 +3,7 @@ import 'dart:convert';
 import 'package:anime_flow/models/item/token_item.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 
-class TokenStorage {
+class BangumiToken {
   static const _tokenKey = 'auth_token';
   static const _storage = FlutterSecureStorage();
 
@@ -20,5 +20,3 @@ class TokenStorage {
     await _storage.delete(key: _tokenKey);
   }
 }
-
-final tokenStorage = TokenStorage();

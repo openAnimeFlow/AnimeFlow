@@ -2,7 +2,7 @@ import 'dart:io';
 
 import 'package:anime_flow/controllers/app/app_info_controller.dart';
 import 'package:anime_flow/controllers/app/apply_updates_controller.dart';
-import 'package:anime_flow/http/dio/dio_request.dart';
+import 'package:anime_flow/http/clients/dio_request.dart';
 import 'package:dio/dio.dart';
 import 'package:get/get.dart';
 import 'package:logger/logger.dart';

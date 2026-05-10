@@ -1,7 +1,6 @@
-import 'package:anime_flow/constants/constants.dart';
-import 'package:anime_flow/controllers/app/app_info_controller.dart';
-import 'package:anime_flow/crawler/html_crawler.dart';
 import 'package:anime_flow/http/api_path.dart';
+import 'package:anime_flow/http/clients/bgm_client.dart';
+import 'package:anime_flow/http/clients/dio_request.dart';
 import 'package:anime_flow/models/enums/sort_type.dart';
 import 'package:anime_flow/models/item/bangumi/actor_item.dart';
 import 'package:anime_flow/models/item/bangumi/calendar_item.dart';
@@ -18,42 +17,27 @@ import 'package:anime_flow/models/item/bangumi/staff_item.dart';
 import 'package:anime_flow/models/item/bangumi/subject_item.dart';
 import 'package:anime_flow/models/item/bangumi/subject_comments_item.dart';
 import 'package:anime_flow/models/item/bangumi/subjects_info_item.dart';
-import 'package:anime_flow/http/dio/bgm_dio_request.dart';
-import 'package:anime_flow/http/dio/dio_request.dart';
 import 'package:anime_flow/models/item/bangumi/timeline_item.dart';
 import 'package:anime_flow/models/item/bangumi/user_collections_item.dart';
 import 'package:anime_flow/models/item/bangumi/user_info_item.dart';
-import 'package:anime_flow/crawler/itme/bgm_user_page_item.dart';
-import 'package:anime_flow/utils/utils.dart';
-import 'package:dio/dio.dart';
-import 'package:get/get.dart';
 import 'package:logger/logger.dart';
 
 class BgmRequest {
   static const String _nextBaseUrl = BgmNextApi.baseUrl;
   static final Logger _logger = Logger();
+  static final BangumiClient _client = BangumiClient.instance;
 
-  static String _getBangumiUserAgent() {
-    final appInfoController = Get.find<AppInfoController>();
-    return CommonApi.bangumiUserAgent
-        .replaceAll('{version}', appInfoController.version);
-  }
 
   /// 获取热门
   static Future<HotItem> getHotService(int limit, int offset) async {
     final response = await dioRequest.get(_nextBaseUrl + BgmNextApi.hot,
-        queryParameters: {'type': 2, 'limit': limit, 'offset': offset},
-        options:
-            Options(headers: {Constants.userAgentName: _getBangumiUserAgent}));
+        queryParameters: {'type': 2, 'limit': limit, 'offset': offset});
     return HotItem.fromJson(response.data);
   }
 
   ///根据id获取条目
   static Future<SubjectsInfoItem> getSubjectByIdService(int id) async {
-    final response = await bgmDioRequest.get(
-        '$_nextBaseUrl${BgmNextApi.subjects}/$id',
-        options:
-            Options(headers: {Constants.userAgentName: _getBangumiUserAgent}));
+    final response = await _client.get('$_nextBaseUrl${BgmNextApi.subjects}/$id');
     return SubjectsInfoItem.fromJson(response.data);
   }
 
@@ -61,12 +45,10 @@ class BgmRequest {
   static Future<EpisodesItem> getSubjectEpisodesByIdService(
       int id, int limit, int offset) async {
     try {
-      final response = await bgmDioRequest.get(
+      final response = await _client.get(
           _nextBaseUrl +
               BgmNextApi.episodes.replaceFirst('{subjectId}', id.toString()),
-          queryParameters: {'limit': limit, 'offset': offset},
-          options: Options(
-              headers: {Constants.userAgentName: _getBangumiUserAgent}));
+          queryParameters: {'limit': limit, 'offset': offset});
       return EpisodesItem.fromJson(response.data);
     } catch (e) {
       _logger.e(e);
@@ -80,7 +62,7 @@ class BgmRequest {
     required int offset,
     required int subjectId,
   }) async {
-    final response = await bgmDioRequest.get(
+    final response = await _client.get(
       _nextBaseUrl +
           BgmNextApi.subjectComments
               .replaceFirst('{subjectId}', subjectId.toString()),
@@ -88,9 +70,6 @@ class BgmRequest {
         'limit': limit,
         'offset': offset,
       },
-      options: Options(
-        headers: {Constants.userAgentName: _getBangumiUserAgent},
-      ),
     );
     try {
       return SubjectCommentItem.fromJson(response.data);
@@ -120,16 +99,13 @@ class BgmRequest {
 
     if (rank != null) data['rank'] = rank;
 
-    final response = await dioRequest.post(
+    final response = await _client.post(
       _nextBaseUrl + BgmNextApi.search,
       queryParameters: {
         'limit': limit,
         'offset': offset,
       },
       data: data,
-      options: Options(
-        headers: {Constants.userAgentName: _getBangumiUserAgent},
-      ),
     );
 
     return SubjectItem.fromJson(response.data);
@@ -137,12 +113,9 @@ class BgmRequest {
 
   ///每日放送
   static Future<Calendar> calendarService() async {
-    return await bgmDioRequest
+    return await _client
         .get(
           _nextBaseUrl + BgmNextApi.calendar,
-          options: Options(
-            headers: {Constants.userAgentName: _getBangumiUserAgent},
-          ),
         )
         .then((value) => Calendar.fromJson(value.data))
         .catchError((error) {
@@ -155,7 +128,7 @@ class BgmRequest {
   static Future<List<EpisodeComment>> episodeCommentsService({
     required int episodeId,
   }) async {
-    final response = await dioRequest.get(_nextBaseUrl +
+    final response = await _client.get(_nextBaseUrl +
         BgmNextApi.episodeComments
             .replaceFirst('{episodeId}', episodeId.toString()));
     return (response.data as List<dynamic>)
@@ -173,15 +146,12 @@ class BgmRequest {
     if (type != null) {
       queryParameters['type'] = type;
     }
-    return dioRequest
+    return _client
         .get(
           _nextBaseUrl +
               BgmNextApi.characters
                   .replaceFirst('{subjectId}', subjectId.toString()),
           queryParameters: queryParameters,
-          options: Options(
-            headers: {Constants.userAgentName: _getBangumiUserAgent},
-          ),
         )
         .then((response) => (CharactersItem.fromJson(response.data)));
   }
@@ -189,7 +159,7 @@ class BgmRequest {
   ///角色信息
   static Future<CharacterDetailItem> characterInfoService(
       int characterId) async {
-    final response = await dioRequest.get(_nextBaseUrl +
+    final response = await _client.get(_nextBaseUrl +
         BgmNextApi.character
             .replaceFirst('{characterId}', characterId.toString()));
     return CharacterDetailItem.fromJson(response.data);
@@ -198,7 +168,7 @@ class BgmRequest {
   ///角色出演作品
   static Future<CharacterCastsItem> characterWorksService(int characterId,
       {required int limit, required int offset, int subjectType = 2}) async {
-    final response = await dioRequest.get(
+    final response = await _client.get(
         _nextBaseUrl +
             BgmNextApi.characterCasts
                 .replaceFirst('{characterId}', characterId.toString()),
@@ -213,7 +183,7 @@ class BgmRequest {
   ///角色吐槽
   static Future<List<CharacterCommentItem>> characterCommentsService(
       int characterId) async {
-    final response = await dioRequest.get(_nextBaseUrl +
+    final response = await _client.get(_nextBaseUrl +
         BgmNextApi.characterComments
             .replaceFirst('{characterId}', characterId.toString()));
     return (response.data as List<dynamic>)
@@ -225,7 +195,7 @@ class BgmRequest {
   ///相关条目
   static Future<SubjectRelationItem> relatedSubjectsService(int subjectId,
       {required int limit, required int offset, int? type = 2}) async {
-    return dioRequest.get(
+    return _client.get(
       _nextBaseUrl +
           BgmNextApi.relations
               .replaceFirst('{subjectId}', subjectId.toString()),
@@ -256,13 +226,10 @@ class BgmRequest {
     if (month != null) queryParameters['month'] = month;
     if (tags != null) queryParameters['tags'] = tags;
 
-    return dioRequest
+    return _client
         .get(
           _nextBaseUrl + BgmNextApi.subjects,
           queryParameters: queryParameters,
-          options: Options(
-            headers: {Constants.userAgentName: _getBangumiUserAgent},
-          ),
         )
         .then((response) => (SubjectItem.fromJson(response.data)));
   }
@@ -280,9 +247,6 @@ class BgmRequest {
       final response = await dioRequest.get(
         _nextBaseUrl + BgmNextApi.timeline,
         queryParameters: queryParameters,
-        options: Options(
-          headers: {Constants.userAgentName: _getBangumiUserAgent},
-        ),
       );
       final data = response.data;
       if (data == null) {
@@ -316,9 +280,6 @@ class BgmRequest {
         'limit': limit,
         'offset': offset,
       },
-      options: Options(
-        headers: {Constants.userAgentName: _getBangumiUserAgent},
-      ),
     );
     return StaffItem.fromJson(response.data);
   }
@@ -326,47 +287,32 @@ class BgmRequest {
 
 class UserRequest {
   static const String _nextBaseUrl = BgmNextApi.baseUrl;
+  static final BangumiClient _client = BangumiClient.instance;
 
   ///获取当前用户信息
   static Future<MeItem> userInfoService() async {
-    return await bgmDioRequest
-        .get(_nextBaseUrl + BgmUsersApi.me,
-            options: Options(
-              headers: {
-                Constants.userAgentName: BgmRequest._getBangumiUserAgent()
-              },
-            ))
+    return await _client
+        .get(_nextBaseUrl + BgmUsersApi.me)
         .then((onValue) => (MeItem.fromJson(onValue.data)));
   }
 
   /// 查询用户信息
   static Future<UserInfoItem> queryUserInfoService(String username) async {
-    return await bgmDioRequest
-        .get(
-          _nextBaseUrl +
-              BgmUsersApi.userInfo.replaceFirst('{username}', username),
-          options: Options(
-            headers: {
-              Constants.userAgentName: BgmRequest._getBangumiUserAgent()
-            },
-          ),
-        )
+    return await _client
+        .get(_nextBaseUrl + BgmUsersApi.userInfo.replaceFirst('{username}', username))
         .then((value) => (UserInfoItem.fromJson(value.data)));
   }
 
   ///用户条目收藏
   static Future<CollectionsItem> userCollectionsService(
       {required int type, required int limit, required int offset}) async {
-    final response = await bgmDioRequest.get(
+    final response = await _client.get(
       _nextBaseUrl + BgmUsersApi.collections,
       queryParameters: {
         'type': type,
         'limit': limit,
         'offset': offset,
       },
-      options: Options(
-        headers: {Constants.userAgentName: BgmRequest._getBangumiUserAgent()},
-      ),
     );
     try {
       return CollectionsItem.fromJson(response.data);
@@ -382,7 +328,7 @@ class UserRequest {
       required int type,
       required int limit,
       required int offset}) async {
-    final response = await bgmDioRequest.get(
+    final response = await _client.get(
         _nextBaseUrl +
             BgmUsersApi.userCollections.replaceFirst('{username}', username),
         queryParameters: {
@@ -391,9 +337,7 @@ class UserRequest {
           'limit': limit,
           'offset': offset,
         },
-        options: Options(
-          headers: {Constants.userAgentName: BgmRequest._getBangumiUserAgent()},
-        ));
+    );
     try {
       return UserCollectionsItem.fromJson(response.data);
     } catch (e) {
@@ -418,16 +362,8 @@ class UserRequest {
     if (comment != null) data['comment'] = comment;
     if (tags != null) data['tags'] = tags;
     try {
-      bgmDioRequest
-          .put(
-            '$_nextBaseUrl${BgmUsersApi.collections}/$subjectId',
-            data: data,
-            options: Options(
-              headers: {
-                Constants.userAgentName: BgmRequest._getBangumiUserAgent()
-              },
-            ),
-          )
+      _client
+          .put('$_nextBaseUrl${BgmUsersApi.collections}/$subjectId',data: data)
           .then((value) => (value.data));
     } catch (e) {
       Logger().e(e);
@@ -438,23 +374,12 @@ class UserRequest {
   ///更新章节进度
   static Future<void> updateEpisodeProgressService(int episodeId,
       {required bool batch, required int type}) async {
-    bgmDioRequest.put(
+    _client.put(
       '$_nextBaseUrl${BgmUsersApi.collectionsEpisodes}/$episodeId',
       data: {
         'type': type,
         'batch': batch,
       },
     );
-  }
-
-  ///获取bgm用户页面数据
-  static Future<BgmUserPageItem> getBgmUserPageService(String username) async {
-    final response = await dioRequest.get(
-      '${CommonApi.bgmTV}/user/$username',
-      options: Options(
-        headers: {Constants.userAgentName: Utils.getRandomUA()},
-      ),
-    );
-    return await HtmlCrawler.parseUserPage(response.data);
   }
 }

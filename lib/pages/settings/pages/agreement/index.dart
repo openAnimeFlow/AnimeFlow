@@ -1,4 +1,4 @@
-import 'package:anime_flow/http/dio/dio_request.dart';
+import 'package:anime_flow/http/clients/dio_request.dart';
 import 'package:flutter/material.dart';
 
 class AgreementPage extends StatefulWidget {

@@ -1,4 +1,4 @@
-import 'package:anime_flow/http/clients/dio_request.dart';
+import 'package:anime_flow/http/clients/client.dart';
 import 'package:flutter/material.dart';
 
 class AgreementPage extends StatefulWidget {
@@ -26,7 +26,7 @@ class _AgreementPageState extends State<AgreementPage> {
     });
 
     try {
-      final response = await dioRequest.get<String>(
+      final response = await Client.instance.get<String>(
         'https://raw.githubusercontent.com/openAnimeFlow/AnimeFlow/main/LICENSE.txt',
       );
 

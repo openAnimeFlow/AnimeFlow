@@ -1,6 +1,6 @@
 import 'package:anime_flow/controllers/app/app_info_controller.dart';
 import 'package:anime_flow/controllers/app/apply_updates_controller.dart';
-import 'package:anime_flow/http/clients/dio_request.dart';
+import 'package:anime_flow/http/clients/client.dart';
 import 'package:dio/dio.dart';
 import 'package:path_provider/path_provider.dart' show getDownloadsDirectory;
 import 'package:path/path.dart' as path;
@@ -18,7 +18,7 @@ class ApplyUpdatesWindowsController implements ApplyUpdatesController {
     try {
       final tempDir = await getDownloadsDirectory();
       final savePath = path.join(tempDir!.path, downloadInfo.fileName);
-      await dioRequest.download(
+      await Client.instance.download(
         downloadInfo.url,
         savePath,
         onReceiveProgress: (received, total) {

@@ -1,6 +1,6 @@
 import 'dart:async';
 import 'package:anime_flow/crawler/itme/crawler_config_item.dart';
-import 'package:anime_flow/http/clients/dio_request.dart';
+import 'package:anime_flow/http/clients/client.dart';
 import 'package:anime_flow/models/play/video/episode_resources_item.dart';
 import 'package:anime_flow/models/play/video/search_resources_item.dart';
 import 'package:anime_flow/utils/utils.dart';
@@ -24,7 +24,7 @@ class CaptchaRequiredException implements Exception {
 
 class WebRequest {
   static Logger logger = Logger();
-
+  static final Client _client = Client.instance;
   ///获取搜索条目列表
   static Future<List<SearchResourcesItem>> getSearchSubjectListService(
       String keyword, CrawlConfigItem crawlConfig) async {
@@ -40,7 +40,7 @@ class WebRequest {
       Constants.userAgentName: Utils.getRandomUA(),
       if (cookie.isNotEmpty) 'Cookie': cookie
     };
-    final response = await dioRequest.get(requestUrl,
+    final response = await _client.get(requestUrl,
         options: Options(headers: httpHeaders));
 
     final antiCrawler = crawlConfig.antiCrawlerConfig;
@@ -82,7 +82,7 @@ class WebRequest {
       Constants.userAgentName: Utils.getRandomUA(),
     };
 
-    final response = await dioRequest.get(linkUrl, options: Options(headers: httpHeaders));
+    final response = await _client.get(linkUrl, options: Options(headers: httpHeaders));
     return HtmlCrawler.parseResourcesHtml(response.data, crawlConfig);
   }
 

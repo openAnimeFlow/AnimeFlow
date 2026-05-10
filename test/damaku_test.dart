@@ -1,6 +1,6 @@
 import 'dart:convert';
 import 'dart:ui';
-import 'package:anime_flow/http/clients/dio_request.dart';
+import 'package:anime_flow/http/clients/client.dart';
 import 'package:anime_flow/http/requests/damaku_request.dart';
 import 'package:anime_flow/utils/utils.dart';
 import 'package:crypto/crypto.dart';
@@ -29,7 +29,7 @@ class Damaku {
       'withRelated': 'true',
     };
     var timestamp = DateTime.now().millisecondsSinceEpoch ~/ 1000;
-    final res = await dioRequest.get(endPoint,
+    final res = await Client.instance.get(endPoint,
         queryParameters: withRelated,
         options: Options(headers: {
           'user-agent': Utils.getRandomUA(),

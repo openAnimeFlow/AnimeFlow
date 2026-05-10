@@ -1,6 +1,5 @@
 import 'package:anime_flow/http/api_path.dart';
 import 'package:anime_flow/http/clients/bgm_client.dart';
-import 'package:anime_flow/http/clients/dio_request.dart';
 import 'package:anime_flow/models/enums/sort_type.dart';
 import 'package:anime_flow/models/item/bangumi/actor_item.dart';
 import 'package:anime_flow/models/item/bangumi/calendar_item.dart';
@@ -30,7 +29,7 @@ class BgmRequest {
 
   /// 获取热门
   static Future<HotItem> getHotService(int limit, int offset) async {
-    final response = await dioRequest.get(_nextBaseUrl + BgmNextApi.hot,
+    final response = await _client.get(_nextBaseUrl + BgmNextApi.hot,
         queryParameters: {'type': 2, 'limit': limit, 'offset': offset});
     return HotItem.fromJson(response.data);
   }
@@ -244,7 +243,7 @@ class BgmRequest {
     if (mode != null) queryParameters['mode'] = mode;
     if (until != null) queryParameters['until'] = until;
     try {
-      final response = await dioRequest.get(
+      final response = await _client.get(
         _nextBaseUrl + BgmNextApi.timeline,
         queryParameters: queryParameters,
       );
@@ -273,7 +272,7 @@ class BgmRequest {
   ///获取条目制作人
   static Future<StaffItem> getProducersService(int subjectId,
       {required int limit, required int offset}) async {
-    final response = await dioRequest.get(
+    final response = await _client.get(
       _nextBaseUrl +
           BgmNextApi.staffs.replaceFirst('{subjectId}', subjectId.toString()),
       queryParameters: {

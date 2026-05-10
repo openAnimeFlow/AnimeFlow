@@ -1,5 +1,5 @@
 import 'dart:convert';
-import 'package:anime_flow/http/clients/dio_request.dart';
+import 'package:anime_flow/http/clients/client.dart';
 import 'package:anime_flow/models/item/danmaku/danmaku_module.dart';
 import 'package:anime_flow/models/item/danmaku/danmaku_search_response.dart';
 import 'package:crypto/crypto.dart';
@@ -10,17 +10,18 @@ import 'package:dio/dio.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 
 class DanmakuRequest {
+  static final Client _client = Client.instance;
   static const String _danDanPlayMain = DamakuApi.dandanAPIDomain;
 
   static Future<DanmakuEpisodeResponse> getDanDanEpisodesByDanDanBangumiID(
       int bangumiID) async {
     var path = DamakuApi.dandanAPIInfo + bangumiID.toString();
     var endPoint = _danDanPlayMain + path;
-    final res = await dioRequest.get(endPoint,
+    final res = await _client.get(endPoint,
         options: Options(headers: danDanPlayHeaders(path)));
     Map<String, dynamic> jsonData = res.data;
     DanmakuEpisodeResponse danmakuEpisodeResponse =
-        DanmakuEpisodeResponse.fromJson(jsonData);
+    DanmakuEpisodeResponse.fromJson(jsonData);
     return danmakuEpisodeResponse;
   }
 
@@ -32,12 +33,12 @@ class DanmakuRequest {
       'keyword': title,
     };
 
-    final res = await dioRequest.get(endPoint,
+    final res = await _client.get(endPoint,
         options: Options(headers: danDanPlayHeaders(path)),
         queryParameters: keywordMap);
     Map<String, dynamic> jsonData = res.data;
     DanmakuSearchResponse danmakuSearchResponse =
-        DanmakuSearchResponse.fromJson(jsonData);
+    DanmakuSearchResponse.fromJson(jsonData);
     return danmakuSearchResponse;
   }
 
@@ -45,7 +46,7 @@ class DanmakuRequest {
     var path = DamakuApi.dandanAPIInfoByBgmBangumiId
         .replaceFirst('{bgmtvSubjectId}', bgmBangumiID.toString());
     var endPoint = _danDanPlayMain + path;
-    final response = await dioRequest.get(endPoint,
+    final response = await _client.get(endPoint,
         options: Options(headers: danDanPlayHeaders(path)));
 
     Map<String, dynamic> jsonData = response.data;
@@ -65,7 +66,7 @@ class DanmakuRequest {
     Map<String, String> withRelated = {
       'withRelated': 'true',
     };
-    final response = await dioRequest.get(endPoint,
+    final response = await _client.get(endPoint,
         queryParameters: withRelated,
         options: Options(headers: danDanPlayHeaders(path)));
     Map<String, dynamic> jsonData = response.data;
@@ -85,7 +86,7 @@ class DanmakuRequest {
     Map<String, String> withRelated = {
       'withRelated': 'true',
     };
-    final res = await dioRequest.get(endPoint,
+    final res = await _client.get(endPoint,
         queryParameters: withRelated,
         options: Options(headers: danDanPlayHeaders(path)));
     Map<String, dynamic> jsonData = res.data;

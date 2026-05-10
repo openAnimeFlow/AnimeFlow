@@ -1,42 +1,44 @@
 import 'package:anime_flow/http/api_path.dart';
+import 'package:anime_flow/http/clients/anime_flow_client.dart';
 import 'package:anime_flow/http/clients/bgm_client.dart';
-import 'package:anime_flow/http/clients/dio_request.dart';
+import 'package:anime_flow/http/clients/client.dart';
 import 'package:anime_flow/models/item/token_item.dart';
 import 'package:anime_flow/utils/systemUtil.dart';
 
 class OAuthRequest {
+  static final AnimeFlowClient _client = AnimeFlowClient.instance;
   static const String _animeFlowApi = AnimeFlowApi.animeFlowApi;
 
   static Future<TokenItem> getTokenService({required String code}) async {
-    final response = await BangumiClient.instance.post(
+    final response = await _client.post(
         _animeFlowApi + AnimeFlowApi.token,
         queryParameters: {'code': code});
-    return TokenItem.fromJson(response.data['data']);
+    return TokenItem.fromJson(response['data']);
   }
 
   ///刷新token
   static Future<TokenItem> refreshTokenService({required String refreshToken}) async {
-    final response = await dioRequest.post(
+    final response = await _client.post(
         '$_animeFlowApi${AnimeFlowApi.refreshToken}',
         queryParameters: {'refreshToken': refreshToken});
-    return TokenItem.fromJson(response.data['data']);
+    return TokenItem.fromJson(response['data']);
   }
 
   //回调api
   static Future<Map<String, dynamic>> callbackService(
       String code, String state) async {
-    return await dioRequest.get(_animeFlowApi + AnimeFlowApi.callback,
+    return await _client.get(_animeFlowApi + AnimeFlowApi.callback,
         queryParameters: {
           'code': code,
           'state': state
-        }).then((value) => value.data);
+        }).then((value) => value);
   }
 
   //获取session
   static Future<Map<String, dynamic>> getSessionService() async {
     String deviceName = SystemUtil.getDevice().toUpperCase();
-    return await dioRequest.get(_animeFlowApi + AnimeFlowApi.session,
-        queryParameters: {'platform': deviceName}).then((value) => value.data);
+    return await _client.get(_animeFlowApi + AnimeFlowApi.session,
+        queryParameters: {'platform': deviceName}).then((value) => value);
   }
 
   // 持续轮询直到获取到 token 或超时（60秒，与 session 过期时间一致）
@@ -47,13 +49,13 @@ class OAuthRequest {
 
     while (DateTime.now().difference(startTime) < maxDuration) {
       try {
-        final response = await dioRequest.get(
+        final response = await _client.get(
           _animeFlowApi + AnimeFlowApi.token,
           queryParameters: {'sessionId': state},
         );
 
-        if (response.data['code'] == 200 && response.data['data'] != null) {
-          return TokenItem.fromJson(response.data['data']);
+        if (response['code'] == 200 && response['data'] != null) {
+          return TokenItem.fromJson(response['data']);
         }
       } catch (e) {
         // 忽略错误，继续轮询

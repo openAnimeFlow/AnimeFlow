@@ -6,7 +6,7 @@ import 'package:anime_flow/crawler/html_crawler.dart';
 import 'package:anime_flow/crawler/itme/bgm_user_page_item.dart';
 import 'package:anime_flow/http/api_path.dart';
 import 'package:anime_flow/crawler/itme/crawler_config_item.dart';
-import 'package:anime_flow/http/clients/dio_request.dart';
+import 'package:anime_flow/http/clients/client.dart';
 import 'package:anime_flow/models/item/image_search_item.dart';
 import 'package:anime_flow/utils/systemUtil.dart';
 import 'package:anime_flow/utils/utils.dart';
@@ -19,8 +19,10 @@ import 'package:path_provider/path_provider.dart'
     show getDownloadsDirectory, getTemporaryDirectory;
 
 class Request {
+  static final Client _client = Client.instance;
+
   static Future<Map<String, dynamic>> getReleases() async {
-    return await dioRequest
+    return await _client
         .get(CommonApi.githubApi + CommonApi.animeFlowVersion)
         .then((onValue) => onValue.data);
   }
@@ -32,7 +34,7 @@ class Request {
       pluginRepo = '${CommonApi.gitMirror}$pluginRepo';
     }
 
-    return await dioRequest
+    return await _client
         .get(pluginRepo,
         options: Options(headers: {
           Constants.userAgentName: Utils.getRandomUA(),
@@ -50,7 +52,7 @@ class Request {
   static Future<CrawlConfigItem> getPlugin(String downloadUrl,{bool isMirror = false}) async {
     if (isMirror) downloadUrl = '${CommonApi.gitMirror}$downloadUrl';
 
-    return await dioRequest.get(downloadUrl).then((onValue) {
+    return await _client.get(downloadUrl).then((onValue) {
       Map<String, dynamic> jsonData;
       if (onValue.data is String) {
         jsonData = jsonDecode(onValue.data as String) as Map<String, dynamic>;
@@ -63,7 +65,7 @@ class Request {
 
   ///获取bgm用户页面数据
   static Future<BgmUserPageItem> getBgmUserPageService(String username) async {
-    final response = await dioRequest.get(
+    final response = await _client.get(
       '${CommonApi.bgmTV}/user/$username',
       options: Options(
         headers: {Constants.userAgentName: Utils.getRandomUA()},
@@ -78,7 +80,7 @@ class Request {
       {int anilistInfo = 2}) async {
     final bytes = await imageFile.readAsBytes();
 
-    return await dioRequest
+    return await _client
         .post(
       CommonApi.traceApi,
       queryParameters: {"anilistInfo": anilistInfo},
@@ -99,7 +101,7 @@ class Request {
   static Future<ImageSearchItem> getAnimeInfoByImageUrl(
       String imageUrl,
       {int anilistInfo = 2}) async {
-    return await dioRequest.post(
+    return await _client.post(
       CommonApi.traceApi,
       queryParameters: {"anilistInfo": anilistInfo, "url": imageUrl},
     ).then((onValue) {
@@ -126,7 +128,7 @@ class Request {
         }
         final tempDir = await getTemporaryDirectory();
         final filePath = '${tempDir.path}/$time.jpg';
-        await dioRequest.download(url, filePath);
+        await _client.download(url, filePath);
         final bytes = await File(filePath).readAsBytes();
         await Gal.putImageBytes(bytes, name: '${name}_$time');
         await File(filePath).delete();
@@ -135,7 +137,7 @@ class Request {
         //桌面端(保持到下载目录)
         final dir = await getDownloadsDirectory();
         final filePath = '${dir?.path}/${name}_$time.jpg';
-        await dioRequest.download(url, filePath);
+        await _client.download(url, filePath);
         Logger().i('图片已保存到:$filePath');
         Get.snackbar('提示', '图片已保存到:$filePath', maxWidth: 500);
       }

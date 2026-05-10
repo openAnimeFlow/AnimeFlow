@@ -2,6 +2,7 @@ import 'dart:async';
 import 'package:anime_flow/constants/constants.dart';
 import 'package:anime_flow/constants/storage_key.dart';
 import 'package:anime_flow/controllers/shaders/shaders_controller.dart';
+import 'package:anime_flow/controllers/video/video_ui_controller.dart';
 import 'package:anime_flow/http/requests/anime_flow_request.dart';
 import 'package:anime_flow/http/requests/bgm_request.dart';
 import 'package:anime_flow/models/enums/video_controls_icon_type.dart';
@@ -15,7 +16,7 @@ import 'package:anime_flow/utils/systemUtil.dart';
 import 'package:anime_flow/utils/utils.dart';
 import 'package:anime_flow/utils/vibrate.dart';
 import 'package:canvas_danmaku/canvas_danmaku.dart';
-import 'package:flutter/cupertino.dart' show MainAxisAlignment;
+import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:hive_ce/hive.dart';
 import 'package:logger/logger.dart';
@@ -23,8 +24,6 @@ import 'package:media_kit/media_kit.dart';
 import 'package:media_kit_video/media_kit_video.dart';
 import 'package:window_manager/window_manager.dart';
 
-import '../../http/requests/damaku_request.dart' show DanmakuRequest;
-import '../video/video_ui_controller.dart' show VideoUiStateController;
 
 class PlayState {
   /// 播放地址
@@ -262,7 +261,7 @@ class PlayController extends GetxController {
 
           /// 播放进度大于90% && collection != null，更新章节进度
           final episodesProgress =
-              setting.get(PlaybackKey.episodesProgress, defaultValue: true);
+          setting.get(PlaybackKey.episodesProgress, defaultValue: true);
           if (episodesProgress) {
             final position = this.position.value;
             final duration = this.duration.value;
@@ -319,11 +318,11 @@ class PlayController extends GetxController {
 
     // 读取各平台的显示设置
     final platformBilibili =
-        setting.get(DanmakuKey.danmakuPlatformBilibili, defaultValue: true);
+    setting.get(DanmakuKey.danmakuPlatformBilibili, defaultValue: true);
     final platformGamer =
-        setting.get(DanmakuKey.danmakuPlatformGamer, defaultValue: true);
+    setting.get(DanmakuKey.danmakuPlatformGamer, defaultValue: true);
     final platformDanDanPlay =
-        setting.get(DanmakuKey.danmakuPlatformDanDanPlay, defaultValue: true);
+    setting.get(DanmakuKey.danmakuPlatformDanDanPlay, defaultValue: true);
 
     // 平台名称映射（从 source 字段中提取的实际名称，如 [BiliBili]、[Gamer]）
     const String platformNameBilibili = 'BiliBili';

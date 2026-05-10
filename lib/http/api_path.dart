@@ -92,15 +92,20 @@ class CommonApi {
 }
 
 class AnimeFlowApi {
-  static const String animeFlowApi = 'https://ligg.top';
+  /// AnimeFlow API Server
+  static const String animeFlowApi = 'https://ligg.top',
 
-  static const String token = '/api/oauth/token';
+  /// 申请Token
+  token = '/api/oauth/token',
 
-  static const String refreshToken = '/api/oauth/refresh';
+  /// 获取弹幕
+  getDanmaku = '/api/v1/danmaku',
 
-  static const String session = '/api/oauth/session';
+  refreshToken = '/api/oauth/refresh',
 
-  static const String callback = '/api/oauth/callback';
+  session = '/api/oauth/session',
+
+  callback = '/api/oauth/callback';
 }
 
 class DamakuApi {

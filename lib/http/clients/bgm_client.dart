@@ -5,7 +5,7 @@ import 'package:anime_flow/controllers/app/app_info_controller.dart';
 import 'package:anime_flow/http/api_path.dart';
 import 'package:anime_flow/http/core/dio_factory.dart';
 import 'package:anime_flow/http/core/network_error_mapper.dart';
-import 'package:anime_flow/http/requests/oauth_request.dart';
+import 'package:anime_flow/http/requests/anime_flow_request.dart';
 import 'package:anime_flow/models/item/token_item.dart';
 import 'package:anime_flow/stores/BangumiToken.dart';
 import 'package:anime_flow/stores/user_info_store.dart';
@@ -181,7 +181,7 @@ class BangumiClient {
         _refreshCompleter = Completer<void>();
 
         try {
-          final newToken = await OAuthRequest.refreshTokenService(
+          final newToken = await AnimeFlowRequest.refreshTokenService(
             refreshToken: oldToken.refreshToken,
           );
           TokenItem newTokenItem = TokenItem(

@@ -1,12 +1,11 @@
 import 'package:anime_flow/http/api_path.dart';
 import 'package:anime_flow/http/clients/anime_flow_client.dart';
-import 'package:anime_flow/http/clients/bgm_client.dart';
-import 'package:anime_flow/http/clients/client.dart';
 import 'package:anime_flow/models/item/token_item.dart';
 import 'package:anime_flow/utils/systemUtil.dart';
 
-class OAuthRequest {
+class AnimeFlowRequest {
   static final AnimeFlowClient _client = AnimeFlowClient.instance;
+
   static const String _animeFlowApi = AnimeFlowApi.animeFlowApi;
 
   static Future<TokenItem> getTokenService({required String code}) async {
@@ -66,4 +65,5 @@ class OAuthRequest {
 
     return null; // 超时未获取到 token
   }
+
 }

@@ -1,7 +1,7 @@
 import 'package:anime_flow/constants/constants.dart';
 import 'package:anime_flow/http/api_path.dart';
+import 'package:anime_flow/http/requests/anime_flow_request.dart';
 import 'package:anime_flow/http/requests/bgm_request.dart';
-import 'package:anime_flow/http/requests/oauth_request.dart';
 import 'package:anime_flow/stores/BangumiToken.dart';
 import 'package:anime_flow/stores/user_info_store.dart';
 import 'package:anime_flow/utils/systemUtil.dart';
@@ -23,7 +23,7 @@ class MyController {
     final code = uri.queryParameters['code'];
     if (code == null || code.isEmpty) return;
     Logger().d('获取code:$code');
-    final token = await OAuthRequest.getTokenService(code: code);
+    final token = await AnimeFlowRequest.getTokenService(code: code);
     Logger().d('获取token:$token');
     await BangumiToken().saveToken(token);
     try {
@@ -41,7 +41,7 @@ class MyController {
   static void openOAuthPage() async {
     const clientId = Constants.bgmClientId;
     const redirectUri = AnimeFlowApi.animeFlowApi + AnimeFlowApi.callback;
-    final session = await OAuthRequest.getSessionService();
+    final session = await AnimeFlowRequest.getSessionService();
     final sessionId = session['data']['sessionId'];
     final authUrl = Uri.parse(
         '${CommonApi.bgmTV}${BgmApi.oauth}?response_type=code&client_id=$clientId&redirect_uri=$redirectUri&state=$sessionId');
@@ -62,7 +62,7 @@ class MyController {
   static Future<void> _pollTokenAfterAuth(String sessionId) async {
     try {
       Logger().d('开始轮询 token，sessionId: $sessionId');
-      final token = await OAuthRequest.pollTokenService(state: sessionId);
+      final token = await AnimeFlowRequest.pollTokenService(state: sessionId);
       if (token != null) {
         Logger().d('轮询获取到 token: $token');
         await BangumiToken().saveToken(token);

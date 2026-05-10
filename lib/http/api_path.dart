@@ -95,6 +95,8 @@ class AnimeFlowApi {
   /// AnimeFlow API Server
   static const String animeFlowApi = 'https://ligg.top',
 
+  animeFlowDevApi = 'http://localhost:1024',
+
   /// 申请Token
   token = '/api/oauth/token',
 
@@ -105,7 +107,16 @@ class AnimeFlowApi {
 
   session = '/api/oauth/session',
 
-  callback = '/api/oauth/callback';
+  callback = '/api/oauth/callback',
+
+  /// 搜索番剧
+  search = '/api/v1/danmaku/search',
+
+  /// 番剧详情
+  animeDetail = '/api/v1/danmaku/bangumi',
+
+  /// 弹幕
+  danmaku = '/api/v1/danmaku';
 }
 
 class DamakuApi {
@@ -121,5 +132,5 @@ class DamakuApi {
   static const String dandanAPIInfo = "/api/v2/bangumi/";
 
   /// 获取弹弹番剧元数据（通过BGM番剧ID）
-  static const String dandanAPIInfoByBgmBangumiId = "/api/v2/bangumi/bgmtv/{bgmtvSubjectId}";
+  static const String dandanAPIInfoByBgmBangumiId = "/api/v2/bangumi/bgmtv/";
 }

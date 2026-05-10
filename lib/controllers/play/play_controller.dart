@@ -2,6 +2,7 @@ import 'dart:async';
 import 'package:anime_flow/constants/constants.dart';
 import 'package:anime_flow/constants/storage_key.dart';
 import 'package:anime_flow/controllers/shaders/shaders_controller.dart';
+import 'package:anime_flow/http/requests/anime_flow_request.dart';
 import 'package:anime_flow/http/requests/bgm_request.dart';
 import 'package:anime_flow/models/enums/video_controls_icon_type.dart';
 import 'package:anime_flow/models/item/danmaku/danmaku_module.dart';
@@ -226,11 +227,8 @@ class PlayController extends GetxController {
     try {
       if (!_isLoadingDanmaku && episode != 0) {
         _isLoadingDanmaku = true;
-        final bgmBangumiId =
-            await DanmakuRequest.getDanDanBangumiIDByBgmBangumiID(subjectId);
-        final danmaku =
-            await DanmakuRequest.getDanDanmaku(bgmBangumiId, episode);
-        logger.i('加载弹幕数:${danmaku.length}');
+        final bgmBangumiId = await DanmakuRequest.getDanDanBangumiIDByBgmBangumiID(subjectId);
+        final danmaku = await AnimeFlowRequest.getDanDanmaku(bgmBangumiId, episode);
         addDanmaku(danmaku);
         _isLoadingDanmaku = false;
       }

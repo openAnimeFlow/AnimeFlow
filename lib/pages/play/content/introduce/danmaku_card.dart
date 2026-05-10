@@ -1,3 +1,4 @@
+import 'package:anime_flow/http/requests/anime_flow_request.dart';
 import 'package:anime_flow/http/requests/damaku_request.dart';
 import 'package:anime_flow/models/item/danmaku/danmaku_search_response.dart';
 import 'package:anime_flow/models/item/danmaku/danmaku_episode_response.dart';
@@ -8,6 +9,7 @@ import 'package:anime_flow/stores/play_subject_state.dart';
 import 'package:anime_flow/utils/format_time_util.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:logger/logger.dart';
 
 class DanmakuCard extends StatefulWidget {
   const DanmakuCard({super.key});
@@ -164,31 +166,31 @@ class _DanmakuCardState extends State<DanmakuCard> {
                           children: sortedPlatforms.map((entry) {
                             final platform = entry.key;
                             final isHidden =
-                                playController.isPlatformHidden(platform);
+                            playController.isPlatformHidden(platform);
                             return ActionChip(
                               label: Text('${entry.key}: ${entry.value}'),
                               labelStyle: Theme.of(context)
                                   .textTheme
                                   .bodySmall
                                   ?.copyWith(
-                                    decoration: isHidden
-                                        ? TextDecoration.lineThrough
-                                        : null,
-                                    color: isHidden
-                                        ? Theme.of(context)
-                                            .textTheme
-                                            .bodySmall
-                                            ?.color
-                                            ?.withValues(alpha: 0.5)
-                                        : null,
-                                  ),
+                                decoration: isHidden
+                                    ? TextDecoration.lineThrough
+                                    : null,
+                                color: isHidden
+                                    ? Theme.of(context)
+                                    .textTheme
+                                    .bodySmall
+                                    ?.color
+                                    ?.withValues(alpha: 0.5)
+                                    : null,
+                              ),
                               materialTapTargetSize:
-                                  MaterialTapTargetSize.shrinkWrap,
+                              MaterialTapTargetSize.shrinkWrap,
                               visualDensity: VisualDensity.compact,
                               backgroundColor: isHidden
                                   ? Theme.of(context)
-                                      .colorScheme
-                                      .surfaceContainerHighest
+                                  .colorScheme
+                                  .surfaceContainerHighest
                                   : null,
                               onPressed: () {
                                 playController
@@ -248,7 +250,7 @@ class _DanmakuCardState extends State<DanmakuCard> {
           icon: const Icon(Icons.subtitles),
           title: const Text('修改弹幕'),
           titleTextStyle:
-              const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+          const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
           content: ConstrainedBox(
             constraints: const BoxConstraints(maxWidth: 500),
             child: SizedBox(
@@ -284,6 +286,7 @@ class _DanmakuCardState extends State<DanmakuCard> {
                         shrinkWrap: true,
                         itemCount: danmakuSearchResponse!.animes.length,
                         itemBuilder: (context, index) {
+
                           final anime = danmakuSearchResponse!.animes[index];
                           return ListTile(
                             title: Text(
@@ -291,9 +294,9 @@ class _DanmakuCardState extends State<DanmakuCard> {
                               style: Theme.of(context).textTheme.bodyLarge,
                             ),
                             onTap: () async {
-                              final episodes = await DanmakuRequest
+                              final episodes = await AnimeFlowRequest
                                   .getDanDanEpisodesByDanDanBangumiID(
-                                      anime.animeId);
+                                  anime.animeId);
                               Get.back();
                               if (context.mounted) {
                                 _showEpisodesDialog(
@@ -325,8 +328,8 @@ class _DanmakuCardState extends State<DanmakuCard> {
                   });
                   try {
                     final response =
-                        await DanmakuRequest.getDanmakuSearchResponse(
-                            danmakuFieldController.text);
+                    await AnimeFlowRequest.searchResponse(
+                        danmakuFieldController.text);
                     setDialogState(() {
                       danmakuSearchResponse = response;
                       isSearchLoading = false;
@@ -360,38 +363,38 @@ class _DanmakuCardState extends State<DanmakuCard> {
               width: double.maxFinite,
               child: episodesResponse.episodes.isEmpty
                   ? const Center(
-                      child: Padding(
-                        padding: EdgeInsets.all(16.0),
-                        child: Text('暂无剧集数据'),
-                      ),
-                    )
+                child: Padding(
+                  padding: EdgeInsets.all(16.0),
+                  child: Text('暂无剧集数据'),
+                ),
+              )
                   : ConstrainedBox(
-                      constraints: const BoxConstraints(
-                        maxHeight: 400,
-                        minHeight: 200,
+                constraints: const BoxConstraints(
+                  maxHeight: 400,
+                  minHeight: 200,
+                ),
+                child: ListView.builder(
+                  shrinkWrap: true,
+                  itemCount: episodesResponse.episodes.length,
+                  itemBuilder: (context, index) {
+                    final episode = episodesResponse.episodes[index];
+                    return ListTile(
+                      title: Text(
+                        episode.episodeTitle,
+                        style: Theme.of(context).textTheme.bodyLarge,
                       ),
-                      child: ListView.builder(
-                        shrinkWrap: true,
-                        itemCount: episodesResponse.episodes.length,
-                        itemBuilder: (context, index) {
-                          final episode = episodesResponse.episodes[index];
-                          return ListTile(
-                            title: Text(
-                              episode.episodeTitle,
-                              style: Theme.of(context).textTheme.bodyLarge,
-                            ),
-                            onTap: () async {
-                              final danmaku =
-                                  await DanmakuRequest.getDanDanmakuByEpisodeID(
-                                      episode.episodeId);
-                              playController.removeDanmaku();
-                              playController.addDanmaku(danmaku);
-                              Get.back();
-                            },
-                          );
-                        },
-                      ),
-                    ),
+                      onTap: () async {
+                        final danmaku =
+                        await AnimeFlowRequest.getDanDanmakuByEpisodeID(
+                            episode.episodeId);
+                        playController.removeDanmaku();
+                        playController.addDanmaku(danmaku);
+                        Get.back();
+                      },
+                    );
+                  },
+                ),
+              ),
             ),
           ),
           actions: [

@@ -95,8 +95,6 @@ class AnimeFlowApi {
   /// AnimeFlow API Server
   static const String animeFlowApi = 'https://ligg.top',
 
-  animeFlowDevApi = 'http://localhost:1024',
-
   /// 申请Token
   token = '/api/oauth/token',
 

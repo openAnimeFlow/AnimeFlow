@@ -29,7 +29,7 @@ class AnimeFlowResponse {
 class AnimeFlowRequest {
   static final AnimeFlowClient _client = AnimeFlowClient.instance;
 
-  static const String _animeFlowApi = AnimeFlowApi.animeFlowDevApi;
+  static const String _animeFlowApi = AnimeFlowApi.animeFlowApi;
 
   static Future<TokenItem> getTokenService({required String code}) async {
     final response = await _client.post(

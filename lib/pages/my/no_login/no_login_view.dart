@@ -182,7 +182,7 @@ class NoLoginView extends StatelessWidget {
                             fontWeight: FontWeight.bold,
                           ),
                         ),
-                        child: const Text('登录授权'),
+                        child: const Text('登录授权1'),
                       ),
                 );
                 },

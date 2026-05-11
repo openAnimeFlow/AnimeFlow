@@ -1,3 +1,4 @@
+import 'package:anime_flow/http/api_path.dart';
 import 'package:anime_flow/http/clients/client.dart';
 import 'package:flutter/material.dart';
 
@@ -27,7 +28,7 @@ class _AgreementPageState extends State<AgreementPage> {
 
     try {
       final response = await Client.instance.get<String>(
-        'https://raw.githubusercontent.com/openAnimeFlow/AnimeFlow/main/LICENSE.txt',
+        '${CommonApi.gitMirror}https://raw.githubusercontent.com/openAnimeFlow/AnimeFlow/main/LICENSE.txt',
       );
 
       setState(() {

@@ -5,7 +5,6 @@ import 'package:anime_flow/http/requests/damaku_request.dart';
 import 'package:anime_flow/utils/utils.dart';
 import 'package:crypto/crypto.dart';
 import 'package:dio/dio.dart';
-import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 class Damaku {
@@ -13,8 +12,8 @@ class Damaku {
   static const String dandanAPIComment = "/api/v2/comment/";
 
   static String generateDandanSignature(String path, int timestamp) {
-    final id = dotenv.env['DANDANPLAY_ID']!;
-    final value = dotenv.env['DANDANPLAY_SECRET']!;
+    const id = 'DANDANPLAY_ID';
+    const value = 'DANDANPLAY_SECRET';
     String data = id + timestamp.toString() + path + value;
     var bytes = utf8.encode(data);
     var digest = sha256.convert(bytes);
@@ -35,7 +34,7 @@ class Damaku {
           'user-agent': Utils.getRandomUA(),
           'referer': '',
           'X-Auth': 1,
-          'X-AppId': dotenv.env['DANDANPLAY_ID']!,
+          'X-AppId': 'DANDANPLAY_ID',
           'X-Timestamp': timestamp,
           'X-Signature':
               Damaku.generateDandanSignature(Uri.parse(path).path, timestamp),
@@ -102,7 +101,7 @@ class Danmaku {
 
 void main() {
   test('Get danmaku by episode ID test', () async {
-    await dotenv.load(fileName: ".env");
+    await ".env";
     final BangumiID = await  DanmakuRequest.getDanDanBangumiIDByBgmBangumiID(565802);
     final danmakus = await DanmakuRequest.getDanDanmaku(BangumiID, 1);
     print('弹幕内容：$danmakus');

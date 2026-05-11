@@ -88,7 +88,7 @@ dependencies:
   antlr4: ^4.13.2
   photo_view: ^0.15.0
 #  app_links: ^7.0.0
-  flutter_dotenv: ^6.0.0
+#  flutter_dotenv: ^6.0.0
   flutter_secure_storage: ^10.0.0
   gal: ^2.3.2
   #  package_info_plus: ^9.0.0
@@ -170,7 +170,6 @@ flutter:
     - assets/shaders/
     - assets/animation/
     - assets/logo/startLogo.png
-    - .env
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/to/resolution-aware-images
 

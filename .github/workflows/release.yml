@@ -11,7 +11,7 @@ on:
         required: true
 
 jobs:
-  flutter-build_ios:
+  flutter-build-ios:
     runs-on: macos-14
     steps:
       - name: Checkout repository
@@ -21,12 +21,6 @@ jobs:
         run: |
           VERSION=$(grep '^version:' pubspec.yaml | sed 's/version: //')
           echo "VERSION=${VERSION}" >> $GITHUB_ENV
-
-      - name: Create .env file
-        run: |
-          echo "REDIRECT_URI=${{ secrets.REDIRECT_URI }}" >> .env
-          echo "DANDANPLAY_ID=${{ secrets.DANDANPLAY_ID }}" >> .env
-          echo "DANDANPLAY_SECRET=${{ secrets.DANDANPLAY_SECRET }}" >> .env
 
       - name: Install Flutter
         uses: subosito/flutter-action@v2
@@ -68,12 +62,6 @@ jobs:
         run: |
           VERSION=$(grep '^version:' pubspec.yaml | sed 's/version: //')
           echo "VERSION=${VERSION}" >> $GITHUB_ENV
-
-      - name: Create .env file
-        run: |
-          echo "REDIRECT_URI=${{ secrets.REDIRECT_URI }}" >> .env
-          echo "DANDANPLAY_ID=${{ secrets.DANDANPLAY_ID }}" >> .env
-          echo "DANDANPLAY_SECRET=${{ secrets.DANDANPLAY_SECRET }}" >> .env
 
       - name: Set up JDK 17
         uses: actions/setup-java@v4
@@ -157,13 +145,6 @@ jobs:
           echo "VERSION=$version" >> $env:GITHUB_ENV
           echo "INSTALLER_VERSION=$semver" >> $env:GITHUB_ENV
 
-      - name: Create .env file
-        shell: pwsh
-        run: |
-          Add-Content -Path .env -Value "REDIRECT_URI=${{ secrets.REDIRECT_URI }}"
-          Add-Content -Path .env -Value "DANDANPLAY_ID=${{ secrets.DANDANPLAY_ID }}" 
-          Add-Content -Path .env -Value "DANDANPLAY_SECRET=${{ secrets.DANDANPLAY_SECRET }}"
-
       - name: Setup Flutter
         uses: subosito/flutter-action@v2.23.0
         with:
@@ -243,12 +224,6 @@ jobs:
         run: |
           VERSION=$(grep '^version:' pubspec.yaml | sed 's/version: //')
           echo "VERSION=${VERSION}" >> $GITHUB_ENV
-
-      - name: Create .env file
-        run: |
-          echo "REDIRECT_URI=${{ secrets.REDIRECT_URI }}" >> .env
-          echo "DANDANPLAY_ID=${{ secrets.DANDANPLAY_ID }}" >> .env
-          echo "DANDANPLAY_SECRET=${{ secrets.DANDANPLAY_SECRET }}" >> .env
 
       - name: Install Linux build dependencies
         run: |
@@ -365,13 +340,6 @@ jobs:
           VERSION=$(grep '^version:' pubspec.yaml | sed 's/version: //')
           echo "VERSION=${VERSION}" >> $GITHUB_ENV
 
-      - name: Create .env file
-        run: |
-          echo "REDIRECT_URI=${{ secrets.REDIRECT_URI }}" >> .env          
-          echo "DANDANPLAY_ID=${{ secrets.DANDANPLAY_ID }}" >> .env
-          echo "DANDANPLAY_SECRET=${{ secrets.DANDANPLAY_SECRET }}" >> .env
-          
-
       - name: Setup Flutter
         uses: subosito/flutter-action@v2
         with:
@@ -401,7 +369,7 @@ jobs:
           if-no-files-found: ignore
 
   release:
-    needs: [flutter-build_ios, flutter-build-android, flutter-build-windows, flutter-build-linux, flutter-build-macos]
+    needs: [flutter-build-ios, flutter-build-android, flutter-build-windows, flutter-build-linux, flutter-build-macos]
     runs-on: ubuntu-latest
     permissions:
       contents: write

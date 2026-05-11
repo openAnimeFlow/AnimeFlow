@@ -7,7 +7,6 @@ import 'package:anime_flow/http/api_path.dart';
 import 'package:anime_flow/models/item/danmaku/danmaku_episode_response.dart';
 import 'package:anime_flow/utils/utils.dart';
 import 'package:dio/dio.dart';
-import 'package:flutter_dotenv/flutter_dotenv.dart';
 
 /// 目前已废弃转至AnimeFlow服务
 class DanmakuRequest {
@@ -106,15 +105,15 @@ class DanmakuRequest {
       'user-agent': Utils.getRandomUA(),
       'referer': '',
       'X-Auth': 1,
-      'X-AppId': dotenv.env['DANDANPLAY_ID']!,
+      'X-AppId': 'DANDANPLAY_ID',
       'X-Timestamp': timestamp,
       'X-Signature': generateDandanSignature(path, timestamp)
     };
   }
 
   static String generateDandanSignature(String path, int timestamp) {
-    final id = dotenv.env['DANDANPLAY_ID']!;
-    final value = dotenv.env['DANDANPLAY_SECRET']!;
+    const id = 'DANDANPLAY_ID';
+    const value = 'DANDANPLAY_SECRET';
     String data = id + timestamp.toString() + path + value;
     var bytes = utf8.encode(data);
     var digest = sha256.convert(bytes);

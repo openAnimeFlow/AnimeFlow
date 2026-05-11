@@ -145,11 +145,10 @@ class EpisodesComponentsState extends State<EpisodesComponents> {
                             children: [
                               Expanded(
                                   child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                mainAxisSize: MainAxisSize.min,
+                                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                    crossAxisAlignment: CrossAxisAlignment.stretch,
                                 children: [
                                   Text('第${episode.sort}话'),
-                                  const SizedBox(height: 5),
                                   Text(
                                     episode.nameCN ?? episode.name,
                                     overflow: TextOverflow.ellipsis,

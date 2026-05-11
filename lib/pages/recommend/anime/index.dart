@@ -1,47 +1,38 @@
-import 'package:anime_flow/models/item/subject_basic_data_item.dart';
-import 'package:anime_flow/routes/routes.dart';
-import 'package:anime_flow/utils/systemUtil.dart';
+import 'package:anime_flow/pages/recommend/anime/anime_controller.dart';
 import 'package:flutter/material.dart';
 import 'package:anime_flow/constants/play_layout_constant.dart';
 import 'package:anime_flow/pages/recommend/anime/calendar.dart';
-import 'package:anime_flow/http/requests/bgm_request.dart';
-import 'package:anime_flow/utils/layout_util.dart';
-import 'package:anime_flow/widget/subject_card.dart';
-import 'package:anime_flow/models/item/bangumi/hot_item.dart';
-import 'package:shimmer/shimmer.dart';
+import 'package:anime_flow/pages/recommend/anime/popular_anime.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import 'play_record.dart';
 
-class AnimePage extends StatefulWidget {
+class AnimePage extends ConsumerStatefulWidget {
   const AnimePage({super.key});
 
   @override
-  State<AnimePage> createState() => _AnimePageState();
+  ConsumerState<AnimePage> createState() => _AnimePageState();
 }
 
-class _AnimePageState extends State<AnimePage>
+class _AnimePageState extends ConsumerState<AnimePage>
     with AutomaticKeepAliveClientMixin {
-  final List<Data> _dataList = [];
-  bool _isLoading = false;
-  bool _hasMore = true;
-  int _offset = 0;
-  final int _limit = 20;
   final _scrollController = ScrollController();
-  String? _errorMessage;
   bool _showBackToTopButton = false;
 
   @override
   void initState() {
     super.initState();
-    _loadData();
     _scrollController.addListener(_scrollListener);
   }
 
   void _scrollListener() {
-    // 加载更多数据
+    final hotState = ref.read(animeHotProvider).asData?.value;
     if (_scrollController.position.pixels >=
-        _scrollController.position.maxScrollExtent - 200) {
-      _loadData();
+        _scrollController.position.maxScrollExtent - 200 &&
+        hotState != null &&
+        !hotState.isLoading &&
+        hotState.hasMore) {
+      ref.read(animeHotProvider.notifier).loadMore();
     }
 
     final shouldShow = _scrollController.position.pixels > 300;
@@ -66,62 +57,13 @@ class _AnimePageState extends State<AnimePage>
     super.dispose();
   }
 
-  // 加载数据
-  Future<void> _loadData({bool isRefresh = false}) async {
-    if (_isLoading || (!isRefresh && !_hasMore)) return;
-
-    setState(() {
-      _isLoading = true;
-      if (isRefresh) {
-        _errorMessage = null;
-        _offset = 0;
-        _hasMore = true;
-      }
-    });
-
-    try {
-      final offset = isRefresh ? 0 : _offset;
-      final hotItem = await BgmRequest.getHotService(_limit, offset);
-
-      if (mounted) {
-        setState(() {
-          if (isRefresh) {
-            _dataList.clear();
-            _offset = 0;
-          }
-          _dataList.addAll(hotItem.data);
-          _offset += hotItem.data.length;
-          if (hotItem.data.length < _limit) {
-            _hasMore = false;
-          }
-          _isLoading = false;
-          _errorMessage = null;
-        });
-      }
-    } catch (e) {
-      if (mounted) {
-        setState(() {
-          _isLoading = false;
-          _errorMessage = e.toString();
-        });
-      }
-    }
-  }
-
   @override
   bool get wantKeepAlive => true;
 
   @override
   Widget build(BuildContext context) {
     super.build(context);
-    // 首次加载中
-    if (_dataList.isEmpty && _isLoading) {
-      return const Center(child: CircularProgressIndicator());
-    }
-    // 首次加载失败，显示错误视图
-    if (_dataList.isEmpty && _errorMessage != null) {
-      return _buildErrorView(context);
-    }
+
     return Scaffold(
       body: Center(
         child: Padding(
@@ -131,137 +73,16 @@ class _AnimePageState extends State<AnimePage>
                 const BoxConstraints(maxWidth: PlayLayoutConstant.maxWidth),
             child: CustomScrollView(
               controller: _scrollController,
-              slivers: [
-                ///今日放送
-                const CalendarView(),
-                const SliverToBoxAdapter(
+              slivers: const [
+                CalendarView(),
+                SliverToBoxAdapter(
                   child: SizedBox(height: 15),
                 ),
-
-                ///播放记录
-                const PlayRecordView(),
-                const SliverToBoxAdapter(
+                PlayRecordView(),
+                SliverToBoxAdapter(
                   child: SizedBox(height: 15),
                 ),
-
-                ///热门动画
-                SliverMainAxisGroup(
-                  slivers: [
-                    const SliverToBoxAdapter(
-                      child: Row(
-                        children: [
-                          Text(
-                            '热门动画',
-                            style: TextStyle(
-                                fontSize: 25, fontWeight: FontWeight.bold),
-                          )
-                        ],
-                      ),
-                    ),
-                    const SliverToBoxAdapter(
-                      child: SizedBox(height: 5),
-                    ),
-                    SliverGrid(
-                      gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                        crossAxisCount: LayoutUtil.getCrossAxisCount(context),
-                        crossAxisSpacing: 10, // 横向间距
-                        mainAxisSpacing: 10, // 纵向间距
-                        childAspectRatio: 0.7, // 宽高比
-                      ),
-                      delegate: SliverChildBuilderDelegate(
-                        (BuildContext context, int index) {
-                          // 显示数据项
-                          if (index < _dataList.length) {
-                            final subject = _dataList[index].subject;
-                            final subjectBasicData = SubjectBasicData(
-                                id: subject.id,
-                                name: subject.nameCN ?? subject.name,
-                                image: subject.images.large);
-                            return InkWell(
-                              onTap: () =>
-                                  AnimeInfoRoute.fromData(subjectBasicData)
-                                      .push(context),
-                              child: SubjectCard(
-                                image: subject.images.large,
-                                title: subject.nameCN ?? subject.name,
-                              ),
-                            );
-                          }
-
-                          // 加载时显示骨架屏(3个)
-                          final skeletonCount = _hasMore && _isLoading ? 3 : 0;
-                          if (index < _dataList.length + skeletonCount) {
-                            return Center(
-                              child: Padding(
-                                padding: const EdgeInsets.all(5),
-                                child: _buildSkeleton(context),
-                              ),
-                            );
-                          }
-
-                          return const SizedBox.shrink();
-                        },
-                        childCount:
-                            _dataList.length + (_hasMore && _isLoading ? 3 : 0),
-                      ),
-                    ),
-                  ],
-                ),
-                // 加载更多失败提示
-                if (_errorMessage != null && _dataList.isNotEmpty)
-                  SliverToBoxAdapter(
-                    child: Padding(
-                      padding: const EdgeInsets.all(16.0),
-                      child: Column(
-                        children: [
-                          Text(
-                            '加载失败',
-                            style: TextStyle(
-                              color: Theme.of(context).colorScheme.error,
-                              fontSize: 14,
-                            ),
-                          ),
-                          const SizedBox(height: 8),
-                          ElevatedButton.icon(
-                            onPressed: () => _loadData(),
-                            icon: const Icon(Icons.refresh),
-                            label: const Text('重试'),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ),
-                // 没有更多数据提示
-                if (!_hasMore && _errorMessage == null)
-                  SliverToBoxAdapter(
-                    child: Padding(
-                      padding: const EdgeInsets.all(16.0),
-                      child: Center(
-                        child: Row(
-                          children: [
-                            Expanded(
-                              child: _buildHorizontalRuleIcons(),
-                            ),
-                            Padding(
-                              padding:
-                                  const EdgeInsets.symmetric(horizontal: 8.0),
-                              child: Text(
-                                '没有更多了',
-                                style: TextStyle(
-                                  color: Theme.of(context)
-                                      .colorScheme
-                                      .onSurfaceVariant,
-                                ),
-                              ),
-                            ),
-                            Expanded(
-                              child: _buildHorizontalRuleIcons(),
-                            ),
-                          ],
-                        ),
-                      ),
-                    ),
-                  ),
+                PopularAnimeView(),
               ],
             ),
           ),
@@ -274,111 +95,5 @@ class _AnimePageState extends State<AnimePage>
             )
           : null,
     );
-  }
-
-  // 构建横线图标（填充剩余空间）
-  Widget _buildHorizontalRuleIcons() {
-    return LayoutBuilder(
-      builder: (context, constraints) {
-        const iconSize = 24.0; // 图标大小
-        const spacing = 4.0; // 图标间距
-        const iconWidth = iconSize + spacing;
-        final iconCount = (constraints.maxWidth / iconWidth).floor();
-
-        return Row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: List.generate(
-            iconCount > 0 ? iconCount : 1,
-            (index) => Padding(
-              padding:
-                  EdgeInsets.only(right: index < iconCount - 1 ? spacing : 0),
-              child: Icon(
-                Icons.horizontal_rule_rounded,
-                size: iconSize,
-                color: Theme.of(context)
-                    .colorScheme
-                    .onSurfaceVariant
-                    .withValues(alpha: 0.5),
-              ),
-            ),
-          ),
-        );
-      },
-    );
-  }
-
-  // 构建错误视图
-  Widget _buildErrorView(BuildContext context) {
-    return Center(
-      child: Padding(
-        padding: const EdgeInsets.all(32.0),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Icon(
-              Icons.error_outline,
-              size: 64,
-              color: Theme.of(context).colorScheme.error,
-            ),
-            const SizedBox(height: 16),
-            Text(
-              '加载失败',
-              style: TextStyle(
-                fontSize: 20,
-                fontWeight: FontWeight.bold,
-                color: Theme.of(context).colorScheme.onSurface,
-              ),
-            ),
-            const SizedBox(height: 8),
-            Text(
-              _errorMessage ?? '未知错误',
-              style: TextStyle(
-                fontSize: 14,
-                color: Theme.of(context).colorScheme.onSurfaceVariant,
-              ),
-              textAlign: TextAlign.center,
-              maxLines: 3,
-              overflow: TextOverflow.ellipsis,
-            ),
-            const SizedBox(height: 24),
-            ElevatedButton.icon(
-              onPressed: () => _loadData(isRefresh: true),
-              icon: const Icon(Icons.refresh),
-              label: const Text('重新加载'),
-              style: ElevatedButton.styleFrom(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 24,
-                  vertical: 12,
-                ),
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  //骨架屏
-  Widget _buildSkeleton(BuildContext context) {
-    final isDark = SystemUtil.isDarkTheme(context);
-    final baseColor = isDark ? Colors.grey[850]! : Colors.grey[300]!;
-    final highlightColor = isDark ? Colors.grey[700]! : Colors.grey[100]!;
-    final containerColor = isDark
-        ? Theme.of(context).colorScheme.surfaceContainerHighest
-        : Theme.of(context).colorScheme.surface;
-    return Stack(children: [
-      Positioned.fill(
-        child: Shimmer.fromColors(
-          baseColor: baseColor,
-          highlightColor: highlightColor,
-          child: Container(
-            decoration: BoxDecoration(
-              color: containerColor,
-              borderRadius: BorderRadius.circular(8.0),
-            ),
-          ),
-        ),
-      ),
-    ]);
   }
 }

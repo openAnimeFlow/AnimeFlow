@@ -13,30 +13,13 @@ class MyPage extends StatefulWidget {
 
 class _MyPageState extends State<MyPage> with SingleTickerProviderStateMixin {
   bool isPinned = false;
-  late UserInfoStore userInfoStore;
+  late final UserInfoStore userInfoStore;
 
   @override
   void initState() {
     super.initState();
     userInfoStore = Get.find<UserInfoStore>();
-    _initialize();
   }
-
-  void _initialize() async {
-    // _appLinks = AppLinks();
-    // _listenForDeepLink(_appLinks);
-  }
-
-  /// 冷启动 OAuth 回调由 [GoRouter.redirect] 处理；此处监听应用在**已运行**时
-  // Future<void> _listenForDeepLink(AppLinks appLinks) async {
-  //   try {
-  //     appLinks.uriLinkStream.listen((Uri uri) async {
-  //       await MyController.handleDeepLink(uri.toString());
-  //     });
-  //   } catch (e) {
-  //     Logger().e("Error in deep link listener: $e");
-  //   }
-  // }
 
   @override
   Widget build(BuildContext context) {

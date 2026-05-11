@@ -8,7 +8,6 @@ import 'package:anime_flow/http/requests/bgm_request.dart';
 import 'package:anime_flow/utils/layout_util.dart';
 import 'package:anime_flow/widget/subject_card.dart';
 import 'package:anime_flow/models/item/bangumi/hot_item.dart';
-import 'package:anime_flow/models/item/bangumi/calendar_item.dart';
 import 'package:logger/logger.dart';
 import 'package:shimmer/shimmer.dart';
 
@@ -29,8 +28,6 @@ class _AnimePageState extends State<AnimePage>
   int _offset = 0;
   final int _limit = 20;
   final _scrollController = ScrollController();
-  Calendar? _calendar;
-  bool _isCalendarLoading = false;
   String? _errorMessage;
   bool _showBackToTopButton = false;
 
@@ -38,7 +35,6 @@ class _AnimePageState extends State<AnimePage>
   void initState() {
     super.initState();
     _loadData();
-    _fetchCalendar();
     _scrollController.addListener(_scrollListener);
   }
 
@@ -114,29 +110,6 @@ class _AnimePageState extends State<AnimePage>
     }
   }
 
-  // 获取日历数据
-  void _fetchCalendar() async {
-    try {
-      setState(() {
-        _isCalendarLoading = true;
-      });
-      final response = await BgmRequest.calendarService();
-      if (mounted) {
-        setState(() {
-          _calendar = response;
-          _isCalendarLoading = false;
-        });
-      }
-    } catch (e) {
-      Logger().e(e);
-      if (mounted) {
-        setState(() {
-          _isCalendarLoading = false;
-        });
-      }
-    }
-  }
-
   @override
   bool get wantKeepAlive => true;
 
@@ -162,11 +135,7 @@ class _AnimePageState extends State<AnimePage>
               controller: _scrollController,
               slivers: [
                 ///今日放送
-                CalendarView(
-                  calendar: _calendar,
-                  isLoading: _isCalendarLoading,
-                  onRefresh: _fetchCalendar,
-                ),
+                const CalendarView(),
                 const SliverToBoxAdapter(
                   child: SizedBox(height: 15),
                 ),

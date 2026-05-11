@@ -77,24 +77,22 @@ class PopularAnimeView extends ConsumerWidget {
             SliverToBoxAdapter(
               child: Padding(
                 padding: const EdgeInsets.all(16.0),
-                child: Column(
-                  children: [
-                    Text(
-                      '加载失败',
-                      style: TextStyle(
-                        color: Theme.of(context).colorScheme.error,
-                        fontSize: 14,
+                child: InkWell(
+                  onTap: () => ref.read(animeHotProvider.notifier).loadMore(),
+                  child: Column(
+                    spacing: 8,
+                    children: [
+                      Text(
+                        '加载失败',
+                        style: TextStyle(
+                          color: Theme.of(context).colorScheme.error,
+                          fontSize: 14,
+                        ),
                       ),
-                    ),
-                    const SizedBox(height: 8),
-                    ElevatedButton.icon(
-                      onPressed: () =>
-                          ref.read(animeHotProvider.notifier).loadMore(),
-                      icon: const Icon(Icons.refresh),
-                      label: const Text('重试'),
-                    ),
-                  ],
-                ),
+                      const Icon(Icons.refresh),
+                    ],
+                  ),
+                ) ,
               ),
             ),
           if (!hotState.hasMore && hotState.errorMessage == null)

@@ -57,15 +57,16 @@ class _CalendarViewState extends State<CalendarView> {
           error: (error, stackTrace) => _buildCalendarSection(
             context,
             content: Center(
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  const Text('获取数据失败'),
-                  IconButton(
-                    onPressed: () => ref.read(animeCalendarProvider.notifier).refreshCalendarDate(),
-                    icon: const Icon(Icons.refresh),
-                  ),
-                ],
+              child: InkWell(
+                onTap: () => ref.read(animeCalendarProvider.notifier).refreshCalendarDate(),
+                child: const Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  spacing: 8,
+                  children: [
+                    Text('获取数据失败'),
+                    Icon(Icons.refresh),
+                  ],
+                ),
               ),
             ),
           ),

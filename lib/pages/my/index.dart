@@ -1,4 +1,4 @@
-import 'package:anime_flow/stores/user_info_store.dart';
+import 'package:anime_flow/controllers/my_controller.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'login_view/login_view.dart';
@@ -13,22 +13,22 @@ class MyPage extends StatefulWidget {
 
 class _MyPageState extends State<MyPage> with SingleTickerProviderStateMixin {
   bool isPinned = false;
-  late final UserInfoStore userInfoStore;
+  late final MyController myController;
 
   @override
   void initState() {
     super.initState();
-    userInfoStore = Get.find<UserInfoStore>();
+    myController = Get.find<MyController>();
   }
 
   @override
   Widget build(BuildContext context) {
     return Obx(
-      () => userInfoStore.userInfo.value == null
+      () => myController.userInfo.value == null
           ? const Scaffold(body: NoLoginView())
           : Scaffold(
               body: LoginView(
-                userInfoItem: userInfoStore.userInfo.value!,
+                userInfoItem: myController.userInfo.value!,
               ),
             ),
     );

@@ -349,10 +349,11 @@ final GoRouter appRouter = GoRouter(
   initialLocation: const MainRoute().location,
   redirect: (context, state) {
     final uri = state.uri;
-    if (MyController.isOAuthAppCallback(uri)) {
+    final myController = Get.find<MyController>();
+    if (myController.isOAuthAppCallback(uri)) {
       final link = uri.toString();
       SchedulerBinding.instance.addPostFrameCallback((_) {
-        MyController.handleDeepLink(link).catchError(
+        myController.handleDeepLink(link).catchError(
           (Object e, StackTrace st) =>
               Logger().e('OAuth 回调处理失败', error: e, stackTrace: st),
         );

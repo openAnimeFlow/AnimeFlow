@@ -1,8 +1,8 @@
+import 'package:anime_flow/controllers/my_controller.dart';
 import 'package:anime_flow/http/requests/bgm_request.dart';
 import 'package:anime_flow/models/enums/collect_type.dart';
 import 'package:anime_flow/models/item/bangumi/subjects_info_item.dart';
 import 'package:anime_flow/routes/routes.dart';
-import 'package:anime_flow/stores/user_info_store.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
@@ -18,7 +18,7 @@ class CollectionButton extends StatefulWidget {
 }
 
 class _CollectionButtonState extends State<CollectionButton> {
-  late UserInfoStore userInfoStore;
+  late final MyController myController;
 
   CollectType? _getCurrentCollectType() {
     if (widget.subject.interest == null) return null;
@@ -42,14 +42,14 @@ class _CollectionButtonState extends State<CollectionButton> {
   @override
   void initState() {
     super.initState();
-    userInfoStore = Get.find<UserInfoStore>();
+    myController = Get.find<MyController>();
   }
 
   @override
   Widget build(BuildContext context) {
     final currentCollectType = _getCurrentCollectType();
 
-    return Obx(() => userInfoStore.userInfo.value == null
+    return Obx(() => myController.userInfo.value == null
         ? OutlinedButton(
             onPressed: () => const MainRoute(tab: 2).go(context),
             style: OutlinedButton.styleFrom(

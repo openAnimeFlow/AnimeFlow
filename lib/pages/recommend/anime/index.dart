@@ -8,7 +8,6 @@ import 'package:anime_flow/http/requests/bgm_request.dart';
 import 'package:anime_flow/utils/layout_util.dart';
 import 'package:anime_flow/widget/subject_card.dart';
 import 'package:anime_flow/models/item/bangumi/hot_item.dart';
-import 'package:logger/logger.dart';
 import 'package:shimmer/shimmer.dart';
 
 import 'play_record.dart';
@@ -100,7 +99,6 @@ class _AnimePageState extends State<AnimePage>
         });
       }
     } catch (e) {
-      Logger().e(e);
       if (mounted) {
         setState(() {
           _isLoading = false;

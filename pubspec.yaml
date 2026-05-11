@@ -122,6 +122,7 @@ flutter_launcher_icons:
   remove_alpha_ios: true  # 添加这一行来移除iOS图标的alpha通道
   adaptive_icon_background: "#FFFFFF"
 
+## dart run flutter_native_splash:create
 flutter_native_splash:
   color: "#0F172A"
   image: assets/logo/startLogo.png
@@ -169,7 +170,7 @@ flutter:
     - assets/plugins/
     - assets/shaders/
     - assets/animation/
-    - assets/logo/startLogo.png
+    - assets/logo/startLogo.webp
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/to/resolution-aware-images
 

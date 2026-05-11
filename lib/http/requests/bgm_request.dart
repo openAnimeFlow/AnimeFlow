@@ -116,11 +116,7 @@ class BgmRequest {
         .get(
           _nextBaseUrl + BgmNextApi.calendar,
         )
-        .then((value) => Calendar.fromJson(value.data))
-        .catchError((error) {
-      _logger.e(error);
-      throw Exception('Failed to fetch calendar: $error');
-    });
+        .then((value) => Calendar.fromJson(value.data));
   }
 
   ///剧集评论

@@ -1,82 +1,129 @@
+import 'dart:io';
+
 import 'package:anime_flow/constants/constants.dart';
 import 'package:anime_flow/http/api_path.dart';
 import 'package:anime_flow/http/requests/anime_flow_request.dart';
 import 'package:anime_flow/http/requests/bgm_request.dart';
+import 'package:anime_flow/models/item/bangumi/user_info_item.dart';
 import 'package:anime_flow/stores/BangumiToken.dart';
-import 'package:anime_flow/stores/user_info_store.dart';
 import 'package:anime_flow/utils/systemUtil.dart';
 import 'package:get/get.dart';
 import 'package:logger/logger.dart';
 import 'package:url_launcher/url_launcher.dart';
 
-class MyController {
-  /// Bangumi OAuth 应用回调（自定义 scheme），与路由 path 无关。
-  static bool isOAuthAppCallback(Uri uri) {
+class MyController extends GetxController {
+  final RxBool isOAuthAuthorizing = false.obs;
+  Rx<UserInfoItem?> userInfo = Rx<UserInfoItem?>(null);
+
+  @override
+  void onInit() {
+    super.onInit();
+    _init();
+  }
+
+  void _setOAuthAuthorizing(bool value) {
+    if (isOAuthAuthorizing.value != value) {
+      isOAuthAuthorizing.value = value;
+    }
+  }
+
+  void cancelOAuthWaiting() {
+    _setOAuthAuthorizing(false);
+  }
+
+
+  ///初始化
+  void _init() async {
+    final token = await BangumiToken().getToken();
+    if (token != null) {
+      final me = await UserRequest.userInfoService();
+      userInfo.value = await UserRequest.queryUserInfoService(me.username);
+    }
+  }
+
+  ///清理userInfo
+  void clearUserInfo() {
+    userInfo.value = null;
+    BangumiToken().deleteToken();
+  }
+
+  /// Bangumi OAuth 应用回调（自定义 scheme）
+  bool isOAuthAppCallback(Uri uri) {
     return uri.scheme == 'flow' &&
         uri.host == 'auth' &&
         uri.path == '/callback';
   }
 
   // 处理深度链接
-  static Future<void> handleDeepLink(String deepLink) async {
-    final uri = Uri.parse(deepLink);
-    final code = uri.queryParameters['code'];
-    if (code == null || code.isEmpty) return;
-    Logger().d('获取code:$code');
-    final token = await AnimeFlowRequest.getTokenService(code: code);
-    Logger().d('获取token:$token');
-    await BangumiToken().saveToken(token);
+  Future<void> handleDeepLink(String deepLink) async {
     try {
-      if (Get.isRegistered<UserInfoStore>()) {
-        final store = Get.find<UserInfoStore>();
-        final me = await UserRequest.userInfoService();
-        store.userInfo.value =
-            await UserRequest.queryUserInfoService(me.username);
+      final uri = Uri.parse(deepLink);
+      final code = uri.queryParameters['code'];
+      if (code == null || code.isEmpty) {
+        _setOAuthAuthorizing(false);
+        return;
       }
+      final token = await AnimeFlowRequest.getTokenService(code: code);
+      await BangumiToken().saveToken(token);
+      final me = await UserRequest.userInfoService();
+      userInfo.value = await UserRequest.queryUserInfoService(me.username);
     } catch (e) {
       Logger().e('登录后拉取用户信息失败: $e');
+    } finally {
+      _setOAuthAuthorizing(false);
     }
   }
 
-  static void openOAuthPage() async {
-    const clientId = Constants.bgmClientId;
-    const redirectUri = AnimeFlowApi.animeFlowApi + AnimeFlowApi.callback;
-    final session = await AnimeFlowRequest.getSessionService();
-    final sessionId = session['data']['sessionId'];
-    final authUrl = Uri.parse(
-        '${CommonApi.bgmTV}${BgmApi.oauth}?response_type=code&client_id=$clientId&redirect_uri=$redirectUri&state=$sessionId');
-    Logger().d('authUrl: $authUrl');
-    if (await canLaunchUrl(authUrl)) {
-      await launchUrl(authUrl);
+  Future<void> openOAuthPage() async {
+    _setOAuthAuthorizing(true);
+    try {
+      const clientId = Constants.bgmClientId;
+      const redirectUri = AnimeFlowApi.animeFlowApi + AnimeFlowApi.callback;
+      final session = await AnimeFlowRequest.getSessionService();
+      final sessionId = session['data']['sessionId'];
+      final authUrl = Uri.parse(
+          '${CommonApi.bgmTV}${BgmApi.oauth}?response_type=code&client_id=$clientId&redirect_uri=$redirectUri&state=$sessionId');
+      Logger().d('authUrl: $authUrl');
+      if (await canLaunchUrl(authUrl)) {
+        await launchUrl(
+          authUrl,
+          // iOS 必须使用外部 Safari 打开，否则 OAuth 回调无法唤起应用。
+          mode: Platform.isIOS
+              ? LaunchMode.externalApplication
+              : LaunchMode.platformDefault,
+        );
 
-      // 桌面端：打开授权页面后，启动轮询任务等待用户完成授权
-      if (SystemUtil.isDesktop) {
-        _pollTokenAfterAuth(sessionId);
+        // 桌面端：打开授权页面后，启动轮询任务等待用户完成授权
+        if (SystemUtil.isDesktop) {
+          _pollTokenAfterAuth(sessionId);
+        }
+      } else {
+        throw 'Could not launch $authUrl';
       }
-    } else {
-      throw 'Could not launch $authUrl';
+    } catch (e) {
+      _setOAuthAuthorizing(false);
+      rethrow;
     }
   }
 
   // 桌面端轮询 token
-  static Future<void> _pollTokenAfterAuth(String sessionId) async {
+  Future<void> _pollTokenAfterAuth(String sessionId) async {
     try {
       Logger().d('开始轮询 token，sessionId: $sessionId');
       final token = await AnimeFlowRequest.pollTokenService(state: sessionId);
       if (token != null) {
-        Logger().d('轮询获取到 token: $token');
         await BangumiToken().saveToken(token);
 
-        // 获取用户信息并更新 store
-        final userInfoStore = Get.find<UserInfoStore>();
         final me = await UserRequest.userInfoService();
         final userInfo = await UserRequest.queryUserInfoService(me.username);
-        userInfoStore.userInfo.value = userInfo;
+        this.userInfo.value = userInfo;
       } else {
         Logger().w('轮询超时，未获取到 token');
       }
     } catch (e) {
       Logger().e('轮询 token 异常: $e');
+    } finally {
+      _setOAuthAuthorizing(false);
     }
   }
 }

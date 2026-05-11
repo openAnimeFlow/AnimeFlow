@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'package:anime_flow/constants/constants.dart';
 import 'package:anime_flow/constants/storage_key.dart';
+import 'package:anime_flow/controllers/my_controller.dart';
 import 'package:anime_flow/controllers/shaders/shaders_controller.dart';
 import 'package:anime_flow/controllers/video/video_ui_controller.dart';
 import 'package:anime_flow/http/requests/anime_flow_request.dart';
@@ -11,7 +12,6 @@ import 'package:anime_flow/models/play/play_history.dart';
 import 'package:anime_flow/repository/play_repository.dart';
 import 'package:anime_flow/repository/storage.dart';
 import 'package:anime_flow/stores/episodes_state.dart';
-import 'package:anime_flow/stores/user_info_store.dart';
 import 'package:anime_flow/utils/systemUtil.dart';
 import 'package:anime_flow/utils/utils.dart';
 import 'package:anime_flow/utils/vibrate.dart';
@@ -265,8 +265,8 @@ class PlayController extends GetxController {
           if (episodesProgress) {
             final position = this.position.value;
             final duration = this.duration.value;
-            final userInfoStore = Get.find<UserInfoStore>();
-            if (userInfoStore.userInfo.value != null) {
+            final myController = Get.find<MyController>();
+            if (myController.userInfo.value != null) {
               final progressPercent =
                   position.inSeconds / duration.inSeconds * 100;
               if (progressPercent > 90) {

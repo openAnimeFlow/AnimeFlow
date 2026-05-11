@@ -1,12 +1,12 @@
 import 'package:anime_flow/constants/storage_key.dart';
 import 'package:anime_flow/controllers/app/app_info_controller.dart';
+import 'package:anime_flow/controllers/my_controller.dart';
 import 'package:anime_flow/controllers/shaders/shaders_controller.dart';
 import 'package:anime_flow/models/item/tab_item.dart';
 import 'package:anime_flow/pages/my/index.dart';
 import 'package:anime_flow/pages/ranking/index.dart';
 import 'package:anime_flow/repository/storage.dart';
 import 'package:anime_flow/routes/routes.dart';
-import 'package:anime_flow/stores/user_info_store.dart';
 import 'package:anime_flow/utils/crawl_config.dart';
 import 'package:anime_flow/utils/systemUtil.dart';
 import 'package:anime_flow/widget/animation_network_image/animation_network_image.dart';
@@ -24,7 +24,7 @@ class MainPage extends StatefulWidget {
 }
 
 class _MainPageState extends State<MainPage> {
-  late UserInfoStore userInfoStore;
+  late MyController myController;
   late AppInfoController appInfoController;
   final setting = Storage.setting;
   int _currentIndex = 0;
@@ -74,8 +74,8 @@ class _MainPageState extends State<MainPage> {
   void initState() {
     super.initState();
     autoUpdate = setting.get(StorageKey.autoUpdateKey, defaultValue: true);
-    userInfoStore = Get.put(UserInfoStore(), permanent: true);
-    appInfoController = Get.put(AppInfoController(), permanent: true);
+    myController = Get.find<MyController>();
+    appInfoController = Get.find<AppInfoController>();
     // TODO 从配置中初始化对应的页面
     _currentIndex =
         widget.initialTabIndex.clamp(0, _tabs.length - 1);
@@ -92,8 +92,7 @@ class _MainPageState extends State<MainPage> {
     if (autoUpdate) {
       appInfoController.compareVersion();
     }
-    final shadersController =
-        Get.put(ShadersController(), permanent: true);
+    final shadersController = Get.find<ShadersController>();
     await shadersController.copyShadersToExternalDirectory();
   }
 
@@ -106,7 +105,7 @@ class _MainPageState extends State<MainPage> {
 
       // 如果是"我的"标签（index == 2），根据用户信息动态显示
       if (index == 2) {
-        final userInfo = userInfoStore.userInfo.value;
+        final userInfo = myController.userInfo.value;
         if (userInfo != null) {
           return NavigationRailDestination(
             icon: AnimationNetworkImage(
@@ -150,7 +149,7 @@ class _MainPageState extends State<MainPage> {
       final index = entry.key;
       final tab = entry.value;
       if (index == 2) {
-        final userInfo = userInfoStore.userInfo.value;
+        final userInfo = myController.userInfo.value;
         if (userInfo != null) {
           return NavigationDestination(
             icon: AnimationNetworkImage(

@@ -2,22 +2,16 @@ import 'package:anime_flow/constants/image_path_constants.dart';
 import 'package:anime_flow/controllers/my_controller.dart';
 import 'package:anime_flow/routes/routes.dart';
 import 'package:flutter/material.dart';
-
+import 'package:get/get.dart';
 
 enum _NoLoginOverflowAction { settings, playRecord }
 
-class NoLoginView extends StatefulWidget {
+class NoLoginView extends StatelessWidget {
   const NoLoginView({super.key});
 
   @override
-  State<NoLoginView> createState() => _NoNoLoginView();
-}
-
-class _NoNoLoginView extends State<NoLoginView> {
-  bool _isAuthorizing = false;
-
-  @override
   Widget build(BuildContext context) {
+    final myController = Get.find<MyController>();
     final colorScheme = Theme.of(context).colorScheme;
     final textStyle = Theme.of(context).textTheme.bodyLarge;
 
@@ -100,10 +94,13 @@ class _NoNoLoginView extends State<NoLoginView> {
                   fontWeight: FontWeight.bold,
                 ),
               ),
-              AnimatedSwitcher(
-                duration: const Duration(milliseconds: 300),
-                child: _isAuthorizing
-                    ? Row(
+              Obx(
+                () {
+                  final isAuthorizing = myController.isOAuthAuthorizing.value;
+                  return AnimatedSwitcher(
+                  duration: const Duration(milliseconds: 300),
+                  child: isAuthorizing
+                      ? Row(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
                           // 左侧
@@ -140,10 +137,8 @@ class _NoNoLoginView extends State<NoLoginView> {
                             width: 76,
                             child: OutlinedButton(
                               onPressed: () {
-                                if (_isAuthorizing) {
-                                  setState(() {
-                                    _isAuthorizing = false;
-                                  });
+                                if (isAuthorizing) {
+                                  myController.cancelOAuthWaiting();
                                 }
                               },
                               style: OutlinedButton.styleFrom(
@@ -177,13 +172,8 @@ class _NoNoLoginView extends State<NoLoginView> {
                           ),
                         ],
                       )
-                    : ElevatedButton(
-                        onPressed: () {
-                          MyController.openOAuthPage();
-                          setState(() {
-                            _isAuthorizing = true;
-                          });
-                        },
+                      : ElevatedButton(
+                        onPressed: () => myController.openOAuthPage(),
                         style: ElevatedButton.styleFrom(
                           padding: const EdgeInsets.symmetric(
                               horizontal: 30, vertical: 10),
@@ -194,6 +184,8 @@ class _NoNoLoginView extends State<NoLoginView> {
                         ),
                         child: const Text('登录授权'),
                       ),
+                );
+                },
               ),
             ],
           ),

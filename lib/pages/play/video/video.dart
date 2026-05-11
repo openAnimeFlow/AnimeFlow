@@ -4,7 +4,6 @@ import 'dart:io';
 import 'package:anime_flow/controllers/play/episode_controller.dart';
 import 'package:anime_flow/models/play/play_history.dart';
 import 'package:anime_flow/repository/play_repository.dart';
-import 'package:anime_flow/stores/user_info_store.dart';
 import 'package:anime_flow/stores/episodes_state.dart';
 import 'package:anime_flow/controllers/play/play_controller.dart';
 import 'package:anime_flow/stores/play_subject_state.dart';
@@ -33,7 +32,6 @@ class _VideoViewState extends State<VideoView> with WindowListener {
   final PlayController playController = Get.find<PlayController>();
   final EpisodesState episodesState = Get.find<EpisodesState>();
   final PlaySubjectState subjectState = Get.find<PlaySubjectState>();
-  final UserInfoStore userInfoStore = Get.find<UserInfoStore>();
   final logger = Logger();
   final _danmuKey = GlobalKey();
 

@@ -1,4 +1,6 @@
+import 'package:anime_flow/controllers/app/app_info_controller.dart';
 import 'package:anime_flow/controllers/my_controller.dart';
+import 'package:anime_flow/controllers/shaders/shaders_controller.dart';
 import 'package:anime_flow/models/item/bangumi/calendar_item.dart';
 import 'package:anime_flow/models/item/subject_basic_data_item.dart';
 import 'package:anime_flow/pages/anime_info/index.dart';
@@ -30,6 +32,14 @@ import 'package:go_router/go_router.dart';
 import 'package:logger/logger.dart';
 
 part 'routes.g.dart';
+
+MyController _ensureMyController() {
+  if (Get.isRegistered<MyController>()) {
+    return Get.find<MyController>();
+  }
+  return Get.put(MyController(), permanent: true);
+}
+
 
 // =====================================================================
 // 页面构造时仍在使用的复合参数对象（非路由数据本身）。
@@ -72,8 +82,12 @@ class MainRoute extends GoRouteData with $MainRoute {
   final int tab;
 
   @override
-  Widget build(BuildContext context, GoRouterState state) =>
-      MainPage(initialTabIndex: tab);
+  Widget build(BuildContext context, GoRouterState state) {
+    _ensureMyController();
+    Get.put(AppInfoController(), permanent: true);
+    Get.put(ShadersController(), permanent: true);
+    return MainPage(initialTabIndex: tab);
+  }
 }
 
 @TypedGoRoute<LoginRoute>(path: '/login')
@@ -349,10 +363,11 @@ final GoRouter appRouter = GoRouter(
   initialLocation: const MainRoute().location,
   redirect: (context, state) {
     final uri = state.uri;
-    if (MyController.isOAuthAppCallback(uri)) {
+    final myController = _ensureMyController();
+    if (myController.isOAuthAppCallback(uri)) {
       final link = uri.toString();
       SchedulerBinding.instance.addPostFrameCallback((_) {
-        MyController.handleDeepLink(link).catchError(
+        myController.handleDeepLink(link).catchError(
           (Object e, StackTrace st) =>
               Logger().e('OAuth 回调处理失败', error: e, stackTrace: st),
         );

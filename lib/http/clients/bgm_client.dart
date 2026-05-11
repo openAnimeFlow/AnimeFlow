@@ -2,13 +2,13 @@ import 'dart:async';
 
 import 'package:anime_flow/constants/constants.dart';
 import 'package:anime_flow/controllers/app/app_info_controller.dart';
+import 'package:anime_flow/controllers/my_controller.dart';
 import 'package:anime_flow/http/api_path.dart';
 import 'package:anime_flow/http/core/dio_factory.dart';
 import 'package:anime_flow/http/core/network_error_mapper.dart';
 import 'package:anime_flow/http/requests/anime_flow_request.dart';
 import 'package:anime_flow/models/item/token_item.dart';
 import 'package:anime_flow/stores/BangumiToken.dart';
-import 'package:anime_flow/stores/user_info_store.dart';
 import 'package:dio/dio.dart';
 import 'package:get/get_core/src/get_main.dart';
 import 'package:get/get_instance/src/extension_instance.dart';
@@ -202,7 +202,7 @@ class BangumiClient {
           _refreshCompleter = null;
           return handler.resolve(response);
         } catch (refreshError) {
-          final UserInfoStore userInfoStore = UserInfoStore();
+          final MyController userInfoStore = Get.find<MyController>();
           _isRefreshing = false;
           _refreshCompleter?.completeError(refreshError);
           _refreshCompleter = null;

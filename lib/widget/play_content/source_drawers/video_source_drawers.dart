@@ -721,6 +721,7 @@ class _CaptchaViewState extends State<CaptchaView> {
   void _onVerified(String websiteName) {
     if (!mounted) return;
     _disposeSession();
+    widget.dataSourceController.markCaptchaVerified(websiteName);
     setState(() {});
     Get.snackbar('验证成功', '正在重新检索，请稍候…',
         snackPosition: SnackPosition.BOTTOM, maxWidth: 300);

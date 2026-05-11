@@ -1,3 +1,4 @@
+import 'package:anime_flow/crawler/cookie_manager.dart';
 import 'package:anime_flow/controllers/play/play_controller.dart';
 import 'package:anime_flow/controllers/video/video_ui_controller.dart';
 import 'package:anime_flow/crawler/html_request.dart';
@@ -69,7 +70,7 @@ class VideoSourceController extends GetxController {
         websiteIcon: config.iconUrl,
         baseUrl: config.baseUrl,
         searchUrl: config.searchUrl,
-        needsCaptcha: config.antiCrawlerConfig.enabled,
+        needsCaptcha: _requiresCaptcha(config),
         episodeResources: [],
       );
     }).toList();
@@ -78,12 +79,12 @@ class VideoSourceController extends GetxController {
 
   //初始化资源
   Future<void> initResources(String keyword) async {
-    _clearAllResources();
+    final configs = await CrawlConfig.loadAllCrawlConfigs();
+    _clearAllResources(configs);
     this.keyword.value = keyword;
     // 重置手动选择标志，允许重新自动选择
     userManuallySelected = false;
     isLoading.value = false;
-    final configs = await CrawlConfig.loadAllCrawlConfigs();
 
     // 错开发起时间（相邻间隔 0.5 秒），不串行等待每个请求；全部完成后再结束加载态
     final futures = <Future<void>>[];
@@ -93,13 +94,16 @@ class VideoSourceController extends GetxController {
       }
       final config = configs[i];
 
-      if(config.antiCrawlerConfig.enabled) {
-        // 如果启用了反爬虫，先设置为需要验证码，等待用户验证后再请求资源
-        _updateResourceStatus(
-          config.name,
-          needsCaptcha: true,
-          antiCrawlerConfig: config.antiCrawlerConfig,
-        );
+      if (config.antiCrawlerConfig.enabled) {
+        if (CookieManager.instance.hasCookies(config.name)) {
+          futures.add(_getResources(keyword, config));
+        } else {
+          _updateResourceStatus(
+            config.name,
+            needsCaptcha: true,
+            antiCrawlerConfig: config.antiCrawlerConfig,
+          );
+        }
         continue;
       }
       futures.add(_getResources(keyword, config));
@@ -108,9 +112,19 @@ class VideoSourceController extends GetxController {
     isLoading.value = true;
   }
 
-  void _clearAllResources() {
+  void _clearAllResources(List<CrawlConfigItem> configs) {
+    CrawlConfigItem? configFor(String name) {
+      for (final c in configs) {
+        if (c.name == name) return c;
+      }
+      return null;
+    }
+
     final currentResources = videoResources;
     final clearedResources = currentResources.map((resource) {
+      final config = configFor(resource.websiteName);
+      final anti = config?.antiCrawlerConfig;
+      final captchaEnabled = anti?.enabled ?? false;
       return ResourcesItem(
         websiteName: resource.websiteName,
         websiteIcon: resource.websiteIcon,
@@ -119,11 +133,28 @@ class VideoSourceController extends GetxController {
         episodeResources: [],
         isLoading: false,
         errorMessage: null,
-        needsCaptcha: false,
+        needsCaptcha: captchaEnabled &&
+            !CookieManager.instance.hasCookies(resource.websiteName),
+        antiCrawlerConfig: captchaEnabled ? anti : null,
       );
     }).toList();
 
     videoResources.value = clearedResources;
+  }
+
+  /// 当前会话内已完成验证码验证（Cookie 已写入内存）
+  void markCaptchaVerified(String websiteName) {
+    _updateResourceStatus(
+      websiteName,
+      needsCaptcha: false,
+      isLoading: true,
+      errorMessage: null,
+    );
+  }
+
+  bool _requiresCaptcha(CrawlConfigItem config) {
+    return config.antiCrawlerConfig.enabled &&
+        !CookieManager.instance.hasCookies(config.name);
   }
 
   /// 重新请求指定站点的资源（验证通过后调用）

@@ -5,7 +5,7 @@ import 'package:anime_flow/widget/animation_network_image/animation_network_imag
 import 'package:anime_flow/widget/play_content/source_drawers/video_source_drawers.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:logger/logger.dart';
+import 'package:anime_flow/utils/logger.dart';
 
 class VideoResourcesView extends StatefulWidget {
   const VideoResourcesView({super.key});
@@ -18,7 +18,7 @@ class _VideoResourcesViewState extends State<VideoResourcesView> {
   final VideoSourceController videoSourceController = Get.find<VideoSourceController>();
   final PlaySubjectState playSubjectState = Get.find<PlaySubjectState>();
   final PlayController playController = Get.find<PlayController>();
-  final Logger logger = Logger();
+  final LiggLogger logger = LiggLogger();
 
   /// 显示数据源抽屉
   void _showSourceDrawer() {

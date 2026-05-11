@@ -8,7 +8,7 @@ import 'package:dio/dio.dart';
 import 'package:anime_flow/constants/constants.dart';
 import 'package:html/parser.dart' as html_parser;
 import 'package:xpath_selector_html_parser/xpath_selector_html_parser.dart';
-import 'package:logger/logger.dart';
+import 'package:anime_flow/utils/logger.dart';
 
 import 'cookie_manager.dart';
 import 'html_crawler.dart';
@@ -23,7 +23,7 @@ class CaptchaRequiredException implements Exception {
 }
 
 class WebRequest {
-  static Logger logger = Logger();
+  static LiggLogger logger = LiggLogger();
   static final Client _client = Client.instance;
   ///获取搜索条目列表
   static Future<List<SearchResourcesItem>> getSearchSubjectListService(

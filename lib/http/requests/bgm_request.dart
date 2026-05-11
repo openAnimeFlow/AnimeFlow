@@ -19,11 +19,11 @@ import 'package:anime_flow/models/item/bangumi/subjects_info_item.dart';
 import 'package:anime_flow/models/item/bangumi/timeline_item.dart';
 import 'package:anime_flow/models/item/bangumi/user_collections_item.dart';
 import 'package:anime_flow/models/item/bangumi/user_info_item.dart';
-import 'package:logger/logger.dart';
+import 'package:anime_flow/utils/logger.dart';
 
 class BgmRequest {
   static const String _nextBaseUrl = BgmNextApi.baseUrl;
-  static final Logger _logger = Logger();
+  static final LiggLogger _logger = LiggLogger();
   static final BangumiClient _client = BangumiClient.instance;
 
 
@@ -312,7 +312,7 @@ class UserRequest {
     try {
       return CollectionsItem.fromJson(response.data);
     } catch (e) {
-      Logger().e(e);
+      LiggLogger().e(e);
       throw Exception('Failed to fetch user collections: $e');
     }
   }
@@ -336,7 +336,7 @@ class UserRequest {
     try {
       return UserCollectionsItem.fromJson(response.data);
     } catch (e) {
-      Logger().e(e);
+      LiggLogger().e(e);
       throw Exception('Failed to fetch user collections: $e');
     }
   }
@@ -361,7 +361,7 @@ class UserRequest {
           .put('$_nextBaseUrl${BgmUsersApi.collections}/$subjectId',data: data)
           .then((value) => (value.data));
     } catch (e) {
-      Logger().e(e);
+      LiggLogger().e(e);
       rethrow;
     }
   }

@@ -8,7 +8,7 @@ import 'package:anime_flow/widget/animation_network_image/animation_network_imag
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:image_picker/image_picker.dart';
-import 'package:logger/logger.dart';
+import 'package:anime_flow/utils/logger.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 class ImageSearchPage extends StatefulWidget {
@@ -87,7 +87,7 @@ class _ImageSearchPageState extends State<ImageSearchPage> {
       final imageUrl = _urlController.text.trim();
       final uri = Uri.tryParse(imageUrl);
       if (imageUrl.isEmpty || uri == null || !uri.hasScheme) {
-        Logger().i('请输入有效的图片链接');
+        LiggLogger().i('请输入有效的图片链接');
         return;
       }
       await searchController.searchImageByUrl(imageUrl);

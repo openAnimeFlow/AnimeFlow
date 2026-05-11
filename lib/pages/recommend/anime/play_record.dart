@@ -8,7 +8,7 @@ import 'package:anime_flow/widget/animation_network_image/animation_network_imag
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:hive_ce_flutter/hive_flutter.dart';
-import 'package:logger/logger.dart';
+import 'package:anime_flow/utils/logger.dart';
 
 class PlayRecordView extends StatefulWidget {
   const PlayRecordView({super.key});
@@ -47,7 +47,7 @@ class _PlayRecordViewState extends State<PlayRecordView> {
         });
       }
     } catch (e) {
-      Logger().e(e);
+      LiggLogger().e(e);
     }
   }
 

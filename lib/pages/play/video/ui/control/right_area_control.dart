@@ -3,7 +3,7 @@ import 'package:anime_flow/controllers/video/video_ui_controller.dart';
 import 'package:anime_flow/utils/systemUtil.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:logger/logger.dart';
+import 'package:anime_flow/utils/logger.dart';
 
 class RightAreaControl extends StatefulWidget {
   const RightAreaControl({super.key});
@@ -53,7 +53,7 @@ class _RightAreaControlState extends State<RightAreaControl> {
                                           maxWidth: 500);
                                     }
                                   } catch (e) {
-                                    Logger().e(e);
+                                    LiggLogger().e(e);
                                     Get.snackbar('提示', '截图失败: $e',
                                         maxWidth: 500);
                                   }

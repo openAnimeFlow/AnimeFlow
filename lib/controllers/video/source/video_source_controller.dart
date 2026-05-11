@@ -16,7 +16,7 @@ import 'package:anime_flow/utils/crawl_config.dart';
 import 'package:anime_flow/stores/episodes_state.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:get/get.dart';
-import 'package:logger/logger.dart';
+import 'package:anime_flow/utils/logger.dart';
 
 class VideoSourceController extends GetxController {
   final RxList<ResourcesItem> videoResources = <ResourcesItem>[].obs;
@@ -32,7 +32,7 @@ class VideoSourceController extends GetxController {
 
   late EpisodesState _episodesState;
   late PlaySubjectState _subjectState;
-  final Logger _logger = Logger();
+  final LiggLogger _logger = LiggLogger();
 
   /// 标记用户是否手动选择了资源
   bool userManuallySelected = false;

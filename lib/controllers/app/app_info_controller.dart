@@ -8,7 +8,7 @@ import 'package:anime_flow/utils/utils.dart';
 import 'package:anime_flow/widget/apply_updates_view.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:logger/logger.dart';
+import 'package:anime_flow/utils/logger.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 import 'package:path_provider/path_provider.dart' show getDownloadsDirectory;
 import 'package:path/path.dart' as path;
@@ -188,7 +188,7 @@ class AppInfoController extends GetxController {
         return VersionType.sameVersion; // 版本相同
       }
     } catch (e) {
-      Logger().e('版本比较失败: $e');
+      LiggLogger().e('版本比较失败: $e');
       return VersionType.localNewer;
     }
   }

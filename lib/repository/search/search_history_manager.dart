@@ -1,6 +1,6 @@
 import 'package:anime_flow/models/search/search_history_module.dart';
 import 'package:anime_flow/repository/storage.dart';
-import 'package:logger/logger.dart';
+import 'package:anime_flow/utils/logger.dart';
 
 class SearchHistoryManager {
   static const int _maxHistoryCount = 20;
@@ -19,7 +19,7 @@ class SearchHistoryManager {
       await _trimHistory();
       return true;
     } catch (e, stackTrace) {
-      Logger().e(
+      LiggLogger().e(
         'GStorage: save search history failed. keyword=$keyword',
         error: e,
         stackTrace: stackTrace,
@@ -35,7 +35,7 @@ class SearchHistoryManager {
       histories.sort((a, b) => b.timestamp.compareTo(a.timestamp));
       return histories;
     } catch (e, stackTrace) {
-      Logger().e(
+      LiggLogger().e(
         'GStorage: get search history failed.',
         error: e,
         stackTrace: stackTrace,
@@ -49,7 +49,7 @@ class SearchHistoryManager {
     try {
       await searchHistoryBox.clear();
     } catch (e, stackTrace) {
-      Logger().e(
+      LiggLogger().e(
         'GStorage: clear all search histories failed',
         error: e,
         stackTrace: stackTrace,
@@ -62,7 +62,7 @@ class SearchHistoryManager {
     try {
       await searchHistoryBox.delete(keyword.trim());
     } catch (e, stackTrace) {
-      Logger().e(
+      LiggLogger().e(
         'GStorage: delete search history failed. key=${keyword.trim()}',
         error: e,
         stackTrace: stackTrace,

@@ -7,7 +7,7 @@ import 'package:anime_flow/routes/routes.dart';
 import 'package:anime_flow/utils/layout_util.dart';
 import 'package:anime_flow/widget/subject_card.dart';
 import 'package:flutter/material.dart';
-import 'package:logger/logger.dart';
+import 'package:anime_flow/utils/logger.dart';
 
 class RankingPage extends StatefulWidget {
   const RankingPage({super.key});
@@ -18,7 +18,7 @@ class RankingPage extends StatefulWidget {
 
 class _RankingPageState extends State<RankingPage> {
   SubjectItem? subject;
-  Logger logger = Logger();
+  LiggLogger logger = LiggLogger();
 
   // 下拉菜单状态
   SortType _selectedSort = SortType.rank;

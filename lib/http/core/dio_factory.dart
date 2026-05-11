@@ -1,7 +1,7 @@
 import 'package:anime_flow/http/api_path.dart';
 import 'package:anime_flow/utils/utils.dart';
 import 'package:dio/dio.dart';
-import 'package:logger/logger.dart';
+import 'package:anime_flow/utils/logger.dart';
 import 'dio_logger_interceptor.dart';
 import 'network_config.dart';
 
@@ -125,7 +125,7 @@ class _GithubMirrorInterceptor extends Interceptor {
     }
 
     final mirrored = '${CommonApi.gitMirror}${uri.toString()}';
-    Logger().d('GitHub mirror: $mirrored');
+    LiggLogger().d('GitHub mirror: $mirrored');
     options.path = mirrored;
     handler.next(options);
   }

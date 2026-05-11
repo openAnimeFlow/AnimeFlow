@@ -12,7 +12,7 @@ import 'package:anime_flow/stores/BangumiToken.dart';
 import 'package:dio/dio.dart';
 import 'package:get/get_core/src/get_main.dart';
 import 'package:get/get_instance/src/extension_instance.dart';
-import 'package:logger/logger.dart';
+import 'package:anime_flow/utils/logger.dart';
 
 class BangumiClient {
   BangumiClient._() {
@@ -208,7 +208,7 @@ class BangumiClient {
           _refreshCompleter = null;
           await BangumiToken().deleteToken();
           userInfoStore.clearUserInfo();
-          Logger().e('刷新 token 失败: $refreshError');
+          LiggLogger().e('刷新 token 失败: $refreshError');
           return handler.next(e);
         }
       }

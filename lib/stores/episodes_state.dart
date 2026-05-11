@@ -1,6 +1,6 @@
 import 'package:anime_flow/models/item/bangumi/episodes_item.dart';
 import 'package:get/get.dart';
-import 'package:logger/logger.dart';
+import 'package:anime_flow/utils/logger.dart';
 
 class EpisodesState extends GetxController {
   final Rx<EpisodesItem?> episodes = Rx<EpisodesItem?>(null);
@@ -19,7 +19,7 @@ class EpisodesState extends GetxController {
       episodeSort.value = sort.toDouble();
     }
     if (this.episodeIndex.value != episodeIndex) {
-      Logger().i('选中剧集索引:$episodeIndex');
+      LiggLogger().i('选中剧集索引:$episodeIndex');
       this.episodeIndex.value = episodeIndex;
     }
     if (this.episodeId.value != episodeId) {

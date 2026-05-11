@@ -4,10 +4,10 @@ import 'package:anime_flow/crawler/itme/crawler_config_item.dart';
 import 'package:anime_flow/repository/storage.dart';
 import 'package:flutter/services.dart';
 import 'package:hive_ce/hive.dart';
-import 'package:logger/logger.dart';
+import 'package:anime_flow/utils/logger.dart';
 
 class CrawlConfig {
-  static final Logger logger = Logger();
+  static final LiggLogger logger = LiggLogger();
   static Box<dynamic> get box => Storage.crawlConfigs;
 
   ///读取所有配置

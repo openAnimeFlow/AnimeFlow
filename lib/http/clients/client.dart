@@ -1,7 +1,7 @@
 import 'package:anime_flow/http/core/dio_factory.dart';
 import 'package:anime_flow/http/core/network_error_mapper.dart';
 import 'package:dio/dio.dart';
-import 'package:logger/logger.dart';
+import 'package:anime_flow/utils/logger.dart';
 
 class Client {
   Client._();
@@ -118,7 +118,7 @@ class Client {
       return response;
     } on DioException catch (e) {
       if (e.type == DioExceptionType.cancel) {
-        Logger().i('下载已取消');
+        LiggLogger().i('下载已取消');
         throw '下载已取消';
       }
       throw await NetworkErrorMapper.mapException(e);

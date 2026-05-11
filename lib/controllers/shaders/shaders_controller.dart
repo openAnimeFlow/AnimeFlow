@@ -1,7 +1,7 @@
 import 'dart:io';
+import 'package:anime_flow/utils/logger.dart';
 import 'package:flutter/services.dart' show rootBundle, AssetManifest;
 import 'package:get/get.dart';
-import 'package:logger/logger.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:path/path.dart' as path;
 
@@ -17,7 +17,7 @@ import 'package:path/path.dart' as path;
 
     if (!await shadersDirectory.exists()) {
       await shadersDirectory.create(recursive: true);
-      Logger()
+      LiggLogger()
           .i('ShaderManager: Create GLSL Shader: ${shadersDirectory.path}');
     }
 
@@ -30,8 +30,7 @@ import 'package:path/path.dart' as path;
       final fileName = filePath.split('/').last;
       final targetFile = File(path.join(shadersDirectory.path, fileName));
       if (await targetFile.exists()) {
-        Logger()
-            .i('ShaderManager: GLSL Shader exists, skip: ${targetFile.path}');
+        LiggLogger().i('ShaderManager: GLSL Shader exists, skip: ${targetFile.path}');
         continue;
       }
 
@@ -40,13 +39,12 @@ import 'package:path/path.dart' as path;
         final List<int> bytes = data.buffer.asUint8List();
         await targetFile.writeAsBytes(bytes);
         copiedFilesCount++;
-        Logger().i('ShaderManager: Copy: ${targetFile.path}');
+        LiggLogger().i('ShaderManager: Copy: ${targetFile.path}');
       } catch (e) {
-        Logger().e('ShaderManager: Copy: ($filePath)', error: e);
+        LiggLogger().e('ShaderManager: Copy: ($filePath)', error: e);
       }
     }
 
-    Logger().i(
-        'ShaderManager: $copiedFilesCount GLSL files copied to ${shadersDirectory.path}');
+    LiggLogger().i('ShaderManager: $copiedFilesCount GLSL files copied to ${shadersDirectory.path}');
   }
 }

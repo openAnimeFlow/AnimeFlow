@@ -14,7 +14,7 @@ import 'package:dio/dio.dart';
 import 'package:gal/gal.dart';
 import 'package:get/get_core/src/get_main.dart';
 import 'package:get/get_navigation/src/extension_navigation.dart';
-import 'package:logger/logger.dart';
+import 'package:anime_flow/utils/logger.dart';
 import 'package:path_provider/path_provider.dart'
     show getDownloadsDirectory, getTemporaryDirectory;
 
@@ -138,12 +138,12 @@ class Request {
         final dir = await getDownloadsDirectory();
         final filePath = '${dir?.path}/${name}_$time.jpg';
         await _client.download(url, filePath);
-        Logger().i('图片已保存到:$filePath');
+        LiggLogger().i('图片已保存到:$filePath');
         Get.snackbar('提示', '图片已保存到:$filePath', maxWidth: 500);
       }
     } catch (e) {
       Get.snackbar('提示', '保存图片失败:$e', maxWidth: 500);
-      Logger().e('保存图片失败:$e');
+      LiggLogger().e('保存图片失败:$e');
     }
   }
 }

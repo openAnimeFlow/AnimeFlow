@@ -3,7 +3,7 @@ import 'dart:async';
 import 'package:anime_flow/utils/utils.dart';
 import 'package:anime_flow/webview/captcha/captcha_webview_controller.dart';
 import 'package:flutter_inappwebview_platform_interface/flutter_inappwebview_platform_interface.dart';
-import 'package:logger/logger.dart';
+import 'package:anime_flow/utils/logger.dart';
 
 class CaptchaWebviewInAppWebviewImpl
     extends CaptchaWebviewController<PlatformInAppWebViewController> {
@@ -36,7 +36,7 @@ class CaptchaWebviewInAppWebviewImpl
         onLoadStop: (controller, url) {
           logEventController.add('[Captcha WebView] Load stop: $url');
           if (buttonWasClicked && !captchaDisappearedController.isClosed) {
-            Logger().i('[Captcha WebView] Button click → page navigated, verification done');
+            LiggLogger().i('[Captcha WebView] Button click → page navigated, verification done');
             buttonWasClicked = false;
             captchaDisappearedController.add(null);
           }
@@ -72,7 +72,7 @@ class CaptchaWebviewInAppWebviewImpl
         logEventController.add('[Captcha WebView JS] Page captcha status: $status');
         if (status == 'absent' && captchaWasFound &&
             !captchaDisappearedController.isClosed) {
-          Logger().i('[Captcha WebView] Captcha gone after navigation (StatusBridge)');
+          LiggLogger().i('[Captcha WebView] Captcha gone after navigation (StatusBridge)');
           captchaWasFound = false;
           captchaDisappearedController.add(null);
         }
@@ -402,7 +402,7 @@ if (!_checkAndClick()) {
       final cookies = await cookieManager.getCookies(url: WebUri(pageUrl));
       return cookies.map((c) => '${c.name}=${c.value}').join('; ');
     } catch (e) {
-      Logger().e('[Captcha WebView] getCookieString error: $e');
+      LiggLogger().e('[Captcha WebView] getCookieString error: $e');
       return '';
     }
   }

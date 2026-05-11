@@ -8,7 +8,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:gal/gal.dart';
 import 'package:get/get.dart';
-import 'package:logger/logger.dart';
+import 'package:anime_flow/utils/logger.dart';
 import 'package:path_provider/path_provider.dart'
     show getDownloadsDirectory;
 import 'package:window_manager/window_manager.dart';
@@ -186,7 +186,7 @@ class SystemUtil {
           DeviceOrientation.landscapeRight
         ]);
       } catch (e) {
-        Logger().e('恢复竖屏方向失败: $e');
+        LiggLogger().e('恢复竖屏方向失败: $e');
       }
     }
   }
@@ -200,7 +200,7 @@ class SystemUtil {
           DeviceOrientation.landscapeRight
         ]);
       } catch (e) {
-        Logger().e('设置横屏方向失败: $e');
+        LiggLogger().e('设置横屏方向失败: $e');
       }
     }
   }
@@ -232,12 +232,12 @@ class SystemUtil {
         final filePath = '${dir?.path}/${name}_$time.png';
         final file = File(filePath);
         await file.writeAsBytes(bytes);
-        Logger().i('图片已保存到:$filePath');
+        LiggLogger().i('图片已保存到:$filePath');
         Get.snackbar('提示', '图片已保存到:$filePath', maxWidth: 500);
       }
     } catch (e) {
       Get.snackbar('提示', '保存图片失败:$e', maxWidth: 500);
-      Logger().e('保存图片失败:$e');
+      LiggLogger().e('保存图片失败:$e');
     }
   }
 

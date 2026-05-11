@@ -6,7 +6,7 @@ import 'package:anime_flow/pages/play/content/introduce/index.dart';
 import 'package:anime_flow/widget/danmaku_text_field.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:logger/logger.dart';
+import 'package:anime_flow/utils/logger.dart';
 import 'comments/index.dart';
 
 class ContentView extends StatefulWidget {
@@ -93,7 +93,7 @@ class _ContentViewState extends State<ContentView>
           });
         }
       } catch (e) {
-        Logger().e(e);
+        LiggLogger().e(e);
         // 请求失败时也要检查 episodeId 是否仍然是当前值
         if (mounted && episodesState.episodeId.value == episodeId) {
           setState(() {

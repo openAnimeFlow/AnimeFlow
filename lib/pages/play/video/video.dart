@@ -11,7 +11,7 @@ import 'package:anime_flow/controllers/video/source/video_source_controller.dart
 import 'package:anime_flow/controllers/video/video_ui_controller.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:logger/logger.dart';
+import 'package:anime_flow/utils/logger.dart';
 import 'package:media_kit_video/media_kit_video.dart';
 import 'package:window_manager/window_manager.dart';
 
@@ -32,7 +32,7 @@ class _VideoViewState extends State<VideoView> with WindowListener {
   final PlayController playController = Get.find<PlayController>();
   final EpisodesState episodesState = Get.find<EpisodesState>();
   final PlaySubjectState subjectState = Get.find<PlaySubjectState>();
-  final logger = Logger();
+  final logger = LiggLogger();
   final _danmuKey = GlobalKey();
 
   /// 解析结果

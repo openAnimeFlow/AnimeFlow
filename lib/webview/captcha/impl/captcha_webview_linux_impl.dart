@@ -3,7 +3,7 @@ import 'dart:async';
 import 'package:anime_flow/webview/captcha/captcha_webview_controller.dart';
 import 'package:flutter/foundation.dart';
 import 'package:desktop_webview_window/desktop_webview_window.dart';
-import 'package:logger/logger.dart';
+import 'package:anime_flow/utils/logger.dart';
 
 class CaptchaWebviewLinuxImpl
     extends CaptchaWebviewController<Webview> {
@@ -123,7 +123,7 @@ class CaptchaWebviewLinuxImpl
 ''');
       return result?.contains('present') ?? false;
     } catch (e) {
-      Logger().d('[Captcha WebView] _isCaptchaPresent error: $e');
+      LiggLogger().d('[Captcha WebView] _isCaptchaPresent error: $e');
       return false;
     }
   }
@@ -216,7 +216,7 @@ class CaptchaWebviewLinuxImpl
     try {
       await webviewController?.evaluateJavaScript(script);
     } catch (e) {
-      Logger().e('[Captcha WebView] inject script error: $e');
+      LiggLogger().e('[Captcha WebView] inject script error: $e');
     }
   }
 
@@ -294,7 +294,7 @@ class CaptchaWebviewLinuxImpl
     try {
       await webviewController?.evaluateJavaScript(script);
     } catch (e) {
-      Logger().e('[Captcha WebView] injectButtonClickScript error: $e');
+      LiggLogger().e('[Captcha WebView] injectButtonClickScript error: $e');
     }
   }
 
@@ -342,7 +342,7 @@ class CaptchaWebviewLinuxImpl
     try {
       await webviewController?.evaluateJavaScript(script);
     } catch (e) {
-      Logger().e('[Captcha WebView] submitCaptchaInteract error: $e');
+      LiggLogger().e('[Captcha WebView] submitCaptchaInteract error: $e');
     }
   }
 
@@ -356,7 +356,7 @@ class CaptchaWebviewLinuxImpl
           .add('[Captcha WebView] Cookies: $cookieString');
       return cookieString;
     } catch (e) {
-      Logger().e('[Captcha WebView] getCookieString error: $e');
+      LiggLogger().e('[Captcha WebView] getCookieString error: $e');
       return '';
     }
   }

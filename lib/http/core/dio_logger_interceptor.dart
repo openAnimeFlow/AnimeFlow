@@ -1,5 +1,5 @@
+import 'package:anime_flow/utils/logger.dart';
 import 'package:dio/dio.dart';
-import 'package:logger/logger.dart';
 
 class DioLoggerInterceptor extends Interceptor {
   static const _startedAtExtraKey = '_kazumiStartedAt';
@@ -7,17 +7,17 @@ class DioLoggerInterceptor extends Interceptor {
   @override
   void onRequest(RequestOptions options, RequestInterceptorHandler handler) {
     options.extra[_startedAtExtraKey] = DateTime.now();
-    Logger().d('HTTP: --> ${options.method} ${options.uri}');
+    LiggLogger().d('HTTP: --> ${options.method} ${options.uri}');
     handler.next(options);
   }
 
   @override
   void onResponse(Response response, ResponseInterceptorHandler handler) {
     final elapsed = _elapsed(response.requestOptions);
-    Logger().d(
+    LiggLogger().d(
       'HTTP: <-- ${response.statusCode} '
-      '${response.requestOptions.method} ${response.requestOptions.uri}'
-      '${elapsed == null ? '' : ' ${elapsed}ms'}',
+          '${response.requestOptions.method} ${response.requestOptions.uri}'
+          '${elapsed == null ? '' : ' ${elapsed}ms'}',
     );
     handler.next(response);
   }
@@ -27,9 +27,9 @@ class DioLoggerInterceptor extends Interceptor {
     final elapsed = _elapsed(err.requestOptions);
     final statusCode = err.response?.statusCode;
     final status = statusCode == null ? err.type.name : statusCode.toString();
-    Logger().w(
+    LiggLogger().w(
       'HTTP: <-- $status ${err.requestOptions.method} ${err.requestOptions.uri}'
-      '${elapsed == null ? '' : ' ${elapsed}ms'}',
+          '${elapsed == null ? '' : ' ${elapsed}ms'}',
       error: err.message,
     );
     handler.next(err);

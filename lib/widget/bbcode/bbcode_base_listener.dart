@@ -1,7 +1,7 @@
 import 'package:anime_flow/widget/bbcode/bbcode_elements.dart';
 import 'package:flutter/material.dart';
 import 'package:antlr4/antlr4.dart';
-import 'package:logger/logger.dart';
+import 'package:anime_flow/utils/logger.dart';
 
 import 'generated/BBCodeListener.dart';
 import 'generated/BBCodeParser.dart';
@@ -63,7 +63,7 @@ class BBCodeBaseListener implements BBCodeListener {
         bbCodeTag.color = bbcode.length;
         break;
       default:
-        Logger()
+        LiggLogger()
             .e('BBCode: unrecognized Tag: ${ctx.text}, please submit an issue with logs, bangumi, and episode information');
         break;
     }
@@ -174,7 +174,7 @@ class BBCodeBaseListener implements BBCodeListener {
         }
         break;
       default:
-        Logger()
+        LiggLogger()
             .e('BBCode: unrecognized Tag: ${ctx.text}, please submit an issue with logs, bangumi, and episode information');
         break;
     }

@@ -6,9 +6,9 @@ import 'package:anime_flow/http/requests/anime_flow_request.dart';
 import 'package:anime_flow/http/requests/bgm_request.dart';
 import 'package:anime_flow/models/item/bangumi/user_info_item.dart';
 import 'package:anime_flow/stores/BangumiToken.dart';
+import 'package:anime_flow/utils/logger.dart';
 import 'package:anime_flow/utils/systemUtil.dart';
 import 'package:get/get.dart';
-import 'package:logger/logger.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 class MyController extends GetxController {
@@ -68,7 +68,7 @@ class MyController extends GetxController {
       final me = await UserRequest.userInfoService();
       userInfo.value = await UserRequest.queryUserInfoService(me.username);
     } catch (e) {
-      Logger().e('登录后拉取用户信息失败: $e');
+      LiggLogger().e('登录后拉取用户信息失败: $e');
     } finally {
       _setOAuthAuthorizing(false);
     }
@@ -83,7 +83,7 @@ class MyController extends GetxController {
       final sessionId = session['data']['sessionId'];
       final authUrl = Uri.parse(
           '${CommonApi.bgmTV}${BgmApi.oauth}?response_type=code&client_id=$clientId&redirect_uri=$redirectUri&state=$sessionId');
-      Logger().d('authUrl: $authUrl');
+      LiggLogger().d('authUrl: $authUrl');
       if (await canLaunchUrl(authUrl)) {
         await launchUrl(
           authUrl,
@@ -109,7 +109,7 @@ class MyController extends GetxController {
   // 桌面端轮询 token
   Future<void> _pollTokenAfterAuth(String sessionId) async {
     try {
-      Logger().d('开始轮询 token，sessionId: $sessionId');
+      LiggLogger().d('开始轮询 token，sessionId: $sessionId');
       final token = await AnimeFlowRequest.pollTokenService(state: sessionId);
       if (token != null) {
         await BangumiToken().saveToken(token);
@@ -118,10 +118,10 @@ class MyController extends GetxController {
         final userInfo = await UserRequest.queryUserInfoService(me.username);
         this.userInfo.value = userInfo;
       } else {
-        Logger().w('轮询超时，未获取到 token');
+        LiggLogger().w('轮询超时，未获取到 token');
       }
     } catch (e) {
-      Logger().e('轮询 token 异常: $e');
+      LiggLogger().e('轮询 token 异常: $e');
     } finally {
       _setOAuthAuthorizing(false);
     }

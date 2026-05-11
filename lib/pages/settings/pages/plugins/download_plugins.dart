@@ -11,7 +11,7 @@ import 'package:anime_flow/widget/animation_network_image/animation_network_imag
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:go_router/go_router.dart';
-import 'package:logger/logger.dart';
+import 'package:anime_flow/utils/logger.dart';
 
 class DownloadPluginsPage extends StatefulWidget {
   const DownloadPluginsPage({super.key});
@@ -63,7 +63,7 @@ class _DownloadPluginsPageState extends State<DownloadPluginsPage> {
           isLoading = false;
         });
       }
-      Logger().e(e);
+      LiggLogger().e(e);
     }
   }
 

@@ -12,7 +12,7 @@ import 'package:anime_flow/routes/routes.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:get/get.dart';
-import 'package:logger/logger.dart';
+import 'package:anime_flow/utils/logger.dart';
 
 import 'content/index.dart';
 
@@ -111,7 +111,7 @@ class _PlayPageState extends State<PlayPage> {
         }
       }
     } catch (e) {
-      Logger().e(e);
+      LiggLogger().e(e);
       if (episodesState.isLoading.value) {
         episodesState.isLoading.value = false;
       }
@@ -136,7 +136,7 @@ class _PlayPageState extends State<PlayPage> {
   //     playTime: timestamp,
   //     episodeId: episodeId,
   //   );
-  //   Logger().i('开始保存播放记录: $playHistory');
+  //   LiggLogger().i('开始保存播放记录: $playHistory');
   //   PlayRepository.savePlayHistory(playHistory);
   // }
 

@@ -29,7 +29,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:get/get.dart';
 import 'package:go_router/go_router.dart';
-import 'package:logger/logger.dart';
+import 'package:anime_flow/utils/logger.dart';
 
 part 'routes.g.dart';
 
@@ -369,7 +369,7 @@ final GoRouter appRouter = GoRouter(
       SchedulerBinding.instance.addPostFrameCallback((_) {
         myController.handleDeepLink(link).catchError(
           (Object e, StackTrace st) =>
-              Logger().e('OAuth 回调处理失败', error: e, stackTrace: st),
+              LiggLogger().e('OAuth 回调处理失败', error: e, stackTrace: st),
         );
       });
       return const MainRoute().location;

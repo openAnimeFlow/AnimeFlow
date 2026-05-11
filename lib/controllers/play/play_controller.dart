@@ -19,7 +19,7 @@ import 'package:canvas_danmaku/canvas_danmaku.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:hive_ce/hive.dart';
-import 'package:logger/logger.dart';
+import 'package:anime_flow/utils/logger.dart';
 import 'package:media_kit/media_kit.dart';
 import 'package:media_kit_video/media_kit_video.dart';
 import 'package:window_manager/window_manager.dart';
@@ -220,7 +220,7 @@ class PlayController extends GetxController {
       player.seek(Duration(seconds: offset));
     });
     await player.play();
-    final logger = Logger();
+    final logger = LiggLogger();
 
     ///加载弹幕
     try {

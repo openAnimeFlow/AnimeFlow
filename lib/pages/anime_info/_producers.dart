@@ -38,7 +38,7 @@ class _ProducersViewState extends State<_ProducersView> {
       setState(() {
         isLoading = false;
       });
-      Logger().e(e);
+      LiggLogger().e(e);
     }
   }
 

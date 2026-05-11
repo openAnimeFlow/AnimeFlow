@@ -1,5 +1,5 @@
 import 'package:cookie_jar/cookie_jar.dart';
-import 'package:logger/logger.dart';
+import 'package:anime_flow/utils/logger.dart';
 
 /// 每条规则的 Cookie 管理器
 ///
@@ -28,7 +28,7 @@ class CookieManager {
     if (cookies.isEmpty) return;
 
     await jar.saveFromResponse(uri, cookies);
-    Logger().i(
+    LiggLogger().i(
         '[PluginCookieManager] Saved ${cookies.length} cookies for $pluginName');
   }
 

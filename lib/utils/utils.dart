@@ -6,10 +6,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_inappwebview_platform_interface/flutter_inappwebview_platform_interface.dart';
 import 'package:path/path.dart' as path;
-import 'package:logger/logger.dart';
+import 'package:anime_flow/utils/logger.dart';
 
 class Utils {
-  static Logger logger = Logger();
+  static LiggLogger logger = LiggLogger();
   static const double kMobileBreakpoint = 480;
   static const double kTabletBreakpoint = 1024;
 

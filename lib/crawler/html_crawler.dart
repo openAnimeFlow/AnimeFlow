@@ -7,11 +7,11 @@ import 'package:anime_flow/models/play/video/episode_resources_item.dart';
 import 'package:anime_flow/models/play/video/search_resources_item.dart';
 import 'package:html/parser.dart';
 import 'package:html/dom.dart';
-import 'package:logger/logger.dart';
+import 'package:anime_flow/utils/logger.dart';
 import 'package:xpath_selector_html_parser/xpath_selector_html_parser.dart';
 
 class HtmlCrawler {
-  static Logger logger = Logger();
+  static LiggLogger logger = LiggLogger();
 
   ///解析html搜索页
   static Future<List<SearchResourcesItem>> parseSearchHtml(

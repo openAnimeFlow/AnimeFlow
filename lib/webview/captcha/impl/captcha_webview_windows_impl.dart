@@ -1,7 +1,7 @@
 import 'dart:async';
 
 import 'package:anime_flow/webview/captcha/captcha_webview_controller.dart';
-import 'package:logger/logger.dart';
+import 'package:anime_flow/utils/logger.dart';
 import 'package:webview_windows/webview_windows.dart';
 
 class CaptchaWebviewWindowsImpl
@@ -105,7 +105,7 @@ class CaptchaWebviewWindowsImpl
 ''');
       return result?.toString().contains('present') ?? false;
     } catch (e) {
-      Logger().d('[Captcha WebView] _isCaptchaPresent error: $e');
+      LiggLogger().d('[Captcha WebView] _isCaptchaPresent error: $e');
       return false;
     }
   }
@@ -231,7 +231,7 @@ class CaptchaWebviewWindowsImpl
     try {
       await _headlessWebview?.executeScript(script);
     } catch (e) {
-      Logger().e('[Captcha WebView] inject script error: $e');
+      LiggLogger().e('[Captcha WebView] inject script error: $e');
     }
   }
 
@@ -311,7 +311,7 @@ class CaptchaWebviewWindowsImpl
     try {
       await _headlessWebview?.executeScript(script);
     } catch (e) {
-      Logger().e('[Captcha WebView] injectButtonClickScript error: $e');
+      LiggLogger().e('[Captcha WebView] injectButtonClickScript error: $e');
     }
   }
 
@@ -359,7 +359,7 @@ class CaptchaWebviewWindowsImpl
     try {
       await _headlessWebview?.executeScript(script);
     } catch (e) {
-      Logger().e('[Captcha WebView] submitCaptchaInteract error: $e');
+      LiggLogger().e('[Captcha WebView] submitCaptchaInteract error: $e');
     }
   }
 
@@ -369,7 +369,7 @@ class CaptchaWebviewWindowsImpl
       final result = await _headlessWebview?.getCookies(pageUrl);
       return result ?? '';
     } catch (e) {
-      Logger().e('[Captcha WebView] getCookieString error: $e');
+      LiggLogger().e('[Captcha WebView] getCookieString error: $e');
       return '';
     }
   }
@@ -380,7 +380,7 @@ class CaptchaWebviewWindowsImpl
       await _headlessWebview?.executeScript(
           "window.location.href = 'about:blank';");
     } catch (e) {
-      Logger().d('[Captcha WebView] unloadPage skipped: $e');
+      LiggLogger().d('[Captcha WebView] unloadPage skipped: $e');
     }
   }
 

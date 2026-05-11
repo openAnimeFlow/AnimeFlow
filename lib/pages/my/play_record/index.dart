@@ -7,7 +7,7 @@ import 'package:anime_flow/utils/format_time_util.dart';
 import 'package:anime_flow/utils/utils.dart';
 import 'package:anime_flow/widget/animation_network_image/animation_network_image.dart';
 import 'package:flutter/material.dart';
-import 'package:logger/logger.dart';
+import 'package:anime_flow/utils/logger.dart';
 
 class PlayRecordPage extends StatefulWidget {
   const PlayRecordPage({super.key});
@@ -43,7 +43,7 @@ class _PlayRecordPageState extends State<PlayRecordPage> {
         });
       }
     } catch (e) {
-      Logger().e(e);
+      LiggLogger().e(e);
       if (mounted) {
         setState(() {
           isLoading = false;

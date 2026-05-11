@@ -3,7 +3,7 @@ import 'dart:collection';
 import 'package:anime_flow/utils/utils.dart';
 import 'package:anime_flow/webview/video/video_webview_controller.dart';
 import 'package:flutter_inappwebview_platform_interface/flutter_inappwebview_platform_interface.dart';
-import 'package:logger/logger.dart';
+import 'package:anime_flow/utils/logger.dart';
 
 class VideoWebviewAppleImpl
     extends VideoWebviewController<PlatformInAppWebViewController> {
@@ -103,7 +103,7 @@ class VideoWebviewAppleImpl
           ],
         ),
         onWebViewCreated: (controller) {
-          Logger().i('WebView: created');
+          LiggLogger().i('WebView: created');
           webviewController = controller;
           initEventController.add(true);
         },
@@ -114,7 +114,7 @@ class VideoWebviewAppleImpl
           logEventController.add('loading completed: $url');
         },
         onReceivedError: (controller, request, error) {
-          Logger().e('WebView: error: ${error.toString()} - Request: ${request.url}');
+          LiggLogger().e('WebView: error: ${error.toString()} - Request: ${request.url}');
         },
       ),
     );

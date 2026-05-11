@@ -1,6 +1,6 @@
 import 'dart:async';
 import 'package:anime_flow/webview/video/video_webview_controller.dart';
-import 'package:logger/logger.dart';
+import 'package:anime_flow/utils/logger.dart';
 import 'package:webview_windows/webview_windows.dart';
 
 class VideoWebviewWindowsImpl
@@ -90,7 +90,7 @@ class VideoWebviewWindowsImpl
         window.location.href = 'about:blank';
       ''');
     } catch (e) {
-      Logger().d('WebView: redirect2Blank skipped (likely disposed): $e');
+      LiggLogger().d('WebView: redirect2Blank skipped (likely disposed): $e');
     }
   }
 }

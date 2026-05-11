@@ -11,7 +11,7 @@ import 'package:anime_flow/stores/episodes_state.dart';
 import 'package:anime_flow/controllers/video/source/video_source_controller.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:logger/logger.dart';
+import 'package:anime_flow/utils/logger.dart';
 
 class VideoSourceDrawers extends StatefulWidget {
   final Function(String url)? onVideoUrlSelected;
@@ -32,7 +32,7 @@ class _VideoSourceDrawersState extends State<VideoSourceDrawers> {
   late EpisodesState episodesController;
   late PlaySubjectState subjectState;
   late VideoSourceController dataSourceController;
-  final logger = Logger();
+  final logger = LiggLogger();
   bool isShowEpisodes = false;
   final _searchController = TextEditingController();
 

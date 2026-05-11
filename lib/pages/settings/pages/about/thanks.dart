@@ -43,8 +43,7 @@ class _ThanksPageState extends State<ThanksPage>
           'icon': const Icon(Icons.web),
           'title': 'WebView',
           'description': 'Kazumi项目提供的WebView技术支持',
-          'url':
-              'https://github.com/Predidit/Kazumi/tree/main/lib/pages/webview',
+          'url': 'https://github.com/Predidit/Kazumi/tree/main/lib/webview',
         },
         {
           'icon': const Icon(Icons.play_circle_outline_rounded),
@@ -76,6 +75,12 @@ class _ThanksPageState extends State<ThanksPage>
           'description': '超分辨率技术，提升视频画质',
           'url': 'https://github.com/bloc97/Anime4K',
         },
+        {
+          'icon': const Icon(Icons.image_search_outlined),
+          'title': 'trace.moe',
+          'description': '提供的以图识别番功能',
+          'url': 'https://trace.moe/',
+        },
       ];
 
   @override
@@ -89,7 +94,7 @@ class _ThanksPageState extends State<ThanksPage>
           final crossAxisCount = constraints.maxWidth > 600
               ? (constraints.maxWidth > 900 ? 3 : 2)
               : 1;
-
+          final viewPadding = MediaQuery.of(context).viewPadding.left;
           return CustomScrollView(
             slivers: [
               // 顶部 logo 和标题
@@ -172,8 +177,9 @@ class _ThanksPageState extends State<ThanksPage>
 
               // 鸣谢项目 Grid
               SliverPadding(
-                padding: const EdgeInsets.symmetric(horizontal: 10),
+                padding: EdgeInsets.only(left: viewPadding > 0 ? viewPadding : 10,right: 10),
                 sliver: SliverGrid(
+                  // 设置内边距
                   gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
                     crossAxisCount: crossAxisCount,
                     mainAxisSpacing: 4,

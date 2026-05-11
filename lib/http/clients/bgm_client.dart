@@ -220,7 +220,8 @@ class BangumiClient {
 
   static String _getBangumiUserAgent() {
     final appInfoController = Get.find<AppInfoController>();
-    return CommonApi.bangumiUserAgent
-        .replaceAll('{version}', appInfoController.version);
+    // todo 首次启动时 packageInfo 的版本号会还未准备好
+    final version = appInfoController.appInfo.value?.version ?? '0.0.0';
+    return CommonApi.bangumiUserAgent.replaceAll('{version}', version);
   }
 }

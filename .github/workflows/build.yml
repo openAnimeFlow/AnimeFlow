@@ -18,7 +18,7 @@ on:
           - all
         default: all
 jobs:
-  flutter-build_ios:
+  flutter-build-ios:
     if: ${{ !github.event.inputs.platform || github.event.inputs.platform == 'ios' || github.event.inputs.platform == 'all'}}
     runs-on: macos-15
     steps:
@@ -372,7 +372,6 @@ jobs:
 
   flutter-build-macos:
     if: ${{ !github.event.inputs.platform || github.event.inputs.platform == 'macos' || github.event.inputs.platform == 'all'}}
-    name: Build macOS
     runs-on: macos-14
     steps:
       - name: Checkout repository

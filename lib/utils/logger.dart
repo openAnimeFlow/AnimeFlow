@@ -1,4 +1,4 @@
-/// 改源码来自: https://github.com/Predidit/Kazumi/blob/main/lib/utils/logger.dart
+/// 源源码来自: https://github.com/Predidit/Kazumi/blob/main/lib/utils/logger.dart
 library;
 
 import 'dart:async';

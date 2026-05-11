@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:anime_flow/constants/constants.dart';
 import 'package:anime_flow/http/api_path.dart';
 import 'package:anime_flow/http/requests/anime_flow_request.dart';
@@ -31,14 +33,14 @@ class MyController {
         final store = Get.find<UserInfoStore>();
         final me = await UserRequest.userInfoService();
         store.userInfo.value =
-            await UserRequest.queryUserInfoService(me.username);
+        await UserRequest.queryUserInfoService(me.username);
       }
     } catch (e) {
       Logger().e('登录后拉取用户信息失败: $e');
     }
   }
 
-  static void openOAuthPage() async {
+  static Future<void> openOAuthPage() async {
     const clientId = Constants.bgmClientId;
     const redirectUri = AnimeFlowApi.animeFlowApi + AnimeFlowApi.callback;
     final session = await AnimeFlowRequest.getSessionService();
@@ -47,7 +49,13 @@ class MyController {
         '${CommonApi.bgmTV}${BgmApi.oauth}?response_type=code&client_id=$clientId&redirect_uri=$redirectUri&state=$sessionId');
     Logger().d('authUrl: $authUrl');
     if (await canLaunchUrl(authUrl)) {
-      await launchUrl(authUrl);
+      await launchUrl(
+        authUrl,
+        // iOS 必须使用外部 Safari 打开，否则 OAuth 回调无法唤起应用。
+        mode: Platform.isIOS
+            ? LaunchMode.externalApplication
+            : LaunchMode.platformDefault,
+      );
 
       // 桌面端：打开授权页面后，启动轮询任务等待用户完成授权
       if (SystemUtil.isDesktop) {

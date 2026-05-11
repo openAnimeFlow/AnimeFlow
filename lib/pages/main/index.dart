@@ -74,8 +74,8 @@ class _MainPageState extends State<MainPage> {
   void initState() {
     super.initState();
     autoUpdate = setting.get(StorageKey.autoUpdateKey, defaultValue: true);
-    myController = Get.put(MyController(), permanent: true);
-    appInfoController = Get.put(AppInfoController(), permanent: true);
+    myController = Get.find<MyController>();
+    appInfoController = Get.find<AppInfoController>();
     // TODO 从配置中初始化对应的页面
     _currentIndex =
         widget.initialTabIndex.clamp(0, _tabs.length - 1);
@@ -92,8 +92,7 @@ class _MainPageState extends State<MainPage> {
     if (autoUpdate) {
       appInfoController.compareVersion();
     }
-    final shadersController =
-        Get.put(ShadersController(), permanent: true);
+    final shadersController = Get.find<ShadersController>();
     await shadersController.copyShadersToExternalDirectory();
   }
 

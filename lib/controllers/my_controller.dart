@@ -47,8 +47,7 @@ class MyController extends GetxController {
     BangumiToken().deleteToken();
   }
 
-
-  /// Bangumi OAuth 应用回调（自定义 scheme），与路由 path 无关。
+  /// Bangumi OAuth 应用回调（自定义 scheme）
   bool isOAuthAppCallback(Uri uri) {
     return uri.scheme == 'flow' &&
         uri.host == 'auth' &&

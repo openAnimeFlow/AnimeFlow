@@ -48,7 +48,7 @@ class MyController extends GetxController {
   }
 
   /// Bangumi OAuth 应用回调（自定义 scheme）
-  bool isOAuthAppCallback(Uri uri) {
+  static bool isOAuthAppCallbackUri(Uri uri) {
     return uri.scheme == 'flow' &&
         uri.host == 'auth' &&
         uri.path == '/callback';

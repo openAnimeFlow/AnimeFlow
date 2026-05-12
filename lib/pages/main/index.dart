@@ -24,14 +24,29 @@ class MainPage extends StatefulWidget {
 }
 
 class _MainPageState extends State<MainPage> {
-  late MyController myController;
-  late AppInfoController appInfoController;
+  late final MyController myController;
+  late final AppInfoController appInfoController;
+  late final ShadersController shadersController;
   final setting = Storage.setting;
   int _currentIndex = 0;
   late bool autoUpdate;
 
   // 使用 GlobalKey 保持 IndexedStack 的状态，防止在布局切换（Row <-> Column）时页面重构
   final GlobalKey _bodyKey = GlobalKey();
+
+  @override
+  void initState() {
+    super.initState();
+    autoUpdate = setting.get(StorageKey.autoUpdateKey, defaultValue: true);
+    myController = Get.put(MyController(), permanent: true);
+    appInfoController = Get.put(AppInfoController(), permanent: true);
+    shadersController = Get.put(ShadersController(), permanent: true);
+
+    // TODO 从配置中初始化对应的页面
+    _currentIndex =
+        widget.initialTabIndex.clamp(0, _tabs.length - 1);
+    _initializeApp();
+  }
 
   final List<TabItem> _tabs = [
     TabItem(
@@ -70,18 +85,6 @@ class _MainPageState extends State<MainPage> {
     }
   }
 
-  @override
-  void initState() {
-    super.initState();
-    autoUpdate = setting.get(StorageKey.autoUpdateKey, defaultValue: true);
-    myController = Get.find<MyController>();
-    appInfoController = Get.find<AppInfoController>();
-    // TODO 从配置中初始化对应的页面
-    _currentIndex =
-        widget.initialTabIndex.clamp(0, _tabs.length - 1);
-    _initializeApp();
-  }
-
   /// 初始化应用程序
   Future<void> _initializeApp() async {
     // 初始化对应的页面
@@ -92,7 +95,6 @@ class _MainPageState extends State<MainPage> {
     if (autoUpdate) {
       appInfoController.compareVersion();
     }
-    final shadersController = Get.find<ShadersController>();
     await shadersController.copyShadersToExternalDirectory();
   }
 

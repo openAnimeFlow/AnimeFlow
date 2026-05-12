@@ -1,6 +1,4 @@
-import 'package:anime_flow/controllers/app/app_info_controller.dart';
 import 'package:anime_flow/controllers/my_controller.dart';
-import 'package:anime_flow/controllers/shaders/shaders_controller.dart';
 import 'package:anime_flow/models/item/bangumi/calendar_item.dart';
 import 'package:anime_flow/models/item/subject_basic_data_item.dart';
 import 'package:anime_flow/pages/anime_info/index.dart';
@@ -9,6 +7,7 @@ import 'package:anime_flow/pages/character_info/index.dart';
 import 'package:anime_flow/pages/characters/index.dart';
 import 'package:anime_flow/pages/main/index.dart';
 import 'package:anime_flow/pages/my/index.dart';
+import 'package:anime_flow/pages/oauth/oauth_callback_page.dart';
 import 'package:anime_flow/pages/my/play_record/index.dart';
 import 'package:anime_flow/pages/play/index.dart';
 import 'package:anime_flow/pages/search/image_search_page.dart';
@@ -26,19 +25,10 @@ import 'package:anime_flow/pages/settings/pages/plugins/plugins.dart';
 import 'package:anime_flow/pages/settings/pages/theme.dart';
 import 'package:anime_flow/pages/user_space/index.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/scheduler.dart';
 import 'package:get/get.dart';
 import 'package:go_router/go_router.dart';
-import 'package:anime_flow/utils/logger.dart';
 
 part 'routes.g.dart';
-
-MyController _ensureMyController() {
-  if (Get.isRegistered<MyController>()) {
-    return Get.find<MyController>();
-  }
-  return Get.put(MyController(), permanent: true);
-}
 
 
 // =====================================================================
@@ -78,14 +68,10 @@ class CharacterInfoExtra {
 @TypedGoRoute<MainRoute>(path: '/')
 class MainRoute extends GoRouteData with $MainRoute {
   const MainRoute({this.tab = 0});
-
   final int tab;
 
   @override
   Widget build(BuildContext context, GoRouterState state) {
-    _ensureMyController();
-    Get.put(AppInfoController(), permanent: true);
-    Get.put(ShadersController(), permanent: true);
     return MainPage(initialTabIndex: tab);
   }
 }
@@ -96,6 +82,15 @@ class LoginRoute extends GoRouteData with $LoginRoute {
 
   @override
   Widget build(BuildContext context, GoRouterState state) => const MyPage();
+}
+
+@TypedGoRoute<OauthCallbackRoute>(path: '/oauth/callback')
+class OauthCallbackRoute extends GoRouteData with $OauthCallbackRoute {
+  const OauthCallbackRoute();
+
+  @override
+  Widget build(BuildContext context, GoRouterState state) =>
+      OAuthCallbackPage(callbackUri: state.uri);
 }
 
 @TypedGoRoute<AnimeInfoRoute>(path: '/anime_info')
@@ -363,16 +358,9 @@ final GoRouter appRouter = GoRouter(
   initialLocation: const MainRoute().location,
   redirect: (context, state) {
     final uri = state.uri;
-    final myController = _ensureMyController();
-    if (myController.isOAuthAppCallback(uri)) {
-      final link = uri.toString();
-      SchedulerBinding.instance.addPostFrameCallback((_) {
-        myController.handleDeepLink(link).catchError(
-          (Object e, StackTrace st) =>
-              LiggLogger().e('OAuth 回调处理失败', error: e, stackTrace: st),
-        );
-      });
-      return const MainRoute().location;
+    if (MyController.isOAuthAppCallbackUri(uri)) {
+      final q = uri.hasQuery ? '?${uri.query}' : '';
+      return '/oauth/callback$q';
     }
     return null;
   },

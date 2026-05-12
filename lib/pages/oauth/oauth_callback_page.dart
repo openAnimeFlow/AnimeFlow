@@ -1,4 +1,3 @@
-import 'package:anime_flow/constants/image_path_constants.dart';
 import 'package:anime_flow/controllers/my_controller.dart';
 import 'package:anime_flow/routes/routes.dart';
 import 'package:anime_flow/utils/logger.dart';
@@ -95,20 +94,6 @@ class _OAuthCallbackPageState extends State<OAuthCallbackPage> with SingleTicker
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    _OAuthBrandPulse(
-                      pulse: _pulse,
-                      colorScheme: cs,
-                    ),
-                    const SizedBox(height: 36),
-                    Text(
-                      '正在完成登录',
-                      textAlign: TextAlign.center,
-                      style: tt.headlineSmall?.copyWith(
-                        fontWeight: FontWeight.w600,
-                        letterSpacing: -0.3,
-                      ),
-                    ),
-                    const SizedBox(height: 10),
                     Text(
                       '正在安全连接 Bangumi 并同步账号信息，请稍候',
                       textAlign: TextAlign.center,
@@ -127,89 +112,9 @@ class _OAuthCallbackPageState extends State<OAuthCallbackPage> with SingleTicker
                         strokeCap: StrokeCap.round,
                       ),
                     ),
-                    const SizedBox(height: 28),
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Icon(
-                          Icons.verified_user_outlined,
-                          size: 18,
-                          color: cs.primary.withValues(alpha: 0.85),
-                        ),
-                        const SizedBox(width: 8),
-                        Text(
-                          'OAuth 安全回调',
-                          style: tt.labelLarge?.copyWith(
-                            color: cs.onSurfaceVariant,
-                            letterSpacing: 0.2,
-                          ),
-                        ),
-                      ],
-                    ),
                   ],
                 ),
               ),
-            ),
-          ),
-        ),
-      ),
-    );
-  }
-}
-
-class _OAuthBrandPulse extends StatelessWidget {
-  const _OAuthBrandPulse({
-    required this.pulse,
-    required this.colorScheme,
-  });
-
-  final Animation<double> pulse;
-  final ColorScheme colorScheme;
-
-  @override
-  Widget build(BuildContext context) {
-    return AnimatedBuilder(
-      animation: pulse,
-      builder: (context, child) {
-        final t = pulse.value;
-        final scale = 1.0 + 0.04 * t;
-
-        return Transform.scale(
-          scale: scale,
-          child: child,
-        );
-      },
-      child: Container(
-        padding: const EdgeInsets.all(22),
-        decoration: BoxDecoration(
-          shape: BoxShape.circle,
-          color: colorScheme.surfaceContainerHighest.withValues(alpha: 0.65),
-          boxShadow: [
-            BoxShadow(
-              color: colorScheme.primary.withValues(alpha: 0.18),
-              blurRadius: 28,
-              spreadRadius: 2,
-            ),
-            BoxShadow(
-              color: colorScheme.shadow.withValues(alpha: 0.06),
-              blurRadius: 16,
-              offset: const Offset(0, 8),
-            ),
-          ],
-          border: Border.all(
-            color: colorScheme.outlineVariant.withValues(alpha: 0.5),
-          ),
-        ),
-        child: ClipOval(
-          child: Image.asset(
-            AssetsPathConstants.logo,
-            width: 72,
-            height: 72,
-            fit: BoxFit.contain,
-            errorBuilder: (_, __, ___) => Icon(
-              Icons.account_circle_rounded,
-              size: 72,
-              color: colorScheme.primary,
             ),
           ),
         ),

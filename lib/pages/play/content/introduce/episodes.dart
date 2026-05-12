@@ -1,4 +1,4 @@
-import 'package:anime_flow/constants/image_path_constants.dart';
+import 'package:anime_flow/constants/assets_path_constants.dart';
 import 'package:anime_flow/controllers/video/source/video_source_controller.dart';
 import 'package:anime_flow/models/item/bangumi/episodes_item.dart';
 import 'package:anime_flow/stores/episodes_state.dart';

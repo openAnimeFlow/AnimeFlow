@@ -1,4 +1,4 @@
-import 'package:anime_flow/constants/image_path_constants.dart';
+import 'package:anime_flow/constants/assets_path_constants.dart';
 import 'package:anime_flow/constants/storage_key.dart';
 import 'package:anime_flow/controllers/app/app_info_controller.dart';
 import 'package:anime_flow/controllers/setting_controller.dart';

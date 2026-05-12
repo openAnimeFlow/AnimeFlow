@@ -18,13 +18,6 @@ class SystemUtil {
   static final Battery _battery = Battery();
   static final Connectivity _connectivity = Connectivity();
 
-  ///网络类型常量
-  static const String  networkTypeNone = 'none';
-  static const String  networkTypeWifi = 'wifi';
-  static const String  networkTypeMobile = 'mobile';
-  static const String  networkTypeEthernet = 'ethernet';
-  static const String  networkTypeUnknown = 'unknown';
-
   /// 获取电池电量（0-100）
   static Future<int> getBatteryLevel() async {
     try {
@@ -100,39 +93,34 @@ class SystemUtil {
 
   /// 获取当前网络类型
   /// 返回：'wifi'、'mobile'、'ethernet'、'none' 或 'unknown'
-  static Future<String> getNetworkType() async {
+  static Future<ConnectivityResult> getNetworkType() async {
     try {
       final connectivityResult = await _connectivity.checkConnectivity();
       
-      // connectivity_plus 返回 List<ConnectivityResult>
-      // 通常取第一个结果，或者检查是否包含 wifi/mobile
       if (connectivityResult.isEmpty) {
-        return networkTypeNone;
+        return ConnectivityResult.none;
       }
 
-      // 优先检查 WiFi
       if (connectivityResult.contains(ConnectivityResult.wifi)) {
-        return networkTypeWifi;
+        return ConnectivityResult.wifi;
       }
       
-      // 检查移动网络
       if (connectivityResult.contains(ConnectivityResult.mobile)) {
-        return networkTypeMobile;
+        return ConnectivityResult.mobile;
       }
       
-      // 检查以太网
       if (connectivityResult.contains(ConnectivityResult.ethernet)) {
-        return networkTypeEthernet;
+        return ConnectivityResult.ethernet;
       }
       
       // 其他类型
       if (connectivityResult.contains(ConnectivityResult.none)) {
-        return networkTypeNone;
+        return ConnectivityResult.none;
       }
 
-      return networkTypeUnknown;
+      return ConnectivityResult.other;
     } catch (e) {
-      return networkTypeUnknown;
+      return ConnectivityResult.other;
     }
   }
 

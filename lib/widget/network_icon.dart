@@ -20,7 +20,7 @@ class NetworkIcon extends StatefulWidget {
 }
 
 class _NetworkIconState extends State<NetworkIcon> {
-  String _networkType = 'unknown';
+  ConnectivityResult _networkType = ConnectivityResult.none;
   StreamSubscription<List<ConnectivityResult>>? _networkSubscription;
 
   @override
@@ -51,19 +51,19 @@ class _NetworkIconState extends State<NetworkIcon> {
   Widget build(BuildContext context) {
     final iconColor = widget.color ?? Colors.white;
 
-    if (_networkType == SystemUtil.networkTypeWifi) {
+    if (_networkType == ConnectivityResult.wifi) {
       return Icon(
         Icons.wifi,
         size: widget.size,
         color: iconColor,
       );
-    } else if (_networkType == SystemUtil.networkTypeMobile) {
+    } else if (_networkType == ConnectivityResult.mobile) {
       return Icon(
         Icons.signal_cellular_alt,
         size: widget.size,
         color: iconColor,
       );
-    } else if (_networkType == SystemUtil.networkTypeEthernet) {
+    } else if (_networkType == ConnectivityResult.ethernet) {
       return Icon(
         Icons.cable,
         size: widget.size,

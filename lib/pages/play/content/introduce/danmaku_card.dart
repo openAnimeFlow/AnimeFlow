@@ -32,14 +32,6 @@ class _DanmakuCardState extends State<DanmakuCard> {
   @override
   void initState() {
     super.initState();
-    // 监听集数变化，当集数改变时重置弹幕加载状态
-    ever(episodesController.episodeIndex, (int episode) {
-      if (_currentEpisode != episode) {
-        _currentEpisode = episode;
-        // 清空之前的弹幕
-        playController.removeDanmaku();
-      }
-    });
   }
 
   /// 从 source 字段中提取平台名称（如 [Gamer]Sabrina2001 -> Gamer）
@@ -388,7 +380,7 @@ class _DanmakuCardState extends State<DanmakuCard> {
                         await AnimeFlowRequest.getDanDanmakuByEpisodeID(
                             episode.episodeId);
                         playController.removeDanmaku();
-                        playController.addDanmaku(danmaku);
+                        playController.addDanmakuAll(danmaku);
                         Get.back();
                       },
                     );

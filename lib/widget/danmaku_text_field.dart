@@ -50,6 +50,7 @@ class _DanmakuTextFieldState extends State<DanmakuTextField> {
     if (text.isEmpty) return;
     widget.onSend?.call(text);
     _textController.clear();
+    FocusScope.of(context).unfocus();
   }
 
   @override
@@ -95,7 +96,7 @@ class _DanmakuTextFieldState extends State<DanmakuTextField> {
                 height: 1.0,
               ),
               decoration: InputDecoration(
-                hintText: '发送弹幕开发中...',
+                hintText: '发送弹幕...',
                 hintStyle: TextStyle(
                   color: widget.textColor,
                   fontSize: 14,

@@ -1,3 +1,4 @@
+import 'package:anime_flow/controllers/video/video_ui_controller.dart';
 import 'package:anime_flow/stores/episodes_state.dart';
 import 'package:anime_flow/controllers/play/play_controller.dart';
 import 'package:anime_flow/http/requests/bgm_request.dart';
@@ -10,7 +11,6 @@ import 'package:anime_flow/utils/logger.dart';
 import 'comments/index.dart';
 
 class ContentView extends StatefulWidget {
-
   const ContentView({super.key});
 
   @override
@@ -20,7 +20,8 @@ class ContentView extends StatefulWidget {
 class _ContentViewState extends State<ContentView>
     with SingleTickerProviderStateMixin {
   final EpisodesState episodesState = Get.find<EpisodesState>();
-  final PlayController playPageController = Get.find<PlayController>();
+  final PlayController playController = Get.find<PlayController>();
+  final VideoUiStateController videoUiStateController = Get.find<VideoUiStateController>();
   final List<String> _tabs = ['简介', '吐槽'];
   late TabController _tabController;
   final GlobalKey _introduceKey = GlobalKey();
@@ -37,7 +38,7 @@ class _ContentViewState extends State<ContentView>
 
     // 监听 Tab 切换
     _tabController.addListener(_onTabChanged);
-    
+
     // 监听 episodeId 变化
     _episodeIdWorker = ever(episodesState.episodeId, (episodeId) {
       // 当 episodeId 变化时，重置 comments 并重新获取
@@ -112,13 +113,14 @@ class _ContentViewState extends State<ContentView>
       }
     }
   }
+
   @override
   Widget build(BuildContext context) {
     return PreferredSize(
       preferredSize: const Size.fromHeight(100),
       child: Column(
         children: [
-           Row(
+          Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               TabBar(
@@ -130,19 +132,31 @@ class _ContentViewState extends State<ContentView>
                 tabs: _tabs.map((name) => Tab(text: name)).toList(),
               ),
               Obx(
-                    () => playPageController.isWideScreen.value
+                () => playController.isWideScreen.value
                     ? const Spacer()
-                    : const SizedBox(
-                  width: 200,
-                  child: Padding(
-                    padding: EdgeInsets.symmetric(horizontal: 8),
-                    child: DanmakuTextField(),
-                  ),
-                ),
+                    : SizedBox(
+                        width: 200,
+                        child: Padding(
+                          padding: const EdgeInsets.symmetric(horizontal: 8),
+                          child: DanmakuTextField(
+                            onFocusChange: (hasFocus) {
+                              if (hasFocus) {
+                                playController.stopPlaying();
+                                videoUiStateController.cancelUiTimer();
+                              } else {
+                                playController.startPlaying();
+                                videoUiStateController.hideControlsUi();
+                              }
+                            },
+                            onSend: (text) {
+                              playController.sendDanmaku(text);
+                            },
+                          ),
+                        ),
+                      ),
               )
             ],
           ),
-
           const Divider(height: 1),
           Expanded(
             child: TabBarView(

@@ -457,7 +457,11 @@ class PlayController extends GetxController {
   }) {
     final trimmed = message.trim();
     if (trimmed.isEmpty) return;
-    LiggLogger().i("发送弹幕");
+    // 输入框聚焦时会 pause，此时 playing 为 false，不能据此拦截发送。
+    if (duration.value == Duration.zero && position.value == Duration.zero) {
+      return;
+    }
+    LiggLogger().i("发送弹幕$message");
     final time = position.value.inMicroseconds / Duration.microsecondsPerSecond;
     final sec = time.floor();
 

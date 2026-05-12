@@ -59,9 +59,14 @@ class PlayState {
 }
 
 class PlayController extends GetxController {
+  PlayController({required this.episodesState, required this.shadersController});
+  final EpisodesState episodesState;
   late Player player;
   late VideoController videoController;
   final setting = Storage.setting;
+
+  ///着色器
+  final ShadersController shadersController;
 
   /// 视频超分
   /// 1. 关闭
@@ -113,9 +118,6 @@ class PlayController extends GetxController {
   final RxSet<String> hiddenPlatforms = <String>{}.obs;
   Timer? _saveSettingsTimer;
 
-  ///着色器
-  late final ShadersController shadersController;
-
   ///视频播放状态
   final RxBool playing = false.obs;
 
@@ -152,10 +154,11 @@ class PlayController extends GetxController {
 
   /// 弹幕相关
   bool _isLoadingDanmaku = false;
-  bool _hasDanmakuLoaded = false;
 
   /// 定时保存播放进度的计时器
   Timer? _saveProgressTimer;
+
+  Worker? _episodeSelectionWorker;
 
   @override
   void onInit() {
@@ -163,7 +166,8 @@ class PlayController extends GetxController {
     player = Player();
     videoController = VideoController(player);
     syncPlatformVisibilityFromStorage();
-    shadersController = Get.find<ShadersController>();
+
+    _episodeSelectionWorker = ever(episodesState.episodeIndex, _onEpisodeIndexChanged);
 
     player.stream.playing.listen((playing) {
       this.playing.value = playing;
@@ -195,8 +199,18 @@ class PlayController extends GetxController {
     });
   }
 
+  /// 选中集与当前播放集不一致时清空弹幕数据与画布（切换集过程中）
+  void _onEpisodeIndexChanged(int selectedIndex) {
+    if (selectedIndex != episode) {
+      try {
+        removeDanmaku();
+      } catch (_) {}
+    }
+  }
+
   @override
   void onClose() {
+    _episodeSelectionWorker?.dispose();
     _saveSettingsTimer?.cancel();
     _saveProgressTimer?.cancel();
     _stopTimer?.cancel();

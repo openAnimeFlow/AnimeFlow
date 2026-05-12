@@ -26,7 +26,6 @@ class _DanmakuCardState extends State<DanmakuCard> {
   final danmakuFieldController = TextEditingController();
 
   bool isExpanded = false;
-  int _currentEpisode = 0; // 记录当前集数
   // DanmakuSearchResponse? danmakuSearchResponse;
 
   @override

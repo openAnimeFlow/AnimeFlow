@@ -2,7 +2,6 @@ import 'dart:async';
 import 'package:anime_flow/constants/storage_key.dart';
 import 'package:anime_flow/controllers/play/play_controller.dart';
 import 'package:anime_flow/repository/storage.dart';
-import 'package:anime_flow/stores/episodes_state.dart';
 import 'package:canvas_danmaku/canvas_danmaku.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -18,11 +17,9 @@ class _DanmakuViewState extends State<DanmakuView>
     with AutomaticKeepAliveClientMixin {
   final setting = Storage.setting;
   final PlayController playController = Get.find<PlayController>();
-  final EpisodesState episodesState = Get.find<EpisodesState>();
   Timer? _danmakuTimer;
   Worker? _playingWorker;
   Worker? _rateWorker;
-  Worker? _episodeWorker;
 
   // 弹幕配置
   late bool _border;
@@ -68,14 +65,6 @@ class _DanmakuViewState extends State<DanmakuView>
     _rateWorker = ever(playController.rate, (rate) {
       // 倍速变化时，更新弹幕速度需要在 DanmakuScreen 重建时更新
       setState(() {});
-    });
-
-    //监听集数切换
-    _episodeWorker = ever(episodesState.episodeIndex, (int episode) {
-      if (episode > 0) {
-        // 清空之前的弹幕
-        playController.removeDanmaku();
-      }
     });
 
     // 监听播放状态变化，控制弹幕暂停/恢复
@@ -165,7 +154,6 @@ class _DanmakuViewState extends State<DanmakuView>
   void dispose() {
     _danmakuTimer?.cancel();
     _rateWorker?.dispose();
-    _episodeWorker?.dispose();
     _playingWorker?.dispose();
     super.dispose();
   }

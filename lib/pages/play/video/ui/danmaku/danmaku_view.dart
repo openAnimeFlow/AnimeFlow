@@ -21,6 +21,8 @@ class _DanmakuViewState extends State<DanmakuView>
   final EpisodesState episodesState = Get.find<EpisodesState>();
   Timer? _danmakuTimer;
   Worker? _playingWorker;
+  Worker? _rateWorker;
+  Worker? _episodeWorker;
 
   // 弹幕配置
   late bool _border;
@@ -63,13 +65,13 @@ class _DanmakuViewState extends State<DanmakuView>
     _startDanmakuTimer();
 
     // 监听倍速变化，更新弹幕速度
-    ever(playController.rate, (rate) {
+    _rateWorker = ever(playController.rate, (rate) {
       // 倍速变化时，更新弹幕速度需要在 DanmakuScreen 重建时更新
       setState(() {});
     });
 
     //监听集数切换
-    ever(episodesState.episodeIndex, (int episode) {
+    _episodeWorker = ever(episodesState.episodeIndex, (int episode) {
       if (episode > 0) {
         // 清空之前的弹幕
         playController.removeDanmaku();
@@ -162,6 +164,8 @@ class _DanmakuViewState extends State<DanmakuView>
   @override
   void dispose() {
     _danmakuTimer?.cancel();
+    _rateWorker?.dispose();
+    _episodeWorker?.dispose();
     _playingWorker?.dispose();
     super.dispose();
   }

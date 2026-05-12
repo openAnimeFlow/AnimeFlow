@@ -228,7 +228,7 @@ class PlayController extends GetxController {
         _isLoadingDanmaku = true;
         final bgmBangumiId = await AnimeFlowRequest.getDanDanBangumiIDByBgmBangumiID(subjectId);
         final danmaku = await AnimeFlowRequest.getDanDanmaku(bgmBangumiId, episode);
-        addDanmaku(danmaku);
+        addDanmakuAll(danmaku);
         _isLoadingDanmaku = false;
       }
     } catch (e) {
@@ -410,7 +410,7 @@ class PlayController extends GetxController {
     }
   }
 
-  void addDanmaku(List<Danmaku> danmaku) {
+  void addDanmakuAll(List<Danmaku> danmaku) {
     // 按时间分组
     danDanmakus.clear();
     for (var item in danmaku) {

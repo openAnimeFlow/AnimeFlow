@@ -1,3 +1,4 @@
+import 'package:anime_flow/constants/assets_path_constants.dart';
 import 'package:anime_flow/controllers/play/play_controller.dart';
 import 'package:anime_flow/controllers/play/episode_controller.dart';
 import 'package:anime_flow/controllers/video/source/video_source_controller.dart';
@@ -142,7 +143,7 @@ class _BottomAreaControlState extends State<BottomAreaControl> {
                                 padding:
                                     const EdgeInsets.symmetric(horizontal: 8),
                                 child: SvgPicture.asset(
-                                  'assets/icons/danmaku_setting.svg',
+                                  AssetsPathConstants.danmakuIcon,
                                   width: 24,
                                   height: 24,
                                   colorFilter: ColorFilter.mode(
@@ -155,9 +156,21 @@ class _BottomAreaControlState extends State<BottomAreaControl> {
                             child: fullscreen || isWideScreen
                                 ? danmakuOn
                                     // 弹幕输入框
-                                    ? const DanmakuTextField(
+                                    ? DanmakuTextField(
                                         iconColor: Colors.white,
                                         textColor: Colors.white,
+                                        onFocusChange: (hasFocus) {
+                                          if (hasFocus) {
+                                            playController.stopPlaying();
+                                            videoUiStateController.cancelUiTimer();
+                                          } else {
+                                            playController.startPlaying();
+                                            videoUiStateController.hideControlsUi();
+                                          }
+                                        },
+                                        onSend: (content) {
+                                          playController.sendDanmaku(content);
+                                        },
                                       )
                                     : const SizedBox.shrink()
                                 // 进度条

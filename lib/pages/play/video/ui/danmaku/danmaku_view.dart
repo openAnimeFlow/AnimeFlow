@@ -85,6 +85,10 @@ class _DanmakuViewState extends State<DanmakuView>
         if (danmakus != null && danmakus.isNotEmpty) {
           // 按索引延迟添加弹幕
           danmakus.asMap().forEach((idx, danmaku) {
+            // 本人弹幕已在 sendDanmaku 中即时上屏，避免与定时器重复派发
+            if (danmaku.selfSend) {
+              return;
+            }
             Future.delayed(
               Duration(
                 milliseconds: idx * 1000 ~/ danmakus.length,
@@ -96,38 +100,23 @@ class _DanmakuViewState extends State<DanmakuView>
                   return;
                 }
 
-                // 检查平台是否被隐藏
-                final regex = RegExp(r'\[([^\]]+)\]');
-                final match = regex.firstMatch(danmaku.source);
-                final platform = match?.group(1) ?? '弹弹Play';
-                if (playController.isPlatformHidden(platform)) {
-                  return; // 如果平台被隐藏，不添加弹幕
-                }
-
-                // 转换弹幕类型
-                DanmakuItemType danmakuType;
-                if (danmaku.type == 4) {
-                  danmakuType = DanmakuItemType.bottom;
-                } else if (danmaku.type == 5) {
-                  danmakuType = DanmakuItemType.top;
-                } else {
-                  danmakuType = DanmakuItemType.scroll;
+                // 本人弹幕不参与平台隐藏
+                if (!danmaku.selfSend) {
+                  final regex = RegExp(r'\[([^\]]+)\]');
+                  final match = regex.firstMatch(danmaku.source);
+                  final platform = match?.group(1) ?? '弹弹Play';
+                  if (playController.isPlatformHidden(platform)) {
+                    return;
+                  }
                 }
 
                 // 处理颜色
-                Color danmakuColor = danmaku.color;
                 if (!_danmakuColor) {
-                  danmakuColor = Colors.white;
+                  danmaku.color = Colors.white;
                 }
 
                 // 添加弹幕
-                playController.danmakuController.addDanmaku(
-                  DanmakuContentItem(
-                    danmaku.message,
-                    color: danmakuColor,
-                    type: danmakuType,
-                  ),
-                );
+                playController.addDanDanmaku(danmaku);
               },
             );
           });

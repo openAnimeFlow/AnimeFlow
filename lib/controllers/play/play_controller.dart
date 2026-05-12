@@ -448,6 +448,58 @@ class PlayController extends GetxController {
     }
   }
 
+  /// 保存单条用户弹幕（[Danmaku.selfSend] 为 true），写入当前时间轴并立即上屏。
+  /// [type]：1 滚动、4 底部、5 顶部。
+  void sendDanmaku(
+    String message, {
+    Color? color,
+    int type = 1,
+  }) {
+    final trimmed = message.trim();
+    if (trimmed.isEmpty) return;
+    LiggLogger().i("发送弹幕");
+    final time = position.value.inMicroseconds / Duration.microsecondsPerSecond;
+    final sec = time.floor();
+
+    final item = Danmaku(
+      message: trimmed,
+      time: time,
+      type: type,
+      color: color ?? Colors.white,
+      selfSend: true,
+      source: 'AnimeFlow',
+    );
+
+    if (!danDanmakus.containsKey(sec)) {
+      danDanmakus[sec] = [];
+    }
+    danDanmakus[sec]!.add(item);
+    addDanDanmaku(item);
+  }
+
+  /// 添加弹幕到画布
+  void addDanDanmaku(Danmaku danmaku) {
+    final DanmakuItemType itemType;
+    if (danmaku.type == 4) {
+      itemType = DanmakuItemType.bottom;
+    } else if (danmaku.type == 5) {
+      itemType = DanmakuItemType.top;
+    } else {
+      itemType = DanmakuItemType.scroll;
+    }
+    try {
+      danmakuController.addDanmaku(
+        DanmakuContentItem(
+          danmaku.message,
+          color: danmaku.color,
+          type: itemType,
+          selfSend: danmaku.selfSend,
+        ),
+      );
+    } catch (_) {
+    }
+
+  }
   void removeDanmaku() {
     danmakuController.clear();
     danDanmakus.clear();

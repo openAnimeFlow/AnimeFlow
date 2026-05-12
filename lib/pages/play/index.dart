@@ -1,4 +1,5 @@
 import 'package:anime_flow/controllers/play/episode_controller.dart';
+import 'package:anime_flow/controllers/shaders/shaders_controller.dart';
 import 'package:anime_flow/controllers/video/video_ui_controller.dart';
 import 'package:anime_flow/http/requests/bgm_request.dart';
 import 'package:anime_flow/pages/play/video/video.dart';
@@ -26,10 +27,12 @@ class PlayPage extends StatefulWidget {
 }
 
 class _PlayPageState extends State<PlayPage> {
-  final VideoSourceController videoSourceController = Get.put(VideoSourceController());
-  final PlayController playController = Get.put(PlayController());
+  final VideoSourceController videoSourceController =
+      Get.put(VideoSourceController());
   final EpisodesState episodesState = Get.put(EpisodesState());
-  late final PlaySubjectState subjectState ;
+  late final PlaySubjectState subjectState;
+  late final PlayController playController;
+
   final GlobalKey _videoKey = GlobalKey();
   final GlobalKey _contentKey = GlobalKey();
 
@@ -39,6 +42,10 @@ class _PlayPageState extends State<PlayPage> {
   @override
   void initState() {
     super.initState();
+    playController = Get.put(PlayController(
+      episodesState: episodesState,
+      shadersController: Get.find<ShadersController>(),
+    ));
     Get.put(EpisodeController());
     Get.put(VideoUiStateController());
     subjectState = Get.put(PlaySubjectState(widget.extra.subjectBasicData));

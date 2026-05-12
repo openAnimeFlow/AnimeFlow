@@ -171,6 +171,8 @@ class _PlayPageState extends State<PlayPage> {
         if (isFullscreen) {
           content = Scaffold(
             backgroundColor: Colors.black,
+            // 移动端全屏时键盘默认会压缩 body，弹幕层高度过小会导致轨道数为 0、本人弹幕无法上屏。
+            resizeToAvoidBottomInset: !SystemUtil.isMobile,
             body: VideoView(key: _videoKey),
           );
         } else {

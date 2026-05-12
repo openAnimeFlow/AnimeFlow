@@ -45,6 +45,10 @@ class _BottomAreaControlState extends State<BottomAreaControl> {
       final isContentExpanded = playController.isContentExpanded.value;
       final hasNextEpisode = episodeController.hasNextEpisode(episodesState);
       final leftPadding = MediaQuery.of(context).padding.left;
+      // 全屏 + 不随键盘压缩 body 时，用 viewInsets 把底部控件顶到键盘上方
+      final keyboardLift = fullscreen && SystemUtil.isMobile
+          ? MediaQuery.viewInsetsOf(context).bottom
+          : 0.0;
       return AnimatedSwitcher(
         duration: const Duration(milliseconds: 200),
         transitionBuilder: (child, animation) =>
@@ -62,11 +66,12 @@ class _BottomAreaControlState extends State<BottomAreaControl> {
                   padding: EdgeInsets.only(
                       left: leftPadding <= 0 ? 5 : leftPadding,
                       right: 5,
-                      bottom: SystemUtil.isDesktop
-                          ? 10
-                          : isWideScreen
-                              ? MediaQuery.of(context).padding.bottom
-                              : 0),
+                      bottom: (SystemUtil.isDesktop
+                              ? 10
+                              : isWideScreen
+                                  ? MediaQuery.of(context).padding.bottom
+                                  : 0) +
+                          keyboardLift),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [

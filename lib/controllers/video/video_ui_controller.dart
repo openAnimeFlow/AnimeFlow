@@ -199,11 +199,11 @@ class VideoUiStateController extends GetxController {
     isHorizontalDragging.value = true;
     isDragging.value = true;
 
-    // 显示控件UI
-    showControlsUi();
-
     // 取消之前的自动隐藏UI计时器
     cancelUiTimer();
+
+    // 显示控件UI
+    showControlsUi();
   }
 
   ///取消ui计时器
@@ -213,16 +213,16 @@ class VideoUiStateController extends GetxController {
 
   // 更新水平拖动进度
   void updateHorizontalDrag(
-      double currentX, double screenWidth, Duration duration) {
+    double currentX,
+    double scale,
+    Duration duration,
+  ) {
     if (duration <= Duration.zero) return;
 
     // 计算拖动距离
     final dragDistance = currentX - _dragStartX;
 
-    // 根据屏幕宽度计算时间偏移（滑动整个屏幕宽度 = 总时长）
-    // 添加系数 0.5 减小拖动敏感度，使拖动更精细
-    final timeOffset =
-        (dragDistance / screenWidth) * duration.inMilliseconds * 0.5;
+    final timeOffset = dragDistance * scale;
 
     // 计算新的播放位置
     var newPosition = _dragStartPosition.inMilliseconds + timeOffset.toInt();
@@ -236,7 +236,6 @@ class VideoUiStateController extends GetxController {
   // 结束水平拖动
   void endHorizontalDrag() {
     if (isHorizontalDragging.value) {
-      // 更新视频进度
       isHorizontalDragging.value = false;
       isDragging.value = false;
 

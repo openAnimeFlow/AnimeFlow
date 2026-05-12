@@ -79,13 +79,15 @@ class _MobileGestureDetectorState extends State<MobileGestureDetector> {
           details.globalPosition.dx,
           playController.position.value,
         );
+        playController.stopPlaying();
       },
 
       // 水平拖动更新：更新播放进度
       onHorizontalDragUpdate: (DragUpdateDetails details) {
+        final double scale = 180000 / MediaQuery.sizeOf(context).width;
         videoUiStateController.updateHorizontalDrag(
           details.globalPosition.dx,
-          screenWidth,
+          scale,
           playController.duration.value,
         );
       },
@@ -94,6 +96,7 @@ class _MobileGestureDetectorState extends State<MobileGestureDetector> {
       onHorizontalDragEnd: (DragEndDetails details) {
         playController.seekTo(videoUiStateController.dragPosition.value);
         videoUiStateController.endHorizontalDrag();
+        playController.startPlaying();
       },
 
       // 水平拖动取消：恢复到拖动前的播放位置

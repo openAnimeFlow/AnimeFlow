@@ -513,11 +513,19 @@ class PlayController extends GetxController {
     });
   }
 
+  /// 开始播放
+  Future<void> startPlaying() async {
+    try {
+      await player.play();
+    } catch (_) {
+      return;
+    }
+  }
+
   ///停止播放
   /// [duration] 可选参数，如果提供则会在指定时间后停止播放
-  void stopPlaying({Duration? duration}) {
+  Future<void> stopPlaying({Duration? duration}) async{
     _stopTimer?.cancel();
-
     if (duration != null && duration > Duration.zero) {
       final totalSeconds = duration.inSeconds;
       scheduledStopDuration.value = totalSeconds;

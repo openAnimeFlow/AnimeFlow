@@ -18,7 +18,6 @@ class _DanmakuViewState extends State<DanmakuView>
   final setting = Storage.setting;
   final PlayController playController = Get.find<PlayController>();
   Timer? _danmakuTimer;
-  Worker? _playingWorker;
   Worker? _rateWorker;
 
   // 弹幕配置
@@ -65,19 +64,6 @@ class _DanmakuViewState extends State<DanmakuView>
     _rateWorker = ever(playController.rate, (rate) {
       // 倍速变化时，更新弹幕速度需要在 DanmakuScreen 重建时更新
       setState(() {});
-    });
-
-    // 监听播放状态变化，控制弹幕暂停/恢复
-    _playingWorker = ever(playController.playing, (playing) {
-      if (mounted) {
-        try {
-          if (playing) {
-            playController.danmakuController.resume();
-          } else {
-            playController.danmakuController.pause();
-          }
-        } catch (_) {}
-      }
     });
   }
 
@@ -154,7 +140,6 @@ class _DanmakuViewState extends State<DanmakuView>
   void dispose() {
     _danmakuTimer?.cancel();
     _rateWorker?.dispose();
-    _playingWorker?.dispose();
     super.dispose();
   }
 

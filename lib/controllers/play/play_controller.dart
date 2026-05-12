@@ -158,6 +158,7 @@ class PlayController extends GetxController {
   /// 定时保存播放进度的计时器
   Timer? _saveProgressTimer;
 
+  /// 监听集数变化
   Worker? _episodeSelectionWorker;
 
   @override
@@ -171,6 +172,7 @@ class PlayController extends GetxController {
 
     player.stream.playing.listen((playing) {
       this.playing.value = playing;
+      _syncDanmakuPauseWithPlayback(playing);
     });
 
     player.stream.volume.listen((vol) {
@@ -197,6 +199,16 @@ class PlayController extends GetxController {
     player.stream.duration.listen((dur) {
       duration.value = dur;
     });
+  }
+
+  void _syncDanmakuPauseWithPlayback(bool playing) {
+    try {
+      if (playing) {
+        danmakuController.resume();
+      } else {
+        danmakuController.pause();
+      }
+    } catch (_) {}
   }
 
   /// 选中集与当前播放集不一致时清空弹幕数据与画布（切换集过程中）

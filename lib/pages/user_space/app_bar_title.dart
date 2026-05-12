@@ -5,7 +5,7 @@ class _AppBarTitleView extends StatelessWidget {
   final bool isPinned;
 
   const _AppBarTitleView(
-      {super.key, required this.userInfo, required this.isPinned});
+      {required this.userInfo, required this.isPinned});
 
   @override
   Widget build(BuildContext context) {
@@ -14,7 +14,7 @@ class _AppBarTitleView extends StatelessWidget {
         child: Row(
           children: [
             InkWell(
-              onTap: () => Get.back(),
+              onTap: () => context.pop(),
               child: const Icon(Icons.arrow_back),
             ),
             const SizedBox(width: 5),

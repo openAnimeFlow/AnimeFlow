@@ -9,6 +9,7 @@ import 'package:anime_flow/widget/animation_network_image/animation_network_imag
 import 'package:anime_flow/widget/bbcode/bbcode_widget.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:go_router/go_router.dart';
 import 'collect/index.dart';
 
 part 'app_bar_title.dart';
@@ -156,21 +157,6 @@ class _UserSpacePageState extends State<UserSpacePage>
           );
         }
       }),
-    );
-  }
-
-  Widget _buildStatsTab(BuildContext context) {
-    final handle = NestedScrollView.sliverOverlapAbsorberHandleFor(context);
-
-    return CustomScrollView(
-      slivers: <Widget>[
-        SliverOverlapInjector(handle: handle),
-        const SliverFillRemaining(
-          child: Center(
-            child: Text('功能待实现'),
-          ),
-        ),
-      ],
     );
   }
 

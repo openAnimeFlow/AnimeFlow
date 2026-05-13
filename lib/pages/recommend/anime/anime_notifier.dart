@@ -20,8 +20,7 @@ class AnimeCalendarNotifier extends AsyncNotifier<Calendar> {
   }
 }
 
-final animeHotProvider =
-    AsyncNotifierProvider<AnimeHotNotifier, AnimeHotState>(
+final animeHotProvider = AsyncNotifierProvider<AnimeHotNotifier, AnimeHotState>(
   AnimeHotNotifier.new,
 );
 

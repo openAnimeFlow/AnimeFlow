@@ -1,6 +1,6 @@
-import 'package:anime_flow/pages/play/controller/play/episode_controller.dart';
-import 'package:anime_flow/pages/play/controller/play/play_controller.dart';
-import 'package:anime_flow/pages/play/controller/video/video_ui_controller.dart';
+import 'package:anime_flow/pages/play/controller/episode_controller.dart';
+import 'package:anime_flow/pages/play/controller/play_controller.dart';
+import 'package:anime_flow/pages/play/controller/video_ui_controller.dart';
 import 'package:anime_flow/pages/play/video/gesture/desktop_gesture_detector.dart';
 import 'package:anime_flow/pages/play/video/gesture/mobile_gesture_detector.dart';
 import 'package:anime_flow/utils/systemUtil.dart';

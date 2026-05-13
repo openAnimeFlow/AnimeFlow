@@ -1,4 +1,4 @@
-import 'package:anime_flow/pages/play/controller/play/play_controller.dart';
+import 'package:anime_flow/pages/play/controller/play_controller.dart';
 import 'package:anime_flow/utils/systemUtil.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';

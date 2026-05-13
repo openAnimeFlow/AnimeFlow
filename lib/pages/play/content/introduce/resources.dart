@@ -1,5 +1,5 @@
-import 'package:anime_flow/pages/play/controller/play/play_controller.dart';
-import 'package:anime_flow/pages/play/controller/video/source/video_source_controller.dart';
+import 'package:anime_flow/pages/play/controller/play_controller.dart';
+import 'package:anime_flow/pages/play/controller/video_source_controller.dart';
 import 'package:anime_flow/stores/episodes_state.dart';
 import 'package:anime_flow/stores/play_subject_state.dart';
 import 'package:anime_flow/widget/animation_network_image/animation_network_image.dart';

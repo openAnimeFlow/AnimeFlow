@@ -1,9 +1,9 @@
 import 'package:anime_flow/controllers/shaders/shaders_controller.dart';
 import 'package:anime_flow/http/requests/bgm_request.dart';
-import 'package:anime_flow/pages/play/controller/play/episode_controller.dart';
-import 'package:anime_flow/pages/play/controller/play/play_controller.dart';
-import 'package:anime_flow/pages/play/controller/video/source/video_source_controller.dart';
-import 'package:anime_flow/pages/play/controller/video/video_ui_controller.dart';
+import 'package:anime_flow/pages/play/controller/episode_controller.dart';
+import 'package:anime_flow/pages/play/controller/play_controller.dart';
+import 'package:anime_flow/pages/play/controller/video_source_controller.dart';
+import 'package:anime_flow/pages/play/controller/video_ui_controller.dart';
 import 'package:anime_flow/pages/play/video/video.dart';
 import 'package:anime_flow/stores/play_subject_state.dart';
 import 'package:anime_flow/utils/systemUtil.dart';

@@ -1,5 +1,5 @@
 import 'package:anime_flow/constants/play_layout_constant.dart';
-import 'package:anime_flow/pages/play/controller/play/play_controller.dart';
+import 'package:anime_flow/pages/play/controller/play_controller.dart';
 import 'package:anime_flow/utils/format_time_util.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';

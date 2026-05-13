@@ -3,7 +3,7 @@ import 'dart:convert';
 import 'package:anime_flow/crawler/itme/anti_crawler_config.dart';
 import 'package:anime_flow/models/play/video/episode_resources_item.dart';
 import 'package:anime_flow/models/play/video/resources_item.dart';
-import 'package:anime_flow/pages/play/controller/video/source/video_source_controller.dart';
+import 'package:anime_flow/pages/play/controller/video_source_controller.dart';
 import 'package:anime_flow/providers/captcha/captcha_provider.dart';
 import 'package:anime_flow/stores/play_subject_state.dart';
 import 'package:anime_flow/widget/animation_network_image/animation_network_image.dart';

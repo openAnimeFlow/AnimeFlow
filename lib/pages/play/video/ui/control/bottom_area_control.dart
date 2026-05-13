@@ -1,9 +1,9 @@
 import 'package:anime_flow/constants/assets_path_constants.dart';
 import 'package:anime_flow/models/enums/video_controls_icon_type.dart';
-import 'package:anime_flow/pages/play/controller/play/episode_controller.dart';
-import 'package:anime_flow/pages/play/controller/play/play_controller.dart';
-import 'package:anime_flow/pages/play/controller/video/source/video_source_controller.dart';
-import 'package:anime_flow/pages/play/controller/video/video_ui_controller.dart';
+import 'package:anime_flow/pages/play/controller/episode_controller.dart';
+import 'package:anime_flow/pages/play/controller/play_controller.dart';
+import 'package:anime_flow/pages/play/controller/video_source_controller.dart';
+import 'package:anime_flow/pages/play/controller/video_ui_controller.dart';
 import 'package:anime_flow/pages/play/video/ui/button/rate_button.dart';
 import 'package:anime_flow/pages/play/video/ui/button/shader_button.dart';
 import 'package:anime_flow/pages/play/video/ui/danmaku/danmaku_setting.dart';

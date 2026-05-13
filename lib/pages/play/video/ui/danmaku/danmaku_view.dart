@@ -87,11 +87,6 @@ class _DanmakuViewState extends State<DanmakuView>
         if (danmakus != null && danmakus.isNotEmpty) {
           // 按索引延迟添加弹幕
           danmakus.asMap().forEach((idx, danmaku) {
-            // 本人弹幕已在 sendDanmaku 中即时上屏，避免与定时器重复派发
-            final userInfo = myController.userInfo.value;
-            if (userInfo != null && userInfo.id == danmaku.bgmUserId) {
-              return;
-            }
             Future.delayed(
               Duration(
                 milliseconds: idx * 1000 ~/ danmakus.length,

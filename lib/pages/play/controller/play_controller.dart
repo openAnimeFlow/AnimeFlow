@@ -448,7 +448,7 @@ class PlayController extends GetxController {
     }
   }
 
-  /// 保存单条用户弹幕（[Danmaku.selfSend] 为 true），写入当前时间轴并立即上屏。
+  /// 发送弹幕
   /// [type]：1 滚动、4 底部、5 顶部。
   Future<void> sendDanmaku(
     String message, {
@@ -464,7 +464,6 @@ class PlayController extends GetxController {
       return;
     }
     final time = position.value.inMicroseconds / Duration.microsecondsPerSecond;
-    final sec = time.floor();
 
     final item = Danmaku(
       message: trimmed,
@@ -474,10 +473,7 @@ class PlayController extends GetxController {
       bgmUserId: userInfo.id,
       source: 'AnimeFlow',
     );
-
-    if (!danDanmakus.containsKey(sec)) {
-      danDanmakus[sec] = [];
-    }
+    addDanDanmaku(item, userInfo.id);
     final bgmBangumiId = await AnimeFlowRequest.getDanDanBangumiIDByBgmBangumiID(subjectId);
     await AnimeFlowRequest.sendDanmaku(
         bgmBangumiId, episode,
@@ -485,8 +481,6 @@ class PlayController extends GetxController {
         time: item.time,
         type: item.type,
         color: item.color);
-    danDanmakus[sec]!.add(item);
-    addDanDanmaku(item, userInfo.id);
   }
 
   /// 添加弹幕到画布

@@ -23,7 +23,7 @@ class BangumiClient {
           final token = await BangumiToken().getToken();
           if (token != null) {
             options.headers[Constants.authorization] =
-                '${token.tokenType} ${token.accessToken}';
+            '${token.tokenType} ${token.accessToken}';
           }
           return handler.next(options);
         },
@@ -49,11 +49,11 @@ class BangumiClient {
 
   /// GET 请求
   Future<Response<T>> get<T>(
-    String path, {
-    Map<String, dynamic>? queryParameters,
-    Options? options,
-    CancelToken? cancelToken,
-  }) async {
+      String path, {
+        Map<String, dynamic>? queryParameters,
+        Options? options,
+        CancelToken? cancelToken,
+      }) async {
     try {
       return await _dio.get<T>(
         path,
@@ -68,13 +68,13 @@ class BangumiClient {
 
   /// POST 请求
   Future<Response> post(
-    String path, {
-    dynamic data,
-    Map<String, dynamic>? queryParameters,
-    Options? options,
-    CancelToken? cancelToken,
+      String path, {
+        dynamic data,
+        Map<String, dynamic>? queryParameters,
+        Options? options,
+        CancelToken? cancelToken,
 
-  }) async {
+      }) async {
     try {
       final Response response = await _dio.post(
         path,
@@ -91,12 +91,12 @@ class BangumiClient {
 
   /// PUT 请求
   Future<Response> put(
-    String path, {
-    dynamic data,
-    Map<String, dynamic>? queryParameters,
-    Options? options,
-    CancelToken? cancelToken,
-  }) async {
+      String path, {
+        dynamic data,
+        Map<String, dynamic>? queryParameters,
+        Options? options,
+        CancelToken? cancelToken,
+      }) async {
     try {
       final Response response = await _dio.put(
         path,
@@ -113,11 +113,11 @@ class BangumiClient {
 
   /// DELETE 请求
   Future<Response> delete(
-    String path, {
-    Map<String, dynamic>? queryParameters,
-    Options? options,
-    CancelToken? cancelToken,
-  }) async {
+      String path, {
+        Map<String, dynamic>? queryParameters,
+        Options? options,
+        CancelToken? cancelToken,
+      }) async {
     try {
       final Response response = await _dio.delete(
         path,
@@ -133,11 +133,11 @@ class BangumiClient {
 
   /// HEAD 请求（用于获取资源信息，不下载内容）
   Future<Response> head(
-    String path, {
-    Map<String, dynamic>? queryParameters,
-    Options? options,
-    CancelToken? cancelToken,
-  }) async {
+      String path, {
+        Map<String, dynamic>? queryParameters,
+        Options? options,
+        CancelToken? cancelToken,
+      }) async {
     try {
       return await _dio.head(
         path,
@@ -151,7 +151,7 @@ class BangumiClient {
   }
 
   ///刷新token
-  void refreshToken(DioException e, ErrorInterceptorHandler handler) async {
+  Future<void> refreshToken(DioException e, ErrorInterceptorHandler handler) async {
     final oldToken = await BangumiToken().getToken();
 
     if (oldToken != null && oldToken.refreshToken.isNotEmpty) {
@@ -163,7 +163,7 @@ class BangumiClient {
           if (newToken != null) {
             final opts = e.requestOptions;
             opts.headers[Constants.authorization] =
-                '${newToken.tokenType} ${newToken.accessToken}';
+            '${newToken.tokenType} ${newToken.accessToken}';
             try {
               final response = await _dio.fetch(opts);
               return handler.resolve(response);
@@ -194,7 +194,7 @@ class BangumiClient {
           await BangumiToken().saveToken(newTokenItem);
           final opts = e.requestOptions;
           opts.headers[Constants.authorization] =
-              '${newToken.tokenType} ${newToken.accessToken}';
+          '${newToken.tokenType} ${newToken.accessToken}';
           final response = await _dio.fetch(opts);
 
           _isRefreshing = false;

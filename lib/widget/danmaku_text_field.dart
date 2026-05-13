@@ -132,7 +132,7 @@ class _DanmakuTextFieldState extends State<DanmakuTextField> {
               ),
               decoration: InputDecoration(
                 hintText: sendLocked
-                    ? '请等待 ${sendCooldownRemaining} 秒后再发…'
+                    ? '请等待 $sendCooldownRemaining 秒后再发…'
                     : '发送弹幕...',
                 hintStyle: TextStyle(
                   color: widget.textColor,

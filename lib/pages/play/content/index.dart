@@ -1,3 +1,4 @@
+import 'package:anime_flow/controllers/my_controller.dart';
 import 'package:anime_flow/pages/play/controller/play_controller.dart';
 import 'package:anime_flow/pages/play/controller/video_ui_controller.dart';
 import 'package:anime_flow/stores/episodes_state.dart';
@@ -21,7 +22,9 @@ class _ContentViewState extends State<ContentView>
     with SingleTickerProviderStateMixin {
   final EpisodesState episodesState = Get.find<EpisodesState>();
   final PlayController playController = Get.find<PlayController>();
-  final VideoUiStateController videoUiStateController = Get.find<VideoUiStateController>();
+  final myController = Get.find<MyController>();
+  final VideoUiStateController videoUiStateController =
+      Get.find<VideoUiStateController>();
   final List<String> _tabs = ['简介', '吐槽'];
   late TabController _tabController;
   final GlobalKey _introduceKey = GlobalKey();
@@ -124,7 +127,8 @@ class _ContentViewState extends State<ContentView>
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               TabBar(
-                padding: EdgeInsets.only(top: MediaQuery.of(context).padding.top),
+                padding:
+                    EdgeInsets.only(top: MediaQuery.of(context).padding.top),
                 dividerHeight: 0,
                 controller: _tabController,
                 tabAlignment: TabAlignment.start,
@@ -134,26 +138,29 @@ class _ContentViewState extends State<ContentView>
               Obx(
                 () => playController.isWideScreen.value
                     ? const Spacer()
-                    : SizedBox(
-                        width: 200,
-                        child: Padding(
-                          padding: const EdgeInsets.symmetric(horizontal: 8),
-                          child: DanmakuTextField(
-                            onFocusChange: (hasFocus) {
-                              if (hasFocus) {
-                                playController.stopPlaying();
-                                videoUiStateController.cancelUiTimer();
-                              } else {
-                                playController.startPlaying();
-                                videoUiStateController.hideControlsUi();
-                              }
-                            },
-                            onSend: (text) {
-                              playController.sendDanmaku(text);
-                            },
-                          ),
-                        ),
-                      ),
+                    : Obx(() => myController.userInfo.value != null
+                        ? SizedBox(
+                            width: 200,
+                            child: Padding(
+                              padding:
+                                  const EdgeInsets.symmetric(horizontal: 8),
+                              child: DanmakuTextField(
+                                onFocusChange: (hasFocus) {
+                                  if (hasFocus) {
+                                    playController.stopPlaying();
+                                    videoUiStateController.cancelUiTimer();
+                                  } else {
+                                    playController.startPlaying();
+                                    videoUiStateController.hideControlsUi();
+                                  }
+                                },
+                                onSend: (text) {
+                                  playController.sendDanmaku(text);
+                                },
+                              ),
+                            ),
+                          )
+                        : const SizedBox.shrink()),
               )
             ],
           ),
@@ -163,8 +170,7 @@ class _ContentViewState extends State<ContentView>
               controller: _tabController,
               children: [
                 //简介
-                IntroduceView(
-                  key: _introduceKey),
+                IntroduceView(key: _introduceKey),
                 //吐槽
                 CommentsView(
                   key: _commentKey,

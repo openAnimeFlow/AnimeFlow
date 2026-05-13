@@ -183,13 +183,14 @@ class _BottomAreaControlState extends State<BottomAreaControl> {
                                             },
                                           )
                                         : Container(
+                                            padding: const EdgeInsets.symmetric(horizontal: 10),
                                             decoration: BoxDecoration(
-                                              color: Colors.black38,
+                                              color: Colors.transparent,
                                               border: Border.all(
-                                                color: Colors.white,
+                                                color: Colors.white.withValues(alpha: 0.8),
                                                 width: 1,
                                               ),
-                                              borderRadius: BorderRadius.circular(4),
+                                              borderRadius: BorderRadius.circular(10),
                                             ),
                                             child: const Text("登录后才能发送弹幕"),
                                           ))

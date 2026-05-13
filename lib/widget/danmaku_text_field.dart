@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'package:flutter/material.dart';
 
 /// 弹幕输入框
@@ -11,7 +12,7 @@ class DanmakuTextField extends StatefulWidget {
   /// 输入框聚焦状态变化（`true` 获得焦点，`false` 失去焦点）
   final ValueChanged<bool>? onFocusChange;
 
-  /// 点击发送或键盘「发送」时回调（
+  /// 点击发送或键盘「发送」时回调。
   final ValueChanged<String>? onSend;
 
   const DanmakuTextField({
@@ -30,34 +31,66 @@ class DanmakuTextField extends StatefulWidget {
 }
 
 class _DanmakuTextFieldState extends State<DanmakuTextField> {
-  late final FocusNode _focusNode;
-  late final TextEditingController _textController;
+  late final FocusNode focusNode;
+  late final TextEditingController textController;
+
+  static const int sendCooldownSeconds = 5;
+
+  int sendCooldownRemaining = 0;
+  Timer? sendCooldownTimer;
+
+  bool get sendLocked => widget.onSend != null && sendCooldownRemaining > 0;
 
   @override
   void initState() {
     super.initState();
-    _focusNode = FocusNode();
-    _focusNode.addListener(_handleFocusChange);
-    _textController = TextEditingController();
+    focusNode = FocusNode();
+    focusNode.addListener(handleFocusChange);
+    textController = TextEditingController();
   }
 
-  void _handleFocusChange() {
-    widget.onFocusChange?.call(_focusNode.hasFocus);
+  void handleFocusChange() {
+    widget.onFocusChange?.call(focusNode.hasFocus);
   }
 
-  void _handleSend() {
-    final text = _textController.text.trim();
+  void handleSend() {
+    if (sendLocked) return;
+    final text = textController.text.trim();
     if (text.isEmpty) return;
     widget.onSend?.call(text);
-    _textController.clear();
+    textController.clear();
     FocusScope.of(context).unfocus();
+    if (widget.onSend != null) {
+      startSendCooldown();
+    }
+  }
+
+  void startSendCooldown() {
+    sendCooldownTimer?.cancel();
+    setState(() {
+      sendCooldownRemaining = sendCooldownSeconds;
+    });
+    sendCooldownTimer = Timer.periodic(const Duration(seconds: 1), (timer) {
+      if (!mounted) {
+        timer.cancel();
+        return;
+      }
+      setState(() {
+        sendCooldownRemaining--;
+        if (sendCooldownRemaining <= 0) {
+          sendCooldownRemaining = 0;
+          timer.cancel();
+        }
+      });
+    });
   }
 
   @override
   void dispose() {
-    _focusNode.removeListener(_handleFocusChange);
-    _focusNode.dispose();
-    _textController.dispose();
+    sendCooldownTimer?.cancel();
+    focusNode.removeListener(handleFocusChange);
+    focusNode.dispose();
+    textController.dispose();
     super.dispose();
   }
 
@@ -87,16 +120,20 @@ class _DanmakuTextFieldState extends State<DanmakuTextField> {
           const SizedBox(width: 8),
           Expanded(
             child: TextField(
-              focusNode: _focusNode,
-              controller: _textController,
+              focusNode: focusNode,
+              controller: textController,
               textInputAction: TextInputAction.send,
-              onSubmitted: widget.onSend == null ? null : (_) => _handleSend(),
+              onSubmitted: (widget.onSend == null || sendLocked)
+                  ? null
+                  : (_) => handleSend(),
               style: const TextStyle(
                 fontSize: 14,
                 height: 1.0,
               ),
               decoration: InputDecoration(
-                hintText: '发送弹幕...',
+                hintText: sendLocked
+                    ? '请等待 ${sendCooldownRemaining} 秒后再发…'
+                    : '发送弹幕...',
                 hintStyle: TextStyle(
                   color: widget.textColor,
                   fontSize: 14,
@@ -115,7 +152,9 @@ class _DanmakuTextFieldState extends State<DanmakuTextField> {
                     size: 20,
                     color: widget.iconColor,
                   ),
-                  onPressed: widget.onSend == null ? null : _handleSend,
+                  onPressed: (widget.onSend == null || sendLocked)
+                      ? null
+                      : handleSend,
                 )
               : const SizedBox.shrink(),
         ],

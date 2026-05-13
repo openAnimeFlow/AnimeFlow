@@ -170,7 +170,7 @@ class _BottomAreaControlState extends State<BottomAreaControl> {
                                             videoUiStateController.cancelUiTimer();
                                           } else {
                                             playController.startPlaying();
-                                            videoUiStateController.hideControlsUi();
+                                            // videoUiStateController.hideControlsUi();
                                           }
                                         },
                                         onSend: (content) {

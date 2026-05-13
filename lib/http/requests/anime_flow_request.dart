@@ -1,10 +1,17 @@
+import 'dart:ffi';
+import 'dart:ui';
+
+import 'package:anime_flow/constants/constants.dart';
 import 'package:anime_flow/http/api_path.dart';
 import 'package:anime_flow/http/clients/anime_flow_client.dart';
 import 'package:anime_flow/models/item/danmaku/danmaku_episode_response.dart';
 import 'package:anime_flow/models/item/danmaku/danmaku_module.dart';
 import 'package:anime_flow/models/item/danmaku/danmaku_search_response.dart';
 import 'package:anime_flow/models/item/token_item.dart';
+import 'package:anime_flow/stores/BangumiToken.dart';
 import 'package:anime_flow/utils/systemUtil.dart';
+import 'package:anime_flow/utils/utils.dart';
+import 'package:dio/dio.dart';
 
 /// animeFlow统一的响应类
 class AnimeFlowResponse {
@@ -12,7 +19,8 @@ class AnimeFlowResponse {
   final String message;
   final Map<String, dynamic> data;
 
-  AnimeFlowResponse({required this.code, required this.message, required this.data});
+  AnimeFlowResponse(
+      {required this.code, required this.message, required this.data});
 
   factory AnimeFlowResponse.fromJson(Map<String, dynamic> json) {
     final dataRaw = json['data'];
@@ -32,14 +40,14 @@ class AnimeFlowRequest {
   static const String _animeFlowApi = AnimeFlowApi.animeFlowApi;
 
   static Future<TokenItem> getTokenService({required String code}) async {
-    final response = await _client.post(
-        _animeFlowApi + AnimeFlowApi.token,
+    final response = await _client.post(_animeFlowApi + AnimeFlowApi.token,
         queryParameters: {'code': code});
     return TokenItem.fromJson(response['data']);
   }
 
   ///刷新token
-  static Future<TokenItem> refreshTokenService({required String refreshToken}) async {
+  static Future<TokenItem> refreshTokenService(
+      {required String refreshToken}) async {
     final response = await _client.post(
         '$_animeFlowApi${AnimeFlowApi.refreshToken}',
         queryParameters: {'refreshToken': refreshToken});
@@ -50,10 +58,7 @@ class AnimeFlowRequest {
   static Future<Map<String, dynamic>> callbackService(
       String code, String state) async {
     return await _client.get(_animeFlowApi + AnimeFlowApi.callback,
-        queryParameters: {
-          'code': code,
-          'state': state
-        }).then((value) => value);
+        queryParameters: {'code': code, 'state': state}).then((value) => value);
   }
 
   //获取session
@@ -125,15 +130,12 @@ class AnimeFlowRequest {
   }
 
   /// 搜索番剧元素
-  static Future<DanmakuSearchResponse> searchResponse(
-      String title,{int type = 1}) async {
+  static Future<DanmakuSearchResponse> searchResponse(String title,
+      {int type = 1}) async {
     const api = _animeFlowApi + AnimeFlowApi.search;
 
-    final res = await _client.get(api,
-        queryParameters: {
-          'keyword': title,
-          'type': type
-        });
+    final res = await _client
+        .get(api, queryParameters: {'keyword': title, 'type': type});
     final response = AnimeFlowResponse.fromJson(Map<String, dynamic>.from(res));
     return DanmakuSearchResponse.fromJson(response.data);
   }
@@ -152,5 +154,30 @@ class AnimeFlowRequest {
     final res = await _client.get(path);
     final response = AnimeFlowResponse.fromJson(Map<String, dynamic>.from(res));
     return DanmakuEpisodeResponse.fromJson(response.data);
+  }
+
+  /// 发送弹幕
+  static Future<AnimeFlowResponse> sendDanmaku(int bangumiID, int episode,
+      {required String message,
+        required double time,
+        required int type,
+        required Color color
+      }) async {
+    // 调用方法前已做了未登录校验，正常情况这里的token不会为null
+    final token = await BangumiToken().getToken();
+    final episodeID = int.parse('$bangumiID${episode.toString().padLeft(4, '0')}');
+    final colorValue = Utils.colorToDecimalRgb(color);
+    var path = '$_animeFlowApi${AnimeFlowApi.danmaku}';
+    final data = {
+      'episodeId': episodeID,
+      'comment': message,
+      'time': time,
+      'type': type,
+      'color': colorValue
+    };
+    final request = await _client.post(path, data: data,
+      options: Options(headers: {Constants.authorization: '${token!.tokenType} ${token.accessToken}'})
+    );
+    return AnimeFlowResponse.fromJson(Map<String, dynamic>.from(request));
   }
 }

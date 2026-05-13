@@ -99,7 +99,7 @@ class PlayController extends GetxController {
 
   String? subjectName;
 
-  /// 当前集数
+  /// 当前集数索引
   int episode = 0;
 
   ///剧集id
@@ -450,21 +450,19 @@ class PlayController extends GetxController {
 
   /// 保存单条用户弹幕（[Danmaku.selfSend] 为 true），写入当前时间轴并立即上屏。
   /// [type]：1 滚动、4 底部、5 顶部。
-  void sendDanmaku(
+  Future<void> sendDanmaku(
     String message, {
     Color? color,
     int type = 1,
-  }) {
+  }) async {
     final trimmed = message.trim();
     final  myController = Get.find<MyController>();
     final userInfo = myController.userInfo.value;
     if (userInfo == null) return;
     if (trimmed.isEmpty) return;
-    // 输入框聚焦时会 pause，此时 playing 为 false，不能据此拦截发送。
-    if (duration.value == Duration.zero && position.value == Duration.zero) {
+    if (duration.value == Duration.zero && position.value == Duration.zero && episode <= 0) {
       return;
     }
-    LiggLogger().i("发送弹幕$message");
     final time = position.value.inMicroseconds / Duration.microsecondsPerSecond;
     final sec = time.floor();
 
@@ -480,6 +478,13 @@ class PlayController extends GetxController {
     if (!danDanmakus.containsKey(sec)) {
       danDanmakus[sec] = [];
     }
+    final bgmBangumiId = await AnimeFlowRequest.getDanDanBangumiIDByBgmBangumiID(subjectId);
+    await AnimeFlowRequest.sendDanmaku(
+        bgmBangumiId, episode,
+        message: item.message,
+        time: item.time,
+        type: item.type,
+        color: item.color);
     danDanmakus[sec]!.add(item);
     addDanDanmaku(item, userInfo.id);
   }

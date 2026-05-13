@@ -93,6 +93,9 @@ class Utils {
     return color;
   }
 
+  /// 将 [color] 转为十进制 RGB 整数**：`R<<16 | G<<8 | B`（0～16777215）。
+  static int colorToDecimalRgb(Color color) => color.toARGB32() & 0xFFFFFF;
+
   ///计算百分率
   static String calculatePercentage(int value, int total) {
     if (total <= 0) {

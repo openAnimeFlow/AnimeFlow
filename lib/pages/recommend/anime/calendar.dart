@@ -4,7 +4,6 @@ import 'package:anime_flow/pages/recommend/anime/anime_notifier.dart';
 import 'package:anime_flow/routes/routes.dart';
 import 'package:anime_flow/widget/animation_network_image/animation_network_image.dart';
 import 'package:anime_flow/widget/ranking.dart';
-import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -58,7 +57,9 @@ class _CalendarViewState extends State<CalendarView> {
             context,
             content: Center(
               child: InkWell(
-                onTap: () => ref.read(animeCalendarProvider.notifier).refreshCalendarDate(),
+                onTap: () => ref
+                    .read(animeCalendarProvider.notifier)
+                    .refreshCalendarDate(),
                 child: const Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   spacing: 8,
@@ -73,9 +74,8 @@ class _CalendarViewState extends State<CalendarView> {
           data: (calendar) {
             final numberOfReleases =
                 calendar.calendarData[weekday.toString()]?.length ?? 0;
-            final numberOfViewers = calendar
-                .calendarData[weekday.toString()]
-                ?.fold(0, (sum, item) => sum + item.subject.rating.total) ??
+            final numberOfViewers = calendar.calendarData[weekday.toString()]
+                    ?.fold(0, (sum, item) => sum + item.subject.rating.total) ??
                 0;
 
             return SliverMainAxisGroup(
@@ -104,7 +104,7 @@ class _CalendarViewState extends State<CalendarView> {
                                   '查看更多',
                                   style: TextStyle(
                                     fontSize:
-                                    windowWidth(context) > 600 ? 15 : 12,
+                                        windowWidth(context) > 600 ? 15 : 12,
                                     color: Colors.grey,
                                   ),
                                 ),
@@ -141,7 +141,8 @@ class _CalendarViewState extends State<CalendarView> {
     );
   }
 
-  Widget _buildCalendarSection(BuildContext context, {required Widget content}) {
+  Widget _buildCalendarSection(BuildContext context,
+      {required Widget content}) {
     return SliverMainAxisGroup(
       slivers: [
         const SliverToBoxAdapter(
@@ -176,98 +177,83 @@ class _CalendarViewState extends State<CalendarView> {
       );
     }
 
-    return Listener(
-      onPointerSignal: (event) {
-        if (event is PointerScrollEvent) {
-          GestureBinding.instance.pointerSignalResolver.register(event,
-                  (event) {
-                final delta = (event as PointerScrollEvent).scrollDelta.dy;
-                final newOffset = (_scrollController.offset + delta).clamp(
-                  _scrollController.position.minScrollExtent,
-                  _scrollController.position.maxScrollExtent,
-                );
-                _scrollController.jumpTo(newOffset);
-              });
-        }
-      },
-      child: ListView.builder(
-        controller: _scrollController,
-        itemCount: items.length,
-        scrollDirection: Axis.horizontal,
-        padding: EdgeInsets.zero,
-        itemBuilder: (BuildContext context, int index) {
-          final itemData = items[index].subject;
-          final subjectBasicData = SubjectBasicData(
-            id: itemData.id,
-            name: itemData.nameCN ?? itemData.name,
-            image: itemData.images.large,
-          );
-          return Container(
-            width: _cardWidth(windowWidth(context)),
-            margin: EdgeInsets.only(right: index == items.length - 1 ? 0 : 10),
-            child: ClipRRect(
-              borderRadius: BorderRadius.circular(10),
-              child: InkWell(
-                onTap: () {
-                  AnimeInfoRoute.fromData(subjectBasicData).push(context);
-                },
-                child: Stack(
-                  children: [
-                    Positioned.fill(
-                      child: AnimationNetworkImage(
-                        url: itemData.images.large,
-                        fit: BoxFit.cover,
-                      ),
+    return ListView.builder(
+      controller: _scrollController,
+      itemCount: items.length,
+      scrollDirection: Axis.horizontal,
+      padding: EdgeInsets.zero,
+      itemBuilder: (BuildContext context, int index) {
+        final itemData = items[index].subject;
+        final subjectBasicData = SubjectBasicData(
+          id: itemData.id,
+          name: itemData.nameCN ?? itemData.name,
+          image: itemData.images.large,
+        );
+        return Container(
+          width: _cardWidth(windowWidth(context)),
+          margin: EdgeInsets.only(right: index == items.length - 1 ? 0 : 10),
+          child: ClipRRect(
+            borderRadius: BorderRadius.circular(10),
+            child: InkWell(
+              onTap: () {
+                AnimeInfoRoute.fromData(subjectBasicData).push(context);
+              },
+              child: Stack(
+                children: [
+                  Positioned.fill(
+                    child: AnimationNetworkImage(
+                      url: itemData.images.large,
+                      fit: BoxFit.cover,
                     ),
-                    Positioned(
-                      left: 0,
-                      right: 0,
-                      bottom: 0,
-                      child: Container(
+                  ),
+                  Positioned(
+                    left: 0,
+                    right: 0,
+                    bottom: 0,
+                    child: Container(
+                      padding: const EdgeInsets.all(5),
+                      decoration: const BoxDecoration(
+                        gradient: LinearGradient(
+                          begin: Alignment.bottomCenter,
+                          end: Alignment.topCenter,
+                          colors: [
+                            Colors.black38,
+                            Colors.transparent,
+                          ],
+                        ),
+                      ),
+                      child: Padding(
                         padding: const EdgeInsets.all(5),
-                        decoration: const BoxDecoration(
-                          gradient: LinearGradient(
-                            begin: Alignment.bottomCenter,
-                            end: Alignment.topCenter,
-                            colors: [
-                              Colors.black38,
-                              Colors.transparent,
-                            ],
+                        child: Text(
+                          itemData.nameCN ?? itemData.name,
+                          style: const TextStyle(
+                            color: Colors.white,
+                            fontWeight: FontWeight.bold,
                           ),
-                        ),
-                        child: Padding(
-                          padding: const EdgeInsets.all(5),
-                          child: Text(
-                            itemData.nameCN ?? itemData.name,
-                            style: const TextStyle(
-                              color: Colors.white,
-                              fontWeight: FontWeight.bold,
-                            ),
-                            maxLines: 2,
-                            overflow: TextOverflow.ellipsis,
-                            textAlign: TextAlign.left,
-                          ),
+                          maxLines: 2,
+                          overflow: TextOverflow.ellipsis,
+                          textAlign: TextAlign.left,
                         ),
                       ),
                     ),
-                    if (itemData.rating.rank > 0)
-                      Positioned(
-                        top: 0,
-                        left: 0,
-                        child: Padding(
-                          padding: const EdgeInsets.all(5),
-                          child: RankingView(
-                            ranking: itemData.rating.rank,
-                          ),
+                  ),
+                  if (itemData.rating.rank > 0)
+                    Positioned(
+                      top: 0,
+                      left: 0,
+                      child: Padding(
+                        padding: const EdgeInsets.all(5),
+                        child: RankingView(
+                          ranking: itemData.rating.rank,
                         ),
                       ),
-                  ],
-                ),
+                    ),
+                ],
               ),
             ),
-          );
-        },
-      ),
+          ),
+        );
+      },
     );
   }
 }

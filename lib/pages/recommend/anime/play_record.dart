@@ -5,7 +5,6 @@ import 'package:anime_flow/repository/storage.dart';
 import 'package:anime_flow/routes/routes.dart';
 import 'package:anime_flow/utils/utils.dart';
 import 'package:anime_flow/widget/animation_network_image/animation_network_image.dart';
-import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:hive_ce_flutter/hive_flutter.dart';
 import 'package:anime_flow/utils/logger.dart';
@@ -95,156 +94,135 @@ class _PlayRecordViewState extends State<PlayRecordView> {
           SliverToBoxAdapter(
             child: SizedBox(
               height: 180,
-              child: Listener(
-                onPointerSignal: (event) {
-                  if (event is PointerScrollEvent) {
-                    GestureBinding.instance.pointerSignalResolver
-                        .register(event, (event) {
-                      final delta =
-                          (event as PointerScrollEvent).scrollDelta.dy;
-                      final newOffset =
-                          (_scrollController.offset + delta).clamp(
-                        _scrollController.position.minScrollExtent,
-                        _scrollController.position.maxScrollExtent,
-                      );
-                      _scrollController.jumpTo(newOffset);
-                    });
-                  }
-                },
-                child: ListView.builder(
-                  controller: _scrollController,
-                  scrollDirection: Axis.horizontal,
-                  padding: EdgeInsets.zero,
-                  itemCount: filterHistory.length,
-                  itemBuilder: (context, index) {
-                    final history = filterHistory[index];
-                    final subjectBasicData = SubjectBasicData(
-                        id: history.subjectId,
-                        name: history.subjectName,
-                        image: history.cover);
-                    return Container(
-                      width: 300,
-                      padding: EdgeInsets.only(
-                          right: index == filterHistory.length - 1 ? 0 : 10),
-                      child: InkWell(
-                        borderRadius: BorderRadius.circular(8),
-                        onTap: () {
-                          AnimeInfoRoute.fromData(subjectBasicData).push(context);
-                        },
-                        child: Column(
-                          mainAxisSize: MainAxisSize.min,
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Expanded(
-                              child: ClipRRect(
-                                borderRadius: BorderRadius.circular(8),
-                                child: Stack(
-                                  children: [
-                                    Positioned.fill(
-                                      child: AspectRatio(
-                                        aspectRatio: 16 / 9,
-                                        child: AnimationNetworkImage(
-                                          alignment: Alignment.topCenter,
-                                          fit: BoxFit.cover,
-                                          url: history.cover,
-                                        ),
+              child: ListView.builder(
+                controller: _scrollController,
+                scrollDirection: Axis.horizontal,
+                padding: EdgeInsets.zero,
+                itemCount: filterHistory.length,
+                itemBuilder: (context, index) {
+                  final history = filterHistory[index];
+                  final subjectBasicData = SubjectBasicData(
+                      id: history.subjectId,
+                      name: history.subjectName,
+                      image: history.cover);
+                  return Container(
+                    width: 300,
+                    padding: EdgeInsets.only(
+                        right: index == filterHistory.length - 1 ? 0 : 10),
+                    child: InkWell(
+                      borderRadius: BorderRadius.circular(8),
+                      onTap: () {
+                        AnimeInfoRoute.fromData(subjectBasicData).push(context);
+                      },
+                      child: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Expanded(
+                            child: ClipRRect(
+                              borderRadius: BorderRadius.circular(8),
+                              child: Stack(
+                                children: [
+                                  Positioned.fill(
+                                    child: AspectRatio(
+                                      aspectRatio: 16 / 9,
+                                      child: AnimationNetworkImage(
+                                        alignment: Alignment.topCenter,
+                                        fit: BoxFit.cover,
+                                        url: history.cover,
                                       ),
                                     ),
-                                    Positioned(
-                                      bottom: 0,
-                                      left: 0,
-                                      right: 0,
-                                      child: Container(
-                                        padding: const EdgeInsets.all(8),
-                                        decoration: const BoxDecoration(
-                                            gradient: LinearGradient(
-                                                begin: Alignment.bottomCenter,
-                                                end: Alignment.topCenter,
-                                                colors: [
-                                              Colors.black87,
-                                              Colors.transparent,
-                                            ])),
-                                        child: Row(
-                                          crossAxisAlignment:
-                                              CrossAxisAlignment.center,
-                                          children: [
-                                            Expanded(
-                                              child: Column(
-                                                crossAxisAlignment:
-                                                    CrossAxisAlignment.start,
-                                                mainAxisSize: MainAxisSize.min,
-                                                children: [
-                                                  Text(
-                                                    '看到${history.episodeSort}话 ${Utils.calculatePercentage(history.position, history.duration)}',
-                                                    style: const TextStyle(
-                                                      color: Colors.white,
-                                                      fontSize: 15,
-                                                      fontWeight:
-                                                          FontWeight.bold,
-                                                    ),
+                                  ),
+                                  Positioned(
+                                    bottom: 0,
+                                    left: 0,
+                                    right: 0,
+                                    child: Container(
+                                      padding: const EdgeInsets.all(8),
+                                      decoration: const BoxDecoration(
+                                          gradient: LinearGradient(
+                                              begin: Alignment.bottomCenter,
+                                              end: Alignment.topCenter,
+                                              colors: [
+                                            Colors.black87,
+                                            Colors.transparent,
+                                          ])),
+                                      child: Row(
+                                        crossAxisAlignment:
+                                            CrossAxisAlignment.center,
+                                        children: [
+                                          Expanded(
+                                            child: Column(
+                                              crossAxisAlignment:
+                                                  CrossAxisAlignment.start,
+                                              mainAxisSize: MainAxisSize.min,
+                                              children: [
+                                                Text(
+                                                  '看到${history.episodeSort}话 ${Utils.calculatePercentage(history.position, history.duration)}',
+                                                  style: const TextStyle(
+                                                    color: Colors.white,
+                                                    fontSize: 15,
+                                                    fontWeight: FontWeight.bold,
                                                   ),
-                                                  const SizedBox(height: 8),
-                                                  ClipRRect(
-                                                    borderRadius:
-                                                        BorderRadius.circular(
-                                                            2),
-                                                    child:
-                                                        LinearProgressIndicator(
-                                                      value: history.duration >
-                                                              0
-                                                          ? history.position /
-                                                              history.duration
-                                                          : 0,
-                                                      minHeight: 4,
-                                                      backgroundColor: Colors
-                                                          .white
-                                                          .withValues(
-                                                              alpha: 0.3),
-                                                      valueColor:
-                                                          const AlwaysStoppedAnimation<
-                                                                  Color>(
-                                                              Colors.white),
-                                                    ),
+                                                ),
+                                                const SizedBox(height: 8),
+                                                ClipRRect(
+                                                  borderRadius:
+                                                      BorderRadius.circular(2),
+                                                  child:
+                                                      LinearProgressIndicator(
+                                                    value: history.duration > 0
+                                                        ? history.position /
+                                                            history.duration
+                                                        : 0,
+                                                    minHeight: 4,
+                                                    backgroundColor: Colors
+                                                        .white
+                                                        .withValues(alpha: 0.3),
+                                                    valueColor:
+                                                        const AlwaysStoppedAnimation<
+                                                                Color>(
+                                                            Colors.white),
                                                   ),
-                                                ],
-                                              ),
+                                                ),
+                                              ],
                                             ),
-                                            InkWell(
-                                              onTap: () {
-                                                PlayRoute.fromData(
-                                                  subjectBasicData,
-                                                  continueEpisode:
-                                                      history.episodeSort,
-                                                ).push(context);
-                                              },
-                                              child: const Icon(
-                                                Icons.play_circle,
-                                                color: Colors.white70,
-                                                size: 40,
-                                              ),
+                                          ),
+                                          InkWell(
+                                            onTap: () {
+                                              PlayRoute.fromData(
+                                                subjectBasicData,
+                                                continueEpisode:
+                                                    history.episodeSort,
+                                              ).push(context);
+                                            },
+                                            child: const Icon(
+                                              Icons.play_circle,
+                                              color: Colors.white70,
+                                              size: 40,
                                             ),
-                                          ],
-                                        ),
+                                          ),
+                                        ],
                                       ),
                                     ),
-                                  ],
-                                ),
+                                  ),
+                                ],
                               ),
                             ),
-                            const SizedBox(height: 4),
-                            Text(
-                              history.subjectName,
-                              maxLines: 1,
-                              overflow: TextOverflow.ellipsis,
-                              style: const TextStyle(
-                                  fontSize: 15, fontWeight: FontWeight.bold),
-                            ),
-                          ],
-                        ),
+                          ),
+                          const SizedBox(height: 4),
+                          Text(
+                            history.subjectName,
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            style: const TextStyle(
+                                fontSize: 15, fontWeight: FontWeight.bold),
+                          ),
+                        ],
                       ),
-                    );
-                  },
-                ),
+                    ),
+                  );
+                },
               ),
             ),
           ),

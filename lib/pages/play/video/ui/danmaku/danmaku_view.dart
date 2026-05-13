@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'package:anime_flow/constants/storage_key.dart';
+import 'package:anime_flow/controllers/my_controller.dart';
 import 'package:anime_flow/pages/play/controller/play_controller.dart';
 import 'package:anime_flow/repository/storage.dart';
 import 'package:canvas_danmaku/canvas_danmaku.dart';
@@ -17,6 +18,7 @@ class _DanmakuViewState extends State<DanmakuView>
     with AutomaticKeepAliveClientMixin {
   final setting = Storage.setting;
   final PlayController playController = Get.find<PlayController>();
+  final MyController myController = Get.find<MyController>();
   Timer? _danmakuTimer;
   Worker? _rateWorker;
 
@@ -86,7 +88,8 @@ class _DanmakuViewState extends State<DanmakuView>
           // 按索引延迟添加弹幕
           danmakus.asMap().forEach((idx, danmaku) {
             // 本人弹幕已在 sendDanmaku 中即时上屏，避免与定时器重复派发
-            if (danmaku.selfSend) {
+            final userInfo = myController.userInfo.value;
+            if (userInfo != null && userInfo.id == danmaku.bgmUserId) {
               return;
             }
             Future.delayed(
@@ -101,14 +104,14 @@ class _DanmakuViewState extends State<DanmakuView>
                 }
 
                 // 本人弹幕不参与平台隐藏
-                if (!danmaku.selfSend) {
+                // if (!danmaku.selfSend) {
                   final regex = RegExp(r'\[([^\]]+)\]');
                   final match = regex.firstMatch(danmaku.source);
                   final platform = match?.group(1) ?? '弹弹Play';
                   if (playController.isPlatformHidden(platform)) {
                     return;
                   }
-                }
+                // }
 
                 // 处理颜色
                 if (!_danmakuColor) {
@@ -116,7 +119,10 @@ class _DanmakuViewState extends State<DanmakuView>
                 }
 
                 // 添加弹幕
-                playController.addDanDanmaku(danmaku);
+                playController.addDanDanmaku(
+                  danmaku,
+                  myController.userInfo.value?.id,
+                );
               },
             );
           });

@@ -456,6 +456,9 @@ class PlayController extends GetxController {
     int type = 1,
   }) {
     final trimmed = message.trim();
+    final  myController = Get.find<MyController>();
+    final userInfo = myController.userInfo.value;
+    if (userInfo == null) return;
     if (trimmed.isEmpty) return;
     // 输入框聚焦时会 pause，此时 playing 为 false，不能据此拦截发送。
     if (duration.value == Duration.zero && position.value == Duration.zero) {
@@ -470,7 +473,7 @@ class PlayController extends GetxController {
       time: time,
       type: type,
       color: color ?? Colors.white,
-      selfSend: true,
+      bgmUserId: userInfo.id,
       source: 'AnimeFlow',
     );
 
@@ -478,11 +481,12 @@ class PlayController extends GetxController {
       danDanmakus[sec] = [];
     }
     danDanmakus[sec]!.add(item);
-    addDanDanmaku(item);
+    addDanDanmaku(item, userInfo.id);
   }
 
   /// 添加弹幕到画布
-  void addDanDanmaku(Danmaku danmaku) {
+  /// [bgmUserId] 当前登录用户的 Bangumi id；未登录时为 null，此时 [DanmakuContentItem.selfSend] 恒为 false。
+  void addDanDanmaku(Danmaku danmaku, int? bgmUserId) {
     final DanmakuItemType itemType;
     if (danmaku.type == 4) {
       itemType = DanmakuItemType.bottom;
@@ -497,7 +501,7 @@ class PlayController extends GetxController {
           danmaku.message,
           color: danmaku.color,
           type: itemType,
-          selfSend: danmaku.selfSend,
+          selfSend: danmaku.bgmUserId != null && danmaku.bgmUserId == bgmUserId,
         ),
       );
     } catch (_) {

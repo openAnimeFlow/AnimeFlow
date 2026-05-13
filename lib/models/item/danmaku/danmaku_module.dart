@@ -17,34 +17,35 @@ class Danmaku {
   // 弹幕来源 ([BiliBili], [Gamer])
   String source;
 
-  bool selfSend;
+  int? bgmUserId;
 
   Danmaku(
       {required this.message,
       required this.time,
       required this.type,
       required this.color,
-      required this.selfSend,
+      this.bgmUserId,
       required this.source});
 
   factory Danmaku.fromJson(Map<String, dynamic> json) {
     String messageValue = json['m'];
     List<String> parts = json['p'].split(',');
-    bool selfSendValue = json['selfSend'] ?? false;
     double timeValue = double.parse(parts[0]);
     int typeValue = int.parse(parts[1]);
     Color color = Utils.generateDanmakuColor(int.parse(parts[2]));
     String sourceValue = parts[3];
+    final int? bgmUserIdValue = parts.length > 4 ? int.tryParse(parts[4]) : null;
     return Danmaku(
         time: timeValue,
         message: messageValue,
         type: typeValue,
         color: color,
-        source: sourceValue, selfSend: selfSendValue);
+        source: sourceValue,
+        bgmUserId: bgmUserIdValue);
   }
 
   @override
   String toString() {
-    return 'Danmaku{message: $message, time: $time, type: $type, color: $color, source: $source, selfSend: $selfSend}';
+    return 'Danmaku{message: $message, time: $time, type: $type, color: $color, source: $source, bgmUserId: $bgmUserId}';
   }
 }

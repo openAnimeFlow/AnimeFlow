@@ -1,5 +1,5 @@
-import 'package:anime_flow/controllers/play/play_controller.dart';
-import 'package:anime_flow/controllers/video/video_ui_controller.dart';
+import 'package:anime_flow/pages/play/controller/play/play_controller.dart';
+import 'package:anime_flow/pages/play/controller/video/video_ui_controller.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 

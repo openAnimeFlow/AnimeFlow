@@ -1,15 +1,13 @@
 import 'package:anime_flow/http/requests/anime_flow_request.dart';
-import 'package:anime_flow/http/requests/damaku_request.dart';
 import 'package:anime_flow/models/item/danmaku/danmaku_search_response.dart';
 import 'package:anime_flow/models/item/danmaku/danmaku_episode_response.dart';
 import 'package:anime_flow/stores/episodes_state.dart';
-import 'package:anime_flow/controllers/play/play_controller.dart';
+import 'package:anime_flow/pages/play/controller/play/play_controller.dart';
 import 'package:anime_flow/models/item/danmaku/danmaku_module.dart';
 import 'package:anime_flow/stores/play_subject_state.dart';
 import 'package:anime_flow/utils/format_time_util.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:anime_flow/utils/logger.dart';
 
 class DanmakuCard extends StatefulWidget {
   const DanmakuCard({super.key});

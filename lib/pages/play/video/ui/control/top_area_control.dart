@@ -1,9 +1,9 @@
-import 'package:anime_flow/controllers/video/source/video_source_controller.dart';
 import 'package:anime_flow/pages/play/video/ui/setting/video_setting.dart';
 import 'package:anime_flow/stores/episodes_state.dart';
-import 'package:anime_flow/controllers/play/play_controller.dart';
 import 'package:anime_flow/stores/play_subject_state.dart';
-import 'package:anime_flow/controllers/video/video_ui_controller.dart';
+import 'package:anime_flow/pages/play/controller/video/source/video_source_controller.dart';
+import 'package:anime_flow/pages/play/controller/play/play_controller.dart';
+import 'package:anime_flow/pages/play/controller/video/video_ui_controller.dart';
 import 'package:anime_flow/features/network_speed/presentation/network_speed_provider.dart';
 import 'package:anime_flow/utils/systemUtil.dart';
 import 'package:anime_flow/utils/utils.dart';
@@ -24,9 +24,11 @@ class TopAreaControl extends ConsumerStatefulWidget {
 }
 
 class _TopAreaControlState extends ConsumerState<TopAreaControl> {
-  final VideoSourceController videoSourceController = Get.find<VideoSourceController>();
+  final VideoSourceController videoSourceController =
+      Get.find<VideoSourceController>();
   final PlayController playController = Get.find<PlayController>();
-  final VideoUiStateController videoUiStateController = Get.find<VideoUiStateController>();
+  final VideoUiStateController videoUiStateController =
+      Get.find<VideoUiStateController>();
   final EpisodesState episodesController = Get.find<EpisodesState>();
   final PlaySubjectState playSubjectState = Get.find<PlaySubjectState>();
 
@@ -197,6 +199,10 @@ class _TopAreaControlState extends ConsumerState<TopAreaControl> {
                                                 .loadVideoPage(url);
                                           },
                                           isBottomSheet: false,
+                                          videoSourceController:
+                                              videoSourceController,
+                                          episodesState: episodesController,
+                                          subjectState: playSubjectState,
                                         );
                                       },
                                     );
@@ -267,7 +273,9 @@ class _TopAreaControlState extends ConsumerState<TopAreaControl> {
                       const RotatedBox(
                         quarterTurns: 1,
                         child: Icon(Icons.arrow_right_alt_outlined,
-                            size: 15, fontWeight: FontWeight.bold,color: Colors.white),
+                            size: 15,
+                            fontWeight: FontWeight.bold,
+                            color: Colors.white),
                       ),
                       Text(
                         Utils.formatBytesPerSec(download),
@@ -280,10 +288,13 @@ class _TopAreaControlState extends ConsumerState<TopAreaControl> {
                       const RotatedBox(
                         quarterTurns: 3,
                         child: Icon(Icons.arrow_right_alt_outlined,
-                            size: 15, fontWeight: FontWeight.bold,color: Colors.white),
+                            size: 15,
+                            fontWeight: FontWeight.bold,
+                            color: Colors.white),
                       ),
                       Text(Utils.formatBytesPerSec(upload),
-                          style: const TextStyle(fontSize: 10, color: Colors.white))
+                          style: const TextStyle(
+                              fontSize: 10, color: Colors.white))
                     ],
                   ],
                 );

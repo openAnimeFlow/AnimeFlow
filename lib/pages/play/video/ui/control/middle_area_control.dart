@@ -1,7 +1,7 @@
-import 'package:anime_flow/controllers/play/play_controller.dart';
-import 'package:anime_flow/controllers/video/video_ui_controller.dart';
 import 'package:anime_flow/features/network_speed/presentation/network_speed_provider.dart';
 import 'package:anime_flow/models/enums/video_controls_icon_type.dart';
+import 'package:anime_flow/pages/play/controller/play/play_controller.dart';
+import 'package:anime_flow/pages/play/controller/video/video_ui_controller.dart';
 import 'package:anime_flow/utils/format_time_util.dart';
 import 'package:anime_flow/utils/utils.dart';
 import 'package:flutter/material.dart';

@@ -1,14 +1,14 @@
-import 'package:anime_flow/controllers/play/episode_controller.dart';
 import 'package:anime_flow/controllers/shaders/shaders_controller.dart';
-import 'package:anime_flow/controllers/video/video_ui_controller.dart';
 import 'package:anime_flow/http/requests/bgm_request.dart';
+import 'package:anime_flow/pages/play/controller/play/episode_controller.dart';
+import 'package:anime_flow/pages/play/controller/play/play_controller.dart';
+import 'package:anime_flow/pages/play/controller/video/source/video_source_controller.dart';
+import 'package:anime_flow/pages/play/controller/video/video_ui_controller.dart';
 import 'package:anime_flow/pages/play/video/video.dart';
 import 'package:anime_flow/stores/play_subject_state.dart';
 import 'package:anime_flow/utils/systemUtil.dart';
 import 'package:anime_flow/constants/play_layout_constant.dart';
 import 'package:anime_flow/stores/episodes_state.dart';
-import 'package:anime_flow/controllers/play/play_controller.dart';
-import 'package:anime_flow/controllers/video/source/video_source_controller.dart';
 import 'package:anime_flow/routes/routes.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -27,8 +27,7 @@ class PlayPage extends StatefulWidget {
 }
 
 class _PlayPageState extends State<PlayPage> {
-  final VideoSourceController videoSourceController =
-      Get.put(VideoSourceController());
+  final VideoSourceController videoSourceController = Get.put(VideoSourceController());
   final EpisodesState episodesState = Get.put(EpisodesState());
   late final PlaySubjectState subjectState;
   late final PlayController playController;

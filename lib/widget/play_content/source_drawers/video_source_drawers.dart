@@ -3,25 +3,30 @@ import 'dart:convert';
 import 'package:anime_flow/crawler/itme/anti_crawler_config.dart';
 import 'package:anime_flow/models/play/video/episode_resources_item.dart';
 import 'package:anime_flow/models/play/video/resources_item.dart';
+import 'package:anime_flow/pages/play/controller/video/source/video_source_controller.dart';
 import 'package:anime_flow/providers/captcha/captcha_provider.dart';
 import 'package:anime_flow/stores/play_subject_state.dart';
 import 'package:anime_flow/widget/animation_network_image/animation_network_image.dart';
 import 'package:anime_flow/constants/play_layout_constant.dart';
 import 'package:anime_flow/stores/episodes_state.dart';
-import 'package:anime_flow/controllers/video/source/video_source_controller.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:anime_flow/utils/logger.dart';
 
 class VideoSourceDrawers extends StatefulWidget {
   final Function(String url)? onVideoUrlSelected;
-
+  final VideoSourceController videoSourceController;
+  final EpisodesState episodesState;
+  final PlaySubjectState subjectState;
   final bool isBottomSheet;
 
   const VideoSourceDrawers({
     super.key,
     this.onVideoUrlSelected,
     this.isBottomSheet = false,
+    required this.videoSourceController,
+    required this.episodesState,
+    required this.subjectState,
   });
 
   @override
@@ -29,9 +34,6 @@ class VideoSourceDrawers extends StatefulWidget {
 }
 
 class _VideoSourceDrawersState extends State<VideoSourceDrawers> {
-  late EpisodesState episodesController;
-  late PlaySubjectState subjectState;
-  late VideoSourceController dataSourceController;
   final logger = LiggLogger();
   bool isShowEpisodes = false;
   final _searchController = TextEditingController();
@@ -39,10 +41,7 @@ class _VideoSourceDrawersState extends State<VideoSourceDrawers> {
   @override
   void initState() {
     super.initState();
-    subjectState = Get.find<PlaySubjectState>();
-    episodesController = Get.find<EpisodesState>();
-    dataSourceController = Get.find<VideoSourceController>();
-    _searchController.text = subjectState.subject.value.name;
+    _searchController.text = widget.subjectState.subject.value.name;
   }
 
   void setShowEpisodes() {
@@ -52,7 +51,7 @@ class _VideoSourceDrawersState extends State<VideoSourceDrawers> {
   }
 
   void setSelectedWebsite(int index) {
-    dataSourceController.selectedWebsiteIndex.value = index;
+    widget.videoSourceController.selectedWebsiteIndex.value = index;
     setState(() {
       isShowEpisodes = false;
     });
@@ -61,11 +60,11 @@ class _VideoSourceDrawersState extends State<VideoSourceDrawers> {
   void _performSearch() {
     String searchQuery = _searchController.text;
     if (searchQuery.isNotEmpty) {
-      dataSourceController.selectedWebsiteIndex.value = 0;
+      widget.videoSourceController.selectedWebsiteIndex.value = 0;
       setState(() {
         isShowEpisodes = false;
       });
-      dataSourceController.initResources(searchQuery);
+      widget.videoSourceController.initResources(searchQuery);
     }
   }
 
@@ -124,7 +123,7 @@ class _VideoSourceDrawersState extends State<VideoSourceDrawers> {
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 16),
             child: Obx(() {
-              final dataSource = dataSourceController.videoResources.toList();
+              final dataSource = widget.videoSourceController.videoResources.toList();
               if (dataSource.isEmpty) {
                 return const SizedBox.shrink();
               }
@@ -136,19 +135,20 @@ class _VideoSourceDrawersState extends State<VideoSourceDrawers> {
             child: Padding(
               padding: const EdgeInsets.symmetric(horizontal: 16),
               child: Obx(() {
-                final dataSource = dataSourceController.videoResources.toList();
+                final videoSourceController = widget.videoSourceController;
+                final dataSource = videoSourceController.videoResources.toList();
                 if (dataSource.isEmpty) {
                   return const SizedBox.shrink();
                 }
                 final currentIndex =
-                    dataSourceController.selectedWebsiteIndex.value;
+                    videoSourceController.selectedWebsiteIndex.value;
                 int validIndex =
                     currentIndex >= dataSource.length ? 0 : currentIndex;
 
                 if (validIndex != currentIndex) {
                   WidgetsBinding.instance.addPostFrameCallback((_) {
                     if (mounted) {
-                      dataSourceController.selectedWebsiteIndex.value =
+                      videoSourceController.selectedWebsiteIndex.value =
                           validIndex;
                     }
                   });
@@ -180,7 +180,8 @@ class _VideoSourceDrawersState extends State<VideoSourceDrawers> {
               _manualSearch(),
               const SizedBox(height: 16),
               Obx(() {
-                final dataSource = dataSourceController.videoResources.toList();
+                final videoSourceController = widget.videoSourceController;
+                final dataSource = videoSourceController.videoResources.toList();
                 if (dataSource.isEmpty) {
                   return const SizedBox.shrink();
                 }
@@ -189,24 +190,20 @@ class _VideoSourceDrawersState extends State<VideoSourceDrawers> {
               const SizedBox(height: 16),
               Expanded(
                 child: Obx(() {
-                  final dataSource =
-                      dataSourceController.videoResources.toList();
+                  final videoSourceController = widget.videoSourceController;
+                  final dataSource = videoSourceController.videoResources.toList();
                   if (dataSource.isEmpty) {
                     return const SizedBox.shrink();
                   }
                   // 确保索引有效，如果无效则使用 0
-                  final currentIndex =
-                      dataSourceController.selectedWebsiteIndex.value;
+                  final currentIndex = videoSourceController.selectedWebsiteIndex.value;
                   int validIndex =
                       currentIndex >= dataSource.length ? 0 : currentIndex;
 
                   // 如果索引不匹配，更新索引
                   if (validIndex != currentIndex) {
                     WidgetsBinding.instance.addPostFrameCallback((_) {
-                      if (mounted) {
-                        dataSourceController.selectedWebsiteIndex.value =
-                            validIndex;
-                      }
+                      if (mounted) () => videoSourceController.selectedWebsiteIndex.value = validIndex;
                     });
                   }
                   return _buildVideoSource(dataSource: dataSource);
@@ -299,9 +296,7 @@ class _VideoSourceDrawersState extends State<VideoSourceDrawers> {
                     itemBuilder: (context, index) {
                       final data = dataSource[index];
                       return Obx(() {
-                        final isSelected =
-                            dataSourceController.selectedWebsiteIndex.value ==
-                                index;
+                        final isSelected = widget.videoSourceController.selectedWebsiteIndex.value == index;
 
                         // final currentEpisodeCount = resource.episodeResources
                         //     .where((item) => item.episodes.any((ep) =>
@@ -386,7 +381,8 @@ class _VideoSourceDrawersState extends State<VideoSourceDrawers> {
 
   Widget _buildVideoSource({required List<ResourcesItem> dataSource}) {
     return Obx(() {
-      final selectedIndex = dataSourceController.selectedWebsiteIndex.value;
+      final videoSourceController = widget.videoSourceController;
+      final selectedIndex = videoSourceController.selectedWebsiteIndex.value;
       if (selectedIndex >= dataSource.length) {
         return const SizedBox.shrink();
       }
@@ -407,7 +403,8 @@ class _VideoSourceDrawersState extends State<VideoSourceDrawers> {
               children: [
                 const Text('未找到播放源'),
                 ElevatedButton(
-                    onPressed: () => dataSourceController.retryResources(selectedResource.websiteName),
+                    onPressed: () => videoSourceController
+                        .retryResources(selectedResource.websiteName),
                     child: const Text('重新搜索'))
               ],
             ),
@@ -421,15 +418,15 @@ class _VideoSourceDrawersState extends State<VideoSourceDrawers> {
           itemBuilder: (context, index) {
             final resourceItem = episodeResources[index];
             final isLastItem = index == episodeResources.length - 1;
-
+            final episodesState = widget.episodesState;
             // 当前选中剧集对应的剧集数据
             final currentEpisode = resourceItem.episodes.firstWhereOrNull(
-              (ep) => ep.episodeSort == episodesController.episodeIndex.value,
+              (ep) => ep.episodeSort == episodesState.episodeIndex.value,
             );
 
             final excludedEpisodesCount = episodeResources
                 .expand((item) => item.episodes.where((ep) =>
-                    ep.episodeSort != episodesController.episodeIndex.value))
+                    ep.episodeSort != episodesState.episodeIndex.value))
                 .length;
 
             // 如果当前资源组没有匹配的剧集，不渲染
@@ -478,7 +475,7 @@ class _VideoSourceDrawersState extends State<VideoSourceDrawers> {
                           .where(
                             (ep) =>
                                 ep.episodeSort !=
-                                episodesController.episodeIndex.value,
+                                widget.episodesState.episodeIndex.value,
                           )
                           .toList();
                       // 遍历所有其他剧集
@@ -505,7 +502,7 @@ class _VideoSourceDrawersState extends State<VideoSourceDrawers> {
     return CaptchaView(
       key: ValueKey(resource.websiteName),
       resource: resource,
-      dataSourceController: dataSourceController,
+      dataSourceController: widget.videoSourceController,
     );
   }
 
@@ -513,7 +510,7 @@ class _VideoSourceDrawersState extends State<VideoSourceDrawers> {
       {required String websiteName,
       required String websiteIcon,
       required String baseUrl}) {
-    final videoUrl = dataSourceController.videoUrl.value;
+    final videoUrl = widget.videoSourceController.videoUrl.value;
     final isSelected = baseUrl + episode.like == videoUrl;
 
     return Container(
@@ -537,7 +534,7 @@ class _VideoSourceDrawersState extends State<VideoSourceDrawers> {
               try {
                 Get.back();
                 final videoUrl = baseUrl + episode.like;
-                dataSourceController.setWebSite(
+                widget.videoSourceController.setWebSite(
                     title: websiteName,
                     iconUrl: websiteIcon,
                     videoUrl: videoUrl,

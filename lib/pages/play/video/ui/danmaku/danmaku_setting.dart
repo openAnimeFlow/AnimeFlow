@@ -1,5 +1,5 @@
 import 'package:anime_flow/constants/storage_key.dart';
-import 'package:anime_flow/controllers/play/play_controller.dart';
+import 'package:anime_flow/pages/play/controller/play/play_controller.dart';
 import 'package:anime_flow/repository/storage.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';

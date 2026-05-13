@@ -1,10 +1,10 @@
-import 'package:anime_flow/controllers/play/episode_controller.dart';
+import 'package:anime_flow/pages/play/controller/play/episode_controller.dart';
+import 'package:anime_flow/pages/play/controller/play/play_controller.dart';
+import 'package:anime_flow/pages/play/controller/video/video_ui_controller.dart';
 import 'package:anime_flow/pages/play/video/gesture/desktop_gesture_detector.dart';
 import 'package:anime_flow/pages/play/video/gesture/mobile_gesture_detector.dart';
 import 'package:anime_flow/utils/systemUtil.dart';
 import 'package:anime_flow/stores/episodes_state.dart';
-import 'package:anime_flow/controllers/play/play_controller.dart';
-import 'package:anime_flow/controllers/video/video_ui_controller.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 

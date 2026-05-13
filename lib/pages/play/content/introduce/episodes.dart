@@ -1,8 +1,8 @@
 import 'package:anime_flow/constants/assets_path_constants.dart';
-import 'package:anime_flow/controllers/video/source/video_source_controller.dart';
 import 'package:anime_flow/models/item/bangumi/episodes_item.dart';
+import 'package:anime_flow/pages/play/controller/play/play_controller.dart';
+import 'package:anime_flow/pages/play/controller/video/source/video_source_controller.dart';
 import 'package:anime_flow/stores/episodes_state.dart';
-import 'package:anime_flow/controllers/play/play_controller.dart';
 import 'package:anime_flow/stores/play_subject_state.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';

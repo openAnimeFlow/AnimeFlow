@@ -1,5 +1,6 @@
-import 'package:anime_flow/controllers/play/play_controller.dart';
-import 'package:anime_flow/controllers/video/source/video_source_controller.dart';
+import 'package:anime_flow/pages/play/controller/play/play_controller.dart';
+import 'package:anime_flow/pages/play/controller/video/source/video_source_controller.dart';
+import 'package:anime_flow/stores/episodes_state.dart';
 import 'package:anime_flow/stores/play_subject_state.dart';
 import 'package:anime_flow/widget/animation_network_image/animation_network_image.dart';
 import 'package:anime_flow/widget/play_content/source_drawers/video_source_drawers.dart';
@@ -15,9 +16,11 @@ class VideoResourcesView extends StatefulWidget {
 }
 
 class _VideoResourcesViewState extends State<VideoResourcesView> {
-  final VideoSourceController videoSourceController = Get.find<VideoSourceController>();
+  final VideoSourceController videoSourceController =
+      Get.find<VideoSourceController>();
   final PlaySubjectState playSubjectState = Get.find<PlaySubjectState>();
   final PlayController playController = Get.find<PlayController>();
+  final EpisodesState episodesState = Get.find<EpisodesState>();
   final LiggLogger logger = LiggLogger();
 
   /// 显示数据源抽屉
@@ -50,6 +53,9 @@ class _VideoResourcesViewState extends State<VideoResourcesView> {
           return VideoSourceDrawers(
             isBottomSheet: false,
             onVideoUrlSelected: onVideoUrlSelected,
+            videoSourceController: videoSourceController,
+            episodesState: episodesState,
+            subjectState: playSubjectState,
           );
         },
       );
@@ -59,6 +65,9 @@ class _VideoResourcesViewState extends State<VideoResourcesView> {
         VideoSourceDrawers(
           isBottomSheet: true,
           onVideoUrlSelected: onVideoUrlSelected,
+          videoSourceController: videoSourceController,
+          episodesState: episodesState,
+          subjectState: playSubjectState,
         ),
         isScrollControlled: true,
         backgroundColor: Colors.transparent,

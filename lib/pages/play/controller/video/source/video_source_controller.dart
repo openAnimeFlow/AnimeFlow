@@ -1,6 +1,4 @@
 import 'package:anime_flow/crawler/cookie_manager.dart';
-import 'package:anime_flow/controllers/play/play_controller.dart';
-import 'package:anime_flow/controllers/video/video_ui_controller.dart';
 import 'package:anime_flow/crawler/html_request.dart';
 import 'package:anime_flow/crawler/itme/anti_crawler_config.dart';
 import 'package:anime_flow/crawler/itme/crawler_config_item.dart';
@@ -8,6 +6,8 @@ import 'package:anime_flow/models/enums/video_controls_icon_type.dart';
 import 'package:anime_flow/models/play/video/episode_resources_item.dart';
 import 'package:anime_flow/models/play/video/resources_item.dart';
 import 'package:anime_flow/models/play/video/search_resources_item.dart';
+import 'package:anime_flow/pages/play/controller/play/play_controller.dart';
+import 'package:anime_flow/pages/play/controller/video/video_ui_controller.dart';
 import 'package:anime_flow/providers/video/video_source_provider.dart';
 import 'package:anime_flow/providers/video/webview_video_source_provider.dart';
 import 'package:anime_flow/repository/play_repository.dart';

@@ -1,5 +1,4 @@
 import 'package:anime_flow/controllers/my_controller.dart';
-import 'package:anime_flow/models/item/bangumi/calendar_item.dart';
 import 'package:anime_flow/models/item/subject_basic_data_item.dart';
 import 'package:anime_flow/pages/anime_info/index.dart';
 import 'package:anime_flow/pages/calendar/index.dart';
@@ -164,20 +163,11 @@ class SearchRoute extends GoRouteData with $SearchRoute {
 
 @TypedGoRoute<CalendarRoute>(path: '/calendar')
 class CalendarRoute extends GoRouteData with $CalendarRoute {
-  const CalendarRoute(this.$extra);
-
-  // Calendar 字段较多，无法用 query 完整序列化，因此通过 $extra 传递。
-  // 代价：Inspector / Hot Restart 后该路由会丢失参数。
-  final Calendar? $extra;
+  const CalendarRoute();
 
   @override
-  Widget build(BuildContext context, GoRouterState state) {
-    final data = $extra;
-    if (data == null) {
-      return const Scaffold(body: Center(child: Text('路由参数无效')));
-    }
-    return CalendarPage(calendar: data);
-  }
+  Widget build(BuildContext context, GoRouterState state) =>
+      const CalendarPage();
 }
 
 @TypedGoRoute<CharactersRoute>(path: '/characters')

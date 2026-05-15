@@ -8,6 +8,7 @@ import 'package:anime_flow/widget/subject_card.dart';
 import 'package:flutter/material.dart';
 import 'package:anime_flow/models/item/bangumi/subject_item.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 
 // 每日放送页面
 class CalendarPage extends StatefulWidget {
@@ -50,6 +51,12 @@ class _CalendarPageState extends State<CalendarPage>
     return Scaffold(
       appBar: AppBar(
         title: const Text('每日放送'),
+        leading: Tooltip(
+          message: '返回',
+          child: IconButton(
+              onPressed: () => context.pop(),
+              icon: const Icon(Icons.arrow_back)),
+        ),
         bottom: PreferredSize(
           preferredSize: const Size.fromHeight(kTextTabBarHeight),
           child: Consumer(
@@ -154,14 +161,14 @@ class _CalendarPageState extends State<CalendarPage>
     // 统计信息
     final totalWatchers = items.fold(0, (sum, item) => sum + item.watchers);
     final avgScore = items
-        .where((item) => item.subject.rating.score > 0)
-        .fold(0.0, (sum, item) => sum + item.subject.rating.score) /
+            .where((item) => item.subject.rating.score > 0)
+            .fold(0.0, (sum, item) => sum + item.subject.rating.score) /
         items.where((item) => item.subject.rating.score > 0).length;
 
     return Center(
       child: ConstrainedBox(
         constraints:
-        const BoxConstraints(maxWidth: PlayLayoutConstant.maxWidth),
+            const BoxConstraints(maxWidth: PlayLayoutConstant.maxWidth),
         child: CustomScrollView(
           slivers: [
             // 统计信息
@@ -172,7 +179,7 @@ class _CalendarPageState extends State<CalendarPage>
                   padding: const EdgeInsets.all(10),
                   decoration: BoxDecoration(
                     color:
-                    Theme.of(context).colorScheme.surfaceContainerHighest,
+                        Theme.of(context).colorScheme.surfaceContainerHighest,
                     borderRadius: BorderRadius.circular(8),
                   ),
                   child: Row(
@@ -202,7 +209,7 @@ class _CalendarPageState extends State<CalendarPage>
                   childAspectRatio: 0.7,
                 ),
                 delegate: SliverChildBuilderDelegate(
-                      (context, index) {
+                  (context, index) {
                     return _buildCard(
                         items[index].subject, items[index].watchers);
                   },

@@ -11,17 +11,35 @@ import 'package:shimmer/shimmer.dart';
 class PopularAnimeView extends ConsumerWidget {
   const PopularAnimeView({super.key});
 
+  /// 首屏加载时的骨架卡片数量。
+  static const int _initialSkeletonCount = 6;
+
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final hotAsync = ref.watch(animeHotProvider);
 
     return hotAsync.when(
-      loading: () => _buildSection(
-        context,
-        child: const Padding(
-          padding: EdgeInsets.symmetric(vertical: 48),
-          child: Center(child: CircularProgressIndicator()),
-        ),
+      loading: () => SliverMainAxisGroup(
+        slivers: [
+          _buildTitleSliver(),
+          SliverGrid(
+            gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+              crossAxisCount: LayoutUtil.getCrossAxisCount(context),
+              crossAxisSpacing: 10,
+              mainAxisSpacing: 10,
+              childAspectRatio: 0.7,
+            ),
+            delegate: SliverChildBuilderDelegate(
+              (BuildContext context, int index) => Center(
+                child: Padding(
+                  padding: const EdgeInsets.all(5),
+                  child: _buildSkeleton(context),
+                ),
+              ),
+              childCount: _initialSkeletonCount,
+            ),
+          ),
+        ],
       ),
       error: (error, stackTrace) => _buildSection(
         context,

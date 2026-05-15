@@ -2,10 +2,12 @@ import 'package:anime_flow/models/item/bangumi/calendar_item.dart';
 import 'package:anime_flow/models/item/subject_basic_data_item.dart';
 import 'package:anime_flow/pages/recommend/anime/anime_notifier.dart';
 import 'package:anime_flow/routes/routes.dart';
+import 'package:anime_flow/utils/systemUtil.dart';
 import 'package:anime_flow/widget/animation_network_image/animation_network_image.dart';
 import 'package:anime_flow/widget/ranking.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:shimmer/shimmer.dart';
 
 class CalendarView extends StatefulWidget {
   const CalendarView({super.key});
@@ -21,6 +23,9 @@ class _CalendarViewState extends State<CalendarView> {
   /// 与常见平板/桌面分界一致：窄 / 中 / 宽 三档。
   static const double _bpMedium = 600;
   static const double _bpExpanded = 900;
+
+  /// 骨架卡片数量
+  static const int _skeletonPlaceholderCount = 6;
 
   @override
   void dispose() {
@@ -51,7 +56,7 @@ class _CalendarViewState extends State<CalendarView> {
         return calendarAsync.when(
           loading: () => _buildCalendarSection(
             context,
-            content: const Center(child: CircularProgressIndicator()),
+            content: _buildCalendarSkeletonCarousel(context),
           ),
           error: (error, stackTrace) => _buildCalendarSection(
             context,
@@ -165,6 +170,76 @@ class _CalendarViewState extends State<CalendarView> {
           ),
         ),
       ],
+    );
+  }
+
+  Widget _buildCalendarSkeletonCarousel(BuildContext context) {
+    final w = windowWidth(context);
+    final cardW = _cardWidth(w);
+    return ListView.builder(
+      padding: EdgeInsets.zero,
+      scrollDirection: Axis.horizontal,
+      itemCount: _skeletonPlaceholderCount,
+      itemBuilder: (BuildContext context, int index) {
+        return Container(
+          width: cardW,
+          margin: EdgeInsets.only(
+            right: index == _skeletonPlaceholderCount - 1 ? 0 : 10,
+          ),
+          child: ClipRRect(
+            borderRadius: BorderRadius.circular(10),
+            child: _buildCalendarPosterSkeleton(context),
+          ),
+        );
+      },
+    );
+  }
+
+  Widget _buildCalendarPosterSkeleton(BuildContext context) {
+    final isDark = SystemUtil.isDarkTheme(context);
+    final baseColor = isDark ? Colors.grey[850]! : Colors.grey[300]!;
+    final highlightColor = isDark ? Colors.grey[700]! : Colors.grey[100]!;
+    final filler = isDark
+        ? Theme.of(context).colorScheme.surfaceContainerHighest
+        : Theme.of(context).colorScheme.surface;
+
+    return Shimmer.fromColors(
+      baseColor: baseColor,
+      highlightColor: highlightColor,
+      child: Stack(
+        fit: StackFit.expand,
+        children: [
+          Positioned.fill(child: Container(color: filler)),
+          Positioned(
+            left: 10,
+            right: 10,
+            bottom: 14,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Container(
+                  height: 12,
+                  width: double.infinity,
+                  decoration: BoxDecoration(
+                    color: filler,
+                    borderRadius: BorderRadius.circular(4),
+                  ),
+                ),
+                const SizedBox(height: 6),
+                Container(
+                  height: 12,
+                  width: 72,
+                  decoration: BoxDecoration(
+                    color: filler,
+                    borderRadius: BorderRadius.circular(4),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
     );
   }
 

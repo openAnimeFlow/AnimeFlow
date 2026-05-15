@@ -1,17 +1,17 @@
 import 'package:anime_flow/constants/play_layout_constant.dart';
 import 'package:anime_flow/models/item/bangumi/calendar_item.dart';
 import 'package:anime_flow/models/item/subject_basic_data_item.dart';
+import 'package:anime_flow/pages/recommend/anime/anime_notifier.dart';
 import 'package:anime_flow/routes/routes.dart';
 import 'package:anime_flow/utils/layout_util.dart';
 import 'package:anime_flow/widget/subject_card.dart';
 import 'package:flutter/material.dart';
 import 'package:anime_flow/models/item/bangumi/subject_item.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 // 每日放送页面
 class CalendarPage extends StatefulWidget {
-  final Calendar calendar;
-
-  const CalendarPage({super.key, required this.calendar});
+  const CalendarPage({super.key});
 
   @override
   State<CalendarPage> createState() => _CalendarPageState();
@@ -20,8 +20,6 @@ class CalendarPage extends StatefulWidget {
 class _CalendarPageState extends State<CalendarPage>
     with SingleTickerProviderStateMixin {
   late TabController _tabController;
-
-  Calendar get calendar => widget.calendar;
 
   final List<String> _weekdayLabels = [
     '周一',
@@ -54,57 +52,94 @@ class _CalendarPageState extends State<CalendarPage>
         title: const Text('每日放送'),
         bottom: PreferredSize(
           preferredSize: const Size.fromHeight(kTextTabBarHeight),
-          child: Center(
-              child: Column(
-            children: [
-              Column(
-                children: [
-                  ConstrainedBox(
-                      constraints: const BoxConstraints(maxWidth: 1800),
-                      child: TabBar(
-                        tabAlignment: TabAlignment.start,
-                        controller: _tabController,
-                        isScrollable: true,
-                        dividerColor: Colors.transparent,
-                        tabs: List.generate(7, (index) {
-                          final weekday = (index + 1).toString();
-                          final items = calendar.calendarData[weekday] ?? [];
-                          return Tab(
-                            child: Column(
-                              mainAxisSize: MainAxisSize.min,
-                              children: [
-                                Text(_weekdayLabels[index]),
-                                Text(
-                                  '${items.length}部',
-                                  style: const TextStyle(fontSize: 10),
-                                ),
-                              ],
-                            ),
-                          );
-                        }),
-                      )),
-                  Divider(
-                    height: 1,
-                    thickness: 1,
-                    color: Theme.of(context).dividerColor,
-                  ),
-                ],
-              )
-            ],
-          )),
+          child: Consumer(
+            builder: (context, ref, _) {
+              final calendarAsync = ref.watch(animeCalendarProvider);
+              return calendarAsync.maybeWhen(
+                data: (calendar) => _buildTabBarSection(context, calendar),
+                orElse: () => const SizedBox.shrink(),
+              );
+            },
+          ),
         ),
       ),
-      body: TabBarView(
-        controller: _tabController,
-        children: List.generate(7, (index) {
-          final weekday = (index + 1).toString();
-          return _buildWeekdayContent(weekday);
-        }),
+      body: Consumer(
+        builder: (context, ref, _) {
+          final calendarAsync = ref.watch(animeCalendarProvider);
+          return calendarAsync.when(
+            loading: () => const Center(child: CircularProgressIndicator()),
+            error: (error, stackTrace) => Center(
+              child: InkWell(
+                onTap: () => ref
+                    .read(animeCalendarProvider.notifier)
+                    .refreshCalendarDate(),
+                child: const Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  spacing: 8,
+                  children: [
+                    Text('获取数据失败'),
+                    Icon(Icons.refresh),
+                  ],
+                ),
+              ),
+            ),
+            data: (calendar) => TabBarView(
+              controller: _tabController,
+              children: List.generate(7, (index) {
+                final weekday = (index + 1).toString();
+                return _buildWeekdayContent(context, calendar, weekday);
+              }),
+            ),
+          );
+        },
       ),
     );
   }
 
-  Widget _buildWeekdayContent(String weekday) {
+  Widget _buildTabBarSection(BuildContext context, Calendar calendar) {
+    return Center(
+      child: Column(
+        children: [
+          Column(
+            children: [
+              ConstrainedBox(
+                  constraints: const BoxConstraints(maxWidth: 1800),
+                  child: TabBar(
+                    tabAlignment: TabAlignment.start,
+                    controller: _tabController,
+                    isScrollable: true,
+                    dividerColor: Colors.transparent,
+                    tabs: List.generate(7, (index) {
+                      final weekday = (index + 1).toString();
+                      final items = calendar.calendarData[weekday] ?? [];
+                      return Tab(
+                        child: Column(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Text(_weekdayLabels[index]),
+                            Text(
+                              '${items.length}部',
+                              style: const TextStyle(fontSize: 10),
+                            ),
+                          ],
+                        ),
+                      );
+                    }),
+                  )),
+              Divider(
+                height: 1,
+                thickness: 1,
+                color: Theme.of(context).dividerColor,
+              ),
+            ],
+          )
+        ],
+      ),
+    );
+  }
+
+  Widget _buildWeekdayContent(
+      BuildContext context, Calendar calendar, String weekday) {
     final items = calendar.calendarData[weekday] ?? [];
 
     if (items.isEmpty) {
@@ -119,14 +154,14 @@ class _CalendarPageState extends State<CalendarPage>
     // 统计信息
     final totalWatchers = items.fold(0, (sum, item) => sum + item.watchers);
     final avgScore = items
-            .where((item) => item.subject.rating.score > 0)
-            .fold(0.0, (sum, item) => sum + item.subject.rating.score) /
+        .where((item) => item.subject.rating.score > 0)
+        .fold(0.0, (sum, item) => sum + item.subject.rating.score) /
         items.where((item) => item.subject.rating.score > 0).length;
 
     return Center(
       child: ConstrainedBox(
         constraints:
-            const BoxConstraints(maxWidth: PlayLayoutConstant.maxWidth),
+        const BoxConstraints(maxWidth: PlayLayoutConstant.maxWidth),
         child: CustomScrollView(
           slivers: [
             // 统计信息
@@ -137,7 +172,7 @@ class _CalendarPageState extends State<CalendarPage>
                   padding: const EdgeInsets.all(10),
                   decoration: BoxDecoration(
                     color:
-                        Theme.of(context).colorScheme.surfaceContainerHighest,
+                    Theme.of(context).colorScheme.surfaceContainerHighest,
                     borderRadius: BorderRadius.circular(8),
                   ),
                   child: Row(
@@ -167,7 +202,7 @@ class _CalendarPageState extends State<CalendarPage>
                   childAspectRatio: 0.7,
                 ),
                 delegate: SliverChildBuilderDelegate(
-                  (context, index) {
+                      (context, index) {
                     return _buildCard(
                         items[index].subject, items[index].watchers);
                   },

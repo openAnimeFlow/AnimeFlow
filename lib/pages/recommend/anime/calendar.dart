@@ -97,7 +97,7 @@ class _CalendarViewState extends State<CalendarView> {
                         crossAxisAlignment: CrossAxisAlignment.end,
                         children: [
                           InkWell(
-                            onTap: () => CalendarRoute(calendar).push(context),
+                            onTap: () => const CalendarRoute().push(context),
                             child: Row(
                               children: [
                                 Text(

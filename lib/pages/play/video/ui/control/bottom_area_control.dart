@@ -40,7 +40,7 @@ class _BottomAreaControlState extends State<BottomAreaControl> {
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
         content: Text(
-          success ? '弹幕发送成功' : '当前暂不支持发送弹幕',
+          success ? '弹幕发送成功' : '当前不支持发送弹幕',
         ),
       ),
     );

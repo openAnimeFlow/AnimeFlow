@@ -5,6 +5,7 @@ import 'package:anime_flow/http/api_path.dart';
 import 'package:anime_flow/http/requests/anime_flow_request.dart';
 import 'package:anime_flow/http/requests/bgm_request.dart';
 import 'package:anime_flow/models/item/bangumi/user_info_item.dart';
+import 'package:anime_flow/models/item/token_item.dart';
 import 'package:anime_flow/stores/BangumiToken.dart';
 import 'package:anime_flow/utils/logger.dart';
 import 'package:anime_flow/utils/systemUtil.dart';
@@ -14,10 +15,12 @@ import 'package:url_launcher/url_launcher.dart';
 class MyController extends GetxController {
   final RxBool isOAuthAuthorizing = false.obs;
   Rx<UserInfoItem?> userInfo = Rx<UserInfoItem?>(null);
+  late BangumiToken bangumiToken;
 
   @override
   void onInit() {
     super.onInit();
+    bangumiToken = BangumiToken();
     _init();
   }
 
@@ -31,10 +34,14 @@ class MyController extends GetxController {
     _setOAuthAuthorizing(false);
   }
 
+  /// 获取Token
+  Future<TokenItem?> getToken() async {
+    return bangumiToken.getToken();
+  }
 
   ///初始化
   void _init() async {
-    final token = await BangumiToken().getToken();
+    final token = await getToken();
     if (token != null) {
       final me = await UserRequest.userInfoService();
       userInfo.value = await UserRequest.queryUserInfoService(me.username);

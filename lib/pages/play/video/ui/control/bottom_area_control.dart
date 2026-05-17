@@ -34,6 +34,18 @@ class _BottomAreaControlState extends State<BottomAreaControl> {
   final myController = Get.find<MyController>();
   final videoSourceController = Get.find<VideoSourceController>();
 
+  Future<void> onSendDanmaku(String text) async {
+    final success = await playController.sendDanmaku(text);
+    if (!mounted) return;
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(
+          success ? '弹幕发送成功' : '当前暂不支持发送弹幕',
+        ),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Obx(() {
@@ -178,8 +190,7 @@ class _BottomAreaControlState extends State<BottomAreaControl> {
                                               }
                                             },
                                             onSend: (content) {
-                                              playController
-                                                  .sendDanmaku(content);
+                                              onSendDanmaku(content);
                                             },
                                           )
                                         : Container(

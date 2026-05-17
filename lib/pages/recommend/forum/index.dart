@@ -19,55 +19,10 @@ class _ForumPageState extends State<ForumPage>
     super.initState();
   }
 
-  void _getTimelineData() async {
-    try {
-      setState(() {
-        isLoading = true;
-      });
-      final data = await BgmRequest.timelineService(20);
-      if (mounted) {
-        setState(() {
-          timelineData = data;
-          isLoading = false;
-        });
-      }
-    } catch (e) {
-      if (mounted) {
-        setState(() {
-          isLoading = false;
-        });
-      }
-    }
-  }
 
-  String _formatTime(int timestamp) {
-    final dateTime = DateTime.fromMillisecondsSinceEpoch(timestamp * 1000);
-    final now = DateTime.now();
-    final difference = now.difference(dateTime);
-
-    if (difference.inDays > 0) {
-      return '${difference.inDays}天前';
-    } else if (difference.inHours > 0) {
-      return '${difference.inHours}小时前';
-    } else if (difference.inMinutes > 0) {
-      return '${difference.inMinutes}分钟前';
-    } else {
-      return '刚刚';
-    }
-  }
 
   @override
   bool get wantKeepAlive => true;
-
-  // 检查条目是否有可渲染的内容
-  bool _hasValidContent(TimelineItem item) {
-    try {
-      final progress = item.memo.progress;
-      return progress.single.episode.id > 0 && progress.single.subject.id > 0;
-    } catch (e) {
-      return false;
-    }
-  }
 
   @override
   Widget build(BuildContext context) {

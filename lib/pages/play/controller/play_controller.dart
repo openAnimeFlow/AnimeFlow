@@ -4,7 +4,6 @@ import 'package:anime_flow/constants/storage_key.dart';
 import 'package:anime_flow/controllers/my_controller.dart';
 import 'package:anime_flow/controllers/shaders/shaders_controller.dart';
 import 'package:anime_flow/http/requests/anime_flow_request.dart';
-import 'package:anime_flow/http/requests/bgm_request.dart';
 import 'package:anime_flow/models/enums/video_controls_icon_type.dart';
 import 'package:anime_flow/models/item/danmaku/danmaku_module.dart';
 import 'package:anime_flow/models/play/play_history.dart';
@@ -253,9 +252,11 @@ class PlayController extends GetxController {
       if (!_isLoadingDanmaku && episode != 0) {
         _isLoadingDanmaku = true;
         final bgmBangumiId = await AnimeFlowRequest.getDanDanBangumiIDByBgmBangumiID(subjectId);
-        final danmaku = await AnimeFlowRequest.getDanDanmaku(bgmBangumiId, episode);
-        addDanmakuAll(danmaku);
-        _isLoadingDanmaku = false;
+        if (bgmBangumiId != null) {
+          final danmaku = await AnimeFlowRequest.getDanDanmaku(bgmBangumiId, episode);
+          addDanmakuAll(danmaku);
+          _isLoadingDanmaku = false;
+        };
       }
     } catch (e) {
       logger.e(e);
@@ -286,32 +287,30 @@ class PlayController extends GetxController {
           }
 
           /// 播放进度大于90% && collection != null，更新章节进度
-          final episodesProgress =
-          setting.get(PlaybackKey.episodesProgress, defaultValue: true);
-          if (episodesProgress) {
-            final position = this.position.value;
-            final duration = this.duration.value;
-            final myController = Get.find<MyController>();
-            if (myController.userInfo.value != null) {
-              final progressPercent =
-                  position.inSeconds / duration.inSeconds * 100;
-              if (progressPercent > 90) {
-                final currentIndex = episode - 1;
-                final episodesState = Get.find<EpisodesState>();
-                final episodes = episodesState.episodes.value;
-                if (episodes != null &&
-                    currentIndex >= 0 &&
-                    currentIndex < episodes.data.length &&
-                    episodes.data[currentIndex].collection == null) {
-                  // TODO需要只有登录后才更新
-                  UserRequest.updateEpisodeProgressService(episodeId,
-                      batch: true, type: 2);
-                  // TODO 同时更新本地剧集进度数据
-                  logger.i('章节进度已更新: episodeId=$episodeId');
-                }
-              }
-            }
-          }
+          // final episodesProgress =
+          // setting.get(PlaybackKey.episodesProgress, defaultValue: true);
+          // if (episodesProgress) {
+          //   final position = this.position.value;
+          //   final duration = this.duration.value;
+          //   final myController = Get.find<MyController>();
+          //   if (myController.userInfo.value != null) {
+          //     final progressPercent =
+          //         position.inSeconds / duration.inSeconds * 100;
+          //     if (progressPercent > 90) {
+          //       final currentIndex = episode - 1;
+          //       final episodesState = Get.find<EpisodesState>();
+          //       final episodes = episodesState.episodes.value;
+          //       if (episodes != null &&
+          //           currentIndex >= 0 &&
+          //           currentIndex < episodes.data.length &&
+          //           episodes.data[currentIndex].collection == null) {
+          //         // TODO需要只有登录后才更新
+          //         // UserRequest.updateEpisodeProgressService(episodeId,
+          //         //     batch: true, type: 2);
+          //       }
+          //     }
+          //   }
+          // }
         }
       });
     } catch (e) {
@@ -450,18 +449,20 @@ class PlayController extends GetxController {
 
   /// 发送弹幕
   /// [type]：1 滚动、4 底部、5 顶部。
-  Future<void> sendDanmaku(
+  Future<bool> sendDanmaku(
     String message, {
     Color? color,
     int type = 1,
   }) async {
+    final bgmBangumiId = await AnimeFlowRequest.getDanDanBangumiIDByBgmBangumiID(subjectId);
+    if (bgmBangumiId == null) return false;
     final trimmed = message.trim();
     final  myController = Get.find<MyController>();
     final userInfo = myController.userInfo.value;
-    if (userInfo == null) return;
-    if (trimmed.isEmpty) return;
+    if (userInfo == null) return false;
+    if (trimmed.isEmpty) return false;
     if (duration.value == Duration.zero && position.value == Duration.zero && episode <= 0) {
-      return;
+      return false;
     }
     final time = position.value.inMicroseconds / Duration.microsecondsPerSecond;
 
@@ -474,13 +475,13 @@ class PlayController extends GetxController {
       source: 'AnimeFlow',
     );
     addDanDanmaku(item, userInfo.id);
-    final bgmBangumiId = await AnimeFlowRequest.getDanDanBangumiIDByBgmBangumiID(subjectId);
     await AnimeFlowRequest.sendDanmaku(
         bgmBangumiId, episode,
         message: item.message,
         time: item.time,
         type: item.type,
         color: item.color);
+    return true;
   }
 
   /// 添加弹幕到画布

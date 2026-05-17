@@ -117,6 +117,18 @@ class _ContentViewState extends State<ContentView>
     }
   }
 
+  Future<void> onSendDanmaku(String text) async {
+    final success = await playController.sendDanmaku(text);
+    if (!mounted) return;
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(
+          success ? '弹幕发送成功' : '当前暂不支持发送弹幕',
+        ),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return PreferredSize(
@@ -154,9 +166,7 @@ class _ContentViewState extends State<ContentView>
                                     videoUiStateController.hideControlsUi();
                                   }
                                 },
-                                onSend: (text) {
-                                  playController.sendDanmaku(text);
-                                },
+                                onSend: onSendDanmaku,
                               ),
                             ),
                           )

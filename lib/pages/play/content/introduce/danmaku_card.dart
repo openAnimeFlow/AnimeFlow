@@ -8,6 +8,7 @@ import 'package:anime_flow/stores/play_subject_state.dart';
 import 'package:anime_flow/utils/format_time_util.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:go_router/go_router.dart';
 
 class DanmakuCard extends StatefulWidget {
   const DanmakuCard({super.key});
@@ -32,17 +33,17 @@ class _DanmakuCardState extends State<DanmakuCard> {
   }
 
   /// 从 source 字段中提取平台名称（如 [Gamer]Sabrina2001 -> Gamer）
-  String _extractPlatform(String source) {
+  String extractPlatform(String source) {
     final regex = RegExp(r'\[([^\]]+)\]');
     final match = regex.firstMatch(source);
     return match?.group(1) ?? '弹弹Play';
   }
 
   /// 统计各平台弹幕数量
-  Map<String, int> _countByPlatform(List<Danmaku> danmakus) {
+  Map<String, int> countByPlatform(List<Danmaku> danmakus) {
     final Map<String, int> counts = {};
     for (var danmaku in danmakus) {
-      final platform = _extractPlatform(danmaku.source);
+      final platform = extractPlatform(danmaku.source);
       counts[platform] = (counts[platform] ?? 0) + 1;
     }
     return counts;
@@ -78,7 +79,7 @@ class _DanmakuCardState extends State<DanmakuCard> {
 
       // 过滤掉被隐藏平台的弹幕
       final filteredDanmakus = allDanmakus.where((danmaku) {
-        final platform = _extractPlatform(danmaku.source);
+        final platform = extractPlatform(danmaku.source);
         return !playController.isPlatformHidden(platform);
       }).toList();
 
@@ -86,7 +87,7 @@ class _DanmakuCardState extends State<DanmakuCard> {
       filteredDanmakus.sort((a, b) => a.time.compareTo(b.time));
 
       // 统计各平台弹幕数量
-      final platformCounts = _countByPlatform(allDanmakus);
+      final platformCounts = countByPlatform(allDanmakus);
       final sortedPlatforms = platformCounts.entries.toList()
         ..sort((a, b) => b.value.compareTo(a.value)); // 按数量降序排列
 
@@ -212,7 +213,7 @@ class _DanmakuCardState extends State<DanmakuCard> {
                                 ),
                               ),
                               Text(
-                                '${FormatTimeUtil.formatDanmakuTime(danmaku.time)} · ${_extractPlatform(danmaku.source)}',
+                                '${FormatTimeUtil.formatDanmakuTime(danmaku.time)} · ${extractPlatform(danmaku.source)}',
                                 style: Theme.of(context).textTheme.bodySmall,
                               )
                             ],
@@ -234,7 +235,7 @@ class _DanmakuCardState extends State<DanmakuCard> {
     DanmakuSearchResponse? danmakuSearchResponse;
     bool isSearchLoading = false;
     return StatefulBuilder(
-      builder: (BuildContext context, StateSetter setDialogState) {
+      builder: (BuildContext dialogContext, StateSetter setDialogState) {
         return AlertDialog(
           icon: const Icon(Icons.subtitles),
           title: const Text('修改弹幕'),
@@ -274,23 +275,25 @@ class _DanmakuCardState extends State<DanmakuCard> {
                       child: ListView.builder(
                         shrinkWrap: true,
                         itemCount: danmakuSearchResponse!.animes.length,
-                        itemBuilder: (context, index) {
-
+                        itemBuilder: (listContext, index) {
                           final anime = danmakuSearchResponse!.animes[index];
                           return ListTile(
                             title: Text(
                               anime.animeTitle,
-                              style: Theme.of(context).textTheme.bodyLarge,
+                              style: Theme.of(listContext).textTheme.bodyLarge,
                             ),
                             onTap: () async {
                               final episodes = await AnimeFlowRequest
                                   .getDanDanEpisodesByDanDanBangumiID(
                                   anime.animeId);
-                              Get.back();
-                              if (context.mounted) {
-                                _showEpisodesDialog(
-                                    context, episodes, anime.animeTitle);
-                              }
+                              if (!dialogContext.mounted) return;
+                              dialogContext.pop();
+                              if (!mounted) return;
+                              _showEpisodesDialog(
+                                context,
+                                episodes,
+                                anime.animeTitle,
+                              );
                             },
                           );
                         },

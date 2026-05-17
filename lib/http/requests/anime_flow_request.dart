@@ -1,4 +1,3 @@
-import 'dart:ffi';
 import 'dart:ui';
 
 import 'package:anime_flow/constants/constants.dart';
@@ -9,6 +8,7 @@ import 'package:anime_flow/models/item/danmaku/danmaku_module.dart';
 import 'package:anime_flow/models/item/danmaku/danmaku_search_response.dart';
 import 'package:anime_flow/models/item/token_item.dart';
 import 'package:anime_flow/stores/BangumiToken.dart';
+import 'package:anime_flow/utils/logger.dart';
 import 'package:anime_flow/utils/systemUtil.dart';
 import 'package:anime_flow/utils/utils.dart';
 import 'package:dio/dio.dart';
@@ -94,7 +94,7 @@ class AnimeFlowRequest {
     return null; // 超时未获取到 token
   }
 
-  // 获取弹幕
+  /// 获取弹幕
   static Future<List<Danmaku>> getDanDanmaku(int bangumiID, int episode) async {
     List<Danmaku> danmakus = [];
     if (bangumiID == 0) {
@@ -140,11 +140,17 @@ class AnimeFlowRequest {
     return DanmakuSearchResponse.fromJson(response.data);
   }
 
-  static Future<int> getDanDanBangumiIDByBgmBangumiID(int bgmBangumiID) async {
+  static Future<int?> getDanDanBangumiIDByBgmBangumiID(int bgmBangumiID) async {
     var path = '$_animeFlowApi${AnimeFlowApi.animeDetailByBgmId}/$bgmBangumiID';
     final res = await _client.get(path);
     final response = AnimeFlowResponse.fromJson(Map<String, dynamic>.from(res));
-    return DanmakuEpisodeResponse.fromJson(response.data).bangumiId;
+    try {
+      final bangumiId = DanmakuEpisodeResponse.fromJson(response.data).bangumiId;
+      return bangumiId;
+    } catch (e) {
+      LiggLogger().e('获取番剧ID 为空：$e');
+      return null;
+    }
   }
 
   /// 通过番剧ID获取番剧元素
@@ -176,7 +182,7 @@ class AnimeFlowRequest {
       'color': colorValue
     };
     final request = await _client.post(path, data: data,
-      options: Options(headers: {Constants.authorization: '${token!.tokenType} ${token.accessToken}'})
+        options: Options(headers: {Constants.authorization: '${token!.tokenType} ${token.accessToken}'})
     );
     return AnimeFlowResponse.fromJson(Map<String, dynamic>.from(request));
   }

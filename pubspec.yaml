@@ -50,10 +50,12 @@ dependencies:
   media_kit: ^1.2.6 # 主要包装.
   media_kit_video: ^2.0.1 # 用于视频渲染.
   media_kit_libs_video: ^1.0.7 # 原生视频依赖项.
-  #  carousel_slider: ^5.1.1
+  # carousel_slider: ^5.1.1
+  # shared_preferences: ^2.5.3#  app_links: ^7.0.0
+  # flutter_dotenv: ^6.0.0
+  # package_info_plus: ^9.0.0
   dio: ^5.9.0
   get: ^4.7.3
-  shared_preferences: ^2.5.3
   flutter_launcher_icons: ^0.14.4
   flutter_svg: ^2.2.3
   logger: ^2.6.2
@@ -86,11 +88,9 @@ dependencies:
   screen_brightness_ios: ^2.1.2
   antlr4: ^4.13.2
   photo_view: ^0.15.0
-#  app_links: ^7.0.0
-#  flutter_dotenv: ^6.0.0
+
   flutter_secure_storage: ^10.0.0
   gal: ^2.3.2
-  #  package_info_plus: ^9.0.0
   open_filex: ^4.7.0
   path: ^1.9.1
   flutter_markdown_plus: ^1.0.7

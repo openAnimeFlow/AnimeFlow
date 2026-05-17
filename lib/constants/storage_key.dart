@@ -35,5 +35,7 @@ class PlaybackKey {
 }
 
 class SettingKey {
-  static const String isMirror = 'setting_is_mirror';
+  static const String isMirror = 'setting_is_mirror',
+      themeMode = 'theme_mode',
+      seedColor = 'theme_seed_color';
 }

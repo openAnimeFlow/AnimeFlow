@@ -7,14 +7,13 @@ import 'package:get/get.dart';
 import 'package:hive_ce_flutter/hive_flutter.dart';
 import 'package:media_kit/media_kit.dart';
 import 'package:window_manager/window_manager.dart';
-import 'controllers/theme_controller.dart';
+import 'providers/theme_provider.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   MediaKit.ensureInitialized();
   await Hive.initFlutter();
   await Storage.init();
-  Get.put(ThemeController());
 
   // 桌面平台初始化窗口管理器
   if (Platform.isWindows || Platform.isLinux || Platform.isMacOS) {
@@ -28,7 +27,6 @@ void main() async {
     });
   }
 
-
   runApp(const ProviderScope(child: MyApp()));
 }
 
@@ -37,16 +35,17 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return GetBuilder<ThemeController>(
-      builder: (controller) {
+    return Consumer(
+      builder: (BuildContext context, WidgetRef ref, Widget? child) {
+        final themeState = ref.watch(themeProvider);
         return GetMaterialApp.router(
           routeInformationProvider: appRouter.routeInformationProvider,
           routeInformationParser: appRouter.routeInformationParser,
           routerDelegate: appRouter.routerDelegate,
           backButtonDispatcher: appRouter.backButtonDispatcher,
-          theme: controller.lightTheme,
-          darkTheme: controller.darkTheme,
-          themeMode: controller.themeMode,
+          theme: buildLightTheme(themeState.seedColor),
+          darkTheme: buildDarkTheme(themeState.seedColor),
+          themeMode: themeState.themeMode,
         );
       },
     );

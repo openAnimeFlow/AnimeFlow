@@ -20,7 +20,7 @@ final class SettingsLayoutProvider
           argument: null,
           retry: null,
           name: r'settingsLayoutProvider',
-          isAutoDispose: false,
+          isAutoDispose: true,
           dependencies: null,
           $allTransitiveDependencies: null,
         );
@@ -41,7 +41,7 @@ final class SettingsLayoutProvider
   }
 }
 
-String _$settingsLayoutHash() => r'bf4aa8b87a34bc52cd06545015a83a44da28a1c1';
+String _$settingsLayoutHash() => r'b36421dedffff123b945522d7c58321e67773597';
 
 abstract class _$SettingsLayout extends $Notifier<bool> {
   bool build();

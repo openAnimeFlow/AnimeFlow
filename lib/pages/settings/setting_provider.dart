@@ -2,7 +2,7 @@ import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 part 'setting_provider.g.dart';
 
-@Riverpod(keepAlive: true)
+@riverpod
 class SettingsLayout extends _$SettingsLayout {
   @override
   bool build() => false;

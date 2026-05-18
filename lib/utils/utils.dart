@@ -1,6 +1,7 @@
 import 'dart:io';
 import 'dart:math';
 import 'package:anime_flow/constants/constants.dart';
+import 'package:anime_flow/http/api_path.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -153,5 +154,43 @@ class Utils {
       }
     }
     return 0;
+  }
+
+  /// 将 GitHub 资源链接转换为 jsDelivr CDN 地址。
+  ///
+  /// 支持 `raw.githubusercontent.com` 与 `github.com/.../blob|raw/...` 格式；
+  /// 已是 jsDelivr 链接或无法解析时原样返回。
+  static String jsDelivrCdnUrl(String url) {
+    var normalized = url;
+    if (normalized.startsWith(CommonApi.jsDelivr)) {
+      return normalized;
+    }
+
+    final uri = Uri.tryParse(normalized);
+    if (uri == null) return url;
+
+    if (uri.host == 'raw.githubusercontent.com') {
+      final segments = uri.pathSegments;
+      if (segments.length < 3) return url;
+      final user = segments[0];
+      final repo = segments[1];
+      final branch = segments[2];
+      final filePath = segments.sublist(3).join('/');
+      return '${CommonApi.jsDelivr}$user/$repo@$branch/$filePath';
+    }
+
+    if (uri.host == 'github.com' && uri.pathSegments.length >= 5) {
+      final segments = uri.pathSegments;
+      final type = segments[2];
+      if (type == 'blob' || type == 'raw') {
+        final user = segments[0];
+        final repo = segments[1];
+        final branch = segments[3];
+        final filePath = segments.sublist(4).join('/');
+        return '${CommonApi.jsDelivr}$user/$repo@$branch/$filePath';
+      }
+    }
+
+    return url;
   }
 }

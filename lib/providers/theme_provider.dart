@@ -2,11 +2,9 @@ import 'package:anime_flow/constants/storage_key.dart';
 import 'package:anime_flow/repository/storage.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:riverpod_annotation/riverpod_annotation.dart';
 
-final themeProvider = NotifierProvider<ThemeNotifier, ThemeState>(
-  ThemeNotifier.new,
-);
+part 'theme_provider.g.dart';
 
 class ThemeState {
   const ThemeState({
@@ -28,7 +26,8 @@ class ThemeState {
   }
 }
 
-class ThemeNotifier extends Notifier<ThemeState> {
+@Riverpod(keepAlive: true)
+class ThemeNotifier extends _$ThemeNotifier {
   // 预定义主题颜色
   static final List<ThemeColorData> themeColors = [
     const ThemeColorData(

@@ -2,7 +2,6 @@ import 'package:anime_flow/constants/storage_key.dart';
 import 'package:anime_flow/http/api_path.dart';
 import 'package:anime_flow/http/requests/request.dart';
 import 'package:anime_flow/crawler/itme/crawler_config_item.dart';
-import 'package:anime_flow/controllers/setting_controller.dart';
 import 'package:anime_flow/repository/storage.dart';
 import 'package:anime_flow/utils/format_time_util.dart';
 import 'package:anime_flow/utils/systemUtil.dart';
@@ -21,7 +20,6 @@ class DownloadPluginsPage extends StatefulWidget {
 }
 
 class _DownloadPluginsPageState extends State<DownloadPluginsPage> {
-  late SettingController settingController;
   final storage = Storage.crawlConfigs;
   final setting = Storage.setting;
   bool isLoading = false;
@@ -38,7 +36,6 @@ class _DownloadPluginsPageState extends State<DownloadPluginsPage> {
   void initState() {
     super.initState();
     isMirror = setting.get(SettingKey.isMirror, defaultValue: false);
-    settingController = Get.find<SettingController>();
     _getPlugins();
   }
 

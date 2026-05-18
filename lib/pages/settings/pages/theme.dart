@@ -1,14 +1,12 @@
 import 'dart:ui';
 
 import 'package:anime_flow/providers/theme_provider.dart';
-import 'package:anime_flow/controllers/setting_controller.dart';
+import 'package:anime_flow/pages/settings/setting_provider.dart';
 import 'package:anime_flow/utils/layout_util.dart';
 import 'package:anime_flow/utils/systemUtil.dart';
 import 'package:anime_flow/widget/theme/theme_preview.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:get/get.dart';
-
 class ThemePage extends StatefulWidget {
   const ThemePage({super.key});
 
@@ -17,22 +15,22 @@ class ThemePage extends StatefulWidget {
 }
 
 class _ThemePageState extends State<ThemePage> {
-  late final SettingController settingController;
-
-  @override
-  void initState() {
-    super.initState();
-    settingController = Get.find<SettingController>();
-  }
-
   @override
   Widget build(BuildContext context) {
     final leftMediaQueryPadding = MediaQuery.of(context).padding.left;
 
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('主题'),
-        automaticallyImplyLeading: !settingController.isWideScreen.value,
+      appBar: PreferredSize(
+        preferredSize: const Size.fromHeight(kToolbarHeight),
+        child: Consumer(
+          builder: (context, ref, _) {
+            final isWideScreen = ref.watch(settingsLayoutProvider);
+            return AppBar(
+              title: const Text('主题样式'),
+              automaticallyImplyLeading: !isWideScreen,
+            );
+          },
+        ),
       ),
       body: Center(
         child: ConstrainedBox(

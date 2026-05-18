@@ -1,10 +1,11 @@
 import 'package:anime_flow/crawler/itme/crawler_config_item.dart';
-import 'package:anime_flow/controllers/setting_controller.dart';
+import 'package:anime_flow/pages/settings/setting_provider.dart';
 import 'package:anime_flow/routes/routes.dart';
 import 'package:anime_flow/utils/crawl_config.dart';
 import 'package:anime_flow/repository/storage.dart';
 import 'package:anime_flow/widget/animation_network_image/animation_network_image.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:get/get.dart';
 import 'package:hive_ce_flutter/adapters.dart';
 
@@ -16,14 +17,12 @@ class PluginsPage extends StatefulWidget {
 }
 
 class _PluginsPageState extends State<PluginsPage> {
-  late SettingController settingController;
   List<CrawlConfigItem> dataSources = [];
   final settingConfig = Storage.crawlConfigs;
 
   @override
   void initState() {
     super.initState();
-    settingController = Get.find<SettingController>();
     settingConfig.listenable().addListener(_initData);
     _initData();
   }
@@ -73,30 +72,34 @@ class _PluginsPageState extends State<PluginsPage> {
 
   @override
   Widget build(BuildContext context) {
-    return Obx(
-      () => Scaffold(
-        appBar: AppBar(
-          title: const Text('数据源管理'),
-          automaticallyImplyLeading: !settingController.isWideScreen.value,
-          actions: [
-            //云下载
-            IconButton(
-                onPressed: () {
-                  const SettingDownloadPluginsRoute().push(context);
-                },
-                icon: const Icon(Icons.cloud_download_outlined, size: 30)),
-            IconButton(
-              icon: const Icon(
-                Icons.save_as_outlined,
-                size: 30,
-              ),
-              onPressed: () {
-                const SettingAddPluginsRoute().push(context);
-              },
-            )
-          ],
+    return Scaffold(
+      appBar: PreferredSize(
+        preferredSize: const Size.fromHeight(kToolbarHeight),
+        child: Consumer(
+          builder: (context, ref, _) {
+            final isWideScreen = ref.watch(settingsLayoutProvider);
+            return AppBar(
+              title: const Text('数据源管理'),
+              automaticallyImplyLeading: !isWideScreen,
+              actions: [
+                IconButton(
+                  onPressed: () {
+                    const SettingDownloadPluginsRoute().push(context);
+                  },
+                  icon: const Icon(Icons.cloud_download_outlined, size: 30),
+                ),
+                IconButton(
+                  icon: const Icon(Icons.save_as_outlined, size: 30),
+                  onPressed: () {
+                    const SettingAddPluginsRoute().push(context);
+                  },
+                ),
+              ],
+            );
+          },
         ),
-        body: ListView(
+      ),
+      body: ListView(
           padding: const EdgeInsets.symmetric(horizontal: 16),
           children: List.generate(dataSources.length, (index) {
             final data = dataSources[index];
@@ -148,7 +151,6 @@ class _PluginsPageState extends State<PluginsPage> {
             );
           }),
         ),
-      ),
     );
   }
 }

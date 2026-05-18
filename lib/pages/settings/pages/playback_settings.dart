@@ -1,9 +1,8 @@
 import 'package:anime_flow/constants/storage_key.dart';
-import 'package:anime_flow/controllers/setting_controller.dart';
+import 'package:anime_flow/pages/settings/setting_provider.dart';
 import 'package:anime_flow/repository/storage.dart';
 import 'package:flutter/material.dart';
-import 'package:get/get.dart';
-
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 class PlaybackSettingsPage extends StatefulWidget {
   const PlaybackSettingsPage({super.key});
 
@@ -12,7 +11,6 @@ class PlaybackSettingsPage extends StatefulWidget {
 }
 
 class _PlaybackSettingsPageState extends State<PlaybackSettingsPage> {
-  late SettingController settingController;
   final setting = Storage.setting;
 
   // 播放配置状态
@@ -23,7 +21,6 @@ class _PlaybackSettingsPageState extends State<PlaybackSettingsPage> {
   @override
   void initState() {
     super.initState();
-    settingController = Get.find<SettingController>();
     _loadSettings();
   }
 
@@ -37,13 +34,20 @@ class _PlaybackSettingsPageState extends State<PlaybackSettingsPage> {
 
   @override
   Widget build(BuildContext context) {
-    return Obx(
-      () => Scaffold(
-        appBar: AppBar(
-          title: const Text("播放设置"),
-          automaticallyImplyLeading: !settingController.isWideScreen.value,
+    return Scaffold(
+      appBar: PreferredSize(
+        preferredSize: const Size.fromHeight(kToolbarHeight),
+        child: Consumer(
+          builder: (context, ref, _) {
+            final isWideScreen = ref.watch(settingsLayoutProvider);
+            return AppBar(
+              title: const Text('播放设置'),
+              automaticallyImplyLeading: !isWideScreen,
+            );
+          },
         ),
-        body: Align(
+      ),
+      body: Align(
           alignment: Alignment.topCenter,
           child: ConstrainedBox(
             constraints: const BoxConstraints(maxWidth: 1200),
@@ -162,7 +166,6 @@ class _PlaybackSettingsPageState extends State<PlaybackSettingsPage> {
             ),
           ),
         ),
-      ),
     );
   }
 

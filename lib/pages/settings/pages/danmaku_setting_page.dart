@@ -1,9 +1,10 @@
 import 'package:anime_flow/constants/storage_key.dart';
-import 'package:anime_flow/controllers/setting_controller.dart';
+import 'package:anime_flow/pages/settings/setting_provider.dart';
 import 'package:anime_flow/pages/play/controller/play_controller.dart';
 import 'package:anime_flow/repository/storage.dart';
 import 'package:anime_flow/utils/systemUtil.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:get/get.dart';
 import 'package:hive_ce/hive.dart';
 
@@ -15,7 +16,6 @@ class DanmakuSettingPage extends StatefulWidget {
 }
 
 class _DanmakuSettingPageState extends State<DanmakuSettingPage> {
-  late SettingController settingController;
   Box setting = Storage.setting;
 
   // 弹幕配置状态
@@ -36,7 +36,6 @@ class _DanmakuSettingPageState extends State<DanmakuSettingPage> {
   @override
   void initState() {
     super.initState();
-    settingController = Get.find<SettingController>();
     _loadSettings();
   }
 
@@ -60,13 +59,20 @@ class _DanmakuSettingPageState extends State<DanmakuSettingPage> {
 
   @override
   Widget build(BuildContext context) {
-    return Obx(
-      () => Scaffold(
-        appBar: AppBar(
-          title: const Text('弹幕设置'),
-          automaticallyImplyLeading: !settingController.isWideScreen.value,
+    return Scaffold(
+      appBar: PreferredSize(
+        preferredSize: const Size.fromHeight(kToolbarHeight),
+        child: Consumer(
+          builder: (context, ref, _) {
+            final isWideScreen = ref.watch(settingsLayoutProvider);
+            return AppBar(
+              title: const Text('弹幕设置'),
+              automaticallyImplyLeading: !isWideScreen,
+            );
+          },
         ),
-        body: Center(
+      ),
+      body: Center(
           child: ConstrainedBox(
             constraints: const BoxConstraints(maxWidth: 1200),
             child: ScrollConfiguration(
@@ -401,7 +407,6 @@ class _DanmakuSettingPageState extends State<DanmakuSettingPage> {
             ),
           ),
         ),
-      ),
     );
   }
 

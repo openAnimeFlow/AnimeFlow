@@ -2,7 +2,7 @@ import 'dart:ui';
 
 import 'package:anime_flow/providers/theme_provider.dart';
 import 'package:anime_flow/pages/settings/setting_provider.dart';
-import 'package:anime_flow/utils/layout_util.dart';
+import 'package:anime_flow/routes/routes.dart';
 import 'package:anime_flow/utils/systemUtil.dart';
 import 'package:anime_flow/widget/theme/theme_preview.dart';
 import 'package:flutter/material.dart';
@@ -47,7 +47,7 @@ class _ThemePageState extends State<ThemePage> {
                   fontWeight: FontWeight.bold,
                 ),
               ),
-              const SizedBox(height: 12),
+              const SizedBox(height: 10),
               Consumer(
                 builder: (context, ref, child) {
                   final themeState = ref.watch(themeProvider);
@@ -126,44 +126,94 @@ class _ThemePageState extends State<ThemePage> {
                   fontWeight: FontWeight.bold,
                 ),
               ),
-              const SizedBox(height: 12),
+              const SizedBox(height: 10),
               Consumer(
                 builder: (context, ref, child) {
                   final themeState = ref.watch(themeProvider);
                   final themeNotifier = ref.read(themeProvider.notifier);
+                  final selectedIndex =
+                      ThemeNotifier.getColorIndex(themeState.seedColor);
 
-                  return GridView.builder(
-                    shrinkWrap: true,
-                    physics: const NeverScrollableScrollPhysics(),
-                    gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                      crossAxisCount: LayoutUtil.getCrossAxisCount(context),
-                      crossAxisSpacing: 5,
-                      mainAxisSpacing: 10,
-                      childAspectRatio: 0.7,
-                    ),
-                    itemCount: ThemeNotifier.themeColors.length,
-                    itemBuilder: (context, index) {
-                      final themeColorData =
-                          ThemeNotifier.themeColors[index];
+                  return Wrap(
+                    spacing: 10,
+                    runSpacing: 10,
+                    children: List.generate(ThemeNotifier.themeColors.length,
+                        (index) {
+                      final themeColorData = ThemeNotifier.themeColors[index];
                       final color = themeColorData.color;
-                      final isSelected = index ==
-                          ThemeNotifier.getColorIndex(themeState.seedColor);
+                      final isSelected = index == selectedIndex;
                       return GestureDetector(
                         onTap: () => themeNotifier.setSeedColor(color),
-                        child: ThemeColorCard(
-                          title: themeColorData.name,
-                          background: color.withValues(alpha: 0.5),
-                          header: color.withValues(alpha: 0.8),
-                          text: Colors.white.withValues(alpha: 0.8),
-                          button: color,
-                          borderColor: isSelected
-                              ? Theme.of(context).colorScheme.primary
-                              : Colors.transparent,
+                        child: SizedBox(
+                          width: 56,
+                          child: Column(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              AnimatedContainer(
+                                duration: const Duration(milliseconds: 200),
+                                width: 40,
+                                height: 40,
+                                decoration: BoxDecoration(
+                                  color: color,
+                                  shape: BoxShape.circle,
+                                  border: Border.all(
+                                    color: isSelected
+                                        ? Theme.of(context)
+                                            .colorScheme
+                                            .primary
+                                        : Theme.of(context)
+                                            .colorScheme
+                                            .outlineVariant
+                                            .withValues(alpha: 0.5),
+                                    width: isSelected ? 2.5 : 1,
+                                  ),
+                                ),
+                                child: isSelected
+                                    ? Icon(
+                                        Icons.check_rounded,
+                                        size: 18,
+                                        color: color.computeLuminance() > 0.55
+                                            ? Colors.black87
+                                            : Colors.white,
+                                      )
+                                    : null,
+                              ),
+                              const SizedBox(height: 4),
+                              Text(
+                                themeColorData.name,
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                                textAlign: TextAlign.center,
+                                style: Theme.of(context)
+                                    .textTheme
+                                    .labelSmall
+                                    ?.copyWith(fontSize: 11),
+                              ),
+                            ],
+                          ),
                         ),
                       );
-                    },
+                    }),
                   );
                 },
+              ),
+              const SizedBox(height: 10),
+              ListTile(
+                contentPadding: EdgeInsets.zero,
+                leading: Icon(
+                  Icons.text_fields_outlined,
+                  color: Theme.of(context).colorScheme.primary,
+                ),
+                title: const Text(
+                  '字体样式',
+                  style: TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+                subtitle: const Text('自定义应用字体'),
+                trailing: const Icon(Icons.chevron_right),
+                onTap: () => const SettingFontRoute().push(context),
               ),
             ],
           ),

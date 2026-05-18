@@ -21,6 +21,7 @@ import 'package:anime_flow/pages/settings/pages/playback_settings.dart';
 import 'package:anime_flow/pages/settings/pages/plugins/add_plugins.dart';
 import 'package:anime_flow/pages/settings/pages/plugins/download_plugins.dart';
 import 'package:anime_flow/pages/settings/pages/plugins/plugins.dart';
+import 'package:anime_flow/pages/settings/pages/font/font_settings.dart';
 import 'package:anime_flow/pages/settings/pages/theme.dart';
 import 'package:anime_flow/pages/user_space/index.dart';
 import 'package:flutter/material.dart';
@@ -320,6 +321,15 @@ class SettingThemeRoute extends GoRouteData with $SettingThemeRoute {
 
   @override
   Widget build(BuildContext context, GoRouterState state) => const ThemePage();
+}
+
+@TypedGoRoute<SettingFontRoute>(path: '/settings/font')
+class SettingFontRoute extends GoRouteData with $SettingFontRoute {
+  const SettingFontRoute();
+
+  @override
+  Widget build(BuildContext context, GoRouterState state) =>
+      const FontSettingsPage();
 }
 
 @TypedGoRoute<SettingThanksRoute>(path: '/settings/thanks')

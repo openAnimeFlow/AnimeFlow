@@ -28,6 +28,7 @@ List<RouteBase> get $appRoutes => [
       $settingPluginsRoute,
       $settingAddPluginsRoute,
       $settingThemeRoute,
+      $settingFontRoute,
       $settingThanksRoute,
       $settingAgreementRoute,
     ];
@@ -678,6 +679,34 @@ mixin $SettingThemeRoute on GoRouteData {
   @override
   String get location => GoRouteData.$location(
         '/settings/theme',
+      );
+
+  @override
+  void go(BuildContext context) => context.go(location);
+
+  @override
+  Future<T?> push<T>(BuildContext context) => context.push<T>(location);
+
+  @override
+  void pushReplacement(BuildContext context) =>
+      context.pushReplacement(location);
+
+  @override
+  void replace(BuildContext context) => context.replace(location);
+}
+
+RouteBase get $settingFontRoute => GoRouteData.$route(
+      path: '/settings/font',
+      factory: $SettingFontRoute._fromState,
+    );
+
+mixin $SettingFontRoute on GoRouteData {
+  static SettingFontRoute _fromState(GoRouterState state) =>
+      const SettingFontRoute();
+
+  @override
+  String get location => GoRouteData.$location(
+        '/settings/font',
       );
 
   @override

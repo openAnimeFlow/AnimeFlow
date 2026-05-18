@@ -172,6 +172,28 @@ class FontDownload extends _$FontDownload {
       );
     }
   }
+
+  /// 删除本地字体文件；若正在使用该字体则恢复系统字体。
+  Future<void> deleteDownload(FontItem font) async {
+    final savedPaths = _getSavedPaths();
+    final filePath = savedPaths.remove(font.id) ?? state.filePath;
+
+    if (filePath != null) {
+      final file = File(filePath);
+      if (file.existsSync()) {
+        await file.delete();
+      }
+    }
+
+    await Storage.setting.put(SettingKey.downloadedFonts, savedPaths);
+
+    final selectedId = Storage.setting.get(SettingKey.selectedFontId) as String?;
+    if (selectedId == font.id) {
+      await ref.read(selectedFontProvider.notifier).clearFont();
+    }
+
+    state = const FontDownloadState();
+  }
 }
 
 // ──────────────────────────────────────────

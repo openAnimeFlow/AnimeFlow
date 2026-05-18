@@ -353,20 +353,35 @@ class _FontListTile extends ConsumerWidget {
         );
 
       case FontDownloadStatus.done:
-        if (isSelected) {
-          return IconButton(
-            icon: Icon(Icons.check_circle_rounded, color: colorScheme.primary),
-            tooltip: '已应用，点击取消使用',
-            onPressed: () =>
-                ref.read(selectedFontProvider.notifier).clearFont(),
-          );
-        }
-        return IconButton(
-          icon: const Icon(Icons.font_download_outlined),
-          tooltip: '点击应用此字体',
-          onPressed: () => ref
-              .read(selectedFontProvider.notifier)
-              .selectFont(font, downloadState.filePath!),
+        return Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            if (isSelected)
+              IconButton(
+                icon: Icon(Icons.check_circle_rounded,
+                    color: colorScheme.primary),
+                tooltip: '已应用，点击取消使用',
+                onPressed: () =>
+                    ref.read(selectedFontProvider.notifier).clearFont(),
+              )
+            else
+              IconButton(
+                icon: const Icon(Icons.font_download_outlined),
+                tooltip: '点击应用此字体',
+                onPressed: () => ref
+                    .read(selectedFontProvider.notifier)
+                    .selectFont(font, downloadState.filePath!),
+              ),
+            IconButton(
+              icon: const Icon(Icons.delete_outline),
+              tooltip: '删除已下载字体',
+              onPressed: () => _confirmDeleteDownload(
+                context,
+                ref,
+                isSelected: isSelected,
+              ),
+            ),
+          ],
         );
 
       case FontDownloadStatus.error:
@@ -376,6 +391,37 @@ class _FontListTile extends ConsumerWidget {
           onPressed: () =>
               ref.read(fontDownloadProvider(font.id).notifier).download(font),
         );
+    }
+  }
+
+  Future<void> _confirmDeleteDownload(
+    BuildContext context,
+    WidgetRef ref, {
+    required bool isSelected,
+  }) async {
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: const Text('删除字体'),
+        content: Text(
+          isSelected
+              ? '将删除「${font.name}」的本地文件，并恢复为系统字体，确定继续？'
+              : '确定删除「${font.name}」的本地字体文件？',
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx, false),
+            child: const Text('取消'),
+          ),
+          FilledButton(
+            onPressed: () => Navigator.pop(ctx, true),
+            child: const Text('删除'),
+          ),
+        ],
+      ),
+    );
+    if (confirmed == true && context.mounted) {
+      await ref.read(fontDownloadProvider(font.id).notifier).deleteDownload(font);
     }
   }
 }

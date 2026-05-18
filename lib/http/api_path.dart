@@ -1,65 +1,64 @@
 class BgmNextApi {
-  static const String baseUrl = 'https://next.bgm.tv';
+  static const String baseUrl = 'https://next.bgm.tv',
 
   ///条目
-  static const String subjects = '/p1/subjects';
+  subjects = '/p1/subjects',
 
   ///热门条目
-  static const String hot = '/p1/trending/subjects';
+  hot = '/p1/trending/subjects',
 
   ///章节s
-  static const String episodes = '/p1/subjects/{subjectId}/episodes';
+  episodes = '/p1/subjects/{subjectId}/episodes',
 
   ///条目评论
-  static const String subjectComments = '/p1/subjects/{subjectId}/comments';
+  subjectComments = '/p1/subjects/{subjectId}/comments',
 
   ///条目搜索
-  static const String search = '/p1/search/subjects';
+  search = '/p1/search/subjects',
 
   ///每日放送
-  static const String calendar = '/p1/calendar';
+  calendar = '/p1/calendar',
 
   ///剧集评论
-  static const String episodeComments = '/p1/episodes/{episodeId}/comments';
+  episodeComments = '/p1/episodes/{episodeId}/comments',
 
   ///角色列表
-  static const String characters = '/p1/subjects/{subjectId}/characters';
+  characters = '/p1/subjects/{subjectId}/characters',
 
   ///角色信息
-  static const String character = '/p1/characters/{characterId}';
+  character = '/p1/characters/{characterId}',
 
   ///角色出演作品
-  static const String characterCasts = '/p1/characters/{characterId}/casts';
+  characterCasts = '/p1/characters/{characterId}/casts',
 
   ///角色吐槽
-  static const String characterComments = '/p1/characters/{characterId}/comments';
+  characterComments = '/p1/characters/{characterId}/comments',
 
   ///关联条目
-  static const String relations = '/p1/subjects/{subjectId}/relations';
+  relations = '/p1/subjects/{subjectId}/relations',
 
   ///时间线
-  static const String timeline = '/p1/timeline';
+  timeline = '/p1/timeline',
 
   ///条目制作人
-  static const String staffs = '/p1/subjects/{subjectId}/staffs/persons';
+  staffs = '/p1/subjects/{subjectId}/staffs/persons';
 }
 
 class BgmUsersApi {
-
   ///获取当前用户信息
-  static const String me = '/p1/me';
+  static const String me = '/p1/me',
 
   ///条目收藏
-  static const String collections = '/p1/collections/subjects';
+  collections = '/p1/collections/subjects',
 
   ///用户收藏
-  static const String userCollections = '/p1/users/{username}/collections/subjects';
+  userCollections = '/p1/users/{username}/collections/subjects',
 
   ///剧集收藏
-  static const String collectionsEpisodes = '/p1/collections/episodes';
+  collectionsEpisodes = '/p1/collections/episodes',
 
   ///用户信息
-  static const String userInfo = '/p1/users/{username}';
+  userInfo = '/p1/users/{username}';
 }
 
 class BgmApi {
@@ -68,72 +67,74 @@ class BgmApi {
 }
 
 class CommonApi {
-  static const String bgmTV = 'https://bgm.tv';
+  static const String bgmTV = 'https://bgm.tv',
+      bangumiTV = 'https://bangumi.tv',
 
-  static const String bangumiTV = 'https://bangumi.tv';
+      /// bangumi请求头
+      bangumiUserAgent = 'AnimeFlow/{version} (https://github.com/openAnimeFlow/AnimeFlow.git)',
 
-  // bangumi请求头
-  static const String bangumiUserAgent = 'AnimeFlow/{version} (https://github.com/openAnimeFlow/AnimeFlow.git)';
+      ///AnimeFLow版本信息
+      animeFlowVersion = '/repos/openAnimeFlow/AnimeFlow/releases/latest',
 
-  ///AnimeFLow版本信息
-  static const String animeFlowVersion = '/repos/openAnimeFlow/AnimeFlow/releases/latest';
+      ///GitHubApi
+      githubApi = 'https://api.github.com',
 
-  ///GitHubApi
-  static const String githubApi = 'https://api.github.com';
+      /// Github镜像
+      gitMirror = 'https://ghfast.top/',
 
-  /// Github镜像
-  static const String gitMirror = 'https://ghfast.top/';
+      ///jsDelivr cdn
+      jsDelivr = 'https://cdn.jsdelivr.net/gh/',
 
-  ///插件仓库
-  static const String pluginRepo = 'https://raw.githubusercontent.com/openAnimeFlow/animeFlow-assets/main/plugins';
+      ///插件仓库
+      pluginRepo = 'https://raw.githubusercontent.com/openAnimeFlow/animeFlow-assets/main/plugins',
 
-  /// 图片识别番剧
-  static const String traceApi = 'https://api.trace.moe/search';
+      /// 字体仓库
+      fontRepo = 'https://raw.githubusercontent.com/openAnimeFlow/animeFlow-assets/main/fonts-repo',
+
+      /// 图片识别番剧
+      traceApi = 'https://api.trace.moe/search';
 }
 
 class AnimeFlowApi {
   /// AnimeFlow API Server
   static const String animeFlowApi = 'https://ligg.top',
 
-  // animeFlowApiDev = 'http://127.0.0.1:1024',
+      // animeFlowApiDev = 'http://127.0.0.1:1024',
 
-  /// 申请Token
-  token = '/api/oauth/token',
+      /// 申请Token
+      token = '/api/oauth/token',
 
-  /// 获取弹幕
-  getDanmaku = '/api/v1/danmaku',
+      /// 获取弹幕
+      getDanmaku = '/api/v1/danmaku',
+      refreshToken = '/api/oauth/refresh',
+      session = '/api/oauth/session',
+      callback = '/api/oauth/callback',
 
-  refreshToken = '/api/oauth/refresh',
+      /// 搜索番剧
+      search = '/api/v1/danmaku/search',
 
-  session = '/api/oauth/session',
+      /// 番剧详情
+      animeDetail = '/api/v1/danmaku/bangumi',
 
-  callback = '/api/oauth/callback',
+      /// 根据BGM番剧ID获取番剧详情
+      animeDetailByBgmId = '/api/v1/danmaku/bangumi/bgmtv',
 
-  /// 搜索番剧
-  search = '/api/v1/danmaku/search',
-
-  /// 番剧详情
-  animeDetail = '/api/v1/danmaku/bangumi',
-
-  /// 根据BGM番剧ID获取番剧详情
-  animeDetailByBgmId = '/api/v1/danmaku/bangumi/bgmtv',
-
-  /// 弹幕
-  danmaku = '/api/v1/danmaku';
+      /// 弹幕
+      danmaku = '/api/v1/danmaku';
 }
 
 class DamakuApi {
-  static const String dandanAPIDomain = 'https://api.dandanplay.net';
+   static const String dandanAPIDomain = 'https://api.dandanplay.net',
 
   /// 获取弹幕
-  static const String dandanAPIComment = "/api/v2/comment/";
+   dandanAPIComment = "/api/v2/comment/",
 
   /// 检索弹弹番剧元数据
-  static const String dandanAPISearch = "/api/v2/search/anime";
+   dandanAPISearch = "/api/v2/search/anime",
 
   /// 获取弹弹番剧元数据
-  static const String dandanAPIInfo = "/api/v2/bangumi/";
+   dandanAPIInfo = "/api/v2/bangumi/",
 
   /// 获取弹弹番剧元数据（通过BGM番剧ID）
-  static const String dandanAPIInfoByBgmBangumiId = "/api/v2/bangumi/bgmtv/";
+   dandanAPIInfoByBgmBangumiId = "/api/v2/bangumi/bgmtv/";
 }

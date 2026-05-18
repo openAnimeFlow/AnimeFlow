@@ -81,9 +81,9 @@ class BgmRequest {
   ///条目搜索
   static Future<SubjectItem> searchSubjectService(String keyword,
       {required int limit,
-      required int offset,
-      String? rank,
-      List<String>? tags}) async {
+        required int offset,
+        String? rank,
+        List<String>? tags}) async {
     final data = <String, dynamic>{
       'keyword': keyword,
     };
@@ -114,8 +114,8 @@ class BgmRequest {
   static Future<Calendar> calendarService() async {
     return await _client
         .get(
-          _nextBaseUrl + BgmNextApi.calendar,
-        )
+      _nextBaseUrl + BgmNextApi.calendar,
+    )
         .then((value) => Calendar.fromJson(value.data));
   }
 
@@ -143,11 +143,11 @@ class BgmRequest {
     }
     return _client
         .get(
-          _nextBaseUrl +
-              BgmNextApi.characters
-                  .replaceFirst('{subjectId}', subjectId.toString()),
-          queryParameters: queryParameters,
-        )
+      _nextBaseUrl +
+          BgmNextApi.characters
+              .replaceFirst('{subjectId}', subjectId.toString()),
+      queryParameters: queryParameters,
+    )
         .then((response) => (CharactersItem.fromJson(response.data)));
   }
 
@@ -183,7 +183,7 @@ class BgmRequest {
             .replaceFirst('{characterId}', characterId.toString()));
     return (response.data as List<dynamic>)
         .map((item) =>
-            CharacterCommentItem.fromJson(item as Map<String, dynamic>))
+        CharacterCommentItem.fromJson(item as Map<String, dynamic>))
         .toList();
   }
 
@@ -223,18 +223,18 @@ class BgmRequest {
 
     return _client
         .get(
-          _nextBaseUrl + BgmNextApi.subjects,
-          queryParameters: queryParameters,
-        )
+      _nextBaseUrl + BgmNextApi.subjects,
+      queryParameters: queryParameters,
+    )
         .then((response) => (SubjectItem.fromJson(response.data)));
   }
 
   ///时间线
   static Future<List<TimelineItem>> timelineService(
-    int limit, {
-    String? mode,
-    int? until,
-  }) async {
+      int limit, {
+        String? mode,
+        int? until,
+      }) async {
     final queryParameters = <String, dynamic>{'limit': limit};
     if (mode != null) queryParameters['mode'] = mode;
     if (until != null) queryParameters['until'] = until;
@@ -320,18 +320,18 @@ class UserRequest {
   ///查询用户收藏
   static Future<UserCollectionsItem> queryUserCollectionService(String username,
       {int subjectType = 2,
-      required int type,
-      required int limit,
-      required int offset}) async {
+        required int type,
+        required int limit,
+        required int offset}) async {
     final response = await _client.get(
-        _nextBaseUrl +
-            BgmUsersApi.userCollections.replaceFirst('{username}', username),
-        queryParameters: {
-          'subjectType': subjectType,
-          'type': type,
-          'limit': limit,
-          'offset': offset,
-        },
+      _nextBaseUrl +
+          BgmUsersApi.userCollections.replaceFirst('{username}', username),
+      queryParameters: {
+        'subjectType': subjectType,
+        'type': type,
+        'limit': limit,
+        'offset': offset,
+      },
     );
     try {
       return UserCollectionsItem.fromJson(response.data);
@@ -344,11 +344,11 @@ class UserRequest {
   ///更新用户条目
   static Future<void> updateCollectionService(int subjectId,
       {int? type,
-      bool? private,
-      bool? progress,
-      int? rate,
-      String? comment,
-      List<String>? tags}) async {
+        bool? private,
+        bool? progress,
+        int? rate,
+        String? comment,
+        List<String>? tags}) async {
     final data = <String, dynamic>{};
     if (type != null) data['type'] = type;
     if (rate != null) data['rate'] = rate;

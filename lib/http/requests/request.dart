@@ -15,8 +15,7 @@ import 'package:gal/gal.dart';
 import 'package:get/get_core/src/get_main.dart';
 import 'package:get/get_navigation/src/extension_navigation.dart';
 import 'package:anime_flow/utils/logger.dart';
-import 'package:path_provider/path_provider.dart'
-    show getDownloadsDirectory, getTemporaryDirectory;
+import 'package:path_provider/path_provider.dart';
 
 class Request {
   static final Client _client = Client.instance;

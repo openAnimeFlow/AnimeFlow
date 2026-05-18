@@ -32,7 +32,7 @@ final class FontProvider extends $AsyncNotifierProvider<Font, List<FontItem>> {
   Font create() => Font();
 }
 
-String _$fontHash() => r'6dee13154c65009f66f133a031ae9edcc8adec8f';
+String _$fontHash() => r'd5d0fb413d651b87f3c3544b4dafe6d63d7ab4d6';
 
 abstract class _$Font extends $AsyncNotifier<List<FontItem>> {
   FutureOr<List<FontItem>> build();

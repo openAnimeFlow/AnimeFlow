@@ -35,7 +35,7 @@ class FontSettingsPage extends ConsumerWidget {
             children: [
               const Text(
                 '字体库',
-                style: const TextStyle(
+                style: TextStyle(
                   fontSize: 20,
                   fontWeight: FontWeight.bold,
                 ),
@@ -235,7 +235,25 @@ class _FontListTile extends StatelessWidget {
             maxLines: 2,
             overflow: TextOverflow.ellipsis,
           ),
-          _FontPreviewSnippet(font: font),
+          _PreviewFontLoader(
+            font: font,
+            builder: (context, {required loaded, required failed, required family}) {
+              return AnimatedSwitcher(
+                duration: const Duration(milliseconds: 220),
+                switchInCurve: Curves.easeOut,
+                switchOutCurve: Curves.easeIn,
+                child: KeyedSubtree(
+                  key: ValueKey('preview-${font.id}-$loaded-$failed'),
+                  child: _FontPreviewBox(
+                    colorScheme: Theme.of(context).colorScheme,
+                    loaded: loaded,
+                    failed: failed,
+                    fontFamily: loaded ? family : null,
+                  ),
+                ),
+              );
+            },
+          )
         ],
       ),
     );
@@ -285,7 +303,7 @@ class _PreviewFontLoaderState extends ConsumerState<_PreviewFontLoader> {
     try {
       final bytes = await ref
           .read(fontProvider.notifier)
-          .downloadFont(widget.font.preview);
+          .loadingFont(widget.font.preview);
       if (bytes.isEmpty) {
         throw StateError('字体预览数据为空');
       }
@@ -419,37 +437,6 @@ class _FontPreviewBox extends StatelessWidget {
           color: colorScheme.onSurface,
         ),
       ),
-    );
-  }
-}
-
-class _FontPreviewSnippet extends StatelessWidget {
-  const _FontPreviewSnippet({required this.font});
-
-  final FontItem font;
-
-  @override
-  Widget build(BuildContext context) {
-    final colorScheme = Theme.of(context).colorScheme;
-
-    return _PreviewFontLoader(
-      font: font,
-      builder: (context, {required loaded, required failed, required family}) {
-        return AnimatedSwitcher(
-          duration: const Duration(milliseconds: 220),
-          switchInCurve: Curves.easeOut,
-          switchOutCurve: Curves.easeIn,
-          child: KeyedSubtree(
-            key: ValueKey('preview-${font.id}-$loaded-$failed'),
-            child: _FontPreviewBox(
-              colorScheme: colorScheme,
-              loaded: loaded,
-              failed: failed,
-              fontFamily: loaded ? family : null,
-            ),
-          ),
-        );
-      },
     );
   }
 }

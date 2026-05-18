@@ -21,6 +21,12 @@ class Font extends _$Font {
     state = await AsyncValue.guard(() => getFontList(useCdn: useCdn));
   }
 
+  /// 加载字体
+  Future<List<int>> loadingFont(String fontUrl, {bool useCdn = true}) async {
+    return await GithubRequest.downloadFont(fontUrl, useCdn: useCdn);
+  }
+
+  /// 下载字体
   Future<List<int>> downloadFont(String fontUrl, {bool useCdn = true}) async {
     return await GithubRequest.downloadFont(fontUrl, useCdn: useCdn);
   }

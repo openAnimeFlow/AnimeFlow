@@ -21,7 +21,7 @@ import 'package:anime_flow/pages/settings/pages/playback_settings.dart';
 import 'package:anime_flow/pages/settings/pages/plugins/add_plugins.dart';
 import 'package:anime_flow/pages/settings/pages/plugins/download_plugins.dart';
 import 'package:anime_flow/pages/settings/pages/plugins/plugins.dart';
-import 'package:anime_flow/pages/settings/pages/font/font_settings.dart';
+import 'package:anime_flow/pages/settings/pages/font/font.dart';
 import 'package:anime_flow/pages/settings/pages/theme.dart';
 import 'package:anime_flow/pages/user_space/index.dart';
 import 'package:flutter/material.dart';

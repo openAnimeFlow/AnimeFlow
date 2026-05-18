@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'package:anime_flow/pages/settings/pages/font/font_provider.dart';
 import 'package:anime_flow/repository/storage.dart';
 import 'package:anime_flow/routes/routes.dart';
 import 'package:flutter/material.dart';
@@ -14,6 +15,7 @@ void main() async {
   MediaKit.ensureInitialized();
   await Hive.initFlutter();
   await Storage.init();
+  await SelectedFont.initOnStartup();
 
   // 桌面平台初始化窗口管理器
   if (Platform.isWindows || Platform.isLinux || Platform.isMacOS) {
@@ -43,8 +45,8 @@ class MyApp extends StatelessWidget {
           routeInformationParser: appRouter.routeInformationParser,
           routerDelegate: appRouter.routerDelegate,
           backButtonDispatcher: appRouter.backButtonDispatcher,
-          theme: buildLightTheme(themeState.seedColor),
-          darkTheme: buildDarkTheme(themeState.seedColor),
+          theme: buildLightTheme(themeState.seedColor, fontFamily: themeState.fontFamily),
+          darkTheme: buildDarkTheme(themeState.seedColor, fontFamily: themeState.fontFamily),
           themeMode: themeState.themeMode,
         );
       },

@@ -10,18 +10,26 @@ class ThemeState {
   const ThemeState({
     required this.themeMode,
     required this.seedColor,
+    this.fontFamily,
   });
 
   final ThemeMode themeMode;
   final Color seedColor;
+  final String? fontFamily;
+
+  static const _undefinedFontFamily = Object();
 
   ThemeState copyWith({
     ThemeMode? themeMode,
     Color? seedColor,
+    Object? fontFamily = _undefinedFontFamily,
   }) {
     return ThemeState(
       themeMode: themeMode ?? this.themeMode,
       seedColor: seedColor ?? this.seedColor,
+      fontFamily: identical(fontFamily, _undefinedFontFamily)
+          ? this.fontFamily
+          : fontFamily as String?,
     );
   }
 }
@@ -102,28 +110,34 @@ class ThemeNotifier extends _$ThemeNotifier {
       seedColor = Color(seedColorValue);
     }
 
+    final fontFamily = setting.get(SettingKey.fontFamily) as String?;
+
     return ThemeState(
       themeMode: themeMode,
       seedColor: seedColor,
+      fontFamily: fontFamily,
     );
   }
 
-  // 设置主题模式并保存
   void setThemeMode(ThemeMode mode) {
     state = state.copyWith(themeMode: mode);
     Storage.setting.put(SettingKey.themeMode, mode.index);
   }
 
-  // 设置主题颜色并保存
   void setSeedColor(Color color) {
     state = state.copyWith(seedColor: color);
     Storage.setting.put(SettingKey.seedColor, color.toARGB32());
   }
+
+  void setFontFamily(String? family) {
+    state = state.copyWith(fontFamily: family);
+  }
 }
 
-ThemeData buildLightTheme(Color seedColor) {
+ThemeData buildLightTheme(Color seedColor, {String? fontFamily}) {
   return ThemeData(
     useMaterial3: true,
+    fontFamily: fontFamily,
     colorScheme: ColorScheme.fromSeed(
       seedColor: seedColor,
       brightness: Brightness.light,
@@ -140,9 +154,10 @@ ThemeData buildLightTheme(Color seedColor) {
   );
 }
 
-ThemeData buildDarkTheme(Color seedColor) {
+ThemeData buildDarkTheme(Color seedColor, {String? fontFamily}) {
   return ThemeData(
     useMaterial3: true,
+    fontFamily: fontFamily,
     colorScheme: ColorScheme.fromSeed(
       seedColor: seedColor,
       brightness: Brightness.dark,

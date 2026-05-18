@@ -33,12 +33,36 @@ class FontSettingsPage extends ConsumerWidget {
               bottom: 24,
             ),
             children: [
-              const Text(
-                '字体库',
-                style: TextStyle(
-                  fontSize: 20,
-                  fontWeight: FontWeight.bold,
-                ),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  const Text(
+                    '字体库',
+                    style: TextStyle(
+                      fontSize: 20,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                  Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Text(
+                        'CDN 加速',
+                        style: Theme.of(context).textTheme.bodyMedium,
+                      ),
+                      const SizedBox(width: 8),
+                      Tooltip(
+                        message: '开启：经 jsDelivr 拉取字体；关闭：直连 GitHub Raw（走镜像）',
+                        child: Switch(
+                          value: ref.watch(fontRepoCdnProvider),
+                          onChanged: (value) => ref
+                              .read(fontRepoCdnProvider.notifier)
+                              .setEnabled(value),
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
               ),
               const SizedBox(height: 10),
               fontsAsync.when(
@@ -175,17 +199,33 @@ class _FontListError extends StatelessWidget {
   }
 }
 
-class _SystemFontListTile extends StatelessWidget {
+class _SystemFontListTile extends ConsumerWidget {
   const _SystemFontListTile();
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final selectedFamily = ref.watch(selectedFontProvider);
+    final isSelected = selectedFamily == null;
+    final colorScheme = Theme.of(context).colorScheme;
+
     return ListTile(
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-      title: const Text(
-        '跟随系统',
-        maxLines: 1,
-        overflow: TextOverflow.ellipsis,
+      selected: isSelected,
+      onTap: !isSelected
+          ? () => ref.read(selectedFontProvider.notifier).clearFont()
+          : null,
+      title: Row(
+        children: [
+          const Expanded(
+            child: Text(
+              '跟随系统',
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+            ),
+          ),
+          if (isSelected)
+            Icon(Icons.check_circle_rounded, color: colorScheme.primary),
+        ],
       ),
       subtitle: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -196,35 +236,46 @@ class _SystemFontListTile extends StatelessWidget {
             overflow: TextOverflow.ellipsis,
           ),
           _FontPreviewBox(
-            colorScheme: Theme.of(context).colorScheme,
+            colorScheme: colorScheme,
             loaded: true,
             failed: false,
-          )
+          ),
         ],
       ),
     );
   }
 }
 
-class _FontListTile extends StatelessWidget {
+class _FontListTile extends ConsumerWidget {
   const _FontListTile({required this.font});
 
   final FontItem font;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final downloadState = ref.watch(fontDownloadProvider(font.id));
+    final selectedFamily = ref.watch(selectedFontProvider);
+    final isSelected = selectedFamily == font.family;
+    final colorScheme = Theme.of(context).colorScheme;
+
     return ListTile(
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+      selected: isSelected,
+      onTap: downloadState.status == FontDownloadStatus.done && !isSelected
+          ? () => ref
+              .read(selectedFontProvider.notifier)
+              .selectFont(font, downloadState.filePath!)
+          : null,
       title: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          Text(
-            font.name,
-            maxLines: 1,
-            overflow: TextOverflow.ellipsis,
+          Expanded(
+            child: Text(
+              font.name,
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+            ),
           ),
-          IconButton(
-              onPressed: () {}, icon: const Icon(Icons.cloud_download_outlined))
+          _buildActionWidget(context, ref, downloadState, isSelected, colorScheme),
         ],
       ),
       subtitle: Column(
@@ -237,7 +288,8 @@ class _FontListTile extends StatelessWidget {
           ),
           _PreviewFontLoader(
             font: font,
-            builder: (context, {required loaded, required failed, required family}) {
+            builder: (context,
+                {required loaded, required failed, required family}) {
               return AnimatedSwitcher(
                 duration: const Duration(milliseconds: 220),
                 switchInCurve: Curves.easeOut,
@@ -253,10 +305,78 @@ class _FontListTile extends StatelessWidget {
                 ),
               );
             },
-          )
+          ),
         ],
       ),
     );
+  }
+
+  Widget _buildActionWidget(
+    BuildContext context,
+    WidgetRef ref,
+    FontDownloadState downloadState,
+    bool isSelected,
+    ColorScheme colorScheme,
+  ) {
+    switch (downloadState.status) {
+      case FontDownloadStatus.idle:
+        return IconButton(
+          icon: const Icon(Icons.cloud_download_outlined),
+          tooltip: '下载字体',
+          onPressed: () =>
+              ref.read(fontDownloadProvider(font.id).notifier).download(font),
+        );
+
+      case FontDownloadStatus.downloading:
+        final percent = (downloadState.progress * 100).toInt();
+        return SizedBox(
+          width: 48,
+          height: 48,
+          child: Stack(
+            alignment: Alignment.center,
+            children: [
+              CircularProgressIndicator(
+                value: downloadState.progress,
+                strokeWidth: 2.5,
+                color: colorScheme.primary,
+              ),
+              Text(
+                '$percent%',
+                style: TextStyle(
+                  fontSize: 10,
+                  fontWeight: FontWeight.w600,
+                  color: colorScheme.onSurface,
+                ),
+              ),
+            ],
+          ),
+        );
+
+      case FontDownloadStatus.done:
+        if (isSelected) {
+          return IconButton(
+            icon: Icon(Icons.check_circle_rounded, color: colorScheme.primary),
+            tooltip: '已应用，点击取消使用',
+            onPressed: () =>
+                ref.read(selectedFontProvider.notifier).clearFont(),
+          );
+        }
+        return IconButton(
+          icon: const Icon(Icons.font_download_outlined),
+          tooltip: '点击应用此字体',
+          onPressed: () => ref
+              .read(selectedFontProvider.notifier)
+              .selectFont(font, downloadState.filePath!),
+        );
+
+      case FontDownloadStatus.error:
+        return IconButton(
+          icon: Icon(Icons.error_outline, color: colorScheme.error),
+          tooltip: '下载失败，点击重试',
+          onPressed: () =>
+              ref.read(fontDownloadProvider(font.id).notifier).download(font),
+        );
+    }
   }
 }
 
@@ -334,6 +454,15 @@ class _PreviewFontLoaderState extends ConsumerState<_PreviewFontLoader> {
 
   @override
   Widget build(BuildContext context) {
+    ref.listen(fontRepoCdnProvider, (previous, next) {
+      if (previous != next && mounted) {
+        setState(() {
+          _loaded = false;
+          _failed = false;
+        });
+        _loadPreviewFont();
+      }
+    });
     return widget.builder(
       context,
       loaded: _loaded,

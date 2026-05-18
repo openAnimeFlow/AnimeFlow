@@ -29,7 +29,7 @@ class GithubRequest {
         .toList();
   }
 
-  ///下载字体
+  /// 下载字体字节（用于预览加载）
   static Future<List<int>> downloadFont(String fontUrl,{bool useCdn = false}) async {
     if (useCdn) {
       fontUrl = Utils.jsDelivrCdnUrl(fontUrl);
@@ -38,5 +38,24 @@ class GithubRequest {
       options: Options(responseType: ResponseType.bytes),
     );
     return response.data;
+  }
+
+  /// 下载字体文件到指定路径（支持进度回调）
+  static Future<void> downloadFontToFile(
+    String fontUrl,
+    String savePath, {
+    bool useCdn = false,
+    ProgressCallback? onReceiveProgress,
+    CancelToken? cancelToken,
+  }) async {
+    if (useCdn) {
+      fontUrl = Utils.jsDelivrCdnUrl(fontUrl);
+    }
+    await _client.download(
+      fontUrl,
+      savePath,
+      onReceiveProgress: onReceiveProgress,
+      cancelToken: cancelToken,
+    );
   }
 }

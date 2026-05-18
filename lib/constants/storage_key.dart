@@ -37,5 +37,10 @@ class PlaybackKey {
 class SettingKey {
   static const String isMirror = 'setting_is_mirror',
       themeMode = 'theme_mode',
-      seedColor = 'theme_seed_color';
+      seedColor = 'theme_seed_color',
+      fontFamily = 'font_family',
+      selectedFontId = 'selected_font_id',
+      downloadedFonts = 'downloaded_fonts',
+      /// 字体仓库是否走 jsDelivr CDN；关闭则走 GitHub Raw（经镜像拦截器）
+      fontRepoUseCdn = 'font_repo_use_cdn';
 }

@@ -375,6 +375,7 @@ class _FontListTile extends ConsumerWidget {
             IconButton(
               icon: const Icon(Icons.delete_outline),
               tooltip: '删除已下载字体',
+              // todo删除逻辑有问题，如果远程已经删除了该字体本地就无法删除了
               onPressed: () => _confirmDeleteDownload(
                 context,
                 ref,

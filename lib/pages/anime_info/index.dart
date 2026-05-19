@@ -115,7 +115,6 @@ class _AnimeInfoPageState extends ConsumerState<AnimeInfoPage> {
           },
           body: InfoSynopsisView(
             subjectId: subjectBasicData.id,
-            subjectsInfo: subjectsInfo,
             onScrollChanged: (bool showButton) {
               if (topButton != showButton) {
                 setState(() {

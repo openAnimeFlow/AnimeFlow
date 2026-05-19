@@ -12,7 +12,7 @@ import 'package:flutter/rendering.dart';
 class RelatedView extends StatefulWidget {
   final int subjectId;
 
-  const RelatedView({required this.subjectId});
+  const RelatedView({super.key, required this.subjectId});
 
   @override
   State<RelatedView> createState() => _RelatedViewState();

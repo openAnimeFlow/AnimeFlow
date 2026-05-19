@@ -41,6 +41,6 @@ class SettingKey {
       fontFamily = 'font_family',
       selectedFontId = 'selected_font_id',
       downloadedFonts = 'downloaded_fonts',
-      /// 字体仓库是否走 jsDelivr CDN；关闭则走 GitHub Raw（经镜像拦截器）
+      downloadedFontsMeta = 'downloaded_fonts_meta',
       fontRepoUseCdn = 'font_repo_use_cdn';
 }

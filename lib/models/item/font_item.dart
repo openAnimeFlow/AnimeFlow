@@ -19,13 +19,23 @@ class FontItem {
 
   factory FontItem.fromJson(Map<String, dynamic> json) {
     return FontItem(
-      id: json['id'],
-      name: json['name'],
-      family: json['family'],
-      author: json['author'],
-      preview: json['preview'],
-      font: json['font'],
-      size: json['size'],
+      id: json['id'] as String,
+      name: json['name'] as String,
+      family: json['family'] as String,
+      author: json['author'] as String,
+      preview: json['preview'] as String,
+      font: json['font'] as String,
+      size: (json['size'] as num).toInt(),
     );
   }
+
+  Map<String, dynamic> toJson() => {
+        'id': id,
+        'name': name,
+        'family': family,
+        'author': author,
+        'preview': preview,
+        'font': font,
+        'size': size,
+      };
 }

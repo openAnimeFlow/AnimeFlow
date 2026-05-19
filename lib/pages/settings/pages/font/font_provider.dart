@@ -78,7 +78,15 @@ class Font extends _$Font {
   @override
   Future<List<FontItem>> build() async {
     final useCdn = ref.watch(fontRepoCdnProvider);
-    return getFontList(useCdn: useCdn);
+    final list = await getFontList(useCdn: useCdn);
+    // 远程列表拿到后，顺手为已下载但缺少元数据的旧版本数据回填元信息，
+    // 以便后续即使远程下架也能在本地正常展示并删除。
+    Future.microtask(() {
+      try {
+        ref.read(downloadedFontMetasProvider.notifier).backfillFromRemote(list);
+      } catch (_) {}
+    });
+    return list;
   }
 
   Future<List<FontItem>> getFontList({required bool useCdn}) async {
@@ -95,6 +103,101 @@ class Font extends _$Font {
   Future<List<int>> loadingFont(String fontUrl) async {
     final useCdn = ref.read(fontRepoCdnProvider);
     return GithubRequest.downloadFont(fontUrl, useCdn: useCdn);
+  }
+}
+
+// ──────────────────────────────────────────
+// 已下载字体的元数据缓存
+// ──────────────────────────────────────────
+
+@Riverpod(keepAlive: true)
+class DownloadedFontMetas extends _$DownloadedFontMetas {
+  @override
+  Map<String, FontItem> build() {
+    return _readMetasFromStorage();
+  }
+
+  static Map<String, FontItem> _readMetasFromStorage() {
+    final raw = Storage.setting.get(SettingKey.downloadedFontsMeta);
+    if (raw is! Map) return {};
+    final result = <String, FontItem>{};
+    raw.forEach((k, v) {
+      if (v is Map) {
+        try {
+          result[k.toString()] =
+              FontItem.fromJson(Map<String, dynamic>.from(v));
+        } catch (_) {
+          // 元数据损坏则跳过，不影响其他条目
+        }
+      }
+    });
+    return result;
+  }
+
+  Map<String, dynamic> _readRawMap() {
+    final raw = Storage.setting.get(SettingKey.downloadedFontsMeta);
+    return raw is Map ? Map<String, dynamic>.from(raw) : <String, dynamic>{};
+  }
+
+  Future<void> save(FontItem font) async {
+    final map = _readRawMap();
+    map[font.id] = font.toJson();
+    await Storage.setting.put(SettingKey.downloadedFontsMeta, map);
+    state = {...state, font.id: font};
+  }
+
+  Future<void> remove(String fontId) async {
+    final map = _readRawMap();
+    if (map.remove(fontId) == null && !state.containsKey(fontId)) return;
+    await Storage.setting.put(SettingKey.downloadedFontsMeta, map);
+    final next = Map<String, FontItem>.from(state)..remove(fontId);
+    state = next;
+  }
+
+  /// 计算"已下载但不在远程列表"的孤立字体。
+  ///
+  /// 兼容旧版本（仅有路径、无元数据）的数据：对此类条目合成占位 [FontItem]，
+  /// 至少保证用户仍能在 UI 中看到并删除它们。
+  List<FontItem> orphansFor(Set<String> remoteIds) {
+    final pathsRaw = Storage.setting.get(SettingKey.downloadedFonts);
+    final pathIds = pathsRaw is Map
+        ? pathsRaw.keys.map((e) => e.toString()).toSet()
+        : <String>{};
+    final candidateIds = <String>{...state.keys, ...pathIds}
+      ..removeAll(remoteIds);
+    return candidateIds.map((id) {
+      final meta = state[id];
+      if (meta != null) return meta;
+      return FontItem(
+        id: id,
+        name: id,
+        family: id,
+        author: '未知',
+        preview: '',
+        font: '',
+        size: 0,
+      );
+    }).toList();
+  }
+
+  /// 为已存在于 [SettingKey.downloadedFonts] 但缺失元数据的旧版本数据回填信息。
+  Future<void> backfillFromRemote(List<FontItem> remote) async {
+    final paths = Storage.setting.get(SettingKey.downloadedFonts);
+    if (paths is! Map || paths.isEmpty) return;
+    final pathKeys = paths.keys.map((e) => e.toString()).toSet();
+    final map = _readRawMap();
+    final next = Map<String, FontItem>.from(state);
+    var changed = false;
+    for (final font in remote) {
+      if (!pathKeys.contains(font.id)) continue;
+      if (map.containsKey(font.id)) continue;
+      map[font.id] = font.toJson();
+      next[font.id] = font;
+      changed = true;
+    }
+    if (!changed) return;
+    await Storage.setting.put(SettingKey.downloadedFontsMeta, map);
+    state = next;
   }
 }
 
@@ -159,6 +262,7 @@ class FontDownload extends _$FontDownload {
       final savedPaths = _getSavedPaths();
       savedPaths[font.id] = filePath;
       await Storage.setting.put(SettingKey.downloadedFonts, savedPaths);
+      await ref.read(downloadedFontMetasProvider.notifier).save(font);
 
       state = FontDownloadState(
         status: FontDownloadStatus.done,
@@ -174,9 +278,12 @@ class FontDownload extends _$FontDownload {
   }
 
   /// 删除本地字体文件；若正在使用该字体则恢复系统字体。
-  Future<void> deleteDownload(FontItem font) async {
+  ///
+  /// 不依赖远程返回的 [FontItem]，仅凭 family 参数的 [fontId] + 本地存储即可清理，
+  /// 因此远程仓库下架某个字体后，本地仍能正常删除其文件与配置。
+  Future<void> deleteDownload() async {
     final savedPaths = _getSavedPaths();
-    final filePath = savedPaths.remove(font.id) ?? state.filePath;
+    final filePath = savedPaths.remove(fontId) ?? state.filePath;
 
     if (filePath != null) {
       final file = File(filePath);
@@ -186,9 +293,11 @@ class FontDownload extends _$FontDownload {
     }
 
     await Storage.setting.put(SettingKey.downloadedFonts, savedPaths);
+    await ref.read(downloadedFontMetasProvider.notifier).remove(fontId);
 
-    final selectedId = Storage.setting.get(SettingKey.selectedFontId) as String?;
-    if (selectedId == font.id) {
+    final selectedId =
+        Storage.setting.get(SettingKey.selectedFontId) as String?;
+    if (selectedId == fontId) {
       await ref.read(selectedFontProvider.notifier).clearFont();
     }
 
@@ -205,18 +314,15 @@ class SelectedFont extends _$SelectedFont {
   /// 在 [Storage.init] 之后、[runApp] 之前调用，注册已持久化的自定义字体。
   static Future<void> initOnStartup() async {
     try {
-      final fontFamily =
-      Storage.setting.get(SettingKey.fontFamily) as String?;
-      final fontId =
-      Storage.setting.get(SettingKey.selectedFontId) as String?;
+      final fontFamily = Storage.setting.get(SettingKey.fontFamily) as String?;
+      final fontId = Storage.setting.get(SettingKey.selectedFontId) as String?;
       if (fontFamily == null || fontId == null) return;
 
       final raw = Storage.setting.get(SettingKey.downloadedFonts);
       if (raw is! Map) return;
 
       final savedPaths = Map<String, String>.fromEntries(
-        raw.entries
-            .map((e) => MapEntry(e.key.toString(), e.value.toString())),
+        raw.entries.map((e) => MapEntry(e.key.toString(), e.value.toString())),
       );
 
       final filePath = savedPaths[fontId];

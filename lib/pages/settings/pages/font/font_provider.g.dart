@@ -40,7 +40,7 @@ final class FontRepoCdnProvider extends $NotifierProvider<FontRepoCdn, bool> {
   }
 }
 
-String _$fontRepoCdnHash() => r'1fd7a974bf9df0f1725bf9c2ad44152ce184e992';
+String _$fontRepoCdnHash() => r'1c30e3e765b09079bfcaf74988f3a656f8d22107';
 
 abstract class _$FontRepoCdn extends $Notifier<bool> {
   bool build();
@@ -77,7 +77,7 @@ final class FontProvider extends $AsyncNotifierProvider<Font, List<FontItem>> {
   Font create() => Font();
 }
 
-String _$fontHash() => r'edb2e456d136df5aa0e46a61340f76d3e6eb4702';
+String _$fontHash() => r'f70d587f9cc59c1d0a2b45cc783974d33bd2900a';
 
 abstract class _$Font extends $AsyncNotifier<List<FontItem>> {
   FutureOr<List<FontItem>> build();
@@ -88,6 +88,56 @@ abstract class _$Font extends $AsyncNotifier<List<FontItem>> {
     final element = ref.element as $ClassProviderElement<
         AnyNotifier<AsyncValue<List<FontItem>>, List<FontItem>>,
         AsyncValue<List<FontItem>>,
+        Object?,
+        Object?>;
+    element.handleCreate(ref, build);
+  }
+}
+
+@ProviderFor(DownloadedFontMetas)
+final downloadedFontMetasProvider = DownloadedFontMetasProvider._();
+
+final class DownloadedFontMetasProvider
+    extends $NotifierProvider<DownloadedFontMetas, Map<String, FontItem>> {
+  DownloadedFontMetasProvider._()
+      : super(
+          from: null,
+          argument: null,
+          retry: null,
+          name: r'downloadedFontMetasProvider',
+          isAutoDispose: false,
+          dependencies: null,
+          $allTransitiveDependencies: null,
+        );
+
+  @override
+  String debugGetCreateSourceHash() => _$downloadedFontMetasHash();
+
+  @$internal
+  @override
+  DownloadedFontMetas create() => DownloadedFontMetas();
+
+  /// {@macro riverpod.override_with_value}
+  Override overrideWithValue(Map<String, FontItem> value) {
+    return $ProviderOverride(
+      origin: this,
+      providerOverride: $SyncValueProvider<Map<String, FontItem>>(value),
+    );
+  }
+}
+
+String _$downloadedFontMetasHash() =>
+    r'f34a63f1a2920fbbf23674517a727b324609ff73';
+
+abstract class _$DownloadedFontMetas extends $Notifier<Map<String, FontItem>> {
+  Map<String, FontItem> build();
+  @$mustCallSuper
+  @override
+  void runBuild() {
+    final ref = this.ref as $Ref<Map<String, FontItem>, Map<String, FontItem>>;
+    final element = ref.element as $ClassProviderElement<
+        AnyNotifier<Map<String, FontItem>, Map<String, FontItem>>,
+        Map<String, FontItem>,
         Object?,
         Object?>;
     element.handleCreate(ref, build);
@@ -142,7 +192,7 @@ final class FontDownloadProvider
   }
 }
 
-String _$fontDownloadHash() => r'748d1a5b60e4c98bec61a8666435bb2229f0201c';
+String _$fontDownloadHash() => r'1a9443728d00a28ee4d4ca70116321f5d5041fef';
 
 final class FontDownloadFamily extends $Family
     with

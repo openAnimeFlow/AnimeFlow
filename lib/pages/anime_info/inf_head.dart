@@ -14,31 +14,8 @@ class InfoHeadView extends StatelessWidget {
   final SubjectsInfoItem? subjectsInfo;
   final double statusBarHeight;
   final double contentHeight;
+
   const InfoHeadView({
-    required this.statusBarHeight,
-    required this.contentHeight,
-    required this.subjectBasicData,
-    required this.subjectsInfo,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return _HeadContent(
-      statusBarHeight: statusBarHeight,
-      contentHeight: contentHeight,
-      subjectBasicData: subjectBasicData,
-      subjectsInfo: subjectsInfo,
-    );
-  }
-}
-
-class _HeadContent extends StatelessWidget {
-  final SubjectBasicData subjectBasicData;
-  final SubjectsInfoItem? subjectsInfo;
-  final double statusBarHeight;
-  final double contentHeight;
-
-  const _HeadContent({
     required this.statusBarHeight,
     required this.contentHeight,
     required this.subjectBasicData,
@@ -148,7 +125,6 @@ class _HeadContent extends StatelessWidget {
     );
   }
 
-  ///骨架屏
   Widget _skeletonView(BuildContext context) {
     final isDark = SystemUtil.isDarkTheme(context);
     final baseColor = isDark ? Colors.grey[400]! : Colors.grey[100]!;

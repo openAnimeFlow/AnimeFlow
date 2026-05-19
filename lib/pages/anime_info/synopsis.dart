@@ -1,6 +1,6 @@
 import 'package:anime_flow/constants/play_layout_constant.dart';
 import 'package:anime_flow/models/item/bangumi/subjects_info_item.dart';
-import 'package:anime_flow/pages/anime_info/anime_info_provider.dart';
+import 'package:anime_flow/pages/anime_info/provider/anime_info_provider.dart';
 import 'package:anime_flow/pages/anime_info/characters.dart';
 import 'package:anime_flow/pages/anime_info/info_comment.dart';
 import 'package:anime_flow/pages/anime_info/details.dart';

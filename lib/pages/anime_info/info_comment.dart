@@ -1,5 +1,5 @@
 import 'package:anime_flow/models/item/bangumi/subject_comments_item.dart';
-import 'package:anime_flow/pages/anime_info/anime_info_provider.dart';
+import 'package:anime_flow/pages/anime_info/provider/anime_info_provider.dart';
 import 'package:anime_flow/routes/routes.dart';
 import 'package:anime_flow/utils/format_time_util.dart';
 import 'package:anime_flow/widget/animation_network_image/animation_network_image.dart';

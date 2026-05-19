@@ -8,7 +8,7 @@ import 'package:anime_flow/http/requests/request.dart';
 import 'package:anime_flow/models/item/subject_basic_data_item.dart';
 import 'package:anime_flow/models/item/bangumi/subjects_info_item.dart';
 import 'package:anime_flow/routes/routes.dart';
-import 'package:anime_flow/pages/anime_info/anime_info_provider.dart';
+import 'package:anime_flow/pages/anime_info/provider/anime_info_provider.dart';
 import 'package:anime_flow/utils/systemUtil.dart';
 import 'package:anime_flow/widget/animation_network_image/animation_network_image.dart';
 import 'package:anime_flow/widget/collection/collection_button.dart';
@@ -39,10 +39,11 @@ class AnimeInfoPage extends ConsumerStatefulWidget {
 
 class _AnimeInfoPageState extends ConsumerState<AnimeInfoPage> {
   late final MyController myController;
-  final double _contentHeight = 200.0; // 内容区域的高度
+  /// 内容区域的高度
+  final double contentHeight = 200.0;
   bool isPinned = false;
   bool topButton = false;
-  final _nestedScrollController = ScrollController();
+  final nestedScrollController = ScrollController();
 
   @override
   void initState() {
@@ -54,7 +55,7 @@ class _AnimeInfoPageState extends ConsumerState<AnimeInfoPage> {
 
   @override
   void dispose() {
-    _nestedScrollController.dispose();
+    nestedScrollController.dispose();
     super.dispose();
   }
 
@@ -75,7 +76,7 @@ class _AnimeInfoPageState extends ConsumerState<AnimeInfoPage> {
           if (notification is ScrollUpdateNotification) {
             if (notification.depth == 0) {
               final bool isPinned =
-                  notification.metrics.pixels >= _contentHeight;
+                  notification.metrics.pixels >= contentHeight;
               if (this.isPinned != isPinned) {
                 setState(() {
                   this.isPinned = isPinned;
@@ -86,7 +87,7 @@ class _AnimeInfoPageState extends ConsumerState<AnimeInfoPage> {
           return false;
         },
         child: NestedScrollView(
-          controller: _nestedScrollController,
+          controller: nestedScrollController,
           headerSliverBuilder: (BuildContext context, bool innerBoxIsScrolled) {
             return <Widget>[
               SliverOverlapAbsorber(
@@ -109,7 +110,7 @@ class _AnimeInfoPageState extends ConsumerState<AnimeInfoPage> {
 
                   // 展开高度计算：内容高度 + 状态栏 + Toolbar
                   expandedHeight:
-                  _contentHeight + statusBarHeight + kToolbarHeight,
+                  contentHeight + statusBarHeight + kToolbarHeight,
 
                   /// 头部内容区域
                   flexibleSpace: FlexibleSpaceBar(
@@ -118,7 +119,7 @@ class _AnimeInfoPageState extends ConsumerState<AnimeInfoPage> {
                       padding: const EdgeInsets.only(bottom: 15),
                       child: InfoHeadView(
                         statusBarHeight: statusBarHeight,
-                        contentHeight: _contentHeight,
+                        contentHeight: contentHeight,
                         subjectBasicData: subjectBasicData,
                         subjectsInfo: subjectsInfo,
                       ),
@@ -158,7 +159,7 @@ class _AnimeInfoPageState extends ConsumerState<AnimeInfoPage> {
               FloatingActionButton(
                 heroTag: 'top_${subjectBasicData.id}',
                 onPressed: () {
-                  _nestedScrollController.animateTo(
+                  nestedScrollController.animateTo(
                     0,
                     duration: const Duration(milliseconds: 300),
                     curve: Curves.easeInOut,

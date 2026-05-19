@@ -2,12 +2,14 @@ part of 'index.dart';
 
 class InfoHeadView extends StatelessWidget {
   final SubjectBasicData subjectBasicData;
+  final SubjectsInfoItem? subjectsInfo;
   final double statusBarHeight;
   final double contentHeight;
   const InfoHeadView({
     required this.statusBarHeight,
     required this.contentHeight,
     required this.subjectBasicData,
+    required this.subjectsInfo,
   });
 
   @override
@@ -16,12 +18,14 @@ class InfoHeadView extends StatelessWidget {
       statusBarHeight: statusBarHeight,
       contentHeight: contentHeight,
       subjectBasicData: subjectBasicData,
+      subjectsInfo: subjectsInfo,
     );
   }
 }
 
-class _HeadContent extends ConsumerWidget {
+class _HeadContent extends StatelessWidget {
   final SubjectBasicData subjectBasicData;
+  final SubjectsInfoItem? subjectsInfo;
   final double statusBarHeight;
   final double contentHeight;
 
@@ -29,12 +33,11 @@ class _HeadContent extends ConsumerWidget {
     required this.statusBarHeight,
     required this.contentHeight,
     required this.subjectBasicData,
+    required this.subjectsInfo,
   });
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final animeInfoAsync = ref.watch(animeInfoProvider(subjectBasicData.id));
-    final animeInfo = animeInfoAsync.asData?.value;
+  Widget build(BuildContext context) {
     return Stack(
       children: [
         // 背景层
@@ -116,12 +119,12 @@ class _HeadContent extends ConsumerWidget {
                               crossAxisAlignment: CrossAxisAlignment.start,
                               mainAxisSize: MainAxisSize.max,
                               children: [
-                                animeInfo == null
+                                subjectsInfo == null
                                     ? Expanded(child: _skeletonView(context))
                                     : Expanded(
                                         child: _dataView(
                                           context,
-                                          subjectItem: animeInfo,
+                                          subjectItem: subjectsInfo!,
                                         ),
                                       ),
                               ]),
@@ -277,7 +280,7 @@ class _HeadContent extends ConsumerWidget {
         ),
         const Spacer(),
         CollectionButton(
-          subjectId: subjectBasicData.id,
+          subjectId: subjectItem.id,
           subject: subjectItem,
         ),
       ],

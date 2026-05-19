@@ -1,16 +1,21 @@
 part of 'index.dart';
 
 /// 评价对话框
-class InfoEvaluateDialog extends ConsumerStatefulWidget {
-  final int subjectId;
+class InfoEvaluateDialog extends StatefulWidget {
+  final SubjectsInfoItem subjectsInfo;
+  final ValueChanged<SubjectsInfoItem> onSaved;
 
-  const InfoEvaluateDialog({required this.subjectId});
+  const InfoEvaluateDialog({
+    super.key,
+    required this.subjectsInfo,
+    required this.onSaved,
+  });
 
   @override
-  ConsumerState<InfoEvaluateDialog> createState() => _EvaluateDialogState();
+  State<InfoEvaluateDialog> createState() => _EvaluateDialogState();
 }
 
-class _EvaluateDialogState extends ConsumerState<InfoEvaluateDialog> {
+class _EvaluateDialogState extends State<InfoEvaluateDialog> {
   late TextEditingController _commentController;
   late TextEditingController _tagsController;
   int _selectedRate = 0; // 0-10分，0表示未评分
@@ -20,9 +25,7 @@ class _EvaluateDialogState extends ConsumerState<InfoEvaluateDialog> {
   @override
   void initState() {
     super.initState();
-    final animeInfo =
-        ref.read(animeInfoProvider(widget.subjectId)).asData?.value;
-    final interest = animeInfo?.interest;
+    final interest = widget.subjectsInfo.interest;
     // 初始化已有数据
     if (interest != null) {
       _selectedRate = interest.rate;
@@ -52,11 +55,7 @@ class _EvaluateDialogState extends ConsumerState<InfoEvaluateDialog> {
       final rate = _selectedRate > 0 ? _selectedRate : null;
       final tags = _selectedTags.isNotEmpty ? _selectedTags.toList() : null;
 
-      final currentAnimeInfo =
-          ref.read(animeInfoProvider(widget.subjectId)).asData?.value;
-      if (currentAnimeInfo == null) {
-        throw Exception('番剧数据加载失败，请稍后重试');
-      }
+      final currentAnimeInfo = widget.subjectsInfo;
       if (currentAnimeInfo.interest != null) {
         if (rate != null) {
           currentAnimeInfo.interest!.rate = rate;
@@ -76,12 +75,10 @@ class _EvaluateDialogState extends ConsumerState<InfoEvaluateDialog> {
         comment: comment.isNotEmpty ? comment : null,
       );
 
-      ref
-          .read(animeInfoProvider(widget.subjectId).notifier)
-          .setAnimeInfo(currentAnimeInfo);
+      widget.onSaved(currentAnimeInfo);
 
       if (mounted) {
-        Get.back();
+        context.pop();
         Get.snackbar('评价成功', '评价已保存', maxWidth: 500);
       }
     } catch (e) {
@@ -101,11 +98,7 @@ class _EvaluateDialogState extends ConsumerState<InfoEvaluateDialog> {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final primaryColor = theme.colorScheme.primary;
-    final animeInfo =
-        ref.watch(animeInfoProvider(widget.subjectId)).asData?.value;
-    if (animeInfo == null) {
-      return const SizedBox.shrink();
-    }
+    final animeInfo = widget.subjectsInfo;
     return Dialog(
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(20),
@@ -136,7 +129,7 @@ class _EvaluateDialogState extends ConsumerState<InfoEvaluateDialog> {
                   ),
                   IconButton(
                     icon: const Icon(Icons.close_rounded),
-                    onPressed: () => Get.back(),
+                    onPressed: () => context.pop(),
                     padding: EdgeInsets.zero,
                     constraints: const BoxConstraints(),
                   ),
@@ -345,11 +338,7 @@ class _EvaluateDialogState extends ConsumerState<InfoEvaluateDialog> {
   Widget get _buildTags {
     final theme = Theme.of(context);
     final primaryColor = theme.colorScheme.primary;
-    final animeInfo =
-        ref.watch(animeInfoProvider(widget.subjectId)).asData?.value;
-    if (animeInfo == null) {
-      return const SizedBox.shrink();
-    }
+    final animeInfo = widget.subjectsInfo;
 
     return ScrollConfiguration(
       behavior: ScrollConfiguration.of(context).copyWith(

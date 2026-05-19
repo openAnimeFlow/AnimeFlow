@@ -22,7 +22,6 @@ class _NoScrollbarBehavior extends ScrollBehavior {
 
 /// 条目详情信息展示ui
 class InfoSynopsisView extends StatefulWidget {
-  final int subjectsId;
   final SubjectsInfoItem? subjectsInfo;
   final ValueChanged<bool>? onScrollChanged;
 
@@ -30,7 +29,6 @@ class InfoSynopsisView extends StatefulWidget {
     super.key,
     this.subjectsInfo,
     this.onScrollChanged,
-    required this.subjectsId,
   });
 
   @override
@@ -134,21 +132,23 @@ class _InfoSynopsisViewState extends State<InfoSynopsisView> {
                       // 角色
                       SliverToBoxAdapter(
                         child: _buildContainer(
-                          CharactersView(subjectsId: widget.subjectsId),
+                          CharactersView(
+                              subjectsId: widget.subjectsInfo!.id),
                         ),
                       ),
 
                       //制作人
                       SliverToBoxAdapter(
                         child: _buildContainer(
-                          ProducersView(subjectId: widget.subjectsId),
+                          ProducersView(
+                              subjectId: widget.subjectsInfo!.id),
                         ),
                       ),
 
                       // 关联条目
                       SliverToBoxAdapter(
                         child: _buildContainer(
-                          RelatedView(subjectId: widget.subjectsId),
+                          RelatedView(subjectId: widget.subjectsInfo!.id),
                         ),
                       ),
 
@@ -157,7 +157,7 @@ class _InfoSynopsisViewState extends State<InfoSynopsisView> {
                         child: _buildContainer(
                           CommentView(
                             key: _commentViewKey,
-                            subjectId: widget.subjectsId,
+                            subjectId: widget.subjectsInfo!.id,
                           ),
                         ),
                       ),

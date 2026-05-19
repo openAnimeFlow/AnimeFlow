@@ -19,6 +19,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:get/get.dart';
+import 'package:go_router/go_router.dart';
 import 'package:shimmer/shimmer.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'synopsis.dart';
@@ -116,6 +117,7 @@ class _AnimeInfoPageState extends ConsumerState<AnimeInfoPage> {
                         statusBarHeight: statusBarHeight,
                         contentHeight: _contentHeight,
                         subjectBasicData: subjectBasicData,
+                        subjectsInfo: subjectsInfo,
                       ),
                     ),
                   ),
@@ -124,7 +126,6 @@ class _AnimeInfoPageState extends ConsumerState<AnimeInfoPage> {
             ];
           },
           body: InfoSynopsisView(
-            subjectsId: subjectBasicData.id,
             subjectsInfo: subjectsInfo,
             onScrollChanged: (bool showButton) {
               if (topButton != showButton) {
@@ -169,9 +170,16 @@ class _AnimeInfoPageState extends ConsumerState<AnimeInfoPage> {
                 ? FloatingActionButton(
                     heroTag: 'evaluate_${subjectBasicData.id}',
                     onPressed: () {
-                      Get.dialog(
-                          barrierDismissible: false,
-                          InfoEvaluateDialog(subjectId: subjectBasicData.id));
+                      showDialog<void>(
+                        context: context,
+                        barrierDismissible: false,
+                        builder: (_) => InfoEvaluateDialog(
+                          subjectsInfo: subjectsInfo,
+                          onSaved: (updated) => ref
+                              .read(animeInfoProvider(subjectBasicData.id).notifier)
+                              .setAnimeInfo(updated),
+                        ),
+                      );
                     },
                     child: Icon(
                       Icons.messenger,

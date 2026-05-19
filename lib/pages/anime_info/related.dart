@@ -78,7 +78,7 @@ class RelatedView extends StatelessWidget {
             LiggLogger().e(error, stackTrace: stackTrace);
             return const SizedBox.shrink();
           },
-          loading: () => const Center(child: CircularProgressIndicator()));
+          loading: () => const SizedBox.shrink());
     });
   }
 }

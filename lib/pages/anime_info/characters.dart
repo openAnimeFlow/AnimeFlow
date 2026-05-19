@@ -150,10 +150,7 @@ class CharactersView extends StatelessWidget {
               }
             },
             loading: () {
-              return const SizedBox(
-                height: 200,
-                child: Center(child: CircularProgressIndicator()),
-              );
+              return const SizedBox.shrink();
             },
             error: (error, stackTrace) {
               LiggLogger().e('获取角色信息失败', error: error, stackTrace: stackTrace);

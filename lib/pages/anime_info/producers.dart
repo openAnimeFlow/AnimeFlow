@@ -94,7 +94,7 @@ class ProducersView extends StatelessWidget {
             LiggLogger().e('获取制作人信息失败', error: error, stackTrace: stackTrace);
             return const SizedBox.shrink();
           },
-          loading: () => const Center(child: CircularProgressIndicator()));
+          loading: () => const SizedBox.shrink());
     });
   }
 }

@@ -1,17 +1,18 @@
 import 'dart:ui';
 import 'package:anime_flow/constants/play_layout_constant.dart';
 import 'package:anime_flow/models/item/subject_basic_data_item.dart';
+import 'package:anime_flow/pages/anime_info/provider/anime_info_provider.dart';
 import 'package:anime_flow/utils/systemUtil.dart';
 import 'package:anime_flow/widget/collection/collection_button.dart';
 import 'package:flutter/material.dart';
 import 'package:anime_flow/models/item/bangumi/subjects_info_item.dart';
 import 'package:anime_flow/widget/animation_network_image/animation_network_image.dart';
 import 'package:anime_flow/widget/star.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shimmer/shimmer.dart';
 
 class InfoHeadView extends StatelessWidget {
   final SubjectBasicData subjectBasicData;
-  final SubjectsInfoItem? subjectsInfo;
   final double statusBarHeight;
   final double contentHeight;
 
@@ -20,7 +21,6 @@ class InfoHeadView extends StatelessWidget {
     required this.statusBarHeight,
     required this.contentHeight,
     required this.subjectBasicData,
-    required this.subjectsInfo,
   });
 
   @override
@@ -103,13 +103,17 @@ class InfoHeadView extends StatelessWidget {
                         //信息
                         Flexible(
                           flex: 3,
-                          child: subjectsInfo == null
-                              ? _skeletonView(context)
-                              : _dataView(
-                                  context,
-                                  subjectItem: subjectsInfo!,
-                                ),
-                        ),
+                          child: Consumer(builder: (context, ref, child) {
+                            final subjectsInfo = ref
+                                .watch(animeInfoProvider(subjectBasicData.id));
+                            return subjectsInfo.when(
+                                data: (data) =>
+                                    _dataView(context, subjectItem: data),
+                                error: (error, stackTrace) =>
+                                    const SizedBox.shrink(),
+                                loading: () => _skeletonView(context));
+                          }),
+                        )
                       ]),
                 ),
               ),

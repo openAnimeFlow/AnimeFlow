@@ -106,7 +106,6 @@ class _AnimeInfoPageState extends ConsumerState<AnimeInfoPage> {
                         statusBarHeight: statusBarHeight,
                         contentHeight: contentHeight,
                         subjectBasicData: subjectBasicData,
-                        subjectsInfo: subjectsInfo,
                       ),
                     ),
                   ),

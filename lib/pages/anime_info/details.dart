@@ -11,7 +11,7 @@ class DetailsView extends StatelessWidget {
   final SubjectsInfoItem subject;
 
   const DetailsView(
-      {required this.subject,
+      {super.key, required this.subject,
       required this.title,
       this.textSize,
       this.textFontWeight});

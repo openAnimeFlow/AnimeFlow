@@ -203,7 +203,10 @@ class _BottomAreaControlState extends State<BottomAreaControl> {
                                               ),
                                               borderRadius: BorderRadius.circular(10),
                                             ),
-                                            child: const Text("登录后才能发送弹幕"),
+                                            child: const Text(
+                                              "登录后才能发送弹幕",
+                                              style: TextStyle(color: Colors.white),
+                                            ),
                                           ))
                                     : const SizedBox.shrink()
                                 // 进度条

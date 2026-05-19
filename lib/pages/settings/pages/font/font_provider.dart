@@ -37,6 +37,8 @@ class FontRepoCdn extends _$FontRepoCdn {
   bool build() => _readFontRepoUseCdnFromStorage();
 
   void setEnabled(bool value) {
+    if (state == value) return;
+    ref.read(fontNetworkTasksProvider.notifier).cancelAll();
     Storage.setting.put(SettingKey.fontRepoUseCdn, value);
     state = value;
   }
@@ -108,13 +110,13 @@ class Font extends _$Font {
     state = await AsyncValue.guard(() => getFontList(useCdn: useCdn));
   }
 
-  /// 仅加载字节用于字体预览（不保存文件）
+  /// 加载字节用于字体预览
   Future<List<int>> loadingFont(
       String fontUrl, {
         CancelToken? cancelToken,
       }) async {
     final useCdn = ref.read(fontRepoCdnProvider);
-    return GithubRequest.downloadFont(
+    return GithubRequest.previewFont(
       fontUrl,
       useCdn: useCdn,
       cancelToken: cancelToken,

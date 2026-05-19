@@ -29,8 +29,8 @@ class GithubRequest {
         .toList();
   }
 
-  /// 下载字体字节（用于预览加载）
-  static Future<List<int>> downloadFont(
+  /// 预览字体
+  static Future<List<int>> previewFont(
     String fontUrl, {
     bool useCdn = false,
     CancelToken? cancelToken,
@@ -46,7 +46,7 @@ class GithubRequest {
     return response.data;
   }
 
-  /// 下载字体文件到指定路径（支持进度回调）
+  /// 下载字体文件到指定路径
   static Future<void> downloadFontToFile(
     String fontUrl,
     String savePath, {

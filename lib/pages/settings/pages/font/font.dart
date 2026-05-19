@@ -65,13 +65,22 @@ class _FontSettingsPageState extends ConsumerState<FontSettingsPage> {
                     ),
                   ),
                   Row(
+                    spacing: 5,
                     mainAxisSize: MainAxisSize.min,
                     children: [
-                      Text(
-                        'CDN 加速',
-                        style: Theme.of(context).textTheme.bodyMedium,
+                      Column(
+                        crossAxisAlignment: CrossAxisAlignment.end,
+                        children: [
+                          Text(
+                            'CDN 加速',
+                            style: Theme.of(context).textTheme.bodyMedium,
+                          ),
+                          const Text(
+                            '使用cdn新上架的字体可能会延迟显示',
+                            style: TextStyle(fontSize: 10),
+                          )
+                        ],
                       ),
-                      const SizedBox(width: 8),
                       Tooltip(
                         message: '开启：经 jsDelivr 拉取字体；关闭：直连 GitHub Raw（走镜像）',
                         child: Switch(
@@ -294,6 +303,7 @@ class _SystemFontListTile extends ConsumerWidget {
             colorScheme: colorScheme,
             loaded: true,
             failed: false,
+            fontFamily: 'System',
           ),
         ],
       ),

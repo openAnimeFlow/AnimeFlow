@@ -40,13 +40,15 @@ class MyApp extends StatelessWidget {
     return Consumer(
       builder: (BuildContext context, WidgetRef ref, Widget? child) {
         final themeState = ref.watch(themeProvider);
+        final fontFamily = themeState.fontFamily;
         return GetMaterialApp.router(
+          key: ValueKey(fontFamily),
           routeInformationProvider: appRouter.routeInformationProvider,
           routeInformationParser: appRouter.routeInformationParser,
           routerDelegate: appRouter.routerDelegate,
           backButtonDispatcher: appRouter.backButtonDispatcher,
-          theme: buildLightTheme(themeState.seedColor, fontFamily: themeState.fontFamily),
-          darkTheme: buildDarkTheme(themeState.seedColor, fontFamily: themeState.fontFamily),
+          theme: buildLightTheme(themeState.seedColor, fontFamily: fontFamily),
+          darkTheme: buildDarkTheme(themeState.seedColor, fontFamily: fontFamily),
           themeMode: themeState.themeMode,
         );
       },

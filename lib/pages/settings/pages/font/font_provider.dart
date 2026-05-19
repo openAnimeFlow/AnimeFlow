@@ -6,7 +6,6 @@ import 'package:anime_flow/models/item/font_item.dart';
 import 'package:anime_flow/providers/theme_provider.dart';
 import 'package:anime_flow/repository/storage.dart';
 import 'package:dio/dio.dart';
-import 'package:flutter/painting.dart';
 import 'package:flutter/services.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
@@ -449,8 +448,6 @@ class SelectedFont extends _$SelectedFont {
 
     state = font.family;
     ref.read(themeProvider.notifier).setFontFamily(font.family);
-    // 通知系统字体列表已更新
-    await PaintingBinding.instance.handleSystemMessage({'type': 'fontsChange'});
   }
 
   /// 清除自定义字体，恢复系统字体
@@ -459,7 +456,5 @@ class SelectedFont extends _$SelectedFont {
     await Storage.setting.delete(SettingKey.selectedFontId);
     state = null;
     ref.read(themeProvider.notifier).setFontFamily(null);
-    // 通知系统字体列表已更新
-    await PaintingBinding.instance.handleSystemMessage({'type': 'fontsChange'});
   }
 }

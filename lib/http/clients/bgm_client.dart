@@ -1,5 +1,3 @@
-import 'dart:async';
-
 import 'package:anime_flow/constants/constants.dart';
 import 'package:anime_flow/controllers/app/app_info_controller.dart';
 import 'package:anime_flow/controllers/my_controller.dart';
@@ -32,9 +30,10 @@ class BangumiClient {
         },
         onError: (DioException e, handler) async {
           if (e.response?.statusCode == 401) {
-            refreshToken(e, handler);
+            await refreshToken(e, handler);
+            return;
           }
-          return handler.next(e);
+          handler.next(e);
         },
       ),
     );
@@ -44,8 +43,7 @@ class BangumiClient {
 
   late final Dio _dio;
 
-  static bool _isRefreshing = false;
-  static Completer<void>? _refreshCompleter;
+  static Future<void>? _refreshFuture;
 
   /// GET 请求
   Future<Response<T>> get<T>(
@@ -150,71 +148,86 @@ class BangumiClient {
     }
   }
 
-  ///刷新token
-  Future<void> refreshToken(DioException e, ErrorInterceptorHandler handler) async {
-    final oldToken = await BangumiToken().getToken();
-
-    if (oldToken != null && oldToken.refreshToken.isNotEmpty) {
-      if (_isRefreshing && _refreshCompleter != null) {
+  /// 401 时刷新 token 并重试原请求；[handler] 在本方法内且仅调用一次。
+  Future<void> refreshToken(
+    DioException e,
+    ErrorInterceptorHandler handler,
+  ) async {
+    while (true) {
+      final inFlight = _refreshFuture;
+      if (inFlight != null) {
         try {
-          await _refreshCompleter!.future;
-
-          final newToken = await BangumiToken().getToken();
-          if (newToken != null) {
-            final opts = e.requestOptions;
-            opts.headers[Constants.authorization] =
-            '${newToken.tokenType} ${newToken.accessToken}';
-            try {
-              final response = await _dio.fetch(opts);
-              return handler.resolve(response);
-            } catch (err) {
-              return handler.next(e);
-            }
-          } else {
-            return handler.next(e);
-          }
-        } catch (refreshError) {
+          await inFlight;
+        } catch (_) {
           return handler.next(e);
         }
-      } else {
-        _isRefreshing = true;
-        _refreshCompleter = Completer<void>();
+        return _retryAfterRefresh(e, handler);
+      }
 
+      final oldToken = await BangumiToken().getToken();
+      if (oldToken == null || oldToken.refreshToken.isEmpty) {
+        await BangumiToken().deleteToken();
+        return handler.next(e);
+      }
+
+      final refreshFuture = _performTokenRefresh(oldToken);
+      if (_refreshFuture == null) {
+        _refreshFuture = refreshFuture;
         try {
-          final newToken = await AnimeFlowRequest.refreshTokenService(
-            refreshToken: oldToken.refreshToken,
-          );
-          TokenItem newTokenItem = TokenItem(
-              accessToken: newToken.accessToken,
-              refreshToken: newToken.refreshToken,
-              expiresIn: newToken.expiresIn,
-              tokenType: newToken.tokenType,
-              scope: newToken.scope,
-              userId: oldToken.userId);
-          await BangumiToken().saveToken(newTokenItem);
-          final opts = e.requestOptions;
-          opts.headers[Constants.authorization] =
-          '${newToken.tokenType} ${newToken.accessToken}';
-          final response = await _dio.fetch(opts);
-
-          _isRefreshing = false;
-          _refreshCompleter?.complete();
-          _refreshCompleter = null;
-          return handler.resolve(response);
+          await refreshFuture;
+          return _retryAfterRefresh(e, handler);
         } catch (refreshError) {
-          final MyController userInfoStore = Get.find<MyController>();
-          _isRefreshing = false;
-          _refreshCompleter?.completeError(refreshError);
-          _refreshCompleter = null;
-          await BangumiToken().deleteToken();
-          userInfoStore.clearUserInfo();
           LiggLogger().e('刷新 token 失败: $refreshError');
           return handler.next(e);
+        } finally {
+          if (identical(_refreshFuture, refreshFuture)) {
+            _refreshFuture = null;
+          }
         }
       }
-    } else {
+    }
+  }
+
+  Future<void> _performTokenRefresh(TokenItem oldToken) async {
+    try {
+      final newToken = await AnimeFlowRequest.refreshTokenService(
+        refreshToken: oldToken.refreshToken,
+      );
+      final newTokenItem = TokenItem(
+        accessToken: newToken.accessToken,
+        refreshToken: newToken.refreshToken,
+        expiresIn: newToken.expiresIn,
+        tokenType: newToken.tokenType,
+        scope: newToken.scope,
+        userId: oldToken.userId,
+      );
+      await BangumiToken().saveToken(newTokenItem);
+    } catch (e) {
       await BangumiToken().deleteToken();
+      final userInfoStore = Get.find<MyController>();
+      userInfoStore.clearUserInfo();
+      rethrow;
+    }
+  }
+
+  Future<void> _retryAfterRefresh(
+    DioException e,
+    ErrorInterceptorHandler handler,
+  ) async {
+    final token = await BangumiToken().getToken();
+    if (token == null) {
       return handler.next(e);
+    }
+    final opts = e.requestOptions;
+    opts.headers[Constants.authorization] =
+        '${token.tokenType} ${token.accessToken}';
+    try {
+      final response = await _dio.fetch(opts);
+      handler.resolve(response);
+    } on DioException catch (err) {
+      handler.next(err);
+    } catch (_) {
+      handler.next(e);
     }
   }
 

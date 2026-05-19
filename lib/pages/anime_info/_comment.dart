@@ -32,7 +32,7 @@ class _CommentViewState extends State<_CommentView> {
       _isLoadingComments = true;
     });
 
-    final currentOffset = loadMore ? _commentOffset + 1 : 0;
+    final currentOffset = loadMore ? _commentOffset += subjectCommentItem?.data.length ?? 0 : 0;
     final result = await BgmRequest.getSubjectCommentsByIdService(
         subjectId: widget.subjectId, limit: 20, offset: currentOffset);
 

@@ -146,15 +146,13 @@ class InfoAppbar extends StatelessWidget {
                         RankingView(ranking: subjectsItem.rating.rank),
                         StarView(score: subjectsItem.rating.score),
                         const SizedBox(width: 5),
-                        Flexible(
-                          child: Text(
-                            subjectsItem.rating.score.toStringAsFixed(1),
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
-                            style: const TextStyle(
-                              fontSize: 10,
-                              fontWeight: FontWeight.bold,
-                            ),
+                        Text(
+                          subjectsItem.rating.score.toStringAsFixed(1),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: const TextStyle(
+                            fontSize: 10,
+                            fontWeight: FontWeight.bold,
                           ),
                         ),
                       ],

@@ -16,6 +16,7 @@ class InfoHeadView extends StatelessWidget {
   final double contentHeight;
 
   const InfoHeadView({
+    super.key,
     required this.statusBarHeight,
     required this.contentHeight,
     required this.subjectBasicData,
@@ -75,6 +76,7 @@ class InfoHeadView extends StatelessWidget {
                   padding: EdgeInsets.only(
                       left: MediaQuery.of(context).padding.left),
                   child: Row(
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
                       mainAxisAlignment: MainAxisAlignment.start,
                       children: [
                         //封面
@@ -100,20 +102,13 @@ class InfoHeadView extends StatelessWidget {
                         const SizedBox(width: 5),
                         //信息
                         Flexible(
-                          flex: 3, // 文本占3份
-                          child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              mainAxisSize: MainAxisSize.max,
-                              children: [
-                                subjectsInfo == null
-                                    ? Expanded(child: _skeletonView(context))
-                                    : Expanded(
-                                        child: _dataView(
-                                          context,
-                                          subjectItem: subjectsInfo!,
-                                        ),
-                                      ),
-                              ]),
+                          flex: 3,
+                          child: subjectsInfo == null
+                              ? _skeletonView(context)
+                              : _dataView(
+                                  context,
+                                  subjectItem: subjectsInfo!,
+                                ),
                         ),
                       ]),
                 ),

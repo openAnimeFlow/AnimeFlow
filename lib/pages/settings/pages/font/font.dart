@@ -612,18 +612,33 @@ class _PreviewFontLoaderState extends ConsumerState<_PreviewFontLoader> {
   bool _loaded = false;
   bool _failed = false;
   CancelToken? _previewCancelToken;
+  ProviderSubscription<bool>? _cdnSubscription;
 
   String get _taskKey => 'preview:${widget.font.id}';
 
   @override
   void initState() {
     super.initState();
+    _cdnSubscription = ref.listenManual(
+      fontRepoCdnProvider,
+      (previous, next) {
+        if (previous != next && mounted) {
+          setState(() {
+            _loaded = false;
+            _failed = false;
+          });
+          _loadPreviewFont();
+        }
+      },
+    );
     _loadPreviewFont();
   }
 
   @override
   void dispose() {
+    _cdnSubscription?.close();
     _previewCancelToken?.cancel();
+    ref.read(fontNetworkTasksProvider.notifier).unregister(_taskKey);
     super.dispose();
   }
 
@@ -675,21 +690,14 @@ class _PreviewFontLoaderState extends ConsumerState<_PreviewFontLoader> {
         });
       }
     } finally {
-      ref.read(fontNetworkTasksProvider.notifier).unregister(_taskKey);
+      if (mounted) {
+        ref.read(fontNetworkTasksProvider.notifier).unregister(_taskKey);
+      }
     }
   }
 
   @override
   Widget build(BuildContext context) {
-    ref.listen(fontRepoCdnProvider, (previous, next) {
-      if (previous != next && mounted) {
-        setState(() {
-          _loaded = false;
-          _failed = false;
-        });
-        _loadPreviewFont();
-      }
-    });
     return widget.builder(
       context,
       loaded: _loaded,

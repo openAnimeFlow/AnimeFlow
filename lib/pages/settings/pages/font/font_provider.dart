@@ -41,6 +41,7 @@ class FontRepoCdn extends _$FontRepoCdn {
     ref.read(fontNetworkTasksProvider.notifier).cancelAll();
     Storage.setting.put(SettingKey.fontRepoUseCdn, value);
     state = value;
+    ref.read(fontProvider.notifier).reload();
   }
 }
 
@@ -88,7 +89,7 @@ class FontDownloadState {
 class Font extends _$Font {
   @override
   Future<List<FontItem>> build() async {
-    final useCdn = ref.watch(fontRepoCdnProvider);
+    final useCdn = ref.read(fontRepoCdnProvider);
     final list = await getFontList(useCdn: useCdn);
     // 远程列表拿到后，顺手为已下载但缺少元数据的旧版本数据回填元信息，
     // 以便后续即使远程下架也能在本地正常展示并删除。
@@ -104,9 +105,9 @@ class Font extends _$Font {
     return GithubRequest.getRepoFonts(useCdn: useCdn);
   }
 
+  /// 刷新字体列表；保留当前 [state] 直至新数据返回，避免切换 CDN 时卸载列表项。
   Future<void> reload() async {
     final useCdn = ref.read(fontRepoCdnProvider);
-    state = const AsyncLoading();
     state = await AsyncValue.guard(() => getFontList(useCdn: useCdn));
   }
 

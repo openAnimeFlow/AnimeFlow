@@ -124,10 +124,13 @@ class _SettingsPageState extends State<SettingsPage> {
                 Padding(
                   padding:
                       EdgeInsets.only(top: MediaQuery.of(context).padding.top),
-                  child: ListTile(
-                    leading: const Icon(Icons.arrow_back),
-                    title: const Text('设置'),
-                    onTap: () => context.pop(),
+                  child: Material(
+                    color: Colors.transparent,
+                    child: ListTile(
+                      leading: const Icon(Icons.arrow_back),
+                      title: const Text('设置'),
+                      onTap: () => context.pop(),
+                    ),
                   ),
                 ),
                 const Divider(height: 1),

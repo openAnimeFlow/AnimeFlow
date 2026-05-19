@@ -59,150 +59,157 @@ class _FontSettingsPageState extends ConsumerState<FontSettingsPage> {
         child: AppBar(
           title: const Text('字体样式'),
           actions: [
-            IconButton(
-              icon: const Icon(Icons.refresh_outlined),
-              tooltip: '刷新字体列表',
-              onPressed: _refreshFontList,
-            ),
+            if (SystemUtil.isDesktop)
+              IconButton(
+                icon: const Icon(Icons.refresh_outlined),
+                tooltip: '刷新字体列表',
+                onPressed: _refreshFontList,
+              ),
           ],
         ),
       ),
       body: Center(
         child: ConstrainedBox(
           constraints: const BoxConstraints(maxWidth: 1200),
-          child: ListView(
-            padding: EdgeInsets.only(
-              left: leftPadding == 0 ? 16 : leftPadding,
-              right: 16,
-              top: 16,
-              bottom: 24,
-            ),
-            children: [
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  const Text(
-                    '字体库',
-                    style: TextStyle(
-                      fontSize: 20,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                  Row(
-                    spacing: 5,
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Column(
-                        crossAxisAlignment: CrossAxisAlignment.end,
-                        children: [
-                          Text(
-                            'CDN 加速',
-                            style: Theme.of(context).textTheme.bodyMedium,
-                          ),
-                          const Text(
-                            '使用cdn新上架的字体可能会延迟显示',
-                            style: TextStyle(fontSize: 10),
-                          )
-                        ],
-                      ),
-                      Tooltip(
-                        message: '开启：经 jsDelivr 拉取字体；关闭：直连 GitHub Raw（走镜像）',
-                        child: Switch(
-                          value: ref.watch(fontRepoCdnProvider),
-                          onChanged: (value) => ref
-                              .read(fontRepoCdnProvider.notifier)
-                              .setEnabled(value),
-                        ),
-                      ),
-                    ],
-                  ),
-                ],
+          child: RefreshIndicator(
+            onRefresh: _refreshFontList,
+            child: ListView(
+              physics: const AlwaysScrollableScrollPhysics(),
+              padding: EdgeInsets.only(
+                left: leftPadding == 0 ? 16 : leftPadding,
+                right: 16,
+                top: 16,
+                bottom: 24,
               ),
-              const SizedBox(height: 10),
-              fontsAsync.when(
-                loading: () => const _FontGlassPanel(
-                  padding: EdgeInsets.symmetric(vertical: 4),
-                  child: Column(
-                    children: [
-                      _SystemFontListTile(),
-                      Padding(
-                        padding: EdgeInsets.symmetric(vertical: 24),
-                        child: Center(child: CircularProgressIndicator()),
-                      ),
-                    ],
-                  ),
-                ),
-                error: (error, _) => Column(
+              children: [
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    const _FontGlassPanel(
-                      padding: EdgeInsets.symmetric(vertical: 4),
-                      child: _SystemFontListTile(),
+                    const Text(
+                      '字体库',
+                      style: TextStyle(
+                        fontSize: 20,
+                        fontWeight: FontWeight.bold,
+                      ),
                     ),
-                    _FontListError(
-                      message: error.toString(),
-                      onRetry: () {
-                        LiggLogger().e(error);
-                        ref.read(fontProvider.notifier).reload();
-                      },
+                    Row(
+                      spacing: 5,
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Column(
+                          crossAxisAlignment: CrossAxisAlignment.end,
+                          children: [
+                            Text(
+                              'CDN 加速',
+                              style: Theme.of(context).textTheme.bodyMedium,
+                            ),
+                            const Text(
+                              '使用cdn新上架的字体可能会延迟显示',
+                              style: TextStyle(fontSize: 10),
+                            )
+                          ],
+                        ),
+                        Tooltip(
+                          message: '开启：经 jsDelivr 拉取字体；关闭：直连 GitHub Raw（走镜像）',
+                          child: Switch(
+                            value: ref.watch(fontRepoCdnProvider),
+                            onChanged: (value) => ref
+                                .read(fontRepoCdnProvider.notifier)
+                                .setEnabled(value),
+                          ),
+                        ),
+                      ],
                     ),
                   ],
                 ),
-                data: (fonts) => _FontGlassPanel(
-                  padding: const EdgeInsets.symmetric(vertical: 4),
-                  child: Column(
-                    children: [
-                      const _SystemFontListTile(),
-                      if (fonts.isEmpty)
+                const SizedBox(height: 10),
+                fontsAsync.when(
+                  loading: () => const _FontGlassPanel(
+                    padding: EdgeInsets.symmetric(vertical: 4),
+                    child: Column(
+                      children: [
+                        _SystemFontListTile(),
                         Padding(
-                          padding: const EdgeInsets.fromLTRB(16, 8, 16, 16),
-                          child: Text(
-                            '暂无其他可用字体',
-                            style:
-                                Theme.of(context).textTheme.bodySmall?.copyWith(
-                                      color: Theme.of(context)
-                                          .colorScheme
-                                          .onSurfaceVariant,
-                                    ),
-                          ),
-                        )
-                      else
-                        ...fonts.map(
-                          (font) => _FontListTile(
-                            font: font,
-                            previewRefreshKey: _previewRefreshKey,
-                          ),
+                          padding: EdgeInsets.symmetric(vertical: 24),
+                          child: Center(child: CircularProgressIndicator()),
                         ),
+                      ],
+                    ),
+                  ),
+                  error: (error, _) => Column(
+                    children: [
+                      const _FontGlassPanel(
+                        padding: EdgeInsets.symmetric(vertical: 4),
+                        child: _SystemFontListTile(),
+                      ),
+                      _FontListError(
+                        message: error.toString(),
+                        onRetry: () {
+                          LiggLogger().e(error);
+                          _refreshFontList();
+                        },
+                      ),
                     ],
                   ),
-                ),
-              ),
-              if (orphans.isNotEmpty) ...[
-                const SizedBox(height: 20),
-                const Text(
-                  '本地已下载（远程已下架）',
-                  style: TextStyle(
-                    fontSize: 18,
-                    fontWeight: FontWeight.bold,
+                  data: (fonts) => _FontGlassPanel(
+                    padding: const EdgeInsets.symmetric(vertical: 4),
+                    child: Column(
+                      children: [
+                        const _SystemFontListTile(),
+                        if (fonts.isEmpty)
+                          Padding(
+                            padding: const EdgeInsets.fromLTRB(16, 8, 16, 16),
+                            child: Text(
+                              '暂无其他可用字体',
+                              style: Theme.of(context)
+                                  .textTheme
+                                  .bodySmall
+                                  ?.copyWith(
+                                    color: Theme.of(context)
+                                        .colorScheme
+                                        .onSurfaceVariant,
+                                  ),
+                            ),
+                          )
+                        else
+                          ...fonts.map(
+                            (font) => _FontListTile(
+                              font: font,
+                              previewRefreshKey: _previewRefreshKey,
+                            ),
+                          ),
+                      ],
+                    ),
                   ),
                 ),
-                const SizedBox(height: 6),
-                Text(
-                  '以下字体不再出现在远程仓库，但本地仍保留有字体文件。可在此处直接删除或继续应用。',
-                  style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                        color: Theme.of(context).colorScheme.onSurfaceVariant,
-                      ),
-                ),
-                const SizedBox(height: 10),
-                _FontGlassPanel(
-                  padding: const EdgeInsets.symmetric(vertical: 4),
-                  child: Column(
-                    children: orphans
-                        .map((font) => _OrphanFontListTile(font: font))
-                        .toList(),
+                if (orphans.isNotEmpty) ...[
+                  const SizedBox(height: 20),
+                  const Text(
+                    '本地已下载（远程已下架）',
+                    style: TextStyle(
+                      fontSize: 18,
+                      fontWeight: FontWeight.bold,
+                    ),
                   ),
-                ),
+                  const SizedBox(height: 6),
+                  Text(
+                    '以下字体不再出现在远程仓库，但本地仍保留有字体文件。可在此处直接删除或继续应用。',
+                    style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                          color: Theme.of(context).colorScheme.onSurfaceVariant,
+                        ),
+                  ),
+                  const SizedBox(height: 10),
+                  _FontGlassPanel(
+                    padding: const EdgeInsets.symmetric(vertical: 4),
+                    child: Column(
+                      children: orphans
+                          .map((font) => _OrphanFontListTile(font: font))
+                          .toList(),
+                    ),
+                  ),
+                ],
               ],
-            ],
+            ),
           ),
         ),
       ),

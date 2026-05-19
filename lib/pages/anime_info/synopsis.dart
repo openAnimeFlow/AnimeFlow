@@ -54,12 +54,12 @@ class _InfoSynopsisViewState extends ConsumerState<InfoSynopsisView> {
           child: NotificationListener<ScrollNotification>(
             onNotification: (ScrollNotification scrollInfo) {
               // 只处理垂直滚动的更新事件
-              if (scrollInfo.metrics.axis == Axis.vertical &&
+              final metrics = scrollInfo.metrics;
+              if (metrics.axis == Axis.vertical &&
                   scrollInfo is ScrollUpdateNotification) {
                 ref
-                    .read(animeInfoProvider(widget.subjectId).notifier)
-                    .checkAndLoadMore(scrollInfo.metrics);
-
+                    .read(subjectCommentsProvider(widget.subjectId).notifier)
+                    .onCommentsScroll(metrics);
                 // 监听页面滚动位置，通知父组件更新按钮显示状态
                 final bool shouldShowButton = scrollInfo.metrics.pixels >= 300;
                 widget.onScrollChanged?.call(shouldShowButton);
@@ -133,16 +133,14 @@ class _InfoSynopsisViewState extends ConsumerState<InfoSynopsisView> {
                       // 角色
                       SliverToBoxAdapter(
                         child: _buildContainer(
-                          CharactersView(
-                              subjectsId: widget.subjectsInfo!.id),
+                          CharactersView(subjectsId: widget.subjectsInfo!.id),
                         ),
                       ),
 
                       //制作人
                       SliverToBoxAdapter(
                         child: _buildContainer(
-                          ProducersView(
-                              subjectId: widget.subjectsInfo!.id),
+                          ProducersView(subjectId: widget.subjectsInfo!.id),
                         ),
                       ),
 

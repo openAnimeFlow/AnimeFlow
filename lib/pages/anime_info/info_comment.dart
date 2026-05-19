@@ -17,25 +17,16 @@ class InfoCommentView extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final commentState = ref.watch(
-      animeInfoProvider(subjectId).select((asyncValue) {
-        final state = asyncValue.asData?.value;
-        if (state == null) return null;
-        return (
-          subjectComments: state.subjectComments,
-          isLoadingComments: state.isLoadingComments,
-          hasMoreComments: state.hasMoreComments,
-        );
-      }),
-    );
+    final commentsAsync = ref.watch(subjectCommentsProvider(subjectId));
 
-    final subjectComments = commentState?.subjectComments;
-    if (subjectComments == null) {
+    if (!commentsAsync.hasValue) {
       return const SizedBox.shrink();
     }
 
-    final isLoadingComments = commentState!.isLoadingComments;
-    final hasMoreComments = commentState.hasMoreComments;
+    final viewState = commentsAsync.requireValue;
+    final subjectComments = viewState.comments;
+    final isLoadingMore = viewState.isLoadingMore;
+    final hasMore = viewState.hasMore;
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -63,7 +54,7 @@ class InfoCommentView extends ConsumerWidget {
           shrinkWrap: true,
           physics: const NeverScrollableScrollPhysics(),
           itemCount: subjectComments.data.length +
-              (hasMoreComments && isLoadingComments ? 1 : 0),
+              (hasMore && isLoadingMore ? 1 : 0),
           itemBuilder: (context, index) {
             if (index == subjectComments.data.length) {
               return const Padding(

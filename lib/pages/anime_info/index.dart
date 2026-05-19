@@ -62,7 +62,7 @@ class _AnimeInfoPageState extends ConsumerState<AnimeInfoPage> {
   Widget build(BuildContext context) {
     final subjectsInfo = ref.watch(
       animeInfoProvider(subjectBasicData.id).select(
-        (asyncValue) => asyncValue.asData?.value.subjectInfo,
+            (asyncValue) => asyncValue.asData?.value,
       ),
     );
 
@@ -109,7 +109,7 @@ class _AnimeInfoPageState extends ConsumerState<AnimeInfoPage> {
 
                   // 展开高度计算：内容高度 + 状态栏 + Toolbar
                   expandedHeight:
-                      _contentHeight + statusBarHeight + kToolbarHeight,
+                  _contentHeight + statusBarHeight + kToolbarHeight,
 
                   /// 头部内容区域
                   flexibleSpace: FlexibleSpaceBar(
@@ -169,27 +169,27 @@ class _AnimeInfoPageState extends ConsumerState<AnimeInfoPage> {
               ),
             const SizedBox(height: 5),
             Obx(() => myController.userInfo.value != null &&
-                    subjectsInfo != null &&
-                    subjectsInfo.interest != null
+                subjectsInfo != null &&
+                subjectsInfo.interest != null
                 ? FloatingActionButton(
-                    heroTag: 'evaluate_${subjectBasicData.id}',
-                    onPressed: () {
-                      showDialog<void>(
-                        context: context,
-                        barrierDismissible: false,
-                        builder: (_) => InfoEvaluateDialog(
-                          subjectsInfo: subjectsInfo,
-                          onSaved: (updated) => ref
-                              .read(animeInfoProvider(subjectBasicData.id).notifier)
-                              .setAnimeInfo(updated),
-                        ),
-                      );
-                    },
-                    child: Icon(
-                      Icons.messenger,
-                      color: Theme.of(context).colorScheme.primary,
-                    ),
-                  )
+              heroTag: 'evaluate_${subjectBasicData.id}',
+              onPressed: () {
+                showDialog<void>(
+                  context: context,
+                  barrierDismissible: false,
+                  builder: (_) => InfoEvaluateDialog(
+                    subjectsInfo: subjectsInfo,
+                    onSaved: (updated) => ref
+                        .read(animeInfoProvider(subjectBasicData.id).notifier)
+                        .setAnimeInfo(updated),
+                  ),
+                );
+              },
+              child: Icon(
+                Icons.messenger,
+                color: Theme.of(context).colorScheme.primary,
+              ),
+            )
                 : const SizedBox.shrink()),
             const SizedBox(height: 5),
             FloatingActionButton(

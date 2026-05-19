@@ -1,112 +1,114 @@
+import 'package:flutter/scheduler.dart';
 import 'package:flutter/widgets.dart';
+import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 import 'package:anime_flow/http/requests/bgm_request.dart';
 import 'package:anime_flow/models/item/bangumi/subject_comments_item.dart';
 import 'package:anime_flow/models/item/bangumi/subjects_info_item.dart';
-import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 part 'anime_info_provider.g.dart';
 
-/// 条目详情页总状态：条目信息 + 吐槽评论
-class AnimeInfoState {
-  const AnimeInfoState({
-    this.subjectInfo,
-    this.subjectComments,
-    this.isLoadingComments = false,
-    this.hasMoreComments = true,
-  });
+@riverpod
+class AnimeInfo extends _$AnimeInfo {
+  @override
+  Future<SubjectsInfoItem> build(int subjectId) async {
+    return BgmRequest.getSubjectByIdService(subjectId);
+  }
 
-  final SubjectsInfoItem? subjectInfo;
-  final SubjectCommentItem? subjectComments;
-  final bool isLoadingComments;
-  final bool hasMoreComments;
-
-  AnimeInfoState copyWith({
-    SubjectsInfoItem? subjectInfo,
-    SubjectCommentItem? subjectComments,
-    bool? isLoadingComments,
-    bool? hasMoreComments,
-  }) {
-    return AnimeInfoState(
-      subjectInfo: subjectInfo ?? this.subjectInfo,
-      subjectComments: subjectComments ?? this.subjectComments,
-      isLoadingComments: isLoadingComments ?? this.isLoadingComments,
-      hasMoreComments: hasMoreComments ?? this.hasMoreComments,
-    );
+  void setAnimeInfo(SubjectsInfoItem subjectInfo) {
+    state = AsyncData(subjectInfo);
   }
 }
 
+/// 评论列表 UI 状态（分页加载标记与 [SubjectCommentItem] 绑定）
+class SubjectCommentsViewState {
+  const SubjectCommentsViewState({
+    required this.comments,
+    this.isLoadingMore = false,
+  });
+
+  final SubjectCommentItem comments;
+  final bool isLoadingMore;
+
+  bool get hasMore => comments.data.length < comments.total;
+}
+
 @riverpod
-class AnimeInfo extends _$AnimeInfo {
-  static const _commentPageSize = 20;
+class SubjectComments extends _$SubjectComments {
+  static const _pageSize = 20;
+  static const _loadMoreThreshold = 200.0;
+
+  bool _armedForBottomLoad = true;
+  bool _loadMoreScheduled = false;
 
   @override
-  Future<AnimeInfoState> build(int subjectId) async {
-    final subjectInfo = await BgmRequest.getSubjectByIdService(subjectId);
-    final subjectComments = await BgmRequest.getSubjectCommentsByIdService(
+  Future<SubjectCommentsViewState> build(int subjectId) async {
+    final comments = await BgmRequest.getSubjectCommentsByIdService(
       subjectId: subjectId,
-      limit: _commentPageSize,
+      limit: _pageSize,
       offset: 0,
     );
-    return AnimeInfoState(
-      subjectInfo: subjectInfo,
-      subjectComments: subjectComments,
-      hasMoreComments: subjectComments.data.isNotEmpty &&
-          subjectComments.data.length < subjectComments.total,
-    );
+    return SubjectCommentsViewState(comments: comments);
   }
 
-  void setAnimeInfo(SubjectsInfoItem? subjectInfo) {
-    state = switch (state) {
-      AsyncData(:final value) => AsyncData(value.copyWith(subjectInfo: subjectInfo)),
-      _ => AsyncData(AnimeInfoState(subjectInfo: subjectInfo)),
-    };
-  }
+  /// 滚动接近底部时加载更多：离开底部后重新武装，触底仅触发一次（postFrame 延后）。
+  void onCommentsScroll(ScrollMetrics metrics) {
+    if (metrics.maxScrollExtent <= 0) return;
 
-  Future<void> loadMoreComments() async {
+    final nearBottom =
+        metrics.pixels >= metrics.maxScrollExtent - _loadMoreThreshold;
+    if (!nearBottom) {
+      _armedForBottomLoad = true;
+      return;
+    }
+    if (!_armedForBottomLoad || _loadMoreScheduled) return;
+
     final current = state.asData?.value;
-    if (current == null ||
-        current.isLoadingComments ||
-        !current.hasMoreComments) {
+    if (current == null || current.isLoadingMore || !current.hasMore) {
       return;
     }
 
-    state = AsyncData(current.copyWith(isLoadingComments: true));
-
-    try {
-      final offset = current.subjectComments?.data.length ?? 0;
-      final result = await BgmRequest.getSubjectCommentsByIdService(
-        subjectId: subjectId,
-        limit: _commentPageSize,
-        offset: offset,
-      );
-
-      final merged = current.subjectComments == null
-          ? result
-          : SubjectCommentItem(
-              data: [...current.subjectComments!.data, ...result.data],
-              total: result.total,
-            );
-
-      state = AsyncData(
-        current.copyWith(
-          subjectComments: merged,
-          isLoadingComments: false,
-          hasMoreComments: result.data.isNotEmpty &&
-              merged.data.length < merged.total,
-        ),
-      );
-    } catch (_) {
-      final latest = state.asData?.value;
-      if (latest != null) {
-        state = AsyncData(latest.copyWith(isLoadingComments: false));
-      }
-    }
+    _armedForBottomLoad = false;
+    _loadMoreScheduled = true;
+    SchedulerBinding.instance.addPostFrameCallback((_) async {
+      _loadMoreScheduled = false;
+      await loadMore();
+    });
   }
 
-  void checkAndLoadMore(ScrollMetrics metrics) {
-    if (metrics.pixels >= metrics.maxScrollExtent - 200) {
-      loadMoreComments();
+  Future<void> loadMore() async {
+    final current = state.asData?.value;
+    if (current == null || current.isLoadingMore || !current.hasMore) {
+      return;
+    }
+
+    state = AsyncData(
+      SubjectCommentsViewState(
+        comments: current.comments,
+        isLoadingMore: true,
+      ),
+    );
+
+    try {
+      final prev = current.comments;
+      final result = await BgmRequest.getSubjectCommentsByIdService(
+        subjectId: subjectId,
+        limit: _pageSize,
+        offset: prev.data.length,
+      );
+      final merged = SubjectCommentItem(
+        data: [...prev.data, ...result.data],
+        total: result.total,
+      );
+      state = AsyncData(SubjectCommentsViewState(comments: merged));
+    } catch (_) {
+      _armedForBottomLoad = true;
+      state = AsyncData(
+        SubjectCommentsViewState(
+          comments: current.comments,
+          isLoadingMore: false,
+        ),
+      );
     }
   }
 }

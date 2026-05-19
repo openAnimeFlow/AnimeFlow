@@ -16,10 +16,27 @@ class FontSettingsPage extends ConsumerStatefulWidget {
 }
 
 class _FontSettingsPageState extends ConsumerState<FontSettingsPage> {
+  /// 递增后强制重建预览加载器（刷新列表 / 取消下载后重新拉预览）。
+  int _previewRefreshKey = 0;
+
   @override
   void dispose() {
     ref.read(fontNetworkTasksProvider.notifier).cancelAll();
     super.dispose();
+  }
+
+  Future<void> _refreshFontList() async {
+    ref.read(fontNetworkTasksProvider.notifier).cancelAll();
+    await ref.read(fontProvider.notifier).reload();
+    if (!mounted) return;
+    final result = ref.read(fontProvider);
+    if (result.hasError) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('刷新失败：${result.error}')),
+      );
+      return;
+    }
+    setState(() => _previewRefreshKey++);
   }
 
   @override
@@ -41,6 +58,13 @@ class _FontSettingsPageState extends ConsumerState<FontSettingsPage> {
         preferredSize: const Size.fromHeight(kToolbarHeight),
         child: AppBar(
           title: const Text('字体样式'),
+          actions: [
+            IconButton(
+              icon: const Icon(Icons.refresh_outlined),
+              tooltip: '刷新字体列表',
+              onPressed: _refreshFontList,
+            ),
+          ],
         ),
       ),
       body: Center(
@@ -142,7 +166,12 @@ class _FontSettingsPageState extends ConsumerState<FontSettingsPage> {
                           ),
                         )
                       else
-                        ...fonts.map((font) => _FontListTile(font: font)),
+                        ...fonts.map(
+                          (font) => _FontListTile(
+                            font: font,
+                            previewRefreshKey: _previewRefreshKey,
+                          ),
+                        ),
                     ],
                   ),
                 ),
@@ -312,9 +341,13 @@ class _SystemFontListTile extends ConsumerWidget {
 }
 
 class _FontListTile extends ConsumerWidget {
-  const _FontListTile({required this.font});
+  const _FontListTile({
+    required this.font,
+    required this.previewRefreshKey,
+  });
 
   final FontItem font;
+  final int previewRefreshKey;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -353,6 +386,7 @@ class _FontListTile extends ConsumerWidget {
             overflow: TextOverflow.ellipsis,
           ),
           _PreviewFontLoader(
+            key: ValueKey('preview-${font.id}-$previewRefreshKey'),
             font: font,
             builder: (context,
                 {required loaded, required failed, required family}) {
@@ -592,6 +626,7 @@ class _OrphanFontListTile extends ConsumerWidget {
 /// 从 [FontItem.preview] 下载子集 TTF，经 [FontLoader] 注册后供子组件使用。
 class _PreviewFontLoader extends ConsumerStatefulWidget {
   const _PreviewFontLoader({
+    super.key,
     required this.font,
     required this.builder,
   });

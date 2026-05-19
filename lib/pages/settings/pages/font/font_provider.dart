@@ -21,7 +21,7 @@ bool isFontRequestCancelled(Object error) {
 }
 
 bool _readFontRepoUseCdnFromStorage() {
-  final v = Storage.setting.get(SettingKey.fontRepoUseCdn, defaultValue: true);
+  final v = Storage.setting.get(SettingKey.fontRepoUseCdn, defaultValue: false);
   if (v is bool) return v;
   if (v is int) return v != 0;
   return true;
@@ -109,6 +109,13 @@ class Font extends _$Font {
   Future<void> reload() async {
     final useCdn = ref.read(fontRepoCdnProvider);
     state = await AsyncValue.guard(() => getFontList(useCdn: useCdn));
+    state.whenData((list) {
+      Future.microtask(() {
+        try {
+          ref.read(downloadedFontMetasProvider.notifier).backfillFromRemote(list);
+        } catch (_) {}
+      });
+    });
   }
 
   /// 加载字节用于字体预览
@@ -146,9 +153,14 @@ class FontNetworkTasks extends _$FontNetworkTasks {
   }
 
   void cancelAll() {
-    for (final token in _tokens.values) {
-      if (!token.isCancelled) {
-        token.cancel();
+    const downloadPrefix = 'download:';
+    for (final entry in Map<String, CancelToken>.from(_tokens).entries) {
+      if (!entry.value.isCancelled) {
+        entry.value.cancel();
+      }
+      if (entry.key.startsWith(downloadPrefix)) {
+        final fontId = entry.key.substring(downloadPrefix.length);
+        ref.read(fontDownloadProvider(fontId).notifier).resetOnCancel();
       }
     }
     _tokens.clear();
@@ -280,6 +292,13 @@ class FontDownload extends _$FontDownload {
     return {};
   }
 
+  /// 切换 CDN / 离开页面等主动取消时，立即恢复为可再次下载。
+  void resetOnCancel() {
+    if (state.status == FontDownloadStatus.downloading) {
+      state = const FontDownloadState();
+    }
+  }
+
   Future<void> download(FontItem font) async {
     final useCdn = _readFontRepoUseCdnFromStorage();
     final taskKey = 'download:$fontId';
@@ -305,12 +324,11 @@ class FontDownload extends _$FontDownload {
         useCdn: useCdn,
         cancelToken: cancelToken,
         onReceiveProgress: (received, total) {
-          if (total > 0) {
-            state = state.copyWith(
-              status: FontDownloadStatus.downloading,
-              progress: received / total,
-            );
-          }
+          if (cancelToken.isCancelled || total <= 0) return;
+          state = state.copyWith(
+            status: FontDownloadStatus.downloading,
+            progress: received / total,
+          );
         },
       );
 

@@ -41,21 +41,23 @@ class _TagViewState extends State<TagView> {
         ? widget.tags
         : widget.tags.take(widget.maxVisibleCount).toList();
 
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          widget.title,
-          style: TextStyle(
-            fontSize: widget.fontSizeTitle,
-            fontWeight: widget.fontWeightTitle,
+    return SizedBox(
+      width: double.infinity,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            widget.title,
+            style: TextStyle(
+              fontSize: widget.fontSizeTitle,
+              fontWeight: widget.fontWeightTitle,
+            ),
           ),
-        ),
-        const SizedBox(height: 5),
-        Wrap(
-          spacing: 8,
-          runSpacing: 8,
-          children: [
+          const SizedBox(height: 5),
+          Wrap(
+            spacing: 8,
+            runSpacing: 8,
+            children: [
             ...visibleTags.map((tag) => _buildTag(tag)),
             // 展开/收起按钮
             if (hasMore)
@@ -110,9 +112,10 @@ class _TagViewState extends State<TagView> {
                   ),
                 ),
               ),
-          ],
-        ),
-      ],
+            ],
+          ),
+        ],
+      ),
     );
   }
 

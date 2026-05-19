@@ -51,7 +51,6 @@ class InfoSynopsisView extends StatelessWidget {
         child: _buildContainer(
           context,
           topPadding: 25,
-          alignment: Alignment.topLeft,
           TagView(
             title: '标签',
             fontSizeTitle: fontSizeTitle,

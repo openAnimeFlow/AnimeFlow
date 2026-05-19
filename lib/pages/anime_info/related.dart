@@ -1,16 +1,23 @@
-part of 'synopsis.dart';
+
+import 'package:anime_flow/http/requests/bgm_request.dart';
+import 'package:anime_flow/models/item/bangumi/related_subjects_item.dart';
+import 'package:anime_flow/models/item/subject_basic_data_item.dart';
+import 'package:anime_flow/routes/routes.dart';
+import 'package:anime_flow/widget/animation_network_image/animation_network_image.dart';
+import 'package:flutter/cupertino.dart';
+import 'package:flutter/material.dart';
 
 ///相关条目
-class _RelatedView extends StatefulWidget {
+class RelatedView extends StatefulWidget {
   final int subjectId;
 
-  const _RelatedView({required this.subjectId});
+  const RelatedView({required this.subjectId});
 
   @override
-  State<_RelatedView> createState() => _RelatedViewState();
+  State<RelatedView> createState() => _RelatedViewState();
 }
 
-class _RelatedViewState extends State<_RelatedView> {
+class _RelatedViewState extends State<RelatedView> {
   SubjectRelationItem? subjectRelation;
 
   @override

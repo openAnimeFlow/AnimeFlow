@@ -1,16 +1,16 @@
 part of 'index.dart';
 
 /// 评价对话框
-class _EvaluateDialog extends ConsumerStatefulWidget {
+class InfoEvaluateDialog extends ConsumerStatefulWidget {
   final int subjectId;
 
-  const _EvaluateDialog({required this.subjectId});
+  const InfoEvaluateDialog({required this.subjectId});
 
   @override
-  ConsumerState<_EvaluateDialog> createState() => _EvaluateDialogState();
+  ConsumerState<InfoEvaluateDialog> createState() => _EvaluateDialogState();
 }
 
-class _EvaluateDialogState extends ConsumerState<_EvaluateDialog> {
+class _EvaluateDialogState extends ConsumerState<InfoEvaluateDialog> {
   late TextEditingController _commentController;
   late TextEditingController _tagsController;
   int _selectedRate = 0; // 0-10分，0表示未评分

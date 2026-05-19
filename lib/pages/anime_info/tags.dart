@@ -1,7 +1,9 @@
-part of 'synopsis.dart';
+
+import 'package:anime_flow/models/item/bangumi/subjects_info_item.dart';
+import 'package:flutter/material.dart';
 
 /// 标签组件（支持展开/收起）
-class _TagView extends StatefulWidget {
+class TagView extends StatefulWidget {
   final String title;
   final double? fontSizeTitle;
   final FontWeight? fontWeightTitle;
@@ -12,7 +14,7 @@ class _TagView extends StatefulWidget {
   final double? fontSize;
   final int maxVisibleCount;
 
-  const _TagView({
+  const TagView({
     super.key,
     this.fontWeight = FontWeight.w400,
     required this.tags,
@@ -26,10 +28,10 @@ class _TagView extends StatefulWidget {
   });
 
   @override
-  State<_TagView> createState() => _TagViewState();
+  State<TagView> createState() => _TagViewState();
 }
 
-class _TagViewState extends State<_TagView> {
+class _TagViewState extends State<TagView> {
   bool _isExpanded = false;
 
   @override

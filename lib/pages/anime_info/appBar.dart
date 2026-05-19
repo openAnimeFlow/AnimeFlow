@@ -1,11 +1,11 @@
 part of 'index.dart';
 
-class _Appbar extends StatelessWidget {
+class InfoAppbar extends StatelessWidget {
   final bool isPinned;
   final SubjectBasicData subjectBasicData;
   final SubjectsInfoItem? subjectsItem;
 
-  const _Appbar({
+  const InfoAppbar({
     required this.subjectsItem,
     required this.isPinned,
     required this.subjectBasicData,

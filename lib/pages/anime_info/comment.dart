@@ -1,18 +1,25 @@
-part of 'synopsis.dart';
+import 'package:anime_flow/http/requests/bgm_request.dart';
+import 'package:anime_flow/models/item/bangumi/subject_comments_item.dart';
+import 'package:anime_flow/routes/routes.dart';
+import 'package:anime_flow/utils/format_time_util.dart';
+import 'package:anime_flow/widget/animation_network_image/animation_network_image.dart';
+import 'package:anime_flow/widget/star.dart';
+import 'package:flutter/material.dart';
+import 'package:flutter/scheduler.dart';
 
-class _CommentView extends StatefulWidget {
+class CommentView extends StatefulWidget {
   final int subjectId;
 
-  const _CommentView({
+  const CommentView({
     super.key,
     required this.subjectId,
   });
 
   @override
-  State<_CommentView> createState() => _CommentViewState();
+  State<CommentView> createState() => CommentViewState();
 }
 
-class _CommentViewState extends State<_CommentView> {
+class CommentViewState extends State<CommentView> {
   SubjectCommentItem? subjectCommentItem;
   int _commentOffset = 0;
   bool _isLoadingComments = false;
@@ -141,7 +148,7 @@ class _CommentViewState extends State<_CommentView> {
     return Container(
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
-          color: Get.theme.disabledColor.withValues(alpha: 0.05),
+          color: Theme.of(context).disabledColor.withValues(alpha: 0.05),
           borderRadius: BorderRadius.circular(8)),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,

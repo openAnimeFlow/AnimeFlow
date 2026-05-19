@@ -1,13 +1,16 @@
-part of 'synopsis.dart';
+
+import 'package:anime_flow/models/item/bangumi/subjects_info_item.dart';
+import 'package:flutter/material.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 ///详情信息
-class _DetailsView extends StatelessWidget {
+class DetailsView extends StatelessWidget {
   final String title;
   final double? textSize;
   final FontWeight? textFontWeight;
   final SubjectsInfoItem subject;
 
-  const _DetailsView(
+  const DetailsView(
       {required this.subject,
       required this.title,
       this.textSize,

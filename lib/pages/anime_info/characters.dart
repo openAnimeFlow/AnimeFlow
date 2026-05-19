@@ -1,15 +1,22 @@
-part of 'synopsis.dart';
 
-class _CharactersView extends StatefulWidget {
+import 'dart:math';
+
+import 'package:anime_flow/http/requests/bgm_request.dart';
+import 'package:anime_flow/models/item/bangumi/actor_item.dart';
+import 'package:anime_flow/routes/routes.dart';
+import 'package:anime_flow/widget/animation_network_image/animation_network_image.dart';
+import 'package:flutter/material.dart';
+
+class CharactersView extends StatefulWidget {
   final int subjectsId;
 
-  const _CharactersView({required this.subjectsId});
+  const CharactersView({required this.subjectsId});
 
   @override
-  State<_CharactersView> createState() => _CharactersViewState();
+  State<CharactersView> createState() => _CharactersViewState();
 }
 
-class _CharactersViewState extends State<_CharactersView> {
+class _CharactersViewState extends State<CharactersView> {
   CharactersItem? characters;
 
   @override

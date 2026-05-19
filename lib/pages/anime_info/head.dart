@@ -1,10 +1,10 @@
 part of 'index.dart';
 
-class _HeadView extends StatelessWidget {
+class InfoHeadView extends StatelessWidget {
   final SubjectBasicData subjectBasicData;
   final double statusBarHeight;
   final double contentHeight;
-  const _HeadView({
+  const InfoHeadView({
     required this.statusBarHeight,
     required this.contentHeight,
     required this.subjectBasicData,

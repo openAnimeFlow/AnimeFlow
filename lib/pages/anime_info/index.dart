@@ -23,9 +23,9 @@ import 'package:shimmer/shimmer.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'synopsis.dart';
 
-part '_evaluate_dialog.dart';
-part '_appBar.dart';
-part '_head.dart';
+part 'evaluate_dialog.dart';
+part 'appBar.dart';
+part 'head.dart';
 
 class AnimeInfoPage extends ConsumerStatefulWidget {
   final SubjectBasicData animeInfoExtra;
@@ -92,7 +92,7 @@ class _AnimeInfoPageState extends ConsumerState<AnimeInfoPage> {
                 sliver: SliverAppBar(
                   automaticallyImplyLeading: false,
                   titleSpacing: 0,
-                  title: _Appbar(
+                  title: InfoAppbar(
                       subjectBasicData: subjectBasicData,
                       subjectsItem: subjectsInfo,
                       isPinned: isPinned),
@@ -112,7 +112,7 @@ class _AnimeInfoPageState extends ConsumerState<AnimeInfoPage> {
                     collapseMode: CollapseMode.pin,
                     background: Padding(
                       padding: const EdgeInsets.only(bottom: 15),
-                      child: _HeadView(
+                      child: InfoHeadView(
                         statusBarHeight: statusBarHeight,
                         contentHeight: _contentHeight,
                         subjectBasicData: subjectBasicData,
@@ -171,7 +171,7 @@ class _AnimeInfoPageState extends ConsumerState<AnimeInfoPage> {
                     onPressed: () {
                       Get.dialog(
                           barrierDismissible: false,
-                          _EvaluateDialog(subjectId: subjectBasicData.id));
+                          InfoEvaluateDialog(subjectId: subjectBasicData.id));
                     },
                     child: Icon(
                       Icons.messenger,

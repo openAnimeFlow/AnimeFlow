@@ -53,8 +53,7 @@ class InfoCommentView extends ConsumerWidget {
           padding: EdgeInsets.zero,
           shrinkWrap: true,
           physics: const NeverScrollableScrollPhysics(),
-          itemCount: subjectComments.data.length +
-              (hasMore && isLoadingMore ? 1 : 0),
+          itemCount: subjectComments.data.length + (hasMore && isLoadingMore ? 1 : 0),
           itemBuilder: (context, index) {
             if (index == subjectComments.data.length) {
               return const Padding(
@@ -85,77 +84,75 @@ class InfoCommentView extends ConsumerWidget {
       decoration: BoxDecoration(
           color: Theme.of(context).disabledColor.withValues(alpha: 0.05),
           borderRadius: BorderRadius.circular(8)),
-      child: Column(
+      child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              InkWell(
-                onTap: () =>
-                    UserSpaceRoute(name: comment.user.username).push(context),
-                child: AnimationNetworkImage(
-                  borderRadius: BorderRadius.circular(10),
-                  url: comment.user.avatar.medium,
-                  width: 40,
-                  height: 40,
-                  fit: BoxFit.cover,
-                ),
-              ),
-              const SizedBox(width: 12),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
+          InkWell(
+            onTap: () =>
+                UserSpaceRoute(name: comment.user.username).push(context),
+            child: AnimationNetworkImage(
+              borderRadius: BorderRadius.circular(10),
+              url: comment.user.avatar.medium,
+              width: 40,
+              height: 40,
+              fit: BoxFit.cover,
+            ),
+          ),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        InkWell(
-                          onTap: () => UserSpaceRoute(name: comment.user.username)
-                              .push(context),
-                          child: Text(
-                            comment.user.nickname.isNotEmpty
-                                ? comment.user.nickname
-                                : comment.user.username,
-                            style: const TextStyle(
-                              fontSize: 14,
-                              fontWeight: FontWeight.w600,
-                            ),
+                    Expanded(
+                      child: InkWell(
+                        onTap: () => UserSpaceRoute(name: comment.user.username)
+                            .push(context),
+                        child: Text(
+                          comment.user.nickname.isNotEmpty
+                              ? comment.user.nickname
+                              : comment.user.username,
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: const TextStyle(
+                            fontSize: 14,
+                            fontWeight: FontWeight.w600,
                           ),
                         ),
-                        Text(
-                          FormatTimeUtil.formatTime(comment.updatedAt),
-                          style: TextStyle(
-                            fontSize: 12,
-                            color: Theme.of(context).textTheme.bodySmall?.color,
-                          ),
-                        ),
-                      ],
-                    ),
-                    if (comment.rate > 0)
-                      Row(
-                        crossAxisAlignment: CrossAxisAlignment.center,
-                        children: [
-                          StarView(
-                              score: comment.rate.toDouble(), iconSize: 16),
-                          const SizedBox(width: 4),
-                          Text(
-                            '${comment.rate}',
-                            style: TextStyle(
-                              fontSize: 12,
-                              color: Theme.of(context).colorScheme.primary,
-                              fontWeight: FontWeight.w600,
-                            ),
-                          ),
-                        ],
                       ),
-                    if (comment.comment.isNotEmpty) ...[
-                      Text(comment.comment),
-                    ],
+                    ),
+                    Text(
+                      FormatTimeUtil.formatTime(comment.updatedAt),
+                      style: TextStyle(
+                        fontSize: 12,
+                        color: Theme.of(context).textTheme.bodySmall?.color,
+                      ),
+                    ),
                   ],
                 ),
-              ),
-            ],
+                if (comment.rate > 0)
+                  Row(
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    children: [
+                      StarView(score: comment.rate.toDouble(), iconSize: 16),
+                      const SizedBox(width: 4),
+                      Text(
+                        '${comment.rate}',
+                        style: TextStyle(
+                          fontSize: 12,
+                          color: Theme.of(context).colorScheme.primary,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                    ],
+                  ),
+                if (comment.comment.isNotEmpty) ...[
+                  Text(comment.comment),
+                ],
+              ],
+            ),
           ),
         ],
       ),

@@ -1,3 +1,4 @@
+import 'package:anime_flow/models/item/bangumi/related_subjects_item.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:flutter/widgets.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
@@ -110,5 +111,17 @@ class SubjectComments extends _$SubjectComments {
         ),
       );
     }
+  }
+}
+
+///相关条目
+@riverpod
+class SubjectRelated extends _$SubjectRelated {
+  @override
+  Future<SubjectRelationItem> build(int subjectId) async {
+    return BgmRequest.relatedSubjectsService(
+        subjectId,
+        limit: 20,
+        offset: 0);
   }
 }

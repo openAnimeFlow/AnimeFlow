@@ -30,12 +30,18 @@ class GithubRequest {
   }
 
   /// 下载字体字节（用于预览加载）
-  static Future<List<int>> downloadFont(String fontUrl,{bool useCdn = false}) async {
+  static Future<List<int>> downloadFont(
+    String fontUrl, {
+    bool useCdn = false,
+    CancelToken? cancelToken,
+  }) async {
     if (useCdn) {
       fontUrl = Utils.jsDelivrCdnUrl(fontUrl);
     }
-    final response = await _client.get(fontUrl,
+    final response = await _client.get(
+      fontUrl,
       options: Options(responseType: ResponseType.bytes),
+      cancelToken: cancelToken,
     );
     return response.data;
   }

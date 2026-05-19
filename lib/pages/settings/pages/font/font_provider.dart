@@ -5,11 +5,20 @@ import 'package:anime_flow/http/requests/github_request.dart';
 import 'package:anime_flow/models/item/font_item.dart';
 import 'package:anime_flow/providers/theme_provider.dart';
 import 'package:anime_flow/repository/storage.dart';
+import 'package:dio/dio.dart';
 import 'package:flutter/services.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 part 'font_provider.g.dart';
+
+bool isFontRequestCancelled(Object error) {
+  if (error is DioException && error.type == DioExceptionType.cancel) {
+    return true;
+  }
+  if (error is String && error.contains('下载已取消')) return true;
+  return error.toString().contains('下载已取消');
+}
 
 bool _readFontRepoUseCdnFromStorage() {
   final v = Storage.setting.get(SettingKey.fontRepoUseCdn, defaultValue: true);
@@ -100,9 +109,46 @@ class Font extends _$Font {
   }
 
   /// 仅加载字节用于字体预览（不保存文件）
-  Future<List<int>> loadingFont(String fontUrl) async {
+  Future<List<int>> loadingFont(
+      String fontUrl, {
+        CancelToken? cancelToken,
+      }) async {
     final useCdn = ref.read(fontRepoCdnProvider);
-    return GithubRequest.downloadFont(fontUrl, useCdn: useCdn);
+    return GithubRequest.downloadFont(
+      fontUrl,
+      useCdn: useCdn,
+      cancelToken: cancelToken,
+    );
+  }
+}
+
+// ──────────────────────────────────────────
+// 字体页网络任务（下载 / 预览），退出页面时统一取消
+// ──────────────────────────────────────────
+
+@riverpod
+class FontNetworkTasks extends _$FontNetworkTasks {
+  final Map<String, CancelToken> _tokens = {};
+
+  @override
+  int build() => 0;
+
+  void register(String key, CancelToken token) {
+    _tokens[key]?.cancel();
+    _tokens[key] = token;
+  }
+
+  void unregister(String key) {
+    _tokens.remove(key);
+  }
+
+  void cancelAll() {
+    for (final token in _tokens.values) {
+      if (!token.isCancelled) {
+        token.cancel();
+      }
+    }
+    _tokens.clear();
   }
 }
 
@@ -110,7 +156,7 @@ class Font extends _$Font {
 // 已下载字体的元数据缓存
 // ──────────────────────────────────────────
 
-@Riverpod(keepAlive: true)
+@riverpod
 class DownloadedFontMetas extends _$DownloadedFontMetas {
   @override
   Map<String, FontItem> build() {
@@ -205,7 +251,7 @@ class DownloadedFontMetas extends _$DownloadedFontMetas {
 // 单个字体下载状态 provider（family by fontId）
 // ──────────────────────────────────────────
 
-@Riverpod(keepAlive: true)
+@riverpod
 class FontDownload extends _$FontDownload {
   @override
   FontDownloadState build(String fontId) {
@@ -233,22 +279,28 @@ class FontDownload extends _$FontDownload {
 
   Future<void> download(FontItem font) async {
     final useCdn = _readFontRepoUseCdnFromStorage();
+    final taskKey = 'download:$fontId';
+    final cancelToken = CancelToken();
+    ref.read(fontNetworkTasksProvider.notifier).register(taskKey, cancelToken);
+
     state = const FontDownloadState(
       status: FontDownloadStatus.downloading,
       progress: 0.0,
     );
-    try {
-      final dir = await getApplicationDocumentsDirectory();
-      final fontsDir = Directory('${dir.path}/animeflow_fonts');
-      if (!fontsDir.existsSync()) {
-        fontsDir.createSync(recursive: true);
-      }
-      final filePath = '${fontsDir.path}/${font.id}.ttf';
 
+    final dir = await getApplicationDocumentsDirectory();
+    final fontsDir = Directory('${dir.path}/animeflow_fonts');
+    if (!fontsDir.existsSync()) {
+      fontsDir.createSync(recursive: true);
+    }
+    final filePath = '${fontsDir.path}/${font.id}.ttf';
+
+    try {
       await GithubRequest.downloadFontToFile(
         font.font,
         filePath,
         useCdn: useCdn,
+        cancelToken: cancelToken,
         onReceiveProgress: (received, total) {
           if (total > 0) {
             state = state.copyWith(
@@ -270,10 +322,24 @@ class FontDownload extends _$FontDownload {
         progress: 1.0,
       );
     } catch (e) {
+      await _deletePartialFile(filePath);
+      if (isFontRequestCancelled(e)) {
+        state = const FontDownloadState();
+        return;
+      }
       state = FontDownloadState(
         status: FontDownloadStatus.error,
         errorMessage: e.toString(),
       );
+    } finally {
+      ref.read(fontNetworkTasksProvider.notifier).unregister(taskKey);
+    }
+  }
+
+  Future<void> _deletePartialFile(String filePath) async {
+    final file = File(filePath);
+    if (file.existsSync()) {
+      await file.delete();
     }
   }
 
@@ -296,7 +362,7 @@ class FontDownload extends _$FontDownload {
     await ref.read(downloadedFontMetasProvider.notifier).remove(fontId);
 
     final selectedId =
-        Storage.setting.get(SettingKey.selectedFontId) as String?;
+    Storage.setting.get(SettingKey.selectedFontId) as String?;
     if (selectedId == fontId) {
       await ref.read(selectedFontProvider.notifier).clearFont();
     }
@@ -309,7 +375,7 @@ class FontDownload extends _$FontDownload {
 // 已选字体 provider（全局持久化）
 // ──────────────────────────────────────────
 
-@Riverpod(keepAlive: true)
+@riverpod
 class SelectedFont extends _$SelectedFont {
   /// 在 [Storage.init] 之后、[runApp] 之前调用，注册已持久化的自定义字体。
   static Future<void> initOnStartup() async {

@@ -3,26 +3,38 @@ import 'package:anime_flow/pages/settings/pages/font/font_provider.dart';
 import 'package:anime_flow/utils/format_time_util.dart';
 import 'package:anime_flow/utils/logger.dart';
 import 'package:anime_flow/utils/systemUtil.dart';
+import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-class FontSettingsPage extends ConsumerWidget {
+class FontSettingsPage extends ConsumerStatefulWidget {
   const FontSettingsPage({super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<FontSettingsPage> createState() => _FontSettingsPageState();
+}
+
+class _FontSettingsPageState extends ConsumerState<FontSettingsPage> {
+  @override
+  void dispose() {
+    ref.read(fontNetworkTasksProvider.notifier).cancelAll();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
     final leftPadding = MediaQuery.of(context).padding.left;
     final fontsAsync = ref.watch(fontProvider);
+    ref.watch(fontNetworkTasksProvider);
     ref.watch(downloadedFontMetasProvider);
 
     final remoteIds = fontsAsync.maybeWhen(
       data: (fonts) => fonts.map((f) => f.id).toSet(),
       orElse: () => <String>{},
     );
-    final orphans = ref
-        .read(downloadedFontMetasProvider.notifier)
-        .orphansFor(remoteIds);
+    final orphans =
+        ref.read(downloadedFontMetasProvider.notifier).orphansFor(remoteIds);
 
     return Scaffold(
       appBar: PreferredSize(
@@ -75,10 +87,9 @@ class FontSettingsPage extends ConsumerWidget {
               ),
               const SizedBox(height: 10),
               fontsAsync.when(
-                loading: () => _fontGlassPanel(
-                  context,
-                  padding: const EdgeInsets.symmetric(vertical: 4),
-                  child: const Column(
+                loading: () => const _FontGlassPanel(
+                  padding: EdgeInsets.symmetric(vertical: 4),
+                  child: Column(
                     children: [
                       _SystemFontListTile(),
                       Padding(
@@ -90,10 +101,9 @@ class FontSettingsPage extends ConsumerWidget {
                 ),
                 error: (error, _) => Column(
                   children: [
-                    _fontGlassPanel(
-                      context,
-                      padding: const EdgeInsets.symmetric(vertical: 4),
-                      child: const _SystemFontListTile(),
+                    const _FontGlassPanel(
+                      padding: EdgeInsets.symmetric(vertical: 4),
+                      child: _SystemFontListTile(),
                     ),
                     _FontListError(
                       message: error.toString(),
@@ -104,8 +114,7 @@ class FontSettingsPage extends ConsumerWidget {
                     ),
                   ],
                 ),
-                data: (fonts) => _fontGlassPanel(
-                  context,
+                data: (fonts) => _FontGlassPanel(
                   padding: const EdgeInsets.symmetric(vertical: 4),
                   child: Column(
                     children: [
@@ -116,11 +125,11 @@ class FontSettingsPage extends ConsumerWidget {
                           child: Text(
                             '暂无其他可用字体',
                             style:
-                            Theme.of(context).textTheme.bodySmall?.copyWith(
-                              color: Theme.of(context)
-                                  .colorScheme
-                                  .onSurfaceVariant,
-                            ),
+                                Theme.of(context).textTheme.bodySmall?.copyWith(
+                                      color: Theme.of(context)
+                                          .colorScheme
+                                          .onSurfaceVariant,
+                                    ),
                           ),
                         )
                       else
@@ -142,12 +151,11 @@ class FontSettingsPage extends ConsumerWidget {
                 Text(
                   '以下字体不再出现在远程仓库，但本地仍保留有字体文件。可在此处直接删除或继续应用。',
                   style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                    color: Theme.of(context).colorScheme.onSurfaceVariant,
-                  ),
+                        color: Theme.of(context).colorScheme.onSurfaceVariant,
+                      ),
                 ),
                 const SizedBox(height: 10),
-                _fontGlassPanel(
-                  context,
+                _FontGlassPanel(
                   padding: const EdgeInsets.symmetric(vertical: 4),
                   child: Column(
                     children: orphans
@@ -164,30 +172,41 @@ class FontSettingsPage extends ConsumerWidget {
   }
 }
 
-Widget _fontGlassPanel(
-    BuildContext context, {
-      required Widget child,
-      EdgeInsetsGeometry? padding,
-    }) {
-  const borderRadius = BorderRadius.all(Radius.circular(24));
-  return ClipRRect(
-    borderRadius: borderRadius,
-    child: Container(
-      padding: padding,
-      decoration: BoxDecoration(
-        color: SystemUtil.isDarkTheme(context)
+class _FontGlassPanel extends StatelessWidget {
+  const _FontGlassPanel({
+    required this.child,
+    this.padding,
+  });
+
+  final Widget child;
+  final EdgeInsetsGeometry? padding;
+
+  @override
+  Widget build(BuildContext context) {
+    const borderRadius = BorderRadius.all(Radius.circular(24));
+    final isDark = SystemUtil.isDarkTheme(context);
+    return ClipRRect(
+      borderRadius: borderRadius,
+      child: Material(
+        color: isDark
             ? Colors.white.withValues(alpha: 0.08)
             : Colors.black.withValues(alpha: 0.08),
-        borderRadius: borderRadius,
-        border: Border.all(
-          color: SystemUtil.isDarkTheme(context)
-              ? Colors.white.withValues(alpha: 0.15)
-              : Colors.black.withValues(alpha: 0.15),
+        shape: RoundedRectangleBorder(
+          borderRadius: borderRadius,
+          side: BorderSide(
+            color: isDark
+                ? Colors.white.withValues(alpha: 0.15)
+                : Colors.black.withValues(alpha: 0.15),
+          ),
+        ),
+        clipBehavior: Clip.antiAlias,
+        child: Padding(
+          padding: padding ?? EdgeInsets.zero,
+          child: child,
         ),
       ),
-      child: child,
-    ),
-  );
+    );
+  }
 }
 
 class _FontListError extends StatelessWidget {
@@ -220,8 +239,8 @@ class _FontListError extends StatelessWidget {
             message,
             textAlign: TextAlign.center,
             style: Theme.of(context).textTheme.bodySmall?.copyWith(
-              color: Theme.of(context).colorScheme.onSurfaceVariant,
-            ),
+                  color: Theme.of(context).colorScheme.onSurfaceVariant,
+                ),
           ),
           const SizedBox(height: 12),
           FilledButton.tonalIcon(
@@ -299,8 +318,8 @@ class _FontListTile extends ConsumerWidget {
       selected: isSelected,
       onTap: downloadState.status == FontDownloadStatus.done && !isSelected
           ? () => ref
-          .read(selectedFontProvider.notifier)
-          .selectFont(font, downloadState.filePath!)
+              .read(selectedFontProvider.notifier)
+              .selectFont(font, downloadState.filePath!)
           : null,
       title: Row(
         children: [
@@ -311,7 +330,8 @@ class _FontListTile extends ConsumerWidget {
               overflow: TextOverflow.ellipsis,
             ),
           ),
-          _buildActionWidget(context, ref, downloadState, isSelected, colorScheme),
+          _buildActionWidget(
+              context, ref, downloadState, isSelected, colorScheme),
         ],
       ),
       subtitle: Column(
@@ -348,12 +368,12 @@ class _FontListTile extends ConsumerWidget {
   }
 
   Widget _buildActionWidget(
-      BuildContext context,
-      WidgetRef ref,
-      FontDownloadState downloadState,
-      bool isSelected,
-      ColorScheme colorScheme,
-      ) {
+    BuildContext context,
+    WidgetRef ref,
+    FontDownloadState downloadState,
+    bool isSelected,
+    ColorScheme colorScheme,
+  ) {
     switch (downloadState.status) {
       case FontDownloadStatus.idle:
         return IconButton(
@@ -411,7 +431,7 @@ class _FontListTile extends ConsumerWidget {
             IconButton(
               icon: const Icon(Icons.delete_outline),
               tooltip: '删除已下载字体',
-              onPressed: () => _confirmDeleteDownload(
+              onPressed: () => _FontDeleteConfirm.show(
                 context,
                 ref,
                 fontId: font.id,
@@ -433,36 +453,40 @@ class _FontListTile extends ConsumerWidget {
   }
 }
 
-Future<void> _confirmDeleteDownload(
+class _FontDeleteConfirm {
+  _FontDeleteConfirm._();
+
+  static Future<void> show(
     BuildContext context,
     WidgetRef ref, {
-      required String fontId,
-      required String fontName,
-      required bool isSelected,
-    }) async {
-  final confirmed = await showDialog<bool>(
-    context: context,
-    builder: (ctx) => AlertDialog(
-      title: const Text('删除字体'),
-      content: Text(
-        isSelected
-            ? '将删除「$fontName」的本地文件，并恢复为系统字体，确定继续？'
-            : '确定删除「$fontName」的本地字体文件？',
+    required String fontId,
+    required String fontName,
+    required bool isSelected,
+  }) async {
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: const Text('删除字体'),
+        content: Text(
+          isSelected
+              ? '将删除「$fontName」的本地文件，并恢复为系统字体，确定继续？'
+              : '确定删除「$fontName」的本地字体文件？',
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx, false),
+            child: const Text('取消'),
+          ),
+          FilledButton(
+            onPressed: () => Navigator.pop(ctx, true),
+            child: const Text('删除'),
+          ),
+        ],
       ),
-      actions: [
-        TextButton(
-          onPressed: () => Navigator.pop(ctx, false),
-          child: const Text('取消'),
-        ),
-        FilledButton(
-          onPressed: () => Navigator.pop(ctx, true),
-          child: const Text('删除'),
-        ),
-      ],
-    ),
-  );
-  if (confirmed == true && context.mounted) {
-    await ref.read(fontDownloadProvider(fontId).notifier).deleteDownload();
+    );
+    if (confirmed == true && context.mounted) {
+      await ref.read(fontDownloadProvider(fontId).notifier).deleteDownload();
+    }
   }
 }
 
@@ -489,8 +513,8 @@ class _OrphanFontListTile extends ConsumerWidget {
       selected: isSelected,
       onTap: hasLocalFile && !isSelected
           ? () => ref
-          .read(selectedFontProvider.notifier)
-          .selectFont(font, downloadState.filePath!)
+              .read(selectedFontProvider.notifier)
+              .selectFont(font, downloadState.filePath!)
           : null,
       title: Row(
         children: [
@@ -503,8 +527,8 @@ class _OrphanFontListTile extends ConsumerWidget {
           ),
           if (isSelected)
             IconButton(
-              icon: Icon(Icons.check_circle_rounded,
-                  color: colorScheme.primary),
+              icon:
+                  Icon(Icons.check_circle_rounded, color: colorScheme.primary),
               tooltip: '已应用，点击取消使用',
               onPressed: () =>
                   ref.read(selectedFontProvider.notifier).clearFont(),
@@ -520,7 +544,7 @@ class _OrphanFontListTile extends ConsumerWidget {
           IconButton(
             icon: const Icon(Icons.delete_outline),
             tooltip: '删除已下载字体',
-            onPressed: () => _confirmDeleteDownload(
+            onPressed: () => _FontDeleteConfirm.show(
               context,
               ref,
               fontId: font.id,
@@ -543,10 +567,10 @@ class _OrphanFontListTile extends ConsumerWidget {
             child: Text(
               hasLocalFile ? '远程仓库已下架，仍可继续使用本地字体' : '本地字体文件已丢失，可在此处清理记录',
               style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                color: hasLocalFile
-                    ? colorScheme.onSurfaceVariant
-                    : colorScheme.error,
-              ),
+                    color: hasLocalFile
+                        ? colorScheme.onSurfaceVariant
+                        : colorScheme.error,
+                  ),
             ),
           ),
         ],
@@ -564,11 +588,11 @@ class _PreviewFontLoader extends ConsumerStatefulWidget {
 
   final FontItem font;
   final Widget Function(
-      BuildContext context, {
-      required bool loaded,
-      required bool failed,
-      required String family,
-      }) builder;
+    BuildContext context, {
+    required bool loaded,
+    required bool failed,
+    required String family,
+  }) builder;
 
   @override
   ConsumerState<_PreviewFontLoader> createState() => _PreviewFontLoaderState();
@@ -577,11 +601,20 @@ class _PreviewFontLoader extends ConsumerStatefulWidget {
 class _PreviewFontLoaderState extends ConsumerState<_PreviewFontLoader> {
   bool _loaded = false;
   bool _failed = false;
+  CancelToken? _previewCancelToken;
+
+  String get _taskKey => 'preview:${widget.font.id}';
 
   @override
   void initState() {
     super.initState();
     _loadPreviewFont();
+  }
+
+  @override
+  void dispose() {
+    _previewCancelToken?.cancel();
+    super.dispose();
   }
 
   @override
@@ -595,10 +628,16 @@ class _PreviewFontLoaderState extends ConsumerState<_PreviewFontLoader> {
   }
 
   Future<void> _loadPreviewFont() async {
+    _previewCancelToken?.cancel();
+    final cancelToken = CancelToken();
+    _previewCancelToken = cancelToken;
+    ref.read(fontNetworkTasksProvider.notifier).register(_taskKey, cancelToken);
+
     try {
-      final bytes = await ref
-          .read(fontProvider.notifier)
-          .loadingFont(widget.font.preview);
+      final bytes = await ref.read(fontProvider.notifier).loadingFont(
+            widget.font.preview,
+            cancelToken: cancelToken,
+          );
       if (bytes.isEmpty) {
         throw StateError('字体预览数据为空');
       }
@@ -617,13 +656,16 @@ class _PreviewFontLoaderState extends ConsumerState<_PreviewFontLoader> {
           _failed = false;
         });
       }
-    } catch (_) {
+    } catch (e) {
+      if (isFontRequestCancelled(e)) return;
       if (mounted) {
         setState(() {
           _failed = true;
           _loaded = false;
         });
       }
+    } finally {
+      ref.read(fontNetworkTasksProvider.notifier).unregister(_taskKey);
     }
   }
 

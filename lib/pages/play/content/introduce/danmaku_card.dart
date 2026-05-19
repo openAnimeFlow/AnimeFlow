@@ -141,7 +141,10 @@ class _DanmakuCardState extends State<DanmakuCard> {
                         TextButton(
                           onPressed: () {
                             danmakuFieldController.text = subjectName;
-                            Get.dialog(danmakuDialog);
+                            showDialog<void>(
+                              context: context,
+                              builder: (_) => danmakuDialog,
+                            );
                           },
                           child: const Text('切换弹幕'),
                         )
@@ -306,9 +309,7 @@ class _DanmakuCardState extends State<DanmakuCard> {
           ),
           actions: [
             TextButton(
-              onPressed: () {
-                Get.back();
-              },
+              onPressed: () => Navigator.of(dialogContext).pop(),
               child: const Text('取消'),
             ),
             TextButton(
@@ -379,9 +380,10 @@ class _DanmakuCardState extends State<DanmakuCard> {
                         final danmaku =
                         await AnimeFlowRequest.getDanDanmakuByEpisodeID(
                             episode.episodeId);
+                        if (!context.mounted) return;
                         playController.removeDanmaku();
                         playController.addDanmakuAll(danmaku);
-                        Get.back();
+                        Navigator.of(context).pop();
                       },
                     );
                   },

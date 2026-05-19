@@ -9,7 +9,6 @@ import 'package:anime_flow/models/item/bangumi/user_info_item.dart';
 import 'package:anime_flow/widget/bbcode/bbcode_widget.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:go_router/go_router.dart';
 
 import 'collection_tab_view.dart';
 
@@ -253,18 +252,19 @@ class _LoginViewState extends State<LoginView> with SingleTickerProviderStateMix
         'title': '退出登录',
         'icon': Icons.logout_outlined,
         'action': () {
-          Get.dialog(
-            AlertDialog(
+          showDialog<void>(
+            context: context,
+            builder: (dialogContext) => AlertDialog(
               title: const Text('确认退出'),
               content: const Text('确定要退出登录吗？'),
               actions: [
                 TextButton(
-                  onPressed: () => context.pop(),
+                  onPressed: () => Navigator.of(dialogContext).pop(),
                   child: const Text('取消'),
                 ),
                 TextButton(
                   onPressed: () {
-                    context.pop();
+                    Navigator.of(dialogContext).pop();
                     myController.clearUserInfo();
                   },
                   child: const Text('确定'),

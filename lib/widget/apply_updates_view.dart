@@ -309,7 +309,7 @@ class _ApplyUpdatesViewState extends State<ApplyUpdatesView> {
                       onPressed: appInfoController.isDownloading.value
                           ? null
                           : () {
-                        Get.back();
+                        Navigator.of(context).pop();
                       },
                       child: const Text("稍后更新"),
                     )),

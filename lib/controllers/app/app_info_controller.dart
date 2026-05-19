@@ -109,9 +109,14 @@ class AppInfoController extends GetxController {
 
         ApplyUpdatesController? updateController;
         final body = release['body']?.toString() ?? '';
-        Get.dialog(
+        final dialogContext = Get.key.currentContext;
+        if (dialogContext == null || !dialogContext.mounted) {
+          return VersionType.localNewer;
+        }
+        await showDialog<void>(
+          context: dialogContext,
           barrierDismissible: false,
-          ApplyUpdatesView(
+          builder: (_) => ApplyUpdatesView(
             setting: setting,
             download: download,
             body: body,
@@ -142,7 +147,7 @@ class AppInfoController extends GetxController {
                 );
 
                 // 关闭下载进度对话框
-                Get.back();
+                _closeDialog();
 
                 // Windows 平台下载完成后显示完成对话框
                 if (Platform.isWindows) {
@@ -154,7 +159,7 @@ class AppInfoController extends GetxController {
               } catch (e) {
                 // 如果是取消操作，不显示错误提示
                 if (!e.toString().contains('下载已取消')) {
-                  Get.back();
+                  _closeDialog();
                   Get.snackbar(
                     "下载失败",
                     "更新下载失败: $e",
@@ -251,58 +256,69 @@ class AppInfoController extends GetxController {
   /// 获取包名
   String get packageName => appInfo.value?.packageName ?? '未知';
 
+  void _closeDialog() {
+    final context = Get.key.currentContext;
+    if (context != null && context.mounted) {
+      Navigator.of(context, rootNavigator: true).pop();
+    }
+  }
+
   /// 显示 Windows 平台下载完成对话框
   void _showWindowsDownloadCompleteDialog(String savePath) {
-    Get.dialog(
+    final context = Get.key.currentContext;
+    if (context == null || !context.mounted) return;
+
+    showDialog<void>(
+      context: context,
       barrierDismissible: false,
-      Builder(
-        builder: (context) => AlertDialog(
-          title: const Text('下载完成'),
-          content: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              const Text('安装包已下载完成'),
-              const SizedBox(height: 8),
-              SelectableText(
-                savePath,
-                style: TextStyle(
-                  fontSize: 12,
-                  color: Theme.of(context).colorScheme.onSurfaceVariant,
-                  fontFamily: 'monospace',
-                ),
+      builder: (dialogContext) => AlertDialog(
+        title: const Text('下载完成'),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            const Text('安装包已下载完成'),
+            const SizedBox(height: 8),
+            SelectableText(
+              savePath,
+              style: TextStyle(
+                fontSize: 12,
+                color: Theme.of(dialogContext).colorScheme.onSurfaceVariant,
+                fontFamily: 'monospace',
               ),
-            ],
-          ),
-          actions: [
-            TextButton(
-              onPressed: () {
-                Get.back();
-              },
-              child: const Text('取消'),
-            ),
-            TextButton(
-              onPressed: () async {
-                try {
-                  await Process.start(
-                    'explorer.exe',
-                    ['/select,', savePath],
-                    runInShell: true,
-                  );
-                  Get.back();
-                } catch (e) {
-                  Get.back();
-                  Get.snackbar(
-                    '打开失败',
-                    '无法打开文件管理器: $e',
-                    maxWidth: 500,
-                  );
-                }
-              },
-              child: const Text('打开安装包文件夹'),
             ),
           ],
         ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(dialogContext).pop(),
+            child: const Text('取消'),
+          ),
+          TextButton(
+            onPressed: () async {
+              try {
+                await Process.start(
+                  'explorer.exe',
+                  ['/select,', savePath],
+                  runInShell: true,
+                );
+                if (dialogContext.mounted) {
+                  Navigator.of(dialogContext).pop();
+                }
+              } catch (e) {
+                if (dialogContext.mounted) {
+                  Navigator.of(dialogContext).pop();
+                }
+                Get.snackbar(
+                  '打开失败',
+                  '无法打开文件管理器: $e',
+                  maxWidth: 500,
+                );
+              }
+            },
+            child: const Text('打开安装包文件夹'),
+          ),
+        ],
       ),
     );
   }

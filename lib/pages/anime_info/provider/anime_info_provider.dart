@@ -1,4 +1,5 @@
 import 'package:anime_flow/models/item/bangumi/actor_item.dart';
+import 'package:anime_flow/models/item/bangumi/producers_item.dart';
 import 'package:anime_flow/models/item/bangumi/related_subjects_item.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:flutter/widgets.dart';
@@ -136,3 +137,11 @@ class SubjectCharacters extends _$SubjectCharacters {
   }
 }
 
+///番剧制作人信息
+@riverpod
+class SubjectProducers extends _$SubjectProducers {
+  @override
+  Future<ProducersItem> build(int subjectId) async {
+    return BgmRequest.getProducersService(subjectId,limit: 10, offset: 0);
+  }
+}

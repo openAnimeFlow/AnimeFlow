@@ -12,7 +12,7 @@ import 'package:anime_flow/models/item/bangumi/episodes_item.dart';
 import 'package:anime_flow/models/item/bangumi/hot_item.dart';
 import 'package:anime_flow/models/item/bangumi/me_item.dart';
 import 'package:anime_flow/models/item/bangumi/related_subjects_item.dart';
-import 'package:anime_flow/models/item/bangumi/staff_item.dart';
+import 'package:anime_flow/models/item/bangumi/producers_item.dart';
 import 'package:anime_flow/models/item/bangumi/subject_item.dart';
 import 'package:anime_flow/models/item/bangumi/subject_comments_item.dart';
 import 'package:anime_flow/models/item/bangumi/subjects_info_item.dart';
@@ -266,7 +266,7 @@ class BgmRequest {
   }
 
   ///获取条目制作人
-  static Future<StaffItem> getProducersService(int subjectId,
+  static Future<ProducersItem> getProducersService(int subjectId,
       {required int limit, required int offset}) async {
     final response = await _client.get(
       _nextBaseUrl +
@@ -276,7 +276,7 @@ class BgmRequest {
         'offset': offset,
       },
     );
-    return StaffItem.fromJson(response.data);
+    return ProducersItem.fromJson(response.data);
   }
 }
 

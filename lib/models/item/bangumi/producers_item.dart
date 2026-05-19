@@ -1,23 +1,22 @@
 import 'package:anime_flow/models/item/bangumi/image_four_item.dart';
 
-/// Staff item data class
-class StaffItem {
+class ProducersItem {
   final List<StaffData> data;
   final int total;
 
-  StaffItem({
+  ProducersItem({
     required this.data,
     required this.total,
   });
 
-  factory StaffItem.fromJson(Map<String, dynamic> json) {
+  factory ProducersItem.fromJson(Map<String, dynamic> json) {
     var dataList = <StaffData>[];
     if (json['data'] != null) {
       dataList = (json['data'] as List)
           .map((item) => StaffData.fromJson(item as Map<String, dynamic>))
           .toList();
     }
-    return StaffItem(
+    return ProducersItem(
       data: dataList,
       total: json['total'] as int,
     );
@@ -31,7 +30,6 @@ class StaffItem {
   }
 }
 
-/// Staff data class containing staff info and positions
 class StaffData {
   final Staff staff;
   final List<Position> positions;

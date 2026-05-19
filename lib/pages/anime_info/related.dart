@@ -6,6 +6,7 @@ import 'package:anime_flow/routes/routes.dart';
 import 'package:anime_flow/widget/animation_network_image/animation_network_image.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
 
 ///相关条目
 class RelatedView extends StatefulWidget {
@@ -73,7 +74,7 @@ class _RelatedViewState extends State<RelatedView> {
               scrollDirection: Axis.horizontal,
               itemCount: relation.data.length,
               // 缓存范围，优化滚动性能
-              cacheExtent: 200,
+              scrollCacheExtent: const ScrollCacheExtent.pixels(200),
               // 不自动保持item状态，节省内存
               addAutomaticKeepAlives: false,
               // 添加重绘边界，优化性能

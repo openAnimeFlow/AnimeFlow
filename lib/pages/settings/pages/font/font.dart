@@ -19,9 +19,17 @@ class _FontSettingsPageState extends ConsumerState<FontSettingsPage> {
   /// 递增后强制重建预览加载器（刷新列表 / 取消下载后重新拉预览）。
   int _previewRefreshKey = 0;
 
+  late final FontNetworkTasks _fontNetworkTasks;
+
+  @override
+  void initState() {
+    super.initState();
+    _fontNetworkTasks = ref.read(fontNetworkTasksProvider.notifier);
+  }
+
   @override
   void dispose() {
-    ref.read(fontNetworkTasksProvider.notifier).cancelAll();
+    _fontNetworkTasks.cancelAll();
     super.dispose();
   }
 
@@ -104,7 +112,7 @@ class _FontSettingsPageState extends ConsumerState<FontSettingsPage> {
                               style: Theme.of(context).textTheme.bodyMedium,
                             ),
                             const Text(
-                              '使用cdn新上架的字体可能会延迟显示',
+                              '新上架的字体可能会延迟显示',
                               style: TextStyle(fontSize: 10),
                             )
                           ],
@@ -121,6 +129,9 @@ class _FontSettingsPageState extends ConsumerState<FontSettingsPage> {
                       ],
                     ),
                   ],
+                ),
+                const Text('如果字体效果没有完全显示请重启应用',
+                  style: TextStyle(fontWeight: FontWeight.bold),
                 ),
                 const SizedBox(height: 10),
                 fontsAsync.when(
@@ -655,12 +666,16 @@ class _PreviewFontLoaderState extends ConsumerState<_PreviewFontLoader> {
   bool _failed = false;
   CancelToken? _previewCancelToken;
   ProviderSubscription<bool>? _cdnSubscription;
+  late final FontNetworkTasks _fontNetworkTasks;
+  late final Font _font;
 
   String get _taskKey => 'preview:${widget.font.id}';
 
   @override
   void initState() {
     super.initState();
+    _fontNetworkTasks = ref.read(fontNetworkTasksProvider.notifier);
+    _font = ref.read(fontProvider.notifier);
     _cdnSubscription = ref.listenManual(
       fontRepoCdnProvider,
       (previous, next) {
@@ -680,7 +695,7 @@ class _PreviewFontLoaderState extends ConsumerState<_PreviewFontLoader> {
   void dispose() {
     _cdnSubscription?.close();
     _previewCancelToken?.cancel();
-    ref.read(fontNetworkTasksProvider.notifier).unregister(_taskKey);
+    _fontNetworkTasks.unregister(_taskKey);
     super.dispose();
   }
 
@@ -698,10 +713,10 @@ class _PreviewFontLoaderState extends ConsumerState<_PreviewFontLoader> {
     _previewCancelToken?.cancel();
     final cancelToken = CancelToken();
     _previewCancelToken = cancelToken;
-    ref.read(fontNetworkTasksProvider.notifier).register(_taskKey, cancelToken);
+    _fontNetworkTasks.register(_taskKey, cancelToken);
 
     try {
-      final bytes = await ref.read(fontProvider.notifier).loadingFont(
+      final bytes = await _font.loadingFont(
             widget.font.preview,
             cancelToken: cancelToken,
           );
@@ -733,7 +748,7 @@ class _PreviewFontLoaderState extends ConsumerState<_PreviewFontLoader> {
       }
     } finally {
       if (mounted) {
-        ref.read(fontNetworkTasksProvider.notifier).unregister(_taskKey);
+        _fontNetworkTasks.unregister(_taskKey);
       }
     }
   }

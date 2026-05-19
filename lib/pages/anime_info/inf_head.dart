@@ -126,8 +126,8 @@ class InfoHeadView extends StatelessWidget {
 
   Widget _skeletonView(BuildContext context) {
     final isDark = SystemUtil.isDarkTheme(context);
-    final baseColor = isDark ? Colors.grey[400]! : Colors.grey[100]!;
-    final highlightColor = isDark ? Colors.grey[300]! : Colors.grey[50]!;
+    final baseColor = isDark ? Colors.grey[850]! : Colors.grey[300]!;
+    final highlightColor = isDark ? Colors.grey[700]! : Colors.grey[100]!;
     final containerColor = isDark
         ? Theme.of(context).colorScheme.surfaceContainerHighest
         : Theme.of(context).colorScheme.surface;

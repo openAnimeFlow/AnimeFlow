@@ -205,85 +205,42 @@ class InfoSynopsisView extends StatelessWidget {
   ///骨架屏
   Widget _skeletonSliver(BuildContext context) {
     final isDark = SystemUtil.isDarkTheme(context);
-
-    final baseColor = isDark ? Colors.grey[400]! : Colors.grey[100]!;
-
-    final highlightColor = isDark ? Colors.grey[300]! : Colors.grey[50]!;
-
+    final baseColor = isDark ? Colors.grey[850]! : Colors.grey[300]!;
+    final highlightColor = isDark ? Colors.grey[700]! : Colors.grey[100]!;
     final containerColor = isDark
         ? Theme.of(context).colorScheme.surfaceContainerHighest
         : Theme.of(context).colorScheme.surface;
+    final boxDecoration = BoxDecoration(
+      color: containerColor,
+      borderRadius: BorderRadius.circular(8.0),
+    );
+
     return SliverToBoxAdapter(
       child: Padding(
         padding: const EdgeInsets.all(16),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Shimmer.fromColors(
-              baseColor: baseColor,
-              highlightColor: highlightColor,
-              child: Container(
+        child: Shimmer.fromColors(
+          baseColor: baseColor,
+          highlightColor: highlightColor,
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Container(
                 height: 30,
-                width: 150,
-                decoration: BoxDecoration(
-                  color: containerColor,
-                  borderRadius: BorderRadius.circular(8.0),
-                ),
+                width: 80,
+                decoration: boxDecoration,
               ),
-            ),
-            const SizedBox(height: 10),
-            Shimmer.fromColors(
-              baseColor: baseColor,
-              highlightColor: highlightColor,
-              child: Container(
-                height: 25,
-                width: 400,
-                decoration: BoxDecoration(
-                  color: containerColor,
-                  borderRadius: BorderRadius.circular(8.0),
-                ),
-              ),
-            ),
-            const SizedBox(height: 10),
-            Shimmer.fromColors(
-              baseColor: baseColor,
-              highlightColor: highlightColor,
-              child: Container(
-                height: 25,
-                width: 400,
-                decoration: BoxDecoration(
-                  color: containerColor,
-                  borderRadius: BorderRadius.circular(8.0),
-                ),
-              ),
-            ),
-            const SizedBox(height: 10),
-            Shimmer.fromColors(
-              baseColor: baseColor,
-              highlightColor: highlightColor,
-              child: Container(
-                height: 25,
-                width: 400,
-                decoration: BoxDecoration(
-                  color: containerColor,
-                  borderRadius: BorderRadius.circular(8.0),
-                ),
-              ),
-            ),
-            const SizedBox(height: 10),
-            Shimmer.fromColors(
-              baseColor: baseColor,
-              highlightColor: highlightColor,
-              child: Container(
-                height: 25,
-                width: 400,
-                decoration: BoxDecoration(
-                  color: containerColor,
-                  borderRadius: BorderRadius.circular(8.0),
-                ),
-              ),
-            ),
-          ],
+              ...List.generate(6, (index) {
+                return Padding(
+                  padding: const EdgeInsets.only(top: 10),
+                  child: Container(
+                    height: 20,
+                    width: index == 5 ? 240 : double.infinity,
+                    decoration: boxDecoration,
+                  ),
+                );
+              }),
+            ],
+          ),
         ),
       ),
     );

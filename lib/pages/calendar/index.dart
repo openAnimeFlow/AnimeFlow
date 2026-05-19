@@ -1,7 +1,7 @@
 import 'package:anime_flow/constants/play_layout_constant.dart';
 import 'package:anime_flow/models/item/bangumi/calendar_item.dart';
 import 'package:anime_flow/models/item/subject_basic_data_item.dart';
-import 'package:anime_flow/pages/recommend/anime/anime_notifier.dart';
+import 'package:anime_flow/pages/recommend/anime/provider/anime_provider.dart';
 import 'package:anime_flow/routes/routes.dart';
 import 'package:anime_flow/utils/layout_util.dart';
 import 'package:anime_flow/widget/subject_card.dart';

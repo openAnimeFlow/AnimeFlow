@@ -1,4 +1,4 @@
-import 'package:anime_flow/pages/recommend/anime/anime_notifier.dart';
+import 'package:anime_flow/pages/recommend/anime/provider/anime_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:anime_flow/constants/play_layout_constant.dart';
 import 'package:anime_flow/pages/recommend/anime/calendar.dart';

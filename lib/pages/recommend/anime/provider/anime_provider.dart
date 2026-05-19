@@ -1,14 +1,12 @@
 import 'package:anime_flow/http/requests/bgm_request.dart';
 import 'package:anime_flow/models/item/bangumi/calendar_item.dart';
 import 'package:anime_flow/models/item/bangumi/hot_item.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:riverpod_annotation/riverpod_annotation.dart';
 
-final animeCalendarProvider =
-    AsyncNotifierProvider<AnimeCalendarNotifier, Calendar>(
-  AnimeCalendarNotifier.new,
-);
+part 'anime_provider.g.dart';
 
-class AnimeCalendarNotifier extends AsyncNotifier<Calendar> {
+@riverpod
+class AnimeCalendar extends _$AnimeCalendar {
   @override
   Future<Calendar> build() async {
     return BgmRequest.calendarService();
@@ -19,10 +17,6 @@ class AnimeCalendarNotifier extends AsyncNotifier<Calendar> {
     state = await AsyncValue.guard(() => BgmRequest.calendarService());
   }
 }
-
-final animeHotProvider = AsyncNotifierProvider<AnimeHotNotifier, AnimeHotState>(
-  AnimeHotNotifier.new,
-);
 
 class AnimeHotState {
   const AnimeHotState({
@@ -54,7 +48,8 @@ class AnimeHotState {
   }
 }
 
-class AnimeHotNotifier extends AsyncNotifier<AnimeHotState> {
+@riverpod
+class AnimeHot extends _$AnimeHot {
   static const int limit = 20;
 
   @override

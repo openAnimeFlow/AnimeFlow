@@ -1,3 +1,4 @@
+import 'package:anime_flow/models/item/bangumi/actor_item.dart';
 import 'package:anime_flow/models/item/bangumi/related_subjects_item.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:flutter/widgets.dart';
@@ -125,3 +126,13 @@ class SubjectRelated extends _$SubjectRelated {
         offset: 0);
   }
 }
+
+///条目角色信息
+@riverpod
+class SubjectCharacters extends _$SubjectCharacters {
+  @override
+  Future<CharactersItem> build(int subjectId) async {
+    return BgmRequest.charactersService(subjectId,limit: 10, offset: 0);
+  }
+}
+

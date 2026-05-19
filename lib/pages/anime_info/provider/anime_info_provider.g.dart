@@ -291,3 +291,102 @@ abstract class _$SubjectRelated extends $AsyncNotifier<SubjectRelationItem> {
             ));
   }
 }
+
+///条目角色信息
+
+@ProviderFor(SubjectCharacters)
+final subjectCharactersProvider = SubjectCharactersFamily._();
+
+///条目角色信息
+final class SubjectCharactersProvider
+    extends $AsyncNotifierProvider<SubjectCharacters, CharactersItem> {
+  ///条目角色信息
+  SubjectCharactersProvider._(
+      {required SubjectCharactersFamily super.from,
+      required int super.argument})
+      : super(
+          retry: null,
+          name: r'subjectCharactersProvider',
+          isAutoDispose: true,
+          dependencies: null,
+          $allTransitiveDependencies: null,
+        );
+
+  @override
+  String debugGetCreateSourceHash() => _$subjectCharactersHash();
+
+  @override
+  String toString() {
+    return r'subjectCharactersProvider'
+        ''
+        '($argument)';
+  }
+
+  @$internal
+  @override
+  SubjectCharacters create() => SubjectCharacters();
+
+  @override
+  bool operator ==(Object other) {
+    return other is SubjectCharactersProvider && other.argument == argument;
+  }
+
+  @override
+  int get hashCode {
+    return argument.hashCode;
+  }
+}
+
+String _$subjectCharactersHash() => r'b4c67d793f50aee50ad5f2c37bda29eef287f09f';
+
+///条目角色信息
+
+final class SubjectCharactersFamily extends $Family
+    with
+        $ClassFamilyOverride<SubjectCharacters, AsyncValue<CharactersItem>,
+            CharactersItem, FutureOr<CharactersItem>, int> {
+  SubjectCharactersFamily._()
+      : super(
+          retry: null,
+          name: r'subjectCharactersProvider',
+          dependencies: null,
+          $allTransitiveDependencies: null,
+          isAutoDispose: true,
+        );
+
+  ///条目角色信息
+
+  SubjectCharactersProvider call(
+    int subjectId,
+  ) =>
+      SubjectCharactersProvider._(argument: subjectId, from: this);
+
+  @override
+  String toString() => r'subjectCharactersProvider';
+}
+
+///条目角色信息
+
+abstract class _$SubjectCharacters extends $AsyncNotifier<CharactersItem> {
+  late final _$args = ref.$arg as int;
+  int get subjectId => _$args;
+
+  FutureOr<CharactersItem> build(
+    int subjectId,
+  );
+  @$mustCallSuper
+  @override
+  void runBuild() {
+    final ref = this.ref as $Ref<AsyncValue<CharactersItem>, CharactersItem>;
+    final element = ref.element as $ClassProviderElement<
+        AnyNotifier<AsyncValue<CharactersItem>, CharactersItem>,
+        AsyncValue<CharactersItem>,
+        Object?,
+        Object?>;
+    element.handleCreate(
+        ref,
+        () => build(
+              _$args,
+            ));
+  }
+}

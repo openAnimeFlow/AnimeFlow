@@ -60,8 +60,11 @@ class _AnimeInfoPageState extends ConsumerState<AnimeInfoPage> {
 
   @override
   Widget build(BuildContext context) {
-    final animeInfoAsync = ref.watch(animeInfoProvider(subjectBasicData.id));
-    final subjectsInfo = animeInfoAsync.asData?.value;
+    final subjectsInfo = ref.watch(
+      animeInfoProvider(subjectBasicData.id).select(
+        (asyncValue) => asyncValue.asData?.value.subjectInfo,
+      ),
+    );
 
     // 状态栏高度
     final double statusBarHeight = MediaQuery.of(context).padding.top;
@@ -126,6 +129,7 @@ class _AnimeInfoPageState extends ConsumerState<AnimeInfoPage> {
             ];
           },
           body: InfoSynopsisView(
+            subjectId: subjectBasicData.id,
             subjectsInfo: subjectsInfo,
             onScrollChanged: (bool showButton) {
               if (topButton != showButton) {

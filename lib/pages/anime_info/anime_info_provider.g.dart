@@ -13,7 +13,7 @@ part of 'anime_info_provider.dart';
 final animeInfoProvider = AnimeInfoFamily._();
 
 final class AnimeInfoProvider
-    extends $AsyncNotifierProvider<AnimeInfo, SubjectsInfoItem?> {
+    extends $AsyncNotifierProvider<AnimeInfo, AnimeInfoState> {
   AnimeInfoProvider._(
       {required AnimeInfoFamily super.from, required int super.argument})
       : super(
@@ -49,12 +49,12 @@ final class AnimeInfoProvider
   }
 }
 
-String _$animeInfoHash() => r'ddd36370a95b2cf40ed6175de72aa7ca62e6feda';
+String _$animeInfoHash() => r'82998039a042b3a27e675e4a852a6cebcafc16f3';
 
 final class AnimeInfoFamily extends $Family
     with
-        $ClassFamilyOverride<AnimeInfo, AsyncValue<SubjectsInfoItem?>,
-            SubjectsInfoItem?, FutureOr<SubjectsInfoItem?>, int> {
+        $ClassFamilyOverride<AnimeInfo, AsyncValue<AnimeInfoState>,
+            AnimeInfoState, FutureOr<AnimeInfoState>, int> {
   AnimeInfoFamily._()
       : super(
           retry: null,
@@ -73,21 +73,20 @@ final class AnimeInfoFamily extends $Family
   String toString() => r'animeInfoProvider';
 }
 
-abstract class _$AnimeInfo extends $AsyncNotifier<SubjectsInfoItem?> {
+abstract class _$AnimeInfo extends $AsyncNotifier<AnimeInfoState> {
   late final _$args = ref.$arg as int;
   int get subjectId => _$args;
 
-  FutureOr<SubjectsInfoItem?> build(
+  FutureOr<AnimeInfoState> build(
     int subjectId,
   );
   @$mustCallSuper
   @override
   void runBuild() {
-    final ref =
-        this.ref as $Ref<AsyncValue<SubjectsInfoItem?>, SubjectsInfoItem?>;
+    final ref = this.ref as $Ref<AsyncValue<AnimeInfoState>, AnimeInfoState>;
     final element = ref.element as $ClassProviderElement<
-        AnyNotifier<AsyncValue<SubjectsInfoItem?>, SubjectsInfoItem?>,
-        AsyncValue<SubjectsInfoItem?>,
+        AnyNotifier<AsyncValue<AnimeInfoState>, AnimeInfoState>,
+        AsyncValue<AnimeInfoState>,
         Object?,
         Object?>;
     element.handleCreate(

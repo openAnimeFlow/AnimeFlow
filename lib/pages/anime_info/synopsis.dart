@@ -1,7 +1,8 @@
 import 'package:anime_flow/constants/play_layout_constant.dart';
 import 'package:anime_flow/models/item/bangumi/subjects_info_item.dart';
+import 'package:anime_flow/pages/anime_info/anime_info_provider.dart';
 import 'package:anime_flow/pages/anime_info/characters.dart';
-import 'package:anime_flow/pages/anime_info/comment.dart';
+import 'package:anime_flow/pages/anime_info/info_comment.dart';
 import 'package:anime_flow/pages/anime_info/details.dart';
 import 'package:anime_flow/pages/anime_info/producers.dart';
 import 'package:anime_flow/pages/anime_info/related.dart';
@@ -9,6 +10,7 @@ import 'package:anime_flow/pages/anime_info/tags.dart';
 import 'package:anime_flow/utils/systemUtil.dart';
 import 'package:anime_flow/widget/text/expandable_text.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shimmer/shimmer.dart';
 
 /// 隐藏滚动条的ScrollBehavior
@@ -21,24 +23,23 @@ class _NoScrollbarBehavior extends ScrollBehavior {
 }
 
 /// 条目详情信息展示ui
-class InfoSynopsisView extends StatefulWidget {
+class InfoSynopsisView extends ConsumerStatefulWidget {
+  final int subjectId;
   final SubjectsInfoItem? subjectsInfo;
   final ValueChanged<bool>? onScrollChanged;
 
   const InfoSynopsisView({
     super.key,
+    required this.subjectId,
     this.subjectsInfo,
     this.onScrollChanged,
   });
 
   @override
-  State<InfoSynopsisView> createState() => _InfoSynopsisViewState();
+  ConsumerState<InfoSynopsisView> createState() => _InfoSynopsisViewState();
 }
 
-class _InfoSynopsisViewState extends State<InfoSynopsisView> {
-  final GlobalKey<CommentViewState> _commentViewKey =
-  GlobalKey<CommentViewState>();
-
+class _InfoSynopsisViewState extends ConsumerState<InfoSynopsisView> {
   @override
   Widget build(BuildContext context) {
     const String title = '简介';
@@ -55,9 +56,9 @@ class _InfoSynopsisViewState extends State<InfoSynopsisView> {
               // 只处理垂直滚动的更新事件
               if (scrollInfo.metrics.axis == Axis.vertical &&
                   scrollInfo is ScrollUpdateNotification) {
-                // 通知 CommentView 检查是否需要加载更多
-                _commentViewKey.currentState
-                    ?.checkAndLoadMore(scrollInfo.metrics);
+                ref
+                    .read(animeInfoProvider(widget.subjectId).notifier)
+                    .checkAndLoadMore(scrollInfo.metrics);
 
                 // 监听页面滚动位置，通知父组件更新按钮显示状态
                 final bool shouldShowButton = scrollInfo.metrics.pixels >= 300;
@@ -155,10 +156,7 @@ class _InfoSynopsisViewState extends State<InfoSynopsisView> {
                       // 评论
                       SliverToBoxAdapter(
                         child: _buildContainer(
-                          CommentView(
-                            key: _commentViewKey,
-                            subjectId: widget.subjectsInfo!.id,
-                          ),
+                          InfoCommentView(subjectId: widget.subjectId),
                         ),
                       ),
                     ],

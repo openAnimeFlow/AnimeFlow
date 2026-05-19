@@ -5,6 +5,7 @@ import 'package:anime_flow/models/item/bangumi/subjects_info_item.dart';
 import 'package:anime_flow/pages/anime_info/inf_head.dart';
 import 'package:anime_flow/routes/routes.dart';
 import 'package:anime_flow/pages/anime_info/provider/anime_info_provider.dart';
+import 'package:anime_flow/utils/logger.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:get/get.dart';
@@ -14,30 +15,23 @@ import 'synopsis.dart';
 
 part 'evaluate_dialog.dart';
 
-class AnimeInfoPage extends ConsumerStatefulWidget {
+class AnimeInfoPage extends StatefulWidget {
   final SubjectBasicData animeInfoExtra;
 
   const AnimeInfoPage({super.key, required this.animeInfoExtra});
 
   @override
-  ConsumerState<AnimeInfoPage> createState() => _AnimeInfoPageState();
+  State<AnimeInfoPage> createState() => _AnimeInfoPageState();
 }
 
-class _AnimeInfoPageState extends ConsumerState<AnimeInfoPage> {
-  late final MyController myController;
+class _AnimeInfoPageState extends State<AnimeInfoPage> {
+  final nestedScrollController = ScrollController();
+  final MyController myController = Get.find<MyController>();
+
   /// 内容区域的高度
   final double contentHeight = 200.0;
   bool isPinned = false;
   bool topButton = false;
-  final nestedScrollController = ScrollController();
-
-  @override
-  void initState() {
-    super.initState();
-    myController = Get.find<MyController>();
-  }
-
-  SubjectBasicData get subjectBasicData => widget.animeInfoExtra;
 
   @override
   void dispose() {
@@ -47,14 +41,8 @@ class _AnimeInfoPageState extends ConsumerState<AnimeInfoPage> {
 
   @override
   Widget build(BuildContext context) {
-    final subjectsInfo = ref.watch(
-      animeInfoProvider(subjectBasicData.id).select(
-            (asyncValue) => asyncValue.asData?.value,
-      ),
-    );
-
-    // 状态栏高度
-    final double statusBarHeight = MediaQuery.of(context).padding.top;
+    final subjectBasicData = widget.animeInfoExtra;
+    final statusBarHeight = MediaQuery.of(context).padding.top;
 
     return Scaffold(
       body: NotificationListener<ScrollNotification>(
@@ -84,8 +72,7 @@ class _AnimeInfoPageState extends ConsumerState<AnimeInfoPage> {
                   automaticallyImplyLeading: false,
                   titleSpacing: 0,
                   title: InfoAppbar(
-                      subjectBasicData: subjectBasicData,
-                      isPinned: isPinned),
+                      subjectBasicData: subjectBasicData, isPinned: isPinned),
                   pinned: true,
                   floating: false,
                   snap: false,
@@ -95,7 +82,7 @@ class _AnimeInfoPageState extends ConsumerState<AnimeInfoPage> {
 
                   // 展开高度计算：内容高度 + 状态栏 + Toolbar
                   expandedHeight:
-                  contentHeight + statusBarHeight + kToolbarHeight,
+                      contentHeight + statusBarHeight + kToolbarHeight,
 
                   /// 头部内容区域
                   flexibleSpace: FlexibleSpaceBar(
@@ -137,6 +124,7 @@ class _AnimeInfoPageState extends ConsumerState<AnimeInfoPage> {
           key: ValueKey<bool>(topButton),
           mainAxisAlignment: MainAxisAlignment.end,
           mainAxisSize: MainAxisSize.min,
+          spacing: 5,
           children: [
             if (topButton)
               FloatingActionButton(
@@ -151,31 +139,45 @@ class _AnimeInfoPageState extends ConsumerState<AnimeInfoPage> {
                 child: Icon(Icons.arrow_upward_rounded,
                     color: Theme.of(context).colorScheme.primary),
               ),
-            const SizedBox(height: 5),
-            Obx(() => myController.userInfo.value != null &&
-                subjectsInfo != null &&
-                subjectsInfo.interest != null
-                ? FloatingActionButton(
-              heroTag: 'evaluate_${subjectBasicData.id}',
-              onPressed: () {
-                showDialog<void>(
-                  context: context,
-                  barrierDismissible: false,
-                  builder: (_) => InfoEvaluateDialog(
-                    subjectsInfo: subjectsInfo,
-                    onSaved: (updated) => ref
-                        .read(animeInfoProvider(subjectBasicData.id).notifier)
-                        .setAnimeInfo(updated),
-                  ),
-                );
+            Consumer(
+              builder: (context, ref, child) {
+                final asyncSubjectsInfo =
+                    ref.watch(animeInfoProvider(subjectBasicData.id));
+                return asyncSubjectsInfo.when(
+                    data: (subjectsInfo) {
+                      return Obx(() => myController.userInfo.value != null &&
+                              subjectsInfo.interest != null
+                          ? FloatingActionButton(
+                              heroTag: 'evaluate_${subjectBasicData.id}',
+                              onPressed: () {
+                                showDialog<void>(
+                                  context: context,
+                                  barrierDismissible: false,
+                                  builder: (_) => InfoEvaluateDialog(
+                                    subjectsInfo: subjectsInfo,
+                                    onSaved: (updated) => ref
+                                        .read(animeInfoProvider(
+                                                subjectBasicData.id)
+                                            .notifier)
+                                        .setAnimeInfo(updated),
+                                  ),
+                                );
+                              },
+                              child: Icon(
+                                Icons.messenger,
+                                color: Theme.of(context).colorScheme.primary,
+                              ),
+                            )
+                          : const SizedBox.shrink());
+                    },
+                    error: (error, stackTrace) {
+                      LiggLogger()
+                          .e('获取番剧详情失败', error: error, stackTrace: stackTrace);
+                      return const SizedBox.shrink();
+                    },
+                    loading: () => const SizedBox.shrink());
               },
-              child: Icon(
-                Icons.messenger,
-                color: Theme.of(context).colorScheme.primary,
-              ),
-            )
-                : const SizedBox.shrink()),
-            const SizedBox(height: 5),
+            ),
             FloatingActionButton(
               heroTag: 'play_${subjectBasicData.id}',
               onPressed: () =>

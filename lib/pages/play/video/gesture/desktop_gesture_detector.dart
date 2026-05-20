@@ -117,7 +117,6 @@ class _DesktopGestureDetectorState extends State<DesktopGestureDetector> {
 
           child: GestureDetector(
             // 双击事件
-            // 使用自定义全屏方法，
             onDoubleTap: () {
               playPageController.toggleFullScreen();
             },

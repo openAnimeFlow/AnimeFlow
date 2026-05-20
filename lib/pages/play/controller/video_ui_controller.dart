@@ -119,10 +119,11 @@ class VideoUiStateController extends GetxController {
     } catch (_) {}
   }
 
-
-  //修改主轴类型
+  /// 修改主轴类型
   void updateMainAxisAlignmentType(MainAxisAlignment type) {
-    mainAxisAlignmentType.value = type;
+    if (mainAxisAlignmentType.value != type) {
+      mainAxisAlignmentType.value = type;
+    }
   }
 
   // 更新指示器类型

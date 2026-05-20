@@ -542,8 +542,9 @@ class PlayController extends GetxController {
     return hiddenPlatforms.contains(platform);
   }
 
-  ///暂停|播放
+  ///暂停/播放
   void playOrPauseVideo() {
+    Get.find<VideoUiStateController>().updateMainAxisAlignmentType(MainAxisAlignment.start);
     player.playOrPause();
   }
 

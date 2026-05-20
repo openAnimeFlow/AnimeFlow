@@ -2,6 +2,7 @@ import 'dart:io';
 import 'package:anime_flow/pages/settings/pages/font/font_provider.dart';
 import 'package:anime_flow/repository/storage.dart';
 import 'package:anime_flow/routes/routes.dart';
+import 'package:bot_toast/bot_toast.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:get/get.dart';
@@ -52,6 +53,7 @@ class MyApp extends StatelessWidget {
         final fontFamily = themeState.fontFamily;
         return GetMaterialApp.router(
           key: ValueKey(fontFamily),
+          builder: BotToastInit(),
           routeInformationProvider: appRouter.routeInformationProvider,
           routeInformationParser: appRouter.routeInformationParser,
           routerDelegate: appRouter.routerDelegate,

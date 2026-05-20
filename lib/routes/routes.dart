@@ -24,6 +24,7 @@ import 'package:anime_flow/pages/settings/pages/plugins/plugins.dart';
 import 'package:anime_flow/pages/settings/pages/font/font.dart';
 import 'package:anime_flow/pages/settings/pages/theme.dart';
 import 'package:anime_flow/pages/user_space/index.dart';
+import 'package:bot_toast/bot_toast.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:go_router/go_router.dart';
@@ -355,6 +356,7 @@ class SettingAgreementRoute extends GoRouteData with $SettingAgreementRoute {
 
 final GoRouter appRouter = GoRouter(
   navigatorKey: Get.key,
+  observers: [BotToastNavigatorObserver()],
   initialLocation: const MainRoute().location,
   redirect: (context, state) {
     final uri = state.uri;

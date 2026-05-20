@@ -1,4 +1,10 @@
-part of 'index.dart';
+
+import 'package:anime_flow/http/requests/bgm_request.dart';
+import 'package:anime_flow/models/item/bangumi/subjects_info_item.dart';
+import 'package:flutter/material.dart';
+import 'package:get/get_core/src/get_main.dart';
+import 'package:get/get_navigation/src/extension_navigation.dart';
+import 'package:go_router/go_router.dart';
 
 /// 评价对话框
 class InfoEvaluateDialog extends StatefulWidget {

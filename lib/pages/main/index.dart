@@ -1,7 +1,8 @@
 import 'package:anime_flow/constants/storage_key.dart';
 import 'package:anime_flow/controllers/app/app_info_controller.dart';
-import 'package:anime_flow/controllers/my_controller.dart';
 import 'package:anime_flow/controllers/shaders/shaders_controller.dart';
+import 'package:anime_flow/models/item/bangumi/user_info_item.dart';
+import 'package:anime_flow/providers/my_provider.dart';
 import 'package:anime_flow/models/item/tab_item.dart';
 import 'package:anime_flow/pages/my/index.dart';
 import 'package:anime_flow/pages/ranking/index.dart';
@@ -12,6 +13,7 @@ import 'package:anime_flow/utils/systemUtil.dart';
 import 'package:anime_flow/widget/animation_network_image/animation_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:anime_flow/pages/recommend/index.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:get/get.dart';
 
 class MainPage extends StatefulWidget {
@@ -24,7 +26,6 @@ class MainPage extends StatefulWidget {
 }
 
 class _MainPageState extends State<MainPage> {
-  late final MyController myController;
   late final AppInfoController appInfoController;
   late final ShadersController shadersController;
   final setting = Storage.setting;
@@ -38,7 +39,6 @@ class _MainPageState extends State<MainPage> {
   void initState() {
     super.initState();
     autoUpdate = setting.get(StorageKey.autoUpdateKey, defaultValue: true);
-    myController = Get.put(MyController(), permanent: true);
     appInfoController = Get.put(AppInfoController(), permanent: true);
     shadersController = Get.put(ShadersController(), permanent: true);
 
@@ -100,14 +100,15 @@ class _MainPageState extends State<MainPage> {
 
   // 构建 NavigationRail
   List<NavigationRailDestination> _buildRailDestinations(
-      ColorScheme colorScheme) {
+    ColorScheme colorScheme,
+    UserInfoItem? userInfo,
+  ) {
     return _tabs.asMap().entries.map((entry) {
       final index = entry.key;
       final tab = entry.value;
 
       // 如果是"我的"标签（index == 2），根据用户信息动态显示
       if (index == 2) {
-        final userInfo = myController.userInfo.value;
         if (userInfo != null) {
           return NavigationRailDestination(
             icon: AnimationNetworkImage(
@@ -146,12 +147,14 @@ class _MainPageState extends State<MainPage> {
   }
 
   // 构建 NavigationBar
-  List<NavigationDestination> _buildBarDestinations(ColorScheme colorScheme) {
+  List<NavigationDestination> _buildBarDestinations(
+    ColorScheme colorScheme,
+    UserInfoItem? userInfo,
+  ) {
     return _tabs.asMap().entries.map((entry) {
       final index = entry.key;
       final tab = entry.value;
       if (index == 2) {
-        final userInfo = myController.userInfo.value;
         if (userInfo != null) {
           return NavigationDestination(
             icon: AnimationNetworkImage(
@@ -208,14 +211,13 @@ class _MainPageState extends State<MainPage> {
       body: Row(
         children: [
           if (isDesktop)
-            Obx(
-              () => NavigationRail(
+            Consumer(
+              builder: (context, ref, _) => NavigationRail(
                 backgroundColor: colorScheme.surfaceContainerHighest,
                 selectedIndex: _currentIndex,
                 groupAlignment: 1.0,
                 onDestinationSelected: _onDestinationSelected,
                 labelType: NavigationRailLabelType.all,
-                // 顶部搜索按钮
                 leading: Padding(
                   padding: const EdgeInsets.only(bottom: 16, top: 8),
                   child: FloatingActionButton(
@@ -227,11 +229,11 @@ class _MainPageState extends State<MainPage> {
                     child: const Icon(Icons.search),
                   ),
                 ),
-                // 底部设置按钮
                 trailing: Padding(
                   padding: EdgeInsets.only(
-                      bottom:
-                          desktop ? 16 : MediaQuery.of(context).padding.bottom),
+                    bottom:
+                        desktop ? 16 : MediaQuery.of(context).padding.bottom,
+                  ),
                   child: IconButton(
                     icon: const Icon(Icons.settings_outlined),
                     iconSize: 28,
@@ -239,7 +241,10 @@ class _MainPageState extends State<MainPage> {
                     onPressed: () => const SettingsRoute().push(context),
                   ),
                 ),
-                destinations: _buildRailDestinations(colorScheme),
+                destinations: _buildRailDestinations(
+                  colorScheme,
+                  ref.watch(myProvider).userInfo,
+                ),
               ),
             ),
           Expanded(
@@ -254,12 +259,17 @@ class _MainPageState extends State<MainPage> {
       ),
       bottomNavigationBar: isDesktop
           ? null
-          : Obx(() => NavigationBar(
+          : Consumer(
+              builder: (context, ref, _) => NavigationBar(
                 backgroundColor: colorScheme.surfaceContainerHighest,
                 selectedIndex: _currentIndex,
                 onDestinationSelected: _onDestinationSelected,
-                destinations: _buildBarDestinations(colorScheme),
-              )),
+                destinations: _buildBarDestinations(
+                  colorScheme,
+                  ref.watch(myProvider).userInfo,
+                ),
+              ),
+            ),
     );
   }
 }

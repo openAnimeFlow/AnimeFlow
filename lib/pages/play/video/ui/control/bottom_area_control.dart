@@ -1,5 +1,5 @@
 import 'package:anime_flow/constants/assets_path_constants.dart';
-import 'package:anime_flow/controllers/my_controller.dart';
+import 'package:anime_flow/providers/my_provider.dart';
 import 'package:anime_flow/models/enums/video_controls_icon_type.dart';
 import 'package:anime_flow/pages/play/controller/episode_controller.dart';
 import 'package:anime_flow/pages/play/controller/play_controller.dart';
@@ -14,6 +14,7 @@ import 'package:anime_flow/utils/systemUtil.dart';
 import 'package:anime_flow/widget/danmaku_text_field.dart';
 import 'package:anime_flow/widget/play_content/episodes_view.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:get/get.dart';
 
@@ -31,7 +32,6 @@ class _BottomAreaControlState extends State<BottomAreaControl> {
   final playController = Get.find<PlayController>();
   final episodesState = Get.find<EpisodesState>();
   final episodeController = Get.find<EpisodeController>();
-  final myController = Get.find<MyController>();
   final videoSourceController = Get.find<VideoSourceController>();
 
   Future<void> onSendDanmaku(String text) async {
@@ -173,41 +173,47 @@ class _BottomAreaControlState extends State<BottomAreaControl> {
                           Expanded(
                             child: fullscreen || isWideScreen
                                 ? danmakuOn
-                                    // 弹幕输入框
-                                    ? Obx(() => myController.userInfo.value !=
-                                            null
-                                        ? DanmakuTextField(
-                                            iconColor: Colors.white,
-                                            textColor: Colors.white,
-                                            onFocusChange: (hasFocus) {
-                                              if (hasFocus) {
-                                                playController.stopPlaying();
-                                                videoUiStateController
-                                                    .cancelUiTimer();
-                                              } else {
-                                                playController.startPlaying();
-                                                // videoUiStateController.hideControlsUi();
-                                              }
-                                            },
-                                            onSend: (content) {
-                                              onSendDanmaku(content);
-                                            },
-                                          )
-                                        : Container(
-                                            padding: const EdgeInsets.symmetric(horizontal: 10),
+                                    ? Consumer(
+                                        builder: (context, ref, _) {
+                                          if (ref.watch(myProvider).userInfo !=
+                                              null) {
+                                            return DanmakuTextField(
+                                              iconColor: Colors.white,
+                                              textColor: Colors.white,
+                                              onFocusChange: (hasFocus) {
+                                                if (hasFocus) {
+                                                  playController.stopPlaying();
+                                                  videoUiStateController
+                                                      .cancelUiTimer();
+                                                } else {
+                                                  playController.startPlaying();
+                                                }
+                                              },
+                                              onSend: onSendDanmaku,
+                                            );
+                                          }
+                                          return Container(
+                                            padding: const EdgeInsets
+                                                .symmetric(horizontal: 10),
                                             decoration: BoxDecoration(
                                               color: Colors.transparent,
                                               border: Border.all(
-                                                color: Colors.white.withValues(alpha: 0.8),
+                                                color: Colors.white
+                                                    .withValues(alpha: 0.8),
                                                 width: 1,
                                               ),
-                                              borderRadius: BorderRadius.circular(10),
+                                              borderRadius:
+                                                  BorderRadius.circular(10),
                                             ),
                                             child: const Text(
-                                              "登录后才能发送弹幕",
-                                              style: TextStyle(color: Colors.white),
+                                              '登录后才能发送弹幕',
+                                              style: TextStyle(
+                                                color: Colors.white,
+                                              ),
                                             ),
-                                          ))
+                                          );
+                                        },
+                                      )
                                     : const SizedBox.shrink()
                                 // 进度条
                                 : const Padding(

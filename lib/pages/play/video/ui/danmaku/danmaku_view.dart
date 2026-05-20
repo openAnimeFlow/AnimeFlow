@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'package:anime_flow/constants/storage_key.dart';
-import 'package:anime_flow/controllers/my_controller.dart';
+import 'package:anime_flow/providers/app_provider_container.dart';
+import 'package:anime_flow/providers/my_provider.dart';
 import 'package:anime_flow/pages/play/controller/play_controller.dart';
 import 'package:anime_flow/repository/storage.dart';
 import 'package:canvas_danmaku/canvas_danmaku.dart';
@@ -18,7 +19,6 @@ class _DanmakuViewState extends State<DanmakuView>
     with AutomaticKeepAliveClientMixin {
   final setting = Storage.setting;
   final PlayController playController = Get.find<PlayController>();
-  final MyController myController = Get.find<MyController>();
   Timer? _danmakuTimer;
   Worker? _rateWorker;
 
@@ -116,7 +116,7 @@ class _DanmakuViewState extends State<DanmakuView>
                 // 添加弹幕
                 playController.addDanDanmaku(
                   danmaku,
-                  myController.userInfo.value?.id,
+                  appProviderContainer.read(myProvider).userInfo?.id,
                 );
               },
             );

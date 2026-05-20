@@ -1,4 +1,4 @@
-import 'package:anime_flow/controllers/my_controller.dart';
+import 'package:anime_flow/providers/my_provider.dart';
 import 'package:anime_flow/pages/play/controller/play_controller.dart';
 import 'package:anime_flow/pages/play/controller/video_ui_controller.dart';
 import 'package:anime_flow/stores/episodes_state.dart';
@@ -7,6 +7,7 @@ import 'package:anime_flow/models/item/bangumi/episode_comments_item.dart';
 import 'package:anime_flow/pages/play/content/introduce/index.dart';
 import 'package:anime_flow/widget/danmaku_text_field.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:get/get.dart';
 import 'package:anime_flow/utils/logger.dart';
 import 'comments/index.dart';
@@ -22,7 +23,6 @@ class _ContentViewState extends State<ContentView>
     with SingleTickerProviderStateMixin {
   final EpisodesState episodesState = Get.find<EpisodesState>();
   final PlayController playController = Get.find<PlayController>();
-  final myController = Get.find<MyController>();
   final VideoUiStateController videoUiStateController =
       Get.find<VideoUiStateController>();
   final List<String> _tabs = ['简介', '吐槽'];
@@ -150,12 +150,17 @@ class _ContentViewState extends State<ContentView>
               Obx(
                 () => playController.isWideScreen.value
                     ? const Spacer()
-                    : Obx(() => myController.userInfo.value != null
-                        ? SizedBox(
+                    : Consumer(
+                        builder: (context, ref, _) {
+                          if (ref.watch(myProvider).userInfo == null) {
+                            return const SizedBox.shrink();
+                          }
+                          return SizedBox(
                             width: 200,
                             child: Padding(
-                              padding:
-                                  const EdgeInsets.symmetric(horizontal: 8),
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 8,
+                              ),
                               child: DanmakuTextField(
                                 onFocusChange: (hasFocus) {
                                   if (hasFocus) {
@@ -169,8 +174,9 @@ class _ContentViewState extends State<ContentView>
                                 onSend: onSendDanmaku,
                               ),
                             ),
-                          )
-                        : const SizedBox.shrink()),
+                          );
+                        },
+                      ),
               )
             ],
           ),

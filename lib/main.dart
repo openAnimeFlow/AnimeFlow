@@ -8,6 +8,7 @@ import 'package:get/get.dart';
 import 'package:hive_ce_flutter/hive_flutter.dart';
 import 'package:media_kit/media_kit.dart';
 import 'package:window_manager/window_manager.dart';
+import 'package:anime_flow/providers/app_provider_container.dart';
 import 'providers/theme_provider.dart';
 
 void main() async {
@@ -29,7 +30,12 @@ void main() async {
     });
   }
 
-  runApp(const ProviderScope(child: MyApp()));
+  runApp(
+    UncontrolledProviderScope(
+      container: appProviderContainer,
+      child: const MyApp(),
+    ),
+  );
 }
 
 class MyApp extends StatelessWidget {

@@ -1,36 +1,24 @@
-import 'package:anime_flow/controllers/my_controller.dart';
+import 'package:anime_flow/pages/my/login_view/login_view.dart';
+import 'package:anime_flow/pages/my/no_login/no_login_view.dart';
+import 'package:anime_flow/providers/my_provider.dart';
 import 'package:flutter/material.dart';
-import 'package:get/get.dart';
-import 'login_view/login_view.dart';
-import 'no_login/no_login_view.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-class MyPage extends StatefulWidget {
+class MyPage extends StatelessWidget {
   const MyPage({super.key});
 
   @override
-  State<MyPage> createState() => _MyPageState();
-}
-
-class _MyPageState extends State<MyPage> with SingleTickerProviderStateMixin {
-  bool isPinned = false;
-  late final MyController myController;
-
-  @override
-  void initState() {
-    super.initState();
-    myController = Get.find<MyController>();
-  }
-
-  @override
   Widget build(BuildContext context) {
-    return Obx(
-      () => myController.userInfo.value == null
-          ? const Scaffold(body: NoLoginView())
-          : Scaffold(
-              body: LoginView(
-                userInfoItem: myController.userInfo.value!,
-              ),
-            ),
+    return Consumer(
+      builder: (context, ref, _) {
+        final userInfo = ref.watch(myProvider).userInfo;
+        if (userInfo == null) {
+          return const Scaffold(body: NoLoginView());
+        }
+        return Scaffold(
+          body: LoginView(userInfoItem: userInfo),
+        );
+      },
     );
   }
 }

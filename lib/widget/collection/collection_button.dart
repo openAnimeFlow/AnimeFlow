@@ -1,9 +1,10 @@
-import 'package:anime_flow/controllers/my_controller.dart';
 import 'package:anime_flow/http/requests/bgm_request.dart';
 import 'package:anime_flow/models/enums/collect_type.dart';
 import 'package:anime_flow/models/item/bangumi/subjects_info_item.dart';
+import 'package:anime_flow/providers/my_provider.dart';
 import 'package:anime_flow/routes/routes.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:get/get.dart';
 
 class CollectionButton extends StatefulWidget {
@@ -18,8 +19,6 @@ class CollectionButton extends StatefulWidget {
 }
 
 class _CollectionButtonState extends State<CollectionButton> {
-  late final MyController myController;
-
   CollectType? _getCurrentCollectType() {
     if (widget.subject.interest == null) return null;
     final apiType = widget.subject.interest!.type;
@@ -40,17 +39,14 @@ class _CollectionButtonState extends State<CollectionButton> {
   }
 
   @override
-  void initState() {
-    super.initState();
-    myController = Get.find<MyController>();
-  }
-
-  @override
   Widget build(BuildContext context) {
-    final currentCollectType = _getCurrentCollectType();
+    return Consumer(
+      builder: (context, ref, _) {
+        final currentCollectType = _getCurrentCollectType();
+        final isLoggedIn = ref.watch(myProvider).userInfo != null;
 
-    return Obx(() => myController.userInfo.value == null
-        ? OutlinedButton(
+        if (!isLoggedIn) {
+          return OutlinedButton(
             onPressed: () => const MainRoute(tab: 2).go(context),
             style: OutlinedButton.styleFrom(
               side: BorderSide(color: Theme.of(context).colorScheme.primary),
@@ -66,8 +62,10 @@ class _CollectionButtonState extends State<CollectionButton> {
                 color: Theme.of(context).colorScheme.primary,
               ),
             ),
-          )
-        : PopupMenuButton<CollectType>(
+          );
+        }
+
+        return PopupMenuButton<CollectType>(
             offset: const Offset(0, 40),
             shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(12),
@@ -155,7 +153,9 @@ class _CollectionButtonState extends State<CollectionButton> {
                 }
               }
             },
-          ));
+          );
+      },
+    );
   }
 
   /// 将 CollectType 的 value 转换为 API 的 type

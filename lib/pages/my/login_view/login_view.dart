@@ -1,6 +1,7 @@
 import 'dart:ui';
 
-import 'package:anime_flow/controllers/my_controller.dart';
+import 'package:anime_flow/providers/app_provider_container.dart';
+import 'package:anime_flow/providers/my_provider.dart';
 import 'package:anime_flow/routes/routes.dart';
 import 'package:anime_flow/widget/animation_network_image/animation_network_image.dart';
 import 'package:anime_flow/http/requests/bgm_request.dart';
@@ -8,7 +9,6 @@ import 'package:anime_flow/models/item/bangumi/collections_item.dart';
 import 'package:anime_flow/models/item/bangumi/user_info_item.dart';
 import 'package:anime_flow/widget/bbcode/bbcode_widget.dart';
 import 'package:flutter/material.dart';
-import 'package:get/get.dart';
 
 import 'collection_tab_view.dart';
 
@@ -21,10 +21,10 @@ class LoginView extends StatefulWidget {
   State<LoginView> createState() => _LoginViewState();
 }
 
-class _LoginViewState extends State<LoginView> with SingleTickerProviderStateMixin {
+class _LoginViewState extends State<LoginView>
+    with SingleTickerProviderStateMixin {
   final double _contentHeight = 200.0; // 头部内容区域的高度
   late TabController _tabController;
-  late final MyController myController;
   bool isPinned = false;
 
   // 为每个 tab 类型缓存数据，key 是 type (1-5)
@@ -119,7 +119,6 @@ class _LoginViewState extends State<LoginView> with SingleTickerProviderStateMix
     // TODO 暂时默认为再看tab索引，后续从设置中获取
     _tabController =
         TabController(length: _tabs.length, vsync: this, initialIndex: 2);
-    myController = Get.find<MyController>();
     // 监听 tab 切换，自动加载对应类型的数据（如果缓存中没有）
     _tabController.addListener(() {
       if (!_tabController.indexIsChanging) {
@@ -265,7 +264,9 @@ class _LoginViewState extends State<LoginView> with SingleTickerProviderStateMix
                 TextButton(
                   onPressed: () {
                     Navigator.of(dialogContext).pop();
-                    myController.clearUserInfo();
+                    appProviderContainer
+                        .read(myProvider.notifier)
+                        .clearUserInfo();
                   },
                   child: const Text('确定'),
                 ),

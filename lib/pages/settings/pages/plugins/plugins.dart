@@ -4,9 +4,9 @@ import 'package:anime_flow/routes/routes.dart';
 import 'package:anime_flow/utils/crawl_config.dart';
 import 'package:anime_flow/repository/storage.dart';
 import 'package:anime_flow/widget/animation_network_image/animation_network_image.dart';
+import 'package:bot_toast/bot_toast.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:get/get.dart';
 import 'package:hive_ce_flutter/adapters.dart';
 
 class PluginsPage extends StatefulWidget {
@@ -23,51 +23,62 @@ class _PluginsPageState extends State<PluginsPage> {
   @override
   void initState() {
     super.initState();
-    settingConfig.listenable().addListener(_initData);
-    _initData();
+    settingConfig.listenable().addListener(initData);
+    initData();
   }
 
   @override
   void deactivate() {
-    settingConfig.listenable().removeListener(_initData);
+    settingConfig.listenable().removeListener(initData);
     super.deactivate();
   }
 
-  void _initData() async {
+  void initData() async {
     final dataSources = await CrawlConfig.loadAllCrawlConfigs();
     setState(() {
       this.dataSources = dataSources;
     });
   }
 
-  void _deleteDataSource(String name) async {
-    // 使用Get.dialog显示确认弹窗
-    Get.defaultDialog(
-      title: "确认删除",
-      middleText: "确定要删除数据源 \"$name\" 吗？此操作不可恢复。",
-      textConfirm: "删除",
-      textCancel: "取消",
-      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
-      buttonColor: Theme.of(context).colorScheme.error,
-      onConfirm: () async {
-        try {
-          await settingConfig.delete(name);
-          Get.back();
-          Get.snackbar(
-            "删除成功",
-            "数据源 \"$name\" 已被删除",
-            maxWidth: 300,
-          );
-        } catch (e) {
-          Get.back();
-          Get.snackbar(
-            "删除失败",
-            "删除数据源 \"$name\" 时发生错误：$e",
-            maxWidth: 300,
-          );
-        }
-      },
+  void showDataSourceToast(String title, String message) {
+    BotToast.showSimpleNotification(
+      title: title,
+      subTitle: message,
+      align: Alignment.bottomCenter,
+      duration: const Duration(seconds: 3),
     );
+  }
+
+  Future<void> deleteDataSource(String name) async {
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (dialogContext) => AlertDialog(
+        title: const Text('确认删除'),
+        content: Text('确定要删除数据源 "$name" 吗？此操作不可恢复。'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(dialogContext).pop(false),
+            child: const Text('取消'),
+          ),
+          TextButton(
+            onPressed: () => Navigator.of(dialogContext).pop(true),
+            style: TextButton.styleFrom(
+              foregroundColor: Theme.of(dialogContext).colorScheme.error,
+            ),
+            child: const Text('删除'),
+          ),
+        ],
+      ),
+    );
+    if (confirmed != true || !mounted) return;
+
+    try {
+      await settingConfig.delete(name);
+      if (!mounted) return;
+      showDataSourceToast('删除成功', '数据源 "$name" 已被删除');
+    } catch (e) {
+      showDataSourceToast('删除失败', '删除数据源 "$name" 时发生错误：$e');
+    }
   }
 
   @override
@@ -139,10 +150,10 @@ class _PluginsPageState extends State<PluginsPage> {
                     IconButton(
                       icon: Icon(
                         Icons.delete_outline_outlined,
-                        color: Theme.of(context).colorScheme.error,
+                          color: Theme.of(context).colorScheme.error,
                       ),
                       onPressed: () {
-                        _deleteDataSource(data.name);
+                        deleteDataSource(data.name);
                       },
                     ),
                   ],

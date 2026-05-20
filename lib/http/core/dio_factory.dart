@@ -25,6 +25,7 @@ class DioFactory {
 
   static Dio get animeFlowDio => _animeFlowDio ??= _create(
     NetworkConfig.fromSettings(),
+    baseUrl: AnimeFlowApi.animeFlowApi,
     defaultHeaders: {
       'referer': '',
       'user-agent': Utils.getRandomUA(),
@@ -59,15 +60,11 @@ class DioFactory {
   );
 
   static Dio get bangumiDio => _bangumiDio ??= _create(
-        NetworkConfig.fromSettings(
-          connectTimeout: const Duration(seconds: 15),
-          receiveTimeout: const Duration(seconds: 30),
-        ),
-      );
-
-  static Dio createForConfig(NetworkConfig config) {
-    return _create(config);
-  }
+    NetworkConfig.fromSettings(
+      connectTimeout: const Duration(seconds: 15),
+      receiveTimeout: const Duration(seconds: 30),
+    ),
+  );
 
   static void reset() {
     _apiDio = null;
@@ -79,21 +76,22 @@ class DioFactory {
   }
 
   static Dio _create(
-      NetworkConfig config, {
-        Map<String, dynamic> defaultHeaders = const {},
-        List<Interceptor> interceptors = const [],
-      }) {
+    NetworkConfig config, {
+    String? baseUrl,
+    Map<String, dynamic> defaultHeaders = const {},
+    List<Interceptor> interceptors = const [],
+  }) {
     // Keep the constructor tear-off form so the migration guard can flag
     // direct Dio construction outside this factory with a simple search.
     // ignore: unnecessary_constructor_name
     final dio = Dio.new(
       BaseOptions(
+        baseUrl: baseUrl ?? '',
         connectTimeout: config.connectTimeout,
         receiveTimeout: config.receiveTimeout,
         sendTimeout: config.sendTimeout,
         headers: defaultHeaders,
-        validateStatus: (status) =>
-        status != null && status >= 200 && status < 300,
+        validateStatus: (status) => status != null && status >= 200 && status < 300,
       ),
     );
     dio.httpClientAdapter = config.createAdapter();

@@ -37,10 +37,10 @@ class AnimeFlowResponse {
 class AnimeFlowRequest {
   static final AnimeFlowClient _client = AnimeFlowClient.instance;
 
-  static const String _animeFlowApi = AnimeFlowApi.animeFlowApi;
+  // static const String _animeFlowApi = AnimeFlowApi.animeFlowApi;
 
   static Future<TokenItem> getTokenService({required String code}) async {
-    final response = await _client.post(_animeFlowApi + AnimeFlowApi.token,
+    final response = await _client.post( AnimeFlowApi.token,
         queryParameters: {'code': code});
     return TokenItem.fromJson(response['data']);
   }
@@ -49,7 +49,7 @@ class AnimeFlowRequest {
   static Future<TokenItem> refreshTokenService(
       {required String refreshToken}) async {
     final response = await _client.post(
-        '$_animeFlowApi${AnimeFlowApi.refreshToken}',
+        AnimeFlowApi.refreshToken,
         queryParameters: {'refreshToken': refreshToken});
     return TokenItem.fromJson(response['data']);
   }
@@ -57,14 +57,14 @@ class AnimeFlowRequest {
   //回调api
   static Future<Map<String, dynamic>> callbackService(
       String code, String state) async {
-    return await _client.get(_animeFlowApi + AnimeFlowApi.callback,
+    return await _client.get(AnimeFlowApi.callback,
         queryParameters: {'code': code, 'state': state}).then((value) => value);
   }
 
   //获取session
   static Future<Map<String, dynamic>> getSessionService() async {
     String deviceName = SystemUtil.getDevice().toUpperCase();
-    return await _client.get(_animeFlowApi + AnimeFlowApi.session,
+    return await _client.get(AnimeFlowApi.session,
         queryParameters: {'platform': deviceName}).then((value) => value);
   }
 
@@ -77,7 +77,7 @@ class AnimeFlowRequest {
     while (DateTime.now().difference(startTime) < maxDuration) {
       try {
         final response = await _client.get(
-          _animeFlowApi + AnimeFlowApi.token,
+          AnimeFlowApi.token,
           queryParameters: {'sessionId': state},
         );
 
@@ -108,7 +108,7 @@ class AnimeFlowRequest {
 
   /// 通过episodeID获取弹幕
   static Future<List<Danmaku>> getDanDanmakuByEpisodeID(int episodeID) async {
-    var path = '$_animeFlowApi${AnimeFlowApi.danmaku}/$episodeID';
+    var path = '${AnimeFlowApi.danmaku}/$episodeID';
     List<Danmaku> danmakus = [];
     Map<String, String> withRelated = {
       'withRelated': 'true',
@@ -132,7 +132,7 @@ class AnimeFlowRequest {
   /// 搜索番剧元素
   static Future<DanmakuSearchResponse> searchResponse(String title,
       {int type = 1}) async {
-    const api = _animeFlowApi + AnimeFlowApi.search;
+    const api = AnimeFlowApi.search;
 
     final res = await _client
         .get(api, queryParameters: {'keyword': title, 'type': type});
@@ -141,7 +141,7 @@ class AnimeFlowRequest {
   }
 
   static Future<int?> getDanDanBangumiIDByBgmBangumiID(int bgmBangumiID) async {
-    var path = '$_animeFlowApi${AnimeFlowApi.animeDetailByBgmId}/$bgmBangumiID';
+    var path = '${AnimeFlowApi.animeDetailByBgmId}/$bgmBangumiID';
     final res = await _client.get(path);
     final response = AnimeFlowResponse.fromJson(Map<String, dynamic>.from(res));
     try {
@@ -156,7 +156,7 @@ class AnimeFlowRequest {
   /// 通过番剧ID获取番剧元素
   static Future<DanmakuEpisodeResponse> getDanDanEpisodesByDanDanBangumiID(
       int bangumiID) async {
-    var path = '$_animeFlowApi${AnimeFlowApi.animeDetail}/$bangumiID';
+    var path = '${AnimeFlowApi.animeDetail}/$bangumiID';
     final res = await _client.get(path);
     final response = AnimeFlowResponse.fromJson(Map<String, dynamic>.from(res));
     return DanmakuEpisodeResponse.fromJson(response.data);
@@ -173,7 +173,7 @@ class AnimeFlowRequest {
     final token = await BangumiToken.instance.getToken();
     final episodeID = int.parse('$bangumiID${episode.toString().padLeft(4, '0')}');
     final colorValue = Utils.colorToDecimalRgb(color);
-    var path = '$_animeFlowApi${AnimeFlowApi.danmaku}';
+    var path = AnimeFlowApi.danmaku;
     final data = {
       'episodeId': episodeID,
       'comment': message,

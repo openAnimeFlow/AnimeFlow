@@ -1,4 +1,7 @@
 import 'package:anime_flow/http/api_path.dart';
+import 'package:anime_flow/http/interceptors/bgm_authInterceptor.dart';
+import 'package:anime_flow/http/interceptors/bgm_refresh_tokenInterceptor.dart';
+import 'package:anime_flow/repository/BangumiToken.dart';
 import 'package:anime_flow/utils/utils.dart';
 import 'package:dio/dio.dart';
 import 'package:anime_flow/utils/logger.dart';
@@ -59,12 +62,21 @@ class DioFactory {
     },
   );
 
-  static Dio get bangumiDio => _bangumiDio ??= _create(
-    NetworkConfig.fromSettings(
-      connectTimeout: const Duration(seconds: 15),
-      receiveTimeout: const Duration(seconds: 30),
-    ),
-  );
+  static Dio get bangumiDio {
+    if (_bangumiDio != null) return _bangumiDio!;
+    final tokenRepo = BangumiToken.instance;
+    final dio = _create(
+      NetworkConfig.fromSettings(
+        connectTimeout: const Duration(seconds: 15),
+        receiveTimeout: const Duration(seconds: 30),
+      ),
+      baseUrl: BgmNextApi.baseUrl,
+    );
+    // Auth拦截器必须要在dio初始化之后添加拦截器
+    dio.interceptors.add(BgmAuthInterceptor(tokenRepo));
+    dio.interceptors.add(BgmRefreshTokeninterceptor(dio, tokenRepo));
+    return _bangumiDio = dio;
+  }
 
   static void reset() {
     _apiDio = null;

@@ -3,9 +3,6 @@ import 'package:anime_flow/controllers/app/app_info_controller.dart';
 import 'package:anime_flow/http/api_path.dart';
 import 'package:anime_flow/http/core/dio_factory.dart';
 import 'package:anime_flow/http/core/network_error_mapper.dart';
-import 'package:anime_flow/http/interceptors/bgm_authInterceptor.dart';
-import 'package:anime_flow/http/interceptors/bgm_refresh_tokenInterceptor.dart';
-import 'package:anime_flow/repository/BangumiToken.dart';
 import 'package:dio/dio.dart';
 import 'package:get/get_core/src/get_main.dart';
 import 'package:get/get_instance/src/extension_instance.dart';
@@ -13,9 +10,6 @@ import 'package:get/get_instance/src/extension_instance.dart';
 class BangumiClient {
   BangumiClient._() {
     _dio = DioFactory.bangumiDio;
-    final tokenRepo = BangumiToken.instance;
-    _dio.interceptors.add(BgmAuthInterceptor(tokenRepo));
-    _dio.interceptors.add(BgmRefreshTokeninterceptor(_dio, tokenRepo));
   }
 
   static final BangumiClient instance = BangumiClient._();

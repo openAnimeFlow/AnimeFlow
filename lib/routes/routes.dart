@@ -358,7 +358,7 @@ final GoRouter appRouter = GoRouter(
   initialLocation: const MainRoute().location,
   redirect: (context, state) {
     final uri = state.uri;
-    if (isOAuthAppCallbackUri(uri)) {
+    if (MyController.isOAuthAppCallbackUri(uri)) {
       final q = uri.hasQuery ? '?${uri.query}' : '';
       return '/oauth/callback$q';
     }

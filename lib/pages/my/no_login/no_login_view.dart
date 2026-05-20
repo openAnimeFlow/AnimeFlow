@@ -1,8 +1,8 @@
 import 'package:anime_flow/constants/assets_path_constants.dart';
-import 'package:anime_flow/providers/my_provider.dart';
+import 'package:anime_flow/controllers/my_controller.dart';
 import 'package:anime_flow/routes/routes.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:get/get.dart';
 
 enum _NoLoginOverflowAction { settings, playRecord }
 
@@ -11,6 +11,7 @@ class NoLoginView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final myController = Get.find<MyController>();
     final colorScheme = Theme.of(context).colorScheme;
     final textStyle = Theme.of(context).textTheme.bodyLarge;
 
@@ -18,10 +19,7 @@ class NoLoginView extends StatelessWidget {
       children: [
         Padding(
           padding: EdgeInsets.only(
-            top: MediaQuery.of(context).padding.top,
-            left: 16,
-            right: 16,
-          ),
+              top: MediaQuery.of(context).padding.top, left: 16, right: 16),
           child: Row(
             children: [
               const Spacer(),
@@ -86,10 +84,9 @@ class NoLoginView extends StatelessWidget {
             spacing: 8,
             children: [
               CircleAvatar(
-                radius: 100,
-                backgroundColor: Colors.transparent,
-                child: Image.asset(AssetsPathConstants.logo),
-              ),
+                  radius: 100,
+                  backgroundColor: Colors.transparent,
+                  child: Image.asset(AssetsPathConstants.logo)),
               const Text(
                 '未登录',
                 style: TextStyle(
@@ -97,101 +94,102 @@ class NoLoginView extends StatelessWidget {
                   fontWeight: FontWeight.bold,
                 ),
               ),
-              Consumer(
-                builder: (context, ref, _) {
-                  final isAuthorizing = ref.watch(myProvider).isOAuthAuthorizing;
-                  final myNotifier = ref.read(myProvider.notifier);
+              Obx(
+                () {
+                  final isAuthorizing = myController.isOAuthAuthorizing.value;
                   return AnimatedSwitcher(
-                    duration: const Duration(milliseconds: 300),
-                    child: isAuthorizing
-                        ? Row(
-                            key: const ValueKey('authorizing'),
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              ElevatedButton(
-                                onPressed: null,
-                                style: ElevatedButton.styleFrom(
-                                  shape: const RoundedRectangleBorder(
-                                    borderRadius: BorderRadius.only(
-                                      topLeft: Radius.circular(20),
-                                      bottomLeft: Radius.circular(20),
-                                      topRight: Radius.circular(5),
-                                      bottomRight: Radius.circular(5),
-                                    ),
-                                  ),
-                                ),
-                                child: const Row(
-                                  mainAxisSize: MainAxisSize.min,
-                                  mainAxisAlignment: MainAxisAlignment.center,
-                                  children: [
-                                    SizedBox(
-                                      width: 18,
-                                      height: 18,
-                                      child: CircularProgressIndicator(
-                                        strokeWidth: 3,
-                                      ),
-                                    ),
-                                    SizedBox(width: 8),
-                                    Text('正在等待登录结果'),
-                                  ],
-                                ),
-                              ),
-                              const SizedBox(width: 5),
-                              SizedBox(
-                                width: 76,
-                                child: OutlinedButton(
-                                  onPressed: myNotifier.cancelOAuthWaiting,
-                                  style: OutlinedButton.styleFrom(
-                                    shape: const RoundedRectangleBorder(
-                                      borderRadius: BorderRadius.only(
-                                        topRight: Radius.circular(20),
-                                        bottomRight: Radius.circular(20),
-                                        topLeft: Radius.circular(5),
-                                        bottomLeft: Radius.circular(5),
-                                      ),
-                                    ),
-                                    backgroundColor: colorScheme.primary
-                                        .withValues(alpha: 0.12),
-                                    foregroundColor: colorScheme.primary,
-                                    side: const BorderSide(
-                                      color: Colors.transparent,
-                                    ),
-                                    padding: const EdgeInsets.symmetric(
-                                      horizontal: 12,
-                                      vertical: 8,
-                                    ),
-                                    textStyle:
-                                        const TextStyle(fontSize: 13),
-                                  ),
-                                  child: const Text(
-                                    '取消',
-                                    style: TextStyle(fontSize: 13),
-                                  ),
-                                ),
-                              ),
-                            ],
-                          )
-                        : ElevatedButton(
-                            key: const ValueKey('login'),
-                            onPressed: () => myNotifier.openOAuthPage(),
+                  duration: const Duration(milliseconds: 300),
+                  child: isAuthorizing
+                      ? Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          // 左侧
+                          ElevatedButton(
+                            onPressed: null, // 等待中禁用
                             style: ElevatedButton.styleFrom(
-                              padding: const EdgeInsets.symmetric(
-                                horizontal: 30,
-                                vertical: 10,
-                              ),
-                              textStyle: const TextStyle(
-                                fontSize: 16,
-                                fontWeight: FontWeight.bold,
+                              shape: const RoundedRectangleBorder(
+                                borderRadius: BorderRadius.only(
+                                  topLeft: Radius.circular(20),
+                                  bottomLeft: Radius.circular(20),
+                                  topRight: Radius.circular(5),
+                                  bottomRight: Radius.circular(5),
+                                ),
                               ),
                             ),
-                            child: const Text('登录'),
+                            child: const Row(
+                              mainAxisSize: MainAxisSize.min,
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                SizedBox(
+                                  width: 18,
+                                  height: 18,
+                                  child:
+                                      CircularProgressIndicator(strokeWidth: 3),
+                                ),
+                                SizedBox(width: 8),
+                                Text('正在等待登录结果'),
+                              ],
+                            ),
                           ),
-                  );
+                          const SizedBox(width: 5),
+                          // 右侧
+                          SizedBox(
+                            width: 76,
+                            child: OutlinedButton(
+                              onPressed: () {
+                                if (isAuthorizing) {
+                                  myController.cancelOAuthWaiting();
+                                }
+                              },
+                              style: OutlinedButton.styleFrom(
+                                shape: const RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.only(
+                                    topRight: Radius.circular(20),
+                                    bottomRight: Radius.circular(20),
+                                    topLeft: Radius.circular(5),
+                                    bottomLeft: Radius.circular(5),
+                                  ),
+                                ),
+                                backgroundColor: Theme.of(context)
+                                    .colorScheme
+                                    .primary
+                                    .withValues(
+                                      alpha: 0.12,
+                                    ),
+                                foregroundColor:
+                                    Theme.of(context).colorScheme.primary,
+                                side:
+                                    const BorderSide(color: Colors.transparent),
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 12,
+                                  vertical: 8,
+                                ),
+                                textStyle: const TextStyle(fontSize: 13),
+                              ),
+                              child: const Text('取消',
+                                  style: TextStyle(fontSize: 13)),
+                            ),
+                          ),
+                        ],
+                      )
+                      : ElevatedButton(
+                        onPressed: () => myController.openOAuthPage(),
+                        style: ElevatedButton.styleFrom(
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: 30, vertical: 10),
+                          textStyle: const TextStyle(
+                            fontSize: 15,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                        child: const Text('登录授权'),
+                      ),
+                );
                 },
               ),
             ],
           ),
-        ),
+        )
       ],
     );
   }

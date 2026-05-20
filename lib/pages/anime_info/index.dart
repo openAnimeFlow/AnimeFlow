@@ -1,15 +1,19 @@
-import 'package:anime_flow/providers/my_provider.dart';
+import 'package:anime_flow/controllers/my_controller.dart';
+import 'package:anime_flow/http/requests/bgm_request.dart';
 import 'package:anime_flow/models/item/subject_basic_data_item.dart';
+import 'package:anime_flow/models/item/bangumi/subjects_info_item.dart';
 import 'package:anime_flow/pages/anime_info/inf_head.dart';
 import 'package:anime_flow/routes/routes.dart';
 import 'package:anime_flow/pages/anime_info/provider/anime_info_provider.dart';
 import 'package:anime_flow/utils/logger.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'evaluate_dialog.dart';
+import 'package:get/get.dart';
+import 'package:go_router/go_router.dart';
 import 'info_appBar.dart';
 import 'synopsis.dart';
 
+part 'evaluate_dialog.dart';
 
 class AnimeInfoPage extends StatefulWidget {
   final SubjectBasicData animeInfoExtra;
@@ -22,6 +26,8 @@ class AnimeInfoPage extends StatefulWidget {
 
 class _AnimeInfoPageState extends State<AnimeInfoPage> {
   final nestedScrollController = ScrollController();
+  final MyController myController = Get.find<MyController>();
+
   /// 内容区域的高度
   final double contentHeight = 200.0;
   bool isPinned = false;
@@ -139,9 +145,8 @@ class _AnimeInfoPageState extends State<AnimeInfoPage> {
                     ref.watch(animeInfoProvider(subjectBasicData.id));
                 return asyncSubjectsInfo.when(
                     data: (subjectsInfo) {
-                      final isLoggedIn =
-                          ref.watch(myProvider).userInfo != null;
-                      return isLoggedIn && subjectsInfo.interest != null
+                      return Obx(() => myController.userInfo.value != null &&
+                              subjectsInfo.interest != null
                           ? FloatingActionButton(
                               heroTag: 'evaluate_${subjectBasicData.id}',
                               onPressed: () {
@@ -163,7 +168,7 @@ class _AnimeInfoPageState extends State<AnimeInfoPage> {
                                 color: Theme.of(context).colorScheme.primary,
                               ),
                             )
-                          : const SizedBox.shrink();
+                          : const SizedBox.shrink());
                     },
                     error: (error, stackTrace) {
                       LiggLogger()

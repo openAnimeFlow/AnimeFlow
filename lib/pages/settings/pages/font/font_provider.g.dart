@@ -40,7 +40,7 @@ final class FontRepoCdnProvider extends $NotifierProvider<FontRepoCdn, bool> {
   }
 }
 
-String _$fontRepoCdnHash() => r'f25c9d597fcd0b83bfc9d6e06aae601c0355b3ea';
+String _$fontRepoCdnHash() => r'1c30e3e765b09079bfcaf74988f3a656f8d22107';
 
 abstract class _$FontRepoCdn extends $Notifier<bool> {
   bool build();
@@ -77,7 +77,7 @@ final class FontProvider extends $AsyncNotifierProvider<Font, List<FontItem>> {
   Font create() => Font();
 }
 
-String _$fontHash() => r'05cde254ea3efdc900b2c83d66afb56e23af6fc2';
+String _$fontHash() => r'24ab7bd09e88943839941739b51ac8184c2ba86f';
 
 abstract class _$Font extends $AsyncNotifier<List<FontItem>> {
   FutureOr<List<FontItem>> build();
@@ -126,7 +126,7 @@ final class FontNetworkTasksProvider
   }
 }
 
-String _$fontNetworkTasksHash() => r'0d8ca26895c27c9a03e4cbce4db546688ce78cc4';
+String _$fontNetworkTasksHash() => r'f92d27b40835721ec526cb2db3df8b59190b9896';
 
 abstract class _$FontNetworkTasks extends $Notifier<int> {
   int build();
@@ -238,7 +238,7 @@ final class FontDownloadProvider
   }
 }
 
-String _$fontDownloadHash() => r'715bf7c3292432a94c63e1a94e31913566e611bf';
+String _$fontDownloadHash() => r'b379044ad13977a6e35907f955e8f13db9bff54b';
 
 final class FontDownloadFamily extends $Family
     with

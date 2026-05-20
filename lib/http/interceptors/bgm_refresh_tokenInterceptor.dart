@@ -1,11 +1,12 @@
 import 'package:anime_flow/constants/constants.dart';
-import 'package:anime_flow/providers/app_provider_container.dart';
-import 'package:anime_flow/providers/my_provider.dart';
+import 'package:anime_flow/controllers/my_controller.dart';
 import 'package:anime_flow/http/requests/anime_flow_request.dart';
 import 'package:anime_flow/models/item/token_item.dart';
 import 'package:anime_flow/repository/BangumiToken.dart';
 import 'package:anime_flow/utils/logger.dart';
 import 'package:dio/dio.dart';
+import 'package:get/get_core/src/get_main.dart';
+import 'package:get/get_instance/src/extension_instance.dart';
 
 class BgmRefreshTokeninterceptor extends Interceptor {
   final Dio _dio;
@@ -78,7 +79,8 @@ class BgmRefreshTokeninterceptor extends Interceptor {
       await _bangumiToken.saveToken(newTokenItem);
     } catch (e) {
       await _bangumiToken.removeToken();
-      appProviderContainer.read(myProvider.notifier).clearUserInfo();
+      final userInfoStore = Get.find<MyController>();
+      userInfoStore.clearUserInfo();
       rethrow;
     }
   }

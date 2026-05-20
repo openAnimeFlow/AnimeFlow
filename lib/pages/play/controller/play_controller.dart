@@ -1,8 +1,7 @@
 import 'dart:async';
 import 'package:anime_flow/constants/constants.dart';
 import 'package:anime_flow/constants/storage_key.dart';
-import 'package:anime_flow/providers/app_provider_container.dart';
-import 'package:anime_flow/providers/my_provider.dart';
+import 'package:anime_flow/controllers/my_controller.dart';
 import 'package:anime_flow/controllers/shaders/shaders_controller.dart';
 import 'package:anime_flow/http/requests/anime_flow_request.dart';
 import 'package:anime_flow/models/enums/video_controls_icon_type.dart';
@@ -458,7 +457,8 @@ class PlayController extends GetxController {
     final bgmBangumiId = await AnimeFlowRequest.getDanDanBangumiIDByBgmBangumiID(subjectId);
     if (bgmBangumiId == null) return false;
     final trimmed = message.trim();
-    final userInfo = appProviderContainer.read(myProvider).userInfo;
+    final  myController = Get.find<MyController>();
+    final userInfo = myController.userInfo.value;
     if (userInfo == null) return false;
     if (trimmed.isEmpty) return false;
     if (duration.value == Duration.zero && position.value == Duration.zero && episode <= 0) {

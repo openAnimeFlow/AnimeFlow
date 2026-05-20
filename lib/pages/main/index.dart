@@ -2,6 +2,7 @@ import 'package:anime_flow/constants/storage_key.dart';
 import 'package:anime_flow/controllers/app/app_info_controller.dart';
 import 'package:anime_flow/controllers/my_controller.dart';
 import 'package:anime_flow/controllers/shaders/shaders_controller.dart';
+import 'package:anime_flow/models/item/bangumi/user_info_item.dart';
 import 'package:anime_flow/models/item/tab_item.dart';
 import 'package:anime_flow/pages/my/index.dart';
 import 'package:anime_flow/pages/ranking/index.dart';
@@ -12,6 +13,7 @@ import 'package:anime_flow/utils/systemUtil.dart';
 import 'package:anime_flow/widget/animation_network_image/animation_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:anime_flow/pages/recommend/index.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:get/get.dart';
 
 class MainPage extends StatefulWidget {
@@ -24,25 +26,21 @@ class MainPage extends StatefulWidget {
 }
 
 class _MainPageState extends State<MainPage> {
-  late final MyController myController;
   late final AppInfoController appInfoController;
   late final ShadersController shadersController;
   final setting = Storage.setting;
   int _currentIndex = 0;
   late bool autoUpdate;
 
-  // 使用 GlobalKey 保持 IndexedStack 的状态，防止在布局切换（Row <-> Column）时页面重构
   final GlobalKey _bodyKey = GlobalKey();
 
   @override
   void initState() {
     super.initState();
     autoUpdate = setting.get(StorageKey.autoUpdateKey, defaultValue: true);
-    myController = Get.put(MyController(), permanent: true);
     appInfoController = Get.put(AppInfoController(), permanent: true);
     shadersController = Get.put(ShadersController(), permanent: true);
 
-    // TODO 从配置中初始化对应的页面
     _currentIndex =
         widget.initialTabIndex.clamp(0, _tabs.length - 1);
     _initializeApp();
@@ -66,7 +64,6 @@ class _MainPageState extends State<MainPage> {
     ),
   ];
 
-  // 懒加载页面缓存
   final List<Widget?> _pageCache = List.filled(3, null);
 
   void _initializePage(int index) {
@@ -85,57 +82,50 @@ class _MainPageState extends State<MainPage> {
     }
   }
 
-  /// 初始化应用程序
   Future<void> _initializeApp() async {
-    // 初始化对应的页面
     _initializePage(_currentIndex);
-    // 初始化爬虫配置
     CrawlConfig.initCrawlConfigs();
-    // 检查新版本
     if (autoUpdate) {
       appInfoController.compareVersion();
     }
     await shadersController.copyShadersToExternalDirectory();
   }
 
-  // 构建 NavigationRail
   List<NavigationRailDestination> _buildRailDestinations(
-      ColorScheme colorScheme) {
+    ColorScheme colorScheme,
+    UserInfoItem? userInfo,
+  ) {
     return _tabs.asMap().entries.map((entry) {
       final index = entry.key;
       final tab = entry.value;
 
-      // 如果是"我的"标签（index == 2），根据用户信息动态显示
-      if (index == 2) {
-        final userInfo = myController.userInfo.value;
-        if (userInfo != null) {
-          return NavigationRailDestination(
-            icon: AnimationNetworkImage(
+      if (index == 2 && userInfo != null) {
+        return NavigationRailDestination(
+          icon: AnimationNetworkImage(
+            borderRadius: BorderRadius.circular(50),
+            url: userInfo.avatar.medium,
+            width: 24,
+            height: 24,
+            fit: BoxFit.cover,
+          ),
+          selectedIcon: Container(
+            decoration: BoxDecoration(
+              border: Border.all(
+                color: colorScheme.primary,
+                width: 2,
+              ),
+              borderRadius: BorderRadius.circular(50),
+            ),
+            child: AnimationNetworkImage(
               borderRadius: BorderRadius.circular(50),
               url: userInfo.avatar.medium,
               width: 24,
               height: 24,
               fit: BoxFit.cover,
             ),
-            selectedIcon: Container(
-              decoration: BoxDecoration(
-                border: Border.all(
-                  color: colorScheme.primary,
-                  width: 2,
-                ),
-                borderRadius: BorderRadius.circular(50),
-              ),
-              child: AnimationNetworkImage(
-                borderRadius: BorderRadius.circular(50),
-                url: userInfo.avatar.medium,
-                width: 24,
-                height: 24,
-                fit: BoxFit.cover,
-              ),
-            ),
-            label: Text(tab.title),
-          );
-        }
+          ),
+          label: Text(tab.title),
+        );
       }
       return NavigationRailDestination(
         icon: Icon(tab.icon),
@@ -145,44 +135,42 @@ class _MainPageState extends State<MainPage> {
     }).toList();
   }
 
-  // 构建 NavigationBar
-  List<NavigationDestination> _buildBarDestinations(ColorScheme colorScheme) {
+  List<NavigationDestination> _buildBarDestinations(
+    ColorScheme colorScheme,
+    UserInfoItem? userInfo,
+  ) {
     return _tabs.asMap().entries.map((entry) {
       final index = entry.key;
       final tab = entry.value;
-      if (index == 2) {
-        final userInfo = myController.userInfo.value;
-        if (userInfo != null) {
-          return NavigationDestination(
-            icon: AnimationNetworkImage(
+      if (index == 2 && userInfo != null) {
+        return NavigationDestination(
+          icon: AnimationNetworkImage(
+            borderRadius: BorderRadius.circular(50),
+            url: userInfo.avatar.medium,
+            width: 24,
+            height: 24,
+            fit: BoxFit.cover,
+          ),
+          selectedIcon: Container(
+            decoration: BoxDecoration(
+              border: Border.all(
+                color: colorScheme.primary,
+                width: 2,
+              ),
+              borderRadius: BorderRadius.circular(50),
+            ),
+            child: AnimationNetworkImage(
               borderRadius: BorderRadius.circular(50),
               url: userInfo.avatar.medium,
               width: 24,
               height: 24,
-              fit: BoxFit.cover,
+              fit: BoxFit.fill,
             ),
-            selectedIcon: Container(
-              decoration: BoxDecoration(
-                border: Border.all(
-                  color: colorScheme.primary,
-                  width: 2,
-                ),
-                borderRadius: BorderRadius.circular(50),
-              ),
-              child: AnimationNetworkImage(
-                borderRadius: BorderRadius.circular(50),
-                url: userInfo.avatar.medium,
-                width: 24,
-                height: 24,
-                fit: BoxFit.fill,
-              ),
-            ),
-            label: tab.title,
-          );
-        }
+          ),
+          label: tab.title,
+        );
       }
 
-      // 默认显示或没有用户信息时
       return NavigationDestination(
         icon: Icon(tab.icon),
         selectedIcon: Icon(tab.activeIcon, color: colorScheme.primary),
@@ -204,43 +192,45 @@ class _MainPageState extends State<MainPage> {
     final colorScheme = Theme.of(context).colorScheme;
     final desktop = SystemUtil.isDesktop;
     return Scaffold(
-      // extendBody: true,
       body: Row(
         children: [
           if (isDesktop)
-            Obx(
-              () => NavigationRail(
-                backgroundColor: colorScheme.surfaceContainerHighest,
-                selectedIndex: _currentIndex,
-                groupAlignment: 1.0,
-                onDestinationSelected: _onDestinationSelected,
-                labelType: NavigationRailLabelType.all,
-                // 顶部搜索按钮
-                leading: Padding(
-                  padding: const EdgeInsets.only(bottom: 16, top: 8),
-                  child: FloatingActionButton(
-                    heroTag: 'main_search',
-                    elevation: 0,
-                    onPressed: () {
-                      const SearchRoute().push(context);
-                    },
-                    child: const Icon(Icons.search),
+            Consumer(
+              builder: (context, ref, _) {
+                final userInfo = ref.watch(currentUserInfoProvider);
+                return NavigationRail(
+                  backgroundColor: colorScheme.surfaceContainerHighest,
+                  selectedIndex: _currentIndex,
+                  groupAlignment: 1.0,
+                  onDestinationSelected: _onDestinationSelected,
+                  labelType: NavigationRailLabelType.all,
+                  leading: Padding(
+                    padding: const EdgeInsets.only(bottom: 16, top: 8),
+                    child: FloatingActionButton(
+                      heroTag: 'main_search',
+                      elevation: 0,
+                      onPressed: () {
+                        const SearchRoute().push(context);
+                      },
+                      child: const Icon(Icons.search),
+                    ),
                   ),
-                ),
-                // 底部设置按钮
-                trailing: Padding(
-                  padding: EdgeInsets.only(
-                      bottom:
-                          desktop ? 16 : MediaQuery.of(context).padding.bottom),
-                  child: IconButton(
-                    icon: const Icon(Icons.settings_outlined),
-                    iconSize: 28,
-                    tooltip: '设置',
-                    onPressed: () => const SettingsRoute().push(context),
+                  trailing: Padding(
+                    padding: EdgeInsets.only(
+                        bottom: desktop
+                            ? 16
+                            : MediaQuery.of(context).padding.bottom),
+                    child: IconButton(
+                      icon: const Icon(Icons.settings_outlined),
+                      iconSize: 28,
+                      tooltip: '设置',
+                      onPressed: () => const SettingsRoute().push(context),
+                    ),
                   ),
-                ),
-                destinations: _buildRailDestinations(colorScheme),
-              ),
+                  destinations:
+                      _buildRailDestinations(colorScheme, userInfo),
+                );
+              },
             ),
           Expanded(
             child: IndexedStack(
@@ -254,12 +244,18 @@ class _MainPageState extends State<MainPage> {
       ),
       bottomNavigationBar: isDesktop
           ? null
-          : Obx(() => NavigationBar(
-                backgroundColor: colorScheme.surfaceContainerHighest,
-                selectedIndex: _currentIndex,
-                onDestinationSelected: _onDestinationSelected,
-                destinations: _buildBarDestinations(colorScheme),
-              )),
+          : Consumer(
+              builder: (context, ref, _) {
+                final userInfo = ref.watch(currentUserInfoProvider);
+                return NavigationBar(
+                  backgroundColor: colorScheme.surfaceContainerHighest,
+                  selectedIndex: _currentIndex,
+                  onDestinationSelected: _onDestinationSelected,
+                  destinations:
+                      _buildBarDestinations(colorScheme, userInfo),
+                );
+              },
+            ),
     );
   }
 }

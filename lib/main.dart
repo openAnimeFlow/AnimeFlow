@@ -8,7 +8,8 @@ import 'package:get/get.dart';
 import 'package:hive_ce_flutter/hive_flutter.dart';
 import 'package:media_kit/media_kit.dart';
 import 'package:window_manager/window_manager.dart';
-import 'providers/theme_provider.dart';
+import 'package:anime_flow/controllers/my_controller.dart';
+import 'package:anime_flow/providers/theme_provider.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -29,7 +30,15 @@ void main() async {
     });
   }
 
-  runApp(const ProviderScope(child: MyApp()));
+  final container = ProviderContainer();
+  container.read(myControllerProvider);
+
+  runApp(
+    UncontrolledProviderScope(
+      container: container,
+      child: const MyApp(),
+    ),
+  );
 }
 
 class MyApp extends StatelessWidget {

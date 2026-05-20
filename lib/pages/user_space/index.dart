@@ -1,13 +1,14 @@
 import 'dart:ui';
 
 import 'package:anime_flow/models/item/bangumi/user_info_item.dart';
-import 'package:anime_flow/repository/user_repository.dart';
+import 'package:anime_flow/repository/providers/repository_providers.dart';
 import 'package:anime_flow/pages/user_space/statistics/index.dart';
 import 'package:anime_flow/pages/user_space/user_stores.dart';
 import 'package:anime_flow/utils/format_time_util.dart';
 import 'package:anime_flow/widget/animation_network_image/animation_network_image.dart';
 import 'package:anime_flow/widget/bbcode/bbcode_widget.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:get/get.dart';
 import 'package:go_router/go_router.dart';
 import 'collect/index.dart';
@@ -51,7 +52,9 @@ class _UserSpacePageState extends State<UserSpacePage>
     setState(() {
       isLoading = true;
     });
-    final userInfo = await UserRepository.instance.getUserProfile(username);
+    final userInfo = await ProviderScope.containerOf(context)
+        .read(userRepositoryProvider)
+        .getUserProfile(username);
     Get.put(UserSpaceStores(userInfo));
     setState(() {
       this.userInfo = userInfo;

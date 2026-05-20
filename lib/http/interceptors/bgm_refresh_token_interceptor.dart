@@ -1,18 +1,17 @@
 import 'package:anime_flow/constants/constants.dart';
-import 'package:anime_flow/controllers/my_controller.dart';
 import 'package:anime_flow/http/requests/anime_flow_request.dart';
 import 'package:anime_flow/models/item/token_item.dart';
 import 'package:anime_flow/repository/BangumiToken.dart';
 import 'package:anime_flow/utils/logger.dart';
 import 'package:dio/dio.dart';
-import 'package:get/get_core/src/get_main.dart';
-import 'package:get/get_instance/src/extension_instance.dart';
 
-class BgmRefreshTokeninterceptor extends Interceptor {
+class BgmRefreshTokenInterceptor extends Interceptor {
   final Dio _dio;
   final BangumiToken _bangumiToken;
 
-  BgmRefreshTokeninterceptor(this._dio, this._bangumiToken);
+  BgmRefreshTokenInterceptor(this._dio, this._bangumiToken);
+
+  static void Function()? onSessionExpired;
 
   static Future<void>? _refreshFuture;
 
@@ -27,9 +26,9 @@ class BgmRefreshTokeninterceptor extends Interceptor {
   }
 
   Future<void> _refreshToken(
-    DioException e,
-    ErrorInterceptorHandler handler,
-  ) async {
+      DioException e,
+      ErrorInterceptorHandler handler,
+      ) async {
     while (true) {
       final inFlight = _refreshFuture;
       if (inFlight != null) {
@@ -79,23 +78,22 @@ class BgmRefreshTokeninterceptor extends Interceptor {
       await _bangumiToken.saveToken(newTokenItem);
     } catch (e) {
       await _bangumiToken.removeToken();
-      final userInfoStore = Get.find<MyController>();
-      userInfoStore.clearUserInfo();
+      onSessionExpired?.call();
       rethrow;
     }
   }
 
   Future<void> _retryAfterRefresh(
-    DioException e,
-    ErrorInterceptorHandler handler,
-  ) async {
+      DioException e,
+      ErrorInterceptorHandler handler,
+      ) async {
     final token = await _bangumiToken.getToken();
     if (token == null) {
       return handler.next(e);
     }
     final opts = e.requestOptions;
     opts.headers[Constants.authorization] =
-        '${token.tokenType} ${token.accessToken}';
+    '${token.tokenType} ${token.accessToken}';
     try {
       final response = await _dio.fetch(opts);
       handler.resolve(response);

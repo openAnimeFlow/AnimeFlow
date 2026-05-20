@@ -5,6 +5,7 @@ import 'package:anime_flow/pages/play/controller/play_controller.dart';
 import 'package:anime_flow/repository/storage.dart';
 import 'package:canvas_danmaku/canvas_danmaku.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:get/get.dart';
 
 class DanmakuView extends StatefulWidget {
@@ -18,7 +19,7 @@ class _DanmakuViewState extends State<DanmakuView>
     with AutomaticKeepAliveClientMixin {
   final setting = Storage.setting;
   final PlayController playController = Get.find<PlayController>();
-  final MyController myController = Get.find<MyController>();
+  ProviderContainer? _container;
   Timer? _danmakuTimer;
   Worker? _rateWorker;
 
@@ -39,6 +40,12 @@ class _DanmakuViewState extends State<DanmakuView>
 
   @override
   bool get wantKeepAlive => true;
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    _container ??= ProviderScope.containerOf(context);
+  }
 
   @override
   void initState() {
@@ -116,7 +123,7 @@ class _DanmakuViewState extends State<DanmakuView>
                 // 添加弹幕
                 playController.addDanDanmaku(
                   danmaku,
-                  myController.userInfo.value?.id,
+                  _container?.read(currentUserInfoProvider)?.id,
                 );
               },
             );

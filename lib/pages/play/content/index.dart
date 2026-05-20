@@ -7,6 +7,7 @@ import 'package:anime_flow/models/item/bangumi/episode_comments_item.dart';
 import 'package:anime_flow/pages/play/content/introduce/index.dart';
 import 'package:anime_flow/widget/danmaku_text_field.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:get/get.dart';
 import 'package:anime_flow/utils/logger.dart';
 import 'comments/index.dart';
@@ -22,7 +23,6 @@ class _ContentViewState extends State<ContentView>
     with SingleTickerProviderStateMixin {
   final EpisodesState episodesState = Get.find<EpisodesState>();
   final PlayController playController = Get.find<PlayController>();
-  final myController = Get.find<MyController>();
   final VideoUiStateController videoUiStateController =
       Get.find<VideoUiStateController>();
   final List<String> _tabs = ['简介', '吐槽'];
@@ -117,8 +117,11 @@ class _ContentViewState extends State<ContentView>
     }
   }
 
-  Future<void> onSendDanmaku(String text) async {
-    final success = await playController.sendDanmaku(text);
+  Future<void> onSendDanmaku(String text, int bgmUserId) async {
+    final success = await playController.sendDanmaku(
+      text,
+      bgmUserId: bgmUserId,
+    );
     if (!mounted) return;
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
@@ -150,8 +153,13 @@ class _ContentViewState extends State<ContentView>
               Obx(
                 () => playController.isWideScreen.value
                     ? const Spacer()
-                    : Obx(() => myController.userInfo.value != null
-                        ? SizedBox(
+                    : Consumer(
+                        builder: (context, ref, _) {
+                          final userInfo = ref.watch(currentUserInfoProvider);
+                          if (userInfo == null) {
+                            return const SizedBox.shrink();
+                          }
+                          return SizedBox(
                             width: 200,
                             child: Padding(
                               padding:
@@ -166,11 +174,13 @@ class _ContentViewState extends State<ContentView>
                                     videoUiStateController.hideControlsUi();
                                   }
                                 },
-                                onSend: onSendDanmaku,
+                                onSend: (text) =>
+                                    onSendDanmaku(text, userInfo.id),
                               ),
                             ),
-                          )
-                        : const SizedBox.shrink()),
+                          );
+                        },
+                      ),
               )
             ],
           ),

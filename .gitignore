@@ -46,3 +46,4 @@ app.*.map.json
 /android/app/release
 /devtools_options.yaml
 /pubspec.lock
+/.cursor/

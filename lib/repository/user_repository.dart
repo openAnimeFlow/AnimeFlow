@@ -3,7 +3,6 @@ import 'package:anime_flow/models/item/bangumi/user_info_item.dart';
 
 class UserRepository {
   UserRepository._();
-
   static final UserRepository instance = UserRepository._();
 
   /// 获取当前登录用户的完整资料（/me → 详情）

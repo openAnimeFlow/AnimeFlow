@@ -2,7 +2,7 @@ import 'package:anime_flow/controllers/my_controller.dart';
 import 'package:anime_flow/routes/routes.dart';
 import 'package:anime_flow/utils/logger.dart';
 import 'package:flutter/material.dart';
-import 'package:get/get.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 /// Bangumi OAuth 应用回调处理页面
 class OAuthCallbackPage extends StatefulWidget {
@@ -13,16 +13,14 @@ class OAuthCallbackPage extends StatefulWidget {
 
   final Uri callbackUri;
 
-  /// 完成后进入主页 [MainPage] 的底栏索引（0 推荐 / 1 排行 / 2 我的）
-
   @override
   State<OAuthCallbackPage> createState() => _OAuthCallbackPageState();
 }
 
-class _OAuthCallbackPageState extends State<OAuthCallbackPage> with SingleTickerProviderStateMixin {
+class _OAuthCallbackPageState extends State<OAuthCallbackPage>
+    with SingleTickerProviderStateMixin {
   late final AnimationController _pulseController;
   late final CurvedAnimation _pulse;
-  // todo 默认回到“我的”，后续可配置默认跳转页面
   final int returnTab = 2;
 
   @override
@@ -46,15 +44,9 @@ class _OAuthCallbackPageState extends State<OAuthCallbackPage> with SingleTicker
     super.dispose();
   }
 
-  MyController _ensureMyController() {
-    if (Get.isRegistered<MyController>()) {
-      return Get.find<MyController>();
-    }
-    return Get.put(MyController(), permanent: true);
-  }
-
   Future<void> _runCallback() async {
-    final controller = _ensureMyController();
+    final container = ProviderScope.containerOf(context);
+    final controller = container.read(myControllerProvider);
     try {
       await controller.handleDeepLink(widget.callbackUri.toString());
     } catch (e, st) {
@@ -95,7 +87,7 @@ class _OAuthCallbackPageState extends State<OAuthCallbackPage> with SingleTicker
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
                     Text(
-                      '正在安全连接 Bangumi 并同步账号信息，请稍候',
+                      '正在连接 Bangumi 并同步账号信息，请稍候',
                       textAlign: TextAlign.center,
                       style: tt.bodyMedium?.copyWith(
                         color: cs.onSurfaceVariant,

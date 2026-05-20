@@ -91,7 +91,7 @@ class _AnimePageState extends ConsumerState<AnimePage>
       floatingActionButton: _showBackToTopButton
           ? FloatingActionButton(
               onPressed: scrollToTop,
-              child: const Icon(Icons.keyboard_arrow_up_rounded),
+              child: const Icon(Icons.arrow_upward_rounded),
             )
           : null,
     );

@@ -63,6 +63,16 @@ class _DownloadPluginsPageState extends State<DownloadPluginsPage> {
     }
   }
 
+  void _persistPlugin(
+    String pluginName,
+    CrawlConfigItem pluginData,
+    String catalogVersion,
+  ) {
+    final data = pluginData.toJson();
+    data['version'] = catalogVersion;
+    storage.put(pluginName, data);
+  }
+
   void _showPluginToast(String title, String message) {
     BotToast.showSimpleNotification(
       title: title,
@@ -84,7 +94,8 @@ class _DownloadPluginsPageState extends State<DownloadPluginsPage> {
       final downloadUrl = '${CommonApi.pluginRepo}/$pluginPath';
       final pluginData =
           await Request.getPlugin(downloadUrl, isMirror: isMirror);
-      storage.put(pluginName, pluginData.toJson());
+      final catalogVersion = plugin['version'] as String;
+      _persistPlugin(pluginName, pluginData, catalogVersion);
       if (!mounted) return;
       setState(() {
         hasChanged = true;
@@ -116,7 +127,7 @@ class _DownloadPluginsPageState extends State<DownloadPluginsPage> {
       final downloadUrl = '${CommonApi.pluginRepo}/$pluginPath';
       final pluginData =
           await Request.getPlugin(downloadUrl, isMirror: isMirror);
-      storage.put(pluginName, pluginData.toJson());
+      _persistPlugin(pluginName, pluginData, pluginVersion);
       if (!mounted) return;
       setState(() {
         hasChanged = true;

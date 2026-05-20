@@ -5,6 +5,7 @@ import 'package:anime_flow/repository/storage.dart';
 import 'package:flutter/services.dart';
 import 'package:hive_ce/hive.dart';
 import 'package:anime_flow/utils/logger.dart';
+import 'package:anime_flow/utils/utils.dart';
 
 class CrawlConfig {
   static final LiggLogger logger = LiggLogger();
@@ -32,11 +33,21 @@ class CrawlConfig {
         final jsonStr = await rootBundle.loadString(path);
         final config = jsonDecode(jsonStr);
 
-        final name = config['name'];
-        final version = config['version'];
-        if (!box.containsKey(name) || box.get(name)['version'] != version) {
+        final name = config['name'] as String;
+        final assetVersion = config['version']?.toString() ?? '';
+        if (!box.containsKey(name)) {
           await box.put(name, config);
-          logger.i('已加载配置：$name,版本：$version');
+          logger.i('已加载配置：$name,版本：$assetVersion');
+          continue;
+        }
+        final local = box.get(name);
+        final localVersion = local is Map
+            ? (local['version']?.toString() ?? '')
+            : '';
+        // 仅当内置资源版本高于本地时才覆盖
+        if (Utils.compareVersionNumbers(assetVersion, localVersion) > 0) {
+          await box.put(name, config);
+          logger.i('已升级配置：$name,$localVersion -> $assetVersion');
         }
       } catch (e) {
         logger.e('加载配置失败：$path, 错误：$e');

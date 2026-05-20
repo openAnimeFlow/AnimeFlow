@@ -7,7 +7,7 @@ import 'package:anime_flow/models/item/danmaku/danmaku_episode_response.dart';
 import 'package:anime_flow/models/item/danmaku/danmaku_module.dart';
 import 'package:anime_flow/models/item/danmaku/danmaku_search_response.dart';
 import 'package:anime_flow/models/item/token_item.dart';
-import 'package:anime_flow/stores/BangumiToken.dart';
+import 'package:anime_flow/repository/BangumiToken.dart';
 import 'package:anime_flow/utils/logger.dart';
 import 'package:anime_flow/utils/systemUtil.dart';
 import 'package:anime_flow/utils/utils.dart';
@@ -170,7 +170,7 @@ class AnimeFlowRequest {
         required Color color
       }) async {
     // 调用方法前已做了未登录校验，正常情况这里的token不会为null
-    final token = await BangumiToken().getToken();
+    final token = await BangumiToken.instance.getToken();
     final episodeID = int.parse('$bangumiID${episode.toString().padLeft(4, '0')}');
     final colorValue = Utils.colorToDecimalRgb(color);
     var path = '$_animeFlowApi${AnimeFlowApi.danmaku}';

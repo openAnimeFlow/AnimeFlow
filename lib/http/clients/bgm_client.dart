@@ -6,7 +6,7 @@ import 'package:anime_flow/http/core/dio_factory.dart';
 import 'package:anime_flow/http/core/network_error_mapper.dart';
 import 'package:anime_flow/http/requests/anime_flow_request.dart';
 import 'package:anime_flow/models/item/token_item.dart';
-import 'package:anime_flow/stores/BangumiToken.dart';
+import 'package:anime_flow/repository/BangumiToken.dart';
 import 'package:dio/dio.dart';
 import 'package:get/get_core/src/get_main.dart';
 import 'package:get/get_instance/src/extension_instance.dart';
@@ -18,7 +18,7 @@ class BangumiClient {
     _dio.interceptors.add(
       InterceptorsWrapper(
         onRequest: (options, handler) async {
-          final token = await BangumiToken().getToken();
+          final token = await BangumiToken.instance.getToken();
           if (token != null) {
             options.headers[Constants.authorization] =
             '${token.tokenType} ${token.accessToken}';
@@ -163,10 +163,10 @@ class BangumiClient {
         }
         return _retryAfterRefresh(e, handler);
       }
-
-      final oldToken = await BangumiToken().getToken();
+      final bangumiToken = BangumiToken.instance;
+      final oldToken = await bangumiToken.getToken();
       if (oldToken == null || oldToken.refreshToken.isEmpty) {
-        await BangumiToken().deleteToken();
+        await bangumiToken.removeToken();
         return handler.next(e);
       }
 
@@ -201,9 +201,9 @@ class BangumiClient {
         scope: newToken.scope,
         userId: oldToken.userId,
       );
-      await BangumiToken().saveToken(newTokenItem);
+      await BangumiToken.instance.saveToken(newTokenItem);
     } catch (e) {
-      await BangumiToken().deleteToken();
+      await BangumiToken.instance.removeToken();
       final userInfoStore = Get.find<MyController>();
       userInfoStore.clearUserInfo();
       rethrow;
@@ -214,7 +214,7 @@ class BangumiClient {
     DioException e,
     ErrorInterceptorHandler handler,
   ) async {
-    final token = await BangumiToken().getToken();
+    final token = await BangumiToken.instance.getToken();
     if (token == null) {
       return handler.next(e);
     }

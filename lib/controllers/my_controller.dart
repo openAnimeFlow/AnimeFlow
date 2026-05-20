@@ -6,7 +6,7 @@ import 'package:anime_flow/http/requests/anime_flow_request.dart';
 import 'package:anime_flow/http/requests/bgm_request.dart';
 import 'package:anime_flow/models/item/bangumi/user_info_item.dart';
 import 'package:anime_flow/models/item/token_item.dart';
-import 'package:anime_flow/stores/BangumiToken.dart';
+import 'package:anime_flow/repository/BangumiToken.dart';
 import 'package:anime_flow/utils/logger.dart';
 import 'package:anime_flow/utils/systemUtil.dart';
 import 'package:get/get.dart';
@@ -15,12 +15,11 @@ import 'package:url_launcher/url_launcher.dart';
 class MyController extends GetxController {
   final RxBool isOAuthAuthorizing = false.obs;
   Rx<UserInfoItem?> userInfo = Rx<UserInfoItem?>(null);
-  late BangumiToken bangumiToken;
+  final BangumiToken bangumiToken = BangumiToken.instance;
 
   @override
   void onInit() {
     super.onInit();
-    bangumiToken = BangumiToken();
     _init();
   }
 
@@ -51,7 +50,7 @@ class MyController extends GetxController {
   ///清理userInfo
   void clearUserInfo() {
     userInfo.value = null;
-    BangumiToken().deleteToken();
+    bangumiToken.removeToken();
   }
 
   /// Bangumi OAuth 应用回调（自定义 scheme）
@@ -71,7 +70,7 @@ class MyController extends GetxController {
         return;
       }
       final token = await AnimeFlowRequest.getTokenService(code: code);
-      await BangumiToken().saveToken(token);
+      await bangumiToken.saveToken(token);
       final me = await UserRequest.userInfoService();
       userInfo.value = await UserRequest.queryUserInfoService(me.username);
     } catch (e) {
@@ -119,7 +118,7 @@ class MyController extends GetxController {
       LiggLogger().d('开始轮询 token，sessionId: $sessionId');
       final token = await AnimeFlowRequest.pollTokenService(state: sessionId);
       if (token != null) {
-        await BangumiToken().saveToken(token);
+        await bangumiToken.saveToken(token);
 
         final me = await UserRequest.userInfoService();
         final userInfo = await UserRequest.queryUserInfoService(me.username);

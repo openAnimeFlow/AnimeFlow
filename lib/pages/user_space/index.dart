@@ -1,7 +1,7 @@
 import 'dart:ui';
 
-import 'package:anime_flow/http/requests/bgm_request.dart';
 import 'package:anime_flow/models/item/bangumi/user_info_item.dart';
+import 'package:anime_flow/repository/user_repository.dart';
 import 'package:anime_flow/pages/user_space/statistics/index.dart';
 import 'package:anime_flow/pages/user_space/user_stores.dart';
 import 'package:anime_flow/utils/format_time_util.dart';
@@ -51,7 +51,7 @@ class _UserSpacePageState extends State<UserSpacePage>
     setState(() {
       isLoading = true;
     });
-    final userInfo = await UserRequest.queryUserInfoService(username);
+    final userInfo = await UserRepository.instance.getUserProfile(username);
     Get.put(UserSpaceStores(userInfo));
     setState(() {
       this.userInfo = userInfo;

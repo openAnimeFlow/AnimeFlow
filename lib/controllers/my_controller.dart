@@ -3,10 +3,10 @@ import 'dart:io';
 import 'package:anime_flow/constants/constants.dart';
 import 'package:anime_flow/http/api_path.dart';
 import 'package:anime_flow/http/requests/anime_flow_request.dart';
-import 'package:anime_flow/http/requests/bgm_request.dart';
 import 'package:anime_flow/models/item/bangumi/user_info_item.dart';
 import 'package:anime_flow/models/item/token_item.dart';
 import 'package:anime_flow/repository/BangumiToken.dart';
+import 'package:anime_flow/repository/user_repository.dart';
 import 'package:anime_flow/utils/logger.dart';
 import 'package:anime_flow/utils/systemUtil.dart';
 import 'package:get/get.dart';
@@ -16,6 +16,7 @@ class MyController extends GetxController {
   final RxBool isOAuthAuthorizing = false.obs;
   Rx<UserInfoItem?> userInfo = Rx<UserInfoItem?>(null);
   final BangumiToken bangumiToken = BangumiToken.instance;
+  final UserRepository userRepository = UserRepository.instance;
 
   @override
   void onInit() {
@@ -42,8 +43,7 @@ class MyController extends GetxController {
   void _init() async {
     final token = await getToken();
     if (token != null) {
-      final me = await UserRequest.userInfoService();
-      userInfo.value = await UserRequest.queryUserInfoService(me.username);
+      userInfo.value = await userRepository.getCurrentUserProfile();
     }
   }
 
@@ -71,8 +71,7 @@ class MyController extends GetxController {
       }
       final token = await AnimeFlowRequest.getTokenService(code: code);
       await bangumiToken.saveToken(token);
-      final me = await UserRequest.userInfoService();
-      userInfo.value = await UserRequest.queryUserInfoService(me.username);
+      userInfo.value = await userRepository.getCurrentUserProfile();
     } catch (e) {
       LiggLogger().e('登录后拉取用户信息失败: $e');
     } finally {
@@ -119,10 +118,7 @@ class MyController extends GetxController {
       final token = await AnimeFlowRequest.pollTokenService(state: sessionId);
       if (token != null) {
         await bangumiToken.saveToken(token);
-
-        final me = await UserRequest.userInfoService();
-        final userInfo = await UserRequest.queryUserInfoService(me.username);
-        this.userInfo.value = userInfo;
+        userInfo.value = await userRepository.getCurrentUserProfile();
       } else {
         LiggLogger().w('轮询超时，未获取到 token');
       }

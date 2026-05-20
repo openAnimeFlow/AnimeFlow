@@ -86,7 +86,7 @@ class MyController extends GetxController {
       const clientId = Constants.bgmClientId;
       const redirectUri = AnimeFlowApi.animeFlowApi + AnimeFlowApi.callback;
       final session = await AnimeFlowRequest.getSessionService();
-      final sessionId = session['data']['sessionId'];
+      final sessionId = session['sessionId'];
       final authUrl = Uri.parse(
           '${CommonApi.bgmTV}${BgmApi.oauth}?response_type=code&client_id=$clientId&redirect_uri=$redirectUri&state=$sessionId');
       LiggLogger().d('authUrl: $authUrl');

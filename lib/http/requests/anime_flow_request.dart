@@ -13,65 +13,54 @@ import 'package:anime_flow/utils/systemUtil.dart';
 import 'package:anime_flow/utils/utils.dart';
 import 'package:dio/dio.dart';
 
-/// animeFlow统一的响应类
-class AnimeFlowResponse {
-  final int code;
-  final String message;
-  final Map<String, dynamic> data;
-
-  AnimeFlowResponse(
-      {required this.code, required this.message, required this.data});
-
-  factory AnimeFlowResponse.fromJson(Map<String, dynamic> json) {
-    final dataRaw = json['data'];
-    return AnimeFlowResponse(
-      code: json['code'] as int,
-      message: json['message'] as String? ?? '',
-      data: dataRaw is Map
-          ? Map<String, dynamic>.from(dataRaw)
-          : <String, dynamic>{},
-    );
-  }
-}
-
 class AnimeFlowRequest {
   static final AnimeFlowClient _client = AnimeFlowClient.instance;
 
-  // static const String _animeFlowApi = AnimeFlowApi.animeFlowApi;
-
   static Future<TokenItem> getTokenService({required String code}) async {
-    final response = await _client.post( AnimeFlowApi.token,
-        queryParameters: {'code': code});
-    return TokenItem.fromJson(response['data']);
+    final response = await _client.post(
+      AnimeFlowApi.token,
+      queryParameters: {'code': code},
+    );
+    return TokenItem.fromJson(response.data);
   }
 
   ///刷新token
-  static Future<TokenItem> refreshTokenService(
-      {required String refreshToken}) async {
+  static Future<TokenItem> refreshTokenService({
+    required String refreshToken,
+  }) async {
     final response = await _client.post(
-        AnimeFlowApi.refreshToken,
-        queryParameters: {'refreshToken': refreshToken});
-    return TokenItem.fromJson(response['data']);
+      AnimeFlowApi.refreshToken,
+      queryParameters: {'refreshToken': refreshToken},
+    );
+    return TokenItem.fromJson(response.data);
   }
 
   //回调api
   static Future<Map<String, dynamic>> callbackService(
-      String code, String state) async {
-    return await _client.get(AnimeFlowApi.callback,
-        queryParameters: {'code': code, 'state': state}).then((value) => value);
+    String code,
+    String state,
+  ) async {
+    final response = await _client.get(
+      AnimeFlowApi.callback,
+      queryParameters: {'code': code, 'state': state},
+    );
+    return response.data;
   }
 
   //获取session
   static Future<Map<String, dynamic>> getSessionService() async {
-    String deviceName = SystemUtil.getDevice().toUpperCase();
-    return await _client.get(AnimeFlowApi.session,
-        queryParameters: {'platform': deviceName}).then((value) => value);
+    final deviceName = SystemUtil.getDevice().toUpperCase();
+    final response = await _client.get(
+      AnimeFlowApi.session,
+      queryParameters: {'platform': deviceName},
+    );
+    return response.data;
   }
 
   // 持续轮询直到获取到 token 或超时（60秒，与 session 过期时间一致）
   static Future<TokenItem?> pollTokenService({required String state}) async {
-    const maxDuration = Duration(seconds: 60); // session 过期时间
-    const pollInterval = Duration(seconds: 2); // 每2秒轮询一次
+    const maxDuration = Duration(seconds: 60);
+    const pollInterval = Duration(seconds: 2);
     final startTime = DateTime.now();
 
     while (DateTime.now().difference(startTime) < maxDuration) {
@@ -81,8 +70,8 @@ class AnimeFlowRequest {
           queryParameters: {'sessionId': state},
         );
 
-        if (response['code'] == 200 && response['data'] != null) {
-          return TokenItem.fromJson(response['data']);
+        if (response.code == 200 && response.data.isNotEmpty) {
+          return TokenItem.fromJson(response.data);
         }
       } catch (e) {
         // 忽略错误，继续轮询
@@ -91,7 +80,7 @@ class AnimeFlowRequest {
       await Future.delayed(pollInterval);
     }
 
-    return null; // 超时未获取到 token
+    return null;
   }
 
   /// 获取弹幕
@@ -108,45 +97,39 @@ class AnimeFlowRequest {
 
   /// 通过episodeID获取弹幕
   static Future<List<Danmaku>> getDanDanmakuByEpisodeID(int episodeID) async {
-    var path = '${AnimeFlowApi.danmaku}/$episodeID';
-    List<Danmaku> danmakus = [];
-    Map<String, String> withRelated = {
-      'withRelated': 'true',
-    };
-    final raw = await _client.get(path, queryParameters: withRelated);
-    if (raw is! Map) {
-      return danmakus;
-    }
-    final response = AnimeFlowResponse.fromJson(Map<String, dynamic>.from(raw));
+    final path = '${AnimeFlowApi.danmaku}/$episodeID';
+    final danmakus = <Danmaku>[];
+    final response = await _client.get(
+      path,
+      queryParameters: {'withRelated': 'true'},
+    );
     final comments = response.data['comments'];
     if (comments is! List) {
       return danmakus;
     }
-    for (var comment in comments) {
-      Danmaku danmaku = Danmaku.fromJson(comment);
-      danmakus.add(danmaku);
+    for (final comment in comments) {
+      danmakus.add(Danmaku.fromJson(comment));
     }
     return danmakus;
   }
 
   /// 搜索番剧元素
-  static Future<DanmakuSearchResponse> searchResponse(String title,
-      {int type = 1}) async {
-    const api = AnimeFlowApi.search;
-
-    final res = await _client
-        .get(api, queryParameters: {'keyword': title, 'type': type});
-    final response = AnimeFlowResponse.fromJson(Map<String, dynamic>.from(res));
+  static Future<DanmakuSearchResponse> searchResponse(
+    String title, {
+    int type = 1,
+  }) async {
+    final response = await _client.get(
+      AnimeFlowApi.search,
+      queryParameters: {'keyword': title, 'type': type},
+    );
     return DanmakuSearchResponse.fromJson(response.data);
   }
 
   static Future<int?> getDanDanBangumiIDByBgmBangumiID(int bgmBangumiID) async {
-    var path = '${AnimeFlowApi.animeDetailByBgmId}/$bgmBangumiID';
-    final res = await _client.get(path);
-    final response = AnimeFlowResponse.fromJson(Map<String, dynamic>.from(res));
+    final path = '${AnimeFlowApi.animeDetailByBgmId}/$bgmBangumiID';
+    final response = await _client.get(path);
     try {
-      final bangumiId = DanmakuEpisodeResponse.fromJson(response.data).bangumiId;
-      return bangumiId;
+      return DanmakuEpisodeResponse.fromJson(response.data).bangumiId;
     } catch (e) {
       LiggLogger().e('获取番剧ID 为空：$e');
       return null;
@@ -155,35 +138,40 @@ class AnimeFlowRequest {
 
   /// 通过番剧ID获取番剧元素
   static Future<DanmakuEpisodeResponse> getDanDanEpisodesByDanDanBangumiID(
-      int bangumiID) async {
-    var path = '${AnimeFlowApi.animeDetail}/$bangumiID';
-    final res = await _client.get(path);
-    final response = AnimeFlowResponse.fromJson(Map<String, dynamic>.from(res));
+    int bangumiID,
+  ) async {
+    final path = '${AnimeFlowApi.animeDetail}/$bangumiID';
+    final response = await _client.get(path);
     return DanmakuEpisodeResponse.fromJson(response.data);
   }
 
   /// 发送弹幕
-  static Future<AnimeFlowResponse> sendDanmaku(int bangumiID, int episode,
-      {required String message,
-        required double time,
-        required int type,
-        required Color color
-      }) async {
-    // 调用方法前已做了未登录校验，正常情况这里的token不会为null
+  static Future<AnimeFlowResponse> sendDanmaku(
+    int bangumiID,
+    int episode, {
+    required String message,
+    required double time,
+    required int type,
+    required Color color,
+  }) async {
     final token = await BangumiToken.instance.getToken();
-    final episodeID = int.parse('$bangumiID${episode.toString().padLeft(4, '0')}');
+    final episodeID =
+        int.parse('$bangumiID${episode.toString().padLeft(4, '0')}');
     final colorValue = Utils.colorToDecimalRgb(color);
-    var path = AnimeFlowApi.danmaku;
-    final data = {
-      'episodeId': episodeID,
-      'comment': message,
-      'time': time,
-      'type': type,
-      'color': colorValue
-    };
-    final request = await _client.post(path, data: data,
-        options: Options(headers: {Constants.authorization: '${token!.tokenType} ${token.accessToken}'})
+    return _client.post(
+      AnimeFlowApi.danmaku,
+      data: {
+        'episodeId': episodeID,
+        'comment': message,
+        'time': time,
+        'type': type,
+        'color': colorValue,
+      },
+      options: Options(
+        headers: {
+          Constants.authorization: '${token!.tokenType} ${token.accessToken}',
+        },
+      ),
     );
-    return AnimeFlowResponse.fromJson(Map<String, dynamic>.from(request));
   }
 }

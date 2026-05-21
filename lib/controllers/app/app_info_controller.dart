@@ -6,6 +6,7 @@ import 'package:anime_flow/repository/storage.dart';
 import 'package:anime_flow/utils/systemUtil.dart';
 import 'package:anime_flow/utils/utils.dart';
 import 'package:anime_flow/widget/apply_updates_view.dart';
+import 'package:anime_flow/widget/notification_toast.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:anime_flow/utils/logger.dart';
@@ -97,7 +98,7 @@ class AppInfoController extends GetxController {
             getDownloadInfo(downloadInfo, htmlUrl ?? '');
 
         if (download.isEmpty) {
-          Get.snackbar("检查更新", "未找到对应平台的下载地址", maxWidth: 500);
+          NotificationToast.show("检查更新", "未找到对应平台的下载地址", maxWidth: 500);
           return VersionType.localNewer;
         }
 
@@ -160,7 +161,7 @@ class AppInfoController extends GetxController {
                 // 如果是取消操作，不显示错误提示
                 if (!e.toString().contains('下载已取消')) {
                   _closeDialog();
-                  Get.snackbar(
+                  NotificationToast.show(
                     "下载失败",
                     "更新下载失败: $e",
                     maxWidth: 500,
@@ -178,7 +179,7 @@ class AppInfoController extends GetxController {
               downloadProgress.value = 0.0;
               receivedBytes.value = 0;
               totalBytes.value = 0;
-              Get.snackbar(
+              NotificationToast.show(
                 "下载已取消",
                 "已取消下载",
                 maxWidth: 500,
@@ -309,7 +310,7 @@ class AppInfoController extends GetxController {
                 if (dialogContext.mounted) {
                   Navigator.of(dialogContext).pop();
                 }
-                Get.snackbar(
+                NotificationToast.show(
                   '打开失败',
                   '无法打开文件管理器: $e',
                   maxWidth: 500,

@@ -53,7 +53,7 @@ dependencies:
   # carousel_slider: ^5.1.1
   # shared_preferences: ^2.5.3#  app_links: ^7.0.0
   # flutter_dotenv: ^6.0.0
-  # package_info_plus: ^9.0.0
+  package_info_plus: ^9.0.0
   dio: ^5.9.0
   get: ^4.7.3
   flutter_launcher_icons: ^0.14.4

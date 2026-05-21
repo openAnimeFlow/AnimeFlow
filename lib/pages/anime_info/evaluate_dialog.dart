@@ -1,7 +1,7 @@
 import 'package:anime_flow/http/requests/bgm_request.dart';
 import 'package:anime_flow/models/item/bangumi/subjects_info_item.dart';
+import 'package:anime_flow/widget/notification_toast.dart';
 import 'package:flutter/material.dart';
-import 'package:get/get.dart';
 import 'package:go_router/go_router.dart';
 
 /// 评价对话框
@@ -83,11 +83,11 @@ class _EvaluateDialogState extends State<InfoEvaluateDialog> {
 
       if (mounted) {
         context.pop();
-        Get.snackbar('评价成功', '评价已保存', maxWidth: 500);
+        NotificationToast.show('评价成功', '评价已保存', maxWidth: 500);
       }
     } catch (e) {
       if (mounted) {
-        Get.snackbar('评价失败', e.toString(), maxWidth: 500);
+        NotificationToast.show('评价失败', e.toString(), maxWidth: 500);
       }
     } finally {
       if (mounted) {

@@ -4,6 +4,7 @@ import 'package:anime_flow/controllers/app/app_info_controller.dart';
 import 'package:anime_flow/pages/settings/setting_provider.dart';
 import 'package:anime_flow/repository/storage.dart';
 import 'package:anime_flow/routes/routes.dart';
+import 'package:anime_flow/widget/notification_toast.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:get/get.dart';
@@ -112,7 +113,7 @@ class _AboutSettingsPageState extends State<AboutSettingsPage> {
                 if (await canLaunchUrl(uri)) {
                   await launchUrl(uri);
                 } else {
-                  Get.snackbar('无法打开网页', '你的设备可能不支持此功能');
+                  NotificationToast.show('无法打开网页', '你的设备可能不支持此功能');
                 }
               },
             ),

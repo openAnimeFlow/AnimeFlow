@@ -31,14 +31,14 @@ class InfoAppbar extends StatelessWidget {
     if (await canLaunchUrl(uri)) {
       await launchUrl(uri, mode: LaunchMode.externalApplication);
     } else {
-      Get.snackbar('错误', '无法打开链接', maxWidth: 500);
+      NotificationToast.show('错误', '无法打开链接', maxWidth: 500);
     }
   }
 
   Future<void> _copyUrl(BuildContext context, String url) async {
     await Clipboard.setData(ClipboardData(text: url));
     if (context.mounted) {
-      Get.snackbar('已复制', '网站链接已复制到剪贴板', maxWidth: 500);
+      NotificationToast.show('已复制', '网站链接已复制到剪贴板', maxWidth: 500);
     }
   }
 

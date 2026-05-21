@@ -5,7 +5,6 @@ import 'package:anime_flow/routes/routes.dart';
 import 'package:bot_toast/bot_toast.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:get/get.dart';
 import 'package:hive_ce_flutter/hive_flutter.dart';
 import 'package:media_kit/media_kit.dart';
 import 'package:window_manager/window_manager.dart';
@@ -51,7 +50,7 @@ class MyApp extends StatelessWidget {
       builder: (BuildContext context, WidgetRef ref, Widget? child) {
         final themeState = ref.watch(themeProvider);
         final fontFamily = themeState.fontFamily;
-        return GetMaterialApp.router(
+        return MaterialApp.router(
           key: ValueKey(fontFamily),
           builder: BotToastInit(),
           routeInformationProvider: appRouter.routeInformationProvider,

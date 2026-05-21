@@ -1,6 +1,8 @@
 import 'package:anime_flow/pages/play/controller/play_controller.dart';
 import 'package:anime_flow/pages/play/controller/video_ui_controller.dart';
+import 'package:anime_flow/utils/exceptions/storage_exception.dart';
 import 'package:anime_flow/utils/systemUtil.dart';
+import 'package:anime_flow/widget/notification_toast.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:anime_flow/utils/logger.dart';
@@ -46,16 +48,26 @@ class _RightAreaControlState extends State<RightAreaControl> {
                                         .player
                                         .screenshot();
                                     if (uint8List != null) {
-                                      await SystemUtil.saveImageBytes(uint8List,
-                                          name: 'video_screenshot');
+                                      final message =
+                                          await SystemUtil.saveImageBytes(
+                                        uint8List,
+                                        name: 'video_screenshot',
+                                      );
+                                      NotificationToast.show(
+                                          '提示', message, maxWidth: 500);
                                     } else {
-                                      Get.snackbar('提示', '截图失败，无法获取截图数据',
+                                      NotificationToast.show(
+                                          '提示', '截图失败，无法获取截图数据',
                                           maxWidth: 500);
                                     }
+                                  } on StoragePermissionDeniedException catch (e) {
+                                    LiggLogger().e(e);
+                                    NotificationToast.show(
+                                        '提示', e.message, maxWidth: 500);
                                   } catch (e) {
                                     LiggLogger().e(e);
-                                    Get.snackbar('提示', '截图失败: $e',
-                                        maxWidth: 500);
+                                    NotificationToast.show(
+                                        '提示', '截图失败: $e', maxWidth: 500);
                                   }
                                 },
                                 child: Container(

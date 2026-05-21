@@ -5,7 +5,10 @@ import 'package:anime_flow/models/item/subject_basic_data_item.dart';
 import 'package:anime_flow/pages/anime_info/provider/anime_info_provider.dart';
 import 'package:anime_flow/widget/animation_network_image/animation_network_image.dart';
 import 'package:anime_flow/widget/drop_down_menu.dart';
+import 'package:anime_flow/widget/notification_toast.dart';
 import 'package:anime_flow/widget/ranking.dart';
+import 'package:anime_flow/utils/exceptions/storage_exception.dart';
+import 'package:anime_flow/utils/logger.dart';
 import 'package:anime_flow/widget/star.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -39,6 +42,22 @@ class InfoAppbar extends StatelessWidget {
     }
   }
 
+  Future<void> _downloadCover() async {
+    try {
+      final message = await Request.downloadImage(
+        subjectBasicData.image,
+        subjectBasicData.name,
+      );
+      NotificationToast.show('提示', message, maxWidth: 500);
+    } on StoragePermissionDeniedException catch (e) {
+      LiggLogger().e('保存图片失败:$e');
+      NotificationToast.show('提示', e.message, maxWidth: 500);
+    } catch (e) {
+      LiggLogger().e('保存图片失败:$e');
+      NotificationToast.show('提示', '保存图片失败:$e', maxWidth: 500);
+    }
+  }
+
   void _handleMenuAction(BuildContext context, MoreMenuAction action) {
     final url = '${CommonApi.bgmTV}/subject/${subjectBasicData.id}';
     switch (action) {
@@ -46,7 +65,7 @@ class InfoAppbar extends StatelessWidget {
         _openInBrowser(url);
         break;
       case MoreMenuAction.downloadCover:
-        Request.downloadImage(subjectBasicData.image, subjectBasicData.name);
+        _downloadCover();
         break;
       case MoreMenuAction.copyUrl:
         _copyUrl(context, url);

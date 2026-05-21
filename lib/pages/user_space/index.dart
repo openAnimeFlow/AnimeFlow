@@ -1,23 +1,16 @@
-import 'dart:ui';
-
 import 'package:anime_flow/models/item/bangumi/user_info_item.dart';
 import 'package:anime_flow/repository/providers/repository_providers.dart';
 import 'package:anime_flow/pages/user_space/statistics/index.dart';
 import 'package:anime_flow/pages/user_space/user_stores.dart';
-import 'package:anime_flow/utils/format_time_util.dart';
-import 'package:anime_flow/widget/animation_network_image/animation_network_image.dart';
-import 'package:anime_flow/widget/bbcode/bbcode_widget.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:get/get.dart';
-import 'package:go_router/go_router.dart';
+import 'app_bar_title.dart';
 import 'collect/index.dart';
+import 'header_content.dart';
+import 'intro.dart';
 
-part 'app_bar_title.dart';
 
-part 'header_content.dart';
-
-part 'intro.dart';
 
 class UserSpacePage extends StatefulWidget {
   final String username;
@@ -108,7 +101,7 @@ class _UserSpacePageState extends State<UserSpacePage>
                     sliver: SliverAppBar(
                       automaticallyImplyLeading: false,
                       titleSpacing: 0,
-                      title: _AppBarTitleView(
+                      title: BarTitleView(
                           userInfo: userInfo!, isPinned: isPinned),
                       pinned: true,
                       floating: false,
@@ -124,7 +117,7 @@ class _UserSpacePageState extends State<UserSpacePage>
                         background: Padding(
                           padding:
                               const EdgeInsets.only(bottom: kTextTabBarHeight),
-                          child: _HeaderContent(
+                          child: HeaderContent(
                             userInfo: userInfo!,
                           ),
                         ),
@@ -150,7 +143,7 @@ class _UserSpacePageState extends State<UserSpacePage>
               body: TabBarView(
                 controller: _tabController,
                 children: [
-                  _IntroView(userInfo: userInfo!),
+                  IntroView(userInfo: userInfo!),
                   const CollectView(),
                   const StatisticsView(),
                   Builder(builder: (context) => _buildTimelineTab(context)),

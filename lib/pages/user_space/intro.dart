@@ -1,8 +1,11 @@
-part of 'index.dart';
 
-class _IntroView extends StatelessWidget {
+import 'package:anime_flow/models/item/bangumi/user_info_item.dart';
+import 'package:anime_flow/widget/bbcode/bbcode_widget.dart';
+import 'package:flutter/material.dart';
+
+class IntroView extends StatelessWidget {
   final UserInfoItem userInfo;
-  const _IntroView({super.key, required this.userInfo});
+  const IntroView({super.key, required this.userInfo});
 
   @override
   Widget build(BuildContext context) {

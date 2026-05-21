@@ -1,11 +1,15 @@
-part of 'index.dart';
 
-class _AppBarTitleView extends StatelessWidget {
+import 'package:anime_flow/models/item/bangumi/user_info_item.dart';
+import 'package:anime_flow/widget/animation_network_image/animation_network_image.dart';
+import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
+
+class BarTitleView extends StatelessWidget {
   final UserInfoItem userInfo;
   final bool isPinned;
 
-  const _AppBarTitleView(
-      {required this.userInfo, required this.isPinned});
+  const BarTitleView(
+      {super.key, required this.userInfo, required this.isPinned});
 
   @override
   Widget build(BuildContext context) {

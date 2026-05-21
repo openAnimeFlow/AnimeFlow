@@ -28,13 +28,14 @@ class _PluginsPageState extends State<PluginsPage> {
   }
 
   @override
-  void deactivate() {
+  void dispose() {
     settingConfig.listenable().removeListener(initData);
-    super.deactivate();
+    super.dispose();
   }
 
-  void initData() async {
+  Future<void> initData() async {
     final dataSources = await CrawlConfig.loadAllCrawlConfigs();
+    if (!mounted) return;
     setState(() {
       this.dataSources = dataSources;
     });

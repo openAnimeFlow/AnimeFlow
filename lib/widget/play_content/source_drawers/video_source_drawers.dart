@@ -12,6 +12,7 @@ import 'package:anime_flow/stores/episodes_state.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:anime_flow/utils/logger.dart';
+import 'package:anime_flow/widget/notification_toast.dart';
 
 class VideoSourceDrawers extends StatefulWidget {
   final Function(String url)? onVideoUrlSelected;
@@ -542,13 +543,7 @@ class _VideoSourceDrawersState extends State<VideoSourceDrawers> {
                 widget.onVideoUrlSelected?.call(videoUrl);
               } catch (e) {
                 logger.e('获取视频源失败', error: e);
-                Get.snackbar(
-                  '错误',
-                  '获取视频源失败: $e',
-                  duration: const Duration(seconds: 3),
-                  maxWidth: 300,
-                  backgroundColor: Colors.red.shade100,
-                );
+                NotificationToast.show('错误','获取视频源失败: $e');
               }
             },
             borderRadius: BorderRadius.circular(12),
@@ -720,8 +715,7 @@ class _CaptchaViewState extends State<CaptchaView> {
     _disposeSession();
     widget.dataSourceController.markCaptchaVerified(websiteName);
     setState(() {});
-    Get.snackbar('验证成功', '正在重新检索，请稍候…',
-        snackPosition: SnackPosition.BOTTOM, maxWidth: 300);
+    NotificationToast.show('验证成功', '正在重新检索，请稍候…', maxWidth: 300);
     Future.delayed(const Duration(seconds: 2), () {
       widget.dataSourceController.retryResources(websiteName);
     });
@@ -731,8 +725,7 @@ class _CaptchaViewState extends State<CaptchaView> {
     final config = widget.resource.antiCrawlerConfig;
     if (config == null || _isSubmitting) return;
     if (_codeController.text.trim().isEmpty) {
-      Get.snackbar('提示', '请输入验证码',
-          snackPosition: SnackPosition.BOTTOM, maxWidth: 300);
+      NotificationToast.show('提示', '请输入验证码');
       return;
     }
     setState(() => _isSubmitting = true);
@@ -754,8 +747,7 @@ class _CaptchaViewState extends State<CaptchaView> {
           _isSubmitting = false;
           _codeController.clear();
         });
-        Get.snackbar('提示', '验证码可能有误，请重新输入',
-            snackPosition: SnackPosition.BOTTOM, maxWidth: 300);
+        NotificationToast.show('提示', '验证码可能有误，请重新输入');
         await _reloadCaptchaImage();
       });
     }

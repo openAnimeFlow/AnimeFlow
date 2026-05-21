@@ -12,11 +12,12 @@ import 'package:anime_flow/pages/play/video/ui/video_ui_components.dart';
 import 'package:anime_flow/stores/episodes_state.dart';
 import 'package:anime_flow/utils/systemUtil.dart';
 import 'package:anime_flow/widget/danmaku_text_field.dart';
-import 'package:anime_flow/widget/play_content/episodes_view.dart';
+import 'package:anime_flow/widget/play_content/episodes_dialog.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:get/get.dart';
+import 'package:go_router/go_router.dart';
 
 /// 底部区域控件
 class BottomAreaControl extends StatefulWidget {
@@ -253,7 +254,21 @@ class _BottomAreaControlState extends State<BottomAreaControl> {
                                       },
                                       pageBuilder: (context, animation,
                                           secondaryAnimation) {
-                                        return const EpisodesView();
+                                        return EpisodesDialog(
+                                          episodes: episodesState.episodes.value?.data,
+                                          selectedEpisode: episodesState.episodeSort.value,
+                                          onEpisodeSelected:
+                                              (episode, episodeIndex) {
+                                            episodesState.setEpisodeSort(
+                                              episodeId: episode.id,
+                                              episodeIndex: episodeIndex,
+                                              sort: episode.sort,
+                                            );
+                                            episodesState.setEpisodeTitle(
+                                                episode.nameCN ?? episode.name);
+                                            context.pop();
+                                          },
+                                        );
                                       });
                                 },
                                 child: const Text("选集")),

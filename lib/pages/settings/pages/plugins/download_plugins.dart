@@ -7,7 +7,7 @@ import 'package:anime_flow/utils/format_time_util.dart';
 import 'package:anime_flow/utils/systemUtil.dart';
 import 'package:anime_flow/utils/utils.dart';
 import 'package:anime_flow/widget/animation_network_image/animation_network_image.dart';
-import 'package:bot_toast/bot_toast.dart';
+import 'package:anime_flow/widget/notification_toast.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:anime_flow/utils/logger.dart';
@@ -73,15 +73,6 @@ class _DownloadPluginsPageState extends State<DownloadPluginsPage> {
     storage.put(pluginName, data);
   }
 
-  void _showPluginToast(String title, String message) {
-    BotToast.showSimpleNotification(
-      title: title,
-      subTitle: message,
-      align: Alignment.bottomCenter,
-      duration: const Duration(seconds: 3),
-    );
-  }
-
   Future<void> _downloadPlugin(Map<dynamic, dynamic> plugin) async {
     final pluginName = plugin['name'] as String;
     if (_busyPluginNames.contains(pluginName)) return;
@@ -100,9 +91,9 @@ class _DownloadPluginsPageState extends State<DownloadPluginsPage> {
       setState(() {
         hasChanged = true;
       });
-      _showPluginToast('下载成功', '插件 "$pluginName" 已下载');
+      NotificationToast.show('下载成功', '插件 "$pluginName" 已下载');
     } catch (e) {
-      _showPluginToast('下载失败', '下载插件 "$pluginName" 时发生错误：$e');
+      NotificationToast.show('下载失败', '下载插件 "$pluginName" 时发生错误：$e');
     } finally {
       if (mounted) {
         setState(() {
@@ -132,12 +123,12 @@ class _DownloadPluginsPageState extends State<DownloadPluginsPage> {
       setState(() {
         hasChanged = true;
       });
-      _showPluginToast(
+      NotificationToast.show(
         '更新成功',
         '插件 "$pluginName" 已更新到版本 $pluginVersion',
       );
     } catch (e) {
-      _showPluginToast(
+      NotificationToast.show(
         '更新失败',
         '更新插件 "$pluginName" 时发生错误：$e',
       );

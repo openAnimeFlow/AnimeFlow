@@ -1,8 +1,9 @@
 import 'package:anime_flow/crawler/itme/crawler_config_item.dart';
 import 'package:anime_flow/crawler/itme/anti_crawler_config.dart';
 import 'package:anime_flow/repository/storage.dart';
+import 'package:anime_flow/widget/notification_toast.dart';
 import 'package:flutter/material.dart';
-import 'package:get/get.dart';
+import 'package:go_router/go_router.dart';
 
 class AddPluginsPage extends StatefulWidget {
   final String? editPluginKey;
@@ -158,7 +159,7 @@ class _AddPluginsPageState extends State<AddPluginsPage> {
     });
   }
 
-  Future<void> _saveConfig() async {
+  Future<bool> _saveConfig() async {
     // 空值校验
     _errorFields.clear();
     for (int i = 0; i < _textFields.length; i++) {
@@ -191,7 +192,7 @@ class _AddPluginsPageState extends State<AddPluginsPage> {
 
     if (_errorFields.isNotEmpty || _antiFieldErrors.isNotEmpty) {
       setState(() {});
-      return;
+      return false;
     }
 
     try {
@@ -224,15 +225,12 @@ class _AddPluginsPageState extends State<AddPluginsPage> {
       }
 
       crawlConfigs.put(item.name, item.toJson());
-      Get.back();
+      return true;
     } catch (e) {
       if (mounted) {
-        Get.snackbar(
-          '保存失败',
-          '数据保存失败:$e',
-          maxWidth: 400,
-        );
+        NotificationToast.show('保存失败', '数据保存失败:$e');
       }
+      return false;
     }
   }
 
@@ -255,7 +253,12 @@ class _AddPluginsPageState extends State<AddPluginsPage> {
       ),
       floatingActionButton: FloatingActionButton(
         heroTag: 'add_source_save',
-        onPressed: _saveConfig,
+        onPressed: () async {
+          final saved = await _saveConfig();
+          if (saved && context.mounted) {
+            context.pop();
+          }
+        },
         child: const Icon(Icons.save_rounded),
       ),
       body: Center(
@@ -281,23 +284,23 @@ class _AddPluginsPageState extends State<AddPluginsPage> {
                           errorText: hasError ? '此字段不能为空' : null,
                           errorBorder: hasError
                               ? OutlineInputBorder(
-                                  borderRadius: BorderRadius.circular(10),
-                                  borderSide: BorderSide(
-                                    color:
-                                        Theme.of(context).colorScheme.error,
-                                    width: 2,
-                                  ),
-                                )
+                            borderRadius: BorderRadius.circular(10),
+                            borderSide: BorderSide(
+                              color:
+                              Theme.of(context).colorScheme.error,
+                              width: 2,
+                            ),
+                          )
                               : null,
                           focusedErrorBorder: hasError
                               ? OutlineInputBorder(
-                                  borderRadius: BorderRadius.circular(10),
-                                  borderSide: BorderSide(
-                                    color:
-                                        Theme.of(context).colorScheme.error,
-                                    width: 2,
-                                  ),
-                                )
+                            borderRadius: BorderRadius.circular(10),
+                            borderSide: BorderSide(
+                              color:
+                              Theme.of(context).colorScheme.error,
+                              width: 2,
+                            ),
+                          )
                               : null,
                           border: OutlineInputBorder(
                             borderRadius: BorderRadius.circular(10),

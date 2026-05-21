@@ -34,7 +34,7 @@ class SubjectItem {
 class Subject {
   final int id;
   final String name;
-  final String? nameCN;
+  final String nameCN;
   final int type;
   final String info;
   final Rating rating;
@@ -59,7 +59,7 @@ class Subject {
     return Subject(
       id: json['id'] as int,
       name: json['name'] as String,
-      nameCN: json['nameCN'] as String?,
+      nameCN: json['nameCN'] as String? ?? '',
       type: json['type'] as int,
       info: json['info'] as String,
       rating: Rating.fromJson(json['rating'] as Map<String, dynamic>),

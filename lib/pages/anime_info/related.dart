@@ -38,7 +38,7 @@ class RelatedView extends StatelessWidget {
                           final item = relation.data[index];
                           final subjectBasicData = SubjectBasicData(
                             id: item.subject.id,
-                            name: item.subject.nameCN ?? item.subject.name,
+                            name: item.subject.nameCN.isEmpty ? item.subject.name : item.subject.nameCN,
                             image: item.subject.images.large,
                           );
                           return Container(
@@ -59,7 +59,7 @@ class RelatedView extends StatelessWidget {
                                   const SizedBox(height: 10),
                                   Expanded(
                                     child: Text(
-                                      item.subject.nameCN ?? item.subject.name,
+                                      item.subject.nameCN.isEmpty ? item.subject.name : item.subject.nameCN,
                                       maxLines: 2,
                                       overflow: TextOverflow.ellipsis,
                                     ),

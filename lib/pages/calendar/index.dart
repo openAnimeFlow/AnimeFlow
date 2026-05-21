@@ -249,7 +249,7 @@ class _CalendarPageState extends State<CalendarPage>
   Widget _buildCard(Subject itemData, int watchers) {
     final subjectBasicData = SubjectBasicData(
       id: itemData.id,
-      name: itemData.nameCN ?? itemData.name,
+      name: itemData.nameCN.isEmpty ? itemData.name : itemData.nameCN,
       image: itemData.images.large,
     );
 
@@ -259,7 +259,7 @@ class _CalendarPageState extends State<CalendarPage>
       },
       child: SubjectCard(
         image: itemData.images.large,
-        title: itemData.nameCN ?? itemData.name,
+        title: itemData.nameCN.isEmpty ? itemData.name : itemData.nameCN,
         rating: itemData.rating.rank,
         isCoverAnimation: false,
       ),

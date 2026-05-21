@@ -120,7 +120,7 @@ class SearchPageController extends GetxController {
       if (requestId != _suggestionRequestId) return;
 
       searchSuggestions.addAll(searchRequest.data
-          .map((item) => item.nameCN ?? item.name)
+          .map((item) => item.nameCN.isEmpty ? item.name : item.nameCN)
           .where((name) => name.isNotEmpty));
     } catch (_) {
       if (requestId != _suggestionRequestId) return;

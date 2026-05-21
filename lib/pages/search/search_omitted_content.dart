@@ -20,13 +20,13 @@ class SearchOmittedContent extends StatelessWidget {
             onTap: () {
               AnimeInfoRoute(
                 id: searchData.id,
-                name: searchData.nameCN ?? searchData.name,
+                name: searchData.nameCN.isEmpty ? searchData.name : searchData.nameCN,
                 image: searchData.images.large,
               ).push(context);
             },
             child: SubjectCard(
               image: searchData.images.large,
-              title: searchData.nameCN ?? searchData.name,
+              title: searchData.nameCN.isEmpty ? searchData.name : searchData.nameCN,
             )));
   }
 }

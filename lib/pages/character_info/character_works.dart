@@ -112,7 +112,7 @@ class _CharacterWorksViewState extends State<CharacterWorksView> {
         onTap: () {
           final subjectBasicData = SubjectBasicData(
             id: work.subject.id,
-            name: work.subject.nameCN ?? work.subject.name,
+            name: work.subject.nameCN.isEmpty ? work.subject.name : work.subject.nameCN,
             image: work.subject.images.large,
           );
           AnimeInfoRoute.fromData(subjectBasicData).push(context);
@@ -139,19 +139,23 @@ class _CharacterWorksViewState extends State<CharacterWorksView> {
                 mainAxisSize: MainAxisSize.min,
                 children: [
                   // 作品名称（中文）
-                  Text(
-                    work.subject.nameCN ?? work.subject.name,
-                    style: const TextStyle(
+                  if (work.subject.nameCN.isNotEmpty)
+                    Text(
+                      work.subject.nameCN,
+                      style: const TextStyle(
+                        fontSize: 20,
+                        fontWeight: FontWeight.bold,
+                      ),
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
+                    ) else
+                    Text(work.subject.name, style: const TextStyle(
                       fontSize: 20,
                       fontWeight: FontWeight.bold,
-                    ),
-                    maxLines: 2,
-                    overflow: TextOverflow.ellipsis,
-                  ),
-                  // 作品名称（日文）
-                  if (work.subject.nameCN != null &&
-                      work.subject.nameCN != work.subject.name) ...[
+                    ), maxLines: 2, overflow: TextOverflow.ellipsis),
+                    // 作品名称（日文）
                     const SizedBox(height: 2),
+                    if (work.subject.name.isNotEmpty)
                     Text(
                       work.subject.name,
                       style: TextStyle(
@@ -162,7 +166,6 @@ class _CharacterWorksViewState extends State<CharacterWorksView> {
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                     ),
-                  ],
                   const SizedBox(height: 2),
                   // 角色类型标签
                   Container(

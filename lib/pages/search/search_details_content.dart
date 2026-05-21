@@ -22,7 +22,7 @@ class SearchDetailsContentView extends StatelessWidget {
   Widget build(BuildContext context) {
     final subjectBasicData = SubjectBasicData(
       id: searchData.id,
-      name: searchData.nameCN ?? searchData.name,
+      name: searchData.nameCN.isEmpty ? searchData.name : searchData.nameCN,
       image: searchData.images.large,
     );
 
@@ -57,7 +57,7 @@ class SearchDetailsContentView extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      searchData.nameCN ?? searchData.name,
+                      searchData.nameCN.isEmpty ? searchData.name : searchData.nameCN,
                       style: const TextStyle(
                           fontSize: 16, fontWeight: FontWeight.bold),
                       maxLines: 2,

@@ -355,7 +355,7 @@ class _RankingPageState extends State<RankingPage> {
                                 final data = subject!.data[index];
                                 final subjectBasicData = SubjectBasicData(
                                   id: data.id,
-                                  name: data.nameCN ?? data.name,
+                                  name: data.nameCN.isEmpty ? data.name : data.nameCN,
                                   image: data.images.large,
                                 );
                                 return InkWell(
@@ -365,7 +365,7 @@ class _RankingPageState extends State<RankingPage> {
                                   child: SubjectCard(
                                       rating: data.rating.rank,
                                       image: data.images.large,
-                                      title: data.nameCN ?? data.name),
+                                      title: data.nameCN.isEmpty ? data.name : data.nameCN),
                                 );
                               },
                             ),

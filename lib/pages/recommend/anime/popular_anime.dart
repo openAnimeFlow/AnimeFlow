@@ -61,7 +61,7 @@ class PopularAnimeView extends ConsumerWidget {
                   final subject = hotState.items[index].subject;
                   final subjectBasicData = SubjectBasicData(
                     id: subject.id,
-                    name: subject.nameCN ?? subject.name,
+                    name: subject.nameCN.isEmpty ? subject.name : subject.nameCN,
                     image: subject.images.large,
                   );
                   return InkWell(
@@ -69,7 +69,7 @@ class PopularAnimeView extends ConsumerWidget {
                         AnimeInfoRoute.fromData(subjectBasicData).push(context),
                     child: SubjectCard(
                       image: subject.images.large,
-                      title: subject.nameCN ?? subject.name,
+                      title: subject.nameCN.isEmpty ? subject.name : subject.nameCN,
                     ),
                   );
                 }

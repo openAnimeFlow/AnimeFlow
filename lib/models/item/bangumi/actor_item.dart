@@ -46,7 +46,7 @@ class CharacterActorData {
           : Character(
               id: 0,
               name: '',
-              nameCN: null,
+              nameCN: '',
               role: 0,
               info: '',
               comment: 0,
@@ -75,7 +75,7 @@ class CharacterActorData {
 class Character {
   final int id;
   final String name;
-  final String? nameCN;
+  final String nameCN;
   final int role;
   final String info;
   final int comment;
@@ -86,7 +86,7 @@ class Character {
   Character({
     required this.id,
     required this.name,
-    this.nameCN,
+    required this.nameCN,
     required this.role,
     required this.info,
     required this.comment,
@@ -99,7 +99,7 @@ class Character {
     return Character(
       id: json['id'] as int,
       name: json['name'] as String,
-      nameCN: json['nameCN'] as String?,
+      nameCN: json['nameCN'] as String? ?? '',
       role: json['role'] as int,
       info: json['info'] as String,
       comment: json['comment'] as int,

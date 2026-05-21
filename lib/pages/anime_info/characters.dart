@@ -86,8 +86,9 @@ class CharactersView extends StatelessWidget {
                                 InkWell(
                                   onTap: () => CharacterInfoRoute(
                                     id: actor.character.id,
-                                    name: actor.character.nameCN ??
-                                        actor.character.name,
+                                    name: actor.character.nameCN.isEmpty
+                                        ? actor.character.name
+                                        : actor.character.nameCN,
                                     image: actor.character.images.large,
                                   ).push(context),
                                   child: AspectRatio(
@@ -106,8 +107,9 @@ class CharactersView extends StatelessWidget {
                                 ),
                                 // 角色名称
                                 Text(
-                                  actor.character.nameCN ??
-                                      actor.character.name,
+                                  actor.character.nameCN.isEmpty
+                                      ? actor.character.name
+                                      : actor.character.nameCN,
                                   style: const TextStyle(
                                     fontSize: 10,
                                     fontWeight: FontWeight.w600,

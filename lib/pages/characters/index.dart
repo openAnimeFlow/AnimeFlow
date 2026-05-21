@@ -219,8 +219,9 @@ class _CharacterPageState extends State<CharacterPage> {
         onTap: () {
           CharacterInfoRoute(
             id: characterData.character.id,
-            name: characterData.character.nameCN ??
-                characterData.character.name,
+            name: characterData.character.nameCN.isNotEmpty
+                ? characterData.character.nameCN
+                : characterData.character.name,
             image: characterData.character.images.large,
           ).push(context);
         },
@@ -250,8 +251,9 @@ class _CharacterPageState extends State<CharacterPage> {
                 children: [
                   // 角色名称（中文）
                   Text(
-                    characterData.character.nameCN ??
-                        characterData.character.name,
+                    characterData.character.nameCN.isEmpty
+                        ? characterData.character.name
+                        : characterData.character.nameCN,
                     style: const TextStyle(
                       fontSize: 20,
                       fontWeight: FontWeight.bold,
@@ -260,7 +262,7 @@ class _CharacterPageState extends State<CharacterPage> {
                     overflow: TextOverflow.ellipsis,
                   ),
                   // 角色名称（日文）
-                  if (characterData.character.nameCN != null &&
+                  if (characterData.character.nameCN.isNotEmpty &&
                       characterData.character.nameCN !=
                           characterData.character.name) ...[
                     const SizedBox(height: 2),

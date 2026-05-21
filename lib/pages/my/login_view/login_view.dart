@@ -3,6 +3,7 @@ import 'dart:ui';
 import 'package:anime_flow/controllers/my_controller.dart';
 import 'package:anime_flow/routes/routes.dart';
 import 'package:anime_flow/widget/animation_network_image/animation_network_image.dart';
+import 'package:anime_flow/widget/drop_down_menu.dart';
 import 'package:anime_flow/http/requests/bgm_request.dart';
 import 'package:anime_flow/models/item/bangumi/collections_item.dart';
 import 'package:anime_flow/models/item/bangumi/user_info_item.dart';
@@ -11,6 +12,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import 'collection_tab_view.dart';
+
+enum _LoginOverflowAction { settings, playRecord, logout }
 
 class LoginView extends StatefulWidget {
   final UserInfoItem userInfoItem;
@@ -230,52 +233,6 @@ class _LoginViewState extends State<LoginView> with SingleTickerProviderStateMix
   Widget _buildAppBarTitle() {
     final userInfo = widget.userInfoItem;
 
-    // 菜单项数据
-    final menuItems = [
-      {
-        'title': '设置',
-        'icon': Icons.settings_outlined,
-        'action': () {
-          const SettingsRoute().push(context);
-        },
-      },
-      {
-        'title': '播放记录',
-        'icon': Icons.smart_display_outlined,
-        'action': () {
-          const PlayRecordRoute().push(context);
-        },
-      },
-      {
-        'title': '退出登录',
-        'icon': Icons.logout_outlined,
-        'action': () {
-          showDialog<void>(
-            context: context,
-            builder: (dialogContext) => AlertDialog(
-              title: const Text('确认退出'),
-              content: const Text('确定要退出登录吗？'),
-              actions: [
-                TextButton(
-                  onPressed: () => Navigator.of(dialogContext).pop(),
-                  child: const Text('取消'),
-                ),
-                TextButton(
-                  onPressed: () {
-                    Navigator.of(dialogContext).pop();
-                    ProviderScope.containerOf(context)
-                        .read(myControllerProvider)
-                        .clearUserInfo();
-                  },
-                  child: const Text('确定'),
-                ),
-              ],
-            ),
-          );
-        },
-      },
-    ];
-
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 16),
       child: Row(
@@ -318,45 +275,64 @@ class _LoginViewState extends State<LoginView> with SingleTickerProviderStateMix
             ),
           ),
           const Spacer(),
-          MenuAnchor(
-            alignmentOffset: const Offset(-100, 0),
-            crossAxisUnconstrained: false,
-            menuChildren:
-                List<MenuItemButton>.generate(menuItems.length, (int index) {
-              final menuItem = menuItems[index];
-              return MenuItemButton(
-                onPressed: menuItem['action'] as VoidCallback,
-                child: SizedBox(
-                  width: 120,
-                  child: Row(
-                    children: [
-                      Icon(
-                        menuItem['icon'] as IconData,
-                        size: 20,
-                      ),
-                      const SizedBox(width: 8),
-                      Text(menuItem['title'] as String),
-                    ],
-                  ),
+          DropDownMenu<_LoginOverflowAction>(
+            items: _LoginOverflowAction.values,
+            tooltip: '更多菜单',
+            disableSelected: false,
+            buttonBuilder: (context, _) => const Icon(
+              Icons.notes_outlined,
+              size: 30,
+            ),
+            itemBuilder: (context, action, _) {
+              final (icon, label) = switch (action) {
+                _LoginOverflowAction.settings =>
+                  (Icons.settings_outlined, '设置'),
+                _LoginOverflowAction.playRecord =>
+                  (Icons.smart_display_outlined, '播放记录'),
+                _LoginOverflowAction.logout =>
+                  (Icons.logout_outlined, '退出登录'),
+              };
+              return SizedBox(
+                width: 120,
+                child: Row(
+                  children: [
+                    Icon(icon, size: 20),
+                    const SizedBox(width: 8),
+                    Text(label),
+                  ],
                 ),
               );
-            }),
-            builder: (BuildContext context, MenuController controller,
-                Widget? child) {
-              return InkWell(
-                borderRadius: BorderRadius.circular(8),
-                onTap: () {
-                  if (controller.isOpen) {
-                    controller.close();
-                  } else {
-                    controller.open();
-                  }
-                },
-                child: const Icon(
-                  Icons.notes_outlined,
-                  size: 30,
-                ),
-              );
+            },
+            onSelected: (action) {
+              switch (action) {
+                case _LoginOverflowAction.settings:
+                  const SettingsRoute().push(context);
+                case _LoginOverflowAction.playRecord:
+                  const PlayRecordRoute().push(context);
+                case _LoginOverflowAction.logout:
+                  showDialog<void>(
+                    context: context,
+                    builder: (dialogContext) => AlertDialog(
+                      title: const Text('确认退出'),
+                      content: const Text('确定要退出登录吗？'),
+                      actions: [
+                        TextButton(
+                          onPressed: () => Navigator.of(dialogContext).pop(),
+                          child: const Text('取消'),
+                        ),
+                        TextButton(
+                          onPressed: () {
+                            Navigator.of(dialogContext).pop();
+                            ProviderScope.containerOf(context)
+                                .read(myControllerProvider)
+                                .clearUserInfo();
+                          },
+                          child: const Text('确定'),
+                        ),
+                      ],
+                    ),
+                  );
+              }
             },
           ),
         ],

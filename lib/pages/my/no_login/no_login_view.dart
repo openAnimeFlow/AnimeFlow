@@ -1,6 +1,7 @@
 import 'package:anime_flow/constants/assets_path_constants.dart';
 import 'package:anime_flow/controllers/my_controller.dart';
 import 'package:anime_flow/routes/routes.dart';
+import 'package:anime_flow/widget/drop_down_menu.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -22,15 +23,37 @@ class NoLoginView extends StatelessWidget {
           child: Row(
             children: [
               const Spacer(),
-              PopupMenuButton<_NoLoginOverflowAction>(
-                tooltip: '更多',
-                position: PopupMenuPosition.under,
-                offset: const Offset(0, 4),
-                icon: Icon(
-                  Icons.more_vert_rounded,
+              DropDownMenu<_NoLoginOverflowAction>(
+                tooltip: '更多菜单',
+                items: _NoLoginOverflowAction.values,
+                disableSelected: false,
+                buttonBuilder: (context, _) => Icon(
+                  Icons.notes_outlined,
                   size: 28,
                   color: colorScheme.onSurface,
                 ),
+                itemBuilder: (context, action, _) {
+                  final (icon, label) = switch (action) {
+                    _NoLoginOverflowAction.settings =>
+                      (Icons.settings_outlined, '设置'),
+                    _NoLoginOverflowAction.playRecord =>
+                      (Icons.smart_display_outlined, '播放记录'),
+                  };
+                  return SizedBox(
+                    height: 48,
+                    child: Row(
+                      children: [
+                        Icon(
+                          icon,
+                          size: 20,
+                          color: colorScheme.onSurfaceVariant,
+                        ),
+                        const SizedBox(width: 12),
+                        Text(label, style: textStyle),
+                      ],
+                    ),
+                  );
+                },
                 onSelected: (action) {
                   switch (action) {
                     case _NoLoginOverflowAction.settings:
@@ -39,40 +62,6 @@ class NoLoginView extends StatelessWidget {
                       const PlayRecordRoute().push(context);
                   }
                 },
-                itemBuilder: (context) => [
-                  PopupMenuItem<_NoLoginOverflowAction>(
-                    value: _NoLoginOverflowAction.settings,
-                    height: 48,
-                    padding: const EdgeInsets.symmetric(horizontal: 16),
-                    child: Row(
-                      children: [
-                        Icon(
-                          Icons.settings_outlined,
-                          size: 20,
-                          color: colorScheme.onSurfaceVariant,
-                        ),
-                        const SizedBox(width: 12),
-                        Text('设置', style: textStyle),
-                      ],
-                    ),
-                  ),
-                  PopupMenuItem<_NoLoginOverflowAction>(
-                    value: _NoLoginOverflowAction.playRecord,
-                    height: 48,
-                    padding: const EdgeInsets.symmetric(horizontal: 16),
-                    child: Row(
-                      children: [
-                        Icon(
-                          Icons.smart_display_outlined,
-                          size: 20,
-                          color: colorScheme.onSurfaceVariant,
-                        ),
-                        const SizedBox(width: 12),
-                        Text('播放记录', style: textStyle),
-                      ],
-                    ),
-                  ),
-                ],
               ),
             ],
           ),

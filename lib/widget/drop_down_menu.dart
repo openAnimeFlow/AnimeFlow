@@ -21,6 +21,9 @@ class DropDownMenu<T> extends StatelessWidget {
   /// 菜单偏移量
   final Offset offset;
 
+  /// 菜单提示文本
+  final String? tooltip;
+
   /// 菜单形状
   final ShapeBorder? shape;
 
@@ -35,6 +38,7 @@ class DropDownMenu<T> extends StatelessWidget {
     required this.itemBuilder,
     required this.onSelected,
     this.offset = const Offset(0, 40),
+    this.tooltip,
     this.shape,
     this.disableSelected = true,
   });
@@ -42,6 +46,7 @@ class DropDownMenu<T> extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return PopupMenuButton<T>(
+      tooltip: tooltip,
       offset: offset,
       shape: shape ??
           RoundedRectangleBorder(

@@ -83,6 +83,7 @@ class InfoAppbar extends StatelessWidget {
 
   Widget _buildMenu(BuildContext context) {
     return DropDownMenu<MoreMenuAction>(
+      tooltip: '更多操作',
       items: MoreMenuAction.values,
       offset: const Offset(0, 40),
       disableSelected: false,

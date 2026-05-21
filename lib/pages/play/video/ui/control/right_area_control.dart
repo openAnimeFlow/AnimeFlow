@@ -37,8 +37,7 @@ class _RightAreaControlState extends State<RightAreaControl> {
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
                       Obx(
-                        () => playController.position.value >
-                                    Duration.zero &&
+                        () => playController.position.value > Duration.zero &&
                                 (playController.isWideScreen.value ||
                                     fullscreen)
                             ? InkWell(
@@ -53,21 +52,26 @@ class _RightAreaControlState extends State<RightAreaControl> {
                                         uint8List,
                                         name: 'video_screenshot',
                                       );
-                                      NotificationToast.show(
-                                          '提示', message, maxWidth: 500);
+                                      NotificationToast.show('提示', message,
+                                          align: Alignment.topCenter,
+                                          maxWidth: 500);
                                     } else {
                                       NotificationToast.show(
-                                          '提示', '截图失败，无法获取截图数据',
+                                          align: Alignment.topCenter,
+                                          '提示',
+                                          '截图失败，无法获取截图数据',
                                           maxWidth: 500);
                                     }
                                   } on StoragePermissionDeniedException catch (e) {
                                     LiggLogger().e(e);
-                                    NotificationToast.show(
-                                        '提示', e.message, maxWidth: 500);
+                                    NotificationToast.show('提示', e.message,
+                                        align: Alignment.topCenter,
+                                        maxWidth: 500);
                                   } catch (e) {
                                     LiggLogger().e(e);
-                                    NotificationToast.show(
-                                        '提示', '截图失败: $e', maxWidth: 500);
+                                    NotificationToast.show('提示', '截图失败: $e',
+                                        align: Alignment.topCenter,
+                                        maxWidth: 500);
                                   }
                                 },
                                 child: Container(

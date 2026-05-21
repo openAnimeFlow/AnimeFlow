@@ -127,7 +127,7 @@ class EpisodesComponentsState extends State<EpisodesComponents> {
                               episodeIndex: episodeIndex,
                               sort: episode.sort);
                           episodesState
-                              .setEpisodeTitle(episode.nameCN ?? episode.name);
+                              .setEpisodeTitle(episode.nameCN.isEmpty ? episode.name : episode.nameCN);
                         },
                         child: Container(
                           decoration: BoxDecoration(
@@ -148,9 +148,9 @@ class EpisodesComponentsState extends State<EpisodesComponents> {
                                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                                     crossAxisAlignment: CrossAxisAlignment.stretch,
                                 children: [
-                                  Text('第${episode.sort}话'),
+                                  Text(episode.sort.toString().padLeft(2, '0')),
                                   Text(
-                                    episode.nameCN ?? episode.name,
+                                    episode.nameCN.isEmpty ? episode.name : episode.nameCN,
                                     overflow: TextOverflow.ellipsis,
                                     maxLines: 1,
                                   ),
@@ -233,7 +233,7 @@ class EpisodesComponentsState extends State<EpisodesComponents> {
                             episodeIndex: episodeIndex,
                             sort: episode.sort);
                         episodesState
-                            .setEpisodeTitle(episode.nameCN ?? episode.name);
+                            .setEpisodeTitle(episode.nameCN.isEmpty ? episode.name : episode.nameCN);
                       },
                       child: Center(
                         child: Text(

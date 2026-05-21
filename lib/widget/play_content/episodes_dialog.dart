@@ -82,14 +82,14 @@ class EpisodesDialog extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    '第${episode.sort}话',
+                    episode.sort.toString().padLeft(2, '0'),
                     style: const TextStyle(
                       fontWeight: FontWeight.bold,
                     ),
                   ),
                   const SizedBox(height: 6),
                   Text(
-                    episode.nameCN ?? episode.name,
+                    episode.nameCN.isEmpty ? episode.name : episode.nameCN,
                     style: const TextStyle(
                       fontSize: 12,
                       color: Colors.grey,

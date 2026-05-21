@@ -267,7 +267,9 @@ class _BottomAreaControlState extends State<BottomAreaControl> {
                                               sort: episode.sort,
                                             );
                                             episodesState.setEpisodeTitle(
-                                                episode.nameCN ?? episode.name);
+                                                episode.nameCN.isEmpty
+                                                    ? episode.name
+                                                    : episode.nameCN);
                                             context.pop();
                                           },
                                         );

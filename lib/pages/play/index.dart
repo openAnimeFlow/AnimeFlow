@@ -111,7 +111,7 @@ class _PlayPageState extends State<PlayPage> {
                   episodeIndex: targetIndex + 1,
                   episodeId: targetEpisode.id);
               episodesState
-                  .setEpisodeTitle(targetEpisode.nameCN ?? targetEpisode.name);
+                  .setEpisodeTitle(targetEpisode.nameCN.isEmpty ? targetEpisode.name : targetEpisode.nameCN);
             }
           });
         }

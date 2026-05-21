@@ -29,7 +29,7 @@ class EpisodeData {
   final int type;
   final int disc;
   final String name;
-  final String? nameCN;
+  final String nameCN;
   final String duration;
   final String airdate;
   final int comment;
@@ -43,7 +43,7 @@ class EpisodeData {
     required this.type,
     required this.disc,
     required this.name,
-    this.nameCN,
+    required this.nameCN,
     required this.duration,
     required this.airdate,
     required this.comment,
@@ -58,7 +58,7 @@ class EpisodeData {
         type = json['type'],
         disc = json['disc'],
         name = json['name'] ?? '',
-        nameCN = json['nameCN'],
+        nameCN = json['nameCN'] ?? '',
         duration = json['duration'] ?? '',
         airdate = json['airdate'] ?? '',
         comment = json['comment'] ?? 0,

@@ -32,6 +32,34 @@ class _TopAreaControlState extends ConsumerState<TopAreaControl> {
   final EpisodesState episodesController = Get.find<EpisodesState>();
   final PlaySubjectState playSubjectState = Get.find<PlaySubjectState>();
 
+  Future<T?> _showRightSlideDialog<T>({
+    required BuildContext context,
+    required String barrierLabel,
+    required Widget child,
+    bool barrierDismissible = false,
+  }) {
+    return showGeneralDialog<T>(
+      context: context,
+      barrierDismissible: barrierDismissible,
+      barrierLabel: barrierLabel,
+      barrierColor: Colors.black54,
+      transitionDuration: const Duration(milliseconds: 300),
+      pageBuilder: (context, animation, secondaryAnimation) => child,
+      transitionBuilder: (context, animation, secondaryAnimation, child) {
+        return SlideTransition(
+          position: Tween<Offset>(
+            begin: const Offset(1, 0),
+            end: Offset.zero,
+          ).animate(CurvedAnimation(
+            parent: animation,
+            curve: Curves.easeOut,
+          )),
+          child: child,
+        );
+      },
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Obx(() {
@@ -139,28 +167,12 @@ class _TopAreaControlState extends ConsumerState<TopAreaControl> {
                                       fullscreen))
                                 IconButton(
                                   onPressed: () {
-                                    Get.generalDialog(
-                                        barrierLabel: "VideoSetting",
-                                        barrierColor: Colors.black54,
-                                        transitionDuration:
-                                            const Duration(milliseconds: 300),
-                                        transitionBuilder: (context, animation,
-                                            secondaryAnimation, child) {
-                                          return SlideTransition(
-                                            position: Tween<Offset>(
-                                              begin: const Offset(1, 0),
-                                              end: Offset.zero,
-                                            ).animate(CurvedAnimation(
-                                              parent: animation,
-                                              curve: Curves.easeOut,
-                                            )),
-                                            child: child,
-                                          );
-                                        },
-                                        pageBuilder: (context, animation,
-                                            secondaryAnimation) {
-                                          return const VideoSetting();
-                                        });
+                                    _showRightSlideDialog(
+                                      barrierDismissible: true,
+                                      context: context,
+                                      barrierLabel: 'VideoSetting',
+                                      child: const VideoSetting(),
+                                    );
                                   },
                                   icon: const Icon(
                                       size: 29,
@@ -171,40 +183,22 @@ class _TopAreaControlState extends ConsumerState<TopAreaControl> {
                                 IconButton(
                                   padding: const EdgeInsets.all(0),
                                   onPressed: () {
-                                    Get.generalDialog(
+                                    _showRightSlideDialog(
+                                      context: context,
+                                      barrierLabel: 'SourceDrawer',
                                       barrierDismissible: true,
-                                      barrierLabel: "SourceDrawer",
-                                      barrierColor: Colors.black54,
-                                      transitionDuration:
-                                          const Duration(milliseconds: 300),
-                                      transitionBuilder: (context, animation,
-                                          secondaryAnimation, child) {
-                                        return SlideTransition(
-                                          position: Tween<Offset>(
-                                            begin: const Offset(1, 0),
-                                            end: Offset.zero,
-                                          ).animate(CurvedAnimation(
-                                            parent: animation,
-                                            curve: Curves.easeOut,
-                                          )),
-                                          child: child,
-                                        );
-                                      },
-                                      pageBuilder: (context, animation,
-                                          secondaryAnimation) {
-                                        return VideoSourceDrawers(
-                                          onVideoUrlSelected: (url) {
-                                            playController.player.stop();
-                                            videoSourceController
-                                                .loadVideoPage(url);
-                                          },
-                                          isBottomSheet: false,
-                                          videoSourceController:
-                                              videoSourceController,
-                                          episodesState: episodesController,
-                                          subjectState: playSubjectState,
-                                        );
-                                      },
+                                      child: VideoSourceDrawers(
+                                        onVideoUrlSelected: (url) {
+                                          playController.player.stop();
+                                          videoSourceController
+                                              .loadVideoPage(url);
+                                        },
+                                        isBottomSheet: false,
+                                        videoSourceController:
+                                            videoSourceController,
+                                        episodesState: episodesController,
+                                        subjectState: playSubjectState,
+                                      ),
                                     );
                                   },
                                   icon: const Icon(
@@ -213,7 +207,7 @@ class _TopAreaControlState extends ConsumerState<TopAreaControl> {
                                     color: Colors.white70,
                                   ),
                                 ),
-                              if (SystemUtil.isDesktop)
+                              if (SystemUtil.isDesktop && !fullscreen)
                                 Obx(() => playController.isWideScreen.value
                                     ? IconButton(
                                         onPressed: () => playController

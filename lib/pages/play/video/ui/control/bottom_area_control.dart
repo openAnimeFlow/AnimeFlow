@@ -215,6 +215,8 @@ class _BottomAreaControlState extends State<BottomAreaControl> {
                                             ),
                                             child: const Text(
                                               "登录后才能发送弹幕",
+                                              maxLines: 1,
+                                              overflow: TextOverflow.ellipsis,
                                               style: TextStyle(
                                                   color: Colors.white),
                                             ),

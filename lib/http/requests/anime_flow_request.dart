@@ -4,6 +4,7 @@ import 'package:anime_flow/constants/constants.dart';
 import 'package:anime_flow/http/api_path.dart';
 import 'package:anime_flow/http/clients/anime_flow_client.dart';
 import 'package:anime_flow/models/item/bangumi/calendar_item.dart';
+import 'package:anime_flow/models/item/bangumi/episodes_item.dart';
 import 'package:anime_flow/models/item/bangumi/hot_item.dart';
 import 'package:anime_flow/models/item/bangumi/subjects_info_item.dart';
 import 'package:anime_flow/models/item/danmaku/danmaku_episode_response.dart';
@@ -188,14 +189,31 @@ class AnimeFlowRequest {
 
   /// 获取热门
   static Future<HotItem> getHotService(int limit, int offset) async {
-    return await _client.get(AnimeFlowApi.hot,
-        queryParameters: {'type': 2, 'limit': limit, 'offset': offset})
-        .then((value) => HotItem.fromJson(value.data));
+    return await _client.get(AnimeFlowApi.hot, queryParameters: {
+      'type': 2,
+      'limit': limit,
+      'offset': offset
+    }).then((value) => HotItem.fromJson(value.data));
   }
 
   ///根据id获取条目
   static Future<SubjectsInfoItem> getSubjectByIdService(int id) async {
     final response = await _client.get('${AnimeFlowApi.subjects}/$id');
     return SubjectsInfoItem.fromJson(response.data);
+  }
+
+  ///获取条目章节
+  static Future<EpisodesItem> getSubjectEpisodesByIdService(
+      int id, int limit, int offset) async {
+    try {
+      return await _client.get(
+          AnimeFlowApi.episodes.replaceFirst('{subjectId}', id.toString()),
+          queryParameters: {
+            'limit': limit,
+            'offset': offset
+          }).then((value) => EpisodesItem.fromJson(value.data));
+    } catch (e) {
+      throw Exception('Failed to fetch episodes: $e');
+    }
   }
 }

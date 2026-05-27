@@ -130,6 +130,9 @@ class AnimeFlowApi {
       ///条目
       subjects = '/api/v1/bangumi/subjects',
 
+      ///章节
+      episodes = '/api/v1/bangumi/subjects/{subjectId}/episodes',
+
       /// 每日放送、
       calendar = '/api/v1/bangumi/calendar';
 }

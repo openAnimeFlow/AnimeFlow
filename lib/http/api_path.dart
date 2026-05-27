@@ -101,7 +101,6 @@ class CommonApi {
 class AnimeFlowApi {
   /// AnimeFlow API Server
   static const String animeFlowApi = 'https://ligg.top',
-
       animeFlowApiDev = 'http://127.0.0.1:1024',
 
       /// 申请Token
@@ -128,10 +127,11 @@ class AnimeFlowApi {
       /// 获取热门条目
       hot = '/api/v1/bangumi/trending/subjects',
 
+      ///条目
+      subjects = '/api/v1/bangumi/subjects',
+
       /// 每日放送、
       calendar = '/api/v1/bangumi/calendar';
-
-
 }
 
 class DamakuApi {

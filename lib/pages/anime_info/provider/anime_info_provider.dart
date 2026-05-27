@@ -1,3 +1,4 @@
+import 'package:anime_flow/http/requests/anime_flow_request.dart';
 import 'package:anime_flow/models/item/bangumi/actor_item.dart';
 import 'package:anime_flow/models/item/bangumi/producers_item.dart';
 import 'package:anime_flow/models/item/bangumi/related_subjects_item.dart';
@@ -15,7 +16,7 @@ part 'anime_info_provider.g.dart';
 class AnimeInfo extends _$AnimeInfo {
   @override
   Future<SubjectsInfoItem> build(int subjectId) async {
-    return BgmRequest.getSubjectByIdService(subjectId);
+    return AnimeFlowRequest.getSubjectByIdService(subjectId);
   }
 
   void setAnimeInfo(SubjectsInfoItem subjectInfo) {

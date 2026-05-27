@@ -5,6 +5,7 @@ import 'package:anime_flow/http/api_path.dart';
 import 'package:anime_flow/http/clients/anime_flow_client.dart';
 import 'package:anime_flow/models/item/bangumi/calendar_item.dart';
 import 'package:anime_flow/models/item/bangumi/hot_item.dart';
+import 'package:anime_flow/models/item/bangumi/subjects_info_item.dart';
 import 'package:anime_flow/models/item/danmaku/danmaku_episode_response.dart';
 import 'package:anime_flow/models/item/danmaku/danmaku_module.dart';
 import 'package:anime_flow/models/item/danmaku/danmaku_search_response.dart';
@@ -190,5 +191,11 @@ class AnimeFlowRequest {
     return await _client.get(AnimeFlowApi.hot,
         queryParameters: {'type': 2, 'limit': limit, 'offset': offset})
         .then((value) => HotItem.fromJson(value.data));
+  }
+
+  ///根据id获取条目
+  static Future<SubjectsInfoItem> getSubjectByIdService(int id) async {
+    final response = await _client.get('${AnimeFlowApi.subjects}/$id');
+    return SubjectsInfoItem.fromJson(response.data);
   }
 }

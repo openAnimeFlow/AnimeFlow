@@ -12,16 +12,16 @@ import 'intro.dart';
 
 
 
-class UserSpacePage extends StatefulWidget {
+class UserSpacePage extends ConsumerStatefulWidget {
   final String username;
 
   const UserSpacePage({super.key, required this.username});
 
   @override
-  State<UserSpacePage> createState() => _UserSpacePageState();
+  ConsumerState<UserSpacePage> createState() => _UserSpacePageState();
 }
 
-class _UserSpacePageState extends State<UserSpacePage>
+class _UserSpacePageState extends ConsumerState<UserSpacePage>
     with SingleTickerProviderStateMixin {
   final double _contentHeight = 200.0; // 头部内容区域的高度
   late TabController _tabController;
@@ -41,18 +41,27 @@ class _UserSpacePageState extends State<UserSpacePage>
   }
 
   //获取用户基础信息
-  void _getUserInfo() async {
+  Future<void> _getUserInfo() async {
+    if (!mounted) return;
     setState(() {
       isLoading = true;
     });
-    final userInfo = await ProviderScope.containerOf(context)
-        .read(userRepositoryProvider)
-        .getUserProfile(username);
-    Get.put(UserSpaceStores(userInfo));
-    setState(() {
-      this.userInfo = userInfo;
-      isLoading = false;
-    });
+    try {
+      final userInfo = await ref
+          .read(userRepositoryProvider)
+          .getUserProfile(username);
+      if (!mounted) return;
+      Get.put(UserSpaceStores(userInfo));
+      setState(() {
+        this.userInfo = userInfo;
+        isLoading = false;
+      });
+    } catch (_) {
+      if (!mounted) return;
+      setState(() {
+        isLoading = false;
+      });
+    }
   }
 
   @override

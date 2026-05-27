@@ -3,6 +3,8 @@ import 'dart:ui';
 import 'package:anime_flow/constants/constants.dart';
 import 'package:anime_flow/http/api_path.dart';
 import 'package:anime_flow/http/clients/anime_flow_client.dart';
+import 'package:anime_flow/models/item/bangumi/calendar_item.dart';
+import 'package:anime_flow/models/item/bangumi/hot_item.dart';
 import 'package:anime_flow/models/item/danmaku/danmaku_episode_response.dart';
 import 'package:anime_flow/models/item/danmaku/danmaku_module.dart';
 import 'package:anime_flow/models/item/danmaku/danmaku_search_response.dart';
@@ -91,7 +93,8 @@ class AnimeFlowRequest {
     }
     // 这里猜测了弹弹Play的分集命名规则，例如上面的番剧ID为1758，第一集弹幕库ID大概率为17580001，
     // 但是此命名规则并没有体现在官方API文档里，保险的做法是请求 Api.dandanInfo（kazumi）
-    final episodeID = int.parse('$bangumiID${episode.toString().padLeft(4, '0')}');
+    final episodeID =
+        int.parse('$bangumiID${episode.toString().padLeft(4, '0')}');
     return getDanDanmakuByEpisodeID(episodeID);
   }
 
@@ -173,5 +176,19 @@ class AnimeFlowRequest {
         },
       ),
     );
+  }
+
+  ///每日放送
+  static Future<Calendar> calendarService() async {
+    return await _client
+        .get(AnimeFlowApi.calendar)
+        .then((value) => Calendar.fromJson(value.data));
+  }
+
+  /// 获取热门
+  static Future<HotItem> getHotService(int limit, int offset) async {
+    return await _client.get(AnimeFlowApi.hot,
+        queryParameters: {'type': 2, 'limit': limit, 'offset': offset})
+        .then((value) => HotItem.fromJson(value.data));
   }
 }

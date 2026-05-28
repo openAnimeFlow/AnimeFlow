@@ -3,9 +3,11 @@ import 'dart:ui';
 import 'package:anime_flow/constants/constants.dart';
 import 'package:anime_flow/http/api_path.dart';
 import 'package:anime_flow/http/clients/anime_flow_client.dart';
+import 'package:anime_flow/models/enums/sort_type.dart';
 import 'package:anime_flow/models/item/bangumi/calendar_item.dart';
 import 'package:anime_flow/models/item/bangumi/episodes_item.dart';
 import 'package:anime_flow/models/item/bangumi/hot_item.dart';
+import 'package:anime_flow/models/item/bangumi/subject_item.dart';
 import 'package:anime_flow/models/item/bangumi/subjects_info_item.dart';
 import 'package:anime_flow/models/item/danmaku/danmaku_episode_response.dart';
 import 'package:anime_flow/models/item/danmaku/danmaku_module.dart';
@@ -215,5 +217,33 @@ class AnimeFlowRequest {
     } catch (e) {
       throw Exception('Failed to fetch episodes: $e');
     }
+  }
+
+  ///排行
+  static Future<SubjectItem> rankService({
+    int? type = 2,
+    required SortType sort,
+    int? cat,
+    int? year,
+    int? month,
+    List<String>? tags,
+    required int page,
+  }) async {
+    final queryParameters = <String, dynamic>{
+      'type': type,
+      'sort': sort.value,
+      'page': page,
+    };
+    if (cat != null) queryParameters['cat'] = cat;
+    if (year != null) queryParameters['year'] = year;
+    if (month != null) queryParameters['month'] = month;
+    if (tags != null) queryParameters['tags'] = tags;
+
+    return _client
+        .get(
+          AnimeFlowApi.subjects,
+          queryParameters: queryParameters,
+        )
+        .then((response) => (SubjectItem.fromJson(response.data)));
   }
 }

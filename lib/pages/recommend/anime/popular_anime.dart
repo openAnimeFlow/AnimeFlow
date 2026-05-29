@@ -32,7 +32,7 @@ class PopularAnimeView extends ConsumerWidget {
             delegate: SliverChildBuilderDelegate(
               (BuildContext context, int index) => Center(
                 child: Padding(
-                  padding: const EdgeInsets.all(5),
+                  padding: const EdgeInsets.all(2),
                   child: _buildSkeleton(context),
                 ),
               ),
@@ -79,7 +79,7 @@ class PopularAnimeView extends ConsumerWidget {
                 if (index < hotState.items.length + skeletonCount) {
                   return Center(
                     child: Padding(
-                      padding: const EdgeInsets.all(5),
+                      padding: const EdgeInsets.all(2),
                       child: _buildSkeleton(context),
                     ),
                   );

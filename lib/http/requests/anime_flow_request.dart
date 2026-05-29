@@ -6,9 +6,15 @@ import 'package:anime_flow/http/clients/anime_flow_client.dart';
 import 'package:anime_flow/models/enums/sort_type.dart';
 import 'package:anime_flow/models/item/bangumi/actor_item.dart';
 import 'package:anime_flow/models/item/bangumi/calendar_item.dart';
+import 'package:anime_flow/models/item/bangumi/character_comments_item.dart';
+import 'package:anime_flow/models/item/bangumi/character_detail_item.dart';
+import 'package:anime_flow/models/item/bangumi/character_subjects_item.dart';
 import 'package:anime_flow/models/item/bangumi/episode_comments_item.dart';
 import 'package:anime_flow/models/item/bangumi/episodes_item.dart';
 import 'package:anime_flow/models/item/bangumi/hot_item.dart';
+import 'package:anime_flow/models/item/bangumi/producers_item.dart';
+import 'package:anime_flow/models/item/bangumi/related_subjects_item.dart';
+import 'package:anime_flow/models/item/bangumi/subject_comments_item.dart';
 import 'package:anime_flow/models/item/bangumi/subject_item.dart';
 import 'package:anime_flow/models/item/bangumi/subjects_info_item.dart';
 import 'package:anime_flow/models/item/danmaku/danmaku_episode_response.dart';
@@ -310,5 +316,87 @@ class AnimeFlowRequest {
           queryParameters: queryParameters,
         )
         .then((response) => (CharactersItem.fromJson(response.data)));
+  }
+
+  ///获取条目制作人
+  static Future<ProducersItem> getProducersService(int subjectId,
+      {required int limit, required int offset}) async {
+    final response = await _client.get(
+      AnimeFlowApi.staffs.replaceFirst('{subjectId}', subjectId.toString()),
+      queryParameters: {
+        'limit': limit,
+        'offset': offset,
+      },
+    );
+    return ProducersItem.fromJson(response.data);
+  }
+
+  ///获取条目评论
+  static Future<SubjectCommentItem> getSubjectCommentsByIdService({
+    required int limit,
+    required int offset,
+    required int subjectId,
+  }) async {
+    final response = await _client.get(
+      AnimeFlowApi.subjectComments
+          .replaceFirst('{subjectId}', subjectId.toString()),
+      queryParameters: {
+        'limit': limit,
+        'offset': offset,
+      },
+    );
+    try {
+      return SubjectCommentItem.fromJson(response.data);
+    } catch (e) {
+      throw Exception('Failed to fetch comments: $e');
+    }
+  }
+
+  ///角色信息
+  static Future<CharacterDetailItem> characterInfoService(
+      int characterId) async {
+    final response = await _client.get(AnimeFlowApi.character
+        .replaceFirst('{characterId}', characterId.toString()));
+    return CharacterDetailItem.fromJson(response.data);
+  }
+
+  ///角色出演作品
+  static Future<CharacterCastsItem> characterWorksService(int characterId,
+      {required int limit, required int offset, int subjectType = 2}) async {
+    final response = await _client.get(
+        AnimeFlowApi.characterCasts
+            .replaceFirst('{characterId}', characterId.toString()),
+        queryParameters: {
+          'subjectType': subjectType,
+          'limit': limit,
+          'offset': offset,
+        });
+    return CharacterCastsItem.fromJson(response.data);
+  }
+
+  ///角色吐槽
+  static Future<List<CharacterCommentItem>> characterCommentsService(
+      int characterId) async {
+    final response = await _client.get(AnimeFlowApi.characterComments
+        .replaceFirst('{characterId}', characterId.toString()));
+    final list =
+        (response.data as Map<String, dynamic>)['data'] as List<dynamic>;
+    return list
+        .map((item) =>
+            CharacterCommentItem.fromJson(item as Map<String, dynamic>))
+        .toList();
+  }
+
+  ///相关条目
+  static Future<SubjectRelationItem> relatedSubjectsService(int subjectId,
+      {required int limit, required int offset, int? type = 2}) async {
+    return _client.get(
+      AnimeFlowApi.relations.replaceFirst('{subjectId}', subjectId.toString()),
+      queryParameters: {
+        'type': type,
+        'limit': limit,
+        'offset': offset,
+      },
+    ).then((response) => (SubjectRelationItem.fromJson(response.data)));
   }
 }

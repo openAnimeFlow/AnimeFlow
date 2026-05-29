@@ -49,7 +49,7 @@ final class AnimeInfoProvider
   }
 }
 
-String _$animeInfoHash() => r'df40e4a2d487a4e8145b92996a037aab97eba092';
+String _$animeInfoHash() => r'065adc692dcd48f95b0da41d6a5d840653c51d42';
 
 final class AnimeInfoFamily extends $Family
     with
@@ -337,7 +337,7 @@ final class SubjectCharactersProvider
   }
 }
 
-String _$subjectCharactersHash() => r'b4c67d793f50aee50ad5f2c37bda29eef287f09f';
+String _$subjectCharactersHash() => r'1879f27401bda7e37ca17ce4e90f5c6892f2b748';
 
 ///条目角色信息
 
@@ -435,7 +435,7 @@ final class SubjectProducersProvider
   }
 }
 
-String _$subjectProducersHash() => r'c7422365c7c8e2ef55a602f52f1f686f136c9efb';
+String _$subjectProducersHash() => r'00d63b907db7b0c56a8c6b3183b1afc67f913c5f';
 
 ///番剧制作人信息
 

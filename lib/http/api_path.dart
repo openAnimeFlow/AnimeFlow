@@ -148,6 +148,24 @@ class AnimeFlowApi {
       ///角色列表
       characters = '/api/v1/bangumi/subjects/{subjectId}/characters',
 
+      ///条目制作人
+      staffs = '/api/v1/bangumi/subjects/{subjectId}/staffs/persons',
+
+      ///条目评论
+      subjectComments = '/api/v1/bangumi/subjects/{subjectId}/comments',
+
+      ///角色信息
+      character = '/api/v1/bangumi/characters/{characterId}',
+
+      ///角色出演作品
+      characterCasts = '/api/v1/bangumi/characters/{characterId}/casts',
+
+      ///角色吐槽
+      characterComments = '/api/v1/bangumi/characters/{characterId}/comments',
+
+      ///关联条目
+      relations = '/api/v1/bangumi/subjects/{subjectId}/relations',
+
       /// 每日放送、
       calendar = '/api/v1/bangumi/calendar';
 }

@@ -1,4 +1,4 @@
-import 'package:anime_flow/http/requests/bgm_request.dart';
+import 'package:anime_flow/http/requests/anime_flow_request.dart';
 import 'package:anime_flow/models/item/bangumi/actor_item.dart';
 import 'package:anime_flow/routes/routes.dart';
 import 'package:anime_flow/utils/bgm_utils.dart';
@@ -58,7 +58,7 @@ class _CharacterPageState extends State<CharacterPage> {
 
     try {
       final offset = loadMore ? _offset : 0;
-      final value = await BgmRequest.charactersService(
+      final value = await AnimeFlowRequest.charactersService(
         subjectsId,
         limit: _limit,
         offset: offset,

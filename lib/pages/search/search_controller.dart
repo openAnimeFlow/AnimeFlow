@@ -1,7 +1,6 @@
 import 'dart:io';
 
 import 'package:anime_flow/http/requests/anime_flow_request.dart';
-import 'package:anime_flow/http/requests/bgm_request.dart';
 import 'package:anime_flow/http/requests/request.dart';
 import 'package:anime_flow/models/item/bangumi/subject_item.dart';
 import 'package:anime_flow/models/item/image_search_item.dart';
@@ -117,7 +116,7 @@ class SearchPageController extends GetxController {
     try {
       searchSuggestions.clear();
       final searchRequest =
-          await BgmRequest.searchSubjectService(keyword, limit: 20, offset: 0);
+          await AnimeFlowRequest.searchSubjectService(keyword, limit: 20, offset: 0);
       if (requestId != _suggestionRequestId) return;
 
       searchSuggestions.addAll(searchRequest.data

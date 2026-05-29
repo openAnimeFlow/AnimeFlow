@@ -5,8 +5,6 @@ import 'package:anime_flow/models/item/bangumi/related_subjects_item.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:flutter/widgets.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
-
-import 'package:anime_flow/http/requests/bgm_request.dart';
 import 'package:anime_flow/models/item/bangumi/subject_comments_item.dart';
 import 'package:anime_flow/models/item/bangumi/subjects_info_item.dart';
 
@@ -47,7 +45,7 @@ class SubjectComments extends _$SubjectComments {
 
   @override
   Future<SubjectCommentsViewState> build(int subjectId) async {
-    final comments = await BgmRequest.getSubjectCommentsByIdService(
+    final comments = await AnimeFlowRequest.getSubjectCommentsByIdService(
       subjectId: subjectId,
       limit: _pageSize,
       offset: 0,
@@ -95,7 +93,7 @@ class SubjectComments extends _$SubjectComments {
 
     try {
       final prev = current.comments;
-      final result = await BgmRequest.getSubjectCommentsByIdService(
+      final result = await AnimeFlowRequest.getSubjectCommentsByIdService(
         subjectId: subjectId,
         limit: _pageSize,
         offset: prev.data.length,
@@ -122,7 +120,7 @@ class SubjectComments extends _$SubjectComments {
 class SubjectRelated extends _$SubjectRelated {
   @override
   Future<SubjectRelationItem> build(int subjectId) async {
-    return BgmRequest.relatedSubjectsService(
+    return AnimeFlowRequest.relatedSubjectsService(
         subjectId,
         limit: 20,
         offset: 0);
@@ -143,6 +141,6 @@ class SubjectCharacters extends _$SubjectCharacters {
 class SubjectProducers extends _$SubjectProducers {
   @override
   Future<ProducersItem> build(int subjectId) async {
-    return BgmRequest.getProducersService(subjectId,limit: 10, offset: 0);
+    return AnimeFlowRequest.getProducersService(subjectId,limit: 10, offset: 0);
   }
 }

@@ -48,4 +48,4 @@ final class MyControllerProvider
   }
 }
 
-String _$myControllerHash() => r'03e81a2f643b85f574e79b5954553fa48eb0cef6';
+String _$myControllerHash() => r'3c3397be7f8accb68dd654f70bc225e61d1294d4';

@@ -29,6 +29,9 @@ class _SearchPageState extends State<SearchPage> {
   /// 搜索建议防抖用
   Timer? suggestionDebounce;
 
+  /// 程序化写入搜索框（历史、建议等）时不触发搜索建议
+  bool _suppressSuggestions = false;
+
   @override
   void initState() {
     super.initState();
@@ -39,8 +42,7 @@ class _SearchPageState extends State<SearchPage> {
           GoRouterState.of(context).uri.queryParameters['keywords'];
       final keywords = (widget.keywords ?? routeKeywords)?.trim();
       if (keywords != null && keywords.isNotEmpty) {
-        searchController.text = keywords;
-        _submitSearch(keywords);
+        unawaited(_searchWithKeyword(keywords));
       }
     });
 
@@ -65,6 +67,7 @@ class _SearchPageState extends State<SearchPage> {
 
   /// 搜索建议
   void fetchSearchSuggestions() {
+    if (_suppressSuggestions) return;
     suggestionDebounce?.cancel();
     final keyword = searchController.text;
     suggestionDebounce = Timer(const Duration(seconds: 2), () {
@@ -82,8 +85,12 @@ class _SearchPageState extends State<SearchPage> {
     searchPageController.clearSearchSuggestions();
   }
 
-  Future<void> _submitSearch(String keyword) async {
+  /// 写入关键词并搜索（不触发搜索建议接口）
+  Future<void> _searchWithKeyword(String keyword) async {
     _cancelSearchSuggestions();
+    _suppressSuggestions = true;
+    searchController.text = keyword;
+    _suppressSuggestions = false;
     await searchPageController.search(keyword);
   }
 
@@ -126,7 +133,7 @@ class _SearchPageState extends State<SearchPage> {
               delegate: _StickySearchHeaderDelegate(
                 searchController: searchController,
                 focusNode: searchFocusNode,
-                onSearch: _submitSearch,
+                onSearch: _searchWithKeyword,
                 maxWidth: maxWidth,
                 onClear: () {
                   searchPageController.clearResults();
@@ -173,8 +180,7 @@ class _SearchPageState extends State<SearchPage> {
                                 ListTile(
                                   title: Text(suggestion),
                                   onTap: () {
-                                    searchController.text = suggestion;
-                                    unawaited(_submitSearch(suggestion));
+                                    unawaited(_searchWithKeyword(suggestion));
                                   },
                                 )
                             ],
@@ -387,8 +393,7 @@ class _SearchPageState extends State<SearchPage> {
                                 tooltip: '删除',
                               ),
                               onTap: () {
-                                searchController.text = history.keyword;
-                                searchPageController.search(history.keyword);
+                                unawaited(_searchWithKeyword(history.keyword));
                               },
                             ),
                           );
@@ -537,7 +542,6 @@ class _StickySearchHeaderDelegate extends SliverPersistentHeaderDelegate {
                                       await const ImageSearchRoute()
                                           .push(context);
                                   if (keyword != null && keyword is String) {
-                                    searchController.text = keyword;
                                     await onSearch(keyword);
                                   }
                                 },

@@ -17,6 +17,11 @@ on:
           - linux
           - all
         default: all
+
+env:
+  ANIME_FLOW_APP_ID: ${{ secrets.ANIME_FLOW_APP_ID }}
+  ANIME_FLOW_SECRET: ${{ secrets.ANIME_FLOW_SECRET }}
+
 jobs:
   flutter-build-ios:
     if: ${{ !github.event.inputs.platform || github.event.inputs.platform == 'ios' || github.event.inputs.platform == 'all'}}
@@ -43,6 +48,13 @@ jobs:
       - name: Install dependencies
         run: flutter pub get
 
+      - name: Validate API signature env
+        run: |
+          if [ -z "$ANIME_FLOW_APP_ID" ] || [ -z "$ANIME_FLOW_SECRET" ]; then
+            echo "::error::ANIME_FLOW_APP_ID and ANIME_FLOW_SECRET must be set (repository secrets)."
+            exit 1
+          fi
+
       # 输出可用模拟器和 SDK
       - name: Show available simulators
         run: |
@@ -50,7 +62,10 @@ jobs:
           xcodebuild -showsdks
 
       - name: Build iOS
-        run: flutter build ios --release --no-codesign
+        run: |
+          flutter build ios --release --no-codesign \
+            --dart-define=ANIME_FLOW_APP_ID="$ANIME_FLOW_APP_ID" \
+            --dart-define=ANIME_FLOW_SECRET="$ANIME_FLOW_SECRET"
 
       - name: Create IPA
         run: |
@@ -91,6 +106,13 @@ jobs:
       - name: Install dependencies
         run: flutter pub get
 
+      - name: Validate API signature env
+        run: |
+          if [ -z "$ANIME_FLOW_APP_ID" ] || [ -z "$ANIME_FLOW_SECRET" ]; then
+            echo "::error::ANIME_FLOW_APP_ID and ANIME_FLOW_SECRET must be set (repository secrets)."
+            exit 1
+          fi
+
       - name: Setup Android signing
         run: |
           # Read base64 encoded key file from secrets and decode
@@ -119,7 +141,9 @@ jobs:
       - name: Build apk
         run: |
           flutter --version
-          flutter build apk --split-per-abi --release
+          flutter build apk --split-per-abi --release \
+            --dart-define=ANIME_FLOW_APP_ID="$ANIME_FLOW_APP_ID" \
+            --dart-define=ANIME_FLOW_SECRET="$ANIME_FLOW_SECRET"
           echo "Android build completed"
 
       - name: Rename APK files
@@ -168,10 +192,22 @@ jobs:
       - name: Install dependencies
         run: flutter pub get
 
+      - name: Validate API signature env
+        shell: pwsh
+        run: |
+          if ([string]::IsNullOrWhiteSpace($env:ANIME_FLOW_APP_ID) -or
+              [string]::IsNullOrWhiteSpace($env:ANIME_FLOW_SECRET)) {
+            Write-Error 'ANIME_FLOW_APP_ID and ANIME_FLOW_SECRET must be set (repository secrets).'
+            exit 1
+          }
+
       - name: Build Windows
         run: |
-          flutter build windows
+          flutter build windows `
+            --dart-define=ANIME_FLOW_APP_ID=$env:ANIME_FLOW_APP_ID `
+            --dart-define=ANIME_FLOW_SECRET=$env:ANIME_FLOW_SECRET
           echo "Windows build completed"
+        shell: pwsh
 
       - name: Create ZIP archive
         shell: pwsh
@@ -268,9 +304,18 @@ jobs:
       - name: Install dependencies
         run: flutter pub get
 
+      - name: Validate API signature env
+        run: |
+          if [ -z "$ANIME_FLOW_APP_ID" ] || [ -z "$ANIME_FLOW_SECRET" ]; then
+            echo "::error::ANIME_FLOW_APP_ID and ANIME_FLOW_SECRET must be set (repository secrets)."
+            exit 1
+          fi
+
       - name: Build Linux
         run: |
-          flutter build linux
+          flutter build linux \
+            --dart-define=ANIME_FLOW_APP_ID="$ANIME_FLOW_APP_ID" \
+            --dart-define=ANIME_FLOW_SECRET="$ANIME_FLOW_SECRET"
           echo "Linux build completed"
 
       - name: Create TAR.GZ archive
@@ -366,9 +411,18 @@ jobs:
       - name: Install dependencies
         run: flutter pub get
 
+      - name: Validate API signature env
+        run: |
+          if [ -z "$ANIME_FLOW_APP_ID" ] || [ -z "$ANIME_FLOW_SECRET" ]; then
+            echo "::error::ANIME_FLOW_APP_ID and ANIME_FLOW_SECRET must be set (repository secrets)."
+            exit 1
+          fi
+
       - name: Build macOS
         run: |
-          flutter build macos
+          flutter build macos \
+            --dart-define=ANIME_FLOW_APP_ID="$ANIME_FLOW_APP_ID" \
+            --dart-define=ANIME_FLOW_SECRET="$ANIME_FLOW_SECRET"
           echo "macOS build completed"
 
       - name: Create DMG

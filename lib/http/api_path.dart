@@ -108,8 +108,14 @@ class AnimeFlowApi {
 
       /// 获取弹幕
       getDanmaku = '/api/v1/danmaku',
+
+      /// 刷新Token
       refreshToken = '/api/oauth/refresh',
+
+      /// Session
       session = '/api/oauth/session',
+
+      /// 回调
       callback = '/api/oauth/callback',
 
       /// 搜索番剧
@@ -132,6 +138,9 @@ class AnimeFlowApi {
 
       ///章节
       episodes = '/api/v1/bangumi/subjects/{subjectId}/episodes',
+
+      /// 剧集评论
+      episodeComments = '/api/v1/bangumi/episodes/{episodeId}/comments',
 
       /// 每日放送、
       calendar = '/api/v1/bangumi/calendar';

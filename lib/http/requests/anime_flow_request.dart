@@ -5,6 +5,7 @@ import 'package:anime_flow/http/api_path.dart';
 import 'package:anime_flow/http/clients/anime_flow_client.dart';
 import 'package:anime_flow/models/enums/sort_type.dart';
 import 'package:anime_flow/models/item/bangumi/calendar_item.dart';
+import 'package:anime_flow/models/item/bangumi/episode_comments_item.dart';
 import 'package:anime_flow/models/item/bangumi/episodes_item.dart';
 import 'package:anime_flow/models/item/bangumi/hot_item.dart';
 import 'package:anime_flow/models/item/bangumi/subject_item.dart';
@@ -245,5 +246,16 @@ class AnimeFlowRequest {
           queryParameters: queryParameters,
         )
         .then((response) => (SubjectItem.fromJson(response.data)));
+  }
+
+  ///剧集评论
+  static Future<List<EpisodeComment>> episodeCommentsService({
+    required int episodeId,
+  }) async {
+    final response = await _client.get(AnimeFlowApi.episodeComments
+        .replaceFirst('{episodeId}', episodeId.toString()));
+    return (response.data as List)
+        .map((item) => EpisodeComment.fromJson(item as Map<String, dynamic>))
+        .toList();
   }
 }

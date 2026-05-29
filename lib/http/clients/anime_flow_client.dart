@@ -2,6 +2,20 @@ import 'package:anime_flow/http/core/dio_factory.dart';
 import 'package:anime_flow/http/core/network_error_mapper.dart';
 import 'package:dio/dio.dart';
 
+/// AnimeFlow API 业务异常：`code != 200` 时抛出。
+class AnimeFlowApiException implements Exception {
+  const AnimeFlowApiException({
+    required this.code,
+    required this.message,
+  });
+
+  final int code;
+  final String message;
+
+  @override
+  String toString() => message;
+}
+
 /// AnimeFlow API 统一响应：`{ code, message, data }`。
 class AnimeFlowResponse {
   const AnimeFlowResponse({
@@ -12,16 +26,13 @@ class AnimeFlowResponse {
 
   final int code;
   final String message;
-  final Map<String, dynamic> data;
+  final dynamic data;
 
   factory AnimeFlowResponse.fromJson(Map<String, dynamic> json) {
-    final dataRaw = json['data'];
     return AnimeFlowResponse(
       code: json['code'] as int,
       message: json['message'] as String? ?? '',
-      data: dataRaw is Map
-          ? Map<String, dynamic>.from(dataRaw)
-          : <String, dynamic>{},
+      data: json['data'],
     );
   }
 }
@@ -33,7 +44,16 @@ class AnimeFlowClient {
 
   static AnimeFlowResponse _parseEnvelope(dynamic raw) {
     if (raw is Map) {
-      return AnimeFlowResponse.fromJson(Map<String, dynamic>.from(raw));
+      final response =
+          AnimeFlowResponse.fromJson(Map<String, dynamic>.from(raw));
+      if (response.code != 200) {
+        throw AnimeFlowApiException(
+          code: response.code,
+          message: response.message,
+        );
+      }
+
+      return response;
     }
     throw FormatException('AnimeFlow API response must be a JSON object: $raw');
   }
@@ -117,25 +137,6 @@ class AnimeFlowClient {
         cancelToken: cancelToken,
       );
       return _parseEnvelope(response.data);
-    } on DioException catch (e) {
-      throw await NetworkErrorMapper.mapException(e);
-    }
-  }
-
-  /// HEAD 请求（用于获取资源信息，不下载内容）
-  Future<Response<dynamic>> head(
-    String path, {
-    Map<String, dynamic>? queryParameters,
-    Options? options,
-    CancelToken? cancelToken,
-  }) async {
-    try {
-      return await DioFactory.animeFlowDio.head(
-        path,
-        queryParameters: queryParameters,
-        options: options,
-        cancelToken: cancelToken,
-      );
     } on DioException catch (e) {
       throw await NetworkErrorMapper.mapException(e);
     }

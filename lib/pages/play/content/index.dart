@@ -1,8 +1,8 @@
 import 'package:anime_flow/controllers/my_controller.dart';
+import 'package:anime_flow/http/requests/anime_flow_request.dart';
 import 'package:anime_flow/pages/play/controller/play_controller.dart';
 import 'package:anime_flow/pages/play/controller/video_ui_controller.dart';
 import 'package:anime_flow/stores/episodes_state.dart';
-import 'package:anime_flow/http/requests/bgm_request.dart';
 import 'package:anime_flow/models/item/bangumi/episode_comments_item.dart';
 import 'package:anime_flow/pages/play/content/introduce/index.dart';
 import 'package:anime_flow/widget/danmaku_text_field.dart';
@@ -89,7 +89,7 @@ class _ContentViewState extends State<ContentView>
 
       try {
         final commentsData =
-            await BgmRequest.episodeCommentsService(episodeId: episodeId);
+            await AnimeFlowRequest.episodeCommentsService(episodeId: episodeId);
         // 再次检查 episodeId 是否仍然是当前值（防止请求期间 episodeId 变化）
         if (mounted && episodesState.episodeId.value == episodeId) {
           setState(() {

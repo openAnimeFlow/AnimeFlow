@@ -1,5 +1,6 @@
 import 'dart:io';
 
+import 'package:anime_flow/http/requests/anime_flow_request.dart';
 import 'package:anime_flow/http/requests/bgm_request.dart';
 import 'package:anime_flow/http/requests/request.dart';
 import 'package:anime_flow/models/item/bangumi/subject_item.dart';
@@ -74,7 +75,7 @@ class SearchPageController extends GetxController {
 
     try {
       final offset = loadMore ? _offset : 0;
-      final value = await BgmRequest.searchSubjectService(
+      final value = await AnimeFlowRequest.searchSubjectService(
         currentKeyword.value,
         limit: _limit,
         offset: offset,

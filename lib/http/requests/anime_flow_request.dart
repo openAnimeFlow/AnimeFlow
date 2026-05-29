@@ -127,7 +127,7 @@ class AnimeFlowRequest {
     int type = 1,
   }) async {
     final response = await _client.get(
-      AnimeFlowApi.search,
+      AnimeFlowApi.dandanPlaySearch,
       queryParameters: {'keyword': title, 'type': type},
     );
     return DanmakuSearchResponse.fromJson(response.data);
@@ -257,5 +257,37 @@ class AnimeFlowRequest {
     return (response.data as List)
         .map((item) => EpisodeComment.fromJson(item as Map<String, dynamic>))
         .toList();
+  }
+
+  ///条目搜索
+  static Future<SubjectItem> searchSubjectService(String keyword,
+      {required int limit,
+      required int offset,
+      String? rank,
+      List<String>? tags}) async {
+    final data = <String, dynamic>{
+      'keyword': keyword,
+    };
+
+    final filter = <String, dynamic>{
+      'type': [2],
+    };
+
+    if (tags != null) filter['tags'] = tags;
+
+    data['filter'] = filter;
+
+    if (rank != null) data['rank'] = rank;
+
+    final response = await _client.post(
+      AnimeFlowApi.bangumiSearch,
+      queryParameters: {
+        'limit': limit,
+        'offset': offset,
+      },
+      data: data,
+    );
+
+    return SubjectItem.fromJson(response.data);
   }
 }

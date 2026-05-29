@@ -119,7 +119,7 @@ class AnimeFlowApi {
       callback = '/api/oauth/callback',
 
       /// 搜索番剧
-      search = '/api/v1/danmaku/search',
+      dandanPlaySearch = '/api/v1/danmaku/search',
 
       /// 番剧详情
       animeDetail = '/api/v1/danmaku/bangumi',
@@ -141,6 +141,9 @@ class AnimeFlowApi {
 
       /// 剧集评论
       episodeComments = '/api/v1/bangumi/episodes/{episodeId}/comments',
+
+      ///条目搜索
+      bangumiSearch = '/api/v1/bangumi/search/subjects',
 
       /// 每日放送、
       calendar = '/api/v1/bangumi/calendar';

@@ -50,6 +50,7 @@ class AnimeFlowRequest {
     final response = await _client.get(
       AnimeFlowApi.callback,
       queryParameters: {'code': code, 'state': state},
+      signRequest: false,
     );
     return response.data;
   }

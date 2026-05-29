@@ -55,6 +55,7 @@ dependencies:
   # flutter_dotenv: ^6.0.0
   package_info_plus: ^9.0.0
   dio: ^5.9.0
+  crypto: ^3.0.6
   get: ^4.7.3
   flutter_launcher_icons: ^0.14.4
   flutter_svg: ^2.2.3

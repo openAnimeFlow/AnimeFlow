@@ -1,3 +1,4 @@
+import 'package:anime_flow/http/core/api_signature.dart';
 import 'package:anime_flow/http/core/dio_factory.dart';
 import 'package:anime_flow/http/core/network_error_mapper.dart';
 import 'package:dio/dio.dart';
@@ -58,18 +59,40 @@ class AnimeFlowClient {
     throw FormatException('AnimeFlow API response must be a JSON object: $raw');
   }
 
+  Options _resolveOptions({
+    required String path,
+    Options? options,
+    required bool signRequest,
+  }) {
+    if (!signRequest) {
+      return options ?? Options();
+    }
+
+    final signHeaders = ApiSignature.headers(path);
+    final mergedHeaders = <String, dynamic>{
+      ...?options?.headers,
+      ...signHeaders,
+    };
+    return (options ?? Options()).copyWith(headers: mergedHeaders);
+  }
+
   /// GET 请求
   Future<AnimeFlowResponse> get(
     String path, {
     Map<String, dynamic>? queryParameters,
     Options? options,
     CancelToken? cancelToken,
+    bool signRequest = true,
   }) async {
     try {
       final response = await DioFactory.animeFlowDio.get(
         path,
         queryParameters: queryParameters,
-        options: options,
+        options: _resolveOptions(
+          path: path,
+          options: options,
+          signRequest: signRequest,
+        ),
         cancelToken: cancelToken,
       );
       return _parseEnvelope(response.data);
@@ -85,13 +108,18 @@ class AnimeFlowClient {
     Map<String, dynamic>? queryParameters,
     Options? options,
     CancelToken? cancelToken,
+    bool signRequest = true,
   }) async {
     try {
       final response = await DioFactory.animeFlowDio.post(
         path,
         data: data,
         queryParameters: queryParameters,
-        options: options,
+        options: _resolveOptions(
+          path: path,
+          options: options,
+          signRequest: signRequest,
+        ),
         cancelToken: cancelToken,
       );
       return _parseEnvelope(response.data);
@@ -107,13 +135,18 @@ class AnimeFlowClient {
     Map<String, dynamic>? queryParameters,
     Options? options,
     CancelToken? cancelToken,
+    bool signRequest = true,
   }) async {
     try {
       final response = await DioFactory.animeFlowDio.put(
         path,
         data: data,
         queryParameters: queryParameters,
-        options: options,
+        options: _resolveOptions(
+          path: path,
+          options: options,
+          signRequest: signRequest,
+        ),
         cancelToken: cancelToken,
       );
       return _parseEnvelope(response.data);
@@ -128,12 +161,17 @@ class AnimeFlowClient {
     Map<String, dynamic>? queryParameters,
     Options? options,
     CancelToken? cancelToken,
+    bool signRequest = true,
   }) async {
     try {
       final response = await DioFactory.animeFlowDio.delete(
         path,
         queryParameters: queryParameters,
-        options: options,
+        options: _resolveOptions(
+          path: path,
+          options: options,
+          signRequest: signRequest,
+        ),
         cancelToken: cancelToken,
       );
       return _parseEnvelope(response.data);

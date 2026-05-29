@@ -6,15 +6,9 @@ import 'package:crypto/crypto.dart';
 class ApiSignature {
   ApiSignature._();
 
-  static const String appId = String.fromEnvironment(
-    'ANIME_FLOW_APP_ID',
-    defaultValue: 'xxxxxx',
-  );
+  static const String appId = String.fromEnvironment('ANIME_FLOW_APP_ID');
 
-  static const String secret = String.fromEnvironment(
-    'ANIME_FLOW_SECRET',
-    defaultValue: 'xxxxxxxxxxxxxxxxxx',
-  );
+  static const String secret = String.fromEnvironment('ANIME_FLOW_SECRET');
 
   static Map<String, dynamic> headers(String path) {
     final signPath = _normalizePath(path);

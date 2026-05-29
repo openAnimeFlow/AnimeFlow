@@ -106,6 +106,158 @@
 
 [//]: # (</div>)
 
+## 🛠️ 编译与启动
+
+以下步骤适用于在本地从源码编译并运行 AnimeFlow 客户端。
+
+### 环境要求
+
+| 工具 | 版本要求 |
+|---|---|
+| Flutter | `3.44.0`（见 `pubspec.yaml`） |
+| Dart SDK | `>= 3.3.4` |
+| Android 构建 | JDK 17、Android SDK |
+| iOS 构建 | macOS + Xcode |
+| 桌面端 | Windows / macOS / Linux 对应平台工具链 |
+
+安装 Flutter 后执行：
+
+```bash
+flutter doctor
+```
+
+确保目标平台（Android / iOS / Windows 等）显示为可用。
+
+### 1. 获取源码并安装依赖
+
+```bash
+git clone https://github.com/openAnimeFlow/AnimeFlow.git
+cd AnimeFlow
+flutter pub get
+```
+
+### 2. 配置 API 签名密钥
+
+客户端请求 AnimeFlow 服务端时需要携带签名头，密钥通过编译期变量注入。
+
+**方式 A：命令行直接传入（适合临时调试）**
+
+```bash
+flutter run \
+  --dart-define=ANIME_FLOW_APP_ID=your_app_id \
+  --dart-define=ANIME_FLOW_SECRET=your_secret
+```
+
+**方式 B：使用配置文件**
+
+在项目根目录创建 `dart_defines.json`（勿提交到 Git）：
+
+```json
+{
+  "ANIME_FLOW_APP_ID": "your_app_id",
+  "ANIME_FLOW_SECRET": "your_secret"
+}
+```
+
+运行或编译时附加：
+
+```bash
+flutter run --dart-define-from-file=dart_defines.json
+```
+
+**方式 C：IntelliJ IDEA / Android Studio （推荐）**
+
+1. 右上角 **Edit Configurations…**
+2. 选择 Flutter 运行配置
+3. 在 **Additional run args** 中填入：
+
+```
+--dart-define-from-file=dart_defines.json
+```
+
+或直接写：
+
+```
+--dart-define=ANIME_FLOW_APP_ID=your_app_id --dart-define=ANIME_FLOW_SECRET=your_secret
+```
+
+> 修改 `--dart-define` 后需完全重启应用（Hot Restart 不会重新加载编译期变量）。
+
+### 3. 代码生成（可选）
+
+项目已提交 `.g.dart` 等生成文件，日常运行通常无需执行。若你修改了 Riverpod、`go_router`、`Hive` 等注解代码，需重新生成：
+
+```bash
+dart run build_runner build --delete-conflicting-outputs
+```
+
+### 4. 启动调试
+
+查看可用设备：
+
+```bash
+flutter devices
+```
+
+在指定平台运行（按需替换 `-d` 参数）：
+
+```bash
+# Windows
+flutter run -d windows --dart-define-from-file=dart_defines.json
+
+# Android（真机或模拟器）
+flutter run -d android --dart-define-from-file=dart_defines.json
+
+# macOS
+flutter run -d macos --dart-define-from-file=dart_defines.json
+
+# Linux
+flutter run -d linux --dart-define-from-file=dart_defines.json
+
+# iOS（需 macOS + Xcode）
+flutter run -d ios --dart-define-from-file=dart_defines.json
+```
+
+### 5. 联调本地服务端
+
+默认开发环境 API 地址为 `http://127.0.0.1:1024`（见 `lib/http/api_path.dart` 中的 `AnimeFlowApi.animeFlowApiDev`）。
+
+联调步骤：
+
+1. 启动 [AnimeFlow Service](https://github.com/openAnimeFlow/AnimeFlow_Service) 后端（默认端口 `1024`）
+2. 确保服务端 `.env` 与客户端 `dart_defines.json` 中的 AppId / Secret 一致
+3. 按上文方式启动客户端
+
+Android 模拟器访问本机服务时，若 `127.0.0.1` 无法连通，需将 API 地址改为 `10.0.2.2:1024`（Android 模拟器访问宿主机的特殊地址）。
+
+### 6. 编译发布包
+
+```bash
+# Android（按架构分包）
+flutter build apk --split-per-abi --release --dart-define-from-file=dart_defines.json
+
+# Windows
+flutter build windows --release --dart-define-from-file=dart_defines.json
+
+# macOS
+flutter build macos --release --dart-define-from-file=dart_defines.json
+
+# Linux
+flutter build linux --release --dart-define-from-file=dart_defines.json
+
+# iOS（需 macOS，签名配置见 Apple 开发者文档）
+flutter build ios --release --dart-define-from-file=dart_defines.json
+```
+
+Release 包输出目录：
+
+| 平台 | 输出路径 |
+|---|---|
+| Android | `build/app/outputs/flutter-apk/` |
+| Windows | `build/windows/x64/runner/Release/` |
+| macOS | `build/macos/Build/Products/Release/` |
+| Linux | `build/linux/x64/release/bundle/` |
+
 ## 📖 使用指南
 
 ### 添加数据源
@@ -156,6 +308,8 @@
 特别感谢 [Bangumi](https://bangumi.tv/) 本项目使用了 Bangumi 开放 API 以提供番剧元数据和用户数据同步。
 
 特别感谢 [DandanPlayer](https://www.dandanplay.com/) 本项目使用了 dandanplayer 开放 API 以提供弹幕体验。
+
+特别感谢 [trace.moe](https://trace.moe) 本项目使用了 trace.moe 提供的图片识别番剧功能。
 
 ---
 

@@ -4,6 +4,7 @@ import 'package:anime_flow/constants/constants.dart';
 import 'package:anime_flow/http/api_path.dart';
 import 'package:anime_flow/http/clients/anime_flow_client.dart';
 import 'package:anime_flow/models/enums/sort_type.dart';
+import 'package:anime_flow/models/item/bangumi/actor_item.dart';
 import 'package:anime_flow/models/item/bangumi/calendar_item.dart';
 import 'package:anime_flow/models/item/bangumi/episode_comments_item.dart';
 import 'package:anime_flow/models/item/bangumi/episodes_item.dart';
@@ -290,5 +291,24 @@ class AnimeFlowRequest {
     );
 
     return SubjectItem.fromJson(response.data);
+  }
+
+  ///角色列表
+  static Future<CharactersItem> charactersService(int subjectId,
+      {required int limit, required int offset, int? type}) async {
+    final queryParameters = <String, dynamic>{
+      'limit': limit,
+      'offset': offset,
+    };
+    if (type != null) {
+      queryParameters['type'] = type;
+    }
+    return _client
+        .get(
+          AnimeFlowApi.characters
+              .replaceFirst('{subjectId}', subjectId.toString()),
+          queryParameters: queryParameters,
+        )
+        .then((response) => (CharactersItem.fromJson(response.data)));
   }
 }

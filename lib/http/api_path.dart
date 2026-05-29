@@ -145,6 +145,9 @@ class AnimeFlowApi {
       ///条目搜索
       bangumiSearch = '/api/v1/bangumi/search/subjects',
 
+      ///角色列表
+      characters = '/api/v1/bangumi/subjects/{subjectId}/characters',
+
       /// 每日放送、
       calendar = '/api/v1/bangumi/calendar';
 }

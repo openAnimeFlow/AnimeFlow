@@ -134,7 +134,7 @@ class SubjectRelated extends _$SubjectRelated {
 class SubjectCharacters extends _$SubjectCharacters {
   @override
   Future<CharactersItem> build(int subjectId) async {
-    return BgmRequest.charactersService(subjectId,limit: 10, offset: 0);
+    return AnimeFlowRequest.charactersService(subjectId,limit: 10, offset: 0);
   }
 }
 

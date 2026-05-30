@@ -53,7 +53,8 @@ class InfoCommentView extends ConsumerWidget {
           padding: EdgeInsets.zero,
           shrinkWrap: true,
           physics: const NeverScrollableScrollPhysics(),
-          itemCount: subjectComments.data.length + (hasMore && isLoadingMore ? 1 : 0),
+          itemCount:
+              subjectComments.data.length + (hasMore && isLoadingMore ? 1 : 0),
           itemBuilder: (context, index) {
             if (index == subjectComments.data.length) {
               return const Padding(
@@ -106,20 +107,18 @@ class InfoCommentView extends ConsumerWidget {
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    Expanded(
-                      child: InkWell(
-                        onTap: () => UserSpaceRoute(name: comment.user.username)
-                            .push(context),
-                        child: Text(
-                          comment.user.nickname.isNotEmpty
-                              ? comment.user.nickname
-                              : comment.user.username,
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                          style: const TextStyle(
-                            fontSize: 14,
-                            fontWeight: FontWeight.w600,
-                          ),
+                    InkWell(
+                      onTap: () => UserSpaceRoute(name: comment.user.username)
+                          .push(context),
+                      child: Text(
+                        comment.user.nickname.isNotEmpty
+                            ? comment.user.nickname
+                            : comment.user.username,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: const TextStyle(
+                          fontSize: 14,
+                          fontWeight: FontWeight.w600,
                         ),
                       ),
                     ),

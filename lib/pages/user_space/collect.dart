@@ -1,25 +1,26 @@
-import 'package:anime_flow/constants/play_layout_constant.dart';
+import 'package:anime_flow/constants/layout_constant.dart';
 import 'package:anime_flow/http/requests/bgm_request.dart';
 import 'package:anime_flow/models/item/bangumi/user_collections_item.dart';
 import 'package:anime_flow/models/item/subject_basic_data_item.dart';
-import 'package:anime_flow/pages/user_space/user_stores.dart';
+import 'package:anime_flow/pages/user_space/provider/user_space_provider.dart';
 import 'package:anime_flow/routes/routes.dart';
 import 'package:anime_flow/utils/layout_util.dart';
 import 'package:anime_flow/widget/subject_card.dart';
 import 'package:flutter/material.dart';
-import 'package:get/get.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 ///空间收藏页面
-class CollectView extends StatefulWidget {
-  const CollectView({super.key});
+class CollectView extends ConsumerStatefulWidget {
+  final String username;
+
+  const CollectView({super.key, required this.username});
 
   @override
-  State<CollectView> createState() => _CollectViewState();
+  ConsumerState<CollectView> createState() => _CollectViewState();
 }
 
-class _CollectViewState extends State<CollectView>
+class _CollectViewState extends ConsumerState<CollectView>
     with AutomaticKeepAliveClientMixin {
-  late UserSpaceStores userSpaceStores;
   UserCollectionsItem? userCollections;
   bool isLoading = false;
   bool isLoadingMore = false;
@@ -35,7 +36,12 @@ class _CollectViewState extends State<CollectView>
       4: '搁置',
       5: '抛弃',
     };
-    final stats = userSpaceStores.userInfo.value.stats.subject.two;
+    final stats = ref
+        .watch(userSpaceProvider(widget.username))
+        .requireValue
+        .stats
+        .subject
+        .two;
     return [
       '${collectionTypes[1]}\n${stats.one}',
       '${collectionTypes[2]}\n${stats.two}',
@@ -48,7 +54,6 @@ class _CollectViewState extends State<CollectView>
   @override
   void initState() {
     super.initState();
-    userSpaceStores = Get.find<UserSpaceStores>();
     _queryUserCollection();
   }
 
@@ -100,7 +105,8 @@ class _CollectViewState extends State<CollectView>
     }
 
     try {
-      final userInfo = userSpaceStores.userInfo.value;
+      final userInfo =
+          ref.read(userSpaceProvider(widget.username)).requireValue;
       final currentOffset = loadMore && userCollections != null
           ? userCollections!.data.length
           : 0;
@@ -197,59 +203,68 @@ class _CollectViewState extends State<CollectView>
             sliver: SliverToBoxAdapter(
               child: Center(
                 child: ConstrainedBox(
-                  constraints: const BoxConstraints(maxWidth: PlayLayoutConstant.maxWidth),
-                  child: Row(
-                    children: List.generate(_tabs.length, (index) {
-                      final tab = _tabs[index];
-                      final parts = tab.split('\n');
-                      final collectionType = index + 1;
-                      final isSelected =
-                          _selectedCollectionType == collectionType;
-                      final textStyle = TextStyle(
-                          fontSize: _fontSize, fontWeight: FontWeight.w600);
-                      return InkWell(
-                        onTap: () {
-                          _queryUserCollection(collectionType: collectionType);
-                        },
-                        borderRadius: BorderRadius.circular(5),
-                        child: Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 3),
-                          margin: const EdgeInsets.only(right: 5),
-                          decoration: BoxDecoration(
-                            color: isSelected
-                                ? Theme.of(context).colorScheme.primaryContainer
-                                : Theme.of(context)
-                                    .colorScheme
-                                    .surfaceContainerHighest,
-                            borderRadius: BorderRadius.circular(5),
-                          ),
-                          child: Row(
-                            children: [
-                              Text(
-                                parts[0],
-                                style: textStyle.copyWith(
-                                  color: isSelected
-                                      ? Theme.of(context)
-                                          .colorScheme
-                                          .onPrimaryContainer
-                                      : null,
+                  constraints: const BoxConstraints(maxWidth: LayoutConstant.maxWidth),
+                  child: SizedBox(
+                    height: _fontSize + 12,
+                    child: ListView.separated(
+                      scrollDirection: Axis.horizontal,
+                      itemCount: _tabs.length,
+                      separatorBuilder: (_, __) => const SizedBox(width: 5),
+                      itemBuilder: (context, index) {
+                        final tab = _tabs[index];
+                        final parts = tab.split('\n');
+                        final collectionType = index + 1;
+                        final isSelected =
+                            _selectedCollectionType == collectionType;
+                        final textStyle = TextStyle(
+                            fontSize: _fontSize, fontWeight: FontWeight.w600);
+                        return InkWell(
+                          onTap: () {
+                            _queryUserCollection(
+                                collectionType: collectionType);
+                          },
+                          borderRadius: BorderRadius.circular(5),
+                          child: Container(
+                            padding:
+                                const EdgeInsets.symmetric(horizontal: 3),
+                            decoration: BoxDecoration(
+                              color: isSelected
+                                  ? Theme.of(context)
+                                      .colorScheme
+                                      .primaryContainer
+                                  : Theme.of(context)
+                                      .colorScheme
+                                      .surfaceContainerHighest,
+                              borderRadius: BorderRadius.circular(5),
+                            ),
+                            child: Row(
+                              children: [
+                                Text(
+                                  parts[0],
+                                  style: textStyle.copyWith(
+                                    color: isSelected
+                                        ? Theme.of(context)
+                                            .colorScheme
+                                            .onPrimaryContainer
+                                        : null,
+                                  ),
                                 ),
-                              ),
-                              Text(
-                                parts[1],
-                                style: textStyle.copyWith(
-                                  color: isSelected
-                                      ? Theme.of(context)
-                                          .colorScheme
-                                          .onPrimaryContainer
-                                      : null,
-                                ),
-                              )
-                            ],
+                                Text(
+                                  parts[1],
+                                  style: textStyle.copyWith(
+                                    color: isSelected
+                                        ? Theme.of(context)
+                                            .colorScheme
+                                            .onPrimaryContainer
+                                        : null,
+                                  ),
+                                )
+                              ],
+                            ),
                           ),
-                        ),
-                      );
-                    }),
+                        );
+                      },
+                    ),
                   ),
                 ),
               ),
@@ -272,7 +287,7 @@ class _CollectViewState extends State<CollectView>
               sliver: SliverToBoxAdapter(
                 child: Center(
                   child: ConstrainedBox(
-                    constraints: const BoxConstraints(maxWidth: PlayLayoutConstant.maxWidth),
+                    constraints: const BoxConstraints(maxWidth: LayoutConstant.maxWidth),
                     child: Padding(
                       padding: const EdgeInsets.symmetric(horizontal: 8),
                       child: GridView.builder(

@@ -3,7 +3,7 @@ import 'dart:io';
 import 'package:anime_flow/constants/constants.dart';
 import 'package:anime_flow/controllers/my/my_state_provider.dart';
 import 'package:anime_flow/http/api_path.dart';
-import 'package:anime_flow/http/requests/anime_flow_request.dart';
+import 'package:anime_flow/http/requests/flow_request.dart';
 import 'package:anime_flow/models/item/token_item.dart';
 import 'package:anime_flow/repository/providers/repository_providers.dart';
 import 'package:anime_flow/repository/token_repository.dart';
@@ -48,7 +48,7 @@ class MyController {
         cancelOAuthWaiting();
         return;
       }
-      final token = await AnimeFlowRequest.getTokenService(code: code);
+      final token = await FlowRequest.getTokenService(code: code);
       await _tokenRepository.saveToken(token);
       await _refreshCurrentUserProfile();
     } catch (e) {
@@ -63,7 +63,7 @@ class MyController {
     try {
       const clientId = Constants.bgmClientId;
       const redirectUri = AnimeFlowApi.animeFlowApi + AnimeFlowApi.callback;
-      final session = await AnimeFlowRequest.getSessionService();
+      final session = await FlowRequest.getSessionService();
       final sessionId = session['sessionId'];
       final authUrl = Uri.parse(
           '${CommonApi.bgmTV}${BgmApi.oauth}?response_type=code&client_id=$clientId&redirect_uri=$redirectUri&state=$sessionId');
@@ -96,7 +96,7 @@ class MyController {
   Future<void> _pollTokenAfterAuth(String sessionId) async {
     try {
       LiggLogger().d('开始轮询 token，sessionId: $sessionId');
-      final token = await AnimeFlowRequest.pollTokenService(state: sessionId);
+      final token = await FlowRequest.pollTokenService(state: sessionId);
       if (token != null) {
         await _tokenRepository.saveToken(token);
         await _refreshCurrentUserProfile();

@@ -1,4 +1,4 @@
-import 'package:anime_flow/http/requests/anime_flow_request.dart';
+import 'package:anime_flow/http/requests/flow_request.dart';
 import 'package:anime_flow/models/item/bangumi/character_subjects_item.dart';
 import 'package:anime_flow/models/item/subject_basic_data_item.dart';
 import 'package:anime_flow/routes/routes.dart';
@@ -27,7 +27,7 @@ class _CharacterWorksViewState extends State<CharacterWorksView> {
 
   ///获取出演作品
   void _getCharacterWorks() async {
-    final works = await AnimeFlowRequest.characterWorksService(widget.characterId,
+    final works = await FlowRequest.characterWorksService(widget.characterId,
         limit: 20, offset: 0);
     if (mounted) {
       setState(() {

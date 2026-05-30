@@ -1,5 +1,5 @@
 import 'package:anime_flow/constants/layout_constant.dart';
-import 'package:anime_flow/http/requests/anime_flow_request.dart';
+import 'package:anime_flow/http/requests/flow_request.dart';
 import 'package:anime_flow/models/enums/sort_type.dart';
 import 'package:anime_flow/models/item/bangumi/subject_item.dart';
 import 'package:anime_flow/models/item/subject_basic_data_item.dart';
@@ -94,7 +94,7 @@ class _RankingPageState extends State<RankingPage> {
 
     try {
       final page = loadMore ? _currentPage + 1 : 1;
-      final response = await AnimeFlowRequest.rankService(
+      final response = await FlowRequest.rankService(
           page: page,
           sort: _selectedSort,
           year: _selectedYear,

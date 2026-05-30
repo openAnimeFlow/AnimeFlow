@@ -1,4 +1,4 @@
-import 'package:anime_flow/http/requests/anime_flow_request.dart';
+import 'package:anime_flow/http/requests/flow_request.dart';
 import 'package:anime_flow/models/item/bangumi/actor_item.dart';
 import 'package:anime_flow/models/item/bangumi/producers_item.dart';
 import 'package:anime_flow/models/item/bangumi/related_subjects_item.dart';
@@ -14,7 +14,7 @@ part 'anime_info_provider.g.dart';
 class AnimeInfo extends _$AnimeInfo {
   @override
   Future<SubjectsInfoItem> build(int subjectId) async {
-    return AnimeFlowRequest.getSubjectByIdService(subjectId);
+    return FlowRequest.getSubjectByIdService(subjectId);
   }
 
   void setAnimeInfo(SubjectsInfoItem subjectInfo) {
@@ -45,7 +45,7 @@ class SubjectComments extends _$SubjectComments {
 
   @override
   Future<SubjectCommentsViewState> build(int subjectId) async {
-    final comments = await AnimeFlowRequest.getSubjectCommentsByIdService(
+    final comments = await FlowRequest.getSubjectCommentsByIdService(
       subjectId: subjectId,
       limit: _pageSize,
       offset: 0,
@@ -93,7 +93,7 @@ class SubjectComments extends _$SubjectComments {
 
     try {
       final prev = current.comments;
-      final result = await AnimeFlowRequest.getSubjectCommentsByIdService(
+      final result = await FlowRequest.getSubjectCommentsByIdService(
         subjectId: subjectId,
         limit: _pageSize,
         offset: prev.data.length,
@@ -120,7 +120,7 @@ class SubjectComments extends _$SubjectComments {
 class SubjectRelated extends _$SubjectRelated {
   @override
   Future<SubjectRelationItem> build(int subjectId) async {
-    return AnimeFlowRequest.relatedSubjectsService(
+    return FlowRequest.relatedSubjectsService(
         subjectId,
         limit: 20,
         offset: 0);
@@ -132,7 +132,7 @@ class SubjectRelated extends _$SubjectRelated {
 class SubjectCharacters extends _$SubjectCharacters {
   @override
   Future<CharactersItem> build(int subjectId) async {
-    return AnimeFlowRequest.charactersService(subjectId,limit: 10, offset: 0);
+    return FlowRequest.charactersService(subjectId,limit: 10, offset: 0);
   }
 }
 
@@ -141,6 +141,6 @@ class SubjectCharacters extends _$SubjectCharacters {
 class SubjectProducers extends _$SubjectProducers {
   @override
   Future<ProducersItem> build(int subjectId) async {
-    return AnimeFlowRequest.getProducersService(subjectId,limit: 10, offset: 0);
+    return FlowRequest.getProducersService(subjectId,limit: 10, offset: 0);
   }
 }

@@ -1,4 +1,4 @@
-import 'package:anime_flow/http/requests/anime_flow_request.dart';
+import 'package:anime_flow/http/requests/flow_request.dart';
 import 'package:anime_flow/models/item/danmaku/danmaku_search_response.dart';
 import 'package:anime_flow/models/item/danmaku/danmaku_episode_response.dart';
 import 'package:anime_flow/stores/episodes_state.dart';
@@ -286,7 +286,7 @@ class _DanmakuCardState extends State<DanmakuCard> {
                               style: Theme.of(listContext).textTheme.bodyLarge,
                             ),
                             onTap: () async {
-                              final episodes = await AnimeFlowRequest
+                              final episodes = await FlowRequest
                                   .getDanDanEpisodesByDanDanBangumiID(
                                   anime.animeId);
                               if (!dialogContext.mounted) return;
@@ -321,7 +321,7 @@ class _DanmakuCardState extends State<DanmakuCard> {
                   });
                   try {
                     final response =
-                    await AnimeFlowRequest.searchResponse(
+                    await FlowRequest.searchResponse(
                         danmakuFieldController.text);
                     setDialogState(() {
                       danmakuSearchResponse = response;
@@ -378,7 +378,7 @@ class _DanmakuCardState extends State<DanmakuCard> {
                       ),
                       onTap: () async {
                         final danmaku =
-                        await AnimeFlowRequest.getDanDanmakuByEpisodeID(
+                        await FlowRequest.getDanDanmakuByEpisodeID(
                             episode.episodeId);
                         if (!context.mounted) return;
                         playController.removeDanmaku();

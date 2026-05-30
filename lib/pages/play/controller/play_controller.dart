@@ -2,7 +2,7 @@ import 'dart:async';
 import 'package:anime_flow/constants/constants.dart';
 import 'package:anime_flow/constants/storage_key.dart';
 import 'package:anime_flow/controllers/shaders/shaders_controller.dart';
-import 'package:anime_flow/http/requests/anime_flow_request.dart';
+import 'package:anime_flow/http/requests/flow_request.dart';
 import 'package:anime_flow/models/enums/video_controls_icon_type.dart';
 import 'package:anime_flow/models/item/danmaku/danmaku_module.dart';
 import 'package:anime_flow/models/play/play_history.dart';
@@ -250,9 +250,9 @@ class PlayController extends GetxController {
     try {
       if (!_isLoadingDanmaku && episode != 0) {
         _isLoadingDanmaku = true;
-        final bgmBangumiId = await AnimeFlowRequest.getDanDanBangumiIDByBgmBangumiID(subjectId);
+        final bgmBangumiId = await FlowRequest.getDanDanBangumiIDByBgmBangumiID(subjectId);
         if (bgmBangumiId != null) {
-          final danmaku = await AnimeFlowRequest.getDanDanmaku(bgmBangumiId, episode);
+          final danmaku = await FlowRequest.getDanDanmaku(bgmBangumiId, episode);
           addDanmakuAll(danmaku);
           _isLoadingDanmaku = false;
         };
@@ -455,7 +455,7 @@ class PlayController extends GetxController {
     int type = 1,
   }) async {
     final bgmBangumiId =
-        await AnimeFlowRequest.getDanDanBangumiIDByBgmBangumiID(subjectId);
+        await FlowRequest.getDanDanBangumiIDByBgmBangumiID(subjectId);
     if (bgmBangumiId == null) return false;
     final trimmed = message.trim();
     if (trimmed.isEmpty) return false;
@@ -473,7 +473,7 @@ class PlayController extends GetxController {
       source: 'AnimeFlow',
     );
     addDanDanmaku(item, bgmUserId);
-    await AnimeFlowRequest.sendDanmaku(
+    await FlowRequest.sendDanmaku(
         bgmBangumiId, episode,
         message: item.message,
         time: item.time,

@@ -1,4 +1,4 @@
-import 'package:anime_flow/http/requests/anime_flow_request.dart';
+import 'package:anime_flow/http/requests/flow_request.dart';
 import 'package:anime_flow/routes/routes.dart';
 import 'package:anime_flow/models/item/bangumi/character_detail_item.dart';
 import 'package:anime_flow/pages/character_info/character_works.dart';
@@ -63,7 +63,7 @@ class _CharacterInfoState extends State<CharacterInfo> {
   }
 
   void _getCharacterInfo() async {
-    final characterInfo = await AnimeFlowRequest.characterInfoService(characterId);
+    final characterInfo = await FlowRequest.characterInfoService(characterId);
     setState(() {
       characterDetail = characterInfo;
     });

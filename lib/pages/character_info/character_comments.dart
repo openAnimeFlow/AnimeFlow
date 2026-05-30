@@ -1,4 +1,4 @@
-import 'package:anime_flow/http/requests/anime_flow_request.dart';
+import 'package:anime_flow/http/requests/flow_request.dart';
 import 'package:anime_flow/models/item/bangumi/character_comments_item.dart';
 import 'package:anime_flow/routes/routes.dart';
 import 'package:anime_flow/utils/format_time_util.dart';
@@ -32,7 +32,7 @@ class _CharacterCommentsViewState extends State<CharacterCommentsView> {
     });
     try {
       final result =
-          await AnimeFlowRequest.characterCommentsService(widget.characterId);
+          await FlowRequest.characterCommentsService(widget.characterId);
       if (mounted) {
         setState(() {
           comments = result;

@@ -1,5 +1,5 @@
 import 'package:anime_flow/constants/constants.dart';
-import 'package:anime_flow/http/requests/anime_flow_request.dart';
+import 'package:anime_flow/http/requests/flow_request.dart';
 import 'package:anime_flow/models/item/token_item.dart';
 import 'package:anime_flow/repository/BangumiToken.dart';
 import 'package:anime_flow/utils/logger.dart';
@@ -64,7 +64,7 @@ class BgmRefreshTokenInterceptor extends Interceptor {
 
   Future<void> _performTokenRefresh(TokenItem oldToken) async {
     try {
-      final newToken = await AnimeFlowRequest.refreshTokenService(
+      final newToken = await FlowRequest.refreshTokenService(
         refreshToken: oldToken.refreshToken,
       );
       final newTokenItem = TokenItem(

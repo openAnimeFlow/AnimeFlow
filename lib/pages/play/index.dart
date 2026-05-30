@@ -1,5 +1,5 @@
 import 'package:anime_flow/controllers/shaders/shaders_controller.dart';
-import 'package:anime_flow/http/requests/anime_flow_request.dart';
+import 'package:anime_flow/http/requests/flow_request.dart';
 import 'package:anime_flow/pages/play/controller/episode_controller.dart';
 import 'package:anime_flow/pages/play/controller/play_controller.dart';
 import 'package:anime_flow/pages/play/controller/video_source_controller.dart';
@@ -77,7 +77,7 @@ class _PlayPageState extends State<PlayPage> {
       if (!episodesState.isLoading.value) {
         episodesState.isLoading.value = true;
       }
-      final episodes = await AnimeFlowRequest.getSubjectEpisodesByIdService(
+      final episodes = await FlowRequest.getSubjectEpisodesByIdService(
           subjectState.subject.value.id, 100, 0);
       episodesState.episodes.value = episodes;
       episodesState.isLoading.value = false;

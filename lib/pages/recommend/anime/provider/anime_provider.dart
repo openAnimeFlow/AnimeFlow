@@ -1,4 +1,4 @@
-import 'package:anime_flow/http/requests/anime_flow_request.dart';
+import 'package:anime_flow/http/requests/flow_request.dart';
 import 'package:anime_flow/models/item/bangumi/calendar_item.dart';
 import 'package:anime_flow/models/item/bangumi/hot_item.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
@@ -9,12 +9,12 @@ part 'anime_provider.g.dart';
 class AnimeCalendar extends _$AnimeCalendar {
   @override
   Future<Calendar> build() async {
-    return AnimeFlowRequest.calendarService();
+    return FlowRequest.calendarService();
   }
 
   Future<void> refreshCalendarDate() async {
     state = const AsyncLoading();
-    state = await AsyncValue.guard(() => AnimeFlowRequest.calendarService());
+    state = await AsyncValue.guard(() => FlowRequest.calendarService());
   }
 }
 
@@ -58,7 +58,7 @@ class AnimeHot extends _$AnimeHot {
   }
 
   Future<AnimeHotState> _fetchFirstPage() async {
-    final hotItem = await AnimeFlowRequest.getHotService(limit, 0);
+    final hotItem = await FlowRequest.getHotService(limit, 0);
     return AnimeHotState(
       items: hotItem.data,
       hasMore: hotItem.data.length >= limit,
@@ -77,7 +77,7 @@ class AnimeHot extends _$AnimeHot {
 
     try {
       final hotItem =
-          await AnimeFlowRequest.getHotService(limit, current.items.length);
+          await FlowRequest.getHotService(limit, current.items.length);
       final nextItems = [...current.items, ...hotItem.data];
       state = AsyncData(
         AnimeHotState(

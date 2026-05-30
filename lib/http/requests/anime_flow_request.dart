@@ -1,7 +1,6 @@
 import 'dart:ui';
 
 import 'package:anime_flow/constants/constants.dart';
-import 'package:anime_flow/crawler/html_crawler.dart';
 import 'package:anime_flow/crawler/itme/bgm_user_page_item.dart';
 import 'package:anime_flow/http/api_path.dart';
 import 'package:anime_flow/http/clients/anime_flow_client.dart';
@@ -19,6 +18,7 @@ import 'package:anime_flow/models/item/bangumi/related_subjects_item.dart';
 import 'package:anime_flow/models/item/bangumi/subject_comments_item.dart';
 import 'package:anime_flow/models/item/bangumi/subject_item.dart';
 import 'package:anime_flow/models/item/bangumi/subjects_info_item.dart';
+import 'package:anime_flow/models/item/bangumi/user_collections_item.dart';
 import 'package:anime_flow/models/item/bangumi/user_info_item.dart';
 import 'package:anime_flow/models/item/danmaku/danmaku_episode_response.dart';
 import 'package:anime_flow/models/item/danmaku/danmaku_module.dart';
@@ -411,7 +411,8 @@ class AnimeFlowRequest {
   }
 
   ///获取bgm用户统计数据
-  static Future<BgmUserStatisticsItem> getBgmUserStatisticsService(String username) async {
+  static Future<BgmUserStatisticsItem> getBgmUserStatisticsService(
+      String username) async {
     final response = await _client.get(
       AnimeFlowApi.userStatistics.replaceFirst('{username}', username),
       options: Options(
@@ -419,5 +420,28 @@ class AnimeFlowRequest {
       ),
     );
     return BgmUserStatisticsItem.fromJson(response.data);
+  }
+
+  ///查询用户收藏
+  static Future<UserCollectionsItem> queryUserCollectionService(String username,
+      {int subjectType = 2,
+      required int type,
+      required int limit,
+      required int offset}) async {
+    final response = await _client.get(
+      AnimeFlowApi.userCollections.replaceFirst('{username}', username),
+      queryParameters: {
+        'subjectType': subjectType,
+        'type': type,
+        'limit': limit,
+        'offset': offset,
+      },
+    );
+    try {
+      return UserCollectionsItem.fromJson(response.data);
+    } catch (e) {
+      LiggLogger().e(e);
+      throw Exception('Failed to fetch user collections: $e');
+    }
   }
 }

@@ -172,6 +172,9 @@ class AnimeFlowApi {
       /// 用户统计信息
       userStatistics = '/api/v1/bangumi/users/{username}/statistics',
 
+      ///用户收藏
+      userCollections = '/api/v1/bangumi/users/{username}/collections/subjects',
+
       /// 每日放送、
       calendar = '/api/v1/bangumi/calendar';
 }

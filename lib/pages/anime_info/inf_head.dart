@@ -1,5 +1,5 @@
 import 'dart:ui';
-import 'package:anime_flow/constants/play_layout_constant.dart';
+import 'package:anime_flow/constants/layout_constant.dart';
 import 'package:anime_flow/models/item/subject_basic_data_item.dart';
 import 'package:anime_flow/pages/anime_info/provider/anime_info_provider.dart';
 import 'package:anime_flow/utils/systemUtil.dart';
@@ -69,7 +69,7 @@ class InfoHeadView extends StatelessWidget {
             alignment: Alignment.center,
             child: ConstrainedBox(
               constraints:
-                  const BoxConstraints(maxWidth: PlayLayoutConstant.maxWidth),
+                  const BoxConstraints(maxWidth: LayoutConstant.maxWidth),
               child: SizedBox(
                 height: double.infinity,
                 child: Padding(

@@ -1,6 +1,6 @@
 import 'package:anime_flow/pages/recommend/anime/provider/anime_provider.dart';
 import 'package:flutter/material.dart';
-import 'package:anime_flow/constants/play_layout_constant.dart';
+import 'package:anime_flow/constants/layout_constant.dart';
 import 'package:anime_flow/pages/recommend/anime/calendar.dart';
 import 'package:anime_flow/pages/recommend/anime/popular_anime.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -70,7 +70,7 @@ class _AnimePageState extends ConsumerState<AnimePage>
           padding: const EdgeInsets.symmetric(horizontal: 10),
           child: ConstrainedBox(
             constraints:
-                const BoxConstraints(maxWidth: PlayLayoutConstant.maxWidth),
+                const BoxConstraints(maxWidth: LayoutConstant.maxWidth),
             child: CustomScrollView(
               controller: _scrollController,
               slivers: const [

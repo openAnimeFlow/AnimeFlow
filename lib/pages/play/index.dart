@@ -7,7 +7,7 @@ import 'package:anime_flow/pages/play/controller/video_ui_controller.dart';
 import 'package:anime_flow/pages/play/video/video.dart';
 import 'package:anime_flow/stores/play_subject_state.dart';
 import 'package:anime_flow/utils/systemUtil.dart';
-import 'package:anime_flow/constants/play_layout_constant.dart';
+import 'package:anime_flow/constants/layout_constant.dart';
 import 'package:anime_flow/stores/episodes_state.dart';
 import 'package:anime_flow/routes/routes.dart';
 import 'package:flutter/material.dart';
@@ -191,7 +191,7 @@ class _PlayPageState extends State<PlayPage> {
                     AnimatedContainer(
                         duration: const Duration(milliseconds: 100),
                         width: playController.isContentExpanded.value
-                            ? PlayLayoutConstant.playContentWidth
+                            ? LayoutConstant.playContentWidth
                             : 0,
                         child: Opacity(
                           opacity:

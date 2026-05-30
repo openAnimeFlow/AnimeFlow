@@ -1,4 +1,4 @@
-import 'package:anime_flow/constants/play_layout_constant.dart';
+import 'package:anime_flow/constants/layout_constant.dart';
 import 'package:anime_flow/pages/play/controller/play_controller.dart';
 import 'package:anime_flow/utils/format_time_util.dart';
 import 'package:flutter/material.dart';
@@ -68,7 +68,7 @@ class _VideoSettingState extends State<VideoSetting> {
       child: Align(
         alignment: Alignment.centerRight,
         child: SizedBox(
-          width: PlayLayoutConstant.playContentWidth,
+          width: LayoutConstant.playContentWidth,
           height: MediaQuery.of(context).size.height,
           child: Container(
             padding: EdgeInsets.only(

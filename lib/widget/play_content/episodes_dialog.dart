@@ -1,4 +1,4 @@
-import 'package:anime_flow/constants/play_layout_constant.dart';
+import 'package:anime_flow/constants/layout_constant.dart';
 import 'package:anime_flow/models/item/bangumi/episodes_item.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -20,7 +20,7 @@ class EpisodesDialog extends StatelessWidget {
     return Align(
       alignment: Alignment.centerRight,
       child: Container(
-        width: PlayLayoutConstant.playContentWidth,
+        width: LayoutConstant.playContentWidth,
         height: double.infinity,
         padding: const EdgeInsets.only(top: 16, right: 16, left: 16),
         color: Theme.of(context).cardColor,

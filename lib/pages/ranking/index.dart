@@ -1,4 +1,4 @@
-import 'package:anime_flow/constants/play_layout_constant.dart';
+import 'package:anime_flow/constants/layout_constant.dart';
 import 'package:anime_flow/http/requests/anime_flow_request.dart';
 import 'package:anime_flow/models/enums/sort_type.dart';
 import 'package:anime_flow/models/item/bangumi/subject_item.dart';
@@ -142,7 +142,7 @@ class _RankingPageState extends State<RankingPage> {
         child: Center(
           child: ConstrainedBox(
             constraints:
-                const BoxConstraints(maxWidth: PlayLayoutConstant.maxWidth),
+                const BoxConstraints(maxWidth: LayoutConstant.maxWidth),
             child: subject == null
                 ? const CustomScrollView(
                     slivers: [

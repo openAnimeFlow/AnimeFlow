@@ -138,7 +138,7 @@ final class SubjectCommentsProvider
   }
 }
 
-String _$subjectCommentsHash() => r'e9023fe12b86201a0b7b9120888500bed0ac8803';
+String _$subjectCommentsHash() => r'60415e30980ab4eb2578144c8b6422aae134143b';
 
 final class SubjectCommentsFamily extends $Family
     with
@@ -237,7 +237,7 @@ final class SubjectRelatedProvider
   }
 }
 
-String _$subjectRelatedHash() => r'3afb97bc5bab2958b128418edcb3823c2a497ce6';
+String _$subjectRelatedHash() => r'632046f70e882baa9891289da4f67fcab027120a';
 
 ///相关条目
 

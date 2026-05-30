@@ -7,7 +7,7 @@ import 'package:anime_flow/pages/play/controller/video_source_controller.dart';
 import 'package:anime_flow/providers/captcha/captcha_provider.dart';
 import 'package:anime_flow/stores/play_subject_state.dart';
 import 'package:anime_flow/widget/animation_network_image/animation_network_image.dart';
-import 'package:anime_flow/constants/play_layout_constant.dart';
+import 'package:anime_flow/constants/layout_constant.dart';
 import 'package:anime_flow/stores/episodes_state.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -168,7 +168,7 @@ class _VideoSourceDrawersState extends State<VideoSourceDrawers> {
     return Align(
       alignment: Alignment.centerRight,
       child: SizedBox(
-        width: PlayLayoutConstant.playContentWidth,
+        width: LayoutConstant.playContentWidth,
         height: MediaQuery.of(context).size.height,
         child: Container(
           padding: EdgeInsets.only(

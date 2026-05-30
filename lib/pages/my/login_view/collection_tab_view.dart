@@ -1,4 +1,4 @@
-import 'package:anime_flow/constants/play_layout_constant.dart';
+import 'package:anime_flow/constants/layout_constant.dart';
 import 'package:anime_flow/widget/animation_network_image/animation_network_image.dart';
 import 'package:anime_flow/models/item/bangumi/collections_item.dart';
 import 'package:anime_flow/models/item/subject_basic_data_item.dart';
@@ -31,7 +31,7 @@ class CollectionTabView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return ConstrainedBox(
-      constraints: const BoxConstraints(maxWidth: PlayLayoutConstant.maxWidth),
+      constraints: const BoxConstraints(maxWidth: LayoutConstant.maxWidth),
       child: TabBarView(
         controller: tabController,
         children: List.generate(tabs.length, (tabIndex) {

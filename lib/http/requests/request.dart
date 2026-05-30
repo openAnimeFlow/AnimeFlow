@@ -61,8 +61,8 @@ class Request {
     });
   }
 
-  ///获取bgm用户页面数据
-  static Future<BgmUserPageItem> getBgmUserPageService(String username) async {
+  ///获取bgm用户统计数据
+  static Future<BgmUserStatisticsItem> getBgmUserStatisticsService(String username) async {
     final response = await _client.get(
       '${CommonApi.bgmTV}/user/$username',
       options: Options(

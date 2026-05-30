@@ -101,7 +101,7 @@ abstract class _$UserSpace extends $AsyncNotifier<UserInfoItem> {
 final userSpaceStatisticsProvider = UserSpaceStatisticsFamily._();
 
 final class UserSpaceStatisticsProvider
-    extends $AsyncNotifierProvider<UserSpaceStatistics, BgmUserPageItem> {
+    extends $AsyncNotifierProvider<UserSpaceStatistics, BgmUserStatisticsItem> {
   UserSpaceStatisticsProvider._(
       {required UserSpaceStatisticsFamily super.from,
       required String super.argument})
@@ -139,12 +139,16 @@ final class UserSpaceStatisticsProvider
 }
 
 String _$userSpaceStatisticsHash() =>
-    r'7b14b08dd655c68969ad35ac95c319d39348da95';
+    r'a920b37d1703fa4740fae43aa1fe3ca6df5ac8de';
 
 final class UserSpaceStatisticsFamily extends $Family
     with
-        $ClassFamilyOverride<UserSpaceStatistics, AsyncValue<BgmUserPageItem>,
-            BgmUserPageItem, FutureOr<BgmUserPageItem>, String> {
+        $ClassFamilyOverride<
+            UserSpaceStatistics,
+            AsyncValue<BgmUserStatisticsItem>,
+            BgmUserStatisticsItem,
+            FutureOr<BgmUserStatisticsItem>,
+            String> {
   UserSpaceStatisticsFamily._()
       : super(
           retry: null,
@@ -163,20 +167,22 @@ final class UserSpaceStatisticsFamily extends $Family
   String toString() => r'userSpaceStatisticsProvider';
 }
 
-abstract class _$UserSpaceStatistics extends $AsyncNotifier<BgmUserPageItem> {
+abstract class _$UserSpaceStatistics
+    extends $AsyncNotifier<BgmUserStatisticsItem> {
   late final _$args = ref.$arg as String;
   String get username => _$args;
 
-  FutureOr<BgmUserPageItem> build(
+  FutureOr<BgmUserStatisticsItem> build(
     String username,
   );
   @$mustCallSuper
   @override
   void runBuild() {
-    final ref = this.ref as $Ref<AsyncValue<BgmUserPageItem>, BgmUserPageItem>;
+    final ref = this.ref
+        as $Ref<AsyncValue<BgmUserStatisticsItem>, BgmUserStatisticsItem>;
     final element = ref.element as $ClassProviderElement<
-        AnyNotifier<AsyncValue<BgmUserPageItem>, BgmUserPageItem>,
-        AsyncValue<BgmUserPageItem>,
+        AnyNotifier<AsyncValue<BgmUserStatisticsItem>, BgmUserStatisticsItem>,
+        AsyncValue<BgmUserStatisticsItem>,
         Object?,
         Object?>;
     element.handleCreate(

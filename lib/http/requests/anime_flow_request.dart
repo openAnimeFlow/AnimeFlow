@@ -1,6 +1,8 @@
 import 'dart:ui';
 
 import 'package:anime_flow/constants/constants.dart';
+import 'package:anime_flow/crawler/html_crawler.dart';
+import 'package:anime_flow/crawler/itme/bgm_user_page_item.dart';
 import 'package:anime_flow/http/api_path.dart';
 import 'package:anime_flow/http/clients/anime_flow_client.dart';
 import 'package:anime_flow/models/enums/sort_type.dart';
@@ -17,6 +19,7 @@ import 'package:anime_flow/models/item/bangumi/related_subjects_item.dart';
 import 'package:anime_flow/models/item/bangumi/subject_comments_item.dart';
 import 'package:anime_flow/models/item/bangumi/subject_item.dart';
 import 'package:anime_flow/models/item/bangumi/subjects_info_item.dart';
+import 'package:anime_flow/models/item/bangumi/user_info_item.dart';
 import 'package:anime_flow/models/item/danmaku/danmaku_episode_response.dart';
 import 'package:anime_flow/models/item/danmaku/danmaku_module.dart';
 import 'package:anime_flow/models/item/danmaku/danmaku_search_response.dart';
@@ -398,5 +401,23 @@ class AnimeFlowRequest {
         'offset': offset,
       },
     ).then((response) => (SubjectRelationItem.fromJson(response.data)));
+  }
+
+  /// 查询用户信息
+  static Future<UserInfoItem> queryUserInfoService(String username) async {
+    return await _client
+        .get(AnimeFlowApi.userInfo.replaceFirst('{username}', username))
+        .then((value) => (UserInfoItem.fromJson(value.data)));
+  }
+
+  ///获取bgm用户统计数据
+  static Future<BgmUserStatisticsItem> getBgmUserStatisticsService(String username) async {
+    final response = await _client.get(
+      AnimeFlowApi.userStatistics.replaceFirst('{username}', username),
+      options: Options(
+        headers: {Constants.userAgentName: Utils.getRandomUA()},
+      ),
+    );
+    return BgmUserStatisticsItem.fromJson(response.data);
   }
 }

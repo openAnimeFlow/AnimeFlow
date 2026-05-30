@@ -166,6 +166,12 @@ class AnimeFlowApi {
       ///关联条目
       relations = '/api/v1/bangumi/subjects/{subjectId}/relations',
 
+      ///用户信息
+      userInfo = '/api/v1/bangumi/users/{username}',
+
+      /// 用户统计信息
+      userStatistics = '/api/v1/bangumi/users/{username}/statistics',
+
       /// 每日放送、
       calendar = '/api/v1/bangumi/calendar';
 }

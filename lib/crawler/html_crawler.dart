@@ -2,7 +2,7 @@ import 'dart:async';
 import 'dart:math' show min;
 
 import 'package:anime_flow/crawler/itme/crawler_config_item.dart';
-import 'package:anime_flow/crawler/itme/bgm_user_page_item.dart' show BgmUserPageItem, Statistic;
+import 'package:anime_flow/crawler/itme/bgm_user_page_item.dart' show BgmUserStatisticsItem, Statistic;
 import 'package:anime_flow/models/play/video/episode_resources_item.dart';
 import 'package:anime_flow/models/play/video/search_resources_item.dart';
 import 'package:html/parser.dart';
@@ -113,37 +113,28 @@ class HtmlCrawler {
     return episodeResourcesList;
   }
 
-  ///解析用户页面数据
-  static Future<BgmUserPageItem> parseUserPage(String userPageHtml) async {
-    const String statisticsDocument = '//*[@id="userStatsContainers"] /div[1]';
+  ///解析用户页面数据（#userStats_all 第一个 div 下每项为一组 value/name）
+  static Future<BgmUserStatisticsItem> parseUserPage(String userPageHtml) async {
+    const String statisticsDocument = '//*[@id="userStats_all"] /div[1] /div';
     final parser = parse(userPageHtml).documentElement!;
 
-    final statisticsElement = parser.queryXPath(statisticsDocument);
+    final rowElements = parser.queryXPath(statisticsDocument);
     final List<Statistic> statistics = [];
 
-    for (int i = 1; i <= 6; i++) {
-      final statisticsValueDocument = '/div[1] /div[$i] /span[1]';
-      final statisticsNameDocument = '/div[1] /div[$i] /span[2]';
+    for (final row in rowElements.nodes) {
+      final valueElement = row.queryXPath('/span[1]');
+      final nameElement = row.queryXPath('/span[2]');
 
-      final statisticsValueElement =
-      statisticsElement.node!.queryXPath(statisticsValueDocument);
-      final statisticsNameElement =
-      statisticsElement.node!.queryXPath(statisticsNameDocument);
-
-      String value = '';
-      String name = '';
-
-      if (statisticsValueElement.nodes.isNotEmpty) {
-        value = statisticsValueElement.nodes[0].text?.trim() ?? '';
-      }
-
-      if (statisticsNameElement.nodes.isNotEmpty) {
-        name = statisticsNameElement.nodes[0].text?.trim() ?? '';
-      }
+      final value = valueElement.nodes.isNotEmpty
+          ? valueElement.nodes[0].text?.trim() ?? ''
+          : '';
+      final name = nameElement.nodes.isNotEmpty
+          ? nameElement.nodes[0].text?.trim() ?? ''
+          : '';
 
       statistics.add(Statistic(value: value, name: name));
     }
 
-    return BgmUserPageItem(statistics: statistics);
+    return BgmUserStatisticsItem(statistics: statistics);
   }
 }

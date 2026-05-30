@@ -1,10 +1,10 @@
-class BgmUserPageItem {
+class BgmUserStatisticsItem {
   final List<Statistic> statistics;
 
-  BgmUserPageItem({required this.statistics});
+  BgmUserStatisticsItem({required this.statistics});
 
-  factory BgmUserPageItem.fromJson(Map<String, dynamic> json) {
-    return BgmUserPageItem(
+  factory BgmUserStatisticsItem.fromJson(Map<String, dynamic> json) {
+    return BgmUserStatisticsItem(
       statistics: (json['statistics'] as List)
           .map((e) => Statistic.fromJson(e))
           .toList(),

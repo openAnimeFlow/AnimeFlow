@@ -66,7 +66,9 @@ class _CollectViewState extends ConsumerState<CollectView>
       final metrics = notification.metrics;
       if (metrics.pixels >= metrics.maxScrollExtent - 200) {
         // 距离底部200像素时加载更多
-        _loadMore();
+        if (!isLoadingMore && hasMore && userCollections != null) {
+          _queryUserCollection(loadMore: true);
+        }
       }
     }
     return false; // 返回 false 让通知继续向上传递，这样外层 NestedScrollView 也能接收到滚动事件
@@ -167,13 +169,6 @@ class _CollectViewState extends ConsumerState<CollectView>
           });
         }
       }
-    }
-  }
-
-  /// 加载更多
-  void _loadMore() {
-    if (!isLoadingMore && hasMore && userCollections != null) {
-      _queryUserCollection(loadMore: true);
     }
   }
 

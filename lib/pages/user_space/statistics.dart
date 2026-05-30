@@ -2,7 +2,7 @@ import 'package:anime_flow/crawler/itme/bgm_user_page_item.dart';
 import 'package:flutter/material.dart';
 
 class UserSpaceStatisticsSection extends StatelessWidget {
-  final BgmUserPageItem userPageItem;
+  final BgmUserStatisticsItem userPageItem;
 
   const UserSpaceStatisticsSection(
       {super.key,  required this.userPageItem});
@@ -167,7 +167,7 @@ class UserSpaceStatisticsSection extends StatelessWidget {
   Widget _cardContent(
       int index,
       BuildContext context,
-      BgmUserPageItem userPageItem,
+      BgmUserStatisticsItem userPageItem,
       ) {
     double fontSize({bool isTitle = false}) {
       final width = MediaQuery.sizeOf(context).width;

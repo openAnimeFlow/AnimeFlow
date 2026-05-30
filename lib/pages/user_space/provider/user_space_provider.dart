@@ -1,5 +1,4 @@
 import 'package:anime_flow/crawler/itme/bgm_user_page_item.dart';
-import 'package:anime_flow/http/requests/request.dart';
 import 'package:anime_flow/models/item/bangumi/user_info_item.dart';
 import 'package:anime_flow/repository/providers/repository_providers.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
@@ -17,7 +16,7 @@ class UserSpace extends _$UserSpace {
 @riverpod
 class UserSpaceStatistics extends _$UserSpaceStatistics {
   @override
-  Future<BgmUserPageItem> build(String username) async {
-    return Request.getBgmUserPageService(username);
+  Future<BgmUserStatisticsItem> build(String username) async {
+    return ref.read(userRepositoryProvider).getUserStatistics(username);
   }
 }

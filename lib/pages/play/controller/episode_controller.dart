@@ -49,6 +49,6 @@ class EpisodeController extends GetxController{
       episodeIndex: nextEpisodeIndex,
       sort: nextEpisode.sort,
     );
-    episodesState.setEpisodeTitle(nextEpisode.nameCN ?? nextEpisode.name);
+    episodesState.setEpisodeTitle(nextEpisode.nameCN.isEmpty ? nextEpisode.name : nextEpisode.nameCN);
   }
 }

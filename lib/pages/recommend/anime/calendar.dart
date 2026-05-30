@@ -261,7 +261,7 @@ class _CalendarViewState extends State<CalendarView> {
         final itemData = items[index].subject;
         final subjectBasicData = SubjectBasicData(
           id: itemData.id,
-          name: itemData.nameCN ?? itemData.name,
+          name: itemData.nameCN.isEmpty ? itemData.name : itemData.nameCN,
           image: itemData.images.large,
         );
         return Container(
@@ -300,7 +300,7 @@ class _CalendarViewState extends State<CalendarView> {
                       child: Padding(
                         padding: const EdgeInsets.all(5),
                         child: Text(
-                          itemData.nameCN ?? itemData.name,
+                          itemData.nameCN.isEmpty ? itemData.name : itemData.nameCN,
                           style: const TextStyle(
                             color: Colors.white,
                             fontWeight: FontWeight.bold,

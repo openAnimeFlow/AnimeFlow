@@ -199,11 +199,10 @@ class _MainPageState extends State<MainPage> {
               builder: (context, ref, _) {
                 final userInfo = ref.watch(currentUserInfoProvider);
                 return NavigationRail(
-                  backgroundColor: colorScheme.surfaceContainerHighest,
                   selectedIndex: _currentIndex,
                   groupAlignment: 1.0,
                   onDestinationSelected: _onDestinationSelected,
-                  labelType: NavigationRailLabelType.all,
+                  labelType: NavigationRailLabelType.none,
                   leading: Padding(
                     padding: const EdgeInsets.only(bottom: 16, top: 8),
                     child: FloatingActionButton(
@@ -223,7 +222,7 @@ class _MainPageState extends State<MainPage> {
                     child: IconButton(
                       icon: const Icon(Icons.settings_outlined),
                       iconSize: 28,
-                      tooltip: '设置',
+                      tooltip: 'Settings',
                       onPressed: () => const SettingsRoute().push(context),
                     ),
                   ),
@@ -248,9 +247,9 @@ class _MainPageState extends State<MainPage> {
               builder: (context, ref, _) {
                 final userInfo = ref.watch(currentUserInfoProvider);
                 return NavigationBar(
-                  backgroundColor: colorScheme.surfaceContainerHighest,
                   selectedIndex: _currentIndex,
                   onDestinationSelected: _onDestinationSelected,
+                  labelBehavior: NavigationDestinationLabelBehavior.alwaysHide,
                   destinations:
                       _buildBarDestinations(colorScheme, userInfo),
                 );

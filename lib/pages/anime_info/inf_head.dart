@@ -209,13 +209,13 @@ class InfoHeadView extends StatelessWidget {
           runSpacing: 5, // 行之间的垂直间距
           children: [
             Text(
-              '${subjectItem.airtime.date}(${subjectItem.platform.typeCN})',
+              '${subjectItem.airtime.date} (${subjectItem.platform.typeCN})',
               style:
                   const TextStyle(fontSize: fontSize, fontWeight: fontWeight),
               maxLines: 1,
               overflow: TextOverflow.ellipsis,
             ),
-            Text('全${subjectItem.eps}话',
+            Text('${subjectItem.eps} Eps',
                 style: const TextStyle(
                     fontSize: fontSize, fontWeight: fontWeight)),
             Column(
@@ -224,7 +224,7 @@ class InfoHeadView extends StatelessWidget {
                 if (subjectItem.interest != null &&
                     subjectItem.interest!.rate > 0)
                   Text(
-                    '你的评分:${subjectItem.interest!.rate}',
+                    'Your Rating: ${subjectItem.interest!.rate}',
                     style: const TextStyle(
                         fontWeight: fontWeight, color: amberAccent),
                   ),
@@ -247,19 +247,32 @@ class InfoHeadView extends StatelessWidget {
               ],
             ),
             Text(
-              '(${subjectItem.rating.total})人评分',
+              '${subjectItem.rating.total} Ratings',
               style:
                   const TextStyle(fontSize: fontSize, fontWeight: fontWeight),
             ),
-            Text('$collectionTotal收藏/',
-                style: const TextStyle(
-                    fontSize: fontSize, fontWeight: fontWeight)),
-            Text('${subjectItem.collection.data['3']}再看/',
-                style: const TextStyle(
-                    fontSize: fontSize, fontWeight: fontWeight)),
-            Text('${subjectItem.collection.data['5']}抛弃',
-                style: const TextStyle(
-                    fontSize: fontSize, fontWeight: fontWeight)),
+            Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                const Icon(Icons.bookmark_border, size: 14),
+                const SizedBox(width: 2),
+                Text('$collectionTotal',
+                    style: const TextStyle(
+                        fontSize: fontSize, fontWeight: fontWeight)),
+                const SizedBox(width: 8),
+                const Icon(Icons.play_circle_outline, size: 14),
+                const SizedBox(width: 2),
+                Text('${subjectItem.collection.data['3']}',
+                    style: const TextStyle(
+                        fontSize: fontSize, fontWeight: fontWeight)),
+                const SizedBox(width: 8),
+                const Icon(Icons.delete_outline, size: 14),
+                const SizedBox(width: 2),
+                Text('${subjectItem.collection.data['5']}',
+                    style: const TextStyle(
+                        fontSize: fontSize, fontWeight: fontWeight)),
+              ],
+            ),
           ],
         ),
         const Spacer(),

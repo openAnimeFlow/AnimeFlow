@@ -41,21 +41,21 @@ class _LoginViewState extends State<LoginView> with SingleTickerProviderStateMix
   // 记录每个 type 是否还有更多数据
   final Map<int, bool> _hasMore = {};
 
-  List<String> get _tabs {
-    const Map<int, String> collectionTypes = {
-      1: '想看',
-      2: '看过',
-      3: '在看',
-      4: '搁置',
-      5: '抛弃',
+  List<Map<String, dynamic>> get _tabs {
+    const Map<int, IconData> collectionIcons = {
+      1: Icons.favorite_border,
+      2: Icons.check_circle_outline,
+      3: Icons.play_circle_outline,
+      4: Icons.pause_circle_outline,
+      5: Icons.delete_outline,
     };
     final stats = widget.userInfoItem.stats.subject.two;
     return [
-      '${collectionTypes[1]}\n${stats.one}',
-      '${collectionTypes[2]}\n${stats.two}',
-      '${collectionTypes[3]}\n${stats.three}',
-      '${collectionTypes[4]}\n${stats.four}',
-      '${collectionTypes[5]}\n${stats.five}',
+      {'icon': collectionIcons[1], 'count': stats.one},
+      {'icon': collectionIcons[2], 'count': stats.two},
+      {'icon': collectionIcons[3], 'count': stats.three},
+      {'icon': collectionIcons[4], 'count': stats.four},
+      {'icon': collectionIcons[5], 'count': stats.five},
     ];
   }
 
@@ -184,25 +184,17 @@ class _LoginViewState extends State<LoginView> with SingleTickerProviderStateMix
                   isScrollable: true,
                   tabAlignment: TabAlignment.start,
                   dividerHeight: 0,
-                  tabs: _tabs.map((String name) {
-                    final parts = name.split('\n');
+                  tabs: _tabs.map((Map<String, dynamic> tabInfo) {
                     return Tab(
                       child: Row(
                         mainAxisSize: MainAxisSize.min,
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
-                          Flexible(
-                            child: Text(
-                              parts[0],
-                              style: const TextStyle(fontSize: 12),
-                              maxLines: 1,
-                              overflow: TextOverflow.ellipsis,
-                            ),
-                          ),
+                          Icon(tabInfo['icon'] as IconData, size: 16),
                           const SizedBox(width: 4),
                           Text(
-                            parts.length > 1 ? parts[1] : '0',
-                            style: const TextStyle(fontSize: 11),
+                            '${tabInfo['count']}',
+                            style: const TextStyle(fontSize: 12),
                           ),
                         ],
                       ),
@@ -244,7 +236,7 @@ class _LoginViewState extends State<LoginView> with SingleTickerProviderStateMix
             child: const Row(
               children: [
                 Text(
-                  '我的空间',
+                  'My Space',
                   style: TextStyle(fontWeight: FontWeight.bold),
                 ),
                 Icon(Icons.import_contacts)
@@ -277,7 +269,7 @@ class _LoginViewState extends State<LoginView> with SingleTickerProviderStateMix
           const Spacer(),
           DropDownMenu<_LoginOverflowAction>(
             items: _LoginOverflowAction.values,
-            tooltip: '更多菜单',
+            tooltip: 'Menu',
             disableSelected: false,
             buttonBuilder: (context, _) => const Icon(
               Icons.notes_outlined,
@@ -286,11 +278,11 @@ class _LoginViewState extends State<LoginView> with SingleTickerProviderStateMix
             itemBuilder: (context, action, _) {
               final (icon, label) = switch (action) {
                 _LoginOverflowAction.settings =>
-                  (Icons.settings_outlined, '设置'),
+                  (Icons.settings_outlined, 'Settings'),
                 _LoginOverflowAction.playRecord =>
-                  (Icons.smart_display_outlined, '播放记录'),
+                  (Icons.smart_display_outlined, 'History'),
                 _LoginOverflowAction.logout =>
-                  (Icons.logout_outlined, '退出登录'),
+                  (Icons.logout_outlined, 'Logout'),
               };
               return SizedBox(
                 width: 120,
@@ -313,12 +305,12 @@ class _LoginViewState extends State<LoginView> with SingleTickerProviderStateMix
                   showDialog<void>(
                     context: context,
                     builder: (dialogContext) => AlertDialog(
-                      title: const Text('确认退出'),
-                      content: const Text('确定要退出登录吗？'),
+                      title: const Text('Confirm Logout'),
+                      content: const Text('Are you sure you want to logout?'),
                       actions: [
                         TextButton(
                           onPressed: () => Navigator.of(dialogContext).pop(),
-                          child: const Text('取消'),
+                          child: const Text('Cancel'),
                         ),
                         TextButton(
                           onPressed: () {
@@ -327,7 +319,7 @@ class _LoginViewState extends State<LoginView> with SingleTickerProviderStateMix
                                 .read(myControllerProvider)
                                 .clearUserInfo();
                           },
-                          child: const Text('确定'),
+                          child: const Text('Confirm'),
                         ),
                       ],
                     ),

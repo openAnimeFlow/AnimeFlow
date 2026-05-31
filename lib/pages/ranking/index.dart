@@ -135,7 +135,8 @@ class _RankingPageState extends State<RankingPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('排行榜'),
+        title: const Icon(Icons.emoji_events),
+        centerTitle: true,
       ),
       body: RefreshIndicator(
         onRefresh: _getRanking,
@@ -184,14 +185,10 @@ class _RankingPageState extends State<RankingPage> {
                                     initialValue: _selectedSort,
                                     child: Container(
                                       padding: const EdgeInsets.symmetric(
-                                          horizontal: 5, vertical: 3),
+                                          horizontal: 12, vertical: 8),
                                       decoration: BoxDecoration(
-                                        border: Border.all(
-                                          color: Theme.of(context)
-                                              .colorScheme
-                                              .outline,
-                                        ),
-                                        borderRadius: BorderRadius.circular(13),
+                                        color: Theme.of(context).colorScheme.surfaceContainerHighest,
+                                        borderRadius: BorderRadius.circular(20),
                                       ),
                                       child: Row(
                                         mainAxisSize: MainAxisSize.min,
@@ -227,22 +224,18 @@ class _RankingPageState extends State<RankingPage> {
                                     initialValue: _selectedYear ?? -1,
                                     child: Container(
                                       padding: const EdgeInsets.symmetric(
-                                          horizontal: 5, vertical: 3),
+                                          horizontal: 12, vertical: 8),
                                       decoration: BoxDecoration(
-                                        border: Border.all(
-                                          color: Theme.of(context)
-                                              .colorScheme
-                                              .outline,
-                                        ),
-                                        borderRadius: BorderRadius.circular(13),
+                                        color: Theme.of(context).colorScheme.surfaceContainerHighest,
+                                        borderRadius: BorderRadius.circular(20),
                                       ),
                                       child: Row(
                                         mainAxisSize: MainAxisSize.min,
                                         children: [
                                           Text(
                                             _selectedYear == null
-                                                ? '全部年份'
-                                                : '$_selectedYear年',
+                                                ? 'All'
+                                                : '$_selectedYear',
                                             style:
                                                 const TextStyle(fontSize: 14),
                                           ),
@@ -253,12 +246,12 @@ class _RankingPageState extends State<RankingPage> {
                                       return [
                                         const PopupMenuItem<int>(
                                           value: -1,
-                                          child: Text('全部'),
+                                          child: Text('All'),
                                         ),
                                         ..._years.map((year) {
                                           return PopupMenuItem<int>(
                                             value: year,
-                                            child: Text('$year年'),
+                                            child: Text('$year'),
                                           );
                                         }),
                                       ];
@@ -277,22 +270,18 @@ class _RankingPageState extends State<RankingPage> {
                                     initialValue: _selectedMonth ?? -1,
                                     child: Container(
                                       padding: const EdgeInsets.symmetric(
-                                          horizontal: 5, vertical: 3),
+                                          horizontal: 12, vertical: 8),
                                       decoration: BoxDecoration(
-                                        border: Border.all(
-                                          color: Theme.of(context)
-                                              .colorScheme
-                                              .outline,
-                                        ),
-                                        borderRadius: BorderRadius.circular(13),
+                                        color: Theme.of(context).colorScheme.surfaceContainerHighest,
+                                        borderRadius: BorderRadius.circular(20),
                                       ),
                                       child: Row(
                                         mainAxisSize: MainAxisSize.min,
                                         children: [
                                           Text(
                                             _selectedMonth == null
-                                                ? '全部月份'
-                                                : '$_selectedMonth月',
+                                                ? 'All'
+                                                : '$_selectedMonth',
                                             style:
                                                 const TextStyle(fontSize: 14),
                                           ),
@@ -303,12 +292,12 @@ class _RankingPageState extends State<RankingPage> {
                                       return [
                                         const PopupMenuItem<int>(
                                           value: -1,
-                                          child: Text('全部'),
+                                          child: Text('All'),
                                         ),
                                         ..._months.map((month) {
                                           return PopupMenuItem<int>(
                                             value: month,
-                                            child: Text('$month月'),
+                                            child: Text('$month'),
                                           );
                                         }),
                                       ];
@@ -348,7 +337,7 @@ class _RankingPageState extends State<RankingPage> {
                                       : const Center(
                                           child: Padding(
                                             padding: EdgeInsets.all(8.0),
-                                            child: Text("到底了"),
+                                            child: Icon(Icons.check_circle_outline),
                                           ),
                                         );
                                 }

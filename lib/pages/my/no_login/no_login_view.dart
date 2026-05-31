@@ -24,7 +24,7 @@ class NoLoginView extends StatelessWidget {
             children: [
               const Spacer(),
               DropDownMenu<_NoLoginOverflowAction>(
-                tooltip: '更多菜单',
+                tooltip: 'Menu',
                 items: _NoLoginOverflowAction.values,
                 disableSelected: false,
                 buttonBuilder: (context, _) => Icon(
@@ -35,9 +35,9 @@ class NoLoginView extends StatelessWidget {
                 itemBuilder: (context, action, _) {
                   final (icon, label) = switch (action) {
                     _NoLoginOverflowAction.settings =>
-                      (Icons.settings_outlined, '设置'),
+                      (Icons.settings_outlined, 'Settings'),
                     _NoLoginOverflowAction.playRecord =>
-                      (Icons.smart_display_outlined, '播放记录'),
+                      (Icons.smart_display_outlined, 'History'),
                   };
                   return SizedBox(
                     height: 48,
@@ -76,7 +76,7 @@ class NoLoginView extends StatelessWidget {
                   backgroundColor: Colors.transparent,
                   child: Image.asset(AssetsPathConstants.logo)),
               const Text(
-                '未登录',
+                'Not Logged In',
                 style: TextStyle(
                   fontSize: 24,
                   fontWeight: FontWeight.bold,
@@ -115,7 +115,7 @@ class NoLoginView extends StatelessWidget {
                                           strokeWidth: 3),
                                     ),
                                     SizedBox(width: 8),
-                                    Text('正在等待登录结果'),
+                                    Text('Waiting for login...'),
                                   ],
                                 ),
                               ),
@@ -151,7 +151,7 @@ class NoLoginView extends StatelessWidget {
                                     ),
                                     textStyle: const TextStyle(fontSize: 13),
                                   ),
-                                  child: const Text('取消',
+                                  child: const Text('Cancel',
                                       style: TextStyle(fontSize: 13)),
                                 ),
                               ),
@@ -167,7 +167,7 @@ class NoLoginView extends StatelessWidget {
                                 fontWeight: FontWeight.bold,
                               ),
                             ),
-                            child: const Text('登录授权'),
+                            child: const Text('Login'),
                           ),
                   );
                 },

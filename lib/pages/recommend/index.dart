@@ -15,7 +15,10 @@ class _RecommendPageState extends State<RecommendPage>
   late TabController _tabController;
   final _animeKey = GlobalKey();
   final _timelineKey = GlobalKey();
-  final List<String> _tabs = ['动漫', '论坛'];
+  final List<Widget> _tabs = [
+    const Tab(icon: Icon(Icons.movie_creation_outlined)),
+    const Tab(icon: Icon(Icons.forum_outlined)),
+  ];
 
   @override
   void initState() {
@@ -38,44 +41,26 @@ class _RecommendPageState extends State<RecommendPage>
             Expanded(
                 child: Row(
                   children: [
-                    const Text("推荐"),
-                    const SizedBox(width: 10),
-                    Container(
-                      width: 200,
-                      height: 35,
-                      decoration: BoxDecoration(
-                        borderRadius: BorderRadius.circular(20),
-                        border: Border.all(
-                          color: Theme.of(context).colorScheme.primary,
-                          width: 1,
+                    Expanded(
+                      child: Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 8.0, vertical: 4.0),
+                        child: SearchBar(
+                          hintText: 'Search...',
+                          elevation: WidgetStateProperty.all(0),
+                          backgroundColor: WidgetStateProperty.all(
+                            Theme.of(context).colorScheme.surfaceContainerHighest,
+                          ),
+                          leading: const Padding(
+                            padding: EdgeInsets.only(left: 8.0),
+                            child: Icon(Icons.search),
+                          ),
+                          constraints: const BoxConstraints(minHeight: 44, maxHeight: 44),
+                          onTap: () {
+                            const SearchRoute().push(context);
+                          },
                         ),
-                      ),
-                      child: TextField(
-                        decoration: InputDecoration(
-                          hintText: "搜索动漫番剧...",
-                          hintStyle: TextStyle(
-                            color: Colors.grey.shade600,
-                            fontSize: 14,
-                          ),
-                          prefixIcon: const Icon(
-                            Icons.search,
-                            size: 25,
-                          ),
-                          filled: false,
-                          border: const OutlineInputBorder(
-                            borderSide: BorderSide.none,
-                          ),
-                          contentPadding: const EdgeInsets.symmetric(
-                            horizontal: 12,
-                          ),
-                        ),
-                        onTap: () {
-                          const SearchRoute().push(context);
-                        },
-                        readOnly: true,
                       ),
                     ),
-                    const Spacer(),
                     IconButton(
                       padding: EdgeInsets.zero,
                       onPressed: () => const PlayRecordRoute().push(context),
@@ -87,11 +72,7 @@ class _RecommendPageState extends State<RecommendPage>
         ),
         bottom: TabBar(
             controller: _tabController,
-            tabs: List.generate(_tabs.length, (index) {
-              return Tab(
-                text: _tabs[index],
-              );
-            })),
+            tabs: _tabs),
       ),
       body: TabBarView(
         controller: _tabController,

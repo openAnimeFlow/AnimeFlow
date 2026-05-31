@@ -25,16 +25,16 @@ class _SettingsPageState extends State<SettingsPage> {
 
   final List<_SettingsCategory> _categories = [
     _SettingsCategory(
-      title: '应用与外观',
+      title: 'Appearance',
       items: [
         _SettingsMenuItem(
-          title: '通用',
+          title: 'General',
           icon: Icons.settings_outlined,
           route: const SettingGeneralRoute(),
           page: const GeneralSettingsPage(),
         ),
         _SettingsMenuItem(
-          title: '主题样式',
+          title: 'Theme',
           icon: Icons.color_lens_outlined,
           route: const SettingThemeRoute(),
           page: const ThemePage(),
@@ -42,10 +42,10 @@ class _SettingsPageState extends State<SettingsPage> {
       ],
     ),
     _SettingsCategory(
-      title: '播放历史与视频源',
+      title: 'History & Sources',
       items: [
         _SettingsMenuItem(
-          title: '数据源管理',
+          title: 'Sources',
           icon: Icons.smart_display_rounded,
           route: const SettingPluginsRoute(),
           page: const PluginsPage(),
@@ -53,16 +53,16 @@ class _SettingsPageState extends State<SettingsPage> {
       ],
     ),
     _SettingsCategory(
-      title: '播放器设置',
+      title: 'Player Settings',
       items: [
         _SettingsMenuItem(
-          title: '播放',
+          title: 'Playback',
           icon: Icons.play_circle_outline,
           route: const SettingPlaybackRoute(),
           page: const PlaybackSettingsPage(),
         ),
         _SettingsMenuItem(
-          title: '弹幕设置',
+          title: 'Danmaku',
           icon: Icons.subtitles_outlined,
           route: const SettingDanmakuRoute(),
           page: const DanmakuSettingPage(),
@@ -70,10 +70,10 @@ class _SettingsPageState extends State<SettingsPage> {
       ],
     ),
     _SettingsCategory(
-      title: '其他',
+      title: 'Other',
       items: [
         _SettingsMenuItem(
-          title: '关于',
+          title: 'About',
           icon: Icons.info_outline,
           route: const SettingAboutRoute(),
           page: const AboutSettingsPage(),
@@ -128,7 +128,7 @@ class _SettingsPageState extends State<SettingsPage> {
                     color: Colors.transparent,
                     child: ListTile(
                       leading: const Icon(Icons.arrow_back),
-                      title: const Text('设置'),
+                      title: const Text('Settings'),
                       onTap: () => context.pop(),
                     ),
                   ),
@@ -240,7 +240,7 @@ class _SettingsPageState extends State<SettingsPage> {
   Widget buildNarrowLayout(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('设置'),
+        title: const Text('Settings'),
       ),
       body: ListView(
         padding: const EdgeInsets.symmetric(vertical: 8),

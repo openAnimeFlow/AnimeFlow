@@ -10,6 +10,7 @@ import 'package:media_kit/media_kit.dart';
 import 'package:window_manager/window_manager.dart';
 import 'package:anime_flow/controllers/my_controller.dart';
 import 'package:anime_flow/providers/theme_provider.dart';
+import 'package:anime_flow/widget/windows_title_bar.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -52,7 +53,15 @@ class MyApp extends StatelessWidget {
         final fontFamily = themeState.fontFamily;
         return MaterialApp.router(
           key: ValueKey(fontFamily),
-          builder: BotToastInit(),
+          builder: (context, child) {
+            final botToast = BotToastInit();
+            return Material(
+              type: MaterialType.transparency,
+              child: WindowsTitleBar(
+                child: botToast(context, child),
+              ),
+            );
+          },
           routeInformationProvider: appRouter.routeInformationProvider,
           routeInformationParser: appRouter.routeInformationParser,
           routerDelegate: appRouter.routerDelegate,

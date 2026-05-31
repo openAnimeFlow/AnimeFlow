@@ -91,71 +91,29 @@ class _ThemePageState extends State<ThemePage> {
                     final selectedIndex =
                         ThemeNotifier.getColorIndex(themeState.seedColor);
 
-                    return Wrap(
-                      spacing: 24,
-                      runSpacing: 24,
-                      alignment: WrapAlignment.center,
-                      children: List.generate(ThemeNotifier.themeColors.length,
-                          (index) {
-                        final themeColorData = ThemeNotifier.themeColors[index];
-                        final color = themeColorData.color;
-                        final isSelected = index == selectedIndex;
-                        return Column(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            Material(
-                              color: Colors.transparent,
-                              shape: const CircleBorder(),
-                              clipBehavior: Clip.hardEdge,
-                              child: InkWell(
-                                onTap: () => themeNotifier.setSeedColor(color),
-                                child: AnimatedContainer(
-                                  duration: const Duration(milliseconds: 300),
-                                  curve: Curves.easeOutCubic,
-                                  width: 56,
-                                  height: 56,
-                                  decoration: BoxDecoration(
-                                    color: color,
-                                    shape: BoxShape.circle,
-                                    border: Border.all(
-                                      color: isSelected
-                                          ? Theme.of(context).colorScheme.primary
-                                          : Theme.of(context).colorScheme.outline.withValues(alpha: 0.2),
-                                      width: isSelected ? 3 : 1,
-                                    ),
-                                    boxShadow: isSelected
-                                        ? [
-                                            BoxShadow(
-                                              color: color.withValues(alpha: 0.4),
-                                              blurRadius: 12,
-                                              offset: const Offset(0, 4),
-                                            )
-                                          ]
-                                        : [],
-                                  ),
-                                  child: isSelected
-                                      ? Icon(
-                                          Icons.check_rounded,
-                                          size: 28,
-                                          color: color.computeLuminance() > 0.55
-                                              ? Colors.black87
-                                              : Colors.white,
-                                        )
-                                      : null,
-                                ),
-                              ),
-                            ),
-                            const SizedBox(height: 10),
-                            Text(
-                              themeColorData.name,
-                              style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                                fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
-                                color: isSelected ? Theme.of(context).colorScheme.primary : Theme.of(context).colorScheme.onSurfaceVariant,
-                              ),
-                            ),
-                          ],
-                        );
-                      }),
+                    return Column(
+                      children: [
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                          children: List.generate(5, (index) {
+                            final themeColorData = ThemeNotifier.themeColors[index];
+                            final color = themeColorData.color;
+                            final isSelected = index == selectedIndex;
+                            return _buildColorItem(context, themeNotifier, themeColorData, color, isSelected);
+                          }),
+                        ),
+                        const SizedBox(height: 24),
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                          children: List.generate(5, (index) {
+                            final realIndex = index + 5;
+                            final themeColorData = ThemeNotifier.themeColors[realIndex];
+                            final color = themeColorData.color;
+                            final isSelected = realIndex == selectedIndex;
+                            return _buildColorItem(context, themeNotifier, themeColorData, color, isSelected);
+                          }),
+                        ),
+                      ],
                     );
                   },
                 ),
@@ -187,6 +145,64 @@ class _ThemePageState extends State<ThemePage> {
           ),
         ),
       ),
+    );
+  }
+
+  Widget _buildColorItem(BuildContext context, ThemeNotifier themeNotifier, themeColorData, Color color, bool isSelected) {
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Material(
+          color: Colors.transparent,
+          shape: const CircleBorder(),
+          clipBehavior: Clip.hardEdge,
+          child: InkWell(
+            onTap: () => themeNotifier.setSeedColor(color),
+            child: AnimatedContainer(
+              duration: const Duration(milliseconds: 300),
+              curve: Curves.easeOutCubic,
+              width: 56,
+              height: 56,
+              decoration: BoxDecoration(
+                color: color,
+                shape: BoxShape.circle,
+                border: Border.all(
+                  color: isSelected
+                      ? Theme.of(context).colorScheme.primary
+                      : Theme.of(context).colorScheme.outline.withValues(alpha: 0.2),
+                  width: isSelected ? 3 : 1,
+                ),
+                boxShadow: isSelected
+                    ? [
+                        BoxShadow(
+                          color: color.withValues(alpha: 0.4),
+                          blurRadius: 12,
+                          offset: const Offset(0, 4),
+                        )
+                      ]
+                    : [],
+              ),
+              child: isSelected
+                  ? Icon(
+                      Icons.check_rounded,
+                      size: 28,
+                      color: color.computeLuminance() > 0.55
+                          ? Colors.black87
+                          : Colors.white,
+                    )
+                  : null,
+            ),
+          ),
+        ),
+        const SizedBox(height: 10),
+        Text(
+          themeColorData.name,
+          style: Theme.of(context).textTheme.labelSmall?.copyWith(
+            fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
+            color: isSelected ? Theme.of(context).colorScheme.primary : Theme.of(context).colorScheme.onSurfaceVariant,
+          ),
+        ),
+      ],
     );
   }
 }

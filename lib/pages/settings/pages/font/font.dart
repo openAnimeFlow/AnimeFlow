@@ -1,5 +1,6 @@
 import 'package:anime_flow/models/item/font_item.dart';
 import 'package:anime_flow/pages/settings/pages/font/font_provider.dart';
+import 'package:anime_flow/pages/settings/widget/setting_card.dart';
 import 'package:anime_flow/utils/format_time_util.dart';
 import 'package:anime_flow/utils/logger.dart';
 import 'package:anime_flow/utils/systemUtil.dart';
@@ -135,7 +136,7 @@ class _FontSettingsPageState extends ConsumerState<FontSettingsPage> {
                 ),
                 const SizedBox(height: 10),
                 fontsAsync.when(
-                  loading: () => const _FontGlassPanel(
+                  loading: () => const SettingCard(
                     padding: EdgeInsets.symmetric(vertical: 4),
                     child: Column(
                       children: [
@@ -149,7 +150,7 @@ class _FontSettingsPageState extends ConsumerState<FontSettingsPage> {
                   ),
                   error: (error, _) => Column(
                     children: [
-                      const _FontGlassPanel(
+                      const SettingCard(
                         padding: EdgeInsets.symmetric(vertical: 4),
                         child: _SystemFontListTile(),
                       ),
@@ -162,7 +163,7 @@ class _FontSettingsPageState extends ConsumerState<FontSettingsPage> {
                       ),
                     ],
                   ),
-                  data: (fonts) => _FontGlassPanel(
+                  data: (fonts) => SettingCard(
                     padding: const EdgeInsets.symmetric(vertical: 4),
                     child: Column(
                       children: [
@@ -210,7 +211,7 @@ class _FontSettingsPageState extends ConsumerState<FontSettingsPage> {
                         ),
                   ),
                   const SizedBox(height: 10),
-                  _FontGlassPanel(
+                  SettingCard(
                     padding: const EdgeInsets.symmetric(vertical: 4),
                     child: Column(
                       children: orphans
@@ -222,43 +223,6 @@ class _FontSettingsPageState extends ConsumerState<FontSettingsPage> {
               ],
             ),
           ),
-        ),
-      ),
-    );
-  }
-}
-
-class _FontGlassPanel extends StatelessWidget {
-  const _FontGlassPanel({
-    required this.child,
-    this.padding,
-  });
-
-  final Widget child;
-  final EdgeInsetsGeometry? padding;
-
-  @override
-  Widget build(BuildContext context) {
-    const borderRadius = BorderRadius.all(Radius.circular(24));
-    final isDark = SystemUtil.isDarkTheme(context);
-    return ClipRRect(
-      borderRadius: borderRadius,
-      child: Material(
-        color: isDark
-            ? Colors.white.withValues(alpha: 0.08)
-            : Colors.black.withValues(alpha: 0.08),
-        shape: RoundedRectangleBorder(
-          borderRadius: borderRadius,
-          side: BorderSide(
-            color: isDark
-                ? Colors.white.withValues(alpha: 0.15)
-                : Colors.black.withValues(alpha: 0.15),
-          ),
-        ),
-        clipBehavior: Clip.antiAlias,
-        child: Padding(
-          padding: padding ?? EdgeInsets.zero,
-          child: child,
         ),
       ),
     );

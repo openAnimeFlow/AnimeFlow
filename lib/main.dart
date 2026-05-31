@@ -22,8 +22,8 @@ void main() async {
   if (Platform.isWindows || Platform.isLinux || Platform.isMacOS) {
     await windowManager.ensureInitialized();
     const windowOptions = WindowOptions(
-        // titleBarStyle: TitleBarStyle.hidden,
-        );
+      titleBarStyle: TitleBarStyle.hidden,
+    );
     await windowManager.waitUntilReadyToShow(windowOptions, () async {
       await windowManager.show();
       await windowManager.focus();

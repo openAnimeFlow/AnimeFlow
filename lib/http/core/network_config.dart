@@ -21,6 +21,7 @@ class NetworkConfig {
     return IOHttpClientAdapter(
       createHttpClient: () {
         final client = HttpClient();
+        client.findProxy = HttpClient.findProxyFromEnvironment;
         if (allowBadCertificates) {
           client.badCertificateCallback = (cert, host, port) => true;
         }

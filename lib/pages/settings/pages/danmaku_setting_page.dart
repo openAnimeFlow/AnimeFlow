@@ -3,6 +3,7 @@ import 'package:anime_flow/pages/settings/setting_provider.dart';
 import 'package:anime_flow/pages/play/controller/play_controller.dart';
 import 'package:anime_flow/repository/storage.dart';
 import 'package:anime_flow/utils/systemUtil.dart';
+import 'package:anime_flow/pages/settings/widget/setting_card.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:get/get.dart';
@@ -79,348 +80,314 @@ class _DanmakuSettingPageState extends State<DanmakuSettingPage> {
               behavior: ScrollBehavior().copyWith(scrollbars: false),
               // 隐藏滚动条
               child: SingleChildScrollView(
-                padding: const EdgeInsets.all(16),
+                padding: const EdgeInsets.symmetric(vertical: 16),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     // 弹幕显示类型
-                    _buildSectionTitle('弹幕显示类型'),
-                    SwitchListTile(
-                      title: const Text('滚动弹幕'),
-                      value: !_hideScroll,
-                      onChanged: (value) {
-                        setState(() {
-                          _hideScroll = !value;
-                          setting.put(
-                              DanmakuKey.danmakuHideScroll, _hideScroll);
-                        });
-                      },
+                    const SettingTitle(title: '弹幕显示类型'),
+                    SettingCard(
+                      child: Column(
+                        children: [
+                          SwitchListTile(
+                            title: const Text('滚动弹幕'),
+                            value: !_hideScroll,
+                            onChanged: (value) {
+                              setState(() {
+                                _hideScroll = !value;
+                                setting.put(DanmakuKey.danmakuHideScroll, _hideScroll);
+                              });
+                            },
+                          ),
+                          SwitchListTile(
+                            title: const Text('顶部弹幕'),
+                            value: !_hideTop,
+                            onChanged: (value) {
+                              setState(() {
+                                _hideTop = !value;
+                                setting.put(DanmakuKey.danmakuHideTop, _hideTop);
+                              });
+                            },
+                          ),
+                          SwitchListTile(
+                            title: const Text('底部弹幕'),
+                            value: !_hideBottom,
+                            onChanged: (value) {
+                              setState(() {
+                                _hideBottom = !value;
+                                setting.put(DanmakuKey.danmakuHideBottom, _hideBottom);
+                              });
+                            },
+                          ),
+                        ],
+                      ),
                     ),
-                    SwitchListTile(
-                      title: const Text('顶部弹幕'),
-                      value: !_hideTop,
-                      onChanged: (value) {
-                        setState(() {
-                          _hideTop = !value;
-                          setting.put(DanmakuKey.danmakuHideTop, _hideTop);
-                        });
-                      },
-                    ),
-                    SwitchListTile(
-                      title: const Text('底部弹幕'),
-                      value: !_hideBottom,
-                      onChanged: (value) {
-                        setState(() {
-                          _hideBottom = !value;
-                          setting.put(
-                              DanmakuKey.danmakuHideBottom, _hideBottom);
-                        });
-                      },
-                    ),
-                    const SizedBox(height: 16),
 
                     // 弹幕来源平台
-                    _buildSectionTitle('弹幕来源平台'),
-                    SwitchListTile(
-                      title: const Text('Bilibili'),
-                      value: _platformBilibili,
-                      onChanged: (value) {
-                        setState(() {
-                          _platformBilibili = value;
-                          setting.put(
-                              DanmakuKey.danmakuPlatformBilibili, value);
-                        });
-                        // 同步更新 PlayController 的平台隐藏状态
-                        try {
-                          final playController = Get.find<PlayController>();
-                          playController.syncPlatformVisibilityFromStorage();
-                        } catch (_) {
-                          // PlayController 可能未初始化，忽略错误
-                        }
-                      },
+                    const SettingTitle(title: '弹幕来源平台'),
+                    SettingCard(
+                      child: Column(
+                        children: [
+                          SwitchListTile(
+                            title: const Text('Bilibili'),
+                            value: _platformBilibili,
+                            onChanged: (value) {
+                              setState(() {
+                                _platformBilibili = value;
+                                setting.put(DanmakuKey.danmakuPlatformBilibili, value);
+                              });
+                              try {
+                                final playController = Get.find<PlayController>();
+                                playController.syncPlatformVisibilityFromStorage();
+                              } catch (_) {}
+                            },
+                          ),
+                          SwitchListTile(
+                            title: const Text('Gamer'),
+                            value: _platformGamer,
+                            onChanged: (value) {
+                              setState(() {
+                                _platformGamer = value;
+                                setting.put(DanmakuKey.danmakuPlatformGamer, value);
+                              });
+                              try {
+                                final playController = Get.find<PlayController>();
+                                playController.syncPlatformVisibilityFromStorage();
+                              } catch (_) {}
+                            },
+                          ),
+                          SwitchListTile(
+                            title: const Text('弹弹Play'),
+                            value: _platformDanDanPlay,
+                            onChanged: (value) {
+                              setState(() {
+                                _platformDanDanPlay = value;
+                                setting.put(DanmakuKey.danmakuPlatformDanDanPlay, value);
+                              });
+                              try {
+                                final playController = Get.find<PlayController>();
+                                playController.syncPlatformVisibilityFromStorage();
+                              } catch (_) {}
+                            },
+                          ),
+                        ],
+                      ),
                     ),
-                    SwitchListTile(
-                      title: const Text('Gamer'),
-                      value: _platformGamer,
-                      onChanged: (value) {
-                        setState(() {
-                          _platformGamer = value;
-                          setting.put(DanmakuKey.danmakuPlatformGamer, value);
-                        });
-                        // 同步更新 PlayController 的平台隐藏状态
-                        try {
-                          final playController = Get.find<PlayController>();
-                          playController.syncPlatformVisibilityFromStorage();
-                        } catch (_) {
-                          // PlayController 可能未初始化，忽略错误
-                        }
-                      },
-                    ),
-                    SwitchListTile(
-                      title: const Text('弹弹Play'),
-                      value: _platformDanDanPlay,
-                      onChanged: (value) {
-                        setState(() {
-                          _platformDanDanPlay = value;
-                          setting.put(
-                              DanmakuKey.danmakuPlatformDanDanPlay, value);
-                        });
-                        // 同步更新 PlayController 的平台隐藏状态
-                        try {
-                          final playController = Get.find<PlayController>();
-                          playController.syncPlatformVisibilityFromStorage();
-                        } catch (_) {
-                          // PlayController 可能未初始化，忽略错误
-                        }
-                      },
-                    ),
-                    const SizedBox(height: 16),
 
                     // 弹幕样式
-                    _buildSectionTitle('弹幕样式'),
-                    SwitchListTile(
-                      title: const Text('显示边框'),
-                      value: _border,
-                      onChanged: (value) {
-                        setState(() {
-                          _border = value;
-                          setting.put(DanmakuKey.danmakuBorder, _border);
-                        });
-                      },
+                    const SettingTitle(title: '弹幕样式'),
+                    SettingCard(
+                      child: Column(
+                        children: [
+                          SwitchListTile(
+                            title: const Text('显示边框'),
+                            value: _border,
+                            onChanged: (value) {
+                              setState(() {
+                                _border = value;
+                                setting.put(DanmakuKey.danmakuBorder, _border);
+                              });
+                            },
+                          ),
+                          SwitchListTile(
+                            title: const Text('显示颜色'),
+                            value: _danmakuColor,
+                            onChanged: (value) {
+                              setState(() {
+                                _danmakuColor = value;
+                                setting.put(DanmakuKey.danmakuColor, _danmakuColor);
+                              });
+                            },
+                          ),
+                          SwitchListTile(
+                            title: const Text('密集模式'),
+                            value: _massiveMode,
+                            onChanged: (value) {
+                              setState(() {
+                                _massiveMode = value;
+                                setting.put(DanmakuKey.danmakuMassiveMode, _massiveMode);
+                              });
+                            },
+                          ),
+                        ],
+                      ),
                     ),
-                    SwitchListTile(
-                      title: const Text('显示颜色'),
-                      value: _danmakuColor,
-                      onChanged: (value) {
-                        setState(() {
-                          _danmakuColor = value;
-                          setting.put(DanmakuKey.danmakuColor, _danmakuColor);
-                        });
-                      },
-                    ),
-                    SwitchListTile(
-                      title: const Text('密集模式'),
-                      value: _massiveMode,
-                      onChanged: (value) {
-                        setState(() {
-                          _massiveMode = value;
-                          setting.put(
-                              DanmakuKey.danmakuMassiveMode, _massiveMode);
-                        });
-                      },
-                    ),
-                    const SizedBox(height: 16),
 
                     // 弹幕速度
-                    _buildSectionTitle('弹幕速度'),
-                    Builder(
-                      builder: (context) {
-                        // duration 范围：2.0 (最快) 到 16.0 (最慢)
-                        // 速度百分比：0% (最慢) 到 100% (最快)
-                        const minDuration = 2.0;
-                        const maxDuration = 16.0;
-                        final currentDuration =
-                            _danmakuDuration.clamp(minDuration, maxDuration);
-                        final speedPercent = ((maxDuration - currentDuration) /
-                                (maxDuration - minDuration) *
-                                100)
-                            .round();
-                        return Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Padding(
-                              padding:
-                                  const EdgeInsets.symmetric(horizontal: 16),
-                              child: Text(
-                                '速度: $speedPercent%',
-                                style: TextStyle(
-                                  fontSize: 14,
-                                  color: Theme.of(context)
-                                      .textTheme
-                                      .bodyMedium
-                                      ?.color,
+                    const SettingTitle(title: '弹幕速度'),
+                    SettingCard(
+                      padding: const EdgeInsets.symmetric(vertical: 8),
+                      child: Builder(
+                        builder: (context) {
+                          const minDuration = 2.0;
+                          const maxDuration = 16.0;
+                          final currentDuration = _danmakuDuration.clamp(minDuration, maxDuration);
+                          final speedPercent = ((maxDuration - currentDuration) / (maxDuration - minDuration) * 100).round();
+                          return Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Padding(
+                                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                                child: Text(
+                                  '速度: $speedPercent%',
+                                  style: TextStyle(
+                                    fontSize: 14,
+                                    color: Theme.of(context).textTheme.bodyMedium?.color,
+                                  ),
                                 ),
                               ),
-                            ),
-                            SliderTheme(
-                              data: SliderTheme.of(context).copyWith(
-                                trackHeight: 15,
+                              SliderTheme(
+                                data: SliderTheme.of(context).copyWith(trackHeight: 15),
+                                child: Slider(
+                                  value: speedPercent.toDouble(),
+                                  min: 0.0,
+                                  max: 100.0,
+                                  divisions: 20,
+                                  label: '$speedPercent%',
+                                  onChanged: (speedPercentValue) {
+                                    setState(() {
+                                      final newDuration = maxDuration - (speedPercentValue / 100.0) * (maxDuration - minDuration);
+                                      _danmakuDuration = newDuration;
+                                      setting.put(DanmakuKey.danmakuDuration, newDuration);
+                                    });
+                                  },
+                                ),
                               ),
-                              child: Slider(
-                                value: speedPercent.toDouble(),
-                                min: 0.0,
-                                max: 100.0,
-                                divisions: 20,
-                                label: '$speedPercent%',
-                                onChanged: (speedPercentValue) {
-                                  setState(() {
-                                    // 将速度百分比转换回 duration
-                                    final newDuration = maxDuration -
-                                        (speedPercentValue / 100.0) *
-                                            (maxDuration - minDuration);
-                                    _danmakuDuration = newDuration;
-                                    setting.put(DanmakuKey.danmakuDuration,
-                                        newDuration);
-                                  });
-                                },
-                              ),
-                            ),
-                          ],
-                        );
-                      },
+                            ],
+                          );
+                        },
+                      ),
                     ),
-                    const SizedBox(height: 16),
 
                     // 透明度
-                    _buildSectionTitle('透明度'),
-                    Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Padding(
-                          padding: const EdgeInsets.symmetric(horizontal: 16),
-                          child: Text(
-                            '${(_opacity * 100).toInt()}%',
-                            style: TextStyle(
-                              fontSize: 14,
-                              color:
-                                  Theme.of(context).textTheme.bodyMedium?.color,
+                    const SettingTitle(title: '透明度'),
+                    SettingCard(
+                      padding: const EdgeInsets.symmetric(vertical: 8),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Padding(
+                            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                            child: Text(
+                              '${(_opacity * 100).toInt()}%',
+                              style: TextStyle(
+                                fontSize: 14,
+                                color: Theme.of(context).textTheme.bodyMedium?.color,
+                              ),
                             ),
                           ),
-                        ),
-                        SliderTheme(
-                          data: SliderTheme.of(context).copyWith(
-                            trackHeight: 15,
+                          SliderTheme(
+                            data: SliderTheme.of(context).copyWith(trackHeight: 15),
+                            child: Slider(
+                              value: _opacity,
+                              min: 0.1,
+                              max: 1.0,
+                              label: '${(_opacity * 100).round()}%',
+                              onChanged: (value) {
+                                setState(() {
+                                  _opacity = value;
+                                  setting.put(DanmakuKey.danmakuOpacity, _opacity);
+                                });
+                              },
+                            ),
                           ),
-                          child: Slider(
-                            value: _opacity,
-                            min: 0.1,
-                            max: 1.0,
-                            label: '${(_opacity * 100).round()}%',
-                            onChanged: (value) {
-                              setState(() {
-                                _opacity = value;
-                                setting.put(
-                                    DanmakuKey.danmakuOpacity, _opacity);
-                              });
-                            },
-                          ),
-                        ),
-                      ],
+                        ],
+                      ),
                     ),
-                    const SizedBox(height: 16),
 
                     // 字体大小
-                    _buildSectionTitle('字体大小'),
-                    Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Padding(
-                          padding: const EdgeInsets.symmetric(horizontal: 16),
-                          child: Text(
-                            '${_fontSize.toInt()}px',
-                            style: TextStyle(
-                              fontSize: 14,
-                              color:
-                                  Theme.of(context).textTheme.bodyMedium?.color,
+                    const SettingTitle(title: '字体大小'),
+                    SettingCard(
+                      padding: const EdgeInsets.symmetric(vertical: 8),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Padding(
+                            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                            child: Text(
+                              '${_fontSize.toInt()}px',
+                              style: TextStyle(
+                                fontSize: 14,
+                                color: Theme.of(context).textTheme.bodyMedium?.color,
+                              ),
                             ),
                           ),
-                        ),
-                        SliderTheme(
-                          data: SliderTheme.of(context).copyWith(
-                            trackHeight: 15,
+                          SliderTheme(
+                            data: SliderTheme.of(context).copyWith(trackHeight: 15),
+                            child: Slider(
+                              value: _fontSize,
+                              min: 12.0,
+                              max: 30.0,
+                              divisions: 18,
+                              label: '${_fontSize.toInt()}px',
+                              onChanged: (value) {
+                                setState(() {
+                                  _fontSize = value;
+                                  setting.put(DanmakuKey.danmakuFontSize, _fontSize);
+                                });
+                              },
+                            ),
                           ),
-                          child: Slider(
-                            value: _fontSize,
-                            min: 12.0,
-                            max: 30.0,
-                            divisions: 18,
-                            label: '${_fontSize.toInt()}px',
-                            onChanged: (value) {
-                              setState(() {
-                                _fontSize = value;
-                                setting.put(
-                                    DanmakuKey.danmakuFontSize, _fontSize);
-                              });
-                            },
-                          ),
-                        ),
-                      ],
+                        ],
+                      ),
                     ),
-                    const SizedBox(height: 16),
 
                     // 显示区域
-                    _buildSectionTitle('显示区域'),
-                    Builder(
-                      builder: (context) {
-                        final fixedValues = [0.1, 0.25, 0.5, 0.75, 1.0];
-                        int currentIndex = 0;
-                        for (int i = 0; i < fixedValues.length; i++) {
-                          if ((_danmakuArea - fixedValues[i]).abs() < 0.01) {
-                            currentIndex = i;
-                            break;
+                    const SettingTitle(title: '显示区域'),
+                    SettingCard(
+                      padding: const EdgeInsets.symmetric(vertical: 8),
+                      child: Builder(
+                        builder: (context) {
+                          final fixedValues = [0.1, 0.25, 0.5, 0.75, 1.0];
+                          int currentIndex = 0;
+                          for (int i = 0; i < fixedValues.length; i++) {
+                            if ((_danmakuArea - fixedValues[i]).abs() < 0.01) {
+                              currentIndex = i;
+                              break;
+                            }
                           }
-                        }
-                        return Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Padding(
-                              padding:
-                                  const EdgeInsets.symmetric(horizontal: 16),
-                              child: Text(
-                                '${(_danmakuArea * 100).toInt()}%',
-                                style: TextStyle(
-                                  fontSize: 14,
-                                  color: Theme.of(context)
-                                      .textTheme
-                                      .bodyMedium
-                                      ?.color,
+                          return Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Padding(
+                                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                                child: Text(
+                                  '${(_danmakuArea * 100).toInt()}%',
+                                  style: TextStyle(
+                                    fontSize: 14,
+                                    color: Theme.of(context).textTheme.bodyMedium?.color,
+                                  ),
                                 ),
                               ),
-                            ),
-                            SliderTheme(
-                              data: SliderTheme.of(context).copyWith(
-                                trackHeight: 15,
+                              SliderTheme(
+                                data: SliderTheme.of(context).copyWith(trackHeight: 15),
+                                child: Slider(
+                                  value: currentIndex.toDouble(),
+                                  min: 0.0,
+                                  max: 4.0,
+                                  divisions: 4,
+                                  label: '${(_danmakuArea * 100).toInt()}%',
+                                  onChanged: (value) {
+                                    final index = value.round().clamp(0, 4);
+                                    setState(() {
+                                      _danmakuArea = fixedValues[index];
+                                      setting.put(DanmakuKey.danmakuArea, _danmakuArea);
+                                    });
+                                  },
+                                ),
                               ),
-                              child: Slider(
-                                value: currentIndex.toDouble(),
-                                min: 0.0,
-                                max: 4.0,
-                                divisions: 4,
-                                label: '${(_danmakuArea * 100).toInt()}%',
-                                onChanged: (value) {
-                                  final index = value.round().clamp(0, 4);
-                                  setState(() {
-                                    _danmakuArea = fixedValues[index];
-                                    setting.put(
-                                        DanmakuKey.danmakuArea, _danmakuArea);
-                                  });
-                                },
-                              ),
-                            ),
-                          ],
-                        );
-                      },
+                            ],
+                          );
+                        },
+                      ),
                     ),
+                    const SizedBox(height: 32),
                   ],
                 ),
               ),
             ),
           ),
         ),
-    );
-  }
-
-  Widget _buildSectionTitle(String title) {
-    return Padding(
-      padding: const EdgeInsets.only(top: 16, bottom: 8, left: 16),
-      child: Text(
-        title,
-        style: TextStyle(
-          fontSize: 20,
-          fontWeight: FontWeight.bold,
-          color: Theme.of(context).textTheme.titleMedium?.color,
-        ),
-      ),
     );
   }
 }

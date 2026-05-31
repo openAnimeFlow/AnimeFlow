@@ -5,6 +5,7 @@ import 'package:anime_flow/pages/settings/setting_provider.dart';
 import 'package:anime_flow/routes/routes.dart';
 import 'package:anime_flow/utils/systemUtil.dart';
 import 'package:anime_flow/widget/theme/theme_preview.dart';
+import 'package:anime_flow/pages/settings/widget/setting_card.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 class ThemePage extends StatefulWidget {
@@ -37,26 +38,21 @@ class _ThemePageState extends State<ThemePage> {
           constraints: const BoxConstraints(maxWidth: 1200),
           child: ListView(
             padding: EdgeInsets.only(
-                left: leftMediaQueryPadding == 0 ? 16 : leftMediaQueryPadding,
-                right: 16),
+                left: leftMediaQueryPadding,
+                right: 0,
+                top: 16,
+                bottom: 16),
             children: [
-              const Text(
-                '主题模式',
-                style: TextStyle(
-                  fontSize: 20,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-              const SizedBox(height: 10),
-              Consumer(
-                builder: (context, ref, child) {
-                  final themeState = ref.watch(themeProvider);
-                  final themeNotifier = ref.read(themeProvider.notifier);
+              const SettingTitle(title: '主题模式'),
+              SettingCard(
+                padding: const EdgeInsets.all(16),
+                child: Consumer(
+                  builder: (context, ref, child) {
+                    final themeState = ref.watch(themeProvider);
+                    final themeNotifier = ref.read(themeProvider.notifier);
 
-                  return IntrinsicWidth(
-                    child: glassPanel(
-                      padding: const EdgeInsets.symmetric(
-                          horizontal: 8, vertical: 10),
+                    return SingleChildScrollView(
+                      scrollDirection: Axis.horizontal,
                       child: Row(
                         children: [
                           GestureDetector(
@@ -73,7 +69,7 @@ class _ThemePageState extends State<ThemePage> {
                                   themeState.themeMode == ThemeMode.dark,
                             ),
                           ),
-                          const SizedBox(width: 5),
+                          const SizedBox(width: 8),
                           GestureDetector(
                             onTap: () =>
                                 themeNotifier.setThemeMode(ThemeMode.light),
@@ -89,7 +85,7 @@ class _ThemePageState extends State<ThemePage> {
                                   themeState.themeMode == ThemeMode.light,
                             ),
                           ),
-                          const SizedBox(width: 5),
+                          const SizedBox(width: 8),
                           GestureDetector(
                             onTap: () =>
                                 themeNotifier.setThemeMode(ThemeMode.system),
@@ -114,107 +110,104 @@ class _ThemePageState extends State<ThemePage> {
                           ),
                         ],
                       ),
-                    ),
-                  );
-                },
-              ),
-              const SizedBox(height: 10),
-              const Text(
-                '主题颜色',
-                style: TextStyle(
-                  fontSize: 20,
-                  fontWeight: FontWeight.bold,
+                    );
+                  },
                 ),
               ),
-              const SizedBox(height: 10),
-              Consumer(
-                builder: (context, ref, child) {
-                  final themeState = ref.watch(themeProvider);
-                  final themeNotifier = ref.read(themeProvider.notifier);
-                  final selectedIndex =
-                      ThemeNotifier.getColorIndex(themeState.seedColor);
+              const SettingTitle(title: '主题颜色'),
+              SettingCard(
+                padding: const EdgeInsets.all(16),
+                child: Consumer(
+                  builder: (context, ref, child) {
+                    final themeState = ref.watch(themeProvider);
+                    final themeNotifier = ref.read(themeProvider.notifier);
+                    final selectedIndex =
+                        ThemeNotifier.getColorIndex(themeState.seedColor);
 
-                  return Wrap(
-                    spacing: 10,
-                    runSpacing: 10,
-                    children: List.generate(ThemeNotifier.themeColors.length,
-                        (index) {
-                      final themeColorData = ThemeNotifier.themeColors[index];
-                      final color = themeColorData.color;
-                      final isSelected = index == selectedIndex;
-                      return GestureDetector(
-                        onTap: () => themeNotifier.setSeedColor(color),
-                        child: SizedBox(
-                          width: 56,
-                          child: Column(
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              AnimatedContainer(
-                                duration: const Duration(milliseconds: 200),
-                                width: 40,
-                                height: 40,
-                                decoration: BoxDecoration(
-                                  color: color,
-                                  shape: BoxShape.circle,
-                                  border: Border.all(
-                                    color: isSelected
-                                        ? Theme.of(context)
-                                            .colorScheme
-                                            .primary
-                                        : Theme.of(context)
-                                            .colorScheme
-                                            .outlineVariant
-                                            .withValues(alpha: 0.5),
-                                    width: isSelected ? 2.5 : 1,
+                    return Wrap(
+                      spacing: 16,
+                      runSpacing: 16,
+                      children: List.generate(ThemeNotifier.themeColors.length,
+                          (index) {
+                        final themeColorData = ThemeNotifier.themeColors[index];
+                        final color = themeColorData.color;
+                        final isSelected = index == selectedIndex;
+                        return GestureDetector(
+                          onTap: () => themeNotifier.setSeedColor(color),
+                          child: SizedBox(
+                            width: 56,
+                            child: Column(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                AnimatedContainer(
+                                  duration: const Duration(milliseconds: 200),
+                                  width: 44,
+                                  height: 44,
+                                  decoration: BoxDecoration(
+                                    color: color,
+                                    shape: BoxShape.circle,
+                                    border: Border.all(
+                                      color: isSelected
+                                          ? Theme.of(context)
+                                              .colorScheme
+                                              .primary
+                                          : Theme.of(context)
+                                              .colorScheme
+                                              .outlineVariant
+                                              .withValues(alpha: 0.5),
+                                      width: isSelected ? 2.5 : 1,
+                                    ),
                                   ),
+                                  child: isSelected
+                                      ? Icon(
+                                          Icons.check_rounded,
+                                          size: 20,
+                                          color: color.computeLuminance() > 0.55
+                                              ? Colors.black87
+                                              : Colors.white,
+                                        )
+                                      : null,
                                 ),
-                                child: isSelected
-                                    ? Icon(
-                                        Icons.check_rounded,
-                                        size: 18,
-                                        color: color.computeLuminance() > 0.55
-                                            ? Colors.black87
-                                            : Colors.white,
-                                      )
-                                    : null,
-                              ),
-                              const SizedBox(height: 4),
-                              Text(
-                                themeColorData.name,
-                                maxLines: 1,
-                                overflow: TextOverflow.ellipsis,
-                                textAlign: TextAlign.center,
-                                style: Theme.of(context)
-                                    .textTheme
-                                    .labelSmall
-                                    ?.copyWith(fontSize: 11),
-                              ),
-                            ],
+                                const SizedBox(height: 6),
+                                Text(
+                                  themeColorData.name,
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis,
+                                  textAlign: TextAlign.center,
+                                  style: Theme.of(context)
+                                      .textTheme
+                                      .labelSmall
+                                      ?.copyWith(fontSize: 11),
+                                ),
+                              ],
+                            ),
                           ),
-                        ),
-                      );
-                    }),
-                  );
-                },
-              ),
-              const SizedBox(height: 10),
-              ListTile(
-                contentPadding: EdgeInsets.zero,
-                leading: Icon(
-                  Icons.text_fields_outlined,
-                  color: Theme.of(context).colorScheme.primary,
+                        );
+                      }),
+                    );
+                  },
                 ),
-                title: const Text(
-                  '字体样式',
-                  style: TextStyle(
-                    fontSize: 16,
-                    fontWeight: FontWeight.w600,
+              ),
+              const SettingTitle(title: '字体样式'),
+              SettingCard(
+                child: ListTile(
+                  leading: Icon(
+                    Icons.text_fields_outlined,
+                    color: Theme.of(context).colorScheme.primary,
                   ),
+                  title: const Text(
+                    '字体样式',
+                    style: TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                  subtitle: const Text('自定义应用字体'),
+                  trailing: const Icon(Icons.chevron_right),
+                  onTap: () => const SettingFontRoute().push(context),
                 ),
-                subtitle: const Text('自定义应用字体'),
-                trailing: const Icon(Icons.chevron_right),
-                onTap: () => const SettingFontRoute().push(context),
               ),
+              const SizedBox(height: 32),
             ],
           ),
         ),

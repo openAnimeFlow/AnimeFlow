@@ -12,12 +12,15 @@ import 'package:anime_flow/controllers/my_controller.dart';
 import 'package:anime_flow/providers/theme_provider.dart';
 import 'package:anime_flow/widget/windows_title_bar.dart';
 
+import 'package:anime_flow/utils/proxy_helper.dart';
+
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   MediaKit.ensureInitialized();
   await Hive.initFlutter();
   await Storage.init();
   await SelectedFont.initOnStartup();
+  await ProxyHelper.init();
 
   // 桌面平台初始化窗口管理器
   if (Platform.isWindows || Platform.isLinux || Platform.isMacOS) {

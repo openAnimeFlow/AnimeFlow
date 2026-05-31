@@ -5,6 +5,7 @@ import 'package:anime_flow/utils/crawl_config.dart';
 import 'package:anime_flow/repository/storage.dart';
 import 'package:anime_flow/widget/animation_network_image/animation_network_image.dart';
 import 'package:anime_flow/widget/notification_toast.dart';
+import 'package:anime_flow/pages/settings/widget/setting_card.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:hive_ce_flutter/adapters.dart';
@@ -103,55 +104,72 @@ class _PluginsPageState extends State<PluginsPage> {
         ),
       ),
       body: ListView(
-        padding: const EdgeInsets.symmetric(horizontal: 16),
-        children: List.generate(dataSources.length, (index) {
-          final data = dataSources[index];
-          return InkWell(
-            onTap: () =>
-                SettingAddPluginsRoute(editPluginKey: data.name).push(context),
-            child: Container(
-              margin: const EdgeInsets.symmetric(vertical: 2),
-              padding: const EdgeInsets.symmetric(vertical: 5),
-              decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(10),
-                  color:
-                      Theme.of(context).disabledColor.withValues(alpha: 0.1)),
-              child: Row(
-                children: [
-                  Padding(
-                    padding:
-                        const EdgeInsets.symmetric(vertical: 5, horizontal: 5),
-                    child: AnimationNetworkImage(
-                        borderRadius: BorderRadius.circular(10),
-                        width: 50,
-                        height: 50,
-                        url: data.iconUrl),
-                  ),
-                  Expanded(
-                    child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            data.name,
-                            style: const TextStyle(fontWeight: FontWeight.bold),
+        padding: const EdgeInsets.symmetric(vertical: 16),
+        children: [
+          const SettingTitle(title: '已安装插件'),
+          SettingCard(
+            padding: const EdgeInsets.symmetric(vertical: 8),
+            child: dataSources.isEmpty
+                ? const Padding(
+                    padding: EdgeInsets.all(16.0),
+                    child: Center(child: Text('暂无已安装的插件')),
+                  )
+                : Column(
+                    children: List.generate(dataSources.length, (index) {
+                      final data = dataSources[index];
+                      return InkWell(
+                        onTap: () => SettingAddPluginsRoute(editPluginKey: data.name)
+                            .push(context),
+                        child: Container(
+                          padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 16),
+                          child: Row(
+                            children: [
+                              AnimationNetworkImage(
+                                borderRadius: BorderRadius.circular(10),
+                                width: 50,
+                                height: 50,
+                                url: data.iconUrl,
+                              ),
+                              const SizedBox(width: 16),
+                              Expanded(
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Text(
+                                      data.name,
+                                      style: const TextStyle(
+                                          fontWeight: FontWeight.bold, fontSize: 16),
+                                    ),
+                                    const SizedBox(height: 4),
+                                    Text(
+                                      '版本: ${data.version}',
+                                      style: TextStyle(
+                                        fontSize: 12,
+                                        color: Theme.of(context)
+                                            .colorScheme
+                                            .onSurfaceVariant,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                              IconButton(
+                                icon: Icon(
+                                  Icons.delete_outline_outlined,
+                                  color: Theme.of(context).colorScheme.error,
+                                ),
+                                onPressed: () {
+                                  deleteDataSource(data.name);
+                                },
+                              ),
+                            ],
                           ),
-                          Text(data.version)
-                        ]),
+                        ),
+                      );
+                    }),
                   ),
-                  IconButton(
-                    icon: Icon(
-                      Icons.delete_outline_outlined,
-                      color: Theme.of(context).colorScheme.error,
-                    ),
-                    onPressed: () {
-                      deleteDataSource(data.name);
-                    },
-                  ),
-                ],
-              ),
-            ),
-          );
-        }),
+          ),
+        ],
       ),
     );
   }

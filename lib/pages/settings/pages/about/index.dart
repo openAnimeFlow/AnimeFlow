@@ -7,6 +7,7 @@ import 'package:anime_flow/routes/routes.dart';
 import 'package:anime_flow/widget/notification_toast.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:anime_flow/pages/settings/widget/setting_card.dart';
 import 'package:get/get.dart';
 import 'package:url_launcher/url_launcher.dart';
 
@@ -77,111 +78,65 @@ class _AboutSettingsPageState extends State<AboutSettingsPage> {
               ),
             ),
             const SizedBox(height: 32),
-            const Divider(),
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 15),
-              child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    const Text("自动更新"),
-                    Switch(
-                      value: autoUpdate,
-                      onChanged: (bool value) {
-                        setState(() {
-                          setting.put(StorageKey.autoUpdateKey, value);
-                          autoUpdate = value;
-                        });
-                      },
-                    ),
-                  ]),
+            const SettingTitle(title: '更新'),
+            SettingCard(
+              child: Column(
+                children: [
+                  SwitchListTile(
+                    title: const Text("自动更新"),
+                    value: autoUpdate,
+                    onChanged: (bool value) {
+                      setState(() {
+                        setting.put(StorageKey.autoUpdateKey, value);
+                        autoUpdate = value;
+                      });
+                    },
+                  ),
+                  ListTile(
+                    title: const Text("检查更新"),
+                    trailing: const Icon(Icons.browser_updated_outlined),
+                    onTap: () {
+                      appInfoController.compareVersion();
+                    },
+                  ),
+                ],
+              ),
             ),
-            const Divider(),
-            ListTile(
-              title: const Text("检查更新"),
-              trailing: const Icon(Icons.browser_updated_outlined),
-              onTap: () {
-                appInfoController.compareVersion();
-              },
+            const SettingTitle(title: '更多信息'),
+            SettingCard(
+              child: Column(
+                children: [
+                  ListTile(
+                    title: const Text("开源地址"),
+                    trailing: const Icon(Icons.open_in_new),
+                    onTap: () async {
+                      final uri =
+                          Uri.parse('https://github.com/openAnimeFlow/AnimeFlow');
+                      if (await canLaunchUrl(uri)) {
+                        await launchUrl(uri);
+                      } else {
+                        NotificationToast.show('无法打开网页', '你的设备可能不支持此功能');
+                      }
+                    },
+                  ),
+                  ListTile(
+                    title: const Text("鸣谢"),
+                    trailing: const Icon(Icons.chevron_right),
+                    onTap: () {
+                      const SettingThanksRoute().push(context);
+                    },
+                  ),
+                  ListTile(
+                    title: const Text("隐私政策"),
+                    trailing: const Icon(Icons.chevron_right),
+                    onTap: () {
+                      const SettingAgreementRoute().push(context);
+                    },
+                  ),
+                ],
+              ),
             ),
-            const Divider(),
-            ListTile(
-              title: const Text("开源地址"),
-              trailing: const Icon(Icons.open_in_new),
-              onTap: () async {
-                final uri =
-                    Uri.parse('https://github.com/openAnimeFlow/AnimeFlow');
-                if (await canLaunchUrl(uri)) {
-                  await launchUrl(uri);
-                } else {
-                  NotificationToast.show('无法打开网页', '你的设备可能不支持此功能');
-                }
-              },
-            ),
-            const Divider(),
-            ListTile(
-              title: const Text("鸣谢"),
-              trailing: const Icon(Icons.chevron_right),
-              onTap: () {
-                const SettingThanksRoute().push(context);
-              },
-            ),
-            const Divider(),
-            ListTile(
-              title: const Text("隐私政策"),
-              trailing: const Icon(Icons.chevron_right),
-              onTap: () {
-                const SettingAgreementRoute().push(context);
-              },
-            ),
-            const Divider(),
-            // Padding(
-            //   padding: const EdgeInsets.symmetric(horizontal: 10),
-            //   child: Align(
-            //     alignment: Alignment.topLeft,
-            //     child: Row(
-            //       children: [
-            //         const Text(
-            //           '交流群:',
-            //           style:
-            //               TextStyle(fontWeight: FontWeight.w500, fontSize: 20),
-            //         ),
-            //         Card(
-            //           elevation: 0,
-            //           child: IntrinsicWidth(
-            //             child: InkWell(
-            //               borderRadius: BorderRadius.circular(10),
-            //               onTap: () async {
-            //                 final uri = Uri.parse(
-            //                     'https://t.me/+8Sc45kSCIlkzODNl');
-            //                 if (await canLaunchUrl(uri)) {
-            //                   await launchUrl(uri);
-            //                 } else {
-            //                   Get.snackbar('无法打开网页', '你的设备可能不支持此功能');
-            //                 }
-            //               },
-            //               child: const Padding(
-            //                 padding: EdgeInsets.symmetric(horizontal: 5),
-            //                 child: Row(
-            //                   mainAxisSize: MainAxisSize.min,
-            //                   children: [
-            //                     Icon(
-            //                       Icons.telegram_sharp,
-            //                       size: 40,
-            //                       color: Colors.blue,
-            //                     ),
-            //                     Text('telegram',
-            //                         style:
-            //                             TextStyle(fontWeight: FontWeight.bold)),
-            //                   ],
-            //                 ),
-            //               ),
-            //             ),
-            //           ),
-            //         ),
-            //       ],
-            //     ),
-            //   ),
-            // ),
+            const SizedBox(height: 32),
           ],
         ),
     );

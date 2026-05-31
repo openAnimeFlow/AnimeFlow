@@ -1,5 +1,6 @@
 import 'dart:io';
 import 'package:dio/io.dart';
+import 'package:anime_flow/utils/proxy_helper.dart';
 
 class NetworkConfig {
   const NetworkConfig({
@@ -21,7 +22,7 @@ class NetworkConfig {
     return IOHttpClientAdapter(
       createHttpClient: () {
         final client = HttpClient();
-        client.findProxy = HttpClient.findProxyFromEnvironment;
+        client.findProxy = ProxyHelper.resolveProxy;
         if (allowBadCertificates) {
           client.badCertificateCallback = (cert, host, port) => true;
         }

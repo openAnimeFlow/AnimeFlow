@@ -9,7 +9,7 @@ import 'package:flutter/material.dart';
 
 class CollectionTabView extends StatelessWidget {
   final TabController tabController;
-  final List<String> tabs;
+  final List<Map<String, dynamic>> tabs;
   final Function(int) onLoad;
   final Function(int) onLoadMore;
   final Function(int) onRefresh;

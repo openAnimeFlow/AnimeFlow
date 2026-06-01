@@ -172,7 +172,13 @@ class NoLoginView extends StatelessWidget {
                   );
                 },
               ),
-              const Text('如果无法登录请使用代理改善网络')
+              Text(
+                '如果无法登录请使用代理改善网络',
+                textAlign: TextAlign.center,
+                style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                      color: colorScheme.onSurfaceVariant,
+                    ),
+              )
             ],
           ),
         )

@@ -1,4 +1,3 @@
-import 'package:anime_flow/routes/model/info_route_extra.dart';
 import 'package:anime_flow/routes/model/play_route_extra.dart';
 import 'package:get/get.dart';
 

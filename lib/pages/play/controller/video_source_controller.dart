@@ -11,12 +11,12 @@ import 'package:anime_flow/pages/play/controller/video_ui_controller.dart';
 import 'package:anime_flow/providers/video/video_source_provider.dart';
 import 'package:anime_flow/providers/video/webview_video_source_provider.dart';
 import 'package:anime_flow/repository/play_repository.dart';
+import 'package:anime_flow/stores/episodes_state.dart';
 import 'package:anime_flow/stores/play_subject_state.dart';
 import 'package:anime_flow/utils/crawl_config.dart';
-import 'package:anime_flow/stores/episodes_state.dart';
+import 'package:anime_flow/utils/logger.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:get/get.dart';
-import 'package:anime_flow/utils/logger.dart';
 
 class VideoSourceController extends GetxController {
   final RxList<ResourcesItem> videoResources = <ResourcesItem>[].obs;
@@ -82,11 +82,9 @@ class VideoSourceController extends GetxController {
     final configs = await CrawlConfig.loadAllCrawlConfigs();
     _clearAllResources(configs);
     this.keyword.value = keyword;
-    // 重置手动选择标志，允许重新自动选择
     userManuallySelected = false;
     isLoading.value = false;
 
-    // 错开发起时间（相邻间隔 0.5 秒），不串行等待每个请求；全部完成后再结束加载态
     final futures = <Future<void>>[];
     for (var i = 0; i < configs.length; i++) {
       if (i > 0) {
@@ -106,8 +104,10 @@ class VideoSourceController extends GetxController {
         }
         continue;
       }
+
       futures.add(_getResources(keyword, config));
     }
+
     await Future.wait(futures);
     isLoading.value = true;
   }
@@ -115,16 +115,18 @@ class VideoSourceController extends GetxController {
   void _clearAllResources(List<CrawlConfigItem> configs) {
     CrawlConfigItem? configFor(String name) {
       for (final c in configs) {
-        if (c.name == name) return c;
+        if (c.name == name) {
+          return c;
+        }
       }
       return null;
     }
 
-    final currentResources = videoResources;
-    final clearedResources = currentResources.map((resource) {
+    final clearedResources = videoResources.map((resource) {
       final config = configFor(resource.websiteName);
       final anti = config?.antiCrawlerConfig;
       final captchaEnabled = anti?.enabled ?? false;
+
       return ResourcesItem(
         websiteName: resource.websiteName,
         websiteIcon: resource.websiteIcon,
@@ -161,7 +163,9 @@ class VideoSourceController extends GetxController {
   Future<void> retryResources(String websiteName) async {
     final configs = await CrawlConfig.loadAllCrawlConfigs();
     final config = configs.firstWhereOrNull((c) => c.name == websiteName);
-    if (config == null) return;
+    if (config == null) {
+      return;
+    }
     await _getResources(keyword.value, config);
   }
 
@@ -173,21 +177,23 @@ class VideoSourceController extends GetxController {
         searchTerm: keyword,
         aliases: _subjectState.subject.value.subjectAliases,
       );
-      final rawSearchList = await WebRequest.getSearchSubjectListService(keyword, config);
+      final rawSearchList =
+      await WebRequest.getSearchSubjectListService(keyword, config);
       final searchList = rankService.sort(rawSearchList, (item) => item.name);
-      List<EpisodeResourcesItem> allEpisodesList = [];
+      final allEpisodesList = <EpisodeResourcesItem>[];
 
-      for (var search in searchList) {
-        var crawlerEpisodeResources =
-            await WebRequest.getResourcesListService(search.link, config);
+      for (final search in searchList) {
+        final crawlerEpisodeResources =
+        await WebRequest.getResourcesListService(search.link, config);
 
-        for (var crawlerResource in crawlerEpisodeResources) {
-          var episodeResource = EpisodeResourcesItem(
-            lineNames: crawlerResource.lineNames,
-            episodes: crawlerResource.episodes,
-            subjectsTitle: search.name,
+        for (final crawlerResource in crawlerEpisodeResources) {
+          allEpisodesList.add(
+            EpisodeResourcesItem(
+              lineNames: crawlerResource.lineNames,
+              episodes: crawlerResource.episodes,
+              subjectsTitle: search.name,
+            ),
           );
-          allEpisodesList.add(episodeResource);
         }
       }
 
@@ -219,15 +225,14 @@ class VideoSourceController extends GetxController {
   }
 
   void _updateResourceStatus(
-    String websiteName, {
-    bool? isLoading,
-    List<EpisodeResourcesItem>? episodeResources,
-    String? errorMessage,
-    bool? needsCaptcha,
-    AntiCrawlerConfig? antiCrawlerConfig,
-  }) {
-    final currentResources = videoResources.toList();
-    final updatedResources = currentResources.map((resource) {
+      String websiteName, {
+        bool? isLoading,
+        List<EpisodeResourcesItem>? episodeResources,
+        String? errorMessage,
+        bool? needsCaptcha,
+        AntiCrawlerConfig? antiCrawlerConfig,
+      }) {
+    final updatedResources = videoResources.map((resource) {
       if (resource.websiteName == websiteName) {
         return resource.copyWith(
           isLoading: isLoading,
@@ -258,81 +263,92 @@ class VideoSourceController extends GetxController {
     this.videoUrl.value = videoUrl;
   }
 
-  /// 查找第一个有资源的网站索引
-  int _findFirstResourceIndex(List<ResourcesItem> dataSource) {
-    for (int i = 0; i < dataSource.length; i++) {
-      if (dataSource[i].episodeResources.isNotEmpty) {
+  int _findFirstResourceIndex(List<ResourcesItem> resources) {
+    for (var i = 0; i < resources.length; i++) {
+      if (resources[i].episodeResources.isNotEmpty) {
         return i;
       }
     }
     return 0;
   }
 
-  /// 自动选择第一个有资源的网站并加载视频
-  /// [force] 是否强制重新选择，即使已经有选中的资源
+  List<_AutoLoadCandidate> _buildAutoLoadCandidates(
+      List<ResourcesItem> resources) {
+    final candidates = <_AutoLoadCandidate>[];
+
+    for (var websiteIndex = 0; websiteIndex < resources.length; websiteIndex++) {
+      final resource = resources[websiteIndex];
+      for (final resourceItem in resource.episodeResources) {
+        final episode = resourceItem.episodes.firstWhereOrNull(
+              (ep) => ep.episodeSort == _episodesState.episodeIndex.value,
+        );
+        if (episode == null) {
+          continue;
+        }
+
+        candidates.add(
+          _AutoLoadCandidate(
+            websiteIndex: websiteIndex,
+            resource: resource,
+            episode: episode,
+          ),
+        );
+      }
+    }
+
+    return candidates;
+  }
+
   void autoSelectFirstResource(List<ResourcesItem> resources,
       {bool force = false}) {
-    // 如果用户手动选择了资源，不再自动选择
     if (userManuallySelected) {
       return;
     }
-    // 如果已经自动选择过，且不是强制重新选择，或者已经有选中的资源且不是强制重新选择，不再自动选择
-    if (!force && (webSiteTitle.value.isNotEmpty)) {
+    if (!force && webSiteTitle.value.isNotEmpty) {
       return;
     }
-    // 检查是否有资源加载完成
+
     final hasResource = resources.any((r) => r.episodeResources.isNotEmpty);
     if (!hasResource) {
       return;
     }
 
-    final firstResourceIndex = _findFirstResourceIndex(resources);
-    final selectedResource = resources[firstResourceIndex];
+    selectedWebsiteIndex.value = _findFirstResourceIndex(resources);
 
-    if (selectedResource.episodeResources.isEmpty) {
-      return; // 没有找到有资源的网站
-    }
-
-    // 自动加载第一个匹配的资源
     Future.microtask(() {
-      _autoLoadFirstResource(selectedResource, force: force);
+      _autoLoadFirstResource(resources, force: force);
     });
   }
 
-  /// 自动加载第一个匹配当前剧集的资源
-  /// [force] 是否强制重新加载，即使已经有选中的资源
-  Future<void> _autoLoadFirstResource(ResourcesItem resource,
+  Future<void> _autoLoadFirstResource(List<ResourcesItem> resources,
       {bool force = false}) async {
-    // 如果用户手动选择了资源，不再自动加载
     if (userManuallySelected) {
       return;
     }
-    // 如果不是强制重新加载，且已经有选中的资源，不再自动加载
     if (!force && webSiteTitle.value.isNotEmpty) {
       return;
     }
 
-    // 遍历资源列表，找到第一个匹配当前剧集的资源
-    for (var resourceItem in resource.episodeResources) {
-      final matchingEpisodes = resourceItem.episodes.where(
-        (ep) => ep.episodeSort == _episodesState.episodeIndex.value,
-      );
-      if (matchingEpisodes.isNotEmpty) {
-        final currentEpisode = matchingEpisodes.first;
-        setWebSite(
-          title: resource.websiteName,
-          iconUrl: resource.websiteIcon,
-          videoUrl: resource.baseUrl + currentEpisode.like,
-        );
-        // _videoStateController.disposeVideo();
-        await loadVideoPage(resource.baseUrl + currentEpisode.like);
-        return;
+    final candidates = _buildAutoLoadCandidates(resources);
+    for (final candidate in candidates) {
+      selectedWebsiteIndex.value = candidate.websiteIndex;
+      final candidateUrl = candidate.resource.baseUrl + candidate.episode.like;
+      final loaded = await loadVideoPage(candidateUrl);
+      if (!loaded) {
+        continue;
       }
+
+      setWebSite(
+        title: candidate.resource.websiteName,
+        iconUrl: candidate.resource.websiteIcon,
+        videoUrl: candidateUrl,
+      );
+      return;
     }
   }
 
   /// 加载视频页面
-  Future<void> loadVideoPage(String url) async {
+  Future<bool> loadVideoPage(String url) async {
     _videoSourceProvider?.cancel();
 
     final playController = Get.find<PlayController>();
@@ -340,7 +356,7 @@ class VideoSourceController extends GetxController {
 
     _videoSourceProvider ??= WebViewVideoSourceProvider();
 
-    int offset = 0;
+    var offset = 0;
     final subjectId = _subjectState.subject.value.subjectId;
     final episodeIndex = _episodesState.episodeIndex.value;
     final subjectName = _subjectState.subject.value.subjectName;
@@ -352,6 +368,7 @@ class VideoSourceController extends GetxController {
         position.episodeSort == episodeIndex) {
       offset = position.position;
     }
+
     try {
       final videoUiStateController = Get.find<VideoUiStateController>();
 
@@ -361,8 +378,10 @@ class VideoSourceController extends GetxController {
           .updateMainAxisAlignmentType(MainAxisAlignment.center);
       videoUiStateController.showIndicator();
       playController.parseResult.value = '正在解析视频源...';
+
       final source = await _videoSourceProvider!
           .resolve(url, useLegacyParser: false, offset: offset);
+
       playController.isParsing.value = false;
       playController.parseResult.value = '视频解析成功';
       await playController.initPlayState(PlayState(
@@ -375,17 +394,19 @@ class VideoSourceController extends GetxController {
         alias: subjectAlias,
         episodeId: _episodesState.episodeId.value,
       ));
+      return true;
     } on VideoSourceTimeoutException {
       playController.isParsing.value = false;
       playController.parseResult.value = '视频解析超时，请重试';
     } on VideoSourceNotFoundException {
       playController.isParsing.value = false;
-      playController.parseResult.value = '为找到视频资源，请切换数据源重试';
+      playController.parseResult.value = '未找到视频资源，请切换数据源重试';
     } catch (e) {
       playController.isParsing.value = false;
-      playController.parseResult.value = '视频解析失败：${e.toString()}';
+      playController.parseResult.value = '视频解析失败: ${e.toString()}';
       _logger.e(e);
     }
+    return false;
   }
 
   /// 取消当前视频源解析并销毁 Provider
@@ -393,4 +414,16 @@ class VideoSourceController extends GetxController {
     _videoSourceProvider?.dispose();
     _videoSourceProvider = null;
   }
+}
+
+class _AutoLoadCandidate {
+  const _AutoLoadCandidate({
+    required this.websiteIndex,
+    required this.resource,
+    required this.episode,
+  });
+
+  final int websiteIndex;
+  final ResourcesItem resource;
+  final Episode episode;
 }

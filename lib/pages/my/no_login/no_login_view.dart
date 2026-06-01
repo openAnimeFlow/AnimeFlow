@@ -172,6 +172,7 @@ class NoLoginView extends StatelessWidget {
                   );
                 },
               ),
+              const Text('如果无法登录请使用代理改善网络')
             ],
           ),
         )

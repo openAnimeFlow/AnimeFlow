@@ -2,10 +2,10 @@ import 'package:anime_flow/crawler/cookie_manager.dart';
 import 'package:anime_flow/crawler/html_request.dart';
 import 'package:anime_flow/crawler/itme/anti_crawler_config.dart';
 import 'package:anime_flow/crawler/itme/crawler_config_item.dart';
+import 'package:anime_flow/features/search_result_rank_service.dart';
 import 'package:anime_flow/models/enums/video_controls_icon_type.dart';
 import 'package:anime_flow/models/play/video/episode_resources_item.dart';
 import 'package:anime_flow/models/play/video/resources_item.dart';
-import 'package:anime_flow/models/play/video/search_resources_item.dart';
 import 'package:anime_flow/pages/play/controller/play_controller.dart';
 import 'package:anime_flow/pages/play/controller/video_ui_controller.dart';
 import 'package:anime_flow/providers/video/video_source_provider.dart';
@@ -169,12 +169,17 @@ class VideoSourceController extends GetxController {
     try {
       _updateResourceStatus(config.name, isLoading: true, errorMessage: null);
 
-      List<SearchResourcesItem> searchList = await WebRequest.getSearchSubjectListService(keyword, config);
+      final rankService = SearchResultRankService(
+        searchTerm: keyword,
+        aliases: _subjectState.subject.value.subjectAliases,
+      );
+      final rawSearchList = await WebRequest.getSearchSubjectListService(keyword, config);
+      final searchList = rankService.sort(rawSearchList, (item) => item.name);
       List<EpisodeResourcesItem> allEpisodesList = [];
 
       for (var search in searchList) {
         var crawlerEpisodeResources =
-        await WebRequest.getResourcesListService(search.link, config);
+            await WebRequest.getResourcesListService(search.link, config);
 
         for (var crawlerResource in crawlerEpisodeResources) {
           var episodeResource = EpisodeResourcesItem(
@@ -214,13 +219,13 @@ class VideoSourceController extends GetxController {
   }
 
   void _updateResourceStatus(
-      String websiteName, {
-        bool? isLoading,
-        List<EpisodeResourcesItem>? episodeResources,
-        String? errorMessage,
-        bool? needsCaptcha,
-        AntiCrawlerConfig? antiCrawlerConfig,
-      }) {
+    String websiteName, {
+    bool? isLoading,
+    List<EpisodeResourcesItem>? episodeResources,
+    String? errorMessage,
+    bool? needsCaptcha,
+    AntiCrawlerConfig? antiCrawlerConfig,
+  }) {
     final currentResources = videoResources.toList();
     final updatedResources = currentResources.map((resource) {
       if (resource.websiteName == websiteName) {
@@ -310,7 +315,7 @@ class VideoSourceController extends GetxController {
     // 遍历资源列表，找到第一个匹配当前剧集的资源
     for (var resourceItem in resource.episodeResources) {
       final matchingEpisodes = resourceItem.episodes.where(
-            (ep) => ep.episodeSort == _episodesState.episodeIndex.value,
+        (ep) => ep.episodeSort == _episodesState.episodeIndex.value,
       );
       if (matchingEpisodes.isNotEmpty) {
         final currentEpisode = matchingEpisodes.first;
@@ -352,7 +357,8 @@ class VideoSourceController extends GetxController {
 
       videoUiStateController
           .updateIndicatorType(VideoControlsIndicatorType.parsingIndicator);
-      videoUiStateController.updateMainAxisAlignmentType(MainAxisAlignment.center);
+      videoUiStateController
+          .updateMainAxisAlignmentType(MainAxisAlignment.center);
       videoUiStateController.showIndicator();
       playController.parseResult.value = '正在解析视频源...';
       final source = await _videoSourceProvider!
@@ -378,7 +384,7 @@ class VideoSourceController extends GetxController {
     } catch (e) {
       playController.isParsing.value = false;
       playController.parseResult.value = '视频解析失败：${e.toString()}';
-      _logger.e( e);
+      _logger.e(e);
     }
   }
 

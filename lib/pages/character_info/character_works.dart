@@ -1,6 +1,6 @@
 import 'package:anime_flow/http/requests/flow_request.dart';
 import 'package:anime_flow/models/item/bangumi/character_subjects_item.dart';
-import 'package:anime_flow/models/item/subject_basic_data_item.dart';
+import 'package:anime_flow/routes/model/info_route_extra.dart';
 import 'package:anime_flow/routes/routes.dart';
 import 'package:anime_flow/utils/bgm_utils.dart';
 import 'package:anime_flow/widget/animation_network_image/animation_network_image.dart';
@@ -110,12 +110,13 @@ class _CharacterWorksViewState extends State<CharacterWorksView> {
       child: InkWell(
         borderRadius: BorderRadius.circular(10),
         onTap: () {
-          final subjectBasicData = SubjectBasicData(
+          AnimeInfoRoute.fromExtra(InfoRouteExtra(
             id: work.subject.id,
-            name: work.subject.nameCN.isEmpty ? work.subject.name : work.subject.nameCN,
+            name: work.subject.nameCN.isEmpty
+                ? work.subject.name
+                : work.subject.nameCN,
             image: work.subject.images.large,
-          );
-          AnimeInfoRoute.fromData(subjectBasicData).push(context);
+          )).push(context);
         },
         child: Row(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -148,14 +149,18 @@ class _CharacterWorksViewState extends State<CharacterWorksView> {
                       ),
                       maxLines: 2,
                       overflow: TextOverflow.ellipsis,
-                    ) else
-                    Text(work.subject.name, style: const TextStyle(
-                      fontSize: 20,
-                      fontWeight: FontWeight.bold,
-                    ), maxLines: 2, overflow: TextOverflow.ellipsis),
-                    // 作品名称（日文）
-                    const SizedBox(height: 2),
-                    if (work.subject.name.isNotEmpty)
+                    )
+                  else
+                    Text(work.subject.name,
+                        style: const TextStyle(
+                          fontSize: 20,
+                          fontWeight: FontWeight.bold,
+                        ),
+                        maxLines: 2,
+                        overflow: TextOverflow.ellipsis),
+                  // 作品名称（日文）
+                  const SizedBox(height: 2),
+                  if (work.subject.name.isNotEmpty)
                     Text(
                       work.subject.name,
                       style: TextStyle(

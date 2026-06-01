@@ -36,6 +36,10 @@ class PlayHistory extends HiveObject {
   @HiveField(7)
   int duration;
 
+  /// 别名
+  @HiveField(8)
+  List<String> alias;
+
   PlayHistory({
     required this.subjectId,
     required this.episodeId,
@@ -45,10 +49,6 @@ class PlayHistory extends HiveObject {
     required this.updateAt,
     required this.position,
     required this.duration,
+    required this.alias,
   });
-
-  @override
-  String toString() {
-    return 'PlayHistory{subjectId: $subjectId, episodeId: $episodeId, episodeSort: $episodeSort, subjectName: $subjectName, cover: $cover, updateAt: $updateAt, position: $position, duration: $duration}';
-  }
 }

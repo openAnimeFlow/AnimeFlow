@@ -5,11 +5,11 @@ import 'package:anime_flow/pages/play/controller/play_controller.dart';
 import 'package:anime_flow/pages/play/controller/video_source_controller.dart';
 import 'package:anime_flow/pages/play/controller/video_ui_controller.dart';
 import 'package:anime_flow/pages/play/video/video.dart';
+import 'package:anime_flow/routes/model/play_route_extra.dart';
 import 'package:anime_flow/stores/play_subject_state.dart';
 import 'package:anime_flow/utils/systemUtil.dart';
 import 'package:anime_flow/constants/layout_constant.dart';
 import 'package:anime_flow/stores/episodes_state.dart';
-import 'package:anime_flow/routes/routes.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:get/get.dart';
@@ -47,7 +47,7 @@ class _PlayPageState extends State<PlayPage> {
     ));
     Get.put(EpisodeController());
     Get.put(VideoUiStateController());
-    subjectState = Get.put(PlaySubjectState(widget.extra.subjectBasicData));
+    subjectState = Get.put(PlaySubjectState(widget.extra.playExtra));
     final continueEp = widget.extra.continueEpisode;
     if (continueEp != null) {
       subjectState.setContinueEpisode(continueEp);
@@ -62,7 +62,7 @@ class _PlayPageState extends State<PlayPage> {
     if (_hasInitResources) {
       return;
     } else {
-      final subjectName = subjectState.subject.value.name;
+      final subjectName = subjectState.subject.value.subjectName;
       if (subjectName.isNotEmpty) {
         _hasInitResources = true;
         videoSourceController.initResources(subjectName);
@@ -78,7 +78,7 @@ class _PlayPageState extends State<PlayPage> {
         episodesState.isLoading.value = true;
       }
       final episodes = await FlowRequest.getSubjectEpisodesByIdService(
-          subjectState.subject.value.id, 100, 0);
+          subjectState.subject.value.subjectId, 100, 0);
       episodesState.episodes.value = episodes;
       episodesState.isLoading.value = false;
       //如果有路由传递剧集号有限根据传递的剧集设置剧集状态

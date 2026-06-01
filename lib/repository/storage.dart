@@ -10,8 +10,7 @@ class Storage {
   static late final Box<PlayHistory> playHistory;
   static late final Box<SearchHistory> searchHistory;
 
-  static Future init() async {
-    /// 通过 hive_registrar.g.dart 统一注册所有已生成的 Hive TypeAdapter。
+  static Future<void> init() async {
     Hive.registerAdapters();
     crawlConfigs = await _openBoxWithFallback<dynamic>(StorageKey.crawlConfigs);
     setting = await _openBoxWithFallback<dynamic>(StorageKey.settingsKey);
@@ -19,16 +18,15 @@ class Storage {
     searchHistory = await _openBoxWithFallback<SearchHistory>(StorageKey.searchHistoryKey);
   }
 
-  /// 打开 Box，如果失败则删除并重新创建
   static Future<Box<T>> _openBoxWithFallback<T>(String boxName) async {
     try {
       return await Hive.openBox<T>(boxName);
-    } catch (e) {
-      // 先关闭 box（如果已打开），释放文件锁
+    } catch (_) {
       if (Hive.isBoxOpen(boxName)) {
-        await Hive.box(boxName).close();
+        await Hive.box<dynamic>(boxName).close();
       }
-      // 删除损坏的数据文件
+      // Give Windows a moment to release file handles after a failed open.
+      await Future<void>.delayed(const Duration(milliseconds: 100));
       await Hive.deleteBoxFromDisk(boxName);
       return await Hive.openBox<T>(boxName);
     }

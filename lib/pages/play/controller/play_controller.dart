@@ -39,6 +39,9 @@ class PlayState {
   ///番剧封面
   final String subjectCover;
 
+  /// 别名
+  final List<String> alias;
+
   /// 集数
   final int episodeIndex;
 
@@ -53,6 +56,7 @@ class PlayState {
     required this.episodeId,
     required this.subjectName,
     required this.subjectCover,
+    required this.alias,
   });
 }
 
@@ -94,6 +98,8 @@ class PlayController extends GetxController {
   int subjectId = 0;
 
   String? subjectCover;
+
+  List<String> alias = [];
 
   String? subjectName;
 
@@ -237,6 +243,7 @@ class PlayController extends GetxController {
     episodeId = state.episodeId;
     subjectName = state.subjectName;
     subjectCover = state.subjectCover;
+    alias = state.alias;
     if (state.videoUrl.isEmpty) return;
     await player.open(Media(state.videoUrl), play: false);
     await player.stream.duration.firstWhere((d) => d > Duration.zero);
@@ -281,6 +288,7 @@ class PlayController extends GetxController {
               updateAt: DateTime.now(),
               position: position.inSeconds,
               duration: duration.inSeconds,
+              alias: alias
             );
             PlayRepository.savePlayHistory(playHistory);
           }

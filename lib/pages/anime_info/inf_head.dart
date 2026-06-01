@@ -1,6 +1,6 @@
 import 'dart:ui';
 import 'package:anime_flow/constants/layout_constant.dart';
-import 'package:anime_flow/models/item/subject_basic_data_item.dart';
+import 'package:anime_flow/routes/model/info_route_extra.dart';
 import 'package:anime_flow/pages/anime_info/provider/anime_info_provider.dart';
 import 'package:anime_flow/utils/systemUtil.dart';
 import 'package:anime_flow/widget/collection/collection_button.dart';
@@ -12,7 +12,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shimmer/shimmer.dart';
 
 class InfoHeadView extends StatelessWidget {
-  final SubjectBasicData subjectBasicData;
+  final InfoRouteExtra subjectBasicData;
   final double statusBarHeight;
   final double contentHeight;
 

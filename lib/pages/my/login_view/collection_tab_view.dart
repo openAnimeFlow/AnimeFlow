@@ -1,8 +1,8 @@
 import 'package:anime_flow/constants/layout_constant.dart';
-import 'package:anime_flow/widget/animation_network_image/animation_network_image.dart';
 import 'package:anime_flow/models/item/bangumi/collections_item.dart';
-import 'package:anime_flow/models/item/subject_basic_data_item.dart';
+import 'package:anime_flow/routes/model/info_route_extra.dart';
 import 'package:anime_flow/routes/routes.dart';
+import 'package:anime_flow/widget/animation_network_image/animation_network_image.dart';
 import 'package:anime_flow/widget/ranking.dart';
 import 'package:anime_flow/widget/star.dart';
 import 'package:flutter/material.dart';
@@ -193,17 +193,15 @@ class __CollectionTabViewState extends State<_CollectionTabView> {
                             }
 
                             final collection = collections[index];
-                            final subjectBasicData = SubjectBasicData(
-                              id: collection.id,
-                              name: collection.nameCN.isEmpty
-                                  ? collection.name
-                                  : collection.nameCN,
-                              image: collection.images.large,
-                            );
                             return InkWell(
                               onTap: () {
-                                AnimeInfoRoute.fromData(subjectBasicData)
-                                    .push(context);
+                                AnimeInfoRoute.fromExtra(InfoRouteExtra(
+                                  id: collection.id,
+                                  name: collection.nameCN.isEmpty
+                                      ? collection.name
+                                      : collection.nameCN,
+                                  image: collection.images.large,
+                                )).push(context);
                               },
                               child: Row(
                                 crossAxisAlignment: CrossAxisAlignment.start,

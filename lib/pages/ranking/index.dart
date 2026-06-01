@@ -2,7 +2,7 @@ import 'package:anime_flow/constants/layout_constant.dart';
 import 'package:anime_flow/http/requests/flow_request.dart';
 import 'package:anime_flow/models/enums/sort_type.dart';
 import 'package:anime_flow/models/item/bangumi/subject_item.dart';
-import 'package:anime_flow/models/item/subject_basic_data_item.dart';
+import 'package:anime_flow/routes/model/info_route_extra.dart';
 import 'package:anime_flow/routes/routes.dart';
 import 'package:anime_flow/utils/layout_util.dart';
 import 'package:anime_flow/widget/subject_card.dart';
@@ -353,14 +353,14 @@ class _RankingPageState extends State<RankingPage> {
                                         );
                                 }
                                 final data = subject!.data[index];
-                                final subjectBasicData = SubjectBasicData(
+                                final subjectBasicData = InfoRouteExtra(
                                   id: data.id,
                                   name: data.nameCN.isEmpty ? data.name : data.nameCN,
                                   image: data.images.large,
                                 );
                                 return InkWell(
                                   onTap: () =>
-                                      AnimeInfoRoute.fromData(subjectBasicData)
+                                      AnimeInfoRoute.fromExtra(subjectBasicData)
                                           .push(context),
                                   child: SubjectCard(
                                       rating: data.rating.rank,

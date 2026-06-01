@@ -1,20 +1,21 @@
 import 'package:anime_flow/controllers/my_controller.dart';
-import 'package:anime_flow/models/item/subject_basic_data_item.dart';
 import 'package:anime_flow/pages/anime_info/inf_head.dart';
-import 'package:anime_flow/routes/routes.dart';
 import 'package:anime_flow/pages/anime_info/provider/anime_info_provider.dart';
+import 'package:anime_flow/routes/model/info_route_extra.dart';
+import 'package:anime_flow/routes/model/play_route_extra.dart';
+import 'package:anime_flow/routes/routes.dart';
 import 'package:anime_flow/utils/logger.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+
 import 'evaluate_dialog.dart';
 import 'info_appBar.dart';
 import 'synopsis.dart';
 
-
 class AnimeInfoPage extends StatefulWidget {
-  final SubjectBasicData animeInfoExtra;
+  final InfoRouteExtra extra;
 
-  const AnimeInfoPage({super.key, required this.animeInfoExtra});
+  const AnimeInfoPage({super.key, required this.extra});
 
   @override
   State<AnimeInfoPage> createState() => _AnimeInfoPageState();
@@ -36,7 +37,7 @@ class _AnimeInfoPageState extends State<AnimeInfoPage> {
 
   @override
   Widget build(BuildContext context) {
-    final subjectBasicData = widget.animeInfoExtra;
+    final subjectBasicData = widget.extra;
     final statusBarHeight = MediaQuery.of(context).padding.top;
 
     return Scaffold(
@@ -174,15 +175,35 @@ class _AnimeInfoPageState extends State<AnimeInfoPage> {
                     loading: () => const SizedBox.shrink());
               },
             ),
-            FloatingActionButton(
-              heroTag: 'play_${subjectBasicData.id}',
-              onPressed: () =>
-                  PlayRoute.fromData(subjectBasicData).push(context),
-              child: Icon(
-                Icons.play_arrow_rounded,
-                color: Theme.of(context).colorScheme.primary,
-              ),
-            ),
+            Consumer(builder: (context, ref, child) {
+              final asyncSubjectsInfo =
+                  ref.watch(animeInfoProvider(subjectBasicData.id));
+              final subjectsInfo = asyncSubjectsInfo.value;
+              if (subjectsInfo != null) {
+                return FloatingActionButton(
+                  heroTag: 'play_${subjectBasicData.id}',
+                  onPressed: () => PlayRoute.fromExtra(
+                    PlayRouteExtra(
+                      playExtra: PlayExtra(
+                        subjectId: subjectBasicData.id,
+                        subjectName: subjectBasicData.name,
+                        subjectCover: subjectBasicData.image,
+                        subjectAliases: subjectsInfo.infobox
+                            .where((item) => item.key == '别名')
+                            .expand((item) => item.values.map((e) => e.v))
+                            .toList(),
+                      ),
+                    ),
+                  ).push(context),
+                  child: Icon(
+                    Icons.play_arrow_rounded,
+                    color: Theme.of(context).colorScheme.primary,
+                  ),
+                );
+              } else {
+                return const SizedBox.shrink();
+              }
+            }),
           ],
         ),
       ),

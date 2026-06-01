@@ -73,7 +73,7 @@ class _VideoViewState extends State<VideoView> with WindowListener {
         playController.player.stream.completed.listen((completed) {
       if (completed) {
         _autoSwitchToNextEpisode();
-        PlayRepository.deletePlayHistoryByPosition(subjectState.subject.value.id);
+        PlayRepository.deletePlayHistoryByPosition(subjectState.subject.value.subjectId);
       }
     });
 
@@ -143,16 +143,17 @@ class _VideoViewState extends State<VideoView> with WindowListener {
     final duration = playController.duration.value;
     if (position == Duration.zero || duration == Duration.zero) return;
 
-    final subjectId = subjectState.subject.value.id;
+    final subjectId = subjectState.subject.value.subjectId;
     final episodeId = episodesState.episodeId.value;
     if (subjectId <= 0 || episodeId <= 0) return;
 
     final playHistory = PlayHistory(
       subjectId: subjectId,
-      subjectName: subjectState.subject.value.name,
+      subjectName: subjectState.subject.value.subjectName,
       episodeId: episodeId,
+      alias: subjectState.subject.value.subjectAliases,
       episodeSort: episodesState.episodeIndex.value,
-      cover: subjectState.subject.value.image,
+      cover: subjectState.subject.value.subjectCover,
       updateAt: DateTime.now(),
       position: position.inSeconds,
       duration: duration.inSeconds,

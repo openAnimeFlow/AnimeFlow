@@ -55,7 +55,7 @@ class _VideoResourcesViewState extends State<VideoResourcesView> {
             onVideoUrlSelected: onVideoUrlSelected,
             videoSourceController: videoSourceController,
             episodesState: episodesState,
-            subjectState: playSubjectState,
+            subjectName: playSubjectState.subject.value.subjectName,
           );
         },
       );
@@ -67,7 +67,7 @@ class _VideoResourcesViewState extends State<VideoResourcesView> {
           onVideoUrlSelected: onVideoUrlSelected,
           videoSourceController: videoSourceController,
           episodesState: episodesState,
-          subjectState: playSubjectState,
+          subjectName: playSubjectState.subject.value.subjectName,
         ),
         isScrollControlled: true,
         backgroundColor: Colors.transparent,

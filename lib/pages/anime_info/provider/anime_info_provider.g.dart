@@ -49,7 +49,7 @@ final class AnimeInfoProvider
   }
 }
 
-String _$animeInfoHash() => r'065adc692dcd48f95b0da41d6a5d840653c51d42';
+String _$animeInfoHash() => r'3e2b6474957cbec7028daee3249d0b253823f9f7';
 
 final class AnimeInfoFamily extends $Family
     with
@@ -138,7 +138,7 @@ final class SubjectCommentsProvider
   }
 }
 
-String _$subjectCommentsHash() => r'60415e30980ab4eb2578144c8b6422aae134143b';
+String _$subjectCommentsHash() => r'758680cda74d7701ab4d4dd9f0bd7dda75480ec1';
 
 final class SubjectCommentsFamily extends $Family
     with
@@ -237,7 +237,7 @@ final class SubjectRelatedProvider
   }
 }
 
-String _$subjectRelatedHash() => r'632046f70e882baa9891289da4f67fcab027120a';
+String _$subjectRelatedHash() => r'ea6043743e663bbd101c5b161a7005a2b94c2a28';
 
 ///相关条目
 
@@ -337,7 +337,7 @@ final class SubjectCharactersProvider
   }
 }
 
-String _$subjectCharactersHash() => r'1879f27401bda7e37ca17ce4e90f5c6892f2b748';
+String _$subjectCharactersHash() => r'f1cc74c10b7732795ebd9f8f175530750ffbaa0e';
 
 ///条目角色信息
 
@@ -435,7 +435,7 @@ final class SubjectProducersProvider
   }
 }
 
-String _$subjectProducersHash() => r'00d63b907db7b0c56a8c6b3183b1afc67f913c5f';
+String _$subjectProducersHash() => r'af7e000fe628c341172f92fe21bad8633090ea4c';
 
 ///番剧制作人信息
 

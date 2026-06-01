@@ -1,4 +1,5 @@
 import 'package:anime_flow/models/item/bangumi/subject_item.dart';
+import 'package:anime_flow/routes/model/info_route_extra.dart';
 import 'package:anime_flow/routes/routes.dart';
 import 'package:anime_flow/widget/subject_card.dart';
 import 'package:flutter/material.dart';
@@ -18,15 +19,19 @@ class SearchOmittedContent extends StatelessWidget {
         borderRadius: BorderRadius.circular(10),
         child: InkWell(
             onTap: () {
-              AnimeInfoRoute(
-                id: searchData.id,
-                name: searchData.nameCN.isEmpty ? searchData.name : searchData.nameCN,
-                image: searchData.images.large,
-              ).push(context);
+              AnimeInfoRoute.fromExtra(InfoRouteExtra(
+                      id: searchData.id,
+                      name: searchData.nameCN.isEmpty
+                          ? searchData.name
+                          : searchData.nameCN,
+                      image: searchData.images.large))
+                  .push(context);
             },
             child: SubjectCard(
               image: searchData.images.large,
-              title: searchData.nameCN.isEmpty ? searchData.name : searchData.nameCN,
+              title: searchData.nameCN.isEmpty
+                  ? searchData.name
+                  : searchData.nameCN,
             )));
   }
 }

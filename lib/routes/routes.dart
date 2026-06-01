@@ -1,13 +1,13 @@
 import 'package:anime_flow/controllers/my_controller.dart';
-import 'package:anime_flow/models/item/subject_basic_data_item.dart';
+import 'package:anime_flow/routes/model/info_route_extra.dart';
 import 'package:anime_flow/pages/anime_info/index.dart';
 import 'package:anime_flow/pages/calendar/index.dart';
 import 'package:anime_flow/pages/character_info/index.dart';
 import 'package:anime_flow/pages/characters/index.dart';
 import 'package:anime_flow/pages/main/index.dart';
 import 'package:anime_flow/pages/my/index.dart';
-import 'package:anime_flow/pages/oauth/oauth_callback_page.dart';
 import 'package:anime_flow/pages/my/play_record/index.dart';
+import 'package:anime_flow/pages/oauth/oauth_callback_page.dart';
 import 'package:anime_flow/pages/play/index.dart';
 import 'package:anime_flow/pages/search/image_search_page.dart';
 import 'package:anime_flow/pages/search/index.dart';
@@ -16,12 +16,12 @@ import 'package:anime_flow/pages/settings/pages/about/index.dart';
 import 'package:anime_flow/pages/settings/pages/about/thanks.dart';
 import 'package:anime_flow/pages/settings/pages/agreement/index.dart';
 import 'package:anime_flow/pages/settings/pages/danmaku_setting_page.dart';
+import 'package:anime_flow/pages/settings/pages/font/font.dart';
 import 'package:anime_flow/pages/settings/pages/general_settings.dart';
 import 'package:anime_flow/pages/settings/pages/playback_settings.dart';
 import 'package:anime_flow/pages/settings/pages/plugins/add_plugins.dart';
 import 'package:anime_flow/pages/settings/pages/plugins/download_plugins.dart';
 import 'package:anime_flow/pages/settings/pages/plugins/plugins.dart';
-import 'package:anime_flow/pages/settings/pages/font/font.dart';
 import 'package:anime_flow/pages/settings/pages/theme.dart';
 import 'package:anime_flow/pages/user_space/index.dart';
 import 'package:bot_toast/bot_toast.dart';
@@ -29,23 +29,14 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:go_router/go_router.dart';
 
-part 'routes.g.dart';
+import 'model/play_route_extra.dart';
 
+part 'routes.g.dart';
 
 // =====================================================================
 // 页面构造时仍在使用的复合参数对象（非路由数据本身）。
 // =====================================================================
 
-/// 播放页传给 [PlayPage] 的参数集。
-class PlayRouteExtra {
-  final SubjectBasicData subjectBasicData;
-  final int? continueEpisode;
-
-  const PlayRouteExtra({
-    required this.subjectBasicData,
-    this.continueEpisode,
-  });
-}
 
 /// 角色详情页传给 [CharacterInfo] 的参数集。
 class CharacterInfoExtra {
@@ -69,6 +60,7 @@ class CharacterInfoExtra {
 @TypedGoRoute<MainRoute>(path: '/')
 class MainRoute extends GoRouteData with $MainRoute {
   const MainRoute({this.tab = 0});
+
   final int tab;
 
   @override
@@ -100,21 +92,24 @@ class AnimeInfoRoute extends GoRouteData with $AnimeInfoRoute {
     required this.id,
     required this.name,
     required this.image,
+    this.$extra,
   });
 
-  factory AnimeInfoRoute.fromData(SubjectBasicData data) => AnimeInfoRoute(
-        id: data.id,
-        name: data.name,
-        image: data.image,
+  factory AnimeInfoRoute.fromExtra(InfoRouteExtra extra) => AnimeInfoRoute(
+        id: extra.id,
+        name: extra.name,
+        image: extra.image,
+        $extra: extra,
       );
 
   final int id;
   final String name;
   final String image;
+  final InfoRouteExtra? $extra;
 
   @override
   Widget build(BuildContext context, GoRouterState state) => AnimeInfoPage(
-        animeInfoExtra: SubjectBasicData(id: id, name: name, image: image),
+        extra: $extra ?? InfoRouteExtra(id: id, name: name, image: image),
       );
 }
 
@@ -125,30 +120,36 @@ class PlayRoute extends GoRouteData with $PlayRoute {
     required this.name,
     required this.image,
     this.continueEpisode,
+    this.$extra,
   });
 
-  factory PlayRoute.fromData(
-    SubjectBasicData data, {
-    int? continueEpisode,
-  }) =>
+  factory PlayRoute.fromExtra(PlayRouteExtra extra) =>
       PlayRoute(
-        id: data.id,
-        name: data.name,
-        image: data.image,
-        continueEpisode: continueEpisode,
+        id: extra.playExtra.subjectId,
+        name: extra.playExtra.subjectName,
+        image: extra.playExtra.subjectCover,
+        continueEpisode: extra.continueEpisode,
+        $extra: extra,
       );
 
   final int id;
   final String name;
   final String image;
   final int? continueEpisode;
+  final PlayRouteExtra? $extra;
 
   @override
   Widget build(BuildContext context, GoRouterState state) => PlayPage(
-        extra: PlayRouteExtra(
-          subjectBasicData: SubjectBasicData(id: id, name: name, image: image),
-          continueEpisode: continueEpisode,
-        ),
+        extra: $extra ??
+            PlayRouteExtra(
+              playExtra: PlayExtra(
+                subjectId: id,
+                subjectName: name,
+                subjectCover: image,
+                subjectAliases: const [],
+              ),
+              continueEpisode: continueEpisode,
+            ),
       );
 }
 

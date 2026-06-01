@@ -40,7 +40,7 @@ class _IntroduceViewState extends State<IntroduceView>
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
-            playSubjectState.subject.value.name,
+            playSubjectState.subject.value.subjectName,
             style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
             textAlign: TextAlign.left,
           ),

@@ -1,5 +1,5 @@
 import 'package:anime_flow/models/item/bangumi/subject_item.dart';
-import 'package:anime_flow/models/item/subject_basic_data_item.dart';
+import 'package:anime_flow/routes/model/info_route_extra.dart';
 import 'package:anime_flow/routes/routes.dart';
 import 'package:anime_flow/widget/animation_network_image/animation_network_image.dart';
 import 'package:anime_flow/widget/ranking.dart';
@@ -20,12 +20,6 @@ class SearchDetailsContentView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final subjectBasicData = SubjectBasicData(
-      id: searchData.id,
-      name: searchData.nameCN.isEmpty ? searchData.name : searchData.nameCN,
-      image: searchData.images.large,
-    );
-
     final disabledColor = Get.theme.disabledColor;
     const textFontWeight = FontWeight.w600;
 
@@ -33,7 +27,11 @@ class SearchDetailsContentView extends StatelessWidget {
       height: itemHeight,
       child: InkWell(
         onTap: () {
-          AnimeInfoRoute.fromData(subjectBasicData).push(context);
+          AnimeInfoRoute.fromExtra(InfoRouteExtra(
+            id: searchData.id,
+            name: searchData.nameCN.isEmpty ? searchData.name : searchData.nameCN,
+            image: searchData.images.large,
+          )).push(context);
         },
         child: Row(
           crossAxisAlignment: CrossAxisAlignment.start,

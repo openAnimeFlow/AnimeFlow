@@ -1,13 +1,14 @@
-import 'package:anime_flow/models/item/subject_basic_data_item.dart';
 import 'package:anime_flow/models/play/play_history.dart';
 import 'package:anime_flow/repository/play_repository.dart';
 import 'package:anime_flow/repository/storage.dart';
+import 'package:anime_flow/routes/model/info_route_extra.dart';
+import 'package:anime_flow/routes/model/play_route_extra.dart';
 import 'package:anime_flow/routes/routes.dart';
 import 'package:anime_flow/utils/format_time_util.dart';
+import 'package:anime_flow/utils/logger.dart';
 import 'package:anime_flow/utils/utils.dart';
 import 'package:anime_flow/widget/animation_network_image/animation_network_image.dart';
 import 'package:flutter/material.dart';
-import 'package:anime_flow/utils/logger.dart';
 
 class PlayRecordPage extends StatefulWidget {
   const PlayRecordPage({super.key});
@@ -93,15 +94,13 @@ class _PlayRecordPageState extends State<PlayRecordPage> {
                   ),
                   itemBuilder: (context, index) {
                     final playHistory = playHistoryList![index];
-                    final subjectBasicData = SubjectBasicData(
-                        id: playHistory.subjectId,
-                        name: playHistory.subjectName,
-                        image: playHistory.cover);
                     return InkWell(
                       borderRadius: BorderRadius.circular(8),
-                      onTap: () =>
-                          AnimeInfoRoute.fromData(subjectBasicData)
-                              .push(context),
+                      onTap: () => AnimeInfoRoute.fromExtra(InfoRouteExtra(
+                              id: playHistory.subjectId,
+                              name: playHistory.subjectName,
+                              image: playHistory.cover))
+                          .push(context),
                       child: Row(
                         children: [
                           AnimationNetworkImage(
@@ -146,10 +145,23 @@ class _PlayRecordPageState extends State<PlayRecordPage> {
                                           onPressed: () async {
                                             final episodeSort =
                                                 playHistory.episodeSort;
-                                            await PlayRoute.fromData(
-                                              subjectBasicData,
-                                              continueEpisode: episodeSort,
-                                            ).push(context);
+                                            await PlayRoute.fromExtra(
+                                                    PlayRouteExtra(
+                                                        playExtra: PlayExtra(
+                                                          subjectId: playHistory
+                                                              .subjectId,
+                                                          subjectName:
+                                                              playHistory
+                                                                  .subjectName,
+                                                          subjectCover:
+                                                              playHistory.cover,
+                                                          subjectAliases:
+                                                              playHistory.alias,
+                                                        ),
+                                                        continueEpisode:
+                                                            episodeSort))
+                                                .push(context);
+
                                             /// TODO 使用hive数据变化监听刷新数据
                                             if (mounted) {
                                               _getPlayHistoryList();

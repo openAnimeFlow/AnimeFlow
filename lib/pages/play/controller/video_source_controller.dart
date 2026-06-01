@@ -174,7 +174,7 @@ class VideoSourceController extends GetxController {
 
       for (var search in searchList) {
         var crawlerEpisodeResources =
-            await WebRequest.getResourcesListService(search.link, config);
+        await WebRequest.getResourcesListService(search.link, config);
 
         for (var crawlerResource in crawlerEpisodeResources) {
           var episodeResource = EpisodeResourcesItem(
@@ -214,13 +214,13 @@ class VideoSourceController extends GetxController {
   }
 
   void _updateResourceStatus(
-    String websiteName, {
-    bool? isLoading,
-    List<EpisodeResourcesItem>? episodeResources,
-    String? errorMessage,
-    bool? needsCaptcha,
-    AntiCrawlerConfig? antiCrawlerConfig,
-  }) {
+      String websiteName, {
+        bool? isLoading,
+        List<EpisodeResourcesItem>? episodeResources,
+        String? errorMessage,
+        bool? needsCaptcha,
+        AntiCrawlerConfig? antiCrawlerConfig,
+      }) {
     final currentResources = videoResources.toList();
     final updatedResources = currentResources.map((resource) {
       if (resource.websiteName == websiteName) {
@@ -310,7 +310,7 @@ class VideoSourceController extends GetxController {
     // 遍历资源列表，找到第一个匹配当前剧集的资源
     for (var resourceItem in resource.episodeResources) {
       final matchingEpisodes = resourceItem.episodes.where(
-        (ep) => ep.episodeSort == _episodesState.episodeIndex.value,
+            (ep) => ep.episodeSort == _episodesState.episodeIndex.value,
       );
       if (matchingEpisodes.isNotEmpty) {
         final currentEpisode = matchingEpisodes.first;
@@ -336,10 +336,11 @@ class VideoSourceController extends GetxController {
     _videoSourceProvider ??= WebViewVideoSourceProvider();
 
     int offset = 0;
-    final subjectId = _subjectState.subject.value.id;
+    final subjectId = _subjectState.subject.value.subjectId;
     final episodeIndex = _episodesState.episodeIndex.value;
-    final subjectName = _subjectState.subject.value.name;
-    final subjectCover = _subjectState.subject.value.image;
+    final subjectName = _subjectState.subject.value.subjectName;
+    final subjectCover = _subjectState.subject.value.subjectCover;
+    final subjectAlias = _subjectState.subject.value.subjectAliases;
     final position = await PlayRepository.getPlayHistory(subjectId);
     if (position != null &&
         position.position > 0 &&
@@ -365,6 +366,7 @@ class VideoSourceController extends GetxController {
         subjectName: subjectName,
         subjectCover: subjectCover,
         episodeIndex: episodeIndex,
+        alias: subjectAlias,
         episodeId: _episodesState.episodeId.value,
       ));
     } on VideoSourceTimeoutException {

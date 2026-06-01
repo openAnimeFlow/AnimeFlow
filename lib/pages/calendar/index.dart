@@ -1,6 +1,6 @@
 import 'package:anime_flow/constants/layout_constant.dart';
 import 'package:anime_flow/models/item/bangumi/calendar_item.dart';
-import 'package:anime_flow/models/item/subject_basic_data_item.dart';
+import 'package:anime_flow/routes/model/info_route_extra.dart';
 import 'package:anime_flow/pages/recommend/anime/provider/anime_provider.dart';
 import 'package:anime_flow/routes/routes.dart';
 import 'package:anime_flow/utils/layout_util.dart';
@@ -247,7 +247,7 @@ class _CalendarPageState extends State<CalendarPage>
   }
 
   Widget _buildCard(Subject itemData, int watchers) {
-    final subjectBasicData = SubjectBasicData(
+    final subjectBasicData = InfoRouteExtra(
       id: itemData.id,
       name: itemData.nameCN.isEmpty ? itemData.name : itemData.nameCN,
       image: itemData.images.large,
@@ -255,7 +255,7 @@ class _CalendarPageState extends State<CalendarPage>
 
     return InkWell(
       onTap: () {
-        AnimeInfoRoute.fromData(subjectBasicData).push(context);
+        AnimeInfoRoute.fromExtra(subjectBasicData).push(context);
       },
       child: SubjectCard(
         image: itemData.images.large,

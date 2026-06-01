@@ -5,7 +5,6 @@ import 'package:anime_flow/models/play/video/episode_resources_item.dart';
 import 'package:anime_flow/models/play/video/resources_item.dart';
 import 'package:anime_flow/pages/play/controller/video_source_controller.dart';
 import 'package:anime_flow/providers/captcha/captcha_provider.dart';
-import 'package:anime_flow/stores/play_subject_state.dart';
 import 'package:anime_flow/widget/animation_network_image/animation_network_image.dart';
 import 'package:anime_flow/constants/layout_constant.dart';
 import 'package:anime_flow/stores/episodes_state.dart';
@@ -18,7 +17,7 @@ class VideoSourceDrawers extends StatefulWidget {
   final Function(String url)? onVideoUrlSelected;
   final VideoSourceController videoSourceController;
   final EpisodesState episodesState;
-  final PlaySubjectState subjectState;
+  final String subjectName;
   final bool isBottomSheet;
 
   const VideoSourceDrawers({
@@ -27,7 +26,7 @@ class VideoSourceDrawers extends StatefulWidget {
     this.isBottomSheet = false,
     required this.videoSourceController,
     required this.episodesState,
-    required this.subjectState,
+    required this.subjectName,
   });
 
   @override
@@ -42,7 +41,7 @@ class _VideoSourceDrawersState extends State<VideoSourceDrawers> {
   @override
   void initState() {
     super.initState();
-    _searchController.text = widget.subjectState.subject.value.name;
+    _searchController.text = widget.subjectName;
   }
 
   void setShowEpisodes() {

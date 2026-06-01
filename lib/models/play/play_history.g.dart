@@ -25,13 +25,14 @@ class PlayHistoryAdapter extends TypeAdapter<PlayHistory> {
       updateAt: fields[5] as DateTime,
       position: (fields[6] as num).toInt(),
       duration: (fields[7] as num).toInt(),
+      alias: (fields[8] as List?)?.cast<String>() ?? const <String>[],
     );
   }
 
   @override
   void write(BinaryWriter writer, PlayHistory obj) {
     writer
-      ..writeByte(8)
+      ..writeByte(9)
       ..writeByte(0)
       ..write(obj.subjectId)
       ..writeByte(1)
@@ -47,7 +48,9 @@ class PlayHistoryAdapter extends TypeAdapter<PlayHistory> {
       ..writeByte(6)
       ..write(obj.position)
       ..writeByte(7)
-      ..write(obj.duration);
+      ..write(obj.duration)
+      ..writeByte(8)
+      ..write(obj.alias);
   }
 
   @override

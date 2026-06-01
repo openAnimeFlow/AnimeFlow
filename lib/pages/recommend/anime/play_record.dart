@@ -1,13 +1,14 @@
-import 'package:anime_flow/models/item/subject_basic_data_item.dart';
+import 'package:anime_flow/routes/model/info_route_extra.dart';
 import 'package:anime_flow/models/play/play_history.dart';
 import 'package:anime_flow/repository/play_repository.dart';
 import 'package:anime_flow/repository/storage.dart';
+import 'package:anime_flow/routes/model/play_route_extra.dart';
 import 'package:anime_flow/routes/routes.dart';
+import 'package:anime_flow/utils/logger.dart';
 import 'package:anime_flow/utils/utils.dart';
 import 'package:anime_flow/widget/animation_network_image/animation_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:hive_ce_flutter/hive_flutter.dart';
-import 'package:anime_flow/utils/logger.dart';
 
 class PlayRecordView extends StatefulWidget {
   const PlayRecordView({super.key});
@@ -101,7 +102,7 @@ class _PlayRecordViewState extends State<PlayRecordView> {
                 itemCount: filterHistory.length,
                 itemBuilder: (context, index) {
                   final history = filterHistory[index];
-                  final subjectBasicData = SubjectBasicData(
+                  final subjectBasicData = InfoRouteExtra(
                       id: history.subjectId,
                       name: history.subjectName,
                       image: history.cover);
@@ -112,7 +113,7 @@ class _PlayRecordViewState extends State<PlayRecordView> {
                     child: InkWell(
                       borderRadius: BorderRadius.circular(8),
                       onTap: () {
-                        AnimeInfoRoute.fromData(subjectBasicData).push(context);
+                        AnimeInfoRoute.fromExtra(subjectBasicData).push(context);
                       },
                       child: Column(
                         mainAxisSize: MainAxisSize.min,
@@ -190,10 +191,17 @@ class _PlayRecordViewState extends State<PlayRecordView> {
                                           ),
                                           InkWell(
                                             onTap: () {
-                                              PlayRoute.fromData(
-                                                subjectBasicData,
-                                                continueEpisode:
-                                                    history.episodeSort,
+                                              PlayRoute.fromExtra(
+                                                PlayRouteExtra(
+                                                    playExtra: PlayExtra(
+                                                        subjectId:
+                                                            history.subjectId,
+                                                        subjectName:
+                                                            history.subjectName,
+                                                        subjectCover: history.cover,
+                                                        subjectAliases: history.alias),
+                                                    continueEpisode:
+                                                        history.episodeSort),
                                               ).push(context);
                                             },
                                             child: const Icon(

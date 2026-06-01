@@ -1,7 +1,7 @@
 import 'package:anime_flow/constants/layout_constant.dart';
 import 'package:anime_flow/http/requests/flow_request.dart';
 import 'package:anime_flow/models/item/bangumi/user_collections_item.dart';
-import 'package:anime_flow/models/item/subject_basic_data_item.dart';
+import 'package:anime_flow/routes/model/info_route_extra.dart';
 import 'package:anime_flow/pages/user_space/provider/user_space_provider.dart';
 import 'package:anime_flow/routes/routes.dart';
 import 'package:anime_flow/utils/layout_util.dart';
@@ -300,11 +300,11 @@ class _CollectViewState extends ConsumerState<CollectView>
                           final collection = userCollections!.data[index];
                           return InkWell(
                             onTap: () {
-                              final subject = SubjectBasicData(
+                              final subject = InfoRouteExtra(
                                   id: collection.id,
                                   name: collection.nameCN ?? collection.name,
                                   image: collection.images.large);
-                              AnimeInfoRoute.fromData(subject).push(context);
+                              AnimeInfoRoute.fromExtra(subject).push(context);
                             },
                             child: SubjectCard(
                               image: collection.images.large,

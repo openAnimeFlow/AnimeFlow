@@ -1,5 +1,5 @@
-import 'package:anime_flow/models/item/subject_basic_data_item.dart';
 import 'package:anime_flow/pages/anime_info/provider/anime_info_provider.dart';
+import 'package:anime_flow/routes/model/info_route_extra.dart';
 import 'package:anime_flow/routes/routes.dart';
 import 'package:anime_flow/utils/logger.dart';
 import 'package:anime_flow/widget/animation_network_image/animation_network_image.dart';
@@ -36,11 +36,6 @@ class RelatedView extends StatelessWidget {
                         itemCount: relation.data.length,
                         itemBuilder: (context, index) {
                           final item = relation.data[index];
-                          final subjectBasicData = SubjectBasicData(
-                            id: item.subject.id,
-                            name: item.subject.nameCN.isEmpty ? item.subject.name : item.subject.nameCN,
-                            image: item.subject.images.large,
-                          );
                           return Container(
                             width: 100,
                             margin: EdgeInsets.only(
@@ -48,8 +43,14 @@ class RelatedView extends StatelessWidget {
                                     index == relation.data.length - 1 ? 0 : 5),
                             child: InkWell(
                               onTap: () {
-                                AnimeInfoRoute.fromData(subjectBasicData)
-                                    .push(context);
+                                AnimeInfoRoute.fromExtra(
+                                  InfoRouteExtra(
+                                      id: item.subject.id,
+                                      name: item.subject.nameCN.isEmpty
+                                          ? item.subject.name
+                                          : item.subject.nameCN,
+                                      image: item.subject.images.large),
+                                ).push(context);
                               },
                               child: Column(
                                 children: [
@@ -59,7 +60,9 @@ class RelatedView extends StatelessWidget {
                                   const SizedBox(height: 10),
                                   Expanded(
                                     child: Text(
-                                      item.subject.nameCN.isEmpty ? item.subject.name : item.subject.nameCN,
+                                      item.subject.nameCN.isEmpty
+                                          ? item.subject.name
+                                          : item.subject.nameCN,
                                       maxLines: 2,
                                       overflow: TextOverflow.ellipsis,
                                     ),

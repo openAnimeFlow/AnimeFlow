@@ -7,6 +7,7 @@ import 'package:anime_flow/models/item/danmaku/danmaku_module.dart';
 import 'package:anime_flow/stores/play_subject_state.dart';
 import 'package:anime_flow/utils/format_time_util.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
 import 'package:get/get.dart';
 import 'package:go_router/go_router.dart';
 
@@ -72,7 +73,7 @@ class _DanmakuCardState extends State<DanmakuCard> {
   Widget build(BuildContext context) {
     return Obx(() {
       final allDanmakus = <Danmaku>[];
-      final subjectName = subjectState.subject.value.name;
+      final subjectName = subjectState.subject.value.subjectName;
       playController.danDanmakus.forEach((time, danmakus) {
         allDanmakus.addAll(danmakus);
       });
@@ -201,7 +202,7 @@ class _DanmakuCardState extends State<DanmakuCard> {
                         // 固定item高度，提升滚动性能
                         itemExtent: 30.0,
                         // 缓存范围
-                        cacheExtent: 200.0,
+                        scrollCacheExtent: const ScrollCacheExtent.pixels(200.0),
                         physics: const ClampingScrollPhysics(),
                         itemBuilder: (context, index) {
                           final danmaku = filteredDanmakus[index];

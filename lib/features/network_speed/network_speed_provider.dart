@@ -1,5 +1,5 @@
 import 'dart:async';
-import 'package:anime_flow/features/network_speed/data/network_speed_service.dart';
+import 'package:anime_flow/features/network_speed/network_speed_service.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 /// 用于依赖注入：每次调用都创建一个独立实例。

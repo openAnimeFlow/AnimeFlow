@@ -1,8 +1,6 @@
 import 'package:anime_flow/pages/play/controller/play_controller.dart';
 import 'package:anime_flow/pages/play/controller/video_source_controller.dart';
-import 'package:anime_flow/stores/episodes_state.dart';
 import 'package:anime_flow/pages/play/provider/play_subject_provider.dart';
-import 'package:anime_flow/utils/logger.dart';
 import 'package:anime_flow/widget/animation_network_image/animation_network_image.dart';
 import 'package:anime_flow/widget/play_content/source_drawers/video_source_drawers.dart';
 import 'package:flutter/material.dart';
@@ -19,8 +17,6 @@ class VideoResourcesView extends ConsumerStatefulWidget {
 class _VideoResourcesViewState extends ConsumerState<VideoResourcesView> {
   final videoSourceController = Get.find<VideoSourceController>();
   final playController = Get.find<PlayController>();
-  final episodesState = Get.find<EpisodesState>();
-  final logger = LiggLogger();
 
   void _showSourceDrawer() {
     void onVideoUrlSelected(String url) {
@@ -31,7 +27,8 @@ class _VideoResourcesViewState extends ConsumerState<VideoResourcesView> {
     final subjectName = ref.read(playSubjectProvider).subjectName;
 
     if (playController.isWideScreen.value) {
-      Get.generalDialog(
+      showGeneralDialog(
+        context: context,
         barrierDismissible: true,
         barrierLabel: "SourceDrawer",
         barrierColor: Colors.black54,
@@ -53,24 +50,23 @@ class _VideoResourcesViewState extends ConsumerState<VideoResourcesView> {
             isBottomSheet: false,
             onVideoUrlSelected: onVideoUrlSelected,
             videoSourceController: videoSourceController,
-            episodesState: episodesState,
             subjectName: subjectName,
           );
         },
       );
     } else {
-      Get.bottomSheet(
-        VideoSourceDrawers(
-          isBottomSheet: true,
-          onVideoUrlSelected: onVideoUrlSelected,
-          videoSourceController: videoSourceController,
-          episodesState: episodesState,
-          subjectName: subjectName,
-        ),
+      showModalBottomSheet(
+        context: context,
         isScrollControlled: true,
         backgroundColor: Colors.transparent,
-        enterBottomSheetDuration: const Duration(milliseconds: 300),
-        exitBottomSheetDuration: const Duration(milliseconds: 200),
+        builder: (context) {
+          return VideoSourceDrawers(
+            isBottomSheet: true,
+            onVideoUrlSelected: onVideoUrlSelected,
+            videoSourceController: videoSourceController,
+            subjectName: subjectName,
+          );
+        },
       );
     }
   }

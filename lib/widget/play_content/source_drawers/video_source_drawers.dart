@@ -1,22 +1,22 @@
 import 'dart:async';
 import 'dart:convert';
+
+import 'package:anime_flow/constants/layout_constant.dart';
 import 'package:anime_flow/crawler/itme/anti_crawler_config.dart';
 import 'package:anime_flow/models/play/video/episode_resources_item.dart';
 import 'package:anime_flow/models/play/video/resources_item.dart';
 import 'package:anime_flow/pages/play/controller/video_source_controller.dart';
 import 'package:anime_flow/providers/captcha/captcha_provider.dart';
+import 'package:anime_flow/utils/logger.dart';
 import 'package:anime_flow/widget/animation_network_image/animation_network_image.dart';
-import 'package:anime_flow/constants/layout_constant.dart';
-import 'package:anime_flow/stores/episodes_state.dart';
+import 'package:anime_flow/widget/notification_toast.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:anime_flow/utils/logger.dart';
-import 'package:anime_flow/widget/notification_toast.dart';
+import 'package:go_router/go_router.dart';
 
 class VideoSourceDrawers extends StatefulWidget {
   final Function(String url)? onVideoUrlSelected;
   final VideoSourceController videoSourceController;
-  final EpisodesState episodesState;
   final String subjectName;
   final bool isBottomSheet;
 
@@ -25,7 +25,6 @@ class VideoSourceDrawers extends StatefulWidget {
     this.onVideoUrlSelected,
     this.isBottomSheet = false,
     required this.videoSourceController,
-    required this.episodesState,
     required this.subjectName,
   });
 
@@ -77,13 +76,13 @@ class _VideoSourceDrawersState extends State<VideoSourceDrawers> {
   @override
   Widget build(BuildContext context) {
     if (widget.isBottomSheet) {
-      return _buildBottomSheetContent(context);
+      return buildBottomSheetContent(context);
     }
-    return _buildSideDrawerContent(context);
+    return buildSideDrawerContent(context);
   }
 
   /// 底部抽屉内容
-  Widget _buildBottomSheetContent(BuildContext context) {
+  Widget buildBottomSheetContent(BuildContext context) {
     return Container(
       constraints: BoxConstraints(
         maxHeight: MediaQuery.of(context).size.height * 0.75,
@@ -113,7 +112,7 @@ class _VideoSourceDrawersState extends State<VideoSourceDrawers> {
           ),
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 16),
-            child: _buildHeader(),
+            child: buildHeader(),
           ),
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 16),
@@ -123,7 +122,8 @@ class _VideoSourceDrawersState extends State<VideoSourceDrawers> {
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 16),
             child: Obx(() {
-              final dataSource = widget.videoSourceController.videoResources.toList();
+              final dataSource =
+                  widget.videoSourceController.videoResources.toList();
               if (dataSource.isEmpty) {
                 return const SizedBox.shrink();
               }
@@ -136,7 +136,8 @@ class _VideoSourceDrawersState extends State<VideoSourceDrawers> {
               padding: const EdgeInsets.symmetric(horizontal: 16),
               child: Obx(() {
                 final videoSourceController = widget.videoSourceController;
-                final dataSource = videoSourceController.videoResources.toList();
+                final dataSource =
+                    videoSourceController.videoResources.toList();
                 if (dataSource.isEmpty) {
                   return const SizedBox.shrink();
                 }
@@ -163,7 +164,7 @@ class _VideoSourceDrawersState extends State<VideoSourceDrawers> {
   }
 
   /// 侧边抽屉内容
-  Widget _buildSideDrawerContent(BuildContext context) {
+  Widget buildSideDrawerContent(BuildContext context) {
     return Align(
       alignment: Alignment.centerRight,
       child: SizedBox(
@@ -176,12 +177,13 @@ class _VideoSourceDrawersState extends State<VideoSourceDrawers> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              _buildHeader(),
+              buildHeader(),
               _manualSearch(),
               const SizedBox(height: 16),
               Obx(() {
                 final videoSourceController = widget.videoSourceController;
-                final dataSource = videoSourceController.videoResources.toList();
+                final dataSource =
+                    videoSourceController.videoResources.toList();
                 if (dataSource.isEmpty) {
                   return const SizedBox.shrink();
                 }
@@ -191,19 +193,24 @@ class _VideoSourceDrawersState extends State<VideoSourceDrawers> {
               Expanded(
                 child: Obx(() {
                   final videoSourceController = widget.videoSourceController;
-                  final dataSource = videoSourceController.videoResources.toList();
+                  final dataSource =
+                      videoSourceController.videoResources.toList();
                   if (dataSource.isEmpty) {
                     return const SizedBox.shrink();
                   }
                   // 确保索引有效，如果无效则使用 0
-                  final currentIndex = videoSourceController.selectedWebsiteIndex.value;
+                  final currentIndex =
+                      videoSourceController.selectedWebsiteIndex.value;
                   int validIndex =
                       currentIndex >= dataSource.length ? 0 : currentIndex;
 
                   // 如果索引不匹配，更新索引
                   if (validIndex != currentIndex) {
                     WidgetsBinding.instance.addPostFrameCallback((_) {
-                      if (mounted) () => videoSourceController.selectedWebsiteIndex.value = validIndex;
+                      if (mounted) {
+                        () => videoSourceController.selectedWebsiteIndex.value =
+                            validIndex;
+                      }
                     });
                   }
                   return _buildVideoSource(dataSource: dataSource);
@@ -217,7 +224,7 @@ class _VideoSourceDrawersState extends State<VideoSourceDrawers> {
   }
 
   /// 标题行
-  Widget _buildHeader() {
+  Widget buildHeader() {
     return Row(
       children: [
         Text(
@@ -296,7 +303,9 @@ class _VideoSourceDrawersState extends State<VideoSourceDrawers> {
                     itemBuilder: (context, index) {
                       final data = dataSource[index];
                       return Obx(() {
-                        final isSelected = widget.videoSourceController.selectedWebsiteIndex.value == index;
+                        final isSelected = widget.videoSourceController
+                                .selectedWebsiteIndex.value ==
+                            index;
 
                         // final currentEpisodeCount = resource.episodeResources
                         //     .where((item) => item.episodes.any((ep) =>
@@ -418,15 +427,15 @@ class _VideoSourceDrawersState extends State<VideoSourceDrawers> {
           itemBuilder: (context, index) {
             final resourceItem = episodeResources[index];
             final isLastItem = index == episodeResources.length - 1;
-            final episodesState = widget.episodesState;
+            final episodeIndex = videoSourceController.currentEpisodeIndex.value;
             // 当前选中剧集对应的剧集数据
             final currentEpisode = resourceItem.episodes.firstWhereOrNull(
-              (ep) => ep.episodeSort == episodesState.episodeIndex.value,
+              (ep) => ep.episodeSort == episodeIndex,
             );
 
             final excludedEpisodesCount = episodeResources
-                .expand((item) => item.episodes.where((ep) =>
-                    ep.episodeSort != episodesState.episodeIndex.value))
+                .expand((item) =>
+                    item.episodes.where((ep) => ep.episodeSort != episodeIndex))
                 .length;
 
             // 如果当前资源组没有匹配的剧集，不渲染
@@ -473,9 +482,7 @@ class _VideoSourceDrawersState extends State<VideoSourceDrawers> {
                       // 获取该资源的所有非当前集数的剧集
                       final excludedEpisodes = item.episodes
                           .where(
-                            (ep) =>
-                                ep.episodeSort !=
-                                widget.episodesState.episodeIndex.value,
+                            (ep) => ep.episodeSort != episodeIndex,
                           )
                           .toList();
                       // 遍历所有其他剧集
@@ -532,7 +539,7 @@ class _VideoSourceDrawersState extends State<VideoSourceDrawers> {
         child: InkWell(
             onTap: () async {
               try {
-                Get.back();
+                context.pop();
                 final videoUrl = baseUrl + episode.like;
                 widget.videoSourceController.setWebSite(
                     title: websiteName,
@@ -542,7 +549,7 @@ class _VideoSourceDrawersState extends State<VideoSourceDrawers> {
                 widget.onVideoUrlSelected?.call(videoUrl);
               } catch (e) {
                 logger.e('获取视频源失败', error: e);
-                NotificationToast.show('错误','获取视频源失败: $e');
+                NotificationToast.show('错误', '获取视频源失败: $e');
               }
             },
             borderRadius: BorderRadius.circular(12),

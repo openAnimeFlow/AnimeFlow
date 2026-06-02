@@ -1,71 +1,82 @@
 import 'package:anime_flow/constants/layout_constant.dart';
 import 'package:anime_flow/models/item/bangumi/episodes_item.dart';
+import 'package:anime_flow/pages/play/provider/episodes_provider.dart';
 import 'package:flutter/material.dart';
-import 'package:get/get.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 
-class EpisodesDialog extends StatelessWidget {
-  const EpisodesDialog({
-    super.key,
-    this.onEpisodeSelected,
-    this.episodes,
-    required this.selectedEpisode,
-  });
-
-  final void Function(EpisodeData episode, int episodeIndex)? onEpisodeSelected;
-  final double selectedEpisode;
-  final List<EpisodeData>? episodes;
+class EpisodesDialog extends ConsumerWidget {
+  const EpisodesDialog({super.key});
 
   @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      body: Align(
-        alignment: Alignment.centerRight,
-        child: Container(
-          width: LayoutConstant.playContentWidth,
-          height: double.infinity,
-          padding: const EdgeInsets.only(top: 16, right: 16, left: 16),
-          color: Theme.of(context).cardColor,
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Text(
-                    "章节列表",
-                    style: TextStyle(
-                      fontSize: 20,
-                      fontWeight: FontWeight.bold,
-                      color: Theme.of(context).textTheme.titleLarge?.color,
-                      decoration: TextDecoration.none,
-                    ),
+  Widget build(BuildContext context, WidgetRef ref) {
+    final episodesState = ref.watch(episodesProvider);
+    final episodes = episodesState.episodes?.data;
+    final selectedEpisode = episodesState.episodeSort;
+
+    return Align(
+      alignment: Alignment.centerRight,
+      child: Container(
+        width: LayoutConstant.playContentWidth,
+        height: double.infinity,
+        padding: const EdgeInsets.all(16),
+        color: Theme.of(context).cardColor,
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text(
+                  "章节列表",
+                  style: TextStyle(
+                    fontSize: 20,
+                    fontWeight: FontWeight.bold,
+                    color: Theme.of(context).textTheme.titleLarge?.color,
+                    decoration: TextDecoration.none,
                   ),
-                  IconButton(
-                    onPressed: () => Get.back(),
-                    icon: const Icon(Icons.close_rounded),
-                  ),
-                ],
+                ),
+                IconButton(
+                  onPressed: () => context.pop(),
+                  icon: const Icon(Icons.close_rounded),
+                ),
+              ],
+            ),
+            const SizedBox(height: 10),
+            Expanded(
+              child: _buildEpisodesList(
+                context,
+                ref,
+                episodes: episodes,
+                selectedEpisode: selectedEpisode,
+                isLoading: episodesState.isLoading,
               ),
-              const SizedBox(height: 10),
-              Expanded(
-                child: _buildEpisodesList(context),
-              ),
-            ],
-          ),
+            ),
+          ],
         ),
       ),
     );
   }
 
-  Widget _buildEpisodesList(BuildContext context) {
-    if (episodes == null || episodes!.isEmpty) {
+  Widget _buildEpisodesList(
+    BuildContext context,
+    WidgetRef ref, {
+    required List<EpisodeData>? episodes,
+    required double selectedEpisode,
+    required bool isLoading,
+  }) {
+    if (isLoading) {
+      return const Center(child: CircularProgressIndicator());
+    }
+
+    if (episodes == null || episodes.isEmpty) {
       return const Center(child: Text('暂无章节数据'));
     }
 
     return ListView.builder(
-      itemCount: episodes!.length,
+      itemCount: episodes.length,
       itemBuilder: (BuildContext context, int index) {
-        final episode = episodes![index];
+        final episode = episodes[index];
         final isSelected = selectedEpisode == episode.sort;
         return Card(
           elevation: 0,
@@ -76,7 +87,16 @@ class EpisodesDialog extends StatelessWidget {
           child: InkWell(
             onTap: () {
               final episodeIndex = index + 1;
-              onEpisodeSelected?.call(episode, episodeIndex);
+              final notifier = ref.read(episodesProvider.notifier);
+              notifier.setEpisodeSort(
+                episodeId: episode.id,
+                episodeIndex: episodeIndex,
+                sort: episode.sort,
+              );
+              notifier.setEpisodeTitle(
+                episode.nameCN.isEmpty ? episode.name : episode.nameCN,
+              );
+              context.pop();
             },
             child: Padding(
               padding: const EdgeInsets.all(12),

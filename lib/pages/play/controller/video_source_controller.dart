@@ -11,7 +11,7 @@ import 'package:anime_flow/pages/play/controller/video_ui_controller.dart';
 import 'package:anime_flow/providers/video/video_source_provider.dart';
 import 'package:anime_flow/providers/video/webview_video_source_provider.dart';
 import 'package:anime_flow/repository/play_repository.dart';
-import 'package:anime_flow/stores/episodes_state.dart';
+import 'package:anime_flow/pages/play/provider/episodes_provider.dart';
 import 'package:anime_flow/pages/play/provider/play_subject_provider.dart';
 import 'package:anime_flow/utils/crawl_config.dart';
 import 'package:anime_flow/utils/logger.dart';
@@ -20,9 +20,13 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:get/get.dart';
 
 class VideoSourceController extends GetxController {
-  VideoSourceController(this._ref);
+  VideoSourceController(this._container);
 
-  final WidgetRef _ref;
+  final ProviderContainer _container;
+
+  final RxInt currentEpisodeIndex = 0.obs;
+  ProviderSubscription<int>? _episodeIndexSubscription;
+
   final videoResources = <ResourcesItem>[].obs;
   final webSiteTitle = ''.obs;
   final webSiteIcon = ''.obs;
@@ -34,37 +38,40 @@ class VideoSourceController extends GetxController {
   final RxInt selectedWebsiteIndex = 0.obs;
   final RxBool isInitWebView = false.obs;
 
-  late EpisodesState _episodesState;
   final LiggLogger _logger = LiggLogger();
 
   /// 标记用户是否手动选择了资源
   bool userManuallySelected = false;
 
   Worker? _isLoadingWorker;
-  Worker? _episodeIndexWorker;
 
   WebViewVideoSourceProvider? _videoSourceProvider;
+
+  void _listenEpisodeIndex() {
+    _episodeIndexSubscription?.close();
+    _episodeIndexSubscription = _container.listen<int>(
+      episodesProvider.select((state) => state.episodeIndex),
+      (_, next) => currentEpisodeIndex.value = next,
+      fireImmediately: true,
+    );
+  }
 
   @override
   void onInit() async {
     super.onInit();
-    await _initVideoResources();
-    _initControllers();
+    _listenEpisodeIndex();
+    await initVideoResources();
   }
 
   @override
   void onClose() {
     _isLoadingWorker?.dispose();
-    _episodeIndexWorker?.dispose();
+    _episodeIndexSubscription?.close();
     super.onClose();
   }
 
-  void _initControllers() {
-    _episodesState = Get.find<EpisodesState>();
-  }
-
   //初始化
-  Future<void> _initVideoResources() async {
+  Future<void> initVideoResources() async {
     final configs = await CrawlConfig.loadAllCrawlConfigs();
     final resources = configs.map((config) {
       return ResourcesItem(
@@ -177,7 +184,7 @@ class VideoSourceController extends GetxController {
 
       final rankService = SearchResultRankService(
         searchTerm: keyword,
-        aliases: _ref.read(playSubjectProvider).subjectAliases,
+        aliases: _container.read(playSubjectProvider).subjectAliases,
       );
       final rawSearchList =
           await WebRequest.getSearchSubjectListService(keyword, config);
@@ -284,7 +291,7 @@ class VideoSourceController extends GetxController {
       final resource = resources[websiteIndex];
       for (final resourceItem in resource.episodeResources) {
         final episode = resourceItem.episodes.firstWhereOrNull(
-          (ep) => ep.episodeSort == _episodesState.episodeIndex.value,
+          (ep) => ep.episodeSort == _container.read(episodesProvider).episodeIndex,
         );
         if (episode == null) {
           continue;
@@ -361,9 +368,10 @@ class VideoSourceController extends GetxController {
     _videoSourceProvider ??= WebViewVideoSourceProvider();
 
     var offset = 0;
-    final subject = _ref.read(playSubjectProvider);
+    final subject = _container.read(playSubjectProvider);
+    final episodesState = _container.read(episodesProvider);
     final subjectId = subject.subjectId;
-    final episodeIndex = _episodesState.episodeIndex.value;
+    final episodeIndex = episodesState.episodeIndex;
     final subjectName = subject.subjectName;
     final subjectCover = subject.subjectCover;
     final subjectAlias = subject.subjectAliases;
@@ -397,7 +405,7 @@ class VideoSourceController extends GetxController {
         subjectCover: subjectCover,
         episodeIndex: episodeIndex,
         alias: subjectAlias,
-        episodeId: _episodesState.episodeId.value,
+        episodeId: episodesState.episodeId,
       ));
       return true;
     } on VideoSourceTimeoutException {

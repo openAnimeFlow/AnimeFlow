@@ -4,7 +4,7 @@ import 'package:anime_flow/models/item/bangumi/episode_comments_item.dart';
 import 'package:anime_flow/pages/play/content/introduce/index.dart';
 import 'package:anime_flow/pages/play/controller/play_controller.dart';
 import 'package:anime_flow/pages/play/controller/video_ui_controller.dart';
-import 'package:anime_flow/stores/episodes_state.dart';
+import 'package:anime_flow/pages/play/provider/episodes_provider.dart';
 import 'package:anime_flow/utils/logger.dart';
 import 'package:anime_flow/widget/danmaku_text_field.dart';
 import 'package:flutter/material.dart';
@@ -22,93 +22,70 @@ class ContentView extends StatefulWidget {
 
 class _ContentViewState extends State<ContentView>
     with SingleTickerProviderStateMixin {
-  final episodesState = Get.find<EpisodesState>();
   final playController = Get.find<PlayController>();
   final videoUiStateController = Get.find<VideoUiStateController>();
-  final List<String> _tabs = ['简介', '吐槽'];
-  late TabController _tabController;
-  final GlobalKey _introduceKey = GlobalKey();
-  final GlobalKey _commentKey = GlobalKey();
-  bool _isRequesting = false;
+  final List<String> tabs = ['简介', '吐槽'];
+  late TabController tabController;
+  bool isRequesting = false;
   List<EpisodeComment>? comments;
-  int? _lastRequestedEpisodeId; // 记录上次请求的 episodeId，避免重复请求
-  Worker? _episodeIdWorker; // 监听 episodeId 变化
+  int? lastRequestedEpisodeId;
+  int currentEpisodeId = 0;
 
   @override
   void initState() {
     super.initState();
-    _tabController = TabController(length: _tabs.length, vsync: this);
-
-    // 监听 Tab 切换
-    _tabController.addListener(_onTabChanged);
-
-    // 监听 episodeId 变化
-    _episodeIdWorker = ever(episodesState.episodeId, (episodeId) {
-      // 当 episodeId 变化时，重置 comments 并重新获取
-      if (episodeId > 0 && episodeId != _lastRequestedEpisodeId) {
-        setState(() {
-          comments = null;
-        });
-        if (_tabController.index == 1) {
-          _getComments();
-        }
-      }
-    });
+    tabController = TabController(length: tabs.length, vsync: this);
+    tabController.addListener(onTabChanged);
   }
 
   @override
   void dispose() {
-    _tabController.removeListener(_onTabChanged);
-    _tabController.dispose();
-    _episodeIdWorker?.dispose();
+    tabController.removeListener(onTabChanged);
+    tabController.dispose();
     super.dispose();
   }
 
-  void _onTabChanged() {
-    // 当切换到"吐槽"标签页（索引1）且 comments 为 null 时，获取评论
-    if (_tabController.index == 1 && comments == null && !_isRequesting) {
-      _getComments();
+  void onTabChanged() {
+    if (tabController.index == 1 && comments == null && !isRequesting) {
+      getComments();
     }
   }
 
-  void _getComments() async {
-    final episodeId = episodesState.episodeId.value;
+  Future<void> getComments() async {
+    final episodeId = currentEpisodeId;
 
-    if (episodeId == _lastRequestedEpisodeId) {
+    if (episodeId == lastRequestedEpisodeId) {
       return;
     }
 
-    if (_isRequesting) {
+    if (isRequesting) {
       return;
     }
 
     if (episodeId > 0) {
-      // 标记正在请求中
-      _isRequesting = true;
-      _lastRequestedEpisodeId = episodeId;
+      isRequesting = true;
+      lastRequestedEpisodeId = episodeId;
 
       try {
         final commentsData =
             await FlowRequest.episodeCommentsService(episodeId: episodeId);
-        // 再次检查 episodeId 是否仍然是当前值（防止请求期间 episodeId 变化）
-        if (mounted && episodesState.episodeId.value == episodeId) {
+        if (mounted && currentEpisodeId == episodeId) {
           setState(() {
             comments = commentsData;
           });
         }
       } catch (e) {
         LiggLogger().e(e);
-        // 请求失败时也要检查 episodeId 是否仍然是当前值
-        if (mounted && episodesState.episodeId.value == episodeId) {
+        if (mounted && currentEpisodeId == episodeId) {
           setState(() {
             comments = [];
           });
         }
       } finally {
-        _isRequesting = false;
+        isRequesting = false;
       }
     } else {
-      _lastRequestedEpisodeId = episodeId;
+      lastRequestedEpisodeId = episodeId;
       if (mounted) {
         setState(() {
           comments = [];
@@ -134,72 +111,89 @@ class _ContentViewState extends State<ContentView>
 
   @override
   Widget build(BuildContext context) {
-    return PreferredSize(
-      preferredSize: const Size.fromHeight(100),
-      child: Column(
-        children: [
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              TabBar(
-                padding:
-                    EdgeInsets.only(top: MediaQuery.of(context).padding.top),
-                dividerHeight: 0,
-                controller: _tabController,
-                tabAlignment: TabAlignment.start,
-                isScrollable: true,
-                tabs: _tabs.map((name) => Tab(text: name)).toList(),
-              ),
-              Obx(
-                () => playController.isWideScreen.value
-                    ? const Spacer()
-                    : Consumer(
-                        builder: (context, ref, _) {
-                          final userInfo = ref.watch(currentUserInfoProvider);
-                          if (userInfo == null) {
-                            return const SizedBox.shrink();
-                          }
-                          return SizedBox(
-                            width: 200,
-                            child: Padding(
-                              padding:
-                                  const EdgeInsets.symmetric(horizontal: 8),
-                              child: DanmakuTextField(
-                                onFocusChange: (hasFocus) {
-                                  if (hasFocus) {
-                                    playController.stopPlaying();
-                                    videoUiStateController.cancelUiTimer();
-                                  } else {
-                                    playController.startPlaying();
-                                    videoUiStateController.hideControlsUi();
-                                  }
-                                },
-                                onSend: (text) =>
-                                    onSendDanmaku(text, userInfo.id),
-                              ),
-                            ),
-                          );
-                        },
-                      ),
-              )
-            ],
-          ),
-          const Divider(height: 1),
-          Expanded(
-            child: TabBarView(
-              controller: _tabController,
+    return Consumer(
+      builder: (context, ref, child) {
+        ref.listen<int>(
+          episodesProvider.select((state) => state.episodeId),
+          (previous, episodeId) {
+            currentEpisodeId = episodeId;
+            if (episodeId > 0 && episodeId != lastRequestedEpisodeId) {
+              setState(() {
+                comments = null;
+              });
+              if (tabController.index == 1) {
+                getComments();
+              }
+            }
+          },
+        );
+        currentEpisodeId = ref.read(episodesProvider).episodeId;
+        return child!;
+      },
+      child: PreferredSize(
+        preferredSize: const Size.fromHeight(100),
+        child: Column(
+          children: [
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                //简介
-                IntroduceView(key: _introduceKey),
-                //吐槽
-                CommentsView(
-                  key: _commentKey,
-                  comments: comments,
+                TabBar(
+                  padding:
+                      EdgeInsets.only(top: MediaQuery.of(context).padding.top),
+                  dividerHeight: 0,
+                  controller: tabController,
+                  tabAlignment: TabAlignment.start,
+                  isScrollable: true,
+                  tabs: tabs.map((name) => Tab(text: name)).toList(),
+                ),
+                Obx(
+                  () => playController.isWideScreen.value
+                      ? const Spacer()
+                      : Consumer(
+                          builder: (context, ref, _) {
+                            final userInfo = ref.watch(currentUserInfoProvider);
+                            if (userInfo == null) {
+                              return const SizedBox.shrink();
+                            }
+                            return SizedBox(
+                              width: 200,
+                              child: Padding(
+                                padding:
+                                    const EdgeInsets.symmetric(horizontal: 8),
+                                child: DanmakuTextField(
+                                  onFocusChange: (hasFocus) {
+                                    if (hasFocus) {
+                                      playController.stopPlaying();
+                                      videoUiStateController.cancelUiTimer();
+                                    } else {
+                                      playController.startPlaying();
+                                      videoUiStateController.hideControlsUi();
+                                    }
+                                  },
+                                  onSend: (text) =>
+                                      onSendDanmaku(text, userInfo.id),
+                                ),
+                              ),
+                            );
+                          },
+                        ),
                 )
               ],
             ),
-          ),
-        ],
+            const Divider(height: 1),
+            Expanded(
+              child: TabBarView(
+                controller: tabController,
+                children: [
+                  const IntroduceView(),
+                  CommentsView(
+                    comments: comments,
+                  )
+                ],
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }

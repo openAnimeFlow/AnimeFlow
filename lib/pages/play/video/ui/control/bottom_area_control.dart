@@ -1,14 +1,13 @@
 import 'package:anime_flow/constants/assets_path_constants.dart';
 import 'package:anime_flow/controllers/my_controller.dart';
 import 'package:anime_flow/models/enums/video_controls_icon_type.dart';
-import 'package:anime_flow/pages/play/controller/episode_controller.dart';
 import 'package:anime_flow/pages/play/controller/play_controller.dart';
 import 'package:anime_flow/pages/play/controller/video_ui_controller.dart';
+import 'package:anime_flow/pages/play/provider/episodes_provider.dart';
 import 'package:anime_flow/pages/play/video/ui/button/rate_button.dart';
 import 'package:anime_flow/pages/play/video/ui/button/shader_button.dart';
 import 'package:anime_flow/pages/play/video/ui/danmaku/danmaku_setting.dart';
 import 'package:anime_flow/pages/play/video/ui/video_ui_components.dart';
-import 'package:anime_flow/stores/episodes_state.dart';
 import 'package:anime_flow/utils/systemUtil.dart';
 import 'package:anime_flow/widget/danmaku_text_field.dart';
 import 'package:anime_flow/widget/play_content/episodes_dialog.dart';
@@ -16,7 +15,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:get/get.dart';
-import 'package:go_router/go_router.dart';
 
 /// 底部区域控件
 class BottomAreaControl extends StatefulWidget {
@@ -29,8 +27,6 @@ class BottomAreaControl extends StatefulWidget {
 class _BottomAreaControlState extends State<BottomAreaControl> {
   final videoUiStateController = Get.find<VideoUiStateController>();
   final playController = Get.find<PlayController>();
-  final episodesState = Get.find<EpisodesState>();
-  final episodeController = Get.find<EpisodeController>();
 
   Future<void> onSendDanmaku(String text, int bgmUserId) async {
     final success = await playController.sendDanmaku(
@@ -57,7 +53,6 @@ class _BottomAreaControlState extends State<BottomAreaControl> {
       final isWideScreen = playController.isWideScreen.value;
       final isShowControlsUi = videoUiStateController.isShowControlsUi.value;
       final isContentExpanded = playController.isContentExpanded.value;
-      final hasNextEpisode = episodeController.hasNextEpisode(episodesState);
       final leftPadding = MediaQuery.of(context).padding.left;
       // 全屏 + 不随键盘压缩 body 时，用 viewInsets 把底部控件顶到键盘上方
       final keyboardLift = fullscreen && SystemUtil.isMobile
@@ -127,18 +122,32 @@ class _BottomAreaControlState extends State<BottomAreaControl> {
                             ),
                           ),
                           // 下一集
-                          if (hasNextEpisode)
-                            InkWell(
-                              onTap: () {
-                                episodeController
-                                    .switchToNextEpisode(episodesState);
-                              },
-                              child: const Icon(
-                                Icons.skip_next_rounded,
-                                size: 33,
-                                color: Colors.white70,
-                              ),
-                            ),
+                          Consumer(
+                            builder: (context, ref, _) {
+                              ref.watch(
+                                episodesProvider
+                                    .select((state) => state.episodeIndex),
+                              );
+                              final hasNextEpisode = ref
+                                  .read(episodesProvider.notifier)
+                                  .hasNextEpisode;
+                              if (!hasNextEpisode) {
+                                return const SizedBox.shrink();
+                              }
+                              return InkWell(
+                                onTap: () {
+                                  ref
+                                      .read(episodesProvider.notifier)
+                                      .switchToNextEpisode();
+                                },
+                                child: const Icon(
+                                  Icons.skip_next_rounded,
+                                  size: 33,
+                                  color: Colors.white70,
+                                ),
+                              );
+                            },
+                          ),
                           //弹幕开关
                           InkWell(
                             onTap: () => playController.toggleDanmaku(),
@@ -152,11 +161,11 @@ class _BottomAreaControlState extends State<BottomAreaControl> {
                           //弹幕设置
                           if (danmakuOn)
                             InkWell(
-                              onTap: () => Get.bottomSheet(
-                                const DanmakuSetting(),
-                                ignoreSafeArea: false,
+                              onTap: () => showModalBottomSheet(
+                                context: context,
                                 isScrollControlled: true,
                                 backgroundColor: Colors.transparent,
+                                builder: (context) => const DanmakuSetting(),
                               ),
                               child: Padding(
                                 padding:
@@ -230,51 +239,44 @@ class _BottomAreaControlState extends State<BottomAreaControl> {
                           ),
                           //选集
                           if (fullscreen || !isContentExpanded)
-                            TextButton(
-                                onPressed: () {
-                                  Get.generalDialog(
-                                      barrierDismissible: true,
-                                      barrierLabel: "episodesDrawer",
-                                      barrierColor: Colors.black54,
-                                      transitionDuration:
-                                          const Duration(milliseconds: 300),
-                                      transitionBuilder: (context, animation,
-                                          secondaryAnimation, child) {
-                                        return SlideTransition(
-                                          position: Tween<Offset>(
-                                            begin: const Offset(1, 0),
-                                            end: Offset.zero,
-                                          ).animate(CurvedAnimation(
-                                            parent: animation,
-                                            curve: Curves.easeOut,
-                                          )),
-                                          child: child,
-                                        );
-                                      },
-                                      pageBuilder: (context, animation,
-                                          secondaryAnimation) {
-                                        return EpisodesDialog(
-                                          episodes: episodesState
-                                              .episodes.value?.data,
-                                          selectedEpisode:
-                                              episodesState.episodeSort.value,
-                                          onEpisodeSelected:
-                                              (episode, episodeIndex) {
-                                            episodesState.setEpisodeSort(
-                                              episodeId: episode.id,
-                                              episodeIndex: episodeIndex,
-                                              sort: episode.sort,
-                                            );
-                                            episodesState.setEpisodeTitle(
-                                                episode.nameCN.isEmpty
-                                                    ? episode.name
-                                                    : episode.nameCN);
-                                            context.pop();
-                                          },
-                                        );
-                                      });
-                                },
-                                child: const Text("选集")),
+                            Consumer(
+                              builder: (context, ref, _) {
+                                return TextButton(
+                                    onPressed: () {
+                                      final container =
+                                          ProviderScope.containerOf(context);
+                                      showGeneralDialog(
+                                        context: context,
+                                        barrierDismissible: true,
+                                        barrierLabel: 'EpisodesDialog',
+                                        barrierColor: Colors.black54,
+                                        transitionDuration:
+                                            const Duration(milliseconds: 300),
+                                        transitionBuilder: (context, animation,
+                                            secondaryAnimation, child) {
+                                          return SlideTransition(
+                                            position: Tween<Offset>(
+                                              begin: const Offset(1, 0),
+                                              end: Offset.zero,
+                                            ).animate(CurvedAnimation(
+                                              parent: animation,
+                                              curve: Curves.easeOut,
+                                            )),
+                                            child: child,
+                                          );
+                                        },
+                                        pageBuilder: (context, animation,
+                                            secondaryAnimation) {
+                                          return UncontrolledProviderScope(
+                                            container: container,
+                                            child: const EpisodesDialog(),
+                                          );
+                                        },
+                                      );
+                                    },
+                                    child: const Text("选集"));
+                              },
+                            ),
 
                           //超分辨率
                           if (isWideScreen || fullscreen)

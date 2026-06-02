@@ -1,9 +1,7 @@
-import 'package:anime_flow/pages/play/controller/episode_controller.dart';
 import 'package:anime_flow/pages/play/controller/play_controller.dart';
 import 'package:anime_flow/pages/play/controller/video_ui_controller.dart';
 import 'package:anime_flow/pages/play/video/gesture/desktop_gesture_detector.dart';
 import 'package:anime_flow/pages/play/video/gesture/mobile_gesture_detector.dart';
-import 'package:anime_flow/stores/episodes_state.dart';
 import 'package:anime_flow/utils/systemUtil.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -24,8 +22,6 @@ class VideoUi extends StatefulWidget {
 class _VideoUiState extends State<VideoUi> {
   final videoUiStateController = Get.find<VideoUiStateController>();
   final playPageController = Get.find<PlayController>();
-  final episodesState = Get.find<EpisodesState>();
-  final episodeController = Get.find<EpisodeController>();
 
   @override
   void dispose() {

@@ -9,7 +9,6 @@ import 'package:anime_flow/models/play/play_history.dart';
 import 'package:anime_flow/pages/play/controller/video_ui_controller.dart';
 import 'package:anime_flow/repository/play_repository.dart';
 import 'package:anime_flow/repository/storage.dart';
-import 'package:anime_flow/stores/episodes_state.dart';
 import 'package:anime_flow/utils/systemUtil.dart';
 import 'package:anime_flow/utils/utils.dart';
 import 'package:anime_flow/utils/vibrate.dart';
@@ -61,8 +60,8 @@ class PlayState {
 }
 
 class PlayController extends GetxController {
-  PlayController({required this.episodesState, required this.shadersController});
-  final EpisodesState episodesState;
+  PlayController({required this.shadersController});
+
   late Player player;
   late VideoController videoController;
   final setting = Storage.setting;
@@ -162,17 +161,12 @@ class PlayController extends GetxController {
   /// 定时保存播放进度的计时器
   Timer? _saveProgressTimer;
 
-  /// 监听集数变化
-  Worker? _episodeSelectionWorker;
-
   @override
   void onInit() {
     super.onInit();
     player = Player();
     videoController = VideoController(player);
     syncPlatformVisibilityFromStorage();
-
-    _episodeSelectionWorker = ever(episodesState.episodeIndex, _onEpisodeIndexChanged);
 
     player.stream.playing.listen((playing) {
       this.playing.value = playing;
@@ -216,7 +210,7 @@ class PlayController extends GetxController {
   }
 
   /// 选中集与当前播放集不一致时清空弹幕数据与画布（切换集过程中）
-  void _onEpisodeIndexChanged(int selectedIndex) {
+  void clearDanmakuIfEpisodeMismatch(int selectedIndex) {
     if (selectedIndex != episode) {
       try {
         removeDanmaku();
@@ -226,7 +220,6 @@ class PlayController extends GetxController {
 
   @override
   void onClose() {
-    _episodeSelectionWorker?.dispose();
     _saveSettingsTimer?.cancel();
     _saveProgressTimer?.cancel();
     _stopTimer?.cancel();
@@ -262,7 +255,7 @@ class PlayController extends GetxController {
           final danmaku = await FlowRequest.getDanDanmaku(bgmBangumiId, episode);
           addDanmakuAll(danmaku);
           _isLoadingDanmaku = false;
-        };
+        }
       }
     } catch (e) {
       logger.e(e);
@@ -293,31 +286,7 @@ class PlayController extends GetxController {
             PlayRepository.savePlayHistory(playHistory);
           }
 
-          /// 播放进度大于90% && collection != null，更新章节进度
-          // final episodesProgress =
-          // setting.get(PlaybackKey.episodesProgress, defaultValue: true);
-          // if (episodesProgress) {
-          //   final position = this.position.value;
-          //   final duration = this.duration.value;
-          //   final myController = Get.find<MyController>();
-          //   if (myController.userInfo.value != null) {
-          //     final progressPercent =
-          //         position.inSeconds / duration.inSeconds * 100;
-          //     if (progressPercent > 90) {
-          //       final currentIndex = episode - 1;
-          //       final episodesState = Get.find<EpisodesState>();
-          //       final episodes = episodesState.episodes.value;
-          //       if (episodes != null &&
-          //           currentIndex >= 0 &&
-          //           currentIndex < episodes.data.length &&
-          //           episodes.data[currentIndex].collection == null) {
-          //         // TODO需要只有登录后才更新
-          //         // UserRequest.updateEpisodeProgressService(episodeId,
-          //         //     batch: true, type: 2);
-          //       }
-          //     }
-          //   }
-          // }
+          /// 播放进度大于90% 时可更新章节进度（待实现）
         }
       });
     } catch (e) {

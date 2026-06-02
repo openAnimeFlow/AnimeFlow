@@ -2,9 +2,9 @@ import 'package:anime_flow/features/network_speed/network_speed_provider.dart';
 import 'package:anime_flow/pages/play/controller/play_controller.dart';
 import 'package:anime_flow/pages/play/controller/video_source_controller.dart';
 import 'package:anime_flow/pages/play/controller/video_ui_controller.dart';
+import 'package:anime_flow/pages/play/provider/episodes_provider.dart';
 import 'package:anime_flow/pages/play/provider/play_subject_provider.dart';
 import 'package:anime_flow/pages/play/video/ui/setting/video_setting.dart';
-import 'package:anime_flow/stores/episodes_state.dart';
 import 'package:anime_flow/utils/systemUtil.dart';
 import 'package:anime_flow/utils/utils.dart';
 import 'package:anime_flow/widget/battery_icon.dart';
@@ -27,7 +27,6 @@ class _TopAreaControlState extends State<TopAreaControl> {
   final videoSourceController = Get.find<VideoSourceController>();
   final playController = Get.find<PlayController>();
   final videoUiStateController = Get.find<VideoUiStateController>();
-  final episodesController = Get.find<EpisodesState>();
 
   Future<T?> _showRightSlideDialog<T>({
     required BuildContext context,
@@ -137,32 +136,40 @@ class _TopAreaControlState extends State<TopAreaControl> {
                                           ),
                                         );
                                       }),
-                                      episodesController.episodeTitle.value !=
-                                              ''
-                                          ? Row(
-                                              children: [
-                                                Text(
-                                                  episodesController
-                                                      .episodeSort.value
-                                                      .toString()
-                                                      .padLeft(2, '0'),
-                                                  style: const TextStyle(
-                                                    color: Colors.white,
-                                                    fontSize: 15,
-                                                  ),
+                                      Consumer(
+                                        builder: (context, ref, child) {
+                                          final episodeTitle = ref.watch(
+                                              episodesProvider.select((state) =>
+                                                  state.episodeTitle));
+                                          final episodeSort = ref.watch(
+                                              episodesProvider.select((state) =>
+                                                  state.episodeSort));
+                                          if (episodeTitle.isEmpty) {
+                                            return const SizedBox.shrink();
+                                          }
+                                          return Row(
+                                            children: [
+                                              Text(
+                                                episodeSort
+                                                    .toString()
+                                                    .padLeft(2, '0'),
+                                                style: const TextStyle(
+                                                  color: Colors.white,
+                                                  fontSize: 15,
                                                 ),
-                                                const SizedBox(width: 8),
-                                                Text(
-                                                  episodesController
-                                                      .episodeTitle.value,
-                                                  style: const TextStyle(
-                                                    color: Colors.white,
-                                                    fontSize: 15,
-                                                  ),
-                                                )
-                                              ],
-                                            )
-                                          : const SizedBox.shrink()
+                                              ),
+                                              const SizedBox(width: 8),
+                                              Text(
+                                                episodeTitle,
+                                                style: const TextStyle(
+                                                  color: Colors.white,
+                                                  fontSize: 15,
+                                                ),
+                                              )
+                                            ],
+                                          );
+                                        },
+                                      )
                                     ],
                                   )
                               ],
@@ -212,7 +219,6 @@ class _TopAreaControlState extends State<TopAreaControl> {
                                             isBottomSheet: false,
                                             videoSourceController:
                                                 videoSourceController,
-                                            episodesState: episodesController,
                                             subjectName: subjectName,
                                           ),
                                         );

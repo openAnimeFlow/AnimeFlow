@@ -3,12 +3,11 @@ import 'dart:io';
 
 import 'package:anime_flow/models/play/play_history.dart';
 import 'package:anime_flow/routes/model/play_route_extra.dart';
-import 'package:anime_flow/pages/play/controller/episode_controller.dart';
 import 'package:anime_flow/pages/play/controller/play_controller.dart';
 import 'package:anime_flow/pages/play/controller/video_source_controller.dart';
 import 'package:anime_flow/pages/play/controller/video_ui_controller.dart';
 import 'package:anime_flow/repository/play_repository.dart';
-import 'package:anime_flow/stores/episodes_state.dart';
+import 'package:anime_flow/pages/play/provider/episodes_provider.dart';
 import 'package:anime_flow/pages/play/provider/play_subject_provider.dart';
 import 'package:anime_flow/utils/logger.dart';
 import 'package:flutter/material.dart';
@@ -30,30 +29,19 @@ class VideoView extends ConsumerStatefulWidget {
 class _VideoViewState extends ConsumerState<VideoView> with WindowListener {
   final videoUiStateController = Get.find<VideoUiStateController>();
   final videoSourceController = Get.find<VideoSourceController>();
-  final episodeController = Get.find<EpisodeController>();
   final playController = Get.find<PlayController>();
-  final episodesState = Get.find<EpisodesState>();
-  final logger = LiggLogger();
-  final _danmuKey = GlobalKey();
 
-  Worker? episodeIndexWorker;
   StreamSubscription<bool>? playbackCompletedSubscription;
   int lastEpisodeIndex = 0;
   late final PlayExtra subject;
+
+  EpisodesData episodesSnapshot = const EpisodesData();
 
   @override
   void initState() {
     super.initState();
     subject = ref.read(playSubjectProvider);
-
-    // 监听集数变化
-    episodeIndexWorker = ever(episodesState.episodeIndex, (int episode) {
-      if (episode > 0 && episode != lastEpisodeIndex) {
-        videoSourceController.userManuallySelected = false;
-        playController.player.stop();
-        _selectResourceAfterInit();
-      }
-    });
+    episodesSnapshot = ref.read(episodesProvider);
 
     // 监听视频播放完成
     playbackCompletedSubscription =
@@ -75,17 +63,20 @@ class _VideoViewState extends ConsumerState<VideoView> with WindowListener {
   }
 
   /// 等待资源初始化完成后选择资源
-  Future<void> _selectResourceAfterInit() async {
+  Future<void> selectResourceAfterInit() async {
     if (!videoSourceController.isLoading.value) {
-      await _waitForResourcesLoaded();
+      await waitForResourcesLoaded();
     }
 
     final resources = videoSourceController.videoResources.toList();
     videoSourceController.autoSelectFirstResource(resources, force: true);
   }
 
-  /// 等待资源加载完成
-  Future<void> _waitForResourcesLoaded() async {
+  /// 等待资源搜索完成。
+  ///
+  /// 注意：[VideoSourceController.isLoading] 表示「资源已就绪」（命名历史遗留），
+  /// 为 `true` 时表示搜索完成，而非正在加载。
+  Future<void> waitForResourcesLoaded() async {
     if (videoSourceController.isLoading.value) {
       return;
     }
@@ -106,7 +97,7 @@ class _VideoViewState extends ConsumerState<VideoView> with WindowListener {
       if (!completer.isCompleted) {
         worker.dispose();
         completer.complete();
-        logger.w('等待资源加载超时');
+        LiggLogger().w('等待资源加载超时');
       }
     });
 
@@ -116,13 +107,14 @@ class _VideoViewState extends ConsumerState<VideoView> with WindowListener {
   /// 自动切换到下一集
   void _autoSwitchToNextEpisode() {
     try {
+      final episodesNotifier = ref.read(episodesProvider.notifier);
       // 检查是否有下一集
-      if (episodeController.hasNextEpisode(episodesState)) {
-        episodeController.switchToNextEpisode(episodesState);
-        lastEpisodeIndex = episodesState.episodeIndex.value;
+      if (episodesNotifier.hasNextEpisode) {
+        episodesNotifier.switchToNextEpisode();
+        lastEpisodeIndex = ref.read(episodesProvider).episodeIndex;
       }
     } catch (e) {
-      logger.e('自动切换到下一集失败: $e');
+      LiggLogger().e('自动切换到下一集失败: $e');
     }
   }
 
@@ -133,7 +125,8 @@ class _VideoViewState extends ConsumerState<VideoView> with WindowListener {
     if (position == Duration.zero || duration == Duration.zero) return;
 
     final subjectId = subject.subjectId;
-    final episodeId = episodesState.episodeId.value;
+    final episodesState = episodesSnapshot;
+    final episodeId = episodesState.episodeId;
     if (subjectId <= 0 || episodeId <= 0) return;
 
     final playHistory = PlayHistory(
@@ -141,7 +134,7 @@ class _VideoViewState extends ConsumerState<VideoView> with WindowListener {
       subjectName: subject.subjectName,
       episodeId: episodeId,
       alias: subject.subjectAliases,
-      episodeSort: episodesState.episodeIndex.value,
+      episodeSort: episodesState.episodeIndex,
       cover: subject.subjectCover,
       updateAt: DateTime.now(),
       position: position.inSeconds,
@@ -152,7 +145,6 @@ class _VideoViewState extends ConsumerState<VideoView> with WindowListener {
 
   @override
   void dispose() {
-    episodeIndexWorker?.dispose();
     playbackCompletedSubscription?.cancel();
     videoSourceController.cancelVideoSourceResolution();
     _savePlayHistory();
@@ -183,6 +175,30 @@ class _VideoViewState extends ConsumerState<VideoView> with WindowListener {
 
   @override
   Widget build(BuildContext context) {
+    // 缓存最新剧集状态，供 dispose 中安全使用
+    ref.listen<EpisodesData>(
+      episodesProvider,
+      (previous, next) => episodesSnapshot = next,
+    );
+    // 监听集数变化：用户手动切集时停止当前播放并重新选择资源
+    ref.listen<int>(
+      episodesProvider.select((state) => state.episodeIndex),
+      (previous, episode) {
+        if (episode <= 0 || episode == lastEpisodeIndex) {
+          return;
+        }
+        // 跳过首次从 0 设置集数，避免与 PlayPage 初始化资源搜索冲突
+        if (previous == null || previous <= 0) {
+          lastEpisodeIndex = episode;
+          return;
+        }
+        lastEpisodeIndex = episode;
+        playController.clearDanmakuIfEpisodeMismatch(episode);
+        videoSourceController.userManuallySelected = false;
+        playController.player.stop();
+        selectResourceAfterInit();
+      },
+    );
     return Stack(
       children: [
         /// 视频层
@@ -192,9 +208,10 @@ class _VideoViewState extends ConsumerState<VideoView> with WindowListener {
         ),
 
         /// 弹幕层
-        Positioned.fill(
-          child: DanmakuView(key: _danmuKey),
+        const Positioned.fill(
+          child: DanmakuView(),
         ),
+
         /// UI层
         const Positioned.fill(child: VideoUi()),
       ],

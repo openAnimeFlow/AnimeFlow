@@ -17,39 +17,41 @@ class EpisodesDialog extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Align(
-      alignment: Alignment.centerRight,
-      child: Container(
-        width: LayoutConstant.playContentWidth,
-        height: double.infinity,
-        padding: const EdgeInsets.only(top: 16, right: 16, left: 16),
-        color: Theme.of(context).cardColor,
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Text(
-                  "章节列表",
-                  style: TextStyle(
-                    fontSize: 20,
-                    fontWeight: FontWeight.bold,
-                    color: Theme.of(context).textTheme.titleLarge?.color,
-                    decoration: TextDecoration.none,
+    return Scaffold(
+      body: Align(
+        alignment: Alignment.centerRight,
+        child: Container(
+          width: LayoutConstant.playContentWidth,
+          height: double.infinity,
+          padding: const EdgeInsets.only(top: 16, right: 16, left: 16),
+          color: Theme.of(context).cardColor,
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Text(
+                    "章节列表",
+                    style: TextStyle(
+                      fontSize: 20,
+                      fontWeight: FontWeight.bold,
+                      color: Theme.of(context).textTheme.titleLarge?.color,
+                      decoration: TextDecoration.none,
+                    ),
                   ),
-                ),
-                IconButton(
-                  onPressed: () => Get.back(),
-                  icon: const Icon(Icons.close_rounded),
-                ),
-              ],
-            ),
-            const SizedBox(height: 10),
-            Expanded(
-              child: _buildEpisodesList(context),
-            ),
-          ],
+                  IconButton(
+                    onPressed: () => Get.back(),
+                    icon: const Icon(Icons.close_rounded),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 10),
+              Expanded(
+                child: _buildEpisodesList(context),
+              ),
+            ],
+          ),
         ),
       ),
     );

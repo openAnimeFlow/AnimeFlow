@@ -19,9 +19,15 @@ class DesktopGestureDetector extends StatefulWidget {
 }
 
 class _DesktopGestureDetectorState extends State<DesktopGestureDetector> {
-  static Timer? _hoverTimer;
-  final VideoUiStateController videoUiStateController = Get.find<VideoUiStateController>();
-  final PlayController playPageController = Get.find<PlayController>();
+  Timer? hoverTimer;
+  final videoUiStateController = Get.find<VideoUiStateController>();
+  final playPageController = Get.find<PlayController>();
+
+  @override
+  void dispose() {
+    hoverTimer?.cancel();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -101,16 +107,16 @@ class _DesktopGestureDetectorState extends State<DesktopGestureDetector> {
 
           // 鼠标悬停事件
           onHover: (event) {
-            _hoverTimer?.cancel();
+            hoverTimer?.cancel();
             videoUiStateController.showControlsUi();
-            _hoverTimer = Timer(const Duration(seconds: 3), () {
+            hoverTimer = Timer(const Duration(seconds: 3), () {
               videoUiStateController.hideControlsUi();
             });
           },
 
           // 鼠标移出事件
           onExit: (event) {
-            _hoverTimer?.cancel();
+            hoverTimer?.cancel();
             videoUiStateController.hideControlsUi(
                 duration: const Duration(seconds: 3));
           },

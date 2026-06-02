@@ -180,22 +180,20 @@ class _VideoViewState extends ConsumerState<VideoView> with WindowListener {
       episodesProvider,
       (previous, next) => episodesSnapshot = next,
     );
-    // 监听集数变化：用户手动切集时停止当前播放并重新选择资源
+    // 监听集数变化：首次设置或切换集数时重新选择资源
     ref.listen<int>(
       episodesProvider.select((state) => state.episodeIndex),
       (previous, episode) {
         if (episode <= 0 || episode == lastEpisodeIndex) {
           return;
         }
-        // 跳过首次从 0 设置集数，避免与 PlayPage 初始化资源搜索冲突
-        if (previous == null || previous <= 0) {
-          lastEpisodeIndex = episode;
-          return;
-        }
         lastEpisodeIndex = episode;
-        playController.clearDanmakuIfEpisodeMismatch(episode);
-        videoSourceController.userManuallySelected = false;
-        playController.player.stop();
+        // 首次设置集数时无需停止播放或清弹幕
+        if (previous != null && previous > 0) {
+          playController.clearDanmakuIfEpisodeMismatch(episode);
+          videoSourceController.userManuallySelected = false;
+          playController.player.stop();
+        }
         selectResourceAfterInit();
       },
     );

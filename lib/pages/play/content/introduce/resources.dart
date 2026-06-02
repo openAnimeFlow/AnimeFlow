@@ -2,11 +2,11 @@ import 'package:anime_flow/pages/play/controller/play_controller.dart';
 import 'package:anime_flow/pages/play/controller/video_source_controller.dart';
 import 'package:anime_flow/stores/episodes_state.dart';
 import 'package:anime_flow/stores/play_subject_state.dart';
+import 'package:anime_flow/utils/logger.dart';
 import 'package:anime_flow/widget/animation_network_image/animation_network_image.dart';
 import 'package:anime_flow/widget/play_content/source_drawers/video_source_drawers.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:anime_flow/utils/logger.dart';
 
 class VideoResourcesView extends StatefulWidget {
   const VideoResourcesView({super.key});
@@ -16,12 +16,11 @@ class VideoResourcesView extends StatefulWidget {
 }
 
 class _VideoResourcesViewState extends State<VideoResourcesView> {
-  final VideoSourceController videoSourceController =
-      Get.find<VideoSourceController>();
-  final PlaySubjectState playSubjectState = Get.find<PlaySubjectState>();
-  final PlayController playController = Get.find<PlayController>();
-  final EpisodesState episodesState = Get.find<EpisodesState>();
-  final LiggLogger logger = LiggLogger();
+  final videoSourceController = Get.find<VideoSourceController>();
+  final playSubjectState = Get.find<PlaySubjectState>();
+  final playController = Get.find<PlayController>();
+  final episodesState = Get.find<EpisodesState>();
+  final logger = LiggLogger();
 
   /// 显示数据源抽屉
   void _showSourceDrawer() {

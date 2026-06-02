@@ -3,7 +3,6 @@ import 'package:anime_flow/controllers/my_controller.dart';
 import 'package:anime_flow/models/enums/video_controls_icon_type.dart';
 import 'package:anime_flow/pages/play/controller/episode_controller.dart';
 import 'package:anime_flow/pages/play/controller/play_controller.dart';
-import 'package:anime_flow/pages/play/controller/video_source_controller.dart';
 import 'package:anime_flow/pages/play/controller/video_ui_controller.dart';
 import 'package:anime_flow/pages/play/video/ui/button/rate_button.dart';
 import 'package:anime_flow/pages/play/video/ui/button/shader_button.dart';
@@ -28,12 +27,10 @@ class BottomAreaControl extends StatefulWidget {
 }
 
 class _BottomAreaControlState extends State<BottomAreaControl> {
-  final VideoUiStateController videoUiStateController =
-      Get.find<VideoUiStateController>();
+  final videoUiStateController = Get.find<VideoUiStateController>();
   final playController = Get.find<PlayController>();
   final episodesState = Get.find<EpisodesState>();
   final episodeController = Get.find<EpisodeController>();
-  final videoSourceController = Get.find<VideoSourceController>();
 
   Future<void> onSendDanmaku(String text, int bgmUserId) async {
     final success = await playController.sendDanmaku(
@@ -180,8 +177,8 @@ class _BottomAreaControlState extends State<BottomAreaControl> {
                                     // 弹幕输入框
                                     ? Consumer(
                                         builder: (context, ref, _) {
-                                          final userInfo = ref.watch(
-                                              currentUserInfoProvider);
+                                          final userInfo = ref
+                                              .watch(currentUserInfoProvider);
                                           if (userInfo != null) {
                                             return DanmakuTextField(
                                               iconColor: Colors.white,
@@ -257,8 +254,10 @@ class _BottomAreaControlState extends State<BottomAreaControl> {
                                       pageBuilder: (context, animation,
                                           secondaryAnimation) {
                                         return EpisodesDialog(
-                                          episodes: episodesState.episodes.value?.data,
-                                          selectedEpisode: episodesState.episodeSort.value,
+                                          episodes: episodesState
+                                              .episodes.value?.data,
+                                          selectedEpisode:
+                                              episodesState.episodeSort.value,
                                           onEpisodeSelected:
                                               (episode, episodeIndex) {
                                             episodesState.setEpisodeSort(

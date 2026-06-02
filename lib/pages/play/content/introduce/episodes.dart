@@ -1,7 +1,6 @@
 import 'package:anime_flow/constants/assets_path_constants.dart';
 import 'package:anime_flow/models/item/bangumi/episodes_item.dart';
 import 'package:anime_flow/pages/play/controller/play_controller.dart';
-import 'package:anime_flow/pages/play/controller/video_source_controller.dart';
 import 'package:anime_flow/stores/episodes_state.dart';
 import 'package:anime_flow/stores/play_subject_state.dart';
 import 'package:flutter/material.dart';
@@ -16,11 +15,10 @@ class EpisodesComponents extends StatefulWidget {
 }
 
 class EpisodesComponentsState extends State<EpisodesComponents> {
-  final PlayController playPageController = Get.find<PlayController>();
-  final PlaySubjectState subjectState = Get.find<PlaySubjectState>();
-  final EpisodesState episodesState = Get.find<EpisodesState>();
-  final VideoSourceController videoSourceController = Get.find<VideoSourceController>();
-  final ScrollController controller = ScrollController();
+  final playPageController = Get.find<PlayController>();
+  final subjectState = Get.find<PlaySubjectState>();
+  final episodesState = Get.find<EpisodesState>();
+  final controller = ScrollController();
   bool isLoading = false;
 
   /// 布局模式：false=列表，true=网格
@@ -126,8 +124,9 @@ class EpisodesComponentsState extends State<EpisodesComponents> {
                               episodeId: episode.id,
                               episodeIndex: episodeIndex,
                               sort: episode.sort);
-                          episodesState
-                              .setEpisodeTitle(episode.nameCN.isEmpty ? episode.name : episode.nameCN);
+                          episodesState.setEpisodeTitle(episode.nameCN.isEmpty
+                              ? episode.name
+                              : episode.nameCN);
                         },
                         child: Container(
                           decoration: BoxDecoration(
@@ -145,12 +144,15 @@ class EpisodesComponentsState extends State<EpisodesComponents> {
                             children: [
                               Expanded(
                                   child: Column(
-                                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                                mainAxisAlignment:
+                                    MainAxisAlignment.spaceBetween,
+                                crossAxisAlignment: CrossAxisAlignment.stretch,
                                 children: [
                                   Text(episode.sort.toString().padLeft(2, '0')),
                                   Text(
-                                    episode.nameCN.isEmpty ? episode.name : episode.nameCN,
+                                    episode.nameCN.isEmpty
+                                        ? episode.name
+                                        : episode.nameCN,
                                     overflow: TextOverflow.ellipsis,
                                     maxLines: 1,
                                   ),
@@ -232,8 +234,9 @@ class EpisodesComponentsState extends State<EpisodesComponents> {
                             episodeId: episode.id,
                             episodeIndex: episodeIndex,
                             sort: episode.sort);
-                        episodesState
-                            .setEpisodeTitle(episode.nameCN.isEmpty ? episode.name : episode.nameCN);
+                        episodesState.setEpisodeTitle(episode.nameCN.isEmpty
+                            ? episode.name
+                            : episode.nameCN);
                       },
                       child: Center(
                         child: Text(

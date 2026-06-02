@@ -1,11 +1,11 @@
 import 'package:anime_flow/pages/play/controller/play_controller.dart';
 import 'package:anime_flow/pages/play/controller/video_ui_controller.dart';
 import 'package:anime_flow/utils/exceptions/storage_exception.dart';
+import 'package:anime_flow/utils/logger.dart';
 import 'package:anime_flow/utils/systemUtil.dart';
 import 'package:anime_flow/widget/notification_toast.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:anime_flow/utils/logger.dart';
 
 class RightAreaControl extends StatefulWidget {
   const RightAreaControl({super.key});
@@ -15,8 +15,8 @@ class RightAreaControl extends StatefulWidget {
 }
 
 class _RightAreaControlState extends State<RightAreaControl> {
-  final VideoUiStateController videoUiStateController = Get.find<VideoUiStateController>();
-  final PlayController playController = Get.find<PlayController>();
+  final videoUiStateController = Get.find<VideoUiStateController>();
+  final playController = Get.find<PlayController>();
 
   @override
   Widget build(BuildContext context) {

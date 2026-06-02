@@ -27,8 +27,8 @@ class PlayPage extends StatefulWidget {
 }
 
 class _PlayPageState extends State<PlayPage> {
-  final VideoSourceController videoSourceController = Get.put(VideoSourceController());
-  final EpisodesState episodesState = Get.put(EpisodesState());
+  final  videoSourceController = Get.put(VideoSourceController());
+  final  episodesState = Get.put(EpisodesState());
   late final PlaySubjectState subjectState;
   late final PlayController playController;
 

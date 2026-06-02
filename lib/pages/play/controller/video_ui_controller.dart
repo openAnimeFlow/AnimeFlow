@@ -12,27 +12,25 @@ import 'package:screen_brightness_platform_interface/screen_brightness_platform_
 
 class VideoUiStateController extends GetxController {
   /// 是否正在拖拽进度条
-  final RxBool isDragging = false.obs;
+  final isDragging = false.obs;
 
   ///是否显示控件ui
-  final RxBool isShowControlsUi = true.obs;
+  final isShowControlsUi = true.obs;
 
   /// 是否正在水平拖动
-  final RxBool isHorizontalDragging = false.obs;
+  final isHorizontalDragging = false.obs;
 
   /// 拖动时的临时进度
-  final Rx<Duration> dragPosition = Duration.zero.obs;
+  final dragPosition = Duration.zero.obs;
 
   /// 是否显示指示器ui
-  final RxBool isShowIndicatorUi = false.obs;
+  final isShowIndicatorUi = false.obs;
 
   /// 指示器类型
-  final Rx<VideoControlsIndicatorType> indicatorType =
-      VideoControlsIndicatorType.noIndicator.obs;
+  final indicatorType = VideoControlsIndicatorType.noIndicator.obs;
 
   /// 主轴对齐类型
-  final Rx<MainAxisAlignment> mainAxisAlignmentType =
-      MainAxisAlignment.start.obs;
+  final mainAxisAlignmentType = MainAxisAlignment.start.obs;
 
   /// 拖动相关
   double _dragStartX = 0;
@@ -52,25 +50,25 @@ class VideoUiStateController extends GetxController {
   double _originalBrightness = 0.5;
 
   /// 当前亮度 0.0-1.0
-  final RxDouble currentBrightness = 0.5.obs;
+  final currentBrightness = 0.5.obs;
 
   /// 是否正在拖动调整亮度
-  final RxBool isBrightnessDragging = false.obs;
+  final isBrightnessDragging = false.obs;
 
   /// 拖动开始时的亮度
   double _dragStartBrightness = 0.5;
 
   /// 当前时间
-  final RxString currentTime = SystemUtil.getCurrentTimeWithoutSeconds().obs;
+  final currentTime = SystemUtil.getCurrentTimeWithoutSeconds().obs;
 
   /// 时间更新计时器
   Timer? _timeUpdateTimer;
 
   /// 电池电量（0-100）
-  final RxInt batteryLevel = 0.obs;
+  final batteryLevel = 0.obs;
 
   /// 电池充电状态
-  final Rx<BatteryState> batteryState = BatteryState.unknown.obs;
+  final batteryState = BatteryState.unknown.obs;
 
   /// 电池状态监听流订阅
   StreamSubscription<BatteryState>? _batteryStateSubscription;
@@ -84,6 +82,17 @@ class VideoUiStateController extends GetxController {
     _initializeBrightness();
     _startTimeUpdate();
     _initializeBattery();
+  }
+
+  @override
+  void onClose() {
+    _indicatorTimer?.cancel();
+    _controlsUiTimer?.cancel();
+    _timeUpdateTimer?.cancel();
+    _batteryUpdateTimer?.cancel();
+    _batteryStateSubscription?.cancel();
+    _resetBrightness();
+    super.onClose();
   }
 
   /// 时间更新
@@ -338,16 +347,5 @@ class VideoUiStateController extends GetxController {
         } catch (_) {}
       }
     });
-  }
-
-  @override
-  void onClose() {
-    _indicatorTimer?.cancel();
-    _controlsUiTimer?.cancel();
-    _timeUpdateTimer?.cancel();
-    _batteryUpdateTimer?.cancel();
-    _batteryStateSubscription?.cancel();
-    _resetBrightness();
-    super.onClose();
   }
 }

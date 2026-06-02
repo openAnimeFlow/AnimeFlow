@@ -9,9 +9,9 @@ import 'package:anime_flow/pages/play/controller/video_ui_controller.dart';
 import 'package:anime_flow/repository/play_repository.dart';
 import 'package:anime_flow/stores/episodes_state.dart';
 import 'package:anime_flow/stores/play_subject_state.dart';
+import 'package:anime_flow/utils/logger.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:anime_flow/utils/logger.dart';
 import 'package:media_kit_video/media_kit_video.dart';
 import 'package:window_manager/window_manager.dart';
 
@@ -26,12 +26,12 @@ class VideoView extends StatefulWidget {
 }
 
 class _VideoViewState extends State<VideoView> with WindowListener {
-  final VideoUiStateController videoUiStateController = Get.find<VideoUiStateController>();
-  final VideoSourceController videoSourceController = Get.find<VideoSourceController>();
-  final EpisodeController episodeController = Get.find<EpisodeController>();
-  final PlayController playController = Get.find<PlayController>();
-  final EpisodesState episodesState = Get.find<EpisodesState>();
-  final PlaySubjectState subjectState = Get.find<PlaySubjectState>();
+  final videoUiStateController = Get.find<VideoUiStateController>();
+  final videoSourceController = Get.find<VideoSourceController>();
+  final episodeController = Get.find<EpisodeController>();
+  final playController = Get.find<PlayController>();
+  final episodesState = Get.find<EpisodesState>();
+  final subjectState = Get.find<PlaySubjectState>();
   final logger = LiggLogger();
   final _danmuKey = GlobalKey();
 
@@ -73,7 +73,8 @@ class _VideoViewState extends State<VideoView> with WindowListener {
         playController.player.stream.completed.listen((completed) {
       if (completed) {
         _autoSwitchToNextEpisode();
-        PlayRepository.deletePlayHistoryByPosition(subjectState.subject.value.subjectId);
+        PlayRepository.deletePlayHistoryByPosition(
+            subjectState.subject.value.subjectId);
       }
     });
 

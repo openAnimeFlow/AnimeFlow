@@ -19,12 +19,12 @@ import 'package:flutter/cupertino.dart';
 import 'package:get/get.dart';
 
 class VideoSourceController extends GetxController {
-  final RxList<ResourcesItem> videoResources = <ResourcesItem>[].obs;
-  final RxString webSiteTitle = ''.obs;
-  final RxString webSiteIcon = ''.obs;
-  final RxString videoUrl = ''.obs;
-  final RxString keyword = ''.obs;
-  final RxBool isLoading = false.obs;
+  final videoResources = <ResourcesItem>[].obs;
+  final webSiteTitle = ''.obs;
+  final webSiteIcon = ''.obs;
+  final videoUrl = ''.obs;
+  final keyword = ''.obs;
+  final isLoading = false.obs;
 
   /// 当前选中的网站索引
   final RxInt selectedWebsiteIndex = 0.obs;
@@ -178,13 +178,13 @@ class VideoSourceController extends GetxController {
         aliases: _subjectState.subject.value.subjectAliases,
       );
       final rawSearchList =
-      await WebRequest.getSearchSubjectListService(keyword, config);
+          await WebRequest.getSearchSubjectListService(keyword, config);
       final searchList = rankService.sort(rawSearchList, (item) => item.name);
       final allEpisodesList = <EpisodeResourcesItem>[];
 
       for (final search in searchList) {
         final crawlerEpisodeResources =
-        await WebRequest.getResourcesListService(search.link, config);
+            await WebRequest.getResourcesListService(search.link, config);
 
         for (final crawlerResource in crawlerEpisodeResources) {
           allEpisodesList.add(
@@ -225,13 +225,13 @@ class VideoSourceController extends GetxController {
   }
 
   void _updateResourceStatus(
-      String websiteName, {
-        bool? isLoading,
-        List<EpisodeResourcesItem>? episodeResources,
-        String? errorMessage,
-        bool? needsCaptcha,
-        AntiCrawlerConfig? antiCrawlerConfig,
-      }) {
+    String websiteName, {
+    bool? isLoading,
+    List<EpisodeResourcesItem>? episodeResources,
+    String? errorMessage,
+    bool? needsCaptcha,
+    AntiCrawlerConfig? antiCrawlerConfig,
+  }) {
     final updatedResources = videoResources.map((resource) {
       if (resource.websiteName == websiteName) {
         return resource.copyWith(
@@ -276,11 +276,13 @@ class VideoSourceController extends GetxController {
       List<ResourcesItem> resources) {
     final candidates = <_AutoLoadCandidate>[];
 
-    for (var websiteIndex = 0; websiteIndex < resources.length; websiteIndex++) {
+    for (var websiteIndex = 0;
+        websiteIndex < resources.length;
+        websiteIndex++) {
       final resource = resources[websiteIndex];
       for (final resourceItem in resource.episodeResources) {
         final episode = resourceItem.episodes.firstWhereOrNull(
-              (ep) => ep.episodeSort == _episodesState.episodeIndex.value,
+          (ep) => ep.episodeSort == _episodesState.episodeIndex.value,
         );
         if (episode == null) {
           continue;

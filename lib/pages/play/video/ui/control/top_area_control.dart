@@ -1,18 +1,18 @@
+import 'package:anime_flow/features/network_speed/network_speed_provider.dart';
+import 'package:anime_flow/pages/play/controller/play_controller.dart';
+import 'package:anime_flow/pages/play/controller/video_source_controller.dart';
+import 'package:anime_flow/pages/play/controller/video_ui_controller.dart';
 import 'package:anime_flow/pages/play/video/ui/setting/video_setting.dart';
 import 'package:anime_flow/stores/episodes_state.dart';
 import 'package:anime_flow/stores/play_subject_state.dart';
-import 'package:anime_flow/pages/play/controller/video_source_controller.dart';
-import 'package:anime_flow/pages/play/controller/play_controller.dart';
-import 'package:anime_flow/pages/play/controller/video_ui_controller.dart';
-import 'package:anime_flow/features/network_speed/network_speed_provider.dart';
 import 'package:anime_flow/utils/systemUtil.dart';
 import 'package:anime_flow/utils/utils.dart';
 import 'package:anime_flow/widget/battery_icon.dart';
 import 'package:anime_flow/widget/network_icon.dart';
 import 'package:anime_flow/widget/play_content/source_drawers/video_source_drawers.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_svg/svg.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_svg/svg.dart';
 import 'package:get/get.dart';
 
 /// 顶部区域空间
@@ -24,13 +24,11 @@ class TopAreaControl extends ConsumerStatefulWidget {
 }
 
 class _TopAreaControlState extends ConsumerState<TopAreaControl> {
-  final VideoSourceController videoSourceController =
-      Get.find<VideoSourceController>();
-  final PlayController playController = Get.find<PlayController>();
-  final VideoUiStateController videoUiStateController =
-      Get.find<VideoUiStateController>();
-  final EpisodesState episodesController = Get.find<EpisodesState>();
-  final PlaySubjectState playSubjectState = Get.find<PlaySubjectState>();
+  final videoSourceController = Get.find<VideoSourceController>();
+  final playController = Get.find<PlayController>();
+  final videoUiStateController = Get.find<VideoUiStateController>();
+  final episodesController = Get.find<EpisodesState>();
+  final playSubjectState = Get.find<PlaySubjectState>();
 
   Future<T?> _showRightSlideDialog<T>({
     required BuildContext context,
@@ -123,7 +121,8 @@ class _TopAreaControlState extends ConsumerState<TopAreaControl> {
                                         CrossAxisAlignment.start,
                                     children: [
                                       Text(
-                                        playSubjectState.subject.value.subjectName,
+                                        playSubjectState
+                                            .subject.value.subjectName,
                                         style: const TextStyle(
                                             color: Colors.white,
                                             fontSize: 16,
@@ -197,7 +196,8 @@ class _TopAreaControlState extends ConsumerState<TopAreaControl> {
                                         videoSourceController:
                                             videoSourceController,
                                         episodesState: episodesController,
-                                        subjectName: playSubjectState.subject.value.subjectName,
+                                        subjectName: playSubjectState
+                                            .subject.value.subjectName,
                                       ),
                                     );
                                   },

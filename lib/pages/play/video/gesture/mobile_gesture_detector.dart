@@ -23,8 +23,8 @@ class _MobileGestureDetectorState extends State<MobileGestureDetector> {
   double _verticalDragStartY = 0; // 垂直拖动开始时的Y坐标
   bool _isRightSide = false; // 是否在屏幕右半侧开始垂直拖动
   late double fastForwardSpeed;
-  final PlayController playController = Get.find<PlayController>();
-  final VideoUiStateController videoUiStateController = Get.find<VideoUiStateController>();
+  final playController = Get.find<PlayController>();
+  final videoUiStateController = Get.find<VideoUiStateController>();
 
   @override
   void initState() {

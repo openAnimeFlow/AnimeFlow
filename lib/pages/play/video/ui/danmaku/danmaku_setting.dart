@@ -15,7 +15,7 @@ class DanmakuSetting extends StatefulWidget {
 }
 
 class _DanmakuSettingState extends State<DanmakuSetting> {
-  final PlayController playController = Get.find<PlayController>();
+  final playController = Get.find<PlayController>();
   Box setting = Storage.setting;
 
   @override

@@ -1,9 +1,9 @@
 import 'package:anime_flow/http/requests/flow_request.dart';
-import 'package:anime_flow/models/item/danmaku/danmaku_search_response.dart';
 import 'package:anime_flow/models/item/danmaku/danmaku_episode_response.dart';
-import 'package:anime_flow/stores/episodes_state.dart';
-import 'package:anime_flow/pages/play/controller/play_controller.dart';
 import 'package:anime_flow/models/item/danmaku/danmaku_module.dart';
+import 'package:anime_flow/models/item/danmaku/danmaku_search_response.dart';
+import 'package:anime_flow/pages/play/controller/play_controller.dart';
+import 'package:anime_flow/stores/episodes_state.dart';
 import 'package:anime_flow/stores/play_subject_state.dart';
 import 'package:anime_flow/utils/format_time_util.dart';
 import 'package:flutter/material.dart';
@@ -19,13 +19,14 @@ class DanmakuCard extends StatefulWidget {
 }
 
 class _DanmakuCardState extends State<DanmakuCard> {
-  final EpisodesState episodesController = Get.find<EpisodesState>();
-  final PlayController playController = Get.find<PlayController>();
-  final PlaySubjectState subjectState = Get.find<PlaySubjectState>();
+  final episodesController = Get.find<EpisodesState>();
+  final playController = Get.find<PlayController>();
+  final subjectState = Get.find<PlaySubjectState>();
 
   final danmakuFieldController = TextEditingController();
 
   bool isExpanded = false;
+
   // DanmakuSearchResponse? danmakuSearchResponse;
 
   @override
@@ -160,31 +161,31 @@ class _DanmakuCardState extends State<DanmakuCard> {
                           children: sortedPlatforms.map((entry) {
                             final platform = entry.key;
                             final isHidden =
-                            playController.isPlatformHidden(platform);
+                                playController.isPlatformHidden(platform);
                             return ActionChip(
                               label: Text('${entry.key}: ${entry.value}'),
                               labelStyle: Theme.of(context)
                                   .textTheme
                                   .bodySmall
                                   ?.copyWith(
-                                decoration: isHidden
-                                    ? TextDecoration.lineThrough
-                                    : null,
-                                color: isHidden
-                                    ? Theme.of(context)
-                                    .textTheme
-                                    .bodySmall
-                                    ?.color
-                                    ?.withValues(alpha: 0.5)
-                                    : null,
-                              ),
+                                    decoration: isHidden
+                                        ? TextDecoration.lineThrough
+                                        : null,
+                                    color: isHidden
+                                        ? Theme.of(context)
+                                            .textTheme
+                                            .bodySmall
+                                            ?.color
+                                            ?.withValues(alpha: 0.5)
+                                        : null,
+                                  ),
                               materialTapTargetSize:
-                              MaterialTapTargetSize.shrinkWrap,
+                                  MaterialTapTargetSize.shrinkWrap,
                               visualDensity: VisualDensity.compact,
                               backgroundColor: isHidden
                                   ? Theme.of(context)
-                                  .colorScheme
-                                  .surfaceContainerHighest
+                                      .colorScheme
+                                      .surfaceContainerHighest
                                   : null,
                               onPressed: () {
                                 playController
@@ -202,7 +203,8 @@ class _DanmakuCardState extends State<DanmakuCard> {
                         // 固定item高度，提升滚动性能
                         itemExtent: 30.0,
                         // 缓存范围
-                        scrollCacheExtent: const ScrollCacheExtent.pixels(200.0),
+                        scrollCacheExtent:
+                            const ScrollCacheExtent.pixels(200.0),
                         physics: const ClampingScrollPhysics(),
                         itemBuilder: (context, index) {
                           final danmaku = filteredDanmakus[index];
@@ -244,7 +246,7 @@ class _DanmakuCardState extends State<DanmakuCard> {
           icon: const Icon(Icons.subtitles),
           title: const Text('修改弹幕'),
           titleTextStyle:
-          const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+              const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
           content: ConstrainedBox(
             constraints: const BoxConstraints(maxWidth: 500),
             child: SizedBox(
@@ -289,7 +291,7 @@ class _DanmakuCardState extends State<DanmakuCard> {
                             onTap: () async {
                               final episodes = await FlowRequest
                                   .getDanDanEpisodesByDanDanBangumiID(
-                                  anime.animeId);
+                                      anime.animeId);
                               if (!dialogContext.mounted) return;
                               dialogContext.pop();
                               if (!mounted) return;
@@ -321,8 +323,7 @@ class _DanmakuCardState extends State<DanmakuCard> {
                     danmakuSearchResponse = null;
                   });
                   try {
-                    final response =
-                    await FlowRequest.searchResponse(
+                    final response = await FlowRequest.searchResponse(
                         danmakuFieldController.text);
                     setDialogState(() {
                       danmakuSearchResponse = response;
@@ -357,39 +358,39 @@ class _DanmakuCardState extends State<DanmakuCard> {
               width: double.maxFinite,
               child: episodesResponse.episodes.isEmpty
                   ? const Center(
-                child: Padding(
-                  padding: EdgeInsets.all(16.0),
-                  child: Text('暂无剧集数据'),
-                ),
-              )
-                  : ConstrainedBox(
-                constraints: const BoxConstraints(
-                  maxHeight: 400,
-                  minHeight: 200,
-                ),
-                child: ListView.builder(
-                  shrinkWrap: true,
-                  itemCount: episodesResponse.episodes.length,
-                  itemBuilder: (context, index) {
-                    final episode = episodesResponse.episodes[index];
-                    return ListTile(
-                      title: Text(
-                        episode.episodeTitle,
-                        style: Theme.of(context).textTheme.bodyLarge,
+                      child: Padding(
+                        padding: EdgeInsets.all(16.0),
+                        child: Text('暂无剧集数据'),
                       ),
-                      onTap: () async {
-                        final danmaku =
-                        await FlowRequest.getDanDanmakuByEpisodeID(
-                            episode.episodeId);
-                        if (!context.mounted) return;
-                        playController.removeDanmaku();
-                        playController.addDanmakuAll(danmaku);
-                        Navigator.of(context).pop();
-                      },
-                    );
-                  },
-                ),
-              ),
+                    )
+                  : ConstrainedBox(
+                      constraints: const BoxConstraints(
+                        maxHeight: 400,
+                        minHeight: 200,
+                      ),
+                      child: ListView.builder(
+                        shrinkWrap: true,
+                        itemCount: episodesResponse.episodes.length,
+                        itemBuilder: (context, index) {
+                          final episode = episodesResponse.episodes[index];
+                          return ListTile(
+                            title: Text(
+                              episode.episodeTitle,
+                              style: Theme.of(context).textTheme.bodyLarge,
+                            ),
+                            onTap: () async {
+                              final danmaku =
+                                  await FlowRequest.getDanDanmakuByEpisodeID(
+                                      episode.episodeId);
+                              if (!context.mounted) return;
+                              playController.removeDanmaku();
+                              playController.addDanmakuAll(danmaku);
+                              Navigator.of(context).pop();
+                            },
+                          );
+                        },
+                      ),
+                    ),
             ),
           ),
           actions: [

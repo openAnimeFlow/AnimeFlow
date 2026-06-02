@@ -18,7 +18,7 @@ class DanmakuView extends StatefulWidget {
 class _DanmakuViewState extends State<DanmakuView>
     with AutomaticKeepAliveClientMixin {
   final setting = Storage.setting;
-  final PlayController playController = Get.find<PlayController>();
+  final playController = Get.find<PlayController>();
   ProviderContainer? _container;
   Timer? _danmakuTimer;
   Worker? _rateWorker;

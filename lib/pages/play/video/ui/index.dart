@@ -3,8 +3,8 @@ import 'package:anime_flow/pages/play/controller/play_controller.dart';
 import 'package:anime_flow/pages/play/controller/video_ui_controller.dart';
 import 'package:anime_flow/pages/play/video/gesture/desktop_gesture_detector.dart';
 import 'package:anime_flow/pages/play/video/gesture/mobile_gesture_detector.dart';
-import 'package:anime_flow/utils/systemUtil.dart';
 import 'package:anime_flow/stores/episodes_state.dart';
+import 'package:anime_flow/utils/systemUtil.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
@@ -22,11 +22,10 @@ class VideoUi extends StatefulWidget {
 }
 
 class _VideoUiState extends State<VideoUi> {
-  final VideoUiStateController videoUiStateController = Get.find<VideoUiStateController>();
-  final PlayController playPageController = Get.find<PlayController>();
-  final EpisodesState episodesState = Get.find<EpisodesState>();
-  final EpisodeController episodeController = Get.find<EpisodeController>();
-
+  final videoUiStateController = Get.find<VideoUiStateController>();
+  final playPageController = Get.find<PlayController>();
+  final episodesState = Get.find<EpisodesState>();
+  final episodeController = Get.find<EpisodeController>();
 
   @override
   void dispose() {
@@ -49,7 +48,8 @@ class _VideoUiState extends State<VideoUi> {
       const Positioned(top: 0, left: 0, right: 0, child: TopAreaControl()),
 
       ///底部
-      const Positioned(bottom: 0, left: 0, right: 0, child: BottomAreaControl()),
+      const Positioned(
+          bottom: 0, left: 0, right: 0, child: BottomAreaControl()),
 
       ///右侧
       const Positioned(right: 0, top: 0, bottom: 0, child: RightAreaControl()),

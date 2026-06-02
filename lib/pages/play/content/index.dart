@@ -1,15 +1,16 @@
 import 'package:anime_flow/controllers/my_controller.dart';
 import 'package:anime_flow/http/requests/flow_request.dart';
+import 'package:anime_flow/models/item/bangumi/episode_comments_item.dart';
+import 'package:anime_flow/pages/play/content/introduce/index.dart';
 import 'package:anime_flow/pages/play/controller/play_controller.dart';
 import 'package:anime_flow/pages/play/controller/video_ui_controller.dart';
 import 'package:anime_flow/stores/episodes_state.dart';
-import 'package:anime_flow/models/item/bangumi/episode_comments_item.dart';
-import 'package:anime_flow/pages/play/content/introduce/index.dart';
+import 'package:anime_flow/utils/logger.dart';
 import 'package:anime_flow/widget/danmaku_text_field.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:get/get.dart';
-import 'package:anime_flow/utils/logger.dart';
+
 import 'comments/index.dart';
 
 class ContentView extends StatefulWidget {
@@ -21,10 +22,9 @@ class ContentView extends StatefulWidget {
 
 class _ContentViewState extends State<ContentView>
     with SingleTickerProviderStateMixin {
-  final EpisodesState episodesState = Get.find<EpisodesState>();
-  final PlayController playController = Get.find<PlayController>();
-  final VideoUiStateController videoUiStateController =
-      Get.find<VideoUiStateController>();
+  final episodesState = Get.find<EpisodesState>();
+  final playController = Get.find<PlayController>();
+  final videoUiStateController = Get.find<VideoUiStateController>();
   final List<String> _tabs = ['简介', '吐槽'];
   late TabController _tabController;
   final GlobalKey _introduceKey = GlobalKey();

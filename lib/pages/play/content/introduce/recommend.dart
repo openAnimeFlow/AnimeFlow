@@ -10,24 +10,7 @@ class RecommendView extends StatefulWidget {
 }
 
 class _RecommendViewState extends State<RecommendView> {
-  late PlaySubjectState subjectStateController;
-
-  @override
-  void initState() {
-    super.initState();
-    subjectStateController = Get.find<PlaySubjectState>();
-    // _searchRecommend();
-  }
-
-  // void _searchRecommend() async {
-  //   final tags = subjectStateController.tags;
-  //   final result = await BgmRequest.searchSubjectService(
-  //       keyword: '',
-  //       limit: 25,
-  //       offset: 0,
-  //       tags: tags.take(6).map((value) => value.name).toList());
-  //   Get.log('$result');
-  // }
+  final subjectStateController = Get.find<PlaySubjectState>();
 
   @override
   Widget build(BuildContext context) {

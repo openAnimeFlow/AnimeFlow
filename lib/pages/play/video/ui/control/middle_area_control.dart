@@ -17,8 +17,8 @@ class MiddleAreaControl extends ConsumerStatefulWidget {
 }
 
 class _MiddleAreaControlState extends ConsumerState<MiddleAreaControl> {
-  final PlayController playController = Get.find<PlayController>();
-  final VideoUiStateController videoUiStateController = Get.find<VideoUiStateController>();
+  final playController = Get.find<PlayController>();
+  final videoUiStateController = Get.find<VideoUiStateController>();
 
   @override
   Widget build(BuildContext context) {

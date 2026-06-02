@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:io';
 import 'package:anime_flow/constants/constants.dart';
 import 'package:anime_flow/constants/storage_key.dart';
 import 'package:anime_flow/controllers/shaders/shaders_controller.dart';
@@ -19,6 +20,7 @@ import 'package:hive_ce/hive.dart';
 import 'package:anime_flow/utils/logger.dart';
 import 'package:media_kit/media_kit.dart';
 import 'package:media_kit_video/media_kit_video.dart';
+import 'package:anime_flow/widget/windows_title_bar.dart';
 import 'package:window_manager/window_manager.dart';
 
 
@@ -220,6 +222,9 @@ class PlayController extends GetxController {
 
   @override
   void onClose() {
+    if (Platform.isWindows) {
+      WindowsTitleBarVisibility.reset();
+    }
     _saveSettingsTimer?.cancel();
     _saveProgressTimer?.cancel();
     _stopTimer?.cancel();
@@ -375,6 +380,9 @@ class PlayController extends GetxController {
   /// 进入全屏
   void enterFullScreen() {
     isFullscreen.value = true;
+    if (Platform.isWindows) {
+      WindowsTitleBarVisibility.setForceHidden(true);
+    }
     // 移动端全屏时自动横屏
     SystemUtil.enterFullScreen();
   }
@@ -382,7 +390,17 @@ class PlayController extends GetxController {
   /// 退出全屏
   void exitFullScreen() {
     isFullscreen.value = false;
-    SystemUtil.exitFullScreen();
+    if (Platform.isWindows) {
+      unawaited(_exitWindowsFullScreen());
+    } else {
+      SystemUtil.exitFullScreen();
+    }
+  }
+
+  /// 先退出窗口全屏再恢复标题栏，避免 forceHidden 已 false 但 _windowFullScreen 仍为 true。
+  Future<void> _exitWindowsFullScreen() async {
+    await SystemUtil.exitFullScreen();
+    WindowsTitleBarVisibility.setForceHidden(false);
   }
 
   /// 切换全屏状态
@@ -397,7 +415,11 @@ class PlayController extends GetxController {
   /// 检测桌面端全屏状态
   Future<void> checkDesktopFullscreen() async {
     if (SystemUtil.isDesktop) {
-      isFullscreen.value = await windowManager.isFullScreen();
+      final fullScreen = await windowManager.isFullScreen();
+      isFullscreen.value = fullScreen;
+      if (Platform.isWindows) {
+        WindowsTitleBarVisibility.setForceHidden(fullScreen);
+      }
     }
   }
 

@@ -10,6 +10,7 @@ import 'package:media_kit/media_kit.dart';
 import 'package:window_manager/window_manager.dart';
 import 'package:anime_flow/controllers/my_controller.dart';
 import 'package:anime_flow/providers/theme_provider.dart';
+import 'package:anime_flow/widget/windows_title_bar.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -21,9 +22,10 @@ void main() async {
   // 桌面平台初始化窗口管理器
   if (Platform.isWindows || Platform.isLinux || Platform.isMacOS) {
     await windowManager.ensureInitialized();
-    const windowOptions = WindowOptions(
-        // titleBarStyle: TitleBarStyle.hidden,
-        );
+    final windowOptions = WindowOptions(
+      titleBarStyle:
+          Platform.isWindows ? TitleBarStyle.hidden : TitleBarStyle.normal,
+    );
     await windowManager.waitUntilReadyToShow(windowOptions, () async {
       await windowManager.show();
       await windowManager.focus();
@@ -52,7 +54,6 @@ class MyApp extends StatelessWidget {
         final fontFamily = themeState.fontFamily;
         return MaterialApp.router(
           key: ValueKey(fontFamily),
-          builder: BotToastInit(),
           routeInformationProvider: appRouter.routeInformationProvider,
           routeInformationParser: appRouter.routeInformationParser,
           routerDelegate: appRouter.routerDelegate,
@@ -60,6 +61,16 @@ class MyApp extends StatelessWidget {
           theme: buildLightTheme(themeState.seedColor, fontFamily: fontFamily),
           darkTheme: buildDarkTheme(themeState.seedColor, fontFamily: fontFamily),
           themeMode: themeState.themeMode,
+          builder: (context, child) {
+            var body = BotToastInit()(context, child);
+            if (Platform.isWindows) {
+              body = WindowsTitleBar(
+                title: 'AnimeFlow',
+                child: body,
+              );
+            }
+            return body;
+          },
         );
       },
     );

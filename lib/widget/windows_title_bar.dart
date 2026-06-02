@@ -1,80 +1,158 @@
-import 'package:anime_flow/pages/play/controller/play_controller.dart';
+import 'dart:io';
+
 import 'package:anime_flow/utils/systemUtil.dart';
 import 'package:flutter/material.dart';
-import 'package:get/get.dart';
 import 'package:window_manager/window_manager.dart';
 
-/// Windows 自定义标题栏组件
-class WindowsTitleBar extends StatelessWidget {
+class WindowsTitleBarVisibility {
+  WindowsTitleBarVisibility._();
+
+  static final ValueNotifier<bool> forceHidden = ValueNotifier(false);
+
+  static void setForceHidden(bool hidden) {
+    if (!Platform.isWindows) return;
+    if (forceHidden.value != hidden) {
+      forceHidden.value = hidden;
+    }
+  }
+
+  static void reset() => setForceHidden(false);
+}
+
+/// Windows 自定义标题栏
+class WindowsTitleBar extends StatefulWidget {
   final Widget? child;
   final Color? backgroundColor;
   final double height;
+  final String? title;
 
   const WindowsTitleBar({
     super.key,
     this.child,
     this.backgroundColor,
     this.height = 35,
+    this.title,
   });
 
   @override
-  Widget build(BuildContext context) {
-    final colorScheme = Theme.of(context).colorScheme;
-    if (!SystemUtil.isDesktop) {
-      return child ?? const SizedBox.shrink();
-    }
+  State<WindowsTitleBar> createState() => _WindowsTitleBarState();
+}
 
-    // 检测是否处于全屏状态
-    // 通过 PlayController 来获取全屏状态，
-    // 如果控制器不存在（不在播放器页面），则显示标题栏
-    try {
-      final playController = Get.find<PlayController>();
-      // 如果控制器存在，使用 Obx 监听全屏状态变化
-      return Obx(() {
-        // 如果处于全屏状态，隐藏标题栏
-        if (playController.isFullscreen.value) {
-          return child ?? const SizedBox.shrink();
-        }
-        // 非全屏状态，显示标题栏
-        return _buildTitleBar(context, colorScheme);
-      });
-    } catch (e) {
-      // 如果 PlayController 不存在（不在播放器页面），显示标题栏
-      // 这是正常的行为
-      return _buildTitleBar(context, colorScheme);
+class _WindowsTitleBarState extends State<WindowsTitleBar> with WindowListener {
+  bool _showTitleBar = true;
+  bool _windowFullScreen = false;
+
+  @override
+  void initState() {
+    super.initState();
+    if (Platform.isWindows) {
+      windowManager.addListener(this);
+      WindowsTitleBarVisibility.forceHidden.addListener(_onForceHiddenChanged);
+      _syncTitleBarVisibility();
     }
   }
 
-  Widget _buildTitleBar(BuildContext context, ColorScheme colorScheme) {
+  @override
+  void dispose() {
+    if (Platform.isWindows) {
+      windowManager.removeListener(this);
+      WindowsTitleBarVisibility.forceHidden
+          .removeListener(_onForceHiddenChanged);
+    }
+    super.dispose();
+  }
+
+  /// 取消强制隐藏后需从 [windowManager] 重新同步，避免 _windowFullScreen 残留为 true。
+  void _onForceHiddenChanged() {
+    if (WindowsTitleBarVisibility.forceHidden.value) {
+      _applyTitleBarVisibility();
+    } else {
+      _syncTitleBarVisibility();
+    }
+  }
+
+  void _applyTitleBarVisibility() {
+    if (!mounted) return;
+    final show =
+        !_windowFullScreen && !WindowsTitleBarVisibility.forceHidden.value;
+    if (_showTitleBar != show) {
+      setState(() => _showTitleBar = show);
+    }
+  }
+
+  Future<void> _syncTitleBarVisibility() async {
+    _windowFullScreen = await windowManager.isFullScreen();
+    _applyTitleBarVisibility();
+  }
+
+  @override
+  void onWindowEnterFullScreen() {
+    _windowFullScreen = true;
+    _applyTitleBarVisibility();
+  }
+
+  @override
+  void onWindowLeaveFullScreen() {
+    _windowFullScreen = false;
+    _applyTitleBarVisibility();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final content = widget.child ?? const SizedBox.shrink();
+    if (!Platform.isWindows) {
+      return content;
+    }
+
+    final colorScheme = Theme.of(context).colorScheme;
     return Column(
       children: [
-        // 标题栏在顶部
-        Container(
-          height: height,
-          decoration: BoxDecoration(
-            color: backgroundColor ?? colorScheme.surfaceContainerHighest,
-            border: Border(
-              bottom: BorderSide(
-                color: Theme.of(context).dividerColor.withValues(alpha: 0.12),
-                width: 1,
-              ),
+        if (_showTitleBar) _buildTitleBar(context, colorScheme),
+        Expanded(child: content),
+      ],
+    );
+  }
+
+  Widget _buildTitleBar(BuildContext context, ColorScheme colorScheme) {
+    final title = widget.title;
+    return Container(
+      height: widget.height,
+      decoration: BoxDecoration(
+        color: widget.backgroundColor ?? colorScheme.surfaceContainerHighest,
+        border: Border(
+          bottom: BorderSide(
+            color: Theme.of(context).dividerColor.withValues(alpha: 0.12),
+            width: 1,
+          ),
+        ),
+      ),
+      child: Row(
+        children: [
+          Expanded(
+            child: WindowDragArea(
+              padding: const EdgeInsets.only(left: 12),
+              child: title == null || title.isEmpty
+                  ? null
+                  : Text(
+                      title,
+                      style: Theme.of(context).textTheme.titleSmall?.copyWith(
+                            color: colorScheme.onSurface.withValues(alpha: 0.8),
+                          ),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                    ),
             ),
           ),
-          child: const Row(
+          const Row(
+            mainAxisSize: MainAxisSize.min,
             children: [
-              Expanded(
-                child: WindowDragArea(),
-              ),
-              // 右侧窗口控制按钮
-              WindowControlButtons(),
+              WindowMinimizeButton(),
+              WindowMaximizeButton(),
+              WindowCloseButton(),
             ],
           ),
-        ),
-        // 内容区域
-        Expanded(
-          child: child ?? const SizedBox.shrink(),
-        ),
-      ],
+        ],
+      ),
     );
   }
 }
@@ -154,22 +232,62 @@ class WindowMaximizeButton extends StatefulWidget {
   State<WindowMaximizeButton> createState() => _WindowMaximizeButtonState();
 }
 
-class _WindowMaximizeButtonState extends State<WindowMaximizeButton> {
+class _WindowMaximizeButtonState extends State<WindowMaximizeButton>
+    with WindowListener {
+  bool _isMaximized = false;
+
+  @override
+  void initState() {
+    super.initState();
+    windowManager.addListener(this);
+    _syncMaximized();
+  }
+
   @override
   void dispose() {
+    windowManager.removeListener(this);
     super.dispose();
+  }
+
+  Future<void> _syncMaximized() async {
+    final maximized = await windowManager.isMaximized();
+    if (!mounted || _isMaximized == maximized) return;
+    setState(() => _isMaximized = maximized);
+  }
+
+  @override
+  void onWindowMaximize() {
+    if (mounted) setState(() => _isMaximized = true);
+  }
+
+  @override
+  void onWindowUnmaximize() {
+    if (mounted) setState(() => _isMaximized = false);
+  }
+
+  @override
+  void onWindowEnterFullScreen() {
+    if (mounted) setState(() => _isMaximized = false);
+  }
+
+  @override
+  void onWindowLeaveFullScreen() {
+    _syncMaximized();
   }
 
   @override
   Widget build(BuildContext context) {
     return WindowControlButton(
-      icon: Icons.crop_square_rounded,
+      icon: _isMaximized
+          ? Icons.filter_none_rounded
+          : Icons.crop_square_rounded,
       onPressed: () async {
-        if (await windowManager.isMaximized()) {
+        if (_isMaximized) {
           await windowManager.restore();
         } else {
           await windowManager.maximize();
         }
+        await _syncMaximized();
       },
     );
   }

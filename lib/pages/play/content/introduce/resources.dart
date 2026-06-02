@@ -1,36 +1,36 @@
 import 'package:anime_flow/pages/play/controller/play_controller.dart';
 import 'package:anime_flow/pages/play/controller/video_source_controller.dart';
 import 'package:anime_flow/stores/episodes_state.dart';
-import 'package:anime_flow/stores/play_subject_state.dart';
+import 'package:anime_flow/pages/play/provider/play_subject_provider.dart';
 import 'package:anime_flow/utils/logger.dart';
 import 'package:anime_flow/widget/animation_network_image/animation_network_image.dart';
 import 'package:anime_flow/widget/play_content/source_drawers/video_source_drawers.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:get/get.dart';
 
-class VideoResourcesView extends StatefulWidget {
+class VideoResourcesView extends ConsumerStatefulWidget {
   const VideoResourcesView({super.key});
 
   @override
-  State<VideoResourcesView> createState() => _VideoResourcesViewState();
+  ConsumerState<VideoResourcesView> createState() => _VideoResourcesViewState();
 }
 
-class _VideoResourcesViewState extends State<VideoResourcesView> {
+class _VideoResourcesViewState extends ConsumerState<VideoResourcesView> {
   final videoSourceController = Get.find<VideoSourceController>();
-  final playSubjectState = Get.find<PlaySubjectState>();
   final playController = Get.find<PlayController>();
   final episodesState = Get.find<EpisodesState>();
   final logger = LiggLogger();
 
-  /// 显示数据源抽屉
   void _showSourceDrawer() {
     void onVideoUrlSelected(String url) {
       playController.player.stop();
       videoSourceController.loadVideoPage(url);
     }
 
+    final subjectName = ref.read(playSubjectProvider).subjectName;
+
     if (playController.isWideScreen.value) {
-      // 宽屏模式：使用侧边抽屉
       Get.generalDialog(
         barrierDismissible: true,
         barrierLabel: "SourceDrawer",
@@ -54,19 +54,18 @@ class _VideoResourcesViewState extends State<VideoResourcesView> {
             onVideoUrlSelected: onVideoUrlSelected,
             videoSourceController: videoSourceController,
             episodesState: episodesState,
-            subjectName: playSubjectState.subject.value.subjectName,
+            subjectName: subjectName,
           );
         },
       );
     } else {
-      // 窄屏模式：使用底部抽屉
       Get.bottomSheet(
         VideoSourceDrawers(
           isBottomSheet: true,
           onVideoUrlSelected: onVideoUrlSelected,
           videoSourceController: videoSourceController,
           episodesState: episodesState,
-          subjectName: playSubjectState.subject.value.subjectName,
+          subjectName: subjectName,
         ),
         isScrollControlled: true,
         backgroundColor: Colors.transparent,
@@ -99,17 +98,16 @@ class _VideoResourcesViewState extends State<VideoResourcesView> {
                       ),
                       const SizedBox(height: 5),
                       Obx(() => videoSourceController.isLoading.value ||
-                              videoSourceController
-                                  .webSiteTitle.value.isNotEmpty
+                              videoSourceController.webSiteTitle.value.isNotEmpty
                           ? Row(
                               children: [
                                 ClipRRect(
                                   borderRadius: BorderRadius.circular(5),
                                   child: AnimationNetworkImage(
-                                      height: 25,
-                                      width: 25,
-                                      url: videoSourceController
-                                          .webSiteIcon.value),
+                                    height: 25,
+                                    width: 25,
+                                    url: videoSourceController.webSiteIcon.value,
+                                  ),
                                 ),
                                 const SizedBox(width: 5),
                                 Text(
@@ -117,8 +115,9 @@ class _VideoResourcesViewState extends State<VideoResourcesView> {
                                   maxLines: 3,
                                   overflow: TextOverflow.ellipsis,
                                   style: const TextStyle(
-                                      fontSize: 20,
-                                      fontWeight: FontWeight.bold),
+                                    fontSize: 20,
+                                    fontWeight: FontWeight.bold,
+                                  ),
                                 )
                               ],
                             )
@@ -138,9 +137,7 @@ class _VideoResourcesViewState extends State<VideoResourcesView> {
                 ),
                 const SizedBox(width: 8),
                 OutlinedButton.icon(
-                  onPressed: () {
-                    _showSourceDrawer();
-                  },
+                  onPressed: _showSourceDrawer,
                   style: OutlinedButton.styleFrom(
                     side: BorderSide(
                       color: Theme.of(context).colorScheme.primary,

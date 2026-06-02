@@ -12,13 +12,17 @@ import 'package:anime_flow/providers/video/video_source_provider.dart';
 import 'package:anime_flow/providers/video/webview_video_source_provider.dart';
 import 'package:anime_flow/repository/play_repository.dart';
 import 'package:anime_flow/stores/episodes_state.dart';
-import 'package:anime_flow/stores/play_subject_state.dart';
+import 'package:anime_flow/pages/play/provider/play_subject_provider.dart';
 import 'package:anime_flow/utils/crawl_config.dart';
 import 'package:anime_flow/utils/logger.dart';
 import 'package:flutter/cupertino.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:get/get.dart';
 
 class VideoSourceController extends GetxController {
+  VideoSourceController(this._ref);
+
+  final WidgetRef _ref;
   final videoResources = <ResourcesItem>[].obs;
   final webSiteTitle = ''.obs;
   final webSiteIcon = ''.obs;
@@ -31,7 +35,6 @@ class VideoSourceController extends GetxController {
   final RxBool isInitWebView = false.obs;
 
   late EpisodesState _episodesState;
-  late PlaySubjectState _subjectState;
   final LiggLogger _logger = LiggLogger();
 
   /// 标记用户是否手动选择了资源
@@ -57,7 +60,6 @@ class VideoSourceController extends GetxController {
   }
 
   void _initControllers() {
-    _subjectState = Get.find<PlaySubjectState>();
     _episodesState = Get.find<EpisodesState>();
   }
 
@@ -175,7 +177,7 @@ class VideoSourceController extends GetxController {
 
       final rankService = SearchResultRankService(
         searchTerm: keyword,
-        aliases: _subjectState.subject.value.subjectAliases,
+        aliases: _ref.read(playSubjectProvider).subjectAliases,
       );
       final rawSearchList =
           await WebRequest.getSearchSubjectListService(keyword, config);
@@ -359,11 +361,12 @@ class VideoSourceController extends GetxController {
     _videoSourceProvider ??= WebViewVideoSourceProvider();
 
     var offset = 0;
-    final subjectId = _subjectState.subject.value.subjectId;
+    final subject = _ref.read(playSubjectProvider);
+    final subjectId = subject.subjectId;
     final episodeIndex = _episodesState.episodeIndex.value;
-    final subjectName = _subjectState.subject.value.subjectName;
-    final subjectCover = _subjectState.subject.value.subjectCover;
-    final subjectAlias = _subjectState.subject.value.subjectAliases;
+    final subjectName = subject.subjectName;
+    final subjectCover = subject.subjectCover;
+    final subjectAlias = subject.subjectAliases;
     final position = await PlayRepository.getPlayHistory(subjectId);
     if (position != null &&
         position.position > 0 &&

@@ -2,9 +2,9 @@ import 'package:anime_flow/features/network_speed/network_speed_provider.dart';
 import 'package:anime_flow/pages/play/controller/play_controller.dart';
 import 'package:anime_flow/pages/play/controller/video_source_controller.dart';
 import 'package:anime_flow/pages/play/controller/video_ui_controller.dart';
+import 'package:anime_flow/pages/play/provider/play_subject_provider.dart';
 import 'package:anime_flow/pages/play/video/ui/setting/video_setting.dart';
 import 'package:anime_flow/stores/episodes_state.dart';
-import 'package:anime_flow/stores/play_subject_state.dart';
 import 'package:anime_flow/utils/systemUtil.dart';
 import 'package:anime_flow/utils/utils.dart';
 import 'package:anime_flow/widget/battery_icon.dart';
@@ -16,19 +16,18 @@ import 'package:flutter_svg/svg.dart';
 import 'package:get/get.dart';
 
 /// 顶部区域空间
-class TopAreaControl extends ConsumerStatefulWidget {
+class TopAreaControl extends StatefulWidget {
   const TopAreaControl({super.key});
 
   @override
-  ConsumerState<TopAreaControl> createState() => _TopAreaControlState();
+  State<TopAreaControl> createState() => _TopAreaControlState();
 }
 
-class _TopAreaControlState extends ConsumerState<TopAreaControl> {
+class _TopAreaControlState extends State<TopAreaControl> {
   final videoSourceController = Get.find<VideoSourceController>();
   final playController = Get.find<PlayController>();
   final videoUiStateController = Get.find<VideoUiStateController>();
   final episodesController = Get.find<EpisodesState>();
-  final playSubjectState = Get.find<PlaySubjectState>();
 
   Future<T?> _showRightSlideDialog<T>({
     required BuildContext context,
@@ -72,28 +71,33 @@ class _TopAreaControlState extends ConsumerState<TopAreaControl> {
         child: videoUiStateController.isShowControlsUi.value
             ? Container(
                 key: ValueKey<bool>(
-                    videoUiStateController.isShowControlsUi.value),
+                  videoUiStateController.isShowControlsUi.value,
+                ),
                 padding:
                     EdgeInsets.only(top: MediaQuery.of(context).padding.top),
                 decoration: const BoxDecoration(
-                    gradient: LinearGradient(
-                        colors: [Colors.black45, Colors.transparent],
-                        begin: Alignment.topCenter,
-                        end: Alignment.bottomCenter)),
+                  gradient: LinearGradient(
+                    colors: [Colors.black45, Colors.transparent],
+                    begin: Alignment.topCenter,
+                    end: Alignment.bottomCenter,
+                  ),
+                ),
                 child: Padding(
                   padding: EdgeInsets.only(
-                      left: leftPadding <= 0 ? 5 : leftPadding,
-                      right: 5,
-                      top: 2),
+                    left: leftPadding <= 0 ? 5 : leftPadding,
+                    right: 5,
+                    top: 2,
+                  ),
                   child: Column(
                     children: [
                       //全屏时顶部信息展示
                       //Obx细粒度更新机制,只有直接访问了响应式变量的Obx才会被触发重建。
                       if (fullscreen)
                         Container(
-                            padding: const EdgeInsets.symmetric(horizontal: 15),
-                            height: 16,
-                            child: _buildTopInfoBar()),
+                          padding: const EdgeInsets.symmetric(horizontal: 15),
+                          height: 16,
+                          child: _buildTopInfoBar(),
+                        ),
                       Row(
                         children: [
                           //左侧
@@ -120,14 +124,19 @@ class _TopAreaControlState extends ConsumerState<TopAreaControl> {
                                     crossAxisAlignment:
                                         CrossAxisAlignment.start,
                                     children: [
-                                      Text(
-                                        playSubjectState
-                                            .subject.value.subjectName,
-                                        style: const TextStyle(
+                                      Consumer(builder: (context, ref, child) {
+                                        final subjectName = ref.watch(
+                                            playSubjectProvider.select(
+                                                (state) => state.subjectName));
+                                        return Text(
+                                          subjectName,
+                                          style: const TextStyle(
                                             color: Colors.white,
                                             fontSize: 16,
-                                            fontWeight: FontWeight.bold),
-                                      ),
+                                            fontWeight: FontWeight.bold,
+                                          ),
+                                        );
+                                      }),
                                       episodesController.episodeTitle.value !=
                                               ''
                                           ? Row(
@@ -138,16 +147,18 @@ class _TopAreaControlState extends ConsumerState<TopAreaControl> {
                                                       .toString()
                                                       .padLeft(2, '0'),
                                                   style: const TextStyle(
-                                                      color: Colors.white,
-                                                      fontSize: 15),
+                                                    color: Colors.white,
+                                                    fontSize: 15,
+                                                  ),
                                                 ),
                                                 const SizedBox(width: 8),
                                                 Text(
                                                   episodesController
                                                       .episodeTitle.value,
                                                   style: const TextStyle(
-                                                      color: Colors.white,
-                                                      fontSize: 15),
+                                                    color: Colors.white,
+                                                    fontSize: 15,
+                                                  ),
                                                 )
                                               ],
                                             )
@@ -174,38 +185,45 @@ class _TopAreaControlState extends ConsumerState<TopAreaControl> {
                                     );
                                   },
                                   icon: const Icon(
-                                      size: 29,
-                                      color: Colors.white70,
-                                      Icons.settings_outlined),
+                                    size: 29,
+                                    color: Colors.white70,
+                                    Icons.settings_outlined,
+                                  ),
                                 ),
                               if (fullscreen)
-                                IconButton(
-                                  padding: const EdgeInsets.all(0),
-                                  onPressed: () {
-                                    _showRightSlideDialog(
-                                      context: context,
-                                      barrierLabel: 'SourceDrawer',
-                                      barrierDismissible: true,
-                                      child: VideoSourceDrawers(
-                                        onVideoUrlSelected: (url) {
-                                          playController.player.stop();
-                                          videoSourceController
-                                              .loadVideoPage(url);
-                                        },
-                                        isBottomSheet: false,
-                                        videoSourceController:
-                                            videoSourceController,
-                                        episodesState: episodesController,
-                                        subjectName: playSubjectState
-                                            .subject.value.subjectName,
+                                Consumer(
+                                  builder: (context, ref, child) {
+                                    final subjectName = ref.watch(
+                                        playSubjectProvider.select(
+                                            (state) => state.subjectName));
+                                    return IconButton(
+                                      padding: const EdgeInsets.all(0),
+                                      onPressed: () {
+                                        _showRightSlideDialog(
+                                          context: context,
+                                          barrierLabel: 'SourceDrawer',
+                                          barrierDismissible: true,
+                                          child: VideoSourceDrawers(
+                                            onVideoUrlSelected: (url) {
+                                              playController.player.stop();
+                                              videoSourceController
+                                                  .loadVideoPage(url);
+                                            },
+                                            isBottomSheet: false,
+                                            videoSourceController:
+                                                videoSourceController,
+                                            episodesState: episodesController,
+                                            subjectName: subjectName,
+                                          ),
+                                        );
+                                      },
+                                      icon: const Icon(
+                                        Icons.reset_tv_outlined,
+                                        size: 29,
+                                        color: Colors.white70,
                                       ),
                                     );
                                   },
-                                  icon: const Icon(
-                                    Icons.reset_tv_outlined,
-                                    size: 29,
-                                    color: Colors.white70,
-                                  ),
                                 ),
                               if (SystemUtil.isDesktop && !fullscreen)
                                 Obx(() => playController.isWideScreen.value
@@ -236,7 +254,8 @@ class _TopAreaControlState extends ConsumerState<TopAreaControl> {
               )
             : SizedBox.shrink(
                 key: ValueKey<bool>(
-                    videoUiStateController.isShowControlsUi.value),
+                  videoUiStateController.isShowControlsUi.value,
+                ),
               ),
       );
     });
@@ -248,54 +267,68 @@ class _TopAreaControlState extends ConsumerState<TopAreaControl> {
       children: [
         //网络图标
         Expanded(
-            child: Row(
-          mainAxisAlignment: MainAxisAlignment.start,
-          spacing: 5,
-          children: [
-            const NetworkIcon(),
-            Builder(
-              builder: (context) {
-                final speedAsync = ref.watch(networkSpeedStreamProvider(2000));
-                final data = speedAsync.asData?.value;
-                final download = data?.download ?? 0;
-                final upload = data?.upload ?? 0;
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.start,
+            spacing: 5,
+            children: [
+              const NetworkIcon(),
+              Consumer(builder: (context, ref, child) {
+                return Builder(
+                  builder: (context) {
+                    final speedAsync =
+                        ref.watch(networkSpeedStreamProvider(2000));
+                    final data = speedAsync.asData?.value;
+                    final download = data?.download ?? 0;
+                    final upload = data?.upload ?? 0;
 
-                return Row(
-                  crossAxisAlignment: CrossAxisAlignment.center,
-                  children: [
-                    if (download > 0) ...[
-                      const RotatedBox(
-                        quarterTurns: 1,
-                        child: Icon(Icons.arrow_right_alt_outlined,
-                            size: 15,
-                            fontWeight: FontWeight.bold,
-                            color: Colors.white),
-                      ),
-                      Text(
-                        Utils.formatBytesPerSec(download),
-                        style:
-                            const TextStyle(fontSize: 10, color: Colors.white),
-                      ),
-                      const SizedBox(width: 5),
-                    ],
-                    if (upload > 0) ...[
-                      const RotatedBox(
-                        quarterTurns: 3,
-                        child: Icon(Icons.arrow_right_alt_outlined,
-                            size: 15,
-                            fontWeight: FontWeight.bold,
-                            color: Colors.white),
-                      ),
-                      Text(Utils.formatBytesPerSec(upload),
-                          style: const TextStyle(
-                              fontSize: 10, color: Colors.white))
-                    ],
-                  ],
+                    return Row(
+                      crossAxisAlignment: CrossAxisAlignment.center,
+                      children: [
+                        if (download > 0) ...[
+                          const RotatedBox(
+                            quarterTurns: 1,
+                            child: Icon(
+                              Icons.arrow_right_alt_outlined,
+                              size: 15,
+                              fontWeight: FontWeight.bold,
+                              color: Colors.white,
+                            ),
+                          ),
+                          Text(
+                            Utils.formatBytesPerSec(download),
+                            style: const TextStyle(
+                              fontSize: 10,
+                              color: Colors.white,
+                            ),
+                          ),
+                          const SizedBox(width: 5),
+                        ],
+                        if (upload > 0) ...[
+                          const RotatedBox(
+                            quarterTurns: 3,
+                            child: Icon(
+                              Icons.arrow_right_alt_outlined,
+                              size: 15,
+                              fontWeight: FontWeight.bold,
+                              color: Colors.white,
+                            ),
+                          ),
+                          Text(
+                            Utils.formatBytesPerSec(upload),
+                            style: const TextStyle(
+                              fontSize: 10,
+                              color: Colors.white,
+                            ),
+                          )
+                        ],
+                      ],
+                    );
+                  },
                 );
-              },
-            )
-          ],
-        )),
+              })
+            ],
+          ),
+        ),
         //系统时间
         Obx(
           () => Text(

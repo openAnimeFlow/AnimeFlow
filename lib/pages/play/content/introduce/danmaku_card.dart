@@ -3,11 +3,12 @@ import 'package:anime_flow/models/item/danmaku/danmaku_episode_response.dart';
 import 'package:anime_flow/models/item/danmaku/danmaku_module.dart';
 import 'package:anime_flow/models/item/danmaku/danmaku_search_response.dart';
 import 'package:anime_flow/pages/play/controller/play_controller.dart';
+import 'package:anime_flow/pages/play/provider/play_subject_provider.dart';
 import 'package:anime_flow/stores/episodes_state.dart';
-import 'package:anime_flow/stores/play_subject_state.dart';
 import 'package:anime_flow/utils/format_time_util.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:get/get.dart';
 import 'package:go_router/go_router.dart';
 
@@ -21,18 +22,9 @@ class DanmakuCard extends StatefulWidget {
 class _DanmakuCardState extends State<DanmakuCard> {
   final episodesController = Get.find<EpisodesState>();
   final playController = Get.find<PlayController>();
-  final subjectState = Get.find<PlaySubjectState>();
-
   final danmakuFieldController = TextEditingController();
 
   bool isExpanded = false;
-
-  // DanmakuSearchResponse? danmakuSearchResponse;
-
-  @override
-  void initState() {
-    super.initState();
-  }
 
   /// 从 source 字段中提取平台名称（如 [Gamer]Sabrina2001 -> Gamer）
   String extractPlatform(String source) {
@@ -43,38 +35,18 @@ class _DanmakuCardState extends State<DanmakuCard> {
 
   /// 统计各平台弹幕数量
   Map<String, int> countByPlatform(List<Danmaku> danmakus) {
-    final Map<String, int> counts = {};
-    for (var danmaku in danmakus) {
+    final counts = <String, int>{};
+    for (final danmaku in danmakus) {
       final platform = extractPlatform(danmaku.source);
       counts[platform] = (counts[platform] ?? 0) + 1;
     }
     return counts;
   }
 
-  //搜索animes
-  // Future<void> _searchAnimes(String query, StateSetter setDialogState) async {
-  //   setDialogState(() {
-  //     isSearchLoading = true;
-  //     danmakuSearchResponse = null;
-  //   });
-  //   try {
-  //     final response = await DanmakuRequest.getDanmakuSearchResponse(query);
-  //     setDialogState(() {
-  //       danmakuSearchResponse = response;
-  //       isSearchLoading = false;
-  //     });
-  //   } catch (e) {
-  //     setDialogState(() {
-  //       isSearchLoading = false;
-  //     });
-  //   }
-  // }
-
   @override
   Widget build(BuildContext context) {
     return Obx(() {
       final allDanmakus = <Danmaku>[];
-      final subjectName = subjectState.subject.value.subjectName;
       playController.danDanmakus.forEach((time, danmakus) {
         allDanmakus.addAll(danmakus);
       });
@@ -91,7 +63,7 @@ class _DanmakuCardState extends State<DanmakuCard> {
       // 统计各平台弹幕数量
       final platformCounts = countByPlatform(allDanmakus);
       final sortedPlatforms = platformCounts.entries.toList()
-        ..sort((a, b) => b.value.compareTo(a.value)); // 按数量降序排列
+        ..sort((a, b) => b.value.compareTo(a.value));
 
       return Card(
         elevation: 0,
@@ -120,7 +92,8 @@ class _DanmakuCardState extends State<DanmakuCard> {
                       });
                     },
                     icon: Icon(
-                        isExpanded ? Icons.expand_less : Icons.expand_more),
+                      isExpanded ? Icons.expand_less : Icons.expand_more,
+                    ),
                   )
                 ],
               ),
@@ -130,29 +103,35 @@ class _DanmakuCardState extends State<DanmakuCard> {
                 height: isExpanded ? 300 : 0,
                 child: Column(
                   children: [
-                    Row(
-                      children: [
-                        Expanded(
-                          child: Padding(
-                            padding: const EdgeInsets.symmetric(vertical: 10),
-                            child: Text(subjectName,
+                    Consumer(builder: (context, ref, child) {
+                      final subjectName = ref.watch(playSubjectProvider
+                          .select((state) => state.subjectName));
+                      return Row(
+                        children: [
+                          Expanded(
+                            child: Padding(
+                              padding: const EdgeInsets.symmetric(vertical: 10),
+                              child: Text(
+                                subjectName,
                                 style: const TextStyle(
-                                    fontWeight: FontWeight.bold)),
+                                    fontWeight: FontWeight.bold),
+                              ),
+                            ),
                           ),
-                        ),
-                        TextButton(
-                          onPressed: () {
-                            danmakuFieldController.text = subjectName;
-                            showDialog<void>(
-                              context: context,
-                              builder: (_) => danmakuDialog,
-                            );
-                          },
-                          child: const Text('切换弹幕'),
-                        )
-                      ],
-                    ),
-                    if (sortedPlatforms.isNotEmpty) ...[
+                          TextButton(
+                            onPressed: () {
+                              danmakuFieldController.text = subjectName;
+                              showDialog<void>(
+                                context: context,
+                                builder: (_) => danmakuDialog,
+                              );
+                            },
+                            child: const Text('切换弹幕'),
+                          )
+                        ],
+                      );
+                    }),
+                    if (sortedPlatforms.isNotEmpty)
                       Align(
                         alignment: Alignment.topLeft,
                         child: Wrap(
@@ -195,14 +174,11 @@ class _DanmakuCardState extends State<DanmakuCard> {
                           }).toList(),
                         ),
                       ),
-                    ],
                     Expanded(
                       child: ListView.builder(
                         padding: const EdgeInsets.all(0),
                         itemCount: filteredDanmakus.length,
-                        // 固定item高度，提升滚动性能
                         itemExtent: 30.0,
-                        // 缓存范围
                         scrollCacheExtent:
                             const ScrollCacheExtent.pixels(200.0),
                         physics: const ClampingScrollPhysics(),
@@ -244,7 +220,7 @@ class _DanmakuCardState extends State<DanmakuCard> {
       builder: (BuildContext dialogContext, StateSetter setDialogState) {
         return AlertDialog(
           icon: const Icon(Icons.subtitles),
-          title: const Text('修改弹幕'),
+          title: const Text('淇敼寮瑰箷'),
           titleTextStyle:
               const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
           content: ConstrainedBox(
@@ -271,7 +247,7 @@ class _DanmakuCardState extends State<DanmakuCard> {
                   ] else ...[
                     const Align(
                       alignment: Alignment.centerLeft,
-                      child: Text('搜索结果:'),
+                      child: Text('鎼滅储缁撴灉:'),
                     ),
                     ConstrainedBox(
                       constraints: const BoxConstraints(
@@ -313,7 +289,7 @@ class _DanmakuCardState extends State<DanmakuCard> {
           actions: [
             TextButton(
               onPressed: () => Navigator.of(dialogContext).pop(),
-              child: const Text('取消'),
+              child: const Text('鍙栨秷'),
             ),
             TextButton(
               onPressed: () async {
@@ -324,7 +300,8 @@ class _DanmakuCardState extends State<DanmakuCard> {
                   });
                   try {
                     final response = await FlowRequest.searchResponse(
-                        danmakuFieldController.text);
+                      danmakuFieldController.text,
+                    );
                     setDialogState(() {
                       danmakuSearchResponse = response;
                       isSearchLoading = false;
@@ -336,7 +313,7 @@ class _DanmakuCardState extends State<DanmakuCard> {
                   }
                 }
               },
-              child: const Text('提交'),
+              child: const Text('鎻愪氦'),
             )
           ],
         );
@@ -344,9 +321,11 @@ class _DanmakuCardState extends State<DanmakuCard> {
     );
   }
 
-  /// 显示剧集选择弹窗
-  void _showEpisodesDialog(BuildContext context,
-      DanmakuEpisodeResponse episodesResponse, String animeTitle) {
+  void _showEpisodesDialog(
+    BuildContext context,
+    DanmakuEpisodeResponse episodesResponse,
+    String animeTitle,
+  ) {
     showDialog(
       context: context,
       builder: (BuildContext context) {
@@ -360,7 +339,7 @@ class _DanmakuCardState extends State<DanmakuCard> {
                   ? const Center(
                       child: Padding(
                         padding: EdgeInsets.all(16.0),
-                        child: Text('暂无剧集数据'),
+                        child: Text('鏆傛棤鍓ч泦鏁版嵁'),
                       ),
                     )
                   : ConstrainedBox(
@@ -398,7 +377,7 @@ class _DanmakuCardState extends State<DanmakuCard> {
               onPressed: () {
                 Navigator.of(context).pop();
               },
-              child: const Text('关闭'),
+              child: const Text('鍏抽棴'),
             ),
           ],
         );

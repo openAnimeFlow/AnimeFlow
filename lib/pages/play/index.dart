@@ -1,3 +1,4 @@
+import 'package:anime_flow/constants/layout_constant.dart';
 import 'package:anime_flow/controllers/shaders/shaders_controller.dart';
 import 'package:anime_flow/http/requests/flow_request.dart';
 import 'package:anime_flow/pages/play/controller/episode_controller.dart';
@@ -6,30 +7,45 @@ import 'package:anime_flow/pages/play/controller/video_source_controller.dart';
 import 'package:anime_flow/pages/play/controller/video_ui_controller.dart';
 import 'package:anime_flow/pages/play/video/video.dart';
 import 'package:anime_flow/routes/model/play_route_extra.dart';
-import 'package:anime_flow/stores/play_subject_state.dart';
-import 'package:anime_flow/utils/systemUtil.dart';
-import 'package:anime_flow/constants/layout_constant.dart';
 import 'package:anime_flow/stores/episodes_state.dart';
+import 'package:anime_flow/pages/play/provider/play_subject_provider.dart';
+import 'package:anime_flow/utils/logger.dart';
+import 'package:anime_flow/utils/systemUtil.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:get/get.dart';
-import 'package:anime_flow/utils/logger.dart';
 
 import 'content/index.dart';
 
-class PlayPage extends StatefulWidget {
-  final PlayRouteExtra extra;
-
+class PlayPage extends StatelessWidget {
   const PlayPage({super.key, required this.extra});
 
+  final PlayRouteExtra extra;
+
   @override
-  State<PlayPage> createState() => _PlayPageState();
+  Widget build(BuildContext context) {
+    return ProviderScope(
+      overrides: [
+        playRouteExtraProvider.overrideWithValue(extra),
+      ],
+      child: _PlayPageView(extra: extra),
+    );
+  }
 }
 
-class _PlayPageState extends State<PlayPage> {
-  final  videoSourceController = Get.put(VideoSourceController());
-  final  episodesState = Get.put(EpisodesState());
-  late final PlaySubjectState subjectState;
+class _PlayPageView extends ConsumerStatefulWidget {
+  const _PlayPageView({required this.extra});
+
+  final PlayRouteExtra extra;
+
+  @override
+  ConsumerState<_PlayPageView> createState() => _PlayPageViewState();
+}
+
+class _PlayPageViewState extends ConsumerState<_PlayPageView> {
+  late final VideoSourceController videoSourceController;
+  final episodesState = Get.put(EpisodesState());
   late final PlayController playController;
 
   final GlobalKey _videoKey = GlobalKey();
@@ -41,19 +57,24 @@ class _PlayPageState extends State<PlayPage> {
   @override
   void initState() {
     super.initState();
+    videoSourceController = Get.put(VideoSourceController(ref));
     playController = Get.put(PlayController(
       episodesState: episodesState,
       shadersController: Get.find<ShadersController>(),
     ));
     Get.put(EpisodeController());
     Get.put(VideoUiStateController());
-    subjectState = Get.put(PlaySubjectState(widget.extra.playExtra));
-    final continueEp = widget.extra.continueEpisode;
-    if (continueEp != null) {
-      subjectState.setContinueEpisode(continueEp);
-    }
     _initEpisodes();
     _initResources();
+  }
+
+  @override
+  void dispose() {
+    Get.delete<PlayController>();
+    Get.delete<EpisodesState>();
+    Get.delete<VideoSourceController>();
+    Get.delete<VideoUiStateController>();
+    super.dispose();
   }
 
   /// 初始化资源
@@ -61,12 +82,12 @@ class _PlayPageState extends State<PlayPage> {
   void _initResources() {
     if (_hasInitResources) {
       return;
-    } else {
-      final subjectName = subjectState.subject.value.subjectName;
-      if (subjectName.isNotEmpty) {
-        _hasInitResources = true;
-        videoSourceController.initResources(subjectName);
-      }
+    }
+
+    final subjectName = ref.read(playSubjectProvider).subjectName;
+    if (subjectName.isNotEmpty) {
+      _hasInitResources = true;
+      videoSourceController.initResources(subjectName);
     }
   }
 
@@ -77,44 +98,50 @@ class _PlayPageState extends State<PlayPage> {
       if (!episodesState.isLoading.value) {
         episodesState.isLoading.value = true;
       }
+      final subject = ref.read(playSubjectProvider);
       final episodes = await FlowRequest.getSubjectEpisodesByIdService(
-          subjectState.subject.value.subjectId, 100, 0);
+          subject.subjectId, 100, 0);
       episodesState.episodes.value = episodes;
       episodesState.isLoading.value = false;
       //如果有路由传递剧集号有限根据传递的剧集设置剧集状态
-      if (subjectState.continueEpisode.value > 0) {
-        final episodeIndex = subjectState.continueEpisode.value;
-        final episode = episodes.data[episodeIndex - 1];
+      final continueEpisode = ref.read(playContinueEpisodeProvider);
+      if (continueEpisode > 0) {
+        final episode = episodes.data[continueEpisode - 1];
         episodesState.setEpisodeSort(
-            sort: episode.sort,
-            episodeIndex: episodeIndex,
-            episodeId: episode.id);
-      } else {
-        if (episodesState.episodeSort.value == 0 && episodes.data.isNotEmpty) {
-          WidgetsBinding.instance.addPostFrameCallback((_) {
-            if (mounted) {
-              // 查找第一个未看过的剧集
-              int targetIndex = 0;
-              for (int i = 0; i < episodes.data.length; i++) {
-                if (episodes.data[i].collection == null) {
-                  targetIndex = i;
-                  break;
-                }
-                // 如果所有剧集都已看过，选择最后一集
-                if (i == episodes.data.length - 1) {
-                  targetIndex = i;
-                }
-              }
-              final targetEpisode = episodes.data[targetIndex];
-              episodesState.setEpisodeSort(
-                  sort: targetEpisode.sort,
-                  episodeIndex: targetIndex + 1,
-                  episodeId: targetEpisode.id);
-              episodesState
-                  .setEpisodeTitle(targetEpisode.nameCN.isEmpty ? targetEpisode.name : targetEpisode.nameCN);
+          sort: episode.sort,
+          episodeIndex: continueEpisode,
+          episodeId: episode.id,
+        );
+        return;
+      }
+
+      if (episodesState.episodeSort.value == 0 && episodes.data.isNotEmpty) {
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          if (!mounted) {
+            return;
+          }
+          var targetIndex = 0;
+          for (var i = 0; i < episodes.data.length; i++) {
+            if (episodes.data[i].collection == null) {
+              targetIndex = i;
+              break;
             }
-          });
-        }
+            if (i == episodes.data.length - 1) {
+              targetIndex = i;
+            }
+          }
+          final targetEpisode = episodes.data[targetIndex];
+          episodesState.setEpisodeSort(
+            sort: targetEpisode.sort,
+            episodeIndex: targetIndex + 1,
+            episodeId: targetEpisode.id,
+          );
+          episodesState.setEpisodeTitle(
+            targetEpisode.nameCN.isEmpty
+                ? targetEpisode.name
+                : targetEpisode.nameCN,
+          );
+        });
       }
     } catch (e) {
       LiggLogger().e(e);
@@ -124,71 +151,34 @@ class _PlayPageState extends State<PlayPage> {
     }
   }
 
-  ///保存播放记录
-  // void _savePlayRecord() async {
-  //   final subjectId = subjectState.subject.value.id;
-  //   final subjectName = subjectState.subject.value.name;
-  //   final subjectImage = subjectState.subject.value.image;
-  //   // 这里需要使用剧集索引作为剧集号,方便后续使用
-  //   final episodeSort = episodesState.episodeIndex.value;
-  //   final episodeId = episodesState.episodeId.value;
-  //   final timestamp = DateTime.now();
-  //
-  //   final playHistory = PlayHistory(
-  //     subjectId: subjectId,
-  //     subjectName: subjectName,
-  //     image: subjectImage,
-  //     episodeSort: episodeSort,
-  //     playTime: timestamp,
-  //     episodeId: episodeId,
-  //   );
-  //   LiggLogger().i('开始保存播放记录: $playHistory');
-  //   PlayRepository.savePlayHistory(playHistory);
-  // }
-
-  @override
-  void dispose() {
-    Get.delete<PlayController>();
-    Get.delete<EpisodesState>();
-    Get.delete<VideoSourceController>();
-    Get.delete<PlaySubjectState>();
-    Get.delete<VideoUiStateController>();
-    super.dispose();
-  }
-
   @override
   Widget build(BuildContext context) {
     return LayoutBuilder(builder: (context, constraints) {
-      final bool isWideScreen = constraints.maxWidth > 600;
-      playController.updateIsWideScreen(isWideScreen); // 更新布局状态
+      final isWideScreen = constraints.maxWidth > 600;
+      playController.updateIsWideScreen(isWideScreen);
 
       return Obx(() {
         final isFullscreen = playController.isFullscreen.value;
 
-        // 构建内容
         Widget content;
         if (isFullscreen) {
           content = Scaffold(
             backgroundColor: Colors.black,
-            // 移动端全屏时键盘默认会压缩 body，弹幕层高度过小会导致轨道数为 0、本人弹幕无法上屏。
             resizeToAvoidBottomInset: !SystemUtil.isMobile,
             body: VideoView(key: _videoKey),
           );
         } else {
           content = isWideScreen
-              // 水平布局
               ? Scaffold(
                   body: Row(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Expanded(
-                      child: Center(
-                        child: VideoView(
-                          key: _videoKey,
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Expanded(
+                        child: Center(
+                          child: VideoView(key: _videoKey),
                         ),
                       ),
-                    ),
-                    AnimatedContainer(
+                      AnimatedContainer(
                         duration: const Duration(milliseconds: 100),
                         width: playController.isContentExpanded.value
                             ? LayoutConstant.playContentWidth
@@ -197,10 +187,11 @@ class _PlayPageState extends State<PlayPage> {
                           opacity:
                               playController.isContentExpanded.value ? 1 : 0,
                           child: ContentView(key: _contentKey),
-                        ))
-                  ],
-                ))
-              // 垂直布局
+                        ),
+                      ),
+                    ],
+                  ),
+                )
               : Scaffold(
                   appBar: AppBar(
                     toolbarHeight: 0,
@@ -226,13 +217,11 @@ class _PlayPageState extends State<PlayPage> {
                 );
         }
 
-        // 手机端监听系统返回事件
         if (SystemUtil.isMobile) {
           return PopScope(
-            canPop: !isFullscreen, // 全屏时不允许返回
+            canPop: !isFullscreen,
             onPopInvokedWithResult: (bool didPop, dynamic result) {
               if (!didPop && isFullscreen) {
-                // 如果返回被阻止且当前是全屏状态，退出全屏
                 playController.exitFullScreen();
               }
             },

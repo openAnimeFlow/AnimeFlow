@@ -2,15 +2,17 @@ import 'dart:async';
 import 'dart:io';
 
 import 'package:anime_flow/models/play/play_history.dart';
+import 'package:anime_flow/routes/model/play_route_extra.dart';
 import 'package:anime_flow/pages/play/controller/episode_controller.dart';
 import 'package:anime_flow/pages/play/controller/play_controller.dart';
 import 'package:anime_flow/pages/play/controller/video_source_controller.dart';
 import 'package:anime_flow/pages/play/controller/video_ui_controller.dart';
 import 'package:anime_flow/repository/play_repository.dart';
 import 'package:anime_flow/stores/episodes_state.dart';
-import 'package:anime_flow/stores/play_subject_state.dart';
+import 'package:anime_flow/pages/play/provider/play_subject_provider.dart';
 import 'package:anime_flow/utils/logger.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:get/get.dart';
 import 'package:media_kit_video/media_kit_video.dart';
 import 'package:window_manager/window_manager.dart';
@@ -18,63 +20,49 @@ import 'package:window_manager/window_manager.dart';
 import 'ui/danmaku/danmaku_view.dart';
 import 'ui/index.dart';
 
-class VideoView extends StatefulWidget {
+class VideoView extends ConsumerStatefulWidget {
   const VideoView({super.key});
 
   @override
-  State<VideoView> createState() => _VideoViewState();
+  ConsumerState<VideoView> createState() => _VideoViewState();
 }
 
-class _VideoViewState extends State<VideoView> with WindowListener {
+class _VideoViewState extends ConsumerState<VideoView> with WindowListener {
   final videoUiStateController = Get.find<VideoUiStateController>();
   final videoSourceController = Get.find<VideoSourceController>();
   final episodeController = Get.find<EpisodeController>();
   final playController = Get.find<PlayController>();
   final episodesState = Get.find<EpisodesState>();
-  final subjectState = Get.find<PlaySubjectState>();
   final logger = LiggLogger();
   final _danmuKey = GlobalKey();
 
-  /// 解析结果
-  StreamSubscription<(String, int)>? _videoURLSubscription;
-
-  StreamSubscription<bool>? _videoLoadingSubscription;
-  StreamSubscription<String>? _logSubscription;
-  StreamSubscription<bool>? _initSubscription;
-
-  Worker? _episodeIndexWorker;
-  StreamSubscription<bool>? _playbackCompletedSubscription;
-
-  Timer? _parseTimeoutTimer;
-
-  //剧集相关
-  int _lastEpisodeIndex = 0;
-
-  //视频相关
-  Timer? _saveProgressTimer;
+  Worker? episodeIndexWorker;
+  StreamSubscription<bool>? playbackCompletedSubscription;
+  int lastEpisodeIndex = 0;
+  late final PlayExtra subject;
 
   @override
   void initState() {
     super.initState();
+    subject = ref.read(playSubjectProvider);
 
     // 监听集数变化
-    _episodeIndexWorker = ever(episodesState.episodeIndex, (int episode) {
-      if (episode > 0) {
-        if (episode != _lastEpisodeIndex) {
-          videoSourceController.userManuallySelected = false;
-          playController.player.stop();
-          _selectResourceAfterInit();
-        }
+    episodeIndexWorker = ever(episodesState.episodeIndex, (int episode) {
+      if (episode > 0 && episode != lastEpisodeIndex) {
+        videoSourceController.userManuallySelected = false;
+        playController.player.stop();
+        _selectResourceAfterInit();
       }
     });
 
     // 监听视频播放完成
-    _playbackCompletedSubscription =
+    playbackCompletedSubscription =
         playController.player.stream.completed.listen((completed) {
       if (completed) {
         _autoSwitchToNextEpisode();
         PlayRepository.deletePlayHistoryByPosition(
-            subjectState.subject.value.subjectId);
+          subject.subjectId,
+        );
       }
     });
 
@@ -131,7 +119,7 @@ class _VideoViewState extends State<VideoView> with WindowListener {
       // 检查是否有下一集
       if (episodeController.hasNextEpisode(episodesState)) {
         episodeController.switchToNextEpisode(episodesState);
-        _lastEpisodeIndex = episodesState.episodeIndex.value;
+        lastEpisodeIndex = episodesState.episodeIndex.value;
       }
     } catch (e) {
       logger.e('自动切换到下一集失败: $e');
@@ -144,17 +132,17 @@ class _VideoViewState extends State<VideoView> with WindowListener {
     final duration = playController.duration.value;
     if (position == Duration.zero || duration == Duration.zero) return;
 
-    final subjectId = subjectState.subject.value.subjectId;
+    final subjectId = subject.subjectId;
     final episodeId = episodesState.episodeId.value;
     if (subjectId <= 0 || episodeId <= 0) return;
 
     final playHistory = PlayHistory(
       subjectId: subjectId,
-      subjectName: subjectState.subject.value.subjectName,
+      subjectName: subject.subjectName,
       episodeId: episodeId,
-      alias: subjectState.subject.value.subjectAliases,
+      alias: subject.subjectAliases,
       episodeSort: episodesState.episodeIndex.value,
-      cover: subjectState.subject.value.subjectCover,
+      cover: subject.subjectCover,
       updateAt: DateTime.now(),
       position: position.inSeconds,
       duration: duration.inSeconds,
@@ -164,14 +152,8 @@ class _VideoViewState extends State<VideoView> with WindowListener {
 
   @override
   void dispose() {
-    _parseTimeoutTimer?.cancel();
-    _videoURLSubscription?.cancel();
-    _videoLoadingSubscription?.cancel();
-    _logSubscription?.cancel();
-    _saveProgressTimer?.cancel();
-    _initSubscription?.cancel();
-    _episodeIndexWorker?.dispose();
-    _playbackCompletedSubscription?.cancel();
+    episodeIndexWorker?.dispose();
+    playbackCompletedSubscription?.cancel();
     videoSourceController.cancelVideoSourceResolution();
     _savePlayHistory();
     // 移除窗口监听器
@@ -213,7 +195,6 @@ class _VideoViewState extends State<VideoView> with WindowListener {
         Positioned.fill(
           child: DanmakuView(key: _danmuKey),
         ),
-
         /// UI层
         const Positioned.fill(child: VideoUi()),
       ],

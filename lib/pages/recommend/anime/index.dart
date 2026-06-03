@@ -1,3 +1,5 @@
+import 'dart:math' as math;
+
 import 'package:anime_flow/pages/recommend/anime/provider/anime_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:anime_flow/constants/layout_constant.dart';
@@ -65,28 +67,34 @@ class _AnimePageState extends ConsumerState<AnimePage>
     super.build(context);
 
     return Scaffold(
-      body: Center(
-        child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 10),
-          child: ConstrainedBox(
-            constraints:
-                const BoxConstraints(maxWidth: LayoutConstant.maxWidth),
-            child: CustomScrollView(
-              controller: _scrollController,
-              slivers: const [
-                CalendarView(),
-                SliverToBoxAdapter(
-                  child: SizedBox(height: 15),
+      body: CustomScrollView(
+        controller: _scrollController,
+        slivers: [
+          SliverLayoutBuilder(
+            builder: (context, constraints) {
+              final horizontalPadding = math.max(
+                10.0,
+                (constraints.crossAxisExtent - LayoutConstant.maxWidth) / 2 + 10,
+              );
+              return SliverPadding(
+                padding: EdgeInsets.symmetric(horizontal: horizontalPadding),
+                sliver: const SliverMainAxisGroup(
+                  slivers: [
+                    CalendarView(),
+                    SliverToBoxAdapter(
+                      child: SizedBox(height: 15),
+                    ),
+                    PlayRecordView(),
+                    SliverToBoxAdapter(
+                      child: SizedBox(height: 15),
+                    ),
+                    PopularAnimeView(),
+                  ],
                 ),
-                PlayRecordView(),
-                SliverToBoxAdapter(
-                  child: SizedBox(height: 15),
-                ),
-                PopularAnimeView(),
-              ],
-            ),
+              );
+            },
           ),
-        ),
+        ],
       ),
       floatingActionButton: _showBackToTopButton
           ? FloatingActionButton(

@@ -36,6 +36,7 @@ void main() async {
 
   final container = ProviderContainer();
   container.read(myControllerProvider);
+  // 无需等待 GLSL 拷贝完成
   unawaited(container.read(shadersDirectoryProvider.future));
 
   runApp(

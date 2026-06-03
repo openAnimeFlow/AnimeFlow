@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:io';
 import 'package:anime_flow/pages/settings/pages/font/font_provider.dart';
 import 'package:anime_flow/repository/storage.dart';
@@ -25,7 +26,7 @@ void main() async {
     await windowManager.ensureInitialized();
     final windowOptions = WindowOptions(
       titleBarStyle:
-          Platform.isWindows ? TitleBarStyle.hidden : TitleBarStyle.normal,
+      Platform.isWindows ? TitleBarStyle.hidden : TitleBarStyle.normal,
     );
     await windowManager.waitUntilReadyToShow(windowOptions, () async {
       await windowManager.show();
@@ -35,7 +36,7 @@ void main() async {
 
   final container = ProviderContainer();
   container.read(myControllerProvider);
-  await container.read(shadersDirectoryProvider.future);
+  unawaited(container.read(shadersDirectoryProvider.future));
 
   runApp(
     UncontrolledProviderScope(

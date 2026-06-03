@@ -1,7 +1,7 @@
 import 'dart:io';
 
-import 'package:anime_flow/controllers/app/app_info_controller.dart';
-import 'package:anime_flow/controllers/app/apply_updates_controller.dart';
+import 'package:anime_flow/features/app/apply_updates_controller.dart';
+import 'package:anime_flow/models/download_info.dart';
 import 'package:anime_flow/http/clients/client.dart';
 import 'package:dio/dio.dart';
 import 'package:get/get.dart';
@@ -39,7 +39,7 @@ class ApplyUpdatesAndroidController implements ApplyUpdatesController {
     } catch (e) {
       // 如果是取消操作，不抛出异常
       if (e.toString().contains('下载已取消')) {
-        return;
+        throw const UpdateDownloadCancelledException();
       }
       rethrow;
     } finally {

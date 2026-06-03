@@ -1,5 +1,5 @@
-import 'package:anime_flow/controllers/app/app_info_controller.dart';
-import 'package:anime_flow/controllers/app/apply_updates_controller.dart';
+import 'package:anime_flow/features/app/apply_updates_controller.dart';
+import 'package:anime_flow/models/download_info.dart';
 import 'package:anime_flow/http/clients/client.dart';
 import 'package:dio/dio.dart';
 import 'package:path_provider/path_provider.dart' show getDownloadsDirectory;
@@ -28,7 +28,7 @@ class ApplyUpdatesWindowsController implements ApplyUpdatesController {
       );
     } catch (e) {
       if (e.toString().contains('下载已取消')) {
-        return;
+        throw const UpdateDownloadCancelledException();
       }
       rethrow;
     } finally {

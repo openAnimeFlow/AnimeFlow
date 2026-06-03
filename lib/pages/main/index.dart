@@ -1,20 +1,14 @@
-import 'package:anime_flow/constants/storage_key.dart';
-import 'package:anime_flow/controllers/app/app_info_controller.dart';
 import 'package:anime_flow/features/my/my_state_provider.dart';
-import 'package:anime_flow/widget/version_update_ui.dart';
 import 'package:anime_flow/models/item/bangumi/user_info_item.dart';
 import 'package:anime_flow/models/item/tab_item.dart';
 import 'package:anime_flow/pages/my/index.dart';
 import 'package:anime_flow/pages/ranking/index.dart';
-import 'package:anime_flow/repository/storage.dart';
 import 'package:anime_flow/routes/routes.dart';
 import 'package:anime_flow/utils/systemUtil.dart';
 import 'package:anime_flow/widget/animation_network_image/animation_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:anime_flow/pages/recommend/index.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:get/get.dart';
-
 class MainPage extends ConsumerStatefulWidget {
   final int initialTabIndex;
 
@@ -25,22 +19,15 @@ class MainPage extends ConsumerStatefulWidget {
 }
 
 class _MainPageState extends ConsumerState<MainPage> {
-  late final AppInfoController appInfoController;
-  final setting = Storage.setting;
   int _currentIndex = 0;
-  late bool autoUpdate;
 
   final GlobalKey _bodyKey = GlobalKey();
 
   @override
   void initState() {
     super.initState();
-    autoUpdate = setting.get(StorageKey.autoUpdateKey, defaultValue: true);
-    appInfoController = Get.put(AppInfoController(), permanent: true);
-
-    _currentIndex =
-        widget.initialTabIndex.clamp(0, _tabs.length - 1);
-    initializeApp();
+    _currentIndex = widget.initialTabIndex.clamp(0, _tabs.length - 1);
+    initializePage(_currentIndex);
   }
 
   final List<TabItem> _tabs = [
@@ -77,21 +64,6 @@ class _MainPageState extends ConsumerState<MainPage> {
           break;
       }
     }
-  }
-
-  Future<void> initializeApp() async {
-    initializePage(_currentIndex);
-    if (autoUpdate) {
-      WidgetsBinding.instance.addPostFrameCallback((_) {
-        checkVersionUpdate();
-      });
-    }
-  }
-
-  Future<void> checkVersionUpdate() async {
-    final result = await appInfoController.checkVersion();
-    if (!mounted) return;
-    await handleVersionCheckResult(context, appInfoController, result);
   }
 
   List<NavigationRailDestination> buildRailDestinations(

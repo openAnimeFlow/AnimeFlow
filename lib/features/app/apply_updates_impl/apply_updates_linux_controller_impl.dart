@@ -1,10 +1,10 @@
-import 'package:anime_flow/controllers/app/app_info_controller.dart';
-import 'package:anime_flow/controllers/app/apply_updates_controller.dart';
+import 'package:anime_flow/features/app/apply_updates_controller.dart';
+import 'package:anime_flow/models/download_info.dart';
 import 'package:anime_flow/utils/logger.dart';
 import 'package:url_launcher/url_launcher.dart';
 
-/// macOS 平台更新实现
-class ApplyUpdatesMacOSController implements ApplyUpdatesController {
+/// Linux 平台更新实现
+class ApplyUpdatesLinuxController implements ApplyUpdatesController {
   @override
   Future<void> applyUpdates({
     required DownloadInfo downloadInfo,
@@ -21,7 +21,7 @@ class ApplyUpdatesMacOSController implements ApplyUpdatesController {
 
   @override
   void cancelDownload() {
-    // TODO: 实现 macOS 平台取消下载逻辑
+    // TODO: 实现 Linux 平台取消下载逻辑
   }
 }
 

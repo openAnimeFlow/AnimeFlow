@@ -1,8 +1,8 @@
 import 'dart:io';
-import 'package:anime_flow/controllers/app/app_info_controller.dart';
-import 'package:anime_flow/controllers/app/apply_updates_impl/apply_updates_android_controller_impl.dart';
-import 'package:anime_flow/controllers/app/apply_updates_impl/apply_updates_ios_controller_impl.dart';
-import 'package:anime_flow/controllers/app/apply_updates_impl/apply_updates_linux_controller_impl.dart';
+import 'package:anime_flow/models/download_info.dart';
+import 'apply_updates_impl/apply_updates_android_controller_impl.dart';
+import 'apply_updates_impl/apply_updates_ios_controller_impl.dart';
+import 'apply_updates_impl/apply_updates_linux_controller_impl.dart';
 import 'apply_updates_impl/apply_updates_macos_controller_impl.dart';
 import 'apply_updates_impl/apply_updates_windows_controller_impl.dart';
 
@@ -17,6 +17,13 @@ abstract class ApplyUpdatesController {
 
   ///取消下载
   void cancelDownload();
+}
+
+class UpdateDownloadCancelledException implements Exception {
+  const UpdateDownloadCancelledException();
+
+  @override
+  String toString() => '下载已取消';
 }
 
 /// 更新控制器工厂类

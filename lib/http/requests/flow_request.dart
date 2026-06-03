@@ -54,9 +54,9 @@ class FlowRequest {
 
   //回调api
   static Future<Map<String, dynamic>> callbackService(
-      String code,
-      String state,
-      ) async {
+    String code,
+    String state,
+  ) async {
     final response = await _client.get(
       AnimeFlowApi.callback,
       queryParameters: {'code': code, 'state': state},
@@ -110,7 +110,7 @@ class FlowRequest {
     // 这里猜测了弹弹Play的分集命名规则，例如上面的番剧ID为1758，第一集弹幕库ID大概率为17580001，
     // 但是此命名规则并没有体现在官方API文档里，保险的做法是请求 Api.dandanInfo（kazumi）
     final episodeID =
-    int.parse('$bangumiID${episode.toString().padLeft(4, '0')}');
+        int.parse('$bangumiID${episode.toString().padLeft(4, '0')}');
     return getDanDanmakuByEpisodeID(episodeID);
   }
 
@@ -134,9 +134,9 @@ class FlowRequest {
 
   /// 搜索番剧元素
   static Future<DanmakuSearchResponse> searchResponse(
-      String title, {
-        int type = 1,
-      }) async {
+    String title, {
+    int type = 1,
+  }) async {
     final response = await _client.get(
       AnimeFlowApi.dandanPlaySearch,
       queryParameters: {'keyword': title, 'type': type},
@@ -157,8 +157,8 @@ class FlowRequest {
 
   /// 通过番剧ID获取番剧元素
   static Future<DanmakuEpisodeResponse> getDanDanEpisodesByDanDanBangumiID(
-      int bangumiID,
-      ) async {
+    int bangumiID,
+  ) async {
     final path = '${AnimeFlowApi.animeDetail}/$bangumiID';
     final response = await _client.get(path);
     return DanmakuEpisodeResponse.fromJson(response.data);
@@ -166,16 +166,16 @@ class FlowRequest {
 
   /// 发送弹幕
   static Future<AnimeFlowResponse> sendDanmaku(
-      int bangumiID,
-      int episode, {
-        required String message,
-        required double time,
-        required int type,
-        required Color color,
-      }) async {
+    int bangumiID,
+    int episode, {
+    required String message,
+    required double time,
+    required int type,
+    required Color color,
+  }) async {
     final token = await BangumiToken.instance.getToken();
     final episodeID =
-    int.parse('$bangumiID${episode.toString().padLeft(4, '0')}');
+        int.parse('$bangumiID${episode.toString().padLeft(4, '0')}');
     final colorValue = Utils.colorToDecimalRgb(color);
     return _client.post(
       AnimeFlowApi.danmaku,
@@ -212,7 +212,14 @@ class FlowRequest {
 
   ///根据id获取条目
   static Future<SubjectsInfoItem> getSubjectByIdService(int id) async {
-    final response = await _client.get('${AnimeFlowApi.subjects}/$id');
+    final token = await BangumiToken.instance.getToken();
+    final headers = <String,dynamic>{};
+    if (token != null) {
+      headers[Constants.authorization] = '${token.tokenType} ${token.accessToken}';
+    }
+
+    final response = await _client.get('${AnimeFlowApi.subjects}/$id',
+        options: Options(headers: headers));
     return SubjectsInfoItem.fromJson(response.data);
   }
 
@@ -253,9 +260,9 @@ class FlowRequest {
 
     return _client
         .get(
-      AnimeFlowApi.subjects,
-      queryParameters: queryParameters,
-    )
+          AnimeFlowApi.subjects,
+          queryParameters: queryParameters,
+        )
         .then((response) => (SubjectItem.fromJson(response.data)));
   }
 
@@ -273,9 +280,9 @@ class FlowRequest {
   ///条目搜索
   static Future<SubjectItem> searchSubjectService(String keyword,
       {required int limit,
-        required int offset,
-        String? rank,
-        List<String>? tags}) async {
+      required int offset,
+      String? rank,
+      List<String>? tags}) async {
     final data = <String, dynamic>{
       'keyword': keyword,
     };
@@ -314,10 +321,10 @@ class FlowRequest {
     }
     return _client
         .get(
-      AnimeFlowApi.characters
-          .replaceFirst('{subjectId}', subjectId.toString()),
-      queryParameters: queryParameters,
-    )
+          AnimeFlowApi.characters
+              .replaceFirst('{subjectId}', subjectId.toString()),
+          queryParameters: queryParameters,
+        )
         .then((response) => (CharactersItem.fromJson(response.data)));
   }
 
@@ -383,10 +390,10 @@ class FlowRequest {
     final response = await _client.get(AnimeFlowApi.characterComments
         .replaceFirst('{characterId}', characterId.toString()));
     final list =
-    (response.data as Map<String, dynamic>)['data'] as List<dynamic>;
+        (response.data as Map<String, dynamic>)['data'] as List<dynamic>;
     return list
         .map((item) =>
-        CharacterCommentItem.fromJson(item as Map<String, dynamic>))
+            CharacterCommentItem.fromJson(item as Map<String, dynamic>))
         .toList();
   }
 
@@ -425,9 +432,9 @@ class FlowRequest {
   ///查询用户收藏
   static Future<UserCollectionsItem> queryUserCollectionService(String username,
       {int subjectType = 2,
-        required int type,
-        required int limit,
-        required int offset}) async {
+      required int type,
+      required int limit,
+      required int offset}) async {
     final response = await _client.get(
       AnimeFlowApi.userCollections.replaceFirst('{username}', username),
       queryParameters: {

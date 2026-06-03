@@ -11,6 +11,7 @@ import 'package:media_kit/media_kit.dart';
 import 'package:window_manager/window_manager.dart';
 import 'package:anime_flow/controllers/my_controller.dart';
 import 'package:anime_flow/features/shaders/shaders_controller.dart';
+import 'package:anime_flow/utils/crawl_config.dart';
 import 'package:anime_flow/providers/theme_provider.dart';
 import 'package:anime_flow/widget/windows_title_bar.dart';
 
@@ -36,8 +37,8 @@ void main() async {
 
   final container = ProviderContainer();
   container.read(myControllerProvider);
-  // 无需等待 GLSL 拷贝完成
   unawaited(container.read(shadersDirectoryProvider.future));
+  unawaited(CrawlConfig.initCrawlConfigs());
 
   runApp(
     UncontrolledProviderScope(

@@ -7,7 +7,6 @@ import 'package:anime_flow/pages/my/index.dart';
 import 'package:anime_flow/pages/ranking/index.dart';
 import 'package:anime_flow/repository/storage.dart';
 import 'package:anime_flow/routes/routes.dart';
-import 'package:anime_flow/utils/crawl_config.dart';
 import 'package:anime_flow/utils/systemUtil.dart';
 import 'package:anime_flow/widget/animation_network_image/animation_network_image.dart';
 import 'package:flutter/material.dart';
@@ -81,7 +80,6 @@ class _MainPageState extends ConsumerState<MainPage> {
 
   Future<void> _initializeApp() async {
     _initializePage(_currentIndex);
-    CrawlConfig.initCrawlConfigs();
     if (autoUpdate) {
       appInfoController.compareVersion();
     }

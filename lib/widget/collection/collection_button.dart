@@ -1,67 +1,69 @@
 import 'package:anime_flow/features/my/my_state_provider.dart';
 import 'package:anime_flow/models/enums/collect_type.dart';
-import 'package:anime_flow/models/item/bangumi/subjects_info_item.dart';
 import 'package:anime_flow/routes/routes.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-/// CollectType.value → Bangumi API type（1=想看, 2=看过, 3=在看, 4=搁置, 5=抛弃）
-int collectTypeValueToApiType(int collectTypeValue) {
-  switch (collectTypeValue) {
+/// Bangumi API type → [CollectType]（API：1=想看, 2=看过, 3=在看, 4=搁置, 5=抛弃）
+CollectType? collectTypeFromApiType(int? apiType) {
+  if (apiType == null) return null;
+  switch (apiType) {
     case 1:
-      return 3;
+      return CollectType.planToWatch;
     case 2:
-      return 1;
+      return CollectType.watched;
     case 3:
-      return 4;
+      return CollectType.watching;
     case 4:
-      return 2;
+      return CollectType.onHold;
     case 5:
-      return 5;
+      return CollectType.abandoned;
     default:
-      return 1;
+      return null;
   }
 }
 
-///todo 待优化
 class CollectionButton extends StatefulWidget {
-  final int subjectId;
-  final SubjectsInfoItem subject;
+  final CollectType? collectType;
+
   final Future<void> Function(CollectType type)? onCollectTypeChanged;
 
-  const CollectionButton(
-      {super.key,
-      required this.subjectId,
-      required this.subject,
-      this.onCollectTypeChanged});
+  const CollectionButton({
+    super.key,
+    this.collectType,
+    this.onCollectTypeChanged,
+  });
 
   @override
   State<CollectionButton> createState() => _CollectionButtonState();
 }
 
 class _CollectionButtonState extends State<CollectionButton> {
-  CollectType? _getCurrentCollectType() {
-    if (widget.subject.interest == null) return null;
-    final apiType = widget.subject.interest!.type;
-    switch (apiType) {
-      case 1: // 想看 -> CollectType.planToWatch (2)
-        return CollectType.planToWatch;
-      case 2: // 看过 -> CollectType.watched (4)
-        return CollectType.watched;
-      case 3: // 在看 -> CollectType.watching (1)
-        return CollectType.watching;
-      case 4: // 搁置 -> CollectType.onHold (3)
-        return CollectType.onHold;
-      case 5: // 抛弃 -> CollectType.abandoned (5)
-        return CollectType.abandoned;
-      default:
-        return null;
+  late CollectType? _displayType;
+
+  @override
+  void initState() {
+    super.initState();
+    _displayType = widget.collectType;
+  }
+
+  @override
+  void didUpdateWidget(CollectionButton oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.collectType != widget.collectType) {
+      _displayType = widget.collectType;
     }
+  }
+
+  Future<void> _onCollectTypeSelected(CollectType type) async {
+    await widget.onCollectTypeChanged?.call(type);
+    if (!mounted) return;
+    setState(() => _displayType = type);
   }
 
   @override
   Widget build(BuildContext context) {
-    final currentCollectType = _getCurrentCollectType();
+    final currentCollectType = _displayType;
 
     return Consumer(
       builder: (context, ref, _) {
@@ -90,35 +92,6 @@ class _CollectionButtonState extends State<CollectionButton> {
                 offset: const Offset(0, 40),
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(12),
-                ),
-                child: Container(
-                  width: 100,
-                  decoration: BoxDecoration(
-                    border: Border.all(
-                        color: Theme.of(context).colorScheme.primary),
-                    borderRadius: BorderRadius.circular(20),
-                  ),
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 12,
-                    vertical: 8,
-                  ),
-                  child: Row(
-                    mainAxisSize: MainAxisSize.min,
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Icon(
-                        currentCollectType != null
-                            ? _getCollectTypeIcon(currentCollectType)
-                            : Icons.play_circle_outline,
-                        size: 16,
-                      ),
-                      const SizedBox(width: 4),
-                      Text(
-                        currentCollectType?.label ?? '收藏',
-                        style: const TextStyle(fontSize: 12),
-                      ),
-                    ],
-                  ),
                 ),
                 itemBuilder: (BuildContext context) {
                   return CollectType.values
@@ -151,15 +124,41 @@ class _CollectionButtonState extends State<CollectionButton> {
                     );
                   }).toList();
                 },
-                onSelected: (CollectType type) async {
-                  await widget.onCollectTypeChanged?.call(type);
-                },
+                onSelected: _onCollectTypeSelected,
+                child: Container(
+                  width: 100,
+                  decoration: BoxDecoration(
+                    border: Border.all(
+                        color: Theme.of(context).colorScheme.primary),
+                    borderRadius: BorderRadius.circular(20),
+                  ),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 12,
+                    vertical: 8,
+                  ),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Icon(
+                        currentCollectType != null
+                            ? _getCollectTypeIcon(currentCollectType)
+                            : Icons.play_circle_outline,
+                        size: 16,
+                      ),
+                      const SizedBox(width: 4),
+                      Text(
+                        currentCollectType?.label ?? '收藏',
+                        style: const TextStyle(fontSize: 12),
+                      ),
+                    ],
+                  ),
+                ),
               );
       },
     );
   }
 
-  /// 获取收藏类型对应的图标
   IconData _getCollectTypeIcon(CollectType type) {
     switch (type) {
       case CollectType.watching:

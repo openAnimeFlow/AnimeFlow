@@ -1,15 +1,16 @@
 import 'dart:ui';
+
 import 'package:anime_flow/constants/layout_constant.dart';
 import 'package:anime_flow/http/requests/bgm_request.dart';
-import 'package:anime_flow/routes/model/info_route_extra.dart';
+import 'package:anime_flow/models/item/bangumi/subjects_info_item.dart';
 import 'package:anime_flow/pages/anime_info/provider/anime_info_provider.dart';
+import 'package:anime_flow/routes/model/info_route_extra.dart';
 import 'package:anime_flow/utils/systemUtil.dart';
+import 'package:anime_flow/widget/animation_network_image/animation_network_image.dart';
 import 'package:anime_flow/widget/collection/collection_button.dart';
 import 'package:anime_flow/widget/notification_toast.dart';
-import 'package:flutter/material.dart';
-import 'package:anime_flow/models/item/bangumi/subjects_info_item.dart';
-import 'package:anime_flow/widget/animation_network_image/animation_network_image.dart';
 import 'package:anime_flow/widget/star.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shimmer/shimmer.dart';
 
@@ -109,8 +110,10 @@ class InfoHeadView extends StatelessWidget {
                             final subjectsInfo = ref
                                 .watch(animeInfoProvider(subjectBasicData.id));
                             return subjectsInfo.when(
-                                data: (data) =>
-                                    _dataView(context, subjectItem: data),
+                                data: (data) => _dataView(
+                                      context,
+                                      subjectItem: data,
+                                    ),
                                 error: (error, stackTrace) =>
                                     const SizedBox.shrink(),
                                 loading: () => _skeletonView(context));
@@ -266,30 +269,18 @@ class InfoHeadView extends StatelessWidget {
         ),
         const Spacer(),
         CollectionButton(
-          subjectId: subjectItem.id,
-          subject: subjectItem,
+          collectType: collectTypeFromApiType(subjectItem.interest?.type),
           onCollectTypeChanged: (type) async {
-            final apiType = collectTypeValueToApiType(type.value);
-            try {
-              await UserRequest.updateCollectionService(
-                subjectItem.id,
-                type: apiType,
+            await UserRequest.updateCollectionService(
+              subjectItem.id,
+              type: type.value,
+            );
+            if (context.mounted) {
+              NotificationToast.show(
+                '收藏更新',
+                '已${type.label}',
+                maxWidth: 500,
               );
-              if (context.mounted) {
-                NotificationToast.show(
-                  '收藏更新',
-                  '已${type.label}',
-                  maxWidth: 500,
-                );
-              }
-            } catch (e) {
-              if (context.mounted) {
-                NotificationToast.show(
-                  '操作失败',
-                  '$e',
-                  maxWidth: 500,
-                );
-              }
             }
           },
         ),

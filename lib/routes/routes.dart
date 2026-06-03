@@ -339,6 +339,7 @@ class SettingAgreementRoute extends GoRouteData with $SettingAgreementRoute {
 // =====================================================================
 
 final GoRouter appRouter = GoRouter(
+  ///Todo 当完全替换成Get依赖后删除 [Get.key]
   navigatorKey: Get.key,
   observers: [BotToastNavigatorObserver()],
   initialLocation: const MainRoute().location,

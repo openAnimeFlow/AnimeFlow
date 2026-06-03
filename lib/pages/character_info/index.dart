@@ -1,5 +1,5 @@
 import 'package:anime_flow/http/requests/flow_request.dart';
-import 'package:anime_flow/routes/routes.dart';
+import 'package:anime_flow/routes/model/character_info_extra.dart';
 import 'package:anime_flow/models/item/bangumi/character_detail_item.dart';
 import 'package:anime_flow/pages/character_info/character_works.dart';
 import 'package:anime_flow/widget/animation_network_image/animation_network_image.dart';

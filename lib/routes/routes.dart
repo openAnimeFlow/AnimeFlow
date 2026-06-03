@@ -29,27 +29,10 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:go_router/go_router.dart';
 
+import 'model/character_info_extra.dart';
 import 'model/play_route_extra.dart';
 
 part 'routes.g.dart';
-
-// =====================================================================
-// 页面构造时仍在使用的复合参数对象（非路由数据本身）。
-// =====================================================================
-
-
-/// 角色详情页传给 [CharacterInfo] 的参数集。
-class CharacterInfoExtra {
-  final int characterId;
-  final String characterName;
-  final String characterImage;
-
-  const CharacterInfoExtra({
-    required this.characterId,
-    required this.characterName,
-    required this.characterImage,
-  });
-}
 
 // =====================================================================
 // 路由定义（go_router_builder typed routes）。

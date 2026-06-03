@@ -1,5 +1,5 @@
 import 'package:anime_flow/constants/layout_constant.dart';
-import 'package:anime_flow/controllers/shaders/shaders_controller.dart';
+import 'package:anime_flow/features/shaders/shaders_controller.dart';
 import 'package:anime_flow/http/requests/flow_request.dart';
 import 'package:anime_flow/pages/play/controller/play_controller.dart';
 import 'package:anime_flow/pages/play/controller/video_source_controller.dart';
@@ -57,7 +57,7 @@ class _PlayPageViewState extends ConsumerState<_PlayPageView> {
   void initState() {
     super.initState();
     playController = Get.put(PlayController(
-      shadersController: Get.find<ShadersController>(),
+      shadersDirectory: ref.read(shadersDirectoryProvider).requireValue,
     ));
     Get.put(VideoUiStateController());
 

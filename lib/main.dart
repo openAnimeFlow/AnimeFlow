@@ -9,6 +9,7 @@ import 'package:hive_ce_flutter/hive_flutter.dart';
 import 'package:media_kit/media_kit.dart';
 import 'package:window_manager/window_manager.dart';
 import 'package:anime_flow/controllers/my_controller.dart';
+import 'package:anime_flow/features/shaders/shaders_controller.dart';
 import 'package:anime_flow/providers/theme_provider.dart';
 import 'package:anime_flow/widget/windows_title_bar.dart';
 
@@ -34,6 +35,7 @@ void main() async {
 
   final container = ProviderContainer();
   container.read(myControllerProvider);
+  await container.read(shadersDirectoryProvider.future);
 
   runApp(
     UncontrolledProviderScope(

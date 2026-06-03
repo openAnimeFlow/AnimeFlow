@@ -1,7 +1,6 @@
 import 'package:anime_flow/constants/storage_key.dart';
 import 'package:anime_flow/controllers/app/app_info_controller.dart';
 import 'package:anime_flow/controllers/my_controller.dart';
-import 'package:anime_flow/controllers/shaders/shaders_controller.dart';
 import 'package:anime_flow/models/item/bangumi/user_info_item.dart';
 import 'package:anime_flow/models/item/tab_item.dart';
 import 'package:anime_flow/pages/my/index.dart';
@@ -16,18 +15,17 @@ import 'package:anime_flow/pages/recommend/index.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:get/get.dart';
 
-class MainPage extends StatefulWidget {
+class MainPage extends ConsumerStatefulWidget {
   final int initialTabIndex;
 
   const MainPage({super.key, this.initialTabIndex = 0});
 
   @override
-  State<MainPage> createState() => _MainPageState();
+  ConsumerState<MainPage> createState() => _MainPageState();
 }
 
-class _MainPageState extends State<MainPage> {
+class _MainPageState extends ConsumerState<MainPage> {
   late final AppInfoController appInfoController;
-  late final ShadersController shadersController;
   final setting = Storage.setting;
   int _currentIndex = 0;
   late bool autoUpdate;
@@ -39,7 +37,6 @@ class _MainPageState extends State<MainPage> {
     super.initState();
     autoUpdate = setting.get(StorageKey.autoUpdateKey, defaultValue: true);
     appInfoController = Get.put(AppInfoController(), permanent: true);
-    shadersController = Get.put(ShadersController(), permanent: true);
 
     _currentIndex =
         widget.initialTabIndex.clamp(0, _tabs.length - 1);
@@ -88,7 +85,6 @@ class _MainPageState extends State<MainPage> {
     if (autoUpdate) {
       appInfoController.compareVersion();
     }
-    await shadersController.copyShadersToExternalDirectory();
   }
 
   List<NavigationRailDestination> _buildRailDestinations(

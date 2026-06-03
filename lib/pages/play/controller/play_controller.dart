@@ -2,7 +2,6 @@ import 'dart:async';
 import 'dart:io';
 import 'package:anime_flow/constants/constants.dart';
 import 'package:anime_flow/constants/storage_key.dart';
-import 'package:anime_flow/controllers/shaders/shaders_controller.dart';
 import 'package:anime_flow/http/requests/flow_request.dart';
 import 'package:anime_flow/models/enums/video_controls_icon_type.dart';
 import 'package:anime_flow/models/item/danmaku/danmaku_module.dart';
@@ -62,14 +61,14 @@ class PlayState {
 }
 
 class PlayController extends GetxController {
-  PlayController({required this.shadersController});
+  PlayController({required this.shadersDirectory});
 
   late Player player;
   late VideoController videoController;
   final setting = Storage.setting;
 
-  ///着色器
-  final ShadersController shadersController;
+  /// 着色器所在目录（由 [shadersDirectoryProvider] 在启动时准备）
+  final Directory shadersDirectory;
 
   /// 视频超分
   /// 1. 关闭
@@ -647,7 +646,7 @@ class PlayController extends GetxController {
         'change-list',
         'glsl-shaders',
         'set',
-        Utils.buildShadersAbsolutePath(shadersController.shadersDirectory.path, mpvAnime4KShadersLite),
+        Utils.buildShadersAbsolutePath(shadersDirectory.path, mpvAnime4KShadersLite),
       ]);
       superResolutionType.value = 2;
       return;
@@ -657,7 +656,7 @@ class PlayController extends GetxController {
         'change-list',
         'glsl-shaders',
         'set',
-        Utils.buildShadersAbsolutePath(shadersController.shadersDirectory.path, mpvAnime4KShaders),
+        Utils.buildShadersAbsolutePath(shadersDirectory.path, mpvAnime4KShaders),
       ]);
       superResolutionType.value = 3;
       return;

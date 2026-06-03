@@ -1,12 +1,12 @@
 import 'dart:io';
+
 import 'package:anime_flow/utils/logger.dart';
 import 'package:flutter/services.dart' show rootBundle, AssetManifest;
 import 'package:get/get.dart';
-import 'package:path_provider/path_provider.dart';
 import 'package:path/path.dart' as path;
+import 'package:path_provider/path_provider.dart';
 
-
- class ShadersController extends GetxController {
+class ShadersController extends GetxController {
   late Directory shadersDirectory;
 
   Future<void> copyShadersToExternalDirectory() async {

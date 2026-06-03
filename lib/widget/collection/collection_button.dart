@@ -1,4 +1,4 @@
-import 'package:anime_flow/controllers/my_controller.dart';
+import 'package:anime_flow/features/my/my_state_provider.dart';
 import 'package:anime_flow/http/requests/bgm_request.dart';
 import 'package:anime_flow/models/enums/collect_type.dart';
 import 'package:anime_flow/models/item/bangumi/subjects_info_item.dart';

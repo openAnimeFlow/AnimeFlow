@@ -1,7 +1,7 @@
 import 'dart:io';
 
 import 'package:anime_flow/constants/constants.dart';
-import 'package:anime_flow/controllers/my/my_state_provider.dart';
+import 'package:anime_flow/features/my/my_state_provider.dart';
 import 'package:anime_flow/http/api_path.dart';
 import 'package:anime_flow/http/requests/flow_request.dart';
 import 'package:anime_flow/models/item/token_item.dart';

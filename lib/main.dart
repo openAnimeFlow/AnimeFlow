@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'dart:io';
+import 'package:anime_flow/features/my/my_controller_provider.dart';
 import 'package:anime_flow/pages/settings/pages/font/font_provider.dart';
 import 'package:anime_flow/repository/storage.dart';
 import 'package:anime_flow/routes/routes.dart';
@@ -9,7 +10,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:hive_ce_flutter/hive_flutter.dart';
 import 'package:media_kit/media_kit.dart';
 import 'package:window_manager/window_manager.dart';
-import 'package:anime_flow/controllers/my_controller.dart';
 import 'package:anime_flow/features/shaders/shaders_controller.dart';
 import 'package:anime_flow/utils/crawl_config.dart';
 import 'package:anime_flow/providers/theme_provider.dart';

@@ -1,4 +1,4 @@
-import 'package:anime_flow/controllers/my_controller.dart';
+import 'package:anime_flow/features/my/my_state_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'login_view/login_view.dart';

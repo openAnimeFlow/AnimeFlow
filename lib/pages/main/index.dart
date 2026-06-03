@@ -1,6 +1,7 @@
 import 'package:anime_flow/constants/storage_key.dart';
 import 'package:anime_flow/controllers/app/app_info_controller.dart';
-import 'package:anime_flow/controllers/my_controller.dart';
+import 'package:anime_flow/features/my/my_state_provider.dart';
+import 'package:anime_flow/widget/version_update_ui.dart';
 import 'package:anime_flow/models/item/bangumi/user_info_item.dart';
 import 'package:anime_flow/models/item/tab_item.dart';
 import 'package:anime_flow/pages/my/index.dart';
@@ -39,7 +40,7 @@ class _MainPageState extends ConsumerState<MainPage> {
 
     _currentIndex =
         widget.initialTabIndex.clamp(0, _tabs.length - 1);
-    _initializeApp();
+    initializeApp();
   }
 
   final List<TabItem> _tabs = [
@@ -62,7 +63,7 @@ class _MainPageState extends ConsumerState<MainPage> {
 
   final List<Widget?> _pageCache = List.filled(3, null);
 
-  void _initializePage(int index) {
+  void initializePage(int index) {
     if (_pageCache[index] == null) {
       switch (index) {
         case 0:
@@ -78,14 +79,22 @@ class _MainPageState extends ConsumerState<MainPage> {
     }
   }
 
-  Future<void> _initializeApp() async {
-    _initializePage(_currentIndex);
+  Future<void> initializeApp() async {
+    initializePage(_currentIndex);
     if (autoUpdate) {
-      appInfoController.compareVersion();
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        checkVersionUpdate();
+      });
     }
   }
 
-  List<NavigationRailDestination> _buildRailDestinations(
+  Future<void> checkVersionUpdate() async {
+    final result = await appInfoController.checkVersion();
+    if (!mounted) return;
+    await handleVersionCheckResult(context, appInfoController, result);
+  }
+
+  List<NavigationRailDestination> buildRailDestinations(
     ColorScheme colorScheme,
     UserInfoItem? userInfo,
   ) {
@@ -129,7 +138,7 @@ class _MainPageState extends ConsumerState<MainPage> {
     }).toList();
   }
 
-  List<NavigationDestination> _buildBarDestinations(
+  List<NavigationDestination> buildBarDestinations(
     ColorScheme colorScheme,
     UserInfoItem? userInfo,
   ) {
@@ -173,10 +182,10 @@ class _MainPageState extends ConsumerState<MainPage> {
     }).toList();
   }
 
-  void _onDestinationSelected(int index) {
+  void onDestinationSelected(int index) {
     setState(() {
       _currentIndex = index;
-      _initializePage(index);
+      initializePage(index);
     });
   }
 
@@ -196,7 +205,7 @@ class _MainPageState extends ConsumerState<MainPage> {
                   backgroundColor: colorScheme.surfaceContainerHighest,
                   selectedIndex: _currentIndex,
                   groupAlignment: 1.0,
-                  onDestinationSelected: _onDestinationSelected,
+                  onDestinationSelected: onDestinationSelected,
                   labelType: NavigationRailLabelType.all,
                   leading: Padding(
                     padding: const EdgeInsets.only(bottom: 16, top: 8),
@@ -222,7 +231,7 @@ class _MainPageState extends ConsumerState<MainPage> {
                     ),
                   ),
                   destinations:
-                      _buildRailDestinations(colorScheme, userInfo),
+                      buildRailDestinations(colorScheme, userInfo),
                 );
               },
             ),
@@ -244,9 +253,9 @@ class _MainPageState extends ConsumerState<MainPage> {
                 return NavigationBar(
                   backgroundColor: colorScheme.surfaceContainerHighest,
                   selectedIndex: _currentIndex,
-                  onDestinationSelected: _onDestinationSelected,
+                  onDestinationSelected: onDestinationSelected,
                   destinations:
-                      _buildBarDestinations(colorScheme, userInfo),
+                      buildBarDestinations(colorScheme, userInfo),
                 );
               },
             ),

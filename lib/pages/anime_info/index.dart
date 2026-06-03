@@ -1,4 +1,4 @@
-import 'package:anime_flow/controllers/my_controller.dart';
+import 'package:anime_flow/features/my/my_state_provider.dart';
 import 'package:anime_flow/pages/anime_info/inf_head.dart';
 import 'package:anime_flow/pages/anime_info/provider/anime_info_provider.dart';
 import 'package:anime_flow/routes/model/info_route_extra.dart';

@@ -1,6 +1,7 @@
 import 'package:anime_flow/constants/assets_path_constants.dart';
 import 'package:anime_flow/constants/storage_key.dart';
 import 'package:anime_flow/controllers/app/app_info_controller.dart';
+import 'package:anime_flow/widget/version_update_ui.dart';
 import 'package:anime_flow/pages/settings/setting_provider.dart';
 import 'package:anime_flow/repository/storage.dart';
 import 'package:anime_flow/routes/routes.dart';
@@ -99,8 +100,15 @@ class _AboutSettingsPageState extends State<AboutSettingsPage> {
             ListTile(
               title: const Text("检查更新"),
               trailing: const Icon(Icons.browser_updated_outlined),
-              onTap: () {
-                appInfoController.compareVersion();
+              onTap: () async {
+                final result = await appInfoController.checkVersion();
+                if (!context.mounted) return;
+                await handleVersionCheckResult(
+                  context,
+                  appInfoController,
+                  result,
+                  notifyWhenUpToDate: true,
+                );
               },
             ),
             const Divider(),

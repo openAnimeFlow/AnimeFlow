@@ -1,4 +1,4 @@
-import 'package:anime_flow/controllers/my_controller.dart';
+import 'package:anime_flow/features/my/my_controller.dart';
 import 'package:anime_flow/routes/model/info_route_extra.dart';
 import 'package:anime_flow/pages/anime_info/index.dart';
 import 'package:anime_flow/pages/calendar/index.dart';

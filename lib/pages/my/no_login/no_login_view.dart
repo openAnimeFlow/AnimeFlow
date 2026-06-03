@@ -1,5 +1,6 @@
 import 'package:anime_flow/constants/assets_path_constants.dart';
-import 'package:anime_flow/controllers/my_controller.dart';
+import 'package:anime_flow/features/my/my_controller_provider.dart';
+import 'package:anime_flow/features/my/my_state_provider.dart';
 import 'package:anime_flow/routes/routes.dart';
 import 'package:anime_flow/widget/drop_down_menu.dart';
 import 'package:flutter/material.dart';

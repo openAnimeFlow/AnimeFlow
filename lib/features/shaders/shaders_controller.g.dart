@@ -8,17 +8,13 @@ part of 'shaders_controller.dart';
 
 // GENERATED CODE - DO NOT MODIFY BY HAND
 // ignore_for_file: type=lint, type=warning
-/// 将 assets 中的 GLSL 拷贝到应用支持目录，供播放器超分使用。
 
 @ProviderFor(shadersDirectory)
 final shadersDirectoryProvider = ShadersDirectoryProvider._();
 
-/// 将 assets 中的 GLSL 拷贝到应用支持目录，供播放器超分使用。
-
 final class ShadersDirectoryProvider extends $FunctionalProvider<
         AsyncValue<Directory>, Directory, FutureOr<Directory>>
     with $FutureModifier<Directory>, $FutureProvider<Directory> {
-  /// 将 assets 中的 GLSL 拷贝到应用支持目录，供播放器超分使用。
   ShadersDirectoryProvider._()
       : super(
           from: null,

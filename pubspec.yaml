@@ -173,7 +173,7 @@ flutter:
     - assets/plugins/
     - assets/shaders/
     - assets/animation/
-    - assets/logo/startLogo.webp
+    - assets/logo/logo.webp
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/to/resolution-aware-images
 

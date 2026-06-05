@@ -119,18 +119,16 @@ flutter_launcher_icons:
     generate: true
   macos:
     generate: true
-  web:
-    generate: true
-  image_path: "assets/logo/Logo.png"
+  image_path: "assets/image/logo/logo_icon.png"
   remove_alpha_ios: true  # 添加这一行来移除iOS图标的alpha通道
   adaptive_icon_background: "#FFFFFF"
 
-## dart run flutter_native_splash:create
+# 启动logo: dart run flutter_native_splash:create
 flutter_native_splash:
   color: "#0F172A"
-  image: assets/logo/startLogo.png
+  image: assets/image/logo/logo.png
   android_12:
-    image: assets/logo/startLogo.png
+    image: assets/image/logo/logo.png
     color: "#0F172A"
   android: true
   ios: true
@@ -173,7 +171,7 @@ flutter:
     - assets/plugins/
     - assets/shaders/
     - assets/animation/
-    - assets/logo/logo.webp
+    - assets/image/logo/logo.webp
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/to/resolution-aware-images
 

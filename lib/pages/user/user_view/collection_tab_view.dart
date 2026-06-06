@@ -166,150 +166,146 @@ class __CollectionTabViewState extends State<_CollectionTabView> {
                 SliverPadding(
                   padding:
                       const EdgeInsets.symmetric(vertical: 10, horizontal: 10),
-                  sliver: SliverMainAxisGroup(
-                    slivers: [
-                      SliverGrid(
-                        gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                          crossAxisCount: _calculateCrossAxisCount(context),
-                          crossAxisSpacing: 12,
-                          mainAxisSpacing: 12,
-                          childAspectRatio: 2.5,
-                        ),
-                        delegate: SliverChildBuilderDelegate(
-                          (context, index) {
-                            // 最后一项
-                            if (index == collections.length) {
-                              return widget.isLoading
-                                  ? const Center(
-                                      child: CircularProgressIndicator(),
-                                    )
-                                  : widget.hasMore
-                                      ? const SizedBox.shrink()
-                                      : const Center(
-                                          child: Padding(
-                                          padding: EdgeInsets.all(8.0),
-                                          child: Text("没有更多了"),
-                                        ));
-                            }
+                  sliver: SliverGrid(
+                    gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                      crossAxisCount: _calculateCrossAxisCount(context),
+                      crossAxisSpacing: 12,
+                      mainAxisSpacing: 12,
+                      childAspectRatio: 2.5,
+                    ),
+                    delegate: SliverChildBuilderDelegate(
+                      (context, index) {
+                        // 最后一项
+                        if (index == collections.length) {
+                          return widget.isLoading
+                              ? const Center(
+                                  child: CircularProgressIndicator(),
+                                )
+                              : widget.hasMore
+                                  ? const SizedBox.shrink()
+                                  : const Center(
+                                      child: Padding(
+                                      padding: EdgeInsets.all(8.0),
+                                      child: Text("没有更多了"),
+                                    ));
+                        }
 
-                            final collection = collections[index];
-                            return InkWell(
-                              onTap: () {
-                                AnimeInfoRoute.fromExtra(InfoRouteExtra(
-                                  id: collection.id,
-                                  name: collection.nameCN.isEmpty
-                                      ? collection.name
-                                      : collection.nameCN,
-                                  image: collection.images.large,
-                                )).push(context);
-                              },
-                              child: Row(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  // 左侧封面
-                                  AspectRatio(
-                                    aspectRatio: 2 / 3,
-                                    child: ClipRRect(
-                                      borderRadius: const BorderRadius.all(
-                                          Radius.circular(12)),
-                                      child: SizedBox(
-                                        child: AnimationNetworkImage(
-                                          url: collection.images.large,
-                                          fit: BoxFit.cover,
-                                        ),
-                                      ),
+                        final collection = collections[index];
+                        return InkWell(
+                          onTap: () {
+                            AnimeInfoRoute.fromExtra(InfoRouteExtra(
+                              id: collection.id,
+                              name: collection.nameCN.isEmpty
+                                  ? collection.name
+                                  : collection.nameCN,
+                              image: collection.images.large,
+                            )).push(context);
+                          },
+                          child: Row(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              // 左侧封面
+                              AspectRatio(
+                                aspectRatio: 2 / 3,
+                                child: ClipRRect(
+                                  borderRadius: const BorderRadius.all(
+                                      Radius.circular(12)),
+                                  child: SizedBox(
+                                    child: AnimationNetworkImage(
+                                      url: collection.images.large,
+                                      fit: BoxFit.cover,
                                     ),
                                   ),
+                                ),
+                              ),
 
-                                  // 右侧信息
-                                  Expanded(
-                                    child: Padding(
-                                      padding: const EdgeInsets.all(5),
-                                      child: Column(
+                              // 右侧信息
+                              Expanded(
+                                child: Padding(
+                                  padding: const EdgeInsets.all(5),
+                                  child: Column(
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
+                                    mainAxisAlignment:
+                                        MainAxisAlignment.start,
+                                    children: [
+                                      Row(
                                         crossAxisAlignment:
                                             CrossAxisAlignment.start,
-                                        mainAxisAlignment:
-                                            MainAxisAlignment.start,
                                         children: [
-                                          Row(
-                                            crossAxisAlignment:
-                                                CrossAxisAlignment.start,
-                                            children: [
-                                              Expanded(
-                                                child: Text(
-                                                  collection.nameCN.isEmpty
-                                                      ? collection.name
-                                                      : collection.nameCN,
-                                                  style: const TextStyle(
-                                                    fontWeight: FontWeight.bold,
-                                                    fontSize: 14,
-                                                  ),
-                                                  maxLines: 2,
-                                                  overflow:
-                                                      TextOverflow.ellipsis,
-                                                ),
-                                              ),
-                                              const InkWell(
-                                                child: Icon(
-                                                    Icons.expand_more_outlined),
-                                              ),
-                                            ],
-                                          ),
-                                          if (collection
-                                              .summary.isNotEmpty) ...[
-                                            const SizedBox(height: 4),
-                                            Text(
-                                              collection.summary,
-                                              style: TextStyle(
-                                                fontSize: 12,
-                                                color: Colors.grey[600],
+                                          Expanded(
+                                            child: Text(
+                                              collection.nameCN.isEmpty
+                                                  ? collection.name
+                                                  : collection.nameCN,
+                                              style: const TextStyle(
+                                                fontWeight: FontWeight.bold,
+                                                fontSize: 14,
                                               ),
                                               maxLines: 2,
-                                              overflow: TextOverflow.ellipsis,
+                                              overflow:
+                                                  TextOverflow.ellipsis,
                                             ),
-                                          ],
-                                          const Spacer(),
-                                          Row(
-                                            children: [
-                                              RankingView(
-                                                  ranking:
-                                                      collection.rating.rank),
-                                              if (collection.rating.score >
-                                                  0) ...[
-                                                const SizedBox(height: 4),
-                                                Row(
-                                                  children: [
-                                                    StarView(
-                                                        iconSize: 16,
-                                                        score: collection
-                                                            .rating.score),
-                                                    const SizedBox(width: 4),
-                                                    Text(
-                                                      '${collection.rating.score}',
-                                                      style: TextStyle(
-                                                        fontWeight:
-                                                            FontWeight.bold,
-                                                        fontSize: 12,
-                                                        color: Colors.grey[600],
-                                                      ),
-                                                    ),
-                                                  ],
-                                                ),
-                                              ],
-                                            ],
-                                          )
+                                          ),
+                                          const InkWell(
+                                            child: Icon(
+                                                Icons.expand_more_outlined),
+                                          ),
                                         ],
                                       ),
-                                    ),
+                                      if (collection
+                                          .summary.isNotEmpty) ...[
+                                        const SizedBox(height: 4),
+                                        Text(
+                                          collection.summary,
+                                          style: TextStyle(
+                                            fontSize: 12,
+                                            color: Colors.grey[600],
+                                          ),
+                                          maxLines: 2,
+                                          overflow: TextOverflow.ellipsis,
+                                        ),
+                                      ],
+                                      const Spacer(),
+                                      Row(
+                                        children: [
+                                          RankingView(
+                                              ranking:
+                                                  collection.rating.rank),
+                                          if (collection.rating.score >
+                                              0) ...[
+                                            const SizedBox(height: 4),
+                                            Row(
+                                              children: [
+                                                StarView(
+                                                    iconSize: 16,
+                                                    score: collection
+                                                        .rating.score),
+                                                const SizedBox(width: 4),
+                                                Text(
+                                                  '${collection.rating.score}',
+                                                  style: TextStyle(
+                                                    fontWeight:
+                                                        FontWeight.bold,
+                                                    fontSize: 12,
+                                                    color: Colors.grey[600],
+                                                  ),
+                                                ),
+                                              ],
+                                            ),
+                                          ],
+                                        ],
+                                      )
+                                    ],
                                   ),
-                                ],
+                                ),
                               ),
-                            );
-                          },
-                          childCount: collections.length + 1,
-                        ),
-                      ),
-                    ],
+                            ],
+                          ),
+                        );
+                      },
+                      childCount: collections.length + 1,
+                    ),
                   ),
                 ),
               ],

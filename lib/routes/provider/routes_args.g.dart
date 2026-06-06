@@ -88,7 +88,7 @@ final class CharactersArgsProvider extends $FunctionalProvider<int, int, int>
   }
 }
 
-String _$charactersArgsHash() => r'ea77d80c8e4387b58e15aa94ef94d2c0f59391a6';
+String _$charactersArgsHash() => r'2b5f66d7d59bcbe53c5446cda42efd2f2c48a3ec';
 
 @ProviderFor(characterInfoArgs)
 final characterInfoArgsProvider = CharacterInfoArgsProvider._();

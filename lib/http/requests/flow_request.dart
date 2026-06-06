@@ -7,6 +7,7 @@ import 'package:anime_flow/http/clients/anime_flow_client.dart';
 import 'package:anime_flow/models/enums/sort_type.dart';
 import 'package:anime_flow/models/item/bangumi/actor_item.dart';
 import 'package:anime_flow/models/item/bangumi/calendar_item.dart';
+import 'package:anime_flow/models/item/captcha_item.dart';
 import 'package:anime_flow/models/item/bangumi/character_comments_item.dart';
 import 'package:anime_flow/models/item/bangumi/character_detail_item.dart';
 import 'package:anime_flow/models/item/bangumi/character_subjects_item.dart';
@@ -450,5 +451,40 @@ class FlowRequest {
       LiggLogger().e(e);
       throw Exception('Failed to fetch user collections: $e');
     }
+  }
+
+  static Future<CaptchaItem> generateCaptchaService() async {
+    final response = await _client.post(AnimeFlowApi.captcha);
+    return CaptchaItem.fromJson(Map<String, dynamic>.from(response.data));
+  }
+
+  static Future<void> sendEmailCodeService({
+    required String email,
+    required String captchaId,
+    required String captcha,
+  }) async {
+    await _client.post(
+      AnimeFlowApi.sendEmail,
+      queryParameters: {
+        'email': email,
+        'captchaId': captchaId,
+        'captcha': captcha,
+      },
+    );
+  }
+
+  static Future<void> registerService({
+    required String email,
+    required String password,
+    required String emailCode,
+  }) async {
+    await _client.post(
+      AnimeFlowApi.register,
+      data: {
+        'email': email,
+        'password': password,
+        'emailCode': emailCode,
+      },
+    );
   }
 }

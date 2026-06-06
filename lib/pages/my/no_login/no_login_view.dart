@@ -76,13 +76,6 @@ class NoLoginView extends StatelessWidget {
                   radius: 100,
                   backgroundColor: Colors.transparent,
                   child: Image.asset(AssetsPathConstants.logo)),
-              const Text(
-                '未登录',
-                style: TextStyle(
-                  fontSize: 24,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
               Consumer(
                 builder: (context, ref, _) {
                   final isAuthorizing = ref.watch(oAuthAuthorizingProvider);
@@ -172,6 +165,13 @@ class NoLoginView extends StatelessWidget {
                           ),
                   );
                 },
+              ),
+              TextButton(
+                onPressed: () => const RegisterRoute().push(context),
+                child: const Text(
+                  '还没有账号？点击注册',
+                  style: TextStyle(fontSize: 11),
+                ),
               ),
               Text(
                 '如果无法登录请使用代理改善网络',

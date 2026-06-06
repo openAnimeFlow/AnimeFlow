@@ -176,7 +176,16 @@ class AnimeFlowApi {
       userCollections = '/api/v1/bangumi/users/{username}/collections/subjects',
 
       /// 每日放送、
-      calendar = '/api/v1/bangumi/calendar';
+      calendar = '/api/v1/bangumi/calendar',
+
+      /// 图片验证码
+      captcha = '/api/verify/captcha',
+
+      /// 发送邮箱验证码
+      sendEmail = '/api/v1/email/send',
+
+      /// 注册账户
+      register = '/api/v1/account/register';
 }
 
 class DamakuApi {

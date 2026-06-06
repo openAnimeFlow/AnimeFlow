@@ -8,6 +8,7 @@ import 'package:anime_flow/pages/my/index.dart';
 import 'package:anime_flow/pages/my/play_record/index.dart';
 import 'package:anime_flow/pages/oauth/oauth_callback_page.dart';
 import 'package:anime_flow/pages/play/index.dart';
+import 'package:anime_flow/pages/register/index.dart';
 import 'package:anime_flow/pages/search/image_search_page.dart';
 import 'package:anime_flow/pages/search/index.dart';
 import 'package:anime_flow/pages/settings/index.dart';
@@ -59,6 +60,15 @@ class LoginRoute extends GoRouteData with $LoginRoute {
 
   @override
   Widget build(BuildContext context, GoRouterState state) => const MyPage();
+}
+
+@TypedGoRoute<RegisterRoute>(path: '/register')
+class RegisterRoute extends GoRouteData with $RegisterRoute {
+  const RegisterRoute();
+
+  @override
+  Widget build(BuildContext context, GoRouterState state) =>
+      const RegisterPage();
 }
 
 @TypedGoRoute<OauthCallbackRoute>(path: '/oauth/callback')

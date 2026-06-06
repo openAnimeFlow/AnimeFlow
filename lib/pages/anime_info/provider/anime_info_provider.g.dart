@@ -10,76 +10,37 @@ part of 'anime_info_provider.dart';
 // ignore_for_file: type=lint, type=warning
 
 @ProviderFor(AnimeInfo)
-final animeInfoProvider = AnimeInfoFamily._();
+final animeInfoProvider = AnimeInfoProvider._();
 
 final class AnimeInfoProvider
     extends $AsyncNotifierProvider<AnimeInfo, SubjectsInfoItem> {
-  AnimeInfoProvider._(
-      {required AnimeInfoFamily super.from, required int super.argument})
+  AnimeInfoProvider._()
       : super(
+          from: null,
+          argument: null,
           retry: null,
           name: r'animeInfoProvider',
           isAutoDispose: true,
-          dependencies: null,
-          $allTransitiveDependencies: null,
+          dependencies: <ProviderOrFamily>[animeInfoArgsProvider],
+          $allTransitiveDependencies: <ProviderOrFamily>[
+            AnimeInfoProvider.$allTransitiveDependencies0,
+          ],
         );
+
+  static final $allTransitiveDependencies0 = animeInfoArgsProvider;
 
   @override
   String debugGetCreateSourceHash() => _$animeInfoHash();
 
-  @override
-  String toString() {
-    return r'animeInfoProvider'
-        ''
-        '($argument)';
-  }
-
   @$internal
   @override
   AnimeInfo create() => AnimeInfo();
-
-  @override
-  bool operator ==(Object other) {
-    return other is AnimeInfoProvider && other.argument == argument;
-  }
-
-  @override
-  int get hashCode {
-    return argument.hashCode;
-  }
 }
 
-String _$animeInfoHash() => r'3e2b6474957cbec7028daee3249d0b253823f9f7';
-
-final class AnimeInfoFamily extends $Family
-    with
-        $ClassFamilyOverride<AnimeInfo, AsyncValue<SubjectsInfoItem>,
-            SubjectsInfoItem, FutureOr<SubjectsInfoItem>, int> {
-  AnimeInfoFamily._()
-      : super(
-          retry: null,
-          name: r'animeInfoProvider',
-          dependencies: null,
-          $allTransitiveDependencies: null,
-          isAutoDispose: true,
-        );
-
-  AnimeInfoProvider call(
-    int subjectId,
-  ) =>
-      AnimeInfoProvider._(argument: subjectId, from: this);
-
-  @override
-  String toString() => r'animeInfoProvider';
-}
+String _$animeInfoHash() => r'af71e7e4092c829eb5fb0fcaac4dded4d8e18f07';
 
 abstract class _$AnimeInfo extends $AsyncNotifier<SubjectsInfoItem> {
-  late final _$args = ref.$arg as int;
-  int get subjectId => _$args;
-
-  FutureOr<SubjectsInfoItem> build(
-    int subjectId,
-  );
+  FutureOr<SubjectsInfoItem> build();
   @$mustCallSuper
   @override
   void runBuild() {
@@ -90,90 +51,43 @@ abstract class _$AnimeInfo extends $AsyncNotifier<SubjectsInfoItem> {
         AsyncValue<SubjectsInfoItem>,
         Object?,
         Object?>;
-    element.handleCreate(
-        ref,
-        () => build(
-              _$args,
-            ));
+    element.handleCreate(ref, build);
   }
 }
 
 @ProviderFor(SubjectComments)
-final subjectCommentsProvider = SubjectCommentsFamily._();
+final subjectCommentsProvider = SubjectCommentsProvider._();
 
 final class SubjectCommentsProvider
     extends $AsyncNotifierProvider<SubjectComments, SubjectCommentsViewState> {
-  SubjectCommentsProvider._(
-      {required SubjectCommentsFamily super.from, required int super.argument})
+  SubjectCommentsProvider._()
       : super(
+          from: null,
+          argument: null,
           retry: null,
           name: r'subjectCommentsProvider',
           isAutoDispose: true,
-          dependencies: null,
-          $allTransitiveDependencies: null,
+          dependencies: <ProviderOrFamily>[animeInfoArgsProvider],
+          $allTransitiveDependencies: <ProviderOrFamily>[
+            SubjectCommentsProvider.$allTransitiveDependencies0,
+          ],
         );
+
+  static final $allTransitiveDependencies0 = animeInfoArgsProvider;
 
   @override
   String debugGetCreateSourceHash() => _$subjectCommentsHash();
 
-  @override
-  String toString() {
-    return r'subjectCommentsProvider'
-        ''
-        '($argument)';
-  }
-
   @$internal
   @override
   SubjectComments create() => SubjectComments();
-
-  @override
-  bool operator ==(Object other) {
-    return other is SubjectCommentsProvider && other.argument == argument;
-  }
-
-  @override
-  int get hashCode {
-    return argument.hashCode;
-  }
 }
 
-String _$subjectCommentsHash() => r'758680cda74d7701ab4d4dd9f0bd7dda75480ec1';
-
-final class SubjectCommentsFamily extends $Family
-    with
-        $ClassFamilyOverride<
-            SubjectComments,
-            AsyncValue<SubjectCommentsViewState>,
-            SubjectCommentsViewState,
-            FutureOr<SubjectCommentsViewState>,
-            int> {
-  SubjectCommentsFamily._()
-      : super(
-          retry: null,
-          name: r'subjectCommentsProvider',
-          dependencies: null,
-          $allTransitiveDependencies: null,
-          isAutoDispose: true,
-        );
-
-  SubjectCommentsProvider call(
-    int subjectId,
-  ) =>
-      SubjectCommentsProvider._(argument: subjectId, from: this);
-
-  @override
-  String toString() => r'subjectCommentsProvider';
-}
+String _$subjectCommentsHash() => r'0a19a22a3171bb0554eb431957496f81acfd1a90';
 
 abstract class _$SubjectComments
     extends $AsyncNotifier<SubjectCommentsViewState> {
-  late final _$args = ref.$arg as int;
-  int get subjectId => _$args;
-
-  FutureOr<SubjectCommentsViewState> build(
-    int subjectId,
-  );
+  FutureOr<SubjectCommentsViewState> build();
   @$mustCallSuper
   @override
   void runBuild() {
@@ -185,95 +99,48 @@ abstract class _$SubjectComments
         AsyncValue<SubjectCommentsViewState>,
         Object?,
         Object?>;
-    element.handleCreate(
-        ref,
-        () => build(
-              _$args,
-            ));
+    element.handleCreate(ref, build);
   }
 }
 
 ///相关条目
 
 @ProviderFor(SubjectRelated)
-final subjectRelatedProvider = SubjectRelatedFamily._();
+final subjectRelatedProvider = SubjectRelatedProvider._();
 
 ///相关条目
 final class SubjectRelatedProvider
     extends $AsyncNotifierProvider<SubjectRelated, SubjectRelationItem> {
   ///相关条目
-  SubjectRelatedProvider._(
-      {required SubjectRelatedFamily super.from, required int super.argument})
+  SubjectRelatedProvider._()
       : super(
+          from: null,
+          argument: null,
           retry: null,
           name: r'subjectRelatedProvider',
           isAutoDispose: true,
-          dependencies: null,
-          $allTransitiveDependencies: null,
+          dependencies: <ProviderOrFamily>[animeInfoArgsProvider],
+          $allTransitiveDependencies: <ProviderOrFamily>[
+            SubjectRelatedProvider.$allTransitiveDependencies0,
+          ],
         );
+
+  static final $allTransitiveDependencies0 = animeInfoArgsProvider;
 
   @override
   String debugGetCreateSourceHash() => _$subjectRelatedHash();
 
-  @override
-  String toString() {
-    return r'subjectRelatedProvider'
-        ''
-        '($argument)';
-  }
-
   @$internal
   @override
   SubjectRelated create() => SubjectRelated();
-
-  @override
-  bool operator ==(Object other) {
-    return other is SubjectRelatedProvider && other.argument == argument;
-  }
-
-  @override
-  int get hashCode {
-    return argument.hashCode;
-  }
 }
 
-String _$subjectRelatedHash() => r'ea6043743e663bbd101c5b161a7005a2b94c2a28';
-
-///相关条目
-
-final class SubjectRelatedFamily extends $Family
-    with
-        $ClassFamilyOverride<SubjectRelated, AsyncValue<SubjectRelationItem>,
-            SubjectRelationItem, FutureOr<SubjectRelationItem>, int> {
-  SubjectRelatedFamily._()
-      : super(
-          retry: null,
-          name: r'subjectRelatedProvider',
-          dependencies: null,
-          $allTransitiveDependencies: null,
-          isAutoDispose: true,
-        );
-
-  ///相关条目
-
-  SubjectRelatedProvider call(
-    int subjectId,
-  ) =>
-      SubjectRelatedProvider._(argument: subjectId, from: this);
-
-  @override
-  String toString() => r'subjectRelatedProvider';
-}
+String _$subjectRelatedHash() => r'953a4fbcfcc6a61e795b46d52db9d2842f54163f';
 
 ///相关条目
 
 abstract class _$SubjectRelated extends $AsyncNotifier<SubjectRelationItem> {
-  late final _$args = ref.$arg as int;
-  int get subjectId => _$args;
-
-  FutureOr<SubjectRelationItem> build(
-    int subjectId,
-  );
+  FutureOr<SubjectRelationItem> build();
   @$mustCallSuper
   @override
   void runBuild() {
@@ -284,96 +151,48 @@ abstract class _$SubjectRelated extends $AsyncNotifier<SubjectRelationItem> {
         AsyncValue<SubjectRelationItem>,
         Object?,
         Object?>;
-    element.handleCreate(
-        ref,
-        () => build(
-              _$args,
-            ));
+    element.handleCreate(ref, build);
   }
 }
 
 ///条目角色信息
 
 @ProviderFor(SubjectCharacters)
-final subjectCharactersProvider = SubjectCharactersFamily._();
+final subjectCharactersProvider = SubjectCharactersProvider._();
 
 ///条目角色信息
 final class SubjectCharactersProvider
     extends $AsyncNotifierProvider<SubjectCharacters, CharactersItem> {
   ///条目角色信息
-  SubjectCharactersProvider._(
-      {required SubjectCharactersFamily super.from,
-      required int super.argument})
+  SubjectCharactersProvider._()
       : super(
+          from: null,
+          argument: null,
           retry: null,
           name: r'subjectCharactersProvider',
           isAutoDispose: true,
-          dependencies: null,
-          $allTransitiveDependencies: null,
+          dependencies: <ProviderOrFamily>[animeInfoArgsProvider],
+          $allTransitiveDependencies: <ProviderOrFamily>[
+            SubjectCharactersProvider.$allTransitiveDependencies0,
+          ],
         );
+
+  static final $allTransitiveDependencies0 = animeInfoArgsProvider;
 
   @override
   String debugGetCreateSourceHash() => _$subjectCharactersHash();
 
-  @override
-  String toString() {
-    return r'subjectCharactersProvider'
-        ''
-        '($argument)';
-  }
-
   @$internal
   @override
   SubjectCharacters create() => SubjectCharacters();
-
-  @override
-  bool operator ==(Object other) {
-    return other is SubjectCharactersProvider && other.argument == argument;
-  }
-
-  @override
-  int get hashCode {
-    return argument.hashCode;
-  }
 }
 
-String _$subjectCharactersHash() => r'f1cc74c10b7732795ebd9f8f175530750ffbaa0e';
-
-///条目角色信息
-
-final class SubjectCharactersFamily extends $Family
-    with
-        $ClassFamilyOverride<SubjectCharacters, AsyncValue<CharactersItem>,
-            CharactersItem, FutureOr<CharactersItem>, int> {
-  SubjectCharactersFamily._()
-      : super(
-          retry: null,
-          name: r'subjectCharactersProvider',
-          dependencies: null,
-          $allTransitiveDependencies: null,
-          isAutoDispose: true,
-        );
-
-  ///条目角色信息
-
-  SubjectCharactersProvider call(
-    int subjectId,
-  ) =>
-      SubjectCharactersProvider._(argument: subjectId, from: this);
-
-  @override
-  String toString() => r'subjectCharactersProvider';
-}
+String _$subjectCharactersHash() => r'1bbf4d7ee30947caee5f48953e862238d6cffafd';
 
 ///条目角色信息
 
 abstract class _$SubjectCharacters extends $AsyncNotifier<CharactersItem> {
-  late final _$args = ref.$arg as int;
-  int get subjectId => _$args;
-
-  FutureOr<CharactersItem> build(
-    int subjectId,
-  );
+  FutureOr<CharactersItem> build();
   @$mustCallSuper
   @override
   void runBuild() {
@@ -383,95 +202,48 @@ abstract class _$SubjectCharacters extends $AsyncNotifier<CharactersItem> {
         AsyncValue<CharactersItem>,
         Object?,
         Object?>;
-    element.handleCreate(
-        ref,
-        () => build(
-              _$args,
-            ));
+    element.handleCreate(ref, build);
   }
 }
 
 ///番剧制作人信息
 
 @ProviderFor(SubjectProducers)
-final subjectProducersProvider = SubjectProducersFamily._();
+final subjectProducersProvider = SubjectProducersProvider._();
 
 ///番剧制作人信息
 final class SubjectProducersProvider
     extends $AsyncNotifierProvider<SubjectProducers, ProducersItem> {
   ///番剧制作人信息
-  SubjectProducersProvider._(
-      {required SubjectProducersFamily super.from, required int super.argument})
+  SubjectProducersProvider._()
       : super(
+          from: null,
+          argument: null,
           retry: null,
           name: r'subjectProducersProvider',
           isAutoDispose: true,
-          dependencies: null,
-          $allTransitiveDependencies: null,
+          dependencies: <ProviderOrFamily>[animeInfoArgsProvider],
+          $allTransitiveDependencies: <ProviderOrFamily>[
+            SubjectProducersProvider.$allTransitiveDependencies0,
+          ],
         );
+
+  static final $allTransitiveDependencies0 = animeInfoArgsProvider;
 
   @override
   String debugGetCreateSourceHash() => _$subjectProducersHash();
 
-  @override
-  String toString() {
-    return r'subjectProducersProvider'
-        ''
-        '($argument)';
-  }
-
   @$internal
   @override
   SubjectProducers create() => SubjectProducers();
-
-  @override
-  bool operator ==(Object other) {
-    return other is SubjectProducersProvider && other.argument == argument;
-  }
-
-  @override
-  int get hashCode {
-    return argument.hashCode;
-  }
 }
 
-String _$subjectProducersHash() => r'af7e000fe628c341172f92fe21bad8633090ea4c';
-
-///番剧制作人信息
-
-final class SubjectProducersFamily extends $Family
-    with
-        $ClassFamilyOverride<SubjectProducers, AsyncValue<ProducersItem>,
-            ProducersItem, FutureOr<ProducersItem>, int> {
-  SubjectProducersFamily._()
-      : super(
-          retry: null,
-          name: r'subjectProducersProvider',
-          dependencies: null,
-          $allTransitiveDependencies: null,
-          isAutoDispose: true,
-        );
-
-  ///番剧制作人信息
-
-  SubjectProducersProvider call(
-    int subjectId,
-  ) =>
-      SubjectProducersProvider._(argument: subjectId, from: this);
-
-  @override
-  String toString() => r'subjectProducersProvider';
-}
+String _$subjectProducersHash() => r'a5057ebf939add838ecbb9b84bb0658313e1518d';
 
 ///番剧制作人信息
 
 abstract class _$SubjectProducers extends $AsyncNotifier<ProducersItem> {
-  late final _$args = ref.$arg as int;
-  int get subjectId => _$args;
-
-  FutureOr<ProducersItem> build(
-    int subjectId,
-  );
+  FutureOr<ProducersItem> build();
   @$mustCallSuper
   @override
   void runBuild() {
@@ -481,10 +253,6 @@ abstract class _$SubjectProducers extends $AsyncNotifier<ProducersItem> {
         AsyncValue<ProducersItem>,
         Object?,
         Object?>;
-    element.handleCreate(
-        ref,
-        () => build(
-              _$args,
-            ));
+    element.handleCreate(ref, build);
   }
 }

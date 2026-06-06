@@ -8,16 +8,13 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 class InfoCommentView extends ConsumerWidget {
-  final int subjectId;
-
   const InfoCommentView({
     super.key,
-    required this.subjectId,
   });
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final commentsAsync = ref.watch(subjectCommentsProvider(subjectId));
+    final commentsAsync = ref.watch(subjectCommentsProvider);
 
     if (!commentsAsync.hasValue) {
       return const SizedBox.shrink();

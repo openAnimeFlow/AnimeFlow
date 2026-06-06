@@ -1,5 +1,4 @@
 import 'package:anime_flow/features/my/my_controller.dart';
-import 'package:anime_flow/routes/model/info_route_extra.dart';
 import 'package:anime_flow/pages/anime_info/index.dart';
 import 'package:anime_flow/pages/calendar/index.dart';
 import 'package:anime_flow/pages/character_info/index.dart';
@@ -24,8 +23,11 @@ import 'package:anime_flow/pages/settings/pages/plugins/download_plugins.dart';
 import 'package:anime_flow/pages/settings/pages/plugins/plugins.dart';
 import 'package:anime_flow/pages/settings/pages/theme.dart';
 import 'package:anime_flow/pages/user_space/index.dart';
+import 'package:anime_flow/routes/model/info_route_extra.dart';
+import 'package:anime_flow/routes/provider/anime_info_args.dart';
 import 'package:bot_toast/bot_toast.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:get/get.dart';
 import 'package:go_router/go_router.dart';
 
@@ -91,9 +93,15 @@ class AnimeInfoRoute extends GoRouteData with $AnimeInfoRoute {
   final InfoRouteExtra? $extra;
 
   @override
-  Widget build(BuildContext context, GoRouterState state) => AnimeInfoPage(
-        extra: $extra ?? InfoRouteExtra(id: id, name: name, image: image),
-      );
+  Widget build(BuildContext context, GoRouterState state) {
+    final extra = $extra ?? InfoRouteExtra(id: id, name: name, image: image);
+    return ProviderScope(
+      overrides: [
+        animeInfoArgsProvider.overrideWithValue(extra),
+      ],
+      child: const AnimeInfoPage(),
+    );
+  }
 }
 
 @TypedGoRoute<PlayRoute>(path: '/play')
@@ -106,8 +114,7 @@ class PlayRoute extends GoRouteData with $PlayRoute {
     this.$extra,
   });
 
-  factory PlayRoute.fromExtra(PlayRouteExtra extra) =>
-      PlayRoute(
+  factory PlayRoute.fromExtra(PlayRouteExtra extra) => PlayRoute(
         id: extra.playExtra.subjectId,
         name: extra.playExtra.subjectName,
         image: extra.playExtra.subjectCover,

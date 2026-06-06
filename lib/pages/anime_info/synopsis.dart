@@ -1,10 +1,10 @@
 import 'package:anime_flow/constants/layout_constant.dart';
 import 'package:anime_flow/models/item/bangumi/subjects_info_item.dart';
-import 'package:anime_flow/pages/anime_info/provider/anime_info_provider.dart';
 import 'package:anime_flow/pages/anime_info/characters.dart';
-import 'package:anime_flow/pages/anime_info/info_comment.dart';
 import 'package:anime_flow/pages/anime_info/details.dart';
+import 'package:anime_flow/pages/anime_info/info_comment.dart';
 import 'package:anime_flow/pages/anime_info/producers.dart';
+import 'package:anime_flow/pages/anime_info/provider/anime_info_provider.dart';
 import 'package:anime_flow/pages/anime_info/related.dart';
 import 'package:anime_flow/pages/anime_info/tags.dart';
 import 'package:anime_flow/utils/systemUtil.dart';
@@ -15,20 +15,16 @@ import 'package:shimmer/shimmer.dart';
 
 /// 条目详情信息展示ui
 class InfoSynopsisView extends StatelessWidget {
-  final int subjectId;
-
   final ValueChanged<bool>? onScrollChanged;
 
   const InfoSynopsisView({
     super.key,
-    required this.subjectId,
     this.onScrollChanged,
   });
 
   List<Widget> _sliversForSubjectsInfo(
     BuildContext context,
     SubjectsInfoItem subjectsInfo, {
-    required int subjectId,
     required String title,
     required double fontSizeTitle,
     required FontWeight fontWeightTitle,
@@ -78,25 +74,25 @@ class InfoSynopsisView extends StatelessWidget {
       SliverToBoxAdapter(
         child: _buildContainer(
           context,
-          CharactersView(subjectsId: subjectsInfo.id),
+          const CharactersView(),
         ),
       ),
       SliverToBoxAdapter(
         child: _buildContainer(
           context,
-          ProducersView(subjectId: subjectsInfo.id),
+          const ProducersView(),
         ),
       ),
       SliverToBoxAdapter(
         child: _buildContainer(
           context,
-          RelatedView(subjectId: subjectsInfo.id),
+          const RelatedView(),
         ),
       ),
       SliverToBoxAdapter(
         child: _buildContainer(
           context,
-          InfoCommentView(subjectId: subjectId),
+          const InfoCommentView(),
         ),
       ),
     ];
@@ -105,11 +101,8 @@ class InfoSynopsisView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     const String title = '简介';
-
     const fontWeightTitle = FontWeight.bold;
-
     const fontSizeTitle = 20.0;
-
     const fontWeight = FontWeight.w600;
 
     return Consumer(
@@ -121,7 +114,7 @@ class InfoSynopsisView extends StatelessWidget {
             if (metrics.axis == Axis.vertical &&
                 scrollInfo is ScrollUpdateNotification) {
               ref
-                  .read(subjectCommentsProvider(subjectId).notifier)
+                  .read(subjectCommentsProvider.notifier)
                   .onCommentsScroll(metrics);
 
               final bool shouldShowButton = scrollInfo.metrics.pixels >= 300;
@@ -143,15 +136,13 @@ class InfoSynopsisView extends StatelessWidget {
                   ),
                   Consumer(
                     builder: (context, ref, _) {
-                      final subjectsInfoAsync =
-                          ref.watch(animeInfoProvider(subjectId));
+                      final subjectsInfoAsync = ref.watch(animeInfoProvider);
 
                       return subjectsInfoAsync.when(
                         data: (subjectsInfo) => SliverMainAxisGroup(
                           slivers: _sliversForSubjectsInfo(
                             context,
                             subjectsInfo,
-                            subjectId: subjectId,
                             title: title,
                             fontSizeTitle: fontSizeTitle,
                             fontWeightTitle: fontWeightTitle,

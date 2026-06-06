@@ -2,18 +2,21 @@ import 'package:anime_flow/http/requests/flow_request.dart';
 import 'package:anime_flow/models/item/bangumi/actor_item.dart';
 import 'package:anime_flow/models/item/bangumi/producers_item.dart';
 import 'package:anime_flow/models/item/bangumi/related_subjects_item.dart';
-import 'package:flutter/scheduler.dart';
-import 'package:flutter/widgets.dart';
-import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:anime_flow/models/item/bangumi/subject_comments_item.dart';
 import 'package:anime_flow/models/item/bangumi/subjects_info_item.dart';
+import 'package:anime_flow/routes/provider/anime_info_args.dart';
+import 'package:flutter/cupertino.dart';
+import 'package:flutter/scheduler.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 part 'anime_info_provider.g.dart';
 
-@riverpod
+@Riverpod(dependencies: [animeInfoArgs])
 class AnimeInfo extends _$AnimeInfo {
   @override
-  Future<SubjectsInfoItem> build(int subjectId) async {
+  Future<SubjectsInfoItem> build() async {
+    final subjectId = ref.watch(animeInfoArgsProvider.select((e) => e.id));
     return FlowRequest.getSubjectByIdService(subjectId);
   }
 
@@ -35,7 +38,7 @@ class SubjectCommentsViewState {
   bool get hasMore => comments.data.length < comments.total;
 }
 
-@riverpod
+@Riverpod(dependencies: [animeInfoArgs])
 class SubjectComments extends _$SubjectComments {
   static const _pageSize = 20;
   static const _loadMoreThreshold = 200.0;
@@ -44,7 +47,8 @@ class SubjectComments extends _$SubjectComments {
   bool _loadMoreScheduled = false;
 
   @override
-  Future<SubjectCommentsViewState> build(int subjectId) async {
+  Future<SubjectCommentsViewState> build() async {
+    final subjectId = ref.watch(animeInfoArgsProvider.select((e) => e.id));
     final comments = await FlowRequest.getSubjectCommentsByIdService(
       subjectId: subjectId,
       limit: _pageSize,
@@ -93,6 +97,7 @@ class SubjectComments extends _$SubjectComments {
 
     try {
       final prev = current.comments;
+      final subjectId = ref.read(animeInfoArgsProvider.select((e) => e.id));
       final result = await FlowRequest.getSubjectCommentsByIdService(
         subjectId: subjectId,
         limit: _pageSize,
@@ -116,31 +121,31 @@ class SubjectComments extends _$SubjectComments {
 }
 
 ///相关条目
-@riverpod
+@Riverpod(dependencies: [animeInfoArgs])
 class SubjectRelated extends _$SubjectRelated {
   @override
-  Future<SubjectRelationItem> build(int subjectId) async {
-    return FlowRequest.relatedSubjectsService(
-        subjectId,
-        limit: 20,
-        offset: 0);
+  Future<SubjectRelationItem> build() async {
+    final subjectId = ref.watch(animeInfoArgsProvider.select((e) => e.id));
+    return FlowRequest.relatedSubjectsService(subjectId, limit: 20, offset: 0);
   }
 }
 
 ///条目角色信息
-@riverpod
+@Riverpod(dependencies: [animeInfoArgs])
 class SubjectCharacters extends _$SubjectCharacters {
   @override
-  Future<CharactersItem> build(int subjectId) async {
-    return FlowRequest.charactersService(subjectId,limit: 10, offset: 0);
+  Future<CharactersItem> build() async {
+    final subjectId = ref.watch(animeInfoArgsProvider.select((e) => e.id));
+    return FlowRequest.charactersService(subjectId, limit: 10, offset: 0);
   }
 }
 
 ///番剧制作人信息
-@riverpod
+@Riverpod(dependencies: [animeInfoArgs])
 class SubjectProducers extends _$SubjectProducers {
   @override
-  Future<ProducersItem> build(int subjectId) async {
-    return FlowRequest.getProducersService(subjectId,limit: 10, offset: 0);
+  Future<ProducersItem> build() async {
+    final subjectId = ref.watch(animeInfoArgsProvider.select((e) => e.id));
+    return FlowRequest.getProducersService(subjectId, limit: 10, offset: 0);
   }
 }

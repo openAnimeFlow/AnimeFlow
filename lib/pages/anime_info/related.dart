@@ -8,14 +8,12 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 ///相关条目
 class RelatedView extends StatelessWidget {
-  final int subjectId;
-
-  const RelatedView({super.key, required this.subjectId});
+  const RelatedView({super.key});
 
   @override
   Widget build(BuildContext context) {
     return Consumer(builder: (context, ref, child) {
-      final asyncRelation = ref.watch(subjectRelatedProvider(subjectId));
+      final asyncRelation = ref.watch(subjectRelatedProvider);
       return asyncRelation.when(
           data: (relation) => Column(
                 crossAxisAlignment: CrossAxisAlignment.start,

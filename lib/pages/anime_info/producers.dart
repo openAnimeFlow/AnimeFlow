@@ -7,15 +7,13 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 /// 番剧制作人信息
 class ProducersView extends StatelessWidget {
-  final int subjectId;
-
-  const ProducersView({super.key, required this.subjectId});
+  const ProducersView({super.key});
 
   @override
   Widget build(BuildContext context) {
     final windowsWidth = MediaQuery.of(context).size.width;
     return Consumer(builder: (context, ref, child) {
-      final asyncProducers = ref.watch(subjectProducersProvider(subjectId));
+      final asyncProducers = ref.watch(subjectProducersProvider);
       return asyncProducers.when(
           data: (producers) {
             if (producers.total > 0) {

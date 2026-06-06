@@ -4,7 +4,7 @@ import 'package:anime_flow/constants/layout_constant.dart';
 import 'package:anime_flow/http/requests/bgm_request.dart';
 import 'package:anime_flow/models/item/bangumi/subjects_info_item.dart';
 import 'package:anime_flow/pages/anime_info/provider/anime_info_provider.dart';
-import 'package:anime_flow/routes/model/info_route_extra.dart';
+import 'package:anime_flow/routes/provider/anime_info_args.dart';
 import 'package:anime_flow/utils/systemUtil.dart';
 import 'package:anime_flow/widget/animation_network_image/animation_network_image.dart';
 import 'package:anime_flow/widget/collection/collection_button.dart';
@@ -15,7 +15,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shimmer/shimmer.dart';
 
 class InfoHeadView extends StatelessWidget {
-  final InfoRouteExtra subjectBasicData;
   final double statusBarHeight;
   final double contentHeight;
 
@@ -23,14 +22,12 @@ class InfoHeadView extends StatelessWidget {
     super.key,
     required this.statusBarHeight,
     required this.contentHeight,
-    required this.subjectBasicData,
   });
 
   @override
   Widget build(BuildContext context) {
     return Stack(
       children: [
-        // 背景层
         Positioned.fill(
           child: IgnorePointer(
             child: Opacity(
@@ -48,11 +45,18 @@ class InfoHeadView extends StatelessWidget {
                           stops: [0.8, 1],
                         ).createShader(bounds);
                       },
-                      child: AnimationNetworkImage(
-                        url: subjectBasicData.image,
-                        width: boxConstraints.maxWidth,
-                        height: boxConstraints.maxHeight,
-                        fit: BoxFit.cover,
+                      child: Consumer(
+                        builder: (context, ref, _) {
+                          final image = ref.watch(
+                            animeInfoArgsProvider.select((e) => e.image),
+                          );
+                          return AnimationNetworkImage(
+                            url: image,
+                            width: boxConstraints.maxWidth,
+                            height: boxConstraints.maxHeight,
+                            fit: BoxFit.cover,
+                          );
+                        },
                       ),
                     ),
                   );
@@ -89,29 +93,36 @@ class InfoHeadView extends StatelessWidget {
                             aspectRatio: 2 / 3,
                             child: Container(
                               margin: const EdgeInsets.only(left: 6),
-                              child: Hero(
-                                tag: subjectBasicData.image,
-                                child: AnimationNetworkImage(
-                                  preview: true,
-                                  useExternalHero: true,
-                                  borderRadius: BorderRadius.circular(8),
-                                  url: subjectBasicData.image,
-                                  fit: BoxFit.cover,
-                                ),
+                              child: Consumer(
+                                builder: (context, ref, _) {
+                                  final image = ref.watch(
+                                    animeInfoArgsProvider
+                                        .select((e) => e.image),
+                                  );
+                                  return Hero(
+                                    tag: image,
+                                    child: AnimationNetworkImage(
+                                      preview: true,
+                                      useExternalHero: true,
+                                      borderRadius: BorderRadius.circular(8),
+                                      url: image,
+                                      fit: BoxFit.cover,
+                                    ),
+                                  );
+                                },
                               ),
                             ),
                           ),
                         ),
                         const SizedBox(width: 5),
-                        //信息
                         Flexible(
                           flex: 3,
                           child: Consumer(builder: (context, ref, child) {
-                            final subjectsInfo = ref
-                                .watch(animeInfoProvider(subjectBasicData.id));
+                            final subjectsInfo = ref.watch(animeInfoProvider);
                             return subjectsInfo.when(
                                 data: (data) => _dataView(
                                       context,
+                                      ref: ref,
                                       subjectItem: data,
                                     ),
                                 error: (error, stackTrace) =>
@@ -187,11 +198,12 @@ class InfoHeadView extends StatelessWidget {
     );
   }
 
-  ///数据视图
   Widget _dataView(
     BuildContext context, {
+    required WidgetRef ref,
     required SubjectsInfoItem subjectItem,
   }) {
+    final name = ref.watch(animeInfoArgsProvider.select((e) => e.name));
     const double fontSize = 12;
     const FontWeight fontWeight = FontWeight.w600;
     const amberAccent = Colors.amberAccent;
@@ -201,7 +213,7 @@ class InfoHeadView extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
-          subjectBasicData.name,
+          name,
           style: const TextStyle(
             fontSize: 20,
             fontWeight: FontWeight.bold,
@@ -210,8 +222,8 @@ class InfoHeadView extends StatelessWidget {
           overflow: TextOverflow.ellipsis,
         ),
         Wrap(
-          spacing: 5, // 子组件之间的水平间距
-          runSpacing: 5, // 行之间的垂直间距
+          spacing: 5,
+          runSpacing: 5,
           children: [
             Text(
               '${subjectItem.airtime.date}(${subjectItem.platform.typeCN})',

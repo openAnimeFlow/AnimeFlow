@@ -1,8 +1,8 @@
 import 'package:anime_flow/features/my/my_state_provider.dart';
 import 'package:anime_flow/pages/anime_info/inf_head.dart';
 import 'package:anime_flow/pages/anime_info/provider/anime_info_provider.dart';
-import 'package:anime_flow/routes/model/info_route_extra.dart';
 import 'package:anime_flow/routes/model/play_route_extra.dart';
+import 'package:anime_flow/routes/provider/anime_info_args.dart';
 import 'package:anime_flow/routes/routes.dart';
 import 'package:anime_flow/utils/logger.dart';
 import 'package:flutter/material.dart';
@@ -13,9 +13,7 @@ import 'info_appBar.dart';
 import 'synopsis.dart';
 
 class AnimeInfoPage extends StatefulWidget {
-  final InfoRouteExtra extra;
-
-  const AnimeInfoPage({super.key, required this.extra});
+  const AnimeInfoPage({super.key});
 
   @override
   State<AnimeInfoPage> createState() => _AnimeInfoPageState();
@@ -37,7 +35,6 @@ class _AnimeInfoPageState extends State<AnimeInfoPage> {
 
   @override
   Widget build(BuildContext context) {
-    final subjectBasicData = widget.extra;
     final statusBarHeight = MediaQuery.of(context).padding.top;
 
     return Scaffold(
@@ -67,20 +64,14 @@ class _AnimeInfoPageState extends State<AnimeInfoPage> {
                 sliver: SliverAppBar(
                   automaticallyImplyLeading: false,
                   titleSpacing: 0,
-                  title: InfoAppbar(
-                      subjectBasicData: subjectBasicData, isPinned: isPinned),
+                  title: InfoAppbar(isPinned: isPinned),
                   pinned: true,
                   floating: false,
                   snap: false,
-                  // 动态设置背景色
                   elevation: isPinned ? 4.0 : 0.0,
                   forceElevated: isPinned,
-
-                  // 展开高度计算：内容高度 + 状态栏 + Toolbar
                   expandedHeight:
                       contentHeight + statusBarHeight + kToolbarHeight,
-
-                  /// 头部内容区域
                   flexibleSpace: FlexibleSpaceBar(
                     collapseMode: CollapseMode.pin,
                     background: Padding(
@@ -88,7 +79,6 @@ class _AnimeInfoPageState extends State<AnimeInfoPage> {
                       child: InfoHeadView(
                         statusBarHeight: statusBarHeight,
                         contentHeight: contentHeight,
-                        subjectBasicData: subjectBasicData,
                       ),
                     ),
                   ),
@@ -97,7 +87,6 @@ class _AnimeInfoPageState extends State<AnimeInfoPage> {
             ];
           },
           body: InfoSynopsisView(
-            subjectId: subjectBasicData.id,
             onScrollChanged: (bool showButton) {
               if (topButton != showButton) {
                 setState(() {
@@ -108,104 +97,106 @@ class _AnimeInfoPageState extends State<AnimeInfoPage> {
           ),
         ),
       ),
-      floatingActionButton: AnimatedSwitcher(
-        duration: const Duration(milliseconds: 300),
-        transitionBuilder: (Widget child, Animation<double> animation) {
-          return ScaleTransition(
-            scale: animation,
-            child: child,
+      floatingActionButton: Consumer(
+        builder: (context, ref, _) {
+          final args = ref.watch(animeInfoArgsProvider);
+          return AnimatedSwitcher(
+            duration: const Duration(milliseconds: 300),
+            transitionBuilder: (Widget child, Animation<double> animation) {
+              return ScaleTransition(
+                scale: animation,
+                child: child,
+              );
+            },
+            child: Column(
+              key: ValueKey<bool>(topButton),
+              mainAxisAlignment: MainAxisAlignment.end,
+              mainAxisSize: MainAxisSize.min,
+              spacing: 5,
+              children: [
+                if (topButton)
+                  FloatingActionButton(
+                    heroTag: 'top_${args.id}',
+                    onPressed: () {
+                      nestedScrollController.animateTo(
+                        0,
+                        duration: const Duration(milliseconds: 300),
+                        curve: Curves.easeInOut,
+                      );
+                    },
+                    child: Icon(Icons.arrow_upward_rounded,
+                        color: Theme.of(context).colorScheme.primary),
+                  ),
+                Consumer(
+                  builder: (context, ref, child) {
+                    final asyncSubjectsInfo = ref.watch(animeInfoProvider);
+                    return asyncSubjectsInfo.when(
+                        data: (subjectsInfo) {
+                          final isLoggedIn =
+                              ref.watch(currentUserInfoProvider) != null;
+                          return isLoggedIn && subjectsInfo.interest != null
+                              ? FloatingActionButton(
+                                  heroTag: 'evaluate_${args.id}',
+                                  onPressed: () {
+                                    showDialog<void>(
+                                      context: context,
+                                      barrierDismissible: false,
+                                      builder: (_) => InfoEvaluateDialog(
+                                        subjectsInfo: subjectsInfo,
+                                        onSaved: (updated) => ref
+                                            .read(animeInfoProvider.notifier)
+                                            .setAnimeInfo(updated),
+                                      ),
+                                    );
+                                  },
+                                  child: Icon(
+                                    Icons.messenger,
+                                    color:
+                                        Theme.of(context).colorScheme.primary,
+                                  ),
+                                )
+                              : const SizedBox.shrink();
+                        },
+                        error: (error, stackTrace) {
+                          LiggLogger().e('获取番剧详情失败',
+                              error: error, stackTrace: stackTrace);
+                          return const SizedBox.shrink();
+                        },
+                        loading: () => const SizedBox.shrink());
+                  },
+                ),
+                Consumer(builder: (context, ref, child) {
+                  final asyncSubjectsInfo = ref.watch(animeInfoProvider);
+                  final subjectsInfo = asyncSubjectsInfo.value;
+                  if (subjectsInfo != null) {
+                    return FloatingActionButton(
+                      heroTag: 'play_${args.id}',
+                      onPressed: () => PlayRoute.fromExtra(
+                        PlayRouteExtra(
+                          playExtra: PlayExtra(
+                            subjectId: args.id,
+                            subjectName: args.name,
+                            subjectCover: args.image,
+                            subjectAliases: subjectsInfo.infobox
+                                .where((item) => item.key == '别名')
+                                .expand((item) => item.values.map((e) => e.v))
+                                .toList(),
+                          ),
+                        ),
+                      ).push(context),
+                      child: Icon(
+                        Icons.play_arrow_rounded,
+                        color: Theme.of(context).colorScheme.primary,
+                      ),
+                    );
+                  } else {
+                    return const SizedBox.shrink();
+                  }
+                }),
+              ],
+            ),
           );
         },
-        child: Column(
-          key: ValueKey<bool>(topButton),
-          mainAxisAlignment: MainAxisAlignment.end,
-          mainAxisSize: MainAxisSize.min,
-          spacing: 5,
-          children: [
-            if (topButton)
-              FloatingActionButton(
-                heroTag: 'top_${subjectBasicData.id}',
-                onPressed: () {
-                  nestedScrollController.animateTo(
-                    0,
-                    duration: const Duration(milliseconds: 300),
-                    curve: Curves.easeInOut,
-                  );
-                },
-                child: Icon(Icons.arrow_upward_rounded,
-                    color: Theme.of(context).colorScheme.primary),
-              ),
-            Consumer(
-              builder: (context, ref, child) {
-                final asyncSubjectsInfo =
-                    ref.watch(animeInfoProvider(subjectBasicData.id));
-                return asyncSubjectsInfo.when(
-                    data: (subjectsInfo) {
-                      final isLoggedIn =
-                          ref.watch(currentUserInfoProvider) != null;
-                      return isLoggedIn && subjectsInfo.interest != null
-                          ? FloatingActionButton(
-                              heroTag: 'evaluate_${subjectBasicData.id}',
-                              onPressed: () {
-                                showDialog<void>(
-                                  context: context,
-                                  barrierDismissible: false,
-                                  builder: (_) => InfoEvaluateDialog(
-                                    subjectsInfo: subjectsInfo,
-                                    onSaved: (updated) => ref
-                                        .read(animeInfoProvider(
-                                                subjectBasicData.id)
-                                            .notifier)
-                                        .setAnimeInfo(updated),
-                                  ),
-                                );
-                              },
-                              child: Icon(
-                                Icons.messenger,
-                                color: Theme.of(context).colorScheme.primary,
-                              ),
-                            )
-                          : const SizedBox.shrink();
-                    },
-                    error: (error, stackTrace) {
-                      LiggLogger()
-                          .e('获取番剧详情失败', error: error, stackTrace: stackTrace);
-                      return const SizedBox.shrink();
-                    },
-                    loading: () => const SizedBox.shrink());
-              },
-            ),
-            Consumer(builder: (context, ref, child) {
-              final asyncSubjectsInfo =
-                  ref.watch(animeInfoProvider(subjectBasicData.id));
-              final subjectsInfo = asyncSubjectsInfo.value;
-              if (subjectsInfo != null) {
-                return FloatingActionButton(
-                  heroTag: 'play_${subjectBasicData.id}',
-                  onPressed: () => PlayRoute.fromExtra(
-                    PlayRouteExtra(
-                      playExtra: PlayExtra(
-                        subjectId: subjectBasicData.id,
-                        subjectName: subjectBasicData.name,
-                        subjectCover: subjectBasicData.image,
-                        subjectAliases: subjectsInfo.infobox
-                            .where((item) => item.key == '别名')
-                            .expand((item) => item.values.map((e) => e.v))
-                            .toList(),
-                      ),
-                    ),
-                  ).push(context),
-                  child: Icon(
-                    Icons.play_arrow_rounded,
-                    color: Theme.of(context).colorScheme.primary,
-                  ),
-                );
-              } else {
-                return const SizedBox.shrink();
-              }
-            }),
-          ],
-        ),
       ),
     );
   }

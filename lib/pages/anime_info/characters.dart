@@ -1,5 +1,7 @@
 import 'dart:math';
+
 import 'package:anime_flow/pages/anime_info/provider/anime_info_provider.dart';
+import 'package:anime_flow/routes/provider/anime_info_args.dart';
 import 'package:anime_flow/routes/routes.dart';
 import 'package:anime_flow/utils/logger.dart';
 import 'package:anime_flow/widget/animation_network_image/animation_network_image.dart';
@@ -7,22 +9,19 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 class CharactersView extends StatelessWidget {
-  final int subjectsId;
-
-  const CharactersView({super.key, required this.subjectsId});
-
+  const CharactersView({super.key});
 
   @override
   Widget build(BuildContext context) {
-
     final double windowsWidth = MediaQuery.of(context).size.width;
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Consumer(builder: (context, ref, child) {
-          final asyncCharacters =
-          ref.watch(subjectCharactersProvider(subjectsId));
+          final asyncCharacters = ref.watch(subjectCharactersProvider);
+          final subjectsId =
+              ref.watch(animeInfoArgsProvider.select((e) => e.id));
           return asyncCharacters.when(
             data: (characters) {
               if (characters.total > 0) {
@@ -95,7 +94,7 @@ class CharactersView extends StatelessWidget {
                                     aspectRatio: 1,
                                     child: Hero(
                                       tag:
-                                      'character:${actor.character.images.large}',
+                                          'character:${actor.character.images.large}',
                                       child: AnimationNetworkImage(
                                         borderRadius: BorderRadius.circular(10),
                                         url: actor.character.images.large,

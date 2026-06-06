@@ -1,14 +1,13 @@
 import 'package:anime_flow/http/api_path.dart';
 import 'package:anime_flow/http/requests/request.dart';
-import 'package:anime_flow/models/item/bangumi/subjects_info_item.dart';
-import 'package:anime_flow/routes/model/info_route_extra.dart';
 import 'package:anime_flow/pages/anime_info/provider/anime_info_provider.dart';
+import 'package:anime_flow/routes/provider/anime_info_args.dart';
+import 'package:anime_flow/utils/exceptions/storage_exception.dart';
+import 'package:anime_flow/utils/logger.dart';
 import 'package:anime_flow/widget/animation_network_image/animation_network_image.dart';
 import 'package:anime_flow/widget/drop_down_menu.dart';
 import 'package:anime_flow/widget/notification_toast.dart';
 import 'package:anime_flow/widget/ranking.dart';
-import 'package:anime_flow/utils/exceptions/storage_exception.dart';
-import 'package:anime_flow/utils/logger.dart';
 import 'package:anime_flow/widget/star.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -16,14 +15,12 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:get/get.dart';
 import 'package:url_launcher/url_launcher.dart';
 
-class InfoAppbar extends StatelessWidget {
+class InfoAppbar extends ConsumerWidget {
   final bool isPinned;
-  final InfoRouteExtra subjectBasicData;
 
   const InfoAppbar({
     super.key,
     required this.isPinned,
-    required this.subjectBasicData,
   });
 
   Future<void> _openInBrowser(String url) async {
@@ -42,12 +39,9 @@ class InfoAppbar extends StatelessWidget {
     }
   }
 
-  Future<void> _downloadCover() async {
+  Future<void> _downloadCover(String image, String name) async {
     try {
-      final message = await Request.downloadImage(
-        subjectBasicData.image,
-        subjectBasicData.name,
-      );
+      final message = await Request.downloadImage(image, name);
       NotificationToast.show('提示', message, maxWidth: 500);
     } on StoragePermissionDeniedException catch (e) {
       LiggLogger().e('保存图片失败:$e');
@@ -58,14 +52,19 @@ class InfoAppbar extends StatelessWidget {
     }
   }
 
-  void _handleMenuAction(BuildContext context, MoreMenuAction action) {
-    final url = '${CommonApi.bgmTV}/subject/${subjectBasicData.id}';
+  void _handleMenuAction(
+    BuildContext context,
+    WidgetRef ref,
+    MoreMenuAction action,
+  ) {
+    final args = ref.read(animeInfoArgsProvider);
+    final url = '${CommonApi.bgmTV}/subject/${args.id}';
     switch (action) {
       case MoreMenuAction.openInBrowser:
         _openInBrowser(url);
         break;
       case MoreMenuAction.downloadCover:
-        _downloadCover();
+        _downloadCover(args.image, args.name);
         break;
       case MoreMenuAction.copyUrl:
         _copyUrl(context, url);
@@ -74,7 +73,7 @@ class InfoAppbar extends StatelessWidget {
   }
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     return Row(
       children: [
         IconButton(
@@ -84,23 +83,14 @@ class InfoAppbar extends StatelessWidget {
           onPressed: Get.back,
         ),
         Expanded(
-          child: Consumer(
-            builder: (context, ref, child) {
-              final infoAsync = ref.watch(animeInfoProvider(subjectBasicData.id));
-              return infoAsync.when(
-                data: (data) => _buildInfo(data),
-                loading: () => const SizedBox.shrink(),
-                error: (_, __) => const SizedBox.shrink(),
-              );
-            },
-          ),
+          child: _buildInfo(ref),
         ),
-        _buildMenu(context),
+        _buildMenu(context, ref),
       ],
     );
   }
 
-  Widget _buildMenu(BuildContext context) {
+  Widget _buildMenu(BuildContext context, WidgetRef ref) {
     return DropDownMenu<MoreMenuAction>(
       tooltip: '更多操作',
       items: MoreMenuAction.values,
@@ -128,11 +118,12 @@ class InfoAppbar extends StatelessWidget {
           ],
         );
       },
-      onSelected: (action) => _handleMenuAction(context, action),
+      onSelected: (action) => _handleMenuAction(context, ref, action),
     );
   }
 
-  Widget _buildInfo(SubjectsInfoItem subjectsItem) {
+  Widget _buildInfo(WidgetRef ref) {
+    final args = ref.watch(animeInfoArgsProvider);
     return AnimatedOpacity(
       opacity: isPinned ? 1.0 : 0.0,
       duration: const Duration(milliseconds: 300),
@@ -145,7 +136,7 @@ class InfoAppbar extends StatelessWidget {
               width: 26,
               height: 36,
               fit: BoxFit.cover,
-              url: subjectBasicData.image,
+              url: args.image,
             ),
             const SizedBox(width: 5),
             Expanded(
@@ -154,29 +145,36 @@ class InfoAppbar extends StatelessWidget {
                 mainAxisSize: MainAxisSize.min,
                 children: [
                   Text(
-                    subjectBasicData.name,
+                    args.name,
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                     style: const TextStyle(fontSize: 15),
                   ),
-                  if (subjectsItem.rating.rank > 0)
-                    Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        RankingView(ranking: subjectsItem.rating.rank),
-                        StarView(score: subjectsItem.rating.score),
-                        const SizedBox(width: 5),
-                        Text(
-                          subjectsItem.rating.score.toStringAsFixed(1),
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                          style: const TextStyle(
-                            fontSize: 10,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                      ],
-                    ),
+                  Consumer(builder: (context, ref, child) {
+                    final infoAsync = ref.watch(animeInfoProvider);
+                    return infoAsync.when(
+                        data: (data) => data.rating.rank > 0
+                            ? Row(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  RankingView(ranking: data.rating.rank),
+                                  StarView(score: data.rating.score),
+                                  const SizedBox(width: 5),
+                                  Text(
+                                    data.rating.score.toStringAsFixed(1),
+                                    maxLines: 1,
+                                    overflow: TextOverflow.ellipsis,
+                                    style: const TextStyle(
+                                      fontSize: 10,
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                  ),
+                                ],
+                              )
+                            : const SizedBox.shrink(),
+                        error: (error, stack) => const SizedBox.shrink(),
+                        loading: () => const SizedBox.shrink());
+                  }),
                 ],
               ),
             ),

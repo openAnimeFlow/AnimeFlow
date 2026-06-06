@@ -148,9 +148,8 @@ class _RegisterPageState extends State<RegisterPage> {
 
   Uint8List? _decodeCaptchaImage(String base64Image) {
     try {
-      final normalized = base64Image.contains(',')
-          ? base64Image.split(',').last
-          : base64Image;
+      final normalized =
+          base64Image.contains(',') ? base64Image.split(',').last : base64Image;
       return base64Decode(normalized);
     } catch (_) {
       return null;
@@ -164,38 +163,60 @@ class _RegisterPageState extends State<RegisterPage> {
     final captchaBytes =
         _captcha == null ? null : _decodeCaptchaImage(_captcha!.imageBase64);
 
+    final topPadding = MediaQuery.paddingOf(context).top;
+    final bottomPadding = MediaQuery.paddingOf(context).bottom;
+
     return Scaffold(
+      extendBodyBehindAppBar: true,
       appBar: AppBar(
+        backgroundColor: Colors.transparent,
+        elevation: 0,
+        scrolledUnderElevation: 0,
+        surfaceTintColor: Colors.transparent,
+        forceMaterialTransparency: true,
         title: const Text('注册'),
       ),
-      body: SafeArea(
+      body: SingleChildScrollView(
+        padding: EdgeInsets.fromLTRB(
+            10, topPadding + kToolbarHeight, 10, bottomPadding),
         child: Center(
-          child: SingleChildScrollView(
-            padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
-            child: ConstrainedBox(
-              constraints: const BoxConstraints(maxWidth: 420),
-              child: Stack(
-                clipBehavior: Clip.none,
-                alignment: Alignment.topCenter,
-                children: [
-                  Padding(
-                    padding: const EdgeInsets.only(top: 88),
-                    child: Material(
-                      elevation: 1,
-                      shadowColor: colorScheme.shadow.withValues(alpha: 0.12),
-                      color: colorScheme.surfaceContainerLowest,
-                      borderRadius: BorderRadius.circular(24),
-                      child: Container(
+          child: ConstrainedBox(
+            constraints: const BoxConstraints(maxWidth: 420),
+            child: Column(
+              children: [
+                Align(
+                  alignment: Alignment.bottomRight,
+                  child: SizedBox(
+                    height: 133,
+                    width: 200,
+                    child: ClipRRect(
+                      child: Image.asset(
                         width: double.infinity,
-                        padding: const EdgeInsets.fromLTRB(24, 36, 24, 24),
-                        decoration: BoxDecoration(
-                          borderRadius: BorderRadius.circular(24),
-                          border: Border.all(
-                            color: colorScheme.outlineVariant
-                                .withValues(alpha: 0.35),
-                          ),
-                        ),
-                        child: Form(
+                        height: double.infinity,
+                        AssetsPathConstants.purpleCatGirlChibi,
+                        fit: BoxFit.cover,
+                      ),
+                    ),
+                  ),
+                ),
+                Material(
+                  elevation: 1,
+                  shadowColor: colorScheme.shadow.withValues(alpha: 0.12),
+                  color: colorScheme.surfaceContainerLowest,
+                  borderRadius: BorderRadius.circular(24),
+                  child: Container(
+                    width: double.infinity,
+                    padding: const EdgeInsets.fromLTRB(24, 36, 24, 24),
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(24),
+                      border: Border.all(
+                        color:
+                            colorScheme.outlineVariant.withValues(alpha: 0.35),
+                      ),
+                    ),
+                    child: Column(
+                      children: [
+                        Form(
                           key: _formKey,
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -243,7 +264,8 @@ class _RegisterPageState extends State<RegisterPage> {
                                   prefixIcon: const Icon(Icons.lock_outline),
                                   suffixIcon: IconButton(
                                     onPressed: () => setState(
-                                      () => _obscurePassword = !_obscurePassword,
+                                      () =>
+                                          _obscurePassword = !_obscurePassword,
                                     ),
                                     icon: Icon(
                                       _obscurePassword
@@ -322,8 +344,8 @@ class _RegisterPageState extends State<RegisterPage> {
                                       height: 48,
                                       alignment: Alignment.center,
                                       decoration: BoxDecoration(
-                                        color: colorScheme
-                                            .surfaceContainerHighest,
+                                        color:
+                                            colorScheme.surfaceContainerHighest,
                                         borderRadius: BorderRadius.circular(12),
                                         border: Border.all(
                                           color: colorScheme.outlineVariant
@@ -363,8 +385,8 @@ class _RegisterPageState extends State<RegisterPage> {
                                       textInputAction: TextInputAction.done,
                                       decoration: const InputDecoration(
                                         labelText: '邮箱验证码',
-                                        prefixIcon:
-                                            Icon(Icons.mark_email_read_outlined),
+                                        prefixIcon: Icon(
+                                            Icons.mark_email_read_outlined),
                                       ),
                                       validator: (value) {
                                         final code = value?.trim() ?? '';
@@ -382,10 +404,10 @@ class _RegisterPageState extends State<RegisterPage> {
                                   SizedBox(
                                     height: 48,
                                     child: OutlinedButton(
-                                      onPressed: (_isSendingCode ||
-                                              _codeCountdown > 0)
-                                          ? null
-                                          : _sendEmailCode,
+                                      onPressed:
+                                          (_isSendingCode || _codeCountdown > 0)
+                                              ? null
+                                              : _sendEmailCode,
                                       child: _isSendingCode
                                           ? const SizedBox(
                                               width: 18,
@@ -439,19 +461,11 @@ class _RegisterPageState extends State<RegisterPage> {
                             ],
                           ),
                         ),
-                      ),
+                      ],
                     ),
                   ),
-                  Positioned(
-                    top: 0,
-                    child: Image.asset(
-                      AssetsPathConstants.purpleCatGirlChibi,
-                      height: 132,
-                      fit: BoxFit.contain,
-                    ),
-                  ),
-                ],
-              ),
+                ),
+              ],
             ),
           ),
         ),

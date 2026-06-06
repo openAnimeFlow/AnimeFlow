@@ -189,13 +189,11 @@ class _RegisterPageState extends State<RegisterPage> {
                   child: SizedBox(
                     height: 133,
                     width: 200,
-                    child: ClipRRect(
-                      child: Image.asset(
-                        width: double.infinity,
-                        height: double.infinity,
-                        AssetsPathConstants.purpleCatGirlChibi,
-                        fit: BoxFit.cover,
-                      ),
+                    child: Image.asset(
+                      AssetsPathConstants.purpleCatGirlChibi,
+                      width: double.infinity,
+                      height: double.infinity,
+                      fit: BoxFit.cover,
                     ),
                   ),
                 ),

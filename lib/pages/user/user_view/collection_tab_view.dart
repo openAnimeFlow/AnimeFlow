@@ -10,23 +10,27 @@ import 'package:flutter/material.dart';
 class CollectionTabView extends StatelessWidget {
   final TabController tabController;
   final List<String> tabs;
-  final Function(int) onLoad;
   final Function(int) onLoadMore;
   final Function(int) onRefresh;
-  final Set<int> loadingTypes;
+  final Set<int> loadingMoreTypes;
   final Map<int, CollectionsItem?> collectionsCache;
   final Map<int, bool> hasMore;
+  final Map<int, String?> initialErrorMessages;
+  final Map<int, String?> loadMoreErrorMessages;
+  final Map<int, GlobalKey<RefreshIndicatorState>> refreshIndicatorKeys;
 
   const CollectionTabView(
       {super.key,
       required this.collectionsCache,
       required this.tabController,
       required this.tabs,
-      required this.onLoad,
       required this.onLoadMore,
       required this.onRefresh,
-      required this.loadingTypes,
-      required this.hasMore});
+      required this.loadingMoreTypes,
+      required this.hasMore,
+      required this.initialErrorMessages,
+      required this.loadMoreErrorMessages,
+      required this.refreshIndicatorKeys});
 
   @override
   Widget build(BuildContext context) {
@@ -40,9 +44,11 @@ class CollectionTabView extends StatelessWidget {
             key: PageStorageKey<int>(type),
             type: type,
             collectionsItem: collectionsCache[type],
-            isLoading: loadingTypes.contains(type),
+            initialErrorMessage: initialErrorMessages[type],
+            loadMoreErrorMessage: loadMoreErrorMessages[type],
+            isLoadingMore: loadingMoreTypes.contains(type),
             hasMore: hasMore[type] ?? true,
-            onLoad: () => onLoad(type),
+            refreshIndicatorKey: refreshIndicatorKeys[type]!,
             onLoadMore: () => onLoadMore(type),
             onRefresh: () => onRefresh(type),
           );
@@ -55,9 +61,11 @@ class CollectionTabView extends StatelessWidget {
 class _CollectionTabView extends StatefulWidget {
   final int type;
   final CollectionsItem? collectionsItem;
-  final bool isLoading;
+  final String? initialErrorMessage;
+  final String? loadMoreErrorMessage;
+  final bool isLoadingMore;
   final bool hasMore;
-  final VoidCallback onLoad;
+  final GlobalKey<RefreshIndicatorState> refreshIndicatorKey;
   final VoidCallback onLoadMore;
   final Future<void> Function() onRefresh;
 
@@ -65,9 +73,11 @@ class _CollectionTabView extends StatefulWidget {
     super.key,
     required this.type,
     required this.collectionsItem,
-    required this.isLoading,
+    required this.initialErrorMessage,
+    required this.loadMoreErrorMessage,
+    required this.isLoadingMore,
     required this.hasMore,
-    required this.onLoad,
+    required this.refreshIndicatorKey,
     required this.onLoadMore,
     required this.onRefresh,
   });
@@ -77,20 +87,8 @@ class _CollectionTabView extends StatefulWidget {
 }
 
 class __CollectionTabViewState extends State<_CollectionTabView> {
-  bool _hasTriggeredLoad = false;
-
-  @override
-  void initState() {
-    super.initState();
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (widget.collectionsItem == null &&
-          !widget.isLoading &&
-          !_hasTriggeredLoad) {
-        _hasTriggeredLoad = true;
-        widget.onLoad();
-      }
-    });
-  }
+  static const double _refreshIndicatorOffset =
+      kToolbarHeight + kTextTabBarHeight;
 
   int _calculateCrossAxisCount(BuildContext context) {
     final width = MediaQuery.of(context).size.width;
@@ -101,8 +99,24 @@ class __CollectionTabViewState extends State<_CollectionTabView> {
 
   @override
   Widget build(BuildContext context) {
-    // 只有首次加载（没有缓存数据）时才显示全屏加载指示器
     if (widget.collectionsItem == null) {
+      if (widget.initialErrorMessage != null) {
+        return _buildPlaceholder(
+          context,
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Text(widget.initialErrorMessage!),
+              const SizedBox(height: 12),
+              FilledButton(
+                onPressed: widget.onRefresh,
+                child: const Text('重试'),
+              ),
+            ],
+          ),
+        );
+      }
+
       return Builder(
         builder: (context) {
           final handle =
@@ -122,21 +136,23 @@ class __CollectionTabViewState extends State<_CollectionTabView> {
     }
 
     if (widget.collectionsItem!.data.isEmpty) {
-      return Builder(
-        builder: (context) {
-          final handle =
-              NestedScrollView.sliverOverlapAbsorberHandleFor(context);
-          return CustomScrollView(
-            slivers: <Widget>[
-              SliverOverlapInjector(handle: handle),
-              const SliverFillRemaining(
+      return _buildPlaceholder(
+        context,
+        child: RefreshIndicator(
+          key: widget.refreshIndicatorKey,
+          onRefresh: widget.onRefresh,
+          child: ListView(
+            physics: const AlwaysScrollableScrollPhysics(),
+            children: const [
+              SizedBox(
+                height: 320,
                 child: Center(
                   child: Text('暂无数据'),
                 ),
               ),
             ],
-          );
-        },
+          ),
+        ),
       );
     }
 
@@ -145,7 +161,13 @@ class __CollectionTabViewState extends State<_CollectionTabView> {
       builder: (context) {
         final handle = NestedScrollView.sliverOverlapAbsorberHandleFor(context);
         return RefreshIndicator(
+          key: widget.refreshIndicatorKey,
           onRefresh: widget.onRefresh,
+          edgeOffset: _refreshIndicatorOffset,
+          displacement: _refreshIndicatorOffset + 16,
+          notificationPredicate: (notification) =>
+              notification.depth == 0 &&
+              notification.metrics.axis == Axis.vertical,
           child: NotificationListener<ScrollNotification>(
             onNotification: (notification) {
               if (notification is ScrollUpdateNotification) {
@@ -154,7 +176,7 @@ class __CollectionTabViewState extends State<_CollectionTabView> {
                 // 确保有数据且不在加载中
                 if (metrics.pixels >= metrics.maxScrollExtent - 200 &&
                     collections.isNotEmpty &&
-                    !widget.isLoading) {
+                    !widget.isLoadingMore) {
                   widget.onLoadMore();
                 }
               }
@@ -175,21 +197,6 @@ class __CollectionTabViewState extends State<_CollectionTabView> {
                     ),
                     delegate: SliverChildBuilderDelegate(
                       (context, index) {
-                        // 最后一项
-                        if (index == collections.length) {
-                          return widget.isLoading
-                              ? const Center(
-                                  child: CircularProgressIndicator(),
-                                )
-                              : widget.hasMore
-                                  ? const SizedBox.shrink()
-                                  : const Center(
-                                      child: Padding(
-                                      padding: EdgeInsets.all(8.0),
-                                      child: Text("没有更多了"),
-                                    ));
-                        }
-
                         final collection = collections[index];
                         return InkWell(
                           onTap: () {
@@ -304,8 +311,16 @@ class __CollectionTabViewState extends State<_CollectionTabView> {
                           ),
                         );
                       },
-                      childCount: collections.length + 1,
+                      childCount: collections.length,
                     ),
+                  ),
+                ),
+                SliverToBoxAdapter(
+                  child: _CollectionFooter(
+                    isLoadingMore: widget.isLoadingMore,
+                    hasMore: widget.hasMore,
+                    errorMessage: widget.loadMoreErrorMessage,
+                    onRetry: widget.onLoadMore,
                   ),
                 ),
               ],
@@ -314,5 +329,78 @@ class __CollectionTabViewState extends State<_CollectionTabView> {
         );
       },
     );
+  }
+
+  Widget _buildPlaceholder(BuildContext context, {required Widget child}) {
+    return Builder(
+      builder: (context) {
+        final handle = NestedScrollView.sliverOverlapAbsorberHandleFor(context);
+        return CustomScrollView(
+          slivers: <Widget>[
+            SliverOverlapInjector(handle: handle),
+            SliverFillRemaining(
+              hasScrollBody: false,
+              child: Center(child: child),
+            ),
+          ],
+        );
+      },
+    );
+  }
+}
+
+class _CollectionFooter extends StatelessWidget {
+  final bool isLoadingMore;
+  final bool hasMore;
+  final String? errorMessage;
+  final VoidCallback onRetry;
+
+  const _CollectionFooter({
+    required this.isLoadingMore,
+    required this.hasMore,
+    required this.errorMessage,
+    required this.onRetry,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    if (isLoadingMore) {
+      return const Padding(
+        padding: EdgeInsets.symmetric(vertical: 16),
+        child: Center(
+          child: CircularProgressIndicator(),
+        ),
+      );
+    }
+
+    if (errorMessage != null) {
+      return Padding(
+        padding: const EdgeInsets.symmetric(vertical: 16),
+        child: Center(
+          child: Wrap(
+            crossAxisAlignment: WrapCrossAlignment.center,
+            spacing: 8,
+            children: [
+              Text(errorMessage!),
+              TextButton(
+                onPressed: onRetry,
+                child: const Text('重试'),
+              ),
+            ],
+          ),
+        ),
+      );
+    }
+
+    if (!hasMore) {
+      return const Padding(
+        padding: EdgeInsets.symmetric(vertical: 16),
+        child: Center(
+          child: Text('没有更多了'),
+        ),
+      );
+    }
+
+    return const SizedBox(height: 16);
   }
 }

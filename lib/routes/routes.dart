@@ -3,8 +3,8 @@ import 'package:anime_flow/pages/anime_info/index.dart';
 import 'package:anime_flow/pages/calendar/index.dart';
 import 'package:anime_flow/pages/character_info/index.dart';
 import 'package:anime_flow/pages/characters/index.dart';
+import 'package:anime_flow/pages/login/index.dart';
 import 'package:anime_flow/pages/main/index.dart';
-import 'package:anime_flow/pages/my/index.dart';
 import 'package:anime_flow/pages/my/play_record/index.dart';
 import 'package:anime_flow/pages/oauth/oauth_callback_page.dart';
 import 'package:anime_flow/pages/play/index.dart';
@@ -59,7 +59,7 @@ class LoginRoute extends GoRouteData with $LoginRoute {
   const LoginRoute();
 
   @override
-  Widget build(BuildContext context, GoRouterState state) => const MyPage();
+  Widget build(BuildContext context, GoRouterState state) => const LoginPage();
 }
 
 @TypedGoRoute<RegisterRoute>(path: '/register')

@@ -152,7 +152,7 @@ class NoLoginView extends StatelessWidget {
                             ],
                           )
                         : ElevatedButton(
-                            onPressed: () => myController.openOAuthPage(),
+                            onPressed: () => const LoginRoute().push(context),
                             style: ElevatedButton.styleFrom(
                               padding: const EdgeInsets.symmetric(
                                   horizontal: 30, vertical: 10),
@@ -161,8 +161,20 @@ class NoLoginView extends StatelessWidget {
                                 fontWeight: FontWeight.bold,
                               ),
                             ),
-                            child: const Text('登录授权'),
+                            child: const Text('账号密码登录'),
                           ),
+                  );
+                },
+              ),
+              Consumer(
+                builder: (context, ref, _) {
+                  return TextButton(
+                    onPressed: () =>
+                        ref.read(myControllerProvider).openOAuthPage(),
+                    child: const Text(
+                      '使用 Bangumi 授权登录',
+                      style: TextStyle(fontSize: 11),
+                    ),
                   );
                 },
               ),

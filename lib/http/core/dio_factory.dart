@@ -28,7 +28,7 @@ class DioFactory {
 
   static Dio get animeFlowDio => _animeFlowDio ??= _create(
     NetworkConfig.fromSettings(),
-    baseUrl: AnimeFlowApi.animeFlowApi,
+    baseUrl: AnimeFlowApi.animeFlowApiDev,
     defaultHeaders: {
       'referer': '',
       'user-agent': Utils.getRandomUA(),

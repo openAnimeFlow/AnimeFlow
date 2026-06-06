@@ -34,26 +34,23 @@ class CollectionTabView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return ConstrainedBox(
-      constraints: const BoxConstraints(maxWidth: LayoutConstant.maxWidth),
-      child: TabBarView(
-        controller: tabController,
-        children: List.generate(tabs.length, (tabIndex) {
-          final type = tabIndex + 1;
-          return _CollectionTabView(
-            key: PageStorageKey<int>(type),
-            type: type,
-            collectionsItem: collectionsCache[type],
-            initialErrorMessage: initialErrorMessages[type],
-            loadMoreErrorMessage: loadMoreErrorMessages[type],
-            isLoadingMore: loadingMoreTypes.contains(type),
-            hasMore: hasMore[type] ?? true,
-            refreshIndicatorKey: refreshIndicatorKeys[type]!,
-            onLoadMore: () => onLoadMore(type),
-            onRefresh: () => onRefresh(type),
-          );
-        }),
-      ),
+    return TabBarView(
+      controller: tabController,
+      children: List.generate(tabs.length, (tabIndex) {
+        final type = tabIndex + 1;
+        return _CollectionTabView(
+          key: PageStorageKey<int>(type),
+          type: type,
+          collectionsItem: collectionsCache[type],
+          initialErrorMessage: initialErrorMessages[type],
+          loadMoreErrorMessage: loadMoreErrorMessages[type],
+          isLoadingMore: loadingMoreTypes.contains(type),
+          hasMore: hasMore[type] ?? true,
+          refreshIndicatorKey: refreshIndicatorKeys[type]!,
+          onLoadMore: () => onLoadMore(type),
+          onRefresh: () => onRefresh(type),
+        );
+      }),
     );
   }
 }
@@ -89,12 +86,21 @@ class _CollectionTabView extends StatefulWidget {
 class __CollectionTabViewState extends State<_CollectionTabView> {
   static const double _refreshIndicatorOffset =
       kToolbarHeight + kTextTabBarHeight;
+  static const double _minHorizontalPadding = 10;
 
   int _calculateCrossAxisCount(BuildContext context) {
     final width = MediaQuery.of(context).size.width;
     const minItemWidth = 320.0;
     if (width < 450) return 1;
     return (width / minItemWidth).floor().clamp(1, 4);
+  }
+
+  double _calculateHorizontalPadding(BuildContext context) {
+    final width = MediaQuery.sizeOf(context).width;
+    final centeredPadding = (width - LayoutConstant.maxWidth) / 2;
+    return centeredPadding > _minHorizontalPadding
+        ? centeredPadding
+        : _minHorizontalPadding;
   }
 
   @override
@@ -160,6 +166,7 @@ class __CollectionTabViewState extends State<_CollectionTabView> {
     return Builder(
       builder: (context) {
         final handle = NestedScrollView.sliverOverlapAbsorberHandleFor(context);
+        final horizontalPadding = _calculateHorizontalPadding(context);
         return RefreshIndicator(
           key: widget.refreshIndicatorKey,
           onRefresh: widget.onRefresh,
@@ -186,8 +193,12 @@ class __CollectionTabViewState extends State<_CollectionTabView> {
               slivers: <Widget>[
                 SliverOverlapInjector(handle: handle),
                 SliverPadding(
-                  padding:
-                      const EdgeInsets.symmetric(vertical: 10, horizontal: 10),
+                  padding: EdgeInsets.fromLTRB(
+                    horizontalPadding,
+                    10,
+                    horizontalPadding,
+                    10,
+                  ),
                   sliver: SliverGrid(
                     gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
                       crossAxisCount: _calculateCrossAxisCount(context),
@@ -315,12 +326,15 @@ class __CollectionTabViewState extends State<_CollectionTabView> {
                     ),
                   ),
                 ),
-                SliverToBoxAdapter(
-                  child: _CollectionFooter(
-                    isLoadingMore: widget.isLoadingMore,
-                    hasMore: widget.hasMore,
-                    errorMessage: widget.loadMoreErrorMessage,
-                    onRetry: widget.onLoadMore,
+                SliverPadding(
+                  padding: EdgeInsets.symmetric(horizontal: horizontalPadding),
+                  sliver: SliverToBoxAdapter(
+                    child: _CollectionFooter(
+                      isLoadingMore: widget.isLoadingMore,
+                      hasMore: widget.hasMore,
+                      errorMessage: widget.loadMoreErrorMessage,
+                      onRetry: widget.onLoadMore,
+                    ),
                   ),
                 ),
               ],

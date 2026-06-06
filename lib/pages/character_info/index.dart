@@ -74,7 +74,7 @@ class _CharacterInfoState extends State<CharacterInfo> {
             slivers: [
               SliverPadding(
                 padding:
-                    const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+                const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
                 sliver: SliverToBoxAdapter(
                   child: Consumer(
                     builder: (context, ref, _) {
@@ -132,68 +132,28 @@ class _CharacterInfoState extends State<CharacterInfo> {
                 builder: (context, ref, _) {
                   final detailAsync = ref.watch(characterInfoDetailProvider);
                   return detailAsync.when(
-                    data: (characterDetail) => SliverMainAxisGroup(
-                      slivers: [
-                        SliverPadding(
-                          padding: const EdgeInsets.symmetric(horizontal: 20),
-                          sliver: SliverToBoxAdapter(
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                const SizedBox(height: 20),
-                                const Text(
-                                  '介绍',
-                                  style: TextStyle(
-                                    fontSize: 20,
-                                    fontWeight: FontWeight.bold,
-                                  ),
-                                ),
-                                const SizedBox(height: 10),
-                                Text(
-                                  characterDetail.summary,
-                                  style: const TextStyle(fontSize: 16),
-                                ),
-                              ],
-                            ),
-                          ),
-                        ),
-                        const SliverPadding(
-                          padding: EdgeInsets.only(
-                            left: 20,
-                            right: 20,
-                            top: 20,
-                            bottom: 8,
-                          ),
-                          sliver: SliverToBoxAdapter(
-                            child: Text(
-                              '出演',
+                    data: (characterDetail) => SliverPadding(
+                      padding: const EdgeInsets.symmetric(horizontal: 20),
+                      sliver: SliverToBoxAdapter(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            const SizedBox(height: 20),
+                            const Text(
+                              '介绍',
                               style: TextStyle(
                                 fontSize: 20,
                                 fontWeight: FontWeight.bold,
                               ),
                             ),
-                          ),
-                        ),
-                        const CharacterWorksView(),
-                        const SliverPadding(
-                          padding: EdgeInsets.only(
-                            left: 20,
-                            right: 20,
-                            top: 20,
-                            bottom: 8,
-                          ),
-                          sliver: SliverToBoxAdapter(
-                            child: Text(
-                              '吐槽',
-                              style: TextStyle(
-                                fontSize: 20,
-                                fontWeight: FontWeight.bold,
-                              ),
+                            const SizedBox(height: 10),
+                            Text(
+                              characterDetail.summary,
+                              style: const TextStyle(fontSize: 16),
                             ),
-                          ),
+                          ],
                         ),
-                        const CharacterCommentsView(),
-                      ],
+                      ),
                     ),
                     loading: () => const SliverToBoxAdapter(
                       child: SizedBox.shrink(),
@@ -204,16 +164,52 @@ class _CharacterInfoState extends State<CharacterInfo> {
                   );
                 },
               ),
+              const SliverPadding(
+                padding: EdgeInsets.only(
+                  left: 20,
+                  right: 20,
+                  top: 20,
+                  bottom: 8,
+                ),
+                sliver: SliverToBoxAdapter(
+                  child: Text(
+                    '出演',
+                    style: TextStyle(
+                      fontSize: 20,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ),
+              ),
+              const CharacterWorksView(),
+              const SliverPadding(
+                padding: EdgeInsets.only(
+                  left: 20,
+                  right: 20,
+                  top: 20,
+                  bottom: 8,
+                ),
+                sliver: SliverToBoxAdapter(
+                  child: Text(
+                    '吐槽',
+                    style: TextStyle(
+                      fontSize: 20,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ),
+              ),
+              const CharacterCommentsView(),
             ],
           ),
         ),
       ),
       floatingActionButton: _showBackToTop
           ? FloatingActionButton(
-              onPressed: _scrollToTop,
-              tooltip: '返回顶部',
-              child: const Icon(Icons.arrow_upward),
-            )
+        onPressed: _scrollToTop,
+        tooltip: '返回顶部',
+        child: const Icon(Icons.arrow_upward),
+      )
           : null,
     );
   }

@@ -1,36 +1,25 @@
-import 'package:anime_flow/http/requests/flow_request.dart';
-import 'package:anime_flow/routes/model/character_info_extra.dart';
-import 'package:anime_flow/models/item/bangumi/character_detail_item.dart';
+import 'package:anime_flow/pages/character_info/character_comments.dart';
 import 'package:anime_flow/pages/character_info/character_works.dart';
+import 'package:anime_flow/pages/character_info/provider/character_info_provider.dart';
+import 'package:anime_flow/routes/provider/routes_args.dart';
 import 'package:anime_flow/widget/animation_network_image/animation_network_image.dart';
 import 'package:flutter/material.dart';
-
-import 'character_comments.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 class CharacterInfo extends StatefulWidget {
-  final CharacterInfoExtra extra;
-
-  const CharacterInfo({super.key, required this.extra});
+  const CharacterInfo({super.key});
 
   @override
   State<CharacterInfo> createState() => _CharacterInfoState();
 }
 
 class _CharacterInfoState extends State<CharacterInfo> {
-  late String characterName;
-  late int characterId;
-  late String characterImage;
-  CharacterDetailItem? characterDetail;
   final ScrollController _scrollController = ScrollController();
   bool _showBackToTop = false;
 
   @override
   void initState() {
     super.initState();
-    characterName = widget.extra.characterName;
-    characterId = widget.extra.characterId;
-    characterImage = widget.extra.characterImage;
-    _getCharacterInfo();
     _scrollController.addListener(_onScroll);
   }
 
@@ -62,20 +51,20 @@ class _CharacterInfoState extends State<CharacterInfo> {
     }
   }
 
-  void _getCharacterInfo() async {
-    final characterInfo = await FlowRequest.characterInfoService(characterId);
-    setState(() {
-      characterDetail = characterInfo;
-    });
-  }
-
   @override
   Widget build(BuildContext context) {
     const maxWidth = 1400.0;
 
     return Scaffold(
       appBar: AppBar(
-        title: Text(characterName),
+        title: Consumer(
+          builder: (context, ref, _) {
+            final name = ref.watch(
+              characterInfoArgsProvider.select((e) => e.characterName),
+            );
+            return Text(name);
+          },
+        ),
       ),
       body: Center(
         child: ConstrainedBox(
@@ -83,125 +72,138 @@ class _CharacterInfoState extends State<CharacterInfo> {
           child: CustomScrollView(
             controller: _scrollController,
             slivers: [
-              // 角色基本信息
               SliverPadding(
-                padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
                 sliver: SliverToBoxAdapter(
-                  child: Row(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Hero(
-                        tag: 'character:$characterImage',
-                        child: AnimationNetworkImage(
-                          fit: BoxFit.cover,
-                          alignment: Alignment.topCenter,
-                          borderRadius: BorderRadius.circular(20),
-                          height: 250,
-                          width: 150,
-                          url: characterImage,
-                        ),
-                      ),
-                      const SizedBox(width: 5),
-                      Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              characterName,
-                              style: const TextStyle(
-                                fontSize: 30,
-                                fontWeight: FontWeight.bold,
-                              ),
+                  child: Consumer(
+                    builder: (context, ref, _) {
+                      final args = ref.watch(characterInfoArgsProvider);
+                      final detailAsync = ref.watch(characterInfoDetailProvider);
+
+                      return Row(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Hero(
+                            tag: 'character:${args.characterImage}',
+                            child: AnimationNetworkImage(
+                              fit: BoxFit.cover,
+                              alignment: Alignment.topCenter,
+                              borderRadius: BorderRadius.circular(20),
+                              height: 250,
+                              width: 150,
+                              url: args.characterImage,
                             ),
-                            const SizedBox(height: 10),
-                            Builder(builder: (context) {
-                              if (characterDetail != null) {
-                                final character = characterDetail!;
-                                final info = character.info;
-                                return Text(
-                                  info,
+                          ),
+                          const SizedBox(width: 5),
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  args.characterName,
                                   style: const TextStyle(
-                                    fontSize: 16,
-                                    fontWeight: FontWeight.w500,
+                                    fontSize: 30,
+                                    fontWeight: FontWeight.bold,
                                   ),
-                                );
-                              } else {
-                                return const SizedBox.shrink();
-                              }
-                            })
-                          ],
-                        ),
-                      )
-                    ],
+                                ),
+                                const SizedBox(height: 10),
+                                detailAsync.when(
+                                  data: (character) => Text(
+                                    character.info,
+                                    style: const TextStyle(
+                                      fontSize: 16,
+                                      fontWeight: FontWeight.w500,
+                                    ),
+                                  ),
+                                  loading: () => const SizedBox.shrink(),
+                                  error: (_, __) => const SizedBox.shrink(),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ],
+                      );
+                    },
                   ),
                 ),
               ),
-              // 介绍部分
-              if (characterDetail != null) ...[
-                SliverPadding(
-                  padding: const EdgeInsets.symmetric(horizontal: 20),
-                  sliver: SliverToBoxAdapter(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        const SizedBox(height: 20),
-                        const Text(
-                          '介绍',
-                          style: TextStyle(
-                            fontSize: 20,
-                            fontWeight: FontWeight.bold,
+              Consumer(
+                builder: (context, ref, _) {
+                  final detailAsync = ref.watch(characterInfoDetailProvider);
+                  return detailAsync.when(
+                    data: (characterDetail) => SliverMainAxisGroup(
+                      slivers: [
+                        SliverPadding(
+                          padding: const EdgeInsets.symmetric(horizontal: 20),
+                          sliver: SliverToBoxAdapter(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                const SizedBox(height: 20),
+                                const Text(
+                                  '介绍',
+                                  style: TextStyle(
+                                    fontSize: 20,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
+                                const SizedBox(height: 10),
+                                Text(
+                                  characterDetail.summary,
+                                  style: const TextStyle(fontSize: 16),
+                                ),
+                              ],
+                            ),
                           ),
                         ),
-                        const SizedBox(height: 10),
-                        Text(
-                          characterDetail!.summary,
-                          style: const TextStyle(fontSize: 16),
+                        const SliverPadding(
+                          padding: EdgeInsets.only(
+                            left: 20,
+                            right: 20,
+                            top: 20,
+                            bottom: 8,
+                          ),
+                          sliver: SliverToBoxAdapter(
+                            child: Text(
+                              '出演',
+                              style: TextStyle(
+                                fontSize: 20,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                          ),
                         ),
+                        const CharacterWorksView(),
+                        const SliverPadding(
+                          padding: EdgeInsets.only(
+                            left: 20,
+                            right: 20,
+                            top: 20,
+                            bottom: 8,
+                          ),
+                          sliver: SliverToBoxAdapter(
+                            child: Text(
+                              '吐槽',
+                              style: TextStyle(
+                                fontSize: 20,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                          ),
+                        ),
+                        const CharacterCommentsView(),
                       ],
                     ),
-                  ),
-                ),
-                // 出演作品标题
-                const SliverPadding(
-                  padding: EdgeInsets.only(
-                    left: 20,
-                    right: 20,
-                    top: 20,
-                    bottom: 8,
-                  ),
-                  sliver: SliverToBoxAdapter(
-                    child: Text(
-                      '出演',
-                      style: TextStyle(
-                        fontSize: 20,
-                        fontWeight: FontWeight.bold,
-                      ),
+                    loading: () => const SliverToBoxAdapter(
+                      child: SizedBox.shrink(),
                     ),
-                  ),
-                ),
-                // 角色出演作品（网格布局）
-                CharacterWorksView(characterId: characterDetail!.id),
-                // 吐槽标题
-                const SliverPadding(
-                  padding: EdgeInsets.only(
-                    left: 20,
-                    right: 20,
-                    top: 20,
-                    bottom: 8,
-                  ),
-                  sliver: SliverToBoxAdapter(
-                    child: Text(
-                      '吐槽',
-                      style: TextStyle(
-                        fontSize: 20,
-                        fontWeight: FontWeight.bold,
-                      ),
+                    error: (_, __) => const SliverToBoxAdapter(
+                      child: SizedBox.shrink(),
                     ),
-                  ),
-                ),
-                // 吐槽列表
-                CharacterCommentsView(characterId: characterDetail!.id)
-              ],
+                  );
+                },
+              ),
             ],
           ),
         ),

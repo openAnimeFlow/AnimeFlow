@@ -1,3 +1,4 @@
+import 'package:anime_flow/routes/model/character_info_extra.dart';
 import 'package:anime_flow/routes/model/info_route_extra.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
@@ -11,4 +12,9 @@ InfoRouteExtra animeInfoArgs(Ref ref) {
 @Riverpod(keepAlive: true, dependencies: [])
 int charactersArgs(Ref ref) {
   throw UnimplementedError('CharactersArgsProvider must be overridden');
+}
+
+@Riverpod(keepAlive: true, dependencies: [])
+CharacterInfoExtra characterInfoArgs(Ref ref) {
+  throw UnimplementedError('characterInfoArgsProvider must be overridden');
 }

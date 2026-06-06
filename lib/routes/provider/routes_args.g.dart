@@ -89,3 +89,46 @@ final class CharactersArgsProvider extends $FunctionalProvider<int, int, int>
 }
 
 String _$charactersArgsHash() => r'ea77d80c8e4387b58e15aa94ef94d2c0f59391a6';
+
+@ProviderFor(characterInfoArgs)
+final characterInfoArgsProvider = CharacterInfoArgsProvider._();
+
+final class CharacterInfoArgsProvider extends $FunctionalProvider<
+    CharacterInfoExtra,
+    CharacterInfoExtra,
+    CharacterInfoExtra> with $Provider<CharacterInfoExtra> {
+  CharacterInfoArgsProvider._()
+      : super(
+          from: null,
+          argument: null,
+          retry: null,
+          name: r'characterInfoArgsProvider',
+          isAutoDispose: false,
+          dependencies: <ProviderOrFamily>[],
+          $allTransitiveDependencies: <ProviderOrFamily>[],
+        );
+
+  @override
+  String debugGetCreateSourceHash() => _$characterInfoArgsHash();
+
+  @$internal
+  @override
+  $ProviderElement<CharacterInfoExtra> $createElement(
+          $ProviderPointer pointer) =>
+      $ProviderElement(pointer);
+
+  @override
+  CharacterInfoExtra create(Ref ref) {
+    return characterInfoArgs(ref);
+  }
+
+  /// {@macro riverpod.override_with_value}
+  Override overrideWithValue(CharacterInfoExtra value) {
+    return $ProviderOverride(
+      origin: this,
+      providerOverride: $SyncValueProvider<CharacterInfoExtra>(value),
+    );
+  }
+}
+
+String _$characterInfoArgsHash() => r'a8fabaf7e796f8ae188a45fc0d193ce0726ee709';

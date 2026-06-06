@@ -200,13 +200,19 @@ class CharacterInfoRoute extends GoRouteData with $CharacterInfoRoute {
   final String image;
 
   @override
-  Widget build(BuildContext context, GoRouterState state) => CharacterInfo(
-        extra: CharacterInfoExtra(
-          characterId: id,
-          characterName: name,
-          characterImage: image,
-        ),
-      );
+  Widget build(BuildContext context, GoRouterState state) {
+    final extra = CharacterInfoExtra(
+      characterId: id,
+      characterName: name,
+      characterImage: image,
+    );
+    return ProviderScope(
+      overrides: [
+        characterInfoArgsProvider.overrideWithValue(extra),
+      ],
+      child: const CharacterInfo(),
+    );
+  }
 }
 
 @TypedGoRoute<PlayRecordRoute>(path: '/play_record')

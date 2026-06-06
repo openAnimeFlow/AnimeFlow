@@ -1,42 +1,16 @@
-import 'package:anime_flow/http/requests/flow_request.dart';
 import 'package:anime_flow/models/item/bangumi/character_subjects_item.dart';
+import 'package:anime_flow/pages/character_info/provider/character_info_provider.dart';
 import 'package:anime_flow/routes/model/info_route_extra.dart';
 import 'package:anime_flow/routes/routes.dart';
 import 'package:anime_flow/utils/bgm_utils.dart';
 import 'package:anime_flow/widget/animation_network_image/animation_network_image.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:get/get.dart';
 
-class CharacterWorksView extends StatefulWidget {
-  final int characterId;
+class CharacterWorksView extends StatelessWidget {
+  const CharacterWorksView({super.key});
 
-  const CharacterWorksView({super.key, required this.characterId});
-
-  @override
-  State<CharacterWorksView> createState() => _CharacterWorksViewState();
-}
-
-class _CharacterWorksViewState extends State<CharacterWorksView> {
-  CharacterCastsItem? characterCasts;
-
-  @override
-  void initState() {
-    super.initState();
-    _getCharacterWorks();
-  }
-
-  ///获取出演作品
-  void _getCharacterWorks() async {
-    final works = await FlowRequest.characterWorksService(widget.characterId,
-        limit: 20, offset: 0);
-    if (mounted) {
-      setState(() {
-        characterCasts = works;
-      });
-    }
-  }
-
-  // 计算列数
   int _calculateCrossAxisCount(double screenWidth) {
     const minItemWidth = 320.0;
     if (screenWidth < 450) return 1;
@@ -45,54 +19,59 @@ class _CharacterWorksViewState extends State<CharacterWorksView> {
 
   @override
   Widget build(BuildContext context) {
-    if (characterCasts == null) {
-      return const SliverFillRemaining(
-        child: Center(
-          child: CircularProgressIndicator(),
-        ),
-      );
-    }
+    return Consumer(
+      builder: (context, ref, _) {
+        final worksAsync = ref.watch(characterWorksProvider);
 
-    if (characterCasts!.data.isEmpty) {
-      return const SliverFillRemaining(
-        child: Center(
-          child: Text('暂无出演作品'),
-        ),
-      );
-    }
-
-    final screenWidth = MediaQuery.of(context).size.width - 32;
-    const maxWidth = 1400.0;
-    const double itemHeight = 160.0;
-
-    final effectiveWidth = screenWidth.clamp(0.0, maxWidth - 32);
-    final crossAxisCount = _calculateCrossAxisCount(effectiveWidth);
-
-    return SliverPadding(
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-      sliver: SliverToBoxAdapter(
-        child: Center(
-          child: ConstrainedBox(
-            constraints: const BoxConstraints(maxWidth: maxWidth),
-            child: GridView.builder(
-              shrinkWrap: true,
-              physics: const NeverScrollableScrollPhysics(),
-              padding: const EdgeInsets.only(bottom: 16),
-              gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                crossAxisCount: crossAxisCount,
-                crossAxisSpacing: 16,
-                mainAxisSpacing: 16,
-                mainAxisExtent: itemHeight,
-              ),
-              itemCount: characterCasts!.data.length,
-              itemBuilder: (context, index) {
-                final work = characterCasts!.data[index];
-                return _buildWorkCard(context, work, itemHeight);
-              },
-            ),
+        return worksAsync.when(
+          loading: () => const SliverFillRemaining(
+            child: Center(child: CircularProgressIndicator()),
           ),
-        ),
-      ),
+          error: (_, __) => const SliverFillRemaining(
+            child: Center(child: Text('加载出演作品失败')),
+          ),
+          data: (characterCasts) {
+            if (characterCasts.data.isEmpty) {
+              return const SliverFillRemaining(
+                child: Center(child: Text('暂无出演作品')),
+              );
+            }
+
+            final screenWidth = MediaQuery.of(context).size.width - 32;
+            const maxWidth = 1400.0;
+            const double itemHeight = 160.0;
+            final effectiveWidth = screenWidth.clamp(0.0, maxWidth - 32);
+            final crossAxisCount = _calculateCrossAxisCount(effectiveWidth);
+
+            return SliverPadding(
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+              sliver: SliverToBoxAdapter(
+                child: Center(
+                  child: ConstrainedBox(
+                    constraints: const BoxConstraints(maxWidth: maxWidth),
+                    child: GridView.builder(
+                      shrinkWrap: true,
+                      physics: const NeverScrollableScrollPhysics(),
+                      padding: const EdgeInsets.only(bottom: 16),
+                      gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                        crossAxisCount: crossAxisCount,
+                        crossAxisSpacing: 16,
+                        mainAxisSpacing: 16,
+                        mainAxisExtent: itemHeight,
+                      ),
+                      itemCount: characterCasts.data.length,
+                      itemBuilder: (context, index) {
+                        final work = characterCasts.data[index];
+                        return _buildWorkCard(context, work, itemHeight);
+                      },
+                    ),
+                  ),
+                ),
+              ),
+            );
+          },
+        );
+      },
     );
   }
 
@@ -121,7 +100,6 @@ class _CharacterWorksViewState extends State<CharacterWorksView> {
         child: Row(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // 左侧：作品封面
             SizedBox(
               height: itemHeight,
               width: 110,
@@ -133,13 +111,11 @@ class _CharacterWorksViewState extends State<CharacterWorksView> {
               ),
             ),
             const SizedBox(width: 8),
-            // 右侧：作品信息
             Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  // 作品名称（中文）
                   if (work.subject.nameCN.isNotEmpty)
                     Text(
                       work.subject.nameCN,
@@ -151,14 +127,15 @@ class _CharacterWorksViewState extends State<CharacterWorksView> {
                       overflow: TextOverflow.ellipsis,
                     )
                   else
-                    Text(work.subject.name,
-                        style: const TextStyle(
-                          fontSize: 20,
-                          fontWeight: FontWeight.bold,
-                        ),
-                        maxLines: 2,
-                        overflow: TextOverflow.ellipsis),
-                  // 作品名称（日文）
+                    Text(
+                      work.subject.name,
+                      style: const TextStyle(
+                        fontSize: 20,
+                        fontWeight: FontWeight.bold,
+                      ),
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
+                    ),
                   const SizedBox(height: 2),
                   if (work.subject.name.isNotEmpty)
                     Text(
@@ -172,7 +149,6 @@ class _CharacterWorksViewState extends State<CharacterWorksView> {
                       overflow: TextOverflow.ellipsis,
                     ),
                   const SizedBox(height: 2),
-                  // 角色类型标签
                   Container(
                     padding:
                         const EdgeInsets.symmetric(horizontal: 4, vertical: 2),
@@ -191,7 +167,6 @@ class _CharacterWorksViewState extends State<CharacterWorksView> {
                     ),
                   ),
                   const Spacer(),
-                  // 声优信息
                   if (work.actors.isNotEmpty)
                     Wrap(
                       spacing: 8,

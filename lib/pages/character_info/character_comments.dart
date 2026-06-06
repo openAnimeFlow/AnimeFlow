@@ -1,104 +1,77 @@
-import 'package:anime_flow/http/requests/flow_request.dart';
 import 'package:anime_flow/models/item/bangumi/character_comments_item.dart';
+import 'package:anime_flow/pages/character_info/provider/character_info_provider.dart';
 import 'package:anime_flow/routes/routes.dart';
 import 'package:anime_flow/utils/format_time_util.dart';
-import 'package:anime_flow/widget/bbcode/bbcode_widget.dart';
 import 'package:anime_flow/widget/animation_network_image/animation_network_image.dart';
+import 'package:anime_flow/widget/bbcode/bbcode_widget.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-class CharacterCommentsView extends StatefulWidget {
-  final int characterId;
-
-  const CharacterCommentsView({super.key, required this.characterId});
-
-  @override
-  State<CharacterCommentsView> createState() => _CharacterCommentsViewState();
-}
-
-class _CharacterCommentsViewState extends State<CharacterCommentsView> {
-  List<CharacterCommentItem>? comments;
-  bool isLoading = false;
-
-  @override
-  void initState() {
-    super.initState();
-    _getComments();
-  }
-
-  void _getComments() async {
-    if (isLoading) return;
-    setState(() {
-      isLoading = true;
-    });
-    try {
-      final result =
-          await FlowRequest.characterCommentsService(widget.characterId);
-      if (mounted) {
-        setState(() {
-          comments = result;
-          isLoading = false;
-        });
-      }
-    } catch (e) {
-      if (mounted) {
-        setState(() {
-          isLoading = false;
-        });
-      }
-    }
-  }
+class CharacterCommentsView extends StatelessWidget {
+  const CharacterCommentsView({super.key});
 
   @override
   Widget build(BuildContext context) {
-    if (isLoading && comments == null) {
-      return const SliverFillRemaining(
-        child: Center(
-          child: CircularProgressIndicator(),
-        ),
-      );
-    }
+    return Consumer(
+      builder: (context, ref, _) {
+        final commentsAsync = ref.watch(characterCommentsProvider);
 
-    if (comments == null || comments!.isEmpty) {
-      return SliverFillRemaining(
-        child: Center(
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Icon(
-                Icons.comment_outlined,
-                size: 64,
-                color: Theme.of(context).colorScheme.outline,
-              ),
-              const SizedBox(height: 16),
-              Text(
-                '暂无吐槽',
-                style: TextStyle(
-                  fontSize: 16,
-                  color: Theme.of(context).colorScheme.outline,
-                ),
-              ),
-            ],
+        return commentsAsync.when(
+          loading: () => const SliverFillRemaining(
+            child: Center(child: CircularProgressIndicator()),
           ),
-        ),
-      );
-    }
+          error: (_, __) => const SliverFillRemaining(
+            child: Center(child: Text('加载吐槽失败')),
+          ),
+          data: (comments) {
+            if (comments.isEmpty) {
+              return SliverFillRemaining(
+                child: Center(
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Icon(
+                        Icons.comment_outlined,
+                        size: 64,
+                        color: Theme.of(context).colorScheme.outline,
+                      ),
+                      const SizedBox(height: 16),
+                      Text(
+                        '暂无吐槽',
+                        style: TextStyle(
+                          fontSize: 16,
+                          color: Theme.of(context).colorScheme.outline,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              );
+            }
 
-    return SliverPadding(
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-      sliver: SliverList.builder(
-        itemCount: comments!.length,
-        itemBuilder: (context, index) {
-          final comment = comments![index];
-          return KeyedSubtree(
-            key: ValueKey(comment.id),
-            child: _buildCommentItem(comment),
-          );
-        },
-      ),
+            return SliverPadding(
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+              sliver: SliverList.builder(
+                itemCount: comments.length,
+                itemBuilder: (context, index) {
+                  final comment = comments[index];
+                  return KeyedSubtree(
+                    key: ValueKey(comment.id),
+                    child: _buildCommentItem(context, comment),
+                  );
+                },
+              ),
+            );
+          },
+        );
+      },
     );
   }
 
-  Widget _buildCommentItem(CharacterCommentItem comment) {
+  Widget _buildCommentItem(
+    BuildContext context,
+    CharacterCommentItem comment,
+  ) {
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 12),
       child: Row(
@@ -146,7 +119,7 @@ class _CharacterCommentsViewState extends State<CharacterCommentsView> {
                 ),
                 if (comment.replies.isNotEmpty) ...[
                   const SizedBox(height: 8),
-                  _buildReplies(comment.replies),
+                  _buildReplies(context, comment.replies),
                 ],
               ],
             ),
@@ -156,7 +129,10 @@ class _CharacterCommentsViewState extends State<CharacterCommentsView> {
     );
   }
 
-  Widget _buildReplies(List<CharacterCommentReply> replies) {
+  Widget _buildReplies(
+    BuildContext context,
+    List<CharacterCommentReply> replies,
+  ) {
     return Column(
       mainAxisSize: MainAxisSize.min,
       children: replies.asMap().entries.map((entry) {
@@ -187,9 +163,8 @@ class _CharacterCommentsViewState extends State<CharacterCommentsView> {
                     mainAxisSize: MainAxisSize.min,
                     children: [
                       GestureDetector(
-                        onTap: () =>
-                            UserSpaceRoute(name: reply.user.username)
-                                .push(context),
+                        onTap: () => UserSpaceRoute(name: reply.user.username)
+                            .push(context),
                         child: Text(
                           reply.user.nickname,
                           style: TextStyle(

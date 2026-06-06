@@ -476,14 +476,14 @@ class FlowRequest {
   static Future<void> registerService({
     required String email,
     required String password,
-    required String emailCode,
+    required String emailCaptcha,
   }) async {
     await _client.post(
       AnimeFlowApi.register,
       data: {
         'email': email,
         'password': password,
-        'emailCode': emailCode,
+        'emailCaptcha': emailCaptcha,
       },
     );
   }

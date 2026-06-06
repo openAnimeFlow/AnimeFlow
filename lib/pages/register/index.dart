@@ -128,7 +128,7 @@ class _RegisterPageState extends State<RegisterPage> {
       await FlowRequest.registerService(
         email: _emailController.text.trim(),
         password: _passwordController.text,
-        emailCode: _emailCodeController.text.trim(),
+        emailCaptcha: _emailCodeController.text.trim(),
       );
       if (!mounted) return;
       NotificationToast.show('提示', '注册成功');

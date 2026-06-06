@@ -1,13 +1,14 @@
 import 'dart:ui';
 
 import 'package:anime_flow/features/my/my_controller_provider.dart';
-import 'package:anime_flow/routes/routes.dart';
-import 'package:anime_flow/widget/animation_network_image/animation_network_image.dart';
-import 'package:anime_flow/widget/drop_down_menu.dart';
 import 'package:anime_flow/http/requests/bgm_request.dart';
 import 'package:anime_flow/models/item/bangumi/collections_item.dart';
 import 'package:anime_flow/models/item/bangumi/user_info_item.dart';
+import 'package:anime_flow/routes/routes.dart';
+import 'package:anime_flow/utils/systemUtil.dart';
+import 'package:anime_flow/widget/animation_network_image/animation_network_image.dart';
 import 'package:anime_flow/widget/bbcode/bbcode_widget.dart';
+import 'package:anime_flow/widget/drop_down_menu.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -15,16 +16,17 @@ import 'collection_tab_view.dart';
 
 enum _LoginOverflowAction { settings, playRecord, logout }
 
-class LoginView extends StatefulWidget {
+class UserView extends StatefulWidget {
   final UserInfoItem userInfoItem;
 
-  const LoginView({super.key, required this.userInfoItem});
+  const UserView({super.key, required this.userInfoItem});
 
   @override
-  State<LoginView> createState() => _LoginViewState();
+  State<UserView> createState() => _UserViewState();
 }
 
-class _LoginViewState extends State<LoginView> with SingleTickerProviderStateMixin {
+class _UserViewState extends State<UserView>
+    with SingleTickerProviderStateMixin {
   final double _contentHeight = 200.0; // 头部内容区域的高度
   late TabController _tabController;
   bool isPinned = false;
@@ -32,14 +34,23 @@ class _LoginViewState extends State<LoginView> with SingleTickerProviderStateMix
   // 为每个 tab 类型缓存数据，key 是 type (1-5)
   final Map<int, CollectionsItem?> _collectionsCache = {};
 
-  // 记录正在加载的 type
-  final Set<int> _loadingTypes = {};
+  // 分别记录首屏加载、刷新、加载更多，避免一个状态承担多种语义
+  final Set<int> _initialLoadingTypes = {};
+  final Set<int> _refreshingTypes = {};
+  final Set<int> _loadingMoreTypes = {};
 
   // 记录每个 type 的 offset
   final Map<int, int> _offsets = {};
 
   // 记录每个 type 是否还有更多数据
   final Map<int, bool> _hasMore = {};
+
+  // 首屏错误和分页错误分别维护，便于展示不同的 UI
+  final Map<int, String?> _initialErrorMessages = {};
+  final Map<int, String?> _loadMoreErrorMessages = {};
+  final Map<int, GlobalKey<RefreshIndicatorState>> _refreshIndicatorKeys = {
+    for (var type = 1; type <= 5; type++) type: GlobalKey<RefreshIndicatorState>(),
+  };
 
   List<String> get _tabs {
     const Map<int, String> collectionTypes = {
@@ -61,26 +72,34 @@ class _LoginViewState extends State<LoginView> with SingleTickerProviderStateMix
 
   Future<void> _getCollections(int type,
       {bool loadMore = false, bool refresh = false}) async {
-    // 如果是刷新，允许重新加载
-    if (!refresh) {
-      // 如果正在加载，则不再加载
-      if (_loadingTypes.contains(type)) {
-        return;
-      }
+    final isBusy = _initialLoadingTypes.contains(type) ||
+        _refreshingTypes.contains(type) ||
+        _loadingMoreTypes.contains(type);
+    if (isBusy) {
+      return;
+    }
 
-      // 如果是加载更多，但没有更多数据，则不加载
-      if (loadMore && (_hasMore[type] == false)) {
-        return;
-      }
+    // 如果是加载更多，但没有更多数据，则不加载
+    if (loadMore && (_hasMore[type] == false)) {
+      return;
+    }
 
-      // 如果是首次加载，但已经有缓存数据，则不加载
-      if (!loadMore && _collectionsCache[type] != null) {
-        return;
-      }
+    // 如果是首次加载，但已经有缓存数据，则不加载
+    if (!loadMore && !refresh && _collectionsCache[type] != null) {
+      return;
     }
 
     setState(() {
-      _loadingTypes.add(type);
+      if (loadMore) {
+        _loadingMoreTypes.add(type);
+        _loadMoreErrorMessages.remove(type);
+      } else if (refresh) {
+        _refreshingTypes.add(type);
+        _loadMoreErrorMessages.remove(type);
+      } else {
+        _initialLoadingTypes.add(type);
+        _initialErrorMessages.remove(type);
+      }
     });
 
     try {
@@ -90,6 +109,7 @@ class _LoginViewState extends State<LoginView> with SingleTickerProviderStateMix
       final collections = await UserRequest.userCollectionsService(
           type: type, limit: 20, offset: offset);
 
+      if (!mounted) return;
       setState(() {
         if (loadMore && !refresh && _collectionsCache[type] != null) {
           // 追加数据
@@ -102,17 +122,46 @@ class _LoginViewState extends State<LoginView> with SingleTickerProviderStateMix
         }
         _hasMore[type] = collections.data.length == 20 &&
             _collectionsCache[type]!.data.length < collections.total;
-        _loadingTypes.remove(type);
+        _initialErrorMessages.remove(type);
+        _loadMoreErrorMessages.remove(type);
       });
     } catch (e) {
+      if (!mounted) return;
       setState(() {
-        _loadingTypes.remove(type);
+        if (loadMore && _collectionsCache[type] != null) {
+          _loadMoreErrorMessages[type] = '加载更多失败，请稍后重试';
+        } else if (_collectionsCache[type] == null) {
+          _initialErrorMessages[type] = '加载失败，请稍后重试';
+        }
+      });
+
+      if (refresh && _collectionsCache[type] != null) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('刷新失败，请稍后重试')),
+        );
+      }
+    } finally {
+      if (!mounted) return;
+      setState(() {
+        _initialLoadingTypes.remove(type);
+        _refreshingTypes.remove(type);
+        _loadingMoreTypes.remove(type);
       });
     }
   }
 
   Future<void> _refreshCollections(int type) async {
     await _getCollections(type, refresh: true);
+  }
+
+  Future<void> _showRefreshIndicatorForCurrentTab() async {
+    await _refreshIndicatorKeys[_tabController.index + 1]?.currentState?.show();
+  }
+
+  bool _isTypeBusy(int type) {
+    return _initialLoadingTypes.contains(type) ||
+        _refreshingTypes.contains(type) ||
+        _loadingMoreTypes.contains(type);
   }
 
   @override
@@ -127,6 +176,9 @@ class _LoginViewState extends State<LoginView> with SingleTickerProviderStateMix
         final type = _tabController.index + 1;
         _getCollections(type);
       }
+    });
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _getCollections(_tabController.index + 1);
     });
   }
 
@@ -220,11 +272,13 @@ class _LoginViewState extends State<LoginView> with SingleTickerProviderStateMix
           collectionsCache: _collectionsCache,
           tabController: _tabController,
           tabs: _tabs,
-          onLoad: (type) => _getCollections(type),
           onLoadMore: (type) => _getCollections(type, loadMore: true),
           onRefresh: (type) => _refreshCollections(type),
-          loadingTypes: _loadingTypes,
+          initialErrorMessages: _initialErrorMessages,
+          loadMoreErrorMessages: _loadMoreErrorMessages,
+          loadingMoreTypes: _loadingMoreTypes,
           hasMore: _hasMore,
+          refreshIndicatorKeys: _refreshIndicatorKeys,
         ),
       ),
     );
@@ -232,6 +286,9 @@ class _LoginViewState extends State<LoginView> with SingleTickerProviderStateMix
 
   Widget _buildAppBarTitle() {
     final userInfo = widget.userInfoItem;
+    final currentType = _tabController.index + 1;
+    final canTriggerRefresh = _collectionsCache[currentType] != null;
+    final isRefreshButtonEnabled = canTriggerRefresh && !_isTypeBusy(currentType);
 
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 16),
@@ -239,8 +296,7 @@ class _LoginViewState extends State<LoginView> with SingleTickerProviderStateMix
         children: [
           InkWell(
             borderRadius: BorderRadius.circular(8),
-            onTap: () =>
-                UserSpaceRoute(name: userInfo.username).push(context),
+            onTap: () => UserSpaceRoute(name: userInfo.username).push(context),
             child: const Row(
               children: [
                 Text(
@@ -275,6 +331,13 @@ class _LoginViewState extends State<LoginView> with SingleTickerProviderStateMix
             ),
           ),
           const Spacer(),
+          if (SystemUtil.isDesktop)
+            IconButton(
+              tooltip: '刷新当前标签',
+              onPressed:
+                  isRefreshButtonEnabled ? _showRefreshIndicatorForCurrentTab : null,
+              icon: const Icon(Icons.refresh),
+            ),
           DropDownMenu<_LoginOverflowAction>(
             items: _LoginOverflowAction.values,
             tooltip: '更多菜单',
@@ -285,12 +348,15 @@ class _LoginViewState extends State<LoginView> with SingleTickerProviderStateMix
             ),
             itemBuilder: (context, action, _) {
               final (icon, label) = switch (action) {
-                _LoginOverflowAction.settings =>
-                  (Icons.settings_outlined, '设置'),
-                _LoginOverflowAction.playRecord =>
-                  (Icons.smart_display_outlined, '播放记录'),
-                _LoginOverflowAction.logout =>
-                  (Icons.logout_outlined, '退出登录'),
+                _LoginOverflowAction.settings => (
+                    Icons.settings_outlined,
+                    '设置'
+                  ),
+                _LoginOverflowAction.playRecord => (
+                    Icons.smart_display_outlined,
+                    '播放记录'
+                  ),
+                _LoginOverflowAction.logout => (Icons.logout_outlined, '退出登录'),
               };
               return SizedBox(
                 width: 120,

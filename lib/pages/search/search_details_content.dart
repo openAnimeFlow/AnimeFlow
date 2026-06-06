@@ -5,7 +5,6 @@ import 'package:anime_flow/widget/animation_network_image/animation_network_imag
 import 'package:anime_flow/widget/ranking.dart';
 import 'package:anime_flow/widget/star.dart';
 import 'package:flutter/material.dart';
-import 'package:get/get.dart';
 
 ///详情View
 class SearchDetailsContentView extends StatelessWidget {
@@ -20,7 +19,7 @@ class SearchDetailsContentView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final disabledColor = Get.theme.disabledColor;
+    final disabledColor = Theme.of(context).disabledColor;
     const textFontWeight = FontWeight.w600;
 
     return SizedBox(

@@ -14,6 +14,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:get/get.dart';
+import 'package:go_router/go_router.dart';
 
 /// 顶部区域空间
 class TopAreaControl extends StatefulWidget {
@@ -108,7 +109,7 @@ class _TopAreaControlState extends State<TopAreaControl> {
                                     if (fullscreen) {
                                       playController.exitFullScreen();
                                     } else {
-                                      Get.back();
+                                      context.pop();
                                     }
                                   },
                                   child: const Icon(

@@ -28,7 +28,6 @@ import 'package:anime_flow/routes/provider/routes_args.dart';
 import 'package:bot_toast/bot_toast.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:get/get.dart';
 import 'package:go_router/go_router.dart';
 
 import 'model/character_info_extra.dart';
@@ -358,8 +357,6 @@ class SettingAgreementRoute extends GoRouteData with $SettingAgreementRoute {
 // =====================================================================
 
 final GoRouter appRouter = GoRouter(
-  ///Todo 当完全替换成Get依赖后删除 [Get.key]
-  navigatorKey: Get.key,
   observers: [BotToastNavigatorObserver()],
   initialLocation: const MainRoute().location,
   redirect: (context, state) {

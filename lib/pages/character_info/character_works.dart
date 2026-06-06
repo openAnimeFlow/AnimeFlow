@@ -6,7 +6,6 @@ import 'package:anime_flow/utils/bgm_utils.dart';
 import 'package:anime_flow/widget/animation_network_image/animation_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:get/get.dart';
 
 class CharacterWorksView extends StatelessWidget {
   const CharacterWorksView({super.key});
@@ -80,8 +79,8 @@ class CharacterWorksView extends StatelessWidget {
     CharacterSubjectData work,
     double itemHeight,
   ) {
-    final disabledColor = Get.theme.disabledColor;
-    final primary = Get.theme.colorScheme.primary;
+    final disabledColor = Theme.of(context).disabledColor;
+    final primary = Theme.of(context).colorScheme.primary;
     const textFontWeight = FontWeight.w600;
 
     return SizedBox(

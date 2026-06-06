@@ -11,7 +11,7 @@ InfoRouteExtra animeInfoArgs(Ref ref) {
 
 @Riverpod(keepAlive: true, dependencies: [])
 int charactersArgs(Ref ref) {
-  throw UnimplementedError('CharactersArgsProvider must be overridden');
+  throw UnimplementedError('charactersArgsProvider must be overridden');
 }
 
 @Riverpod(keepAlive: true, dependencies: [])

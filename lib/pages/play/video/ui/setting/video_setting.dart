@@ -3,6 +3,7 @@ import 'package:anime_flow/pages/play/controller/play_controller.dart';
 import 'package:anime_flow/utils/format_time_util.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:go_router/go_router.dart';
 
 class VideoSetting extends StatefulWidget {
   const VideoSetting({super.key});
@@ -201,7 +202,9 @@ class _VideoSettingState extends State<VideoSetting> {
                                   setState(() {
                                     isExpandedTime = false;
                                   });
-                                  Get.back();
+                                  // VideoSetting 通过 showGeneralDialog 打开，不是 GoRouter 路由页。
+                                  // 里应使用 Navigator.of(context).pop() 关闭
+                                  Navigator.of(context).pop();
                                 },
                                 child: Text(
                                   '确定',

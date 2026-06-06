@@ -5,7 +5,6 @@ import 'package:anime_flow/utils/bgm_utils.dart';
 import 'package:anime_flow/widget/animation_network_image/animation_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:get/get.dart';
 
 /// 角色列表页面
 class CharacterPage extends StatefulWidget {
@@ -163,8 +162,8 @@ class _CharacterPageState extends State<CharacterPage> {
     CharacterActorData characterData,
     double itemHeight,
   ) {
-    final disabledColor = Get.theme.disabledColor;
-    final primary = Get.theme.colorScheme.primary;
+    final disabledColor = Theme.of(context).disabledColor;
+    final primary = Theme.of(context).colorScheme.primary;
     const textFontWeight = FontWeight.w600;
 
     return SizedBox(

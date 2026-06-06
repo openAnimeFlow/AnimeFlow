@@ -489,7 +489,7 @@ class _StickySearchHeaderDelegate extends SliverPersistentHeaderDelegate {
                   children: [
                     IconButton(
                       icon: const Icon(Icons.arrow_back),
-                      onPressed: () => Get.back(),
+                      onPressed: () => context.pop(),
                     ),
                     const Text(
                       '搜索',

@@ -1,11 +1,10 @@
 import 'dart:async';
-import 'dart:convert';
-import 'dart:typed_data';
 
 import 'package:anime_flow/constants/assets_path_constants.dart';
 import 'package:anime_flow/http/clients/anime_flow_client.dart';
 import 'package:anime_flow/http/requests/flow_request.dart';
-import 'package:anime_flow/models/item/captcha_item.dart';
+import 'package:anime_flow/pages/register/send_code_button.dart';
+import 'package:anime_flow/pages/register/graphic_captcha.dart';
 import 'package:anime_flow/widget/notification_toast.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
@@ -23,99 +22,54 @@ class _RegisterPageState extends State<RegisterPage> {
   final _passwordController = TextEditingController();
   final _confirmPasswordController = TextEditingController();
   final _emailCodeController = TextEditingController();
-  final _captchaController = TextEditingController();
+  final _graphicCaptchaController = GraphicCaptchaController();
 
-  CaptchaItem? _captcha;
   bool _obscurePassword = true;
   bool _obscureConfirmPassword = true;
   bool _isSubmitting = false;
-  bool _isSendingCode = false;
-  int _codeCountdown = 0;
-  Timer? _countdownTimer;
-
-  @override
-  void initState() {
-    super.initState();
-    unawaited(_loadCaptcha());
-  }
 
   @override
   void dispose() {
-    _countdownTimer?.cancel();
     _emailController.dispose();
     _passwordController.dispose();
     _confirmPasswordController.dispose();
     _emailCodeController.dispose();
-    _captchaController.dispose();
+    _graphicCaptchaController.dispose();
     super.dispose();
   }
 
-  Future<void> _loadCaptcha() async {
-    try {
-      final captcha = await FlowRequest.generateCaptchaService();
-      if (!mounted) return;
-      setState(() {
-        _captcha = captcha;
-        _captchaController.clear();
-      });
-    } catch (e) {
-      if (!mounted) return;
-      NotificationToast.show('提示', e.toString());
-    }
-  }
-
-  void _startCountdown() {
-    _countdownTimer?.cancel();
-    setState(() => _codeCountdown = 60);
-    _countdownTimer = Timer.periodic(const Duration(seconds: 1), (timer) {
-      if (!mounted) {
-        timer.cancel();
-        return;
-      }
-      if (_codeCountdown <= 1) {
-        timer.cancel();
-        setState(() => _codeCountdown = 0);
-      } else {
-        setState(() => _codeCountdown -= 1);
-      }
-    });
-  }
-
-  Future<void> _sendEmailCode() async {
+  Future<bool> _sendEmailCode() async {
     final email = _emailController.text.trim();
     if (email.isEmpty || !email.contains('@')) {
       NotificationToast.show('提示', '请先填写有效邮箱');
-      return;
+      return false;
     }
-    final captcha = _captchaController.text.trim();
-    if (_captcha == null || captcha.isEmpty) {
+    if (!_graphicCaptchaController.isReady) {
       NotificationToast.show('提示', '请先填写图形验证码');
-      return;
+      return false;
     }
-    if (_isSendingCode || _codeCountdown > 0) return;
 
-    setState(() => _isSendingCode = true);
     try {
       await FlowRequest.sendEmailCodeService(
         email: email,
-        captchaId: _captcha!.captchaId,
-        captcha: captcha,
+        captchaId: _graphicCaptchaController.captchaId!,
+        captcha: _graphicCaptchaController.text,
       );
-      if (!mounted) return;
+      if (!mounted) return false;
       NotificationToast.show('提示', '验证码已发送，请查收邮件');
-      _startCountdown();
+      // 图形验证码校验成功后服务端会删除，需刷新以便再次发送
+      unawaited(_graphicCaptchaController.reload());
+      return true;
     } on AnimeFlowApiException catch (e) {
-      if (!mounted) return;
+      if (!mounted) return false;
       NotificationToast.show('提示', e.message);
-      unawaited(_loadCaptcha());
+      unawaited(_graphicCaptchaController.reload());
+      return false;
     } catch (e) {
-      if (!mounted) return;
+      if (!mounted) return false;
       NotificationToast.show('提示', e.toString());
-      unawaited(_loadCaptcha());
-    } finally {
-      if (mounted) {
-        setState(() => _isSendingCode = false);
-      }
+      unawaited(_graphicCaptchaController.reload());
+      return false;
     }
   }
 
@@ -145,22 +99,10 @@ class _RegisterPageState extends State<RegisterPage> {
     }
   }
 
-  Uint8List? _decodeCaptchaImage(String base64Image) {
-    try {
-      final normalized =
-          base64Image.contains(',') ? base64Image.split(',').last : base64Image;
-      return base64Decode(normalized);
-    } catch (_) {
-      return null;
-    }
-  }
-
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
-    final captchaBytes =
-        _captcha == null ? null : _decodeCaptchaImage(_captcha!.imageBase64);
 
     final topPadding = MediaQuery.paddingOf(context).top;
     final bottomPadding = MediaQuery.paddingOf(context).bottom;
@@ -312,58 +254,8 @@ class _RegisterPageState extends State<RegisterPage> {
                                 },
                               ),
                               const SizedBox(height: 16),
-                              Row(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Expanded(
-                                    child: TextFormField(
-                                      controller: _captchaController,
-                                      textInputAction: TextInputAction.next,
-                                      decoration: const InputDecoration(
-                                        labelText: '输入6位验证码',
-                                        prefixIcon:
-                                            Icon(Icons.verified_outlined),
-                                      ),
-                                    ),
-                                  ),
-                                  const SizedBox(width: 12),
-                                  InkWell(
-                                    onTap: _loadCaptcha,
-                                    borderRadius: BorderRadius.circular(12),
-                                    child: Container(
-                                      width: 112,
-                                      height: 48,
-                                      alignment: Alignment.center,
-                                      decoration: BoxDecoration(
-                                        color:
-                                            colorScheme.surfaceContainerHighest,
-                                        borderRadius: BorderRadius.circular(12),
-                                        border: Border.all(
-                                          color: colorScheme.outlineVariant
-                                              .withValues(alpha: 0.5),
-                                        ),
-                                      ),
-                                      child: captchaBytes == null
-                                          ? const SizedBox(
-                                              width: 20,
-                                              height: 20,
-                                              child: CircularProgressIndicator(
-                                                strokeWidth: 2,
-                                              ),
-                                            )
-                                          : ClipRRect(
-                                              borderRadius:
-                                                  BorderRadius.circular(8),
-                                              child: Image.memory(
-                                                captchaBytes,
-                                                width: double.infinity,
-                                                height: double.infinity,
-                                                fit: BoxFit.fill,
-                                              ),
-                                            ),
-                                    ),
-                                  ),
-                                ],
+                              GraphicCaptchaView(
+                                controller: _graphicCaptchaController,
                               ),
                               const SizedBox(height: 16),
                               Row(
@@ -392,30 +284,7 @@ class _RegisterPageState extends State<RegisterPage> {
                                     ),
                                   ),
                                   const SizedBox(width: 12),
-                                  SizedBox(
-                                    height: 48,
-                                    child: OutlinedButton(
-                                      onPressed:
-                                          (_isSendingCode || _codeCountdown > 0)
-                                              ? null
-                                              : _sendEmailCode,
-                                      child: _isSendingCode
-                                          ? const SizedBox(
-                                              width: 18,
-                                              height: 18,
-                                              child: CircularProgressIndicator(
-                                                strokeWidth: 2,
-                                              ),
-                                            )
-                                          : Text(
-                                              _codeCountdown > 0
-                                                  ? '${_codeCountdown}s'
-                                                  : '发送验证码',
-                                              style:
-                                                  const TextStyle(fontSize: 13),
-                                            ),
-                                    ),
-                                  ),
+                                  SendCodeButton(onSend: _sendEmailCode),
                                 ],
                               ),
                               const SizedBox(height: 28),

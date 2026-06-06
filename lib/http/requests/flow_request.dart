@@ -453,8 +453,13 @@ class FlowRequest {
     }
   }
 
-  static Future<CaptchaItem> generateCaptchaService() async {
-    final response = await _client.post(AnimeFlowApi.captcha);
+  static Future<CaptchaItem> generateCaptchaService({String? captchaId}) async {
+    final response = await _client.post(
+      AnimeFlowApi.captcha,
+      queryParameters: captchaId == null || captchaId.isEmpty
+          ? null
+          : {'captchaId': captchaId},
+    );
     return CaptchaItem.fromJson(Map<String, dynamic>.from(response.data));
   }
 

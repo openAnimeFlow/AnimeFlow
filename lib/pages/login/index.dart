@@ -38,72 +38,47 @@ class _LoginPageState extends ConsumerState<LoginPage> {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
-    final size = MediaQuery.sizeOf(context);
-    final isWide = size.width >= 720;
-
+    final padding = MediaQuery.paddingOf(context);
     return Scaffold(
+      extendBodyBehindAppBar: true,
       appBar: AppBar(
-        title: const Text('账号登录'),
-        backgroundColor: Colors.transparent,
-        elevation: 0,
-        scrolledUnderElevation: 0,
+        forceMaterialTransparency: true,
+        title: const Text('登录'),
       ),
-      body: SafeArea(
-        child:  SingleChildScrollView(
-            padding: const EdgeInsets.fromLTRB(20, 12, 20, 28),
-            child: Center(
-              child: ConstrainedBox(
-              constraints: const BoxConstraints(maxWidth: 860),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.end,
-                children: [
-                  if (isWide) ...[
-                    ClipRRect(
-                      borderRadius: BorderRadius.circular(8),
-                      child: Image.asset(
-                        AssetsPathConstants.purpleCatGirlChibi,
-                        height: 168,
-                        fit: BoxFit.cover,
-                      ),
+      body: SingleChildScrollView(
+        padding:  EdgeInsets.fromLTRB(20, padding.top, 20, 28),
+        child: Center(
+          child: ConstrainedBox(
+            constraints: const BoxConstraints(maxWidth: 600),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.end,
+              children: [
+                  ClipRRect(
+                    borderRadius: BorderRadius.circular(8),
+                    child: Image.asset(
+                      AssetsPathConstants.purpleCatGirlChibi,
+                      height: 100,
+                      fit: BoxFit.cover,
                     ),
-                  ],
-                  DecoratedBox(
-                    decoration: BoxDecoration(
-                      color: colorScheme.surfaceContainerLowest,
-                      borderRadius: BorderRadius.circular(8),
-                      border: Border.all(
-                        color:
-                            colorScheme.outlineVariant.withValues(alpha: 0.48),
-                      ),
-                      boxShadow: [
-                        BoxShadow(
-                          color: colorScheme.shadow.withValues(alpha: 0.08),
-                          blurRadius: 20,
-                          offset: const Offset(0, 10),
-                        ),
-                      ],
-                    ),
-                    child: isWide
-                        ? IntrinsicHeight(
-                            child: Row(
-                              crossAxisAlignment: CrossAxisAlignment.stretch,
-                              children: [
-                                Expanded(child: _LoginVisualPane(theme: theme)),
-                                Expanded(
-                                  child: _LoginFormPane(form: _buildForm()),
-                                ),
-                              ],
-                            ),
-                          )
-                        : Column(
-                          children: [
-                            _LoginVisualPane(theme: theme, compact: true),
-                            _LoginFormPane(form: _buildForm()),
-                          ],
-                        ),
                   ),
-                ],
-              ),
+                DecoratedBox(
+                  decoration: BoxDecoration(
+                    color: colorScheme.surfaceContainerLowest,
+                    borderRadius: BorderRadius.circular(8),
+                    border: Border.all(
+                      color: colorScheme.outlineVariant.withValues(alpha: 0.48),
+                    ),
+                    boxShadow: [
+                      BoxShadow(
+                        color: colorScheme.shadow.withValues(alpha: 0.08),
+                        blurRadius: 20,
+                        offset: const Offset(0, 10),
+                      ),
+                    ],
+                  ),
+                  child: _LoginFormPane(form: _buildForm()),
+                ),
+              ],
             ),
           ),
         ),
@@ -122,11 +97,24 @@ class _LoginPageState extends ConsumerState<LoginPage> {
         crossAxisAlignment: CrossAxisAlignment.stretch,
         mainAxisSize: MainAxisSize.min,
         children: [
-          Text(
-            '欢迎回来',
-            style: theme.textTheme.headlineSmall?.copyWith(
-              fontWeight: FontWeight.w700,
-            ),
+          Text.rich(
+            TextSpan(
+              children: [
+                TextSpan(
+                  text: '欢迎来到 ',
+                  style: theme.textTheme.titleLarge?.copyWith(
+                    fontWeight: FontWeight.w700,
+                  ),
+                ),
+                TextSpan(
+                  text: '登录后进行收藏管理',
+                  style: theme.textTheme.titleLarge?.copyWith(
+                    fontWeight: FontWeight.w700,
+                    fontSize: 15,
+                  ),
+                ),
+              ],
+            )
           ),
           TextFormField(
             controller: _accountController,
@@ -261,65 +249,6 @@ class _LoginPageState extends ConsumerState<LoginPage> {
       focusedBorder: OutlineInputBorder(
         borderRadius: BorderRadius.circular(8),
         borderSide: BorderSide(color: colorScheme.primary, width: 1.4),
-      ),
-    );
-  }
-}
-
-class _LoginVisualPane extends StatelessWidget {
-  const _LoginVisualPane({
-    required this.theme,
-    this.compact = false,
-  });
-
-  final ThemeData theme;
-  final bool compact;
-
-  @override
-  Widget build(BuildContext context) {
-    final colorScheme = theme.colorScheme;
-
-    return Container(
-      width: double.infinity,
-      padding:
-          EdgeInsets.fromLTRB(24, compact ? 22 : 34, 24, compact ? 18 : 34),
-      decoration: BoxDecoration(
-        color: colorScheme.surfaceContainer,
-        borderRadius: compact
-            ? const BorderRadius.vertical(top: Radius.circular(8))
-            : const BorderRadius.horizontal(left: Radius.circular(8)),
-      ),
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        spacing: 12,
-        children: [
-          Image.asset(
-            AssetsPathConstants.logo,
-            width: compact ? 96 : 128,
-            height: compact ? 96 : 128,
-            fit: BoxFit.contain,
-          ),
-          Text(
-            'AnimeFlow',
-            textAlign: TextAlign.center,
-            style: theme.textTheme.headlineMedium?.copyWith(
-              fontWeight: FontWeight.w800,
-            ),
-          ),
-          Text(
-            '登录后继续管理收藏、播放记录与追番进度',
-            textAlign: TextAlign.center,
-            style: theme.textTheme.bodyMedium?.copyWith(
-              color: colorScheme.onSurfaceVariant,
-            ),
-          ),
-          Text(
-            '使用 AnimeFlow 账号继续同步你的追番记录',
-            style: theme.textTheme.bodyMedium?.copyWith(
-              color: colorScheme.onSurfaceVariant,
-            ),
-          ),
-        ],
       ),
     );
   }

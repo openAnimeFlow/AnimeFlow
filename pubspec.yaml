@@ -172,6 +172,7 @@ flutter:
     - assets/shaders/
     - assets/animation/
     - assets/image/logo/logo.webp
+    - assets/image/purple_cat_girl_chibi.webp
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/to/resolution-aware-images
 

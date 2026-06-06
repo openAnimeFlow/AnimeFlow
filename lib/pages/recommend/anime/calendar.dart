@@ -65,13 +65,17 @@ class _CalendarViewState extends State<CalendarView> {
                 onTap: () => ref
                     .read(animeCalendarProvider.notifier)
                     .refreshCalendarDate(),
-                child: const Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  spacing: 8,
-                  children: [
-                    Text('获取数据失败'),
-                    Icon(Icons.refresh),
-                  ],
+                child: const Padding(
+                  padding: EdgeInsets.all(8.0),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    spacing: 8,
+                    children: [
+                      Text('获取数据失败'),
+                      Icon(Icons.refresh),
+                    ],
+                  ),
                 ),
               ),
             ),

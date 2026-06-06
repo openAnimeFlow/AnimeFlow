@@ -3,7 +3,6 @@ import 'package:anime_flow/pages/play/controller/play_controller.dart';
 import 'package:anime_flow/utils/format_time_util.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:go_router/go_router.dart';
 
 class VideoSetting extends StatefulWidget {
   const VideoSetting({super.key});

@@ -15,16 +15,16 @@ import 'collection_tab_view.dart';
 
 enum _LoginOverflowAction { settings, playRecord, logout }
 
-class LoginView extends StatefulWidget {
+class UserView extends StatefulWidget {
   final UserInfoItem userInfoItem;
 
-  const LoginView({super.key, required this.userInfoItem});
+  const UserView({super.key, required this.userInfoItem});
 
   @override
-  State<LoginView> createState() => _LoginViewState();
+  State<UserView> createState() => _UserViewState();
 }
 
-class _LoginViewState extends State<LoginView> with SingleTickerProviderStateMixin {
+class _UserViewState extends State<UserView> with SingleTickerProviderStateMixin {
   final double _contentHeight = 200.0; // 头部内容区域的高度
   late TabController _tabController;
   bool isPinned = false;

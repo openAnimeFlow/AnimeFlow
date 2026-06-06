@@ -1,8 +1,8 @@
 import 'package:anime_flow/features/my/my_state_provider.dart';
 import 'package:anime_flow/models/item/bangumi/user_info_item.dart';
 import 'package:anime_flow/models/item/tab_item.dart';
-import 'package:anime_flow/pages/my/index.dart';
 import 'package:anime_flow/pages/ranking/index.dart';
+import 'package:anime_flow/pages/user/index.dart';
 import 'package:anime_flow/routes/routes.dart';
 import 'package:anime_flow/utils/systemUtil.dart';
 import 'package:anime_flow/widget/animation_network_image/animation_network_image.dart';
@@ -60,7 +60,7 @@ class _MainPageState extends ConsumerState<MainPage> {
           _pageCache[index] = const RankingPage();
           break;
         case 2:
-          _pageCache[index] = const MyPage();
+          _pageCache[index] = const UserPage();
           break;
       }
     }

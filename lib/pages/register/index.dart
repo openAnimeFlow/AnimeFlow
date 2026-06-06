@@ -104,7 +104,6 @@ class _RegisterPageState extends State<RegisterPage> {
       if (!mounted) return;
       NotificationToast.show('提示', '验证码已发送，请查收邮件');
       _startCountdown();
-      unawaited(_loadCaptcha());
     } on AnimeFlowApiException catch (e) {
       if (!mounted) return;
       NotificationToast.show('提示', e.message);
@@ -325,12 +324,6 @@ class _RegisterPageState extends State<RegisterPage> {
                                         prefixIcon:
                                             Icon(Icons.verified_outlined),
                                       ),
-                                      validator: (value) {
-                                        if ((value ?? '').trim().isEmpty) {
-                                          return '请输入图形验证码';
-                                        }
-                                        return null;
-                                      },
                                     ),
                                   ),
                                   const SizedBox(width: 12),

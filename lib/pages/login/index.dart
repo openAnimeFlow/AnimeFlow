@@ -2,6 +2,7 @@ import 'package:anime_flow/constants/assets_path_constants.dart';
 import 'package:anime_flow/features/my/my_controller_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_svg/svg.dart';
 import 'package:go_router/go_router.dart';
 
 class LoginPage extends ConsumerStatefulWidget {
@@ -68,13 +69,6 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                     border: Border.all(
                       color: colorScheme.outlineVariant.withValues(alpha: 0.48),
                     ),
-                    boxShadow: [
-                      BoxShadow(
-                        color: colorScheme.shadow.withValues(alpha: 0.08),
-                        blurRadius: 20,
-                        offset: const Offset(0, 10),
-                      ),
-                    ],
                   ),
                   child: _LoginFormPane(form: _buildForm()),
                 ),
@@ -195,7 +189,10 @@ class _LoginPageState extends ConsumerState<LoginPage> {
             onPressed: () {
               ref.read(myControllerProvider).openOAuthPage();
             },
-            icon: const Icon(Icons.open_in_new_outlined),
+            icon: SvgPicture.asset(AssetsPathConstants.bangumi,
+              height: 20,
+              width: 20,
+            ),
             label: const Text('Bangumi 授权登录'),
             style: OutlinedButton.styleFrom(
               minimumSize: const Size.fromHeight(44),

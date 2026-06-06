@@ -12,4 +12,7 @@ class AssetsPathConstants {
 
   /// 弹幕图标
   static const String danmakuIcon = 'assets/icons/danmaku_setting.svg';
+
+  /// bangumi
+  static const String bangumi = 'assets/icons/bangumi.svg';
 }

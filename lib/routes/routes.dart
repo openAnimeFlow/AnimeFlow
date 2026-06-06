@@ -24,7 +24,7 @@ import 'package:anime_flow/pages/settings/pages/plugins/plugins.dart';
 import 'package:anime_flow/pages/settings/pages/theme.dart';
 import 'package:anime_flow/pages/user_space/index.dart';
 import 'package:anime_flow/routes/model/info_route_extra.dart';
-import 'package:anime_flow/routes/provider/anime_info_args.dart';
+import 'package:anime_flow/routes/provider/routes_args.dart';
 import 'package:bot_toast/bot_toast.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -170,8 +170,14 @@ class CharactersRoute extends GoRouteData with $CharactersRoute {
   final int subjectsId;
 
   @override
-  Widget build(BuildContext context, GoRouterState state) =>
-      CharacterPage(subjectsId: subjectsId);
+  Widget build(BuildContext context, GoRouterState state) {
+    return ProviderScope(
+      overrides: [
+        charactersArgsProvider.overrideWithValue(subjectsId),
+      ],
+      child: const CharacterPage(),
+    );
+  }
 }
 
 @TypedGoRoute<CharacterInfoRoute>(path: '/character_info')

@@ -4,7 +4,7 @@ import 'package:anime_flow/constants/layout_constant.dart';
 import 'package:anime_flow/http/requests/bgm_request.dart';
 import 'package:anime_flow/models/item/bangumi/subjects_info_item.dart';
 import 'package:anime_flow/pages/anime_info/provider/anime_info_provider.dart';
-import 'package:anime_flow/routes/provider/anime_info_args.dart';
+import 'package:anime_flow/routes/provider/routes_args.dart';
 import 'package:anime_flow/utils/systemUtil.dart';
 import 'package:anime_flow/widget/animation_network_image/animation_network_image.dart';
 import 'package:anime_flow/widget/collection/collection_button.dart';

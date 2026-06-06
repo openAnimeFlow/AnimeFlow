@@ -1,116 +1,23 @@
-import 'package:anime_flow/http/requests/flow_request.dart';
 import 'package:anime_flow/models/item/bangumi/actor_item.dart';
+import 'package:anime_flow/pages/characters/provider/characters_provider.dart';
 import 'package:anime_flow/routes/routes.dart';
 import 'package:anime_flow/utils/bgm_utils.dart';
 import 'package:anime_flow/widget/animation_network_image/animation_network_image.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:get/get.dart';
 
-///角色列表页面
+/// 角色列表页面
 class CharacterPage extends StatefulWidget {
-  final int subjectsId;
-
-  const CharacterPage({super.key, required this.subjectsId});
+  const CharacterPage({super.key});
 
   @override
   State<CharacterPage> createState() => _CharacterPageState();
 }
 
 class _CharacterPageState extends State<CharacterPage> {
-  CharactersItem? characters;
-
-  int get subjectsId => widget.subjectsId;
   final ScrollController _scrollController = ScrollController();
-  bool _isLoading = false;
-  int _offset = 0;
-  final int _limit = 10;
-  bool _hasMore = true;
-
-  @override
-  void initState() {
-    super.initState();
-    _getCharacters();
-
-    // 监听滚动，触发加载更多
-    _scrollController.addListener(() {
-      if (_scrollController.position.pixels >=
-          _scrollController.position.maxScrollExtent - 200) {
-        _loadMore();
-      }
-    });
-  }
-
-  ///获取角色信息
-  void _getCharacters({bool loadMore = false}) async {
-    // 如果正在加载，则不再加载
-    if (_isLoading) return;
-
-    // 如果是加载更多，但没有更多数据，则不加载
-    if (loadMore && !_hasMore) return;
-
-    setState(() {
-      _isLoading = true;
-      if (!loadMore) {
-        _offset = 0;
-        _hasMore = true;
-      }
-    });
-
-    try {
-      final offset = loadMore ? _offset : 0;
-      final value = await FlowRequest.charactersService(
-        subjectsId,
-        limit: _limit,
-        offset: offset,
-      );
-      if (mounted) {
-        setState(() {
-          if (loadMore && characters != null) {
-            // 追加数据
-            characters = CharactersItem(
-              data: [...characters!.data, ...value.data],
-              total: value.total,
-            );
-          } else {
-            // 首次加载
-            characters = value;
-          }
-          _offset = offset + value.data.length;
-          _hasMore = value.data.length == _limit &&
-              characters!.data.length < value.total;
-          _isLoading = false;
-        });
-
-        // 数据加载完成后，检查是否需要自动加载更多（宽屏情况）
-        WidgetsBinding.instance.addPostFrameCallback((_) {
-          if (!mounted || _isLoading || !_hasMore) return;
-
-          if (!_scrollController.hasClients) return;
-
-          // 如果内容高度小于等于视口高度（无法滚动），且还有更多数据，则自动加载更多
-          final position = _scrollController.position;
-          // maxScrollExtent <= 0 表示内容可以完全显示，无需滚动
-          // 或者 maxScrollExtent 很小（接近0），表示内容几乎填满屏幕
-          if (position.maxScrollExtent <= 50 && _hasMore) {
-            _loadMore();
-          }
-        });
-      }
-    } catch (e) {
-      if (mounted) {
-        setState(() {
-          _isLoading = false;
-        });
-      }
-    }
-  }
-
-  // 加载更多
-  void _loadMore() {
-    if (!_isLoading && _hasMore) {
-      _getCharacters(loadMore: true);
-    }
-  }
+  bool _autoFillChecked = false;
 
   @override
   void dispose() {
@@ -118,7 +25,6 @@ class _CharacterPageState extends State<CharacterPage> {
     super.dispose();
   }
 
-  // 计算列数
   int _calculateCrossAxisCount(double screenWidth) {
     const minItemWidth = 320.0;
     if (screenWidth < 450) return 1;
@@ -131,75 +37,124 @@ class _CharacterPageState extends State<CharacterPage> {
     const maxWidth = 1400.0;
     const double itemHeight = 160.0;
 
-    return Scaffold(
-      appBar: AppBar(
-        title: Text(
-          '角色${characters != null ? '(${characters!.total})' : ''}',
-          style: const TextStyle(fontSize: 25, fontWeight: FontWeight.bold),
-        ),
-      ),
-      body: Center(
-        child: ConstrainedBox(
-          constraints: const BoxConstraints(maxWidth: maxWidth),
-          child: Builder(builder: (context) {
-            if (characters == null && _isLoading) {
-              return const Center(
-                child: CircularProgressIndicator(),
-              );
+    return Consumer(
+      builder: (context, ref, _) {
+        return NotificationListener<ScrollNotification>(
+          onNotification: (notification) {
+            if (notification is ScrollUpdateNotification &&
+                notification.metrics.axis == Axis.vertical) {
+              ref
+                  .read(charactersListProvider.notifier)
+                  .onScroll(notification.metrics);
             }
-
-            if (characters == null || characters!.data.isEmpty) {
-              return const Center(
-                child: Text('暂无角色信息'),
-              );
-            }
-
-            final charactersData = characters!;
-
-            final effectiveWidth = screenWidth.clamp(0.0, maxWidth - 32);
-            final crossAxisCount = _calculateCrossAxisCount(effectiveWidth);
-
-            return  GridView.builder(
-                controller: _scrollController,
-                padding: const EdgeInsets.symmetric(horizontal: 10,vertical: 10),
-                gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                  crossAxisCount: crossAxisCount,
-                  crossAxisSpacing: 10,
-                  mainAxisSpacing: 10,
-                  mainAxisExtent: itemHeight,
-                ),
-                itemCount: charactersData.data.length + 1,
-                itemBuilder: (context, index) {
-                  // 如果是最后一项，显示加载指示器或"没有更多了"
-                  if (index == charactersData.data.length) {
-                    return SizedBox(
-                      height: itemHeight,
-                      child: _hasMore
-                          ? _isLoading
-                              ? const Center(
-                                  child: CircularProgressIndicator(),
-                                )
-                              : const SizedBox.shrink()
-                          : const Center(
-                              child: Padding(
-                                padding: EdgeInsets.all(8.0),
-                                child: Text("没有更多了"),
-                              ),
-                            ),
-                    );
-                  }
-
-                  final characterData = charactersData.data[index];
-                  return _buildCharacterCard(
-                    context,
-                    characterData,
-                    itemHeight,
+            return false;
+          },
+          child: Scaffold(
+            appBar: AppBar(
+              title: Consumer(
+                builder: (context, ref, _) {
+                  final charactersAsync = ref.watch(charactersListProvider);
+                  final total = charactersAsync.asData?.value.characters.total;
+                  return Text(
+                    '角色${total != null ? '($total)' : ''}',
+                    style: const TextStyle(
+                      fontSize: 25,
+                      fontWeight: FontWeight.bold,
+                    ),
                   );
                 },
-            );
-          }),
-        ),
-      ),
+              ),
+            ),
+            body: Center(
+              child: ConstrainedBox(
+                constraints: const BoxConstraints(maxWidth: maxWidth),
+                child: Consumer(
+                  builder: (context, ref, _) {
+                    final charactersAsync = ref.watch(charactersListProvider);
+
+                    return charactersAsync.when(
+                      loading: () => const Center(
+                        child: CircularProgressIndicator(),
+                      ),
+                      error: (_, __) => const Center(
+                        child: Text('加载角色信息失败'),
+                      ),
+                      data: (viewState) {
+                        final charactersData = viewState.characters;
+                        if (charactersData.data.isEmpty) {
+                          return const Center(
+                            child: Text('暂无角色信息'),
+                          );
+                        }
+
+                        final effectiveWidth =
+                            screenWidth.clamp(0.0, maxWidth - 32);
+                        final crossAxisCount =
+                            _calculateCrossAxisCount(effectiveWidth);
+
+                        WidgetsBinding.instance.addPostFrameCallback((_) {
+                          if (_autoFillChecked ||
+                              !_scrollController.hasClients) {
+                            return;
+                          }
+                          _autoFillChecked = true;
+                          ref
+                              .read(charactersListProvider.notifier)
+                              .maybeAutoFillShortContent(
+                                _scrollController.position,
+                              );
+                        });
+
+                        return GridView.builder(
+                          controller: _scrollController,
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 10,
+                            vertical: 10,
+                          ),
+                          gridDelegate:
+                              SliverGridDelegateWithFixedCrossAxisCount(
+                            crossAxisCount: crossAxisCount,
+                            crossAxisSpacing: 10,
+                            mainAxisSpacing: 10,
+                            mainAxisExtent: itemHeight,
+                          ),
+                          itemCount: charactersData.data.length + 1,
+                          itemBuilder: (context, index) {
+                            if (index == charactersData.data.length) {
+                              return SizedBox(
+                                height: itemHeight,
+                                child: viewState.hasMore
+                                    ? viewState.isLoadingMore
+                                        ? const Center(
+                                            child: CircularProgressIndicator(),
+                                          )
+                                        : const SizedBox.shrink()
+                                    : const Center(
+                                        child: Padding(
+                                          padding: EdgeInsets.all(8.0),
+                                          child: Text('没有更多了'),
+                                        ),
+                                      ),
+                              );
+                            }
+
+                            final characterData = charactersData.data[index];
+                            return _buildCharacterCard(
+                              context,
+                              characterData,
+                              itemHeight,
+                            );
+                          },
+                        );
+                      },
+                    );
+                  },
+                ),
+              ),
+            ),
+          ),
+        );
+      },
     );
   }
 
@@ -228,7 +183,6 @@ class _CharacterPageState extends State<CharacterPage> {
         child: Row(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // 左侧：角色封面
             SizedBox(
               height: itemHeight,
               width: 110,
@@ -243,13 +197,11 @@ class _CharacterPageState extends State<CharacterPage> {
               ),
             ),
             const SizedBox(width: 12),
-            // 右侧：角色信息
             Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  // 角色名称（中文）
                   Text(
                     characterData.character.nameCN.isEmpty
                         ? characterData.character.name
@@ -261,7 +213,6 @@ class _CharacterPageState extends State<CharacterPage> {
                     maxLines: 2,
                     overflow: TextOverflow.ellipsis,
                   ),
-                  // 角色名称（日文）
                   if (characterData.character.nameCN.isNotEmpty &&
                       characterData.character.nameCN !=
                           characterData.character.name) ...[
@@ -277,7 +228,6 @@ class _CharacterPageState extends State<CharacterPage> {
                       overflow: TextOverflow.ellipsis,
                     ),
                   ],
-                  // 角色类型
                   Container(
                     padding:
                         const EdgeInsets.symmetric(horizontal: 4, vertical: 2),
@@ -289,13 +239,12 @@ class _CharacterPageState extends State<CharacterPage> {
                     child: Text(
                       BgmUtils.getCharacterType(characterData.type),
                       style: TextStyle(
-                          fontSize: 10,
-                          fontWeight: textFontWeight,
-                          color: primary),
+                        fontSize: 10,
+                        fontWeight: textFontWeight,
+                        color: primary,
+                      ),
                     ),
                   ),
-
-                  // 角色信息
                   if (characterData.character.info.isNotEmpty) ...[
                     const SizedBox(height: 4),
                     Text(
@@ -309,7 +258,6 @@ class _CharacterPageState extends State<CharacterPage> {
                     ),
                   ],
                   const Spacer(),
-                  // 声优信息（水平布局）
                   if (characterData.actors.isNotEmpty)
                     Wrap(
                       spacing: 8,
@@ -320,14 +268,14 @@ class _CharacterPageState extends State<CharacterPage> {
                           mainAxisSize: MainAxisSize.min,
                           children: [
                             if (actor.images.medium.isNotEmpty) ...[
-                               SizedBox(
-                                  width: 32,
-                                  height: 32,
-                                  child: AnimationNetworkImage(
-                                    borderRadius: BorderRadius.circular(6),
-                                    url: actor.images.medium,
-                                    fit: BoxFit.cover,
-                                  ),
+                              SizedBox(
+                                width: 32,
+                                height: 32,
+                                child: AnimationNetworkImage(
+                                  borderRadius: BorderRadius.circular(6),
+                                  url: actor.images.medium,
+                                  fit: BoxFit.cover,
+                                ),
                               ),
                               const SizedBox(width: 4),
                             ],

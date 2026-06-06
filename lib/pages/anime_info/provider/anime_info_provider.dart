@@ -4,7 +4,7 @@ import 'package:anime_flow/models/item/bangumi/producers_item.dart';
 import 'package:anime_flow/models/item/bangumi/related_subjects_item.dart';
 import 'package:anime_flow/models/item/bangumi/subject_comments_item.dart';
 import 'package:anime_flow/models/item/bangumi/subjects_info_item.dart';
-import 'package:anime_flow/routes/provider/anime_info_args.dart';
+import 'package:anime_flow/routes/provider/routes_args.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';

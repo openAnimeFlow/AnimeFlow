@@ -128,8 +128,8 @@ class _RegisterPageState extends State<RegisterPage> {
                 Align(
                   alignment: Alignment.bottomRight,
                   child: SizedBox(
-                    height: 133,
-                    width: 200,
+                    height: 120,
+                    width: 160,
                     child: Image.asset(
                       AssetsPathConstants.purpleCatGirlChibi,
                       width: double.infinity,

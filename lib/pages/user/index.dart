@@ -26,7 +26,7 @@ class UserPage extends ConsumerWidget {
       final message = shouldNotifyError ? '获取用户资料失败，请重新登录' : '登录状态已失效，请重新登录';
       WidgetsBinding.instance.addPostFrameCallback((_) {
         if (!context.mounted) return;
-        NotificationToast.show('提示', message);
+        NotificationToast.show('提示', message,align: Alignment.topCenter);
       });
     });
 

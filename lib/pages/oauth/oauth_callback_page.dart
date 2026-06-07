@@ -1,4 +1,4 @@
-import 'package:anime_flow/features/my/my_controller_provider.dart';
+import 'package:anime_flow/providers/user/my_controller_provider.dart';
 import 'package:anime_flow/routes/routes.dart';
 import 'package:anime_flow/utils/logger.dart';
 import 'package:flutter/material.dart';

@@ -1,5 +1,5 @@
 import 'package:anime_flow/constants/assets_path_constants.dart';
-import 'package:anime_flow/features/my/my_controller_provider.dart';
+import 'package:anime_flow/providers/user/my_controller_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_svg/svg.dart';

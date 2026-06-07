@@ -1,4 +1,4 @@
-import 'package:anime_flow/features/my/my_state_provider.dart';
+import 'package:anime_flow/providers/user/my_state_provider.dart';
 import 'package:anime_flow/http/requests/flow_request.dart';
 import 'package:anime_flow/models/item/bangumi/episode_comments_item.dart';
 import 'package:anime_flow/pages/play/content/introduce/index.dart';

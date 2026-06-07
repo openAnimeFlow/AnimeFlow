@@ -1,6 +1,6 @@
 import 'dart:ui';
 
-import 'package:anime_flow/features/my/my_controller_provider.dart';
+import 'package:anime_flow/providers/user/my_controller_provider.dart';
 import 'package:anime_flow/http/requests/bgm_request.dart';
 import 'package:anime_flow/models/item/bangumi/collections_item.dart';
 import 'package:anime_flow/models/item/bangumi/user_info_item.dart';

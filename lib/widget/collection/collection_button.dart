@@ -1,4 +1,4 @@
-import 'package:anime_flow/features/my/my_state_provider.dart';
+import 'package:anime_flow/providers/user/my_state_provider.dart';
 import 'package:anime_flow/models/enums/collect_type.dart';
 import 'package:anime_flow/routes/routes.dart';
 import 'package:flutter/material.dart';

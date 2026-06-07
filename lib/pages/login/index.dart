@@ -1,5 +1,5 @@
 import 'package:anime_flow/constants/assets_path_constants.dart';
-import 'package:anime_flow/providers/user/my_controller_provider.dart';
+import 'package:anime_flow/providers/user/user_controller.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_svg/svg.dart';
@@ -187,7 +187,7 @@ class _LoginPageState extends ConsumerState<LoginPage> {
           ),
           OutlinedButton.icon(
             onPressed: () {
-              ref.read(myControllerProvider).openOAuthPage();
+              ref.read(userControllerProvider.notifier).openOAuthPage();
             },
             icon: SvgPicture.asset(AssetsPathConstants.bangumi,
               height: 20,

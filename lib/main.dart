@@ -2,7 +2,6 @@ import 'dart:async';
 import 'dart:io';
 import 'package:anime_flow/features/app/app_info_provider.dart';
 import 'package:anime_flow/features/app/app_provider_container.dart';
-import 'package:anime_flow/providers/user/my_controller_provider.dart';
 import 'package:anime_flow/pages/settings/pages/font/font_provider.dart';
 import 'package:anime_flow/repository/storage.dart';
 import 'package:anime_flow/routes/routes.dart';
@@ -42,7 +41,6 @@ void main() async {
 
   final container = ProviderContainer();
   appProviderContainer = container;
-  container.read(myControllerProvider);
   container.read(appInfoProvider);
   unawaited(container.read(shadersDirectoryProvider.future));
   unawaited(CrawlConfig.initCrawlConfigs());

@@ -1,6 +1,5 @@
 import 'package:anime_flow/constants/assets_path_constants.dart';
-import 'package:anime_flow/providers/user/my_controller_provider.dart';
-import 'package:anime_flow/providers/user/my_state_provider.dart';
+import 'package:anime_flow/providers/user/user_controller.dart';
 import 'package:anime_flow/routes/routes.dart';
 import 'package:anime_flow/widget/drop_down_menu.dart';
 import 'package:flutter/material.dart';
@@ -78,8 +77,8 @@ class NoLoginView extends StatelessWidget {
                   child: Image.asset(AssetsPathConstants.logo)),
               Consumer(
                 builder: (context, ref, _) {
-                  final isAuthorizing = ref.watch(oAuthAuthorizingProvider);
-                  final myController = ref.read(myControllerProvider);
+                  final isAuthorizing = ref.watch(userControllerProvider);
+                  final myController = ref.read(userControllerProvider.notifier);
                   return AnimatedSwitcher(
                     duration: const Duration(milliseconds: 300),
                     child: isAuthorizing
@@ -170,7 +169,7 @@ class NoLoginView extends StatelessWidget {
                 builder: (context, ref, _) {
                   return TextButton(
                     onPressed: () =>
-                        ref.read(myControllerProvider).openOAuthPage(),
+                        ref.read(userControllerProvider.notifier).openOAuthPage(),
                     child: const Text(
                       '使用 Bangumi 授权登录',
                       style: TextStyle(fontSize: 11),

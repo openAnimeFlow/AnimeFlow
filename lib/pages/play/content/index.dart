@@ -1,4 +1,4 @@
-import 'package:anime_flow/providers/user/my_state_provider.dart';
+import 'package:anime_flow/providers/user/user_state_provider.dart';
 import 'package:anime_flow/http/requests/flow_request.dart';
 import 'package:anime_flow/models/item/bangumi/episode_comments_item.dart';
 import 'package:anime_flow/pages/play/content/introduce/index.dart';
@@ -151,7 +151,8 @@ class _ContentViewState extends State<ContentView>
                       ? const Spacer()
                       : Consumer(
                           builder: (context, ref, _) {
-                            final userInfo = ref.watch(currentUserInfoProvider);
+                            final userInfo =
+                                ref.watch(currentUserInfoProvider).value;
                             if (userInfo == null) {
                               return const SizedBox.shrink();
                             }

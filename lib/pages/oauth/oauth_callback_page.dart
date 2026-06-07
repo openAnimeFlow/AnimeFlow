@@ -1,11 +1,11 @@
-import 'package:anime_flow/providers/user/my_controller_provider.dart';
+import 'package:anime_flow/providers/user/user_controller.dart';
 import 'package:anime_flow/routes/routes.dart';
 import 'package:anime_flow/utils/logger.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 /// Bangumi OAuth 应用回调处理页面
-class OAuthCallbackPage extends StatefulWidget {
+class OAuthCallbackPage extends ConsumerStatefulWidget {
   const OAuthCallbackPage({
     super.key,
     required this.callbackUri,
@@ -14,10 +14,10 @@ class OAuthCallbackPage extends StatefulWidget {
   final Uri callbackUri;
 
   @override
-  State<OAuthCallbackPage> createState() => _OAuthCallbackPageState();
+  ConsumerState<OAuthCallbackPage> createState() => _OAuthCallbackPageState();
 }
 
-class _OAuthCallbackPageState extends State<OAuthCallbackPage>
+class _OAuthCallbackPageState extends ConsumerState<OAuthCallbackPage>
     with SingleTickerProviderStateMixin {
   late final AnimationController _pulseController;
   late final CurvedAnimation _pulse;
@@ -45,10 +45,10 @@ class _OAuthCallbackPageState extends State<OAuthCallbackPage>
   }
 
   Future<void> _runCallback() async {
-    final container = ProviderScope.containerOf(context);
-    final controller = container.read(myControllerProvider);
     try {
-      await controller.handleDeepLink(widget.callbackUri.toString());
+      await ref
+          .read(userControllerProvider.notifier)
+          .handleDeepLink(widget.callbackUri.toString());
     } catch (e, st) {
       LiggLogger().e('OAuth 回调处理失败', error: e, stackTrace: st);
     } finally {

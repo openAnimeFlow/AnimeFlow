@@ -25,7 +25,7 @@ class PlayHistoryAdapter extends TypeAdapter<PlayHistory> {
       updateAt: fields[5] as DateTime,
       position: (fields[6] as num).toInt(),
       duration: (fields[7] as num).toInt(),
-      alias: (fields[8] as List?)?.cast<String>() ?? const <String>[],
+      alias: (fields[8] as List).cast<String>(),
     );
   }
 

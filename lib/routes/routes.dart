@@ -23,7 +23,7 @@ import 'package:anime_flow/pages/settings/pages/plugins/download_plugins.dart';
 import 'package:anime_flow/pages/settings/pages/plugins/plugins.dart';
 import 'package:anime_flow/pages/settings/pages/theme.dart';
 import 'package:anime_flow/pages/user_space/index.dart';
-import 'package:anime_flow/providers/user/my_controller.dart';
+import 'package:anime_flow/providers/user/user_controller.dart';
 import 'package:anime_flow/routes/model/info_route_extra.dart';
 import 'package:anime_flow/routes/provider/routes_args.dart';
 import 'package:bot_toast/bot_toast.dart';

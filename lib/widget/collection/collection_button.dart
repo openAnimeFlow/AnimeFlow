@@ -1,4 +1,4 @@
-import 'package:anime_flow/providers/user/my_state_provider.dart';
+import 'package:anime_flow/providers/user/user_state_provider.dart';
 import 'package:anime_flow/models/enums/collect_type.dart';
 import 'package:anime_flow/routes/routes.dart';
 import 'package:flutter/material.dart';
@@ -67,7 +67,7 @@ class _CollectionButtonState extends State<CollectionButton> {
 
     return Consumer(
       builder: (context, ref, _) {
-        final isLoggedIn = ref.watch(currentUserInfoProvider) != null;
+        final isLoggedIn = ref.watch(isLoggedInProvider).value ?? false;
         return !isLoggedIn
             ? OutlinedButton(
                 onPressed: () => const MainRoute(tab: 2).go(context),

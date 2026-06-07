@@ -1,4 +1,4 @@
-import 'package:anime_flow/providers/user/my_state_provider.dart';
+import 'package:anime_flow/providers/user/user_state_provider.dart';
 import 'package:anime_flow/models/item/bangumi/user_info_item.dart';
 import 'package:anime_flow/models/item/tab_item.dart';
 import 'package:anime_flow/pages/ranking/index.dart';
@@ -172,7 +172,7 @@ class _MainPageState extends ConsumerState<MainPage> {
           if (isDesktop)
             Consumer(
               builder: (context, ref, _) {
-                final userInfo = ref.watch(currentUserInfoProvider);
+                final userInfo = ref.watch(currentUserInfoProvider).value;
                 return NavigationRail(
                   backgroundColor: colorScheme.surfaceContainerHighest,
                   selectedIndex: _currentIndex,
@@ -221,7 +221,7 @@ class _MainPageState extends ConsumerState<MainPage> {
           ? null
           : Consumer(
               builder: (context, ref, _) {
-                final userInfo = ref.watch(currentUserInfoProvider);
+                final userInfo = ref.watch(currentUserInfoProvider).value;
                 return NavigationBar(
                   backgroundColor: colorScheme.surfaceContainerHighest,
                   selectedIndex: _currentIndex,

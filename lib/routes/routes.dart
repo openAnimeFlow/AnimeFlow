@@ -365,7 +365,6 @@ class SettingAgreementRoute extends GoRouteData with $SettingAgreementRoute {
 // =====================================================================
 // GoRouter 实例
 // =====================================================================
-
 final GoRouter appRouter = GoRouter(
   observers: [BotToastNavigatorObserver()],
   initialLocation: const MainRoute().location,

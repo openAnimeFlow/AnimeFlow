@@ -46,36 +46,51 @@ class _LoginPageState extends ConsumerState<LoginPage> {
         forceMaterialTransparency: true,
         title: const Text('登录'),
       ),
-      body: SingleChildScrollView(
-        padding:  EdgeInsets.fromLTRB(20, padding.top, 20, 28),
-        child: Center(
-          child: ConstrainedBox(
-            constraints: const BoxConstraints(maxWidth: 600),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.end,
-              children: [
-                  ClipRRect(
-                    borderRadius: BorderRadius.circular(8),
-                    child: Image.asset(
-                      AssetsPathConstants.purpleCatGirlChibi,
-                      height: 100,
-                      fit: BoxFit.cover,
-                    ),
+      body: LayoutBuilder(
+        builder: (context, constraints) {
+          return SingleChildScrollView(
+            padding: EdgeInsets.fromLTRB(20, padding.top, 20, 28),
+            child: ConstrainedBox(
+              constraints: BoxConstraints(
+                minHeight: constraints.maxHeight - padding.top - 28,
+              ),
+              child: Center(
+                child: ConstrainedBox(
+                  constraints: const BoxConstraints(maxWidth: 600),
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: [
+                      Align(
+                        alignment: Alignment.bottomRight,
+                        child: ClipRRect(
+                          borderRadius: BorderRadius.circular(8),
+                          child: Image.asset(
+                            AssetsPathConstants.purpleCatGirlChibi,
+                            height: 100,
+                            fit: BoxFit.cover,
+                          ),
+                        ),
+                      ),
+                      const SizedBox(height: 16),
+                      DecoratedBox(
+                        decoration: BoxDecoration(
+                          color: colorScheme.surfaceContainerLowest,
+                          borderRadius: BorderRadius.circular(8),
+                          border: Border.all(
+                            color: colorScheme.outlineVariant
+                                .withValues(alpha: 0.48),
+                          ),
+                        ),
+                        child: _LoginFormPane(form: _buildForm()),
+                      ),
+                    ],
                   ),
-                DecoratedBox(
-                  decoration: BoxDecoration(
-                    color: colorScheme.surfaceContainerLowest,
-                    borderRadius: BorderRadius.circular(8),
-                    border: Border.all(
-                      color: colorScheme.outlineVariant.withValues(alpha: 0.48),
-                    ),
-                  ),
-                  child: _LoginFormPane(form: _buildForm()),
                 ),
-              ],
+              ),
             ),
-          ),
-        ),
+          );
+        },
       ),
     );
   }
@@ -91,25 +106,23 @@ class _LoginPageState extends ConsumerState<LoginPage> {
         crossAxisAlignment: CrossAxisAlignment.stretch,
         mainAxisSize: MainAxisSize.min,
         children: [
-          Text.rich(
-            TextSpan(
-              children: [
-                TextSpan(
-                  text: '欢迎来到 ',
-                  style: theme.textTheme.titleLarge?.copyWith(
-                    fontWeight: FontWeight.w700,
-                  ),
+          Text.rich(TextSpan(
+            children: [
+              TextSpan(
+                text: '欢迎来到 ',
+                style: theme.textTheme.titleLarge?.copyWith(
+                  fontWeight: FontWeight.w700,
                 ),
-                TextSpan(
-                  text: '登录后进行收藏管理',
-                  style: theme.textTheme.titleLarge?.copyWith(
-                    fontWeight: FontWeight.w700,
-                    fontSize: 15,
-                  ),
+              ),
+              TextSpan(
+                text: '登录后进行收藏管理',
+                style: theme.textTheme.titleLarge?.copyWith(
+                  fontWeight: FontWeight.w700,
+                  fontSize: 15,
                 ),
-              ],
-            )
-          ),
+              ),
+            ],
+          )),
           TextFormField(
             controller: _accountController,
             keyboardType: TextInputType.emailAddress,
@@ -189,7 +202,8 @@ class _LoginPageState extends ConsumerState<LoginPage> {
             onPressed: () {
               ref.read(userControllerProvider.notifier).openOAuthPage();
             },
-            icon: SvgPicture.asset(AssetsPathConstants.bangumi,
+            icon: SvgPicture.asset(
+              AssetsPathConstants.bangumi,
               height: 20,
               width: 20,
             ),

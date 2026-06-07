@@ -6,7 +6,6 @@ class NotificationToast {
   NotificationToast._();
 
   static const Duration defaultDuration = Duration(seconds: 3);
-  static const double defaultMaxWidth = 500;
   static const BorderRadius defaultBorderRadius = BorderRadius.all(Radius.circular(12));
 
   /// 从下往上滑入
@@ -34,7 +33,7 @@ class NotificationToast {
     String message, {
     BorderRadius borderRadius = defaultBorderRadius,
     Duration duration = defaultDuration,
-    double maxWidth = defaultMaxWidth,
+    double maxWidth = 500.0,
     Alignment align = Alignment.bottomCenter,
     WrapAnimation? wrapToastAnimation,
   }) {

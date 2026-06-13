@@ -1,6 +1,5 @@
 import 'dart:io';
 
-import 'package:anime_flow/utils/systemUtil.dart';
 import 'package:flutter/material.dart';
 import 'package:window_manager/window_manager.dart';
 
@@ -196,14 +195,12 @@ class WindowControlButtons extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Row(
+    return const Row(
       mainAxisSize: MainAxisSize.min,
       children: [
-        if (SystemUtil.isDesktop) ...[
-          const WindowMinimizeButton(),
-          const WindowMaximizeButton(),
-          const WindowCloseButton(),
-        ]
+          WindowMinimizeButton(),
+          WindowMaximizeButton(),
+          WindowCloseButton(),
       ],
     );
   }

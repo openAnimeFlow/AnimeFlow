@@ -1,6 +1,6 @@
 import 'dart:async';
 import 'package:anime_flow/constants/storage_key.dart';
-import 'package:anime_flow/features/my/my_state_provider.dart';
+import 'package:anime_flow/providers/user/user_state_provider.dart';
 import 'package:anime_flow/pages/play/controller/play_controller.dart';
 import 'package:anime_flow/repository/storage.dart';
 import 'package:canvas_danmaku/canvas_danmaku.dart';
@@ -8,18 +8,17 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:get/get.dart';
 
-class DanmakuView extends StatefulWidget {
+class DanmakuView extends ConsumerStatefulWidget {
   const DanmakuView({super.key});
 
   @override
-  State<DanmakuView> createState() => _DanmakuViewState();
+  ConsumerState<DanmakuView> createState() => _DanmakuViewState();
 }
 
-class _DanmakuViewState extends State<DanmakuView>
+class _DanmakuViewState extends ConsumerState<DanmakuView>
     with AutomaticKeepAliveClientMixin {
   final setting = Storage.setting;
   final playController = Get.find<PlayController>();
-  ProviderContainer? _container;
   Timer? _danmakuTimer;
   Worker? _rateWorker;
 
@@ -40,12 +39,6 @@ class _DanmakuViewState extends State<DanmakuView>
 
   @override
   bool get wantKeepAlive => true;
-
-  @override
-  void didChangeDependencies() {
-    super.didChangeDependencies();
-    _container ??= ProviderScope.containerOf(context);
-  }
 
   @override
   void initState() {
@@ -123,7 +116,7 @@ class _DanmakuViewState extends State<DanmakuView>
                 // 添加弹幕
                 playController.addDanDanmaku(
                   danmaku,
-                  _container?.read(currentUserInfoProvider)?.id,
+                  ref.read(currentUserInfoProvider).value?.id,
                 );
               },
             );

@@ -1,4 +1,4 @@
-import 'package:anime_flow/features/my/my_state_provider.dart';
+import 'package:anime_flow/providers/user/user_state_provider.dart';
 import 'package:anime_flow/pages/anime_info/inf_head.dart';
 import 'package:anime_flow/pages/anime_info/provider/anime_info_provider.dart';
 import 'package:anime_flow/routes/model/play_route_extra.dart';
@@ -133,7 +133,7 @@ class _AnimeInfoPageState extends State<AnimeInfoPage> {
                     return asyncSubjectsInfo.when(
                         data: (subjectsInfo) {
                           final isLoggedIn =
-                              ref.watch(currentUserInfoProvider) != null;
+                              ref.watch(isLoggedInProvider).value ?? false;
                           return isLoggedIn && subjectsInfo.interest != null
                               ? FloatingActionButton(
                                   heroTag: 'evaluate_${args.id}',

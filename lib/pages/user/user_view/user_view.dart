@@ -1,9 +1,9 @@
 import 'dart:ui';
 
-import 'package:anime_flow/features/my/my_controller_provider.dart';
 import 'package:anime_flow/http/requests/bgm_request.dart';
 import 'package:anime_flow/models/item/bangumi/collections_item.dart';
 import 'package:anime_flow/models/item/bangumi/user_info_item.dart';
+import 'package:anime_flow/providers/user/user_controller.dart';
 import 'package:anime_flow/routes/routes.dart';
 import 'package:anime_flow/utils/systemUtil.dart';
 import 'package:anime_flow/widget/animation_network_image/animation_network_image.dart';
@@ -49,7 +49,8 @@ class _UserViewState extends State<UserView>
   final Map<int, String?> _initialErrorMessages = {};
   final Map<int, String?> _loadMoreErrorMessages = {};
   final Map<int, GlobalKey<RefreshIndicatorState>> _refreshIndicatorKeys = {
-    for (var type = 1; type <= 5; type++) type: GlobalKey<RefreshIndicatorState>(),
+    for (var type = 1; type <= 5; type++)
+      type: GlobalKey<RefreshIndicatorState>(),
   };
 
   List<String> get _tabs {
@@ -334,8 +335,9 @@ class _UserViewState extends State<UserView>
           if (SystemUtil.isDesktop)
             IconButton(
               tooltip: '刷新当前标签',
-              onPressed:
-                  isRefreshButtonEnabled ? _showRefreshIndicatorForCurrentTab : null,
+              onPressed: isRefreshButtonEnabled
+                  ? _showRefreshIndicatorForCurrentTab
+                  : null,
               icon: const Icon(Icons.refresh),
             ),
           DropDownMenu<_LoginOverflowAction>(
@@ -386,15 +388,17 @@ class _UserViewState extends State<UserView>
                           onPressed: () => Navigator.of(dialogContext).pop(),
                           child: const Text('取消'),
                         ),
-                        TextButton(
-                          onPressed: () {
-                            Navigator.of(dialogContext).pop();
-                            ProviderScope.containerOf(context)
-                                .read(myControllerProvider)
-                                .clearUserInfo();
-                          },
-                          child: const Text('确定'),
-                        ),
+                        Consumer(builder: (context, ref, _) {
+                          return TextButton(
+                            onPressed: () {
+                              Navigator.of(dialogContext).pop();
+                              ref
+                                  .read(userControllerProvider.notifier)
+                                  .clearUserInfo();
+                            },
+                            child: const Text('确定'),
+                          );
+                        }),
                       ],
                     ),
                   );

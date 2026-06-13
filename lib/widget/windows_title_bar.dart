@@ -1,5 +1,6 @@
 import 'dart:io';
 
+import 'package:anime_flow/utils/systemUtil.dart';
 import 'package:flutter/material.dart';
 import 'package:window_manager/window_manager.dart';
 
@@ -213,9 +214,9 @@ class WindowControlButtons extends StatelessWidget {
     return const Row(
       mainAxisSize: MainAxisSize.min,
       children: [
-        WindowMinimizeButton(),
-        WindowMaximizeButton(),
-        WindowCloseButton(),
+          WindowMinimizeButton(),
+          WindowMaximizeButton(),
+          WindowCloseButton(),
       ],
     );
   }
@@ -290,8 +291,9 @@ class _WindowMaximizeButtonState extends State<WindowMaximizeButton>
   @override
   Widget build(BuildContext context) {
     return WindowControlButton(
-      icon:
-          _isMaximized ? Icons.filter_none_rounded : Icons.crop_square_rounded,
+      icon: _isMaximized
+          ? Icons.filter_none_rounded
+          : Icons.crop_square_rounded,
       onPressed: () async {
         if (_isMaximized) {
           await windowManager.restore();

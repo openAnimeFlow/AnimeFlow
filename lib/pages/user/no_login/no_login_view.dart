@@ -1,6 +1,5 @@
 import 'package:anime_flow/constants/assets_path_constants.dart';
-import 'package:anime_flow/features/my/my_controller_provider.dart';
-import 'package:anime_flow/features/my/my_state_provider.dart';
+import 'package:anime_flow/providers/user/user_controller.dart';
 import 'package:anime_flow/routes/routes.dart';
 import 'package:anime_flow/widget/drop_down_menu.dart';
 import 'package:flutter/material.dart';
@@ -76,17 +75,10 @@ class NoLoginView extends StatelessWidget {
                   radius: 100,
                   backgroundColor: Colors.transparent,
                   child: Image.asset(AssetsPathConstants.logo)),
-              const Text(
-                '未登录',
-                style: TextStyle(
-                  fontSize: 24,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
               Consumer(
                 builder: (context, ref, _) {
-                  final isAuthorizing = ref.watch(oAuthAuthorizingProvider);
-                  final myController = ref.read(myControllerProvider);
+                  final isAuthorizing = ref.watch(userControllerProvider);
+                  final myController = ref.read(userControllerProvider.notifier);
                   return AnimatedSwitcher(
                     duration: const Duration(milliseconds: 300),
                     child: isAuthorizing
@@ -159,7 +151,7 @@ class NoLoginView extends StatelessWidget {
                             ],
                           )
                         : ElevatedButton(
-                            onPressed: () => myController.openOAuthPage(),
+                            onPressed: () => const LoginRoute().push(context),
                             style: ElevatedButton.styleFrom(
                               padding: const EdgeInsets.symmetric(
                                   horizontal: 30, vertical: 10),
@@ -168,10 +160,29 @@ class NoLoginView extends StatelessWidget {
                                 fontWeight: FontWeight.bold,
                               ),
                             ),
-                            child: const Text('登录授权'),
+                            child: const Text('账号密码登录'),
                           ),
                   );
                 },
+              ),
+              Consumer(
+                builder: (context, ref, _) {
+                  return TextButton(
+                    onPressed: () =>
+                        ref.read(userControllerProvider.notifier).openOAuthPage(),
+                    child: const Text(
+                      '使用 Bangumi 授权登录',
+                      style: TextStyle(fontSize: 11),
+                    ),
+                  );
+                },
+              ),
+              TextButton(
+                onPressed: () => const RegisterRoute().push(context),
+                child: const Text(
+                  '还没有账号？点击注册',
+                  style: TextStyle(fontSize: 11),
+                ),
               ),
               Text(
                 '如果无法登录请使用代理改善网络',

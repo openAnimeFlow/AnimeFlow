@@ -1,12 +1,13 @@
-import 'package:anime_flow/features/my/my_controller.dart';
 import 'package:anime_flow/pages/anime_info/index.dart';
 import 'package:anime_flow/pages/calendar/index.dart';
 import 'package:anime_flow/pages/character_info/index.dart';
 import 'package:anime_flow/pages/characters/index.dart';
+import 'package:anime_flow/pages/login/index.dart';
 import 'package:anime_flow/pages/main/index.dart';
 import 'package:anime_flow/pages/oauth/oauth_callback_page.dart';
 import 'package:anime_flow/pages/play/index.dart';
 import 'package:anime_flow/pages/play_record/index.dart';
+import 'package:anime_flow/pages/register/index.dart';
 import 'package:anime_flow/pages/search/image_search_page.dart';
 import 'package:anime_flow/pages/search/index.dart';
 import 'package:anime_flow/pages/settings/index.dart';
@@ -21,8 +22,9 @@ import 'package:anime_flow/pages/settings/pages/plugins/add_plugins.dart';
 import 'package:anime_flow/pages/settings/pages/plugins/download_plugins.dart';
 import 'package:anime_flow/pages/settings/pages/plugins/plugins.dart';
 import 'package:anime_flow/pages/settings/pages/theme.dart';
-import 'package:anime_flow/pages/user/index.dart';
 import 'package:anime_flow/pages/user_space/index.dart';
+import 'package:anime_flow/providers/user/user_controller.dart';
+import 'package:anime_flow/routes/model/info_route_extra.dart';
 import 'package:anime_flow/routes/provider/routes_args.dart';
 import 'package:bot_toast/bot_toast.dart';
 import 'package:flutter/material.dart';
@@ -30,7 +32,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import 'model/character_info_extra.dart';
-import 'model/info_route_extra.dart';
 import 'model/play_route_extra.dart';
 
 part 'routes.g.dart';
@@ -58,7 +59,16 @@ class LoginRoute extends GoRouteData with $LoginRoute {
   const LoginRoute();
 
   @override
-  Widget build(BuildContext context, GoRouterState state) => const UserPage();
+  Widget build(BuildContext context, GoRouterState state) => const LoginPage();
+}
+
+@TypedGoRoute<RegisterRoute>(path: '/register')
+class RegisterRoute extends GoRouteData with $RegisterRoute {
+  const RegisterRoute();
+
+  @override
+  Widget build(BuildContext context, GoRouterState state) =>
+      const RegisterPage();
 }
 
 @TypedGoRoute<OauthCallbackRoute>(path: '/oauth/callback')
@@ -355,7 +365,6 @@ class SettingAgreementRoute extends GoRouteData with $SettingAgreementRoute {
 // =====================================================================
 // GoRouter 实例
 // =====================================================================
-
 final GoRouter appRouter = GoRouter(
   observers: [BotToastNavigatorObserver()],
   initialLocation: const MainRoute().location,

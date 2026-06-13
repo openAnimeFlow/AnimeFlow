@@ -23,6 +23,7 @@ class WindowsTitleBar extends StatefulWidget {
   final Widget? child;
   final Color? backgroundColor;
   final double height;
+  final Widget? icon;
   final String? title;
 
   const WindowsTitleBar({
@@ -31,6 +32,7 @@ class WindowsTitleBar extends StatefulWidget {
     this.backgroundColor,
     this.height = 35,
     this.title,
+    this.icon,
   });
 
   @override
@@ -138,9 +140,12 @@ class _WindowsTitleBarState extends State<WindowsTitleBar> with WindowListener {
           Expanded(
             child: WindowDragArea(
               padding: const EdgeInsets.only(left: 12),
-              child: title == null || title.isEmpty
-                  ? null
-                  : Text(
+              child: Row(
+                spacing: 5,
+                children: [
+                  if (widget.icon != null) widget.icon!,
+                  if (title != null)
+                    Text(
                       title,
                       style: Theme.of(context).textTheme.titleSmall?.copyWith(
                             color: colorScheme.onSurface.withValues(alpha: 0.8),
@@ -148,6 +153,8 @@ class _WindowsTitleBarState extends State<WindowsTitleBar> with WindowListener {
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                     ),
+                ],
+              ),
             ),
           ),
           const Row(
@@ -206,9 +213,9 @@ class WindowControlButtons extends StatelessWidget {
     return const Row(
       mainAxisSize: MainAxisSize.min,
       children: [
-          WindowMinimizeButton(),
-          WindowMaximizeButton(),
-          WindowCloseButton(),
+        WindowMinimizeButton(),
+        WindowMaximizeButton(),
+        WindowCloseButton(),
       ],
     );
   }
@@ -283,9 +290,8 @@ class _WindowMaximizeButtonState extends State<WindowMaximizeButton>
   @override
   Widget build(BuildContext context) {
     return WindowControlButton(
-      icon: _isMaximized
-          ? Icons.filter_none_rounded
-          : Icons.crop_square_rounded,
+      icon:
+          _isMaximized ? Icons.filter_none_rounded : Icons.crop_square_rounded,
       onPressed: () async {
         if (_isMaximized) {
           await windowManager.restore();

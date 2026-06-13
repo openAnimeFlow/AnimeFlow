@@ -1,5 +1,6 @@
 import 'dart:io';
 
+import 'package:anime_flow/utils/systemUtil.dart';
 import 'package:flutter/material.dart';
 import 'package:window_manager/window_manager.dart';
 
@@ -23,6 +24,7 @@ class WindowsTitleBar extends StatefulWidget {
   final Widget? child;
   final Color? backgroundColor;
   final double height;
+  final Widget? icon;
   final String? title;
 
   const WindowsTitleBar({
@@ -31,6 +33,7 @@ class WindowsTitleBar extends StatefulWidget {
     this.backgroundColor,
     this.height = 35,
     this.title,
+    this.icon,
   });
 
   @override
@@ -138,9 +141,12 @@ class _WindowsTitleBarState extends State<WindowsTitleBar> with WindowListener {
           Expanded(
             child: WindowDragArea(
               padding: const EdgeInsets.only(left: 12),
-              child: title == null || title.isEmpty
-                  ? null
-                  : Text(
+              child: Row(
+                spacing: 5,
+                children: [
+                  if (widget.icon != null) widget.icon!,
+                  if (title != null)
+                    Text(
                       title,
                       style: Theme.of(context).textTheme.titleSmall?.copyWith(
                             color: colorScheme.onSurface.withValues(alpha: 0.8),
@@ -148,6 +154,8 @@ class _WindowsTitleBarState extends State<WindowsTitleBar> with WindowListener {
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                     ),
+                ],
+              ),
             ),
           ),
           const Row(

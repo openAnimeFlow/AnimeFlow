@@ -1,5 +1,10 @@
 import 'package:anime_flow/constants/assets_path_constants.dart';
+import 'package:anime_flow/http/clients/anime_flow_client.dart';
+import 'package:anime_flow/pages/login/service/login_service.dart';
 import 'package:anime_flow/providers/user/user_controller.dart';
+import 'package:anime_flow/providers/user/user_state_provider.dart';
+import 'package:anime_flow/routes/routes.dart';
+import 'package:anime_flow/widget/notification_toast.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_svg/svg.dart';
@@ -19,6 +24,9 @@ class _LoginPageState extends ConsumerState<LoginPage> {
 
   bool _obscurePassword = true;
   bool _rememberMe = true;
+  bool _isSubmitting = false;
+
+  final _loginService = LoginService();
 
   @override
   void dispose() {
@@ -27,12 +35,32 @@ class _LoginPageState extends ConsumerState<LoginPage> {
     super.dispose();
   }
 
-  void _submit() {
-    if (!_formKey.currentState!.validate()) return;
+  Future<void> _submit() async {
+    if (_isSubmitting || !_formKey.currentState!.validate()) return;
 
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('账号密码登录接口待接入')),
-    );
+    setState(() => _isSubmitting = true);
+    try {
+      await _loginService.login(
+        email: _accountController.text.trim(),
+        password: _passwordController.text,
+      );
+      if (!mounted) return;
+      ref.invalidate(currentFlowTokenProvider);
+      ref.invalidate(isLoggedInProvider);
+      ref.invalidate(currentUserInfoProvider);
+      NotificationToast.show('提示', '登录成功');
+      const MainRoute(tab: 2).go(context);
+    } on AnimeFlowApiException catch (e) {
+      if (!mounted) return;
+      NotificationToast.show('提示', e.message);
+    } catch (e) {
+      if (!mounted) return;
+      NotificationToast.show('提示', e.toString());
+    } finally {
+      if (mounted) {
+        setState(() => _isSubmitting = false);
+      }
+    }
   }
 
   @override
@@ -129,13 +157,13 @@ class _LoginPageState extends ConsumerState<LoginPage> {
             textInputAction: TextInputAction.next,
             decoration: _inputDecoration(
               context,
-              label: '邮箱 / 用户名',
-              icon: Icons.person_outline,
+              label: '邮箱',
+              icon: Icons.email_outlined,
             ),
             validator: (value) {
               final account = value?.trim() ?? '';
-              if (account.isEmpty) return '请输入邮箱或用户名';
-              if (account.length < 3) return '账号至少需要 3 个字符';
+              if (account.isEmpty) return '请输入邮箱';
+              if (!account.contains('@')) return '请输入有效邮箱';
               return null;
             },
           ),
@@ -184,9 +212,15 @@ class _LoginPageState extends ConsumerState<LoginPage> {
             ],
           ),
           FilledButton.icon(
-            onPressed: _submit,
-            icon: const Icon(Icons.login_outlined),
-            label: const Text('登录'),
+            onPressed: _isSubmitting ? null : _submit,
+            icon: _isSubmitting
+                ? const SizedBox(
+                    width: 20,
+                    height: 20,
+                    child: CircularProgressIndicator(strokeWidth: 2),
+                  )
+                : const Icon(Icons.login_outlined),
+            label: Text(_isSubmitting ? '登录中...' : '登录'),
             style: FilledButton.styleFrom(
               minimumSize: const Size.fromHeight(48),
               shape: RoundedRectangleBorder(

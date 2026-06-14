@@ -1,5 +1,7 @@
 import 'package:anime_flow/http/interceptors/bgm_refresh_token_interceptor.dart';
-import 'package:anime_flow/models/item/bangumi/user_info_item.dart';
+import 'package:anime_flow/http/interceptors/flow_refresh_token_interceptor.dart';
+import 'package:anime_flow/models/item/flow/flow_token.dart';
+import 'package:anime_flow/models/item/flow/flow_users.dart';
 import 'package:anime_flow/models/item/token_item.dart';
 import 'package:anime_flow/repository/providers/repository_providers.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
@@ -19,25 +21,41 @@ class CurrentUserToken extends _$CurrentUserToken {
 }
 
 @Riverpod(keepAlive: true)
+class CurrentFlowToken extends _$CurrentFlowToken {
+  @override
+  Future<FlowToken?> build() async {
+    FlowRefreshTokenInterceptor.onSessionExpired = () {
+      ref.invalidateSelf();
+      ref.invalidate(isLoggedInProvider);
+      ref.invalidate(currentUserInfoProvider);
+    };
+    FlowRefreshTokenInterceptor.onTokenRefreshed = () {
+      ref.invalidateSelf();
+    };
+    return ref.watch(flowTokenRepositoryProvider).getToken();
+  }
+}
+
+@Riverpod(keepAlive: true)
 Future<bool> isLoggedIn(Ref ref) async {
-  final token = await ref.watch(currentUserTokenProvider.future);
+  final token = await ref.watch(currentFlowTokenProvider.future);
   return token != null;
 }
 
 @Riverpod(keepAlive: true)
 class CurrentUserInfo extends _$CurrentUserInfo {
   @override
-  Future<UserInfoItem?> build() async {
+  Future<FlowUsers?> build() async {
     final userRepository = ref.watch(userRepositoryProvider);
-    final token = await ref.watch(currentUserTokenProvider.future);
-    if (token == null) {
+    final flowToken = await ref.watch(currentFlowTokenProvider.future);
+    if (flowToken == null) {
       return null;
     }
 
     try {
-      return await userRepository.getCurrentUserProfile();
+      return await userRepository.getCurrentUserProfile(flowToken);
     } catch (error, stackTrace) {
-      final latestToken = await ref.read(tokenRepositoryProvider).getToken();
+      final latestToken = await ref.read(flowTokenRepositoryProvider).getToken();
       if (latestToken == null) {
         return null;
       }

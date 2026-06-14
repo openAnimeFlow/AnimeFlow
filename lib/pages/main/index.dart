@@ -1,6 +1,6 @@
 import 'package:anime_flow/providers/user/user_state_provider.dart';
-import 'package:anime_flow/models/item/bangumi/user_info_item.dart';
 import 'package:anime_flow/models/item/tab_item.dart';
+import 'package:anime_flow/pages/login/index.dart';
 import 'package:anime_flow/pages/ranking/index.dart';
 import 'package:anime_flow/pages/user/index.dart';
 import 'package:anime_flow/routes/routes.dart';
@@ -9,6 +9,7 @@ import 'package:anime_flow/widget/animation_network_image/animation_network_imag
 import 'package:flutter/material.dart';
 import 'package:anime_flow/pages/recommend/index.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 class MainPage extends ConsumerStatefulWidget {
   final int initialTabIndex;
 
@@ -19,15 +20,12 @@ class MainPage extends ConsumerStatefulWidget {
 }
 
 class _MainPageState extends ConsumerState<MainPage> {
-  int _currentIndex = 0;
-
   final GlobalKey _bodyKey = GlobalKey();
 
-  @override
-  void initState() {
-    super.initState();
-    _currentIndex = widget.initialTabIndex.clamp(0, _tabs.length - 1);
-    initializePage(_currentIndex);
+  int _tabIndexFromRoute() {
+    final tab = GoRouterState.of(context).uri.queryParameters['tab'];
+    final parsed = int.tryParse(tab ?? '');
+    return (parsed ?? widget.initialTabIndex).clamp(0, _tabs.length - 1);
   }
 
   final List<TabItem> _tabs = [
@@ -60,7 +58,7 @@ class _MainPageState extends ConsumerState<MainPage> {
           _pageCache[index] = const RankingPage();
           break;
         case 2:
-          _pageCache[index] = const UserPage();
+          _pageCache[index] = const _UserTabPage();
           break;
       }
     }
@@ -68,17 +66,17 @@ class _MainPageState extends ConsumerState<MainPage> {
 
   List<NavigationRailDestination> buildRailDestinations(
     ColorScheme colorScheme,
-    UserInfoItem? userInfo,
+    String? avatar,
   ) {
     return _tabs.asMap().entries.map((entry) {
       final index = entry.key;
       final tab = entry.value;
 
-      if (index == 2 && userInfo != null) {
+      if (index == 2 && avatar != null) {
         return NavigationRailDestination(
           icon: AnimationNetworkImage(
             borderRadius: BorderRadius.circular(50),
-            url: userInfo.avatar.medium,
+            url: avatar,
             width: 24,
             height: 24,
             fit: BoxFit.cover,
@@ -93,7 +91,7 @@ class _MainPageState extends ConsumerState<MainPage> {
             ),
             child: AnimationNetworkImage(
               borderRadius: BorderRadius.circular(50),
-              url: userInfo.avatar.medium,
+              url: avatar,
               width: 24,
               height: 24,
               fit: BoxFit.cover,
@@ -112,16 +110,16 @@ class _MainPageState extends ConsumerState<MainPage> {
 
   List<NavigationDestination> buildBarDestinations(
     ColorScheme colorScheme,
-    UserInfoItem? userInfo,
+    String? avatar,
   ) {
     return _tabs.asMap().entries.map((entry) {
       final index = entry.key;
       final tab = entry.value;
-      if (index == 2 && userInfo != null) {
+      if (index == 2 && avatar != null ) {
         return NavigationDestination(
           icon: AnimationNetworkImage(
             borderRadius: BorderRadius.circular(50),
-            url: userInfo.avatar.medium,
+            url: avatar,
             width: 24,
             height: 24,
             fit: BoxFit.cover,
@@ -136,7 +134,7 @@ class _MainPageState extends ConsumerState<MainPage> {
             ),
             child: AnimationNetworkImage(
               borderRadius: BorderRadius.circular(50),
-              url: userInfo.avatar.medium,
+              url: avatar,
               width: 24,
               height: 24,
               fit: BoxFit.fill,
@@ -155,14 +153,14 @@ class _MainPageState extends ConsumerState<MainPage> {
   }
 
   void onDestinationSelected(int index) {
-    setState(() {
-      _currentIndex = index;
-      initializePage(index);
-    });
+    MainRoute(tab: index).go(context);
+    initializePage(index);
   }
 
   @override
   Widget build(BuildContext context) {
+    final currentIndex = _tabIndexFromRoute();
+    initializePage(currentIndex);
     final bool isDesktop = MediaQuery.of(context).size.width >= 640;
     final colorScheme = Theme.of(context).colorScheme;
     final desktop = SystemUtil.isDesktop;
@@ -173,9 +171,14 @@ class _MainPageState extends ConsumerState<MainPage> {
             Consumer(
               builder: (context, ref, _) {
                 final userInfo = ref.watch(currentUserInfoProvider).value;
+                final isLoggedIn = ref.watch(isLoggedInProvider).value ?? false;
+                final avatar = isLoggedIn &&
+                        (userInfo?.avatar.isNotEmpty ?? false)
+                    ? userInfo!.avatar
+                    : null;
                 return NavigationRail(
                   backgroundColor: colorScheme.surfaceContainerHighest,
-                  selectedIndex: _currentIndex,
+                  selectedIndex: currentIndex,
                   groupAlignment: 1.0,
                   onDestinationSelected: onDestinationSelected,
                   labelType: NavigationRailLabelType.all,
@@ -203,14 +206,14 @@ class _MainPageState extends ConsumerState<MainPage> {
                     ),
                   ),
                   destinations:
-                      buildRailDestinations(colorScheme, userInfo),
+                      buildRailDestinations(colorScheme, avatar),
                 );
               },
             ),
           Expanded(
             child: IndexedStack(
               key: _bodyKey,
-              index: _currentIndex,
+              index: currentIndex,
               children:
                   _pageCache.map((e) => e ?? const SizedBox.shrink()).toList(),
             ),
@@ -222,15 +225,35 @@ class _MainPageState extends ConsumerState<MainPage> {
           : Consumer(
               builder: (context, ref, _) {
                 final userInfo = ref.watch(currentUserInfoProvider).value;
+                final isLoggedIn = ref.watch(isLoggedInProvider).value ?? false;
+                final avatar = isLoggedIn &&
+                        (userInfo?.avatar.isNotEmpty ?? false)
+                    ? userInfo!.avatar
+                    : null;
                 return NavigationBar(
                   backgroundColor: colorScheme.surfaceContainerHighest,
-                  selectedIndex: _currentIndex,
+                  selectedIndex: currentIndex,
                   onDestinationSelected: onDestinationSelected,
                   destinations:
-                      buildBarDestinations(colorScheme, userInfo),
+                      buildBarDestinations(colorScheme, avatar),
                 );
               },
             ),
+    );
+  }
+}
+
+class _UserTabPage extends ConsumerWidget {
+  const _UserTabPage();
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final isLoggedInAsync = ref.watch(isLoggedInProvider);
+    return isLoggedInAsync.when(
+      data: (isLoggedIn) =>
+          isLoggedIn ? const UserPage() : const LoginPage(),
+      loading: () => const Center(child: CircularProgressIndicator()),
+      error: (_, __) => const LoginPage(),
     );
   }
 }

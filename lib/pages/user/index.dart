@@ -1,4 +1,3 @@
-import 'package:anime_flow/pages/login/index.dart';
 import 'package:anime_flow/pages/user/user_view/user_view.dart';
 import 'package:anime_flow/providers/user/user_state_provider.dart';
 import 'package:anime_flow/widget/notification_toast.dart';
@@ -11,11 +10,6 @@ class UserPage extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     ref.listen<AsyncValue<dynamic>>(currentUserInfoProvider, (previous, next) {
-      final isLoggedIn = ref.read(isLoggedInProvider).value ?? false;
-      if (!isLoggedIn) {
-        return;
-      }
-
       final shouldNotifyNull =
           next is AsyncData && next.value == null && previous?.value != null;
       final shouldNotifyError = next is AsyncError;
@@ -23,35 +17,26 @@ class UserPage extends ConsumerWidget {
         return;
       }
 
-      final message = shouldNotifyError ? '获取用户资料失败，请重新登录' : '登录状态已失效，请重新登录';
+      final message = shouldNotifyError ? '获取用户资料失败' : '用户资料已失效';
       WidgetsBinding.instance.addPostFrameCallback((_) {
         if (!context.mounted) return;
-        NotificationToast.show('提示', message,align: Alignment.topCenter);
+        NotificationToast.show('提示', message, align: Alignment.topCenter);
       });
     });
 
-    final isLoggedInAsync = ref.watch(isLoggedInProvider);
     final userInfoAsync = ref.watch(currentUserInfoProvider);
-    return isLoggedInAsync.when(
-      data: (isLoggedIn) {
-        if (!isLoggedIn) {
-          return const Scaffold(body: LoginPage());
-        }
-        return userInfoAsync.when(
-          data: (userInfo) => userInfo == null
-              ? const Scaffold(body: LoginPage())
-              : Scaffold(body: UserView(userInfoItem: userInfo)),
-          loading: () => const Scaffold(
-            body: Center(child: CircularProgressIndicator()),
-          ),
-          error: (_, __) => const Scaffold(body: LoginPage()),
-        );
-      },
+    return userInfoAsync.when(
+      data: (userInfo) => userInfo == null
+          ? const Scaffold(
+              body: Center(child: Text('暂无用户资料')),
+            )
+          : Scaffold(body: UserView(user: userInfo)),
       loading: () => const Scaffold(
         body: Center(child: CircularProgressIndicator()),
       ),
-      error: (_, __) => const Scaffold(body: LoginPage()),
+      error: (_, __) => const Scaffold(
+        body: Center(child: Text('获取用户资料失败')),
+      ),
     );
   }
-
 }

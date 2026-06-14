@@ -50,6 +50,47 @@ abstract class _$CurrentUserToken extends $AsyncNotifier<TokenItem?> {
   }
 }
 
+@ProviderFor(CurrentFlowToken)
+final currentFlowTokenProvider = CurrentFlowTokenProvider._();
+
+final class CurrentFlowTokenProvider
+    extends $AsyncNotifierProvider<CurrentFlowToken, FlowToken?> {
+  CurrentFlowTokenProvider._()
+      : super(
+          from: null,
+          argument: null,
+          retry: null,
+          name: r'currentFlowTokenProvider',
+          isAutoDispose: false,
+          dependencies: null,
+          $allTransitiveDependencies: null,
+        );
+
+  @override
+  String debugGetCreateSourceHash() => _$currentFlowTokenHash();
+
+  @$internal
+  @override
+  CurrentFlowToken create() => CurrentFlowToken();
+}
+
+String _$currentFlowTokenHash() => r'b5aed99f1a9f41959939de2e7539a5b4f28536a2';
+
+abstract class _$CurrentFlowToken extends $AsyncNotifier<FlowToken?> {
+  FutureOr<FlowToken?> build();
+  @$mustCallSuper
+  @override
+  void runBuild() {
+    final ref = this.ref as $Ref<AsyncValue<FlowToken?>, FlowToken?>;
+    final element = ref.element as $ClassProviderElement<
+        AnyNotifier<AsyncValue<FlowToken?>, FlowToken?>,
+        AsyncValue<FlowToken?>,
+        Object?,
+        Object?>;
+    element.handleCreate(ref, build);
+  }
+}
+
 @ProviderFor(isLoggedIn)
 final isLoggedInProvider = IsLoggedInProvider._();
 
@@ -81,13 +122,13 @@ final class IsLoggedInProvider
   }
 }
 
-String _$isLoggedInHash() => r'6e63d4684fabb36ed92287e7ffec88ced998ee16';
+String _$isLoggedInHash() => r'34cdd0d8d6d6fb849bd0ab13e13c43188cd3c9dd';
 
 @ProviderFor(CurrentUserInfo)
 final currentUserInfoProvider = CurrentUserInfoProvider._();
 
 final class CurrentUserInfoProvider
-    extends $AsyncNotifierProvider<CurrentUserInfo, UserInfoItem?> {
+    extends $AsyncNotifierProvider<CurrentUserInfo, FlowUsers?> {
   CurrentUserInfoProvider._()
       : super(
           from: null,
@@ -107,17 +148,17 @@ final class CurrentUserInfoProvider
   CurrentUserInfo create() => CurrentUserInfo();
 }
 
-String _$currentUserInfoHash() => r'6f716026aae9eac100a1fdc23bf728a4dc88d601';
+String _$currentUserInfoHash() => r'cbaa643507526b59379474c31dda20ddc1a4b6dd';
 
-abstract class _$CurrentUserInfo extends $AsyncNotifier<UserInfoItem?> {
-  FutureOr<UserInfoItem?> build();
+abstract class _$CurrentUserInfo extends $AsyncNotifier<FlowUsers?> {
+  FutureOr<FlowUsers?> build();
   @$mustCallSuper
   @override
   void runBuild() {
-    final ref = this.ref as $Ref<AsyncValue<UserInfoItem?>, UserInfoItem?>;
+    final ref = this.ref as $Ref<AsyncValue<FlowUsers?>, FlowUsers?>;
     final element = ref.element as $ClassProviderElement<
-        AnyNotifier<AsyncValue<UserInfoItem?>, UserInfoItem?>,
-        AsyncValue<UserInfoItem?>,
+        AnyNotifier<AsyncValue<FlowUsers?>, FlowUsers?>,
+        AsyncValue<FlowUsers?>,
         Object?,
         Object?>;
     element.handleCreate(ref, build);

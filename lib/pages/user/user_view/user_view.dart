@@ -2,12 +2,11 @@ import 'dart:ui';
 
 import 'package:anime_flow/http/requests/bgm_request.dart';
 import 'package:anime_flow/models/item/bangumi/collections_item.dart';
-import 'package:anime_flow/models/item/bangumi/user_info_item.dart';
+import 'package:anime_flow/models/item/flow/flow_users.dart';
 import 'package:anime_flow/providers/user/user_controller.dart';
 import 'package:anime_flow/routes/routes.dart';
 import 'package:anime_flow/utils/systemUtil.dart';
 import 'package:anime_flow/widget/animation_network_image/animation_network_image.dart';
-import 'package:anime_flow/widget/bbcode/bbcode_widget.dart';
 import 'package:anime_flow/widget/drop_down_menu.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -17,9 +16,9 @@ import 'collection_tab_view.dart';
 enum _LoginOverflowAction { settings, playRecord, logout }
 
 class UserView extends StatefulWidget {
-  final UserInfoItem userInfoItem;
+  final FlowUsers user;
 
-  const UserView({super.key, required this.userInfoItem});
+  const UserView({super.key, required this.user});
 
   @override
   State<UserView> createState() => _UserViewState();
@@ -53,23 +52,10 @@ class _UserViewState extends State<UserView>
       type: GlobalKey<RefreshIndicatorState>(),
   };
 
-  List<String> get _tabs {
-    const Map<int, String> collectionTypes = {
-      1: '想看',
-      2: '看过',
-      3: '在看',
-      4: '搁置',
-      5: '抛弃',
-    };
-    final stats = widget.userInfoItem.stats.subject.two;
-    return [
-      '${collectionTypes[1]}\n${stats.one}',
-      '${collectionTypes[2]}\n${stats.two}',
-      '${collectionTypes[3]}\n${stats.three}',
-      '${collectionTypes[4]}\n${stats.four}',
-      '${collectionTypes[5]}\n${stats.five}',
-    ];
-  }
+  static const _collectionTypes = ['想看', '看过', '在看', '搁置', '抛弃'];
+
+  List<String> get _tabs =>
+      _collectionTypes.map((label) => '$label\n0').toList();
 
   Future<void> _getCollections(int type,
       {bool loadMore = false, bool refresh = false}) async {
@@ -286,7 +272,7 @@ class _UserViewState extends State<UserView>
   }
 
   Widget _buildAppBarTitle() {
-    final userInfo = widget.userInfoItem;
+    final user = widget.user;
     final currentType = _tabController.index + 1;
     final canTriggerRefresh = _collectionsCache[currentType] != null;
     final isRefreshButtonEnabled = canTriggerRefresh && !_isTypeBusy(currentType);
@@ -297,7 +283,7 @@ class _UserViewState extends State<UserView>
         children: [
           InkWell(
             borderRadius: BorderRadius.circular(8),
-            onTap: () => UserSpaceRoute(name: userInfo.username).push(context),
+            onTap: null,
             child: const Row(
               children: [
                 Text(
@@ -317,14 +303,14 @@ class _UserViewState extends State<UserView>
               children: [
                 ClipRRect(
                   borderRadius: BorderRadius.circular(5),
-                  child: AnimationNetworkImage(
-                      width: 30, height: 30, url: userInfo.avatar.large),
+                  child: user.avatar.isNotEmpty
+                      ? AnimationNetworkImage(
+                          width: 30, height: 30, url: user.avatar)
+                      : const Icon(Icons.person, size: 30),
                 ),
                 const SizedBox(width: 5),
                 Text(
-                  userInfo.nickname != ''
-                      ? userInfo.nickname
-                      : userInfo.username,
+                  user.nickname.isNotEmpty ? user.nickname : user.email,
                   style: const TextStyle(
                       fontSize: 12, fontWeight: FontWeight.bold),
                 )
@@ -411,38 +397,10 @@ class _UserViewState extends State<UserView>
   }
 
   Widget _buildHeaderContent(double statusBarHeight) {
-    final userInfo = widget.userInfoItem;
-    final bio = userInfo.bio;
+    final user = widget.user;
+    final hasAvatar = user.avatar.isNotEmpty;
     return Stack(
       children: [
-        // Positioned.fill(
-        //   child: IgnorePointer(
-        //     child: Opacity(
-        //       opacity: 0.4,
-        //       child: LayoutBuilder(
-        //         builder: (context, boxConstraints) {
-        //           return ImageFiltered(
-        //             imageFilter: ImageFilter.blur(sigmaX: 15.0, sigmaY: 15.0),
-        //             child: ShaderMask(
-        //               shaderCallback: (Rect bounds) {
-        //                 return const LinearGradient(
-        //                   begin: Alignment.topCenter,
-        //                   end: Alignment.bottomCenter,
-        //                   colors: [Colors.white, Colors.transparent],
-        //                   stops: [0.8, 1],
-        //                 ).createShader(bounds);
-        //               },
-        //               child: AnimationNetworkImage(
-        //                 url: userInfo.avatar.large,
-        //                 fit: BoxFit.cover,
-        //               ),
-        //             ),
-        //           );
-        //         },
-        //       ),
-        //     ),
-        //   ),
-        // ),
         Positioned.fill(
           child: IgnorePointer(
             child: Opacity(
@@ -451,8 +409,7 @@ class _UserViewState extends State<UserView>
                 builder: (context, boxConstraints) {
                   return ImageFiltered(
                     imageFilter: ImageFilter.blur(
-                        sigmaX: bio != null ? 0 : 15,
-                        sigmaY: bio != null ? 0 : 15),
+                        sigmaX: hasAvatar ? 15 : 0, sigmaY: hasAvatar ? 15 : 0),
                     child: ShaderMask(
                       shaderCallback: (Rect bounds) {
                         return const LinearGradient(
@@ -462,15 +419,12 @@ class _UserViewState extends State<UserView>
                           stops: [0.9, 1],
                         ).createShader(bounds);
                       },
-                      child: bio != null
-                          ? BBCodeWidget(
-                              bbcode: userInfo.bio ?? '',
+                      child: hasAvatar
+                          ? AnimationNetworkImage(
+                              url: user.avatar,
                               fit: BoxFit.cover,
                             )
-                          : AnimationNetworkImage(
-                              url: userInfo.avatar.large,
-                              fit: BoxFit.cover,
-                            ),
+                          : const SizedBox.expand(),
                     ),
                   );
                 },
@@ -484,19 +438,19 @@ class _UserViewState extends State<UserView>
             children: [
               ClipRRect(
                 borderRadius: BorderRadius.circular(60),
-                child: AnimationNetworkImage(
-                  url: userInfo.avatar.large,
-                  fit: BoxFit.cover,
-                ),
+                child: hasAvatar
+                    ? AnimationNetworkImage(
+                        url: user.avatar,
+                        fit: BoxFit.cover,
+                      )
+                    : const Icon(Icons.person, size: 96),
               ),
               const SizedBox(height: 16),
               Text.rich(TextSpan(
-                text: userInfo.nickname != ''
-                    ? userInfo.nickname
-                    : userInfo.username,
+                text: user.nickname.isNotEmpty ? user.nickname : user.email,
                 children: [
                   TextSpan(
-                      text: '@${userInfo.id}',
+                      text: ' #${user.id}',
                       style: TextStyle(
                           fontSize: 16, color: Theme.of(context).disabledColor))
                 ],

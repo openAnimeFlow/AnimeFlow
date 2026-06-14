@@ -1,6 +1,7 @@
 import 'package:anime_flow/http/core/api_signature.dart';
 import 'package:anime_flow/http/core/dio_factory.dart';
 import 'package:anime_flow/http/core/network_error_mapper.dart';
+import 'package:anime_flow/http/interceptors/flow_refresh_token_interceptor.dart';
 import 'package:dio/dio.dart';
 
 /// AnimeFlow API 业务异常：`code != 200` 时抛出。
@@ -63,17 +64,27 @@ class AnimeFlowClient {
     required String path,
     Options? options,
     required bool signRequest,
+    bool skipFlowTokenRefresh = false,
   }) {
-    if (!signRequest) {
+    if (!signRequest && !skipFlowTokenRefresh) {
       return options ?? Options();
     }
 
-    final signHeaders = ApiSignature.headers(path);
+    final signHeaders =
+        signRequest ? ApiSignature.headers(path) : <String, dynamic>{};
     final mergedHeaders = <String, dynamic>{
       ...?options?.headers,
       ...signHeaders,
     };
-    return (options ?? Options()).copyWith(headers: mergedHeaders);
+    final mergedExtra = <String, dynamic>{
+      ...?options?.extra,
+      if (skipFlowTokenRefresh)
+        FlowRefreshTokenInterceptor.skipKey: true,
+    };
+    return (options ?? Options()).copyWith(
+      headers: mergedHeaders,
+      extra: mergedExtra,
+    );
   }
 
   /// GET 请求
@@ -83,6 +94,7 @@ class AnimeFlowClient {
     Options? options,
     CancelToken? cancelToken,
     bool signRequest = true,
+    bool skipFlowTokenRefresh = false,
   }) async {
     try {
       final response = await DioFactory.animeFlowDio.get(
@@ -92,6 +104,7 @@ class AnimeFlowClient {
           path: path,
           options: options,
           signRequest: signRequest,
+          skipFlowTokenRefresh: skipFlowTokenRefresh,
         ),
         cancelToken: cancelToken,
       );
@@ -109,6 +122,7 @@ class AnimeFlowClient {
     Options? options,
     CancelToken? cancelToken,
     bool signRequest = true,
+    bool skipFlowTokenRefresh = false,
   }) async {
     try {
       final response = await DioFactory.animeFlowDio.post(
@@ -119,6 +133,7 @@ class AnimeFlowClient {
           path: path,
           options: options,
           signRequest: signRequest,
+          skipFlowTokenRefresh: skipFlowTokenRefresh,
         ),
         cancelToken: cancelToken,
       );
@@ -136,6 +151,7 @@ class AnimeFlowClient {
     Options? options,
     CancelToken? cancelToken,
     bool signRequest = true,
+    bool skipFlowTokenRefresh = false,
   }) async {
     try {
       final response = await DioFactory.animeFlowDio.put(
@@ -146,6 +162,7 @@ class AnimeFlowClient {
           path: path,
           options: options,
           signRequest: signRequest,
+          skipFlowTokenRefresh: skipFlowTokenRefresh,
         ),
         cancelToken: cancelToken,
       );
@@ -162,6 +179,7 @@ class AnimeFlowClient {
     Options? options,
     CancelToken? cancelToken,
     bool signRequest = true,
+    bool skipFlowTokenRefresh = false,
   }) async {
     try {
       final response = await DioFactory.animeFlowDio.delete(
@@ -171,6 +189,7 @@ class AnimeFlowClient {
           path: path,
           options: options,
           signRequest: signRequest,
+          skipFlowTokenRefresh: skipFlowTokenRefresh,
         ),
         cancelToken: cancelToken,
       );

@@ -185,7 +185,16 @@ class AnimeFlowApi {
       sendEmail = '/api/v1/email/send',
 
       /// 注册账户
-      register = '/api/v1/account/register';
+      register = '/api/v1/account/register',
+
+      /// 邮箱登录
+      emailLogin = '/api/v1/account/email/login',
+
+      /// 刷新 AnimeFlow token
+      flowRefreshToken = '/api/v1/account/refresh',
+
+      /// 获取当前用户信息
+      flowUsers = '/api/v1/users';
 }
 
 class DamakuApi {

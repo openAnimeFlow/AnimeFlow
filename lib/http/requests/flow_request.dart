@@ -7,7 +7,6 @@ import 'package:anime_flow/http/clients/anime_flow_client.dart';
 import 'package:anime_flow/models/enums/sort_type.dart';
 import 'package:anime_flow/models/item/bangumi/actor_item.dart';
 import 'package:anime_flow/models/item/bangumi/calendar_item.dart';
-import 'package:anime_flow/models/item/captcha_item.dart';
 import 'package:anime_flow/models/item/bangumi/character_comments_item.dart';
 import 'package:anime_flow/models/item/bangumi/character_detail_item.dart';
 import 'package:anime_flow/models/item/bangumi/character_subjects_item.dart';
@@ -21,9 +20,12 @@ import 'package:anime_flow/models/item/bangumi/subject_item.dart';
 import 'package:anime_flow/models/item/bangumi/subjects_info_item.dart';
 import 'package:anime_flow/models/item/bangumi/user_collections_item.dart';
 import 'package:anime_flow/models/item/bangumi/user_info_item.dart';
+import 'package:anime_flow/models/item/captcha_item.dart';
 import 'package:anime_flow/models/item/danmaku/danmaku_episode_response.dart';
 import 'package:anime_flow/models/item/danmaku/danmaku_module.dart';
 import 'package:anime_flow/models/item/danmaku/danmaku_search_response.dart';
+import 'package:anime_flow/models/item/flow/flow_token.dart';
+import 'package:anime_flow/models/item/flow/flow_users.dart';
 import 'package:anime_flow/models/item/token_item.dart';
 import 'package:anime_flow/repository/BangumiToken.dart';
 import 'package:anime_flow/utils/logger.dart';
@@ -214,9 +216,10 @@ class FlowRequest {
   ///根据id获取条目
   static Future<SubjectsInfoItem> getSubjectByIdService(int id) async {
     final token = await BangumiToken.instance.getToken();
-    final headers = <String,dynamic>{};
+    final headers = <String, dynamic>{};
     if (token != null) {
-      headers[Constants.authorization] = '${token.tokenType} ${token.accessToken}';
+      headers[Constants.authorization] =
+          '${token.tokenType} ${token.accessToken}';
     }
 
     final response = await _client.get('${AnimeFlowApi.subjects}/$id',
@@ -491,5 +494,46 @@ class FlowRequest {
         'emailCaptcha': emailCaptcha,
       },
     );
+  }
+
+  /// 登录
+  static Future<FlowToken> emailLoginService({
+    required String email,
+    required String password,
+    required String platform,
+  }) async {
+    final response = await _client.post(AnimeFlowApi.emailLogin, data: {
+      'email': email,
+      'password': password,
+      'platform': platform,
+    });
+    return FlowToken.fromJson(response.data as Map<String, dynamic>);
+  }
+
+  /// 刷新 AnimeFlow token
+  static Future<FlowToken> flowRefreshTokenService({
+    required String refreshToken,
+  }) async {
+    final response = await _client.post(
+      AnimeFlowApi.flowRefreshToken,
+      data: {'refreshToken': refreshToken},
+      skipFlowTokenRefresh: true,
+    );
+    return FlowToken.fromJson(response.data as Map<String, dynamic>);
+  }
+
+  /// 获取当前用户信息
+  static Future<FlowUsers> getUserInfoService(
+      {required String token, required String tokenType}) async {
+    return await _client
+        .get(
+          AnimeFlowApi.flowUsers,
+          options: Options(
+            headers: {
+              Constants.authorization: '$tokenType $token',
+            },
+          ),
+        )
+        .then((value) => FlowUsers.fromJson((value.data) as Map<String, dynamic>));
   }
 }

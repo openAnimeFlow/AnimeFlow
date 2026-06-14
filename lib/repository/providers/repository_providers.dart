@@ -11,6 +11,8 @@
 /// ```
 library;
 import 'package:anime_flow/repository/BangumiToken.dart';
+import 'package:anime_flow/repository/flow_token_repository.dart';
+import 'package:anime_flow/repository/flow_token_storage.dart';
 import 'package:anime_flow/repository/token_repository.dart';
 import 'package:anime_flow/repository/user_repository.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
@@ -19,6 +21,9 @@ part 'repository_providers.g.dart';
 
 @Riverpod(keepAlive: true)
 TokenRepository tokenRepository(Ref ref) => BangumiToken.instance;
+
+@Riverpod(keepAlive: true)
+FlowTokenRepository flowTokenRepository(Ref ref) => FlowTokenStorage.instance;
 
 @Riverpod(keepAlive: true)
 UserRepository userRepository(Ref ref) => UserRepository.instance;

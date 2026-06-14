@@ -29,7 +29,9 @@ class UserController extends _$UserController {
 
   Future<void> clearUserInfo() async {
     await _tokenRepository.removeToken();
+    await ref.read(flowTokenRepositoryProvider).removeToken();
     ref.invalidate(currentUserTokenProvider);
+    ref.invalidate(currentFlowTokenProvider);
     ref.invalidate(currentUserInfoProvider);
   }
 

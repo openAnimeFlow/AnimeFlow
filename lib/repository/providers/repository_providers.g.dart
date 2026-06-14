@@ -49,6 +49,50 @@ final class TokenRepositoryProvider extends $FunctionalProvider<TokenRepository,
 
 String _$tokenRepositoryHash() => r'77e8a245e66fe85d263eb51d37cbf598911cde63';
 
+@ProviderFor(flowTokenRepository)
+final flowTokenRepositoryProvider = FlowTokenRepositoryProvider._();
+
+final class FlowTokenRepositoryProvider extends $FunctionalProvider<
+    FlowTokenRepository,
+    FlowTokenRepository,
+    FlowTokenRepository> with $Provider<FlowTokenRepository> {
+  FlowTokenRepositoryProvider._()
+      : super(
+          from: null,
+          argument: null,
+          retry: null,
+          name: r'flowTokenRepositoryProvider',
+          isAutoDispose: false,
+          dependencies: null,
+          $allTransitiveDependencies: null,
+        );
+
+  @override
+  String debugGetCreateSourceHash() => _$flowTokenRepositoryHash();
+
+  @$internal
+  @override
+  $ProviderElement<FlowTokenRepository> $createElement(
+          $ProviderPointer pointer) =>
+      $ProviderElement(pointer);
+
+  @override
+  FlowTokenRepository create(Ref ref) {
+    return flowTokenRepository(ref);
+  }
+
+  /// {@macro riverpod.override_with_value}
+  Override overrideWithValue(FlowTokenRepository value) {
+    return $ProviderOverride(
+      origin: this,
+      providerOverride: $SyncValueProvider<FlowTokenRepository>(value),
+    );
+  }
+}
+
+String _$flowTokenRepositoryHash() =>
+    r'52852ee613f378535a393d316dd50ed559144c2c';
+
 @ProviderFor(userRepository)
 final userRepositoryProvider = UserRepositoryProvider._();
 

@@ -24,10 +24,12 @@ import 'package:anime_flow/models/item/captcha_item.dart';
 import 'package:anime_flow/models/item/danmaku/danmaku_episode_response.dart';
 import 'package:anime_flow/models/item/danmaku/danmaku_module.dart';
 import 'package:anime_flow/models/item/danmaku/danmaku_search_response.dart';
+import 'package:anime_flow/models/item/flow/bangumi_bind_item.dart';
 import 'package:anime_flow/models/item/flow/flow_token.dart';
 import 'package:anime_flow/models/item/flow/flow_users.dart';
 import 'package:anime_flow/models/item/token_item.dart';
 import 'package:anime_flow/repository/BangumiToken.dart';
+import 'package:anime_flow/repository/flow_token_storage.dart';
 import 'package:anime_flow/utils/logger.dart';
 import 'package:anime_flow/utils/systemUtil.dart';
 import 'package:anime_flow/utils/utils.dart';
@@ -535,5 +537,38 @@ class FlowRequest {
           ),
         )
         .then((value) => FlowUsers.fromJson((value.data) as Map<String, dynamic>));
+  }
+
+  static Future<Options> _flowAuthOptions() async {
+    final token = await FlowTokenStorage.instance.getToken();
+    if (token == null) {
+      throw StateError('未登录');
+    }
+    return Options(
+      headers: {
+        Constants.authorization: '${token.tokenType} ${token.accessToken}',
+      },
+    );
+  }
+
+  /// 查询当前账号的 Bangumi 绑定状态
+  static Future<BangumiBindItem> getBangumiBindService() async {
+    final response = await _client.get(
+      AnimeFlowApi.bangumiBind,
+      options: await _flowAuthOptions(),
+    );
+    return BangumiBindItem.fromJson(response.data as Map<String, dynamic>);
+  }
+
+  /// 绑定 Bangumi 账号
+  static Future<BangumiBindItem> bindBangumiService({
+    required String code,
+  }) async {
+    final response = await _client.post(
+      AnimeFlowApi.bangumiBindPost,
+      data: {'code': code},
+      options: await _flowAuthOptions(),
+    );
+    return BangumiBindItem.fromJson(response.data as Map<String, dynamic>);
   }
 }

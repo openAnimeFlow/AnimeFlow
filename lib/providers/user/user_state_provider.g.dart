@@ -74,7 +74,7 @@ final class CurrentFlowTokenProvider
   CurrentFlowToken create() => CurrentFlowToken();
 }
 
-String _$currentFlowTokenHash() => r'b5aed99f1a9f41959939de2e7539a5b4f28536a2';
+String _$currentFlowTokenHash() => r'437649b1d18ad44e072dead1212243cbaf9ed188';
 
 abstract class _$CurrentFlowToken extends $AsyncNotifier<FlowToken?> {
   FutureOr<FlowToken?> build();

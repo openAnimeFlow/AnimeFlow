@@ -21,6 +21,7 @@ List<RouteBase> get $appRoutes => [
       $userSpaceRoute,
       $imageSearchRoute,
       $settingsRoute,
+      $settingAccountRoute,
       $settingGeneralRoute,
       $settingPlaybackRoute,
       $settingDownloadPluginsRoute,
@@ -481,6 +482,34 @@ mixin $SettingsRoute on GoRouteData {
   @override
   String get location => GoRouteData.$location(
         '/settings',
+      );
+
+  @override
+  void go(BuildContext context) => context.go(location);
+
+  @override
+  Future<T?> push<T>(BuildContext context) => context.push<T>(location);
+
+  @override
+  void pushReplacement(BuildContext context) =>
+      context.pushReplacement(location);
+
+  @override
+  void replace(BuildContext context) => context.replace(location);
+}
+
+RouteBase get $settingAccountRoute => GoRouteData.$route(
+      path: '/settings/account',
+      factory: $SettingAccountRoute._fromState,
+    );
+
+mixin $SettingAccountRoute on GoRouteData {
+  static SettingAccountRoute _fromState(GoRouterState state) =>
+      const SettingAccountRoute();
+
+  @override
+  String get location => GoRouteData.$location(
+        '/settings/account',
       );
 
   @override

@@ -11,6 +11,7 @@ import 'package:anime_flow/pages/register/index.dart';
 import 'package:anime_flow/pages/search/image_search_page.dart';
 import 'package:anime_flow/pages/search/index.dart';
 import 'package:anime_flow/pages/settings/index.dart';
+import 'package:anime_flow/pages/settings/pages/account_settings.dart';
 import 'package:anime_flow/pages/settings/pages/about/index.dart';
 import 'package:anime_flow/pages/settings/pages/about/thanks.dart';
 import 'package:anime_flow/pages/settings/pages/agreement/index.dart';
@@ -260,6 +261,15 @@ class SettingsRoute extends GoRouteData with $SettingsRoute {
   @override
   Widget build(BuildContext context, GoRouterState state) =>
       const SettingsPage();
+}
+
+@TypedGoRoute<SettingAccountRoute>(path: '/settings/account')
+class SettingAccountRoute extends GoRouteData with $SettingAccountRoute {
+  const SettingAccountRoute();
+
+  @override
+  Widget build(BuildContext context, GoRouterState state) =>
+      const AccountSettingsPage();
 }
 
 @TypedGoRoute<SettingGeneralRoute>(path: '/settings/general')

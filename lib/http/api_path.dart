@@ -194,7 +194,13 @@ class AnimeFlowApi {
       flowRefreshToken = '/api/v1/account/refresh',
 
       /// 获取当前用户信息
-      flowUsers = '/api/v1/users';
+      flowUsers = '/api/v1/users',
+
+      /// 查询 Bangumi 绑定状态
+      bangumiBind = '/api/v1/account/oauth/bangumi',
+
+      /// 绑定 Bangumi 账号
+      bangumiBindPost = '/api/v1/account/oauth/bangumi/bind';
 }
 
 class DamakuApi {

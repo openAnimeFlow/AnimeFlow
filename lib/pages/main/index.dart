@@ -10,16 +10,16 @@ import 'package:flutter/material.dart';
 import 'package:anime_flow/pages/recommend/index.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-class MainPage extends ConsumerStatefulWidget {
+class MainPage extends StatefulWidget {
   final int initialTabIndex;
 
   const MainPage({super.key, this.initialTabIndex = 0});
 
   @override
-  ConsumerState<MainPage> createState() => _MainPageState();
+  State<MainPage> createState() => _MainPageState();
 }
 
-class _MainPageState extends ConsumerState<MainPage> {
+class _MainPageState extends State<MainPage> {
   final GlobalKey _bodyKey = GlobalKey();
 
   int _tabIndexFromRoute() {

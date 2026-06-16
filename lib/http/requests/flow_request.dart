@@ -554,6 +554,19 @@ class FlowRequest {
     return FlowToken.fromJson(response.data as Map<String, dynamic>);
   }
 
+  /// 登出当前会话，销毁服务端 token（无本地 token 时跳过）
+  static Future<void> logoutService() async {
+    final token = await FlowTokenStorage.instance.getToken();
+    if (token == null) {
+      return;
+    }
+    await _client.post(
+      AnimeFlowApi.logout,
+      options: await _flowAuthOptions(),
+      skipFlowTokenRefresh: true,
+    );
+  }
+
   /// 获取当前用户信息
   static Future<FlowUsers> getUserInfoService(
       {required String token, required String tokenType}) async {

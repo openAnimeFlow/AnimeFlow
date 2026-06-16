@@ -193,6 +193,9 @@ class AnimeFlowApi {
       /// 刷新 AnimeFlow token
       flowRefreshToken = '/api/v1/account/refresh',
 
+      /// 登出并销毁服务端 token
+      logout = '/api/v1/account/logout',
+
       /// 获取当前用户信息
       flowUsers = '/api/v1/users',
 

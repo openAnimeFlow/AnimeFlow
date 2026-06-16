@@ -28,6 +28,11 @@ class UserController extends _$UserController {
   }
 
   Future<void> clearUserInfo() async {
+    try {
+      await FlowRequest.logoutService();
+    } catch (e) {
+      LiggLogger().w('服务端登出失败，仍清除本地登录状态: $e');
+    }
     await ref.read(tokenRepositoryProvider).removeToken();
     await ref.read(flowTokenRepositoryProvider).removeToken();
     ref.invalidate(currentUserTokenProvider);

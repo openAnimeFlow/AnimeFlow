@@ -382,9 +382,9 @@ class _UserViewState extends State<UserView>
                         ),
                         Consumer(builder: (context, ref, _) {
                           return TextButton(
-                            onPressed: () {
+                            onPressed: () async {
                               Navigator.of(dialogContext).pop();
-                              ref
+                              await ref
                                   .read(userControllerProvider.notifier)
                                   .clearUserInfo();
                             },

@@ -1,7 +1,8 @@
 import 'package:anime_flow/constants/constants.dart';
 import 'package:anime_flow/http/requests/flow_request.dart';
 import 'package:anime_flow/models/item/flow/flow_token.dart';
-import 'package:anime_flow/repository/flow_token_repository.dart';
+import 'package:anime_flow/models/item/flow/flow_token.dart';
+import 'package:anime_flow/repository/token_repository.dart';
 import 'package:anime_flow/utils/logger.dart';
 import 'package:dio/dio.dart';
 
@@ -12,7 +13,7 @@ class FlowRefreshTokenInterceptor extends Interceptor {
   static const skipKey = 'skipFlowTokenRefresh';
 
   final Dio _dio;
-  final FlowTokenRepository _flowTokenRepository;
+  final TokenRepository<FlowToken> _flowTokenRepository;
 
   static void Function()? onSessionExpired;
   static void Function()? onTokenRefreshed;

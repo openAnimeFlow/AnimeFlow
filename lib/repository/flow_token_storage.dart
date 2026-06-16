@@ -1,11 +1,11 @@
 import 'dart:convert';
 
 import 'package:anime_flow/models/item/flow/flow_token.dart';
-import 'package:anime_flow/repository/flow_token_repository.dart';
+import 'package:anime_flow/repository/token_repository.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 
 /// AnimeFlow 账号令牌：写入 [FlutterSecureStorage]。
-class FlowTokenStorage implements FlowTokenRepository {
+class FlowTokenStorage implements TokenRepository<FlowToken> {
   FlowTokenStorage._();
 
   static final FlowTokenStorage instance = FlowTokenStorage._();

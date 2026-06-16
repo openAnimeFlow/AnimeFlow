@@ -250,17 +250,12 @@ class FlowRequest {
     }).then((value) => HotItem.fromJson(value.data));
   }
 
-  ///根据id获取条目
+  ///根据id获取条目（已登录时携带 Flow Token，服务端换取 Bangumi token 返回 interest）
   static Future<SubjectsInfoItem> getSubjectByIdService(int id) async {
-    final token = await BangumiToken.instance.getToken();
-    final headers = <String, dynamic>{};
-    if (token != null) {
-      headers[Constants.authorization] =
-          '${token.tokenType} ${token.accessToken}';
-    }
-
-    final response = await _client.get('${AnimeFlowApi.subjects}/$id',
-        options: Options(headers: headers));
+    final response = await _client.get(
+      '${AnimeFlowApi.subjects}/$id',
+      options: await _optionalFlowAuthOptions(),
+    );
     return SubjectsInfoItem.fromJson(response.data);
   }
 
@@ -586,6 +581,19 @@ class FlowRequest {
     );
   }
 
+  /// 已登录时附带 Flow Token；未登录返回 {@code null}（公开接口可选鉴权）。
+  static Future<Options?> _optionalFlowAuthOptions() async {
+    final token = await FlowTokenStorage.instance.getToken();
+    if (token == null) {
+      return null;
+    }
+    return Options(
+      headers: {
+        Constants.authorization: '${token.tokenType} ${token.accessToken}',
+      },
+    );
+  }
+
   /// 查询当前账号的 Bangumi 绑定状态
   static Future<BangumiBindItem> getBangumiBindService() async {
     final response = await _client.get(
@@ -690,5 +698,32 @@ class FlowRequest {
       LiggLogger().e(e);
       throw Exception('Failed to fetch user collections: $e');
     }
+  }
+
+  /// 更新当前用户对条目的 Bangumi 收藏（需登录且已绑定 Bangumi）
+  static Future<void> updateCollectionService(
+    int subjectId, {
+    int? type,
+    bool? isPrivate,
+    bool? progress,
+    int? rate,
+    String? comment,
+    List<String>? tags,
+    int? subjectType,
+  }) async {
+    final data = <String, dynamic>{};
+    if (type != null) data['type'] = type;
+    if (rate != null) data['rate'] = rate;
+    if (isPrivate != null) data['private'] = isPrivate;
+    if (progress != null) data['progress'] = progress;
+    if (comment != null) data['comment'] = comment;
+    if (tags != null) data['tags'] = tags;
+    if (subjectType != null) data['subjectType'] = subjectType;
+
+    await _client.put(
+      '${AnimeFlowApi.flowUserCollections}/$subjectId',
+      data: data,
+      options: await _flowAuthOptions(),
+    );
   }
 }

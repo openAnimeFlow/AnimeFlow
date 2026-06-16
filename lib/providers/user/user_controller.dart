@@ -6,6 +6,7 @@ import 'package:anime_flow/http/clients/flow_client.dart';
 import 'package:anime_flow/http/requests/flow_request.dart';
 import 'package:anime_flow/models/item/flow/bangumi_bind_item.dart';
 import 'package:anime_flow/models/item/flow/flow_token.dart';
+import 'package:anime_flow/pages/user/provider/user_collection_provider.dart';
 import 'package:anime_flow/providers/user/bgm_collection_sync_provider.dart';
 import 'package:anime_flow/providers/user/user_oauth_state.dart';
 import 'package:anime_flow/providers/user/user_state_provider.dart';
@@ -41,6 +42,7 @@ class UserController extends _$UserController {
     ref.invalidate(currentUserInfoProvider);
     ref.invalidate(bangumiBindProvider);
     ref.invalidate(bgmCollectionSyncProvider);
+    ref.invalidate(userCollectionsProvider);
   }
 
   Future<void> handleDeepLink(String deepLink) async {

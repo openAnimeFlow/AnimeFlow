@@ -1,8 +1,8 @@
 import 'dart:ui';
 
-import 'package:anime_flow/http/requests/flow_request.dart';
-import 'package:anime_flow/models/item/bangumi/user_collections_item.dart';
 import 'package:anime_flow/models/item/flow/flow_users.dart';
+import 'package:anime_flow/pages/user/provider/user_collection_provider.dart';
+import 'package:anime_flow/pages/user/provider/user_collection_state.dart';
 import 'package:anime_flow/providers/user/user_controller.dart';
 import 'package:anime_flow/routes/routes.dart';
 import 'package:anime_flow/utils/systemUtil.dart';
@@ -15,167 +15,60 @@ import 'collection_tab_view.dart';
 
 enum _LoginOverflowAction { settings, playRecord, logout }
 
-class UserView extends StatefulWidget {
+class UserView extends ConsumerStatefulWidget {
   final FlowUsers user;
 
   const UserView({super.key, required this.user});
 
   @override
-  State<UserView> createState() => _UserViewState();
+  ConsumerState<UserView> createState() => _UserViewState();
 }
 
-class _UserViewState extends State<UserView>
+class _UserViewState extends ConsumerState<UserView>
     with SingleTickerProviderStateMixin {
-  final double _contentHeight = 200.0; // 头部内容区域的高度
+  final double _contentHeight = 200.0;
   late TabController _tabController;
   bool isPinned = false;
 
-  // 为每个 tab 类型缓存数据，key 是 type (1-5)
-  final Map<int, UserCollectionsItem?> _collectionsCache = {};
-
-  // 分别记录首屏加载、刷新、加载更多，避免一个状态承担多种语义
-  final Set<int> _initialLoadingTypes = {};
-  final Set<int> _refreshingTypes = {};
-  final Set<int> _loadingMoreTypes = {};
-
-  // 记录每个 type 的 offset
-  final Map<int, int> _offsets = {};
-
-  // 记录每个 type 是否还有更多数据
-  final Map<int, bool> _hasMore = {};
-
-  // 首屏错误和分页错误分别维护，便于展示不同的 UI
-  final Map<int, String?> _initialErrorMessages = {};
-  final Map<int, String?> _loadMoreErrorMessages = {};
   final Map<int, GlobalKey<RefreshIndicatorState>> _refreshIndicatorKeys = {
     for (var type = 1; type <= 5; type++)
       type: GlobalKey<RefreshIndicatorState>(),
   };
 
-  static const _collectionTypes = ['想看', '看过', '在看', '搁置', '抛弃'];
-
-  List<String> get _tabs => _collectionTypes.asMap().entries.map((entry) {
-        final type = entry.key + 1;
-        final total = widget.user.collectionCounts.countForType(type);
-        return '${entry.value}\n$total';
-      }).toList();
-
-  Future<void> _getCollections(int type,
-      {bool loadMore = false, bool refresh = false}) async {
-    final isBusy = _initialLoadingTypes.contains(type) ||
-        _refreshingTypes.contains(type) ||
-        _loadingMoreTypes.contains(type);
-    if (isBusy) {
-      return;
-    }
-
-    // 如果是加载更多，但没有更多数据，则不加载
-    if (loadMore && (_hasMore[type] == false)) {
-      return;
-    }
-
-    // 如果是首次加载，但已经有缓存数据，则不加载
-    if (!loadMore && !refresh && _collectionsCache[type] != null) {
-      return;
-    }
-
-    setState(() {
-      if (loadMore) {
-        _loadingMoreTypes.add(type);
-        _loadMoreErrorMessages.remove(type);
-      } else if (refresh) {
-        _refreshingTypes.add(type);
-        _loadMoreErrorMessages.remove(type);
-      } else {
-        _initialLoadingTypes.add(type);
-        _initialErrorMessages.remove(type);
-      }
-    });
-
-    try {
-      final offset = loadMore && !refresh
-          ? (_offsets[type] ?? _collectionsCache[type]?.data.length ?? 0)
-          : 0;
-      final collections = await FlowRequest.myCollectionsService(
-          type: type, limit: 20, offset: offset);
-
-      if (!mounted) return;
-      setState(() {
-        if (loadMore && !refresh && _collectionsCache[type] != null) {
-          final cached = _collectionsCache[type]!;
-          _collectionsCache[type] = UserCollectionsItem(
-            data: [...cached.data, ...collections.data],
-            total: collections.total,
-          );
-          _offsets[type] = offset + collections.data.length;
-        } else {
-          _collectionsCache[type] = collections;
-          _offsets[type] = collections.data.length;
-        }
-        _hasMore[type] = collections.data.length == 20 &&
-            _collectionsCache[type]!.data.length < collections.total;
-        _initialErrorMessages.remove(type);
-        _loadMoreErrorMessages.remove(type);
-      });
-    } catch (e) {
-      if (!mounted) return;
-      setState(() {
-        if (loadMore && _collectionsCache[type] != null) {
-          _loadMoreErrorMessages[type] = '加载更多失败，请稍后重试';
-        } else if (_collectionsCache[type] == null) {
-          _initialErrorMessages[type] = '加载失败，请稍后重试';
-        }
-      });
-
-      if (refresh && _collectionsCache[type] != null) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('刷新失败，请稍后重试')),
-        );
-      }
-    } finally {
-      if (!mounted) return;
-      setState(() {
-        _initialLoadingTypes.remove(type);
-        _refreshingTypes.remove(type);
-        _loadingMoreTypes.remove(type);
-      });
-    }
-  }
-
-  Future<void> _refreshCollections(int type) async {
-    await _getCollections(type, refresh: true);
-  }
+  List<String> get _tabs => buildUserCollectionTabLabels(widget.user);
 
   Future<void> _showRefreshIndicatorForCurrentTab() async {
     await _refreshIndicatorKeys[_tabController.index + 1]?.currentState?.show();
-  }
-
-  bool _isTypeBusy(int type) {
-    return _initialLoadingTypes.contains(type) ||
-        _refreshingTypes.contains(type) ||
-        _loadingMoreTypes.contains(type);
   }
 
   @override
   void initState() {
     super.initState();
     // TODO 暂时默认为再看tab索引，后续从设置中获取
-    _tabController =
-        TabController(length: _tabs.length, vsync: this, initialIndex: 2);
-    // 监听 tab 切换，自动加载对应类型的数据（如果缓存中没有）
-    _tabController.addListener(() {
-      if (!_tabController.indexIsChanging) {
-        final type = _tabController.index + 1;
-        _getCollections(type);
-      }
-    });
+    _tabController = TabController(
+      length: userCollectionTypeLabels.length,
+      vsync: this,
+      initialIndex: 2,
+    );
+    _tabController.addListener(_onTabChanged);
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      _getCollections(_tabController.index + 1);
+      ref
+          .read(userCollectionsProvider.notifier)
+          .loadInitial(_tabController.index + 1);
     });
+  }
+
+  void _onTabChanged() {
+    if (!_tabController.indexIsChanging) {
+      ref
+          .read(userCollectionsProvider.notifier)
+          .loadInitial(_tabController.index + 1);
+    }
   }
 
   @override
   void dispose() {
+    _tabController.removeListener(_onTabChanged);
     _tabController.dispose();
     super.dispose();
   }
@@ -261,15 +154,8 @@ class _UserViewState extends State<UserView>
           ];
         },
         body: CollectionTabView(
-          collectionsCache: _collectionsCache,
           tabController: _tabController,
           tabs: _tabs,
-          onLoadMore: (type) => _getCollections(type, loadMore: true),
-          onRefresh: (type) => _refreshCollections(type),
-          initialErrorMessages: _initialErrorMessages,
-          loadMoreErrorMessages: _loadMoreErrorMessages,
-          loadingMoreTypes: _loadingMoreTypes,
-          hasMore: _hasMore,
           refreshIndicatorKeys: _refreshIndicatorKeys,
         ),
       ),
@@ -279,9 +165,6 @@ class _UserViewState extends State<UserView>
   Widget _buildAppBarTitle() {
     final user = widget.user;
     final currentType = _tabController.index + 1;
-    final canTriggerRefresh = _collectionsCache[currentType] != null;
-    final isRefreshButtonEnabled =
-        canTriggerRefresh && !_isTypeBusy(currentType);
 
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 16),
@@ -325,12 +208,25 @@ class _UserViewState extends State<UserView>
           ),
           const Spacer(),
           if (SystemUtil.isDesktop)
-            IconButton(
-              tooltip: '刷新当前标签',
-              onPressed: isRefreshButtonEnabled
-                  ? _showRefreshIndicatorForCurrentTab
-                  : null,
-              icon: const Icon(Icons.refresh),
+            Consumer(
+              builder: (context, ref, _) {
+                final tabState = ref.watch(
+                  userCollectionsProvider.select(
+                    (state) => state.tabState(currentType),
+                  ),
+                );
+                final canTriggerRefresh = tabState.data != null;
+                final isRefreshButtonEnabled =
+                    canTriggerRefresh && !tabState.isBusy;
+
+                return IconButton(
+                  tooltip: '刷新当前标签',
+                  onPressed: isRefreshButtonEnabled
+                      ? _showRefreshIndicatorForCurrentTab
+                      : null,
+                  icon: const Icon(Icons.refresh),
+                );
+              },
             ),
           DropDownMenu<_LoginOverflowAction>(
             items: _LoginOverflowAction.values,

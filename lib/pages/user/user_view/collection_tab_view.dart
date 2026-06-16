@@ -1,54 +1,59 @@
 import 'package:anime_flow/constants/layout_constant.dart';
 import 'package:anime_flow/models/item/bangumi/user_collections_item.dart';
+import 'package:anime_flow/pages/user/provider/user_collection_provider.dart';
 import 'package:anime_flow/routes/model/info_route_extra.dart';
 import 'package:anime_flow/routes/routes.dart';
 import 'package:anime_flow/widget/animation_network_image/animation_network_image.dart';
 import 'package:anime_flow/widget/ranking.dart';
 import 'package:anime_flow/widget/star.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-class CollectionTabView extends StatelessWidget {
+class CollectionTabView extends ConsumerWidget {
   final TabController tabController;
   final List<String> tabs;
-  final Function(int) onLoadMore;
-  final Function(int) onRefresh;
-  final Set<int> loadingMoreTypes;
-  final Map<int, UserCollectionsItem?> collectionsCache;
-  final Map<int, bool> hasMore;
-  final Map<int, String?> initialErrorMessages;
-  final Map<int, String?> loadMoreErrorMessages;
   final Map<int, GlobalKey<RefreshIndicatorState>> refreshIndicatorKeys;
 
-  const CollectionTabView(
-      {super.key,
-      required this.collectionsCache,
-      required this.tabController,
-      required this.tabs,
-      required this.onLoadMore,
-      required this.onRefresh,
-      required this.loadingMoreTypes,
-      required this.hasMore,
-      required this.initialErrorMessages,
-      required this.loadMoreErrorMessages,
-      required this.refreshIndicatorKeys});
+  const CollectionTabView({
+    super.key,
+    required this.tabController,
+    required this.tabs,
+    required this.refreshIndicatorKeys,
+  });
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     return TabBarView(
       controller: tabController,
       children: List.generate(tabs.length, (tabIndex) {
         final type = tabIndex + 1;
-        return _CollectionTabView(
-          key: PageStorageKey<int>(type),
-          type: type,
-          collectionsItem: collectionsCache[type],
-          initialErrorMessage: initialErrorMessages[type],
-          loadMoreErrorMessage: loadMoreErrorMessages[type],
-          isLoadingMore: loadingMoreTypes.contains(type),
-          hasMore: hasMore[type] ?? true,
-          refreshIndicatorKey: refreshIndicatorKeys[type]!,
-          onLoadMore: () => onLoadMore(type),
-          onRefresh: () => onRefresh(type),
+        return Consumer(
+          builder: (context, ref, _) {
+            final tabState = ref.watch(
+              userCollectionsProvider.select((state) => state.tabState(type)),
+            );
+            return _CollectionTabView(
+              key: PageStorageKey<int>(type),
+              type: type,
+              collectionsItem: tabState.data,
+              initialErrorMessage: tabState.initialErrorMessage,
+              loadMoreErrorMessage: tabState.loadMoreErrorMessage,
+              isLoadingMore: tabState.isLoadingMore,
+              hasMore: tabState.canLoadMore,
+              refreshIndicatorKey: refreshIndicatorKeys[type]!,
+              onLoadMore: () =>
+                  ref.read(userCollectionsProvider.notifier).loadMore(type),
+              onRefresh: () async {
+                final success =
+                    await ref.read(userCollectionsProvider.notifier).refresh(type);
+                if (!success && context.mounted) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(content: Text('刷新失败，请稍后重试')),
+                  );
+                }
+              },
+            );
+          },
         );
       }),
     );

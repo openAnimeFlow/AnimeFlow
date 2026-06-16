@@ -87,6 +87,65 @@ class __CollectionTabViewState extends State<_CollectionTabView> {
   static const double _refreshIndicatorOffset =
       kToolbarHeight + kTextTabBarHeight;
   static const double _minHorizontalPadding = 10;
+  static const double _loadMoreTriggerDistance = 200;
+
+  late final ScrollController _scrollController;
+
+  @override
+  void initState() {
+    super.initState();
+    _scrollController = ScrollController();
+    _scheduleLoadMoreIfShortContent();
+  }
+
+  @override
+  void dispose() {
+    _scrollController.dispose();
+    super.dispose();
+  }
+
+  @override
+  void didUpdateWidget(covariant _CollectionTabView oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    final oldCount = oldWidget.collectionsItem?.data.length ?? 0;
+    final newCount = widget.collectionsItem?.data.length ?? 0;
+    if (oldCount != newCount ||
+        oldWidget.isLoadingMore != widget.isLoadingMore ||
+        oldWidget.hasMore != widget.hasMore) {
+      _scheduleLoadMoreIfShortContent();
+    }
+  }
+
+  void _scheduleLoadMoreIfShortContent() {
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
+      _loadMoreIfContentDoesNotFillViewport();
+    });
+  }
+
+  void _loadMoreIfContentDoesNotFillViewport() {
+    if (!widget.hasMore || widget.isLoadingMore) {
+      return;
+    }
+    if (widget.collectionsItem == null || widget.collectionsItem!.data.isEmpty) {
+      return;
+    }
+
+    final scrollPosition = _scrollController.hasClients
+        ? _scrollController.position
+        : null;
+    if (scrollPosition == null || !scrollPosition.hasContentDimensions) {
+      return;
+    }
+
+    if (scrollPosition.maxScrollExtent <= _loadMoreTriggerDistance) {
+      widget.onLoadMore();
+    }
+  }
+
+  bool _shouldTriggerLoadMore(ScrollMetrics metrics) {
+    return metrics.pixels >= metrics.maxScrollExtent - _loadMoreTriggerDistance;
+  }
 
   int _calculateCrossAxisCount(BuildContext context) {
     final width = MediaQuery.of(context).size.width;
@@ -128,6 +187,9 @@ class __CollectionTabViewState extends State<_CollectionTabView> {
           final handle =
               NestedScrollView.sliverOverlapAbsorberHandleFor(context);
           return CustomScrollView(
+            physics: const AlwaysScrollableScrollPhysics(
+              parent: ClampingScrollPhysics(),
+            ),
             slivers: <Widget>[
               SliverOverlapInjector(handle: handle),
               const SliverFillRemaining(
@@ -177,12 +239,12 @@ class __CollectionTabViewState extends State<_CollectionTabView> {
               notification.metrics.axis == Axis.vertical,
           child: NotificationListener<ScrollNotification>(
             onNotification: (notification) {
-              if (notification is ScrollUpdateNotification) {
+              if (notification is ScrollUpdateNotification ||
+                  notification is ScrollMetricsNotification) {
                 final metrics = notification.metrics;
-                // 当滚动到距离底部 200px 时，触发加载更多
-                // 确保有数据且不在加载中
-                if (metrics.pixels >= metrics.maxScrollExtent - 200 &&
+                if (_shouldTriggerLoadMore(metrics) &&
                     collections.isNotEmpty &&
+                    widget.hasMore &&
                     !widget.isLoadingMore) {
                   widget.onLoadMore();
                 }
@@ -190,6 +252,10 @@ class __CollectionTabViewState extends State<_CollectionTabView> {
               return false;
             },
             child: CustomScrollView(
+              controller: _scrollController,
+              physics: const AlwaysScrollableScrollPhysics(
+                parent: ClampingScrollPhysics(),
+              ),
               slivers: <Widget>[
                 SliverOverlapInjector(handle: handle),
                 SliverPadding(
@@ -337,6 +403,9 @@ class __CollectionTabViewState extends State<_CollectionTabView> {
       builder: (context) {
         final handle = NestedScrollView.sliverOverlapAbsorberHandleFor(context);
         return CustomScrollView(
+          physics: const AlwaysScrollableScrollPhysics(
+            parent: ClampingScrollPhysics(),
+          ),
           slivers: <Widget>[
             SliverOverlapInjector(handle: handle),
             SliverFillRemaining(

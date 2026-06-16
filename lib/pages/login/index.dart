@@ -1,5 +1,5 @@
 import 'package:anime_flow/constants/assets_path_constants.dart';
-import 'package:anime_flow/http/clients/anime_flow_client.dart';
+import 'package:anime_flow/http/clients/flow_client.dart';
 import 'package:anime_flow/pages/login/service/login_service.dart';
 import 'package:anime_flow/providers/user/user_controller.dart';
 import 'package:anime_flow/providers/user/user_state_provider.dart';

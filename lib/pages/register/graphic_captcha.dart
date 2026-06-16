@@ -2,7 +2,7 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:typed_data';
 
-import 'package:anime_flow/http/clients/anime_flow_client.dart';
+import 'package:anime_flow/http/clients/flow_client.dart';
 import 'package:anime_flow/http/requests/flow_request.dart';
 import 'package:anime_flow/models/item/captcha_item.dart';
 import 'package:anime_flow/widget/notification_toast.dart';

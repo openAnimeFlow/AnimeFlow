@@ -2,7 +2,7 @@ import 'dart:io';
 
 import 'package:anime_flow/constants/constants.dart';
 import 'package:anime_flow/http/api_path.dart';
-import 'package:anime_flow/http/clients/anime_flow_client.dart';
+import 'package:anime_flow/http/clients/flow_client.dart';
 import 'package:anime_flow/http/requests/flow_request.dart';
 import 'package:anime_flow/models/item/flow/bangumi_bind_item.dart';
 import 'package:anime_flow/models/item/flow/flow_token.dart';

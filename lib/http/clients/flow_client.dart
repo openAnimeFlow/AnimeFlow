@@ -39,10 +39,10 @@ class AnimeFlowResponse {
   }
 }
 
-class AnimeFlowClient {
-  AnimeFlowClient._();
+class FlowClient {
+  FlowClient._();
 
-  static final AnimeFlowClient instance = AnimeFlowClient._();
+  static final FlowClient instance = FlowClient._();
 
   static AnimeFlowResponse _parseEnvelope(dynamic raw) {
     if (raw is Map) {

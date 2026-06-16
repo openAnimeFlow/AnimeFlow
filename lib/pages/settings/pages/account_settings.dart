@@ -1,5 +1,5 @@
 import 'package:anime_flow/constants/assets_path_constants.dart';
-import 'package:anime_flow/http/clients/anime_flow_client.dart';
+import 'package:anime_flow/http/clients/flow_client.dart';
 import 'package:anime_flow/models/item/flow/bgm_collection_sync_status_item.dart';
 import 'package:anime_flow/models/item/flow/bangumi_bind_item.dart';
 import 'package:anime_flow/models/item/flow/flow_users.dart';

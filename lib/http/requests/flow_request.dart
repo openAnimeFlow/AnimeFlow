@@ -3,7 +3,7 @@ import 'dart:ui';
 import 'package:anime_flow/constants/constants.dart';
 import 'package:anime_flow/crawler/itme/bgm_user_page_item.dart';
 import 'package:anime_flow/http/api_path.dart';
-import 'package:anime_flow/http/clients/anime_flow_client.dart';
+import 'package:anime_flow/http/clients/flow_client.dart';
 import 'package:anime_flow/models/enums/sort_type.dart';
 import 'package:anime_flow/models/item/bangumi/actor_item.dart';
 import 'package:anime_flow/models/item/bangumi/calendar_item.dart';
@@ -37,7 +37,7 @@ import 'package:anime_flow/utils/utils.dart';
 import 'package:dio/dio.dart';
 
 class FlowRequest {
-  static final AnimeFlowClient _client = AnimeFlowClient.instance;
+  static final FlowClient _client = FlowClient.instance;
 
   static Future<TokenItem> getTokenService({required String code}) async {
     final response = await _client.post(

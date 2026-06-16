@@ -1,6 +1,6 @@
 import 'dart:async';
 
-import 'package:anime_flow/http/clients/anime_flow_client.dart';
+import 'package:anime_flow/http/clients/flow_client.dart';
 import 'package:anime_flow/http/requests/flow_request.dart';
 import 'package:anime_flow/pages/register/graphic_captcha.dart';
 import 'package:anime_flow/pages/register/send_code_button.dart';

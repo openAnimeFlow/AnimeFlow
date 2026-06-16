@@ -439,7 +439,7 @@ class _UserViewState extends State<UserView>
             children: [
               if (hasAvatar)
                 AnimationNetworkImage(
-                  borderRadius: BorderRadius.circular(60),
+                  borderRadius: BorderRadius.circular(100),
                   url: user.avatar,
                   fit: BoxFit.cover,
                   width: 150,

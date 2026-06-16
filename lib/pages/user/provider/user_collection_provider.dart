@@ -7,11 +7,10 @@ part 'user_collection_provider.g.dart';
 
 @Riverpod(keepAlive: true)
 class UserCollections extends _$UserCollections {
-  late final UserCollectionService _service;
+  final UserCollectionService _service = UserCollectionService();
 
   @override
   UserCollectionsState build() {
-    _service = UserCollectionService();
     return const UserCollectionsState();
   }
 

@@ -4,11 +4,14 @@ import 'package:anime_flow/pages/login/service/login_service.dart';
 import 'package:anime_flow/providers/user/user_controller.dart';
 import 'package:anime_flow/providers/user/user_state_provider.dart';
 import 'package:anime_flow/routes/routes.dart';
+import 'package:anime_flow/widget/drop_down_menu.dart';
 import 'package:anime_flow/widget/notification_toast.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:go_router/go_router.dart';
+
+enum _NoLoginOverflowAction { settings, playRecord }
 
 class LoginPage extends ConsumerStatefulWidget {
   const LoginPage({super.key});
@@ -73,6 +76,51 @@ class _LoginPageState extends ConsumerState<LoginPage> {
       appBar: AppBar(
         forceMaterialTransparency: true,
         title: const Text('登录'),
+        actions: [
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 8),
+            child: DropDownMenu<_NoLoginOverflowAction>(
+              tooltip: '更多菜单',
+              items: _NoLoginOverflowAction.values,
+              disableSelected: false,
+              buttonBuilder: (context, _) => Icon(
+                Icons.notes_outlined,
+                size: 28,
+                color: colorScheme.onSurface,
+              ),
+              itemBuilder: (context, action, _) {
+                final (icon, label) = switch (action) {
+                  _NoLoginOverflowAction.settings =>
+                  (Icons.settings_outlined, '设置'),
+                  _NoLoginOverflowAction.playRecord =>
+                  (Icons.smart_display_outlined, '播放记录'),
+                };
+                return SizedBox(
+                  height: 48,
+                  child: Row(
+                    children: [
+                      Icon(
+                        icon,
+                        size: 20,
+                        color: colorScheme.onSurfaceVariant,
+                      ),
+                      const SizedBox(width: 12),
+                      Text(label, style: Theme.of(context).textTheme.bodyLarge),
+                    ],
+                  ),
+                );
+              },
+              onSelected: (action) {
+                switch (action) {
+                  case _NoLoginOverflowAction.settings:
+                    const SettingsRoute().push(context);
+                  case _NoLoginOverflowAction.playRecord:
+                    const PlayRecordRoute().push(context);
+                }
+              },
+            ),
+          ),
+        ],
       ),
       body: LayoutBuilder(
         builder: (context, constraints) {

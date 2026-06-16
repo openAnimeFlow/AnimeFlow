@@ -265,11 +265,11 @@ class AccountSettingsPage extends ConsumerWidget {
               Icons.logout_outlined,
               color: Theme.of(context).colorScheme.error,
             ),
+            onTap: () => _confirmLogout(context, ref),
             title: Text(
               '退出登录',
               style: TextStyle(color: Theme.of(context).colorScheme.error),
             ),
-            onTap: () => _confirmLogout(context, ref),
           ),
         ),
       ],

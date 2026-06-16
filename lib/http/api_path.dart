@@ -200,7 +200,10 @@ class AnimeFlowApi {
       bangumiBind = '/api/v1/account/oauth/bangumi',
 
       /// 绑定 Bangumi 账号
-      bangumiBindPost = '/api/v1/account/oauth/bangumi/bind';
+      bangumiBindPost = '/api/v1/account/oauth/bangumi/bind',
+
+      /// 轮询 Bangumi 绑定授权码（桌面端）
+      oauthBindCode = '/api/oauth/bind-code';
 }
 
 class DamakuApi {

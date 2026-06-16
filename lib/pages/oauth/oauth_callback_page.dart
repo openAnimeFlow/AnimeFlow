@@ -1,4 +1,5 @@
 import 'package:anime_flow/providers/user/user_controller.dart';
+import 'package:anime_flow/providers/user/user_oauth_state.dart';
 import 'package:anime_flow/routes/routes.dart';
 import 'package:anime_flow/utils/logger.dart';
 import 'package:flutter/material.dart';
@@ -17,34 +18,17 @@ class OAuthCallbackPage extends ConsumerStatefulWidget {
   ConsumerState<OAuthCallbackPage> createState() => _OAuthCallbackPageState();
 }
 
-class _OAuthCallbackPageState extends ConsumerState<OAuthCallbackPage>
-    with SingleTickerProviderStateMixin {
-  late final AnimationController _pulseController;
-  late final CurvedAnimation _pulse;
+class _OAuthCallbackPageState extends ConsumerState<OAuthCallbackPage> {
   final int returnTab = 2;
 
   @override
   void initState() {
     super.initState();
-    _pulseController = AnimationController(
-      vsync: this,
-      duration: const Duration(milliseconds: 1600),
-    )..repeat(reverse: true);
-    _pulse = CurvedAnimation(
-      parent: _pulseController,
-      curve: Curves.easeInOut,
-    );
     WidgetsBinding.instance.addPostFrameCallback((_) => _runCallback());
   }
 
-  @override
-  void dispose() {
-    _pulse.dispose();
-    _pulseController.dispose();
-    super.dispose();
-  }
-
   Future<void> _runCallback() async {
+    final purpose = ref.read(userControllerProvider).purpose;
     try {
       await ref
           .read(userControllerProvider.notifier)
@@ -53,7 +37,11 @@ class _OAuthCallbackPageState extends ConsumerState<OAuthCallbackPage>
       LiggLogger().e('OAuth 回调处理失败', error: e, stackTrace: st);
     } finally {
       if (mounted) {
-        MainRoute(tab: returnTab.clamp(0, 2)).go(context);
+        if (purpose == OAuthPurpose.bindBangumi) {
+          const SettingAccountRoute().go(context);
+        } else {
+          MainRoute(tab: returnTab.clamp(0, 2)).go(context);
+        }
       }
     }
   }
@@ -62,6 +50,8 @@ class _OAuthCallbackPageState extends ConsumerState<OAuthCallbackPage>
   Widget build(BuildContext context) {
     final cs = Theme.of(context).colorScheme;
     final tt = Theme.of(context).textTheme;
+    final isBinding =
+        ref.watch(userControllerProvider).purpose == OAuthPurpose.bindBangumi;
 
     return Scaffold(
       body: DecoratedBox(
@@ -87,7 +77,9 @@ class _OAuthCallbackPageState extends ConsumerState<OAuthCallbackPage>
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
                     Text(
-                      '正在连接 Bangumi 并同步账号信息，请稍候',
+                      isBinding
+                          ? '正在绑定 Bangumi 账号，请稍候'
+                          : '正在连接 Bangumi 并同步账号信息，请稍候',
                       textAlign: TextAlign.center,
                       style: tt.bodyMedium?.copyWith(
                         color: cs.onSurfaceVariant,

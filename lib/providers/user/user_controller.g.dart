@@ -13,7 +13,7 @@ part of 'user_controller.dart';
 final userControllerProvider = UserControllerProvider._();
 
 final class UserControllerProvider
-    extends $NotifierProvider<UserController, bool> {
+    extends $NotifierProvider<UserController, UserOAuthState> {
   UserControllerProvider._()
       : super(
           from: null,
@@ -33,24 +33,27 @@ final class UserControllerProvider
   UserController create() => UserController();
 
   /// {@macro riverpod.override_with_value}
-  Override overrideWithValue(bool value) {
+  Override overrideWithValue(UserOAuthState value) {
     return $ProviderOverride(
       origin: this,
-      providerOverride: $SyncValueProvider<bool>(value),
+      providerOverride: $SyncValueProvider<UserOAuthState>(value),
     );
   }
 }
 
-String _$userControllerHash() => r'082d40e8fa420c60d6d0da2b8a8adf4f705c6822';
+String _$userControllerHash() => r'b757a5063b1a25069d3aa8e3a05bd5a311390d7d';
 
-abstract class _$UserController extends $Notifier<bool> {
-  bool build();
+abstract class _$UserController extends $Notifier<UserOAuthState> {
+  UserOAuthState build();
   @$mustCallSuper
   @override
   void runBuild() {
-    final ref = this.ref as $Ref<bool, bool>;
+    final ref = this.ref as $Ref<UserOAuthState, UserOAuthState>;
     final element = ref.element as $ClassProviderElement<
-        AnyNotifier<bool, bool>, bool, Object?, Object?>;
+        AnyNotifier<UserOAuthState, UserOAuthState>,
+        UserOAuthState,
+        Object?,
+        Object?>;
     element.handleCreate(ref, build);
   }
 }

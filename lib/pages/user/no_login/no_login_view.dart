@@ -77,7 +77,7 @@ class NoLoginView extends StatelessWidget {
                   child: Image.asset(AssetsPathConstants.logo)),
               Consumer(
                 builder: (context, ref, _) {
-                  final isAuthorizing = ref.watch(userControllerProvider);
+                  final isAuthorizing = ref.watch(userControllerProvider).isAuthorizing;
                   final myController = ref.read(userControllerProvider.notifier);
                   return AnimatedSwitcher(
                     duration: const Duration(milliseconds: 300),

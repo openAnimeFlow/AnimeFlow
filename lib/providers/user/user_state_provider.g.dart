@@ -74,7 +74,7 @@ final class CurrentFlowTokenProvider
   CurrentFlowToken create() => CurrentFlowToken();
 }
 
-String _$currentFlowTokenHash() => r'437649b1d18ad44e072dead1212243cbaf9ed188';
+String _$currentFlowTokenHash() => r'6344bd3d595a4693694b6e88efb5ee144a8a3fe0';
 
 abstract class _$CurrentFlowToken extends $AsyncNotifier<FlowToken?> {
   FutureOr<FlowToken?> build();
@@ -123,6 +123,42 @@ final class IsLoggedInProvider
 }
 
 String _$isLoggedInHash() => r'34cdd0d8d6d6fb849bd0ab13e13c43188cd3c9dd';
+
+@ProviderFor(bangumiBind)
+final bangumiBindProvider = BangumiBindProvider._();
+
+final class BangumiBindProvider extends $FunctionalProvider<
+        AsyncValue<BangumiBindItem?>,
+        BangumiBindItem?,
+        FutureOr<BangumiBindItem?>>
+    with $FutureModifier<BangumiBindItem?>, $FutureProvider<BangumiBindItem?> {
+  BangumiBindProvider._()
+      : super(
+          from: null,
+          argument: null,
+          retry: null,
+          name: r'bangumiBindProvider',
+          isAutoDispose: false,
+          dependencies: null,
+          $allTransitiveDependencies: null,
+        );
+
+  @override
+  String debugGetCreateSourceHash() => _$bangumiBindHash();
+
+  @$internal
+  @override
+  $FutureProviderElement<BangumiBindItem?> $createElement(
+          $ProviderPointer pointer) =>
+      $FutureProviderElement(pointer);
+
+  @override
+  FutureOr<BangumiBindItem?> create(Ref ref) {
+    return bangumiBind(ref);
+  }
+}
+
+String _$bangumiBindHash() => r'901f79109a6005eb777f90bc2a185bdd6da5d8f6';
 
 @ProviderFor(CurrentUserInfo)
 final currentUserInfoProvider = CurrentUserInfoProvider._();

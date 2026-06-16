@@ -1,10 +1,10 @@
 import 'package:anime_flow/constants/assets_path_constants.dart';
 import 'package:anime_flow/http/clients/anime_flow_client.dart';
-import 'package:anime_flow/http/requests/flow_request.dart';
 import 'package:anime_flow/models/item/flow/bangumi_bind_item.dart';
 import 'package:anime_flow/models/item/flow/flow_users.dart';
 import 'package:anime_flow/pages/settings/setting_provider.dart';
 import 'package:anime_flow/providers/user/user_controller.dart';
+import 'package:anime_flow/providers/user/user_oauth_state.dart';
 import 'package:anime_flow/providers/user/user_state_provider.dart';
 import 'package:anime_flow/routes/routes.dart';
 import 'package:anime_flow/widget/animation_network_image/animation_network_image.dart';
@@ -13,83 +13,17 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_svg/svg.dart';
 
-class AccountSettingsPage extends ConsumerStatefulWidget {
+class AccountSettingsPage extends ConsumerWidget {
   const AccountSettingsPage({super.key});
 
   @override
-  ConsumerState<AccountSettingsPage> createState() =>
-      _AccountSettingsPageState();
-}
-
-class _AccountSettingsPageState extends ConsumerState<AccountSettingsPage> {
-  BangumiBindItem? _bangumiBind;
-  bool _loadingBind = false;
-  String? _bindError;
-
-  @override
-  void initState() {
-    super.initState();
-    WidgetsBinding.instance.addPostFrameCallback((_) => _loadBangumiBind());
-  }
-
-  Future<void> _loadBangumiBind() async {
-    final isLoggedIn = await ref.read(isLoggedInProvider.future);
-    if (!isLoggedIn || !mounted) return;
-
-    setState(() {
-      _loadingBind = true;
-      _bindError = null;
-    });
-
-    try {
-      final bind = await FlowRequest.getBangumiBindService();
-      if (!mounted) return;
-      setState(() {
-        _bangumiBind = bind;
-        _loadingBind = false;
-      });
-    } catch (e) {
-      if (!mounted) return;
-      setState(() {
-        _loadingBind = false;
-        _bindError = '获取绑定状态失败';
-      });
-    }
-  }
-
-  Future<void> _confirmLogout() async {
-    final confirmed = await showDialog<bool>(
-      context: context,
-      builder: (dialogContext) => AlertDialog(
-        title: const Text('确认退出'),
-        content: const Text('确定要退出登录吗？'),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(dialogContext).pop(false),
-            child: const Text('取消'),
-          ),
-          TextButton(
-            onPressed: () => Navigator.of(dialogContext).pop(true),
-            child: const Text('确定'),
-          ),
-        ],
-      ),
-    );
-
-    if (confirmed != true || !mounted) return;
-
-    await ref.read(userControllerProvider.notifier).clearUserInfo();
-    if (!mounted) return;
-    setState(() {
-      _bangumiBind = null;
-    });
-    NotificationToast.show('提示', '已退出登录');
-  }
-
-  @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final isLoggedInAsync = ref.watch(isLoggedInProvider);
     final userInfoAsync = ref.watch(currentUserInfoProvider);
+    final bangumiBindAsync = ref.watch(bangumiBindProvider);
+    final oauthState = ref.watch(userControllerProvider);
+    final isBinding = oauthState.isAuthorizing &&
+        oauthState.purpose == OAuthPurpose.bindBangumi;
 
     return Scaffold(
       appBar: PreferredSize(
@@ -116,7 +50,13 @@ class _AccountSettingsPageState extends ConsumerState<AccountSettingsPage> {
               return userInfoAsync.when(
                 data: (user) => user == null
                     ? _buildNotLoggedIn(context)
-                    : _buildLoggedInContent(context, user),
+                    : _buildLoggedInContent(
+                        context,
+                        ref,
+                        user,
+                        bangumiBindAsync,
+                        isBinding,
+                      ),
                 loading: () => const Center(child: CircularProgressIndicator()),
                 error: (_, __) => _buildErrorState('获取用户资料失败'),
               );
@@ -127,6 +67,48 @@ class _AccountSettingsPageState extends ConsumerState<AccountSettingsPage> {
         ),
       ),
     );
+  }
+
+  Future<void> _confirmLogout(BuildContext context, WidgetRef ref) async {
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (dialogContext) => AlertDialog(
+        title: const Text('确认退出'),
+        content: const Text('确定要退出登录吗？'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(dialogContext).pop(false),
+            child: const Text('取消'),
+          ),
+          TextButton(
+            onPressed: () => Navigator.of(dialogContext).pop(true),
+            child: const Text('确定'),
+          ),
+        ],
+      ),
+    );
+
+    if (confirmed != true || !context.mounted) return;
+
+    await ref.read(userControllerProvider.notifier).clearUserInfo();
+    if (!context.mounted) return;
+    NotificationToast.show('提示', '已退出登录');
+  }
+
+  Future<void> _bindBangumi(BuildContext context, WidgetRef ref) async {
+    try {
+      await ref.read(userControllerProvider.notifier).openOAuthPageForBind();
+      if (!context.mounted) return;
+      NotificationToast.show('提示', '请在浏览器完成授权后返回应用');
+    } catch (e) {
+      if (!context.mounted) return;
+      final message = e is AnimeFlowApiException
+          ? e.message
+          : e is StateError
+              ? e.message
+              : '打开授权页面失败';
+      NotificationToast.show('提示', message);
+    }
   }
 
   Widget _buildNotLoggedIn(BuildContext context) {
@@ -186,7 +168,13 @@ class _AccountSettingsPageState extends ConsumerState<AccountSettingsPage> {
     );
   }
 
-  Widget _buildLoggedInContent(BuildContext context, FlowUsers user) {
+  Widget _buildLoggedInContent(
+    BuildContext context,
+    WidgetRef ref,
+    FlowUsers user,
+    AsyncValue<BangumiBindItem?> bangumiBindAsync,
+    bool isBinding,
+  ) {
     return ListView(
       padding: const EdgeInsets.all(16),
       children: [
@@ -263,7 +251,12 @@ class _AccountSettingsPageState extends ConsumerState<AccountSettingsPage> {
         ),
         const SizedBox(height: 24),
         _buildSectionTitle('第三方账号'),
-        _buildBangumiBindCard(context),
+        _buildBangumiBindCard(
+          context,
+          ref,
+          bangumiBindAsync,
+          isBinding,
+        ),
         const SizedBox(height: 24),
         _buildSectionTitle('账户操作'),
         Card(
@@ -276,27 +269,59 @@ class _AccountSettingsPageState extends ConsumerState<AccountSettingsPage> {
               '退出登录',
               style: TextStyle(color: Theme.of(context).colorScheme.error),
             ),
-            onTap: _confirmLogout,
+            onTap: () => _confirmLogout(context, ref),
           ),
         ),
       ],
     );
   }
 
-  Widget _buildBangumiBindCard(BuildContext context) {
+  Widget _buildBangumiBindCard(
+    BuildContext context,
+    WidgetRef ref,
+    AsyncValue<BangumiBindItem?> bangumiBindAsync,
+    bool isBinding,
+  ) {
     final colorScheme = Theme.of(context).colorScheme;
 
-    if (_loadingBind) {
-      return const Card(
+    if (isBinding) {
+      return Card(
         child: Padding(
-          padding: EdgeInsets.all(24),
-          child: Center(child: CircularProgressIndicator()),
+          padding: const EdgeInsets.all(24),
+          child: Row(
+            children: [
+              const SizedBox(
+                width: 24,
+                height: 24,
+                child: CircularProgressIndicator(strokeWidth: 2.5),
+              ),
+              const SizedBox(width: 16),
+              Expanded(
+                child: Text(
+                  '正在等待 Bangumi 授权结果...',
+                  style: TextStyle(color: colorScheme.onSurfaceVariant),
+                ),
+              ),
+              TextButton(
+                onPressed: () =>
+                    ref.read(userControllerProvider.notifier).cancelOAuthWaiting(),
+                child: const Text('取消'),
+              ),
+            ],
+          ),
         ),
       );
     }
 
-    if (_bindError != null) {
-      return Card(
+    return bangumiBindAsync.when(
+      data: (bind) => _buildBangumiBindContent(context, ref, bind),
+      loading: () => const Card(
+        child: Padding(
+          padding: EdgeInsets.all(24),
+          child: Center(child: CircularProgressIndicator()),
+        ),
+      ),
+      error: (_, __) => Card(
         child: ListTile(
           leading: SvgPicture.asset(
             AssetsPathConstants.bangumi,
@@ -304,16 +329,22 @@ class _AccountSettingsPageState extends ConsumerState<AccountSettingsPage> {
             height: 28,
           ),
           title: const Text('Bangumi'),
-          subtitle: Text(_bindError!),
+          subtitle: const Text('获取绑定状态失败'),
           trailing: IconButton(
             icon: const Icon(Icons.refresh),
-            onPressed: _loadBangumiBind,
+            onPressed: () => ref.invalidate(bangumiBindProvider),
           ),
         ),
-      );
-    }
+      ),
+    );
+  }
 
-    final bind = _bangumiBind;
+  Widget _buildBangumiBindContent(
+    BuildContext context,
+    WidgetRef ref,
+    BangumiBindItem? bind,
+  ) {
+    final colorScheme = Theme.of(context).colorScheme;
     final isBound = bind?.bound ?? false;
 
     return Card(
@@ -413,7 +444,7 @@ class _AccountSettingsPageState extends ConsumerState<AccountSettingsPage> {
               ),
               const SizedBox(height: 12),
               OutlinedButton.icon(
-                onPressed: _bindBangumi,
+                onPressed: () => _bindBangumi(context, ref),
                 icon: SvgPicture.asset(
                   AssetsPathConstants.bangumi,
                   width: 18,
@@ -426,19 +457,6 @@ class _AccountSettingsPageState extends ConsumerState<AccountSettingsPage> {
         ),
       ),
     );
-  }
-
-  Future<void> _bindBangumi() async {
-    try {
-      await ref.read(userControllerProvider.notifier).openOAuthPage();
-      if (!mounted) return;
-      NotificationToast.show('提示', '请在浏览器完成授权后返回应用');
-    } catch (e) {
-      if (!mounted) return;
-      final message =
-          e is AnimeFlowApiException ? e.message : '打开授权页面失败';
-      NotificationToast.show('提示', message);
-    }
   }
 
   Widget _buildErrorState(String message) {

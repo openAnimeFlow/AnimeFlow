@@ -71,11 +71,16 @@ class FlowRequest {
   }
 
   //获取session
-  static Future<Map<String, dynamic>> getSessionService() async {
+  static Future<Map<String, dynamic>> getSessionService({
+    bool bindMode = false,
+  }) async {
     final deviceName = SystemUtil.getDevice().toUpperCase();
     final response = await _client.get(
       AnimeFlowApi.session,
-      queryParameters: {'platform': deviceName},
+      queryParameters: {
+        'platform': deviceName,
+        if (bindMode) 'bindMode': 'true',
+      },
     );
     return response.data;
   }
@@ -97,6 +102,35 @@ class FlowRequest {
           return TokenItem.fromJson(response.data);
         }
       } catch (e) {
+        // 忽略错误，继续轮询
+      }
+
+      await Future.delayed(pollInterval);
+    }
+
+    return null;
+  }
+
+  /// 桌面端绑定模式：轮询 OAuth 授权码
+  static Future<String?> pollBindCodeService({required String state}) async {
+    const maxDuration = Duration(seconds: 60);
+    const pollInterval = Duration(seconds: 2);
+    final startTime = DateTime.now();
+
+    while (DateTime.now().difference(startTime) < maxDuration) {
+      try {
+        final response = await _client.get(
+          AnimeFlowApi.oauthBindCode,
+          queryParameters: {'sessionId': state},
+        );
+
+        if (response.code == 200) {
+          final code = response.data;
+          if (code is String && code.isNotEmpty) {
+            return code;
+          }
+        }
+      } catch (_) {
         // 忽略错误，继续轮询
       }
 

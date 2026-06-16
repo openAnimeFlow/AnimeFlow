@@ -646,4 +646,31 @@ class FlowRequest {
       response.data as Map<String, dynamic>,
     );
   }
+
+  /// 获取当前用户 Bangumi 收藏列表
+  static Future<UserCollectionsItem> myCollectionsService({
+    int subjectType = 2,
+    required int type,
+    required int limit,
+    required int offset,
+  }) async {
+    final response = await _client.get(
+      AnimeFlowApi.flowUserCollections,
+      queryParameters: {
+        'subjectType': subjectType,
+        'type': type,
+        'limit': limit,
+        'offset': offset,
+      },
+      options: await _flowAuthOptions(),
+    );
+    try {
+      return UserCollectionsItem.fromJson(
+        response.data as Map<String, dynamic>,
+      );
+    } catch (e) {
+      LiggLogger().e(e);
+      throw Exception('Failed to fetch user collections: $e');
+    }
+  }
 }

@@ -196,6 +196,9 @@ class AnimeFlowApi {
       /// 获取当前用户信息
       flowUsers = '/api/v1/users',
 
+      /// 当前用户 Bangumi 收藏
+      flowUserCollections = '/api/v1/users/collections',
+
       /// 查询 Bangumi 绑定状态
       bangumiBind = '/api/v1/account/oauth/bangumi',
 

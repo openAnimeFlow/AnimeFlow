@@ -1,7 +1,7 @@
 import 'dart:ui';
 
-import 'package:anime_flow/http/requests/bgm_request.dart';
-import 'package:anime_flow/models/item/bangumi/collections_item.dart';
+import 'package:anime_flow/http/requests/flow_request.dart';
+import 'package:anime_flow/models/item/bangumi/user_collections_item.dart';
 import 'package:anime_flow/models/item/flow/flow_users.dart';
 import 'package:anime_flow/providers/user/user_controller.dart';
 import 'package:anime_flow/routes/routes.dart';
@@ -31,7 +31,7 @@ class _UserViewState extends State<UserView>
   bool isPinned = false;
 
   // 为每个 tab 类型缓存数据，key 是 type (1-5)
-  final Map<int, CollectionsItem?> _collectionsCache = {};
+  final Map<int, UserCollectionsItem?> _collectionsCache = {};
 
   // 分别记录首屏加载、刷新、加载更多，避免一个状态承担多种语义
   final Set<int> _initialLoadingTypes = {};
@@ -54,8 +54,11 @@ class _UserViewState extends State<UserView>
 
   static const _collectionTypes = ['想看', '看过', '在看', '搁置', '抛弃'];
 
-  List<String> get _tabs =>
-      _collectionTypes.map((label) => '$label\n0').toList();
+  List<String> get _tabs => _collectionTypes.asMap().entries.map((entry) {
+        final type = entry.key + 1;
+        final total = _collectionsCache[type]?.total;
+        return '${entry.value}\n${total ?? 0}';
+      }).toList();
 
   Future<void> _getCollections(int type,
       {bool loadMore = false, bool refresh = false}) async {
@@ -93,17 +96,19 @@ class _UserViewState extends State<UserView>
       final offset = loadMore && !refresh
           ? (_offsets[type] ?? _collectionsCache[type]?.data.length ?? 0)
           : 0;
-      final collections = await UserRequest.userCollectionsService(
+      final collections = await FlowRequest.myCollectionsService(
           type: type, limit: 20, offset: offset);
 
       if (!mounted) return;
       setState(() {
         if (loadMore && !refresh && _collectionsCache[type] != null) {
-          // 追加数据
-          _collectionsCache[type]!.data.addAll(collections.data);
+          final cached = _collectionsCache[type]!;
+          _collectionsCache[type] = UserCollectionsItem(
+            data: [...cached.data, ...collections.data],
+            total: collections.total,
+          );
           _offsets[type] = offset + collections.data.length;
         } else {
-          // 首次加载或刷新
           _collectionsCache[type] = collections;
           _offsets[type] = collections.data.length;
         }

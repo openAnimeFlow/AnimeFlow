@@ -23,11 +23,11 @@ class ImageFiveItem {
 
   factory ImageFiveItem.fromJson(Map<String, dynamic> json) {
     return ImageFiveItem(
-      large: json['large'] as String,
-      common: json['common'] as String,
-      medium: json['medium'] as String,
-      small: json['small'] as String,
-      grid: json['grid'] as String,
+      large: json['large'] as String? ?? '',
+      common: json['common'] as String? ?? '',
+      medium: json['medium'] as String? ?? '',
+      small: json['small'] as String? ?? '',
+      grid: json['grid'] as String? ?? '',
     );
   }
 

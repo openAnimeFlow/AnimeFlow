@@ -1,5 +1,5 @@
 import 'package:anime_flow/constants/layout_constant.dart';
-import 'package:anime_flow/models/item/bangumi/collections_item.dart';
+import 'package:anime_flow/models/item/bangumi/user_collections_item.dart';
 import 'package:anime_flow/routes/model/info_route_extra.dart';
 import 'package:anime_flow/routes/routes.dart';
 import 'package:anime_flow/widget/animation_network_image/animation_network_image.dart';
@@ -13,7 +13,7 @@ class CollectionTabView extends StatelessWidget {
   final Function(int) onLoadMore;
   final Function(int) onRefresh;
   final Set<int> loadingMoreTypes;
-  final Map<int, CollectionsItem?> collectionsCache;
+  final Map<int, UserCollectionsItem?> collectionsCache;
   final Map<int, bool> hasMore;
   final Map<int, String?> initialErrorMessages;
   final Map<int, String?> loadMoreErrorMessages;
@@ -57,7 +57,7 @@ class CollectionTabView extends StatelessWidget {
 
 class _CollectionTabView extends StatefulWidget {
   final int type;
-  final CollectionsItem? collectionsItem;
+  final UserCollectionsItem? collectionsItem;
   final String? initialErrorMessage;
   final String? loadMoreErrorMessage;
   final bool isLoadingMore;
@@ -209,13 +209,15 @@ class __CollectionTabViewState extends State<_CollectionTabView> {
                     delegate: SliverChildBuilderDelegate(
                       (context, index) {
                         final collection = collections[index];
+                        final displayName =
+                            (collection.nameCN == null || collection.nameCN!.isEmpty)
+                                ? collection.name
+                                : collection.nameCN!;
                         return InkWell(
                           onTap: () {
                             AnimeInfoRoute.fromExtra(InfoRouteExtra(
                               id: collection.id,
-                              name: collection.nameCN.isEmpty
-                                  ? collection.name
-                                  : collection.nameCN,
+                              name: displayName,
                               image: collection.images.large,
                             )).push(context);
                           },
@@ -253,9 +255,7 @@ class __CollectionTabViewState extends State<_CollectionTabView> {
                                         children: [
                                           Expanded(
                                             child: Text(
-                                              collection.nameCN.isEmpty
-                                                  ? collection.name
-                                                  : collection.nameCN,
+                                              displayName,
                                               style: const TextStyle(
                                                 fontWeight: FontWeight.bold,
                                                 fontSize: 14,
@@ -271,19 +271,6 @@ class __CollectionTabViewState extends State<_CollectionTabView> {
                                           ),
                                         ],
                                       ),
-                                      if (collection
-                                          .summary.isNotEmpty) ...[
-                                        const SizedBox(height: 4),
-                                        Text(
-                                          collection.summary,
-                                          style: TextStyle(
-                                            fontSize: 12,
-                                            color: Colors.grey[600],
-                                          ),
-                                          maxLines: 2,
-                                          overflow: TextOverflow.ellipsis,
-                                        ),
-                                      ],
                                       const Spacer(),
                                       Row(
                                         children: [

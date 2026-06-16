@@ -2,6 +2,7 @@ import 'package:anime_flow/constants/assets_path_constants.dart';
 import 'package:anime_flow/http/clients/anime_flow_client.dart';
 import 'package:anime_flow/models/item/flow/bangumi_bind_item.dart';
 import 'package:anime_flow/models/item/flow/flow_users.dart';
+import 'package:anime_flow/pages/login/index.dart';
 import 'package:anime_flow/pages/settings/setting_provider.dart';
 import 'package:anime_flow/providers/user/user_controller.dart';
 import 'package:anime_flow/providers/user/user_oauth_state.dart';
@@ -45,7 +46,7 @@ class AccountSettingsPage extends ConsumerWidget {
           child: isLoggedInAsync.when(
             data: (isLoggedIn) {
               if (!isLoggedIn) {
-                return _buildNotLoggedIn(context);
+                return const LoginPage();
               }
               return userInfoAsync.when(
                 data: (user) => user == null
@@ -147,19 +148,74 @@ class AccountSettingsPage extends ConsumerWidget {
                       ),
                 ),
                 const SizedBox(height: 24),
-                FilledButton.icon(
-                  onPressed: () => const LoginRoute().push(context),
-                  icon: const Icon(Icons.login_outlined),
-                  label: const Text('登录'),
-                  style: FilledButton.styleFrom(
-                    minimumSize: const Size.fromHeight(44),
+                Center(
+                  child: ConstrainedBox(
+                    constraints: const BoxConstraints(maxWidth: 400),
+                    child: Column(children: [
+                      FilledButton.icon(
+                        onPressed: () => const LoginRoute().push(context),
+                        icon: const Icon(Icons.login_outlined),
+                        label: const Text('登录'),
+                        style: FilledButton.styleFrom(
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                          minimumSize: const Size.fromHeight(44),
+                        ),
+                      ),
+                      const SizedBox(height: 12),
+                      Row(
+                        children: [
+                          Expanded(
+                            child: Consumer(builder: (context, ref, _) {
+                              return OutlinedButton.icon(
+                                onPressed: () {
+                                  ref
+                                      .read(userControllerProvider.notifier)
+                                      .openOAuthPage();
+                                },
+                                icon: SvgPicture.asset(
+                                  AssetsPathConstants.bangumi,
+                                  height: 20,
+                                  width: 20,
+                                ),
+                                label: const Text(
+                                  '授权登录',
+                                  overflow: TextOverflow.ellipsis,
+                                  maxLines: 1,
+                                ),
+                                style: OutlinedButton.styleFrom(
+                                  minimumSize: const Size.fromHeight(44),
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(8),
+                                  ),
+                                ),
+                              );
+                            }),
+                          ),
+                          const SizedBox(width: 12),
+                          Expanded(
+                            child: OutlinedButton(
+                              onPressed: () =>
+                                  const RegisterRoute().push(context),
+                              style: OutlinedButton.styleFrom(
+                                minimumSize: const Size.fromHeight(44),
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(8),
+                                ),
+                              ),
+                              child: const Text(
+                                '注册账号',
+                                overflow: TextOverflow.ellipsis,
+                                maxLines: 1,
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ]),
                   ),
-                ),
-                const SizedBox(height: 12),
-                OutlinedButton(
-                  onPressed: () => const RegisterRoute().push(context),
-                  child: const Text('注册新账号'),
-                ),
+                )
               ],
             ),
           ),
@@ -199,9 +255,8 @@ class AccountSettingsPage extends ConsumerWidget {
                           child: Icon(
                             Icons.person,
                             size: 48,
-                            color: Theme.of(context)
-                                .colorScheme
-                                .onSurfaceVariant,
+                            color:
+                                Theme.of(context).colorScheme.onSurfaceVariant,
                           ),
                         ),
                 ),
@@ -303,8 +358,9 @@ class AccountSettingsPage extends ConsumerWidget {
                 ),
               ),
               TextButton(
-                onPressed: () =>
-                    ref.read(userControllerProvider.notifier).cancelOAuthWaiting(),
+                onPressed: () => ref
+                    .read(userControllerProvider.notifier)
+                    .cancelOAuthWaiting(),
                 child: const Text('取消'),
               ),
             ],

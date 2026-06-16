@@ -1,15 +1,17 @@
-import 'package:anime_flow/providers/user/user_state_provider.dart';
 import 'package:anime_flow/models/item/tab_item.dart';
 import 'package:anime_flow/pages/login/index.dart';
 import 'package:anime_flow/pages/ranking/index.dart';
+import 'package:anime_flow/pages/recommend/index.dart';
 import 'package:anime_flow/pages/user/index.dart';
+import 'package:anime_flow/providers/user/user_state_provider.dart';
 import 'package:anime_flow/routes/routes.dart';
 import 'package:anime_flow/utils/systemUtil.dart';
 import 'package:anime_flow/widget/animation_network_image/animation_network_image.dart';
+import 'package:anime_flow/widget/drop_down_menu.dart';
 import 'package:flutter/material.dart';
-import 'package:anime_flow/pages/recommend/index.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+
 class MainPage extends StatefulWidget {
   final int initialTabIndex;
 
@@ -115,7 +117,7 @@ class _MainPageState extends State<MainPage> {
     return _tabs.asMap().entries.map((entry) {
       final index = entry.key;
       final tab = entry.value;
-      if (index == 2 && avatar != null ) {
+      if (index == 2 && avatar != null) {
         return NavigationDestination(
           icon: AnimationNetworkImage(
             borderRadius: BorderRadius.circular(50),
@@ -172,10 +174,10 @@ class _MainPageState extends State<MainPage> {
               builder: (context, ref, _) {
                 final userInfo = ref.watch(currentUserInfoProvider).value;
                 final isLoggedIn = ref.watch(isLoggedInProvider).value ?? false;
-                final avatar = isLoggedIn &&
-                        (userInfo?.avatar.isNotEmpty ?? false)
-                    ? userInfo!.avatar
-                    : null;
+                final avatar =
+                    isLoggedIn && (userInfo?.avatar.isNotEmpty ?? false)
+                        ? userInfo!.avatar
+                        : null;
                 return NavigationRail(
                   backgroundColor: colorScheme.surfaceContainerHighest,
                   selectedIndex: currentIndex,
@@ -205,8 +207,7 @@ class _MainPageState extends State<MainPage> {
                       onPressed: () => const SettingsRoute().push(context),
                     ),
                   ),
-                  destinations:
-                      buildRailDestinations(colorScheme, avatar),
+                  destinations: buildRailDestinations(colorScheme, avatar),
                 );
               },
             ),
@@ -226,16 +227,15 @@ class _MainPageState extends State<MainPage> {
               builder: (context, ref, _) {
                 final userInfo = ref.watch(currentUserInfoProvider).value;
                 final isLoggedIn = ref.watch(isLoggedInProvider).value ?? false;
-                final avatar = isLoggedIn &&
-                        (userInfo?.avatar.isNotEmpty ?? false)
-                    ? userInfo!.avatar
-                    : null;
+                final avatar =
+                    isLoggedIn && (userInfo?.avatar.isNotEmpty ?? false)
+                        ? userInfo!.avatar
+                        : null;
                 return NavigationBar(
                   backgroundColor: colorScheme.surfaceContainerHighest,
                   selectedIndex: currentIndex,
                   onDestinationSelected: onDestinationSelected,
-                  destinations:
-                      buildBarDestinations(colorScheme, avatar),
+                  destinations: buildBarDestinations(colorScheme, avatar),
                 );
               },
             ),
@@ -249,11 +249,69 @@ class _UserTabPage extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final isLoggedInAsync = ref.watch(isLoggedInProvider);
+    final colorScheme = Theme.of(context).colorScheme;
     return isLoggedInAsync.when(
-      data: (isLoggedIn) =>
-          isLoggedIn ? const UserPage() : const LoginPage(),
+      data: (isLoggedIn) => isLoggedIn
+          ? const UserPage()
+          : LoginPage(
+              appBar: AppBar(
+                forceMaterialTransparency: true,
+                actions: [
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 8),
+                    child: DropDownMenu<_NoLoginOverflowAction>(
+                      tooltip: '更多菜单',
+                      items: _NoLoginOverflowAction.values,
+                      disableSelected: false,
+                      buttonBuilder: (context, _) => Icon(
+                        Icons.notes_outlined,
+                        size: 28,
+                        color: colorScheme.onSurface,
+                      ),
+                      itemBuilder: (context, action, _) {
+                        final (icon, label) = switch (action) {
+                          _NoLoginOverflowAction.settings => (
+                              Icons.settings_outlined,
+                              '设置'
+                            ),
+                          _NoLoginOverflowAction.playRecord => (
+                              Icons.smart_display_outlined,
+                              '播放记录'
+                            ),
+                        };
+                        return SizedBox(
+                          height: 48,
+                          child: Row(
+                            children: [
+                              Icon(
+                                icon,
+                                size: 20,
+                                color: colorScheme.onSurfaceVariant,
+                              ),
+                              const SizedBox(width: 12),
+                              Text(label,
+                                  style: Theme.of(context).textTheme.bodyLarge),
+                            ],
+                          ),
+                        );
+                      },
+                      onSelected: (action) {
+                        switch (action) {
+                          case _NoLoginOverflowAction.settings:
+                            const SettingsRoute().push(context);
+                          case _NoLoginOverflowAction.playRecord:
+                            const PlayRecordRoute().push(context);
+                        }
+                      },
+                    ),
+                  ),
+                ],
+              ),
+            ),
       loading: () => const Center(child: CircularProgressIndicator()),
       error: (_, __) => const LoginPage(),
     );
   }
 }
+
+enum _NoLoginOverflowAction { settings, playRecord }

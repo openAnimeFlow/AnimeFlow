@@ -275,7 +275,8 @@ class _UserViewState extends State<UserView>
     final user = widget.user;
     final currentType = _tabController.index + 1;
     final canTriggerRefresh = _collectionsCache[currentType] != null;
-    final isRefreshButtonEnabled = canTriggerRefresh && !_isTypeBusy(currentType);
+    final isRefreshButtonEnabled =
+        canTriggerRefresh && !_isTypeBusy(currentType);
 
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 16),
@@ -436,29 +437,23 @@ class _UserViewState extends State<UserView>
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              ClipRRect(
-                borderRadius: BorderRadius.circular(60),
-                child: hasAvatar
-                    ? AnimationNetworkImage(
-                        url: user.avatar,
-                        fit: BoxFit.cover,
-                      )
-                    : const Icon(Icons.person, size: 96),
-              ),
-              const SizedBox(height: 16),
-              Text.rich(TextSpan(
-                text: user.nickname.isNotEmpty ? user.nickname : user.email,
-                children: [
-                  TextSpan(
-                      text: ' #${user.id}',
-                      style: TextStyle(
-                          fontSize: 16, color: Theme.of(context).disabledColor))
-                ],
+              if (hasAvatar)
+                AnimationNetworkImage(
+                  borderRadius: BorderRadius.circular(60),
+                  url: user.avatar,
+                  fit: BoxFit.cover,
+                  width: 150,
+                  height: 150,
+                )
+              else
+                const Icon(Icons.person, size: 96),
+              Text(
+                user.nickname.isNotEmpty ? user.nickname : user.email,
                 style: const TextStyle(
                   fontSize: 23,
                   fontWeight: FontWeight.bold,
                 ),
-              )),
+              ),
             ],
           ),
         )

@@ -41,8 +41,13 @@ class BgmCollectionSync extends _$BgmCollectionSync {
       return;
     }
 
+    final previous = state.value;
     final status = await FlowRequest.getBgmCollectionSyncStatusService();
     state = AsyncData(status);
+    if (previous?.isRunning == true &&
+        status.status == BgmCollectionSyncStatus.success) {
+      ref.invalidate(currentUserInfoProvider);
+    }
     _ensurePolling(status);
   }
 

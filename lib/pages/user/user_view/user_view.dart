@@ -56,8 +56,8 @@ class _UserViewState extends State<UserView>
 
   List<String> get _tabs => _collectionTypes.asMap().entries.map((entry) {
         final type = entry.key + 1;
-        final total = _collectionsCache[type]?.total;
-        return '${entry.value}\n${total ?? 0}';
+        final total = widget.user.collectionCounts.countForType(type);
+        return '${entry.value}\n$total';
       }).toList();
 
   Future<void> _getCollections(int type,

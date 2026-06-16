@@ -4,6 +4,7 @@ import 'package:anime_flow/models/item/flow/bgm_collection_sync_status_item.dart
 import 'package:anime_flow/models/item/flow/bangumi_bind_item.dart';
 import 'package:anime_flow/models/item/flow/flow_users.dart';
 import 'package:anime_flow/pages/login/index.dart';
+import 'package:anime_flow/pages/settings/pages/bind_email_section.dart';
 import 'package:anime_flow/pages/settings/setting_provider.dart';
 import 'package:anime_flow/providers/user/bgm_collection_sync_provider.dart';
 import 'package:anime_flow/providers/user/user_controller.dart';
@@ -308,6 +309,10 @@ class AccountSettingsPage extends ConsumerWidget {
             ),
           ),
         ),
+        if (user.email.isEmpty) ...[
+          const SizedBox(height: 16),
+          const BindEmailSection(),
+        ],
         const SizedBox(height: 24),
         _buildSectionTitle('第三方账号'),
         _buildBangumiBindCard(

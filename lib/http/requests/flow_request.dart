@@ -647,6 +647,24 @@ class FlowRequest {
     );
   }
 
+  /// 绑定邮箱并设置登录密码
+  static Future<FlowUsers> bindEmailService({
+    required String email,
+    required String password,
+    required String emailCaptcha,
+  }) async {
+    final response = await _client.post(
+      AnimeFlowApi.bindEmail,
+      data: {
+        'email': email,
+        'password': password,
+        'emailCaptcha': emailCaptcha,
+      },
+      options: await _flowAuthOptions(),
+    );
+    return FlowUsers.fromJson(response.data as Map<String, dynamic>);
+  }
+
   /// 获取当前用户 Bangumi 收藏列表
   static Future<UserCollectionsItem> myCollectionsService({
     int subjectType = 2,

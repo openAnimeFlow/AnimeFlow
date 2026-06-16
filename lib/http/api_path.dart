@@ -205,6 +205,9 @@ class AnimeFlowApi {
       /// 绑定 Bangumi 账号
       bangumiBindPost = '/api/v1/account/oauth/bangumi/bind',
 
+      /// 绑定邮箱
+      bindEmail = '/api/v1/account/email/bind',
+
       /// 提交 Bangumi 收藏同步
       bangumiCollectionSync = '/api/v1/account/oauth/bangumi/collections/sync',
 

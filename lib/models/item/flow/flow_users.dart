@@ -15,7 +15,7 @@ class FlowUsers {
   factory FlowUsers.fromJson(Map<String, dynamic> json) {
     return FlowUsers(
       id: json['id'] as int,
-      email: json['email'] as String,
+      email: json['email'] as String? ?? '',
       nickname: json['nickname'] as String,
       avatar: json['avatar'] as String,
       createTime: json['createTime'] as String,

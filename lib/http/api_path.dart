@@ -202,6 +202,12 @@ class AnimeFlowApi {
       /// 绑定 Bangumi 账号
       bangumiBindPost = '/api/v1/account/oauth/bangumi/bind',
 
+      /// 提交 Bangumi 收藏同步
+      bangumiCollectionSync = '/api/v1/account/oauth/bangumi/collections/sync',
+
+      /// Bangumi 第三方授权登录
+      bangumiLogin = '/api/v1/account/oauth/bangumi/login',
+
       /// 轮询 Bangumi 绑定授权码（桌面端）
       oauthBindCode = '/api/oauth/bind-code';
 }

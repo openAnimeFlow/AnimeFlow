@@ -5,11 +5,11 @@ import 'package:anime_flow/http/api_path.dart';
 import 'package:anime_flow/http/clients/anime_flow_client.dart';
 import 'package:anime_flow/http/requests/flow_request.dart';
 import 'package:anime_flow/models/item/flow/bangumi_bind_item.dart';
-import 'package:anime_flow/models/item/token_item.dart';
+import 'package:anime_flow/models/item/flow/flow_token.dart';
+import 'package:anime_flow/providers/user/bgm_collection_sync_provider.dart';
 import 'package:anime_flow/providers/user/user_oauth_state.dart';
 import 'package:anime_flow/providers/user/user_state_provider.dart';
 import 'package:anime_flow/repository/providers/repository_providers.dart';
-import 'package:anime_flow/repository/token_repository.dart';
 import 'package:anime_flow/utils/logger.dart';
 import 'package:anime_flow/utils/systemUtil.dart';
 import 'package:anime_flow/widget/notification_toast.dart';
@@ -23,21 +23,19 @@ class UserController extends _$UserController {
   @override
   UserOAuthState build() => const UserOAuthState();
 
-  TokenRepository get _tokenRepository => ref.read(tokenRepositoryProvider);
-
-  void cancelOAuthWaiting() {
+  Future<void> cancelOAuthWaiting() async {
     state = const UserOAuthState();
   }
 
-  Future<TokenItem?> getToken() => _tokenRepository.getToken();
-
   Future<void> clearUserInfo() async {
-    await _tokenRepository.removeToken();
+    await ref.read(tokenRepositoryProvider).removeToken();
     await ref.read(flowTokenRepositoryProvider).removeToken();
     ref.invalidate(currentUserTokenProvider);
     ref.invalidate(currentFlowTokenProvider);
+    ref.invalidate(isLoggedInProvider);
     ref.invalidate(currentUserInfoProvider);
     ref.invalidate(bangumiBindProvider);
+    ref.invalidate(bgmCollectionSyncProvider);
   }
 
   Future<void> handleDeepLink(String deepLink) async {
@@ -53,17 +51,14 @@ class UserController extends _$UserController {
       if (purpose == OAuthPurpose.bindBangumi) {
         await _completeBangumiBind(code);
       } else {
-        final token = await FlowRequest.getTokenService(code: code);
-        await _tokenRepository.saveToken(token);
-        ref.invalidate(currentUserTokenProvider);
-        ref.invalidate(currentUserInfoProvider);
+        await _completeBangumiLogin(code);
       }
     } catch (e) {
       final message = e is AnimeFlowApiException
           ? e.message
           : purpose == OAuthPurpose.bindBangumi
               ? 'Bangumi 绑定失败'
-              : '登录后拉取用户信息失败';
+              : 'Bangumi 授权登录失败';
       LiggLogger().e('$message: $e');
       NotificationToast.show('提示', message);
     } finally {
@@ -74,7 +69,7 @@ class UserController extends _$UserController {
   Future<void> openOAuthPage() {
     return _openOAuth(
       purpose: OAuthPurpose.login,
-      bindMode: false,
+      storeCode: true,
     );
   }
 
@@ -85,19 +80,20 @@ class UserController extends _$UserController {
     }
     return _openOAuth(
       purpose: OAuthPurpose.bindBangumi,
-      bindMode: true,
+      storeCode: true,
     );
   }
 
   Future<void> _openOAuth({
     required OAuthPurpose purpose,
-    required bool bindMode,
+    required bool storeCode,
   }) async {
     state = UserOAuthState(isAuthorizing: true, purpose: purpose);
     try {
       const clientId = Constants.bgmClientId;
       const redirectUri = AnimeFlowApi.animeFlowApi + AnimeFlowApi.callback;
-      final session = await FlowRequest.getSessionService(bindMode: bindMode);
+      final session =
+          await FlowRequest.getSessionService(bindMode: storeCode);
       final sessionId = session['sessionId'] as String;
       final authUrl = Uri.parse(
         '${CommonApi.bgmTV}${BgmApi.oauth}?response_type=code&client_id=$clientId&redirect_uri=$redirectUri&state=$sessionId',
@@ -112,11 +108,7 @@ class UserController extends _$UserController {
         );
 
         if (SystemUtil.isDesktop) {
-          if (purpose == OAuthPurpose.bindBangumi) {
-            await _pollBindCodeAfterAuth(sessionId);
-          } else {
-            await _pollTokenAfterAuth(sessionId);
-          }
+          await _pollOAuthCodeAfterAuth(sessionId, purpose);
         }
       } else {
         throw 'Could not launch $authUrl';
@@ -127,47 +119,53 @@ class UserController extends _$UserController {
     }
   }
 
+  Future<FlowToken> _completeBangumiLogin(String code) async {
+    final flowToken = await FlowRequest.bangumiLoginService(
+      code: code,
+      platform: SystemUtil.getDevice().toUpperCase(),
+    );
+    await ref.read(flowTokenRepositoryProvider).saveToken(flowToken);
+    ref.invalidate(currentFlowTokenProvider);
+    ref.invalidate(isLoggedInProvider);
+    ref.invalidate(currentUserInfoProvider);
+    ref.invalidate(bangumiBindProvider);
+    NotificationToast.show('提示', 'Bangumi 授权登录成功');
+    return flowToken;
+  }
+
   Future<BangumiBindItem?> _completeBangumiBind(String code) async {
     final bind = await FlowRequest.bindBangumiService(code: code);
     ref.invalidate(bangumiBindProvider);
+    ref.invalidate(bgmCollectionSyncProvider);
     NotificationToast.show('提示', 'Bangumi 账号绑定成功');
     return bind;
   }
 
-  Future<void> _pollTokenAfterAuth(String sessionId) async {
+  Future<void> _pollOAuthCodeAfterAuth(
+    String sessionId,
+    OAuthPurpose purpose,
+  ) async {
     try {
-      LiggLogger().d('开始轮询 token，sessionId: $sessionId');
-      final token = await FlowRequest.pollTokenService(state: sessionId);
-      if (token != null) {
-        await _tokenRepository.saveToken(token);
-        ref.invalidate(currentUserTokenProvider);
-        ref.invalidate(currentUserInfoProvider);
-      } else {
-        LiggLogger().w('轮询超时，未获取到 token');
-        NotificationToast.show('提示', '授权超时，请重试');
-      }
-    } catch (e) {
-      LiggLogger().e('轮询 token 异常: $e');
-      NotificationToast.show('提示', '登录失败，请重试');
-    } finally {
-      cancelOAuthWaiting();
-    }
-  }
-
-  Future<void> _pollBindCodeAfterAuth(String sessionId) async {
-    try {
-      LiggLogger().d('开始轮询绑定授权码，sessionId: $sessionId');
+      LiggLogger().d('开始轮询 OAuth 授权码，sessionId: $sessionId');
       final code = await FlowRequest.pollBindCodeService(state: sessionId);
-      if (code != null && code.isNotEmpty) {
+      if (code == null || code.isEmpty) {
+        LiggLogger().w('轮询超时，未获取到 OAuth 授权码');
+        NotificationToast.show('提示', '授权超时，请重试');
+        return;
+      }
+
+      if (purpose == OAuthPurpose.bindBangumi) {
         await _completeBangumiBind(code);
       } else {
-        LiggLogger().w('轮询超时，未获取到绑定授权码');
-        NotificationToast.show('提示', '绑定授权超时，请重试');
+        await _completeBangumiLogin(code);
       }
     } catch (e) {
-      LiggLogger().e('轮询绑定授权码异常: $e');
-      final message =
-          e is AnimeFlowApiException ? e.message : 'Bangumi 绑定失败，请重试';
+      LiggLogger().e('轮询 OAuth 授权码异常: $e');
+      final message = e is AnimeFlowApiException
+          ? e.message
+          : purpose == OAuthPurpose.bindBangumi
+              ? 'Bangumi 绑定失败，请重试'
+              : 'Bangumi 授权登录失败，请重试';
       NotificationToast.show('提示', message);
     } finally {
       cancelOAuthWaiting();

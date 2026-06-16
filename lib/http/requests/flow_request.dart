@@ -24,6 +24,7 @@ import 'package:anime_flow/models/item/captcha_item.dart';
 import 'package:anime_flow/models/item/danmaku/danmaku_episode_response.dart';
 import 'package:anime_flow/models/item/danmaku/danmaku_module.dart';
 import 'package:anime_flow/models/item/danmaku/danmaku_search_response.dart';
+import 'package:anime_flow/models/item/flow/bgm_collection_sync_status_item.dart';
 import 'package:anime_flow/models/item/flow/bangumi_bind_item.dart';
 import 'package:anime_flow/models/item/flow/flow_token.dart';
 import 'package:anime_flow/models/item/flow/flow_users.dart';
@@ -594,6 +595,21 @@ class FlowRequest {
     return BangumiBindItem.fromJson(response.data as Map<String, dynamic>);
   }
 
+  /// Bangumi 第三方授权登录
+  static Future<FlowToken> bangumiLoginService({
+    required String code,
+    required String platform,
+  }) async {
+    final response = await _client.post(
+      AnimeFlowApi.bangumiLogin,
+      data: {
+        'code': code,
+        'platform': platform,
+      },
+    );
+    return FlowToken.fromJson(response.data as Map<String, dynamic>);
+  }
+
   /// 绑定 Bangumi 账号
   static Future<BangumiBindItem> bindBangumiService({
     required String code,
@@ -604,5 +620,30 @@ class FlowRequest {
       options: await _flowAuthOptions(),
     );
     return BangumiBindItem.fromJson(response.data as Map<String, dynamic>);
+  }
+
+  /// 提交 Bangumi 收藏同步任务
+  static Future<BgmCollectionSyncStatusItem> triggerBgmCollectionSyncService({
+    int subjectType = 2,
+  }) async {
+    final response = await _client.post(
+      AnimeFlowApi.bangumiCollectionSync,
+      queryParameters: {'subjectType': subjectType},
+      options: await _flowAuthOptions(),
+    );
+    return BgmCollectionSyncStatusItem.fromJson(
+      response.data as Map<String, dynamic>,
+    );
+  }
+
+  /// 查询 Bangumi 收藏同步状态
+  static Future<BgmCollectionSyncStatusItem> getBgmCollectionSyncStatusService() async {
+    final response = await _client.get(
+      AnimeFlowApi.bangumiCollectionSync,
+      options: await _flowAuthOptions(),
+    );
+    return BgmCollectionSyncStatusItem.fromJson(
+      response.data as Map<String, dynamic>,
+    );
   }
 }

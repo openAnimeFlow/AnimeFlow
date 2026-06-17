@@ -13,6 +13,7 @@ import 'package:anime_flow/providers/user/user_controller.dart';
 import 'package:anime_flow/providers/user/user_oauth_state.dart';
 import 'package:anime_flow/providers/user/user_state_provider.dart';
 import 'package:anime_flow/routes/routes.dart';
+import 'package:anime_flow/utils/systemUtil.dart';
 import 'package:anime_flow/widget/network_check_button.dart';
 import 'package:anime_flow/widget/animation_network_image/animation_network_image.dart';
 import 'package:anime_flow/widget/notification_toast.dart';
@@ -106,17 +107,21 @@ class AccountSettingsPage extends ConsumerWidget {
 
   Future<void> _bindBangumi(BuildContext context, WidgetRef ref) async {
     try {
+      final launched =
       await ref.read(userControllerProvider.notifier).openOAuthPageForBind();
       if (!context.mounted) return;
-      NotificationToast.show('提示', '请在浏览器完成授权后返回应用');
+      if (launched && !SystemUtil.isDesktop) {
+        NotificationToast.show('提示', '请在浏览器完成授权后返回应用');
+      }
+    } on StateError catch (e) {
+      if (!context.mounted) return;
+      NotificationToast.show('提示', e.message);
     } catch (e) {
       if (!context.mounted) return;
-      final message = e is AnimeFlowApiException
-          ? e.message
-          : e is StateError
-          ? e.message
-          : '打开授权页面失败';
-      NotificationToast.show('提示', message);
+      NotificationToast.show(
+        '提示',
+        resolveAnimeFlowErrorMessage(e, fallback: '打开授权页面失败'),
+      );
     }
   }
 

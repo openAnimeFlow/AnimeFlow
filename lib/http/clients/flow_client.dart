@@ -1,4 +1,5 @@
 import 'package:anime_flow/http/core/api_signature.dart';
+import 'package:anime_flow/http/core/network_exception.dart';
 import 'package:anime_flow/http/core/dio_factory.dart';
 import 'package:anime_flow/http/core/network_error_mapper.dart';
 import 'package:anime_flow/http/interceptors/flow_refresh_token_interceptor.dart';
@@ -16,6 +17,25 @@ class AnimeFlowApiException implements Exception {
 
   @override
   String toString() => message;
+}
+
+/// 将 Flow 业务异常、网络异常等转换为用户可读提示。
+String resolveAnimeFlowErrorMessage(
+  Object error, {
+  required String fallback,
+}) {
+  if (error is AnimeFlowApiException) {
+    final message = error.message.trim();
+    return message.isNotEmpty ? message : fallback;
+  }
+  if (error is NetworkException) {
+    final message = error.message.trim();
+    return message.isNotEmpty ? message : fallback;
+  }
+  if (error is StateError) {
+    return error.message;
+  }
+  return fallback;
 }
 
 /// AnimeFlow API 统一响应：`{ code, message, data }`。

@@ -19,8 +19,6 @@ class OAuthCallbackPage extends ConsumerStatefulWidget {
 }
 
 class _OAuthCallbackPageState extends ConsumerState<OAuthCallbackPage> {
-  final int returnTab = 2;
-
   @override
   void initState() {
     super.initState();
@@ -28,20 +26,53 @@ class _OAuthCallbackPageState extends ConsumerState<OAuthCallbackPage> {
   }
 
   Future<void> _runCallback() async {
-    final purpose = ref.read(userControllerProvider).purpose;
+    OAuthPurpose purpose = OAuthPurpose.login;
     try {
-      await ref
+      final result = await ref
           .read(userControllerProvider.notifier)
           .handleDeepLink(widget.callbackUri.toString());
+      purpose = result.purpose;
+      if (!mounted) return;
+
+      if (!result.success && result.errorMessage != null) {
+        await showDialog<void>(
+          context: context,
+          barrierDismissible: false,
+          builder: (dialogContext) => AlertDialog(
+            title: Text(
+              purpose == OAuthPurpose.bindBangumi
+                  ? 'Bangumi 绑定失败'
+                  : 'Bangumi 授权登录失败',
+            ),
+            content: Text(result.errorMessage!),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.of(dialogContext).pop(),
+                child: const Text('知道了'),
+              ),
+            ],
+          ),
+        );
+      }
     } catch (e, st) {
       LiggLogger().e('OAuth 回调处理失败', error: e, stackTrace: st);
+      if (!mounted) return;
+      await showDialog<void>(
+        context: context,
+        builder: (dialogContext) => AlertDialog(
+          title: const Text('授权处理失败'),
+          content: Text(e.toString()),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(dialogContext).pop(),
+              child: const Text('知道了'),
+            ),
+          ],
+        ),
+      );
     } finally {
       if (mounted) {
-        if (purpose == OAuthPurpose.bindBangumi) {
-          const SettingAccountRoute().go(context);
-        } else {
-          MainRoute(tab: returnTab.clamp(0, 2)).go(context);
-        }
+        const MainRoute(tab: 2).go(context);
       }
     }
   }

@@ -64,6 +64,29 @@ class _LoginPageState extends ConsumerState<LoginPage> {
     }
   }
 
+  void _showBangumiLoginHelp() {
+    showDialog<void>(
+      context: context,
+      builder: (dialogContext) => AlertDialog(
+        title: const Text('Bangumi 授权说明'),
+        content: const Text(
+          'Bangumi 授权登录需跳转至 bgm.tv 完成验证。受网络环境影响，'
+          '国内可能出现页面无法打开或授权超时的情况。\n\n'
+          '若遇到问题，可以尝试：\n'
+          '· 开启 VPN 或代理后重试\n'
+          '· 先使用邮箱注册/登录，再在「账号设置」中绑定 Bangumi\n\n'
+          '绑定邮箱后，可使用邮箱和密码直接登录，无需每次授权。',
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(dialogContext).pop(),
+            child: const Text('知道了'),
+          ),
+        ],
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
@@ -220,22 +243,33 @@ class _LoginPageState extends ConsumerState<LoginPage> {
               ),
             ),
           ),
-          OutlinedButton.icon(
-            onPressed: () {
-              ref.read(userControllerProvider.notifier).openOAuthPage();
-            },
-            icon: SvgPicture.asset(
-              AssetsPathConstants.bangumi,
-              height: 20,
-              width: 20,
-            ),
-            label: const Text('Bangumi 授权登录'),
-            style: OutlinedButton.styleFrom(
-              minimumSize: const Size.fromHeight(44),
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(8),
+          Row(
+            children: [
+              Expanded(
+                child: OutlinedButton.icon(
+                  onPressed: () {
+                    ref.read(userControllerProvider.notifier).openOAuthPage();
+                  },
+                  icon: SvgPicture.asset(
+                    AssetsPathConstants.bangumi,
+                    height: 20,
+                    width: 20,
+                  ),
+                  label: const Text('Bangumi 授权登录'),
+                  style: OutlinedButton.styleFrom(
+                    minimumSize: const Size.fromHeight(44),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                  ),
+                ),
               ),
-            ),
+              IconButton(
+                tooltip: '授权说明',
+                onPressed: _showBangumiLoginHelp,
+                icon: const Icon(Icons.help_outline),
+              ),
+            ],
           ),
           Row(
             mainAxisAlignment: MainAxisAlignment.center,

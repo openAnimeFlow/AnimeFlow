@@ -259,7 +259,8 @@ class _RegisterPageState extends State<RegisterPage> {
                               ),
                               const SizedBox(height: 16),
                               Row(
-                                crossAxisAlignment: CrossAxisAlignment.start,
+                                crossAxisAlignment: CrossAxisAlignment.end,
+                                spacing: 8,
                                 children: [
                                   Expanded(
                                     child: TextFormField(
@@ -283,7 +284,6 @@ class _RegisterPageState extends State<RegisterPage> {
                                       },
                                     ),
                                   ),
-                                  const SizedBox(width: 12),
                                   SendCodeButton(onSend: _sendEmailCode),
                                 ],
                               ),
@@ -313,7 +313,6 @@ class _RegisterPageState extends State<RegisterPage> {
                                         ),
                                       ),
                               ),
-                              const SizedBox(height: 12),
                               TextButton(
                                 onPressed: () => context.pop(),
                                 child: const Text('已有账号？返回登录'),

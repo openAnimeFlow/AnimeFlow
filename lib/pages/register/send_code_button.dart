@@ -6,11 +6,11 @@ class SendCodeButton extends StatefulWidget {
   const SendCodeButton({
     super.key,
     required this.onSend,
-    this.width = 120,
+    this.width,
   });
 
   final Future<bool> Function() onSend;
-  final double width;
+  final double? width;
 
   @override
   State<SendCodeButton> createState() => _SendCodeButtonState();

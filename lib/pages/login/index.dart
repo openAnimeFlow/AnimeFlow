@@ -1,9 +1,11 @@
 import 'package:anime_flow/constants/assets_path_constants.dart';
+import 'package:anime_flow/http/api_path.dart';
 import 'package:anime_flow/http/clients/flow_client.dart';
 import 'package:anime_flow/pages/login/service/login_service.dart';
 import 'package:anime_flow/providers/user/user_controller.dart';
 import 'package:anime_flow/providers/user/user_state_provider.dart';
 import 'package:anime_flow/routes/routes.dart';
+import 'package:anime_flow/widget/network_check_button.dart';
 import 'package:anime_flow/widget/notification_toast.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -62,29 +64,6 @@ class _LoginPageState extends ConsumerState<LoginPage> {
         setState(() => _isSubmitting = false);
       }
     }
-  }
-
-  void _showBangumiLoginHelp() {
-    showDialog<void>(
-      context: context,
-      builder: (dialogContext) => AlertDialog(
-        title: const Text('Bangumi 授权说明'),
-        content: const Text(
-          'Bangumi 授权登录需跳转至 bgm.tv 完成验证。受网络环境影响，'
-          '国内可能出现页面无法打开或授权超时的情况。\n\n'
-          '若遇到问题，可以尝试：\n'
-          '· 开启 VPN 或代理后重试\n'
-          '· 先使用邮箱注册/登录，再在「账号设置」中绑定 Bangumi\n\n'
-          '绑定邮箱后，可使用邮箱和密码直接登录，无需每次授权。',
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(dialogContext).pop(),
-            child: const Text('知道了'),
-          ),
-        ],
-      ),
-    );
   }
 
   @override
@@ -264,10 +243,11 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                   ),
                 ),
               ),
-              IconButton(
-                tooltip: '授权说明',
-                onPressed: _showBangumiLoginHelp,
-                icon: const Icon(Icons.help_outline),
+              const NetworkCheckButton(
+                url: CommonApi.bgmTV,
+                label: 'Bangumi',
+                successHint: 'Bangumi 授权与绑定应可正常使用。',
+                failureHint: '授权或绑定 Bangumi 时，建议开启 VPN 或代理后重试。',
               ),
             ],
           ),

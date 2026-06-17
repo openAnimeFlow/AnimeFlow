@@ -1,4 +1,5 @@
 import 'package:anime_flow/constants/assets_path_constants.dart';
+import 'package:anime_flow/http/api_path.dart';
 import 'package:anime_flow/http/clients/flow_client.dart';
 import 'package:anime_flow/http/requests/flow_request.dart';
 import 'package:anime_flow/models/item/flow/bangumi_bind_item.dart';
@@ -12,6 +13,7 @@ import 'package:anime_flow/providers/user/user_controller.dart';
 import 'package:anime_flow/providers/user/user_oauth_state.dart';
 import 'package:anime_flow/providers/user/user_state_provider.dart';
 import 'package:anime_flow/routes/routes.dart';
+import 'package:anime_flow/widget/network_check_button.dart';
 import 'package:anime_flow/widget/animation_network_image/animation_network_image.dart';
 import 'package:anime_flow/widget/notification_toast.dart';
 import 'package:flutter/material.dart';
@@ -365,70 +367,6 @@ class AccountSettingsPage extends ConsumerWidget {
       ) {
     final colorScheme = Theme.of(context).colorScheme;
 
-    if (isBinding) {
-      return Card(
-        child: Padding(
-          padding: const EdgeInsets.all(24),
-          child: Row(
-            children: [
-              const SizedBox(
-                width: 24,
-                height: 24,
-                child: CircularProgressIndicator(strokeWidth: 2.5),
-              ),
-              const SizedBox(width: 16),
-              Expanded(
-                child: Text(
-                  '正在等待 Bangumi 授权结果...',
-                  style: TextStyle(color: colorScheme.onSurfaceVariant),
-                ),
-              ),
-              TextButton(
-                onPressed: () => ref
-                    .read(userControllerProvider.notifier)
-                    .cancelOAuthWaiting(),
-                child: const Text('取消'),
-              ),
-            ],
-          ),
-        ),
-      );
-    }
-
-    return bangumiBindAsync.when(
-      data: (bind) => _buildBangumiBindContent(context, ref, bind),
-      loading: () => const Card(
-        child: Padding(
-          padding: EdgeInsets.all(24),
-          child: Center(child: CircularProgressIndicator()),
-        ),
-      ),
-      error: (_, __) => Card(
-        child: ListTile(
-          leading: SvgPicture.asset(
-            AssetsPathConstants.bangumi,
-            width: 28,
-            height: 28,
-          ),
-          title: const Text('Bangumi'),
-          subtitle: const Text('获取绑定状态失败'),
-          trailing: IconButton(
-            icon: const Icon(Icons.refresh),
-            onPressed: () => ref.invalidate(bangumiBindProvider),
-          ),
-        ),
-      ),
-    );
-  }
-
-  Widget _buildBangumiBindContent(
-      BuildContext context,
-      WidgetRef ref,
-      BangumiBindItem? bind,
-      ) {
-    final colorScheme = Theme.of(context).colorScheme;
-    final isBound = bind?.bound ?? false;
-
     return Card(
       child: Padding(
         padding: const EdgeInsets.all(16),
@@ -436,6 +374,7 @@ class AccountSettingsPage extends ConsumerWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 SvgPicture.asset(
                   AssetsPathConstants.bangumi,
@@ -444,106 +383,213 @@ class AccountSettingsPage extends ConsumerWidget {
                 ),
                 const SizedBox(width: 12),
                 Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      const Text(
-                        'Bangumi',
-                        style: TextStyle(
-                          fontSize: 16,
-                          fontWeight: FontWeight.w600,
-                        ),
-                      ),
-                      const SizedBox(height: 2),
-                      Text(
-                        isBound ? '已绑定' : '未绑定',
-                        style: TextStyle(
-                          color: isBound
-                              ? colorScheme.primary
-                              : colorScheme.onSurfaceVariant,
-                        ),
-                      ),
-                    ],
+                  child: _buildBangumiStatusInfo(
+                    colorScheme: colorScheme,
+                    bangumiBindAsync: bangumiBindAsync,
+                    isBinding: isBinding,
                   ),
                 ),
-                if (isBound && bind!.platformUid != null)
-                  Text(
-                    '#${bind.platformUid}',
-                    style: TextStyle(
-                      fontSize: 12,
-                      color: colorScheme.onSurfaceVariant,
-                    ),
-                  ),
+                bangumiBindAsync.maybeWhen(
+                  data: (bind) {
+                    final isBound = bind?.bound ?? false;
+                    if (!isBinding &&
+                        isBound &&
+                        bind?.platformUid != null) {
+                      return Padding(
+                        padding: const EdgeInsets.only(top: 4, right: 4),
+                        child: Text(
+                          '#${bind!.platformUid}',
+                          style: TextStyle(
+                            fontSize: 12,
+                            color: colorScheme.onSurfaceVariant,
+                          ),
+                        ),
+                      );
+                    }
+                    return const SizedBox.shrink();
+                  },
+                  orElse: () => const SizedBox.shrink(),
+                ),
+                const NetworkCheckButton(
+                  url: CommonApi.bgmTV,
+                  label: 'Bangumi',
+                  successHint: 'Bangumi 授权与绑定应可正常使用。',
+                  failureHint: '授权或绑定 Bangumi 时，建议开启 VPN 或代理后重试。',
+                ),
               ],
             ),
-            if (isBound &&
-                (bind!.nickname?.isNotEmpty == true ||
-                    bind.username?.isNotEmpty == true)) ...[
-              const SizedBox(height: 12),
+            if (isBinding) ...[
+              const SizedBox(height: 16),
               Row(
                 children: [
-                  if (bind.avatar?.isNotEmpty == true)
-                    ClipRRect(
-                      borderRadius: BorderRadius.circular(20),
-                      child: AnimationNetworkImage(
-                        url: bind.avatar!,
-                        width: 40,
-                        height: 40,
-                        fit: BoxFit.cover,
-                      ),
-                    )
-                  else
-                    const Icon(Icons.person, size: 40),
-                  const SizedBox(width: 12),
+                  const SizedBox(
+                    width: 24,
+                    height: 24,
+                    child: CircularProgressIndicator(strokeWidth: 2.5),
+                  ),
+                  const SizedBox(width: 16),
                   Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        if (bind.nickname?.isNotEmpty == true)
-                          Text(bind.nickname!),
-                        if (bind.username?.isNotEmpty == true)
-                          Text(
-                            '@${bind.username}',
-                            style: TextStyle(
-                              fontSize: 12,
-                              color: colorScheme.onSurfaceVariant,
-                            ),
-                          ),
-                      ],
+                    child: Text(
+                      '正在等待 Bangumi 授权结果...',
+                      style: TextStyle(color: colorScheme.onSurfaceVariant),
                     ),
+                  ),
+                  TextButton(
+                    onPressed: () => ref
+                        .read(userControllerProvider.notifier)
+                        .cancelOAuthWaiting(),
+                    child: const Text('取消'),
                   ),
                 ],
               ),
-            ],
-            if (!isBound) ...[
-              const SizedBox(height: 16),
-              Text(
-                '绑定 Bangumi 账号后可同步收藏等数据',
-                style: TextStyle(
-                  fontSize: 13,
-                  color: colorScheme.onSurfaceVariant,
+            ] else
+              bangumiBindAsync.when(
+                data: (bind) => _buildBangumiBindBody(context, ref, bind),
+                loading: () => const Padding(
+                  padding: EdgeInsets.only(top: 16),
+                  child: Center(child: CircularProgressIndicator()),
+                ),
+                error: (_, __) => Padding(
+                  padding: const EdgeInsets.only(top: 12),
+                  child: Align(
+                    alignment: Alignment.centerRight,
+                    child: TextButton.icon(
+                      onPressed: () => ref.invalidate(bangumiBindProvider),
+                      icon: const Icon(Icons.refresh),
+                      label: const Text('重试'),
+                    ),
+                  ),
                 ),
               ),
-              const SizedBox(height: 12),
-              OutlinedButton.icon(
-                onPressed: () => _bindBangumi(context, ref),
-                icon: SvgPicture.asset(
-                  AssetsPathConstants.bangumi,
-                  width: 18,
-                  height: 18,
-                ),
-                label: const Text('绑定 Bangumi 账号'),
-              ),
-            ],
-            if (isBound) ...[
-              const SizedBox(height: 16),
-              const Divider(),
-              const SizedBox(height: 8),
-              const _BangumiCollectionSyncSection(),
-            ],
           ],
         ),
       ),
+    );
+  }
+
+  Widget _buildBangumiStatusInfo({
+    required ColorScheme colorScheme,
+    required AsyncValue<BangumiBindItem?> bangumiBindAsync,
+    required bool isBinding,
+  }) {
+    return bangumiBindAsync.when(
+      data: (bind) {
+        final isBound = bind?.bound ?? false;
+        final statusText = isBinding
+            ? '授权中...'
+            : isBound
+            ? '已绑定'
+            : '未绑定';
+        final statusColor = isBinding
+            ? colorScheme.onSurfaceVariant
+            : isBound
+            ? colorScheme.primary
+            : colorScheme.onSurfaceVariant;
+        return _buildBangumiTitleColumn(statusText, statusColor);
+      },
+      loading: () => _buildBangumiTitleColumn(
+        isBinding ? '授权中...' : '加载中...',
+        colorScheme.onSurfaceVariant,
+      ),
+      error: (_, __) => _buildBangumiTitleColumn(
+        '获取绑定状态失败',
+        colorScheme.error,
+      ),
+    );
+  }
+
+  Widget _buildBangumiTitleColumn(String statusText, Color statusColor) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        const Text(
+          'Bangumi',
+          style: TextStyle(
+            fontSize: 16,
+            fontWeight: FontWeight.w600,
+          ),
+        ),
+        const SizedBox(height: 2),
+        Text(
+          statusText,
+          style: TextStyle(color: statusColor),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildBangumiBindBody(
+      BuildContext context,
+      WidgetRef ref,
+      BangumiBindItem? bind,
+      ) {
+    final colorScheme = Theme.of(context).colorScheme;
+    final isBound = bind?.bound ?? false;
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        if (isBound &&
+            (bind!.nickname?.isNotEmpty == true ||
+                bind.username?.isNotEmpty == true)) ...[
+          const SizedBox(height: 12),
+          Row(
+            children: [
+              if (bind.avatar?.isNotEmpty == true)
+                ClipRRect(
+                  borderRadius: BorderRadius.circular(20),
+                  child: AnimationNetworkImage(
+                    url: bind.avatar!,
+                    width: 40,
+                    height: 40,
+                    fit: BoxFit.cover,
+                  ),
+                )
+              else
+                const Icon(Icons.person, size: 40),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    if (bind.nickname?.isNotEmpty == true)
+                      Text(bind.nickname!),
+                    if (bind.username?.isNotEmpty == true)
+                      Text(
+                        '@${bind.username}',
+                        style: TextStyle(
+                          fontSize: 12,
+                          color: colorScheme.onSurfaceVariant,
+                        ),
+                      ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+        ],
+        if (!isBound) ...[
+          const SizedBox(height: 16),
+          Text(
+            '绑定 Bangumi 账号后可同步收藏等数据',
+            style: TextStyle(
+              fontSize: 13,
+              color: colorScheme.onSurfaceVariant,
+            ),
+          ),
+          const SizedBox(height: 12),
+          OutlinedButton(
+            onPressed: () => _bindBangumi(context, ref),
+            child: const Text('绑定 Bangumi 账号'),
+          ),
+        ],
+        if (isBound) ...[
+          const SizedBox(height: 16),
+          const Divider(),
+          const SizedBox(height: 8),
+          const _BangumiCollectionSyncSection(),
+        ],
+      ],
     );
   }
 

@@ -12,7 +12,7 @@ import 'package:anime_flow/pages/register/index.dart';
 import 'package:anime_flow/pages/search/image_search_page.dart';
 import 'package:anime_flow/pages/search/index.dart';
 import 'package:anime_flow/pages/settings/index.dart';
-import 'package:anime_flow/pages/settings/pages/account_settings.dart';
+import 'package:anime_flow/pages/settings/pages/account/account_settings.dart';
 import 'package:anime_flow/pages/settings/pages/about/index.dart';
 import 'package:anime_flow/pages/settings/pages/about/thanks.dart';
 import 'package:anime_flow/pages/settings/pages/agreement/index.dart';

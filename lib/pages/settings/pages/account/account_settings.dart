@@ -1,5 +1,6 @@
 import 'package:anime_flow/constants/assets_path_constants.dart';
 import 'package:anime_flow/http/clients/flow_client.dart';
+import 'package:anime_flow/http/requests/flow_request.dart';
 import 'package:anime_flow/models/item/flow/bangumi_bind_item.dart';
 import 'package:anime_flow/models/item/flow/bgm_collection_sync_status_item.dart';
 import 'package:anime_flow/models/item/flow/flow_users.dart';
@@ -16,6 +17,8 @@ import 'package:anime_flow/widget/notification_toast.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_svg/svg.dart';
+
+import 'nickname_editor.dart';
 
 class AccountSettingsPage extends ConsumerWidget {
   const AccountSettingsPage({super.key});
@@ -55,12 +58,12 @@ class AccountSettingsPage extends ConsumerWidget {
                 data: (user) => user == null
                     ? _buildNotLoggedIn(context)
                     : _buildLoggedInContent(
-                        context,
-                        ref,
-                        user,
-                        bangumiBindAsync,
-                        isBinding,
-                      ),
+                  context,
+                  ref,
+                  user,
+                  bangumiBindAsync,
+                  isBinding,
+                ),
                 loading: () => const Center(child: CircularProgressIndicator()),
                 error: (_, __) => _buildErrorState('获取用户资料失败'),
               );
@@ -109,8 +112,8 @@ class AccountSettingsPage extends ConsumerWidget {
       final message = e is AnimeFlowApiException
           ? e.message
           : e is StateError
-              ? e.message
-              : '打开授权页面失败';
+          ? e.message
+          : '打开授权页面失败';
       NotificationToast.show('提示', message);
     }
   }
@@ -139,16 +142,16 @@ class AccountSettingsPage extends ConsumerWidget {
                 Text(
                   '尚未登录',
                   style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                        fontWeight: FontWeight.bold,
-                      ),
+                    fontWeight: FontWeight.bold,
+                  ),
                 ),
                 const SizedBox(height: 8),
                 Text(
                   '登录后可管理账户信息、绑定 Bangumi 账号',
                   textAlign: TextAlign.center,
                   style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                        color: colorScheme.onSurfaceVariant,
-                      ),
+                    color: colorScheme.onSurfaceVariant,
+                  ),
                 ),
                 const SizedBox(height: 24),
                 Center(
@@ -228,12 +231,12 @@ class AccountSettingsPage extends ConsumerWidget {
   }
 
   Widget _buildLoggedInContent(
-    BuildContext context,
-    WidgetRef ref,
-    FlowUsers user,
-    AsyncValue<BangumiBindItem?> bangumiBindAsync,
-    bool isBinding,
-  ) {
+      BuildContext context,
+      WidgetRef ref,
+      FlowUsers user,
+      AsyncValue<BangumiBindItem?> bangumiBindAsync,
+      bool isBinding,
+      ) {
     return ListView(
       padding: const EdgeInsets.all(16),
       children: [
@@ -247,40 +250,47 @@ class AccountSettingsPage extends ConsumerWidget {
                   borderRadius: BorderRadius.circular(40),
                   child: user.avatar.isNotEmpty
                       ? AnimationNetworkImage(
-                          url: user.avatar,
-                          width: 72,
-                          height: 72,
-                          fit: BoxFit.cover,
-                        )
+                    url: user.avatar,
+                    width: 72,
+                    height: 72,
+                    fit: BoxFit.cover,
+                  )
                       : SizedBox(
-                          width: 72,
-                          height: 72,
-                          child: Icon(
-                            Icons.person,
-                            size: 48,
-                            color:
-                                Theme.of(context).colorScheme.onSurfaceVariant,
-                          ),
-                        ),
+                    width: 72,
+                    height: 72,
+                    child: Icon(
+                      Icons.person,
+                      size: 48,
+                      color:
+                      Theme.of(context).colorScheme.onSurfaceVariant,
+                    ),
+                  ),
                 ),
                 const SizedBox(width: 16),
                 Expanded(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Row(
-                        children: [
-                          Text(
-                            user.nickname.isNotEmpty
-                                ? user.nickname
-                                : user.email,
-                            style: const TextStyle(
-                              fontSize: 18,
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
-                          IconButton(onPressed: () {}, icon: const Icon(Icons.edit))
-                        ],
+                      NicknameEditorView(
+                        nickname: user.nickname,
+                        displayText: user.nickname.isNotEmpty
+                            ? user.nickname
+                            : user.email,
+                        onConfirm: (newNickname) async {
+                          try {
+                            await FlowRequest.updateUserInfoService(
+                              nickname: newNickname,
+                            );
+                            ref.invalidate(currentUserInfoProvider);
+                            NotificationToast.show('提示', '昵称已更新');
+                          } on AnimeFlowApiException catch (e) {
+                            NotificationToast.show('提示', e.message);
+                            rethrow;
+                          } catch (e) {
+                            NotificationToast.show('提示', '更新昵称失败');
+                            rethrow;
+                          }
+                        },
                       ),
                       const SizedBox(height: 4),
                       Text(
@@ -348,11 +358,11 @@ class AccountSettingsPage extends ConsumerWidget {
   }
 
   Widget _buildBangumiBindCard(
-    BuildContext context,
-    WidgetRef ref,
-    AsyncValue<BangumiBindItem?> bangumiBindAsync,
-    bool isBinding,
-  ) {
+      BuildContext context,
+      WidgetRef ref,
+      AsyncValue<BangumiBindItem?> bangumiBindAsync,
+      bool isBinding,
+      ) {
     final colorScheme = Theme.of(context).colorScheme;
 
     if (isBinding) {
@@ -412,10 +422,10 @@ class AccountSettingsPage extends ConsumerWidget {
   }
 
   Widget _buildBangumiBindContent(
-    BuildContext context,
-    WidgetRef ref,
-    BangumiBindItem? bind,
-  ) {
+      BuildContext context,
+      WidgetRef ref,
+      BangumiBindItem? bind,
+      ) {
     final colorScheme = Theme.of(context).colorScheme;
     final isBound = bind?.bound ?? false;
 
@@ -587,8 +597,8 @@ class _BangumiCollectionSyncSectionState
       final message = e is AnimeFlowApiException
           ? e.message
           : e is StateError
-              ? e.message
-              : '启动同步失败';
+          ? e.message
+          : '启动同步失败';
       NotificationToast.show('提示', message);
     } finally {
       if (mounted) {
@@ -759,21 +769,21 @@ class _SyncStatusChip extends StatelessWidget {
     final colorScheme = Theme.of(context).colorScheme;
     final (Color bg, Color fg) = switch (status) {
       BgmCollectionSyncStatus.running => (
-          colorScheme.primaryContainer,
-          colorScheme.onPrimaryContainer,
-        ),
+      colorScheme.primaryContainer,
+      colorScheme.onPrimaryContainer,
+      ),
       BgmCollectionSyncStatus.success => (
-          colorScheme.tertiaryContainer,
-          colorScheme.onTertiaryContainer,
-        ),
+      colorScheme.tertiaryContainer,
+      colorScheme.onTertiaryContainer,
+      ),
       BgmCollectionSyncStatus.failed => (
-          colorScheme.errorContainer,
-          colorScheme.onErrorContainer,
-        ),
+      colorScheme.errorContainer,
+      colorScheme.onErrorContainer,
+      ),
       BgmCollectionSyncStatus.idle => (
-          colorScheme.surfaceContainerHighest,
-          colorScheme.onSurfaceVariant,
-        ),
+      colorScheme.surfaceContainerHighest,
+      colorScheme.onSurfaceVariant,
+      ),
     };
 
     return Container(

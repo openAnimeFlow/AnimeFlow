@@ -598,6 +598,23 @@ class FlowRequest {
         .then((value) => FlowUsers.fromJson((value.data) as Map<String, dynamic>));
   }
 
+  /// 更新当前用户资料（昵称、头像）
+  static Future<FlowUsers> updateUserInfoService({
+    String? nickname,
+    String? avatar,
+  }) async {
+    final data = <String, dynamic>{};
+    if (nickname != null) data['nickname'] = nickname;
+    if (avatar != null) data['avatar'] = avatar;
+
+    final response = await _client.put(
+      AnimeFlowApi.flowUsers,
+      data: data,
+      options: await _flowAuthOptions(),
+    );
+    return FlowUsers.fromJson(response.data as Map<String, dynamic>);
+  }
+
   static Future<Options> _flowAuthOptions() async {
     final token = await FlowTokenStorage.instance.getToken();
     if (token == null) {

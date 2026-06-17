@@ -7,7 +7,7 @@ import 'package:anime_flow/utils/systemUtil.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import 'package:anime_flow/pages/settings/pages/account_settings.dart';
+import 'package:anime_flow/pages/settings/pages/account/account_settings.dart';
 import 'package:anime_flow/pages/settings/pages/general_settings.dart';
 import 'package:anime_flow/pages/settings/pages/playback_settings.dart';
 import 'package:anime_flow/pages/settings/pages/about/index.dart';

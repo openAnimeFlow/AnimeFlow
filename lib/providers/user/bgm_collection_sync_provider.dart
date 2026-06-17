@@ -10,6 +10,7 @@ part 'bgm_collection_sync_provider.g.dart';
 @Riverpod(keepAlive: true)
 class BgmCollectionSync extends _$BgmCollectionSync {
   Timer? _pollTimer;
+  bool _refreshInFlight = false;
 
   @override
   Future<BgmCollectionSyncStatusItem?> build() async {
@@ -34,21 +35,29 @@ class BgmCollectionSync extends _$BgmCollectionSync {
   }
 
   Future<void> refreshStatus() async {
-    final bind = await ref.read(bangumiBindProvider.future);
-    if (bind?.bound != true) {
-      state = const AsyncData(null);
-      _stopPolling();
+    if (_refreshInFlight) {
       return;
     }
+    _refreshInFlight = true;
+    try {
+      final bind = await ref.read(bangumiBindProvider.future);
+      if (bind?.bound != true) {
+        state = const AsyncData(null);
+        _stopPolling();
+        return;
+      }
 
-    final previous = state.value;
-    final status = await FlowRequest.getBgmCollectionSyncStatusService();
-    state = AsyncData(status);
-    if (previous?.isRunning == true &&
-        status.status == BgmCollectionSyncStatus.success) {
-      ref.invalidate(currentUserInfoProvider);
+      final previous = state.value;
+      final status = await FlowRequest.getBgmCollectionSyncStatusService();
+      state = AsyncData(status);
+      if (previous?.isRunning == true &&
+          status.status == BgmCollectionSyncStatus.success) {
+        ref.invalidate(currentUserInfoProvider);
+      }
+      _ensurePolling(status);
+    } finally {
+      _refreshInFlight = false;
     }
-    _ensurePolling(status);
   }
 
   void _ensurePolling(BgmCollectionSyncStatusItem? status) {

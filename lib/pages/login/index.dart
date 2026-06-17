@@ -25,7 +25,6 @@ class _LoginPageState extends ConsumerState<LoginPage> {
   final _passwordController = TextEditingController();
 
   bool _obscurePassword = true;
-  bool _rememberMe = true;
   bool _isSubmitting = false;
 
   final _loginService = LoginService();
@@ -194,21 +193,12 @@ class _LoginPageState extends ConsumerState<LoginPage> {
               return null;
             },
           ),
-          Row(
-            children: [
-              Checkbox(
-                value: _rememberMe,
-                onChanged: (value) {
-                  setState(() => _rememberMe = value ?? false);
-                },
-              ),
-              const Text('记住登录'),
-              const Spacer(),
-              TextButton(
-                onPressed: () => const ForgotPasswordRoute().push(context),
-                child: const Text('忘记密码'),
-              ),
-            ],
+          Align(
+            alignment: Alignment.centerRight,
+            child: TextButton(
+              onPressed: () => const ForgotPasswordRoute().push(context),
+              child: const Text('忘记密码'),
+            ),
           ),
           FilledButton.icon(
             onPressed: _isSubmitting ? null : _submit,

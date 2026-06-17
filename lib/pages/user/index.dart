@@ -34,8 +34,24 @@ class UserPage extends ConsumerWidget {
       loading: () => const Scaffold(
         body: Center(child: CircularProgressIndicator()),
       ),
-      error: (_, __) => const Scaffold(
-        body: Center(child: Text('获取用户资料失败')),
+      error: (_, __) => Scaffold(
+        body: Center(
+          child: InkWell(
+            onTap: () => ref.invalidate(currentUserInfoProvider),
+            child: const Padding(
+              padding: EdgeInsets.all(8.0),
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                mainAxisAlignment: MainAxisAlignment.center,
+                spacing: 8,
+                children: [
+                  Text('获取用户资料失败'),
+                  Icon(Icons.refresh),
+                ],
+              ),
+            ),
+          ),
+        ),
       ),
     );
   }

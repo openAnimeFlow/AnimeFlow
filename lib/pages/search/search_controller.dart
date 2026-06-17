@@ -115,12 +115,12 @@ class SearchPageController extends GetxController {
     final requestId = ++_suggestionRequestId;
     try {
       searchSuggestions.clear();
-      final searchRequest =
-          await FlowRequest.searchSubjectService(keyword, limit: 20, offset: 0);
+      final suggestions =
+          await FlowRequest.searchSuggestionsService(keyword, limit: 20);
       if (requestId != _suggestionRequestId) return;
 
-      searchSuggestions.addAll(searchRequest.data
-          .map((item) => item.nameCN.isEmpty ? item.name : item.nameCN)
+      searchSuggestions.addAll(suggestions.data
+          .map((item) => item.displayName)
           .where((name) => name.isNotEmpty));
     } catch (_) {
       if (requestId != _suggestionRequestId) return;

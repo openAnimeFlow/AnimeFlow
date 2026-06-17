@@ -29,6 +29,7 @@ import 'package:anime_flow/models/item/flow/bangumi_bind_item.dart';
 import 'package:anime_flow/models/item/flow/flow_token.dart';
 import 'package:anime_flow/models/item/flow/flow_users.dart';
 import 'package:anime_flow/models/item/token_item.dart';
+import 'package:anime_flow/models/search/search_suggestions_item.dart';
 import 'package:anime_flow/repository/BangumiToken.dart';
 import 'package:anime_flow/repository/flow_token_storage.dart';
 import 'package:anime_flow/utils/logger.dart';
@@ -343,6 +344,23 @@ class FlowRequest {
     );
 
     return SubjectItem.fromJson(response.data);
+  }
+
+  /// 搜索建议
+  static Future<SearchSuggestionsItem> searchSuggestionsService(
+    String keyword, {
+    int limit = 20,
+    int type = 2,
+  }) async {
+    final response = await _client.get(
+      AnimeFlowApi.bangumiSearchSuggestions,
+      queryParameters: {
+        'keyword': keyword,
+        'limit': limit,
+        'type': type,
+      },
+    );
+    return SearchSuggestionsItem.fromJson(response.data);
   }
 
   ///角色列表

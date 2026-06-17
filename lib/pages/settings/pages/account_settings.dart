@@ -1,7 +1,7 @@
 import 'package:anime_flow/constants/assets_path_constants.dart';
 import 'package:anime_flow/http/clients/flow_client.dart';
-import 'package:anime_flow/models/item/flow/bgm_collection_sync_status_item.dart';
 import 'package:anime_flow/models/item/flow/bangumi_bind_item.dart';
+import 'package:anime_flow/models/item/flow/bgm_collection_sync_status_item.dart';
 import 'package:anime_flow/models/item/flow/flow_users.dart';
 import 'package:anime_flow/pages/login/index.dart';
 import 'package:anime_flow/pages/settings/pages/bind_email_section.dart';
@@ -268,12 +268,19 @@ class AccountSettingsPage extends ConsumerWidget {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text(
-                        user.nickname.isNotEmpty ? user.nickname : user.email,
-                        style: const TextStyle(
-                          fontSize: 18,
-                          fontWeight: FontWeight.bold,
-                        ),
+                      Row(
+                        children: [
+                          Text(
+                            user.nickname.isNotEmpty
+                                ? user.nickname
+                                : user.email,
+                            style: const TextStyle(
+                              fontSize: 18,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                          IconButton(onPressed: () {}, icon: const Icon(Icons.edit))
+                        ],
                       ),
                       const SizedBox(height: 4),
                       Text(
@@ -609,7 +616,8 @@ class _BangumiCollectionSyncSectionState
       data: (status) {
         final item = status;
         final isRunning = item?.isRunning == true || _isSubmitting;
-        final statusLabel = item?.status.label ?? BgmCollectionSyncStatus.idle.label;
+        final statusLabel =
+            item?.status.label ?? BgmCollectionSyncStatus.idle.label;
         final message = item?.message;
         final syncedCount = item?.syncedCount ?? 0;
         final totalCount = item?.totalCount ?? 0;

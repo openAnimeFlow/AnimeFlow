@@ -542,6 +542,22 @@ class FlowRequest {
     return FlowToken.fromJson(response.data as Map<String, dynamic>);
   }
 
+  /// 忘记密码：通过邮箱验证码重置登录密码
+  static Future<void> forgotPasswordService({
+    required String email,
+    required String password,
+    required String emailCaptcha,
+  }) async {
+    await _client.post(
+      AnimeFlowApi.forgotPassword,
+      data: {
+        'email': email,
+        'password': password,
+        'emailCaptcha': emailCaptcha,
+      },
+    );
+  }
+
   /// 刷新 AnimeFlow token
   static Future<FlowToken> flowRefreshTokenService({
     required String refreshToken,

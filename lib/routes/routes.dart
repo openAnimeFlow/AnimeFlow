@@ -2,6 +2,7 @@ import 'package:anime_flow/pages/anime_info/index.dart';
 import 'package:anime_flow/pages/calendar/index.dart';
 import 'package:anime_flow/pages/character_info/index.dart';
 import 'package:anime_flow/pages/characters/index.dart';
+import 'package:anime_flow/pages/forgot_password/index.dart';
 import 'package:anime_flow/pages/login/index.dart';
 import 'package:anime_flow/pages/main/index.dart';
 import 'package:anime_flow/pages/oauth/oauth_callback_page.dart';
@@ -70,6 +71,15 @@ class RegisterRoute extends GoRouteData with $RegisterRoute {
   @override
   Widget build(BuildContext context, GoRouterState state) =>
       const RegisterPage();
+}
+
+@TypedGoRoute<ForgotPasswordRoute>(path: '/forgot_password')
+class ForgotPasswordRoute extends GoRouteData with $ForgotPasswordRoute {
+  const ForgotPasswordRoute();
+
+  @override
+  Widget build(BuildContext context, GoRouterState state) =>
+      const ForgotPasswordPage();
 }
 
 @TypedGoRoute<OauthCallbackRoute>(path: '/oauth/callback')

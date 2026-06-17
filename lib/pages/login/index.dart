@@ -205,7 +205,7 @@ class _LoginPageState extends ConsumerState<LoginPage> {
               const Text('记住登录'),
               const Spacer(),
               TextButton(
-                onPressed: () {},
+                onPressed: () => const ForgotPasswordRoute().push(context),
                 child: const Text('忘记密码'),
               ),
             ],

@@ -190,6 +190,9 @@ class AnimeFlowApi {
       /// 邮箱登录
       emailLogin = '/api/v1/account/email/login',
 
+      /// 忘记密码
+      forgotPassword = '/api/v1/account/email/forgot-password',
+
       /// 刷新 AnimeFlow token
       flowRefreshToken = '/api/v1/account/refresh',
 

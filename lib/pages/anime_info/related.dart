@@ -29,8 +29,12 @@ class RelatedView extends StatelessWidget {
                     const SizedBox(height: 10),
                     SizedBox(
                       height: 200,
-                      child: ListView.builder(
-                        scrollDirection: Axis.horizontal,
+                      child: ScrollConfiguration(
+                        behavior: ScrollConfiguration.of(context).copyWith(
+                          scrollbars: false,
+                        ),
+                        child: ListView.builder(
+                          scrollDirection: Axis.horizontal,
                         itemCount: relation.data.length,
                         itemBuilder: (context, index) {
                           final item = relation.data[index];
@@ -71,6 +75,7 @@ class RelatedView extends StatelessWidget {
                           );
                         },
                       ),
+                    ),
                     )
                   ]
                 ],

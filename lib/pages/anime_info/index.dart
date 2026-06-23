@@ -54,6 +54,9 @@ class _AnimeInfoPageState extends State<AnimeInfoPage> {
           return false;
         },
         child: NestedScrollView(
+          scrollBehavior: const ScrollBehavior().copyWith(
+            scrollbars: false,
+          ),
           controller: nestedScrollController,
           headerSliverBuilder: (BuildContext context, bool innerBoxIsScrolled) {
             return <Widget>[

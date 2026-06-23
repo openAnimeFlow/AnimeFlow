@@ -171,19 +171,6 @@ class _UserViewState extends ConsumerState<UserView>
       padding: const EdgeInsets.symmetric(horizontal: 16),
       child: Row(
         children: [
-          InkWell(
-            borderRadius: BorderRadius.circular(8),
-            onTap: null,
-            child: const Row(
-              children: [
-                Text(
-                  '我的空间',
-                  style: TextStyle(fontWeight: FontWeight.bold),
-                ),
-                Icon(Icons.import_contacts)
-              ],
-            ),
-          ),
           const Spacer(),
           AnimatedOpacity(
             opacity: isPinned ? 1 : 0,

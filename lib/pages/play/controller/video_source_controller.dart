@@ -1,3 +1,5 @@
+import 'dart:isolate';
+
 import 'package:anime_flow/crawler/cookie_manager.dart';
 import 'package:anime_flow/crawler/html_request.dart';
 import 'package:anime_flow/crawler/itme/anti_crawler_config.dart';
@@ -178,17 +180,40 @@ class VideoSourceController extends GetxController {
     await _getResources(keyword.value, config);
   }
 
+  /// 搜索结果经权重排序后最多处理的条数，防止过多 HTTP 请求
+  static const _maxSearchItems = 5;
+
   Future<void> _getResources(String keyword, CrawlConfigItem config) async {
     try {
       _updateResourceStatus(config.name, isLoading: true, errorMessage: null);
 
-      final rankService = SearchResultRankService(
-        searchTerm: keyword,
-        aliases: _container.read(playSubjectProvider).subjectAliases,
-      );
+      // 在主线程读取 aliases，随后交给 Isolate 做排序
+      final aliases = _container.read(playSubjectProvider).subjectAliases;
       final rawSearchList =
           await WebRequest.getSearchSubjectListService(keyword, config);
-      final searchList = rankService.sort(rawSearchList, (item) => item.name);
+
+      // 将 O(n²~n³) 的权重排序移入后台 Isolate，避免阻塞 UI 线程
+      final names = rawSearchList.map((item) => item.name).toList(growable: false);
+      final sortedIndices = await Isolate.run(() {
+        final service = SearchResultRankService(
+          searchTerm: keyword,
+          aliases: aliases,
+        );
+        final scores = service.computeScoresBatch(names);
+        final indices = List.generate(names.length, (i) => i, growable: false);
+        indices.sort((a, b) {
+          final cmp = scores[b].compareTo(scores[a]);
+          return cmp != 0 ? cmp : a.compareTo(b);
+        });
+        return indices;
+      });
+
+      // 仅处理相关度最高的前 N 条，避免对大量低质量结果发起无效请求
+      final searchList = sortedIndices
+          .take(_maxSearchItems)
+          .map((i) => rawSearchList[i])
+          .toList(growable: false);
+
       final allEpisodesList = <EpisodeResourcesItem>[];
 
       for (final search in searchList) {

@@ -17,6 +17,7 @@ class _PlaybackSettingsPageState extends State<PlaybackSettingsPage> {
   late bool _autoPlayNext;
   late bool _episodesProgress;
   late double _fastForwardSpeed;
+  late bool _adBlocker;
 
   @override
   void initState() {
@@ -29,6 +30,7 @@ class _PlaybackSettingsPageState extends State<PlaybackSettingsPage> {
       _autoPlayNext = setting.get(PlaybackKey.autoPlayNext, defaultValue: true);
       _episodesProgress = setting.get(PlaybackKey.episodesProgress, defaultValue: true);
       _fastForwardSpeed = setting.get(PlaybackKey.fastForwardSpeed, defaultValue: 2.0);
+      _adBlocker = setting.get(PlaybackKey.adBlocker, defaultValue: false);
     });
   }
 
@@ -59,7 +61,7 @@ class _PlaybackSettingsPageState extends State<PlaybackSettingsPage> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     // 自动播放设置
-                    _buildSectionTitle('自动播放'),
+                    _buildSectionTitle('播放设置'),
                     SwitchListTile(
                       title: const Text('自动跳转下一集'),
                       subtitle: const Text('播放完成后自动切换到下一集'),
@@ -71,8 +73,18 @@ class _PlaybackSettingsPageState extends State<PlaybackSettingsPage> {
                         });
                       },
                     ),
+                    SwitchListTile(
+                      title: const Text('过滤广告'),
+                      subtitle: const Text('过滤视频中插入的广告切片'),
+                      value: _adBlocker,
+                      onChanged: (value) {
+                        setState(() {
+                          _adBlocker = value;
+                          setting.put(PlaybackKey.adBlocker, _adBlocker);
+                        });
+                      },
+                    ),
                     const SizedBox(height: 16),
-
                     // 进度设置
                     _buildSectionTitle('播放进度'),
                     SwitchListTile(

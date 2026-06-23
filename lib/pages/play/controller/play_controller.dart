@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'dart:io';
+
 import 'package:anime_flow/constants/constants.dart';
 import 'package:anime_flow/constants/storage_key.dart';
 import 'package:anime_flow/http/requests/flow_request.dart';
@@ -9,19 +10,18 @@ import 'package:anime_flow/models/play/play_history.dart';
 import 'package:anime_flow/pages/play/controller/video_ui_controller.dart';
 import 'package:anime_flow/repository/play_repository.dart';
 import 'package:anime_flow/repository/storage.dart';
+import 'package:anime_flow/utils/logger.dart';
 import 'package:anime_flow/utils/systemUtil.dart';
 import 'package:anime_flow/utils/utils.dart';
 import 'package:anime_flow/utils/vibrate.dart';
+import 'package:anime_flow/widget/windows_title_bar.dart';
 import 'package:canvas_danmaku/canvas_danmaku.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:hive_ce/hive.dart';
-import 'package:anime_flow/utils/logger.dart';
 import 'package:media_kit/media_kit.dart';
 import 'package:media_kit_video/media_kit_video.dart';
-import 'package:anime_flow/widget/windows_title_bar.dart';
 import 'package:window_manager/window_manager.dart';
-
 
 class PlayState {
   /// 播放地址
@@ -165,7 +165,8 @@ class PlayController extends GetxController {
   @override
   void onInit() {
     super.onInit();
-    player = Player();
+    final adBlocker = setting.get(PlaybackKey.adBlocker, defaultValue: false);
+    player = Player(configuration: PlayerConfiguration(adBlocker: adBlocker));
     videoController = VideoController(player);
     syncPlatformVisibilityFromStorage();
 
@@ -254,9 +255,11 @@ class PlayController extends GetxController {
     try {
       if (!_isLoadingDanmaku && episode != 0) {
         _isLoadingDanmaku = true;
-        final bgmBangumiId = await FlowRequest.getDanDanBangumiIDByBgmBangumiID(subjectId);
+        final bgmBangumiId =
+            await FlowRequest.getDanDanBangumiIDByBgmBangumiID(subjectId);
         if (bgmBangumiId != null) {
-          final danmaku = await FlowRequest.getDanDanmaku(bgmBangumiId, episode);
+          final danmaku =
+              await FlowRequest.getDanDanmaku(bgmBangumiId, episode);
           addDanmakuAll(danmaku);
           _isLoadingDanmaku = false;
         }
@@ -277,16 +280,15 @@ class PlayController extends GetxController {
         if (position != Duration.zero || duration != Duration.zero) {
           if (subjectId > 0 && episodeId > 0) {
             final playHistory = PlayHistory(
-              subjectId: subjectId,
-              subjectName: subjectName!,
-              episodeId: episodeId,
-              episodeSort: episode,
-              cover: subjectCover!,
-              updateAt: DateTime.now(),
-              position: position.inSeconds,
-              duration: duration.inSeconds,
-              alias: alias
-            );
+                subjectId: subjectId,
+                subjectName: subjectName!,
+                episodeId: episodeId,
+                episodeSort: episode,
+                cover: subjectCover!,
+                updateAt: DateTime.now(),
+                position: position.inSeconds,
+                duration: duration.inSeconds,
+                alias: alias);
             PlayRepository.savePlayHistory(playHistory);
           }
 
@@ -323,11 +325,11 @@ class PlayController extends GetxController {
 
     // 读取各平台的显示设置
     final platformBilibili =
-    setting.get(DanmakuKey.danmakuPlatformBilibili, defaultValue: true);
+        setting.get(DanmakuKey.danmakuPlatformBilibili, defaultValue: true);
     final platformGamer =
-    setting.get(DanmakuKey.danmakuPlatformGamer, defaultValue: true);
+        setting.get(DanmakuKey.danmakuPlatformGamer, defaultValue: true);
     final platformDanDanPlay =
-    setting.get(DanmakuKey.danmakuPlatformDanDanPlay, defaultValue: true);
+        setting.get(DanmakuKey.danmakuPlatformDanDanPlay, defaultValue: true);
 
     // 平台名称映射（从 source 字段中提取的实际名称，如 [BiliBili]、[Gamer]）
     const String platformNameBilibili = 'BiliBili';
@@ -457,7 +459,9 @@ class PlayController extends GetxController {
     if (bgmBangumiId == null) return false;
     final trimmed = message.trim();
     if (trimmed.isEmpty) return false;
-    if (duration.value == Duration.zero && position.value == Duration.zero && episode <= 0) {
+    if (duration.value == Duration.zero &&
+        position.value == Duration.zero &&
+        episode <= 0) {
       return false;
     }
     final time = position.value.inMicroseconds / Duration.microsecondsPerSecond;
@@ -471,8 +475,7 @@ class PlayController extends GetxController {
       source: 'AnimeFlow',
     );
     addDanDanmaku(item, bgmUserId);
-    await FlowRequest.sendDanmaku(
-        bgmBangumiId, episode,
+    await FlowRequest.sendDanmaku(bgmBangumiId, episode,
         message: item.message,
         time: item.time,
         type: item.type,
@@ -500,10 +503,9 @@ class PlayController extends GetxController {
           selfSend: danmaku.bgmUserId != null && danmaku.bgmUserId == bgmUserId,
         ),
       );
-    } catch (_) {
-    }
-
+    } catch (_) {}
   }
+
   void removeDanmaku() {
     danmakuController.clear();
     danDanmakus.clear();
@@ -540,7 +542,8 @@ class PlayController extends GetxController {
 
   ///暂停/播放
   void playOrPauseVideo() {
-    Get.find<VideoUiStateController>().updateMainAxisAlignmentType(MainAxisAlignment.start);
+    Get.find<VideoUiStateController>()
+        .updateMainAxisAlignmentType(MainAxisAlignment.start);
     player.playOrPause();
   }
 
@@ -607,7 +610,7 @@ class PlayController extends GetxController {
 
   ///停止播放
   /// [duration] 可选参数，如果提供则会在指定时间后停止播放
-  Future<void> stopPlaying({Duration? duration}) async{
+  Future<void> stopPlaying({Duration? duration}) async {
     _stopTimer?.cancel();
     if (duration != null && duration > Duration.zero) {
       final totalSeconds = duration.inSeconds;
@@ -646,7 +649,8 @@ class PlayController extends GetxController {
         'change-list',
         'glsl-shaders',
         'set',
-        Utils.buildShadersAbsolutePath(shadersDirectory.path, mpvAnime4KShadersLite),
+        Utils.buildShadersAbsolutePath(
+            shadersDirectory.path, mpvAnime4KShadersLite),
       ]);
       superResolutionType.value = 2;
       return;
@@ -656,7 +660,8 @@ class PlayController extends GetxController {
         'change-list',
         'glsl-shaders',
         'set',
-        Utils.buildShadersAbsolutePath(shadersDirectory.path, mpvAnime4KShaders),
+        Utils.buildShadersAbsolutePath(
+            shadersDirectory.path, mpvAnime4KShaders),
       ]);
       superResolutionType.value = 3;
       return;

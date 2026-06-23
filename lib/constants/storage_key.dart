@@ -30,7 +30,8 @@ class DanmakuKey {
 class PlaybackKey {
   static const String autoPlayNext = 'playback_auto_play_next',
       episodesProgress = 'playback_episodes_progress',
-      fastForwardSpeed = 'playback_fast_forward_speed';
+      fastForwardSpeed = 'playback_fast_forward_speed',
+      adBlocker = 'playback_ad_blocker';
 }
 
 class SettingKey {

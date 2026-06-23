@@ -66,19 +66,6 @@ class FormatTimeUtil {
     }
   }
 
-  /// 格式化字节数
-  static String formatBytes(int bytes) {
-    if (bytes < 1024) {
-      return '$bytes B';
-    } else if (bytes < 1024 * 1024) {
-      return '${(bytes / 1024).toStringAsFixed(2)} KB';
-    } else if (bytes < 1024 * 1024 * 1024) {
-      return '${(bytes / (1024 * 1024)).toStringAsFixed(2)} MB';
-    } else {
-      return '${(bytes / (1024 * 1024 * 1024)).toStringAsFixed(2)} GB';
-    }
-  }
-
   /// 格式化弹幕时间（秒数）
   /// [seconds] 弹幕时间，单位：秒
   /// 返回格式：MM:SS 或 HH:MM:SS
@@ -127,6 +114,15 @@ class FormatTimeUtil {
       return '${hours.toString().padLeft(2, '0')}:00';
     }
     return '${hours.toString().padLeft(2, '0')}:${minutes.toString().padLeft(2, '0')}';
+  }
+
+  /// [timestamp] 秒级时间戳
+  /// 返回格式：YYYY-MM-DD
+  static String formatDate(int timestamp) {
+    final dateTime = DateTime.fromMillisecondsSinceEpoch(timestamp * 1000);
+    return '${dateTime.year}-'
+        '${dateTime.month.toString().padLeft(2, '0')}-'
+        '${dateTime.day.toString().padLeft(2, '0')}';
   }
 
   /// [timestamp] 秒级时间戳

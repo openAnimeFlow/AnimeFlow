@@ -13,6 +13,7 @@ import 'package:anime_flow/providers/user/user_controller.dart';
 import 'package:anime_flow/providers/user/user_oauth_state.dart';
 import 'package:anime_flow/providers/user/user_state_provider.dart';
 import 'package:anime_flow/routes/routes.dart';
+import 'package:anime_flow/utils/format_time_util.dart';
 import 'package:anime_flow/utils/systemUtil.dart';
 import 'package:anime_flow/widget/network_check_button.dart';
 import 'package:anime_flow/widget/animation_network_image/animation_network_image.dart';
@@ -316,10 +317,10 @@ class AccountSettingsPage extends ConsumerWidget {
                           color: Theme.of(context).disabledColor,
                         ),
                       ),
-                      if (user.createTime.isNotEmpty) ...[
+                      if (user.createTime != 0) ...[
                         const SizedBox(height: 4),
                         Text(
-                          '注册于 ${user.createTime}',
+                          '注册于 ${FormatTimeUtil.formatDate(user.createTime)}',
                           style: TextStyle(
                             fontSize: 12,
                             color: Theme.of(context).disabledColor,

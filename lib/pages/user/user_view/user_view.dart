@@ -5,6 +5,7 @@ import 'package:anime_flow/pages/user/provider/user_collection_provider.dart';
 import 'package:anime_flow/pages/user/provider/user_collection_state.dart';
 import 'package:anime_flow/providers/user/user_controller.dart';
 import 'package:anime_flow/routes/routes.dart';
+import 'package:anime_flow/utils/format_time_util.dart';
 import 'package:anime_flow/utils/systemUtil.dart';
 import 'package:anime_flow/widget/animation_network_image/animation_network_image.dart';
 import 'package:anime_flow/widget/drop_down_menu.dart';
@@ -343,8 +344,8 @@ class _UserViewState extends ConsumerState<UserView>
                   borderRadius: BorderRadius.circular(100),
                   url: user.avatar,
                   fit: BoxFit.cover,
-                  width: 150,
-                  height: 150,
+                  width: 120,
+                  height: 120,
                 )
               else
                 const Icon(Icons.person, size: 96),
@@ -353,6 +354,15 @@ class _UserViewState extends ConsumerState<UserView>
                 style: const TextStyle(
                   fontSize: 23,
                   fontWeight: FontWeight.bold,
+                ),
+              ),
+              Text(
+                '${FormatTimeUtil.formatDate(user.createTime)}加入',
+                style: TextStyle(
+                  color: Theme.of(context)
+                      .colorScheme
+                      .onSurface
+                      .withValues(alpha: 0.5),
                 ),
               ),
             ],

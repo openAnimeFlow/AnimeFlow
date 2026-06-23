@@ -5,7 +5,7 @@ class FlowUsers {
   final String email;
   final String nickname;
   final String avatar;
-  final String createTime;
+  final int createTime;
   final FlowUserCollectionCounts collectionCounts;
 
   FlowUsers({
@@ -23,7 +23,7 @@ class FlowUsers {
       email: json['email'] as String? ?? '',
       nickname: json['nickname'] as String,
       avatar: json['avatar'] as String,
-      createTime: json['createTime'] as String,
+      createTime: json['createTime'] as int,
       collectionCounts: FlowUserCollectionCounts.fromJson(
         json['collectionCounts'] as Map<String, dynamic>?,
       ),

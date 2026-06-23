@@ -5,7 +5,7 @@ import 'package:anime_flow/repository/token_repository.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 
 /// Bangumi OAuth 令牌：写入 [FlutterSecureStorage]，
-class BangumiToken implements TokenRepository {
+class BangumiToken implements TokenRepository<TokenItem> {
   BangumiToken._();
 
   static final BangumiToken instance = BangumiToken._();

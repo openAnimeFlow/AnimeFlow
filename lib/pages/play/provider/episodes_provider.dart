@@ -1,5 +1,7 @@
+import 'package:anime_flow/http/requests/flow_request.dart';
 import 'package:anime_flow/models/item/bangumi/episodes_item.dart';
 import 'package:anime_flow/pages/play/provider/play_subject_provider.dart';
+import 'package:anime_flow/pages/play/service/episodes_pagination.dart';
 import 'package:anime_flow/utils/logger.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
@@ -14,6 +16,8 @@ class EpisodesData {
     this.episodeIndex = 0,
     this.episodeId = 0,
     this.isLoading = false,
+    this.isLoadingMore = false,
+    this.hasMore = false,
   });
 
   /// 剧集列表数据
@@ -31,8 +35,14 @@ class EpisodesData {
   /// 当前剧集 id
   final int episodeId;
 
-  /// 是否正在加载
+  /// 是否正在加载首屏
   final bool isLoading;
+
+  /// 是否正在加载更多
+  final bool isLoadingMore;
+
+  /// 是否还有更多剧集可加载
+  final bool hasMore;
 
   EpisodesData copyWith({
     EpisodesItem? episodes,
@@ -41,6 +51,8 @@ class EpisodesData {
     int? episodeIndex,
     int? episodeId,
     bool? isLoading,
+    bool? isLoadingMore,
+    bool? hasMore,
   }) {
     return EpisodesData(
       episodes: episodes ?? this.episodes,
@@ -49,6 +61,8 @@ class EpisodesData {
       episodeIndex: episodeIndex ?? this.episodeIndex,
       episodeId: episodeId ?? this.episodeId,
       isLoading: isLoading ?? this.isLoading,
+      isLoadingMore: isLoadingMore ?? this.isLoadingMore,
+      hasMore: hasMore ?? this.hasMore,
     );
   }
 }
@@ -67,9 +81,65 @@ class Episodes extends _$Episodes {
     state = const EpisodesData();
   }
 
+  /// 加载首屏剧集
+  Future<void> loadInitial(int subjectId) async {
+    if (state.episodes != null || state.isLoading) {
+      return;
+    }
+    state = state.copyWith(isLoading: true);
+    try {
+      final page = await FlowRequest.getSubjectEpisodesByIdService(
+        subjectId,
+        EpisodesPagination.pageSize,
+        0,
+      );
+      state = state.copyWith(
+        episodes: page,
+        hasMore: EpisodesPagination.hasMore(page),
+        isLoading: false,
+      );
+    } catch (e) {
+      LiggLogger().e(e);
+      state = state.copyWith(isLoading: false);
+      rethrow;
+    }
+  }
+
+  /// 滚动到底部时加载更多剧集
+  Future<void> loadMore(int subjectId) async {
+    final episodes = state.episodes;
+    if (episodes == null ||
+        state.isLoading ||
+        state.isLoadingMore ||
+        !state.hasMore) {
+      return;
+    }
+
+    state = state.copyWith(isLoadingMore: true);
+    try {
+      final page = await FlowRequest.getSubjectEpisodesByIdService(
+        subjectId,
+        EpisodesPagination.pageSize,
+        episodes.data.length,
+      );
+      final merged = EpisodesPagination.mergePages(cached: episodes, page: page);
+      state = state.copyWith(
+        episodes: merged,
+        hasMore: EpisodesPagination.hasMore(merged),
+        isLoadingMore: false,
+      );
+    } catch (e) {
+      LiggLogger().e(e);
+      state = state.copyWith(isLoadingMore: false);
+    }
+  }
+
   /// 设置剧集列表数据
   void setEpisodes(EpisodesItem episodes) {
-    state = state.copyWith(episodes: episodes);
+    state = state.copyWith(
+      episodes: episodes,
+      hasMore: EpisodesPagination.hasMore(episodes),
+    );
   }
 
   /// 设置加载状态

@@ -2,7 +2,9 @@ import 'package:anime_flow/http/api_path.dart';
 import 'package:anime_flow/http/interceptors/bgm_authInterceptor.dart';
 import 'package:anime_flow/http/interceptors/bgm_refresh_token_interceptor.dart';
 import 'package:anime_flow/http/interceptors/dio_logger_interceptor.dart';
+import 'package:anime_flow/http/interceptors/flow_refresh_token_interceptor.dart';
 import 'package:anime_flow/repository/BangumiToken.dart';
+import 'package:anime_flow/repository/flow_token_storage.dart';
 import 'package:anime_flow/utils/utils.dart';
 import 'package:dio/dio.dart';
 import 'package:anime_flow/utils/logger.dart';
@@ -26,14 +28,21 @@ class DioFactory {
     },
   );
 
-  static Dio get animeFlowDio => _animeFlowDio ??= _create(
-    NetworkConfig.fromSettings(),
-    baseUrl: AnimeFlowApi.animeFlowApi,
-    defaultHeaders: {
-      'referer': '',
-      'user-agent': Utils.getRandomUA(),
-    },
-  );
+  static Dio get animeFlowDio {
+    if (_animeFlowDio != null) return _animeFlowDio!;
+    final dio = _create(
+      NetworkConfig.fromSettings(),
+      baseUrl: AnimeFlowApi.animeFlowApi,
+      defaultHeaders: {
+        'referer': '',
+        'user-agent': Utils.getRandomUA(),
+      },
+    );
+    dio.interceptors.add(
+      FlowRefreshTokenInterceptor(dio, FlowTokenStorage.instance),
+    );
+    return _animeFlowDio = dio;
+  }
 
   static Dio get githubDio => _githubDio ??= _create(
     NetworkConfig.fromSettings(),

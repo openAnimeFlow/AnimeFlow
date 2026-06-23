@@ -3,7 +3,7 @@ import 'dart:ui';
 import 'package:anime_flow/constants/constants.dart';
 import 'package:anime_flow/crawler/itme/bgm_user_page_item.dart';
 import 'package:anime_flow/http/api_path.dart';
-import 'package:anime_flow/http/clients/anime_flow_client.dart';
+import 'package:anime_flow/http/clients/flow_client.dart';
 import 'package:anime_flow/models/enums/sort_type.dart';
 import 'package:anime_flow/models/item/bangumi/actor_item.dart';
 import 'package:anime_flow/models/item/bangumi/calendar_item.dart';
@@ -20,18 +20,25 @@ import 'package:anime_flow/models/item/bangumi/subject_item.dart';
 import 'package:anime_flow/models/item/bangumi/subjects_info_item.dart';
 import 'package:anime_flow/models/item/bangumi/user_collections_item.dart';
 import 'package:anime_flow/models/item/bangumi/user_info_item.dart';
+import 'package:anime_flow/models/item/captcha_item.dart';
 import 'package:anime_flow/models/item/danmaku/danmaku_episode_response.dart';
 import 'package:anime_flow/models/item/danmaku/danmaku_module.dart';
 import 'package:anime_flow/models/item/danmaku/danmaku_search_response.dart';
+import 'package:anime_flow/models/item/flow/bgm_collection_sync_status_item.dart';
+import 'package:anime_flow/models/item/flow/bangumi_bind_item.dart';
+import 'package:anime_flow/models/item/flow/flow_token.dart';
+import 'package:anime_flow/models/item/flow/flow_users.dart';
 import 'package:anime_flow/models/item/token_item.dart';
+import 'package:anime_flow/models/search/search_suggestions_item.dart';
 import 'package:anime_flow/repository/BangumiToken.dart';
+import 'package:anime_flow/repository/flow_token_storage.dart';
 import 'package:anime_flow/utils/logger.dart';
 import 'package:anime_flow/utils/systemUtil.dart';
 import 'package:anime_flow/utils/utils.dart';
 import 'package:dio/dio.dart';
 
 class FlowRequest {
-  static final AnimeFlowClient _client = AnimeFlowClient.instance;
+  static final FlowClient _client = FlowClient.instance;
 
   static Future<TokenItem> getTokenService({required String code}) async {
     final response = await _client.post(
@@ -66,11 +73,16 @@ class FlowRequest {
   }
 
   //获取session
-  static Future<Map<String, dynamic>> getSessionService() async {
+  static Future<Map<String, dynamic>> getSessionService({
+    bool bindMode = false,
+  }) async {
     final deviceName = SystemUtil.getDevice().toUpperCase();
     final response = await _client.get(
       AnimeFlowApi.session,
-      queryParameters: {'platform': deviceName},
+      queryParameters: {
+        'platform': deviceName,
+        if (bindMode) 'bindMode': 'true',
+      },
     );
     return response.data;
   }
@@ -92,6 +104,35 @@ class FlowRequest {
           return TokenItem.fromJson(response.data);
         }
       } catch (e) {
+        // 忽略错误，继续轮询
+      }
+
+      await Future.delayed(pollInterval);
+    }
+
+    return null;
+  }
+
+  /// 桌面端绑定模式：轮询 OAuth 授权码
+  static Future<String?> pollBindCodeService({required String state}) async {
+    const maxDuration = Duration(seconds: 60);
+    const pollInterval = Duration(seconds: 2);
+    final startTime = DateTime.now();
+
+    while (DateTime.now().difference(startTime) < maxDuration) {
+      try {
+        final response = await _client.get(
+          AnimeFlowApi.oauthBindCode,
+          queryParameters: {'sessionId': state},
+        );
+
+        if (response.code == 200) {
+          final code = response.data;
+          if (code is String && code.isNotEmpty) {
+            return code;
+          }
+        }
+      } catch (_) {
         // 忽略错误，继续轮询
       }
 
@@ -210,16 +251,12 @@ class FlowRequest {
     }).then((value) => HotItem.fromJson(value.data));
   }
 
-  ///根据id获取条目
+  ///根据id获取条目（已登录时携带 Flow Token，服务端换取 Bangumi token 返回 interest）
   static Future<SubjectsInfoItem> getSubjectByIdService(int id) async {
-    final token = await BangumiToken.instance.getToken();
-    final headers = <String,dynamic>{};
-    if (token != null) {
-      headers[Constants.authorization] = '${token.tokenType} ${token.accessToken}';
-    }
-
-    final response = await _client.get('${AnimeFlowApi.subjects}/$id',
-        options: Options(headers: headers));
+    final response = await _client.get(
+      '${AnimeFlowApi.subjects}/$id',
+      options: await _optionalFlowAuthOptions(),
+    );
     return SubjectsInfoItem.fromJson(response.data);
   }
 
@@ -307,6 +344,23 @@ class FlowRequest {
     );
 
     return SubjectItem.fromJson(response.data);
+  }
+
+  /// 搜索建议
+  static Future<SearchSuggestionsItem> searchSuggestionsService(
+    String keyword, {
+    int limit = 20,
+    int type = 2,
+  }) async {
+    final response = await _client.get(
+      AnimeFlowApi.bangumiSearchSuggestions,
+      queryParameters: {
+        'keyword': keyword,
+        'limit': limit,
+        'type': type,
+      },
+    );
+    return SearchSuggestionsItem.fromJson(response.data);
   }
 
   ///角色列表
@@ -450,5 +504,290 @@ class FlowRequest {
       LiggLogger().e(e);
       throw Exception('Failed to fetch user collections: $e');
     }
+  }
+
+  static Future<CaptchaItem> generateCaptchaService({String? captchaId}) async {
+    final response = await _client.post(
+      AnimeFlowApi.captcha,
+      queryParameters: captchaId == null || captchaId.isEmpty
+          ? null
+          : {'captchaId': captchaId},
+    );
+    return CaptchaItem.fromJson(Map<String, dynamic>.from(response.data));
+  }
+
+  static Future<void> sendEmailCodeService({
+    required String email,
+    required String captchaId,
+    required String captcha,
+  }) async {
+    await _client.post(
+      AnimeFlowApi.sendEmail,
+      queryParameters: {
+        'email': email,
+        'captchaId': captchaId,
+        'captcha': captcha,
+      },
+    );
+  }
+
+  static Future<void> registerService({
+    required String email,
+    required String password,
+    required String emailCaptcha,
+  }) async {
+    await _client.post(
+      AnimeFlowApi.register,
+      data: {
+        'email': email,
+        'password': password,
+        'emailCaptcha': emailCaptcha,
+      },
+    );
+  }
+
+  /// 登录
+  static Future<FlowToken> emailLoginService({
+    required String email,
+    required String password,
+    required String platform,
+  }) async {
+    final response = await _client.post(AnimeFlowApi.emailLogin, data: {
+      'email': email,
+      'password': password,
+      'platform': platform,
+    });
+    return FlowToken.fromJson(response.data as Map<String, dynamic>);
+  }
+
+  /// 忘记密码：通过邮箱验证码重置登录密码
+  static Future<void> forgotPasswordService({
+    required String email,
+    required String password,
+    required String emailCaptcha,
+  }) async {
+    await _client.post(
+      AnimeFlowApi.forgotPassword,
+      data: {
+        'email': email,
+        'password': password,
+        'emailCaptcha': emailCaptcha,
+      },
+    );
+  }
+
+  /// 刷新 AnimeFlow token
+  static Future<FlowToken> flowRefreshTokenService({
+    required String refreshToken,
+  }) async {
+    final response = await _client.post(
+      AnimeFlowApi.flowRefreshToken,
+      data: {'refreshToken': refreshToken},
+      skipFlowTokenRefresh: true,
+    );
+    return FlowToken.fromJson(response.data as Map<String, dynamic>);
+  }
+
+  /// 登出当前会话，销毁服务端 token（无本地 token 时跳过）
+  static Future<void> logoutService() async {
+    final token = await FlowTokenStorage.instance.getToken();
+    if (token == null) {
+      return;
+    }
+    await _client.post(
+      AnimeFlowApi.logout,
+      options: await _flowAuthOptions(),
+      skipFlowTokenRefresh: true,
+    );
+  }
+
+  /// 获取当前用户信息
+  static Future<FlowUsers> getUserInfoService(
+      {required String token, required String tokenType}) async {
+    return await _client
+        .get(
+          AnimeFlowApi.flowUsers,
+          options: Options(
+            headers: {
+              Constants.authorization: '$tokenType $token',
+            },
+          ),
+        )
+        .then((value) => FlowUsers.fromJson((value.data) as Map<String, dynamic>));
+  }
+
+  /// 更新当前用户资料（昵称、头像）
+  static Future<FlowUsers> updateUserInfoService({
+    String? nickname,
+    String? avatar,
+  }) async {
+    final data = <String, dynamic>{};
+    if (nickname != null) data['nickname'] = nickname;
+    if (avatar != null) data['avatar'] = avatar;
+
+    final response = await _client.put(
+      AnimeFlowApi.flowUsers,
+      data: data,
+      options: await _flowAuthOptions(),
+    );
+    return FlowUsers.fromJson(response.data as Map<String, dynamic>);
+  }
+
+  static Future<Options> _flowAuthOptions() async {
+    final token = await FlowTokenStorage.instance.getToken();
+    if (token == null) {
+      throw StateError('未登录');
+    }
+    return Options(
+      headers: {
+        Constants.authorization: '${token.tokenType} ${token.accessToken}',
+      },
+    );
+  }
+
+  /// 已登录时附带 Flow Token；未登录返回 {@code null}（公开接口可选鉴权）。
+  static Future<Options?> _optionalFlowAuthOptions() async {
+    final token = await FlowTokenStorage.instance.getToken();
+    if (token == null) {
+      return null;
+    }
+    return Options(
+      headers: {
+        Constants.authorization: '${token.tokenType} ${token.accessToken}',
+      },
+    );
+  }
+
+  /// 查询当前账号的 Bangumi 绑定状态
+  static Future<BangumiBindItem> getBangumiBindService() async {
+    final response = await _client.get(
+      AnimeFlowApi.bangumiBind,
+      options: await _flowAuthOptions(),
+    );
+    return BangumiBindItem.fromJson(response.data as Map<String, dynamic>);
+  }
+
+  /// Bangumi 第三方授权登录
+  static Future<FlowToken> bangumiLoginService({
+    required String code,
+    required String platform,
+  }) async {
+    final response = await _client.post(
+      AnimeFlowApi.bangumiLogin,
+      data: {
+        'code': code,
+        'platform': platform,
+      },
+    );
+    return FlowToken.fromJson(response.data as Map<String, dynamic>);
+  }
+
+  /// 绑定 Bangumi 账号
+  static Future<BangumiBindItem> bindBangumiService({
+    required String code,
+  }) async {
+    final response = await _client.post(
+      AnimeFlowApi.bangumiBindPost,
+      data: {'code': code},
+      options: await _flowAuthOptions(),
+    );
+    return BangumiBindItem.fromJson(response.data as Map<String, dynamic>);
+  }
+
+  /// 提交 Bangumi 收藏同步任务
+  static Future<BgmCollectionSyncStatusItem> triggerBgmCollectionSyncService({
+    int subjectType = 2,
+  }) async {
+    final response = await _client.post(
+      AnimeFlowApi.bangumiCollectionSync,
+      queryParameters: {'subjectType': subjectType},
+      options: await _flowAuthOptions(),
+    );
+    return BgmCollectionSyncStatusItem.fromJson(
+      response.data as Map<String, dynamic>,
+    );
+  }
+
+  /// 查询 Bangumi 收藏同步状态
+  static Future<BgmCollectionSyncStatusItem> getBgmCollectionSyncStatusService() async {
+    final response = await _client.get(
+      AnimeFlowApi.bangumiCollectionSync,
+      options: await _flowAuthOptions(),
+    );
+    return BgmCollectionSyncStatusItem.fromJson(
+      response.data as Map<String, dynamic>,
+    );
+  }
+
+  /// 绑定邮箱并设置登录密码
+  static Future<FlowUsers> bindEmailService({
+    required String email,
+    required String password,
+    required String emailCaptcha,
+  }) async {
+    final response = await _client.post(
+      AnimeFlowApi.bindEmail,
+      data: {
+        'email': email,
+        'password': password,
+        'emailCaptcha': emailCaptcha,
+      },
+      options: await _flowAuthOptions(),
+    );
+    return FlowUsers.fromJson(response.data as Map<String, dynamic>);
+  }
+
+  /// 获取当前用户 Bangumi 收藏列表
+  static Future<UserCollectionsItem> myCollectionsService({
+    int subjectType = 2,
+    required int type,
+    required int limit,
+    required int offset,
+  }) async {
+    final response = await _client.get(
+      AnimeFlowApi.flowUserCollections,
+      queryParameters: {
+        'subjectType': subjectType,
+        'type': type,
+        'limit': limit,
+        'offset': offset,
+      },
+      options: await _flowAuthOptions(),
+    );
+    try {
+      return UserCollectionsItem.fromJson(
+        response.data as Map<String, dynamic>,
+      );
+    } catch (e) {
+      LiggLogger().e(e);
+      throw Exception('Failed to fetch user collections: $e');
+    }
+  }
+
+  /// 更新当前用户对条目的 Bangumi 收藏（需登录且已绑定 Bangumi）
+  static Future<void> updateCollectionService(
+    int subjectId, {
+    int? type,
+    bool? isPrivate,
+    bool? progress,
+    int? rate,
+    String? comment,
+    List<String>? tags,
+    int? subjectType,
+  }) async {
+    final data = <String, dynamic>{};
+    if (type != null) data['type'] = type;
+    if (rate != null) data['rate'] = rate;
+    if (isPrivate != null) data['private'] = isPrivate;
+    if (progress != null) data['progress'] = progress;
+    if (comment != null) data['comment'] = comment;
+    if (tags != null) data['tags'] = tags;
+    if (subjectType != null) data['subjectType'] = subjectType;
+
+    await _client.put(
+      '${AnimeFlowApi.flowUserCollections}/$subjectId',
+      data: data,
+      options: await _flowAuthOptions(),
+    );
   }
 }

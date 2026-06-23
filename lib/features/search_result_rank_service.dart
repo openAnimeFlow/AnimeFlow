@@ -14,29 +14,10 @@ class SearchResultRankService {
   static const _searchTermWeight = 100.0;
   static const _aliasWeight = 100.0;
 
-  /// 按相关度降序排列 [items]，相关度相同时保持原顺序。
-  List<T> sort<T>(
-      List<T> items,
-      String Function(T item) titleSelector,
-      ) {
-    if (_weightedTerms.isEmpty || items.length <= 1) {
-      return items;
-    }
-
-    final indexed = items.asMap().entries.toList();
-    final scores = {
-      for (final entry in indexed)
-        entry.key: computeScore(titleSelector(entry.value)),
-    };
-
-    indexed.sort((a, b) {
-      final scoreCompare = scores[b.key]!.compareTo(scores[a.key]!);
-      if (scoreCompare != 0) {
-        return scoreCompare;
-      }
-      return a.key.compareTo(b.key);
-    });
-    return indexed.map((entry) => entry.value).toList();
+  /// 批量计算一组标题的得分，顺序与 [names] 一一对应。
+  /// 设计为可安全传入 [Isolate.run] 闭包使用。
+  List<double> computeScoresBatch(List<String> names) {
+    return [for (final name in names) computeScore(name)];
   }
 
   /// 返回 0~1 的匹配度
@@ -74,16 +55,18 @@ class SearchResultRankService {
     var maxScore = 0.0;
 
     for (final term in _weightedTerms) {
-      maxScore = max(
-        maxScore,
-        _pairScore(
-          normalizedItem,
-          term.normalized,
-          term.weight,
-          itemProfile: itemProfile,
-          termProfile: term.profile,
-        ),
+      final score = _pairScore(
+        normalizedItem,
+        term.normalized,
+        term.weight,
+        itemProfile: itemProfile,
+        termProfile: term.profile,
       );
+      if (score > maxScore) {
+        maxScore = score;
+        // 已达满分（seasonFactor=1 时 score==weight），无需检查剩余词条
+        if (maxScore >= term.weight) break;
+      }
     }
 
     return maxScore;
@@ -141,7 +124,12 @@ class SearchResultRankService {
     for (var windowSize = term.length; windowSize <= maxWindow; windowSize++) {
       for (var start = 0; start <= item.length - windowSize; start++) {
         final window = item.substring(start, start + windowSize);
-        best = max(best, Utils.calculateSimilarity(window, term));
+        final sim = Utils.calculateSimilarity(window, term);
+        if (sim > best) {
+          best = sim;
+          // 已达调用方判断阈值，无需继续扫描
+          if (best >= 0.75) return best;
+        }
       }
     }
     return best;

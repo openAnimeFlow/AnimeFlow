@@ -1,21 +1,22 @@
 /// 收藏类型枚举
 ///
-/// 用于标识番剧的收藏状态
+/// 数值与 Bangumi API [SubjectCollectionType] 一致：
+/// 1=想看, 2=看过, 3=在看, 4=搁置, 5=抛弃
 enum CollectType {
   /// 未收藏
   none(0, '未收藏'),
 
-  /// 在看
-  watching(1, '在看'),
-
   /// 想看
-  planToWatch(2, '想看'),
-
-  /// 搁置
-  onHold(3, '搁置'),
+  planToWatch(1, '想看'),
 
   /// 看过
-  watched(4, '看过'),
+  watched(2, '看过'),
+
+  /// 在看
+  watching(3, '在看'),
+
+  /// 搁置
+  onHold(4, '搁置'),
 
   /// 抛弃
   abandoned(5, '抛弃');

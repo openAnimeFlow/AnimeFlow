@@ -9,6 +9,8 @@ part of 'routes.dart';
 List<RouteBase> get $appRoutes => [
       $mainRoute,
       $loginRoute,
+      $registerRoute,
+      $forgotPasswordRoute,
       $oauthCallbackRoute,
       $animeInfoRoute,
       $playRoute,
@@ -20,6 +22,7 @@ List<RouteBase> get $appRoutes => [
       $userSpaceRoute,
       $imageSearchRoute,
       $settingsRoute,
+      $settingAccountRoute,
       $settingGeneralRoute,
       $settingPlaybackRoute,
       $settingDownloadPluginsRoute,
@@ -88,6 +91,61 @@ mixin $LoginRoute on GoRouteData {
   @override
   String get location => GoRouteData.$location(
         '/login',
+      );
+
+  @override
+  void go(BuildContext context) => context.go(location);
+
+  @override
+  Future<T?> push<T>(BuildContext context) => context.push<T>(location);
+
+  @override
+  void pushReplacement(BuildContext context) =>
+      context.pushReplacement(location);
+
+  @override
+  void replace(BuildContext context) => context.replace(location);
+}
+
+RouteBase get $registerRoute => GoRouteData.$route(
+      path: '/register',
+      factory: $RegisterRoute._fromState,
+    );
+
+mixin $RegisterRoute on GoRouteData {
+  static RegisterRoute _fromState(GoRouterState state) => const RegisterRoute();
+
+  @override
+  String get location => GoRouteData.$location(
+        '/register',
+      );
+
+  @override
+  void go(BuildContext context) => context.go(location);
+
+  @override
+  Future<T?> push<T>(BuildContext context) => context.push<T>(location);
+
+  @override
+  void pushReplacement(BuildContext context) =>
+      context.pushReplacement(location);
+
+  @override
+  void replace(BuildContext context) => context.replace(location);
+}
+
+RouteBase get $forgotPasswordRoute => GoRouteData.$route(
+      path: '/forgot_password',
+      factory: $ForgotPasswordRoute._fromState,
+    );
+
+mixin $ForgotPasswordRoute on GoRouteData {
+  static ForgotPasswordRoute _fromState(GoRouterState state) =>
+      const ForgotPasswordRoute();
+
+  @override
+  String get location => GoRouteData.$location(
+        '/forgot_password',
       );
 
   @override
@@ -453,6 +511,34 @@ mixin $SettingsRoute on GoRouteData {
   @override
   String get location => GoRouteData.$location(
         '/settings',
+      );
+
+  @override
+  void go(BuildContext context) => context.go(location);
+
+  @override
+  Future<T?> push<T>(BuildContext context) => context.push<T>(location);
+
+  @override
+  void pushReplacement(BuildContext context) =>
+      context.pushReplacement(location);
+
+  @override
+  void replace(BuildContext context) => context.replace(location);
+}
+
+RouteBase get $settingAccountRoute => GoRouteData.$route(
+      path: '/settings/account',
+      factory: $SettingAccountRoute._fromState,
+    );
+
+mixin $SettingAccountRoute on GoRouteData {
+  static SettingAccountRoute _fromState(GoRouterState state) =>
+      const SettingAccountRoute();
+
+  @override
+  String get location => GoRouteData.$location(
+        '/settings/account',
       );
 
   @override

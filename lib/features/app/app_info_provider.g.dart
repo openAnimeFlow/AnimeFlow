@@ -47,7 +47,7 @@ final class AppVersionProvider
   }
 }
 
-String _$appVersionHash() => r'b09267ae01f15ed97510858967de95b800840cdc';
+String _$appVersionHash() => r'e2b0f3c8c6b48424a1b5b05e5ba9e32571a44223';
 
 @ProviderFor(AppInfo)
 final appInfoProvider = AppInfoProvider._();
@@ -80,7 +80,7 @@ final class AppInfoProvider extends $NotifierProvider<AppInfo, AppInfoState> {
   }
 }
 
-String _$appInfoHash() => r'4a4f05bd5f8bce0083a0c893fb8918d98982a3df';
+String _$appInfoHash() => r'abd106fa99741089d91966dbbaaa0e91df25c6b6';
 
 abstract class _$AppInfo extends $Notifier<AppInfoState> {
   AppInfoState build();

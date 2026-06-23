@@ -30,8 +30,12 @@ class ProducersView extends StatelessWidget {
                   const SizedBox(height: 10),
                   SizedBox(
                     height: windowsWidth > 600 ? 180 : 100,
-                    child: ListView.builder(
-                      scrollDirection: Axis.horizontal,
+                    child: ScrollConfiguration(
+                      behavior: ScrollConfiguration.of(context).copyWith(
+                        scrollbars: false,
+                      ),
+                      child: ListView.builder(
+                        scrollDirection: Axis.horizontal,
                       itemCount: producers.data.length,
                       itemBuilder: (BuildContext context, int index) {
                         final staffItem = producers.data[index];
@@ -81,6 +85,7 @@ class ProducersView extends StatelessWidget {
                         );
                       },
                     ),
+                  ),
                   ),
                 ],
               );

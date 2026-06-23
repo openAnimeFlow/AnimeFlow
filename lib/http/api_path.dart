@@ -145,6 +145,9 @@ class AnimeFlowApi {
       ///条目搜索
       bangumiSearch = '/api/v1/bangumi/search/subjects',
 
+      ///搜索建议
+      bangumiSearchSuggestions = '/api/v1/bangumi/search/suggestions',
+
       ///角色列表
       characters = '/api/v1/bangumi/subjects/{subjectId}/characters',
 
@@ -176,7 +179,52 @@ class AnimeFlowApi {
       userCollections = '/api/v1/bangumi/users/{username}/collections/subjects',
 
       /// 每日放送、
-      calendar = '/api/v1/bangumi/calendar';
+      calendar = '/api/v1/bangumi/calendar',
+
+      /// 图片验证码
+      captcha = '/api/verify/captcha',
+
+      /// 发送邮箱验证码
+      sendEmail = '/api/v1/email/send',
+
+      /// 注册账户
+      register = '/api/v1/account/register',
+
+      /// 邮箱登录
+      emailLogin = '/api/v1/account/email/login',
+
+      /// 忘记密码
+      forgotPassword = '/api/v1/account/email/forgot-password',
+
+      /// 刷新 AnimeFlow token
+      flowRefreshToken = '/api/v1/account/refresh',
+
+      /// 登出并销毁服务端 token
+      logout = '/api/v1/account/logout',
+
+      /// 获取当前用户信息
+      flowUsers = '/api/v1/users',
+
+      /// 当前用户 Bangumi 收藏
+      flowUserCollections = '/api/v1/users/collections',
+
+      /// 查询 Bangumi 绑定状态
+      bangumiBind = '/api/v1/account/oauth/bangumi',
+
+      /// 绑定 Bangumi 账号
+      bangumiBindPost = '/api/v1/account/oauth/bangumi/bind',
+
+      /// 绑定邮箱
+      bindEmail = '/api/v1/account/email/bind',
+
+      /// 提交 Bangumi 收藏同步
+      bangumiCollectionSync = '/api/v1/account/oauth/bangumi/collections/sync',
+
+      /// Bangumi 第三方授权登录
+      bangumiLogin = '/api/v1/account/oauth/bangumi/login',
+
+      /// 轮询 Bangumi 绑定授权码（桌面端）
+      oauthBindCode = '/api/oauth/bind-code';
 }
 
 class DamakuApi {

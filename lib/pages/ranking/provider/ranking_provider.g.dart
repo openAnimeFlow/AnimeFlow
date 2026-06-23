@@ -115,7 +115,7 @@ final class RankingProvider
   Ranking create() => Ranking();
 }
 
-String _$rankingHash() => r'499227533131578130f6ea697cd6e9a4911f6215';
+String _$rankingHash() => r'ee497c7a3aea2bc230bd0e032d9e58712a3b4deb';
 
 abstract class _$Ranking extends $AsyncNotifier<RankingState> {
   FutureOr<RankingState> build();

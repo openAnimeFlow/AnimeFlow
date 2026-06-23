@@ -1,6 +1,5 @@
 import 'package:anime_flow/constants/layout_constant.dart';
 import 'package:anime_flow/features/shaders/shaders_controller.dart';
-import 'package:anime_flow/http/requests/flow_request.dart';
 import 'package:anime_flow/pages/play/controller/play_controller.dart';
 import 'package:anime_flow/pages/play/controller/video_source_controller.dart';
 import 'package:anime_flow/pages/play/controller/video_ui_controller.dart';
@@ -105,17 +104,25 @@ class _PlayPageViewState extends ConsumerState<_PlayPageView> {
   Future<void> initEpisodes() async {
     final episodesNotifier = ref.read(episodesProvider.notifier);
     if (ref.read(episodesProvider).episodes != null) return;
+
+    final subjectId = ref.read(playSubjectProvider).subjectId;
     try {
-      episodesNotifier.setLoading(true);
-      final subject = ref.read(playSubjectProvider);
-      final episodes = await FlowRequest.getSubjectEpisodesByIdService(
-          subject.subjectId, 100, 0);
-      episodesNotifier.setEpisodes(episodes);
-      episodesNotifier.setLoading(false);
-      //如果有路由传递剧集号有限根据传递的剧集设置剧集状态
+      await episodesNotifier.loadInitial(subjectId);
+
       final continueEpisode = ref.read(playContinueEpisodeProvider);
-      if (continueEpisode > 0 &&
-          continueEpisode <= episodes.data.length) {
+      while (continueEpisode > 0 &&
+          continueEpisode >
+              (ref.read(episodesProvider).episodes?.data.length ?? 0) &&
+          ref.read(episodesProvider).hasMore) {
+        await episodesNotifier.loadMore(subjectId);
+      }
+
+      final episodes = ref.read(episodesProvider).episodes;
+      if (episodes == null || episodes.data.isEmpty) {
+        return;
+      }
+
+      if (continueEpisode > 0 && continueEpisode <= episodes.data.length) {
         final episode = episodes.data[continueEpisode - 1];
         episodesNotifier.setEpisodeSort(
           sort: episode.sort,
@@ -128,8 +135,7 @@ class _PlayPageViewState extends ConsumerState<_PlayPageView> {
         return;
       }
 
-      if (ref.read(episodesProvider).episodeSort == 0 &&
-          episodes.data.isNotEmpty) {
+      if (ref.read(episodesProvider).episodeSort == 0) {
         WidgetsBinding.instance.addPostFrameCallback((_) {
           if (!mounted) {
             return;
@@ -159,9 +165,6 @@ class _PlayPageViewState extends ConsumerState<_PlayPageView> {
       }
     } catch (e) {
       LiggLogger().e(e);
-      if (ref.read(episodesProvider).isLoading) {
-        episodesNotifier.setLoading(false);
-      }
     }
   }
 

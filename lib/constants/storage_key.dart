@@ -1,5 +1,4 @@
 class StorageKey {
-  /// 爬虫配置表
   static const String crawlConfigs = 'crawl_configs_key',
       settingsKey = 'settings_key',
       playPositionKey = 'play_position_key',

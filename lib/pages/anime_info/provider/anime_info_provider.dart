@@ -4,6 +4,7 @@ import 'package:anime_flow/models/item/bangumi/producers_item.dart';
 import 'package:anime_flow/models/item/bangumi/related_subjects_item.dart';
 import 'package:anime_flow/models/item/bangumi/subject_comments_item.dart';
 import 'package:anime_flow/models/item/bangumi/subjects_info_item.dart';
+import 'package:anime_flow/providers/user/user_state_provider.dart';
 import 'package:anime_flow/routes/provider/routes_args.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/scheduler.dart';
@@ -17,6 +18,8 @@ class AnimeInfo extends _$AnimeInfo {
   @override
   Future<SubjectsInfoItem> build() async {
     final subjectId = ref.watch(animeInfoArgsProvider.select((e) => e.id));
+    // 登录/登出或 token 刷新后重新拉取，以获取 Bangumi interest
+    ref.watch(currentFlowTokenProvider);
     return FlowRequest.getSubjectByIdService(subjectId);
   }
 

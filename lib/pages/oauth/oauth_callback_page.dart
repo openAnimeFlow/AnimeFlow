@@ -1,11 +1,12 @@
-import 'package:anime_flow/features/my/my_controller_provider.dart';
+import 'package:anime_flow/providers/user/user_controller.dart';
+import 'package:anime_flow/providers/user/user_oauth_state.dart';
 import 'package:anime_flow/routes/routes.dart';
 import 'package:anime_flow/utils/logger.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 /// Bangumi OAuth 应用回调处理页面
-class OAuthCallbackPage extends StatefulWidget {
+class OAuthCallbackPage extends ConsumerStatefulWidget {
   const OAuthCallbackPage({
     super.key,
     required this.callbackUri,
@@ -14,46 +15,64 @@ class OAuthCallbackPage extends StatefulWidget {
   final Uri callbackUri;
 
   @override
-  State<OAuthCallbackPage> createState() => _OAuthCallbackPageState();
+  ConsumerState<OAuthCallbackPage> createState() => _OAuthCallbackPageState();
 }
 
-class _OAuthCallbackPageState extends State<OAuthCallbackPage>
-    with SingleTickerProviderStateMixin {
-  late final AnimationController _pulseController;
-  late final CurvedAnimation _pulse;
-  final int returnTab = 2;
-
+class _OAuthCallbackPageState extends ConsumerState<OAuthCallbackPage> {
   @override
   void initState() {
     super.initState();
-    _pulseController = AnimationController(
-      vsync: this,
-      duration: const Duration(milliseconds: 1600),
-    )..repeat(reverse: true);
-    _pulse = CurvedAnimation(
-      parent: _pulseController,
-      curve: Curves.easeInOut,
-    );
     WidgetsBinding.instance.addPostFrameCallback((_) => _runCallback());
   }
 
-  @override
-  void dispose() {
-    _pulse.dispose();
-    _pulseController.dispose();
-    super.dispose();
-  }
-
   Future<void> _runCallback() async {
-    final container = ProviderScope.containerOf(context);
-    final controller = container.read(myControllerProvider);
+    OAuthPurpose purpose = OAuthPurpose.login;
     try {
-      await controller.handleDeepLink(widget.callbackUri.toString());
+      final result = await ref
+          .read(userControllerProvider.notifier)
+          .handleDeepLink(widget.callbackUri.toString());
+      purpose = result.purpose;
+      if (!mounted) return;
+
+      if (!result.success && result.errorMessage != null) {
+        await showDialog<void>(
+          context: context,
+          barrierDismissible: false,
+          builder: (dialogContext) => AlertDialog(
+            title: Text(
+              purpose == OAuthPurpose.bindBangumi
+                  ? 'Bangumi 绑定失败'
+                  : 'Bangumi 授权登录失败',
+            ),
+            content: Text(result.errorMessage!),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.of(dialogContext).pop(),
+                child: const Text('知道了'),
+              ),
+            ],
+          ),
+        );
+      }
     } catch (e, st) {
       LiggLogger().e('OAuth 回调处理失败', error: e, stackTrace: st);
+      if (!mounted) return;
+      await showDialog<void>(
+        context: context,
+        builder: (dialogContext) => AlertDialog(
+          title: const Text('授权处理失败'),
+          content: Text(e.toString()),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(dialogContext).pop(),
+              child: const Text('知道了'),
+            ),
+          ],
+        ),
+      );
     } finally {
       if (mounted) {
-        MainRoute(tab: returnTab.clamp(0, 2)).go(context);
+        const MainRoute(tab: 2).go(context);
       }
     }
   }
@@ -62,6 +81,8 @@ class _OAuthCallbackPageState extends State<OAuthCallbackPage>
   Widget build(BuildContext context) {
     final cs = Theme.of(context).colorScheme;
     final tt = Theme.of(context).textTheme;
+    final isBinding =
+        ref.watch(userControllerProvider).purpose == OAuthPurpose.bindBangumi;
 
     return Scaffold(
       body: DecoratedBox(
@@ -87,7 +108,9 @@ class _OAuthCallbackPageState extends State<OAuthCallbackPage>
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
                     Text(
-                      '正在连接 Bangumi 并同步账号信息，请稍候',
+                      isBinding
+                          ? '正在绑定 Bangumi 账号，请稍候'
+                          : '正在连接 Bangumi 并同步账号信息，请稍候',
                       textAlign: TextAlign.center,
                       style: tt.bodyMedium?.copyWith(
                         color: cs.onSurfaceVariant,

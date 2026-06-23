@@ -65,8 +65,12 @@ class CharactersView extends StatelessWidget {
                     const SizedBox(height: 8),
                     SizedBox(
                       height: windowsWidth > 600 ? 130 : 120,
-                      child: ListView.builder(
-                        scrollDirection: Axis.horizontal,
+                      child: ScrollConfiguration(
+                        behavior: ScrollConfiguration.of(context).copyWith(
+                          scrollbars: false,
+                        ),
+                        child: ListView.builder(
+                          scrollDirection: Axis.horizontal,
                         itemCount: characters.data.length,
                         itemBuilder: (context, index) {
                           final actor = characters.data[index];
@@ -143,6 +147,7 @@ class CharactersView extends StatelessWidget {
                           );
                         },
                       ),
+                    ),
                     ),
                   ],
                 );

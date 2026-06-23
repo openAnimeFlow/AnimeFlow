@@ -7,6 +7,7 @@ import 'package:anime_flow/utils/systemUtil.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:anime_flow/pages/settings/pages/account/account_settings.dart';
 import 'package:anime_flow/pages/settings/pages/general_settings.dart';
 import 'package:anime_flow/pages/settings/pages/playback_settings.dart';
 import 'package:anime_flow/pages/settings/pages/about/index.dart';
@@ -24,6 +25,17 @@ class _SettingsPageState extends State<SettingsPage> {
   bool? _syncedIsWideScreen;
 
   final List<_SettingsCategory> _categories = [
+    _SettingsCategory(
+      title: '用户信息',
+      items: [
+        _SettingsMenuItem(
+          title: '账户设置',
+          icon: Icons.account_circle_outlined,
+          route: const SettingAccountRoute(),
+          page: const AccountSettingsPage(),
+        ),
+      ],
+    ),
     _SettingsCategory(
       title: '应用与外观',
       items: [

@@ -1,4 +1,4 @@
-import 'package:anime_flow/http/requests/bgm_request.dart';
+import 'package:anime_flow/http/requests/flow_request.dart';
 import 'package:anime_flow/models/item/bangumi/subjects_info_item.dart';
 import 'package:anime_flow/widget/notification_toast.dart';
 import 'package:flutter/material.dart';
@@ -72,11 +72,12 @@ class _EvaluateDialogState extends State<InfoEvaluateDialog> {
         }
       }
 
-      await UserRequest.updateCollectionService(
+      await FlowRequest.updateCollectionService(
         currentAnimeInfo.id,
         rate: rate,
         tags: tags,
         comment: comment.isNotEmpty ? comment : null,
+        subjectType: currentAnimeInfo.type,
       );
 
       widget.onSaved(currentAnimeInfo);

@@ -12,10 +12,12 @@ class RatingItem {
   });
 
   RatingItem.fromJson(Map<String, dynamic> json)
-      : rank = json['rank'],
-        count = List<int>.from(json['count']),
-        score = json['score'] as num,
-        total = json['total'];
+      : rank = json['rank'] ?? 0,
+        count = json['count'] != null
+            ? List<int>.from(json['count'])
+            : List<int>.filled(10, 0),
+        score = json['score'] as num? ?? 0,
+        total = json['total'] ?? 0;
 
   Map<String, dynamic> toJson() {
     return {

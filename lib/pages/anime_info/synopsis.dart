@@ -128,6 +128,9 @@ class InfoSynopsisView extends StatelessWidget {
             builder: (BuildContext context) {
               return CustomScrollView(
                 key: const PageStorageKey<String>(title),
+                scrollBehavior: const ScrollBehavior().copyWith(
+                  scrollbars: false,
+                ),
                 slivers: <Widget>[
                   SliverOverlapInjector(
                     handle: NestedScrollView.sliverOverlapAbsorberHandleFor(

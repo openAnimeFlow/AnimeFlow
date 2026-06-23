@@ -1,9 +1,11 @@
 import 'dart:ui';
 
 import 'package:anime_flow/constants/layout_constant.dart';
-import 'package:anime_flow/http/requests/bgm_request.dart';
+import 'package:anime_flow/http/clients/flow_client.dart';
+import 'package:anime_flow/http/requests/flow_request.dart';
 import 'package:anime_flow/models/item/bangumi/subjects_info_item.dart';
 import 'package:anime_flow/pages/anime_info/provider/anime_info_provider.dart';
+import 'package:anime_flow/providers/user/user_state_provider.dart';
 import 'package:anime_flow/routes/provider/routes_args.dart';
 import 'package:anime_flow/utils/systemUtil.dart';
 import 'package:anime_flow/widget/animation_network_image/animation_network_image.dart';
@@ -283,16 +285,29 @@ class InfoHeadView extends StatelessWidget {
         CollectionButton(
           collectType: collectTypeFromApiType(subjectItem.interest?.type),
           onCollectTypeChanged: (type) async {
-            await UserRequest.updateCollectionService(
-              subjectItem.id,
-              type: type.value,
-            );
-            if (context.mounted) {
-              NotificationToast.show(
-                '收藏更新',
-                '已${type.label}',
-                maxWidth: 500,
+            try {
+              await FlowRequest.updateCollectionService(
+                subjectItem.id,
+                type: type.value,
+                subjectType: subjectItem.type,
               );
+              if (context.mounted) {
+                NotificationToast.show(
+                  '收藏更新',
+                  '已${type.label}',
+                  maxWidth: 500,
+                );
+              }
+              ref.invalidate(currentUserInfoProvider);
+            } on AnimeFlowApiException catch (e) {
+              if (context.mounted) {
+                NotificationToast.show(
+                  '收藏更新失败',
+                  e.message,
+                  maxWidth: 500,
+                );
+              }
+              rethrow;
             }
           },
         ),

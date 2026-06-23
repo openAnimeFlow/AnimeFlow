@@ -2,7 +2,7 @@ import 'package:anime_flow/constants/storage_key.dart';
 import 'package:anime_flow/features/app/app_info_provider.dart';
 import 'package:anime_flow/models/download_info.dart';
 import 'package:anime_flow/models/version_download_state.dart';
-import 'package:anime_flow/utils/format_time_util.dart';
+import 'package:anime_flow/utils/utils.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_markdown_plus/flutter_markdown_plus.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -193,7 +193,7 @@ class _DownloadProgressSection extends StatelessWidget {
         const SizedBox(height: 4),
         if (download.totalBytes > 0)
           Text(
-            '${FormatTimeUtil.formatBytes(download.receivedBytes)} / ${FormatTimeUtil.formatBytes(download.totalBytes)}',
+            '${Utils.formatBytes(download.receivedBytes)} / ${Utils.formatBytes(download.totalBytes)}',
             style: TextStyle(
               fontSize: 12,
               color: Theme.of(context).colorScheme.onSurfaceVariant,
@@ -280,7 +280,7 @@ class _DownloadUrlSection extends StatelessWidget {
                           overflow: TextOverflow.ellipsis,
                         ),
                         Text(
-                          FormatTimeUtil.formatBytes(data.size),
+                          Utils.formatBytes(data.size),
                           style: const TextStyle(
                             fontSize: 12,
                             fontWeight: FontWeight.w500,

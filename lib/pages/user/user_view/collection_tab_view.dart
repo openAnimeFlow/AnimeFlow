@@ -1,92 +1,72 @@
 import 'package:anime_flow/constants/layout_constant.dart';
-import 'package:anime_flow/models/item/bangumi/collections_item.dart';
+import 'package:anime_flow/pages/user/provider/user_collection_provider.dart';
 import 'package:anime_flow/routes/model/info_route_extra.dart';
 import 'package:anime_flow/routes/routes.dart';
 import 'package:anime_flow/widget/animation_network_image/animation_network_image.dart';
 import 'package:anime_flow/widget/ranking.dart';
 import 'package:anime_flow/widget/star.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-class CollectionTabView extends StatelessWidget {
+class CollectionTabView extends ConsumerWidget {
   final TabController tabController;
   final List<String> tabs;
-  final Function(int) onLoadMore;
-  final Function(int) onRefresh;
-  final Set<int> loadingMoreTypes;
-  final Map<int, CollectionsItem?> collectionsCache;
-  final Map<int, bool> hasMore;
-  final Map<int, String?> initialErrorMessages;
-  final Map<int, String?> loadMoreErrorMessages;
   final Map<int, GlobalKey<RefreshIndicatorState>> refreshIndicatorKeys;
 
-  const CollectionTabView(
-      {super.key,
-      required this.collectionsCache,
-      required this.tabController,
-      required this.tabs,
-      required this.onLoadMore,
-      required this.onRefresh,
-      required this.loadingMoreTypes,
-      required this.hasMore,
-      required this.initialErrorMessages,
-      required this.loadMoreErrorMessages,
-      required this.refreshIndicatorKeys});
+  const CollectionTabView({
+    super.key,
+    required this.tabController,
+    required this.tabs,
+    required this.refreshIndicatorKeys,
+  });
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     return TabBarView(
       controller: tabController,
       children: List.generate(tabs.length, (tabIndex) {
         final type = tabIndex + 1;
         return _CollectionTabView(
-          key: PageStorageKey<int>(type),
           type: type,
-          collectionsItem: collectionsCache[type],
-          initialErrorMessage: initialErrorMessages[type],
-          loadMoreErrorMessage: loadMoreErrorMessages[type],
-          isLoadingMore: loadingMoreTypes.contains(type),
-          hasMore: hasMore[type] ?? true,
           refreshIndicatorKey: refreshIndicatorKeys[type]!,
-          onLoadMore: () => onLoadMore(type),
-          onRefresh: () => onRefresh(type),
         );
       }),
     );
   }
 }
 
-class _CollectionTabView extends StatefulWidget {
+class _CollectionTabView extends ConsumerWidget {
   final int type;
-  final CollectionsItem? collectionsItem;
-  final String? initialErrorMessage;
-  final String? loadMoreErrorMessage;
-  final bool isLoadingMore;
-  final bool hasMore;
   final GlobalKey<RefreshIndicatorState> refreshIndicatorKey;
-  final VoidCallback onLoadMore;
-  final Future<void> Function() onRefresh;
 
   const _CollectionTabView({
-    super.key,
     required this.type,
-    required this.collectionsItem,
-    required this.initialErrorMessage,
-    required this.loadMoreErrorMessage,
-    required this.isLoadingMore,
-    required this.hasMore,
     required this.refreshIndicatorKey,
-    required this.onLoadMore,
-    required this.onRefresh,
   });
 
-  @override
-  State<_CollectionTabView> createState() => __CollectionTabViewState();
-}
-
-class __CollectionTabViewState extends State<_CollectionTabView> {
   static const double _refreshIndicatorOffset =
       kToolbarHeight + kTextTabBarHeight;
   static const double _minHorizontalPadding = 10;
+  static const double _loadMoreTriggerDistance = 200;
+
+  Future<void> _onRefresh(WidgetRef ref, BuildContext context) async {
+    final success =
+        await ref.read(userCollectionsProvider.notifier).refresh(type);
+    if (!success && context.mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('刷新失败，请稍后重试')),
+      );
+    }
+  }
+
+  void _onLoadMore(WidgetRef ref) {
+    ref.read(userCollectionsProvider.notifier).loadMore(type);
+  }
+
+  bool _shouldTriggerLoadMore(ScrollMetrics metrics) {
+    return metrics.pixels >= metrics.maxScrollExtent - _loadMoreTriggerDistance ||
+        metrics.maxScrollExtent <= _loadMoreTriggerDistance;
+  }
 
   int _calculateCrossAxisCount(BuildContext context) {
     final width = MediaQuery.of(context).size.width;
@@ -104,72 +84,20 @@ class __CollectionTabViewState extends State<_CollectionTabView> {
   }
 
   @override
-  Widget build(BuildContext context) {
-    if (widget.collectionsItem == null) {
-      if (widget.initialErrorMessage != null) {
-        return _buildPlaceholder(
-          context,
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Text(widget.initialErrorMessage!),
-              const SizedBox(height: 12),
-              FilledButton(
-                onPressed: widget.onRefresh,
-                child: const Text('重试'),
-              ),
-            ],
-          ),
-        );
-      }
+  Widget build(BuildContext context, WidgetRef ref) {
+    final tabState = ref.watch(
+      userCollectionsProvider.select((state) => state.tabState(type)),
+    );
+    final collectionsItem = tabState.data;
 
-      return Builder(
-        builder: (context) {
-          final handle =
-              NestedScrollView.sliverOverlapAbsorberHandleFor(context);
-          return CustomScrollView(
-            slivers: <Widget>[
-              SliverOverlapInjector(handle: handle),
-              const SliverFillRemaining(
-                child: Center(
-                  child: CircularProgressIndicator(),
-                ),
-              ),
-            ],
-          );
-        },
-      );
-    }
-
-    if (widget.collectionsItem!.data.isEmpty) {
-      return _buildPlaceholder(
-        context,
-        child: RefreshIndicator(
-          key: widget.refreshIndicatorKey,
-          onRefresh: widget.onRefresh,
-          child: ListView(
-            physics: const AlwaysScrollableScrollPhysics(),
-            children: const [
-              SizedBox(
-                height: 320,
-                child: Center(
-                  child: Text('暂无数据'),
-                ),
-              ),
-            ],
-          ),
-        ),
-      );
-    }
-
-    final collections = widget.collectionsItem!.data;
     return Builder(
-      builder: (context) {
+      builder: (BuildContext context) {
         final handle = NestedScrollView.sliverOverlapAbsorberHandleFor(context);
         final horizontalPadding = _calculateHorizontalPadding(context);
+
         return RefreshIndicator(
-          key: widget.refreshIndicatorKey,
-          onRefresh: widget.onRefresh,
+          key: refreshIndicatorKey,
+          onRefresh: () => _onRefresh(ref, context),
           edgeOffset: _refreshIndicatorOffset,
           displacement: _refreshIndicatorOffset + 16,
           notificationPredicate: (notification) =>
@@ -177,186 +105,191 @@ class __CollectionTabViewState extends State<_CollectionTabView> {
               notification.metrics.axis == Axis.vertical,
           child: NotificationListener<ScrollNotification>(
             onNotification: (notification) {
-              if (notification is ScrollUpdateNotification) {
+              if (notification is ScrollUpdateNotification ||
+                  notification is ScrollMetricsNotification ||
+                  notification is ScrollEndNotification) {
                 final metrics = notification.metrics;
-                // 当滚动到距离底部 200px 时，触发加载更多
-                // 确保有数据且不在加载中
-                if (metrics.pixels >= metrics.maxScrollExtent - 200 &&
-                    collections.isNotEmpty &&
-                    !widget.isLoadingMore) {
-                  widget.onLoadMore();
+                if (_shouldTriggerLoadMore(metrics) &&
+                    collectionsItem != null &&
+                    collectionsItem.data.isNotEmpty &&
+                    tabState.canLoadMore &&
+                    !tabState.isLoadingMore) {
+                  _onLoadMore(ref);
                 }
               }
               return false;
             },
             child: CustomScrollView(
+              key: PageStorageKey<int>(type),
+              scrollBehavior: const ScrollBehavior().copyWith(
+                scrollbars: false,
+              ),
+              physics: const AlwaysScrollableScrollPhysics(
+                parent: ClampingScrollPhysics(),
+              ),
               slivers: <Widget>[
                 SliverOverlapInjector(handle: handle),
-                SliverPadding(
-                  padding: EdgeInsets.fromLTRB(
-                    horizontalPadding,
-                    10,
-                    horizontalPadding,
-                    10,
-                  ),
-                  sliver: SliverGrid(
-                    gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                      crossAxisCount: _calculateCrossAxisCount(context),
-                      crossAxisSpacing: 12,
-                      mainAxisSpacing: 12,
-                      childAspectRatio: 2.5,
+                if (collectionsItem == null &&
+                    tabState.initialErrorMessage != null)
+                  SliverFillRemaining(
+                    hasScrollBody: false,
+                    child: Center(
+                      child: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Text(tabState.initialErrorMessage!),
+                          const SizedBox(height: 12),
+                          FilledButton(
+                            onPressed: () => _onRefresh(ref, context),
+                            child: const Text('重试'),
+                          ),
+                        ],
+                      ),
                     ),
-                    delegate: SliverChildBuilderDelegate(
-                      (context, index) {
-                        final collection = collections[index];
-                        return InkWell(
-                          onTap: () {
-                            AnimeInfoRoute.fromExtra(InfoRouteExtra(
-                              id: collection.id,
-                              name: collection.nameCN.isEmpty
-                                  ? collection.name
-                                  : collection.nameCN,
-                              image: collection.images.large,
-                            )).push(context);
-                          },
-                          child: Row(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              // 左侧封面
-                              AspectRatio(
-                                aspectRatio: 2 / 3,
-                                child: ClipRRect(
-                                  borderRadius: const BorderRadius.all(
-                                      Radius.circular(12)),
-                                  child: SizedBox(
-                                    child: AnimationNetworkImage(
-                                      url: collection.images.large,
-                                      fit: BoxFit.cover,
+                  )
+                else if (collectionsItem == null)
+                  const SliverFillRemaining(
+                    child: Center(child: CircularProgressIndicator()),
+                  )
+                else if (collectionsItem.data.isEmpty)
+                  const SliverFillRemaining(
+                    hasScrollBody: false,
+                    child: Center(child: Text('暂无数据')),
+                  )
+                else ...[
+                  SliverPadding(
+                    padding: EdgeInsets.fromLTRB(
+                      horizontalPadding,
+                      10,
+                      horizontalPadding,
+                      10,
+                    ),
+                    sliver: SliverGrid(
+                      gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                        crossAxisCount: _calculateCrossAxisCount(context),
+                        crossAxisSpacing: 12,
+                        mainAxisSpacing: 12,
+                        childAspectRatio: 2.5,
+                      ),
+                      delegate: SliverChildBuilderDelegate(
+                        (context, index) {
+                          final collection = collectionsItem.data[index];
+                          final displayName = (collection.nameCN == null ||
+                                  collection.nameCN!.isEmpty)
+                              ? collection.name
+                              : collection.nameCN!;
+                          return InkWell(
+                            onTap: () {
+                              AnimeInfoRoute.fromExtra(InfoRouteExtra(
+                                id: collection.id,
+                                name: displayName,
+                                image: collection.images.large,
+                              )).push(context);
+                            },
+                            child: Row(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                AspectRatio(
+                                  aspectRatio: 2 / 3,
+                                  child: ClipRRect(
+                                    borderRadius: const BorderRadius.all(
+                                        Radius.circular(12)),
+                                    child: SizedBox(
+                                      child: AnimationNetworkImage(
+                                        url: collection.images.large,
+                                        fit: BoxFit.cover,
+                                      ),
                                     ),
                                   ),
                                 ),
-                              ),
-
-                              // 右侧信息
-                              Expanded(
-                                child: Padding(
-                                  padding: const EdgeInsets.all(5),
-                                  child: Column(
-                                    crossAxisAlignment:
-                                        CrossAxisAlignment.start,
-                                    mainAxisAlignment:
-                                        MainAxisAlignment.start,
-                                    children: [
-                                      Row(
-                                        crossAxisAlignment:
-                                            CrossAxisAlignment.start,
-                                        children: [
-                                          Expanded(
-                                            child: Text(
-                                              collection.nameCN.isEmpty
-                                                  ? collection.name
-                                                  : collection.nameCN,
-                                              style: const TextStyle(
-                                                fontWeight: FontWeight.bold,
-                                                fontSize: 14,
-                                              ),
-                                              maxLines: 2,
-                                              overflow:
-                                                  TextOverflow.ellipsis,
-                                            ),
-                                          ),
-                                          const InkWell(
-                                            child: Icon(
-                                                Icons.expand_more_outlined),
-                                          ),
-                                        ],
-                                      ),
-                                      if (collection
-                                          .summary.isNotEmpty) ...[
-                                        const SizedBox(height: 4),
-                                        Text(
-                                          collection.summary,
-                                          style: TextStyle(
-                                            fontSize: 12,
-                                            color: Colors.grey[600],
-                                          ),
-                                          maxLines: 2,
-                                          overflow: TextOverflow.ellipsis,
-                                        ),
-                                      ],
-                                      const Spacer(),
-                                      Row(
-                                        children: [
-                                          RankingView(
-                                              ranking:
-                                                  collection.rating.rank),
-                                          if (collection.rating.score >
-                                              0) ...[
-                                            const SizedBox(height: 4),
-                                            Row(
-                                              children: [
-                                                StarView(
-                                                    iconSize: 16,
-                                                    score: collection
-                                                        .rating.score),
-                                                const SizedBox(width: 4),
-                                                Text(
-                                                  '${collection.rating.score}',
-                                                  style: TextStyle(
-                                                    fontWeight:
-                                                        FontWeight.bold,
-                                                    fontSize: 12,
-                                                    color: Colors.grey[600],
-                                                  ),
+                                Expanded(
+                                  child: Padding(
+                                    padding: const EdgeInsets.all(5),
+                                    child: Column(
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.start,
+                                      mainAxisAlignment:
+                                          MainAxisAlignment.start,
+                                      children: [
+                                        Row(
+                                          crossAxisAlignment:
+                                              CrossAxisAlignment.start,
+                                          children: [
+                                            Expanded(
+                                              child: Text(
+                                                displayName,
+                                                style: const TextStyle(
+                                                  fontWeight: FontWeight.bold,
+                                                  fontSize: 14,
                                                 ),
-                                              ],
+                                                maxLines: 2,
+                                                overflow: TextOverflow.ellipsis,
+                                              ),
+                                            ),
+                                            const InkWell(
+                                              child: Icon(
+                                                  Icons.expand_more_outlined),
                                             ),
                                           ],
-                                        ],
-                                      )
-                                    ],
+                                        ),
+                                        const Spacer(),
+                                        Row(
+                                          children: [
+                                            RankingView(
+                                                ranking:
+                                                    collection.rating.rank),
+                                            if (collection.rating.score >
+                                                0) ...[
+                                              const SizedBox(height: 4),
+                                              Row(
+                                                children: [
+                                                  StarView(
+                                                      iconSize: 16,
+                                                      score: collection
+                                                          .rating.score),
+                                                  const SizedBox(width: 4),
+                                                  Text(
+                                                    '${collection.rating.score}',
+                                                    style: TextStyle(
+                                                      fontWeight:
+                                                          FontWeight.bold,
+                                                      fontSize: 12,
+                                                      color: Colors.grey[600],
+                                                    ),
+                                                  ),
+                                                ],
+                                              ),
+                                            ],
+                                          ],
+                                        )
+                                      ],
+                                    ),
                                   ),
                                 ),
-                              ),
-                            ],
-                          ),
-                        );
-                      },
-                      childCount: collections.length,
+                              ],
+                            ),
+                          );
+                        },
+                        childCount: collectionsItem.data.length,
+                      ),
                     ),
                   ),
-                ),
-                SliverPadding(
-                  padding: EdgeInsets.symmetric(horizontal: horizontalPadding),
-                  sliver: SliverToBoxAdapter(
-                    child: _CollectionFooter(
-                      isLoadingMore: widget.isLoadingMore,
-                      hasMore: widget.hasMore,
-                      errorMessage: widget.loadMoreErrorMessage,
-                      onRetry: widget.onLoadMore,
+                  SliverPadding(
+                    padding:
+                        EdgeInsets.symmetric(horizontal: horizontalPadding),
+                    sliver: SliverToBoxAdapter(
+                      child: _CollectionFooter(
+                        isLoadingMore: tabState.isLoadingMore,
+                        hasMore: tabState.canLoadMore,
+                        errorMessage: tabState.loadMoreErrorMessage,
+                        onRetry: () => _onLoadMore(ref),
+                      ),
                     ),
                   ),
-                ),
+                ],
               ],
             ),
           ),
-        );
-      },
-    );
-  }
-
-  Widget _buildPlaceholder(BuildContext context, {required Widget child}) {
-    return Builder(
-      builder: (context) {
-        final handle = NestedScrollView.sliverOverlapAbsorberHandleFor(context);
-        return CustomScrollView(
-          slivers: <Widget>[
-            SliverOverlapInjector(handle: handle),
-            SliverFillRemaining(
-              hasScrollBody: false,
-              child: Center(child: child),
-            ),
-          ],
         );
       },
     );

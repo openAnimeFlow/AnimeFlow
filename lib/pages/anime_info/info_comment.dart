@@ -16,15 +16,27 @@ class InfoCommentView extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final commentsAsync = ref.watch(subjectCommentsProvider);
 
-    if (!commentsAsync.hasValue) {
-      return const SizedBox.shrink();
-    }
+    return commentsAsync.when(
+      loading: () => const Padding(
+        padding: EdgeInsets.symmetric(vertical: 24),
+        child: Center(child: CircularProgressIndicator()),
+      ),
+      error: (e, _) => const SizedBox.shrink(),
+      data: (viewState) {
+        final subjectComments = viewState.comments;
+        final isLoadingMore = viewState.isLoadingMore;
+        final hasMore = viewState.hasMore;
+        return _buildContent(context, subjectComments, isLoadingMore, hasMore);
+      },
+    );
+  }
 
-    final viewState = commentsAsync.requireValue;
-    final subjectComments = viewState.comments;
-    final isLoadingMore = viewState.isLoadingMore;
-    final hasMore = viewState.hasMore;
-
+  Widget _buildContent(
+    BuildContext context,
+    SubjectCommentItem subjectComments,
+    bool isLoadingMore,
+    bool hasMore,
+  ) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [

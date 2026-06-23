@@ -344,16 +344,18 @@ class VideoSourceController extends GetxController {
     for (final candidate in candidates) {
       selectedWebsiteIndex.value = candidate.websiteIndex;
       final candidateUrl = candidate.resource.baseUrl + candidate.episode.like;
-      final loaded = await loadVideoPage(candidateUrl);
-      if (!loaded) {
-        continue;
-      }
 
       setWebSite(
         title: candidate.resource.websiteName,
         iconUrl: candidate.resource.websiteIcon,
         videoUrl: candidateUrl,
       );
+
+      final loaded = await loadVideoPage(candidateUrl);
+      if (!loaded) {
+        setWebSite(title: '', iconUrl: '', videoUrl: '');
+        continue;
+      }
       return;
     }
   }

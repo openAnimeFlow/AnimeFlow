@@ -47,13 +47,25 @@ dependencies:
   #构建每个架构一个APK
   #flutter build apk --split-per-abi
 
-  media_kit: ^1.2.6 # 主要包装.
-  media_kit_video: ^2.0.1 # 用于视频渲染.
-  media_kit_libs_video: ^1.0.7 # 原生视频依赖项.
+  media_kit:
+    git:
+      url: https://github.com/Predidit/media-kit.git
+      ref: 11f72195b4b1298ad5a96b56fe66be63b39e0797
+      path: ./media_kit
+  media_kit_video:
+    git:
+      url: https://github.com/Predidit/media-kit.git
+      ref: 11f72195b4b1298ad5a96b56fe66be63b39e0797
+      path: ./media_kit_video
+  media_kit_libs_video:
+    git:
+      url: https://github.com/Predidit/media-kit.git
+      ref: 11f72195b4b1298ad5a96b56fe66be63b39e0797
+      path: ./libs/universal/media_kit_libs_video
   # carousel_slider: ^5.1.1
   # shared_preferences: ^2.5.3#  app_links: ^7.0.0
   # flutter_dotenv: ^6.0.0
-  package_info_plus: ^9.0.0
+  package_info_plus: ^8.3.1
   dio: ^5.9.0
   crypto: ^3.0.6
   get: ^4.7.3
@@ -109,6 +121,33 @@ dependencies:
   flutter_riverpod: ^3.2.1
   path_provider: ^2.1.5
   bot_toast: ^4.1.3
+
+dependency_overrides:
+  media_kit_libs_linux:
+    git:
+      url: https://github.com/Predidit/media-kit.git
+      ref: 11f72195b4b1298ad5a96b56fe66be63b39e0797
+      path: ./libs/linux/media_kit_libs_linux
+  media_kit_libs_ios_video:
+    git:
+      url: https://github.com/Predidit/media-kit.git
+      ref: 11f72195b4b1298ad5a96b56fe66be63b39e0797
+      path: ./libs/ios/media_kit_libs_ios_video
+  media_kit_libs_android_video:
+    git:
+      url: https://github.com/Predidit/media-kit.git
+      ref: 11f72195b4b1298ad5a96b56fe66be63b39e0797
+      path: ./libs/android/media_kit_libs_android_video
+  media_kit_libs_windows_video:
+    git:
+      url: https://github.com/Predidit/media-kit.git
+      ref: 11f72195b4b1298ad5a96b56fe66be63b39e0797
+      path: ./libs/windows/media_kit_libs_windows_video
+  media_kit_libs_macos_video:
+    git:
+      url: https://github.com/Predidit/media-kit.git
+      ref: 11f72195b4b1298ad5a96b56fe66be63b39e0797
+      path: ./libs/macos/media_kit_libs_macos_video
 
 # logo图标生成生成命令:dart run flutter_launcher_icons
 flutter_launcher_icons:

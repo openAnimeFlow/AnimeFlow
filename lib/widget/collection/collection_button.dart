@@ -4,23 +4,11 @@ import 'package:anime_flow/routes/routes.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-/// Bangumi API type → [CollectType]（API：1=想看, 2=看过, 3=在看, 4=搁置, 5=抛弃）
+/// Bangumi API type → [CollectType]
 CollectType? collectTypeFromApiType(int? apiType) {
   if (apiType == null) return null;
-  switch (apiType) {
-    case 1:
-      return CollectType.planToWatch;
-    case 2:
-      return CollectType.watched;
-    case 3:
-      return CollectType.watching;
-    case 4:
-      return CollectType.onHold;
-    case 5:
-      return CollectType.abandoned;
-    default:
-      return null;
-  }
+  final type = CollectType.fromValue(apiType);
+  return type == CollectType.none ? null : type;
 }
 
 class CollectionButton extends StatefulWidget {

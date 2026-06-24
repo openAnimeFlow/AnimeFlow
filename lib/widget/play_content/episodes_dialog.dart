@@ -12,7 +12,7 @@ class EpisodesDialog extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final episodesState = ref.watch(episodesProvider);
     final episodes = episodesState.episodes?.data;
-    final selectedEpisode = episodesState.episodeSort;
+    final selectedEpisodeId = episodesState.episodeId;
 
     return Align(
       alignment: Alignment.centerRight,
@@ -48,7 +48,7 @@ class EpisodesDialog extends ConsumerWidget {
                 context,
                 ref,
                 episodes: episodes,
-                selectedEpisode: selectedEpisode,
+                selectedEpisodeId: selectedEpisodeId,
                 isLoading: episodesState.isLoading,
               ),
             ),
@@ -58,11 +58,21 @@ class EpisodesDialog extends ConsumerWidget {
     );
   }
 
+  void _sortEpisodes(List<EpisodeData> episodes) {
+    episodes.sort((a, b) {
+      final aIsMain = a.type == 0 ? 0 : 1;
+      final bIsMain = b.type == 0 ? 0 : 1;
+      if (aIsMain != bIsMain) return aIsMain.compareTo(bIsMain);
+      if (a.type != b.type) return a.type.compareTo(b.type);
+      return a.sort.compareTo(b.sort);
+    });
+  }
+
   Widget _buildEpisodesList(
     BuildContext context,
     WidgetRef ref, {
     required List<EpisodeData>? episodes,
-    required double selectedEpisode,
+    required int selectedEpisodeId,
     required bool isLoading,
   }) {
     if (isLoading) {
@@ -73,11 +83,14 @@ class EpisodesDialog extends ConsumerWidget {
       return const Center(child: Text('暂无章节数据'));
     }
 
+    // 正篇置顶，其他按 type 分组排列
+    _sortEpisodes(episodes);
+
     return ListView.builder(
       itemCount: episodes.length,
       itemBuilder: (BuildContext context, int index) {
         final episode = episodes[index];
-        final isSelected = selectedEpisode == episode.sort;
+        final isSelected = selectedEpisodeId == episode.id;
         return Card(
           elevation: 0,
           color: isSelected

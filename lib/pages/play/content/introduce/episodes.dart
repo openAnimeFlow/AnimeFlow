@@ -22,8 +22,19 @@ class _EpisodesComponentsState extends ConsumerState<EpisodesComponents> {
   /// 布局模式：false=列表，true=网格
   bool isGridView = false;
 
-  /// 上次滚动定位对应的 sort，避免 rebuild 重复触发滚动
-  double? lastScrolledSort;
+  /// 上次滚动定位对应的 episodeId，避免 rebuild 重复触发滚动
+  int? lastScrolledEpisodeId;
+
+  /// 剧集类型 → 中文标签
+  static const Map<int, String> _typeLabels = {
+    0: '正篇',
+    1: '特别篇',
+    2: 'OP',
+    3: 'ED',
+    4: 'Trailer',
+    5: 'MAD',
+    6: '其他',
+  };
 
   /// 剧集列表每行固定高度
   final double itemHeight = 80;
@@ -62,14 +73,25 @@ class _EpisodesComponentsState extends ConsumerState<EpisodesComponents> {
     ref.read(episodesProvider.notifier).loadMore(subjectId);
   }
 
+  /// 正篇(type=0)置顶，其余按 type 分组，同 type 内按 sort 排序
+  void _sortEpisodes(List<EpisodeData> episodes) {
+    episodes.sort((a, b) {
+      final aIsMain = a.type == 0 ? 0 : 1;
+      final bIsMain = b.type == 0 ? 0 : 1;
+      if (aIsMain != bIsMain) return aIsMain.compareTo(bIsMain);
+      if (a.type != b.type) return a.type.compareTo(b.type);
+      return a.sort.compareTo(b.sort);
+    });
+  }
+
   /// 将列表滚动到当前选集对应行（需在布局完成、`controller` 已 attach 后调用）。
   void _scrollListToSelectedEpisode(
     List<EpisodeData> episodes,
-    double selectedSort,
+    int episodeId,
   ) {
     if (!mounted || isGridView || !controller.hasClients) return;
     final index = episodes.indexWhere(
-      (e) => e.sort.toDouble() == selectedSort,
+      (e) => e.id == episodeId,
     );
     if (index < 0) return;
     final maxExtent = controller.position.maxScrollExtent;
@@ -147,11 +169,13 @@ class _EpisodesComponentsState extends ConsumerState<EpisodesComponents> {
         }
 
         final episodes = episodesItem.data;
-        final selectedSort = episodesState.episodeSort;
-        if (lastScrolledSort != selectedSort) {
-          lastScrolledSort = selectedSort;
+        // 正篇置顶，其他按 type 分组排列
+        _sortEpisodes(episodes);
+        final selectedEpisodeId = episodesState.episodeId;
+        if (lastScrolledEpisodeId != selectedEpisodeId) {
+          lastScrolledEpisodeId = selectedEpisodeId;
           WidgetsBinding.instance.addPostFrameCallback((_) {
-            _scrollListToSelectedEpisode(episodes, selectedSort);
+            _scrollListToSelectedEpisode(episodes, selectedEpisodeId);
           });
         }
 
@@ -178,7 +202,7 @@ class _EpisodesComponentsState extends ConsumerState<EpisodesComponents> {
               }
 
               final episode = episodes[index];
-              final isSelected = selectedSort == episode.sort;
+              final isSelected = selectedEpisodeId == episode.id;
               return SizedBox(
                 height: itemHeight,
                 child: Card(
@@ -219,7 +243,23 @@ class _EpisodesComponentsState extends ConsumerState<EpisodesComponents> {
                               mainAxisAlignment: MainAxisAlignment.spaceBetween,
                               crossAxisAlignment: CrossAxisAlignment.stretch,
                               children: [
-                                Text(episode.sort.toString().padLeft(2, '0')),
+                                Row(
+                                  children: [
+                                    Text(episode.sort.toString().padLeft(2, '0')),
+                                    if (episode.type != 0) ...[
+                                      const SizedBox(width: 6),
+                                      Text(
+                                        _typeLabels[episode.type] ?? '',
+                                        style: TextStyle(
+                                          fontSize: 10,
+                                          color: Theme.of(context)
+                                              .colorScheme
+                                              .outline,
+                                        ),
+                                      ),
+                                    ],
+                                  ],
+                                ),
                                 Text(
                                   episode.nameCN.isEmpty
                                       ? episode.name
@@ -272,7 +312,9 @@ class _EpisodesComponentsState extends ConsumerState<EpisodesComponents> {
         }
 
         final episodes = episodesItem.data;
-        final selectedSort = episodesState.episodeSort;
+        // 正篇置顶，其他按 type 分组排列
+        _sortEpisodes(episodes);
+        final selectedEpisodeId = episodesState.episodeId;
         final itemCount =
             episodes.length + (episodesState.isLoadingMore ? 1 : 0);
 
@@ -310,7 +352,7 @@ class _EpisodesComponentsState extends ConsumerState<EpisodesComponents> {
               }
 
               final episode = episodes[index];
-              final isSelected = selectedSort == episode.sort;
+              final isSelected = selectedEpisodeId == episode.id;
               return Card(
                 elevation: 0,
                 color: isSelected

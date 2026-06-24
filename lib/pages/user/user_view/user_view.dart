@@ -289,39 +289,43 @@ class _UserViewState extends ConsumerState<UserView>
   Widget _buildHeaderContent(double statusBarHeight) {
     final user = widget.user;
     final hasAvatar = user.avatar.isNotEmpty;
+    final hasBackground = user.background.isNotEmpty;
+    final backgroundUrl = hasBackground
+        ? user.background
+        : (hasAvatar ? user.avatar : null);
+    final blurSigma = hasBackground ? 0.0 : 15.0;
     return Stack(
       children: [
-        Positioned.fill(
-          child: IgnorePointer(
-            child: Opacity(
-              opacity: 0.4,
-              child: LayoutBuilder(
-                builder: (context, boxConstraints) {
-                  return ImageFiltered(
-                    imageFilter: ImageFilter.blur(
-                        sigmaX: hasAvatar ? 15 : 0, sigmaY: hasAvatar ? 15 : 0),
-                    child: ShaderMask(
-                      shaderCallback: (Rect bounds) {
-                        return const LinearGradient(
-                          begin: Alignment.topCenter,
-                          end: Alignment.bottomCenter,
-                          colors: [Colors.white, Colors.transparent],
-                          stops: [0.9, 1],
-                        ).createShader(bounds);
-                      },
-                      child: hasAvatar
-                          ? AnimationNetworkImage(
-                              url: user.avatar,
-                              fit: BoxFit.cover,
-                            )
-                          : const SizedBox.expand(),
-                    ),
-                  );
-                },
+        if (backgroundUrl != null)
+          Positioned.fill(
+            child: IgnorePointer(
+              child: Opacity(
+                opacity: 0.4,
+                child: LayoutBuilder(
+                  builder: (context, boxConstraints) {
+                    return ImageFiltered(
+                      imageFilter: ImageFilter.blur(
+                          sigmaX: blurSigma, sigmaY: blurSigma),
+                      child: ShaderMask(
+                        shaderCallback: (Rect bounds) {
+                          return const LinearGradient(
+                            begin: Alignment.topCenter,
+                            end: Alignment.bottomCenter,
+                            colors: [Colors.white, Colors.transparent],
+                            stops: [0.9, 1],
+                          ).createShader(bounds);
+                        },
+                        child: AnimationNetworkImage(
+                          url: backgroundUrl,
+                          fit: BoxFit.cover,
+                        ),
+                      ),
+                    );
+                  },
+                ),
               ),
             ),
           ),
-        ),
         Positioned.fill(
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
@@ -331,8 +335,8 @@ class _UserViewState extends ConsumerState<UserView>
                   borderRadius: BorderRadius.circular(100),
                   url: user.avatar,
                   fit: BoxFit.cover,
-                  width: 120,
-                  height: 120,
+                  width: 100,
+                  height: 100,
                 )
               else
                 const Icon(Icons.person, size: 96),

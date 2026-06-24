@@ -202,7 +202,7 @@ class AnimeFlowApi {
       /// 登出并销毁服务端 token
       logout = '/api/v1/account/logout',
 
-      /// 获取当前用户信息
+      /// 用户信息
       flowUsers = '/api/v1/users',
 
       /// 当前用户 Bangumi 收藏

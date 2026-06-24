@@ -1,3 +1,4 @@
+import 'package:anime_flow/constants/assets_path_constants.dart';
 import 'package:bot_toast/bot_toast.dart';
 import 'package:flutter/material.dart';
 
@@ -34,6 +35,7 @@ class NotificationToast {
     BorderRadius borderRadius = defaultBorderRadius,
     Duration duration = defaultDuration,
     double maxWidth = 500.0,
+    String iconPath = AssetsPathConstants.logo,
     Alignment align = Alignment.bottomCenter,
     WrapAnimation? wrapToastAnimation,
   }) {
@@ -58,6 +60,7 @@ class NotificationToast {
                 side: BorderSide(color: colorScheme.outlineVariant),
               ),
               child: ListTile(
+                leading: Image.asset(iconPath),
                 title: Text(title),
                 subtitle: Text(message),
               ),

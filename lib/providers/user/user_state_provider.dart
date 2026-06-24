@@ -1,3 +1,5 @@
+import 'dart:typed_data';
+
 import 'package:anime_flow/http/interceptors/bgm_refresh_token_interceptor.dart';
 import 'package:anime_flow/http/interceptors/flow_refresh_token_interceptor.dart';
 import 'package:anime_flow/http/requests/flow_request.dart';
@@ -84,7 +86,8 @@ class CurrentUserInfo extends _$CurrentUserInfo {
     }
   }
 
-  void setUserInfo(FlowUsers user) {
-    state = AsyncData(user);
+  Future<void> uploadAvatar(Uint8List imageBytes) async {
+    final updatedUser = await FlowRequest.uploadAvatarService(imageBytes);
+    state = AsyncData(updatedUser);
   }
 }

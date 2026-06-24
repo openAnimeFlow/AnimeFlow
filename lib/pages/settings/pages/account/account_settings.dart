@@ -264,13 +264,11 @@ class AccountSettingsPage extends ConsumerWidget {
                         currentAvatar: user.avatar,
                       );
                       if (cropped == null) return;
+                      final notifier =
+                          ref.read(currentUserInfoProvider.notifier);
                       NotificationToast.show('提示', '正在上传头像...');
                       try {
-                        final updatedUser =
-                            await FlowRequest.uploadAvatarService(cropped);
-                        ref
-                            .read(currentUserInfoProvider.notifier)
-                            .setUserInfo(updatedUser);
+                        await notifier.uploadAvatar(cropped);
                         NotificationToast.show('提示', '头像已更新');
                       } on AnimeFlowApiException catch (e) {
                         NotificationToast.show('上传失败', e.message);

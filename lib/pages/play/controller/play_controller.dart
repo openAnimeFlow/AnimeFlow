@@ -292,7 +292,7 @@ class PlayController extends GetxController {
             PlayRepository.savePlayHistory(playHistory);
           }
 
-          /// 播放进度大于90% 时可更新章节进度（待实现）
+          /// Todo播放进度大于90% 时可更新章节进度（待实现）
         }
       });
     } catch (e) {

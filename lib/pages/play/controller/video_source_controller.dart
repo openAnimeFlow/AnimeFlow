@@ -367,6 +367,11 @@ class VideoSourceController extends GetxController {
 
     final candidates = _buildAutoLoadCandidates(resources);
     for (final candidate in candidates) {
+      // 用户在自动切换过程中手动选择了数据源，取消自动选择
+      if (userManuallySelected) {
+        return;
+      }
+
       selectedWebsiteIndex.value = candidate.websiteIndex;
       final candidateUrl = candidate.resource.baseUrl + candidate.episode.like;
 
@@ -378,6 +383,10 @@ class VideoSourceController extends GetxController {
 
       final loaded = await loadVideoPage(candidateUrl);
       if (!loaded) {
+        // 解析失败，但在解析期间用户可能已手动选择，检查后决定是否继续
+        if (userManuallySelected) {
+          return;
+        }
         setWebSite(title: '', iconUrl: '', videoUrl: '');
         continue;
       }

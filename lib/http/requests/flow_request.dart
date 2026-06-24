@@ -1,3 +1,4 @@
+import 'dart:typed_data';
 import 'dart:ui';
 
 import 'package:anime_flow/constants/constants.dart';
@@ -614,6 +615,21 @@ class FlowRequest {
           ),
         )
         .then((value) => FlowUsers.fromJson((value.data) as Map<String, dynamic>));
+  }
+
+  /// 上传当前登录用户的头像（支持 JPEG / PNG / WebP / GIF，最大 2MB）
+  static Future<FlowUsers> uploadAvatarService(Uint8List imageBytes, {
+    String filename = 'avatar.png',
+  }) async {
+    final formData = FormData.fromMap({
+      'file': MultipartFile.fromBytes(imageBytes, filename: filename),
+    });
+    final response = await _client.post(
+      '${AnimeFlowApi.flowUsers}/avatar',
+      data: formData,
+      options: await _flowAuthOptions(),
+    );
+    return FlowUsers.fromJson(response.data as Map<String, dynamic>);
   }
 
   /// 更新当前用户资料（昵称、头像）

@@ -121,6 +121,7 @@ dependencies:
   flutter_riverpod: ^3.2.1
   path_provider: ^2.1.5
   bot_toast: ^4.1.3
+  crop_your_image: ^2.0.0
 
 dependency_overrides:
   media_kit_libs_linux:

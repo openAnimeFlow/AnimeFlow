@@ -15,14 +15,16 @@ import 'package:anime_flow/providers/user/user_state_provider.dart';
 import 'package:anime_flow/routes/routes.dart';
 import 'package:anime_flow/utils/format_time_util.dart';
 import 'package:anime_flow/utils/systemUtil.dart';
-import 'package:anime_flow/widget/network_check_button.dart';
 import 'package:anime_flow/widget/animation_network_image/animation_network_image.dart';
+import 'package:anime_flow/widget/network_check_button.dart';
 import 'package:anime_flow/widget/notification_toast.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_svg/svg.dart';
 
+import 'avatar_dialog.dart';
 import 'nickname_editor.dart';
+import 'user_avatar.dart';
 
 class AccountSettingsPage extends ConsumerWidget {
   const AccountSettingsPage({super.key});
@@ -62,12 +64,12 @@ class AccountSettingsPage extends ConsumerWidget {
                 data: (user) => user == null
                     ? _buildNotLoggedIn(context)
                     : _buildLoggedInContent(
-                  context,
-                  ref,
-                  user,
-                  bangumiBindAsync,
-                  isBinding,
-                ),
+                        context,
+                        ref,
+                        user,
+                        bangumiBindAsync,
+                        isBinding,
+                      ),
                 loading: () => const Center(child: CircularProgressIndicator()),
                 error: (_, __) => _buildErrorState('获取用户资料失败'),
               );
@@ -108,8 +110,9 @@ class AccountSettingsPage extends ConsumerWidget {
 
   Future<void> _bindBangumi(BuildContext context, WidgetRef ref) async {
     try {
-      final launched =
-      await ref.read(userControllerProvider.notifier).openOAuthPageForBind();
+      final launched = await ref
+          .read(userControllerProvider.notifier)
+          .openOAuthPageForBind();
       if (!context.mounted) return;
       if (launched && !SystemUtil.isDesktop) {
         NotificationToast.show('提示', '请在浏览器完成授权后返回应用');
@@ -150,16 +153,16 @@ class AccountSettingsPage extends ConsumerWidget {
                 Text(
                   '尚未登录',
                   style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                    fontWeight: FontWeight.bold,
-                  ),
+                        fontWeight: FontWeight.bold,
+                      ),
                 ),
                 const SizedBox(height: 8),
                 Text(
                   '登录后可管理账户信息、绑定 Bangumi 账号',
                   textAlign: TextAlign.center,
                   style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                    color: colorScheme.onSurfaceVariant,
-                  ),
+                        color: colorScheme.onSurfaceVariant,
+                      ),
                 ),
                 const SizedBox(height: 24),
                 Center(
@@ -239,12 +242,12 @@ class AccountSettingsPage extends ConsumerWidget {
   }
 
   Widget _buildLoggedInContent(
-      BuildContext context,
-      WidgetRef ref,
-      FlowUsers user,
-      AsyncValue<BangumiBindItem?> bangumiBindAsync,
-      bool isBinding,
-      ) {
+    BuildContext context,
+    WidgetRef ref,
+    FlowUsers user,
+    AsyncValue<BangumiBindItem?> bangumiBindAsync,
+    bool isBinding,
+  ) {
     return ListView(
       padding: const EdgeInsets.all(16),
       children: [
@@ -254,26 +257,28 @@ class AccountSettingsPage extends ConsumerWidget {
             padding: const EdgeInsets.all(16),
             child: Row(
               children: [
-                ClipRRect(
-                  borderRadius: BorderRadius.circular(40),
-                  child: user.avatar.isNotEmpty
-                      ? AnimationNetworkImage(
-                    url: user.avatar,
-                    width: 72,
-                    height: 72,
-                    fit: BoxFit.cover,
-                  )
-                      : SizedBox(
-                    width: 72,
-                    height: 72,
-                    child: Icon(
-                      Icons.person,
-                      size: 48,
-                      color:
-                      Theme.of(context).colorScheme.onSurfaceVariant,
-                    ),
-                  ),
-                ),
+                UserAvatarView(
+                    onTap: () async {
+                      final cropped = await AvatarDialog.pickAndCrop(
+                        context,
+                        currentAvatar: user.avatar,
+                      );
+                      if (cropped == null) return;
+                      NotificationToast.show('提示', '正在上传头像...');
+                      try {
+                        final updatedUser =
+                            await FlowRequest.uploadAvatarService(cropped);
+                        ref
+                            .read(currentUserInfoProvider.notifier)
+                            .setUserInfo(updatedUser);
+                        NotificationToast.show('提示', '头像已更新');
+                      } on AnimeFlowApiException catch (e) {
+                        NotificationToast.show('上传失败', e.message);
+                      } catch (e) {
+                        NotificationToast.show('上传失败', '头像上传失败，请重试');
+                      }
+                    },
+                    avatar: user.avatar),
                 const SizedBox(width: 16),
                 Expanded(
                   child: Column(
@@ -366,11 +371,11 @@ class AccountSettingsPage extends ConsumerWidget {
   }
 
   Widget _buildBangumiBindCard(
-      BuildContext context,
-      WidgetRef ref,
-      AsyncValue<BangumiBindItem?> bangumiBindAsync,
-      bool isBinding,
-      ) {
+    BuildContext context,
+    WidgetRef ref,
+    AsyncValue<BangumiBindItem?> bangumiBindAsync,
+    bool isBinding,
+  ) {
     final colorScheme = Theme.of(context).colorScheme;
 
     return Card(
@@ -398,9 +403,7 @@ class AccountSettingsPage extends ConsumerWidget {
                 bangumiBindAsync.maybeWhen(
                   data: (bind) {
                     final isBound = bind?.bound ?? false;
-                    if (!isBinding &&
-                        isBound &&
-                        bind?.platformUid != null) {
+                    if (!isBinding && isBound && bind?.platformUid != null) {
                       return Padding(
                         padding: const EdgeInsets.only(top: 4, right: 4),
                         child: Text(
@@ -484,13 +487,13 @@ class AccountSettingsPage extends ConsumerWidget {
         final statusText = isBinding
             ? '授权中...'
             : isBound
-            ? '已绑定'
-            : '未绑定';
+                ? '已绑定'
+                : '未绑定';
         final statusColor = isBinding
             ? colorScheme.onSurfaceVariant
             : isBound
-            ? colorScheme.primary
-            : colorScheme.onSurfaceVariant;
+                ? colorScheme.primary
+                : colorScheme.onSurfaceVariant;
         return _buildBangumiTitleColumn(statusText, statusColor);
       },
       loading: () => _buildBangumiTitleColumn(
@@ -525,10 +528,10 @@ class AccountSettingsPage extends ConsumerWidget {
   }
 
   Widget _buildBangumiBindBody(
-      BuildContext context,
-      WidgetRef ref,
-      BangumiBindItem? bind,
-      ) {
+    BuildContext context,
+    WidgetRef ref,
+    BangumiBindItem? bind,
+  ) {
     final colorScheme = Theme.of(context).colorScheme;
     final isBound = bind?.bound ?? false;
 
@@ -558,8 +561,7 @@ class AccountSettingsPage extends ConsumerWidget {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    if (bind.nickname?.isNotEmpty == true)
-                      Text(bind.nickname!),
+                    if (bind.nickname?.isNotEmpty == true) Text(bind.nickname!),
                     if (bind.username?.isNotEmpty == true)
                       Text(
                         '@${bind.username}',
@@ -649,8 +651,8 @@ class _BangumiCollectionSyncSectionState
       final message = e is AnimeFlowApiException
           ? e.message
           : e is StateError
-          ? e.message
-          : '启动同步失败';
+              ? e.message
+              : '启动同步失败';
       NotificationToast.show('提示', message);
     } finally {
       if (mounted) {
@@ -821,21 +823,21 @@ class _SyncStatusChip extends StatelessWidget {
     final colorScheme = Theme.of(context).colorScheme;
     final (Color bg, Color fg) = switch (status) {
       BgmCollectionSyncStatus.running => (
-      colorScheme.primaryContainer,
-      colorScheme.onPrimaryContainer,
-      ),
+          colorScheme.primaryContainer,
+          colorScheme.onPrimaryContainer,
+        ),
       BgmCollectionSyncStatus.success => (
-      colorScheme.tertiaryContainer,
-      colorScheme.onTertiaryContainer,
-      ),
+          colorScheme.tertiaryContainer,
+          colorScheme.onTertiaryContainer,
+        ),
       BgmCollectionSyncStatus.failed => (
-      colorScheme.errorContainer,
-      colorScheme.onErrorContainer,
-      ),
+          colorScheme.errorContainer,
+          colorScheme.onErrorContainer,
+        ),
       BgmCollectionSyncStatus.idle => (
-      colorScheme.surfaceContainerHighest,
-      colorScheme.onSurfaceVariant,
-      ),
+          colorScheme.surfaceContainerHighest,
+          colorScheme.onSurfaceVariant,
+        ),
     };
 
     return Container(

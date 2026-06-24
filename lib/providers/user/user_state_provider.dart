@@ -83,4 +83,8 @@ class CurrentUserInfo extends _$CurrentUserInfo {
       Error.throwWithStackTrace(error, stackTrace);
     }
   }
+
+  void setUserInfo(FlowUsers user) {
+    state = AsyncData(user);
+  }
 }

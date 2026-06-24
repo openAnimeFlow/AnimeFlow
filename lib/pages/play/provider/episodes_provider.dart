@@ -88,14 +88,14 @@ class Episodes extends _$Episodes {
     }
     state = state.copyWith(isLoading: true);
     try {
-      final page = await FlowRequest.getSubjectEpisodesByIdService(
+      final episodes = await FlowRequest.getSubjectEpisodesByIdService(
         subjectId,
         EpisodesPagination.pageSize,
         0,
       );
       state = state.copyWith(
-        episodes: page,
-        hasMore: EpisodesPagination.hasMore(page),
+        episodes: episodes,
+        hasMore: EpisodesPagination.hasMore(episodes),
         isLoading: false,
       );
     } catch (e) {

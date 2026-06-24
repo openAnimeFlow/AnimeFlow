@@ -44,6 +44,9 @@ app.*.map.json
 /android/app/debug
 /android/app/profile
 /android/app/release
+
+# Eclipse/Gradle Buildship
+.settings/
 /devtools_options.yaml
 /pubspec.lock
 /.cursor/

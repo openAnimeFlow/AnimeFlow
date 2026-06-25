@@ -12,9 +12,9 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:go_router/go_router.dart';
 
-
 class LoginPage extends ConsumerStatefulWidget {
   final AppBar? appBar;
+
   const LoginPage({super.key, this.appBar});
 
   @override
@@ -51,7 +51,7 @@ class _LoginPageState extends ConsumerState<LoginPage> {
       ref.invalidate(currentFlowTokenProvider);
       ref.invalidate(isLoggedInProvider);
       ref.invalidate(currentUserInfoProvider);
-      NotificationToast.show('提示', '登录成功');
+      NotificationToast.show('提示', '登录成功', align: Alignment.topCenter);
       const MainRoute(tab: 2).go(context);
     } on AnimeFlowApiException catch (e) {
       if (!mounted) return;

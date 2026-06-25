@@ -645,7 +645,7 @@ class FlowRequest {
     return FlowUsers.fromJson(response.data as Map<String, dynamic>);
   }
 
-  /// 更新当前用户资料（昵称、头像、背景）
+  /// 更新当前用户资料（昵称、背景）
   static Future<FlowUsers> updateUserInfoService({
     String? nickname,
     String? avatar,

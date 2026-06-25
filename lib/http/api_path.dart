@@ -216,6 +216,9 @@ class AnimeFlowApi {
       /// 绑定 Bangumi 账号
       bangumiBindPost = '/api/v1/account/oauth/bangumi/bind',
 
+      /// 解绑 Bangumi 账号
+      bangumiUnbind = '/api/v1/account/oauth/bangumi/unbind',
+
       /// 绑定邮箱
       bindEmail = '/api/v1/account/email/bind',
 

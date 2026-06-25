@@ -725,6 +725,15 @@ class FlowRequest {
     return BangumiBindItem.fromJson(response.data as Map<String, dynamic>);
   }
 
+  /// 解绑当前账号绑定的 Bangumi 账号
+  static Future<BangumiBindItem> unbindBangumiService() async {
+    final response = await _client.post(
+      AnimeFlowApi.bangumiUnbind,
+      options: await _flowAuthOptions(),
+    );
+    return BangumiBindItem.fromJson(response.data as Map<String, dynamic>);
+  }
+
   /// 提交 Bangumi 收藏同步任务
   static Future<BgmCollectionSyncStatusItem> triggerBgmCollectionSyncService({
     int subjectType = 2,

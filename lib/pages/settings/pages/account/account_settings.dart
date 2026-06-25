@@ -527,6 +527,35 @@ class AccountSettingsPage extends ConsumerWidget {
           ),
         ],
         if (isBound) ...[
+          Align(
+            alignment: Alignment.centerRight,
+            child: OutlinedButton.icon(
+              onPressed: () async {
+                final confirmed = await showDialog<bool>(
+                  context: context,
+                  builder: (dialogContext) => AlertDialog(
+                    title: const Text('确认解绑'),
+                    content: const Text('确定要解绑 Bangumi 账号吗？解绑后可能影响部分功能。'),
+                    actions: [
+                      TextButton(
+                        onPressed: () => Navigator.of(dialogContext).pop(false),
+                        child: const Text('取消'),
+                      ),
+                      TextButton(
+                        onPressed: () => Navigator.of(dialogContext).pop(true),
+                        child: const Text('确定解绑'),
+                      ),
+                    ],
+                  ),
+                );
+                if (confirmed == true) {
+                  await ref.read(userControllerProvider.notifier).unbindBangumi();
+                }
+              },
+              icon: const Icon(Icons.link_off, size: 18),
+              label: const Text('解绑'),
+            ),
+          ),
           const Divider(),
           const BangumiCollectionSyncSection(),
         ],

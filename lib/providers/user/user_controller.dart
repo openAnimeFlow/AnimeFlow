@@ -155,6 +155,15 @@ class UserController extends _$UserController {
     return bind;
   }
 
+  /// 解绑当前账号绑定的 Bangumi 账号。
+  Future<BangumiBindItem> unbindBangumi() async {
+    final bind = await FlowRequest.unbindBangumiService();
+    ref.invalidate(bangumiBindProvider);
+    ref.invalidate(bgmCollectionSyncProvider);
+    NotificationToast.show('提示', 'Bangumi 账号已解绑');
+    return bind;
+  }
+
   Future<bool> _pollOAuthCodeAfterAuth(
     String sessionId,
     OAuthPurpose purpose,

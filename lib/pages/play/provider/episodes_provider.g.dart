@@ -47,7 +47,7 @@ final class EpisodesProvider extends $NotifierProvider<Episodes, EpisodesData> {
   }
 }
 
-String _$episodesHash() => r'a73e34c5caea2618bee508ebc82218448d0b450c';
+String _$episodesHash() => r'bf6b054cffb023532a75018108423c01c57764ad';
 
 /// 播放页剧集状态，生命周期与 [playRouteExtraProvider] 绑定。
 

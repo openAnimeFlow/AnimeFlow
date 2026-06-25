@@ -1,20 +1,17 @@
 import 'package:anime_flow/constants/assets_path_constants.dart';
 import 'package:anime_flow/http/api_path.dart';
 import 'package:anime_flow/http/clients/flow_client.dart';
-import 'package:anime_flow/http/requests/flow_request.dart';
 import 'package:anime_flow/models/item/flow/bangumi_bind_item.dart';
-import 'package:anime_flow/models/item/flow/bgm_collection_sync_status_item.dart';
 import 'package:anime_flow/models/item/flow/flow_users.dart';
 import 'package:anime_flow/pages/login/index.dart';
+import 'package:anime_flow/pages/settings/pages/account/bgm_collection_sync_section.dart';
 import 'package:anime_flow/pages/settings/pages/bind_email_section.dart';
 import 'package:anime_flow/pages/settings/setting_provider.dart';
-import 'package:anime_flow/providers/user/bgm_collection_sync_provider.dart';
 import 'package:anime_flow/providers/user/user_controller.dart';
 import 'package:anime_flow/providers/user/user_oauth_state.dart';
 import 'package:anime_flow/providers/user/user_state_provider.dart';
 import 'package:anime_flow/routes/routes.dart';
 import 'package:anime_flow/utils/format_time_util.dart';
-import 'package:anime_flow/utils/systemUtil.dart';
 import 'package:anime_flow/widget/animation_network_image.dart';
 import 'package:anime_flow/widget/network_check_button.dart';
 import 'package:anime_flow/widget/notification_toast.dart';
@@ -28,6 +25,68 @@ import 'user_avatar.dart';
 
 class AccountSettingsPage extends ConsumerWidget {
   const AccountSettingsPage({super.key});
+
+  Future<void> _confirmLogout(BuildContext context, WidgetRef ref) async {
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (dialogContext) => AlertDialog(
+        title: const Text('确认退出'),
+        content: const Text('确定要退出登录吗？'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(dialogContext).pop(false),
+            child: const Text('取消'),
+          ),
+          TextButton(
+            onPressed: () => Navigator.of(dialogContext).pop(true),
+            child: const Text('确定'),
+          ),
+        ],
+      ),
+    );
+
+    if (confirmed != true || !context.mounted) return;
+
+    await ref.read(userControllerProvider.notifier).clearUserInfo();
+    if (!context.mounted) return;
+    NotificationToast.show('提示', '已退出登录');
+  }
+
+  Future<void> _bindBangumi(BuildContext context, WidgetRef ref) async {
+    try {
+      await ref.read(userControllerProvider.notifier).openOAuthPageForBind();
+      if (!context.mounted) return;
+    } on StateError catch (e) {
+      if (!context.mounted) return;
+      NotificationToast.show('提示', e.message);
+    } catch (e) {
+      if (!context.mounted) return;
+      NotificationToast.show(
+        '提示',
+        resolveAnimeFlowErrorMessage(e, fallback: '打开授权页面失败'),
+      );
+    }
+  }
+
+  Future<void> _handleAvatarUpload(
+      BuildContext context, WidgetRef ref, String currentAvatar) async {
+    final cropped = await AvatarDialog.pickAndCrop(
+      context,
+      currentAvatar: currentAvatar,
+    );
+    if (cropped == null) return;
+
+    NotificationToast.show('提示', '正在上传头像...');
+    final error =
+        await ref.read(currentUserInfoProvider.notifier).uploadAvatar(cropped);
+    if (!context.mounted) return;
+    if (error != null) {
+      if (!context.mounted) return;
+      NotificationToast.show('提示', error, duration: const Duration(seconds: 5));
+      return;
+    }
+    NotificationToast.show('提示', '头像已更新');
+  }
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -80,53 +139,6 @@ class AccountSettingsPage extends ConsumerWidget {
         ),
       ),
     );
-  }
-
-  Future<void> _confirmLogout(BuildContext context, WidgetRef ref) async {
-    final confirmed = await showDialog<bool>(
-      context: context,
-      builder: (dialogContext) => AlertDialog(
-        title: const Text('确认退出'),
-        content: const Text('确定要退出登录吗？'),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(dialogContext).pop(false),
-            child: const Text('取消'),
-          ),
-          TextButton(
-            onPressed: () => Navigator.of(dialogContext).pop(true),
-            child: const Text('确定'),
-          ),
-        ],
-      ),
-    );
-
-    if (confirmed != true || !context.mounted) return;
-
-    await ref.read(userControllerProvider.notifier).clearUserInfo();
-    if (!context.mounted) return;
-    NotificationToast.show('提示', '已退出登录');
-  }
-
-  Future<void> _bindBangumi(BuildContext context, WidgetRef ref) async {
-    try {
-      final launched = await ref
-          .read(userControllerProvider.notifier)
-          .openOAuthPageForBind();
-      if (!context.mounted) return;
-      if (launched && !SystemUtil.isDesktop) {
-        NotificationToast.show('提示', '请在浏览器完成授权后返回应用');
-      }
-    } on StateError catch (e) {
-      if (!context.mounted) return;
-      NotificationToast.show('提示', e.message);
-    } catch (e) {
-      if (!context.mounted) return;
-      NotificationToast.show(
-        '提示',
-        resolveAnimeFlowErrorMessage(e, fallback: '打开授权页面失败'),
-      );
-    }
   }
 
   Widget _buildNotLoggedIn(BuildContext context) {
@@ -258,24 +270,7 @@ class AccountSettingsPage extends ConsumerWidget {
             child: Row(
               children: [
                 UserAvatarView(
-                    onTap: () async {
-                      final cropped = await AvatarDialog.pickAndCrop(
-                        context,
-                        currentAvatar: user.avatar,
-                      );
-                      if (cropped == null) return;
-                      final notifier =
-                          ref.read(currentUserInfoProvider.notifier);
-                      NotificationToast.show('提示', '正在上传头像...');
-                      try {
-                        await notifier.uploadAvatar(cropped);
-                        NotificationToast.show('提示', '头像已更新');
-                      } on AnimeFlowApiException catch (e) {
-                        NotificationToast.show('上传失败', e.message);
-                      } catch (e) {
-                        NotificationToast.show('上传失败', '头像上传失败，请重试');
-                      }
-                    },
+                    onTap: () => _handleAvatarUpload(context, ref, user.avatar),
                     avatar: user.avatar),
                 const SizedBox(width: 16),
                 Expanded(
@@ -288,19 +283,14 @@ class AccountSettingsPage extends ConsumerWidget {
                             ? user.nickname
                             : user.email,
                         onConfirm: (newNickname) async {
-                          try {
-                            await FlowRequest.updateUserInfoService(
-                              nickname: newNickname,
-                            );
-                            ref.invalidate(currentUserInfoProvider);
-                            NotificationToast.show('提示', '昵称已更新');
-                          } on AnimeFlowApiException catch (e) {
-                            NotificationToast.show('提示', e.message);
-                            rethrow;
-                          } catch (e) {
-                            NotificationToast.show('提示', '更新昵称失败');
-                            rethrow;
+                          final error = await ref
+                              .read(currentUserInfoProvider.notifier)
+                              .updateNickname(newNickname);
+                          if (error != null) {
+                            NotificationToast.show('提示', error);
+                            throw error;
                           }
+                          NotificationToast.show('提示', '昵称已更新');
                         },
                       ),
                       const SizedBox(height: 4),
@@ -535,11 +525,11 @@ class AccountSettingsPage extends ConsumerWidget {
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
+      spacing: 18,
       children: [
         if (isBound &&
             (bind!.nickname?.isNotEmpty == true ||
                 bind.username?.isNotEmpty == true)) ...[
-          const SizedBox(height: 12),
           Row(
             children: [
               if (bind.avatar?.isNotEmpty == true)
@@ -575,7 +565,6 @@ class AccountSettingsPage extends ConsumerWidget {
           ),
         ],
         if (!isBound) ...[
-          const SizedBox(height: 16),
           Text(
             '绑定 Bangumi 账号后可同步收藏等数据',
             style: TextStyle(
@@ -583,17 +572,14 @@ class AccountSettingsPage extends ConsumerWidget {
               color: colorScheme.onSurfaceVariant,
             ),
           ),
-          const SizedBox(height: 12),
           OutlinedButton(
             onPressed: () => _bindBangumi(context, ref),
             child: const Text('绑定 Bangumi 账号'),
           ),
         ],
         if (isBound) ...[
-          const SizedBox(height: 16),
           const Divider(),
-          const SizedBox(height: 8),
-          const _BangumiCollectionSyncSection(),
+          const BangumiCollectionSyncSection(),
         ],
       ],
     );
@@ -621,232 +607,6 @@ class AccountSettingsPage extends ConsumerWidget {
           fontSize: 14,
           fontWeight: FontWeight.bold,
         ),
-      ),
-    );
-  }
-}
-
-class _BangumiCollectionSyncSection extends ConsumerStatefulWidget {
-  const _BangumiCollectionSyncSection();
-
-  @override
-  ConsumerState<_BangumiCollectionSyncSection> createState() =>
-      _BangumiCollectionSyncSectionState();
-}
-
-class _BangumiCollectionSyncSectionState
-    extends ConsumerState<_BangumiCollectionSyncSection> {
-  bool _isSubmitting = false;
-
-  Future<void> _triggerSync() async {
-    setState(() => _isSubmitting = true);
-    try {
-      await ref.read(bgmCollectionSyncProvider.notifier).triggerSync();
-      if (!mounted) return;
-      NotificationToast.show('提示', '收藏同步已开始');
-    } catch (e) {
-      if (!mounted) return;
-      final message = e is AnimeFlowApiException
-          ? e.message
-          : e is StateError
-              ? e.message
-              : '启动同步失败';
-      NotificationToast.show('提示', message);
-    } finally {
-      if (mounted) {
-        setState(() => _isSubmitting = false);
-      }
-    }
-  }
-
-  Future<void> _refreshStatus() async {
-    try {
-      await ref.read(bgmCollectionSyncProvider.notifier).refreshStatus();
-    } catch (e) {
-      if (!mounted) return;
-      final message = e is AnimeFlowApiException ? e.message : '刷新状态失败';
-      NotificationToast.show('提示', message);
-    }
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    final syncAsync = ref.watch(bgmCollectionSyncProvider);
-    final colorScheme = Theme.of(context).colorScheme;
-
-    return syncAsync.when(
-      data: (status) {
-        final item = status;
-        final isRunning = item?.isRunning == true || _isSubmitting;
-        final statusLabel =
-            item?.status.label ?? BgmCollectionSyncStatus.idle.label;
-        final message = item?.message;
-        final syncedCount = item?.syncedCount ?? 0;
-        final totalCount = item?.totalCount ?? 0;
-        final hasProgress = isRunning && totalCount > 0;
-
-        return Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
-              children: [
-                Icon(
-                  Icons.sync_outlined,
-                  size: 20,
-                  color: colorScheme.primary,
-                ),
-                const SizedBox(width: 8),
-                const Text(
-                  '收藏同步',
-                  style: TextStyle(
-                    fontSize: 15,
-                    fontWeight: FontWeight.w600,
-                  ),
-                ),
-                const Spacer(),
-                IconButton(
-                  tooltip: '刷新状态',
-                  onPressed: isRunning ? null : _refreshStatus,
-                  icon: const Icon(Icons.refresh, size: 20),
-                ),
-              ],
-            ),
-            const SizedBox(height: 8),
-            Row(
-              children: [
-                _SyncStatusChip(
-                  label: statusLabel,
-                  status: item?.status ?? BgmCollectionSyncStatus.idle,
-                ),
-                if (isRunning) ...[
-                  const SizedBox(width: 12),
-                  const SizedBox(
-                    width: 16,
-                    height: 16,
-                    child: CircularProgressIndicator(strokeWidth: 2),
-                  ),
-                ],
-              ],
-            ),
-            if (message != null && message.isNotEmpty) ...[
-              const SizedBox(height: 8),
-              Text(
-                message,
-                style: TextStyle(
-                  fontSize: 13,
-                  color: colorScheme.onSurfaceVariant,
-                ),
-              ),
-            ],
-            if (hasProgress) ...[
-              const SizedBox(height: 8),
-              LinearProgressIndicator(
-                value: syncedCount / totalCount,
-                minHeight: 6,
-                borderRadius: BorderRadius.circular(3),
-              ),
-              const SizedBox(height: 4),
-              Text(
-                '$syncedCount / $totalCount',
-                style: TextStyle(
-                  fontSize: 12,
-                  color: colorScheme.onSurfaceVariant,
-                ),
-              ),
-            ] else if (isRunning && syncedCount > 0) ...[
-              const SizedBox(height: 8),
-              Text(
-                '已同步 $syncedCount 条',
-                style: TextStyle(
-                  fontSize: 12,
-                  color: colorScheme.onSurfaceVariant,
-                ),
-              ),
-            ],
-            const SizedBox(height: 12),
-            SizedBox(
-              width: double.infinity,
-              child: OutlinedButton.icon(
-                onPressed: isRunning ? null : _triggerSync,
-                icon: const Icon(Icons.cloud_download_outlined, size: 18),
-                label: Text(isRunning ? '同步进行中…' : '同步 Bangumi 收藏'),
-              ),
-            ),
-          ],
-        );
-      },
-      loading: () => const Padding(
-        padding: EdgeInsets.symmetric(vertical: 8),
-        child: Center(child: CircularProgressIndicator()),
-      ),
-      error: (_, __) => Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            '收藏同步',
-            style: TextStyle(
-              fontSize: 15,
-              fontWeight: FontWeight.w600,
-              color: colorScheme.onSurface,
-            ),
-          ),
-          const SizedBox(height: 8),
-          Text(
-            '获取同步状态失败',
-            style: TextStyle(color: colorScheme.onSurfaceVariant),
-          ),
-          const SizedBox(height: 8),
-          OutlinedButton.icon(
-            onPressed: () => ref.invalidate(bgmCollectionSyncProvider),
-            icon: const Icon(Icons.refresh),
-            label: const Text('重试'),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-class _SyncStatusChip extends StatelessWidget {
-  const _SyncStatusChip({
-    required this.label,
-    required this.status,
-  });
-
-  final String label;
-  final BgmCollectionSyncStatus status;
-
-  @override
-  Widget build(BuildContext context) {
-    final colorScheme = Theme.of(context).colorScheme;
-    final (Color bg, Color fg) = switch (status) {
-      BgmCollectionSyncStatus.running => (
-          colorScheme.primaryContainer,
-          colorScheme.onPrimaryContainer,
-        ),
-      BgmCollectionSyncStatus.success => (
-          colorScheme.tertiaryContainer,
-          colorScheme.onTertiaryContainer,
-        ),
-      BgmCollectionSyncStatus.failed => (
-          colorScheme.errorContainer,
-          colorScheme.onErrorContainer,
-        ),
-      BgmCollectionSyncStatus.idle => (
-          colorScheme.surfaceContainerHighest,
-          colorScheme.onSurfaceVariant,
-        ),
-    };
-
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-      decoration: BoxDecoration(
-        color: bg,
-        borderRadius: BorderRadius.circular(999),
-      ),
-      child: Text(
-        label,
-        style: TextStyle(fontSize: 12, color: fg, fontWeight: FontWeight.w500),
       ),
     );
   }

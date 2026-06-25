@@ -184,7 +184,7 @@ final class CurrentUserInfoProvider
   CurrentUserInfo create() => CurrentUserInfo();
 }
 
-String _$currentUserInfoHash() => r'cbaa643507526b59379474c31dda20ddc1a4b6dd';
+String _$currentUserInfoHash() => r'19bcd9107922323a08690dd0b9c4da6f377d3508';
 
 abstract class _$CurrentUserInfo extends $AsyncNotifier<FlowUsers?> {
   FutureOr<FlowUsers?> build();

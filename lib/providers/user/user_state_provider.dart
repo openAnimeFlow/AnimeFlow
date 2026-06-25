@@ -1,5 +1,6 @@
 import 'dart:typed_data';
 
+import 'package:anime_flow/http/clients/flow_client.dart';
 import 'package:anime_flow/http/interceptors/bgm_refresh_token_interceptor.dart';
 import 'package:anime_flow/http/interceptors/flow_refresh_token_interceptor.dart';
 import 'package:anime_flow/http/requests/flow_request.dart';
@@ -86,8 +87,31 @@ class CurrentUserInfo extends _$CurrentUserInfo {
     }
   }
 
-  Future<void> uploadAvatar(Uint8List imageBytes) async {
-    final updatedUser = await FlowRequest.uploadAvatarService(imageBytes);
-    state = AsyncData(updatedUser);
+  Future<String?> uploadAvatar(Uint8List imageBytes) async {
+    try {
+      final updatedUser = await FlowRequest.uploadAvatarService(imageBytes);
+      state = AsyncData(updatedUser);
+      return null;
+    } on AnimeFlowApiException catch (e) {
+      return e.message;
+    } catch (_) {
+      return '上传头像失败';
+    }
+  }
+
+  /// 更新昵称。
+  ///
+  /// 返回 `null` 表示成功，否则返回错误描述字符串。
+  Future<String?> updateNickname(String newNickname) async {
+    try {
+      final updatedUser =
+          await FlowRequest.updateUserInfoService(nickname: newNickname);
+      state = AsyncData(updatedUser);
+      return null;
+    } on AnimeFlowApiException catch (e) {
+      return e.message;
+    } catch (_) {
+      return '更新昵称失败';
+    }
   }
 }

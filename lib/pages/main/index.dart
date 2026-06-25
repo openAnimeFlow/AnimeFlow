@@ -6,7 +6,7 @@ import 'package:anime_flow/pages/user/index.dart';
 import 'package:anime_flow/providers/user/user_state_provider.dart';
 import 'package:anime_flow/routes/routes.dart';
 import 'package:anime_flow/utils/systemUtil.dart';
-import 'package:anime_flow/widget/animation_network_image/animation_network_image.dart';
+import 'package:anime_flow/widget/animation_network_image.dart';
 import 'package:anime_flow/widget/drop_down_menu.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';

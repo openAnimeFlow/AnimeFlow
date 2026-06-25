@@ -1,7 +1,7 @@
 import 'package:anime_flow/pages/play/controller/play_controller.dart';
 import 'package:anime_flow/pages/play/controller/video_source_controller.dart';
 import 'package:anime_flow/pages/play/provider/play_subject_provider.dart';
-import 'package:anime_flow/widget/animation_network_image/animation_network_image.dart';
+import 'package:anime_flow/widget/animation_network_image.dart';
 import 'package:anime_flow/widget/play_content/source_drawers/video_source_drawers.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';

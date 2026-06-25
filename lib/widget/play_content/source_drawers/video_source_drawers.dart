@@ -8,7 +8,7 @@ import 'package:anime_flow/models/play/video/resources_item.dart';
 import 'package:anime_flow/pages/play/controller/video_source_controller.dart';
 import 'package:anime_flow/providers/captcha/captcha_provider.dart';
 import 'package:anime_flow/utils/logger.dart';
-import 'package:anime_flow/widget/animation_network_image/animation_network_image.dart';
+import 'package:anime_flow/widget/animation_network_image.dart';
 import 'package:anime_flow/widget/notification_toast.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';

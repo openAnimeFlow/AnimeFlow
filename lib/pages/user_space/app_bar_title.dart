@@ -1,5 +1,5 @@
 import 'package:anime_flow/models/item/bangumi/user_info_item.dart';
-import 'package:anime_flow/widget/animation_network_image/animation_network_image.dart';
+import 'package:anime_flow/widget/animation_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 

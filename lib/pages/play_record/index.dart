@@ -7,7 +7,7 @@ import 'package:anime_flow/routes/routes.dart';
 import 'package:anime_flow/utils/format_time_util.dart';
 import 'package:anime_flow/utils/logger.dart';
 import 'package:anime_flow/utils/utils.dart';
-import 'package:anime_flow/widget/animation_network_image/animation_network_image.dart';
+import 'package:anime_flow/widget/animation_network_image.dart';
 import 'package:flutter/material.dart';
 
 class PlayRecordPage extends StatefulWidget {

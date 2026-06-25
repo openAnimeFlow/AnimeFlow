@@ -4,7 +4,7 @@ import 'dart:io';
 import 'package:anime_flow/models/item/image_search_item.dart';
 import 'package:anime_flow/pages/search/search_controller.dart';
 import 'package:anime_flow/utils/format_time_util.dart';
-import 'package:anime_flow/widget/animation_network_image/animation_network_image.dart';
+import 'package:anime_flow/widget/animation_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:image_picker/image_picker.dart';

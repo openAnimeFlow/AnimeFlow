@@ -2,7 +2,7 @@ import 'package:anime_flow/models/item/bangumi/character_comments_item.dart';
 import 'package:anime_flow/pages/character_info/provider/character_info_provider.dart';
 import 'package:anime_flow/routes/routes.dart';
 import 'package:anime_flow/utils/format_time_util.dart';
-import 'package:anime_flow/widget/animation_network_image/animation_network_image.dart';
+import 'package:anime_flow/widget/animation_network_image.dart';
 import 'package:anime_flow/widget/bbcode/bbcode_widget.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';

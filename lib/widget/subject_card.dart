@@ -1,6 +1,6 @@
 import 'package:anime_flow/widget/ranking.dart';
 import 'package:flutter/material.dart';
-import 'animation_network_image/animation_network_image.dart';
+import 'animation_network_image.dart';
 
 class SubjectCard extends StatelessWidget {
   final String image;

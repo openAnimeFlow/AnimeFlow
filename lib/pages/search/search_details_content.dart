@@ -1,7 +1,7 @@
 import 'package:anime_flow/models/item/bangumi/subject_item.dart';
 import 'package:anime_flow/routes/model/info_route_extra.dart';
 import 'package:anime_flow/routes/routes.dart';
-import 'package:anime_flow/widget/animation_network_image/animation_network_image.dart';
+import 'package:anime_flow/widget/animation_network_image.dart';
 import 'package:anime_flow/widget/ranking.dart';
 import 'package:anime_flow/widget/star.dart';
 import 'package:flutter/material.dart';

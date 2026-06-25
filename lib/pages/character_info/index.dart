@@ -2,7 +2,7 @@ import 'package:anime_flow/pages/character_info/character_comments.dart';
 import 'package:anime_flow/pages/character_info/character_works.dart';
 import 'package:anime_flow/pages/character_info/provider/character_info_provider.dart';
 import 'package:anime_flow/routes/provider/routes_args.dart';
-import 'package:anime_flow/widget/animation_network_image/animation_network_image.dart';
+import 'package:anime_flow/widget/animation_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 

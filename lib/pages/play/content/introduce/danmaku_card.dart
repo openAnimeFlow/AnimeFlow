@@ -18,11 +18,45 @@ class DanmakuCard extends StatefulWidget {
   State<DanmakuCard> createState() => _DanmakuCardState();
 }
 
-class _DanmakuCardState extends State<DanmakuCard> {
+class _DanmakuCardState extends State<DanmakuCard>
+    with SingleTickerProviderStateMixin {
   final playController = Get.find<PlayController>();
   final danmakuFieldController = TextEditingController();
 
-  bool isExpanded = false;
+  late final AnimationController _animationController;
+  late final Animation<double> _expandAnimation;
+  bool _isExpanded = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _animationController = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 300),
+    );
+    _expandAnimation = CurvedAnimation(
+      parent: _animationController,
+      curve: Curves.easeInOut,
+    );
+  }
+
+  @override
+  void dispose() {
+    _animationController.dispose();
+    danmakuFieldController.dispose();
+    super.dispose();
+  }
+
+  void _toggleExpanded() {
+    setState(() {
+      _isExpanded = !_isExpanded;
+      if (_isExpanded) {
+        _animationController.forward();
+      } else {
+        _animationController.reverse();
+      }
+    });
+  }
 
   /// 从 source 字段中提取平台名称（如 [Gamer]Sabrina2001 -> Gamer）
   String extractPlatform(String source) {
@@ -84,22 +118,21 @@ class _DanmakuCardState extends State<DanmakuCard> {
                     const Spacer(),
                   ],
                   IconButton(
-                    onPressed: () {
-                      setState(() {
-                        isExpanded = !isExpanded;
-                      });
-                    },
-                    icon: Icon(
-                      isExpanded ? Icons.expand_less : Icons.expand_more,
+                    onPressed: _toggleExpanded,
+                    icon: AnimatedRotation(
+                      turns: _isExpanded ? 0.5 : 0,
+                      duration: const Duration(milliseconds: 300),
+                      child: const Icon(Icons.expand_more),
                     ),
                   )
                 ],
               ),
               // 平台统计信息
-              AnimatedContainer(
-                duration: const Duration(milliseconds: 300),
-                height: isExpanded ? 300 : 0,
+              SizeTransition(
+                sizeFactor: _expandAnimation,
+                alignment: Alignment.topCenter,
                 child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Consumer(builder: (context, ref, child) {
                       final subjectName = ref.watch(playSubjectProvider
@@ -172,7 +205,8 @@ class _DanmakuCardState extends State<DanmakuCard> {
                           }).toList(),
                         ),
                       ),
-                    Expanded(
+                    SizedBox(
+                      height: 200,
                       child: ListView.builder(
                         padding: const EdgeInsets.all(0),
                         itemCount: filteredDanmakus.length,

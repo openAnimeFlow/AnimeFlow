@@ -25,6 +25,7 @@ import 'package:anime_flow/models/item/captcha_item.dart';
 import 'package:anime_flow/models/item/danmaku/danmaku_episode_response.dart';
 import 'package:anime_flow/models/item/danmaku/danmaku_module.dart';
 import 'package:anime_flow/models/item/danmaku/danmaku_search_response.dart';
+import 'package:anime_flow/models/item/flow/background_image_item.dart';
 import 'package:anime_flow/models/item/flow/bgm_collection_sync_status_item.dart';
 import 'package:anime_flow/models/item/flow/bangumi_bind_item.dart';
 import 'package:anime_flow/models/item/flow/flow_token.dart';
@@ -617,6 +618,18 @@ class FlowRequest {
         .then((value) => FlowUsers.fromJson((value.data) as Map<String, dynamic>));
   }
 
+  /// 获取背景图列表
+  static Future<List<BackgroundImageItem>> getBackgroundListService() async {
+    final response = await _client.get(
+      AnimeFlowApi.backgroundList,
+      options: await _optionalFlowAuthOptions(),
+    );
+    return (response.data as List)
+        .map((e) =>
+            BackgroundImageItem.fromJson(e as Map<String, dynamic>))
+        .toList();
+  }
+
   /// 上传当前登录用户的头像（支持 JPEG / PNG / WebP / GIF，最大 2MB）
   static Future<FlowUsers> uploadAvatarService(Uint8List imageBytes, {
     String filename = 'avatar.png',
@@ -632,14 +645,16 @@ class FlowRequest {
     return FlowUsers.fromJson(response.data as Map<String, dynamic>);
   }
 
-  /// 更新当前用户资料（昵称、头像）
+  /// 更新当前用户资料（昵称、头像、背景）
   static Future<FlowUsers> updateUserInfoService({
     String? nickname,
     String? avatar,
+    int? backgroundId,
   }) async {
     final data = <String, dynamic>{};
     if (nickname != null) data['nickname'] = nickname;
     if (avatar != null) data['avatar'] = avatar;
+    if (backgroundId != null) data['backgroundId'] = backgroundId;
 
     final response = await _client.put(
       AnimeFlowApi.flowUsers,

@@ -114,4 +114,22 @@ class CurrentUserInfo extends _$CurrentUserInfo {
       return '更新昵称失败';
     }
   }
+
+  /// 更新背景图。
+  ///
+  /// 传入背景图的 ID（[BackgroundImageItem.id]），传入 `null` 清除背景。
+  /// 返回 `null` 表示成功，否则返回错误描述字符串。
+  Future<String?> updateBackground(int? backgroundId) async {
+    try {
+      final updatedUser = await FlowRequest.updateUserInfoService(
+        backgroundId: backgroundId,
+      );
+      state = AsyncData(updatedUser);
+      return null;
+    } on AnimeFlowApiException catch (e) {
+      return e.message;
+    } catch (_) {
+      return '更新背景图失败';
+    }
+  }
 }

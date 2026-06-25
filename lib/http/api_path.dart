@@ -103,7 +103,7 @@ class AnimeFlowApi {
   static const String animeFlowApi = 'https://ligg.top',
 
       /// dev url
-      animeFlowApiDev = 'http://127.0.0.1:1024',
+      animeFlowApiDev = 'http://192.168.3.62:1024',
 
       /// 申请Token
       token = '/api/oauth/token',
@@ -218,6 +218,9 @@ class AnimeFlowApi {
 
       /// 绑定邮箱
       bindEmail = '/api/v1/account/email/bind',
+
+      /// 背景图列表
+      backgroundList = '/api/v1/common/background',
 
       /// 提交 Bangumi 收藏同步
       bangumiCollectionSync = '/api/v1/account/oauth/bangumi/collections/sync',

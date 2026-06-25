@@ -11,7 +11,6 @@ import 'package:anime_flow/providers/user/user_controller.dart';
 import 'package:anime_flow/providers/user/user_oauth_state.dart';
 import 'package:anime_flow/providers/user/user_state_provider.dart';
 import 'package:anime_flow/routes/routes.dart';
-import 'package:anime_flow/utils/format_time_util.dart';
 import 'package:anime_flow/widget/animation_network_image.dart';
 import 'package:anime_flow/widget/network_check_button.dart';
 import 'package:anime_flow/widget/notification_toast.dart';
@@ -19,9 +18,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_svg/svg.dart';
 
+import 'account_content.dart';
 import 'avatar_dialog.dart';
-import 'nickname_editor.dart';
-import 'user_avatar.dart';
 
 class AccountSettingsPage extends ConsumerWidget {
   const AccountSettingsPage({super.key});
@@ -264,68 +262,19 @@ class AccountSettingsPage extends ConsumerWidget {
       padding: const EdgeInsets.all(16),
       children: [
         _buildSectionTitle('账户信息'),
-        Card(
-          child: Padding(
-            padding: const EdgeInsets.all(16),
-            child: Row(
-              children: [
-                UserAvatarView(
-                    onTap: () => _handleAvatarUpload(context, ref, user.avatar),
-                    avatar: user.avatar),
-                const SizedBox(width: 16),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      NicknameEditorView(
-                        nickname: user.nickname,
-                        displayText: user.nickname.isNotEmpty
-                            ? user.nickname
-                            : user.email,
-                        onConfirm: (newNickname) async {
-                          final error = await ref
-                              .read(currentUserInfoProvider.notifier)
-                              .updateNickname(newNickname);
-                          if (error != null) {
-                            NotificationToast.show('提示', error);
-                            throw error;
-                          }
-                          NotificationToast.show('提示', '昵称已更新');
-                        },
-                      ),
-                      const SizedBox(height: 4),
-                      Text(
-                        user.email.isNotEmpty ? user.email : '未绑定邮箱',
-                        style: TextStyle(
-                          color: user.email.isNotEmpty
-                              ? Theme.of(context).colorScheme.onSurfaceVariant
-                              : Theme.of(context).colorScheme.primary,
-                        ),
-                      ),
-                      const SizedBox(height: 4),
-                      Text(
-                        'ID: ${user.id}',
-                        style: TextStyle(
-                          fontSize: 12,
-                          color: Theme.of(context).disabledColor,
-                        ),
-                      ),
-                      if (user.createTime != 0) ...[
-                        const SizedBox(height: 4),
-                        Text(
-                          '注册于 ${FormatTimeUtil.formatDate(user.createTime)}',
-                          style: TextStyle(
-                            fontSize: 12,
-                            color: Theme.of(context).disabledColor,
-                          ),
-                        ),
-                      ],
-                    ],
-                  ),
-                ),
-              ],
-            ),
-          ),
+        AccountContentView(
+          userInfo: user,
+          onAvatarUpload: () => _handleAvatarUpload(context, ref, user.avatar),
+          onNicknameConfirm: (newNickname) async {
+            final error = await ref
+                .read(currentUserInfoProvider.notifier)
+                .updateNickname(newNickname);
+            if (error != null) {
+              NotificationToast.show('提示', error);
+              throw error;
+            }
+            NotificationToast.show('提示', '昵称已更新');
+          },
         ),
         if (user.email.isEmpty) ...[
           const SizedBox(height: 16),

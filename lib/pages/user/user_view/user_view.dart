@@ -180,9 +180,9 @@ class _UserViewState extends ConsumerState<UserView>
               children: [
                 ClipRRect(
                   borderRadius: BorderRadius.circular(5),
-                  child: user.avatar.isNotEmpty
+                  child: user.avatar != null && user.avatar!.isNotEmpty
                       ? AnimationNetworkImage(
-                          width: 30, height: 30, url: user.avatar)
+                          width: 30, height: 30, url: user.avatar!)
                       : const Icon(Icons.person, size: 30),
                 ),
                 const SizedBox(width: 5),
@@ -288,11 +288,10 @@ class _UserViewState extends ConsumerState<UserView>
 
   Widget _buildHeaderContent(double statusBarHeight) {
     final user = widget.user;
-    final hasAvatar = user.avatar.isNotEmpty;
-    final hasBackground = user.background.isNotEmpty;
-    final backgroundUrl = hasBackground
-        ? user.background
-        : (hasAvatar ? user.avatar : null);
+    final hasAvatar = user.avatar != null && user.avatar!.isNotEmpty;
+    final hasBackground = user.background?.isNotEmpty ?? false;
+    final backgroundUrl =
+        hasBackground ? user.background : (hasAvatar ? user.avatar : null);
     final blurSigma = hasBackground ? 0.0 : 15.0;
     return Stack(
       children: [
@@ -333,7 +332,7 @@ class _UserViewState extends ConsumerState<UserView>
               if (hasAvatar)
                 AnimationNetworkImage(
                   borderRadius: BorderRadius.circular(100),
-                  url: user.avatar,
+                  url: user.avatar!,
                   fit: BoxFit.cover,
                   width: 100,
                   height: 100,

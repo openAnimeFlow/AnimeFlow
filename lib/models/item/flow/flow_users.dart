@@ -4,8 +4,8 @@ class FlowUsers {
   final int id;
   final String email;
   final String nickname;
-  final String avatar;
-  final String background;
+  final String? avatar;
+  final String? background;
   final int createTime;
   final FlowUserCollectionCounts collectionCounts;
 
@@ -13,9 +13,9 @@ class FlowUsers {
     required this.id,
     required this.email,
     required this.nickname,
-    required this.avatar,
     required this.createTime,
-    required this.background,
+    this.avatar,
+    this.background,
     FlowUserCollectionCounts? collectionCounts,
   }) : collectionCounts = collectionCounts ?? const FlowUserCollectionCounts();
 
@@ -24,8 +24,8 @@ class FlowUsers {
       id: json['id'] as int,
       email: json['email'] as String? ?? '',
       nickname: json['nickname'] as String,
-      avatar: json['avatar'] as String,
-      background: json['background'] as String,
+      avatar: json['avatar'] as String?,
+      background: json['background'] as String?,
       createTime: json['createTime'] as int,
       collectionCounts: FlowUserCollectionCounts.fromJson(
         json['collectionCounts'] as Map<String, dynamic>?,

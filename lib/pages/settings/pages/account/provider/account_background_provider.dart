@@ -16,7 +16,7 @@ Future<List<BackgroundImageItem>> backgroundImageList(Ref ref) async {
 int? currentUserBackgroundId(Ref ref) {
   final userAsync = ref.watch(currentUserInfoProvider);
   final user = userAsync.value;
-  if (user == null || user.background.isEmpty) return null;
+  if (user == null || user.background == null) return null;
 
   final listAsync = ref.watch(backgroundImageListProvider);
   final list = listAsync.value;

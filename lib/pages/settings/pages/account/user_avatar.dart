@@ -2,10 +2,10 @@ import 'package:anime_flow/widget/animation_network_image.dart';
 import 'package:flutter/material.dart';
 
 class UserAvatarView extends StatefulWidget {
-  final String avatar;
+  final String? avatar;
   final VoidCallback? onTap;
 
-  const UserAvatarView({super.key, required this.avatar, this.onTap});
+  const UserAvatarView({super.key, this.avatar, this.onTap});
 
   @override
   State<UserAvatarView> createState() => _UserAvatarViewState();
@@ -24,7 +24,7 @@ class _UserAvatarViewState extends State<UserAvatarView> {
           Positioned.fill(
             child: ClipRRect(
               borderRadius: BorderRadius.circular(36),
-              child: avatar.isNotEmpty
+              child: avatar != null && avatar.isNotEmpty
                   ? AnimationNetworkImage(
                       height: double.infinity,
                       width: double.infinity,

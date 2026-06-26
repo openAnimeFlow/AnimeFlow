@@ -67,7 +67,7 @@ class AccountSettingsPage extends ConsumerWidget {
   }
 
   Future<void> _handleAvatarUpload(
-      BuildContext context, WidgetRef ref, String currentAvatar) async {
+      BuildContext context, WidgetRef ref, String? currentAvatar) async {
     final cropped = await AvatarDialog.pickAndCrop(
       context,
       currentAvatar: currentAvatar,

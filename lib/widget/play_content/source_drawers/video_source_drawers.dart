@@ -427,7 +427,8 @@ class _VideoSourceDrawersState extends State<VideoSourceDrawers> {
           itemBuilder: (context, index) {
             final resourceItem = episodeResources[index];
             final isLastItem = index == episodeResources.length - 1;
-            final episodeIndex = videoSourceController.currentEpisodeIndex.value;
+            final episodeIndex =
+                videoSourceController.currentEpisodeIndex.value;
             // 当前选中剧集对应的剧集数据
             final currentEpisode = resourceItem.episodes.firstWhereOrNull(
               (ep) => ep.episodeSort == episodeIndex,
@@ -513,6 +514,33 @@ class _VideoSourceDrawersState extends State<VideoSourceDrawers> {
     );
   }
 
+  /// 匹配度徽章
+  Widget _buildMatchRatioBadge(double ratio) {
+    final cs = Theme.of(context).colorScheme;
+    final (Color color, Color containerColor) = ratio >= 0.9
+        ? (cs.primary, cs.primaryContainer)
+        : ratio >= 0.7
+            ? (cs.tertiary, cs.tertiaryContainer)
+            : ratio >= 0.5
+                ? (cs.secondary, cs.secondaryContainer)
+                : (cs.error, cs.errorContainer);
+
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+      decoration: BoxDecoration(
+        color: containerColor,
+        borderRadius: BorderRadius.circular(5),
+      ),
+      child: Text(
+        '${(ratio * 100).round()}%',
+        style: Theme.of(context).textTheme.labelSmall?.copyWith(
+              color: color,
+              fontWeight: FontWeight.w600,
+            ),
+      ),
+    );
+  }
+
   Widget _buildSource(Episode episode, EpisodeResourcesItem item,
       {required String websiteName,
       required String websiteIcon,
@@ -558,33 +586,26 @@ class _VideoSourceDrawersState extends State<VideoSourceDrawers> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Row(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Expanded(
-                        child: Text.rich(
-                          TextSpan(
-                            style: const TextStyle(
-                              fontSize: 16,
-                              fontWeight: FontWeight.bold,
-                            ),
-                            text: item.subjectsTitle,
-                            children: [
-                              TextSpan(
-                                text:
-                                    ' 第${episode.episodeSort.toString().padLeft(2, '0')}集',
-                                style: const TextStyle(
-                                  fontSize: 14,
-                                  fontWeight: FontWeight.bold,
-                                ),
-                              )
-                            ],
-                          ),
-                          maxLines: 2,
-                          overflow: TextOverflow.ellipsis,
-                        ),
+                  Text.rich(
+                    TextSpan(
+                      style: const TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.bold,
                       ),
-                    ],
+                      text: item.subjectsTitle,
+                      children: [
+                        TextSpan(
+                          text:
+                              ' 第${episode.episodeSort.toString().padLeft(2, '0')}集',
+                          style: const TextStyle(
+                            fontSize: 14,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        )
+                      ],
+                    ),
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
                   ),
                   const SizedBox(height: 12),
                   Row(
@@ -607,6 +628,9 @@ class _VideoSourceDrawersState extends State<VideoSourceDrawers> {
                       ),
                       const Icon(Icons.link, size: 20, color: Colors.grey),
                       const Spacer(),
+                      const Text('匹配度:'),
+                      const SizedBox(width: 5),
+                      _buildMatchRatioBadge(item.matchRatio),
                     ],
                   ),
                 ],

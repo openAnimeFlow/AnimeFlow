@@ -193,30 +193,39 @@ class VideoSourceController extends GetxController {
           await WebRequest.getSearchSubjectListService(keyword, config);
 
       // 将 O(n²~n³) 的权重排序移入后台 Isolate，避免阻塞 UI 线程
-      final names = rawSearchList.map((item) => item.name).toList(growable: false);
-      final sortedIndices = await Isolate.run(() {
+      final names =
+          rawSearchList.map((item) => item.name).toList(growable: false);
+      final sortedResult = await Isolate.run(() {
         final service = SearchResultRankService(
           searchTerm: keyword,
           aliases: aliases,
         );
         final scores = service.computeScoresBatch(names);
+        final matchRatios = names
+            .map((n) => service.computeMatchRatio(n))
+            .toList(growable: false);
         final indices = List.generate(names.length, (i) => i, growable: false);
         indices.sort((a, b) {
           final cmp = scores[b].compareTo(scores[a]);
           return cmp != 0 ? cmp : a.compareTo(b);
         });
-        return indices;
+        return (indices: indices, matchRatios: matchRatios);
       });
 
       // 仅处理相关度最高的前 N 条，避免对大量低质量结果发起无效请求
-      final searchList = sortedIndices
+      final searchEntries = sortedResult.indices
           .take(_maxSearchItems)
-          .map((i) => rawSearchList[i])
+          .map((i) => (
+                item: rawSearchList[i],
+                matchRatio: sortedResult.matchRatios[i],
+              ))
           .toList(growable: false);
 
       final allEpisodesList = <EpisodeResourcesItem>[];
 
-      for (final search in searchList) {
+      for (final entry in searchEntries) {
+        final search = entry.item;
+        final matchRatio = entry.matchRatio;
         final crawlerEpisodeResources =
             await WebRequest.getResourcesListService(search.link, config);
 
@@ -226,6 +235,7 @@ class VideoSourceController extends GetxController {
               lineNames: crawlerResource.lineNames,
               episodes: crawlerResource.episodes,
               subjectsTitle: search.name,
+              matchRatio: matchRatio,
             ),
           );
         }
@@ -316,7 +326,8 @@ class VideoSourceController extends GetxController {
       final resource = resources[websiteIndex];
       for (final resourceItem in resource.episodeResources) {
         final episode = resourceItem.episodes.firstWhereOrNull(
-          (ep) => ep.episodeSort == _container.read(episodesProvider).episodeIndex,
+          (ep) =>
+              ep.episodeSort == _container.read(episodesProvider).episodeIndex,
         );
         if (episode == null) {
           continue;

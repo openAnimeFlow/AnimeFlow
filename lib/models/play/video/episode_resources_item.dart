@@ -24,23 +24,27 @@ class EpisodeResourcesItem {
   final String subjectsTitle;
   final String lineNames;
   final List<Episode> episodes;
+  final double matchRatio;
 
-  EpisodeResourcesItem(
-      {required this.lineNames,
-      required this.episodes,
-      required this.subjectsTitle});
+  EpisodeResourcesItem({
+    required this.lineNames,
+    required this.episodes,
+    required this.subjectsTitle,
+    this.matchRatio = 0.0,
+  });
 
   factory EpisodeResourcesItem.fromJson(Map<String, dynamic> json) {
     return EpisodeResourcesItem(
       lineNames: json['lineNames'],
       episodes: json['episodes'],
       subjectsTitle: json['subjectsTitle'],
+      matchRatio: (json['matchRatio'] as num?)?.toDouble() ?? 0.0,
     );
   }
 
   @override
   String toString() {
-    return 'EpisodeResourcesItem{subjectsTitle: $subjectsTitle, lineNames: $lineNames, episodes: $episodes}';
+    return 'EpisodeResourcesItem{subjectsTitle: $subjectsTitle, lineNames: $lineNames, episodes: $episodes, matchRatio: $matchRatio}';
   }
 }
 

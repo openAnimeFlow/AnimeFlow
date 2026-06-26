@@ -109,6 +109,7 @@ class _BackgroundGridSectionState extends ConsumerState<BackgroundGridSection>
   late final Animation<double> _expandAnimation;
   bool _isExpanded = false;
   bool _isRefreshing = false;
+  int? _loadingItemId;
 
   @override
   void initState() {
@@ -141,10 +142,12 @@ class _BackgroundGridSectionState extends ConsumerState<BackgroundGridSection>
   }
 
   Future<void> _selectBackground(int? backgroundId) async {
+    setState(() => _loadingItemId = backgroundId);
     final error = await ref
         .read(currentUserInfoProvider.notifier)
         .updateBackground(backgroundId);
     if (!mounted) return;
+    setState(() => _loadingItemId = null);
     if (error != null) {
       NotificationToast.show('提示', error);
       return;
@@ -231,44 +234,45 @@ class _BackgroundGridSectionState extends ConsumerState<BackgroundGridSection>
           final crossAxisCount =
               (constraints.maxWidth / 180).floor().clamp(2, 4);
           return SizedBox(
-            height: 200,
+            height: 300,
             child: list.isEmpty
                 ? Center(
                     child: Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Text(
-                          '什么都没有0_O',
-                          style: TextStyle(color: colorScheme.onSurfaceVariant),
-                        ),
-                        IconButton(
-                          onPressed: _isRefreshing
-                              ? null
-                              : () {
-                                  setState(() => _isRefreshing = true);
-                                  ref
-                                      .refresh(backgroundImageListProvider.future)
-                                      .whenComplete(() {
-                                    if (mounted) {
-                                      setState(() => _isRefreshing = false);
-                                    }
-                                  });
-                                },
-                          icon: _isRefreshing
-                              ? SizedBox(
-                                  width: 20,
-                                  height: 20,
-                                  child: CircularProgressIndicator(
-                                    strokeWidth: 2,
-                                    color: colorScheme.primary,
-                                  ),
-                                )
-                              : const Icon(Icons.refresh_outlined),
-                          tooltip: '刷新',
-                        ),
-                      ],
-                    ))
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Text(
+                        '什么都没有0_O',
+                        style: TextStyle(color: colorScheme.onSurfaceVariant),
+                      ),
+                      IconButton(
+                        onPressed: _isRefreshing
+                            ? null
+                            : () {
+                                setState(() => _isRefreshing = true);
+                                ref
+                                    .refresh(backgroundImageListProvider.future)
+                                    .whenComplete(() {
+                                  if (mounted) {
+                                    setState(() => _isRefreshing = false);
+                                  }
+                                });
+                              },
+                        icon: _isRefreshing
+                            ? SizedBox(
+                                width: 20,
+                                height: 20,
+                                child: CircularProgressIndicator(
+                                  strokeWidth: 2,
+                                  color: colorScheme.primary,
+                                ),
+                              )
+                            : const Icon(Icons.refresh_outlined),
+                        tooltip: '刷新',
+                      ),
+                    ],
+                  ))
                 : GridView.builder(
+                    padding: const EdgeInsets.all(5),
                     physics: const ClampingScrollPhysics(),
                     gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
                       crossAxisCount: crossAxisCount,
@@ -289,6 +293,7 @@ class _BackgroundGridSectionState extends ConsumerState<BackgroundGridSection>
                                 ? Border.all(
                                     color: colorScheme.primary,
                                     width: 2.5,
+                                    strokeAlign: BorderSide.strokeAlignOutside,
                                   )
                                 : null,
                           ),
@@ -301,7 +306,20 @@ class _BackgroundGridSectionState extends ConsumerState<BackgroundGridSection>
                                 height: double.infinity,
                                 fit: BoxFit.cover,
                               ),
-                              if (isSelected)
+                              if (_loadingItemId == item.id)
+                                Container(
+                                  color: Colors.black38,
+                                  alignment: Alignment.center,
+                                  child: SizedBox(
+                                    width: 28,
+                                    height: 28,
+                                    child: CircularProgressIndicator(
+                                      strokeWidth: 2.5,
+                                      color: colorScheme.primary,
+                                    ),
+                                  ),
+                                )
+                              else if (isSelected)
                                 Positioned(
                                   top: 4,
                                   right: 4,

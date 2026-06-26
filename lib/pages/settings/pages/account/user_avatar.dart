@@ -4,8 +4,10 @@ import 'package:flutter/material.dart';
 class UserAvatarView extends StatefulWidget {
   final String? avatar;
   final VoidCallback? onTap;
+  final bool isLoading;
 
-  const UserAvatarView({super.key, this.avatar, this.onTap});
+  const UserAvatarView(
+      {super.key, this.avatar, this.onTap, this.isLoading = false});
 
   @override
   State<UserAvatarView> createState() => _UserAvatarViewState();
@@ -14,12 +16,13 @@ class UserAvatarView extends StatefulWidget {
 class _UserAvatarViewState extends State<UserAvatarView> {
   @override
   Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
     final avatar = widget.avatar;
     return SizedBox(
       width: 72,
       height: 72,
       child: InkWell(
-        onTap: widget.onTap,
+        onTap: widget.isLoading ? null : widget.onTap,
         child: Stack(children: [
           Positioned.fill(
             child: ClipRRect(
@@ -33,31 +36,50 @@ class _UserAvatarViewState extends State<UserAvatarView> {
                   : Icon(
                       Icons.person,
                       size: 48,
-                      color: Theme.of(context).colorScheme.onSurfaceVariant,
+                      color: colorScheme.onSurfaceVariant,
                     ),
             ),
           ),
-          Positioned(
-            bottom: 0,
-            right: 0,
-            child: Container(
-              width: 24,
-              height: 24,
-              decoration: BoxDecoration(
-                color: Theme.of(context).colorScheme.primary,
-                shape: BoxShape.circle,
-                border: Border.all(
-                  color: Theme.of(context).colorScheme.surface,
-                  width: 2,
+          if (widget.isLoading)
+            Positioned.fill(
+              child: ClipRRect(
+                borderRadius: BorderRadius.circular(36),
+                child: Container(
+                  color: Colors.black38,
+                  alignment: Alignment.center,
+                  child: SizedBox(
+                    width: 28,
+                    height: 28,
+                    child: CircularProgressIndicator(
+                      strokeWidth: 2.5,
+                      color: colorScheme.primary,
+                    ),
+                  ),
                 ),
               ),
-              child: Icon(
-                Icons.edit_outlined,
-                size: 14,
-                color: Theme.of(context).colorScheme.onPrimary,
+            ),
+          if (!widget.isLoading)
+            Positioned(
+              bottom: 0,
+              right: 0,
+              child: Container(
+                width: 24,
+                height: 24,
+                decoration: BoxDecoration(
+                  color: colorScheme.primary,
+                  shape: BoxShape.circle,
+                  border: Border.all(
+                    color: colorScheme.surface,
+                    width: 2,
+                  ),
+                ),
+                child: Icon(
+                  Icons.edit_outlined,
+                  size: 14,
+                  color: colorScheme.onPrimary,
+                ),
               ),
             ),
-          ),
         ]),
       ),
     );

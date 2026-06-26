@@ -21,10 +21,18 @@ import 'package:flutter_svg/svg.dart';
 import 'account_content.dart';
 import 'avatar_dialog.dart';
 
-class AccountSettingsPage extends ConsumerWidget {
+class AccountSettingsPage extends ConsumerStatefulWidget {
   const AccountSettingsPage({super.key});
 
-  Future<void> _confirmLogout(BuildContext context, WidgetRef ref) async {
+  @override
+  ConsumerState<AccountSettingsPage> createState() =>
+      _AccountSettingsPageState();
+}
+
+class _AccountSettingsPageState extends ConsumerState<AccountSettingsPage> {
+  bool _isAvatarUploading = false;
+
+  Future<void> _confirmLogout() async {
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (dialogContext) => AlertDialog(
@@ -50,7 +58,7 @@ class AccountSettingsPage extends ConsumerWidget {
     NotificationToast.show('提示', '已退出登录');
   }
 
-  Future<void> _bindBangumi(BuildContext context, WidgetRef ref) async {
+  Future<void> _bindBangumi() async {
     try {
       await ref.read(userControllerProvider.notifier).openOAuthPageForBind();
       if (!context.mounted) return;
@@ -67,27 +75,31 @@ class AccountSettingsPage extends ConsumerWidget {
   }
 
   Future<void> _handleAvatarUpload(
-      BuildContext context, WidgetRef ref, String? currentAvatar) async {
+      BuildContext context, String? currentAvatar) async {
     final cropped = await AvatarDialog.pickAndCrop(
       context,
       currentAvatar: currentAvatar,
     );
     if (cropped == null) return;
 
-    NotificationToast.show('提示', '正在上传头像...');
-    final error =
-        await ref.read(currentUserInfoProvider.notifier).uploadAvatar(cropped);
-    if (!context.mounted) return;
-    if (error != null) {
+    setState(() => _isAvatarUploading = true);
+    try {
+      final error = await ref
+          .read(currentUserInfoProvider.notifier)
+          .uploadAvatar(cropped);
       if (!context.mounted) return;
-      NotificationToast.show('提示', error, duration: const Duration(seconds: 5));
-      return;
+      if (error != null) {
+        NotificationToast.show('提示', error,
+            duration: const Duration(seconds: 5));
+        return;
+      }
+    } finally {
+      if (mounted) setState(() => _isAvatarUploading = false);
     }
-    NotificationToast.show('提示', '头像已更新');
   }
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  Widget build(BuildContext context) {
     final isLoggedInAsync = ref.watch(isLoggedInProvider);
     final userInfoAsync = ref.watch(currentUserInfoProvider);
     final bangumiBindAsync = ref.watch(bangumiBindProvider);
@@ -122,7 +134,6 @@ class AccountSettingsPage extends ConsumerWidget {
                     ? _buildNotLoggedIn(context)
                     : _buildLoggedInContent(
                         context,
-                        ref,
                         user,
                         bangumiBindAsync,
                         isBinding,
@@ -253,7 +264,6 @@ class AccountSettingsPage extends ConsumerWidget {
 
   Widget _buildLoggedInContent(
     BuildContext context,
-    WidgetRef ref,
     FlowUsers user,
     AsyncValue<BangumiBindItem?> bangumiBindAsync,
     bool isBinding,
@@ -264,7 +274,8 @@ class AccountSettingsPage extends ConsumerWidget {
         _buildSectionTitle('账户信息'),
         AccountContentView(
           userInfo: user,
-          onAvatarUpload: () => _handleAvatarUpload(context, ref, user.avatar),
+          isAvatarUploading: _isAvatarUploading,
+          onAvatarUpload: () => _handleAvatarUpload(context, user.avatar),
           onNicknameConfirm: (newNickname) async {
             final error = await ref
                 .read(currentUserInfoProvider.notifier)
@@ -296,7 +307,7 @@ class AccountSettingsPage extends ConsumerWidget {
               Icons.logout_outlined,
               color: Theme.of(context).colorScheme.error,
             ),
-            onTap: () => _confirmLogout(context, ref),
+            onTap: () => _confirmLogout(),
             title: Text(
               '退出登录',
               style: TextStyle(color: Theme.of(context).colorScheme.error),
@@ -522,7 +533,7 @@ class AccountSettingsPage extends ConsumerWidget {
             ),
           ),
           OutlinedButton(
-            onPressed: () => _bindBangumi(context, ref),
+            onPressed: () => _bindBangumi(),
             child: const Text('绑定 Bangumi 账号'),
           ),
         ],
@@ -549,7 +560,9 @@ class AccountSettingsPage extends ConsumerWidget {
                   ),
                 );
                 if (confirmed == true) {
-                  await ref.read(userControllerProvider.notifier).unbindBangumi();
+                  await ref
+                      .read(userControllerProvider.notifier)
+                      .unbindBangumi();
                 }
               },
               icon: const Icon(Icons.link_off, size: 18),

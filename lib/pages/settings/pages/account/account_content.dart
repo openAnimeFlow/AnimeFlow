@@ -14,12 +14,14 @@ import 'nickname_editor.dart';
 class AccountContentView extends StatefulWidget {
   final FlowUsers userInfo;
   final VoidCallback? onAvatarUpload;
+  final bool isAvatarUploading;
   final Future<void> Function(String nickname)? onNicknameConfirm;
 
   const AccountContentView({
     super.key,
     required this.userInfo,
     this.onAvatarUpload,
+    this.isAvatarUploading = false,
     this.onNicknameConfirm,
   });
 
@@ -39,7 +41,9 @@ class _AccountContentViewState extends State<AccountContentView> {
             Row(
               children: [
                 UserAvatarView(
-                    onTap: widget.onAvatarUpload, avatar: user.avatar),
+                    onTap: widget.onAvatarUpload,
+                    avatar: user.avatar,
+                    isLoading: widget.isAvatarUploading),
                 const SizedBox(width: 16),
                 Expanded(
                   child: Column(

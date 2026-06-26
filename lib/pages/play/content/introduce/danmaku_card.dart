@@ -252,7 +252,7 @@ class _DanmakuCardState extends State<DanmakuCard>
       builder: (BuildContext dialogContext, StateSetter setDialogState) {
         return AlertDialog(
           icon: const Icon(Icons.subtitles),
-          title: const Text('淇敼寮瑰箷'),
+          title: const Text('切换弹幕'),
           titleTextStyle:
               const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
           content: ConstrainedBox(
@@ -279,7 +279,7 @@ class _DanmakuCardState extends State<DanmakuCard>
                   ] else ...[
                     const Align(
                       alignment: Alignment.centerLeft,
-                      child: Text('鎼滅储缁撴灉:'),
+                      child: Text('搜索结果:'),
                     ),
                     ConstrainedBox(
                       constraints: const BoxConstraints(
@@ -321,7 +321,7 @@ class _DanmakuCardState extends State<DanmakuCard>
           actions: [
             TextButton(
               onPressed: () => Navigator.of(dialogContext).pop(),
-              child: const Text('鍙栨秷'),
+              child: const Text('取消'),
             ),
             TextButton(
               onPressed: () async {
@@ -345,7 +345,7 @@ class _DanmakuCardState extends State<DanmakuCard>
                   }
                 }
               },
-              child: const Text('鎻愪氦'),
+              child: const Text('提交'),
             )
           ],
         );

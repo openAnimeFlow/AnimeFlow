@@ -420,87 +420,97 @@ class _VideoSourceDrawersState extends State<VideoSourceDrawers> {
           ),
         );
       }
+      final episodeIndex = videoSourceController.currentEpisodeIndex.value;
+
+      // 预过滤：只保留有匹配当前剧集的资源项
+      final matchedResources = episodeResources
+          .where((item) =>
+              item.episodes.any((ep) => ep.episodeSort == episodeIndex))
+          .toList();
+
+      final excludedEpisodesCount = episodeResources
+          .expand((item) =>
+              item.episodes.where((ep) => ep.episodeSort != episodeIndex))
+          .length;
+
       return Material(
-        child: ListView.builder(
-          padding: EdgeInsets.zero,
-          itemCount: episodeResources.length,
-          itemBuilder: (context, index) {
-            final resourceItem = episodeResources[index];
-            final isLastItem = index == episodeResources.length - 1;
-            final episodeIndex =
-                videoSourceController.currentEpisodeIndex.value;
-            // 当前选中剧集对应的剧集数据
-            final currentEpisode = resourceItem.episodes.firstWhereOrNull(
-              (ep) => ep.episodeSort == episodeIndex,
-            );
-
-            final excludedEpisodesCount = episodeResources
-                .expand((item) =>
-                    item.episodes.where((ep) => ep.episodeSort != episodeIndex))
-                .length;
-
-            // 如果当前资源组没有匹配的剧集，不渲染
-            if (currentEpisode == null) {
-              return const SizedBox.shrink();
-            }
-
-            // 只渲染当前选中的剧集
-            return Column(
-              children: [
-                _buildSource(
-                  currentEpisode,
-                  resourceItem,
-                  baseUrl: selectedResource.baseUrl,
-                  websiteName: selectedResource.websiteName,
-                  websiteIcon: selectedResource.websiteIcon,
-                ),
-
-                // 在最后一项后显示开关按钮
-                if (isLastItem) ...[
-                  Padding(
-                    padding: const EdgeInsets.symmetric(vertical: 8),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.end,
-                      children: [
-                        Text(
-                          '显示已被排除的资源($excludedEpisodesCount)',
-                          style: const TextStyle(fontSize: 14),
-                        ),
-                        const SizedBox(width: 8),
-                        Switch(
-                          value: isShowEpisodes,
-                          onChanged: (value) {
-                            setShowEpisodes();
-                          },
-                        ),
-                      ],
+        child: Column(
+          children: [
+            Expanded(
+              child: matchedResources.isEmpty
+                  ? const Center(child: Text('当前剧集无可用的播放源'))
+                  : ListView.builder(
+                      padding: EdgeInsets.zero,
+                      itemCount: matchedResources.length,
+                      itemExtent: 95,
+                      itemBuilder: (context, index) {
+                        final resourceItem = matchedResources[index];
+                        final currentEpisode = resourceItem.episodes.firstWhere(
+                          (ep) => ep.episodeSort == episodeIndex,
+                        );
+                        return _buildSource(
+                          currentEpisode,
+                          resourceItem,
+                          baseUrl: selectedResource.baseUrl,
+                          websiteName: selectedResource.websiteName,
+                          websiteIcon: selectedResource.websiteIcon,
+                        );
+                      },
                     ),
+            ),
+            // 切换开关
+            Padding(
+              padding: const EdgeInsets.symmetric(vertical: 8),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.end,
+                children: [
+                  Text(
+                    '显示已被排除的资源($excludedEpisodesCount)',
+                    style: const TextStyle(fontSize: 14),
                   ),
+                  const SizedBox(width: 8),
+                  Switch(
+                    value: isShowEpisodes,
+                    onChanged: (value) {
+                      setShowEpisodes();
+                    },
+                  ),
+                ],
+              ),
+            ),
+            // 展开的其他剧集
+            if (isShowEpisodes)
+              LimitedBox(
+                maxHeight: 240,
+                child: () {
+                  // 预构建展平列表，避免 builder 中重复计算
+                  final expandedItems = episodeResources.expand((item) {
+                    return item.episodes
+                        .where((ep) => ep.episodeSort != episodeIndex)
+                        .map((ep) => (resource: item, episode: ep));
+                  }).toList(growable: false);
 
-                  // 当开关打开时，显示所有资源的所有其他剧集
-                  if (isShowEpisodes)
-                    ...episodeResources.expand((item) {
-                      // 获取该资源的所有非当前集数的剧集
-                      final excludedEpisodes = item.episodes
-                          .where(
-                            (ep) => ep.episodeSort != episodeIndex,
-                          )
-                          .toList();
-                      // 遍历所有其他剧集
-                      return excludedEpisodes.map(
-                        (excludedEpisode) => _buildSource(
-                          excludedEpisode,
-                          item,
+                  return ListView.builder(
+                    padding: EdgeInsets.zero,
+                    itemCount: expandedItems.length,
+                    itemExtent: 95,
+                    itemBuilder: (context, index) {
+                      final entry = expandedItems[index];
+                      return Padding(
+                        padding: const EdgeInsets.only(bottom: 8),
+                        child: _buildSource(
+                          entry.episode,
+                          entry.resource,
                           baseUrl: selectedResource.baseUrl,
                           websiteName: selectedResource.websiteName,
                           websiteIcon: selectedResource.websiteIcon,
                         ),
                       );
-                    }),
-                ],
-              ],
-            );
-          },
+                    },
+                  );
+                }(),
+              ),
+          ],
         ),
       );
     });
@@ -565,77 +575,90 @@ class _VideoSourceDrawersState extends State<VideoSourceDrawers> {
           borderRadius: BorderRadius.circular(12),
         ),
         child: InkWell(
-            onTap: () async {
-              try {
-                context.pop();
-                final videoUrl = baseUrl + episode.like;
-                widget.videoSourceController.setWebSite(
-                    title: websiteName,
-                    iconUrl: websiteIcon,
-                    videoUrl: videoUrl,
-                    isManual: true);
-                widget.onVideoUrlSelected?.call(videoUrl);
-              } catch (e) {
-                logger.e('获取视频源失败', error: e);
-                NotificationToast.show('错误', '获取视频源失败: $e');
-              }
-            },
-            borderRadius: BorderRadius.circular(12),
-            child: Padding(
-              padding: const EdgeInsets.all(12),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text.rich(
-                    TextSpan(
-                      style: const TextStyle(
-                        fontSize: 16,
-                        fontWeight: FontWeight.bold,
-                      ),
-                      text: item.subjectsTitle,
-                      children: [
+          onTap: () async {
+            try {
+              context.pop();
+              final videoUrl = baseUrl + episode.like;
+              widget.videoSourceController.setWebSite(
+                title: websiteName,
+                iconUrl: websiteIcon,
+                videoUrl: videoUrl,
+                isManual: true,
+              );
+              widget.onVideoUrlSelected?.call(videoUrl);
+            } catch (e) {
+              logger.e('获取视频源失败', error: e);
+              NotificationToast.show('错误', '获取视频源失败: $e');
+            }
+          },
+          borderRadius: BorderRadius.circular(12),
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Row(
+                  children: [
+                    Expanded(
+                      child: Text.rich(
                         TextSpan(
-                          text:
-                              ' 第${episode.episodeSort.toString().padLeft(2, '0')}集',
                           style: const TextStyle(
                             fontSize: 14,
-                            fontWeight: FontWeight.bold,
+                            fontWeight: FontWeight.w600,
                           ),
-                        )
-                      ],
+                          text: item.subjectsTitle,
+                          children: [
+                            TextSpan(
+                              text:
+                                  ' 第${episode.episodeSort.toString().padLeft(2, '0')}集',
+                              style: const TextStyle(
+                                fontSize: 12,
+                                fontWeight: FontWeight.w600,
+                              ),
+                            ),
+                          ],
+                        ),
+                        maxLines: 2,
+                        overflow: TextOverflow.ellipsis,
+                      ),
                     ),
-                    maxLines: 2,
-                    overflow: TextOverflow.ellipsis,
-                  ),
-                  const SizedBox(height: 12),
-                  Row(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      const Text(
-                        '线路:',
-                        style: TextStyle(
-                          fontSize: 12,
-                          color: Colors.grey,
-                        ),
+                  ],
+                ),
+                Row(
+                  children: [
+                    Text(
+                      '线路:',
+                      style: TextStyle(
+                        fontSize: 12,
+                        color: Theme.of(context).colorScheme.onSurfaceVariant,
                       ),
-                      const SizedBox(width: 8),
-                      Text(
-                        item.lineNames,
-                        style: const TextStyle(
-                          fontSize: 12,
-                          color: Colors.grey,
-                        ),
+                    ),
+                    const SizedBox(width: 6),
+                    Text(
+                      item.lineNames,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: TextStyle(
+                        fontSize: 12,
+                        color: Theme.of(context).colorScheme.onSurfaceVariant,
                       ),
-                      const Icon(Icons.link, size: 20, color: Colors.grey),
-                      const Spacer(),
-                      const Text('匹配度:'),
-                      const SizedBox(width: 5),
-                      _buildMatchRatioBadge(item.matchRatio),
-                    ],
-                  ),
-                ],
-              ),
-            )),
+                    ),
+                    Icon(
+                      Icons.link,
+                      size: 16,
+                      color: Theme.of(context).colorScheme.onSurfaceVariant,
+                    ),
+                    const Spacer(),
+                    const Text('匹配度:'),
+                    const SizedBox(width: 4),
+                    _buildMatchRatioBadge(item.matchRatio),
+                  ],
+                ),
+              ],
+            ),
+          ),
+        ),
       ),
     );
   }

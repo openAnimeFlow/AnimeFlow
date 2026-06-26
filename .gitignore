@@ -50,3 +50,4 @@ app.*.map.json
 /devtools_options.yaml
 /pubspec.lock
 /.cursor/
+/.codegraph/

@@ -25,18 +25,13 @@ class Request {
         .then((onValue) => onValue.data);
   }
 
-  ///获取插件列表
-  static Future<List<dynamic>> getPluginRepo({bool isMirror = false}) async {
-    var pluginRepo = '${CommonApi.pluginRepo}/index.json';
-    if (isMirror) {
-      pluginRepo = '${CommonApi.gitMirror}$pluginRepo';
-    }
-
+  /// 获取资源
+  static Future<List<dynamic>> getResources(String url) async {
     return await _client
-        .get(pluginRepo,
-        options: Options(headers: {
-          Constants.userAgentName: Utils.getRandomUA(),
-        }))
+        .get(url,
+            options: Options(headers: {
+              Constants.userAgentName: Utils.getRandomUA(),
+            }))
         .then((onValue) {
       if (onValue.data is String) {
         return jsonDecode(onValue.data as String) as List<dynamic>;
@@ -46,10 +41,8 @@ class Request {
     });
   }
 
-  ///获取插件数据
-  static Future<CrawlConfigItem> getPlugin(String downloadUrl,{bool isMirror = false}) async {
-    if (isMirror) downloadUrl = '${CommonApi.gitMirror}$downloadUrl';
-
+  ///下载资源
+  static Future<CrawlConfigItem> downloadResources(String downloadUrl) async {
     return await _client.get(downloadUrl).then((onValue) {
       Map<String, dynamic> jsonData;
       if (onValue.data is String) {
@@ -62,7 +55,8 @@ class Request {
   }
 
   ///获取bgm用户统计数据
-  static Future<BgmUserStatisticsItem> getBgmUserStatisticsService(String username) async {
+  static Future<BgmUserStatisticsItem> getBgmUserStatisticsService(
+      String username) async {
     final response = await _client.get(
       '${CommonApi.bgmTV}/user/$username',
       options: Options(
@@ -73,8 +67,7 @@ class Request {
   }
 
   /// 图片识别番剧 [file]
-  static Future<ImageSearchItem> getAnimeInfoByImageFile(
-      File imageFile,
+  static Future<ImageSearchItem> getAnimeInfoByImageFile(File imageFile,
       {int anilistInfo = 2}) async {
     final bytes = await imageFile.readAsBytes();
 
@@ -90,21 +83,18 @@ class Request {
       ),
     )
         .then((onValue) {
-      return ImageSearchItem.fromJson(
-          onValue.data as Map<String, dynamic>);
+      return ImageSearchItem.fromJson(onValue.data as Map<String, dynamic>);
     });
   }
 
   /// 图片识别番剧 [url]
-  static Future<ImageSearchItem> getAnimeInfoByImageUrl(
-      String imageUrl,
+  static Future<ImageSearchItem> getAnimeInfoByImageUrl(String imageUrl,
       {int anilistInfo = 2}) async {
     return await _client.post(
       CommonApi.traceApi,
       queryParameters: {"anilistInfo": anilistInfo, "url": imageUrl},
     ).then((onValue) {
-      return ImageSearchItem.fromJson(
-          onValue.data as Map<String, dynamic>);
+      return ImageSearchItem.fromJson(onValue.data as Map<String, dynamic>);
     });
   }
 

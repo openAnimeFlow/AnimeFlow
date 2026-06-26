@@ -1,16 +1,16 @@
 import 'package:anime_flow/constants/storage_key.dart';
+import 'package:anime_flow/crawler/itme/crawler_config_item.dart';
 import 'package:anime_flow/http/api_path.dart';
 import 'package:anime_flow/http/requests/request.dart';
-import 'package:anime_flow/crawler/itme/crawler_config_item.dart';
 import 'package:anime_flow/repository/storage.dart';
 import 'package:anime_flow/utils/format_time_util.dart';
+import 'package:anime_flow/utils/logger.dart';
 import 'package:anime_flow/utils/systemUtil.dart';
 import 'package:anime_flow/utils/utils.dart';
 import 'package:anime_flow/widget/animation_network_image.dart';
 import 'package:anime_flow/widget/notification_toast.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
-import 'package:anime_flow/utils/logger.dart';
 
 class DownloadPluginsPage extends StatefulWidget {
   const DownloadPluginsPage({super.key});
@@ -24,6 +24,7 @@ class _DownloadPluginsPageState extends State<DownloadPluginsPage> {
   final setting = Storage.setting;
   bool isLoading = false;
   late bool isMirror;
+  String? errorMessage;
 
   // List<CrawlConfigItem>? plugins;
   List<dynamic>? pluginRepo;
@@ -43,10 +44,13 @@ class _DownloadPluginsPageState extends State<DownloadPluginsPage> {
     if (!isLoading && mounted) {
       setState(() {
         isLoading = true;
+        errorMessage = null;
       });
     }
     try {
-      final plugins = await Request.getPluginRepo(isMirror: isMirror);
+      String url = '${CommonApi.pluginRepo}/index.json';
+      if (isMirror) url = Utils.jsDelivrCdnUrl(url);
+      final plugins = await Request.getResources(url);
       if (mounted) {
         setState(() {
           isLoading = false;
@@ -56,6 +60,7 @@ class _DownloadPluginsPageState extends State<DownloadPluginsPage> {
     } catch (e) {
       if (mounted) {
         setState(() {
+          errorMessage = e.toString();
           isLoading = false;
         });
       }
@@ -82,9 +87,9 @@ class _DownloadPluginsPageState extends State<DownloadPluginsPage> {
     });
     try {
       final pluginPath = plugin['path'] as String;
-      final downloadUrl = '${CommonApi.pluginRepo}/$pluginPath';
-      final pluginData =
-          await Request.getPlugin(downloadUrl, isMirror: isMirror);
+      var downloadUrl = '${CommonApi.pluginRepo}/$pluginPath';
+      if (isMirror) downloadUrl = Utils.jsDelivrCdnUrl(downloadUrl);
+      final pluginData = await Request.downloadResources(downloadUrl);
       final catalogVersion = plugin['version'] as String;
       _persistPlugin(pluginName, pluginData, catalogVersion);
       if (!mounted) return;
@@ -115,9 +120,9 @@ class _DownloadPluginsPageState extends State<DownloadPluginsPage> {
     });
     try {
       final pluginPath = plugin['path'] as String;
-      final downloadUrl = '${CommonApi.pluginRepo}/$pluginPath';
-      final pluginData =
-          await Request.getPlugin(downloadUrl, isMirror: isMirror);
+      var downloadUrl = '${CommonApi.pluginRepo}/$pluginPath';
+      if (isMirror) downloadUrl = Utils.jsDelivrCdnUrl(downloadUrl);
+      final pluginData = await Request.downloadResources(downloadUrl);
       _persistPlugin(pluginName, pluginData, pluginVersion);
       if (!mounted) return;
       setState(() {
@@ -143,6 +148,7 @@ class _DownloadPluginsPageState extends State<DownloadPluginsPage> {
 
   @override
   Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
     return PopScope(
       canPop: !hasChanged, // 如果有变化，不允许默认返回
       onPopInvokedWithResult: (didPop, result) {
@@ -194,11 +200,19 @@ class _DownloadPluginsPageState extends State<DownloadPluginsPage> {
                   title: Text('加载中...'),
                 ),
               ),
-            if (pluginRepo == null && !isLoading)
+            if (errorMessage != null && errorMessage!.isNotEmpty)
+              ListTile(
+                leading: Icon(Icons.error, color: colorScheme.error),
+                title: Text(
+                  errorMessage!,
+                  style: TextStyle(color: colorScheme.error),
+                ),
+              )
+            else if (pluginRepo == null && !isLoading)
               const ListTile(
                 title: Text('没有找到数据请刷新'),
-              ),
-            if (pluginRepo != null && !isLoading)
+              )
+            else if (pluginRepo != null && !isLoading)
               ...pluginRepo!.map((plugin) {
                 final pluginName = plugin['name'] as String;
                 final localPlugin = storage.get(pluginName);

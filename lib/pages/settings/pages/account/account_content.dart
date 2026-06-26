@@ -1,3 +1,4 @@
+import 'package:anime_flow/http/api_path.dart';
 import 'package:anime_flow/models/item/flow/background_image_item.dart';
 import 'package:anime_flow/models/item/flow/flow_users.dart';
 import 'package:anime_flow/pages/settings/pages/account/provider/account_background_provider.dart';
@@ -8,6 +9,7 @@ import 'package:anime_flow/widget/animation_network_image.dart';
 import 'package:anime_flow/widget/notification_toast.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 import 'nickname_editor.dart';
 
@@ -230,7 +232,6 @@ class _BackgroundGridSectionState extends ConsumerState<BackgroundGridSection>
 
   Widget _buildGrid(List<BackgroundImageItem> list, int selectedId) {
     final colorScheme = Theme.of(context).colorScheme;
-
     return Padding(
       padding: const EdgeInsets.only(top: 8),
       child: LayoutBuilder(
@@ -275,76 +276,98 @@ class _BackgroundGridSectionState extends ConsumerState<BackgroundGridSection>
                       ),
                     ],
                   ))
-                : GridView.builder(
-                    padding: const EdgeInsets.all(5),
-                    physics: const ClampingScrollPhysics(),
-                    gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                      crossAxisCount: crossAxisCount,
-                      mainAxisSpacing: 10,
-                      crossAxisSpacing: 10,
-                      childAspectRatio: 16 / 9,
-                    ),
-                    itemCount: list.length,
-                    itemBuilder: (context, index) {
-                      final item = list[index];
-                      final isSelected = item.id == selectedId;
-                      return GestureDetector(
-                        onTap: () => _selectBackground(item.id),
-                        child: Container(
-                          decoration: BoxDecoration(
-                            borderRadius: BorderRadius.circular(8),
-                            border: isSelected
-                                ? Border.all(
-                                    color: colorScheme.primary,
-                                    width: 2.5,
-                                    strokeAlign: BorderSide.strokeAlignOutside,
-                                  )
-                                : null,
-                          ),
-                          clipBehavior: Clip.antiAlias,
-                          child: Stack(
-                            children: [
-                              AnimationNetworkImage(
-                                url: item.image,
-                                width: double.infinity,
-                                height: double.infinity,
-                                fit: BoxFit.cover,
-                              ),
-                              if (_loadingItemId == item.id)
-                                Container(
-                                  color: Colors.black38,
-                                  alignment: Alignment.center,
-                                  child: SizedBox(
-                                    width: 28,
-                                    height: 28,
-                                    child: CircularProgressIndicator(
-                                      strokeWidth: 2.5,
-                                      color: colorScheme.primary,
-                                    ),
-                                  ),
-                                )
-                              else if (isSelected)
-                                Positioned(
-                                  top: 4,
-                                  right: 4,
-                                  child: Container(
-                                    padding: const EdgeInsets.all(2),
-                                    decoration: BoxDecoration(
-                                      color: colorScheme.primary,
-                                      shape: BoxShape.circle,
-                                    ),
-                                    child: Icon(
-                                      Icons.check,
-                                      size: 14,
-                                      color: colorScheme.onPrimary,
-                                    ),
-                                  ),
-                                ),
-                            ],
+                : Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    spacing: 8,
+                    children: [
+                      InkWell(
+                        onTap: () => launchUrl(
+                          Uri.parse(CommonApi.imageWeb),
+                          mode: LaunchMode.externalApplication,
+                        ),
+                        child: Text(
+                          '资源来自 ${CommonApi.imageWeb}',
+                          style: TextStyle(
+                            color: colorScheme.primary,
                           ),
                         ),
-                      );
-                    },
+                      ),
+                      Expanded(
+                        child: GridView.builder(
+                          padding: const EdgeInsets.all(5),
+                          physics: const ClampingScrollPhysics(),
+                          gridDelegate:
+                              SliverGridDelegateWithFixedCrossAxisCount(
+                            crossAxisCount: crossAxisCount,
+                            mainAxisSpacing: 10,
+                            crossAxisSpacing: 10,
+                            childAspectRatio: 16 / 9,
+                          ),
+                          itemCount: list.length,
+                          itemBuilder: (context, index) {
+                            final item = list[index];
+                            final isSelected = item.id == selectedId;
+                            return GestureDetector(
+                              onTap: () => _selectBackground(item.id),
+                              child: Container(
+                                decoration: BoxDecoration(
+                                  borderRadius: BorderRadius.circular(8),
+                                  border: isSelected
+                                      ? Border.all(
+                                          color: colorScheme.primary,
+                                          width: 2.5,
+                                          strokeAlign:
+                                              BorderSide.strokeAlignOutside,
+                                        )
+                                      : null,
+                                ),
+                                clipBehavior: Clip.antiAlias,
+                                child: Stack(
+                                  children: [
+                                    AnimationNetworkImage(
+                                      url: item.image,
+                                      width: double.infinity,
+                                      height: double.infinity,
+                                      fit: BoxFit.cover,
+                                    ),
+                                    if (_loadingItemId == item.id)
+                                      Container(
+                                        color: Colors.black38,
+                                        alignment: Alignment.center,
+                                        child: SizedBox(
+                                          width: 28,
+                                          height: 28,
+                                          child: CircularProgressIndicator(
+                                            strokeWidth: 2.5,
+                                            color: colorScheme.primary,
+                                          ),
+                                        ),
+                                      )
+                                    else if (isSelected)
+                                      Positioned(
+                                        top: 4,
+                                        right: 4,
+                                        child: Container(
+                                          padding: const EdgeInsets.all(2),
+                                          decoration: BoxDecoration(
+                                            color: colorScheme.primary,
+                                            shape: BoxShape.circle,
+                                          ),
+                                          child: Icon(
+                                            Icons.check,
+                                            size: 14,
+                                            color: colorScheme.onPrimary,
+                                          ),
+                                        ),
+                                      ),
+                                  ],
+                                ),
+                              ),
+                            );
+                          },
+                        ),
+                      ),
+                    ],
                   ),
           );
         },

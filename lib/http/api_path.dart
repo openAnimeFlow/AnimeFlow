@@ -95,7 +95,10 @@ class CommonApi {
           'https://raw.githubusercontent.com/openAnimeFlow/animeFlow-assets/main/fonts-repo',
 
       /// 图片识别番剧
-      traceApi = 'https://api.trace.moe/search';
+      traceApi = 'https://api.trace.moe/search',
+
+      /// 图片网站
+      imageWeb = 'https://anime-pictures.net';
 }
 
 class AnimeFlowApi {

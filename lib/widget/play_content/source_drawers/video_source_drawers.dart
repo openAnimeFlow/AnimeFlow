@@ -721,7 +721,7 @@ class _CaptchaViewState extends State<CaptchaView> {
     _disposeSession();
     widget.dataSourceController.markCaptchaVerified(websiteName);
     setState(() {});
-    NotificationToast.show('验证成功', '正在重新检索，请稍候…', maxWidth: 300);
+    NotificationToast.show('验证成功', '正在重新检索，请稍候…');
     Future.delayed(const Duration(seconds: 2), () {
       widget.dataSourceController.retryResources(websiteName);
     });

@@ -175,7 +175,7 @@ class _MainPageState extends State<MainPage> {
                 final userInfo = ref.watch(currentUserInfoProvider).value;
                 final isLoggedIn = ref.watch(isLoggedInProvider).value ?? false;
                 final avatar =
-                    isLoggedIn && (userInfo?.avatar.isNotEmpty ?? false)
+                    isLoggedIn && (userInfo?.avatar?.isNotEmpty ?? false)
                         ? userInfo!.avatar
                         : null;
                 return NavigationRail(
@@ -228,7 +228,7 @@ class _MainPageState extends State<MainPage> {
                 final userInfo = ref.watch(currentUserInfoProvider).value;
                 final isLoggedIn = ref.watch(isLoggedInProvider).value ?? false;
                 final avatar =
-                    isLoggedIn && (userInfo?.avatar.isNotEmpty ?? false)
+                    isLoggedIn && (userInfo?.avatar?.isNotEmpty ?? false)
                         ? userInfo!.avatar
                         : null;
                 return NavigationBar(

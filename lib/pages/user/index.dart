@@ -1,4 +1,5 @@
 import 'package:anime_flow/pages/user/user_view/user_view.dart';
+import 'package:anime_flow/providers/user/user_controller.dart';
 import 'package:anime_flow/providers/user/user_state_provider.dart';
 import 'package:anime_flow/widget/notification_toast.dart';
 import 'package:flutter/material.dart';
@@ -36,20 +37,53 @@ class UserPage extends ConsumerWidget {
       ),
       error: (_, __) => Scaffold(
         body: Center(
-          child: InkWell(
-            onTap: () => ref.invalidate(currentUserInfoProvider),
-            child: const Padding(
-              padding: EdgeInsets.all(8.0),
-              child: Row(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              const Text('获取用户资料失败'),
+              const SizedBox(height: 24),
+              Row(
                 mainAxisSize: MainAxisSize.min,
-                mainAxisAlignment: MainAxisAlignment.center,
-                spacing: 8,
+                spacing: 16,
                 children: [
-                  Text('获取用户资料失败'),
-                  Icon(Icons.refresh),
+                  FilledButton.tonalIcon(
+                    onPressed: () => ref.invalidate(currentUserInfoProvider),
+                    icon: const Icon(Icons.refresh),
+                    label: const Text('重试'),
+                  ),
+                  FilledButton.icon(
+                    onPressed: () async {
+                      final confirmed = await showDialog<bool>(
+                        context: context,
+                        builder: (dialogContext) => AlertDialog(
+                          title: const Text('确认退出'),
+                          content: const Text('确定要退出登录吗？'),
+                          actions: [
+                            TextButton(
+                              onPressed: () =>
+                                  Navigator.of(dialogContext).pop(false),
+                              child: const Text('取消'),
+                            ),
+                            TextButton(
+                              onPressed: () =>
+                                  Navigator.of(dialogContext).pop(true),
+                              child: const Text('确定'),
+                            ),
+                          ],
+                        ),
+                      );
+                      if (confirmed == true && context.mounted) {
+                        await ref
+                            .read(userControllerProvider.notifier)
+                            .clearUserInfo();
+                      }
+                    },
+                    icon: const Icon(Icons.logout),
+                    label: const Text('退出登录'),
+                  ),
                 ],
               ),
-            ),
+            ],
           ),
         ),
       ),

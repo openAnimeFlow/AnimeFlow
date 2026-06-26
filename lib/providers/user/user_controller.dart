@@ -29,11 +29,6 @@ class UserController extends _$UserController {
   }
 
   Future<void> clearUserInfo() async {
-    try {
-      await FlowRequest.logoutService();
-    } catch (e) {
-      LiggLogger().w('服务端登出失败，仍清除本地登录状态: $e');
-    }
     cancelOAuthWaiting();
     await ref.read(tokenRepositoryProvider).removeToken();
     await ref.read(flowTokenRepositoryProvider).removeToken();
@@ -44,6 +39,9 @@ class UserController extends _$UserController {
     ref.invalidate(bangumiBindProvider);
     ref.invalidate(bgmCollectionSyncProvider);
     ref.invalidate(userCollectionsProvider);
+    FlowRequest.logoutService().catchError((e) {
+      LiggLogger().w('服务端登出失败: $e');
+    });
   }
 
   Future<OAuthHandleResult> handleDeepLink(String deepLink) async {
@@ -105,8 +103,7 @@ class UserController extends _$UserController {
     try {
       const clientId = Constants.bgmClientId;
       const redirectUri = AnimeFlowApi.animeFlowApi + AnimeFlowApi.callback;
-      final session =
-          await FlowRequest.getSessionService(bindMode: storeCode);
+      final session = await FlowRequest.getSessionService(bindMode: storeCode);
       final sessionId = session['sessionId'] as String;
       final authUrl = Uri.parse(
         '${CommonApi.bgmTV}${BgmApi.oauth}?response_type=code&client_id=$clientId&redirect_uri=$redirectUri&state=$sessionId',
@@ -229,8 +226,8 @@ class UserController extends _$UserController {
     );
   }
 }
+
 /// Bangumi OAuth 应用回调（自定义 scheme）
 bool isOAuthAppCallbackUri(Uri uri) {
   return uri.scheme == 'flow' && uri.host == 'auth' && uri.path == '/callback';
 }
-

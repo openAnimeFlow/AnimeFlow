@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:anime_flow/constants/storage_key.dart';
 import 'package:anime_flow/crawler/itme/crawler_config_item.dart';
 import 'package:anime_flow/http/api_path.dart';
@@ -50,7 +52,10 @@ class _DownloadPluginsPageState extends State<DownloadPluginsPage> {
     try {
       String url = '${CommonApi.pluginRepo}/index.json';
       if (isMirror) url = Utils.jsDelivrCdnUrl(url);
-      final plugins = await Request.getResources(url);
+      final data = await Request.getResources(url);
+      final plugins = data is String
+          ? jsonDecode(data) as List<dynamic>
+          : data as List<dynamic>;
       if (mounted) {
         setState(() {
           isLoading = false;
@@ -89,7 +94,11 @@ class _DownloadPluginsPageState extends State<DownloadPluginsPage> {
       final pluginPath = plugin['path'] as String;
       var downloadUrl = '${CommonApi.pluginRepo}/$pluginPath';
       if (isMirror) downloadUrl = Utils.jsDelivrCdnUrl(downloadUrl);
-      final pluginData = await Request.downloadResources(downloadUrl);
+      final raw = await Request.getResources(downloadUrl);
+      final jsonMap = raw is String
+          ? jsonDecode(raw) as Map<String, dynamic>
+          : raw as Map<String, dynamic>;
+      final pluginData = CrawlConfigItem.fromJson(jsonMap);
       final catalogVersion = plugin['version'] as String;
       _persistPlugin(pluginName, pluginData, catalogVersion);
       if (!mounted) return;
@@ -122,7 +131,11 @@ class _DownloadPluginsPageState extends State<DownloadPluginsPage> {
       final pluginPath = plugin['path'] as String;
       var downloadUrl = '${CommonApi.pluginRepo}/$pluginPath';
       if (isMirror) downloadUrl = Utils.jsDelivrCdnUrl(downloadUrl);
-      final pluginData = await Request.downloadResources(downloadUrl);
+      final raw = await Request.getResources(downloadUrl);
+      final jsonMap = raw is String
+          ? jsonDecode(raw) as Map<String, dynamic>
+          : raw as Map<String, dynamic>;
+      final pluginData = CrawlConfigItem.fromJson(jsonMap);
       _persistPlugin(pluginName, pluginData, pluginVersion);
       if (!mounted) return;
       setState(() {

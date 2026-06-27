@@ -1,5 +1,6 @@
 import 'package:anime_flow/http/api_path.dart';
-import 'package:anime_flow/http/clients/client.dart';
+import 'package:anime_flow/http/requests/request.dart';
+import 'package:anime_flow/utils/utils.dart';
 import 'package:flutter/material.dart';
 
 class AgreementPage extends StatefulWidget {
@@ -27,12 +28,10 @@ class _AgreementPageState extends State<AgreementPage> {
     });
 
     try {
-      final response = await Client.instance.get<String>(
-        '${CommonApi.gitMirror}https://raw.githubusercontent.com/openAnimeFlow/AnimeFlow/main/LICENSE.txt',
-      );
-
+      final response = await Request.getResources<String>(
+          Utils.jsDelivrCdnUrl('https://raw.githubusercontent.com/openAnimeFlow/AnimeFlow/main/LICENSE.txt'));
       setState(() {
-        _licenseText = response.data ?? '';
+        _licenseText = response;
         _isLoading = false;
       });
     } catch (e) {

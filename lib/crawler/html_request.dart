@@ -1,14 +1,15 @@
 import 'dart:async';
+
+import 'package:anime_flow/constants/constants.dart';
 import 'package:anime_flow/crawler/itme/crawler_config_item.dart';
-import 'package:anime_flow/http/clients/client.dart';
+import 'package:anime_flow/http/requests/request.dart';
 import 'package:anime_flow/models/play/video/episode_resources_item.dart';
 import 'package:anime_flow/models/play/video/search_resources_item.dart';
+import 'package:anime_flow/utils/logger.dart';
 import 'package:anime_flow/utils/utils.dart';
 import 'package:dio/dio.dart';
-import 'package:anime_flow/constants/constants.dart';
 import 'package:html/parser.dart' as html_parser;
 import 'package:xpath_selector_html_parser/xpath_selector_html_parser.dart';
-import 'package:anime_flow/utils/logger.dart';
 
 import 'cookie_manager.dart';
 import 'html_crawler.dart';
@@ -16,7 +17,9 @@ import 'html_crawler.dart';
 /// 搜索响应中检测到验证码质询时抛出
 class CaptchaRequiredException implements Exception {
   final String configName;
+
   const CaptchaRequiredException(this.configName);
+
   @override
   String toString() =>
       'CaptchaRequiredException: $configName requires captcha verification';
@@ -24,7 +27,7 @@ class CaptchaRequiredException implements Exception {
 
 class WebRequest {
   static LiggLogger logger = LiggLogger();
-  static final Client _client = Client.instance;
+
   ///获取搜索条目列表
   static Future<List<SearchResourcesItem>> getSearchSubjectListService(
       String keyword, CrawlConfigItem crawlConfig) async {
@@ -35,18 +38,17 @@ class WebRequest {
     final httpHeaders = {
       'referer': '$searchURL/',
       'Content-Type': 'application/x-www-form-urlencoded',
-      'Accept-Language':Utils.getRandomAcceptedLanguage(),
+      'Accept-Language': Utils.getRandomAcceptedLanguage(),
       'Connection': 'keep-alive',
       Constants.userAgentName: Utils.getRandomUA(),
       if (cookie.isNotEmpty) 'Cookie': cookie
     };
-    final response = await _client.get(requestUrl,
+    final response = await Request.getResources(requestUrl,
         options: Options(headers: httpHeaders));
-
     final antiCrawler = crawlConfig.antiCrawlerConfig;
     if (antiCrawler.enabled) {
       final htmlElement =
-          html_parser.parse(response.data.toString()).documentElement!;
+          html_parser.parse(response.toString()).documentElement!;
       final detectionXpaths = [
         antiCrawler.captchaImage,
         antiCrawler.captchaButton,
@@ -59,7 +61,7 @@ class WebRequest {
       }
     }
 
-    return HtmlCrawler.parseSearchHtml(response.data, crawlConfig);
+    return HtmlCrawler.parseSearchHtml(response, crawlConfig);
   }
 
   ///获取剧集资源列表
@@ -77,13 +79,14 @@ class WebRequest {
     final httpHeaders = {
       'referer': '$searchURL/',
       'Content-Type': 'application/x-www-form-urlencoded',
-      'Accept-Language':Utils.getRandomAcceptedLanguage(),
+      'Accept-Language': Utils.getRandomAcceptedLanguage(),
       'Connection': 'keep-alive',
       Constants.userAgentName: Utils.getRandomUA(),
     };
 
-    final response = await _client.get(linkUrl, options: Options(headers: httpHeaders));
-    return HtmlCrawler.parseResourcesHtml(response.data, crawlConfig);
+    final response = await Request.getResources(linkUrl,
+        options: Options(headers: httpHeaders));
+    return HtmlCrawler.parseResourcesHtml(response, crawlConfig);
   }
 
   static Future<String> _cookieHeaderFor(String url, String name) async {
@@ -92,7 +95,7 @@ class WebRequest {
     if (uri == null) return '';
     try {
       final cookies =
-      await CookieManager.instance.getJar(name).loadForRequest(uri);
+          await CookieManager.instance.getJar(name).loadForRequest(uri);
       if (cookies.isEmpty) return '';
       return cookies.map((c) => '${c.name}=${c.value}').join('; ');
     } catch (_) {

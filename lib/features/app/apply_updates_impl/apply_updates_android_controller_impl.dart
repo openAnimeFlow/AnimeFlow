@@ -1,11 +1,11 @@
 import 'dart:io';
 
 import 'package:anime_flow/features/app/apply_updates_controller.dart';
+import 'package:anime_flow/http/requests/request.dart';
 import 'package:anime_flow/models/download_info.dart';
-import 'package:anime_flow/http/clients/client.dart';
+import 'package:anime_flow/utils/logger.dart';
 import 'package:dio/dio.dart';
 import 'package:get/get.dart';
-import 'package:anime_flow/utils/logger.dart';
 import 'package:open_filex/open_filex.dart';
 import 'package:path_provider/path_provider.dart'
     show getExternalStorageDirectory;
@@ -25,11 +25,14 @@ class ApplyUpdatesAndroidController implements ApplyUpdatesController {
       final dir = await getExternalStorageDirectory();
       final savePath = '${dir!.path}/${downloadInfo.fileName}';
       Get.log(savePath);
-      await Client.instance.download(downloadInfo.url, savePath,
-          onReceiveProgress: (received, total) {
-        // 调用进度回调
-        onProgress?.call(received, total);
-      }, cancelToken: _cancelToken);
+      await Request.downloadFile(
+        downloadInfo.url,
+        savePath,
+        onReceiveProgress: (received, total) {
+          onProgress?.call(received, total);
+        },
+        cancelToken: _cancelToken,
+      );
 
       final result = await OpenFilex.open(File(savePath).path);
       if (result.type != ResultType.done) {

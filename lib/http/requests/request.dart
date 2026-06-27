@@ -1,57 +1,47 @@
-import 'dart:convert';
 import 'dart:io';
 
 import 'package:anime_flow/constants/constants.dart';
 import 'package:anime_flow/crawler/html_crawler.dart';
 import 'package:anime_flow/crawler/itme/bgm_user_page_item.dart';
 import 'package:anime_flow/http/api_path.dart';
-import 'package:anime_flow/crawler/itme/crawler_config_item.dart';
 import 'package:anime_flow/http/clients/client.dart';
 import 'package:anime_flow/models/item/image_search_item.dart';
+import 'package:anime_flow/utils/exceptions/storage_exception.dart';
+import 'package:anime_flow/utils/logger.dart';
 import 'package:anime_flow/utils/systemUtil.dart';
 import 'package:anime_flow/utils/utils.dart';
 import 'package:dio/dio.dart';
 import 'package:gal/gal.dart';
-import 'package:anime_flow/utils/exceptions/storage_exception.dart';
-import 'package:anime_flow/utils/logger.dart';
 import 'package:path_provider/path_provider.dart';
 
 class Request {
   static final Client _client = Client.instance;
 
-  static Future<Map<String, dynamic>> getReleases() async {
-    return await _client
-        .get(CommonApi.githubApi + CommonApi.animeFlowVersion)
-        .then((onValue) => onValue.data);
+  /// 获取资源，返回原始响应数据
+  static Future<T> getResources<T>(String url, {Options? options}) async {
+    return (await _client.get(
+      url,
+      options: options ??
+          Options(headers: {
+            Constants.userAgentName: Utils.getRandomUA(),
+          }),
+    ))
+        .data as T;
   }
 
-  /// 获取资源
-  static Future<List<dynamic>> getResources(String url) async {
-    return await _client
-        .get(url,
-            options: Options(headers: {
-              Constants.userAgentName: Utils.getRandomUA(),
-            }))
-        .then((onValue) {
-      if (onValue.data is String) {
-        return jsonDecode(onValue.data as String) as List<dynamic>;
-      } else {
-        return onValue.data as List<dynamic>;
-      }
-    });
-  }
-
-  ///下载资源
-  static Future<CrawlConfigItem> downloadResources(String downloadUrl) async {
-    return await _client.get(downloadUrl).then((onValue) {
-      Map<String, dynamic> jsonData;
-      if (onValue.data is String) {
-        jsonData = jsonDecode(onValue.data as String) as Map<String, dynamic>;
-      } else {
-        jsonData = onValue.data as Map<String, dynamic>;
-      }
-      return CrawlConfigItem.fromJson(jsonData);
-    });
+  /// 资源下载
+  static Future<void> downloadFile(
+    String url,
+    String savePath, {
+    ProgressCallback? onReceiveProgress,
+    CancelToken? cancelToken,
+  }) async {
+    await _client.download(
+      url,
+      savePath,
+      onReceiveProgress: onReceiveProgress,
+      cancelToken: cancelToken,
+    );
   }
 
   ///获取bgm用户统计数据

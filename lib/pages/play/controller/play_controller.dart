@@ -85,6 +85,9 @@ class PlayController extends GetxController {
   /// 全屏状态
   final isFullscreen = false.obs;
 
+  /// 视频画面填充模式
+  final videoFit = BoxFit.contain.obs;
+
   /// 视频地址
   String? videoUrl;
 
@@ -519,6 +522,13 @@ class PlayController extends GetxController {
       try {
         danmakuController.clear();
       } catch (_) {}
+    }
+  }
+
+  /// 切换视频画面填充模式
+  void toggleVideoFit(BoxFit fits) {
+    if (videoFit.value != fits) {
+      videoFit.value = fits;
     }
   }
 

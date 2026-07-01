@@ -1,13 +1,14 @@
 import 'package:anime_flow/constants/assets_path_constants.dart';
-import 'package:anime_flow/providers/user/user_state_provider.dart';
 import 'package:anime_flow/models/enums/video_controls_icon_type.dart';
 import 'package:anime_flow/pages/play/controller/play_controller.dart';
 import 'package:anime_flow/pages/play/controller/video_ui_controller.dart';
 import 'package:anime_flow/pages/play/provider/episodes_provider.dart';
+import 'package:anime_flow/pages/play/video/ui/button/fit_button.dart';
 import 'package:anime_flow/pages/play/video/ui/button/rate_button.dart';
 import 'package:anime_flow/pages/play/video/ui/button/shader_button.dart';
 import 'package:anime_flow/pages/play/video/ui/danmaku/danmaku_setting.dart';
 import 'package:anime_flow/pages/play/video/ui/video_ui_components.dart';
+import 'package:anime_flow/providers/user/user_state_provider.dart';
 import 'package:anime_flow/utils/systemUtil.dart';
 import 'package:anime_flow/widget/danmaku_text_field.dart';
 import 'package:anime_flow/widget/play_content/episodes_dialog.dart';
@@ -286,12 +287,28 @@ class _BottomAreaControlState extends State<BottomAreaControl> {
                               videoUiStateController: videoUiStateController,
                             ),
 
-                          //倍速按钮
-                          if (isWideScreen || fullscreen)
+                          if (isWideScreen || fullscreen) ...[
+                            //倍速按钮
                             RateButton(
                               playController: playController,
                               videoUiStateController: videoUiStateController,
                             ),
+                            // 画面填充按钮
+                            Obx(
+                              () => FitButton(
+                                value: playController.videoFit.value,
+                                onChanged: (fit) {
+                                  playController.toggleVideoFit(fit);
+                                },
+                                onMenuOpen: () =>
+                                    videoUiStateController.cancelUiTimer(),
+                                onMenuClose: () =>
+                                    videoUiStateController.hideControlsUi(
+                                  duration: const Duration(seconds: 2),
+                                ),
+                              ),
+                            ),
+                          ],
 
                           // 全屏按钮
                           AnimatedContainer(

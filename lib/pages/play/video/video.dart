@@ -200,9 +200,12 @@ class _VideoViewState extends ConsumerState<VideoView> with WindowListener {
     return Stack(
       children: [
         /// 视频层
-        Video(
-          controller: playController.videoController,
-          controls: NoVideoControls,
+        Obx(
+          () => Video(
+            controller: playController.videoController,
+            fit: playController.videoFit.value,
+            controls: NoVideoControls,
+          ),
         ),
 
         /// 弹幕层

@@ -1,8 +1,10 @@
+import 'package:anime_flow/constants/constants.dart';
 import 'package:anime_flow/http/core/api_signature.dart';
 import 'package:anime_flow/http/core/network_exception.dart';
 import 'package:anime_flow/http/core/dio_factory.dart';
 import 'package:anime_flow/http/core/network_error_mapper.dart';
 import 'package:anime_flow/http/interceptors/flow_refresh_token_interceptor.dart';
+import 'package:anime_flow/repository/flow_token_storage.dart';
 import 'package:dio/dio.dart';
 
 /// AnimeFlow API 业务异常：`code != 200` 时抛出。
@@ -80,13 +82,14 @@ class FlowClient {
     throw FormatException('AnimeFlow API response must be a JSON object: $raw');
   }
 
-  Options _resolveOptions({
+  Future<Options> _resolveOptions({
     required String path,
     Options? options,
     required bool signRequest,
     bool skipFlowTokenRefresh = false,
-  }) {
-    if (!signRequest && !skipFlowTokenRefresh) {
+    bool includeFlowToken = true,
+  }) async {
+    if (!signRequest && !skipFlowTokenRefresh && !includeFlowToken) {
       return options ?? Options();
     }
 
@@ -96,10 +99,15 @@ class FlowClient {
       ...?options?.headers,
       ...signHeaders,
     };
+    if (includeFlowToken) {
+      final token = await FlowTokenStorage.instance.getToken();
+      if (token != null) {
+        mergedHeaders[Constants.authorization] = '${token.tokenType} ${token.accessToken}';
+      }
+    }
     final mergedExtra = <String, dynamic>{
       ...?options?.extra,
-      if (skipFlowTokenRefresh)
-        FlowRefreshTokenInterceptor.skipKey: true,
+      if (skipFlowTokenRefresh) FlowRefreshTokenInterceptor.skipKey: true,
     };
     return (options ?? Options()).copyWith(
       headers: mergedHeaders,
@@ -115,16 +123,18 @@ class FlowClient {
     CancelToken? cancelToken,
     bool signRequest = true,
     bool skipFlowTokenRefresh = false,
+    bool includeFlowToken = true,
   }) async {
     try {
       final response = await DioFactory.animeFlowDio.get(
         path,
         queryParameters: queryParameters,
-        options: _resolveOptions(
+        options: await _resolveOptions(
           path: path,
           options: options,
           signRequest: signRequest,
           skipFlowTokenRefresh: skipFlowTokenRefresh,
+          includeFlowToken: includeFlowToken,
         ),
         cancelToken: cancelToken,
       );
@@ -143,17 +153,19 @@ class FlowClient {
     CancelToken? cancelToken,
     bool signRequest = true,
     bool skipFlowTokenRefresh = false,
+    bool includeFlowToken = true,
   }) async {
     try {
       final response = await DioFactory.animeFlowDio.post(
         path,
         data: data,
         queryParameters: queryParameters,
-        options: _resolveOptions(
+        options: await _resolveOptions(
           path: path,
           options: options,
           signRequest: signRequest,
           skipFlowTokenRefresh: skipFlowTokenRefresh,
+          includeFlowToken: includeFlowToken,
         ),
         cancelToken: cancelToken,
       );
@@ -172,17 +184,19 @@ class FlowClient {
     CancelToken? cancelToken,
     bool signRequest = true,
     bool skipFlowTokenRefresh = false,
+    bool includeFlowToken = true,
   }) async {
     try {
       final response = await DioFactory.animeFlowDio.put(
         path,
         data: data,
         queryParameters: queryParameters,
-        options: _resolveOptions(
+        options: await _resolveOptions(
           path: path,
           options: options,
           signRequest: signRequest,
           skipFlowTokenRefresh: skipFlowTokenRefresh,
+          includeFlowToken: includeFlowToken,
         ),
         cancelToken: cancelToken,
       );
@@ -200,16 +214,18 @@ class FlowClient {
     CancelToken? cancelToken,
     bool signRequest = true,
     bool skipFlowTokenRefresh = false,
+    bool includeFlowToken = true,
   }) async {
     try {
       final response = await DioFactory.animeFlowDio.delete(
         path,
         queryParameters: queryParameters,
-        options: _resolveOptions(
+        options: await _resolveOptions(
           path: path,
           options: options,
           signRequest: signRequest,
           skipFlowTokenRefresh: skipFlowTokenRefresh,
+          includeFlowToken: includeFlowToken,
         ),
         cancelToken: cancelToken,
       );

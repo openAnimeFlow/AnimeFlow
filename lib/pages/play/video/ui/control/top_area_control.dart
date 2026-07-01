@@ -1,3 +1,4 @@
+import 'package:anime_flow/constants/storage_key.dart';
 import 'package:anime_flow/features/network_speed/network_speed_provider.dart';
 import 'package:anime_flow/pages/play/controller/play_controller.dart';
 import 'package:anime_flow/pages/play/controller/video_source_controller.dart';
@@ -5,6 +6,7 @@ import 'package:anime_flow/pages/play/controller/video_ui_controller.dart';
 import 'package:anime_flow/pages/play/provider/episodes_provider.dart';
 import 'package:anime_flow/pages/play/provider/play_subject_provider.dart';
 import 'package:anime_flow/pages/play/video/ui/setting/video_setting.dart';
+import 'package:anime_flow/repository/storage.dart';
 import 'package:anime_flow/utils/systemUtil.dart';
 import 'package:anime_flow/utils/utils.dart';
 import 'package:anime_flow/widget/battery_icon.dart';
@@ -25,9 +27,17 @@ class TopAreaControl extends StatefulWidget {
 }
 
 class _TopAreaControlState extends State<TopAreaControl> {
+  final setting = Storage.setting;
   final videoSourceController = Get.find<VideoSourceController>();
   final playController = Get.find<PlayController>();
   final videoUiStateController = Get.find<VideoUiStateController>();
+  late int _skipDuration;
+
+  @override
+  void initState() {
+    _skipDuration = setting.get(PlaybackKey.skipDuration, defaultValue: 85);
+    super.initState();
+  }
 
   Future<T?> _showRightSlideDialog<T>({
     required BuildContext context,
@@ -182,7 +192,21 @@ class _TopAreaControlState extends State<TopAreaControl> {
                               if (playController.position.value >
                                       Duration.zero &&
                                   (playController.isWideScreen.value ||
-                                      fullscreen))
+                                      fullscreen)) ...[
+                                Tooltip(
+                                  message: '跳过 $_skipDuration 秒',
+                                  child: IconButton(
+                                    onPressed: () => playController.seekTo(
+                                      playController.position.value +
+                                          Duration(seconds: _skipDuration),
+                                    ),
+                                    icon: const Icon(
+                                      Icons.fast_forward_rounded,
+                                      color: Colors.white70,
+                                      size: 29,
+                                    ),
+                                  ),
+                                ),
                                 IconButton(
                                   onPressed: () {
                                     _showRightSlideDialog(
@@ -198,6 +222,7 @@ class _TopAreaControlState extends State<TopAreaControl> {
                                     Icons.settings_outlined,
                                   ),
                                 ),
+                              ],
                               if (fullscreen)
                                 Consumer(
                                   builder: (context, ref, child) {

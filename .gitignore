@@ -48,6 +48,5 @@ app.*.map.json
 # Eclipse/Gradle Buildship
 .settings/
 /devtools_options.yaml
-/pubspec.lock
 /.cursor/
 /.codegraph/

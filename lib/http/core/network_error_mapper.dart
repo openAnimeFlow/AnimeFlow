@@ -58,6 +58,13 @@ class NetworkErrorMapper {
           rawError: error,
           stackTrace: error.stackTrace,
         );
+      case DioExceptionType.transformTimeout:
+        return NetworkException(
+          type: NetworkExceptionType.transformTimeout,
+          message: '数据转换超时，请稍后重试！',
+          rawError: error,
+          stackTrace: error.stackTrace,
+        );
       case DioExceptionType.unknown:
         final connection = await _connectionLabel();
         return NetworkException(

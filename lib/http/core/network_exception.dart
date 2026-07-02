@@ -6,6 +6,7 @@ enum NetworkExceptionType {
   connectionTimeout,
   receiveTimeout,
   sendTimeout,
+  transformTimeout,
   parseError,
   unknown,
 }

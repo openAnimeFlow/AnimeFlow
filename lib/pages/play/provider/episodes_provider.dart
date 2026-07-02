@@ -1,13 +1,13 @@
 import 'package:anime_flow/http/requests/flow_request.dart';
 import 'package:anime_flow/models/item/bangumi/episodes_item.dart';
 import 'package:anime_flow/pages/play/service/episodes_pagination.dart';
+import 'package:anime_flow/routes/model/play_route_extra.dart';
 import 'package:anime_flow/routes/provider/routes_args.dart';
 import 'package:anime_flow/utils/logger.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 part 'episodes_provider.g.dart';
 
-/// 剧集状态数据
 class EpisodesData {
   const EpisodesData({
     this.episodes,
@@ -67,27 +67,26 @@ class EpisodesData {
   }
 }
 
+/// 当路由参数变化（切换到不同番剧）时自动重新加载剧集。
 @Riverpod(dependencies: [playExtra])
 class Episodes extends _$Episodes {
   @override
   EpisodesData build() {
-    ref.watch(playExtraProvider);
+    final extra = ref.watch(playExtraProvider);
+    // 异步加载剧集
+    Future.microtask(() => _load(extra));
     return const EpisodesData();
   }
 
-  /// 重置为初始状态（进入播放页时调用，确保获得全新状态）
-  void reset() {
-    state = const EpisodesData();
-  }
+  /// 并定位到续播集数或首个正篇。
+  Future<void> _load(PlayRouteExtra extra) async {
+    final subjectId = extra.playExtra.subjectId;
+    final continueEpisode = extra.continueEpisode ?? 0;
 
-  /// 加载首屏剧集
-  Future<void> loadInitial(int subjectId) async {
-    if (state.episodes != null || state.isLoading) {
-      return;
-    }
     state = state.copyWith(isLoading: true);
     try {
-      final episodes = await FlowRequest.getSubjectEpisodesByIdService(
+      // 加载首屏
+      var episodes = await FlowRequest.getSubjectEpisodesByIdService(
         subjectId,
         EpisodesPagination.pageSize,
         0,
@@ -95,12 +94,42 @@ class Episodes extends _$Episodes {
       state = state.copyWith(
         episodes: episodes,
         hasMore: EpisodesPagination.hasMore(episodes),
-        isLoading: false,
       );
+
+      // 如需续播，继续翻页直到 data 覆盖 continueEpisode
+      while (continueEpisode > 0 &&
+          continueEpisode > episodes.data.length &&
+          EpisodesPagination.hasMore(episodes)) {
+        final page = await FlowRequest.getSubjectEpisodesByIdService(
+          subjectId,
+          EpisodesPagination.pageSize,
+          episodes.data.length,
+        );
+        episodes = EpisodesPagination.mergePages(cached: episodes, page: page);
+        state = state.copyWith(
+          episodes: episodes,
+          hasMore: EpisodesPagination.hasMore(episodes),
+        );
+      }
+
+      if (episodes.data.isEmpty) {
+        state = state.copyWith(isLoading: false);
+        return;
+      }
+
+      //  定位到续播集数
+      if (continueEpisode > 0 && continueEpisode <= episodes.data.length) {
+        final episode = episodes.data[continueEpisode - 1];
+        _selectEpisode(episode, continueEpisode);
+      } else {
+        // 否则定位到首个非集合（正篇）
+        _selectFirstNonCollection(episodes);
+      }
+
+      state = state.copyWith(isLoading: false);
     } catch (e) {
       LiggLogger().e(e);
       state = state.copyWith(isLoading: false);
-      rethrow;
     }
   }
 
@@ -134,20 +163,6 @@ class Episodes extends _$Episodes {
     }
   }
 
-  /// 设置剧集列表数据
-  void setEpisodes(EpisodesItem episodes) {
-    state = state.copyWith(
-      episodes: episodes,
-      hasMore: EpisodesPagination.hasMore(episodes),
-    );
-  }
-
-  /// 设置加载状态
-  void setLoading(bool isLoading) {
-    if (state.isLoading == isLoading) return;
-    state = state.copyWith(isLoading: isLoading);
-  }
-
   /// 设置当前剧集标题
   void setEpisodeTitle(String title) {
     if (state.episodeTitle == title) return;
@@ -176,7 +191,6 @@ class Episodes extends _$Episodes {
     if (episodesData == null || episodesData.data.isEmpty) {
       return false;
     }
-    // episodeIndex 从 1 开始，下一集索引为 episodeIndex + 1
     final nextEpisodeIndex = state.episodeIndex + 1;
     if (nextEpisodeIndex - 1 >= episodesData.data.length) {
       return false;
@@ -202,6 +216,36 @@ class Episodes extends _$Episodes {
     );
     setEpisodeTitle(
       nextEpisode.nameCN.isEmpty ? nextEpisode.name : nextEpisode.nameCN,
+    );
+  }
+
+  void _selectEpisode(EpisodeData episode, int index) {
+    setEpisodeSort(
+      sort: episode.sort,
+      episodeIndex: index,
+      episodeId: episode.id,
+    );
+    setEpisodeTitle(
+      episode.nameCN.isEmpty ? episode.name : episode.nameCN,
+    );
+  }
+
+  void _selectFirstNonCollection(EpisodesItem episodes) {
+    var targetIndex = 0;
+    for (var i = 0; i < episodes.data.length; i++) {
+      if (episodes.data[i].collection == null) {
+        targetIndex = i;
+        break;
+      }
+    }
+    final target = episodes.data[targetIndex];
+    setEpisodeSort(
+      sort: target.sort,
+      episodeIndex: targetIndex + 1,
+      episodeId: target.id,
+    );
+    setEpisodeTitle(
+      target.nameCN.isEmpty ? target.name : target.nameCN,
     );
   }
 }

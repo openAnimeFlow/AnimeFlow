@@ -172,4 +172,4 @@ final class PlayExtraProvider
   }
 }
 
-String _$playExtraHash() => r'741487d77685d0c4cf21ac1bf751ffaa1b6b6704';
+String _$playExtraHash() => r'fdb488cc3eed729dc75faff4521ad0ce66f61c09';

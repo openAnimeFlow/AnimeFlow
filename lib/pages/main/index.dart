@@ -1,7 +1,5 @@
 import 'package:anime_flow/models/item/tab_item.dart';
 import 'package:anime_flow/pages/login/index.dart';
-import 'package:anime_flow/pages/ranking/index.dart';
-import 'package:anime_flow/pages/recommend/index.dart';
 import 'package:anime_flow/pages/user/index.dart';
 import 'package:anime_flow/providers/user/user_state_provider.dart';
 import 'package:anime_flow/routes/routes.dart';
@@ -12,25 +10,14 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
-class MainPage extends StatefulWidget {
-  final int initialTabIndex;
+/// 主页面 — 使用 [StatefulNavigationShell] 管理三个 Tab 分支页面。
+/// 桌面端使用 [NavigationRail]，移动端使用 [NavigationBar]。
+class MainPage extends StatelessWidget {
+  final StatefulNavigationShell navigationShell;
 
-  const MainPage({super.key, this.initialTabIndex = 0});
+  const MainPage({super.key, required this.navigationShell});
 
-  @override
-  State<MainPage> createState() => _MainPageState();
-}
-
-class _MainPageState extends State<MainPage> {
-  final GlobalKey _bodyKey = GlobalKey();
-
-  int _tabIndexFromRoute() {
-    final tab = GoRouterState.of(context).uri.queryParameters['tab'];
-    final parsed = int.tryParse(tab ?? '');
-    return (parsed ?? widget.initialTabIndex).clamp(0, _tabs.length - 1);
-  }
-
-  final List<TabItem> _tabs = [
+  static final List<TabItem> _tabs = [
     TabItem(
       title: "推荐",
       icon: Icons.smart_display_outlined,
@@ -48,25 +35,7 @@ class _MainPageState extends State<MainPage> {
     ),
   ];
 
-  final List<Widget?> _pageCache = List.filled(3, null);
-
-  void initializePage(int index) {
-    if (_pageCache[index] == null) {
-      switch (index) {
-        case 0:
-          _pageCache[index] = const RecommendPage();
-          break;
-        case 1:
-          _pageCache[index] = const RankingPage();
-          break;
-        case 2:
-          _pageCache[index] = const _UserTabPage();
-          break;
-      }
-    }
-  }
-
-  List<NavigationRailDestination> buildRailDestinations(
+  List<NavigationRailDestination> _buildRailDestinations(
     ColorScheme colorScheme,
     String? avatar,
   ) {
@@ -110,7 +79,7 @@ class _MainPageState extends State<MainPage> {
     }).toList();
   }
 
-  List<NavigationDestination> buildBarDestinations(
+  List<NavigationDestination> _buildBarDestinations(
     ColorScheme colorScheme,
     String? avatar,
   ) {
@@ -154,15 +123,8 @@ class _MainPageState extends State<MainPage> {
     }).toList();
   }
 
-  void onDestinationSelected(int index) {
-    MainRoute(tab: index).go(context);
-    initializePage(index);
-  }
-
   @override
   Widget build(BuildContext context) {
-    final currentIndex = _tabIndexFromRoute();
-    initializePage(currentIndex);
     final bool isDesktop = MediaQuery.of(context).size.width >= 640;
     final colorScheme = Theme.of(context).colorScheme;
     final desktop = SystemUtil.isDesktop;
@@ -180,9 +142,9 @@ class _MainPageState extends State<MainPage> {
                         : null;
                 return NavigationRail(
                   backgroundColor: colorScheme.surfaceContainerHighest,
-                  selectedIndex: currentIndex,
+                  selectedIndex: navigationShell.currentIndex,
                   groupAlignment: 1.0,
-                  onDestinationSelected: onDestinationSelected,
+                  onDestinationSelected: navigationShell.goBranch,
                   labelType: NavigationRailLabelType.all,
                   leading: Padding(
                     padding: const EdgeInsets.only(bottom: 16, top: 8),
@@ -207,18 +169,11 @@ class _MainPageState extends State<MainPage> {
                       onPressed: () => const SettingsRoute().push(context),
                     ),
                   ),
-                  destinations: buildRailDestinations(colorScheme, avatar),
+                  destinations: _buildRailDestinations(colorScheme, avatar),
                 );
               },
             ),
-          Expanded(
-            child: IndexedStack(
-              key: _bodyKey,
-              index: currentIndex,
-              children:
-                  _pageCache.map((e) => e ?? const SizedBox.shrink()).toList(),
-            ),
-          ),
+          Expanded(child: navigationShell),
         ],
       ),
       bottomNavigationBar: isDesktop
@@ -233,9 +188,9 @@ class _MainPageState extends State<MainPage> {
                         : null;
                 return NavigationBar(
                   backgroundColor: colorScheme.surfaceContainerHighest,
-                  selectedIndex: currentIndex,
-                  onDestinationSelected: onDestinationSelected,
-                  destinations: buildBarDestinations(colorScheme, avatar),
+                  selectedIndex: navigationShell.currentIndex,
+                  onDestinationSelected: navigationShell.goBranch,
+                  destinations: _buildBarDestinations(colorScheme, avatar),
                 );
               },
             ),
@@ -243,8 +198,9 @@ class _MainPageState extends State<MainPage> {
   }
 }
 
-class _UserTabPage extends ConsumerWidget {
-  const _UserTabPage();
+/// 用户 Tab 页 — 已登录显示 [UserPage]，未登录显示 [LoginPage]。
+class UserTabPage extends ConsumerWidget {
+  const UserTabPage({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {

@@ -72,7 +72,7 @@ class _OAuthCallbackPageState extends ConsumerState<OAuthCallbackPage> {
       );
     } finally {
       if (mounted) {
-        const MainRoute(tab: 2).go(context);
+        const UserRoute().go(context);
       }
     }
   }

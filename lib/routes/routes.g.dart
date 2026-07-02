@@ -7,7 +7,7 @@ part of 'routes.dart';
 // **************************************************************************
 
 List<RouteBase> get $appRoutes => [
-      $mainRoute,
+      $mainShellRoute,
       $loginRoute,
       $registerRoute,
       $forgotPasswordRoute,
@@ -36,25 +36,48 @@ List<RouteBase> get $appRoutes => [
       $settingAgreementRoute,
     ];
 
-RouteBase get $mainRoute => GoRouteData.$route(
-      path: '/',
-      factory: $MainRoute._fromState,
+RouteBase get $mainShellRoute => StatefulShellRouteData.$route(
+      factory: $MainShellRouteExtension._fromState,
+      branches: [
+        StatefulShellBranchData.$branch(
+          routes: [
+            GoRouteData.$route(
+              path: '/recommend',
+              factory: $RecommendTabRoute._fromState,
+            ),
+          ],
+        ),
+        StatefulShellBranchData.$branch(
+          routes: [
+            GoRouteData.$route(
+              path: '/ranking',
+              factory: $RankingTabRoute._fromState,
+            ),
+          ],
+        ),
+        StatefulShellBranchData.$branch(
+          routes: [
+            GoRouteData.$route(
+              path: '/user',
+              factory: $UserTabRoute._fromState,
+            ),
+          ],
+        ),
+      ],
     );
 
-mixin $MainRoute on GoRouteData {
-  static MainRoute _fromState(GoRouterState state) => MainRoute(
-        tab:
-            _$convertMapValue('tab', state.uri.queryParameters, int.parse) ?? 0,
-      );
+extension $MainShellRouteExtension on MainShellRoute {
+  static MainShellRoute _fromState(GoRouterState state) =>
+      const MainShellRoute();
+}
 
-  MainRoute get _self => this as MainRoute;
+mixin $RecommendTabRoute on GoRouteData {
+  static RecommendRoute _fromState(GoRouterState state) =>
+      const RecommendRoute();
 
   @override
   String get location => GoRouteData.$location(
-        '/',
-        queryParams: {
-          if (_self.tab != 0) 'tab': _self.tab.toString(),
-        },
+        '/recommend',
       );
 
   @override
@@ -71,13 +94,49 @@ mixin $MainRoute on GoRouteData {
   void replace(BuildContext context) => context.replace(location);
 }
 
-T? _$convertMapValue<T>(
-  String key,
-  Map<String, String> map,
-  T? Function(String) converter,
-) {
-  final value = map[key];
-  return value == null ? null : converter(value);
+mixin $RankingTabRoute on GoRouteData {
+  static RankingRoute _fromState(GoRouterState state) =>
+      const RankingRoute();
+
+  @override
+  String get location => GoRouteData.$location(
+        '/ranking',
+      );
+
+  @override
+  void go(BuildContext context) => context.go(location);
+
+  @override
+  Future<T?> push<T>(BuildContext context) => context.push<T>(location);
+
+  @override
+  void pushReplacement(BuildContext context) =>
+      context.pushReplacement(location);
+
+  @override
+  void replace(BuildContext context) => context.replace(location);
+}
+
+mixin $UserTabRoute on GoRouteData {
+  static UserRoute _fromState(GoRouterState state) => const UserRoute();
+
+  @override
+  String get location => GoRouteData.$location(
+        '/user',
+      );
+
+  @override
+  void go(BuildContext context) => context.go(location);
+
+  @override
+  Future<T?> push<T>(BuildContext context) => context.push<T>(location);
+
+  @override
+  void pushReplacement(BuildContext context) =>
+      context.pushReplacement(location);
+
+  @override
+  void replace(BuildContext context) => context.replace(location);
 }
 
 RouteBase get $loginRoute => GoRouteData.$route(
@@ -274,6 +333,15 @@ mixin $PlayRoute on GoRouteData {
   @override
   void replace(BuildContext context) =>
       context.replace(location, extra: _self.$extra);
+}
+
+T? _$convertMapValue<T>(
+  String key,
+  Map<String, String> map,
+  T? Function(String) converter,
+) {
+  final value = map[key];
+  return value == null ? null : converter(value);
 }
 
 RouteBase get $searchRoute => GoRouteData.$route(

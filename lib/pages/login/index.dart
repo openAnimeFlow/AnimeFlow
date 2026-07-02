@@ -52,7 +52,7 @@ class _LoginPageState extends ConsumerState<LoginPage> {
       ref.invalidate(isLoggedInProvider);
       ref.invalidate(currentUserInfoProvider);
       NotificationToast.show('提示', '登录成功', align: Alignment.topCenter);
-      const MainRoute(tab: 2).go(context);
+      const UserRoute().go(context);
     } on AnimeFlowApiException catch (e) {
       if (!mounted) return;
       NotificationToast.show('提示', e.message);

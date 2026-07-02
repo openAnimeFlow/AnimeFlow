@@ -8,16 +8,13 @@ part of 'episodes_provider.dart';
 
 // GENERATED CODE - DO NOT MODIFY BY HAND
 // ignore_for_file: type=lint, type=warning
-/// 播放页剧集状态，生命周期与 [playExtraProvider] 绑定。
 /// 当路由参数变化（切换到不同番剧）时自动重新加载剧集。
 
 @ProviderFor(Episodes)
 final episodesProvider = EpisodesProvider._();
 
-/// 播放页剧集状态，生命周期与 [playExtraProvider] 绑定。
 /// 当路由参数变化（切换到不同番剧）时自动重新加载剧集。
 final class EpisodesProvider extends $NotifierProvider<Episodes, EpisodesData> {
-  /// 播放页剧集状态，生命周期与 [playExtraProvider] 绑定。
   /// 当路由参数变化（切换到不同番剧）时自动重新加载剧集。
   EpisodesProvider._()
       : super(
@@ -52,7 +49,6 @@ final class EpisodesProvider extends $NotifierProvider<Episodes, EpisodesData> {
 
 String _$episodesHash() => r'092006556ecb8b3f95277b355008aba5e14158c9';
 
-/// 播放页剧集状态，生命周期与 [playExtraProvider] 绑定。
 /// 当路由参数变化（切换到不同番剧）时自动重新加载剧集。
 
 abstract class _$Episodes extends $Notifier<EpisodesData> {

@@ -8,6 +8,8 @@ import 'package:anime_flow/pages/main/index.dart';
 import 'package:anime_flow/pages/oauth/oauth_callback_page.dart';
 import 'package:anime_flow/pages/play/index.dart';
 import 'package:anime_flow/pages/play_record/index.dart';
+import 'package:anime_flow/pages/ranking/index.dart';
+import 'package:anime_flow/pages/recommend/index.dart';
 import 'package:anime_flow/pages/register/index.dart';
 import 'package:anime_flow/pages/search/image_search_page.dart';
 import 'package:anime_flow/pages/search/index.dart';
@@ -38,22 +40,68 @@ import 'model/play_route_extra.dart';
 
 part 'routes.g.dart';
 
-// =====================================================================
-// 路由定义（go_router_builder typed routes）。
-// 关键参数走 query parameters，确保 Hot Restart / Inspector / 深链接
-// 重建时能够从 URL 完全还原；复杂对象则使用 $extra。
-// =====================================================================
+@TypedStatefulShellRoute<MainShellRoute>(
+  branches: [
+    TypedStatefulShellBranch<RecommendBranch>(
+      routes: [TypedGoRoute<RecommendRoute>(path: '/recommend')],
+    ),
+    TypedStatefulShellBranch<RankingBranch>(
+      routes: [TypedGoRoute<RankingRoute>(path: '/ranking')],
+    ),
+    TypedStatefulShellBranch<UserBranch>(
+      routes: [TypedGoRoute<UserRoute>(path: '/user')],
+    ),
+  ],
+)
+class MainShellRoute extends StatefulShellRouteData {
+  const MainShellRoute();
 
-@TypedGoRoute<MainRoute>(path: '/')
-class MainRoute extends GoRouteData with $MainRoute {
-  const MainRoute({this.tab = 0});
-
-  final int tab;
+  static final GlobalKey<NavigatorState> $navigatorKey =
+      GlobalKey<NavigatorState>();
 
   @override
-  Widget build(BuildContext context, GoRouterState state) {
-    return MainPage(initialTabIndex: tab);
+  Widget builder(
+    BuildContext context,
+    GoRouterState state,
+    StatefulNavigationShell navigationShell,
+  ) {
+    return MainPage(navigationShell: navigationShell);
   }
+}
+
+/// 推荐分支
+class RecommendBranch extends StatefulShellBranchData {}
+
+/// 排行分支
+class RankingBranch extends StatefulShellBranchData {}
+
+/// 我的分支
+class UserBranch extends StatefulShellBranchData {}
+
+// ---- 分支路由 ----
+
+class RecommendRoute extends GoRouteData with $RecommendTabRoute {
+  const RecommendRoute();
+
+  @override
+  Widget build(BuildContext context, GoRouterState state) =>
+      const RecommendPage();
+}
+
+class RankingRoute extends GoRouteData with $RankingTabRoute {
+  const RankingRoute();
+
+  @override
+  Widget build(BuildContext context, GoRouterState state) =>
+      const RankingPage();
+}
+
+class UserRoute extends GoRouteData with $UserTabRoute {
+  const UserRoute();
+
+  @override
+  Widget build(BuildContext context, GoRouterState state) =>
+      const UserTabPage();
 }
 
 @TypedGoRoute<LoginRoute>(path: '/login')
@@ -392,8 +440,9 @@ class SettingAgreementRoute extends GoRouteData with $SettingAgreementRoute {
 // GoRouter 实例
 // =====================================================================
 final GoRouter appRouter = GoRouter(
+  navigatorKey: MainShellRoute.$navigatorKey,
   observers: [BotToastNavigatorObserver()],
-  initialLocation: const MainRoute().location,
+  initialLocation: const RecommendRoute().location,
   redirect: (context, state) {
     final uri = state.uri;
     if (isOAuthAppCallbackUri(uri)) {

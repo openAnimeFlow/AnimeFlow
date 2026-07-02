@@ -58,7 +58,7 @@ class _CollectionButtonState extends State<CollectionButton> {
         final isLoggedIn = ref.watch(isLoggedInProvider).value ?? false;
         return !isLoggedIn
             ? OutlinedButton(
-                onPressed: () => const MainRoute(tab: 2).go(context),
+                onPressed: () => const UserRoute().go(context),
                 style: OutlinedButton.styleFrom(
                   side:
                       BorderSide(color: Theme.of(context).colorScheme.primary),

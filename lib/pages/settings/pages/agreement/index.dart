@@ -1,4 +1,3 @@
-import 'package:anime_flow/http/api_path.dart';
 import 'package:anime_flow/http/requests/request.dart';
 import 'package:anime_flow/utils/utils.dart';
 import 'package:flutter/material.dart';

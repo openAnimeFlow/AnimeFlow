@@ -1,6 +1,5 @@
 import 'dart:io';
 
-import 'package:anime_flow/utils/systemUtil.dart';
 import 'package:flutter/material.dart';
 import 'package:window_manager/window_manager.dart';
 

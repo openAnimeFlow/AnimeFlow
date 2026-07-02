@@ -4,7 +4,7 @@ import 'package:anime_flow/pages/play/controller/play_controller.dart';
 import 'package:anime_flow/pages/play/controller/video_source_controller.dart';
 import 'package:anime_flow/pages/play/controller/video_ui_controller.dart';
 import 'package:anime_flow/pages/play/provider/episodes_provider.dart';
-import 'package:anime_flow/pages/play/provider/play_subject_provider.dart';
+import 'package:anime_flow/routes/provider/routes_args.dart';
 import 'package:anime_flow/pages/play/video/ui/setting/video_setting.dart';
 import 'package:anime_flow/repository/storage.dart';
 import 'package:anime_flow/utils/systemUtil.dart';
@@ -136,8 +136,8 @@ class _TopAreaControlState extends State<TopAreaControl> {
                                     children: [
                                       Consumer(builder: (context, ref, child) {
                                         final subjectName = ref.watch(
-                                            playSubjectProvider.select(
-                                                (state) => state.subjectName));
+                                            playExtraProvider.select((e) =>
+                                                e.playExtra.subjectName));
                                         return Text(
                                           subjectName,
                                           style: const TextStyle(
@@ -227,8 +227,8 @@ class _TopAreaControlState extends State<TopAreaControl> {
                                 Consumer(
                                   builder: (context, ref, child) {
                                     final subjectName = ref.watch(
-                                        playSubjectProvider.select(
-                                            (state) => state.subjectName));
+                                        playExtraProvider.select(
+                                            (e) => e.playExtra.subjectName));
                                     return IconButton(
                                       padding: const EdgeInsets.all(0),
                                       onPressed: () {

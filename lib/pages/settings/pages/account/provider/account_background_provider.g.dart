@@ -52,16 +52,16 @@ final class BackgroundImageListProvider extends $FunctionalProvider<
 String _$backgroundImageListHash() =>
     r'74d3047e6108ebf98ba908e0411583c1801eac65';
 
-/// 当前用户已选背景图 ID（从 background URL 匹配），null 表示未选择。
+/// 当前用户已选背景图 ID
 
 @ProviderFor(currentUserBackgroundId)
 final currentUserBackgroundIdProvider = CurrentUserBackgroundIdProvider._();
 
-/// 当前用户已选背景图 ID（从 background URL 匹配），null 表示未选择。
+/// 当前用户已选背景图 ID
 
 final class CurrentUserBackgroundIdProvider
     extends $FunctionalProvider<int?, int?, int?> with $Provider<int?> {
-  /// 当前用户已选背景图 ID（从 background URL 匹配），null 表示未选择。
+  /// 当前用户已选背景图 ID
   CurrentUserBackgroundIdProvider._()
       : super(
           from: null,
@@ -96,4 +96,4 @@ final class CurrentUserBackgroundIdProvider
 }
 
 String _$currentUserBackgroundIdHash() =>
-    r'8a66d65233c81884164d60769f298f10d08b7ac4';
+    r'f5974b5b8c1922dc7dacfeaca25f0418a5c3c345';

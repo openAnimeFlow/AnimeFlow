@@ -8,14 +8,11 @@ part of 'episodes_provider.dart';
 
 // GENERATED CODE - DO NOT MODIFY BY HAND
 // ignore_for_file: type=lint, type=warning
-/// 播放页剧集状态，生命周期与 [playRouteExtraProvider] 绑定。
 
 @ProviderFor(Episodes)
 final episodesProvider = EpisodesProvider._();
 
-/// 播放页剧集状态，生命周期与 [playRouteExtraProvider] 绑定。
 final class EpisodesProvider extends $NotifierProvider<Episodes, EpisodesData> {
-  /// 播放页剧集状态，生命周期与 [playRouteExtraProvider] 绑定。
   EpisodesProvider._()
       : super(
           from: null,
@@ -23,13 +20,13 @@ final class EpisodesProvider extends $NotifierProvider<Episodes, EpisodesData> {
           retry: null,
           name: r'episodesProvider',
           isAutoDispose: true,
-          dependencies: <ProviderOrFamily>[playRouteExtraProvider],
+          dependencies: <ProviderOrFamily>[playExtraProvider],
           $allTransitiveDependencies: <ProviderOrFamily>[
             EpisodesProvider.$allTransitiveDependencies0,
           ],
         );
 
-  static final $allTransitiveDependencies0 = playRouteExtraProvider;
+  static final $allTransitiveDependencies0 = playExtraProvider;
 
   @override
   String debugGetCreateSourceHash() => _$episodesHash();
@@ -47,9 +44,7 @@ final class EpisodesProvider extends $NotifierProvider<Episodes, EpisodesData> {
   }
 }
 
-String _$episodesHash() => r'bf6b054cffb023532a75018108423c01c57764ad';
-
-/// 播放页剧集状态，生命周期与 [playRouteExtraProvider] 绑定。
+String _$episodesHash() => r'0e33435f92a70978f38af40308f535688641bcba';
 
 abstract class _$Episodes extends $Notifier<EpisodesData> {
   EpisodesData build();

@@ -14,7 +14,7 @@ import 'package:anime_flow/providers/video/video_source_provider.dart';
 import 'package:anime_flow/providers/video/webview_video_source_provider.dart';
 import 'package:anime_flow/repository/play_repository.dart';
 import 'package:anime_flow/pages/play/provider/episodes_provider.dart';
-import 'package:anime_flow/pages/play/provider/play_subject_provider.dart';
+import 'package:anime_flow/routes/provider/routes_args.dart';
 import 'package:anime_flow/utils/crawl_config.dart';
 import 'package:anime_flow/utils/logger.dart';
 import 'package:flutter/cupertino.dart';
@@ -188,7 +188,8 @@ class VideoSourceController extends GetxController {
       _updateResourceStatus(config.name, isLoading: true, errorMessage: null);
 
       // 在主线程读取 aliases，随后交给 Isolate 做排序
-      final aliases = _container.read(playSubjectProvider).subjectAliases;
+      final aliases =
+          _container.read(playExtraProvider).playExtra.subjectAliases;
       final rawSearchList =
           await WebRequest.getSearchSubjectListService(keyword, config);
 
@@ -415,7 +416,7 @@ class VideoSourceController extends GetxController {
     _videoSourceProvider ??= WebViewVideoSourceProvider();
 
     var offset = 0;
-    final subject = _container.read(playSubjectProvider);
+    final subject = _container.read(playExtraProvider).playExtra;
     final episodesState = _container.read(episodesProvider);
     final subjectId = subject.subjectId;
     final episodeIndex = episodesState.episodeIndex;

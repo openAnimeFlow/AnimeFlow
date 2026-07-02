@@ -2,7 +2,7 @@ import 'package:anime_flow/constants/assets_path_constants.dart';
 import 'package:anime_flow/models/item/bangumi/episodes_item.dart';
 import 'package:anime_flow/pages/play/controller/play_controller.dart';
 import 'package:anime_flow/pages/play/provider/episodes_provider.dart';
-import 'package:anime_flow/pages/play/provider/play_subject_provider.dart';
+import 'package:anime_flow/routes/provider/routes_args.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:get/get.dart';
@@ -57,7 +57,8 @@ class _EpisodesComponentsState extends ConsumerState<EpisodesComponents> {
   void _onScroll() {
     if (!controller.hasClients) return;
     final position = controller.position;
-    if (position.pixels >= position.maxScrollExtent - _loadMoreTriggerDistance) {
+    if (position.pixels >=
+        position.maxScrollExtent - _loadMoreTriggerDistance) {
       _tryLoadMore();
     }
   }
@@ -69,7 +70,7 @@ class _EpisodesComponentsState extends ConsumerState<EpisodesComponents> {
         episodesState.isLoading) {
       return;
     }
-    final subjectId = ref.read(playSubjectProvider).subjectId;
+    final subjectId = ref.read(playExtraProvider).playExtra.subjectId;
     ref.read(episodesProvider.notifier).loadMore(subjectId);
   }
 
@@ -245,7 +246,9 @@ class _EpisodesComponentsState extends ConsumerState<EpisodesComponents> {
                               children: [
                                 Row(
                                   children: [
-                                    Text(episode.sort.toString().padLeft(2, '0')),
+                                    Text(episode.sort
+                                        .toString()
+                                        .padLeft(2, '0')),
                                     if (episode.type != 0) ...[
                                       const SizedBox(width: 6),
                                       Text(

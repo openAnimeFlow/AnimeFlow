@@ -1,6 +1,6 @@
 import 'package:anime_flow/pages/play/controller/play_controller.dart';
 import 'package:anime_flow/pages/play/controller/video_source_controller.dart';
-import 'package:anime_flow/pages/play/provider/play_subject_provider.dart';
+import 'package:anime_flow/routes/provider/routes_args.dart';
 import 'package:anime_flow/widget/animation_network_image.dart';
 import 'package:anime_flow/widget/play_content/source_drawers/video_source_drawers.dart';
 import 'package:flutter/material.dart';
@@ -24,7 +24,7 @@ class _VideoResourcesViewState extends ConsumerState<VideoResourcesView> {
       videoSourceController.loadVideoPage(url);
     }
 
-    final subjectName = ref.read(playSubjectProvider).subjectName;
+    final subjectName = ref.read(playExtraProvider).playExtra.subjectName;
 
     if (playController.isWideScreen.value) {
       showGeneralDialog(
@@ -94,7 +94,8 @@ class _VideoResourcesViewState extends ConsumerState<VideoResourcesView> {
                       ),
                       const SizedBox(height: 5),
                       Obx(() => videoSourceController.isLoading.value ||
-                              videoSourceController.webSiteTitle.value.isNotEmpty
+                              videoSourceController
+                                  .webSiteTitle.value.isNotEmpty
                           ? Row(
                               children: [
                                 ClipRRect(
@@ -102,7 +103,8 @@ class _VideoResourcesViewState extends ConsumerState<VideoResourcesView> {
                                   child: AnimationNetworkImage(
                                     height: 25,
                                     width: 25,
-                                    url: videoSourceController.webSiteIcon.value,
+                                    url:
+                                        videoSourceController.webSiteIcon.value,
                                   ),
                                 ),
                                 const SizedBox(width: 5),

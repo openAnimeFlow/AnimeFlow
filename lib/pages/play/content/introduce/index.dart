@@ -1,7 +1,7 @@
 import 'package:anime_flow/pages/play/content/introduce/danmaku_card.dart';
 import 'package:anime_flow/pages/play/content/introduce/episodes.dart';
 import 'package:anime_flow/pages/play/content/introduce/resources.dart';
-import 'package:anime_flow/pages/play/provider/play_subject_provider.dart';
+import 'package:anime_flow/routes/provider/routes_args.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -28,8 +28,8 @@ class _IntroduceViewState extends State<IntroduceView>
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Consumer(builder: (context, ref, child) {
-              final subjectName = ref.watch(playSubjectProvider
-                  .select((selector) => selector.subjectName));
+              final subjectName = ref.watch(playExtraProvider
+                  .select((e) => e.playExtra.subjectName));
               return Text(
                 subjectName,
                 style:

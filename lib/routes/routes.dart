@@ -149,18 +149,24 @@ class PlayRoute extends GoRouteData with $PlayRoute {
   final PlayRouteExtra? $extra;
 
   @override
-  Widget build(BuildContext context, GoRouterState state) => PlayPage(
-        extra: $extra ??
-            PlayRouteExtra(
-              playExtra: PlayExtra(
-                subjectId: id,
-                subjectName: name,
-                subjectCover: image,
-                subjectAliases: const [],
-              ),
-              continueEpisode: continueEpisode,
-            ),
-      );
+  Widget build(BuildContext context, GoRouterState state) {
+    final extra = $extra ??
+        PlayRouteExtra(
+          playExtra: PlayExtra(
+            subjectId: id,
+            subjectName: name,
+            subjectCover: image,
+            subjectAliases: const [],
+          ),
+          continueEpisode: continueEpisode,
+        );
+    return ProviderScope(
+      overrides: [
+        playExtraProvider.overrideWithValue(extra),
+      ],
+      child: const PlayPage(),
+    );
+  }
 }
 
 @TypedGoRoute<SearchRoute>(path: '/search')

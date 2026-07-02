@@ -8,7 +8,7 @@ import 'package:anime_flow/pages/play/controller/video_source_controller.dart';
 import 'package:anime_flow/pages/play/controller/video_ui_controller.dart';
 import 'package:anime_flow/repository/play_repository.dart';
 import 'package:anime_flow/pages/play/provider/episodes_provider.dart';
-import 'package:anime_flow/pages/play/provider/play_subject_provider.dart';
+import 'package:anime_flow/routes/provider/routes_args.dart';
 import 'package:anime_flow/utils/logger.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -40,7 +40,7 @@ class _VideoViewState extends ConsumerState<VideoView> with WindowListener {
   @override
   void initState() {
     super.initState();
-    subject = ref.read(playSubjectProvider);
+    subject = ref.read(playExtraProvider).playExtra;
     episodesSnapshot = ref.read(episodesProvider);
 
     // 监听视频播放完成

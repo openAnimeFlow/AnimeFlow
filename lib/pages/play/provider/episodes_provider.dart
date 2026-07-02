@@ -1,13 +1,13 @@
 import 'package:anime_flow/http/requests/flow_request.dart';
 import 'package:anime_flow/models/item/bangumi/episodes_item.dart';
-import 'package:anime_flow/pages/play/provider/play_subject_provider.dart';
 import 'package:anime_flow/pages/play/service/episodes_pagination.dart';
+import 'package:anime_flow/routes/provider/routes_args.dart';
 import 'package:anime_flow/utils/logger.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 part 'episodes_provider.g.dart';
 
-/// 剧集状态数据（不可变）
+/// 剧集状态数据
 class EpisodesData {
   const EpisodesData({
     this.episodes,
@@ -67,12 +67,11 @@ class EpisodesData {
   }
 }
 
-/// 播放页剧集状态，生命周期与 [playRouteExtraProvider] 绑定。
-@Riverpod(dependencies: [playRouteExtra])
+@Riverpod(dependencies: [playExtra])
 class Episodes extends _$Episodes {
   @override
   EpisodesData build() {
-    ref.watch(playRouteExtraProvider);
+    ref.watch(playExtraProvider);
     return const EpisodesData();
   }
 
@@ -122,7 +121,8 @@ class Episodes extends _$Episodes {
         EpisodesPagination.pageSize,
         episodes.data.length,
       );
-      final merged = EpisodesPagination.mergePages(cached: episodes, page: page);
+      final merged =
+          EpisodesPagination.mergePages(cached: episodes, page: page);
       state = state.copyWith(
         episodes: merged,
         hasMore: EpisodesPagination.hasMore(merged),

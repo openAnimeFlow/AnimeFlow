@@ -4,9 +4,8 @@ import 'package:anime_flow/pages/play/controller/play_controller.dart';
 import 'package:anime_flow/pages/play/controller/video_source_controller.dart';
 import 'package:anime_flow/pages/play/controller/video_ui_controller.dart';
 import 'package:anime_flow/pages/play/video/video.dart';
-import 'package:anime_flow/routes/model/play_route_extra.dart';
 import 'package:anime_flow/pages/play/provider/episodes_provider.dart';
-import 'package:anime_flow/pages/play/provider/play_subject_provider.dart';
+import 'package:anime_flow/routes/provider/routes_args.dart';
 import 'package:anime_flow/utils/logger.dart';
 import 'package:anime_flow/utils/systemUtil.dart';
 import 'package:flutter/material.dart';
@@ -16,32 +15,14 @@ import 'package:get/get.dart';
 
 import 'content/index.dart';
 
-class PlayPage extends StatelessWidget {
-  const PlayPage({super.key, required this.extra});
-
-  final PlayRouteExtra extra;
+class PlayPage extends ConsumerStatefulWidget {
+  const PlayPage({super.key});
 
   @override
-  Widget build(BuildContext context) {
-    return ProviderScope(
-      overrides: [
-        playRouteExtraProvider.overrideWithValue(extra),
-      ],
-      child: _PlayPageView(extra: extra),
-    );
-  }
+  ConsumerState<PlayPage> createState() => _PlayPageViewState();
 }
 
-class _PlayPageView extends ConsumerStatefulWidget {
-  const _PlayPageView({required this.extra});
-
-  final PlayRouteExtra extra;
-
-  @override
-  ConsumerState<_PlayPageView> createState() => _PlayPageViewState();
-}
-
-class _PlayPageViewState extends ConsumerState<_PlayPageView> {
+class _PlayPageViewState extends ConsumerState<PlayPage> {
   late final VideoSourceController videoSourceController;
   late final PlayController playController;
 
@@ -93,7 +74,7 @@ class _PlayPageViewState extends ConsumerState<_PlayPageView> {
       return;
     }
 
-    final subjectName = ref.read(playSubjectProvider).subjectName;
+    final subjectName = ref.read(playExtraProvider).playExtra.subjectName;
     if (subjectName.isNotEmpty) {
       _hasInitResources = true;
       videoSourceController.initResources(subjectName);
@@ -105,11 +86,12 @@ class _PlayPageViewState extends ConsumerState<_PlayPageView> {
     final episodesNotifier = ref.read(episodesProvider.notifier);
     if (ref.read(episodesProvider).episodes != null) return;
 
-    final subjectId = ref.read(playSubjectProvider).subjectId;
+    final subjectId = ref.read(playExtraProvider).playExtra.subjectId;
     try {
       await episodesNotifier.loadInitial(subjectId);
 
-      final continueEpisode = ref.read(playContinueEpisodeProvider);
+      final continueEpisode =
+          ref.read(playExtraProvider).continueEpisode ?? 0;
       while (continueEpisode > 0 &&
           continueEpisode >
               (ref.read(episodesProvider).episodes?.data.length ?? 0) &&

@@ -3,7 +3,7 @@ import 'package:anime_flow/models/item/danmaku/danmaku_episode_response.dart';
 import 'package:anime_flow/models/item/danmaku/danmaku_module.dart';
 import 'package:anime_flow/models/item/danmaku/danmaku_search_response.dart';
 import 'package:anime_flow/pages/play/controller/play_controller.dart';
-import 'package:anime_flow/pages/play/provider/play_subject_provider.dart';
+import 'package:anime_flow/routes/provider/routes_args.dart';
 import 'package:anime_flow/utils/format_time_util.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
@@ -135,8 +135,8 @@ class _DanmakuCardState extends State<DanmakuCard>
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Consumer(builder: (context, ref, child) {
-                      final subjectName = ref.watch(playSubjectProvider
-                          .select((state) => state.subjectName));
+                      final subjectName = ref.watch(playExtraProvider
+                          .select((e) => e.playExtra.subjectName));
                       return Row(
                         children: [
                           Expanded(

@@ -132,3 +132,44 @@ final class CharacterInfoArgsProvider extends $FunctionalProvider<
 }
 
 String _$characterInfoArgsHash() => r'a8fabaf7e796f8ae188a45fc0d193ce0726ee709';
+
+@ProviderFor(playExtra)
+final playExtraProvider = PlayExtraProvider._();
+
+final class PlayExtraProvider
+    extends $FunctionalProvider<PlayRouteExtra, PlayRouteExtra, PlayRouteExtra>
+    with $Provider<PlayRouteExtra> {
+  PlayExtraProvider._()
+      : super(
+          from: null,
+          argument: null,
+          retry: null,
+          name: r'playExtraProvider',
+          isAutoDispose: true,
+          dependencies: <ProviderOrFamily>[],
+          $allTransitiveDependencies: <ProviderOrFamily>[],
+        );
+
+  @override
+  String debugGetCreateSourceHash() => _$playExtraHash();
+
+  @$internal
+  @override
+  $ProviderElement<PlayRouteExtra> $createElement($ProviderPointer pointer) =>
+      $ProviderElement(pointer);
+
+  @override
+  PlayRouteExtra create(Ref ref) {
+    return playExtra(ref);
+  }
+
+  /// {@macro riverpod.override_with_value}
+  Override overrideWithValue(PlayRouteExtra value) {
+    return $ProviderOverride(
+      origin: this,
+      providerOverride: $SyncValueProvider<PlayRouteExtra>(value),
+    );
+  }
+}
+
+String _$playExtraHash() => r'741487d77685d0c4cf21ac1bf751ffaa1b6b6704';

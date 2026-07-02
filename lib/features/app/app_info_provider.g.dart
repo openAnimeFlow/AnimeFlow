@@ -80,7 +80,7 @@ final class AppInfoProvider extends $NotifierProvider<AppInfo, AppInfoState> {
   }
 }
 
-String _$appInfoHash() => r'abd106fa99741089d91966dbbaaa0e91df25c6b6';
+String _$appInfoHash() => r'c807cbb90e7ac4011ab8d266213273648a976e81';
 
 abstract class _$AppInfo extends $Notifier<AppInfoState> {
   AppInfoState build();

@@ -228,8 +228,8 @@ class AnimeFlowApi {
       /// 背景图列表
       backgroundList = '/api/v1/common/background',
 
-      /// 提交 Bangumi 收藏同步
-      bangumiCollectionSync = '/api/v1/account/oauth/bangumi/collections/sync',
+      /// Bangumi 收藏同步
+      bangumiCollectionSync = '/api/v1/users/collections/sync',
 
       /// Bangumi 第三方授权登录
       bangumiLogin = '/api/v1/account/oauth/bangumi/login',

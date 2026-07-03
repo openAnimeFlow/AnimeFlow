@@ -81,7 +81,7 @@ class UserBranch extends StatefulShellBranchData {}
 
 // ---- 分支路由 ----
 
-class RecommendRoute extends GoRouteData with $RecommendTabRoute {
+class RecommendRoute extends GoRouteData with $RecommendRoute {
   const RecommendRoute();
 
   @override
@@ -89,7 +89,7 @@ class RecommendRoute extends GoRouteData with $RecommendTabRoute {
       const RecommendPage();
 }
 
-class RankingRoute extends GoRouteData with $RankingTabRoute {
+class RankingRoute extends GoRouteData with $RankingRoute {
   const RankingRoute();
 
   @override
@@ -97,7 +97,7 @@ class RankingRoute extends GoRouteData with $RankingTabRoute {
       const RankingPage();
 }
 
-class UserRoute extends GoRouteData with $UserTabRoute {
+class UserRoute extends GoRouteData with $UserRoute {
   const UserRoute();
 
   @override

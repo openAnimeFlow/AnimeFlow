@@ -43,7 +43,7 @@ RouteBase get $mainShellRoute => StatefulShellRouteData.$route(
           routes: [
             GoRouteData.$route(
               path: '/recommend',
-              factory: $RecommendTabRoute._fromState,
+              factory: $RecommendRoute._fromState,
             ),
           ],
         ),
@@ -51,7 +51,7 @@ RouteBase get $mainShellRoute => StatefulShellRouteData.$route(
           routes: [
             GoRouteData.$route(
               path: '/ranking',
-              factory: $RankingTabRoute._fromState,
+              factory: $RankingRoute._fromState,
             ),
           ],
         ),
@@ -59,7 +59,7 @@ RouteBase get $mainShellRoute => StatefulShellRouteData.$route(
           routes: [
             GoRouteData.$route(
               path: '/user',
-              factory: $UserTabRoute._fromState,
+              factory: $UserRoute._fromState,
             ),
           ],
         ),
@@ -71,7 +71,7 @@ extension $MainShellRouteExtension on MainShellRoute {
       const MainShellRoute();
 }
 
-mixin $RecommendTabRoute on GoRouteData {
+mixin $RecommendRoute on GoRouteData {
   static RecommendRoute _fromState(GoRouterState state) =>
       const RecommendRoute();
 
@@ -94,9 +94,8 @@ mixin $RecommendTabRoute on GoRouteData {
   void replace(BuildContext context) => context.replace(location);
 }
 
-mixin $RankingTabRoute on GoRouteData {
-  static RankingRoute _fromState(GoRouterState state) =>
-      const RankingRoute();
+mixin $RankingRoute on GoRouteData {
+  static RankingRoute _fromState(GoRouterState state) => const RankingRoute();
 
   @override
   String get location => GoRouteData.$location(
@@ -117,7 +116,7 @@ mixin $RankingTabRoute on GoRouteData {
   void replace(BuildContext context) => context.replace(location);
 }
 
-mixin $UserTabRoute on GoRouteData {
+mixin $UserRoute on GoRouteData {
   static UserRoute _fromState(GoRouterState state) => const UserRoute();
 
   @override

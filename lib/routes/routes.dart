@@ -5,6 +5,7 @@ import 'package:anime_flow/pages/characters/index.dart';
 import 'package:anime_flow/pages/forgot_password/index.dart';
 import 'package:anime_flow/pages/login/index.dart';
 import 'package:anime_flow/pages/main/index.dart';
+import 'package:anime_flow/pages/user/index.dart';
 import 'package:anime_flow/pages/oauth/oauth_callback_page.dart';
 import 'package:anime_flow/pages/play/index.dart';
 import 'package:anime_flow/pages/play_record/index.dart';
@@ -101,7 +102,7 @@ class UserRoute extends GoRouteData with $UserTabRoute {
 
   @override
   Widget build(BuildContext context, GoRouterState state) =>
-      const UserTabPage();
+      const UserPage();
 }
 
 @TypedGoRoute<LoginRoute>(path: '/login')

@@ -10,7 +10,19 @@ import 'package:flutter/widgets.dart';
 import 'package:get/get.dart';
 import 'package:screen_brightness_platform_interface/screen_brightness_platform_interface.dart';
 
-class VideoUiStateController extends GetxController {
+abstract class VideoUiStateActions {
+  void updateMainAxisAlignmentType(MainAxisAlignment type);
+
+  void updateIndicatorType(VideoControlsIndicatorType type);
+
+  void showIndicator();
+
+  void hideIndicator();
+
+  VideoControlsIndicatorType get currentIndicatorType;
+}
+
+class VideoUiStateController extends GetxController implements VideoUiStateActions {
 
   ///是否显示控件ui
   final isShowControlsUi = true.obs;
@@ -26,6 +38,9 @@ class VideoUiStateController extends GetxController {
 
   /// 指示器类型
   final indicatorType = VideoControlsIndicatorType.noIndicator.obs;
+
+  @override
+  VideoControlsIndicatorType get currentIndicatorType => indicatorType.value;
 
   /// 主轴对齐类型
   final mainAxisAlignmentType = MainAxisAlignment.start.obs;
@@ -127,6 +142,7 @@ class VideoUiStateController extends GetxController {
   }
 
   /// 修改主轴类型
+  @override
   void updateMainAxisAlignmentType(MainAxisAlignment type) {
     if (mainAxisAlignmentType.value != type) {
       mainAxisAlignmentType.value = type;
@@ -140,17 +156,20 @@ class VideoUiStateController extends GetxController {
   }
 
   ///  更新指示器类型
+  @override
   void updateIndicatorType(VideoControlsIndicatorType type) {
     indicatorType.value = type;
   }
 
   ///  显示指示器
+  @override
   void showIndicator() {
     _indicatorTimer?.cancel();
     isShowIndicatorUi.value = true;
   }
 
   /// 隐藏指示器
+  @override
   void hideIndicator() {
     _indicatorTimer?.cancel();
     isShowIndicatorUi.value = false;

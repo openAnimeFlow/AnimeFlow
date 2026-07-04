@@ -61,10 +61,14 @@ class PlayState {
 }
 
 class PlayController extends GetxController {
-  PlayController({required this.shadersDirectory});
+  PlayController({
+    required this.shadersDirectory,
+    required VideoUiStateActions videoUiStateActions,
+  }) : _videoUiStateActions = videoUiStateActions;
 
   late Player player;
   late VideoController videoController;
+  final VideoUiStateActions _videoUiStateActions;
   final setting = Storage.setting;
 
   /// 着色器所在目录（由 [shadersDirectoryProvider] 在启动时准备）
@@ -305,7 +309,7 @@ class PlayController extends GetxController {
 
   ///更新缓冲状态
   void _updateBufferingState(bool buffering) {
-    final videoUiStateController = Get.find<VideoUiStateController>();
+    final videoUiStateController = _videoUiStateActions;
     if (buffering) {
       videoUiStateController
           .updateIndicatorType(VideoControlsIndicatorType.bufferingIndicator);
@@ -313,7 +317,7 @@ class PlayController extends GetxController {
           .updateMainAxisAlignmentType(MainAxisAlignment.center);
       videoUiStateController.showIndicator();
     } else {
-      if (videoUiStateController.indicatorType.value ==
+      if (videoUiStateController.currentIndicatorType ==
           VideoControlsIndicatorType.bufferingIndicator) {
         videoUiStateController.hideIndicator();
         videoUiStateController
@@ -552,8 +556,7 @@ class PlayController extends GetxController {
 
   ///暂停/播放
   void playOrPauseVideo() {
-    Get.find<VideoUiStateController>()
-        .updateMainAxisAlignmentType(MainAxisAlignment.start);
+    _videoUiStateActions.updateMainAxisAlignmentType(MainAxisAlignment.start);
     player.playOrPause();
   }
 

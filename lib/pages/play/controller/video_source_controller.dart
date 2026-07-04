@@ -15,13 +15,9 @@ import 'package:anime_flow/providers/video/providers.dart';
 import 'package:anime_flow/utils/crawl_config.dart';
 import 'package:anime_flow/utils/logger.dart';
 import 'package:get/get.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:riverpod_annotation/riverpod_annotation.dart';
 
-final videoSourceControllerProvider =
-    NotifierProvider<VideoSourceController, VideoSourceState>(
-  VideoSourceController.new,
-  dependencies: [episodesProvider, playExtraProvider],
-);
+part 'video_source_controller.g.dart';
 
 class VideoSourceState {
   const VideoSourceState({
@@ -75,7 +71,8 @@ class VideoSourceState {
   }
 }
 
-class VideoSourceController extends Notifier<VideoSourceState> {
+@Riverpod(keepAlive: true, dependencies: [Episodes, playExtra])
+class VideoSourceController extends _$VideoSourceController {
   WebViewVideoSourceProvider? _videoSourceProvider;
   final LiggLogger _logger = LiggLogger();
 

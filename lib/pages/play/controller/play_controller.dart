@@ -48,10 +48,11 @@ PlayController playController(Ref ref) {
   return controller;
 }
 
-@Riverpod(keepAlive: true)
+@Riverpod(keepAlive: true, dependencies: [playExtra])
 class PlayStateController extends _$PlayStateController {
   @override
   PlayControllerState build() {
+    ref.watch(playExtraProvider);
     return PlayControllerState(
       danmakuOn: Storage.setting.get(DanmakuKey.danmakuOn, defaultValue: true),
       hiddenPlatforms: _loadHiddenPlatformsFromStorage(),
@@ -360,7 +361,6 @@ class PlayController {
   Timer? _saveProgressTimer;
 
   final List<StreamSubscription<Object?>> _playerSubscriptions = [];
-  bool _disposed = false;
 
   void init() {
     final adBlocker = setting.get(PlaybackKey.adBlocker, defaultValue: false);
@@ -414,8 +414,6 @@ class PlayController {
   }
 
   void dispose() {
-    if (_disposed) return;
-    _disposed = true;
     if (Platform.isWindows) {
       WindowsTitleBarVisibility.reset();
     }
@@ -426,11 +424,13 @@ class PlayController {
       subscription.cancel();
     }
     _playerSubscriptions.clear();
+    _clearDanmakuCanvas();
     player.dispose();
   }
 
   /// 初始化播放状态
   Future<void> initPlayState(PlayState state) async {
+    removeDanmaku();
     videoUrl = state.videoUrl;
     offset = state.offset;
     subjectId = state.subjectId;
@@ -664,8 +664,14 @@ class PlayController {
   }
 
   void removeDanmaku() {
-    danmakuController.clear();
+    _clearDanmakuCanvas();
     _playStateActions.clearDanDanmakus();
+  }
+
+  void _clearDanmakuCanvas() {
+    try {
+      danmakuController.clear();
+    } catch (_) {}
   }
 
   /// 切换弹幕开关

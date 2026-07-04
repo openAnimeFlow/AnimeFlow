@@ -38,8 +38,9 @@ final class PlayControllerProvider
 
   static final $allTransitiveDependencies0 = shadersDirectoryProvider;
   static final $allTransitiveDependencies1 = playStateControllerProvider;
-  static final $allTransitiveDependencies2 = videoUiStateControllerProvider;
-  static final $allTransitiveDependencies3 = playExtraProvider;
+  static final $allTransitiveDependencies2 =
+      PlayStateControllerProvider.$allTransitiveDependencies0;
+  static final $allTransitiveDependencies3 = videoUiStateControllerProvider;
 
   @override
   String debugGetCreateSourceHash() => _$playControllerHash();
@@ -77,9 +78,13 @@ final class PlayStateControllerProvider
           retry: null,
           name: r'playStateControllerProvider',
           isAutoDispose: false,
-          dependencies: null,
-          $allTransitiveDependencies: null,
+          dependencies: <ProviderOrFamily>[playExtraProvider],
+          $allTransitiveDependencies: <ProviderOrFamily>[
+            PlayStateControllerProvider.$allTransitiveDependencies0,
+          ],
         );
+
+  static final $allTransitiveDependencies0 = playExtraProvider;
 
   @override
   String debugGetCreateSourceHash() => _$playStateControllerHash();
@@ -98,7 +103,7 @@ final class PlayStateControllerProvider
 }
 
 String _$playStateControllerHash() =>
-    r'1fff7c88fd10c5615128eac17c9935cfe7433d60';
+    r'93bba1a1b74d01d32637d2f6361a12c8caece34f';
 
 abstract class _$PlayStateController extends $Notifier<PlayControllerState> {
   PlayControllerState build();

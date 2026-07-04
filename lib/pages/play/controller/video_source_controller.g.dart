@@ -45,7 +45,7 @@ final class VideoSourceControllerProvider
   static final $allTransitiveDependencies4 =
       PlayControllerProvider.$allTransitiveDependencies0;
   static final $allTransitiveDependencies5 =
-      PlayControllerProvider.$allTransitiveDependencies2;
+      PlayControllerProvider.$allTransitiveDependencies3;
 
   @override
   String debugGetCreateSourceHash() => _$videoSourceControllerHash();

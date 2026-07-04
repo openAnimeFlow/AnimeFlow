@@ -5,8 +5,8 @@ import 'package:anime_flow/models/enums/video_controls_icon_type.dart';
 import 'package:anime_flow/models/play/play_history.dart';
 import 'package:anime_flow/routes/model/play_route_extra.dart';
 import 'package:anime_flow/pages/play/controller/play_controller.dart';
-import 'package:anime_flow/pages/play/controller/video_source_controller.dart';
 import 'package:anime_flow/pages/play/controller/video_ui_controller.dart';
+import 'package:anime_flow/pages/play/controller/video_source_controller.dart';
 import 'package:anime_flow/repository/play_repository.dart';
 import 'package:anime_flow/pages/play/provider/episodes_provider.dart';
 import 'package:anime_flow/routes/provider/routes_args.dart';
@@ -30,8 +30,9 @@ class VideoView extends ConsumerStatefulWidget {
 class _VideoViewState extends ConsumerState<VideoView> with WindowListener {
   VideoUiStateController get videoUiStateController =>
       ref.read(videoUiStateControllerProvider.notifier);
-  final videoSourceController = Get.find<VideoSourceController>();
   final playController = Get.find<PlayController>();
+  VideoSourceController get videoSourceController =>
+      ref.read(videoSourceControllerProvider.notifier);
 
   StreamSubscription<bool>? playbackCompletedSubscription;
   int lastEpisodeIndex = 0;
@@ -66,11 +67,11 @@ class _VideoViewState extends ConsumerState<VideoView> with WindowListener {
 
   /// 等待资源初始化完成后选择资源
   Future<void> selectResourceAfterInit() async {
-    if (!videoSourceController.isLoading.value) {
+    if (!ref.read(videoSourceControllerProvider).isLoading) {
       await waitForResourcesLoaded();
     }
 
-    final resources = videoSourceController.videoResources.toList();
+    final resources = ref.read(videoSourceControllerProvider).videoResources;
     videoSourceController.autoSelectFirstResource(resources, force: true);
     videoUiStateController.updateIndicatorType(
         VideoControlsIndicatorType.parsingIndicator);
@@ -84,31 +85,18 @@ class _VideoViewState extends ConsumerState<VideoView> with WindowListener {
   /// 注意：[VideoSourceController.isLoading] 表示「资源已就绪」（命名历史遗留），
   /// 为 `true` 时表示搜索完成，而非正在加载。
   Future<void> waitForResourcesLoaded() async {
-    if (videoSourceController.isLoading.value) {
+    if (ref.read(videoSourceControllerProvider).isLoading) {
       return;
     }
 
-    final completer = Completer<void>();
-    late Worker worker;
-
-    worker = ever(videoSourceController.isLoading, (bool isLoading) {
-      if (isLoading) {
-        worker.dispose();
-        if (!completer.isCompleted) {
-          completer.complete();
-        }
-      }
-    });
-
-    Future.delayed(const Duration(seconds: 30), () {
-      if (!completer.isCompleted) {
-        worker.dispose();
-        completer.complete();
+    final deadline = DateTime.now().add(const Duration(seconds: 30));
+    while (!ref.read(videoSourceControllerProvider).isLoading) {
+      if (DateTime.now().isAfter(deadline)) {
         LiggLogger().w('等待资源加载超时');
+        return;
       }
-    });
-
-    return completer.future;
+      await Future.delayed(const Duration(milliseconds: 100));
+    }
   }
 
   /// 自动切换到下一集
@@ -198,7 +186,7 @@ class _VideoViewState extends ConsumerState<VideoView> with WindowListener {
         // 首次设置集数时无需停止播放或清弹幕
         if (previous != null && previous > 0) {
           playController.clearDanmakuIfEpisodeMismatch(episode);
-          videoSourceController.userManuallySelected = false;
+          videoSourceController.resetManualSelection();
           playController.player.stop();
         }
         selectResourceAfterInit();

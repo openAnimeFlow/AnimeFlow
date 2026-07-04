@@ -22,37 +22,30 @@ class PlayPage extends ConsumerStatefulWidget {
 }
 
 class _PlayPageViewState extends ConsumerState<PlayPage> {
-  late final VideoSourceController videoSourceController;
   late final PlayController playController;
+  late final VideoSourceController videoSourceController;
 
   final GlobalKey _videoKey = GlobalKey();
   final GlobalKey _contentKey = GlobalKey();
 
   bool _hasInitResources = false;
-  bool _controllersInitialized = false;
 
   @override
   void initState() {
     super.initState();
-    final videoUiStateController = ref.read(videoUiStateControllerProvider.notifier);
+    final videoUiStateController =
+        ref.read(videoUiStateControllerProvider.notifier);
+    videoSourceController = ref.read(videoSourceControllerProvider.notifier);
     playController = Get.put(PlayController(
       shadersDirectory: ref.read(shadersDirectoryProvider).requireValue,
       videoUiStateActions: videoUiStateController,
     ));
-  }
-
-  @override
-  void didChangeDependencies() {
-    super.didChangeDependencies();
-    if (_controllersInitialized) return;
-    _controllersInitialized = true;
-    videoSourceController = Get.put(VideoSourceController(ref.container));
+    videoSourceController.initVideoResources();
   }
 
   @override
   void dispose() {
     Get.delete<PlayController>();
-    Get.delete<VideoSourceController>();
     super.dispose();
   }
 

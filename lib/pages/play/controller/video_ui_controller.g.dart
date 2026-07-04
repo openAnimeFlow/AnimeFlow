@@ -42,7 +42,7 @@ final class VideoUiStateControllerProvider
 }
 
 String _$videoUiStateControllerHash() =>
-    r'3820734743504ee62c439af3a1fac721d6b9588d';
+    r'e8fd7d1fd217b8ec667055272f573e3007597299';
 
 abstract class _$VideoUiStateController extends $Notifier<VideoUiState> {
   VideoUiState build();

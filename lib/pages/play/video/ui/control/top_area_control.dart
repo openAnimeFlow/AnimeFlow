@@ -29,9 +29,11 @@ class TopAreaControl extends ConsumerStatefulWidget {
 
 class _TopAreaControlState extends ConsumerState<TopAreaControl> {
   final setting = Storage.setting;
-  final videoSourceController = Get.find<VideoSourceController>();
   final playController = Get.find<PlayController>();
   late int _skipDuration;
+
+  VideoSourceController get videoSourceController =>
+      ref.read(videoSourceControllerProvider.notifier);
 
   @override
   void initState() {

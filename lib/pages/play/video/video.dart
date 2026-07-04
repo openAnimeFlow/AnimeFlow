@@ -28,11 +28,9 @@ class VideoView extends ConsumerStatefulWidget {
 }
 
 class _VideoViewState extends ConsumerState<VideoView> with WindowListener {
-  VideoUiStateController get videoUiStateController =>
-      ref.read(videoUiStateControllerProvider.notifier);
   final playController = Get.find<PlayController>();
-  VideoSourceController get videoSourceController =>
-      ref.read(videoSourceControllerProvider.notifier);
+  late final VideoUiStateController videoUiStateController;
+  late final VideoSourceController videoSourceController;
 
   StreamSubscription<bool>? playbackCompletedSubscription;
   int lastEpisodeIndex = 0;
@@ -43,6 +41,8 @@ class _VideoViewState extends ConsumerState<VideoView> with WindowListener {
   @override
   void initState() {
     super.initState();
+    videoUiStateController = ref.read(videoUiStateControllerProvider.notifier);
+    videoSourceController = ref.read(videoSourceControllerProvider.notifier);
     subject = ref.read(playExtraProvider).playExtra;
     episodesSnapshot = ref.read(episodesProvider);
 
@@ -65,6 +65,35 @@ class _VideoViewState extends ConsumerState<VideoView> with WindowListener {
     }
   }
 
+  @override
+  void dispose() {
+    playbackCompletedSubscription?.cancel();
+    _savePlayHistory();
+    // 移除窗口监听器
+    if (Platform.isWindows || Platform.isLinux || Platform.isMacOS) {
+      windowManager.removeListener(this);
+    }
+    super.dispose();
+  }
+
+  /// 窗口恢复时处理
+  @override
+  void onWindowRestore() {
+    playController.checkDesktopFullscreen();
+  }
+
+  /// 窗口进入全屏时处理
+  @override
+  void onWindowEnterFullScreen() {
+    playController.isFullscreen.value = true;
+  }
+
+  /// 窗口退出全屏时处理
+  @override
+  void onWindowLeaveFullScreen() {
+    playController.isFullscreen.value = false;
+  }
+
   /// 等待资源初始化完成后选择资源
   Future<void> selectResourceAfterInit() async {
     if (!ref.read(videoSourceControllerProvider).isLoading) {
@@ -73,8 +102,8 @@ class _VideoViewState extends ConsumerState<VideoView> with WindowListener {
 
     final resources = ref.read(videoSourceControllerProvider).videoResources;
     videoSourceController.autoSelectFirstResource(resources, force: true);
-    videoUiStateController.updateIndicatorType(
-        VideoControlsIndicatorType.parsingIndicator);
+    videoUiStateController
+        .updateIndicatorType(VideoControlsIndicatorType.parsingIndicator);
     videoUiStateController
         .updateMainAxisAlignmentType(MainAxisAlignment.center);
     videoUiStateController.showIndicator();
@@ -136,36 +165,6 @@ class _VideoViewState extends ConsumerState<VideoView> with WindowListener {
       duration: duration.inSeconds,
     );
     PlayRepository.savePlayHistory(playHistory);
-  }
-
-  @override
-  void dispose() {
-    playbackCompletedSubscription?.cancel();
-    videoSourceController.cancelVideoSourceResolution();
-    _savePlayHistory();
-    // 移除窗口监听器
-    if (Platform.isWindows || Platform.isLinux || Platform.isMacOS) {
-      windowManager.removeListener(this);
-    }
-    super.dispose();
-  }
-
-  /// 窗口恢复时处理
-  @override
-  void onWindowRestore() {
-    playController.checkDesktopFullscreen();
-  }
-
-  /// 窗口进入全屏时处理
-  @override
-  void onWindowEnterFullScreen() {
-    playController.isFullscreen.value = true;
-  }
-
-  /// 窗口退出全屏时处理
-  @override
-  void onWindowLeaveFullScreen() {
-    playController.isFullscreen.value = false;
   }
 
   @override

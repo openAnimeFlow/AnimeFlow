@@ -509,10 +509,6 @@ class VideoSourceController extends _$VideoSourceController {
   }
 
   /// 取消当前视频源解析并销毁 Provider
-  void cancelVideoSourceResolution() {
-    _videoSourceProvider?.dispose();
-    _videoSourceProvider = null;
-  }
 }
 
 class _AutoLoadCandidate {

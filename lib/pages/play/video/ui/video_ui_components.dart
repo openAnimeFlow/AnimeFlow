@@ -90,8 +90,6 @@ class _VideoProgressBarState extends State<VideoProgressBar> {
                   value: value.clamp(0.0, max > 0 ? max : 1.0),
                   min: 0.0,
                   max: max > 0 ? max : 1.0,
-                  // 进度条开始拖动
-                  onChangeStart: (_) => videoUiStateController.startDrag(),
                   // 进度条正在拖动
                   onChanged: (v) {
                     // 更新拖动位置，但不更新实际播放位置
@@ -102,8 +100,6 @@ class _VideoProgressBarState extends State<VideoProgressBar> {
                   onChangeEnd: (v) {
                     playController
                         .seekTo(Duration(milliseconds: v.toInt()));
-                    videoUiStateController
-                        .endDrag(Duration(milliseconds: v.toInt()));
                   },
                 ),
               ),

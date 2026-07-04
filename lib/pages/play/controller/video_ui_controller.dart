@@ -11,8 +11,6 @@ import 'package:get/get.dart';
 import 'package:screen_brightness_platform_interface/screen_brightness_platform_interface.dart';
 
 class VideoUiStateController extends GetxController {
-  /// 是否正在拖拽进度条
-  final isDragging = false.obs;
 
   ///是否显示控件ui
   final isShowControlsUi = true.obs;
@@ -170,16 +168,6 @@ class VideoUiStateController extends GetxController {
     });
   }
 
-  // 开始拖拽
-  void startDrag() {
-    isDragging.value = true;
-  }
-
-  //  结束拖拽
-  void endDrag(Duration pos) {
-    isDragging.value = false;
-  }
-
   ///显示获|隐藏控件ui
   void showOrHideControlsUi() {
     isShowControlsUi.value = !isShowControlsUi.value;
@@ -207,7 +195,6 @@ class VideoUiStateController extends GetxController {
     _dragStartX = startX;
     _dragStartPosition = position;
     isHorizontalDragging.value = true;
-    isDragging.value = true;
 
     // 取消之前的自动隐藏UI计时器
     cancelUiTimer();
@@ -247,7 +234,6 @@ class VideoUiStateController extends GetxController {
   void endHorizontalDrag() {
     if (isHorizontalDragging.value) {
       isHorizontalDragging.value = false;
-      isDragging.value = false;
 
       // 1秒后隐藏控件UI
       hideControlsUi(duration: const Duration(seconds: 1));
@@ -258,7 +244,6 @@ class VideoUiStateController extends GetxController {
   void cancelHorizontalDrag() {
     if (isHorizontalDragging.value) {
       isHorizontalDragging.value = false;
-      isDragging.value = false;
       // 恢复到拖动开始前的位置
       dragPosition.value = _dragStartPosition;
       // 1秒后隐藏控件UI

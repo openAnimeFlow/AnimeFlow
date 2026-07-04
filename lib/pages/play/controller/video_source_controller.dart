@@ -73,7 +73,7 @@ class VideoSourceState {
 
 @Riverpod(keepAlive: true, dependencies: [Episodes, playExtra])
 class VideoSourceController extends _$VideoSourceController {
-  WebViewVideoSourceProvider? _videoSourceProvider;
+  WebViewVideoSourceProvider? _webViewVideoProvider;
   final LiggLogger _logger = LiggLogger();
 
   static const _maxSearchItems = 5;
@@ -110,8 +110,8 @@ class VideoSourceController extends _$VideoSourceController {
   }
 
   void _dispose() {
-    _videoSourceProvider?.dispose();
-    _videoSourceProvider = null;
+    _webViewVideoProvider?.dispose();
+    _webViewVideoProvider = null;
   }
 
   Future<void> initVideoResources() async {
@@ -451,12 +451,12 @@ class VideoSourceController extends _$VideoSourceController {
   }
 
   Future<bool> loadVideoPage(String url) async {
-    _videoSourceProvider?.cancel();
+    _webViewVideoProvider?.cancel();
 
     final playController = Get.find<PlayController>();
     playController.isParsing.value = true;
 
-    _videoSourceProvider ??= WebViewVideoSourceProvider();
+    _webViewVideoProvider ??= WebViewVideoSourceProvider();
 
     var offset = 0;
     final subject = ref.read(playExtraProvider).playExtra;
@@ -476,7 +476,7 @@ class VideoSourceController extends _$VideoSourceController {
     try {
       playController.parseResult.value = '正在解析视频源...';
 
-      final source = await _videoSourceProvider!
+      final source = await _webViewVideoProvider!
           .resolve(url, useLegacyParser: false, offset: offset);
 
       playController.isParsing.value = false;

@@ -6,22 +6,26 @@ import 'package:anime_flow/pages/play/controller/video_ui_controller.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:get/get.dart';
 
 /// 桌面端手势检测器
-class DesktopGestureDetector extends StatefulWidget {
+class DesktopGestureDetector extends ConsumerStatefulWidget {
   final Widget child;
 
   const DesktopGestureDetector({super.key, required this.child});
 
   @override
-  State<DesktopGestureDetector> createState() => _DesktopGestureDetectorState();
+  ConsumerState<DesktopGestureDetector> createState() =>
+      _DesktopGestureDetectorState();
 }
 
-class _DesktopGestureDetectorState extends State<DesktopGestureDetector> {
+class _DesktopGestureDetectorState extends ConsumerState<DesktopGestureDetector> {
   Timer? hoverTimer;
-  final videoUiStateController = Get.find<VideoUiStateController>();
   final playPageController = Get.find<PlayController>();
+
+  VideoUiStateController get videoUiStateController =>
+      ref.read(videoUiStateControllerProvider.notifier);
 
   @override
   void dispose() {

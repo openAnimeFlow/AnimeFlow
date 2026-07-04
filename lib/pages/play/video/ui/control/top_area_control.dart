@@ -20,18 +20,17 @@ import 'package:get/get.dart';
 import 'package:go_router/go_router.dart';
 
 /// 顶部区域空间
-class TopAreaControl extends StatefulWidget {
+class TopAreaControl extends ConsumerStatefulWidget {
   const TopAreaControl({super.key});
 
   @override
-  State<TopAreaControl> createState() => _TopAreaControlState();
+  ConsumerState<TopAreaControl> createState() => _TopAreaControlState();
 }
 
-class _TopAreaControlState extends State<TopAreaControl> {
+class _TopAreaControlState extends ConsumerState<TopAreaControl> {
   final setting = Storage.setting;
   final videoSourceController = Get.find<VideoSourceController>();
   final playController = Get.find<PlayController>();
-  final videoUiStateController = Get.find<VideoUiStateController>();
   late int _skipDuration;
 
   @override
@@ -70,6 +69,10 @@ class _TopAreaControlState extends State<TopAreaControl> {
 
   @override
   Widget build(BuildContext context) {
+    final videoUiStateController =
+        ref.read(videoUiStateControllerProvider.notifier);
+    final isShowControlsUi = ref.watch(
+        videoUiStateControllerProvider.select((s) => s.isShowControlsUi));
     return Obx(() {
       // 全屏状态
       final fullscreen = playController.isFullscreen.value;
@@ -79,10 +82,10 @@ class _TopAreaControlState extends State<TopAreaControl> {
         transitionBuilder: (child, animation) {
           return FadeTransition(opacity: animation, child: child);
         },
-        child: videoUiStateController.isShowControlsUi.value
+        child: isShowControlsUi
             ? Container(
                 key: ValueKey<bool>(
-                  videoUiStateController.isShowControlsUi.value,
+                  isShowControlsUi,
                 ),
                 padding:
                     EdgeInsets.only(top: MediaQuery.of(context).padding.top),
@@ -243,10 +246,14 @@ class _TopAreaControlState extends State<TopAreaControl> {
                                               videoSourceController
                                                   .loadVideoPage(url);
                                               videoUiStateController
-                                                  .updateIndicatorType(VideoControlsIndicatorType.parsingIndicator);
+                                                  .updateIndicatorType(
+                                                      VideoControlsIndicatorType
+                                                          .parsingIndicator);
                                               videoUiStateController
-                                                  .updateMainAxisAlignmentType(MainAxisAlignment.center);
-                                              videoUiStateController.showIndicator();
+                                                  .updateMainAxisAlignmentType(
+                                                      MainAxisAlignment.center);
+                                              videoUiStateController
+                                                  .showIndicator();
                                             },
                                             isBottomSheet: false,
                                             videoSourceController:
@@ -292,7 +299,7 @@ class _TopAreaControlState extends State<TopAreaControl> {
               )
             : SizedBox.shrink(
                 key: ValueKey<bool>(
-                  videoUiStateController.isShowControlsUi.value,
+                  isShowControlsUi,
                 ),
               ),
       );
@@ -368,30 +375,42 @@ class _TopAreaControlState extends State<TopAreaControl> {
           ),
         ),
         //系统时间
-        Obx(
-          () => Text(
-            videoUiStateController.currentTime.value,
-            style: const TextStyle(
-              color: Colors.white,
-              fontSize: 12,
-              fontWeight: FontWeight.w600,
-            ),
-          ),
+        Consumer(
+          builder: (context, ref, child) {
+            final currentTime = ref.watch(
+              videoUiStateControllerProvider
+                  .select((state) => state.currentTime),
+            );
+            return Text(
+              currentTime,
+              style: const TextStyle(
+                color: Colors.white,
+                fontSize: 12,
+                fontWeight: FontWeight.w600,
+              ),
+            );
+          },
         ),
         //电池图标
         if (SystemUtil.isMobile)
           Expanded(
-            child: Obx(
-              () {
-                final battery = videoUiStateController.batteryLevel.value;
-                final batteryState = videoUiStateController.batteryState.value;
+            child: Consumer(
+              builder: (context, ref, child) {
+                final battery = ref.watch(
+                  videoUiStateControllerProvider
+                      .select((state) => state.batteryLevel),
+                );
+                final batteryState = ref.watch(
+                  videoUiStateControllerProvider
+                      .select((state) => state.batteryState),
+                );
 
                 return Row(
                   crossAxisAlignment: CrossAxisAlignment.center,
                   mainAxisAlignment: MainAxisAlignment.end,
                   children: [
                     Text(
-                      '${videoUiStateController.batteryLevel.value}%',
+                      '$battery%',
                       style: const TextStyle(
                         color: Colors.white,
                         fontSize: 10,

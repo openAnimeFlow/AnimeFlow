@@ -5,21 +5,17 @@ import 'package:anime_flow/utils/logger.dart';
 import 'package:anime_flow/utils/systemUtil.dart';
 import 'package:anime_flow/widget/notification_toast.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:get/get.dart';
 
-class RightAreaControl extends StatefulWidget {
+class RightAreaControl extends ConsumerWidget {
   const RightAreaControl({super.key});
 
   @override
-  State<RightAreaControl> createState() => _RightAreaControlState();
-}
-
-class _RightAreaControlState extends State<RightAreaControl> {
-  final videoUiStateController = Get.find<VideoUiStateController>();
-  final playController = Get.find<PlayController>();
-
-  @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final playController = Get.find<PlayController>();
+    final isShowControlsUi = ref.watch(videoUiStateControllerProvider
+        .select((state) => state.isShowControlsUi));
     return Obx(
       () {
         final fullscreen = playController.isFullscreen.value;
@@ -28,12 +24,11 @@ class _RightAreaControlState extends State<RightAreaControl> {
           transitionBuilder: (child, animation) {
             return FadeTransition(opacity: animation, child: child);
           },
-          child: videoUiStateController.isShowControlsUi.value
+          child: isShowControlsUi
               ? Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 10),
                   child: Column(
-                    key: ValueKey<bool>(
-                        videoUiStateController.isShowControlsUi.value),
+                    key: ValueKey<bool>(isShowControlsUi),
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
                       Obx(
@@ -93,8 +88,7 @@ class _RightAreaControlState extends State<RightAreaControl> {
                   ),
                 )
               : SizedBox.shrink(
-                  key: ValueKey<bool>(
-                      videoUiStateController.isShowControlsUi.value),
+                  key: ValueKey<bool>(isShowControlsUi),
                 ),
         );
       },

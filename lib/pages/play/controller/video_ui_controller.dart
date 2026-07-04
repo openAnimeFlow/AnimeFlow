@@ -4,11 +4,11 @@ import 'package:anime_flow/models/enums/video_controls_icon_type.dart';
 import 'package:anime_flow/utils/systemUtil.dart';
 import 'package:anime_flow/utils/vibrate.dart';
 import 'package:battery_plus/battery_plus.dart';
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/widgets.dart';
-import 'package:get/get.dart';
+import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:screen_brightness_platform_interface/screen_brightness_platform_interface.dart';
+
+part 'video_ui_controller.g.dart';
 
 abstract class VideoUiStateActions {
   void updateMainAxisAlignmentType(MainAxisAlignment type);
@@ -22,212 +22,229 @@ abstract class VideoUiStateActions {
   VideoControlsIndicatorType get currentIndicatorType;
 }
 
-class VideoUiStateController extends GetxController implements VideoUiStateActions {
+class VideoUiState {
+  const VideoUiState({
+    this.isShowControlsUi = true,
+    this.isHorizontalDragging = false,
+    this.dragPosition = Duration.zero,
+    this.isShowIndicatorUi = false,
+    this.indicatorType = VideoControlsIndicatorType.noIndicator,
+    this.mainAxisAlignmentType = MainAxisAlignment.start,
+    this.currentBrightness = 0.5,
+    this.isBrightnessDragging = false,
+    this.currentTime = '',
+    this.batteryLevel = 0,
+    this.batteryState = BatteryState.unknown,
+  });
 
-  ///是否显示控件ui
-  final isShowControlsUi = true.obs;
+  final bool isShowControlsUi;
+  final bool isHorizontalDragging;
+  final Duration dragPosition;
+  final bool isShowIndicatorUi;
+  final VideoControlsIndicatorType indicatorType;
+  final MainAxisAlignment mainAxisAlignmentType;
+  final double currentBrightness;
+  final bool isBrightnessDragging;
+  final String currentTime;
+  final int batteryLevel;
+  final BatteryState batteryState;
 
-  /// 是否正在水平拖动
-  final isHorizontalDragging = false.obs;
+  VideoUiState copyWith({
+    bool? isShowControlsUi,
+    bool? isHorizontalDragging,
+    Duration? dragPosition,
+    bool? isShowIndicatorUi,
+    VideoControlsIndicatorType? indicatorType,
+    MainAxisAlignment? mainAxisAlignmentType,
+    double? currentBrightness,
+    bool? isBrightnessDragging,
+    String? currentTime,
+    int? batteryLevel,
+    BatteryState? batteryState,
+  }) {
+    return VideoUiState(
+      isShowControlsUi: isShowControlsUi ?? this.isShowControlsUi,
+      isHorizontalDragging:
+          isHorizontalDragging ?? this.isHorizontalDragging,
+      dragPosition: dragPosition ?? this.dragPosition,
+      isShowIndicatorUi: isShowIndicatorUi ?? this.isShowIndicatorUi,
+      indicatorType: indicatorType ?? this.indicatorType,
+      mainAxisAlignmentType:
+          mainAxisAlignmentType ?? this.mainAxisAlignmentType,
+      currentBrightness: currentBrightness ?? this.currentBrightness,
+      isBrightnessDragging: isBrightnessDragging ?? this.isBrightnessDragging,
+      currentTime: currentTime ?? this.currentTime,
+      batteryLevel: batteryLevel ?? this.batteryLevel,
+      batteryState: batteryState ?? this.batteryState,
+    );
+  }
+}
 
-  /// 拖动时的临时进度
-  final dragPosition = Duration.zero.obs;
-
-  /// 是否显示指示器ui
-  final isShowIndicatorUi = false.obs;
-
-  /// 指示器类型
-  final indicatorType = VideoControlsIndicatorType.noIndicator.obs;
-
-  @override
-  VideoControlsIndicatorType get currentIndicatorType => indicatorType.value;
-
-  /// 主轴对齐类型
-  final mainAxisAlignmentType = MainAxisAlignment.start.obs;
-
-  /// 拖动相关
-  double _dragStartX = 0;
-  Duration _dragStartPosition = Duration.zero;
-
-  /// 指示器计时器
+@Riverpod(keepAlive: true)
+class VideoUiStateController extends _$VideoUiStateController
+    implements VideoUiStateActions {
   Timer? _indicatorTimer;
-
-  /// 控件ui计时器
   Timer? _controlsUiTimer;
-
-  /// 屏幕亮度相关
+  Timer? _timeUpdateTimer;
+  Timer? _batteryUpdateTimer;
+  StreamSubscription<BatteryState>? _batteryStateSubscription;
   final ScreenBrightnessPlatform _screenBrightness =
       ScreenBrightnessPlatform.instance;
 
-  /// 保存原始亮度
   double _originalBrightness = 0.5;
-
-  /// 当前亮度 0.0-1.0
-  final currentBrightness = 0.5.obs;
-
-  /// 是否正在拖动调整亮度
-  final isBrightnessDragging = false.obs;
-
-  /// 拖动开始时的亮度
+  double _dragStartX = 0;
+  Duration _dragStartPosition = Duration.zero;
   double _dragStartBrightness = 0.5;
+  bool _initialized = false;
 
-  /// 当前时间
-  final currentTime = SystemUtil.getCurrentTimeWithoutSeconds().obs;
-
-  /// 时间更新计时器
-  Timer? _timeUpdateTimer;
-
-  /// 电池电量（0-100）
-  final batteryLevel = 0.obs;
-
-  /// 电池充电状态
-  final batteryState = BatteryState.unknown.obs;
-
-  /// 电池状态监听流订阅
-  StreamSubscription<BatteryState>? _batteryStateSubscription;
-
-  /// 电池更新计时器
-  Timer? _batteryUpdateTimer;
+  bool get isShowControlsUi => state.isShowControlsUi;
+  bool get isHorizontalDragging => state.isHorizontalDragging;
+  Duration get dragPosition => state.dragPosition;
+  bool get isShowIndicatorUi => state.isShowIndicatorUi;
+  VideoControlsIndicatorType get indicatorType => state.indicatorType;
+  @override
+  VideoControlsIndicatorType get currentIndicatorType => state.indicatorType;
+  MainAxisAlignment get mainAxisAlignmentType => state.mainAxisAlignmentType;
+  double get currentBrightness => state.currentBrightness;
+  bool get isBrightnessDragging => state.isBrightnessDragging;
+  String get currentTime => state.currentTime;
+  int get batteryLevel => state.batteryLevel;
+  BatteryState get batteryState => state.batteryState;
 
   @override
-  void onInit() {
-    super.onInit();
-    _initializeBrightness();
-    _startTimeUpdate();
-    _initializeBattery();
+  VideoUiState build() {
+    ref.onDispose(_dispose);
+    final initialState = VideoUiState(
+      currentTime: SystemUtil.getCurrentTimeWithoutSeconds(),
+    );
+    state = initialState;
+    if (!_initialized) {
+      _initialized = true;
+      unawaited(_initializeRuntimeState());
+    }
+    return initialState;
   }
 
-  @override
-  void onClose() {
+  Future<void> _initializeRuntimeState() async {
+    await _initializeBrightness();
+    _startTimeUpdate();
+    await _initializeBattery();
+  }
+
+  void _dispose() {
     _indicatorTimer?.cancel();
     _controlsUiTimer?.cancel();
     _timeUpdateTimer?.cancel();
     _batteryUpdateTimer?.cancel();
     _batteryStateSubscription?.cancel();
-    _resetBrightness();
-    super.onClose();
+    unawaited(_resetBrightness());
   }
 
-  /// 时间更新
   void _startTimeUpdate() {
     _timeUpdateTimer?.cancel();
     _timeUpdateTimer = Timer.periodic(const Duration(seconds: 1), (_) {
-      currentTime.value = SystemUtil.getCurrentTimeWithoutSeconds();
+      state = state.copyWith(
+        currentTime: SystemUtil.getCurrentTimeWithoutSeconds(),
+      );
     });
   }
 
-  /// 初始化电池信息
   Future<void> _initializeBattery() async {
-    // 获取初始电池信息
     await _updateBatteryInfo();
 
-    // 监听电池状态变化
+    await _batteryStateSubscription?.cancel();
     _batteryStateSubscription = SystemUtil.batteryStateStream.listen((state) {
-      batteryState.value = state;
+      this.state = this.state.copyWith(batteryState: state);
       _updateBatteryInfo();
     });
 
-    // 定期更新电池电量（每30秒更新一次）
+    _batteryUpdateTimer?.cancel();
     _batteryUpdateTimer = Timer.periodic(const Duration(seconds: 30), (_) {
       _updateBatteryInfo();
     });
   }
 
-  /// 更新电池信息
   Future<void> _updateBatteryInfo() async {
     try {
-      batteryLevel.value = await SystemUtil.getBatteryLevel();
-      batteryState.value = await SystemUtil.getBatteryState();
+      final level = await SystemUtil.getBatteryLevel();
+      final currentState = await SystemUtil.getBatteryState();
+      state = state.copyWith(
+        batteryLevel: level,
+        batteryState: currentState,
+      );
     } catch (_) {}
   }
 
-  /// 修改主轴类型
   @override
   void updateMainAxisAlignmentType(MainAxisAlignment type) {
-    if (mainAxisAlignmentType.value != type) {
-      mainAxisAlignmentType.value = type;
+    if (state.mainAxisAlignmentType != type) {
+      state = state.copyWith(mainAxisAlignmentType: type);
     }
   }
 
-  // 更新指示器类型
   void updateIndicatorTypeAndShowIndicator(VideoControlsIndicatorType type) {
-    indicatorType.value = type;
+    state = state.copyWith(indicatorType: type);
     _showIndicatorSetUp();
   }
 
-  ///  更新指示器类型
   @override
   void updateIndicatorType(VideoControlsIndicatorType type) {
-    indicatorType.value = type;
+    if (state.indicatorType != type) {
+      state = state.copyWith(indicatorType: type);
+    }
   }
 
-  ///  显示指示器
   @override
   void showIndicator() {
     _indicatorTimer?.cancel();
-    isShowIndicatorUi.value = true;
+    state = state.copyWith(isShowIndicatorUi: true);
   }
 
-  /// 隐藏指示器
   @override
   void hideIndicator() {
     _indicatorTimer?.cancel();
-    isShowIndicatorUi.value = false;
+    state = state.copyWith(isShowIndicatorUi: false);
   }
 
-  // 显示指示器and
   void _showIndicatorSetUp() {
     _indicatorTimer?.cancel();
-    isShowIndicatorUi.value = true;
+    state = state.copyWith(isShowIndicatorUi: true);
     _indicatorTimer = Timer(const Duration(seconds: 3), () {
-      isShowIndicatorUi.value = false;
-      updateIndicatorTypeAndShowIndicator(
-          VideoControlsIndicatorType.noIndicator);
-      updateMainAxisAlignmentType(MainAxisAlignment.start);
+      state = state.copyWith(
+        isShowIndicatorUi: false,
+        indicatorType: VideoControlsIndicatorType.noIndicator,
+        mainAxisAlignmentType: MainAxisAlignment.start,
+      );
     });
   }
 
-  ///显示获|隐藏控件ui
   void showOrHideControlsUi() {
-    isShowControlsUi.value = !isShowControlsUi.value;
+    state = state.copyWith(isShowControlsUi: !state.isShowControlsUi);
   }
 
-  ///显示控件ui
   void showControlsUi() {
-    isShowControlsUi.value = true;
+    state = state.copyWith(isShowControlsUi: true);
   }
 
-  ///隐藏控件ui
   void hideControlsUi({Duration? duration}) {
     _controlsUiTimer?.cancel();
     if (duration != null && duration > Duration.zero) {
       _controlsUiTimer = Timer(duration, () {
-        isShowControlsUi.value = false;
+        state = state.copyWith(isShowControlsUi: false);
       });
     } else {
-      isShowControlsUi.value = false;
+      state = state.copyWith(isShowControlsUi: false);
     }
   }
 
-  // 开始水平拖动
   void startHorizontalDrag(double startX, Duration position) {
     _dragStartX = startX;
     _dragStartPosition = position;
-    isHorizontalDragging.value = true;
-
-    // 取消之前的自动隐藏UI计时器
+    state = state.copyWith(isHorizontalDragging: true);
     cancelUiTimer();
-
-    // 显示控件UI
     showControlsUi();
   }
 
-  ///取消ui计时器
-  void cancelUiTimer() {
-    _controlsUiTimer?.cancel();
-  }
-
-  // 更新水平拖动进度
   void updateHorizontalDrag(
     double currentX,
     double scale,
@@ -235,119 +252,102 @@ class VideoUiStateController extends GetxController implements VideoUiStateActio
   ) {
     if (duration <= Duration.zero) return;
 
-    // 计算拖动距离
     final dragDistance = currentX - _dragStartX;
-
     final timeOffset = dragDistance * scale;
-
-    // 计算新的播放位置
     var newPosition = _dragStartPosition.inMilliseconds + timeOffset.toInt();
-
-    // 限制在有效范围内
     newPosition = newPosition.clamp(0, duration.inMilliseconds);
 
-    dragPosition.value = Duration(milliseconds: newPosition);
+    state = state.copyWith(
+      dragPosition: Duration(milliseconds: newPosition),
+    );
   }
 
-  // 结束水平拖动
+  void setHorizontalDragPosition(Duration position) {
+    state = state.copyWith(dragPosition: position);
+  }
+
   void endHorizontalDrag() {
-    if (isHorizontalDragging.value) {
-      isHorizontalDragging.value = false;
-
-      // 1秒后隐藏控件UI
+    if (state.isHorizontalDragging) {
+      state = state.copyWith(isHorizontalDragging: false);
       hideControlsUi(duration: const Duration(seconds: 1));
     }
   }
 
-  // 取消水平拖动
   void cancelHorizontalDrag() {
-    if (isHorizontalDragging.value) {
-      isHorizontalDragging.value = false;
-      // 恢复到拖动开始前的位置
-      dragPosition.value = _dragStartPosition;
-      // 1秒后隐藏控件UI
+    if (state.isHorizontalDragging) {
+      state = state.copyWith(
+        isHorizontalDragging: false,
+        dragPosition: _dragStartPosition,
+      );
       hideControlsUi(duration: const Duration(seconds: 1));
     }
   }
 
-  // 初始化并保存原始亮度
   Future<void> _initializeBrightness() async {
     try {
-      // 获取当前应用屏幕亮度
       final brightness = await _screenBrightness.application;
       _originalBrightness = brightness;
-      currentBrightness.value = brightness;
-    } catch (e) {
-      // 如果获取失败，使用默认值
+      state = state.copyWith(currentBrightness: brightness);
+    } catch (_) {
       _originalBrightness = 0.5;
-      currentBrightness.value = 0.5;
+      state = state.copyWith(currentBrightness: 0.5);
     }
   }
 
-  // 开始垂直拖动调整亮度
   void startBrightnessDrag() {
-    _dragStartBrightness = currentBrightness.value;
-    isBrightnessDragging.value = true;
-
-    // 取消之前的自动隐藏UI计时器
+    _dragStartBrightness = state.currentBrightness;
+    state = state.copyWith(isBrightnessDragging: true);
     _controlsUiTimer?.cancel();
-
-    // 显示控件UI
     showControlsUi();
-
-    // 显示亮度指示器
     updateIndicatorTypeAndShowIndicator(
-        VideoControlsIndicatorType.brightnessIndicator);
+      VideoControlsIndicatorType.brightnessIndicator,
+    );
   }
 
-  // 开始垂直拖动调整亮度（不设置自动隐藏定时器）
   void startBrightnessDragWithoutAutoHide() {
-    _dragStartBrightness = currentBrightness.value;
-    isBrightnessDragging.value = true;
+    _dragStartBrightness = state.currentBrightness;
+    state = state.copyWith(isBrightnessDragging: true);
   }
 
-  // 更新亮度
-  void updateBrightnessDrag(double dragDistance, double screenHeight) {
-    // 向上拖动减少亮度，向下拖动增加亮度
-    final brightnessChange = -(dragDistance / screenHeight);
-    double newBrightness =
-        (_dragStartBrightness + brightnessChange).clamp(0.0, 1.0);
+  void setBrightnessDragging(bool value) {
+    state = state.copyWith(isBrightnessDragging: value);
+  }
 
-    if (newBrightness >= 1.0 && currentBrightness.value < 1.0) {
+  void updateBrightnessDrag(double dragDistance, double screenHeight) {
+    final brightnessChange = -(dragDistance / screenHeight);
+    final newBrightness = (_dragStartBrightness + brightnessChange).clamp(0.0, 1.0);
+
+    if (newBrightness >= 1.0 && state.currentBrightness < 1.0) {
       vibrateHeavy();
-    } else if (newBrightness <= 0.0 && currentBrightness.value > 0.0) {
+    } else if (newBrightness <= 0.0 && state.currentBrightness > 0.0) {
       vibrateHeavy();
     }
-    currentBrightness.value = newBrightness;
-
+    state = state.copyWith(currentBrightness: newBrightness);
     _screenBrightness.setApplicationScreenBrightness(newBrightness);
   }
 
-  // 结束垂直拖动亮度
   void endBrightnessDrag() {
-    isBrightnessDragging.value = false;
-
-    // 隐藏亮度指示器
+    state = state.copyWith(isBrightnessDragging: false);
     hideIndicator();
     updateIndicatorType(VideoControlsIndicatorType.noIndicator);
     updateMainAxisAlignmentType(MainAxisAlignment.start);
-
-    // 1秒后隐藏控件UI
     hideControlsUi(duration: const Duration(seconds: 1));
   }
 
-  // 恢复原始屏幕亮度
+  void cancelUiTimer() {
+    _controlsUiTimer?.cancel();
+  }
+
   Future<void> _resetBrightness() async {
     WidgetsBinding.instance.addPostFrameCallback((_) async {
       try {
         await _screenBrightness.resetApplicationScreenBrightness();
-        currentBrightness.value = _originalBrightness;
-      } catch (e) {
-        // 如果重置失败，尝试设置为原始值
+        state = state.copyWith(currentBrightness: _originalBrightness);
+      } catch (_) {
         try {
           await _screenBrightness
               .setApplicationScreenBrightness(_originalBrightness);
-          currentBrightness.value = _originalBrightness;
+          state = state.copyWith(currentBrightness: _originalBrightness);
         } catch (_) {}
       }
     });

@@ -34,7 +34,7 @@ class _PlayPageViewState extends ConsumerState<PlayPage> {
   @override
   void initState() {
     super.initState();
-    final videoUiStateController = Get.put(VideoUiStateController());
+    final videoUiStateController = ref.read(videoUiStateControllerProvider.notifier);
     playController = Get.put(PlayController(
       shadersDirectory: ref.read(shadersDirectoryProvider).requireValue,
       videoUiStateActions: videoUiStateController,
@@ -53,7 +53,6 @@ class _PlayPageViewState extends ConsumerState<PlayPage> {
   void dispose() {
     Get.delete<PlayController>();
     Get.delete<VideoSourceController>();
-    Get.delete<VideoUiStateController>();
     super.dispose();
   }
 
@@ -67,7 +66,7 @@ class _PlayPageViewState extends ConsumerState<PlayPage> {
 
   @override
   Widget build(BuildContext context) {
-    // 鐩戝惉鍓ч泦鍔犺浇瀹屾垚 鈫?鍒濆鍖栬棰戣祫婧愭悳绱?
+    // 监听剧集加载完成 → 初始化视频资源搜索
     ref.listen(episodesProvider, (prev, next) {
       if (!next.isLoading && next.episodes != null) {
         final subjectName = ref.read(playExtraProvider).playExtra.subjectName;

@@ -1,20 +1,18 @@
 import 'package:anime_flow/pages/play/controller/play_controller.dart';
 import 'package:anime_flow/pages/play/controller/video_ui_controller.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:get/get.dart';
 
-class ShaderButton extends StatelessWidget {
+class ShaderButton extends ConsumerWidget {
   final PlayController playController;
-  final VideoUiStateController videoUiStateController;
 
-  const ShaderButton(
-      {super.key,
-      required this.playController,
-      required this.videoUiStateController});
+  const ShaderButton({super.key, required this.playController});
 
   @override
-  Widget build(BuildContext context) {
-
+  Widget build(BuildContext context, WidgetRef ref) {
+    final videoUiStateController =
+        ref.read(videoUiStateControllerProvider.notifier);
     return Obx(() {
       final currentType = playController.superResolutionType.value;
       final labels = ['关闭', '效率档', '质量档'];

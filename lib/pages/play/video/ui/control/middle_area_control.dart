@@ -18,10 +18,10 @@ class MiddleAreaControl extends ConsumerStatefulWidget {
 
 class _MiddleAreaControlState extends ConsumerState<MiddleAreaControl> {
   final playController = Get.find<PlayController>();
-  final videoUiStateController = Get.find<VideoUiStateController>();
 
   @override
   Widget build(BuildContext context) {
+    final videoUiState = ref.watch(videoUiStateControllerProvider);
     const double topAreaHeight = 50.0;
     final speedAsync = ref.watch(networkSpeedStreamProvider(2000));
     final speed = speedAsync.asData?.value;
@@ -34,16 +34,15 @@ class _MiddleAreaControlState extends ConsumerState<MiddleAreaControl> {
       fontWeight: FontWeight.w500,
     );
 
-    return Obx(
-      () => Container(
-        height: double.infinity,
-        width: double.infinity,
-        color: Colors.transparent,
-        child: Column(
-          mainAxisAlignment: videoUiStateController.mainAxisAlignmentType.value,
-          children: [
-            //指示器Icon
-            switch (videoUiStateController.indicatorType.value) {
+    return Container(
+      height: double.infinity,
+      width: double.infinity,
+      color: Colors.transparent,
+      child: Column(
+        mainAxisAlignment: videoUiState.mainAxisAlignmentType,
+        children: [
+          //指示器Icon
+          switch (videoUiState.indicatorType) {
               //无指示器
               VideoControlsIndicatorType.noIndicator => const SizedBox.shrink(),
 
@@ -138,7 +137,7 @@ class _MiddleAreaControlState extends ConsumerState<MiddleAreaControl> {
                     borderRadius: BorderRadius.circular(8),
                   ),
                   child: Text(
-                    '${FormatTimeUtil.formatDuration(videoUiStateController.dragPosition.value)} / ${FormatTimeUtil.formatDuration(playController.duration.value)}',
+                    '${FormatTimeUtil.formatDuration(videoUiState.dragPosition)} / ${FormatTimeUtil.formatDuration(playController.duration.value)}',
                     style: const TextStyle(
                       color: Colors.white,
                       fontSize: 16,
@@ -178,7 +177,7 @@ class _MiddleAreaControlState extends ConsumerState<MiddleAreaControl> {
                     children: [
                       Positioned.fill(
                         child: LinearProgressIndicator(
-                          value: videoUiStateController.currentBrightness.value,
+                          value: videoUiState.currentBrightness,
                           backgroundColor: Colors.white30,
                           valueColor: AlwaysStoppedAnimation<Color>(
                               Theme.of(context).colorScheme.primary),
@@ -188,10 +187,9 @@ class _MiddleAreaControlState extends ConsumerState<MiddleAreaControl> {
                         padding: const EdgeInsets.symmetric(
                             vertical: 5, horizontal: 5),
                         child: Icon(
-                          videoUiStateController.currentBrightness.value < 0.3
+                          videoUiState.currentBrightness < 0.3
                               ? Icons.brightness_2
-                              : videoUiStateController.currentBrightness.value <
-                                      0.7
+                              : videoUiState.currentBrightness < 0.7
                                   ? Icons.brightness_4
                                   : Icons.brightness_high,
                           color: Colors.white,
@@ -231,9 +229,8 @@ class _MiddleAreaControlState extends ConsumerState<MiddleAreaControl> {
                     ],
                   ),
                 ),
-            }
-          ],
-        ),
+          }
+        ],
       ),
     );
   }

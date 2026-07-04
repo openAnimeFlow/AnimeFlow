@@ -28,7 +28,8 @@ class VideoView extends ConsumerStatefulWidget {
 }
 
 class _VideoViewState extends ConsumerState<VideoView> with WindowListener {
-  final videoUiStateController = Get.find<VideoUiStateController>();
+  VideoUiStateController get videoUiStateController =>
+      ref.read(videoUiStateControllerProvider.notifier);
   final videoSourceController = Get.find<VideoSourceController>();
   final playController = Get.find<PlayController>();
 
@@ -71,8 +72,8 @@ class _VideoViewState extends ConsumerState<VideoView> with WindowListener {
 
     final resources = videoSourceController.videoResources.toList();
     videoSourceController.autoSelectFirstResource(resources, force: true);
-    videoUiStateController
-        .updateIndicatorType(VideoControlsIndicatorType.parsingIndicator);
+    videoUiStateController.updateIndicatorType(
+        VideoControlsIndicatorType.parsingIndicator);
     videoUiStateController
         .updateMainAxisAlignmentType(MainAxisAlignment.center);
     videoUiStateController.showIndicator();

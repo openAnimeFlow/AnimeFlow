@@ -19,14 +19,15 @@ class VideoResourcesView extends ConsumerStatefulWidget {
 class _VideoResourcesViewState extends ConsumerState<VideoResourcesView> {
   final videoSourceController = Get.find<VideoSourceController>();
   final playController = Get.find<PlayController>();
-  final videoUiStateController = Get.find<VideoUiStateController>();
 
   void _showSourceDrawer() {
+    final videoUiStateController =
+        ref.read(videoUiStateControllerProvider.notifier);
     void onVideoUrlSelected(String url) {
       playController.player.stop();
       videoSourceController.loadVideoPage(url);
-      videoUiStateController
-          .updateIndicatorType(VideoControlsIndicatorType.parsingIndicator);
+      videoUiStateController.updateIndicatorType(
+          VideoControlsIndicatorType.parsingIndicator);
       videoUiStateController
           .updateMainAxisAlignmentType(MainAxisAlignment.center);
       videoUiStateController.showIndicator();

@@ -5,26 +5,29 @@ import 'package:anime_flow/pages/play/controller/video_ui_controller.dart';
 import 'package:anime_flow/repository/storage.dart';
 import 'package:anime_flow/utils/vibrate.dart';
 import 'package:flutter/material.dart';
-import 'package:get/get_core/src/get_main.dart';
-import 'package:get/get_instance/src/extension_instance.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:get/get.dart';
 
 /// 移动端手势监听组件
-class MobileGestureDetector extends StatefulWidget {
+class MobileGestureDetector extends ConsumerStatefulWidget {
   final Widget child;
 
   const MobileGestureDetector({super.key, required this.child});
 
   @override
-  State<MobileGestureDetector> createState() => _MobileGestureDetectorState();
+  ConsumerState<MobileGestureDetector> createState() =>
+      _MobileGestureDetectorState();
 }
 
-class _MobileGestureDetectorState extends State<MobileGestureDetector> {
+class _MobileGestureDetectorState extends ConsumerState<MobileGestureDetector> {
   final setting = Storage.setting;
   double _verticalDragStartY = 0; // 垂直拖动开始时的Y坐标
   bool _isRightSide = false; // 是否在屏幕右半侧开始垂直拖动
   late double fastForwardSpeed;
   final playController = Get.find<PlayController>();
-  final videoUiStateController = Get.find<VideoUiStateController>();
+
+  VideoUiStateController get videoUiStateController =>
+      ref.read(videoUiStateControllerProvider.notifier);
 
   @override
   void initState() {
@@ -92,7 +95,7 @@ class _MobileGestureDetectorState extends State<MobileGestureDetector> {
 
       // 水平拖动结束：应用新的播放进度
       onHorizontalDragEnd: (DragEndDetails details) {
-        playController.seekTo(videoUiStateController.dragPosition.value);
+        playController.seekTo(videoUiStateController.dragPosition);
         videoUiStateController.endHorizontalDrag();
         playController.startPlaying();
       },
@@ -163,11 +166,11 @@ class _MobileGestureDetectorState extends State<MobileGestureDetector> {
           });
         } else {
           // 垂直拖动结束（左半屏）：结束亮度调整
-          videoUiStateController.isBrightnessDragging.value = false;
+          videoUiStateController.setBrightnessDragging(false);
           // 保持指示器显示，2秒后自动隐藏
           videoUiStateController.showIndicator();
           Future.delayed(const Duration(seconds: 2), () {
-            if (!videoUiStateController.isBrightnessDragging.value) {
+            if (!videoUiStateController.isBrightnessDragging) {
               videoUiStateController.hideIndicator();
               videoUiStateController
                   .updateIndicatorType(VideoControlsIndicatorType.noIndicator);

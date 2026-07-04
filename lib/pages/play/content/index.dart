@@ -23,7 +23,6 @@ class ContentView extends StatefulWidget {
 class _ContentViewState extends State<ContentView>
     with SingleTickerProviderStateMixin {
   final playController = Get.find<PlayController>();
-  final videoUiStateController = Get.find<VideoUiStateController>();
   final List<String> tabs = ['简介', '吐槽'];
   late TabController tabController;
   bool isRequesting = false;
@@ -113,6 +112,8 @@ class _ContentViewState extends State<ContentView>
   Widget build(BuildContext context) {
     return Consumer(
       builder: (context, ref, child) {
+        final videoUiStateController =
+            ref.read(videoUiStateControllerProvider.notifier);
         ref.listen<int>(
           episodesProvider.select((state) => state.episodeId),
           (previous, episodeId) {
@@ -128,11 +129,9 @@ class _ContentViewState extends State<ContentView>
           },
         );
         currentEpisodeId = ref.read(episodesProvider).episodeId;
-        return child!;
-      },
-      child: PreferredSize(
-        preferredSize: const Size.fromHeight(100),
-        child: Column(
+        return PreferredSize(
+          preferredSize: const Size.fromHeight(100),
+          child: Column(
           children: [
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -194,8 +193,9 @@ class _ContentViewState extends State<ContentView>
               ),
             ),
           ],
-        ),
-      ),
+          ),
+        );
+      },
     );
   }
 }

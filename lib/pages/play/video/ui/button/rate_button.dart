@@ -1,16 +1,13 @@
 import 'package:anime_flow/pages/play/controller/play_controller.dart';
 import 'package:anime_flow/pages/play/controller/video_ui_controller.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:get/get.dart';
 
-class RateButton extends StatelessWidget {
+class RateButton extends ConsumerWidget {
   final PlayController playController;
-  final VideoUiStateController videoUiStateController;
 
-  const RateButton(
-      {super.key,
-      required this.playController,
-      required this.videoUiStateController});
+  const RateButton({super.key, required this.playController});
 
   static const List<double> _speeds = [
     0.5,
@@ -24,8 +21,9 @@ class RateButton extends StatelessWidget {
   ];
 
   @override
-  Widget build(BuildContext context) {
-
+  Widget build(BuildContext context, WidgetRef ref) {
+    final videoUiStateController =
+        ref.read(videoUiStateControllerProvider.notifier);
     return Obx(() {
       final currentRate = playController.rate.value;
       final colorScheme = Theme.of(context).colorScheme;

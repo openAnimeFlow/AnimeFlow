@@ -29,8 +29,7 @@ class VideoSourceDrawers extends ConsumerStatefulWidget {
   });
 
   @override
-  ConsumerState<VideoSourceDrawers> createState() =>
-      _VideoSourceDrawersState();
+  ConsumerState<VideoSourceDrawers> createState() => _VideoSourceDrawersState();
 }
 
 class _VideoSourceDrawersState extends ConsumerState<VideoSourceDrawers> {
@@ -144,14 +143,16 @@ class _VideoSourceDrawersState extends ConsumerState<VideoSourceDrawers> {
                   if (dataSource.isEmpty) {
                     return const SizedBox.shrink();
                   }
-                  final currentIndex = videoSourceController.selectedWebsiteIndex;
+                  final currentIndex =
+                      videoSourceController.selectedWebsiteIndex;
                   final validIndex =
                       currentIndex >= dataSource.length ? 0 : currentIndex;
 
                   if (validIndex != currentIndex) {
                     WidgetsBinding.instance.addPostFrameCallback((_) {
                       if (mounted) {
-                        videoSourceController.setSelectedWebsiteIndex(validIndex);
+                        videoSourceController
+                            .setSelectedWebsiteIndex(validIndex);
                       }
                     });
                   }
@@ -420,16 +421,16 @@ class _VideoSourceDrawersState extends ConsumerState<VideoSourceDrawers> {
     }
     final episodeIndex = videoSourceController.currentEpisodeIndex;
 
-      // 预过滤：只保留有匹配当前剧集的资源项
-      final matchedResources = episodeResources
-          .where((item) =>
-              item.episodes.any((ep) => ep.episodeSort == episodeIndex))
-          .toList();
+    // 预过滤：只保留有匹配当前剧集的资源项
+    final matchedResources = episodeResources
+        .where(
+            (item) => item.episodes.any((ep) => ep.episodeSort == episodeIndex))
+        .toList();
 
-      final excludedEpisodesCount = episodeResources
-          .expand((item) =>
-              item.episodes.where((ep) => ep.episodeSort != episodeIndex))
-          .length;
+    final excludedEpisodesCount = episodeResources
+        .expand((item) =>
+            item.episodes.where((ep) => ep.episodeSort != episodeIndex))
+        .length;
 
     return Material(
       child: Column(
@@ -456,61 +457,61 @@ class _VideoSourceDrawersState extends ConsumerState<VideoSourceDrawers> {
                     },
                   ),
           ),
-            // 切换开关
-            Padding(
-              padding: const EdgeInsets.symmetric(vertical: 8),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.end,
-                children: [
-                  Text(
-                    '显示已被排除的资源($excludedEpisodesCount)',
-                    style: const TextStyle(fontSize: 14),
-                  ),
-                  const SizedBox(width: 8),
-                  Switch(
-                    value: isShowEpisodes,
-                    onChanged: (value) {
-                      setShowEpisodes();
-                    },
-                  ),
-                ],
-              ),
+          // 切换开关
+          Padding(
+            padding: const EdgeInsets.symmetric(vertical: 8),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.end,
+              children: [
+                Text(
+                  '显示已被排除的资源($excludedEpisodesCount)',
+                  style: const TextStyle(fontSize: 14),
+                ),
+                const SizedBox(width: 8),
+                Switch(
+                  value: isShowEpisodes,
+                  onChanged: (value) {
+                    setShowEpisodes();
+                  },
+                ),
+              ],
             ),
-            // 展开的其他剧集
-            if (isShowEpisodes)
-              LimitedBox(
-                maxHeight: 240,
-                child: () {
-                  // 预构建展平列表，避免 builder 中重复计算
-                  final expandedItems = episodeResources.expand((item) {
-                    return item.episodes
-                        .where((ep) => ep.episodeSort != episodeIndex)
-                        .map((ep) => (resource: item, episode: ep));
-                  }).toList(growable: false);
+          ),
+          // 展开的其他剧集
+          if (isShowEpisodes)
+            LimitedBox(
+              maxHeight: 240,
+              child: () {
+                // 预构建展平列表，避免 builder 中重复计算
+                final expandedItems = episodeResources.expand((item) {
+                  return item.episodes
+                      .where((ep) => ep.episodeSort != episodeIndex)
+                      .map((ep) => (resource: item, episode: ep));
+                }).toList(growable: false);
 
-                  return ListView.builder(
-                    padding: EdgeInsets.zero,
-                    itemCount: expandedItems.length,
-                    itemExtent: 95,
-                    itemBuilder: (context, index) {
-                      final entry = expandedItems[index];
-                      return Padding(
-                        padding: const EdgeInsets.only(bottom: 8),
-                        child: _buildSource(
-                          entry.episode,
-                          entry.resource,
-                          baseUrl: selectedResource.baseUrl,
-                          websiteName: selectedResource.websiteName,
-                          websiteIcon: selectedResource.websiteIcon,
-                        ),
-                      );
-                    },
-                  );
-                }(),
+                return ListView.builder(
+                  padding: EdgeInsets.zero,
+                  itemCount: expandedItems.length,
+                  itemExtent: 95,
+                  itemBuilder: (context, index) {
+                    final entry = expandedItems[index];
+                    return Padding(
+                      padding: const EdgeInsets.only(bottom: 8),
+                      child: _buildSource(
+                        entry.episode,
+                        entry.resource,
+                        baseUrl: selectedResource.baseUrl,
+                        websiteName: selectedResource.websiteName,
+                        websiteIcon: selectedResource.websiteIcon,
+                      ),
+                    );
+                  },
+                );
+              }(),
             ),
-          ],
-        ),
-      );
+        ],
+      ),
+    );
   }
 
   Widget _buildCaptchaRequired(ResourcesItem resource) {
@@ -518,6 +519,7 @@ class _VideoSourceDrawersState extends ConsumerState<VideoSourceDrawers> {
       key: ValueKey(resource.websiteName),
       resource: resource,
       dataSourceController: widget.videoSourceController,
+      subjectName: widget.subjectName,
     );
   }
 
@@ -667,10 +669,12 @@ class CaptchaView extends StatefulWidget {
     super.key,
     required this.resource,
     required this.dataSourceController,
+    required this.subjectName,
   });
 
   final ResourcesItem resource;
   final VideoSourceController dataSourceController;
+  final String subjectName;
 
   @override
   State<CaptchaView> createState() => _CaptchaViewState();
@@ -706,19 +710,15 @@ class _CaptchaViewState extends State<CaptchaView> {
     _imageData = null;
   }
 
-  String _searchPageUrl() {
-    final keyword = widget.dataSourceController.keyword;
-    return widget.resource.searchUrl.replaceFirst('{keyword}', keyword);
-  }
-
   void _startVerification() {
     final config = widget.resource.antiCrawlerConfig;
     if (config == null) return;
+    final keyword = widget.subjectName;
 
     _disposeSession();
     _provider = CaptchaProvider();
     final name = widget.resource.websiteName;
-    final url = _searchPageUrl();
+    final url = widget.resource.searchUrl.replaceFirst('{keyword}', keyword);
 
     if (config.captchaType == CaptchaType.autoClickButton) {
       setState(() {

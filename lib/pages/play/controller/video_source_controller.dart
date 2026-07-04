@@ -431,13 +431,6 @@ class VideoSourceController extends GetxController {
     }
 
     try {
-      final videoUiStateController = Get.find<VideoUiStateController>();
-
-      videoUiStateController
-          .updateIndicatorType(VideoControlsIndicatorType.parsingIndicator);
-      videoUiStateController
-          .updateMainAxisAlignmentType(MainAxisAlignment.center);
-      videoUiStateController.showIndicator();
       playController.parseResult.value = '正在解析视频源...';
 
       final source = await _videoSourceProvider!

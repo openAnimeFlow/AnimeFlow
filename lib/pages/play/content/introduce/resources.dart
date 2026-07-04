@@ -1,5 +1,7 @@
+import 'package:anime_flow/models/enums/video_controls_icon_type.dart';
 import 'package:anime_flow/pages/play/controller/play_controller.dart';
 import 'package:anime_flow/pages/play/controller/video_source_controller.dart';
+import 'package:anime_flow/pages/play/controller/video_ui_controller.dart';
 import 'package:anime_flow/routes/provider/routes_args.dart';
 import 'package:anime_flow/widget/animation_network_image.dart';
 import 'package:anime_flow/widget/play_content/source_drawers/video_source_drawers.dart';
@@ -17,11 +19,17 @@ class VideoResourcesView extends ConsumerStatefulWidget {
 class _VideoResourcesViewState extends ConsumerState<VideoResourcesView> {
   final videoSourceController = Get.find<VideoSourceController>();
   final playController = Get.find<PlayController>();
+  final videoUiStateController = Get.find<VideoUiStateController>();
 
   void _showSourceDrawer() {
     void onVideoUrlSelected(String url) {
       playController.player.stop();
       videoSourceController.loadVideoPage(url);
+      videoUiStateController
+          .updateIndicatorType(VideoControlsIndicatorType.parsingIndicator);
+      videoUiStateController
+          .updateMainAxisAlignmentType(MainAxisAlignment.center);
+      videoUiStateController.showIndicator();
     }
 
     final subjectName = ref.read(playExtraProvider).playExtra.subjectName;

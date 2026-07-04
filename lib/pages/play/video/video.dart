@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:io';
 
+import 'package:anime_flow/models/enums/video_controls_icon_type.dart';
 import 'package:anime_flow/models/play/play_history.dart';
 import 'package:anime_flow/routes/model/play_route_extra.dart';
 import 'package:anime_flow/pages/play/controller/play_controller.dart';
@@ -70,6 +71,11 @@ class _VideoViewState extends ConsumerState<VideoView> with WindowListener {
 
     final resources = videoSourceController.videoResources.toList();
     videoSourceController.autoSelectFirstResource(resources, force: true);
+    videoUiStateController
+        .updateIndicatorType(VideoControlsIndicatorType.parsingIndicator);
+    videoUiStateController
+        .updateMainAxisAlignmentType(MainAxisAlignment.center);
+    videoUiStateController.showIndicator();
   }
 
   /// 等待资源搜索完成。

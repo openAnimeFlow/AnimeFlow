@@ -2,21 +2,21 @@ import 'package:anime_flow/constants/layout_constant.dart';
 import 'package:anime_flow/pages/play/controller/play_controller.dart';
 import 'package:anime_flow/utils/format_time_util.dart';
 import 'package:flutter/material.dart';
-import 'package:get/get.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-class VideoSetting extends StatefulWidget {
+class VideoSetting extends ConsumerStatefulWidget {
   const VideoSetting({super.key});
 
   @override
-  State<VideoSetting> createState() => _VideoSettingState();
+  ConsumerState<VideoSetting> createState() => _VideoSettingState();
 }
 
-class _VideoSettingState extends State<VideoSetting> {
+class _VideoSettingState extends ConsumerState<VideoSetting> {
   bool isExpandedTime = false;
   int selectedHours = 0; // 选中的小时
   int selectedMinutes = 0; // 选中的分钟
 
-  final PlayController playController = Get.find<PlayController>();
+  late final PlayController playController;
 
   // 小时列表 (0-23)
   final List<int> _hours = List.generate(24, (index) => index);
@@ -26,13 +26,14 @@ class _VideoSettingState extends State<VideoSetting> {
 
   // 滚动控制器
   final FixedExtentScrollController _hoursController =
-  FixedExtentScrollController();
+      FixedExtentScrollController();
   final FixedExtentScrollController _minutesController =
-  FixedExtentScrollController();
+      FixedExtentScrollController();
 
   @override
   void initState() {
     super.initState();
+    playController = ref.read(playControllerProvider);
     // 延迟设置初始位置，确保列表已构建
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _hoursController.jumpToItem(selectedHours);
@@ -117,14 +118,15 @@ class _VideoSettingState extends State<VideoSetting> {
                           const Icon(Icons.slow_motion_video_outlined,
                               size: 25),
                           const SizedBox(height: 5),
-                          Obx(
-                                () => Text(
-                              playController
-                                  .scheduledStopDuration.value ==
-                                  0
+                          ValueListenableBuilder<int>(
+                            valueListenable:
+                                playController.scheduledStopDuration,
+                            builder: (context, scheduledStopDuration, _) =>
+                                Text(
+                              scheduledStopDuration == 0
                                   ? '定时关闭'
-                                  : FormatTimeUtil.formatScheduledTime(playController
-                                  .scheduledStopDuration.value),
+                                  : FormatTimeUtil.formatScheduledTime(
+                                      scheduledStopDuration),
                               style: TextStyle(
                                 fontSize: 12,
                                 decoration: TextDecoration.none,
@@ -146,192 +148,191 @@ class _VideoSettingState extends State<VideoSetting> {
                     height: isExpandedTime ? null : 0,
                     child: isExpandedTime
                         ? Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        // 显示选中的时间
-                        Container(
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 16,
-                            vertical: 12,
-                          ),
-                          decoration: BoxDecoration(
-                            color: Theme.of(context)
-                                .colorScheme
-                                .primaryContainer
-                                .withValues(alpha: 0.3),
-                            borderRadius: BorderRadius.circular(12),
-                            border: Border.all(
-                              color:
-                              Theme.of(context).colorScheme.primary,
-                              width: 2,
-                            ),
-                          ),
-                          child: Row(
+                            crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              Expanded(
-                                child: Text(
-                                  _formatSelectedTime(),
-                                  style: TextStyle(
-                                    fontSize: 16,
-                                    fontWeight: FontWeight.w600,
-                                    decoration: TextDecoration.none,
-                                    color: Theme.of(context)
-                                        .colorScheme
-                                        .primary,
+                              // 显示选中的时间
+                              Container(
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 16,
+                                  vertical: 12,
+                                ),
+                                decoration: BoxDecoration(
+                                  color: Theme.of(context)
+                                      .colorScheme
+                                      .primaryContainer
+                                      .withValues(alpha: 0.3),
+                                  borderRadius: BorderRadius.circular(12),
+                                  border: Border.all(
+                                    color:
+                                        Theme.of(context).colorScheme.primary,
+                                    width: 2,
                                   ),
                                 ),
-                              ),
-                              InkWell(
-                                onTap: () {
-                                  final totalSeconds =
-                                      selectedHours * 3600 +
-                                          selectedMinutes * 60;
-
-                                  if (totalSeconds > 0) {
-                                    playController.stopPlaying(
-                                      duration:
-                                      Duration(seconds: totalSeconds),
-                                    );
-                                  } else {
-                                    // 如果选择的是0，取消定时停止
-                                    playController
-                                        .cancelScheduledStop();
-                                  }
-
-                                  setState(() {
-                                    isExpandedTime = false;
-                                  });
-                                  // VideoSetting 通过 showGeneralDialog 打开，不是 GoRouter 路由页。
-                                  // 里应使用 Navigator.of(context).pop() 关闭
-                                  Navigator.of(context).pop();
-                                },
-                                child: Text(
-                                  '确定',
-                                  style: TextStyle(
-                                    fontWeight: FontWeight.w600,
-                                    color: Theme.of(context)
-                                        .colorScheme
-                                        .primary,
-                                  ),
-                                ),
-                              )
-                            ],
-                          ),
-                        ),
-                        const SizedBox(height: 16),
-                        // 滚动时间选择器
-                        Stack(
-                          children: [
-                            SizedBox(
-                              height: 150,
-                              child: Row(
-                                children: [
-                                  // 小时选择器
-                                  Expanded(
-                                    child:
-                                    ListWheelScrollView.useDelegate(
-                                      controller: _hoursController,
-                                      itemExtent: 40,
-                                      physics:
-                                      const FixedExtentScrollPhysics(),
-                                      onSelectedItemChanged: (index) {
-                                        setState(() {
-                                          selectedHours = _hours[index];
-                                        });
-                                      },
-                                      childDelegate:
-                                      ListWheelChildBuilderDelegate(
-                                        builder: (context, index) {
-                                          if (index >= _hours.length) {
-                                            return null;
-                                          }
-                                          final hour = _hours[index];
-                                          final isSelected =
-                                              selectedHours == hour;
-                                          return Center(
-                                            child: Text(
-                                              hour.toString(),
-                                              style: TextStyle(
-                                                fontSize:
-                                                isSelected ? 20 : 16,
-                                                fontWeight: isSelected
-                                                    ? FontWeight.bold
-                                                    : FontWeight.normal,
-                                                color: isSelected
-                                                    ? Theme.of(context)
-                                                    .colorScheme
-                                                    .primary
-                                                    : Theme.of(context)
-                                                    .textTheme
-                                                    .bodyLarge
-                                                    ?.color,
-                                                decoration:
-                                                TextDecoration.none,
-                                              ),
-                                            ),
-                                          );
-                                        },
-                                        childCount: _hours.length,
+                                child: Row(
+                                  children: [
+                                    Expanded(
+                                      child: Text(
+                                        _formatSelectedTime(),
+                                        style: TextStyle(
+                                          fontSize: 16,
+                                          fontWeight: FontWeight.w600,
+                                          decoration: TextDecoration.none,
+                                          color: Theme.of(context)
+                                              .colorScheme
+                                              .primary,
+                                        ),
                                       ),
                                     ),
-                                  ),
-                                  // 分钟选择器
-                                  Expanded(
-                                    child:
-                                    ListWheelScrollView.useDelegate(
-                                      controller: _minutesController,
-                                      itemExtent: 40,
-                                      physics:
-                                      const FixedExtentScrollPhysics(),
-                                      onSelectedItemChanged: (index) {
-                                        setState(() {
-                                          selectedMinutes =
-                                          _minutes[index];
-                                        });
-                                      },
-                                      childDelegate:
-                                      ListWheelChildBuilderDelegate(
-                                        builder: (context, index) {
-                                          if (index >= _minutes.length) {
-                                            return null;
-                                          }
-                                          final minute = _minutes[index];
-                                          final isSelected =
-                                              selectedMinutes == minute;
-                                          return Center(
-                                            child: Text(
-                                              minute.toString(),
-                                              style: TextStyle(
-                                                fontSize:
-                                                isSelected ? 20 : 16,
-                                                fontWeight: isSelected
-                                                    ? FontWeight.bold
-                                                    : FontWeight.normal,
-                                                color: isSelected
-                                                    ? Theme.of(context)
-                                                    .colorScheme
-                                                    .primary
-                                                    : Theme.of(context)
-                                                    .textTheme
-                                                    .bodyLarge
-                                                    ?.color,
-                                                decoration:
-                                                TextDecoration.none,
-                                              ),
-                                            ),
+                                    InkWell(
+                                      onTap: () {
+                                        final totalSeconds =
+                                            selectedHours * 3600 +
+                                                selectedMinutes * 60;
+
+                                        if (totalSeconds > 0) {
+                                          playController.stopPlaying(
+                                            duration:
+                                                Duration(seconds: totalSeconds),
                                           );
-                                        },
-                                        childCount: _minutes.length,
+                                        } else {
+                                          // 如果选择的是0，取消定时停止
+                                          playController.cancelScheduledStop();
+                                        }
+
+                                        setState(() {
+                                          isExpandedTime = false;
+                                        });
+                                        // VideoSetting 通过 showGeneralDialog 打开，不是 GoRouter 路由页。
+                                        // 里应使用 Navigator.of(context).pop() 关闭
+                                        Navigator.of(context).pop();
+                                      },
+                                      child: Text(
+                                        '确定',
+                                        style: TextStyle(
+                                          fontWeight: FontWeight.w600,
+                                          color: Theme.of(context)
+                                              .colorScheme
+                                              .primary,
+                                        ),
                                       ),
+                                    )
+                                  ],
+                                ),
+                              ),
+                              const SizedBox(height: 16),
+                              // 滚动时间选择器
+                              Stack(
+                                children: [
+                                  SizedBox(
+                                    height: 150,
+                                    child: Row(
+                                      children: [
+                                        // 小时选择器
+                                        Expanded(
+                                          child:
+                                              ListWheelScrollView.useDelegate(
+                                            controller: _hoursController,
+                                            itemExtent: 40,
+                                            physics:
+                                                const FixedExtentScrollPhysics(),
+                                            onSelectedItemChanged: (index) {
+                                              setState(() {
+                                                selectedHours = _hours[index];
+                                              });
+                                            },
+                                            childDelegate:
+                                                ListWheelChildBuilderDelegate(
+                                              builder: (context, index) {
+                                                if (index >= _hours.length) {
+                                                  return null;
+                                                }
+                                                final hour = _hours[index];
+                                                final isSelected =
+                                                    selectedHours == hour;
+                                                return Center(
+                                                  child: Text(
+                                                    hour.toString(),
+                                                    style: TextStyle(
+                                                      fontSize:
+                                                          isSelected ? 20 : 16,
+                                                      fontWeight: isSelected
+                                                          ? FontWeight.bold
+                                                          : FontWeight.normal,
+                                                      color: isSelected
+                                                          ? Theme.of(context)
+                                                              .colorScheme
+                                                              .primary
+                                                          : Theme.of(context)
+                                                              .textTheme
+                                                              .bodyLarge
+                                                              ?.color,
+                                                      decoration:
+                                                          TextDecoration.none,
+                                                    ),
+                                                  ),
+                                                );
+                                              },
+                                              childCount: _hours.length,
+                                            ),
+                                          ),
+                                        ),
+                                        // 分钟选择器
+                                        Expanded(
+                                          child:
+                                              ListWheelScrollView.useDelegate(
+                                            controller: _minutesController,
+                                            itemExtent: 40,
+                                            physics:
+                                                const FixedExtentScrollPhysics(),
+                                            onSelectedItemChanged: (index) {
+                                              setState(() {
+                                                selectedMinutes =
+                                                    _minutes[index];
+                                              });
+                                            },
+                                            childDelegate:
+                                                ListWheelChildBuilderDelegate(
+                                              builder: (context, index) {
+                                                if (index >= _minutes.length) {
+                                                  return null;
+                                                }
+                                                final minute = _minutes[index];
+                                                final isSelected =
+                                                    selectedMinutes == minute;
+                                                return Center(
+                                                  child: Text(
+                                                    minute.toString(),
+                                                    style: TextStyle(
+                                                      fontSize:
+                                                          isSelected ? 20 : 16,
+                                                      fontWeight: isSelected
+                                                          ? FontWeight.bold
+                                                          : FontWeight.normal,
+                                                      color: isSelected
+                                                          ? Theme.of(context)
+                                                              .colorScheme
+                                                              .primary
+                                                          : Theme.of(context)
+                                                              .textTheme
+                                                              .bodyLarge
+                                                              ?.color,
+                                                      decoration:
+                                                          TextDecoration.none,
+                                                    ),
+                                                  ),
+                                                );
+                                              },
+                                              childCount: _minutes.length,
+                                            ),
+                                          ),
+                                        ),
+                                      ],
                                     ),
                                   ),
                                 ],
                               ),
-                            ),
-                          ],
-                        ),
-                      ],
-                    )
+                            ],
+                          )
                         : const SizedBox.shrink(),
                   ),
                   const Divider(),

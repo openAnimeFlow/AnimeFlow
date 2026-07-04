@@ -2,21 +2,27 @@ import 'package:anime_flow/constants/storage_key.dart';
 import 'package:anime_flow/pages/play/controller/play_controller.dart';
 import 'package:anime_flow/repository/storage.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_svg/svg.dart';
-import 'package:get/get.dart';
 import 'package:hive_ce/hive.dart';
 
 /// 弹幕设置弹窗
-class DanmakuSetting extends StatefulWidget {
+class DanmakuSetting extends ConsumerStatefulWidget {
   const DanmakuSetting({super.key});
 
   @override
-  State<DanmakuSetting> createState() => _DanmakuSettingState();
+  ConsumerState<DanmakuSetting> createState() => _DanmakuSettingState();
 }
 
-class _DanmakuSettingState extends State<DanmakuSetting> {
-  final playController = Get.find<PlayController>();
+class _DanmakuSettingState extends ConsumerState<DanmakuSetting> {
+  late final PlayController playController;
   Box setting = Storage.setting;
+
+  @override
+  void initState() {
+    super.initState();
+    playController = ref.read(playControllerProvider);
+  }
 
   @override
   Widget build(BuildContext context) {

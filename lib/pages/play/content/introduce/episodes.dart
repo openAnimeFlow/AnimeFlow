@@ -1,11 +1,9 @@
 import 'package:anime_flow/constants/assets_path_constants.dart';
 import 'package:anime_flow/models/item/bangumi/episodes_item.dart';
-import 'package:anime_flow/pages/play/controller/play_controller.dart';
 import 'package:anime_flow/pages/play/provider/episodes_provider.dart';
 import 'package:anime_flow/routes/provider/routes_args.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:get/get.dart';
 import 'package:lottie/lottie.dart';
 
 class EpisodesComponents extends ConsumerStatefulWidget {
@@ -16,7 +14,6 @@ class EpisodesComponents extends ConsumerStatefulWidget {
 }
 
 class _EpisodesComponentsState extends ConsumerState<EpisodesComponents> {
-  final playPageController = Get.find<PlayController>();
   final controller = ScrollController();
 
   /// 布局模式：false=列表，true=网格

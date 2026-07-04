@@ -4,9 +4,9 @@ import 'package:anime_flow/pages/play/controller/play_controller.dart';
 import 'package:anime_flow/pages/play/controller/video_ui_controller.dart';
 import 'package:anime_flow/utils/format_time_util.dart';
 import 'package:anime_flow/utils/utils.dart';
+import 'package:anime_flow/widget/multi_value_listenable_builder.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:get/get.dart';
 
 /// 中间区域控件
 class MiddleAreaControl extends ConsumerStatefulWidget {
@@ -17,10 +17,9 @@ class MiddleAreaControl extends ConsumerStatefulWidget {
 }
 
 class _MiddleAreaControlState extends ConsumerState<MiddleAreaControl> {
-  final playController = Get.find<PlayController>();
-
   @override
   Widget build(BuildContext context) {
+    final playController = ref.read(playControllerProvider);
     final videoUiState = ref.watch(videoUiStateControllerProvider);
     const double topAreaHeight = 50.0;
     final speedAsync = ref.watch(networkSpeedStreamProvider(2000));
@@ -34,15 +33,23 @@ class _MiddleAreaControlState extends ConsumerState<MiddleAreaControl> {
       fontWeight: FontWeight.w500,
     );
 
-    return Container(
-      height: double.infinity,
-      width: double.infinity,
-      color: Colors.transparent,
-      child: Column(
-        mainAxisAlignment: videoUiState.mainAxisAlignmentType,
-        children: [
-          //指示器Icon
-          switch (videoUiState.indicatorType) {
+    return MultiValueListenableBuilder(
+      listenables: [
+        playController.volume,
+        playController.playing,
+        playController.duration,
+        playController.parseResult,
+        playController.rate,
+      ],
+      builder: (context) => Container(
+        height: double.infinity,
+        width: double.infinity,
+        color: Colors.transparent,
+        child: Column(
+          mainAxisAlignment: videoUiState.mainAxisAlignmentType,
+          children: [
+            //指示器Icon
+            switch (videoUiState.indicatorType) {
               //无指示器
               VideoControlsIndicatorType.noIndicator => const SizedBox.shrink(),
 
@@ -229,8 +236,9 @@ class _MiddleAreaControlState extends ConsumerState<MiddleAreaControl> {
                     ],
                   ),
                 ),
-          }
-        ],
+            }
+          ],
+        ),
       ),
     );
   }

@@ -2,7 +2,6 @@ import 'package:anime_flow/pages/play/controller/play_controller.dart';
 import 'package:anime_flow/pages/play/controller/video_ui_controller.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:get/get.dart';
 
 class RateButton extends ConsumerWidget {
   final PlayController playController;
@@ -24,65 +23,67 @@ class RateButton extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final videoUiStateController =
         ref.read(videoUiStateControllerProvider.notifier);
-    return Obx(() {
-      final currentRate = playController.rate.value;
-      final colorScheme = Theme.of(context).colorScheme;
+    return ValueListenableBuilder<double>(
+        valueListenable: playController.rate,
+        builder: (context, currentRate, _) {
+          final colorScheme = Theme.of(context).colorScheme;
 
-      return MenuAnchor(
-        onOpen: () {
-          videoUiStateController.cancelUiTimer();
-        },
-        onClose: () {
-          videoUiStateController.hideControlsUi(
-            duration: const Duration(seconds: 2),
-          );
-        },
-        menuChildren: _speeds.map((speed) {
-          final isSelected = currentRate == speed;
-          return MenuItemButton(
-            onPressed: () {
-              playController.startSpeedBoost(speed);
+          return MenuAnchor(
+            onOpen: () {
+              videoUiStateController.cancelUiTimer();
             },
-            child: SizedBox(
-              width: 112,
-              height: 40,
-              child: Row(
-                children: [
-                  Expanded(
-                    child: Text(
-                      '${speed}x',
-                      style: TextStyle(
-                        color: isSelected ? colorScheme.primary : null,
-                        fontWeight:
-                            isSelected ? FontWeight.bold : FontWeight.normal,
+            onClose: () {
+              videoUiStateController.hideControlsUi(
+                duration: const Duration(seconds: 2),
+              );
+            },
+            menuChildren: _speeds.map((speed) {
+              final isSelected = currentRate == speed;
+              return MenuItemButton(
+                onPressed: () {
+                  playController.startSpeedBoost(speed);
+                },
+                child: SizedBox(
+                  width: 112,
+                  height: 40,
+                  child: Row(
+                    children: [
+                      Expanded(
+                        child: Text(
+                          '${speed}x',
+                          style: TextStyle(
+                            color: isSelected ? colorScheme.primary : null,
+                            fontWeight: isSelected
+                                ? FontWeight.bold
+                                : FontWeight.normal,
+                          ),
+                        ),
                       ),
-                    ),
+                      if (isSelected)
+                        Icon(
+                          Icons.check,
+                          size: 18,
+                          color: colorScheme.primary,
+                        ),
+                    ],
                   ),
-                  if (isSelected)
-                    Icon(
-                      Icons.check,
-                      size: 18,
-                      color: colorScheme.primary,
-                    ),
-                ],
-              ),
-            ),
-          );
-        }).toList(),
-        builder:
-            (BuildContext context, MenuController controller, Widget? child) {
-          return TextButton(
-            onPressed: () {
-              if (controller.isOpen) {
-                controller.close();
-              } else {
-                controller.open();
-              }
+                ),
+              );
+            }).toList(),
+            builder: (BuildContext context, MenuController controller,
+                Widget? child) {
+              return TextButton(
+                onPressed: () {
+                  if (controller.isOpen) {
+                    controller.close();
+                  } else {
+                    controller.open();
+                  }
+                },
+                child: Text(currentRate == 1.0 ? '倍速' : '${currentRate}x'),
+              );
             },
-            child: Text(currentRate == 1.0 ? '倍速' : '${currentRate}x'),
           );
-        },
-      );
-    });
+        });
   }
 }

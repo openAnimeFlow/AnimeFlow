@@ -14,7 +14,6 @@ import 'package:anime_flow/repository/play_repository.dart';
 import 'package:anime_flow/providers/video/providers.dart';
 import 'package:anime_flow/utils/crawl_config.dart';
 import 'package:anime_flow/utils/logger.dart';
-import 'package:get/get.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 part 'video_source_controller.g.dart';
@@ -71,7 +70,7 @@ class VideoSourceState {
   }
 }
 
-@Riverpod(keepAlive: true, dependencies: [Episodes, playExtra])
+@Riverpod(keepAlive: true, dependencies: [Episodes, playExtra, playController])
 class VideoSourceController extends _$VideoSourceController {
   WebViewVideoSourceProvider? _webViewVideoProvider;
   final LiggLogger _logger = LiggLogger();
@@ -209,7 +208,7 @@ class VideoSourceController extends _$VideoSourceController {
 
   Future<void> retryResources(String websiteName) async {
     final configs = await CrawlConfig.loadAllCrawlConfigs();
-    final config = configs.firstWhereOrNull((c) => c.name == websiteName);
+    final config = _firstConfigWhere(configs, (c) => c.name == websiteName);
     if (config == null) {
       return;
     }
@@ -367,7 +366,8 @@ class VideoSourceController extends _$VideoSourceController {
         websiteIndex++) {
       final resource = resources[websiteIndex];
       for (final resourceItem in resource.episodeResources) {
-        final episode = resourceItem.episodes.firstWhereOrNull(
+        final episode = _firstEpisodeWhere(
+          resourceItem.episodes,
           (ep) => ep.episodeSort == state.currentEpisodeIndex,
         );
         if (episode == null) {
@@ -453,7 +453,7 @@ class VideoSourceController extends _$VideoSourceController {
   Future<bool> loadVideoPage(String url) async {
     _webViewVideoProvider?.cancel();
 
-    final playController = Get.find<PlayController>();
+    final playController = ref.read(playControllerProvider);
     playController.isParsing.value = true;
 
     _webViewVideoProvider ??= WebViewVideoSourceProvider();
@@ -509,6 +509,26 @@ class VideoSourceController extends _$VideoSourceController {
   }
 
   /// 取消当前视频源解析并销毁 Provider
+}
+
+CrawlConfigItem? _firstConfigWhere(
+  List<CrawlConfigItem> configs,
+  bool Function(CrawlConfigItem config) test,
+) {
+  for (final config in configs) {
+    if (test(config)) return config;
+  }
+  return null;
+}
+
+Episode? _firstEpisodeWhere(
+  List<Episode> episodes,
+  bool Function(Episode episode) test,
+) {
+  for (final episode in episodes) {
+    if (test(episode)) return episode;
+  }
+  return null;
 }
 
 class _AutoLoadCandidate {

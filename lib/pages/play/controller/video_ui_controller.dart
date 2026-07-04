@@ -64,8 +64,7 @@ class VideoUiState {
   }) {
     return VideoUiState(
       isShowControlsUi: isShowControlsUi ?? this.isShowControlsUi,
-      isHorizontalDragging:
-          isHorizontalDragging ?? this.isHorizontalDragging,
+      isHorizontalDragging: isHorizontalDragging ?? this.isHorizontalDragging,
       dragPosition: dragPosition ?? this.dragPosition,
       isShowIndicatorUi: isShowIndicatorUi ?? this.isShowIndicatorUi,
       indicatorType: indicatorType ?? this.indicatorType,
@@ -315,7 +314,8 @@ class VideoUiStateController extends _$VideoUiStateController
 
   void updateBrightnessDrag(double dragDistance, double screenHeight) {
     final brightnessChange = -(dragDistance / screenHeight);
-    final newBrightness = (_dragStartBrightness + brightnessChange).clamp(0.0, 1.0);
+    final newBrightness =
+        (_dragStartBrightness + brightnessChange).clamp(0.0, 1.0);
 
     if (newBrightness >= 1.0 && state.currentBrightness < 1.0) {
       vibrateHeavy();

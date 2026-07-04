@@ -14,7 +14,6 @@ class IntroduceView extends StatefulWidget {
 
 class _IntroduceViewState extends State<IntroduceView>
     with AutomaticKeepAliveClientMixin {
-
   @override
   bool get wantKeepAlive => true;
 
@@ -28,8 +27,8 @@ class _IntroduceViewState extends State<IntroduceView>
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Consumer(builder: (context, ref, child) {
-              final subjectName = ref.watch(playExtraProvider
-                  .select((e) => e.playExtra.subjectName));
+              final subjectName = ref.watch(
+                  playExtraProvider.select((e) => e.playExtra.subjectName));
               return Text(
                 subjectName,
                 style:

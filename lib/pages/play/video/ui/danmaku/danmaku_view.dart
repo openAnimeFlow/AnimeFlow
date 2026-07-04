@@ -6,7 +6,6 @@ import 'package:anime_flow/repository/storage.dart';
 import 'package:canvas_danmaku/canvas_danmaku.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:get/get.dart';
 
 class DanmakuView extends ConsumerStatefulWidget {
   const DanmakuView({super.key});
@@ -18,9 +17,8 @@ class DanmakuView extends ConsumerStatefulWidget {
 class _DanmakuViewState extends ConsumerState<DanmakuView>
     with AutomaticKeepAliveClientMixin {
   final setting = Storage.setting;
-  final playController = Get.find<PlayController>();
+  late final PlayController playController;
   Timer? _danmakuTimer;
-  Worker? _rateWorker;
 
   // 弹幕配置
   late bool _border;
@@ -43,6 +41,7 @@ class _DanmakuViewState extends ConsumerState<DanmakuView>
   @override
   void initState() {
     super.initState();
+    playController = ref.read(playControllerProvider);
 
     // 初始化弹幕配置
     _border = setting.get(DanmakuKey.danmakuBorder, defaultValue: true);
@@ -50,23 +49,31 @@ class _DanmakuViewState extends ConsumerState<DanmakuView>
     _fontSize = setting.get(DanmakuKey.danmakuFontSize, defaultValue: 16.0);
     _danmakuArea = setting.get(DanmakuKey.danmakuArea, defaultValue: 0.25);
     _hideTop = setting.get(DanmakuKey.danmakuHideTop, defaultValue: false);
-    _hideBottom = setting.get(DanmakuKey.danmakuHideBottom, defaultValue: false);
-    _hideScroll = setting.get(DanmakuKey.danmakuHideScroll, defaultValue: false);
-    _massiveMode = setting.get(DanmakuKey.danmakuMassiveMode, defaultValue: false);
+    _hideBottom =
+        setting.get(DanmakuKey.danmakuHideBottom, defaultValue: false);
+    _hideScroll =
+        setting.get(DanmakuKey.danmakuHideScroll, defaultValue: false);
+    _massiveMode =
+        setting.get(DanmakuKey.danmakuMassiveMode, defaultValue: false);
     _danmakuColor = setting.get(DanmakuKey.danmakuColor, defaultValue: true);
-    _danmakuDuration = setting.get(DanmakuKey.danmakuDuration, defaultValue: 8.0);
-    _danmakuLineHeight = setting.get(DanmakuKey.danmakuLineHeight, defaultValue: 1.6);
-    _danmakuFontWeight = setting.get(DanmakuKey.danmakuFontWeight, defaultValue: 4);
-    _danmakuUseSystemFont = setting.get(DanmakuKey.danmakuUseSystemFont, defaultValue: false);
+    _danmakuDuration =
+        setting.get(DanmakuKey.danmakuDuration, defaultValue: 8.0);
+    _danmakuLineHeight =
+        setting.get(DanmakuKey.danmakuLineHeight, defaultValue: 1.6);
+    _danmakuFontWeight =
+        setting.get(DanmakuKey.danmakuFontWeight, defaultValue: 4);
+    _danmakuUseSystemFont =
+        setting.get(DanmakuKey.danmakuUseSystemFont, defaultValue: false);
 
     // 启动弹幕定时器
     _startDanmakuTimer();
 
-    // 监听倍速变化，更新弹幕速度
-    _rateWorker = ever(playController.rate, (rate) {
-      // 倍速变化时，更新弹幕速度需要在 DanmakuScreen 重建时更新
-      setState(() {});
-    });
+    playController.rate.addListener(_handleRateChanged);
+  }
+
+  void _handleRateChanged() {
+    if (!mounted) return;
+    setState(() {});
   }
 
   void _startDanmakuTimer() {
@@ -82,7 +89,7 @@ class _DanmakuViewState extends ConsumerState<DanmakuView>
           playing &&
           playController.danmakuOn.value) {
         final currentSecond = currentPosition.inSeconds;
-        final danmakus = playController.danDanmakus[currentSecond];
+        final danmakus = playController.danDanmakus.value[currentSecond];
 
         if (danmakus != null && danmakus.isNotEmpty) {
           // 按索引延迟添加弹幕
@@ -100,12 +107,12 @@ class _DanmakuViewState extends ConsumerState<DanmakuView>
 
                 // 本人弹幕不参与平台隐藏
                 // if (!danmaku.selfSend) {
-                  final regex = RegExp(r'\[([^\]]+)\]');
-                  final match = regex.firstMatch(danmaku.source);
-                  final platform = match?.group(1) ?? '弹弹Play';
-                  if (playController.isPlatformHidden(platform)) {
-                    return;
-                  }
+                final regex = RegExp(r'\[([^\]]+)\]');
+                final match = regex.firstMatch(danmaku.source);
+                final platform = match?.group(1) ?? '弹弹Play';
+                if (playController.isPlatformHidden(platform)) {
+                  return;
+                }
                 // }
 
                 // 处理颜色
@@ -129,7 +136,7 @@ class _DanmakuViewState extends ConsumerState<DanmakuView>
   @override
   void dispose() {
     _danmakuTimer?.cancel();
-    _rateWorker?.dispose();
+    playController.rate.removeListener(_handleRateChanged);
     super.dispose();
   }
 

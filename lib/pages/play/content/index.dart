@@ -9,20 +9,19 @@ import 'package:anime_flow/utils/logger.dart';
 import 'package:anime_flow/widget/danmaku_text_field.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:get/get.dart';
 
 import 'comments/index.dart';
 
-class ContentView extends StatefulWidget {
+class ContentView extends ConsumerStatefulWidget {
   const ContentView({super.key});
 
   @override
-  State<ContentView> createState() => _ContentViewState();
+  ConsumerState<ContentView> createState() => _ContentViewState();
 }
 
-class _ContentViewState extends State<ContentView>
+class _ContentViewState extends ConsumerState<ContentView>
     with SingleTickerProviderStateMixin {
-  final playController = Get.find<PlayController>();
+  late final PlayController playController;
   final List<String> tabs = ['简介', '吐槽'];
   late TabController tabController;
   bool isRequesting = false;
@@ -33,6 +32,7 @@ class _ContentViewState extends State<ContentView>
   @override
   void initState() {
     super.initState();
+    playController = ref.read(playControllerProvider);
     tabController = TabController(length: tabs.length, vsync: this);
     tabController.addListener(onTabChanged);
   }
@@ -132,67 +132,68 @@ class _ContentViewState extends State<ContentView>
         return PreferredSize(
           preferredSize: const Size.fromHeight(100),
           child: Column(
-          children: [
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                TabBar(
-                  padding:
-                      EdgeInsets.only(top: MediaQuery.of(context).padding.top),
-                  dividerHeight: 0,
-                  controller: tabController,
-                  tabAlignment: TabAlignment.start,
-                  isScrollable: true,
-                  tabs: tabs.map((name) => Tab(text: name)).toList(),
-                ),
-                Obx(
-                  () => playController.isWideScreen.value
-                      ? const Spacer()
-                      : Consumer(
-                          builder: (context, ref, _) {
-                            final userInfo =
-                                ref.watch(currentUserInfoProvider).value;
-                            if (userInfo == null) {
-                              return const SizedBox.shrink();
-                            }
-                            return SizedBox(
-                              width: 200,
-                              child: Padding(
-                                padding:
-                                    const EdgeInsets.symmetric(horizontal: 8),
-                                child: DanmakuTextField(
-                                  onFocusChange: (hasFocus) {
-                                    if (hasFocus) {
-                                      playController.stopPlaying();
-                                      videoUiStateController.cancelUiTimer();
-                                    } else {
-                                      playController.startPlaying();
-                                      videoUiStateController.hideControlsUi();
-                                    }
-                                  },
-                                  onSend: (text) =>
-                                      onSendDanmaku(text, userInfo.id),
-                                ),
-                              ),
-                            );
-                          },
-                        ),
-                )
-              ],
-            ),
-            const Divider(height: 1),
-            Expanded(
-              child: TabBarView(
-                controller: tabController,
+            children: [
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  const IntroduceView(),
-                  CommentsView(
-                    comments: comments,
+                  TabBar(
+                    padding: EdgeInsets.only(
+                        top: MediaQuery.of(context).padding.top),
+                    dividerHeight: 0,
+                    controller: tabController,
+                    tabAlignment: TabAlignment.start,
+                    isScrollable: true,
+                    tabs: tabs.map((name) => Tab(text: name)).toList(),
+                  ),
+                  ValueListenableBuilder<bool>(
+                    valueListenable: playController.isWideScreen,
+                    builder: (context, isWideScreen, _) => isWideScreen
+                        ? const Spacer()
+                        : Consumer(
+                            builder: (context, ref, _) {
+                              final userInfo =
+                                  ref.watch(currentUserInfoProvider).value;
+                              if (userInfo == null) {
+                                return const SizedBox.shrink();
+                              }
+                              return SizedBox(
+                                width: 200,
+                                child: Padding(
+                                  padding:
+                                      const EdgeInsets.symmetric(horizontal: 8),
+                                  child: DanmakuTextField(
+                                    onFocusChange: (hasFocus) {
+                                      if (hasFocus) {
+                                        playController.stopPlaying();
+                                        videoUiStateController.cancelUiTimer();
+                                      } else {
+                                        playController.startPlaying();
+                                        videoUiStateController.hideControlsUi();
+                                      }
+                                    },
+                                    onSend: (text) =>
+                                        onSendDanmaku(text, userInfo.id),
+                                  ),
+                                ),
+                              );
+                            },
+                          ),
                   )
                 ],
               ),
-            ),
-          ],
+              const Divider(height: 1),
+              Expanded(
+                child: TabBarView(
+                  controller: tabController,
+                  children: [
+                    const IntroduceView(),
+                    CommentsView(
+                      comments: comments,
+                    )
+                  ],
+                ),
+              ),
+            ],
           ),
         );
       },

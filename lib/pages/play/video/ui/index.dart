@@ -36,7 +36,8 @@ class VideoUi extends StatelessWidget {
         ),
 
         ///右侧
-        const Positioned(right: 0, top: 0, bottom: 0, child: RightAreaControl()),
+        const Positioned(
+            right: 0, top: 0, bottom: 0, child: RightAreaControl()),
       ],
     );
   }

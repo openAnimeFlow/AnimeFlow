@@ -6,7 +6,6 @@ import 'package:anime_flow/repository/storage.dart';
 import 'package:anime_flow/utils/vibrate.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:get/get.dart';
 
 /// 移动端手势监听组件
 class MobileGestureDetector extends ConsumerStatefulWidget {
@@ -24,7 +23,7 @@ class _MobileGestureDetectorState extends ConsumerState<MobileGestureDetector> {
   double _verticalDragStartY = 0; // 垂直拖动开始时的Y坐标
   bool _isRightSide = false; // 是否在屏幕右半侧开始垂直拖动
   late double fastForwardSpeed;
-  final playController = Get.find<PlayController>();
+  late final PlayController playController;
 
   VideoUiStateController get videoUiStateController =>
       ref.read(videoUiStateControllerProvider.notifier);
@@ -32,6 +31,7 @@ class _MobileGestureDetectorState extends ConsumerState<MobileGestureDetector> {
   @override
   void initState() {
     super.initState();
+    playController = ref.read(playControllerProvider);
     fastForwardSpeed =
         setting.get(PlaybackKey.fastForwardSpeed, defaultValue: 2.0);
   }
@@ -117,14 +117,16 @@ class _MobileGestureDetectorState extends ConsumerState<MobileGestureDetector> {
         if (_isRightSide) {
           // 右半屏：调整音量
           playController.startVerticalDrag();
-          videoUiStateController.updateMainAxisAlignmentType(MainAxisAlignment.start);
+          videoUiStateController
+              .updateMainAxisAlignmentType(MainAxisAlignment.start);
           videoUiStateController
               .updateIndicatorType(VideoControlsIndicatorType.volumeIndicator);
           videoUiStateController.showIndicator();
         } else {
           // 左半屏：调整屏幕亮度
           videoUiStateController.startBrightnessDragWithoutAutoHide();
-          videoUiStateController.updateMainAxisAlignmentType(MainAxisAlignment.start);
+          videoUiStateController
+              .updateMainAxisAlignmentType(MainAxisAlignment.start);
           videoUiStateController.updateIndicatorType(
               VideoControlsIndicatorType.brightnessIndicator);
           videoUiStateController.showIndicator();

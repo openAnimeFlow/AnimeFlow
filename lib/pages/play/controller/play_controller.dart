@@ -3,6 +3,7 @@ import 'dart:io';
 
 import 'package:anime_flow/constants/constants.dart';
 import 'package:anime_flow/constants/storage_key.dart';
+import 'package:anime_flow/features/shaders/shaders_controller.dart';
 import 'package:anime_flow/http/requests/flow_request.dart';
 import 'package:anime_flow/models/enums/video_controls_icon_type.dart';
 import 'package:anime_flow/models/item/danmaku/danmaku_module.dart';
@@ -10,6 +11,7 @@ import 'package:anime_flow/models/play/play_history.dart';
 import 'package:anime_flow/pages/play/controller/video_ui_controller.dart';
 import 'package:anime_flow/repository/play_repository.dart';
 import 'package:anime_flow/repository/storage.dart';
+import 'package:anime_flow/routes/provider/routes_args.dart';
 import 'package:anime_flow/utils/logger.dart';
 import 'package:anime_flow/utils/systemUtil.dart';
 import 'package:anime_flow/utils/utils.dart';
@@ -17,11 +19,29 @@ import 'package:anime_flow/utils/vibrate.dart';
 import 'package:anime_flow/widget/windows_title_bar.dart';
 import 'package:canvas_danmaku/canvas_danmaku.dart';
 import 'package:flutter/material.dart';
-import 'package:get/get.dart';
 import 'package:hive_ce/hive.dart';
 import 'package:media_kit/media_kit.dart';
 import 'package:media_kit_video/media_kit_video.dart';
+import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:window_manager/window_manager.dart';
+
+part 'play_controller.g.dart';
+
+@Riverpod(
+  keepAlive: true,
+  dependencies: [shadersDirectory, VideoUiStateController, playExtra],
+)
+PlayController playController(Ref ref) {
+  ref.watch(playExtraProvider);
+  final controller = PlayController(
+    shadersDirectory: ref.watch(shadersDirectoryProvider).requireValue,
+    videoUiStateActions: ref.watch(videoUiStateControllerProvider.notifier),
+  )..init();
+
+  ref.onDispose(controller.dispose);
+
+  return controller;
+}
 
 class PlayState {
   /// 播放地址
@@ -60,7 +80,7 @@ class PlayState {
   });
 }
 
-class PlayController extends GetxController {
+class PlayController {
   PlayController({
     required this.shadersDirectory,
     required VideoUiStateActions videoUiStateActions,
@@ -78,19 +98,19 @@ class PlayController extends GetxController {
   /// 1. 关闭
   /// 2. 效率档
   /// 3. 质量档
-  final superResolutionType = 0.obs;
+  final superResolutionType = ValueNotifier<int>(0);
 
   /// 宽屏状态
-  final isWideScreen = false.obs;
+  final isWideScreen = ValueNotifier<bool>(false);
 
   /// 内容区域展开状态
-  final isContentExpanded = true.obs;
+  final isContentExpanded = ValueNotifier<bool>(true);
 
   /// 全屏状态
-  final isFullscreen = false.obs;
+  final isFullscreen = ValueNotifier<bool>(false);
 
   /// 视频画面填充模式
-  final videoFit = BoxFit.contain.obs;
+  final videoFit = ValueNotifier<BoxFit>(BoxFit.contain);
 
   /// 视频地址
   String? videoUrl;
@@ -117,39 +137,39 @@ class PlayController extends GetxController {
   int episodeId = 0;
 
   ///视频解析状态
-  final isParsing = false.obs;
+  final isParsing = ValueNotifier<bool>(false);
 
   ///视频解析结果
-  final RxString parseResult = ''.obs;
+  final parseResult = ValueNotifier<String>('');
 
   ///弹幕相关
-  final RxMap<int, List<Danmaku>> danDanmakus = <int, List<Danmaku>>{}.obs;
+  final danDanmakus = ValueNotifier<Map<int, List<Danmaku>>>({});
   late DanmakuController danmakuController;
-  final RxBool danmakuOn = true.obs;
-  final RxSet<String> hiddenPlatforms = <String>{}.obs;
+  final danmakuOn = ValueNotifier<bool>(true);
+  final hiddenPlatforms = ValueNotifier<Set<String>>({});
   Timer? _saveSettingsTimer;
 
   ///视频播放状态
-  final RxBool playing = false.obs;
+  final playing = ValueNotifier<bool>(false);
 
   ///视频播放进度
-  final Rx<Duration> position = Duration.zero.obs;
+  final position = ValueNotifier<Duration>(Duration.zero);
 
   ///视频总时长
-  final Rx<Duration> duration = Duration.zero.obs;
+  final duration = ValueNotifier<Duration>(Duration.zero);
 
   ///视频缓冲
-  final Rx<Duration> buffered = Duration.zero.obs;
+  final buffered = ValueNotifier<Duration>(Duration.zero);
 
   ///音量
-  final RxDouble volume = 100.0.obs;
+  final volume = ValueNotifier<double>(100.0);
 
   /// 是否正在垂直拖动调整音量
-  final RxBool isVerticalDragging = false.obs;
-  final RxDouble rate = 1.0.obs;
+  final isVerticalDragging = ValueNotifier<bool>(false);
+  final rate = ValueNotifier<double>(1.0);
 
   /// 缓冲状态
-  final RxBool buffering = false.obs;
+  final buffering = ValueNotifier<bool>(false);
 
   /// 记录原始倍速
   double _originalSpeed = 1.0;
@@ -161,7 +181,7 @@ class PlayController extends GetxController {
   Timer? _stopTimer;
 
   /// 定时停止的时间（秒）
-  final RxInt scheduledStopDuration = 0.obs;
+  final scheduledStopDuration = ValueNotifier<int>(0);
 
   /// 弹幕相关
   bool _isLoadingDanmaku = false;
@@ -169,43 +189,40 @@ class PlayController extends GetxController {
   /// 定时保存播放进度的计时器
   Timer? _saveProgressTimer;
 
-  @override
-  void onInit() {
-    super.onInit();
+  final List<StreamSubscription<Object?>> _playerSubscriptions = [];
+  bool _disposed = false;
+
+  void init() {
     final adBlocker = setting.get(PlaybackKey.adBlocker, defaultValue: false);
     player = Player(configuration: PlayerConfiguration(adBlocker: adBlocker));
     videoController = VideoController(player);
     syncPlatformVisibilityFromStorage();
 
-    player.stream.playing.listen((playing) {
-      this.playing.value = playing;
-      _syncDanmakuPauseWithPlayback(playing);
-    });
-
-    player.stream.volume.listen((vol) {
-      volume.value = vol;
-    });
-
-    player.stream.buffer.listen((buffered) {
-      this.buffered.value = buffered;
-    });
-
-    player.stream.buffering.listen((buffering) {
-      this.buffering.value = buffering;
-      _updateBufferingState(buffering);
-    });
-
-    player.stream.rate.listen((r) {
-      rate.value = r;
-    });
-
-    player.stream.position.listen((pos) {
-      position.value = pos;
-    });
-
-    player.stream.duration.listen((dur) {
-      duration.value = dur;
-    });
+    _playerSubscriptions.addAll([
+      player.stream.playing.listen((playing) {
+        this.playing.value = playing;
+        _syncDanmakuPauseWithPlayback(playing);
+      }),
+      player.stream.volume.listen((vol) {
+        volume.value = vol;
+      }),
+      player.stream.buffer.listen((buffered) {
+        this.buffered.value = buffered;
+      }),
+      player.stream.buffering.listen((buffering) {
+        this.buffering.value = buffering;
+        _updateBufferingState(buffering);
+      }),
+      player.stream.rate.listen((r) {
+        rate.value = r;
+      }),
+      player.stream.position.listen((pos) {
+        position.value = pos;
+      }),
+      player.stream.duration.listen((dur) {
+        duration.value = dur;
+      }),
+    ]);
   }
 
   void _syncDanmakuPauseWithPlayback(bool playing) {
@@ -227,16 +244,39 @@ class PlayController extends GetxController {
     }
   }
 
-  @override
-  void onClose() {
+  void dispose() {
+    if (_disposed) return;
+    _disposed = true;
     if (Platform.isWindows) {
       WindowsTitleBarVisibility.reset();
     }
     _saveSettingsTimer?.cancel();
     _saveProgressTimer?.cancel();
     _stopTimer?.cancel();
+    for (final subscription in _playerSubscriptions) {
+      subscription.cancel();
+    }
+    _playerSubscriptions.clear();
     player.dispose();
-    super.onClose();
+    superResolutionType.dispose();
+    isWideScreen.dispose();
+    isContentExpanded.dispose();
+    isFullscreen.dispose();
+    videoFit.dispose();
+    isParsing.dispose();
+    parseResult.dispose();
+    danDanmakus.dispose();
+    danmakuOn.dispose();
+    hiddenPlatforms.dispose();
+    playing.dispose();
+    position.dispose();
+    duration.dispose();
+    buffered.dispose();
+    volume.dispose();
+    isVerticalDragging.dispose();
+    rate.dispose();
+    buffering.dispose();
+    scheduledStopDuration.dispose();
   }
 
   /// 初始化播放状态
@@ -343,30 +383,17 @@ class PlayController extends GetxController {
     const String platformNameGamer = 'Gamer';
     const String platformNameDanDanPlay = '弹弹Play';
 
-    // 根据设置更新 hiddenPlatforms
+    final nextHiddenPlatforms = <String>{};
     if (!platformBilibili) {
-      if (!hiddenPlatforms.contains(platformNameBilibili)) {
-        hiddenPlatforms.add(platformNameBilibili);
-      }
-    } else {
-      hiddenPlatforms.remove(platformNameBilibili);
+      nextHiddenPlatforms.add(platformNameBilibili);
     }
-
     if (!platformGamer) {
-      if (!hiddenPlatforms.contains(platformNameGamer)) {
-        hiddenPlatforms.add(platformNameGamer);
-      }
-    } else {
-      hiddenPlatforms.remove(platformNameGamer);
+      nextHiddenPlatforms.add(platformNameGamer);
     }
-
     if (!platformDanDanPlay) {
-      if (!hiddenPlatforms.contains(platformNameDanDanPlay)) {
-        hiddenPlatforms.add(platformNameDanDanPlay);
-      }
-    } else {
-      hiddenPlatforms.remove(platformNameDanDanPlay);
+      nextHiddenPlatforms.add(platformNameDanDanPlay);
     }
+    hiddenPlatforms.value = nextHiddenPlatforms;
 
     // 同步后清空屏幕弹幕，让新设置生效
     try {
@@ -443,14 +470,12 @@ class PlayController extends GetxController {
 
   void addDanmakuAll(List<Danmaku> danmaku) {
     // 按时间分组
-    danDanmakus.clear();
+    final groupedDanmakus = <int, List<Danmaku>>{};
     for (var item in danmaku) {
       int second = item.time.toInt();
-      if (!danDanmakus.containsKey(second)) {
-        danDanmakus[second] = [];
-      }
-      danDanmakus[second]!.add(item);
+      groupedDanmakus.putIfAbsent(second, () => []).add(item);
     }
+    danDanmakus.value = groupedDanmakus;
   }
 
   /// 发送弹幕
@@ -515,7 +540,7 @@ class PlayController extends GetxController {
 
   void removeDanmaku() {
     danmakuController.clear();
-    danDanmakus.clear();
+    danDanmakus.value = {};
   }
 
   /// 切换弹幕开关
@@ -538,11 +563,13 @@ class PlayController extends GetxController {
 
   /// 切换平台显示/隐藏状态
   void togglePlatformVisibility(String platform) {
-    if (hiddenPlatforms.contains(platform)) {
-      hiddenPlatforms.remove(platform);
+    final nextHiddenPlatforms = {...hiddenPlatforms.value};
+    if (nextHiddenPlatforms.contains(platform)) {
+      nextHiddenPlatforms.remove(platform);
     } else {
-      hiddenPlatforms.add(platform);
+      nextHiddenPlatforms.add(platform);
     }
+    hiddenPlatforms.value = nextHiddenPlatforms;
     // 清空屏幕上的弹幕，新弹幕会按照新的隐藏状态过滤
     try {
       danmakuController.clear();
@@ -551,7 +578,7 @@ class PlayController extends GetxController {
 
   /// 检查平台是否被隐藏
   bool isPlatformHidden(String platform) {
-    return hiddenPlatforms.contains(platform);
+    return hiddenPlatforms.value.contains(platform);
   }
 
   ///暂停/播放

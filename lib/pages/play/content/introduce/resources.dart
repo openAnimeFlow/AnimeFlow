@@ -7,7 +7,6 @@ import 'package:anime_flow/widget/animation_network_image.dart';
 import 'package:anime_flow/widget/play_content/source_drawers/video_source_drawers.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:get/get.dart';
 
 class VideoResourcesView extends ConsumerStatefulWidget {
   const VideoResourcesView({super.key});
@@ -17,9 +16,8 @@ class VideoResourcesView extends ConsumerStatefulWidget {
 }
 
 class _VideoResourcesViewState extends ConsumerState<VideoResourcesView> {
-  final playController = Get.find<PlayController>();
-
   void _showSourceDrawer() {
+    final playController = ref.read(playControllerProvider);
     final videoUiStateController =
         ref.read(videoUiStateControllerProvider.notifier);
     final videoSourceController =

@@ -7,7 +7,6 @@ import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:get/get.dart';
 
 /// 桌面端手势检测器
 class DesktopGestureDetector extends ConsumerStatefulWidget {
@@ -20,12 +19,19 @@ class DesktopGestureDetector extends ConsumerStatefulWidget {
       _DesktopGestureDetectorState();
 }
 
-class _DesktopGestureDetectorState extends ConsumerState<DesktopGestureDetector> {
+class _DesktopGestureDetectorState
+    extends ConsumerState<DesktopGestureDetector> {
   Timer? hoverTimer;
-  final playPageController = Get.find<PlayController>();
+  late final PlayController playPageController;
 
   VideoUiStateController get videoUiStateController =>
       ref.read(videoUiStateControllerProvider.notifier);
+
+  @override
+  void initState() {
+    super.initState();
+    playPageController = ref.read(playControllerProvider);
+  }
 
   @override
   void dispose() {
@@ -50,7 +56,8 @@ class _DesktopGestureDetectorState extends ConsumerState<DesktopGestureDetector>
           if (event.logicalKey == LogicalKeyboardKey.arrowLeft) {
             final currentPosition = playPageController.position.value;
             final duration = playPageController.duration.value;
-            final newPositionMs = (currentPosition - const Duration(seconds: 10)).inMilliseconds;
+            final newPositionMs =
+                (currentPosition - const Duration(seconds: 10)).inMilliseconds;
             final clampedMs = newPositionMs.clamp(0, duration.inMilliseconds);
             playPageController.seekTo(Duration(milliseconds: clampedMs));
             videoUiStateController.updateIndicatorTypeAndShowIndicator(
@@ -61,7 +68,8 @@ class _DesktopGestureDetectorState extends ConsumerState<DesktopGestureDetector>
           if (event.logicalKey == LogicalKeyboardKey.arrowRight) {
             final currentPosition = playPageController.position.value;
             final duration = playPageController.duration.value;
-            final newPositionMs = (currentPosition + const Duration(seconds: 10)).inMilliseconds;
+            final newPositionMs =
+                (currentPosition + const Duration(seconds: 10)).inMilliseconds;
             final clampedMs = newPositionMs.clamp(0, duration.inMilliseconds);
             playPageController.seekTo(Duration(milliseconds: clampedMs));
             videoUiStateController.updateIndicatorTypeAndShowIndicator(
@@ -70,7 +78,8 @@ class _DesktopGestureDetectorState extends ConsumerState<DesktopGestureDetector>
           }
           // 上方向键：增加音量
           if (event.logicalKey == LogicalKeyboardKey.arrowUp) {
-            videoUiStateController.updateMainAxisAlignmentType(MainAxisAlignment.start);
+            videoUiStateController
+                .updateMainAxisAlignmentType(MainAxisAlignment.start);
             videoUiStateController.updateIndicatorTypeAndShowIndicator(
                 VideoControlsIndicatorType.volumeIndicator);
             playPageController.adjustVolumeByWheel(5.0); // 每次增加5%
@@ -78,7 +87,8 @@ class _DesktopGestureDetectorState extends ConsumerState<DesktopGestureDetector>
           }
           // 下方向键：减少音量
           if (event.logicalKey == LogicalKeyboardKey.arrowDown) {
-            videoUiStateController.updateMainAxisAlignmentType(MainAxisAlignment.start);
+            videoUiStateController
+                .updateMainAxisAlignmentType(MainAxisAlignment.start);
             videoUiStateController.updateIndicatorTypeAndShowIndicator(
                 VideoControlsIndicatorType.volumeIndicator);
             playPageController.adjustVolumeByWheel(-5.0); // 每次减少5%

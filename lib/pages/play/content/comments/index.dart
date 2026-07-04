@@ -221,9 +221,8 @@ class _CommentsViewState extends State<CommentsView>
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     InkWell(
-                      onTap: () =>
-                          UserSpaceRoute(name: comment.user.username)
-                              .push(context),
+                      onTap: () => UserSpaceRoute(name: comment.user.username)
+                          .push(context),
                       child: Text(
                         comment.user.nickname,
                         style: const TextStyle(

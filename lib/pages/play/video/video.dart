@@ -13,7 +13,6 @@ import 'package:anime_flow/routes/provider/routes_args.dart';
 import 'package:anime_flow/utils/logger.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:get/get.dart';
 import 'package:media_kit_video/media_kit_video.dart';
 import 'package:window_manager/window_manager.dart';
 
@@ -28,7 +27,7 @@ class VideoView extends ConsumerStatefulWidget {
 }
 
 class _VideoViewState extends ConsumerState<VideoView> with WindowListener {
-  final playController = Get.find<PlayController>();
+  late final PlayController playController;
   late final VideoUiStateController videoUiStateController;
   late final VideoSourceController videoSourceController;
 
@@ -41,6 +40,7 @@ class _VideoViewState extends ConsumerState<VideoView> with WindowListener {
   @override
   void initState() {
     super.initState();
+    playController = ref.read(playControllerProvider);
     videoUiStateController = ref.read(videoUiStateControllerProvider.notifier);
     videoSourceController = ref.read(videoSourceControllerProvider.notifier);
     subject = ref.read(playExtraProvider).playExtra;
@@ -194,10 +194,11 @@ class _VideoViewState extends ConsumerState<VideoView> with WindowListener {
     return Stack(
       children: [
         /// 视频层
-        Obx(
-          () => Video(
+        ValueListenableBuilder<BoxFit>(
+          valueListenable: playController.videoFit,
+          builder: (context, videoFit, _) => Video(
             controller: playController.videoController,
-            fit: playController.videoFit.value,
+            fit: videoFit,
             controls: NoVideoControls,
           ),
         ),

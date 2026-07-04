@@ -28,8 +28,10 @@ class VideoView extends ConsumerStatefulWidget {
 
 class _VideoViewState extends ConsumerState<VideoView> with WindowListener {
   late final PlayController playController;
+  late final PlayStateController playStateController;
   late final VideoUiStateController videoUiStateController;
   late final VideoSourceController videoSourceController;
+  late final PlayControllerState playStateSnapshot;
 
   StreamSubscription<bool>? playbackCompletedSubscription;
   int lastEpisodeIndex = 0;
@@ -41,10 +43,12 @@ class _VideoViewState extends ConsumerState<VideoView> with WindowListener {
   void initState() {
     super.initState();
     playController = ref.read(playControllerProvider);
+    playStateController = ref.read(playStateControllerProvider.notifier);
     videoUiStateController = ref.read(videoUiStateControllerProvider.notifier);
     videoSourceController = ref.read(videoSourceControllerProvider.notifier);
     subject = ref.read(playExtraProvider).playExtra;
     episodesSnapshot = ref.read(episodesProvider);
+    playStateSnapshot = ref.read(playStateControllerProvider);
 
     // 监听视频播放完成
     playbackCompletedSubscription =
@@ -85,13 +89,13 @@ class _VideoViewState extends ConsumerState<VideoView> with WindowListener {
   /// 窗口进入全屏时处理
   @override
   void onWindowEnterFullScreen() {
-    playController.isFullscreen.value = true;
+    playStateController.setIsFullscreen(true);
   }
 
   /// 窗口退出全屏时处理
   @override
   void onWindowLeaveFullScreen() {
-    playController.isFullscreen.value = false;
+    playStateController.setIsFullscreen(false);
   }
 
   /// 等待资源初始化完成后选择资源
@@ -144,8 +148,8 @@ class _VideoViewState extends ConsumerState<VideoView> with WindowListener {
 
   /// 保存播放记录
   void _savePlayHistory() {
-    final position = playController.position.value;
-    final duration = playController.duration.value;
+    final position = playStateSnapshot.position;
+    final duration = playStateSnapshot.duration;
     if (position == Duration.zero || duration == Duration.zero) return;
 
     final subjectId = subject.subjectId;
@@ -194,13 +198,16 @@ class _VideoViewState extends ConsumerState<VideoView> with WindowListener {
     return Stack(
       children: [
         /// 视频层
-        ValueListenableBuilder<BoxFit>(
-          valueListenable: playController.videoFit,
-          builder: (context, videoFit, _) => Video(
-            controller: playController.videoController,
-            fit: videoFit,
-            controls: NoVideoControls,
-          ),
+        Consumer(
+          builder: (context, ref, child) {
+            final videoFit = ref.watch(
+                playStateControllerProvider.select((state) => state.videoFit));
+            return Video(
+              controller: playController.videoController,
+              fit: videoFit,
+              controls: NoVideoControls,
+            );
+          },
         ),
 
         /// 弹幕层

@@ -145,40 +145,38 @@ class _ContentViewState extends ConsumerState<ContentView>
                     isScrollable: true,
                     tabs: tabs.map((name) => Tab(text: name)).toList(),
                   ),
-                  ValueListenableBuilder<bool>(
-                    valueListenable: playController.isWideScreen,
-                    builder: (context, isWideScreen, _) => isWideScreen
-                        ? const Spacer()
-                        : Consumer(
-                            builder: (context, ref, _) {
-                              final userInfo =
-                                  ref.watch(currentUserInfoProvider).value;
-                              if (userInfo == null) {
-                                return const SizedBox.shrink();
-                              }
-                              return SizedBox(
-                                width: 200,
-                                child: Padding(
-                                  padding:
-                                      const EdgeInsets.symmetric(horizontal: 8),
-                                  child: DanmakuTextField(
-                                    onFocusChange: (hasFocus) {
-                                      if (hasFocus) {
-                                        playController.stopPlaying();
-                                        videoUiStateController.cancelUiTimer();
-                                      } else {
-                                        playController.startPlaying();
-                                        videoUiStateController.hideControlsUi();
-                                      }
-                                    },
-                                    onSend: (text) =>
-                                        onSendDanmaku(text, userInfo.id),
-                                  ),
+                  ref.watch(playStateControllerProvider
+                          .select((state) => state.isWideScreen))
+                      ? const Spacer()
+                      : Consumer(
+                          builder: (context, ref, _) {
+                            final userInfo =
+                                ref.watch(currentUserInfoProvider).value;
+                            if (userInfo == null) {
+                              return const SizedBox.shrink();
+                            }
+                            return SizedBox(
+                              width: 200,
+                              child: Padding(
+                                padding:
+                                    const EdgeInsets.symmetric(horizontal: 8),
+                                child: DanmakuTextField(
+                                  onFocusChange: (hasFocus) {
+                                    if (hasFocus) {
+                                      playController.stopPlaying();
+                                      videoUiStateController.cancelUiTimer();
+                                    } else {
+                                      playController.startPlaying();
+                                      videoUiStateController.hideControlsUi();
+                                    }
+                                  },
+                                  onSend: (text) =>
+                                      onSendDanmaku(text, userInfo.id),
                                 ),
-                              );
-                            },
-                          ),
-                  )
+                              ),
+                            );
+                          },
+                        )
                 ],
               ),
               const Divider(height: 1),

@@ -23,67 +23,65 @@ class RateButton extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final videoUiStateController =
         ref.read(videoUiStateControllerProvider.notifier);
-    return ValueListenableBuilder<double>(
-        valueListenable: playController.rate,
-        builder: (context, currentRate, _) {
-          final colorScheme = Theme.of(context).colorScheme;
+    final currentRate = ref.watch(
+      playStateControllerProvider.select((state) => state.rate),
+    );
+    final colorScheme = Theme.of(context).colorScheme;
 
-          return MenuAnchor(
-            onOpen: () {
-              videoUiStateController.cancelUiTimer();
-            },
-            onClose: () {
-              videoUiStateController.hideControlsUi(
-                duration: const Duration(seconds: 2),
-              );
-            },
-            menuChildren: _speeds.map((speed) {
-              final isSelected = currentRate == speed;
-              return MenuItemButton(
-                onPressed: () {
-                  playController.startSpeedBoost(speed);
-                },
-                child: SizedBox(
-                  width: 112,
-                  height: 40,
-                  child: Row(
-                    children: [
-                      Expanded(
-                        child: Text(
-                          '${speed}x',
-                          style: TextStyle(
-                            color: isSelected ? colorScheme.primary : null,
-                            fontWeight: isSelected
-                                ? FontWeight.bold
-                                : FontWeight.normal,
-                          ),
-                        ),
-                      ),
-                      if (isSelected)
-                        Icon(
-                          Icons.check,
-                          size: 18,
-                          color: colorScheme.primary,
-                        ),
-                    ],
+    return MenuAnchor(
+      onOpen: () {
+        videoUiStateController.cancelUiTimer();
+      },
+      onClose: () {
+        videoUiStateController.hideControlsUi(
+          duration: const Duration(seconds: 2),
+        );
+      },
+      menuChildren: _speeds.map((speed) {
+        final isSelected = currentRate == speed;
+        return MenuItemButton(
+          onPressed: () {
+            playController.startSpeedBoost(speed);
+          },
+          child: SizedBox(
+            width: 112,
+            height: 40,
+            child: Row(
+              children: [
+                Expanded(
+                  child: Text(
+                    '${speed}x',
+                    style: TextStyle(
+                      color: isSelected ? colorScheme.primary : null,
+                      fontWeight:
+                          isSelected ? FontWeight.bold : FontWeight.normal,
+                    ),
                   ),
                 ),
-              );
-            }).toList(),
-            builder: (BuildContext context, MenuController controller,
-                Widget? child) {
-              return TextButton(
-                onPressed: () {
-                  if (controller.isOpen) {
-                    controller.close();
-                  } else {
-                    controller.open();
-                  }
-                },
-                child: Text(currentRate == 1.0 ? '倍速' : '${currentRate}x'),
-              );
-            },
-          );
-        });
+                if (isSelected)
+                  Icon(
+                    Icons.check,
+                    size: 18,
+                    color: colorScheme.primary,
+                  ),
+              ],
+            ),
+          ),
+        );
+      }).toList(),
+      builder:
+          (BuildContext context, MenuController controller, Widget? child) {
+        return TextButton(
+          onPressed: () {
+            if (controller.isOpen) {
+              controller.close();
+            } else {
+              controller.open();
+            }
+          },
+          child: Text(currentRate == 1.0 ? '倍速' : '${currentRate}x'),
+        );
+      },
+    );
   }
 }

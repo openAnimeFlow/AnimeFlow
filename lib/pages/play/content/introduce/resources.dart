@@ -35,7 +35,7 @@ class _VideoResourcesViewState extends ConsumerState<VideoResourcesView> {
     final subjectName = ref.read(playExtraProvider).playExtra.subjectName;
     final providerContainer = ProviderScope.containerOf(context);
 
-    if (playController.isWideScreen.value) {
+    if (ref.read(playStateControllerProvider).isWideScreen) {
       showGeneralDialog(
         context: context,
         barrierDismissible: true,

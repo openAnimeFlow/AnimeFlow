@@ -54,8 +54,9 @@ class _DesktopGestureDetectorState
           }
           // 左方向键：快退10秒
           if (event.logicalKey == LogicalKeyboardKey.arrowLeft) {
-            final currentPosition = playPageController.position.value;
-            final duration = playPageController.duration.value;
+            final playState = ref.read(playStateControllerProvider);
+            final currentPosition = playState.position;
+            final duration = playState.duration;
             final newPositionMs =
                 (currentPosition - const Duration(seconds: 10)).inMilliseconds;
             final clampedMs = newPositionMs.clamp(0, duration.inMilliseconds);
@@ -66,8 +67,9 @@ class _DesktopGestureDetectorState
           }
           // 右方向键：快进10秒
           if (event.logicalKey == LogicalKeyboardKey.arrowRight) {
-            final currentPosition = playPageController.position.value;
-            final duration = playPageController.duration.value;
+            final playState = ref.read(playStateControllerProvider);
+            final currentPosition = playState.position;
+            final duration = playState.duration;
             final newPositionMs =
                 (currentPosition + const Duration(seconds: 10)).inMilliseconds;
             final clampedMs = newPositionMs.clamp(0, duration.inMilliseconds);

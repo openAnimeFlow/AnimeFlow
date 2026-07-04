@@ -67,13 +67,6 @@ class _DanmakuViewState extends ConsumerState<DanmakuView>
 
     // 启动弹幕定时器
     _startDanmakuTimer();
-
-    playController.rate.addListener(_handleRateChanged);
-  }
-
-  void _handleRateChanged() {
-    if (!mounted) return;
-    setState(() {});
   }
 
   void _startDanmakuTimer() {
@@ -81,15 +74,16 @@ class _DanmakuViewState extends ConsumerState<DanmakuView>
     _danmakuTimer = Timer.periodic(const Duration(seconds: 1), (timer) {
       if (!mounted) return;
 
-      final currentPosition = playController.position.value;
-      final playing = playController.playing.value;
+      final playState = ref.read(playStateControllerProvider);
+      final currentPosition = playState.position;
+      final playing = playState.playing;
 
       // 只有在播放时才添加弹幕
       if (currentPosition.inMicroseconds != 0 &&
           playing &&
-          playController.danmakuOn.value) {
+          playState.danmakuOn) {
         final currentSecond = currentPosition.inSeconds;
-        final danmakus = playController.danDanmakus.value[currentSecond];
+        final danmakus = playState.danDanmakus[currentSecond];
 
         if (danmakus != null && danmakus.isNotEmpty) {
           // 按索引延迟添加弹幕
@@ -100,8 +94,8 @@ class _DanmakuViewState extends ConsumerState<DanmakuView>
               ),
               () {
                 if (!mounted ||
-                    !playController.playing.value ||
-                    !playController.danmakuOn.value) {
+                    !ref.read(playStateControllerProvider).playing ||
+                    !ref.read(playStateControllerProvider).danmakuOn) {
                   return;
                 }
 
@@ -136,13 +130,15 @@ class _DanmakuViewState extends ConsumerState<DanmakuView>
   @override
   void dispose() {
     _danmakuTimer?.cancel();
-    playController.rate.removeListener(_handleRateChanged);
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
     super.build(context);
+    final rate = ref.watch(
+      playStateControllerProvider.select((state) => state.rate),
+    );
     return IgnorePointer(
       // 弹幕层不拦截点击事件，让播放器控件可以正常交互
       ignoring: true,
@@ -161,7 +157,7 @@ class _DanmakuViewState extends ConsumerState<DanmakuView>
                   hideScroll: _hideScroll,
                   hideTop: _hideTop,
                   hideBottom: _hideBottom,
-                  duration: _danmakuDuration / playController.rate.value,
+                  duration: _danmakuDuration / rate,
                   massiveMode: _massiveMode,
                 ),
               );
@@ -177,7 +173,7 @@ class _DanmakuViewState extends ConsumerState<DanmakuView>
           area: _danmakuArea,
           opacity: _opacity,
           fontSize: _fontSize,
-          duration: _danmakuDuration / playController.rate.value,
+          duration: _danmakuDuration / rate,
           lineHeight: _danmakuLineHeight,
           strokeWidth: _border ? 1.5 : 0.0,
           fontWeight: _danmakuFontWeight,

@@ -58,7 +58,7 @@ class _MobileGestureDetectorState extends ConsumerState<MobileGestureDetector> {
 
       //长按开始
       onLongPressStart: (LongPressStartDetails details) {
-        if (playController.playing.value) {
+        if (ref.read(playStateControllerProvider).playing) {
           vibrateMedium();
           playController.startSpeedBoost(fastForwardSpeed);
           videoUiStateController.updateIndicatorTypeAndShowIndicator(
@@ -78,7 +78,7 @@ class _MobileGestureDetectorState extends ConsumerState<MobileGestureDetector> {
       onHorizontalDragStart: (DragStartDetails details) {
         videoUiStateController.startHorizontalDrag(
           details.globalPosition.dx,
-          playController.position.value,
+          ref.read(playStateControllerProvider).position,
         );
         playController.stopPlaying();
       },
@@ -89,7 +89,7 @@ class _MobileGestureDetectorState extends ConsumerState<MobileGestureDetector> {
         videoUiStateController.updateHorizontalDrag(
           details.globalPosition.dx,
           scale,
-          playController.duration.value,
+          ref.read(playStateControllerProvider).duration,
         );
       },
 
@@ -160,7 +160,7 @@ class _MobileGestureDetectorState extends ConsumerState<MobileGestureDetector> {
           // 保持指示器显示，2秒后自动隐藏
           videoUiStateController.showIndicator();
           Future.delayed(const Duration(seconds: 2), () {
-            if (!playController.isVerticalDragging.value) {
+            if (!ref.read(playStateControllerProvider).isVerticalDragging) {
               videoUiStateController.hideIndicator();
               videoUiStateController
                   .updateIndicatorType(VideoControlsIndicatorType.noIndicator);

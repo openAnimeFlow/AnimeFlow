@@ -19,7 +19,6 @@ import 'package:anime_flow/utils/vibrate.dart';
 import 'package:anime_flow/widget/windows_title_bar.dart';
 import 'package:canvas_danmaku/canvas_danmaku.dart';
 import 'package:flutter/material.dart';
-import 'package:hive_ce/hive.dart';
 import 'package:media_kit/media_kit.dart';
 import 'package:media_kit_video/media_kit_video.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
@@ -29,18 +28,238 @@ part 'play_controller.g.dart';
 
 @Riverpod(
   keepAlive: true,
-  dependencies: [shadersDirectory, VideoUiStateController, playExtra],
+  dependencies: [
+    shadersDirectory,
+    PlayStateController,
+    VideoUiStateController,
+    playExtra,
+  ],
 )
 PlayController playController(Ref ref) {
   ref.watch(playExtraProvider);
   final controller = PlayController(
     shadersDirectory: ref.watch(shadersDirectoryProvider).requireValue,
+    playStateActions: ref.watch(playStateControllerProvider.notifier),
     videoUiStateActions: ref.watch(videoUiStateControllerProvider.notifier),
   )..init();
 
   ref.onDispose(controller.dispose);
 
   return controller;
+}
+
+@Riverpod(keepAlive: true)
+class PlayStateController extends _$PlayStateController {
+  @override
+  PlayControllerState build() {
+    return PlayControllerState(
+      danmakuOn: Storage.setting.get(DanmakuKey.danmakuOn, defaultValue: true),
+      hiddenPlatforms: _loadHiddenPlatformsFromStorage(),
+    );
+  }
+
+  PlayControllerState get value => state;
+
+  void setSuperResolutionType(int value) {
+    state = state.copyWith(superResolutionType: value);
+  }
+
+  void setIsWideScreen(bool value) {
+    if (state.isWideScreen == value) return;
+    state = state.copyWith(isWideScreen: value);
+  }
+
+  void toggleContentExpanded() {
+    state = state.copyWith(isContentExpanded: !state.isContentExpanded);
+  }
+
+  void setIsFullscreen(bool value) {
+    state = state.copyWith(isFullscreen: value);
+  }
+
+  void setVideoFit(BoxFit value) {
+    if (state.videoFit == value) return;
+    state = state.copyWith(videoFit: value);
+  }
+
+  void setIsParsing(bool value) {
+    state = state.copyWith(isParsing: value);
+  }
+
+  void setParseResult(String value) {
+    state = state.copyWith(parseResult: value);
+  }
+
+  void setDanDanmakus(Map<int, List<Danmaku>> value) {
+    state = state.copyWith(danDanmakus: value);
+  }
+
+  void clearDanDanmakus() {
+    state = state.copyWith(danDanmakus: const {});
+  }
+
+  void toggleDanmakuOn() {
+    state = state.copyWith(danmakuOn: !state.danmakuOn);
+  }
+
+  void setHiddenPlatforms(Set<String> value) {
+    state = state.copyWith(hiddenPlatforms: value);
+  }
+
+  void toggleHiddenPlatform(String platform) {
+    final nextHiddenPlatforms = {...state.hiddenPlatforms};
+    if (nextHiddenPlatforms.contains(platform)) {
+      nextHiddenPlatforms.remove(platform);
+    } else {
+      nextHiddenPlatforms.add(platform);
+    }
+    state = state.copyWith(hiddenPlatforms: nextHiddenPlatforms);
+  }
+
+  void setPlaying(bool value) {
+    state = state.copyWith(playing: value);
+  }
+
+  void setPosition(Duration value) {
+    state = state.copyWith(position: value);
+  }
+
+  void setDuration(Duration value) {
+    state = state.copyWith(duration: value);
+  }
+
+  void setBuffered(Duration value) {
+    state = state.copyWith(buffered: value);
+  }
+
+  void setVolume(double value) {
+    state = state.copyWith(volume: value);
+  }
+
+  void setIsVerticalDragging(bool value) {
+    state = state.copyWith(isVerticalDragging: value);
+  }
+
+  void setRate(double value) {
+    state = state.copyWith(rate: value);
+  }
+
+  void setBuffering(bool value) {
+    state = state.copyWith(buffering: value);
+  }
+
+  void setScheduledStopDuration(int value) {
+    state = state.copyWith(scheduledStopDuration: value);
+  }
+}
+
+Set<String> _loadHiddenPlatformsFromStorage() {
+  final setting = Storage.setting;
+  final platformBilibili =
+      setting.get(DanmakuKey.danmakuPlatformBilibili, defaultValue: true);
+  final platformGamer =
+      setting.get(DanmakuKey.danmakuPlatformGamer, defaultValue: true);
+  final platformDanDanPlay =
+      setting.get(DanmakuKey.danmakuPlatformDanDanPlay, defaultValue: true);
+
+  const platformNameBilibili = 'BiliBili';
+  const platformNameGamer = 'Gamer';
+  const platformNameDanDanPlay = '弹弹Play';
+
+  return {
+    if (!platformBilibili) platformNameBilibili,
+    if (!platformGamer) platformNameGamer,
+    if (!platformDanDanPlay) platformNameDanDanPlay,
+  };
+}
+
+class PlayControllerState {
+  final int superResolutionType;
+  final bool isWideScreen;
+  final bool isContentExpanded;
+  final bool isFullscreen;
+  final BoxFit videoFit;
+  final bool isParsing;
+  final String parseResult;
+  final Map<int, List<Danmaku>> danDanmakus;
+  final bool danmakuOn;
+  final Set<String> hiddenPlatforms;
+  final bool playing;
+  final Duration position;
+  final Duration duration;
+  final Duration buffered;
+  final double volume;
+  final bool isVerticalDragging;
+  final double rate;
+  final bool buffering;
+  final int scheduledStopDuration;
+
+  const PlayControllerState({
+    this.superResolutionType = 0,
+    this.isWideScreen = false,
+    this.isContentExpanded = true,
+    this.isFullscreen = false,
+    this.videoFit = BoxFit.contain,
+    this.isParsing = false,
+    this.parseResult = '',
+    this.danDanmakus = const {},
+    this.danmakuOn = true,
+    this.hiddenPlatforms = const {},
+    this.playing = false,
+    this.position = Duration.zero,
+    this.duration = Duration.zero,
+    this.buffered = Duration.zero,
+    this.volume = 100.0,
+    this.isVerticalDragging = false,
+    this.rate = 1.0,
+    this.buffering = false,
+    this.scheduledStopDuration = 0,
+  });
+
+  PlayControllerState copyWith({
+    int? superResolutionType,
+    bool? isWideScreen,
+    bool? isContentExpanded,
+    bool? isFullscreen,
+    BoxFit? videoFit,
+    bool? isParsing,
+    String? parseResult,
+    Map<int, List<Danmaku>>? danDanmakus,
+    bool? danmakuOn,
+    Set<String>? hiddenPlatforms,
+    bool? playing,
+    Duration? position,
+    Duration? duration,
+    Duration? buffered,
+    double? volume,
+    bool? isVerticalDragging,
+    double? rate,
+    bool? buffering,
+    int? scheduledStopDuration,
+  }) {
+    return PlayControllerState(
+      superResolutionType: superResolutionType ?? this.superResolutionType,
+      isWideScreen: isWideScreen ?? this.isWideScreen,
+      isContentExpanded: isContentExpanded ?? this.isContentExpanded,
+      isFullscreen: isFullscreen ?? this.isFullscreen,
+      videoFit: videoFit ?? this.videoFit,
+      isParsing: isParsing ?? this.isParsing,
+      parseResult: parseResult ?? this.parseResult,
+      danDanmakus: danDanmakus ?? this.danDanmakus,
+      danmakuOn: danmakuOn ?? this.danmakuOn,
+      hiddenPlatforms: hiddenPlatforms ?? this.hiddenPlatforms,
+      playing: playing ?? this.playing,
+      position: position ?? this.position,
+      duration: duration ?? this.duration,
+      buffered: buffered ?? this.buffered,
+      volume: volume ?? this.volume,
+      isVerticalDragging: isVerticalDragging ?? this.isVerticalDragging,
+      rate: rate ?? this.rate,
+      buffering: buffering ?? this.buffering,
+      scheduledStopDuration:
+          scheduledStopDuration ?? this.scheduledStopDuration,
+    );
+  }
 }
 
 class PlayState {
@@ -83,34 +302,19 @@ class PlayState {
 class PlayController {
   PlayController({
     required this.shadersDirectory,
+    required PlayStateController playStateActions,
     required VideoUiStateActions videoUiStateActions,
-  }) : _videoUiStateActions = videoUiStateActions;
+  })  : _playStateActions = playStateActions,
+        _videoUiStateActions = videoUiStateActions;
 
   late Player player;
   late VideoController videoController;
+  final PlayStateController _playStateActions;
   final VideoUiStateActions _videoUiStateActions;
   final setting = Storage.setting;
 
   /// 着色器所在目录（由 [shadersDirectoryProvider] 在启动时准备）
   final Directory shadersDirectory;
-
-  /// 视频超分
-  /// 1. 关闭
-  /// 2. 效率档
-  /// 3. 质量档
-  final superResolutionType = ValueNotifier<int>(0);
-
-  /// 宽屏状态
-  final isWideScreen = ValueNotifier<bool>(false);
-
-  /// 内容区域展开状态
-  final isContentExpanded = ValueNotifier<bool>(true);
-
-  /// 全屏状态
-  final isFullscreen = ValueNotifier<bool>(false);
-
-  /// 视频画面填充模式
-  final videoFit = ValueNotifier<BoxFit>(BoxFit.contain);
 
   /// 视频地址
   String? videoUrl;
@@ -136,40 +340,9 @@ class PlayController {
   ///剧集id
   int episodeId = 0;
 
-  ///视频解析状态
-  final isParsing = ValueNotifier<bool>(false);
-
-  ///视频解析结果
-  final parseResult = ValueNotifier<String>('');
-
   ///弹幕相关
-  final danDanmakus = ValueNotifier<Map<int, List<Danmaku>>>({});
   late DanmakuController danmakuController;
-  final danmakuOn = ValueNotifier<bool>(true);
-  final hiddenPlatforms = ValueNotifier<Set<String>>({});
   Timer? _saveSettingsTimer;
-
-  ///视频播放状态
-  final playing = ValueNotifier<bool>(false);
-
-  ///视频播放进度
-  final position = ValueNotifier<Duration>(Duration.zero);
-
-  ///视频总时长
-  final duration = ValueNotifier<Duration>(Duration.zero);
-
-  ///视频缓冲
-  final buffered = ValueNotifier<Duration>(Duration.zero);
-
-  ///音量
-  final volume = ValueNotifier<double>(100.0);
-
-  /// 是否正在垂直拖动调整音量
-  final isVerticalDragging = ValueNotifier<bool>(false);
-  final rate = ValueNotifier<double>(1.0);
-
-  /// 缓冲状态
-  final buffering = ValueNotifier<bool>(false);
 
   /// 记录原始倍速
   double _originalSpeed = 1.0;
@@ -179,9 +352,6 @@ class PlayController {
 
   /// 定时停止播放的计时器
   Timer? _stopTimer;
-
-  /// 定时停止的时间（秒）
-  final scheduledStopDuration = ValueNotifier<int>(0);
 
   /// 弹幕相关
   bool _isLoadingDanmaku = false;
@@ -196,31 +366,30 @@ class PlayController {
     final adBlocker = setting.get(PlaybackKey.adBlocker, defaultValue: false);
     player = Player(configuration: PlayerConfiguration(adBlocker: adBlocker));
     videoController = VideoController(player);
-    syncPlatformVisibilityFromStorage();
 
     _playerSubscriptions.addAll([
       player.stream.playing.listen((playing) {
-        this.playing.value = playing;
+        _playStateActions.setPlaying(playing);
         _syncDanmakuPauseWithPlayback(playing);
       }),
       player.stream.volume.listen((vol) {
-        volume.value = vol;
+        _playStateActions.setVolume(vol);
       }),
       player.stream.buffer.listen((buffered) {
-        this.buffered.value = buffered;
+        _playStateActions.setBuffered(buffered);
       }),
       player.stream.buffering.listen((buffering) {
-        this.buffering.value = buffering;
+        _playStateActions.setBuffering(buffering);
         _updateBufferingState(buffering);
       }),
       player.stream.rate.listen((r) {
-        rate.value = r;
+        _playStateActions.setRate(r);
       }),
       player.stream.position.listen((pos) {
-        position.value = pos;
+        _playStateActions.setPosition(pos);
       }),
       player.stream.duration.listen((dur) {
-        duration.value = dur;
+        _playStateActions.setDuration(dur);
       }),
     ]);
   }
@@ -258,25 +427,6 @@ class PlayController {
     }
     _playerSubscriptions.clear();
     player.dispose();
-    superResolutionType.dispose();
-    isWideScreen.dispose();
-    isContentExpanded.dispose();
-    isFullscreen.dispose();
-    videoFit.dispose();
-    isParsing.dispose();
-    parseResult.dispose();
-    danDanmakus.dispose();
-    danmakuOn.dispose();
-    hiddenPlatforms.dispose();
-    playing.dispose();
-    position.dispose();
-    duration.dispose();
-    buffered.dispose();
-    volume.dispose();
-    isVerticalDragging.dispose();
-    rate.dispose();
-    buffering.dispose();
-    scheduledStopDuration.dispose();
   }
 
   /// 初始化播放状态
@@ -321,8 +471,8 @@ class PlayController {
     try {
       // 播放时，每5秒保存一次，使用实时获取的进度值
       _saveProgressTimer = Timer.periodic(const Duration(seconds: 5), (_) {
-        final position = this.position.value;
-        final duration = this.duration.value;
+        final position = _playStateActions.value.position;
+        final duration = _playStateActions.value.duration;
         // 播放进度大于0 && 播放时长大于0 开始保存剧集进度
         if (position != Duration.zero || duration != Duration.zero) {
           if (subjectId > 0 && episodeId > 0) {
@@ -368,32 +518,7 @@ class PlayController {
 
   /// 从存储同步平台显示/隐藏状态
   void syncPlatformVisibilityFromStorage() {
-    final Box setting = Storage.setting;
-
-    // 读取各平台的显示设置
-    final platformBilibili =
-        setting.get(DanmakuKey.danmakuPlatformBilibili, defaultValue: true);
-    final platformGamer =
-        setting.get(DanmakuKey.danmakuPlatformGamer, defaultValue: true);
-    final platformDanDanPlay =
-        setting.get(DanmakuKey.danmakuPlatformDanDanPlay, defaultValue: true);
-
-    // 平台名称映射（从 source 字段中提取的实际名称，如 [BiliBili]、[Gamer]）
-    const String platformNameBilibili = 'BiliBili';
-    const String platformNameGamer = 'Gamer';
-    const String platformNameDanDanPlay = '弹弹Play';
-
-    final nextHiddenPlatforms = <String>{};
-    if (!platformBilibili) {
-      nextHiddenPlatforms.add(platformNameBilibili);
-    }
-    if (!platformGamer) {
-      nextHiddenPlatforms.add(platformNameGamer);
-    }
-    if (!platformDanDanPlay) {
-      nextHiddenPlatforms.add(platformNameDanDanPlay);
-    }
-    hiddenPlatforms.value = nextHiddenPlatforms;
+    _playStateActions.setHiddenPlatforms(_loadHiddenPlatformsFromStorage());
 
     // 同步后清空屏幕弹幕，让新设置生效
     try {
@@ -402,19 +527,17 @@ class PlayController {
   }
 
   void updateIsWideScreen(bool value) {
-    if (isWideScreen.value != value) {
-      isWideScreen.value = value;
-    }
+    _playStateActions.setIsWideScreen(value);
   }
 
   // 切换内容区域展开状态
   void toggleContentExpanded() {
-    isContentExpanded.value = !isContentExpanded.value;
+    _playStateActions.toggleContentExpanded();
   }
 
   /// 进入全屏
   void enterFullScreen() {
-    isFullscreen.value = true;
+    _playStateActions.setIsFullscreen(true);
     if (Platform.isWindows) {
       WindowsTitleBarVisibility.setForceHidden(true);
     }
@@ -424,7 +547,7 @@ class PlayController {
 
   /// 退出全屏
   void exitFullScreen() {
-    isFullscreen.value = false;
+    _playStateActions.setIsFullscreen(false);
     if (Platform.isWindows) {
       unawaited(_exitWindowsFullScreen());
     } else {
@@ -440,7 +563,7 @@ class PlayController {
 
   /// 切换全屏状态
   void toggleFullScreen() {
-    if (isFullscreen.value) {
+    if (_playStateActions.value.isFullscreen) {
       exitFullScreen();
     } else {
       enterFullScreen();
@@ -451,7 +574,7 @@ class PlayController {
   Future<void> checkDesktopFullscreen() async {
     if (SystemUtil.isDesktop) {
       final fullScreen = await windowManager.isFullScreen();
-      isFullscreen.value = fullScreen;
+      _playStateActions.setIsFullscreen(fullScreen);
       if (Platform.isWindows) {
         WindowsTitleBarVisibility.setForceHidden(fullScreen);
       }
@@ -475,7 +598,7 @@ class PlayController {
       int second = item.time.toInt();
       groupedDanmakus.putIfAbsent(second, () => []).add(item);
     }
-    danDanmakus.value = groupedDanmakus;
+    _playStateActions.setDanDanmakus(groupedDanmakus);
   }
 
   /// 发送弹幕
@@ -491,12 +614,14 @@ class PlayController {
     if (bgmBangumiId == null) return false;
     final trimmed = message.trim();
     if (trimmed.isEmpty) return false;
-    if (duration.value == Duration.zero &&
-        position.value == Duration.zero &&
+    final playState = _playStateActions.value;
+    if (playState.duration == Duration.zero &&
+        playState.position == Duration.zero &&
         episode <= 0) {
       return false;
     }
-    final time = position.value.inMicroseconds / Duration.microsecondsPerSecond;
+    final time =
+        playState.position.inMicroseconds / Duration.microsecondsPerSecond;
 
     final item = Danmaku(
       message: trimmed,
@@ -540,14 +665,15 @@ class PlayController {
 
   void removeDanmaku() {
     danmakuController.clear();
-    danDanmakus.value = {};
+    _playStateActions.clearDanDanmakus();
   }
 
   /// 切换弹幕开关
   void toggleDanmaku() {
-    danmakuOn.value = !danmakuOn.value;
-    Storage.setting.put(DanmakuKey.danmakuOn, danmakuOn.value);
-    if (!danmakuOn.value) {
+    _playStateActions.toggleDanmakuOn();
+    final danmakuOn = _playStateActions.value.danmakuOn;
+    Storage.setting.put(DanmakuKey.danmakuOn, danmakuOn);
+    if (!danmakuOn) {
       try {
         danmakuController.clear();
       } catch (_) {}
@@ -556,20 +682,12 @@ class PlayController {
 
   /// 切换视频画面填充模式
   void toggleVideoFit(BoxFit fits) {
-    if (videoFit.value != fits) {
-      videoFit.value = fits;
-    }
+    _playStateActions.setVideoFit(fits);
   }
 
   /// 切换平台显示/隐藏状态
   void togglePlatformVisibility(String platform) {
-    final nextHiddenPlatforms = {...hiddenPlatforms.value};
-    if (nextHiddenPlatforms.contains(platform)) {
-      nextHiddenPlatforms.remove(platform);
-    } else {
-      nextHiddenPlatforms.add(platform);
-    }
-    hiddenPlatforms.value = nextHiddenPlatforms;
+    _playStateActions.toggleHiddenPlatform(platform);
     // 清空屏幕上的弹幕，新弹幕会按照新的隐藏状态过滤
     try {
       danmakuController.clear();
@@ -578,7 +696,7 @@ class PlayController {
 
   /// 检查平台是否被隐藏
   bool isPlatformHidden(String platform) {
-    return hiddenPlatforms.value.contains(platform);
+    return _playStateActions.value.hiddenPlatforms.contains(platform);
   }
 
   ///暂停/播放
@@ -589,8 +707,8 @@ class PlayController {
 
   ///设置播放倍数
   void startSpeedBoost(double speed) {
-    _originalSpeed = rate.value;
-    rate.value = speed;
+    _originalSpeed = _playStateActions.value.rate;
+    _playStateActions.setRate(speed);
     player.setRate(speed);
   }
 
@@ -601,7 +719,7 @@ class PlayController {
 
   /// 结束速度提升
   void endSpeedBoost() {
-    rate.value = _originalSpeed;
+    _playStateActions.setRate(_originalSpeed);
     player.setRate(_originalSpeed);
   }
 
@@ -612,30 +730,31 @@ class PlayController {
   }
 
   void startVerticalDrag() {
-    _dragStartVolume = volume.value;
-    isVerticalDragging.value = true;
+    _dragStartVolume = _playStateActions.value.volume;
+    _playStateActions.setIsVerticalDragging(true);
   }
 
   void adjustVolumeByWheel(double delta) {
-    double newVolume = volume.value + delta;
+    double newVolume = _playStateActions.value.volume + delta;
     setVolume(newVolume);
   }
 
   void updateVerticalDrag(double dragDistance, double screenHeight) {
     final volumeChange = -(dragDistance / screenHeight) * 100;
     double newVolume = _dragStartVolume + volumeChange;
-    if (newVolume >= 100 && volume.value < 100) {
+    final volume = _playStateActions.value.volume;
+    if (newVolume >= 100 && volume < 100) {
       vibrateHeavy();
-    } else if (newVolume <= 0 && volume.value > 0) {
+    } else if (newVolume <= 0 && volume > 0) {
       vibrateHeavy();
     }
     setVolume(newVolume);
   }
 
   void endVerticalDrag() {
-    isVerticalDragging.value = false;
+    _playStateActions.setIsVerticalDragging(false);
     Future.delayed(const Duration(seconds: 2), () {
-      if (!isVerticalDragging.value) {}
+      if (!_playStateActions.value.isVerticalDragging) {}
     });
   }
 
@@ -654,11 +773,15 @@ class PlayController {
     _stopTimer?.cancel();
     if (duration != null && duration > Duration.zero) {
       final totalSeconds = duration.inSeconds;
-      scheduledStopDuration.value = totalSeconds;
+      _playStateActions.setScheduledStopDuration(totalSeconds);
 
       _stopTimer = Timer.periodic(const Duration(seconds: 1), (timer) {
-        if (scheduledStopDuration.value > 0) {
-          scheduledStopDuration.value--;
+        final scheduledStopDuration =
+            _playStateActions.value.scheduledStopDuration;
+        if (scheduledStopDuration > 0) {
+          _playStateActions.setScheduledStopDuration(
+            scheduledStopDuration - 1,
+          );
         } else {
           player.pause();
           timer.cancel();
@@ -666,7 +789,7 @@ class PlayController {
         }
       });
     } else {
-      scheduledStopDuration.value = 0;
+      _playStateActions.setScheduledStopDuration(0);
       player.pause();
     }
   }
@@ -675,7 +798,7 @@ class PlayController {
   void cancelScheduledStop() {
     _stopTimer?.cancel();
     _stopTimer = null;
-    scheduledStopDuration.value = 0;
+    _playStateActions.setScheduledStopDuration(0);
   }
 
   ///设置超分辨率
@@ -692,7 +815,7 @@ class PlayController {
         Utils.buildShadersAbsolutePath(
             shadersDirectory.path, mpvAnime4KShadersLite),
       ]);
-      superResolutionType.value = 2;
+      _playStateActions.setSuperResolutionType(2);
       return;
     }
     if (type == 3) {
@@ -703,10 +826,10 @@ class PlayController {
         Utils.buildShadersAbsolutePath(
             shadersDirectory.path, mpvAnime4KShaders),
       ]);
-      superResolutionType.value = 3;
+      _playStateActions.setSuperResolutionType(3);
       return;
     }
     await pp.command(['change-list', 'glsl-shaders', 'clr', '']);
-    superResolutionType.value = 1;
+    _playStateActions.setSuperResolutionType(1);
   }
 }

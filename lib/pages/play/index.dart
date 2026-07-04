@@ -5,7 +5,6 @@ import 'package:anime_flow/pages/play/video/video.dart';
 import 'package:anime_flow/pages/play/provider/episodes_provider.dart';
 import 'package:anime_flow/routes/provider/routes_args.dart';
 import 'package:anime_flow/utils/systemUtil.dart';
-import 'package:anime_flow/widget/multi_value_listenable_builder.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -27,6 +26,7 @@ class _PlayPageViewState extends ConsumerState<PlayPage> {
   final GlobalKey _contentKey = GlobalKey();
 
   bool _hasInitResources = false;
+  bool? _lastReportedIsWideScreen;
 
   @override
   void initState() {
@@ -44,6 +44,15 @@ class _PlayPageViewState extends ConsumerState<PlayPage> {
     }
   }
 
+  void _syncIsWideScreenAfterBuild(bool isWideScreen) {
+    if (_lastReportedIsWideScreen == isWideScreen) return;
+    _lastReportedIsWideScreen = isWideScreen;
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
+      playController.updateIsWideScreen(isWideScreen);
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     // 监听剧集加载完成 → 初始化视频资源搜索
@@ -55,87 +64,83 @@ class _PlayPageViewState extends ConsumerState<PlayPage> {
     });
     return LayoutBuilder(builder: (context, constraints) {
       final isWideScreen = constraints.maxWidth > 600;
-      playController.updateIsWideScreen(isWideScreen);
+      _syncIsWideScreenAfterBuild(isWideScreen);
 
-      return MultiValueListenableBuilder(
-          listenables: [
-            playController.isFullscreen,
-            playController.isContentExpanded,
-          ],
-          builder: (context) {
-            final isFullscreen = playController.isFullscreen.value;
+      final isFullscreen = ref.watch(
+        playStateControllerProvider.select((state) => state.isFullscreen),
+      );
+      final isContentExpanded = ref.watch(
+        playStateControllerProvider.select((state) => state.isContentExpanded),
+      );
 
-            Widget content;
-            if (isFullscreen) {
-              content = Scaffold(
-                backgroundColor: Colors.black,
-                resizeToAvoidBottomInset: !SystemUtil.isMobile,
-                body: VideoView(key: _videoKey),
+      Widget content;
+      if (isFullscreen) {
+        content = Scaffold(
+          backgroundColor: Colors.black,
+          resizeToAvoidBottomInset: !SystemUtil.isMobile,
+          body: VideoView(key: _videoKey),
+        );
+      } else {
+        content = isWideScreen
+            ? Scaffold(
+                body: Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Expanded(
+                      child: Center(
+                        child: VideoView(key: _videoKey),
+                      ),
+                    ),
+                    AnimatedContainer(
+                      duration: const Duration(milliseconds: 100),
+                      width: isContentExpanded
+                          ? LayoutConstant.playContentWidth
+                          : 0,
+                      child: Opacity(
+                        opacity: isContentExpanded ? 1 : 0,
+                        child: ContentView(key: _contentKey),
+                      ),
+                    ),
+                  ],
+                ),
+              )
+            : Scaffold(
+                appBar: AppBar(
+                  toolbarHeight: 0,
+                  backgroundColor: Colors.black,
+                  systemOverlayStyle: SystemUiOverlayStyle.light.copyWith(
+                    systemNavigationBarColor: Colors.transparent,
+                  ),
+                ),
+                body: SafeArea(
+                  bottom: false,
+                  child: Column(
+                    children: [
+                      AspectRatio(
+                        aspectRatio: 16 / 9,
+                        child: VideoView(key: _videoKey),
+                      ),
+                      Expanded(
+                        child: ContentView(key: _contentKey),
+                      ),
+                    ],
+                  ),
+                ),
               );
-            } else {
-              content = isWideScreen
-                  ? Scaffold(
-                      body: Row(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Expanded(
-                            child: Center(
-                              child: VideoView(key: _videoKey),
-                            ),
-                          ),
-                          AnimatedContainer(
-                            duration: const Duration(milliseconds: 100),
-                            width: playController.isContentExpanded.value
-                                ? LayoutConstant.playContentWidth
-                                : 0,
-                            child: Opacity(
-                              opacity: playController.isContentExpanded.value
-                                  ? 1
-                                  : 0,
-                              child: ContentView(key: _contentKey),
-                            ),
-                          ),
-                        ],
-                      ),
-                    )
-                  : Scaffold(
-                      appBar: AppBar(
-                        toolbarHeight: 0,
-                        backgroundColor: Colors.black,
-                        systemOverlayStyle: SystemUiOverlayStyle.light.copyWith(
-                          systemNavigationBarColor: Colors.transparent,
-                        ),
-                      ),
-                      body: SafeArea(
-                        bottom: false,
-                        child: Column(
-                          children: [
-                            AspectRatio(
-                              aspectRatio: 16 / 9,
-                              child: VideoView(key: _videoKey),
-                            ),
-                            Expanded(
-                              child: ContentView(key: _contentKey),
-                            ),
-                          ],
-                        ),
-                      ),
-                    );
-            }
+      }
 
-            if (SystemUtil.isMobile) {
-              return PopScope(
-                canPop: !isFullscreen,
-                onPopInvokedWithResult: (bool didPop, dynamic result) {
-                  if (!didPop && isFullscreen) {
-                    playController.exitFullScreen();
-                  }
-                },
-                child: content,
-              );
+      if (SystemUtil.isMobile) {
+        return PopScope(
+          canPop: !isFullscreen,
+          onPopInvokedWithResult: (bool didPop, dynamic result) {
+            if (!didPop && isFullscreen) {
+              playController.exitFullScreen();
             }
-            return content;
-          });
+          },
+          child: content,
+        );
+      }
+      return content;
     });
   }
 }

@@ -118,25 +118,28 @@ class _VideoSettingState extends ConsumerState<VideoSetting> {
                           const Icon(Icons.slow_motion_video_outlined,
                               size: 25),
                           const SizedBox(height: 5),
-                          ValueListenableBuilder<int>(
-                            valueListenable:
-                                playController.scheduledStopDuration,
-                            builder: (context, scheduledStopDuration, _) =>
-                                Text(
-                              scheduledStopDuration == 0
-                                  ? '定时关闭'
-                                  : FormatTimeUtil.formatScheduledTime(
-                                      scheduledStopDuration),
-                              style: TextStyle(
-                                fontSize: 12,
-                                decoration: TextDecoration.none,
-                                fontWeight: FontWeight.w400,
-                                color: Theme.of(context)
-                                    .textTheme
-                                    .titleMedium
-                                    ?.color,
-                              ),
-                            ),
+                          Consumer(
+                            builder: (context, ref, child) {
+                              final scheduledStopDuration = ref.watch(
+                                playStateControllerProvider.select(
+                                    (state) => state.scheduledStopDuration),
+                              );
+                              return Text(
+                                scheduledStopDuration == 0
+                                    ? '定时关闭'
+                                    : FormatTimeUtil.formatScheduledTime(
+                                        scheduledStopDuration),
+                                style: TextStyle(
+                                  fontSize: 12,
+                                  decoration: TextDecoration.none,
+                                  fontWeight: FontWeight.w400,
+                                  color: Theme.of(context)
+                                      .textTheme
+                                      .titleMedium
+                                      ?.color,
+                                ),
+                              );
+                            },
                           )
                         ],
                       ),

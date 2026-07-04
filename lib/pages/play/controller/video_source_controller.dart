@@ -70,7 +70,10 @@ class VideoSourceState {
   }
 }
 
-@Riverpod(keepAlive: true, dependencies: [Episodes, playExtra, playController])
+@Riverpod(
+  keepAlive: true,
+  dependencies: [Episodes, playExtra, PlayStateController, playController],
+)
 class VideoSourceController extends _$VideoSourceController {
   WebViewVideoSourceProvider? _webViewVideoProvider;
   final LiggLogger _logger = LiggLogger();
@@ -454,7 +457,7 @@ class VideoSourceController extends _$VideoSourceController {
     _webViewVideoProvider?.cancel();
 
     final playController = ref.read(playControllerProvider);
-    playController.isParsing.value = true;
+    ref.read(playStateControllerProvider.notifier).setIsParsing(true);
 
     _webViewVideoProvider ??= WebViewVideoSourceProvider();
 
@@ -474,13 +477,15 @@ class VideoSourceController extends _$VideoSourceController {
     }
 
     try {
-      playController.parseResult.value = '正在解析视频源...';
+      ref
+          .read(playStateControllerProvider.notifier)
+          .setParseResult('正在解析视频源...');
 
       final source = await _webViewVideoProvider!
           .resolve(url, useLegacyParser: false, offset: offset);
 
-      playController.isParsing.value = false;
-      playController.parseResult.value = '视频解析成功';
+      ref.read(playStateControllerProvider.notifier).setIsParsing(false);
+      ref.read(playStateControllerProvider.notifier).setParseResult('视频解析成功');
       await playController.initPlayState(
         PlayState(
           videoUrl: source.url,
@@ -495,14 +500,20 @@ class VideoSourceController extends _$VideoSourceController {
       );
       return true;
     } on VideoSourceTimeoutException {
-      playController.isParsing.value = false;
-      playController.parseResult.value = '视频解析超时，请重试';
+      ref.read(playStateControllerProvider.notifier).setIsParsing(false);
+      ref
+          .read(playStateControllerProvider.notifier)
+          .setParseResult('视频解析超时，请重试');
     } on VideoSourceNotFoundException {
-      playController.isParsing.value = false;
-      playController.parseResult.value = '未找到视频资源，请切换数据源重试';
+      ref.read(playStateControllerProvider.notifier).setIsParsing(false);
+      ref
+          .read(playStateControllerProvider.notifier)
+          .setParseResult('未找到视频资源，请切换数据源重试');
     } catch (e) {
-      playController.isParsing.value = false;
-      playController.parseResult.value = '视频解析失败: ${e.toString()}';
+      ref.read(playStateControllerProvider.notifier).setIsParsing(false);
+      ref
+          .read(playStateControllerProvider.notifier)
+          .setParseResult('视频解析失败: ${e.toString()}');
       _logger.e(e);
     }
     return false;

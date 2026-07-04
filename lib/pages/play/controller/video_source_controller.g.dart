@@ -24,6 +24,7 @@ final class VideoSourceControllerProvider
           dependencies: <ProviderOrFamily>[
             episodesProvider,
             playExtraProvider,
+            playStateControllerProvider,
             playControllerProvider
           ],
           $allTransitiveDependencies: <ProviderOrFamily>{
@@ -32,17 +33,19 @@ final class VideoSourceControllerProvider
             VideoSourceControllerProvider.$allTransitiveDependencies2,
             VideoSourceControllerProvider.$allTransitiveDependencies3,
             VideoSourceControllerProvider.$allTransitiveDependencies4,
+            VideoSourceControllerProvider.$allTransitiveDependencies5,
           },
         );
 
   static final $allTransitiveDependencies0 = episodesProvider;
   static final $allTransitiveDependencies1 =
       EpisodesProvider.$allTransitiveDependencies0;
-  static final $allTransitiveDependencies2 = playControllerProvider;
-  static final $allTransitiveDependencies3 =
-      PlayControllerProvider.$allTransitiveDependencies0;
+  static final $allTransitiveDependencies2 = playStateControllerProvider;
+  static final $allTransitiveDependencies3 = playControllerProvider;
   static final $allTransitiveDependencies4 =
-      PlayControllerProvider.$allTransitiveDependencies1;
+      PlayControllerProvider.$allTransitiveDependencies0;
+  static final $allTransitiveDependencies5 =
+      PlayControllerProvider.$allTransitiveDependencies2;
 
   @override
   String debugGetCreateSourceHash() => _$videoSourceControllerHash();
@@ -61,7 +64,7 @@ final class VideoSourceControllerProvider
 }
 
 String _$videoSourceControllerHash() =>
-    r'ce2f72b0067b1a429184ee7d3823fec08fdf0a57';
+    r'95c3f8fa7809e7431dd4aa65e6df33918841583d';
 
 abstract class _$VideoSourceController extends $Notifier<VideoSourceState> {
   VideoSourceState build();

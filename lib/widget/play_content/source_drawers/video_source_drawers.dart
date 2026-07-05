@@ -19,11 +19,15 @@ class VideoSourceDrawers extends ConsumerStatefulWidget {
   final VideoSourceController videoSourceController;
   final String subjectName;
   final bool isBottomSheet;
+  final ScrollController? scrollController;
+  final DraggableScrollableController? draggableController;
 
   const VideoSourceDrawers({
     super.key,
     this.onVideoUrlSelected,
     this.isBottomSheet = false,
+    this.scrollController,
+    this.draggableController,
     required this.videoSourceController,
     required this.subjectName,
   });
@@ -33,15 +37,24 @@ class VideoSourceDrawers extends ConsumerStatefulWidget {
 }
 
 class _VideoSourceDrawersState extends ConsumerState<VideoSourceDrawers> {
+  static const double _minSheetSize = 0.3;
+  static const double _initialSheetSize = 0.52;
+  static const double _maxSheetSize = 0.95;
+
   final logger = LiggLogger();
   bool isShowEpisodes = false;
   final _searchController = TextEditingController();
   int? _drawerSelectedWebsiteIndex;
   bool _followInitialAutoSelection = true;
+  late final ScrollController _fallbackScrollController;
+
+  ScrollController get _scrollController =>
+      widget.scrollController ?? _fallbackScrollController;
 
   @override
   void initState() {
     super.initState();
+    _fallbackScrollController = ScrollController();
     _searchController.text = widget.subjectName;
   }
 
@@ -98,6 +111,9 @@ class _VideoSourceDrawersState extends ConsumerState<VideoSourceDrawers> {
 
   @override
   void dispose() {
+    if (widget.scrollController == null) {
+      _fallbackScrollController.dispose();
+    }
     _searchController.dispose();
     super.dispose();
   }
@@ -113,45 +129,21 @@ class _VideoSourceDrawersState extends ConsumerState<VideoSourceDrawers> {
 
   /// 底部抽屉内容
   Widget buildBottomSheetContent(BuildContext context) {
-    return Container(
-      constraints: BoxConstraints(
-        maxHeight: MediaQuery.of(context).size.height * 0.75,
-      ),
-      decoration: BoxDecoration(
-        color: Theme.of(context).cardColor,
-        borderRadius: const BorderRadius.vertical(top: Radius.circular(16)),
-      ),
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          // 拖动指示器
-          Center(
-            child: Container(
-              margin: const EdgeInsets.only(top: 12, bottom: 8),
-              width: 40,
-              height: 4,
-              decoration: BoxDecoration(
-                color: Theme.of(context)
-                    .colorScheme
-                    .onSurfaceVariant
-                    .withValues(alpha: 0.4),
-                borderRadius: BorderRadius.circular(2),
-              ),
-            ),
-          ),
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 16),
-            child: buildHeader(),
-          ),
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 16),
-            child: _manualSearch(),
-          ),
-          const SizedBox(height: 16),
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 16),
-            child: Builder(
+    return Material(
+      color: Theme.of(context).cardColor,
+      borderRadius: const BorderRadius.vertical(top: Radius.circular(16)),
+      clipBehavior: Clip.antiAlias,
+      child: Padding(
+        padding: EdgeInsets.fromLTRB(
+            16, 20, 16, 16 + MediaQuery.of(context).padding.bottom),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            _buildDragHandle(context),
+            buildHeader(),
+            _manualSearch(),
+            const SizedBox(height: 16),
+            Builder(
               builder: (context) {
                 final dataSource = widget.videoSourceController.videoResources;
                 if (dataSource.isEmpty) {
@@ -160,11 +152,8 @@ class _VideoSourceDrawersState extends ConsumerState<VideoSourceDrawers> {
                 return _buildWebsiteSelector(dataSource: dataSource);
               },
             ),
-          ),
-          const SizedBox(height: 16),
-          Expanded(
-            child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 16),
+            const SizedBox(height: 16),
+            Expanded(
               child: Builder(
                 builder: (context) {
                   final videoSourceController = widget.videoSourceController;
@@ -180,8 +169,62 @@ class _VideoSourceDrawersState extends ConsumerState<VideoSourceDrawers> {
                 },
               ),
             ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildDragHandle(BuildContext context) {
+    return GestureDetector(
+      behavior: HitTestBehavior.opaque,
+      onVerticalDragUpdate: widget.draggableController == null
+          ? null
+          : (details) {
+              final controller = widget.draggableController!;
+              if (!controller.isAttached) return;
+              final height = MediaQuery.sizeOf(context).height;
+              final nextSize =
+                  (controller.size - details.primaryDelta! / height).clamp(
+                _minSheetSize,
+                _maxSheetSize,
+              );
+              controller.jumpTo(nextSize);
+            },
+      onVerticalDragEnd: widget.draggableController == null
+          ? null
+          : (_) {
+              final controller = widget.draggableController!;
+              if (!controller.isAttached) return;
+              final currentSize = controller.size;
+              final snapTargets = [
+                _minSheetSize,
+                _initialSheetSize,
+                _maxSheetSize,
+              ];
+              final target = snapTargets.reduce(
+                (a, b) =>
+                    (currentSize - a).abs() < (currentSize - b).abs() ? a : b,
+              );
+              controller.animateTo(
+                target,
+                duration: const Duration(milliseconds: 180),
+                curve: Curves.easeOutCubic,
+              );
+            },
+      child: Center(
+        child: Container(
+          margin: const EdgeInsets.only(bottom: 8),
+          width: 40,
+          height: 4,
+          decoration: BoxDecoration(
+            color: Theme.of(context)
+                .colorScheme
+                .onSurfaceVariant
+                .withValues(alpha: 0.45),
+            borderRadius: BorderRadius.circular(999),
           ),
-        ],
+        ),
       ),
     );
   }
@@ -450,6 +493,7 @@ class _VideoSourceDrawersState extends ConsumerState<VideoSourceDrawers> {
             child: matchedResources.isEmpty
                 ? const Center(child: Text('当前剧集无可用的播放源'))
                 : ListView.builder(
+                    controller: widget.isBottomSheet ? _scrollController : null,
                     padding: EdgeInsets.zero,
                     itemCount: matchedResources.length,
                     itemExtent: 95,

@@ -67,18 +67,32 @@ class _VideoResourcesViewState extends ConsumerState<VideoResourcesView> {
         },
       );
     } else {
-      showModalBottomSheet(
+      final drawerController = DraggableScrollableController();
+      showModalBottomSheet<void>(
         context: context,
         isScrollControlled: true,
         backgroundColor: Colors.transparent,
-        builder: (context) {
+        builder: (sheetContext) {
           return UncontrolledProviderScope(
             container: providerContainer,
-            child: VideoSourceDrawers(
-              isBottomSheet: true,
-              onVideoUrlSelected: onVideoUrlSelected,
-              videoSourceController: videoSourceController,
-              subjectName: subjectName,
+            child: DraggableScrollableSheet(
+              controller: drawerController,
+              expand: false,
+              initialChildSize: 0.60,
+              minChildSize: 0.3,
+              maxChildSize: 0.95,
+              snap: true,
+              snapSizes: const [0.52, 0.95],
+              builder: (context, scrollController) {
+                return VideoSourceDrawers(
+                  isBottomSheet: true,
+                  scrollController: scrollController,
+                  draggableController: drawerController,
+                  onVideoUrlSelected: onVideoUrlSelected,
+                  videoSourceController: videoSourceController,
+                  subjectName: subjectName,
+                );
+              },
             ),
           );
         },

@@ -9,6 +9,7 @@ import 'package:anime_flow/models/enums/video_controls_icon_type.dart';
 import 'package:anime_flow/models/item/danmaku/danmaku_module.dart';
 import 'package:anime_flow/models/play/play_history.dart';
 import 'package:anime_flow/pages/play/controller/video_ui_controller.dart';
+import 'package:anime_flow/pages/play/provider/episodes_provider.dart';
 import 'package:anime_flow/repository/play_repository.dart';
 import 'package:anime_flow/repository/storage.dart';
 import 'package:anime_flow/routes/provider/routes_args.dart';
@@ -32,6 +33,7 @@ part 'play_controller.g.dart';
     shadersDirectory,
     PlayStateController,
     VideoUiStateController,
+    Episodes,
     playExtra,
   ],
 )
@@ -41,6 +43,7 @@ PlayController playController(Ref ref) {
     shadersDirectory: ref.watch(shadersDirectoryProvider).requireValue,
     playStateActions: ref.watch(playStateControllerProvider.notifier),
     videoUiStateActions: ref.watch(videoUiStateControllerProvider.notifier),
+    episodesActions: ref.watch(episodesProvider.notifier),
   )..init();
 
   ref.listen<PlayControllerState>(
@@ -309,13 +312,16 @@ class PlayController {
     required this.shadersDirectory,
     required PlayStateController playStateActions,
     required VideoUiStateActions videoUiStateActions,
+    required Episodes episodesActions,
   })  : _playStateActions = playStateActions,
-        _videoUiStateActions = videoUiStateActions;
+        _videoUiStateActions = videoUiStateActions,
+        _episodesActions = episodesActions;
 
   late Player player;
   late VideoController videoController;
   final PlayStateController _playStateActions;
   final VideoUiStateActions _videoUiStateActions;
+  final Episodes _episodesActions;
   final setting = Storage.setting;
 
   /// 着色器所在目录（由 [shadersDirectoryProvider] 在启动时准备）
@@ -397,6 +403,7 @@ class PlayController {
       }),
       player.stream.completed.listen((completed) {
         if (completed && subjectId > 0) {
+          _autoSwitchToNextEpisode();
           unawaited(PlayRepository.deletePlayHistoryByPosition(subjectId));
         }
       }),
@@ -411,6 +418,16 @@ class PlayController {
         danmakuController.pause();
       }
     } catch (_) {}
+  }
+
+  void _autoSwitchToNextEpisode() {
+    try {
+      if (_episodesActions.hasNextEpisode) {
+        _episodesActions.switchToNextEpisode();
+      }
+    } catch (e) {
+      LiggLogger().e('自动切换到下一集失败: $e');
+    }
   }
 
   /// 选中集与当前播放集不一致时清空弹幕数据与画布（切换集过程中）

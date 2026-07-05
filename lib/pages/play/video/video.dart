@@ -27,8 +27,6 @@ class _VideoViewState extends ConsumerState<VideoView> with WindowListener {
   late final PlayStateController playStateController;
   late final VideoUiStateController videoUiStateController;
   late final VideoSourceController videoSourceController;
-
-  StreamSubscription<bool>? playbackCompletedSubscription;
   int lastEpisodeIndex = 0;
 
   @override
@@ -38,14 +36,6 @@ class _VideoViewState extends ConsumerState<VideoView> with WindowListener {
     playStateController = ref.read(playStateControllerProvider.notifier);
     videoUiStateController = ref.read(videoUiStateControllerProvider.notifier);
     videoSourceController = ref.read(videoSourceControllerProvider.notifier);
-
-    // 监听视频播放完成
-    playbackCompletedSubscription =
-        playController.player.stream.completed.listen((completed) {
-      if (completed) {
-        _autoSwitchToNextEpisode();
-      }
-    });
 
     // 监听窗口状态变化，
     if (Platform.isWindows || Platform.isLinux || Platform.isMacOS) {
@@ -57,7 +47,6 @@ class _VideoViewState extends ConsumerState<VideoView> with WindowListener {
 
   @override
   void dispose() {
-    playbackCompletedSubscription?.cancel();
     // 移除窗口监听器
     if (Platform.isWindows || Platform.isLinux || Platform.isMacOS) {
       windowManager.removeListener(this);
@@ -114,20 +103,6 @@ class _VideoViewState extends ConsumerState<VideoView> with WindowListener {
         return;
       }
       await Future.delayed(const Duration(milliseconds: 100));
-    }
-  }
-
-  /// 自动切换到下一集
-  void _autoSwitchToNextEpisode() {
-    try {
-      final episodesNotifier = ref.read(episodesProvider.notifier);
-      // 检查是否有下一集
-      if (episodesNotifier.hasNextEpisode) {
-        episodesNotifier.switchToNextEpisode();
-        lastEpisodeIndex = ref.read(episodesProvider).episodeIndex;
-      }
-    } catch (e) {
-      LiggLogger().e('自动切换到下一集失败: $e');
     }
   }
 

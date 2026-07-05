@@ -123,7 +123,7 @@ class _VideoResourcesViewState extends ConsumerState<VideoResourcesView> {
                         ),
                       ),
                       const SizedBox(height: 5),
-                      if (videoSourceState.isLoading ||
+                      if (videoSourceState.isSearchCompleted ||
                           videoSourceState.webSiteTitle.isNotEmpty)
                         Row(
                           children: [

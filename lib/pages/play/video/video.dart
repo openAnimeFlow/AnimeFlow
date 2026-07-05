@@ -74,7 +74,7 @@ class _VideoViewState extends ConsumerState<VideoView> with WindowListener {
 
   /// 等待资源初始化完成后选择资源
   Future<void> selectResourceAfterInit() async {
-    if (!ref.read(videoSourceControllerProvider).isLoading) {
+    if (!ref.read(videoSourceControllerProvider).isSearchCompleted) {
       await waitForResourcesLoaded();
     }
 
@@ -89,15 +89,15 @@ class _VideoViewState extends ConsumerState<VideoView> with WindowListener {
 
   /// 等待资源搜索完成。
   ///
-  /// 注意：[VideoSourceController.isLoading] 表示「资源已就绪」（命名历史遗留），
-  /// 为 `true` 时表示搜索完成，而非正在加载。
+  /// 注意：[VideoSourceController.isSearchCompleted] 为 `true` 时
+  /// 表示当前一轮资源搜索已经完成。
   Future<void> waitForResourcesLoaded() async {
-    if (ref.read(videoSourceControllerProvider).isLoading) {
+    if (ref.read(videoSourceControllerProvider).isSearchCompleted) {
       return;
     }
 
     final deadline = DateTime.now().add(const Duration(seconds: 30));
-    while (!ref.read(videoSourceControllerProvider).isLoading) {
+    while (!ref.read(videoSourceControllerProvider).isSearchCompleted) {
       if (DateTime.now().isAfter(deadline)) {
         LiggLogger().w('等待资源加载超时');
         return;

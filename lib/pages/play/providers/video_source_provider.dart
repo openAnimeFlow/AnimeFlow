@@ -26,7 +26,7 @@ class VideoSourceState {
     this.webSiteIcon = '',
     this.videoUrl = '',
     this.keyword = '',
-    this.isLoading = false,
+    this.isSearchCompleted = false,
     this.selectedWebsiteIndex = 0,
     this.isInitWebView = false,
     this.userManuallySelected = false,
@@ -38,7 +38,7 @@ class VideoSourceState {
   final String webSiteIcon;
   final String videoUrl;
   final String keyword;
-  final bool isLoading;
+  final bool isSearchCompleted;
   final int selectedWebsiteIndex;
   final bool isInitWebView;
   final bool userManuallySelected;
@@ -50,7 +50,7 @@ class VideoSourceState {
     String? webSiteIcon,
     String? videoUrl,
     String? keyword,
-    bool? isLoading,
+    bool? isSearchCompleted,
     int? selectedWebsiteIndex,
     bool? isInitWebView,
     bool? userManuallySelected,
@@ -62,7 +62,7 @@ class VideoSourceState {
       webSiteIcon: webSiteIcon ?? this.webSiteIcon,
       videoUrl: videoUrl ?? this.videoUrl,
       keyword: keyword ?? this.keyword,
-      isLoading: isLoading ?? this.isLoading,
+      isSearchCompleted: isSearchCompleted ?? this.isSearchCompleted,
       selectedWebsiteIndex: selectedWebsiteIndex ?? this.selectedWebsiteIndex,
       isInitWebView: isInitWebView ?? this.isInitWebView,
       userManuallySelected: userManuallySelected ?? this.userManuallySelected,
@@ -79,6 +79,11 @@ class VideoSourceController extends _$VideoSourceController {
   final LiggLogger _logger = LiggLogger();
 
   static const _maxSearchItems = 5;
+  static const _maxConcurrentSearches = 5;
+
+  Future<List<CrawlConfigItem>>? _crawlConfigsFuture;
+  int _searchSessionId = 0;
+  final Map<String, int> _websiteRequestTokens = {};
 
   int get currentEpisodeIndex => state.currentEpisodeIndex;
   List<ResourcesItem> get videoResources => state.videoResources;
@@ -86,7 +91,7 @@ class VideoSourceController extends _$VideoSourceController {
   String get webSiteIcon => state.webSiteIcon;
   String get videoUrl => state.videoUrl;
   String get keyword => state.keyword;
-  bool get isLoading => state.isLoading;
+  bool get isSearchCompleted => state.isSearchCompleted;
   int get selectedWebsiteIndex => state.selectedWebsiteIndex;
   bool get isInitWebView => state.isInitWebView;
   bool get userManuallySelected => state.userManuallySelected;
@@ -116,47 +121,46 @@ class VideoSourceController extends _$VideoSourceController {
   void _dispose() {
     _webViewVideoProvider?.dispose();
     _webViewVideoProvider = null;
+    _crawlConfigsFuture = null;
+    _websiteRequestTokens.clear();
   }
 
   Future<void> initVideoResources() async {
-    final configs = await CrawlConfig.loadAllCrawlConfigs();
-    final resources = configs.map((config) {
-      return ResourcesItem(
-        websiteName: config.name,
-        websiteIcon: config.iconUrl,
-        baseUrl: config.baseUrl,
-        searchUrl: config.searchUrl,
-        needsCaptcha: _requiresCaptcha(config),
-        episodeResources: [],
-      );
-    }).toList(growable: false);
-
-    state = state.copyWith(videoResources: resources);
+    if (state.videoResources.isNotEmpty) {
+      return;
+    }
+    final configs = await _getCrawlConfigs();
+    if (state.videoResources.isNotEmpty) {
+      return;
+    }
+    state = state.copyWith(videoResources: _buildInitialResources(configs));
   }
 
   Future<void> initResources(String keyword) async {
-    final configs = await CrawlConfig.loadAllCrawlConfigs();
+    final normalizedKeyword = keyword.trim();
+    if (normalizedKeyword.isEmpty) {
+      return;
+    }
+
+    final configs = await _getCrawlConfigs();
+    final sessionId = ++_searchSessionId;
+    _ensureVideoResourcesInitialized(configs);
     _clearAllResources(configs);
     state = state.copyWith(
-      keyword: keyword,
+      keyword: normalizedKeyword,
       userManuallySelected: false,
-      isLoading: false,
+      isSearchCompleted: false,
       selectedWebsiteIndex: 0,
       webSiteTitle: '',
       webSiteIcon: '',
       videoUrl: '',
     );
 
-    final futures = <Future<void>>[];
-    for (var i = 0; i < configs.length; i++) {
-      if (i > 0) {
-        await Future.delayed(const Duration(milliseconds: 500));
-      }
-      final config = configs[i];
-
+    final eligibleConfigs = <CrawlConfigItem>[];
+    for (final config in configs) {
       if (config.antiCrawlerConfig.enabled) {
         if (CookieManager.instance.hasCookies(config.name)) {
-          futures.add(_getResources(keyword, config));
+          eligibleConfigs.add(config);
         } else {
           _updateResourceStatus(
             config.name,
@@ -167,25 +171,48 @@ class VideoSourceController extends _$VideoSourceController {
         continue;
       }
 
-      futures.add(_getResources(keyword, config));
+      eligibleConfigs.add(config);
     }
 
-    await Future.wait(futures);
-    state = state.copyWith(isLoading: true);
+    await _runSearchPool(
+      configs: eligibleConfigs,
+      keyword: normalizedKeyword,
+      sessionId: sessionId,
+    );
+
+    if (_searchSessionId != sessionId) {
+      return;
+    }
+    state = state.copyWith(isSearchCompleted: true);
+  }
+
+  List<ResourcesItem> _buildInitialResources(List<CrawlConfigItem> configs) {
+    return configs.map((config) {
+      return ResourcesItem(
+        websiteName: config.name,
+        websiteIcon: config.iconUrl,
+        baseUrl: config.baseUrl,
+        searchUrl: config.searchUrl,
+        needsCaptcha: _requiresCaptcha(config),
+        episodeResources: const [],
+      );
+    }).toList(growable: false);
+  }
+
+  void _ensureVideoResourcesInitialized(List<CrawlConfigItem> configs) {
+    if (state.videoResources.isNotEmpty) {
+      return;
+    }
+    state = state.copyWith(videoResources: _buildInitialResources(configs));
   }
 
   void _clearAllResources(List<CrawlConfigItem> configs) {
-    CrawlConfigItem? configFor(String name) {
-      for (final c in configs) {
-        if (c.name == name) {
-          return c;
-        }
-      }
-      return null;
-    }
+    final configsByName = {
+      for (final config in configs) config.name: config,
+    };
 
     final clearedResources = state.videoResources.map((resource) {
-      final config = configFor(resource.websiteName);
+      final config = configsByName[resource.websiteName];
       final anti = config?.antiCrawlerConfig;
       final captchaEnabled = anti?.enabled ?? false;
 
@@ -212,21 +239,56 @@ class VideoSourceController extends _$VideoSourceController {
   }
 
   Future<void> retryResources(String websiteName) async {
-    final configs = await CrawlConfig.loadAllCrawlConfigs();
+    final configs = await _getCrawlConfigs();
+    _ensureVideoResourcesInitialized(configs);
     final config = _firstConfigWhere(configs, (c) => c.name == websiteName);
     if (config == null) {
       return;
     }
-    await _getResources(state.keyword, config);
+    final fallbackKeyword = ref.read(playExtraProvider).playExtra.subjectName;
+    final retryKeyword = state.keyword.trim().isNotEmpty
+        ? state.keyword.trim()
+        : fallbackKeyword.trim();
+    if (retryKeyword.isEmpty) {
+      return;
+    }
+
+    final sessionId = _searchSessionId;
+    _updateResourceStatus(
+      websiteName,
+      isLoading: false,
+      episodeResources: const [],
+      errorMessage: null,
+      needsCaptcha: _requiresCaptcha(config),
+      antiCrawlerConfig:
+          config.antiCrawlerConfig.enabled ? config.antiCrawlerConfig : null,
+    );
+    await _getResources(
+      retryKeyword,
+      config,
+      sessionId: sessionId,
+      requestToken: _nextWebsiteRequestToken(websiteName),
+    );
   }
 
-  Future<void> _getResources(String keyword, CrawlConfigItem config) async {
+  Future<void> _getResources(
+    String keyword,
+    CrawlConfigItem config, {
+    required int sessionId,
+    required int requestToken,
+  }) async {
     try {
+      if (!_isRequestCurrent(config.name, sessionId, requestToken)) {
+        return;
+      }
       _updateResourceStatus(config.name, isLoading: true, errorMessage: null);
 
       final aliases = ref.read(playExtraProvider).playExtra.subjectAliases;
       final rawSearchList =
           await WebRequest.getSearchSubjectListService(keyword, config);
+      if (!_isRequestCurrent(config.name, sessionId, requestToken)) {
+        return;
+      }
 
       final names =
           rawSearchList.map((item) => item.name).toList(growable: false);
@@ -262,6 +324,9 @@ class VideoSourceController extends _$VideoSourceController {
         final matchRatio = entry.matchRatio;
         final crawlerEpisodeResources =
             await WebRequest.getResourcesListService(search.link, config);
+        if (!_isRequestCurrent(config.name, sessionId, requestToken)) {
+          return;
+        }
 
         for (final crawlerResource in crawlerEpisodeResources) {
           allEpisodesList.add(
@@ -275,6 +340,9 @@ class VideoSourceController extends _$VideoSourceController {
         }
       }
 
+      if (!_isRequestCurrent(config.name, sessionId, requestToken)) {
+        return;
+      }
       _updateResourceStatus(
         config.name,
         isLoading: false,
@@ -282,6 +350,9 @@ class VideoSourceController extends _$VideoSourceController {
         needsCaptcha: false,
       );
     } on CaptchaRequiredException {
+      if (!_isRequestCurrent(config.name, sessionId, requestToken)) {
+        return;
+      }
       _updateResourceStatus(
         config.name,
         isLoading: false,
@@ -290,6 +361,9 @@ class VideoSourceController extends _$VideoSourceController {
         errorMessage: null,
       );
     } catch (e) {
+      if (!_isRequestCurrent(config.name, sessionId, requestToken)) {
+        return;
+      }
       _updateResourceStatus(
         config.name,
         isLoading: false,
@@ -298,8 +372,72 @@ class VideoSourceController extends _$VideoSourceController {
     }
   }
 
-  void updateLoading(bool isLoading) {
-    state = state.copyWith(isLoading: isLoading);
+  void updateSearchCompleted(bool isSearchCompleted) {
+    state = state.copyWith(isSearchCompleted: isSearchCompleted);
+  }
+
+  Future<List<CrawlConfigItem>> _getCrawlConfigs() async {
+    final existingFuture = _crawlConfigsFuture;
+    if (existingFuture != null) {
+      return existingFuture;
+    }
+
+    final future = CrawlConfig.loadAllCrawlConfigs();
+    _crawlConfigsFuture = future;
+    try {
+      return await future;
+    } catch (_) {
+      if (identical(_crawlConfigsFuture, future)) {
+        _crawlConfigsFuture = null;
+      }
+      rethrow;
+    }
+  }
+
+  Future<void> _runSearchPool({
+    required List<CrawlConfigItem> configs,
+    required String keyword,
+    required int sessionId,
+  }) async {
+    if (configs.isEmpty) {
+      return;
+    }
+
+    var nextIndex = 0;
+    final workerCount =
+        configs.length < _maxConcurrentSearches ? configs.length : _maxConcurrentSearches;
+
+    Future<void> worker() async {
+      while (true) {
+        if (_searchSessionId != sessionId) {
+          return;
+        }
+        final currentIndex = nextIndex++;
+        if (currentIndex >= configs.length) {
+          return;
+        }
+        final config = configs[currentIndex];
+        await _getResources(
+          keyword,
+          config,
+          sessionId: sessionId,
+          requestToken: _nextWebsiteRequestToken(config.name),
+        );
+      }
+    }
+
+    await Future.wait(List.generate(workerCount, (_) => worker()));
+  }
+
+  int _nextWebsiteRequestToken(String websiteName) {
+    final nextToken = (_websiteRequestTokens[websiteName] ?? 0) + 1;
+    _websiteRequestTokens[websiteName] = nextToken;
+    return nextToken;
+  }
+
+  bool _isRequestCurrent(String websiteName, int sessionId, int requestToken) {
+    return _searchSessionId == sessionId &&
+        _websiteRequestTokens[websiteName] == requestToken;
   }
 
   void _updateResourceStatus(

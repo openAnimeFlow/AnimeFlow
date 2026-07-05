@@ -15,7 +15,6 @@ class EpisodesData {
     this.episodeSort = 0,
     this.episodeIndex = 0,
     this.episodeId = 0,
-    this.isLoading = false,
     this.isLoadingMore = false,
     this.hasMore = false,
   });
@@ -35,9 +34,6 @@ class EpisodesData {
   /// 当前剧集 id
   final int episodeId;
 
-  /// 是否正在加载首屏
-  final bool isLoading;
-
   /// 是否正在加载更多
   final bool isLoadingMore;
 
@@ -50,7 +46,6 @@ class EpisodesData {
     double? episodeSort,
     int? episodeIndex,
     int? episodeId,
-    bool? isLoading,
     bool? isLoadingMore,
     bool? hasMore,
   }) {
@@ -60,7 +55,6 @@ class EpisodesData {
       episodeSort: episodeSort ?? this.episodeSort,
       episodeIndex: episodeIndex ?? this.episodeIndex,
       episodeId: episodeId ?? this.episodeId,
-      isLoading: isLoading ?? this.isLoading,
       isLoadingMore: isLoadingMore ?? this.isLoadingMore,
       hasMore: hasMore ?? this.hasMore,
     );
@@ -71,80 +65,82 @@ class EpisodesData {
 @Riverpod(dependencies: [playExtra])
 class Episodes extends _$Episodes {
   @override
-  EpisodesData build() {
+  Future<EpisodesData> build() async {
     final extra = ref.watch(playExtraProvider);
-    // 异步加载剧集
-    Future.microtask(() => _load(extra));
-    return const EpisodesData();
+    return _fetchInitialData(extra);
   }
 
-  /// 并定位到续播集数或首个正篇。
-  Future<void> _load(PlayRouteExtra extra) async {
+  Future<EpisodesData> _fetchInitialData(PlayRouteExtra extra) async {
     final subjectId = extra.playExtra.subjectId;
     final continueEpisode = extra.continueEpisode ?? 0;
 
-    state = state.copyWith(isLoading: true);
-    try {
-      // 加载首屏
-      var episodes = await FlowRequest.getSubjectEpisodesByIdService(
+    var episodes = await FlowRequest.getSubjectEpisodesByIdService(
+      subjectId,
+      EpisodesPagination.pageSize,
+      0,
+    );
+
+    while (continueEpisode > 0 &&
+        continueEpisode > episodes.data.length &&
+        EpisodesPagination.hasMore(episodes)) {
+      final page = await FlowRequest.getSubjectEpisodesByIdService(
         subjectId,
         EpisodesPagination.pageSize,
-        0,
+        episodes.data.length,
       );
-      state = state.copyWith(
+      episodes = EpisodesPagination.mergePages(cached: episodes, page: page);
+    }
+
+    if (episodes.data.isEmpty) {
+      return EpisodesData(
         episodes: episodes,
         hasMore: EpisodesPagination.hasMore(episodes),
       );
-
-      // 如需续播，继续翻页直到 data 覆盖 continueEpisode
-      while (continueEpisode > 0 &&
-          continueEpisode > episodes.data.length &&
-          EpisodesPagination.hasMore(episodes)) {
-        final page = await FlowRequest.getSubjectEpisodesByIdService(
-          subjectId,
-          EpisodesPagination.pageSize,
-          episodes.data.length,
-        );
-        episodes = EpisodesPagination.mergePages(cached: episodes, page: page);
-        state = state.copyWith(
-          episodes: episodes,
-          hasMore: EpisodesPagination.hasMore(episodes),
-        );
-      }
-
-      if (episodes.data.isEmpty) {
-        state = state.copyWith(isLoading: false);
-        return;
-      }
-
-      //  定位到续播集数
-      if (continueEpisode > 0 && continueEpisode <= episodes.data.length) {
-        final episode = episodes.data[continueEpisode - 1];
-        _selectEpisode(episode, continueEpisode);
-      } else {
-        // 否则定位到首个非集合（正篇）
-        _selectFirstNonCollection(episodes);
-      }
-
-      state = state.copyWith(isLoading: false);
-    } catch (e) {
-      LiggLogger().e(e);
-      state = state.copyWith(isLoading: false);
     }
+
+    final selection =
+        continueEpisode > 0 && continueEpisode <= episodes.data.length
+            ? _buildEpisodeSelection(
+                episode: episodes.data[continueEpisode - 1],
+                index: continueEpisode,
+              )
+            : _buildFirstNonCollectionSelection(episodes);
+
+    return EpisodesData(
+      episodes: episodes,
+      episodeTitle: selection.title,
+      episodeSort: selection.sort,
+      episodeIndex: selection.index,
+      episodeId: selection.id,
+      hasMore: EpisodesPagination.hasMore(episodes),
+    );
+  }
+
+  EpisodesData? get _currentData => state.asData?.value;
+
+  Future<void> retry() async {
+    state = const AsyncLoading();
+    state = await AsyncValue.guard(() async {
+      final extra = ref.read(playExtraProvider);
+      return _fetchInitialData(extra);
+    });
   }
 
   /// 滚动到底部时加载更多剧集
-  Future<void> loadMore(int subjectId) async {
-    final episodes = state.episodes;
-    if (episodes == null ||
+  Future<void> loadMore() async {
+    final current = _currentData;
+    final episodes = current?.episodes;
+    if (current == null ||
+        episodes == null ||
         state.isLoading ||
-        state.isLoadingMore ||
-        !state.hasMore) {
+        current.isLoadingMore ||
+        !current.hasMore) {
       return;
     }
 
-    state = state.copyWith(isLoadingMore: true);
+    state = AsyncData(current.copyWith(isLoadingMore: true));
     try {
+      final subjectId = ref.read(playExtraProvider).playExtra.subjectId;
       final page = await FlowRequest.getSubjectEpisodesByIdService(
         subjectId,
         EpisodesPagination.pageSize,
@@ -152,46 +148,56 @@ class Episodes extends _$Episodes {
       );
       final merged =
           EpisodesPagination.mergePages(cached: episodes, page: page);
-      state = state.copyWith(
-        episodes: merged,
-        hasMore: EpisodesPagination.hasMore(merged),
-        isLoadingMore: false,
+      state = AsyncData(
+        current.copyWith(
+          episodes: merged,
+          hasMore: EpisodesPagination.hasMore(merged),
+          isLoadingMore: false,
+        ),
       );
     } catch (e) {
       LiggLogger().e(e);
-      state = state.copyWith(isLoadingMore: false);
+      state = AsyncData(current.copyWith(isLoadingMore: false));
     }
   }
 
-  /// 设置当前剧集标题
   void setEpisodeTitle(String title) {
-    if (state.episodeTitle == title) return;
-    state = state.copyWith(episodeTitle: title);
+    final current = _currentData;
+    if (current == null || current.episodeTitle == title) {
+      return;
+    }
+    state = AsyncData(current.copyWith(episodeTitle: title));
   }
 
-  /// 设置当前选中剧集
   void setEpisodeSort({
     required num sort,
     required int episodeIndex,
     required int episodeId,
   }) {
-    if (state.episodeIndex != episodeIndex) {
+    final current = _currentData;
+    if (current == null) {
+      return;
+    }
+    if (current.episodeIndex != episodeIndex) {
       LiggLogger().i('选中剧集索引:$episodeIndex');
     }
-    state = state.copyWith(
-      episodeSort: sort.toDouble(),
-      episodeIndex: episodeIndex,
-      episodeId: episodeId,
+    state = AsyncData(
+      current.copyWith(
+        episodeSort: sort.toDouble(),
+        episodeIndex: episodeIndex,
+        episodeId: episodeId,
+      ),
     );
   }
 
   /// 是否存在下一集（下一集的 name 字段不为空字符串）
   bool get hasNextEpisode {
-    final episodesData = state.episodes;
-    if (episodesData == null || episodesData.data.isEmpty) {
+    final current = _currentData;
+    final episodesData = current?.episodes;
+    if (current == null || episodesData == null || episodesData.data.isEmpty) {
       return false;
     }
-    final nextEpisodeIndex = state.episodeIndex + 1;
+    final nextEpisodeIndex = current.episodeIndex + 1;
     if (nextEpisodeIndex - 1 >= episodesData.data.length) {
       return false;
     }
@@ -200,37 +206,41 @@ class Episodes extends _$Episodes {
 
   /// 切换到下一集
   void switchToNextEpisode() {
-    final episodesData = state.episodes;
-    if (episodesData == null || episodesData.data.isEmpty) {
+    final current = _currentData;
+    final episodesData = current?.episodes;
+    if (current == null || episodesData == null || episodesData.data.isEmpty) {
       return;
     }
-    final nextEpisodeIndex = state.episodeIndex + 1;
+    final nextEpisodeIndex = current.episodeIndex + 1;
     if (nextEpisodeIndex - 1 >= episodesData.data.length) {
       return;
     }
     final nextEpisode = episodesData.data[nextEpisodeIndex - 1];
-    setEpisodeSort(
-      episodeId: nextEpisode.id,
-      episodeIndex: nextEpisodeIndex,
-      sort: nextEpisode.sort,
-    );
-    setEpisodeTitle(
-      nextEpisode.nameCN.isEmpty ? nextEpisode.name : nextEpisode.nameCN,
-    );
-  }
-
-  void _selectEpisode(EpisodeData episode, int index) {
-    setEpisodeSort(
-      sort: episode.sort,
-      episodeIndex: index,
-      episodeId: episode.id,
-    );
-    setEpisodeTitle(
-      episode.nameCN.isEmpty ? episode.name : episode.nameCN,
+    final title =
+        nextEpisode.nameCN.isEmpty ? nextEpisode.name : nextEpisode.nameCN;
+    state = AsyncData(
+      current.copyWith(
+        episodeSort: nextEpisode.sort.toDouble(),
+        episodeIndex: nextEpisodeIndex,
+        episodeId: nextEpisode.id,
+        episodeTitle: title,
+      ),
     );
   }
 
-  void _selectFirstNonCollection(EpisodesItem episodes) {
+  _EpisodeSelection _buildEpisodeSelection({
+    required EpisodeData episode,
+    required int index,
+  }) {
+    return _EpisodeSelection(
+      id: episode.id,
+      index: index,
+      sort: episode.sort.toDouble(),
+      title: episode.nameCN.isEmpty ? episode.name : episode.nameCN,
+    );
+  }
+
+  _EpisodeSelection _buildFirstNonCollectionSelection(EpisodesItem episodes) {
     var targetIndex = 0;
     for (var i = 0; i < episodes.data.length; i++) {
       if (episodes.data[i].collection == null) {
@@ -238,14 +248,23 @@ class Episodes extends _$Episodes {
         break;
       }
     }
-    final target = episodes.data[targetIndex];
-    setEpisodeSort(
-      sort: target.sort,
-      episodeIndex: targetIndex + 1,
-      episodeId: target.id,
-    );
-    setEpisodeTitle(
-      target.nameCN.isEmpty ? target.name : target.nameCN,
+    return _buildEpisodeSelection(
+      episode: episodes.data[targetIndex],
+      index: targetIndex + 1,
     );
   }
+}
+
+class _EpisodeSelection {
+  const _EpisodeSelection({
+    required this.id,
+    required this.index,
+    required this.sort,
+    required this.title,
+  });
+
+  final int id;
+  final int index;
+  final double sort;
+  final String title;
 }

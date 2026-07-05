@@ -110,7 +110,7 @@ class _VideoViewState extends ConsumerState<VideoView> with WindowListener {
   Widget build(BuildContext context) {
     // 监听集数变化：首次设置或切换集数时重新选择资源
     ref.listen<int>(
-      episodesProvider.select((state) => state.episodeIndex),
+      episodesProvider.select((state) => state.asData?.value.episodeIndex ?? 0),
       (previous, episode) {
         if (episode <= 0 || episode == lastEpisodeIndex) {
           return;
@@ -130,8 +130,8 @@ class _VideoViewState extends ConsumerState<VideoView> with WindowListener {
         /// 视频层
         Consumer(
           builder: (context, ref, child) {
-            final videoFit = ref.watch(
-                playStateProvider.select((state) => state.videoFit));
+            final videoFit =
+                ref.watch(playStateProvider.select((state) => state.videoFit));
             return Video(
               controller: playController.videoController,
               fit: videoFit,

@@ -115,7 +115,8 @@ class _ContentViewState extends ConsumerState<ContentView>
         final videoUiStateController =
             ref.read(videoUiStateControllerProvider.notifier);
         ref.listen<int>(
-          episodesProvider.select((state) => state.episodeId),
+          episodesProvider
+              .select((state) => state.asData?.value.episodeId ?? 0),
           (previous, episodeId) {
             currentEpisodeId = episodeId;
             if (episodeId > 0 && episodeId != lastRequestedEpisodeId) {
@@ -128,7 +129,8 @@ class _ContentViewState extends ConsumerState<ContentView>
             }
           },
         );
-        currentEpisodeId = ref.read(episodesProvider).episodeId;
+        currentEpisodeId =
+            ref.read(episodesProvider).asData?.value.episodeId ?? 0;
         return PreferredSize(
           preferredSize: const Size.fromHeight(100),
           child: Column(

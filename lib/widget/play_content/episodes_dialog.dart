@@ -10,9 +10,10 @@ class EpisodesDialog extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final episodesState = ref.watch(episodesProvider);
-    final episodes = episodesState.episodes?.data;
-    final selectedEpisodeId = episodesState.episodeId;
+    final episodesAsync = ref.watch(episodesProvider);
+    final episodesState = episodesAsync.asData?.value;
+    final episodes = episodesState?.episodes?.data;
+    final selectedEpisodeId = episodesState?.episodeId ?? 0;
 
     return Align(
       alignment: Alignment.centerRight,
@@ -47,9 +48,9 @@ class EpisodesDialog extends ConsumerWidget {
               child: _buildEpisodesList(
                 context,
                 ref,
+                episodesAsync: episodesAsync,
                 episodes: episodes,
                 selectedEpisodeId: selectedEpisodeId,
-                isLoading: episodesState.isLoading,
               ),
             ),
           ],
@@ -71,12 +72,28 @@ class EpisodesDialog extends ConsumerWidget {
   Widget _buildEpisodesList(
     BuildContext context,
     WidgetRef ref, {
+    required AsyncValue<EpisodesData> episodesAsync,
     required List<EpisodeData>? episodes,
     required int selectedEpisodeId,
-    required bool isLoading,
   }) {
-    if (isLoading) {
+    if (episodesAsync.isLoading) {
       return const Center(child: CircularProgressIndicator());
+    }
+
+    if (episodesAsync.hasError) {
+      return Center(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            const Text('章节加载失败'),
+            const SizedBox(height: 12),
+            FilledButton(
+              onPressed: () => ref.read(episodesProvider.notifier).retry(),
+              child: const Text('重试'),
+            ),
+          ],
+        ),
+      );
     }
 
     if (episodes == null || episodes.isEmpty) {

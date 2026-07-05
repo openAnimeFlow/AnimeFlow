@@ -99,12 +99,14 @@ class VideoSourceController extends _$VideoSourceController {
   @override
   VideoSourceState build() {
     ref.onDispose(_dispose);
-    final currentEpisodeIndex = ref.read(episodesProvider).episodeIndex;
-    ref.listen<EpisodesData>(
+    final currentEpisodeIndex =
+        ref.read(episodesProvider).asData?.value.episodeIndex ?? 0;
+    ref.listen<AsyncValue<EpisodesData>>(
       episodesProvider,
       (previous, next) {
-        if (state.currentEpisodeIndex != next.episodeIndex) {
-          state = state.copyWith(currentEpisodeIndex: next.episodeIndex);
+        final nextEpisodeIndex = next.asData?.value.episodeIndex ?? 0;
+        if (state.currentEpisodeIndex != nextEpisodeIndex) {
+          state = state.copyWith(currentEpisodeIndex: nextEpisodeIndex);
         }
       },
     );
@@ -463,7 +465,8 @@ class VideoSourceController extends _$VideoSourceController {
 
     var offset = 0;
     final subject = ref.read(playExtraProvider).playExtra;
-    final episodesState = ref.read(episodesProvider);
+    final episodesState =
+        ref.read(episodesProvider).asData?.value ?? const EpisodesData();
     final subjectId = subject.subjectId;
     final episodeIndex = episodesState.episodeIndex;
     final subjectName = subject.subjectName;
@@ -477,9 +480,7 @@ class VideoSourceController extends _$VideoSourceController {
     }
 
     try {
-      ref
-          .read(playStateProvider.notifier)
-          .setParseResult('正在解析视频源...');
+      ref.read(playStateProvider.notifier).setParseResult('正在解析视频源...');
 
       final source = await _webViewVideoProvider!
           .resolve(url, useLegacyParser: false, offset: offset);
@@ -501,14 +502,10 @@ class VideoSourceController extends _$VideoSourceController {
       return true;
     } on VideoSourceTimeoutException {
       ref.read(playStateProvider.notifier).setIsParsing(false);
-      ref
-          .read(playStateProvider.notifier)
-          .setParseResult('视频解析超时，请重试');
+      ref.read(playStateProvider.notifier).setParseResult('视频解析超时，请重试');
     } on VideoSourceNotFoundException {
       ref.read(playStateProvider.notifier).setIsParsing(false);
-      ref
-          .read(playStateProvider.notifier)
-          .setParseResult('未找到视频资源，请切换数据源重试');
+      ref.read(playStateProvider.notifier).setParseResult('未找到视频资源，请切换数据源重试');
     } catch (e) {
       ref.read(playStateProvider.notifier).setIsParsing(false);
       ref

@@ -57,7 +57,8 @@ class _PlayPageViewState extends ConsumerState<PlayPage> {
   Widget build(BuildContext context) {
     // 监听剧集加载完成 → 初始化视频资源搜索
     ref.listen(episodesProvider, (prev, next) {
-      if (!next.isLoading && next.episodes != null) {
+      final episodesState = next.asData?.value;
+      if (episodesState?.episodes != null) {
         final subjectName = ref.read(playExtraProvider).playExtra.subjectName;
         _initResources(subjectName);
       }

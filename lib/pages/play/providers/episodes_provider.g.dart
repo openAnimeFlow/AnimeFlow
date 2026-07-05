@@ -14,7 +14,8 @@ part of 'episodes_provider.dart';
 final episodesProvider = EpisodesProvider._();
 
 /// 当路由参数变化（切换到不同番剧）时自动重新加载剧集。
-final class EpisodesProvider extends $NotifierProvider<Episodes, EpisodesData> {
+final class EpisodesProvider
+    extends $AsyncNotifierProvider<Episodes, EpisodesData> {
   /// 当路由参数变化（切换到不同番剧）时自动重新加载剧集。
   EpisodesProvider._()
       : super(
@@ -37,29 +38,21 @@ final class EpisodesProvider extends $NotifierProvider<Episodes, EpisodesData> {
   @$internal
   @override
   Episodes create() => Episodes();
-
-  /// {@macro riverpod.override_with_value}
-  Override overrideWithValue(EpisodesData value) {
-    return $ProviderOverride(
-      origin: this,
-      providerOverride: $SyncValueProvider<EpisodesData>(value),
-    );
-  }
 }
 
-String _$episodesHash() => r'092006556ecb8b3f95277b355008aba5e14158c9';
+String _$episodesHash() => r'077f6a49dcfedddf95885587a96f3b3ba419acf1';
 
 /// 当路由参数变化（切换到不同番剧）时自动重新加载剧集。
 
-abstract class _$Episodes extends $Notifier<EpisodesData> {
-  EpisodesData build();
+abstract class _$Episodes extends $AsyncNotifier<EpisodesData> {
+  FutureOr<EpisodesData> build();
   @$mustCallSuper
   @override
   void runBuild() {
-    final ref = this.ref as $Ref<EpisodesData, EpisodesData>;
+    final ref = this.ref as $Ref<AsyncValue<EpisodesData>, EpisodesData>;
     final element = ref.element as $ClassProviderElement<
-        AnyNotifier<EpisodesData, EpisodesData>,
-        EpisodesData,
+        AnyNotifier<AsyncValue<EpisodesData>, EpisodesData>,
+        AsyncValue<EpisodesData>,
         Object?,
         Object?>;
     element.handleCreate(ref, build);

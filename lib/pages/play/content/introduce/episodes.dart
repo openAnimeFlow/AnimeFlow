@@ -1,7 +1,6 @@
 import 'package:anime_flow/constants/assets_path_constants.dart';
 import 'package:anime_flow/models/item/bangumi/episodes_item.dart';
 import 'package:anime_flow/pages/play/providers/episodes_provider.dart';
-import 'package:anime_flow/routes/provider/routes_args.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:lottie/lottie.dart';
@@ -61,14 +60,13 @@ class _EpisodesComponentsState extends ConsumerState<EpisodesComponents> {
   }
 
   void _tryLoadMore() {
-    final episodesState = ref.read(episodesProvider);
-    if (!episodesState.hasMore ||
-        episodesState.isLoadingMore ||
-        episodesState.isLoading) {
+    final episodesState = ref.read(episodesProvider).asData?.value;
+    if (episodesState == null ||
+        !episodesState.hasMore ||
+        episodesState.isLoadingMore) {
       return;
     }
-    final subjectId = ref.read(playExtraProvider).playExtra.subjectId;
-    ref.read(episodesProvider.notifier).loadMore(subjectId);
+    ref.read(episodesProvider.notifier).loadMore();
   }
 
   /// 正篇(type=0)置顶，其余按 type 分组，同 type 内按 sort 排序
@@ -117,8 +115,77 @@ class _EpisodesComponentsState extends ConsumerState<EpisodesComponents> {
     );
   }
 
+  Widget _buildInitialLoading() {
+    return Container(
+      height: 250,
+      padding: const EdgeInsets.symmetric(horizontal: 16),
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(10),
+        color: Theme.of(context)
+            .colorScheme
+            .surfaceContainerHighest
+            .withValues(alpha: 0.8),
+      ),
+      child: const Center(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            SizedBox(
+              width: 180,
+              child: LinearProgressIndicator(),
+            ),
+            SizedBox(height: 12),
+            Text('正在获取剧集...'),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildLoadError(Object error) {
+    return Container(
+      height: 250,
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(10),
+        color: Theme.of(context)
+            .colorScheme
+            .surfaceContainerHighest
+            .withValues(alpha: 0.8),
+      ),
+      child: Center(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            const Text('剧集获取失败'),
+            const SizedBox(height: 8),
+            Text(
+              '$error',
+              maxLines: 2,
+              overflow: TextOverflow.ellipsis,
+              textAlign: TextAlign.center,
+              style: TextStyle(
+                fontSize: 12,
+                color: Theme.of(context).colorScheme.outline,
+              ),
+            ),
+            const SizedBox(height: 12),
+            FilledButton.icon(
+              onPressed: () => ref.read(episodesProvider.notifier).retry(),
+              icon: const Icon(Icons.refresh),
+              label: const Text('重试'),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
+    final episodesAsync = ref.watch(episodesProvider);
+    final hasEpisodes = episodesAsync.asData?.value.episodes != null;
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -126,268 +193,232 @@ class _EpisodesComponentsState extends ConsumerState<EpisodesComponents> {
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
             const Text('选集'),
-            Consumer(
-              builder: (context, ref, _) {
-                final hasEpisodes = ref.watch(
-                  episodesProvider.select((state) => state.episodes != null),
-                );
-                return hasEpisodes
-                    ? IconButton(
-                        onPressed: () {
-                          setState(() {
-                            isGridView = !isGridView;
-                          });
-                        },
-                        icon: Icon(
-                          isGridView ? Icons.view_list : Icons.grid_view,
-                        ),
-                        tooltip: isGridView ? '切换到列表' : '切换到网格',
-                      )
-                    : const SizedBox.shrink();
-              },
-            ),
+            hasEpisodes
+                ? IconButton(
+                    onPressed: () {
+                      setState(() {
+                        isGridView = !isGridView;
+                      });
+                    },
+                    icon: Icon(
+                      isGridView ? Icons.view_list : Icons.grid_view,
+                    ),
+                    tooltip: isGridView ? '切换到列表' : '切换到网格',
+                  )
+                : const SizedBox.shrink(),
           ],
         ),
-        isGridView ? buildGridEpisodes() : buildListEpisodes(),
+        episodesAsync.when(
+          loading: _buildInitialLoading,
+          error: (error, _) => _buildLoadError(error),
+          data: (episodesState) => isGridView
+              ? buildGridEpisodes(episodesState)
+              : buildListEpisodes(episodesState),
+        ),
       ],
     );
   }
 
-  Widget buildListEpisodes() {
-    return Consumer(
-      builder: (context, ref, _) {
-        final episodesState = ref.watch(episodesProvider);
-        if (episodesState.isLoading) {
-          return const SizedBox();
-        }
+  Widget buildListEpisodes(EpisodesData episodesState) {
+    final episodesItem = episodesState.episodes;
+    if (episodesItem == null || episodesItem.data.isEmpty) {
+      return const Text('暂无章节数据');
+    }
 
-        final episodesItem = episodesState.episodes;
-        if (episodesItem == null || episodesItem.data.isEmpty) {
-          return const Text('暂无章节数据');
-        }
+    final episodes = episodesItem.data;
+    _sortEpisodes(episodes);
+    final selectedEpisodeId = episodesState.episodeId;
+    if (lastScrolledEpisodeId != selectedEpisodeId) {
+      lastScrolledEpisodeId = selectedEpisodeId;
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        _scrollListToSelectedEpisode(episodes, selectedEpisodeId);
+      });
+    }
 
-        final episodes = episodesItem.data;
-        // 正篇置顶，其他按 type 分组排列
-        _sortEpisodes(episodes);
-        final selectedEpisodeId = episodesState.episodeId;
-        if (lastScrolledEpisodeId != selectedEpisodeId) {
-          lastScrolledEpisodeId = selectedEpisodeId;
-          WidgetsBinding.instance.addPostFrameCallback((_) {
-            _scrollListToSelectedEpisode(episodes, selectedEpisodeId);
-          });
-        }
+    final itemCount = episodes.length + (episodesState.isLoadingMore ? 1 : 0);
 
-        final itemCount =
-            episodes.length + (episodesState.isLoadingMore ? 1 : 0);
+    return Container(
+      height: 250,
+      padding: const EdgeInsets.symmetric(vertical: 5, horizontal: 3),
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(10),
+        color: Theme.of(context)
+            .colorScheme
+            .surfaceContainerHighest
+            .withValues(alpha: 0.8),
+      ),
+      child: ListView.builder(
+        controller: controller,
+        itemCount: itemCount,
+        padding: EdgeInsets.zero,
+        itemBuilder: (context, index) {
+          if (index >= episodes.length) {
+            return _buildLoadMoreFooter(episodesState.isLoadingMore);
+          }
 
-        return Container(
-          height: 250,
-          padding: const EdgeInsets.symmetric(vertical: 5, horizontal: 3),
-          decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(10),
-            color: Theme.of(context)
-                .colorScheme
-                .surfaceContainerHighest
-                .withValues(alpha: 0.8),
-          ),
-          child: ListView.builder(
-            controller: controller,
-            itemCount: itemCount,
-            padding: EdgeInsets.zero,
-            itemBuilder: (context, index) {
-              if (index >= episodes.length) {
-                return _buildLoadMoreFooter(episodesState.isLoadingMore);
-              }
-
-              final episode = episodes[index];
-              final isSelected = selectedEpisodeId == episode.id;
-              return SizedBox(
-                height: itemHeight,
-                child: Card(
-                  elevation: 0,
-                  color: isSelected
-                      ? Theme.of(context).colorScheme.primaryContainer
-                      : null,
-                  child: InkWell(
+          final episode = episodes[index];
+          final isSelected = selectedEpisodeId == episode.id;
+          return SizedBox(
+            height: itemHeight,
+            child: Card(
+              elevation: 0,
+              color: isSelected
+                  ? Theme.of(context).colorScheme.primaryContainer
+                  : null,
+              child: InkWell(
+                borderRadius: BorderRadius.circular(10),
+                onTap: () => _selectEpisode(episode, index + 1),
+                child: Container(
+                  decoration: BoxDecoration(
                     borderRadius: BorderRadius.circular(10),
-                    onTap: () {
-                      final episodeIndex = index + 1;
-                      final notifier = ref.read(episodesProvider.notifier);
-                      notifier.setEpisodeSort(
-                        episodeId: episode.id,
-                        episodeIndex: episodeIndex,
-                        sort: episode.sort,
-                      );
-                      notifier.setEpisodeTitle(
-                        episode.nameCN.isEmpty ? episode.name : episode.nameCN,
-                      );
-                    },
-                    child: Container(
-                      decoration: BoxDecoration(
-                        borderRadius: BorderRadius.circular(10),
-                        color: episode.collection != null
-                            ? Theme.of(context)
-                                .colorScheme
-                                .outlineVariant
-                                .withValues(alpha: 0.3)
-                            : null,
-                      ),
-                      padding: const EdgeInsets.all(8),
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          Expanded(
-                            child: Column(
-                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                              crossAxisAlignment: CrossAxisAlignment.stretch,
+                    color: episode.collection != null
+                        ? Theme.of(context)
+                            .colorScheme
+                            .outlineVariant
+                            .withValues(alpha: 0.3)
+                        : null,
+                  ),
+                  padding: const EdgeInsets.all(8),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Expanded(
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          crossAxisAlignment: CrossAxisAlignment.stretch,
+                          children: [
+                            Row(
                               children: [
-                                Row(
-                                  children: [
-                                    Text(episode.sort
-                                        .toString()
-                                        .padLeft(2, '0')),
-                                    if (episode.type != 0) ...[
-                                      const SizedBox(width: 6),
-                                      Text(
-                                        _typeLabels[episode.type] ?? '',
-                                        style: TextStyle(
-                                          fontSize: 10,
-                                          color: Theme.of(context)
-                                              .colorScheme
-                                              .outline,
-                                        ),
-                                      ),
-                                    ],
-                                  ],
-                                ),
-                                Text(
-                                  episode.nameCN.isEmpty
-                                      ? episode.name
-                                      : episode.nameCN,
-                                  overflow: TextOverflow.ellipsis,
-                                  maxLines: 1,
-                                ),
+                                Text(episode.sort.toString().padLeft(2, '0')),
+                                if (episode.type != 0) ...[
+                                  const SizedBox(width: 6),
+                                  Text(
+                                    _typeLabels[episode.type] ?? '',
+                                    style: TextStyle(
+                                      fontSize: 10,
+                                      color:
+                                          Theme.of(context).colorScheme.outline,
+                                    ),
+                                  ),
+                                ],
                               ],
                             ),
-                          ),
-                          if (isSelected)
-                            Lottie.asset(
-                              AssetsPathConstants.playJsonIng,
-                              width: 30,
-                              height: 30,
-                              frameBuilder: (context, child, composition) {
-                                return ColorFiltered(
-                                  colorFilter: ColorFilter.mode(
-                                    Theme.of(context).colorScheme.primary,
-                                    BlendMode.srcIn,
-                                  ),
-                                  child: child,
-                                );
-                              },
+                            Text(
+                              episode.nameCN.isEmpty
+                                  ? episode.name
+                                  : episode.nameCN,
+                              overflow: TextOverflow.ellipsis,
+                              maxLines: 1,
                             ),
-                        ],
+                          ],
+                        ),
                       ),
-                    ),
+                      if (isSelected)
+                        Lottie.asset(
+                          AssetsPathConstants.playJsonIng,
+                          width: 30,
+                          height: 30,
+                          frameBuilder: (context, child, composition) {
+                            return ColorFiltered(
+                              colorFilter: ColorFilter.mode(
+                                Theme.of(context).colorScheme.primary,
+                                BlendMode.srcIn,
+                              ),
+                              child: child,
+                            );
+                          },
+                        ),
+                    ],
                   ),
                 ),
-              );
-            },
-          ),
-        );
-      },
+              ),
+            ),
+          );
+        },
+      ),
     );
   }
 
-  Widget buildGridEpisodes() {
-    return Consumer(
-      builder: (context, ref, _) {
-        final episodesState = ref.watch(episodesProvider);
-        if (episodesState.isLoading) {
-          return const SizedBox();
-        }
+  Widget buildGridEpisodes(EpisodesData episodesState) {
+    final episodesItem = episodesState.episodes;
+    if (episodesItem == null || episodesItem.data.isEmpty) {
+      return const Text('暂无章节数据');
+    }
 
-        final episodesItem = episodesState.episodes;
-        if (episodesItem == null || episodesItem.data.isEmpty) {
-          return const Text('暂无章节数据');
-        }
+    final episodes = episodesItem.data;
+    _sortEpisodes(episodes);
+    final selectedEpisodeId = episodesState.episodeId;
+    final itemCount = episodes.length + (episodesState.isLoadingMore ? 1 : 0);
 
-        final episodes = episodesItem.data;
-        // 正篇置顶，其他按 type 分组排列
-        _sortEpisodes(episodes);
-        final selectedEpisodeId = episodesState.episodeId;
-        final itemCount =
-            episodes.length + (episodesState.isLoadingMore ? 1 : 0);
+    return Container(
+      constraints: const BoxConstraints(maxHeight: 250),
+      padding: const EdgeInsets.all(8),
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(10),
+        color: Theme.of(context)
+            .colorScheme
+            .surfaceContainerHighest
+            .withValues(alpha: 0.8),
+      ),
+      child: GridView.builder(
+        controller: controller,
+        shrinkWrap: true,
+        padding: EdgeInsets.zero,
+        physics: const AlwaysScrollableScrollPhysics(),
+        gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+          crossAxisCount: 5,
+          crossAxisSpacing: 1,
+          mainAxisSpacing: 1,
+          childAspectRatio: 1,
+        ),
+        itemCount: itemCount,
+        itemBuilder: (context, index) {
+          if (index >= episodes.length) {
+            return const Center(
+              child: SizedBox(
+                width: 16,
+                height: 16,
+                child: CircularProgressIndicator(strokeWidth: 2),
+              ),
+            );
+          }
 
-        return Container(
-          constraints: const BoxConstraints(maxHeight: 250),
-          padding: const EdgeInsets.all(8),
-          decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(10),
-            color: Theme.of(context)
-                .colorScheme
-                .surfaceContainerHighest
-                .withValues(alpha: 0.8),
-          ),
-          child: GridView.builder(
-            controller: controller,
-            shrinkWrap: true,
-            padding: EdgeInsets.zero,
-            physics: const AlwaysScrollableScrollPhysics(),
-            gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-              crossAxisCount: 5,
-              crossAxisSpacing: 1,
-              mainAxisSpacing: 1,
-              childAspectRatio: 1,
-            ),
-            itemCount: itemCount,
-            itemBuilder: (context, index) {
-              if (index >= episodes.length) {
-                return const Center(
-                  child: SizedBox(
-                    width: 16,
-                    height: 16,
-                    child: CircularProgressIndicator(strokeWidth: 2),
-                  ),
-                );
-              }
-
-              final episode = episodes[index];
-              final isSelected = selectedEpisodeId == episode.id;
-              return Card(
-                elevation: 0,
-                color: isSelected
-                    ? Theme.of(context).colorScheme.primaryContainer
-                    : null,
-                child: InkWell(
-                  borderRadius: BorderRadius.circular(10),
-                  onTap: () {
-                    final episodeIndex = index + 1;
-                    final notifier = ref.read(episodesProvider.notifier);
-                    notifier.setEpisodeSort(
-                      episodeId: episode.id,
-                      episodeIndex: episodeIndex,
-                      sort: episode.sort,
-                    );
-                    notifier.setEpisodeTitle(
-                      episode.nameCN.isEmpty ? episode.name : episode.nameCN,
-                    );
-                  },
-                  child: Center(
-                    child: Text(
-                      '${episode.sort}',
-                      style: TextStyle(
-                        fontSize: 16,
-                        fontWeight:
-                            isSelected ? FontWeight.bold : FontWeight.normal,
-                      ),
-                    ),
+          final episode = episodes[index];
+          final isSelected = selectedEpisodeId == episode.id;
+          return Card(
+            elevation: 0,
+            color: isSelected
+                ? Theme.of(context).colorScheme.primaryContainer
+                : null,
+            child: InkWell(
+              borderRadius: BorderRadius.circular(10),
+              onTap: () => _selectEpisode(episode, index + 1),
+              child: Center(
+                child: Text(
+                  '${episode.sort}',
+                  style: TextStyle(
+                    fontSize: 16,
+                    fontWeight:
+                        isSelected ? FontWeight.bold : FontWeight.normal,
                   ),
                 ),
-              );
-            },
-          ),
-        );
-      },
+              ),
+            ),
+          );
+        },
+      ),
+    );
+  }
+
+  void _selectEpisode(EpisodeData episode, int episodeIndex) {
+    final notifier = ref.read(episodesProvider.notifier);
+    notifier.setEpisodeSort(
+      episodeId: episode.id,
+      episodeIndex: episodeIndex,
+      sort: episode.sort,
+    );
+    notifier.setEpisodeTitle(
+      episode.nameCN.isEmpty ? episode.name : episode.nameCN,
     );
   }
 }

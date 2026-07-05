@@ -45,11 +45,15 @@ class BottomAreaControl extends ConsumerWidget {
     final playController = ref.read(playSessionProvider);
     final videoUiStateController =
         ref.read(videoUiStateControllerProvider.notifier);
-    final fullscreen = ref.watch(playStateProvider.select((s) => s.isFullscreen));
+    final fullscreen =
+        ref.watch(playStateProvider.select((s) => s.isFullscreen));
     final danmakuOn = ref.watch(playStateProvider.select((s) => s.danmakuOn));
-    final isWideScreen = ref.watch(playStateProvider.select((s) => s.isWideScreen));
-    final isContentExpanded = ref.watch(playStateProvider.select((s) => s.isContentExpanded));
-    final isShowControlsUi = ref.watch(videoUiStateControllerProvider.select((s) => s.isShowControlsUi));
+    final isWideScreen =
+        ref.watch(playStateProvider.select((s) => s.isWideScreen));
+    final isContentExpanded =
+        ref.watch(playStateProvider.select((s) => s.isContentExpanded));
+    final isShowControlsUi = ref.watch(
+        videoUiStateControllerProvider.select((s) => s.isShowControlsUi));
     final leftPadding = MediaQuery.of(context).padding.left;
     // 全屏 + 不随键盘压缩 body 时，用 viewInsets 把底部控件顶到键盘上方
     final keyboardLift = fullscreen && SystemUtil.isMobile
@@ -99,15 +103,17 @@ class BottomAreaControl extends ConsumerWidget {
                       children: [
                         // 播放按钮
                         Consumer(
-                          builder: (context,  ref, child) {
-                            final playing = ref.watch(playStateProvider.select((s) => s.playing));
+                          builder: (context, ref, child) {
+                            final playing = ref.watch(
+                                playStateProvider.select((s) => s.playing));
                             return InkWell(
                               key: ValueKey<bool>(playing),
                               onTap: () {
                                 playController.playOrPauseVideo();
                                 videoUiStateController
                                     .updateIndicatorTypeAndShowIndicator(
-                                  VideoControlsIndicatorType.playStatusIndicator,
+                                  VideoControlsIndicatorType
+                                      .playStatusIndicator,
                                 );
                               },
                               child: Icon(
@@ -124,8 +130,8 @@ class BottomAreaControl extends ConsumerWidget {
                         Consumer(
                           builder: (context, ref, _) {
                             ref.watch(
-                              episodesProvider
-                                  .select((state) => state.episodeIndex),
+                              episodesProvider.select((state) =>
+                                  state.asData?.value.episodeIndex ?? 0),
                             );
                             final hasNextEpisode = ref
                                 .read(episodesProvider.notifier)
@@ -301,8 +307,9 @@ class BottomAreaControl extends ConsumerWidget {
                           ),
                           // 画面填充按钮
                           Consumer(
-                            builder: ( context, ref, child) {
-                              final videoFit = ref.watch(playStateProvider.select((s) => s.videoFit));
+                            builder: (context, ref, child) {
+                              final videoFit = ref.watch(
+                                  playStateProvider.select((s) => s.videoFit));
                               return FitButton(
                                 value: videoFit,
                                 onChanged: (fit) {
@@ -312,8 +319,8 @@ class BottomAreaControl extends ConsumerWidget {
                                     videoUiStateController.cancelUiTimer(),
                                 onMenuClose: () =>
                                     videoUiStateController.hideControlsUi(
-                                      duration: const Duration(seconds: 2),
-                                    ),
+                                  duration: const Duration(seconds: 2),
+                                ),
                               );
                             },
                           ),

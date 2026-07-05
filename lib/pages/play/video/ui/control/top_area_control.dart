@@ -159,11 +159,15 @@ class _TopAreaControlState extends ConsumerState<TopAreaControl> {
                                     Consumer(
                                       builder: (context, ref, child) {
                                         final episodeTitle = ref.watch(
-                                            episodesProvider.select(
-                                                (state) => state.episodeTitle));
+                                            episodesProvider.select((state) =>
+                                                state.asData?.value
+                                                    .episodeTitle ??
+                                                ''));
                                         final episodeSort = ref.watch(
-                                            episodesProvider.select(
-                                                (state) => state.episodeSort));
+                                            episodesProvider.select((state) =>
+                                                state.asData?.value
+                                                    .episodeSort ??
+                                                0));
                                         if (episodeTitle.isEmpty) {
                                           return const SizedBox.shrink();
                                         }
@@ -199,11 +203,9 @@ class _TopAreaControlState extends ConsumerState<TopAreaControl> {
                         Consumer(
                           builder: (context, ref, child) {
                             final position = ref.watch(
-                                playStateProvider
-                                    .select((s) => s.position));
-                            final isWideScreen = ref.watch(
-                                playStateProvider
-                                    .select((s) => s.isWideScreen));
+                                playStateProvider.select((s) => s.position));
+                            final isWideScreen = ref.watch(playStateProvider
+                                .select((s) => s.isWideScreen));
                             return Row(
                               children: [
                                 if (position > Duration.zero &&
@@ -287,9 +289,8 @@ class _TopAreaControlState extends ConsumerState<TopAreaControl> {
                                       ? Consumer(
                                           builder: (context, ref, child) {
                                             final isContentExpanded = ref.watch(
-                                                playStateProvider
-                                                    .select((s) =>
-                                                        s.isContentExpanded));
+                                                playStateProvider.select((s) =>
+                                                    s.isContentExpanded));
                                             return IconButton(
                                               onPressed: () => playController
                                                   .toggleContentExpanded(),

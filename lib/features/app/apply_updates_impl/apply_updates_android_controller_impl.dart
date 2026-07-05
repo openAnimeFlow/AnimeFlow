@@ -5,7 +5,6 @@ import 'package:anime_flow/http/requests/request.dart';
 import 'package:anime_flow/models/download_info.dart';
 import 'package:anime_flow/utils/logger.dart';
 import 'package:dio/dio.dart';
-import 'package:get/get.dart';
 import 'package:open_filex/open_filex.dart';
 import 'package:path_provider/path_provider.dart'
     show getExternalStorageDirectory;
@@ -24,7 +23,6 @@ class ApplyUpdatesAndroidController implements ApplyUpdatesController {
     try {
       final dir = await getExternalStorageDirectory();
       final savePath = '${dir!.path}/${downloadInfo.fileName}';
-      Get.log(savePath);
       await Request.downloadFile(
         downloadInfo.url,
         savePath,

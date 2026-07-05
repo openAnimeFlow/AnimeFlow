@@ -26,6 +26,7 @@ final class PlayControllerProvider
             shadersDirectoryProvider,
             playStateControllerProvider,
             videoUiStateControllerProvider,
+            episodesProvider,
             playExtraProvider
           ],
           $allTransitiveDependencies: <ProviderOrFamily>{
@@ -33,6 +34,7 @@ final class PlayControllerProvider
             PlayControllerProvider.$allTransitiveDependencies1,
             PlayControllerProvider.$allTransitiveDependencies2,
             PlayControllerProvider.$allTransitiveDependencies3,
+            PlayControllerProvider.$allTransitiveDependencies4,
           },
         );
 
@@ -41,6 +43,7 @@ final class PlayControllerProvider
   static final $allTransitiveDependencies2 =
       PlayStateControllerProvider.$allTransitiveDependencies0;
   static final $allTransitiveDependencies3 = videoUiStateControllerProvider;
+  static final $allTransitiveDependencies4 = episodesProvider;
 
   @override
   String debugGetCreateSourceHash() => _$playControllerHash();
@@ -64,7 +67,7 @@ final class PlayControllerProvider
   }
 }
 
-String _$playControllerHash() => r'a77f839f454d9989c71e35b2c26fa897d8493bf1';
+String _$playControllerHash() => r'0b448892d3463248efbae177c8f7ce20eee1f47f';
 
 @ProviderFor(PlayStateController)
 final playStateControllerProvider = PlayStateControllerProvider._();

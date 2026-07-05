@@ -1,11 +1,12 @@
-import 'package:anime_flow/pages/play/controller/play_controller.dart';
-import 'package:anime_flow/pages/play/controller/video_source_controller.dart';
+import 'package:anime_flow/models/enums/video_controls_icon_type.dart';
+import 'package:anime_flow/pages/play/providers/play_provider.dart';
+import 'package:anime_flow/pages/play/providers/video_ui_provider.dart';
+import 'package:anime_flow/pages/play/providers/video_source_provider.dart';
 import 'package:anime_flow/routes/provider/routes_args.dart';
 import 'package:anime_flow/widget/animation_network_image.dart';
 import 'package:anime_flow/widget/play_content/source_drawers/video_source_drawers.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:get/get.dart';
 
 class VideoResourcesView extends ConsumerStatefulWidget {
   const VideoResourcesView({super.key});
@@ -15,18 +16,26 @@ class VideoResourcesView extends ConsumerStatefulWidget {
 }
 
 class _VideoResourcesViewState extends ConsumerState<VideoResourcesView> {
-  final videoSourceController = Get.find<VideoSourceController>();
-  final playController = Get.find<PlayController>();
-
   void _showSourceDrawer() {
+    final playController = ref.read(playSessionProvider);
+    final videoUiStateController =
+        ref.read(videoUiStateControllerProvider.notifier);
+    final videoSourceController =
+        ref.read(videoSourceControllerProvider.notifier);
     void onVideoUrlSelected(String url) {
       playController.player.stop();
       videoSourceController.loadVideoPage(url);
+      videoUiStateController
+          .updateIndicatorType(VideoControlsIndicatorType.parsingIndicator);
+      videoUiStateController
+          .updateMainAxisAlignmentType(MainAxisAlignment.center);
+      videoUiStateController.showIndicator();
     }
 
     final subjectName = ref.read(playExtraProvider).playExtra.subjectName;
+    final providerContainer = ProviderScope.containerOf(context);
 
-    if (playController.isWideScreen.value) {
+    if (ref.read(playStateProvider).isWideScreen) {
       showGeneralDialog(
         context: context,
         barrierDismissible: true,
@@ -46,11 +55,14 @@ class _VideoResourcesViewState extends ConsumerState<VideoResourcesView> {
           );
         },
         pageBuilder: (context, animation, secondaryAnimation) {
-          return VideoSourceDrawers(
-            isBottomSheet: false,
-            onVideoUrlSelected: onVideoUrlSelected,
-            videoSourceController: videoSourceController,
-            subjectName: subjectName,
+          return UncontrolledProviderScope(
+            container: providerContainer,
+            child: VideoSourceDrawers(
+              isBottomSheet: false,
+              onVideoUrlSelected: onVideoUrlSelected,
+              videoSourceController: videoSourceController,
+              subjectName: subjectName,
+            ),
           );
         },
       );
@@ -60,11 +72,14 @@ class _VideoResourcesViewState extends ConsumerState<VideoResourcesView> {
         isScrollControlled: true,
         backgroundColor: Colors.transparent,
         builder: (context) {
-          return VideoSourceDrawers(
-            isBottomSheet: true,
-            onVideoUrlSelected: onVideoUrlSelected,
-            videoSourceController: videoSourceController,
-            subjectName: subjectName,
+          return UncontrolledProviderScope(
+            container: providerContainer,
+            child: VideoSourceDrawers(
+              isBottomSheet: true,
+              onVideoUrlSelected: onVideoUrlSelected,
+              videoSourceController: videoSourceController,
+              subjectName: subjectName,
+            ),
           );
         },
       );
@@ -73,6 +88,7 @@ class _VideoResourcesViewState extends ConsumerState<VideoResourcesView> {
 
   @override
   Widget build(BuildContext context) {
+    final videoSourceState = ref.watch(videoSourceControllerProvider);
     return Stack(
       children: [
         Card(
@@ -93,43 +109,42 @@ class _VideoResourcesViewState extends ConsumerState<VideoResourcesView> {
                         ),
                       ),
                       const SizedBox(height: 5),
-                      Obx(() => videoSourceController.isLoading.value ||
-                              videoSourceController
-                                  .webSiteTitle.value.isNotEmpty
-                          ? Row(
-                              children: [
-                                ClipRRect(
-                                  borderRadius: BorderRadius.circular(5),
-                                  child: AnimationNetworkImage(
-                                    height: 25,
-                                    width: 25,
-                                    url:
-                                        videoSourceController.webSiteIcon.value,
-                                  ),
-                                ),
-                                const SizedBox(width: 5),
-                                Text(
-                                  videoSourceController.webSiteTitle.value,
-                                  maxLines: 3,
-                                  overflow: TextOverflow.ellipsis,
-                                  style: const TextStyle(
-                                    fontSize: 20,
-                                    fontWeight: FontWeight.bold,
-                                  ),
-                                )
-                              ],
+                      if (videoSourceState.isLoading ||
+                          videoSourceState.webSiteTitle.isNotEmpty)
+                        Row(
+                          children: [
+                            ClipRRect(
+                              borderRadius: BorderRadius.circular(5),
+                              child: AnimationNetworkImage(
+                                height: 25,
+                                width: 25,
+                                url: videoSourceState.webSiteIcon,
+                              ),
+                            ),
+                            const SizedBox(width: 5),
+                            Text(
+                              videoSourceState.webSiteTitle,
+                              maxLines: 3,
+                              overflow: TextOverflow.ellipsis,
+                              style: const TextStyle(
+                                fontSize: 20,
+                                fontWeight: FontWeight.bold,
+                              ),
                             )
-                          : const Row(
-                              children: [
-                                Text('自动选择资源中'),
-                                SizedBox(width: 5),
-                                SizedBox(
-                                  height: 10,
-                                  width: 10,
-                                  child: CircularProgressIndicator(),
-                                )
-                              ],
-                            )),
+                          ],
+                        )
+                      else
+                        const Row(
+                          children: [
+                            Text('自动选择资源中'),
+                            SizedBox(width: 5),
+                            SizedBox(
+                              height: 10,
+                              width: 10,
+                              child: CircularProgressIndicator(),
+                            )
+                          ],
+                        ),
                     ],
                   ),
                 ),

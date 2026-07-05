@@ -4,23 +4,22 @@ import 'dart:io';
 import 'package:anime_flow/models/item/image_search_item.dart';
 import 'package:anime_flow/pages/search/search_controller.dart';
 import 'package:anime_flow/utils/format_time_util.dart';
+import 'package:anime_flow/utils/logger.dart';
 import 'package:anime_flow/widget/animation_network_image.dart';
 import 'package:flutter/material.dart';
-import 'package:get/get.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:image_picker/image_picker.dart';
-import 'package:anime_flow/utils/logger.dart';
 import 'package:url_launcher/url_launcher.dart';
 
-class ImageSearchPage extends StatefulWidget {
+class ImageSearchPage extends ConsumerStatefulWidget {
   const ImageSearchPage({super.key});
 
   @override
-  State<ImageSearchPage> createState() => _ImageSearchPageState();
+  ConsumerState<ImageSearchPage> createState() => _ImageSearchPageState();
 }
 
-class _ImageSearchPageState extends State<ImageSearchPage> {
+class _ImageSearchPageState extends ConsumerState<ImageSearchPage> {
   final TextEditingController _urlController = TextEditingController();
-  final SearchPageController searchController = Get.find<SearchPageController>();
   final ImagePicker _picker = ImagePicker();
   bool _isUrlMode = false;
   String _previewUrl = '';
@@ -54,7 +53,7 @@ class _ImageSearchPageState extends State<ImageSearchPage> {
         return;
       }
       setState(() {
-        searchController.clearImageSearchState();
+        ref.read(searchPageControllerProvider.notifier).clearImageSearchState();
         _previewUrl = text;
       });
     });
@@ -76,13 +75,14 @@ class _ImageSearchPageState extends State<ImageSearchPage> {
 
     if (!mounted) return;
     setState(() {
-      searchController.clearImageSearchState();
+      ref.read(searchPageControllerProvider.notifier).clearImageSearchState();
       _selectedImageFile = imageFile;
       _selectedImageName = image.name;
     });
   }
 
   Future<void> _startSearch() async {
+    final notifier = ref.read(searchPageControllerProvider.notifier);
     if (_isUrlMode) {
       final imageUrl = _urlController.text.trim();
       final uri = Uri.tryParse(imageUrl);
@@ -90,7 +90,7 @@ class _ImageSearchPageState extends State<ImageSearchPage> {
         LiggLogger().i('请输入有效的图片链接');
         return;
       }
-      await searchController.searchImageByUrl(imageUrl);
+      await notifier.searchImageByUrl(imageUrl);
     } else {
       final imageFile = _selectedImageFile;
       if (imageFile == null) {
@@ -99,17 +99,18 @@ class _ImageSearchPageState extends State<ImageSearchPage> {
         );
         return;
       }
-      await searchController.searchImageByFile(imageFile);
+      await notifier.searchImageByFile(imageFile);
     }
 
     if (!mounted) {
       return;
     }
 
-    if (searchController.imageSearchError.isNotEmpty &&
-        searchController.imageSearchResults.isEmpty) {
+    final searchState = ref.read(searchPageControllerProvider);
+    if (searchState.imageSearchError.isNotEmpty &&
+        searchState.imageSearchResults.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(searchController.imageSearchError.value)),
+        SnackBar(content: Text(searchState.imageSearchError)),
       );
     }
   }
@@ -157,6 +158,7 @@ class _ImageSearchPageState extends State<ImageSearchPage> {
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
     final textTheme = Theme.of(context).textTheme;
+    final searchState = ref.watch(searchPageControllerProvider);
 
     return Scaffold(
       appBar: AppBar(
@@ -188,34 +190,28 @@ class _ImageSearchPageState extends State<ImageSearchPage> {
                     label: Text(_isUrlMode ? '改为上传图片文件' : '改为输入图片 URL'),
                   ),
                 ),
-                Obx(
-                  () => SizedBox(
-                    width: double.infinity,
-                    height: 52,
-                    child: FilledButton.icon(
-                      onPressed: searchController.isImageSearching.value
-                          ? null
-                          : _startSearch,
-                      icon: searchController.isImageSearching.value
-                          ? SizedBox(
-                              width: 18,
-                              height: 18,
-                              child: CircularProgressIndicator(
-                                strokeWidth: 2.2,
-                                color: colorScheme.onPrimary,
-                              ),
-                            )
-                          : const Icon(Icons.image_search_rounded),
-                      label: Text(
-                        searchController.isImageSearching.value
-                            ? '搜索中...'
-                            : '开始搜索',
-                        style: const TextStyle(fontSize: 16),
-                      ),
+                SizedBox(
+                  width: double.infinity,
+                  height: 52,
+                  child: FilledButton.icon(
+                    onPressed: searchState.isImageSearching ? null : _startSearch,
+                    icon: searchState.isImageSearching
+                        ? SizedBox(
+                            width: 18,
+                            height: 18,
+                            child: CircularProgressIndicator(
+                              strokeWidth: 2.2,
+                              color: colorScheme.onPrimary,
+                            ),
+                          )
+                        : const Icon(Icons.image_search_rounded),
+                    label: Text(
+                      searchState.isImageSearching ? '搜索中...' : '开始搜索',
+                      style: const TextStyle(fontSize: 16),
                     ),
                   ),
                 ),
-                _buildResultSection(colorScheme, textTheme),
+                _buildResultSection(colorScheme, textTheme, searchState),
                 _buildTips(colorScheme, textTheme),
               ],
             ),
@@ -485,91 +481,86 @@ class _ImageSearchPageState extends State<ImageSearchPage> {
     );
   }
 
-  Widget _buildResultSection(ColorScheme colorScheme, TextTheme textTheme) {
-    return Obx(
-      () {
-        final results = searchController.imageSearchResults;
-        final errorMessage = searchController.imageSearchError.value;
+  Widget _buildResultSection(
+    ColorScheme colorScheme,
+    TextTheme textTheme,
+    SearchPageState searchState,
+  ) {
+    final results = searchState.imageSearchResults;
+    final errorMessage = searchState.imageSearchError;
 
-        if (searchController.isImageSearching.value) {
-          return _buildStateCard(
-            colorScheme: colorScheme,
-            textTheme: textTheme,
-            icon: const SizedBox(
-              width: 28,
-              height: 28,
-              child: CircularProgressIndicator(strokeWidth: 2.4),
-            ),
-            title: '正在识别图片',
-            description: '请稍候，正在从截图中匹配番剧信息',
-          );
-        }
+    if (searchState.isImageSearching) {
+      return _buildStateCard(
+        colorScheme: colorScheme,
+        textTheme: textTheme,
+        icon: const SizedBox(
+          width: 28,
+          height: 28,
+          child: CircularProgressIndicator(strokeWidth: 2.4),
+        ),
+        title: '正在识别图片',
+        description: '请稍候，正在从截图中匹配番剧信息',
+      );
+    }
 
-        if (results.isEmpty) {
-          return _buildStateCard(
-            colorScheme: colorScheme,
-            textTheme: textTheme,
-            icon: Icon(
-              errorMessage.isEmpty
-                  ? Icons.grid_view_rounded
-                  : Icons.error_outline,
-              size: 30,
-              color: errorMessage.isEmpty
-                  ? colorScheme.primary
-                  : colorScheme.error,
-            ),
-            title: errorMessage.isEmpty ? '搜索结果将在这里展示' : '未获取到搜索结果',
-            description:
-                errorMessage.isEmpty ? '选择图片文件或输入图片链接后开始搜索' : errorMessage,
-          );
-        }
+    if (results.isEmpty) {
+      return _buildStateCard(
+        colorScheme: colorScheme,
+        textTheme: textTheme,
+        icon: Icon(
+          errorMessage.isEmpty ? Icons.grid_view_rounded : Icons.error_outline,
+          size: 30,
+          color: errorMessage.isEmpty ? colorScheme.primary : colorScheme.error,
+        ),
+        title: errorMessage.isEmpty ? '搜索结果将在这里展示' : '未获取到搜索结果',
+        description: errorMessage.isEmpty ? '选择图片文件或输入图片链接后开始搜索' : errorMessage,
+      );
+    }
 
-        return Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              '识别结果',
-              style: textTheme.titleLarge?.copyWith(
-                fontWeight: FontWeight.w700,
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          '识别结果',
+          style: textTheme.titleLarge?.copyWith(
+            fontWeight: FontWeight.w700,
+          ),
+        ),
+        const SizedBox(height: 16),
+        LayoutBuilder(
+          builder: (context, constraints) {
+            final crossAxisCount = _resolveCrossAxisCount(
+              constraints.maxWidth,
+            );
+            return GridView.builder(
+              shrinkWrap: true,
+              physics: const NeverScrollableScrollPhysics(),
+              itemCount: results.length,
+              gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                crossAxisCount: crossAxisCount,
+                crossAxisSpacing: 16,
+                mainAxisSpacing: 16,
+                mainAxisExtent: 152,
               ),
-            ),
-            const SizedBox(height: 16),
-            LayoutBuilder(
-              builder: (context, constraints) {
-                final crossAxisCount = _resolveCrossAxisCount(
-                  constraints.maxWidth,
-                );
-                return GridView.builder(
-                  shrinkWrap: true,
-                  physics: const NeverScrollableScrollPhysics(),
-                  itemCount: results.length,
-                  gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                    crossAxisCount: crossAxisCount,
-                    crossAxisSpacing: 16,
-                    mainAxisSpacing: 16,
-                    mainAxisExtent: 152,
-                  ),
-                  itemBuilder: (context, index) {
-                    final result = results[index];
-                    return InkWell(
-                      onTap: () {
-                        final title = _formatTraceResultTitle(result);
-                        Navigator.of(context).pop(title);
-                      },
-                      child: _buildResultCard(
-                        context,
-                        colorScheme,
-                        textTheme,
-                        result,
-                      ),
-                    );
+              itemBuilder: (context, index) {
+                final result = results[index];
+                return InkWell(
+                  onTap: () {
+                    final title = _formatTraceResultTitle(result);
+                    Navigator.of(context).pop(title);
                   },
+                  child: _buildResultCard(
+                    context,
+                    colorScheme,
+                    textTheme,
+                    result,
+                  ),
                 );
               },
-            ),
-          ],
-        );
-      },
+            );
+          },
+        ),
+      ],
     );
   }
 
@@ -670,7 +661,10 @@ class _ImageSearchPageState extends State<ImageSearchPage> {
                         _formatTraceEpisode(result.episode),
                       ),
                       _buildInfoLine(
-                          textTheme, colorScheme, '相似度: $similarityPercent%'),
+                        textTheme,
+                        colorScheme,
+                        '相似度: $similarityPercent%',
+                      ),
                       _buildInfoLine(
                         textTheme,
                         colorScheme,
@@ -740,51 +734,51 @@ class _ImageSearchPageState extends State<ImageSearchPage> {
       ),
     ];
 
-    return  Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            children: [
-              Icon(
-                Icons.info_outline,
-                size: 16,
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Row(
+          children: [
+            Icon(
+              Icons.info_outline,
+              size: 16,
+              color: colorScheme.onSurfaceVariant,
+            ),
+            const SizedBox(width: 6),
+            Text(
+              '以图搜番',
+              style: textTheme.labelLarge?.copyWith(
                 color: colorScheme.onSurfaceVariant,
-              ),
-              const SizedBox(width: 6),
-              Text(
-                '以图搜番',
-                style: textTheme.labelLarge?.copyWith(
-                  color: colorScheme.onSurfaceVariant,
-                  fontWeight: FontWeight.w600,
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 10),
-          ...tips.map(
-            (tipWidget) => Padding(
-              padding: const EdgeInsets.only(bottom: 6),
-              child: Row(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Padding(
-                    padding: const EdgeInsets.only(top: 5),
-                    child: Container(
-                      width: 4,
-                      height: 4,
-                      decoration: BoxDecoration(
-                        color: dotColor,
-                        shape: BoxShape.circle,
-                      ),
-                    ),
-                  ),
-                  const SizedBox(width: 8),
-                  Expanded(child: tipWidget),
-                ],
+                fontWeight: FontWeight.w600,
               ),
             ),
+          ],
+        ),
+        const SizedBox(height: 10),
+        ...tips.map(
+          (tipWidget) => Padding(
+            padding: const EdgeInsets.only(bottom: 6),
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Padding(
+                  padding: const EdgeInsets.only(top: 5),
+                  child: Container(
+                    width: 4,
+                    height: 4,
+                    decoration: BoxDecoration(
+                      color: dotColor,
+                      shape: BoxShape.circle,
+                    ),
+                  ),
+                ),
+                const SizedBox(width: 8),
+                Expanded(child: tipWidget),
+              ],
+            ),
           ),
-        ],
+        ),
+      ],
     );
   }
 }

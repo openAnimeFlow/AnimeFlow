@@ -1,16 +1,12 @@
-import 'package:anime_flow/pages/play/controller/play_controller.dart';
-import 'package:anime_flow/pages/play/controller/video_ui_controller.dart';
+import 'package:anime_flow/pages/play/providers/play_provider.dart';
+import 'package:anime_flow/pages/play/providers/video_ui_provider.dart';
 import 'package:flutter/material.dart';
-import 'package:get/get.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-class RateButton extends StatelessWidget {
-  final PlayController playController;
-  final VideoUiStateController videoUiStateController;
+class RateButton extends ConsumerWidget {
+  final PlaySession playController;
 
-  const RateButton(
-      {super.key,
-      required this.playController,
-      required this.videoUiStateController});
+  const RateButton({super.key, required this.playController});
 
   static const List<double> _speeds = [
     0.5,
@@ -24,67 +20,68 @@ class RateButton extends StatelessWidget {
   ];
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final videoUiStateController =
+        ref.read(videoUiStateControllerProvider.notifier);
+    final currentRate = ref.watch(
+      playStateProvider.select((state) => state.rate),
+    );
+    final colorScheme = Theme.of(context).colorScheme;
 
-    return Obx(() {
-      final currentRate = playController.rate.value;
-      final colorScheme = Theme.of(context).colorScheme;
-
-      return MenuAnchor(
-        onOpen: () {
-          videoUiStateController.cancelUiTimer();
-        },
-        onClose: () {
-          videoUiStateController.hideControlsUi(
-            duration: const Duration(seconds: 2),
-          );
-        },
-        menuChildren: _speeds.map((speed) {
-          final isSelected = currentRate == speed;
-          return MenuItemButton(
-            onPressed: () {
-              playController.startSpeedBoost(speed);
-            },
-            child: SizedBox(
-              width: 112,
-              height: 40,
-              child: Row(
-                children: [
-                  Expanded(
-                    child: Text(
-                      '${speed}x',
-                      style: TextStyle(
-                        color: isSelected ? colorScheme.primary : null,
-                        fontWeight:
-                            isSelected ? FontWeight.bold : FontWeight.normal,
-                      ),
+    return MenuAnchor(
+      onOpen: () {
+        videoUiStateController.cancelUiTimer();
+      },
+      onClose: () {
+        videoUiStateController.hideControlsUi(
+          duration: const Duration(seconds: 2),
+        );
+      },
+      menuChildren: _speeds.map((speed) {
+        final isSelected = currentRate == speed;
+        return MenuItemButton(
+          onPressed: () {
+            playController.startSpeedBoost(speed);
+          },
+          child: SizedBox(
+            width: 112,
+            height: 40,
+            child: Row(
+              children: [
+                Expanded(
+                  child: Text(
+                    '${speed}x',
+                    style: TextStyle(
+                      color: isSelected ? colorScheme.primary : null,
+                      fontWeight:
+                          isSelected ? FontWeight.bold : FontWeight.normal,
                     ),
                   ),
-                  if (isSelected)
-                    Icon(
-                      Icons.check,
-                      size: 18,
-                      color: colorScheme.primary,
-                    ),
-                ],
-              ),
+                ),
+                if (isSelected)
+                  Icon(
+                    Icons.check,
+                    size: 18,
+                    color: colorScheme.primary,
+                  ),
+              ],
             ),
-          );
-        }).toList(),
-        builder:
-            (BuildContext context, MenuController controller, Widget? child) {
-          return TextButton(
-            onPressed: () {
-              if (controller.isOpen) {
-                controller.close();
-              } else {
-                controller.open();
-              }
-            },
-            child: Text(currentRate == 1.0 ? '倍速' : '${currentRate}x'),
-          );
-        },
-      );
-    });
+          ),
+        );
+      }).toList(),
+      builder:
+          (BuildContext context, MenuController controller, Widget? child) {
+        return TextButton(
+          onPressed: () {
+            if (controller.isOpen) {
+              controller.close();
+            } else {
+              controller.open();
+            }
+          },
+          child: Text(currentRate == 1.0 ? '倍速' : '${currentRate}x'),
+        );
+      },
+    );
   }
 }

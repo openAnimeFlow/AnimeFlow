@@ -2,25 +2,24 @@ import 'package:anime_flow/http/requests/flow_request.dart';
 import 'package:anime_flow/models/item/danmaku/danmaku_episode_response.dart';
 import 'package:anime_flow/models/item/danmaku/danmaku_module.dart';
 import 'package:anime_flow/models/item/danmaku/danmaku_search_response.dart';
-import 'package:anime_flow/pages/play/controller/play_controller.dart';
+import 'package:anime_flow/pages/play/providers/play_provider.dart';
 import 'package:anime_flow/routes/provider/routes_args.dart';
 import 'package:anime_flow/utils/format_time_util.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:get/get.dart';
 import 'package:go_router/go_router.dart';
 
-class DanmakuCard extends StatefulWidget {
+class DanmakuCard extends ConsumerStatefulWidget {
   const DanmakuCard({super.key});
 
   @override
-  State<DanmakuCard> createState() => _DanmakuCardState();
+  ConsumerState<DanmakuCard> createState() => _DanmakuCardState();
 }
 
-class _DanmakuCardState extends State<DanmakuCard>
+class _DanmakuCardState extends ConsumerState<DanmakuCard>
     with SingleTickerProviderStateMixin {
-  final playController = Get.find<PlayController>();
+  late final PlaySession playController;
   final danmakuFieldController = TextEditingController();
 
   late final AnimationController _animationController;
@@ -30,6 +29,7 @@ class _DanmakuCardState extends State<DanmakuCard>
   @override
   void initState() {
     super.initState();
+    playController = ref.read(playSessionProvider);
     _animationController = AnimationController(
       vsync: this,
       duration: const Duration(milliseconds: 300),
@@ -77,16 +77,22 @@ class _DanmakuCardState extends State<DanmakuCard>
 
   @override
   Widget build(BuildContext context) {
-    return Obx(() {
+    final danDanmakus = ref.watch(
+      playStateProvider.select((s) => s.danDanmakus),
+    );
+    final hiddenPlatforms = ref.watch(
+      playStateProvider.select((s) => s.hiddenPlatforms),
+    );
+    return Builder(builder: (context) {
       final allDanmakus = <Danmaku>[];
-      playController.danDanmakus.forEach((time, danmakus) {
+      danDanmakus.forEach((time, danmakus) {
         allDanmakus.addAll(danmakus);
       });
 
       // 过滤掉被隐藏平台的弹幕
       final filteredDanmakus = allDanmakus.where((danmaku) {
         final platform = extractPlatform(danmaku.source);
-        return !playController.isPlatformHidden(platform);
+        return !hiddenPlatforms.contains(platform);
       }).toList();
 
       // 按时间排序
@@ -170,8 +176,7 @@ class _DanmakuCardState extends State<DanmakuCard>
                           runSpacing: 4,
                           children: sortedPlatforms.map((entry) {
                             final platform = entry.key;
-                            final isHidden =
-                                playController.isPlatformHidden(platform);
+                            final isHidden = hiddenPlatforms.contains(platform);
                             return ActionChip(
                               label: Text('${entry.key}: ${entry.value}'),
                               labelStyle: Theme.of(context)

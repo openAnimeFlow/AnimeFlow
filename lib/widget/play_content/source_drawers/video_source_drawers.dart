@@ -5,16 +5,16 @@ import 'package:anime_flow/constants/layout_constant.dart';
 import 'package:anime_flow/crawler/itme/anti_crawler_config.dart';
 import 'package:anime_flow/models/play/video/episode_resources_item.dart';
 import 'package:anime_flow/models/play/video/resources_item.dart';
-import 'package:anime_flow/pages/play/controller/video_source_controller.dart';
+import 'package:anime_flow/pages/play/provider/video_source_provider.dart';
 import 'package:anime_flow/providers/captcha/captcha_provider.dart';
 import 'package:anime_flow/utils/logger.dart';
 import 'package:anime_flow/widget/animation_network_image.dart';
 import 'package:anime_flow/widget/notification_toast.dart';
 import 'package:flutter/material.dart';
-import 'package:get/get.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
-class VideoSourceDrawers extends StatefulWidget {
+class VideoSourceDrawers extends ConsumerStatefulWidget {
   final Function(String url)? onVideoUrlSelected;
   final VideoSourceController videoSourceController;
   final String subjectName;
@@ -29,10 +29,10 @@ class VideoSourceDrawers extends StatefulWidget {
   });
 
   @override
-  State<VideoSourceDrawers> createState() => _VideoSourceDrawersState();
+  ConsumerState<VideoSourceDrawers> createState() => _VideoSourceDrawersState();
 }
 
-class _VideoSourceDrawersState extends State<VideoSourceDrawers> {
+class _VideoSourceDrawersState extends ConsumerState<VideoSourceDrawers> {
   final logger = LiggLogger();
   bool isShowEpisodes = false;
   final _searchController = TextEditingController();
@@ -50,7 +50,7 @@ class _VideoSourceDrawersState extends State<VideoSourceDrawers> {
   }
 
   void setSelectedWebsite(int index) {
-    widget.videoSourceController.selectedWebsiteIndex.value = index;
+    widget.videoSourceController.setSelectedWebsiteIndex(index);
     setState(() {
       isShowEpisodes = false;
     });
@@ -59,7 +59,7 @@ class _VideoSourceDrawersState extends State<VideoSourceDrawers> {
   void _performSearch() {
     String searchQuery = _searchController.text;
     if (searchQuery.isNotEmpty) {
-      widget.videoSourceController.selectedWebsiteIndex.value = 0;
+      widget.videoSourceController.setSelectedWebsiteIndex(0);
       setState(() {
         isShowEpisodes = false;
       });
@@ -75,6 +75,7 @@ class _VideoSourceDrawersState extends State<VideoSourceDrawers> {
 
   @override
   Widget build(BuildContext context) {
+    ref.watch(videoSourceControllerProvider);
     if (widget.isBottomSheet) {
       return buildBottomSheetContent(context);
     }
@@ -121,41 +122,43 @@ class _VideoSourceDrawersState extends State<VideoSourceDrawers> {
           const SizedBox(height: 16),
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 16),
-            child: Obx(() {
-              final dataSource =
-                  widget.videoSourceController.videoResources.toList();
-              if (dataSource.isEmpty) {
-                return const SizedBox.shrink();
-              }
-              return _buildWebsiteSelector(dataSource: dataSource);
-            }),
+            child: Builder(
+              builder: (context) {
+                final dataSource = widget.videoSourceController.videoResources;
+                if (dataSource.isEmpty) {
+                  return const SizedBox.shrink();
+                }
+                return _buildWebsiteSelector(dataSource: dataSource);
+              },
+            ),
           ),
           const SizedBox(height: 16),
           Expanded(
             child: Padding(
               padding: const EdgeInsets.symmetric(horizontal: 16),
-              child: Obx(() {
-                final videoSourceController = widget.videoSourceController;
-                final dataSource =
-                    videoSourceController.videoResources.toList();
-                if (dataSource.isEmpty) {
-                  return const SizedBox.shrink();
-                }
-                final currentIndex =
-                    videoSourceController.selectedWebsiteIndex.value;
-                int validIndex =
-                    currentIndex >= dataSource.length ? 0 : currentIndex;
+              child: Builder(
+                builder: (context) {
+                  final videoSourceController = widget.videoSourceController;
+                  final dataSource = videoSourceController.videoResources;
+                  if (dataSource.isEmpty) {
+                    return const SizedBox.shrink();
+                  }
+                  final currentIndex =
+                      videoSourceController.selectedWebsiteIndex;
+                  final validIndex =
+                      currentIndex >= dataSource.length ? 0 : currentIndex;
 
-                if (validIndex != currentIndex) {
-                  WidgetsBinding.instance.addPostFrameCallback((_) {
-                    if (mounted) {
-                      videoSourceController.selectedWebsiteIndex.value =
-                          validIndex;
-                    }
-                  });
-                }
-                return _buildVideoSource(dataSource: dataSource);
-              }),
+                  if (validIndex != currentIndex) {
+                    WidgetsBinding.instance.addPostFrameCallback((_) {
+                      if (mounted) {
+                        videoSourceController
+                            .setSelectedWebsiteIndex(validIndex);
+                      }
+                    });
+                  }
+                  return _buildVideoSource(dataSource: dataSource);
+                },
+              ),
             ),
           ),
         ],
@@ -180,41 +183,42 @@ class _VideoSourceDrawersState extends State<VideoSourceDrawers> {
               buildHeader(),
               _manualSearch(),
               const SizedBox(height: 16),
-              Obx(() {
-                final videoSourceController = widget.videoSourceController;
-                final dataSource =
-                    videoSourceController.videoResources.toList();
-                if (dataSource.isEmpty) {
-                  return const SizedBox.shrink();
-                }
-                return _buildWebsiteSelector(dataSource: dataSource);
-              }),
-              const SizedBox(height: 16),
-              Expanded(
-                child: Obx(() {
+              Builder(
+                builder: (context) {
                   final videoSourceController = widget.videoSourceController;
-                  final dataSource =
-                      videoSourceController.videoResources.toList();
+                  final dataSource = videoSourceController.videoResources;
                   if (dataSource.isEmpty) {
                     return const SizedBox.shrink();
                   }
-                  // 确保索引有效，如果无效则使用 0
-                  final currentIndex =
-                      videoSourceController.selectedWebsiteIndex.value;
-                  int validIndex =
-                      currentIndex >= dataSource.length ? 0 : currentIndex;
+                  return _buildWebsiteSelector(dataSource: dataSource);
+                },
+              ),
+              const SizedBox(height: 16),
+              Expanded(
+                child: Builder(
+                  builder: (context) {
+                    final videoSourceController = widget.videoSourceController;
+                    final dataSource = videoSourceController.videoResources;
+                    if (dataSource.isEmpty) {
+                      return const SizedBox.shrink();
+                    }
+                    final currentIndex =
+                        videoSourceController.selectedWebsiteIndex;
+                    final validIndex =
+                        currentIndex >= dataSource.length ? 0 : currentIndex;
 
-                  // 如果索引不匹配，更新索引
-                  if (validIndex != currentIndex) {
-                    WidgetsBinding.instance.addPostFrameCallback((_) {
-                      if (mounted) {
-                        () => videoSourceController.selectedWebsiteIndex.value =
-                            validIndex;
-                      }
-                    });
-                  }
-                  return _buildVideoSource(dataSource: dataSource);
-                }),
+                    if (validIndex != currentIndex) {
+                      WidgetsBinding.instance.addPostFrameCallback((_) {
+                        if (mounted) {
+                          videoSourceController.setSelectedWebsiteIndex(
+                            validIndex,
+                          );
+                        }
+                      });
+                    }
+                    return _buildVideoSource(dataSource: dataSource);
+                  },
+                ),
               ),
             ],
           ),
@@ -302,218 +306,212 @@ class _VideoSourceDrawersState extends State<VideoSourceDrawers> {
                     itemCount: dataSource.length,
                     itemBuilder: (context, index) {
                       final data = dataSource[index];
-                      return Obx(() {
-                        final isSelected = widget.videoSourceController
-                                .selectedWebsiteIndex.value ==
-                            index;
+                      final isSelected =
+                          widget.videoSourceController.selectedWebsiteIndex ==
+                              index;
 
-                        // final currentEpisodeCount = resource.episodeResources
-                        //     .where((item) => item.episodes.any((ep) =>
-                        //         ep.episodeSort ==
-                        //         episodesController.episodeIndex.value))
-                        //     .length;
+                      // final currentEpisodeCount = resource.episodeResources
+                      //     .where((item) => item.episodes.any((ep) =>
+                      //         ep.episodeSort ==
+                      //         episodesController.episodeIndex.value))
+                      //     .length;
 
-                        return GestureDetector(
-                          onTap: () => setSelectedWebsite(index),
-                          child: Container(
-                            margin: const EdgeInsets.only(right: 12),
-                            padding: const EdgeInsets.all(8),
-                            decoration: BoxDecoration(
+                      return GestureDetector(
+                        onTap: () => setSelectedWebsite(index),
+                        child: Container(
+                          margin: const EdgeInsets.only(right: 12),
+                          padding: const EdgeInsets.all(8),
+                          decoration: BoxDecoration(
+                            color: isSelected
+                                ? Theme.of(context)
+                                    .colorScheme
+                                    .surfaceContainerHighest
+                                : Theme.of(context)
+                                    .colorScheme
+                                    .surfaceContainerHighest,
+                            borderRadius: BorderRadius.circular(12),
+                            border: Border.all(
                               color: isSelected
-                                  ? Theme.of(context)
-                                      .colorScheme
-                                      .surfaceContainerHighest
-                                  : Theme.of(context)
-                                      .colorScheme
-                                      .surfaceContainerHighest,
-                              borderRadius: BorderRadius.circular(12),
-                              border: Border.all(
-                                color: isSelected
-                                    ? Theme.of(context).colorScheme.primary
-                                    : Colors.transparent,
-                                width: 2,
-                              ),
+                                  ? Theme.of(context).colorScheme.primary
+                                  : Colors.transparent,
+                              width: 2,
                             ),
-                            child: Row(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              children: [
-                                ClipOval(
-                                  child: AnimationNetworkImage(
-                                      width: 24,
-                                      height: 24,
-                                      url: data.websiteIcon),
-                                ),
-                                if (data.isLoading) ...[
-                                  const SizedBox(width: 4),
-                                  SizedBox(
-                                    width: 12,
-                                    height: 12,
-                                    child: CircularProgressIndicator(
-                                      strokeWidth: 2,
-                                      color:
-                                          Theme.of(context).colorScheme.primary,
-                                    ),
-                                  ),
-                                ] else if (data.needsCaptcha) ...[
-                                  const SizedBox(width: 4),
-                                  const Icon(
-                                    Icons.shield_outlined,
-                                    size: 14,
-                                    color: Colors.blue,
-                                  ),
-                                ] else if (data.errorMessage != null) ...[
-                                  const SizedBox(width: 4),
-                                  Icon(
-                                    Icons.error_outline,
-                                    size: 14,
-                                    color: Theme.of(context).colorScheme.error,
-                                  ),
-                                ] else if (data
-                                    .episodeResources.isNotEmpty) ...[
-                                  const SizedBox(width: 4),
-                                  Icon(
-                                    Icons.check_circle_outline,
-                                    size: 14,
+                          ),
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              ClipOval(
+                                child: AnimationNetworkImage(
+                                    width: 24,
+                                    height: 24,
+                                    url: data.websiteIcon),
+                              ),
+                              if (data.isLoading) ...[
+                                const SizedBox(width: 4),
+                                SizedBox(
+                                  width: 12,
+                                  height: 12,
+                                  child: CircularProgressIndicator(
+                                    strokeWidth: 2,
                                     color:
                                         Theme.of(context).colorScheme.primary,
                                   ),
-                                ],
+                                ),
+                              ] else if (data.needsCaptcha) ...[
+                                const SizedBox(width: 4),
+                                const Icon(
+                                  Icons.shield_outlined,
+                                  size: 14,
+                                  color: Colors.blue,
+                                ),
+                              ] else if (data.errorMessage != null) ...[
+                                const SizedBox(width: 4),
+                                Icon(
+                                  Icons.error_outline,
+                                  size: 14,
+                                  color: Theme.of(context).colorScheme.error,
+                                ),
+                              ] else if (data.episodeResources.isNotEmpty) ...[
+                                const SizedBox(width: 4),
+                                Icon(
+                                  Icons.check_circle_outline,
+                                  size: 14,
+                                  color: Theme.of(context).colorScheme.primary,
+                                ),
                               ],
-                            ),
+                            ],
                           ),
-                        );
-                      });
+                        ),
+                      );
                     })),
           ],
         ));
   }
 
   Widget _buildVideoSource({required List<ResourcesItem> dataSource}) {
-    return Obx(() {
-      final videoSourceController = widget.videoSourceController;
-      final selectedIndex = videoSourceController.selectedWebsiteIndex.value;
-      if (selectedIndex >= dataSource.length) {
-        return const SizedBox.shrink();
-      }
+    final videoSourceController = widget.videoSourceController;
+    final selectedIndex = videoSourceController.selectedWebsiteIndex;
+    if (selectedIndex >= dataSource.length) {
+      return const SizedBox.shrink();
+    }
 
-      final selectedResource = dataSource[selectedIndex];
-      final episodeResources = selectedResource.episodeResources;
+    final selectedResource = dataSource[selectedIndex];
+    final episodeResources = selectedResource.episodeResources;
 
-      if (selectedResource.needsCaptcha) {
-        return _buildCaptchaRequired(selectedResource);
-      }
+    if (selectedResource.needsCaptcha) {
+      return _buildCaptchaRequired(selectedResource);
+    }
 
-      if (episodeResources.isEmpty) {
-        return Material(
-          child: Center(
-            child: Column(
-              spacing: 8,
-              mainAxisAlignment: MainAxisAlignment.center,
+    if (episodeResources.isEmpty) {
+      return Material(
+        child: Center(
+          child: Column(
+            spacing: 8,
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              const Text('未找到播放源'),
+              ElevatedButton(
+                  onPressed: () => videoSourceController
+                      .retryResources(selectedResource.websiteName),
+                  child: const Text('重新搜索'))
+            ],
+          ),
+        ),
+      );
+    }
+    final episodeIndex = videoSourceController.currentEpisodeIndex;
+
+    // 预过滤：只保留有匹配当前剧集的资源项
+    final matchedResources = episodeResources
+        .where(
+            (item) => item.episodes.any((ep) => ep.episodeSort == episodeIndex))
+        .toList();
+
+    final excludedEpisodesCount = episodeResources
+        .expand((item) =>
+            item.episodes.where((ep) => ep.episodeSort != episodeIndex))
+        .length;
+
+    return Material(
+      child: Column(
+        children: [
+          Expanded(
+            child: matchedResources.isEmpty
+                ? const Center(child: Text('当前剧集无可用的播放源'))
+                : ListView.builder(
+                    padding: EdgeInsets.zero,
+                    itemCount: matchedResources.length,
+                    itemExtent: 95,
+                    itemBuilder: (context, index) {
+                      final resourceItem = matchedResources[index];
+                      final currentEpisode = resourceItem.episodes.firstWhere(
+                        (ep) => ep.episodeSort == episodeIndex,
+                      );
+                      return _buildSource(
+                        currentEpisode,
+                        resourceItem,
+                        baseUrl: selectedResource.baseUrl,
+                        websiteName: selectedResource.websiteName,
+                        websiteIcon: selectedResource.websiteIcon,
+                      );
+                    },
+                  ),
+          ),
+          // 切换开关
+          Padding(
+            padding: const EdgeInsets.symmetric(vertical: 8),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.end,
               children: [
-                const Text('未找到播放源'),
-                ElevatedButton(
-                    onPressed: () => videoSourceController
-                        .retryResources(selectedResource.websiteName),
-                    child: const Text('重新搜索'))
+                Text(
+                  '显示已被排除的资源($excludedEpisodesCount)',
+                  style: const TextStyle(fontSize: 14),
+                ),
+                const SizedBox(width: 8),
+                Switch(
+                  value: isShowEpisodes,
+                  onChanged: (value) {
+                    setShowEpisodes();
+                  },
+                ),
               ],
             ),
           ),
-        );
-      }
-      final episodeIndex = videoSourceController.currentEpisodeIndex.value;
+          // 展开的其他剧集
+          if (isShowEpisodes)
+            LimitedBox(
+              maxHeight: 240,
+              child: () {
+                // 预构建展平列表，避免 builder 中重复计算
+                final expandedItems = episodeResources.expand((item) {
+                  return item.episodes
+                      .where((ep) => ep.episodeSort != episodeIndex)
+                      .map((ep) => (resource: item, episode: ep));
+                }).toList(growable: false);
 
-      // 预过滤：只保留有匹配当前剧集的资源项
-      final matchedResources = episodeResources
-          .where((item) =>
-              item.episodes.any((ep) => ep.episodeSort == episodeIndex))
-          .toList();
-
-      final excludedEpisodesCount = episodeResources
-          .expand((item) =>
-              item.episodes.where((ep) => ep.episodeSort != episodeIndex))
-          .length;
-
-      return Material(
-        child: Column(
-          children: [
-            Expanded(
-              child: matchedResources.isEmpty
-                  ? const Center(child: Text('当前剧集无可用的播放源'))
-                  : ListView.builder(
-                      padding: EdgeInsets.zero,
-                      itemCount: matchedResources.length,
-                      itemExtent: 95,
-                      itemBuilder: (context, index) {
-                        final resourceItem = matchedResources[index];
-                        final currentEpisode = resourceItem.episodes.firstWhere(
-                          (ep) => ep.episodeSort == episodeIndex,
-                        );
-                        return _buildSource(
-                          currentEpisode,
-                          resourceItem,
-                          baseUrl: selectedResource.baseUrl,
-                          websiteName: selectedResource.websiteName,
-                          websiteIcon: selectedResource.websiteIcon,
-                        );
-                      },
-                    ),
+                return ListView.builder(
+                  padding: EdgeInsets.zero,
+                  itemCount: expandedItems.length,
+                  itemExtent: 95,
+                  itemBuilder: (context, index) {
+                    final entry = expandedItems[index];
+                    return Padding(
+                      padding: const EdgeInsets.only(bottom: 8),
+                      child: _buildSource(
+                        entry.episode,
+                        entry.resource,
+                        baseUrl: selectedResource.baseUrl,
+                        websiteName: selectedResource.websiteName,
+                        websiteIcon: selectedResource.websiteIcon,
+                      ),
+                    );
+                  },
+                );
+              }(),
             ),
-            // 切换开关
-            Padding(
-              padding: const EdgeInsets.symmetric(vertical: 8),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.end,
-                children: [
-                  Text(
-                    '显示已被排除的资源($excludedEpisodesCount)',
-                    style: const TextStyle(fontSize: 14),
-                  ),
-                  const SizedBox(width: 8),
-                  Switch(
-                    value: isShowEpisodes,
-                    onChanged: (value) {
-                      setShowEpisodes();
-                    },
-                  ),
-                ],
-              ),
-            ),
-            // 展开的其他剧集
-            if (isShowEpisodes)
-              LimitedBox(
-                maxHeight: 240,
-                child: () {
-                  // 预构建展平列表，避免 builder 中重复计算
-                  final expandedItems = episodeResources.expand((item) {
-                    return item.episodes
-                        .where((ep) => ep.episodeSort != episodeIndex)
-                        .map((ep) => (resource: item, episode: ep));
-                  }).toList(growable: false);
-
-                  return ListView.builder(
-                    padding: EdgeInsets.zero,
-                    itemCount: expandedItems.length,
-                    itemExtent: 95,
-                    itemBuilder: (context, index) {
-                      final entry = expandedItems[index];
-                      return Padding(
-                        padding: const EdgeInsets.only(bottom: 8),
-                        child: _buildSource(
-                          entry.episode,
-                          entry.resource,
-                          baseUrl: selectedResource.baseUrl,
-                          websiteName: selectedResource.websiteName,
-                          websiteIcon: selectedResource.websiteIcon,
-                        ),
-                      );
-                    },
-                  );
-                }(),
-              ),
-          ],
-        ),
-      );
-    });
+        ],
+      ),
+    );
   }
 
   Widget _buildCaptchaRequired(ResourcesItem resource) {
@@ -521,6 +519,7 @@ class _VideoSourceDrawersState extends State<VideoSourceDrawers> {
       key: ValueKey(resource.websiteName),
       resource: resource,
       dataSourceController: widget.videoSourceController,
+      subjectName: widget.subjectName,
     );
   }
 
@@ -555,7 +554,7 @@ class _VideoSourceDrawersState extends State<VideoSourceDrawers> {
       {required String websiteName,
       required String websiteIcon,
       required String baseUrl}) {
-    final videoUrl = widget.videoSourceController.videoUrl.value;
+    final videoUrl = widget.videoSourceController.videoUrl;
     final isSelected = baseUrl + episode.like == videoUrl;
 
     return Container(
@@ -670,10 +669,12 @@ class CaptchaView extends StatefulWidget {
     super.key,
     required this.resource,
     required this.dataSourceController,
+    required this.subjectName,
   });
 
   final ResourcesItem resource;
   final VideoSourceController dataSourceController;
+  final String subjectName;
 
   @override
   State<CaptchaView> createState() => _CaptchaViewState();
@@ -709,19 +710,15 @@ class _CaptchaViewState extends State<CaptchaView> {
     _imageData = null;
   }
 
-  String _searchPageUrl() {
-    final keyword = widget.dataSourceController.keyword.value;
-    return widget.resource.searchUrl.replaceFirst('{keyword}', keyword);
-  }
-
   void _startVerification() {
     final config = widget.resource.antiCrawlerConfig;
     if (config == null) return;
+    final keyword = widget.subjectName;
 
     _disposeSession();
     _provider = CaptchaProvider();
     final name = widget.resource.websiteName;
-    final url = _searchPageUrl();
+    final url = widget.resource.searchUrl.replaceFirst('{keyword}', keyword);
 
     if (config.captchaType == CaptchaType.autoClickButton) {
       setState(() {

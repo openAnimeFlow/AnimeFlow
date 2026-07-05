@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:io';
 
 import 'package:anime_flow/http/requests/flow_request.dart';
@@ -6,47 +7,79 @@ import 'package:anime_flow/models/item/bangumi/subject_item.dart';
 import 'package:anime_flow/models/item/image_search_item.dart';
 import 'package:anime_flow/models/search/search_history_module.dart';
 import 'package:anime_flow/repository/search/search_history_manager.dart';
-import 'package:get/get.dart';
-import 'package:hive_ce_flutter/adapters.dart';
+import 'package:hive_ce_flutter/hive_flutter.dart';
+import 'package:riverpod_annotation/riverpod_annotation.dart';
 
-class SearchPageController extends GetxController {
-  /// 搜索结果
-  final searchResults = Rxn<SubjectItem>();
+part 'search_controller.g.dart';
 
-  /// 搜索建议结果
-  final searchSuggestions = RxList<String>();
+const _searchPageStateUnset = Object();
 
-  /// 搜索历史
-  final searchHistoryManager = SearchHistoryManager();
+class SearchPageState {
+  const SearchPageState({
+    this.searchResults,
+    this.searchSuggestions = const [],
+    this.searchHistory = const [],
+    this.imageSearchResults = const [],
+    this.isSearching = false,
+    this.hasMore = true,
+    this.currentKeyword = '',
+    this.isImageSearching = false,
+    this.imageSearchError = '',
+  });
 
-  /// 搜索历史列表
-  final searchHistory = RxList<SearchHistory>();
+  final SubjectItem? searchResults;
+  final List<String> searchSuggestions;
+  final List<SearchHistory> searchHistory;
+  final List<ResultItem> imageSearchResults;
+  final bool isSearching;
+  final bool hasMore;
+  final String currentKeyword;
+  final bool isImageSearching;
+  final String imageSearchError;
 
-  /// 图片搜索结果
-  final imageSearchResults = RxList<ResultItem>();
+  SearchPageState copyWith({
+    Object? searchResults = _searchPageStateUnset,
+    List<String>? searchSuggestions,
+    List<SearchHistory>? searchHistory,
+    List<ResultItem>? imageSearchResults,
+    bool? isSearching,
+    bool? hasMore,
+    String? currentKeyword,
+    bool? isImageSearching,
+    String? imageSearchError,
+  }) {
+    return SearchPageState(
+      searchResults: identical(searchResults, _searchPageStateUnset)
+          ? this.searchResults
+          : searchResults as SubjectItem?,
+      searchSuggestions: searchSuggestions ?? this.searchSuggestions,
+      searchHistory: searchHistory ?? this.searchHistory,
+      imageSearchResults: imageSearchResults ?? this.imageSearchResults,
+      isSearching: isSearching ?? this.isSearching,
+      hasMore: hasMore ?? this.hasMore,
+      currentKeyword: currentKeyword ?? this.currentKeyword,
+      isImageSearching: isImageSearching ?? this.isImageSearching,
+      imageSearchError: imageSearchError ?? this.imageSearchError,
+    );
+  }
+}
 
-  final isSearching = RxBool(false);
-  final hasMore = RxBool(true);
-  final currentKeyword = RxString('');
-  final isImageSearching = RxBool(false);
-  final imageSearchError = RxString('');
+@Riverpod()
+class SearchPageController extends _$SearchPageController {
+  final SearchHistoryManager _searchHistoryManager = SearchHistoryManager();
 
   static const int _limit = 10;
   int _offset = 0;
   int _suggestionRequestId = 0;
 
   @override
-  void onInit() {
-    super.onInit();
-    /// 加载搜索历史
-    _loadSearchHistory();
-    searchHistoryManager.searchHistoryBox.listenable().addListener(_loadSearchHistory);
-  }
-
-  @override
-  void onClose () {
-    searchHistoryManager.searchHistoryBox.listenable().removeListener(_loadSearchHistory);
-    super.onClose();
+  SearchPageState build() {
+    final listenable = _searchHistoryManager.searchHistoryBox.listenable();
+    listenable.addListener(_loadSearchHistory);
+    ref.onDispose(() {
+      listenable.removeListener(_loadSearchHistory);
+    });
+    return SearchPageState(searchHistory: _searchHistoryManager.getSearchHistory());
   }
 
   /// 搜索番剧
@@ -59,49 +92,52 @@ class SearchPageController extends GetxController {
 
     if (!loadMore) {
       clearSearchSuggestions();
-      await searchHistoryManager.saveHistory(keyword);
+      await _searchHistoryManager.saveHistory(keyword);
     }
 
-    if (isSearching.value || (loadMore && !hasMore.value)) return;
+    if (state.isSearching || (loadMore && !state.hasMore)) return;
 
-    isSearching.value = true;
+    state = state.copyWith(isSearching: true);
     if (!loadMore) {
-      currentKeyword.value = keyword;
+      state = state.copyWith(
+        currentKeyword: keyword,
+        searchResults: null,
+        hasMore: true,
+      );
       _offset = 0;
-      hasMore.value = true;
-      searchResults.value = null;
     }
 
     try {
       final offset = loadMore ? _offset : 0;
       final value = await FlowRequest.searchSubjectService(
-        currentKeyword.value,
+        state.currentKeyword,
         limit: _limit,
         offset: offset,
       );
 
-      if (loadMore && searchResults.value != null) {
-        final oldValue = searchResults.value!;
-        searchResults.value = SubjectItem(
-          data: [...oldValue.data, ...value.data],
-          total: value.total,
-        );
-      } else {
-        searchResults.value = value;
-      }
+      final nextResults = loadMore && state.searchResults != null
+          ? SubjectItem(
+              data: [...state.searchResults!.data, ...value.data],
+              total: value.total,
+            )
+          : value;
 
       _offset = offset + value.data.length;
-      hasMore.value = value.data.length == _limit &&
-          searchResults.value!.data.length < value.total;
+      state = state.copyWith(
+        searchResults: nextResults,
+        hasMore: value.data.length == _limit &&
+            nextResults.data.length < value.total,
+      );
     } catch (_) {
     } finally {
-      isSearching.value = false;
+      state = state.copyWith(isSearching: false);
     }
   }
 
   void _loadSearchHistory() {
-    searchHistory.clear();
-    searchHistory.addAll(searchHistoryManager.getSearchHistory());
+    state = state.copyWith(
+      searchHistory: _searchHistoryManager.getSearchHistory(),
+    );
   }
 
   /// 搜索建议
@@ -114,80 +150,103 @@ class SearchPageController extends GetxController {
 
     final requestId = ++_suggestionRequestId;
     try {
-      searchSuggestions.clear();
+      state = state.copyWith(searchSuggestions: const []);
       final suggestions =
           await FlowRequest.searchSuggestionsService(keyword, limit: 20);
       if (requestId != _suggestionRequestId) return;
 
-      searchSuggestions.addAll(suggestions.data
-          .map((item) => item.displayName)
-          .where((name) => name.isNotEmpty));
+      state = state.copyWith(
+        searchSuggestions: suggestions.data
+            .map((item) => item.displayName)
+            .where((name) => name.isNotEmpty)
+            .toList(growable: false),
+      );
     } catch (_) {
       if (requestId != _suggestionRequestId) return;
-      searchSuggestions.clear();
+      state = state.copyWith(searchSuggestions: const []);
     }
   }
 
   void clearSearchSuggestions() {
     _suggestionRequestId++;
-    searchSuggestions.clear();
+    state = state.copyWith(searchSuggestions: const []);
   }
 
   Future<void> searchImageByFile(File imageFile) async {
-    isImageSearching.value = true;
-    imageSearchError.value = '';
-    imageSearchResults.clear();
+    state = state.copyWith(
+      isImageSearching: true,
+      imageSearchError: '',
+      imageSearchResults: const [],
+    );
     try {
       final result = await Request.getAnimeInfoByImageFile(imageFile);
-      imageSearchResults.value = result.result ?? [];
+      final results = result.result ?? const <ResultItem>[];
+      state = state.copyWith(imageSearchResults: results);
       if (result.error != null && result.error!.isNotEmpty) {
-        imageSearchError.value = result.error!;
-      } else if (imageSearchResults.isEmpty) {
-        imageSearchError.value = '未找到匹配结果';
+        state = state.copyWith(imageSearchError: result.error!);
+      } else if (results.isEmpty) {
+        state = state.copyWith(imageSearchError: '未找到匹配结果');
       }
     } catch (e) {
-      imageSearchError.value = '图片搜索失败，请稍后重试';
+      state = state.copyWith(imageSearchError: '图片搜索失败，请稍后重试');
     } finally {
-      isImageSearching.value = false;
+      state = state.copyWith(isImageSearching: false);
     }
   }
 
   Future<void> searchImageByUrl(String imageUrl) async {
-    isImageSearching.value = true;
-    imageSearchError.value = '';
-    imageSearchResults.clear();
+    state = state.copyWith(
+      isImageSearching: true,
+      imageSearchError: '',
+      imageSearchResults: const [],
+    );
     try {
       final result = await Request.getAnimeInfoByImageUrl(imageUrl);
-      imageSearchResults.addAll(result.result ?? []);
+      final results = result.result ?? const <ResultItem>[];
+      state = state.copyWith(imageSearchResults: results);
       if (result.error != null && result.error!.isNotEmpty) {
-        imageSearchError.value = result.error!;
-      } else if (imageSearchResults.isEmpty) {
-        imageSearchError.value = '未找到匹配结果';
+        state = state.copyWith(imageSearchError: result.error!);
+      } else if (results.isEmpty) {
+        state = state.copyWith(imageSearchError: '未找到匹配结果');
       }
     } catch (e) {
-      imageSearchError.value = '图片搜索失败，请检查图片地址或稍后重试';
+      state = state.copyWith(imageSearchError: '图片搜索失败，请检查图片地址或稍后重试');
     } finally {
-      isImageSearching.value = false;
+      state = state.copyWith(isImageSearching: false);
     }
   }
 
   void clearImageSearchState() {
-    isImageSearching.value = false;
-    imageSearchError.value = '';
-    imageSearchResults.clear();
+    state = state.copyWith(
+      isImageSearching: false,
+      imageSearchError: '',
+      imageSearchResults: const [],
+    );
   }
 
   void loadMore() {
-    if (currentKeyword.value.isEmpty || isSearching.value || !hasMore.value) {
+    if (state.currentKeyword.isEmpty || state.isSearching || !state.hasMore) {
       return;
     }
-    search(currentKeyword.value, loadMore: true);
+    unawaited(search(state.currentKeyword, loadMore: true));
   }
 
   void clearResults() {
-    searchResults.value = null;
-    currentKeyword.value = '';
+    state = state.copyWith(
+      searchResults: null,
+      currentKeyword: '',
+      hasMore: true,
+    );
     _offset = 0;
-    hasMore.value = true;
+  }
+
+  Future<void> clearAllHistory() async {
+    await _searchHistoryManager.clearAllHistory();
+    _loadSearchHistory();
+  }
+
+  Future<void> removeSearchHistory(String keyword) async {
+    await _searchHistoryManager.removeSearchHistory(keyword);
+    _loadSearchHistory();
   }
 }

@@ -2,28 +2,26 @@ import 'package:anime_flow/providers/user/user_state_provider.dart';
 import 'package:anime_flow/http/requests/flow_request.dart';
 import 'package:anime_flow/models/item/bangumi/episode_comments_item.dart';
 import 'package:anime_flow/pages/play/content/introduce/index.dart';
-import 'package:anime_flow/pages/play/controller/play_controller.dart';
-import 'package:anime_flow/pages/play/controller/video_ui_controller.dart';
-import 'package:anime_flow/pages/play/provider/episodes_provider.dart';
+import 'package:anime_flow/pages/play/providers/play_provider.dart';
+import 'package:anime_flow/pages/play/providers/video_ui_provider.dart';
+import 'package:anime_flow/pages/play/providers/episodes_provider.dart';
 import 'package:anime_flow/utils/logger.dart';
 import 'package:anime_flow/widget/danmaku_text_field.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:get/get.dart';
 
 import 'comments/index.dart';
 
-class ContentView extends StatefulWidget {
+class ContentView extends ConsumerStatefulWidget {
   const ContentView({super.key});
 
   @override
-  State<ContentView> createState() => _ContentViewState();
+  ConsumerState<ContentView> createState() => _ContentViewState();
 }
 
-class _ContentViewState extends State<ContentView>
+class _ContentViewState extends ConsumerState<ContentView>
     with SingleTickerProviderStateMixin {
-  final playController = Get.find<PlayController>();
-  final videoUiStateController = Get.find<VideoUiStateController>();
+  late final PlaySession playController;
   final List<String> tabs = ['简介', '吐槽'];
   late TabController tabController;
   bool isRequesting = false;
@@ -34,6 +32,7 @@ class _ContentViewState extends State<ContentView>
   @override
   void initState() {
     super.initState();
+    playController = ref.read(playSessionProvider);
     tabController = TabController(length: tabs.length, vsync: this);
     tabController.addListener(onTabChanged);
   }
@@ -113,6 +112,8 @@ class _ContentViewState extends State<ContentView>
   Widget build(BuildContext context) {
     return Consumer(
       builder: (context, ref, child) {
+        final videoUiStateController =
+            ref.read(videoUiStateControllerProvider.notifier);
         ref.listen<int>(
           episodesProvider.select((state) => state.episodeId),
           (previous, episodeId) {
@@ -128,26 +129,24 @@ class _ContentViewState extends State<ContentView>
           },
         );
         currentEpisodeId = ref.read(episodesProvider).episodeId;
-        return child!;
-      },
-      child: PreferredSize(
-        preferredSize: const Size.fromHeight(100),
-        child: Column(
-          children: [
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                TabBar(
-                  padding:
-                      EdgeInsets.only(top: MediaQuery.of(context).padding.top),
-                  dividerHeight: 0,
-                  controller: tabController,
-                  tabAlignment: TabAlignment.start,
-                  isScrollable: true,
-                  tabs: tabs.map((name) => Tab(text: name)).toList(),
-                ),
-                Obx(
-                  () => playController.isWideScreen.value
+        return PreferredSize(
+          preferredSize: const Size.fromHeight(100),
+          child: Column(
+            children: [
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  TabBar(
+                    padding: EdgeInsets.only(
+                        top: MediaQuery.of(context).padding.top),
+                    dividerHeight: 0,
+                    controller: tabController,
+                    tabAlignment: TabAlignment.start,
+                    isScrollable: true,
+                    tabs: tabs.map((name) => Tab(text: name)).toList(),
+                  ),
+                  ref.watch(playStateProvider
+                          .select((state) => state.isWideScreen))
                       ? const Spacer()
                       : Consumer(
                           builder: (context, ref, _) {
@@ -177,25 +176,25 @@ class _ContentViewState extends State<ContentView>
                               ),
                             );
                           },
-                        ),
-                )
-              ],
-            ),
-            const Divider(height: 1),
-            Expanded(
-              child: TabBarView(
-                controller: tabController,
-                children: [
-                  const IntroduceView(),
-                  CommentsView(
-                    comments: comments,
-                  )
+                        )
                 ],
               ),
-            ),
-          ],
-        ),
-      ),
+              const Divider(height: 1),
+              Expanded(
+                child: TabBarView(
+                  controller: tabController,
+                  children: [
+                    const IntroduceView(),
+                    CommentsView(
+                      comments: comments,
+                    )
+                  ],
+                ),
+              ),
+            ],
+          ),
+        );
+      },
     );
   }
 }

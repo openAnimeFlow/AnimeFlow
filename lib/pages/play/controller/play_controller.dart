@@ -48,7 +48,7 @@ PlayController playController(Ref ref) {
 
   ref.listen<PlayControllerState>(
     playStateControllerProvider,
-    (previous, next) => controller.handlePlayStateChanged(next),
+    (previous, next) => controller._handlePlayStateChanged(next),
   );
   ref.onDispose(controller.dispose);
 
@@ -492,7 +492,7 @@ class PlayController {
     }
   }
 
-  void handlePlayStateChanged(PlayControllerState state) {
+  void _handlePlayStateChanged(PlayControllerState state) {
     if (!state.playing) return;
     if (state.position <= const Duration(seconds: 5)) return;
     if (state.duration <= Duration.zero) return;

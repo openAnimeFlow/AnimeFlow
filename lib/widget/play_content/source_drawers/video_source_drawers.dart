@@ -36,6 +36,8 @@ class _VideoSourceDrawersState extends ConsumerState<VideoSourceDrawers> {
   final logger = LiggLogger();
   bool isShowEpisodes = false;
   final _searchController = TextEditingController();
+  int? _drawerSelectedWebsiteIndex;
+  bool _followInitialAutoSelection = true;
 
   @override
   void initState() {
@@ -49,7 +51,9 @@ class _VideoSourceDrawersState extends ConsumerState<VideoSourceDrawers> {
     });
   }
 
-  void setSelectedWebsite(int index) {
+  void _setSelectedWebsite(int index) {
+    _followInitialAutoSelection = false;
+    _drawerSelectedWebsiteIndex = index;
     widget.videoSourceController.setSelectedWebsiteIndex(index);
     setState(() {
       isShowEpisodes = false;
@@ -60,11 +64,36 @@ class _VideoSourceDrawersState extends ConsumerState<VideoSourceDrawers> {
     String searchQuery = _searchController.text;
     if (searchQuery.isNotEmpty) {
       widget.videoSourceController.setSelectedWebsiteIndex(0);
+      _followInitialAutoSelection = true;
+      _drawerSelectedWebsiteIndex = 0;
       setState(() {
         isShowEpisodes = false;
       });
       widget.videoSourceController.initResources(searchQuery);
     }
+  }
+
+  int _getDrawerSelectedIndex(List<ResourcesItem> dataSource) {
+    final controller = widget.videoSourceController;
+    final providerIndex = controller.selectedWebsiteIndex >= dataSource.length
+        ? 0
+        : controller.selectedWebsiteIndex;
+
+    if (_drawerSelectedWebsiteIndex == null ||
+        _drawerSelectedWebsiteIndex! >= dataSource.length) {
+      _drawerSelectedWebsiteIndex = providerIndex;
+    }
+
+    if (_followInitialAutoSelection &&
+        _drawerSelectedWebsiteIndex != providerIndex) {
+      _drawerSelectedWebsiteIndex = providerIndex;
+    }
+
+    if (_followInitialAutoSelection && controller.webSiteTitle.isNotEmpty) {
+      _followInitialAutoSelection = false;
+    }
+
+    return _drawerSelectedWebsiteIndex ?? providerIndex;
   }
 
   @override
@@ -143,20 +172,11 @@ class _VideoSourceDrawersState extends ConsumerState<VideoSourceDrawers> {
                   if (dataSource.isEmpty) {
                     return const SizedBox.shrink();
                   }
-                  final currentIndex =
-                      videoSourceController.selectedWebsiteIndex;
-                  final validIndex =
-                      currentIndex >= dataSource.length ? 0 : currentIndex;
-
-                  if (validIndex != currentIndex) {
-                    WidgetsBinding.instance.addPostFrameCallback((_) {
-                      if (mounted) {
-                        videoSourceController
-                            .setSelectedWebsiteIndex(validIndex);
-                      }
-                    });
-                  }
-                  return _buildVideoSource(dataSource: dataSource);
+                  final selectedIndex = _getDrawerSelectedIndex(dataSource);
+                  return _buildVideoSource(
+                    dataSource: dataSource,
+                    selectedIndex: selectedIndex,
+                  );
                 },
               ),
             ),
@@ -202,21 +222,11 @@ class _VideoSourceDrawersState extends ConsumerState<VideoSourceDrawers> {
                     if (dataSource.isEmpty) {
                       return const SizedBox.shrink();
                     }
-                    final currentIndex =
-                        videoSourceController.selectedWebsiteIndex;
-                    final validIndex =
-                        currentIndex >= dataSource.length ? 0 : currentIndex;
-
-                    if (validIndex != currentIndex) {
-                      WidgetsBinding.instance.addPostFrameCallback((_) {
-                        if (mounted) {
-                          videoSourceController.setSelectedWebsiteIndex(
-                            validIndex,
-                          );
-                        }
-                      });
-                    }
-                    return _buildVideoSource(dataSource: dataSource);
+                    final selectedIndex = _getDrawerSelectedIndex(dataSource);
+                    return _buildVideoSource(
+                      dataSource: dataSource,
+                      selectedIndex: selectedIndex,
+                    );
                   },
                 ),
               ),
@@ -289,6 +299,7 @@ class _VideoSourceDrawersState extends ConsumerState<VideoSourceDrawers> {
 
   // 数据源选择器
   Widget _buildWebsiteSelector({required List<ResourcesItem> dataSource}) {
+    final selectedIndex = _getDrawerSelectedIndex(dataSource);
     return SizedBox(
         height: 40,
         child: Row(
@@ -306,9 +317,7 @@ class _VideoSourceDrawersState extends ConsumerState<VideoSourceDrawers> {
                     itemCount: dataSource.length,
                     itemBuilder: (context, index) {
                       final data = dataSource[index];
-                      final isSelected =
-                          widget.videoSourceController.selectedWebsiteIndex ==
-                              index;
+                      final isSelected = selectedIndex == index;
 
                       // final currentEpisodeCount = resource.episodeResources
                       //     .where((item) => item.episodes.any((ep) =>
@@ -317,7 +326,7 @@ class _VideoSourceDrawersState extends ConsumerState<VideoSourceDrawers> {
                       //     .length;
 
                       return GestureDetector(
-                        onTap: () => setSelectedWebsite(index),
+                        onTap: () => _setSelectedWebsite(index),
                         child: Container(
                           margin: const EdgeInsets.only(right: 12),
                           padding: const EdgeInsets.all(8),
@@ -388,9 +397,11 @@ class _VideoSourceDrawersState extends ConsumerState<VideoSourceDrawers> {
         ));
   }
 
-  Widget _buildVideoSource({required List<ResourcesItem> dataSource}) {
+  Widget _buildVideoSource({
+    required List<ResourcesItem> dataSource,
+    required int selectedIndex,
+  }) {
     final videoSourceController = widget.videoSourceController;
-    final selectedIndex = videoSourceController.selectedWebsiteIndex;
     if (selectedIndex >= dataSource.length) {
       return const SizedBox.shrink();
     }

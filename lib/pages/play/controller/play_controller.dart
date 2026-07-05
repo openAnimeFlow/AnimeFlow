@@ -43,6 +43,10 @@ PlayController playController(Ref ref) {
     videoUiStateActions: ref.watch(videoUiStateControllerProvider.notifier),
   )..init();
 
+  ref.listen<PlayControllerState>(
+    playStateControllerProvider,
+    (previous, next) => controller.handlePlayStateChanged(next),
+  );
   ref.onDispose(controller.dispose);
 
   return controller;
@@ -357,8 +361,8 @@ class PlayController {
   /// 弹幕相关
   bool _isLoadingDanmaku = false;
 
-  /// 定时保存播放进度的计时器
-  Timer? _saveProgressTimer;
+  int? _lastSavedPositionSeconds;
+  bool _isSavingPlayHistory = false;
 
   final List<StreamSubscription<Object?>> _playerSubscriptions = [];
 
@@ -391,6 +395,11 @@ class PlayController {
       player.stream.duration.listen((dur) {
         _playStateActions.setDuration(dur);
       }),
+      player.stream.completed.listen((completed) {
+        if (completed && subjectId > 0) {
+          unawaited(PlayRepository.deletePlayHistoryByPosition(subjectId));
+        }
+      }),
     ]);
   }
 
@@ -418,7 +427,6 @@ class PlayController {
       WindowsTitleBarVisibility.reset();
     }
     _saveSettingsTimer?.cancel();
-    _saveProgressTimer?.cancel();
     _stopTimer?.cancel();
     for (final subscription in _playerSubscriptions) {
       subscription.cancel();
@@ -439,6 +447,7 @@ class PlayController {
     subjectName = state.subjectName;
     subjectCover = state.subjectCover;
     alias = state.alias;
+    _lastSavedPositionSeconds = null;
     if (state.videoUrl.isEmpty) return;
     await player.open(Media(state.videoUrl), play: false);
     await player.stream.duration.firstWhere((d) => d > Duration.zero);
@@ -464,36 +473,47 @@ class PlayController {
     } catch (e) {
       logger.e(e);
     }
+  }
 
-    /// 播放记录保存和章节进度更新
-    _saveProgressTimer?.cancel();
-    _saveProgressTimer = null;
+  void handlePlayStateChanged(PlayControllerState state) {
+    if (!state.playing) return;
+    if (state.position <= const Duration(seconds: 5)) return;
+    if (state.duration <= Duration.zero) return;
+    if (subjectId <= 0 || episodeId <= 0) return;
+    if (subjectName == null || subjectCover == null) return;
+
+    final positionSeconds = state.position.inSeconds;
+    final lastSavedPositionSeconds = _lastSavedPositionSeconds;
+    if (lastSavedPositionSeconds != null &&
+        positionSeconds >= lastSavedPositionSeconds &&
+        positionSeconds - lastSavedPositionSeconds < 5) {
+      return;
+    }
+
+    _lastSavedPositionSeconds = positionSeconds;
+    unawaited(_savePlayHistory(state));
+  }
+
+  Future<void> _savePlayHistory(PlayControllerState state) async {
+    if (_isSavingPlayHistory) return;
+    _isSavingPlayHistory = true;
     try {
-      // 播放时，每5秒保存一次，使用实时获取的进度值
-      _saveProgressTimer = Timer.periodic(const Duration(seconds: 5), (_) {
-        final position = _playStateActions.value.position;
-        final duration = _playStateActions.value.duration;
-        // 播放进度大于0 && 播放时长大于0 开始保存剧集进度
-        if (position != Duration.zero || duration != Duration.zero) {
-          if (subjectId > 0 && episodeId > 0) {
-            final playHistory = PlayHistory(
-                subjectId: subjectId,
-                subjectName: subjectName!,
-                episodeId: episodeId,
-                episodeSort: episode,
-                cover: subjectCover!,
-                updateAt: DateTime.now(),
-                position: position.inSeconds,
-                duration: duration.inSeconds,
-                alias: alias);
-            PlayRepository.savePlayHistory(playHistory);
-          }
-
-          /// Todo播放进度大于90% 时可更新章节进度（待实现）
-        }
-      });
+      final playHistory = PlayHistory(
+        subjectId: subjectId,
+        subjectName: subjectName!,
+        episodeId: episodeId,
+        episodeSort: episode,
+        cover: subjectCover!,
+        updateAt: DateTime.now(),
+        position: state.position.inSeconds,
+        duration: state.duration.inSeconds,
+        alias: alias,
+      );
+      await PlayRepository.savePlayHistory(playHistory);
     } catch (e) {
-      logger.e('保存播放进度失败: $e');
+      LiggLogger().e('保存播放进度失败: $e');
+    } finally {
+      _isSavingPlayHistory = false;
     }
   }
 

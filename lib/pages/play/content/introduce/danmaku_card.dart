@@ -77,7 +77,12 @@ class _DanmakuCardState extends ConsumerState<DanmakuCard>
 
   @override
   Widget build(BuildContext context) {
-    final danDanmakus = ref.watch(playStateControllerProvider.select((s) => s.danDanmakus));
+    final danDanmakus = ref.watch(
+      playStateControllerProvider.select((s) => s.danDanmakus),
+    );
+    final hiddenPlatforms = ref.watch(
+      playStateControllerProvider.select((s) => s.hiddenPlatforms),
+    );
     return Builder(builder: (context) {
       final allDanmakus = <Danmaku>[];
       danDanmakus.forEach((time, danmakus) {
@@ -87,7 +92,7 @@ class _DanmakuCardState extends ConsumerState<DanmakuCard>
       // 过滤掉被隐藏平台的弹幕
       final filteredDanmakus = allDanmakus.where((danmaku) {
         final platform = extractPlatform(danmaku.source);
-        return !playController.isPlatformHidden(platform);
+        return !hiddenPlatforms.contains(platform);
       }).toList();
 
       // 按时间排序
@@ -171,8 +176,7 @@ class _DanmakuCardState extends ConsumerState<DanmakuCard>
                           runSpacing: 4,
                           children: sortedPlatforms.map((entry) {
                             final platform = entry.key;
-                            final isHidden =
-                                playController.isPlatformHidden(platform);
+                            final isHidden = hiddenPlatforms.contains(platform);
                             return ActionChip(
                               label: Text('${entry.key}: ${entry.value}'),
                               labelStyle: Theme.of(context)

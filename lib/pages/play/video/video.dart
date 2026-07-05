@@ -2,14 +2,10 @@ import 'dart:async';
 import 'dart:io';
 
 import 'package:anime_flow/models/enums/video_controls_icon_type.dart';
-import 'package:anime_flow/models/play/play_history.dart';
-import 'package:anime_flow/routes/model/play_route_extra.dart';
 import 'package:anime_flow/pages/play/controller/play_controller.dart';
 import 'package:anime_flow/pages/play/controller/video_ui_controller.dart';
 import 'package:anime_flow/pages/play/controller/video_source_controller.dart';
-import 'package:anime_flow/repository/play_repository.dart';
 import 'package:anime_flow/pages/play/provider/episodes_provider.dart';
-import 'package:anime_flow/routes/provider/routes_args.dart';
 import 'package:anime_flow/utils/logger.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -31,13 +27,9 @@ class _VideoViewState extends ConsumerState<VideoView> with WindowListener {
   late final PlayStateController playStateController;
   late final VideoUiStateController videoUiStateController;
   late final VideoSourceController videoSourceController;
-  late final PlayControllerState playStateSnapshot;
 
   StreamSubscription<bool>? playbackCompletedSubscription;
   int lastEpisodeIndex = 0;
-  late final PlayExtra subject;
-
-  EpisodesData episodesSnapshot = const EpisodesData();
 
   @override
   void initState() {
@@ -46,18 +38,12 @@ class _VideoViewState extends ConsumerState<VideoView> with WindowListener {
     playStateController = ref.read(playStateControllerProvider.notifier);
     videoUiStateController = ref.read(videoUiStateControllerProvider.notifier);
     videoSourceController = ref.read(videoSourceControllerProvider.notifier);
-    subject = ref.read(playExtraProvider).playExtra;
-    episodesSnapshot = ref.read(episodesProvider);
-    playStateSnapshot = ref.read(playStateControllerProvider);
 
     // 监听视频播放完成
     playbackCompletedSubscription =
         playController.player.stream.completed.listen((completed) {
       if (completed) {
         _autoSwitchToNextEpisode();
-        PlayRepository.deletePlayHistoryByPosition(
-          subject.subjectId,
-        );
       }
     });
 
@@ -72,7 +58,6 @@ class _VideoViewState extends ConsumerState<VideoView> with WindowListener {
   @override
   void dispose() {
     playbackCompletedSubscription?.cancel();
-    _savePlayHistory();
     // 移除窗口监听器
     if (Platform.isWindows || Platform.isLinux || Platform.isMacOS) {
       windowManager.removeListener(this);
@@ -146,38 +131,8 @@ class _VideoViewState extends ConsumerState<VideoView> with WindowListener {
     }
   }
 
-  /// 保存播放记录
-  void _savePlayHistory() {
-    final position = playStateSnapshot.position;
-    final duration = playStateSnapshot.duration;
-    if (position == Duration.zero || duration == Duration.zero) return;
-
-    final subjectId = subject.subjectId;
-    final episodesState = episodesSnapshot;
-    final episodeId = episodesState.episodeId;
-    if (subjectId <= 0 || episodeId <= 0) return;
-
-    final playHistory = PlayHistory(
-      subjectId: subjectId,
-      subjectName: subject.subjectName,
-      episodeId: episodeId,
-      alias: subject.subjectAliases,
-      episodeSort: episodesState.episodeIndex,
-      cover: subject.subjectCover,
-      updateAt: DateTime.now(),
-      position: position.inSeconds,
-      duration: duration.inSeconds,
-    );
-    PlayRepository.savePlayHistory(playHistory);
-  }
-
   @override
   Widget build(BuildContext context) {
-    // 缓存最新剧集状态，供 dispose 中安全使用
-    ref.listen<EpisodesData>(
-      episodesProvider,
-      (previous, next) => episodesSnapshot = next,
-    );
     // 监听集数变化：首次设置或切换集数时重新选择资源
     ref.listen<int>(
       episodesProvider.select((state) => state.episodeIndex),

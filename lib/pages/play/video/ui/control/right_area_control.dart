@@ -1,5 +1,5 @@
-import 'package:anime_flow/pages/play/controller/play_controller.dart';
-import 'package:anime_flow/pages/play/controller/video_ui_controller.dart';
+import 'package:anime_flow/pages/play/provider/play_provider.dart';
+import 'package:anime_flow/pages/play/provider/video_ui_provider.dart';
 import 'package:anime_flow/utils/exceptions/storage_exception.dart';
 import 'package:anime_flow/utils/logger.dart';
 import 'package:anime_flow/utils/systemUtil.dart';

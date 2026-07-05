@@ -1,7 +1,7 @@
 import 'package:anime_flow/models/enums/video_controls_icon_type.dart';
-import 'package:anime_flow/pages/play/controller/play_controller.dart';
-import 'package:anime_flow/pages/play/controller/video_ui_controller.dart';
-import 'package:anime_flow/pages/play/controller/video_source_controller.dart';
+import 'package:anime_flow/pages/play/providers/play_provider.dart';
+import 'package:anime_flow/pages/play/providers/video_ui_provider.dart';
+import 'package:anime_flow/pages/play/providers/video_source_provider.dart';
 import 'package:anime_flow/routes/provider/routes_args.dart';
 import 'package:anime_flow/widget/animation_network_image.dart';
 import 'package:anime_flow/widget/play_content/source_drawers/video_source_drawers.dart';

@@ -1,6 +1,6 @@
 // GENERATED CODE - DO NOT MODIFY BY HAND
 
-part of 'video_source_controller.dart';
+part of 'video_source_provider.dart';
 
 // **************************************************************************
 // RiverpodGenerator
@@ -64,7 +64,7 @@ final class VideoSourceControllerProvider
 }
 
 String _$videoSourceControllerHash() =>
-    r'14df30880b212ff7b5b5c1a08b9ea5aedc3ea212';
+    r'3997a06e30fd434e28d7847caf51eaf3d473cc2d';
 
 abstract class _$VideoSourceController extends $Notifier<VideoSourceState> {
   VideoSourceState build();

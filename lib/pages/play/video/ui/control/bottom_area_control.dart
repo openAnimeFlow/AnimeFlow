@@ -1,8 +1,8 @@
 import 'package:anime_flow/constants/assets_path_constants.dart';
 import 'package:anime_flow/models/enums/video_controls_icon_type.dart';
-import 'package:anime_flow/pages/play/controller/play_controller.dart';
-import 'package:anime_flow/pages/play/controller/video_ui_controller.dart';
-import 'package:anime_flow/pages/play/provider/episodes_provider.dart';
+import 'package:anime_flow/pages/play/providers/play_provider.dart';
+import 'package:anime_flow/pages/play/providers/video_ui_provider.dart';
+import 'package:anime_flow/pages/play/providers/episodes_provider.dart';
 import 'package:anime_flow/pages/play/video/ui/button/fit_button.dart';
 import 'package:anime_flow/pages/play/video/ui/button/rate_button.dart';
 import 'package:anime_flow/pages/play/video/ui/button/shader_button.dart';

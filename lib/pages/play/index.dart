@@ -1,8 +1,8 @@
 import 'package:anime_flow/constants/layout_constant.dart';
-import 'package:anime_flow/pages/play/controller/play_controller.dart';
-import 'package:anime_flow/pages/play/controller/video_source_controller.dart';
+import 'package:anime_flow/pages/play/providers/play_provider.dart';
+import 'package:anime_flow/pages/play/providers/video_source_provider.dart';
 import 'package:anime_flow/pages/play/video/video.dart';
-import 'package:anime_flow/pages/play/provider/episodes_provider.dart';
+import 'package:anime_flow/pages/play/providers/episodes_provider.dart';
 import 'package:anime_flow/routes/provider/routes_args.dart';
 import 'package:anime_flow/utils/systemUtil.dart';
 import 'package:flutter/material.dart';

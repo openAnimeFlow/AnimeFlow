@@ -1,6 +1,6 @@
 // GENERATED CODE - DO NOT MODIFY BY HAND
 
-part of 'play_controller.dart';
+part of 'play_provider.dart';
 
 // **************************************************************************
 // RiverpodGenerator
@@ -67,7 +67,7 @@ final class PlaySessionProvider
   }
 }
 
-String _$playSessionHash() => r'f9545794efd0a9dd6889bf2f3c9af29e79594955';
+String _$playSessionHash() => r'7485c88ab32e91ef9fcfb87aab9feb4eed3ecd48';
 
 @ProviderFor(PlayStateNotifier)
 final playStateProvider = PlayStateNotifierProvider._();
@@ -105,7 +105,7 @@ final class PlayStateNotifierProvider
   }
 }
 
-String _$playStateNotifierHash() => r'93b72ad6ec76de7870c20ee2d3a08c826bf62809';
+String _$playStateNotifierHash() => r'3be31cdc9d20018075bc71a3ccba842c51fc7079';
 
 abstract class _$PlayStateNotifier extends $Notifier<PlayState> {
   PlayState build();

@@ -8,7 +8,7 @@ import 'package:flutter/material.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:screen_brightness_platform_interface/screen_brightness_platform_interface.dart';
 
-part 'video_ui_controller.g.dart';
+part 'video_ui_provider.g.dart';
 
 abstract class VideoUiStateActions {
   void updateMainAxisAlignmentType(MainAxisAlignment type);

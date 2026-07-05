@@ -8,8 +8,8 @@ import 'package:anime_flow/http/requests/flow_request.dart';
 import 'package:anime_flow/models/enums/video_controls_icon_type.dart';
 import 'package:anime_flow/models/item/danmaku/danmaku_module.dart';
 import 'package:anime_flow/models/play/play_history.dart';
-import 'package:anime_flow/pages/play/controller/video_ui_controller.dart';
-import 'package:anime_flow/pages/play/provider/episodes_provider.dart';
+import 'package:anime_flow/pages/play/providers/video_ui_provider.dart';
+import 'package:anime_flow/pages/play/providers/episodes_provider.dart';
 import 'package:anime_flow/repository/play_repository.dart';
 import 'package:anime_flow/repository/storage.dart';
 import 'package:anime_flow/routes/provider/routes_args.dart';
@@ -25,7 +25,7 @@ import 'package:media_kit_video/media_kit_video.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:window_manager/window_manager.dart';
 
-part 'play_controller.g.dart';
+part 'play_provider.g.dart';
 
 @Riverpod(
   keepAlive: true,

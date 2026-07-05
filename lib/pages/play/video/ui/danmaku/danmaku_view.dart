@@ -1,7 +1,7 @@
 import 'dart:async';
 import 'package:anime_flow/constants/storage_key.dart';
 import 'package:anime_flow/providers/user/user_state_provider.dart';
-import 'package:anime_flow/pages/play/controller/play_controller.dart';
+import 'package:anime_flow/pages/play/providers/play_provider.dart';
 import 'package:anime_flow/repository/storage.dart';
 import 'package:canvas_danmaku/canvas_danmaku.dart';
 import 'package:flutter/material.dart';

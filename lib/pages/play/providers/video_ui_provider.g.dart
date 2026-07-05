@@ -1,6 +1,6 @@
 // GENERATED CODE - DO NOT MODIFY BY HAND
 
-part of 'video_ui_controller.dart';
+part of 'video_ui_provider.dart';
 
 // **************************************************************************
 // RiverpodGenerator

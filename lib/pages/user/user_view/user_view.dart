@@ -30,6 +30,7 @@ class _UserViewState extends ConsumerState<UserView>
   final double _contentHeight = 200.0;
   late TabController _tabController;
   bool isPinned = false;
+  bool isHideUserInfo = true;
 
   final Map<int, GlobalKey<RefreshIndicatorState>> _refreshIndicatorKeys = {
     for (var type = 1; type <= 5; type++)
@@ -40,6 +41,13 @@ class _UserViewState extends ConsumerState<UserView>
 
   Future<void> _showRefreshIndicatorForCurrentTab() async {
     await _refreshIndicatorKeys[_tabController.index + 1]?.currentState?.show();
+  }
+
+  ///
+  void _toggleUserInfoVisibility() {
+    setState(() {
+      isHideUserInfo = !isHideUserInfo;
+    });
   }
 
   @override
@@ -195,6 +203,12 @@ class _UserViewState extends ConsumerState<UserView>
             ),
           ),
           const Spacer(),
+          IconButton(
+            onPressed: _toggleUserInfoVisibility,
+            icon: Icon(
+              isHideUserInfo ? Icons.visibility : Icons.visibility_off,
+            ),
+          ),
           if (SystemUtil.isDesktop)
             Consumer(
               builder: (context, ref, _) {
@@ -325,39 +339,40 @@ class _UserViewState extends ConsumerState<UserView>
               ),
             ),
           ),
-        Positioned.fill(
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              if (hasAvatar)
-                AnimationNetworkImage(
-                  borderRadius: BorderRadius.circular(100),
-                  url: user.avatar!,
-                  fit: BoxFit.cover,
-                  width: 100,
-                  height: 100,
-                )
-              else
-                const Icon(Icons.person, size: 96),
-              Text(
-                user.nickname.isNotEmpty ? user.nickname : user.email,
-                style: const TextStyle(
-                  fontSize: 23,
-                  fontWeight: FontWeight.bold,
+        if (isHideUserInfo)
+          Positioned.fill(
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                if (hasAvatar)
+                  AnimationNetworkImage(
+                    borderRadius: BorderRadius.circular(100),
+                    url: user.avatar!,
+                    fit: BoxFit.cover,
+                    width: 100,
+                    height: 100,
+                  )
+                else
+                  const Icon(Icons.person, size: 96),
+                Text(
+                  user.nickname.isNotEmpty ? user.nickname : user.email,
+                  style: const TextStyle(
+                    fontSize: 23,
+                    fontWeight: FontWeight.bold,
+                  ),
                 ),
-              ),
-              Text(
-                '${FormatTimeUtil.formatDate(user.createTime)}加入',
-                style: TextStyle(
-                  color: Theme.of(context)
-                      .colorScheme
-                      .onSurface
-                      .withValues(alpha: 0.5),
+                Text(
+                  '${FormatTimeUtil.formatDate(user.createTime)}加入',
+                  style: TextStyle(
+                    color: Theme.of(context)
+                        .colorScheme
+                        .onSurface
+                        .withValues(alpha: 0.5),
+                  ),
                 ),
-              ),
-            ],
-          ),
-        )
+              ],
+            ),
+          )
       ],
     );
   }

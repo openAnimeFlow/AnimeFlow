@@ -21,7 +21,7 @@ class ContentView extends ConsumerStatefulWidget {
 
 class _ContentViewState extends ConsumerState<ContentView>
     with SingleTickerProviderStateMixin {
-  late final PlayController playController;
+  late final PlaySession playController;
   final List<String> tabs = ['简介', '吐槽'];
   late TabController tabController;
   bool isRequesting = false;
@@ -32,7 +32,7 @@ class _ContentViewState extends ConsumerState<ContentView>
   @override
   void initState() {
     super.initState();
-    playController = ref.read(playControllerProvider);
+    playController = ref.read(playSessionProvider);
     tabController = TabController(length: tabs.length, vsync: this);
     tabController.addListener(onTabChanged);
   }
@@ -145,7 +145,7 @@ class _ContentViewState extends ConsumerState<ContentView>
                     isScrollable: true,
                     tabs: tabs.map((name) => Tab(text: name)).toList(),
                   ),
-                  ref.watch(playStateControllerProvider
+                  ref.watch(playStateProvider
                           .select((state) => state.isWideScreen))
                       ? const Spacer()
                       : Consumer(

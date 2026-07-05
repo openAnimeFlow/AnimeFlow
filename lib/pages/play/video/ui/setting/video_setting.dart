@@ -16,7 +16,7 @@ class _VideoSettingState extends ConsumerState<VideoSetting> {
   int selectedHours = 0; // 选中的小时
   int selectedMinutes = 0; // 选中的分钟
 
-  late final PlayController playController;
+  late final PlaySession playController;
 
   // 小时列表 (0-23)
   final List<int> _hours = List.generate(24, (index) => index);
@@ -33,7 +33,7 @@ class _VideoSettingState extends ConsumerState<VideoSetting> {
   @override
   void initState() {
     super.initState();
-    playController = ref.read(playControllerProvider);
+    playController = ref.read(playSessionProvider);
     // 延迟设置初始位置，确保列表已构建
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _hoursController.jumpToItem(selectedHours);
@@ -121,7 +121,7 @@ class _VideoSettingState extends ConsumerState<VideoSetting> {
                           Consumer(
                             builder: (context, ref, child) {
                               final scheduledStopDuration = ref.watch(
-                                playStateControllerProvider.select(
+                                playStateProvider.select(
                                     (state) => state.scheduledStopDuration),
                               );
                               return Text(

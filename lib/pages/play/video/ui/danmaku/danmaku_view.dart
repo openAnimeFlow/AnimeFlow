@@ -17,7 +17,7 @@ class DanmakuView extends ConsumerStatefulWidget {
 class _DanmakuViewState extends ConsumerState<DanmakuView>
     with AutomaticKeepAliveClientMixin {
   final setting = Storage.setting;
-  late final PlayController playController;
+  late final PlaySession playController;
   Timer? _danmakuTimer;
 
   // 弹幕配置
@@ -41,7 +41,7 @@ class _DanmakuViewState extends ConsumerState<DanmakuView>
   @override
   void initState() {
     super.initState();
-    playController = ref.read(playControllerProvider);
+    playController = ref.read(playSessionProvider);
 
     // 初始化弹幕配置
     _border = setting.get(DanmakuKey.danmakuBorder, defaultValue: true);
@@ -74,7 +74,7 @@ class _DanmakuViewState extends ConsumerState<DanmakuView>
     _danmakuTimer = Timer.periodic(const Duration(seconds: 1), (timer) {
       if (!mounted) return;
 
-      final playState = ref.read(playStateControllerProvider);
+      final playState = ref.read(playStateProvider);
       final currentPosition = playState.position;
       final playing = playState.playing;
 
@@ -94,8 +94,8 @@ class _DanmakuViewState extends ConsumerState<DanmakuView>
               ),
               () {
                 if (!mounted ||
-                    !ref.read(playStateControllerProvider).playing ||
-                    !ref.read(playStateControllerProvider).danmakuOn) {
+                    !ref.read(playStateProvider).playing ||
+                    !ref.read(playStateProvider).danmakuOn) {
                   return;
                 }
 
@@ -137,7 +137,7 @@ class _DanmakuViewState extends ConsumerState<DanmakuView>
   Widget build(BuildContext context) {
     super.build(context);
     final rate = ref.watch(
-      playStateControllerProvider.select((state) => state.rate),
+      playStateProvider.select((state) => state.rate),
     );
     return IgnorePointer(
       // 弹幕层不拦截点击事件，让播放器控件可以正常交互

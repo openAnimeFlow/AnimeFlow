@@ -17,7 +17,7 @@ class VideoResourcesView extends ConsumerStatefulWidget {
 
 class _VideoResourcesViewState extends ConsumerState<VideoResourcesView> {
   void _showSourceDrawer() {
-    final playController = ref.read(playControllerProvider);
+    final playController = ref.read(playSessionProvider);
     final videoUiStateController =
         ref.read(videoUiStateControllerProvider.notifier);
     final videoSourceController =
@@ -35,7 +35,7 @@ class _VideoResourcesViewState extends ConsumerState<VideoResourcesView> {
     final subjectName = ref.read(playExtraProvider).playExtra.subjectName;
     final providerContainer = ProviderScope.containerOf(context);
 
-    if (ref.read(playStateControllerProvider).isWideScreen) {
+    if (ref.read(playStateProvider).isWideScreen) {
       showGeneralDialog(
         context: context,
         barrierDismissible: true,

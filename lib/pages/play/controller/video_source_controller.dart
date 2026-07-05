@@ -72,7 +72,7 @@ class VideoSourceState {
 
 @Riverpod(
   keepAlive: true,
-  dependencies: [Episodes, playExtra, PlayStateController, playController],
+  dependencies: [Episodes, playExtra, PlayStateNotifier, playSession],
 )
 class VideoSourceController extends _$VideoSourceController {
   WebViewVideoSourceProvider? _webViewVideoProvider;
@@ -456,8 +456,8 @@ class VideoSourceController extends _$VideoSourceController {
   Future<bool> loadVideoPage(String url) async {
     _webViewVideoProvider?.cancel();
 
-    final playController = ref.read(playControllerProvider);
-    ref.read(playStateControllerProvider.notifier).setIsParsing(true);
+    final playController = ref.read(playSessionProvider);
+    ref.read(playStateProvider.notifier).setIsParsing(true);
 
     _webViewVideoProvider ??= WebViewVideoSourceProvider();
 
@@ -478,16 +478,16 @@ class VideoSourceController extends _$VideoSourceController {
 
     try {
       ref
-          .read(playStateControllerProvider.notifier)
+          .read(playStateProvider.notifier)
           .setParseResult('正在解析视频源...');
 
       final source = await _webViewVideoProvider!
           .resolve(url, useLegacyParser: false, offset: offset);
 
-      ref.read(playStateControllerProvider.notifier).setIsParsing(false);
-      ref.read(playStateControllerProvider.notifier).setParseResult('视频解析成功');
+      ref.read(playStateProvider.notifier).setIsParsing(false);
+      ref.read(playStateProvider.notifier).setParseResult('视频解析成功');
       await playController.initPlayState(
-        PlayState(
+        PlayRequest(
           videoUrl: source.url,
           offset: source.offset,
           subjectId: subjectId,
@@ -500,19 +500,19 @@ class VideoSourceController extends _$VideoSourceController {
       );
       return true;
     } on VideoSourceTimeoutException {
-      ref.read(playStateControllerProvider.notifier).setIsParsing(false);
+      ref.read(playStateProvider.notifier).setIsParsing(false);
       ref
-          .read(playStateControllerProvider.notifier)
+          .read(playStateProvider.notifier)
           .setParseResult('视频解析超时，请重试');
     } on VideoSourceNotFoundException {
-      ref.read(playStateControllerProvider.notifier).setIsParsing(false);
+      ref.read(playStateProvider.notifier).setIsParsing(false);
       ref
-          .read(playStateControllerProvider.notifier)
+          .read(playStateProvider.notifier)
           .setParseResult('未找到视频资源，请切换数据源重试');
     } catch (e) {
-      ref.read(playStateControllerProvider.notifier).setIsParsing(false);
+      ref.read(playStateProvider.notifier).setIsParsing(false);
       ref
-          .read(playStateControllerProvider.notifier)
+          .read(playStateProvider.notifier)
           .setParseResult('视频解析失败: ${e.toString()}');
       _logger.e(e);
     }

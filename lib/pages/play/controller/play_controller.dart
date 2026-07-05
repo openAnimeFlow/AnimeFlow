@@ -31,24 +31,30 @@ part 'play_controller.g.dart';
   keepAlive: true,
   dependencies: [
     shadersDirectory,
-    PlayStateController,
+    PlayStateNotifier,
     VideoUiStateController,
     Episodes,
     playExtra,
   ],
 )
-PlayController playController(Ref ref) {
+PlaySession playSession(Ref ref) {
   ref.watch(playExtraProvider);
-  final controller = PlayController(
+  final controller = PlaySession(
     shadersDirectory: ref.watch(shadersDirectoryProvider).requireValue,
-    playStateActions: ref.watch(playStateControllerProvider.notifier),
+    playStateActions: ref.watch(playStateProvider.notifier),
     videoUiStateActions: ref.watch(videoUiStateControllerProvider.notifier),
     episodesActions: ref.watch(episodesProvider.notifier),
   )..init();
 
-  ref.listen<PlayControllerState>(
-    playStateControllerProvider,
-    (previous, next) => controller._handlePlayStateChanged(next),
+  ref.listen<PlayState>(
+    playStateProvider,
+    (previous, next) {
+      controller._handlePlayStateChanged(next);
+      controller._handleParseResultChanged(
+        previous?.parseResult,
+        next.parseResult,
+      );
+    },
   );
   ref.onDispose(controller.dispose);
 
@@ -56,17 +62,17 @@ PlayController playController(Ref ref) {
 }
 
 @Riverpod(keepAlive: true, dependencies: [playExtra])
-class PlayStateController extends _$PlayStateController {
+class PlayStateNotifier extends _$PlayStateNotifier {
   @override
-  PlayControllerState build() {
+  PlayState build() {
     ref.watch(playExtraProvider);
-    return PlayControllerState(
+    return PlayState(
       danmakuOn: Storage.setting.get(DanmakuKey.danmakuOn, defaultValue: true),
       hiddenPlatforms: _loadHiddenPlatformsFromStorage(),
     );
   }
 
-  PlayControllerState get value => state;
+  PlayState get value => state;
 
   void setSuperResolutionType(int value) {
     state = state.copyWith(superResolutionType: value);
@@ -181,7 +187,7 @@ Set<String> _loadHiddenPlatformsFromStorage() {
   };
 }
 
-class PlayControllerState {
+class PlayState {
   final int superResolutionType;
   final bool isWideScreen;
   final bool isContentExpanded;
@@ -202,7 +208,7 @@ class PlayControllerState {
   final bool buffering;
   final int scheduledStopDuration;
 
-  const PlayControllerState({
+  const PlayState({
     this.superResolutionType = 0,
     this.isWideScreen = false,
     this.isContentExpanded = true,
@@ -224,7 +230,7 @@ class PlayControllerState {
     this.scheduledStopDuration = 0,
   });
 
-  PlayControllerState copyWith({
+  PlayState copyWith({
     int? superResolutionType,
     bool? isWideScreen,
     bool? isContentExpanded,
@@ -245,7 +251,7 @@ class PlayControllerState {
     bool? buffering,
     int? scheduledStopDuration,
   }) {
-    return PlayControllerState(
+    return PlayState(
       superResolutionType: superResolutionType ?? this.superResolutionType,
       isWideScreen: isWideScreen ?? this.isWideScreen,
       isContentExpanded: isContentExpanded ?? this.isContentExpanded,
@@ -270,7 +276,7 @@ class PlayControllerState {
   }
 }
 
-class PlayState {
+class PlayRequest {
   /// 播放地址
   final String videoUrl;
 
@@ -295,7 +301,7 @@ class PlayState {
   ///剧集id
   final int episodeId;
 
-  const PlayState({
+  const PlayRequest({
     required this.videoUrl,
     required this.offset,
     required this.subjectId,
@@ -307,10 +313,12 @@ class PlayState {
   });
 }
 
-class PlayController {
-  PlayController({
+class PlaySession {
+  static const _parseSuccessResult = '视频解析成功';
+
+  PlaySession({
     required this.shadersDirectory,
-    required PlayStateController playStateActions,
+    required PlayStateNotifier playStateActions,
     required VideoUiStateActions videoUiStateActions,
     required Episodes episodesActions,
   })  : _playStateActions = playStateActions,
@@ -319,7 +327,7 @@ class PlayController {
 
   late Player player;
   late VideoController videoController;
-  final PlayStateController _playStateActions;
+  final PlayStateNotifier _playStateActions;
   final VideoUiStateActions _videoUiStateActions;
   final Episodes _episodesActions;
   final setting = Storage.setting;
@@ -430,6 +438,27 @@ class PlayController {
     }
   }
 
+  void _handleParseResultChanged(
+    String? previousParseResult,
+    String nextParseResult,
+  ) {
+    if (previousParseResult == nextParseResult) {
+      return;
+    }
+    if (nextParseResult != _parseSuccessResult) {
+      return;
+    }
+
+    if (_videoUiStateActions.currentIndicatorType !=
+        VideoControlsIndicatorType.parsingIndicator) {
+      return;
+    }
+    _videoUiStateActions.hideIndicator();
+    _videoUiStateActions
+        .updateIndicatorType(VideoControlsIndicatorType.noIndicator);
+    _videoUiStateActions.updateMainAxisAlignmentType(MainAxisAlignment.start);
+  }
+
   /// 选中集与当前播放集不一致时清空弹幕数据与画布（切换集过程中）
   void clearDanmakuIfEpisodeMismatch(int selectedIndex) {
     if (selectedIndex != episode) {
@@ -454,7 +483,7 @@ class PlayController {
   }
 
   /// 初始化播放状态
-  Future<void> initPlayState(PlayState state) async {
+  Future<void> initPlayState(PlayRequest state) async {
     removeDanmaku();
     videoUrl = state.videoUrl;
     offset = state.offset;
@@ -492,7 +521,7 @@ class PlayController {
     }
   }
 
-  void _handlePlayStateChanged(PlayControllerState state) {
+  void _handlePlayStateChanged(PlayState state) {
     if (!state.playing) return;
     if (state.position <= const Duration(seconds: 5)) return;
     if (state.duration <= Duration.zero) return;
@@ -511,7 +540,7 @@ class PlayController {
     unawaited(_savePlayHistory(state));
   }
 
-  Future<void> _savePlayHistory(PlayControllerState state) async {
+  Future<void> _savePlayHistory(PlayState state) async {
     if (_isSavingPlayHistory) return;
     _isSavingPlayHistory = true;
     try {

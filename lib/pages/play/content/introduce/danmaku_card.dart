@@ -19,7 +19,7 @@ class DanmakuCard extends ConsumerStatefulWidget {
 
 class _DanmakuCardState extends ConsumerState<DanmakuCard>
     with SingleTickerProviderStateMixin {
-  late final PlayController playController;
+  late final PlaySession playController;
   final danmakuFieldController = TextEditingController();
 
   late final AnimationController _animationController;
@@ -29,7 +29,7 @@ class _DanmakuCardState extends ConsumerState<DanmakuCard>
   @override
   void initState() {
     super.initState();
-    playController = ref.read(playControllerProvider);
+    playController = ref.read(playSessionProvider);
     _animationController = AnimationController(
       vsync: this,
       duration: const Duration(milliseconds: 300),
@@ -78,10 +78,10 @@ class _DanmakuCardState extends ConsumerState<DanmakuCard>
   @override
   Widget build(BuildContext context) {
     final danDanmakus = ref.watch(
-      playStateControllerProvider.select((s) => s.danDanmakus),
+      playStateProvider.select((s) => s.danDanmakus),
     );
     final hiddenPlatforms = ref.watch(
-      playStateControllerProvider.select((s) => s.hiddenPlatforms),
+      playStateProvider.select((s) => s.hiddenPlatforms),
     );
     return Builder(builder: (context) {
       final allDanmakus = <Danmaku>[];

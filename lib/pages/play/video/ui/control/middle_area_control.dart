@@ -80,7 +80,7 @@ class _MiddleAreaControlState extends ConsumerState<MiddleAreaControl> {
                 child: Consumer(
                   builder: (context, ref, child) {
                     final volume = ref.watch(
-                        playStateControllerProvider.select((s) => s.volume));
+                        playStateProvider.select((s) => s.volume));
                     return Stack(
                       children: [
                         Positioned.fill(
@@ -123,7 +123,7 @@ class _MiddleAreaControlState extends ConsumerState<MiddleAreaControl> {
                 ),
                 child: Consumer(builder: (context, ref, child) {
                   final playing = ref.watch(
-                      playStateControllerProvider.select((s) => s.playing));
+                      playStateProvider.select((s) => s.playing));
                   return Icon(
                     playing ? Icons.pause_rounded : Icons.play_arrow_rounded,
                     size: 33,
@@ -142,7 +142,7 @@ class _MiddleAreaControlState extends ConsumerState<MiddleAreaControl> {
                 ),
                 child: Consumer(
                   builder: (BuildContext context, WidgetRef ref, Widget? child) {
-                    final duration = ref.watch(playStateControllerProvider.select((s) => s.duration));
+                    final duration = ref.watch(playStateProvider.select((s) => s.duration));
                     return Text(
                       '${FormatTimeUtil.formatDuration(videoUiState.dragPosition)} / ${FormatTimeUtil.formatDuration(duration)}',
                       style: const TextStyle(
@@ -164,7 +164,7 @@ class _MiddleAreaControlState extends ConsumerState<MiddleAreaControl> {
                   const SizedBox(height: 5),
                   Consumer(
                     builder: (BuildContext context, WidgetRef ref, Widget? child) {
-                      final parseResult = ref.watch(playStateControllerProvider.select((s) => s.parseResult));
+                      final parseResult = ref.watch(playStateProvider.select((s) => s.parseResult));
                       return Text(
                         parseResult,
                         style: const TextStyle(
@@ -234,7 +234,7 @@ class _MiddleAreaControlState extends ConsumerState<MiddleAreaControl> {
                     const SizedBox(width: 8),
                     Consumer(
                       builder: (BuildContext context, WidgetRef ref, Widget? child) {
-                        final rate = ref.watch(playStateControllerProvider.select((s) => s.rate));
+                        final rate = ref.watch(playStateProvider.select((s) => s.rate));
                         return Text(
                           '${rate.toStringAsFixed(1)}x',
                           style: const TextStyle(

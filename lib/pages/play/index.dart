@@ -19,7 +19,7 @@ class PlayPage extends ConsumerStatefulWidget {
 }
 
 class _PlayPageViewState extends ConsumerState<PlayPage> {
-  late final PlayController playController;
+  late final PlaySession playController;
   late final VideoSourceController videoSourceController;
 
   final GlobalKey _videoKey = GlobalKey();
@@ -32,7 +32,7 @@ class _PlayPageViewState extends ConsumerState<PlayPage> {
   void initState() {
     super.initState();
     videoSourceController = ref.read(videoSourceControllerProvider.notifier);
-    playController = ref.read(playControllerProvider);
+    playController = ref.read(playSessionProvider);
     videoSourceController.initVideoResources();
   }
 
@@ -67,10 +67,10 @@ class _PlayPageViewState extends ConsumerState<PlayPage> {
       _syncIsWideScreenAfterBuild(isWideScreen);
 
       final isFullscreen = ref.watch(
-        playStateControllerProvider.select((state) => state.isFullscreen),
+        playStateProvider.select((state) => state.isFullscreen),
       );
       final isContentExpanded = ref.watch(
-        playStateControllerProvider.select((state) => state.isContentExpanded),
+        playStateProvider.select((state) => state.isContentExpanded),
       );
 
       Widget content;

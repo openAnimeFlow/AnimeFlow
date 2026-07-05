@@ -4,7 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 class ShaderButton extends ConsumerWidget {
-  final PlayController playController;
+  final PlaySession playController;
 
   const ShaderButton({super.key, required this.playController});
 
@@ -13,7 +13,7 @@ class ShaderButton extends ConsumerWidget {
     final videoUiStateController =
         ref.read(videoUiStateControllerProvider.notifier);
     final currentType = ref.watch(
-      playStateControllerProvider.select((state) => state.superResolutionType),
+      playStateProvider.select((state) => state.superResolutionType),
     );
     final labels = ['关闭', '效率档', '质量档'];
 

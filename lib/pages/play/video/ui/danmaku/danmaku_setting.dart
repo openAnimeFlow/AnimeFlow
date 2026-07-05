@@ -15,13 +15,13 @@ class DanmakuSetting extends ConsumerStatefulWidget {
 }
 
 class _DanmakuSettingState extends ConsumerState<DanmakuSetting> {
-  late final PlayController playController;
+  late final PlaySession playController;
   Box setting = Storage.setting;
 
   @override
   void initState() {
     super.initState();
-    playController = ref.read(playControllerProvider);
+    playController = ref.read(playSessionProvider);
   }
 
   @override

@@ -22,7 +22,7 @@ class BottomAreaControl extends ConsumerWidget {
 
   Future<void> onSendDanmaku(
     BuildContext context,
-    PlayController playController,
+    PlaySession playController,
     String text,
     int bgmUserId,
   ) async {
@@ -42,13 +42,13 @@ class BottomAreaControl extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final playController = ref.read(playControllerProvider);
+    final playController = ref.read(playSessionProvider);
     final videoUiStateController =
         ref.read(videoUiStateControllerProvider.notifier);
-    final fullscreen = ref.watch(playStateControllerProvider.select((s) => s.isFullscreen));
-    final danmakuOn = ref.watch(playStateControllerProvider.select((s) => s.danmakuOn));
-    final isWideScreen = ref.watch(playStateControllerProvider.select((s) => s.isWideScreen));
-    final isContentExpanded = ref.watch(playStateControllerProvider.select((s) => s.isContentExpanded));
+    final fullscreen = ref.watch(playStateProvider.select((s) => s.isFullscreen));
+    final danmakuOn = ref.watch(playStateProvider.select((s) => s.danmakuOn));
+    final isWideScreen = ref.watch(playStateProvider.select((s) => s.isWideScreen));
+    final isContentExpanded = ref.watch(playStateProvider.select((s) => s.isContentExpanded));
     final isShowControlsUi = ref.watch(videoUiStateControllerProvider.select((s) => s.isShowControlsUi));
     final leftPadding = MediaQuery.of(context).padding.left;
     // 全屏 + 不随键盘压缩 body 时，用 viewInsets 把底部控件顶到键盘上方
@@ -100,7 +100,7 @@ class BottomAreaControl extends ConsumerWidget {
                         // 播放按钮
                         Consumer(
                           builder: (context,  ref, child) {
-                            final playing = ref.watch(playStateControllerProvider.select((s) => s.playing));
+                            final playing = ref.watch(playStateProvider.select((s) => s.playing));
                             return InkWell(
                               key: ValueKey<bool>(playing),
                               onTap: () {
@@ -302,7 +302,7 @@ class BottomAreaControl extends ConsumerWidget {
                           // 画面填充按钮
                           Consumer(
                             builder: ( context, ref, child) {
-                              final videoFit = ref.watch(playStateControllerProvider.select((s) => s.videoFit));
+                              final videoFit = ref.watch(playStateProvider.select((s) => s.videoFit));
                               return FitButton(
                                 value: videoFit,
                                 onChanged: (fit) {

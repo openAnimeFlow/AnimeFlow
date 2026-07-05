@@ -23,7 +23,7 @@ class _MobileGestureDetectorState extends ConsumerState<MobileGestureDetector> {
   double _verticalDragStartY = 0; // 垂直拖动开始时的Y坐标
   bool _isRightSide = false; // 是否在屏幕右半侧开始垂直拖动
   late double fastForwardSpeed;
-  late final PlayController playController;
+  late final PlaySession playController;
 
   VideoUiStateController get videoUiStateController =>
       ref.read(videoUiStateControllerProvider.notifier);
@@ -31,7 +31,7 @@ class _MobileGestureDetectorState extends ConsumerState<MobileGestureDetector> {
   @override
   void initState() {
     super.initState();
-    playController = ref.read(playControllerProvider);
+    playController = ref.read(playSessionProvider);
     fastForwardSpeed =
         setting.get(PlaybackKey.fastForwardSpeed, defaultValue: 2.0);
   }
@@ -58,7 +58,7 @@ class _MobileGestureDetectorState extends ConsumerState<MobileGestureDetector> {
 
       //长按开始
       onLongPressStart: (LongPressStartDetails details) {
-        if (ref.read(playStateControllerProvider).playing) {
+        if (ref.read(playStateProvider).playing) {
           vibrateMedium();
           playController.startSpeedBoost(fastForwardSpeed);
           videoUiStateController.updateIndicatorTypeAndShowIndicator(
@@ -78,7 +78,7 @@ class _MobileGestureDetectorState extends ConsumerState<MobileGestureDetector> {
       onHorizontalDragStart: (DragStartDetails details) {
         videoUiStateController.startHorizontalDrag(
           details.globalPosition.dx,
-          ref.read(playStateControllerProvider).position,
+          ref.read(playStateProvider).position,
         );
         playController.stopPlaying();
       },
@@ -89,7 +89,7 @@ class _MobileGestureDetectorState extends ConsumerState<MobileGestureDetector> {
         videoUiStateController.updateHorizontalDrag(
           details.globalPosition.dx,
           scale,
-          ref.read(playStateControllerProvider).duration,
+          ref.read(playStateProvider).duration,
         );
       },
 
@@ -160,7 +160,7 @@ class _MobileGestureDetectorState extends ConsumerState<MobileGestureDetector> {
           // 保持指示器显示，2秒后自动隐藏
           videoUiStateController.showIndicator();
           Future.delayed(const Duration(seconds: 2), () {
-            if (!ref.read(playStateControllerProvider).isVerticalDragging) {
+            if (!ref.read(playStateProvider).isVerticalDragging) {
               videoUiStateController.hideIndicator();
               videoUiStateController
                   .updateIndicatorType(VideoControlsIndicatorType.noIndicator);

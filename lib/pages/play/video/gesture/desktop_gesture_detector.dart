@@ -22,7 +22,7 @@ class DesktopGestureDetector extends ConsumerStatefulWidget {
 class _DesktopGestureDetectorState
     extends ConsumerState<DesktopGestureDetector> {
   Timer? hoverTimer;
-  late final PlayController playPageController;
+  late final PlaySession playPageController;
 
   VideoUiStateController get videoUiStateController =>
       ref.read(videoUiStateControllerProvider.notifier);
@@ -30,7 +30,7 @@ class _DesktopGestureDetectorState
   @override
   void initState() {
     super.initState();
-    playPageController = ref.read(playControllerProvider);
+    playPageController = ref.read(playSessionProvider);
   }
 
   @override
@@ -54,7 +54,7 @@ class _DesktopGestureDetectorState
           }
           // 左方向键：快退10秒
           if (event.logicalKey == LogicalKeyboardKey.arrowLeft) {
-            final playState = ref.read(playStateControllerProvider);
+            final playState = ref.read(playStateProvider);
             final currentPosition = playState.position;
             final duration = playState.duration;
             final newPositionMs =
@@ -67,7 +67,7 @@ class _DesktopGestureDetectorState
           }
           // 右方向键：快进10秒
           if (event.logicalKey == LogicalKeyboardKey.arrowRight) {
-            final playState = ref.read(playStateControllerProvider);
+            final playState = ref.read(playStateProvider);
             final currentPosition = playState.position;
             final duration = playState.duration;
             final newPositionMs =

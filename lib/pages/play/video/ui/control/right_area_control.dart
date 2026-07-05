@@ -12,12 +12,12 @@ class RightAreaControl extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final playController = ref.read(playControllerProvider);
+    final playController = ref.read(playSessionProvider);
     final isShowControlsUi = ref.watch(videoUiStateControllerProvider
         .select((state) => state.isShowControlsUi));
-    final fullscreen = ref.watch(playStateControllerProvider.select((s) => s.isFullscreen));
-    final position = ref.watch(playStateControllerProvider.select((s) => s.position));
-    final isWideScreen = ref.watch(playStateControllerProvider.select((s) => s.isWideScreen));
+    final fullscreen = ref.watch(playStateProvider.select((s) => s.isFullscreen));
+    final position = ref.watch(playStateProvider.select((s) => s.position));
+    final isWideScreen = ref.watch(playStateProvider.select((s) => s.isWideScreen));
     return AnimatedSwitcher(
       duration: const Duration(milliseconds: 200),
       transitionBuilder: (child, animation) {

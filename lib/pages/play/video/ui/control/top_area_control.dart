@@ -28,7 +28,7 @@ class TopAreaControl extends ConsumerStatefulWidget {
 
 class _TopAreaControlState extends ConsumerState<TopAreaControl> {
   final setting = Storage.setting;
-  late final PlayController playController;
+  late final PlaySession playController;
   late int _skipDuration;
 
   VideoSourceController get videoSourceController =>
@@ -37,7 +37,7 @@ class _TopAreaControlState extends ConsumerState<TopAreaControl> {
   @override
   void initState() {
     super.initState();
-    playController = ref.read(playControllerProvider);
+    playController = ref.read(playSessionProvider);
     _skipDuration = setting.get(PlaybackKey.skipDuration, defaultValue: 85);
   }
 
@@ -82,7 +82,7 @@ class _TopAreaControlState extends ConsumerState<TopAreaControl> {
     final isShowControlsUi = ref.watch(
         videoUiStateControllerProvider.select((s) => s.isShowControlsUi));
     final fullscreen =
-        ref.watch(playStateControllerProvider.select((s) => s.isFullscreen));
+        ref.watch(playStateProvider.select((s) => s.isFullscreen));
     final leftPadding = MediaQuery.of(context).padding.left;
     return AnimatedSwitcher(
       duration: const Duration(milliseconds: 200),
@@ -199,10 +199,10 @@ class _TopAreaControlState extends ConsumerState<TopAreaControl> {
                         Consumer(
                           builder: (context, ref, child) {
                             final position = ref.watch(
-                                playStateControllerProvider
+                                playStateProvider
                                     .select((s) => s.position));
                             final isWideScreen = ref.watch(
-                                playStateControllerProvider
+                                playStateProvider
                                     .select((s) => s.isWideScreen));
                             return Row(
                               children: [
@@ -287,7 +287,7 @@ class _TopAreaControlState extends ConsumerState<TopAreaControl> {
                                       ? Consumer(
                                           builder: (context, ref, child) {
                                             final isContentExpanded = ref.watch(
-                                                playStateControllerProvider
+                                                playStateProvider
                                                     .select((s) =>
                                                         s.isContentExpanded));
                                             return IconButton(

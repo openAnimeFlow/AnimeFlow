@@ -4,7 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 class RateButton extends ConsumerWidget {
-  final PlayController playController;
+  final PlaySession playController;
 
   const RateButton({super.key, required this.playController});
 
@@ -24,7 +24,7 @@ class RateButton extends ConsumerWidget {
     final videoUiStateController =
         ref.read(videoUiStateControllerProvider.notifier);
     final currentRate = ref.watch(
-      playStateControllerProvider.select((state) => state.rate),
+      playStateProvider.select((state) => state.rate),
     );
     final colorScheme = Theme.of(context).colorScheme;
 

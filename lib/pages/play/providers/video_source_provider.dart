@@ -84,6 +84,12 @@ class VideoSourceController extends _$VideoSourceController {
   Future<List<CrawlConfigItem>>? _crawlConfigsFuture;
   int _searchSessionId = 0;
   final Map<String, int> _websiteRequestTokens = {};
+  bool _isAutoSelecting = false;
+  int _autoSelectEpoch = 0;
+  int? _autoSelectEpisodeIndex;
+  String? _preferredAutoSelectWebsiteName;
+  int _videoPageLoadToken = 0;
+  final Set<String> _attemptedAutoLoadUrls = {};
 
   int get currentEpisodeIndex => state.currentEpisodeIndex;
   List<ResourcesItem> get videoResources => state.videoResources;
@@ -123,6 +129,7 @@ class VideoSourceController extends _$VideoSourceController {
     _webViewVideoProvider = null;
     _crawlConfigsFuture = null;
     _websiteRequestTokens.clear();
+    _attemptedAutoLoadUrls.clear();
   }
 
   Future<void> initVideoResources() async {
@@ -144,6 +151,7 @@ class VideoSourceController extends _$VideoSourceController {
 
     final configs = await _getCrawlConfigs();
     final sessionId = ++_searchSessionId;
+    _resetAutoSelectionAttempts();
     _ensureVideoResourcesInitialized(configs);
     _clearAllResources(configs);
     state = state.copyWith(
@@ -184,6 +192,7 @@ class VideoSourceController extends _$VideoSourceController {
       return;
     }
     state = state.copyWith(isSearchCompleted: true);
+    autoSelectAvailableResource(preferCurrentWebsite: true);
   }
 
   List<ResourcesItem> _buildInitialResources(List<CrawlConfigItem> configs) {
@@ -349,6 +358,7 @@ class VideoSourceController extends _$VideoSourceController {
         episodeResources: allEpisodesList,
         needsCaptcha: false,
       );
+      autoSelectAvailableResource(preferCurrentWebsite: true);
     } on CaptchaRequiredException {
       if (!_isRequestCurrent(config.name, sessionId, requestToken)) {
         return;
@@ -404,8 +414,9 @@ class VideoSourceController extends _$VideoSourceController {
     }
 
     var nextIndex = 0;
-    final workerCount =
-        configs.length < _maxConcurrentSearches ? configs.length : _maxConcurrentSearches;
+    final workerCount = configs.length < _maxConcurrentSearches
+        ? configs.length
+        : _maxConcurrentSearches;
 
     Future<void> worker() async {
       while (true) {
@@ -490,18 +501,10 @@ class VideoSourceController extends _$VideoSourceController {
     }
   }
 
-  int _findFirstResourceIndex(List<ResourcesItem> resources) {
-    for (var i = 0; i < resources.length; i++) {
-      if (resources[i].episodeResources.isNotEmpty) {
-        return i;
-      }
-    }
-    return 0;
-  }
-
   List<_AutoLoadCandidate> _buildAutoLoadCandidates(
-    List<ResourcesItem> resources,
-  ) {
+    List<ResourcesItem> resources, {
+    String? preferredWebsiteName,
+  }) {
     final candidates = <_AutoLoadCandidate>[];
 
     for (var websiteIndex = 0;
@@ -521,11 +524,28 @@ class VideoSourceController extends _$VideoSourceController {
           _AutoLoadCandidate(
             websiteIndex: websiteIndex,
             resource: resource,
+            resourceItem: resourceItem,
             episode: episode,
           ),
         );
       }
     }
+
+    candidates.sort((a, b) {
+      if (preferredWebsiteName != null && preferredWebsiteName.isNotEmpty) {
+        final aPreferred = a.resource.websiteName == preferredWebsiteName;
+        final bPreferred = b.resource.websiteName == preferredWebsiteName;
+        if (aPreferred != bPreferred) {
+          return aPreferred ? -1 : 1;
+        }
+      }
+      final matchRatioCompare =
+          b.resourceItem.matchRatio.compareTo(a.resourceItem.matchRatio);
+      if (matchRatioCompare != 0) {
+        return matchRatioCompare;
+      }
+      return a.websiteIndex.compareTo(b.websiteIndex);
+    });
 
     return candidates;
   }
@@ -534,30 +554,63 @@ class VideoSourceController extends _$VideoSourceController {
     List<ResourcesItem> resources, {
     bool force = false,
   }) {
+    autoSelectAvailableResource(force: force, preferCurrentWebsite: true);
+  }
+
+  void autoSelectAvailableResource({
+    bool force = false,
+    bool preferCurrentWebsite = false,
+  }) {
     if (state.userManuallySelected) {
       return;
     }
     if (!force && state.webSiteTitle.isNotEmpty) {
       return;
     }
-
-    final hasResource = resources.any((r) => r.episodeResources.isNotEmpty);
-    if (!hasResource) {
+    if (_isAutoSelecting) {
       return;
     }
 
-    state = state.copyWith(
-      selectedWebsiteIndex: _findFirstResourceIndex(resources),
-    );
-
     Future.microtask(() {
-      _autoLoadFirstResource(resources, force: force);
+      final preferredWebsiteName = state.webSiteTitle.isNotEmpty
+          ? state.webSiteTitle
+          : _preferredAutoSelectWebsiteName;
+      _autoLoadAvailableResource(
+        force: force,
+        preferredWebsiteName:
+            preferCurrentWebsite ? preferredWebsiteName : null,
+      );
     });
   }
 
-  Future<void> _autoLoadFirstResource(
-    List<ResourcesItem> resources, {
+  void _resetAutoSelectionAttempts() {
+    _autoSelectEpoch++;
+    _isAutoSelecting = false;
+    _autoSelectEpisodeIndex = state.currentEpisodeIndex;
+    _preferredAutoSelectWebsiteName = null;
+    _attemptedAutoLoadUrls.clear();
+  }
+
+  void resetAutoSelectionForCurrentEpisode() {
+    final preferredWebsiteName =
+        state.webSiteTitle.isNotEmpty ? state.webSiteTitle : null;
+    _resetAutoSelectionAttempts();
+    _preferredAutoSelectWebsiteName = preferredWebsiteName;
+    state = state.copyWith(webSiteTitle: '', webSiteIcon: '', videoUrl: '');
+  }
+
+  void _syncAutoSelectionEpisode() {
+    if (_autoSelectEpisodeIndex == state.currentEpisodeIndex) {
+      return;
+    }
+    _autoSelectEpoch++;
+    _autoSelectEpisodeIndex = state.currentEpisodeIndex;
+    _attemptedAutoLoadUrls.clear();
+  }
+
+  Future<void> _autoLoadAvailableResource({
     bool force = false,
+    String? preferredWebsiteName,
   }) async {
     if (state.userManuallySelected) {
       return;
@@ -565,35 +618,76 @@ class VideoSourceController extends _$VideoSourceController {
     if (!force && state.webSiteTitle.isNotEmpty) {
       return;
     }
+    if (_isAutoSelecting) {
+      return;
+    }
 
-    final candidates = _buildAutoLoadCandidates(resources);
-    for (final candidate in candidates) {
-      if (state.userManuallySelected) {
-        return;
-      }
+    _syncAutoSelectionEpisode();
+    final epoch = _autoSelectEpoch;
+    _isAutoSelecting = true;
 
-      state = state.copyWith(selectedWebsiteIndex: candidate.websiteIndex);
-      final candidateUrl = candidate.resource.baseUrl + candidate.episode.like;
+    try {
+      while (true) {
+        if (epoch != _autoSelectEpoch || state.userManuallySelected) {
+          return;
+        }
+        if (!force && state.webSiteTitle.isNotEmpty) {
+          return;
+        }
 
-      setWebSite(
-        title: candidate.resource.websiteName,
-        iconUrl: candidate.resource.websiteIcon,
-        videoUrl: candidateUrl,
-      );
+        final candidates = _buildAutoLoadCandidates(
+          state.videoResources,
+          preferredWebsiteName: preferredWebsiteName,
+        ).where((candidate) {
+          final url = candidate.resource.baseUrl + candidate.episode.like;
+          return !_attemptedAutoLoadUrls.contains(url);
+        }).toList(growable: false);
 
-      final loaded = await loadVideoPage(candidateUrl);
-      if (!loaded) {
-        if (state.userManuallySelected) {
+        if (candidates.isEmpty) {
+          return;
+        }
+
+        final candidate = candidates.first;
+        final candidateUrl =
+            candidate.resource.baseUrl + candidate.episode.like;
+        _attemptedAutoLoadUrls.add(candidateUrl);
+
+        state = state.copyWith(selectedWebsiteIndex: candidate.websiteIndex);
+        setWebSite(
+          title: candidate.resource.websiteName,
+          iconUrl: candidate.resource.websiteIcon,
+          videoUrl: candidateUrl,
+        );
+
+        final loaded = await loadVideoPage(
+          candidateUrl,
+          shouldUseResult: () => epoch == _autoSelectEpoch,
+        );
+        if (loaded) {
+          _preferredAutoSelectWebsiteName = null;
+          return;
+        }
+
+        if (epoch != _autoSelectEpoch || state.userManuallySelected) {
           return;
         }
         setWebSite(title: '', iconUrl: '', videoUrl: '');
-        continue;
       }
-      return;
+    } finally {
+      if (epoch == _autoSelectEpoch) {
+        _isAutoSelecting = false;
+      }
     }
   }
 
-  Future<bool> loadVideoPage(String url) async {
+  Future<bool> loadVideoPage(
+    String url, {
+    bool Function()? shouldUseResult,
+  }) async {
+    if (shouldUseResult != null && !shouldUseResult()) {
+      return false;
+    }
+    final loadToken = ++_videoPageLoadToken;
     _webViewVideoProvider?.cancel();
 
     final playController = ref.read(playSessionProvider);
@@ -622,6 +716,14 @@ class VideoSourceController extends _$VideoSourceController {
 
       final source = await _webViewVideoProvider!
           .resolve(url, useLegacyParser: false, offset: offset);
+      final canUseResult = loadToken == _videoPageLoadToken &&
+          (shouldUseResult == null || shouldUseResult());
+      if (!canUseResult) {
+        if (loadToken == _videoPageLoadToken) {
+          ref.read(playStateProvider.notifier).setIsParsing(false);
+        }
+        return false;
+      }
 
       ref.read(playStateProvider.notifier).setIsParsing(false);
       ref.read(playStateProvider.notifier).setParseResult('视频解析成功');
@@ -639,22 +741,26 @@ class VideoSourceController extends _$VideoSourceController {
       );
       return true;
     } on VideoSourceTimeoutException {
-      ref.read(playStateProvider.notifier).setIsParsing(false);
-      ref.read(playStateProvider.notifier).setParseResult('视频解析超时，请重试');
+      if (loadToken == _videoPageLoadToken) {
+        ref.read(playStateProvider.notifier).setIsParsing(false);
+        ref.read(playStateProvider.notifier).setParseResult('视频解析超时，请重试');
+      }
     } on VideoSourceNotFoundException {
-      ref.read(playStateProvider.notifier).setIsParsing(false);
-      ref.read(playStateProvider.notifier).setParseResult('未找到视频资源，请切换数据源重试');
+      if (loadToken == _videoPageLoadToken) {
+        ref.read(playStateProvider.notifier).setIsParsing(false);
+        ref.read(playStateProvider.notifier).setParseResult('未找到视频资源，请切换数据源重试');
+      }
     } catch (e) {
-      ref.read(playStateProvider.notifier).setIsParsing(false);
-      ref
-          .read(playStateProvider.notifier)
-          .setParseResult('视频解析失败: ${e.toString()}');
-      _logger.e(e);
+      if (loadToken == _videoPageLoadToken) {
+        ref.read(playStateProvider.notifier).setIsParsing(false);
+        ref
+            .read(playStateProvider.notifier)
+            .setParseResult('视频解析失败: ${e.toString()}');
+        _logger.e(e);
+      }
     }
     return false;
   }
-
-  /// 取消当前视频源解析并销毁 Provider
 }
 
 CrawlConfigItem? _firstConfigWhere(
@@ -681,10 +787,12 @@ class _AutoLoadCandidate {
   const _AutoLoadCandidate({
     required this.websiteIndex,
     required this.resource,
+    required this.resourceItem,
     required this.episode,
   });
 
   final int websiteIndex;
   final ResourcesItem resource;
+  final EpisodeResourcesItem resourceItem;
   final Episode episode;
 }

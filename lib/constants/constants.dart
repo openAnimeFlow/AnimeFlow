@@ -52,3 +52,13 @@ const List<String> acceptLanguageList = [
   'zh-CN,zh;q=0.9,en;q=0.8,en-GB;q=0.7,en-US;q=0.6',
   'zh-CN,zh-TW;q=0.9,zh;q=0.8,en-US;q=0.7,en;q=0.6',
 ];
+
+const Map<int, String> episodesTypeLabels = {
+  0: '正篇',
+  1: '特别篇',
+  2: 'OP',
+  3: 'ED',
+  4: 'Trailer',
+  5: 'MAD',
+  6: '其他',
+};

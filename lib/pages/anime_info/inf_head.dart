@@ -5,6 +5,8 @@ import 'package:anime_flow/http/clients/flow_client.dart';
 import 'package:anime_flow/http/requests/flow_request.dart';
 import 'package:anime_flow/models/item/bangumi/subjects_info_item.dart';
 import 'package:anime_flow/pages/anime_info/provider/anime_info_provider.dart';
+import 'package:anime_flow/pages/anime_info/episodes_drawer.dart';
+import 'package:anime_flow/providers/episodes/subject_episodes_provider.dart';
 import 'package:anime_flow/providers/user/user_state_provider.dart';
 import 'package:anime_flow/routes/provider/routes_args.dart';
 import 'package:anime_flow/utils/systemUtil.dart';
@@ -78,7 +80,7 @@ class InfoHeadView extends StatelessWidget {
             alignment: Alignment.center,
             child: ConstrainedBox(
               constraints:
-                  const BoxConstraints(maxWidth: LayoutConstant.maxWidth),
+              const BoxConstraints(maxWidth: LayoutConstant.maxWidth),
               child: SizedBox(
                 height: double.infinity,
                 child: Padding(
@@ -123,12 +125,12 @@ class InfoHeadView extends StatelessWidget {
                             final subjectsInfo = ref.watch(animeInfoProvider);
                             return subjectsInfo.when(
                                 data: (data) => _dataView(
-                                      context,
-                                      ref: ref,
-                                      subjectItem: data,
-                                    ),
+                                  context,
+                                  ref: ref,
+                                  subjectItem: data,
+                                ),
                                 error: (error, stackTrace) =>
-                                    const SizedBox.shrink(),
+                                const SizedBox.shrink(),
                                 loading: () => _skeletonView(context));
                           }),
                         )
@@ -201,16 +203,17 @@ class InfoHeadView extends StatelessWidget {
   }
 
   Widget _dataView(
-    BuildContext context, {
-    required WidgetRef ref,
-    required SubjectsInfoItem subjectItem,
-  }) {
+      BuildContext context, {
+        required WidgetRef ref,
+        required SubjectsInfoItem subjectItem,
+      }) {
     final name = ref.watch(animeInfoArgsProvider.select((e) => e.name));
+    final image = ref.watch(animeInfoArgsProvider.select((e) => e.image));
     const double fontSize = 12;
     const FontWeight fontWeight = FontWeight.w600;
     const amberAccent = Colors.amberAccent;
     final collectionTotal =
-        subjectItem.collection.data.values.reduce((a, b) => a + b);
+    subjectItem.collection.data.values.reduce((a, b) => a + b);
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -230,7 +233,7 @@ class InfoHeadView extends StatelessWidget {
             Text(
               '${subjectItem.airtime.date}(${subjectItem.platform.typeCN})',
               style:
-                  const TextStyle(fontSize: fontSize, fontWeight: fontWeight),
+              const TextStyle(fontSize: fontSize, fontWeight: fontWeight),
               maxLines: 1,
               overflow: TextOverflow.ellipsis,
             ),
@@ -268,7 +271,7 @@ class InfoHeadView extends StatelessWidget {
             Text(
               '(${subjectItem.rating.total})人评分',
               style:
-                  const TextStyle(fontSize: fontSize, fontWeight: fontWeight),
+              const TextStyle(fontSize: fontSize, fontWeight: fontWeight),
             ),
             Text('$collectionTotal收藏/',
                 style: const TextStyle(
@@ -282,34 +285,68 @@ class InfoHeadView extends StatelessWidget {
           ],
         ),
         const Spacer(),
-        CollectionButton(
-          collectType: collectTypeFromApiType(subjectItem.interest?.type),
-          onCollectTypeChanged: (type) async {
-            try {
-              await FlowRequest.updateCollectionService(
-                subjectItem.id,
-                type: type.value,
-                subjectType: subjectItem.type,
-              );
-              if (context.mounted) {
-                NotificationToast.show(
-                  '收藏更新',
-                  '已${type.label}',
-                  maxWidth: 500,
+        Row(
+          spacing: 8,
+          children: [
+            CollectionButton(
+              collectType: collectTypeFromApiType(subjectItem.interest?.type),
+              onCollectTypeChanged: (type) async {
+                try {
+                  await FlowRequest.updateCollectionService(
+                    subjectItem.id,
+                    type: type.value,
+                    subjectType: subjectItem.type,
+                  );
+                  if (context.mounted) {
+                    NotificationToast.show(
+                      '收藏更新',
+                      '已${type.label}',
+                      maxWidth: 500,
+                    );
+                  }
+                  ref.invalidate(currentUserInfoProvider);
+                } on AnimeFlowApiException catch (e) {
+                  if (context.mounted) {
+                    NotificationToast.show(
+                      '收藏更新失败',
+                      e.message,
+                      maxWidth: 500,
+                    );
+                  }
+                  rethrow;
+                }
+              },
+            ),
+            Consumer(
+              builder: (context, ref, child) {
+                // Keep episodes cached while the anime info page is alive.
+                ref.watch(subjectEpisodesProvider(subjectItem.id));
+                return OutlinedButton.icon(
+                  onPressed: () => EpisodesDrawerView.show(
+                    context,
+                    subjectItem: subjectItem,
+                    subjectName: name,
+                    subjectImage: image,
+                  ),
+                  style: OutlinedButton.styleFrom(
+                    side: BorderSide(
+                        color: Theme.of(context).colorScheme.primary),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(20),
+                    ),
+                    padding:
+                    const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                  ),
+                  icon:
+                  const Icon(Icons.format_list_bulleted_rounded, size: 16),
+                  label: const Text(
+                    '剧集',
+                    style: TextStyle(fontSize: 12),
+                  ),
                 );
-              }
-              ref.invalidate(currentUserInfoProvider);
-            } on AnimeFlowApiException catch (e) {
-              if (context.mounted) {
-                NotificationToast.show(
-                  '收藏更新失败',
-                  e.message,
-                  maxWidth: 500,
-                );
-              }
-              rethrow;
-            }
-          },
+              },
+            ),
+          ],
         ),
       ],
     );

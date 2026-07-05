@@ -1,4 +1,5 @@
 import 'package:anime_flow/constants/assets_path_constants.dart';
+import 'package:anime_flow/constants/constants.dart';
 import 'package:anime_flow/models/item/bangumi/episodes_item.dart';
 import 'package:anime_flow/pages/play/providers/episodes_provider.dart';
 import 'package:flutter/material.dart';
@@ -20,17 +21,6 @@ class _EpisodesComponentsState extends ConsumerState<EpisodesComponents> {
 
   /// 上次滚动定位对应的 episodeId，避免 rebuild 重复触发滚动
   int? lastScrolledEpisodeId;
-
-  /// 剧集类型 → 中文标签
-  static const Map<int, String> _typeLabels = {
-    0: '正篇',
-    1: '特别篇',
-    2: 'OP',
-    3: 'ED',
-    4: 'Trailer',
-    5: 'MAD',
-    6: '其他',
-  };
 
   /// 剧集列表每行固定高度
   final double itemHeight = 80;
@@ -143,22 +133,6 @@ class _EpisodesComponentsState extends ConsumerState<EpisodesComponents> {
     );
   }
 
-  Widget _buildLoadMoreFooter(bool isLoadingMore) {
-    if (!isLoadingMore) {
-      return const SizedBox.shrink();
-    }
-    return const Padding(
-      padding: EdgeInsets.symmetric(vertical: 12),
-      child: Center(
-        child: SizedBox(
-          width: 20,
-          height: 20,
-          child: CircularProgressIndicator(strokeWidth: 2),
-        ),
-      ),
-    );
-  }
-
   Widget _buildLoadError(Object error) {
     return Container(
       height: 250,
@@ -198,6 +172,22 @@ class _EpisodesComponentsState extends ConsumerState<EpisodesComponents> {
     );
   }
 
+  Widget _buildLoadMoreFooter(bool isLoadingMore) {
+    if (!isLoadingMore) {
+      return const SizedBox.shrink();
+    }
+    return const Padding(
+      padding: EdgeInsets.symmetric(vertical: 12),
+      child: Center(
+        child: SizedBox(
+          width: 20,
+          height: 20,
+          child: CircularProgressIndicator(strokeWidth: 2),
+        ),
+      ),
+    );
+  }
+
   Widget buildListEpisodes(EpisodesData episodesState) {
     final episodesItem = episodesState.episodes;
     if (episodesItem == null || episodesItem.data.isEmpty) {
@@ -207,14 +197,13 @@ class _EpisodesComponentsState extends ConsumerState<EpisodesComponents> {
     final episodes = episodesItem.data;
     _sortEpisodes(episodes);
     final selectedEpisodeId = episodesState.episodeId;
+    final itemCount = episodes.length + (episodesState.isLoadingMore ? 1 : 0);
     if (lastScrolledEpisodeId != selectedEpisodeId) {
       lastScrolledEpisodeId = selectedEpisodeId;
       WidgetsBinding.instance.addPostFrameCallback((_) {
         _scrollListToSelectedEpisode(episodes, selectedEpisodeId);
       });
     }
-
-    final itemCount = episodes.length + (episodesState.isLoadingMore ? 1 : 0);
 
     return Container(
       height: 250,
@@ -272,7 +261,7 @@ class _EpisodesComponentsState extends ConsumerState<EpisodesComponents> {
                                 if (episode.type != 0) ...[
                                   const SizedBox(width: 6),
                                   Text(
-                                    _typeLabels[episode.type] ?? '',
+                                    episodesTypeLabels[episode.type] ?? '',
                                     style: TextStyle(
                                       fontSize: 10,
                                       color:

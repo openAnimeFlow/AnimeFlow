@@ -1,9 +1,7 @@
-import 'package:anime_flow/http/requests/flow_request.dart';
 import 'package:anime_flow/models/item/bangumi/episodes_item.dart';
-import 'package:anime_flow/pages/play/service/episodes_pagination.dart';
+import 'package:anime_flow/providers/episodes/subject_episodes_provider.dart';
 import 'package:anime_flow/routes/model/play_route_extra.dart';
 import 'package:anime_flow/routes/provider/routes_args.dart';
-import 'package:anime_flow/utils/logger.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 part 'episodes_provider.g.dart';
@@ -67,44 +65,37 @@ class Episodes extends _$Episodes {
   @override
   Future<EpisodesData> build() async {
     final extra = ref.watch(playExtraProvider);
-    return _fetchInitialData(extra);
+    final subjectId = extra.playExtra.subjectId;
+    final requestedEpisodeSort = extra.continueEpisode;
+    if (requestedEpisodeSort != null) {
+      await ref
+          .read(subjectEpisodesProvider(subjectId).notifier)
+          .loadUntilEpisodeSort(requestedEpisodeSort);
+    }
+    final subjectEpisodes =
+        await ref.watch(subjectEpisodesProvider(subjectId).future);
+    return _buildEpisodesData(extra, subjectEpisodes);
   }
 
-  Future<EpisodesData> _fetchInitialData(PlayRouteExtra extra) async {
-    final subjectId = extra.playExtra.subjectId;
-    final continueEpisode = extra.continueEpisode ?? 0;
-
-    var episodes = await FlowRequest.getSubjectEpisodesByIdService(
-      subjectId,
-      EpisodesPagination.pageSize,
-      0,
-    );
-
-    while (continueEpisode > 0 &&
-        continueEpisode > episodes.data.length &&
-        EpisodesPagination.hasMore(episodes)) {
-      final page = await FlowRequest.getSubjectEpisodesByIdService(
-        subjectId,
-        EpisodesPagination.pageSize,
-        episodes.data.length,
-      );
-      episodes = EpisodesPagination.mergePages(cached: episodes, page: page);
-    }
+  EpisodesData _buildEpisodesData(
+    PlayRouteExtra extra,
+    SubjectEpisodesState subjectEpisodes,
+  ) {
+    final episodes = subjectEpisodes.episodes;
+    final continueEpisodeSort = extra.continueEpisode;
 
     if (episodes.data.isEmpty) {
       return EpisodesData(
         episodes: episodes,
-        hasMore: EpisodesPagination.hasMore(episodes),
+        isLoadingMore: subjectEpisodes.isLoadingMore,
+        hasMore: subjectEpisodes.hasMore,
       );
     }
 
-    final selection =
-        continueEpisode > 0 && continueEpisode <= episodes.data.length
-            ? _buildEpisodeSelection(
-                episode: episodes.data[continueEpisode - 1],
-                index: continueEpisode,
-              )
-            : _buildFirstNonCollectionSelection(episodes);
+    final selection = continueEpisodeSort != null
+        ? _findEpisodeSelectionBySort(episodes, continueEpisodeSort) ??
+            _buildFirstNonCollectionSelection(episodes)
+        : _buildFirstNonCollectionSelection(episodes);
 
     return EpisodesData(
       episodes: episodes,
@@ -112,53 +103,42 @@ class Episodes extends _$Episodes {
       episodeSort: selection.sort,
       episodeIndex: selection.index,
       episodeId: selection.id,
-      hasMore: EpisodesPagination.hasMore(episodes),
+      isLoadingMore: subjectEpisodes.isLoadingMore,
+      hasMore: subjectEpisodes.hasMore,
     );
   }
 
   EpisodesData? get _currentData => state.asData?.value;
 
   Future<void> retry() async {
+    final extra = ref.read(playExtraProvider);
+    final subjectId = extra.playExtra.subjectId;
+    ref.invalidate(subjectEpisodesProvider(subjectId));
     state = const AsyncLoading();
     state = await AsyncValue.guard(() async {
-      final extra = ref.read(playExtraProvider);
-      return _fetchInitialData(extra);
+      final subjectEpisodes =
+          await ref.read(subjectEpisodesProvider(subjectId).future);
+      return _buildEpisodesData(extra, subjectEpisodes);
     });
   }
 
-  /// 滚动到底部时加载更多剧集
   Future<void> loadMore() async {
     final current = _currentData;
-    final episodes = current?.episodes;
-    if (current == null ||
-        episodes == null ||
-        state.isLoading ||
-        current.isLoadingMore ||
-        !current.hasMore) {
+    if (current == null || current.isLoadingMore || !current.hasMore) {
       return;
     }
 
+    final extra = ref.read(playExtraProvider);
+    final subjectId = extra.playExtra.subjectId;
     state = AsyncData(current.copyWith(isLoadingMore: true));
-    try {
-      final subjectId = ref.read(playExtraProvider).playExtra.subjectId;
-      final page = await FlowRequest.getSubjectEpisodesByIdService(
-        subjectId,
-        EpisodesPagination.pageSize,
-        episodes.data.length,
-      );
-      final merged =
-          EpisodesPagination.mergePages(cached: episodes, page: page);
-      state = AsyncData(
-        current.copyWith(
-          episodes: merged,
-          hasMore: EpisodesPagination.hasMore(merged),
-          isLoadingMore: false,
-        ),
-      );
-    } catch (e) {
-      LiggLogger().e(e);
+    await ref.read(subjectEpisodesProvider(subjectId).notifier).loadMore();
+    final subjectEpisodes =
+        ref.read(subjectEpisodesProvider(subjectId)).asData?.value;
+    if (subjectEpisodes == null) {
       state = AsyncData(current.copyWith(isLoadingMore: false));
+      return;
     }
+    state = AsyncData(_buildEpisodesData(extra, subjectEpisodes));
   }
 
   void setEpisodeTitle(String title) {
@@ -177,9 +157,6 @@ class Episodes extends _$Episodes {
     final current = _currentData;
     if (current == null) {
       return;
-    }
-    if (current.episodeIndex != episodeIndex) {
-      LiggLogger().i('选中剧集索引:$episodeIndex');
     }
     state = AsyncData(
       current.copyWith(
@@ -252,6 +229,22 @@ class Episodes extends _$Episodes {
       episode: episodes.data[targetIndex],
       index: targetIndex + 1,
     );
+  }
+
+  _EpisodeSelection? _findEpisodeSelectionBySort(
+    EpisodesItem episodes,
+    int episodeSort,
+  ) {
+    for (var i = 0; i < episodes.data.length; i++) {
+      final episode = episodes.data[i];
+      if (episode.sort.toInt() == episodeSort) {
+        return _buildEpisodeSelection(
+          episode: episode,
+          index: i + 1,
+        );
+      }
+    }
+    return null;
   }
 }
 

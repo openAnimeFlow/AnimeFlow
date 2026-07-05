@@ -99,6 +99,50 @@ class _EpisodesComponentsState extends ConsumerState<EpisodesComponents> {
     );
   }
 
+  @override
+  Widget build(BuildContext context) {
+    final episodesAsync = ref.watch(episodesProvider);
+    final hasEpisodes = episodesAsync.asData?.value.episodes != null;
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            const Text('选集'),
+            hasEpisodes
+                ? IconButton(
+                    onPressed: () {
+                      setState(() {
+                        isGridView = !isGridView;
+                      });
+                    },
+                    icon: Icon(
+                      isGridView ? Icons.view_list : Icons.grid_view,
+                    ),
+                    tooltip: isGridView ? '切换到列表' : '切换到网格',
+                  )
+                : const SizedBox.shrink(),
+          ],
+        ),
+        episodesAsync.when(
+          loading: () => const Column(
+            children: [
+              LinearProgressIndicator(),
+              SizedBox(height: 12),
+              Text('正在获取剧集...'),
+            ],
+          ),
+          error: (error, _) => _buildLoadError(error),
+          data: (episodesState) => isGridView
+              ? buildGridEpisodes(episodesState)
+              : buildListEpisodes(episodesState),
+        ),
+      ],
+    );
+  }
+
   Widget _buildLoadMoreFooter(bool isLoadingMore) {
     if (!isLoadingMore) {
       return const SizedBox.shrink();
@@ -110,33 +154,6 @@ class _EpisodesComponentsState extends ConsumerState<EpisodesComponents> {
           width: 20,
           height: 20,
           child: CircularProgressIndicator(strokeWidth: 2),
-        ),
-      ),
-    );
-  }
-
-  Widget _buildInitialLoading() {
-    return Container(
-      height: 250,
-      padding: const EdgeInsets.symmetric(horizontal: 16),
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(10),
-        color: Theme.of(context)
-            .colorScheme
-            .surfaceContainerHighest
-            .withValues(alpha: 0.8),
-      ),
-      child: const Center(
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            SizedBox(
-              width: 180,
-              child: LinearProgressIndicator(),
-            ),
-            SizedBox(height: 12),
-            Text('正在获取剧集...'),
-          ],
         ),
       ),
     );
@@ -178,44 +195,6 @@ class _EpisodesComponentsState extends ConsumerState<EpisodesComponents> {
           ],
         ),
       ),
-    );
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    final episodesAsync = ref.watch(episodesProvider);
-    final hasEpisodes = episodesAsync.asData?.value.episodes != null;
-
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            const Text('选集'),
-            hasEpisodes
-                ? IconButton(
-                    onPressed: () {
-                      setState(() {
-                        isGridView = !isGridView;
-                      });
-                    },
-                    icon: Icon(
-                      isGridView ? Icons.view_list : Icons.grid_view,
-                    ),
-                    tooltip: isGridView ? '切换到列表' : '切换到网格',
-                  )
-                : const SizedBox.shrink(),
-          ],
-        ),
-        episodesAsync.when(
-          loading: _buildInitialLoading,
-          error: (error, _) => _buildLoadError(error),
-          data: (episodesState) => isGridView
-              ? buildGridEpisodes(episodesState)
-              : buildListEpisodes(episodesState),
-        ),
-      ],
     );
   }
 

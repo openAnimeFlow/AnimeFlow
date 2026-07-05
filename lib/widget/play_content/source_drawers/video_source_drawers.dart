@@ -5,7 +5,7 @@ import 'package:anime_flow/constants/layout_constant.dart';
 import 'package:anime_flow/crawler/itme/anti_crawler_config.dart';
 import 'package:anime_flow/models/play/video/episode_resources_item.dart';
 import 'package:anime_flow/models/play/video/resources_item.dart';
-import 'package:anime_flow/pages/play/provider/video_source_provider.dart';
+import 'package:anime_flow/pages/play/providers/video_source_provider.dart';
 import 'package:anime_flow/providers/captcha/captcha_provider.dart';
 import 'package:anime_flow/utils/logger.dart';
 import 'package:anime_flow/widget/animation_network_image.dart';

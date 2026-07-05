@@ -1,10 +1,10 @@
 import 'package:anime_flow/constants/storage_key.dart';
 import 'package:anime_flow/features/network_speed/network_speed_provider.dart';
 import 'package:anime_flow/models/enums/video_controls_icon_type.dart';
-import 'package:anime_flow/pages/play/provider/play_provider.dart';
-import 'package:anime_flow/pages/play/provider/video_source_provider.dart';
-import 'package:anime_flow/pages/play/provider/video_ui_provider.dart';
-import 'package:anime_flow/pages/play/provider/episodes_provider.dart';
+import 'package:anime_flow/pages/play/providers/play_provider.dart';
+import 'package:anime_flow/pages/play/providers/video_source_provider.dart';
+import 'package:anime_flow/pages/play/providers/video_ui_provider.dart';
+import 'package:anime_flow/pages/play/providers/episodes_provider.dart';
 import 'package:anime_flow/routes/provider/routes_args.dart';
 import 'package:anime_flow/pages/play/video/ui/setting/video_setting.dart';
 import 'package:anime_flow/repository/storage.dart';

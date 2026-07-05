@@ -456,20 +456,48 @@ class _VideoSourceDrawersState extends ConsumerState<VideoSourceDrawers> {
       return _buildCaptchaRequired(selectedResource);
     }
 
+    if (selectedResource.isLoading) {
+      return _buildResourceStatusView(
+        icon: const SizedBox(
+          width: 36,
+          height: 36,
+          child: CircularProgressIndicator(strokeWidth: 3),
+        ),
+        title: '正在获取 ${selectedResource.websiteName} 的资源',
+        message: '当前站点正在重新检索，请稍候片刻。',
+      );
+    }
+
+    if (selectedResource.errorMessage != null) {
+      return _buildResourceStatusView(
+        icon: Icon(
+          Icons.error_outline,
+          size: 44,
+          color: Theme.of(context).colorScheme.error,
+        ),
+        title: '${selectedResource.websiteName} 请求失败',
+        message: selectedResource.errorMessage!,
+        action: ElevatedButton(
+          onPressed: () =>
+              videoSourceController.retryResources(selectedResource.websiteName),
+          child: const Text('点击重试'),
+        ),
+      );
+    }
+
     if (episodeResources.isEmpty) {
-      return Material(
-        child: Center(
-          child: Column(
-            spacing: 8,
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              const Text('未找到播放源'),
-              ElevatedButton(
-                  onPressed: () => videoSourceController
-                      .retryResources(selectedResource.websiteName),
-                  child: const Text('重新搜索'))
-            ],
-          ),
+      return _buildResourceStatusView(
+        icon: Icon(
+          Icons.search_off_rounded,
+          size: 44,
+          color: Theme.of(context).colorScheme.onSurfaceVariant,
+        ),
+        title: '${selectedResource.websiteName} 暂未搜到资源',
+        message: '没有检索到可用播放源。你可以稍后重试，或切换其他站点。',
+        action: ElevatedButton(
+          onPressed: () =>
+              videoSourceController.retryResources(selectedResource.websiteName),
+          child: const Text('重新搜索'),
         ),
       );
     }
@@ -491,7 +519,17 @@ class _VideoSourceDrawersState extends ConsumerState<VideoSourceDrawers> {
         children: [
           Expanded(
             child: matchedResources.isEmpty
-                ? const Center(child: Text('当前剧集无可用的播放源'))
+                ? _buildResourceStatusView(
+                    icon: Icon(
+                      Icons.playlist_remove_rounded,
+                      size: 44,
+                      color: Theme.of(context).colorScheme.onSurfaceVariant,
+                    ),
+                    title: '当前剧集暂无可用播放源',
+                    message: excludedEpisodesCount > 0
+                        ? '前选中剧集不在这些结果里。你可以展开下方“已被排除的资源”确认是否搜到了其他集。'
+                        : '当前剧集没有匹配到对应播放源。',
+                  )
                 : ListView.builder(
                     controller: widget.isBottomSheet ? _scrollController : null,
                     padding: EdgeInsets.zero,
@@ -565,6 +603,45 @@ class _VideoSourceDrawersState extends ConsumerState<VideoSourceDrawers> {
               }(),
             ),
         ],
+      ),
+    );
+  }
+
+  Widget _buildResourceStatusView({
+    required Widget icon,
+    required String title,
+    required String message,
+    Widget? action,
+  }) {
+    return Material(
+      child: Center(
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 24),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              icon,
+              const SizedBox(height: 16),
+              Text(
+                title,
+                style: Theme.of(context).textTheme.titleMedium,
+                textAlign: TextAlign.center,
+              ),
+              const SizedBox(height: 8),
+              Text(
+                message,
+                style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                      color: Theme.of(context).colorScheme.onSurfaceVariant,
+                    ),
+                textAlign: TextAlign.center,
+              ),
+              if (action != null) ...[
+                const SizedBox(height: 16),
+                action,
+              ],
+            ],
+          ),
+        ),
       ),
     );
   }

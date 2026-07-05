@@ -1,4 +1,3 @@
-import 'dart:async';
 import 'dart:io';
 
 import 'package:anime_flow/models/enums/video_controls_icon_type.dart';
@@ -6,7 +5,6 @@ import 'package:anime_flow/pages/play/providers/play_provider.dart';
 import 'package:anime_flow/pages/play/providers/video_ui_provider.dart';
 import 'package:anime_flow/pages/play/providers/video_source_provider.dart';
 import 'package:anime_flow/pages/play/providers/episodes_provider.dart';
-import 'package:anime_flow/utils/logger.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:media_kit_video/media_kit_video.dart';
@@ -72,38 +70,17 @@ class _VideoViewState extends ConsumerState<VideoView> with WindowListener {
     playStateController.setIsFullscreen(false);
   }
 
-  /// 等待资源初始化完成后选择资源
-  Future<void> selectResourceAfterInit() async {
-    if (!ref.read(videoSourceControllerProvider).isLoading) {
-      await waitForResourcesLoaded();
-    }
-
-    final resources = ref.read(videoSourceControllerProvider).videoResources;
-    videoSourceController.autoSelectFirstResource(resources, force: true);
+  /// 请求自动选择资源。
+  void requestAutoSelectResource() {
+    videoSourceController.autoSelectAvailableResource(
+      force: true,
+      preferCurrentWebsite: true,
+    );
     videoUiStateController
         .updateIndicatorType(VideoControlsIndicatorType.parsingIndicator);
     videoUiStateController
         .updateMainAxisAlignmentType(MainAxisAlignment.center);
     videoUiStateController.showIndicator();
-  }
-
-  /// 等待资源搜索完成。
-  ///
-  /// 注意：[VideoSourceController.isLoading] 表示「资源已就绪」（命名历史遗留），
-  /// 为 `true` 时表示搜索完成，而非正在加载。
-  Future<void> waitForResourcesLoaded() async {
-    if (ref.read(videoSourceControllerProvider).isLoading) {
-      return;
-    }
-
-    final deadline = DateTime.now().add(const Duration(seconds: 30));
-    while (!ref.read(videoSourceControllerProvider).isLoading) {
-      if (DateTime.now().isAfter(deadline)) {
-        LiggLogger().w('等待资源加载超时');
-        return;
-      }
-      await Future.delayed(const Duration(milliseconds: 100));
-    }
   }
 
   @override
@@ -120,9 +97,10 @@ class _VideoViewState extends ConsumerState<VideoView> with WindowListener {
         if (previous != null && previous > 0) {
           playController.clearDanmakuIfEpisodeMismatch(episode);
           videoSourceController.resetManualSelection();
+          videoSourceController.resetAutoSelectionForCurrentEpisode();
           playController.player.stop();
         }
-        selectResourceAfterInit();
+        requestAutoSelectResource();
       },
     );
     return Stack(

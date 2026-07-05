@@ -76,12 +76,14 @@ class WebRequest {
     } else {
       linkUrl = baseURL + link;
     }
+    final cookie = await _cookieHeaderFor(linkUrl, crawlConfig.name);
     final httpHeaders = {
       'referer': '$searchURL/',
       'Content-Type': 'application/x-www-form-urlencoded',
       'Accept-Language': Utils.getRandomAcceptedLanguage(),
       'Connection': 'keep-alive',
       Constants.userAgentName: Utils.getRandomUA(),
+      if (cookie.isNotEmpty) 'Cookie': cookie,
     };
 
     final response = await Request.getResources(linkUrl,

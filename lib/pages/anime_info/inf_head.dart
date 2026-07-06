@@ -208,7 +208,6 @@ class InfoHeadView extends StatelessWidget {
         required SubjectsInfoItem subjectItem,
       }) {
     final name = ref.watch(animeInfoArgsProvider.select((e) => e.name));
-    final image = ref.watch(animeInfoArgsProvider.select((e) => e.image));
     const double fontSize = 12;
     const FontWeight fontWeight = FontWeight.w600;
     const amberAccent = Colors.amberAccent;
@@ -319,6 +318,7 @@ class InfoHeadView extends StatelessWidget {
             ),
             Consumer(
               builder: (context, ref, child) {
+                final image = ref.watch(animeInfoArgsProvider.select((e) => e.image));
                 // Keep episodes cached while the anime info page is alive.
                 ref.watch(subjectEpisodesProvider(subjectItem.id));
                 return IconButton(

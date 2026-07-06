@@ -62,7 +62,7 @@ class _MobileGestureDetectorState extends ConsumerState<MobileGestureDetector> {
           vibrateMedium();
           playController.startSpeedBoost(fastForwardSpeed);
           videoUiStateController
-              .updateMainAxisAlignmentType(MainAxisAlignment.center);
+              .updateMainAxisAlignmentType(MainAxisAlignment.start);
           videoUiStateController.updateIndicatorTypeAndShowIndicator(
               VideoControlsIndicatorType.speedIndicator);
         }

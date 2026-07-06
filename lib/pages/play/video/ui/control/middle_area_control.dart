@@ -4,6 +4,7 @@ import 'package:anime_flow/pages/play/providers/play_provider.dart';
 import 'package:anime_flow/pages/play/providers/video_ui_provider.dart';
 import 'package:anime_flow/utils/format_time_util.dart';
 import 'package:anime_flow/utils/utils.dart';
+import 'package:anime_flow/widget/play_pause_icon.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -116,6 +117,7 @@ class _MiddleAreaControlState extends ConsumerState<MiddleAreaControl> {
             VideoControlsIndicatorType.playStatusIndicator => Container(
                 height: 50,
                 width: 60,
+                alignment: Alignment.center,
                 margin: const EdgeInsets.only(top: topAreaHeight),
                 decoration: BoxDecoration(
                   color: Colors.black54,
@@ -124,10 +126,10 @@ class _MiddleAreaControlState extends ConsumerState<MiddleAreaControl> {
                 child: Consumer(builder: (context, ref, child) {
                   final playing = ref.watch(
                       playStateProvider.select((s) => s.playing));
-                  return Icon(
-                    playing ? Icons.pause_rounded : Icons.play_arrow_rounded,
-                    size: 33,
-                    color: Colors.white54,
+                  return PlayPauseIcon(
+                    playing: playing,
+                    iconSize: 33,
+                    iconColor: Colors.white54,
                   );
                 }),
               ),

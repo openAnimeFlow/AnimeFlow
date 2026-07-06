@@ -4,7 +4,6 @@ import 'package:anime_flow/pages/play/providers/play_provider.dart';
 import 'package:anime_flow/pages/play/providers/video_ui_provider.dart';
 import 'package:anime_flow/pages/play/providers/episodes_provider.dart';
 import 'package:anime_flow/pages/play/video/ui/button/fit_button.dart';
-import 'package:anime_flow/pages/play/video/ui/button/play_pause_button.dart';
 import 'package:anime_flow/pages/play/video/ui/button/rate_button.dart';
 import 'package:anime_flow/pages/play/video/ui/button/shader_button.dart';
 import 'package:anime_flow/pages/play/video/ui/danmaku/danmaku_setting.dart';
@@ -13,6 +12,7 @@ import 'package:anime_flow/providers/user/user_state_provider.dart';
 import 'package:anime_flow/utils/systemUtil.dart';
 import 'package:anime_flow/widget/danmaku_text_field.dart';
 import 'package:anime_flow/widget/play_content/episodes_dialog.dart';
+import 'package:anime_flow/widget/play_pause_icon.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_svg/svg.dart';
@@ -107,11 +107,8 @@ class BottomAreaControl extends ConsumerWidget {
                           builder: (context, ref, child) {
                             final playing = ref.watch(
                                 playStateProvider.select((s) => s.playing));
-                            return PlayPauseButton(
+                            return IconButton(
                               tooltip: playing ? '暂停' : '播放',
-                              playing: playing,
-                              iconSize: 30,
-                              iconColor: Colors.white70,
                               onPressed: () {
                                 playController.playOrPauseVideo();
                                 videoUiStateController
@@ -120,6 +117,10 @@ class BottomAreaControl extends ConsumerWidget {
                                       .playStatusIndicator,
                                 );
                               },
+                              icon: PlayPauseIcon(
+                                playing: playing,
+                                iconColor: Colors.white70,
+                              ),
                             );
                           },
                         ),

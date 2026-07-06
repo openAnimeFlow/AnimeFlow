@@ -298,16 +298,18 @@ class _TopAreaControlState extends ConsumerState<TopAreaControl> {
                                               onPressed: () => playController
                                                   .toggleContentExpanded(),
                                               padding: const EdgeInsets.all(0),
-                                              icon: SvgPicture.asset(
-                                                isContentExpanded
-                                                    ? "assets/icons/right_panel_close.svg"
-                                                    : "assets/icons/left_panel_close.svg",
-                                                width: 30,
-                                                height: 30,
-                                                colorFilter:
-                                                    const ColorFilter.mode(
-                                                  Colors.white70,
-                                                  BlendMode.srcIn,
+                                              icon: AnimatedRotation(
+                                                turns: isContentExpanded ? 0 : 0.5,
+                                                duration: const Duration(milliseconds: 300),
+                                                child: SvgPicture.asset(
+                                                  AssetsPathConstants.rightPanelClose,
+                                                  width: 30,
+                                                  height: 30,
+                                                  colorFilter:
+                                                      const ColorFilter.mode(
+                                                    Colors.white70,
+                                                    BlendMode.srcIn,
+                                                  ),
                                                 ),
                                               ),
                                             );

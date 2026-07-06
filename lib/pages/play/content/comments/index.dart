@@ -1,56 +1,41 @@
 import 'package:anime_flow/models/item/bangumi/episode_comments_item.dart';
+import 'package:anime_flow/pages/play/providers/episode_comments_provider.dart';
 import 'package:anime_flow/routes/routes.dart';
 import 'package:anime_flow/utils/format_time_util.dart';
 import 'package:anime_flow/utils/systemUtil.dart';
 import 'package:anime_flow/widget/bbcode/bbcode_widget.dart';
 import 'package:anime_flow/widget/animation_network_image.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shimmer/shimmer.dart';
 
-class CommentsView extends StatefulWidget {
-  final List<EpisodeComment>? comments;
-
-  const CommentsView({super.key, this.comments});
+class CommentsView extends ConsumerStatefulWidget {
+  const CommentsView({super.key});
 
   @override
-  State<CommentsView> createState() => _CommentsViewState();
+  ConsumerState<CommentsView> createState() => _CommentsViewState();
 }
 
-class _CommentsViewState extends State<CommentsView>
+class _CommentsViewState extends ConsumerState<CommentsView>
     with AutomaticKeepAliveClientMixin {
   String _sortOrder = 'default';
-  List<EpisodeComment>? _sortedComments; // 排序后的评论列表
+  List<EpisodeComment>? _sortedComments;
   final _scrollController = ScrollController();
 
   @override
   bool get wantKeepAlive => true;
 
-  @override
-  void initState() {
-    super.initState();
-    _updateSortedComments();
+  void _updateSortedComments(List<EpisodeComment>? comments) {
+    setState(() {
+      if (comments == null) {
+        _sortedComments = null;
+      } else {
+        _sortedComments = List<EpisodeComment>.from(comments);
+        _applySort();
+      }
+    });
   }
 
-  @override
-  void didUpdateWidget(CommentsView oldWidget) {
-    super.didUpdateWidget(oldWidget);
-    // 当传入的 comments 变化时，更新排序后的列表
-    if (oldWidget.comments != widget.comments) {
-      _updateSortedComments();
-    }
-  }
-
-  // 更新排序后的评论列表
-  void _updateSortedComments() {
-    if (widget.comments == null) {
-      _sortedComments = null;
-    } else {
-      _sortedComments = List<EpisodeComment>.from(widget.comments!);
-      _applySort();
-    }
-  }
-
-  // 应用排序
   void _applySort() {
     if (_sortedComments == null) return;
     if (_sortOrder == 'newest') {
@@ -60,7 +45,6 @@ class _CommentsViewState extends State<CommentsView>
     }
   }
 
-  // 评论排序
   void _sortComments() {
     setState(() {
       _applySort();
@@ -70,16 +54,24 @@ class _CommentsViewState extends State<CommentsView>
   @override
   Widget build(BuildContext context) {
     super.build(context);
+    final commentsAsync = ref.watch(episodeCommentsProvider);
+    ref.listen<AsyncValue<List<EpisodeComment>>>(
+      episodeCommentsProvider,
+      (previous, next) {
+        _updateSortedComments(next.asData?.value);
+      },
+    );
+
     return Scaffold(
-      body: buildComments(),
-      floatingActionButton: widget.comments != null
+      body: buildComments(commentsAsync),
+      floatingActionButton: commentsAsync.hasValue
           ? _CommentButton(scrollController: _scrollController)
           : null,
     );
   }
 
-  Widget buildComments() {
-    if (widget.comments == null) {
+  Widget buildComments(AsyncValue<List<EpisodeComment>> commentsAsync) {
+    if (commentsAsync.isLoading) {
       return Padding(
         padding: const EdgeInsets.all(10),
         child: SingleChildScrollView(
@@ -98,104 +90,131 @@ class _CommentsViewState extends State<CommentsView>
           ),
         ),
       );
-    } else {
-      final comments = _sortedComments ?? widget.comments!;
-      return CustomScrollView(
-        controller: _scrollController,
-        slivers: [
-          // 标题行
-          SliverPadding(
-            padding: const EdgeInsets.symmetric(horizontal: 10),
-            sliver: SliverToBoxAdapter(
-              child: Row(
-                children: [
-                  const Text(
-                    '吐槽',
-                    style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+    }
+
+    if (commentsAsync.hasError) {
+      return Center(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(
+              Icons.error_outline,
+              size: 48,
+              color: Theme.of(context).colorScheme.outline,
+            ),
+            const SizedBox(height: 12),
+            Text(
+              '评论加载失败',
+              style: TextStyle(
+                fontSize: 16,
+                color: Theme.of(context).colorScheme.outline,
+              ),
+            ),
+            const SizedBox(height: 12),
+            FilledButton.tonal(
+              onPressed: () => ref.invalidate(episodeCommentsProvider),
+              child: const Text('重试'),
+            ),
+          ],
+        ),
+      );
+    }
+
+    final comments = _sortedComments ?? commentsAsync.value ?? const [];
+    return CustomScrollView(
+      controller: _scrollController,
+      slivers: [
+        SliverPadding(
+          padding: const EdgeInsets.symmetric(horizontal: 10),
+          sliver: SliverToBoxAdapter(
+            child: Row(
+              children: [
+                const Text(
+                  '吐槽',
+                  style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+                ),
+                const Spacer(),
+                Text(
+                  comments.isNotEmpty ? "评论数 ${comments.length}" : "评论数",
+                  style: TextStyle(
+                    color: Theme.of(context).colorScheme.outline,
                   ),
-                  const Spacer(),
+                ),
+                PopupMenuButton<String>(
+                  icon: const Icon(Icons.sort_rounded),
+                  offset: const Offset(0, 40),
+                  itemBuilder: (BuildContext context) {
+                    return [
+                      CheckedPopupMenuItem<String>(
+                        padding: const EdgeInsets.symmetric(vertical: 5),
+                        checked: _sortOrder == 'default',
+                        value: 'default',
+                        child: const Text('默认'),
+                      ),
+                      CheckedPopupMenuItem<String>(
+                        padding: const EdgeInsets.symmetric(vertical: 5),
+                        value: 'newest',
+                        checked: _sortOrder == 'newest',
+                        child: const Text('最新'),
+                      ),
+                    ];
+                  },
+                  onSelected: (value) {
+                    setState(() {
+                      _sortOrder = value;
+                    });
+                    _sortComments();
+                  },
+                )
+              ],
+            ),
+          ),
+        ),
+
+        if (comments.isEmpty)
+          SliverFillRemaining(
+            child: Center(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Icon(
+                    Icons.comment_outlined,
+                    size: 64,
+                    color: Theme.of(context).colorScheme.outline,
+                  ),
+                  const SizedBox(height: 16),
                   Text(
-                    comments.isNotEmpty ? "评论数 ${comments.length}" : "评论数",
+                    '暂无评论',
                     style: TextStyle(
+                      fontSize: 16,
                       color: Theme.of(context).colorScheme.outline,
                     ),
                   ),
-                  //排序
-                  PopupMenuButton<String>(
-                    icon: const Icon(Icons.sort_rounded),
-                    offset: const Offset(0, 40),
-                    itemBuilder: (BuildContext context) {
-                      return [
-                        CheckedPopupMenuItem<String>(
-                          padding: const EdgeInsets.symmetric(vertical: 5),
-                          checked: _sortOrder == 'default',
-                          value: 'default',
-                          child: const Text('默认'),
-                        ),
-                        CheckedPopupMenuItem<String>(
-                          padding: const EdgeInsets.symmetric(vertical: 5),
-                          value: 'newest',
-                          checked: _sortOrder == 'newest',
-                          child: const Text('最新'),
-                        ),
-                      ];
-                    },
-                    onSelected: (value) {
-                      setState(() {
-                        _sortOrder = value;
-                      });
-                      _sortComments();
-                    },
-                  )
                 ],
               ),
             ),
-          ),
-
-          // 评论列表或空状态
-          if (comments.isEmpty)
-            SliverFillRemaining(
-              child: Center(
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Icon(
-                      Icons.comment_outlined,
-                      size: 64,
-                      color: Theme.of(context).colorScheme.outline,
-                    ),
-                    const SizedBox(height: 16),
-                    Text(
-                      '暂无评论',
-                      style: TextStyle(
-                        fontSize: 16,
-                        color: Theme.of(context).colorScheme.outline,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            )
-          else
-            SliverPadding(
-              padding: const EdgeInsets.symmetric(horizontal: 10),
-              sliver: SliverList.separated(
-                itemCount: comments.length,
-                itemBuilder: (BuildContext context, int index) {
-                  final comment = comments[index];
-                  return _buildCommentItem(comment);
-                },
-                separatorBuilder: (BuildContext context, int index) {
-                  return const Divider();
-                },
-              ),
-            )
-        ],
-      );
-    }
+          )
+        else
+          SliverPadding(
+            padding: const EdgeInsets.symmetric(horizontal: 10),
+            sliver: SliverList.separated(
+              itemCount: comments.length,
+              itemBuilder: (BuildContext context, int index) {
+                final comment = comments[index];
+                return _buildCommentItem(comment);
+              },
+              separatorBuilder: (BuildContext context, int index) {
+                return const Divider();
+              },
+            ),
+          )
+      ],
+    );
   }
 
-  // 主评论
+  /*
+   * 主评论
+   */
   Widget _buildCommentItem(EpisodeComment comment) {
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 10),
@@ -248,7 +267,6 @@ class _CommentsViewState extends State<CommentsView>
                   borderRadius: BorderRadius.circular(8),
                   bbcode: comment.content,
                 ),
-                // 回复列表
                 if (comment.replies.isNotEmpty) ...[
                   const SizedBox(height: 8),
                   _buildReplies(comment.replies),

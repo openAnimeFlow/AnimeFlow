@@ -1,11 +1,7 @@
 import 'package:anime_flow/providers/user/user_state_provider.dart';
-import 'package:anime_flow/http/requests/flow_request.dart';
-import 'package:anime_flow/models/item/bangumi/episode_comments_item.dart';
 import 'package:anime_flow/pages/play/content/introduce/index.dart';
 import 'package:anime_flow/pages/play/providers/play_provider.dart';
 import 'package:anime_flow/pages/play/providers/video_ui_provider.dart';
-import 'package:anime_flow/pages/play/providers/episodes_provider.dart';
-import 'package:anime_flow/utils/logger.dart';
 import 'package:anime_flow/widget/danmaku_text_field.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -21,80 +17,27 @@ class ContentView extends ConsumerStatefulWidget {
 
 class _ContentViewState extends ConsumerState<ContentView>
     with SingleTickerProviderStateMixin {
-  late final PlaySession playController;
+  late final PlaySession playSession;
+  late final VideoUiStateController videoUiStateController;
   final List<String> tabs = ['简介', '吐槽'];
   late TabController tabController;
-  bool isRequesting = false;
-  List<EpisodeComment>? comments;
-  int? lastRequestedEpisodeId;
-  int currentEpisodeId = 0;
 
   @override
   void initState() {
     super.initState();
-    playController = ref.read(playSessionProvider);
+    playSession = ref.read(playSessionProvider);
+    videoUiStateController = ref.read(videoUiStateControllerProvider.notifier);
     tabController = TabController(length: tabs.length, vsync: this);
-    tabController.addListener(onTabChanged);
   }
 
   @override
   void dispose() {
-    tabController.removeListener(onTabChanged);
     tabController.dispose();
     super.dispose();
   }
 
-  void onTabChanged() {
-    if (tabController.index == 1 && comments == null && !isRequesting) {
-      getComments();
-    }
-  }
-
-  Future<void> getComments() async {
-    final episodeId = currentEpisodeId;
-
-    if (episodeId == lastRequestedEpisodeId) {
-      return;
-    }
-
-    if (isRequesting) {
-      return;
-    }
-
-    if (episodeId > 0) {
-      isRequesting = true;
-      lastRequestedEpisodeId = episodeId;
-
-      try {
-        final commentsData =
-            await FlowRequest.episodeCommentsService(episodeId: episodeId);
-        if (mounted && currentEpisodeId == episodeId) {
-          setState(() {
-            comments = commentsData;
-          });
-        }
-      } catch (e) {
-        LiggLogger().e(e);
-        if (mounted && currentEpisodeId == episodeId) {
-          setState(() {
-            comments = [];
-          });
-        }
-      } finally {
-        isRequesting = false;
-      }
-    } else {
-      lastRequestedEpisodeId = episodeId;
-      if (mounted) {
-        setState(() {
-          comments = [];
-        });
-      }
-    }
-  }
-
   Future<void> onSendDanmaku(String text, int bgmUserId) async {
-    final success = await playController.sendDanmaku(
+    final success = await playSession.sendDanmaku(
       text,
       bgmUserId: bgmUserId,
     );
@@ -110,93 +53,66 @@ class _ContentViewState extends ConsumerState<ContentView>
 
   @override
   Widget build(BuildContext context) {
-    return Consumer(
-      builder: (context, ref, child) {
-        final videoUiStateController =
-            ref.read(videoUiStateControllerProvider.notifier);
-        ref.listen<int>(
-          episodesProvider
-              .select((state) => state.asData?.value.episodeId ?? 0),
-          (previous, episodeId) {
-            currentEpisodeId = episodeId;
-            if (episodeId > 0 && episodeId != lastRequestedEpisodeId) {
-              setState(() {
-                comments = null;
-              });
-              if (tabController.index == 1) {
-                getComments();
-              }
-            }
-          },
-        );
-        currentEpisodeId =
-            ref.read(episodesProvider).asData?.value.episodeId ?? 0;
-        return PreferredSize(
-          preferredSize: const Size.fromHeight(100),
-          child: Column(
+    return PreferredSize(
+      preferredSize: const Size.fromHeight(100),
+      child: Column(
+        children: [
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  TabBar(
-                    padding: EdgeInsets.only(
-                        top: MediaQuery.of(context).padding.top),
-                    dividerHeight: 0,
-                    controller: tabController,
-                    tabAlignment: TabAlignment.start,
-                    isScrollable: true,
-                    tabs: tabs.map((name) => Tab(text: name)).toList(),
-                  ),
-                  ref.watch(playStateProvider
-                          .select((state) => state.isWideScreen))
-                      ? const Spacer()
-                      : Consumer(
-                          builder: (context, ref, _) {
-                            final userInfo =
-                                ref.watch(currentUserInfoProvider).value;
-                            if (userInfo == null) {
-                              return const SizedBox.shrink();
-                            }
-                            return SizedBox(
-                              width: 200,
-                              child: Padding(
-                                padding:
-                                    const EdgeInsets.symmetric(horizontal: 8),
-                                child: DanmakuTextField(
-                                  onFocusChange: (hasFocus) {
-                                    if (hasFocus) {
-                                      playController.stopPlaying();
-                                      videoUiStateController.cancelUiTimer();
-                                    } else {
-                                      playController.startPlaying();
-                                      videoUiStateController.hideControlsUi();
-                                    }
-                                  },
-                                  onSend: (text) =>
-                                      onSendDanmaku(text, userInfo.id),
-                                ),
-                              ),
-                            );
-                          },
-                        )
-                ],
+              TabBar(
+                padding:
+                    EdgeInsets.only(top: MediaQuery.of(context).padding.top),
+                dividerHeight: 0,
+                controller: tabController,
+                tabAlignment: TabAlignment.start,
+                isScrollable: true,
+                tabs: tabs.map((name) => Tab(text: name)).toList(),
               ),
-              const Divider(height: 1),
-              Expanded(
-                child: TabBarView(
-                  controller: tabController,
-                  children: [
-                    const IntroduceView(),
-                    CommentsView(
-                      comments: comments,
+              ref.watch(playStateProvider.select((state) => state.isWideScreen))
+                  ? const Spacer()
+                  : Consumer(
+                      builder: (context, ref, _) {
+                        final userInfo =
+                            ref.watch(currentUserInfoProvider).value;
+                        if (userInfo == null) {
+                          return const SizedBox.shrink();
+                        }
+                        return SizedBox(
+                          width: 200,
+                          child: Padding(
+                            padding:
+                                const EdgeInsets.symmetric(horizontal: 8),
+                            child: DanmakuTextField(
+                              onFocusChange: (hasFocus) {
+                                if (hasFocus) {
+                                  playSession.stopPlaying();
+                                  videoUiStateController.cancelUiTimer();
+                                } else {
+                                  playSession.startPlaying();
+                                  videoUiStateController.hideControlsUi();
+                                }
+                              },
+                              onSend: (text) => onSendDanmaku(text, userInfo.id),
+                            ),
+                          ),
+                        );
+                      },
                     )
-                  ],
-                ),
-              ),
             ],
           ),
-        );
-      },
+          const Divider(height: 1),
+          Expanded(
+            child: TabBarView(
+              controller: tabController,
+              children: const [
+                IntroduceView(),
+                CommentsView(),
+              ],
+            ),
+          ),
+        ],
+      ),
     );
   }
 }

@@ -1,16 +1,14 @@
 import 'dart:io';
-import 'dart:typed_data';
-
 import 'package:battery_plus/battery_plus.dart';
 import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_volume_controller/flutter_volume_controller.dart';
 import 'package:gal/gal.dart';
 import 'package:anime_flow/utils/exceptions/storage_exception.dart';
 import 'package:anime_flow/utils/logger.dart';
-import 'package:path_provider/path_provider.dart'
-    show getDownloadsDirectory;
+import 'package:path_provider/path_provider.dart' show getDownloadsDirectory;
 import 'package:window_manager/window_manager.dart';
 
 /// 系统信息工具类
@@ -54,7 +52,6 @@ class SystemUtil {
     return "${now.hour.toString().padLeft(2, '0')}:${now.minute.toString().padLeft(2, '0')}";
   }
 
-
   static String getDevice() {
     if (kIsWeb) {
       return 'web';
@@ -86,9 +83,62 @@ class SystemUtil {
         defaultTargetPlatform == TargetPlatform.iOS;
   }
 
+  /// 是否支持系统音量同步
+  static bool get supportsSystemVolumeSync =>
+      !kIsWeb && (isMobile || isDesktop);
+
   ///判断系统是否深色主题
   static bool isDarkTheme(BuildContext context) {
     return Theme.of(context).brightness == Brightness.dark;
+  }
+
+  /// 获取系统音量，范围 0.0 - 1.0
+  static Future<double?> getSystemVolume() async {
+    if (!supportsSystemVolumeSync) return null;
+    try {
+      return await FlutterVolumeController.getVolume();
+    } catch (e) {
+      LiggLogger().e('获取系统音量失败: $e');
+      return null;
+    }
+  }
+
+  /// 设置系统音量，范围 0.0 - 1.0
+  static Future<void> setSystemVolume(double volume) async {
+    if (!supportsSystemVolumeSync) return;
+    try {
+      await FlutterVolumeController.setVolume(volume.clamp(0.0, 1.0));
+    } catch (e) {
+      LiggLogger().e('设置系统音量失败: $e');
+    }
+  }
+
+  /// 监听系统音量变化，回调参数范围 0.0 - 1.0
+  static void addSystemVolumeListener(void Function(double volume) listener) {
+    if (!supportsSystemVolumeSync) return;
+    FlutterVolumeController.addListener(listener);
+  }
+
+  static void removeSystemVolumeListener() {
+    if (!supportsSystemVolumeSync) return;
+    FlutterVolumeController.removeListener();
+  }
+
+  static Future<void> configureSystemVolumeSync() async {
+    if (!supportsSystemVolumeSync) return;
+    try {
+      await FlutterVolumeController.updateShowSystemUI(false);
+    } catch (_) {}
+
+    if (defaultTargetPlatform == TargetPlatform.android) {
+      try {
+        await FlutterVolumeController.setAndroidAudioStream(
+          stream: AudioStream.music,
+        );
+      } catch (e) {
+        LiggLogger().e('设置 Android 音量流失败: $e');
+      }
+    }
   }
 
   /// 获取当前网络类型
@@ -96,7 +146,7 @@ class SystemUtil {
   static Future<ConnectivityResult> getNetworkType() async {
     try {
       final connectivityResult = await _connectivity.checkConnectivity();
-      
+
       if (connectivityResult.isEmpty) {
         return ConnectivityResult.none;
       }
@@ -104,15 +154,15 @@ class SystemUtil {
       if (connectivityResult.contains(ConnectivityResult.wifi)) {
         return ConnectivityResult.wifi;
       }
-      
+
       if (connectivityResult.contains(ConnectivityResult.mobile)) {
         return ConnectivityResult.mobile;
       }
-      
+
       if (connectivityResult.contains(ConnectivityResult.ethernet)) {
         return ConnectivityResult.ethernet;
       }
-      
+
       // 其他类型
       if (connectivityResult.contains(ConnectivityResult.none)) {
         return ConnectivityResult.none;
@@ -127,7 +177,6 @@ class SystemUtil {
   /// 获取网络状态流（监听网络状态变化）
   static Stream<List<ConnectivityResult>> get networkStateStream =>
       _connectivity.onConnectivityChanged;
-
 
   /// 进入全屏显示
   static Future<void> enterFullScreen() async {
@@ -196,7 +245,8 @@ class SystemUtil {
   /// 保存图片字节数据，成功时返回提示文案。
   /// [bytes] 图片字节数据
   /// [name] 图片名称（不含扩展名）
-  static Future<String> saveImageBytes(Uint8List bytes, {String name = 'screenshot'}) async {
+  static Future<String> saveImageBytes(Uint8List bytes,
+      {String name = 'screenshot'}) async {
     final String time = DateTime.now().millisecondsSinceEpoch.toString();
 
     if (isMobile) {
@@ -222,6 +272,4 @@ class SystemUtil {
       return '图片已保存到:$filePath';
     }
   }
-
 }
-

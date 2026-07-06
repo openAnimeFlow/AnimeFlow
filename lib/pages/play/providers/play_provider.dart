@@ -369,6 +369,13 @@ class PlaySession {
   /// 垂直拖动相关
   double _dragStartVolume = 100.0;
 
+  Timer? _systemVolumeSyncTimer;
+  double? _pendingSystemVolume;
+  double? _lastKnownSystemVolume;
+  DateTime? _ignoreSystemVolumeEventsUntil;
+
+  static const Duration _systemVolumeSyncInterval = Duration(milliseconds: 80);
+
   /// 定时停止播放的计时器
   Timer? _stopTimer;
 
@@ -384,6 +391,7 @@ class PlaySession {
     final adBlocker = setting.get(PlaybackKey.adBlocker, defaultValue: false);
     player = Player(configuration: PlayerConfiguration(adBlocker: adBlocker));
     videoController = VideoController(player);
+    unawaited(_initSystemVolumeSync());
 
     _playerSubscriptions.addAll([
       player.stream.playing.listen((playing) {
@@ -472,6 +480,8 @@ class PlaySession {
     if (Platform.isWindows) {
       WindowsTitleBarVisibility.reset();
     }
+    SystemUtil.removeSystemVolumeListener();
+    _systemVolumeSyncTimer?.cancel();
     _saveSettingsTimer?.cancel();
     _stopTimer?.cancel();
     for (final subscription in _playerSubscriptions) {
@@ -795,10 +805,83 @@ class PlaySession {
     player.setRate(_originalSpeed);
   }
 
-  ///设置视频音量（绝对值）
-  void setVolume(double newVolume) {
-    double clampedVolume = newVolume.clamp(0.0, 100.0);
+  ///设置视频音量
+  void _setPlayerVolume(double newVolume) {
+    final clampedVolume = newVolume.clamp(0.0, 100.0);
+    _playStateActions.setVolume(clampedVolume);
     player.setVolume(clampedVolume);
+  }
+
+  void _updateVolume(
+    double newVolume, {
+    bool syncSystemVolume = true,
+  }) {
+    final clampedVolume = newVolume.clamp(0.0, 100.0);
+    _setPlayerVolume(clampedVolume);
+    if (syncSystemVolume) {
+      _scheduleSystemVolumeSync(clampedVolume / 100);
+    }
+  }
+
+  Future<void> _initSystemVolumeSync() async {
+    if (!SystemUtil.supportsSystemVolumeSync) return;
+
+    await SystemUtil.configureSystemVolumeSync();
+    final systemVolume = await SystemUtil.getSystemVolume();
+    if (systemVolume != null) {
+      _lastKnownSystemVolume = systemVolume;
+      _setPlayerVolume(systemVolume * 100);
+    }
+
+    SystemUtil.addSystemVolumeListener(_handleSystemVolumeChanged);
+  }
+
+  void _handleSystemVolumeChanged(double volume) {
+    final normalized = volume.clamp(0.0, 1.0);
+    final ignoreUntil = _ignoreSystemVolumeEventsUntil;
+    final isSelfTriggered = ignoreUntil != null &&
+        DateTime.now().isBefore(ignoreUntil) &&
+        _isSameVolume(_lastKnownSystemVolume, normalized);
+    if (isSelfTriggered) {
+      return;
+    }
+
+    _lastKnownSystemVolume = normalized;
+    _pendingSystemVolume = null;
+    _updateVolume(normalized * 100, syncSystemVolume: false);
+  }
+
+  void _scheduleSystemVolumeSync(double normalizedVolume) {
+    if (!SystemUtil.supportsSystemVolumeSync) return;
+
+    final clampedVolume = normalizedVolume.clamp(0.0, 1.0);
+    _pendingSystemVolume = clampedVolume;
+
+    if (_systemVolumeSyncTimer?.isActive ?? false) {
+      return;
+    }
+
+    _systemVolumeSyncTimer = Timer(_systemVolumeSyncInterval, () {
+      final pendingVolume = _pendingSystemVolume;
+      _pendingSystemVolume = null;
+      if (pendingVolume == null ||
+          _isSameVolume(_lastKnownSystemVolume, pendingVolume)) {
+        return;
+      }
+      unawaited(_pushSystemVolume(pendingVolume));
+    });
+  }
+
+  Future<void> _pushSystemVolume(double normalizedVolume) async {
+    _lastKnownSystemVolume = normalizedVolume;
+    _ignoreSystemVolumeEventsUntil =
+        DateTime.now().add(_systemVolumeSyncInterval * 2);
+    await SystemUtil.setSystemVolume(normalizedVolume);
+  }
+
+  bool _isSameVolume(double? a, double? b) {
+    if (a == null || b == null) return false;
+    return (a - b).abs() < 0.01;
   }
 
   void startVerticalDrag() {
@@ -807,20 +890,20 @@ class PlaySession {
   }
 
   void adjustVolumeByWheel(double delta) {
-    double newVolume = _playStateActions.value.volume + delta;
-    setVolume(newVolume);
+    final newVolume = _playStateActions.value.volume + delta;
+    _updateVolume(newVolume);
   }
 
   void updateVerticalDrag(double dragDistance, double screenHeight) {
     final volumeChange = -(dragDistance / screenHeight) * 100;
-    double newVolume = _dragStartVolume + volumeChange;
+    final newVolume = _dragStartVolume + volumeChange;
     final volume = _playStateActions.value.volume;
     if (newVolume >= 100 && volume < 100) {
       vibrateHeavy();
     } else if (newVolume <= 0 && volume > 0) {
       vibrateHeavy();
     }
-    setVolume(newVolume);
+    _updateVolume(newVolume);
   }
 
   void endVerticalDrag() {

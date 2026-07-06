@@ -620,6 +620,14 @@ packages:
     description: flutter
     source: sdk
     version: "0.0.0"
+  flutter_volume_controller:
+    dependency: "direct main"
+    description:
+      name: flutter_volume_controller
+      sha256: "78297fd48ce6330d39a11a4c1ae219a3256249f99dec34cfbe9323d2cbb5ebb9"
+      url: "https://pub.flutter-io.cn"
+    source: hosted
+    version: "2.0.1"
   flutter_web_plugins:
     dependency: transitive
     description: flutter

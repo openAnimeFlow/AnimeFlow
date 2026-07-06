@@ -321,28 +321,15 @@ class InfoHeadView extends StatelessWidget {
               builder: (context, ref, child) {
                 // Keep episodes cached while the anime info page is alive.
                 ref.watch(subjectEpisodesProvider(subjectItem.id));
-                return OutlinedButton.icon(
+                return IconButton(
                   onPressed: () => EpisodesDrawerView.show(
                     context,
                     subjectItem: subjectItem,
                     subjectName: name,
                     subjectImage: image,
                   ),
-                  style: OutlinedButton.styleFrom(
-                    side: BorderSide(
-                        color: Theme.of(context).colorScheme.primary),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(20),
-                    ),
-                    padding:
-                    const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-                  ),
                   icon:
-                  const Icon(Icons.format_list_bulleted_rounded, size: 16),
-                  label: const Text(
-                    '剧集',
-                    style: TextStyle(fontSize: 12),
-                  ),
+                  const Icon(Icons.format_list_bulleted_rounded, size: 25),
                 );
               },
             ),

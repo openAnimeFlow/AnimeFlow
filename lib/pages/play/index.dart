@@ -20,7 +20,7 @@ class PlayPage extends ConsumerStatefulWidget {
 
 class _PlayPageViewState extends ConsumerState<PlayPage> {
   late final PlaySession playController;
-  late final VideoSourceController videoSourceController;
+  late final VideoSourceNotifier videoSourceController;
 
   final GlobalKey _videoKey = GlobalKey();
   final GlobalKey _contentKey = GlobalKey();
@@ -31,7 +31,7 @@ class _PlayPageViewState extends ConsumerState<PlayPage> {
   @override
   void initState() {
     super.initState();
-    videoSourceController = ref.read(videoSourceControllerProvider.notifier);
+    videoSourceController = ref.read(videoSourceProvider.notifier);
     playController = ref.read(playSessionProvider);
     videoSourceController.initVideoResources();
   }

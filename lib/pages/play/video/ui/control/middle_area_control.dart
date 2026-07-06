@@ -19,7 +19,7 @@ class MiddleAreaControl extends ConsumerStatefulWidget {
 class _MiddleAreaControlState extends ConsumerState<MiddleAreaControl> {
   @override
   Widget build(BuildContext context) {
-    final videoUiState = ref.watch(videoUiStateControllerProvider);
+    final videoUiState = ref.watch(videoUiProvider);
     const double topAreaHeight = 50.0;
     final speedAsync = ref.watch(networkSpeedStreamProvider(2000));
     final speed = speedAsync.asData?.value;

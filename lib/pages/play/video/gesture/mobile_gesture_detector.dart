@@ -25,8 +25,8 @@ class _MobileGestureDetectorState extends ConsumerState<MobileGestureDetector> {
   late double fastForwardSpeed;
   late final PlaySession playController;
 
-  VideoUiStateController get videoUiStateController =>
-      ref.read(videoUiStateControllerProvider.notifier);
+  VideoUiNotifier get videoUiStateController =>
+      ref.read(videoUiProvider.notifier);
 
   @override
   void initState() {

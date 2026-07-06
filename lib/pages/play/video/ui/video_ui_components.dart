@@ -12,13 +12,13 @@ class VideoProgressBar extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final playController = ref.read(playSessionProvider);
     final videoUiStateController =
-        ref.read(videoUiStateControllerProvider.notifier);
+        ref.read(videoUiProvider.notifier);
     final isHorizontalDragging = ref.watch(
-      videoUiStateControllerProvider
+      videoUiProvider
           .select((state) => state.isHorizontalDragging),
     );
     final dragPosition = ref.watch(
-      videoUiStateControllerProvider.select((state) => state.dragPosition),
+      videoUiProvider.select((state) => state.dragPosition),
     );
     final duration = ref.watch(playStateProvider.select((s) => s.duration));
     final position = ref.watch(playStateProvider.select((s) => s.position));
@@ -129,11 +129,11 @@ class VideoTimeDisplay extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final isHorizontalDragging = ref.watch(
-      videoUiStateControllerProvider
+      videoUiProvider
           .select((state) => state.isHorizontalDragging),
     );
     final dragPosition = ref.watch(
-      videoUiStateControllerProvider.select((state) => state.dragPosition),
+      videoUiProvider.select((state) => state.dragPosition),
     );
     final playState = ref.watch(playStateProvider);
 

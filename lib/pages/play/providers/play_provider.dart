@@ -32,7 +32,7 @@ part 'play_provider.g.dart';
   dependencies: [
     shadersDirectory,
     PlayStateNotifier,
-    VideoUiStateController,
+    VideoUiNotifier,
     Episodes,
     playExtra,
   ],
@@ -42,7 +42,7 @@ PlaySession playSession(Ref ref) {
   final controller = PlaySession(
     shadersDirectory: ref.watch(shadersDirectoryProvider).requireValue,
     playStateActions: ref.watch(playStateProvider.notifier),
-    videoUiStateActions: ref.watch(videoUiStateControllerProvider.notifier),
+    videoUiStateActions: ref.watch(videoUiProvider.notifier),
     episodesActions: ref.watch(episodesProvider.notifier),
   )..init();
 

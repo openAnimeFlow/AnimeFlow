@@ -16,7 +16,7 @@ import 'package:go_router/go_router.dart';
 
 class VideoSourceDrawers extends ConsumerStatefulWidget {
   final Function(String url)? onVideoUrlSelected;
-  final VideoSourceController videoSourceController;
+  final VideoSourceNotifier videoSourceController;
   final String subjectName;
   final bool isBottomSheet;
   final ScrollController? scrollController;
@@ -120,7 +120,7 @@ class _VideoSourceDrawersState extends ConsumerState<VideoSourceDrawers> {
 
   @override
   Widget build(BuildContext context) {
-    ref.watch(videoSourceControllerProvider);
+    ref.watch(videoSourceProvider);
     if (widget.isBottomSheet) {
       return buildBottomSheetContent(context);
     }
@@ -805,7 +805,7 @@ class CaptchaView extends StatefulWidget {
   });
 
   final ResourcesItem resource;
-  final VideoSourceController dataSourceController;
+  final VideoSourceNotifier dataSourceController;
   final String subjectName;
 
   @override

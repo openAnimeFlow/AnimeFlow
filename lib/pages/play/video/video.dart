@@ -23,8 +23,8 @@ class VideoView extends ConsumerStatefulWidget {
 class _VideoViewState extends ConsumerState<VideoView> with WindowListener {
   late final PlaySession playController;
   late final PlayStateNotifier playStateController;
-  late final VideoUiStateController videoUiStateController;
-  late final VideoSourceController videoSourceController;
+  late final VideoUiNotifier videoUiStateController;
+  late final VideoSourceNotifier videoSourceController;
   int lastEpisodeIndex = 0;
 
   @override
@@ -32,8 +32,8 @@ class _VideoViewState extends ConsumerState<VideoView> with WindowListener {
     super.initState();
     playController = ref.read(playSessionProvider);
     playStateController = ref.read(playStateProvider.notifier);
-    videoUiStateController = ref.read(videoUiStateControllerProvider.notifier);
-    videoSourceController = ref.read(videoSourceControllerProvider.notifier);
+    videoUiStateController = ref.read(videoUiProvider.notifier);
+    videoSourceController = ref.read(videoSourceProvider.notifier);
 
     // 监听窗口状态变化，
     if (Platform.isWindows || Platform.isLinux || Platform.isMacOS) {

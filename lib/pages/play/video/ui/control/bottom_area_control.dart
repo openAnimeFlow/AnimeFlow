@@ -45,7 +45,7 @@ class BottomAreaControl extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final playController = ref.read(playSessionProvider);
     final videoUiStateController =
-        ref.read(videoUiStateControllerProvider.notifier);
+        ref.read(videoUiProvider.notifier);
     final fullscreen =
         ref.watch(playStateProvider.select((s) => s.isFullscreen));
     final danmakuOn = ref.watch(playStateProvider.select((s) => s.danmakuOn));
@@ -54,7 +54,7 @@ class BottomAreaControl extends ConsumerWidget {
     final isContentExpanded =
         ref.watch(playStateProvider.select((s) => s.isContentExpanded));
     final isShowControlsUi = ref.watch(
-        videoUiStateControllerProvider.select((s) => s.isShowControlsUi));
+        videoUiProvider.select((s) => s.isShowControlsUi));
     final leftPadding = MediaQuery.of(context).padding.left;
     // 全屏 + 不随键盘压缩 body 时，用 viewInsets 把底部控件顶到键盘上方
     final keyboardLift = fullscreen && SystemUtil.isMobile

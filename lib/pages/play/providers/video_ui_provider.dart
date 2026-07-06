@@ -80,7 +80,7 @@ class VideoUiState {
 }
 
 @Riverpod(keepAlive: true)
-class VideoUiStateController extends _$VideoUiStateController
+class VideoUiNotifier extends _$VideoUiNotifier
     implements VideoUiStateActions {
   Timer? _indicatorTimer;
   Timer? _controlsUiTimer;

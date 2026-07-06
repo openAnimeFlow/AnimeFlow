@@ -9,17 +9,17 @@ part of 'video_source_provider.dart';
 // GENERATED CODE - DO NOT MODIFY BY HAND
 // ignore_for_file: type=lint, type=warning
 
-@ProviderFor(VideoSourceController)
-final videoSourceControllerProvider = VideoSourceControllerProvider._();
+@ProviderFor(VideoSourceNotifier)
+final videoSourceProvider = VideoSourceNotifierProvider._();
 
-final class VideoSourceControllerProvider
-    extends $NotifierProvider<VideoSourceController, VideoSourceState> {
-  VideoSourceControllerProvider._()
+final class VideoSourceNotifierProvider
+    extends $NotifierProvider<VideoSourceNotifier, VideoSourceState> {
+  VideoSourceNotifierProvider._()
       : super(
           from: null,
           argument: null,
           retry: null,
-          name: r'videoSourceControllerProvider',
+          name: r'videoSourceProvider',
           isAutoDispose: false,
           dependencies: <ProviderOrFamily>[
             episodesProvider,
@@ -28,12 +28,12 @@ final class VideoSourceControllerProvider
             playSessionProvider
           ],
           $allTransitiveDependencies: <ProviderOrFamily>{
-            VideoSourceControllerProvider.$allTransitiveDependencies0,
-            VideoSourceControllerProvider.$allTransitiveDependencies1,
-            VideoSourceControllerProvider.$allTransitiveDependencies2,
-            VideoSourceControllerProvider.$allTransitiveDependencies3,
-            VideoSourceControllerProvider.$allTransitiveDependencies4,
-            VideoSourceControllerProvider.$allTransitiveDependencies5,
+            VideoSourceNotifierProvider.$allTransitiveDependencies0,
+            VideoSourceNotifierProvider.$allTransitiveDependencies1,
+            VideoSourceNotifierProvider.$allTransitiveDependencies2,
+            VideoSourceNotifierProvider.$allTransitiveDependencies3,
+            VideoSourceNotifierProvider.$allTransitiveDependencies4,
+            VideoSourceNotifierProvider.$allTransitiveDependencies5,
           },
         );
 
@@ -48,11 +48,11 @@ final class VideoSourceControllerProvider
       PlaySessionProvider.$allTransitiveDependencies3;
 
   @override
-  String debugGetCreateSourceHash() => _$videoSourceControllerHash();
+  String debugGetCreateSourceHash() => _$videoSourceNotifierHash();
 
   @$internal
   @override
-  VideoSourceController create() => VideoSourceController();
+  VideoSourceNotifier create() => VideoSourceNotifier();
 
   /// {@macro riverpod.override_with_value}
   Override overrideWithValue(VideoSourceState value) {
@@ -63,10 +63,10 @@ final class VideoSourceControllerProvider
   }
 }
 
-String _$videoSourceControllerHash() =>
-    r'cb6f4b545c26f537e425b852b36f116c3f1003fb';
+String _$videoSourceNotifierHash() =>
+    r'e434930092d7a15c157e793530e93468608dc1a9';
 
-abstract class _$VideoSourceController extends $Notifier<VideoSourceState> {
+abstract class _$VideoSourceNotifier extends $Notifier<VideoSourceState> {
   VideoSourceState build();
   @$mustCallSuper
   @override

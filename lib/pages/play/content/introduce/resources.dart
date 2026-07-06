@@ -19,9 +19,9 @@ class _VideoResourcesViewState extends ConsumerState<VideoResourcesView> {
   void _showSourceDrawer() {
     final playController = ref.read(playSessionProvider);
     final videoUiStateController =
-        ref.read(videoUiStateControllerProvider.notifier);
+        ref.read(videoUiProvider.notifier);
     final videoSourceController =
-        ref.read(videoSourceControllerProvider.notifier);
+        ref.read(videoSourceProvider.notifier);
     void onVideoUrlSelected(String url) {
       playController.player.stop();
       videoSourceController.loadVideoPage(url);
@@ -102,7 +102,7 @@ class _VideoResourcesViewState extends ConsumerState<VideoResourcesView> {
 
   @override
   Widget build(BuildContext context) {
-    final videoSourceState = ref.watch(videoSourceControllerProvider);
+    final videoSourceState = ref.watch(videoSourceProvider);
     return Stack(
       children: [
         Card(

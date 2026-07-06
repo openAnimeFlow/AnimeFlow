@@ -22,7 +22,7 @@ class RateButton extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final videoUiStateController =
-        ref.read(videoUiStateControllerProvider.notifier);
+        ref.read(videoUiProvider.notifier);
     final currentRate = ref.watch(
       playStateProvider.select((state) => state.rate),
     );

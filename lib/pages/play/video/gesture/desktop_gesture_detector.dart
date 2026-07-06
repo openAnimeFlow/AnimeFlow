@@ -24,8 +24,8 @@ class _DesktopGestureDetectorState
   Timer? hoverTimer;
   late final PlaySession playPageController;
 
-  VideoUiStateController get videoUiStateController =>
-      ref.read(videoUiStateControllerProvider.notifier);
+  VideoUiNotifier get videoUiStateController =>
+      ref.read(videoUiProvider.notifier);
 
   @override
   void initState() {

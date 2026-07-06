@@ -18,7 +18,7 @@ class ContentView extends ConsumerStatefulWidget {
 class _ContentViewState extends ConsumerState<ContentView>
     with SingleTickerProviderStateMixin {
   late final PlaySession playSession;
-  late final VideoUiStateController videoUiStateController;
+  late final VideoUiNotifier videoUiStateController;
   final List<String> tabs = ['简介', '吐槽'];
   late TabController tabController;
 
@@ -26,7 +26,7 @@ class _ContentViewState extends ConsumerState<ContentView>
   void initState() {
     super.initState();
     playSession = ref.read(playSessionProvider);
-    videoUiStateController = ref.read(videoUiStateControllerProvider.notifier);
+    videoUiStateController = ref.read(videoUiProvider.notifier);
     tabController = TabController(length: tabs.length, vsync: this);
   }
 

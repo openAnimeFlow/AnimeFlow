@@ -9,28 +9,28 @@ part of 'video_ui_provider.dart';
 // GENERATED CODE - DO NOT MODIFY BY HAND
 // ignore_for_file: type=lint, type=warning
 
-@ProviderFor(VideoUiStateController)
-final videoUiStateControllerProvider = VideoUiStateControllerProvider._();
+@ProviderFor(VideoUiNotifier)
+final videoUiProvider = VideoUiNotifierProvider._();
 
-final class VideoUiStateControllerProvider
-    extends $NotifierProvider<VideoUiStateController, VideoUiState> {
-  VideoUiStateControllerProvider._()
+final class VideoUiNotifierProvider
+    extends $NotifierProvider<VideoUiNotifier, VideoUiState> {
+  VideoUiNotifierProvider._()
       : super(
           from: null,
           argument: null,
           retry: null,
-          name: r'videoUiStateControllerProvider',
+          name: r'videoUiProvider',
           isAutoDispose: false,
           dependencies: null,
           $allTransitiveDependencies: null,
         );
 
   @override
-  String debugGetCreateSourceHash() => _$videoUiStateControllerHash();
+  String debugGetCreateSourceHash() => _$videoUiNotifierHash();
 
   @$internal
   @override
-  VideoUiStateController create() => VideoUiStateController();
+  VideoUiNotifier create() => VideoUiNotifier();
 
   /// {@macro riverpod.override_with_value}
   Override overrideWithValue(VideoUiState value) {
@@ -41,10 +41,9 @@ final class VideoUiStateControllerProvider
   }
 }
 
-String _$videoUiStateControllerHash() =>
-    r'e8fd7d1fd217b8ec667055272f573e3007597299';
+String _$videoUiNotifierHash() => r'2e2b42c07b66589701281f7431512597715f8cc8';
 
-abstract class _$VideoUiStateController extends $Notifier<VideoUiState> {
+abstract class _$VideoUiNotifier extends $Notifier<VideoUiState> {
   VideoUiState build();
   @$mustCallSuper
   @override

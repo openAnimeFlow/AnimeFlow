@@ -13,7 +13,7 @@ class RightAreaControl extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final playController = ref.read(playSessionProvider);
-    final isShowControlsUi = ref.watch(videoUiStateControllerProvider
+    final isShowControlsUi = ref.watch(videoUiProvider
         .select((state) => state.isShowControlsUi));
     final fullscreen = ref.watch(playStateProvider.select((s) => s.isFullscreen));
     final position = ref.watch(playStateProvider.select((s) => s.position));

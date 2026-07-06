@@ -25,7 +25,7 @@ final class PlaySessionProvider
           dependencies: <ProviderOrFamily>[
             shadersDirectoryProvider,
             playStateProvider,
-            videoUiStateControllerProvider,
+            videoUiProvider,
             episodesProvider,
             playExtraProvider
           ],
@@ -42,7 +42,7 @@ final class PlaySessionProvider
   static final $allTransitiveDependencies1 = playStateProvider;
   static final $allTransitiveDependencies2 =
       PlayStateNotifierProvider.$allTransitiveDependencies0;
-  static final $allTransitiveDependencies3 = videoUiStateControllerProvider;
+  static final $allTransitiveDependencies3 = videoUiProvider;
   static final $allTransitiveDependencies4 = episodesProvider;
 
   @override
@@ -67,7 +67,7 @@ final class PlaySessionProvider
   }
 }
 
-String _$playSessionHash() => r'7485c88ab32e91ef9fcfb87aab9feb4eed3ecd48';
+String _$playSessionHash() => r'6de0e4d94c0808278c3e578d6f1541d050060ec4';
 
 @ProviderFor(PlayStateNotifier)
 final playStateProvider = PlayStateNotifierProvider._();

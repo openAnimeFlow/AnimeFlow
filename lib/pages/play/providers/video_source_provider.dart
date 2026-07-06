@@ -74,7 +74,7 @@ class VideoSourceState {
   keepAlive: true,
   dependencies: [Episodes, playExtra, PlayStateNotifier, playSession],
 )
-class VideoSourceController extends _$VideoSourceController {
+class VideoSourceNotifier extends _$VideoSourceNotifier {
   WebViewVideoSourceProvider? _webViewVideoProvider;
   final LiggLogger _logger = LiggLogger();
 

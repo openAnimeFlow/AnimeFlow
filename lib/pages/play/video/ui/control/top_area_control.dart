@@ -32,8 +32,8 @@ class _TopAreaControlState extends ConsumerState<TopAreaControl> {
   late final PlaySession playController;
   late int _skipDuration;
 
-  VideoSourceController get videoSourceController =>
-      ref.read(videoSourceControllerProvider.notifier);
+  VideoSourceNotifier get videoSourceController =>
+      ref.read(videoSourceProvider.notifier);
 
   @override
   void initState() {
@@ -79,9 +79,9 @@ class _TopAreaControlState extends ConsumerState<TopAreaControl> {
   @override
   Widget build(BuildContext context) {
     final videoUiStateController =
-        ref.read(videoUiStateControllerProvider.notifier);
+        ref.read(videoUiProvider.notifier);
     final isShowControlsUi = ref.watch(
-        videoUiStateControllerProvider.select((s) => s.isShowControlsUi));
+        videoUiProvider.select((s) => s.isShowControlsUi));
     final fullscreen =
         ref.watch(playStateProvider.select((s) => s.isFullscreen));
     final leftPadding = MediaQuery.of(context).padding.left;
@@ -411,7 +411,7 @@ class _TopAreaControlState extends ConsumerState<TopAreaControl> {
         Consumer(
           builder: (context, ref, child) {
             final currentTime = ref.watch(
-              videoUiStateControllerProvider
+              videoUiProvider
                   .select((state) => state.currentTime),
             );
             return Text(
@@ -430,11 +430,11 @@ class _TopAreaControlState extends ConsumerState<TopAreaControl> {
             child: Consumer(
               builder: (context, ref, child) {
                 final battery = ref.watch(
-                  videoUiStateControllerProvider
+                  videoUiProvider
                       .select((state) => state.batteryLevel),
                 );
                 final batteryState = ref.watch(
-                  videoUiStateControllerProvider
+                  videoUiProvider
                       .select((state) => state.batteryState),
                 );
 

@@ -8,7 +8,9 @@ import 'package:anime_flow/utils/format_time_util.dart';
 import 'package:anime_flow/utils/logger.dart';
 import 'package:anime_flow/utils/utils.dart';
 import 'package:anime_flow/widget/animation_network_image.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:hive_ce_flutter/hive_flutter.dart';
 
 class PlayRecordPage extends StatefulWidget {
   const PlayRecordPage({super.key});
@@ -19,13 +21,22 @@ class PlayRecordPage extends StatefulWidget {
 
 class _PlayRecordPageState extends State<PlayRecordPage> {
   final playHistoryStorage = Storage.playHistory;
+  late final ValueListenable<Box<PlayHistory>> _playHistoryListenable;
   List<PlayHistory>? playHistoryList;
   bool isLoading = false;
 
   @override
   void initState() {
     super.initState();
+    _playHistoryListenable = playHistoryStorage.listenable();
+    _playHistoryListenable.addListener(_getPlayHistoryList);
     _getPlayHistoryList();
+  }
+
+  @override
+  void dispose() {
+    _playHistoryListenable.removeListener(_getPlayHistoryList);
+    super.dispose();
   }
 
   void _getPlayHistoryList() async {
@@ -161,11 +172,6 @@ class _PlayRecordPageState extends State<PlayRecordPage> {
                                                         continueEpisode:
                                                             episodeSort))
                                                 .push(context);
-
-                                            /// TODO 使用hive数据变化监听刷新数据
-                                            if (mounted) {
-                                              _getPlayHistoryList();
-                                            }
                                           },
                                           child: Text(
                                             '播放(${playHistory.episodeSort.toString().padLeft(2, '0')})',

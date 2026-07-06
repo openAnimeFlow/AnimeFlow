@@ -43,7 +43,7 @@ class _UserViewState extends ConsumerState<UserView>
     await _refreshIndicatorKeys[_tabController.index + 1]?.currentState?.show();
   }
 
-  ///
+  /// 切换用户信息显示状态
   void _toggleUserInfoVisibility() {
     setState(() {
       isHideUserInfo = !isHideUserInfo;
@@ -179,7 +179,6 @@ class _UserViewState extends ConsumerState<UserView>
       padding: const EdgeInsets.symmetric(horizontal: 16),
       child: Row(
         children: [
-          const Spacer(),
           AnimatedOpacity(
             opacity: isPinned ? 1 : 0,
             duration: const Duration(milliseconds: 500),
@@ -194,10 +193,19 @@ class _UserViewState extends ConsumerState<UserView>
                       : const Icon(Icons.person, size: 30),
                 ),
                 const SizedBox(width: 5),
-                Text(
-                  user.nickname.isNotEmpty ? user.nickname : user.email,
-                  style: const TextStyle(
-                      fontSize: 12, fontWeight: FontWeight.bold),
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      user.nickname.isNotEmpty ? user.nickname : user.email,
+                      style: const TextStyle(
+                          fontSize: 12, fontWeight: FontWeight.bold),
+                    ),
+                    Text(
+                      FormatTimeUtil.formatDate(user.createTime),
+                      style: const TextStyle(fontSize: 10),
+                    ),
+                  ],
                 )
               ],
             ),

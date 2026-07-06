@@ -1,3 +1,4 @@
+import 'package:anime_flow/constants/assets_path_constants.dart';
 import 'package:anime_flow/constants/storage_key.dart';
 import 'package:anime_flow/features/network_speed/network_speed_provider.dart';
 import 'package:anime_flow/models/enums/video_controls_icon_type.dart';
@@ -217,10 +218,12 @@ class _TopAreaControlState extends ConsumerState<TopAreaControl> {
                                         position +
                                             Duration(seconds: _skipDuration),
                                       ),
-                                      icon: const Icon(
-                                        Icons.fast_forward_rounded,
-                                        color: Colors.white70,
-                                        size: 29,
+                                      icon: SvgPicture.asset(
+                                        AssetsPathConstants.blockGrove,
+                                        width: 25,
+                                        height: 25,
+                                        colorFilter: const ColorFilter.mode(
+                                            Colors.white70, BlendMode.srcIn),
                                       ),
                                     ),
                                   ),

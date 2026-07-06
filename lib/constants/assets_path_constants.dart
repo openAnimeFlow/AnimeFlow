@@ -15,4 +15,7 @@ class AssetsPathConstants {
 
   /// bangumi
   static const String bangumi = 'assets/icons/bangumi.svg';
+
+  /// 块茎图标
+  static const String blockGrove = 'assets/icons/FormkitFastforward.svg';
 }

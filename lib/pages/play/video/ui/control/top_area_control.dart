@@ -125,15 +125,16 @@ class _TopAreaControlState extends ConsumerState<TopAreaControl> {
                         Expanded(
                           child: Row(
                             children: [
-                              InkWell(
-                                onTap: () {
+                              IconButton(
+                                tooltip: fullscreen ? '退出全屏' : '返回',
+                                onPressed: () {
                                   if (fullscreen) {
                                     playController.exitFullScreen();
                                   } else {
                                     context.pop();
                                   }
                                 },
-                                child: const Icon(
+                                icon: const Icon(
                                   Icons.arrow_back_outlined,
                                   color: Colors.white,
                                 ),
@@ -228,6 +229,7 @@ class _TopAreaControlState extends ConsumerState<TopAreaControl> {
                                     ),
                                   ),
                                   IconButton(
+                                    tooltip: '设置',
                                     onPressed: () {
                                       _showRightSlideDialog(
                                         barrierDismissible: true,
@@ -299,10 +301,13 @@ class _TopAreaControlState extends ConsumerState<TopAreaControl> {
                                                   .toggleContentExpanded(),
                                               padding: const EdgeInsets.all(0),
                                               icon: AnimatedRotation(
-                                                turns: isContentExpanded ? 0 : 0.5,
-                                                duration: const Duration(milliseconds: 300),
+                                                turns:
+                                                    isContentExpanded ? 0 : 0.5,
+                                                duration: const Duration(
+                                                    milliseconds: 300),
                                                 child: SvgPicture.asset(
-                                                  AssetsPathConstants.rightPanelClose,
+                                                  AssetsPathConstants
+                                                      .rightPanelClose,
                                                   width: 30,
                                                   height: 30,
                                                   colorFilter:

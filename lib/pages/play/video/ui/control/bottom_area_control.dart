@@ -108,6 +108,7 @@ class BottomAreaControl extends ConsumerWidget {
                             final playing = ref.watch(
                                 playStateProvider.select((s) => s.playing));
                             return PlayPauseButton(
+                              tooltip: playing ? '暂停' : '播放',
                               playing: playing,
                               iconSize: 30,
                               iconColor: Colors.white70,
@@ -135,13 +136,12 @@ class BottomAreaControl extends ConsumerWidget {
                             if (!hasNextEpisode) {
                               return const SizedBox.shrink();
                             }
-                            return InkWell(
-                              onTap: () {
-                                ref
-                                    .read(episodesProvider.notifier)
-                                    .switchToNextEpisode();
-                              },
-                              child: const Icon(
+                            return IconButton(
+                              tooltip: '下一集',
+                              onPressed: () => ref
+                                  .read(episodesProvider.notifier)
+                                  .switchToNextEpisode(),
+                              icon: const Icon(
                                 Icons.skip_next_rounded,
                                 size: 33,
                                 color: Colors.white70,
@@ -150,9 +150,10 @@ class BottomAreaControl extends ConsumerWidget {
                           },
                         ),
                         //弹幕开关
-                        InkWell(
-                          onTap: () => playController.toggleDanmaku(),
-                          child: Icon(
+                        IconButton(
+                          tooltip: danmakuOn ? '关闭弹幕' : '开启弹幕',
+                          onPressed: () => playController.toggleDanmaku(),
+                          icon: Icon(
                               danmakuOn
                                   ? Icons.subtitles_outlined
                                   : Icons.subtitles_off_outlined,
@@ -161,8 +162,9 @@ class BottomAreaControl extends ConsumerWidget {
                         ),
                         //弹幕设置
                         if (danmakuOn)
-                          InkWell(
-                            onTap: () {
+                          IconButton(
+                            tooltip: '弹幕设置',
+                            onPressed: () {
                               final container =
                                   ProviderScope.containerOf(context);
                               showModalBottomSheet(
@@ -177,17 +179,13 @@ class BottomAreaControl extends ConsumerWidget {
                                 },
                               );
                             },
-                            child: Padding(
-                              padding:
-                                  const EdgeInsets.symmetric(horizontal: 8),
-                              child: SvgPicture.asset(
-                                AssetsPathConstants.danmakuIcon,
-                                width: 24,
-                                height: 24,
-                                colorFilter: ColorFilter.mode(
-                                    Colors.white.withValues(alpha: 0.8),
-                                    BlendMode.srcIn),
-                              ),
+                            icon: SvgPicture.asset(
+                              AssetsPathConstants.danmakuIcon,
+                              width: 24,
+                              height: 24,
+                              colorFilter: ColorFilter.mode(
+                                  Colors.white.withValues(alpha: 0.8),
+                                  BlendMode.srcIn),
                             ),
                           ),
                         Expanded(

@@ -4,6 +4,7 @@ import 'package:anime_flow/pages/play/providers/play_provider.dart';
 import 'package:anime_flow/pages/play/providers/video_ui_provider.dart';
 import 'package:anime_flow/pages/play/providers/episodes_provider.dart';
 import 'package:anime_flow/pages/play/video/ui/button/fit_button.dart';
+import 'package:anime_flow/pages/play/video/ui/button/play_pause_button.dart';
 import 'package:anime_flow/pages/play/video/ui/button/rate_button.dart';
 import 'package:anime_flow/pages/play/video/ui/button/shader_button.dart';
 import 'package:anime_flow/pages/play/video/ui/danmaku/danmaku_setting.dart';
@@ -106,9 +107,11 @@ class BottomAreaControl extends ConsumerWidget {
                           builder: (context, ref, child) {
                             final playing = ref.watch(
                                 playStateProvider.select((s) => s.playing));
-                            return InkWell(
-                              key: ValueKey<bool>(playing),
-                              onTap: () {
+                            return PlayPauseButton(
+                              playing: playing,
+                              iconSize: 30,
+                              iconColor: Colors.white70,
+                              onPressed: () {
                                 playController.playOrPauseVideo();
                                 videoUiStateController
                                     .updateIndicatorTypeAndShowIndicator(
@@ -116,13 +119,6 @@ class BottomAreaControl extends ConsumerWidget {
                                       .playStatusIndicator,
                                 );
                               },
-                              child: Icon(
-                                playing
-                                    ? Icons.pause_rounded
-                                    : Icons.play_arrow_rounded,
-                                size: 33,
-                                color: Colors.white70,
-                              ),
                             );
                           },
                         ),

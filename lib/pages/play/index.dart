@@ -19,7 +19,7 @@ class PlayPage extends ConsumerStatefulWidget {
 }
 
 class _PlayPageViewState extends ConsumerState<PlayPage> {
-  late final PlaySession playController;
+  late final PlaySession playSession;
   late final VideoSourceNotifier videoSourceController;
 
   final GlobalKey _videoKey = GlobalKey();
@@ -32,7 +32,7 @@ class _PlayPageViewState extends ConsumerState<PlayPage> {
   void initState() {
     super.initState();
     videoSourceController = ref.read(videoSourceProvider.notifier);
-    playController = ref.read(playSessionProvider);
+    playSession = ref.read(playSessionProvider);
     videoSourceController.initVideoResources();
   }
 
@@ -49,7 +49,7 @@ class _PlayPageViewState extends ConsumerState<PlayPage> {
     _lastReportedIsWideScreen = isWideScreen;
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (!mounted) return;
-      playController.updateIsWideScreen(isWideScreen);
+      playSession.updateIsWideScreen(isWideScreen);
     });
   }
 
@@ -135,7 +135,7 @@ class _PlayPageViewState extends ConsumerState<PlayPage> {
           canPop: !isFullscreen,
           onPopInvokedWithResult: (bool didPop, dynamic result) {
             if (!didPop && isFullscreen) {
-              playController.exitFullScreen();
+              playSession.exitFullScreen();
             }
           },
           child: content,

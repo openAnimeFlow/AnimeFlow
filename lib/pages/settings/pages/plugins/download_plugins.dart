@@ -3,7 +3,7 @@ import 'dart:convert';
 import 'package:anime_flow/constants/storage_key.dart';
 import 'package:anime_flow/crawler/itme/crawler_config_item.dart';
 import 'package:anime_flow/network/api_path.dart';
-import 'package:anime_flow/network/api/request.dart';
+import 'package:anime_flow/network/api/api.dart';
 import 'package:anime_flow/repository/storage.dart';
 import 'package:anime_flow/utils/format_time_util.dart';
 import 'package:anime_flow/utils/logger.dart';
@@ -52,7 +52,7 @@ class _DownloadPluginsPageState extends State<DownloadPluginsPage> {
     try {
       String url = '${CommonApi.pluginRepo}/index.json';
       if (isMirror) url = Utils.jsDelivrCdnUrl(url);
-      final data = await Request.getResources(url);
+      final data = await Api.getResources(url);
       final plugins = data is String
           ? jsonDecode(data) as List<dynamic>
           : data as List<dynamic>;
@@ -94,7 +94,7 @@ class _DownloadPluginsPageState extends State<DownloadPluginsPage> {
       final pluginPath = plugin['path'] as String;
       var downloadUrl = '${CommonApi.pluginRepo}/$pluginPath';
       if (isMirror) downloadUrl = Utils.jsDelivrCdnUrl(downloadUrl);
-      final raw = await Request.getResources(downloadUrl);
+      final raw = await Api.getResources(downloadUrl);
       final jsonMap = raw is String
           ? jsonDecode(raw) as Map<String, dynamic>
           : raw as Map<String, dynamic>;
@@ -131,7 +131,7 @@ class _DownloadPluginsPageState extends State<DownloadPluginsPage> {
       final pluginPath = plugin['path'] as String;
       var downloadUrl = '${CommonApi.pluginRepo}/$pluginPath';
       if (isMirror) downloadUrl = Utils.jsDelivrCdnUrl(downloadUrl);
-      final raw = await Request.getResources(downloadUrl);
+      final raw = await Api.getResources(downloadUrl);
       final jsonMap = raw is String
           ? jsonDecode(raw) as Map<String, dynamic>
           : raw as Map<String, dynamic>;

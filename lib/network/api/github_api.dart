@@ -6,7 +6,7 @@ import 'package:anime_flow/models/item/font_item.dart';
 import 'package:anime_flow/utils/utils.dart';
 import 'package:dio/dio.dart';
 
-class GithubRequest {
+class GithubApi {
   static final GithubClient _client = GithubClient.instance;
 
   /// 获取仓库字体列表

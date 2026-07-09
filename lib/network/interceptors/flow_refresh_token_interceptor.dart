@@ -1,5 +1,5 @@
 import 'package:anime_flow/constants/constants.dart';
-import 'package:anime_flow/network/api/flow_request.dart';
+import 'package:anime_flow/network/api/flow_api.dart';
 import 'package:anime_flow/models/item/flow/flow_token.dart';
 import 'package:anime_flow/repository/token_repository.dart';
 import 'package:anime_flow/utils/logger.dart';
@@ -135,7 +135,7 @@ class FlowRefreshTokenInterceptor extends Interceptor {
 
   Future<void> _performTokenRefresh(FlowToken oldToken) async {
     try {
-      final newToken = await FlowRequest.flowRefreshTokenService(
+      final newToken = await FlowApi.flowRefreshTokenService(
         refreshToken: oldToken.refreshToken,
       );
       await _flowTokenRepository.saveToken(newToken);

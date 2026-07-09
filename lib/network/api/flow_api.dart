@@ -39,7 +39,7 @@ import 'package:anime_flow/utils/systemUtil.dart';
 import 'package:anime_flow/utils/utils.dart';
 import 'package:dio/dio.dart';
 
-class FlowRequest {
+class FlowApi {
   static final FlowClient _client = FlowClient.instance;
 
   static Future<TokenItem> getTokenService({required String code}) async {

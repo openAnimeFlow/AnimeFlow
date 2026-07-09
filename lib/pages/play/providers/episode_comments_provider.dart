@@ -1,4 +1,4 @@
-import 'package:anime_flow/network/api/flow_request.dart';
+import 'package:anime_flow/network/api/flow_api.dart';
 import 'package:anime_flow/models/item/bangumi/episode_comments_item.dart';
 import 'package:anime_flow/pages/play/providers/episodes_provider.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
@@ -13,5 +13,5 @@ Future<List<EpisodeComment>> episodeComments(Ref ref) async {
     return const [];
   }
 
-  return FlowRequest.episodeCommentsService(episodeId: episodeId);
+  return FlowApi.episodeCommentsService(episodeId: episodeId);
 }

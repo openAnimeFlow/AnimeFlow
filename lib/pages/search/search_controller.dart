@@ -1,8 +1,8 @@
 import 'dart:async';
 import 'dart:io';
 
-import 'package:anime_flow/network/api/flow_request.dart';
-import 'package:anime_flow/network/api/request.dart';
+import 'package:anime_flow/network/api/flow_api.dart';
+import 'package:anime_flow/network/api/api.dart';
 import 'package:anime_flow/models/item/bangumi/subject_item.dart';
 import 'package:anime_flow/models/item/image_search_item.dart';
 import 'package:anime_flow/models/search/search_history_module.dart';
@@ -110,7 +110,7 @@ class SearchPageController extends _$SearchPageController {
 
     try {
       final offset = loadMore ? _offset : 0;
-      final value = await FlowRequest.searchSubjectService(
+      final value = await FlowApi.searchSubjectService(
         state.currentKeyword,
         limit: _limit,
         offset: offset,
@@ -153,7 +153,7 @@ class SearchPageController extends _$SearchPageController {
     try {
       state = state.copyWith(searchSuggestions: const []);
       final suggestions =
-          await FlowRequest.searchSuggestionsService(keyword, limit: 20);
+          await FlowApi.searchSuggestionsService(keyword, limit: 20);
       if (requestId != _suggestionRequestId) return;
 
       state = state.copyWith(
@@ -180,7 +180,7 @@ class SearchPageController extends _$SearchPageController {
       imageSearchResults: const [],
     );
     try {
-      final result = await Request.getAnimeInfoByImageFile(imageFile);
+      final result = await Api.getAnimeInfoByImageFile(imageFile);
       final results = result.result ?? const <ResultItem>[];
       state = state.copyWith(imageSearchResults: results);
       if (result.error != null && result.error!.isNotEmpty) {
@@ -202,7 +202,7 @@ class SearchPageController extends _$SearchPageController {
       imageSearchResults: const [],
     );
     try {
-      final result = await Request.getAnimeInfoByImageUrl(imageUrl);
+      final result = await Api.getAnimeInfoByImageUrl(imageUrl);
       final results = result.result ?? const <ResultItem>[];
       state = state.copyWith(imageSearchResults: results);
       if (result.error != null && result.error!.isNotEmpty) {

@@ -1,4 +1,4 @@
-import 'package:anime_flow/network/api/flow_request.dart';
+import 'package:anime_flow/network/api/flow_api.dart';
 import 'package:anime_flow/models/item/bangumi/character_comments_item.dart';
 import 'package:anime_flow/models/item/bangumi/character_detail_item.dart';
 import 'package:anime_flow/models/item/bangumi/character_subjects_item.dart';
@@ -14,7 +14,7 @@ class CharacterInfoDetail extends _$CharacterInfoDetail {
   Future<CharacterDetailItem> build() async {
     final characterId =
         ref.watch(characterInfoArgsProvider.select((e) => e.characterId));
-    return FlowRequest.characterInfoService(characterId);
+    return FlowApi.characterInfoService(characterId);
   }
 }
 
@@ -24,7 +24,7 @@ class CharacterWorks extends _$CharacterWorks {
   Future<CharacterCastsItem> build() async {
     final characterId =
         ref.watch(characterInfoArgsProvider.select((e) => e.characterId));
-    return FlowRequest.characterWorksService(
+    return FlowApi.characterWorksService(
       characterId,
       limit: 20,
       offset: 0,
@@ -38,6 +38,6 @@ class CharacterComments extends _$CharacterComments {
   Future<List<CharacterCommentItem>> build() async {
     final characterId =
         ref.watch(characterInfoArgsProvider.select((e) => e.characterId));
-    return FlowRequest.characterCommentsService(characterId);
+    return FlowApi.characterCommentsService(characterId);
   }
 }

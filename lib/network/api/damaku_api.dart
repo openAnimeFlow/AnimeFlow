@@ -9,7 +9,7 @@ import 'package:anime_flow/utils/utils.dart';
 import 'package:dio/dio.dart';
 
 /// 目前已废弃转至AnimeFlow服务
-class DanmakuRequest {
+class DanmakuApi {
   static final Client _client = Client.instance;
   static const String _danDanPlayMain = DamakuApi.dandanAPIDomain;
 

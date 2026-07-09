@@ -1,6 +1,6 @@
 import 'dart:async';
 
-import 'package:anime_flow/network/api/flow_request.dart';
+import 'package:anime_flow/network/api/flow_api.dart';
 import 'package:anime_flow/models/item/flow/bgm_collection_sync_status_item.dart';
 import 'package:anime_flow/providers/user/user_state_provider.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
@@ -21,13 +21,13 @@ class BgmCollectionSync extends _$BgmCollectionSync {
       return null;
     }
 
-    final status = await FlowRequest.getBgmCollectionSyncStatusService();
+    final status = await FlowApi.getBgmCollectionSyncStatusService();
     _ensurePolling(status);
     return status;
   }
 
   Future<void> triggerSync({int subjectType = 2}) async {
-    final status = await FlowRequest.triggerBgmCollectionSyncService(
+    final status = await FlowApi.triggerBgmCollectionSyncService(
       subjectType: subjectType,
     );
     state = AsyncData(status);
@@ -48,7 +48,7 @@ class BgmCollectionSync extends _$BgmCollectionSync {
       }
 
       final previous = state.value;
-      final status = await FlowRequest.getBgmCollectionSyncStatusService();
+      final status = await FlowApi.getBgmCollectionSyncStatusService();
       state = AsyncData(status);
       if (previous?.isRunning == true &&
           status.status == BgmCollectionSyncStatus.success) {

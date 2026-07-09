@@ -21,7 +21,7 @@ import 'package:anime_flow/models/item/bangumi/user_collections_item.dart';
 import 'package:anime_flow/models/item/bangumi/user_info_item.dart';
 import 'package:anime_flow/utils/logger.dart';
 
-class BgmRequest {
+class BgmApi {
   static const String _nextBaseUrl = BgmNextApi.baseUrl;
   static final LiggLogger _logger = LiggLogger();
   static final BangumiClient _client = BangumiClient.instance;

@@ -1,4 +1,4 @@
-import 'package:anime_flow/network/api/flow_request.dart';
+import 'package:anime_flow/network/api/flow_api.dart';
 import 'package:anime_flow/models/item/bangumi/episodes_item.dart';
 import 'package:anime_flow/pages/play/service/episodes_pagination.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
@@ -85,7 +85,7 @@ Future<EpisodesItem> _fetchEpisodesPage(
   int subjectId, {
   required int offset,
 }) {
-  return FlowRequest.getSubjectEpisodesByIdService(
+  return FlowApi.getSubjectEpisodesByIdService(
     subjectId,
     EpisodesPagination.pageSize,
     offset,

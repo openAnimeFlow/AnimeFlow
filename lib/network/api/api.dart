@@ -14,7 +14,7 @@ import 'package:dio/dio.dart';
 import 'package:gal/gal.dart';
 import 'package:path_provider/path_provider.dart';
 
-class Request {
+class Api {
   static final Client _client = Client.instance;
 
   /// 获取资源，返回原始响应数据

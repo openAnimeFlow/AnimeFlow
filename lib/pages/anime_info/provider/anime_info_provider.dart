@@ -1,4 +1,4 @@
-import 'package:anime_flow/network/api/flow_request.dart';
+import 'package:anime_flow/network/api/flow_api.dart';
 import 'package:anime_flow/models/item/bangumi/actor_item.dart';
 import 'package:anime_flow/models/item/bangumi/producers_item.dart';
 import 'package:anime_flow/models/item/bangumi/related_subjects_item.dart';
@@ -20,7 +20,7 @@ class AnimeInfo extends _$AnimeInfo {
     final subjectId = ref.watch(animeInfoArgsProvider.select((e) => e.id));
     // 登录/登出或 token 刷新后重新拉取，以获取 Bangumi interest
     ref.watch(currentFlowTokenProvider);
-    return FlowRequest.getSubjectByIdService(subjectId);
+    return FlowApi.getSubjectByIdService(subjectId);
   }
 
   void setAnimeInfo(SubjectsInfoItem subjectInfo) {
@@ -52,7 +52,7 @@ class SubjectComments extends _$SubjectComments {
   @override
   Future<SubjectCommentsViewState> build() async {
     final subjectId = ref.watch(animeInfoArgsProvider.select((e) => e.id));
-    final comments = await FlowRequest.getSubjectCommentsByIdService(
+    final comments = await FlowApi.getSubjectCommentsByIdService(
       subjectId: subjectId,
       limit: _pageSize,
       offset: 0,
@@ -101,7 +101,7 @@ class SubjectComments extends _$SubjectComments {
     try {
       final prev = current.comments;
       final subjectId = ref.read(animeInfoArgsProvider.select((e) => e.id));
-      final result = await FlowRequest.getSubjectCommentsByIdService(
+      final result = await FlowApi.getSubjectCommentsByIdService(
         subjectId: subjectId,
         limit: _pageSize,
         offset: prev.data.length,
@@ -129,7 +129,7 @@ class SubjectRelated extends _$SubjectRelated {
   @override
   Future<SubjectRelationItem> build() async {
     final subjectId = ref.watch(animeInfoArgsProvider.select((e) => e.id));
-    return FlowRequest.relatedSubjectsService(subjectId, limit: 20, offset: 0);
+    return FlowApi.relatedSubjectsService(subjectId, limit: 20, offset: 0);
   }
 }
 
@@ -139,7 +139,7 @@ class SubjectCharacters extends _$SubjectCharacters {
   @override
   Future<CharactersItem> build() async {
     final subjectId = ref.watch(animeInfoArgsProvider.select((e) => e.id));
-    return FlowRequest.charactersService(subjectId, limit: 10, offset: 0);
+    return FlowApi.charactersService(subjectId, limit: 10, offset: 0);
   }
 }
 
@@ -149,6 +149,6 @@ class SubjectProducers extends _$SubjectProducers {
   @override
   Future<ProducersItem> build() async {
     final subjectId = ref.watch(animeInfoArgsProvider.select((e) => e.id));
-    return FlowRequest.getProducersService(subjectId, limit: 10, offset: 0);
+    return FlowApi.getProducersService(subjectId, limit: 10, offset: 0);
   }
 }

@@ -1,4 +1,4 @@
-import 'package:anime_flow/network/api/request.dart';
+import 'package:anime_flow/network/api/api.dart';
 import 'package:anime_flow/utils/utils.dart';
 import 'package:flutter/material.dart';
 
@@ -27,7 +27,7 @@ class _AgreementPageState extends State<AgreementPage> {
     });
 
     try {
-      final response = await Request.getResources<String>(Utils.jsDelivrCdnUrl(
+      final response = await Api.getResources<String>(Utils.jsDelivrCdnUrl(
           'https://raw.githubusercontent.com/openAnimeFlow/AnimeFlow/main/LICENSE.txt'));
       setState(() {
         _licenseText = response;

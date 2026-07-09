@@ -1,4 +1,4 @@
-import 'package:anime_flow/network/api/flow_request.dart';
+import 'package:anime_flow/network/api/flow_api.dart';
 import 'package:anime_flow/models/enums/sort_type.dart';
 import 'package:anime_flow/models/item/bangumi/subject_item.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
@@ -93,7 +93,7 @@ class Ranking extends _$Ranking {
     final effectiveMonth =
         clearMonth ? null : (month ?? current?.selectedMonth);
 
-    final response = await FlowRequest.rankService(
+    final response = await FlowApi.rankService(
       page: 1,
       sort: effectiveSort,
       year: effectiveYear,
@@ -203,7 +203,7 @@ class Ranking extends _$Ranking {
 
     try {
       final page = current.currentPage + 1;
-      final response = await FlowRequest.rankService(
+      final response = await FlowApi.rankService(
         page: page,
         sort: current.selectedSort,
         year: current.selectedYear,

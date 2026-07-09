@@ -1,7 +1,7 @@
 import 'dart:io';
 
 import 'package:anime_flow/constants/storage_key.dart';
-import 'package:anime_flow/network/api/github_request.dart';
+import 'package:anime_flow/network/api/github_api.dart';
 import 'package:anime_flow/models/item/font_item.dart';
 import 'package:anime_flow/providers/theme_provider.dart';
 import 'package:anime_flow/repository/storage.dart';
@@ -102,7 +102,7 @@ class Font extends _$Font {
   }
 
   Future<List<FontItem>> getFontList({required bool useCdn}) async {
-    return GithubRequest.getRepoFonts(useCdn: useCdn);
+    return GithubApi.getRepoFonts(useCdn: useCdn);
   }
 
   /// 刷新字体列表；保留当前 [state] 直至新数据返回，避免切换 CDN 时卸载列表项。
@@ -126,7 +126,7 @@ class Font extends _$Font {
     CancelToken? cancelToken,
   }) async {
     final useCdn = ref.read(fontRepoCdnProvider);
-    return GithubRequest.previewFont(
+    return GithubApi.previewFont(
       fontUrl,
       useCdn: useCdn,
       cancelToken: cancelToken,
@@ -320,7 +320,7 @@ class FontDownload extends _$FontDownload {
     final filePath = '${fontsDir.path}/${font.id}.ttf';
 
     try {
-      await GithubRequest.downloadFontToFile(
+      await GithubApi.downloadFontToFile(
         font.font,
         filePath,
         useCdn: useCdn,

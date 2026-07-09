@@ -3,7 +3,7 @@ import 'dart:convert';
 import 'dart:typed_data';
 
 import 'package:anime_flow/network/clients/flow_client.dart';
-import 'package:anime_flow/network/api/flow_request.dart';
+import 'package:anime_flow/network/api/flow_api.dart';
 import 'package:anime_flow/models/item/captcha_item.dart';
 import 'package:anime_flow/widget/notification_toast.dart';
 import 'package:flutter/material.dart';
@@ -59,7 +59,7 @@ class _GraphicCaptchaViewState extends State<GraphicCaptchaView> {
     final previousCaptchaId = widget.controller.captcha?.captchaId;
     setState(() => _isLoading = true);
     try {
-      final captcha = await FlowRequest.generateCaptchaService(
+      final captcha = await FlowApi.generateCaptchaService(
         captchaId: previousCaptchaId,
       );
       if (!mounted) return;

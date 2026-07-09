@@ -1,4 +1,4 @@
-import 'package:anime_flow/network/api/flow_request.dart';
+import 'package:anime_flow/network/api/flow_api.dart';
 import 'package:anime_flow/models/item/flow/background_image_item.dart';
 import 'package:anime_flow/providers/user/user_state_provider.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
@@ -8,7 +8,7 @@ part 'account_background_provider.g.dart';
 /// 背景图列表。
 @Riverpod(keepAlive: true)
 Future<List<BackgroundImageItem>> backgroundImageList(Ref ref) async {
-  return FlowRequest.getBackgroundListService();
+  return FlowApi.getBackgroundListService();
 }
 
 /// 当前用户已选背景图 ID

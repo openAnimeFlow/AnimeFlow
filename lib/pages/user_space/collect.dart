@@ -1,5 +1,5 @@
 import 'package:anime_flow/constants/layout_constant.dart';
-import 'package:anime_flow/network/api/flow_request.dart';
+import 'package:anime_flow/network/api/flow_api.dart';
 import 'package:anime_flow/models/item/bangumi/user_collections_item.dart';
 import 'package:anime_flow/routes/model/info_route_extra.dart';
 import 'package:anime_flow/pages/user_space/provider/user_space_provider.dart';
@@ -113,7 +113,7 @@ class _CollectViewState extends ConsumerState<CollectView>
           ? userCollections!.data.length
           : 0;
 
-      final newCollections = await FlowRequest.queryUserCollectionService(
+      final newCollections = await FlowApi.queryUserCollectionService(
           userInfo.username,
           type: type,
           limit: 20,

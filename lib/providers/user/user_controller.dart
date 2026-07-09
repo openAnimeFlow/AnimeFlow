@@ -3,7 +3,7 @@ import 'dart:io';
 import 'package:anime_flow/constants/constants.dart';
 import 'package:anime_flow/network/api_path.dart';
 import 'package:anime_flow/network/clients/flow_client.dart';
-import 'package:anime_flow/network/api/flow_request.dart';
+import 'package:anime_flow/network/api/flow_api.dart';
 import 'package:anime_flow/models/item/flow/bangumi_bind_item.dart';
 import 'package:anime_flow/models/item/flow/flow_token.dart';
 import 'package:anime_flow/pages/user/provider/user_collection_provider.dart';
@@ -39,7 +39,7 @@ class UserController extends _$UserController {
     ref.invalidate(bangumiBindProvider);
     ref.invalidate(bgmCollectionSyncProvider);
     ref.invalidate(userCollectionsProvider);
-    FlowRequest.logoutService().catchError((e) {
+    FlowApi.logoutService().catchError((e) {
       LiggLogger().w('服务端登出失败: $e');
     });
   }
@@ -103,7 +103,7 @@ class UserController extends _$UserController {
     try {
       const clientId = Constants.bgmClientId;
       const redirectUri = AnimeFlowApi.animeFlowApi + AnimeFlowApi.callback;
-      final session = await FlowRequest.getSessionService(bindMode: storeCode);
+      final session = await FlowApi.getSessionService(bindMode: storeCode);
       final sessionId = session['sessionId'] as String;
       final authUrl = Uri.parse(
         '${CommonApi.bgmTV}${BgmApi.oauth}?response_type=code&client_id=$clientId&redirect_uri=$redirectUri&state=$sessionId',
@@ -131,7 +131,7 @@ class UserController extends _$UserController {
   }
 
   Future<FlowToken> _completeBangumiLogin(String code) async {
-    final flowToken = await FlowRequest.bangumiLoginService(
+    final flowToken = await FlowApi.bangumiLoginService(
       code: code,
       platform: SystemUtil.getDevice().toUpperCase(),
     );
@@ -145,7 +145,7 @@ class UserController extends _$UserController {
   }
 
   Future<BangumiBindItem?> _completeBangumiBind(String code) async {
-    final bind = await FlowRequest.bindBangumiService(code: code);
+    final bind = await FlowApi.bindBangumiService(code: code);
     ref.invalidate(bangumiBindProvider);
     ref.invalidate(bgmCollectionSyncProvider);
     NotificationToast.show('提示', 'Bangumi 账号绑定成功');
@@ -154,7 +154,7 @@ class UserController extends _$UserController {
 
   /// 解绑当前账号绑定的 Bangumi 账号。
   Future<BangumiBindItem> unbindBangumi() async {
-    final bind = await FlowRequest.unbindBangumiService();
+    final bind = await FlowApi.unbindBangumiService();
     ref.invalidate(bangumiBindProvider);
     ref.invalidate(bgmCollectionSyncProvider);
     NotificationToast.show('提示', 'Bangumi 账号已解绑');
@@ -167,7 +167,7 @@ class UserController extends _$UserController {
   ) async {
     try {
       LiggLogger().d('开始轮询 OAuth 授权码，sessionId: $sessionId');
-      final code = await FlowRequest.pollBindCodeService(state: sessionId);
+      final code = await FlowApi.pollBindCodeService(state: sessionId);
       if (code == null || code.isEmpty) {
         LiggLogger().w('轮询超时，未获取到 OAuth 授权码');
         NotificationToast.show(

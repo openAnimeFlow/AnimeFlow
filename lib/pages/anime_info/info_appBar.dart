@@ -1,5 +1,5 @@
 import 'package:anime_flow/network/api_path.dart';
-import 'package:anime_flow/network/api/request.dart';
+import 'package:anime_flow/network/api/api.dart';
 import 'package:anime_flow/pages/anime_info/provider/anime_info_provider.dart';
 import 'package:anime_flow/routes/provider/routes_args.dart';
 import 'package:anime_flow/utils/exceptions/storage_exception.dart';
@@ -41,7 +41,7 @@ class InfoAppbar extends ConsumerWidget {
 
   Future<void> _downloadCover(String image, String name) async {
     try {
-      final message = await Request.downloadImage(image, name);
+      final message = await Api.downloadImage(image, name);
       NotificationToast.show('提示', message, maxWidth: 500);
     } on StoragePermissionDeniedException catch (e) {
       LiggLogger().e('保存图片失败:$e');

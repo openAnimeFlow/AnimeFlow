@@ -4,7 +4,7 @@ import 'dart:io';
 import 'package:anime_flow/constants/constants.dart';
 import 'package:anime_flow/constants/storage_key.dart';
 import 'package:anime_flow/features/shaders/shaders_controller.dart';
-import 'package:anime_flow/network/api/flow_request.dart';
+import 'package:anime_flow/network/api/flow_api.dart';
 import 'package:anime_flow/models/enums/video_controls_icon_type.dart';
 import 'package:anime_flow/models/item/danmaku/danmaku_module.dart';
 import 'package:anime_flow/models/play/play_history.dart';
@@ -518,10 +518,10 @@ class PlaySession {
       if (!_isLoadingDanmaku && episode != 0) {
         _isLoadingDanmaku = true;
         final bgmBangumiId =
-            await FlowRequest.getDanDanBangumiIDByBgmBangumiID(subjectId);
+            await FlowApi.getDanDanBangumiIDByBgmBangumiID(subjectId);
         if (bgmBangumiId != null) {
           final danmaku =
-              await FlowRequest.getDanDanmaku(bgmBangumiId, episode);
+              await FlowApi.getDanDanmaku(bgmBangumiId, episode);
           addDanmakuAll(danmaku);
           _isLoadingDanmaku = false;
         }
@@ -686,7 +686,7 @@ class PlaySession {
     int type = 1,
   }) async {
     final bgmBangumiId =
-        await FlowRequest.getDanDanBangumiIDByBgmBangumiID(subjectId);
+        await FlowApi.getDanDanBangumiIDByBgmBangumiID(subjectId);
     if (bgmBangumiId == null) return false;
     final trimmed = message.trim();
     if (trimmed.isEmpty) return false;
@@ -708,7 +708,7 @@ class PlaySession {
       source: 'AnimeFlow',
     );
     addDanDanmaku(item, bgmUserId);
-    await FlowRequest.sendDanmaku(bgmBangumiId, episode,
+    await FlowApi.sendDanmaku(bgmBangumiId, episode,
         message: item.message,
         time: item.time,
         type: item.type,

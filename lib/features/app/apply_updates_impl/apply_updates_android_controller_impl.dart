@@ -1,7 +1,7 @@
 import 'dart:io';
 
 import 'package:anime_flow/features/app/apply_updates_controller.dart';
-import 'package:anime_flow/network/api/request.dart';
+import 'package:anime_flow/network/api/api.dart';
 import 'package:anime_flow/models/download_info.dart';
 import 'package:anime_flow/utils/logger.dart';
 import 'package:dio/dio.dart';
@@ -23,7 +23,7 @@ class ApplyUpdatesAndroidController implements ApplyUpdatesController {
     try {
       final dir = await getExternalStorageDirectory();
       final savePath = '${dir!.path}/${downloadInfo.fileName}';
-      await Request.downloadFile(
+      await Api.downloadFile(
         downloadInfo.url,
         savePath,
         onReceiveProgress: (received, total) {

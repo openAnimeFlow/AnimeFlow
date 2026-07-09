@@ -1,4 +1,4 @@
-import 'package:anime_flow/network/api/flow_request.dart';
+import 'package:anime_flow/network/api/flow_api.dart';
 import 'package:anime_flow/models/item/flow/flow_token.dart';
 import 'package:anime_flow/repository/flow_token_storage.dart';
 import 'package:anime_flow/repository/token_repository.dart';
@@ -16,7 +16,7 @@ class LoginService {
     TokenRepository<FlowToken>? flowTokenRepository,
     EmailLoginFn? emailLogin,
   })  : _flowTokenRepository = flowTokenRepository ?? FlowTokenStorage.instance,
-        _emailLogin = emailLogin ?? FlowRequest.emailLoginService;
+        _emailLogin = emailLogin ?? FlowApi.emailLoginService;
 
   final TokenRepository<FlowToken> _flowTokenRepository;
   final EmailLoginFn _emailLogin;

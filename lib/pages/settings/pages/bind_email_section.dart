@@ -1,7 +1,7 @@
 import 'dart:async';
 
 import 'package:anime_flow/network/clients/flow_client.dart';
-import 'package:anime_flow/network/api/flow_request.dart';
+import 'package:anime_flow/network/api/flow_api.dart';
 import 'package:anime_flow/pages/register/graphic_captcha.dart';
 import 'package:anime_flow/pages/register/send_code_button.dart';
 import 'package:anime_flow/providers/user/user_state_provider.dart';
@@ -51,7 +51,7 @@ class _BindEmailSectionState extends ConsumerState<BindEmailSection> {
     }
 
     try {
-      await FlowRequest.sendEmailCodeService(
+      await FlowApi.sendEmailCodeService(
         email: email,
         captchaId: _graphicCaptchaController.captchaId!,
         captcha: _graphicCaptchaController.text,
@@ -78,7 +78,7 @@ class _BindEmailSectionState extends ConsumerState<BindEmailSection> {
 
     setState(() => _isSubmitting = true);
     try {
-      await FlowRequest.bindEmailService(
+      await FlowApi.bindEmailService(
         email: _emailController.text.trim(),
         password: _passwordController.text,
         emailCaptcha: _emailCodeController.text.trim(),

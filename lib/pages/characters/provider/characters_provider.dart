@@ -1,4 +1,4 @@
-import 'package:anime_flow/network/api/flow_request.dart';
+import 'package:anime_flow/network/api/flow_api.dart';
 import 'package:anime_flow/models/item/bangumi/actor_item.dart';
 import 'package:anime_flow/routes/provider/routes_args.dart';
 import 'package:flutter/scheduler.dart';
@@ -32,7 +32,7 @@ class CharactersList extends _$CharactersList {
   @override
   Future<CharactersViewState> build() async {
     final subjectId = ref.watch(charactersArgsProvider);
-    final characters = await FlowRequest.charactersService(
+    final characters = await FlowApi.charactersService(
       subjectId,
       limit: _pageSize,
       offset: 0,
@@ -99,7 +99,7 @@ class CharactersList extends _$CharactersList {
     try {
       final prev = current.characters;
       final subjectId = ref.read(charactersArgsProvider);
-      final result = await FlowRequest.charactersService(
+      final result = await FlowApi.charactersService(
         subjectId,
         limit: _pageSize,
         offset: prev.data.length,

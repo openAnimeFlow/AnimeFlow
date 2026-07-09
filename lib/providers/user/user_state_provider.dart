@@ -3,7 +3,7 @@ import 'dart:typed_data';
 import 'package:anime_flow/network/clients/flow_client.dart';
 import 'package:anime_flow/network/interceptors/bgm_refresh_token_interceptor.dart';
 import 'package:anime_flow/network/interceptors/flow_refresh_token_interceptor.dart';
-import 'package:anime_flow/network/api/flow_request.dart';
+import 'package:anime_flow/network/api/flow_api.dart';
 import 'package:anime_flow/models/item/flow/bangumi_bind_item.dart';
 import 'package:anime_flow/models/item/flow/flow_token.dart';
 import 'package:anime_flow/models/item/flow/flow_users.dart';
@@ -56,7 +56,7 @@ Future<BangumiBindItem?> bangumiBind(Ref ref) async {
   }
 
   try {
-    return await FlowRequest.getBangumiBindService();
+    return await FlowApi.getBangumiBindService();
   } catch (error, stackTrace) {
     final latestToken = await ref.read(flowTokenRepositoryProvider).getToken();
     if (latestToken == null) {
@@ -90,7 +90,7 @@ class CurrentUserInfo extends _$CurrentUserInfo {
 
   Future<String?> uploadAvatar(Uint8List imageBytes) async {
     try {
-      final updatedUser = await FlowRequest.uploadAvatarService(imageBytes);
+      final updatedUser = await FlowApi.uploadAvatarService(imageBytes);
       state = AsyncData(updatedUser);
       return null;
     } on AnimeFlowApiException catch (e) {
@@ -106,7 +106,7 @@ class CurrentUserInfo extends _$CurrentUserInfo {
   Future<String?> updateNickname(String newNickname) async {
     try {
       final updatedUser =
-          await FlowRequest.updateUserInfoService(nickname: newNickname);
+          await FlowApi.updateUserInfoService(nickname: newNickname);
       state = AsyncData(updatedUser);
       return null;
     } on AnimeFlowApiException catch (e) {
@@ -122,7 +122,7 @@ class CurrentUserInfo extends _$CurrentUserInfo {
   /// 返回 `null` 表示成功，否则返回错误描述字符串。
   Future<String?> updateBackground(int? backgroundId) async {
     try {
-      final updatedUser = await FlowRequest.updateUserInfoService(
+      final updatedUser = await FlowApi.updateUserInfoService(
         backgroundId: backgroundId,
       );
       state = AsyncData(updatedUser);

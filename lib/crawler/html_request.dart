@@ -2,7 +2,7 @@ import 'dart:async';
 
 import 'package:anime_flow/constants/constants.dart';
 import 'package:anime_flow/crawler/itme/crawler_config_item.dart';
-import 'package:anime_flow/network/api/request.dart';
+import 'package:anime_flow/network/api/api.dart';
 import 'package:anime_flow/models/play/video/episode_resources_item.dart';
 import 'package:anime_flow/models/play/video/search_resources_item.dart';
 import 'package:anime_flow/utils/logger.dart';
@@ -43,7 +43,7 @@ class WebRequest {
       Constants.userAgentName: Utils.getRandomUA(),
       if (cookie.isNotEmpty) 'Cookie': cookie
     };
-    final response = await Request.getResources(requestUrl,
+    final response = await Api.getResources(requestUrl,
         options: Options(headers: httpHeaders));
     final antiCrawler = crawlConfig.antiCrawlerConfig;
     if (antiCrawler.enabled) {
@@ -86,7 +86,7 @@ class WebRequest {
       if (cookie.isNotEmpty) 'Cookie': cookie,
     };
 
-    final response = await Request.getResources(linkUrl,
+    final response = await Api.getResources(linkUrl,
         options: Options(headers: httpHeaders));
     return HtmlCrawler.parseResourcesHtml(response, crawlConfig);
   }

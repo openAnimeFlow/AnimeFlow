@@ -223,27 +223,28 @@ class _EpisodesComponentsState extends ConsumerState<EpisodesComponents> {
           if (index >= episodes.length) {
             return _buildLoadMoreFooter(episodesState.isLoadingMore);
           }
-
+          final colorScheme = Theme.of(context).colorScheme;
           final episode = episodes[index];
           final isSelected = selectedEpisodeId == episode.id;
           return SizedBox(
             height: itemHeight,
             child: Card(
               elevation: 0,
-              color: isSelected
-                  ? Theme.of(context).colorScheme.primaryContainer
-                  : null,
+              color: isSelected ? colorScheme.primaryContainer : null,
               child: InkWell(
                 borderRadius: BorderRadius.circular(10),
                 onTap: () => _selectEpisode(episode, index + 1),
                 child: Container(
                   decoration: BoxDecoration(
                     borderRadius: BorderRadius.circular(10),
-                    color: episode.collection != null
-                        ? Theme.of(context)
-                            .colorScheme
-                            .outlineVariant
-                            .withValues(alpha: 0.3)
+                    color: episode.watched == true
+                        ? colorScheme.surfaceContainerHighest
+                        : null,
+                    border: episode.watched == true
+                        ? Border.all(
+                            color: colorScheme.secondaryContainer,
+                            width: 2,
+                          )
                         : null,
                   ),
                   padding: const EdgeInsets.all(8),
@@ -350,24 +351,35 @@ class _EpisodesComponentsState extends ConsumerState<EpisodesComponents> {
               ),
             );
           }
-
+          final colorScheme = Theme.of(context).colorScheme;
           final episode = episodes[index];
           final isSelected = selectedEpisodeId == episode.id;
           return Card(
             elevation: 0,
-            color: isSelected
-                ? Theme.of(context).colorScheme.primaryContainer
-                : null,
+            color: isSelected ? colorScheme.primaryContainer : null,
             child: InkWell(
               borderRadius: BorderRadius.circular(10),
               onTap: () => _selectEpisode(episode, index + 1),
-              child: Center(
-                child: Text(
-                  '${episode.sort}',
-                  style: TextStyle(
-                    fontSize: 16,
-                    fontWeight:
-                        isSelected ? FontWeight.bold : FontWeight.normal,
+              child: DecoratedBox(
+                decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(10),
+                    color: episode.watched == true
+                        ? colorScheme.surfaceContainerHighest
+                        : null,
+                    border: episode.watched == true
+                        ? Border.all(
+                            color: colorScheme.secondaryContainer,
+                            width: 2,
+                          )
+                        : null),
+                child: Center(
+                  child: Text(
+                    '${episode.sort}',
+                    style: TextStyle(
+                      fontSize: 16,
+                      fontWeight:
+                          isSelected ? FontWeight.bold : FontWeight.normal,
+                    ),
                   ),
                 ),
               ),

@@ -108,12 +108,13 @@ class EpisodesDialog extends ConsumerWidget {
       itemBuilder: (BuildContext context, int index) {
         final episode = episodes[index];
         final isSelected = selectedEpisodeId == episode.id;
+        final colorScheme = Theme.of(context).colorScheme;
         return Card(
           elevation: 0,
-          color: isSelected
-              ? Theme.of(context).colorScheme.primaryContainer
+          color: isSelected ? colorScheme.primaryContainer : null,
+          margin: index != episodes.length - 1
+              ? const EdgeInsets.only(bottom: 8)
               : null,
-          margin: const EdgeInsets.only(bottom: 8),
           child: InkWell(
             onTap: () {
               final episodeIndex = index + 1;
@@ -128,29 +129,42 @@ class EpisodesDialog extends ConsumerWidget {
               );
               context.pop();
             },
-            child: Padding(
-              padding: const EdgeInsets.all(12),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    episode.sort.toString().padLeft(2, '0'),
-                    style: const TextStyle(
-                      fontWeight: FontWeight.bold,
+            child: DecoratedBox(
+              decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(10),
+                  color: episode.watched == true
+                      ? colorScheme.surfaceContainerHighest
+                      : null,
+                  border: episode.watched == true
+                      ? Border.all(
+                          color: colorScheme.secondaryContainer,
+                          width: 2,
+                        )
+                      : null),
+              child: Padding(
+                padding: const EdgeInsets.all(12),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      episode.sort.toString().padLeft(2, '0'),
+                      style: const TextStyle(
+                        fontWeight: FontWeight.bold,
+                      ),
                     ),
-                  ),
-                  const SizedBox(height: 6),
-                  Text(
-                    episode.nameCN.isEmpty ? episode.name : episode.nameCN,
-                    style: const TextStyle(
-                      fontSize: 12,
-                      color: Colors.grey,
-                      fontWeight: FontWeight.bold,
+                    const SizedBox(height: 6),
+                    Text(
+                      episode.nameCN.isEmpty ? episode.name : episode.nameCN,
+                      style: const TextStyle(
+                        fontSize: 12,
+                        color: Colors.grey,
+                        fontWeight: FontWeight.bold,
+                      ),
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
                     ),
-                    maxLines: 2,
-                    overflow: TextOverflow.ellipsis,
-                  ),
-                ],
+                  ],
+                ),
               ),
             ),
           ),

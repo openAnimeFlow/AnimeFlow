@@ -33,6 +33,7 @@ class EpisodeData {
   final String duration;
   final String airdate;
   final int comment;
+  final bool? watched;
   final String desc;
   final EpisodeCollection? collection;
 
@@ -48,6 +49,7 @@ class EpisodeData {
     required this.airdate,
     required this.comment,
     required this.desc,
+    this.watched,
     this.collection,
   });
 
@@ -57,6 +59,7 @@ class EpisodeData {
         sort = json['sort'],
         type = json['type'],
         disc = json['disc'],
+        watched = json['watched'] as bool?,
         name = json['name'] ?? '',
         nameCN = json['nameCN'] ?? '',
         duration = json['duration'] ?? '',

@@ -197,6 +197,10 @@ class _EpisodesDrawerViewState extends ConsumerState<EpisodesDrawerView> {
 
                 final episode = sortedEpisodes[index];
                 return ListTile(
+                  tileColor: episode.watched == true
+                      ? Theme.of(context).colorScheme.surfaceContainerHighest
+                      : null,
+                  onLongPress: () {},
                   onTap: () {
                     Navigator.of(context).pop();
                     PlayRoute.fromExtra(

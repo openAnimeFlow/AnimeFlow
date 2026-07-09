@@ -2,7 +2,7 @@ import 'dart:async';
 
 import 'package:anime_flow/constants/constants.dart';
 import 'package:anime_flow/crawler/itme/crawler_config_item.dart';
-import 'package:anime_flow/network/requests/request.dart';
+import 'package:anime_flow/network/api/request.dart';
 import 'package:anime_flow/models/play/video/episode_resources_item.dart';
 import 'package:anime_flow/models/play/video/search_resources_item.dart';
 import 'package:anime_flow/utils/logger.dart';

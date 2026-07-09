@@ -1,5 +1,5 @@
 import 'package:anime_flow/constants/constants.dart';
-import 'package:anime_flow/network/requests/flow_request.dart';
+import 'package:anime_flow/network/api/flow_request.dart';
 import 'package:anime_flow/models/item/token_item.dart';
 import 'package:anime_flow/repository/BangumiToken.dart';
 import 'package:anime_flow/utils/logger.dart';

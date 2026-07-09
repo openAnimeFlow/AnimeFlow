@@ -5,7 +5,7 @@ import 'package:anime_flow/features/app/app_info_state.dart';
 import 'package:anime_flow/features/app/app_provider_container.dart';
 import 'package:anime_flow/features/app/apply_updates_controller.dart';
 import 'package:anime_flow/network/api_path.dart';
-import 'package:anime_flow/network/requests/request.dart';
+import 'package:anime_flow/network/api/request.dart';
 import 'package:anime_flow/models/download_info.dart';
 import 'package:anime_flow/models/enums/version_type.dart';
 import 'package:anime_flow/models/version_check_result.dart';

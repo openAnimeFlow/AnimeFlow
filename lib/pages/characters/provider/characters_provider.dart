@@ -1,4 +1,4 @@
-import 'package:anime_flow/network/requests/flow_request.dart';
+import 'package:anime_flow/network/api/flow_request.dart';
 import 'package:anime_flow/models/item/bangumi/actor_item.dart';
 import 'package:anime_flow/routes/provider/routes_args.dart';
 import 'package:flutter/scheduler.dart';

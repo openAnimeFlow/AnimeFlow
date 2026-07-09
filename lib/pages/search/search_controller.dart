@@ -1,8 +1,8 @@
 import 'dart:async';
 import 'dart:io';
 
-import 'package:anime_flow/network/requests/flow_request.dart';
-import 'package:anime_flow/network/requests/request.dart';
+import 'package:anime_flow/network/api/flow_request.dart';
+import 'package:anime_flow/network/api/request.dart';
 import 'package:anime_flow/models/item/bangumi/subject_item.dart';
 import 'package:anime_flow/models/item/image_search_item.dart';
 import 'package:anime_flow/models/search/search_history_module.dart';

@@ -1,4 +1,4 @@
-import 'package:anime_flow/network/requests/request.dart';
+import 'package:anime_flow/network/api/request.dart';
 import 'package:anime_flow/utils/utils.dart';
 import 'package:flutter/material.dart';
 

@@ -1,7 +1,7 @@
 import 'dart:io';
 
 import 'package:anime_flow/constants/storage_key.dart';
-import 'package:anime_flow/network/requests/github_request.dart';
+import 'package:anime_flow/network/api/github_request.dart';
 import 'package:anime_flow/models/item/font_item.dart';
 import 'package:anime_flow/providers/theme_provider.dart';
 import 'package:anime_flow/repository/storage.dart';

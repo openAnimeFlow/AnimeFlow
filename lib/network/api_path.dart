@@ -235,7 +235,10 @@ class AnimeFlowApi {
       bangumiLogin = '/api/v1/account/oauth/bangumi/login',
 
       /// 轮询 Bangumi 绑定授权码（桌面端）
-      oauthBindCode = '/api/oauth/bind-code';
+      oauthBindCode = '/api/oauth/bind-code',
+
+      /// 剧集观看记录
+      episodeWatched = '/episodes/{episodeId}/watch';
 }
 
 class DamakuApi {

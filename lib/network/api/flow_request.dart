@@ -832,4 +832,13 @@ class FlowRequest {
       options: await _flowAuthOptions(),
     );
   }
+
+  /// 更新剧集观看状态
+  static Future<void> updateEpisodeWatchedService(int episodeId,
+      {required bool watched}) async {
+    await _client.put(
+      AnimeFlowApi.episodeWatched,
+      options: await _flowAuthOptions(),
+    );
+  }
 }

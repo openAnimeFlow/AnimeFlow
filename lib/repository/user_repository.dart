@@ -1,5 +1,5 @@
 import 'package:anime_flow/crawler/itme/bgm_user_page_item.dart';
-import 'package:anime_flow/network/requests/flow_request.dart';
+import 'package:anime_flow/network/api/flow_request.dart';
 import 'package:anime_flow/models/item/bangumi/user_info_item.dart';
 import 'package:anime_flow/models/item/flow/flow_token.dart';
 import 'package:anime_flow/models/item/flow/flow_users.dart';

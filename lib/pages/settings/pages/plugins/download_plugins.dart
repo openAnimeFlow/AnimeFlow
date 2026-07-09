@@ -3,7 +3,7 @@ import 'dart:convert';
 import 'package:anime_flow/constants/storage_key.dart';
 import 'package:anime_flow/crawler/itme/crawler_config_item.dart';
 import 'package:anime_flow/network/api_path.dart';
-import 'package:anime_flow/network/requests/request.dart';
+import 'package:anime_flow/network/api/request.dart';
 import 'package:anime_flow/repository/storage.dart';
 import 'package:anime_flow/utils/format_time_util.dart';
 import 'package:anime_flow/utils/logger.dart';

@@ -1,4 +1,4 @@
-import 'package:anime_flow/network/requests/flow_request.dart';
+import 'package:anime_flow/network/api/flow_request.dart';
 import 'package:anime_flow/models/enums/sort_type.dart';
 import 'package:anime_flow/models/item/bangumi/subject_item.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';

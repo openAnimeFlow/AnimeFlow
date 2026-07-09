@@ -2,7 +2,7 @@ import 'dart:async';
 
 import 'package:anime_flow/constants/assets_path_constants.dart';
 import 'package:anime_flow/network/clients/flow_client.dart';
-import 'package:anime_flow/network/requests/flow_request.dart';
+import 'package:anime_flow/network/api/flow_request.dart';
 import 'package:anime_flow/pages/register/send_code_button.dart';
 import 'package:anime_flow/pages/register/graphic_captcha.dart';
 import 'package:anime_flow/widget/notification_toast.dart';

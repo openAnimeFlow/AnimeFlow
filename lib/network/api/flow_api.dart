@@ -234,6 +234,7 @@ class FlowApi {
           Constants.authorization: '${token!.tokenType} ${token.accessToken}',
         },
       ),
+      includeFlowToken: false,
     );
   }
 
@@ -255,10 +256,7 @@ class FlowApi {
 
   ///根据id获取条目（已登录时携带 Flow Token，服务端换取 Bangumi token 返回 interest）
   static Future<SubjectsInfoItem> getSubjectByIdService(int id) async {
-    final response = await _client.get(
-      '${AnimeFlowApi.subjects}/$id',
-      options: await _optionalFlowAuthOptions(),
-    );
+    final response = await _client.get('${AnimeFlowApi.subjects}/$id');
     return SubjectsInfoItem.fromJson(response.data);
   }
 
@@ -598,8 +596,8 @@ class FlowApi {
     }
     await _client.post(
       AnimeFlowApi.logout,
-      options: await _flowAuthOptions(),
       skipFlowTokenRefresh: true,
+      requireFlowToken: true,
     );
   }
 
@@ -614,6 +612,7 @@ class FlowApi {
               Constants.authorization: '$tokenType $token',
             },
           ),
+          includeFlowToken: false,
         )
         .then((value) =>
             FlowUsers.fromJson((value.data) as Map<String, dynamic>));
@@ -621,10 +620,7 @@ class FlowApi {
 
   /// 获取背景图列表
   static Future<List<BackgroundImageItem>> getBackgroundListService() async {
-    final response = await _client.get(
-      AnimeFlowApi.backgroundList,
-      options: await _optionalFlowAuthOptions(),
-    );
+    final response = await _client.get(AnimeFlowApi.backgroundList);
     return (response.data as List)
         .map((e) => BackgroundImageItem.fromJson(e as Map<String, dynamic>))
         .toList();
@@ -641,7 +637,7 @@ class FlowApi {
     final response = await _client.post(
       '${AnimeFlowApi.flowUsers}/avatar',
       data: formData,
-      options: await _flowAuthOptions(),
+      requireFlowToken: true,
     );
     return FlowUsers.fromJson(response.data as Map<String, dynamic>);
   }
@@ -660,41 +656,16 @@ class FlowApi {
     final response = await _client.put(
       AnimeFlowApi.flowUsers,
       data: data,
-      options: await _flowAuthOptions(),
+      requireFlowToken: true,
     );
     return FlowUsers.fromJson(response.data as Map<String, dynamic>);
-  }
-
-  static Future<Options> _flowAuthOptions() async {
-    final token = await FlowTokenStorage.instance.getToken();
-    if (token == null) {
-      throw StateError('未登录');
-    }
-    return Options(
-      headers: {
-        Constants.authorization: '${token.tokenType} ${token.accessToken}',
-      },
-    );
-  }
-
-  /// 已登录时附带 Flow Token；未登录返回 {@code null}（公开接口可选鉴权）。
-  static Future<Options?> _optionalFlowAuthOptions() async {
-    final token = await FlowTokenStorage.instance.getToken();
-    if (token == null) {
-      return null;
-    }
-    return Options(
-      headers: {
-        Constants.authorization: '${token.tokenType} ${token.accessToken}',
-      },
-    );
   }
 
   /// 查询当前账号的 Bangumi 绑定状态
   static Future<BangumiBindItem> getBangumiBindService() async {
     final response = await _client.get(
       AnimeFlowApi.bangumiBind,
-      options: await _flowAuthOptions(),
+      requireFlowToken: true,
     );
     return BangumiBindItem.fromJson(response.data as Map<String, dynamic>);
   }
@@ -721,7 +692,7 @@ class FlowApi {
     final response = await _client.post(
       AnimeFlowApi.bangumiBindPost,
       data: {'code': code},
-      options: await _flowAuthOptions(),
+      requireFlowToken: true,
     );
     return BangumiBindItem.fromJson(response.data as Map<String, dynamic>);
   }
@@ -730,7 +701,7 @@ class FlowApi {
   static Future<BangumiBindItem> unbindBangumiService() async {
     final response = await _client.post(
       AnimeFlowApi.bangumiUnbind,
-      options: await _flowAuthOptions(),
+      requireFlowToken: true,
     );
     return BangumiBindItem.fromJson(response.data as Map<String, dynamic>);
   }
@@ -742,7 +713,7 @@ class FlowApi {
     final response = await _client.post(
       AnimeFlowApi.bangumiCollectionSync,
       queryParameters: {'subjectType': subjectType},
-      options: await _flowAuthOptions(),
+      requireFlowToken: true,
     );
     return BgmCollectionSyncStatusItem.fromJson(
       response.data as Map<String, dynamic>,
@@ -754,7 +725,7 @@ class FlowApi {
       getBgmCollectionSyncStatusService() async {
     final response = await _client.get(
       AnimeFlowApi.bangumiCollectionSync,
-      options: await _flowAuthOptions(),
+      requireFlowToken: true,
     );
     return BgmCollectionSyncStatusItem.fromJson(
       response.data as Map<String, dynamic>,
@@ -774,7 +745,7 @@ class FlowApi {
         'password': password,
         'emailCaptcha': emailCaptcha,
       },
-      options: await _flowAuthOptions(),
+      requireFlowToken: true,
     );
     return FlowUsers.fromJson(response.data as Map<String, dynamic>);
   }
@@ -794,7 +765,7 @@ class FlowApi {
         'limit': limit,
         'offset': offset,
       },
-      options: await _flowAuthOptions(),
+      requireFlowToken: true,
     );
     try {
       return UserCollectionsItem.fromJson(
@@ -829,7 +800,7 @@ class FlowApi {
     await _client.put(
       '${AnimeFlowApi.flowUserCollections}/$subjectId',
       data: data,
-      options: await _flowAuthOptions(),
+      requireFlowToken: true,
     );
   }
 
@@ -838,7 +809,7 @@ class FlowApi {
       {required bool watched}) async {
     await _client.put(
       AnimeFlowApi.episodeWatched,
-      options: await _flowAuthOptions(),
+      requireFlowToken: true,
     );
   }
 }

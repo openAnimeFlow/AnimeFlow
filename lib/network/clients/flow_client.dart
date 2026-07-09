@@ -20,7 +20,6 @@ class AnimeFlowApiException implements Exception {
   @override
   String toString() => message;
 }
-
 /// 将 Flow 业务异常、网络异常等转换为用户可读提示。
 String resolveAnimeFlowErrorMessage(
   Object error, {
@@ -88,8 +87,12 @@ class FlowClient {
     required bool signRequest,
     bool skipFlowTokenRefresh = false,
     bool includeFlowToken = true,
+    bool requireFlowToken = false,
   }) async {
-    if (!signRequest && !skipFlowTokenRefresh && !includeFlowToken) {
+    if (!signRequest &&
+        !skipFlowTokenRefresh &&
+        !includeFlowToken &&
+        !requireFlowToken) {
       return options ?? Options();
     }
 
@@ -99,11 +102,14 @@ class FlowClient {
       ...?options?.headers,
       ...signHeaders,
     };
-    if (includeFlowToken) {
+    if (includeFlowToken &&
+        !mergedHeaders.containsKey(Constants.authorization)) {
       final token = await FlowTokenStorage.instance.getToken();
       if (token != null) {
         mergedHeaders[Constants.authorization] =
             '${token.tokenType} ${token.accessToken}';
+      } else if (requireFlowToken) {
+        throw StateError('未登录');
       }
     }
     final mergedExtra = <String, dynamic>{
@@ -125,6 +131,7 @@ class FlowClient {
     bool signRequest = true,
     bool skipFlowTokenRefresh = false,
     bool includeFlowToken = true,
+    bool requireFlowToken = false,
   }) async {
     try {
       final response = await DioFactory.animeFlowDio.get(
@@ -136,6 +143,7 @@ class FlowClient {
           signRequest: signRequest,
           skipFlowTokenRefresh: skipFlowTokenRefresh,
           includeFlowToken: includeFlowToken,
+          requireFlowToken: requireFlowToken,
         ),
         cancelToken: cancelToken,
       );
@@ -155,6 +163,7 @@ class FlowClient {
     bool signRequest = true,
     bool skipFlowTokenRefresh = false,
     bool includeFlowToken = true,
+    bool requireFlowToken = false,
   }) async {
     try {
       final response = await DioFactory.animeFlowDio.post(
@@ -167,6 +176,7 @@ class FlowClient {
           signRequest: signRequest,
           skipFlowTokenRefresh: skipFlowTokenRefresh,
           includeFlowToken: includeFlowToken,
+          requireFlowToken: requireFlowToken,
         ),
         cancelToken: cancelToken,
       );
@@ -186,6 +196,7 @@ class FlowClient {
     bool signRequest = true,
     bool skipFlowTokenRefresh = false,
     bool includeFlowToken = true,
+    bool requireFlowToken = false,
   }) async {
     try {
       final response = await DioFactory.animeFlowDio.put(
@@ -198,6 +209,7 @@ class FlowClient {
           signRequest: signRequest,
           skipFlowTokenRefresh: skipFlowTokenRefresh,
           includeFlowToken: includeFlowToken,
+          requireFlowToken: requireFlowToken,
         ),
         cancelToken: cancelToken,
       );
@@ -216,6 +228,7 @@ class FlowClient {
     bool signRequest = true,
     bool skipFlowTokenRefresh = false,
     bool includeFlowToken = true,
+    bool requireFlowToken = false,
   }) async {
     try {
       final response = await DioFactory.animeFlowDio.delete(
@@ -227,6 +240,7 @@ class FlowClient {
           signRequest: signRequest,
           skipFlowTokenRefresh: skipFlowTokenRefresh,
           includeFlowToken: includeFlowToken,
+          requireFlowToken: requireFlowToken,
         ),
         cancelToken: cancelToken,
       );

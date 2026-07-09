@@ -1,6 +1,6 @@
 import 'package:anime_flow/features/app/apply_updates_controller.dart';
 import 'package:anime_flow/models/download_info.dart';
-import 'package:anime_flow/http/requests/request.dart';
+import 'package:anime_flow/network/requests/request.dart';
 import 'package:dio/dio.dart';
 import 'package:path_provider/path_provider.dart' show getDownloadsDirectory;
 import 'package:path/path.dart' as path;

@@ -3,8 +3,8 @@ import 'dart:ui';
 
 import 'package:anime_flow/constants/constants.dart';
 import 'package:anime_flow/crawler/itme/bgm_user_page_item.dart';
-import 'package:anime_flow/http/api_path.dart';
-import 'package:anime_flow/http/clients/flow_client.dart';
+import 'package:anime_flow/network/api_path.dart';
+import 'package:anime_flow/network/clients/flow_client.dart';
 import 'package:anime_flow/models/enums/sort_type.dart';
 import 'package:anime_flow/models/item/bangumi/actor_item.dart';
 import 'package:anime_flow/models/item/bangumi/calendar_item.dart';
@@ -615,7 +615,8 @@ class FlowRequest {
             },
           ),
         )
-        .then((value) => FlowUsers.fromJson((value.data) as Map<String, dynamic>));
+        .then((value) =>
+            FlowUsers.fromJson((value.data) as Map<String, dynamic>));
   }
 
   /// 获取背景图列表
@@ -625,13 +626,13 @@ class FlowRequest {
       options: await _optionalFlowAuthOptions(),
     );
     return (response.data as List)
-        .map((e) =>
-            BackgroundImageItem.fromJson(e as Map<String, dynamic>))
+        .map((e) => BackgroundImageItem.fromJson(e as Map<String, dynamic>))
         .toList();
   }
 
   /// 上传当前登录用户的头像（支持 JPEG / PNG / WebP / GIF，最大 2MB）
-  static Future<FlowUsers> uploadAvatarService(Uint8List imageBytes, {
+  static Future<FlowUsers> uploadAvatarService(
+    Uint8List imageBytes, {
     String filename = 'avatar.png',
   }) async {
     final formData = FormData.fromMap({
@@ -749,7 +750,8 @@ class FlowRequest {
   }
 
   /// 查询 Bangumi 收藏同步状态
-  static Future<BgmCollectionSyncStatusItem> getBgmCollectionSyncStatusService() async {
+  static Future<BgmCollectionSyncStatusItem>
+      getBgmCollectionSyncStatusService() async {
     final response = await _client.get(
       AnimeFlowApi.bangumiCollectionSync,
       options: await _flowAuthOptions(),

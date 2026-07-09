@@ -1,4 +1,4 @@
-import 'package:anime_flow/http/api_path.dart';
+import 'package:anime_flow/network/api_path.dart';
 import 'package:anime_flow/models/item/flow/background_image_item.dart';
 import 'package:anime_flow/models/item/flow/flow_users.dart';
 import 'package:anime_flow/pages/settings/pages/account/provider/account_background_provider.dart';

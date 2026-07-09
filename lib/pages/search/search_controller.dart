@@ -1,8 +1,8 @@
 import 'dart:async';
 import 'dart:io';
 
-import 'package:anime_flow/http/requests/flow_request.dart';
-import 'package:anime_flow/http/requests/request.dart';
+import 'package:anime_flow/network/requests/flow_request.dart';
+import 'package:anime_flow/network/requests/request.dart';
 import 'package:anime_flow/models/item/bangumi/subject_item.dart';
 import 'package:anime_flow/models/item/image_search_item.dart';
 import 'package:anime_flow/models/search/search_history_module.dart';
@@ -79,7 +79,8 @@ class SearchPageController extends _$SearchPageController {
     ref.onDispose(() {
       listenable.removeListener(_loadSearchHistory);
     });
-    return SearchPageState(searchHistory: _searchHistoryManager.getSearchHistory());
+    return SearchPageState(
+        searchHistory: _searchHistoryManager.getSearchHistory());
   }
 
   /// 搜索番剧

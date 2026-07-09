@@ -1,7 +1,7 @@
 import 'dart:convert';
 
-import 'package:anime_flow/http/api_path.dart';
-import 'package:anime_flow/http/clients/github_client.dart';
+import 'package:anime_flow/network/api_path.dart';
+import 'package:anime_flow/network/clients/github_client.dart';
 import 'package:anime_flow/models/item/font_item.dart';
 import 'package:anime_flow/utils/utils.dart';
 import 'package:dio/dio.dart';

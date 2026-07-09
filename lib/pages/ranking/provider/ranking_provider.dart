@@ -1,4 +1,4 @@
-import 'package:anime_flow/http/requests/flow_request.dart';
+import 'package:anime_flow/network/requests/flow_request.dart';
 import 'package:anime_flow/models/enums/sort_type.dart';
 import 'package:anime_flow/models/item/bangumi/subject_item.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
@@ -90,7 +90,8 @@ class Ranking extends _$Ranking {
     final current = state.asData?.value;
     final effectiveSort = sort ?? current?.selectedSort ?? SortType.rank;
     final effectiveYear = clearYear ? null : (year ?? current?.selectedYear);
-    final effectiveMonth = clearMonth ? null : (month ?? current?.selectedMonth);
+    final effectiveMonth =
+        clearMonth ? null : (month ?? current?.selectedMonth);
 
     final response = await FlowRequest.rankService(
       page: 1,
@@ -143,7 +144,8 @@ class Ranking extends _$Ranking {
     final current = state.asData?.value;
     final effectiveSort = sort ?? current?.selectedSort ?? SortType.rank;
     final effectiveYear = clearYear ? null : (year ?? current?.selectedYear);
-    final effectiveMonth = clearMonth ? null : (month ?? current?.selectedMonth);
+    final effectiveMonth =
+        clearMonth ? null : (month ?? current?.selectedMonth);
 
     if (current == null) {
       state = await AsyncValue.guard(

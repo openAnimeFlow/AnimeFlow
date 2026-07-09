@@ -1,8 +1,8 @@
 import 'dart:ui';
 
 import 'package:anime_flow/constants/layout_constant.dart';
-import 'package:anime_flow/http/clients/flow_client.dart';
-import 'package:anime_flow/http/requests/flow_request.dart';
+import 'package:anime_flow/network/clients/flow_client.dart';
+import 'package:anime_flow/network/requests/flow_request.dart';
 import 'package:anime_flow/models/item/bangumi/subjects_info_item.dart';
 import 'package:anime_flow/pages/anime_info/provider/anime_info_provider.dart';
 import 'package:anime_flow/pages/anime_info/episodes_drawer.dart';
@@ -80,7 +80,7 @@ class InfoHeadView extends StatelessWidget {
             alignment: Alignment.center,
             child: ConstrainedBox(
               constraints:
-              const BoxConstraints(maxWidth: LayoutConstant.maxWidth),
+                  const BoxConstraints(maxWidth: LayoutConstant.maxWidth),
               child: SizedBox(
                 height: double.infinity,
                 child: Padding(
@@ -125,12 +125,12 @@ class InfoHeadView extends StatelessWidget {
                             final subjectsInfo = ref.watch(animeInfoProvider);
                             return subjectsInfo.when(
                                 data: (data) => _dataView(
-                                  context,
-                                  ref: ref,
-                                  subjectItem: data,
-                                ),
+                                      context,
+                                      ref: ref,
+                                      subjectItem: data,
+                                    ),
                                 error: (error, stackTrace) =>
-                                const SizedBox.shrink(),
+                                    const SizedBox.shrink(),
                                 loading: () => _skeletonView(context));
                           }),
                         )
@@ -203,16 +203,16 @@ class InfoHeadView extends StatelessWidget {
   }
 
   Widget _dataView(
-      BuildContext context, {
-        required WidgetRef ref,
-        required SubjectsInfoItem subjectItem,
-      }) {
+    BuildContext context, {
+    required WidgetRef ref,
+    required SubjectsInfoItem subjectItem,
+  }) {
     final name = ref.watch(animeInfoArgsProvider.select((e) => e.name));
     const double fontSize = 12;
     const FontWeight fontWeight = FontWeight.w600;
     const amberAccent = Colors.amberAccent;
     final collectionTotal =
-    subjectItem.collection.data.values.reduce((a, b) => a + b);
+        subjectItem.collection.data.values.reduce((a, b) => a + b);
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -232,7 +232,7 @@ class InfoHeadView extends StatelessWidget {
             Text(
               '${subjectItem.airtime.date}(${subjectItem.platform.typeCN})',
               style:
-              const TextStyle(fontSize: fontSize, fontWeight: fontWeight),
+                  const TextStyle(fontSize: fontSize, fontWeight: fontWeight),
               maxLines: 1,
               overflow: TextOverflow.ellipsis,
             ),
@@ -270,7 +270,7 @@ class InfoHeadView extends StatelessWidget {
             Text(
               '(${subjectItem.rating.total})人评分',
               style:
-              const TextStyle(fontSize: fontSize, fontWeight: fontWeight),
+                  const TextStyle(fontSize: fontSize, fontWeight: fontWeight),
             ),
             Text('$collectionTotal收藏/',
                 style: const TextStyle(
@@ -318,7 +318,8 @@ class InfoHeadView extends StatelessWidget {
             ),
             Consumer(
               builder: (context, ref, child) {
-                final image = ref.watch(animeInfoArgsProvider.select((e) => e.image));
+                final image =
+                    ref.watch(animeInfoArgsProvider.select((e) => e.image));
                 // Keep episodes cached while the anime info page is alive.
                 ref.watch(subjectEpisodesProvider(subjectItem.id));
                 return IconButton(
@@ -329,7 +330,7 @@ class InfoHeadView extends StatelessWidget {
                     subjectImage: image,
                   ),
                   icon:
-                  const Icon(Icons.format_list_bulleted_rounded, size: 25),
+                      const Icon(Icons.format_list_bulleted_rounded, size: 25),
                 );
               },
             ),

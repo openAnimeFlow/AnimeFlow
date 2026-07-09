@@ -1,5 +1,5 @@
-import 'package:anime_flow/http/api_path.dart';
-import 'package:anime_flow/http/clients/bgm_client.dart';
+import 'package:anime_flow/network/api_path.dart';
+import 'package:anime_flow/network/clients/bgm_client.dart';
 import 'package:anime_flow/models/enums/sort_type.dart';
 import 'package:anime_flow/models/item/bangumi/actor_item.dart';
 import 'package:anime_flow/models/item/bangumi/calendar_item.dart';

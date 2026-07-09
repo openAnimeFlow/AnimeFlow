@@ -1,5 +1,5 @@
 import 'package:anime_flow/constants/constants.dart';
-import 'package:anime_flow/http/requests/flow_request.dart';
+import 'package:anime_flow/network/requests/flow_request.dart';
 import 'package:anime_flow/models/item/token_item.dart';
 import 'package:anime_flow/repository/BangumiToken.dart';
 import 'package:anime_flow/utils/logger.dart';
@@ -26,9 +26,9 @@ class BgmRefreshTokenInterceptor extends Interceptor {
   }
 
   Future<void> _refreshToken(
-      DioException e,
-      ErrorInterceptorHandler handler,
-      ) async {
+    DioException e,
+    ErrorInterceptorHandler handler,
+  ) async {
     while (true) {
       final inFlight = _refreshFuture;
       if (inFlight != null) {
@@ -84,16 +84,16 @@ class BgmRefreshTokenInterceptor extends Interceptor {
   }
 
   Future<void> _retryAfterRefresh(
-      DioException e,
-      ErrorInterceptorHandler handler,
-      ) async {
+    DioException e,
+    ErrorInterceptorHandler handler,
+  ) async {
     final token = await _bangumiToken.getToken();
     if (token == null) {
       return handler.next(e);
     }
     final opts = e.requestOptions;
     opts.headers[Constants.authorization] =
-    '${token.tokenType} ${token.accessToken}';
+        '${token.tokenType} ${token.accessToken}';
     try {
       final response = await _dio.fetch(opts);
       handler.resolve(response);

@@ -1,5 +1,5 @@
 import 'package:anime_flow/constants/layout_constant.dart';
-import 'package:anime_flow/http/requests/flow_request.dart';
+import 'package:anime_flow/network/requests/flow_request.dart';
 import 'package:anime_flow/models/item/bangumi/user_collections_item.dart';
 import 'package:anime_flow/routes/model/info_route_extra.dart';
 import 'package:anime_flow/pages/user_space/provider/user_space_provider.dart';
@@ -194,11 +194,12 @@ class _CollectViewState extends ConsumerState<CollectView>
         slivers: <Widget>[
           SliverOverlapInjector(handle: handle),
           SliverPadding(
-            padding: const EdgeInsets.symmetric(horizontal: 10,vertical: 10),
+            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 10),
             sliver: SliverToBoxAdapter(
               child: Center(
                 child: ConstrainedBox(
-                  constraints: const BoxConstraints(maxWidth: LayoutConstant.maxWidth),
+                  constraints:
+                      const BoxConstraints(maxWidth: LayoutConstant.maxWidth),
                   child: SizedBox(
                     height: _fontSize + 12,
                     child: ListView.separated(
@@ -220,8 +221,7 @@ class _CollectViewState extends ConsumerState<CollectView>
                           },
                           borderRadius: BorderRadius.circular(5),
                           child: Container(
-                            padding:
-                                const EdgeInsets.symmetric(horizontal: 3),
+                            padding: const EdgeInsets.symmetric(horizontal: 3),
                             decoration: BoxDecoration(
                               color: isSelected
                                   ? Theme.of(context)
@@ -282,7 +282,8 @@ class _CollectViewState extends ConsumerState<CollectView>
               sliver: SliverToBoxAdapter(
                 child: Center(
                   child: ConstrainedBox(
-                    constraints: const BoxConstraints(maxWidth: LayoutConstant.maxWidth),
+                    constraints:
+                        const BoxConstraints(maxWidth: LayoutConstant.maxWidth),
                     child: Padding(
                       padding: const EdgeInsets.symmetric(horizontal: 8),
                       child: GridView.builder(

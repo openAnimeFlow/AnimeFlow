@@ -1,4 +1,4 @@
-import 'package:anime_flow/http/requests/flow_request.dart';
+import 'package:anime_flow/network/requests/flow_request.dart';
 import 'package:anime_flow/models/item/danmaku/danmaku_episode_response.dart';
 import 'package:anime_flow/models/item/danmaku/danmaku_module.dart';
 import 'package:anime_flow/models/item/danmaku/danmaku_search_response.dart';

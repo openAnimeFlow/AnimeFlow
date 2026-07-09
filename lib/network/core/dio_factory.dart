@@ -1,8 +1,8 @@
-import 'package:anime_flow/http/api_path.dart';
-import 'package:anime_flow/http/interceptors/bgm_authInterceptor.dart';
-import 'package:anime_flow/http/interceptors/bgm_refresh_token_interceptor.dart';
-import 'package:anime_flow/http/interceptors/dio_logger_interceptor.dart';
-import 'package:anime_flow/http/interceptors/flow_refresh_token_interceptor.dart';
+import 'package:anime_flow/network/api_path.dart';
+import 'package:anime_flow/network/interceptors/bgm_authInterceptor.dart';
+import 'package:anime_flow/network/interceptors/bgm_refresh_token_interceptor.dart';
+import 'package:anime_flow/network/interceptors/dio_logger_interceptor.dart';
+import 'package:anime_flow/network/interceptors/flow_refresh_token_interceptor.dart';
 import 'package:anime_flow/repository/BangumiToken.dart';
 import 'package:anime_flow/repository/flow_token_storage.dart';
 import 'package:anime_flow/utils/utils.dart';
@@ -21,12 +21,12 @@ class DioFactory {
   static Dio? _animeFlowDio;
 
   static Dio get apiDio => _apiDio ??= _create(
-    NetworkConfig.fromSettings(),
-    defaultHeaders: {
-      'referer': '',
-      'user-agent': Utils.getRandomUA(),
-    },
-  );
+        NetworkConfig.fromSettings(),
+        defaultHeaders: {
+          'referer': '',
+          'user-agent': Utils.getRandomUA(),
+        },
+      );
 
   static Dio get animeFlowDio {
     if (_animeFlowDio != null) return _animeFlowDio!;
@@ -48,31 +48,31 @@ class DioFactory {
   }
 
   static Dio get githubDio => _githubDio ??= _create(
-    NetworkConfig.fromSettings(),
-    defaultHeaders: {
-      'accept': 'application/vnd.github+json',
-      'user-agent': Utils.getRandomUA(),
-    },
-    interceptors: [_GithubMirrorInterceptor()],
-  );
+        NetworkConfig.fromSettings(),
+        defaultHeaders: {
+          'accept': 'application/vnd.github+json',
+          'user-agent': Utils.getRandomUA(),
+        },
+        interceptors: [_GithubMirrorInterceptor()],
+      );
 
   static Dio get pluginDio => _pluginDio ??= _create(
-    NetworkConfig.fromSettings(),
-    defaultHeaders: {
-      'user-agent': Utils.getRandomUA(),
-      'accept-language': Utils.getRandomAcceptedLanguage(),
-    },
-  );
+        NetworkConfig.fromSettings(),
+        defaultHeaders: {
+          'user-agent': Utils.getRandomUA(),
+          'accept-language': Utils.getRandomAcceptedLanguage(),
+        },
+      );
 
   static Dio get downloadDio => _downloadDio ??= _create(
-    NetworkConfig.fromSettings(
-      connectTimeout: const Duration(seconds: 15),
-      receiveTimeout: const Duration(seconds: 30),
-    ),
-    defaultHeaders: {
-      'user-agent': Utils.getRandomUA(),
-    },
-  );
+        NetworkConfig.fromSettings(
+          connectTimeout: const Duration(seconds: 15),
+          receiveTimeout: const Duration(seconds: 30),
+        ),
+        defaultHeaders: {
+          'user-agent': Utils.getRandomUA(),
+        },
+      );
 
   static Dio get bangumiDio {
     if (_bangumiDio != null) return _bangumiDio!;
@@ -115,7 +115,8 @@ class DioFactory {
         receiveTimeout: config.receiveTimeout,
         sendTimeout: config.sendTimeout,
         headers: defaultHeaders,
-        validateStatus: (status) => status != null && status >= 200 && status < 300,
+        validateStatus: (status) =>
+            status != null && status >= 200 && status < 300,
       ),
     );
     dio.httpClientAdapter = config.createAdapter();
@@ -139,7 +140,6 @@ class _GithubMirrorInterceptor extends Interceptor {
 
   @override
   void onRequest(RequestOptions options, RequestInterceptorHandler handler) {
-
     final uri = options.uri;
     if (!_mirrorableHosts.contains(uri.host)) {
       handler.next(options);

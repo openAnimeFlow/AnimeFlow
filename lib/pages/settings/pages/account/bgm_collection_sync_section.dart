@@ -1,4 +1,4 @@
-import 'package:anime_flow/http/clients/flow_client.dart';
+import 'package:anime_flow/network/clients/flow_client.dart';
 import 'package:anime_flow/models/item/flow/bgm_collection_sync_status_item.dart';
 import 'package:anime_flow/providers/user/bgm_collection_sync_provider.dart';
 import 'package:anime_flow/widget/notification_toast.dart';

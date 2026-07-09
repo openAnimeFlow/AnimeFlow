@@ -1,5 +1,5 @@
-import 'package:anime_flow/http/core/dio_factory.dart';
-import 'package:anime_flow/http/core/network_error_mapper.dart';
+import 'package:anime_flow/network/core/dio_factory.dart';
+import 'package:anime_flow/network/core/network_error_mapper.dart';
 import 'package:dio/dio.dart';
 import 'package:anime_flow/utils/logger.dart';
 
@@ -7,7 +7,6 @@ class Client {
   Client._();
 
   static final Client instance = Client._();
-
 
   /// GET 请求
   Future<Response<T>> get<T>(
@@ -128,7 +127,8 @@ class Client {
   /// 上传文件
   Future<Response> upload(String path, FormData formData) async {
     try {
-      final Response response = await DioFactory.apiDio.post(path, data: formData);
+      final Response response =
+          await DioFactory.apiDio.post(path, data: formData);
       return response;
     } on DioException catch (e) {
       throw await NetworkErrorMapper.mapException(e);

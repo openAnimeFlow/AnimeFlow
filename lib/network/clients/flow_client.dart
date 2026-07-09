@@ -1,9 +1,9 @@
 import 'package:anime_flow/constants/constants.dart';
-import 'package:anime_flow/http/core/api_signature.dart';
-import 'package:anime_flow/http/core/network_exception.dart';
-import 'package:anime_flow/http/core/dio_factory.dart';
-import 'package:anime_flow/http/core/network_error_mapper.dart';
-import 'package:anime_flow/http/interceptors/flow_refresh_token_interceptor.dart';
+import 'package:anime_flow/network/core/api_signature.dart';
+import 'package:anime_flow/network/core/network_exception.dart';
+import 'package:anime_flow/network/core/dio_factory.dart';
+import 'package:anime_flow/network/core/network_error_mapper.dart';
+import 'package:anime_flow/network/interceptors/flow_refresh_token_interceptor.dart';
 import 'package:anime_flow/repository/flow_token_storage.dart';
 import 'package:dio/dio.dart';
 
@@ -102,7 +102,8 @@ class FlowClient {
     if (includeFlowToken) {
       final token = await FlowTokenStorage.instance.getToken();
       if (token != null) {
-        mergedHeaders[Constants.authorization] = '${token.tokenType} ${token.accessToken}';
+        mergedHeaders[Constants.authorization] =
+            '${token.tokenType} ${token.accessToken}';
       }
     }
     final mergedExtra = <String, dynamic>{

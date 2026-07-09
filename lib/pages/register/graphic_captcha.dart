@@ -2,8 +2,8 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:typed_data';
 
-import 'package:anime_flow/http/clients/flow_client.dart';
-import 'package:anime_flow/http/requests/flow_request.dart';
+import 'package:anime_flow/network/clients/flow_client.dart';
+import 'package:anime_flow/network/requests/flow_request.dart';
 import 'package:anime_flow/models/item/captcha_item.dart';
 import 'package:anime_flow/widget/notification_toast.dart';
 import 'package:flutter/material.dart';
@@ -94,9 +94,8 @@ class _GraphicCaptchaViewState extends State<GraphicCaptchaView> {
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
     final captcha = widget.controller.captcha;
-    final captchaBytes = captcha == null
-        ? null
-        : _decodeCaptchaImage(captcha.imageBase64);
+    final captchaBytes =
+        captcha == null ? null : _decodeCaptchaImage(captcha.imageBase64);
 
     return Row(
       crossAxisAlignment: CrossAxisAlignment.start,

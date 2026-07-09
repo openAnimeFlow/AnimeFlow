@@ -1,6 +1,6 @@
 import 'package:anime_flow/constants/assets_path_constants.dart';
-import 'package:anime_flow/http/api_path.dart';
-import 'package:anime_flow/http/clients/flow_client.dart';
+import 'package:anime_flow/network/api_path.dart';
+import 'package:anime_flow/network/clients/flow_client.dart';
 import 'package:anime_flow/models/item/flow/bangumi_bind_item.dart';
 import 'package:anime_flow/models/item/flow/flow_users.dart';
 import 'package:anime_flow/pages/login/index.dart';

@@ -1,10 +1,11 @@
 import 'package:anime_flow/constants/constants.dart';
 import 'package:anime_flow/features/app/app_provider_container.dart';
 import 'package:anime_flow/features/app/app_info_provider.dart';
-import 'package:anime_flow/http/api_path.dart';
-import 'package:anime_flow/http/core/dio_factory.dart';
-import 'package:anime_flow/http/core/network_error_mapper.dart';
+import 'package:anime_flow/network/api_path.dart';
+import 'package:anime_flow/network/core/dio_factory.dart';
+import 'package:anime_flow/network/core/network_error_mapper.dart';
 import 'package:dio/dio.dart';
+
 class BangumiClient {
   BangumiClient._() {
     _dio = DioFactory.bangumiDio;
@@ -16,17 +17,18 @@ class BangumiClient {
 
   /// GET 请求
   Future<Response<T>> get<T>(
-      String path, {
-        Map<String, dynamic>? queryParameters,
-        Options? options,
-        CancelToken? cancelToken,
-      }) async {
+    String path, {
+    Map<String, dynamic>? queryParameters,
+    Options? options,
+    CancelToken? cancelToken,
+  }) async {
     try {
       return await _dio.get<T>(
         path,
         queryParameters: queryParameters,
         cancelToken: cancelToken,
-        options: options ?? Options(headers: {Constants.userAgentName: _getBangumiUserAgent()}),
+        options: options ??
+            Options(headers: {Constants.userAgentName: _getBangumiUserAgent()}),
       );
     } on DioException catch (e) {
       throw await NetworkErrorMapper.mapException(e);
@@ -35,20 +37,20 @@ class BangumiClient {
 
   /// POST 请求
   Future<Response> post(
-      String path, {
-        dynamic data,
-        Map<String, dynamic>? queryParameters,
-        Options? options,
-        CancelToken? cancelToken,
-
-      }) async {
+    String path, {
+    dynamic data,
+    Map<String, dynamic>? queryParameters,
+    Options? options,
+    CancelToken? cancelToken,
+  }) async {
     try {
       final Response response = await _dio.post(
         path,
         data: data,
         queryParameters: queryParameters,
         cancelToken: cancelToken,
-        options: options ?? Options(headers: {Constants.userAgentName: _getBangumiUserAgent()}),
+        options: options ??
+            Options(headers: {Constants.userAgentName: _getBangumiUserAgent()}),
       );
       return response;
     } on DioException catch (e) {
@@ -58,19 +60,20 @@ class BangumiClient {
 
   /// PUT 请求
   Future<Response> put(
-      String path, {
-        dynamic data,
-        Map<String, dynamic>? queryParameters,
-        Options? options,
-        CancelToken? cancelToken,
-      }) async {
+    String path, {
+    dynamic data,
+    Map<String, dynamic>? queryParameters,
+    Options? options,
+    CancelToken? cancelToken,
+  }) async {
     try {
       final Response response = await _dio.put(
         path,
         data: data,
         queryParameters: queryParameters,
         cancelToken: cancelToken,
-        options: options ?? Options(headers: {Constants.userAgentName: _getBangumiUserAgent()}),
+        options: options ??
+            Options(headers: {Constants.userAgentName: _getBangumiUserAgent()}),
       );
       return response;
     } on DioException catch (e) {
@@ -80,17 +83,18 @@ class BangumiClient {
 
   /// DELETE 请求
   Future<Response> delete(
-      String path, {
-        Map<String, dynamic>? queryParameters,
-        Options? options,
-        CancelToken? cancelToken,
-      }) async {
+    String path, {
+    Map<String, dynamic>? queryParameters,
+    Options? options,
+    CancelToken? cancelToken,
+  }) async {
     try {
       final Response response = await _dio.delete(
         path,
         queryParameters: queryParameters,
         cancelToken: cancelToken,
-        options: options ?? Options(headers: {Constants.userAgentName: _getBangumiUserAgent()}),
+        options: options ??
+            Options(headers: {Constants.userAgentName: _getBangumiUserAgent()}),
       );
       return response;
     } on DioException catch (e) {
@@ -100,17 +104,18 @@ class BangumiClient {
 
   /// HEAD 请求（用于获取资源信息，不下载内容）
   Future<Response> head(
-      String path, {
-        Map<String, dynamic>? queryParameters,
-        Options? options,
-        CancelToken? cancelToken,
-      }) async {
+    String path, {
+    Map<String, dynamic>? queryParameters,
+    Options? options,
+    CancelToken? cancelToken,
+  }) async {
     try {
       return await _dio.head(
         path,
         queryParameters: queryParameters,
         cancelToken: cancelToken,
-        options: options ?? Options(headers: {Constants.userAgentName: _getBangumiUserAgent()}),
+        options: options ??
+            Options(headers: {Constants.userAgentName: _getBangumiUserAgent()}),
       );
     } on DioException catch (e) {
       throw await NetworkErrorMapper.mapException(e);

@@ -4,7 +4,7 @@ import 'dart:io';
 import 'package:anime_flow/constants/constants.dart';
 import 'package:anime_flow/constants/storage_key.dart';
 import 'package:anime_flow/features/shaders/shaders_controller.dart';
-import 'package:anime_flow/http/requests/flow_request.dart';
+import 'package:anime_flow/network/requests/flow_request.dart';
 import 'package:anime_flow/models/enums/video_controls_icon_type.dart';
 import 'package:anime_flow/models/item/danmaku/danmaku_module.dart';
 import 'package:anime_flow/models/play/play_history.dart';

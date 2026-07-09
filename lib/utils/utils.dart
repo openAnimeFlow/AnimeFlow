@@ -2,7 +2,7 @@ import 'dart:io';
 import 'dart:math';
 
 import 'package:anime_flow/constants/constants.dart';
-import 'package:anime_flow/http/api_path.dart';
+import 'package:anime_flow/network/api_path.dart';
 import 'package:anime_flow/utils/logger.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';

@@ -1,5 +1,5 @@
-import 'package:anime_flow/http/core/dio_factory.dart';
-import 'package:anime_flow/http/core/network_error_mapper.dart';
+import 'package:anime_flow/network/core/dio_factory.dart';
+import 'package:anime_flow/network/core/network_error_mapper.dart';
 import 'package:dio/dio.dart';
 import 'package:anime_flow/utils/logger.dart';
 
@@ -7,7 +7,6 @@ class GithubClient {
   GithubClient._();
 
   static final GithubClient instance = GithubClient._();
-
 
   /// GET 请求
   Future<Response<T>> get<T>(

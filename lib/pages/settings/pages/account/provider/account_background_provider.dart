@@ -1,4 +1,4 @@
-import 'package:anime_flow/http/requests/flow_request.dart';
+import 'package:anime_flow/network/requests/flow_request.dart';
 import 'package:anime_flow/models/item/flow/background_image_item.dart';
 import 'package:anime_flow/providers/user/user_state_provider.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';

@@ -1,7 +1,7 @@
 import 'dart:io';
 
 import 'package:anime_flow/constants/storage_key.dart';
-import 'package:anime_flow/http/requests/github_request.dart';
+import 'package:anime_flow/network/requests/github_request.dart';
 import 'package:anime_flow/models/item/font_item.dart';
 import 'package:anime_flow/providers/theme_provider.dart';
 import 'package:anime_flow/repository/storage.dart';
@@ -112,7 +112,9 @@ class Font extends _$Font {
     state.whenData((list) {
       Future.microtask(() {
         try {
-          ref.read(downloadedFontMetasProvider.notifier).backfillFromRemote(list);
+          ref
+              .read(downloadedFontMetasProvider.notifier)
+              .backfillFromRemote(list);
         } catch (_) {}
       });
     });
@@ -120,9 +122,9 @@ class Font extends _$Font {
 
   /// 加载字节用于字体预览
   Future<List<int>> loadingFont(
-      String fontUrl, {
-        CancelToken? cancelToken,
-      }) async {
+    String fontUrl, {
+    CancelToken? cancelToken,
+  }) async {
     final useCdn = ref.read(fontRepoCdnProvider);
     return GithubRequest.previewFont(
       fontUrl,
@@ -383,7 +385,7 @@ class FontDownload extends _$FontDownload {
     await ref.read(downloadedFontMetasProvider.notifier).remove(fontId);
 
     final selectedId =
-    Storage.setting.get(SettingKey.selectedFontId) as String?;
+        Storage.setting.get(SettingKey.selectedFontId) as String?;
     if (selectedId == fontId) {
       await ref.read(selectedFontProvider.notifier).clearFont();
     }

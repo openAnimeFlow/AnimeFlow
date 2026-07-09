@@ -1,9 +1,9 @@
 import 'dart:typed_data';
 
-import 'package:anime_flow/http/clients/flow_client.dart';
-import 'package:anime_flow/http/interceptors/bgm_refresh_token_interceptor.dart';
-import 'package:anime_flow/http/interceptors/flow_refresh_token_interceptor.dart';
-import 'package:anime_flow/http/requests/flow_request.dart';
+import 'package:anime_flow/network/clients/flow_client.dart';
+import 'package:anime_flow/network/interceptors/bgm_refresh_token_interceptor.dart';
+import 'package:anime_flow/network/interceptors/flow_refresh_token_interceptor.dart';
+import 'package:anime_flow/network/requests/flow_request.dart';
 import 'package:anime_flow/models/item/flow/bangumi_bind_item.dart';
 import 'package:anime_flow/models/item/flow/flow_token.dart';
 import 'package:anime_flow/models/item/flow/flow_users.dart';
@@ -79,7 +79,8 @@ class CurrentUserInfo extends _$CurrentUserInfo {
     try {
       return await userRepository.getCurrentUserProfile(flowToken);
     } catch (error, stackTrace) {
-      final latestToken = await ref.read(flowTokenRepositoryProvider).getToken();
+      final latestToken =
+          await ref.read(flowTokenRepositoryProvider).getToken();
       if (latestToken == null) {
         return null;
       }

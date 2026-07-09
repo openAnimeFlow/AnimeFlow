@@ -1,8 +1,8 @@
 import 'dart:async';
 
 import 'package:anime_flow/constants/assets_path_constants.dart';
-import 'package:anime_flow/http/clients/flow_client.dart';
-import 'package:anime_flow/http/requests/flow_request.dart';
+import 'package:anime_flow/network/clients/flow_client.dart';
+import 'package:anime_flow/network/requests/flow_request.dart';
 import 'package:anime_flow/pages/register/graphic_captcha.dart';
 import 'package:anime_flow/pages/register/send_code_button.dart';
 import 'package:anime_flow/widget/notification_toast.dart';
@@ -225,8 +225,7 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
                             textInputAction: TextInputAction.next,
                             decoration: InputDecoration(
                               labelText: '确认新密码',
-                              prefixIcon:
-                                  const Icon(Icons.lock_reset_outlined),
+                              prefixIcon: const Icon(Icons.lock_reset_outlined),
                               suffixIcon: IconButton(
                                 onPressed: () => setState(() =>
                                     _obscureConfirmPassword =
@@ -264,8 +263,8 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
                                   onFieldSubmitted: (_) => _submit(),
                                   decoration: const InputDecoration(
                                     labelText: '邮箱验证码',
-                                    prefixIcon: Icon(
-                                        Icons.mark_email_read_outlined),
+                                    prefixIcon:
+                                        Icon(Icons.mark_email_read_outlined),
                                   ),
                                   validator: (value) {
                                     final code = value?.trim() ?? '';
@@ -287,8 +286,7 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
                           FilledButton(
                             onPressed: _isSubmitting ? null : _submit,
                             style: FilledButton.styleFrom(
-                              padding:
-                                  const EdgeInsets.symmetric(vertical: 14),
+                              padding: const EdgeInsets.symmetric(vertical: 14),
                               shape: RoundedRectangleBorder(
                                 borderRadius: BorderRadius.circular(16),
                               ),

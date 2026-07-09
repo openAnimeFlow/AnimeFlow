@@ -33,7 +33,7 @@ final class AnimeCalendarProvider
   AnimeCalendar create() => AnimeCalendar();
 }
 
-String _$animeCalendarHash() => r'a9db0ce0c8c5fb09093c6ba5240df3cb9ead2c3b';
+String _$animeCalendarHash() => r'986caceddc918fa44e0bf26c37835946237785f3';
 
 abstract class _$AnimeCalendar extends $AsyncNotifier<Calendar> {
   FutureOr<Calendar> build();
@@ -74,7 +74,7 @@ final class AnimeHotProvider
   AnimeHot create() => AnimeHot();
 }
 
-String _$animeHotHash() => r'c8ac2f5aeb177adad69fb8c16ea7717c89a605c5';
+String _$animeHotHash() => r'e47bfbd49b088563b29e0bf46d582160971b4d9c';
 
 abstract class _$AnimeHot extends $AsyncNotifier<AnimeHotState> {
   FutureOr<AnimeHotState> build();

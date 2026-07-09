@@ -50,7 +50,7 @@ final class BackgroundImageListProvider extends $FunctionalProvider<
 }
 
 String _$backgroundImageListHash() =>
-    r'74d3047e6108ebf98ba908e0411583c1801eac65';
+    r'ed3b1c2301b9093f7a141177319a4caba9482bfa';
 
 /// 当前用户已选背景图 ID
 

@@ -158,7 +158,7 @@ final class BangumiBindProvider extends $FunctionalProvider<
   }
 }
 
-String _$bangumiBindHash() => r'901f79109a6005eb777f90bc2a185bdd6da5d8f6';
+String _$bangumiBindHash() => r'467d11536761f45b2e2ef2076e638e004106dbcc';
 
 @ProviderFor(CurrentUserInfo)
 final currentUserInfoProvider = CurrentUserInfoProvider._();
@@ -184,7 +184,7 @@ final class CurrentUserInfoProvider
   CurrentUserInfo create() => CurrentUserInfo();
 }
 
-String _$currentUserInfoHash() => r'2f8e14ed8310454253a8a6ea0d69c1d5bc10499b';
+String _$currentUserInfoHash() => r'db6cb867658b4db17597ad2af63adf242643ad9d';
 
 abstract class _$CurrentUserInfo extends $AsyncNotifier<FlowUsers?> {
   FutureOr<FlowUsers?> build();

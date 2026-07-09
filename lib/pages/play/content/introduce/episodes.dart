@@ -15,7 +15,7 @@ class EpisodesComponents extends ConsumerStatefulWidget {
 
 class _EpisodesComponentsState extends ConsumerState<EpisodesComponents> {
   final controller = ScrollController();
-
+  final
   /// 布局模式：false=列表，true=网格
   bool isGridView = false;
 

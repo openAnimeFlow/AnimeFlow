@@ -520,8 +520,7 @@ class PlaySession {
         final bgmBangumiId =
             await FlowApi.getDanDanBangumiIDByBgmBangumiID(subjectId);
         if (bgmBangumiId != null) {
-          final danmaku =
-              await FlowApi.getDanDanmaku(bgmBangumiId, episode);
+          final danmaku = await FlowApi.getDanDanmaku(bgmBangumiId, episode);
           addDanmakuAll(danmaku);
           _isLoadingDanmaku = false;
         }
@@ -589,6 +588,16 @@ class PlaySession {
         videoUiStateController
             .updateIndicatorType(VideoControlsIndicatorType.noIndicator);
       }
+    }
+  }
+
+  /// 更新剧集观看状态
+  Future<void> updateEpisodeWatchedState(int episodeId,
+      {bool watched = true}) async {
+    try {
+      await FlowApi.updateEpisodeWatchedService(episodeId, watched: watched);
+    } catch (e) {
+      LiggLogger().e('更新剧集观看状态失败: $e');
     }
   }
 

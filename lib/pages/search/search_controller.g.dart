@@ -42,7 +42,7 @@ final class SearchPageControllerProvider
 }
 
 String _$searchPageControllerHash() =>
-    r'7d121e0a5045bfbb3c25041fb53729fd0f2aab8c';
+    r'a5beb859f9f50738a6f1ac0fc94121c8e0264d63';
 
 abstract class _$SearchPageController extends $Notifier<SearchPageState> {
   SearchPageState build();

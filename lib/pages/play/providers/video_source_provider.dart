@@ -15,6 +15,7 @@ import 'package:anime_flow/providers/video/providers.dart';
 import 'package:anime_flow/utils/crawl_config.dart';
 import 'package:anime_flow/utils/logger.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
+import 'package:webview_windows/webview_windows.dart';
 
 part 'video_source_provider.g.dart';
 
@@ -101,6 +102,11 @@ class VideoSourceNotifier extends _$VideoSourceNotifier {
   int get selectedWebsiteIndex => state.selectedWebsiteIndex;
   bool get isInitWebView => state.isInitWebView;
   bool get userManuallySelected => state.userManuallySelected;
+
+  WebviewController? get windowsWebviewController {
+    final controller = _webViewVideoProvider?.webviewController;
+    return controller is WebviewController ? controller : null;
+  }
 
   bool _requiresCaptcha(CrawlConfigItem config) {
     return config.antiCrawlerConfig.enabled &&
@@ -694,6 +700,13 @@ class VideoSourceNotifier extends _$VideoSourceNotifier {
     ref.read(playStateProvider.notifier).setIsParsing(true);
 
     _webViewVideoProvider ??= WebViewVideoSourceProvider();
+    await _webViewVideoProvider!.ensureInitialized();
+    if (loadToken != _videoPageLoadToken) {
+      return false;
+    }
+    if (!state.isInitWebView) {
+      state = state.copyWith(isInitWebView: true);
+    }
 
     var offset = 0;
     final subject = ref.read(playExtraProvider).playExtra;

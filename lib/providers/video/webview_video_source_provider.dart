@@ -3,7 +3,6 @@ import 'dart:async';
 import 'package:anime_flow/providers/video/video_source_provider.dart';
 import 'package:anime_flow/webview/video/video_webview_controller.dart';
 
-
 /// WebView 视频源提供者
 ///
 /// 使用 WebView 解析视频页面，提取视频源 URL。
@@ -22,6 +21,22 @@ class WebViewVideoSourceProvider implements IVideoSourceProvider {
       StreamController<String>.broadcast();
   Stream<String> get onLog => _logController.stream;
 
+  /// The platform controller is exposed so desktop platforms can mount their
+  /// native WebView in the widget tree when required by the plugin.
+  Object? get webviewController => _webview?.webviewController;
+
+  Future<void> ensureInitialized() async {
+    if (_webview != null) return;
+
+    _webview = VideoWebviewControllerFactory.getController();
+    await _webview!.init();
+    _logSubscription = _webview!.onLog.listen((log) {
+      if (!_logController.isClosed) {
+        _logController.add(log);
+      }
+    });
+  }
+
   @override
   Future<VideoSource> resolve(
     String episodeUrl, {
@@ -32,16 +47,7 @@ class WebViewVideoSourceProvider implements IVideoSourceProvider {
     _resolveId++;
     final currentResolveId = _resolveId;
 
-    if (_webview == null) {
-      _webview = VideoWebviewControllerFactory.getController();
-      await _webview!.init();
-
-      _logSubscription = _webview!.onLog.listen((log) {
-        if (!_logController.isClosed) {
-          _logController.add(log);
-        }
-      });
-    }
+    await ensureInitialized();
 
     try {
       await _webview!.loadUrl(

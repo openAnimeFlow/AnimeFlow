@@ -1,9 +1,10 @@
 import 'package:anime_flow/network/api/flow_api.dart';
 import 'package:anime_flow/models/item/bangumi/episodes_item.dart';
-import 'package:anime_flow/pages/play/service/episodes_pagination.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 part 'subject_episodes_provider.g.dart';
+
+const _episodesPageSize = 100;
 
 class SubjectEpisodesState {
   const SubjectEpisodesState({
@@ -14,7 +15,7 @@ class SubjectEpisodesState {
   final EpisodesItem episodes;
   final bool isLoadingMore;
 
-  bool get hasMore => EpisodesPagination.hasMore(episodes);
+  bool get hasMore => episodes.data.length < episodes.total;
 
   SubjectEpisodesState copyWith({
     EpisodesItem? episodes,
@@ -25,6 +26,109 @@ class SubjectEpisodesState {
       isLoadingMore: isLoadingMore ?? this.isLoadingMore,
     );
   }
+
+  EpisodeSelection? selectionForContinueEpisode(int? continueEpisodeSort) {
+    if (episodes.data.isEmpty) {
+      return null;
+    }
+    if (continueEpisodeSort != null) {
+      return findSelectionBySort(continueEpisodeSort) ??
+          firstNonCollectionSelection();
+    }
+    return firstNonCollectionSelection();
+  }
+
+  EpisodeSelection? firstNonCollectionSelection() {
+    if (episodes.data.isEmpty) {
+      return null;
+    }
+    var targetIndex = 0;
+    for (var i = 0; i < episodes.data.length; i++) {
+      if (episodes.data[i].collection == null) {
+        targetIndex = i;
+        break;
+      }
+    }
+    return _buildEpisodeSelection(
+      episode: episodes.data[targetIndex],
+      index: targetIndex + 1,
+    );
+  }
+
+  EpisodeSelection? findSelectionBySort(int episodeSort) {
+    for (var i = 0; i < episodes.data.length; i++) {
+      final episode = episodes.data[i];
+      if (episode.sort.toInt() == episodeSort) {
+        return _buildEpisodeSelection(
+          episode: episode,
+          index: i + 1,
+        );
+      }
+    }
+    return null;
+  }
+
+  EpisodeSelection? findSelectionById(int episodeId) {
+    for (var i = 0; i < episodes.data.length; i++) {
+      final episode = episodes.data[i];
+      if (episode.id == episodeId) {
+        return _buildEpisodeSelection(
+          episode: episode,
+          index: i + 1,
+        );
+      }
+    }
+    return null;
+  }
+
+  bool hasNextEpisode(int currentEpisodeIndex) {
+    return nextEpisodeSelection(currentEpisodeIndex) != null;
+  }
+
+  EpisodeSelection? nextEpisodeSelection(int currentEpisodeIndex) {
+    if (episodes.data.isEmpty) {
+      return null;
+    }
+    final nextEpisodeIndex = currentEpisodeIndex + 1;
+    final dataIndex = nextEpisodeIndex - 1;
+    if (dataIndex >= episodes.data.length) {
+      return null;
+    }
+    final nextEpisode = episodes.data[dataIndex];
+    if (nextEpisode.name.isEmpty) {
+      return null;
+    }
+    return _buildEpisodeSelection(
+      episode: nextEpisode,
+      index: nextEpisodeIndex,
+    );
+  }
+
+  EpisodeSelection _buildEpisodeSelection({
+    required EpisodeData episode,
+    required int index,
+  }) {
+    return EpisodeSelection(
+      id: episode.id,
+      index: index,
+      sort: episode.sort.toDouble(),
+      title: episode.nameCN.isEmpty ? episode.name : episode.nameCN,
+    );
+  }
+}
+
+class EpisodeSelection {
+  const EpisodeSelection({
+    required this.id,
+    required this.index,
+    required this.sort,
+    required this.title,
+  });
+
+  final int id;
+  final int index;
+  final double sort;
+  final String title;
 }
 
 @riverpod
@@ -55,9 +159,9 @@ class SubjectEpisodes extends _$SubjectEpisodes {
         subjectId,
         offset: current.episodes.data.length,
       );
-      final merged = EpisodesPagination.mergePages(
-        cached: current.episodes,
-        page: page,
+      final merged = current.episodes.copyWith(
+        data: [...current.episodes.data, ...page.data],
+        total: page.total,
       );
       state = AsyncData(
         SubjectEpisodesState(
@@ -109,7 +213,7 @@ Future<EpisodesItem> _fetchEpisodesPage(
 }) {
   return FlowApi.getSubjectEpisodesByIdService(
     subjectId,
-    EpisodesPagination.pageSize,
+    _episodesPageSize,
     offset,
   );
 }

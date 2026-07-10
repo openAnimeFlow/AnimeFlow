@@ -1,5 +1,5 @@
 import 'package:anime_flow/models/item/bangumi/episodes_item.dart';
-import 'package:anime_flow/pages/play/service/episodes_pagination.dart';
+import 'package:anime_flow/providers/episodes/subject_episodes_provider.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 EpisodeData _episode(int id, {num sort = 1}) {
@@ -19,8 +19,8 @@ EpisodeData _episode(int id, {num sort = 1}) {
 }
 
 void main() {
-  group('EpisodesPagination', () {
-    test('mergePages appends data and keeps total from latest page', () {
+  group('SubjectEpisodesState pagination', () {
+    test('page merge appends data and keeps total from latest page', () {
       final cached = EpisodesItem(
         data: [_episode(1), _episode(2)],
         total: 5,
@@ -30,7 +30,10 @@ void main() {
         total: 5,
       );
 
-      final merged = EpisodesPagination.mergePages(cached: cached, page: page);
+      final merged = cached.copyWith(
+        data: [...cached.data, ...page.data],
+        total: page.total,
+      );
 
       expect(merged.data.length, 4);
       expect(merged.data.last.id, 4);
@@ -43,7 +46,7 @@ void main() {
         total: 250,
       );
 
-      expect(EpisodesPagination.hasMore(item), isTrue);
+      expect(SubjectEpisodesState(episodes: item).hasMore, isTrue);
     });
 
     test('hasMore is false when all episodes are loaded', () {
@@ -52,7 +55,7 @@ void main() {
         total: 3,
       );
 
-      expect(EpisodesPagination.hasMore(item), isFalse);
+      expect(SubjectEpisodesState(episodes: item).hasMore, isFalse);
     });
   });
 }

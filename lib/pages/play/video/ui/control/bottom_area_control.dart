@@ -8,6 +8,7 @@ import 'package:anime_flow/pages/play/video/ui/button/rate_button.dart';
 import 'package:anime_flow/pages/play/video/ui/button/shader_button.dart';
 import 'package:anime_flow/pages/play/video/ui/danmaku/danmaku_setting.dart';
 import 'package:anime_flow/pages/play/video/ui/video_ui_components.dart';
+import 'package:anime_flow/providers/episodes/subject_episodes_provider.dart';
 import 'package:anime_flow/providers/user/user_state_provider.dart';
 import 'package:anime_flow/utils/systemUtil.dart';
 import 'package:anime_flow/widget/danmaku_text_field.dart';
@@ -44,8 +45,7 @@ class BottomAreaControl extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final playController = ref.read(playSessionProvider);
-    final videoUiStateController =
-        ref.read(videoUiProvider.notifier);
+    final videoUiStateController = ref.read(videoUiProvider.notifier);
     final fullscreen =
         ref.watch(playStateProvider.select((s) => s.isFullscreen));
     final danmakuOn = ref.watch(playStateProvider.select((s) => s.danmakuOn));
@@ -53,8 +53,8 @@ class BottomAreaControl extends ConsumerWidget {
         ref.watch(playStateProvider.select((s) => s.isWideScreen));
     final isContentExpanded =
         ref.watch(playStateProvider.select((s) => s.isContentExpanded));
-    final isShowControlsUi = ref.watch(
-        videoUiProvider.select((s) => s.isShowControlsUi));
+    final isShowControlsUi =
+        ref.watch(videoUiProvider.select((s) => s.isShowControlsUi));
     final leftPadding = MediaQuery.of(context).padding.left;
     // 全屏 + 不随键盘压缩 body 时，用 viewInsets 把底部控件顶到键盘上方
     final keyboardLift = fullscreen && SystemUtil.isMobile
@@ -127,21 +127,30 @@ class BottomAreaControl extends ConsumerWidget {
                         // 下一集
                         Consumer(
                           builder: (context, ref, _) {
-                            ref.watch(
-                              episodesProvider.select((state) =>
-                                  state.asData?.value.episodeIndex ?? 0),
-                            );
-                            final hasNextEpisode = ref
-                                .read(episodesProvider.notifier)
-                                .hasNextEpisode;
-                            if (!hasNextEpisode) {
+                            final episodesState =
+                                ref.watch(episodesProvider).asData?.value;
+                            final episodes = episodesState?.episodes;
+                            final selection = episodes == null
+                                ? null
+                                : SubjectEpisodesState(episodes: episodes)
+                                    .nextEpisodeSelection(
+                                    episodesState!.episodeIndex,
+                                  );
+                            if (selection == null) {
                               return const SizedBox.shrink();
                             }
                             return IconButton(
                               tooltip: '下一集',
-                              onPressed: () => ref
-                                  .read(episodesProvider.notifier)
-                                  .switchToNextEpisode(),
+                              onPressed: () {
+                                final notifier =
+                                    ref.read(episodesProvider.notifier);
+                                notifier.setEpisodeSort(
+                                  episodeId: selection.id,
+                                  episodeIndex: selection.index,
+                                  sort: selection.sort,
+                                );
+                                notifier.setEpisodeTitle(selection.title);
+                              },
                               icon: const Icon(
                                 Icons.skip_next_rounded,
                                 size: 33,
@@ -280,7 +289,11 @@ class BottomAreaControl extends ConsumerWidget {
                                           secondaryAnimation) {
                                         return UncontrolledProviderScope(
                                           container: container,
-                                          child: const EpisodesDialog(),
+                                          child: EpisodesDialog(
+                                            onEpisodeLongPress: (episodeId) {
+                                              // Handle long press event
+                                            },
+                                          ),
                                         );
                                       },
                                     );

@@ -1,12 +1,15 @@
 import 'package:anime_flow/constants/layout_constant.dart';
 import 'package:anime_flow/models/item/bangumi/episodes_item.dart';
 import 'package:anime_flow/pages/play/providers/episodes_provider.dart';
+import 'package:anime_flow/providers/episodes/subject_episodes_provider.dart';
+import 'package:anime_flow/routes/provider/routes_args.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 class EpisodesDialog extends ConsumerWidget {
-  const EpisodesDialog({super.key});
+  final void Function(int episodeId)? onEpisodeLongPress;
+  const EpisodesDialog({super.key, this.onEpisodeLongPress});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -14,6 +17,8 @@ class EpisodesDialog extends ConsumerWidget {
     final episodesState = episodesAsync.asData?.value;
     final episodes = episodesState?.episodes?.data;
     final selectedEpisodeId = episodesState?.episodeId ?? 0;
+    final subjectId =
+        ref.watch(playExtraProvider.select((s) => s.playExtra.subjectId));
 
     return Align(
       alignment: Alignment.centerRight,
@@ -51,6 +56,7 @@ class EpisodesDialog extends ConsumerWidget {
                 episodesAsync: episodesAsync,
                 episodes: episodes,
                 selectedEpisodeId: selectedEpisodeId,
+                subjectId: subjectId,
               ),
             ),
           ],
@@ -75,6 +81,7 @@ class EpisodesDialog extends ConsumerWidget {
     required AsyncValue<EpisodesData> episodesAsync,
     required List<EpisodeData>? episodes,
     required int selectedEpisodeId,
+    required int subjectId,
   }) {
     if (episodesAsync.isLoading) {
       return const Center(child: CircularProgressIndicator());
@@ -88,7 +95,8 @@ class EpisodesDialog extends ConsumerWidget {
             const Text('章节加载失败'),
             const SizedBox(height: 12),
             FilledButton(
-              onPressed: () => ref.read(episodesProvider.notifier).retry(),
+              onPressed: () =>
+                  ref.read(subjectEpisodesProvider(subjectId).notifier).retry(),
               child: const Text('重试'),
             ),
           ],
@@ -129,6 +137,8 @@ class EpisodesDialog extends ConsumerWidget {
               );
               context.pop();
             },
+            // 长按
+            onLongPress: () => onEpisodeLongPress?.call(episode.id),
             child: DecoratedBox(
               decoration: BoxDecoration(
                   borderRadius: BorderRadius.circular(10),

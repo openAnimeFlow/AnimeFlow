@@ -52,18 +52,16 @@ class _EpisodesComponentsState extends ConsumerState<EpisodesComponents> {
     final position = controller.position;
     if (position.pixels >=
         position.maxScrollExtent - _loadMoreTriggerDistance) {
-      _tryLoadMore();
+      final subjectId = ref.read(playExtraProvider).playExtra.subjectId;
+      final episodesState =
+          ref.read(subjectEpisodesProvider(subjectId)).asData?.value;
+      if (episodesState == null ||
+          !episodesState.hasMore ||
+          episodesState.isLoadingMore) {
+        return;
+      }
+      ref.read(subjectEpisodesProvider(subjectId).notifier).loadMore();
     }
-  }
-
-  void _tryLoadMore() {
-    final episodesState = ref.read(episodesProvider).asData?.value;
-    if (episodesState == null ||
-        !episodesState.hasMore ||
-        episodesState.isLoadingMore) {
-      return;
-    }
-    ref.read(episodesProvider.notifier).loadMore();
   }
 
   /// 正篇(type=0)置顶，其余按 type 分组，同 type 内按 sort 排序
@@ -189,7 +187,11 @@ class _EpisodesComponentsState extends ConsumerState<EpisodesComponents> {
             ),
             const SizedBox(height: 12),
             FilledButton.icon(
-              onPressed: () => ref.read(episodesProvider.notifier).retry(),
+              onPressed: () {
+                final subjectId =
+                    ref.read(playExtraProvider).playExtra.subjectId;
+                ref.read(subjectEpisodesProvider(subjectId).notifier).retry();
+              },
               icon: const Icon(Icons.refresh),
               label: const Text('重试'),
             ),

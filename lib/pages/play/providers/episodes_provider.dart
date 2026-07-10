@@ -1,6 +1,5 @@
 import 'package:anime_flow/models/item/bangumi/episodes_item.dart';
 import 'package:anime_flow/providers/episodes/subject_episodes_provider.dart';
-import 'package:anime_flow/routes/model/play_route_extra.dart';
 import 'package:anime_flow/routes/provider/routes_args.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
@@ -8,6 +7,7 @@ part 'episodes_provider.g.dart';
 
 class EpisodesData {
   const EpisodesData({
+    this.subjectId = 0,
     this.episodes,
     this.episodeTitle = '',
     this.episodeSort = 0,
@@ -16,6 +16,9 @@ class EpisodesData {
     this.isLoadingMore = false,
     this.hasMore = false,
   });
+
+  /// 当前番剧 id
+  final int subjectId;
 
   /// 剧集列表数据
   final EpisodesItem? episodes;
@@ -39,6 +42,7 @@ class EpisodesData {
   final bool hasMore;
 
   EpisodesData copyWith({
+    int? subjectId,
     EpisodesItem? episodes,
     String? episodeTitle,
     double? episodeSort,
@@ -48,6 +52,7 @@ class EpisodesData {
     bool? hasMore,
   }) {
     return EpisodesData(
+      subjectId: subjectId ?? this.subjectId,
       episodes: episodes ?? this.episodes,
       episodeTitle: episodeTitle ?? this.episodeTitle,
       episodeSort: episodeSort ?? this.episodeSort,
@@ -79,30 +84,41 @@ class Episodes extends _$Episodes {
         Error.throwWithStackTrace(error, stackTrace),
       _ => await ref.watch(subjectEpisodesProvider(subjectId).future),
     };
-    return _buildEpisodesData(extra, subjectEpisodes);
+    return _buildEpisodesData(subjectId, subjectEpisodes);
   }
 
   EpisodesData _buildEpisodesData(
-    PlayRouteExtra extra,
+    int subjectId,
     SubjectEpisodesState subjectEpisodes,
   ) {
     final episodes = subjectEpisodes.episodes;
-    final continueEpisodeSort = extra.continueEpisode;
+    final continueEpisodeSort = ref.read(playExtraProvider).continueEpisode;
+    final current = _currentData;
 
     if (episodes.data.isEmpty) {
       return EpisodesData(
+        subjectId: subjectId,
         episodes: episodes,
         isLoadingMore: subjectEpisodes.isLoadingMore,
         hasMore: subjectEpisodes.hasMore,
       );
     }
 
-    final selection = continueEpisodeSort != null
-        ? _findEpisodeSelectionBySort(episodes, continueEpisodeSort) ??
-            _buildFirstNonCollectionSelection(episodes)
-        : _buildFirstNonCollectionSelection(episodes);
+    final selection = current != null && current.subjectId == subjectId
+        ? subjectEpisodes.findSelectionById(current.episodeId) ??
+            subjectEpisodes.selectionForContinueEpisode(continueEpisodeSort)
+        : subjectEpisodes.selectionForContinueEpisode(continueEpisodeSort);
+    if (selection == null) {
+      return EpisodesData(
+        subjectId: subjectId,
+        episodes: episodes,
+        isLoadingMore: subjectEpisodes.isLoadingMore,
+        hasMore: subjectEpisodes.hasMore,
+      );
+    }
 
     return EpisodesData(
+      subjectId: subjectId,
       episodes: episodes,
       episodeTitle: selection.title,
       episodeSort: selection.sort,
@@ -114,37 +130,6 @@ class Episodes extends _$Episodes {
   }
 
   EpisodesData? get _currentData => state.asData?.value;
-
-  Future<void> retry() async {
-    final extra = ref.read(playExtraProvider);
-    final subjectId = extra.playExtra.subjectId;
-    ref.invalidate(subjectEpisodesProvider(subjectId));
-    state = const AsyncLoading();
-    state = await AsyncValue.guard(() async {
-      final subjectEpisodes =
-          await ref.read(subjectEpisodesProvider(subjectId).future);
-      return _buildEpisodesData(extra, subjectEpisodes);
-    });
-  }
-
-  Future<void> loadMore() async {
-    final current = _currentData;
-    if (current == null || current.isLoadingMore || !current.hasMore) {
-      return;
-    }
-
-    final extra = ref.read(playExtraProvider);
-    final subjectId = extra.playExtra.subjectId;
-    state = AsyncData(current.copyWith(isLoadingMore: true));
-    await ref.read(subjectEpisodesProvider(subjectId).notifier).loadMore();
-    final subjectEpisodes =
-        ref.read(subjectEpisodesProvider(subjectId)).asData?.value;
-    if (subjectEpisodes == null) {
-      state = AsyncData(current.copyWith(isLoadingMore: false));
-      return;
-    }
-    state = AsyncData(_buildEpisodesData(extra, subjectEpisodes));
-  }
 
   void setEpisodeTitle(String title) {
     final current = _currentData;
@@ -179,11 +164,9 @@ class Episodes extends _$Episodes {
     if (current == null || episodesData == null || episodesData.data.isEmpty) {
       return false;
     }
-    final nextEpisodeIndex = current.episodeIndex + 1;
-    if (nextEpisodeIndex - 1 >= episodesData.data.length) {
-      return false;
-    }
-    return episodesData.data[nextEpisodeIndex - 1].name.isNotEmpty;
+    return SubjectEpisodesState(episodes: episodesData).hasNextEpisode(
+      current.episodeIndex,
+    );
   }
 
   /// 切换到下一集
@@ -193,76 +176,16 @@ class Episodes extends _$Episodes {
     if (current == null || episodesData == null || episodesData.data.isEmpty) {
       return;
     }
-    final nextEpisodeIndex = current.episodeIndex + 1;
-    if (nextEpisodeIndex - 1 >= episodesData.data.length) {
-      return;
-    }
-    final nextEpisode = episodesData.data[nextEpisodeIndex - 1];
-    final title =
-        nextEpisode.nameCN.isEmpty ? nextEpisode.name : nextEpisode.nameCN;
+    final selection = SubjectEpisodesState(episodes: episodesData)
+        .nextEpisodeSelection(current.episodeIndex);
+    if (selection == null) return;
     state = AsyncData(
       current.copyWith(
-        episodeSort: nextEpisode.sort.toDouble(),
-        episodeIndex: nextEpisodeIndex,
-        episodeId: nextEpisode.id,
-        episodeTitle: title,
+        episodeSort: selection.sort,
+        episodeIndex: selection.index,
+        episodeId: selection.id,
+        episodeTitle: selection.title,
       ),
     );
   }
-
-  _EpisodeSelection _buildEpisodeSelection({
-    required EpisodeData episode,
-    required int index,
-  }) {
-    return _EpisodeSelection(
-      id: episode.id,
-      index: index,
-      sort: episode.sort.toDouble(),
-      title: episode.nameCN.isEmpty ? episode.name : episode.nameCN,
-    );
-  }
-
-  _EpisodeSelection _buildFirstNonCollectionSelection(EpisodesItem episodes) {
-    var targetIndex = 0;
-    for (var i = 0; i < episodes.data.length; i++) {
-      if (episodes.data[i].collection == null) {
-        targetIndex = i;
-        break;
-      }
-    }
-    return _buildEpisodeSelection(
-      episode: episodes.data[targetIndex],
-      index: targetIndex + 1,
-    );
-  }
-
-  _EpisodeSelection? _findEpisodeSelectionBySort(
-    EpisodesItem episodes,
-    int episodeSort,
-  ) {
-    for (var i = 0; i < episodes.data.length; i++) {
-      final episode = episodes.data[i];
-      if (episode.sort.toInt() == episodeSort) {
-        return _buildEpisodeSelection(
-          episode: episode,
-          index: i + 1,
-        );
-      }
-    }
-    return null;
-  }
-}
-
-class _EpisodeSelection {
-  const _EpisodeSelection({
-    required this.id,
-    required this.index,
-    required this.sort,
-    required this.title,
-  });
-
-  final int id;
-  final int index;
-  final double sort;
-  final String title;
 }

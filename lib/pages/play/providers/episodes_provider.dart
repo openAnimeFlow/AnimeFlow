@@ -72,8 +72,13 @@ class Episodes extends _$Episodes {
           .read(subjectEpisodesProvider(subjectId).notifier)
           .loadUntilEpisodeSort(requestedEpisodeSort);
     }
-    final subjectEpisodes =
-        await ref.watch(subjectEpisodesProvider(subjectId).future);
+    final subjectEpisodesAsync = ref.watch(subjectEpisodesProvider(subjectId));
+    final subjectEpisodes = switch (subjectEpisodesAsync) {
+      AsyncData(:final value) => value,
+      AsyncError(:final error, :final stackTrace) =>
+        Error.throwWithStackTrace(error, stackTrace),
+      _ => await ref.watch(subjectEpisodesProvider(subjectId).future),
+    };
     return _buildEpisodesData(extra, subjectEpisodes);
   }
 

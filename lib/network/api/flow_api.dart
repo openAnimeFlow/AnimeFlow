@@ -808,7 +808,9 @@ class FlowApi {
   static Future<void> updateEpisodeWatchedService(int episodeId,
       {required bool watched}) async {
     await _client.put(
-      AnimeFlowApi.episodeWatched,
+      AnimeFlowApi.episodeWatched
+          .replaceFirst('{episodeId}', episodeId.toString()),
+      data: {'watched': watched},
       requireFlowToken: true,
     );
   }

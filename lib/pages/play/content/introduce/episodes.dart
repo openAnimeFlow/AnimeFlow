@@ -1,7 +1,12 @@
 import 'package:anime_flow/constants/assets_path_constants.dart';
 import 'package:anime_flow/constants/constants.dart';
 import 'package:anime_flow/models/item/bangumi/episodes_item.dart';
+import 'package:anime_flow/network/clients/flow_client.dart';
 import 'package:anime_flow/pages/play/providers/episodes_provider.dart';
+import 'package:anime_flow/pages/play/providers/play_provider.dart';
+import 'package:anime_flow/providers/episodes/subject_episodes_provider.dart';
+import 'package:anime_flow/routes/provider/routes_args.dart';
+import 'package:anime_flow/widget/notification_toast.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:lottie/lottie.dart';
@@ -15,7 +20,8 @@ class EpisodesComponents extends ConsumerStatefulWidget {
 
 class _EpisodesComponentsState extends ConsumerState<EpisodesComponents> {
   final controller = ScrollController();
-  final
+  late final PlaySession playSession;
+
   /// 布局模式：false=列表，true=网格
   bool isGridView = false;
 
@@ -31,6 +37,7 @@ class _EpisodesComponentsState extends ConsumerState<EpisodesComponents> {
   void initState() {
     super.initState();
     controller.addListener(_onScroll);
+    playSession = ref.read(playSessionProvider);
   }
 
   @override
@@ -87,6 +94,26 @@ class _EpisodesComponentsState extends ConsumerState<EpisodesComponents> {
       duration: const Duration(milliseconds: 280),
       curve: Curves.easeOutCubic,
     );
+  }
+
+  /// 更新剧集观看状态
+  Future<void> _updateEpisodeWatched(int episodeId) async {
+    try {
+      await playSession.updateEpisodeWatchedState(episodeId);
+      if (!mounted) return;
+      final subjectId = ref.read(playExtraProvider).playExtra.subjectId;
+      ref.read(subjectEpisodesProvider(subjectId).notifier).setEpisodeWatched(
+            episodeId: episodeId,
+            watched: true,
+          );
+      NotificationToast.show('提示', '已更新观看进度');
+    } on AnimeFlowApiException catch (e) {
+      if (!mounted) return;
+      NotificationToast.show('更新失败', e.message);
+    } catch (e) {
+      if (!mounted) return;
+      NotificationToast.show('更新失败', e.toString());
+    }
   }
 
   @override
@@ -234,6 +261,8 @@ class _EpisodesComponentsState extends ConsumerState<EpisodesComponents> {
               child: InkWell(
                 borderRadius: BorderRadius.circular(10),
                 onTap: () => _selectEpisode(episode, index + 1),
+                // 长按
+                onLongPress: () => _updateEpisodeWatched(episode.id),
                 child: Container(
                   decoration: BoxDecoration(
                     borderRadius: BorderRadius.circular(10),

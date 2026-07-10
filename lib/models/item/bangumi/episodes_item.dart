@@ -7,6 +7,16 @@ class EpisodesItem {
     required this.total,
   });
 
+  EpisodesItem copyWith({
+    List<EpisodeData>? data,
+    int? total,
+  }) {
+    return EpisodesItem(
+      data: data ?? this.data,
+      total: total ?? this.total,
+    );
+  }
+
   EpisodesItem.fromJson(Map<String, dynamic> json)
       : data = (json['data'] as List?)
                 ?.map((e) => EpisodeData.fromJson(e))
@@ -53,6 +63,38 @@ class EpisodeData {
     this.collection,
   });
 
+  EpisodeData copyWith({
+    int? id,
+    int? subjectID,
+    num? sort,
+    int? type,
+    int? disc,
+    String? name,
+    String? nameCN,
+    String? duration,
+    String? airdate,
+    int? comment,
+    bool? watched,
+    String? desc,
+    EpisodeCollection? collection,
+  }) {
+    return EpisodeData(
+      id: id ?? this.id,
+      subjectID: subjectID ?? this.subjectID,
+      sort: sort ?? this.sort,
+      type: type ?? this.type,
+      disc: disc ?? this.disc,
+      name: name ?? this.name,
+      nameCN: nameCN ?? this.nameCN,
+      duration: duration ?? this.duration,
+      airdate: airdate ?? this.airdate,
+      comment: comment ?? this.comment,
+      watched: watched ?? this.watched,
+      desc: desc ?? this.desc,
+      collection: collection ?? this.collection,
+    );
+  }
+
   EpisodeData.fromJson(Map<String, dynamic> json)
       : id = json['id'],
         subjectID = json['subjectID'],
@@ -82,6 +124,7 @@ class EpisodeData {
       'duration': duration,
       'airdate': airdate,
       'comment': comment,
+      if (watched != null) 'watched': watched,
       'desc': desc,
       if (collection != null) 'collection': collection!.toJson(),
     };

@@ -79,6 +79,28 @@ class SubjectEpisodes extends _$SubjectEpisodes {
       current = state.asData?.value;
     }
   }
+
+  void setEpisodeWatched({
+    required int episodeId,
+    required bool watched,
+  }) {
+    final current = state.asData?.value;
+    if (current == null) {
+      return;
+    }
+    final index =
+        current.episodes.data.indexWhere((episode) => episode.id == episodeId);
+    if (index < 0 || current.episodes.data[index].watched == watched) {
+      return;
+    }
+    final updatedEpisodes = [...current.episodes.data];
+    updatedEpisodes[index] = updatedEpisodes[index].copyWith(watched: watched);
+    state = AsyncData(
+      current.copyWith(
+        episodes: current.episodes.copyWith(data: updatedEpisodes),
+      ),
+    );
+  }
 }
 
 Future<EpisodesItem> _fetchEpisodesPage(

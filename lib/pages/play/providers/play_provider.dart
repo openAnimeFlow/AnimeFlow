@@ -594,11 +594,7 @@ class PlaySession {
   /// 更新剧集观看状态
   Future<void> updateEpisodeWatchedState(int episodeId,
       {bool watched = true}) async {
-    try {
-      await FlowApi.updateEpisodeWatchedService(episodeId, watched: watched);
-    } catch (e) {
-      LiggLogger().e('更新剧集观看状态失败: $e');
-    }
+    await FlowApi.updateEpisodeWatchedService(episodeId, watched: watched);
   }
 
   /// 从存储同步平台显示/隐藏状态

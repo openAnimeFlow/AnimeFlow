@@ -238,7 +238,7 @@ class AnimeFlowApi {
       oauthBindCode = '/api/oauth/bind-code',
 
       /// 剧集观看记录
-      episodeWatched = '/episodes/{episodeId}/watch';
+      episodeWatched = '/api/v1/users/episodes/{episodeId}/watch';
 }
 
 class DamakuApi {

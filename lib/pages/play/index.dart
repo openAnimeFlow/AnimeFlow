@@ -18,9 +18,12 @@ class PlayPage extends ConsumerStatefulWidget {
   ConsumerState<PlayPage> createState() => _PlayPageViewState();
 }
 
-class _PlayPageViewState extends ConsumerState<PlayPage> {
+class _PlayPageViewState extends ConsumerState<PlayPage>
+    with SingleTickerProviderStateMixin {
   late final PlaySession playSession;
   late final VideoSourceNotifier videoSourceController;
+  late final AnimationController _contentAnimationController;
+  late final Animation<double> _contentSizeFactor;
 
   final GlobalKey _videoKey = GlobalKey();
   final GlobalKey _contentKey = GlobalKey();
@@ -33,7 +36,23 @@ class _PlayPageViewState extends ConsumerState<PlayPage> {
     super.initState();
     videoSourceController = ref.read(videoSourceProvider.notifier);
     playSession = ref.read(playSessionProvider);
+    _contentAnimationController = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 200),
+      value: ref.read(playStateProvider).isContentExpanded ? 1 : 0,
+    );
+    _contentSizeFactor = CurvedAnimation(
+      parent: _contentAnimationController,
+      curve: Curves.easeOutCubic,
+      reverseCurve: Curves.easeInCubic,
+    );
     videoSourceController.initVideoResources();
+  }
+
+  @override
+  void dispose() {
+    _contentAnimationController.dispose();
+    super.dispose();
   }
 
   void _initResources(String subjectName) {
@@ -63,6 +82,16 @@ class _PlayPageViewState extends ConsumerState<PlayPage> {
         _initResources(subjectName);
       }
     });
+    ref.listen<bool>(
+      playStateProvider.select((state) => state.isContentExpanded),
+      (_, isExpanded) {
+        if (isExpanded) {
+          _contentAnimationController.forward();
+        } else {
+          _contentAnimationController.reverse();
+        }
+      },
+    );
     return LayoutBuilder(builder: (context, constraints) {
       final isWideScreen = constraints.maxWidth > 600;
       _syncIsWideScreenAfterBuild(isWideScreen);
@@ -70,10 +99,6 @@ class _PlayPageViewState extends ConsumerState<PlayPage> {
       final isFullscreen = ref.watch(
         playStateProvider.select((state) => state.isFullscreen),
       );
-      final isContentExpanded = ref.watch(
-        playStateProvider.select((state) => state.isContentExpanded),
-      );
-
       Widget content;
       if (isFullscreen) {
         content = Scaffold(
@@ -92,14 +117,15 @@ class _PlayPageViewState extends ConsumerState<PlayPage> {
                         child: VideoView(key: _videoKey),
                       ),
                     ),
-                    AnimatedContainer(
-                      duration: const Duration(milliseconds: 100),
-                      width: isContentExpanded
-                          ? LayoutConstant.playContentWidth
-                          : 0,
-                      child: Opacity(
-                        opacity: isContentExpanded ? 1 : 0,
-                        child: ContentView(key: _contentKey),
+                    ClipRect(
+                      child: SizeTransition(
+                        axis: Axis.horizontal,
+                        alignment: Alignment.centerRight,
+                        sizeFactor: _contentSizeFactor,
+                        child: SizedBox(
+                          width: LayoutConstant.playContentWidth,
+                          child: ContentView(key: _contentKey),
+                        ),
                       ),
                     ),
                   ],

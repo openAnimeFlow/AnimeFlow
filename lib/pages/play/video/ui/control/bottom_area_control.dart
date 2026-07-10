@@ -1,5 +1,6 @@
 import 'package:anime_flow/constants/assets_path_constants.dart';
 import 'package:anime_flow/models/enums/video_controls_icon_type.dart';
+import 'package:anime_flow/network/clients/flow_client.dart';
 import 'package:anime_flow/pages/play/providers/play_provider.dart';
 import 'package:anime_flow/pages/play/providers/video_ui_provider.dart';
 import 'package:anime_flow/pages/play/providers/episodes_provider.dart';
@@ -10,8 +11,11 @@ import 'package:anime_flow/pages/play/video/ui/danmaku/danmaku_setting.dart';
 import 'package:anime_flow/pages/play/video/ui/video_ui_components.dart';
 import 'package:anime_flow/providers/episodes/subject_episodes_provider.dart';
 import 'package:anime_flow/providers/user/user_state_provider.dart';
+import 'package:anime_flow/routes/provider/routes_args.dart';
+import 'package:anime_flow/utils/logger.dart';
 import 'package:anime_flow/utils/systemUtil.dart';
 import 'package:anime_flow/widget/danmaku_text_field.dart';
+import 'package:anime_flow/widget/notification_toast.dart';
 import 'package:anime_flow/widget/play_content/episodes_dialog.dart';
 import 'package:anime_flow/widget/play_pause_icon.dart';
 import 'package:flutter/material.dart';
@@ -40,6 +44,35 @@ class BottomAreaControl extends ConsumerWidget {
         ),
       ),
     );
+  }
+
+  Future<void> _updateEpisodeWatched(
+    BuildContext dialogContext,
+    ProviderContainer container,
+    int episodeId,
+  ) async {
+    try {
+      final playController = container.read(playSessionProvider);
+      await playController.updateEpisodeWatchedState(episodeId);
+      if (!dialogContext.mounted) return;
+      final subjectId = container.read(playExtraProvider).playExtra.subjectId;
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        container
+            .read(subjectEpisodesProvider(subjectId).notifier)
+            .setEpisodeWatched(
+              episodeId: episodeId,
+              watched: true,
+            );
+      });
+      NotificationToast.show('提示', '已更新观看进度');
+    } on AnimeFlowApiException catch (e) {
+      if (!dialogContext.mounted) return;
+      NotificationToast.show('更新失败', e.message);
+    } catch (e) {
+      if (!dialogContext.mounted) return;
+      LiggLogger().e(e);
+      NotificationToast.show('更新失败', e.toString());
+    }
   }
 
   @override
@@ -285,13 +318,17 @@ class BottomAreaControl extends ConsumerWidget {
                                           child: child,
                                         );
                                       },
-                                      pageBuilder: (context, animation,
+                                      pageBuilder: (dialogContext, animation,
                                           secondaryAnimation) {
                                         return UncontrolledProviderScope(
                                           container: container,
                                           child: EpisodesDialog(
                                             onEpisodeLongPress: (episodeId) {
-                                              // Handle long press event
+                                              _updateEpisodeWatched(
+                                                dialogContext,
+                                                container,
+                                                episodeId,
+                                              );
                                             },
                                           ),
                                         );

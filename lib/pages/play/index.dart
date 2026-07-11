@@ -1,7 +1,7 @@
 import 'package:anime_flow/constants/layout_constant.dart';
 import 'package:anime_flow/pages/play/providers/play_provider.dart';
 import 'package:anime_flow/pages/play/providers/video_source_provider.dart';
-import 'package:anime_flow/pages/play/video/video.dart';
+import 'package:anime_flow/pages/play/video/player.dart';
 import 'package:anime_flow/pages/play/providers/episodes_provider.dart';
 import 'package:anime_flow/routes/provider/routes_args.dart';
 import 'package:anime_flow/utils/systemUtil.dart';
@@ -104,7 +104,7 @@ class _PlayPageViewState extends ConsumerState<PlayPage>
         content = Scaffold(
           backgroundColor: Colors.black,
           resizeToAvoidBottomInset: !SystemUtil.isMobile,
-          body: VideoView(key: _videoKey),
+          body: PlayerView(key: _videoKey),
         );
       } else {
         content = isWideScreen
@@ -114,7 +114,7 @@ class _PlayPageViewState extends ConsumerState<PlayPage>
                   children: [
                     Expanded(
                       child: Center(
-                        child: VideoView(key: _videoKey),
+                        child: PlayerView(key: _videoKey),
                       ),
                     ),
                     ClipRect(
@@ -145,7 +145,7 @@ class _PlayPageViewState extends ConsumerState<PlayPage>
                     children: [
                       AspectRatio(
                         aspectRatio: 16 / 9,
-                        child: VideoView(key: _videoKey),
+                        child: PlayerView(key: _videoKey),
                       ),
                       Expanded(
                         child: ContentView(key: _contentKey),

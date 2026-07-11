@@ -14,14 +14,14 @@ import 'package:window_manager/window_manager.dart';
 import 'ui/danmaku/danmaku_view.dart';
 import 'ui/index.dart';
 
-class VideoView extends ConsumerStatefulWidget {
-  const VideoView({super.key});
+class PlayerView extends ConsumerStatefulWidget {
+  const PlayerView({super.key});
 
   @override
-  ConsumerState<VideoView> createState() => _VideoViewState();
+  ConsumerState<PlayerView> createState() => _PlayerViewState();
 }
 
-class _VideoViewState extends ConsumerState<VideoView> with WindowListener {
+class _PlayerViewState extends ConsumerState<PlayerView> with WindowListener {
   late final PlaySession playController;
   late final PlayStateNotifier playStateController;
   late final VideoUiNotifier videoUiStateController;

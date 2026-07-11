@@ -64,17 +64,6 @@ class _EpisodesComponentsState extends ConsumerState<EpisodesComponents> {
     }
   }
 
-  /// 正篇(type=0)置顶，其余按 type 分组，同 type 内按 sort 排序
-  void _sortEpisodes(List<EpisodeData> episodes) {
-    episodes.sort((a, b) {
-      final aIsMain = a.type == 0 ? 0 : 1;
-      final bIsMain = b.type == 0 ? 0 : 1;
-      if (aIsMain != bIsMain) return aIsMain.compareTo(bIsMain);
-      if (a.type != b.type) return a.type.compareTo(b.type);
-      return a.sort.compareTo(b.sort);
-    });
-  }
-
   /// 将列表滚动到当前选集对应行（需在布局完成、`controller` 已 attach 后调用）。
   void _scrollListToSelectedEpisode(
     List<EpisodeData> episodes,
@@ -224,7 +213,6 @@ class _EpisodesComponentsState extends ConsumerState<EpisodesComponents> {
     }
 
     final episodes = episodesItem.data;
-    _sortEpisodes(episodes);
     final selectedEpisodeId = episodesState.episodeId;
     final itemCount = episodes.length + (episodesState.isLoadingMore ? 1 : 0);
     if (lastScrolledEpisodeId != selectedEpisodeId) {
@@ -346,7 +334,6 @@ class _EpisodesComponentsState extends ConsumerState<EpisodesComponents> {
     }
 
     final episodes = episodesItem.data;
-    _sortEpisodes(episodes);
     final selectedEpisodeId = episodesState.episodeId;
     final itemCount = episodes.length + (episodesState.isLoadingMore ? 1 : 0);
 

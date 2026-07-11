@@ -82,16 +82,6 @@ class _EpisodesDialogState extends ConsumerState<EpisodesDialog> {
     );
   }
 
-  void _sortEpisodes(List<EpisodeData> episodes) {
-    episodes.sort((a, b) {
-      final aIsMain = a.type == 0 ? 0 : 1;
-      final bIsMain = b.type == 0 ? 0 : 1;
-      if (aIsMain != bIsMain) return aIsMain.compareTo(bIsMain);
-      if (a.type != b.type) return a.type.compareTo(b.type);
-      return a.sort.compareTo(b.sort);
-    });
-  }
-
   void _tryLoadMoreEpisodes({
     required int subjectId,
     required EpisodesData? episodesState,
@@ -180,11 +170,8 @@ class _EpisodesDialogState extends ConsumerState<EpisodesDialog> {
       return const Center(child: Text('暂无章节数据'));
     }
 
-    // 正篇置顶，其他按 type 分组排列
-    final sortedEpisodes = [...episodes];
-    _sortEpisodes(sortedEpisodes);
     _scrollToSelectedEpisode(
-      episodes: sortedEpisodes,
+      episodes: episodes,
       selectedEpisodeId: selectedEpisodeId,
     );
 
@@ -201,10 +188,10 @@ class _EpisodesDialogState extends ConsumerState<EpisodesDialog> {
       },
       child: ListView.builder(
         controller: _scrollController,
-        itemCount: sortedEpisodes.length +
-            (episodesState?.isLoadingMore == true ? 1 : 0),
+        itemCount:
+            episodes.length + (episodesState?.isLoadingMore == true ? 1 : 0),
         itemBuilder: (BuildContext context, int index) {
-          if (index >= sortedEpisodes.length) {
+          if (index >= episodes.length) {
             return const Padding(
               padding: EdgeInsets.symmetric(vertical: 12),
               child: Center(
@@ -217,14 +204,14 @@ class _EpisodesDialogState extends ConsumerState<EpisodesDialog> {
             );
           }
 
-          final episode = sortedEpisodes[index];
+          final episode = episodes[index];
           final isSelected = selectedEpisodeId == episode.id;
           final colorScheme = Theme.of(context).colorScheme;
           return Card(
             key: isSelected ? _selectedEpisodeKey : null,
             elevation: 0,
             color: isSelected ? colorScheme.primaryContainer : null,
-            margin: index != sortedEpisodes.length - 1 ||
+            margin: index != episodes.length - 1 ||
                     episodesState?.isLoadingMore == true
                 ? const EdgeInsets.only(bottom: 8)
                 : null,

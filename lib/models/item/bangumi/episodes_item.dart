@@ -45,7 +45,6 @@ class EpisodeData {
   final int comment;
   final bool? watched;
   final String desc;
-  final EpisodeCollection? collection;
 
   EpisodeData({
     required this.id,
@@ -60,7 +59,6 @@ class EpisodeData {
     required this.comment,
     required this.desc,
     this.watched,
-    this.collection,
   });
 
   EpisodeData copyWith({
@@ -76,7 +74,6 @@ class EpisodeData {
     int? comment,
     bool? watched,
     String? desc,
-    EpisodeCollection? collection,
   }) {
     return EpisodeData(
       id: id ?? this.id,
@@ -91,7 +88,6 @@ class EpisodeData {
       comment: comment ?? this.comment,
       watched: watched ?? this.watched,
       desc: desc ?? this.desc,
-      collection: collection ?? this.collection,
     );
   }
 
@@ -107,10 +103,7 @@ class EpisodeData {
         duration = json['duration'] ?? '',
         airdate = json['airdate'] ?? '',
         comment = json['comment'] ?? 0,
-        desc = json['desc'] ?? '',
-        collection = json['collection'] != null
-            ? EpisodeCollection.fromJson(json['collection'])
-            : null;
+        desc = json['desc'] ?? '';
 
   Map<String, dynamic> toJson() {
     return {
@@ -126,28 +119,6 @@ class EpisodeData {
       'comment': comment,
       if (watched != null) 'watched': watched,
       'desc': desc,
-      if (collection != null) 'collection': collection!.toJson(),
-    };
-  }
-}
-
-class EpisodeCollection {
-  final int status;
-  final int? updatedAt;
-
-  EpisodeCollection({
-    required this.status,
-    this.updatedAt,
-  });
-
-  EpisodeCollection.fromJson(Map<String, dynamic> json)
-      : status = json['status'],
-        updatedAt = json['updatedAt'];
-
-  Map<String, dynamic> toJson() {
-    return {
-      'status': status,
-      if (updatedAt != null) 'updatedAt': updatedAt,
     };
   }
 }

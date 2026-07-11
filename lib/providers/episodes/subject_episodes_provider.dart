@@ -7,10 +7,10 @@ part 'subject_episodes_provider.g.dart';
 const _episodesPageSize = 100;
 
 class SubjectEpisodesState {
-  const SubjectEpisodesState({
-    required this.episodes,
+  SubjectEpisodesState({
+    required EpisodesItem episodes,
     this.isLoadingMore = false,
-  });
+  }) : episodes = _sortEpisodesItem(episodes);
 
   final EpisodesItem episodes;
   final bool isLoadingMore;
@@ -33,25 +33,43 @@ class SubjectEpisodesState {
     }
     if (continueEpisodeSort != null) {
       return findSelectionBySort(continueEpisodeSort) ??
-          firstNonCollectionSelection();
+          firstEpisodeSelection();
     }
-    return firstNonCollectionSelection();
+    return nextWatchedEpisodeSelection() ?? firstEpisodeSelection();
   }
 
-  EpisodeSelection? firstNonCollectionSelection() {
+  /// 返回最后一个已观看剧集的下一集。
+  ///
+  /// 未通过路由指定剧集时，用它恢复到用户下一集应观看的内容。
+  EpisodeSelection? nextWatchedEpisodeSelection() {
+    var lastWatchedIndex = -1;
+    for (var i = 0; i < episodes.data.length; i++) {
+      if (episodes.data[i].watched == true) {
+        lastWatchedIndex = i;
+      }
+    }
+
+    if (lastWatchedIndex < 0 || lastWatchedIndex + 1 >= episodes.data.length) {
+      return null;
+    }
+
+    final nextEpisode = episodes.data[lastWatchedIndex + 1];
+    if (nextEpisode.name.isEmpty) {
+      return null;
+    }
+    return _buildEpisodeSelection(
+      episode: nextEpisode,
+      index: lastWatchedIndex + 2,
+    );
+  }
+
+  EpisodeSelection? firstEpisodeSelection() {
     if (episodes.data.isEmpty) {
       return null;
     }
-    var targetIndex = 0;
-    for (var i = 0; i < episodes.data.length; i++) {
-      if (episodes.data[i].collection == null) {
-        targetIndex = i;
-        break;
-      }
-    }
     return _buildEpisodeSelection(
-      episode: episodes.data[targetIndex],
-      index: targetIndex + 1,
+      episode: episodes.data.first,
+      index: 1,
     );
   }
 
@@ -129,6 +147,27 @@ class EpisodeSelection {
   final int index;
   final double sort;
   final String title;
+}
+
+EpisodesItem _sortEpisodesItem(EpisodesItem episodes) {
+  final sortedEpisodes = [...episodes.data]..sort(_compareEpisodes);
+  return episodes.copyWith(data: sortedEpisodes);
+}
+
+int _compareEpisodes(EpisodeData a, EpisodeData b) {
+  final aIsMain = a.type == 0 ? 0 : 1;
+  final bIsMain = b.type == 0 ? 0 : 1;
+  if (aIsMain != bIsMain) {
+    return aIsMain.compareTo(bIsMain);
+  }
+  if (a.type != b.type) {
+    return a.type.compareTo(b.type);
+  }
+  final sortComparison = a.sort.compareTo(b.sort);
+  if (sortComparison != 0) {
+    return sortComparison;
+  }
+  return a.id.compareTo(b.id);
 }
 
 @riverpod

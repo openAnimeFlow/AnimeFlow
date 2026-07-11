@@ -71,11 +71,11 @@ class Episodes extends _$Episodes {
   Future<EpisodesData> build() async {
     final extra = ref.watch(playExtraProvider);
     final subjectId = extra.playExtra.subjectId;
-    final requestedEpisodeSort = extra.continueEpisode;
-    if (requestedEpisodeSort != null) {
+    final requestedEpisodeId = extra.continueEpisodeId;
+    if (requestedEpisodeId != null) {
       await ref
           .read(subjectEpisodesProvider(subjectId).notifier)
-          .loadUntilEpisodeSort(requestedEpisodeSort);
+          .loadUntilEpisodeId(requestedEpisodeId);
     }
     final subjectEpisodesAsync = ref.watch(subjectEpisodesProvider(subjectId));
     final subjectEpisodes = switch (subjectEpisodesAsync) {
@@ -92,7 +92,7 @@ class Episodes extends _$Episodes {
     SubjectEpisodesState subjectEpisodes,
   ) {
     final episodes = subjectEpisodes.episodes;
-    final continueEpisodeSort = ref.read(playExtraProvider).continueEpisode;
+    final continueEpisodeId = ref.read(playExtraProvider).continueEpisodeId;
     final current = _currentData;
 
     if (episodes.data.isEmpty) {
@@ -106,8 +106,14 @@ class Episodes extends _$Episodes {
 
     final selection = current != null && current.subjectId == subjectId
         ? subjectEpisodes.findSelectionById(current.episodeId) ??
-            subjectEpisodes.selectionForContinueEpisode(continueEpisodeSort)
-        : subjectEpisodes.selectionForContinueEpisode(continueEpisodeSort);
+            _selectionForContinueEpisode(
+              subjectEpisodes,
+              continueEpisodeId: continueEpisodeId,
+            )
+        : _selectionForContinueEpisode(
+            subjectEpisodes,
+            continueEpisodeId: continueEpisodeId,
+          );
     if (selection == null) {
       return EpisodesData(
         subjectId: subjectId,
@@ -130,6 +136,16 @@ class Episodes extends _$Episodes {
   }
 
   EpisodesData? get _currentData => state.asData?.value;
+
+  EpisodeSelection? _selectionForContinueEpisode(
+    SubjectEpisodesState subjectEpisodes, {
+    required int? continueEpisodeId,
+  }) {
+    if (continueEpisodeId != null) {
+      return subjectEpisodes.findSelectionById(continueEpisodeId);
+    }
+    return subjectEpisodes.selectionForContinueEpisode();
+  }
 
   void setEpisodeTitle(String title) {
     final current = _currentData;

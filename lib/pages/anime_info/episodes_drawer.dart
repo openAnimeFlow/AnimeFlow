@@ -220,7 +220,7 @@ class _EpisodesDrawerViewState extends ConsumerState<EpisodesDrawerView> {
                               .expand((item) => item.values.map((e) => e.v))
                               .toList(),
                         ),
-                        continueEpisode: episode.sort.toInt(),
+                        continueEpisodeId: episode.id,
                       ),
                     ).push(context);
                   },

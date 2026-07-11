@@ -113,7 +113,8 @@ class _PlayRecordViewState extends State<PlayRecordView> {
                     child: InkWell(
                       borderRadius: BorderRadius.circular(8),
                       onTap: () {
-                        AnimeInfoRoute.fromExtra(subjectBasicData).push(context);
+                        AnimeInfoRoute.fromExtra(subjectBasicData)
+                            .push(context);
                       },
                       child: Column(
                         mainAxisSize: MainAxisSize.min,
@@ -198,10 +199,12 @@ class _PlayRecordViewState extends State<PlayRecordView> {
                                                             history.subjectId,
                                                         subjectName:
                                                             history.subjectName,
-                                                        subjectCover: history.cover,
-                                                        subjectAliases: history.alias),
-                                                    continueEpisode:
-                                                        history.episodeSort),
+                                                        subjectCover:
+                                                            history.cover,
+                                                        subjectAliases:
+                                                            history.alias),
+                                                    continueEpisodeId:
+                                                        history.episodeId),
                                               ).push(context);
                                             },
                                             child: const Icon(

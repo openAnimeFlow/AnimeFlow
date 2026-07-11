@@ -27,13 +27,9 @@ class SubjectEpisodesState {
     );
   }
 
-  EpisodeSelection? selectionForContinueEpisode(int? continueEpisodeSort) {
+  EpisodeSelection? selectionForContinueEpisode() {
     if (episodes.data.isEmpty) {
       return null;
-    }
-    if (continueEpisodeSort != null) {
-      return findSelectionBySort(continueEpisodeSort) ??
-          firstEpisodeSelection();
     }
     return nextWatchedEpisodeSelection() ?? firstEpisodeSelection();
   }
@@ -71,19 +67,6 @@ class SubjectEpisodesState {
       episode: episodes.data.first,
       index: 1,
     );
-  }
-
-  EpisodeSelection? findSelectionBySort(int episodeSort) {
-    for (var i = 0; i < episodes.data.length; i++) {
-      final episode = episodes.data[i];
-      if (episode.sort.toInt() == episodeSort) {
-        return _buildEpisodeSelection(
-          episode: episode,
-          index: i + 1,
-        );
-      }
-    }
-    return null;
   }
 
   EpisodeSelection? findSelectionById(int episodeId) {
@@ -213,11 +196,11 @@ class SubjectEpisodes extends _$SubjectEpisodes {
     }
   }
 
-  Future<void> loadUntilEpisodeSort(int episodeSort) async {
+  Future<void> loadUntilEpisodeId(int episodeId) async {
     var current = state.asData?.value;
     while (current != null &&
         current.hasMore &&
-        !_containsEpisodeSort(current.episodes, episodeSort)) {
+        !_containsEpisodeId(current.episodes, episodeId)) {
       await loadMore();
       current = state.asData?.value;
     }
@@ -271,6 +254,6 @@ Future<EpisodesItem> _fetchEpisodesPage(
   );
 }
 
-bool _containsEpisodeSort(EpisodesItem episodes, int episodeSort) {
-  return episodes.data.any((episode) => episode.sort.toInt() == episodeSort);
+bool _containsEpisodeId(EpisodesItem episodes, int episodeId) {
+  return episodes.data.any((episode) => episode.id == episodeId);
 }

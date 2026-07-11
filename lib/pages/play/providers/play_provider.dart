@@ -10,6 +10,7 @@ import 'package:anime_flow/models/item/danmaku/danmaku_module.dart';
 import 'package:anime_flow/models/play/play_history.dart';
 import 'package:anime_flow/pages/play/providers/video_ui_provider.dart';
 import 'package:anime_flow/pages/play/providers/episodes_provider.dart';
+import 'package:anime_flow/providers/episodes/subject_episodes_provider.dart';
 import 'package:anime_flow/repository/play_repository.dart';
 import 'package:anime_flow/repository/storage.dart';
 import 'package:anime_flow/routes/provider/routes_args.dart';
@@ -44,6 +45,16 @@ PlaySession playSession(Ref ref) {
     playStateActions: ref.watch(playStateProvider.notifier),
     videoUiStateActions: ref.watch(videoUiProvider.notifier),
     episodesActions: ref.watch(episodesProvider.notifier),
+    setEpisodeWatched: ({
+      required subjectId,
+      required episodeId,
+      required watched,
+    }) {
+      ref.read(subjectEpisodesProvider(subjectId).notifier).setEpisodeWatched(
+            episodeId: episodeId,
+            watched: watched,
+          );
+    },
   )..init();
 
   ref.listen<PlayState>(
@@ -298,6 +309,9 @@ class PlayRequest {
   /// 集数
   final int episodeIndex;
 
+  /// Bangumi 剧集 sort
+  final int episodeSort;
+
   ///剧集id
   final int episodeId;
 
@@ -306,6 +320,7 @@ class PlayRequest {
     required this.offset,
     required this.subjectId,
     required this.episodeIndex,
+    required this.episodeSort,
     required this.episodeId,
     required this.subjectName,
     required this.subjectCover,
@@ -315,21 +330,33 @@ class PlayRequest {
 
 class PlaySession {
   static const _parseSuccessResult = '视频解析成功';
+  static const _watchedProgressThreshold = 0.90;
 
   PlaySession({
     required this.shadersDirectory,
     required PlayStateNotifier playStateActions,
     required VideoUiStateActions videoUiStateActions,
     required Episodes episodesActions,
+    required void Function({
+      required int subjectId,
+      required int episodeId,
+      required bool watched,
+    }) setEpisodeWatched,
   })  : _playStateActions = playStateActions,
         _videoUiStateActions = videoUiStateActions,
-        _episodesActions = episodesActions;
+        _episodesActions = episodesActions,
+        _setEpisodeWatched = setEpisodeWatched;
 
   late Player player;
   late VideoController videoController;
   final PlayStateNotifier _playStateActions;
   final VideoUiStateActions _videoUiStateActions;
   final Episodes _episodesActions;
+  final void Function({
+    required int subjectId,
+    required int episodeId,
+    required bool watched,
+  }) _setEpisodeWatched;
   final setting = Storage.setting;
 
   /// 着色器所在目录（由 [shadersDirectoryProvider] 在启动时准备）
@@ -355,6 +382,9 @@ class PlaySession {
 
   /// 当前集数索引
   int episode = 0;
+
+  /// 当前 Bangumi 剧集 sort
+  int episodeSort = 0;
 
   ///剧集id
   int episodeId = 0;
@@ -384,6 +414,8 @@ class PlaySession {
 
   int? _lastSavedPositionSeconds;
   bool _isSavingPlayHistory = false;
+  final Set<int> _autoWatchedEpisodeIds = {};
+  final Set<int> _autoWatchedEpisodeUpdatesInFlight = {};
 
   final List<StreamSubscription<Object?>> _playerSubscriptions = [];
 
@@ -499,6 +531,7 @@ class PlaySession {
     offset = state.offset;
     subjectId = state.subjectId;
     episode = state.episodeIndex;
+    episodeSort = state.episodeSort;
     episodeId = state.episodeId;
     subjectName = state.subjectName;
     subjectCover = state.subjectCover;
@@ -537,6 +570,10 @@ class PlaySession {
     if (subjectId <= 0 || episodeId <= 0) return;
     if (subjectName == null || subjectCover == null) return;
 
+    final setting = Storage.setting;
+    if (setting.get(PlaybackKey.episodesProgress, defaultValue: true)) {
+      _autoUpdateEpisodeWatchedIfNeeded(state);
+    }
     final positionSeconds = state.position.inSeconds;
     final lastSavedPositionSeconds = _lastSavedPositionSeconds;
     if (lastSavedPositionSeconds != null &&
@@ -549,6 +586,32 @@ class PlaySession {
     unawaited(_savePlayHistory(state));
   }
 
+  void _autoUpdateEpisodeWatchedIfNeeded(PlayState state) {
+    final progress =
+        state.position.inMilliseconds / state.duration.inMilliseconds;
+    if (progress < _watchedProgressThreshold) {
+      return;
+    }
+    if (_autoWatchedEpisodeIds.contains(episodeId) ||
+        _autoWatchedEpisodeUpdatesInFlight.contains(episodeId)) {
+      return;
+    }
+
+    _autoWatchedEpisodeUpdatesInFlight.add(episodeId);
+    unawaited(_autoUpdateEpisodeWatched(episodeId));
+  }
+
+  Future<void> _autoUpdateEpisodeWatched(int targetEpisodeId) async {
+    try {
+      await updateEpisodeWatchedState(targetEpisodeId);
+      _autoWatchedEpisodeIds.add(targetEpisodeId);
+    } catch (e) {
+      LiggLogger().e('自动更新观看进度失败: $e');
+    } finally {
+      _autoWatchedEpisodeUpdatesInFlight.remove(targetEpisodeId);
+    }
+  }
+
   Future<void> _savePlayHistory(PlayState state) async {
     if (_isSavingPlayHistory) return;
     _isSavingPlayHistory = true;
@@ -557,7 +620,7 @@ class PlaySession {
         subjectId: subjectId,
         subjectName: subjectName!,
         episodeId: episodeId,
-        episodeSort: episode,
+        episodeSort: episodeSort,
         cover: subjectCover!,
         updateAt: DateTime.now(),
         position: state.position.inSeconds,
@@ -594,7 +657,16 @@ class PlaySession {
   /// 更新剧集观看状态
   Future<void> updateEpisodeWatchedState(int episodeId,
       {bool watched = true}) async {
+    final targetSubjectId = subjectId;
     await FlowApi.updateEpisodeWatchedService(episodeId, watched: watched);
+    if (targetSubjectId <= 0) {
+      return;
+    }
+    _setEpisodeWatched(
+      subjectId: targetSubjectId,
+      episodeId: episodeId,
+      watched: watched,
+    );
   }
 
   /// 从存储同步平台显示/隐藏状态

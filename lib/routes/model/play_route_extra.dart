@@ -1,11 +1,11 @@
 /// 播放页传给 [PlayPage] 的参数集。
 class PlayRouteExtra {
   final PlayExtra playExtra;
-  final int? continueEpisode;
+  final int? continueEpisodeId;
 
   const PlayRouteExtra({
     required this.playExtra,
-    this.continueEpisode,
+    this.continueEpisodeId,
   });
 }
 

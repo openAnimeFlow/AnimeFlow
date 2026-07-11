@@ -154,8 +154,6 @@ class _PlayRecordPageState extends State<PlayRecordPage> {
                                           style: ElevatedButton.styleFrom(
                                               elevation: 0),
                                           onPressed: () async {
-                                            final episodeSort =
-                                                playHistory.episodeSort;
                                             await PlayRoute.fromExtra(
                                                     PlayRouteExtra(
                                                         playExtra: PlayExtra(
@@ -169,8 +167,9 @@ class _PlayRecordPageState extends State<PlayRecordPage> {
                                                           subjectAliases:
                                                               playHistory.alias,
                                                         ),
-                                                        continueEpisode:
-                                                            episodeSort))
+                                                        continueEpisodeId:
+                                                            playHistory
+                                                                .episodeId))
                                                 .push(context);
                                           },
                                           child: Text(

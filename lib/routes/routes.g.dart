@@ -299,8 +299,8 @@ mixin $PlayRoute on GoRouteData {
         id: int.parse(state.uri.queryParameters['id']!),
         name: state.uri.queryParameters['name']!,
         image: state.uri.queryParameters['image']!,
-        continueEpisode: _$convertMapValue(
-            'continue-episode', state.uri.queryParameters, int.tryParse),
+        continueEpisodeId: _$convertMapValue(
+            'continue-episode-id', state.uri.queryParameters, int.tryParse),
         $extra: state.extra as PlayRouteExtra?,
       );
 
@@ -313,8 +313,8 @@ mixin $PlayRoute on GoRouteData {
           'id': _self.id.toString(),
           'name': _self.name,
           'image': _self.image,
-          if (_self.continueEpisode != null)
-            'continue-episode': _self.continueEpisode!.toString(),
+          if (_self.continueEpisodeId != null)
+            'continue-episode-id': _self.continueEpisodeId!.toString(),
         },
       );
 

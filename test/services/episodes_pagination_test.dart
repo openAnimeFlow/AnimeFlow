@@ -92,7 +92,7 @@ void main() {
         ),
       );
 
-      final selection = state.selectionForContinueEpisode(null);
+      final selection = state.selectionForContinueEpisode();
 
       expect(selection?.id, 3);
       expect(selection?.index, 3);
@@ -112,31 +112,33 @@ void main() {
         ),
       );
 
-      final selection = state.selectionForContinueEpisode(null);
+      final selection = state.selectionForContinueEpisode();
 
       expect(selection?.id, 3);
       expect(selection?.index, 3);
     });
 
-    test('prefers the main episode when requested sort also exists in specials',
+    test('finds an episode by id when episode sort does not start from one',
         () {
       final state = SubjectEpisodesState(
         episodes: EpisodesItem(
           data: [
-            _episode(102, sort: 2, type: 3),
-            _episode(2, sort: 2),
+            _episode(500, sort: 50),
+            _episode(501, sort: 51),
+            _episode(502, sort: 52),
           ],
-          total: 2,
+          total: 3,
         ),
       );
 
-      final selection = state.selectionForContinueEpisode(2);
+      final selection = state.findSelectionById(501);
 
-      expect(selection?.id, 2);
-      expect(selection?.index, 1);
+      expect(selection?.id, 501);
+      expect(selection?.sort, 51);
+      expect(selection?.index, 2);
     });
 
-    test('uses the requested episode when one is supplied', () {
+    test('uses the requested episode id when one is supplied', () {
       final state = SubjectEpisodesState(
         episodes: EpisodesItem(
           data: [
@@ -148,7 +150,7 @@ void main() {
         ),
       );
 
-      final selection = state.selectionForContinueEpisode(2);
+      final selection = state.findSelectionById(2);
 
       expect(selection?.id, 2);
       expect(selection?.index, 2);
@@ -166,7 +168,7 @@ void main() {
         ),
       );
 
-      final selection = state.selectionForContinueEpisode(null);
+      final selection = state.selectionForContinueEpisode();
 
       expect(selection?.id, 1);
       expect(selection?.index, 1);

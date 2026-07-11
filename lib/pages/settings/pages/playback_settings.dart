@@ -143,7 +143,7 @@ class _PlaybackSettingsPageState extends State<PlaybackSettingsPage> {
                   _buildSectionTitle('播放进度'),
                   SwitchListTile(
                     title: const Text('保存剧集进度'),
-                    subtitle: const Text('自动保存保存剧集进度,下次从未观看的剧集开始播放'),
+                    subtitle: const Text('播放至90%自动保存剧集进度,下次从未观看的剧集开始播放'),
                     value: _episodesProgress,
                     onChanged: (value) {
                       setState(() {

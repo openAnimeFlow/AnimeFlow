@@ -714,13 +714,15 @@ class VideoSourceNotifier extends _$VideoSourceNotifier {
         ref.read(episodesProvider).asData?.value ?? const EpisodesData();
     final subjectId = subject.subjectId;
     final episodeIndex = episodesState.episodeIndex;
+    final episodeSort = episodesState.episodeSort.toInt();
+    final episodeId = episodesState.episodeId;
     final subjectName = subject.subjectName;
     final subjectCover = subject.subjectCover;
     final subjectAlias = subject.subjectAliases;
     final position = await PlayRepository.getPlayHistory(subjectId);
     if (position != null &&
         position.position > 0 &&
-        position.episodeSort == episodeIndex) {
+        position.episodeId == episodeId) {
       offset = position.position;
     }
 
@@ -748,8 +750,9 @@ class VideoSourceNotifier extends _$VideoSourceNotifier {
           subjectName: subjectName,
           subjectCover: subjectCover,
           episodeIndex: episodeIndex,
+          episodeSort: episodeSort,
           alias: subjectAlias,
-          episodeId: episodesState.episodeId,
+          episodeId: episodeId,
         ),
       );
       return true;

@@ -101,8 +101,7 @@ class UserRoute extends GoRouteData with $UserRoute {
   const UserRoute();
 
   @override
-  Widget build(BuildContext context, GoRouterState state) =>
-      const UserPage();
+  Widget build(BuildContext context, GoRouterState state) => const UserPage();
 }
 
 @TypedGoRoute<LoginRoute>(path: '/login')
@@ -179,7 +178,7 @@ class PlayRoute extends GoRouteData with $PlayRoute {
     required this.id,
     required this.name,
     required this.image,
-    this.continueEpisode,
+    this.continueEpisodeId,
     this.$extra,
   });
 
@@ -187,14 +186,14 @@ class PlayRoute extends GoRouteData with $PlayRoute {
         id: extra.playExtra.subjectId,
         name: extra.playExtra.subjectName,
         image: extra.playExtra.subjectCover,
-        continueEpisode: extra.continueEpisode,
+        continueEpisodeId: extra.continueEpisodeId,
         $extra: extra,
       );
 
   final int id;
   final String name;
   final String image;
-  final int? continueEpisode;
+  final int? continueEpisodeId;
   final PlayRouteExtra? $extra;
 
   @override
@@ -207,7 +206,7 @@ class PlayRoute extends GoRouteData with $PlayRoute {
             subjectCover: image,
             subjectAliases: const [],
           ),
-          continueEpisode: continueEpisode,
+          continueEpisodeId: continueEpisodeId,
         );
     return ProviderScope(
       overrides: [

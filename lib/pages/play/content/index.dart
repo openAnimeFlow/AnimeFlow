@@ -36,10 +36,10 @@ class _ContentViewState extends ConsumerState<ContentView>
     super.dispose();
   }
 
-  Future<void> onSendDanmaku(String text, int bgmUserId) async {
+  Future<void> onSendDanmaku(String text, int userId) async {
     final success = await playSession.sendDanmaku(
       text,
-      bgmUserId: bgmUserId,
+      bgmUserId: userId,
     );
     if (!mounted) return;
     ScaffoldMessenger.of(context).showSnackBar(
@@ -73,16 +73,13 @@ class _ContentViewState extends ConsumerState<ContentView>
                   ? const Spacer()
                   : Consumer(
                       builder: (context, ref, _) {
-                        final userInfo =
-                            ref.watch(currentUserInfoProvider).value;
-                        if (userInfo == null) {
-                          return const SizedBox.shrink();
-                        }
+                        final isLogin = ref.watch(isLoggedInProvider).value;
+                        if (isLogin != true) return const SizedBox.shrink();
+                        final userInfo = ref.watch(currentUserInfoProvider).value;
                         return SizedBox(
                           width: 200,
                           child: Padding(
-                            padding:
-                                const EdgeInsets.symmetric(horizontal: 8),
+                            padding: const EdgeInsets.symmetric(horizontal: 8),
                             child: DanmakuTextField(
                               onFocusChange: (hasFocus) {
                                 if (hasFocus) {
@@ -93,7 +90,8 @@ class _ContentViewState extends ConsumerState<ContentView>
                                   videoUiStateController.hideControlsUi();
                                 }
                               },
-                              onSend: (text) => onSendDanmaku(text, userInfo.id),
+                              onSend: (text) =>
+                                  onSendDanmaku(text, userInfo!.id),
                             ),
                           ),
                         );

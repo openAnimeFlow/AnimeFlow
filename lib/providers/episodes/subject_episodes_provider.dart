@@ -184,6 +184,20 @@ class SubjectEpisodes extends _$SubjectEpisodes {
     }
   }
 
+  Future<void> updateEpisodeWatched({
+    required int episodeId,
+    bool watched = true,
+  }) async {
+    await FlowApi.updateEpisodeWatchedService(
+      episodeId,
+      watched: watched,
+    );
+    setEpisodeWatched(
+      episodeId: episodeId,
+      watched: watched,
+    );
+  }
+
   void setEpisodeWatched({
     required int episodeId,
     required bool watched,

@@ -12,6 +12,7 @@ class EpisodesDrawerView extends ConsumerStatefulWidget {
   final String subjectName;
   final String subjectImage;
   final ScrollController scrollController;
+  final void Function(int episodeId)? onEpisodeLongPress;
 
   const EpisodesDrawerView({
     super.key,
@@ -19,6 +20,7 @@ class EpisodesDrawerView extends ConsumerStatefulWidget {
     required this.subjectName,
     required this.subjectImage,
     required this.scrollController,
+    this.onEpisodeLongPress,
   });
 
   static void show(
@@ -26,6 +28,7 @@ class EpisodesDrawerView extends ConsumerStatefulWidget {
     required SubjectsInfoItem subjectItem,
     required String subjectName,
     required String subjectImage,
+    void Function(int episodeId)? onEpisodeLongPress,
   }) {
     final providerContainer = ProviderScope.containerOf(context);
     showModalBottomSheet<void>(
@@ -48,6 +51,7 @@ class EpisodesDrawerView extends ConsumerStatefulWidget {
                 subjectItem: subjectItem,
                 subjectName: subjectName,
                 subjectImage: subjectImage,
+                onEpisodeLongPress: onEpisodeLongPress,
               );
             },
           ),
@@ -200,7 +204,9 @@ class _EpisodesDrawerViewState extends ConsumerState<EpisodesDrawerView> {
                   tileColor: episode.watched == true
                       ? Theme.of(context).colorScheme.surfaceContainerHighest
                       : null,
-                  onLongPress: () {},
+                  onLongPress: () => widget.onEpisodeLongPress?.call(
+                    episode.id,
+                  ),
                   onTap: () {
                     Navigator.of(context).pop();
                     PlayRoute.fromExtra(

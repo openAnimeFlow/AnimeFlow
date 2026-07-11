@@ -2,8 +2,8 @@ import 'dart:ui';
 
 import 'package:anime_flow/constants/layout_constant.dart';
 import 'package:anime_flow/network/clients/flow_client.dart';
-import 'package:anime_flow/network/api/flow_api.dart';
 import 'package:anime_flow/models/item/bangumi/subjects_info_item.dart';
+import 'package:anime_flow/network/api/flow_api.dart';
 import 'package:anime_flow/pages/anime_info/provider/anime_info_provider.dart';
 import 'package:anime_flow/pages/anime_info/episodes_drawer.dart';
 import 'package:anime_flow/providers/episodes/subject_episodes_provider.dart';
@@ -328,6 +328,23 @@ class InfoHeadView extends StatelessWidget {
                     subjectItem: subjectItem,
                     subjectName: name,
                     subjectImage: image,
+                    onEpisodeLongPress: (episodeId) async {
+                      try {
+                        await ref
+                            .read(
+                              subjectEpisodesProvider(subjectItem.id).notifier,
+                            )
+                            .updateEpisodeWatched(episodeId: episodeId);
+                        if (!context.mounted) return;
+                        NotificationToast.show('提示', '已更新观看进度');
+                      } on AnimeFlowApiException catch (e) {
+                        if (!context.mounted) return;
+                        NotificationToast.show('更新失败', e.message);
+                      } catch (e) {
+                        if (!context.mounted) return;
+                        NotificationToast.show('更新失败', e.toString());
+                      }
+                    },
                   ),
                   icon:
                       const Icon(Icons.format_list_bulleted_rounded, size: 25),

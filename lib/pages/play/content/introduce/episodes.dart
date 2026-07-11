@@ -6,6 +6,7 @@ import 'package:anime_flow/pages/play/providers/episodes_provider.dart';
 import 'package:anime_flow/pages/play/providers/play_provider.dart';
 import 'package:anime_flow/providers/episodes/subject_episodes_provider.dart';
 import 'package:anime_flow/routes/provider/routes_args.dart';
+import 'package:anime_flow/widget/layout_toggle_icon.dart';
 import 'package:anime_flow/widget/notification_toast.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -45,6 +46,12 @@ class _EpisodesComponentsState extends ConsumerState<EpisodesComponents> {
     controller.removeListener(_onScroll);
     controller.dispose();
     super.dispose();
+  }
+
+  void _toggleLayoutMode() {
+    setState(() {
+      isGridView = !isGridView;
+    });
   }
 
   void _onScroll() {
@@ -117,14 +124,8 @@ class _EpisodesComponentsState extends ConsumerState<EpisodesComponents> {
             const Text('选集'),
             hasEpisodes
                 ? IconButton(
-                    onPressed: () {
-                      setState(() {
-                        isGridView = !isGridView;
-                      });
-                    },
-                    icon: Icon(
-                      isGridView ? Icons.view_list : Icons.grid_view,
-                    ),
+                    onPressed: _toggleLayoutMode,
+                    icon: LayoutToggleIcon(isGridView: isGridView),
                     tooltip: isGridView ? '切换到列表' : '切换到网格',
                   )
                 : const SizedBox.shrink(),

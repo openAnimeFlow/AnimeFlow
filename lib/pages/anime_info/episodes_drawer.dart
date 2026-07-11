@@ -1,9 +1,12 @@
 import 'package:anime_flow/constants/constants.dart';
 import 'package:anime_flow/models/item/bangumi/subjects_info_item.dart';
+import 'package:anime_flow/network/clients/flow_client.dart';
 import 'package:anime_flow/providers/episodes/subject_episodes_provider.dart';
+import 'package:anime_flow/providers/user/user_state_provider.dart';
 import 'package:anime_flow/routes/model/play_route_extra.dart';
 import 'package:anime_flow/routes/routes.dart';
 import 'package:anime_flow/utils/logger.dart';
+import 'package:anime_flow/widget/notification_toast.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -66,6 +69,49 @@ class EpisodesDrawerView extends ConsumerStatefulWidget {
 
 class _EpisodesDrawerViewState extends ConsumerState<EpisodesDrawerView> {
   static const double _loadMoreTriggerDistance = 80;
+  bool _isMarkingAllWatched = false;
+
+  Future<void> _markAllEpisodesWatched() async {
+    if (_isMarkingAllWatched) return;
+
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (dialogContext) => AlertDialog(
+        title: const Text('确认全部已看'),
+        content: const Text('确定将该番剧的全部剧集标记为已看吗？'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(dialogContext).pop(false),
+            child: const Text('取消'),
+          ),
+          TextButton(
+            onPressed: () => Navigator.of(dialogContext).pop(true),
+            child: const Text('确定'),
+          ),
+        ],
+      ),
+    );
+    if (confirmed != true || !mounted) return;
+
+    setState(() => _isMarkingAllWatched = true);
+    try {
+      await ref
+          .read(subjectEpisodesProvider(widget.subjectItem.id).notifier)
+          .markAllEpisodesWatched();
+      if (!mounted) return;
+      NotificationToast.show('提示', '已将全部剧集标记为已看');
+    } on AnimeFlowApiException catch (e) {
+      if (!mounted) return;
+      NotificationToast.show('更新失败', e.message);
+    } catch (e) {
+      if (!mounted) return;
+      NotificationToast.show('更新失败', e.toString());
+    } finally {
+      if (mounted) {
+        setState(() => _isMarkingAllWatched = false);
+      }
+    }
+  }
 
   void _tryLoadMoreEpisodes(int subjectId) {
     final controller = widget.scrollController;
@@ -89,6 +135,7 @@ class _EpisodesDrawerViewState extends ConsumerState<EpisodesDrawerView> {
   Widget build(BuildContext context) {
     final subjectItem = widget.subjectItem;
     final episodesAsync = ref.watch(subjectEpisodesProvider(subjectItem.id));
+    final isLoggedIn = ref.watch(isLoggedInProvider).value ?? false;
 
     return episodesAsync.when(
       loading: () => const Center(
@@ -126,13 +173,15 @@ class _EpisodesDrawerViewState extends ConsumerState<EpisodesDrawerView> {
           ),
         );
       },
-      data: (episodesState) => _buildEpisodesList(episodesState, subjectItem),
+      data: (episodesState) =>
+          _buildEpisodesList(episodesState, subjectItem, isLoggedIn),
     );
   }
 
   Widget _buildEpisodesList(
     SubjectEpisodesState episodesState,
     SubjectsInfoItem subjectItem,
+    bool isLoggedIn,
   ) {
     final sortedEpisodes = [...episodesState.episodes.data]..sort((a, b) {
         final aIsMain = a.type == 0 ? 0 : 1;
@@ -165,6 +214,20 @@ class _EpisodesDrawerViewState extends ConsumerState<EpisodesDrawerView> {
                   color: Theme.of(context).colorScheme.outline,
                 ),
               ),
+              if (isLoggedIn) ...[
+                const Spacer(),
+                TextButton(
+                  onPressed:
+                      _isMarkingAllWatched ? null : _markAllEpisodesWatched,
+                  child: _isMarkingAllWatched
+                      ? const SizedBox(
+                          width: 16,
+                          height: 16,
+                          child: CircularProgressIndicator(strokeWidth: 2),
+                        )
+                      : const Text('全部已看'),
+                ),
+              ],
             ],
           ),
         ),

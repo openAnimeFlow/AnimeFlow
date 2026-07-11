@@ -814,4 +814,13 @@ class FlowApi {
       requireFlowToken: true,
     );
   }
+
+  /// 标记番剧的全部剧集为已看。
+  static Future<void> markAllEpisodesWatchedService(int subjectId) async {
+    await _client.put(
+      AnimeFlowApi.markAllEpisodesWatched
+          .replaceFirst('{subjectId}', subjectId.toString()),
+      requireFlowToken: true,
+    );
+  }
 }

@@ -220,6 +220,25 @@ class SubjectEpisodes extends _$SubjectEpisodes {
     );
   }
 
+  Future<void> markAllEpisodesWatched() async {
+    await FlowApi.markAllEpisodesWatchedService(subjectId);
+
+    final current = state.asData?.value;
+    if (current == null) {
+      return;
+    }
+
+    state = AsyncData(
+      current.copyWith(
+        episodes: current.episodes.copyWith(
+          data: current.episodes.data
+              .map((episode) => episode.copyWith(watched: true))
+              .toList(),
+        ),
+      ),
+    );
+  }
+
   void setEpisodeWatched({
     required int episodeId,
     required bool watched,

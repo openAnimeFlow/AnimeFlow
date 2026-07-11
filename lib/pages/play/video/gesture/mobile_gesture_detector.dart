@@ -22,11 +22,31 @@ class _MobileGestureDetectorState extends ConsumerState<MobileGestureDetector> {
   final setting = Storage.setting;
   double _verticalDragStartY = 0; // 垂直拖动开始时的Y坐标
   bool _isRightSide = false; // 是否在屏幕右半侧开始垂直拖动
+  bool _isSpeedBoosting = false;
   late double fastForwardSpeed;
   late final PlaySession playController;
 
   VideoUiNotifier get videoUiStateController =>
       ref.read(videoUiProvider.notifier);
+
+  void _endTemporaryPlaybackRate() {
+    if (!_isSpeedBoosting) return;
+
+    _isSpeedBoosting = false;
+    playController.endTemporaryPlaybackRate();
+    videoUiStateController.hideIndicator();
+    videoUiStateController
+        .updateIndicatorType(VideoControlsIndicatorType.noIndicator);
+  }
+
+  @override
+  void dispose() {
+    if (_isSpeedBoosting) {
+      _isSpeedBoosting = false;
+      playController.endTemporaryPlaybackRate();
+    }
+    super.dispose();
+  }
 
   @override
   void initState() {
@@ -60,21 +80,22 @@ class _MobileGestureDetectorState extends ConsumerState<MobileGestureDetector> {
       onLongPressStart: (LongPressStartDetails details) {
         if (ref.read(playStateProvider).playing) {
           vibrateMedium();
-          playController.startSpeedBoost(fastForwardSpeed);
+          _isSpeedBoosting = true;
+          playController.setPlaybackRate(fastForwardSpeed, temporary: true);
           videoUiStateController
               .updateMainAxisAlignmentType(MainAxisAlignment.start);
-          videoUiStateController.updateIndicatorTypeAndShowIndicator(
-              VideoControlsIndicatorType.speedIndicator);
+          videoUiStateController
+              .updateIndicatorType(VideoControlsIndicatorType.speedIndicator);
+          videoUiStateController.showIndicator();
         }
       },
 
       //长按结束
       onLongPressEnd: (LongPressEndDetails details) {
-        playController.endSpeedBoost();
-        videoUiStateController.hideIndicator();
-        videoUiStateController
-            .updateIndicatorType(VideoControlsIndicatorType.noIndicator);
+        _endTemporaryPlaybackRate();
       },
+
+      onLongPressCancel: _endTemporaryPlaybackRate,
 
       // 水平拖动开始：调整播放进度
       onHorizontalDragStart: (DragStartDetails details) {

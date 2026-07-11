@@ -394,7 +394,8 @@ class PlaySession {
   Timer? _saveSettingsTimer;
 
   /// 记录原始倍速
-  double _originalSpeed = 1.0;
+  double? _speedBeforeBoost;
+  bool _isSpeedBoosting = false;
 
   /// 垂直拖动相关
   double _dragStartVolume = 100.0;
@@ -864,11 +865,29 @@ class PlaySession {
     player.playOrPause();
   }
 
-  ///设置播放倍数
-  void startSpeedBoost(double speed) {
-    _originalSpeed = _playStateActions.value.rate;
+  void _applyPlaybackRate(double speed) {
     _playStateActions.setRate(speed);
     player.setRate(speed);
+  }
+
+  /// 设置播放倍数
+  void setPlaybackRate(double speed, {bool temporary = false}) {
+    if (temporary) {
+      if (!_isSpeedBoosting) {
+        _speedBeforeBoost = _playStateActions.value.rate;
+        _isSpeedBoosting = true;
+      }
+
+      _applyPlaybackRate(speed);
+      return;
+    }
+
+    if (_isSpeedBoosting) {
+      _speedBeforeBoost = speed;
+      return;
+    }
+
+    _applyPlaybackRate(speed);
   }
 
   /// 跳转到指定位置
@@ -876,10 +895,14 @@ class PlaySession {
     player.seek(pos);
   }
 
-  /// 结束速度提升
-  void endSpeedBoost() {
-    _playStateActions.setRate(_originalSpeed);
-    player.setRate(_originalSpeed);
+  /// 结束临时播放倍速
+  void endTemporaryPlaybackRate() {
+    if (!_isSpeedBoosting || _speedBeforeBoost == null) return;
+
+    final speed = _speedBeforeBoost!;
+    _isSpeedBoosting = false;
+    _speedBeforeBoost = null;
+    _applyPlaybackRate(speed);
   }
 
   ///设置视频音量

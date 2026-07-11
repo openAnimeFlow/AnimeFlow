@@ -21,8 +21,7 @@ class RateButton extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final videoUiStateController =
-        ref.read(videoUiProvider.notifier);
+    final videoUiStateController = ref.read(videoUiProvider.notifier);
     final currentRate = ref.watch(
       playStateProvider.select((state) => state.rate),
     );
@@ -41,7 +40,7 @@ class RateButton extends ConsumerWidget {
         final isSelected = currentRate == speed;
         return MenuItemButton(
           onPressed: () {
-            playController.startSpeedBoost(speed);
+            playController.setPlaybackRate(speed);
           },
           child: SizedBox(
             width: 112,

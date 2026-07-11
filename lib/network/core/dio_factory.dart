@@ -35,7 +35,7 @@ class DioFactory {
         connectTimeout: const Duration(seconds: 15),
         receiveTimeout: const Duration(seconds: 60),
       ),
-      baseUrl: AnimeFlowApi.animeFlowApi,
+      baseUrl: AnimeFlowApi.animeFlowApiDev,
       defaultHeaders: {
         'referer': '',
         'user-agent': Utils.getRandomUA(),

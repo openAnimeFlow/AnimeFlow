@@ -80,6 +80,23 @@ class _UserViewState extends ConsumerState<UserView>
   }
 
   @override
+  void didUpdateWidget(covariant UserView oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.user.id == widget.user.id) {
+      return;
+    }
+
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) {
+        return;
+      }
+      final notifier = ref.read(userCollectionsProvider.notifier);
+      notifier.reset();
+      notifier.loadInitial(_currentType);
+    });
+  }
+
+  @override
   void initState() {
     super.initState();
     // TODO 暂时默认为再看tab索引，后续从设置中获取
@@ -90,9 +107,7 @@ class _UserViewState extends ConsumerState<UserView>
     );
     _tabController.addListener(_onTabChanged);
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      ref
-          .read(userCollectionsProvider.notifier)
-          .loadInitial(_tabController.index + 1);
+      ref.read(userCollectionsProvider.notifier).loadInitial(_currentType);
     });
   }
 

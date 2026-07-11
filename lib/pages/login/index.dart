@@ -2,6 +2,7 @@ import 'package:anime_flow/constants/assets_path_constants.dart';
 import 'package:anime_flow/network/api_path.dart';
 import 'package:anime_flow/network/clients/flow_client.dart';
 import 'package:anime_flow/pages/login/service/login_service.dart';
+import 'package:anime_flow/pages/user/provider/user_collection_provider.dart';
 import 'package:anime_flow/providers/user/user_controller.dart';
 import 'package:anime_flow/providers/user/user_state_provider.dart';
 import 'package:anime_flow/routes/routes.dart';
@@ -51,6 +52,7 @@ class _LoginPageState extends ConsumerState<LoginPage> {
       ref.invalidate(currentFlowTokenProvider);
       ref.invalidate(isLoggedInProvider);
       ref.invalidate(currentUserInfoProvider);
+      ref.invalidate(userCollectionsProvider);
       NotificationToast.show('提示', '登录成功', align: Alignment.topCenter);
       const UserRoute().go(context);
     } on AnimeFlowApiException catch (e) {

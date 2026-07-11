@@ -140,6 +140,7 @@ class UserController extends _$UserController {
     ref.invalidate(isLoggedInProvider);
     ref.invalidate(currentUserInfoProvider);
     ref.invalidate(bangumiBindProvider);
+    ref.invalidate(userCollectionsProvider);
     NotificationToast.show('提示', 'Bangumi 授权登录成功');
     return flowToken;
   }

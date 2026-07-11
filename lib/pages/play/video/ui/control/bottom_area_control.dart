@@ -8,7 +8,8 @@ import 'package:anime_flow/pages/play/video/ui/button/fit_button.dart';
 import 'package:anime_flow/pages/play/video/ui/button/rate_button.dart';
 import 'package:anime_flow/pages/play/video/ui/button/shader_button.dart';
 import 'package:anime_flow/pages/play/video/ui/danmaku/danmaku_setting.dart';
-import 'package:anime_flow/pages/play/video/ui/video_ui_components.dart';
+import 'package:anime_flow/pages/play/video/ui/player_progress_bar.dart';
+import 'package:anime_flow/pages/play/video/ui/player_time_display.dart';
 import 'package:anime_flow/providers/episodes/subject_episodes_provider.dart';
 import 'package:anime_flow/providers/user/user_state_provider.dart';
 import 'package:anime_flow/routes/provider/routes_args.dart';
@@ -122,14 +123,14 @@ class BottomAreaControl extends ConsumerWidget {
                     // 时间显示
                     const Padding(
                       padding: EdgeInsets.symmetric(horizontal: 5),
-                      child: VideoTimeDisplay(),
+                      child: PlayerTimeDisplay(),
                     ),
                     // 进度条
                     if (fullscreen || isWideScreen)
                       const Padding(
                         padding:
                             EdgeInsets.symmetric(horizontal: 10, vertical: 0),
-                        child: VideoProgressBar(),
+                        child: PlayerProgressBar(),
                       ),
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -287,7 +288,7 @@ class BottomAreaControl extends ConsumerWidget {
                               // 进度条
                               : const Padding(
                                   padding: EdgeInsets.symmetric(horizontal: 5),
-                                  child: VideoProgressBar(),
+                                  child: PlayerProgressBar(),
                                 ),
                         ),
                         //选集

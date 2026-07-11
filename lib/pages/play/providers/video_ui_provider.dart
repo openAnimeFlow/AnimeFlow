@@ -80,8 +80,7 @@ class VideoUiState {
 }
 
 @Riverpod(keepAlive: true)
-class VideoUiNotifier extends _$VideoUiNotifier
-    implements VideoUiStateActions {
+class VideoUiNotifier extends _$VideoUiNotifier implements VideoUiStateActions {
   Timer? _indicatorTimer;
   Timer? _controlsUiTimer;
   Timer? _timeUpdateTimer;
@@ -259,6 +258,15 @@ class VideoUiNotifier extends _$VideoUiNotifier
     state = state.copyWith(
       dragPosition: Duration(milliseconds: newPosition),
     );
+  }
+
+  void startProgressDrag(Duration position) {
+    state = state.copyWith(
+      isHorizontalDragging: true,
+      dragPosition: position,
+    );
+    cancelUiTimer();
+    showControlsUi();
   }
 
   void setHorizontalDragPosition(Duration position) {

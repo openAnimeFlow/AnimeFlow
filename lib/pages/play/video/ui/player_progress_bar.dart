@@ -1,21 +1,17 @@
 import 'package:anime_flow/pages/play/providers/play_provider.dart';
 import 'package:anime_flow/pages/play/providers/video_ui_provider.dart';
-import 'package:anime_flow/utils/format_time_util.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-/// 视频播放进度条组件
-class VideoProgressBar extends ConsumerWidget {
-  const VideoProgressBar({super.key});
+class PlayerProgressBar extends ConsumerWidget {
+  const PlayerProgressBar({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final playController = ref.read(playSessionProvider);
-    final videoUiStateController =
-        ref.read(videoUiProvider.notifier);
+    final videoUiStateController = ref.read(videoUiProvider.notifier);
     final isHorizontalDragging = ref.watch(
-      videoUiProvider
-          .select((state) => state.isHorizontalDragging),
+      videoUiProvider.select((state) => state.isHorizontalDragging),
     );
     final dragPosition = ref.watch(
       videoUiProvider.select((state) => state.dragPosition),
@@ -85,6 +81,12 @@ class VideoProgressBar extends ConsumerWidget {
                 value: value.clamp(0.0, max > 0 ? max : 1.0),
                 min: 0.0,
                 max: max > 0 ? max : 1.0,
+                onChangeStart: (v) {
+                  videoUiStateController.startProgressDrag(
+                    Duration(milliseconds: v.toInt()),
+                  );
+                  playController.stopPlaying();
+                },
                 onChanged: (v) {
                   videoUiStateController.setHorizontalDragPosition(
                     Duration(milliseconds: v.toInt()),
@@ -92,6 +94,8 @@ class VideoProgressBar extends ConsumerWidget {
                 },
                 onChangeEnd: (v) {
                   playController.seekTo(Duration(milliseconds: v.toInt()));
+                  videoUiStateController.endHorizontalDrag();
+                  playController.startPlaying();
                 },
               ),
             ),
@@ -119,36 +123,5 @@ class _CustomTrackShape extends RoundedRectSliderTrackShape {
         offset.dy + (parentBox.size.height - trackHeight) / 2;
     final double trackWidth = parentBox.size.width;
     return Rect.fromLTWH(trackLeft, trackTop, trackWidth, trackHeight);
-  }
-}
-
-/// 视频时间显示组件
-class VideoTimeDisplay extends ConsumerWidget {
-  const VideoTimeDisplay({super.key});
-
-  @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final isHorizontalDragging = ref.watch(
-      videoUiProvider
-          .select((state) => state.isHorizontalDragging),
-    );
-    final dragPosition = ref.watch(
-      videoUiProvider.select((state) => state.dragPosition),
-    );
-    final playState = ref.watch(playStateProvider);
-
-    return Builder(builder: (context) {
-      final position = isHorizontalDragging ? dragPosition : playState.position;
-      final duration = playState.duration;
-
-      return Text(
-        "${FormatTimeUtil.formatDuration(position)} / ${FormatTimeUtil.formatDuration(duration)}",
-        style: const TextStyle(
-          color: Colors.white,
-          fontSize: 12,
-          fontWeight: FontWeight.w800,
-        ),
-      );
-    });
   }
 }

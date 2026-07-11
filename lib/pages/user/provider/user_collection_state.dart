@@ -10,6 +10,8 @@ class UserCollectionTabState {
   final bool isLoadingMore;
   final String? initialErrorMessage;
   final String? loadMoreErrorMessage;
+  final String? keyword;
+  final int requestVersion;
 
   const UserCollectionTabState({
     this.data,
@@ -20,6 +22,8 @@ class UserCollectionTabState {
     this.isLoadingMore = false,
     this.initialErrorMessage,
     this.loadMoreErrorMessage,
+    this.keyword,
+    this.requestVersion = 0,
   });
 
   bool get isBusy => isInitialLoading || isRefreshing || isLoadingMore;
@@ -35,13 +39,18 @@ class UserCollectionTabState {
     bool? isLoadingMore,
     String? initialErrorMessage,
     String? loadMoreErrorMessage,
+    String? keyword,
+    int? requestVersion,
+    bool clearData = false,
+    bool clearHasMore = false,
+    bool clearKeyword = false,
     bool clearInitialErrorMessage = false,
     bool clearLoadMoreErrorMessage = false,
   }) {
     return UserCollectionTabState(
-      data: data ?? this.data,
+      data: clearData ? null : (data ?? this.data),
       offset: offset ?? this.offset,
-      hasMore: hasMore ?? this.hasMore,
+      hasMore: clearHasMore ? null : (hasMore ?? this.hasMore),
       isInitialLoading: isInitialLoading ?? this.isInitialLoading,
       isRefreshing: isRefreshing ?? this.isRefreshing,
       isLoadingMore: isLoadingMore ?? this.isLoadingMore,
@@ -51,6 +60,8 @@ class UserCollectionTabState {
       loadMoreErrorMessage: clearLoadMoreErrorMessage
           ? null
           : (loadMoreErrorMessage ?? this.loadMoreErrorMessage),
+      keyword: clearKeyword ? null : (keyword ?? this.keyword),
+      requestVersion: requestVersion ?? this.requestVersion,
     );
   }
 }

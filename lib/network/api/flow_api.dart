@@ -750,12 +750,13 @@ class FlowApi {
     return FlowUsers.fromJson(response.data as Map<String, dynamic>);
   }
 
-  /// 获取当前用户 Bangumi 收藏列表
+  /// 获取当前用户收藏列表
   static Future<UserCollectionsItem> myCollectionsService({
     int subjectType = 2,
     required int type,
     required int limit,
     required int offset,
+    String? keyword,
   }) async {
     final response = await _client.get(
       AnimeFlowApi.flowUserCollections,
@@ -764,6 +765,7 @@ class FlowApi {
         'type': type,
         'limit': limit,
         'offset': offset,
+        if (keyword != null) 'keyword': keyword,
       },
       requireFlowToken: true,
     );

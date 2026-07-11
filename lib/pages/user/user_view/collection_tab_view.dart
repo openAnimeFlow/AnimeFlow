@@ -64,7 +64,8 @@ class _CollectionTabView extends ConsumerWidget {
   }
 
   bool _shouldTriggerLoadMore(ScrollMetrics metrics) {
-    return metrics.pixels >= metrics.maxScrollExtent - _loadMoreTriggerDistance ||
+    return metrics.pixels >=
+            metrics.maxScrollExtent - _loadMoreTriggerDistance ||
         metrics.maxScrollExtent <= _loadMoreTriggerDistance;
   }
 

@@ -12,6 +12,7 @@ import 'package:anime_flow/widget/drop_down_menu.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import 'collection_search_dialog.dart';
 import 'collection_tab_view.dart';
 
 enum _LoginOverflowAction { settings, playRecord, logout }
@@ -39,8 +40,36 @@ class _UserViewState extends ConsumerState<UserView>
 
   List<String> get _tabs => buildUserCollectionTabLabels(widget.user);
 
+  int get _currentType => _tabController.index + 1;
+
   Future<void> _showRefreshIndicatorForCurrentTab() async {
-    await _refreshIndicatorKeys[_tabController.index + 1]?.currentState?.show();
+    await _refreshIndicatorKeys[_currentType]?.currentState?.show();
+  }
+
+  Future<void> _showCollectionSearchDialog() async {
+    final currentType = _currentType;
+    final keyword = await showDialog<String>(
+      context: context,
+      useRootNavigator: false,
+      builder: (dialogContext) => CollectionSearchDialog(
+        initialKeyword:
+            ref.read(userCollectionsProvider).tabState(currentType).keyword ??
+                '',
+      ),
+    );
+    if (keyword == null || !mounted) {
+      return;
+    }
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) {
+        return;
+      }
+      ref.read(userCollectionsProvider.notifier).search(currentType, keyword);
+    });
+  }
+
+  Future<void> _clearCurrentTypeSearch() async {
+    await ref.read(userCollectionsProvider.notifier).search(_currentType, '');
   }
 
   /// 切换用户信息显示状态
@@ -69,9 +98,8 @@ class _UserViewState extends ConsumerState<UserView>
 
   void _onTabChanged() {
     if (!_tabController.indexIsChanging) {
-      ref
-          .read(userCollectionsProvider.notifier)
-          .loadInitial(_tabController.index + 1);
+      setState(() {});
+      ref.read(userCollectionsProvider.notifier).loadInitial(_currentType);
     }
   }
 
@@ -85,95 +113,126 @@ class _UserViewState extends ConsumerState<UserView>
   @override
   Widget build(BuildContext context) {
     final double statusBarHeight = MediaQuery.of(context).padding.top;
-    return NotificationListener<ScrollNotification>(
-      onNotification: (notification) {
-        if (notification.depth == 0 &&
-            notification is ScrollUpdateNotification) {
-          final bool isPinned = notification.metrics.pixels >= _contentHeight;
-          if (this.isPinned != isPinned) {
-            setState(() {
-              this.isPinned = isPinned;
-            });
+    return Scaffold(
+      body: NotificationListener<ScrollNotification>(
+        onNotification: (notification) {
+          if (notification.depth == 0 &&
+              notification is ScrollUpdateNotification) {
+            final bool isPinned = notification.metrics.pixels >= _contentHeight;
+            if (this.isPinned != isPinned) {
+              setState(() {
+                this.isPinned = isPinned;
+              });
+            }
           }
-        }
-        return false;
-      },
-      child: NestedScrollView(
-        headerSliverBuilder: (BuildContext context, bool innerBoxIsScrolled) {
-          return <Widget>[
-            SliverOverlapAbsorber(
-              handle: NestedScrollView.sliverOverlapAbsorberHandleFor(
-                context,
-              ),
-              sliver: SliverAppBar(
-                automaticallyImplyLeading: false,
-                titleSpacing: 0,
-                title: _buildAppBarTitle(),
-                pinned: true,
-                floating: false,
-                snap: false,
-                elevation: isPinned ? 4.0 : 0.0,
-                forceElevated: isPinned,
-                expandedHeight: _contentHeight +
-                    statusBarHeight +
-                    kToolbarHeight +
-                    kTextTabBarHeight,
-                flexibleSpace: FlexibleSpaceBar(
-                  collapseMode: CollapseMode.pin,
-                  background: Padding(
-                    padding: const EdgeInsets.only(bottom: 20),
-                    child: _buildHeaderContent(statusBarHeight),
+          return false;
+        },
+        child: NestedScrollView(
+          headerSliverBuilder: (BuildContext context, bool innerBoxIsScrolled) {
+            return <Widget>[
+              SliverOverlapAbsorber(
+                handle: NestedScrollView.sliverOverlapAbsorberHandleFor(
+                  context,
+                ),
+                sliver: SliverAppBar(
+                  automaticallyImplyLeading: false,
+                  titleSpacing: 0,
+                  title: _buildAppBarTitle(),
+                  pinned: true,
+                  floating: false,
+                  snap: false,
+                  elevation: isPinned ? 4.0 : 0.0,
+                  forceElevated: isPinned,
+                  expandedHeight: _contentHeight +
+                      statusBarHeight +
+                      kToolbarHeight +
+                      kTextTabBarHeight,
+                  flexibleSpace: FlexibleSpaceBar(
+                    collapseMode: CollapseMode.pin,
+                    background: Padding(
+                      padding: const EdgeInsets.only(bottom: 20),
+                      child: _buildHeaderContent(statusBarHeight),
+                    ),
+                  ),
+                  bottom: TabBar(
+                    controller: _tabController,
+                    isScrollable: true,
+                    tabAlignment: TabAlignment.start,
+                    dividerHeight: 0,
+                    tabs: _tabs.map((String name) {
+                      final parts = name.split('\n');
+                      return Tab(
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Flexible(
+                              child: Text(
+                                parts[0],
+                                style: const TextStyle(fontSize: 12),
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                              ),
+                            ),
+                            const SizedBox(width: 4),
+                            Text(
+                              parts.length > 1 ? parts[1] : '0',
+                              style: const TextStyle(fontSize: 11),
+                            ),
+                          ],
+                        ),
+                      );
+                    }).toList(),
+                    labelColor: Theme.of(context).colorScheme.primary,
+                    unselectedLabelColor: Colors.grey,
+                    indicatorColor: Theme.of(context).colorScheme.primary,
                   ),
                 ),
-                bottom: TabBar(
-                  controller: _tabController,
-                  isScrollable: true,
-                  tabAlignment: TabAlignment.start,
-                  dividerHeight: 0,
-                  tabs: _tabs.map((String name) {
-                    final parts = name.split('\n');
-                    return Tab(
-                      child: Row(
-                        mainAxisSize: MainAxisSize.min,
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          Flexible(
-                            child: Text(
-                              parts[0],
-                              style: const TextStyle(fontSize: 12),
-                              maxLines: 1,
-                              overflow: TextOverflow.ellipsis,
-                            ),
-                          ),
-                          const SizedBox(width: 4),
-                          Text(
-                            parts.length > 1 ? parts[1] : '0',
-                            style: const TextStyle(fontSize: 11),
-                          ),
-                        ],
-                      ),
-                    );
-                  }).toList(),
-                  labelColor: Theme.of(context).colorScheme.primary,
-                  unselectedLabelColor: Colors.grey,
-                  indicatorColor: Theme.of(context).colorScheme.primary,
-                ),
+              ),
+            ];
+          },
+          body: CollectionTabView(
+            tabController: _tabController,
+            tabs: _tabs,
+            refreshIndicatorKeys: _refreshIndicatorKeys,
+          ),
+        ),
+      ),
+      floatingActionButton: Consumer(
+        builder: (context, ref, _) {
+          final keyword = ref.watch(
+            userCollectionsProvider.select(
+              (state) => state.tabState(_currentType).keyword,
+            ),
+          );
+          if (keyword == null || keyword.isEmpty) {
+            return FloatingActionButton(
+              tooltip: '搜索收藏',
+              onPressed: _showCollectionSearchDialog,
+              child: const Icon(Icons.search),
+            );
+          }
+
+          return FloatingActionButton.extended(
+            tooltip: '清除搜索',
+            onPressed: _clearCurrentTypeSearch,
+            icon: const Icon(Icons.close),
+            label: ConstrainedBox(
+              constraints: const BoxConstraints(maxWidth: 160),
+              child: Text(
+                keyword,
+                overflow: TextOverflow.ellipsis,
               ),
             ),
-          ];
+          );
         },
-        body: CollectionTabView(
-          tabController: _tabController,
-          tabs: _tabs,
-          refreshIndicatorKeys: _refreshIndicatorKeys,
-        ),
       ),
     );
   }
 
   Widget _buildAppBarTitle() {
     final user = widget.user;
-    final currentType = _tabController.index + 1;
+    final currentType = _currentType;
 
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 16),

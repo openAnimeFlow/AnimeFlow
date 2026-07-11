@@ -50,7 +50,7 @@ class UserPage extends ConsumerWidget {
               ? const Scaffold(
                   body: Center(child: Text('暂无用户资料')),
                 )
-              : Scaffold(body: UserView(user: userInfo)),
+              :  UserView(user: userInfo),
           loading: () => const Scaffold(
             body: Center(child: CircularProgressIndicator()),
           ),

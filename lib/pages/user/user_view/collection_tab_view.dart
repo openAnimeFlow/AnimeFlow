@@ -159,11 +159,9 @@ class _CollectionTabView extends ConsumerWidget {
                   )
                 else ...[
                   SliverPadding(
-                    padding: EdgeInsets.fromLTRB(
-                      horizontalPadding,
-                      10,
-                      horizontalPadding,
-                      10,
+                    padding: EdgeInsets.symmetric(
+                      horizontal: horizontalPadding,
+                      vertical: 10,
                     ),
                     sliver: SliverGrid(
                       gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(

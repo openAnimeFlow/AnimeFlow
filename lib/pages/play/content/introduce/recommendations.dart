@@ -7,8 +7,8 @@ import 'package:anime_flow/widget/animation_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-class BangumiRecommendationsView extends ConsumerWidget {
-  const BangumiRecommendationsView({super.key});
+class RecommendationsView extends ConsumerWidget {
+  const RecommendationsView({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -111,7 +111,7 @@ class _RecommendationTile extends StatelessWidget {
                         maxLines: 2,
                         overflow: TextOverflow.ellipsis,
                         style: const TextStyle(
-                          fontSize: 15,
+                          fontSize: 14,
                           fontWeight: FontWeight.bold,
                         ),
                       ),
@@ -119,10 +119,10 @@ class _RecommendationTile extends StatelessWidget {
                       if (subject.info.isNotEmpty)
                         Text(
                           subject.info,
-                          maxLines: 1,
+                          maxLines: 2,
                           overflow: TextOverflow.ellipsis,
                           style: TextStyle(
-                            fontSize: 12,
+                            fontSize: 11,
                             color: colorScheme.onSurfaceVariant,
                           ),
                         ),

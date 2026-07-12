@@ -1,6 +1,6 @@
 import 'package:anime_flow/models/item/bangumi/subject_item.dart';
 import 'package:anime_flow/network/clients/flow_client.dart';
-import 'package:anime_flow/pages/play/providers/bangumi_recommendation_provider.dart';
+import 'package:anime_flow/pages/play/providers/recommendation_provider.dart';
 import 'package:anime_flow/routes/model/info_route_extra.dart';
 import 'package:anime_flow/routes/routes.dart';
 import 'package:anime_flow/widget/animation_network_image.dart';
@@ -12,7 +12,7 @@ class RecommendationsView extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final recommendations = ref.watch(bangumiRecommendationProvider);
+    final recommendations = ref.watch(recommendationProvider);
 
     return recommendations.when(
       loading: () => _buildSection(
@@ -29,7 +29,7 @@ class RecommendationsView extends ConsumerWidget {
             error,
             fallback: '推荐数据获取失败',
           ),
-          onRetry: () => ref.invalidate(bangumiRecommendationProvider),
+          onRetry: () => ref.invalidate(recommendationProvider),
         ),
       ),
       data: (item) {

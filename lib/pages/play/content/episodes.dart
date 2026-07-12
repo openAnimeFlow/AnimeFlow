@@ -93,13 +93,8 @@ class _EpisodesComponentsState extends ConsumerState<EpisodesComponents> {
   /// 更新剧集观看状态
   Future<void> _updateEpisodeWatched(int episodeId) async {
     try {
-      await playSession.updateEpisodeWatchedState(episodeId);
+      await playSession.updateEpisodeWatched(episodeId);
       if (!mounted) return;
-      final subjectId = ref.read(playExtraProvider).playExtra.subjectId;
-      ref.read(subjectEpisodesProvider(subjectId).notifier).setEpisodeWatched(
-            episodeId: episodeId,
-            watched: true,
-          );
       NotificationToast.show('提示', '已更新观看进度');
     } on AnimeFlowApiException catch (e) {
       if (!mounted) return;

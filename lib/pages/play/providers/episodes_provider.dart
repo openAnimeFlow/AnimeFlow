@@ -67,11 +67,26 @@ class EpisodesData {
 /// 当路由参数变化（切换到不同番剧）时自动重新加载剧集。
 @Riverpod(dependencies: [playExtra])
 class Episodes extends _$Episodes {
+  int? _selectedSubjectId;
+  int? _selectedEpisodeId;
+  int? _lastRequestedEpisodeId;
+
   @override
   Future<EpisodesData> build() async {
     final extra = ref.watch(playExtraProvider);
     final subjectId = extra.playExtra.subjectId;
     final requestedEpisodeId = extra.continueEpisodeId;
+    if (_selectedSubjectId != subjectId) {
+      _selectedSubjectId = null;
+      _selectedEpisodeId = null;
+      _lastRequestedEpisodeId = null;
+    }
+    if (requestedEpisodeId != null &&
+        requestedEpisodeId != _lastRequestedEpisodeId) {
+      _selectedSubjectId = subjectId;
+      _selectedEpisodeId = requestedEpisodeId;
+      _lastRequestedEpisodeId = requestedEpisodeId;
+    }
     if (requestedEpisodeId != null) {
       await ref
           .read(subjectEpisodesProvider(subjectId).notifier)
@@ -94,6 +109,8 @@ class Episodes extends _$Episodes {
     final episodes = subjectEpisodes.episodes;
     final continueEpisodeId = ref.read(playExtraProvider).continueEpisodeId;
     final current = _currentData;
+    final selectedEpisodeId =
+        _selectedSubjectId == subjectId ? _selectedEpisodeId : null;
 
     if (episodes.data.isEmpty) {
       return EpisodesData(
@@ -106,14 +123,22 @@ class Episodes extends _$Episodes {
 
     final selection = current != null && current.subjectId == subjectId
         ? subjectEpisodes.findSelectionById(current.episodeId) ??
+            _findSelectedEpisode(
+              subjectEpisodes,
+              selectedEpisodeId: selectedEpisodeId,
+            ) ??
             _selectionForContinueEpisode(
               subjectEpisodes,
               continueEpisodeId: continueEpisodeId,
             )
-        : _selectionForContinueEpisode(
-            subjectEpisodes,
-            continueEpisodeId: continueEpisodeId,
-          );
+        : _findSelectedEpisode(
+              subjectEpisodes,
+              selectedEpisodeId: selectedEpisodeId,
+            ) ??
+            _selectionForContinueEpisode(
+              subjectEpisodes,
+              continueEpisodeId: continueEpisodeId,
+            );
     if (selection == null) {
       return EpisodesData(
         subjectId: subjectId,
@@ -122,6 +147,9 @@ class Episodes extends _$Episodes {
         hasMore: subjectEpisodes.hasMore,
       );
     }
+
+    _selectedSubjectId = subjectId;
+    _selectedEpisodeId = selection.id;
 
     return EpisodesData(
       subjectId: subjectId,
@@ -136,6 +164,16 @@ class Episodes extends _$Episodes {
   }
 
   EpisodesData? get _currentData => state.asData?.value;
+
+  EpisodeSelection? _findSelectedEpisode(
+    SubjectEpisodesState subjectEpisodes, {
+    required int? selectedEpisodeId,
+  }) {
+    if (selectedEpisodeId == null) {
+      return null;
+    }
+    return subjectEpisodes.findSelectionById(selectedEpisodeId);
+  }
 
   EpisodeSelection? _selectionForContinueEpisode(
     SubjectEpisodesState subjectEpisodes, {
@@ -164,6 +202,8 @@ class Episodes extends _$Episodes {
     if (current == null) {
       return;
     }
+    _selectedSubjectId = current.subjectId;
+    _selectedEpisodeId = episodeId;
     state = AsyncData(
       current.copyWith(
         episodeSort: sort.toDouble(),
@@ -195,6 +235,8 @@ class Episodes extends _$Episodes {
     final selection = SubjectEpisodesState(episodes: episodesData)
         .nextEpisodeSelection(current.episodeIndex);
     if (selection == null) return;
+    _selectedSubjectId = current.subjectId;
+    _selectedEpisodeId = selection.id;
     state = AsyncData(
       current.copyWith(
         episodeSort: selection.sort,

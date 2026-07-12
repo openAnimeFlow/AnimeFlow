@@ -1,6 +1,6 @@
 // GENERATED CODE - DO NOT MODIFY BY HAND
 
-part of 'bangumi_recommendation_provider.dart';
+part of 'recommendation_provider.dart';
 
 // **************************************************************************
 // RiverpodGenerator
@@ -9,29 +9,29 @@ part of 'bangumi_recommendation_provider.dart';
 // GENERATED CODE - DO NOT MODIFY BY HAND
 // ignore_for_file: type=lint, type=warning
 
-@ProviderFor(bangumiRecommendation)
-final bangumiRecommendationProvider = BangumiRecommendationProvider._();
+@ProviderFor(recommendation)
+final recommendationProvider = RecommendationProvider._();
 
-final class BangumiRecommendationProvider extends $FunctionalProvider<
+final class RecommendationProvider extends $FunctionalProvider<
         AsyncValue<SubjectItem>, SubjectItem, FutureOr<SubjectItem>>
     with $FutureModifier<SubjectItem>, $FutureProvider<SubjectItem> {
-  BangumiRecommendationProvider._()
+  RecommendationProvider._()
       : super(
           from: null,
           argument: null,
           retry: null,
-          name: r'bangumiRecommendationProvider',
-          isAutoDispose: true,
+          name: r'recommendationProvider',
+          isAutoDispose: false,
           dependencies: <ProviderOrFamily>[playExtraProvider],
           $allTransitiveDependencies: <ProviderOrFamily>[
-            BangumiRecommendationProvider.$allTransitiveDependencies0,
+            RecommendationProvider.$allTransitiveDependencies0,
           ],
         );
 
   static final $allTransitiveDependencies0 = playExtraProvider;
 
   @override
-  String debugGetCreateSourceHash() => _$bangumiRecommendationHash();
+  String debugGetCreateSourceHash() => _$recommendationHash();
 
   @$internal
   @override
@@ -41,9 +41,8 @@ final class BangumiRecommendationProvider extends $FunctionalProvider<
 
   @override
   FutureOr<SubjectItem> create(Ref ref) {
-    return bangumiRecommendation(ref);
+    return recommendation(ref);
   }
 }
 
-String _$bangumiRecommendationHash() =>
-    r'f750f037543df0623d8795d0d418ed0ec3b8f4b0';
+String _$recommendationHash() => r'706799299dd58e4207e96bb57906bc90c492787e';

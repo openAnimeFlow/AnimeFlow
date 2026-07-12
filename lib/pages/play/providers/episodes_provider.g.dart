@@ -40,7 +40,7 @@ final class EpisodesProvider
   Episodes create() => Episodes();
 }
 
-String _$episodesHash() => r'12fcf39a77e212ccef10aeb006cf189a162b25c7';
+String _$episodesHash() => r'aad00cdd4fabbd66d2b2ac918484d2e1f98a3938';
 
 /// 当路由参数变化（切换到不同番剧）时自动重新加载剧集。
 

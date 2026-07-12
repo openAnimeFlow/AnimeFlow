@@ -8,8 +8,8 @@ import 'package:anime_flow/network/api/flow_api.dart';
 import 'package:anime_flow/models/enums/video_controls_icon_type.dart';
 import 'package:anime_flow/models/item/danmaku/danmaku_module.dart';
 import 'package:anime_flow/models/play/play_history.dart';
-import 'package:anime_flow/pages/play/providers/video_ui_provider.dart';
 import 'package:anime_flow/pages/play/providers/episodes_provider.dart';
+import 'package:anime_flow/pages/play/providers/video_ui_provider.dart';
 import 'package:anime_flow/providers/episodes/subject_episodes_provider.dart';
 import 'package:anime_flow/repository/play_repository.dart';
 import 'package:anime_flow/repository/storage.dart';
@@ -616,7 +616,7 @@ class PlaySession {
 
   Future<void> _autoUpdateEpisodeWatched(int targetEpisodeId) async {
     try {
-      await updateEpisodeWatchedState(targetEpisodeId);
+      await updateEpisodeWatched(targetEpisodeId);
       _autoWatchedEpisodeIds.add(targetEpisodeId);
     } catch (e) {
       LiggLogger().e('自动更新观看进度失败: $e');
@@ -668,7 +668,7 @@ class PlaySession {
   }
 
   /// 更新剧集观看状态
-  Future<void> updateEpisodeWatchedState(int episodeId,
+  Future<void> updateEpisodeWatched(int episodeId,
       {bool watched = true}) async {
     final targetSubjectId = subjectId;
     await FlowApi.updateEpisodeWatchedService(episodeId, watched: watched);

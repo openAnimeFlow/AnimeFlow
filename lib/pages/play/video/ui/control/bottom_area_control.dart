@@ -12,7 +12,6 @@ import 'package:anime_flow/pages/play/video/ui/player_progress_bar.dart';
 import 'package:anime_flow/pages/play/video/ui/player_time_display.dart';
 import 'package:anime_flow/providers/episodes/subject_episodes_provider.dart';
 import 'package:anime_flow/providers/user/user_state_provider.dart';
-import 'package:anime_flow/routes/provider/routes_args.dart';
 import 'package:anime_flow/utils/logger.dart';
 import 'package:anime_flow/utils/systemUtil.dart';
 import 'package:anime_flow/widget/danmaku_text_field.dart';
@@ -56,17 +55,8 @@ class BottomAreaControl extends ConsumerWidget {
   ) async {
     try {
       final playController = container.read(playSessionProvider);
-      await playController.updateEpisodeWatchedState(episodeId);
+      await playController.updateEpisodeWatched(episodeId);
       if (!dialogContext.mounted) return;
-      final subjectId = container.read(playExtraProvider).playExtra.subjectId;
-      WidgetsBinding.instance.addPostFrameCallback((_) {
-        container
-            .read(subjectEpisodesProvider(subjectId).notifier)
-            .setEpisodeWatched(
-              episodeId: episodeId,
-              watched: true,
-            );
-      });
       NotificationToast.show('提示', '已更新观看进度');
     } on AnimeFlowApiException catch (e) {
       if (!dialogContext.mounted) return;

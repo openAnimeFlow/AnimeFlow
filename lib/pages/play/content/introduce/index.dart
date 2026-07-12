@@ -1,3 +1,4 @@
+import 'package:anime_flow/pages/play/content/introduce/bangumi_recommendations.dart';
 import 'package:anime_flow/pages/play/content/introduce/danmaku_card.dart';
 import 'package:anime_flow/pages/play/content/introduce/episodes.dart';
 import 'package:anime_flow/pages/play/content/introduce/resources.dart';
@@ -45,6 +46,8 @@ class _IntroduceViewState extends State<IntroduceView>
             const SizedBox(height: 5),
             //弹幕
             const DanmakuCard(),
+            const SizedBox(height: 5),
+            const BangumiRecommendationsView(),
             const SizedBox(height: 5),
           ],
         ),

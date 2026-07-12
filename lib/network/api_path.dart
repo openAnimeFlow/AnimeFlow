@@ -237,6 +237,9 @@ class AnimeFlowApi {
       /// 轮询 Bangumi 绑定授权码（桌面端）
       oauthBindCode = '/api/oauth/bind-code',
 
+      /// 番剧推荐
+      bangumiRecommendation = '/api/v1/bangumi/subjects/{subjectId}/recommendations',
+
       /// 标记该番剧所有剧集为已看
       markAllEpisodesWatched =
           '/api/v1/users/subjects/{subjectId}/episodes/watch',

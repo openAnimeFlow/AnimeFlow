@@ -464,6 +464,17 @@ class FlowApi {
     ).then((response) => (SubjectRelationItem.fromJson(response.data)));
   }
 
+  /// 获取番剧推荐
+  static Future<SubjectItem> getBangumiRecommendationService(int subjectId,
+      {int limit = 20, int offset = 0}) async {
+    final response = await _client.get(
+      AnimeFlowApi.bangumiRecommendation
+          .replaceFirst('{subjectId}', subjectId.toString()),
+      queryParameters: {'limit': limit, 'offset': offset},
+    );
+    return SubjectItem.fromJson(response.data as Map<String, dynamic>);
+  }
+
   /// 查询用户信息
   static Future<UserInfoItem> queryUserInfoService(String username) async {
     return await _client

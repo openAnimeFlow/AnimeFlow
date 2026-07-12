@@ -1,7 +1,7 @@
-import 'package:anime_flow/pages/play/content/introduce/recommendations.dart';
-import 'package:anime_flow/pages/play/content/introduce/danmaku_card.dart';
-import 'package:anime_flow/pages/play/content/introduce/episodes.dart';
-import 'package:anime_flow/pages/play/content/introduce/resources.dart';
+import 'package:anime_flow/pages/play/content/recommendations.dart';
+import 'package:anime_flow/pages/play/content/danmaku_card.dart';
+import 'package:anime_flow/pages/play/content/episodes.dart';
+import 'package:anime_flow/pages/play/content/resources.dart';
 import 'package:anime_flow/routes/provider/routes_args.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';

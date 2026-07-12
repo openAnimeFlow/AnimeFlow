@@ -31,6 +31,7 @@ import 'package:anime_flow/pages/user_space/index.dart';
 import 'package:anime_flow/providers/user/user_controller.dart';
 import 'package:anime_flow/routes/model/info_route_extra.dart';
 import 'package:anime_flow/routes/provider/routes_args.dart';
+import 'package:anime_flow/routes/app_route_observer.dart';
 import 'package:bot_toast/bot_toast.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -441,7 +442,7 @@ class SettingAgreementRoute extends GoRouteData with $SettingAgreementRoute {
 // =====================================================================
 final GoRouter appRouter = GoRouter(
   navigatorKey: MainShellRoute.$navigatorKey,
-  observers: [BotToastNavigatorObserver()],
+  observers: [BotToastNavigatorObserver(), appRouteObserver],
   initialLocation: const RecommendRoute().location,
   redirect: (context, state) {
     final uri = state.uri;

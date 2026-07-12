@@ -525,8 +525,20 @@ class PlaySession {
     player.dispose();
   }
 
+  void pauseForRouteCover() {
+    cancelScheduledStop();
+    unawaited(player.pause());
+  }
+
+  Future<void> stopCurrentMedia() async {
+    cancelScheduledStop();
+    await player.stop();
+    _clearDanmakuCanvas();
+  }
+
   /// 初始化播放状态
   Future<void> initPlayState(PlayRequest state) async {
+    await stopCurrentMedia();
     removeDanmaku();
     videoUrl = state.videoUrl;
     offset = state.offset;

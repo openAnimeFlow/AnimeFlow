@@ -3,6 +3,7 @@ import 'package:anime_flow/pages/play/providers/play_provider.dart';
 import 'package:anime_flow/pages/play/providers/video_source_provider.dart';
 import 'package:anime_flow/pages/play/video/player.dart';
 import 'package:anime_flow/pages/play/providers/episodes_provider.dart';
+import 'package:anime_flow/routes/app_route_observer.dart';
 import 'package:anime_flow/routes/provider/routes_args.dart';
 import 'package:anime_flow/utils/systemUtil.dart';
 import 'package:flutter/material.dart';
@@ -19,7 +20,7 @@ class PlayPage extends ConsumerStatefulWidget {
 }
 
 class _PlayPageViewState extends ConsumerState<PlayPage>
-    with SingleTickerProviderStateMixin {
+    with SingleTickerProviderStateMixin, RouteAware {
   late final PlaySession playSession;
   late final VideoSourceNotifier videoSourceController;
   late final AnimationController _contentAnimationController;
@@ -30,6 +31,8 @@ class _PlayPageViewState extends ConsumerState<PlayPage>
 
   bool _hasInitResources = false;
   bool? _lastReportedIsWideScreen;
+  bool _subscribedRouteObserver = false;
+  bool _resumeWhenRouteVisible = false;
 
   @override
   void initState() {
@@ -51,8 +54,41 @@ class _PlayPageViewState extends ConsumerState<PlayPage>
 
   @override
   void dispose() {
+    if (_subscribedRouteObserver) {
+      appRouteObserver.unsubscribe(this);
+    }
     _contentAnimationController.dispose();
     super.dispose();
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    if (_subscribedRouteObserver) return;
+    final route = ModalRoute.of(context);
+    if (route is PageRoute<dynamic>) {
+      appRouteObserver.subscribe(this, route);
+      _subscribedRouteObserver = true;
+    }
+  }
+
+  @override
+  void didPushNext() {
+    _resumeWhenRouteVisible = ref.read(playStateProvider).playing;
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
+      playSession.pauseForRouteCover();
+    });
+  }
+
+  @override
+  void didPopNext() {
+    if (!_resumeWhenRouteVisible) return;
+    _resumeWhenRouteVisible = false;
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
+      playSession.startPlaying();
+    });
   }
 
   void _initResources(String subjectName) {

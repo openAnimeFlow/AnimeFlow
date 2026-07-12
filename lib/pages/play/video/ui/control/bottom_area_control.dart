@@ -27,6 +27,8 @@ import 'package:flutter_svg/svg.dart';
 class BottomAreaControl extends ConsumerWidget {
   const BottomAreaControl({super.key});
 
+  static const double _wideDanmakuControlsMaxWidth = 520;
+
   Future<void> onSendDanmaku(
     BuildContext context,
     PlaySession playController,
@@ -76,6 +78,124 @@ class BottomAreaControl extends ConsumerWidget {
     }
   }
 
+  Widget _buildDanmakuInputField({
+    required BuildContext context,
+    required WidgetRef ref,
+    required bool danmakuOn,
+    required PlaySession playController,
+    required VideoUiNotifier videoUiStateController,
+  }) {
+    if (!danmakuOn) return const SizedBox.shrink();
+    final userInfo = ref.watch(currentUserInfoProvider).value;
+    if (userInfo != null) {
+      return DanmakuTextField(
+        showCloseButton: false,
+        iconColor: Colors.white,
+        textColor: Colors.white,
+        onFocusChange: (hasFocus) {
+          if (hasFocus) {
+            playController.stopPlaying();
+            videoUiStateController.cancelUiTimer();
+          } else {
+            playController.startPlaying();
+          }
+        },
+        onSend: (message) => onSendDanmaku(
+          context,
+          playController,
+          message,
+          userInfo.id,
+        ),
+      );
+    }
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 10),
+      decoration: BoxDecoration(
+        color: Colors.transparent,
+        border: Border.all(
+          color: Colors.white.withValues(alpha: 0.8),
+          width: 1,
+        ),
+        borderRadius: BorderRadius.circular(10),
+      ),
+      child: const Text(
+        "登录后才能发送弹幕",
+        maxLines: 1,
+        overflow: TextOverflow.ellipsis,
+        style: TextStyle(color: Colors.white),
+      ),
+    );
+  }
+
+  Widget _buildWideDanmakuControls({
+    required BuildContext context,
+    required WidgetRef ref,
+    required bool danmakuOn,
+    required PlaySession playController,
+    required VideoUiNotifier videoUiStateController,
+  }) {
+    return Center(
+      child: ConstrainedBox(
+        constraints: const BoxConstraints(
+          maxWidth: _wideDanmakuControlsMaxWidth,
+        ),
+        child: Row(
+          children: [
+            //弹幕开关
+            IconButton(
+              tooltip: danmakuOn ? '关闭弹幕' : '开启弹幕',
+              onPressed: () => playController.toggleDanmaku(),
+              icon: Icon(
+                danmakuOn
+                    ? Icons.subtitles_outlined
+                    : Icons.subtitles_off_outlined,
+                color: Colors.white70,
+                size: 25,
+              ),
+            ),
+            //弹幕设置
+            if (danmakuOn)
+              IconButton(
+                tooltip: '弹幕设置',
+                onPressed: () {
+                  final container = ProviderScope.containerOf(context);
+                  showModalBottomSheet(
+                    context: context,
+                    isScrollControlled: true,
+                    backgroundColor: Colors.transparent,
+                    builder: (context) {
+                      return UncontrolledProviderScope(
+                        container: container,
+                        child: const DanmakuSetting(),
+                      );
+                    },
+                  );
+                },
+                icon: SvgPicture.asset(
+                  AssetsPathConstants.danmakuIcon,
+                  width: 24,
+                  height: 24,
+                  colorFilter: ColorFilter.mode(
+                    Colors.white.withValues(alpha: 0.8),
+                    BlendMode.srcIn,
+                  ),
+                ),
+              ),
+            Expanded(
+              child: _buildDanmakuInputField(
+                context: context,
+                ref: ref,
+                danmakuOn: danmakuOn,
+                playController: playController,
+                videoUiStateController: videoUiStateController,
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final playController = ref.read(playSessionProvider);
@@ -94,6 +214,7 @@ class BottomAreaControl extends ConsumerWidget {
     final keyboardLift = fullscreen && SystemUtil.isMobile
         ? MediaQuery.viewInsetsOf(context).bottom
         : 0.0;
+
     return AnimatedSwitcher(
       duration: const Duration(milliseconds: 200),
       transitionBuilder: (child, animation) =>
@@ -193,103 +314,31 @@ class BottomAreaControl extends ConsumerWidget {
                             );
                           },
                         ),
-                        //弹幕开关
-                        IconButton(
-                          tooltip: danmakuOn ? '关闭弹幕' : '开启弹幕',
-                          onPressed: () => playController.toggleDanmaku(),
-                          icon: Icon(
-                              danmakuOn
-                                  ? Icons.subtitles_outlined
-                                  : Icons.subtitles_off_outlined,
-                              color: Colors.white70,
-                              size: 25),
-                        ),
-                        //弹幕设置
-                        if (danmakuOn)
-                          IconButton(
-                            tooltip: '弹幕设置',
-                            onPressed: () {
-                              final container =
-                                  ProviderScope.containerOf(context);
-                              showModalBottomSheet(
-                                context: context,
-                                isScrollControlled: true,
-                                backgroundColor: Colors.transparent,
-                                builder: (context) {
-                                  return UncontrolledProviderScope(
-                                    container: container,
-                                    child: const DanmakuSetting(),
-                                  );
-                                },
-                              );
-                            },
-                            icon: SvgPicture.asset(
-                              AssetsPathConstants.danmakuIcon,
-                              width: 24,
-                              height: 24,
-                              colorFilter: ColorFilter.mode(
-                                  Colors.white.withValues(alpha: 0.8),
-                                  BlendMode.srcIn),
-                            ),
-                          ),
                         Expanded(
-                          child: fullscreen || isWideScreen
-                              ? danmakuOn
-                                  // 弹幕输入框
-                                  ? Consumer(
-                                      builder: (context, ref, _) {
-                                        final userInfo = ref
-                                            .watch(currentUserInfoProvider)
-                                            .value;
-                                        if (userInfo != null) {
-                                          return DanmakuTextField(
-                                            iconColor: Colors.white,
-                                            textColor: Colors.white,
-                                            onFocusChange: (hasFocus) {
-                                              if (hasFocus) {
-                                                playController.stopPlaying();
-                                                videoUiStateController
-                                                    .cancelUiTimer();
-                                              } else {
-                                                playController.startPlaying();
-                                              }
-                                            },
-                                            onSend: (message) => onSendDanmaku(
-                                                context,
-                                                playController,
-                                                message,
-                                                userInfo.id),
-                                          );
-                                        }
-                                        return Container(
-                                          padding: const EdgeInsets.symmetric(
-                                              horizontal: 10),
-                                          decoration: BoxDecoration(
-                                            color: Colors.transparent,
-                                            border: Border.all(
-                                              color: Colors.white
-                                                  .withValues(alpha: 0.8),
-                                              width: 1,
-                                            ),
-                                            borderRadius:
-                                                BorderRadius.circular(10),
-                                          ),
-                                          child: const Text(
-                                            "登录后才能发送弹幕",
-                                            maxLines: 1,
-                                            overflow: TextOverflow.ellipsis,
-                                            style:
-                                                TextStyle(color: Colors.white),
-                                          ),
-                                        );
-                                      },
+                          child: isWideScreen
+                              ? _buildWideDanmakuControls(
+                                  context: context,
+                                  ref: ref,
+                                  danmakuOn: danmakuOn,
+                                  playController: playController,
+                                  videoUiStateController:
+                                      videoUiStateController,
+                                )
+                              : fullscreen
+                                  ? _buildDanmakuInputField(
+                                      context: context,
+                                      ref: ref,
+                                      danmakuOn: danmakuOn,
+                                      playController: playController,
+                                      videoUiStateController:
+                                          videoUiStateController,
                                     )
-                                  : const SizedBox.shrink()
-                              // 进度条
-                              : const Padding(
-                                  padding: EdgeInsets.symmetric(horizontal: 5),
-                                  child: PlayerProgressBar(),
-                                ),
+                                  // 进度条
+                                  : const Padding(
+                                      padding:
+                                          EdgeInsets.symmetric(horizontal: 5),
+                                      child: PlayerProgressBar(),
+                                    ),
                         ),
                         //选集
                         if (fullscreen || !isContentExpanded)

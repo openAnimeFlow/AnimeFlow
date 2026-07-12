@@ -75,24 +75,27 @@ class _ContentViewState extends ConsumerState<ContentView>
                       builder: (context, ref, _) {
                         final isLogin = ref.watch(isLoggedInProvider).value;
                         if (isLogin != true) return const SizedBox.shrink();
-                        final userInfo = ref.watch(currentUserInfoProvider).value;
-                        return SizedBox(
-                          width: 200,
-                          child: Padding(
-                            padding: const EdgeInsets.symmetric(horizontal: 8),
-                            child: DanmakuTextField(
-                              onFocusChange: (hasFocus) {
-                                if (hasFocus) {
-                                  playSession.stopPlaying();
-                                  videoUiStateController.cancelUiTimer();
-                                } else {
-                                  playSession.startPlaying();
-                                  videoUiStateController.hideControlsUi();
-                                }
-                              },
-                              onSend: (text) =>
-                                  onSendDanmaku(text, userInfo!.id),
-                            ),
+                        final danmakuOn = ref.watch(
+                          playStateProvider.select((state) => state.danmakuOn),
+                        );
+                        final userInfo =
+                            ref.watch(currentUserInfoProvider).value;
+                        return Padding(
+                          padding: const EdgeInsets.all(8.0),
+                          child: DanmakuTextField(
+                            inputVisible: danmakuOn,
+                            onFocusChange: (hasFocus) {
+                              if (hasFocus) {
+                                playSession.stopPlaying();
+                                videoUiStateController.cancelUiTimer();
+                              } else {
+                                playSession.startPlaying();
+                                videoUiStateController.hideControlsUi();
+                              }
+                            },
+                            onSend: (text) =>
+                                onSendDanmaku(text, userInfo!.id),
+                            onClose: playSession.toggleDanmaku,
                           ),
                         );
                       },

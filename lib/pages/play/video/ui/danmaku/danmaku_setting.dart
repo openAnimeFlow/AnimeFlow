@@ -84,10 +84,15 @@ class _DanmakuSettingState extends ConsumerState<DanmakuSetting> {
                         children: [
                           InkWell(
                             onTap: () {
+                              final newHideScroll = !hideScroll;
                               setState(() {
                                 danmakuController.updateOption(
                                   danmakuController.option
-                                      .copyWith(hideScroll: !hideScroll),
+                                      .copyWith(hideScroll: newHideScroll),
+                                );
+                                setting.put(
+                                  DanmakuKey.danmakuHideScroll,
+                                  newHideScroll,
                                 );
                               });
                             },
@@ -121,10 +126,15 @@ class _DanmakuSettingState extends ConsumerState<DanmakuSetting> {
                         children: [
                           InkWell(
                             onTap: () {
+                              final newHideTop = !hideTop;
                               setState(() {
                                 danmakuController.updateOption(
                                   danmakuController.option
-                                      .copyWith(hideTop: !hideTop),
+                                      .copyWith(hideTop: newHideTop),
+                                );
+                                setting.put(
+                                  DanmakuKey.danmakuHideTop,
+                                  newHideTop,
                                 );
                               });
                             },
@@ -158,10 +168,15 @@ class _DanmakuSettingState extends ConsumerState<DanmakuSetting> {
                         children: [
                           InkWell(
                             onTap: () {
+                              final newHideBottom = !hideBottom;
                               setState(() {
                                 danmakuController.updateOption(
                                   danmakuController.option
-                                      .copyWith(hideBottom: !hideBottom),
+                                      .copyWith(hideBottom: newHideBottom),
+                                );
+                                setting.put(
+                                  DanmakuKey.danmakuHideBottom,
+                                  newHideBottom,
                                 );
                               });
                             },

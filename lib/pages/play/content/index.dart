@@ -3,6 +3,7 @@ import 'package:anime_flow/pages/play/content/introduce/index.dart';
 import 'package:anime_flow/pages/play/providers/play_provider.dart';
 import 'package:anime_flow/pages/play/providers/video_ui_provider.dart';
 import 'package:anime_flow/widget/danmaku_text_field.dart';
+import 'package:anime_flow/widget/notification_toast.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -36,18 +37,20 @@ class _ContentViewState extends ConsumerState<ContentView>
     super.dispose();
   }
 
-  Future<void> onSendDanmaku(String text, int userId) async {
+  Future<void> onSendDanmaku(String text) async {
+    final userId = ref.read(currentUserInfoProvider).value?.id;
+    if (userId == null) {
+      NotificationToast.show('请先登录', '请先登录后再发送弹幕');
+      return;
+    }
     final success = await playSession.sendDanmaku(
       text,
       bgmUserId: userId,
     );
     if (!mounted) return;
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text(
-          success ? '弹幕发送成功' : '当前不支持发送弹幕',
-        ),
-      ),
+    NotificationToast.show(
+      '提示',
+      success ? '弹幕发送成功' : '当前不支持发送弹幕',
     );
   }
 
@@ -73,13 +76,9 @@ class _ContentViewState extends ConsumerState<ContentView>
                   ? const Spacer()
                   : Consumer(
                       builder: (context, ref, _) {
-                        final isLogin = ref.watch(isLoggedInProvider).value;
-                        if (isLogin != true) return const SizedBox.shrink();
                         final danmakuOn = ref.watch(
                           playStateProvider.select((state) => state.danmakuOn),
                         );
-                        final userInfo =
-                            ref.watch(currentUserInfoProvider).value;
                         return Padding(
                           padding: const EdgeInsets.all(8.0),
                           child: DanmakuTextField(
@@ -93,8 +92,7 @@ class _ContentViewState extends ConsumerState<ContentView>
                                 videoUiStateController.hideControlsUi();
                               }
                             },
-                            onSend: (text) =>
-                                onSendDanmaku(text, userInfo!.id),
+                            onSend: (text) => onSendDanmaku(text),
                             onClose: playSession.toggleDanmaku,
                           ),
                         );

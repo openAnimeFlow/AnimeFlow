@@ -1,3 +1,4 @@
+import 'package:anime_flow/constants/assets_path_constants.dart';
 import 'package:anime_flow/constants/layout_constant.dart';
 import 'package:anime_flow/models/item/bangumi/episodes_item.dart';
 import 'package:anime_flow/pages/play/providers/episodes_provider.dart';
@@ -6,12 +7,14 @@ import 'package:anime_flow/routes/provider/routes_args.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:lottie/lottie.dart';
 
 class EpisodesDialog extends ConsumerStatefulWidget {
   static const double _loadMoreTriggerDistance = 80;
   static const double _estimatedEpisodeItemExtent = 86;
 
   final void Function(int episodeId)? onEpisodeLongPress;
+
   const EpisodesDialog({super.key, this.onEpisodeLongPress});
 
   @override
@@ -43,7 +46,7 @@ class _EpisodesDialogState extends ConsumerState<EpisodesDialog> {
       child: Container(
         width: LayoutConstant.playContentWidth,
         height: double.infinity,
-        padding: const EdgeInsets.all(16),
+        padding: const EdgeInsets.symmetric(horizontal: 10),
         color: Theme.of(context).cardColor,
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -210,11 +213,6 @@ class _EpisodesDialogState extends ConsumerState<EpisodesDialog> {
           return Card(
             key: isSelected ? _selectedEpisodeKey : null,
             elevation: 0,
-            color: isSelected ? colorScheme.primaryContainer : null,
-            margin: index != episodes.length - 1 ||
-                    episodesState?.isLoadingMore == true
-                ? const EdgeInsets.only(bottom: 8)
-                : null,
             child: InkWell(
               onTap: () {
                 final episodeIndex = index + 1;
@@ -245,26 +243,49 @@ class _EpisodesDialogState extends ConsumerState<EpisodesDialog> {
                         : null),
                 child: Padding(
                   padding: const EdgeInsets.all(12),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
+                  child: Row(
                     children: [
-                      Text(
-                        episode.sort.toString().padLeft(2, '0'),
-                        style: const TextStyle(
-                          fontWeight: FontWeight.bold,
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              episode.sort.toString().padLeft(2, '0'),
+                              style: const TextStyle(
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                            const SizedBox(height: 6),
+                            Text(
+                              episode.nameCN.isEmpty
+                                  ? episode.name
+                                  : episode.nameCN,
+                              style: const TextStyle(
+                                fontSize: 12,
+                                color: Colors.grey,
+                                fontWeight: FontWeight.bold,
+                              ),
+                              maxLines: 2,
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                          ],
                         ),
                       ),
-                      const SizedBox(height: 6),
-                      Text(
-                        episode.nameCN.isEmpty ? episode.name : episode.nameCN,
-                        style: const TextStyle(
-                          fontSize: 12,
-                          color: Colors.grey,
-                          fontWeight: FontWeight.bold,
-                        ),
-                        maxLines: 2,
-                        overflow: TextOverflow.ellipsis,
-                      ),
+                      if (isSelected)
+                        Lottie.asset(
+                          AssetsPathConstants.playJsonIng,
+                          width: 30,
+                          height: 30,
+                          frameBuilder: (context, child, composition) {
+                            return ColorFiltered(
+                              colorFilter: ColorFilter.mode(
+                                Theme.of(context).colorScheme.primary,
+                                BlendMode.srcIn,
+                              ),
+                              child: child,
+                            );
+                          },
+                        )
                     ],
                   ),
                 ),

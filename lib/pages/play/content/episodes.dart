@@ -386,15 +386,33 @@ class _EpisodesComponentsState extends ConsumerState<EpisodesComponents> {
                             width: 2,
                           )
                         : null),
-                child: Center(
-                  child: Text(
-                    '${episode.sort}',
-                    style: TextStyle(
-                      fontSize: 16,
-                      fontWeight:
-                          isSelected ? FontWeight.bold : FontWeight.normal,
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Text(
+                      '${episode.sort}',
+                      style: TextStyle(
+                        fontSize: 16,
+                        fontWeight:
+                            isSelected ? FontWeight.bold : FontWeight.normal,
+                      ),
                     ),
-                  ),
+                    if (isSelected)
+                      Lottie.asset(
+                        AssetsPathConstants.playJsonIng,
+                        width: 25,
+                        height: 25,
+                        frameBuilder: (context, child, composition) {
+                          return ColorFiltered(
+                            colorFilter: ColorFilter.mode(
+                              Theme.of(context).colorScheme.primary,
+                              BlendMode.srcIn,
+                            ),
+                            child: child,
+                          );
+                        },
+                      )
+                  ],
                 ),
               ),
             ),

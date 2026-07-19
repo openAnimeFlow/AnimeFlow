@@ -26,6 +26,7 @@ class _IntroduceViewState extends State<IntroduceView>
         padding: const EdgeInsets.all(10),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
+          spacing: 5,
           children: [
             Consumer(builder: (context, ref, child) {
               final subjectName = ref.watch(
@@ -37,18 +38,14 @@ class _IntroduceViewState extends State<IntroduceView>
                 textAlign: TextAlign.left,
               );
             }),
-            const SizedBox(height: 10),
+            const SizedBox(height: 5),
             //章节
             const EpisodesComponents(),
-            const SizedBox(height: 5),
             //数据源
             const VideoResourcesView(),
-            const SizedBox(height: 5),
             //弹幕
             const DanmakuCard(),
-            const SizedBox(height: 5),
             const RecommendationsView(),
-            const SizedBox(height: 5),
           ],
         ),
       ),

@@ -1,4 +1,3 @@
-import 'package:anime_flow/constants/assets_path_constants.dart';
 import 'package:anime_flow/constants/layout_constant.dart';
 import 'package:anime_flow/models/item/bangumi/episodes_item.dart';
 import 'package:anime_flow/pages/play/providers/episodes_provider.dart';
@@ -7,15 +6,19 @@ import 'package:anime_flow/routes/provider/routes_args.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import 'package:lottie/lottie.dart';
 
 class EpisodesDialog extends ConsumerStatefulWidget {
   static const double _loadMoreTriggerDistance = 80;
   static const double _estimatedEpisodeItemExtent = 86;
 
   final void Function(int episodeId)? onEpisodeLongPress;
+  final Widget isSelectedIcon;
 
-  const EpisodesDialog({super.key, this.onEpisodeLongPress});
+  const EpisodesDialog({
+    super.key,
+    required this.isSelectedIcon,
+    this.onEpisodeLongPress,
+  });
 
   @override
   ConsumerState<EpisodesDialog> createState() => _EpisodesDialogState();
@@ -271,21 +274,7 @@ class _EpisodesDialogState extends ConsumerState<EpisodesDialog> {
                           ],
                         ),
                       ),
-                      if (isSelected)
-                        Lottie.asset(
-                          AssetsPathConstants.playJsonIng,
-                          width: 30,
-                          height: 30,
-                          frameBuilder: (context, child, composition) {
-                            return ColorFiltered(
-                              colorFilter: ColorFilter.mode(
-                                Theme.of(context).colorScheme.primary,
-                                BlendMode.srcIn,
-                              ),
-                              child: child,
-                            );
-                          },
-                        )
+                      if (isSelected) widget.isSelectedIcon
                     ],
                   ),
                 ),

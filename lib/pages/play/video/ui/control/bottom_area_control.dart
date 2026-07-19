@@ -16,6 +16,7 @@ import 'package:anime_flow/utils/logger.dart';
 import 'package:anime_flow/utils/systemUtil.dart';
 import 'package:anime_flow/widget/danmaku_text_field.dart';
 import 'package:anime_flow/widget/notification_toast.dart';
+import 'package:anime_flow/widget/play_content/episode_playing_indicator.dart';
 import 'package:anime_flow/widget/play_content/episodes_dialog.dart';
 import 'package:anime_flow/widget/play_pause_icon.dart';
 import 'package:flutter/material.dart';
@@ -363,6 +364,19 @@ class BottomAreaControl extends ConsumerWidget {
                                         return UncontrolledProviderScope(
                                           container: container,
                                           child: EpisodesDialog(
+                                            isSelectedIcon: Consumer(
+                                              builder: (context, ref, _) {
+                                                final playing = ref.watch(
+                                                  playStateProvider.select(
+                                                    (s) => s.playing,
+                                                  ),
+                                                );
+                                                return EpisodePlayingIndicator(
+                                                  size: 30,
+                                                  isPlaying: playing,
+                                                );
+                                              },
+                                            ),
                                             onEpisodeLongPress: (episodeId) {
                                               _updateEpisodeWatched(
                                                 dialogContext,

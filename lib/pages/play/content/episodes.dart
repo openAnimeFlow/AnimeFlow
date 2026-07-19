@@ -1,4 +1,3 @@
-import 'package:anime_flow/constants/assets_path_constants.dart';
 import 'package:anime_flow/constants/constants.dart';
 import 'package:anime_flow/models/item/bangumi/episodes_item.dart';
 import 'package:anime_flow/network/clients/flow_client.dart';
@@ -10,10 +9,14 @@ import 'package:anime_flow/widget/layout_toggle_icon.dart';
 import 'package:anime_flow/widget/notification_toast.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:lottie/lottie.dart';
 
 class EpisodesComponents extends ConsumerStatefulWidget {
-  const EpisodesComponents({super.key});
+  const EpisodesComponents({
+    super.key,
+    required this.isSelectedIcon,
+  });
+
+  final Widget isSelectedIcon;
 
   @override
   ConsumerState<EpisodesComponents> createState() => _EpisodesComponentsState();
@@ -297,21 +300,7 @@ class _EpisodesComponentsState extends ConsumerState<EpisodesComponents> {
                           ],
                         ),
                       ),
-                      if (isSelected)
-                        Lottie.asset(
-                          AssetsPathConstants.playJsonIng,
-                          width: 30,
-                          height: 30,
-                          frameBuilder: (context, child, composition) {
-                            return ColorFiltered(
-                              colorFilter: ColorFilter.mode(
-                                Theme.of(context).colorScheme.primary,
-                                BlendMode.srcIn,
-                              ),
-                              child: child,
-                            );
-                          },
-                        ),
+                      if (isSelected) widget.isSelectedIcon,
                     ],
                   ),
                 ),
@@ -397,21 +386,7 @@ class _EpisodesComponentsState extends ConsumerState<EpisodesComponents> {
                             isSelected ? FontWeight.bold : FontWeight.normal,
                       ),
                     ),
-                    if (isSelected)
-                      Lottie.asset(
-                        AssetsPathConstants.playJsonIng,
-                        width: 25,
-                        height: 25,
-                        frameBuilder: (context, child, composition) {
-                          return ColorFiltered(
-                            colorFilter: ColorFilter.mode(
-                              Theme.of(context).colorScheme.primary,
-                              BlendMode.srcIn,
-                            ),
-                            child: child,
-                          );
-                        },
-                      )
+                    if (isSelected) widget.isSelectedIcon
                   ],
                 ),
               ),

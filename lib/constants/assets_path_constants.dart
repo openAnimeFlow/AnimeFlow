@@ -17,6 +17,8 @@ class AssetsPathConstants {
       /// 块茎图标
       blockGrove = 'assets/icons/FormkitFastforward.svg',
 
+      blockGroveFastForward = 'assets/icons/MajesticonsFastForward.svg',
+
       /// 侧面板关闭图标
       rightPanelClose = 'assets/icons/right_panel_close.svg';
 }

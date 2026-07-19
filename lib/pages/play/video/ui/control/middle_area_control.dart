@@ -1,3 +1,4 @@
+import 'package:anime_flow/constants/assets_path_constants.dart';
 import 'package:anime_flow/features/network_speed/network_speed_provider.dart';
 import 'package:anime_flow/models/enums/video_controls_icon_type.dart';
 import 'package:anime_flow/pages/play/providers/play_provider.dart';
@@ -7,6 +8,7 @@ import 'package:anime_flow/utils/utils.dart';
 import 'package:anime_flow/widget/play_pause_icon.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 
 /// 中间区域控件
 class MiddleAreaControl extends ConsumerStatefulWidget {
@@ -80,8 +82,8 @@ class _MiddleAreaControlState extends ConsumerState<MiddleAreaControl> {
                 clipBehavior: Clip.hardEdge,
                 child: Consumer(
                   builder: (context, ref, child) {
-                    final volume = ref.watch(
-                        playStateProvider.select((s) => s.volume));
+                    final volume =
+                        ref.watch(playStateProvider.select((s) => s.volume));
                     return Stack(
                       children: [
                         Positioned.fill(
@@ -124,8 +126,8 @@ class _MiddleAreaControlState extends ConsumerState<MiddleAreaControl> {
                   borderRadius: BorderRadius.circular(10),
                 ),
                 child: Consumer(builder: (context, ref, child) {
-                  final playing = ref.watch(
-                      playStateProvider.select((s) => s.playing));
+                  final playing =
+                      ref.watch(playStateProvider.select((s) => s.playing));
                   return PlayPauseIcon(
                     playing: playing,
                     iconSize: 33,
@@ -143,8 +145,10 @@ class _MiddleAreaControlState extends ConsumerState<MiddleAreaControl> {
                   borderRadius: BorderRadius.circular(8),
                 ),
                 child: Consumer(
-                  builder: (BuildContext context, WidgetRef ref, Widget? child) {
-                    final duration = ref.watch(playStateProvider.select((s) => s.duration));
+                  builder:
+                      (BuildContext context, WidgetRef ref, Widget? child) {
+                    final duration =
+                        ref.watch(playStateProvider.select((s) => s.duration));
                     return Text(
                       '${FormatTimeUtil.formatDuration(videoUiState.dragPosition)} / ${FormatTimeUtil.formatDuration(duration)}',
                       style: const TextStyle(
@@ -165,8 +169,10 @@ class _MiddleAreaControlState extends ConsumerState<MiddleAreaControl> {
                   ),
                   const SizedBox(height: 5),
                   Consumer(
-                    builder: (BuildContext context, WidgetRef ref, Widget? child) {
-                      final parseResult = ref.watch(playStateProvider.select((s) => s.parseResult));
+                    builder:
+                        (BuildContext context, WidgetRef ref, Widget? child) {
+                      final parseResult = ref.watch(
+                          playStateProvider.select((s) => s.parseResult));
                       return Text(
                         parseResult,
                         style: const TextStyle(
@@ -227,16 +233,19 @@ class _MiddleAreaControlState extends ConsumerState<MiddleAreaControl> {
                 ),
                 child: Row(
                   mainAxisSize: MainAxisSize.min,
+                  spacing: 5,
                   children: [
-                    const Icon(
-                      Icons.fast_forward_rounded,
-                      color: Colors.white,
-                      size: 35,
+                    SvgPicture.asset(
+                      AssetsPathConstants.blockGroveFastForward,
+                      width: 30,
+                      height: 30,
+                      colorFilter:
+                          const ColorFilter.mode(Colors.white, BlendMode.srcIn),
                     ),
-                    const SizedBox(width: 8),
                     Consumer(
-                      builder: (BuildContext context, WidgetRef ref, Widget? child) {
-                        final rate = ref.watch(playStateProvider.select((s) => s.rate));
+                      builder: (context, ref, child) {
+                        final rate =
+                            ref.watch(playStateProvider.select((s) => s.rate));
                         return Text(
                           '${rate.toStringAsFixed(1)}x',
                           style: const TextStyle(

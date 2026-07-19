@@ -31,120 +31,112 @@ dependencies:
   flutter:
     sdk: flutter
 
-  # The following adds the Cupertino Icons font to your application.
-  # Use with the CupertinoIcons class for iOS style icons.
-  cupertino_icons: ^1.0.8
+  # UI 与视觉
+  cupertino_icons: ^1.0.8 # 提供 iOS 风格 Cupertino 图标。
+  flutter_svg: ^2.2.3 # 渲染 SVG 图标和矢量资源。
+  cached_network_image: ^3.4.1 # 缓存并展示网络图片。
+  shimmer: ^3.0.0 # 构建骨架屏和加载占位效果。
+  photo_view: ^0.15.0 # 提供图片预览、缩放和平移能力。
+  lottie: ^3.3.3 # 播放 Lottie JSON 动画资源。
+  bot_toast: ^4.1.3 # 显示全局 Toast 和通知提示。
 
-  # 统一appName dart run rename_app:main all="My App Name"
-  # 文档:https://github.com/Syed-Waleed-Shah/rename_app/blob/master/README.md
-  rename_app: ^1.6.5
-
-  # 修改包名
-  # 命令: flutter pub run change_app_package_name:main com.ligg.anime_flow
-  change_app_package_name: ^1.5.0
-
-  #构建每个架构一个APK
-  #flutter build apk --split-per-abi
-
-  media_kit:
+  # 播放器与视频体验
+  media_kit: # media_kit 播放器核心。
     git:
       url: https://github.com/Predidit/media-kit.git
       ref: 11f72195b4b1298ad5a96b56fe66be63b39e0797
       path: ./media_kit
-  media_kit_video:
+  media_kit_video: # media_kit 的 Flutter 视频渲染组件。
     git:
       url: https://github.com/Predidit/media-kit.git
       ref: 11f72195b4b1298ad5a96b56fe66be63b39e0797
       path: ./media_kit_video
-  media_kit_libs_video:
+  media_kit_libs_video: # media_kit 通用平台视频运行库。
     git:
       url: https://github.com/Predidit/media-kit.git
       ref: 11f72195b4b1298ad5a96b56fe66be63b39e0797
       path: ./libs/universal/media_kit_libs_video
-  # carousel_slider: ^5.1.1
-  # shared_preferences: ^2.5.3#  app_links: ^7.0.0
-  # flutter_dotenv: ^6.0.0
-  # get: ^4.7.3
-  package_info_plus: ^8.3.1
-  dio: ^5.10.0
-  crypto: ^3.0.6
-  flutter_launcher_icons: ^0.14.4
-  flutter_svg: ^2.2.3
-  logger: ^2.6.2
-  xpath_selector: ^3.0.2
-  xpath_selector_html_parser: ^3.0.1
-  html: ^0.15.6
-  webview_flutter: ^4.13.0
-  flutter_inappwebview_platform_interface: ^1.3.0+1
-  flutter_inappwebview_ios: ^1.1.2
-  flutter_inappwebview_macos: ^1.1.2
-  flutter_inappwebview_android: ^1.1.3
-  webview_windows:
+  canvas_danmaku: ^0.3.1 # 渲染视频弹幕层。
+  screen_brightness_platform_interface: ^2.1.0 # 抽象屏幕亮度控制平台接口。
+  screen_brightness_android: ^2.1.3 # Android 端屏幕亮度控制实现。
+  screen_brightness_ios: ^2.1.2 # iOS 端屏幕亮度控制实现。
+  flutter_volume_controller: ^2.0.1 # 读取、监听和设置系统音量。
+
+  # WebView 与网页解析
+  webview_flutter: ^4.13.0 # 移动端 WebView 基础能力。
+  flutter_inappwebview_platform_interface: ^1.3.0+1 # inappwebview 平台接口定义。
+  flutter_inappwebview_ios: ^1.1.2 # iOS 端 inappwebview 实现。
+  flutter_inappwebview_macos: ^1.1.2 # macOS 端 inappwebview 实现。
+  flutter_inappwebview_android: ^1.1.3 # Android 端 inappwebview 实现。
+  webview_windows: # Windows WebView 宿主组件。
     git:
       url: https://github.com/Predidit/flutter-webview-windows.git
       ref: 39c20a6fc5436988d7495a51a704056e4fca4751
-  desktop_webview_window:
+  desktop_webview_window: # Linux 桌面 WebView 窗口实现。
     git:
       url: https://github.com/Predidit/linux_webview_window.git
       ref: b429f8ba6b8a99cd0f7eb5fe8d1621f325635c3d
-  #  animation_network_image:
-  #    git:
-  #      url: https://github.com/openAnimeFlow/AnimationNetworkImage.git
-  #      ref: 04ea497b5c0111dd3396aaa157e2312620a1764c
-  cached_network_image: ^3.4.1
-  shimmer: ^3.0.0
-  window_manager: ^0.5.1
-  url_launcher: ^6.3.2
-  screen_brightness_platform_interface: ^2.1.0
-  screen_brightness_android: ^2.1.3
-  screen_brightness_ios: ^2.1.2
-  antlr4: ^4.13.2
-  photo_view: ^0.15.0
 
-  flutter_secure_storage: ^10.0.0
-  gal: ^2.3.2
-  open_filex: ^4.7.0
-  path: ^1.9.1
-  flutter_markdown_plus: ^1.0.7
-  canvas_danmaku: ^0.3.1
-  flutter_native_splash: ^2.4.7
-  battery_plus: ^7.0.0
-  connectivity_plus: ^6.0.5
-  hive_ce: ^2.19.3
-  hive_ce_flutter: ^2.3.4
-  cookie_jar: ^4.0.9
-  go_router: ^17.1.0
-  image_picker: ^1.2.1
-  lottie: ^3.3.3
-  riverpod_annotation: ^4.0.2
-  flutter_riverpod: ^3.2.1
-  path_provider: ^2.1.5
-  bot_toast: ^4.1.3
-  crop_your_image: ^2.0.0
-  flutter_volume_controller: ^2.0.1
+  # 网络、抓取与解析
+  dio: ^5.10.0 # HTTP 客户端和接口请求。
+  cookie_jar: ^4.0.9 # 管理请求 Cookie 持久化。
+  crypto: ^3.0.6 # 计算签名、哈希和加密摘要。
+  html: ^0.15.6 # 解析 HTML 文档结构。
+  xpath_selector: ^3.0.2 # 使用 XPath 查询解析后的文档。
+  xpath_selector_html_parser: ^3.0.1 # 为 HTML 提供 XPath 解析适配。
+  antlr4: ^4.13.2 # 支持 BBCode 等语法解析器运行。
+
+  # 状态管理与路由
+  flutter_riverpod: ^3.2.1 # Riverpod 状态管理运行时。
+  riverpod_annotation: ^4.0.2 # Riverpod 注解式 Provider 声明。
+  go_router: ^17.1.0 # 声明式路由和页面导航。
+
+  # 本地存储与文件
+  flutter_secure_storage: ^10.0.0 # 安全存储 Token 等敏感数据。
+  hive_ce: ^2.19.3 # 本地轻量级键值数据库。
+  hive_ce_flutter: ^2.3.4 # Hive 的 Flutter 初始化与适配。
+  path_provider: ^2.1.5 # 获取应用文档、缓存和下载目录。
+  path: ^1.9.1 # 处理跨平台文件路径。
+  gal: ^2.3.2 # 保存图片到系统相册。
+  open_filex: ^4.7.0 # 调用系统应用打开本地文件。
+
+  # 系统能力与平台集成
+  package_info_plus: ^8.3.1 # 获取应用版本和构建信息。
+  battery_plus: ^7.0.0 # 读取电池电量与充电状态。
+  connectivity_plus: ^6.0.5 # 检测网络连接类型与状态。
+  window_manager: ^0.5.1 # 控制桌面窗口、全屏和窗口事件。
+  url_launcher: ^6.3.2 # 打开外部链接、邮件和系统 URL。
+
+  # 内容编辑与展示
+  flutter_markdown_plus: ^1.0.7 # 渲染 Markdown 富文本内容。
+  image_picker: ^1.2.1 # 从相册或相机选择图片。
+  crop_your_image: ^2.0.0 # 裁剪用户选择的图片。
+
+  # 日志
+  logger: ^2.6.2 # 输出结构化调试日志。
 
 dependency_overrides:
-  media_kit_libs_linux:
+  media_kit_libs_linux: # 覆盖 Linux 平台 media_kit 运行库来源。
     git:
       url: https://github.com/Predidit/media-kit.git
       ref: 11f72195b4b1298ad5a96b56fe66be63b39e0797
       path: ./libs/linux/media_kit_libs_linux
-  media_kit_libs_ios_video:
+  media_kit_libs_ios_video: # 覆盖 iOS 平台 media_kit 视频运行库来源。
     git:
       url: https://github.com/Predidit/media-kit.git
       ref: 11f72195b4b1298ad5a96b56fe66be63b39e0797
       path: ./libs/ios/media_kit_libs_ios_video
-  media_kit_libs_android_video:
+  media_kit_libs_android_video: # 覆盖 Android 平台 media_kit 视频运行库来源。
     git:
       url: https://github.com/Predidit/media-kit.git
       ref: 11f72195b4b1298ad5a96b56fe66be63b39e0797
       path: ./libs/android/media_kit_libs_android_video
-  media_kit_libs_windows_video:
+  media_kit_libs_windows_video: # 覆盖 Windows 平台 media_kit 视频运行库来源。
     git:
       url: https://github.com/Predidit/media-kit.git
       ref: 11f72195b4b1298ad5a96b56fe66be63b39e0797
       path: ./libs/windows/media_kit_libs_windows_video
-  media_kit_libs_macos_video:
+  media_kit_libs_macos_video: # 覆盖 macOS 平台 media_kit 视频运行库来源。
     git:
       url: https://github.com/Predidit/media-kit.git
       ref: 11f72195b4b1298ad5a96b56fe66be63b39e0797
@@ -174,24 +166,25 @@ flutter_native_splash:
   ios: true
 
 dev_dependencies:
-  flutter_test:
+  # 测试
+  flutter_test: # Flutter 官方测试框架。
     sdk: flutter
 
-  # The "flutter_lints" package below contains a set of recommended lints to
-  # encourage good coding practices. The lint set provided by the package is
-  # activated in the `analysis_options.yaml` file located at the root of your
-  # package. See that file for information about deactivating specific lint
-  # rules and activating additional ones.
-  flutter_lints: ^6.0.0
-  # dart run build_runner build --delete-conflicting-outputs
-  build_runner: ^2.13.1
-  # 生成Hive Type
-  hive_ce_generator: 1.11.0
+  # 代码质量
+  flutter_lints: ^6.0.0 # Flutter 推荐 lint 规则集合。
+  riverpod_lint: ^3.1.3 # Riverpod 专用 lint 规则。
 
-  #riverpod代码生成
-  riverpod_generator: ^4.0.3
-  riverpod_lint: ^3.1.3
-  go_router_builder: ^4.3.0
+  # 代码生成
+  build_runner: ^2.13.1 # 运行代码生成任务。
+  hive_ce_generator: 1.11.0 # 生成 Hive TypeAdapter。
+  riverpod_generator: ^4.0.3 # 生成 Riverpod Provider 代码。
+  go_router_builder: ^4.3.0 # 生成 go_router 类型安全路由代码。
+
+  # 应用打包工具
+  rename_app: ^1.6.5 # 批量修改应用显示名称。
+  change_app_package_name: ^1.5.0 # 修改 Android/iOS 应用包名。
+  flutter_launcher_icons: ^0.14.4 # 根据配置生成各平台应用图标。
+  flutter_native_splash: ^2.4.7 # 根据配置生成原生启动屏。
 
 
 # For information on the generic Dart part of this file, see the

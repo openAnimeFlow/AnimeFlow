@@ -432,7 +432,9 @@ class PlaySession {
         _syncDanmakuPauseWithPlayback(playing);
       }),
       player.stream.volume.listen((vol) {
-        _playStateActions.setVolume(vol);
+        if (!SystemUtil.supportsSystemVolumeSync) {
+          _playStateActions.setVolume(vol);
+        }
       }),
       player.stream.buffer.listen((buffered) {
         _playStateActions.setBuffered(buffered);
@@ -921,7 +923,9 @@ class PlaySession {
   void _setPlayerVolume(double newVolume) {
     final clampedVolume = newVolume.clamp(0.0, 100.0);
     _playStateActions.setVolume(clampedVolume);
-    player.setVolume(clampedVolume);
+    player.setVolume(
+      SystemUtil.supportsSystemVolumeSync ? 100.0 : clampedVolume,
+    );
   }
 
   void _updateVolume(

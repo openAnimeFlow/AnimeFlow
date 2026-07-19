@@ -85,10 +85,10 @@ packages:
     dependency: "direct main"
     description:
       name: battery_plus
-      sha256: ad16fcb55b7384be6b4bbc763d5e2031ac7ea62b2d9b6b661490c7b9741155bf
+      sha256: "3853aa1e18ea1d15493dd1d3edac05770b4b95c1e691fb85934c5fd3b1ac0fcc"
       url: "https://pub.flutter-io.cn"
     source: hosted
-    version: "7.0.0"
+    version: "7.1.1"
   battery_plus_platform_interface:
     dependency: transitive
     description:
@@ -941,8 +941,8 @@ packages:
     dependency: "direct main"
     description:
       path: media_kit
-      ref: "11f72195b4b1298ad5a96b56fe66be63b39e0797"
-      resolved-ref: "11f72195b4b1298ad5a96b56fe66be63b39e0797"
+      ref: "652cfc765a43792be8bec429ea72296d5d96fb7d"
+      resolved-ref: "652cfc765a43792be8bec429ea72296d5d96fb7d"
       url: "https://github.com/Predidit/media-kit.git"
     source: git
     version: "1.1.11"
@@ -950,8 +950,8 @@ packages:
     dependency: "direct overridden"
     description:
       path: "libs/android/media_kit_libs_android_video"
-      ref: "11f72195b4b1298ad5a96b56fe66be63b39e0797"
-      resolved-ref: "11f72195b4b1298ad5a96b56fe66be63b39e0797"
+      ref: "652cfc765a43792be8bec429ea72296d5d96fb7d"
+      resolved-ref: "652cfc765a43792be8bec429ea72296d5d96fb7d"
       url: "https://github.com/Predidit/media-kit.git"
     source: git
     version: "1.3.6"
@@ -959,8 +959,8 @@ packages:
     dependency: "direct overridden"
     description:
       path: "libs/ios/media_kit_libs_ios_video"
-      ref: "11f72195b4b1298ad5a96b56fe66be63b39e0797"
-      resolved-ref: "11f72195b4b1298ad5a96b56fe66be63b39e0797"
+      ref: "652cfc765a43792be8bec429ea72296d5d96fb7d"
+      resolved-ref: "652cfc765a43792be8bec429ea72296d5d96fb7d"
       url: "https://github.com/Predidit/media-kit.git"
     source: git
     version: "1.1.4"
@@ -968,8 +968,8 @@ packages:
     dependency: "direct overridden"
     description:
       path: "libs/linux/media_kit_libs_linux"
-      ref: "11f72195b4b1298ad5a96b56fe66be63b39e0797"
-      resolved-ref: "11f72195b4b1298ad5a96b56fe66be63b39e0797"
+      ref: "652cfc765a43792be8bec429ea72296d5d96fb7d"
+      resolved-ref: "652cfc765a43792be8bec429ea72296d5d96fb7d"
       url: "https://github.com/Predidit/media-kit.git"
     source: git
     version: "1.1.3"
@@ -977,8 +977,8 @@ packages:
     dependency: "direct overridden"
     description:
       path: "libs/macos/media_kit_libs_macos_video"
-      ref: "11f72195b4b1298ad5a96b56fe66be63b39e0797"
-      resolved-ref: "11f72195b4b1298ad5a96b56fe66be63b39e0797"
+      ref: "652cfc765a43792be8bec429ea72296d5d96fb7d"
+      resolved-ref: "652cfc765a43792be8bec429ea72296d5d96fb7d"
       url: "https://github.com/Predidit/media-kit.git"
     source: git
     version: "1.1.4"
@@ -986,8 +986,8 @@ packages:
     dependency: transitive
     description:
       path: "libs/ohos/media_kit_libs_ohos"
-      ref: "11f72195b4b1298ad5a96b56fe66be63b39e0797"
-      resolved-ref: "11f72195b4b1298ad5a96b56fe66be63b39e0797"
+      ref: "652cfc765a43792be8bec429ea72296d5d96fb7d"
+      resolved-ref: "652cfc765a43792be8bec429ea72296d5d96fb7d"
       url: "https://github.com/Predidit/media-kit.git"
     source: git
     version: "1.0.0"
@@ -995,8 +995,8 @@ packages:
     dependency: "direct main"
     description:
       path: "libs/universal/media_kit_libs_video"
-      ref: "11f72195b4b1298ad5a96b56fe66be63b39e0797"
-      resolved-ref: "11f72195b4b1298ad5a96b56fe66be63b39e0797"
+      ref: "652cfc765a43792be8bec429ea72296d5d96fb7d"
+      resolved-ref: "652cfc765a43792be8bec429ea72296d5d96fb7d"
       url: "https://github.com/Predidit/media-kit.git"
     source: git
     version: "1.0.5"
@@ -1004,8 +1004,8 @@ packages:
     dependency: "direct overridden"
     description:
       path: "libs/windows/media_kit_libs_windows_video"
-      ref: "11f72195b4b1298ad5a96b56fe66be63b39e0797"
-      resolved-ref: "11f72195b4b1298ad5a96b56fe66be63b39e0797"
+      ref: "652cfc765a43792be8bec429ea72296d5d96fb7d"
+      resolved-ref: "652cfc765a43792be8bec429ea72296d5d96fb7d"
       url: "https://github.com/Predidit/media-kit.git"
     source: git
     version: "1.0.10"
@@ -1013,8 +1013,8 @@ packages:
     dependency: "direct main"
     description:
       path: media_kit_video
-      ref: "11f72195b4b1298ad5a96b56fe66be63b39e0797"
-      resolved-ref: "11f72195b4b1298ad5a96b56fe66be63b39e0797"
+      ref: "652cfc765a43792be8bec429ea72296d5d96fb7d"
+      resolved-ref: "652cfc765a43792be8bec429ea72296d5d96fb7d"
       url: "https://github.com/Predidit/media-kit.git"
     source: git
     version: "1.2.5"
@@ -1326,18 +1326,18 @@ packages:
     dependency: "direct main"
     description:
       name: screen_brightness_ios
-      sha256: "2493953340ecfe8f4f13f61db50ce72533a55b0bbd58ba1402893feecf3727f5"
+      sha256: "352d355e8523a186ba1e494b74218e5ca96e51975a0630b8ed89fbb7ff609762"
       url: "https://pub.flutter-io.cn"
     source: hosted
-    version: "2.1.2"
+    version: "2.1.4"
   screen_brightness_platform_interface:
     dependency: "direct main"
     description:
       name: screen_brightness_platform_interface
-      sha256: "737bd47b57746bc4291cab1b8a5843ee881af499514881b0247ec77447ee769c"
+      sha256: "2de60c0ba569b898950029cc1f7e9dd72bda44a22beb5054aac331cb6fce2ff2"
       url: "https://pub.flutter-io.cn"
     source: hosted
-    version: "2.1.0"
+    version: "2.1.2"
   screen_retriever:
     dependency: transitive
     description:

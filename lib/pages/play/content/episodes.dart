@@ -10,8 +10,8 @@ import 'package:anime_flow/widget/notification_toast.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-class EpisodesComponents extends ConsumerStatefulWidget {
-  const EpisodesComponents({
+class EpisodesListView extends ConsumerStatefulWidget {
+  const EpisodesListView({
     super.key,
     required this.isSelectedIcon,
   });
@@ -19,10 +19,10 @@ class EpisodesComponents extends ConsumerStatefulWidget {
   final Widget isSelectedIcon;
 
   @override
-  ConsumerState<EpisodesComponents> createState() => _EpisodesComponentsState();
+  ConsumerState<EpisodesListView> createState() => _EpisodesListViewState();
 }
 
-class _EpisodesComponentsState extends ConsumerState<EpisodesComponents> {
+class _EpisodesListViewState extends ConsumerState<EpisodesListView> {
   final controller = ScrollController();
   late final PlaySession playSession;
 
@@ -246,7 +246,6 @@ class _EpisodesComponentsState extends ConsumerState<EpisodesComponents> {
             height: itemHeight,
             child: Card(
               elevation: 0,
-              color: isSelected ? colorScheme.primaryContainer : null,
               child: InkWell(
                 borderRadius: BorderRadius.circular(10),
                 onTap: () => _selectEpisode(episode, index + 1),
@@ -359,7 +358,6 @@ class _EpisodesComponentsState extends ConsumerState<EpisodesComponents> {
           final isSelected = selectedEpisodeId == episode.id;
           return Card(
             elevation: 0,
-            color: isSelected ? colorScheme.primaryContainer : null,
             child: InkWell(
               borderRadius: BorderRadius.circular(10),
               onTap: () => _selectEpisode(episode, index + 1),
@@ -377,6 +375,8 @@ class _EpisodesComponentsState extends ConsumerState<EpisodesComponents> {
                         : null),
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.center,
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  mainAxisSize: MainAxisSize.min,
                   children: [
                     Text(
                       '${episode.sort}',

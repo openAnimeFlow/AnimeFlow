@@ -42,14 +42,14 @@ class _IntroduceViewState extends State<IntroduceView>
             }),
             const SizedBox(height: 5),
             //章节
-            EpisodesComponents(
+            EpisodesListView(
               isSelectedIcon: Consumer(
                 builder: (context, ref, _) {
                   final playing = ref.watch(
                     playStateProvider.select((s) => s.playing),
                   );
                   return EpisodePlayingIndicator(
-                    size: 30,
+                    size: 25,
                     isPlaying: playing,
                   );
                 },

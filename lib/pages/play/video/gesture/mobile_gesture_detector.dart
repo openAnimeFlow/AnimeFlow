@@ -114,6 +114,9 @@ class _MobileGestureDetectorState extends ConsumerState<MobileGestureDetector> {
           scale,
           ref.read(playStateProvider).duration,
         );
+        playController.updateBufferingForPendingSeek(
+          videoUiStateController.dragPosition,
+        );
       },
 
       // 水平拖动结束：应用新的播放进度

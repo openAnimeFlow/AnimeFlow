@@ -412,6 +412,7 @@ class PlaySession {
 
   /// 弹幕相关
   bool _isLoadingDanmaku = false;
+  bool _isPlayerBuffering = false;
 
   int? _lastSavedPositionSeconds;
   bool _isSavingPlayHistory = false;
@@ -419,6 +420,9 @@ class PlaySession {
   final Set<int> _autoWatchedEpisodeUpdatesInFlight = {};
 
   final List<StreamSubscription<Object?>> _playerSubscriptions = [];
+
+  static const Duration _bufferingPositionTolerance =
+      Duration(milliseconds: 500);
 
   void init() {
     final adBlocker = setting.get(PlaybackKey.adBlocker, defaultValue: false);
@@ -438,16 +442,18 @@ class PlaySession {
       }),
       player.stream.buffer.listen((buffered) {
         _playStateActions.setBuffered(buffered);
+        _updateEffectiveBufferingState(buffered: buffered);
       }),
       player.stream.buffering.listen((buffering) {
-        _playStateActions.setBuffering(buffering);
-        _updateBufferingState(buffering);
+        _isPlayerBuffering = buffering;
+        _updateEffectiveBufferingState(playerBuffering: buffering);
       }),
       player.stream.rate.listen((r) {
         _playStateActions.setRate(r);
       }),
       player.stream.position.listen((pos) {
         _playStateActions.setPosition(pos);
+        _updateEffectiveBufferingState(position: pos);
       }),
       player.stream.duration.listen((dur) {
         _playStateActions.setDuration(dur);
@@ -667,6 +673,28 @@ class PlaySession {
             .updateIndicatorType(VideoControlsIndicatorType.noIndicator);
       }
     }
+  }
+
+  void _updateEffectiveBufferingState({
+    Duration? position,
+    Duration? buffered,
+    bool? playerBuffering,
+  }) {
+    final playState = _playStateActions.value;
+    final currentPosition = position ?? playState.position;
+    final currentBuffered = buffered ?? playState.buffered;
+    final isBuffering = (playerBuffering ?? _isPlayerBuffering) ||
+        _isPositionPastBuffered(currentPosition, currentBuffered);
+
+    _playStateActions.setBuffering(isBuffering);
+    _updateBufferingState(isBuffering);
+  }
+
+  bool _isPositionPastBuffered(Duration position, Duration buffered) {
+    if (position <= Duration.zero) return false;
+    if (buffered <= Duration.zero) return false;
+
+    return position - buffered > _bufferingPositionTolerance;
   }
 
   /// 更新剧集观看状态
@@ -907,6 +935,11 @@ class PlaySession {
   /// 跳转到指定位置
   void seekTo(Duration pos) {
     player.seek(pos);
+    _updateEffectiveBufferingState(position: pos);
+  }
+
+  void updateBufferingForPendingSeek(Duration pos) {
+    _updateEffectiveBufferingState(position: pos);
   }
 
   /// 结束临时播放倍速

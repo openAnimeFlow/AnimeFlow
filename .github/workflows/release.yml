@@ -204,11 +204,22 @@ jobs:
         shell: pwsh
         run: |
           $ErrorActionPreference = 'Stop'
-          $dst = Join-Path $env:TEMP 'innosetup-install.exe'
-          Invoke-WebRequest -Uri 'https://jrsoftware.org/download.php/is.exe' -OutFile $dst -UseBasicParsing
-          Start-Process -FilePath $dst -ArgumentList '/VERYSILENT','/SUPPRESSMSGBOXES','/NORESTART' -Wait
-          $iscc = Join-Path ${env:ProgramFiles(x86)} 'Inno Setup 6\ISCC.exe'
-          if (-not (Test-Path $iscc)) { $iscc = Join-Path $env:ProgramFiles 'Inno Setup 6\ISCC.exe' }
+          function Find-Iscc {
+            $candidates = @(
+              (Join-Path ${env:ProgramFiles(x86)} 'Inno Setup 6\ISCC.exe'),
+              (Join-Path $env:ProgramFiles 'Inno Setup 6\ISCC.exe')
+            )
+            foreach ($candidate in $candidates) {
+              if (Test-Path $candidate) { return $candidate }
+            }
+            return $null
+          }
+
+          $iscc = Find-Iscc
+          if (-not $iscc) {
+            choco install innosetup --yes --no-progress
+            $iscc = Find-Iscc
+          }
           if (-not (Test-Path $iscc)) { throw "ISCC.exe not found after Inno Setup install" }
           echo "ISCC_PATH=$iscc" >> $env:GITHUB_ENV
           $innoDir = Split-Path $iscc -Parent

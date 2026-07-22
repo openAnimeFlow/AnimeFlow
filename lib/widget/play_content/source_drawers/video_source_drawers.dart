@@ -920,6 +920,8 @@ class _VideoSourceDrawersState extends ConsumerState<VideoSourceDrawers> {
               widget.videoSourceController.bindManualSourceForCurrentEpisode(
                 websiteName: websiteName,
                 websiteIcon: websiteIcon,
+                resourceTitle: item.subjectsTitle,
+                lineName: item.lineNames,
                 videoUrl: videoUrl,
               );
               widget.onVideoUrlSelected?.call(videoUrl);

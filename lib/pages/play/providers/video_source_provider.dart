@@ -25,6 +25,8 @@ class VideoSourceState {
     this.videoResources = const [],
     this.webSiteTitle = '',
     this.webSiteIcon = '',
+    this.resourceTitle = '',
+    this.lineName = '',
     this.videoUrl = '',
     this.keyword = '',
     this.isSearchCompleted = false,
@@ -38,6 +40,8 @@ class VideoSourceState {
   final List<ResourcesItem> videoResources;
   final String webSiteTitle;
   final String webSiteIcon;
+  final String resourceTitle;
+  final String lineName;
   final String videoUrl;
   final String keyword;
   final bool isSearchCompleted;
@@ -51,6 +55,8 @@ class VideoSourceState {
     List<ResourcesItem>? videoResources,
     String? webSiteTitle,
     String? webSiteIcon,
+    String? resourceTitle,
+    String? lineName,
     String? videoUrl,
     String? keyword,
     bool? isSearchCompleted,
@@ -64,6 +70,8 @@ class VideoSourceState {
       videoResources: videoResources ?? this.videoResources,
       webSiteTitle: webSiteTitle ?? this.webSiteTitle,
       webSiteIcon: webSiteIcon ?? this.webSiteIcon,
+      resourceTitle: resourceTitle ?? this.resourceTitle,
+      lineName: lineName ?? this.lineName,
       videoUrl: videoUrl ?? this.videoUrl,
       keyword: keyword ?? this.keyword,
       isSearchCompleted: isSearchCompleted ?? this.isSearchCompleted,
@@ -79,11 +87,15 @@ class ManualEpisodeSource {
   const ManualEpisodeSource({
     required this.websiteName,
     required this.websiteIcon,
+    required this.resourceTitle,
+    required this.lineName,
     required this.videoUrl,
   });
 
   final String websiteName;
   final String websiteIcon;
+  final String resourceTitle;
+  final String lineName;
   final String videoUrl;
 }
 
@@ -112,6 +124,8 @@ class VideoSourceNotifier extends _$VideoSourceNotifier {
   List<ResourcesItem> get videoResources => state.videoResources;
   String get webSiteTitle => state.webSiteTitle;
   String get webSiteIcon => state.webSiteIcon;
+  String get resourceTitle => state.resourceTitle;
+  String get lineName => state.lineName;
   String get videoUrl => state.videoUrl;
   String get keyword => state.keyword;
   bool get isSearchCompleted => state.isSearchCompleted;
@@ -185,6 +199,8 @@ class VideoSourceNotifier extends _$VideoSourceNotifier {
       selectedWebsiteIndex: 0,
       webSiteTitle: '',
       webSiteIcon: '',
+      resourceTitle: '',
+      lineName: '',
       videoUrl: '',
     );
 
@@ -502,12 +518,16 @@ class VideoSourceNotifier extends _$VideoSourceNotifier {
   void setWebSite({
     required String title,
     required String iconUrl,
+    String resourceTitle = '',
+    String lineName = '',
     required String videoUrl,
     bool isManual = false,
   }) {
     state = state.copyWith(
       webSiteTitle: title,
       webSiteIcon: iconUrl,
+      resourceTitle: resourceTitle,
+      lineName: lineName,
       videoUrl: videoUrl,
       userManuallySelected: isManual ? true : state.userManuallySelected,
     );
@@ -516,6 +536,8 @@ class VideoSourceNotifier extends _$VideoSourceNotifier {
   void bindManualSourceForCurrentEpisode({
     required String websiteName,
     required String websiteIcon,
+    required String resourceTitle,
+    required String lineName,
     required String videoUrl,
   }) {
     final episodeId = _currentEpisodeId;
@@ -523,6 +545,8 @@ class VideoSourceNotifier extends _$VideoSourceNotifier {
       setWebSite(
         title: websiteName,
         iconUrl: websiteIcon,
+        resourceTitle: resourceTitle,
+        lineName: lineName,
         videoUrl: videoUrl,
         isManual: true,
       );
@@ -534,6 +558,8 @@ class VideoSourceNotifier extends _$VideoSourceNotifier {
       episodeId: ManualEpisodeSource(
         websiteName: websiteName,
         websiteIcon: websiteIcon,
+        resourceTitle: resourceTitle,
+        lineName: lineName,
         videoUrl: videoUrl,
       ),
     };
@@ -542,6 +568,8 @@ class VideoSourceNotifier extends _$VideoSourceNotifier {
     setWebSite(
       title: websiteName,
       iconUrl: websiteIcon,
+      resourceTitle: resourceTitle,
+      lineName: lineName,
       videoUrl: videoUrl,
       isManual: true,
     );
@@ -579,6 +607,8 @@ class VideoSourceNotifier extends _$VideoSourceNotifier {
     setWebSite(
       title: manualSource.websiteName,
       iconUrl: manualSource.websiteIcon,
+      resourceTitle: manualSource.resourceTitle,
+      lineName: manualSource.lineName,
       videoUrl: manualSource.videoUrl,
     );
     return loadVideoPage(manualSource.videoUrl);
@@ -684,7 +714,13 @@ class VideoSourceNotifier extends _$VideoSourceNotifier {
         state.webSiteTitle.isNotEmpty ? state.webSiteTitle : null;
     _resetAutoSelectionAttempts();
     _preferredAutoSelectWebsiteName = preferredWebsiteName;
-    state = state.copyWith(webSiteTitle: '', webSiteIcon: '', videoUrl: '');
+    state = state.copyWith(
+      webSiteTitle: '',
+      webSiteIcon: '',
+      resourceTitle: '',
+      lineName: '',
+      videoUrl: '',
+    );
   }
 
   void _syncAutoSelectionEpisode() {
@@ -744,6 +780,8 @@ class VideoSourceNotifier extends _$VideoSourceNotifier {
         setWebSite(
           title: candidate.resource.websiteName,
           iconUrl: candidate.resource.websiteIcon,
+          resourceTitle: candidate.resourceItem.subjectsTitle,
+          lineName: candidate.resourceItem.lineNames,
           videoUrl: candidateUrl,
         );
 
@@ -759,7 +797,13 @@ class VideoSourceNotifier extends _$VideoSourceNotifier {
         if (epoch != _autoSelectEpoch || state.userManuallySelected) {
           return;
         }
-        setWebSite(title: '', iconUrl: '', videoUrl: '');
+        setWebSite(
+          title: '',
+          iconUrl: '',
+          resourceTitle: '',
+          lineName: '',
+          videoUrl: '',
+        );
       }
     } finally {
       if (epoch == _autoSelectEpoch) {

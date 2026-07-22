@@ -30,6 +30,9 @@ class DropDownMenu<T> extends StatelessWidget {
   /// 是否禁用选中的项
   final bool disableSelected;
 
+  /// 菜单打开/关闭状态变化回调
+  final void Function(bool isOpen)? onOpenedChanged;
+
   const DropDownMenu({
     super.key,
     required this.items,
@@ -41,6 +44,7 @@ class DropDownMenu<T> extends StatelessWidget {
     this.tooltip,
     this.shape,
     this.disableSelected = true,
+    this.onOpenedChanged,
   });
 
   @override
@@ -62,9 +66,13 @@ class DropDownMenu<T> extends StatelessWidget {
           );
         }).toList();
       },
-      onSelected: onSelected,
+      onOpened: () => onOpenedChanged?.call(true),
+      onCanceled: () => onOpenedChanged?.call(false),
+      onSelected: (item) {
+        onOpenedChanged?.call(false);
+        onSelected(item);
+      },
       child: buttonBuilder(context, selectedItem),
     );
   }
 }
-

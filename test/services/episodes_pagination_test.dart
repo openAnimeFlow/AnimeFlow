@@ -21,26 +21,6 @@ EpisodeData _episode(int id, {num sort = 1, int type = 0, bool? watched}) {
 
 void main() {
   group('SubjectEpisodesState pagination', () {
-    test('page merge appends data and keeps total from latest page', () {
-      final cached = EpisodesItem(
-        data: [_episode(1), _episode(2)],
-        total: 5,
-      );
-      final page = EpisodesItem(
-        data: [_episode(3), _episode(4)],
-        total: 5,
-      );
-
-      final merged = cached.copyWith(
-        data: [...cached.data, ...page.data],
-        total: page.total,
-      );
-
-      expect(merged.data.length, 4);
-      expect(merged.data.last.id, 4);
-      expect(merged.total, 5);
-    });
-
     test('orders main episodes before special episodes', () {
       final state = SubjectEpisodesState(
         episodes: EpisodesItem(

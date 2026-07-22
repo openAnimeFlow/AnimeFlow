@@ -64,7 +64,7 @@ class SearchPageState {
   }
 }
 
-@Riverpod()
+@riverpod
 class SearchPageController extends _$SearchPageController {
   final SearchHistoryManager _searchHistoryManager = SearchHistoryManager();
 

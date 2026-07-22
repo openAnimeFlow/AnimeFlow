@@ -19,7 +19,7 @@ jobs:
     runs-on: macos-14
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
 
       - name: Extract version
         run: |
@@ -61,7 +61,7 @@ jobs:
           zip -q -r "AnimeFlow-ios-${{ env.VERSION }}.ipa" Payload
 
       - name: Upload IPA artifact
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v6
         with:
           name: ios
           path: AnimeFlow-ios-${{ env.VERSION }}.ipa
@@ -70,7 +70,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
 
       - name: Extract version
         run: |
@@ -78,7 +78,7 @@ jobs:
           echo "VERSION=${VERSION}" >> $GITHUB_ENV
 
       - name: Set up JDK 17
-        uses: actions/setup-java@v4
+        uses: actions/setup-java@v5
         with:
           java-version: '17'
           distribution: 'temurin'
@@ -148,7 +148,7 @@ jobs:
           ls -lh AnimeFlow-android-*.apk || true
 
       - name: Archive artifacts
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v6
         with:
           name: android
           path: build/app/outputs/flutter-apk/AnimeFlow-android-*.apk
@@ -158,7 +158,7 @@ jobs:
     runs-on: windows-2025
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
 
       - name: Extract version
         shell: pwsh
@@ -241,7 +241,7 @@ jobs:
           if (-not (Test-Path $exe)) { throw "Expected installer not found: $exe" }
 
       - name: Archive artifacts
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v6
         with:
           name: windows
           path: |
@@ -253,7 +253,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
 
       - name: Extract version
         run: |
@@ -365,7 +365,7 @@ jobs:
           echo "Created AnimeFlow-linux-${{ env.VERSION }}.deb"
 
       - name: Archive artifacts
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v6
         with:
           name: linux
           path: |
@@ -377,7 +377,7 @@ jobs:
     runs-on: macos-14
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
 
       - name: Extract version
         run: |
@@ -415,7 +415,7 @@ jobs:
           hdiutil create -fs HFS+ -volname "${{ env.VERSION }}" -srcfolder build/dist build/dist/AnimeFlow-macos-${{ env.VERSION }}.dmg
 
       - name: Archive artifacts
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v6
         with:
           name: macos
           path: build/dist/AnimeFlow-macos-${{ env.VERSION }}.dmg
@@ -428,7 +428,7 @@ jobs:
       contents: write
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
 
       - name: Extract version
         run: |
@@ -463,7 +463,7 @@ jobs:
           VERSION: ${{ env.VERSION }}
 
       - name: Download all artifacts
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v7
         with:
           path: artifacts
 

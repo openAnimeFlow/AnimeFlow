@@ -9,6 +9,7 @@ import 'package:anime_flow/pages/play/providers/video_source_provider.dart';
 import 'package:anime_flow/providers/captcha/captcha_provider.dart';
 import 'package:anime_flow/utils/logger.dart';
 import 'package:anime_flow/widget/animation_network_image.dart';
+import 'package:anime_flow/widget/drop_down_menu.dart';
 import 'package:anime_flow/widget/notification_toast.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -42,10 +43,13 @@ class _VideoSourceDrawersState extends ConsumerState<VideoSourceDrawers> {
   static const double _minSheetSize = 0.3;
   static const double _initialSheetSize = 0.52;
   static const double _maxSheetSize = 0.95;
+  static const String _allLinesValue = '__all_lines__';
+  static const double _sourceItemExtent = 95;
 
   final logger = LiggLogger();
   _SourceEpisodeMode _sourceEpisodeMode = _SourceEpisodeMode.matched;
   String? _selectedLineName;
+  bool _sortDescending = false;
   final _searchController = TextEditingController();
   int? _drawerSelectedWebsiteIndex;
   bool _followInitialAutoSelection = true;
@@ -68,6 +72,7 @@ class _VideoSourceDrawersState extends ConsumerState<VideoSourceDrawers> {
     setState(() {
       _sourceEpisodeMode = _SourceEpisodeMode.matched;
       _selectedLineName = null;
+      _sortDescending = false;
     });
   }
 
@@ -80,6 +85,7 @@ class _VideoSourceDrawersState extends ConsumerState<VideoSourceDrawers> {
       setState(() {
         _sourceEpisodeMode = _SourceEpisodeMode.matched;
         _selectedLineName = null;
+        _sortDescending = false;
       });
       widget.videoSourceController.initResources(searchQuery);
     }
@@ -523,7 +529,7 @@ class _VideoSourceDrawersState extends ConsumerState<VideoSourceDrawers> {
     return Material(
       child: Column(
         children: [
-          _buildLineFilter(
+          _buildSourceControls(
             lineNames: lineNames,
             selectedLineName: selectedLineName,
           ),
@@ -539,6 +545,7 @@ class _VideoSourceDrawersState extends ConsumerState<VideoSourceDrawers> {
                 ? _buildAllEpisodeSources(
                     episodeResources: filteredEpisodeResources,
                     selectedResource: selectedResource,
+                    sortDescending: _sortDescending,
                   )
                 : _buildMatchedEpisodeSources(
                     matchedResources: matchedResources,
@@ -556,7 +563,7 @@ class _VideoSourceDrawersState extends ConsumerState<VideoSourceDrawers> {
     final names = <String>[];
     final seen = <String>{};
     for (final item in episodeResources) {
-      final lineName = item.lineNames.trim().isEmpty ? '未命名线路' : item.lineNames;
+      final lineName = _normalizedLineName(item.lineNames);
       if (seen.add(lineName)) {
         names.add(lineName);
       }
@@ -572,66 +579,116 @@ class _VideoSourceDrawersState extends ConsumerState<VideoSourceDrawers> {
       return episodeResources;
     }
     return episodeResources.where((item) {
-      final itemLineName =
-          item.lineNames.trim().isEmpty ? '未命名线路' : item.lineNames;
-      return itemLineName == lineName;
+      return _normalizedLineName(item.lineNames) == lineName;
     }).toList(growable: false);
   }
 
-  Widget _buildLineFilter({
+  String _normalizedLineName(String lineName) {
+    final trimmed = lineName.trim();
+    return trimmed.isEmpty ? '未命名线路' : trimmed;
+  }
+
+  Widget _buildSourceControls({
     required List<String> lineNames,
     required String? selectedLineName,
   }) {
-    if (lineNames.length <= 1) {
-      return const SizedBox.shrink();
-    }
-
     return SizedBox(
-      height: 38,
+      height: 40,
       child: Row(
         children: [
-          Icon(
-            Icons.account_tree_outlined,
-            size: 20,
-            color: Theme.of(context).colorScheme.onSurfaceVariant,
+          Expanded(
+            child: _buildLineDropdown(
+              lineNames: lineNames,
+              selectedLineName: selectedLineName,
+            ),
           ),
           const SizedBox(width: 8),
-          Expanded(
-            child: ListView(
-              scrollDirection: Axis.horizontal,
-              padding: EdgeInsets.zero,
-              children: [
-                Padding(
-                  padding: const EdgeInsets.only(right: 8),
-                  child: ChoiceChip(
-                    label: const Text('全部线路'),
-                    selected: selectedLineName == null,
-                    onSelected: (_) {
-                      setState(() {
-                        _selectedLineName = null;
-                      });
-                    },
-                  ),
-                ),
-                ...lineNames.map(
-                  (lineName) => Padding(
-                    padding: const EdgeInsets.only(right: 8),
-                    child: ChoiceChip(
-                      label: Text(lineName),
-                      selected: selectedLineName == lineName,
-                      onSelected: (_) {
-                        setState(() {
-                          _selectedLineName = lineName;
-                        });
-                      },
-                    ),
-                  ),
-                ),
-              ],
+          OutlinedButton.icon(
+            onPressed: () {
+              setState(() {
+                _sortDescending = !_sortDescending;
+              });
+            },
+            icon: Icon(
+              _sortDescending ? Icons.south_rounded : Icons.north_rounded,
+              size: 18,
             ),
+            label: Text(_sortDescending ? '倒序' : '升序'),
           ),
         ],
       ),
+    );
+  }
+
+  Widget _buildLineDropdown({
+    required List<String> lineNames,
+    required String? selectedLineName,
+  }) {
+    final value = selectedLineName ?? _allLinesValue;
+    final items = [_allLinesValue, ...lineNames];
+    return DropDownMenu<String>(
+      items: items,
+      selectedItem: value,
+      tooltip: '线路筛选',
+      offset: const Offset(0, 44),
+      itemBuilder: (context, item, isSelected) {
+        final label = item == _allLinesValue ? '全部线路' : item;
+        return SizedBox(
+          width: 180,
+          child: Row(
+            children: [
+              Icon(
+                isSelected ? Icons.check_rounded : Icons.account_tree_outlined,
+                size: 18,
+                color: isSelected
+                    ? Theme.of(context).colorScheme.primary
+                    : Theme.of(context).colorScheme.onSurfaceVariant,
+              ),
+              const SizedBox(width: 8),
+              Expanded(
+                child: Text(
+                  label,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                ),
+              ),
+            ],
+          ),
+        );
+      },
+      buttonBuilder: (context, selectedItem) {
+        final label = selectedItem == null || selectedItem == _allLinesValue
+            ? '全部线路'
+            : selectedItem;
+        return Container(
+          height: 40,
+          padding: const EdgeInsets.symmetric(horizontal: 12),
+          decoration: BoxDecoration(
+            border: Border.all(color: Theme.of(context).colorScheme.outline),
+            borderRadius: BorderRadius.circular(8),
+          ),
+          child: Row(
+            children: [
+              const Icon(Icons.account_tree_outlined, size: 18),
+              const SizedBox(width: 8),
+              Expanded(
+                child: Text(
+                  label,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                ),
+              ),
+              const SizedBox(width: 8),
+              const Icon(Icons.arrow_drop_down_rounded),
+            ],
+          ),
+        );
+      },
+      onSelected: (value) {
+        setState(() {
+          _selectedLineName = value == _allLinesValue ? null : value;
+        });
+      },
     );
   }
 
@@ -689,7 +746,7 @@ class _VideoSourceDrawersState extends ConsumerState<VideoSourceDrawers> {
       controller: widget.isBottomSheet ? _scrollController : null,
       padding: EdgeInsets.zero,
       itemCount: matchedResources.length,
-      itemExtent: 95,
+      itemExtent: _sourceItemExtent,
       itemBuilder: (context, index) {
         final resourceItem = matchedResources[index];
         final currentEpisode = resourceItem.episodes.firstWhere(
@@ -709,10 +766,23 @@ class _VideoSourceDrawersState extends ConsumerState<VideoSourceDrawers> {
   Widget _buildAllEpisodeSources({
     required List<EpisodeResourcesItem> episodeResources,
     required ResourcesItem selectedResource,
+    required bool sortDescending,
   }) {
     final expandedItems = episodeResources.expand((item) {
       return item.episodes.map((ep) => (resource: item, episode: ep));
     }).toList(growable: false);
+    expandedItems.sort((a, b) {
+      final sortCompare =
+          a.episode.episodeSort.compareTo(b.episode.episodeSort);
+      if (sortCompare != 0) {
+        return sortDescending ? -sortCompare : sortCompare;
+      }
+      final lineCompare = a.resource.lineNames.compareTo(b.resource.lineNames);
+      if (lineCompare != 0) {
+        return lineCompare;
+      }
+      return a.resource.subjectsTitle.compareTo(b.resource.subjectsTitle);
+    });
 
     if (expandedItems.isEmpty) {
       return _buildResourceStatusView(
@@ -730,7 +800,7 @@ class _VideoSourceDrawersState extends ConsumerState<VideoSourceDrawers> {
       controller: widget.isBottomSheet ? _scrollController : null,
       padding: EdgeInsets.zero,
       itemCount: expandedItems.length,
-      itemExtent: 95,
+      itemExtent: _sourceItemExtent,
       itemBuilder: (context, index) {
         final entry = expandedItems[index];
         return _buildSource(

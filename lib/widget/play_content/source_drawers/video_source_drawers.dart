@@ -14,6 +14,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+enum _SourceEpisodeMode { matched, all }
+
 class VideoSourceDrawers extends ConsumerStatefulWidget {
   final Function(String url)? onVideoUrlSelected;
   final VideoSourceNotifier videoSourceController;
@@ -42,7 +44,8 @@ class _VideoSourceDrawersState extends ConsumerState<VideoSourceDrawers> {
   static const double _maxSheetSize = 0.95;
 
   final logger = LiggLogger();
-  bool isShowEpisodes = false;
+  _SourceEpisodeMode _sourceEpisodeMode = _SourceEpisodeMode.matched;
+  String? _selectedLineName;
   final _searchController = TextEditingController();
   int? _drawerSelectedWebsiteIndex;
   bool _followInitialAutoSelection = true;
@@ -58,18 +61,13 @@ class _VideoSourceDrawersState extends ConsumerState<VideoSourceDrawers> {
     _searchController.text = widget.subjectName;
   }
 
-  void setShowEpisodes() {
-    setState(() {
-      isShowEpisodes = !isShowEpisodes;
-    });
-  }
-
   void _setSelectedWebsite(int index) {
     _followInitialAutoSelection = false;
     _drawerSelectedWebsiteIndex = index;
     widget.videoSourceController.setSelectedWebsiteIndex(index);
     setState(() {
-      isShowEpisodes = false;
+      _sourceEpisodeMode = _SourceEpisodeMode.matched;
+      _selectedLineName = null;
     });
   }
 
@@ -80,7 +78,8 @@ class _VideoSourceDrawersState extends ConsumerState<VideoSourceDrawers> {
       _followInitialAutoSelection = true;
       _drawerSelectedWebsiteIndex = 0;
       setState(() {
-        isShowEpisodes = false;
+        _sourceEpisodeMode = _SourceEpisodeMode.matched;
+        _selectedLineName = null;
       });
       widget.videoSourceController.initResources(searchQuery);
     }
@@ -478,8 +477,8 @@ class _VideoSourceDrawersState extends ConsumerState<VideoSourceDrawers> {
         title: '${selectedResource.websiteName} 请求失败',
         message: selectedResource.errorMessage!,
         action: ElevatedButton(
-          onPressed: () =>
-              videoSourceController.retryResources(selectedResource.websiteName),
+          onPressed: () => videoSourceController
+              .retryResources(selectedResource.websiteName),
           child: const Text('点击重试'),
         ),
       );
@@ -495,21 +494,28 @@ class _VideoSourceDrawersState extends ConsumerState<VideoSourceDrawers> {
         title: '${selectedResource.websiteName} 暂未搜到资源',
         message: '没有检索到可用播放源。你可以稍后重试，或切换其他站点。',
         action: ElevatedButton(
-          onPressed: () =>
-              videoSourceController.retryResources(selectedResource.websiteName),
+          onPressed: () => videoSourceController
+              .retryResources(selectedResource.websiteName),
           child: const Text('重新搜索'),
         ),
       );
     }
     final episodeIndex = videoSourceController.currentEpisodeIndex;
+    final lineNames = _buildLineNames(episodeResources);
+    final selectedLineName =
+        lineNames.contains(_selectedLineName) ? _selectedLineName : null;
+    final filteredEpisodeResources = _filterResourcesByLine(
+      episodeResources,
+      selectedLineName,
+    );
 
     // 预过滤：只保留有匹配当前剧集的资源项
-    final matchedResources = episodeResources
+    final matchedResources = filteredEpisodeResources
         .where(
             (item) => item.episodes.any((ep) => ep.episodeSort == episodeIndex))
         .toList();
 
-    final excludedEpisodesCount = episodeResources
+    final excludedEpisodesCount = filteredEpisodeResources
         .expand((item) =>
             item.episodes.where((ep) => ep.episodeSort != episodeIndex))
         .length;
@@ -517,93 +523,224 @@ class _VideoSourceDrawersState extends ConsumerState<VideoSourceDrawers> {
     return Material(
       child: Column(
         children: [
+          _buildLineFilter(
+            lineNames: lineNames,
+            selectedLineName: selectedLineName,
+          ),
+          const SizedBox(height: 8),
+          _buildEpisodeModeSelector(
+            matchedCount: matchedResources.length,
+            allCount: filteredEpisodeResources.fold<int>(
+                0, (sum, item) => sum + item.episodes.length),
+          ),
+          const SizedBox(height: 8),
           Expanded(
-            child: matchedResources.isEmpty
-                ? _buildResourceStatusView(
-                    icon: Icon(
-                      Icons.playlist_remove_rounded,
-                      size: 44,
-                      color: Theme.of(context).colorScheme.onSurfaceVariant,
-                    ),
-                    title: '当前剧集暂无可用播放源',
-                    message: excludedEpisodesCount > 0
-                        ? '前选中剧集不在这些结果里。你可以展开下方“已被排除的资源”确认是否搜到了其他集。'
-                        : '当前剧集没有匹配到对应播放源。',
+            child: _sourceEpisodeMode == _SourceEpisodeMode.all
+                ? _buildAllEpisodeSources(
+                    episodeResources: filteredEpisodeResources,
+                    selectedResource: selectedResource,
                   )
-                : ListView.builder(
-                    controller: widget.isBottomSheet ? _scrollController : null,
-                    padding: EdgeInsets.zero,
-                    itemCount: matchedResources.length,
-                    itemExtent: 95,
-                    itemBuilder: (context, index) {
-                      final resourceItem = matchedResources[index];
-                      final currentEpisode = resourceItem.episodes.firstWhere(
-                        (ep) => ep.episodeSort == episodeIndex,
-                      );
-                      return _buildSource(
-                        currentEpisode,
-                        resourceItem,
-                        baseUrl: selectedResource.baseUrl,
-                        websiteName: selectedResource.websiteName,
-                        websiteIcon: selectedResource.websiteIcon,
-                      );
-                    },
+                : _buildMatchedEpisodeSources(
+                    matchedResources: matchedResources,
+                    selectedResource: selectedResource,
+                    episodeIndex: episodeIndex,
+                    excludedEpisodesCount: excludedEpisodesCount,
                   ),
           ),
-          // 切换开关
-          Padding(
-            padding: const EdgeInsets.symmetric(vertical: 8),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.end,
+        ],
+      ),
+    );
+  }
+
+  List<String> _buildLineNames(List<EpisodeResourcesItem> episodeResources) {
+    final names = <String>[];
+    final seen = <String>{};
+    for (final item in episodeResources) {
+      final lineName = item.lineNames.trim().isEmpty ? '未命名线路' : item.lineNames;
+      if (seen.add(lineName)) {
+        names.add(lineName);
+      }
+    }
+    return names;
+  }
+
+  List<EpisodeResourcesItem> _filterResourcesByLine(
+    List<EpisodeResourcesItem> episodeResources,
+    String? lineName,
+  ) {
+    if (lineName == null) {
+      return episodeResources;
+    }
+    return episodeResources.where((item) {
+      final itemLineName =
+          item.lineNames.trim().isEmpty ? '未命名线路' : item.lineNames;
+      return itemLineName == lineName;
+    }).toList(growable: false);
+  }
+
+  Widget _buildLineFilter({
+    required List<String> lineNames,
+    required String? selectedLineName,
+  }) {
+    if (lineNames.length <= 1) {
+      return const SizedBox.shrink();
+    }
+
+    return SizedBox(
+      height: 38,
+      child: Row(
+        children: [
+          Icon(
+            Icons.account_tree_outlined,
+            size: 20,
+            color: Theme.of(context).colorScheme.onSurfaceVariant,
+          ),
+          const SizedBox(width: 8),
+          Expanded(
+            child: ListView(
+              scrollDirection: Axis.horizontal,
+              padding: EdgeInsets.zero,
               children: [
-                Text(
-                  '显示已被排除的资源($excludedEpisodesCount)',
-                  style: const TextStyle(fontSize: 14),
+                Padding(
+                  padding: const EdgeInsets.only(right: 8),
+                  child: ChoiceChip(
+                    label: const Text('全部线路'),
+                    selected: selectedLineName == null,
+                    onSelected: (_) {
+                      setState(() {
+                        _selectedLineName = null;
+                      });
+                    },
+                  ),
                 ),
-                const SizedBox(width: 8),
-                Switch(
-                  value: isShowEpisodes,
-                  onChanged: (value) {
-                    setShowEpisodes();
-                  },
+                ...lineNames.map(
+                  (lineName) => Padding(
+                    padding: const EdgeInsets.only(right: 8),
+                    child: ChoiceChip(
+                      label: Text(lineName),
+                      selected: selectedLineName == lineName,
+                      onSelected: (_) {
+                        setState(() {
+                          _selectedLineName = lineName;
+                        });
+                      },
+                    ),
+                  ),
                 ),
               ],
             ),
           ),
-          // 展开的其他剧集
-          if (isShowEpisodes)
-            LimitedBox(
-              maxHeight: 240,
-              child: () {
-                // 预构建展平列表，避免 builder 中重复计算
-                final expandedItems = episodeResources.expand((item) {
-                  return item.episodes
-                      .where((ep) => ep.episodeSort != episodeIndex)
-                      .map((ep) => (resource: item, episode: ep));
-                }).toList(growable: false);
-
-                return ListView.builder(
-                  padding: EdgeInsets.zero,
-                  itemCount: expandedItems.length,
-                  itemExtent: 95,
-                  itemBuilder: (context, index) {
-                    final entry = expandedItems[index];
-                    return Padding(
-                      padding: const EdgeInsets.only(bottom: 8),
-                      child: _buildSource(
-                        entry.episode,
-                        entry.resource,
-                        baseUrl: selectedResource.baseUrl,
-                        websiteName: selectedResource.websiteName,
-                        websiteIcon: selectedResource.websiteIcon,
-                      ),
-                    );
-                  },
-                );
-              }(),
-            ),
         ],
       ),
+    );
+  }
+
+  Widget _buildEpisodeModeSelector({
+    required int matchedCount,
+    required int allCount,
+  }) {
+    return Align(
+      alignment: Alignment.centerLeft,
+      child: SegmentedButton<_SourceEpisodeMode>(
+        segments: [
+          ButtonSegment(
+            value: _SourceEpisodeMode.matched,
+            icon: const Icon(Icons.rule_rounded, size: 18),
+            label: Text('匹配当前集($matchedCount)'),
+          ),
+          ButtonSegment(
+            value: _SourceEpisodeMode.all,
+            icon: const Icon(Icons.format_list_numbered_rounded, size: 18),
+            label: Text('全部集数($allCount)'),
+          ),
+        ],
+        selected: {_sourceEpisodeMode},
+        showSelectedIcon: false,
+        onSelectionChanged: (selection) {
+          setState(() {
+            _sourceEpisodeMode = selection.first;
+          });
+        },
+      ),
+    );
+  }
+
+  Widget _buildMatchedEpisodeSources({
+    required List<EpisodeResourcesItem> matchedResources,
+    required ResourcesItem selectedResource,
+    required int episodeIndex,
+    required int excludedEpisodesCount,
+  }) {
+    if (matchedResources.isEmpty) {
+      return _buildResourceStatusView(
+        icon: Icon(
+          Icons.playlist_remove_rounded,
+          size: 44,
+          color: Theme.of(context).colorScheme.onSurfaceVariant,
+        ),
+        title: '当前剧集暂无可用播放源',
+        message: excludedEpisodesCount > 0
+            ? '当前选中剧集不在这些结果里。你可以切到“全部集数”手动指定资源站集数。'
+            : '当前剧集没有匹配到对应播放源。',
+      );
+    }
+
+    return ListView.builder(
+      controller: widget.isBottomSheet ? _scrollController : null,
+      padding: EdgeInsets.zero,
+      itemCount: matchedResources.length,
+      itemExtent: 95,
+      itemBuilder: (context, index) {
+        final resourceItem = matchedResources[index];
+        final currentEpisode = resourceItem.episodes.firstWhere(
+          (ep) => ep.episodeSort == episodeIndex,
+        );
+        return _buildSource(
+          currentEpisode,
+          resourceItem,
+          baseUrl: selectedResource.baseUrl,
+          websiteName: selectedResource.websiteName,
+          websiteIcon: selectedResource.websiteIcon,
+        );
+      },
+    );
+  }
+
+  Widget _buildAllEpisodeSources({
+    required List<EpisodeResourcesItem> episodeResources,
+    required ResourcesItem selectedResource,
+  }) {
+    final expandedItems = episodeResources.expand((item) {
+      return item.episodes.map((ep) => (resource: item, episode: ep));
+    }).toList(growable: false);
+
+    if (expandedItems.isEmpty) {
+      return _buildResourceStatusView(
+        icon: Icon(
+          Icons.search_off_rounded,
+          size: 44,
+          color: Theme.of(context).colorScheme.onSurfaceVariant,
+        ),
+        title: '暂无可选集数',
+        message: '当前站点没有返回可用播放集数。',
+      );
+    }
+
+    return ListView.builder(
+      controller: widget.isBottomSheet ? _scrollController : null,
+      padding: EdgeInsets.zero,
+      itemCount: expandedItems.length,
+      itemExtent: 95,
+      itemBuilder: (context, index) {
+        final entry = expandedItems[index];
+        return _buildSource(
+          entry.episode,
+          entry.resource,
+          baseUrl: selectedResource.baseUrl,
+          websiteName: selectedResource.websiteName,
+          websiteIcon: selectedResource.websiteIcon,
+        );
+      },
     );
   }
 
@@ -710,11 +847,10 @@ class _VideoSourceDrawersState extends ConsumerState<VideoSourceDrawers> {
             try {
               context.pop();
               final videoUrl = baseUrl + episode.like;
-              widget.videoSourceController.setWebSite(
-                title: websiteName,
-                iconUrl: websiteIcon,
+              widget.videoSourceController.bindManualSourceForCurrentEpisode(
+                websiteName: websiteName,
+                websiteIcon: websiteIcon,
                 videoUrl: videoUrl,
-                isManual: true,
               );
               widget.onVideoUrlSelected?.call(videoUrl);
             } catch (e) {

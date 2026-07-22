@@ -31,6 +31,7 @@ class VideoSourceState {
     this.selectedWebsiteIndex = 0,
     this.isInitWebView = false,
     this.userManuallySelected = false,
+    this.manualEpisodeSources = const {},
   });
 
   final int currentEpisodeIndex;
@@ -43,6 +44,7 @@ class VideoSourceState {
   final int selectedWebsiteIndex;
   final bool isInitWebView;
   final bool userManuallySelected;
+  final Map<int, ManualEpisodeSource> manualEpisodeSources;
 
   VideoSourceState copyWith({
     int? currentEpisodeIndex,
@@ -55,6 +57,7 @@ class VideoSourceState {
     int? selectedWebsiteIndex,
     bool? isInitWebView,
     bool? userManuallySelected,
+    Map<int, ManualEpisodeSource>? manualEpisodeSources,
   }) {
     return VideoSourceState(
       currentEpisodeIndex: currentEpisodeIndex ?? this.currentEpisodeIndex,
@@ -67,8 +70,21 @@ class VideoSourceState {
       selectedWebsiteIndex: selectedWebsiteIndex ?? this.selectedWebsiteIndex,
       isInitWebView: isInitWebView ?? this.isInitWebView,
       userManuallySelected: userManuallySelected ?? this.userManuallySelected,
+      manualEpisodeSources: manualEpisodeSources ?? this.manualEpisodeSources,
     );
   }
+}
+
+class ManualEpisodeSource {
+  const ManualEpisodeSource({
+    required this.websiteName,
+    required this.websiteIcon,
+    required this.videoUrl,
+  });
+
+  final String websiteName;
+  final String websiteIcon;
+  final String videoUrl;
 }
 
 @Riverpod(
@@ -102,6 +118,8 @@ class VideoSourceNotifier extends _$VideoSourceNotifier {
   int get selectedWebsiteIndex => state.selectedWebsiteIndex;
   bool get isInitWebView => state.isInitWebView;
   bool get userManuallySelected => state.userManuallySelected;
+  Map<int, ManualEpisodeSource> get manualEpisodeSources =>
+      state.manualEpisodeSources;
 
   WebviewController? get windowsWebviewController {
     final controller = _webViewVideoProvider?.webviewController;
@@ -495,6 +513,40 @@ class VideoSourceNotifier extends _$VideoSourceNotifier {
     );
   }
 
+  void bindManualSourceForCurrentEpisode({
+    required String websiteName,
+    required String websiteIcon,
+    required String videoUrl,
+  }) {
+    final episodeId = _currentEpisodeId;
+    if (episodeId <= 0) {
+      setWebSite(
+        title: websiteName,
+        iconUrl: websiteIcon,
+        videoUrl: videoUrl,
+        isManual: true,
+      );
+      return;
+    }
+
+    final nextManualSources = {
+      ...state.manualEpisodeSources,
+      episodeId: ManualEpisodeSource(
+        websiteName: websiteName,
+        websiteIcon: websiteIcon,
+        videoUrl: videoUrl,
+      ),
+    };
+
+    state = state.copyWith(manualEpisodeSources: nextManualSources);
+    setWebSite(
+      title: websiteName,
+      iconUrl: websiteIcon,
+      videoUrl: videoUrl,
+      isManual: true,
+    );
+  }
+
   void setSelectedWebsiteIndex(int index) {
     if (state.selectedWebsiteIndex != index) {
       state = state.copyWith(selectedWebsiteIndex: index);
@@ -505,6 +557,31 @@ class VideoSourceNotifier extends _$VideoSourceNotifier {
     if (state.userManuallySelected) {
       state = state.copyWith(userManuallySelected: false);
     }
+  }
+
+  int get _currentEpisodeId =>
+      ref.read(episodesProvider).asData?.value.episodeId ?? 0;
+
+  ManualEpisodeSource? _manualSourceForCurrentEpisode() {
+    final episodeId = _currentEpisodeId;
+    if (episodeId <= 0) {
+      return null;
+    }
+    return state.manualEpisodeSources[episodeId];
+  }
+
+  Future<bool> _loadManualSourceForCurrentEpisode() async {
+    final manualSource = _manualSourceForCurrentEpisode();
+    if (manualSource == null) {
+      return false;
+    }
+
+    setWebSite(
+      title: manualSource.websiteName,
+      iconUrl: manualSource.websiteIcon,
+      videoUrl: manualSource.videoUrl,
+    );
+    return loadVideoPage(manualSource.videoUrl);
   }
 
   List<_AutoLoadCandidate> _buildAutoLoadCandidates(
@@ -578,6 +655,11 @@ class VideoSourceNotifier extends _$VideoSourceNotifier {
     }
 
     Future.microtask(() {
+      final manualSource = _manualSourceForCurrentEpisode();
+      if (manualSource != null) {
+        _loadManualSourceForCurrentEpisode();
+        return;
+      }
       final preferredWebsiteName = state.webSiteTitle.isNotEmpty
           ? state.webSiteTitle
           : _preferredAutoSelectWebsiteName;

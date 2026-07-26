@@ -4,8 +4,6 @@ import 'package:anime_flow/crawler/cookie_manager.dart';
 import 'package:anime_flow/webview/captcha/captcha_webview_controller.dart';
 import 'package:anime_flow/utils/logger.dart';
 
-
-
 /// 验证码解决 Provider
 ///
 /// 支持两种独立的验证流程：
@@ -29,7 +27,7 @@ class CaptchaProvider {
   CaptchaWebviewController? _controller;
 
   final StreamController<String?> _captchaImageStreamController =
-  StreamController<String?>.broadcast();
+      StreamController<String?>.broadcast();
 
   Stream<String?> get onCaptchaImageUrl => _captchaImageStreamController.stream;
 
@@ -64,7 +62,8 @@ class CaptchaProvider {
   /// [url] 要加载的页面地址
   /// [captchaXpath] 验证码图片元素的 XPath
   /// [inputXpath] 可选，验证码输入框的 XPath。如果提供，会在检测验证码前先触发输入框的 focus 事件
-  Future<void> loadForCaptcha(String url, String captchaXpath, {String? inputXpath}) async {
+  Future<void> loadForCaptcha(String url, String captchaXpath,
+      {String? inputXpath}) async {
     _pageUrl = url;
     await _ensureInitialized();
     if (_disposed || _controller == null) return;
@@ -83,7 +82,8 @@ class CaptchaProvider {
 
   /// 验证码提交错误后重新加载当前搜索页，以获取新图片
   /// 会取消 [submitCaptcha] 期间注册的「验证码消失」监听，避免重载过程中误触发成功回调。
-  Future<void> reloadCaptchaImage(String captchaXpath, {String? inputXpath}) async {
+  Future<void> reloadCaptchaImage(String captchaXpath,
+      {String? inputXpath}) async {
     if (_disposed || _controller == null || _pageUrl.isEmpty) return;
     _disappearedSub?.cancel();
     _disappearedSub = null;
@@ -112,11 +112,11 @@ class CaptchaProvider {
 
     LiggLogger().i('[CaptchaProvider] Submitting captcha code via interact');
 
-    bool _handled = false;
+    bool handled = false;
 
     Future<void> onDisappeared() async {
-      if (_handled) return;
-      _handled = true;
+      if (handled) return;
+      handled = true;
       _disappearedSub?.cancel();
       final cookieString = await _controller!.getCookieString(_pageUrl);
       LiggLogger().i('[CaptchaProvider] Captured cookies: $cookieString');
@@ -129,11 +129,13 @@ class CaptchaProvider {
       await _controller!.unloadPage();
       onVerified();
     }
+
     _disappearedSub?.cancel();
     _disappearedSub = _controller!.onCaptchaDisappeared.listen((_) {
       onDisappeared();
     });
-    await _controller!.submitCaptchaInteract(captchaCode, inputXpath, buttonXpath);
+    await _controller!
+        .submitCaptchaInteract(captchaCode, inputXpath, buttonXpath);
   }
 
   /// 加载页面并自动点击验证按钮
@@ -152,19 +154,20 @@ class CaptchaProvider {
     await _ensureInitialized();
     if (_disposed || _controller == null) return;
 
-    bool _handled = false;
+    bool handled = false;
 
     Future<void> onDisappeared() async {
-      if (_handled) return;
-      _handled = true;
+      if (handled) return;
+      handled = true;
       _disappearedSub?.cancel();
       final cookieString = await _controller!.getCookieString(_pageUrl);
-      LiggLogger().i('[CaptchaProvider] (type2) Captured cookies: $cookieString');
+      LiggLogger()
+          .i('[CaptchaProvider] (type2) Captured cookies: $cookieString');
       if (cookieString.isNotEmpty) {
         await CookieManager.instance
             .saveFromWebView(pluginName, _pageUrl, cookieString);
-        LiggLogger()
-            .i('[CaptchaProvider] (type2) Cookies saved for plugin: $pluginName');
+        LiggLogger().i(
+            '[CaptchaProvider] (type2) Cookies saved for plugin: $pluginName');
       }
       await _controller!.unloadPage();
       onVerified();
@@ -176,7 +179,8 @@ class CaptchaProvider {
     });
 
     await _controller!.loadPageForButtonClick(url, buttonXpath);
-    LiggLogger().i('[CaptchaProvider] (type2) Page loading for button click: $url');
+    LiggLogger()
+        .i('[CaptchaProvider] (type2) Page loading for button click: $url');
   }
 
   /// 保存 Cookie 并取消加载页面
@@ -193,8 +197,8 @@ class CaptchaProvider {
     if (cookieString.isNotEmpty) {
       await CookieManager.instance
           .saveFromWebView(pluginName, _pageUrl, cookieString);
-      LiggLogger()
-          .i('[CaptchaProvider] Cookies saved on cancel for plugin: $pluginName');
+      LiggLogger().i(
+          '[CaptchaProvider] Cookies saved on cancel for plugin: $pluginName');
     }
     await controller.unloadPage();
   }

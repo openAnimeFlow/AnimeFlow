@@ -59,4 +59,20 @@ class CookieManager {
   bool hasCookies(String pluginName) {
     return _jars.containsKey(pluginName);
   }
+
+  Future<bool> hasUsableCookies(String pluginName, String url) async {
+    final uri = Uri.tryParse(url);
+    final jar = _jars[pluginName];
+    if (uri == null || jar == null) return false;
+
+    try {
+      return (await jar.loadForRequest(uri)).isNotEmpty;
+    } catch (error) {
+      LiggLogger().w(
+        '[PluginCookieManager] Failed to load cookies for $pluginName',
+        error: error,
+      );
+      return false;
+    }
+  }
 }

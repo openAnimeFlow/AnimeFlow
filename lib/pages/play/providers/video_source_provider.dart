@@ -302,13 +302,31 @@ class VideoSourceNotifier extends _$VideoSourceNotifier {
       return;
     }
 
+    final searchUrl = config.searchUrl.replaceFirst(
+      '{keyword}',
+      Uri.encodeQueryComponent(retryKeyword),
+    );
+    final requiresCaptcha = config.antiCrawlerConfig.enabled &&
+        !await CookieManager.instance.hasUsableCookies(config.name, searchUrl);
+    if (requiresCaptcha) {
+      _updateResourceStatus(
+        websiteName,
+        isLoading: false,
+        episodeResources: const [],
+        errorMessage: null,
+        needsCaptcha: true,
+        antiCrawlerConfig: config.antiCrawlerConfig,
+      );
+      return;
+    }
+
     final sessionId = _searchSessionId;
     _updateResourceStatus(
       websiteName,
       isLoading: false,
       episodeResources: const [],
       errorMessage: null,
-      needsCaptcha: _requiresCaptcha(config),
+      needsCaptcha: false,
       antiCrawlerConfig:
           config.antiCrawlerConfig.enabled ? config.antiCrawlerConfig : null,
     );

@@ -27,39 +27,30 @@ class CaptchaRequiredException implements Exception {
 
 class WebRequest {
   static LiggLogger logger = LiggLogger();
+  static const int _maxAttempts = 3;
 
   ///获取搜索条目列表
   static Future<List<SearchResourcesItem>> getSearchSubjectListService(
       String keyword, CrawlConfigItem crawlConfig) async {
-    final String searchURL = crawlConfig.searchUrl;
-    final requestUrl = searchURL.replaceFirst("{keyword}", keyword);
+    final requestUrl = crawlConfig.searchUrl.replaceFirst(
+      '{keyword}',
+      Uri.encodeQueryComponent(keyword),
+    );
     final cookie = await _cookieHeaderFor(requestUrl, crawlConfig.name);
 
     final httpHeaders = {
-      'referer': '$searchURL/',
+      'referer': '${crawlConfig.baseUrl}/',
       'Content-Type': 'application/x-www-form-urlencoded',
       'Accept-Language': Utils.getRandomAcceptedLanguage(),
       'Connection': 'keep-alive',
       Constants.userAgentName: Utils.getRandomUA(),
       if (cookie.isNotEmpty) 'Cookie': cookie
     };
-    final response = await Api.getResources(requestUrl,
-        options: Options(headers: httpHeaders));
-    final antiCrawler = crawlConfig.antiCrawlerConfig;
-    if (antiCrawler.enabled) {
-      final htmlElement =
-          html_parser.parse(response.toString()).documentElement!;
-      final detectionXpaths = [
-        antiCrawler.captchaImage,
-        antiCrawler.captchaButton,
-      ].where((x) => x.isNotEmpty).toList();
-      final captchaDetected = detectionXpaths
-          .any((xpath) => htmlElement.queryXPath(xpath).node != null);
-      if (captchaDetected) {
-        logger.w('WebRequest: ${crawlConfig.name} detected captcha challenge');
-        throw CaptchaRequiredException(crawlConfig.name);
-      }
-    }
+    final response = await _getHtmlWithRetry(
+      requestUrl,
+      httpHeaders,
+      crawlConfig,
+    );
 
     return HtmlCrawler.parseSearchHtml(response, crawlConfig);
   }
@@ -68,8 +59,6 @@ class WebRequest {
   static Future<List<CrawlerEpisodeResourcesItem>> getResourcesListService(
       String link, CrawlConfigItem crawlConfig) async {
     final String baseURL = crawlConfig.baseUrl;
-    final String searchURL = crawlConfig.searchUrl;
-
     String linkUrl;
     if (link.startsWith("http")) {
       linkUrl = link;
@@ -78,7 +67,7 @@ class WebRequest {
     }
     final cookie = await _cookieHeaderFor(linkUrl, crawlConfig.name);
     final httpHeaders = {
-      'referer': '$searchURL/',
+      'referer': '${crawlConfig.baseUrl}/',
       'Content-Type': 'application/x-www-form-urlencoded',
       'Accept-Language': Utils.getRandomAcceptedLanguage(),
       'Connection': 'keep-alive',
@@ -86,9 +75,79 @@ class WebRequest {
       if (cookie.isNotEmpty) 'Cookie': cookie,
     };
 
-    final response = await Api.getResources(linkUrl,
-        options: Options(headers: httpHeaders));
+    final response = await _getHtmlWithRetry(
+      linkUrl,
+      httpHeaders,
+      crawlConfig,
+    );
     return HtmlCrawler.parseResourcesHtml(response, crawlConfig);
+  }
+
+  static Future<String> _getHtmlWithRetry(
+    String url,
+    Map<String, dynamic> headers,
+    CrawlConfigItem crawlConfig,
+  ) async {
+    Object? lastError;
+    StackTrace? lastStackTrace;
+
+    for (var attempt = 1; attempt <= _maxAttempts; attempt++) {
+      try {
+        final response = await Api.getResources<String>(
+          url,
+          options: Options(
+            headers: headers,
+            responseType: ResponseType.plain,
+          ),
+        );
+        if (response.trim().isEmpty) {
+          throw StateError('empty HTML response');
+        }
+
+        _ensureCaptchaNotDetected(response, crawlConfig);
+        return response;
+      } on CaptchaRequiredException {
+        rethrow;
+      } catch (error, stackTrace) {
+        lastError = error;
+        lastStackTrace = stackTrace;
+        logger.w(
+          'WebRequest: ${crawlConfig.name} request attempt '
+          '$attempt/$_maxAttempts failed: $url',
+          error: error,
+        );
+        if (attempt < _maxAttempts) {
+          await Future<void>.delayed(
+            Duration(milliseconds: 300 * attempt),
+          );
+        }
+      }
+    }
+
+    Error.throwWithStackTrace(lastError!, lastStackTrace!);
+  }
+
+  static void _ensureCaptchaNotDetected(
+    String response,
+    CrawlConfigItem crawlConfig,
+  ) {
+    final antiCrawler = crawlConfig.antiCrawlerConfig;
+    if (!antiCrawler.enabled) return;
+
+    final htmlElement = html_parser.parse(response).documentElement;
+    if (htmlElement == null) return;
+
+    final detectionXpaths = [
+      antiCrawler.captchaImage,
+      antiCrawler.captchaButton,
+    ].where((xpath) => xpath.trim().isNotEmpty);
+    final captchaDetected = detectionXpaths.any(
+      (xpath) => htmlElement.queryXPath(xpath).node != null,
+    );
+    if (captchaDetected) {
+      logger.w('WebRequest: ${crawlConfig.name} detected captcha challenge');
+      throw CaptchaRequiredException(crawlConfig.name);
+    }
   }
 
   static Future<String> _cookieHeaderFor(String url, String name) async {

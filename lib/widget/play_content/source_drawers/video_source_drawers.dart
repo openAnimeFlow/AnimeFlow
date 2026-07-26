@@ -1059,7 +1059,10 @@ class _CaptchaViewState extends State<CaptchaView> {
     _disposeSession();
     _provider = CaptchaProvider();
     final name = widget.resource.websiteName;
-    final url = widget.resource.searchUrl.replaceFirst('{keyword}', keyword);
+    final url = widget.resource.searchUrl.replaceFirst(
+      '{keyword}',
+      Uri.encodeQueryComponent(keyword),
+    );
 
     if (config.captchaType == CaptchaType.autoClickButton) {
       setState(() {
@@ -1103,12 +1106,13 @@ class _CaptchaViewState extends State<CaptchaView> {
 
   void _onVerified(String websiteName) {
     if (!mounted) return;
+    final dataSourceController = widget.dataSourceController;
     _disposeSession();
-    widget.dataSourceController.markCaptchaVerified(websiteName);
+    dataSourceController.markCaptchaVerified(websiteName);
     setState(() {});
     NotificationToast.show('验证成功', '正在重新检索，请稍候…');
-    Future.delayed(const Duration(seconds: 2), () {
-      widget.dataSourceController.retryResources(websiteName);
+    Future<void>.delayed(const Duration(seconds: 3), () {
+      dataSourceController.retryResources(websiteName);
     });
   }
 

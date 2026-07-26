@@ -696,23 +696,24 @@ class _VideoSourceDrawersState extends ConsumerState<VideoSourceDrawers> {
     required int matchedCount,
     required int allCount,
   }) {
-    return Align(
-      alignment: Alignment.centerLeft,
+    return SizedBox(
+      width: double.infinity,
       child: SegmentedButton<_SourceEpisodeMode>(
         segments: [
           ButtonSegment(
             value: _SourceEpisodeMode.matched,
             icon: const Icon(Icons.rule_rounded, size: 18),
-            label: Text('匹配当前集($matchedCount)'),
+            label: Text('当前集($matchedCount)'),
           ),
           ButtonSegment(
             value: _SourceEpisodeMode.all,
             icon: const Icon(Icons.format_list_numbered_rounded, size: 18),
-            label: Text('全部集数($allCount)'),
+            label: Text('全集($allCount)'),
           ),
         ],
         selected: {_sourceEpisodeMode},
         showSelectedIcon: false,
+        expandedInsets: EdgeInsets.zero,
         onSelectionChanged: (selection) {
           setState(() {
             _sourceEpisodeMode = selection.first;

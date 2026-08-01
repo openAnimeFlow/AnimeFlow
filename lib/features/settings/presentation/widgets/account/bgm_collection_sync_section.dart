@@ -1,3 +1,4 @@
+import 'package:anime_flow/app/localization/app_localizations.dart';
 import 'package:anime_flow/core/network/clients/flow_client.dart';
 import 'package:anime_flow/shared/models/flow/bgm_collection_sync_status_item.dart';
 import 'package:anime_flow/features/user/application/bgm_collection_sync_provider.dart';
@@ -23,15 +24,16 @@ class _BangumiCollectionSyncSectionState
     try {
       await ref.read(bgmCollectionSyncProvider.notifier).triggerSync();
       if (!mounted) return;
-      NotificationToast.show('提示', '收藏同步已开始');
+      final l10n = AppLocalizations.of(context);
+      NotificationToast.show(l10n.tip, l10n.collectionSyncStarted);
     } catch (e) {
       if (!mounted) return;
       final message = e is AnimeFlowApiException
           ? e.message
           : e is StateError
               ? e.message
-              : '启动同步失败';
-      NotificationToast.show('提示', message);
+              : AppLocalizations.of(context).syncStartFailed;
+      NotificationToast.show(AppLocalizations.of(context).tip, message);
     } finally {
       if (mounted) {
         setState(() => _isSubmitting = false);
@@ -44,8 +46,10 @@ class _BangumiCollectionSyncSectionState
       await ref.read(bgmCollectionSyncProvider.notifier).refreshStatus();
     } catch (e) {
       if (!mounted) return;
-      final message = e is AnimeFlowApiException ? e.message : '刷新状态失败';
-      NotificationToast.show('提示', message);
+      final message = e is AnimeFlowApiException
+          ? e.message
+          : AppLocalizations.of(context).refreshStatusFailed;
+      NotificationToast.show(AppLocalizations.of(context).tip, message);
     }
   }
 
@@ -53,13 +57,13 @@ class _BangumiCollectionSyncSectionState
   Widget build(BuildContext context) {
     final syncAsync = ref.watch(bgmCollectionSyncProvider);
     final colorScheme = Theme.of(context).colorScheme;
+    final l10n = AppLocalizations.of(context);
 
     return syncAsync.when(
       data: (status) {
         final item = status;
         final isRunning = item?.isRunning == true || _isSubmitting;
-        final statusLabel =
-            item?.status.label ?? BgmCollectionSyncStatus.idle.label;
+        final statusLabel = _statusLabel(l10n, item?.status);
         final message = item?.message;
         final syncedCount = item?.syncedCount ?? 0;
         final totalCount = item?.totalCount ?? 0;
@@ -76,16 +80,16 @@ class _BangumiCollectionSyncSectionState
                   color: colorScheme.primary,
                 ),
                 const SizedBox(width: 8),
-                const Text(
-                  '收藏同步',
-                  style: TextStyle(
+                Text(
+                  l10n.collectionSyncTitle,
+                  style: const TextStyle(
                     fontSize: 15,
                     fontWeight: FontWeight.w600,
                   ),
                 ),
                 const Spacer(),
                 IconButton(
-                  tooltip: '刷新状态',
+                  tooltip: l10n.refreshStatus,
                   onPressed: isRunning ? null : _refreshStatus,
                   icon: const Icon(Icons.refresh, size: 20),
                 ),
@@ -136,7 +140,7 @@ class _BangumiCollectionSyncSectionState
             ] else if (isRunning && syncedCount > 0) ...[
               const SizedBox(height: 8),
               Text(
-                '已同步 $syncedCount 条',
+                l10n.syncedItems(syncedCount),
                 style: TextStyle(
                   fontSize: 12,
                   color: colorScheme.onSurfaceVariant,
@@ -149,7 +153,9 @@ class _BangumiCollectionSyncSectionState
               child: OutlinedButton.icon(
                 onPressed: isRunning ? null : _triggerSync,
                 icon: const Icon(Icons.cloud_download_outlined, size: 18),
-                label: Text(isRunning ? '同步进行中…' : '同步 Bangumi 收藏'),
+                label: Text(isRunning
+                    ? l10n.syncInProgress
+                    : l10n.syncBangumiCollection),
               ),
             ),
           ],
@@ -163,7 +169,7 @@ class _BangumiCollectionSyncSectionState
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
-            '收藏同步',
+            l10n.collectionSyncTitle,
             style: TextStyle(
               fontSize: 15,
               fontWeight: FontWeight.w600,
@@ -172,18 +178,34 @@ class _BangumiCollectionSyncSectionState
           ),
           const SizedBox(height: 8),
           Text(
-            '获取同步状态失败',
+            l10n.syncStatusLoadFailed,
             style: TextStyle(color: colorScheme.onSurfaceVariant),
           ),
           const SizedBox(height: 8),
           OutlinedButton.icon(
             onPressed: () => ref.invalidate(bgmCollectionSyncProvider),
             icon: const Icon(Icons.refresh),
-            label: const Text('重试'),
+            label: Text(l10n.retry),
           ),
         ],
       ),
     );
+  }
+
+  String _statusLabel(
+    AppLocalizations l10n,
+    BgmCollectionSyncStatus? status,
+  ) {
+    switch (status ?? BgmCollectionSyncStatus.idle) {
+      case BgmCollectionSyncStatus.idle:
+        return l10n.syncStatusIdle;
+      case BgmCollectionSyncStatus.running:
+        return l10n.syncStatusRunning;
+      case BgmCollectionSyncStatus.success:
+        return l10n.syncStatusSuccess;
+      case BgmCollectionSyncStatus.failed:
+        return l10n.syncStatusFailed;
+    }
   }
 }
 

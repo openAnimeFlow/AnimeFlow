@@ -1063,6 +1063,47 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
+  String get collectionSyncTitle => 'Collection Sync';
+
+  @override
+  String get collectionSyncStarted => 'Collection sync started';
+
+  @override
+  String get syncStartFailed => 'Failed to start sync';
+
+  @override
+  String get refreshStatus => 'Refresh status';
+
+  @override
+  String get refreshStatusFailed => 'Failed to refresh status';
+
+  @override
+  String syncedItems(Object count) {
+    return 'Synced $count items';
+  }
+
+  @override
+  String get syncInProgress => 'Syncing…';
+
+  @override
+  String get syncBangumiCollection => 'Sync Bangumi collection';
+
+  @override
+  String get syncStatusLoadFailed => 'Failed to load sync status';
+
+  @override
+  String get syncStatusIdle => 'Not synced';
+
+  @override
+  String get syncStatusRunning => 'Syncing';
+
+  @override
+  String get syncStatusSuccess => 'Sync complete';
+
+  @override
+  String get syncStatusFailed => 'Sync failed';
+
+  @override
   String watchedLabel(Object progress) {
     return 'Watched $progress';
   }

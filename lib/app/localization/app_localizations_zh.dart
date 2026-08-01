@@ -1042,8 +1042,49 @@ class AppLocalizationsZh extends AppLocalizations {
   }
 
   @override
+  String get collectionSyncTitle => '收藏同步';
+
+  @override
+  String get collectionSyncStarted => '收藏同步已開始';
+
+  @override
+  String get syncStartFailed => '啟動同步失敗';
+
+  @override
+  String get refreshStatus => '重新整理狀態';
+
+  @override
+  String get refreshStatusFailed => '重新整理狀態失敗';
+
+  @override
+  String syncedItems(Object count) {
+    return '已同步 $count 條';
+  }
+
+  @override
+  String get syncInProgress => '同步進行中…';
+
+  @override
+  String get syncBangumiCollection => '同步 Bangumi 收藏';
+
+  @override
+  String get syncStatusLoadFailed => '取得同步狀態失敗';
+
+  @override
+  String get syncStatusIdle => '未同步';
+
+  @override
+  String get syncStatusRunning => '同步中';
+
+  @override
+  String get syncStatusSuccess => '同步完成';
+
+  @override
+  String get syncStatusFailed => '同步失敗';
+
+  @override
   String watchedLabel(Object progress) {
-    return '观看$progress';
+    return '觀看$progress';
   }
 
   @override
@@ -2090,6 +2131,47 @@ class AppLocalizationsZhHans extends AppLocalizationsZh {
   }
 
   @override
+  String get collectionSyncTitle => '收藏同步';
+
+  @override
+  String get collectionSyncStarted => '收藏同步已开始';
+
+  @override
+  String get syncStartFailed => '启动同步失败';
+
+  @override
+  String get refreshStatus => '刷新状态';
+
+  @override
+  String get refreshStatusFailed => '刷新状态失败';
+
+  @override
+  String syncedItems(Object count) {
+    return '已同步 $count 条';
+  }
+
+  @override
+  String get syncInProgress => '同步进行中…';
+
+  @override
+  String get syncBangumiCollection => '同步 Bangumi 收藏';
+
+  @override
+  String get syncStatusLoadFailed => '获取同步状态失败';
+
+  @override
+  String get syncStatusIdle => '未同步';
+
+  @override
+  String get syncStatusRunning => '同步中';
+
+  @override
+  String get syncStatusSuccess => '同步完成';
+
+  @override
+  String get syncStatusFailed => '同步失败';
+
+  @override
   String watchedLabel(Object progress) {
     return '观看$progress';
   }
@@ -2944,6 +3026,47 @@ class AppLocalizationsZhHantHk extends AppLocalizationsZh {
   String get orphanFontMissing => '本機字型檔案已遺失，可在此處清理記錄';
 
   @override
+  String get collectionSyncTitle => '收藏同步';
+
+  @override
+  String get collectionSyncStarted => '收藏同步已開始';
+
+  @override
+  String get syncStartFailed => '啟動同步失敗';
+
+  @override
+  String get refreshStatus => '重新整理狀態';
+
+  @override
+  String get refreshStatusFailed => '重新整理狀態失敗';
+
+  @override
+  String syncedItems(Object count) {
+    return '已同步 $count 條';
+  }
+
+  @override
+  String get syncInProgress => '同步進行中…';
+
+  @override
+  String get syncBangumiCollection => '同步 Bangumi 收藏';
+
+  @override
+  String get syncStatusLoadFailed => '取得同步狀態失敗';
+
+  @override
+  String get syncStatusIdle => '未同步';
+
+  @override
+  String get syncStatusRunning => '同步中';
+
+  @override
+  String get syncStatusSuccess => '同步完成';
+
+  @override
+  String get syncStatusFailed => '同步失敗';
+
+  @override
   String watchedLabel(Object progress) {
     return '觀看$progress';
   }
@@ -3796,6 +3919,47 @@ class AppLocalizationsZhHantTw extends AppLocalizationsZh {
 
   @override
   String get orphanFontMissing => '本機字型檔案已遺失，可在此處清理記錄';
+
+  @override
+  String get collectionSyncTitle => '收藏同步';
+
+  @override
+  String get collectionSyncStarted => '收藏同步已開始';
+
+  @override
+  String get syncStartFailed => '啟動同步失敗';
+
+  @override
+  String get refreshStatus => '重新整理狀態';
+
+  @override
+  String get refreshStatusFailed => '重新整理狀態失敗';
+
+  @override
+  String syncedItems(Object count) {
+    return '已同步 $count 筆';
+  }
+
+  @override
+  String get syncInProgress => '同步進行中…';
+
+  @override
+  String get syncBangumiCollection => '同步 Bangumi 收藏';
+
+  @override
+  String get syncStatusLoadFailed => '取得同步狀態失敗';
+
+  @override
+  String get syncStatusIdle => '未同步';
+
+  @override
+  String get syncStatusRunning => '同步中';
+
+  @override
+  String get syncStatusSuccess => '同步完成';
+
+  @override
+  String get syncStatusFailed => '同步失敗';
 
   @override
   String watchedLabel(Object progress) {

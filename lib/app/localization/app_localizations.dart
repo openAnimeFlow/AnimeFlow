@@ -2023,6 +2023,84 @@ abstract class AppLocalizations {
   /// **'版本：{version} - {date}'**
   String pluginVersionDate(Object date, Object version);
 
+  /// No description provided for @collectionSyncTitle.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'收藏同步'**
+  String get collectionSyncTitle;
+
+  /// No description provided for @collectionSyncStarted.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'收藏同步已开始'**
+  String get collectionSyncStarted;
+
+  /// No description provided for @syncStartFailed.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'启动同步失败'**
+  String get syncStartFailed;
+
+  /// No description provided for @refreshStatus.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'刷新状态'**
+  String get refreshStatus;
+
+  /// No description provided for @refreshStatusFailed.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'刷新状态失败'**
+  String get refreshStatusFailed;
+
+  /// No description provided for @syncedItems.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'已同步 {count} 条'**
+  String syncedItems(Object count);
+
+  /// No description provided for @syncInProgress.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'同步进行中…'**
+  String get syncInProgress;
+
+  /// No description provided for @syncBangumiCollection.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'同步 Bangumi 收藏'**
+  String get syncBangumiCollection;
+
+  /// No description provided for @syncStatusLoadFailed.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'获取同步状态失败'**
+  String get syncStatusLoadFailed;
+
+  /// No description provided for @syncStatusIdle.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'未同步'**
+  String get syncStatusIdle;
+
+  /// No description provided for @syncStatusRunning.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'同步中'**
+  String get syncStatusRunning;
+
+  /// No description provided for @syncStatusSuccess.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'同步完成'**
+  String get syncStatusSuccess;
+
+  /// No description provided for @syncStatusFailed.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'同步失败'**
+  String get syncStatusFailed;
+
   /// No description provided for @watchedLabel.
   ///
   /// In zh_Hans, this message translates to:

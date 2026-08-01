@@ -220,5 +220,22 @@
   "confirmUnbindAction": "Unbind",
   "unbind": "Unbind",
   "bangumiBindSuccessHint": "Bangumi authorization and binding should work normally.",
-  "bangumiBindFailureHint": "If Bangumi authorization or binding fails, try enabling a VPN or proxy."
+  "bangumiBindFailureHint": "If Bangumi authorization or binding fails, try enabling a VPN or proxy.",
+  "version": "Version {version}",
+  "autoUpdate": "Automatic updates",
+  "checkUpdate": "Check for updates",
+  "openSource": "Open source",
+  "unableOpenWeb": "Unable to open webpage",
+  "deviceUnsupportedWeb": "Your device may not support this feature",
+  "thanks": "Acknowledgements",
+  "privacyPolicy": "Privacy policy",
+  "specialThanks": "Special thanks",
+  "thanksDescription": "Thanks to the excellent open-source projects and technical support that make AnimeFlow better",
+  "kazumiWebViewSupport": "WebView support provided by the Kazumi project",
+  "mediaKitDescription": "Cross-platform video player with high-quality playback",
+  "canvasDanmakuDescription": "Danmaku plugin providing smooth danmaku rendering",
+  "dandanplayDescription": "Provides rich danmaku sources",
+  "bangumiDescription": "Provides anime information and user data synchronization",
+  "anime4kDescription": "Super-resolution technology for improved video quality",
+  "traceMoeDescription": "Provides anime recognition from images"
 }

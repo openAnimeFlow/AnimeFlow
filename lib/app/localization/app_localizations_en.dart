@@ -706,4 +706,63 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get bangumiBindFailureHint =>
       'If Bangumi authorization or binding fails, try enabling a VPN or proxy.';
+
+  @override
+  String version(Object version) {
+    return 'Version $version';
+  }
+
+  @override
+  String get autoUpdate => 'Automatic updates';
+
+  @override
+  String get checkUpdate => 'Check for updates';
+
+  @override
+  String get openSource => 'Open source';
+
+  @override
+  String get unableOpenWeb => 'Unable to open webpage';
+
+  @override
+  String get deviceUnsupportedWeb => 'Your device may not support this feature';
+
+  @override
+  String get thanks => 'Acknowledgements';
+
+  @override
+  String get privacyPolicy => 'Privacy policy';
+
+  @override
+  String get specialThanks => 'Special thanks';
+
+  @override
+  String get thanksDescription =>
+      'Thanks to the excellent open-source projects and technical support that make AnimeFlow better';
+
+  @override
+  String get kazumiWebViewSupport =>
+      'WebView support provided by the Kazumi project';
+
+  @override
+  String get mediaKitDescription =>
+      'Cross-platform video player with high-quality playback';
+
+  @override
+  String get canvasDanmakuDescription =>
+      'Danmaku plugin providing smooth danmaku rendering';
+
+  @override
+  String get dandanplayDescription => 'Provides rich danmaku sources';
+
+  @override
+  String get bangumiDescription =>
+      'Provides anime information and user data synchronization';
+
+  @override
+  String get anime4kDescription =>
+      'Super-resolution technology for improved video quality';
+
+  @override
+  String get traceMoeDescription => 'Provides anime recognition from images';
 }

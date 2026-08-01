@@ -1,61 +1,63 @@
 import 'package:anime_flow/core/constants/assets_path_constants.dart';
 import 'package:flutter/material.dart';
 import 'package:url_launcher/url_launcher.dart';
+import 'package:anime_flow/app/localization/app_localizations.dart';
 
 class ThanksPage extends StatelessWidget {
   const ThanksPage({super.key});
 
   // 鸣谢项目数据
-  List<Map<String, dynamic>> get _thanksItems => [
+  List<Map<String, dynamic>> _thanksItems(AppLocalizations l10n) => [
         {
           'icon': const Icon(Icons.web),
           'title': 'WebView',
-          'description': 'Kazumi项目提供的WebView技术支持',
+          'description': l10n.kazumiWebViewSupport,
           'url': 'https://github.com/Predidit/Kazumi/tree/main/lib/webview',
         },
         {
           'icon': const Icon(Icons.play_circle_outline_rounded),
           'title': 'media-kit',
-          'description': '跨平台视频播放器，支持高质量视频播放',
+          'description': l10n.mediaKitDescription,
           'url': 'https://github.com/media-kit/media-kit',
         },
         {
           'icon': const Icon(Icons.subtitles),
           'title': 'canvas_danmaku',
-          'description': '弹幕插件，提供流畅的弹幕绘制',
+          'description': l10n.canvasDanmakuDescription,
           'url': 'https://pub.dev/packages/canvas_danmaku',
         },
         {
           'icon': const Icon(Icons.subtitles_outlined),
           'title': '弹弹Play',
-          'description': '提供丰富的弹幕数据源',
+          'description': l10n.dandanplayDescription,
           'url': 'https://www.dandanplay.com/',
         },
         {
           'icon': const Icon(Icons.live_tv_rounded),
           'title': 'Bangumi',
-          'description': '提供番剧信息和用户数据同步服务',
+          'description': l10n.bangumiDescription,
           'url': 'https://bangumi.tv',
         },
         {
           'icon': const Icon(Icons.hd_outlined),
           'title': 'Anime4K',
-          'description': '超分辨率技术，提升视频画质',
+          'description': l10n.anime4kDescription,
           'url': 'https://github.com/bloc97/Anime4K',
         },
         {
           'icon': const Icon(Icons.image_search_outlined),
           'title': 'trace.moe',
-          'description': '提供的以图识别番功能',
+          'description': l10n.traceMoeDescription,
           'url': 'https://trace.moe/',
         },
       ];
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     return Scaffold(
       appBar: AppBar(
-        title: const Text('鸣谢'),
+        title: Text(l10n.thanks),
       ),
       body: LayoutBuilder(
         builder: (context, constraints) {
@@ -80,7 +82,7 @@ class ThanksPage extends StatelessWidget {
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
                           Text(
-                            '特别鸣谢',
+                            l10n.specialThanks,
                             style: Theme.of(context)
                                 .textTheme
                                 .headlineSmall
@@ -96,7 +98,7 @@ class ThanksPage extends StatelessWidget {
                       Padding(
                         padding: const EdgeInsets.symmetric(horizontal: 24),
                         child: Text(
-                          '感谢以下优秀的开源项目和技术支持，让 AnimeFlow 变得更好',
+                          l10n.thanksDescription,
                           style:
                               Theme.of(context).textTheme.bodyMedium?.copyWith(
                                     color: Theme.of(context)
@@ -127,7 +129,7 @@ class ThanksPage extends StatelessWidget {
                   ),
                   delegate: SliverChildBuilderDelegate(
                     (context, index) {
-                      final item = _thanksItems[index];
+                      final item = _thanksItems(l10n)[index];
                       return _buildThanksCard(
                         context: context,
                         icon: item['icon'] as Widget,
@@ -136,7 +138,7 @@ class ThanksPage extends StatelessWidget {
                         url: item['url'] as String?,
                       );
                     },
-                    childCount: _thanksItems.length,
+                    childCount: _thanksItems(l10n).length,
                   ),
                 ),
               ),
@@ -161,6 +163,7 @@ class ThanksPage extends StatelessWidget {
   }) {
     final hasUrl = url != null;
     final urlString = url;
+    final l10n = AppLocalizations.of(context);
 
     return Card(
       elevation: 0,
@@ -176,8 +179,10 @@ class ThanksPage extends StatelessWidget {
                   await launchUrl(uri, mode: LaunchMode.externalApplication);
                 } else {
                   messenger.showSnackBar(
-                    const SnackBar(
-                      content: Text('无法打开网页，你的设备可能不支持此功能'),
+                    SnackBar(
+                      content: Text(
+                        '${l10n.unableOpenWeb}，${l10n.deviceUnsupportedWeb}',
+                      ),
                     ),
                   );
                 }

@@ -1398,6 +1398,108 @@ abstract class AppLocalizations {
   /// In zh_Hans, this message translates to:
   /// **'授权或绑定 Bangumi 时，建议开启 VPN 或代理后重试。'**
   String get bangumiBindFailureHint;
+
+  /// No description provided for @version.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'版本 {version}'**
+  String version(Object version);
+
+  /// No description provided for @autoUpdate.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'自动更新'**
+  String get autoUpdate;
+
+  /// No description provided for @checkUpdate.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'检查更新'**
+  String get checkUpdate;
+
+  /// No description provided for @openSource.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'开源地址'**
+  String get openSource;
+
+  /// No description provided for @unableOpenWeb.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'无法打开网页'**
+  String get unableOpenWeb;
+
+  /// No description provided for @deviceUnsupportedWeb.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'你的设备可能不支持此功能'**
+  String get deviceUnsupportedWeb;
+
+  /// No description provided for @thanks.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'鸣谢'**
+  String get thanks;
+
+  /// No description provided for @privacyPolicy.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'隐私政策'**
+  String get privacyPolicy;
+
+  /// No description provided for @specialThanks.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'特别鸣谢'**
+  String get specialThanks;
+
+  /// No description provided for @thanksDescription.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'感谢以下优秀的开源项目和技术支持，让 AnimeFlow 变得更好'**
+  String get thanksDescription;
+
+  /// No description provided for @kazumiWebViewSupport.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'Kazumi 项目提供的 WebView 技术支持'**
+  String get kazumiWebViewSupport;
+
+  /// No description provided for @mediaKitDescription.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'跨平台视频播放器，支持高质量视频播放'**
+  String get mediaKitDescription;
+
+  /// No description provided for @canvasDanmakuDescription.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'弹幕插件，提供流畅的弹幕绘制'**
+  String get canvasDanmakuDescription;
+
+  /// No description provided for @dandanplayDescription.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'提供丰富的弹幕数据源'**
+  String get dandanplayDescription;
+
+  /// No description provided for @bangumiDescription.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'提供番剧信息和用户数据同步服务'**
+  String get bangumiDescription;
+
+  /// No description provided for @anime4kDescription.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'超分辨率技术，提升视频画质'**
+  String get anime4kDescription;
+
+  /// No description provided for @traceMoeDescription.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'提供以图识别番功能'**
+  String get traceMoeDescription;
 }
 
 class _AppLocalizationsDelegate

@@ -697,6 +697,59 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get bangumiBindFailureHint => '授权或绑定 Bangumi 时，建议开启 VPN 或代理后重试。';
+
+  @override
+  String version(Object version) {
+    return '版本 $version';
+  }
+
+  @override
+  String get autoUpdate => '自动更新';
+
+  @override
+  String get checkUpdate => '检查更新';
+
+  @override
+  String get openSource => '开源地址';
+
+  @override
+  String get unableOpenWeb => '无法打开网页';
+
+  @override
+  String get deviceUnsupportedWeb => '你的设备可能不支持此功能';
+
+  @override
+  String get thanks => '鸣谢';
+
+  @override
+  String get privacyPolicy => '隐私政策';
+
+  @override
+  String get specialThanks => '特别鸣谢';
+
+  @override
+  String get thanksDescription => '感谢以下优秀的开源项目和技术支持，让 AnimeFlow 变得更好';
+
+  @override
+  String get kazumiWebViewSupport => 'Kazumi 项目提供的 WebView 技术支持';
+
+  @override
+  String get mediaKitDescription => '跨平台视频播放器，支持高质量视频播放';
+
+  @override
+  String get canvasDanmakuDescription => '弹幕插件，提供流畅的弹幕绘制';
+
+  @override
+  String get dandanplayDescription => '提供丰富的弹幕数据源';
+
+  @override
+  String get bangumiDescription => '提供番剧信息和用户数据同步服务';
+
+  @override
+  String get anime4kDescription => '超分辨率技术，提升视频画质';
+
+  @override
+  String get traceMoeDescription => '提供以图识别番功能';
 }
 
 /// The translations for Chinese, using the Han script (`zh_Hans`).
@@ -1392,6 +1445,59 @@ class AppLocalizationsZhHans extends AppLocalizationsZh {
 
   @override
   String get bangumiBindFailureHint => '授权或绑定 Bangumi 时，建议开启 VPN 或代理后重试。';
+
+  @override
+  String version(Object version) {
+    return '版本 $version';
+  }
+
+  @override
+  String get autoUpdate => '自动更新';
+
+  @override
+  String get checkUpdate => '检查更新';
+
+  @override
+  String get openSource => '开源地址';
+
+  @override
+  String get unableOpenWeb => '无法打开网页';
+
+  @override
+  String get deviceUnsupportedWeb => '你的设备可能不支持此功能';
+
+  @override
+  String get thanks => '鸣谢';
+
+  @override
+  String get privacyPolicy => '隐私政策';
+
+  @override
+  String get specialThanks => '特别鸣谢';
+
+  @override
+  String get thanksDescription => '感谢以下优秀的开源项目和技术支持，让 AnimeFlow 变得更好';
+
+  @override
+  String get kazumiWebViewSupport => 'Kazumi 项目提供的 WebView 技术支持';
+
+  @override
+  String get mediaKitDescription => '跨平台视频播放器，支持高质量视频播放';
+
+  @override
+  String get canvasDanmakuDescription => '弹幕插件，提供流畅的弹幕绘制';
+
+  @override
+  String get dandanplayDescription => '提供丰富的弹幕数据源';
+
+  @override
+  String get bangumiDescription => '提供番剧信息和用户数据同步服务';
+
+  @override
+  String get anime4kDescription => '超分辨率技术，提升视频画质';
+
+  @override
+  String get traceMoeDescription => '提供以图识别番功能';
 }
 
 /// The translations for Chinese, as used in Hong Kong, using the Han script (`zh_Hant_HK`).
@@ -2087,6 +2193,59 @@ class AppLocalizationsZhHantHk extends AppLocalizationsZh {
 
   @override
   String get bangumiBindFailureHint => '授權或綁定 Bangumi 時，建議開啟 VPN 或 Proxy 後再試。';
+
+  @override
+  String version(Object version) {
+    return '版本 $version';
+  }
+
+  @override
+  String get autoUpdate => '自動更新';
+
+  @override
+  String get checkUpdate => '檢查更新';
+
+  @override
+  String get openSource => '開源地址';
+
+  @override
+  String get unableOpenWeb => '無法開啟網頁';
+
+  @override
+  String get deviceUnsupportedWeb => '你的裝置可能不支援此功能';
+
+  @override
+  String get thanks => '鳴謝';
+
+  @override
+  String get privacyPolicy => '私隱政策';
+
+  @override
+  String get specialThanks => '特別鳴謝';
+
+  @override
+  String get thanksDescription => '感謝以下優秀的開源專案和技術支援，讓 AnimeFlow 變得更好';
+
+  @override
+  String get kazumiWebViewSupport => 'Kazumi 專案提供的 WebView 技術支援';
+
+  @override
+  String get mediaKitDescription => '跨平台影片播放器，支援高品質影片播放';
+
+  @override
+  String get canvasDanmakuDescription => '彈幕插件，提供流暢的彈幕繪製';
+
+  @override
+  String get dandanplayDescription => '提供豐富的彈幕資料來源';
+
+  @override
+  String get bangumiDescription => '提供番劇資訊和使用者資料同步服務';
+
+  @override
+  String get anime4kDescription => '超解析度技術，提升影片畫質';
+
+  @override
+  String get traceMoeDescription => '提供以圖識別番劇功能';
 }
 
 /// The translations for Chinese, as used in Taiwan, using the Han script (`zh_Hant_TW`).
@@ -2782,4 +2941,57 @@ class AppLocalizationsZhHantTw extends AppLocalizationsZh {
 
   @override
   String get bangumiBindFailureHint => '授權或綁定 Bangumi 時，建議開啟 VPN 或 Proxy 後再試。';
+
+  @override
+  String version(Object version) {
+    return '版本 $version';
+  }
+
+  @override
+  String get autoUpdate => '自動更新';
+
+  @override
+  String get checkUpdate => '檢查更新';
+
+  @override
+  String get openSource => '開源地址';
+
+  @override
+  String get unableOpenWeb => '無法開啟網頁';
+
+  @override
+  String get deviceUnsupportedWeb => '你的裝置可能不支援此功能';
+
+  @override
+  String get thanks => '鳴謝';
+
+  @override
+  String get privacyPolicy => '隱私政策';
+
+  @override
+  String get specialThanks => '特別鳴謝';
+
+  @override
+  String get thanksDescription => '感謝以下優秀的開源專案和技術支援，讓 AnimeFlow 變得更好';
+
+  @override
+  String get kazumiWebViewSupport => 'Kazumi 專案提供的 WebView 技術支援';
+
+  @override
+  String get mediaKitDescription => '跨平台影片播放器，支援高品質影片播放';
+
+  @override
+  String get canvasDanmakuDescription => '彈幕插件，提供流暢的彈幕繪製';
+
+  @override
+  String get dandanplayDescription => '提供豐富的彈幕資料來源';
+
+  @override
+  String get bangumiDescription => '提供番劇資訊和使用者資料同步服務';
+
+  @override
+  String get anime4kDescription => '超解析度技術，提升影片畫質';
+
+  @override
+  String get traceMoeDescription => '提供以圖識別番劇功能';
 }

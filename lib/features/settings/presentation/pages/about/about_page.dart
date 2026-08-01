@@ -9,6 +9,7 @@ import 'package:anime_flow/features/app_update/presentation/widgets/version_upda
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:url_launcher/url_launcher.dart';
+import 'package:anime_flow/app/localization/app_localizations.dart';
 
 class AboutSettingsPage extends ConsumerStatefulWidget {
   const AboutSettingsPage({super.key});
@@ -27,6 +28,7 @@ class _AboutSettingsPageState extends ConsumerState<AboutSettingsPage> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     return Scaffold(
       appBar: PreferredSize(
         preferredSize: const Size.fromHeight(kToolbarHeight),
@@ -34,7 +36,7 @@ class _AboutSettingsPageState extends ConsumerState<AboutSettingsPage> {
           builder: (context, ref, _) {
             final isWideScreen = ref.watch(settingsLayoutProvider);
             return AppBar(
-              title: const Text('关于'),
+              title: Text(l10n.about),
               automaticallyImplyLeading: !isWideScreen,
             );
           },
@@ -65,7 +67,7 @@ class _AboutSettingsPageState extends ConsumerState<AboutSettingsPage> {
                     ),
                     const SizedBox(height: 8),
                     Text(
-                      '版本 ${appInfo.version}',
+                      l10n.version(appInfo.version),
                       style: TextStyle(
                         color: Theme.of(context).colorScheme.onSurfaceVariant,
                       ),
@@ -82,7 +84,7 @@ class _AboutSettingsPageState extends ConsumerState<AboutSettingsPage> {
             child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  const Text("自动更新"),
+                  Text(l10n.autoUpdate),
                   Switch(
                     value: autoUpdate,
                     onChanged: (bool value) {
@@ -96,7 +98,7 @@ class _AboutSettingsPageState extends ConsumerState<AboutSettingsPage> {
           ),
           const Divider(),
           ListTile(
-            title: const Text("检查更新"),
+            title: Text(l10n.checkUpdate),
             trailing: const Icon(Icons.browser_updated_outlined),
             onTap: () async {
               final notifier = ref.read(appInfoProvider.notifier);
@@ -113,7 +115,7 @@ class _AboutSettingsPageState extends ConsumerState<AboutSettingsPage> {
           ),
           const Divider(),
           ListTile(
-            title: const Text("开源地址"),
+            title: Text(l10n.openSource),
             trailing: const Icon(Icons.open_in_new),
             onTap: () async {
               final uri =
@@ -121,13 +123,14 @@ class _AboutSettingsPageState extends ConsumerState<AboutSettingsPage> {
               if (await canLaunchUrl(uri)) {
                 await launchUrl(uri);
               } else {
-                NotificationToast.show('无法打开网页', '你的设备可能不支持此功能');
+                NotificationToast.show(
+                    l10n.unableOpenWeb, l10n.deviceUnsupportedWeb);
               }
             },
           ),
           const Divider(),
           ListTile(
-            title: const Text("鸣谢"),
+            title: Text(l10n.thanks),
             trailing: const Icon(Icons.chevron_right),
             onTap: () {
               const SettingThanksRoute().push(context);
@@ -135,7 +138,7 @@ class _AboutSettingsPageState extends ConsumerState<AboutSettingsPage> {
           ),
           const Divider(),
           ListTile(
-            title: const Text("隐私政策"),
+            title: Text(l10n.privacyPolicy),
             trailing: const Icon(Icons.chevron_right),
             onTap: () {
               const SettingAgreementRoute().push(context);

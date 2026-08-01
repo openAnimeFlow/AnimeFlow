@@ -220,5 +220,22 @@
   "confirmUnbindAction": "确定解绑",
   "unbind": "解绑",
   "bangumiBindSuccessHint": "Bangumi 授权与绑定应可正常使用。",
-  "bangumiBindFailureHint": "授权或绑定 Bangumi 时，建议开启 VPN 或代理后重试。"
+  "bangumiBindFailureHint": "授权或绑定 Bangumi 时，建议开启 VPN 或代理后重试。",
+  "version": "版本 {version}",
+  "autoUpdate": "自动更新",
+  "checkUpdate": "检查更新",
+  "openSource": "开源地址",
+  "unableOpenWeb": "无法打开网页",
+  "deviceUnsupportedWeb": "你的设备可能不支持此功能",
+  "thanks": "鸣谢",
+  "privacyPolicy": "隐私政策",
+  "specialThanks": "特别鸣谢",
+  "thanksDescription": "感谢以下优秀的开源项目和技术支持，让 AnimeFlow 变得更好",
+  "kazumiWebViewSupport": "Kazumi 项目提供的 WebView 技术支持",
+  "mediaKitDescription": "跨平台视频播放器，支持高质量视频播放",
+  "canvasDanmakuDescription": "弹幕插件，提供流畅的弹幕绘制",
+  "dandanplayDescription": "提供丰富的弹幕数据源",
+  "bangumiDescription": "提供番剧信息和用户数据同步服务",
+  "anime4kDescription": "超分辨率技术，提升视频画质",
+  "traceMoeDescription": "提供以图识别番功能"
 }

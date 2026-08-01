@@ -1,6 +1,6 @@
-import 'package:anime_flow/pages/character_info/character_comments.dart';
-import 'package:anime_flow/pages/character_info/character_works.dart';
-import 'package:anime_flow/pages/character_info/provider/character_info_provider.dart';
+import 'package:anime_flow/features/character_info/presentation/widgets/character_comments.dart';
+import 'package:anime_flow/features/character_info/presentation/widgets/character_works.dart';
+import 'package:anime_flow/features/character_info/presentation/providers/character_info_provider.dart';
 import 'package:anime_flow/routes/provider/routes_args.dart';
 import 'package:anime_flow/shared/widgets/animation_network_image.dart';
 import 'package:flutter/material.dart';
@@ -74,12 +74,13 @@ class _CharacterInfoState extends State<CharacterInfo> {
             slivers: [
               SliverPadding(
                 padding:
-                const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+                    const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
                 sliver: SliverToBoxAdapter(
                   child: Consumer(
                     builder: (context, ref, _) {
                       final args = ref.watch(characterInfoArgsProvider);
-                      final detailAsync = ref.watch(characterInfoDetailProvider);
+                      final detailAsync =
+                          ref.watch(characterInfoDetailProvider);
 
                       return Row(
                         crossAxisAlignment: CrossAxisAlignment.start,
@@ -206,10 +207,10 @@ class _CharacterInfoState extends State<CharacterInfo> {
       ),
       floatingActionButton: _showBackToTop
           ? FloatingActionButton(
-        onPressed: _scrollToTop,
-        tooltip: '返回顶部',
-        child: const Icon(Icons.arrow_upward),
-      )
+              onPressed: _scrollToTop,
+              tooltip: '返回顶部',
+              child: const Icon(Icons.arrow_upward),
+            )
           : null,
     );
   }

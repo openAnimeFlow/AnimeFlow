@@ -1,5 +1,5 @@
 import 'package:anime_flow/models/item/bangumi/actor_item.dart';
-import 'package:anime_flow/pages/characters/provider/characters_provider.dart';
+import 'package:anime_flow/features/characters/presentation/providers/characters_provider.dart';
 import 'package:anime_flow/routes/routes.dart';
 import 'package:anime_flow/core/utils/bgm_utils.dart';
 import 'package:anime_flow/shared/widgets/animation_network_image.dart';

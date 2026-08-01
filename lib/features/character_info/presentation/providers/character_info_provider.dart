@@ -13,7 +13,7 @@ class CharacterInfoDetail extends _$CharacterInfoDetail {
   @override
   Future<CharacterDetailItem> build() async {
     final characterId =
-        ref.watch(characterInfoArgsProvider.select((e) => e.characterId));
+    ref.watch(characterInfoArgsProvider.select((e) => e.characterId));
     return FlowApi.characterInfoService(characterId);
   }
 }
@@ -23,7 +23,7 @@ class CharacterWorks extends _$CharacterWorks {
   @override
   Future<CharacterCastsItem> build() async {
     final characterId =
-        ref.watch(characterInfoArgsProvider.select((e) => e.characterId));
+    ref.watch(characterInfoArgsProvider.select((e) => e.characterId));
     return FlowApi.characterWorksService(
       characterId,
       limit: 20,
@@ -37,7 +37,7 @@ class CharacterComments extends _$CharacterComments {
   @override
   Future<List<CharacterCommentItem>> build() async {
     final characterId =
-        ref.watch(characterInfoArgsProvider.select((e) => e.characterId));
+    ref.watch(characterInfoArgsProvider.select((e) => e.characterId));
     return FlowApi.characterCommentsService(characterId);
   }
 }

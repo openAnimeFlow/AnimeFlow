@@ -1,7 +1,7 @@
 import 'package:anime_flow/features/anime_info/presentation/pages/anime_info_page.dart';
 import 'package:anime_flow/pages/calendar/index.dart';
-import 'package:anime_flow/pages/character_info/index.dart';
-import 'package:anime_flow/pages/characters/index.dart';
+import 'package:anime_flow/features/character_info/presentation/pages/character_info_page.dart';
+import 'package:anime_flow/features/characters/presentation/pages/characters_page.dart';
 import 'package:anime_flow/features/auth/presentation/pages/forgot_password_page.dart';
 import 'package:anime_flow/features/auth/presentation/pages/login_page.dart';
 import 'package:anime_flow/pages/main/index.dart';

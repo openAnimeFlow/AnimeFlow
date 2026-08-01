@@ -1273,113 +1273,120 @@ class AppLocalizationsEn extends AppLocalizations {
   String get downloadConfig => 'Download configuration';
 
   @override
-  String get addSource => '添加数据源';
+  String get addSource => 'Add data source';
 
   @override
-  String get editSource => '编辑数据源';
+  String get editSource => 'Edit data source';
 
   @override
-  String get saveFailed => '保存失败';
+  String get saveFailed => 'Save failed';
 
   @override
   String dataSaveFailed(Object error) {
-    return '数据保存失败：$error';
+    return 'Failed to save data: $error';
   }
 
   @override
-  String get fieldRequired => '此字段不能为空';
+  String get fieldRequired => 'This field is required';
 
   @override
-  String get versionNumber => '版本号';
+  String get versionNumber => 'Version';
 
   @override
-  String get versionExample => '如（1.0.0）';
+  String get versionExample => 'For example (1.0.0)';
 
   @override
-  String get sourceName => '名称';
+  String get sourceName => 'Name';
 
   @override
-  String get sourceNameHint => '网站名称，唯一值避免与其他配置名称重复，否则将被覆盖';
+  String get sourceNameHint =>
+      'Website name. Use a unique name to avoid overwriting another configuration.';
 
   @override
-  String get iconLink => '图标链接';
+  String get iconLink => 'Icon URL';
 
   @override
-  String get websiteLink => '网站链接';
+  String get websiteLink => 'Website URL';
 
   @override
-  String get websiteLinkHint => '网站主链接，避免以 / 结尾';
+  String get websiteLinkHint => 'Main website URL; avoid ending with /.';
 
   @override
-  String get searchLink => '搜索链接';
+  String get searchLink => 'Search URL';
 
   @override
   String searchLinkHint(Object keyword) {
-    return '用$keyword搜索关键字，示例：https://dm.xifanacg.com/search.html?wd=$keyword';
+    return 'Use $keyword as the keyword, for example: https://dm.xifanacg.com/search.html?wd=$keyword';
   }
 
   @override
-  String get searchContentList => '搜索内容列表';
+  String get searchContentList => 'Search content list';
 
   @override
-  String get searchListName => '搜索列表名称';
+  String get searchListName => 'Search list name';
 
   @override
-  String get searchListLink => '搜索列表链接';
+  String get searchListLink => 'Search list URL';
 
   @override
-  String get lineName => '线路名称';
+  String get lineName => 'Line name';
 
   @override
-  String get episodeList => '剧集列表';
+  String get episodeList => 'Episode list';
 
   @override
-  String get episode => '剧集';
+  String get episode => 'Episode';
 
   @override
-  String get episodeHint => '剧集链接，从剧集列表中获取的数据的 XPath';
+  String get episodeHint =>
+      'Episode URL XPath from the data in the episode list';
 
   @override
-  String get antiCrawlerOptional => '反爬 / 验证码（可选）';
+  String get antiCrawlerOptional => 'Anti-crawling / CAPTCHA (optional)';
 
   @override
-  String get enableWebViewCaptcha => '启用 WebView 验证码处理';
+  String get enableWebViewCaptcha => 'Enable WebView CAPTCHA handling';
 
   @override
-  String get webViewCaptchaSubtitle => '搜索触发验证码时，用 WebView 完成验证并保存 Cookie';
+  String get webViewCaptchaSubtitle =>
+      'Use WebView to complete verification and save cookies when a search triggers CAPTCHA';
 
   @override
-  String get captchaType => '验证类型';
+  String get captchaType => 'Verification type';
 
   @override
-  String get imageCaptchaManual => '图片验证码（手动输入）';
+  String get imageCaptchaManual => 'Image CAPTCHA (manual input)';
 
   @override
-  String get autoClickCaptcha => '自动点击验证按钮';
+  String get autoClickCaptcha => 'Automatically click verification button';
 
   @override
-  String get captchaImageXPath => '验证码图片 XPath';
+  String get captchaImageXPath => 'CAPTCHA image XPath';
 
   @override
-  String get captchaImageXPathHint => 'WebView 内定位验证码图片元素';
+  String get captchaImageXPathHint =>
+      'Locate the CAPTCHA image element in WebView';
 
   @override
-  String get captchaInputXPath => '验证码输入框 XPath';
+  String get captchaInputXPath => 'CAPTCHA input XPath';
 
   @override
-  String get captchaInputXPathHint => '供用户输入验证码的 input 元素';
+  String get captchaInputXPathHint =>
+      'The input element for entering the CAPTCHA in WebView';
 
   @override
-  String get submitCaptchaXPath => '提交验证码按钮 XPath';
+  String get submitCaptchaXPath => 'Submit CAPTCHA button XPath';
 
   @override
-  String get verifyButtonXPath => '验证按钮 XPath';
+  String get verifyButtonXPath => 'Verification button XPath';
 
   @override
-  String get submitCaptchaHint => '点击后提交验证码的按钮';
+  String get submitCaptchaHint =>
+      'The button to click after entering the CAPTCHA';
 
   @override
-  String get autoClickCaptchaHint => '检测到后自动点击的验证按钮（如「我不是机器人」）';
+  String get autoClickCaptchaHint =>
+      'The verification button to click automatically when detected (such as “I am not a robot”)';
 
   @override
   String get downloadSuccess => 'Download successful';

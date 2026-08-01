@@ -1246,113 +1246,113 @@ class AppLocalizationsZh extends AppLocalizations {
   String get downloadConfig => '下载配置';
 
   @override
-  String get addSource => '添加数据源';
+  String get addSource => '新增資料來源';
 
   @override
-  String get editSource => '编辑数据源';
+  String get editSource => '編輯資料來源';
 
   @override
-  String get saveFailed => '保存失败';
+  String get saveFailed => '儲存失敗';
 
   @override
   String dataSaveFailed(Object error) {
-    return '数据保存失败：$error';
+    return '資料儲存失敗：$error';
   }
 
   @override
-  String get fieldRequired => '此字段不能为空';
+  String get fieldRequired => '此欄位不能為空';
 
   @override
-  String get versionNumber => '版本号';
+  String get versionNumber => '版本號';
 
   @override
-  String get versionExample => '如（1.0.0）';
+  String get versionExample => '例如（1.0.0）';
 
   @override
-  String get sourceName => '名称';
+  String get sourceName => '名稱';
 
   @override
-  String get sourceNameHint => '网站名称，唯一值避免与其他配置名称重复，否则将被覆盖';
+  String get sourceNameHint => '網站名稱，請使用唯一值以避免覆蓋其他設定。';
 
   @override
-  String get iconLink => '图标链接';
+  String get iconLink => '圖示連結';
 
   @override
-  String get websiteLink => '网站链接';
+  String get websiteLink => '網站連結';
 
   @override
-  String get websiteLinkHint => '网站主链接，避免以 / 结尾';
+  String get websiteLinkHint => '網站主連結，避免以 / 結尾。';
 
   @override
-  String get searchLink => '搜索链接';
+  String get searchLink => '搜尋連結';
 
   @override
   String searchLinkHint(Object keyword) {
-    return '用$keyword搜索关键字，示例：https://dm.xifanacg.com/search.html?wd=$keyword';
+    return '使用 $keyword 搜尋關鍵字，例如：https://dm.xifanacg.com/search.html?wd=$keyword';
   }
 
   @override
-  String get searchContentList => '搜索内容列表';
+  String get searchContentList => '搜尋內容列表';
 
   @override
-  String get searchListName => '搜索列表名称';
+  String get searchListName => '搜尋列表名稱';
 
   @override
-  String get searchListLink => '搜索列表链接';
+  String get searchListLink => '搜尋列表連結';
 
   @override
-  String get lineName => '线路名称';
+  String get lineName => '線路名稱';
 
   @override
-  String get episodeList => '剧集列表';
+  String get episodeList => '劇集列表';
 
   @override
-  String get episode => '剧集';
+  String get episode => '劇集';
 
   @override
-  String get episodeHint => '剧集链接，从剧集列表中获取的数据的 XPath';
+  String get episodeHint => '從劇集列表資料中取得劇集連結的 XPath';
 
   @override
-  String get antiCrawlerOptional => '反爬 / 验证码（可选）';
+  String get antiCrawlerOptional => '反爬蟲／驗證碼（可選）';
 
   @override
-  String get enableWebViewCaptcha => '启用 WebView 验证码处理';
+  String get enableWebViewCaptcha => '啟用 WebView 驗證碼處理';
 
   @override
-  String get webViewCaptchaSubtitle => '搜索触发验证码时，用 WebView 完成验证并保存 Cookie';
+  String get webViewCaptchaSubtitle => '搜尋觸發驗證碼時，使用 WebView 完成驗證並儲存 Cookie';
 
   @override
-  String get captchaType => '验证类型';
+  String get captchaType => '驗證類型';
 
   @override
-  String get imageCaptchaManual => '图片验证码（手动输入）';
+  String get imageCaptchaManual => '圖片驗證碼（手動輸入）';
 
   @override
-  String get autoClickCaptcha => '自动点击验证按钮';
+  String get autoClickCaptcha => '自動點擊驗證按鈕';
 
   @override
-  String get captchaImageXPath => '验证码图片 XPath';
+  String get captchaImageXPath => '驗證碼圖片 XPath';
 
   @override
-  String get captchaImageXPathHint => 'WebView 内定位验证码图片元素';
+  String get captchaImageXPathHint => '在 WebView 中定位驗證碼圖片元素';
 
   @override
-  String get captchaInputXPath => '验证码输入框 XPath';
+  String get captchaInputXPath => '驗證碼輸入框 XPath';
 
   @override
-  String get captchaInputXPathHint => '供用户输入验证码的 input 元素';
+  String get captchaInputXPathHint => '供使用者在 WebView 中輸入驗證碼的 input 元素';
 
   @override
-  String get submitCaptchaXPath => '提交验证码按钮 XPath';
+  String get submitCaptchaXPath => '提交驗證碼按鈕 XPath';
 
   @override
-  String get verifyButtonXPath => '验证按钮 XPath';
+  String get verifyButtonXPath => '驗證按鈕 XPath';
 
   @override
-  String get submitCaptchaHint => '点击后提交验证码的按钮';
+  String get submitCaptchaHint => '輸入驗證碼後要點擊的按鈕';
 
   @override
-  String get autoClickCaptchaHint => '检测到后自动点击的验证按钮（如「我不是机器人」）';
+  String get autoClickCaptchaHint => '偵測到後自動點擊的驗證按鈕（例如「我不是機器人」）';
 
   @override
   String get downloadSuccess => '下载成功';
@@ -4498,6 +4498,115 @@ class AppLocalizationsZhHantHk extends AppLocalizationsZh {
   String get orphanFontMissing => '本機字型檔案已遺失，可在此處清理記錄';
 
   @override
+  String get addSource => '新增資料來源';
+
+  @override
+  String get editSource => '編輯資料來源';
+
+  @override
+  String get saveFailed => '儲存失敗';
+
+  @override
+  String dataSaveFailed(Object error) {
+    return '資料儲存失敗：$error';
+  }
+
+  @override
+  String get fieldRequired => '此欄位不能為空';
+
+  @override
+  String get versionNumber => '版本號';
+
+  @override
+  String get versionExample => '例如（1.0.0）';
+
+  @override
+  String get sourceName => '名稱';
+
+  @override
+  String get sourceNameHint => '網站名稱，請使用唯一值以避免覆蓋其他設定。';
+
+  @override
+  String get iconLink => '圖示連結';
+
+  @override
+  String get websiteLink => '網站連結';
+
+  @override
+  String get websiteLinkHint => '網站主連結，避免以 / 結尾。';
+
+  @override
+  String get searchLink => '搜尋連結';
+
+  @override
+  String searchLinkHint(Object keyword) {
+    return '使用 $keyword 搜尋關鍵字，例如：https://dm.xifanacg.com/search.html?wd=$keyword';
+  }
+
+  @override
+  String get searchContentList => '搜尋內容列表';
+
+  @override
+  String get searchListName => '搜尋列表名稱';
+
+  @override
+  String get searchListLink => '搜尋列表連結';
+
+  @override
+  String get lineName => '線路名稱';
+
+  @override
+  String get episodeList => '劇集列表';
+
+  @override
+  String get episode => '劇集';
+
+  @override
+  String get episodeHint => '從劇集列表資料中取得劇集連結的 XPath';
+
+  @override
+  String get antiCrawlerOptional => '反爬蟲／驗證碼（可選）';
+
+  @override
+  String get enableWebViewCaptcha => '啟用 WebView 驗證碼處理';
+
+  @override
+  String get webViewCaptchaSubtitle => '搜尋觸發驗證碼時，使用 WebView 完成驗證並儲存 Cookie';
+
+  @override
+  String get captchaType => '驗證類型';
+
+  @override
+  String get imageCaptchaManual => '圖片驗證碼（手動輸入）';
+
+  @override
+  String get autoClickCaptcha => '自動點擊驗證按鈕';
+
+  @override
+  String get captchaImageXPath => '驗證碼圖片 XPath';
+
+  @override
+  String get captchaImageXPathHint => '在 WebView 中定位驗證碼圖片元素';
+
+  @override
+  String get captchaInputXPath => '驗證碼輸入框 XPath';
+
+  @override
+  String get captchaInputXPathHint => '供使用者在 WebView 中輸入驗證碼的 input 元素';
+
+  @override
+  String get submitCaptchaXPath => '提交驗證碼按鈕 XPath';
+
+  @override
+  String get verifyButtonXPath => '驗證按鈕 XPath';
+
+  @override
+  String get submitCaptchaHint => '輸入驗證碼後要點擊的按鈕';
+
+  @override
+  String get autoClickCaptchaHint => '偵測到後自動點擊的驗證按鈕（例如「我不是機器人」）';
+
+  @override
   String get collectionSyncTitle => '收藏同步';
 
   @override
@@ -5945,6 +6054,115 @@ class AppLocalizationsZhHantTw extends AppLocalizationsZh {
 
   @override
   String get orphanFontMissing => '本機字型檔案已遺失，可在此處清理記錄';
+
+  @override
+  String get addSource => '新增資料來源';
+
+  @override
+  String get editSource => '編輯資料來源';
+
+  @override
+  String get saveFailed => '儲存失敗';
+
+  @override
+  String dataSaveFailed(Object error) {
+    return '資料儲存失敗：$error';
+  }
+
+  @override
+  String get fieldRequired => '此欄位不能為空';
+
+  @override
+  String get versionNumber => '版本號';
+
+  @override
+  String get versionExample => '例如（1.0.0）';
+
+  @override
+  String get sourceName => '名稱';
+
+  @override
+  String get sourceNameHint => '網站名稱，請使用唯一值以避免覆蓋其他設定。';
+
+  @override
+  String get iconLink => '圖示連結';
+
+  @override
+  String get websiteLink => '網站連結';
+
+  @override
+  String get websiteLinkHint => '網站主連結，避免以 / 結尾。';
+
+  @override
+  String get searchLink => '搜尋連結';
+
+  @override
+  String searchLinkHint(Object keyword) {
+    return '使用 $keyword 搜尋關鍵字，例如：https://dm.xifanacg.com/search.html?wd=$keyword';
+  }
+
+  @override
+  String get searchContentList => '搜尋內容列表';
+
+  @override
+  String get searchListName => '搜尋列表名稱';
+
+  @override
+  String get searchListLink => '搜尋列表連結';
+
+  @override
+  String get lineName => '線路名稱';
+
+  @override
+  String get episodeList => '劇集列表';
+
+  @override
+  String get episode => '劇集';
+
+  @override
+  String get episodeHint => '從劇集列表資料中取得劇集連結的 XPath';
+
+  @override
+  String get antiCrawlerOptional => '反爬蟲／驗證碼（可選）';
+
+  @override
+  String get enableWebViewCaptcha => '啟用 WebView 驗證碼處理';
+
+  @override
+  String get webViewCaptchaSubtitle => '搜尋觸發驗證碼時，使用 WebView 完成驗證並儲存 Cookie';
+
+  @override
+  String get captchaType => '驗證類型';
+
+  @override
+  String get imageCaptchaManual => '圖片驗證碼（手動輸入）';
+
+  @override
+  String get autoClickCaptcha => '自動點擊驗證按鈕';
+
+  @override
+  String get captchaImageXPath => '驗證碼圖片 XPath';
+
+  @override
+  String get captchaImageXPathHint => '在 WebView 中定位驗證碼圖片元素';
+
+  @override
+  String get captchaInputXPath => '驗證碼輸入框 XPath';
+
+  @override
+  String get captchaInputXPathHint => '供使用者在 WebView 中輸入驗證碼的 input 元素';
+
+  @override
+  String get submitCaptchaXPath => '提交驗證碼按鈕 XPath';
+
+  @override
+  String get verifyButtonXPath => '驗證按鈕 XPath';
+
+  @override
+  String get submitCaptchaHint => '輸入驗證碼後要點擊的按鈕';
+
+  @override
+  String get autoClickCaptchaHint => '偵測到後自動點擊的驗證按鈕（例如「我不是機器人」）';
 
   @override
   String get collectionSyncTitle => '收藏同步';

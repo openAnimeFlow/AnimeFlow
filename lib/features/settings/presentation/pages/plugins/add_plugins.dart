@@ -16,64 +16,7 @@ class AddPluginsPage extends StatefulWidget {
 }
 
 class _AddPluginsPageState extends State<AddPluginsPage> {
-  final List<_Field> _textFields = [
-    _Field(
-      title: '版本号',
-      message: '如（1.0.0）',
-      isRequired: true,
-    ),
-    _Field(
-      title: '名称',
-      message: '网站名称,唯一值避免与其他配置名称重复,否则将被覆盖',
-      isRequired: true,
-    ),
-    _Field(
-      title: '图标链接',
-      message: '网站图标链接',
-      isRequired: true,
-    ),
-    _Field(
-      title: '网站链接',
-      message: '网站主链接,避免以 / 结尾',
-      isRequired: true,
-    ),
-    _Field(
-      title: '搜索链接',
-      message:
-          '用{keyword}搜索关键字,示例:https://dm.xifanacg.com/search.html?wd={keyword}',
-      isRequired: true,
-    ),
-    _Field(
-      title: '搜索内容列表',
-      message: '搜索内容列表',
-      isRequired: true,
-    ),
-    _Field(
-      title: '搜索列表名称',
-      message: '搜索列表名称',
-      isRequired: true,
-    ),
-    _Field(
-      title: '搜索列表链接',
-      message: '搜索列表链接',
-      isRequired: true,
-    ),
-    _Field(
-      title: '线路名称',
-      message: '线路名称',
-      isRequired: true,
-    ),
-    _Field(
-      title: '剧集列表',
-      message: '剧集列表',
-      isRequired: true,
-    ),
-    _Field(
-      title: '剧集',
-      message: '剧集链接,从剧集列表中获取的数据的xpath',
-      isRequired: true,
-    )
-  ];
+  static const _fieldCount = 11;
 
   List<_Field> _localizedTextFields(AppLocalizations l10n) => [
         _Field(
@@ -129,7 +72,10 @@ class _AddPluginsPageState extends State<AddPluginsPage> {
   @override
   void initState() {
     super.initState();
-    _controllers = _textFields.map((field) => TextEditingController()).toList();
+    _controllers = List.generate(
+      _fieldCount,
+      (_) => TextEditingController(),
+    );
     _captchaImageController = TextEditingController();
     _captchaInputController = TextEditingController();
     _captchaButtonController = TextEditingController();
@@ -202,7 +148,7 @@ class _AddPluginsPageState extends State<AddPluginsPage> {
   Future<bool> _saveConfig() async {
     // 空值校验
     _errorFields.clear();
-    for (int i = 0; i < _textFields.length; i++) {
+    for (int i = 0; i < _controllers.length; i++) {
       final controller = _controllers[i];
       final value = controller.text.trim();
 

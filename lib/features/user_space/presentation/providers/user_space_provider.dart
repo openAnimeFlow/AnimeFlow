@@ -1,6 +1,6 @@
 import 'package:anime_flow/core/crawler/itme/bgm_user_page_item.dart';
 import 'package:anime_flow/shared/models/bangumi/user_info_item.dart';
-import 'package:anime_flow/repository/providers/repository_providers.dart';
+import 'package:anime_flow/features/user/data/repository/user_repository_provider.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 part 'user_space_provider.g.dart';

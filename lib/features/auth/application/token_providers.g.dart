@@ -1,6 +1,6 @@
 // GENERATED CODE - DO NOT MODIFY BY HAND
 
-part of 'repository_providers.dart';
+part of 'token_providers.dart';
 
 // **************************************************************************
 // RiverpodGenerator
@@ -95,44 +95,3 @@ final class FlowTokenRepositoryProvider extends $FunctionalProvider<
 
 String _$flowTokenRepositoryHash() =>
     r'b693b8ce2bf80424f29ea5c2323d3ea8edb1fad5';
-
-@ProviderFor(userRepository)
-final userRepositoryProvider = UserRepositoryProvider._();
-
-final class UserRepositoryProvider
-    extends $FunctionalProvider<UserRepository, UserRepository, UserRepository>
-    with $Provider<UserRepository> {
-  UserRepositoryProvider._()
-      : super(
-          from: null,
-          argument: null,
-          retry: null,
-          name: r'userRepositoryProvider',
-          isAutoDispose: false,
-          dependencies: null,
-          $allTransitiveDependencies: null,
-        );
-
-  @override
-  String debugGetCreateSourceHash() => _$userRepositoryHash();
-
-  @$internal
-  @override
-  $ProviderElement<UserRepository> $createElement($ProviderPointer pointer) =>
-      $ProviderElement(pointer);
-
-  @override
-  UserRepository create(Ref ref) {
-    return userRepository(ref);
-  }
-
-  /// {@macro riverpod.override_with_value}
-  Override overrideWithValue(UserRepository value) {
-    return $ProviderOverride(
-      origin: this,
-      providerOverride: $SyncValueProvider<UserRepository>(value),
-    );
-  }
-}
-
-String _$userRepositoryHash() => r'84ebea9d77037ee3902cc442482e31c5897f287b';

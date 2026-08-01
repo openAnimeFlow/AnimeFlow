@@ -10,7 +10,7 @@ import 'package:anime_flow/features/user/presentation/providers/user_collection_
 import 'package:anime_flow/features/user/application/bgm_collection_sync_provider.dart';
 import 'package:anime_flow/features/user/application/user_oauth_state.dart';
 import 'package:anime_flow/features/user/presentation/providers/user_state_provider.dart';
-import 'package:anime_flow/repository/providers/repository_providers.dart';
+import 'package:anime_flow/features/auth/application/token_providers.dart';
 import 'package:anime_flow/core/logger/logger.dart';
 import 'package:anime_flow/core/utils/systemUtil.dart';
 import 'package:anime_flow/shared/widgets/notification_toast.dart';

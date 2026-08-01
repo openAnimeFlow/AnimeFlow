@@ -39,6 +39,7 @@ class SettingKey {
   static const String isMirror = 'setting_is_mirror',
       themeMode = 'theme_mode',
       seedColor = 'theme_seed_color',
+      locale = 'app_locale',
       fontFamily = 'font_family',
       selectedFontId = 'selected_font_id',
       downloadedFonts = 'downloaded_fonts',

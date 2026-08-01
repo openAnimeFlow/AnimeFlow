@@ -13,7 +13,7 @@ import 'package:anime_flow/core/utils/systemUtil.dart';
 import 'package:anime_flow/core/utils/utils.dart';
 import 'package:anime_flow/shared/widgets/battery_icon.dart';
 import 'package:anime_flow/shared/widgets/network_icon.dart';
-import 'package:anime_flow/shared/widgets/play_content/source_drawers/video_source_drawers.dart';
+import 'package:anime_flow/features/player/presentation/widgets/source_drawers/video_source_drawers.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_svg/svg.dart';

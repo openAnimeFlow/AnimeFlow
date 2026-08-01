@@ -6,7 +6,7 @@ import 'package:anime_flow/routes/provider/routes_args.dart';
 import 'package:anime_flow/shared/widgets/animation_network_image.dart';
 import 'package:anime_flow/shared/widgets/drop_down_menu.dart';
 import 'package:anime_flow/shared/widgets/notification_toast.dart';
-import 'package:anime_flow/shared/widgets/play_content/source_drawers/video_source_drawers.dart';
+import 'package:anime_flow/features/player/presentation/widgets/source_drawers/video_source_drawers.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter/services.dart';

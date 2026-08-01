@@ -5,7 +5,7 @@ import 'package:anime_flow/shared/models/download_info.dart';
 import 'package:anime_flow/shared/models/enums/version_type.dart';
 import 'package:anime_flow/models/version_check_result.dart';
 import 'package:anime_flow/core/storage/storage.dart';
-import 'package:anime_flow/shared/widgets/apply_updates_view.dart';
+import 'package:anime_flow/features/app_update/presentation/widgets/apply_updates_view.dart';
 import 'package:anime_flow/shared/widgets/notification_toast.dart';
 import 'package:flutter/material.dart';
 

@@ -11,7 +11,7 @@ import 'package:anime_flow/providers/user/user_state_provider.dart';
 import 'package:anime_flow/routes/provider/routes_args.dart';
 import 'package:anime_flow/core/utils/systemUtil.dart';
 import 'package:anime_flow/shared/widgets/animation_network_image.dart';
-import 'package:anime_flow/shared/widgets/collection_button.dart';
+import 'package:anime_flow/features/user/presentation/widgets/collection_button.dart';
 import 'package:anime_flow/shared/widgets/notification_toast.dart';
 import 'package:anime_flow/shared/widgets/star.dart';
 import 'package:flutter/material.dart';

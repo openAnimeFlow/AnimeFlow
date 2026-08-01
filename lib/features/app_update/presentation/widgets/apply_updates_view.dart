@@ -121,8 +121,7 @@ class _ApplyUpdatesViewState extends ConsumerState<ApplyUpdatesView> {
                     else
                       TextButton(
                         onPressed: () async {
-                          final downloadData =
-                              widget.download[_selectedIndex];
+                          final downloadData = widget.download[_selectedIndex];
                           await widget.onStartDownload(
                             downloadData.url,
                             downloadData.fileName,

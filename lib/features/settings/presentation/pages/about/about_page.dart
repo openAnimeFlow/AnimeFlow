@@ -1,6 +1,6 @@
 import 'package:anime_flow/core/constants/assets_path_constants.dart';
 import 'package:anime_flow/core/constants/storage_key.dart';
-import 'package:anime_flow/core/apply_update/app_info_provider.dart';
+import 'package:anime_flow/features/app_update/application/app_info_provider.dart';
 import 'package:anime_flow/features/settings/presentation/providers/setting_provider.dart';
 import 'package:anime_flow/core/storage/storage.dart';
 import 'package:anime_flow/app/router/app_router.dart';

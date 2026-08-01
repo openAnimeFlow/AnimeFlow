@@ -2,8 +2,8 @@ import 'dart:async';
 import 'dart:io';
 
 import 'package:anime_flow/app/app.dart';
-import 'package:anime_flow/core/apply_update/app_info_provider.dart';
-import 'package:anime_flow/core/apply_update/app_provider_container.dart';
+import 'package:anime_flow/features/app_update/application/app_info_provider.dart';
+import 'package:anime_flow/features/app_update/application/app_provider_container.dart';
 import 'package:anime_flow/features/shaders/shaders_controller.dart';
 import 'package:anime_flow/features/settings/presentation/providers/font_provider.dart';
 import 'package:anime_flow/core/storage/storage.dart';

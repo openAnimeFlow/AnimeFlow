@@ -1,0 +1,56 @@
+import 'dart:io';
+
+import 'package:anime_flow/features/app_update/application/apply_updates_controller.dart';
+import 'package:anime_flow/core/network/api/api.dart';
+import 'package:anime_flow/shared/models/download_info.dart';
+import 'package:anime_flow/core/logger/logger.dart';
+import 'package:dio/dio.dart';
+import 'package:open_filex/open_filex.dart';
+import 'package:path_provider/path_provider.dart'
+    show getExternalStorageDirectory;
+
+/// Android 平台更新实现
+class ApplyUpdatesAndroidController implements ApplyUpdatesController {
+  CancelToken? _cancelToken;
+
+  @override
+  Future<void> applyUpdates({
+    required DownloadInfo downloadInfo,
+    void Function(int received, int total)? onProgress,
+  }) async {
+    _cancelToken = CancelToken();
+
+    try {
+      final dir = await getExternalStorageDirectory();
+      final savePath = '${dir!.path}/${downloadInfo.fileName}';
+      await Api.downloadFile(
+        downloadInfo.url,
+        savePath,
+        onReceiveProgress: (received, total) {
+          onProgress?.call(received, total);
+        },
+        cancelToken: _cancelToken,
+      );
+
+      final result = await OpenFilex.open(File(savePath).path);
+      if (result.type != ResultType.done) {
+        LiggLogger().e('无法打开安装程序，请检查是否授予了安装权限');
+        return;
+      }
+    } catch (e) {
+      // 如果是取消操作，不抛出异常
+      if (e.toString().contains('下载已取消')) {
+        throw const UpdateDownloadCancelledException();
+      }
+      rethrow;
+    } finally {
+      _cancelToken = null;
+    }
+  }
+
+  @override
+  void cancelDownload() {
+    _cancelToken?.cancel('用户取消下载');
+    _cancelToken = null;
+  }
+}

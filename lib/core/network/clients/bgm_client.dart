@@ -1,6 +1,6 @@
 import 'package:anime_flow/core/constants/constants.dart';
-import 'package:anime_flow/core/apply_update/app_provider_container.dart';
-import 'package:anime_flow/core/apply_update/app_info_provider.dart';
+import 'package:anime_flow/features/app_update/application/app_provider_container.dart';
+import 'package:anime_flow/features/app_update/application/app_info_provider.dart';
 import 'package:anime_flow/core/network/api_path.dart';
 import 'package:anime_flow/core/network/core/dio_factory.dart';
 import 'package:anime_flow/core/network/core/network_error_mapper.dart';

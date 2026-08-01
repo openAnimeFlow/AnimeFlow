@@ -1,4 +1,4 @@
-import 'package:anime_flow/core/apply_update/apply_updates_controller.dart';
+import 'package:anime_flow/features/app_update/application/apply_updates_controller.dart';
 import 'package:anime_flow/shared/models/download_info.dart';
 import 'package:anime_flow/core/logger/logger.dart';
 import 'package:url_launcher/url_launcher.dart';

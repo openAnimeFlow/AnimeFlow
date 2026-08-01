@@ -72,7 +72,7 @@ class _GeneralSettingsPageState extends ConsumerState<GeneralSettingsPage> {
                     mainAxisSize: MainAxisSize.min,
                     children: [
                       Text(
-                        selectedLanguage.label(l10n),
+                        selectedLanguage.label,
                         style: TextStyle(color: colorScheme.primary),
                       ),
                       AnimatedRotation(
@@ -101,7 +101,7 @@ class _GeneralSettingsPageState extends ConsumerState<GeneralSettingsPage> {
                               )
                             : null,
                       ),
-                      Text(language.label(l10n)),
+                      Text(language.label),
                     ],
                   );
                 },
@@ -123,11 +123,11 @@ enum _LanguageOption {
 
   const _LanguageOption();
 
-  String label(AppLocalizations l10n) => switch (this) {
-        simplifiedChinese => l10n.simplifiedChinese,
-        traditionalChineseTaiwan => l10n.traditionalChineseTaiwan,
-        traditionalChineseHongKong => l10n.traditionalChineseHongKong,
-        english => l10n.englishLanguage,
+  String get label => switch (this) {
+        simplifiedChinese => '简体中文',
+        traditionalChineseTaiwan => '繁體中文（台灣）',
+        traditionalChineseHongKong => '繁體中文（香港）',
+        english => 'English',
       };
 
   Locale get locale => switch (this) {

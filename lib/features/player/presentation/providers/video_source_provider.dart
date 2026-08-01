@@ -4,7 +4,7 @@ import 'package:anime_flow/core/crawler/cookie_manager.dart';
 import 'package:anime_flow/core/crawler/html_request.dart';
 import 'package:anime_flow/core/crawler/itme/anti_crawler_config.dart';
 import 'package:anime_flow/core/crawler/itme/crawler_config_item.dart';
-import 'package:anime_flow/features/search_result_rank_service.dart';
+import 'package:anime_flow/features/player/application/search_result_rank_service.dart';
 import 'package:anime_flow/shared/models/player/play/video/episode_resources_item.dart';
 import 'package:anime_flow/shared/models/player/play/video/resources_item.dart';
 import 'package:anime_flow/features/player/presentation/providers/play_provider.dart';

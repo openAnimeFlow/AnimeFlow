@@ -12,8 +12,8 @@ import 'package:anime_flow/features/player/presentation/pages/play_record_page.d
 import 'package:anime_flow/pages/ranking/index.dart';
 import 'package:anime_flow/pages/recommend/index.dart';
 import 'package:anime_flow/features/auth/presentation/pages/register_page.dart';
-import 'package:anime_flow/pages/search/image_search_page.dart';
-import 'package:anime_flow/pages/search/index.dart';
+import 'package:anime_flow/features/search/presentation/pages/image_search_page.dart';
+import 'package:anime_flow/features/search/presentation/pages/search_page.dart';
 import 'package:anime_flow/pages/settings/index.dart';
 import 'package:anime_flow/pages/settings/pages/account/account_settings.dart';
 import 'package:anime_flow/pages/settings/pages/about/index.dart';

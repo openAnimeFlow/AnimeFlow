@@ -2,7 +2,7 @@ import 'dart:async';
 import 'dart:io';
 
 import 'package:anime_flow/models/item/image_search_item.dart';
-import 'package:anime_flow/pages/search/search_controller.dart';
+import 'package:anime_flow/features/search/presentation/providers/search_controller.dart';
 import 'package:anime_flow/core/utils/format_time_util.dart';
 import 'package:anime_flow/core/logger/logger.dart';
 import 'package:anime_flow/shared/widgets/animation_network_image.dart';
@@ -194,7 +194,8 @@ class _ImageSearchPageState extends ConsumerState<ImageSearchPage> {
                   width: double.infinity,
                   height: 52,
                   child: FilledButton.icon(
-                    onPressed: searchState.isImageSearching ? null : _startSearch,
+                    onPressed:
+                        searchState.isImageSearching ? null : _startSearch,
                     icon: searchState.isImageSearching
                         ? SizedBox(
                             width: 18,

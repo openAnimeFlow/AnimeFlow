@@ -28,7 +28,8 @@ class SearchDetailsContentView extends StatelessWidget {
         onTap: () {
           AnimeInfoRoute.fromExtra(InfoRouteExtra(
             id: searchData.id,
-            name: searchData.nameCN.isEmpty ? searchData.name : searchData.nameCN,
+            name:
+                searchData.nameCN.isEmpty ? searchData.name : searchData.nameCN,
             image: searchData.images.large,
           )).push(context);
         },
@@ -54,7 +55,9 @@ class SearchDetailsContentView extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      searchData.nameCN.isEmpty ? searchData.name : searchData.nameCN,
+                      searchData.nameCN.isEmpty
+                          ? searchData.name
+                          : searchData.nameCN,
                       style: const TextStyle(
                           fontSize: 16, fontWeight: FontWeight.bold),
                       maxLines: 2,

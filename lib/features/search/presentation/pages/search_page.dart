@@ -1,8 +1,8 @@
 import 'dart:async';
 
-import 'package:anime_flow/pages/search/search_controller.dart';
-import 'package:anime_flow/pages/search/search_details_content.dart';
-import 'package:anime_flow/pages/search/search_omitted_content.dart';
+import 'package:anime_flow/features/search/presentation/providers/search_controller.dart';
+import 'package:anime_flow/features/search/presentation/widgets/search_details_content.dart';
+import 'package:anime_flow/features/search/presentation/widgets/search_omitted_content.dart';
 import 'package:anime_flow/routes/routes.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -67,10 +67,14 @@ class _SearchPageState extends ConsumerState<SearchPage> {
     final keyword = searchController.text;
     suggestionDebounce = Timer(const Duration(seconds: 2), () {
       if (keyword.trim().isEmpty) {
-        ref.read(searchPageControllerProvider.notifier).clearSearchSuggestions();
+        ref
+            .read(searchPageControllerProvider.notifier)
+            .clearSearchSuggestions();
         return;
       }
-      ref.read(searchPageControllerProvider.notifier).fetchSearchSuggestions(keyword);
+      ref
+          .read(searchPageControllerProvider.notifier)
+          .fetchSearchSuggestions(keyword);
     });
   }
 
@@ -132,7 +136,9 @@ class _SearchPageState extends ConsumerState<SearchPage> {
                 onSearch: _searchWithKeyword,
                 maxWidth: maxWidth,
                 onClear: () {
-                  ref.read(searchPageControllerProvider.notifier).clearResults();
+                  ref
+                      .read(searchPageControllerProvider.notifier)
+                      .clearResults();
                   searchController.clear();
                   _cancelSearchSuggestions();
                 },
@@ -164,7 +170,8 @@ class _SearchPageState extends ConsumerState<SearchPage> {
                               ),
                             ),
                             const SizedBox(height: 8),
-                            for (var suggestion in searchState.searchSuggestions)
+                            for (var suggestion
+                                in searchState.searchSuggestions)
                               ListTile(
                                 title: Text(suggestion),
                                 onTap: () {
@@ -250,9 +257,11 @@ class _SearchPageState extends ConsumerState<SearchPage> {
                                     mainAxisSpacing: 16,
                                     childAspectRatio: 2 / 3,
                                   ),
-                            itemCount: searchState.searchResults!.data.length + 1,
+                            itemCount:
+                                searchState.searchResults!.data.length + 1,
                             itemBuilder: (context, index) {
-                              if (index == searchState.searchResults!.data.length) {
+                              if (index ==
+                                  searchState.searchResults!.data.length) {
                                 return searchState.hasMore
                                     ? searchState.isSearching
                                         ? const Center(
@@ -532,9 +541,8 @@ class _StickySearchHeaderDelegate extends SliverPersistentHeaderDelegate {
                                 padding:
                                     const EdgeInsets.symmetric(horizontal: 10),
                                 onPressed: () async {
-                                  final keyword =
-                                      await const ImageSearchRoute()
-                                          .push(context);
+                                  final keyword = await const ImageSearchRoute()
+                                      .push(context);
                                   if (keyword != null && keyword is String) {
                                     await onSearch(keyword);
                                   }

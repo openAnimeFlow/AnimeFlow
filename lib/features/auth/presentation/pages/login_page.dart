@@ -2,7 +2,7 @@ import 'package:anime_flow/core/constants/assets_path_constants.dart';
 import 'package:anime_flow/core/network/api_path.dart';
 import 'package:anime_flow/core/network/clients/flow_client.dart';
 import 'package:anime_flow/features/auth/application/login_service.dart';
-import 'package:anime_flow/pages/user/provider/user_collection_provider.dart';
+import 'package:anime_flow/features/user/presentation/providers/user_collection_provider.dart';
 import 'package:anime_flow/providers/user/user_controller.dart';
 import 'package:anime_flow/providers/user/user_state_provider.dart';
 import 'package:anime_flow/routes/routes.dart';

@@ -1,5 +1,5 @@
 import 'package:anime_flow/features/auth/presentation/pages/login_page.dart';
-import 'package:anime_flow/pages/user/user_view/user_view.dart';
+import 'package:anime_flow/features/user/presentation/widgets/user_view.dart';
 import 'package:anime_flow/providers/user/user_controller.dart';
 import 'package:anime_flow/providers/user/user_state_provider.dart';
 import 'package:anime_flow/routes/routes.dart';
@@ -24,10 +24,9 @@ class UserPage extends ConsumerWidget {
           return _buildLoginPage(context, colorScheme);
         }
 
-        ref.listen<AsyncValue<dynamic>>(
-            currentUserInfoProvider, (previous, next) {
-          final shouldNotifyNull =
-              next is AsyncData &&
+        ref.listen<AsyncValue<dynamic>>(currentUserInfoProvider,
+            (previous, next) {
+          final shouldNotifyNull = next is AsyncData &&
               next.value == null &&
               previous?.value != null;
           final shouldNotifyError = next is AsyncError;
@@ -35,12 +34,10 @@ class UserPage extends ConsumerWidget {
             return;
           }
 
-          final message =
-              shouldNotifyError ? '获取用户资料失败' : '用户资料已失效';
+          final message = shouldNotifyError ? '获取用户资料失败' : '用户资料已失效';
           WidgetsBinding.instance.addPostFrameCallback((_) {
             if (!context.mounted) return;
-            NotificationToast.show('提示', message,
-                align: Alignment.topCenter);
+            NotificationToast.show('提示', message, align: Alignment.topCenter);
           });
         });
 
@@ -50,7 +47,7 @@ class UserPage extends ConsumerWidget {
               ? const Scaffold(
                   body: Center(child: Text('暂无用户资料')),
                 )
-              :  UserView(user: userInfo),
+              : UserView(user: userInfo),
           loading: () => const Scaffold(
             body: Center(child: CircularProgressIndicator()),
           ),
@@ -152,8 +149,7 @@ class UserPage extends ConsumerWidget {
                         color: colorScheme.onSurfaceVariant,
                       ),
                       const SizedBox(width: 12),
-                      Text(label,
-                          style: Theme.of(context).textTheme.bodyLarge),
+                      Text(label, style: Theme.of(context).textTheme.bodyLarge),
                     ],
                   ),
                 );

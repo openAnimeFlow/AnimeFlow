@@ -1,5 +1,5 @@
 import 'package:anime_flow/routes/model/info_route_extra.dart';
-import 'package:anime_flow/pages/recommend/anime/provider/anime_provider.dart';
+import 'package:anime_flow/features/home/presentation/providers/anime_provider.dart';
 import 'package:anime_flow/routes/routes.dart';
 import 'package:anime_flow/core/utils/layout_util.dart';
 import 'package:anime_flow/core/utils/systemUtil.dart';
@@ -60,15 +60,18 @@ class PopularAnimeView extends ConsumerWidget {
                 if (index < hotState.items.length) {
                   final subject = hotState.items[index].subject;
                   return InkWell(
-                    onTap: () =>
-                        AnimeInfoRoute.fromExtra(InfoRouteExtra(
-                          id: subject.id,
-                          name: subject.nameCN.isEmpty ? subject.name : subject.nameCN,
-                          image: subject.images.large,
-                        )).push(context),
+                    onTap: () => AnimeInfoRoute.fromExtra(InfoRouteExtra(
+                      id: subject.id,
+                      name: subject.nameCN.isEmpty
+                          ? subject.name
+                          : subject.nameCN,
+                      image: subject.images.large,
+                    )).push(context),
                     child: SubjectCard(
                       image: subject.images.large,
-                      title: subject.nameCN.isEmpty ? subject.name : subject.nameCN,
+                      title: subject.nameCN.isEmpty
+                          ? subject.name
+                          : subject.nameCN,
                     ),
                   );
                 }
@@ -109,7 +112,7 @@ class PopularAnimeView extends ConsumerWidget {
                       const Icon(Icons.refresh),
                     ],
                   ),
-                ) ,
+                ),
               ),
             ),
           if (!hotState.hasMore && hotState.errorMessage == null)
@@ -125,9 +128,8 @@ class PopularAnimeView extends ConsumerWidget {
                         child: Text(
                           '没有更多了',
                           style: TextStyle(
-                            color: Theme.of(context)
-                                .colorScheme
-                                .onSurfaceVariant,
+                            color:
+                                Theme.of(context).colorScheme.onSurfaceVariant,
                           ),
                         ),
                       ),

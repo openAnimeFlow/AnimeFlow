@@ -10,7 +10,7 @@ import 'package:anime_flow/features/auth/presentation/pages/oauth_callback_page.
 import 'package:anime_flow/features/player/presentation/pages/play_page.dart';
 import 'package:anime_flow/features/player/presentation/pages/play_record_page.dart';
 import 'package:anime_flow/features/ranking/presentation/pages/ranking_page.dart';
-import 'package:anime_flow/pages/recommend/index.dart';
+import 'package:anime_flow/features/home/presentation/pages/home_page.dart';
 import 'package:anime_flow/features/auth/presentation/pages/register_page.dart';
 import 'package:anime_flow/features/search/presentation/pages/image_search_page.dart';
 import 'package:anime_flow/features/search/presentation/pages/search_page.dart';

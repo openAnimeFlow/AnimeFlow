@@ -18,8 +18,6 @@ class _ForumPageState extends State<ForumPage>
     super.initState();
   }
 
-
-
   @override
   bool get wantKeepAlive => true;
 

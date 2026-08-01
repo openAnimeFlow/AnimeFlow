@@ -1,10 +1,10 @@
 import 'dart:math' as math;
 
-import 'package:anime_flow/pages/recommend/anime/provider/anime_provider.dart';
+import 'package:anime_flow/features/home/presentation/providers/anime_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:anime_flow/core/constants/layout_constant.dart';
-import 'package:anime_flow/pages/recommend/anime/calendar.dart';
-import 'package:anime_flow/pages/recommend/anime/popular_anime.dart';
+import 'package:anime_flow/features/home/presentation/widgets/anime/calendar.dart';
+import 'package:anime_flow/features/home/presentation/widgets/anime/popular_anime.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import 'play_record.dart';
@@ -30,7 +30,7 @@ class _AnimePageState extends ConsumerState<AnimePage>
   void _scrollListener() {
     final hotState = ref.read(animeHotProvider).asData?.value;
     if (_scrollController.position.pixels >=
-        _scrollController.position.maxScrollExtent - 200 &&
+            _scrollController.position.maxScrollExtent - 200 &&
         hotState != null &&
         !hotState.isLoading &&
         hotState.hasMore) {
@@ -74,7 +74,8 @@ class _AnimePageState extends ConsumerState<AnimePage>
             builder: (context, constraints) {
               final horizontalPadding = math.max(
                 10.0,
-                (constraints.crossAxisExtent - LayoutConstant.maxWidth) / 2 + 10,
+                (constraints.crossAxisExtent - LayoutConstant.maxWidth) / 2 +
+                    10,
               );
               return SliverPadding(
                 padding: EdgeInsets.symmetric(horizontal: horizontalPadding),

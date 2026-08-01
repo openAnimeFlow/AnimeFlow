@@ -1,5 +1,5 @@
 import 'package:anime_flow/models/item/bangumi/calendar_item.dart';
-import 'package:anime_flow/pages/recommend/anime/provider/anime_provider.dart';
+import 'package:anime_flow/features/home/presentation/providers/anime_provider.dart';
 import 'package:anime_flow/routes/model/info_route_extra.dart';
 import 'package:anime_flow/routes/routes.dart';
 import 'package:anime_flow/core/utils/systemUtil.dart';
@@ -272,7 +272,8 @@ class _CalendarViewState extends State<CalendarView> {
               onTap: () {
                 AnimeInfoRoute.fromExtra(InfoRouteExtra(
                   id: itemData.id,
-                  name: itemData.nameCN.isEmpty ? itemData.name : itemData.nameCN,
+                  name:
+                      itemData.nameCN.isEmpty ? itemData.name : itemData.nameCN,
                   image: itemData.images.large,
                 )).push(context);
               },

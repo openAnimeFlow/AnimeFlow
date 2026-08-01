@@ -76,8 +76,7 @@ class AnimeHot extends _$AnimeHot {
     );
 
     try {
-      final hotItem =
-          await FlowApi.getHotService(limit, current.items.length);
+      final hotItem = await FlowApi.getHotService(limit, current.items.length);
       final nextItems = [...current.items, ...hotItem.data];
       state = AsyncData(
         AnimeHotState(

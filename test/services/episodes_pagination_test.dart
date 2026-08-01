@@ -1,5 +1,5 @@
-import 'package:anime_flow/models/item/bangumi/episodes_item.dart';
-import 'package:anime_flow/providers/episodes/subject_episodes_provider.dart';
+import 'package:anime_flow/features/player/data/models/bangumi/episodes_item.dart';
+import 'package:anime_flow/features/player/presentation/providers/subject_episodes_provider.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 EpisodeData _episode(int id, {num sort = 1, int type = 0, bool? watched}) {

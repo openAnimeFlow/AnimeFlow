@@ -1,7 +1,7 @@
 import 'package:anime_flow/core/constants/layout_constant.dart';
-import 'package:anime_flow/models/item/bangumi/episodes_item.dart';
-import 'package:anime_flow/pages/play/providers/episodes_provider.dart';
-import 'package:anime_flow/providers/episodes/subject_episodes_provider.dart';
+import 'package:anime_flow/features/player/data/models/bangumi/episodes_item.dart';
+import 'package:anime_flow/features/player/presentation/providers/episodes_provider.dart';
+import 'package:anime_flow/features/player/presentation/providers/subject_episodes_provider.dart';
 import 'package:anime_flow/routes/provider/routes_args.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';

@@ -1,13 +1,13 @@
-import 'package:anime_flow/routes/model/info_route_extra.dart';
-import 'package:anime_flow/models/play/play_history.dart';
-import 'package:anime_flow/repository/play_repository.dart';
-import 'package:anime_flow/core/storage/storage.dart';
-import 'package:anime_flow/routes/model/play_route_extra.dart';
-import 'package:anime_flow/routes/routes.dart';
+import 'package:anime_flow/app/router/app_router.dart';
+import 'package:anime_flow/app/router/model/info_route_extra.dart';
+import 'package:anime_flow/features/player/data/models/play/play_history.dart';
+import 'package:anime_flow/features/player/application/play_history_service.dart';
+import 'package:anime_flow/app/router/model/play_route_extra.dart';
 import 'package:anime_flow/core/logger/logger.dart';
 import 'package:anime_flow/core/utils/utils.dart';
 import 'package:anime_flow/shared/widgets/animation_network_image.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/foundation.dart';
 import 'package:hive_ce_flutter/hive_flutter.dart';
 
 class PlayRecordView extends StatefulWidget {
@@ -18,28 +18,29 @@ class PlayRecordView extends StatefulWidget {
 }
 
 class _PlayRecordViewState extends State<PlayRecordView> {
-  final playHistoryStorage = Storage.playHistory;
+  late final ValueListenable<Box<PlayHistory>> _playHistoryListenable;
   List<PlayHistory>? playHistoryList;
   final ScrollController _scrollController = ScrollController();
 
   @override
   void initState() {
     super.initState();
+    _playHistoryListenable = PlayHistoryService.listenable();
     _getPlayHistoryList();
     // 监听 Hive Box 变化，写入记录后自动刷新
-    playHistoryStorage.listenable().addListener(_getPlayHistoryList);
+    _playHistoryListenable.addListener(_getPlayHistoryList);
   }
 
   @override
   void dispose() {
-    playHistoryStorage.listenable().removeListener(_getPlayHistoryList);
+    _playHistoryListenable.removeListener(_getPlayHistoryList);
     _scrollController.dispose();
     super.dispose();
   }
 
   void _getPlayHistoryList() async {
     try {
-      final playHistoryList = await PlayRepository.getPlayHistoryList();
+      final playHistoryList = await PlayHistoryService.getAll();
       playHistoryList.sort((a, b) => b.updateAt.compareTo(a.updateAt));
       if (mounted) {
         setState(() {

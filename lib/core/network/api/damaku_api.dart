@@ -1,10 +1,10 @@
 import 'dart:convert';
 import 'package:anime_flow/core/network/clients/client.dart';
-import 'package:anime_flow/models/item/danmaku/danmaku_module.dart';
-import 'package:anime_flow/models/item/danmaku/danmaku_search_response.dart';
+import 'package:anime_flow/features/player/data/models/danmaku/danmaku_module.dart';
+import 'package:anime_flow/features/player/data/models/danmaku/danmaku_search_response.dart';
 import 'package:crypto/crypto.dart';
 import 'package:anime_flow/core/network/api_path.dart';
-import 'package:anime_flow/models/item/danmaku/danmaku_episode_response.dart';
+import 'package:anime_flow/features/player/data/models/danmaku/danmaku_episode_response.dart';
 import 'package:anime_flow/core/utils/utils.dart';
 import 'package:dio/dio.dart';
 

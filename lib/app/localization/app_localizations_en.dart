@@ -65,6 +65,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get popularAnimeTitle => 'Popular Anime';
 
   @override
+  String get buffering => 'Buffering...';
+
+  @override
   String get loadFailed => 'Failed to load';
 
   @override

@@ -19,6 +19,7 @@
   "watchedProgress": "Episode {episode} {progress}",
   "@watchedProgress": {"placeholders": {"episode": {}, "progress": {}}},
   "popularAnimeTitle": "Popular Anime",
+  "buffering": "Buffering...",
   "loadFailed": "Failed to load",
   "updateAvailable": "Update available",
   "disableAutoUpdate": "Disable automatic updates",

@@ -1,3 +1,4 @@
+import 'package:anime_flow/app/localization/app_localizations.dart';
 import 'package:anime_flow/core/constants/assets_path_constants.dart';
 import 'package:anime_flow/core/network_speed/network_speed_provider.dart';
 import 'package:anime_flow/shared/models/enums/video_controls_icon_type.dart';
@@ -21,6 +22,7 @@ class MiddleAreaControl extends ConsumerStatefulWidget {
 class _MiddleAreaControlState extends ConsumerState<MiddleAreaControl> {
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     final videoUiState = ref.watch(videoUiProvider);
     const double topAreaHeight = 50.0;
     final speedAsync = ref.watch(networkSpeedStreamProvider(2000));
@@ -62,8 +64,8 @@ class _MiddleAreaControlState extends ConsumerState<MiddleAreaControl> {
                       style: textStyle,
                     ),
                     const SizedBox(width: 5),
-                    const Text(
-                      '正在缓冲...',
+                    Text(
+                      l10n.buffering,
                       style: textStyle,
                     ),
                   ]),

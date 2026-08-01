@@ -65,6 +65,9 @@ class AppLocalizationsZh extends AppLocalizations {
   String get popularAnimeTitle => '热门动画';
 
   @override
+  String get buffering => '正在緩衝...';
+
+  @override
   String get loadFailed => '加载失败';
 
   @override
@@ -1210,6 +1213,9 @@ class AppLocalizationsZhHans extends AppLocalizationsZh {
 
   @override
   String get popularAnimeTitle => '热门动画';
+
+  @override
+  String get buffering => '正在缓冲...';
 
   @override
   String get loadFailed => '加载失败';
@@ -2359,6 +2365,9 @@ class AppLocalizationsZhHantHk extends AppLocalizationsZh {
   String get popularAnimeTitle => '熱門動畫';
 
   @override
+  String get buffering => '正在緩衝...';
+
+  @override
   String get loadFailed => '載入失敗';
 
   @override
@@ -3313,6 +3322,9 @@ class AppLocalizationsZhHantTw extends AppLocalizationsZh {
 
   @override
   String get popularAnimeTitle => '熱門動畫';
+
+  @override
+  String get buffering => '正在緩衝...';
 
   @override
   String get loadFailed => '載入失敗';

@@ -211,6 +211,12 @@ abstract class AppLocalizations {
   /// **'热门动画'**
   String get popularAnimeTitle;
 
+  /// No description provided for @buffering.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'正在缓冲...'**
+  String get buffering;
+
   /// No description provided for @loadFailed.
   ///
   /// In zh_Hans, this message translates to:

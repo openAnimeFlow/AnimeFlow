@@ -9,6 +9,7 @@ import 'package:anime_flow/core/utils/format_time_util.dart';
 import 'package:anime_flow/core/utils/system_util.dart';
 import 'package:anime_flow/shared/widgets/animation_network_image.dart';
 import 'package:anime_flow/shared/widgets/drop_down_menu.dart';
+import 'package:anime_flow/app/localization/app_localizations.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -38,7 +39,16 @@ class _UserViewState extends ConsumerState<UserView>
       type: GlobalKey<RefreshIndicatorState>(),
   };
 
-  List<String> get _tabs => buildUserCollectionTabLabels(widget.user);
+  List<String> _buildTabs(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
+    return buildUserCollectionTabLabels(widget.user, [
+      l10n.collectionPlanToWatch,
+      l10n.collectionWatched,
+      l10n.collectionWatching,
+      l10n.collectionOnHold,
+      l10n.collectionAbandoned,
+    ]);
+  }
 
   int get _currentType => _tabController.index + 1;
 
@@ -127,6 +137,7 @@ class _UserViewState extends ConsumerState<UserView>
 
   @override
   Widget build(BuildContext context) {
+    final tabs = _buildTabs(context);
     final double statusBarHeight = MediaQuery.of(context).padding.top;
     return Scaffold(
       body: NotificationListener<ScrollNotification>(
@@ -152,7 +163,7 @@ class _UserViewState extends ConsumerState<UserView>
                 sliver: SliverAppBar(
                   automaticallyImplyLeading: false,
                   titleSpacing: 0,
-                  title: _buildAppBarTitle(),
+                  title: _buildAppBarTitle(context),
                   pinned: true,
                   floating: false,
                   snap: false,
@@ -174,7 +185,7 @@ class _UserViewState extends ConsumerState<UserView>
                     isScrollable: true,
                     tabAlignment: TabAlignment.start,
                     dividerHeight: 0,
-                    tabs: _tabs.map((String name) {
+                    tabs: tabs.map((String name) {
                       final parts = name.split('\n');
                       return Tab(
                         child: Row(
@@ -208,7 +219,7 @@ class _UserViewState extends ConsumerState<UserView>
           },
           body: CollectionTabView(
             tabController: _tabController,
-            tabs: _tabs,
+            tabs: tabs,
             refreshIndicatorKeys: _refreshIndicatorKeys,
           ),
         ),
@@ -222,14 +233,14 @@ class _UserViewState extends ConsumerState<UserView>
           );
           if (keyword == null || keyword.isEmpty) {
             return FloatingActionButton(
-              tooltip: '搜索收藏',
+              tooltip: AppLocalizations.of(context).searchCollection,
               onPressed: _showCollectionSearchDialog,
               child: const Icon(Icons.search),
             );
           }
 
           return FloatingActionButton.extended(
-            tooltip: '清除搜索',
+            tooltip: AppLocalizations.of(context).clearSearch,
             onPressed: _clearCurrentTypeSearch,
             icon: const Icon(Icons.close),
             label: ConstrainedBox(
@@ -245,9 +256,10 @@ class _UserViewState extends ConsumerState<UserView>
     );
   }
 
-  Widget _buildAppBarTitle() {
+  Widget _buildAppBarTitle(BuildContext context) {
     final user = widget.user;
     final currentType = _currentType;
+    final l10n = AppLocalizations.of(context);
 
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 16),
@@ -287,6 +299,7 @@ class _UserViewState extends ConsumerState<UserView>
           const Spacer(),
           IconButton(
             onPressed: _toggleUserInfoVisibility,
+            tooltip: isHideUserInfo ? l10n.showUserInfo : l10n.hideUserInfo,
             icon: Icon(
               isHideUserInfo ? Icons.visibility : Icons.visibility_off,
             ),
@@ -304,7 +317,7 @@ class _UserViewState extends ConsumerState<UserView>
                     canTriggerRefresh && !tabState.isBusy;
 
                 return IconButton(
-                  tooltip: '刷新当前标签',
+                  tooltip: l10n.refreshCurrentTab,
                   onPressed: isRefreshButtonEnabled
                       ? _showRefreshIndicatorForCurrentTab
                       : null,
@@ -314,7 +327,7 @@ class _UserViewState extends ConsumerState<UserView>
             ),
           DropDownMenu<_LoginOverflowAction>(
             items: _LoginOverflowAction.values,
-            tooltip: '更多菜单',
+            tooltip: l10n.moreMenu,
             disableSelected: false,
             buttonBuilder: (context, _) => const Icon(
               Icons.notes_outlined,
@@ -324,13 +337,16 @@ class _UserViewState extends ConsumerState<UserView>
               final (icon, label) = switch (action) {
                 _LoginOverflowAction.settings => (
                     Icons.settings_outlined,
-                    '设置'
+                    l10n.settingsLabel
                   ),
                 _LoginOverflowAction.playRecord => (
                     Icons.smart_display_outlined,
-                    '播放记录'
+                    l10n.playbackHistory
                   ),
-                _LoginOverflowAction.logout => (Icons.logout_outlined, '退出登录'),
+                _LoginOverflowAction.logout => (
+                    Icons.logout_outlined,
+                    l10n.logout
+                  ),
               };
               return SizedBox(
                 width: 120,
@@ -353,12 +369,12 @@ class _UserViewState extends ConsumerState<UserView>
                   showDialog<void>(
                     context: context,
                     builder: (dialogContext) => AlertDialog(
-                      title: const Text('确认退出'),
-                      content: const Text('确定要退出登录吗？'),
+                      title: Text(l10n.confirmLogout),
+                      content: Text(l10n.logoutConfirmation),
                       actions: [
                         TextButton(
                           onPressed: () => Navigator.of(dialogContext).pop(),
-                          child: const Text('取消'),
+                          child: Text(l10n.cancel),
                         ),
                         Consumer(builder: (context, ref, _) {
                           return TextButton(
@@ -368,7 +384,7 @@ class _UserViewState extends ConsumerState<UserView>
                                   .read(userControllerProvider.notifier)
                                   .clearUserInfo();
                             },
-                            child: const Text('确定'),
+                            child: Text(l10n.confirm),
                           );
                         }),
                       ],
@@ -384,6 +400,7 @@ class _UserViewState extends ConsumerState<UserView>
 
   Widget _buildHeaderContent(double statusBarHeight) {
     final user = widget.user;
+    final l10n = AppLocalizations.of(context);
     final hasAvatar = user.avatar != null && user.avatar!.isNotEmpty;
     final hasBackground = user.background?.isNotEmpty ?? false;
     final backgroundUrl =
@@ -444,7 +461,7 @@ class _UserViewState extends ConsumerState<UserView>
                   ),
                 ),
                 Text(
-                  '${FormatTimeUtil.formatDate(user.createTime)}加入',
+                  l10n.joinedDate(FormatTimeUtil.formatDate(user.createTime)),
                   style: TextStyle(
                     color: Theme.of(context)
                         .colorScheme

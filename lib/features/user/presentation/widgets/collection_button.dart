@@ -3,6 +3,7 @@ import 'package:anime_flow/features/user/presentation/providers/user_state_provi
 import 'package:anime_flow/shared/models/enums/collect_type.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:anime_flow/app/localization/app_localizations.dart';
 
 /// Bangumi API type → [CollectType]
 CollectType? collectTypeFromApiType(int? apiType) {
@@ -55,6 +56,7 @@ class _CollectionButtonState extends State<CollectionButton> {
 
     return Consumer(
       builder: (context, ref, _) {
+        final l10n = AppLocalizations.of(context);
         final isLoggedIn = ref.watch(isLoggedInProvider).value ?? false;
         return !isLoggedIn
             ? OutlinedButton(
@@ -69,7 +71,7 @@ class _CollectionButtonState extends State<CollectionButton> {
                       const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
                 ),
                 child: Text(
-                  '登录后收藏',
+                  l10n.loginToCollect,
                   style: TextStyle(
                     fontSize: 12,
                     color: Theme.of(context).colorScheme.primary,
@@ -100,7 +102,7 @@ class _CollectionButtonState extends State<CollectionButton> {
                           ),
                           const SizedBox(width: 8),
                           Text(
-                            type.label,
+                            _collectTypeLabel(type, l10n),
                             style: TextStyle(
                               color: isCurrentType
                                   ? Theme.of(context).disabledColor
@@ -136,7 +138,9 @@ class _CollectionButtonState extends State<CollectionButton> {
                       ),
                       const SizedBox(width: 4),
                       Text(
-                        currentCollectType?.label ?? '收藏',
+                        currentCollectType == null
+                            ? l10n.collectionLabel
+                            : _collectTypeLabel(currentCollectType, l10n),
                         style: const TextStyle(fontSize: 12),
                       ),
                     ],
@@ -161,6 +165,23 @@ class _CollectionButtonState extends State<CollectionButton> {
         return Icons.auto_delete_outlined;
       case CollectType.none:
         return Icons.circle_outlined;
+    }
+  }
+
+  String _collectTypeLabel(CollectType type, AppLocalizations l10n) {
+    switch (type) {
+      case CollectType.planToWatch:
+        return l10n.collectionPlanToWatch;
+      case CollectType.watched:
+        return l10n.collectionWatched;
+      case CollectType.watching:
+        return l10n.collectionWatching;
+      case CollectType.onHold:
+        return l10n.collectionOnHold;
+      case CollectType.abandoned:
+        return l10n.collectionAbandoned;
+      case CollectType.none:
+        return l10n.collectionLabel;
     }
   }
 }

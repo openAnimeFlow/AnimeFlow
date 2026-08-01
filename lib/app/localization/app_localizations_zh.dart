@@ -393,6 +393,92 @@ class AppLocalizationsZh extends AppLocalizations {
   String waitToSendDanmaku(Object seconds) {
     return '请等待$seconds秒后再发…';
   }
+
+  @override
+  String get collectionPlanToWatch => '想看';
+
+  @override
+  String get collectionWatched => '看过';
+
+  @override
+  String get collectionWatching => '在看';
+
+  @override
+  String get collectionOnHold => '搁置';
+
+  @override
+  String get collectionAbandoned => '抛弃';
+
+  @override
+  String get collectionLabel => '收藏';
+
+  @override
+  String get searchCollection => '搜索收藏';
+
+  @override
+  String get collectionKeywordHint => '输入收藏关键词';
+
+  @override
+  String get search => '搜索';
+
+  @override
+  String get refreshFailedRetry => '刷新失败，请稍后重试';
+
+  @override
+  String get noData => '暂无数据';
+
+  @override
+  String get noMore => '没有更多了';
+
+  @override
+  String get loginToCollect => '登录后收藏';
+
+  @override
+  String get collectionLoadFailed => '加载失败，请稍后重试';
+
+  @override
+  String get collectionLoadMoreFailed => '加载更多失败，请稍后重试';
+
+  @override
+  String get moreMenu => '更多菜单';
+
+  @override
+  String get profileLoadFailed => '获取用户资料失败';
+
+  @override
+  String get profileExpired => '用户资料已失效';
+
+  @override
+  String get noUserProfile => '暂无用户资料';
+
+  @override
+  String get confirmLogout => '确认退出';
+
+  @override
+  String get logoutConfirmation => '确定要退出登录吗？';
+
+  @override
+  String get logout => '退出登录';
+
+  @override
+  String get playbackHistory => '播放记录';
+
+  @override
+  String get clearSearch => '清除搜索';
+
+  @override
+  String get refreshCurrentTab => '刷新当前标签';
+
+  @override
+  String get showUserInfo => '显示用户信息';
+
+  @override
+  String get hideUserInfo => '隐藏用户信息';
+
+  @override
+  String joinedDate(Object date) {
+    return '$date加入';
+  }
 }
 
 /// The translations for Chinese, using the Han script (`zh_Hans`).
@@ -783,6 +869,92 @@ class AppLocalizationsZhHans extends AppLocalizationsZh {
   @override
   String waitToSendDanmaku(Object seconds) {
     return '请等待$seconds秒后再发…';
+  }
+
+  @override
+  String get collectionPlanToWatch => '想看';
+
+  @override
+  String get collectionWatched => '看过';
+
+  @override
+  String get collectionWatching => '在看';
+
+  @override
+  String get collectionOnHold => '搁置';
+
+  @override
+  String get collectionAbandoned => '抛弃';
+
+  @override
+  String get collectionLabel => '收藏';
+
+  @override
+  String get searchCollection => '搜索收藏';
+
+  @override
+  String get collectionKeywordHint => '输入收藏关键词';
+
+  @override
+  String get search => '搜索';
+
+  @override
+  String get refreshFailedRetry => '刷新失败，请稍后重试';
+
+  @override
+  String get noData => '暂无数据';
+
+  @override
+  String get noMore => '没有更多了';
+
+  @override
+  String get loginToCollect => '登录后收藏';
+
+  @override
+  String get collectionLoadFailed => '加载失败，请稍后重试';
+
+  @override
+  String get collectionLoadMoreFailed => '加载更多失败，请稍后重试';
+
+  @override
+  String get moreMenu => '更多菜单';
+
+  @override
+  String get profileLoadFailed => '获取用户资料失败';
+
+  @override
+  String get profileExpired => '用户资料已失效';
+
+  @override
+  String get noUserProfile => '暂无用户资料';
+
+  @override
+  String get confirmLogout => '确认退出';
+
+  @override
+  String get logoutConfirmation => '确定要退出登录吗？';
+
+  @override
+  String get logout => '退出登录';
+
+  @override
+  String get playbackHistory => '播放记录';
+
+  @override
+  String get clearSearch => '清除搜索';
+
+  @override
+  String get refreshCurrentTab => '刷新当前标签';
+
+  @override
+  String get showUserInfo => '显示用户信息';
+
+  @override
+  String get hideUserInfo => '隐藏用户信息';
+
+  @override
+  String joinedDate(Object date) {
+    return '$date加入';
   }
 }
 
@@ -1175,6 +1347,92 @@ class AppLocalizationsZhHantHk extends AppLocalizationsZh {
   String waitToSendDanmaku(Object seconds) {
     return '請等待$seconds秒後再發…';
   }
+
+  @override
+  String get collectionPlanToWatch => '想看';
+
+  @override
+  String get collectionWatched => '看過';
+
+  @override
+  String get collectionWatching => '在看';
+
+  @override
+  String get collectionOnHold => '擱置';
+
+  @override
+  String get collectionAbandoned => '拋棄';
+
+  @override
+  String get collectionLabel => '收藏';
+
+  @override
+  String get searchCollection => '搜尋收藏';
+
+  @override
+  String get collectionKeywordHint => '輸入收藏關鍵字';
+
+  @override
+  String get search => '搜尋';
+
+  @override
+  String get refreshFailedRetry => '重新整理失敗，請稍後再試';
+
+  @override
+  String get noData => '暫無資料';
+
+  @override
+  String get noMore => '沒有更多了';
+
+  @override
+  String get loginToCollect => '登入後收藏';
+
+  @override
+  String get collectionLoadFailed => '載入失敗，請稍後再試';
+
+  @override
+  String get collectionLoadMoreFailed => '載入更多失敗，請稍後再試';
+
+  @override
+  String get moreMenu => '更多選單';
+
+  @override
+  String get profileLoadFailed => '取得使用者資料失敗';
+
+  @override
+  String get profileExpired => '使用者資料已失效';
+
+  @override
+  String get noUserProfile => '暫無使用者資料';
+
+  @override
+  String get confirmLogout => '確認登出';
+
+  @override
+  String get logoutConfirmation => '確定要登出嗎？';
+
+  @override
+  String get logout => '登出';
+
+  @override
+  String get playbackHistory => '播放記錄';
+
+  @override
+  String get clearSearch => '清除搜尋';
+
+  @override
+  String get refreshCurrentTab => '重新整理目前標籤';
+
+  @override
+  String get showUserInfo => '顯示使用者資訊';
+
+  @override
+  String get hideUserInfo => '隱藏使用者資訊';
+
+  @override
+  String joinedDate(Object date) {
+    return '$date加入';
+  }
 }
 
 /// The translations for Chinese, as used in Taiwan, using the Han script (`zh_Hant_TW`).
@@ -1565,5 +1823,91 @@ class AppLocalizationsZhHantTw extends AppLocalizationsZh {
   @override
   String waitToSendDanmaku(Object seconds) {
     return '請等待$seconds秒後再發…';
+  }
+
+  @override
+  String get collectionPlanToWatch => '想看';
+
+  @override
+  String get collectionWatched => '看過';
+
+  @override
+  String get collectionWatching => '在看';
+
+  @override
+  String get collectionOnHold => '擱置';
+
+  @override
+  String get collectionAbandoned => '拋棄';
+
+  @override
+  String get collectionLabel => '收藏';
+
+  @override
+  String get searchCollection => '搜尋收藏';
+
+  @override
+  String get collectionKeywordHint => '輸入收藏關鍵字';
+
+  @override
+  String get search => '搜尋';
+
+  @override
+  String get refreshFailedRetry => '重新整理失敗，請稍後再試';
+
+  @override
+  String get noData => '暫無資料';
+
+  @override
+  String get noMore => '沒有更多了';
+
+  @override
+  String get loginToCollect => '登入後收藏';
+
+  @override
+  String get collectionLoadFailed => '載入失敗，請稍後再試';
+
+  @override
+  String get collectionLoadMoreFailed => '載入更多失敗，請稍後再試';
+
+  @override
+  String get moreMenu => '更多選單';
+
+  @override
+  String get profileLoadFailed => '取得使用者資料失敗';
+
+  @override
+  String get profileExpired => '使用者資料已失效';
+
+  @override
+  String get noUserProfile => '暫無使用者資料';
+
+  @override
+  String get confirmLogout => '確認登出';
+
+  @override
+  String get logoutConfirmation => '確定要登出嗎？';
+
+  @override
+  String get logout => '登出';
+
+  @override
+  String get playbackHistory => '播放記錄';
+
+  @override
+  String get clearSearch => '清除搜尋';
+
+  @override
+  String get refreshCurrentTab => '重新整理目前標籤';
+
+  @override
+  String get showUserInfo => '顯示使用者資訊';
+
+  @override
+  String get hideUserInfo => '隱藏使用者資訊';
+
+  @override
+  String joinedDate(Object date) {
+    return '$date加入';
   }
 }

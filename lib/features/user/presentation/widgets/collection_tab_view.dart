@@ -7,6 +7,7 @@ import 'package:anime_flow/shared/widgets/ranking.dart';
 import 'package:anime_flow/shared/widgets/star.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:anime_flow/app/localization/app_localizations.dart';
 
 class CollectionTabView extends ConsumerWidget {
   final TabController tabController;
@@ -50,11 +51,12 @@ class _CollectionTabView extends ConsumerWidget {
   static const double _loadMoreTriggerDistance = 200;
 
   Future<void> _onRefresh(WidgetRef ref, BuildContext context) async {
+    final l10n = AppLocalizations.of(context);
     final success =
         await ref.read(userCollectionsProvider.notifier).refresh(type);
     if (!success && context.mounted) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('刷新失败，请稍后重试')),
+        SnackBar(content: Text(l10n.refreshFailedRetry)),
       );
     }
   }
@@ -86,6 +88,7 @@ class _CollectionTabView extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = AppLocalizations.of(context);
     final tabState = ref.watch(
       userCollectionsProvider.select((state) => state.tabState(type)),
     );
@@ -138,24 +141,24 @@ class _CollectionTabView extends ConsumerWidget {
                       child: Column(
                         mainAxisSize: MainAxisSize.min,
                         children: [
-                          Text(tabState.initialErrorMessage!),
+                          Text(l10n.collectionLoadFailed),
                           const SizedBox(height: 12),
                           FilledButton(
                             onPressed: () => _onRefresh(ref, context),
-                            child: const Text('重试'),
+                            child: Text(l10n.retry),
                           ),
                         ],
                       ),
                     ),
                   )
                 else if (collectionsItem == null)
-                  const SliverFillRemaining(
+                  SliverFillRemaining(
                     child: Center(child: CircularProgressIndicator()),
                   )
                 else if (collectionsItem.data.isEmpty)
-                  const SliverFillRemaining(
+                  SliverFillRemaining(
                     hasScrollBody: false,
-                    child: Center(child: Text('暂无数据')),
+                    child: Center(child: Text(l10n.noData)),
                   )
                 else ...[
                   SliverPadding(
@@ -310,8 +313,9 @@ class _CollectionFooter extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     if (isLoadingMore) {
-      return const Padding(
+      return Padding(
         padding: EdgeInsets.symmetric(vertical: 16),
         child: Center(
           child: CircularProgressIndicator(),
@@ -327,10 +331,10 @@ class _CollectionFooter extends StatelessWidget {
             crossAxisAlignment: WrapCrossAlignment.center,
             spacing: 8,
             children: [
-              Text(errorMessage!),
+              Text(l10n.collectionLoadMoreFailed),
               TextButton(
                 onPressed: onRetry,
-                child: const Text('重试'),
+                child: Text(l10n.retry),
               ),
             ],
           ),
@@ -339,10 +343,10 @@ class _CollectionFooter extends StatelessWidget {
     }
 
     if (!hasMore) {
-      return const Padding(
+      return Padding(
         padding: EdgeInsets.symmetric(vertical: 16),
         child: Center(
-          child: Text('没有更多了'),
+          child: Text(l10n.noMore),
         ),
       );
     }

@@ -798,6 +798,174 @@ abstract class AppLocalizations {
   /// In zh_Hans, this message translates to:
   /// **'请等待{seconds}秒后再发…'**
   String waitToSendDanmaku(Object seconds);
+
+  /// No description provided for @collectionPlanToWatch.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'想看'**
+  String get collectionPlanToWatch;
+
+  /// No description provided for @collectionWatched.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'看过'**
+  String get collectionWatched;
+
+  /// No description provided for @collectionWatching.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'在看'**
+  String get collectionWatching;
+
+  /// No description provided for @collectionOnHold.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'搁置'**
+  String get collectionOnHold;
+
+  /// No description provided for @collectionAbandoned.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'抛弃'**
+  String get collectionAbandoned;
+
+  /// No description provided for @collectionLabel.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'收藏'**
+  String get collectionLabel;
+
+  /// No description provided for @searchCollection.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'搜索收藏'**
+  String get searchCollection;
+
+  /// No description provided for @collectionKeywordHint.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'输入收藏关键词'**
+  String get collectionKeywordHint;
+
+  /// No description provided for @search.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'搜索'**
+  String get search;
+
+  /// No description provided for @refreshFailedRetry.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'刷新失败，请稍后重试'**
+  String get refreshFailedRetry;
+
+  /// No description provided for @noData.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'暂无数据'**
+  String get noData;
+
+  /// No description provided for @noMore.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'没有更多了'**
+  String get noMore;
+
+  /// No description provided for @loginToCollect.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'登录后收藏'**
+  String get loginToCollect;
+
+  /// No description provided for @collectionLoadFailed.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'加载失败，请稍后重试'**
+  String get collectionLoadFailed;
+
+  /// No description provided for @collectionLoadMoreFailed.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'加载更多失败，请稍后重试'**
+  String get collectionLoadMoreFailed;
+
+  /// No description provided for @moreMenu.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'更多菜单'**
+  String get moreMenu;
+
+  /// No description provided for @profileLoadFailed.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'获取用户资料失败'**
+  String get profileLoadFailed;
+
+  /// No description provided for @profileExpired.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'用户资料已失效'**
+  String get profileExpired;
+
+  /// No description provided for @noUserProfile.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'暂无用户资料'**
+  String get noUserProfile;
+
+  /// No description provided for @confirmLogout.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'确认退出'**
+  String get confirmLogout;
+
+  /// No description provided for @logoutConfirmation.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'确定要退出登录吗？'**
+  String get logoutConfirmation;
+
+  /// No description provided for @logout.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'退出登录'**
+  String get logout;
+
+  /// No description provided for @playbackHistory.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'播放记录'**
+  String get playbackHistory;
+
+  /// No description provided for @clearSearch.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'清除搜索'**
+  String get clearSearch;
+
+  /// No description provided for @refreshCurrentTab.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'刷新当前标签'**
+  String get refreshCurrentTab;
+
+  /// No description provided for @showUserInfo.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'显示用户信息'**
+  String get showUserInfo;
+
+  /// No description provided for @hideUserInfo.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'隐藏用户信息'**
+  String get hideUserInfo;
+
+  /// No description provided for @joinedDate.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'{date}加入'**
+  String joinedDate(Object date);
 }
 
 class _AppLocalizationsDelegate

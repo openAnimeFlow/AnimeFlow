@@ -173,8 +173,11 @@ class UserCollections extends _$UserCollections {
   }
 }
 
-List<String> buildUserCollectionTabLabels(FlowUsers user) {
-  return userCollectionTypeLabels.asMap().entries.map((entry) {
+List<String> buildUserCollectionTabLabels(
+  FlowUsers user,
+  List<String> localizedLabels,
+) {
+  return localizedLabels.asMap().entries.map((entry) {
     final type = entry.key + 1;
     final total = user.collectionCounts.countForType(type);
     return '${entry.value}\n$total';

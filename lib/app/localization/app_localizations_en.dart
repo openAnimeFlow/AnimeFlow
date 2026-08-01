@@ -393,4 +393,91 @@ class AppLocalizationsEn extends AppLocalizations {
   String waitToSendDanmaku(Object seconds) {
     return 'Please wait $seconds seconds before sending…';
   }
+
+  @override
+  String get collectionPlanToWatch => 'Plan to watch';
+
+  @override
+  String get collectionWatched => 'Watched';
+
+  @override
+  String get collectionWatching => 'Watching';
+
+  @override
+  String get collectionOnHold => 'On hold';
+
+  @override
+  String get collectionAbandoned => 'Abandoned';
+
+  @override
+  String get collectionLabel => 'Collection';
+
+  @override
+  String get searchCollection => 'Search collection';
+
+  @override
+  String get collectionKeywordHint => 'Enter collection keywords';
+
+  @override
+  String get search => 'Search';
+
+  @override
+  String get refreshFailedRetry => 'Refresh failed, please try again later';
+
+  @override
+  String get noData => 'No data';
+
+  @override
+  String get noMore => 'No more';
+
+  @override
+  String get loginToCollect => 'Log in to collect';
+
+  @override
+  String get collectionLoadFailed => 'Failed to load, please try again later';
+
+  @override
+  String get collectionLoadMoreFailed =>
+      'Failed to load more, please try again later';
+
+  @override
+  String get moreMenu => 'More menu';
+
+  @override
+  String get profileLoadFailed => 'Failed to load user profile';
+
+  @override
+  String get profileExpired => 'User profile is no longer valid';
+
+  @override
+  String get noUserProfile => 'No user profile';
+
+  @override
+  String get confirmLogout => 'Confirm logout';
+
+  @override
+  String get logoutConfirmation => 'Are you sure you want to log out?';
+
+  @override
+  String get logout => 'Log out';
+
+  @override
+  String get playbackHistory => 'Playback history';
+
+  @override
+  String get clearSearch => 'Clear search';
+
+  @override
+  String get refreshCurrentTab => 'Refresh current tab';
+
+  @override
+  String get showUserInfo => 'Show user info';
+
+  @override
+  String get hideUserInfo => 'Hide user info';
+
+  @override
+  String joinedDate(Object date) {
+    return 'Joined $date';
+  }
 }

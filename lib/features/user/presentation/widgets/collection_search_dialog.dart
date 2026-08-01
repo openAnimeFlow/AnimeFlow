@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:anime_flow/app/localization/app_localizations.dart';
 
 class CollectionSearchDialog extends StatefulWidget {
   final String initialKeyword;
@@ -30,26 +31,27 @@ class _CollectionSearchDialogState extends State<CollectionSearchDialog> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     return AlertDialog(
-      title: const Text('搜索收藏'),
+      title: Text(l10n.searchCollection),
       content: TextField(
         controller: _controller,
         autofocus: true,
         textInputAction: TextInputAction.search,
-        decoration: const InputDecoration(
-          hintText: '输入收藏关键词',
-          prefixIcon: Icon(Icons.search),
+        decoration: InputDecoration(
+          hintText: l10n.collectionKeywordHint,
+          prefixIcon: const Icon(Icons.search),
         ),
         onSubmitted: (_) => _submit(),
       ),
       actions: [
         TextButton(
           onPressed: () => Navigator.of(context).pop(),
-          child: const Text('取消'),
+          child: Text(l10n.cancel),
         ),
         FilledButton(
           onPressed: _submit,
-          child: const Text('搜索'),
+          child: Text(l10n.search),
         ),
       ],
     );

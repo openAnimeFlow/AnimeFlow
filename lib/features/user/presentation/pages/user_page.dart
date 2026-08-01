@@ -7,6 +7,7 @@ import 'package:anime_flow/shared/widgets/drop_down_menu.dart';
 import 'package:anime_flow/shared/widgets/notification_toast.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:anime_flow/app/localization/app_localizations.dart';
 
 enum _NoLoginOverflowAction { settings, playRecord }
 
@@ -16,6 +17,7 @@ class UserPage extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = AppLocalizations.of(context);
     final isLoggedInAsync = ref.watch(isLoggedInProvider);
     final colorScheme = Theme.of(context).colorScheme;
     return isLoggedInAsync.when(
@@ -34,18 +36,20 @@ class UserPage extends ConsumerWidget {
             return;
           }
 
-          final message = shouldNotifyError ? '获取用户资料失败' : '用户资料已失效';
+          final message =
+              shouldNotifyError ? l10n.profileLoadFailed : l10n.profileExpired;
           WidgetsBinding.instance.addPostFrameCallback((_) {
             if (!context.mounted) return;
-            NotificationToast.show('提示', message, align: Alignment.topCenter);
+            NotificationToast.show(l10n.tip, message,
+                align: Alignment.topCenter);
           });
         });
 
         final userInfoAsync = ref.watch(currentUserInfoProvider);
         return userInfoAsync.when(
           data: (userInfo) => userInfo == null
-              ? const Scaffold(
-                  body: Center(child: Text('暂无用户资料')),
+              ? Scaffold(
+                  body: Center(child: Text(l10n.noUserProfile)),
                 )
               : UserView(user: userInfo),
           loading: () => const Scaffold(
@@ -56,7 +60,7 @@ class UserPage extends ConsumerWidget {
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  const Text('获取用户资料失败'),
+                  Text(l10n.profileLoadFailed),
                   const SizedBox(height: 24),
                   Row(
                     mainAxisSize: MainAxisSize.min,
@@ -66,25 +70,25 @@ class UserPage extends ConsumerWidget {
                         onPressed: () =>
                             ref.invalidate(currentUserInfoProvider),
                         icon: const Icon(Icons.refresh),
-                        label: const Text('重试'),
+                        label: Text(l10n.retry),
                       ),
                       FilledButton.icon(
                         onPressed: () async {
                           final confirmed = await showDialog<bool>(
                             context: context,
                             builder: (dialogContext) => AlertDialog(
-                              title: const Text('确认退出'),
-                              content: const Text('确定要退出登录吗？'),
+                              title: Text(l10n.confirmLogout),
+                              content: Text(l10n.logoutConfirmation),
                               actions: [
                                 TextButton(
                                   onPressed: () =>
                                       Navigator.of(dialogContext).pop(false),
-                                  child: const Text('取消'),
+                                  child: Text(l10n.cancel),
                                 ),
                                 TextButton(
                                   onPressed: () =>
                                       Navigator.of(dialogContext).pop(true),
-                                  child: const Text('确定'),
+                                  child: Text(l10n.confirm),
                                 ),
                               ],
                             ),
@@ -96,7 +100,7 @@ class UserPage extends ConsumerWidget {
                           }
                         },
                         icon: const Icon(Icons.logout),
-                        label: const Text('退出登录'),
+                        label: Text(l10n.logout),
                       ),
                     ],
                   ),
@@ -113,6 +117,7 @@ class UserPage extends ConsumerWidget {
   }
 
   Widget _buildLoginPage(BuildContext context, ColorScheme colorScheme) {
+    final l10n = AppLocalizations.of(context);
     return LoginPage(
       appBar: AppBar(
         forceMaterialTransparency: true,
@@ -120,7 +125,7 @@ class UserPage extends ConsumerWidget {
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 8),
             child: DropDownMenu<_NoLoginOverflowAction>(
-              tooltip: '更多菜单',
+              tooltip: l10n.moreMenu,
               items: _NoLoginOverflowAction.values,
               disableSelected: false,
               buttonBuilder: (context, _) => Icon(
@@ -132,11 +137,11 @@ class UserPage extends ConsumerWidget {
                 final (icon, label) = switch (action) {
                   _NoLoginOverflowAction.settings => (
                       Icons.settings_outlined,
-                      '设置'
+                      l10n.settingsLabel
                     ),
                   _NoLoginOverflowAction.playRecord => (
                       Icons.smart_display_outlined,
-                      '播放记录'
+                      l10n.playbackHistory
                     ),
                 };
                 return SizedBox(

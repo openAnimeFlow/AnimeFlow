@@ -1,3 +1,4 @@
+import 'package:anime_flow/app/localization/app_localizations.dart';
 import 'package:anime_flow/core/constants/layout_constant.dart';
 import 'package:anime_flow/shared/models/bangumi/calendar_item.dart';
 import 'package:anime_flow/app/router/model/info_route_extra.dart';
@@ -22,15 +23,15 @@ class _CalendarPageState extends State<CalendarPage>
     with SingleTickerProviderStateMixin {
   late TabController _tabController;
 
-  final List<String> _weekdayLabels = [
-    '周一',
-    '周二',
-    '周三',
-    '周四',
-    '周五',
-    '周六',
-    '周日'
-  ];
+  List<String> _weekdayLabels(AppLocalizations l10n) => [
+        l10n.monday,
+        l10n.tuesday,
+        l10n.wednesday,
+        l10n.thursday,
+        l10n.friday,
+        l10n.saturday,
+        l10n.sunday,
+      ];
 
   @override
   void initState() {
@@ -48,11 +49,12 @@ class _CalendarPageState extends State<CalendarPage>
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     return Scaffold(
       appBar: AppBar(
-        title: const Text('每日放送'),
+        title: Text(l10n.todayBroadcast),
         leading: Tooltip(
-          message: '返回',
+          message: l10n.back,
           child: IconButton(
               onPressed: () => context.pop(),
               icon: const Icon(Icons.arrow_back)),
@@ -63,7 +65,8 @@ class _CalendarPageState extends State<CalendarPage>
             builder: (context, ref, _) {
               final calendarAsync = ref.watch(animeCalendarProvider);
               return calendarAsync.maybeWhen(
-                data: (calendar) => _buildTabBarSection(context, calendar),
+                data: (calendar) =>
+                    _buildTabBarSection(context, calendar, l10n),
                 orElse: () => const SizedBox.shrink(),
               );
             },
@@ -80,12 +83,12 @@ class _CalendarPageState extends State<CalendarPage>
                 onTap: () => ref
                     .read(animeCalendarProvider.notifier)
                     .refreshCalendarDate(),
-                child: const Row(
+                child: Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   spacing: 8,
                   children: [
-                    Text('获取数据失败'),
-                    Icon(Icons.refresh),
+                    Text(l10n.loadFailed),
+                    const Icon(Icons.refresh),
                   ],
                 ),
               ),
@@ -94,7 +97,7 @@ class _CalendarPageState extends State<CalendarPage>
               controller: _tabController,
               children: List.generate(7, (index) {
                 final weekday = (index + 1).toString();
-                return _buildWeekdayContent(context, calendar, weekday);
+                return _buildWeekdayContent(context, calendar, weekday, l10n);
               }),
             ),
           );
@@ -103,7 +106,12 @@ class _CalendarPageState extends State<CalendarPage>
     );
   }
 
-  Widget _buildTabBarSection(BuildContext context, Calendar calendar) {
+  Widget _buildTabBarSection(
+    BuildContext context,
+    Calendar calendar,
+    AppLocalizations l10n,
+  ) {
+    final weekdayLabels = _weekdayLabels(l10n);
     return Center(
       child: Column(
         children: [
@@ -123,9 +131,9 @@ class _CalendarPageState extends State<CalendarPage>
                         child: Column(
                           mainAxisSize: MainAxisSize.min,
                           children: [
-                            Text(_weekdayLabels[index]),
+                            Text(weekdayLabels[index]),
                             Text(
-                              '${items.length}部',
+                              l10n.releaseCount(items.length),
                               style: const TextStyle(fontSize: 10),
                             ),
                           ],
@@ -146,13 +154,18 @@ class _CalendarPageState extends State<CalendarPage>
   }
 
   Widget _buildWeekdayContent(
-      BuildContext context, Calendar calendar, String weekday) {
+    BuildContext context,
+    Calendar calendar,
+    String weekday,
+    AppLocalizations l10n,
+  ) {
     final items = calendar.calendarData[weekday] ?? [];
+    final weekdayLabel = _weekdayLabels(l10n)[int.parse(weekday) - 1];
 
     if (items.isEmpty) {
       return Center(
         child: Text(
-          '${_weekdayLabels[int.parse(weekday) - 1]}无番剧更新',
+          l10n.noUpdatesOnWeekday(weekdayLabel),
           style: const TextStyle(fontSize: 16, color: Colors.grey),
         ),
       );
@@ -184,10 +197,12 @@ class _CalendarPageState extends State<CalendarPage>
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.spaceAround,
                     children: [
-                      _buildStatItem('番剧数量', '${items.length}部'),
-                      _buildStatItem('总观看人数', '$totalWatchers'),
+                      _buildStatItem(
+                          l10n.animeCount, l10n.releaseCount(items.length)),
+                      _buildStatItem(l10n.totalWatchers, '$totalWatchers'),
                       if (avgScore > 0)
-                        _buildStatItem('平均评分', avgScore.toStringAsFixed(1)),
+                        _buildStatItem(
+                            l10n.averageRating, avgScore.toStringAsFixed(1)),
                     ],
                   ),
                 ),

@@ -156,6 +156,49 @@ class AppLocalizationsZh extends AppLocalizations {
   String get todayBroadcast => '今日放送';
 
   @override
+  String get back => '返回';
+
+  @override
+  String get monday => '週一';
+
+  @override
+  String get tuesday => '週二';
+
+  @override
+  String get wednesday => '週三';
+
+  @override
+  String get thursday => '週四';
+
+  @override
+  String get friday => '週五';
+
+  @override
+  String get saturday => '週六';
+
+  @override
+  String get sunday => '週日';
+
+  @override
+  String releaseCount(Object count) {
+    return '$count 部';
+  }
+
+  @override
+  String noUpdatesOnWeekday(Object weekday) {
+    return '$weekday無番劇更新';
+  }
+
+  @override
+  String get animeCount => '番劇數量';
+
+  @override
+  String get totalWatchers => '總觀看人數';
+
+  @override
+  String get averageRating => '平均評分';
+
+  @override
   String calendarSummary(Object weekday, Object releases, Object viewers) {
     return '周$weekday上映$releases部,总$viewers人收看';
   }
@@ -401,7 +444,7 @@ class AppLocalizationsZh extends AppLocalizations {
   String get copySourceLink => '复制数据源链接';
 
   @override
-  String get copied => '已複製';
+  String get copied => '已复制';
 
   @override
   String get sourceLinkCopied => '数据源链接已复制';
@@ -446,9 +489,6 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get exitFullscreen => '退出全屏';
-
-  @override
-  String get back => '返回';
 
   @override
   String skipSeconds(Object seconds) {
@@ -1454,6 +1494,49 @@ class AppLocalizationsZhHans extends AppLocalizationsZh {
   String get todayBroadcast => '今日放送';
 
   @override
+  String get back => '返回';
+
+  @override
+  String get monday => '周一';
+
+  @override
+  String get tuesday => '周二';
+
+  @override
+  String get wednesday => '周三';
+
+  @override
+  String get thursday => '周四';
+
+  @override
+  String get friday => '周五';
+
+  @override
+  String get saturday => '周六';
+
+  @override
+  String get sunday => '周日';
+
+  @override
+  String releaseCount(Object count) {
+    return '$count部';
+  }
+
+  @override
+  String noUpdatesOnWeekday(Object weekday) {
+    return '$weekday无番剧更新';
+  }
+
+  @override
+  String get animeCount => '番剧数量';
+
+  @override
+  String get totalWatchers => '总观看人数';
+
+  @override
+  String get averageRating => '平均评分';
+
+  @override
   String calendarSummary(Object weekday, Object releases, Object viewers) {
     return '周$weekday上映$releases部,总$viewers人收看';
   }
@@ -1744,9 +1827,6 @@ class AppLocalizationsZhHans extends AppLocalizationsZh {
 
   @override
   String get exitFullscreen => '退出全屏';
-
-  @override
-  String get back => '返回';
 
   @override
   String skipSeconds(Object seconds) {
@@ -2752,6 +2832,49 @@ class AppLocalizationsZhHantHk extends AppLocalizationsZh {
   String get todayBroadcast => '今日放送';
 
   @override
+  String get back => '返回';
+
+  @override
+  String get monday => '星期一';
+
+  @override
+  String get tuesday => '星期二';
+
+  @override
+  String get wednesday => '星期三';
+
+  @override
+  String get thursday => '星期四';
+
+  @override
+  String get friday => '星期五';
+
+  @override
+  String get saturday => '星期六';
+
+  @override
+  String get sunday => '星期日';
+
+  @override
+  String releaseCount(Object count) {
+    return '$count 集';
+  }
+
+  @override
+  String noUpdatesOnWeekday(Object weekday) {
+    return '$weekday沒有番劇更新';
+  }
+
+  @override
+  String get animeCount => '番劇數量';
+
+  @override
+  String get totalWatchers => '總觀看人數';
+
+  @override
+  String get averageRating => '平均評分';
+
+  @override
   String calendarSummary(Object weekday, Object releases, Object viewers) {
     return '週$weekday上映$releases部,共$viewers人收看';
   }
@@ -3042,9 +3165,6 @@ class AppLocalizationsZhHantHk extends AppLocalizationsZh {
 
   @override
   String get exitFullscreen => '退出全螢幕';
-
-  @override
-  String get back => '返回';
 
   @override
   String skipSeconds(Object seconds) {
@@ -3859,6 +3979,49 @@ class AppLocalizationsZhHantTw extends AppLocalizationsZh {
   String get todayBroadcast => '今日放送';
 
   @override
+  String get back => '返回';
+
+  @override
+  String get monday => '週一';
+
+  @override
+  String get tuesday => '週二';
+
+  @override
+  String get wednesday => '週三';
+
+  @override
+  String get thursday => '週四';
+
+  @override
+  String get friday => '週五';
+
+  @override
+  String get saturday => '週六';
+
+  @override
+  String get sunday => '週日';
+
+  @override
+  String releaseCount(Object count) {
+    return '$count 部';
+  }
+
+  @override
+  String noUpdatesOnWeekday(Object weekday) {
+    return '$weekday無番劇更新';
+  }
+
+  @override
+  String get animeCount => '番劇數量';
+
+  @override
+  String get totalWatchers => '總觀看人數';
+
+  @override
+  String get averageRating => '平均評分';
+
+  @override
   String calendarSummary(Object weekday, Object releases, Object viewers) {
     return '週$weekday上映$releases部,共$viewers人收看';
   }
@@ -4149,9 +4312,6 @@ class AppLocalizationsZhHantTw extends AppLocalizationsZh {
 
   @override
   String get exitFullscreen => '退出全螢幕';
-
-  @override
-  String get back => '返回';
 
   @override
   String skipSeconds(Object seconds) {

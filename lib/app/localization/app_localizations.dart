@@ -385,6 +385,84 @@ abstract class AppLocalizations {
   /// **'今日放送'**
   String get todayBroadcast;
 
+  /// No description provided for @back.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'返回'**
+  String get back;
+
+  /// No description provided for @monday.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'周一'**
+  String get monday;
+
+  /// No description provided for @tuesday.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'周二'**
+  String get tuesday;
+
+  /// No description provided for @wednesday.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'周三'**
+  String get wednesday;
+
+  /// No description provided for @thursday.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'周四'**
+  String get thursday;
+
+  /// No description provided for @friday.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'周五'**
+  String get friday;
+
+  /// No description provided for @saturday.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'周六'**
+  String get saturday;
+
+  /// No description provided for @sunday.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'周日'**
+  String get sunday;
+
+  /// No description provided for @releaseCount.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'{count}部'**
+  String releaseCount(Object count);
+
+  /// No description provided for @noUpdatesOnWeekday.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'{weekday}无番剧更新'**
+  String noUpdatesOnWeekday(Object weekday);
+
+  /// No description provided for @animeCount.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'番剧数量'**
+  String get animeCount;
+
+  /// No description provided for @totalWatchers.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'总观看人数'**
+  String get totalWatchers;
+
+  /// No description provided for @averageRating.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'平均评分'**
+  String get averageRating;
+
   /// No description provided for @calendarSummary.
   ///
   /// In zh_Hans, this message translates to:
@@ -900,12 +978,6 @@ abstract class AppLocalizations {
   /// In zh_Hans, this message translates to:
   /// **'退出全屏'**
   String get exitFullscreen;
-
-  /// No description provided for @back.
-  ///
-  /// In zh_Hans, this message translates to:
-  /// **'返回'**
-  String get back;
 
   /// No description provided for @skipSeconds.
   ///

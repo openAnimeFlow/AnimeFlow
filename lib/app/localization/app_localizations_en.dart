@@ -157,6 +157,49 @@ class AppLocalizationsEn extends AppLocalizations {
   String get todayBroadcast => 'Today\'s Broadcasts';
 
   @override
+  String get back => 'Back';
+
+  @override
+  String get monday => 'Mon';
+
+  @override
+  String get tuesday => 'Tue';
+
+  @override
+  String get wednesday => 'Wed';
+
+  @override
+  String get thursday => 'Thu';
+
+  @override
+  String get friday => 'Fri';
+
+  @override
+  String get saturday => 'Sat';
+
+  @override
+  String get sunday => 'Sun';
+
+  @override
+  String releaseCount(Object count) {
+    return '$count releases';
+  }
+
+  @override
+  String noUpdatesOnWeekday(Object weekday) {
+    return 'No anime updates on $weekday';
+  }
+
+  @override
+  String get animeCount => 'Anime count';
+
+  @override
+  String get totalWatchers => 'Total viewers';
+
+  @override
+  String get averageRating => 'Average rating';
+
+  @override
   String calendarSummary(Object weekday, Object releases, Object viewers) {
     return '$releases releases on $weekday, $viewers viewers';
   }
@@ -448,9 +491,6 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get exitFullscreen => 'Exit fullscreen';
-
-  @override
-  String get back => 'Back';
 
   @override
   String skipSeconds(Object seconds) {

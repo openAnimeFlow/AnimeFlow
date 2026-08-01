@@ -45,4 +45,18 @@
   "rankingLoadFailed": "Failed to load: {error}",
   "@rankingLoadFailed": {"placeholders": {"error": {}}},
   "retry": "Retry"
+  ,"summaryTitle": "Summary",
+  "tagsTitle": "Tags",
+  "detailsTitle": "Details",
+  "charactersTitle": "Characters",
+  "viewDetails": "View details",
+  "producersTitle": "Producers",
+  "relatedTitle": "Related entries",
+  "commentsTitle": "Comments",
+  "episodeCount": "{count} episodes",
+  "yourRating": "Your rating: {rating}",
+  "ratingCount": "({count}) ratings",
+  "collectionCount": "{count} collected/",
+  "watchingCount": "{count} watching/",
+  "droppedCount": "{count} dropped"
 }

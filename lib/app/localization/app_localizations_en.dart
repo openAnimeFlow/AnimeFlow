@@ -137,4 +137,58 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get retry => 'Retry';
+
+  @override
+  String get summaryTitle => 'Summary';
+
+  @override
+  String get tagsTitle => 'Tags';
+
+  @override
+  String get detailsTitle => 'Details';
+
+  @override
+  String get charactersTitle => 'Characters';
+
+  @override
+  String get viewDetails => 'View details';
+
+  @override
+  String get producersTitle => 'Producers';
+
+  @override
+  String get relatedTitle => 'Related entries';
+
+  @override
+  String get commentsTitle => 'Comments';
+
+  @override
+  String episodeCount(Object count) {
+    return '$count episodes';
+  }
+
+  @override
+  String yourRating(Object rating) {
+    return 'Your rating: $rating';
+  }
+
+  @override
+  String ratingCount(Object count) {
+    return '($count) ratings';
+  }
+
+  @override
+  String collectionCount(Object count) {
+    return '$count collected/';
+  }
+
+  @override
+  String watchingCount(Object count) {
+    return '$count watching/';
+  }
+
+  @override
+  String droppedCount(Object count) {
+    return '$count dropped';
+  }
 }

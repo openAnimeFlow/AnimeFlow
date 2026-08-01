@@ -1,4 +1,5 @@
 import 'package:anime_flow/core/constants/layout_constant.dart';
+import 'package:anime_flow/app/localization/app_localizations.dart';
 import 'package:anime_flow/shared/models/bangumi/subjects_info_item.dart';
 import 'package:anime_flow/features/anime_info/presentation/widgets/characters.dart';
 import 'package:anime_flow/features/anime_info/presentation/widgets/details.dart';
@@ -29,6 +30,7 @@ class InfoSynopsisView extends StatelessWidget {
     required double fontSizeTitle,
     required FontWeight fontWeightTitle,
     required FontWeight fontWeight,
+    required AppLocalizations l10n,
   }) {
     return [
       SliverToBoxAdapter(
@@ -48,7 +50,7 @@ class InfoSynopsisView extends StatelessWidget {
           context,
           topPadding: 25,
           TagView(
-            title: '标签',
+            title: l10n.tagsTitle,
             fontSizeTitle: fontSizeTitle,
             fontWeightTitle: fontWeightTitle,
             tags: subjectsInfo.tags,
@@ -63,7 +65,7 @@ class InfoSynopsisView extends StatelessWidget {
         child: _buildContainer(
           context,
           DetailsView(
-            title: '详情',
+            title: l10n.detailsTitle,
             subject: subjectsInfo,
             textSize: 13,
             textFontWeight: FontWeight.w600,
@@ -100,7 +102,8 @@ class InfoSynopsisView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    const String title = '简介';
+    final l10n = AppLocalizations.of(context);
+    final title = l10n.summaryTitle;
     const fontWeightTitle = FontWeight.bold;
     const fontSizeTitle = 20.0;
     const fontWeight = FontWeight.w600;
@@ -127,7 +130,7 @@ class InfoSynopsisView extends StatelessWidget {
           child: Builder(
             builder: (BuildContext context) {
               return CustomScrollView(
-                key: const PageStorageKey<String>(title),
+                key: PageStorageKey<String>(title),
                 scrollBehavior: const ScrollBehavior().copyWith(
                   scrollbars: false,
                 ),
@@ -150,6 +153,7 @@ class InfoSynopsisView extends StatelessWidget {
                             fontSizeTitle: fontSizeTitle,
                             fontWeightTitle: fontWeightTitle,
                             fontWeight: fontWeight,
+                            l10n: l10n,
                           ),
                         ),
                         loading: () => _skeletonSliver(context),

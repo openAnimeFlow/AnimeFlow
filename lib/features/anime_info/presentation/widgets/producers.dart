@@ -1,4 +1,5 @@
 import 'package:anime_flow/core/constants/constants.dart';
+import 'package:anime_flow/app/localization/app_localizations.dart';
 import 'package:anime_flow/features/anime_info/presentation/providers/anime_info_provider.dart';
 import 'package:anime_flow/core/logger/logger.dart';
 import 'package:anime_flow/shared/widgets/animation_network_image.dart';
@@ -12,6 +13,7 @@ class ProducersView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final windowsWidth = MediaQuery.of(context).size.width;
+    final l10n = AppLocalizations.of(context);
     return Consumer(builder: (context, ref, child) {
       final asyncProducers = ref.watch(subjectProducersProvider);
       return asyncProducers.when(
@@ -20,9 +22,9 @@ class ProducersView extends StatelessWidget {
               return Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  const Text(
-                    '制作人',
-                    style: TextStyle(
+                  Text(
+                    l10n.producersTitle,
+                    style: const TextStyle(
                       fontSize: 20,
                       fontWeight: FontWeight.bold,
                     ),

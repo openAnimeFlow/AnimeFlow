@@ -1,5 +1,6 @@
 import 'dart:ui';
 
+import 'package:anime_flow/app/localization/app_localizations.dart';
 import 'package:anime_flow/core/constants/layout_constant.dart';
 import 'package:anime_flow/core/network/clients/flow_client.dart';
 import 'package:anime_flow/shared/models/bangumi/subjects_info_item.dart';
@@ -208,6 +209,7 @@ class InfoHeadView extends StatelessWidget {
     required SubjectsInfoItem subjectItem,
   }) {
     final name = ref.watch(animeInfoArgsProvider.select((e) => e.name));
+    final l10n = AppLocalizations.of(context);
     const double fontSize = 12;
     const FontWeight fontWeight = FontWeight.w600;
     const amberAccent = Colors.amberAccent;
@@ -236,7 +238,7 @@ class InfoHeadView extends StatelessWidget {
               maxLines: 1,
               overflow: TextOverflow.ellipsis,
             ),
-            Text('全${subjectItem.eps}话',
+            Text(l10n.episodeCount(subjectItem.eps),
                 style: const TextStyle(
                     fontSize: fontSize, fontWeight: fontWeight)),
             Column(
@@ -245,7 +247,7 @@ class InfoHeadView extends StatelessWidget {
                 if (subjectItem.interest != null &&
                     subjectItem.interest!.rate > 0)
                   Text(
-                    '你的评分:${subjectItem.interest!.rate}',
+                    l10n.yourRating(subjectItem.interest!.rate),
                     style: const TextStyle(
                         fontWeight: fontWeight, color: amberAccent),
                   ),
@@ -268,17 +270,17 @@ class InfoHeadView extends StatelessWidget {
               ],
             ),
             Text(
-              '(${subjectItem.rating.total})人评分',
+              l10n.ratingCount(subjectItem.rating.total),
               style:
                   const TextStyle(fontSize: fontSize, fontWeight: fontWeight),
             ),
-            Text('$collectionTotal收藏/',
+            Text(l10n.collectionCount(collectionTotal),
                 style: const TextStyle(
                     fontSize: fontSize, fontWeight: fontWeight)),
-            Text('${subjectItem.collection.data['3']}再看/',
+            Text(l10n.watchingCount(subjectItem.collection.data['3'] ?? 0),
                 style: const TextStyle(
                     fontSize: fontSize, fontWeight: fontWeight)),
-            Text('${subjectItem.collection.data['5']}抛弃',
+            Text(l10n.droppedCount(subjectItem.collection.data['5'] ?? 0),
                 style: const TextStyle(
                     fontSize: fontSize, fontWeight: fontWeight)),
           ],

@@ -342,6 +342,90 @@ abstract class AppLocalizations {
   /// In zh_Hans, this message translates to:
   /// **'重试'**
   String get retry;
+
+  /// No description provided for @summaryTitle.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'简介'**
+  String get summaryTitle;
+
+  /// No description provided for @tagsTitle.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'标签'**
+  String get tagsTitle;
+
+  /// No description provided for @detailsTitle.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'详情'**
+  String get detailsTitle;
+
+  /// No description provided for @charactersTitle.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'角色'**
+  String get charactersTitle;
+
+  /// No description provided for @viewDetails.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'查看详情'**
+  String get viewDetails;
+
+  /// No description provided for @producersTitle.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'制作人'**
+  String get producersTitle;
+
+  /// No description provided for @relatedTitle.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'关联条目'**
+  String get relatedTitle;
+
+  /// No description provided for @commentsTitle.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'吐槽'**
+  String get commentsTitle;
+
+  /// No description provided for @episodeCount.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'全{count}话'**
+  String episodeCount(Object count);
+
+  /// No description provided for @yourRating.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'你的评分:{rating}'**
+  String yourRating(Object rating);
+
+  /// No description provided for @ratingCount.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'({count})人评分'**
+  String ratingCount(Object count);
+
+  /// No description provided for @collectionCount.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'{count}收藏/'**
+  String collectionCount(Object count);
+
+  /// No description provided for @watchingCount.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'{count}再看/'**
+  String watchingCount(Object count);
+
+  /// No description provided for @droppedCount.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'{count}抛弃'**
+  String droppedCount(Object count);
 }
 
 class _AppLocalizationsDelegate

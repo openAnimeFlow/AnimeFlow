@@ -137,6 +137,60 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get retry => '重试';
+
+  @override
+  String get summaryTitle => '简介';
+
+  @override
+  String get tagsTitle => '标签';
+
+  @override
+  String get detailsTitle => '详情';
+
+  @override
+  String get charactersTitle => '角色';
+
+  @override
+  String get viewDetails => '查看详情';
+
+  @override
+  String get producersTitle => '制作人';
+
+  @override
+  String get relatedTitle => '关联条目';
+
+  @override
+  String get commentsTitle => '吐槽';
+
+  @override
+  String episodeCount(Object count) {
+    return '全$count话';
+  }
+
+  @override
+  String yourRating(Object rating) {
+    return '你的评分:$rating';
+  }
+
+  @override
+  String ratingCount(Object count) {
+    return '($count)人评分';
+  }
+
+  @override
+  String collectionCount(Object count) {
+    return '$count收藏/';
+  }
+
+  @override
+  String watchingCount(Object count) {
+    return '$count再看/';
+  }
+
+  @override
+  String droppedCount(Object count) {
+    return '$count抛弃';
+  }
 }
 
 /// The translations for Chinese, using the Han script (`zh_Hans`).
@@ -272,6 +326,60 @@ class AppLocalizationsZhHans extends AppLocalizationsZh {
 
   @override
   String get retry => '重试';
+
+  @override
+  String get summaryTitle => '简介';
+
+  @override
+  String get tagsTitle => '标签';
+
+  @override
+  String get detailsTitle => '详情';
+
+  @override
+  String get charactersTitle => '角色';
+
+  @override
+  String get viewDetails => '查看详情';
+
+  @override
+  String get producersTitle => '制作人';
+
+  @override
+  String get relatedTitle => '关联条目';
+
+  @override
+  String get commentsTitle => '吐槽';
+
+  @override
+  String episodeCount(Object count) {
+    return '全$count话';
+  }
+
+  @override
+  String yourRating(Object rating) {
+    return '你的评分:$rating';
+  }
+
+  @override
+  String ratingCount(Object count) {
+    return '($count)人评分';
+  }
+
+  @override
+  String collectionCount(Object count) {
+    return '$count收藏/';
+  }
+
+  @override
+  String watchingCount(Object count) {
+    return '$count再看/';
+  }
+
+  @override
+  String droppedCount(Object count) {
+    return '$count抛弃';
+  }
 }
 
 /// The translations for Chinese, as used in Hong Kong, using the Han script (`zh_Hant_HK`).
@@ -407,6 +515,60 @@ class AppLocalizationsZhHantHk extends AppLocalizationsZh {
 
   @override
   String get retry => '重試';
+
+  @override
+  String get summaryTitle => '簡介';
+
+  @override
+  String get tagsTitle => '標籤';
+
+  @override
+  String get detailsTitle => '詳情';
+
+  @override
+  String get charactersTitle => '角色';
+
+  @override
+  String get viewDetails => '查看詳情';
+
+  @override
+  String get producersTitle => '製作人';
+
+  @override
+  String get relatedTitle => '關聯條目';
+
+  @override
+  String get commentsTitle => '評論';
+
+  @override
+  String episodeCount(Object count) {
+    return '全$count集';
+  }
+
+  @override
+  String yourRating(Object rating) {
+    return '你的評分:$rating';
+  }
+
+  @override
+  String ratingCount(Object count) {
+    return '($count)人評分';
+  }
+
+  @override
+  String collectionCount(Object count) {
+    return '$count收藏/';
+  }
+
+  @override
+  String watchingCount(Object count) {
+    return '$count再看/';
+  }
+
+  @override
+  String droppedCount(Object count) {
+    return '$count放棄';
+  }
 }
 
 /// The translations for Chinese, as used in Taiwan, using the Han script (`zh_Hant_TW`).
@@ -542,4 +704,58 @@ class AppLocalizationsZhHantTw extends AppLocalizationsZh {
 
   @override
   String get retry => '重試';
+
+  @override
+  String get summaryTitle => '簡介';
+
+  @override
+  String get tagsTitle => '標籤';
+
+  @override
+  String get detailsTitle => '詳情';
+
+  @override
+  String get charactersTitle => '角色';
+
+  @override
+  String get viewDetails => '查看詳情';
+
+  @override
+  String get producersTitle => '製作人';
+
+  @override
+  String get relatedTitle => '關聯條目';
+
+  @override
+  String get commentsTitle => '吐槽';
+
+  @override
+  String episodeCount(Object count) {
+    return '全$count話';
+  }
+
+  @override
+  String yourRating(Object rating) {
+    return '你的評分:$rating';
+  }
+
+  @override
+  String ratingCount(Object count) {
+    return '($count)人評分';
+  }
+
+  @override
+  String collectionCount(Object count) {
+    return '$count收藏/';
+  }
+
+  @override
+  String watchingCount(Object count) {
+    return '$count再看/';
+  }
+
+  @override
+  String droppedCount(Object count) {
+    return '$count拋棄';
+  }
 }

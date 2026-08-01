@@ -1,3 +1,4 @@
+import 'package:anime_flow/app/localization/app_localizations.dart';
 import 'package:anime_flow/features/anime_info/presentation/providers/anime_info_provider.dart';
 import 'package:anime_flow/app/router/model/info_route_extra.dart';
 import 'package:anime_flow/app/router/app_router.dart';
@@ -12,6 +13,7 @@ class RelatedView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     return Consumer(builder: (context, ref, child) {
       final asyncRelation = ref.watch(subjectRelatedProvider);
       return asyncRelation.when(
@@ -19,9 +21,9 @@ class RelatedView extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   if (relation.data.isNotEmpty) ...[
-                    const Text(
-                      '关联条目',
-                      style: TextStyle(
+                    Text(
+                      l10n.relatedTitle,
+                      style: const TextStyle(
                         fontSize: 20,
                         fontWeight: FontWeight.bold,
                       ),

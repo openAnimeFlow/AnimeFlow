@@ -44,5 +44,19 @@
   "rankingEnd": "到底了",
   "rankingLoadFailed": "載入失敗: {error}",
   "@rankingLoadFailed": {"placeholders": {"error": {}}},
-  "retry": "重試"
+  "retry": "重試",
+  "summaryTitle": "簡介",
+  "tagsTitle": "標籤",
+  "detailsTitle": "詳情",
+  "charactersTitle": "角色",
+  "viewDetails": "查看詳情",
+  "producersTitle": "製作人",
+  "relatedTitle": "關聯條目",
+  "commentsTitle": "吐槽",
+  "episodeCount": "全{count}話",
+  "yourRating": "你的評分:{rating}",
+  "ratingCount": "({count})人評分",
+  "collectionCount": "{count}收藏/",
+  "watchingCount": "{count}再看/",
+  "droppedCount": "{count}拋棄"
 }

@@ -1,3 +1,4 @@
+import 'package:anime_flow/app/localization/app_localizations.dart';
 import 'package:anime_flow/shared/models/bangumi/subject_comments_item.dart';
 import 'package:anime_flow/features/anime_info/presentation/providers/anime_info_provider.dart';
 import 'package:anime_flow/app/router/app_router.dart';
@@ -14,6 +15,7 @@ class InfoCommentView extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = AppLocalizations.of(context);
     final commentsAsync = ref.watch(subjectCommentsProvider);
 
     return commentsAsync.when(
@@ -26,7 +28,8 @@ class InfoCommentView extends ConsumerWidget {
         final subjectComments = viewState.comments;
         final isLoadingMore = viewState.isLoadingMore;
         final hasMore = viewState.hasMore;
-        return _buildContent(context, subjectComments, isLoadingMore, hasMore);
+        return _buildContent(
+            context, subjectComments, isLoadingMore, hasMore, l10n);
       },
     );
   }
@@ -36,6 +39,7 @@ class InfoCommentView extends ConsumerWidget {
     SubjectCommentItem subjectComments,
     bool isLoadingMore,
     bool hasMore,
+    AppLocalizations l10n,
   ) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -43,8 +47,8 @@ class InfoCommentView extends ConsumerWidget {
         Row(
           crossAxisAlignment: CrossAxisAlignment.end,
           children: [
-            const Text(
-              '吐槽',
+            Text(
+              l10n.commentsTitle,
               style: TextStyle(
                 fontSize: 20,
                 fontWeight: FontWeight.bold,

@@ -1,5 +1,6 @@
 import 'dart:math';
 
+import 'package:anime_flow/app/localization/app_localizations.dart';
 import 'package:anime_flow/features/anime_info/presentation/providers/anime_info_provider.dart';
 import 'package:anime_flow/app/router/routes_args.dart';
 import 'package:anime_flow/app/router/app_router.dart';
@@ -14,6 +15,7 @@ class CharactersView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final double windowsWidth = MediaQuery.of(context).size.width;
+    final l10n = AppLocalizations.of(context);
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -31,9 +33,9 @@ class CharactersView extends StatelessWidget {
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        const Text(
-                          '角色',
-                          style: TextStyle(
+                        Text(
+                          l10n.charactersTitle,
+                          style: const TextStyle(
                               fontSize: 20, fontWeight: FontWeight.w600),
                         ),
                         InkWell(
@@ -42,7 +44,7 @@ class CharactersView extends StatelessWidget {
                           child: Row(
                             children: [
                               Text(
-                                '查看详情',
+                                l10n.viewDetails,
                                 style: TextStyle(
                                     fontSize: 16,
                                     fontWeight: FontWeight.w600,

@@ -1,0 +1,13 @@
+{
+  "@@locale": "zh_Hant_HK",
+  "generalSettingsTitle": "一般設定",
+  "languageLabel": "語言",
+  "selectLanguageTooltip": "選擇語言",
+  "simplifiedChinese": "簡體中文",
+  "traditionalChineseTaiwan": "繁體中文（台灣）",
+  "traditionalChineseHongKong": "繁體中文（香港）",
+  "recommendTab": "推薦",
+  "rankingTab": "排行",
+  "mineTab": "我的",
+  "settingsLabel": "設定"
+}

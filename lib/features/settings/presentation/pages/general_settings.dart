@@ -1,39 +1,39 @@
-import 'package:anime_flow/core/constants/storage_key.dart';
-import 'package:anime_flow/core/storage/storage.dart';
+import 'package:anime_flow/app/localization/app_localizations.dart';
+import 'package:anime_flow/app/localization/locale_provider.dart';
 import 'package:anime_flow/features/settings/presentation/providers/setting_provider.dart';
 import 'package:anime_flow/shared/widgets/drop_down_menu.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-class GeneralSettingsPage extends StatefulWidget {
+class GeneralSettingsPage extends ConsumerStatefulWidget {
   const GeneralSettingsPage({super.key});
 
   @override
-  State<GeneralSettingsPage> createState() => _GeneralSettingsPageState();
+  ConsumerState<GeneralSettingsPage> createState() =>
+      _GeneralSettingsPageState();
 }
 
-class _GeneralSettingsPageState extends State<GeneralSettingsPage> {
-  late _LanguageOption _selectedLanguage;
+class _GeneralSettingsPageState extends ConsumerState<GeneralSettingsPage> {
   bool _isLanguageMenuOpen = false;
 
-  @override
-  void initState() {
-    super.initState();
-    final storedLocale = Storage.setting.get(SettingKey.locale);
-    _selectedLanguage = _LanguageOption.values.firstWhere(
-      (language) => language.storageValue == storedLocale,
-      orElse: () => _LanguageOption.simplifiedChinese,
-    );
+  _LanguageOption _languageForLocale(Locale locale) {
+    if (locale.scriptCode == 'Hant' && locale.countryCode == 'HK') {
+      return _LanguageOption.traditionalChineseHongKong;
+    }
+    if (locale.scriptCode == 'Hant' && locale.countryCode == 'TW') {
+      return _LanguageOption.traditionalChineseTaiwan;
+    }
+    return _LanguageOption.simplifiedChinese;
   }
 
   void _setLanguage(_LanguageOption language) {
-    if (language == _selectedLanguage) return;
-    setState(() => _selectedLanguage = language);
-    Storage.setting.put(SettingKey.locale, language.storageValue);
+    ref.read(localeProvider.notifier).setLocale(language.locale);
   }
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
+    final selectedLanguage = _languageForLocale(ref.watch(localeProvider));
     return Scaffold(
       appBar: PreferredSize(
         preferredSize: const Size.fromHeight(kToolbarHeight),
@@ -41,7 +41,7 @@ class _GeneralSettingsPageState extends State<GeneralSettingsPage> {
           builder: (context, ref, _) {
             final isWideScreen = ref.watch(settingsLayoutProvider);
             return AppBar(
-              title: const Text('通用设置'),
+              title: Text(l10n.generalSettingsTitle),
               automaticallyImplyLeading: !isWideScreen,
             );
           },
@@ -54,11 +54,11 @@ class _GeneralSettingsPageState extends State<GeneralSettingsPage> {
             clipBehavior: Clip.antiAlias,
             child: ListTile(
               leading: const Icon(Icons.language),
-              title: const Text('语言'),
+              title: Text(l10n.languageLabel),
               trailing: DropDownMenu<_LanguageOption>(
                 items: _LanguageOption.values,
-                selectedItem: _selectedLanguage,
-                tooltip: '选择语言',
+                selectedItem: selectedLanguage,
+                tooltip: l10n.selectLanguageTooltip,
                 onOpenedChanged: (isOpen) {
                   if (_isLanguageMenuOpen == isOpen) return;
                   setState(() => _isLanguageMenuOpen = isOpen);
@@ -69,7 +69,7 @@ class _GeneralSettingsPageState extends State<GeneralSettingsPage> {
                     mainAxisSize: MainAxisSize.min,
                     children: [
                       Text(
-                        _selectedLanguage.label,
+                        selectedLanguage.label(l10n),
                         style: TextStyle(color: colorScheme.primary),
                       ),
                       AnimatedRotation(
@@ -98,7 +98,7 @@ class _GeneralSettingsPageState extends State<GeneralSettingsPage> {
                               )
                             : null,
                       ),
-                      Text(language.label),
+                      Text(language.label(l10n)),
                     ],
                   );
                 },
@@ -113,12 +113,32 @@ class _GeneralSettingsPageState extends State<GeneralSettingsPage> {
 }
 
 enum _LanguageOption {
-  simplifiedChinese('简体中文', 'zh-Hans'),
-  traditionalChineseTaiwan('繁體中文（台灣）', 'zh-Hant-TW'),
-  traditionalChineseHongKong('繁體中文（香港）', 'zh-Hant-HK');
+  simplifiedChinese,
+  traditionalChineseTaiwan,
+  traditionalChineseHongKong;
 
-  const _LanguageOption(this.label, this.storageValue);
+  const _LanguageOption();
 
-  final String label;
-  final String storageValue;
+  String label(AppLocalizations l10n) => switch (this) {
+        simplifiedChinese => l10n.simplifiedChinese,
+        traditionalChineseTaiwan => l10n.traditionalChineseTaiwan,
+        traditionalChineseHongKong => l10n.traditionalChineseHongKong,
+      };
+
+  Locale get locale => switch (this) {
+        simplifiedChinese => const Locale.fromSubtags(
+            languageCode: 'zh',
+            scriptCode: 'Hans',
+          ),
+        traditionalChineseTaiwan => const Locale.fromSubtags(
+            languageCode: 'zh',
+            scriptCode: 'Hant',
+            countryCode: 'TW',
+          ),
+        traditionalChineseHongKong => const Locale.fromSubtags(
+            languageCode: 'zh',
+            scriptCode: 'Hant',
+            countryCode: 'HK',
+          ),
+      };
 }

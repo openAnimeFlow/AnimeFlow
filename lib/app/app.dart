@@ -1,4 +1,6 @@
 import 'dart:io';
+import 'package:anime_flow/app/localization/app_localizations.dart';
+import 'package:anime_flow/app/localization/locale_provider.dart';
 import 'package:anime_flow/app/router/app_router.dart';
 import 'package:anime_flow/app/theme/theme_provider.dart';
 import 'package:bot_toast/bot_toast.dart';
@@ -16,6 +18,7 @@ class MyApp extends StatelessWidget {
     return Consumer(
       builder: (BuildContext context, WidgetRef ref, Widget? child) {
         final themeState = ref.watch(themeProvider);
+        final locale = ref.watch(localeProvider);
         final fontFamily = themeState.fontFamily;
         return MaterialApp.router(
           key: ValueKey(fontFamily),
@@ -27,6 +30,9 @@ class MyApp extends StatelessWidget {
           darkTheme:
               buildDarkTheme(themeState.seedColor, fontFamily: fontFamily),
           themeMode: themeState.themeMode,
+          locale: locale,
+          localizationsDelegates: AppLocalizations.localizationsDelegates,
+          supportedLocales: AppLocalizations.supportedLocales,
           builder: (context, child) {
             var body = BotToastInit()(context, child);
             body = AppVersionUpdateListener(child: body);

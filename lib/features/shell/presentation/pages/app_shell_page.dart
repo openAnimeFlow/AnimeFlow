@@ -1,3 +1,4 @@
+import 'package:anime_flow/app/localization/app_localizations.dart';
 import 'package:anime_flow/shared/models/tab_item.dart';
 import 'package:anime_flow/features/user/presentation/providers/user_state_provider.dart';
 import 'package:anime_flow/app/router/app_router.dart';
@@ -14,29 +15,30 @@ class AppShellPage extends StatelessWidget {
 
   const AppShellPage({super.key, required this.navigationShell});
 
-  static final List<TabItem> _tabs = [
-    TabItem(
-      title: "推荐",
-      icon: Icons.smart_display_outlined,
-      activeIcon: Icons.smart_display_rounded,
-    ),
-    TabItem(
-      title: "排行",
-      icon: Icons.leaderboard_outlined,
-      activeIcon: Icons.leaderboard_rounded,
-    ),
-    TabItem(
-      title: "我的",
-      icon: Icons.person_outline,
-      activeIcon: Icons.person,
-    ),
-  ];
+  List<TabItem> _tabs(AppLocalizations l10n) => [
+        TabItem(
+          title: l10n.recommendTab,
+          icon: Icons.smart_display_outlined,
+          activeIcon: Icons.smart_display_rounded,
+        ),
+        TabItem(
+          title: l10n.rankingTab,
+          icon: Icons.leaderboard_outlined,
+          activeIcon: Icons.leaderboard_rounded,
+        ),
+        TabItem(
+          title: l10n.mineTab,
+          icon: Icons.person_outline,
+          activeIcon: Icons.person,
+        ),
+      ];
 
   List<NavigationRailDestination> _buildRailDestinations(
     ColorScheme colorScheme,
     String? avatar,
+    AppLocalizations l10n,
   ) {
-    return _tabs.asMap().entries.map((entry) {
+    return _tabs(l10n).asMap().entries.map((entry) {
       final index = entry.key;
       final tab = entry.value;
 
@@ -79,8 +81,9 @@ class AppShellPage extends StatelessWidget {
   List<NavigationDestination> _buildBarDestinations(
     ColorScheme colorScheme,
     String? avatar,
+    AppLocalizations l10n,
   ) {
-    return _tabs.asMap().entries.map((entry) {
+    return _tabs(l10n).asMap().entries.map((entry) {
       final index = entry.key;
       final tab = entry.value;
       if (index == 2 && avatar != null) {
@@ -124,6 +127,7 @@ class AppShellPage extends StatelessWidget {
   Widget build(BuildContext context) {
     final bool isDesktop = MediaQuery.of(context).size.width >= 640;
     final colorScheme = Theme.of(context).colorScheme;
+    final l10n = AppLocalizations.of(context);
     final desktop = SystemUtil.isDesktop;
     return Scaffold(
       body: Row(
@@ -162,11 +166,12 @@ class AppShellPage extends StatelessWidget {
                     child: IconButton(
                       icon: const Icon(Icons.settings_outlined),
                       iconSize: 28,
-                      tooltip: '设置',
+                      tooltip: l10n.settingsLabel,
                       onPressed: () => const SettingsRoute().push(context),
                     ),
                   ),
-                  destinations: _buildRailDestinations(colorScheme, avatar),
+                  destinations:
+                      _buildRailDestinations(colorScheme, avatar, l10n),
                 );
               },
             ),
@@ -187,7 +192,8 @@ class AppShellPage extends StatelessWidget {
                   backgroundColor: colorScheme.surfaceContainerHighest,
                   selectedIndex: navigationShell.currentIndex,
                   onDestinationSelected: navigationShell.goBranch,
-                  destinations: _buildBarDestinations(colorScheme, avatar),
+                  destinations:
+                      _buildBarDestinations(colorScheme, avatar, l10n),
                 );
               },
             ),

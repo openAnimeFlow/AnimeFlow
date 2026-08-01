@@ -20,6 +20,8 @@
   "@watchedProgress": {"placeholders": {"episode": {}, "progress": {}}},
   "popularAnimeTitle": "Popular Anime",
   "loadFailed": "Failed to load",
+  "openSourceLicense": "Open Source License",
+  "noLicenseInfo": "No license information",
   "noMoreContent": "No more content",
   "reload": "Reload",
   "todayBroadcast": "Today's Broadcasts",

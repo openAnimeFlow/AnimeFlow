@@ -68,6 +68,12 @@ class AppLocalizationsEn extends AppLocalizations {
   String get loadFailed => 'Failed to load';
 
   @override
+  String get openSourceLicense => 'Open Source License';
+
+  @override
+  String get noLicenseInfo => 'No license information';
+
+  @override
   String get noMoreContent => 'No more content';
 
   @override

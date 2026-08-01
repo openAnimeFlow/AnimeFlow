@@ -1,5 +1,6 @@
 import 'package:anime_flow/core/network/api/api.dart';
 import 'package:anime_flow/core/utils/utils.dart';
+import 'package:anime_flow/app/localization/app_localizations.dart';
 import 'package:flutter/material.dart';
 
 class AgreementPage extends StatefulWidget {
@@ -43,15 +44,17 @@ class _AgreementPageState extends State<AgreementPage> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
+
     return Scaffold(
       appBar: AppBar(
-        title: const Text('开源协议'),
+        title: Text(l10n.openSourceLicense),
       ),
-      body: _buildBody(),
+      body: _buildBody(l10n),
     );
   }
 
-  Widget _buildBody() {
+  Widget _buildBody(AppLocalizations l10n) {
     if (_isLoading) {
       return const Center(
         child: CircularProgressIndicator(),
@@ -70,7 +73,7 @@ class _AgreementPageState extends State<AgreementPage> {
             ),
             const SizedBox(height: 16),
             Text(
-              '加载失败',
+              l10n.loadFailed,
               style: Theme.of(context).textTheme.titleLarge,
             ),
             const SizedBox(height: 8),
@@ -88,7 +91,7 @@ class _AgreementPageState extends State<AgreementPage> {
             ElevatedButton.icon(
               onPressed: _fetchLicense,
               icon: const Icon(Icons.refresh),
-              label: const Text('重试'),
+              label: Text(l10n.retry),
             ),
           ],
         ),
@@ -96,8 +99,8 @@ class _AgreementPageState extends State<AgreementPage> {
     }
 
     if (_licenseText == null || _licenseText!.isEmpty) {
-      return const Center(
-        child: Text('暂无许可证信息'),
+      return Center(
+        child: Text(l10n.noLicenseInfo),
       );
     }
 

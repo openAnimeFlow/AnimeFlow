@@ -20,6 +20,8 @@
   "@watchedProgress": {"placeholders": {"episode": {}, "progress": {}}},
   "popularAnimeTitle": "热门动画",
   "loadFailed": "加载失败",
+  "openSourceLicense": "开源协议",
+  "noLicenseInfo": "暂无许可证信息",
   "noMoreContent": "没有更多了",
   "reload": "重新加载",
   "todayBroadcast": "今日放送",

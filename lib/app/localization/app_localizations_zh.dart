@@ -68,6 +68,12 @@ class AppLocalizationsZh extends AppLocalizations {
   String get loadFailed => '加载失败';
 
   @override
+  String get openSourceLicense => '開源協議';
+
+  @override
+  String get noLicenseInfo => '暫無授權資訊';
+
+  @override
   String get noMoreContent => '没有更多了';
 
   @override
@@ -1108,6 +1114,12 @@ class AppLocalizationsZhHans extends AppLocalizationsZh {
 
   @override
   String get loadFailed => '加载失败';
+
+  @override
+  String get openSourceLicense => '开源协议';
+
+  @override
+  String get noLicenseInfo => '暂无许可证信息';
 
   @override
   String get noMoreContent => '没有更多了';
@@ -2152,6 +2164,12 @@ class AppLocalizationsZhHantHk extends AppLocalizationsZh {
   String get loadFailed => '載入失敗';
 
   @override
+  String get openSourceLicense => '開源授權條款';
+
+  @override
+  String get noLicenseInfo => '暫無授權資訊';
+
+  @override
   String get noMoreContent => '沒有更多了';
 
   @override
@@ -2998,6 +3016,12 @@ class AppLocalizationsZhHantTw extends AppLocalizationsZh {
 
   @override
   String get loadFailed => '載入失敗';
+
+  @override
+  String get openSourceLicense => '開源授權條款';
+
+  @override
+  String get noLicenseInfo => '暫無授權資訊';
 
   @override
   String get noMoreContent => '沒有更多了';

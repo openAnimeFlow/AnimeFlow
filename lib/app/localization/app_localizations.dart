@@ -217,6 +217,18 @@ abstract class AppLocalizations {
   /// **'加载失败'**
   String get loadFailed;
 
+  /// No description provided for @openSourceLicense.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'开源协议'**
+  String get openSourceLicense;
+
+  /// No description provided for @noLicenseInfo.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'暂无许可证信息'**
+  String get noLicenseInfo;
+
   /// No description provided for @noMoreContent.
   ///
   /// In zh_Hans, this message translates to:

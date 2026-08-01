@@ -1,10 +1,2 @@
-class InfoRouteExtra {
-  final int id;
-  final String name;
-  final String image;
-
-  InfoRouteExtra(
-      {required this.id,
-      required this.name,
-      required this.image});
-}
+@Deprecated('Use package:anime_flow/app/router/model/info_route_extra.dart')
+export 'package:anime_flow/app/router/model/info_route_extra.dart';

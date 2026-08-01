@@ -5,8 +5,8 @@ import 'package:anime_flow/features/app_update/presentation/widgets/version_upda
 import 'package:flutter/cupertino.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import 'core/apply_update/app_info_provider.dart';
-import 'core/apply_update/app_info_state.dart';
+import '../core/apply_update/app_info_provider.dart';
+import '../core/apply_update/app_info_state.dart';
 
 class AppVersionUpdateListener extends ConsumerStatefulWidget {
   const AppVersionUpdateListener({super.key, required this.child});

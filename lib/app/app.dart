@@ -5,7 +5,7 @@ import 'package:bot_toast/bot_toast.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:anime_flow/shared/widgets/windows_title_bar.dart';
-import 'package:anime_flow/app_version.dart';
+import 'package:anime_flow/app/app_version.dart';
 import 'package:anime_flow/core/constants/assets_path_constants.dart';
 
 class MyApp extends StatelessWidget {

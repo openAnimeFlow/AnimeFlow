@@ -247,6 +247,23 @@ class AppLocalizationsZh extends AppLocalizations {
   }
 
   @override
+  String get confirmAllWatched => '確認全部看過';
+
+  @override
+  String get confirmAllWatchedMessage => '確定要將此番劇的全部劇集標記為看過嗎？';
+
+  @override
+  String get markAllWatchedSuccess => '已將全部劇集標記為看過';
+
+  @override
+  String loadedEpisodes(Object count) {
+    return '已載入 $count 集';
+  }
+
+  @override
+  String get allWatched => '全部看過';
+
+  @override
   String yourRating(Object rating) {
     return '你的评分:$rating';
   }
@@ -384,7 +401,7 @@ class AppLocalizationsZh extends AppLocalizations {
   String get copySourceLink => '复制数据源链接';
 
   @override
-  String get copied => '已复制';
+  String get copied => '已複製';
 
   @override
   String get sourceLinkCopied => '数据源链接已复制';
@@ -716,6 +733,83 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get login => '登录';
+
+  @override
+  String get error => '錯誤';
+
+  @override
+  String get moreActions => '更多操作';
+
+  @override
+  String get unableOpenLink => '無法開啟連結';
+
+  @override
+  String get websiteLinkCopied => '網站連結已複製到剪貼簿';
+
+  @override
+  String saveImageFailed(Object error) {
+    return '儲存圖片失敗: $error';
+  }
+
+  @override
+  String get openInBrowser => '在瀏覽器中查看';
+
+  @override
+  String get downloadCover => '下載封面';
+
+  @override
+  String get copyWebsite => '複製網站連結';
+
+  @override
+  String get loginSuccess => '登入成功';
+
+  @override
+  String get welcomeTo => '歡迎來到 ';
+
+  @override
+  String get loginToManageCollection => '登入後管理收藏';
+
+  @override
+  String get email => '電子郵件';
+
+  @override
+  String get password => '密碼';
+
+  @override
+  String get enterEmail => '請輸入電子郵件';
+
+  @override
+  String get invalidEmail => '請輸入有效的電子郵件';
+
+  @override
+  String get enterPassword => '請輸入密碼';
+
+  @override
+  String get passwordMinLength => '密碼至少需要 6 位';
+
+  @override
+  String get showPassword => '顯示密碼';
+
+  @override
+  String get hidePassword => '隱藏密碼';
+
+  @override
+  String get forgotPassword => '忘記密碼';
+
+  @override
+  String get loggingIn => '登入中...';
+
+  @override
+  String get bangumiAuthorizeLogin => 'Bangumi 授權登入';
+
+  @override
+  String get bangumi => 'Bangumi';
+
+  @override
+  String get noAccount => '還沒有帳號？';
+
+  @override
+  String get registerNow => '立即註冊';
 
   @override
   String get authorizeLogin => '授权登录';
@@ -1406,6 +1500,23 @@ class AppLocalizationsZhHans extends AppLocalizationsZh {
   }
 
   @override
+  String get confirmAllWatched => '确认全部已看';
+
+  @override
+  String get confirmAllWatchedMessage => '确定将该番剧的全部剧集标记为已看吗？';
+
+  @override
+  String get markAllWatchedSuccess => '已将全部剧集标记为已看';
+
+  @override
+  String loadedEpisodes(Object count) {
+    return '已加载 $count 集';
+  }
+
+  @override
+  String get allWatched => '全部已看';
+
+  @override
   String yourRating(Object rating) {
     return '你的评分:$rating';
   }
@@ -1875,6 +1986,83 @@ class AppLocalizationsZhHans extends AppLocalizationsZh {
 
   @override
   String get login => '登录';
+
+  @override
+  String get error => '错误';
+
+  @override
+  String get moreActions => '更多操作';
+
+  @override
+  String get unableOpenLink => '无法打开链接';
+
+  @override
+  String get websiteLinkCopied => '网站链接已复制到剪贴板';
+
+  @override
+  String saveImageFailed(Object error) {
+    return '保存图片失败: $error';
+  }
+
+  @override
+  String get openInBrowser => '浏览器查看';
+
+  @override
+  String get downloadCover => '下载封面';
+
+  @override
+  String get copyWebsite => '复制网站';
+
+  @override
+  String get loginSuccess => '登录成功';
+
+  @override
+  String get welcomeTo => '欢迎来到 ';
+
+  @override
+  String get loginToManageCollection => '登录后进行收藏管理';
+
+  @override
+  String get email => '邮箱';
+
+  @override
+  String get password => '密码';
+
+  @override
+  String get enterEmail => '请输入邮箱';
+
+  @override
+  String get invalidEmail => '请输入有效邮箱';
+
+  @override
+  String get enterPassword => '请输入密码';
+
+  @override
+  String get passwordMinLength => '密码至少需要 6 位';
+
+  @override
+  String get showPassword => '显示密码';
+
+  @override
+  String get hidePassword => '隐藏密码';
+
+  @override
+  String get forgotPassword => '忘记密码';
+
+  @override
+  String get loggingIn => '登录中...';
+
+  @override
+  String get bangumiAuthorizeLogin => 'Bangumi 授权登录';
+
+  @override
+  String get bangumi => 'Bangumi';
+
+  @override
+  String get noAccount => '还没有账号？';
+
+  @override
+  String get registerNow => '立即注册';
 
   @override
   String get authorizeLogin => '授权登录';
@@ -2565,6 +2753,23 @@ class AppLocalizationsZhHantHk extends AppLocalizationsZh {
   }
 
   @override
+  String get confirmAllWatched => '確認全部看過';
+
+  @override
+  String get confirmAllWatchedMessage => '確定要將此番劇的全部劇集標記為看過嗎？';
+
+  @override
+  String get markAllWatchedSuccess => '已將全部劇集標記為看過';
+
+  @override
+  String loadedEpisodes(Object count) {
+    return '已載入 $count 集';
+  }
+
+  @override
+  String get allWatched => '全部看過';
+
+  @override
   String yourRating(Object rating) {
     return '你的評分:$rating';
   }
@@ -3034,6 +3239,83 @@ class AppLocalizationsZhHantHk extends AppLocalizationsZh {
 
   @override
   String get login => '登入';
+
+  @override
+  String get error => '錯誤';
+
+  @override
+  String get moreActions => '更多操作';
+
+  @override
+  String get unableOpenLink => '無法開啟連結';
+
+  @override
+  String get websiteLinkCopied => '網站連結已複製到剪貼簿';
+
+  @override
+  String saveImageFailed(Object error) {
+    return '儲存圖片失敗: $error';
+  }
+
+  @override
+  String get openInBrowser => '在瀏覽器中查看';
+
+  @override
+  String get downloadCover => '下載封面';
+
+  @override
+  String get copyWebsite => '複製網站連結';
+
+  @override
+  String get loginSuccess => '登入成功';
+
+  @override
+  String get welcomeTo => '歡迎來到 ';
+
+  @override
+  String get loginToManageCollection => '登入後管理收藏';
+
+  @override
+  String get email => '電子郵件';
+
+  @override
+  String get password => '密碼';
+
+  @override
+  String get enterEmail => '請輸入電子郵件';
+
+  @override
+  String get invalidEmail => '請輸入有效的電子郵件';
+
+  @override
+  String get enterPassword => '請輸入密碼';
+
+  @override
+  String get passwordMinLength => '密碼至少需要 6 位';
+
+  @override
+  String get showPassword => '顯示密碼';
+
+  @override
+  String get hidePassword => '隱藏密碼';
+
+  @override
+  String get forgotPassword => '忘記密碼';
+
+  @override
+  String get loggingIn => '登入中...';
+
+  @override
+  String get bangumiAuthorizeLogin => 'Bangumi 授權登入';
+
+  @override
+  String get bangumi => 'Bangumi';
+
+  @override
+  String get noAccount => '還沒有帳號？';
+
+  @override
+  String get registerNow => '立即註冊';
 
   @override
   String get authorizeLogin => '授權登入';
@@ -3533,6 +3815,23 @@ class AppLocalizationsZhHantTw extends AppLocalizationsZh {
   }
 
   @override
+  String get confirmAllWatched => '確認全部看過';
+
+  @override
+  String get confirmAllWatchedMessage => '確定要將此番劇的全部劇集標記為看過嗎？';
+
+  @override
+  String get markAllWatchedSuccess => '已將全部劇集標記為看過';
+
+  @override
+  String loadedEpisodes(Object count) {
+    return '已載入 $count 集';
+  }
+
+  @override
+  String get allWatched => '全部看過';
+
+  @override
   String yourRating(Object rating) {
     return '你的評分:$rating';
   }
@@ -4002,6 +4301,83 @@ class AppLocalizationsZhHantTw extends AppLocalizationsZh {
 
   @override
   String get login => '登入';
+
+  @override
+  String get error => '錯誤';
+
+  @override
+  String get moreActions => '更多操作';
+
+  @override
+  String get unableOpenLink => '無法開啟連結';
+
+  @override
+  String get websiteLinkCopied => '網站連結已複製到剪貼簿';
+
+  @override
+  String saveImageFailed(Object error) {
+    return '儲存圖片失敗: $error';
+  }
+
+  @override
+  String get openInBrowser => '在瀏覽器中查看';
+
+  @override
+  String get downloadCover => '下載封面';
+
+  @override
+  String get copyWebsite => '複製網站連結';
+
+  @override
+  String get loginSuccess => '登入成功';
+
+  @override
+  String get welcomeTo => '歡迎來到 ';
+
+  @override
+  String get loginToManageCollection => '登入後管理收藏';
+
+  @override
+  String get email => '電子郵件';
+
+  @override
+  String get password => '密碼';
+
+  @override
+  String get enterEmail => '請輸入電子郵件';
+
+  @override
+  String get invalidEmail => '請輸入有效的電子郵件';
+
+  @override
+  String get enterPassword => '請輸入密碼';
+
+  @override
+  String get passwordMinLength => '密碼至少需要 6 位';
+
+  @override
+  String get showPassword => '顯示密碼';
+
+  @override
+  String get hidePassword => '隱藏密碼';
+
+  @override
+  String get forgotPassword => '忘記密碼';
+
+  @override
+  String get loggingIn => '登入中...';
+
+  @override
+  String get bangumiAuthorizeLogin => 'Bangumi 授權登入';
+
+  @override
+  String get bangumi => 'Bangumi';
+
+  @override
+  String get noAccount => '還沒有帳號？';
+
+  @override
+  String get registerNow => '立即註冊';
 
   @override
   String get authorizeLogin => '授權登入';

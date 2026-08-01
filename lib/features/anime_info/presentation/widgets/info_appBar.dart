@@ -1,3 +1,4 @@
+import 'package:anime_flow/app/localization/app_localizations.dart';
 import 'package:anime_flow/core/network/api_path.dart';
 import 'package:anime_flow/core/network/api/api.dart';
 import 'package:anime_flow/features/anime_info/presentation/providers/anime_info_provider.dart';
@@ -23,32 +24,42 @@ class InfoAppbar extends ConsumerWidget {
     required this.isPinned,
   });
 
-  Future<void> _openInBrowser(String url) async {
+  Future<void> _openInBrowser(String url, AppLocalizations l10n) async {
     final uri = Uri.parse(url);
     if (await canLaunchUrl(uri)) {
       await launchUrl(uri, mode: LaunchMode.externalApplication);
     } else {
-      NotificationToast.show('错误', '无法打开链接', maxWidth: 500);
+      NotificationToast.show(l10n.error, l10n.unableOpenLink, maxWidth: 500);
     }
   }
 
-  Future<void> _copyUrl(BuildContext context, String url) async {
+  Future<void> _copyUrl(
+    BuildContext context,
+    String url,
+    AppLocalizations l10n,
+  ) async {
     await Clipboard.setData(ClipboardData(text: url));
     if (context.mounted) {
-      NotificationToast.show('已复制', '网站链接已复制到剪贴板', maxWidth: 500);
+      NotificationToast.show(l10n.copied, l10n.websiteLinkCopied,
+          maxWidth: 500);
     }
   }
 
-  Future<void> _downloadCover(String image, String name) async {
+  Future<void> _downloadCover(
+    String image,
+    String name,
+    AppLocalizations l10n,
+  ) async {
     try {
       final message = await Api.downloadImage(image, name);
-      NotificationToast.show('提示', message, maxWidth: 500);
+      NotificationToast.show(l10n.tip, message, maxWidth: 500);
     } on StoragePermissionDeniedException catch (e) {
       LiggLogger().e('保存图片失败:$e');
-      NotificationToast.show('提示', e.message, maxWidth: 500);
+      NotificationToast.show(l10n.tip, e.message, maxWidth: 500);
     } catch (e) {
       LiggLogger().e('保存图片失败:$e');
-      NotificationToast.show('提示', '保存图片失败:$e', maxWidth: 500);
+      NotificationToast.show(l10n.tip, l10n.saveImageFailed(e.toString()),
+          maxWidth: 500);
     }
   }
 
@@ -58,16 +69,17 @@ class InfoAppbar extends ConsumerWidget {
     MoreMenuAction action,
   ) {
     final args = ref.read(animeInfoArgsProvider);
+    final l10n = AppLocalizations.of(context);
     final url = '${CommonApi.bgmTV}/subject/${args.id}';
     switch (action) {
       case MoreMenuAction.openInBrowser:
-        _openInBrowser(url);
+        _openInBrowser(url, l10n);
         break;
       case MoreMenuAction.downloadCover:
-        _downloadCover(args.image, args.name);
+        _downloadCover(args.image, args.name, l10n);
         break;
       case MoreMenuAction.copyUrl:
-        _copyUrl(context, url);
+        _copyUrl(context, url, l10n);
         break;
     }
   }
@@ -91,8 +103,9 @@ class InfoAppbar extends ConsumerWidget {
   }
 
   Widget _buildMenu(BuildContext context, WidgetRef ref) {
+    final l10n = AppLocalizations.of(context);
     return DropDownMenu<MoreMenuAction>(
-      tooltip: '更多操作',
+      tooltip: l10n.moreActions,
       items: MoreMenuAction.values,
       offset: const Offset(0, 40),
       disableSelected: false,
@@ -114,7 +127,7 @@ class InfoAppbar extends ConsumerWidget {
               color: Theme.of(context).colorScheme.primary,
             ),
             const SizedBox(width: 12),
-            Text(item.label),
+            Text(item.label(l10n)),
           ],
         );
       },
@@ -187,12 +200,17 @@ class InfoAppbar extends ConsumerWidget {
 
 /// 更多菜单操作枚举
 enum MoreMenuAction {
-  openInBrowser('浏览器查看', Icons.open_in_browser),
-  downloadCover('下载封面', Icons.download),
-  copyUrl('复制网站', Icons.link);
+  openInBrowser(Icons.open_in_browser),
+  downloadCover(Icons.download),
+  copyUrl(Icons.link);
 
-  final String label;
   final IconData icon;
 
-  const MoreMenuAction(this.label, this.icon);
+  const MoreMenuAction(this.icon);
+
+  String label(AppLocalizations l10n) => switch (this) {
+        MoreMenuAction.openInBrowser => l10n.openInBrowser,
+        MoreMenuAction.downloadCover => l10n.downloadCover,
+        MoreMenuAction.copyUrl => l10n.copyWebsite,
+      };
 }

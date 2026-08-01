@@ -1,3 +1,4 @@
+import 'package:anime_flow/app/localization/app_localizations.dart';
 import 'package:anime_flow/core/constants/assets_path_constants.dart';
 import 'package:anime_flow/core/network/api_path.dart';
 import 'package:anime_flow/core/network/clients/flow_client.dart';
@@ -11,7 +12,6 @@ import 'package:anime_flow/shared/widgets/notification_toast.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_svg/svg.dart';
-import 'package:go_router/go_router.dart';
 
 class LoginPage extends ConsumerStatefulWidget {
   final AppBar? appBar;
@@ -53,7 +53,9 @@ class _LoginPageState extends ConsumerState<LoginPage> {
       ref.invalidate(isLoggedInProvider);
       ref.invalidate(currentUserInfoProvider);
       ref.invalidate(userCollectionsProvider);
-      NotificationToast.show('提示', '登录成功', align: Alignment.topCenter);
+      final l10n = AppLocalizations.of(context);
+      NotificationToast.show(l10n.tip, l10n.loginSuccess,
+          align: Alignment.topCenter);
       const UserRoute().go(context);
     } on AnimeFlowApiException catch (e) {
       if (!mounted) return;
@@ -127,6 +129,7 @@ class _LoginPageState extends ConsumerState<LoginPage> {
   Widget _buildForm() {
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
+    final l10n = AppLocalizations.of(context);
 
     return Form(
       key: _formKey,
@@ -138,13 +141,13 @@ class _LoginPageState extends ConsumerState<LoginPage> {
           Text.rich(TextSpan(
             children: [
               TextSpan(
-                text: '欢迎来到 ',
+                text: l10n.welcomeTo,
                 style: theme.textTheme.titleLarge?.copyWith(
                   fontWeight: FontWeight.w700,
                 ),
               ),
               TextSpan(
-                text: '登录后进行收藏管理',
+                text: l10n.loginToManageCollection,
                 style: theme.textTheme.titleLarge?.copyWith(
                   fontWeight: FontWeight.w700,
                   fontSize: 15,
@@ -158,13 +161,13 @@ class _LoginPageState extends ConsumerState<LoginPage> {
             textInputAction: TextInputAction.next,
             decoration: _inputDecoration(
               context,
-              label: '邮箱',
+              label: l10n.email,
               icon: Icons.email_outlined,
             ),
             validator: (value) {
               final account = value?.trim() ?? '';
-              if (account.isEmpty) return '请输入邮箱';
-              if (!account.contains('@')) return '请输入有效邮箱';
+              if (account.isEmpty) return l10n.enterEmail;
+              if (!account.contains('@')) return l10n.invalidEmail;
               return null;
             },
           ),
@@ -175,10 +178,11 @@ class _LoginPageState extends ConsumerState<LoginPage> {
             onFieldSubmitted: (_) => _submit(),
             decoration: _inputDecoration(
               context,
-              label: '密码',
+              label: l10n.password,
               icon: Icons.lock_outline,
               suffixIcon: IconButton(
-                tooltip: _obscurePassword ? '显示密码' : '隐藏密码',
+                tooltip:
+                    _obscurePassword ? l10n.showPassword : l10n.hidePassword,
                 onPressed: () {
                   setState(() => _obscurePassword = !_obscurePassword);
                 },
@@ -191,8 +195,8 @@ class _LoginPageState extends ConsumerState<LoginPage> {
             ),
             validator: (value) {
               final password = value ?? '';
-              if (password.isEmpty) return '请输入密码';
-              if (password.length < 6) return '密码至少需要 6 位';
+              if (password.isEmpty) return l10n.enterPassword;
+              if (password.length < 6) return l10n.passwordMinLength;
               return null;
             },
           ),
@@ -200,7 +204,7 @@ class _LoginPageState extends ConsumerState<LoginPage> {
             alignment: Alignment.centerRight,
             child: TextButton(
               onPressed: () => const ForgotPasswordRoute().push(context),
-              child: const Text('忘记密码'),
+              child: Text(l10n.forgotPassword),
             ),
           ),
           FilledButton.icon(
@@ -212,7 +216,7 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                     child: CircularProgressIndicator(strokeWidth: 2),
                   )
                 : const Icon(Icons.login_outlined),
-            label: Text(_isSubmitting ? '登录中...' : '登录'),
+            label: Text(_isSubmitting ? l10n.loggingIn : l10n.login),
             style: FilledButton.styleFrom(
               minimumSize: const Size.fromHeight(48),
               shape: RoundedRectangleBorder(
@@ -236,7 +240,7 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                     height: 20,
                     width: 20,
                   ),
-                  label: const Text('Bangumi 授权登录'),
+                  label: Text(l10n.bangumiAuthorizeLogin),
                   style: OutlinedButton.styleFrom(
                     minimumSize: const Size.fromHeight(44),
                     shape: RoundedRectangleBorder(
@@ -245,11 +249,11 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                   ),
                 ),
               ),
-              const NetworkCheckButton(
+              NetworkCheckButton(
                 url: CommonApi.bgmTV,
-                label: 'Bangumi',
-                successHint: 'Bangumi 授权与绑定应可正常使用。',
-                failureHint: '授权或绑定 Bangumi 时，建议开启 VPN 或代理后重试。',
+                label: l10n.bangumi,
+                successHint: l10n.bangumiBindSuccessHint,
+                failureHint: l10n.bangumiBindFailureHint,
               ),
             ],
           ),
@@ -257,14 +261,14 @@ class _LoginPageState extends ConsumerState<LoginPage> {
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
               Text(
-                '还没有账号？',
+                l10n.noAccount,
                 style: theme.textTheme.bodySmall?.copyWith(
                   color: colorScheme.onSurfaceVariant,
                 ),
               ),
               TextButton(
-                onPressed: () => context.push('/register'),
-                child: const Text('立即注册'),
+                onPressed: () => const RegisterRoute().push(context),
+                child: Text(l10n.registerNow),
               ),
             ],
           ),

@@ -1,3 +1,4 @@
+import 'package:anime_flow/app/localization/app_localizations.dart';
 import 'package:anime_flow/core/constants/layout_constant.dart';
 import 'package:anime_flow/shared/models/player/bangumi/episodes_item.dart';
 import 'package:anime_flow/features/player/presentation/providers/episodes_provider.dart';
@@ -43,6 +44,7 @@ class _EpisodesDialogState extends ConsumerState<EpisodesDialog> {
     final selectedEpisodeId = episodesState?.episodeId ?? 0;
     final subjectId =
         ref.watch(playExtraProvider.select((s) => s.playExtra.subjectId));
+    final l10n = AppLocalizations.of(context);
 
     return Align(
       alignment: Alignment.centerRight,
@@ -58,7 +60,7 @@ class _EpisodesDialogState extends ConsumerState<EpisodesDialog> {
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 Text(
-                  "章节列表",
+                  l10n.episodeSelection,
                   style: TextStyle(
                     fontSize: 20,
                     fontWeight: FontWeight.bold,
@@ -76,6 +78,7 @@ class _EpisodesDialogState extends ConsumerState<EpisodesDialog> {
             Expanded(
               child: _buildEpisodesList(
                 context,
+                l10n: l10n,
                 episodesAsync: episodesAsync,
                 episodes: episodes,
                 selectedEpisodeId: selectedEpisodeId,
@@ -144,6 +147,7 @@ class _EpisodesDialogState extends ConsumerState<EpisodesDialog> {
 
   Widget _buildEpisodesList(
     BuildContext context, {
+    required AppLocalizations l10n,
     required AsyncValue<EpisodesData> episodesAsync,
     required List<EpisodeData>? episodes,
     required int selectedEpisodeId,
@@ -160,12 +164,12 @@ class _EpisodesDialogState extends ConsumerState<EpisodesDialog> {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            const Text('章节加载失败'),
+            Text(l10n.episodeLoadFailed),
             const SizedBox(height: 12),
             FilledButton(
               onPressed: () =>
                   ref.read(subjectEpisodesProvider(subjectId).notifier).retry(),
-              child: const Text('重试'),
+              child: Text(l10n.retry),
             ),
           ],
         ),
@@ -173,7 +177,7 @@ class _EpisodesDialogState extends ConsumerState<EpisodesDialog> {
     }
 
     if (episodes == null || episodes.isEmpty) {
-      return const Center(child: Text('暂无章节数据'));
+      return Center(child: Text(l10n.noEpisodeData));
     }
 
     _scrollToSelectedEpisode(

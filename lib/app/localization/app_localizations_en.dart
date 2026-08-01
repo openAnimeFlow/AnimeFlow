@@ -248,6 +248,24 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
+  String get confirmAllWatched => 'Mark all as watched?';
+
+  @override
+  String get confirmAllWatchedMessage =>
+      'Mark all episodes of this anime as watched?';
+
+  @override
+  String get markAllWatchedSuccess => 'All episodes marked as watched';
+
+  @override
+  String loadedEpisodes(Object count) {
+    return '$count episodes loaded';
+  }
+
+  @override
+  String get allWatched => 'All watched';
+
+  @override
   String yourRating(Object rating) {
     return 'Your rating: $rating';
   }
@@ -721,6 +739,83 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get login => 'Log in';
+
+  @override
+  String get error => 'Error';
+
+  @override
+  String get moreActions => 'More actions';
+
+  @override
+  String get unableOpenLink => 'Unable to open link';
+
+  @override
+  String get websiteLinkCopied => 'Website link copied to clipboard';
+
+  @override
+  String saveImageFailed(Object error) {
+    return 'Failed to save image: $error';
+  }
+
+  @override
+  String get openInBrowser => 'Open in browser';
+
+  @override
+  String get downloadCover => 'Download cover';
+
+  @override
+  String get copyWebsite => 'Copy website link';
+
+  @override
+  String get loginSuccess => 'Logged in successfully';
+
+  @override
+  String get welcomeTo => 'Welcome to ';
+
+  @override
+  String get loginToManageCollection => 'Log in to manage your collection';
+
+  @override
+  String get email => 'Email';
+
+  @override
+  String get password => 'Password';
+
+  @override
+  String get enterEmail => 'Please enter your email';
+
+  @override
+  String get invalidEmail => 'Please enter a valid email';
+
+  @override
+  String get enterPassword => 'Please enter your password';
+
+  @override
+  String get passwordMinLength => 'Password must be at least 6 characters';
+
+  @override
+  String get showPassword => 'Show password';
+
+  @override
+  String get hidePassword => 'Hide password';
+
+  @override
+  String get forgotPassword => 'Forgot password';
+
+  @override
+  String get loggingIn => 'Logging in...';
+
+  @override
+  String get bangumiAuthorizeLogin => 'Authorize with Bangumi';
+
+  @override
+  String get bangumi => 'Bangumi';
+
+  @override
+  String get noAccount => 'Don\'t have an account?';
+
+  @override
+  String get registerNow => 'Register now';
 
   @override
   String get authorizeLogin => 'Authorize login';

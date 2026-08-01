@@ -547,6 +547,36 @@ abstract class AppLocalizations {
   /// **'全{count}话'**
   String episodeCount(Object count);
 
+  /// No description provided for @confirmAllWatched.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'确认全部已看'**
+  String get confirmAllWatched;
+
+  /// No description provided for @confirmAllWatchedMessage.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'确定将该番剧的全部剧集标记为已看吗？'**
+  String get confirmAllWatchedMessage;
+
+  /// No description provided for @markAllWatchedSuccess.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'已将全部剧集标记为已看'**
+  String get markAllWatchedSuccess;
+
+  /// No description provided for @loadedEpisodes.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'已加载 {count} 集'**
+  String loadedEpisodes(Object count);
+
+  /// No description provided for @allWatched.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'全部已看'**
+  String get allWatched;
+
   /// No description provided for @yourRating.
   ///
   /// In zh_Hans, this message translates to:
@@ -1428,6 +1458,156 @@ abstract class AppLocalizations {
   /// In zh_Hans, this message translates to:
   /// **'登录'**
   String get login;
+
+  /// No description provided for @error.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'错误'**
+  String get error;
+
+  /// No description provided for @moreActions.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'更多操作'**
+  String get moreActions;
+
+  /// No description provided for @unableOpenLink.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'无法打开链接'**
+  String get unableOpenLink;
+
+  /// No description provided for @websiteLinkCopied.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'网站链接已复制到剪贴板'**
+  String get websiteLinkCopied;
+
+  /// No description provided for @saveImageFailed.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'保存图片失败: {error}'**
+  String saveImageFailed(Object error);
+
+  /// No description provided for @openInBrowser.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'浏览器查看'**
+  String get openInBrowser;
+
+  /// No description provided for @downloadCover.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'下载封面'**
+  String get downloadCover;
+
+  /// No description provided for @copyWebsite.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'复制网站'**
+  String get copyWebsite;
+
+  /// No description provided for @loginSuccess.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'登录成功'**
+  String get loginSuccess;
+
+  /// No description provided for @welcomeTo.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'欢迎来到 '**
+  String get welcomeTo;
+
+  /// No description provided for @loginToManageCollection.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'登录后进行收藏管理'**
+  String get loginToManageCollection;
+
+  /// No description provided for @email.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'邮箱'**
+  String get email;
+
+  /// No description provided for @password.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'密码'**
+  String get password;
+
+  /// No description provided for @enterEmail.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'请输入邮箱'**
+  String get enterEmail;
+
+  /// No description provided for @invalidEmail.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'请输入有效邮箱'**
+  String get invalidEmail;
+
+  /// No description provided for @enterPassword.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'请输入密码'**
+  String get enterPassword;
+
+  /// No description provided for @passwordMinLength.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'密码至少需要 6 位'**
+  String get passwordMinLength;
+
+  /// No description provided for @showPassword.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'显示密码'**
+  String get showPassword;
+
+  /// No description provided for @hidePassword.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'隐藏密码'**
+  String get hidePassword;
+
+  /// No description provided for @forgotPassword.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'忘记密码'**
+  String get forgotPassword;
+
+  /// No description provided for @loggingIn.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'登录中...'**
+  String get loggingIn;
+
+  /// No description provided for @bangumiAuthorizeLogin.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'Bangumi 授权登录'**
+  String get bangumiAuthorizeLogin;
+
+  /// No description provided for @bangumi.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'Bangumi'**
+  String get bangumi;
+
+  /// No description provided for @noAccount.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'还没有账号？'**
+  String get noAccount;
+
+  /// No description provided for @registerNow.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'立即注册'**
+  String get registerNow;
 
   /// No description provided for @authorizeLogin.
   ///

@@ -1,3 +1,4 @@
+import 'package:anime_flow/app/localization/app_localizations.dart';
 import 'package:anime_flow/core/constants/constants.dart';
 import 'package:anime_flow/shared/models/bangumi/subjects_info_item.dart';
 import 'package:anime_flow/core/network/clients/flow_client.dart';
@@ -73,20 +74,21 @@ class _EpisodesDrawerViewState extends ConsumerState<EpisodesDrawerView> {
 
   Future<void> _markAllEpisodesWatched() async {
     if (_isMarkingAllWatched) return;
+    final l10n = AppLocalizations.of(context);
 
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (dialogContext) => AlertDialog(
-        title: const Text('确认全部已看'),
-        content: const Text('确定将该番剧的全部剧集标记为已看吗？'),
+        title: Text(l10n.confirmAllWatched),
+        content: Text(l10n.confirmAllWatchedMessage),
         actions: [
           TextButton(
             onPressed: () => Navigator.of(dialogContext).pop(false),
-            child: const Text('取消'),
+            child: Text(l10n.cancel),
           ),
           TextButton(
             onPressed: () => Navigator.of(dialogContext).pop(true),
-            child: const Text('确定'),
+            child: Text(l10n.confirm),
           ),
         ],
       ),
@@ -99,13 +101,13 @@ class _EpisodesDrawerViewState extends ConsumerState<EpisodesDrawerView> {
           .read(subjectEpisodesProvider(widget.subjectItem.id).notifier)
           .markAllEpisodesWatched();
       if (!mounted) return;
-      NotificationToast.show('提示', '已将全部剧集标记为已看');
+      NotificationToast.show(l10n.tip, l10n.markAllWatchedSuccess);
     } on AnimeFlowApiException catch (e) {
       if (!mounted) return;
-      NotificationToast.show('更新失败', e.message);
+      NotificationToast.show(l10n.updateFailed, e.message);
     } catch (e) {
       if (!mounted) return;
-      NotificationToast.show('更新失败', e.toString());
+      NotificationToast.show(l10n.updateFailed, e.toString());
     } finally {
       if (mounted) {
         setState(() => _isMarkingAllWatched = false);
@@ -136,6 +138,7 @@ class _EpisodesDrawerViewState extends ConsumerState<EpisodesDrawerView> {
     final subjectItem = widget.subjectItem;
     final episodesAsync = ref.watch(subjectEpisodesProvider(subjectItem.id));
     final isLoggedIn = ref.watch(isLoggedInProvider).value ?? false;
+    final l10n = AppLocalizations.of(context);
 
     return episodesAsync.when(
       loading: () => const Center(
@@ -150,7 +153,7 @@ class _EpisodesDrawerViewState extends ConsumerState<EpisodesDrawerView> {
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              const Text('剧集加载失败'),
+              Text(l10n.episodeLoadFailed),
               const SizedBox(height: 8),
               Text(
                 '$error',
@@ -167,14 +170,14 @@ class _EpisodesDrawerViewState extends ConsumerState<EpisodesDrawerView> {
                     .read(subjectEpisodesProvider(subjectItem.id).notifier)
                     .retry(),
                 icon: const Icon(Icons.refresh),
-                label: const Text('重试'),
+                label: Text(l10n.retry),
               ),
             ],
           ),
         );
       },
       data: (episodesState) =>
-          _buildEpisodesList(episodesState, subjectItem, isLoggedIn),
+          _buildEpisodesList(episodesState, subjectItem, isLoggedIn, l10n),
     );
   }
 
@@ -182,6 +185,7 @@ class _EpisodesDrawerViewState extends ConsumerState<EpisodesDrawerView> {
     SubjectEpisodesState episodesState,
     SubjectsInfoItem subjectItem,
     bool isLoggedIn,
+    AppLocalizations l10n,
   ) {
     final sortedEpisodes = [...episodesState.episodes.data]..sort((a, b) {
         final aIsMain = a.type == 0 ? 0 : 1;
@@ -192,7 +196,7 @@ class _EpisodesDrawerViewState extends ConsumerState<EpisodesDrawerView> {
       });
 
     if (sortedEpisodes.isEmpty) {
-      return const Center(child: Text('暂无剧集数据'));
+      return Center(child: Text(l10n.noEpisodeData));
     }
 
     return Column(
@@ -202,14 +206,14 @@ class _EpisodesDrawerViewState extends ConsumerState<EpisodesDrawerView> {
           child: Row(
             children: [
               Text(
-                '剧集',
+                l10n.episodeSelection,
                 style: Theme.of(context).textTheme.titleLarge,
               ),
               const SizedBox(width: 8),
               Text(
                 episodesState.hasMore
-                    ? '已加载 ${sortedEpisodes.length} 集'
-                    : '共 ${sortedEpisodes.length} 集',
+                    ? l10n.loadedEpisodes(sortedEpisodes.length)
+                    : l10n.episodeCount(sortedEpisodes.length),
                 style: TextStyle(
                   color: Theme.of(context).colorScheme.outline,
                 ),
@@ -225,7 +229,7 @@ class _EpisodesDrawerViewState extends ConsumerState<EpisodesDrawerView> {
                           height: 16,
                           child: CircularProgressIndicator(strokeWidth: 2),
                         )
-                      : const Text('全部已看'),
+                      : Text(l10n.allWatched),
                 ),
               ],
             ],

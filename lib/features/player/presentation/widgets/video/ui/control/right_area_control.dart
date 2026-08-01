@@ -2,7 +2,7 @@ import 'package:anime_flow/features/player/presentation/providers/play_provider.
 import 'package:anime_flow/features/player/presentation/providers/video_ui_provider.dart';
 import 'package:anime_flow/core/exception/storage_exception.dart';
 import 'package:anime_flow/core/logger/logger.dart';
-import 'package:anime_flow/core/utils/systemUtil.dart';
+import 'package:anime_flow/core/utils/system_util.dart';
 import 'package:anime_flow/shared/widgets/notification_toast.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';

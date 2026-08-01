@@ -1,7 +1,7 @@
 import 'package:anime_flow/core/constants/storage_key.dart';
 import 'package:anime_flow/features/settings/presentation/providers/setting_provider.dart';
 import 'package:anime_flow/core/storage/storage.dart';
-import 'package:anime_flow/core/utils/systemUtil.dart';
+import 'package:anime_flow/core/utils/system_util.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:hive_ce/hive.dart';

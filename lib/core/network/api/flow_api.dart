@@ -35,7 +35,7 @@ import 'package:anime_flow/shared/models/search/search_suggestions_item.dart';
 import 'package:anime_flow/core/auth/repository/bangumi_token.dart';
 import 'package:anime_flow/core/auth/repository/flow_token_storage.dart';
 import 'package:anime_flow/core/logger/logger.dart';
-import 'package:anime_flow/core/utils/systemUtil.dart';
+import 'package:anime_flow/core/utils/system_util.dart';
 import 'package:anime_flow/core/utils/utils.dart';
 import 'package:dio/dio.dart';
 

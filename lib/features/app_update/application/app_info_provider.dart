@@ -12,7 +12,7 @@ import 'package:anime_flow/shared/models/version_check_result.dart';
 import 'package:anime_flow/shared/models/version_download_state.dart';
 import 'package:anime_flow/core/storage/storage.dart';
 import 'package:anime_flow/core/logger/logger.dart';
-import 'package:anime_flow/core/utils/systemUtil.dart';
+import 'package:anime_flow/core/utils/system_util.dart';
 import 'package:anime_flow/core/utils/utils.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 import 'package:path/path.dart' as path;

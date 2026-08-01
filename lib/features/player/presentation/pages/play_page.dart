@@ -7,7 +7,7 @@ import 'package:anime_flow/features/player/presentation/providers/episodes_provi
 import 'package:anime_flow/features/user/presentation/providers/user_state_provider.dart';
 import 'package:anime_flow/app/router/app_route_observer.dart';
 import 'package:anime_flow/app/router/routes_args.dart';
-import 'package:anime_flow/core/utils/systemUtil.dart';
+import 'package:anime_flow/core/utils/system_util.dart';
 import 'package:anime_flow/shared/widgets/danmaku_text_field.dart';
 import 'package:anime_flow/shared/widgets/notification_toast.dart';
 import 'package:flutter/material.dart';

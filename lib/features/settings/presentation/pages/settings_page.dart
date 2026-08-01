@@ -3,7 +3,7 @@ import 'package:anime_flow/features/settings/presentation/pages/plugins/plugins.
 import 'package:anime_flow/features/settings/presentation/pages/theme.dart';
 import 'package:anime_flow/features/settings/presentation/providers/setting_provider.dart';
 import 'package:anime_flow/app/router/app_router.dart';
-import 'package:anime_flow/core/utils/systemUtil.dart';
+import 'package:anime_flow/core/utils/system_util.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';

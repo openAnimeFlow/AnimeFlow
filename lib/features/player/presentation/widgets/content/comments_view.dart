@@ -2,7 +2,7 @@ import 'package:anime_flow/shared/models/player/bangumi/episode_comments_item.da
 import 'package:anime_flow/features/player/presentation/providers/episode_comments_provider.dart';
 import 'package:anime_flow/app/router/app_router.dart';
 import 'package:anime_flow/core/utils/format_time_util.dart';
-import 'package:anime_flow/core/utils/systemUtil.dart';
+import 'package:anime_flow/core/utils/system_util.dart';
 import 'package:anime_flow/shared/widgets/bbcode/bbcode_widget.dart';
 import 'package:anime_flow/shared/widgets/animation_network_image.dart';
 import 'package:flutter/material.dart';

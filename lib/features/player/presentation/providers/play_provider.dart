@@ -15,7 +15,7 @@ import 'package:anime_flow/features/player/data/repository/play_repository.dart'
 import 'package:anime_flow/core/storage/storage.dart';
 import 'package:anime_flow/app/router/routes_args.dart';
 import 'package:anime_flow/core/logger/logger.dart';
-import 'package:anime_flow/core/utils/systemUtil.dart';
+import 'package:anime_flow/core/utils/system_util.dart';
 import 'package:anime_flow/core/utils/utils.dart';
 import 'package:anime_flow/core/utils/vibrate.dart';
 import 'package:anime_flow/shared/widgets/windows_title_bar.dart';

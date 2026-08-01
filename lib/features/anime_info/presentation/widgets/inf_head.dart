@@ -9,7 +9,7 @@ import 'package:anime_flow/features/anime_info/presentation/widgets/episodes_dra
 import 'package:anime_flow/features/player/presentation/providers/subject_episodes_provider.dart';
 import 'package:anime_flow/features/user/presentation/providers/user_state_provider.dart';
 import 'package:anime_flow/app/router/routes_args.dart';
-import 'package:anime_flow/core/utils/systemUtil.dart';
+import 'package:anime_flow/core/utils/system_util.dart';
 import 'package:anime_flow/shared/widgets/animation_network_image.dart';
 import 'package:anime_flow/features/user/presentation/widgets/collection_button.dart';
 import 'package:anime_flow/shared/widgets/notification_toast.dart';

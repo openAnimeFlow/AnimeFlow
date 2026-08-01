@@ -1,7 +1,7 @@
 import 'dart:async';
 
 import 'package:anime_flow/shared/models/enums/video_controls_icon_type.dart';
-import 'package:anime_flow/core/utils/systemUtil.dart';
+import 'package:anime_flow/core/utils/system_util.dart';
 import 'package:anime_flow/core/utils/vibrate.dart';
 import 'package:battery_plus/battery_plus.dart';
 import 'package:flutter/material.dart';

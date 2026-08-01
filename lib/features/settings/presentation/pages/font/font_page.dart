@@ -1,7 +1,7 @@
 import 'package:anime_flow/shared/models/font_item.dart';
 import 'package:anime_flow/features/settings/presentation/providers/font_provider.dart';
 import 'package:anime_flow/core/logger/logger.dart';
-import 'package:anime_flow/core/utils/systemUtil.dart';
+import 'package:anime_flow/core/utils/system_util.dart';
 import 'package:anime_flow/core/utils/utils.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';

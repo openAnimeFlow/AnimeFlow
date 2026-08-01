@@ -2,7 +2,7 @@ import 'package:anime_flow/shared/models/bangumi/calendar_item.dart';
 import 'package:anime_flow/features/home/presentation/providers/anime_provider.dart';
 import 'package:anime_flow/app/router/model/info_route_extra.dart';
 import 'package:anime_flow/app/router/app_router.dart';
-import 'package:anime_flow/core/utils/systemUtil.dart';
+import 'package:anime_flow/core/utils/system_util.dart';
 import 'package:anime_flow/shared/widgets/animation_network_image.dart';
 import 'package:anime_flow/shared/widgets/ranking.dart';
 import 'package:flutter/material.dart';

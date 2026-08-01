@@ -3,6 +3,7 @@ import 'package:anime_flow/features/settings/presentation/providers/setting_prov
 import 'package:anime_flow/core/storage/storage.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:anime_flow/app/localization/app_localizations.dart';
 
 class PlaybackSettingsPage extends StatefulWidget {
   const PlaybackSettingsPage({super.key});
@@ -41,6 +42,7 @@ class _PlaybackSettingsPageState extends State<PlaybackSettingsPage> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     return Scaffold(
       appBar: PreferredSize(
         preferredSize: const Size.fromHeight(kToolbarHeight),
@@ -48,7 +50,7 @@ class _PlaybackSettingsPageState extends State<PlaybackSettingsPage> {
           builder: (context, ref, _) {
             final isWideScreen = ref.watch(settingsLayoutProvider);
             return AppBar(
-              title: const Text('播放设置'),
+              title: Text(l10n.playbackSettings),
               automaticallyImplyLeading: !isWideScreen,
             );
           },
@@ -66,10 +68,10 @@ class _PlaybackSettingsPageState extends State<PlaybackSettingsPage> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   // 自动播放设置
-                  _buildSectionTitle('播放设置'),
+                  _buildSectionTitle(l10n.playbackSettings),
                   SwitchListTile(
-                    title: const Text('自动跳转下一集'),
-                    subtitle: const Text('播放完成后自动切换到下一集'),
+                    title: Text(l10n.autoNextEpisode),
+                    subtitle: Text(l10n.autoNextEpisodeSubtitle),
                     value: _autoPlayNext,
                     onChanged: (value) {
                       setState(() {
@@ -79,8 +81,8 @@ class _PlaybackSettingsPageState extends State<PlaybackSettingsPage> {
                     },
                   ),
                   SwitchListTile(
-                    title: const Text('过滤广告'),
-                    subtitle: const Text('过滤视频中插入的广告切片'),
+                    title: Text(l10n.adBlocker),
+                    subtitle: Text(l10n.adBlockerSubtitle),
                     value: _adBlocker,
                     onChanged: (value) {
                       setState(() {
@@ -93,16 +95,16 @@ class _PlaybackSettingsPageState extends State<PlaybackSettingsPage> {
                     padding: const EdgeInsets.symmetric(horizontal: 16),
                     child: Row(
                       children: [
-                        const Expanded(
+                        Expanded(
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               Text(
-                                '跳过时长（秒）',
+                                l10n.skipDuration,
                                 style: TextStyle(fontSize: 16),
                               ),
                               Text(
-                                '用于跳过视频op/ed',
+                                l10n.skipDurationSubtitle,
                                 style: TextStyle(fontSize: 12),
                               )
                             ],
@@ -123,7 +125,7 @@ class _PlaybackSettingsPageState extends State<PlaybackSettingsPage> {
                               border: OutlineInputBorder(
                                 borderRadius: BorderRadius.circular(8),
                               ),
-                              suffixText: '秒',
+                              suffixText: l10n.seconds,
                             ),
                             onChanged: (value) {
                               final parsed = int.tryParse(value);
@@ -142,10 +144,10 @@ class _PlaybackSettingsPageState extends State<PlaybackSettingsPage> {
                   ),
                   const SizedBox(height: 16),
                   // 进度设置
-                  _buildSectionTitle('播放进度'),
+                  _buildSectionTitle(l10n.playbackProgress),
                   SwitchListTile(
-                    title: const Text('保存剧集进度'),
-                    subtitle: const Text('播放至90%自动保存剧集进度,下次从未观看的剧集开始播放'),
+                    title: Text(l10n.saveEpisodeProgress),
+                    subtitle: Text(l10n.saveEpisodeProgressSubtitle),
                     value: _episodesProgress,
                     onChanged: (value) {
                       setState(() {
@@ -158,7 +160,7 @@ class _PlaybackSettingsPageState extends State<PlaybackSettingsPage> {
                   const SizedBox(height: 16),
 
                   // 播放速度设置
-                  _buildSectionTitle('播放控制'),
+                  _buildSectionTitle(l10n.playbackControl),
                   Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
@@ -167,8 +169,8 @@ class _PlaybackSettingsPageState extends State<PlaybackSettingsPage> {
                         child: Row(
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
-                            const Text(
-                              '长按快进速度',
+                            Text(
+                              l10n.longPressFastForwardSpeed,
                               style: TextStyle(fontSize: 16),
                             ),
                             Text(

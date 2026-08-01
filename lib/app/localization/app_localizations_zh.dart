@@ -539,6 +539,42 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get customAppFont => '自定义应用字体';
+
+  @override
+  String get autoNextEpisode => '自动跳转下一集';
+
+  @override
+  String get autoNextEpisodeSubtitle => '播放完成后自动切换到下一集';
+
+  @override
+  String get adBlocker => '过滤广告';
+
+  @override
+  String get adBlockerSubtitle => '过滤视频中插入的广告切片';
+
+  @override
+  String get skipDuration => '跳过时长（秒）';
+
+  @override
+  String get skipDurationSubtitle => '用于跳过视频 OP/ED';
+
+  @override
+  String get seconds => '秒';
+
+  @override
+  String get playbackProgress => '播放进度';
+
+  @override
+  String get saveEpisodeProgress => '保存剧集进度';
+
+  @override
+  String get saveEpisodeProgressSubtitle => '播放至90%自动保存剧集进度，下次从未观看的剧集开始播放';
+
+  @override
+  String get playbackControl => '播放控制';
+
+  @override
+  String get longPressFastForwardSpeed => '长按快进速度';
 }
 
 /// The translations for Chinese, using the Han script (`zh_Hans`).
@@ -1076,6 +1112,42 @@ class AppLocalizationsZhHans extends AppLocalizationsZh {
 
   @override
   String get customAppFont => '自定义应用字体';
+
+  @override
+  String get autoNextEpisode => '自动跳转下一集';
+
+  @override
+  String get autoNextEpisodeSubtitle => '播放完成后自动切换到下一集';
+
+  @override
+  String get adBlocker => '过滤广告';
+
+  @override
+  String get adBlockerSubtitle => '过滤视频中插入的广告切片';
+
+  @override
+  String get skipDuration => '跳过时长（秒）';
+
+  @override
+  String get skipDurationSubtitle => '用于跳过视频 OP/ED';
+
+  @override
+  String get seconds => '秒';
+
+  @override
+  String get playbackProgress => '播放进度';
+
+  @override
+  String get saveEpisodeProgress => '保存剧集进度';
+
+  @override
+  String get saveEpisodeProgressSubtitle => '播放至90%自动保存剧集进度，下次从未观看的剧集开始播放';
+
+  @override
+  String get playbackControl => '播放控制';
+
+  @override
+  String get longPressFastForwardSpeed => '长按快进速度';
 }
 
 /// The translations for Chinese, as used in Hong Kong, using the Han script (`zh_Hant_HK`).
@@ -1613,6 +1685,42 @@ class AppLocalizationsZhHantHk extends AppLocalizationsZh {
 
   @override
   String get customAppFont => '自訂應用程式字型';
+
+  @override
+  String get autoNextEpisode => '自動跳轉下一集';
+
+  @override
+  String get autoNextEpisodeSubtitle => '播放完成後自動切換到下一集';
+
+  @override
+  String get adBlocker => '過濾廣告';
+
+  @override
+  String get adBlockerSubtitle => '過濾影片中插入的廣告片段';
+
+  @override
+  String get skipDuration => '跳過時長（秒）';
+
+  @override
+  String get skipDurationSubtitle => '用於跳過影片 OP/ED';
+
+  @override
+  String get seconds => '秒';
+
+  @override
+  String get playbackProgress => '播放進度';
+
+  @override
+  String get saveEpisodeProgress => '儲存劇集進度';
+
+  @override
+  String get saveEpisodeProgressSubtitle => '播放至90%自動儲存劇集進度，下次從未觀看的劇集開始播放';
+
+  @override
+  String get playbackControl => '播放控制';
+
+  @override
+  String get longPressFastForwardSpeed => '長按快進速度';
 }
 
 /// The translations for Chinese, as used in Taiwan, using the Han script (`zh_Hant_TW`).
@@ -2150,4 +2258,40 @@ class AppLocalizationsZhHantTw extends AppLocalizationsZh {
 
   @override
   String get customAppFont => '自訂應用程式字型';
+
+  @override
+  String get autoNextEpisode => '自動跳轉下一集';
+
+  @override
+  String get autoNextEpisodeSubtitle => '播放完成後自動切換到下一集';
+
+  @override
+  String get adBlocker => '過濾廣告';
+
+  @override
+  String get adBlockerSubtitle => '過濾影片中插入的廣告片段';
+
+  @override
+  String get skipDuration => '跳過時長（秒）';
+
+  @override
+  String get skipDurationSubtitle => '用於跳過影片 OP/ED';
+
+  @override
+  String get seconds => '秒';
+
+  @override
+  String get playbackProgress => '播放進度';
+
+  @override
+  String get saveEpisodeProgress => '儲存劇集進度';
+
+  @override
+  String get saveEpisodeProgressSubtitle => '播放至90%自動儲存劇集進度，下次從未觀看的劇集開始播放';
+
+  @override
+  String get playbackControl => '播放控制';
+
+  @override
+  String get longPressFastForwardSpeed => '長按快進速度';
 }

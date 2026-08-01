@@ -168,5 +168,17 @@
   "autoAdapt": "自动适配",
   "themeColor": "主题颜色",
   "fontStyle": "字体样式",
-  "customAppFont": "自定义应用字体"
+  "customAppFont": "自定义应用字体",
+  "autoNextEpisode": "自动跳转下一集",
+  "autoNextEpisodeSubtitle": "播放完成后自动切换到下一集",
+  "adBlocker": "过滤广告",
+  "adBlockerSubtitle": "过滤视频中插入的广告切片",
+  "skipDuration": "跳过时长（秒）",
+  "skipDurationSubtitle": "用于跳过视频 OP/ED",
+  "seconds": "秒",
+  "playbackProgress": "播放进度",
+  "saveEpisodeProgress": "保存剧集进度",
+  "saveEpisodeProgressSubtitle": "播放至90%自动保存剧集进度，下次从未观看的剧集开始播放",
+  "playbackControl": "播放控制",
+  "longPressFastForwardSpeed": "长按快进速度"
 }

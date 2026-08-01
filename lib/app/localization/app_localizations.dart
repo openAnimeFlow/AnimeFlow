@@ -1086,6 +1086,78 @@ abstract class AppLocalizations {
   /// In zh_Hans, this message translates to:
   /// **'自定义应用字体'**
   String get customAppFont;
+
+  /// No description provided for @autoNextEpisode.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'自动跳转下一集'**
+  String get autoNextEpisode;
+
+  /// No description provided for @autoNextEpisodeSubtitle.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'播放完成后自动切换到下一集'**
+  String get autoNextEpisodeSubtitle;
+
+  /// No description provided for @adBlocker.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'过滤广告'**
+  String get adBlocker;
+
+  /// No description provided for @adBlockerSubtitle.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'过滤视频中插入的广告切片'**
+  String get adBlockerSubtitle;
+
+  /// No description provided for @skipDuration.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'跳过时长（秒）'**
+  String get skipDuration;
+
+  /// No description provided for @skipDurationSubtitle.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'用于跳过视频 OP/ED'**
+  String get skipDurationSubtitle;
+
+  /// No description provided for @seconds.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'秒'**
+  String get seconds;
+
+  /// No description provided for @playbackProgress.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'播放进度'**
+  String get playbackProgress;
+
+  /// No description provided for @saveEpisodeProgress.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'保存剧集进度'**
+  String get saveEpisodeProgress;
+
+  /// No description provided for @saveEpisodeProgressSubtitle.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'播放至90%自动保存剧集进度，下次从未观看的剧集开始播放'**
+  String get saveEpisodeProgressSubtitle;
+
+  /// No description provided for @playbackControl.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'播放控制'**
+  String get playbackControl;
+
+  /// No description provided for @longPressFastForwardSpeed.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'长按快进速度'**
+  String get longPressFastForwardSpeed;
 }
 
 class _AppLocalizationsDelegate

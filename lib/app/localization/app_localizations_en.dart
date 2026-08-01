@@ -540,4 +540,42 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get customAppFont => 'Customize app font';
+
+  @override
+  String get autoNextEpisode => 'Auto-play next episode';
+
+  @override
+  String get autoNextEpisodeSubtitle =>
+      'Automatically switch to the next episode when playback finishes';
+
+  @override
+  String get adBlocker => 'Ad blocking';
+
+  @override
+  String get adBlockerSubtitle => 'Filter inserted ad clips in videos';
+
+  @override
+  String get skipDuration => 'Skip duration (seconds)';
+
+  @override
+  String get skipDurationSubtitle => 'Used to skip video OP/ED';
+
+  @override
+  String get seconds => 'sec';
+
+  @override
+  String get playbackProgress => 'Playback progress';
+
+  @override
+  String get saveEpisodeProgress => 'Save episode progress';
+
+  @override
+  String get saveEpisodeProgressSubtitle =>
+      'Save progress automatically at 90%, then start the next unwatched episode';
+
+  @override
+  String get playbackControl => 'Playback controls';
+
+  @override
+  String get longPressFastForwardSpeed => 'Long-press fast-forward speed';
 }

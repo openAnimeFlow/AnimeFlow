@@ -168,5 +168,17 @@
   "autoAdapt": "Adapt automatically",
   "themeColor": "Theme color",
   "fontStyle": "Font style",
-  "customAppFont": "Customize app font"
+  "customAppFont": "Customize app font",
+  "autoNextEpisode": "Auto-play next episode",
+  "autoNextEpisodeSubtitle": "Automatically switch to the next episode when playback finishes",
+  "adBlocker": "Ad blocking",
+  "adBlockerSubtitle": "Filter inserted ad clips in videos",
+  "skipDuration": "Skip duration (seconds)",
+  "skipDurationSubtitle": "Used to skip video OP/ED",
+  "seconds": "sec",
+  "playbackProgress": "Playback progress",
+  "saveEpisodeProgress": "Save episode progress",
+  "saveEpisodeProgressSubtitle": "Save progress automatically at 90%, then start the next unwatched episode",
+  "playbackControl": "Playback controls",
+  "longPressFastForwardSpeed": "Long-press fast-forward speed"
 }

@@ -1,9 +1,9 @@
 import 'dart:typed_data';
 
-import 'package:anime_flow/network/clients/flow_client.dart';
-import 'package:anime_flow/network/interceptors/bgm_refresh_token_interceptor.dart';
-import 'package:anime_flow/network/interceptors/flow_refresh_token_interceptor.dart';
-import 'package:anime_flow/network/api/flow_api.dart';
+import 'package:anime_flow/core/network/clients/flow_client.dart';
+import 'package:anime_flow/core/network/interceptors/bgm_refresh_token_interceptor.dart';
+import 'package:anime_flow/core/network/interceptors/flow_refresh_token_interceptor.dart';
+import 'package:anime_flow/core/network/api/flow_api.dart';
 import 'package:anime_flow/models/item/flow/bangumi_bind_item.dart';
 import 'package:anime_flow/models/item/flow/flow_token.dart';
 import 'package:anime_flow/models/item/flow/flow_users.dart';

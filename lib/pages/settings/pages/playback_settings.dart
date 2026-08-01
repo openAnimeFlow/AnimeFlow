@@ -1,6 +1,6 @@
-import 'package:anime_flow/constants/storage_key.dart';
+import 'package:anime_flow/core/constants/storage_key.dart';
 import 'package:anime_flow/pages/settings/setting_provider.dart';
-import 'package:anime_flow/repository/storage.dart';
+import 'package:anime_flow/core/storage/storage.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 

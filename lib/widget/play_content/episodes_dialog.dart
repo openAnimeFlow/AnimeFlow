@@ -1,4 +1,4 @@
-import 'package:anime_flow/constants/layout_constant.dart';
+import 'package:anime_flow/core/constants/layout_constant.dart';
 import 'package:anime_flow/models/item/bangumi/episodes_item.dart';
 import 'package:anime_flow/pages/play/providers/episodes_provider.dart';
 import 'package:anime_flow/providers/episodes/subject_episodes_provider.dart';

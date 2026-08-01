@@ -3,8 +3,8 @@ import 'dart:io';
 
 import 'package:anime_flow/models/item/image_search_item.dart';
 import 'package:anime_flow/pages/search/search_controller.dart';
-import 'package:anime_flow/utils/format_time_util.dart';
-import 'package:anime_flow/utils/logger.dart';
+import 'package:anime_flow/core/utils/format_time_util.dart';
+import 'package:anime_flow/core/logger/logger.dart';
 import 'package:anime_flow/widget/animation_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';

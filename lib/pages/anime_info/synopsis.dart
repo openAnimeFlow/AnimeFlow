@@ -1,4 +1,4 @@
-import 'package:anime_flow/constants/layout_constant.dart';
+import 'package:anime_flow/core/constants/layout_constant.dart';
 import 'package:anime_flow/models/item/bangumi/subjects_info_item.dart';
 import 'package:anime_flow/pages/anime_info/characters.dart';
 import 'package:anime_flow/pages/anime_info/details.dart';
@@ -7,7 +7,7 @@ import 'package:anime_flow/pages/anime_info/producers.dart';
 import 'package:anime_flow/pages/anime_info/provider/anime_info_provider.dart';
 import 'package:anime_flow/pages/anime_info/related.dart';
 import 'package:anime_flow/pages/anime_info/tags.dart';
-import 'package:anime_flow/utils/systemUtil.dart';
+import 'package:anime_flow/core/utils/systemUtil.dart';
 import 'package:anime_flow/widget/text/expandable_text.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';

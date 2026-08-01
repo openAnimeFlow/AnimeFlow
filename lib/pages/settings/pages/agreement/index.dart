@@ -1,5 +1,5 @@
-import 'package:anime_flow/network/api/api.dart';
-import 'package:anime_flow/utils/utils.dart';
+import 'package:anime_flow/core/network/api/api.dart';
+import 'package:anime_flow/core/utils/utils.dart';
 import 'package:flutter/material.dart';
 
 class AgreementPage extends StatefulWidget {

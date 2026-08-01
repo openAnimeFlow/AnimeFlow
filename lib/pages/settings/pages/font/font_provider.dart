@@ -1,10 +1,10 @@
 import 'dart:io';
 
-import 'package:anime_flow/constants/storage_key.dart';
-import 'package:anime_flow/network/api/github_api.dart';
+import 'package:anime_flow/core/constants/storage_key.dart';
+import 'package:anime_flow/core/network/api/github_api.dart';
 import 'package:anime_flow/models/item/font_item.dart';
 import 'package:anime_flow/providers/theme_provider.dart';
-import 'package:anime_flow/repository/storage.dart';
+import 'package:anime_flow/core/storage/storage.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter/services.dart';
 import 'package:path_provider/path_provider.dart';

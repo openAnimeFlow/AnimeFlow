@@ -1,7 +1,7 @@
 import 'dart:async';
 
 import 'package:anime_flow/providers/video/video_source_provider.dart';
-import 'package:anime_flow/webview/video/video_webview_controller.dart';
+import 'package:anime_flow/core/webview/video/video_webview_controller.dart';
 
 /// WebView 视频源提供者
 ///

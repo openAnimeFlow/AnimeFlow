@@ -1,6 +1,6 @@
 import 'dart:math';
 
-import 'package:anime_flow/utils/utils.dart';
+import 'package:anime_flow/core/utils/utils.dart';
 
 /// 根据搜索词条与别名对检索结果进行权重排序。
 class SearchResultRankService {

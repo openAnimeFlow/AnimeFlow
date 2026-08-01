@@ -1,9 +1,9 @@
-import 'package:anime_flow/network/api_path.dart';
-import 'package:anime_flow/network/api/api.dart';
+import 'package:anime_flow/core/network/api_path.dart';
+import 'package:anime_flow/core/network/api/api.dart';
 import 'package:anime_flow/pages/anime_info/provider/anime_info_provider.dart';
 import 'package:anime_flow/routes/provider/routes_args.dart';
-import 'package:anime_flow/utils/exceptions/storage_exception.dart';
-import 'package:anime_flow/utils/logger.dart';
+import 'package:anime_flow/core/exception/storage_exception.dart';
+import 'package:anime_flow/core/logger/logger.dart';
 import 'package:anime_flow/widget/animation_network_image.dart';
 import 'package:anime_flow/widget/drop_down_menu.dart';
 import 'package:anime_flow/widget/notification_toast.dart';

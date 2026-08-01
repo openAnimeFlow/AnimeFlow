@@ -1,4 +1,4 @@
-import 'package:anime_flow/constants/layout_constant.dart';
+import 'package:anime_flow/core/constants/layout_constant.dart';
 import 'package:anime_flow/pages/user/provider/user_collection_provider.dart';
 import 'package:anime_flow/routes/model/info_route_extra.dart';
 import 'package:anime_flow/routes/routes.dart';

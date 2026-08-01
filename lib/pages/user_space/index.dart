@@ -1,4 +1,4 @@
-import 'package:anime_flow/constants/layout_constant.dart';
+import 'package:anime_flow/core/constants/layout_constant.dart';
 import 'package:anime_flow/pages/user_space/provider/user_space_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';

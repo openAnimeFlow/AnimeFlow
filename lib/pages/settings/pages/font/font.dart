@@ -1,8 +1,8 @@
 import 'package:anime_flow/models/item/font_item.dart';
 import 'package:anime_flow/pages/settings/pages/font/font_provider.dart';
-import 'package:anime_flow/utils/logger.dart';
-import 'package:anime_flow/utils/systemUtil.dart';
-import 'package:anime_flow/utils/utils.dart';
+import 'package:anime_flow/core/logger/logger.dart';
+import 'package:anime_flow/core/utils/systemUtil.dart';
+import 'package:anime_flow/core/utils/utils.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';

@@ -1,4 +1,4 @@
-import 'package:anime_flow/network/api/flow_api.dart';
+import 'package:anime_flow/core/network/api/flow_api.dart';
 import 'package:anime_flow/models/item/bangumi/character_comments_item.dart';
 import 'package:anime_flow/models/item/bangumi/character_detail_item.dart';
 import 'package:anime_flow/models/item/bangumi/character_subjects_item.dart';

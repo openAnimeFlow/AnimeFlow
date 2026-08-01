@@ -1,9 +1,9 @@
 import 'dart:isolate';
 
-import 'package:anime_flow/crawler/cookie_manager.dart';
-import 'package:anime_flow/crawler/html_request.dart';
-import 'package:anime_flow/crawler/itme/anti_crawler_config.dart';
-import 'package:anime_flow/crawler/itme/crawler_config_item.dart';
+import 'package:anime_flow/core/crawler/cookie_manager.dart';
+import 'package:anime_flow/core/crawler/html_request.dart';
+import 'package:anime_flow/core/crawler/itme/anti_crawler_config.dart';
+import 'package:anime_flow/core/crawler/itme/crawler_config_item.dart';
 import 'package:anime_flow/features/search_result_rank_service.dart';
 import 'package:anime_flow/models/play/video/episode_resources_item.dart';
 import 'package:anime_flow/models/play/video/resources_item.dart';
@@ -12,8 +12,8 @@ import 'package:anime_flow/pages/play/providers/episodes_provider.dart';
 import 'package:anime_flow/routes/provider/routes_args.dart';
 import 'package:anime_flow/repository/play_repository.dart';
 import 'package:anime_flow/providers/video/providers.dart';
-import 'package:anime_flow/utils/crawl_config.dart';
-import 'package:anime_flow/utils/logger.dart';
+import 'package:anime_flow/core/utils/crawl_config.dart';
+import 'package:anime_flow/core/logger/logger.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:webview_windows/webview_windows.dart';
 

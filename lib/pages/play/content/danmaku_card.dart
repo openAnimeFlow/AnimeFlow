@@ -1,10 +1,10 @@
-import 'package:anime_flow/network/api/flow_api.dart';
+import 'package:anime_flow/core/network/api/flow_api.dart';
 import 'package:anime_flow/models/item/danmaku/danmaku_episode_response.dart';
 import 'package:anime_flow/models/item/danmaku/danmaku_module.dart';
 import 'package:anime_flow/models/item/danmaku/danmaku_search_response.dart';
 import 'package:anime_flow/pages/play/providers/play_provider.dart';
 import 'package:anime_flow/routes/provider/routes_args.dart';
-import 'package:anime_flow/utils/format_time_util.dart';
+import 'package:anime_flow/core/utils/format_time_util.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';

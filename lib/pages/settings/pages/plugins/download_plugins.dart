@@ -1,14 +1,14 @@
 import 'dart:convert';
 
-import 'package:anime_flow/constants/storage_key.dart';
-import 'package:anime_flow/crawler/itme/crawler_config_item.dart';
-import 'package:anime_flow/network/api_path.dart';
-import 'package:anime_flow/network/api/api.dart';
-import 'package:anime_flow/repository/storage.dart';
-import 'package:anime_flow/utils/format_time_util.dart';
-import 'package:anime_flow/utils/logger.dart';
-import 'package:anime_flow/utils/systemUtil.dart';
-import 'package:anime_flow/utils/utils.dart';
+import 'package:anime_flow/core/constants/storage_key.dart';
+import 'package:anime_flow/core/crawler/itme/crawler_config_item.dart';
+import 'package:anime_flow/core/network/api_path.dart';
+import 'package:anime_flow/core/network/api/api.dart';
+import 'package:anime_flow/core/storage/storage.dart';
+import 'package:anime_flow/core/utils/format_time_util.dart';
+import 'package:anime_flow/core/logger/logger.dart';
+import 'package:anime_flow/core/utils/systemUtil.dart';
+import 'package:anime_flow/core/utils/utils.dart';
 import 'package:anime_flow/widget/animation_network_image.dart';
 import 'package:anime_flow/widget/notification_toast.dart';
 import 'package:flutter/material.dart';

@@ -1,6 +1,6 @@
 import 'package:anime_flow/models/item/bangumi/user_collections_item.dart';
 import 'package:anime_flow/models/item/flow/flow_users.dart';
-import 'package:anime_flow/network/api/flow_api.dart';
+import 'package:anime_flow/core/network/api/flow_api.dart';
 import 'package:anime_flow/pages/user/provider/user_collection_state.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 

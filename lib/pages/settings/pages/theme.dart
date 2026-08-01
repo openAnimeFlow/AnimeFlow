@@ -3,7 +3,7 @@ import 'dart:ui';
 import 'package:anime_flow/providers/theme_provider.dart';
 import 'package:anime_flow/pages/settings/setting_provider.dart';
 import 'package:anime_flow/routes/routes.dart';
-import 'package:anime_flow/utils/systemUtil.dart';
+import 'package:anime_flow/core/utils/systemUtil.dart';
 import 'package:anime_flow/widget/theme/theme_preview.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';

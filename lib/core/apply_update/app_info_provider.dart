@@ -1,19 +1,19 @@
 import 'dart:io';
 
-import 'package:anime_flow/constants/storage_key.dart';
+import 'package:anime_flow/core/constants/storage_key.dart';
 import 'package:anime_flow/core/apply_update/app_info_state.dart';
 import 'package:anime_flow/core/apply_update/app_provider_container.dart';
 import 'package:anime_flow/core/apply_update/apply_updates_controller.dart';
-import 'package:anime_flow/network/api_path.dart';
-import 'package:anime_flow/network/api/api.dart';
+import 'package:anime_flow/core/network/api_path.dart';
+import 'package:anime_flow/core/network/api/api.dart';
 import 'package:anime_flow/models/download_info.dart';
 import 'package:anime_flow/models/enums/version_type.dart';
 import 'package:anime_flow/models/version_check_result.dart';
 import 'package:anime_flow/models/version_download_state.dart';
-import 'package:anime_flow/repository/storage.dart';
-import 'package:anime_flow/utils/logger.dart';
-import 'package:anime_flow/utils/systemUtil.dart';
-import 'package:anime_flow/utils/utils.dart';
+import 'package:anime_flow/core/storage/storage.dart';
+import 'package:anime_flow/core/logger/logger.dart';
+import 'package:anime_flow/core/utils/systemUtil.dart';
+import 'package:anime_flow/core/utils/utils.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 import 'package:path/path.dart' as path;
 import 'package:path_provider/path_provider.dart' show getDownloadsDirectory;

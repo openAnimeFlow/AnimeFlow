@@ -1,7 +1,7 @@
 import 'package:anime_flow/providers/user/user_controller.dart';
 import 'package:anime_flow/providers/user/user_oauth_state.dart';
 import 'package:anime_flow/routes/routes.dart';
-import 'package:anime_flow/utils/logger.dart';
+import 'package:anime_flow/core/logger/logger.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 

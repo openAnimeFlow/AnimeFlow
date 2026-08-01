@@ -1,4 +1,4 @@
-import 'package:anime_flow/utils/network_util.dart';
+import 'package:anime_flow/core/utils/network_util.dart';
 import 'package:flutter/material.dart';
 
 class NetworkCheckButton extends StatefulWidget {

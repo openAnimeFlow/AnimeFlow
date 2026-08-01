@@ -1,8 +1,8 @@
 import 'package:anime_flow/models/item/bangumi/episode_comments_item.dart';
 import 'package:anime_flow/pages/play/providers/episode_comments_provider.dart';
 import 'package:anime_flow/routes/routes.dart';
-import 'package:anime_flow/utils/format_time_util.dart';
-import 'package:anime_flow/utils/systemUtil.dart';
+import 'package:anime_flow/core/utils/format_time_util.dart';
+import 'package:anime_flow/core/utils/systemUtil.dart';
 import 'package:anime_flow/widget/bbcode/bbcode_widget.dart';
 import 'package:anime_flow/widget/animation_network_image.dart';
 import 'package:flutter/material.dart';

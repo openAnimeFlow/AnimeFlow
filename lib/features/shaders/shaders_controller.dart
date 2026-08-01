@@ -1,6 +1,6 @@
 import 'dart:io';
 
-import 'package:anime_flow/utils/logger.dart';
+import 'package:anime_flow/core/logger/logger.dart';
 import 'package:flutter/services.dart' show rootBundle, AssetManifest;
 import 'package:path/path.dart' as path;
 import 'package:path_provider/path_provider.dart';

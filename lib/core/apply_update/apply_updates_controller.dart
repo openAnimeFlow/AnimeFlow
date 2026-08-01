@@ -7,7 +7,6 @@ import 'apply_updates_impl/apply_updates_linux_controller_impl.dart';
 import 'apply_updates_impl/apply_updates_macos_controller_impl.dart';
 import 'apply_updates_impl/apply_updates_windows_controller_impl.dart';
 
-
 abstract class ApplyUpdatesController {
   ///应用更新
   /// [downloadUrl] 下载地址

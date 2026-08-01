@@ -1,9 +1,9 @@
 import 'dart:io';
 
 import 'package:anime_flow/core/apply_update/apply_updates_controller.dart';
-import 'package:anime_flow/network/api/api.dart';
+import 'package:anime_flow/core/network/api/api.dart';
 import 'package:anime_flow/models/download_info.dart';
-import 'package:anime_flow/utils/logger.dart';
+import 'package:anime_flow/core/logger/logger.dart';
 import 'package:dio/dio.dart';
 import 'package:open_filex/open_filex.dart';
 import 'package:path_provider/path_provider.dart'

@@ -2,7 +2,7 @@ import 'dart:math' as math;
 
 import 'package:anime_flow/pages/recommend/anime/provider/anime_provider.dart';
 import 'package:flutter/material.dart';
-import 'package:anime_flow/constants/layout_constant.dart';
+import 'package:anime_flow/core/constants/layout_constant.dart';
 import 'package:anime_flow/pages/recommend/anime/calendar.dart';
 import 'package:anime_flow/pages/recommend/anime/popular_anime.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';

@@ -1,6 +1,6 @@
 import 'package:anime_flow/core/apply_update/apply_updates_controller.dart';
 import 'package:anime_flow/models/download_info.dart';
-import 'package:anime_flow/utils/logger.dart';
+import 'package:anime_flow/core/logger/logger.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 /// iOS 平台更新实现
@@ -20,6 +20,5 @@ class ApplyUpdatesIOSController implements ApplyUpdatesController {
   }
 
   @override
-  void cancelDownload() {
-  }
+  void cancelDownload() {}
 }

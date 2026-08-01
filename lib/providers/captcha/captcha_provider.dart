@@ -1,8 +1,8 @@
 import 'dart:async';
 
-import 'package:anime_flow/crawler/cookie_manager.dart';
-import 'package:anime_flow/webview/captcha/captcha_webview_controller.dart';
-import 'package:anime_flow/utils/logger.dart';
+import 'package:anime_flow/core/crawler/cookie_manager.dart';
+import 'package:anime_flow/core/webview/captcha/captcha_webview_controller.dart';
+import 'package:anime_flow/core/logger/logger.dart';
 
 /// 验证码解决 Provider
 ///

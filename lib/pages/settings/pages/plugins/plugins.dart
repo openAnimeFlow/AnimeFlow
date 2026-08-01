@@ -1,8 +1,8 @@
-import 'package:anime_flow/crawler/itme/crawler_config_item.dart';
+import 'package:anime_flow/core/crawler/itme/crawler_config_item.dart';
 import 'package:anime_flow/pages/settings/setting_provider.dart';
 import 'package:anime_flow/routes/routes.dart';
-import 'package:anime_flow/utils/crawl_config.dart';
-import 'package:anime_flow/repository/storage.dart';
+import 'package:anime_flow/core/utils/crawl_config.dart';
+import 'package:anime_flow/core/storage/storage.dart';
 import 'package:anime_flow/widget/animation_network_image.dart';
 import 'package:anime_flow/widget/notification_toast.dart';
 import 'package:flutter/material.dart';

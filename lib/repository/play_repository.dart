@@ -1,5 +1,5 @@
 import 'package:anime_flow/models/play/play_history.dart';
-import 'package:anime_flow/repository/storage.dart';
+import 'package:anime_flow/core/storage/storage.dart';
 import 'package:hive_ce/hive.dart';
 
 class PlayRepository {

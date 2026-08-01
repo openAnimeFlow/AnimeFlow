@@ -1,6 +1,6 @@
 import 'dart:math' as math;
 
-import 'package:anime_flow/constants/layout_constant.dart';
+import 'package:anime_flow/core/constants/layout_constant.dart';
 import 'package:anime_flow/pages/ranking/provider/ranking_provider.dart';
 import 'package:anime_flow/pages/ranking/ranking_filter_bar.dart';
 import 'package:anime_flow/pages/ranking/ranking_grid.dart';

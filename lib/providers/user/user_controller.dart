@@ -1,9 +1,9 @@
 import 'dart:io';
 
-import 'package:anime_flow/constants/constants.dart';
-import 'package:anime_flow/network/api_path.dart';
-import 'package:anime_flow/network/clients/flow_client.dart';
-import 'package:anime_flow/network/api/flow_api.dart';
+import 'package:anime_flow/core/constants/constants.dart';
+import 'package:anime_flow/core/network/api_path.dart';
+import 'package:anime_flow/core/network/clients/flow_client.dart';
+import 'package:anime_flow/core/network/api/flow_api.dart';
 import 'package:anime_flow/models/item/flow/bangumi_bind_item.dart';
 import 'package:anime_flow/models/item/flow/flow_token.dart';
 import 'package:anime_flow/pages/user/provider/user_collection_provider.dart';
@@ -11,8 +11,8 @@ import 'package:anime_flow/providers/user/bgm_collection_sync_provider.dart';
 import 'package:anime_flow/providers/user/user_oauth_state.dart';
 import 'package:anime_flow/providers/user/user_state_provider.dart';
 import 'package:anime_flow/repository/providers/repository_providers.dart';
-import 'package:anime_flow/utils/logger.dart';
-import 'package:anime_flow/utils/systemUtil.dart';
+import 'package:anime_flow/core/logger/logger.dart';
+import 'package:anime_flow/core/utils/systemUtil.dart';
 import 'package:anime_flow/widget/notification_toast.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:url_launcher/url_launcher.dart';

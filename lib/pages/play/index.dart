@@ -1,4 +1,4 @@
-import 'package:anime_flow/constants/layout_constant.dart';
+import 'package:anime_flow/core/constants/layout_constant.dart';
 import 'package:anime_flow/pages/play/providers/play_provider.dart';
 import 'package:anime_flow/pages/play/providers/video_source_provider.dart';
 import 'package:anime_flow/pages/play/providers/video_ui_provider.dart';
@@ -7,7 +7,7 @@ import 'package:anime_flow/pages/play/providers/episodes_provider.dart';
 import 'package:anime_flow/providers/user/user_state_provider.dart';
 import 'package:anime_flow/routes/app_route_observer.dart';
 import 'package:anime_flow/routes/provider/routes_args.dart';
-import 'package:anime_flow/utils/systemUtil.dart';
+import 'package:anime_flow/core/utils/systemUtil.dart';
 import 'package:anime_flow/widget/danmaku_text_field.dart';
 import 'package:anime_flow/widget/notification_toast.dart';
 import 'package:flutter/material.dart';

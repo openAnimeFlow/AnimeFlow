@@ -1,6 +1,6 @@
 import 'dart:async';
 
-import 'package:anime_flow/network/api/flow_api.dart';
+import 'package:anime_flow/core/network/api/flow_api.dart';
 import 'package:anime_flow/models/item/flow/bgm_collection_sync_status_item.dart';
 import 'package:anime_flow/providers/user/user_state_provider.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';

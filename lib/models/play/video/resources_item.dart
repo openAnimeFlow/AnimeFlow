@@ -1,4 +1,4 @@
-import 'package:anime_flow/crawler/itme/anti_crawler_config.dart';
+import 'package:anime_flow/core/crawler/itme/anti_crawler_config.dart';
 
 import 'episode_resources_item.dart';
 

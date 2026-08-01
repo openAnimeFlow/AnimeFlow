@@ -1,4 +1,4 @@
-import 'package:anime_flow/crawler/itme/bgm_user_page_item.dart';
+import 'package:anime_flow/core/crawler/itme/bgm_user_page_item.dart';
 import 'package:flutter/material.dart';
 
 class UserSpaceStatisticsSection extends StatelessWidget {

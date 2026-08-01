@@ -1,10 +1,10 @@
-import 'package:anime_flow/network/api_path.dart';
+import 'package:anime_flow/core/network/api_path.dart';
 import 'package:anime_flow/models/item/flow/background_image_item.dart';
 import 'package:anime_flow/models/item/flow/flow_users.dart';
 import 'package:anime_flow/pages/settings/pages/account/provider/account_background_provider.dart';
 import 'package:anime_flow/pages/settings/pages/account/user_avatar.dart';
 import 'package:anime_flow/providers/user/user_state_provider.dart';
-import 'package:anime_flow/utils/format_time_util.dart';
+import 'package:anime_flow/core/utils/format_time_util.dart';
 import 'package:anime_flow/widget/animation_network_image.dart';
 import 'package:anime_flow/widget/notification_toast.dart';
 import 'package:flutter/material.dart';

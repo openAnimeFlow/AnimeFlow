@@ -1,6 +1,6 @@
 import 'package:anime_flow/pages/play/video/gesture/desktop_gesture_detector.dart';
 import 'package:anime_flow/pages/play/video/gesture/mobile_gesture_detector.dart';
-import 'package:anime_flow/utils/systemUtil.dart';
+import 'package:anime_flow/core/utils/systemUtil.dart';
 import 'package:flutter/material.dart';
 
 import 'control/bottom_area_control.dart';

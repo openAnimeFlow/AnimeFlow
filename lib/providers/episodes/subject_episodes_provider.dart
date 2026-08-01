@@ -1,4 +1,4 @@
-import 'package:anime_flow/network/api/flow_api.dart';
+import 'package:anime_flow/core/network/api/flow_api.dart';
 import 'package:anime_flow/models/item/bangumi/episodes_item.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 

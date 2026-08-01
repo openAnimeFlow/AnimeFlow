@@ -1,4 +1,4 @@
-import 'package:anime_flow/constants/assets_path_constants.dart';
+import 'package:anime_flow/core/constants/assets_path_constants.dart';
 import 'package:flutter/material.dart';
 import 'package:url_launcher/url_launcher.dart';
 

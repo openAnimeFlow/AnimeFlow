@@ -2,8 +2,8 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:typed_data';
 
-import 'package:anime_flow/network/clients/flow_client.dart';
-import 'package:anime_flow/network/api/flow_api.dart';
+import 'package:anime_flow/core/network/clients/flow_client.dart';
+import 'package:anime_flow/core/network/api/flow_api.dart';
 import 'package:anime_flow/models/item/captcha_item.dart';
 import 'package:anime_flow/widget/notification_toast.dart';
 import 'package:flutter/material.dart';

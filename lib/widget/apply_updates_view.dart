@@ -1,8 +1,8 @@
-import 'package:anime_flow/constants/storage_key.dart';
+import 'package:anime_flow/core/constants/storage_key.dart';
 import 'package:anime_flow/core/apply_update/app_info_provider.dart';
 import 'package:anime_flow/models/download_info.dart';
 import 'package:anime_flow/models/version_download_state.dart';
-import 'package:anime_flow/utils/utils.dart';
+import 'package:anime_flow/core/utils/utils.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_markdown_plus/flutter_markdown_plus.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';

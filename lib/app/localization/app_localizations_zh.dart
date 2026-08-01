@@ -65,6 +65,15 @@ class AppLocalizationsZh extends AppLocalizations {
   String get popularAnimeTitle => '热门动画';
 
   @override
+  String get fitAuto => '自動填充';
+
+  @override
+  String get fitCrop => '裁切填充';
+
+  @override
+  String get fitStretch => '拉伸填充';
+
+  @override
   String get buffering => '正在緩衝...';
 
   @override
@@ -1213,6 +1222,15 @@ class AppLocalizationsZhHans extends AppLocalizationsZh {
 
   @override
   String get popularAnimeTitle => '热门动画';
+
+  @override
+  String get fitAuto => '自动填充';
+
+  @override
+  String get fitCrop => '裁剪填充';
+
+  @override
+  String get fitStretch => '拉伸填充';
 
   @override
   String get buffering => '正在缓冲...';
@@ -2365,6 +2383,15 @@ class AppLocalizationsZhHantHk extends AppLocalizationsZh {
   String get popularAnimeTitle => '熱門動畫';
 
   @override
+  String get fitAuto => '自動填充';
+
+  @override
+  String get fitCrop => '裁切填充';
+
+  @override
+  String get fitStretch => '拉伸填充';
+
+  @override
   String get buffering => '正在緩衝...';
 
   @override
@@ -3322,6 +3349,15 @@ class AppLocalizationsZhHantTw extends AppLocalizationsZh {
 
   @override
   String get popularAnimeTitle => '熱門動畫';
+
+  @override
+  String get fitAuto => '自動填充';
+
+  @override
+  String get fitCrop => '裁切填充';
+
+  @override
+  String get fitStretch => '拉伸填充';
 
   @override
   String get buffering => '正在緩衝...';

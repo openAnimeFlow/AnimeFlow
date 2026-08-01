@@ -211,6 +211,24 @@ abstract class AppLocalizations {
   /// **'热门动画'**
   String get popularAnimeTitle;
 
+  /// No description provided for @fitAuto.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'自动填充'**
+  String get fitAuto;
+
+  /// No description provided for @fitCrop.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'裁剪填充'**
+  String get fitCrop;
+
+  /// No description provided for @fitStretch.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'拉伸填充'**
+  String get fitStretch;
+
   /// No description provided for @buffering.
   ///
   /// In zh_Hans, this message translates to:

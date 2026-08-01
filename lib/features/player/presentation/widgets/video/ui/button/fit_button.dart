@@ -1,3 +1,4 @@
+import 'package:anime_flow/app/localization/app_localizations.dart';
 import 'package:flutter/material.dart';
 
 class FitButton extends StatelessWidget {
@@ -19,6 +20,7 @@ class FitButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
+    final l10n = AppLocalizations.of(context);
     final currentOption = _options.firstWhere(
       (o) => o.fit == value,
       orElse: () => _options.first,
@@ -31,28 +33,26 @@ class FitButton extends StatelessWidget {
         final isSelected = value == option.fit;
         return MenuItemButton(
           onPressed: () => onChanged(option.fit),
-          child: SizedBox(
-            child: Row(
-              spacing: 10,
-              children: [
-                Expanded(
-                  child: Text(
-                    option.label,
-                    style: TextStyle(
-                      color: isSelected ? colorScheme.primary : null,
-                      fontWeight:
-                          isSelected ? FontWeight.bold : FontWeight.normal,
-                    ),
+          child: Row(
+            spacing: 10,
+            children: [
+              Expanded(
+                child: Text(
+                  option.label(l10n),
+                  style: TextStyle(
+                    color: isSelected ? colorScheme.primary : null,
+                    fontWeight:
+                        isSelected ? FontWeight.bold : FontWeight.normal,
                   ),
                 ),
-                if (isSelected)
-                  Icon(
-                    Icons.check,
-                    size: 18,
-                    color: colorScheme.primary,
-                  ),
-              ],
-            ),
+              ),
+              if (isSelected)
+                Icon(
+                  Icons.check,
+                  size: 18,
+                  color: colorScheme.primary,
+                ),
+            ],
           ),
         );
       }).toList(),
@@ -72,7 +72,7 @@ class FitButton extends StatelessWidget {
             size: 25,
             color: Colors.white70,
           ),
-          tooltip: currentOption.label,
+          tooltip: currentOption.label(l10n),
         );
       },
     );
@@ -80,12 +80,17 @@ class FitButton extends StatelessWidget {
 }
 
 enum _FitOption {
-  contain(BoxFit.contain, '自动填充'),
-  cover(BoxFit.cover, '裁剪填充'),
-  fill(BoxFit.fill, '拉伸填充');
+  contain(BoxFit.contain),
+  cover(BoxFit.cover),
+  fill(BoxFit.fill);
 
-  const _FitOption(this.fit, this.label);
+  const _FitOption(this.fit);
 
   final BoxFit fit;
-  final String label;
+
+  String label(AppLocalizations l10n) => switch (this) {
+        _FitOption.contain => l10n.fitAuto,
+        _FitOption.cover => l10n.fitCrop,
+        _FitOption.fill => l10n.fitStretch,
+      };
 }

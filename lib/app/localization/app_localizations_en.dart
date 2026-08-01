@@ -65,6 +65,15 @@ class AppLocalizationsEn extends AppLocalizations {
   String get popularAnimeTitle => 'Popular Anime';
 
   @override
+  String get fitAuto => 'Contain';
+
+  @override
+  String get fitCrop => 'Crop to fill';
+
+  @override
+  String get fitStretch => 'Stretch to fill';
+
+  @override
   String get buffering => 'Buffering...';
 
   @override

@@ -244,6 +244,96 @@ abstract class AppLocalizations {
   /// In zh_Hans, this message translates to:
   /// **'施工中...'**
   String get forumUnderConstruction;
+
+  /// No description provided for @rankingTitle.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'排行榜'**
+  String get rankingTitle;
+
+  /// No description provided for @allYears.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'全部年份'**
+  String get allYears;
+
+  /// No description provided for @allMonths.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'全部月份'**
+  String get allMonths;
+
+  /// No description provided for @all.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'全部'**
+  String get all;
+
+  /// No description provided for @yearSuffix.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'{year}年'**
+  String yearSuffix(Object year);
+
+  /// No description provided for @monthSuffix.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'{month}月'**
+  String monthSuffix(Object month);
+
+  /// No description provided for @sortRank.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'排名'**
+  String get sortRank;
+
+  /// No description provided for @sortTrends.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'热门'**
+  String get sortTrends;
+
+  /// No description provided for @sortCollects.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'收藏'**
+  String get sortCollects;
+
+  /// No description provided for @sortDate.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'日期'**
+  String get sortDate;
+
+  /// No description provided for @sortTitle.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'名称'**
+  String get sortTitle;
+
+  /// No description provided for @rankingNoData.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'暂无数据'**
+  String get rankingNoData;
+
+  /// No description provided for @rankingEnd.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'到底了'**
+  String get rankingEnd;
+
+  /// No description provided for @rankingLoadFailed.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'加载失败: {error}'**
+  String rankingLoadFailed(Object error);
+
+  /// No description provided for @retry.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'重试'**
+  String get retry;
 }
 
 class _AppLocalizationsDelegate

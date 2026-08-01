@@ -1,3 +1,4 @@
+import 'package:anime_flow/app/localization/app_localizations.dart';
 import 'package:anime_flow/shared/models/enums/sort_type.dart';
 import 'package:anime_flow/features/ranking/presentation/providers/ranking_provider.dart';
 import 'package:flutter/material.dart';
@@ -8,6 +9,7 @@ class RankingFilterBar extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = AppLocalizations.of(context);
     final rankingState = ref.watch(rankingProvider).asData?.value;
     final years = ref.watch(rankingYearsProvider);
     final months = ref.watch(rankingMonthsProvider);
@@ -27,7 +29,7 @@ class RankingFilterBar extends ConsumerWidget {
               return SortType.values.map((type) {
                 return PopupMenuItem<SortType>(
                   value: type,
-                  child: Text(type.name),
+                  child: Text(_sortLabel(type, l10n)),
                 );
               }).toList();
             },
@@ -39,7 +41,7 @@ class RankingFilterBar extends ConsumerWidget {
                   const Icon(Icons.sort, size: 16),
                   const SizedBox(width: 4),
                   Text(
-                    selectedSort.name,
+                    _sortLabel(selectedSort, l10n),
                     style: const TextStyle(fontSize: 14),
                   ),
                 ],
@@ -51,20 +53,22 @@ class RankingFilterBar extends ConsumerWidget {
             initialValue: selectedYear ?? -1,
             child: _FilterChip(
               child: Text(
-                selectedYear == null ? '全部年份' : '$selectedYear年',
+                selectedYear == null
+                    ? l10n.allYears
+                    : l10n.yearSuffix(selectedYear),
                 style: const TextStyle(fontSize: 14),
               ),
             ),
             itemBuilder: (context) {
               return [
-                const PopupMenuItem<int>(
+                PopupMenuItem<int>(
                   value: -1,
-                  child: Text('全部'),
+                  child: Text(l10n.all),
                 ),
                 ...years.map((year) {
                   return PopupMenuItem<int>(
                     value: year,
-                    child: Text('$year年'),
+                    child: Text(l10n.yearSuffix(year)),
                   );
                 }),
               ];
@@ -78,20 +82,22 @@ class RankingFilterBar extends ConsumerWidget {
             initialValue: selectedMonth ?? -1,
             child: _FilterChip(
               child: Text(
-                selectedMonth == null ? '全部月份' : '$selectedMonth月',
+                selectedMonth == null
+                    ? l10n.allMonths
+                    : l10n.monthSuffix(selectedMonth),
                 style: const TextStyle(fontSize: 14),
               ),
             ),
             itemBuilder: (context) {
               return [
-                const PopupMenuItem<int>(
+                PopupMenuItem<int>(
                   value: -1,
-                  child: Text('全部'),
+                  child: Text(l10n.all),
                 ),
                 ...months.map((month) {
                   return PopupMenuItem<int>(
                     value: month,
-                    child: Text('$month月'),
+                    child: Text(l10n.monthSuffix(month)),
                   );
                 }),
               ];
@@ -103,6 +109,16 @@ class RankingFilterBar extends ConsumerWidget {
         ],
       ),
     );
+  }
+
+  String _sortLabel(SortType type, AppLocalizations l10n) {
+    return switch (type) {
+      SortType.rank => l10n.sortRank,
+      SortType.trends => l10n.sortTrends,
+      SortType.collects => l10n.sortCollects,
+      SortType.date => l10n.sortDate,
+      SortType.title => l10n.sortTitle,
+    };
   }
 }
 

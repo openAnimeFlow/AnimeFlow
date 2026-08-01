@@ -83,6 +83,57 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get forumUnderConstruction => '施工中...';
+
+  @override
+  String get rankingTitle => '排行榜';
+
+  @override
+  String get allYears => '全部年份';
+
+  @override
+  String get allMonths => '全部月份';
+
+  @override
+  String get all => '全部';
+
+  @override
+  String yearSuffix(Object year) {
+    return '$year年';
+  }
+
+  @override
+  String monthSuffix(Object month) {
+    return '$month月';
+  }
+
+  @override
+  String get sortRank => '排名';
+
+  @override
+  String get sortTrends => '热门';
+
+  @override
+  String get sortCollects => '收藏';
+
+  @override
+  String get sortDate => '日期';
+
+  @override
+  String get sortTitle => '名称';
+
+  @override
+  String get rankingNoData => '暂无数据';
+
+  @override
+  String get rankingEnd => '到底了';
+
+  @override
+  String rankingLoadFailed(Object error) {
+    return '加载失败: $error';
+  }
+
+  @override
+  String get retry => '重试';
 }
 
 /// The translations for Chinese, using the Han script (`zh_Hans`).
@@ -164,6 +215,57 @@ class AppLocalizationsZhHans extends AppLocalizationsZh {
 
   @override
   String get forumUnderConstruction => '施工中...';
+
+  @override
+  String get rankingTitle => '排行榜';
+
+  @override
+  String get allYears => '全部年份';
+
+  @override
+  String get allMonths => '全部月份';
+
+  @override
+  String get all => '全部';
+
+  @override
+  String yearSuffix(Object year) {
+    return '$year年';
+  }
+
+  @override
+  String monthSuffix(Object month) {
+    return '$month月';
+  }
+
+  @override
+  String get sortRank => '排名';
+
+  @override
+  String get sortTrends => '热门';
+
+  @override
+  String get sortCollects => '收藏';
+
+  @override
+  String get sortDate => '日期';
+
+  @override
+  String get sortTitle => '名称';
+
+  @override
+  String get rankingNoData => '暂无数据';
+
+  @override
+  String get rankingEnd => '到底了';
+
+  @override
+  String rankingLoadFailed(Object error) {
+    return '加载失败: $error';
+  }
+
+  @override
+  String get retry => '重试';
 }
 
 /// The translations for Chinese, as used in Hong Kong, using the Han script (`zh_Hant_HK`).
@@ -245,6 +347,57 @@ class AppLocalizationsZhHantHk extends AppLocalizationsZh {
 
   @override
   String get forumUnderConstruction => '施工中...';
+
+  @override
+  String get rankingTitle => '排行榜';
+
+  @override
+  String get allYears => '全部年份';
+
+  @override
+  String get allMonths => '全部月份';
+
+  @override
+  String get all => '全部';
+
+  @override
+  String yearSuffix(Object year) {
+    return '$year年';
+  }
+
+  @override
+  String monthSuffix(Object month) {
+    return '$month月';
+  }
+
+  @override
+  String get sortRank => '排名';
+
+  @override
+  String get sortTrends => '熱門';
+
+  @override
+  String get sortCollects => '收藏';
+
+  @override
+  String get sortDate => '日期';
+
+  @override
+  String get sortTitle => '名稱';
+
+  @override
+  String get rankingNoData => '暫無資料';
+
+  @override
+  String get rankingEnd => '到底了';
+
+  @override
+  String rankingLoadFailed(Object error) {
+    return '載入失敗: $error';
+  }
+
+  @override
+  String get retry => '重試';
 }
 
 /// The translations for Chinese, as used in Taiwan, using the Han script (`zh_Hant_TW`).
@@ -326,4 +479,55 @@ class AppLocalizationsZhHantTw extends AppLocalizationsZh {
 
   @override
   String get forumUnderConstruction => '施工中...';
+
+  @override
+  String get rankingTitle => '排行榜';
+
+  @override
+  String get allYears => '全部年份';
+
+  @override
+  String get allMonths => '全部月份';
+
+  @override
+  String get all => '全部';
+
+  @override
+  String yearSuffix(Object year) {
+    return '$year年';
+  }
+
+  @override
+  String monthSuffix(Object month) {
+    return '$month月';
+  }
+
+  @override
+  String get sortRank => '排名';
+
+  @override
+  String get sortTrends => '熱門';
+
+  @override
+  String get sortCollects => '收藏';
+
+  @override
+  String get sortDate => '日期';
+
+  @override
+  String get sortTitle => '名稱';
+
+  @override
+  String get rankingNoData => '暫無資料';
+
+  @override
+  String get rankingEnd => '到底了';
+
+  @override
+  String rankingLoadFailed(Object error) {
+    return '載入失敗: $error';
+  }
+
+  @override
+  String get retry => '重試';
 }

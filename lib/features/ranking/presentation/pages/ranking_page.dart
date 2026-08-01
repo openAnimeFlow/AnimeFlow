@@ -1,5 +1,6 @@
 import 'dart:math' as math;
 
+import 'package:anime_flow/app/localization/app_localizations.dart';
 import 'package:anime_flow/core/constants/layout_constant.dart';
 import 'package:anime_flow/features/ranking/presentation/providers/ranking_provider.dart';
 import 'package:anime_flow/features/ranking/presentation/widgets/ranking_filter_bar.dart';
@@ -57,12 +58,13 @@ class _RankingPageState extends ConsumerState<RankingPage> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     final rankingAsync = ref.watch(rankingProvider);
     final rankingState = rankingAsync.asData?.value;
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('排行榜'),
+        title: Text(l10n.rankingTitle),
       ),
       body: RefreshIndicator(
         onRefresh: () => ref.read(rankingProvider.notifier).refresh(),
@@ -128,13 +130,13 @@ class _RankingPageState extends ConsumerState<RankingPage> {
                           child: Column(
                             mainAxisSize: MainAxisSize.min,
                             children: [
-                              Text('加载失败: $error'),
+                              Text(l10n.rankingLoadFailed(error.toString())),
                               const SizedBox(height: 12),
                               FilledButton(
                                 onPressed: () => ref
                                     .read(rankingProvider.notifier)
                                     .refresh(),
-                                child: const Text('重试'),
+                                child: Text(l10n.retry),
                               ),
                             ],
                           ),

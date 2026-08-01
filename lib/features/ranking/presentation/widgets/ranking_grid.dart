@@ -1,3 +1,4 @@
+import 'package:anime_flow/app/localization/app_localizations.dart';
 import 'package:anime_flow/features/ranking/presentation/providers/ranking_provider.dart';
 import 'package:anime_flow/app/router/model/info_route_extra.dart';
 import 'package:anime_flow/app/router/app_router.dart';
@@ -11,6 +12,7 @@ class RankingGrid extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = AppLocalizations.of(context);
     final rankingAsync = ref.watch(rankingProvider);
 
     if (rankingAsync.isLoading && !rankingAsync.hasValue) {
@@ -22,8 +24,8 @@ class RankingGrid extends ConsumerWidget {
     final rankingState = rankingAsync.requireValue;
 
     if (rankingState.items.isEmpty) {
-      return const SliverFillRemaining(
-        child: Center(child: Text('暂无数据')),
+      return SliverFillRemaining(
+        child: Center(child: Text(l10n.rankingNoData)),
       );
     }
 
@@ -48,10 +50,10 @@ class RankingGrid extends ConsumerWidget {
             }
             return isLoadingMore
                 ? const Center(child: CircularProgressIndicator())
-                : const Center(
+                : Center(
                     child: Padding(
-                      padding: EdgeInsets.all(8.0),
-                      child: Text('到底了'),
+                      padding: const EdgeInsets.all(8.0),
+                      child: Text(l10n.rankingEnd),
                     ),
                   );
           }

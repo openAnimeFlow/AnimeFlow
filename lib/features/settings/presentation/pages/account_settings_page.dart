@@ -17,6 +17,7 @@ import 'package:anime_flow/shared/widgets/notification_toast.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_svg/svg.dart';
+import 'package:anime_flow/app/localization/app_localizations.dart';
 
 import 'package:anime_flow/features/settings/presentation/widgets/account/account_content.dart';
 import 'package:anime_flow/features/settings/presentation/widgets/account/avatar_dialog.dart';
@@ -33,19 +34,20 @@ class _AccountSettingsPageState extends ConsumerState<AccountSettingsPage> {
   bool _isAvatarUploading = false;
 
   Future<void> _confirmLogout() async {
+    final l10n = AppLocalizations.of(context);
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (dialogContext) => AlertDialog(
-        title: const Text('确认退出'),
-        content: const Text('确定要退出登录吗？'),
+        title: Text(l10n.confirmLogout),
+        content: Text(l10n.logoutConfirmation),
         actions: [
           TextButton(
             onPressed: () => Navigator.of(dialogContext).pop(false),
-            child: const Text('取消'),
+            child: Text(l10n.cancel),
           ),
           TextButton(
             onPressed: () => Navigator.of(dialogContext).pop(true),
-            child: const Text('确定'),
+            child: Text(l10n.confirm),
           ),
         ],
       ),
@@ -55,21 +57,22 @@ class _AccountSettingsPageState extends ConsumerState<AccountSettingsPage> {
 
     await ref.read(userControllerProvider.notifier).clearUserInfo();
     if (!context.mounted) return;
-    NotificationToast.show('提示', '已退出登录');
+    NotificationToast.show(l10n.tip, l10n.logoutSuccess);
   }
 
   Future<void> _bindBangumi() async {
+    final l10n = AppLocalizations.of(context);
     try {
       await ref.read(userControllerProvider.notifier).openOAuthPageForBind();
       if (!context.mounted) return;
     } on StateError catch (e) {
       if (!context.mounted) return;
-      NotificationToast.show('提示', e.message);
+      NotificationToast.show(l10n.tip, e.message);
     } catch (e) {
       if (!context.mounted) return;
       NotificationToast.show(
-        '提示',
-        resolveAnimeFlowErrorMessage(e, fallback: '打开授权页面失败'),
+        l10n.tip,
+        resolveAnimeFlowErrorMessage(e, fallback: l10n.openAuthorizationFailed),
       );
     }
   }
@@ -100,6 +103,7 @@ class _AccountSettingsPageState extends ConsumerState<AccountSettingsPage> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     final isLoggedInAsync = ref.watch(isLoggedInProvider);
     final userInfoAsync = ref.watch(currentUserInfoProvider);
     final bangumiBindAsync = ref.watch(bangumiBindProvider);
@@ -114,7 +118,7 @@ class _AccountSettingsPageState extends ConsumerState<AccountSettingsPage> {
           builder: (context, ref, _) {
             final isWideScreen = ref.watch(settingsLayoutProvider);
             return AppBar(
-              title: const Text('账户设置'),
+              title: Text(l10n.accountSettings),
               automaticallyImplyLeading: !isWideScreen,
             );
           },
@@ -139,11 +143,11 @@ class _AccountSettingsPageState extends ConsumerState<AccountSettingsPage> {
                         isBinding,
                       ),
                 loading: () => const Center(child: CircularProgressIndicator()),
-                error: (_, __) => _buildErrorState('获取用户资料失败'),
+                error: (_, __) => _buildErrorState(l10n.profileLoadFailed),
               );
             },
             loading: () => const Center(child: CircularProgressIndicator()),
-            error: (_, __) => _buildErrorState('加载登录状态失败'),
+            error: (_, __) => _buildErrorState(l10n.loginStateLoadFailed),
           ),
         ),
       ),
@@ -152,6 +156,7 @@ class _AccountSettingsPageState extends ConsumerState<AccountSettingsPage> {
 
   Widget _buildNotLoggedIn(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
+    final l10n = AppLocalizations.of(context);
 
     return ListView(
       padding: const EdgeInsets.all(16),
@@ -172,14 +177,14 @@ class _AccountSettingsPageState extends ConsumerState<AccountSettingsPage> {
                 ),
                 const SizedBox(height: 16),
                 Text(
-                  '尚未登录',
+                  l10n.notLoggedIn,
                   style: Theme.of(context).textTheme.titleLarge?.copyWith(
                         fontWeight: FontWeight.bold,
                       ),
                 ),
                 const SizedBox(height: 8),
                 Text(
-                  '登录后可管理账户信息、绑定 Bangumi 账号',
+                  l10n.loginToManageAccount,
                   textAlign: TextAlign.center,
                   style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                         color: colorScheme.onSurfaceVariant,
@@ -193,7 +198,7 @@ class _AccountSettingsPageState extends ConsumerState<AccountSettingsPage> {
                       FilledButton.icon(
                         onPressed: () => const LoginRoute().push(context),
                         icon: const Icon(Icons.login_outlined),
-                        label: const Text('登录'),
+                        label: Text(l10n.login),
                         style: FilledButton.styleFrom(
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(8),
@@ -217,8 +222,8 @@ class _AccountSettingsPageState extends ConsumerState<AccountSettingsPage> {
                                   height: 20,
                                   width: 20,
                                 ),
-                                label: const Text(
-                                  '授权登录',
+                                label: Text(
+                                  l10n.authorizeLogin,
                                   overflow: TextOverflow.ellipsis,
                                   maxLines: 1,
                                 ),
@@ -242,8 +247,8 @@ class _AccountSettingsPageState extends ConsumerState<AccountSettingsPage> {
                                   borderRadius: BorderRadius.circular(8),
                                 ),
                               ),
-                              child: const Text(
-                                '注册账号',
+                              child: Text(
+                                l10n.registerAccount,
                                 overflow: TextOverflow.ellipsis,
                                 maxLines: 1,
                               ),
@@ -268,10 +273,11 @@ class _AccountSettingsPageState extends ConsumerState<AccountSettingsPage> {
     AsyncValue<BangumiBindItem?> bangumiBindAsync,
     bool isBinding,
   ) {
+    final l10n = AppLocalizations.of(context);
     return ListView(
       padding: const EdgeInsets.all(16),
       children: [
-        _buildSectionTitle('账户信息'),
+        _buildSectionTitle(l10n.accountInfo),
         AccountContentView(
           userInfo: user,
           isAvatarUploading: _isAvatarUploading,
@@ -281,10 +287,10 @@ class _AccountSettingsPageState extends ConsumerState<AccountSettingsPage> {
                 .read(currentUserInfoProvider.notifier)
                 .updateNickname(newNickname);
             if (error != null) {
-              NotificationToast.show('提示', error);
+              NotificationToast.show(l10n.tip, error);
               throw error;
             }
-            NotificationToast.show('提示', '昵称已更新');
+            NotificationToast.show(l10n.tip, l10n.nicknameUpdated);
           },
         ),
         if (user.email.isEmpty) ...[
@@ -292,7 +298,7 @@ class _AccountSettingsPageState extends ConsumerState<AccountSettingsPage> {
           const BindEmailSection(),
         ],
         const SizedBox(height: 24),
-        _buildSectionTitle('第三方账号'),
+        _buildSectionTitle(l10n.thirdPartyAccounts),
         _buildBangumiBindCard(
           context,
           ref,
@@ -300,7 +306,7 @@ class _AccountSettingsPageState extends ConsumerState<AccountSettingsPage> {
           isBinding,
         ),
         const SizedBox(height: 24),
-        _buildSectionTitle('账户操作'),
+        _buildSectionTitle(l10n.accountActions),
         Card(
           child: ListTile(
             leading: Icon(
@@ -309,7 +315,7 @@ class _AccountSettingsPageState extends ConsumerState<AccountSettingsPage> {
             ),
             onTap: () => _confirmLogout(),
             title: Text(
-              '退出登录',
+              l10n.logout,
               style: TextStyle(color: Theme.of(context).colorScheme.error),
             ),
           ),
@@ -325,6 +331,7 @@ class _AccountSettingsPageState extends ConsumerState<AccountSettingsPage> {
     bool isBinding,
   ) {
     final colorScheme = Theme.of(context).colorScheme;
+    final l10n = AppLocalizations.of(context);
 
     return Card(
       child: Padding(
@@ -367,11 +374,11 @@ class _AccountSettingsPageState extends ConsumerState<AccountSettingsPage> {
                   },
                   orElse: () => const SizedBox.shrink(),
                 ),
-                const NetworkCheckButton(
+                NetworkCheckButton(
                   url: CommonApi.bgmTV,
                   label: 'Bangumi',
-                  successHint: 'Bangumi 授权与绑定应可正常使用。',
-                  failureHint: '授权或绑定 Bangumi 时，建议开启 VPN 或代理后重试。',
+                  successHint: l10n.bangumiBindSuccessHint,
+                  failureHint: l10n.bangumiBindFailureHint,
                 ),
               ],
             ),
@@ -387,7 +394,7 @@ class _AccountSettingsPageState extends ConsumerState<AccountSettingsPage> {
                   const SizedBox(width: 16),
                   Expanded(
                     child: Text(
-                      '正在等待 Bangumi 授权结果...',
+                      l10n.waitingBangumiAuthorization,
                       style: TextStyle(color: colorScheme.onSurfaceVariant),
                     ),
                   ),
@@ -395,7 +402,7 @@ class _AccountSettingsPageState extends ConsumerState<AccountSettingsPage> {
                     onPressed: () => ref
                         .read(userControllerProvider.notifier)
                         .cancelOAuthWaiting(),
-                    child: const Text('取消'),
+                    child: Text(l10n.cancel),
                   ),
                 ],
               ),
@@ -413,7 +420,7 @@ class _AccountSettingsPageState extends ConsumerState<AccountSettingsPage> {
                     child: TextButton.icon(
                       onPressed: () => ref.invalidate(bangumiBindProvider),
                       icon: const Icon(Icons.refresh),
-                      label: const Text('重试'),
+                      label: Text(l10n.retry),
                     ),
                   ),
                 ),
@@ -429,14 +436,15 @@ class _AccountSettingsPageState extends ConsumerState<AccountSettingsPage> {
     required AsyncValue<BangumiBindItem?> bangumiBindAsync,
     required bool isBinding,
   }) {
+    final l10n = AppLocalizations.of(context);
     return bangumiBindAsync.when(
       data: (bind) {
         final isBound = bind?.bound ?? false;
         final statusText = isBinding
-            ? '授权中...'
+            ? l10n.authorizing
             : isBound
-                ? '已绑定'
-                : '未绑定';
+                ? l10n.bound
+                : l10n.unbound;
         final statusColor = isBinding
             ? colorScheme.onSurfaceVariant
             : isBound
@@ -445,11 +453,11 @@ class _AccountSettingsPageState extends ConsumerState<AccountSettingsPage> {
         return _buildBangumiTitleColumn(statusText, statusColor);
       },
       loading: () => _buildBangumiTitleColumn(
-        isBinding ? '授权中...' : '加载中...',
+        isBinding ? l10n.authorizing : l10n.loading,
         colorScheme.onSurfaceVariant,
       ),
       error: (_, __) => _buildBangumiTitleColumn(
-        '获取绑定状态失败',
+        l10n.bindStatusLoadFailed,
         colorScheme.error,
       ),
     );
@@ -481,6 +489,7 @@ class _AccountSettingsPageState extends ConsumerState<AccountSettingsPage> {
     BangumiBindItem? bind,
   ) {
     final colorScheme = Theme.of(context).colorScheme;
+    final l10n = AppLocalizations.of(context);
     final isBound = bind?.bound ?? false;
 
     return Column(
@@ -526,7 +535,7 @@ class _AccountSettingsPageState extends ConsumerState<AccountSettingsPage> {
         ],
         if (!isBound) ...[
           Text(
-            '绑定 Bangumi 账号后可同步收藏等数据',
+            l10n.bindBangumiHint,
             style: TextStyle(
               fontSize: 13,
               color: colorScheme.onSurfaceVariant,
@@ -534,7 +543,7 @@ class _AccountSettingsPageState extends ConsumerState<AccountSettingsPage> {
           ),
           OutlinedButton(
             onPressed: () => _bindBangumi(),
-            child: const Text('绑定 Bangumi 账号'),
+            child: Text(l10n.bindBangumiAccount),
           ),
         ],
         if (isBound) ...[
@@ -545,16 +554,16 @@ class _AccountSettingsPageState extends ConsumerState<AccountSettingsPage> {
                 final confirmed = await showDialog<bool>(
                   context: context,
                   builder: (dialogContext) => AlertDialog(
-                    title: const Text('确认解绑'),
-                    content: const Text('确定要解绑 Bangumi 账号吗？解绑后可能影响部分功能。'),
+                    title: Text(l10n.confirmUnbind),
+                    content: Text(l10n.unbindConfirmation),
                     actions: [
                       TextButton(
                         onPressed: () => Navigator.of(dialogContext).pop(false),
-                        child: const Text('取消'),
+                        child: Text(l10n.cancel),
                       ),
                       TextButton(
                         onPressed: () => Navigator.of(dialogContext).pop(true),
-                        child: const Text('确定解绑'),
+                        child: Text(l10n.confirmUnbindAction),
                       ),
                     ],
                   ),
@@ -566,7 +575,7 @@ class _AccountSettingsPageState extends ConsumerState<AccountSettingsPage> {
                 }
               },
               icon: const Icon(Icons.link_off, size: 18),
-              label: const Text('解绑'),
+              label: Text(l10n.unbind),
             ),
           ),
           const Divider(),

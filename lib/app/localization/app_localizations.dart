@@ -1242,6 +1242,162 @@ abstract class AppLocalizations {
   /// In zh_Hans, this message translates to:
   /// **'显示区域'**
   String get displayArea;
+
+  /// No description provided for @logoutSuccess.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'已退出登录'**
+  String get logoutSuccess;
+
+  /// No description provided for @openAuthorizationFailed.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'打开授权页面失败'**
+  String get openAuthorizationFailed;
+
+  /// No description provided for @loginStateLoadFailed.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'加载登录状态失败'**
+  String get loginStateLoadFailed;
+
+  /// No description provided for @notLoggedIn.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'尚未登录'**
+  String get notLoggedIn;
+
+  /// No description provided for @loginToManageAccount.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'登录后可管理账户信息、绑定 Bangumi 账号'**
+  String get loginToManageAccount;
+
+  /// No description provided for @login.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'登录'**
+  String get login;
+
+  /// No description provided for @authorizeLogin.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'授权登录'**
+  String get authorizeLogin;
+
+  /// No description provided for @registerAccount.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'注册账号'**
+  String get registerAccount;
+
+  /// No description provided for @accountInfo.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'账户信息'**
+  String get accountInfo;
+
+  /// No description provided for @thirdPartyAccounts.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'第三方账号'**
+  String get thirdPartyAccounts;
+
+  /// No description provided for @accountActions.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'账户操作'**
+  String get accountActions;
+
+  /// No description provided for @nicknameUpdated.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'昵称已更新'**
+  String get nicknameUpdated;
+
+  /// No description provided for @waitingBangumiAuthorization.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'正在等待 Bangumi 授权结果...'**
+  String get waitingBangumiAuthorization;
+
+  /// No description provided for @authorizing.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'授权中...'**
+  String get authorizing;
+
+  /// No description provided for @bound.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'已绑定'**
+  String get bound;
+
+  /// No description provided for @unbound.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'未绑定'**
+  String get unbound;
+
+  /// No description provided for @loading.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'加载中...'**
+  String get loading;
+
+  /// No description provided for @bindStatusLoadFailed.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'获取绑定状态失败'**
+  String get bindStatusLoadFailed;
+
+  /// No description provided for @bindBangumiHint.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'绑定 Bangumi 账号后可同步收藏等数据'**
+  String get bindBangumiHint;
+
+  /// No description provided for @bindBangumiAccount.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'绑定 Bangumi 账号'**
+  String get bindBangumiAccount;
+
+  /// No description provided for @confirmUnbind.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'确认解绑'**
+  String get confirmUnbind;
+
+  /// No description provided for @unbindConfirmation.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'确定要解绑 Bangumi 账号吗？解绑后可能影响部分功能。'**
+  String get unbindConfirmation;
+
+  /// No description provided for @confirmUnbindAction.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'确定解绑'**
+  String get confirmUnbindAction;
+
+  /// No description provided for @unbind.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'解绑'**
+  String get unbind;
+
+  /// No description provided for @bangumiBindSuccessHint.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'Bangumi 授权与绑定应可正常使用。'**
+  String get bangumiBindSuccessHint;
+
+  /// No description provided for @bangumiBindFailureHint.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'授权或绑定 Bangumi 时，建议开启 VPN 或代理后重试。'**
+  String get bangumiBindFailureHint;
 }
 
 class _AppLocalizationsDelegate

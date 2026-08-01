@@ -619,6 +619,84 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get displayArea => '显示区域';
+
+  @override
+  String get logoutSuccess => '已退出登录';
+
+  @override
+  String get openAuthorizationFailed => '打开授权页面失败';
+
+  @override
+  String get loginStateLoadFailed => '加载登录状态失败';
+
+  @override
+  String get notLoggedIn => '尚未登录';
+
+  @override
+  String get loginToManageAccount => '登录后可管理账户信息、绑定 Bangumi 账号';
+
+  @override
+  String get login => '登录';
+
+  @override
+  String get authorizeLogin => '授权登录';
+
+  @override
+  String get registerAccount => '注册账号';
+
+  @override
+  String get accountInfo => '账户信息';
+
+  @override
+  String get thirdPartyAccounts => '第三方账号';
+
+  @override
+  String get accountActions => '账户操作';
+
+  @override
+  String get nicknameUpdated => '昵称已更新';
+
+  @override
+  String get waitingBangumiAuthorization => '正在等待 Bangumi 授权结果...';
+
+  @override
+  String get authorizing => '授权中...';
+
+  @override
+  String get bound => '已绑定';
+
+  @override
+  String get unbound => '未绑定';
+
+  @override
+  String get loading => '加载中...';
+
+  @override
+  String get bindStatusLoadFailed => '获取绑定状态失败';
+
+  @override
+  String get bindBangumiHint => '绑定 Bangumi 账号后可同步收藏等数据';
+
+  @override
+  String get bindBangumiAccount => '绑定 Bangumi 账号';
+
+  @override
+  String get confirmUnbind => '确认解绑';
+
+  @override
+  String get unbindConfirmation => '确定要解绑 Bangumi 账号吗？解绑后可能影响部分功能。';
+
+  @override
+  String get confirmUnbindAction => '确定解绑';
+
+  @override
+  String get unbind => '解绑';
+
+  @override
+  String get bangumiBindSuccessHint => 'Bangumi 授权与绑定应可正常使用。';
+
+  @override
+  String get bangumiBindFailureHint => '授权或绑定 Bangumi 时，建议开启 VPN 或代理后重试。';
 }
 
 /// The translations for Chinese, using the Han script (`zh_Hans`).
@@ -1236,6 +1314,84 @@ class AppLocalizationsZhHans extends AppLocalizationsZh {
 
   @override
   String get displayArea => '显示区域';
+
+  @override
+  String get logoutSuccess => '已退出登录';
+
+  @override
+  String get openAuthorizationFailed => '打开授权页面失败';
+
+  @override
+  String get loginStateLoadFailed => '加载登录状态失败';
+
+  @override
+  String get notLoggedIn => '尚未登录';
+
+  @override
+  String get loginToManageAccount => '登录后可管理账户信息、绑定 Bangumi 账号';
+
+  @override
+  String get login => '登录';
+
+  @override
+  String get authorizeLogin => '授权登录';
+
+  @override
+  String get registerAccount => '注册账号';
+
+  @override
+  String get accountInfo => '账户信息';
+
+  @override
+  String get thirdPartyAccounts => '第三方账号';
+
+  @override
+  String get accountActions => '账户操作';
+
+  @override
+  String get nicknameUpdated => '昵称已更新';
+
+  @override
+  String get waitingBangumiAuthorization => '正在等待 Bangumi 授权结果...';
+
+  @override
+  String get authorizing => '授权中...';
+
+  @override
+  String get bound => '已绑定';
+
+  @override
+  String get unbound => '未绑定';
+
+  @override
+  String get loading => '加载中...';
+
+  @override
+  String get bindStatusLoadFailed => '获取绑定状态失败';
+
+  @override
+  String get bindBangumiHint => '绑定 Bangumi 账号后可同步收藏等数据';
+
+  @override
+  String get bindBangumiAccount => '绑定 Bangumi 账号';
+
+  @override
+  String get confirmUnbind => '确认解绑';
+
+  @override
+  String get unbindConfirmation => '确定要解绑 Bangumi 账号吗？解绑后可能影响部分功能。';
+
+  @override
+  String get confirmUnbindAction => '确定解绑';
+
+  @override
+  String get unbind => '解绑';
+
+  @override
+  String get bangumiBindSuccessHint => 'Bangumi 授权与绑定应可正常使用。';
+
+  @override
+  String get bangumiBindFailureHint => '授权或绑定 Bangumi 时，建议开启 VPN 或代理后重试。';
 }
 
 /// The translations for Chinese, as used in Hong Kong, using the Han script (`zh_Hant_HK`).
@@ -1853,6 +2009,84 @@ class AppLocalizationsZhHantHk extends AppLocalizationsZh {
 
   @override
   String get displayArea => '顯示區域';
+
+  @override
+  String get logoutSuccess => '已登出';
+
+  @override
+  String get openAuthorizationFailed => '開啟授權頁面失敗';
+
+  @override
+  String get loginStateLoadFailed => '載入登入狀態失敗';
+
+  @override
+  String get notLoggedIn => '尚未登入';
+
+  @override
+  String get loginToManageAccount => '登入後可管理帳戶資訊、綁定 Bangumi 帳戶';
+
+  @override
+  String get login => '登入';
+
+  @override
+  String get authorizeLogin => '授權登入';
+
+  @override
+  String get registerAccount => '註冊帳戶';
+
+  @override
+  String get accountInfo => '帳戶資訊';
+
+  @override
+  String get thirdPartyAccounts => '第三方帳戶';
+
+  @override
+  String get accountActions => '帳戶操作';
+
+  @override
+  String get nicknameUpdated => '暱稱已更新';
+
+  @override
+  String get waitingBangumiAuthorization => '正在等待 Bangumi 授權結果...';
+
+  @override
+  String get authorizing => '授權中...';
+
+  @override
+  String get bound => '已綁定';
+
+  @override
+  String get unbound => '未綁定';
+
+  @override
+  String get loading => '載入中...';
+
+  @override
+  String get bindStatusLoadFailed => '取得綁定狀態失敗';
+
+  @override
+  String get bindBangumiHint => '綁定 Bangumi 帳戶後可同步收藏等資料';
+
+  @override
+  String get bindBangumiAccount => '綁定 Bangumi 帳戶';
+
+  @override
+  String get confirmUnbind => '確認解除綁定';
+
+  @override
+  String get unbindConfirmation => '確定要解除綁定 Bangumi 帳戶嗎？解除後可能影響部分功能。';
+
+  @override
+  String get confirmUnbindAction => '確定解除綁定';
+
+  @override
+  String get unbind => '解除綁定';
+
+  @override
+  String get bangumiBindSuccessHint => 'Bangumi 授權與綁定應可正常使用。';
+
+  @override
+  String get bangumiBindFailureHint => '授權或綁定 Bangumi 時，建議開啟 VPN 或 Proxy 後再試。';
 }
 
 /// The translations for Chinese, as used in Taiwan, using the Han script (`zh_Hant_TW`).
@@ -2470,4 +2704,82 @@ class AppLocalizationsZhHantTw extends AppLocalizationsZh {
 
   @override
   String get displayArea => '顯示區域';
+
+  @override
+  String get logoutSuccess => '已登出';
+
+  @override
+  String get openAuthorizationFailed => '開啟授權頁面失敗';
+
+  @override
+  String get loginStateLoadFailed => '載入登入狀態失敗';
+
+  @override
+  String get notLoggedIn => '尚未登入';
+
+  @override
+  String get loginToManageAccount => '登入後可管理帳戶資訊、綁定 Bangumi 帳戶';
+
+  @override
+  String get login => '登入';
+
+  @override
+  String get authorizeLogin => '授權登入';
+
+  @override
+  String get registerAccount => '註冊帳戶';
+
+  @override
+  String get accountInfo => '帳戶資訊';
+
+  @override
+  String get thirdPartyAccounts => '第三方帳戶';
+
+  @override
+  String get accountActions => '帳戶操作';
+
+  @override
+  String get nicknameUpdated => '暱稱已更新';
+
+  @override
+  String get waitingBangumiAuthorization => '正在等待 Bangumi 授權結果...';
+
+  @override
+  String get authorizing => '授權中...';
+
+  @override
+  String get bound => '已綁定';
+
+  @override
+  String get unbound => '未綁定';
+
+  @override
+  String get loading => '載入中...';
+
+  @override
+  String get bindStatusLoadFailed => '取得綁定狀態失敗';
+
+  @override
+  String get bindBangumiHint => '綁定 Bangumi 帳戶後可同步收藏等資料';
+
+  @override
+  String get bindBangumiAccount => '綁定 Bangumi 帳戶';
+
+  @override
+  String get confirmUnbind => '確認解除綁定';
+
+  @override
+  String get unbindConfirmation => '確定要解除綁定 Bangumi 帳戶嗎？解除後可能影響部分功能。';
+
+  @override
+  String get confirmUnbindAction => '確定解除綁定';
+
+  @override
+  String get unbind => '解除綁定';
+
+  @override
+  String get bangumiBindSuccessHint => 'Bangumi 授權與綁定應可正常使用。';
+
+  @override
+  String get bangumiBindFailureHint => '授權或綁定 Bangumi 時，建議開啟 VPN 或 Proxy 後再試。';
 }

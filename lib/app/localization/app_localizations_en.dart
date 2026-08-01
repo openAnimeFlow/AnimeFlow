@@ -622,4 +622,88 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get displayArea => 'Display area';
+
+  @override
+  String get logoutSuccess => 'Logged out';
+
+  @override
+  String get openAuthorizationFailed => 'Failed to open authorization page';
+
+  @override
+  String get loginStateLoadFailed => 'Failed to load login status';
+
+  @override
+  String get notLoggedIn => 'Not logged in';
+
+  @override
+  String get loginToManageAccount =>
+      'Log in to manage your account and bind a Bangumi account';
+
+  @override
+  String get login => 'Log in';
+
+  @override
+  String get authorizeLogin => 'Authorize login';
+
+  @override
+  String get registerAccount => 'Register';
+
+  @override
+  String get accountInfo => 'Account information';
+
+  @override
+  String get thirdPartyAccounts => 'Third-party accounts';
+
+  @override
+  String get accountActions => 'Account actions';
+
+  @override
+  String get nicknameUpdated => 'Nickname updated';
+
+  @override
+  String get waitingBangumiAuthorization =>
+      'Waiting for Bangumi authorization result...';
+
+  @override
+  String get authorizing => 'Authorizing...';
+
+  @override
+  String get bound => 'Bound';
+
+  @override
+  String get unbound => 'Not bound';
+
+  @override
+  String get loading => 'Loading...';
+
+  @override
+  String get bindStatusLoadFailed => 'Failed to get binding status';
+
+  @override
+  String get bindBangumiHint =>
+      'Bind a Bangumi account to sync collections and more';
+
+  @override
+  String get bindBangumiAccount => 'Bind Bangumi account';
+
+  @override
+  String get confirmUnbind => 'Confirm unbinding';
+
+  @override
+  String get unbindConfirmation =>
+      'Are you sure you want to unbind your Bangumi account? Some features may be affected.';
+
+  @override
+  String get confirmUnbindAction => 'Unbind';
+
+  @override
+  String get unbind => 'Unbind';
+
+  @override
+  String get bangumiBindSuccessHint =>
+      'Bangumi authorization and binding should work normally.';
+
+  @override
+  String get bangumiBindFailureHint =>
+      'If Bangumi authorization or binding fails, try enabling a VPN or proxy.';
 }

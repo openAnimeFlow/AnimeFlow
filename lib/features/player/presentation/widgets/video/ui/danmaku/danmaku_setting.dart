@@ -1,3 +1,4 @@
+import 'package:anime_flow/app/localization/app_localizations.dart';
 import 'package:anime_flow/core/constants/storage_key.dart';
 import 'package:anime_flow/features/player/presentation/providers/play_provider.dart';
 import 'package:anime_flow/core/storage/storage.dart';
@@ -26,6 +27,7 @@ class _DanmakuSettingState extends ConsumerState<DanmakuSetting> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     final danmakuController = playController.danmakuController;
     final hideScroll = danmakuController.option.hideScroll;
     final hideTop = danmakuController.option.hideTop;
@@ -70,7 +72,7 @@ class _DanmakuSettingState extends ConsumerState<DanmakuSetting> {
                   Padding(
                     padding: const EdgeInsets.only(bottom: 16),
                     child: Text(
-                      '弹幕显示类型',
+                      l10n.danmakuDisplayType,
                       style: TextStyle(
                         fontSize: 18,
                         fontWeight: FontWeight.bold,
@@ -118,7 +120,7 @@ class _DanmakuSettingState extends ConsumerState<DanmakuSetting> {
                               ),
                             ),
                           ),
-                          const Text('滚动弹幕')
+                          Text(l10n.scrollingDanmaku)
                         ],
                       ),
                       const SizedBox(width: 16),
@@ -160,7 +162,7 @@ class _DanmakuSettingState extends ConsumerState<DanmakuSetting> {
                               ),
                             ),
                           ),
-                          const Text('顶部弹幕')
+                          Text(l10n.topDanmaku)
                         ],
                       ),
                       const SizedBox(width: 16),
@@ -205,13 +207,13 @@ class _DanmakuSettingState extends ConsumerState<DanmakuSetting> {
                               ),
                             ),
                           ),
-                          const Text('底部弹幕')
+                          Text(l10n.bottomDanmaku)
                         ],
                       )
                     ],
                   ),
                   _buildSettingItem(
-                    title: '密集模式',
+                    title: l10n.massiveMode,
                     value: danmakuController.option.massiveMode,
                     onChanged: (value) {
                       setState(() {
@@ -240,7 +242,7 @@ class _DanmakuSettingState extends ConsumerState<DanmakuSetting> {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Text(
-                            '弹幕速度: $speedPercent%',
+                            l10n.danmakuSpeed(speedPercent),
                             style: TextStyle(
                               fontSize: 14,
                               color:
@@ -286,7 +288,7 @@ class _DanmakuSettingState extends ConsumerState<DanmakuSetting> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        '透明度: ${(danmakuController.option.opacity * 100).toInt()}%',
+                        '${l10n.opacity}: ${(danmakuController.option.opacity * 100).toInt()}%',
                         style: TextStyle(
                           fontSize: 14,
                           color: Theme.of(context).textTheme.bodyMedium?.color,
@@ -323,7 +325,7 @@ class _DanmakuSettingState extends ConsumerState<DanmakuSetting> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        '字体大小: ${danmakuController.option.fontSize.toInt()}px',
+                        '${l10n.fontSize}: ${danmakuController.option.fontSize.toInt()}px',
                         style: TextStyle(
                           fontSize: 14,
                           color: Theme.of(context).textTheme.bodyMedium?.color,
@@ -358,7 +360,7 @@ class _DanmakuSettingState extends ConsumerState<DanmakuSetting> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        '显示区域: ${(danmakuController.option.area * 100).toInt()}%',
+                        '${l10n.displayArea}: ${(danmakuController.option.area * 100).toInt()}%',
                         style: TextStyle(
                           fontSize: 14,
                           color: Theme.of(context).textTheme.bodyMedium?.color,

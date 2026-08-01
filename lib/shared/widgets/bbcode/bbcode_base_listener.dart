@@ -1,4 +1,4 @@
-import 'package:anime_flow/widget/bbcode/bbcode_elements.dart';
+import 'package:anime_flow/shared/widgets/bbcode/bbcode_elements.dart';
 import 'package:flutter/material.dart';
 import 'package:antlr4/antlr4.dart';
 import 'package:anime_flow/core/logger/logger.dart';

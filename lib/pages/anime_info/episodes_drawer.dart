@@ -6,7 +6,7 @@ import 'package:anime_flow/providers/user/user_state_provider.dart';
 import 'package:anime_flow/routes/model/play_route_extra.dart';
 import 'package:anime_flow/routes/routes.dart';
 import 'package:anime_flow/core/logger/logger.dart';
-import 'package:anime_flow/widget/notification_toast.dart';
+import 'package:anime_flow/shared/widgets/notification_toast.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 

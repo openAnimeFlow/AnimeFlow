@@ -1,7 +1,7 @@
 import 'package:anime_flow/models/item/bangumi/user_info_item.dart';
 import 'package:anime_flow/pages/user_space/provider/user_space_provider.dart';
 import 'package:anime_flow/pages/user_space/statistics.dart';
-import 'package:anime_flow/widget/bbcode/bbcode_widget.dart';
+import 'package:anime_flow/shared/widgets/bbcode/bbcode_widget.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 

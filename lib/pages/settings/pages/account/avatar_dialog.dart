@@ -1,7 +1,7 @@
 import 'dart:typed_data';
 
-import 'package:anime_flow/widget/animation_network_image.dart';
-import 'package:anime_flow/widget/notification_toast.dart';
+import 'package:anime_flow/shared/widgets/animation_network_image.dart';
+import 'package:anime_flow/shared/widgets/notification_toast.dart';
 import 'package:crop_your_image/crop_your_image.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';

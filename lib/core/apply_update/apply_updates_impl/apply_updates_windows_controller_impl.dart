@@ -1,5 +1,5 @@
 import 'package:anime_flow/core/apply_update/apply_updates_controller.dart';
-import 'package:anime_flow/models/download_info.dart';
+import 'package:anime_flow/shared/models/download_info.dart';
 import 'package:anime_flow/core/network/api/api.dart';
 import 'package:dio/dio.dart';
 import 'package:path_provider/path_provider.dart' show getDownloadsDirectory;

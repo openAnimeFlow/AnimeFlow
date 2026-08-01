@@ -1,4 +1,4 @@
-import 'package:anime_flow/widget/animation_network_image.dart';
+import 'package:anime_flow/shared/widgets/animation_network_image.dart';
 import 'package:flutter/material.dart';
 
 class UserAvatarView extends StatefulWidget {

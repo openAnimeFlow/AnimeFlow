@@ -9,8 +9,8 @@ import 'package:anime_flow/core/utils/format_time_util.dart';
 import 'package:anime_flow/core/logger/logger.dart';
 import 'package:anime_flow/core/utils/systemUtil.dart';
 import 'package:anime_flow/core/utils/utils.dart';
-import 'package:anime_flow/widget/animation_network_image.dart';
-import 'package:anime_flow/widget/notification_toast.dart';
+import 'package:anime_flow/shared/widgets/animation_network_image.dart';
+import 'package:anime_flow/shared/widgets/notification_toast.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 

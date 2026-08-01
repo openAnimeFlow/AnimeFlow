@@ -1,7 +1,7 @@
 import 'package:anime_flow/models/item/bangumi/subject_item.dart';
 import 'package:anime_flow/routes/model/info_route_extra.dart';
 import 'package:anime_flow/routes/routes.dart';
-import 'package:anime_flow/widget/subject_card.dart';
+import 'package:anime_flow/shared/widgets/subject_card.dart';
 import 'package:flutter/material.dart';
 
 /// 简洁View（海报卡片）

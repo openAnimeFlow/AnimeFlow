@@ -5,7 +5,7 @@ import 'package:anime_flow/core/network/api/flow_api.dart';
 import 'package:anime_flow/pages/register/graphic_captcha.dart';
 import 'package:anime_flow/pages/register/send_code_button.dart';
 import 'package:anime_flow/providers/user/user_state_provider.dart';
-import 'package:anime_flow/widget/notification_toast.dart';
+import 'package:anime_flow/shared/widgets/notification_toast.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 

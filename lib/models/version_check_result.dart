@@ -1,5 +1,5 @@
-import 'package:anime_flow/models/download_info.dart';
-import 'package:anime_flow/models/enums/version_type.dart';
+import 'package:anime_flow/shared/models/download_info.dart';
+import 'package:anime_flow/shared/models/enums/version_type.dart';
 
 class VersionUpdateInfo {
   final List<DownloadInfo> download;

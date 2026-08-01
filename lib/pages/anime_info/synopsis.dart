@@ -8,7 +8,7 @@ import 'package:anime_flow/pages/anime_info/provider/anime_info_provider.dart';
 import 'package:anime_flow/pages/anime_info/related.dart';
 import 'package:anime_flow/pages/anime_info/tags.dart';
 import 'package:anime_flow/core/utils/systemUtil.dart';
-import 'package:anime_flow/widget/text/expandable_text.dart';
+import 'package:anime_flow/shared/widgets/expandable_text.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shimmer/shimmer.dart';

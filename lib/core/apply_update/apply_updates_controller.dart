@@ -1,5 +1,5 @@
 import 'dart:io';
-import 'package:anime_flow/models/download_info.dart';
+import 'package:anime_flow/shared/models/download_info.dart';
 
 import 'apply_updates_impl/apply_updates_android_controller_impl.dart';
 import 'apply_updates_impl/apply_updates_ios_controller_impl.dart';

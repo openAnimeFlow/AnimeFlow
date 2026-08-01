@@ -1,7 +1,7 @@
 import 'dart:async';
 
 import 'package:anime_flow/routes/routes.dart';
-import 'package:anime_flow/widget/version_update_ui.dart';
+import 'package:anime_flow/shared/widgets/version_update_ui.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 

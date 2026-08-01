@@ -3,7 +3,7 @@ import 'package:anime_flow/pages/recommend/anime/provider/anime_provider.dart';
 import 'package:anime_flow/routes/routes.dart';
 import 'package:anime_flow/core/utils/layout_util.dart';
 import 'package:anime_flow/core/utils/systemUtil.dart';
-import 'package:anime_flow/widget/subject_card.dart';
+import 'package:anime_flow/shared/widgets/subject_card.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shimmer/shimmer.dart';

@@ -5,8 +5,8 @@ import 'package:anime_flow/pages/settings/pages/account/provider/account_backgro
 import 'package:anime_flow/pages/settings/pages/account/user_avatar.dart';
 import 'package:anime_flow/providers/user/user_state_provider.dart';
 import 'package:anime_flow/core/utils/format_time_util.dart';
-import 'package:anime_flow/widget/animation_network_image.dart';
-import 'package:anime_flow/widget/notification_toast.dart';
+import 'package:anime_flow/shared/widgets/animation_network_image.dart';
+import 'package:anime_flow/shared/widgets/notification_toast.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:url_launcher/url_launcher.dart';

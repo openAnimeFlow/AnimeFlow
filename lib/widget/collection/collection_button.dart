@@ -1,6 +1,6 @@
+import 'package:anime_flow/app/router/app_router.dart';
 import 'package:anime_flow/providers/user/user_state_provider.dart';
-import 'package:anime_flow/models/enums/collect_type.dart';
-import 'package:anime_flow/routes/routes.dart';
+import 'package:anime_flow/shared/models/enums/collect_type.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 

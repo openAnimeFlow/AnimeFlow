@@ -6,7 +6,7 @@ import 'package:anime_flow/routes/model/play_route_extra.dart';
 import 'package:anime_flow/routes/routes.dart';
 import 'package:anime_flow/core/logger/logger.dart';
 import 'package:anime_flow/core/utils/utils.dart';
-import 'package:anime_flow/widget/animation_network_image.dart';
+import 'package:anime_flow/shared/widgets/animation_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:hive_ce_flutter/hive_flutter.dart';
 

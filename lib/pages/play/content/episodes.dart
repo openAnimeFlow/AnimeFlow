@@ -5,8 +5,8 @@ import 'package:anime_flow/pages/play/providers/episodes_provider.dart';
 import 'package:anime_flow/pages/play/providers/play_provider.dart';
 import 'package:anime_flow/providers/episodes/subject_episodes_provider.dart';
 import 'package:anime_flow/routes/provider/routes_args.dart';
-import 'package:anime_flow/widget/layout_toggle_icon.dart';
-import 'package:anime_flow/widget/notification_toast.dart';
+import 'package:anime_flow/shared/widgets/layout_toggle_icon.dart';
+import 'package:anime_flow/shared/widgets/notification_toast.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 

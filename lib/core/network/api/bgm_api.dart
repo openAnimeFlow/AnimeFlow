@@ -1,6 +1,6 @@
 import 'package:anime_flow/core/network/api_path.dart';
 import 'package:anime_flow/core/network/clients/bgm_client.dart';
-import 'package:anime_flow/models/enums/sort_type.dart';
+import 'package:anime_flow/shared/models/enums/sort_type.dart';
 import 'package:anime_flow/models/item/bangumi/actor_item.dart';
 import 'package:anime_flow/models/item/bangumi/calendar_item.dart';
 import 'package:anime_flow/models/item/bangumi/character_comments_item.dart';

@@ -1,5 +1,5 @@
 import 'package:anime_flow/core/constants/storage_key.dart';
-import 'package:anime_flow/models/enums/video_controls_icon_type.dart';
+import 'package:anime_flow/shared/models/enums/video_controls_icon_type.dart';
 import 'package:anime_flow/pages/play/providers/play_provider.dart';
 import 'package:anime_flow/pages/play/providers/video_ui_provider.dart';
 import 'package:anime_flow/core/storage/storage.dart';

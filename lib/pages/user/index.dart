@@ -3,8 +3,8 @@ import 'package:anime_flow/pages/user/user_view/user_view.dart';
 import 'package:anime_flow/providers/user/user_controller.dart';
 import 'package:anime_flow/providers/user/user_state_provider.dart';
 import 'package:anime_flow/routes/routes.dart';
-import 'package:anime_flow/widget/drop_down_menu.dart';
-import 'package:anime_flow/widget/notification_toast.dart';
+import 'package:anime_flow/shared/widgets/drop_down_menu.dart';
+import 'package:anime_flow/shared/widgets/notification_toast.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 

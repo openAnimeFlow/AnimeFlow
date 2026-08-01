@@ -1,4 +1,4 @@
-import 'package:anime_flow/widget/ranking.dart';
+import 'package:anime_flow/shared/widgets/ranking.dart';
 import 'package:flutter/material.dart';
 import 'animation_network_image.dart';
 

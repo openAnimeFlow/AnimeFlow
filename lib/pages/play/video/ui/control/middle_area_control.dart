@@ -1,11 +1,11 @@
 import 'package:anime_flow/core/constants/assets_path_constants.dart';
 import 'package:anime_flow/core/network_speed/network_speed_provider.dart';
-import 'package:anime_flow/models/enums/video_controls_icon_type.dart';
+import 'package:anime_flow/shared/models/enums/video_controls_icon_type.dart';
 import 'package:anime_flow/pages/play/providers/play_provider.dart';
 import 'package:anime_flow/pages/play/providers/video_ui_provider.dart';
 import 'package:anime_flow/core/utils/format_time_util.dart';
 import 'package:anime_flow/core/utils/utils.dart';
-import 'package:anime_flow/widget/play_pause_icon.dart';
+import 'package:anime_flow/shared/widgets/play_pause_icon.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_svg/flutter_svg.dart';

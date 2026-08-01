@@ -7,8 +7,8 @@ import 'package:anime_flow/providers/user/user_controller.dart';
 import 'package:anime_flow/routes/routes.dart';
 import 'package:anime_flow/core/utils/format_time_util.dart';
 import 'package:anime_flow/core/utils/systemUtil.dart';
-import 'package:anime_flow/widget/animation_network_image.dart';
-import 'package:anime_flow/widget/drop_down_menu.dart';
+import 'package:anime_flow/shared/widgets/animation_network_image.dart';
+import 'package:anime_flow/shared/widgets/drop_down_menu.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 

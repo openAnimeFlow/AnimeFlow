@@ -1,4 +1,4 @@
-import 'package:anime_flow/models/enums/sort_type.dart';
+import 'package:anime_flow/shared/models/enums/sort_type.dart';
 import 'package:anime_flow/pages/ranking/provider/ranking_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';

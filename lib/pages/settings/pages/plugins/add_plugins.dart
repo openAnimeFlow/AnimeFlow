@@ -1,7 +1,7 @@
 import 'package:anime_flow/core/crawler/itme/crawler_config_item.dart';
 import 'package:anime_flow/core/crawler/itme/anti_crawler_config.dart';
 import 'package:anime_flow/core/storage/storage.dart';
-import 'package:anime_flow/widget/notification_toast.dart';
+import 'package:anime_flow/shared/widgets/notification_toast.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 

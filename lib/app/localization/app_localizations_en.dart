@@ -1504,6 +1504,131 @@ class AppLocalizationsEn extends AppLocalizations {
   String get mysteriousUser => 'This user is mysterious';
 
   @override
+  String get manualSearch => 'Manual search';
+
+  @override
+  String get manualSearchResource => 'Search resources manually';
+
+  @override
+  String fetchingResource(Object website) {
+    return 'Fetching resources from $website';
+  }
+
+  @override
+  String get reSearchingResource =>
+      'The site is being searched again. Please wait.';
+
+  @override
+  String resourceRequestFailed(Object website) {
+    return '$website request failed';
+  }
+
+  @override
+  String resourceNotFoundForSite(Object website) {
+    return 'No resources found on $website';
+  }
+
+  @override
+  String get noPlayableSourceHint =>
+      'No playable source was found. Try again later or switch to another site.';
+
+  @override
+  String get searchAgain => 'Search again';
+
+  @override
+  String get unnamedLine => 'Unnamed line';
+
+  @override
+  String get descending => 'Descending';
+
+  @override
+  String get ascending => 'Ascending';
+
+  @override
+  String get lineFilter => 'Line filter';
+
+  @override
+  String get allLines => 'All lines';
+
+  @override
+  String currentEpisodeCount(Object count) {
+    return 'Current episode ($count)';
+  }
+
+  @override
+  String allEpisodesCount(Object count) {
+    return 'All episodes ($count)';
+  }
+
+  @override
+  String get noPlayableSourceForEpisode =>
+      'No playable source for the current episode';
+
+  @override
+  String get episodeNotInResultsHint =>
+      'The selected episode is not in these results. Switch to “All episodes” to choose an episode manually.';
+
+  @override
+  String get episodeNoSourceHint =>
+      'No matching source was found for the current episode.';
+
+  @override
+  String get noSelectableEpisodes => 'No selectable episodes';
+
+  @override
+  String get siteNoEpisodes => 'The site returned no playable episodes.';
+
+  @override
+  String videoSourceLoadFailed(Object error) {
+    return 'Failed to get video source: $error';
+  }
+
+  @override
+  String get matchLabel => 'Match:';
+
+  @override
+  String get verificationSuccess => 'Verification successful';
+
+  @override
+  String get verificationRetrying => 'Searching again, please wait…';
+
+  @override
+  String get enterCaptcha => 'Enter the CAPTCHA';
+
+  @override
+  String get captchaMayBeWrong =>
+      'The CAPTCHA may be incorrect. Please try again.';
+
+  @override
+  String siteRequiresCaptcha(Object website) {
+    return '$website requires CAPTCHA verification';
+  }
+
+  @override
+  String get verify => 'Verify';
+
+  @override
+  String siteAutoVerifying(Object website) {
+    return '$website is being verified automatically. Please wait';
+  }
+
+  @override
+  String captchaVerification(Object website) {
+    return '$website CAPTCHA verification';
+  }
+
+  @override
+  String get loadingCaptchaImage => 'Loading CAPTCHA image...';
+
+  @override
+  String get imageDecodeFailed => 'Failed to decode image';
+
+  @override
+  String episodeNumber(Object episode) {
+    return 'Episode $episode';
+  }
+
+  @override
   String watchedLabel(Object progress) {
     return 'Watched $progress';
   }

@@ -11,6 +11,7 @@ import 'package:anime_flow/core/logger/logger.dart';
 import 'package:anime_flow/shared/widgets/animation_network_image.dart';
 import 'package:anime_flow/shared/widgets/drop_down_menu.dart';
 import 'package:anime_flow/shared/widgets/notification_toast.dart';
+import 'package:anime_flow/app/localization/app_localizations.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -287,10 +288,11 @@ class _VideoSourceDrawersState extends ConsumerState<VideoSourceDrawers> {
 
   /// 标题行
   Widget buildHeader() {
+    final l10n = AppLocalizations.of(context);
     return Row(
       children: [
         Text(
-          '数据源',
+          l10n.videoSource,
           style: TextStyle(
             fontSize: 20,
             fontWeight: FontWeight.bold,
@@ -308,12 +310,13 @@ class _VideoSourceDrawersState extends ConsumerState<VideoSourceDrawers> {
   }
 
   Widget _manualSearch() {
+    final l10n = AppLocalizations.of(context);
     return SizedBox(
       height: 40,
       child: Row(
         children: [
           Text(
-            '手动搜索',
+            l10n.manualSearch,
             style: TextStyle(
               fontSize: 20,
               fontWeight: FontWeight.bold,
@@ -327,7 +330,7 @@ class _VideoSourceDrawersState extends ConsumerState<VideoSourceDrawers> {
             child: TextField(
               controller: _searchController,
               decoration: InputDecoration(
-                hintText: '手动搜索资源',
+                hintText: l10n.manualSearchResource,
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(8),
                 ),
@@ -455,6 +458,7 @@ class _VideoSourceDrawersState extends ConsumerState<VideoSourceDrawers> {
     }
 
     final selectedResource = dataSource[selectedIndex];
+    final l10n = AppLocalizations.of(context);
     final episodeResources = selectedResource.episodeResources;
 
     if (selectedResource.needsCaptcha) {
@@ -468,8 +472,8 @@ class _VideoSourceDrawersState extends ConsumerState<VideoSourceDrawers> {
           height: 36,
           child: CircularProgressIndicator(strokeWidth: 3),
         ),
-        title: '正在获取 ${selectedResource.websiteName} 的资源',
-        message: '当前站点正在重新检索，请稍候片刻。',
+        title: l10n.fetchingResource(selectedResource.websiteName),
+        message: l10n.reSearchingResource,
       );
     }
 
@@ -480,12 +484,12 @@ class _VideoSourceDrawersState extends ConsumerState<VideoSourceDrawers> {
           size: 44,
           color: Theme.of(context).colorScheme.error,
         ),
-        title: '${selectedResource.websiteName} 请求失败',
+        title: l10n.resourceRequestFailed(selectedResource.websiteName),
         message: selectedResource.errorMessage!,
         action: ElevatedButton(
           onPressed: () => videoSourceController
               .retryResources(selectedResource.websiteName),
-          child: const Text('点击重试'),
+          child: Text(l10n.retry),
         ),
       );
     }
@@ -497,12 +501,12 @@ class _VideoSourceDrawersState extends ConsumerState<VideoSourceDrawers> {
           size: 44,
           color: Theme.of(context).colorScheme.onSurfaceVariant,
         ),
-        title: '${selectedResource.websiteName} 暂未搜到资源',
-        message: '没有检索到可用播放源。你可以稍后重试，或切换其他站点。',
+        title: l10n.resourceNotFoundForSite(selectedResource.websiteName),
+        message: l10n.noPlayableSourceHint,
         action: ElevatedButton(
           onPressed: () => videoSourceController
               .retryResources(selectedResource.websiteName),
-          child: const Text('重新搜索'),
+          child: Text(l10n.searchAgain),
         ),
       );
     }
@@ -585,13 +589,14 @@ class _VideoSourceDrawersState extends ConsumerState<VideoSourceDrawers> {
 
   String _normalizedLineName(String lineName) {
     final trimmed = lineName.trim();
-    return trimmed.isEmpty ? '未命名线路' : trimmed;
+    return trimmed.isEmpty ? AppLocalizations.of(context).unnamedLine : trimmed;
   }
 
   Widget _buildSourceControls({
     required List<String> lineNames,
     required String? selectedLineName,
   }) {
+    final l10n = AppLocalizations.of(context);
     return SizedBox(
       height: 40,
       child: Row(
@@ -613,7 +618,7 @@ class _VideoSourceDrawersState extends ConsumerState<VideoSourceDrawers> {
               _sortDescending ? Icons.south_rounded : Icons.north_rounded,
               size: 18,
             ),
-            label: Text(_sortDescending ? '倒序' : '升序'),
+            label: Text(_sortDescending ? l10n.descending : l10n.ascending),
           ),
         ],
       ),
@@ -624,15 +629,16 @@ class _VideoSourceDrawersState extends ConsumerState<VideoSourceDrawers> {
     required List<String> lineNames,
     required String? selectedLineName,
   }) {
+    final l10n = AppLocalizations.of(context);
     final value = selectedLineName ?? _allLinesValue;
     final items = [_allLinesValue, ...lineNames];
     return DropDownMenu<String>(
       items: items,
       selectedItem: value,
-      tooltip: '线路筛选',
+      tooltip: l10n.lineFilter,
       offset: const Offset(0, 44),
       itemBuilder: (context, item, isSelected) {
-        final label = item == _allLinesValue ? '全部线路' : item;
+        final label = item == _allLinesValue ? l10n.allLines : item;
         return SizedBox(
           width: 180,
           child: Row(
@@ -658,7 +664,7 @@ class _VideoSourceDrawersState extends ConsumerState<VideoSourceDrawers> {
       },
       buttonBuilder: (context, selectedItem) {
         final label = selectedItem == null || selectedItem == _allLinesValue
-            ? '全部线路'
+            ? l10n.allLines
             : selectedItem;
         return Container(
           height: 40,
@@ -696,6 +702,7 @@ class _VideoSourceDrawersState extends ConsumerState<VideoSourceDrawers> {
     required int matchedCount,
     required int allCount,
   }) {
+    final l10n = AppLocalizations.of(context);
     return SizedBox(
       width: double.infinity,
       child: SegmentedButton<_SourceEpisodeMode>(
@@ -703,12 +710,12 @@ class _VideoSourceDrawersState extends ConsumerState<VideoSourceDrawers> {
           ButtonSegment(
             value: _SourceEpisodeMode.matched,
             icon: const Icon(Icons.rule_rounded, size: 18),
-            label: Text('当前集($matchedCount)'),
+            label: Text(l10n.currentEpisodeCount(matchedCount)),
           ),
           ButtonSegment(
             value: _SourceEpisodeMode.all,
             icon: const Icon(Icons.format_list_numbered_rounded, size: 18),
-            label: Text('全集($allCount)'),
+            label: Text(l10n.allEpisodesCount(allCount)),
           ),
         ],
         selected: {_sourceEpisodeMode},
@@ -729,6 +736,7 @@ class _VideoSourceDrawersState extends ConsumerState<VideoSourceDrawers> {
     required int episodeIndex,
     required int excludedEpisodesCount,
   }) {
+    final l10n = AppLocalizations.of(context);
     if (matchedResources.isEmpty) {
       return _buildResourceStatusView(
         icon: Icon(
@@ -736,10 +744,10 @@ class _VideoSourceDrawersState extends ConsumerState<VideoSourceDrawers> {
           size: 44,
           color: Theme.of(context).colorScheme.onSurfaceVariant,
         ),
-        title: '当前剧集暂无可用播放源',
+        title: l10n.noPlayableSourceForEpisode,
         message: excludedEpisodesCount > 0
-            ? '当前选中剧集不在这些结果里。你可以切到“全部集数”手动指定资源站集数。'
-            : '当前剧集没有匹配到对应播放源。',
+            ? l10n.episodeNotInResultsHint
+            : l10n.episodeNoSourceHint,
       );
     }
 
@@ -769,6 +777,7 @@ class _VideoSourceDrawersState extends ConsumerState<VideoSourceDrawers> {
     required ResourcesItem selectedResource,
     required bool sortDescending,
   }) {
+    final l10n = AppLocalizations.of(context);
     final expandedItems = episodeResources.expand((item) {
       return item.episodes.map((ep) => (resource: item, episode: ep));
     }).toList(growable: false);
@@ -792,8 +801,8 @@ class _VideoSourceDrawersState extends ConsumerState<VideoSourceDrawers> {
           size: 44,
           color: Theme.of(context).colorScheme.onSurfaceVariant,
         ),
-        title: '暂无可选集数',
-        message: '当前站点没有返回可用播放集数。',
+        title: l10n.noSelectableEpisodes,
+        message: l10n.siteNoEpisodes,
       );
     }
 
@@ -928,7 +937,11 @@ class _VideoSourceDrawersState extends ConsumerState<VideoSourceDrawers> {
               widget.onVideoUrlSelected?.call(videoUrl);
             } catch (e) {
               logger.e('获取视频源失败', error: e);
-              NotificationToast.show('错误', '获取视频源失败: $e');
+              final l10n = AppLocalizations.of(context);
+              NotificationToast.show(
+                l10n.error,
+                l10n.videoSourceLoadFailed(e.toString()),
+              );
             }
           },
           borderRadius: BorderRadius.circular(12),
@@ -950,8 +963,7 @@ class _VideoSourceDrawersState extends ConsumerState<VideoSourceDrawers> {
                           text: item.subjectsTitle,
                           children: [
                             TextSpan(
-                              text:
-                                  ' 第${episode.episodeSort.toString().padLeft(2, '0')}集',
+                            text: ' ${AppLocalizations.of(context).episodeNumber(episode.episodeSort.toString().padLeft(2, '0'))}',
                               style: const TextStyle(
                                 fontSize: 12,
                                 fontWeight: FontWeight.w600,
@@ -968,7 +980,7 @@ class _VideoSourceDrawersState extends ConsumerState<VideoSourceDrawers> {
                 Row(
                   children: [
                     Text(
-                      '线路:',
+                      AppLocalizations.of(context).lineLabel('').trimRight(),
                       style: TextStyle(
                         fontSize: 12,
                         color: Theme.of(context).colorScheme.onSurfaceVariant,
@@ -990,7 +1002,7 @@ class _VideoSourceDrawersState extends ConsumerState<VideoSourceDrawers> {
                       color: Theme.of(context).colorScheme.onSurfaceVariant,
                     ),
                     const Spacer(),
-                    const Text('匹配度:'),
+                    Text(AppLocalizations.of(context).matchLabel),
                     const SizedBox(width: 4),
                     _buildMatchRatioBadge(item.matchRatio),
                   ],
@@ -1110,7 +1122,8 @@ class _CaptchaViewState extends State<CaptchaView> {
     _disposeSession();
     dataSourceController.markCaptchaVerified(websiteName);
     setState(() {});
-    NotificationToast.show('验证成功', '正在重新检索，请稍候…');
+    final l10n = AppLocalizations.of(context);
+    NotificationToast.show(l10n.verificationSuccess, l10n.verificationRetrying);
     Future<void>.delayed(const Duration(seconds: 3), () {
       dataSourceController.retryResources(websiteName);
     });
@@ -1120,7 +1133,8 @@ class _CaptchaViewState extends State<CaptchaView> {
     final config = widget.resource.antiCrawlerConfig;
     if (config == null || _isSubmitting) return;
     if (_codeController.text.trim().isEmpty) {
-      NotificationToast.show('提示', '请输入验证码');
+      final l10n = AppLocalizations.of(context);
+      NotificationToast.show(l10n.tip, l10n.enterCaptcha);
       return;
     }
     setState(() => _isSubmitting = true);
@@ -1142,7 +1156,8 @@ class _CaptchaViewState extends State<CaptchaView> {
           _isSubmitting = false;
           _codeController.clear();
         });
-        NotificationToast.show('提示', '验证码可能有误，请重新输入');
+        final l10n = AppLocalizations.of(context);
+        NotificationToast.show(l10n.tip, l10n.captchaMayBeWrong);
         await _reloadCaptchaImage();
       });
     }
@@ -1190,6 +1205,7 @@ class _CaptchaViewState extends State<CaptchaView> {
   @override
   Widget build(BuildContext context) {
     final r = widget.resource;
+    final l10n = AppLocalizations.of(context);
 
     if (!_sessionActive) {
       return Center(
@@ -1199,7 +1215,7 @@ class _CaptchaViewState extends State<CaptchaView> {
             Icon(Icons.shield_outlined,
                 size: 48, color: Theme.of(context).colorScheme.primary),
             const SizedBox(height: 16),
-            Text('${r.websiteName} 需要验证码验证',
+            Text(l10n.siteRequiresCaptcha(r.websiteName),
                 style: Theme.of(context).textTheme.bodyMedium),
             const SizedBox(height: 16),
             Row(
@@ -1208,14 +1224,14 @@ class _CaptchaViewState extends State<CaptchaView> {
                 FilledButton.icon(
                   onPressed: _startVerification,
                   icon: const Icon(Icons.verified_user_outlined, size: 18),
-                  label: const Text('进行验证'),
+                  label: Text(l10n.verify),
                 ),
                 const SizedBox(width: 12),
                 OutlinedButton.icon(
                   onPressed: () =>
                       widget.dataSourceController.retryResources(r.websiteName),
                   icon: const Icon(Icons.refresh, size: 18),
-                  label: const Text('重试'),
+                  label: Text(l10n.retry),
                 ),
               ],
             ),
@@ -1231,13 +1247,13 @@ class _CaptchaViewState extends State<CaptchaView> {
           children: [
             const CircularProgressIndicator(),
             const SizedBox(height: 16),
-            Text('${r.websiteName} 正在自动完成验证，请稍候',
+            Text(l10n.siteAutoVerifying(r.websiteName),
                 style: Theme.of(context).textTheme.bodyMedium,
                 textAlign: TextAlign.center),
             const SizedBox(height: 16),
             TextButton(
               onPressed: _cancel,
-              child: Text('取消',
+              child: Text(l10n.cancel,
                   style:
                       TextStyle(color: Theme.of(context).colorScheme.outline)),
             ),
@@ -1261,13 +1277,13 @@ class _CaptchaViewState extends State<CaptchaView> {
                 Icon(Icons.shield_outlined,
                     size: 36, color: Theme.of(context).colorScheme.primary),
                 const SizedBox(height: 8),
-                Text('${r.websiteName} 验证码验证',
+                Text(l10n.captchaVerification(r.websiteName),
                     style: Theme.of(context).textTheme.titleSmall),
                 const SizedBox(height: 16),
                 if (_imageData == null) ...[
                   const CircularProgressIndicator(),
                   const SizedBox(height: 12),
-                  const Text('正在加载验证码图片...'),
+                  Text(l10n.loadingCaptchaImage),
                 ] else ...[
                   ClipRRect(
                     borderRadius: BorderRadius.circular(8),
@@ -1282,7 +1298,7 @@ class _CaptchaViewState extends State<CaptchaView> {
                         width: double.infinity,
                         base64Decode(_imageData!.split(',').last),
                         fit: BoxFit.contain,
-                        errorBuilder: (ctx, err, _) => const Text('图片解码失败'),
+                        errorBuilder: (ctx, err, _) => Text(l10n.imageDecodeFailed),
                       ),
                     ),
                   ),
@@ -1292,8 +1308,8 @@ class _CaptchaViewState extends State<CaptchaView> {
                       controller: _codeController,
                       autofocus: true,
                       enabled: !_isSubmitting,
-                      decoration: const InputDecoration(
-                        labelText: '请输入验证码',
+                      decoration: InputDecoration(
+                        labelText: l10n.enterCaptcha,
                         border: OutlineInputBorder(),
                         contentPadding:
                             EdgeInsets.symmetric(horizontal: 12, vertical: 10),
@@ -1307,7 +1323,7 @@ class _CaptchaViewState extends State<CaptchaView> {
                     children: [
                       TextButton(
                         onPressed: _cancel,
-                        child: Text('取消',
+                        child: Text(l10n.cancel,
                             style: TextStyle(
                                 color: Theme.of(context).colorScheme.outline)),
                       ),
@@ -1322,7 +1338,7 @@ class _CaptchaViewState extends State<CaptchaView> {
                                 height: 18,
                                 child:
                                     CircularProgressIndicator(strokeWidth: 2))
-                            : const Text('提交'),
+                            : Text(l10n.submit),
                       ),
                     ],
                   ),

@@ -1475,6 +1475,126 @@ class AppLocalizationsZh extends AppLocalizations {
   String get mysteriousUser => '這位使用者很神秘';
 
   @override
+  String get manualSearch => '手動搜尋';
+
+  @override
+  String get manualSearchResource => '手動搜尋資源';
+
+  @override
+  String fetchingResource(Object website) {
+    return '正在取得 $website 的資源';
+  }
+
+  @override
+  String get reSearchingResource => '目前網站正在重新搜尋，請稍候片刻。';
+
+  @override
+  String resourceRequestFailed(Object website) {
+    return '$website 請求失敗';
+  }
+
+  @override
+  String resourceNotFoundForSite(Object website) {
+    return '$website 暫未搜尋到資源';
+  }
+
+  @override
+  String get noPlayableSourceHint => '沒有搜尋到可用播放來源。你可以稍後重試，或切換其他網站。';
+
+  @override
+  String get searchAgain => '重新搜尋';
+
+  @override
+  String get unnamedLine => '未命名線路';
+
+  @override
+  String get descending => '降冪';
+
+  @override
+  String get ascending => '升冪';
+
+  @override
+  String get lineFilter => '線路篩選';
+
+  @override
+  String get allLines => '全部線路';
+
+  @override
+  String currentEpisodeCount(Object count) {
+    return '目前集數($count)';
+  }
+
+  @override
+  String allEpisodesCount(Object count) {
+    return '全集($count)';
+  }
+
+  @override
+  String get noPlayableSourceForEpisode => '目前劇集沒有可用播放來源';
+
+  @override
+  String get episodeNotInResultsHint =>
+      '目前選取的劇集不在這些結果中。你可以切換到「全部集數」手動指定資源網站集數。';
+
+  @override
+  String get episodeNoSourceHint => '目前劇集沒有找到相符的播放來源。';
+
+  @override
+  String get noSelectableEpisodes => '沒有可選集數';
+
+  @override
+  String get siteNoEpisodes => '目前網站沒有回傳可用播放集數。';
+
+  @override
+  String videoSourceLoadFailed(Object error) {
+    return '取得影片來源失敗：$error';
+  }
+
+  @override
+  String get matchLabel => '相符度：';
+
+  @override
+  String get verificationSuccess => '驗證成功';
+
+  @override
+  String get verificationRetrying => '正在重新搜尋，請稍候…';
+
+  @override
+  String get enterCaptcha => '請輸入驗證碼';
+
+  @override
+  String get captchaMayBeWrong => '驗證碼可能有誤，請重新輸入';
+
+  @override
+  String siteRequiresCaptcha(Object website) {
+    return '$website 需要驗證碼驗證';
+  }
+
+  @override
+  String get verify => '進行驗證';
+
+  @override
+  String siteAutoVerifying(Object website) {
+    return '$website 正在自動完成驗證，請稍候';
+  }
+
+  @override
+  String captchaVerification(Object website) {
+    return '$website 驗證碼驗證';
+  }
+
+  @override
+  String get loadingCaptchaImage => '正在載入驗證碼圖片…';
+
+  @override
+  String get imageDecodeFailed => '圖片解碼失敗';
+
+  @override
+  String episodeNumber(Object episode) {
+    return '第$episode集';
+  }
+
+  @override
   String watchedLabel(Object progress) {
     return '觀看$progress';
   }
@@ -2956,6 +3076,125 @@ class AppLocalizationsZhHans extends AppLocalizationsZh {
   String get mysteriousUser => '该用户很神秘';
 
   @override
+  String get manualSearch => '手动搜索';
+
+  @override
+  String get manualSearchResource => '手动搜索资源';
+
+  @override
+  String fetchingResource(Object website) {
+    return '正在获取 $website 的资源';
+  }
+
+  @override
+  String get reSearchingResource => '当前站点正在重新检索，请稍候片刻。';
+
+  @override
+  String resourceRequestFailed(Object website) {
+    return '$website 请求失败';
+  }
+
+  @override
+  String resourceNotFoundForSite(Object website) {
+    return '$website 暂未搜到资源';
+  }
+
+  @override
+  String get noPlayableSourceHint => '没有检索到可用播放源。你可以稍后重试，或切换其他站点。';
+
+  @override
+  String get searchAgain => '重新搜索';
+
+  @override
+  String get unnamedLine => '未命名线路';
+
+  @override
+  String get descending => '倒序';
+
+  @override
+  String get ascending => '升序';
+
+  @override
+  String get lineFilter => '线路筛选';
+
+  @override
+  String get allLines => '全部线路';
+
+  @override
+  String currentEpisodeCount(Object count) {
+    return '当前集($count)';
+  }
+
+  @override
+  String allEpisodesCount(Object count) {
+    return '全集($count)';
+  }
+
+  @override
+  String get noPlayableSourceForEpisode => '当前剧集暂无可用播放源';
+
+  @override
+  String get episodeNotInResultsHint => '当前选中剧集不在这些结果里。你可以切到“全部集数”手动指定资源站集数。';
+
+  @override
+  String get episodeNoSourceHint => '当前剧集没有匹配到对应播放源。';
+
+  @override
+  String get noSelectableEpisodes => '暂无可选集数';
+
+  @override
+  String get siteNoEpisodes => '当前站点没有返回可用播放集数。';
+
+  @override
+  String videoSourceLoadFailed(Object error) {
+    return '获取视频源失败: $error';
+  }
+
+  @override
+  String get matchLabel => '匹配度:';
+
+  @override
+  String get verificationSuccess => '验证成功';
+
+  @override
+  String get verificationRetrying => '正在重新检索，请稍候…';
+
+  @override
+  String get enterCaptcha => '请输入验证码';
+
+  @override
+  String get captchaMayBeWrong => '验证码可能有误，请重新输入';
+
+  @override
+  String siteRequiresCaptcha(Object website) {
+    return '$website 需要验证码验证';
+  }
+
+  @override
+  String get verify => '进行验证';
+
+  @override
+  String siteAutoVerifying(Object website) {
+    return '$website 正在自动完成验证，请稍候';
+  }
+
+  @override
+  String captchaVerification(Object website) {
+    return '$website 验证码验证';
+  }
+
+  @override
+  String get loadingCaptchaImage => '正在加载验证码图片...';
+
+  @override
+  String get imageDecodeFailed => '图片解码失败';
+
+  @override
+  String episodeNumber(Object episode) {
+    return '第$episode集';
+  }
+
+  @override
   String watchedLabel(Object progress) {
     return '观看$progress';
   }
@@ -4246,6 +4485,126 @@ class AppLocalizationsZhHantHk extends AppLocalizationsZh {
   String get mysteriousUser => '這位使用者很神秘';
 
   @override
+  String get manualSearch => '手動搜尋';
+
+  @override
+  String get manualSearchResource => '手動搜尋資源';
+
+  @override
+  String fetchingResource(Object website) {
+    return '正在取得 $website 的資源';
+  }
+
+  @override
+  String get reSearchingResource => '目前網站正在重新搜尋，請稍候片刻。';
+
+  @override
+  String resourceRequestFailed(Object website) {
+    return '$website 請求失敗';
+  }
+
+  @override
+  String resourceNotFoundForSite(Object website) {
+    return '$website 暫未搜尋到資源';
+  }
+
+  @override
+  String get noPlayableSourceHint => '沒有搜尋到可用播放來源。你可以稍後重試，或切換其他網站。';
+
+  @override
+  String get searchAgain => '重新搜尋';
+
+  @override
+  String get unnamedLine => '未命名線路';
+
+  @override
+  String get descending => '降冪';
+
+  @override
+  String get ascending => '升冪';
+
+  @override
+  String get lineFilter => '線路篩選';
+
+  @override
+  String get allLines => '全部線路';
+
+  @override
+  String currentEpisodeCount(Object count) {
+    return '目前集數($count)';
+  }
+
+  @override
+  String allEpisodesCount(Object count) {
+    return '全集($count)';
+  }
+
+  @override
+  String get noPlayableSourceForEpisode => '目前劇集沒有可用播放來源';
+
+  @override
+  String get episodeNotInResultsHint =>
+      '目前選取的劇集不在這些結果中。你可以切換到「全部集數」手動指定資源網站集數。';
+
+  @override
+  String get episodeNoSourceHint => '目前劇集沒有找到相符的播放來源。';
+
+  @override
+  String get noSelectableEpisodes => '沒有可選集數';
+
+  @override
+  String get siteNoEpisodes => '目前網站沒有回傳可用播放集數。';
+
+  @override
+  String videoSourceLoadFailed(Object error) {
+    return '取得影片來源失敗：$error';
+  }
+
+  @override
+  String get matchLabel => '相符度：';
+
+  @override
+  String get verificationSuccess => '驗證成功';
+
+  @override
+  String get verificationRetrying => '正在重新搜尋，請稍候…';
+
+  @override
+  String get enterCaptcha => '請輸入驗證碼';
+
+  @override
+  String get captchaMayBeWrong => '驗證碼可能有誤，請重新輸入';
+
+  @override
+  String siteRequiresCaptcha(Object website) {
+    return '$website 需要驗證碼驗證';
+  }
+
+  @override
+  String get verify => '進行驗證';
+
+  @override
+  String siteAutoVerifying(Object website) {
+    return '$website 正在自動完成驗證，請稍候';
+  }
+
+  @override
+  String captchaVerification(Object website) {
+    return '$website 驗證碼驗證';
+  }
+
+  @override
+  String get loadingCaptchaImage => '正在載入驗證碼圖片…';
+
+  @override
+  String get imageDecodeFailed => '圖片解碼失敗';
+
+  @override
+  String episodeNumber(Object episode) {
+    return '第$episode集';
+  }
+
+  @override
   String watchedLabel(Object progress) {
     return '觀看$progress';
   }
@@ -5534,6 +5893,126 @@ class AppLocalizationsZhHantTw extends AppLocalizationsZh {
 
   @override
   String get mysteriousUser => '這位使用者很神秘';
+
+  @override
+  String get manualSearch => '手動搜尋';
+
+  @override
+  String get manualSearchResource => '手動搜尋資源';
+
+  @override
+  String fetchingResource(Object website) {
+    return '正在取得 $website 的資源';
+  }
+
+  @override
+  String get reSearchingResource => '目前網站正在重新搜尋，請稍候片刻。';
+
+  @override
+  String resourceRequestFailed(Object website) {
+    return '$website 請求失敗';
+  }
+
+  @override
+  String resourceNotFoundForSite(Object website) {
+    return '$website 暫未搜尋到資源';
+  }
+
+  @override
+  String get noPlayableSourceHint => '沒有搜尋到可用播放來源。你可以稍後重試，或切換其他網站。';
+
+  @override
+  String get searchAgain => '重新搜尋';
+
+  @override
+  String get unnamedLine => '未命名線路';
+
+  @override
+  String get descending => '降冪';
+
+  @override
+  String get ascending => '升冪';
+
+  @override
+  String get lineFilter => '線路篩選';
+
+  @override
+  String get allLines => '全部線路';
+
+  @override
+  String currentEpisodeCount(Object count) {
+    return '目前集數($count)';
+  }
+
+  @override
+  String allEpisodesCount(Object count) {
+    return '全集($count)';
+  }
+
+  @override
+  String get noPlayableSourceForEpisode => '目前劇集沒有可用播放來源';
+
+  @override
+  String get episodeNotInResultsHint =>
+      '目前選取的劇集不在這些結果中。你可以切換到「全部集數」手動指定資源網站集數。';
+
+  @override
+  String get episodeNoSourceHint => '目前劇集沒有找到相符的播放來源。';
+
+  @override
+  String get noSelectableEpisodes => '沒有可選集數';
+
+  @override
+  String get siteNoEpisodes => '目前網站沒有回傳可用播放集數。';
+
+  @override
+  String videoSourceLoadFailed(Object error) {
+    return '取得影片來源失敗：$error';
+  }
+
+  @override
+  String get matchLabel => '相符度：';
+
+  @override
+  String get verificationSuccess => '驗證成功';
+
+  @override
+  String get verificationRetrying => '正在重新搜尋，請稍候…';
+
+  @override
+  String get enterCaptcha => '請輸入驗證碼';
+
+  @override
+  String get captchaMayBeWrong => '驗證碼可能有誤，請重新輸入';
+
+  @override
+  String siteRequiresCaptcha(Object website) {
+    return '$website 需要驗證碼驗證';
+  }
+
+  @override
+  String get verify => '進行驗證';
+
+  @override
+  String siteAutoVerifying(Object website) {
+    return '$website 正在自動完成驗證，請稍候';
+  }
+
+  @override
+  String captchaVerification(Object website) {
+    return '$website 驗證碼驗證';
+  }
+
+  @override
+  String get loadingCaptchaImage => '正在載入驗證碼圖片…';
+
+  @override
+  String get imageDecodeFailed => '圖片解碼失敗';
+
+  @override
+  String episodeNumber(Object episode) {
+    return '第$episode集';
+  }
 
   @override
   String watchedLabel(Object progress) {

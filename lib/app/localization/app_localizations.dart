@@ -2857,6 +2857,204 @@ abstract class AppLocalizations {
   /// **'该用户很神秘'**
   String get mysteriousUser;
 
+  /// No description provided for @manualSearch.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'手动搜索'**
+  String get manualSearch;
+
+  /// No description provided for @manualSearchResource.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'手动搜索资源'**
+  String get manualSearchResource;
+
+  /// No description provided for @fetchingResource.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'正在获取 {website} 的资源'**
+  String fetchingResource(Object website);
+
+  /// No description provided for @reSearchingResource.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'当前站点正在重新检索，请稍候片刻。'**
+  String get reSearchingResource;
+
+  /// No description provided for @resourceRequestFailed.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'{website} 请求失败'**
+  String resourceRequestFailed(Object website);
+
+  /// No description provided for @resourceNotFoundForSite.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'{website} 暂未搜到资源'**
+  String resourceNotFoundForSite(Object website);
+
+  /// No description provided for @noPlayableSourceHint.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'没有检索到可用播放源。你可以稍后重试，或切换其他站点。'**
+  String get noPlayableSourceHint;
+
+  /// No description provided for @searchAgain.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'重新搜索'**
+  String get searchAgain;
+
+  /// No description provided for @unnamedLine.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'未命名线路'**
+  String get unnamedLine;
+
+  /// No description provided for @descending.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'倒序'**
+  String get descending;
+
+  /// No description provided for @ascending.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'升序'**
+  String get ascending;
+
+  /// No description provided for @lineFilter.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'线路筛选'**
+  String get lineFilter;
+
+  /// No description provided for @allLines.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'全部线路'**
+  String get allLines;
+
+  /// No description provided for @currentEpisodeCount.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'当前集({count})'**
+  String currentEpisodeCount(Object count);
+
+  /// No description provided for @allEpisodesCount.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'全集({count})'**
+  String allEpisodesCount(Object count);
+
+  /// No description provided for @noPlayableSourceForEpisode.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'当前剧集暂无可用播放源'**
+  String get noPlayableSourceForEpisode;
+
+  /// No description provided for @episodeNotInResultsHint.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'当前选中剧集不在这些结果里。你可以切到“全部集数”手动指定资源站集数。'**
+  String get episodeNotInResultsHint;
+
+  /// No description provided for @episodeNoSourceHint.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'当前剧集没有匹配到对应播放源。'**
+  String get episodeNoSourceHint;
+
+  /// No description provided for @noSelectableEpisodes.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'暂无可选集数'**
+  String get noSelectableEpisodes;
+
+  /// No description provided for @siteNoEpisodes.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'当前站点没有返回可用播放集数。'**
+  String get siteNoEpisodes;
+
+  /// No description provided for @videoSourceLoadFailed.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'获取视频源失败: {error}'**
+  String videoSourceLoadFailed(Object error);
+
+  /// No description provided for @matchLabel.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'匹配度:'**
+  String get matchLabel;
+
+  /// No description provided for @verificationSuccess.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'验证成功'**
+  String get verificationSuccess;
+
+  /// No description provided for @verificationRetrying.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'正在重新检索，请稍候…'**
+  String get verificationRetrying;
+
+  /// No description provided for @enterCaptcha.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'请输入验证码'**
+  String get enterCaptcha;
+
+  /// No description provided for @captchaMayBeWrong.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'验证码可能有误，请重新输入'**
+  String get captchaMayBeWrong;
+
+  /// No description provided for @siteRequiresCaptcha.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'{website} 需要验证码验证'**
+  String siteRequiresCaptcha(Object website);
+
+  /// No description provided for @verify.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'进行验证'**
+  String get verify;
+
+  /// No description provided for @siteAutoVerifying.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'{website} 正在自动完成验证，请稍候'**
+  String siteAutoVerifying(Object website);
+
+  /// No description provided for @captchaVerification.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'{website} 验证码验证'**
+  String captchaVerification(Object website);
+
+  /// No description provided for @loadingCaptchaImage.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'正在加载验证码图片...'**
+  String get loadingCaptchaImage;
+
+  /// No description provided for @imageDecodeFailed.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'图片解码失败'**
+  String get imageDecodeFailed;
+
+  /// No description provided for @episodeNumber.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'第{episode}集'**
+  String episodeNumber(Object episode);
+
   /// No description provided for @watchedLabel.
   ///
   /// In zh_Hans, this message translates to:

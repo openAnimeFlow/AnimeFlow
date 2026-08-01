@@ -7,6 +7,7 @@ import 'package:anime_flow/core/utils/system_util.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:anime_flow/app/localization/app_localizations.dart';
 import 'package:anime_flow/features/settings/presentation/pages/account_settings_page.dart';
 import 'package:anime_flow/features/settings/presentation/pages/general_settings.dart';
 import 'package:anime_flow/features/settings/presentation/pages/playback_settings.dart';
@@ -24,78 +25,77 @@ class _SettingsPageState extends State<SettingsPage> {
   int _selectedIndex = 0;
   bool? _syncedIsWideScreen;
 
-  final List<_SettingsCategory> _categories = [
-    _SettingsCategory(
-      title: '用户信息',
-      items: [
-        _SettingsMenuItem(
-          title: '账户设置',
-          icon: Icons.account_circle_outlined,
-          route: const SettingAccountRoute(),
-          page: const AccountSettingsPage(),
-        ),
-      ],
-    ),
-    _SettingsCategory(
-      title: '应用与外观',
-      items: [
-        _SettingsMenuItem(
-          title: '通用',
-          icon: Icons.settings_outlined,
-          route: const SettingGeneralRoute(),
-          page: const GeneralSettingsPage(),
-        ),
-        _SettingsMenuItem(
-          title: '主题样式',
-          icon: Icons.color_lens_outlined,
-          route: const SettingThemeRoute(),
-          page: const ThemePage(),
-        ),
-      ],
-    ),
-    _SettingsCategory(
-      title: '播放历史与视频源',
-      items: [
-        _SettingsMenuItem(
-          title: '数据源管理',
-          icon: Icons.smart_display_rounded,
-          route: const SettingPluginsRoute(),
-          page: const PluginsPage(),
-        ),
-      ],
-    ),
-    _SettingsCategory(
-      title: '播放器设置',
-      items: [
-        _SettingsMenuItem(
-          title: '播放',
-          icon: Icons.play_circle_outline,
-          route: const SettingPlaybackRoute(),
-          page: const PlaybackSettingsPage(),
-        ),
-        _SettingsMenuItem(
-          title: '弹幕设置',
-          icon: Icons.subtitles_outlined,
-          route: const SettingDanmakuRoute(),
-          page: const DanmakuSettingPage(),
-        ),
-      ],
-    ),
-    _SettingsCategory(
-      title: '其他',
-      items: [
-        _SettingsMenuItem(
-          title: '关于',
-          icon: Icons.info_outline,
-          route: const SettingAboutRoute(),
-          page: const AboutSettingsPage(),
-        ),
-      ],
-    )
-  ];
-
-  List<_SettingsMenuItem> get _allMenuItems {
-    return _categories.expand((category) => category.items).toList();
+  List<_SettingsCategory> _categories(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
+    return [
+      _SettingsCategory(
+        title: l10n.userInfoSettings,
+        items: [
+          _SettingsMenuItem(
+            title: l10n.accountSettings,
+            icon: Icons.account_circle_outlined,
+            route: const SettingAccountRoute(),
+            page: const AccountSettingsPage(),
+          ),
+        ],
+      ),
+      _SettingsCategory(
+        title: l10n.appAppearance,
+        items: [
+          _SettingsMenuItem(
+            title: l10n.generalSettingsTitle,
+            icon: Icons.settings_outlined,
+            route: const SettingGeneralRoute(),
+            page: const GeneralSettingsPage(),
+          ),
+          _SettingsMenuItem(
+            title: l10n.themeStyle,
+            icon: Icons.color_lens_outlined,
+            route: const SettingThemeRoute(),
+            page: const ThemePage(),
+          ),
+        ],
+      ),
+      _SettingsCategory(
+        title: l10n.playbackHistoryVideoSource,
+        items: [
+          _SettingsMenuItem(
+            title: l10n.sourceManagement,
+            icon: Icons.smart_display_rounded,
+            route: const SettingPluginsRoute(),
+            page: const PluginsPage(),
+          ),
+        ],
+      ),
+      _SettingsCategory(
+        title: l10n.playerSettings,
+        items: [
+          _SettingsMenuItem(
+            title: l10n.playbackSettings,
+            icon: Icons.play_circle_outline,
+            route: const SettingPlaybackRoute(),
+            page: const PlaybackSettingsPage(),
+          ),
+          _SettingsMenuItem(
+            title: l10n.danmakuSettings,
+            icon: Icons.subtitles_outlined,
+            route: const SettingDanmakuRoute(),
+            page: const DanmakuSettingPage(),
+          ),
+        ],
+      ),
+      _SettingsCategory(
+        title: l10n.otherSettings,
+        items: [
+          _SettingsMenuItem(
+            title: l10n.about,
+            icon: Icons.info_outline,
+            route: const SettingAboutRoute(),
+            page: const AboutSettingsPage(),
+          ),
+        ],
+      )
+    ];
   }
 
   void _syncWideScreenIfNeeded(WidgetRef ref, bool isWideScreen) {
@@ -125,6 +125,9 @@ class _SettingsPageState extends State<SettingsPage> {
   }
 
   Widget buildWideLayout(BuildContext context) {
+    final categories = _categories(context);
+    final allMenuItems =
+        categories.expand((category) => category.items).toList();
     return Scaffold(
       body: Row(
         children: [
@@ -140,7 +143,7 @@ class _SettingsPageState extends State<SettingsPage> {
                     color: Colors.transparent,
                     child: ListTile(
                       leading: const Icon(Icons.arrow_back),
-                      title: const Text('设置'),
+                      title: Text(AppLocalizations.of(context).settingsLabel),
                       onTap: () => context.pop(),
                     ),
                   ),
@@ -154,7 +157,7 @@ class _SettingsPageState extends State<SettingsPage> {
                       right: 15,
                     ),
                     children: [
-                      ..._categories.map((category) {
+                      ...categories.map((category) {
                         return Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
@@ -173,7 +176,7 @@ class _SettingsPageState extends State<SettingsPage> {
                               ),
                             ),
                             ...category.items.map((item) {
-                              final globalIndex = _allMenuItems.indexOf(item);
+                              final globalIndex = allMenuItems.indexOf(item);
                               final isSelected = globalIndex == _selectedIndex;
                               return Material(
                                 color: Colors.transparent,
@@ -240,7 +243,7 @@ class _SettingsPageState extends State<SettingsPage> {
             ),
           ),
           Expanded(
-            child: _allMenuItems[_selectedIndex].page,
+            child: allMenuItems[_selectedIndex].page,
           ),
         ],
       ),
@@ -248,13 +251,14 @@ class _SettingsPageState extends State<SettingsPage> {
   }
 
   Widget buildNarrowLayout(BuildContext context) {
+    final categories = _categories(context);
     return Scaffold(
       appBar: AppBar(
-        title: const Text('设置'),
+        title: Text(AppLocalizations.of(context).settingsLabel),
       ),
       body: ListView(
         padding: const EdgeInsets.symmetric(vertical: 8),
-        children: _categories.map((category) {
+        children: categories.map((category) {
           return Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [

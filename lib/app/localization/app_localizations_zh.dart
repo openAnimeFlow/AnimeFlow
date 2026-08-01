@@ -479,6 +479,66 @@ class AppLocalizationsZh extends AppLocalizations {
   String joinedDate(Object date) {
     return '$date加入';
   }
+
+  @override
+  String get userInfoSettings => '用户信息';
+
+  @override
+  String get accountSettings => '账户设置';
+
+  @override
+  String get appAppearance => '应用与外观';
+
+  @override
+  String get themeStyle => '主题样式';
+
+  @override
+  String get playbackHistoryVideoSource => '播放历史与视频源';
+
+  @override
+  String get sourceManagement => '数据源管理';
+
+  @override
+  String get playerSettings => '播放器设置';
+
+  @override
+  String get playbackSettings => '播放';
+
+  @override
+  String get otherSettings => '其他';
+
+  @override
+  String get about => '关于';
+
+  @override
+  String get themeMode => '主题模式';
+
+  @override
+  String get darkMode => '深色模式';
+
+  @override
+  String get darkModeSubtitle => '深色护眼';
+
+  @override
+  String get lightMode => '浅色模式';
+
+  @override
+  String get lightModeSubtitle => '明亮清爽';
+
+  @override
+  String get followSystem => '跟随系统';
+
+  @override
+  String get autoAdapt => '自动适配';
+
+  @override
+  String get themeColor => '主题颜色';
+
+  @override
+  String get fontStyle => '字体样式';
+
+  @override
+  String get customAppFont => '自定义应用字体';
 }
 
 /// The translations for Chinese, using the Han script (`zh_Hans`).
@@ -956,6 +1016,66 @@ class AppLocalizationsZhHans extends AppLocalizationsZh {
   String joinedDate(Object date) {
     return '$date加入';
   }
+
+  @override
+  String get userInfoSettings => '用户信息';
+
+  @override
+  String get accountSettings => '账户设置';
+
+  @override
+  String get appAppearance => '应用与外观';
+
+  @override
+  String get themeStyle => '主题样式';
+
+  @override
+  String get playbackHistoryVideoSource => '播放历史与视频源';
+
+  @override
+  String get sourceManagement => '数据源管理';
+
+  @override
+  String get playerSettings => '播放器设置';
+
+  @override
+  String get playbackSettings => '播放';
+
+  @override
+  String get otherSettings => '其他';
+
+  @override
+  String get about => '关于';
+
+  @override
+  String get themeMode => '主题模式';
+
+  @override
+  String get darkMode => '深色模式';
+
+  @override
+  String get darkModeSubtitle => '深色护眼';
+
+  @override
+  String get lightMode => '浅色模式';
+
+  @override
+  String get lightModeSubtitle => '明亮清爽';
+
+  @override
+  String get followSystem => '跟随系统';
+
+  @override
+  String get autoAdapt => '自动适配';
+
+  @override
+  String get themeColor => '主题颜色';
+
+  @override
+  String get fontStyle => '字体样式';
+
+  @override
+  String get customAppFont => '自定义应用字体';
 }
 
 /// The translations for Chinese, as used in Hong Kong, using the Han script (`zh_Hant_HK`).
@@ -1433,6 +1553,66 @@ class AppLocalizationsZhHantHk extends AppLocalizationsZh {
   String joinedDate(Object date) {
     return '$date加入';
   }
+
+  @override
+  String get userInfoSettings => '使用者資訊';
+
+  @override
+  String get accountSettings => '帳戶設定';
+
+  @override
+  String get appAppearance => '應用程式與外觀';
+
+  @override
+  String get themeStyle => '主題樣式';
+
+  @override
+  String get playbackHistoryVideoSource => '播放記錄與影片來源';
+
+  @override
+  String get sourceManagement => '資料來源管理';
+
+  @override
+  String get playerSettings => '播放器設定';
+
+  @override
+  String get playbackSettings => '播放';
+
+  @override
+  String get otherSettings => '其他';
+
+  @override
+  String get about => '關於';
+
+  @override
+  String get themeMode => '主題模式';
+
+  @override
+  String get darkMode => '深色模式';
+
+  @override
+  String get darkModeSubtitle => '深色護眼';
+
+  @override
+  String get lightMode => '淺色模式';
+
+  @override
+  String get lightModeSubtitle => '明亮清爽';
+
+  @override
+  String get followSystem => '跟隨系統';
+
+  @override
+  String get autoAdapt => '自動適配';
+
+  @override
+  String get themeColor => '主題顏色';
+
+  @override
+  String get fontStyle => '字型樣式';
+
+  @override
+  String get customAppFont => '自訂應用程式字型';
 }
 
 /// The translations for Chinese, as used in Taiwan, using the Han script (`zh_Hant_TW`).
@@ -1910,4 +2090,64 @@ class AppLocalizationsZhHantTw extends AppLocalizationsZh {
   String joinedDate(Object date) {
     return '$date加入';
   }
+
+  @override
+  String get userInfoSettings => '使用者資訊';
+
+  @override
+  String get accountSettings => '帳戶設定';
+
+  @override
+  String get appAppearance => '應用程式與外觀';
+
+  @override
+  String get themeStyle => '主題樣式';
+
+  @override
+  String get playbackHistoryVideoSource => '播放記錄與影片來源';
+
+  @override
+  String get sourceManagement => '資料來源管理';
+
+  @override
+  String get playerSettings => '播放器設定';
+
+  @override
+  String get playbackSettings => '播放';
+
+  @override
+  String get otherSettings => '其他';
+
+  @override
+  String get about => '關於';
+
+  @override
+  String get themeMode => '主題模式';
+
+  @override
+  String get darkMode => '深色模式';
+
+  @override
+  String get darkModeSubtitle => '深色護眼';
+
+  @override
+  String get lightMode => '淺色模式';
+
+  @override
+  String get lightModeSubtitle => '明亮清爽';
+
+  @override
+  String get followSystem => '跟隨系統';
+
+  @override
+  String get autoAdapt => '自動適配';
+
+  @override
+  String get themeColor => '主題顏色';
+
+  @override
+  String get fontStyle => '字型樣式';
+
+  @override
+  String get customAppFont => '自訂應用程式字型';
 }

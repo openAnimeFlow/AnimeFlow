@@ -480,4 +480,64 @@ class AppLocalizationsEn extends AppLocalizations {
   String joinedDate(Object date) {
     return 'Joined $date';
   }
+
+  @override
+  String get userInfoSettings => 'User info';
+
+  @override
+  String get accountSettings => 'Account settings';
+
+  @override
+  String get appAppearance => 'App and appearance';
+
+  @override
+  String get themeStyle => 'Theme';
+
+  @override
+  String get playbackHistoryVideoSource => 'Playback history and video sources';
+
+  @override
+  String get sourceManagement => 'Source management';
+
+  @override
+  String get playerSettings => 'Player settings';
+
+  @override
+  String get playbackSettings => 'Playback';
+
+  @override
+  String get otherSettings => 'Other';
+
+  @override
+  String get about => 'About';
+
+  @override
+  String get themeMode => 'Theme mode';
+
+  @override
+  String get darkMode => 'Dark mode';
+
+  @override
+  String get darkModeSubtitle => 'Easy on the eyes';
+
+  @override
+  String get lightMode => 'Light mode';
+
+  @override
+  String get lightModeSubtitle => 'Bright and clean';
+
+  @override
+  String get followSystem => 'Follow system';
+
+  @override
+  String get autoAdapt => 'Adapt automatically';
+
+  @override
+  String get themeColor => 'Theme color';
+
+  @override
+  String get fontStyle => 'Font style';
+
+  @override
+  String get customAppFont => 'Customize app font';
 }

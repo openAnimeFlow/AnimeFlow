@@ -7,6 +7,7 @@ import 'package:anime_flow/core/utils/system_util.dart';
 import 'package:anime_flow/shared/widgets/theme_preview.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:anime_flow/app/localization/app_localizations.dart';
 
 class ThemePage extends StatefulWidget {
   const ThemePage({super.key});
@@ -18,6 +19,7 @@ class ThemePage extends StatefulWidget {
 class _ThemePageState extends State<ThemePage> {
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     final leftMediaQueryPadding = MediaQuery.of(context).padding.left;
 
     return Scaffold(
@@ -27,7 +29,7 @@ class _ThemePageState extends State<ThemePage> {
           builder: (context, ref, _) {
             final isWideScreen = ref.watch(settingsLayoutProvider);
             return AppBar(
-              title: const Text('主题样式'),
+              title: Text(l10n.themeStyle),
               automaticallyImplyLeading: !isWideScreen,
             );
           },
@@ -41,8 +43,8 @@ class _ThemePageState extends State<ThemePage> {
                 left: leftMediaQueryPadding == 0 ? 16 : leftMediaQueryPadding,
                 right: 16),
             children: [
-              const Text(
-                '主题模式',
+              Text(
+                l10n.themeMode,
                 style: TextStyle(
                   fontSize: 20,
                   fontWeight: FontWeight.bold,
@@ -69,8 +71,8 @@ class _ThemePageState extends State<ThemePage> {
                               titleColor: Colors.white,
                               subtitleColor: const Color(0xFF6B7280),
                               icon: Icons.nightlight_round,
-                              title: "深色模式",
-                              subtitle: "深色护眼",
+                              title: l10n.darkMode,
+                              subtitle: l10n.darkModeSubtitle,
                               selected: themeState.themeMode == ThemeMode.dark,
                             ),
                           ),
@@ -84,8 +86,8 @@ class _ThemePageState extends State<ThemePage> {
                               titleColor: Colors.black,
                               subtitleColor: Colors.black54,
                               icon: Icons.wb_sunny,
-                              title: "浅色模式",
-                              subtitle: "明亮清爽",
+                              title: l10n.lightMode,
+                              subtitle: l10n.lightModeSubtitle,
                               selected: themeState.themeMode == ThemeMode.light,
                             ),
                           ),
@@ -103,8 +105,8 @@ class _ThemePageState extends State<ThemePage> {
                                 titleColor: Colors.white,
                                 subtitleColor: Colors.white60,
                                 icon: Icons.settings,
-                                title: "跟随系统",
-                                subtitle: "自动适配",
+                                title: l10n.followSystem,
+                                subtitle: l10n.autoAdapt,
                                 overlay: const DiagonalOverlay(),
                                 selected:
                                     themeState.themeMode == ThemeMode.system,
@@ -118,8 +120,8 @@ class _ThemePageState extends State<ThemePage> {
                 },
               ),
               const SizedBox(height: 10),
-              const Text(
-                '主题颜色',
+              Text(
+                l10n.themeColor,
                 style: TextStyle(
                   fontSize: 20,
                   fontWeight: FontWeight.bold,
@@ -201,14 +203,14 @@ class _ThemePageState extends State<ThemePage> {
                   Icons.text_fields_outlined,
                   color: Theme.of(context).colorScheme.primary,
                 ),
-                title: const Text(
-                  '字体样式',
+                title: Text(
+                  l10n.fontStyle,
                   style: TextStyle(
                     fontSize: 16,
                     fontWeight: FontWeight.w600,
                   ),
                 ),
-                subtitle: const Text('自定义应用字体'),
+                subtitle: Text(l10n.customAppFont),
                 trailing: const Icon(Icons.chevron_right),
                 onTap: () => const SettingFontRoute().push(context),
               ),

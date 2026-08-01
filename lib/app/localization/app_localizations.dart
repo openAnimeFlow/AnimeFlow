@@ -966,6 +966,126 @@ abstract class AppLocalizations {
   /// In zh_Hans, this message translates to:
   /// **'{date}加入'**
   String joinedDate(Object date);
+
+  /// No description provided for @userInfoSettings.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'用户信息'**
+  String get userInfoSettings;
+
+  /// No description provided for @accountSettings.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'账户设置'**
+  String get accountSettings;
+
+  /// No description provided for @appAppearance.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'应用与外观'**
+  String get appAppearance;
+
+  /// No description provided for @themeStyle.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'主题样式'**
+  String get themeStyle;
+
+  /// No description provided for @playbackHistoryVideoSource.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'播放历史与视频源'**
+  String get playbackHistoryVideoSource;
+
+  /// No description provided for @sourceManagement.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'数据源管理'**
+  String get sourceManagement;
+
+  /// No description provided for @playerSettings.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'播放器设置'**
+  String get playerSettings;
+
+  /// No description provided for @playbackSettings.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'播放'**
+  String get playbackSettings;
+
+  /// No description provided for @otherSettings.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'其他'**
+  String get otherSettings;
+
+  /// No description provided for @about.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'关于'**
+  String get about;
+
+  /// No description provided for @themeMode.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'主题模式'**
+  String get themeMode;
+
+  /// No description provided for @darkMode.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'深色模式'**
+  String get darkMode;
+
+  /// No description provided for @darkModeSubtitle.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'深色护眼'**
+  String get darkModeSubtitle;
+
+  /// No description provided for @lightMode.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'浅色模式'**
+  String get lightMode;
+
+  /// No description provided for @lightModeSubtitle.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'明亮清爽'**
+  String get lightModeSubtitle;
+
+  /// No description provided for @followSystem.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'跟随系统'**
+  String get followSystem;
+
+  /// No description provided for @autoAdapt.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'自动适配'**
+  String get autoAdapt;
+
+  /// No description provided for @themeColor.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'主题颜色'**
+  String get themeColor;
+
+  /// No description provided for @fontStyle.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'字体样式'**
+  String get fontStyle;
+
+  /// No description provided for @customAppFont.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'自定义应用字体'**
+  String get customAppFont;
 }
 
 class _AppLocalizationsDelegate

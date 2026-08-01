@@ -3,7 +3,7 @@ import 'dart:io';
 import 'package:anime_flow/core/constants/storage_key.dart';
 import 'package:anime_flow/core/network/api/github_api.dart';
 import 'package:anime_flow/shared/models/font_item.dart';
-import 'package:anime_flow/providers/theme_provider.dart';
+import 'package:anime_flow/app/theme/theme_provider.dart';
 import 'package:anime_flow/core/storage/storage.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter/services.dart';

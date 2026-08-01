@@ -1,6 +1,6 @@
 import 'dart:ui';
 
-import 'package:anime_flow/providers/theme_provider.dart';
+import 'package:anime_flow/app/theme/theme_provider.dart';
 import 'package:anime_flow/features/settings/presentation/providers/setting_provider.dart';
 import 'package:anime_flow/routes/routes.dart';
 import 'package:anime_flow/core/utils/systemUtil.dart';

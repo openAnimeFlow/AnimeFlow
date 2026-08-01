@@ -2010,6 +2010,18 @@ abstract class AppLocalizations {
   /// In zh_Hans, this message translates to:
   /// **'版本：{version} - {date}'**
   String pluginVersionDate(Object date, Object version);
+
+  /// No description provided for @watchedLabel.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'观看{progress}'**
+  String watchedLabel(Object progress);
+
+  /// No description provided for @playEpisode.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'播放（{episode}）'**
+  String playEpisode(Object episode);
 }
 
 class _AppLocalizationsDelegate

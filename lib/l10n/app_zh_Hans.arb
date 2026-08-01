@@ -322,5 +322,7 @@
   "downloaded": "已下载",
   "updating": "更新中…",
   "update": "更新",
-  "pluginVersionDate": "版本：{version} - {date}"
+  "pluginVersionDate": "版本：{version} - {date}",
+  "watchedLabel": "观看{progress}",
+  "playEpisode": "播放（{episode}）"
 }

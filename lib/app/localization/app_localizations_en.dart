@@ -1055,4 +1055,14 @@ class AppLocalizationsEn extends AppLocalizations {
   String pluginVersionDate(Object date, Object version) {
     return '版本：$version - $date';
   }
+
+  @override
+  String watchedLabel(Object progress) {
+    return 'Watched $progress';
+  }
+
+  @override
+  String playEpisode(Object episode) {
+    return 'Play ($episode)';
+  }
 }

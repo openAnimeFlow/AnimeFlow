@@ -10,6 +10,7 @@ import 'package:anime_flow/shared/widgets/animation_network_image.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:hive_ce_flutter/hive_flutter.dart';
+import 'package:anime_flow/app/localization/app_localizations.dart';
 
 class PlayRecordPage extends StatefulWidget {
   const PlayRecordPage({super.key});
@@ -71,9 +72,10 @@ class _PlayRecordPageState extends State<PlayRecordPage> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     return Scaffold(
       appBar: AppBar(
-        title: const Text('播放记录'),
+        title: Text(l10n.playbackHistory),
       ),
       body: Center(
         child: Builder(
@@ -83,8 +85,8 @@ class _PlayRecordPageState extends State<PlayRecordPage> {
                 child: CircularProgressIndicator(),
               );
             } else if (playHistoryList == null || playHistoryList!.isEmpty) {
-              return const Center(
-                child: Text('暂无数据'),
+              return Center(
+                child: Text(l10n.noData),
               );
             } else {
               return ConstrainedBox(
@@ -137,7 +139,12 @@ class _PlayRecordPageState extends State<PlayRecordPage> {
                                           style: const TextStyle(
                                               fontWeight: FontWeight.bold)),
                                       Text(
-                                        '-观看${Utils.calculatePercentage(playHistory.position, playHistory.duration)}',
+                                        l10n.watchedLabel(
+                                          Utils.calculatePercentage(
+                                            playHistory.position,
+                                            playHistory.duration,
+                                          ),
+                                        ),
                                         style: const TextStyle(
                                             fontWeight: FontWeight.bold),
                                       ),
@@ -171,7 +178,11 @@ class _PlayRecordPageState extends State<PlayRecordPage> {
                                                 .push(context);
                                           },
                                           child: Text(
-                                            '播放(${playHistory.episodeSort.toString().padLeft(2, '0')})',
+                                            l10n.playEpisode(
+                                              playHistory.episodeSort
+                                                  .toString()
+                                                  .padLeft(2, '0'),
+                                            ),
                                             style: const TextStyle(
                                                 fontWeight: FontWeight.bold),
                                           ))

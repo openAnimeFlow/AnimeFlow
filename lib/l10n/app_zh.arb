@@ -264,5 +264,7 @@
   "previewLoadFailed": "预览加载失败",
   "fontPreviewHeadline": "欢迎使用 AnimeFlow",
   "orphanFontAvailable": "远程仓库已下架，仍可继续使用本地字体",
-  "orphanFontMissing": "本地字体文件已丢失，可在此处清理记录"
+  "orphanFontMissing": "本地字体文件已丢失，可在此处清理记录",
+  "watchedLabel": "观看{progress}",
+  "playEpisode": "播放（{episode}）"
 }

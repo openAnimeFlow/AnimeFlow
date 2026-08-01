@@ -1034,6 +1034,16 @@ class AppLocalizationsZh extends AppLocalizations {
   String pluginVersionDate(Object date, Object version) {
     return '版本：$version - $date';
   }
+
+  @override
+  String watchedLabel(Object progress) {
+    return '观看$progress';
+  }
+
+  @override
+  String playEpisode(Object episode) {
+    return '播放（$episode）';
+  }
 }
 
 /// The translations for Chinese, using the Han script (`zh_Hans`).
@@ -2066,6 +2076,16 @@ class AppLocalizationsZhHans extends AppLocalizationsZh {
   String pluginVersionDate(Object date, Object version) {
     return '版本：$version - $date';
   }
+
+  @override
+  String watchedLabel(Object progress) {
+    return '观看$progress';
+  }
+
+  @override
+  String playEpisode(Object episode) {
+    return '播放（$episode）';
+  }
 }
 
 /// The translations for Chinese, as used in Hong Kong, using the Han script (`zh_Hant_HK`).
@@ -2904,6 +2924,16 @@ class AppLocalizationsZhHantHk extends AppLocalizationsZh {
 
   @override
   String get orphanFontMissing => '本機字型檔案已遺失，可在此處清理記錄';
+
+  @override
+  String watchedLabel(Object progress) {
+    return '觀看$progress';
+  }
+
+  @override
+  String playEpisode(Object episode) {
+    return '播放（$episode）';
+  }
 }
 
 /// The translations for Chinese, as used in Taiwan, using the Han script (`zh_Hant_TW`).
@@ -3742,4 +3772,14 @@ class AppLocalizationsZhHantTw extends AppLocalizationsZh {
 
   @override
   String get orphanFontMissing => '本機字型檔案已遺失，可在此處清理記錄';
+
+  @override
+  String watchedLabel(Object progress) {
+    return '觀看$progress';
+  }
+
+  @override
+  String playEpisode(Object episode) {
+    return '播放（$episode）';
+  }
 }

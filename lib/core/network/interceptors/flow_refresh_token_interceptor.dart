@@ -1,7 +1,7 @@
 import 'package:anime_flow/core/constants/constants.dart';
 import 'package:anime_flow/core/network/api/flow_api.dart';
-import 'package:anime_flow/features/auth/data/models/flow_token.dart';
-import 'package:anime_flow/features/auth/data/repository/token_repository.dart';
+import 'package:anime_flow/core/auth/models/flow_token.dart';
+import 'package:anime_flow/core/auth/repository/token_repository.dart';
 import 'package:anime_flow/core/logger/logger.dart';
 import 'package:dio/dio.dart';
 

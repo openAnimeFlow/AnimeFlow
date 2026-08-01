@@ -1,4 +1,4 @@
-import 'package:anime_flow/features/player/data/models/play/play_history.dart';
+import 'package:anime_flow/shared/models/player/play/play_history.dart';
 import 'package:anime_flow/features/player/application/play_history_service.dart';
 import 'package:anime_flow/app/router/app_router.dart';
 import 'package:anime_flow/app/router/model/info_route_extra.dart';

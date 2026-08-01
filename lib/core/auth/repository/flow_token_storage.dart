@@ -1,21 +1,21 @@
 import 'dart:convert';
 
-import 'package:anime_flow/features/auth/data/models/token_item.dart';
-import 'package:anime_flow/features/auth/data/repository/token_repository.dart';
+import 'package:anime_flow/core/auth/models/flow_token.dart';
+import 'package:anime_flow/core/auth/repository/token_repository.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 
-/// Bangumi OAuth 令牌：写入 [FlutterSecureStorage]，
-class BangumiToken implements TokenRepository<TokenItem> {
-  BangumiToken._();
+/// AnimeFlow 账号令牌：写入 [FlutterSecureStorage]。
+class FlowTokenStorage implements TokenRepository<FlowToken> {
+  FlowTokenStorage._();
 
-  static final BangumiToken instance = BangumiToken._();
+  static final FlowTokenStorage instance = FlowTokenStorage._();
 
-  static const _tokenKey = 'auth_token';
+  static const _tokenKey = 'flow_auth_token';
 
   static const FlutterSecureStorage _storage = FlutterSecureStorage();
 
   @override
-  Future<TokenItem?> getToken() async {
+  Future<FlowToken?> getToken() async {
     try {
       final raw = await _storage.read(key: _tokenKey);
       if (raw == null || raw.isEmpty) return null;
@@ -26,7 +26,7 @@ class BangumiToken implements TokenRepository<TokenItem> {
         return null;
       }
 
-      return TokenItem.fromJson(Map<String, dynamic>.from(decoded));
+      return FlowToken.fromJson(Map<String, dynamic>.from(decoded));
     } catch (_) {
       await removeToken();
       return null;
@@ -34,7 +34,7 @@ class BangumiToken implements TokenRepository<TokenItem> {
   }
 
   @override
-  Future<void> saveToken(TokenItem token) async {
+  Future<void> saveToken(FlowToken token) async {
     await _storage.write(key: _tokenKey, value: jsonEncode(token.toJson()));
   }
 

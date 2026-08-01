@@ -1,6 +1,6 @@
-import 'package:anime_flow/features/auth/data/models/flow_token.dart';
+import 'package:anime_flow/core/auth/models/flow_token.dart';
 import 'package:anime_flow/features/auth/application/login_service.dart';
-import 'package:anime_flow/features/auth/data/repository/token_repository.dart';
+import 'package:anime_flow/core/auth/repository/token_repository.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 class _FakeFlowTokenRepository implements TokenRepository<FlowToken> {

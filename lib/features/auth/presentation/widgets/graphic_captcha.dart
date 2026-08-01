@@ -4,7 +4,7 @@ import 'dart:typed_data';
 
 import 'package:anime_flow/core/network/clients/flow_client.dart';
 import 'package:anime_flow/core/network/api/flow_api.dart';
-import 'package:anime_flow/features/auth/data/models/captcha_item.dart';
+import 'package:anime_flow/core/auth/models/captcha_item.dart';
 import 'package:anime_flow/shared/widgets/notification_toast.dart';
 import 'package:flutter/material.dart';
 

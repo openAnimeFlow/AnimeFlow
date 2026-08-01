@@ -1,7 +1,7 @@
 import 'package:anime_flow/core/crawler/itme/bgm_user_page_item.dart';
 import 'package:anime_flow/core/network/api/flow_api.dart';
 import 'package:anime_flow/shared/models/bangumi/user_info_item.dart';
-import 'package:anime_flow/features/auth/data/models/flow_token.dart';
+import 'package:anime_flow/core/auth/models/flow_token.dart';
 import 'package:anime_flow/shared/models/flow/flow_users.dart';
 
 class UserRepository {

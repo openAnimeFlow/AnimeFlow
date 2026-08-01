@@ -1,5 +1,5 @@
 import 'package:anime_flow/core/constants/layout_constant.dart';
-import 'package:anime_flow/features/player/data/models/bangumi/episodes_item.dart';
+import 'package:anime_flow/shared/models/player/bangumi/episodes_item.dart';
 import 'package:anime_flow/features/player/presentation/providers/episodes_provider.dart';
 import 'package:anime_flow/features/player/presentation/providers/subject_episodes_provider.dart';
 import 'package:anime_flow/app/router/routes_args.dart';

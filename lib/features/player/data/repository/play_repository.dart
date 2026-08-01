@@ -1,4 +1,4 @@
-import 'package:anime_flow/features/player/data/models/play/play_history.dart';
+import 'package:anime_flow/shared/models/player/play/play_history.dart';
 import 'package:anime_flow/core/storage/storage.dart';
 import 'package:hive_ce/hive.dart';
 

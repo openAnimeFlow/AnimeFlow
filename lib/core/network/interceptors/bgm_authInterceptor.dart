@@ -1,5 +1,5 @@
 import 'package:anime_flow/core/constants/constants.dart';
-import 'package:anime_flow/features/auth/data/repository/bangumi_token.dart';
+import 'package:anime_flow/core/auth/repository/bangumi_token.dart';
 import 'package:dio/dio.dart';
 
 class BgmAuthInterceptor extends Interceptor {

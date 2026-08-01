@@ -1,6 +1,6 @@
 import 'package:anime_flow/core/constants/storage_key.dart';
 import 'package:anime_flow/core/storage/hive_registrar.g.dart';
-import 'package:anime_flow/features/player/data/models/play/play_history.dart';
+import 'package:anime_flow/shared/models/player/play/play_history.dart';
 import 'package:anime_flow/shared/models/search/search_history_module.dart';
 import 'package:hive_ce/hive.dart';
 

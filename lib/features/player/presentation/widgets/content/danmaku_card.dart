@@ -1,7 +1,7 @@
 import 'package:anime_flow/core/network/api/flow_api.dart';
-import 'package:anime_flow/features/player/data/models/danmaku/danmaku_episode_response.dart';
-import 'package:anime_flow/features/player/data/models/danmaku/danmaku_module.dart';
-import 'package:anime_flow/features/player/data/models/danmaku/danmaku_search_response.dart';
+import 'package:anime_flow/shared/models/player/danmaku/danmaku_episode_response.dart';
+import 'package:anime_flow/shared/models/player/danmaku/danmaku_module.dart';
+import 'package:anime_flow/shared/models/player/danmaku/danmaku_search_response.dart';
 import 'package:anime_flow/features/player/presentation/providers/play_provider.dart';
 import 'package:anime_flow/app/router/routes_args.dart';
 import 'package:anime_flow/core/utils/format_time_util.dart';

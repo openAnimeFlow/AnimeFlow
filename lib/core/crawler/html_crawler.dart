@@ -4,8 +4,8 @@ import 'dart:math' show min;
 import 'package:anime_flow/core/crawler/itme/crawler_config_item.dart';
 import 'package:anime_flow/core/crawler/itme/bgm_user_page_item.dart'
     show BgmUserStatisticsItem, Statistic;
-import 'package:anime_flow/features/player/data/models/play/video/episode_resources_item.dart';
-import 'package:anime_flow/features/player/data/models/play/video/search_resources_item.dart';
+import 'package:anime_flow/shared/models/player/play/video/episode_resources_item.dart';
+import 'package:anime_flow/shared/models/player/play/video/search_resources_item.dart';
 import 'package:html/parser.dart';
 import 'package:html/dom.dart';
 import 'package:anime_flow/core/logger/logger.dart';

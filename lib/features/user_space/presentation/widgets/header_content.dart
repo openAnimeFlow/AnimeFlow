@@ -1,4 +1,3 @@
-
 import 'dart:ui';
 
 import 'package:anime_flow/models/item/bangumi/user_info_item.dart';

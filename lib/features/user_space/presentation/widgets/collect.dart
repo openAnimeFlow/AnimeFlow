@@ -2,7 +2,7 @@ import 'package:anime_flow/core/constants/layout_constant.dart';
 import 'package:anime_flow/core/network/api/flow_api.dart';
 import 'package:anime_flow/models/item/bangumi/user_collections_item.dart';
 import 'package:anime_flow/routes/model/info_route_extra.dart';
-import 'package:anime_flow/pages/user_space/provider/user_space_provider.dart';
+import 'package:anime_flow/features/user_space/presentation/providers/user_space_provider.dart';
 import 'package:anime_flow/routes/routes.dart';
 import 'package:anime_flow/core/utils/layout_util.dart';
 import 'package:anime_flow/shared/widgets/subject_card.dart';

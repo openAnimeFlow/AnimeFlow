@@ -4,8 +4,7 @@ import 'package:flutter/material.dart';
 class UserSpaceStatisticsSection extends StatelessWidget {
   final BgmUserStatisticsItem userPageItem;
 
-  const UserSpaceStatisticsSection(
-      {super.key,  required this.userPageItem});
+  const UserSpaceStatisticsSection({super.key, required this.userPageItem});
 
   BoxDecoration _cardDecoration(int index) {
     switch (index) {
@@ -142,33 +141,33 @@ class UserSpaceStatisticsSection extends StatelessWidget {
   Widget build(BuildContext context) {
     return Center(
       child: GridView.builder(
-          shrinkWrap: true,
-          physics: const NeverScrollableScrollPhysics(),
-          padding: EdgeInsets.zero,
-          gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-            crossAxisCount: 3,
-            crossAxisSpacing: 10,
-            mainAxisSpacing: 10,
-            childAspectRatio: 2.2,
-          ),
-          itemCount: userPageItem.statistics.length.clamp(0, 6),
-          itemBuilder: (context, index) {
-            return Container(
-              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 5),
-              alignment: Alignment.centerLeft,
-              decoration: _cardDecoration(index),
-              child: _cardContent(index, context, userPageItem),
-            );
-          },
+        shrinkWrap: true,
+        physics: const NeverScrollableScrollPhysics(),
+        padding: EdgeInsets.zero,
+        gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+          crossAxisCount: 3,
+          crossAxisSpacing: 10,
+          mainAxisSpacing: 10,
+          childAspectRatio: 2.2,
         ),
+        itemCount: userPageItem.statistics.length.clamp(0, 6),
+        itemBuilder: (context, index) {
+          return Container(
+            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 5),
+            alignment: Alignment.centerLeft,
+            decoration: _cardDecoration(index),
+            child: _cardContent(index, context, userPageItem),
+          );
+        },
+      ),
     );
   }
 
   Widget _cardContent(
-      int index,
-      BuildContext context,
-      BgmUserStatisticsItem userPageItem,
-      ) {
+    int index,
+    BuildContext context,
+    BgmUserStatisticsItem userPageItem,
+  ) {
     double fontSize({bool isTitle = false}) {
       final width = MediaQuery.sizeOf(context).width;
       if (width < 500) {

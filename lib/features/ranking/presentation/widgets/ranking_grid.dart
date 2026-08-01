@@ -1,4 +1,4 @@
-import 'package:anime_flow/pages/ranking/provider/ranking_provider.dart';
+import 'package:anime_flow/features/ranking/presentation/providers/ranking_provider.dart';
 import 'package:anime_flow/routes/model/info_route_extra.dart';
 import 'package:anime_flow/routes/routes.dart';
 import 'package:anime_flow/core/utils/layout_util.dart';

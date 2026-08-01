@@ -1,5 +1,5 @@
 import 'package:anime_flow/features/anime_info/presentation/pages/anime_info_page.dart';
-import 'package:anime_flow/pages/calendar/index.dart';
+import 'package:anime_flow/features/calendar/presentation/pages/calendar_page.dart';
 import 'package:anime_flow/features/character_info/presentation/pages/character_info_page.dart';
 import 'package:anime_flow/features/characters/presentation/pages/characters_page.dart';
 import 'package:anime_flow/features/auth/presentation/pages/forgot_password_page.dart';
@@ -9,7 +9,7 @@ import 'package:anime_flow/pages/user/index.dart';
 import 'package:anime_flow/features/auth/presentation/pages/oauth_callback_page.dart';
 import 'package:anime_flow/features/player/presentation/pages/play_page.dart';
 import 'package:anime_flow/features/player/presentation/pages/play_record_page.dart';
-import 'package:anime_flow/pages/ranking/index.dart';
+import 'package:anime_flow/features/ranking/presentation/pages/ranking_page.dart';
 import 'package:anime_flow/pages/recommend/index.dart';
 import 'package:anime_flow/features/auth/presentation/pages/register_page.dart';
 import 'package:anime_flow/features/search/presentation/pages/image_search_page.dart';

@@ -1,9 +1,9 @@
 import 'dart:math' as math;
 
 import 'package:anime_flow/core/constants/layout_constant.dart';
-import 'package:anime_flow/pages/ranking/provider/ranking_provider.dart';
-import 'package:anime_flow/pages/ranking/ranking_filter_bar.dart';
-import 'package:anime_flow/pages/ranking/ranking_grid.dart';
+import 'package:anime_flow/features/ranking/presentation/providers/ranking_provider.dart';
+import 'package:anime_flow/features/ranking/presentation/widgets/ranking_filter_bar.dart';
+import 'package:anime_flow/features/ranking/presentation/widgets/ranking_grid.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -102,7 +102,8 @@ class _RankingPageState extends ConsumerState<RankingPage> {
                         child: Text(
                           errorMessage,
                           style: TextStyle(
-                            color: Theme.of(context).colorScheme.onErrorContainer,
+                            color:
+                                Theme.of(context).colorScheme.onErrorContainer,
                           ),
                         ),
                       ),

@@ -167,8 +167,7 @@ class _CalendarPageState extends State<CalendarPage>
 
     return Center(
       child: ConstrainedBox(
-        constraints:
-            const BoxConstraints(maxWidth: LayoutConstant.maxWidth),
+        constraints: const BoxConstraints(maxWidth: LayoutConstant.maxWidth),
         child: CustomScrollView(
           slivers: [
             // 统计信息

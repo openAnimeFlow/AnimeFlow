@@ -1,4 +1,4 @@
-import 'package:anime_flow/models/item/bangumi/user_info_item.dart';
+import 'package:anime_flow/shared/models/bangumi/user_info_item.dart';
 import 'package:anime_flow/features/user_space/presentation/providers/user_space_provider.dart';
 import 'package:anime_flow/features/user_space/presentation/widgets/statistics.dart';
 import 'package:anime_flow/shared/widgets/bbcode/bbcode_widget.dart';

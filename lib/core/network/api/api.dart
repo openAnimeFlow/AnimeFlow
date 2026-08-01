@@ -5,7 +5,7 @@ import 'package:anime_flow/core/crawler/html_crawler.dart';
 import 'package:anime_flow/core/crawler/itme/bgm_user_page_item.dart';
 import 'package:anime_flow/core/network/api_path.dart';
 import 'package:anime_flow/core/network/clients/client.dart';
-import 'package:anime_flow/models/item/image_search_item.dart';
+import 'package:anime_flow/shared/models/image_search_item.dart';
 import 'package:anime_flow/core/exception/storage_exception.dart';
 import 'package:anime_flow/core/logger/logger.dart';
 import 'package:anime_flow/core/utils/systemUtil.dart';

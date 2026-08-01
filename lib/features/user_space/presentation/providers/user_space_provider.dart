@@ -1,5 +1,5 @@
 import 'package:anime_flow/core/crawler/itme/bgm_user_page_item.dart';
-import 'package:anime_flow/models/item/bangumi/user_info_item.dart';
+import 'package:anime_flow/shared/models/bangumi/user_info_item.dart';
 import 'package:anime_flow/repository/providers/repository_providers.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 

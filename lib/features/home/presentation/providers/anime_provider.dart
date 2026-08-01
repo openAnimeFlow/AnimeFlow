@@ -1,6 +1,6 @@
 import 'package:anime_flow/core/network/api/flow_api.dart';
-import 'package:anime_flow/models/item/bangumi/calendar_item.dart';
-import 'package:anime_flow/models/item/bangumi/hot_item.dart';
+import 'package:anime_flow/shared/models/bangumi/calendar_item.dart';
+import 'package:anime_flow/shared/models/bangumi/hot_item.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 part 'anime_provider.g.dart';

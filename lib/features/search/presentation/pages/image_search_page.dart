@@ -1,7 +1,7 @@
 import 'dart:async';
 import 'dart:io';
 
-import 'package:anime_flow/models/item/image_search_item.dart';
+import 'package:anime_flow/shared/models/image_search_item.dart';
 import 'package:anime_flow/features/search/presentation/providers/search_controller.dart';
 import 'package:anime_flow/core/utils/format_time_util.dart';
 import 'package:anime_flow/core/logger/logger.dart';

@@ -1,5 +1,5 @@
 import 'package:anime_flow/core/network/api/flow_api.dart';
-import 'package:anime_flow/models/item/flow/background_image_item.dart';
+import 'package:anime_flow/shared/models/flow/background_image_item.dart';
 import 'package:anime_flow/providers/user/user_state_provider.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 

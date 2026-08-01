@@ -1,4 +1,4 @@
-import 'package:anime_flow/models/item/bangumi/user_collections_item.dart';
+import 'package:anime_flow/shared/models/bangumi/user_collections_item.dart';
 
 /// 单个收藏 Tab 的分页与加载状态。
 class UserCollectionTabState {

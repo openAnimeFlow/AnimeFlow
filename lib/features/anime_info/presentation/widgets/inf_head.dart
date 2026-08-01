@@ -2,7 +2,7 @@ import 'dart:ui';
 
 import 'package:anime_flow/core/constants/layout_constant.dart';
 import 'package:anime_flow/core/network/clients/flow_client.dart';
-import 'package:anime_flow/models/item/bangumi/subjects_info_item.dart';
+import 'package:anime_flow/shared/models/bangumi/subjects_info_item.dart';
 import 'package:anime_flow/core/network/api/flow_api.dart';
 import 'package:anime_flow/features/anime_info/presentation/providers/anime_info_provider.dart';
 import 'package:anime_flow/features/anime_info/presentation/widgets/episodes_drawer.dart';

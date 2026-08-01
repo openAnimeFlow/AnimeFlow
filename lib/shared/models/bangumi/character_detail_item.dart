@@ -1,4 +1,4 @@
-import 'package:anime_flow/models/item/bangumi/image_four_item.dart';
+import 'package:anime_flow/shared/models/bangumi/image_four_item.dart';
 
 /// 角色详情数据类
 class CharacterDetailItem {

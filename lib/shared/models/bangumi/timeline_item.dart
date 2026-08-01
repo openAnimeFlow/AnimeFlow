@@ -1,4 +1,4 @@
-import 'package:anime_flow/models/item/bangumi/image_five_item.dart';
+import 'package:anime_flow/shared/models/bangumi/image_five_item.dart';
 class TimelineItem {
   final int id;
   final int uid;

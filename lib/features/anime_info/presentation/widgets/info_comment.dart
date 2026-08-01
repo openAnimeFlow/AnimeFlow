@@ -1,4 +1,4 @@
-import 'package:anime_flow/models/item/bangumi/subject_comments_item.dart';
+import 'package:anime_flow/shared/models/bangumi/subject_comments_item.dart';
 import 'package:anime_flow/features/anime_info/presentation/providers/anime_info_provider.dart';
 import 'package:anime_flow/routes/routes.dart';
 import 'package:anime_flow/core/utils/format_time_util.dart';

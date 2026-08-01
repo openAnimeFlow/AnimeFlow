@@ -1,4 +1,4 @@
-import 'package:anime_flow/models/search/search_history_module.dart';
+import 'package:anime_flow/shared/models/search/search_history_module.dart';
 import 'package:anime_flow/core/storage/storage.dart';
 import 'package:anime_flow/core/logger/logger.dart';
 
@@ -77,7 +77,6 @@ class SearchHistoryManager {
     );
     return entries;
   }
-
 
   Future<void> _trimHistory() async {
     final entries = _sortedHistoryEntries();

@@ -1,4 +1,4 @@
-import 'package:anime_flow/models/item/bangumi/subject_item.dart';
+import 'package:anime_flow/shared/models/bangumi/subject_item.dart';
 import 'package:anime_flow/core/network/clients/flow_client.dart';
 import 'package:anime_flow/features/player/presentation/providers/recommendation_provider.dart';
 import 'package:anime_flow/routes/model/info_route_extra.dart';

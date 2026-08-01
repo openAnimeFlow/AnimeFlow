@@ -1,4 +1,4 @@
-import 'package:anime_flow/models/item/bangumi/subjects_info_item.dart';
+import 'package:anime_flow/shared/models/bangumi/subjects_info_item.dart';
 import 'dart:io' as io;
 import 'package:flutter/material.dart';
 import 'package:url_launcher/url_launcher.dart';

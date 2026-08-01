@@ -1,6 +1,6 @@
 import 'package:anime_flow/core/network/api/flow_api.dart';
 import 'package:anime_flow/shared/models/enums/sort_type.dart';
-import 'package:anime_flow/models/item/bangumi/subject_item.dart';
+import 'package:anime_flow/shared/models/bangumi/subject_item.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 part 'ranking_provider.g.dart';

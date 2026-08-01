@@ -1,4 +1,4 @@
-import 'package:anime_flow/models/item/bangumi/user_comments_item.dart';
+import 'package:anime_flow/shared/models/bangumi/user_comments_item.dart';
 
 /// 角色吐槽项
 class CharacterCommentItem {

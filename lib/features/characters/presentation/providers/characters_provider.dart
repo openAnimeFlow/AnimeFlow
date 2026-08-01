@@ -1,5 +1,5 @@
 import 'package:anime_flow/core/network/api/flow_api.dart';
-import 'package:anime_flow/models/item/bangumi/actor_item.dart';
+import 'package:anime_flow/shared/models/bangumi/actor_item.dart';
 import 'package:anime_flow/routes/provider/routes_args.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:flutter/widgets.dart';

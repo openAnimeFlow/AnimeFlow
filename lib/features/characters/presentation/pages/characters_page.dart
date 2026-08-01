@@ -1,4 +1,4 @@
-import 'package:anime_flow/models/item/bangumi/actor_item.dart';
+import 'package:anime_flow/shared/models/bangumi/actor_item.dart';
 import 'package:anime_flow/features/characters/presentation/providers/characters_provider.dart';
 import 'package:anime_flow/routes/routes.dart';
 import 'package:anime_flow/core/utils/bgm_utils.dart';

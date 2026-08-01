@@ -1,4 +1,4 @@
-import 'package:anime_flow/models/item/bangumi/avatar_item.dart';
+import 'package:anime_flow/shared/models/bangumi/avatar_item.dart';
 
 class UserCommentsItem {
   final int id;

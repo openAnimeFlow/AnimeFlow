@@ -1,5 +1,5 @@
 import 'package:anime_flow/core/constants/layout_constant.dart';
-import 'package:anime_flow/models/item/bangumi/subjects_info_item.dart';
+import 'package:anime_flow/shared/models/bangumi/subjects_info_item.dart';
 import 'package:anime_flow/features/anime_info/presentation/widgets/characters.dart';
 import 'package:anime_flow/features/anime_info/presentation/widgets/details.dart';
 import 'package:anime_flow/features/anime_info/presentation/widgets/info_comment.dart';

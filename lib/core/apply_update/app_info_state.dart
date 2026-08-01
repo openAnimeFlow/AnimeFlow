@@ -1,5 +1,5 @@
-import 'package:anime_flow/models/version_download_state.dart';
-import 'package:anime_flow/models/version_check_result.dart';
+import 'package:anime_flow/shared/models/version_download_state.dart';
+import 'package:anime_flow/shared/models/version_check_result.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 
 class AppInfoState {

@@ -1,12 +1,12 @@
 import 'package:anime_flow/core/constants/layout_constant.dart';
-import 'package:anime_flow/models/item/bangumi/calendar_item.dart';
+import 'package:anime_flow/shared/models/bangumi/calendar_item.dart';
 import 'package:anime_flow/routes/model/info_route_extra.dart';
 import 'package:anime_flow/features/home/presentation/providers/anime_provider.dart';
 import 'package:anime_flow/routes/routes.dart';
 import 'package:anime_flow/core/utils/layout_util.dart';
 import 'package:anime_flow/shared/widgets/subject_card.dart';
 import 'package:flutter/material.dart';
-import 'package:anime_flow/models/item/bangumi/subject_item.dart';
+import 'package:anime_flow/shared/models/bangumi/subject_item.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 

@@ -1,4 +1,4 @@
-import 'package:anime_flow/models/item/bangumi/calendar_item.dart';
+import 'package:anime_flow/shared/models/bangumi/calendar_item.dart';
 import 'package:anime_flow/features/home/presentation/providers/anime_provider.dart';
 import 'package:anime_flow/routes/model/info_route_extra.dart';
 import 'package:anime_flow/routes/routes.dart';

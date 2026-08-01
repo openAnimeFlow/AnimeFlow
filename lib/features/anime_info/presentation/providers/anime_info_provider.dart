@@ -1,9 +1,9 @@
 import 'package:anime_flow/core/network/api/flow_api.dart';
-import 'package:anime_flow/models/item/bangumi/actor_item.dart';
-import 'package:anime_flow/models/item/bangumi/producers_item.dart';
-import 'package:anime_flow/models/item/bangumi/related_subjects_item.dart';
-import 'package:anime_flow/models/item/bangumi/subject_comments_item.dart';
-import 'package:anime_flow/models/item/bangumi/subjects_info_item.dart';
+import 'package:anime_flow/shared/models/bangumi/actor_item.dart';
+import 'package:anime_flow/shared/models/bangumi/producers_item.dart';
+import 'package:anime_flow/shared/models/bangumi/related_subjects_item.dart';
+import 'package:anime_flow/shared/models/bangumi/subject_comments_item.dart';
+import 'package:anime_flow/shared/models/bangumi/subjects_info_item.dart';
 import 'package:anime_flow/providers/user/user_state_provider.dart';
 import 'package:anime_flow/routes/provider/routes_args.dart';
 import 'package:flutter/cupertino.dart';

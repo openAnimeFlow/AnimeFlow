@@ -2,7 +2,7 @@ import 'dart:convert';
 
 import 'package:anime_flow/core/network/api_path.dart';
 import 'package:anime_flow/core/network/clients/github_client.dart';
-import 'package:anime_flow/models/item/font_item.dart';
+import 'package:anime_flow/shared/models/font_item.dart';
 import 'package:anime_flow/core/utils/utils.dart';
 import 'package:dio/dio.dart';
 

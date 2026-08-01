@@ -1,5 +1,5 @@
-import 'package:anime_flow/models/item/bangumi/actor_item.dart';
-import 'package:anime_flow/models/item/bangumi/subject_item.dart';
+import 'package:anime_flow/shared/models/bangumi/actor_item.dart';
+import 'package:anime_flow/shared/models/bangumi/subject_item.dart';
 
 /// 角色出演作品数据类
 class CharacterCastsItem {

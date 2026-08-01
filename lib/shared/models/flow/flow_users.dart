@@ -1,4 +1,4 @@
-import 'package:anime_flow/models/item/flow/flow_user_collection_counts.dart';
+import 'package:anime_flow/shared/models/flow/flow_user_collection_counts.dart';
 
 class FlowUsers {
   final int id;

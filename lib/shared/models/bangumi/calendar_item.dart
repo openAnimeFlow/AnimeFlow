@@ -1,4 +1,4 @@
-import 'package:anime_flow/models/item/bangumi/subject_item.dart';
+import 'package:anime_flow/shared/models/bangumi/subject_item.dart';
 
 class Calendar {
   final Map<String, List<CalendarItem>> calendarData;

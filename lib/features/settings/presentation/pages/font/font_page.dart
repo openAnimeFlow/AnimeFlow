@@ -1,4 +1,4 @@
-import 'package:anime_flow/models/item/font_item.dart';
+import 'package:anime_flow/shared/models/font_item.dart';
 import 'package:anime_flow/features/settings/presentation/providers/font_provider.dart';
 import 'package:anime_flow/core/logger/logger.dart';
 import 'package:anime_flow/core/utils/systemUtil.dart';

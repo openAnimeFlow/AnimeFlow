@@ -217,6 +217,120 @@ abstract class AppLocalizations {
   /// **'加载失败'**
   String get loadFailed;
 
+  /// No description provided for @updateAvailable.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'有版本更新'**
+  String get updateAvailable;
+
+  /// No description provided for @disableAutoUpdate.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'取消自动更新'**
+  String get disableAutoUpdate;
+
+  /// No description provided for @updateLater.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'稍后更新'**
+  String get updateLater;
+
+  /// No description provided for @cancelDownload.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'取消下载'**
+  String get cancelDownload;
+
+  /// No description provided for @updateNow.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'立即更新'**
+  String get updateNow;
+
+  /// No description provided for @updateDownloadHint.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'安装包会在 GitHub 仓库中下载，国内网络速度较慢，请使用代理改善网络'**
+  String get updateDownloadHint;
+
+  /// No description provided for @downloading.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'正在下载...'**
+  String get downloading;
+
+  /// No description provided for @selectDownloadSource.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'请选择下载地址:'**
+  String get selectDownloadSource;
+
+  /// No description provided for @checkForUpdates.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'检查更新'**
+  String get checkForUpdates;
+
+  /// No description provided for @latestVersion.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'当前为最新版本'**
+  String get latestVersion;
+
+  /// No description provided for @downloadFailed.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'下载失败'**
+  String get downloadFailed;
+
+  /// No description provided for @updateDownloadFailed.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'更新下载失败: {error}'**
+  String updateDownloadFailed(Object error);
+
+  /// No description provided for @downloadCancelled.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'下载已取消'**
+  String get downloadCancelled;
+
+  /// No description provided for @downloadCancelledMessage.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'已取消下载'**
+  String get downloadCancelledMessage;
+
+  /// No description provided for @downloadComplete.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'下载完成'**
+  String get downloadComplete;
+
+  /// No description provided for @packageDownloaded.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'安装包已下载完成'**
+  String get packageDownloaded;
+
+  /// No description provided for @openFailed.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'打开失败'**
+  String get openFailed;
+
+  /// No description provided for @openFileManagerFailed.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'无法打开文件管理器: {error}'**
+  String openFileManagerFailed(Object error);
+
+  /// No description provided for @openPackageFolder.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'打开安装包文件夹'**
+  String get openPackageFolder;
+
   /// No description provided for @openSourceLicense.
   ///
   /// In zh_Hans, this message translates to:
@@ -1932,12 +2046,6 @@ abstract class AppLocalizations {
   /// In zh_Hans, this message translates to:
   /// **'下载成功'**
   String get downloadSuccess;
-
-  /// No description provided for @downloadFailed.
-  ///
-  /// In zh_Hans, this message translates to:
-  /// **'下载失败'**
-  String get downloadFailed;
 
   /// No description provided for @pluginDownloaded.
   ///

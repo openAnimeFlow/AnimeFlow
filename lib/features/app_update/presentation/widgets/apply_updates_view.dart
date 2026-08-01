@@ -1,3 +1,4 @@
+import 'package:anime_flow/app/localization/app_localizations.dart';
 import 'package:anime_flow/core/constants/storage_key.dart';
 import 'package:anime_flow/features/app_update/application/app_info_provider.dart';
 import 'package:anime_flow/shared/models/download_info.dart';
@@ -33,8 +34,10 @@ class _ApplyUpdatesViewState extends ConsumerState<ApplyUpdatesView> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
+
     return AlertDialog(
-      title: const Text('有版本更新'),
+      title: Text(l10n.updateAvailable),
       content: SingleChildScrollView(
         child: Column(
           mainAxisSize: MainAxisSize.min,
@@ -98,7 +101,7 @@ class _ApplyUpdatesViewState extends ConsumerState<ApplyUpdatesView> {
                 widget.setting.put(StorageKey.autoUpdateKey, false);
                 Navigator.of(context).pop();
               },
-              child: const Text('取消自动更新'),
+              child: Text(l10n.disableAutoUpdate),
             ),
             Consumer(
               builder: (context, ref, _) {
@@ -111,12 +114,12 @@ class _ApplyUpdatesViewState extends ConsumerState<ApplyUpdatesView> {
                       onPressed: isDownloading
                           ? null
                           : () => Navigator.of(context).pop(),
-                      child: const Text('稍后更新'),
+                      child: Text(l10n.updateLater),
                     ),
                     if (isDownloading)
                       TextButton(
                         onPressed: widget.onCancelDownload,
-                        child: const Text('取消下载'),
+                        child: Text(l10n.cancelDownload),
                       )
                     else
                       TextButton(
@@ -127,7 +130,7 @@ class _ApplyUpdatesViewState extends ConsumerState<ApplyUpdatesView> {
                             downloadData.fileName,
                           );
                         },
-                        child: const Text('立即更新'),
+                        child: Text(l10n.updateNow),
                       ),
                   ],
                 );
@@ -156,15 +159,15 @@ class _DownloadProgressSection extends StatelessWidget {
             color: Theme.of(context).colorScheme.surfaceContainerHighest,
             borderRadius: BorderRadius.circular(4),
           ),
-          child: const Text(
-            '安装包会在GitHub仓库中下载，国内网络速度较慢，请使用代理改善网络',
+          child: Text(
+            AppLocalizations.of(context).updateDownloadHint,
           ),
         ),
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
             Text(
-              '正在下载...',
+              AppLocalizations.of(context).downloading,
               style: TextStyle(
                 fontSize: 14,
                 color: Theme.of(context).colorScheme.onSurface,
@@ -221,7 +224,7 @@ class _DownloadUrlSection extends StatelessWidget {
       children: [
         if (downloadList.length > 1)
           Text(
-            '请选择下载地址:',
+            AppLocalizations.of(context).selectDownloadSource,
             style: TextStyle(
               fontSize: 14,
               color: Theme.of(context).colorScheme.onSurfaceVariant,

@@ -1,5 +1,6 @@
 import 'dart:io';
 
+import 'package:anime_flow/app/localization/app_localizations.dart';
 import 'package:anime_flow/features/app_update/application/apply_updates_controller.dart';
 import 'package:anime_flow/shared/models/download_info.dart';
 import 'package:anime_flow/shared/models/enums/version_type.dart';
@@ -46,7 +47,8 @@ Future<void> handleVersionCheckResult(
       break;
     case VersionType.sameVersion:
       if (notifyWhenUpToDate) {
-        NotificationToast.show('检查更新', VersionType.sameVersion.message);
+        final l10n = AppLocalizations.of(context);
+        NotificationToast.show(l10n.checkForUpdates, l10n.latestVersion);
       }
       break;
     case VersionType.localNewer:
@@ -61,6 +63,7 @@ Future<void> showVersionUpdateDialog(
   required OnVersionCancelDownload onCancelDownload,
 }) async {
   if (!context.mounted) return;
+  final l10n = AppLocalizations.of(context);
 
   await showDialog<void>(
     context: context,
@@ -93,15 +96,18 @@ Future<void> showVersionUpdateDialog(
             Navigator.of(dialogContext, rootNavigator: true).pop();
           }
           NotificationToast.show(
-            '下载失败',
-            '更新下载失败: $e',
+            l10n.downloadFailed,
+            l10n.updateDownloadFailed(e.toString()),
             maxWidth: 500,
           );
         }
       },
       onCancelDownload: () {
         onCancelDownload();
-        NotificationToast.show('下载已取消', '已取消下载', maxWidth: 500);
+        final l10n = AppLocalizations.of(context);
+        NotificationToast.show(
+            l10n.downloadCancelled, l10n.downloadCancelledMessage,
+            maxWidth: 500);
       },
     ),
   );
@@ -112,17 +118,18 @@ Future<void> showWindowsDownloadCompleteDialog(
   String savePath,
 ) async {
   if (!context.mounted) return;
+  final l10n = AppLocalizations.of(context);
 
   await showDialog<void>(
     context: context,
     barrierDismissible: false,
     builder: (dialogContext) => AlertDialog(
-      title: const Text('下载完成'),
+      title: Text(l10n.downloadComplete),
       content: Column(
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Text('安装包已下载完成'),
+          Text(l10n.packageDownloaded),
           const SizedBox(height: 8),
           SelectableText(
             savePath,
@@ -137,7 +144,7 @@ Future<void> showWindowsDownloadCompleteDialog(
       actions: [
         TextButton(
           onPressed: () => Navigator.of(dialogContext).pop(),
-          child: const Text('取消'),
+          child: Text(l10n.cancel),
         ),
         TextButton(
           onPressed: () async {
@@ -155,13 +162,13 @@ Future<void> showWindowsDownloadCompleteDialog(
                 Navigator.of(dialogContext).pop();
               }
               NotificationToast.show(
-                '打开失败',
-                '无法打开文件管理器: $e',
+                l10n.openFailed,
+                l10n.openFileManagerFailed(e.toString()),
                 maxWidth: 500,
               );
             }
           },
-          child: const Text('打开安装包文件夹'),
+          child: Text(l10n.openPackageFolder),
         ),
       ],
     ),

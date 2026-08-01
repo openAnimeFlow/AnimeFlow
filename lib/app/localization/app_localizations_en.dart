@@ -68,6 +68,68 @@ class AppLocalizationsEn extends AppLocalizations {
   String get loadFailed => 'Failed to load';
 
   @override
+  String get updateAvailable => 'Update available';
+
+  @override
+  String get disableAutoUpdate => 'Disable automatic updates';
+
+  @override
+  String get updateLater => 'Update later';
+
+  @override
+  String get cancelDownload => 'Cancel download';
+
+  @override
+  String get updateNow => 'Update now';
+
+  @override
+  String get updateDownloadHint =>
+      'The package is downloaded from GitHub. Network speeds may be slow in some regions; use a proxy for better performance.';
+
+  @override
+  String get downloading => 'Downloading...';
+
+  @override
+  String get selectDownloadSource => 'Select a download source:';
+
+  @override
+  String get checkForUpdates => 'Check for updates';
+
+  @override
+  String get latestVersion => 'You are using the latest version';
+
+  @override
+  String get downloadFailed => 'Download failed';
+
+  @override
+  String updateDownloadFailed(Object error) {
+    return 'Update download failed: $error';
+  }
+
+  @override
+  String get downloadCancelled => 'Download cancelled';
+
+  @override
+  String get downloadCancelledMessage => 'The download was cancelled';
+
+  @override
+  String get downloadComplete => 'Download complete';
+
+  @override
+  String get packageDownloaded => 'The package has been downloaded';
+
+  @override
+  String get openFailed => 'Failed to open';
+
+  @override
+  String openFileManagerFailed(Object error) {
+    return 'Unable to open the file manager: $error';
+  }
+
+  @override
+  String get openPackageFolder => 'Open package folder';
+
+  @override
   String get openSourceLicense => 'Open Source License';
 
   @override
@@ -1004,9 +1066,6 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get downloadSuccess => 'Download successful';
-
-  @override
-  String get downloadFailed => 'Download failed';
 
   @override
   String pluginDownloaded(Object name) {

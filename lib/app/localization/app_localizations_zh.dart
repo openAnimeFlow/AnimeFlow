@@ -68,6 +68,67 @@ class AppLocalizationsZh extends AppLocalizations {
   String get loadFailed => '加载失败';
 
   @override
+  String get updateAvailable => '有版本更新';
+
+  @override
+  String get disableAutoUpdate => '取消自動更新';
+
+  @override
+  String get updateLater => '稍後更新';
+
+  @override
+  String get cancelDownload => '取消下載';
+
+  @override
+  String get updateNow => '立即更新';
+
+  @override
+  String get updateDownloadHint => '安裝包會在 GitHub 儲存庫中下載，部分地區網路速度較慢，請使用代理改善網路';
+
+  @override
+  String get downloading => '正在下載...';
+
+  @override
+  String get selectDownloadSource => '請選擇下載地址:';
+
+  @override
+  String get checkForUpdates => '檢查更新';
+
+  @override
+  String get latestVersion => '目前已是最新版本';
+
+  @override
+  String get downloadFailed => '下載失敗';
+
+  @override
+  String updateDownloadFailed(Object error) {
+    return '更新下載失敗: $error';
+  }
+
+  @override
+  String get downloadCancelled => '下載已取消';
+
+  @override
+  String get downloadCancelledMessage => '已取消下載';
+
+  @override
+  String get downloadComplete => '下載完成';
+
+  @override
+  String get packageDownloaded => '安裝包已下載完成';
+
+  @override
+  String get openFailed => '開啟失敗';
+
+  @override
+  String openFileManagerFailed(Object error) {
+    return '無法開啟檔案管理器: $error';
+  }
+
+  @override
+  String get openPackageFolder => '開啟安裝包資料夾';
+
+  @override
   String get openSourceLicense => '開源協議';
 
   @override
@@ -987,9 +1048,6 @@ class AppLocalizationsZh extends AppLocalizations {
   String get downloadSuccess => '下载成功';
 
   @override
-  String get downloadFailed => '下载失败';
-
-  @override
   String pluginDownloaded(Object name) {
     return '插件 \"$name\" 已下载';
   }
@@ -1155,6 +1213,67 @@ class AppLocalizationsZhHans extends AppLocalizationsZh {
 
   @override
   String get loadFailed => '加载失败';
+
+  @override
+  String get updateAvailable => '有版本更新';
+
+  @override
+  String get disableAutoUpdate => '取消自动更新';
+
+  @override
+  String get updateLater => '稍后更新';
+
+  @override
+  String get cancelDownload => '取消下载';
+
+  @override
+  String get updateNow => '立即更新';
+
+  @override
+  String get updateDownloadHint => '安装包会在 GitHub 仓库中下载，国内网络速度较慢，请使用代理改善网络';
+
+  @override
+  String get downloading => '正在下载...';
+
+  @override
+  String get selectDownloadSource => '请选择下载地址:';
+
+  @override
+  String get checkForUpdates => '检查更新';
+
+  @override
+  String get latestVersion => '当前为最新版本';
+
+  @override
+  String get downloadFailed => '下载失败';
+
+  @override
+  String updateDownloadFailed(Object error) {
+    return '更新下载失败: $error';
+  }
+
+  @override
+  String get downloadCancelled => '下载已取消';
+
+  @override
+  String get downloadCancelledMessage => '已取消下载';
+
+  @override
+  String get downloadComplete => '下载完成';
+
+  @override
+  String get packageDownloaded => '安装包已下载完成';
+
+  @override
+  String get openFailed => '打开失败';
+
+  @override
+  String openFileManagerFailed(Object error) {
+    return '无法打开文件管理器: $error';
+  }
+
+  @override
+  String get openPackageFolder => '打开安装包文件夹';
 
   @override
   String get openSourceLicense => '开源协议';
@@ -2076,9 +2195,6 @@ class AppLocalizationsZhHans extends AppLocalizationsZh {
   String get downloadSuccess => '下载成功';
 
   @override
-  String get downloadFailed => '下载失败';
-
-  @override
   String pluginDownloaded(Object name) {
     return '插件 \"$name\" 已下载';
   }
@@ -2244,6 +2360,67 @@ class AppLocalizationsZhHantHk extends AppLocalizationsZh {
 
   @override
   String get loadFailed => '載入失敗';
+
+  @override
+  String get updateAvailable => '有版本更新';
+
+  @override
+  String get disableAutoUpdate => '取消自動更新';
+
+  @override
+  String get updateLater => '稍後更新';
+
+  @override
+  String get cancelDownload => '取消下載';
+
+  @override
+  String get updateNow => '立即更新';
+
+  @override
+  String get updateDownloadHint => '安裝包會在 GitHub 儲存庫中下載，部分地區網路速度較慢，請使用代理改善網路';
+
+  @override
+  String get downloading => '正在下載...';
+
+  @override
+  String get selectDownloadSource => '請選擇下載地址:';
+
+  @override
+  String get checkForUpdates => '檢查更新';
+
+  @override
+  String get latestVersion => '目前已是最新版本';
+
+  @override
+  String get downloadFailed => '下載失敗';
+
+  @override
+  String updateDownloadFailed(Object error) {
+    return '更新下載失敗: $error';
+  }
+
+  @override
+  String get downloadCancelled => '下載已取消';
+
+  @override
+  String get downloadCancelledMessage => '已取消下載';
+
+  @override
+  String get downloadComplete => '下載完成';
+
+  @override
+  String get packageDownloaded => '安裝包已下載完成';
+
+  @override
+  String get openFailed => '開啟失敗';
+
+  @override
+  String openFileManagerFailed(Object error) {
+    return '無法開啟檔案管理器: $error';
+  }
+
+  @override
+  String get openPackageFolder => '開啟安裝包資料夾';
 
   @override
   String get openSourceLicense => '開源授權條款';
@@ -3139,6 +3316,67 @@ class AppLocalizationsZhHantTw extends AppLocalizationsZh {
 
   @override
   String get loadFailed => '載入失敗';
+
+  @override
+  String get updateAvailable => '有版本更新';
+
+  @override
+  String get disableAutoUpdate => '取消自動更新';
+
+  @override
+  String get updateLater => '稍後更新';
+
+  @override
+  String get cancelDownload => '取消下載';
+
+  @override
+  String get updateNow => '立即更新';
+
+  @override
+  String get updateDownloadHint => '安裝包會在 GitHub 儲存庫中下載，部分地區網路速度較慢，請使用代理改善網路';
+
+  @override
+  String get downloading => '正在下載...';
+
+  @override
+  String get selectDownloadSource => '請選擇下載地址:';
+
+  @override
+  String get checkForUpdates => '檢查更新';
+
+  @override
+  String get latestVersion => '目前已是最新版本';
+
+  @override
+  String get downloadFailed => '下載失敗';
+
+  @override
+  String updateDownloadFailed(Object error) {
+    return '更新下載失敗: $error';
+  }
+
+  @override
+  String get downloadCancelled => '下載已取消';
+
+  @override
+  String get downloadCancelledMessage => '已取消下載';
+
+  @override
+  String get downloadComplete => '下載完成';
+
+  @override
+  String get packageDownloaded => '安裝包已下載完成';
+
+  @override
+  String get openFailed => '開啟失敗';
+
+  @override
+  String openFileManagerFailed(Object error) {
+    return '無法開啟檔案管理器: $error';
+  }
+
+  @override
+  String get openPackageFolder => '開啟安裝包資料夾';
 
   @override
   String get openSourceLicense => '開源授權條款';

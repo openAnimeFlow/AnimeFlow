@@ -818,6 +818,51 @@ class AppLocalizationsZh extends AppLocalizations {
   String get registerAccount => '注册账号';
 
   @override
+  String get registerSuccess => '註冊成功';
+
+  @override
+  String get registerTitle => '註冊';
+
+  @override
+  String get createAccount => '建立帳號';
+
+  @override
+  String get registerSubtitle => '加入 AnimeFlow，同步你的追番體驗';
+
+  @override
+  String get enterGraphicCaptcha => '請先填寫圖形驗證碼';
+
+  @override
+  String get emailCodeSent => '驗證碼已寄出，請查收電子郵件';
+
+  @override
+  String get invalidEmailFormat => '電子郵件格式不正確';
+
+  @override
+  String get confirmPassword => '確認密碼';
+
+  @override
+  String get passwordLengthRange => '密碼長度需在 6-30 位之間';
+
+  @override
+  String get enterConfirmPassword => '請再次輸入密碼';
+
+  @override
+  String get passwordMismatch => '兩次輸入的密碼不一致';
+
+  @override
+  String get emailVerificationCode => '電子郵件驗證碼';
+
+  @override
+  String get enterEmailCode => '請輸入電子郵件驗證碼';
+
+  @override
+  String get emailCodeLength => '驗證碼必須為 6 位數字';
+
+  @override
+  String get haveAccountBackToLogin => '已有帳號？返回登入';
+
+  @override
   String get accountInfo => '账户信息';
 
   @override
@@ -2069,6 +2114,51 @@ class AppLocalizationsZhHans extends AppLocalizationsZh {
 
   @override
   String get registerAccount => '注册账号';
+
+  @override
+  String get registerSuccess => '注册成功';
+
+  @override
+  String get registerTitle => '注册';
+
+  @override
+  String get createAccount => '创建账号';
+
+  @override
+  String get registerSubtitle => '加入 AnimeFlow，同步你的追番体验';
+
+  @override
+  String get enterGraphicCaptcha => '请先填写图形验证码';
+
+  @override
+  String get emailCodeSent => '验证码已发送，请查收邮件';
+
+  @override
+  String get invalidEmailFormat => '邮箱格式不正确';
+
+  @override
+  String get confirmPassword => '确认密码';
+
+  @override
+  String get passwordLengthRange => '密码长度需在 6-30 位之间';
+
+  @override
+  String get enterConfirmPassword => '请再次输入密码';
+
+  @override
+  String get passwordMismatch => '两次输入的密码不一致';
+
+  @override
+  String get emailVerificationCode => '邮箱验证码';
+
+  @override
+  String get enterEmailCode => '请输入邮箱验证码';
+
+  @override
+  String get emailCodeLength => '验证码为 6 位数字';
+
+  @override
+  String get haveAccountBackToLogin => '已有账号？返回登录';
 
   @override
   String get accountInfo => '账户信息';
@@ -3324,6 +3414,51 @@ class AppLocalizationsZhHantHk extends AppLocalizationsZh {
   String get registerAccount => '註冊帳戶';
 
   @override
+  String get registerSuccess => '註冊成功';
+
+  @override
+  String get registerTitle => '註冊';
+
+  @override
+  String get createAccount => '建立帳號';
+
+  @override
+  String get registerSubtitle => '加入 AnimeFlow，同步你的追番體驗';
+
+  @override
+  String get enterGraphicCaptcha => '請先填寫圖形驗證碼';
+
+  @override
+  String get emailCodeSent => '驗證碼已寄出，請查收電子郵件';
+
+  @override
+  String get invalidEmailFormat => '電子郵件格式不正確';
+
+  @override
+  String get confirmPassword => '確認密碼';
+
+  @override
+  String get passwordLengthRange => '密碼長度需在 6-30 位之間';
+
+  @override
+  String get enterConfirmPassword => '請再次輸入密碼';
+
+  @override
+  String get passwordMismatch => '兩次輸入的密碼不一致';
+
+  @override
+  String get emailVerificationCode => '電子郵件驗證碼';
+
+  @override
+  String get enterEmailCode => '請輸入電子郵件驗證碼';
+
+  @override
+  String get emailCodeLength => '驗證碼必須為 6 位數字';
+
+  @override
+  String get haveAccountBackToLogin => '已有帳號？返回登入';
+
+  @override
   String get accountInfo => '帳戶資訊';
 
   @override
@@ -4384,6 +4519,51 @@ class AppLocalizationsZhHantTw extends AppLocalizationsZh {
 
   @override
   String get registerAccount => '註冊帳戶';
+
+  @override
+  String get registerSuccess => '註冊成功';
+
+  @override
+  String get registerTitle => '註冊';
+
+  @override
+  String get createAccount => '建立帳號';
+
+  @override
+  String get registerSubtitle => '加入 AnimeFlow，同步你的追番體驗';
+
+  @override
+  String get enterGraphicCaptcha => '請先填寫圖形驗證碼';
+
+  @override
+  String get emailCodeSent => '驗證碼已寄出，請查收電子郵件';
+
+  @override
+  String get invalidEmailFormat => '電子郵件格式不正確';
+
+  @override
+  String get confirmPassword => '確認密碼';
+
+  @override
+  String get passwordLengthRange => '密碼長度需在 6-30 位之間';
+
+  @override
+  String get enterConfirmPassword => '請再次輸入密碼';
+
+  @override
+  String get passwordMismatch => '兩次輸入的密碼不一致';
+
+  @override
+  String get emailVerificationCode => '電子郵件驗證碼';
+
+  @override
+  String get enterEmailCode => '請輸入電子郵件驗證碼';
+
+  @override
+  String get emailCodeLength => '驗證碼必須為 6 位數字';
+
+  @override
+  String get haveAccountBackToLogin => '已有帳號？返回登入';
 
   @override
   String get accountInfo => '帳戶資訊';

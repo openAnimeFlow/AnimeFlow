@@ -1621,6 +1621,96 @@ abstract class AppLocalizations {
   /// **'注册账号'**
   String get registerAccount;
 
+  /// No description provided for @registerSuccess.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'注册成功'**
+  String get registerSuccess;
+
+  /// No description provided for @registerTitle.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'注册'**
+  String get registerTitle;
+
+  /// No description provided for @createAccount.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'创建账号'**
+  String get createAccount;
+
+  /// No description provided for @registerSubtitle.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'加入 AnimeFlow，同步你的追番体验'**
+  String get registerSubtitle;
+
+  /// No description provided for @enterGraphicCaptcha.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'请先填写图形验证码'**
+  String get enterGraphicCaptcha;
+
+  /// No description provided for @emailCodeSent.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'验证码已发送，请查收邮件'**
+  String get emailCodeSent;
+
+  /// No description provided for @invalidEmailFormat.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'邮箱格式不正确'**
+  String get invalidEmailFormat;
+
+  /// No description provided for @confirmPassword.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'确认密码'**
+  String get confirmPassword;
+
+  /// No description provided for @passwordLengthRange.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'密码长度需在 6-30 位之间'**
+  String get passwordLengthRange;
+
+  /// No description provided for @enterConfirmPassword.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'请再次输入密码'**
+  String get enterConfirmPassword;
+
+  /// No description provided for @passwordMismatch.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'两次输入的密码不一致'**
+  String get passwordMismatch;
+
+  /// No description provided for @emailVerificationCode.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'邮箱验证码'**
+  String get emailVerificationCode;
+
+  /// No description provided for @enterEmailCode.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'请输入邮箱验证码'**
+  String get enterEmailCode;
+
+  /// No description provided for @emailCodeLength.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'验证码为 6 位数字'**
+  String get emailCodeLength;
+
+  /// No description provided for @haveAccountBackToLogin.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'已有账号？返回登录'**
+  String get haveAccountBackToLogin;
+
   /// No description provided for @accountInfo.
   ///
   /// In zh_Hans, this message translates to:

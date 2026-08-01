@@ -824,6 +824,53 @@ class AppLocalizationsEn extends AppLocalizations {
   String get registerAccount => 'Register';
 
   @override
+  String get registerSuccess => 'Registered successfully';
+
+  @override
+  String get registerTitle => 'Register';
+
+  @override
+  String get createAccount => 'Create an account';
+
+  @override
+  String get registerSubtitle =>
+      'Join AnimeFlow and sync your anime experience';
+
+  @override
+  String get enterGraphicCaptcha => 'Please enter the image captcha first';
+
+  @override
+  String get emailCodeSent => 'Verification code sent; check your email';
+
+  @override
+  String get invalidEmailFormat => 'Invalid email format';
+
+  @override
+  String get confirmPassword => 'Confirm password';
+
+  @override
+  String get passwordLengthRange => 'Password must be 6–30 characters';
+
+  @override
+  String get enterConfirmPassword => 'Please enter your password again';
+
+  @override
+  String get passwordMismatch => 'The passwords do not match';
+
+  @override
+  String get emailVerificationCode => 'Email verification code';
+
+  @override
+  String get enterEmailCode => 'Please enter the email verification code';
+
+  @override
+  String get emailCodeLength => 'The verification code must contain 6 digits';
+
+  @override
+  String get haveAccountBackToLogin =>
+      'Already have an account? Back to log in';
+
+  @override
   String get accountInfo => 'Account information';
 
   @override

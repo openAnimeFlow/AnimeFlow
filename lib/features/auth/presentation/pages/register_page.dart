@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:anime_flow/app/localization/app_localizations.dart';
 import 'package:anime_flow/core/constants/assets_path_constants.dart';
 import 'package:anime_flow/core/network/clients/flow_client.dart';
 import 'package:anime_flow/core/network/api/flow_api.dart';
@@ -40,12 +41,13 @@ class _RegisterPageState extends State<RegisterPage> {
 
   Future<bool> _sendEmailCode() async {
     final email = _emailController.text.trim();
+    final l10n = AppLocalizations.of(context);
     if (email.isEmpty || !email.contains('@')) {
-      NotificationToast.show('提示', '请先填写有效邮箱');
+      NotificationToast.show(l10n.tip, l10n.invalidEmail);
       return false;
     }
     if (!_graphicCaptchaController.isReady) {
-      NotificationToast.show('提示', '请先填写图形验证码');
+      NotificationToast.show(l10n.tip, l10n.enterGraphicCaptcha);
       return false;
     }
 
@@ -56,7 +58,7 @@ class _RegisterPageState extends State<RegisterPage> {
         captcha: _graphicCaptchaController.text,
       );
       if (!mounted) return false;
-      NotificationToast.show('提示', '验证码已发送，请查收邮件');
+      NotificationToast.show(l10n.tip, l10n.emailCodeSent);
       // 图形验证码校验成功后服务端会删除，需刷新以便再次发送
       unawaited(_graphicCaptchaController.reload());
       return true;
@@ -75,6 +77,7 @@ class _RegisterPageState extends State<RegisterPage> {
 
   Future<void> _submit() async {
     if (_isSubmitting || !_formKey.currentState!.validate()) return;
+    final l10n = AppLocalizations.of(context);
 
     setState(() => _isSubmitting = true);
     try {
@@ -84,7 +87,7 @@ class _RegisterPageState extends State<RegisterPage> {
         emailCaptcha: _emailCodeController.text.trim(),
       );
       if (!mounted) return;
-      NotificationToast.show('提示', '注册成功');
+      NotificationToast.show(l10n.tip, l10n.registerSuccess);
       context.pop();
     } on AnimeFlowApiException catch (e) {
       if (!mounted) return;
@@ -103,6 +106,7 @@ class _RegisterPageState extends State<RegisterPage> {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
+    final l10n = AppLocalizations.of(context);
 
     final topPadding = MediaQuery.paddingOf(context).top;
     final bottomPadding = MediaQuery.paddingOf(context).bottom;
@@ -115,7 +119,7 @@ class _RegisterPageState extends State<RegisterPage> {
         scrolledUnderElevation: 0,
         surfaceTintColor: Colors.transparent,
         forceMaterialTransparency: true,
-        title: const Text('注册'),
+        title: Text(l10n.registerTitle),
       ),
       body: SingleChildScrollView(
         padding: EdgeInsets.fromLTRB(
@@ -161,7 +165,7 @@ class _RegisterPageState extends State<RegisterPage> {
                             crossAxisAlignment: CrossAxisAlignment.stretch,
                             children: [
                               Text(
-                                '创建账号',
+                                l10n.createAccount,
                                 textAlign: TextAlign.center,
                                 style: theme.textTheme.headlineSmall?.copyWith(
                                   fontWeight: FontWeight.bold,
@@ -169,7 +173,7 @@ class _RegisterPageState extends State<RegisterPage> {
                               ),
                               const SizedBox(height: 6),
                               Text(
-                                '加入 AnimeFlow，同步你的追番体验',
+                                l10n.registerSubtitle,
                                 textAlign: TextAlign.center,
                                 style: theme.textTheme.bodySmall?.copyWith(
                                   color: colorScheme.onSurfaceVariant,
@@ -180,15 +184,15 @@ class _RegisterPageState extends State<RegisterPage> {
                                 controller: _emailController,
                                 keyboardType: TextInputType.emailAddress,
                                 textInputAction: TextInputAction.next,
-                                decoration: const InputDecoration(
-                                  labelText: '邮箱',
+                                decoration: InputDecoration(
+                                  labelText: l10n.email,
                                   prefixIcon: Icon(Icons.email_outlined),
                                 ),
                                 validator: (value) {
                                   final email = value?.trim() ?? '';
-                                  if (email.isEmpty) return '请输入邮箱';
+                                  if (email.isEmpty) return l10n.enterEmail;
                                   if (!email.contains('@')) {
-                                    return '邮箱格式不正确';
+                                    return l10n.invalidEmailFormat;
                                   }
                                   return null;
                                 },
@@ -199,7 +203,7 @@ class _RegisterPageState extends State<RegisterPage> {
                                 obscureText: _obscurePassword,
                                 textInputAction: TextInputAction.next,
                                 decoration: InputDecoration(
-                                  labelText: '密码',
+                                  labelText: l10n.password,
                                   prefixIcon: const Icon(Icons.lock_outline),
                                   suffixIcon: IconButton(
                                     onPressed: () => setState(
@@ -215,10 +219,12 @@ class _RegisterPageState extends State<RegisterPage> {
                                 ),
                                 validator: (value) {
                                   final password = value ?? '';
-                                  if (password.isEmpty) return '请输入密码';
+                                  if (password.isEmpty) {
+                                    return l10n.enterPassword;
+                                  }
                                   if (password.length < 6 ||
                                       password.length > 30) {
-                                    return '密码长度需在 6-30 位之间';
+                                    return l10n.passwordLengthRange;
                                   }
                                   return null;
                                 },
@@ -229,7 +235,7 @@ class _RegisterPageState extends State<RegisterPage> {
                                 obscureText: _obscureConfirmPassword,
                                 textInputAction: TextInputAction.next,
                                 decoration: InputDecoration(
-                                  labelText: '确认密码',
+                                  labelText: l10n.confirmPassword,
                                   prefixIcon:
                                       const Icon(Icons.lock_reset_outlined),
                                   suffixIcon: IconButton(
@@ -245,10 +251,10 @@ class _RegisterPageState extends State<RegisterPage> {
                                 ),
                                 validator: (value) {
                                   if ((value ?? '').isEmpty) {
-                                    return '请再次输入密码';
+                                    return l10n.enterConfirmPassword;
                                   }
                                   if (value != _passwordController.text) {
-                                    return '两次输入的密码不一致';
+                                    return l10n.passwordMismatch;
                                   }
                                   return null;
                                 },
@@ -267,18 +273,18 @@ class _RegisterPageState extends State<RegisterPage> {
                                       controller: _emailCodeController,
                                       keyboardType: TextInputType.number,
                                       textInputAction: TextInputAction.done,
-                                      decoration: const InputDecoration(
-                                        labelText: '邮箱验证码',
-                                        prefixIcon: Icon(
+                                      decoration: InputDecoration(
+                                        labelText: l10n.emailVerificationCode,
+                                        prefixIcon: const Icon(
                                             Icons.mark_email_read_outlined),
                                       ),
                                       validator: (value) {
                                         final code = value?.trim() ?? '';
                                         if (code.isEmpty) {
-                                          return '请输入邮箱验证码';
+                                          return l10n.enterEmailCode;
                                         }
                                         if (code.length != 6) {
-                                          return '验证码为 6 位数字';
+                                          return l10n.emailCodeLength;
                                         }
                                         return null;
                                       },
@@ -305,9 +311,9 @@ class _RegisterPageState extends State<RegisterPage> {
                                           strokeWidth: 2.5,
                                         ),
                                       )
-                                    : const Text(
-                                        '注册',
-                                        style: TextStyle(
+                                    : Text(
+                                        l10n.registerAccount,
+                                        style: const TextStyle(
                                           fontSize: 16,
                                           fontWeight: FontWeight.bold,
                                         ),
@@ -315,7 +321,7 @@ class _RegisterPageState extends State<RegisterPage> {
                               ),
                               TextButton(
                                 onPressed: () => context.pop(),
-                                child: const Text('已有账号？返回登录'),
+                                child: Text(l10n.haveAccountBackToLogin),
                               ),
                             ],
                           ),

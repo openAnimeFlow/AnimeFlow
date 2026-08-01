@@ -1,7 +1,7 @@
 import 'dart:convert';
 
-import 'package:anime_flow/models/item/flow/flow_token.dart';
-import 'package:anime_flow/repository/token_repository.dart';
+import 'package:anime_flow/features/auth/data/models/flow_token.dart';
+import 'package:anime_flow/features/auth/data/repository/token_repository.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 
 /// AnimeFlow 账号令牌：写入 [FlutterSecureStorage]。

@@ -5,9 +5,9 @@ import 'package:anime_flow/core/network/interceptors/bgm_refresh_token_intercept
 import 'package:anime_flow/core/network/interceptors/flow_refresh_token_interceptor.dart';
 import 'package:anime_flow/core/network/api/flow_api.dart';
 import 'package:anime_flow/models/item/flow/bangumi_bind_item.dart';
-import 'package:anime_flow/models/item/flow/flow_token.dart';
+import 'package:anime_flow/features/auth/data/models/flow_token.dart';
 import 'package:anime_flow/models/item/flow/flow_users.dart';
-import 'package:anime_flow/models/item/token_item.dart';
+import 'package:anime_flow/features/auth/data/models/token_item.dart';
 import 'package:anime_flow/repository/providers/repository_providers.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 

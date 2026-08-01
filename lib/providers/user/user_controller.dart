@@ -5,7 +5,7 @@ import 'package:anime_flow/core/network/api_path.dart';
 import 'package:anime_flow/core/network/clients/flow_client.dart';
 import 'package:anime_flow/core/network/api/flow_api.dart';
 import 'package:anime_flow/models/item/flow/bangumi_bind_item.dart';
-import 'package:anime_flow/models/item/flow/flow_token.dart';
+import 'package:anime_flow/features/auth/data/models/flow_token.dart';
 import 'package:anime_flow/pages/user/provider/user_collection_provider.dart';
 import 'package:anime_flow/providers/user/bgm_collection_sync_provider.dart';
 import 'package:anime_flow/providers/user/user_oauth_state.dart';

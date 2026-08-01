@@ -3,7 +3,7 @@ import 'package:anime_flow/core/network/api_path.dart';
 import 'package:anime_flow/core/network/clients/flow_client.dart';
 import 'package:anime_flow/models/item/flow/bangumi_bind_item.dart';
 import 'package:anime_flow/models/item/flow/flow_users.dart';
-import 'package:anime_flow/pages/login/index.dart';
+import 'package:anime_flow/features/auth/presentation/pages/login_page.dart';
 import 'package:anime_flow/pages/settings/pages/account/bgm_collection_sync_section.dart';
 import 'package:anime_flow/pages/settings/pages/bind_email_section.dart';
 import 'package:anime_flow/pages/settings/setting_provider.dart';

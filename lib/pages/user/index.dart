@@ -1,4 +1,4 @@
-import 'package:anime_flow/pages/login/index.dart';
+import 'package:anime_flow/features/auth/presentation/pages/login_page.dart';
 import 'package:anime_flow/pages/user/user_view/user_view.dart';
 import 'package:anime_flow/providers/user/user_controller.dart';
 import 'package:anime_flow/providers/user/user_state_provider.dart';

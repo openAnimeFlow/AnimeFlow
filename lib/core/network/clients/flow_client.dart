@@ -4,7 +4,7 @@ import 'package:anime_flow/core/network/core/network_exception.dart';
 import 'package:anime_flow/core/network/core/dio_factory.dart';
 import 'package:anime_flow/core/network/core/network_error_mapper.dart';
 import 'package:anime_flow/core/network/interceptors/flow_refresh_token_interceptor.dart';
-import 'package:anime_flow/core/storage/flow_token_storage.dart';
+import 'package:anime_flow/features/auth/data/repository/flow_token_storage.dart';
 import 'package:dio/dio.dart';
 
 /// AnimeFlow API 业务异常：`code != 200` 时抛出。

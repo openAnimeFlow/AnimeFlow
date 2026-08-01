@@ -1,7 +1,7 @@
 import 'package:anime_flow/core/network/api/flow_api.dart';
-import 'package:anime_flow/models/item/flow/flow_token.dart';
-import 'package:anime_flow/core/storage/flow_token_storage.dart';
-import 'package:anime_flow/repository/token_repository.dart';
+import 'package:anime_flow/features/auth/data/models/flow_token.dart';
+import 'package:anime_flow/features/auth/data/repository/flow_token_storage.dart';
+import 'package:anime_flow/features/auth/data/repository/token_repository.dart';
 import 'package:anime_flow/core/utils/systemUtil.dart';
 
 typedef EmailLoginFn = Future<FlowToken> Function({

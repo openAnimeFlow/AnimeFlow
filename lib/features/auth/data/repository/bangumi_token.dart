@@ -1,7 +1,7 @@
 import 'dart:convert';
 
-import 'package:anime_flow/models/item/token_item.dart';
-import 'package:anime_flow/repository/token_repository.dart';
+import 'package:anime_flow/features/auth/data/models/token_item.dart';
+import 'package:anime_flow/features/auth/data/repository/token_repository.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 
 /// Bangumi OAuth 令牌：写入 [FlutterSecureStorage]，
@@ -14,7 +14,6 @@ class BangumiToken implements TokenRepository<TokenItem> {
 
   static const FlutterSecureStorage _storage = FlutterSecureStorage();
 
-
   @override
   Future<TokenItem?> getToken() async {
     try {
@@ -26,7 +25,6 @@ class BangumiToken implements TokenRepository<TokenItem> {
         await removeToken();
         return null;
       }
-
 
       return TokenItem.fromJson(Map<String, dynamic>.from(decoded));
     } catch (_) {

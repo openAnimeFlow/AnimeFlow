@@ -9,10 +9,10 @@ import 'package:go_router/go_router.dart';
 
 /// 主页面 — 使用 [StatefulNavigationShell] 管理三个 Tab 分支页面。
 /// 桌面端使用 [NavigationRail]，移动端使用 [NavigationBar]。
-class MainPage extends StatelessWidget {
+class AppShellPage extends StatelessWidget {
   final StatefulNavigationShell navigationShell;
 
-  const MainPage({super.key, required this.navigationShell});
+  const AppShellPage({super.key, required this.navigationShell});
 
   static final List<TabItem> _tabs = [
     TabItem(
@@ -194,4 +194,3 @@ class MainPage extends StatelessWidget {
     );
   }
 }
-

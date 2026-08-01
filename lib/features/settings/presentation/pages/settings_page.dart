@@ -1,16 +1,16 @@
-import 'package:anime_flow/pages/settings/pages/danmaku_setting_page.dart';
-import 'package:anime_flow/pages/settings/pages/plugins/plugins.dart';
-import 'package:anime_flow/pages/settings/pages/theme.dart';
-import 'package:anime_flow/pages/settings/setting_provider.dart';
+import 'package:anime_flow/features/settings/presentation/pages/danmaku_setting_page.dart';
+import 'package:anime_flow/features/settings/presentation/pages/plugins/plugins.dart';
+import 'package:anime_flow/features/settings/presentation/pages/theme.dart';
+import 'package:anime_flow/features/settings/presentation/providers/setting_provider.dart';
 import 'package:anime_flow/routes/routes.dart';
 import 'package:anime_flow/core/utils/systemUtil.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import 'package:anime_flow/pages/settings/pages/account/account_settings.dart';
-import 'package:anime_flow/pages/settings/pages/general_settings.dart';
-import 'package:anime_flow/pages/settings/pages/playback_settings.dart';
-import 'package:anime_flow/pages/settings/pages/about/index.dart';
+import 'package:anime_flow/features/settings/presentation/pages/account_settings_page.dart';
+import 'package:anime_flow/features/settings/presentation/pages/general_settings.dart';
+import 'package:anime_flow/features/settings/presentation/pages/playback_settings.dart';
+import 'package:anime_flow/features/settings/presentation/pages/about/about_page.dart';
 
 ///设置页面
 class SettingsPage extends StatefulWidget {
@@ -167,8 +167,7 @@ class _SettingsPageState extends State<SettingsPage> {
                                 category.title,
                                 style: TextStyle(
                                   fontWeight: FontWeight.bold,
-                                  color:
-                                      Theme.of(context).colorScheme.primary,
+                                  color: Theme.of(context).colorScheme.primary,
                                   fontSize: 14,
                                 ),
                               ),
@@ -186,8 +185,7 @@ class _SettingsPageState extends State<SettingsPage> {
                                   },
                                   borderRadius: BorderRadius.circular(50),
                                   child: AnimatedContainer(
-                                    duration:
-                                        const Duration(milliseconds: 300),
+                                    duration: const Duration(milliseconds: 300),
                                     margin: const EdgeInsets.symmetric(
                                       vertical: 3,
                                       horizontal: 3,

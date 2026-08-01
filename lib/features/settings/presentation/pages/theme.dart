@@ -1,12 +1,13 @@
 import 'dart:ui';
 
 import 'package:anime_flow/providers/theme_provider.dart';
-import 'package:anime_flow/pages/settings/setting_provider.dart';
+import 'package:anime_flow/features/settings/presentation/providers/setting_provider.dart';
 import 'package:anime_flow/routes/routes.dart';
 import 'package:anime_flow/core/utils/systemUtil.dart';
 import 'package:anime_flow/shared/widgets/theme_preview.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+
 class ThemePage extends StatefulWidget {
   const ThemePage({super.key});
 
@@ -60,7 +61,8 @@ class _ThemePageState extends State<ThemePage> {
                       child: Row(
                         children: [
                           GestureDetector(
-                            onTap: () => themeNotifier.setThemeMode(ThemeMode.dark),
+                            onTap: () =>
+                                themeNotifier.setThemeMode(ThemeMode.dark),
                             child: ThemePreviewCard(
                               bg: const Color(0xFF020617),
                               primary: const Color(0xFF3B82F6),
@@ -69,8 +71,7 @@ class _ThemePageState extends State<ThemePage> {
                               icon: Icons.nightlight_round,
                               title: "深色模式",
                               subtitle: "深色护眼",
-                              selected:
-                                  themeState.themeMode == ThemeMode.dark,
+                              selected: themeState.themeMode == ThemeMode.dark,
                             ),
                           ),
                           const SizedBox(width: 5),
@@ -85,8 +86,7 @@ class _ThemePageState extends State<ThemePage> {
                               icon: Icons.wb_sunny,
                               title: "浅色模式",
                               subtitle: "明亮清爽",
-                              selected:
-                                  themeState.themeMode == ThemeMode.light,
+                              selected: themeState.themeMode == ThemeMode.light,
                             ),
                           ),
                           const SizedBox(width: 5),
@@ -99,16 +99,15 @@ class _ThemePageState extends State<ThemePage> {
                               ),
                               child: ThemePreviewCard(
                                 bg: const Color(0xFF020617),
-                                primary:
-                                    Theme.of(context).colorScheme.primary,
+                                primary: Theme.of(context).colorScheme.primary,
                                 titleColor: Colors.white,
                                 subtitleColor: Colors.white60,
                                 icon: Icons.settings,
                                 title: "跟随系统",
                                 subtitle: "自动适配",
                                 overlay: const DiagonalOverlay(),
-                                selected: themeState.themeMode ==
-                                    ThemeMode.system,
+                                selected:
+                                    themeState.themeMode == ThemeMode.system,
                               ),
                             ),
                           ),
@@ -158,9 +157,7 @@ class _ThemePageState extends State<ThemePage> {
                                   shape: BoxShape.circle,
                                   border: Border.all(
                                     color: isSelected
-                                        ? Theme.of(context)
-                                            .colorScheme
-                                            .primary
+                                        ? Theme.of(context).colorScheme.primary
                                         : Theme.of(context)
                                             .colorScheme
                                             .outlineVariant

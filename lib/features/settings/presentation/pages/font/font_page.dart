@@ -1,5 +1,5 @@
 import 'package:anime_flow/models/item/font_item.dart';
-import 'package:anime_flow/pages/settings/pages/font/font_provider.dart';
+import 'package:anime_flow/features/settings/presentation/providers/font_provider.dart';
 import 'package:anime_flow/core/logger/logger.dart';
 import 'package:anime_flow/core/utils/systemUtil.dart';
 import 'package:anime_flow/core/utils/utils.dart';
@@ -130,7 +130,8 @@ class _FontSettingsPageState extends ConsumerState<FontSettingsPage> {
                     ),
                   ],
                 ),
-                const Text('如果字体效果没有完全显示请重启应用',
+                const Text(
+                  '如果字体效果没有完全显示请重启应用',
                   style: TextStyle(fontWeight: FontWeight.bold),
                 ),
                 const SizedBox(height: 10),
@@ -717,9 +718,9 @@ class _PreviewFontLoaderState extends ConsumerState<_PreviewFontLoader> {
 
     try {
       final bytes = await _font.loadingFont(
-            widget.font.preview,
-            cancelToken: cancelToken,
-          );
+        widget.font.preview,
+        cancelToken: cancelToken,
+      );
       if (bytes.isEmpty) {
         throw StateError('字体预览数据为空');
       }

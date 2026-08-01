@@ -110,9 +110,9 @@ class _NicknameEditorState extends State<NicknameEditorView> {
                 ),
         ),
         if (_isEditing)
-        IconButton(
-            onPressed: () => setState(() => _isEditing = false),
-            icon: const Icon(Icons.close_rounded)),
+          IconButton(
+              onPressed: () => setState(() => _isEditing = false),
+              icon: const Icon(Icons.close_rounded)),
         IconButton(
           onPressed: _isSubmitting
               ? null

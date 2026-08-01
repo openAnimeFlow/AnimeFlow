@@ -1,4 +1,4 @@
-import 'package:anime_flow/pages/settings/setting_provider.dart';
+import 'package:anime_flow/features/settings/presentation/providers/setting_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 

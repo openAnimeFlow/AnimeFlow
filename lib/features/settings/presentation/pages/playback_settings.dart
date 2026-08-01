@@ -1,5 +1,5 @@
 import 'package:anime_flow/core/constants/storage_key.dart';
-import 'package:anime_flow/pages/settings/setting_provider.dart';
+import 'package:anime_flow/features/settings/presentation/providers/setting_provider.dart';
 import 'package:anime_flow/core/storage/storage.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -30,8 +30,10 @@ class _PlaybackSettingsPageState extends State<PlaybackSettingsPage> {
   void _loadSettings() {
     setState(() {
       _autoPlayNext = setting.get(PlaybackKey.autoPlayNext, defaultValue: true);
-      _episodesProgress = setting.get(PlaybackKey.episodesProgress, defaultValue: true);
-      _fastForwardSpeed = setting.get(PlaybackKey.fastForwardSpeed, defaultValue: 2.0);
+      _episodesProgress =
+          setting.get(PlaybackKey.episodesProgress, defaultValue: true);
+      _fastForwardSpeed =
+          setting.get(PlaybackKey.fastForwardSpeed, defaultValue: 2.0);
       _adBlocker = setting.get(PlaybackKey.adBlocker, defaultValue: false);
       _skipDuration = setting.get(PlaybackKey.skipDuration, defaultValue: 85);
     });

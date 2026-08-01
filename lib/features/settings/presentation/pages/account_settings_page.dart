@@ -4,9 +4,9 @@ import 'package:anime_flow/core/network/clients/flow_client.dart';
 import 'package:anime_flow/models/item/flow/bangumi_bind_item.dart';
 import 'package:anime_flow/models/item/flow/flow_users.dart';
 import 'package:anime_flow/features/auth/presentation/pages/login_page.dart';
-import 'package:anime_flow/pages/settings/pages/account/bgm_collection_sync_section.dart';
-import 'package:anime_flow/pages/settings/pages/bind_email_section.dart';
-import 'package:anime_flow/pages/settings/setting_provider.dart';
+import 'package:anime_flow/features/settings/presentation/widgets/account/bgm_collection_sync_section.dart';
+import 'package:anime_flow/features/settings/presentation/widgets/account/bind_email_section.dart';
+import 'package:anime_flow/features/settings/presentation/providers/setting_provider.dart';
 import 'package:anime_flow/providers/user/user_controller.dart';
 import 'package:anime_flow/providers/user/user_oauth_state.dart';
 import 'package:anime_flow/providers/user/user_state_provider.dart';
@@ -18,8 +18,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_svg/svg.dart';
 
-import 'account_content.dart';
-import 'avatar_dialog.dart';
+import 'package:anime_flow/features/settings/presentation/widgets/account/account_content.dart';
+import 'package:anime_flow/features/settings/presentation/widgets/account/avatar_dialog.dart';
 
 class AccountSettingsPage extends ConsumerStatefulWidget {
   const AccountSettingsPage({super.key});

@@ -39,7 +39,7 @@ class _AddPluginsPageState extends State<AddPluginsPage> {
     _Field(
       title: '搜索链接',
       message:
-      '用{keyword}搜索关键字,示例:https://dm.xifanacg.com/search.html?wd={keyword}',
+          '用{keyword}搜索关键字,示例:https://dm.xifanacg.com/search.html?wd={keyword}',
       isRequired: true,
     ),
     _Field(
@@ -284,23 +284,21 @@ class _AddPluginsPageState extends State<AddPluginsPage> {
                           errorText: hasError ? '此字段不能为空' : null,
                           errorBorder: hasError
                               ? OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(10),
-                            borderSide: BorderSide(
-                              color:
-                              Theme.of(context).colorScheme.error,
-                              width: 2,
-                            ),
-                          )
+                                  borderRadius: BorderRadius.circular(10),
+                                  borderSide: BorderSide(
+                                    color: Theme.of(context).colorScheme.error,
+                                    width: 2,
+                                  ),
+                                )
                               : null,
                           focusedErrorBorder: hasError
                               ? OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(10),
-                            borderSide: BorderSide(
-                              color:
-                              Theme.of(context).colorScheme.error,
-                              width: 2,
-                            ),
-                          )
+                                  borderRadius: BorderRadius.circular(10),
+                                  borderSide: BorderSide(
+                                    color: Theme.of(context).colorScheme.error,
+                                    width: 2,
+                                  ),
+                                )
                               : null,
                           border: OutlineInputBorder(
                             borderRadius: BorderRadius.circular(10),
@@ -315,9 +313,8 @@ class _AddPluginsPageState extends State<AddPluginsPage> {
                           style: TextStyle(
                             fontSize: 12,
                             fontWeight: FontWeight.w600,
-                            color: Theme.of(context)
-                                .colorScheme
-                                .onSurfaceVariant,
+                            color:
+                                Theme.of(context).colorScheme.onSurfaceVariant,
                           ),
                         ),
                       )
@@ -346,21 +343,21 @@ class _AddPluginsPageState extends State<AddPluginsPage> {
         errorText: hasError ? '此字段不能为空' : null,
         errorBorder: hasError
             ? OutlineInputBorder(
-          borderRadius: BorderRadius.circular(10),
-          borderSide: BorderSide(
-            color: Theme.of(context).colorScheme.error,
-            width: 2,
-          ),
-        )
+                borderRadius: BorderRadius.circular(10),
+                borderSide: BorderSide(
+                  color: Theme.of(context).colorScheme.error,
+                  width: 2,
+                ),
+              )
             : null,
         focusedErrorBorder: hasError
             ? OutlineInputBorder(
-          borderRadius: BorderRadius.circular(10),
-          borderSide: BorderSide(
-            color: Theme.of(context).colorScheme.error,
-            width: 2,
-          ),
-        )
+                borderRadius: BorderRadius.circular(10),
+                borderSide: BorderSide(
+                  color: Theme.of(context).colorScheme.error,
+                  width: 2,
+                ),
+              )
             : null,
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(10),
@@ -378,8 +375,8 @@ class _AddPluginsPageState extends State<AddPluginsPage> {
         child: Text(
           '反爬 / 验证码（可选）',
           style: Theme.of(context).textTheme.titleSmall?.copyWith(
-            fontWeight: FontWeight.w700,
-          ),
+                fontWeight: FontWeight.w700,
+              ),
         ),
       ),
       Padding(
@@ -444,7 +441,7 @@ class _AddPluginsPageState extends State<AddPluginsPage> {
                 ),
                 Padding(
                   padding:
-                  const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                      const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
                   child: Text(
                     'WebView 内定位验证码图片元素',
                     style: TextStyle(
@@ -471,7 +468,7 @@ class _AddPluginsPageState extends State<AddPluginsPage> {
                 ),
                 Padding(
                   padding:
-                  const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                      const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
                   child: Text(
                     '供用户输入验证码的 input 元素',
                     style: TextStyle(
@@ -501,7 +498,7 @@ class _AddPluginsPageState extends State<AddPluginsPage> {
               ),
               Padding(
                 padding:
-                const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                    const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
                 child: Text(
                   _captchaType == CaptchaType.imageCaptcha
                       ? '点击后提交验证码的按钮'

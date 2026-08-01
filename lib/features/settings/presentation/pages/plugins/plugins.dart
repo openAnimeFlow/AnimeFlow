@@ -1,5 +1,5 @@
 import 'package:anime_flow/core/crawler/itme/crawler_config_item.dart';
-import 'package:anime_flow/pages/settings/setting_provider.dart';
+import 'package:anime_flow/features/settings/presentation/providers/setting_provider.dart';
 import 'package:anime_flow/routes/routes.dart';
 import 'package:anime_flow/core/utils/crawl_config.dart';
 import 'package:anime_flow/core/storage/storage.dart';

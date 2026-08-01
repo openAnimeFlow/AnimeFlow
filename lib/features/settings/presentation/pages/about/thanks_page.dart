@@ -7,49 +7,49 @@ class ThanksPage extends StatelessWidget {
 
   // 鸣谢项目数据
   List<Map<String, dynamic>> get _thanksItems => [
-    {
-      'icon': const Icon(Icons.web),
-      'title': 'WebView',
-      'description': 'Kazumi项目提供的WebView技术支持',
-      'url': 'https://github.com/Predidit/Kazumi/tree/main/lib/webview',
-    },
-    {
-      'icon': const Icon(Icons.play_circle_outline_rounded),
-      'title': 'media-kit',
-      'description': '跨平台视频播放器，支持高质量视频播放',
-      'url': 'https://github.com/media-kit/media-kit',
-    },
-    {
-      'icon': const Icon(Icons.subtitles),
-      'title': 'canvas_danmaku',
-      'description': '弹幕插件，提供流畅的弹幕绘制',
-      'url': 'https://pub.dev/packages/canvas_danmaku',
-    },
-    {
-      'icon': const Icon(Icons.subtitles_outlined),
-      'title': '弹弹Play',
-      'description': '提供丰富的弹幕数据源',
-      'url': 'https://www.dandanplay.com/',
-    },
-    {
-      'icon': const Icon(Icons.live_tv_rounded),
-      'title': 'Bangumi',
-      'description': '提供番剧信息和用户数据同步服务',
-      'url': 'https://bangumi.tv',
-    },
-    {
-      'icon': const Icon(Icons.hd_outlined),
-      'title': 'Anime4K',
-      'description': '超分辨率技术，提升视频画质',
-      'url': 'https://github.com/bloc97/Anime4K',
-    },
-    {
-      'icon': const Icon(Icons.image_search_outlined),
-      'title': 'trace.moe',
-      'description': '提供的以图识别番功能',
-      'url': 'https://trace.moe/',
-    },
-  ];
+        {
+          'icon': const Icon(Icons.web),
+          'title': 'WebView',
+          'description': 'Kazumi项目提供的WebView技术支持',
+          'url': 'https://github.com/Predidit/Kazumi/tree/main/lib/webview',
+        },
+        {
+          'icon': const Icon(Icons.play_circle_outline_rounded),
+          'title': 'media-kit',
+          'description': '跨平台视频播放器，支持高质量视频播放',
+          'url': 'https://github.com/media-kit/media-kit',
+        },
+        {
+          'icon': const Icon(Icons.subtitles),
+          'title': 'canvas_danmaku',
+          'description': '弹幕插件，提供流畅的弹幕绘制',
+          'url': 'https://pub.dev/packages/canvas_danmaku',
+        },
+        {
+          'icon': const Icon(Icons.subtitles_outlined),
+          'title': '弹弹Play',
+          'description': '提供丰富的弹幕数据源',
+          'url': 'https://www.dandanplay.com/',
+        },
+        {
+          'icon': const Icon(Icons.live_tv_rounded),
+          'title': 'Bangumi',
+          'description': '提供番剧信息和用户数据同步服务',
+          'url': 'https://bangumi.tv',
+        },
+        {
+          'icon': const Icon(Icons.hd_outlined),
+          'title': 'Anime4K',
+          'description': '超分辨率技术，提升视频画质',
+          'url': 'https://github.com/bloc97/Anime4K',
+        },
+        {
+          'icon': const Icon(Icons.image_search_outlined),
+          'title': 'trace.moe',
+          'description': '提供的以图识别番功能',
+          'url': 'https://trace.moe/',
+        },
+      ];
 
   @override
   Widget build(BuildContext context) {
@@ -85,9 +85,9 @@ class ThanksPage extends StatelessWidget {
                                 .textTheme
                                 .headlineSmall
                                 ?.copyWith(
-                              fontWeight: FontWeight.bold,
-                              letterSpacing: 0.5,
-                            ),
+                                  fontWeight: FontWeight.bold,
+                                  letterSpacing: 0.5,
+                                ),
                           ),
                           const Icon(Icons.code_rounded)
                         ],
@@ -98,12 +98,12 @@ class ThanksPage extends StatelessWidget {
                         child: Text(
                           '感谢以下优秀的开源项目和技术支持，让 AnimeFlow 变得更好',
                           style:
-                          Theme.of(context).textTheme.bodyMedium?.copyWith(
-                            color: Theme.of(context)
-                                .colorScheme
-                                .onSurfaceVariant,
-                            height: 1.5,
-                          ),
+                              Theme.of(context).textTheme.bodyMedium?.copyWith(
+                                    color: Theme.of(context)
+                                        .colorScheme
+                                        .onSurfaceVariant,
+                                    height: 1.5,
+                                  ),
                           textAlign: TextAlign.center,
                         ),
                       ),
@@ -126,7 +126,7 @@ class ThanksPage extends StatelessWidget {
                     mainAxisExtent: 110,
                   ),
                   delegate: SliverChildBuilderDelegate(
-                        (context, index) {
+                    (context, index) {
                       final item = _thanksItems[index];
                       return _buildThanksCard(
                         context: context,
@@ -170,18 +170,18 @@ class ThanksPage extends StatelessWidget {
       child: InkWell(
         onTap: hasUrl
             ? () async {
-          final uri = Uri.parse(urlString!);
-          final messenger = ScaffoldMessenger.of(context);
-          if (await canLaunchUrl(uri)) {
-            await launchUrl(uri, mode: LaunchMode.externalApplication);
-          } else {
-            messenger.showSnackBar(
-              const SnackBar(
-                content: Text('无法打开网页，你的设备可能不支持此功能'),
-              ),
-            );
-          }
-        }
+                final uri = Uri.parse(urlString!);
+                final messenger = ScaffoldMessenger.of(context);
+                if (await canLaunchUrl(uri)) {
+                  await launchUrl(uri, mode: LaunchMode.externalApplication);
+                } else {
+                  messenger.showSnackBar(
+                    const SnackBar(
+                      content: Text('无法打开网页，你的设备可能不支持此功能'),
+                    ),
+                  );
+                }
+              }
             : null,
         borderRadius: BorderRadius.circular(16),
         child: Container(
@@ -190,7 +190,7 @@ class ThanksPage extends StatelessWidget {
             borderRadius: BorderRadius.circular(16),
             border: Border.all(
               color:
-              Theme.of(context).colorScheme.outline.withValues(alpha: 0.1),
+                  Theme.of(context).colorScheme.outline.withValues(alpha: 0.1),
               width: 1,
             ),
           ),
@@ -239,9 +239,9 @@ class ThanksPage extends StatelessWidget {
                                 .textTheme
                                 .titleMedium
                                 ?.copyWith(
-                              fontWeight: FontWeight.w600,
-                              letterSpacing: 0.2,
-                            ),
+                                  fontWeight: FontWeight.w600,
+                                  letterSpacing: 0.2,
+                                ),
                           ),
                         ),
                         if (hasUrl)
@@ -256,11 +256,11 @@ class ThanksPage extends StatelessWidget {
                       child: Text(
                         description,
                         style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                          color: Theme.of(context)
-                              .colorScheme
-                              .onSurfaceVariant,
-                          height: 1.4,
-                        ),
+                              color: Theme.of(context)
+                                  .colorScheme
+                                  .onSurfaceVariant,
+                              height: 1.4,
+                            ),
                         maxLines: 2,
                         overflow: TextOverflow.ellipsis,
                       ),

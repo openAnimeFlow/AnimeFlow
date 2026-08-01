@@ -1,7 +1,7 @@
 import 'package:anime_flow/core/constants/assets_path_constants.dart';
 import 'package:anime_flow/core/constants/storage_key.dart';
 import 'package:anime_flow/core/apply_update/app_info_provider.dart';
-import 'package:anime_flow/pages/settings/setting_provider.dart';
+import 'package:anime_flow/features/settings/presentation/providers/setting_provider.dart';
 import 'package:anime_flow/core/storage/storage.dart';
 import 'package:anime_flow/routes/routes.dart';
 import 'package:anime_flow/shared/widgets/notification_toast.dart';

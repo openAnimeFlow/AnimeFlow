@@ -264,5 +264,21 @@
   "previewLoadFailed": "Failed to load preview",
   "fontPreviewHeadline": "Welcome to AnimeFlow",
   "orphanFontAvailable": "Removed remotely, but the local font can still be used",
-  "orphanFontMissing": "The local font file is missing; you can clean up this record here"
+  "orphanFontMissing": "The local font file is missing; you can clean up this record here",
+  "downloadConfig": "Download configuration",
+  "downloadSources": "Download data sources",
+  "downloadSourcesSubtitle": "Data sources are downloaded from GitHub. Check your network and pull to refresh.",
+  "useMirror": "Use mirror",
+  "useMirrorSubtitle": "Enable this when GitHub cannot be accessed directly to fetch the plugin list through a mirror.",
+  "noDataRefresh": "No data found, please refresh",
+  "downloaded": "Downloaded",
+  "updating": "Updating…",
+  "update": "Update",
+  "downloadSuccess": "Download successful",
+  "pluginDownloaded": "Plugin \"{name}\" downloaded",
+  "downloadFailed": "Download failed",
+  "pluginDownloadFailed": "Error downloading plugin \"{name}\": {error}",
+  "updateSuccess": "Update successful",
+  "pluginUpdated": "Plugin \"{name}\" updated to version {version}",
+  "pluginUpdateFailed": "Error updating plugin \"{name}\": {error}"
 }

@@ -13,6 +13,7 @@ import 'package:anime_flow/shared/widgets/animation_network_image.dart';
 import 'package:anime_flow/shared/widgets/notification_toast.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:anime_flow/app/localization/app_localizations.dart';
 
 class DownloadPluginsPage extends StatefulWidget {
   const DownloadPluginsPage({super.key});
@@ -84,6 +85,7 @@ class _DownloadPluginsPageState extends State<DownloadPluginsPage> {
   }
 
   Future<void> _downloadPlugin(Map<dynamic, dynamic> plugin) async {
+    final l10n = AppLocalizations.of(context);
     final pluginName = plugin['name'] as String;
     if (_busyPluginNames.contains(pluginName)) return;
 
@@ -105,9 +107,13 @@ class _DownloadPluginsPageState extends State<DownloadPluginsPage> {
       setState(() {
         hasChanged = true;
       });
-      NotificationToast.show('下载成功', '插件 "$pluginName" 已下载');
+      NotificationToast.show(
+          l10n.downloadSuccess, l10n.pluginDownloaded(pluginName));
     } catch (e) {
-      NotificationToast.show('下载失败', '下载插件 "$pluginName" 时发生错误：$e');
+      NotificationToast.show(
+        l10n.downloadFailed,
+        l10n.pluginDownloadFailed(pluginName, e.toString()),
+      );
     } finally {
       if (mounted) {
         setState(() {
@@ -122,6 +128,7 @@ class _DownloadPluginsPageState extends State<DownloadPluginsPage> {
     String pluginName,
     String pluginVersion,
   ) async {
+    final l10n = AppLocalizations.of(context);
     if (_busyPluginNames.contains(pluginName)) return;
 
     setState(() {
@@ -142,13 +149,13 @@ class _DownloadPluginsPageState extends State<DownloadPluginsPage> {
         hasChanged = true;
       });
       NotificationToast.show(
-        '更新成功',
-        '插件 "$pluginName" 已更新到版本 $pluginVersion',
+        l10n.updateSuccess,
+        l10n.pluginUpdated(pluginName, pluginVersion),
       );
     } catch (e) {
       NotificationToast.show(
-        '更新失败',
-        '更新插件 "$pluginName" 时发生错误：$e',
+        l10n.updateFailed,
+        l10n.pluginUpdateFailed(pluginName, e.toString()),
       );
     } finally {
       if (mounted) {
@@ -162,6 +169,7 @@ class _DownloadPluginsPageState extends State<DownloadPluginsPage> {
   @override
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
+    final l10n = AppLocalizations.of(context);
     return PopScope(
       canPop: !hasChanged, // 如果有变化，不允许默认返回
       onPopInvokedWithResult: (didPop, result) {
@@ -172,7 +180,7 @@ class _DownloadPluginsPageState extends State<DownloadPluginsPage> {
       },
       child: Scaffold(
         appBar: AppBar(
-          title: const Text('下载配置'),
+          title: Text(l10n.downloadConfig),
         ),
         body: RefreshIndicator(
           onRefresh: () async {
@@ -180,11 +188,11 @@ class _DownloadPluginsPageState extends State<DownloadPluginsPage> {
           },
           child: ListView(padding: EdgeInsets.zero, children: [
             ListTile(
-              title: const Text(
-                '下载数据源',
-                style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+              title: Text(
+                l10n.downloadSources,
+                style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
               ),
-              subtitle: const Text('当前会从Github仓库中下载数据源，注意网络环境,下拉刷新数据'),
+              subtitle: Text(l10n.downloadSourcesSubtitle),
               trailing: SystemUtil.isDesktop
                   ? IconButton(
                       onPressed: () {
@@ -195,8 +203,8 @@ class _DownloadPluginsPageState extends State<DownloadPluginsPage> {
                   : null,
             ),
             SwitchListTile(
-              title: const Text('使用镜像'),
-              subtitle: const Text('无法直连 GitHub 时开启，通过镜像拉取插件列表'),
+              title: Text(l10n.useMirror),
+              subtitle: Text(l10n.useMirrorSubtitle),
               value: isMirror,
               onChanged: (v) {
                 setState(() {
@@ -207,10 +215,10 @@ class _DownloadPluginsPageState extends State<DownloadPluginsPage> {
               },
             ),
             if (isLoading)
-              const Center(
+              Center(
                 child: ListTile(
                   leading: CircularProgressIndicator(),
-                  title: Text('加载中...'),
+                  title: Text(l10n.loading),
                 ),
               ),
             if (errorMessage != null && errorMessage!.isNotEmpty)
@@ -222,8 +230,8 @@ class _DownloadPluginsPageState extends State<DownloadPluginsPage> {
                 ),
               )
             else if (pluginRepo == null && !isLoading)
-              const ListTile(
-                title: Text('没有找到数据请刷新'),
+              ListTile(
+                title: Text(l10n.noDataRefresh),
               )
             else if (pluginRepo != null && !isLoading)
               ...pluginRepo!.map((plugin) {
@@ -260,8 +268,12 @@ class _DownloadPluginsPageState extends State<DownloadPluginsPage> {
                                                 fontSize: 16,
                                                 fontWeight: FontWeight.bold),
                                           ),
-                                          Text(
-                                              '版本:${plugin['version']} - ${FormatTimeUtil.formatUpdateTime(plugin['updateTime'])}'),
+                                          Text(l10n.pluginVersionDate(
+                                            plugin['version'] as String,
+                                            FormatTimeUtil.formatUpdateTime(
+                                              plugin['updateTime'],
+                                            ),
+                                          )),
                                         ],
                                       ),
                                     ),
@@ -292,7 +304,7 @@ class _DownloadPluginsPageState extends State<DownloadPluginsPage> {
                             if (isNew == 0 || isNew == -1) {
                               return TextButton(
                                 onPressed: () {},
-                                child: const Text('已下载'),
+                                child: Text(l10n.downloaded),
                               );
                             } else {
                               return TextButton(
@@ -304,7 +316,7 @@ class _DownloadPluginsPageState extends State<DownloadPluginsPage> {
                                           pluginVersion,
                                         ),
                                 child: isPluginBusy
-                                    ? const Row(
+                                    ? Row(
                                         mainAxisSize: MainAxisSize.min,
                                         children: [
                                           SizedBox(
@@ -315,10 +327,10 @@ class _DownloadPluginsPageState extends State<DownloadPluginsPage> {
                                             ),
                                           ),
                                           SizedBox(width: 8),
-                                          Text('更新中…'),
+                                          Text(l10n.updating),
                                         ],
                                       )
-                                    : const Text('更新'),
+                                    : Text(l10n.update),
                               );
                             }
                           })

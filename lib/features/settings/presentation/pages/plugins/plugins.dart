@@ -8,6 +8,7 @@ import 'package:anime_flow/shared/widgets/notification_toast.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:hive_ce_flutter/adapters.dart';
+import 'package:anime_flow/app/localization/app_localizations.dart';
 
 class PluginsPage extends StatefulWidget {
   const PluginsPage({super.key});
@@ -42,22 +43,23 @@ class _PluginsPageState extends State<PluginsPage> {
   }
 
   Future<void> deleteDataSource(String name) async {
+    final l10n = AppLocalizations.of(context);
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (dialogContext) => AlertDialog(
-        title: const Text('确认删除'),
-        content: Text('确定要删除数据源 "$name" 吗？此操作不可恢复。'),
+        title: Text(l10n.confirmDelete),
+        content: Text(l10n.deleteSourceConfirmation(name)),
         actions: [
           TextButton(
             onPressed: () => Navigator.of(dialogContext).pop(false),
-            child: const Text('取消'),
+            child: Text(l10n.cancel),
           ),
           TextButton(
             onPressed: () => Navigator.of(dialogContext).pop(true),
             style: TextButton.styleFrom(
               foregroundColor: Theme.of(dialogContext).colorScheme.error,
             ),
-            child: const Text('删除'),
+            child: Text(l10n.deleteFont),
           ),
         ],
       ),
@@ -67,14 +69,18 @@ class _PluginsPageState extends State<PluginsPage> {
     try {
       await settingConfig.delete(name);
       if (!mounted) return;
-      NotificationToast.show('删除成功', '数据源 "$name" 已被删除');
+      NotificationToast.show(l10n.deleteSuccess, l10n.sourceDeleted(name));
     } catch (e) {
-      NotificationToast.show('删除失败', '删除数据源 "$name" 时发生错误：$e');
+      NotificationToast.show(
+        l10n.deleteFailed,
+        l10n.sourceDeleteFailed(name, e.toString()),
+      );
     }
   }
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     return Scaffold(
       appBar: PreferredSize(
         preferredSize: const Size.fromHeight(kToolbarHeight),
@@ -82,7 +88,7 @@ class _PluginsPageState extends State<PluginsPage> {
           builder: (context, ref, _) {
             final isWideScreen = ref.watch(settingsLayoutProvider);
             return AppBar(
-              title: const Text('数据源管理'),
+              title: Text(l10n.sourceManagement),
               automaticallyImplyLeading: !isWideScreen,
               actions: [
                 IconButton(

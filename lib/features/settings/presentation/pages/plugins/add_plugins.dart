@@ -4,6 +4,7 @@ import 'package:anime_flow/core/storage/storage.dart';
 import 'package:anime_flow/shared/widgets/notification_toast.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:anime_flow/app/localization/app_localizations.dart';
 
 class AddPluginsPage extends StatefulWidget {
   final String? editPluginKey;
@@ -73,6 +74,45 @@ class _AddPluginsPageState extends State<AddPluginsPage> {
       isRequired: true,
     )
   ];
+
+  List<_Field> _localizedTextFields(AppLocalizations l10n) => [
+        _Field(
+            title: l10n.versionNumber,
+            message: l10n.versionExample,
+            isRequired: true),
+        _Field(
+            title: l10n.sourceName,
+            message: l10n.sourceNameHint,
+            isRequired: true),
+        _Field(title: l10n.iconLink, message: l10n.iconLink, isRequired: true),
+        _Field(
+            title: l10n.websiteLink,
+            message: l10n.websiteLinkHint,
+            isRequired: true),
+        _Field(
+            title: l10n.searchLink,
+            message: l10n.searchLinkHint('{keyword}'),
+            isRequired: true),
+        _Field(
+            title: l10n.searchContentList,
+            message: l10n.searchContentList,
+            isRequired: true),
+        _Field(
+            title: l10n.searchListName,
+            message: l10n.searchListName,
+            isRequired: true),
+        _Field(
+            title: l10n.searchListLink,
+            message: l10n.searchListLink,
+            isRequired: true),
+        _Field(title: l10n.lineName, message: l10n.lineName, isRequired: true),
+        _Field(
+            title: l10n.episodeList,
+            message: l10n.episodeList,
+            isRequired: true),
+        _Field(
+            title: l10n.episode, message: l10n.episodeHint, isRequired: true),
+      ];
 
   late final List<TextEditingController> _controllers;
   final Set<int> _errorFields = {};
@@ -228,7 +268,9 @@ class _AddPluginsPageState extends State<AddPluginsPage> {
       return true;
     } catch (e) {
       if (mounted) {
-        NotificationToast.show('保存失败', '数据保存失败:$e');
+        final l10n = AppLocalizations.of(context);
+        NotificationToast.show(
+            l10n.saveFailed, l10n.dataSaveFailed(e.toString()));
       }
       return false;
     }
@@ -247,9 +289,11 @@ class _AddPluginsPageState extends State<AddPluginsPage> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
+    final localizedTextFields = _localizedTextFields(l10n);
     return Scaffold(
       appBar: AppBar(
-        title: Text(_originalKey != null ? '编辑数据源' : '添加数据源'),
+        title: Text(_originalKey != null ? l10n.editSource : l10n.addSource),
       ),
       floatingActionButton: FloatingActionButton(
         heroTag: 'add_source_save',
@@ -267,8 +311,8 @@ class _AddPluginsPageState extends State<AddPluginsPage> {
           child: ListView(
             padding: const EdgeInsets.symmetric(vertical: 10),
             children: [
-              ...List.generate(_textFields.length, (index) {
-                final textField = _textFields[index];
+              ...List.generate(localizedTextFields.length, (index) {
+                final textField = localizedTextFields[index];
                 final controller = _controllers[index];
                 final hasError = _errorFields.contains(index);
                 return Container(
@@ -281,7 +325,7 @@ class _AddPluginsPageState extends State<AddPluginsPage> {
                         controller: controller,
                         decoration: InputDecoration(
                           labelText: textField.title,
-                          errorText: hasError ? '此字段不能为空' : null,
+                          errorText: hasError ? l10n.fieldRequired : null,
                           errorBorder: hasError
                               ? OutlineInputBorder(
                                   borderRadius: BorderRadius.circular(10),
@@ -336,11 +380,12 @@ class _AddPluginsPageState extends State<AddPluginsPage> {
     required String label,
     required bool hasError,
   }) {
+    final l10n = AppLocalizations.of(context);
     return TextField(
       controller: controller,
       decoration: InputDecoration(
         labelText: label,
-        errorText: hasError ? '此字段不能为空' : null,
+        errorText: hasError ? l10n.fieldRequired : null,
         errorBorder: hasError
             ? OutlineInputBorder(
                 borderRadius: BorderRadius.circular(10),
@@ -367,13 +412,14 @@ class _AddPluginsPageState extends State<AddPluginsPage> {
   }
 
   List<Widget> _buildAntiCrawlerSection(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     final showImageCaptchaFields =
         _antiEnabled && _captchaType == CaptchaType.imageCaptcha;
     return [
       Padding(
         padding: const EdgeInsets.fromLTRB(16, 16, 16, 4),
         child: Text(
-          '反爬 / 验证码（可选）',
+          l10n.antiCrawlerOptional,
           style: Theme.of(context).textTheme.titleSmall?.copyWith(
                 fontWeight: FontWeight.w700,
               ),
@@ -382,8 +428,8 @@ class _AddPluginsPageState extends State<AddPluginsPage> {
       Padding(
         padding: const EdgeInsets.symmetric(horizontal: 8),
         child: SwitchListTile(
-          title: const Text('启用 WebView 验证码处理'),
-          subtitle: const Text('搜索触发验证码时，用 WebView 完成验证并保存 Cookie'),
+          title: Text(l10n.enableWebViewCaptcha),
+          subtitle: Text(l10n.webViewCaptchaSubtitle),
           value: _antiEnabled,
           onChanged: (v) {
             setState(() {
@@ -397,7 +443,7 @@ class _AddPluginsPageState extends State<AddPluginsPage> {
           padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
           child: InputDecorator(
             decoration: InputDecoration(
-              labelText: '验证类型',
+              labelText: l10n.captchaType,
               border: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(10),
               ),
@@ -406,14 +452,14 @@ class _AddPluginsPageState extends State<AddPluginsPage> {
               child: DropdownButton<int>(
                 isExpanded: true,
                 value: _captchaType,
-                items: const [
+                items: [
                   DropdownMenuItem(
                     value: CaptchaType.imageCaptcha,
-                    child: Text('图片验证码（手动输入）'),
+                    child: Text(l10n.imageCaptchaManual),
                   ),
                   DropdownMenuItem(
                     value: CaptchaType.autoClickButton,
-                    child: Text('自动点击验证按钮'),
+                    child: Text(l10n.autoClickCaptcha),
                   ),
                 ],
                 onChanged: (v) {
@@ -436,14 +482,14 @@ class _AddPluginsPageState extends State<AddPluginsPage> {
                 _antiTextField(
                   context: context,
                   controller: _captchaImageController,
-                  label: '验证码图片 XPath',
+                  label: l10n.captchaImageXPath,
                   hasError: _antiFieldErrors.contains('captchaImage'),
                 ),
                 Padding(
                   padding:
                       const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
                   child: Text(
-                    'WebView 内定位验证码图片元素',
+                    l10n.captchaImageXPathHint,
                     style: TextStyle(
                       fontSize: 12,
                       fontWeight: FontWeight.w600,
@@ -463,14 +509,14 @@ class _AddPluginsPageState extends State<AddPluginsPage> {
                 _antiTextField(
                   context: context,
                   controller: _captchaInputController,
-                  label: '验证码输入框 XPath',
+                  label: l10n.captchaInputXPath,
                   hasError: _antiFieldErrors.contains('captchaInput'),
                 ),
                 Padding(
                   padding:
                       const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
                   child: Text(
-                    '供用户输入验证码的 input 元素',
+                    l10n.captchaInputXPathHint,
                     style: TextStyle(
                       fontSize: 12,
                       fontWeight: FontWeight.w600,
@@ -492,8 +538,8 @@ class _AddPluginsPageState extends State<AddPluginsPage> {
                 context: context,
                 controller: _captchaButtonController,
                 label: _captchaType == CaptchaType.imageCaptcha
-                    ? '提交验证码按钮 XPath'
-                    : '验证按钮 XPath',
+                    ? l10n.submitCaptchaXPath
+                    : l10n.verifyButtonXPath,
                 hasError: _antiFieldErrors.contains('captchaButton'),
               ),
               Padding(
@@ -501,8 +547,8 @@ class _AddPluginsPageState extends State<AddPluginsPage> {
                     const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
                 child: Text(
                   _captchaType == CaptchaType.imageCaptcha
-                      ? '点击后提交验证码的按钮'
-                      : '检测到后自动点击的验证按钮（如「我不是机器人」）',
+                      ? l10n.submitCaptchaHint
+                      : l10n.autoClickCaptchaHint,
                   style: TextStyle(
                     fontSize: 12,
                     fontWeight: FontWeight.w600,

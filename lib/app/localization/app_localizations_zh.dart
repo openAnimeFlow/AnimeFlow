@@ -840,6 +840,200 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get orphanFontMissing => '本地字体文件已丢失，可在此处清理记录';
+
+  @override
+  String get confirmDelete => '确认删除';
+
+  @override
+  String deleteSourceConfirmation(Object name) {
+    return '确定要删除数据源 \"$name\" 吗？此操作不可恢复。';
+  }
+
+  @override
+  String get deleteSuccess => '删除成功';
+
+  @override
+  String get deleteFailed => '删除失败';
+
+  @override
+  String sourceDeleted(Object name) {
+    return '数据源 \"$name\" 已被删除';
+  }
+
+  @override
+  String sourceDeleteFailed(Object error, Object name) {
+    return '删除数据源 \"$name\" 时发生错误：$error';
+  }
+
+  @override
+  String get downloadConfig => '下载配置';
+
+  @override
+  String get addSource => '添加数据源';
+
+  @override
+  String get editSource => '编辑数据源';
+
+  @override
+  String get saveFailed => '保存失败';
+
+  @override
+  String dataSaveFailed(Object error) {
+    return '数据保存失败：$error';
+  }
+
+  @override
+  String get fieldRequired => '此字段不能为空';
+
+  @override
+  String get versionNumber => '版本号';
+
+  @override
+  String get versionExample => '如（1.0.0）';
+
+  @override
+  String get sourceName => '名称';
+
+  @override
+  String get sourceNameHint => '网站名称，唯一值避免与其他配置名称重复，否则将被覆盖';
+
+  @override
+  String get iconLink => '图标链接';
+
+  @override
+  String get websiteLink => '网站链接';
+
+  @override
+  String get websiteLinkHint => '网站主链接，避免以 / 结尾';
+
+  @override
+  String get searchLink => '搜索链接';
+
+  @override
+  String searchLinkHint(Object keyword) {
+    return '用$keyword搜索关键字，示例：https://dm.xifanacg.com/search.html?wd=$keyword';
+  }
+
+  @override
+  String get searchContentList => '搜索内容列表';
+
+  @override
+  String get searchListName => '搜索列表名称';
+
+  @override
+  String get searchListLink => '搜索列表链接';
+
+  @override
+  String get lineName => '线路名称';
+
+  @override
+  String get episodeList => '剧集列表';
+
+  @override
+  String get episode => '剧集';
+
+  @override
+  String get episodeHint => '剧集链接，从剧集列表中获取的数据的 XPath';
+
+  @override
+  String get antiCrawlerOptional => '反爬 / 验证码（可选）';
+
+  @override
+  String get enableWebViewCaptcha => '启用 WebView 验证码处理';
+
+  @override
+  String get webViewCaptchaSubtitle => '搜索触发验证码时，用 WebView 完成验证并保存 Cookie';
+
+  @override
+  String get captchaType => '验证类型';
+
+  @override
+  String get imageCaptchaManual => '图片验证码（手动输入）';
+
+  @override
+  String get autoClickCaptcha => '自动点击验证按钮';
+
+  @override
+  String get captchaImageXPath => '验证码图片 XPath';
+
+  @override
+  String get captchaImageXPathHint => 'WebView 内定位验证码图片元素';
+
+  @override
+  String get captchaInputXPath => '验证码输入框 XPath';
+
+  @override
+  String get captchaInputXPathHint => '供用户输入验证码的 input 元素';
+
+  @override
+  String get submitCaptchaXPath => '提交验证码按钮 XPath';
+
+  @override
+  String get verifyButtonXPath => '验证按钮 XPath';
+
+  @override
+  String get submitCaptchaHint => '点击后提交验证码的按钮';
+
+  @override
+  String get autoClickCaptchaHint => '检测到后自动点击的验证按钮（如「我不是机器人」）';
+
+  @override
+  String get downloadSuccess => '下载成功';
+
+  @override
+  String get downloadFailed => '下载失败';
+
+  @override
+  String pluginDownloaded(Object name) {
+    return '插件 \"$name\" 已下载';
+  }
+
+  @override
+  String pluginDownloadFailed(Object error, Object name) {
+    return '下载插件 \"$name\" 时发生错误：$error';
+  }
+
+  @override
+  String get updateSuccess => '更新成功';
+
+  @override
+  String pluginUpdated(Object name, Object version) {
+    return '插件 \"$name\" 已更新到版本 $version';
+  }
+
+  @override
+  String pluginUpdateFailed(Object error, Object name) {
+    return '更新插件 \"$name\" 时发生错误：$error';
+  }
+
+  @override
+  String get downloadSources => '下载数据源';
+
+  @override
+  String get downloadSourcesSubtitle => '当前会从 GitHub 仓库中下载数据源，注意网络环境，下拉刷新数据';
+
+  @override
+  String get useMirror => '使用镜像';
+
+  @override
+  String get useMirrorSubtitle => '无法直连 GitHub 时开启，通过镜像拉取插件列表';
+
+  @override
+  String get noDataRefresh => '没有找到数据，请刷新';
+
+  @override
+  String get downloaded => '已下载';
+
+  @override
+  String get updating => '更新中…';
+
+  @override
+  String get update => '更新';
+
+  @override
+  String pluginVersionDate(Object date, Object version) {
+    return '版本：$version - $date';
+  }
 }
 
 /// The translations for Chinese, using the Han script (`zh_Hans`).
@@ -1678,6 +1872,200 @@ class AppLocalizationsZhHans extends AppLocalizationsZh {
 
   @override
   String get orphanFontMissing => '本地字体文件已丢失，可在此处清理记录';
+
+  @override
+  String get confirmDelete => '确认删除';
+
+  @override
+  String deleteSourceConfirmation(Object name) {
+    return '确定要删除数据源 \"$name\" 吗？此操作不可恢复。';
+  }
+
+  @override
+  String get deleteSuccess => '删除成功';
+
+  @override
+  String get deleteFailed => '删除失败';
+
+  @override
+  String sourceDeleted(Object name) {
+    return '数据源 \"$name\" 已被删除';
+  }
+
+  @override
+  String sourceDeleteFailed(Object error, Object name) {
+    return '删除数据源 \"$name\" 时发生错误：$error';
+  }
+
+  @override
+  String get downloadConfig => '下载配置';
+
+  @override
+  String get addSource => '添加数据源';
+
+  @override
+  String get editSource => '编辑数据源';
+
+  @override
+  String get saveFailed => '保存失败';
+
+  @override
+  String dataSaveFailed(Object error) {
+    return '数据保存失败：$error';
+  }
+
+  @override
+  String get fieldRequired => '此字段不能为空';
+
+  @override
+  String get versionNumber => '版本号';
+
+  @override
+  String get versionExample => '如（1.0.0）';
+
+  @override
+  String get sourceName => '名称';
+
+  @override
+  String get sourceNameHint => '网站名称，唯一值避免与其他配置名称重复，否则将被覆盖';
+
+  @override
+  String get iconLink => '图标链接';
+
+  @override
+  String get websiteLink => '网站链接';
+
+  @override
+  String get websiteLinkHint => '网站主链接，避免以 / 结尾';
+
+  @override
+  String get searchLink => '搜索链接';
+
+  @override
+  String searchLinkHint(Object keyword) {
+    return '用$keyword搜索关键字，示例：https://dm.xifanacg.com/search.html?wd=$keyword';
+  }
+
+  @override
+  String get searchContentList => '搜索内容列表';
+
+  @override
+  String get searchListName => '搜索列表名称';
+
+  @override
+  String get searchListLink => '搜索列表链接';
+
+  @override
+  String get lineName => '线路名称';
+
+  @override
+  String get episodeList => '剧集列表';
+
+  @override
+  String get episode => '剧集';
+
+  @override
+  String get episodeHint => '剧集链接，从剧集列表中获取的数据的 XPath';
+
+  @override
+  String get antiCrawlerOptional => '反爬 / 验证码（可选）';
+
+  @override
+  String get enableWebViewCaptcha => '启用 WebView 验证码处理';
+
+  @override
+  String get webViewCaptchaSubtitle => '搜索触发验证码时，用 WebView 完成验证并保存 Cookie';
+
+  @override
+  String get captchaType => '验证类型';
+
+  @override
+  String get imageCaptchaManual => '图片验证码（手动输入）';
+
+  @override
+  String get autoClickCaptcha => '自动点击验证按钮';
+
+  @override
+  String get captchaImageXPath => '验证码图片 XPath';
+
+  @override
+  String get captchaImageXPathHint => 'WebView 内定位验证码图片元素';
+
+  @override
+  String get captchaInputXPath => '验证码输入框 XPath';
+
+  @override
+  String get captchaInputXPathHint => '供用户输入验证码的 input 元素';
+
+  @override
+  String get submitCaptchaXPath => '提交验证码按钮 XPath';
+
+  @override
+  String get verifyButtonXPath => '验证按钮 XPath';
+
+  @override
+  String get submitCaptchaHint => '点击后提交验证码的按钮';
+
+  @override
+  String get autoClickCaptchaHint => '检测到后自动点击的验证按钮（如「我不是机器人」）';
+
+  @override
+  String get downloadSuccess => '下载成功';
+
+  @override
+  String get downloadFailed => '下载失败';
+
+  @override
+  String pluginDownloaded(Object name) {
+    return '插件 \"$name\" 已下载';
+  }
+
+  @override
+  String pluginDownloadFailed(Object error, Object name) {
+    return '下载插件 \"$name\" 时发生错误：$error';
+  }
+
+  @override
+  String get updateSuccess => '更新成功';
+
+  @override
+  String pluginUpdated(Object name, Object version) {
+    return '插件 \"$name\" 已更新到版本 $version';
+  }
+
+  @override
+  String pluginUpdateFailed(Object error, Object name) {
+    return '更新插件 \"$name\" 时发生错误：$error';
+  }
+
+  @override
+  String get downloadSources => '下载数据源';
+
+  @override
+  String get downloadSourcesSubtitle => '当前会从 GitHub 仓库中下载数据源，注意网络环境，下拉刷新数据';
+
+  @override
+  String get useMirror => '使用镜像';
+
+  @override
+  String get useMirrorSubtitle => '无法直连 GitHub 时开启，通过镜像拉取插件列表';
+
+  @override
+  String get noDataRefresh => '没有找到数据，请刷新';
+
+  @override
+  String get downloaded => '已下载';
+
+  @override
+  String get updating => '更新中…';
+
+  @override
+  String get update => '更新';
+
+  @override
+  String pluginVersionDate(Object date, Object version) {
+    return '版本：$version - $date';
+  }
 }
 
 /// The translations for Chinese, as used in Hong Kong, using the Han script (`zh_Hant_HK`).

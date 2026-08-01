@@ -1662,6 +1662,354 @@ abstract class AppLocalizations {
   /// In zh_Hans, this message translates to:
   /// **'本地字体文件已丢失，可在此处清理记录'**
   String get orphanFontMissing;
+
+  /// No description provided for @confirmDelete.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'确认删除'**
+  String get confirmDelete;
+
+  /// No description provided for @deleteSourceConfirmation.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'确定要删除数据源 \"{name}\" 吗？此操作不可恢复。'**
+  String deleteSourceConfirmation(Object name);
+
+  /// No description provided for @deleteSuccess.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'删除成功'**
+  String get deleteSuccess;
+
+  /// No description provided for @deleteFailed.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'删除失败'**
+  String get deleteFailed;
+
+  /// No description provided for @sourceDeleted.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'数据源 \"{name}\" 已被删除'**
+  String sourceDeleted(Object name);
+
+  /// No description provided for @sourceDeleteFailed.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'删除数据源 \"{name}\" 时发生错误：{error}'**
+  String sourceDeleteFailed(Object error, Object name);
+
+  /// No description provided for @downloadConfig.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'下载配置'**
+  String get downloadConfig;
+
+  /// No description provided for @addSource.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'添加数据源'**
+  String get addSource;
+
+  /// No description provided for @editSource.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'编辑数据源'**
+  String get editSource;
+
+  /// No description provided for @saveFailed.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'保存失败'**
+  String get saveFailed;
+
+  /// No description provided for @dataSaveFailed.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'数据保存失败：{error}'**
+  String dataSaveFailed(Object error);
+
+  /// No description provided for @fieldRequired.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'此字段不能为空'**
+  String get fieldRequired;
+
+  /// No description provided for @versionNumber.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'版本号'**
+  String get versionNumber;
+
+  /// No description provided for @versionExample.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'如（1.0.0）'**
+  String get versionExample;
+
+  /// No description provided for @sourceName.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'名称'**
+  String get sourceName;
+
+  /// No description provided for @sourceNameHint.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'网站名称，唯一值避免与其他配置名称重复，否则将被覆盖'**
+  String get sourceNameHint;
+
+  /// No description provided for @iconLink.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'图标链接'**
+  String get iconLink;
+
+  /// No description provided for @websiteLink.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'网站链接'**
+  String get websiteLink;
+
+  /// No description provided for @websiteLinkHint.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'网站主链接，避免以 / 结尾'**
+  String get websiteLinkHint;
+
+  /// No description provided for @searchLink.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'搜索链接'**
+  String get searchLink;
+
+  /// No description provided for @searchLinkHint.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'用{keyword}搜索关键字，示例：https://dm.xifanacg.com/search.html?wd={keyword}'**
+  String searchLinkHint(Object keyword);
+
+  /// No description provided for @searchContentList.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'搜索内容列表'**
+  String get searchContentList;
+
+  /// No description provided for @searchListName.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'搜索列表名称'**
+  String get searchListName;
+
+  /// No description provided for @searchListLink.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'搜索列表链接'**
+  String get searchListLink;
+
+  /// No description provided for @lineName.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'线路名称'**
+  String get lineName;
+
+  /// No description provided for @episodeList.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'剧集列表'**
+  String get episodeList;
+
+  /// No description provided for @episode.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'剧集'**
+  String get episode;
+
+  /// No description provided for @episodeHint.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'剧集链接，从剧集列表中获取的数据的 XPath'**
+  String get episodeHint;
+
+  /// No description provided for @antiCrawlerOptional.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'反爬 / 验证码（可选）'**
+  String get antiCrawlerOptional;
+
+  /// No description provided for @enableWebViewCaptcha.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'启用 WebView 验证码处理'**
+  String get enableWebViewCaptcha;
+
+  /// No description provided for @webViewCaptchaSubtitle.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'搜索触发验证码时，用 WebView 完成验证并保存 Cookie'**
+  String get webViewCaptchaSubtitle;
+
+  /// No description provided for @captchaType.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'验证类型'**
+  String get captchaType;
+
+  /// No description provided for @imageCaptchaManual.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'图片验证码（手动输入）'**
+  String get imageCaptchaManual;
+
+  /// No description provided for @autoClickCaptcha.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'自动点击验证按钮'**
+  String get autoClickCaptcha;
+
+  /// No description provided for @captchaImageXPath.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'验证码图片 XPath'**
+  String get captchaImageXPath;
+
+  /// No description provided for @captchaImageXPathHint.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'WebView 内定位验证码图片元素'**
+  String get captchaImageXPathHint;
+
+  /// No description provided for @captchaInputXPath.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'验证码输入框 XPath'**
+  String get captchaInputXPath;
+
+  /// No description provided for @captchaInputXPathHint.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'供用户输入验证码的 input 元素'**
+  String get captchaInputXPathHint;
+
+  /// No description provided for @submitCaptchaXPath.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'提交验证码按钮 XPath'**
+  String get submitCaptchaXPath;
+
+  /// No description provided for @verifyButtonXPath.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'验证按钮 XPath'**
+  String get verifyButtonXPath;
+
+  /// No description provided for @submitCaptchaHint.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'点击后提交验证码的按钮'**
+  String get submitCaptchaHint;
+
+  /// No description provided for @autoClickCaptchaHint.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'检测到后自动点击的验证按钮（如「我不是机器人」）'**
+  String get autoClickCaptchaHint;
+
+  /// No description provided for @downloadSuccess.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'下载成功'**
+  String get downloadSuccess;
+
+  /// No description provided for @downloadFailed.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'下载失败'**
+  String get downloadFailed;
+
+  /// No description provided for @pluginDownloaded.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'插件 \"{name}\" 已下载'**
+  String pluginDownloaded(Object name);
+
+  /// No description provided for @pluginDownloadFailed.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'下载插件 \"{name}\" 时发生错误：{error}'**
+  String pluginDownloadFailed(Object error, Object name);
+
+  /// No description provided for @updateSuccess.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'更新成功'**
+  String get updateSuccess;
+
+  /// No description provided for @pluginUpdated.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'插件 \"{name}\" 已更新到版本 {version}'**
+  String pluginUpdated(Object name, Object version);
+
+  /// No description provided for @pluginUpdateFailed.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'更新插件 \"{name}\" 时发生错误：{error}'**
+  String pluginUpdateFailed(Object error, Object name);
+
+  /// No description provided for @downloadSources.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'下载数据源'**
+  String get downloadSources;
+
+  /// No description provided for @downloadSourcesSubtitle.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'当前会从 GitHub 仓库中下载数据源，注意网络环境，下拉刷新数据'**
+  String get downloadSourcesSubtitle;
+
+  /// No description provided for @useMirror.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'使用镜像'**
+  String get useMirror;
+
+  /// No description provided for @useMirrorSubtitle.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'无法直连 GitHub 时开启，通过镜像拉取插件列表'**
+  String get useMirrorSubtitle;
+
+  /// No description provided for @noDataRefresh.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'没有找到数据，请刷新'**
+  String get noDataRefresh;
+
+  /// No description provided for @downloaded.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'已下载'**
+  String get downloaded;
+
+  /// No description provided for @updating.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'更新中…'**
+  String get updating;
+
+  /// No description provided for @update.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'更新'**
+  String get update;
+
+  /// No description provided for @pluginVersionDate.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'版本：{version} - {date}'**
+  String pluginVersionDate(Object date, Object version);
 }
 
 class _AppLocalizationsDelegate

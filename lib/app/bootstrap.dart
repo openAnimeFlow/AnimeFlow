@@ -6,6 +6,7 @@ import 'package:anime_flow/features/app_update/application/app_info_provider.dar
 import 'package:anime_flow/features/app_update/application/app_provider_container.dart';
 import 'package:anime_flow/features/shaders/shaders_controller.dart';
 import 'package:anime_flow/features/settings/presentation/providers/font_provider.dart';
+import 'package:anime_flow/core/network/network_runtime_config.dart';
 import 'package:anime_flow/core/storage/storage.dart';
 import 'package:anime_flow/core/utils/crawl_config.dart';
 import 'package:flutter/material.dart';
@@ -22,6 +23,7 @@ Future<void> bootstrap() async {
   await Storage.init();
   await SelectedFont.initOnStartup();
   appPackageInfo = await PackageInfo.fromPlatform();
+  NetworkRuntimeConfig.configure(appVersion: appPackageInfo!.version);
 
   if (Platform.isWindows || Platform.isLinux || Platform.isMacOS) {
     await windowManager.ensureInitialized();

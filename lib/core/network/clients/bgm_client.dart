@@ -1,9 +1,8 @@
 import 'package:anime_flow/core/constants/constants.dart';
-import 'package:anime_flow/features/app_update/application/app_provider_container.dart';
-import 'package:anime_flow/features/app_update/application/app_info_provider.dart';
 import 'package:anime_flow/core/network/api_path.dart';
 import 'package:anime_flow/core/network/core/dio_factory.dart';
 import 'package:anime_flow/core/network/core/network_error_mapper.dart';
+import 'package:anime_flow/core/network/network_runtime_config.dart';
 import 'package:dio/dio.dart';
 
 class BangumiClient {
@@ -123,7 +122,9 @@ class BangumiClient {
   }
 
   static String _getBangumiUserAgent() {
-    final version = appProviderContainer?.read(appVersionProvider) ?? '1.0.0';
-    return CommonApi.bangumiUserAgent.replaceAll('{version}', version);
+    return CommonApi.bangumiUserAgent.replaceAll(
+      '{version}',
+      NetworkRuntimeConfig.appVersion,
+    );
   }
 }

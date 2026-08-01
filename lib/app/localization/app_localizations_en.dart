@@ -765,4 +765,98 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get traceMoeDescription => 'Provides anime recognition from images';
+
+  @override
+  String fontRefreshFailed(Object error) {
+    return 'Refresh failed: $error';
+  }
+
+  @override
+  String get fontStylePageTitle => 'Font style';
+
+  @override
+  String get refreshFontList => 'Refresh font list';
+
+  @override
+  String get fontLibrary => 'Font library';
+
+  @override
+  String get cdnAcceleration => 'CDN acceleration';
+
+  @override
+  String get fontDelayHint => 'Newly added fonts may take time to appear';
+
+  @override
+  String get cdnTooltip =>
+      'On: fetch fonts through jsDelivr; off: connect directly to GitHub Raw through a mirror';
+
+  @override
+  String get fontRestartHint =>
+      'Restart the app if the font effect is not fully displayed';
+
+  @override
+  String get noOtherFonts => 'No other fonts available';
+
+  @override
+  String get downloadedOrphanFonts => 'Downloaded locally (removed remotely)';
+
+  @override
+  String get orphanFontDescription =>
+      'These fonts are no longer in the remote repository but remain on your device. You can delete or continue using them here.';
+
+  @override
+  String get fontListLoadFailed => 'Failed to load font list';
+
+  @override
+  String get systemFont => 'Follow system';
+
+  @override
+  String get systemFontSubtitle => 'Use the system default font';
+
+  @override
+  String fontAuthorInfo(Object author, Object size) {
+    return 'Author: $author - Font size: $size';
+  }
+
+  @override
+  String get downloadFont => 'Download font';
+
+  @override
+  String get appliedFont => 'Applied, tap to stop using';
+
+  @override
+  String get applyFont => 'Tap to apply this font';
+
+  @override
+  String get deleteDownloadedFont => 'Delete downloaded font';
+
+  @override
+  String get downloadFontFailedRetry => 'Download failed, tap to retry';
+
+  @override
+  String get deleteFont => 'Delete font';
+
+  @override
+  String deleteSelectedFontConfirmation(Object fontName) {
+    return 'Delete the local file for “$fontName” and restore the system font?';
+  }
+
+  @override
+  String deleteFontConfirmation(Object fontName) {
+    return 'Delete the local font file for “$fontName”?';
+  }
+
+  @override
+  String get previewLoadFailed => 'Failed to load preview';
+
+  @override
+  String get fontPreviewHeadline => 'Welcome to AnimeFlow';
+
+  @override
+  String get orphanFontAvailable =>
+      'Removed remotely, but the local font can still be used';
+
+  @override
+  String get orphanFontMissing =>
+      'The local font file is missing; you can clean up this record here';
 }

@@ -7,6 +7,7 @@ import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:anime_flow/app/localization/app_localizations.dart';
 
 class FontSettingsPage extends ConsumerStatefulWidget {
   const FontSettingsPage({super.key});
@@ -40,7 +41,11 @@ class _FontSettingsPageState extends ConsumerState<FontSettingsPage> {
     final result = ref.read(fontProvider);
     if (result.hasError) {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('刷新失败：${result.error}')),
+        SnackBar(
+          content: Text(AppLocalizations.of(context).fontRefreshFailed(
+            result.error.toString(),
+          )),
+        ),
       );
       return;
     }
@@ -49,6 +54,7 @@ class _FontSettingsPageState extends ConsumerState<FontSettingsPage> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     final leftPadding = MediaQuery.of(context).padding.left;
     final fontsAsync = ref.watch(fontProvider);
     ref.watch(fontNetworkTasksProvider);
@@ -65,12 +71,12 @@ class _FontSettingsPageState extends ConsumerState<FontSettingsPage> {
       appBar: PreferredSize(
         preferredSize: const Size.fromHeight(kToolbarHeight),
         child: AppBar(
-          title: const Text('字体样式'),
+          title: Text(l10n.fontStylePageTitle),
           actions: [
             if (SystemUtil.isDesktop)
               IconButton(
                 icon: const Icon(Icons.refresh_outlined),
-                tooltip: '刷新字体列表',
+                tooltip: l10n.refreshFontList,
                 onPressed: _refreshFontList,
               ),
           ],
@@ -93,8 +99,8 @@ class _FontSettingsPageState extends ConsumerState<FontSettingsPage> {
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    const Text(
-                      '字体库',
+                    Text(
+                      l10n.fontLibrary,
                       style: TextStyle(
                         fontSize: 20,
                         fontWeight: FontWeight.bold,
@@ -108,17 +114,17 @@ class _FontSettingsPageState extends ConsumerState<FontSettingsPage> {
                           crossAxisAlignment: CrossAxisAlignment.end,
                           children: [
                             Text(
-                              'CDN 加速',
+                              l10n.cdnAcceleration,
                               style: Theme.of(context).textTheme.bodyMedium,
                             ),
-                            const Text(
-                              '新上架的字体可能会延迟显示',
+                            Text(
+                              l10n.fontDelayHint,
                               style: TextStyle(fontSize: 10),
                             )
                           ],
                         ),
                         Tooltip(
-                          message: '开启：经 jsDelivr 拉取字体；关闭：直连 GitHub Raw（走镜像）',
+                          message: l10n.cdnTooltip,
                           child: Switch(
                             value: ref.watch(fontRepoCdnProvider),
                             onChanged: (value) => ref
@@ -130,8 +136,8 @@ class _FontSettingsPageState extends ConsumerState<FontSettingsPage> {
                     ),
                   ],
                 ),
-                const Text(
-                  '如果字体效果没有完全显示请重启应用',
+                Text(
+                  l10n.fontRestartHint,
                   style: TextStyle(fontWeight: FontWeight.bold),
                 ),
                 const SizedBox(height: 10),
@@ -172,7 +178,7 @@ class _FontSettingsPageState extends ConsumerState<FontSettingsPage> {
                           Padding(
                             padding: const EdgeInsets.fromLTRB(16, 8, 16, 16),
                             child: Text(
-                              '暂无其他可用字体',
+                              l10n.noOtherFonts,
                               style: Theme.of(context)
                                   .textTheme
                                   .bodySmall
@@ -196,8 +202,8 @@ class _FontSettingsPageState extends ConsumerState<FontSettingsPage> {
                 ),
                 if (orphans.isNotEmpty) ...[
                   const SizedBox(height: 20),
-                  const Text(
-                    '本地已下载（远程已下架）',
+                  Text(
+                    l10n.downloadedOrphanFonts,
                     style: TextStyle(
                       fontSize: 18,
                       fontWeight: FontWeight.bold,
@@ -205,7 +211,7 @@ class _FontSettingsPageState extends ConsumerState<FontSettingsPage> {
                   ),
                   const SizedBox(height: 6),
                   Text(
-                    '以下字体不再出现在远程仓库，但本地仍保留有字体文件。可在此处直接删除或继续应用。',
+                    l10n.orphanFontDescription,
                     style: Theme.of(context).textTheme.bodySmall?.copyWith(
                           color: Theme.of(context).colorScheme.onSurfaceVariant,
                         ),
@@ -277,6 +283,7 @@ class _FontListError extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 24),
       child: Column(
@@ -288,7 +295,7 @@ class _FontListError extends StatelessWidget {
           ),
           const SizedBox(height: 8),
           Text(
-            '加载字体列表失败',
+            l10n.fontListLoadFailed,
             style: Theme.of(context).textTheme.titleSmall,
           ),
           const SizedBox(height: 4),
@@ -303,7 +310,7 @@ class _FontListError extends StatelessWidget {
           FilledButton.tonalIcon(
             onPressed: onRetry,
             icon: const Icon(Icons.refresh),
-            label: const Text('重试'),
+            label: Text(l10n.retry),
           ),
         ],
       ),
@@ -316,6 +323,7 @@ class _SystemFontListTile extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = AppLocalizations.of(context);
     final selectedFamily = ref.watch(selectedFontProvider);
     final isSelected = selectedFamily == null;
     final colorScheme = Theme.of(context).colorScheme;
@@ -328,9 +336,9 @@ class _SystemFontListTile extends ConsumerWidget {
           : null,
       title: Row(
         children: [
-          const Expanded(
+          Expanded(
             child: Text(
-              '跟随系统',
+              l10n.systemFont,
               maxLines: 1,
               overflow: TextOverflow.ellipsis,
             ),
@@ -342,8 +350,8 @@ class _SystemFontListTile extends ConsumerWidget {
       subtitle: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Text(
-            '使用系统默认字体',
+          Text(
+            l10n.systemFontSubtitle,
             maxLines: 1,
             overflow: TextOverflow.ellipsis,
           ),
@@ -370,6 +378,7 @@ class _FontListTile extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = AppLocalizations.of(context);
     final downloadState = ref.watch(fontDownloadProvider(font.id));
     final selectedFamily = ref.watch(selectedFontProvider);
     final isSelected = selectedFamily == font.family;
@@ -400,7 +409,7 @@ class _FontListTile extends ConsumerWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
-            '作者：${font.author} - 字体包体积：${Utils.formatBytes(font.size)}',
+            l10n.fontAuthorInfo(font.author, Utils.formatBytes(font.size)),
             maxLines: 2,
             overflow: TextOverflow.ellipsis,
           ),
@@ -437,11 +446,12 @@ class _FontListTile extends ConsumerWidget {
     bool isSelected,
     ColorScheme colorScheme,
   ) {
+    final l10n = AppLocalizations.of(context);
     switch (downloadState.status) {
       case FontDownloadStatus.idle:
         return IconButton(
           icon: const Icon(Icons.cloud_download_outlined),
-          tooltip: '下载字体',
+          tooltip: l10n.downloadFont,
           onPressed: () =>
               ref.read(fontDownloadProvider(font.id).notifier).download(font),
         );
@@ -479,21 +489,21 @@ class _FontListTile extends ConsumerWidget {
               IconButton(
                 icon: Icon(Icons.check_circle_rounded,
                     color: colorScheme.primary),
-                tooltip: '已应用，点击取消使用',
+                tooltip: l10n.appliedFont,
                 onPressed: () =>
                     ref.read(selectedFontProvider.notifier).clearFont(),
               )
             else
               IconButton(
                 icon: const Icon(Icons.font_download_outlined),
-                tooltip: '点击应用此字体',
+                tooltip: l10n.applyFont,
                 onPressed: () => ref
                     .read(selectedFontProvider.notifier)
                     .selectFont(font, downloadState.filePath!),
               ),
             IconButton(
               icon: const Icon(Icons.delete_outline),
-              tooltip: '删除已下载字体',
+              tooltip: l10n.deleteDownloadedFont,
               onPressed: () => _FontDeleteConfirm.show(
                 context,
                 ref,
@@ -508,7 +518,7 @@ class _FontListTile extends ConsumerWidget {
       case FontDownloadStatus.error:
         return IconButton(
           icon: Icon(Icons.error_outline, color: colorScheme.error),
-          tooltip: '下载失败，点击重试',
+          tooltip: l10n.downloadFontFailedRetry,
           onPressed: () =>
               ref.read(fontDownloadProvider(font.id).notifier).download(font),
         );
@@ -529,20 +539,21 @@ class _FontDeleteConfirm {
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (ctx) => AlertDialog(
-        title: const Text('删除字体'),
+        title: Text(AppLocalizations.of(ctx).deleteFont),
         content: Text(
           isSelected
-              ? '将删除「$fontName」的本地文件，并恢复为系统字体，确定继续？'
-              : '确定删除「$fontName」的本地字体文件？',
+              ? AppLocalizations.of(ctx)
+                  .deleteSelectedFontConfirmation(fontName)
+              : AppLocalizations.of(ctx).deleteFontConfirmation(fontName),
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(ctx, false),
-            child: const Text('取消'),
+            child: Text(AppLocalizations.of(ctx).cancel),
           ),
           FilledButton(
             onPressed: () => Navigator.pop(ctx, true),
-            child: const Text('删除'),
+            child: Text(AppLocalizations.of(ctx).deleteFont),
           ),
         ],
       ),
@@ -564,6 +575,7 @@ class _OrphanFontListTile extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = AppLocalizations.of(context);
     final downloadState = ref.watch(fontDownloadProvider(font.id));
     final selectedFamily = ref.watch(selectedFontProvider);
     final isSelected = selectedFamily == font.family;
@@ -592,21 +604,21 @@ class _OrphanFontListTile extends ConsumerWidget {
             IconButton(
               icon:
                   Icon(Icons.check_circle_rounded, color: colorScheme.primary),
-              tooltip: '已应用，点击取消使用',
+              tooltip: l10n.appliedFont,
               onPressed: () =>
                   ref.read(selectedFontProvider.notifier).clearFont(),
             )
           else if (hasLocalFile)
             IconButton(
               icon: const Icon(Icons.font_download_outlined),
-              tooltip: '点击应用此字体',
+              tooltip: l10n.applyFont,
               onPressed: () => ref
                   .read(selectedFontProvider.notifier)
                   .selectFont(font, downloadState.filePath!),
             ),
           IconButton(
             icon: const Icon(Icons.delete_outline),
-            tooltip: '删除已下载字体',
+            tooltip: l10n.deleteDownloadedFont,
             onPressed: () => _FontDeleteConfirm.show(
               context,
               ref,
@@ -621,14 +633,14 @@ class _OrphanFontListTile extends ConsumerWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
-            '作者：${font.author} - 字体包体积：${Utils.formatBytes(font.size)}',
+            l10n.fontAuthorInfo(font.author, Utils.formatBytes(font.size)),
             maxLines: 2,
             overflow: TextOverflow.ellipsis,
           ),
           Padding(
             padding: const EdgeInsets.only(top: 4),
             child: Text(
-              hasLocalFile ? '远程仓库已下架，仍可继续使用本地字体' : '本地字体文件已丢失，可在此处清理记录',
+              hasLocalFile ? l10n.orphanFontAvailable : l10n.orphanFontMissing,
               style: Theme.of(context).textTheme.bodySmall?.copyWith(
                     color: hasLocalFile
                         ? colorScheme.onSurfaceVariant
@@ -778,10 +790,9 @@ class _FontPreviewBox extends StatelessWidget {
   final bool failed;
   final String? fontFamily;
 
-  static const headline = '欢迎使用 AnimeFlow';
-
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     return Padding(
       padding: const EdgeInsets.only(top: 8),
       child: DecoratedBox(
@@ -802,13 +813,13 @@ class _FontPreviewBox extends StatelessWidget {
               color: colorScheme.outlineVariant.withValues(alpha: 0.35),
             ),
           ),
-          child: _buildContent(),
+          child: _buildContent(l10n),
         ),
       ),
     );
   }
 
-  Widget _buildContent() {
+  Widget _buildContent(AppLocalizations l10n) {
     if (failed) {
       return Center(
         child: Row(
@@ -821,7 +832,7 @@ class _FontPreviewBox extends StatelessWidget {
             ),
             const SizedBox(width: 6),
             Text(
-              '预览加载失败',
+              l10n.previewLoadFailed,
               style: TextStyle(
                 fontSize: 13,
                 color: colorScheme.onSurfaceVariant,
@@ -848,7 +859,7 @@ class _FontPreviewBox extends StatelessWidget {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
       child: Text(
-        headline,
+        l10n.fontPreviewHeadline,
         maxLines: 1,
         overflow: TextOverflow.ellipsis,
         style: TextStyle(

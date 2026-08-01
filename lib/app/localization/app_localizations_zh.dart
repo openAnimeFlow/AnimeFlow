@@ -750,6 +750,96 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get traceMoeDescription => '提供以图识别番功能';
+
+  @override
+  String fontRefreshFailed(Object error) {
+    return '刷新失败：$error';
+  }
+
+  @override
+  String get fontStylePageTitle => '字体样式';
+
+  @override
+  String get refreshFontList => '刷新字体列表';
+
+  @override
+  String get fontLibrary => '字体库';
+
+  @override
+  String get cdnAcceleration => 'CDN 加速';
+
+  @override
+  String get fontDelayHint => '新上架的字体可能会延迟显示';
+
+  @override
+  String get cdnTooltip => '开启：经 jsDelivr 拉取字体；关闭：直连 GitHub Raw（走镜像）';
+
+  @override
+  String get fontRestartHint => '如果字体效果没有完全显示请重启应用';
+
+  @override
+  String get noOtherFonts => '暂无其他可用字体';
+
+  @override
+  String get downloadedOrphanFonts => '本地已下载（远程已下架）';
+
+  @override
+  String get orphanFontDescription =>
+      '以下字体不再出现在远程仓库，但本地仍保留有字体文件。可在此处直接删除或继续应用。';
+
+  @override
+  String get fontListLoadFailed => '加载字体列表失败';
+
+  @override
+  String get systemFont => '跟随系统';
+
+  @override
+  String get systemFontSubtitle => '使用系统默认字体';
+
+  @override
+  String fontAuthorInfo(Object author, Object size) {
+    return '作者：$author - 字体包体积：$size';
+  }
+
+  @override
+  String get downloadFont => '下载字体';
+
+  @override
+  String get appliedFont => '已应用，点击取消使用';
+
+  @override
+  String get applyFont => '点击应用此字体';
+
+  @override
+  String get deleteDownloadedFont => '删除已下载字体';
+
+  @override
+  String get downloadFontFailedRetry => '下载失败，点击重试';
+
+  @override
+  String get deleteFont => '删除字体';
+
+  @override
+  String deleteSelectedFontConfirmation(Object fontName) {
+    return '将删除「$fontName」的本地文件，并恢复为系统字体，确定继续？';
+  }
+
+  @override
+  String deleteFontConfirmation(Object fontName) {
+    return '确定删除「$fontName」的本地字体文件？';
+  }
+
+  @override
+  String get previewLoadFailed => '预览加载失败';
+
+  @override
+  String get fontPreviewHeadline => '欢迎使用 AnimeFlow';
+
+  @override
+  String get orphanFontAvailable => '远程仓库已下架，仍可继续使用本地字体';
+
+  @override
+  String get orphanFontMissing => '本地字体文件已丢失，可在此处清理记录';
 }
 
 /// The translations for Chinese, using the Han script (`zh_Hans`).
@@ -1498,6 +1588,96 @@ class AppLocalizationsZhHans extends AppLocalizationsZh {
 
   @override
   String get traceMoeDescription => '提供以图识别番功能';
+
+  @override
+  String fontRefreshFailed(Object error) {
+    return '刷新失败：$error';
+  }
+
+  @override
+  String get fontStylePageTitle => '字体样式';
+
+  @override
+  String get refreshFontList => '刷新字体列表';
+
+  @override
+  String get fontLibrary => '字体库';
+
+  @override
+  String get cdnAcceleration => 'CDN 加速';
+
+  @override
+  String get fontDelayHint => '新上架的字体可能会延迟显示';
+
+  @override
+  String get cdnTooltip => '开启：经 jsDelivr 拉取字体；关闭：直连 GitHub Raw（走镜像）';
+
+  @override
+  String get fontRestartHint => '如果字体效果没有完全显示请重启应用';
+
+  @override
+  String get noOtherFonts => '暂无其他可用字体';
+
+  @override
+  String get downloadedOrphanFonts => '本地已下载（远程已下架）';
+
+  @override
+  String get orphanFontDescription =>
+      '以下字体不再出现在远程仓库，但本地仍保留有字体文件。可在此处直接删除或继续应用。';
+
+  @override
+  String get fontListLoadFailed => '加载字体列表失败';
+
+  @override
+  String get systemFont => '跟随系统';
+
+  @override
+  String get systemFontSubtitle => '使用系统默认字体';
+
+  @override
+  String fontAuthorInfo(Object author, Object size) {
+    return '作者：$author - 字体包体积：$size';
+  }
+
+  @override
+  String get downloadFont => '下载字体';
+
+  @override
+  String get appliedFont => '已应用，点击取消使用';
+
+  @override
+  String get applyFont => '点击应用此字体';
+
+  @override
+  String get deleteDownloadedFont => '删除已下载字体';
+
+  @override
+  String get downloadFontFailedRetry => '下载失败，点击重试';
+
+  @override
+  String get deleteFont => '删除字体';
+
+  @override
+  String deleteSelectedFontConfirmation(Object fontName) {
+    return '将删除「$fontName」的本地文件，并恢复为系统字体，确定继续？';
+  }
+
+  @override
+  String deleteFontConfirmation(Object fontName) {
+    return '确定删除「$fontName」的本地字体文件？';
+  }
+
+  @override
+  String get previewLoadFailed => '预览加载失败';
+
+  @override
+  String get fontPreviewHeadline => '欢迎使用 AnimeFlow';
+
+  @override
+  String get orphanFontAvailable => '远程仓库已下架，仍可继续使用本地字体';
+
+  @override
+  String get orphanFontMissing => '本地字体文件已丢失，可在此处清理记录';
 }
 
 /// The translations for Chinese, as used in Hong Kong, using the Han script (`zh_Hant_HK`).
@@ -2246,6 +2426,96 @@ class AppLocalizationsZhHantHk extends AppLocalizationsZh {
 
   @override
   String get traceMoeDescription => '提供以圖識別番劇功能';
+
+  @override
+  String fontRefreshFailed(Object error) {
+    return '重新整理失敗：$error';
+  }
+
+  @override
+  String get fontStylePageTitle => '字型樣式';
+
+  @override
+  String get refreshFontList => '重新整理字型列表';
+
+  @override
+  String get fontLibrary => '字型庫';
+
+  @override
+  String get cdnAcceleration => 'CDN 加速';
+
+  @override
+  String get fontDelayHint => '新上架的字型可能會延遲顯示';
+
+  @override
+  String get cdnTooltip => '開啟：經 jsDelivr 取得字型；關閉：直連 GitHub Raw（透過鏡像）';
+
+  @override
+  String get fontRestartHint => '如果字型效果沒有完整顯示，請重新啟動應用程式';
+
+  @override
+  String get noOtherFonts => '暫無其他可用字型';
+
+  @override
+  String get downloadedOrphanFonts => '本機已下載（遠端已下架）';
+
+  @override
+  String get orphanFontDescription =>
+      '以下字型不再出現在遠端儲存庫，但本機仍保留字型檔案。可在此處直接刪除或繼續套用。';
+
+  @override
+  String get fontListLoadFailed => '載入字型列表失敗';
+
+  @override
+  String get systemFont => '跟隨系統';
+
+  @override
+  String get systemFontSubtitle => '使用系統預設字型';
+
+  @override
+  String fontAuthorInfo(Object author, Object size) {
+    return '作者：$author - 字型包大小：$size';
+  }
+
+  @override
+  String get downloadFont => '下載字型';
+
+  @override
+  String get appliedFont => '已套用，點擊取消使用';
+
+  @override
+  String get applyFont => '點擊套用此字型';
+
+  @override
+  String get deleteDownloadedFont => '刪除已下載字型';
+
+  @override
+  String get downloadFontFailedRetry => '下載失敗，點擊重試';
+
+  @override
+  String get deleteFont => '刪除字型';
+
+  @override
+  String deleteSelectedFontConfirmation(Object fontName) {
+    return '將刪除「$fontName」的本機檔案，並恢復為系統字型，確定繼續？';
+  }
+
+  @override
+  String deleteFontConfirmation(Object fontName) {
+    return '確定刪除「$fontName」的本機字型檔案？';
+  }
+
+  @override
+  String get previewLoadFailed => '預覽載入失敗';
+
+  @override
+  String get fontPreviewHeadline => '歡迎使用 AnimeFlow';
+
+  @override
+  String get orphanFontAvailable => '遠端儲存庫已下架，仍可繼續使用本機字型';
+
+  @override
+  String get orphanFontMissing => '本機字型檔案已遺失，可在此處清理記錄';
 }
 
 /// The translations for Chinese, as used in Taiwan, using the Han script (`zh_Hant_TW`).
@@ -2994,4 +3264,94 @@ class AppLocalizationsZhHantTw extends AppLocalizationsZh {
 
   @override
   String get traceMoeDescription => '提供以圖識別番劇功能';
+
+  @override
+  String fontRefreshFailed(Object error) {
+    return '重新整理失敗：$error';
+  }
+
+  @override
+  String get fontStylePageTitle => '字型樣式';
+
+  @override
+  String get refreshFontList => '重新整理字型列表';
+
+  @override
+  String get fontLibrary => '字型庫';
+
+  @override
+  String get cdnAcceleration => 'CDN 加速';
+
+  @override
+  String get fontDelayHint => '新上架的字型可能會延遲顯示';
+
+  @override
+  String get cdnTooltip => '開啟：經 jsDelivr 取得字型；關閉：直連 GitHub Raw（透過鏡像）';
+
+  @override
+  String get fontRestartHint => '如果字型效果沒有完整顯示，請重新啟動應用程式';
+
+  @override
+  String get noOtherFonts => '暫無其他可用字型';
+
+  @override
+  String get downloadedOrphanFonts => '本機已下載（遠端已下架）';
+
+  @override
+  String get orphanFontDescription =>
+      '以下字型不再出現在遠端儲存庫，但本機仍保留字型檔案。可在此處直接刪除或繼續套用。';
+
+  @override
+  String get fontListLoadFailed => '載入字型列表失敗';
+
+  @override
+  String get systemFont => '跟隨系統';
+
+  @override
+  String get systemFontSubtitle => '使用系統預設字型';
+
+  @override
+  String fontAuthorInfo(Object author, Object size) {
+    return '作者：$author - 字型包大小：$size';
+  }
+
+  @override
+  String get downloadFont => '下載字型';
+
+  @override
+  String get appliedFont => '已套用，點擊取消使用';
+
+  @override
+  String get applyFont => '點擊套用此字型';
+
+  @override
+  String get deleteDownloadedFont => '刪除已下載字型';
+
+  @override
+  String get downloadFontFailedRetry => '下載失敗，點擊重試';
+
+  @override
+  String get deleteFont => '刪除字型';
+
+  @override
+  String deleteSelectedFontConfirmation(Object fontName) {
+    return '將刪除「$fontName」的本機檔案，並恢復為系統字型，確定繼續？';
+  }
+
+  @override
+  String deleteFontConfirmation(Object fontName) {
+    return '確定刪除「$fontName」的本機字型檔案？';
+  }
+
+  @override
+  String get previewLoadFailed => '預覽載入失敗';
+
+  @override
+  String get fontPreviewHeadline => '歡迎使用 AnimeFlow';
+
+  @override
+  String get orphanFontAvailable => '遠端儲存庫已下架，仍可繼續使用本機字型';
+
+  @override
+  String get orphanFontMissing => '本機字型檔案已遺失，可在此處清理記錄';
 }

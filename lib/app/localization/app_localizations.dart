@@ -1500,6 +1500,168 @@ abstract class AppLocalizations {
   /// In zh_Hans, this message translates to:
   /// **'提供以图识别番功能'**
   String get traceMoeDescription;
+
+  /// No description provided for @fontRefreshFailed.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'刷新失败：{error}'**
+  String fontRefreshFailed(Object error);
+
+  /// No description provided for @fontStylePageTitle.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'字体样式'**
+  String get fontStylePageTitle;
+
+  /// No description provided for @refreshFontList.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'刷新字体列表'**
+  String get refreshFontList;
+
+  /// No description provided for @fontLibrary.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'字体库'**
+  String get fontLibrary;
+
+  /// No description provided for @cdnAcceleration.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'CDN 加速'**
+  String get cdnAcceleration;
+
+  /// No description provided for @fontDelayHint.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'新上架的字体可能会延迟显示'**
+  String get fontDelayHint;
+
+  /// No description provided for @cdnTooltip.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'开启：经 jsDelivr 拉取字体；关闭：直连 GitHub Raw（走镜像）'**
+  String get cdnTooltip;
+
+  /// No description provided for @fontRestartHint.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'如果字体效果没有完全显示请重启应用'**
+  String get fontRestartHint;
+
+  /// No description provided for @noOtherFonts.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'暂无其他可用字体'**
+  String get noOtherFonts;
+
+  /// No description provided for @downloadedOrphanFonts.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'本地已下载（远程已下架）'**
+  String get downloadedOrphanFonts;
+
+  /// No description provided for @orphanFontDescription.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'以下字体不再出现在远程仓库，但本地仍保留有字体文件。可在此处直接删除或继续应用。'**
+  String get orphanFontDescription;
+
+  /// No description provided for @fontListLoadFailed.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'加载字体列表失败'**
+  String get fontListLoadFailed;
+
+  /// No description provided for @systemFont.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'跟随系统'**
+  String get systemFont;
+
+  /// No description provided for @systemFontSubtitle.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'使用系统默认字体'**
+  String get systemFontSubtitle;
+
+  /// No description provided for @fontAuthorInfo.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'作者：{author} - 字体包体积：{size}'**
+  String fontAuthorInfo(Object author, Object size);
+
+  /// No description provided for @downloadFont.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'下载字体'**
+  String get downloadFont;
+
+  /// No description provided for @appliedFont.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'已应用，点击取消使用'**
+  String get appliedFont;
+
+  /// No description provided for @applyFont.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'点击应用此字体'**
+  String get applyFont;
+
+  /// No description provided for @deleteDownloadedFont.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'删除已下载字体'**
+  String get deleteDownloadedFont;
+
+  /// No description provided for @downloadFontFailedRetry.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'下载失败，点击重试'**
+  String get downloadFontFailedRetry;
+
+  /// No description provided for @deleteFont.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'删除字体'**
+  String get deleteFont;
+
+  /// No description provided for @deleteSelectedFontConfirmation.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'将删除「{fontName}」的本地文件，并恢复为系统字体，确定继续？'**
+  String deleteSelectedFontConfirmation(Object fontName);
+
+  /// No description provided for @deleteFontConfirmation.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'确定删除「{fontName}」的本地字体文件？'**
+  String deleteFontConfirmation(Object fontName);
+
+  /// No description provided for @previewLoadFailed.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'预览加载失败'**
+  String get previewLoadFailed;
+
+  /// No description provided for @fontPreviewHeadline.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'欢迎使用 AnimeFlow'**
+  String get fontPreviewHeadline;
+
+  /// No description provided for @orphanFontAvailable.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'远程仓库已下架，仍可继续使用本地字体'**
+  String get orphanFontAvailable;
+
+  /// No description provided for @orphanFontMissing.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'本地字体文件已丢失，可在此处清理记录'**
+  String get orphanFontMissing;
 }
 
 class _AppLocalizationsDelegate

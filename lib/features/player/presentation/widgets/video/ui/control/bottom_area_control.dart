@@ -19,6 +19,7 @@ import 'package:anime_flow/shared/widgets/notification_toast.dart';
 import 'package:anime_flow/features/player/presentation/widgets/episode_playing_indicator.dart';
 import 'package:anime_flow/features/player/presentation/widgets/episodes_dialog.dart';
 import 'package:anime_flow/features/player/presentation/widgets/play_pause_icon.dart';
+import 'package:anime_flow/app/localization/app_localizations.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_svg/svg.dart';
@@ -43,7 +44,9 @@ class BottomAreaControl extends ConsumerWidget {
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
         content: Text(
-          success ? '弹幕发送成功' : '当前不支持发送弹幕',
+          success
+              ? AppLocalizations.of(context).danmakuSent
+              : AppLocalizations.of(context).danmakuUnsupported,
         ),
       ),
     );
@@ -58,14 +61,17 @@ class BottomAreaControl extends ConsumerWidget {
       final playController = container.read(playSessionProvider);
       await playController.updateEpisodeWatched(episodeId);
       if (!dialogContext.mounted) return;
-      NotificationToast.show('提示', '已更新观看进度');
+      final l10n = AppLocalizations.of(dialogContext);
+      NotificationToast.show(l10n.tip, l10n.updatedProgress);
     } on AnimeFlowApiException catch (e) {
       if (!dialogContext.mounted) return;
-      NotificationToast.show('更新失败', e.message);
+      NotificationToast.show(
+          AppLocalizations.of(dialogContext).updateFailed, e.message);
     } catch (e) {
       if (!dialogContext.mounted) return;
       LiggLogger().e(e);
-      NotificationToast.show('更新失败', e.toString());
+      NotificationToast.show(
+          AppLocalizations.of(dialogContext).updateFailed, e.toString());
     }
   }
 
@@ -109,11 +115,11 @@ class BottomAreaControl extends ConsumerWidget {
         ),
         borderRadius: BorderRadius.circular(10),
       ),
-      child: const Text(
-        "登录后才能发送弹幕",
+      child: Text(
+        AppLocalizations.of(context).loginToSendDanmaku,
         maxLines: 1,
         overflow: TextOverflow.ellipsis,
-        style: TextStyle(color: Colors.white),
+        style: const TextStyle(color: Colors.white),
       ),
     );
   }
@@ -125,6 +131,7 @@ class BottomAreaControl extends ConsumerWidget {
     required PlaySession playController,
     required VideoUiNotifier videoUiStateController,
   }) {
+    final l10n = AppLocalizations.of(context);
     return Center(
       child: ConstrainedBox(
         constraints: const BoxConstraints(
@@ -134,7 +141,7 @@ class BottomAreaControl extends ConsumerWidget {
           children: [
             //弹幕开关
             IconButton(
-              tooltip: danmakuOn ? '关闭弹幕' : '开启弹幕',
+              tooltip: danmakuOn ? l10n.turnOffDanmaku : l10n.turnOnDanmaku,
               onPressed: () => playController.toggleDanmaku(),
               icon: Icon(
                 danmakuOn
@@ -147,7 +154,7 @@ class BottomAreaControl extends ConsumerWidget {
             //弹幕设置
             if (danmakuOn)
               IconButton(
-                tooltip: '弹幕设置',
+                tooltip: l10n.danmakuSettings,
                 onPressed: () {
                   final container = ProviderScope.containerOf(context);
                   showModalBottomSheet(
@@ -189,6 +196,7 @@ class BottomAreaControl extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = AppLocalizations.of(context);
     final playController = ref.read(playSessionProvider);
     final videoUiStateController = ref.read(videoUiProvider.notifier);
     final fullscreen =
@@ -254,7 +262,7 @@ class BottomAreaControl extends ConsumerWidget {
                             final playing = ref.watch(
                                 playStateProvider.select((s) => s.playing));
                             return IconButton(
-                              tooltip: playing ? '暂停' : '播放',
+                              tooltip: playing ? l10n.pause : l10n.play,
                               onPressed: () {
                                 playController.playOrPauseVideo();
                                 videoUiStateController
@@ -286,7 +294,7 @@ class BottomAreaControl extends ConsumerWidget {
                               return const SizedBox.shrink();
                             }
                             return IconButton(
-                              tooltip: '下一集',
+                              tooltip: l10n.nextEpisode,
                               onPressed: () {
                                 final notifier =
                                     ref.read(episodesProvider.notifier);
@@ -389,7 +397,7 @@ class BottomAreaControl extends ConsumerWidget {
                                       },
                                     );
                                   },
-                                  child: const Text("选集"));
+                                  child: Text(l10n.episodeSelection));
                             },
                           ),
 

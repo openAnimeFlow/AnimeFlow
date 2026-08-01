@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'package:anime_flow/app/localization/app_localizations.dart';
 import 'package:flutter/material.dart';
 
 /// 弹幕输入框
@@ -137,6 +138,7 @@ class _DanmakuTextFieldState extends State<DanmakuTextField>
   Widget build(BuildContext context) {
     return LayoutBuilder(
       builder: (context, constraints) {
+        final l10n = AppLocalizations.of(context);
         final maxWidth =
             constraints.hasBoundedWidth ? constraints.maxWidth - 16 : 150.0;
         final closeButtonWidth = widget.showCloseButton ? collapsedWidth : 0.0;
@@ -179,8 +181,8 @@ class _DanmakuTextFieldState extends State<DanmakuTextField>
                         ),
                         decoration: InputDecoration(
                           hintText: sendLocked
-                              ? '请等待 $sendCooldownRemaining 秒后再发…'
-                              : '发送弹幕...',
+                              ? l10n.waitToSendDanmaku(sendCooldownRemaining)
+                              : l10n.sendDanmakuHint,
                           hintStyle: TextStyle(
                             color: widget.textColor,
                             fontSize: 14,
@@ -197,7 +199,9 @@ class _DanmakuTextFieldState extends State<DanmakuTextField>
                 ),
                 if (widget.showCloseButton)
                   IconButton(
-                    tooltip: widget.inputVisible ? '关闭弹幕' : '开启弹幕',
+                    tooltip: widget.inputVisible
+                        ? l10n.turnOffDanmaku
+                        : l10n.turnOnDanmaku,
                     constraints: const BoxConstraints.tightFor(
                       width: collapsedWidth,
                       height: 36,

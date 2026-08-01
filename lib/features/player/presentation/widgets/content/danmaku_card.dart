@@ -1,3 +1,4 @@
+import 'package:anime_flow/app/localization/app_localizations.dart';
 import 'package:anime_flow/core/network/api/flow_api.dart';
 import 'package:anime_flow/shared/models/player/danmaku/danmaku_episode_response.dart';
 import 'package:anime_flow/shared/models/player/danmaku/danmaku_module.dart';
@@ -77,6 +78,7 @@ class _DanmakuCardState extends ConsumerState<DanmakuCard>
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     final danDanmakus = ref.watch(
       playStateProvider.select((s) => s.danDanmakus),
     );
@@ -111,13 +113,13 @@ class _DanmakuCardState extends ConsumerState<DanmakuCard>
             children: [
               Row(
                 children: [
-                  const Text(
-                    '弹幕源:',
+                  Text(
+                    l10n.danmakuSource,
                     style: TextStyle(fontWeight: FontWeight.bold),
                   ),
                   if (allDanmakus.isNotEmpty) ...[
                     const SizedBox(width: 5),
-                    Text('总装填(${allDanmakus.length})条弹幕',
+                    Text(l10n.totalDanmaku(allDanmakus.length),
                         style: Theme.of(context).textTheme.bodySmall),
                     const Spacer(),
                   ] else ...[
@@ -163,7 +165,7 @@ class _DanmakuCardState extends ConsumerState<DanmakuCard>
                                 builder: (_) => danmakuDialog,
                               );
                             },
-                            child: const Text('切换弹幕'),
+                            child: Text(l10n.switchDanmaku),
                           )
                         ],
                       );
@@ -257,7 +259,7 @@ class _DanmakuCardState extends ConsumerState<DanmakuCard>
       builder: (BuildContext dialogContext, StateSetter setDialogState) {
         return AlertDialog(
           icon: const Icon(Icons.subtitles),
-          title: const Text('切换弹幕'),
+          title: Text(AppLocalizations.of(context).switchDanmaku),
           titleTextStyle:
               const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
           content: ConstrainedBox(
@@ -269,8 +271,8 @@ class _DanmakuCardState extends ConsumerState<DanmakuCard>
                 children: [
                   TextField(
                     controller: danmakuFieldController,
-                    decoration: const InputDecoration(
-                      hintText: '请输入标题',
+                    decoration: InputDecoration(
+                      hintText: AppLocalizations.of(context).enterTitle,
                     ),
                   ),
                   const SizedBox(height: 16),
@@ -282,9 +284,9 @@ class _DanmakuCardState extends ConsumerState<DanmakuCard>
                   ] else if (danmakuSearchResponse == null) ...[
                     const SizedBox.shrink()
                   ] else ...[
-                    const Align(
+                    Align(
                       alignment: Alignment.centerLeft,
-                      child: Text('搜索结果:'),
+                      child: Text(AppLocalizations.of(context).searchResults),
                     ),
                     ConstrainedBox(
                       constraints: const BoxConstraints(
@@ -326,7 +328,7 @@ class _DanmakuCardState extends ConsumerState<DanmakuCard>
           actions: [
             TextButton(
               onPressed: () => Navigator.of(dialogContext).pop(),
-              child: const Text('取消'),
+              child: Text(AppLocalizations.of(context).cancel),
             ),
             TextButton(
               onPressed: () async {
@@ -350,7 +352,7 @@ class _DanmakuCardState extends ConsumerState<DanmakuCard>
                   }
                 }
               },
-              child: const Text('提交'),
+              child: Text(AppLocalizations.of(context).submit),
             )
           ],
         );
@@ -373,10 +375,12 @@ class _DanmakuCardState extends ConsumerState<DanmakuCard>
             child: SizedBox(
               width: double.maxFinite,
               child: episodesResponse.episodes.isEmpty
-                  ? const Center(
+                  ? Center(
                       child: Padding(
                         padding: EdgeInsets.all(16.0),
-                        child: Text('鏆傛棤鍓ч泦鏁版嵁'),
+                        child: Text(
+                          AppLocalizations.of(context).noDanmakuEpisodes,
+                        ),
                       ),
                     )
                   : ConstrainedBox(
@@ -414,7 +418,7 @@ class _DanmakuCardState extends ConsumerState<DanmakuCard>
               onPressed: () {
                 Navigator.of(context).pop();
               },
-              child: const Text('鍏抽棴'),
+              child: Text(AppLocalizations.of(context).close),
             ),
           ],
         );

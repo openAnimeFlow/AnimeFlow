@@ -1,3 +1,4 @@
+import 'package:anime_flow/app/localization/app_localizations.dart';
 import 'package:anime_flow/shared/models/bangumi/subject_item.dart';
 import 'package:anime_flow/core/network/clients/flow_client.dart';
 import 'package:anime_flow/features/player/presentation/providers/recommendation_provider.dart';
@@ -12,11 +13,13 @@ class RecommendationsView extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = AppLocalizations.of(context);
     final recommendations = ref.watch(recommendationProvider);
 
     return recommendations.when(
       loading: () => _buildSection(
         context,
+        l10n: l10n,
         child: const Padding(
           padding: EdgeInsets.symmetric(vertical: 12),
           child: LinearProgressIndicator(),
@@ -24,12 +27,14 @@ class RecommendationsView extends ConsumerWidget {
       ),
       error: (error, _) => _buildSection(
         context,
+        l10n: l10n,
         child: _RecommendationError(
           message: resolveAnimeFlowErrorMessage(
             error,
-            fallback: '推荐数据获取失败',
+            fallback: l10n.recommendationLoadFailed,
           ),
           onRetry: () => ref.invalidate(recommendationProvider),
+          retryLabel: l10n.retry,
         ),
       ),
       data: (item) {
@@ -38,6 +43,7 @@ class RecommendationsView extends ConsumerWidget {
         }
         return _buildSection(
           context,
+          l10n: l10n,
           child: Column(
             children: [
               for (final subject in item.data) _RecommendationTile(subject),
@@ -48,11 +54,12 @@ class RecommendationsView extends ConsumerWidget {
     );
   }
 
-  Widget _buildSection(BuildContext context, {required Widget child}) {
+  Widget _buildSection(BuildContext context,
+      {required Widget child, required AppLocalizations l10n}) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const Text('相关推荐'),
+        Text(l10n.recommendationsTitle),
         const SizedBox(height: 8),
         child,
       ],
@@ -196,10 +203,12 @@ class _RecommendationError extends StatelessWidget {
   const _RecommendationError({
     required this.message,
     required this.onRetry,
+    required this.retryLabel,
   });
 
   final String message;
   final VoidCallback onRetry;
+  final String retryLabel;
 
   @override
   Widget build(BuildContext context) {
@@ -222,7 +231,7 @@ class _RecommendationError extends StatelessWidget {
           TextButton.icon(
             onPressed: onRetry,
             icon: const Icon(Icons.refresh),
-            label: const Text('重试'),
+            label: Text(retryLabel),
           ),
         ],
       ),

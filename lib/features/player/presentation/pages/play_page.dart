@@ -1,4 +1,5 @@
 import 'package:anime_flow/core/constants/layout_constant.dart';
+import 'package:anime_flow/app/localization/app_localizations.dart';
 import 'package:anime_flow/features/player/presentation/providers/play_provider.dart';
 import 'package:anime_flow/features/player/presentation/providers/video_source_provider.dart';
 import 'package:anime_flow/features/player/presentation/providers/video_ui_provider.dart';
@@ -224,7 +225,6 @@ class _ContentViewState extends ConsumerState<_ContentView>
     with SingleTickerProviderStateMixin {
   late final PlaySession playSession;
   late final VideoUiNotifier videoUiStateController;
-  final List<String> tabs = ['简介', '吐槽'];
   late TabController tabController;
 
   @override
@@ -232,7 +232,7 @@ class _ContentViewState extends ConsumerState<_ContentView>
     super.initState();
     playSession = ref.read(playSessionProvider);
     videoUiStateController = ref.read(videoUiProvider.notifier);
-    tabController = TabController(length: tabs.length, vsync: this);
+    tabController = TabController(length: 2, vsync: this);
   }
 
   @override
@@ -242,9 +242,10 @@ class _ContentViewState extends ConsumerState<_ContentView>
   }
 
   Future<void> onSendDanmaku(String text) async {
+    final l10n = AppLocalizations.of(context);
     final userId = ref.read(currentUserInfoProvider).value?.id;
     if (userId == null) {
-      NotificationToast.show('请先登录', '请先登录后再发送弹幕');
+      NotificationToast.show(l10n.pleaseLogin, l10n.loginBeforeDanmaku);
       return;
     }
     final success = await playSession.sendDanmaku(
@@ -253,8 +254,8 @@ class _ContentViewState extends ConsumerState<_ContentView>
     );
     if (!mounted) return;
     NotificationToast.show(
-      '提示',
-      success ? '弹幕发送成功' : '当前不支持发送弹幕',
+      l10n.tip,
+      success ? l10n.danmakuSent : l10n.danmakuUnsupported,
     );
   }
 
@@ -274,7 +275,10 @@ class _ContentViewState extends ConsumerState<_ContentView>
                 controller: tabController,
                 tabAlignment: TabAlignment.start,
                 isScrollable: true,
-                tabs: tabs.map((name) => Tab(text: name)).toList(),
+                tabs: [
+                  Tab(text: AppLocalizations.of(context).playIntroTab),
+                  Tab(text: AppLocalizations.of(context).playCommentsTab),
+                ],
               ),
               ref.watch(playStateProvider.select((state) => state.isWideScreen))
                   ? const Spacer()

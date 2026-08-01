@@ -191,4 +191,206 @@ class AppLocalizationsEn extends AppLocalizations {
   String droppedCount(Object count) {
     return '$count dropped';
   }
+
+  @override
+  String get playIntroTab => 'Introduction';
+
+  @override
+  String get playCommentsTab => 'Comments';
+
+  @override
+  String get pleaseLogin => 'Please log in';
+
+  @override
+  String get loginBeforeDanmaku => 'Please log in before sending danmaku';
+
+  @override
+  String get tip => 'Tip';
+
+  @override
+  String get danmakuSent => 'Danmaku sent successfully';
+
+  @override
+  String get danmakuUnsupported => 'Sending danmaku is not supported';
+
+  @override
+  String get episodeSelection => 'Episodes';
+
+  @override
+  String get switchToList => 'Switch to list';
+
+  @override
+  String get switchToGrid => 'Switch to grid';
+
+  @override
+  String get fetchingEpisodes => 'Loading episodes...';
+
+  @override
+  String get episodeLoadFailed => 'Failed to load episodes';
+
+  @override
+  String get noEpisodeData => 'No episode data';
+
+  @override
+  String get updatedProgress => 'Watch progress updated';
+
+  @override
+  String get updateFailed => 'Update failed';
+
+  @override
+  String commentCount(Object count) {
+    return 'Comments $count';
+  }
+
+  @override
+  String get commentLoadFailed => 'Failed to load comments';
+
+  @override
+  String get defaultSort => 'Default';
+
+  @override
+  String get newestSort => 'Newest';
+
+  @override
+  String get noComments => 'No comments';
+
+  @override
+  String get commentsAction => 'Comments';
+
+  @override
+  String get danmakuSource => 'Danmaku sources:';
+
+  @override
+  String totalDanmaku(Object count) {
+    return '$count danmaku loaded';
+  }
+
+  @override
+  String get switchDanmaku => 'Switch danmaku';
+
+  @override
+  String get enterTitle => 'Enter title';
+
+  @override
+  String get searchResults => 'Search results:';
+
+  @override
+  String get cancel => 'Cancel';
+
+  @override
+  String get submit => 'Submit';
+
+  @override
+  String get noDanmakuEpisodes => 'No danmaku episodes';
+
+  @override
+  String get close => 'Close';
+
+  @override
+  String get videoSource => 'Video source';
+
+  @override
+  String get autoSelectingResource => 'Selecting resource automatically';
+
+  @override
+  String get switchSource => 'Switch source';
+
+  @override
+  String get sourceActions => 'Source actions';
+
+  @override
+  String get openPlaybackPage => 'Open playback page in browser';
+
+  @override
+  String get copySourceLink => 'Copy source link';
+
+  @override
+  String get copied => 'Copied';
+
+  @override
+  String get sourceLinkCopied => 'Source link copied';
+
+  @override
+  String lineLabel(Object line) {
+    return 'Line: $line';
+  }
+
+  @override
+  String get recommendationsTitle => 'Recommended';
+
+  @override
+  String get recommendationLoadFailed => 'Failed to load recommendations';
+
+  @override
+  String get videoSettingsTitle => 'Video settings';
+
+  @override
+  String get scheduledOff => 'Scheduled stop';
+
+  @override
+  String minutesUnit(Object count) {
+    return '$count min';
+  }
+
+  @override
+  String hoursUnit(Object count) {
+    return '$count hr';
+  }
+
+  @override
+  String hoursMinutesUnit(Object hours, Object minutes) {
+    return '$hours hr $minutes min';
+  }
+
+  @override
+  String get confirm => 'Confirm';
+
+  @override
+  String get moreSettingsBuilding => 'More settings are under construction...';
+
+  @override
+  String get exitFullscreen => 'Exit fullscreen';
+
+  @override
+  String get back => 'Back';
+
+  @override
+  String skipSeconds(Object seconds) {
+    return 'Skip $seconds seconds';
+  }
+
+  @override
+  String get settings => 'Settings';
+
+  @override
+  String get turnOffDanmaku => 'Turn off danmaku';
+
+  @override
+  String get turnOnDanmaku => 'Turn on danmaku';
+
+  @override
+  String get danmakuSettings => 'Danmaku settings';
+
+  @override
+  String get loginToSendDanmaku => 'Log in to send danmaku';
+
+  @override
+  String get pause => 'Pause';
+
+  @override
+  String get play => 'Play';
+
+  @override
+  String get nextEpisode => 'Next episode';
+
+  @override
+  String get playbackRate => 'Speed';
+
+  @override
+  String get sendDanmakuHint => 'Send danmaku...';
+
+  @override
+  String waitToSendDanmaku(Object seconds) {
+    return 'Please wait $seconds seconds before sending…';
+  }
 }

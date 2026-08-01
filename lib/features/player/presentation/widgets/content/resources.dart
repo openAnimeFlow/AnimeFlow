@@ -1,3 +1,4 @@
+import 'package:anime_flow/app/localization/app_localizations.dart';
 import 'package:anime_flow/shared/models/enums/video_controls_icon_type.dart';
 import 'package:anime_flow/features/player/presentation/providers/play_provider.dart';
 import 'package:anime_flow/features/player/presentation/providers/video_ui_provider.dart';
@@ -112,15 +113,16 @@ class _VideoResourcesViewState extends ConsumerState<VideoResourcesView> {
   }
 
   Future<void> _copySourcePageUrl(String videoUrl) async {
+    final l10n = AppLocalizations.of(context);
     final url = videoUrl.trim();
     await Clipboard.setData(ClipboardData(text: url));
-    NotificationToast.show('已复制', '数据源链接已复制到剪贴板');
+    NotificationToast.show(l10n.copied, l10n.sourceLinkCopied);
   }
 
-  Widget _buildSourceActionMenu(String videoUrl) {
+  Widget _buildSourceActionMenu(String videoUrl, AppLocalizations l10n) {
     return DropDownMenu<_SourceAction>(
       items: _SourceAction.values,
-      tooltip: '数据源操作',
+      tooltip: l10n.sourceActions,
       disableSelected: false,
       onOpenedChanged: (isOpen) {
         if (!mounted || _isSourceActionMenuOpen == isOpen) {
@@ -150,9 +152,12 @@ class _VideoResourcesViewState extends ConsumerState<VideoResourcesView> {
         final (icon, label) = switch (action) {
           _SourceAction.openPageUrl => (
               Icons.open_in_browser_rounded,
-              '浏览器播放页面'
+              l10n.openPlaybackPage
             ),
-          _SourceAction.copyPageUrl => (Icons.content_copy_rounded, '复制数据源链接'),
+          _SourceAction.copyPageUrl => (
+              Icons.content_copy_rounded,
+              l10n.copySourceLink
+            ),
         };
         return SizedBox(
           width: 150,
@@ -178,6 +183,7 @@ class _VideoResourcesViewState extends ConsumerState<VideoResourcesView> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     final videoSourceState = ref.watch(videoSourceProvider);
     final hasSourceUrl = videoSourceState.videoUrl.trim().isNotEmpty;
     final resourceTitle = videoSourceState.resourceTitle.trim();
@@ -185,7 +191,7 @@ class _VideoResourcesViewState extends ConsumerState<VideoResourcesView> {
     final displayLineName = lineName.isEmpty ? '' : lineName;
     final resourceDetail = [
       if (resourceTitle.isNotEmpty) resourceTitle,
-      if (displayLineName.isNotEmpty) '线路: $displayLineName',
+      if (displayLineName.isNotEmpty) l10n.lineLabel(displayLineName),
     ].join(' - ');
     return Card(
       elevation: 0,
@@ -198,8 +204,8 @@ class _VideoResourcesViewState extends ConsumerState<VideoResourcesView> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  const Text(
-                    '数据源',
+                  Text(
+                    l10n.videoSource,
                     style: TextStyle(
                       fontSize: 15,
                     ),
@@ -252,11 +258,11 @@ class _VideoResourcesViewState extends ConsumerState<VideoResourcesView> {
                       ],
                     )
                   else
-                    const Row(
+                    Row(
                       children: [
-                        Text('自动选择资源中'),
-                        SizedBox(width: 5),
-                        SizedBox(
+                        Text(l10n.autoSelectingResource),
+                        const SizedBox(width: 5),
+                        const SizedBox(
                           height: 10,
                           width: 10,
                           child: CircularProgressIndicator(),
@@ -278,10 +284,10 @@ class _VideoResourcesViewState extends ConsumerState<VideoResourcesView> {
                     ),
                   ),
                   icon: const Icon(Icons.sync_alt_rounded),
-                  label: const Text("切换源"),
+                  label: Text(l10n.switchSource),
                 ),
                 if (hasSourceUrl) ...[
-                  _buildSourceActionMenu(videoSourceState.videoUrl),
+                  _buildSourceActionMenu(videoSourceState.videoUrl, l10n),
                 ],
               ],
             ),

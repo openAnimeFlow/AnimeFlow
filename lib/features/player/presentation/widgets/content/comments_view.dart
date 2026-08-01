@@ -1,3 +1,4 @@
+import 'package:anime_flow/app/localization/app_localizations.dart';
 import 'package:anime_flow/shared/models/player/bangumi/episode_comments_item.dart';
 import 'package:anime_flow/features/player/presentation/providers/episode_comments_provider.dart';
 import 'package:anime_flow/app/router/app_router.dart';
@@ -71,6 +72,7 @@ class _CommentsViewState extends ConsumerState<CommentsView>
   }
 
   Widget buildComments(AsyncValue<List<EpisodeComment>> commentsAsync) {
+    final l10n = AppLocalizations.of(context);
     if (commentsAsync.isLoading) {
       return Padding(
         padding: const EdgeInsets.all(10),
@@ -104,7 +106,7 @@ class _CommentsViewState extends ConsumerState<CommentsView>
             ),
             const SizedBox(height: 12),
             Text(
-              '评论加载失败',
+              l10n.commentLoadFailed,
               style: TextStyle(
                 fontSize: 16,
                 color: Theme.of(context).colorScheme.outline,
@@ -113,7 +115,7 @@ class _CommentsViewState extends ConsumerState<CommentsView>
             const SizedBox(height: 12),
             FilledButton.tonal(
               onPressed: () => ref.invalidate(episodeCommentsProvider),
-              child: const Text('重试'),
+              child: Text(l10n.retry),
             ),
           ],
         ),
@@ -129,13 +131,15 @@ class _CommentsViewState extends ConsumerState<CommentsView>
           sliver: SliverToBoxAdapter(
             child: Row(
               children: [
-                const Text(
-                  '吐槽',
+                Text(
+                  l10n.commentsTitle,
                   style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
                 ),
                 const Spacer(),
                 Text(
-                  comments.isNotEmpty ? "评论数 ${comments.length}" : "评论数",
+                  comments.isNotEmpty
+                      ? l10n.commentCount(comments.length)
+                      : l10n.commentsAction,
                   style: TextStyle(
                     color: Theme.of(context).colorScheme.outline,
                   ),
@@ -149,13 +153,13 @@ class _CommentsViewState extends ConsumerState<CommentsView>
                         padding: const EdgeInsets.symmetric(vertical: 5),
                         checked: _sortOrder == 'default',
                         value: 'default',
-                        child: const Text('默认'),
+                        child: Text(l10n.defaultSort),
                       ),
                       CheckedPopupMenuItem<String>(
                         padding: const EdgeInsets.symmetric(vertical: 5),
                         value: 'newest',
                         checked: _sortOrder == 'newest',
-                        child: const Text('最新'),
+                        child: Text(l10n.newestSort),
                       ),
                     ];
                   },
@@ -183,7 +187,7 @@ class _CommentsViewState extends ConsumerState<CommentsView>
                   ),
                   const SizedBox(height: 16),
                   Text(
-                    '暂无评论',
+                    l10n.noComments,
                     style: TextStyle(
                       fontSize: 16,
                       color: Theme.of(context).colorScheme.outline,
@@ -485,9 +489,12 @@ class _CommentButtonState extends State<_CommentButton> {
                 ? CrossFadeState.showFirst
                 : CrossFadeState.showSecond,
             firstChild: const SizedBox.shrink(),
-            secondChild: const Padding(
+            secondChild: Padding(
               padding: EdgeInsets.only(left: 8),
-              child: Text('评论', style: labelStyle),
+              child: Text(
+                AppLocalizations.of(context).commentsAction,
+                style: labelStyle,
+              ),
             ),
           ),
         ],

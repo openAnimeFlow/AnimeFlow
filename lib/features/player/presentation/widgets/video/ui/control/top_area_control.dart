@@ -14,6 +14,7 @@ import 'package:anime_flow/core/utils/utils.dart';
 import 'package:anime_flow/shared/widgets/battery_icon.dart';
 import 'package:anime_flow/shared/widgets/network_icon.dart';
 import 'package:anime_flow/features/player/presentation/widgets/source_drawers/video_source_drawers.dart';
+import 'package:anime_flow/app/localization/app_localizations.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_svg/svg.dart';
@@ -78,6 +79,7 @@ class _TopAreaControlState extends ConsumerState<TopAreaControl> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     final videoUiStateController = ref.read(videoUiProvider.notifier);
     final isShowControlsUi =
         ref.watch(videoUiProvider.select((s) => s.isShowControlsUi));
@@ -116,7 +118,7 @@ class _TopAreaControlState extends ConsumerState<TopAreaControl> {
                       Container(
                         padding: const EdgeInsets.symmetric(horizontal: 15),
                         height: 16,
-                        child: _buildTopInfoBar(),
+                        child: _buildTopInfoBar(context),
                       ),
                     Row(
                       children: [
@@ -125,7 +127,9 @@ class _TopAreaControlState extends ConsumerState<TopAreaControl> {
                           child: Row(
                             children: [
                               IconButton(
-                                tooltip: fullscreen ? '退出全屏' : '返回',
+                                tooltip: fullscreen
+                                    ? l10n.exitFullscreen
+                                    : l10n.back,
                                 onPressed: () {
                                   if (fullscreen) {
                                     playController.exitFullScreen();
@@ -212,7 +216,7 @@ class _TopAreaControlState extends ConsumerState<TopAreaControl> {
                                 if (position > Duration.zero &&
                                     (isWideScreen || fullscreen)) ...[
                                   Tooltip(
-                                    message: '跳过 $_skipDuration 秒',
+                                    message: l10n.skipSeconds(_skipDuration),
                                     child: IconButton(
                                       onPressed: () => playController.seekTo(
                                         position +
@@ -228,7 +232,7 @@ class _TopAreaControlState extends ConsumerState<TopAreaControl> {
                                     ),
                                   ),
                                   IconButton(
-                                    tooltip: '设置',
+                                    tooltip: l10n.settings,
                                     onPressed: () {
                                       _showRightSlideDialog(
                                         barrierDismissible: true,
@@ -339,7 +343,7 @@ class _TopAreaControlState extends ConsumerState<TopAreaControl> {
   }
 
   ///顶部信息栏
-  Widget _buildTopInfoBar() {
+  Widget _buildTopInfoBar(BuildContext context) {
     return Row(
       children: [
         //网络图标

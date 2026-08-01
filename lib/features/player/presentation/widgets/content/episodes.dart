@@ -1,4 +1,5 @@
 import 'package:anime_flow/core/constants/constants.dart';
+import 'package:anime_flow/app/localization/app_localizations.dart';
 import 'package:anime_flow/shared/models/player/bangumi/episodes_item.dart';
 import 'package:anime_flow/core/network/clients/flow_client.dart';
 import 'package:anime_flow/features/player/presentation/providers/episodes_provider.dart';
@@ -110,6 +111,7 @@ class _EpisodesListViewState extends ConsumerState<EpisodesListView> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     final episodesAsync = ref.watch(episodesProvider);
     final hasEpisodes = episodesAsync.asData?.value.episodes != null;
 
@@ -119,22 +121,22 @@ class _EpisodesListViewState extends ConsumerState<EpisodesListView> {
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            const Text('选集'),
+            Text(l10n.episodeSelection),
             hasEpisodes
                 ? IconButton(
                     onPressed: _toggleLayoutMode,
                     icon: LayoutToggleIcon(isGridView: isGridView),
-                    tooltip: isGridView ? '切换到列表' : '切换到网格',
+                    tooltip: isGridView ? l10n.switchToList : l10n.switchToGrid,
                   )
                 : const SizedBox.shrink(),
           ],
         ),
         episodesAsync.when(
-          loading: () => const Column(
+          loading: () => Column(
             children: [
-              LinearProgressIndicator(),
-              SizedBox(height: 12),
-              Text('正在获取剧集...'),
+              const LinearProgressIndicator(),
+              const SizedBox(height: 12),
+              Text(l10n.fetchingEpisodes),
             ],
           ),
           error: (error, _) => _buildLoadError(error),
@@ -161,7 +163,7 @@ class _EpisodesListViewState extends ConsumerState<EpisodesListView> {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            const Text('剧集获取失败'),
+            Text(AppLocalizations.of(context).episodeLoadFailed),
             const SizedBox(height: 8),
             Text(
               '$error',
@@ -181,7 +183,7 @@ class _EpisodesListViewState extends ConsumerState<EpisodesListView> {
                 ref.read(subjectEpisodesProvider(subjectId).notifier).retry();
               },
               icon: const Icon(Icons.refresh),
-              label: const Text('重试'),
+              label: Text(AppLocalizations.of(context).retry),
             ),
           ],
         ),
@@ -208,7 +210,7 @@ class _EpisodesListViewState extends ConsumerState<EpisodesListView> {
   Widget buildListEpisodes(EpisodesData episodesState) {
     final episodesItem = episodesState.episodes;
     if (episodesItem == null || episodesItem.data.isEmpty) {
-      return const Text('暂无章节数据');
+      return Text(AppLocalizations.of(context).noEpisodeData);
     }
 
     final episodes = episodesItem.data;

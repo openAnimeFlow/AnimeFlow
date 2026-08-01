@@ -426,6 +426,378 @@ abstract class AppLocalizations {
   /// In zh_Hans, this message translates to:
   /// **'{count}抛弃'**
   String droppedCount(Object count);
+
+  /// No description provided for @playIntroTab.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'简介'**
+  String get playIntroTab;
+
+  /// No description provided for @playCommentsTab.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'吐槽'**
+  String get playCommentsTab;
+
+  /// No description provided for @pleaseLogin.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'请先登录'**
+  String get pleaseLogin;
+
+  /// No description provided for @loginBeforeDanmaku.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'请先登录后再发送弹幕'**
+  String get loginBeforeDanmaku;
+
+  /// No description provided for @tip.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'提示'**
+  String get tip;
+
+  /// No description provided for @danmakuSent.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'弹幕发送成功'**
+  String get danmakuSent;
+
+  /// No description provided for @danmakuUnsupported.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'当前不支持发送弹幕'**
+  String get danmakuUnsupported;
+
+  /// No description provided for @episodeSelection.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'选集'**
+  String get episodeSelection;
+
+  /// No description provided for @switchToList.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'切换到列表'**
+  String get switchToList;
+
+  /// No description provided for @switchToGrid.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'切换到网格'**
+  String get switchToGrid;
+
+  /// No description provided for @fetchingEpisodes.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'正在获取剧集...'**
+  String get fetchingEpisodes;
+
+  /// No description provided for @episodeLoadFailed.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'剧集获取失败'**
+  String get episodeLoadFailed;
+
+  /// No description provided for @noEpisodeData.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'暂无章节数据'**
+  String get noEpisodeData;
+
+  /// No description provided for @updatedProgress.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'已更新观看进度'**
+  String get updatedProgress;
+
+  /// No description provided for @updateFailed.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'更新失败'**
+  String get updateFailed;
+
+  /// No description provided for @commentCount.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'评论数 {count}'**
+  String commentCount(Object count);
+
+  /// No description provided for @commentLoadFailed.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'评论加载失败'**
+  String get commentLoadFailed;
+
+  /// No description provided for @defaultSort.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'默认'**
+  String get defaultSort;
+
+  /// No description provided for @newestSort.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'最新'**
+  String get newestSort;
+
+  /// No description provided for @noComments.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'暂无评论'**
+  String get noComments;
+
+  /// No description provided for @commentsAction.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'评论'**
+  String get commentsAction;
+
+  /// No description provided for @danmakuSource.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'弹幕源:'**
+  String get danmakuSource;
+
+  /// No description provided for @totalDanmaku.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'总装填({count})条弹幕'**
+  String totalDanmaku(Object count);
+
+  /// No description provided for @switchDanmaku.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'切换弹幕'**
+  String get switchDanmaku;
+
+  /// No description provided for @enterTitle.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'请输入标题'**
+  String get enterTitle;
+
+  /// No description provided for @searchResults.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'搜索结果:'**
+  String get searchResults;
+
+  /// No description provided for @cancel.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'取消'**
+  String get cancel;
+
+  /// No description provided for @submit.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'提交'**
+  String get submit;
+
+  /// No description provided for @noDanmakuEpisodes.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'暂无剧集数据'**
+  String get noDanmakuEpisodes;
+
+  /// No description provided for @close.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'关闭'**
+  String get close;
+
+  /// No description provided for @videoSource.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'数据源'**
+  String get videoSource;
+
+  /// No description provided for @autoSelectingResource.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'自动选择资源中'**
+  String get autoSelectingResource;
+
+  /// No description provided for @switchSource.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'切换源'**
+  String get switchSource;
+
+  /// No description provided for @sourceActions.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'数据源操作'**
+  String get sourceActions;
+
+  /// No description provided for @openPlaybackPage.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'浏览器播放页面'**
+  String get openPlaybackPage;
+
+  /// No description provided for @copySourceLink.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'复制数据源链接'**
+  String get copySourceLink;
+
+  /// No description provided for @copied.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'已复制'**
+  String get copied;
+
+  /// No description provided for @sourceLinkCopied.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'数据源链接已复制'**
+  String get sourceLinkCopied;
+
+  /// No description provided for @lineLabel.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'线路: {line}'**
+  String lineLabel(Object line);
+
+  /// No description provided for @recommendationsTitle.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'相关推荐'**
+  String get recommendationsTitle;
+
+  /// No description provided for @recommendationLoadFailed.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'推荐数据获取失败'**
+  String get recommendationLoadFailed;
+
+  /// No description provided for @videoSettingsTitle.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'视频设置'**
+  String get videoSettingsTitle;
+
+  /// No description provided for @scheduledOff.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'定时关闭'**
+  String get scheduledOff;
+
+  /// No description provided for @minutesUnit.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'{count}分钟'**
+  String minutesUnit(Object count);
+
+  /// No description provided for @hoursUnit.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'{count}小时'**
+  String hoursUnit(Object count);
+
+  /// No description provided for @hoursMinutesUnit.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'{hours}小时{minutes}分钟'**
+  String hoursMinutesUnit(Object hours, Object minutes);
+
+  /// No description provided for @confirm.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'确定'**
+  String get confirm;
+
+  /// No description provided for @moreSettingsBuilding.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'更多设置正在施工中...'**
+  String get moreSettingsBuilding;
+
+  /// No description provided for @exitFullscreen.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'退出全屏'**
+  String get exitFullscreen;
+
+  /// No description provided for @back.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'返回'**
+  String get back;
+
+  /// No description provided for @skipSeconds.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'跳过{seconds}秒'**
+  String skipSeconds(Object seconds);
+
+  /// No description provided for @settings.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'设置'**
+  String get settings;
+
+  /// No description provided for @turnOffDanmaku.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'关闭弹幕'**
+  String get turnOffDanmaku;
+
+  /// No description provided for @turnOnDanmaku.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'开启弹幕'**
+  String get turnOnDanmaku;
+
+  /// No description provided for @danmakuSettings.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'弹幕设置'**
+  String get danmakuSettings;
+
+  /// No description provided for @loginToSendDanmaku.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'登录后才能发送弹幕'**
+  String get loginToSendDanmaku;
+
+  /// No description provided for @pause.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'暂停'**
+  String get pause;
+
+  /// No description provided for @play.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'播放'**
+  String get play;
+
+  /// No description provided for @nextEpisode.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'下一集'**
+  String get nextEpisode;
+
+  /// No description provided for @playbackRate.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'倍速'**
+  String get playbackRate;
+
+  /// No description provided for @sendDanmakuHint.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'发送弹幕...'**
+  String get sendDanmakuHint;
+
+  /// No description provided for @waitToSendDanmaku.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'请等待{seconds}秒后再发…'**
+  String waitToSendDanmaku(Object seconds);
 }
 
 class _AppLocalizationsDelegate

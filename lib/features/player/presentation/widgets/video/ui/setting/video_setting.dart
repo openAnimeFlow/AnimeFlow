@@ -1,4 +1,5 @@
 import 'package:anime_flow/core/constants/layout_constant.dart';
+import 'package:anime_flow/app/localization/app_localizations.dart';
 import 'package:anime_flow/features/player/presentation/providers/play_provider.dart';
 import 'package:anime_flow/core/utils/format_time_util.dart';
 import 'package:flutter/material.dart';
@@ -50,20 +51,22 @@ class _VideoSettingState extends ConsumerState<VideoSetting> {
 
   /// 格式化时长显示
   String _formatSelectedTime() {
+    final l10n = AppLocalizations.of(context);
     if (selectedHours == 0 && selectedMinutes == 0) {
-      return '关闭';
+      return l10n.close;
     }
     if (selectedHours == 0) {
-      return '$selectedMinutes分钟';
+      return l10n.minutesUnit(selectedMinutes);
     }
     if (selectedMinutes == 0) {
-      return '$selectedHours小时';
+      return l10n.hoursUnit(selectedHours);
     }
-    return '$selectedHours小时$selectedMinutes分钟';
+    return l10n.hoursMinutesUnit(selectedHours, selectedMinutes);
   }
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     return Material(
       color: Colors.transparent,
       child: Align(
@@ -86,8 +89,8 @@ class _VideoSettingState extends ConsumerState<VideoSetting> {
                   // 标题栏
                   Row(
                     children: [
-                      const Text(
-                        '视频设置',
+                      Text(
+                        l10n.videoSettingsTitle,
                         style: TextStyle(
                           decoration: TextDecoration.none,
                           fontSize: 20,
@@ -126,7 +129,7 @@ class _VideoSettingState extends ConsumerState<VideoSetting> {
                               );
                               return Text(
                                 scheduledStopDuration == 0
-                                    ? '定时关闭'
+                                    ? l10n.scheduledOff
                                     : FormatTimeUtil.formatScheduledTime(
                                         scheduledStopDuration),
                                 style: TextStyle(
@@ -210,7 +213,7 @@ class _VideoSettingState extends ConsumerState<VideoSetting> {
                                         Navigator.of(context).pop();
                                       },
                                       child: Text(
-                                        '确定',
+                                        l10n.confirm,
                                         style: TextStyle(
                                           fontWeight: FontWeight.w600,
                                           color: Theme.of(context)
@@ -341,7 +344,7 @@ class _VideoSettingState extends ConsumerState<VideoSetting> {
                   const Divider(),
                   const SizedBox(height: 10),
                   Text(
-                    '更多设置正在施工中...',
+                    l10n.moreSettingsBuilding,
                     style: TextStyle(
                       fontSize: 20,
                       decoration: TextDecoration.none,

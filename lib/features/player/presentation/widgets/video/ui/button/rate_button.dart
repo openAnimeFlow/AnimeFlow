@@ -1,5 +1,6 @@
 import 'package:anime_flow/features/player/presentation/providers/play_provider.dart';
 import 'package:anime_flow/features/player/presentation/providers/video_ui_provider.dart';
+import 'package:anime_flow/app/localization/app_localizations.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -26,6 +27,7 @@ class RateButton extends ConsumerWidget {
       playStateProvider.select((state) => state.rate),
     );
     final colorScheme = Theme.of(context).colorScheme;
+    final l10n = AppLocalizations.of(context);
 
     return MenuAnchor(
       onOpen: () {
@@ -78,7 +80,8 @@ class RateButton extends ConsumerWidget {
               controller.open();
             }
           },
-          child: Text(currentRate == 1.0 ? '倍速' : '${currentRate}x'),
+          child:
+              Text(currentRate == 1.0 ? l10n.playbackRate : '${currentRate}x'),
         );
       },
     );

@@ -5,6 +5,7 @@ import 'package:flutter/widgets.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:intl/intl.dart' as intl;
 
+import 'app_localizations_en.dart';
 import 'app_localizations_zh.dart';
 
 // ignore_for_file: type=lint
@@ -93,6 +94,7 @@ abstract class AppLocalizations {
 
   /// A list of this localizations delegate's supported locales.
   static const List<Locale> supportedLocales = <Locale>[
+    Locale('en'),
     Locale('zh'),
     Locale.fromSubtags(languageCode: 'zh', scriptCode: 'Hans'),
     Locale.fromSubtags(
@@ -136,6 +138,12 @@ abstract class AppLocalizations {
   /// In zh_Hans, this message translates to:
   /// **'繁體中文（香港）'**
   String get traditionalChineseHongKong;
+
+  /// No description provided for @englishLanguage.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'English'**
+  String get englishLanguage;
 
   /// No description provided for @recommendTab.
   ///
@@ -347,7 +355,7 @@ class _AppLocalizationsDelegate
 
   @override
   bool isSupported(Locale locale) =>
-      <String>['zh'].contains(locale.languageCode);
+      <String>['en', 'zh'].contains(locale.languageCode);
 
   @override
   bool shouldReload(_AppLocalizationsDelegate old) => false;
@@ -376,6 +384,8 @@ AppLocalizations lookupAppLocalizations(Locale locale) {
 
   // Lookup logic when only language code is specified.
   switch (locale.languageCode) {
+    case 'en':
+      return AppLocalizationsEn();
     case 'zh':
       return AppLocalizationsZh();
   }

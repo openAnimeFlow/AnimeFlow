@@ -19,6 +19,7 @@ class LocaleNotifier extends _$LocaleNotifier {
 
   static Locale _parseLocale(Object? value) {
     return switch (value) {
+      'en' => const Locale('en'),
       'zh-Hant-TW' => const Locale.fromSubtags(
           languageCode: 'zh',
           scriptCode: 'Hant',
@@ -34,6 +35,9 @@ class LocaleNotifier extends _$LocaleNotifier {
   }
 
   static String _localeKey(Locale locale) {
+    if (locale.languageCode == 'en') {
+      return 'en';
+    }
     if (locale.scriptCode == 'Hant' && locale.countryCode == 'HK') {
       return 'zh-Hant-HK';
     }

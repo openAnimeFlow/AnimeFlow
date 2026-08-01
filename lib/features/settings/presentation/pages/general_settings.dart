@@ -17,6 +17,9 @@ class _GeneralSettingsPageState extends ConsumerState<GeneralSettingsPage> {
   bool _isLanguageMenuOpen = false;
 
   _LanguageOption _languageForLocale(Locale locale) {
+    if (locale.languageCode == 'en') {
+      return _LanguageOption.english;
+    }
     if (locale.scriptCode == 'Hant' && locale.countryCode == 'HK') {
       return _LanguageOption.traditionalChineseHongKong;
     }
@@ -113,6 +116,7 @@ class _GeneralSettingsPageState extends ConsumerState<GeneralSettingsPage> {
 }
 
 enum _LanguageOption {
+  english,
   simplifiedChinese,
   traditionalChineseTaiwan,
   traditionalChineseHongKong;
@@ -123,6 +127,7 @@ enum _LanguageOption {
         simplifiedChinese => l10n.simplifiedChinese,
         traditionalChineseTaiwan => l10n.traditionalChineseTaiwan,
         traditionalChineseHongKong => l10n.traditionalChineseHongKong,
+        english => l10n.englishLanguage,
       };
 
   Locale get locale => switch (this) {
@@ -140,5 +145,6 @@ enum _LanguageOption {
             scriptCode: 'Hant',
             countryCode: 'HK',
           ),
+        english => const Locale('en'),
       };
 }

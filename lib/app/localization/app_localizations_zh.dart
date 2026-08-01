@@ -27,6 +27,9 @@ class AppLocalizationsZh extends AppLocalizations {
   String get traditionalChineseHongKong => '繁體中文（香港）';
 
   @override
+  String get englishLanguage => 'English';
+
+  @override
   String get recommendTab => '推荐';
 
   @override
@@ -157,6 +160,9 @@ class AppLocalizationsZhHans extends AppLocalizationsZh {
 
   @override
   String get traditionalChineseHongKong => '繁體中文（香港）';
+
+  @override
+  String get englishLanguage => 'English';
 
   @override
   String get recommendTab => '推荐';
@@ -291,6 +297,9 @@ class AppLocalizationsZhHantHk extends AppLocalizationsZh {
   String get traditionalChineseHongKong => '繁體中文（香港）';
 
   @override
+  String get englishLanguage => 'English';
+
+  @override
   String get recommendTab => '推薦';
 
   @override
@@ -421,6 +430,9 @@ class AppLocalizationsZhHantTw extends AppLocalizationsZh {
 
   @override
   String get traditionalChineseHongKong => '繁體中文（香港）';
+
+  @override
+  String get englishLanguage => 'English';
 
   @override
   String get recommendTab => '推薦';

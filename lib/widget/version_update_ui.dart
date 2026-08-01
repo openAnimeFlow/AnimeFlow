@@ -1,6 +1,6 @@
 import 'dart:io';
 
-import 'package:anime_flow/features/app/apply_updates_controller.dart';
+import 'package:anime_flow/core/apply_update/apply_updates_controller.dart';
 import 'package:anime_flow/models/download_info.dart';
 import 'package:anime_flow/models/enums/version_type.dart';
 import 'package:anime_flow/models/version_check_result.dart';

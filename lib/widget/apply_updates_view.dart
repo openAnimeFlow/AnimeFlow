@@ -1,5 +1,5 @@
 import 'package:anime_flow/constants/storage_key.dart';
-import 'package:anime_flow/features/app/app_info_provider.dart';
+import 'package:anime_flow/core/apply_update/app_info_provider.dart';
 import 'package:anime_flow/models/download_info.dart';
 import 'package:anime_flow/models/version_download_state.dart';
 import 'package:anime_flow/utils/utils.dart';

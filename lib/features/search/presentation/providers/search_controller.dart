@@ -6,7 +6,7 @@ import 'package:anime_flow/core/network/api/api.dart';
 import 'package:anime_flow/shared/models/bangumi/subject_item.dart';
 import 'package:anime_flow/shared/models/image_search_item.dart';
 import 'package:anime_flow/shared/models/search/search_history_module.dart';
-import 'package:anime_flow/repository/search/search_history_manager.dart';
+import 'package:anime_flow/features/search/data/repository/search_history_manager.dart';
 import 'package:hive_ce_flutter/hive_flutter.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 

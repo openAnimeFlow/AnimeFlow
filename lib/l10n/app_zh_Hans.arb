@@ -9,5 +9,21 @@
   "recommendTab": "推荐",
   "rankingTab": "排行",
   "mineTab": "我的",
-  "settingsLabel": "设置"
+  "settingsLabel": "设置",
+  "animeTab": "动漫",
+  "forumTab": "论坛",
+  "searchAnimeHint": "搜索动漫番剧...",
+  "playHistorySection": "播放记录",
+  "viewMore": "查看更多",
+  "watchedProgress": "看到{episode}话 {progress}",
+  "@watchedProgress": {"placeholders": {"episode": {}, "progress": {}}},
+  "popularAnimeTitle": "热门动画",
+  "loadFailed": "加载失败",
+  "noMoreContent": "没有更多了",
+  "reload": "重新加载",
+  "todayBroadcast": "今日放送",
+  "calendarSummary": "周{weekday}上映{releases}部,总{viewers}人收看",
+  "@calendarSummary": {"placeholders": {"weekday": {}, "releases": {}, "viewers": {}}},
+  "noUpdatesToday": "今日无番剧更新",
+  "forumUnderConstruction": "施工中..."
 }

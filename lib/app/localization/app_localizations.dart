@@ -160,6 +160,90 @@ abstract class AppLocalizations {
   /// In zh_Hans, this message translates to:
   /// **'设置'**
   String get settingsLabel;
+
+  /// No description provided for @animeTab.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'动漫'**
+  String get animeTab;
+
+  /// No description provided for @forumTab.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'论坛'**
+  String get forumTab;
+
+  /// No description provided for @searchAnimeHint.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'搜索动漫番剧...'**
+  String get searchAnimeHint;
+
+  /// No description provided for @playHistorySection.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'播放记录'**
+  String get playHistorySection;
+
+  /// No description provided for @viewMore.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'查看更多'**
+  String get viewMore;
+
+  /// No description provided for @watchedProgress.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'看到{episode}话 {progress}'**
+  String watchedProgress(Object episode, Object progress);
+
+  /// No description provided for @popularAnimeTitle.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'热门动画'**
+  String get popularAnimeTitle;
+
+  /// No description provided for @loadFailed.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'加载失败'**
+  String get loadFailed;
+
+  /// No description provided for @noMoreContent.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'没有更多了'**
+  String get noMoreContent;
+
+  /// No description provided for @reload.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'重新加载'**
+  String get reload;
+
+  /// No description provided for @todayBroadcast.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'今日放送'**
+  String get todayBroadcast;
+
+  /// No description provided for @calendarSummary.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'周{weekday}上映{releases}部,总{viewers}人收看'**
+  String calendarSummary(Object weekday, Object releases, Object viewers);
+
+  /// No description provided for @noUpdatesToday.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'今日无番剧更新'**
+  String get noUpdatesToday;
+
+  /// No description provided for @forumUnderConstruction.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'施工中...'**
+  String get forumUnderConstruction;
 }
 
 class _AppLocalizationsDelegate

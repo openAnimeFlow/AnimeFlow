@@ -1,3 +1,4 @@
+import 'package:anime_flow/app/localization/app_localizations.dart';
 import 'package:anime_flow/shared/models/bangumi/calendar_item.dart';
 import 'package:anime_flow/features/home/presentation/providers/anime_provider.dart';
 import 'package:anime_flow/app/router/model/info_route_extra.dart';
@@ -51,12 +52,14 @@ class _CalendarViewState extends State<CalendarView> {
   Widget build(BuildContext context) {
     return Consumer(
       builder: (context, ref, child) {
+        final l10n = AppLocalizations.of(context);
         final calendarAsync = ref.watch(animeCalendarProvider);
 
         return calendarAsync.when(
           loading: () => _buildCalendarSection(
             context,
             content: _buildCalendarSkeletonCarousel(context),
+            l10n: l10n,
           ),
           error: (error, stackTrace) => _buildCalendarSection(
             context,
@@ -65,20 +68,21 @@ class _CalendarViewState extends State<CalendarView> {
                 onTap: () => ref
                     .read(animeCalendarProvider.notifier)
                     .refreshCalendarDate(),
-                child: const Padding(
-                  padding: EdgeInsets.all(8.0),
+                child: Padding(
+                  padding: const EdgeInsets.all(8.0),
                   child: Row(
                     mainAxisSize: MainAxisSize.min,
                     mainAxisAlignment: MainAxisAlignment.center,
                     spacing: 8,
                     children: [
-                      Text('获取数据失败'),
-                      Icon(Icons.refresh),
+                      Text(l10n.loadFailed),
+                      const Icon(Icons.refresh),
                     ],
                   ),
                 ),
               ),
             ),
+            l10n: l10n,
           ),
           data: (calendar) {
             final numberOfReleases =
@@ -93,10 +97,10 @@ class _CalendarViewState extends State<CalendarView> {
                   child: Row(
                     crossAxisAlignment: CrossAxisAlignment.end,
                     children: [
-                      const Expanded(
+                      Expanded(
                         child: Text(
-                          '今日放送',
-                          style: TextStyle(
+                          l10n.todayBroadcast,
+                          style: const TextStyle(
                             fontSize: 25,
                             fontWeight: FontWeight.bold,
                           ),
@@ -110,7 +114,7 @@ class _CalendarViewState extends State<CalendarView> {
                             child: Row(
                               children: [
                                 Text(
-                                  '查看更多',
+                                  l10n.viewMore,
                                   style: TextStyle(
                                     fontSize:
                                         windowWidth(context) > 600 ? 15 : 12,
@@ -125,7 +129,11 @@ class _CalendarViewState extends State<CalendarView> {
                             ),
                           ),
                           Text(
-                            '周$weekday上映$numberOfReleases部,总$numberOfViewers人收看',
+                            l10n.calendarSummary(
+                              weekday,
+                              numberOfReleases,
+                              numberOfViewers,
+                            ),
                             style: TextStyle(
                               fontSize: windowWidth(context) > 600 ? 15 : 10,
                               color: Colors.grey,
@@ -139,7 +147,7 @@ class _CalendarViewState extends State<CalendarView> {
                 SliverToBoxAdapter(
                   child: SizedBox(
                     height: _carouselHeight(windowWidth(context)),
-                    child: _buildContent(context, calendar),
+                    child: _buildContent(context, calendar, l10n),
                   ),
                 ),
               ],
@@ -151,17 +159,18 @@ class _CalendarViewState extends State<CalendarView> {
   }
 
   Widget _buildCalendarSection(BuildContext context,
-      {required Widget content}) {
+      {required Widget content, required AppLocalizations l10n}) {
     return SliverMainAxisGroup(
       slivers: [
-        const SliverToBoxAdapter(
+        SliverToBoxAdapter(
           child: Row(
             crossAxisAlignment: CrossAxisAlignment.end,
             children: [
               Expanded(
                 child: Text(
-                  '今日放送',
-                  style: TextStyle(fontSize: 25, fontWeight: FontWeight.bold),
+                  l10n.todayBroadcast,
+                  style: const TextStyle(
+                      fontSize: 25, fontWeight: FontWeight.bold),
                 ),
               ),
             ],
@@ -247,12 +256,13 @@ class _CalendarViewState extends State<CalendarView> {
     );
   }
 
-  Widget _buildContent(BuildContext context, Calendar calendar) {
+  Widget _buildContent(
+      BuildContext context, Calendar calendar, AppLocalizations l10n) {
     final items = calendar.calendarData[weekday.toString()];
 
     if (items == null || items.isEmpty) {
-      return const Center(
-        child: Text('今日无番剧更新'),
+      return Center(
+        child: Text(l10n.noUpdatesToday),
       );
     }
 

@@ -1,3 +1,4 @@
+import 'package:anime_flow/app/localization/app_localizations.dart';
 import 'package:anime_flow/shared/models/bangumi/timeline_item.dart';
 import 'package:flutter/material.dart';
 
@@ -24,7 +25,8 @@ class _ForumPageState extends State<ForumPage>
   @override
   Widget build(BuildContext context) {
     super.build(context);
-    return Center(child: Text('施工中...'));
+    return Center(
+        child: Text(AppLocalizations.of(context).forumUnderConstruction));
   }
 //   if (isLoading && timelineData.isEmpty) {
 //     return const Center(child: CircularProgressIndicator());

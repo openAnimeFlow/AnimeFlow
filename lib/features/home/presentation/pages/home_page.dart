@@ -1,3 +1,4 @@
+import 'package:anime_flow/app/localization/app_localizations.dart';
 import 'package:anime_flow/features/home/presentation/widgets/anime/anime_view.dart';
 import 'package:anime_flow/features/home/presentation/widgets/forum/forum_view.dart';
 import 'package:anime_flow/app/router/app_router.dart';
@@ -15,12 +16,10 @@ class _RecommendPageState extends State<RecommendPage>
   late TabController _tabController;
   final _animeKey = GlobalKey();
   final _timelineKey = GlobalKey();
-  final List<String> _tabs = ['动漫', '论坛'];
-
   @override
   void initState() {
     super.initState();
-    _tabController = TabController(length: _tabs.length, vsync: this);
+    _tabController = TabController(length: 2, vsync: this);
   }
 
   @override
@@ -31,6 +30,7 @@ class _RecommendPageState extends State<RecommendPage>
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     return Scaffold(
       appBar: AppBar(
         title: Row(
@@ -38,7 +38,7 @@ class _RecommendPageState extends State<RecommendPage>
             Expanded(
                 child: Row(
               children: [
-                const Text("推荐"),
+                Text(l10n.recommendTab),
                 const SizedBox(width: 10),
                 Container(
                   width: 200,
@@ -52,7 +52,7 @@ class _RecommendPageState extends State<RecommendPage>
                   ),
                   child: TextField(
                     decoration: InputDecoration(
-                      hintText: "搜索动漫番剧...",
+                      hintText: l10n.searchAnimeHint,
                       hintStyle: TextStyle(
                         color: Colors.grey.shade600,
                         fontSize: 14,
@@ -85,13 +85,10 @@ class _RecommendPageState extends State<RecommendPage>
             )),
           ],
         ),
-        bottom: TabBar(
-            controller: _tabController,
-            tabs: List.generate(_tabs.length, (index) {
-              return Tab(
-                text: _tabs[index],
-              );
-            })),
+        bottom: TabBar(controller: _tabController, tabs: [
+          Tab(text: l10n.animeTab),
+          Tab(text: l10n.forumTab),
+        ]),
       ),
       body: TabBarView(
         controller: _tabController,

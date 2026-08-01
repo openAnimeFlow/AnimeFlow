@@ -1,3 +1,4 @@
+import 'package:anime_flow/app/localization/app_localizations.dart';
 import 'package:anime_flow/app/router/model/info_route_extra.dart';
 import 'package:anime_flow/features/home/presentation/providers/anime_provider.dart';
 import 'package:anime_flow/app/router/app_router.dart';
@@ -16,12 +17,13 @@ class PopularAnimeView extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = AppLocalizations.of(context);
     final hotAsync = ref.watch(animeHotProvider);
 
     return hotAsync.when(
       loading: () => SliverMainAxisGroup(
         slivers: [
-          _buildTitleSliver(),
+          _buildTitleSliver(l10n),
           SliverGrid(
             gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
               crossAxisCount: LayoutUtil.getCrossAxisCount(context),
@@ -43,11 +45,12 @@ class PopularAnimeView extends ConsumerWidget {
       ),
       error: (error, stackTrace) => _buildSection(
         context,
-        child: _buildErrorContent(context, ref, error.toString()),
+        child: _buildErrorContent(context, ref, error.toString(), l10n),
+        l10n: l10n,
       ),
       data: (hotState) => SliverMainAxisGroup(
         slivers: [
-          _buildTitleSliver(),
+          _buildTitleSliver(l10n),
           SliverGrid(
             gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
               crossAxisCount: LayoutUtil.getCrossAxisCount(context),
@@ -103,7 +106,7 @@ class PopularAnimeView extends ConsumerWidget {
                     spacing: 8,
                     children: [
                       Text(
-                        '加载失败',
+                        l10n.loadFailed,
                         style: TextStyle(
                           color: Theme.of(context).colorScheme.error,
                           fontSize: 14,
@@ -126,7 +129,7 @@ class PopularAnimeView extends ConsumerWidget {
                       Padding(
                         padding: const EdgeInsets.symmetric(horizontal: 8.0),
                         child: Text(
-                          '没有更多了',
+                          l10n.noMoreContent,
                           style: TextStyle(
                             color:
                                 Theme.of(context).colorScheme.onSurfaceVariant,
@@ -144,29 +147,31 @@ class PopularAnimeView extends ConsumerWidget {
     );
   }
 
-  Widget _buildSection(BuildContext context, {required Widget child}) {
+  Widget _buildSection(BuildContext context,
+      {required Widget child, required AppLocalizations l10n}) {
     return SliverMainAxisGroup(
       slivers: [
-        _buildTitleSliver(),
+        _buildTitleSliver(l10n),
         SliverToBoxAdapter(child: child),
       ],
     );
   }
 
-  Widget _buildTitleSliver() {
-    return const SliverToBoxAdapter(
+  Widget _buildTitleSliver(AppLocalizations l10n) {
+    return SliverToBoxAdapter(
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Row(
             children: [
               Text(
-                '热门动画',
-                style: TextStyle(fontSize: 25, fontWeight: FontWeight.bold),
+                l10n.popularAnimeTitle,
+                style:
+                    const TextStyle(fontSize: 25, fontWeight: FontWeight.bold),
               ),
             ],
           ),
-          SizedBox(height: 5),
+          const SizedBox(height: 5),
         ],
       ),
     );
@@ -176,6 +181,7 @@ class PopularAnimeView extends ConsumerWidget {
     BuildContext context,
     WidgetRef ref,
     String errorMessage,
+    AppLocalizations l10n,
   ) {
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 32),
@@ -188,7 +194,7 @@ class PopularAnimeView extends ConsumerWidget {
           ),
           const SizedBox(height: 12),
           Text(
-            '加载失败',
+            l10n.loadFailed,
             style: TextStyle(
               fontSize: 18,
               fontWeight: FontWeight.bold,
@@ -210,7 +216,7 @@ class PopularAnimeView extends ConsumerWidget {
           ElevatedButton.icon(
             onPressed: () => ref.read(animeHotProvider.notifier).refresh(),
             icon: const Icon(Icons.refresh),
-            label: const Text('重新加载'),
+            label: Text(l10n.reload),
           ),
         ],
       ),

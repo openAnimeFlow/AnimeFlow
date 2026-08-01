@@ -1,3 +1,4 @@
+import 'package:anime_flow/app/localization/app_localizations.dart';
 import 'package:anime_flow/app/router/app_router.dart';
 import 'package:anime_flow/app/router/model/info_route_extra.dart';
 import 'package:anime_flow/shared/models/player/play/play_history.dart';
@@ -56,6 +57,7 @@ class _PlayRecordViewState extends State<PlayRecordView> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     if (playHistoryList == null || playHistoryList!.isEmpty) {
       return const SliverToBoxAdapter(child: SizedBox.shrink());
     } else {
@@ -67,9 +69,9 @@ class _PlayRecordViewState extends State<PlayRecordView> {
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                const Text(
-                  '播放记录',
-                  style: TextStyle(
+                Text(
+                  l10n.playHistorySection,
+                  style: const TextStyle(
                     fontSize: 25,
                     fontWeight: FontWeight.bold,
                   ),
@@ -80,7 +82,7 @@ class _PlayRecordViewState extends State<PlayRecordView> {
                     child: Row(
                       children: [
                         Text(
-                          '查看更多',
+                          l10n.viewMore,
                           style: TextStyle(
                               fontSize: windowWidth(context) > 600 ? 16 : 14,
                               color: Colors.grey),
@@ -161,7 +163,13 @@ class _PlayRecordViewState extends State<PlayRecordView> {
                                               mainAxisSize: MainAxisSize.min,
                                               children: [
                                                 Text(
-                                                  '看到${history.episodeSort}话 ${Utils.calculatePercentage(history.position, history.duration)}',
+                                                  l10n.watchedProgress(
+                                                    history.episodeSort,
+                                                    Utils.calculatePercentage(
+                                                      history.position,
+                                                      history.duration,
+                                                    ),
+                                                  ),
                                                   style: const TextStyle(
                                                     color: Colors.white,
                                                     fontSize: 15,

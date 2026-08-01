@@ -37,6 +37,52 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get settingsLabel => '设置';
+
+  @override
+  String get animeTab => '动漫';
+
+  @override
+  String get forumTab => '论坛';
+
+  @override
+  String get searchAnimeHint => '搜索动漫番剧...';
+
+  @override
+  String get playHistorySection => '播放记录';
+
+  @override
+  String get viewMore => '查看更多';
+
+  @override
+  String watchedProgress(Object episode, Object progress) {
+    return '看到$episode话 $progress';
+  }
+
+  @override
+  String get popularAnimeTitle => '热门动画';
+
+  @override
+  String get loadFailed => '加载失败';
+
+  @override
+  String get noMoreContent => '没有更多了';
+
+  @override
+  String get reload => '重新加载';
+
+  @override
+  String get todayBroadcast => '今日放送';
+
+  @override
+  String calendarSummary(Object weekday, Object releases, Object viewers) {
+    return '周$weekday上映$releases部,总$viewers人收看';
+  }
+
+  @override
+  String get noUpdatesToday => '今日无番剧更新';
+
+  @override
+  String get forumUnderConstruction => '施工中...';
 }
 
 /// The translations for Chinese, using the Han script (`zh_Hans`).
@@ -72,6 +118,52 @@ class AppLocalizationsZhHans extends AppLocalizationsZh {
 
   @override
   String get settingsLabel => '设置';
+
+  @override
+  String get animeTab => '动漫';
+
+  @override
+  String get forumTab => '论坛';
+
+  @override
+  String get searchAnimeHint => '搜索动漫番剧...';
+
+  @override
+  String get playHistorySection => '播放记录';
+
+  @override
+  String get viewMore => '查看更多';
+
+  @override
+  String watchedProgress(Object episode, Object progress) {
+    return '看到$episode话 $progress';
+  }
+
+  @override
+  String get popularAnimeTitle => '热门动画';
+
+  @override
+  String get loadFailed => '加载失败';
+
+  @override
+  String get noMoreContent => '没有更多了';
+
+  @override
+  String get reload => '重新加载';
+
+  @override
+  String get todayBroadcast => '今日放送';
+
+  @override
+  String calendarSummary(Object weekday, Object releases, Object viewers) {
+    return '周$weekday上映$releases部,总$viewers人收看';
+  }
+
+  @override
+  String get noUpdatesToday => '今日无番剧更新';
+
+  @override
+  String get forumUnderConstruction => '施工中...';
 }
 
 /// The translations for Chinese, as used in Hong Kong, using the Han script (`zh_Hant_HK`).
@@ -107,6 +199,52 @@ class AppLocalizationsZhHantHk extends AppLocalizationsZh {
 
   @override
   String get settingsLabel => '設定';
+
+  @override
+  String get animeTab => '動畫';
+
+  @override
+  String get forumTab => '論壇';
+
+  @override
+  String get searchAnimeHint => '搜尋動畫番組...';
+
+  @override
+  String get playHistorySection => '播放記錄';
+
+  @override
+  String get viewMore => '查看更多';
+
+  @override
+  String watchedProgress(Object episode, Object progress) {
+    return '看到$episode話 $progress';
+  }
+
+  @override
+  String get popularAnimeTitle => '熱門動畫';
+
+  @override
+  String get loadFailed => '載入失敗';
+
+  @override
+  String get noMoreContent => '沒有更多了';
+
+  @override
+  String get reload => '重新載入';
+
+  @override
+  String get todayBroadcast => '今日放送';
+
+  @override
+  String calendarSummary(Object weekday, Object releases, Object viewers) {
+    return '週$weekday上映$releases部,共$viewers人收看';
+  }
+
+  @override
+  String get noUpdatesToday => '今日沒有番劇更新';
+
+  @override
+  String get forumUnderConstruction => '施工中...';
 }
 
 /// The translations for Chinese, as used in Taiwan, using the Han script (`zh_Hant_TW`).
@@ -142,4 +280,50 @@ class AppLocalizationsZhHantTw extends AppLocalizationsZh {
 
   @override
   String get settingsLabel => '設定';
+
+  @override
+  String get animeTab => '動畫';
+
+  @override
+  String get forumTab => '論壇';
+
+  @override
+  String get searchAnimeHint => '搜尋動畫番劇...';
+
+  @override
+  String get playHistorySection => '播放記錄';
+
+  @override
+  String get viewMore => '查看更多';
+
+  @override
+  String watchedProgress(Object episode, Object progress) {
+    return '看到$episode話 $progress';
+  }
+
+  @override
+  String get popularAnimeTitle => '熱門動畫';
+
+  @override
+  String get loadFailed => '載入失敗';
+
+  @override
+  String get noMoreContent => '沒有更多了';
+
+  @override
+  String get reload => '重新載入';
+
+  @override
+  String get todayBroadcast => '今日放送';
+
+  @override
+  String calendarSummary(Object weekday, Object releases, Object viewers) {
+    return '週$weekday上映$releases部,共$viewers人收看';
+  }
+
+  @override
+  String get noUpdatesToday => '今日沒有番劇更新';
+
+  @override
+  String get forumUnderConstruction => '施工中...';
 }

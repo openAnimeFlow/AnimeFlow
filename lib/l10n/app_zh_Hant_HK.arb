@@ -9,5 +9,21 @@
   "recommendTab": "推薦",
   "rankingTab": "排行",
   "mineTab": "我的",
-  "settingsLabel": "設定"
+  "settingsLabel": "設定",
+  "animeTab": "動畫",
+  "forumTab": "論壇",
+  "searchAnimeHint": "搜尋動畫番組...",
+  "playHistorySection": "播放記錄",
+  "viewMore": "查看更多",
+  "watchedProgress": "看到{episode}話 {progress}",
+  "@watchedProgress": {"placeholders": {"episode": {}, "progress": {}}},
+  "popularAnimeTitle": "熱門動畫",
+  "loadFailed": "載入失敗",
+  "noMoreContent": "沒有更多了",
+  "reload": "重新載入",
+  "todayBroadcast": "今日放送",
+  "calendarSummary": "週{weekday}上映{releases}部,共{viewers}人收看",
+  "@calendarSummary": {"placeholders": {"weekday": {}, "releases": {}, "viewers": {}}},
+  "noUpdatesToday": "今日沒有番劇更新",
+  "forumUnderConstruction": "施工中..."
 }

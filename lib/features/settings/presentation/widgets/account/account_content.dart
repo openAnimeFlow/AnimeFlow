@@ -3,7 +3,7 @@ import 'package:anime_flow/shared/models/flow/background_image_item.dart';
 import 'package:anime_flow/shared/models/flow/flow_users.dart';
 import 'package:anime_flow/features/settings/presentation/providers/account/account_background_provider.dart';
 import 'package:anime_flow/features/settings/presentation/widgets/account/user_avatar.dart';
-import 'package:anime_flow/providers/user/user_state_provider.dart';
+import 'package:anime_flow/features/user/presentation/providers/user_state_provider.dart';
 import 'package:anime_flow/core/utils/format_time_util.dart';
 import 'package:anime_flow/shared/widgets/animation_network_image.dart';
 import 'package:anime_flow/shared/widgets/notification_toast.dart';

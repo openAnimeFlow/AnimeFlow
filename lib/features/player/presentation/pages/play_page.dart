@@ -4,7 +4,7 @@ import 'package:anime_flow/features/player/presentation/providers/video_source_p
 import 'package:anime_flow/features/player/presentation/providers/video_ui_provider.dart';
 import 'package:anime_flow/features/player/presentation/widgets/video/player.dart';
 import 'package:anime_flow/features/player/presentation/providers/episodes_provider.dart';
-import 'package:anime_flow/providers/user/user_state_provider.dart';
+import 'package:anime_flow/features/user/presentation/providers/user_state_provider.dart';
 import 'package:anime_flow/routes/app_route_observer.dart';
 import 'package:anime_flow/routes/provider/routes_args.dart';
 import 'package:anime_flow/core/utils/systemUtil.dart';

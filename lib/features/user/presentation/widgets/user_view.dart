@@ -3,7 +3,7 @@ import 'dart:ui';
 import 'package:anime_flow/shared/models/flow/flow_users.dart';
 import 'package:anime_flow/features/user/presentation/providers/user_collection_provider.dart';
 import 'package:anime_flow/features/user/presentation/providers/user_collection_state.dart';
-import 'package:anime_flow/providers/user/user_controller.dart';
+import 'package:anime_flow/features/user/application/user_controller.dart';
 import 'package:anime_flow/routes/routes.dart';
 import 'package:anime_flow/core/utils/format_time_util.dart';
 import 'package:anime_flow/core/utils/systemUtil.dart';

@@ -4,7 +4,7 @@ import 'package:anime_flow/shared/models/bangumi/producers_item.dart';
 import 'package:anime_flow/shared/models/bangumi/related_subjects_item.dart';
 import 'package:anime_flow/shared/models/bangumi/subject_comments_item.dart';
 import 'package:anime_flow/shared/models/bangumi/subjects_info_item.dart';
-import 'package:anime_flow/providers/user/user_state_provider.dart';
+import 'package:anime_flow/features/user/presentation/providers/user_state_provider.dart';
 import 'package:anime_flow/routes/provider/routes_args.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/scheduler.dart';

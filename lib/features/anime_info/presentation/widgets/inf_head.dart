@@ -7,7 +7,7 @@ import 'package:anime_flow/core/network/api/flow_api.dart';
 import 'package:anime_flow/features/anime_info/presentation/providers/anime_info_provider.dart';
 import 'package:anime_flow/features/anime_info/presentation/widgets/episodes_drawer.dart';
 import 'package:anime_flow/features/player/presentation/providers/subject_episodes_provider.dart';
-import 'package:anime_flow/providers/user/user_state_provider.dart';
+import 'package:anime_flow/features/user/presentation/providers/user_state_provider.dart';
 import 'package:anime_flow/routes/provider/routes_args.dart';
 import 'package:anime_flow/core/utils/systemUtil.dart';
 import 'package:anime_flow/shared/widgets/animation_network_image.dart';

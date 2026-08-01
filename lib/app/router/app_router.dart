@@ -28,7 +28,7 @@ import 'package:anime_flow/features/settings/presentation/pages/plugins/download
 import 'package:anime_flow/features/settings/presentation/pages/plugins/plugins.dart';
 import 'package:anime_flow/features/settings/presentation/pages/theme.dart';
 import 'package:anime_flow/features/user_space/presentation/pages/user_space_page.dart';
-import 'package:anime_flow/providers/user/user_controller.dart';
+import 'package:anime_flow/features/user/application/user_controller.dart';
 import 'package:anime_flow/app/router/model/info_route_extra.dart';
 import 'package:anime_flow/app/router/routes_args.dart';
 import 'package:anime_flow/app/router/app_route_observer.dart';

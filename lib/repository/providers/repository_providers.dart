@@ -10,12 +10,13 @@
 /// final userRepo = ref.read(userRepositoryProvider);
 /// ```
 library;
+
 import 'package:anime_flow/features/auth/data/models/flow_token.dart';
 import 'package:anime_flow/features/auth/data/models/token_item.dart';
 import 'package:anime_flow/features/auth/data/repository/bangumi_token.dart';
 import 'package:anime_flow/features/auth/data/repository/flow_token_storage.dart';
 import 'package:anime_flow/features/auth/data/repository/token_repository.dart';
-import 'package:anime_flow/repository/user_repository.dart';
+import 'package:anime_flow/features/user/data/repository/user_repository.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 part 'repository_providers.g.dart';

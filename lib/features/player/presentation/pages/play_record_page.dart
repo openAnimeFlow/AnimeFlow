@@ -114,10 +114,15 @@ class _PlayRecordPageState extends State<PlayRecordPage> {
                           .push(context),
                       child: Row(
                         children: [
-                          AnimationNetworkImage(
+                          AspectRatio(
+                            aspectRatio: 2 / 3,
+                            child: AnimationNetworkImage(
                               filterQuality: FilterQuality.high,
                               borderRadius: BorderRadius.circular(8),
-                              url: playHistory.cover),
+                              fit: BoxFit.cover,
+                              url: playHistory.cover,
+                            ),
+                          ),
                           Expanded(
                             child: Padding(
                               padding: const EdgeInsets.symmetric(

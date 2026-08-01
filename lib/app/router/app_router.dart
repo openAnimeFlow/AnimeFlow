@@ -1,4 +1,4 @@
-import 'package:anime_flow/pages/anime_info/index.dart';
+import 'package:anime_flow/features/anime_info/presentation/pages/anime_info_page.dart';
 import 'package:anime_flow/pages/calendar/index.dart';
 import 'package:anime_flow/pages/character_info/index.dart';
 import 'package:anime_flow/pages/characters/index.dart';

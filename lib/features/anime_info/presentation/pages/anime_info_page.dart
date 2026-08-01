@@ -1,6 +1,6 @@
 import 'package:anime_flow/providers/user/user_state_provider.dart';
-import 'package:anime_flow/pages/anime_info/inf_head.dart';
-import 'package:anime_flow/pages/anime_info/provider/anime_info_provider.dart';
+import 'package:anime_flow/features/anime_info/presentation/widgets/inf_head.dart';
+import 'package:anime_flow/features/anime_info/presentation/providers/anime_info_provider.dart';
 import 'package:anime_flow/routes/model/play_route_extra.dart';
 import 'package:anime_flow/routes/provider/routes_args.dart';
 import 'package:anime_flow/routes/routes.dart';
@@ -8,9 +8,9 @@ import 'package:anime_flow/core/logger/logger.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import 'evaluate_dialog.dart';
-import 'info_appBar.dart';
-import 'synopsis.dart';
+import 'package:anime_flow/features/anime_info/presentation/widgets/evaluate_dialog.dart';
+import 'package:anime_flow/features/anime_info/presentation/widgets/info_appBar.dart';
+import 'package:anime_flow/features/anime_info/presentation/widgets/synopsis.dart';
 
 class AnimeInfoPage extends StatefulWidget {
   const AnimeInfoPage({super.key});

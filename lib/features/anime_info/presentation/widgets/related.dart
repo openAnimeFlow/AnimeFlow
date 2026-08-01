@@ -1,6 +1,6 @@
 import 'package:anime_flow/features/anime_info/presentation/providers/anime_info_provider.dart';
-import 'package:anime_flow/routes/model/info_route_extra.dart';
-import 'package:anime_flow/routes/routes.dart';
+import 'package:anime_flow/app/router/model/info_route_extra.dart';
+import 'package:anime_flow/app/router/app_router.dart';
 import 'package:anime_flow/core/logger/logger.dart';
 import 'package:anime_flow/shared/widgets/animation_network_image.dart';
 import 'package:flutter/material.dart';

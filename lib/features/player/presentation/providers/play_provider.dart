@@ -13,7 +13,7 @@ import 'package:anime_flow/features/player/presentation/providers/video_ui_provi
 import 'package:anime_flow/features/player/presentation/providers/subject_episodes_provider.dart';
 import 'package:anime_flow/features/player/data/repository/play_repository.dart';
 import 'package:anime_flow/core/storage/storage.dart';
-import 'package:anime_flow/routes/provider/routes_args.dart';
+import 'package:anime_flow/app/router/routes_args.dart';
 import 'package:anime_flow/core/logger/logger.dart';
 import 'package:anime_flow/core/utils/systemUtil.dart';
 import 'package:anime_flow/core/utils/utils.dart';

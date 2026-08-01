@@ -1,6 +1,6 @@
 import 'package:anime_flow/features/player/data/models/bangumi/episodes_item.dart';
 import 'package:anime_flow/features/player/presentation/providers/subject_episodes_provider.dart';
-import 'package:anime_flow/routes/provider/routes_args.dart';
+import 'package:anime_flow/app/router/routes_args.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 part 'episodes_provider.g.dart';

@@ -2,7 +2,7 @@ import 'package:anime_flow/core/network/api/flow_api.dart';
 import 'package:anime_flow/shared/models/bangumi/character_comments_item.dart';
 import 'package:anime_flow/shared/models/bangumi/character_detail_item.dart';
 import 'package:anime_flow/shared/models/bangumi/character_subjects_item.dart';
-import 'package:anime_flow/routes/provider/routes_args.dart';
+import 'package:anime_flow/app/router/routes_args.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 

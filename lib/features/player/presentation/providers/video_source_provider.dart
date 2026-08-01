@@ -9,7 +9,7 @@ import 'package:anime_flow/features/player/data/models/play/video/episode_resour
 import 'package:anime_flow/features/player/data/models/play/video/resources_item.dart';
 import 'package:anime_flow/features/player/presentation/providers/play_provider.dart';
 import 'package:anime_flow/features/player/presentation/providers/episodes_provider.dart';
-import 'package:anime_flow/routes/provider/routes_args.dart';
+import 'package:anime_flow/app/router/routes_args.dart';
 import 'package:anime_flow/features/player/data/repository/play_repository.dart';
 import 'package:anime_flow/features/player/presentation/providers/providers.dart';
 import 'package:anime_flow/core/utils/crawl_config.dart';

@@ -2,7 +2,7 @@ import 'dart:ui';
 
 import 'package:anime_flow/app/theme/theme_provider.dart';
 import 'package:anime_flow/features/settings/presentation/providers/setting_provider.dart';
-import 'package:anime_flow/routes/routes.dart';
+import 'package:anime_flow/app/router/app_router.dart';
 import 'package:anime_flow/core/utils/systemUtil.dart';
 import 'package:anime_flow/shared/widgets/theme_preview.dart';
 import 'package:flutter/material.dart';

@@ -1,6 +1,6 @@
 import 'package:anime_flow/features/player/data/models/bangumi/episode_comments_item.dart';
 import 'package:anime_flow/features/player/presentation/providers/episode_comments_provider.dart';
-import 'package:anime_flow/routes/routes.dart';
+import 'package:anime_flow/app/router/app_router.dart';
 import 'package:anime_flow/core/utils/format_time_util.dart';
 import 'package:anime_flow/core/utils/systemUtil.dart';
 import 'package:anime_flow/shared/widgets/bbcode/bbcode_widget.dart';

@@ -1,9 +1,9 @@
 import 'package:anime_flow/features/user/presentation/providers/user_state_provider.dart';
 import 'package:anime_flow/features/anime_info/presentation/widgets/inf_head.dart';
 import 'package:anime_flow/features/anime_info/presentation/providers/anime_info_provider.dart';
-import 'package:anime_flow/routes/model/play_route_extra.dart';
-import 'package:anime_flow/routes/provider/routes_args.dart';
-import 'package:anime_flow/routes/routes.dart';
+import 'package:anime_flow/app/router/model/play_route_extra.dart';
+import 'package:anime_flow/app/router/routes_args.dart';
+import 'package:anime_flow/app/router/app_router.dart';
 import 'package:anime_flow/core/logger/logger.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';

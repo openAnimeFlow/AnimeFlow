@@ -13,11 +13,13 @@ Future<Directory> shadersDirectory(Ref ref) async {
   final assetManifest = await AssetManifest.loadFromAssetBundle(rootBundle);
   final assets = assetManifest.listAssets();
   final directory = await getApplicationSupportDirectory();
-  final shadersDirectory = Directory(path.join(directory.path, 'anime_shaders'));
+  final shadersDirectory =
+      Directory(path.join(directory.path, 'anime_shaders'));
 
   if (!await shadersDirectory.exists()) {
     await shadersDirectory.create(recursive: true);
-    LiggLogger().i('ShaderManager: Create GLSL Shader: ${shadersDirectory.path}');
+    LiggLogger()
+        .i('ShaderManager: Create GLSL Shader: ${shadersDirectory.path}');
   }
 
   final shaderFiles = assets.where((String asset) =>
@@ -45,6 +47,7 @@ Future<Directory> shadersDirectory(Ref ref) async {
     }
   }
 
-  LiggLogger().i('ShaderManager: $copiedFilesCount GLSL files copied to ${shadersDirectory.path}');
+  LiggLogger().i(
+      'ShaderManager: $copiedFilesCount GLSL files copied to ${shadersDirectory.path}');
   return shadersDirectory;
 }

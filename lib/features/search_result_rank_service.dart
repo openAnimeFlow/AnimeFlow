@@ -73,24 +73,23 @@ class SearchResultRankService {
   }
 
   double _pairScore(
-      String item,
-      String term,
-      double weight, {
-        required _TitleSeasonProfile itemProfile,
-        required _TitleSeasonProfile termProfile,
-      }) {
+    String item,
+    String term,
+    double weight, {
+    required _TitleSeasonProfile itemProfile,
+    required _TitleSeasonProfile termProfile,
+  }) {
     final seasonFactor =
-    _TitleSeasonProfile.alignmentFactor(termProfile, itemProfile);
+        _TitleSeasonProfile.alignmentFactor(termProfile, itemProfile);
 
     late final double rawScore;
     if (item == term) {
       rawScore = weight;
     } else if (item.contains(term)) {
-      rawScore = weight *
-          (0.85 + 0.13 * (term.length / item.length).clamp(0.0, 1.0));
-    } else if (term.contains(item)) {
       rawScore =
-          weight * 0.7 * (item.length / term.length).clamp(0.5, 1.0);
+          weight * (0.85 + 0.13 * (term.length / item.length).clamp(0.0, 1.0));
+    } else if (term.contains(item)) {
+      rawScore = weight * 0.7 * (item.length / term.length).clamp(0.5, 1.0);
     } else if (itemProfile.baseTitle.isNotEmpty &&
         termProfile.baseTitle.isNotEmpty &&
         itemProfile.baseTitle == termProfile.baseTitle) {
@@ -151,9 +150,9 @@ class SearchResultRankService {
   }
 
   static List<_WeightedTerm> _buildWeightedTerms(
-      String searchTerm,
-      List<String> aliases,
-      ) {
+    String searchTerm,
+    List<String> aliases,
+  ) {
     final terms = <_WeightedTerm>[];
     final seen = <String>{};
 
@@ -175,8 +174,8 @@ class SearchResultRankService {
   }
 
   static String _normalize(String text) {
-    return text.toLowerCase().replaceAll(RegExp(r'\s+'), '')
-        .replaceAll(RegExp(r'[^0-9a-z\u4E00-\u9FFF\u3040-\u309F\u30A0-\u30FF]+'), '');
+    return text.toLowerCase().replaceAll(RegExp(r'\s+'), '').replaceAll(
+        RegExp(r'[^0-9a-z\u4E00-\u9FFF\u3040-\u309F\u30A0-\u30FF]+'), '');
   }
 }
 
@@ -200,8 +199,7 @@ class _TitleSeasonProfile {
   static final _leadingNoisePattern = RegExp(
     r'^(?:\d{4}年)?(?:\d{1,2}月)?(?:新番|动画|动漫|tv)',
   );
-  static final _numberedSeasonPattern =
-  RegExp(r'第([一二三四五六七八九十\d]+)[季部]');
+  static final _numberedSeasonPattern = RegExp(r'第([一二三四五六七八九十\d]+)[季部]');
   static final _latinSeasonPattern = RegExp(r'(?:season|part)([1-9]\d*)');
   static final _qualityNoisePattern = RegExp(
     r'完整版|无修正|中文字幕|高清|超清|抢先版|同步播出|独家|连载|1080[pP]|720[pP]',
@@ -264,9 +262,9 @@ class _TitleSeasonProfile {
 
   /// 搜索词与结果季数/类型对齐系数。
   static double alignmentFactor(
-      _TitleSeasonProfile search,
-      _TitleSeasonProfile result,
-      ) {
+    _TitleSeasonProfile search,
+    _TitleSeasonProfile result,
+  ) {
     if (!search.hasSeasonMarker && !result.hasSeasonMarker) {
       return 1;
     }

@@ -1,6 +1,6 @@
 import 'dart:async';
 
-import 'package:anime_flow/routes/routes.dart';
+import 'package:anime_flow/app/router/app_router.dart';
 import 'package:anime_flow/features/app_update/presentation/widgets/version_update_ui.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -27,11 +27,12 @@ class _AppVersionUpdateListenerState
     super.initState();
     _appInfoSubscription = ref.listenManual(
       appInfoProvider,
-          (previous, next) async => _handlePendingVersionResult(next),
+      (previous, next) async => _handlePendingVersionResult(next),
     );
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (!mounted) return;
-      unawaited(ref.read(appInfoProvider.notifier).triggerStartupVersionCheck());
+      unawaited(
+          ref.read(appInfoProvider.notifier).triggerStartupVersionCheck());
       _handlePendingVersionResult(ref.read(appInfoProvider));
     });
   }
@@ -40,7 +41,8 @@ class _AppVersionUpdateListenerState
     final result = state.pendingStartupVersionResult;
     if (result == null || !mounted) return;
 
-    final navigatorContext = appRouter.routerDelegate.navigatorKey.currentContext;
+    final navigatorContext =
+        appRouter.routerDelegate.navigatorKey.currentContext;
     if (navigatorContext == null) {
       WidgetsBinding.instance.addPostFrameCallback((_) {
         if (!mounted) return;

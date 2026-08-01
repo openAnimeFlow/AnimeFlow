@@ -1,7 +1,7 @@
 import 'package:anime_flow/core/network/api_path.dart';
 import 'package:anime_flow/core/network/api/api.dart';
 import 'package:anime_flow/features/anime_info/presentation/providers/anime_info_provider.dart';
-import 'package:anime_flow/routes/provider/routes_args.dart';
+import 'package:anime_flow/app/router/routes_args.dart';
 import 'package:anime_flow/core/exception/storage_exception.dart';
 import 'package:anime_flow/core/logger/logger.dart';
 import 'package:anime_flow/shared/widgets/animation_network_image.dart';

@@ -1,7 +1,7 @@
 import 'package:anime_flow/features/character_info/presentation/widgets/character_comments.dart';
 import 'package:anime_flow/features/character_info/presentation/widgets/character_works.dart';
 import 'package:anime_flow/features/character_info/presentation/providers/character_info_provider.dart';
-import 'package:anime_flow/routes/provider/routes_args.dart';
+import 'package:anime_flow/app/router/routes_args.dart';
 import 'package:anime_flow/shared/widgets/animation_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';

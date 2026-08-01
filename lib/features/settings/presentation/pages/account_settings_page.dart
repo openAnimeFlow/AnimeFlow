@@ -10,7 +10,7 @@ import 'package:anime_flow/features/settings/presentation/providers/setting_prov
 import 'package:anime_flow/features/user/application/user_controller.dart';
 import 'package:anime_flow/features/user/application/user_oauth_state.dart';
 import 'package:anime_flow/features/user/presentation/providers/user_state_provider.dart';
-import 'package:anime_flow/routes/routes.dart';
+import 'package:anime_flow/app/router/app_router.dart';
 import 'package:anime_flow/shared/widgets/animation_network_image.dart';
 import 'package:anime_flow/shared/widgets/network_check_button.dart';
 import 'package:anime_flow/shared/widgets/notification_toast.dart';

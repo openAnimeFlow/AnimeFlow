@@ -4,7 +4,7 @@ import 'package:anime_flow/core/network/clients/flow_client.dart';
 import 'package:anime_flow/features/player/presentation/providers/episodes_provider.dart';
 import 'package:anime_flow/features/player/presentation/providers/play_provider.dart';
 import 'package:anime_flow/features/player/presentation/providers/subject_episodes_provider.dart';
-import 'package:anime_flow/routes/provider/routes_args.dart';
+import 'package:anime_flow/app/router/routes_args.dart';
 import 'package:anime_flow/features/player/presentation/widgets/layout_toggle_icon.dart';
 import 'package:anime_flow/shared/widgets/notification_toast.dart';
 import 'package:flutter/material.dart';

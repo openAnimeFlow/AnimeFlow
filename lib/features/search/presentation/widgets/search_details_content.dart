@@ -1,6 +1,6 @@
 import 'package:anime_flow/shared/models/bangumi/subject_item.dart';
-import 'package:anime_flow/routes/model/info_route_extra.dart';
-import 'package:anime_flow/routes/routes.dart';
+import 'package:anime_flow/app/router/model/info_route_extra.dart';
+import 'package:anime_flow/app/router/app_router.dart';
 import 'package:anime_flow/shared/widgets/animation_network_image.dart';
 import 'package:anime_flow/shared/widgets/ranking.dart';
 import 'package:anime_flow/shared/widgets/star.dart';

@@ -1,6 +1,6 @@
 import 'package:anime_flow/features/ranking/presentation/providers/ranking_provider.dart';
-import 'package:anime_flow/routes/model/info_route_extra.dart';
-import 'package:anime_flow/routes/routes.dart';
+import 'package:anime_flow/app/router/model/info_route_extra.dart';
+import 'package:anime_flow/app/router/app_router.dart';
 import 'package:anime_flow/core/utils/layout_util.dart';
 import 'package:anime_flow/shared/widgets/subject_card.dart';
 import 'package:flutter/material.dart';

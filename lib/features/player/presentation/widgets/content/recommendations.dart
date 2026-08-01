@@ -1,8 +1,8 @@
 import 'package:anime_flow/shared/models/bangumi/subject_item.dart';
 import 'package:anime_flow/core/network/clients/flow_client.dart';
 import 'package:anime_flow/features/player/presentation/providers/recommendation_provider.dart';
-import 'package:anime_flow/routes/model/info_route_extra.dart';
-import 'package:anime_flow/routes/routes.dart';
+import 'package:anime_flow/app/router/model/info_route_extra.dart';
+import 'package:anime_flow/app/router/app_router.dart';
 import 'package:anime_flow/shared/widgets/animation_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';

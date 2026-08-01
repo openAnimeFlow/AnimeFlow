@@ -1,6 +1,6 @@
 import 'package:anime_flow/features/home/presentation/widgets/anime/anime_view.dart';
 import 'package:anime_flow/features/home/presentation/widgets/forum/forum_view.dart';
-import 'package:anime_flow/routes/routes.dart';
+import 'package:anime_flow/app/router/app_router.dart';
 import 'package:flutter/material.dart';
 
 class RecommendPage extends StatefulWidget {

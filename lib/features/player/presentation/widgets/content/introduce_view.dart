@@ -3,7 +3,7 @@ import 'package:anime_flow/features/player/presentation/widgets/content/danmaku_
 import 'package:anime_flow/features/player/presentation/widgets/content/episodes.dart';
 import 'package:anime_flow/features/player/presentation/widgets/content/resources.dart';
 import 'package:anime_flow/features/player/presentation/providers/play_provider.dart';
-import 'package:anime_flow/routes/provider/routes_args.dart';
+import 'package:anime_flow/app/router/routes_args.dart';
 import 'package:anime_flow/features/player/presentation/widgets/episode_playing_indicator.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';

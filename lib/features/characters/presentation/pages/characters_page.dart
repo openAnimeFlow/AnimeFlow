@@ -1,6 +1,6 @@
 import 'package:anime_flow/shared/models/bangumi/actor_item.dart';
 import 'package:anime_flow/features/characters/presentation/providers/characters_provider.dart';
-import 'package:anime_flow/routes/routes.dart';
+import 'package:anime_flow/app/router/app_router.dart';
 import 'package:anime_flow/core/utils/bgm_utils.dart';
 import 'package:anime_flow/shared/widgets/animation_network_image.dart';
 import 'package:flutter/material.dart';

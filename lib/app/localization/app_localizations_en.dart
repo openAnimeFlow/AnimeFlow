@@ -578,4 +578,48 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get longPressFastForwardSpeed => 'Long-press fast-forward speed';
+
+  @override
+  String get danmakuDisplayType => 'Danmaku display type';
+
+  @override
+  String get scrollingDanmaku => 'Scrolling danmaku';
+
+  @override
+  String get topDanmaku => 'Top danmaku';
+
+  @override
+  String get bottomDanmaku => 'Bottom danmaku';
+
+  @override
+  String get danmakuSourcePlatform => 'Danmaku source platforms';
+
+  @override
+  String get danmakuStyle => 'Danmaku style';
+
+  @override
+  String get showBorder => 'Show border';
+
+  @override
+  String get showColor => 'Show color';
+
+  @override
+  String get massiveMode => 'Dense mode';
+
+  @override
+  String get danmakuSpeedTitle => 'Danmaku speed';
+
+  @override
+  String danmakuSpeed(Object percent) {
+    return 'Speed: $percent%';
+  }
+
+  @override
+  String get opacity => 'Opacity';
+
+  @override
+  String get fontSize => 'Font size';
+
+  @override
+  String get displayArea => 'Display area';
 }

@@ -5,6 +5,7 @@ import 'package:anime_flow/core/utils/system_util.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:hive_ce/hive.dart';
+import 'package:anime_flow/app/localization/app_localizations.dart';
 
 class DanmakuSettingPage extends StatefulWidget {
   const DanmakuSettingPage({super.key});
@@ -65,6 +66,7 @@ class _DanmakuSettingPageState extends State<DanmakuSettingPage> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     return Scaffold(
       appBar: PreferredSize(
         preferredSize: const Size.fromHeight(kToolbarHeight),
@@ -72,7 +74,7 @@ class _DanmakuSettingPageState extends State<DanmakuSettingPage> {
           builder: (context, ref, _) {
             final isWideScreen = ref.watch(settingsLayoutProvider);
             return AppBar(
-              title: const Text('弹幕设置'),
+              title: Text(l10n.danmakuSettings),
               automaticallyImplyLeading: !isWideScreen,
             );
           },
@@ -90,9 +92,9 @@ class _DanmakuSettingPageState extends State<DanmakuSettingPage> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   // 弹幕显示类型
-                  _buildSectionTitle('弹幕显示类型'),
+                  _buildSectionTitle(l10n.danmakuDisplayType),
                   SwitchListTile(
-                    title: const Text('滚动弹幕'),
+                    title: Text(l10n.scrollingDanmaku),
                     value: !_hideScroll,
                     onChanged: (value) {
                       setState(() {
@@ -102,7 +104,7 @@ class _DanmakuSettingPageState extends State<DanmakuSettingPage> {
                     },
                   ),
                   SwitchListTile(
-                    title: const Text('顶部弹幕'),
+                    title: Text(l10n.topDanmaku),
                     value: !_hideTop,
                     onChanged: (value) {
                       setState(() {
@@ -112,7 +114,7 @@ class _DanmakuSettingPageState extends State<DanmakuSettingPage> {
                     },
                   ),
                   SwitchListTile(
-                    title: const Text('底部弹幕'),
+                    title: Text(l10n.bottomDanmaku),
                     value: !_hideBottom,
                     onChanged: (value) {
                       setState(() {
@@ -124,7 +126,7 @@ class _DanmakuSettingPageState extends State<DanmakuSettingPage> {
                   const SizedBox(height: 16),
 
                   // 弹幕来源平台
-                  _buildSectionTitle('弹幕来源平台'),
+                  _buildSectionTitle(l10n.danmakuSourcePlatform),
                   SwitchListTile(
                     title: const Text('Bilibili'),
                     value: _platformBilibili,
@@ -159,9 +161,9 @@ class _DanmakuSettingPageState extends State<DanmakuSettingPage> {
                   const SizedBox(height: 16),
 
                   // 弹幕样式
-                  _buildSectionTitle('弹幕样式'),
+                  _buildSectionTitle(l10n.danmakuStyle),
                   SwitchListTile(
-                    title: const Text('显示边框'),
+                    title: Text(l10n.showBorder),
                     value: _border,
                     onChanged: (value) {
                       setState(() {
@@ -171,7 +173,7 @@ class _DanmakuSettingPageState extends State<DanmakuSettingPage> {
                     },
                   ),
                   SwitchListTile(
-                    title: const Text('显示颜色'),
+                    title: Text(l10n.showColor),
                     value: _danmakuColor,
                     onChanged: (value) {
                       setState(() {
@@ -181,7 +183,7 @@ class _DanmakuSettingPageState extends State<DanmakuSettingPage> {
                     },
                   ),
                   SwitchListTile(
-                    title: const Text('密集模式'),
+                    title: Text(l10n.massiveMode),
                     value: _massiveMode,
                     onChanged: (value) {
                       setState(() {
@@ -194,7 +196,7 @@ class _DanmakuSettingPageState extends State<DanmakuSettingPage> {
                   const SizedBox(height: 16),
 
                   // 弹幕速度
-                  _buildSectionTitle('弹幕速度'),
+                  _buildSectionTitle(l10n.danmakuSpeedTitle),
                   Builder(
                     builder: (context) {
                       // duration 范围：2.0 (最快) 到 16.0 (最慢)
@@ -213,7 +215,7 @@ class _DanmakuSettingPageState extends State<DanmakuSettingPage> {
                           Padding(
                             padding: const EdgeInsets.symmetric(horizontal: 16),
                             child: Text(
-                              '速度: $speedPercent%',
+                              l10n.danmakuSpeed(speedPercent),
                               style: TextStyle(
                                 fontSize: 14,
                                 color: Theme.of(context)
@@ -253,7 +255,7 @@ class _DanmakuSettingPageState extends State<DanmakuSettingPage> {
                   const SizedBox(height: 16),
 
                   // 透明度
-                  _buildSectionTitle('透明度'),
+                  _buildSectionTitle(l10n.opacity),
                   Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
@@ -290,7 +292,7 @@ class _DanmakuSettingPageState extends State<DanmakuSettingPage> {
                   const SizedBox(height: 16),
 
                   // 字体大小
-                  _buildSectionTitle('字体大小'),
+                  _buildSectionTitle(l10n.fontSize),
                   Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
@@ -329,7 +331,7 @@ class _DanmakuSettingPageState extends State<DanmakuSettingPage> {
                   const SizedBox(height: 16),
 
                   // 显示区域
-                  _buildSectionTitle('显示区域'),
+                  _buildSectionTitle(l10n.displayArea),
                   Builder(
                     builder: (context) {
                       final fixedValues = [0.1, 0.25, 0.5, 0.75, 1.0];

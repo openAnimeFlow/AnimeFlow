@@ -1158,6 +1158,90 @@ abstract class AppLocalizations {
   /// In zh_Hans, this message translates to:
   /// **'长按快进速度'**
   String get longPressFastForwardSpeed;
+
+  /// No description provided for @danmakuDisplayType.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'弹幕显示类型'**
+  String get danmakuDisplayType;
+
+  /// No description provided for @scrollingDanmaku.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'滚动弹幕'**
+  String get scrollingDanmaku;
+
+  /// No description provided for @topDanmaku.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'顶部弹幕'**
+  String get topDanmaku;
+
+  /// No description provided for @bottomDanmaku.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'底部弹幕'**
+  String get bottomDanmaku;
+
+  /// No description provided for @danmakuSourcePlatform.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'弹幕来源平台'**
+  String get danmakuSourcePlatform;
+
+  /// No description provided for @danmakuStyle.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'弹幕样式'**
+  String get danmakuStyle;
+
+  /// No description provided for @showBorder.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'显示边框'**
+  String get showBorder;
+
+  /// No description provided for @showColor.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'显示颜色'**
+  String get showColor;
+
+  /// No description provided for @massiveMode.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'密集模式'**
+  String get massiveMode;
+
+  /// No description provided for @danmakuSpeedTitle.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'弹幕速度'**
+  String get danmakuSpeedTitle;
+
+  /// No description provided for @danmakuSpeed.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'速度：{percent}%'**
+  String danmakuSpeed(Object percent);
+
+  /// No description provided for @opacity.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'透明度'**
+  String get opacity;
+
+  /// No description provided for @fontSize.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'字体大小'**
+  String get fontSize;
+
+  /// No description provided for @displayArea.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'显示区域'**
+  String get displayArea;
 }
 
 class _AppLocalizationsDelegate

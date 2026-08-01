@@ -180,5 +180,19 @@
   "saveEpisodeProgress": "Save episode progress",
   "saveEpisodeProgressSubtitle": "Save progress automatically at 90%, then start the next unwatched episode",
   "playbackControl": "Playback controls",
-  "longPressFastForwardSpeed": "Long-press fast-forward speed"
+  "longPressFastForwardSpeed": "Long-press fast-forward speed",
+  "danmakuDisplayType": "Danmaku display type",
+  "scrollingDanmaku": "Scrolling danmaku",
+  "topDanmaku": "Top danmaku",
+  "bottomDanmaku": "Bottom danmaku",
+  "danmakuSourcePlatform": "Danmaku source platforms",
+  "danmakuStyle": "Danmaku style",
+  "showBorder": "Show border",
+  "showColor": "Show color",
+  "massiveMode": "Dense mode",
+  "danmakuSpeedTitle": "Danmaku speed",
+  "danmakuSpeed": "Speed: {percent}%",
+  "opacity": "Opacity",
+  "fontSize": "Font size",
+  "displayArea": "Display area"
 }

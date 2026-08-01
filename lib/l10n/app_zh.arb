@@ -180,5 +180,19 @@
   "saveEpisodeProgress": "保存剧集进度",
   "saveEpisodeProgressSubtitle": "播放至90%自动保存剧集进度，下次从未观看的剧集开始播放",
   "playbackControl": "播放控制",
-  "longPressFastForwardSpeed": "长按快进速度"
+  "longPressFastForwardSpeed": "长按快进速度",
+  "danmakuDisplayType": "弹幕显示类型",
+  "scrollingDanmaku": "滚动弹幕",
+  "topDanmaku": "顶部弹幕",
+  "bottomDanmaku": "底部弹幕",
+  "danmakuSourcePlatform": "弹幕来源平台",
+  "danmakuStyle": "弹幕样式",
+  "showBorder": "显示边框",
+  "showColor": "显示颜色",
+  "massiveMode": "密集模式",
+  "danmakuSpeedTitle": "弹幕速度",
+  "danmakuSpeed": "速度：{percent}%",
+  "opacity": "透明度",
+  "fontSize": "字体大小",
+  "displayArea": "显示区域"
 }

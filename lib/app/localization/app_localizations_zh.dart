@@ -575,6 +575,50 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get longPressFastForwardSpeed => '长按快进速度';
+
+  @override
+  String get danmakuDisplayType => '弹幕显示类型';
+
+  @override
+  String get scrollingDanmaku => '滚动弹幕';
+
+  @override
+  String get topDanmaku => '顶部弹幕';
+
+  @override
+  String get bottomDanmaku => '底部弹幕';
+
+  @override
+  String get danmakuSourcePlatform => '弹幕来源平台';
+
+  @override
+  String get danmakuStyle => '弹幕样式';
+
+  @override
+  String get showBorder => '显示边框';
+
+  @override
+  String get showColor => '显示颜色';
+
+  @override
+  String get massiveMode => '密集模式';
+
+  @override
+  String get danmakuSpeedTitle => '弹幕速度';
+
+  @override
+  String danmakuSpeed(Object percent) {
+    return '速度：$percent%';
+  }
+
+  @override
+  String get opacity => '透明度';
+
+  @override
+  String get fontSize => '字体大小';
+
+  @override
+  String get displayArea => '显示区域';
 }
 
 /// The translations for Chinese, using the Han script (`zh_Hans`).
@@ -1148,6 +1192,50 @@ class AppLocalizationsZhHans extends AppLocalizationsZh {
 
   @override
   String get longPressFastForwardSpeed => '长按快进速度';
+
+  @override
+  String get danmakuDisplayType => '弹幕显示类型';
+
+  @override
+  String get scrollingDanmaku => '滚动弹幕';
+
+  @override
+  String get topDanmaku => '顶部弹幕';
+
+  @override
+  String get bottomDanmaku => '底部弹幕';
+
+  @override
+  String get danmakuSourcePlatform => '弹幕来源平台';
+
+  @override
+  String get danmakuStyle => '弹幕样式';
+
+  @override
+  String get showBorder => '显示边框';
+
+  @override
+  String get showColor => '显示颜色';
+
+  @override
+  String get massiveMode => '密集模式';
+
+  @override
+  String get danmakuSpeedTitle => '弹幕速度';
+
+  @override
+  String danmakuSpeed(Object percent) {
+    return '速度：$percent%';
+  }
+
+  @override
+  String get opacity => '透明度';
+
+  @override
+  String get fontSize => '字体大小';
+
+  @override
+  String get displayArea => '显示区域';
 }
 
 /// The translations for Chinese, as used in Hong Kong, using the Han script (`zh_Hant_HK`).
@@ -1721,6 +1809,50 @@ class AppLocalizationsZhHantHk extends AppLocalizationsZh {
 
   @override
   String get longPressFastForwardSpeed => '長按快進速度';
+
+  @override
+  String get danmakuDisplayType => '彈幕顯示類型';
+
+  @override
+  String get scrollingDanmaku => '滾動彈幕';
+
+  @override
+  String get topDanmaku => '頂部彈幕';
+
+  @override
+  String get bottomDanmaku => '底部彈幕';
+
+  @override
+  String get danmakuSourcePlatform => '彈幕來源平台';
+
+  @override
+  String get danmakuStyle => '彈幕樣式';
+
+  @override
+  String get showBorder => '顯示邊框';
+
+  @override
+  String get showColor => '顯示顏色';
+
+  @override
+  String get massiveMode => '密集模式';
+
+  @override
+  String get danmakuSpeedTitle => '彈幕速度';
+
+  @override
+  String danmakuSpeed(Object percent) {
+    return '速度：$percent%';
+  }
+
+  @override
+  String get opacity => '透明度';
+
+  @override
+  String get fontSize => '字型大小';
+
+  @override
+  String get displayArea => '顯示區域';
 }
 
 /// The translations for Chinese, as used in Taiwan, using the Han script (`zh_Hant_TW`).
@@ -2294,4 +2426,48 @@ class AppLocalizationsZhHantTw extends AppLocalizationsZh {
 
   @override
   String get longPressFastForwardSpeed => '長按快進速度';
+
+  @override
+  String get danmakuDisplayType => '彈幕顯示類型';
+
+  @override
+  String get scrollingDanmaku => '滾動彈幕';
+
+  @override
+  String get topDanmaku => '頂部彈幕';
+
+  @override
+  String get bottomDanmaku => '底部彈幕';
+
+  @override
+  String get danmakuSourcePlatform => '彈幕來源平台';
+
+  @override
+  String get danmakuStyle => '彈幕樣式';
+
+  @override
+  String get showBorder => '顯示邊框';
+
+  @override
+  String get showColor => '顯示顏色';
+
+  @override
+  String get massiveMode => '密集模式';
+
+  @override
+  String get danmakuSpeedTitle => '彈幕速度';
+
+  @override
+  String danmakuSpeed(Object percent) {
+    return '速度：$percent%';
+  }
+
+  @override
+  String get opacity => '透明度';
+
+  @override
+  String get fontSize => '字型大小';
+
+  @override
+  String get displayArea => '顯示區域';
 }

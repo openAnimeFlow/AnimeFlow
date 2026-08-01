@@ -558,6 +558,107 @@ class AppLocalizationsZh extends AppLocalizations {
   String get search => '搜索';
 
   @override
+  String get imageSearch => '圖片搜尋';
+
+  @override
+  String get switchToUploadImage => '改為上傳圖片檔案';
+
+  @override
+  String get switchToImageUrl => '改為輸入圖片 URL';
+
+  @override
+  String get searching => '搜尋中...';
+
+  @override
+  String get startSearch => '開始搜尋';
+
+  @override
+  String get tapToSelectImage => '點選選擇圖片';
+
+  @override
+  String get supportedImageFormats => '支援 JPG、PNG、WEBP 格式';
+
+  @override
+  String get imagePreviewFailed => '圖片預覽失敗';
+
+  @override
+  String get imageSelected => '已選擇圖片';
+
+  @override
+  String get tapToReselectImage => '點選可重新選擇圖片';
+
+  @override
+  String get reselect => '重新選擇';
+
+  @override
+  String get enterImageUrl => '請輸入圖片連結';
+
+  @override
+  String get clear => '清除';
+
+  @override
+  String get enterImageUrlToPreview => '輸入圖片連結後預覽';
+
+  @override
+  String get imageLoadFailed => '圖片載入失敗';
+
+  @override
+  String get checkImageUrl => '請檢查連結是否有效';
+
+  @override
+  String get recognizingImage => '正在辨識圖片';
+
+  @override
+  String get matchingAnimeFromImage => '請稍候，正在從截圖中匹配番劇資訊';
+
+  @override
+  String get imageSearchResultPlaceholder => '搜尋結果將在這裡顯示';
+
+  @override
+  String get noImageSearchResults => '未取得搜尋結果';
+
+  @override
+  String get startImageSearchHint => '選擇圖片檔案或輸入圖片連結後開始搜尋';
+
+  @override
+  String get recognitionResults => '辨識結果';
+
+  @override
+  String get originalAspectRatioTip => '僅支援使用原始比例番劇截圖搜尋結果';
+
+  @override
+  String get clearScreenshotTip => '截圖應清晰，避免過度壓縮或新增浮水印';
+
+  @override
+  String get searchEnginePoweredBy => '搜尋引擎由 ';
+
+  @override
+  String get providesSupport => ' 提供支援';
+
+  @override
+  String get searchAnimeByImage => '以圖搜番';
+
+  @override
+  String get searchSuggestions => '搜尋建議';
+
+  @override
+  String searchResultCount(Object count) {
+    return '搜尋到 $count 筆內容';
+  }
+
+  @override
+  String get enterKeywordToSearch => '輸入關鍵字開始搜尋';
+
+  @override
+  String get searchHistory => '搜尋記錄';
+
+  @override
+  String get clearAll => '全部清除';
+
+  @override
+  String get delete => '刪除';
+
+  @override
   String get refreshFailedRetry => '刷新失败，请稍后重试';
 
   @override
@@ -1894,6 +1995,107 @@ class AppLocalizationsZhHans extends AppLocalizationsZh {
 
   @override
   String get search => '搜索';
+
+  @override
+  String get imageSearch => '图片搜索';
+
+  @override
+  String get switchToUploadImage => '改为上传图片文件';
+
+  @override
+  String get switchToImageUrl => '改为输入图片 URL';
+
+  @override
+  String get searching => '搜索中...';
+
+  @override
+  String get startSearch => '开始搜索';
+
+  @override
+  String get tapToSelectImage => '点击选择图片';
+
+  @override
+  String get supportedImageFormats => '支持 JPG、PNG、WEBP 格式';
+
+  @override
+  String get imagePreviewFailed => '图片预览失败';
+
+  @override
+  String get imageSelected => '已选择图片';
+
+  @override
+  String get tapToReselectImage => '点击可重新选择图片';
+
+  @override
+  String get reselect => '重新选择';
+
+  @override
+  String get enterImageUrl => '请输入图片链接';
+
+  @override
+  String get clear => '清除';
+
+  @override
+  String get enterImageUrlToPreview => '输入图片链接后预览';
+
+  @override
+  String get imageLoadFailed => '图片加载失败';
+
+  @override
+  String get checkImageUrl => '请检查链接是否有效';
+
+  @override
+  String get recognizingImage => '正在识别图片';
+
+  @override
+  String get matchingAnimeFromImage => '请稍候，正在从截图中匹配番剧信息';
+
+  @override
+  String get imageSearchResultPlaceholder => '搜索结果将在这里展示';
+
+  @override
+  String get noImageSearchResults => '未获取到搜索结果';
+
+  @override
+  String get startImageSearchHint => '选择图片文件或输入图片链接后开始搜索';
+
+  @override
+  String get recognitionResults => '识别结果';
+
+  @override
+  String get originalAspectRatioTip => '仅支持使用原始比例番剧截图搜索结果';
+
+  @override
+  String get clearScreenshotTip => '截图应清晰，避免过度压缩或添加水印';
+
+  @override
+  String get searchEnginePoweredBy => '搜索引擎由 ';
+
+  @override
+  String get providesSupport => ' 提供支持';
+
+  @override
+  String get searchAnimeByImage => '以图搜番';
+
+  @override
+  String get searchSuggestions => '搜索建议';
+
+  @override
+  String searchResultCount(Object count) {
+    return '搜索到 $count 条内容';
+  }
+
+  @override
+  String get enterKeywordToSearch => '输入关键词开始搜索';
+
+  @override
+  String get searchHistory => '搜索历史';
+
+  @override
+  String get clearAll => '清除全部';
+
+  @override
+  String get delete => '删除';
 
   @override
   String get refreshFailedRetry => '刷新失败，请稍后重试';
@@ -3234,6 +3436,107 @@ class AppLocalizationsZhHantHk extends AppLocalizationsZh {
   String get search => '搜尋';
 
   @override
+  String get imageSearch => '圖片搜尋';
+
+  @override
+  String get switchToUploadImage => '改為上傳圖片檔案';
+
+  @override
+  String get switchToImageUrl => '改為輸入圖片 URL';
+
+  @override
+  String get searching => '搜尋中...';
+
+  @override
+  String get startSearch => '開始搜尋';
+
+  @override
+  String get tapToSelectImage => '按一下選擇圖片';
+
+  @override
+  String get supportedImageFormats => '支援 JPG、PNG、WEBP 格式';
+
+  @override
+  String get imagePreviewFailed => '圖片預覽失敗';
+
+  @override
+  String get imageSelected => '已選擇圖片';
+
+  @override
+  String get tapToReselectImage => '按一下可重新選擇圖片';
+
+  @override
+  String get reselect => '重新選擇';
+
+  @override
+  String get enterImageUrl => '請輸入圖片連結';
+
+  @override
+  String get clear => '清除';
+
+  @override
+  String get enterImageUrlToPreview => '輸入圖片連結後預覽';
+
+  @override
+  String get imageLoadFailed => '圖片載入失敗';
+
+  @override
+  String get checkImageUrl => '請檢查連結是否有效';
+
+  @override
+  String get recognizingImage => '正在辨識圖片';
+
+  @override
+  String get matchingAnimeFromImage => '請稍候，正在從截圖中匹配番劇資訊';
+
+  @override
+  String get imageSearchResultPlaceholder => '搜尋結果將在這裡顯示';
+
+  @override
+  String get noImageSearchResults => '未取得搜尋結果';
+
+  @override
+  String get startImageSearchHint => '選擇圖片檔案或輸入圖片連結後開始搜尋';
+
+  @override
+  String get recognitionResults => '辨識結果';
+
+  @override
+  String get originalAspectRatioTip => '僅支援使用原始比例番劇截圖搜尋結果';
+
+  @override
+  String get clearScreenshotTip => '截圖應清晰，避免過度壓縮或新增浮水印';
+
+  @override
+  String get searchEnginePoweredBy => '搜尋引擎由 ';
+
+  @override
+  String get providesSupport => ' 提供支援';
+
+  @override
+  String get searchAnimeByImage => '以圖搜番';
+
+  @override
+  String get searchSuggestions => '搜尋建議';
+
+  @override
+  String searchResultCount(Object count) {
+    return '搜尋到 $count 筆內容';
+  }
+
+  @override
+  String get enterKeywordToSearch => '輸入關鍵字開始搜尋';
+
+  @override
+  String get searchHistory => '搜尋記錄';
+
+  @override
+  String get clearAll => '全部清除';
+
+  @override
+  String get delete => '刪除';
+
+  @override
   String get refreshFailedRetry => '重新整理失敗，請稍後再試';
 
   @override
@@ -4379,6 +4682,107 @@ class AppLocalizationsZhHantTw extends AppLocalizationsZh {
 
   @override
   String get search => '搜尋';
+
+  @override
+  String get imageSearch => '圖片搜尋';
+
+  @override
+  String get switchToUploadImage => '改為上傳圖片檔案';
+
+  @override
+  String get switchToImageUrl => '改為輸入圖片 URL';
+
+  @override
+  String get searching => '搜尋中...';
+
+  @override
+  String get startSearch => '開始搜尋';
+
+  @override
+  String get tapToSelectImage => '點選選擇圖片';
+
+  @override
+  String get supportedImageFormats => '支援 JPG、PNG、WEBP 格式';
+
+  @override
+  String get imagePreviewFailed => '圖片預覽失敗';
+
+  @override
+  String get imageSelected => '已選擇圖片';
+
+  @override
+  String get tapToReselectImage => '點選可重新選擇圖片';
+
+  @override
+  String get reselect => '重新選擇';
+
+  @override
+  String get enterImageUrl => '請輸入圖片連結';
+
+  @override
+  String get clear => '清除';
+
+  @override
+  String get enterImageUrlToPreview => '輸入圖片連結後預覽';
+
+  @override
+  String get imageLoadFailed => '圖片載入失敗';
+
+  @override
+  String get checkImageUrl => '請檢查連結是否有效';
+
+  @override
+  String get recognizingImage => '正在辨識圖片';
+
+  @override
+  String get matchingAnimeFromImage => '請稍候，正在從截圖中匹配番劇資訊';
+
+  @override
+  String get imageSearchResultPlaceholder => '搜尋結果將在這裡顯示';
+
+  @override
+  String get noImageSearchResults => '未取得搜尋結果';
+
+  @override
+  String get startImageSearchHint => '選擇圖片檔案或輸入圖片連結後開始搜尋';
+
+  @override
+  String get recognitionResults => '辨識結果';
+
+  @override
+  String get originalAspectRatioTip => '僅支援使用原始比例番劇截圖搜尋結果';
+
+  @override
+  String get clearScreenshotTip => '截圖應清晰，避免過度壓縮或新增浮水印';
+
+  @override
+  String get searchEnginePoweredBy => '搜尋引擎由 ';
+
+  @override
+  String get providesSupport => ' 提供支援';
+
+  @override
+  String get searchAnimeByImage => '以圖搜番';
+
+  @override
+  String get searchSuggestions => '搜尋建議';
+
+  @override
+  String searchResultCount(Object count) {
+    return '搜尋到 $count 筆內容';
+  }
+
+  @override
+  String get enterKeywordToSearch => '輸入關鍵字開始搜尋';
+
+  @override
+  String get searchHistory => '搜尋記錄';
+
+  @override
+  String get clearAll => '全部清除';
+
+  @override
+  String get delete => '刪除';
 
   @override
   String get refreshFailedRetry => '重新整理失敗，請稍後再試';

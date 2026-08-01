@@ -1105,6 +1105,204 @@ abstract class AppLocalizations {
   /// **'搜索'**
   String get search;
 
+  /// No description provided for @imageSearch.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'图片搜索'**
+  String get imageSearch;
+
+  /// No description provided for @switchToUploadImage.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'改为上传图片文件'**
+  String get switchToUploadImage;
+
+  /// No description provided for @switchToImageUrl.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'改为输入图片 URL'**
+  String get switchToImageUrl;
+
+  /// No description provided for @searching.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'搜索中...'**
+  String get searching;
+
+  /// No description provided for @startSearch.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'开始搜索'**
+  String get startSearch;
+
+  /// No description provided for @tapToSelectImage.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'点击选择图片'**
+  String get tapToSelectImage;
+
+  /// No description provided for @supportedImageFormats.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'支持 JPG、PNG、WEBP 格式'**
+  String get supportedImageFormats;
+
+  /// No description provided for @imagePreviewFailed.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'图片预览失败'**
+  String get imagePreviewFailed;
+
+  /// No description provided for @imageSelected.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'已选择图片'**
+  String get imageSelected;
+
+  /// No description provided for @tapToReselectImage.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'点击可重新选择图片'**
+  String get tapToReselectImage;
+
+  /// No description provided for @reselect.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'重新选择'**
+  String get reselect;
+
+  /// No description provided for @enterImageUrl.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'请输入图片链接'**
+  String get enterImageUrl;
+
+  /// No description provided for @clear.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'清除'**
+  String get clear;
+
+  /// No description provided for @enterImageUrlToPreview.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'输入图片链接后预览'**
+  String get enterImageUrlToPreview;
+
+  /// No description provided for @imageLoadFailed.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'图片加载失败'**
+  String get imageLoadFailed;
+
+  /// No description provided for @checkImageUrl.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'请检查链接是否有效'**
+  String get checkImageUrl;
+
+  /// No description provided for @recognizingImage.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'正在识别图片'**
+  String get recognizingImage;
+
+  /// No description provided for @matchingAnimeFromImage.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'请稍候，正在从截图中匹配番剧信息'**
+  String get matchingAnimeFromImage;
+
+  /// No description provided for @imageSearchResultPlaceholder.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'搜索结果将在这里展示'**
+  String get imageSearchResultPlaceholder;
+
+  /// No description provided for @noImageSearchResults.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'未获取到搜索结果'**
+  String get noImageSearchResults;
+
+  /// No description provided for @startImageSearchHint.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'选择图片文件或输入图片链接后开始搜索'**
+  String get startImageSearchHint;
+
+  /// No description provided for @recognitionResults.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'识别结果'**
+  String get recognitionResults;
+
+  /// No description provided for @originalAspectRatioTip.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'仅支持使用原始比例番剧截图搜索结果'**
+  String get originalAspectRatioTip;
+
+  /// No description provided for @clearScreenshotTip.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'截图应清晰，避免过度压缩或添加水印'**
+  String get clearScreenshotTip;
+
+  /// No description provided for @searchEnginePoweredBy.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'搜索引擎由 '**
+  String get searchEnginePoweredBy;
+
+  /// No description provided for @providesSupport.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **' 提供支持'**
+  String get providesSupport;
+
+  /// No description provided for @searchAnimeByImage.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'以图搜番'**
+  String get searchAnimeByImage;
+
+  /// No description provided for @searchSuggestions.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'搜索建议'**
+  String get searchSuggestions;
+
+  /// No description provided for @searchResultCount.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'搜索到 {count} 条内容'**
+  String searchResultCount(Object count);
+
+  /// No description provided for @enterKeywordToSearch.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'输入关键词开始搜索'**
+  String get enterKeywordToSearch;
+
+  /// No description provided for @searchHistory.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'搜索历史'**
+  String get searchHistory;
+
+  /// No description provided for @clearAll.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'清除全部'**
+  String get clearAll;
+
+  /// No description provided for @delete.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'删除'**
+  String get delete;
+
   /// No description provided for @refreshFailedRetry.
   ///
   /// In zh_Hans, this message translates to:

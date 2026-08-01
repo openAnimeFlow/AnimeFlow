@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:anime_flow/app/localization/app_localizations.dart';
 import 'package:anime_flow/features/search/presentation/providers/search_controller.dart';
 import 'package:anime_flow/features/search/presentation/widgets/search_details_content.dart';
 import 'package:anime_flow/features/search/presentation/widgets/search_omitted_content.dart';
@@ -108,6 +109,7 @@ class _SearchPageState extends ConsumerState<SearchPage> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     final topPadding = MediaQuery.of(context).padding.top;
     final screenWidth = MediaQuery.of(context).size.width - 32; // 减去左右 padding
     const maxWidth = 1400.0;
@@ -162,7 +164,7 @@ class _SearchPageState extends ConsumerState<SearchPage> {
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             Text(
-                              '搜索建议',
+                              l10n.searchSuggestions,
                               style: TextStyle(
                                 fontSize: 18,
                                 fontWeight: FontWeight.bold,
@@ -201,7 +203,8 @@ class _SearchPageState extends ConsumerState<SearchPage> {
                             mainAxisAlignment: MainAxisAlignment.spaceBetween,
                             children: [
                               Text(
-                                '搜索到 ${searchState.searchResults!.total} 条内容',
+                                l10n.searchResultCount(
+                                    searchState.searchResults!.total),
                                 style: TextStyle(
                                   color: Theme.of(context).colorScheme.outline,
                                 ),
@@ -267,10 +270,10 @@ class _SearchPageState extends ConsumerState<SearchPage> {
                                         ? const Center(
                                             child: CircularProgressIndicator())
                                         : const SizedBox.shrink()
-                                    : const Center(
+                                    : Center(
                                         child: Padding(
                                         padding: EdgeInsets.all(8.0),
-                                        child: Text("没有更多了"),
+                                        child: Text(l10n.noMoreContent),
                                       ));
                               }
 
@@ -300,12 +303,13 @@ class _SearchPageState extends ConsumerState<SearchPage> {
 
   // 搜索历史
   Widget _buildSearchHistory() {
+    final l10n = AppLocalizations.of(context);
     final searchHistory = ref.watch(
       searchPageControllerProvider.select((state) => state.searchHistory),
     );
 
     if (searchHistory.isEmpty) {
-      return const SliverFillRemaining(
+      return SliverFillRemaining(
         child: Center(
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
@@ -317,7 +321,7 @@ class _SearchPageState extends ConsumerState<SearchPage> {
               ),
               SizedBox(height: 16),
               Text(
-                '输入关键词开始搜索',
+                l10n.enterKeywordToSearch,
                 style: TextStyle(
                   fontSize: 16,
                   color: Colors.grey,
@@ -343,7 +347,7 @@ class _SearchPageState extends ConsumerState<SearchPage> {
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
                     Text(
-                      '搜索历史',
+                      l10n.searchHistory,
                       style: TextStyle(
                         fontSize: 18,
                         fontWeight: FontWeight.bold,
@@ -355,7 +359,7 @@ class _SearchPageState extends ConsumerState<SearchPage> {
                           .read(searchPageControllerProvider.notifier)
                           .clearAllHistory(),
                       icon: const Icon(Icons.delete_outline, size: 18),
-                      label: const Text('清除全部'),
+                      label: Text(l10n.clearAll),
                       style: TextButton.styleFrom(
                         foregroundColor: Theme.of(context).colorScheme.error,
                       ),
@@ -395,7 +399,7 @@ class _SearchPageState extends ConsumerState<SearchPage> {
                                   .read(searchPageControllerProvider.notifier)
                                   .removeSearchHistory(history.keyword);
                             },
-                            tooltip: '删除',
+                            tooltip: l10n.delete,
                           ),
                           onTap: () {
                             unawaited(_searchWithKeyword(history.keyword));
@@ -452,6 +456,7 @@ class _StickySearchHeaderDelegate extends SliverPersistentHeaderDelegate {
     double shrinkOffset,
     bool overlapsContent,
   ) {
+    final l10n = AppLocalizations.of(context);
     final collapseProgress =
         (shrinkOffset / (maxExtent - minExtent)).clamp(0.0, 1.0);
     final isCollapsed = collapseProgress > 0.5;
@@ -494,8 +499,8 @@ class _StickySearchHeaderDelegate extends SliverPersistentHeaderDelegate {
                       icon: const Icon(Icons.arrow_back),
                       onPressed: () => context.pop(),
                     ),
-                    const Text(
-                      '搜索',
+                    Text(
+                      l10n.search,
                       style: TextStyle(
                         fontSize: 20,
                         fontWeight: FontWeight.w500,
@@ -526,7 +531,7 @@ class _StickySearchHeaderDelegate extends SliverPersistentHeaderDelegate {
                         }
                       },
                       decoration: InputDecoration(
-                        hintText: '搜索动漫...',
+                        hintText: l10n.searchAnimeHint,
                         prefixIcon: const Icon(Icons.search),
                         suffixIcon: value.text.isNotEmpty
                             ? IconButton(

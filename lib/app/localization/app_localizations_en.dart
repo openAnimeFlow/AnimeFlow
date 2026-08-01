@@ -560,6 +560,111 @@ class AppLocalizationsEn extends AppLocalizations {
   String get search => 'Search';
 
   @override
+  String get imageSearch => 'Image search';
+
+  @override
+  String get switchToUploadImage => 'Switch to image upload';
+
+  @override
+  String get switchToImageUrl => 'Switch to image URL';
+
+  @override
+  String get searching => 'Searching...';
+
+  @override
+  String get startSearch => 'Start search';
+
+  @override
+  String get tapToSelectImage => 'Tap to select an image';
+
+  @override
+  String get supportedImageFormats => 'JPG, PNG, and WEBP supported';
+
+  @override
+  String get imagePreviewFailed => 'Image preview failed';
+
+  @override
+  String get imageSelected => 'Image selected';
+
+  @override
+  String get tapToReselectImage => 'Tap to select another image';
+
+  @override
+  String get reselect => 'Select again';
+
+  @override
+  String get enterImageUrl => 'Enter an image URL';
+
+  @override
+  String get clear => 'Clear';
+
+  @override
+  String get enterImageUrlToPreview => 'Enter an image URL to preview';
+
+  @override
+  String get imageLoadFailed => 'Failed to load image';
+
+  @override
+  String get checkImageUrl => 'Check whether the URL is valid';
+
+  @override
+  String get recognizingImage => 'Recognizing image';
+
+  @override
+  String get matchingAnimeFromImage =>
+      'Please wait while anime information is matched';
+
+  @override
+  String get imageSearchResultPlaceholder => 'Search results will appear here';
+
+  @override
+  String get noImageSearchResults => 'No search results found';
+
+  @override
+  String get startImageSearchHint =>
+      'Select an image or enter an image URL to search';
+
+  @override
+  String get recognitionResults => 'Recognition results';
+
+  @override
+  String get originalAspectRatioTip =>
+      'Only screenshots with the original aspect ratio are supported';
+
+  @override
+  String get clearScreenshotTip =>
+      'Use a clear screenshot without heavy compression or watermarks';
+
+  @override
+  String get searchEnginePoweredBy => 'Powered by ';
+
+  @override
+  String get providesSupport => '';
+
+  @override
+  String get searchAnimeByImage => 'Search anime by image';
+
+  @override
+  String get searchSuggestions => 'Search suggestions';
+
+  @override
+  String searchResultCount(Object count) {
+    return '$count results found';
+  }
+
+  @override
+  String get enterKeywordToSearch => 'Enter a keyword to search';
+
+  @override
+  String get searchHistory => 'Search history';
+
+  @override
+  String get clearAll => 'Clear all';
+
+  @override
+  String get delete => 'Delete';
+
+  @override
   String get refreshFailedRetry => 'Refresh failed, please try again later';
 
   @override

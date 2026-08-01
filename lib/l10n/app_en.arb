@@ -91,6 +91,8 @@
   "tagsTitle": "Tags",
   "detailsTitle": "Details",
   "charactersTitle": "Characters",
+  "charactersLoadFailed": "Failed to load character information",
+  "noCharacters": "No character information",
   "characterWorks": "Works",
   "backToTop": "Back to top",
   "noComments": "No comments",

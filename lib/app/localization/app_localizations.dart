@@ -595,6 +595,18 @@ abstract class AppLocalizations {
   /// **'角色'**
   String get charactersTitle;
 
+  /// No description provided for @charactersLoadFailed.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'加载角色信息失败'**
+  String get charactersLoadFailed;
+
+  /// No description provided for @noCharacters.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'暂无角色信息'**
+  String get noCharacters;
+
   /// No description provided for @characterWorks.
   ///
   /// In zh_Hans, this message translates to:

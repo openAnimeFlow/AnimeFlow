@@ -91,6 +91,8 @@
   "tagsTitle": "標籤",
   "detailsTitle": "詳情",
   "charactersTitle": "角色",
+  "charactersLoadFailed": "載入角色資訊失敗",
+  "noCharacters": "暫無角色資訊",
   "characterWorks": "出演作品",
   "backToTop": "返回頂部",
   "noComments": "暫無吐槽",

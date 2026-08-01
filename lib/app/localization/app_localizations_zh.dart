@@ -273,6 +273,12 @@ class AppLocalizationsZh extends AppLocalizations {
   String get charactersTitle => '角色';
 
   @override
+  String get charactersLoadFailed => '載入角色資訊失敗';
+
+  @override
+  String get noCharacters => '暫無角色資訊';
+
+  @override
   String get characterWorks => '出演作品';
 
   @override
@@ -1872,6 +1878,12 @@ class AppLocalizationsZhHans extends AppLocalizationsZh {
 
   @override
   String get charactersTitle => '角色';
+
+  @override
+  String get charactersLoadFailed => '加载角色信息失败';
+
+  @override
+  String get noCharacters => '暂无角色信息';
 
   @override
   String get characterWorks => '出演';
@@ -3474,6 +3486,12 @@ class AppLocalizationsZhHantHk extends AppLocalizationsZh {
   String get charactersTitle => '角色';
 
   @override
+  String get charactersLoadFailed => '載入角色資訊失敗';
+
+  @override
+  String get noCharacters => '暫無角色資訊';
+
+  @override
   String get characterWorks => '出演作品';
 
   @override
@@ -4882,6 +4900,12 @@ class AppLocalizationsZhHantTw extends AppLocalizationsZh {
 
   @override
   String get charactersTitle => '角色';
+
+  @override
+  String get charactersLoadFailed => '載入角色資訊失敗';
+
+  @override
+  String get noCharacters => '暫無角色資訊';
 
   @override
   String get characterWorks => '出演作品';

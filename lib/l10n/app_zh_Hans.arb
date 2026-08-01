@@ -91,6 +91,8 @@
   "tagsTitle": "标签",
   "detailsTitle": "详情",
   "charactersTitle": "角色",
+  "charactersLoadFailed": "加载角色信息失败",
+  "noCharacters": "暂无角色信息",
   "characterWorks": "出演",
   "backToTop": "返回顶部",
   "noComments": "暂无吐槽",

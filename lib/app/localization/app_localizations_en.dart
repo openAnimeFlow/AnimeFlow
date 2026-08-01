@@ -274,6 +274,12 @@ class AppLocalizationsEn extends AppLocalizations {
   String get charactersTitle => 'Characters';
 
   @override
+  String get charactersLoadFailed => 'Failed to load character information';
+
+  @override
+  String get noCharacters => 'No character information';
+
+  @override
   String get characterWorks => 'Works';
 
   @override

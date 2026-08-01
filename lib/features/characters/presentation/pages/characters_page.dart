@@ -3,6 +3,7 @@ import 'package:anime_flow/features/characters/presentation/providers/characters
 import 'package:anime_flow/app/router/app_router.dart';
 import 'package:anime_flow/core/utils/bgm_utils.dart';
 import 'package:anime_flow/shared/widgets/animation_network_image.dart';
+import 'package:anime_flow/app/localization/app_localizations.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -32,6 +33,7 @@ class _CharacterPageState extends State<CharacterPage> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     final screenWidth = MediaQuery.of(context).size.width - 32;
     const maxWidth = 1400.0;
     const double itemHeight = 160.0;
@@ -55,7 +57,7 @@ class _CharacterPageState extends State<CharacterPage> {
                   final charactersAsync = ref.watch(charactersListProvider);
                   final total = charactersAsync.asData?.value.characters.total;
                   return Text(
-                    '角色${total != null ? '($total)' : ''}',
+                    '${l10n.charactersTitle}${total != null ? '($total)' : ''}',
                     style: const TextStyle(
                       fontSize: 25,
                       fontWeight: FontWeight.bold,
@@ -75,14 +77,14 @@ class _CharacterPageState extends State<CharacterPage> {
                       loading: () => const Center(
                         child: CircularProgressIndicator(),
                       ),
-                      error: (_, __) => const Center(
-                        child: Text('加载角色信息失败'),
+                      error: (_, __) => Center(
+                        child: Text(l10n.charactersLoadFailed),
                       ),
                       data: (viewState) {
                         final charactersData = viewState.characters;
                         if (charactersData.data.isEmpty) {
-                          return const Center(
-                            child: Text('暂无角色信息'),
+                          return Center(
+                            child: Text(l10n.noCharacters),
                           );
                         }
 
@@ -128,10 +130,10 @@ class _CharacterPageState extends State<CharacterPage> {
                                             child: CircularProgressIndicator(),
                                           )
                                         : const SizedBox.shrink()
-                                    : const Center(
+                                    : Center(
                                         child: Padding(
-                                          padding: EdgeInsets.all(8.0),
-                                          child: Text('没有更多了'),
+                                          padding: const EdgeInsets.all(8.0),
+                                          child: Text(l10n.noMore),
                                         ),
                                       ),
                               );

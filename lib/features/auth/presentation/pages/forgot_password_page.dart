@@ -6,6 +6,7 @@ import 'package:anime_flow/core/network/api/flow_api.dart';
 import 'package:anime_flow/features/auth/presentation/widgets/graphic_captcha.dart';
 import 'package:anime_flow/features/auth/presentation/widgets/send_code_button.dart';
 import 'package:anime_flow/shared/widgets/notification_toast.dart';
+import 'package:anime_flow/app/localization/app_localizations.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
@@ -39,13 +40,14 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
   }
 
   Future<bool> _sendEmailCode() async {
+    final l10n = AppLocalizations.of(context);
     final email = _emailController.text.trim();
     if (email.isEmpty || !email.contains('@')) {
-      NotificationToast.show('提示', '请先填写有效邮箱');
+      NotificationToast.show(l10n.tip, l10n.invalidEmail);
       return false;
     }
     if (!_graphicCaptchaController.isReady) {
-      NotificationToast.show('提示', '请先填写图形验证码');
+      NotificationToast.show(l10n.tip, l10n.enterGraphicCaptcha);
       return false;
     }
 
@@ -56,17 +58,17 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
         captcha: _graphicCaptchaController.text,
       );
       if (!mounted) return false;
-      NotificationToast.show('提示', '验证码已发送，请查收邮件');
+      NotificationToast.show(l10n.tip, l10n.emailCodeSent);
       unawaited(_graphicCaptchaController.reload());
       return true;
     } on AnimeFlowApiException catch (e) {
       if (!mounted) return false;
-      NotificationToast.show('提示', e.message);
+      NotificationToast.show(l10n.tip, e.message);
       unawaited(_graphicCaptchaController.reload());
       return false;
     } catch (e) {
       if (!mounted) return false;
-      NotificationToast.show('提示', e.toString());
+      NotificationToast.show(l10n.tip, e.toString());
       unawaited(_graphicCaptchaController.reload());
       return false;
     }
@@ -76,6 +78,7 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
     if (_isSubmitting || !_formKey.currentState!.validate()) return;
 
     setState(() => _isSubmitting = true);
+    final l10n = AppLocalizations.of(context);
     try {
       await FlowApi.forgotPasswordService(
         email: _emailController.text.trim(),
@@ -83,14 +86,14 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
         emailCaptcha: _emailCodeController.text.trim(),
       );
       if (!mounted) return;
-      NotificationToast.show('提示', '密码重置成功，请使用新密码登录');
+      NotificationToast.show(l10n.tip, l10n.passwordResetSuccess);
       context.pop();
     } on AnimeFlowApiException catch (e) {
       if (!mounted) return;
-      NotificationToast.show('提示', e.message);
+      NotificationToast.show(l10n.tip, e.message);
     } catch (e) {
       if (!mounted) return;
-      NotificationToast.show('提示', e.toString());
+      NotificationToast.show(l10n.tip, e.toString());
     } finally {
       if (mounted) {
         setState(() => _isSubmitting = false);
@@ -100,6 +103,7 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
 
@@ -114,7 +118,7 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
         scrolledUnderElevation: 0,
         surfaceTintColor: Colors.transparent,
         forceMaterialTransparency: true,
-        title: const Text('忘记密码'),
+        title: Text(l10n.forgotPassword),
       ),
       body: SingleChildScrollView(
         padding: EdgeInsets.fromLTRB(
@@ -158,7 +162,7 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
                         crossAxisAlignment: CrossAxisAlignment.stretch,
                         children: [
                           Text(
-                            '重置密码',
+                            l10n.resetPassword,
                             textAlign: TextAlign.center,
                             style: theme.textTheme.headlineSmall?.copyWith(
                               fontWeight: FontWeight.bold,
@@ -166,7 +170,7 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
                           ),
                           const SizedBox(height: 6),
                           Text(
-                            '通过邮箱验证码重置登录密码，每个邮箱每天仅可重置一次',
+                            l10n.resetPasswordDescription,
                             textAlign: TextAlign.center,
                             style: theme.textTheme.bodySmall?.copyWith(
                               color: colorScheme.onSurfaceVariant,
@@ -177,15 +181,15 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
                             controller: _emailController,
                             keyboardType: TextInputType.emailAddress,
                             textInputAction: TextInputAction.next,
-                            decoration: const InputDecoration(
-                              labelText: '邮箱',
+                            decoration: InputDecoration(
+                              labelText: l10n.email,
                               prefixIcon: Icon(Icons.email_outlined),
                             ),
                             validator: (value) {
                               final email = value?.trim() ?? '';
-                              if (email.isEmpty) return '请输入邮箱';
+                              if (email.isEmpty) return l10n.enterEmail;
                               if (!email.contains('@')) {
-                                return '邮箱格式不正确';
+                                return l10n.invalidEmailFormat;
                               }
                               return null;
                             },
@@ -196,7 +200,7 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
                             obscureText: _obscurePassword,
                             textInputAction: TextInputAction.next,
                             decoration: InputDecoration(
-                              labelText: '新密码',
+                              labelText: l10n.newPassword,
                               prefixIcon: const Icon(Icons.lock_outline),
                               suffixIcon: IconButton(
                                 onPressed: () => setState(
@@ -211,9 +215,9 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
                             ),
                             validator: (value) {
                               final password = value ?? '';
-                              if (password.isEmpty) return '请输入新密码';
+                              if (password.isEmpty) return l10n.enterNewPassword;
                               if (password.length < 6 || password.length > 30) {
-                                return '密码长度需在 6-30 位之间';
+                                return l10n.passwordLengthRange;
                               }
                               return null;
                             },
@@ -224,7 +228,7 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
                             obscureText: _obscureConfirmPassword,
                             textInputAction: TextInputAction.next,
                             decoration: InputDecoration(
-                              labelText: '确认新密码',
+                              labelText: l10n.confirmNewPassword,
                               prefixIcon: const Icon(Icons.lock_reset_outlined),
                               suffixIcon: IconButton(
                                 onPressed: () => setState(() =>
@@ -239,10 +243,10 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
                             ),
                             validator: (value) {
                               if ((value ?? '').isEmpty) {
-                                return '请再次输入新密码';
+                                return l10n.enterConfirmNewPassword;
                               }
                               if (value != _passwordController.text) {
-                                return '两次输入的密码不一致';
+                                return l10n.passwordMismatch;
                               }
                               return null;
                             },
@@ -261,18 +265,18 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
                                   keyboardType: TextInputType.number,
                                   textInputAction: TextInputAction.done,
                                   onFieldSubmitted: (_) => _submit(),
-                                  decoration: const InputDecoration(
-                                    labelText: '邮箱验证码',
+                                  decoration: InputDecoration(
+                                    labelText: l10n.emailCode,
                                     prefixIcon:
                                         Icon(Icons.mark_email_read_outlined),
                                   ),
                                   validator: (value) {
                                     final code = value?.trim() ?? '';
                                     if (code.isEmpty) {
-                                      return '请输入邮箱验证码';
+                                      return l10n.enterEmailCode;
                                     }
                                     if (code.length != 6) {
-                                      return '验证码为 6 位数字';
+                                      return l10n.emailCodeLength;
                                     }
                                     return null;
                                   },
@@ -299,8 +303,8 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
                                       strokeWidth: 2.5,
                                     ),
                                   )
-                                : const Text(
-                                    '重置密码',
+                                : Text(
+                                    l10n.resetPassword,
                                     style: TextStyle(
                                       fontSize: 16,
                                       fontWeight: FontWeight.bold,
@@ -310,7 +314,7 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
                           const SizedBox(height: 12),
                           TextButton(
                             onPressed: () => context.pop(),
-                            child: const Text('返回登录'),
+                            child: Text(l10n.backToLogin),
                           ),
                         ],
                       ),

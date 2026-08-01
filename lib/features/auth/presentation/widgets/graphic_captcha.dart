@@ -7,6 +7,7 @@ import 'package:anime_flow/core/network/api/flow_api.dart';
 import 'package:anime_flow/core/auth/models/captcha_item.dart';
 import 'package:anime_flow/shared/widgets/notification_toast.dart';
 import 'package:flutter/material.dart';
+import 'package:anime_flow/app/localization/app_localizations.dart';
 
 class GraphicCaptchaController {
   CaptchaItem? captcha;
@@ -69,10 +70,10 @@ class _GraphicCaptchaViewState extends State<GraphicCaptchaView> {
       });
     } on AnimeFlowApiException catch (e) {
       if (!mounted) return;
-      NotificationToast.show('提示', e.toString());
+      NotificationToast.show(AppLocalizations.of(context).tip, e.toString());
     } catch (e) {
       if (!mounted) return;
-      NotificationToast.show('提示', e.toString());
+      NotificationToast.show(AppLocalizations.of(context).tip, e.toString());
     } finally {
       if (mounted) {
         setState(() => _isLoading = false);
@@ -104,8 +105,8 @@ class _GraphicCaptchaViewState extends State<GraphicCaptchaView> {
           child: TextFormField(
             controller: widget.controller.textController,
             textInputAction: TextInputAction.next,
-            decoration: const InputDecoration(
-              labelText: '输入6位验证码',
+            decoration: InputDecoration(
+              labelText: AppLocalizations.of(context).enterGraphicCaptchaCode,
               prefixIcon: Icon(Icons.verified_outlined),
             ),
           ),

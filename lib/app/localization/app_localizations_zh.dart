@@ -1609,6 +1609,39 @@ class AppLocalizationsZh extends AppLocalizations {
   String playEpisode(Object episode) {
     return '播放（$episode）';
   }
+
+  @override
+  String get resetPassword => '重設密碼';
+
+  @override
+  String get newPassword => '新密碼';
+
+  @override
+  String get emailCode => '電子郵件驗證碼';
+
+  @override
+  String get backToLogin => '返回登入';
+
+  @override
+  String get resetPasswordDescription => '透過電子郵件驗證碼重設登入密碼，每個電子郵件每天只能重設一次';
+
+  @override
+  String get passwordResetSuccess => '密碼重設成功，請使用新密碼登入';
+
+  @override
+  String get enterNewPassword => '請輸入新密碼';
+
+  @override
+  String get confirmNewPassword => '確認新密碼';
+
+  @override
+  String get enterConfirmNewPassword => '請再次輸入新密碼';
+
+  @override
+  String get sendEmailCode => '傳送驗證碼';
+
+  @override
+  String get enterGraphicCaptchaCode => '輸入6位驗證碼';
 }
 
 /// The translations for Chinese, using the Han script (`zh_Hans`).
@@ -3215,6 +3248,39 @@ class AppLocalizationsZhHans extends AppLocalizationsZh {
   String playEpisode(Object episode) {
     return '播放（$episode）';
   }
+
+  @override
+  String get resetPassword => '重置密码';
+
+  @override
+  String get newPassword => '新密码';
+
+  @override
+  String get emailCode => '邮箱验证码';
+
+  @override
+  String get backToLogin => '返回登录';
+
+  @override
+  String get resetPasswordDescription => '通过邮箱验证码重置登录密码，每个邮箱每天仅可重置一次';
+
+  @override
+  String get passwordResetSuccess => '密码重置成功，请使用新密码登录';
+
+  @override
+  String get enterNewPassword => '请输入新密码';
+
+  @override
+  String get confirmNewPassword => '确认新密码';
+
+  @override
+  String get enterConfirmNewPassword => '请再次输入新密码';
+
+  @override
+  String get sendEmailCode => '发送验证码';
+
+  @override
+  String get enterGraphicCaptchaCode => '输入6位验证码';
 }
 
 /// The translations for Chinese, as used in Hong Kong, using the Han script (`zh_Hant_HK`).
@@ -4631,6 +4697,39 @@ class AppLocalizationsZhHantHk extends AppLocalizationsZh {
   String playEpisode(Object episode) {
     return '播放（$episode）';
   }
+
+  @override
+  String get resetPassword => '重設密碼';
+
+  @override
+  String get newPassword => '新密碼';
+
+  @override
+  String get emailCode => '電子郵件驗證碼';
+
+  @override
+  String get backToLogin => '返回登入';
+
+  @override
+  String get resetPasswordDescription => '透過電子郵件驗證碼重設登入密碼，每個電子郵件每天只能重設一次';
+
+  @override
+  String get passwordResetSuccess => '密碼重設成功，請使用新密碼登入';
+
+  @override
+  String get enterNewPassword => '請輸入新密碼';
+
+  @override
+  String get confirmNewPassword => '確認新密碼';
+
+  @override
+  String get enterConfirmNewPassword => '請再次輸入新密碼';
+
+  @override
+  String get sendEmailCode => '傳送驗證碼';
+
+  @override
+  String get enterGraphicCaptchaCode => '輸入6位驗證碼';
 }
 
 /// The translations for Chinese, as used in Taiwan, using the Han script (`zh_Hant_TW`).
@@ -6047,4 +6146,37 @@ class AppLocalizationsZhHantTw extends AppLocalizationsZh {
   String playEpisode(Object episode) {
     return '播放（$episode）';
   }
+
+  @override
+  String get resetPassword => '重設密碼';
+
+  @override
+  String get newPassword => '新密碼';
+
+  @override
+  String get emailCode => '電子郵件驗證碼';
+
+  @override
+  String get backToLogin => '返回登入';
+
+  @override
+  String get resetPasswordDescription => '透過電子郵件驗證碼重設登入密碼，每個電子郵件每天只能重設一次';
+
+  @override
+  String get passwordResetSuccess => '密碼重設成功，請使用新密碼登入';
+
+  @override
+  String get enterNewPassword => '請輸入新密碼';
+
+  @override
+  String get confirmNewPassword => '確認新密碼';
+
+  @override
+  String get enterConfirmNewPassword => '請再次輸入新密碼';
+
+  @override
+  String get sendEmailCode => '傳送驗證碼';
+
+  @override
+  String get enterGraphicCaptchaCode => '輸入6位驗證碼';
 }

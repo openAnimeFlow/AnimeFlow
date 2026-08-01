@@ -451,4 +451,15 @@
   "episodeNumber": "第{episode}集",
   "watchedLabel": "觀看{progress}",
   "playEpisode": "播放（{episode}）"
+  ,"resetPassword": "重設密碼"
+  ,"newPassword": "新密碼"
+  ,"emailCode": "電子郵件驗證碼"
+  ,"backToLogin": "返回登入"
+  ,"resetPasswordDescription": "透過電子郵件驗證碼重設登入密碼，每個電子郵件每天只能重設一次"
+  ,"passwordResetSuccess": "密碼重設成功，請使用新密碼登入"
+  ,"enterNewPassword": "請輸入新密碼"
+  ,"confirmNewPassword": "確認新密碼"
+  ,"enterConfirmNewPassword": "請再次輸入新密碼"
+  ,"sendEmailCode": "傳送驗證碼"
+  ,"enterGraphicCaptchaCode": "輸入6位驗證碼"
 }

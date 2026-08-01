@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+import 'package:anime_flow/app/localization/app_localizations.dart';
 
 class SendCodeButton extends StatefulWidget {
   const SendCodeButton({
@@ -61,6 +62,7 @@ class _SendCodeButtonState extends State<SendCodeButton> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     return SizedBox(
       height: 48,
       width: widget.width,
@@ -75,7 +77,7 @@ class _SendCodeButtonState extends State<SendCodeButton> {
                 ),
               )
             : Text(
-                _countdown > 0 ? '${_countdown}s' : '发送验证码',
+                _countdown > 0 ? '${_countdown}s' : l10n.sendEmailCode,
                 style: const TextStyle(fontSize: 13),
               ),
       ),

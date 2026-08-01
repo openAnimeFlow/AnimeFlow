@@ -3078,6 +3078,72 @@ abstract class AppLocalizations {
   /// In zh_Hans, this message translates to:
   /// **'播放（{episode}）'**
   String playEpisode(Object episode);
+
+  /// No description provided for @resetPassword.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'重置密码'**
+  String get resetPassword;
+
+  /// No description provided for @newPassword.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'新密码'**
+  String get newPassword;
+
+  /// No description provided for @emailCode.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'邮箱验证码'**
+  String get emailCode;
+
+  /// No description provided for @backToLogin.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'返回登录'**
+  String get backToLogin;
+
+  /// No description provided for @resetPasswordDescription.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'通过邮箱验证码重置登录密码，每个邮箱每天仅可重置一次'**
+  String get resetPasswordDescription;
+
+  /// No description provided for @passwordResetSuccess.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'密码重置成功，请使用新密码登录'**
+  String get passwordResetSuccess;
+
+  /// No description provided for @enterNewPassword.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'请输入新密码'**
+  String get enterNewPassword;
+
+  /// No description provided for @confirmNewPassword.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'确认新密码'**
+  String get confirmNewPassword;
+
+  /// No description provided for @enterConfirmNewPassword.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'请再次输入新密码'**
+  String get enterConfirmNewPassword;
+
+  /// No description provided for @sendEmailCode.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'发送验证码'**
+  String get sendEmailCode;
+
+  /// No description provided for @enterGraphicCaptchaCode.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'输入6位验证码'**
+  String get enterGraphicCaptchaCode;
 }
 
 class _AppLocalizationsDelegate

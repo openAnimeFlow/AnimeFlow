@@ -466,4 +466,15 @@
   "episodeNumber": "Episode {episode}",
   "watchedLabel": "Watched {progress}",
   "playEpisode": "Play ({episode})"
+  ,"resetPassword": "Reset password"
+  ,"newPassword": "New password"
+  ,"emailCode": "Email verification code"
+  ,"backToLogin": "Back to login"
+  ,"resetPasswordDescription": "Reset your login password with an email verification code. Each email can be reset once per day."
+  ,"passwordResetSuccess": "Password reset successfully. Please log in with your new password."
+  ,"enterNewPassword": "Please enter a new password"
+  ,"confirmNewPassword": "Confirm new password"
+  ,"enterConfirmNewPassword": "Please enter the new password again"
+  ,"sendEmailCode": "Send verification code"
+  ,"enterGraphicCaptchaCode": "Enter the 6-digit CAPTCHA"
 }

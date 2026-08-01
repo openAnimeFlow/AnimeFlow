@@ -1643,4 +1643,39 @@ class AppLocalizationsEn extends AppLocalizations {
   String playEpisode(Object episode) {
     return 'Play ($episode)';
   }
+
+  @override
+  String get resetPassword => 'Reset password';
+
+  @override
+  String get newPassword => 'New password';
+
+  @override
+  String get emailCode => 'Email verification code';
+
+  @override
+  String get backToLogin => 'Back to login';
+
+  @override
+  String get resetPasswordDescription =>
+      'Reset your login password with an email verification code. Each email can be reset once per day.';
+
+  @override
+  String get passwordResetSuccess =>
+      'Password reset successfully. Please log in with your new password.';
+
+  @override
+  String get enterNewPassword => 'Please enter a new password';
+
+  @override
+  String get confirmNewPassword => 'Confirm new password';
+
+  @override
+  String get enterConfirmNewPassword => 'Please enter the new password again';
+
+  @override
+  String get sendEmailCode => 'Send verification code';
+
+  @override
+  String get enterGraphicCaptchaCode => 'Enter the 6-digit CAPTCHA';
 }

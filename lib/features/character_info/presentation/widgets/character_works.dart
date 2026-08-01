@@ -1,3 +1,4 @@
+import 'package:anime_flow/app/localization/app_localizations.dart';
 import 'package:anime_flow/shared/models/bangumi/character_subjects_item.dart';
 import 'package:anime_flow/features/character_info/presentation/providers/character_info_provider.dart';
 import 'package:anime_flow/app/router/model/info_route_extra.dart';
@@ -18,6 +19,7 @@ class CharacterWorksView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     return Consumer(
       builder: (context, ref, _) {
         final worksAsync = ref.watch(characterWorksProvider);
@@ -26,13 +28,13 @@ class CharacterWorksView extends StatelessWidget {
           loading: () => const SliverFillRemaining(
             child: Center(child: CircularProgressIndicator()),
           ),
-          error: (_, __) => const SliverFillRemaining(
-            child: Center(child: Text('加载出演作品失败')),
+          error: (_, __) => SliverFillRemaining(
+            child: Center(child: Text(l10n.characterWorksLoadFailed)),
           ),
           data: (characterCasts) {
             if (characterCasts.data.isEmpty) {
-              return const SliverFillRemaining(
-                child: Center(child: Text('暂无出演作品')),
+              return SliverFillRemaining(
+                child: Center(child: Text(l10n.noCharacterWorks)),
               );
             }
 

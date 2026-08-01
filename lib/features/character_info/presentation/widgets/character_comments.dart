@@ -1,3 +1,4 @@
+import 'package:anime_flow/app/localization/app_localizations.dart';
 import 'package:anime_flow/shared/models/bangumi/character_comments_item.dart';
 import 'package:anime_flow/features/character_info/presentation/providers/character_info_provider.dart';
 import 'package:anime_flow/app/router/app_router.dart';
@@ -12,6 +13,7 @@ class CharacterCommentsView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     return Consumer(
       builder: (context, ref, _) {
         final commentsAsync = ref.watch(characterCommentsProvider);
@@ -20,8 +22,8 @@ class CharacterCommentsView extends StatelessWidget {
           loading: () => const SliverFillRemaining(
             child: Center(child: CircularProgressIndicator()),
           ),
-          error: (_, __) => const SliverFillRemaining(
-            child: Center(child: Text('加载吐槽失败')),
+          error: (_, __) => SliverFillRemaining(
+            child: Center(child: Text(l10n.commentLoadFailed)),
           ),
           data: (comments) {
             if (comments.isEmpty) {
@@ -37,7 +39,7 @@ class CharacterCommentsView extends StatelessWidget {
                       ),
                       const SizedBox(height: 16),
                       Text(
-                        '暂无吐槽',
+                        l10n.noComments,
                         style: TextStyle(
                           fontSize: 16,
                           color: Theme.of(context).colorScheme.outline,

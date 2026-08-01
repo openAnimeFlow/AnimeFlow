@@ -1,3 +1,4 @@
+import 'package:anime_flow/app/localization/app_localizations.dart';
 import 'package:anime_flow/features/character_info/presentation/widgets/character_comments.dart';
 import 'package:anime_flow/features/character_info/presentation/widgets/character_works.dart';
 import 'package:anime_flow/features/character_info/presentation/providers/character_info_provider.dart';
@@ -53,6 +54,7 @@ class _CharacterInfoState extends State<CharacterInfo> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     const maxWidth = 1400.0;
 
     return Scaffold(
@@ -140,9 +142,9 @@ class _CharacterInfoState extends State<CharacterInfo> {
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             const SizedBox(height: 20),
-                            const Text(
-                              '介绍',
-                              style: TextStyle(
+                            Text(
+                              l10n.summaryTitle,
+                              style: const TextStyle(
                                 fontSize: 20,
                                 fontWeight: FontWeight.bold,
                               ),
@@ -165,7 +167,7 @@ class _CharacterInfoState extends State<CharacterInfo> {
                   );
                 },
               ),
-              const SliverPadding(
+              SliverPadding(
                 padding: EdgeInsets.only(
                   left: 20,
                   right: 20,
@@ -174,7 +176,7 @@ class _CharacterInfoState extends State<CharacterInfo> {
                 ),
                 sliver: SliverToBoxAdapter(
                   child: Text(
-                    '出演',
+                    l10n.characterWorks,
                     style: TextStyle(
                       fontSize: 20,
                       fontWeight: FontWeight.bold,
@@ -183,7 +185,7 @@ class _CharacterInfoState extends State<CharacterInfo> {
                 ),
               ),
               const CharacterWorksView(),
-              const SliverPadding(
+              SliverPadding(
                 padding: EdgeInsets.only(
                   left: 20,
                   right: 20,
@@ -192,7 +194,7 @@ class _CharacterInfoState extends State<CharacterInfo> {
                 ),
                 sliver: SliverToBoxAdapter(
                   child: Text(
-                    '吐槽',
+                    l10n.commentsTitle,
                     style: TextStyle(
                       fontSize: 20,
                       fontWeight: FontWeight.bold,
@@ -208,7 +210,7 @@ class _CharacterInfoState extends State<CharacterInfo> {
       floatingActionButton: _showBackToTop
           ? FloatingActionButton(
               onPressed: _scrollToTop,
-              tooltip: '返回顶部',
+              tooltip: l10n.backToTop,
               child: const Icon(Icons.arrow_upward),
             )
           : null,

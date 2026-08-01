@@ -274,6 +274,21 @@ class AppLocalizationsEn extends AppLocalizations {
   String get charactersTitle => 'Characters';
 
   @override
+  String get characterWorks => 'Works';
+
+  @override
+  String get backToTop => 'Back to top';
+
+  @override
+  String get noComments => 'No comments';
+
+  @override
+  String get characterWorksLoadFailed => 'Failed to load works';
+
+  @override
+  String get noCharacterWorks => 'No works';
+
+  @override
   String get viewDetails => 'View details';
 
   @override
@@ -391,9 +406,6 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get newestSort => 'Newest';
-
-  @override
-  String get noComments => 'No comments';
 
   @override
   String get commentsAction => 'Comments';
@@ -1460,6 +1472,36 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get syncStatusFailed => 'Sync failed';
+
+  @override
+  String get introduction => 'Introduction';
+
+  @override
+  String get collection => 'Collection';
+
+  @override
+  String get timeline => 'Timeline';
+
+  @override
+  String get userInfoUnavailable => 'Unable to load user information';
+
+  @override
+  String get timelineComingSoon => 'Timeline is coming soon';
+
+  @override
+  String get statistics => 'Statistics';
+
+  @override
+  String get bio => 'Bio';
+
+  @override
+  String get location => 'Location';
+
+  @override
+  String get website => 'Website';
+
+  @override
+  String get mysteriousUser => 'This user is mysterious';
 
   @override
   String watchedLabel(Object progress) {

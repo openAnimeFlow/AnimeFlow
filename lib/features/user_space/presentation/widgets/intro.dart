@@ -1,3 +1,4 @@
+import 'package:anime_flow/app/localization/app_localizations.dart';
 import 'package:anime_flow/shared/models/bangumi/user_info_item.dart';
 import 'package:anime_flow/features/user_space/presentation/providers/user_space_provider.dart';
 import 'package:anime_flow/features/user_space/presentation/widgets/statistics.dart';
@@ -12,6 +13,7 @@ class IntroView extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = AppLocalizations.of(context);
     final handle = NestedScrollView.sliverOverlapAbsorberHandleFor(context);
     final statisticsAsync =
         ref.watch(userSpaceStatisticsProvider(userInfo.username));
@@ -42,8 +44,8 @@ class IntroView extends ConsumerWidget {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         spacing: 10,
                         children: [
-                          const Text(
-                            '统计',
+                          Text(
+                            l10n.statistics,
                             style: TextStyle(
                                 fontSize: 18, fontWeight: FontWeight.bold),
                           ),
@@ -59,8 +61,8 @@ class IntroView extends ConsumerWidget {
               if (hasProfileInfo) ...[
                 const SizedBox(height: 24),
                 if (hasBio) ...[
-                  const Text(
-                    '个人简介',
+                  Text(
+                    l10n.bio,
                     style: TextStyle(
                       fontSize: 18,
                       fontWeight: FontWeight.bold,
@@ -71,8 +73,8 @@ class IntroView extends ConsumerWidget {
                   const SizedBox(height: 24),
                 ],
                 if (hasLocation) ...[
-                  const Text(
-                    '所在地',
+                  Text(
+                    l10n.location,
                     style: TextStyle(
                       fontSize: 18,
                       fontWeight: FontWeight.bold,
@@ -83,8 +85,8 @@ class IntroView extends ConsumerWidget {
                   const SizedBox(height: 24),
                 ],
                 if (hasSite) ...[
-                  const Text(
-                    '网站',
+                  Text(
+                    l10n.website,
                     style: TextStyle(
                       fontSize: 18,
                       fontWeight: FontWeight.bold,
@@ -97,7 +99,7 @@ class IntroView extends ConsumerWidget {
                 const SizedBox(height: 24),
                 Center(
                   child: Text(
-                    '该用户很神秘',
+                    l10n.mysteriousUser,
                     style: TextStyle(
                       fontSize: 16,
                       color: Theme.of(context)

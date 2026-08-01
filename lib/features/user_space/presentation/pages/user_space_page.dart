@@ -1,3 +1,4 @@
+import 'package:anime_flow/app/localization/app_localizations.dart';
 import 'package:anime_flow/core/constants/layout_constant.dart';
 import 'package:anime_flow/features/user_space/presentation/providers/user_space_provider.dart';
 import 'package:flutter/material.dart';
@@ -23,12 +24,10 @@ class _UserSpacePageState extends State<UserSpacePage>
   late TabController tabController;
   bool isPinned = false;
 
-  final List<String> tabs = ['介绍', '收藏', '时间线'];
-
   @override
   void initState() {
     super.initState();
-    tabController = TabController(length: tabs.length, vsync: this);
+    tabController = TabController(length: 3, vsync: this);
   }
 
   @override
@@ -39,6 +38,8 @@ class _UserSpacePageState extends State<UserSpacePage>
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
+    final tabs = [l10n.introduction, l10n.collection, l10n.timeline];
     final double statusBarHeight = MediaQuery.of(context).padding.top;
     return Scaffold(
       body: NotificationListener<ScrollNotification>(
@@ -143,6 +144,7 @@ class _UserSpacePageState extends State<UserSpacePage>
   }
 
   Widget buildBody(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     return Consumer(
       builder: (context, ref, _) {
         final userInfoAsync = ref.watch(userSpaceProvider(widget.username));
@@ -157,7 +159,7 @@ class _UserSpacePageState extends State<UserSpacePage>
           error: (_, __) => wrapBodyMaxWidth(
               buildOverlapBody(
                 context,
-                child: const Center(child: Text('无法查询到用户信息')),
+                child: Center(child: Text(l10n.userInfoUnavailable)),
               ),
               maxWidth: LayoutConstant.maxWidth),
           data: (userInfo) => wrapBodyMaxWidth(
@@ -166,7 +168,7 @@ class _UserSpacePageState extends State<UserSpacePage>
               children: [
                 IntroView(userInfo: userInfo),
                 CollectView(username: widget.username),
-                buildTimelineTab(context),
+                buildTimelineTab(context, l10n),
               ],
             ),
             maxWidth: LayoutConstant.maxWidth,
@@ -176,14 +178,14 @@ class _UserSpacePageState extends State<UserSpacePage>
     );
   }
 
-  Widget buildTimelineTab(BuildContext context) {
+  Widget buildTimelineTab(BuildContext context, AppLocalizations l10n) {
     final handle = NestedScrollView.sliverOverlapAbsorberHandleFor(context);
 
     return CustomScrollView(
       slivers: [
         SliverOverlapInjector(handle: handle),
-        const SliverFillRemaining(
-          child: Center(child: Text('时间线功能待实现')),
+        SliverFillRemaining(
+          child: Center(child: Text(l10n.timelineComingSoon)),
         ),
       ],
     );

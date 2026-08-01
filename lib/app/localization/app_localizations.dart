@@ -595,6 +595,36 @@ abstract class AppLocalizations {
   /// **'角色'**
   String get charactersTitle;
 
+  /// No description provided for @characterWorks.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'出演'**
+  String get characterWorks;
+
+  /// No description provided for @backToTop.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'返回顶部'**
+  String get backToTop;
+
+  /// No description provided for @noComments.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'暂无吐槽'**
+  String get noComments;
+
+  /// No description provided for @characterWorksLoadFailed.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'加载出演作品失败'**
+  String get characterWorksLoadFailed;
+
+  /// No description provided for @noCharacterWorks.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'暂无出演作品'**
+  String get noCharacterWorks;
+
   /// No description provided for @viewDetails.
   ///
   /// In zh_Hans, this message translates to:
@@ -798,12 +828,6 @@ abstract class AppLocalizations {
   /// In zh_Hans, this message translates to:
   /// **'最新'**
   String get newestSort;
-
-  /// No description provided for @noComments.
-  ///
-  /// In zh_Hans, this message translates to:
-  /// **'暂无评论'**
-  String get noComments;
 
   /// No description provided for @commentsAction.
   ///
@@ -2772,6 +2796,66 @@ abstract class AppLocalizations {
   /// In zh_Hans, this message translates to:
   /// **'同步失败'**
   String get syncStatusFailed;
+
+  /// No description provided for @introduction.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'介绍'**
+  String get introduction;
+
+  /// No description provided for @collection.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'收藏'**
+  String get collection;
+
+  /// No description provided for @timeline.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'时间线'**
+  String get timeline;
+
+  /// No description provided for @userInfoUnavailable.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'无法查询到用户信息'**
+  String get userInfoUnavailable;
+
+  /// No description provided for @timelineComingSoon.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'时间线功能待实现'**
+  String get timelineComingSoon;
+
+  /// No description provided for @statistics.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'统计'**
+  String get statistics;
+
+  /// No description provided for @bio.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'个人简介'**
+  String get bio;
+
+  /// No description provided for @location.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'所在地'**
+  String get location;
+
+  /// No description provided for @website.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'网站'**
+  String get website;
+
+  /// No description provided for @mysteriousUser.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'该用户很神秘'**
+  String get mysteriousUser;
 
   /// No description provided for @watchedLabel.
   ///

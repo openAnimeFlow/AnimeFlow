@@ -273,6 +273,21 @@ class AppLocalizationsZh extends AppLocalizations {
   String get charactersTitle => '角色';
 
   @override
+  String get characterWorks => '出演作品';
+
+  @override
+  String get backToTop => '返回頂部';
+
+  @override
+  String get noComments => '暫無吐槽';
+
+  @override
+  String get characterWorksLoadFailed => '載入出演作品失敗';
+
+  @override
+  String get noCharacterWorks => '暫無出演作品';
+
+  @override
   String get viewDetails => '查看详情';
 
   @override
@@ -389,9 +404,6 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get newestSort => '最新';
-
-  @override
-  String get noComments => '暂无评论';
 
   @override
   String get commentsAction => '评论';
@@ -1433,6 +1445,36 @@ class AppLocalizationsZh extends AppLocalizations {
   String get syncStatusFailed => '同步失敗';
 
   @override
+  String get introduction => '介紹';
+
+  @override
+  String get collection => '收藏';
+
+  @override
+  String get timeline => '時間軸';
+
+  @override
+  String get userInfoUnavailable => '無法取得使用者資訊';
+
+  @override
+  String get timelineComingSoon => '時間軸功能即將推出';
+
+  @override
+  String get statistics => '統計';
+
+  @override
+  String get bio => '個人簡介';
+
+  @override
+  String get location => '所在地';
+
+  @override
+  String get website => '網站';
+
+  @override
+  String get mysteriousUser => '這位使用者很神秘';
+
+  @override
   String watchedLabel(Object progress) {
     return '觀看$progress';
   }
@@ -1712,6 +1754,21 @@ class AppLocalizationsZhHans extends AppLocalizationsZh {
   String get charactersTitle => '角色';
 
   @override
+  String get characterWorks => '出演';
+
+  @override
+  String get backToTop => '返回顶部';
+
+  @override
+  String get noComments => '暂无吐槽';
+
+  @override
+  String get characterWorksLoadFailed => '加载出演作品失败';
+
+  @override
+  String get noCharacterWorks => '暂无出演作品';
+
+  @override
   String get viewDetails => '查看详情';
 
   @override
@@ -1828,9 +1885,6 @@ class AppLocalizationsZhHans extends AppLocalizationsZh {
 
   @override
   String get newestSort => '最新';
-
-  @override
-  String get noComments => '暂无评论';
 
   @override
   String get commentsAction => '评论';
@@ -2872,6 +2926,36 @@ class AppLocalizationsZhHans extends AppLocalizationsZh {
   String get syncStatusFailed => '同步失败';
 
   @override
+  String get introduction => '介绍';
+
+  @override
+  String get collection => '收藏';
+
+  @override
+  String get timeline => '时间线';
+
+  @override
+  String get userInfoUnavailable => '无法查询到用户信息';
+
+  @override
+  String get timelineComingSoon => '时间线功能待实现';
+
+  @override
+  String get statistics => '统计';
+
+  @override
+  String get bio => '个人简介';
+
+  @override
+  String get location => '所在地';
+
+  @override
+  String get website => '网站';
+
+  @override
+  String get mysteriousUser => '该用户很神秘';
+
+  @override
   String watchedLabel(Object progress) {
     return '观看$progress';
   }
@@ -3151,6 +3235,21 @@ class AppLocalizationsZhHantHk extends AppLocalizationsZh {
   String get charactersTitle => '角色';
 
   @override
+  String get characterWorks => '出演作品';
+
+  @override
+  String get backToTop => '返回頂部';
+
+  @override
+  String get noComments => '暫無吐槽';
+
+  @override
+  String get characterWorksLoadFailed => '載入出演作品失敗';
+
+  @override
+  String get noCharacterWorks => '暫無出演作品';
+
+  @override
   String get viewDetails => '查看詳情';
 
   @override
@@ -3267,9 +3366,6 @@ class AppLocalizationsZhHantHk extends AppLocalizationsZh {
 
   @override
   String get newestSort => '最新';
-
-  @override
-  String get noComments => '暫無評論';
 
   @override
   String get commentsAction => '評論';
@@ -4120,6 +4216,36 @@ class AppLocalizationsZhHantHk extends AppLocalizationsZh {
   String get syncStatusFailed => '同步失敗';
 
   @override
+  String get introduction => '介紹';
+
+  @override
+  String get collection => '收藏';
+
+  @override
+  String get timeline => '時間軸';
+
+  @override
+  String get userInfoUnavailable => '無法取得使用者資訊';
+
+  @override
+  String get timelineComingSoon => '時間軸功能即將推出';
+
+  @override
+  String get statistics => '統計';
+
+  @override
+  String get bio => '個人簡介';
+
+  @override
+  String get location => '所在地';
+
+  @override
+  String get website => '網站';
+
+  @override
+  String get mysteriousUser => '這位使用者很神秘';
+
+  @override
   String watchedLabel(Object progress) {
     return '觀看$progress';
   }
@@ -4399,6 +4525,21 @@ class AppLocalizationsZhHantTw extends AppLocalizationsZh {
   String get charactersTitle => '角色';
 
   @override
+  String get characterWorks => '出演作品';
+
+  @override
+  String get backToTop => '返回頂部';
+
+  @override
+  String get noComments => '暫無吐槽';
+
+  @override
+  String get characterWorksLoadFailed => '載入出演作品失敗';
+
+  @override
+  String get noCharacterWorks => '暫無出演作品';
+
+  @override
   String get viewDetails => '查看詳情';
 
   @override
@@ -4515,9 +4656,6 @@ class AppLocalizationsZhHantTw extends AppLocalizationsZh {
 
   @override
   String get newestSort => '最新';
-
-  @override
-  String get noComments => '暫無評論';
 
   @override
   String get commentsAction => '評論';
@@ -5366,6 +5504,36 @@ class AppLocalizationsZhHantTw extends AppLocalizationsZh {
 
   @override
   String get syncStatusFailed => '同步失敗';
+
+  @override
+  String get introduction => '介紹';
+
+  @override
+  String get collection => '收藏';
+
+  @override
+  String get timeline => '時間軸';
+
+  @override
+  String get userInfoUnavailable => '無法取得使用者資訊';
+
+  @override
+  String get timelineComingSoon => '時間軸功能即將推出';
+
+  @override
+  String get statistics => '統計';
+
+  @override
+  String get bio => '個人簡介';
+
+  @override
+  String get location => '所在地';
+
+  @override
+  String get website => '網站';
+
+  @override
+  String get mysteriousUser => '這位使用者很神秘';
 
   @override
   String watchedLabel(Object progress) {

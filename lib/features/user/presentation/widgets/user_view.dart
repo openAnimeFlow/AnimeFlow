@@ -265,35 +265,45 @@ class _UserViewState extends ConsumerState<UserView>
       padding: const EdgeInsets.symmetric(horizontal: 16),
       child: Row(
         children: [
-          AnimatedOpacity(
-            opacity: isPinned ? 1 : 0,
-            duration: const Duration(milliseconds: 500),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                ClipRRect(
-                  borderRadius: BorderRadius.circular(5),
-                  child: user.avatar != null && user.avatar!.isNotEmpty
-                      ? AnimationNetworkImage(
-                          width: 30, height: 30, url: user.avatar!)
-                      : const Icon(Icons.person, size: 30),
-                ),
-                const SizedBox(width: 5),
-                Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
+          ClipRect(
+            child: AnimatedSlide(
+              offset: isPinned ? Offset.zero : const Offset(0, 1),
+              duration: const Duration(milliseconds: 300),
+              curve: Curves.easeOutCubic,
+              child: IgnorePointer(
+                ignoring: !isPinned,
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    Text(
-                      user.nickname.isNotEmpty ? user.nickname : user.email,
-                      style: const TextStyle(
-                          fontSize: 12, fontWeight: FontWeight.bold),
+                    ClipRRect(
+                      borderRadius: BorderRadius.circular(5),
+                      child: user.avatar != null && user.avatar!.isNotEmpty
+                          ? AnimationNetworkImage(
+                              width: 30, height: 30, url: user.avatar!)
+                          : const Icon(Icons.person, size: 30),
                     ),
-                    Text(
-                      FormatTimeUtil.formatDate(user.createTime),
-                      style: const TextStyle(fontSize: 10),
+                    const SizedBox(width: 5),
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          user.nickname.isNotEmpty
+                              ? user.nickname
+                              : user.email,
+                          style: const TextStyle(
+                            fontSize: 12,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                        Text(
+                          FormatTimeUtil.formatDate(user.createTime),
+                          style: const TextStyle(fontSize: 10),
+                        ),
+                      ],
                     ),
                   ],
-                )
-              ],
+                ),
+              ),
             ),
           ),
           const Spacer(),

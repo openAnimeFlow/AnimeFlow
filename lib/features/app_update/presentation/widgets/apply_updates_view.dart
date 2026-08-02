@@ -35,6 +35,7 @@ class _ApplyUpdatesViewState extends ConsumerState<ApplyUpdatesView> {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
+    final colorScheme = Theme.of(context).colorScheme;
 
     return AlertDialog(
       title: Text(l10n.updateAvailable),
@@ -48,26 +49,25 @@ class _ApplyUpdatesViewState extends ConsumerState<ApplyUpdatesView> {
               styleSheet: MarkdownStyleSheet(
                 p: TextStyle(
                   fontSize: 14,
-                  color: Theme.of(context).colorScheme.onSurface,
+                  color: colorScheme.onSurface,
                 ),
                 h3: TextStyle(
                   fontSize: 16,
                   fontWeight: FontWeight.bold,
-                  color: Theme.of(context).colorScheme.onSurface,
+                  color: colorScheme.onSurface,
                 ),
                 listBullet: TextStyle(
                   fontSize: 14,
-                  color: Theme.of(context).colorScheme.onSurface,
+                  color: colorScheme.onSurface,
                 ),
                 code: TextStyle(
                   fontSize: 12,
                   fontFamily: 'monospace',
-                  color: Theme.of(context).colorScheme.onSurfaceVariant,
-                  backgroundColor:
-                      Theme.of(context).colorScheme.surfaceContainerHighest,
+                  color: colorScheme.onSurfaceVariant,
+                  backgroundColor: colorScheme.surfaceContainerHighest,
                 ),
                 codeblockDecoration: BoxDecoration(
-                  color: Theme.of(context).colorScheme.surfaceContainerHighest,
+                  color: colorScheme.surfaceContainerHighest,
                   borderRadius: BorderRadius.circular(4),
                 ),
               ),
@@ -150,13 +150,15 @@ class _DownloadProgressSection extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Container(
           padding: const EdgeInsets.all(5),
           decoration: BoxDecoration(
-            color: Theme.of(context).colorScheme.surfaceContainerHighest,
+            color: colorScheme.surfaceContainerHighest,
             borderRadius: BorderRadius.circular(4),
           ),
           child: Text(
@@ -170,14 +172,14 @@ class _DownloadProgressSection extends StatelessWidget {
               AppLocalizations.of(context).downloading,
               style: TextStyle(
                 fontSize: 14,
-                color: Theme.of(context).colorScheme.onSurface,
+                color: colorScheme.onSurface,
               ),
             ),
             Text(
               '${(download.progress * 100).toStringAsFixed(1)}%',
               style: TextStyle(
                 fontSize: 14,
-                color: Theme.of(context).colorScheme.primary,
+                color: colorScheme.primary,
                 fontWeight: FontWeight.bold,
               ),
             ),
@@ -219,6 +221,7 @@ class _DownloadUrlSection extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -227,7 +230,7 @@ class _DownloadUrlSection extends StatelessWidget {
             AppLocalizations.of(context).selectDownloadSource,
             style: TextStyle(
               fontSize: 14,
-              color: Theme.of(context).colorScheme.onSurfaceVariant,
+              color: colorScheme.onSurfaceVariant,
             ),
           ),
         if (downloadList.length > 1) const SizedBox(height: 8),
@@ -241,17 +244,12 @@ class _DownloadUrlSection extends StatelessWidget {
               padding: const EdgeInsets.all(12),
               decoration: BoxDecoration(
                 border: Border.all(
-                  color: isSelected
-                      ? Theme.of(context).colorScheme.primary
-                      : Theme.of(context).colorScheme.outline,
+                  color: isSelected ? colorScheme.primary : colorScheme.outline,
                   width: isSelected ? 2 : 1,
                 ),
                 borderRadius: BorderRadius.circular(8),
                 color: isSelected
-                    ? Theme.of(context)
-                        .colorScheme
-                        .primaryContainer
-                        .withValues(alpha: 0.3)
+                    ? colorScheme.primaryContainer.withValues(alpha: 0.3)
                     : Colors.transparent,
               ),
               child: Row(
@@ -262,8 +260,8 @@ class _DownloadUrlSection extends StatelessWidget {
                           ? Icons.check_circle
                           : Icons.radio_button_unchecked,
                       color: isSelected
-                          ? Theme.of(context).colorScheme.primary
-                          : Theme.of(context).colorScheme.outline,
+                          ? colorScheme.primary
+                          : colorScheme.outline,
                       size: 20,
                     ),
                     const SizedBox(width: 8),
@@ -276,7 +274,7 @@ class _DownloadUrlSection extends StatelessWidget {
                           data.fileName,
                           style: TextStyle(
                             fontSize: 12,
-                            color: Theme.of(context).colorScheme.onSurface,
+                            color: colorScheme.onSurface,
                           ),
                           maxLines: 2,
                           overflow: TextOverflow.ellipsis,

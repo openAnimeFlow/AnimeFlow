@@ -4,11 +4,11 @@ import 'package:anime_flow/features/character_info/presentation/pages/character_
 import 'package:anime_flow/features/characters/presentation/pages/characters_page.dart';
 import 'package:anime_flow/features/auth/presentation/pages/forgot_password_page.dart';
 import 'package:anime_flow/features/auth/presentation/pages/login_page.dart';
+import 'package:anime_flow/features/play/presentation/pages/play_page.dart';
+import 'package:anime_flow/features/play/presentation/pages/play_record_page.dart';
 import 'package:anime_flow/features/shell/presentation/pages/app_shell_page.dart';
 import 'package:anime_flow/features/user/presentation/pages/user_page.dart';
 import 'package:anime_flow/features/auth/presentation/pages/oauth_callback_page.dart';
-import 'package:anime_flow/features/player/presentation/pages/play_page.dart';
-import 'package:anime_flow/features/player/presentation/pages/play_record_page.dart';
 import 'package:anime_flow/features/ranking/presentation/pages/ranking_page.dart';
 import 'package:anime_flow/features/home/presentation/pages/home_page.dart';
 import 'package:anime_flow/features/auth/presentation/pages/register_page.dart';

@@ -1,8 +1,8 @@
 import 'package:anime_flow/app/localization/app_localizations.dart';
 import 'package:anime_flow/app/router/app_router.dart';
 import 'package:anime_flow/app/router/model/info_route_extra.dart';
+import 'package:anime_flow/features/play/application/play_history_service.dart';
 import 'package:anime_flow/shared/models/player/play/play_history.dart';
-import 'package:anime_flow/features/player/application/play_history_service.dart';
 import 'package:anime_flow/app/router/model/play_route_extra.dart';
 import 'package:anime_flow/core/logger/logger.dart';
 import 'package:anime_flow/core/utils/utils.dart';

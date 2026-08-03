@@ -415,6 +415,7 @@ class PlaySession {
   bool _isPlayerBuffering = false;
 
   int? _lastSavedPositionSeconds;
+  DateTime? _lastPlayHistorySavedAt;
   bool _isSavingPlayHistory = false;
   final Set<int> _autoWatchedEpisodeIds = {};
   final Set<int> _autoWatchedEpisodeUpdatesInFlight = {};
@@ -423,6 +424,7 @@ class PlaySession {
 
   static const Duration _bufferingPositionTolerance =
       Duration(milliseconds: 500);
+  static const Duration _playHistorySaveInterval = Duration(seconds: 5);
 
   void init() {
     final adBlocker = setting.get(PlaybackKey.adBlocker, defaultValue: false);
@@ -558,6 +560,7 @@ class PlaySession {
     subjectCover = state.subjectCover;
     alias = state.alias;
     _lastSavedPositionSeconds = null;
+    _lastPlayHistorySavedAt = null;
     if (state.videoUrl.isEmpty) return;
     await player.open(Media(state.videoUrl), play: false);
     await player.stream.duration.firstWhere((d) => d > Duration.zero);
@@ -598,12 +601,19 @@ class PlaySession {
     final positionSeconds = state.position.inSeconds;
     final lastSavedPositionSeconds = _lastSavedPositionSeconds;
     if (lastSavedPositionSeconds != null &&
-        positionSeconds >= lastSavedPositionSeconds &&
-        positionSeconds - lastSavedPositionSeconds < 5) {
+        (positionSeconds - lastSavedPositionSeconds).abs() < 5) {
+      return;
+    }
+
+    final lastPlayHistorySavedAt = _lastPlayHistorySavedAt;
+    if (lastPlayHistorySavedAt != null &&
+        DateTime.now().difference(lastPlayHistorySavedAt) <
+            _playHistorySaveInterval) {
       return;
     }
 
     _lastSavedPositionSeconds = positionSeconds;
+    _lastPlayHistorySavedAt = DateTime.now();
     unawaited(_savePlayHistory(state));
   }
 

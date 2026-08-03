@@ -246,7 +246,17 @@ class AnimeFlowApi {
           '/api/v1/users/subjects/{subjectId}/episodes/watch',
 
       /// 剧集观看记录
-      episodeWatched = '/api/v1/users/episodes/{episodeId}/watch';
+      episodeWatched = '/api/v1/users/episodes/{episodeId}/watch',
+
+      /// 当前用户播放记录
+      playHistory = '/api/v1/users/play-history',
+
+      /// 当前用户指定番剧播放记录
+      subjectPlayHistory = '/api/v1/users/play-history/subjects/{subjectId}',
+
+      /// 清除当前用户指定番剧的播放进度
+      subjectPlayHistoryProgress =
+          '/api/v1/users/play-history/subjects/{subjectId}/progress';
 }
 
 class DamakuApi {

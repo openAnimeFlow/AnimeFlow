@@ -1,5 +1,8 @@
 import 'package:anime_flow/shared/models/player/play/play_history.dart';
 import 'package:anime_flow/core/storage/storage.dart';
+import 'package:anime_flow/core/logger/logger.dart';
+import 'package:anime_flow/core/network/api/flow_api.dart';
+import 'package:anime_flow/core/auth/repository/flow_token_storage.dart';
 import 'package:hive_ce/hive.dart';
 
 class PlayRepository {
@@ -12,6 +15,26 @@ class PlayRepository {
       playHistoryStorage,
       (a, b) => b.updateAt.compareTo(a.updateAt),
     );
+
+    if (await FlowTokenStorage.instance.getToken() == null) {
+      return;
+    }
+
+    // 本地记录先落盘；服务端同步失败不影响本地播放记录。
+    try {
+      await FlowApi.savePlayHistoryService(
+        subjectId: playHistory.subjectId,
+        episodeId: playHistory.episodeId,
+        episodeSort: playHistory.episodeSort,
+        subjectName: playHistory.subjectName,
+        cover: playHistory.cover,
+        alias: playHistory.alias,
+        positionSeconds: playHistory.position,
+        durationSeconds: playHistory.duration,
+      );
+    } catch (e) {
+      LiggLogger().e('同步播放记录失败: $e');
+    }
   }
 
   ///获取播放记录列表
@@ -31,6 +54,16 @@ class PlayRepository {
       playHistory.position = 0;
       playHistory.duration = 0;
       await playHistory.save();
+    }
+
+    if (await FlowTokenStorage.instance.getToken() == null) {
+      return;
+    }
+
+    try {
+      await FlowApi.clearPlayHistoryProgressService(subjectId);
+    } catch (e) {
+      LiggLogger().e('同步播放完成状态失败: $e');
     }
   }
 

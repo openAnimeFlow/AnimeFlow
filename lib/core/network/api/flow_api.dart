@@ -836,4 +836,40 @@ class FlowApi {
       requireFlowToken: true,
     );
   }
+
+  /// 保存当前用户的播放记录。
+  static Future<void> savePlayHistoryService({
+    required int subjectId,
+    required int episodeId,
+    required int episodeSort,
+    required String subjectName,
+    required String cover,
+    required List<String> alias,
+    required int positionSeconds,
+    required int durationSeconds,
+  }) async {
+    await _client.put(
+      AnimeFlowApi.playHistory,
+      data: {
+        'subjectId': subjectId,
+        'episodeId': episodeId,
+        'episodeSort': episodeSort,
+        'subjectName': subjectName,
+        'cover': cover,
+        'alias': alias,
+        'positionSeconds': positionSeconds,
+        'durationSeconds': durationSeconds,
+      },
+      requireFlowToken: true,
+    );
+  }
+
+  /// 清除当前用户指定番剧的播放进度。
+  static Future<void> clearPlayHistoryProgressService(int subjectId) async {
+    await _client.delete(
+      AnimeFlowApi.subjectPlayHistoryProgress
+          .replaceFirst('{subjectId}', subjectId.toString()),
+      requireFlowToken: true,
+    );
+  }
 }

@@ -10,17 +10,22 @@ class PlayRepository {
 
   /// 保存播放记录
   static Future<void> savePlayHistory(PlayHistory playHistory) async {
+    playHistory.isSyncedToServer = false;
     await playHistoryStorage.put(playHistory.subjectId, playHistory);
     await _trimToLimit<PlayHistory>(
       playHistoryStorage,
       (a, b) => b.updateAt.compareTo(a.updateAt),
     );
 
+    await syncPlayHistory(playHistory);
+  }
+
+  /// 将单条本地播放记录同步到服务器。
+  static Future<bool> syncPlayHistory(PlayHistory playHistory) async {
     if (await FlowTokenStorage.instance.getToken() == null) {
-      return;
+      return false;
     }
 
-    // 本地记录先落盘；服务端同步失败不影响本地播放记录。
     try {
       await FlowApi.savePlayHistoryService(
         subjectId: playHistory.subjectId,
@@ -32,9 +37,42 @@ class PlayRepository {
         positionSeconds: playHistory.position,
         durationSeconds: playHistory.duration,
       );
+      playHistory.isSyncedToServer = true;
+      await playHistoryStorage.put(playHistory.subjectId, playHistory);
+      return true;
     } catch (e) {
+      playHistory.isSyncedToServer = false;
+      await playHistoryStorage.put(playHistory.subjectId, playHistory);
       LiggLogger().e('同步播放记录失败: $e');
+      return false;
     }
+  }
+
+  /// 批量补同步本地尚未上传的播放记录。
+  static Future<PlayHistorySyncResult> syncPendingPlayHistories() async {
+    final pendingHistories = playHistoryStorage.values
+        .where((history) => !history.isSyncedToServer)
+        .toList(growable: false);
+    if (pendingHistories.isEmpty) {
+      return const PlayHistorySyncResult();
+    }
+    if (await FlowTokenStorage.instance.getToken() == null) {
+      return PlayHistorySyncResult(
+        total: pendingHistories.length,
+        requiresLogin: true,
+      );
+    }
+
+    var synced = 0;
+    for (final history in pendingHistories) {
+      if (await syncPlayHistory(history)) {
+        synced++;
+      }
+    }
+    return PlayHistorySyncResult(
+      total: pendingHistories.length,
+      synced: synced,
+    );
   }
 
   ///获取播放记录列表
@@ -53,7 +91,8 @@ class PlayRepository {
     if (playHistory != null) {
       playHistory.position = 0;
       playHistory.duration = 0;
-      await playHistory.save();
+      playHistory.isSyncedToServer = false;
+      await playHistoryStorage.put(subjectId, playHistory);
     }
 
     if (await FlowTokenStorage.instance.getToken() == null) {
@@ -62,6 +101,10 @@ class PlayRepository {
 
     try {
       await FlowApi.clearPlayHistoryProgressService(subjectId);
+      if (playHistory != null) {
+        playHistory.isSyncedToServer = true;
+        await playHistoryStorage.put(subjectId, playHistory);
+      }
     } catch (e) {
       LiggLogger().e('同步播放完成状态失败: $e');
     }
@@ -89,4 +132,18 @@ class PlayRepository {
       }
     }
   }
+}
+
+class PlayHistorySyncResult {
+  const PlayHistorySyncResult({
+    this.total = 0,
+    this.synced = 0,
+    this.requiresLogin = false,
+  });
+
+  final int total;
+  final int synced;
+  final bool requiresLogin;
+
+  int get failed => total - synced;
 }

@@ -40,6 +40,10 @@ class PlayHistory extends HiveObject {
   @HiveField(8)
   List<String> alias;
 
+  /// 是否已同步到服务器。
+  @HiveField(9)
+  bool isSyncedToServer;
+
   PlayHistory({
     required this.subjectId,
     required this.episodeId,
@@ -50,5 +54,6 @@ class PlayHistory extends HiveObject {
     required this.position,
     required this.duration,
     required this.alias,
+    this.isSyncedToServer = false,
   });
 }

@@ -7,6 +7,7 @@ import 'package:anime_flow/core/utils/format_time_util.dart';
 import 'package:anime_flow/core/logger/logger.dart';
 import 'package:anime_flow/core/utils/utils.dart';
 import 'package:anime_flow/shared/widgets/animation_network_image.dart';
+import 'package:anime_flow/shared/widgets/notification_toast.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:hive_ce_flutter/hive_flutter.dart';
@@ -23,6 +24,7 @@ class _PlayRecordPageState extends State<PlayRecordPage> {
   late final ValueListenable<Box<PlayHistory>> _playHistoryListenable;
   List<PlayHistory>? playHistoryList;
   bool isLoading = false;
+  bool _isSyncing = false;
 
   @override
   void initState() {
@@ -70,12 +72,83 @@ class _PlayRecordPageState extends State<PlayRecordPage> {
     return (width / minItemWidth).floor().clamp(1, 4);
   }
 
+  Future<void> _syncPendingRecords() async {
+    if (_isSyncing) return;
+    setState(() {
+      _isSyncing = true;
+    });
+
+    try {
+      final result = await PlayHistoryService.syncPending();
+      if (!mounted) return;
+
+      final l10n = AppLocalizations.of(context);
+      final message = result.requiresLogin
+          ? l10n.loginToManageAccount
+          : result.failed > 0
+              ? l10n.syncStatusFailed
+              : result.total == 0
+                  ? l10n.syncStatusSuccess
+                  : l10n.syncedItems(result.synced);
+      NotificationToast.show('提示', message);
+    } catch (e) {
+      LiggLogger().e('手动同步播放记录失败: $e');
+      if (mounted) {
+        NotificationToast.show('提示', AppLocalizations.of(context).syncStatusFailed);
+      }
+    } finally {
+      if (mounted) {
+        setState(() {
+          _isSyncing = false;
+        });
+      }
+    }
+  }
+
+  Future<void> _confirmAndSyncPendingRecords() async {
+    if (_isSyncing) return;
+    final l10n = AppLocalizations.of(context);
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (dialogContext) => AlertDialog(
+        title: Text(l10n.confirm),
+        content: const Text('是否将未同步的播放记录同步到服务器？'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(dialogContext).pop(false),
+            child: Text(l10n.cancel),
+          ),
+          FilledButton(
+            onPressed: () => Navigator.of(dialogContext).pop(true),
+            child: Text(l10n.confirm),
+          ),
+        ],
+      ),
+    );
+    if (confirmed == true && mounted) {
+      await _syncPendingRecords();
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
     return Scaffold(
       appBar: AppBar(
         title: Text(l10n.playbackHistory),
+        actions: [
+          IconButton(
+            tooltip: _isSyncing ? l10n.syncInProgress : l10n.syncStatusIdle,
+            onPressed: _isSyncing ? null : _confirmAndSyncPendingRecords,
+            icon: _isSyncing
+                ? const SizedBox(
+                    width: 20,
+                    height: 20,
+                    child: CircularProgressIndicator(strokeWidth: 2),
+                  )
+                : const Icon(Icons.cloud_upload_outlined),
+          ),
+        ],
       ),
       body: Center(
         child: Builder(
@@ -152,6 +225,40 @@ class _PlayRecordPageState extends State<PlayRecordPage> {
                                         ),
                                         style: const TextStyle(
                                             fontWeight: FontWeight.bold),
+                                      ),
+                                    ],
+                                  ),
+                                  const SizedBox(height: 4),
+                                  Row(
+                                    children: [
+                                      Icon(
+                                        playHistory.isSyncedToServer
+                                            ? Icons.cloud_done_outlined
+                                            : Icons.cloud_upload_outlined,
+                                        size: 16,
+                                        color: playHistory.isSyncedToServer
+                                            ? Theme.of(context)
+                                                .colorScheme
+                                                .primary
+                                            : Theme.of(context)
+                                                .colorScheme
+                                                .onSurfaceVariant,
+                                      ),
+                                      const SizedBox(width: 4),
+                                      Text(
+                                        playHistory.isSyncedToServer
+                                            ? l10n.syncStatusSuccess
+                                            : l10n.syncStatusIdle,
+                                        style: TextStyle(
+                                          fontSize: 12,
+                                          color: playHistory.isSyncedToServer
+                                              ? Theme.of(context)
+                                                  .colorScheme
+                                                  .primary
+                                              : Theme.of(context)
+                                                  .colorScheme
+                                                  .onSurfaceVariant,
+                                        ),
                                       ),
                                     ],
                                   ),

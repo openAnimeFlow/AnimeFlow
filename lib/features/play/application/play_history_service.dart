@@ -21,4 +21,7 @@ class PlayHistoryService {
 
   static Future<void> clearPosition(int subjectId) =>
       PlayRepository.deletePlayHistoryByPosition(subjectId);
+
+  static Future<PlayHistorySyncResult> syncPending() =>
+      PlayRepository.syncPendingPlayHistories();
 }

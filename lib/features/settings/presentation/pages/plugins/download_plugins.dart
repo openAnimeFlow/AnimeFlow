@@ -5,6 +5,7 @@ import 'package:anime_flow/core/crawler/itme/crawler_config_item.dart';
 import 'package:anime_flow/core/network/api_path.dart';
 import 'package:anime_flow/core/network/api/api.dart';
 import 'package:anime_flow/core/storage/storage.dart';
+import 'package:anime_flow/features/source/data/repositories/source_repository.dart';
 import 'package:anime_flow/core/utils/format_time_util.dart';
 import 'package:anime_flow/core/logger/logger.dart';
 import 'package:anime_flow/core/utils/system_util.dart';
@@ -23,7 +24,7 @@ class DownloadPluginsPage extends StatefulWidget {
 }
 
 class _DownloadPluginsPageState extends State<DownloadPluginsPage> {
-  final storage = Storage.crawlConfigs;
+  final sourceRepository = SourceRepository.instance;
   final setting = Storage.setting;
   bool isLoading = false;
   late bool isMirror;
@@ -74,14 +75,16 @@ class _DownloadPluginsPageState extends State<DownloadPluginsPage> {
     }
   }
 
-  void _persistPlugin(
+  Future<void> _persistPlugin(
     String pluginName,
     CrawlConfigItem pluginData,
     String catalogVersion,
-  ) {
+  ) async {
     final data = pluginData.toJson();
     data['version'] = catalogVersion;
-    storage.put(pluginName, data);
+    await sourceRepository.saveSource(
+      CrawlConfigItem.fromJson(data),
+    );
   }
 
   Future<void> _downloadPlugin(Map<dynamic, dynamic> plugin) async {
@@ -102,7 +105,7 @@ class _DownloadPluginsPageState extends State<DownloadPluginsPage> {
           : raw as Map<String, dynamic>;
       final pluginData = CrawlConfigItem.fromJson(jsonMap);
       final catalogVersion = plugin['version'] as String;
-      _persistPlugin(pluginName, pluginData, catalogVersion);
+      await _persistPlugin(pluginName, pluginData, catalogVersion);
       if (!mounted) return;
       setState(() {
         hasChanged = true;
@@ -143,7 +146,7 @@ class _DownloadPluginsPageState extends State<DownloadPluginsPage> {
           ? jsonDecode(raw) as Map<String, dynamic>
           : raw as Map<String, dynamic>;
       final pluginData = CrawlConfigItem.fromJson(jsonMap);
-      _persistPlugin(pluginName, pluginData, pluginVersion);
+      await _persistPlugin(pluginName, pluginData, pluginVersion);
       if (!mounted) return;
       setState(() {
         hasChanged = true;
@@ -190,7 +193,8 @@ class _DownloadPluginsPageState extends State<DownloadPluginsPage> {
             ListTile(
               title: Text(
                 l10n.downloadSources,
-                style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+                style:
+                    const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
               ),
               subtitle: Text(l10n.downloadSourcesSubtitle),
               trailing: SystemUtil.isDesktop
@@ -236,7 +240,7 @@ class _DownloadPluginsPageState extends State<DownloadPluginsPage> {
             else if (pluginRepo != null && !isLoading)
               ...pluginRepo!.map((plugin) {
                 final pluginName = plugin['name'] as String;
-                final localPlugin = storage.get(pluginName);
+                final localPlugin = sourceRepository.getSourceSync(pluginName);
                 final isPluginBusy = _busyPluginNames.contains(pluginName);
                 return Padding(
                   padding: const EdgeInsets.only(left: 10, right: 10),
@@ -295,9 +299,7 @@ class _DownloadPluginsPageState extends State<DownloadPluginsPage> {
                                   : const Icon(Icons.download))
                         else
                           Builder(builder: (context) {
-                            final config = CrawlConfigItem.fromJson(
-                              Map<String, dynamic>.from(localPlugin),
-                            );
+                            final config = localPlugin;
                             final pluginVersion = plugin['version'] as String;
                             final isNew = Utils.compareVersionNumbers(
                                 pluginVersion, config.version);

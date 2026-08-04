@@ -64,7 +64,7 @@ final class VideoSourceNotifierProvider
 }
 
 String _$videoSourceNotifierHash() =>
-    r'7f969fa1aa36b5a452b6913578bf0bc0c059ce1a';
+    r'8594fb66e1b12b894a4e893b0b4f299c36903104';
 
 abstract class _$VideoSourceNotifier extends $Notifier<VideoSourceState> {
   VideoSourceState build();

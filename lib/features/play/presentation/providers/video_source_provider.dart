@@ -10,10 +10,10 @@ import 'package:anime_flow/features/play/presentation/providers/episodes_provide
 import 'package:anime_flow/features/play/presentation/providers/play_provider.dart';
 import 'package:anime_flow/features/play/presentation/providers/video_source_service.dart';
 import 'package:anime_flow/features/play/presentation/providers/webview_video_source_provider.dart';
+import 'package:anime_flow/features/source/data/repositories/source_repository_provider.dart';
 import 'package:anime_flow/shared/models/player/play/video/episode_resources_item.dart';
 import 'package:anime_flow/shared/models/player/play/video/resources_item.dart';
 import 'package:anime_flow/app/router/routes_args.dart';
-import 'package:anime_flow/core/utils/crawl_config.dart';
 import 'package:anime_flow/core/logger/logger.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:webview_windows/webview_windows.dart';
@@ -111,7 +111,6 @@ class VideoSourceNotifier extends _$VideoSourceNotifier {
   static const _maxSearchItems = 5;
   static const _maxConcurrentSearches = 5;
 
-  Future<List<CrawlConfigItem>>? _crawlConfigsFuture;
   int _searchSessionId = 0;
   final Map<String, int> _websiteRequestTokens = {};
   bool _isAutoSelecting = false;
@@ -166,20 +165,13 @@ class VideoSourceNotifier extends _$VideoSourceNotifier {
   void _dispose() {
     _webViewVideoProvider?.dispose();
     _webViewVideoProvider = null;
-    _crawlConfigsFuture = null;
     _websiteRequestTokens.clear();
     _attemptedAutoLoadUrls.clear();
   }
 
   Future<void> initVideoResources() async {
-    if (state.videoResources.isNotEmpty) {
-      return;
-    }
-    final configs = await _getCrawlConfigs();
-    if (state.videoResources.isNotEmpty) {
-      return;
-    }
-    state = state.copyWith(videoResources: _buildInitialResources(configs));
+    final configs = await _loadSources();
+    _syncVideoResources(configs);
   }
 
   Future<void> initResources(String keyword) async {
@@ -188,10 +180,10 @@ class VideoSourceNotifier extends _$VideoSourceNotifier {
       return;
     }
 
-    final configs = await _getCrawlConfigs();
+    final configs = await _loadSources();
     final sessionId = ++_searchSessionId;
     _resetAutoSelectionAttempts();
-    _ensureVideoResourcesInitialized(configs);
+    _syncVideoResources(configs);
     _clearAllResources(configs);
     state = state.copyWith(
       keyword: normalizedKeyword,
@@ -236,24 +228,49 @@ class VideoSourceNotifier extends _$VideoSourceNotifier {
     autoSelectAvailableResource(preferCurrentWebsite: true);
   }
 
-  List<ResourcesItem> _buildInitialResources(List<CrawlConfigItem> configs) {
-    return configs.map((config) {
-      return ResourcesItem(
-        websiteName: config.name,
+  void _syncVideoResources(List<CrawlConfigItem> configs) {
+    final previousResources = {
+      for (final resource in state.videoResources)
+        resource.websiteName: resource,
+    };
+    final selectedWebsiteName = state.selectedWebsiteIndex >= 0 &&
+            state.selectedWebsiteIndex < state.videoResources.length
+        ? state.videoResources[state.selectedWebsiteIndex].websiteName
+        : null;
+
+    final syncedResources = configs.map((config) {
+      final previous = previousResources[config.name];
+      if (previous == null) {
+        return ResourcesItem(
+          websiteName: config.name,
+          websiteIcon: config.iconUrl,
+          baseUrl: config.baseUrl,
+          searchUrl: config.searchUrl,
+          needsCaptcha: _requiresCaptcha(config),
+          episodeResources: const [],
+        );
+      }
+
+      return previous.copyWith(
         websiteIcon: config.iconUrl,
         baseUrl: config.baseUrl,
         searchUrl: config.searchUrl,
-        needsCaptcha: _requiresCaptcha(config),
-        episodeResources: const [],
+        needsCaptcha:
+            config.antiCrawlerConfig.enabled ? previous.needsCaptcha : false,
+        antiCrawlerConfig:
+            config.antiCrawlerConfig.enabled ? config.antiCrawlerConfig : null,
       );
     }).toList(growable: false);
-  }
+    final selectedIndex = selectedWebsiteName == null
+        ? 0
+        : syncedResources.indexWhere(
+            (resource) => resource.websiteName == selectedWebsiteName,
+          );
 
-  void _ensureVideoResourcesInitialized(List<CrawlConfigItem> configs) {
-    if (state.videoResources.isNotEmpty) {
-      return;
-    }
-    state = state.copyWith(videoResources: _buildInitialResources(configs));
+    state = state.copyWith(
+      videoResources: syncedResources,
+      selectedWebsiteIndex: selectedIndex < 0 ? 0 : selectedIndex,
+    );
   }
 
   void _clearAllResources(List<CrawlConfigItem> configs) {
@@ -289,8 +306,8 @@ class VideoSourceNotifier extends _$VideoSourceNotifier {
   }
 
   Future<void> retryResources(String websiteName) async {
-    final configs = await _getCrawlConfigs();
-    _ensureVideoResourcesInitialized(configs);
+    final configs = await _loadSources();
+    _syncVideoResources(configs);
     final config = _firstConfigWhere(configs, (c) => c.name == websiteName);
     if (config == null) {
       return;
@@ -445,22 +462,8 @@ class VideoSourceNotifier extends _$VideoSourceNotifier {
     state = state.copyWith(isSearchCompleted: isSearchCompleted);
   }
 
-  Future<List<CrawlConfigItem>> _getCrawlConfigs() async {
-    final existingFuture = _crawlConfigsFuture;
-    if (existingFuture != null) {
-      return existingFuture;
-    }
-
-    final future = CrawlConfig.loadAllCrawlConfigs();
-    _crawlConfigsFuture = future;
-    try {
-      return await future;
-    } catch (_) {
-      if (identical(_crawlConfigsFuture, future)) {
-        _crawlConfigsFuture = null;
-      }
-      rethrow;
-    }
+  Future<List<CrawlConfigItem>> _loadSources() {
+    return ref.read(sourceRepositoryProvider).getSources();
   }
 
   Future<void> _runSearchPool({

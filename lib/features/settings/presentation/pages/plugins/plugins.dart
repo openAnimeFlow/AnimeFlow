@@ -1,13 +1,11 @@
 import 'package:anime_flow/core/crawler/itme/crawler_config_item.dart';
 import 'package:anime_flow/features/settings/presentation/providers/setting_provider.dart';
 import 'package:anime_flow/app/router/app_router.dart';
-import 'package:anime_flow/core/utils/crawl_config.dart';
-import 'package:anime_flow/core/storage/storage.dart';
+import 'package:anime_flow/features/source/data/repositories/source_repository.dart';
 import 'package:anime_flow/shared/widgets/animation_network_image.dart';
 import 'package:anime_flow/shared/widgets/notification_toast.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:hive_ce_flutter/adapters.dart';
 import 'package:anime_flow/app/localization/app_localizations.dart';
 
 class PluginsPage extends StatefulWidget {
@@ -19,23 +17,23 @@ class PluginsPage extends StatefulWidget {
 
 class _PluginsPageState extends State<PluginsPage> {
   List<CrawlConfigItem> dataSources = [];
-  final settingConfig = Storage.crawlConfigs;
+  final sourceRepository = SourceRepository.instance;
 
   @override
   void initState() {
     super.initState();
-    settingConfig.listenable().addListener(initData);
+    sourceRepository.listenable.addListener(initData);
     initData();
   }
 
   @override
   void dispose() {
-    settingConfig.listenable().removeListener(initData);
+    sourceRepository.listenable.removeListener(initData);
     super.dispose();
   }
 
   Future<void> initData() async {
-    final dataSources = await CrawlConfig.loadAllCrawlConfigs();
+    final dataSources = await sourceRepository.getSources();
     if (!mounted) return;
     setState(() {
       this.dataSources = dataSources;
@@ -67,7 +65,7 @@ class _PluginsPageState extends State<PluginsPage> {
     if (confirmed != true || !mounted) return;
 
     try {
-      await settingConfig.delete(name);
+      await sourceRepository.deleteSource(name);
       if (!mounted) return;
       NotificationToast.show(l10n.deleteSuccess, l10n.sourceDeleted(name));
     } catch (e) {
@@ -108,11 +106,20 @@ class _PluginsPageState extends State<PluginsPage> {
           },
         ),
       ),
-      body: ListView(
+      body: ReorderableListView.builder(
         padding: const EdgeInsets.symmetric(horizontal: 16),
-        children: List.generate(dataSources.length, (index) {
+        itemCount: dataSources.length,
+        buildDefaultDragHandles: false,
+        onReorderItem: (oldIndex, newIndex) async {
+          final item = dataSources.removeAt(oldIndex);
+          dataSources.insert(newIndex, item);
+          setState(() {});
+          await sourceRepository.reorderSources(oldIndex, newIndex);
+        },
+        itemBuilder: (context, index) {
           final data = dataSources[index];
           return InkWell(
+            key: ValueKey(data.name),
             onTap: () =>
                 SettingAddPluginsRoute(editPluginKey: data.name).push(context),
             child: Container(
@@ -145,19 +152,25 @@ class _PluginsPageState extends State<PluginsPage> {
                         ]),
                   ),
                   IconButton(
+                    tooltip: l10n.delete,
                     icon: Icon(
-                      Icons.delete_outline_outlined,
+                      Icons.delete_outline,
                       color: Theme.of(context).colorScheme.error,
                     ),
-                    onPressed: () {
-                      deleteDataSource(data.name);
-                    },
+                    onPressed: () => deleteDataSource(data.name),
+                  ),
+                  ReorderableDragStartListener(
+                    index: index,
+                    child: const Padding(
+                      padding: EdgeInsets.symmetric(horizontal: 8),
+                      child: Icon(Icons.drag_handle),
+                    ),
                   ),
                 ],
               ),
             ),
           );
-        }),
+        },
       ),
     );
   }

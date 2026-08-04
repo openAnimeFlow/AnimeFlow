@@ -1,6 +1,6 @@
 import 'package:anime_flow/core/crawler/itme/crawler_config_item.dart';
 import 'package:anime_flow/core/crawler/itme/anti_crawler_config.dart';
-import 'package:anime_flow/core/storage/storage.dart';
+import 'package:anime_flow/features/source/data/repositories/source_repository.dart';
 import 'package:anime_flow/shared/widgets/notification_toast.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
@@ -60,7 +60,7 @@ class _AddPluginsPageState extends State<AddPluginsPage> {
   late final List<TextEditingController> _controllers;
   final Set<int> _errorFields = {};
   final Set<String> _antiFieldErrors = {};
-  final crawlConfigs = Storage.crawlConfigs;
+  final sourceRepository = SourceRepository.instance;
   String? _originalKey; // 保存原始key值，用于编辑模式下删除旧数据
 
   late final TextEditingController _captchaImageController;
@@ -84,29 +84,30 @@ class _AddPluginsPageState extends State<AddPluginsPage> {
 
     // 如果有key，从持久化存储中查询数据并填充表单
     if (_originalKey != null) {
-      final configData = crawlConfigs.get(_originalKey!);
-      if (configData != null) {
-        final editConfig = CrawlConfigItem.fromJson(
-          Map<String, dynamic>.from(configData),
-        );
-        final anti = editConfig.antiCrawlerConfig;
-        _antiEnabled = anti.enabled;
-        _captchaType = anti.captchaType;
-        _captchaImageController.text = anti.captchaImage;
-        _captchaInputController.text = anti.captchaInput;
-        _captchaButtonController.text = anti.captchaButton;
-        _controllers[0].text = editConfig.version;
-        _controllers[1].text = editConfig.name;
-        _controllers[2].text = editConfig.iconUrl;
-        _controllers[3].text = editConfig.baseUrl;
-        _controllers[4].text = editConfig.searchUrl;
-        _controllers[5].text = editConfig.searchList;
-        _controllers[6].text = editConfig.searchName;
-        _controllers[7].text = editConfig.searchLink;
-        _controllers[8].text = editConfig.lineNames;
-        _controllers[9].text = editConfig.lineList;
-        _controllers[10].text = editConfig.episode;
-      }
+      _loadEditSource();
+    }
+  }
+
+  Future<void> _loadEditSource() async {
+    final editConfig = await sourceRepository.getSource(_originalKey!);
+    if (editConfig != null && mounted) {
+      final anti = editConfig.antiCrawlerConfig;
+      _antiEnabled = anti.enabled;
+      _captchaType = anti.captchaType;
+      _captchaImageController.text = anti.captchaImage;
+      _captchaInputController.text = anti.captchaInput;
+      _captchaButtonController.text = anti.captchaButton;
+      _controllers[0].text = editConfig.version;
+      _controllers[1].text = editConfig.name;
+      _controllers[2].text = editConfig.iconUrl;
+      _controllers[3].text = editConfig.baseUrl;
+      _controllers[4].text = editConfig.searchUrl;
+      _controllers[5].text = editConfig.searchList;
+      _controllers[6].text = editConfig.searchName;
+      _controllers[7].text = editConfig.searchLink;
+      _controllers[8].text = editConfig.lineNames;
+      _controllers[9].text = editConfig.lineList;
+      _controllers[10].text = editConfig.episode;
     }
 
     // 监听输入变化，清除错误状态
@@ -205,12 +206,7 @@ class _AddPluginsPageState extends State<AddPluginsPage> {
         antiCrawlerConfig: antiCrawlerConfig,
       );
 
-      // 如果是编辑模式且名称（key）改变了，先删除旧的key
-      if (_originalKey != null && _originalKey != newName) {
-        await crawlConfigs.delete(_originalKey);
-      }
-
-      crawlConfigs.put(item.name, item.toJson());
+      await sourceRepository.saveSource(item, originalName: _originalKey);
       return true;
     } catch (e) {
       if (mounted) {

@@ -1,5 +1,6 @@
 class StorageKey {
   static const String crawlConfigs = 'crawl_configs_key',
+      crawlConfigOrder = 'crawl_config_order',
       settingsKey = 'settings_key',
       playPositionKey = 'play_position_key',
       playHistoryKey = 'play_history_key',

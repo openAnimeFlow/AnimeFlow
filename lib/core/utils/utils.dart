@@ -4,10 +4,12 @@ import 'dart:math';
 import 'package:anime_flow/core/constants/constants.dart';
 import 'package:anime_flow/core/network/api_path.dart';
 import 'package:anime_flow/core/logger/logger.dart';
+import 'package:device_info_plus/device_info_plus.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_inappwebview_platform_interface/flutter_inappwebview_platform_interface.dart';
+import 'package:package_info_plus/package_info_plus.dart';
 import 'package:path/path.dart' as path;
 
 class Utils {
@@ -50,6 +52,67 @@ class Utils {
   static String getRandomAcceptedLanguage() {
     final random = Random();
     return acceptLanguageList[random.nextInt(acceptLanguageList.length)];
+  }
+
+  /// 获取当前平台 [user-agent]
+  static Future<String> getCurrentUserAgent() async {
+    final packageInfo = await PackageInfo.fromPlatform();
+    final deviceInfo = DeviceInfoPlugin();
+
+    String runtimeArchitecture() {
+      final match = RegExp(r' on ([A-Za-z0-9_]+)').firstMatch(Platform.version);
+      return match?.group(1) ?? 'unknown';
+    }
+
+    String escapeUserAgentComment(String value) {
+      return value
+          .replaceAll(r'\', r'\\')
+          .replaceAll('(', r'\(')
+          .replaceAll(')', r'\)')
+          .replaceAll(RegExp(r'[\x00-\x1F\x7F]'), ' ')
+          .trim();
+    }
+
+    Future<String> platformDescription(DeviceInfoPlugin deviceInfo) async {
+      if (Platform.isAndroid) {
+        final info = await deviceInfo.androidInfo;
+        final abi = info.supportedAbis.isNotEmpty
+            ? info.supportedAbis.first
+            : runtimeArchitecture();
+        return 'Android ${info.version.release}; SDK ${info.version.sdkInt}; '
+            '${info.manufacturer} ${info.model}; $abi';
+      }
+      if (Platform.isIOS) {
+        final info = await deviceInfo.iosInfo;
+        return 'iOS ${info.systemVersion}; build ${info.utsname.release}; '
+            '${info.utsname.machine}; ${info.name}';
+      }
+      if (Platform.isWindows) {
+        final info = await deviceInfo.windowsInfo;
+        return 'Windows ${info.displayVersion}; build ${info.buildNumber}; '
+            '${runtimeArchitecture()}; ${info.computerName}';
+      }
+      if (Platform.isMacOS) {
+        final info = await deviceInfo.macOsInfo;
+        return 'macOS ${info.osRelease}; kernel ${info.kernelVersion}; '
+            '${runtimeArchitecture()}; ${info.computerName}';
+      }
+      if (Platform.isLinux) {
+        final info = await deviceInfo.linuxInfo;
+        return 'Linux ${info.versionId ?? info.version}; '
+            'build ${info.buildId ?? 'unknown'}; ${runtimeArchitecture()}; '
+            '${info.prettyName}';
+      }
+      return Platform.operatingSystem;
+    }
+
+    final platform = escapeUserAgentComment(
+      await platformDescription(deviceInfo),
+    );
+    final locale = escapeUserAgentComment(
+      Platform.localeName.replaceAll('_', '-'),
+    );
+    return 'AnimeFlow/${packageInfo.version} ($platform; $locale)';
   }
 
   static bool? _isDocumentStartScriptSupported;

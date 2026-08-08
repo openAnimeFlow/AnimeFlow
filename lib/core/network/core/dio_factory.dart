@@ -19,12 +19,17 @@ class DioFactory {
   static Dio? _downloadDio;
   static Dio? _bangumiDio;
   static Dio? _animeFlowDio;
+  static String? _deviceUserAgent;
+
+  static Future<void> initialize() async {
+    _deviceUserAgent = await Utils.getCurrentUserAgent();
+  }
 
   static Dio get apiDio => _apiDio ??= _create(
         NetworkConfig.fromSettings(),
         defaultHeaders: {
           'referer': '',
-          'user-agent': Utils.getRandomUA(),
+          'user-agent': _deviceUserAgent ?? Utils.getRandomUA(),
         },
       );
 
@@ -35,10 +40,10 @@ class DioFactory {
         connectTimeout: const Duration(seconds: 15),
         receiveTimeout: const Duration(seconds: 60),
       ),
-      baseUrl: AnimeFlowApi.animeFlowApiDev,
+      baseUrl: AnimeFlowApi.animeFlowApi,
       defaultHeaders: {
         'referer': '',
-        'user-agent': Utils.getRandomUA(),
+        'user-agent': _deviceUserAgent ?? Utils.getRandomUA(),
       },
     );
     dio.interceptors.add(

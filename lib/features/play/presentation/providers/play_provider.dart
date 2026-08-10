@@ -415,7 +415,6 @@ class PlaySession {
   bool _isLoadingDanmaku = false;
   bool _isPlayerBuffering = false;
   bool _lastPlayerPlaying = false;
-  bool _isAppBackgrounded = false;
   DateTime? _lastPausePlayHistorySavedAt;
   late final AppLifecycleListener _appLifecycleListener;
 
@@ -434,9 +433,6 @@ class PlaySession {
     final adBlocker = setting.get(PlaybackKey.adBlocker, defaultValue: false);
     player = Player(configuration: PlayerConfiguration(adBlocker: adBlocker));
     videoController = VideoController(player);
-    _appLifecycleListener = AppLifecycleListener(
-      onStateChange: _handleAppLifecycleStateChanged,
-    );
     unawaited(_initSystemVolumeSync());
 
     _playerSubscriptions.addAll([
@@ -552,22 +548,6 @@ class PlaySession {
     _playerSubscriptions.clear();
     _clearDanmakuCanvas();
     player.dispose();
-  }
-
-  void _handleAppLifecycleStateChanged(AppLifecycleState state) {
-    switch (state) {
-      case AppLifecycleState.hidden:
-      case AppLifecycleState.paused:
-      case AppLifecycleState.detached:
-        if (_isAppBackgrounded) return;
-        _isAppBackgrounded = true;
-        unawaited(_savePlayHistory());
-      case AppLifecycleState.resumed:
-        _isAppBackgrounded = false;
-      case AppLifecycleState.inactive:
-        // inactive 可能只是系统弹窗或桌面窗口失焦，不视为进入后台。
-        break;
-    }
   }
 
   void pauseForRouteCover() {

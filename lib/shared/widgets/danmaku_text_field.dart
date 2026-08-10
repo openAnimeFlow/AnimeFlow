@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'package:anime_flow/app/localization/app_localizations.dart';
+import 'package:anime_flow/core/utils/system_util.dart';
 import 'package:flutter/material.dart';
 
 /// 弹幕输入框
@@ -136,6 +137,7 @@ class _DanmakuTextFieldState extends State<DanmakuTextField>
 
   @override
   Widget build(BuildContext context) {
+    final isDarkTheme = SystemUtil.isDarkTheme(context);
     return LayoutBuilder(
       builder: (context, constraints) {
         final l10n = AppLocalizations.of(context);
@@ -152,7 +154,9 @@ class _DanmakuTextFieldState extends State<DanmakuTextField>
               color: widget.backgroundColor,
               borderRadius: BorderRadius.circular(18),
               border: Border.all(
-                color: Colors.white.withValues(alpha: 0.3),
+                color: isDarkTheme
+                    ? Colors.white.withValues(alpha: 0.3)
+                    : Colors.black.withValues(alpha: 0.3),
                 width: 1,
               ),
             ),

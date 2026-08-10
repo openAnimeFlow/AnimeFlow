@@ -1,4 +1,5 @@
 import 'package:anime_flow/shared/models/player/play/play_history.dart';
+import 'package:anime_flow/shared/models/player/play/play_history_event_type.dart';
 import 'package:anime_flow/core/storage/storage.dart';
 import 'package:anime_flow/core/logger/logger.dart';
 import 'package:anime_flow/core/network/api/flow_api.dart';
@@ -9,7 +10,10 @@ class PlayRepository {
   static final playHistoryStorage = Storage.playHistory;
 
   /// 保存播放记录
-  static Future<void> savePlayHistory(PlayHistory playHistory) async {
+  static Future<void> savePlayHistory(
+    PlayHistory playHistory, {
+    PlayHistoryEventType eventType = PlayHistoryEventType.defaults,
+  }) async {
     playHistory.isSyncedToServer = false;
     await playHistoryStorage.put(playHistory.subjectId, playHistory);
     await _trimToLimit<PlayHistory>(
@@ -17,17 +21,21 @@ class PlayRepository {
       (a, b) => b.updateAt.compareTo(a.updateAt),
     );
 
-    await syncPlayHistory(playHistory);
+    await syncPlayHistory(playHistory, eventType: eventType);
   }
 
   /// 将单条本地播放记录同步到服务器。
-  static Future<bool> syncPlayHistory(PlayHistory playHistory) async {
+  static Future<bool> syncPlayHistory(
+    PlayHistory playHistory, {
+    PlayHistoryEventType eventType = PlayHistoryEventType.defaults,
+  }) async {
     if (await FlowTokenStorage.instance.getToken() == null) {
       return false;
     }
 
     try {
       await FlowApi.savePlayHistoryService(
+        eventType: eventType,
         subjectId: playHistory.subjectId,
         episodeId: playHistory.episodeId,
         episodeSort: playHistory.episodeSort,

@@ -31,6 +31,7 @@ import 'package:anime_flow/shared/models/flow/bangumi_bind_item.dart';
 import 'package:anime_flow/core/auth/models/flow_token.dart';
 import 'package:anime_flow/shared/models/flow/flow_users.dart';
 import 'package:anime_flow/core/auth/models/token_item.dart';
+import 'package:anime_flow/shared/models/player/play/play_history_event_type.dart';
 import 'package:anime_flow/shared/models/search/search_suggestions_item.dart';
 import 'package:anime_flow/core/auth/repository/bangumi_token.dart';
 import 'package:anime_flow/core/auth/repository/flow_token_storage.dart';
@@ -839,6 +840,7 @@ class FlowApi {
 
   /// 保存当前用户的播放记录。
   static Future<void> savePlayHistoryService({
+    PlayHistoryEventType eventType = PlayHistoryEventType.defaults,
     required int subjectId,
     required int episodeId,
     required int episodeSort,
@@ -851,6 +853,7 @@ class FlowApi {
     await _client.put(
       AnimeFlowApi.playHistory,
       data: {
+        'eventType': eventType.value,
         'subjectId': subjectId,
         'episodeId': episodeId,
         'episodeSort': episodeSort,

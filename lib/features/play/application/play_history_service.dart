@@ -1,5 +1,6 @@
 import 'package:anime_flow/features/play/data/repository/play_repository.dart';
 import 'package:anime_flow/shared/models/player/play/play_history.dart';
+import 'package:anime_flow/shared/models/player/play/play_history_event_type.dart';
 import 'package:flutter/foundation.dart';
 import 'package:hive_ce_flutter/hive_flutter.dart';
 
@@ -16,8 +17,11 @@ class PlayHistoryService {
   static Future<PlayHistory?> getBySubjectId(int subjectId) =>
       PlayRepository.getPlayHistory(subjectId);
 
-  static Future<void> save(PlayHistory history) =>
-      PlayRepository.savePlayHistory(history);
+  static Future<void> save(
+    PlayHistory history, {
+    PlayHistoryEventType eventType = PlayHistoryEventType.defaults,
+  }) =>
+      PlayRepository.savePlayHistory(history, eventType: eventType);
 
   static Future<void> clearPosition(int subjectId) =>
       PlayRepository.deletePlayHistoryByPosition(subjectId);

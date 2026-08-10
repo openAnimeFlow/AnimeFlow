@@ -3,7 +3,7 @@ import 'dart:io';
 
 import 'package:anime_flow/core/constants/constants.dart';
 import 'package:anime_flow/core/constants/storage_key.dart';
-import 'package:anime_flow/features/play/data/repository/play_repository.dart';
+import 'package:anime_flow/features/play/application/play_history_service.dart';
 import 'package:anime_flow/features/play/presentation/providers/episodes_provider.dart';
 import 'package:anime_flow/features/play/presentation/providers/subject_episodes_provider.dart';
 import 'package:anime_flow/features/play/presentation/providers/video_ui_provider.dart';
@@ -12,6 +12,7 @@ import 'package:anime_flow/core/network/api/flow_api.dart';
 import 'package:anime_flow/shared/models/enums/video_controls_icon_type.dart';
 import 'package:anime_flow/shared/models/player/danmaku/danmaku_module.dart';
 import 'package:anime_flow/shared/models/player/play/play_history.dart';
+import 'package:anime_flow/shared/models/player/play/play_history_event_type.dart';
 import 'package:anime_flow/core/storage/storage.dart';
 import 'package:anime_flow/app/router/routes_args.dart';
 import 'package:anime_flow/core/logger/logger.dart';
@@ -357,6 +358,7 @@ class PlaySession {
     required int episodeId,
     required bool watched,
   }) _setEpisodeWatched;
+  PlayState _latestPlayState = const PlayState();
   final setting = Storage.setting;
 
   /// 着色器所在目录（由 [shadersDirectoryProvider] 在启动时准备）
@@ -410,13 +412,14 @@ class PlaySession {
   /// 定时停止播放的计时器
   Timer? _stopTimer;
 
-  /// 弹幕相关
   bool _isLoadingDanmaku = false;
   bool _isPlayerBuffering = false;
+  bool _lastPlayerPlaying = false;
+  bool _isAppBackgrounded = false;
+  DateTime? _lastPausePlayHistorySavedAt;
+  late final AppLifecycleListener _appLifecycleListener;
 
-  int? _lastSavedPositionSeconds;
-  DateTime? _lastPlayHistorySavedAt;
-  bool _isSavingPlayHistory = false;
+  Future<void> _playHistorySaveQueue = Future<void>.value();
   final Set<int> _autoWatchedEpisodeIds = {};
   final Set<int> _autoWatchedEpisodeUpdatesInFlight = {};
 
@@ -424,16 +427,30 @@ class PlaySession {
 
   static const Duration _bufferingPositionTolerance =
       Duration(milliseconds: 500);
-  static const Duration _playHistorySaveInterval = Duration(seconds: 5);
+  static const Duration _pausePlayHistoryThrottle = Duration(seconds: 1);
 
   void init() {
+    _latestPlayState = _playStateActions.value;
     final adBlocker = setting.get(PlaybackKey.adBlocker, defaultValue: false);
     player = Player(configuration: PlayerConfiguration(adBlocker: adBlocker));
     videoController = VideoController(player);
+    _appLifecycleListener = AppLifecycleListener(
+      onStateChange: _handleAppLifecycleStateChanged,
+    );
     unawaited(_initSystemVolumeSync());
 
     _playerSubscriptions.addAll([
       player.stream.playing.listen((playing) {
+        if (_lastPlayerPlaying && !playing) {
+          final now = DateTime.now();
+          final lastSavedAt = _lastPausePlayHistorySavedAt;
+          if (lastSavedAt == null ||
+              now.difference(lastSavedAt) >= _pausePlayHistoryThrottle) {
+            _lastPausePlayHistorySavedAt = now;
+            unawaited(_savePlayHistory());
+          }
+        }
+        _lastPlayerPlaying = playing;
         _playStateActions.setPlaying(playing);
         _syncDanmakuPauseWithPlayback(playing);
       }),
@@ -463,7 +480,7 @@ class PlaySession {
       player.stream.completed.listen((completed) {
         if (completed && subjectId > 0) {
           _autoSwitchToNextEpisode();
-          unawaited(PlayRepository.deletePlayHistoryByPosition(subjectId));
+          unawaited(PlayHistoryService.clearPosition(subjectId));
         }
       }),
     ]);
@@ -520,6 +537,8 @@ class PlaySession {
   }
 
   void dispose() {
+    _appLifecycleListener.dispose();
+    unawaited(_savePlayHistory());
     if (Platform.isWindows) {
       WindowsTitleBarVisibility.reset();
     }
@@ -533,6 +552,22 @@ class PlaySession {
     _playerSubscriptions.clear();
     _clearDanmakuCanvas();
     player.dispose();
+  }
+
+  void _handleAppLifecycleStateChanged(AppLifecycleState state) {
+    switch (state) {
+      case AppLifecycleState.hidden:
+      case AppLifecycleState.paused:
+      case AppLifecycleState.detached:
+        if (_isAppBackgrounded) return;
+        _isAppBackgrounded = true;
+        unawaited(_savePlayHistory());
+      case AppLifecycleState.resumed:
+        _isAppBackgrounded = false;
+      case AppLifecycleState.inactive:
+        // inactive 可能只是系统弹窗或桌面窗口失焦，不视为进入后台。
+        break;
+    }
   }
 
   void pauseForRouteCover() {
@@ -559,8 +594,6 @@ class PlaySession {
     subjectName = state.subjectName;
     subjectCover = state.subjectCover;
     alias = state.alias;
-    _lastSavedPositionSeconds = null;
-    _lastPlayHistorySavedAt = null;
     if (state.videoUrl.isEmpty) return;
     await player.open(Media(state.videoUrl), play: false);
     await player.stream.duration.firstWhere((d) => d > Duration.zero);
@@ -588,33 +621,17 @@ class PlaySession {
   }
 
   void _handlePlayStateChanged(PlayState state) {
-    if (!state.playing) return;
-    if (state.position <= const Duration(seconds: 5)) return;
+    _latestPlayState = state;
     if (state.duration <= Duration.zero) return;
     if (subjectId <= 0 || episodeId <= 0) return;
     if (subjectName == null || subjectCover == null) return;
 
     final setting = Storage.setting;
     if (setting.get(PlaybackKey.episodesProgress, defaultValue: true)) {
-      _autoUpdateEpisodeWatchedIfNeeded(state);
+      if (state.playing) {
+        _autoUpdateEpisodeWatchedIfNeeded(state);
+      }
     }
-    final positionSeconds = state.position.inSeconds;
-    final lastSavedPositionSeconds = _lastSavedPositionSeconds;
-    if (lastSavedPositionSeconds != null &&
-        (positionSeconds - lastSavedPositionSeconds).abs() < 5) {
-      return;
-    }
-
-    final lastPlayHistorySavedAt = _lastPlayHistorySavedAt;
-    if (lastPlayHistorySavedAt != null &&
-        DateTime.now().difference(lastPlayHistorySavedAt) <
-            _playHistorySaveInterval) {
-      return;
-    }
-
-    _lastSavedPositionSeconds = positionSeconds;
-    _lastPlayHistorySavedAt = DateTime.now();
-    unawaited(_savePlayHistory(state));
   }
 
   void _autoUpdateEpisodeWatchedIfNeeded(PlayState state) {
@@ -643,27 +660,44 @@ class PlaySession {
     }
   }
 
-  Future<void> _savePlayHistory(PlayState state) async {
-    if (_isSavingPlayHistory) return;
-    _isSavingPlayHistory = true;
-    try {
-      final playHistory = PlayHistory(
-        subjectId: subjectId,
-        subjectName: subjectName!,
-        episodeId: episodeId,
-        episodeSort: episodeSort,
-        cover: subjectCover!,
-        updateAt: DateTime.now(),
-        position: state.position.inSeconds,
-        duration: state.duration.inSeconds,
-        alias: alias,
-      );
-      await PlayRepository.savePlayHistory(playHistory);
-    } catch (e) {
-      LiggLogger().e('保存播放进度失败: $e');
-    } finally {
-      _isSavingPlayHistory = false;
+  Future<void> _savePlayHistory({
+    Duration? position,
+    PlayHistoryEventType eventType = PlayHistoryEventType.defaults,
+  }) async {
+    final state = _latestPlayState;
+    if (state.duration <= Duration.zero ||
+        subjectId <= 0 ||
+        episodeId <= 0 ||
+        subjectName == null ||
+        subjectCover == null) {
+      return;
     }
+    final savedPosition = position ?? state.position;
+    final savedSubjectId = subjectId;
+    final savedEpisodeId = episodeId;
+    final savedEpisodeSort = episodeSort;
+    final savedSubjectName = subjectName!;
+    final savedSubjectCover = subjectCover!;
+    final savedAlias = List<String>.from(alias);
+    _playHistorySaveQueue = _playHistorySaveQueue.then((_) async {
+      try {
+        final playHistory = PlayHistory(
+          subjectId: savedSubjectId,
+          subjectName: savedSubjectName,
+          episodeId: savedEpisodeId,
+          episodeSort: savedEpisodeSort,
+          cover: savedSubjectCover,
+          updateAt: DateTime.now(),
+          position: savedPosition.inSeconds,
+          duration: state.duration.inSeconds,
+          alias: savedAlias,
+        );
+        await PlayHistoryService.save(playHistory, eventType: eventType);
+      } catch (e) {
+        LiggLogger().e('保存播放进度失败: $e');
+      }
+    });
+    await _playHistorySaveQueue;
   }
 
   ///更新缓冲状态
@@ -946,6 +980,12 @@ class PlaySession {
   void seekTo(Duration pos) {
     player.seek(pos);
     _updateEffectiveBufferingState(position: pos);
+    unawaited(
+      _savePlayHistory(
+        position: pos,
+        eventType: PlayHistoryEventType.forceOverwrite,
+      ),
+    );
   }
 
   void updateBufferingForPendingSeek(Duration pos) {
@@ -1097,14 +1137,14 @@ class PlaySession {
             scheduledStopDuration - 1,
           );
         } else {
-          player.pause();
+          unawaited(player.pause());
           timer.cancel();
           _stopTimer = null;
         }
       });
     } else {
       _playStateActions.setScheduledStopDuration(0);
-      player.pause();
+      await player.pause();
     }
   }
 

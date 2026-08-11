@@ -163,6 +163,8 @@ class VideoSourceNotifier extends _$VideoSourceNotifier {
   }
 
   void _dispose() {
+    _searchSessionId++;
+    _videoPageLoadToken++;
     _webViewVideoProvider?.dispose();
     _webViewVideoProvider = null;
     _websiteRequestTokens.clear();
@@ -171,6 +173,7 @@ class VideoSourceNotifier extends _$VideoSourceNotifier {
 
   Future<void> initVideoResources() async {
     final configs = await _loadSources();
+    if (!ref.mounted) return;
     _syncVideoResources(configs);
   }
 
@@ -181,6 +184,7 @@ class VideoSourceNotifier extends _$VideoSourceNotifier {
     }
 
     final configs = await _loadSources();
+    if (!ref.mounted) return;
     final sessionId = ++_searchSessionId;
     _resetAutoSelectionAttempts();
     _syncVideoResources(configs);
@@ -221,6 +225,7 @@ class VideoSourceNotifier extends _$VideoSourceNotifier {
       sessionId: sessionId,
     );
 
+    if (!ref.mounted) return;
     if (_searchSessionId != sessionId) {
       return;
     }
@@ -282,7 +287,6 @@ class VideoSourceNotifier extends _$VideoSourceNotifier {
       final config = configsByName[resource.websiteName];
       final anti = config?.antiCrawlerConfig;
       final captchaEnabled = anti?.enabled ?? false;
-
       return resource.copyWith(
         episodeResources: const [],
         isLoading: false,
@@ -307,6 +311,7 @@ class VideoSourceNotifier extends _$VideoSourceNotifier {
 
   Future<void> retryResources(String websiteName) async {
     final configs = await _loadSources();
+    if (!ref.mounted) return;
     _syncVideoResources(configs);
     final config = _firstConfigWhere(configs, (c) => c.name == websiteName);
     if (config == null) {
@@ -326,6 +331,7 @@ class VideoSourceNotifier extends _$VideoSourceNotifier {
     );
     final requiresCaptcha = config.antiCrawlerConfig.enabled &&
         !await CookieManager.instance.hasUsableCookies(config.name, searchUrl);
+    if (!ref.mounted) return;
     if (requiresCaptcha) {
       _updateResourceStatus(
         websiteName,
@@ -362,6 +368,7 @@ class VideoSourceNotifier extends _$VideoSourceNotifier {
     required int sessionId,
     required int requestToken,
   }) async {
+    if (!ref.mounted) return;
     try {
       if (!_isRequestCurrent(config.name, sessionId, requestToken)) {
         return;
@@ -371,6 +378,7 @@ class VideoSourceNotifier extends _$VideoSourceNotifier {
       final aliases = ref.read(playExtraProvider).playExtra.subjectAliases;
       final rawSearchList =
           await WebRequest.getSearchSubjectListService(keyword, config);
+      if (!ref.mounted) return;
       if (!_isRequestCurrent(config.name, sessionId, requestToken)) {
         return;
       }
@@ -393,6 +401,7 @@ class VideoSourceNotifier extends _$VideoSourceNotifier {
         });
         return (indices: indices, matchRatios: matchRatios);
       });
+      if (!ref.mounted) return;
 
       final searchEntries = sortedResult.indices
           .take(_maxSearchItems)
@@ -409,6 +418,7 @@ class VideoSourceNotifier extends _$VideoSourceNotifier {
         final matchRatio = entry.matchRatio;
         final crawlerEpisodeResources =
             await WebRequest.getResourcesListService(search.link, config);
+        if (!ref.mounted) return;
         if (!_isRequestCurrent(config.name, sessionId, requestToken)) {
           return;
         }
@@ -436,6 +446,7 @@ class VideoSourceNotifier extends _$VideoSourceNotifier {
       );
       autoSelectAvailableResource(preferCurrentWebsite: true);
     } on CaptchaRequiredException {
+      if (!ref.mounted) return;
       if (!_isRequestCurrent(config.name, sessionId, requestToken)) {
         return;
       }
@@ -447,6 +458,7 @@ class VideoSourceNotifier extends _$VideoSourceNotifier {
         errorMessage: null,
       );
     } catch (e) {
+      if (!ref.mounted) return;
       if (!_isRequestCurrent(config.name, sessionId, requestToken)) {
         return;
       }
@@ -621,6 +633,7 @@ class VideoSourceNotifier extends _$VideoSourceNotifier {
   }
 
   Future<bool> _loadManualSourceForCurrentEpisode() async {
+    if (!ref.mounted) return false;
     final manualSource = _manualSourceForCurrentEpisode();
     if (manualSource == null) {
       return false;
@@ -707,6 +720,7 @@ class VideoSourceNotifier extends _$VideoSourceNotifier {
     }
 
     Future.microtask(() {
+      if (!ref.mounted) return;
       final manualSource = _manualSourceForCurrentEpisode();
       if (manualSource != null) {
         _loadManualSourceForCurrentEpisode();
@@ -758,6 +772,7 @@ class VideoSourceNotifier extends _$VideoSourceNotifier {
     bool force = false,
     String? preferredWebsiteName,
   }) async {
+    if (!ref.mounted) return;
     if (state.userManuallySelected) {
       return;
     }
@@ -811,6 +826,7 @@ class VideoSourceNotifier extends _$VideoSourceNotifier {
           candidateUrl,
           shouldUseResult: () => epoch == _autoSelectEpoch,
         );
+        if (!ref.mounted) return;
         if (loaded) {
           _preferredAutoSelectWebsiteName = null;
           return;
@@ -841,6 +857,7 @@ class VideoSourceNotifier extends _$VideoSourceNotifier {
     if (shouldUseResult != null && !shouldUseResult()) {
       return false;
     }
+    if (!ref.mounted) return false;
     final loadToken = ++_videoPageLoadToken;
     _webViewVideoProvider?.cancel();
 
@@ -849,6 +866,7 @@ class VideoSourceNotifier extends _$VideoSourceNotifier {
 
     _webViewVideoProvider ??= WebViewVideoSourceProvider();
     await _webViewVideoProvider!.ensureInitialized();
+    if (!ref.mounted) return false;
     if (loadToken != _videoPageLoadToken) {
       return false;
     }
@@ -868,6 +886,7 @@ class VideoSourceNotifier extends _$VideoSourceNotifier {
     final subjectCover = subject.subjectCover;
     final subjectAlias = subject.subjectAliases;
     final position = await PlayRepository.getPlayHistory(subjectId);
+    if (!ref.mounted) return false;
     if (position != null &&
         position.position > 0 &&
         position.episodeId == episodeId) {
@@ -879,6 +898,7 @@ class VideoSourceNotifier extends _$VideoSourceNotifier {
 
       final source = await _webViewVideoProvider!
           .resolve(url, useLegacyParser: false, offset: offset);
+      if (!ref.mounted) return false;
       final canUseResult = loadToken == _videoPageLoadToken &&
           (shouldUseResult == null || shouldUseResult());
       if (!canUseResult) {
@@ -903,18 +923,22 @@ class VideoSourceNotifier extends _$VideoSourceNotifier {
           episodeId: episodeId,
         ),
       );
+      if (!ref.mounted) return false;
       return true;
     } on VideoSourceTimeoutException {
+      if (!ref.mounted) return false;
       if (loadToken == _videoPageLoadToken) {
         ref.read(playStateProvider.notifier).setIsParsing(false);
         ref.read(playStateProvider.notifier).setParseResult('视频解析超时，请重试');
       }
     } on VideoSourceNotFoundException {
+      if (!ref.mounted) return false;
       if (loadToken == _videoPageLoadToken) {
         ref.read(playStateProvider.notifier).setIsParsing(false);
         ref.read(playStateProvider.notifier).setParseResult('未找到视频资源，请切换数据源重试');
       }
     } catch (e) {
+      if (!ref.mounted) return false;
       if (loadToken == _videoPageLoadToken) {
         ref.read(playStateProvider.notifier).setIsParsing(false);
         ref

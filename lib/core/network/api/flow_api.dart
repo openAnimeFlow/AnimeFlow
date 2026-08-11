@@ -32,6 +32,7 @@ import 'package:anime_flow/core/auth/models/flow_token.dart';
 import 'package:anime_flow/shared/models/flow/flow_users.dart';
 import 'package:anime_flow/core/auth/models/token_item.dart';
 import 'package:anime_flow/shared/models/player/play/play_history_event_type.dart';
+import 'package:anime_flow/shared/models/player/play/play_history_item.dart';
 import 'package:anime_flow/shared/models/search/search_suggestions_item.dart';
 import 'package:anime_flow/core/auth/repository/bangumi_token.dart';
 import 'package:anime_flow/core/auth/repository/flow_token_storage.dart';
@@ -836,6 +837,32 @@ class FlowApi {
           .replaceFirst('{subjectId}', subjectId.toString()),
       requireFlowToken: true,
     );
+  }
+
+  /// 获取当前用户的播放记录。
+  static Future<List<PlayHistoryItem>> getPlayHistoryService({
+    int limit = 50,
+    int offset = 0,
+  }) async {
+    final response = await _client.get(
+      AnimeFlowApi.playHistory,
+      queryParameters: {
+        'limit': limit,
+        'offset': offset,
+      },
+      requireFlowToken: true,
+    );
+
+    final data = response.data;
+    if (data is! List) {
+      return const [];
+    }
+    return data
+        .whereType<Map>()
+        .map((item) => PlayHistoryItem.fromJson(
+              Map<String, dynamic>.from(item),
+            ))
+        .toList(growable: false);
   }
 
   /// 保存当前用户的播放记录。

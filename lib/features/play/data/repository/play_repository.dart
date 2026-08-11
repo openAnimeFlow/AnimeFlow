@@ -1,5 +1,6 @@
 import 'package:anime_flow/shared/models/player/play/play_history.dart';
 import 'package:anime_flow/shared/models/player/play/play_history_event_type.dart';
+import 'package:anime_flow/shared/models/player/play/play_history_item.dart';
 import 'package:anime_flow/core/storage/storage.dart';
 import 'package:anime_flow/core/logger/logger.dart';
 import 'package:anime_flow/core/network/api/flow_api.dart';
@@ -83,9 +84,79 @@ class PlayRepository {
     );
   }
 
+  /// 从服务器拉取播放记录并合并到本地。
+  static Future<PlayHistoryPullResult> syncPlayHistoriesFromServer() async {
+    if (await FlowTokenStorage.instance.getToken() == null) {
+      return const PlayHistoryPullResult(requiresLogin: true);
+    }
+
+    const limit = 50;
+    final remoteRecords = <PlayHistoryItem>[];
+    var offset = 0;
+    while (true) {
+      final page = await FlowApi.getPlayHistoryService(
+        limit: limit,
+        offset: offset,
+      );
+      remoteRecords.addAll(page);
+      if (page.length < limit) break;
+      offset += limit;
+    }
+
+    var imported = 0;
+    var updated = 0;
+    var skipped = 0;
+    for (final remote in remoteRecords) {
+      final local = await getPlayHistory(remote.subjectId);
+      if (local != null && !local.isSyncedToServer) {
+        skipped++;
+        continue;
+      }
+      if (local != null && !remote.lastPlayedAt.isAfter(local.updateAt)) {
+        skipped++;
+        continue;
+      }
+
+      final history = PlayHistory(
+        subjectId: remote.subjectId,
+        episodeId: remote.episodeId,
+        episodeSort: remote.episodeSort,
+        subjectName: remote.subjectName,
+        cover: remote.cover,
+        alias: remote.alias,
+        position: remote.positionSeconds,
+        duration: remote.durationSeconds,
+        updateAt: remote.lastPlayedAt,
+        isSyncedToServer: true,
+      );
+      await playHistoryStorage.put(history.subjectId, history);
+      if (local == null) {
+        imported++;
+      } else {
+        updated++;
+      }
+    }
+
+    await _trimToLimit<PlayHistory>(
+      playHistoryStorage,
+      (a, b) => b.updateAt.compareTo(a.updateAt),
+    );
+    return PlayHistoryPullResult(
+      total: remoteRecords.length,
+      imported: imported,
+      updated: updated,
+      skipped: skipped,
+    );
+  }
+
   ///获取播放记录列表
   static Future<List<PlayHistory>> getPlayHistoryList() async {
     return playHistoryStorage.values.toList();
+  }
+
+  /// 清空本地播放记录。
+  static Future<void> clearLocalPlayHistories() async {
+    await playHistoryStorage.clear();
   }
 
   /// 读取播放记录
@@ -154,4 +225,22 @@ class PlayHistorySyncResult {
   final bool requiresLogin;
 
   int get failed => total - synced;
+}
+
+class PlayHistoryPullResult {
+  const PlayHistoryPullResult({
+    this.total = 0,
+    this.imported = 0,
+    this.updated = 0,
+    this.skipped = 0,
+    this.requiresLogin = false,
+  });
+
+  final int total;
+  final int imported;
+  final int updated;
+  final int skipped;
+  final bool requiresLogin;
+
+  int get changed => imported + updated;
 }

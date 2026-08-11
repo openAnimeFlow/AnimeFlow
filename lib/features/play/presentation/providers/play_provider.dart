@@ -416,7 +416,6 @@ class PlaySession {
   bool _isPlayerBuffering = false;
   bool _lastPlayerPlaying = false;
   DateTime? _lastPausePlayHistorySavedAt;
-  late final AppLifecycleListener _appLifecycleListener;
 
   Future<void> _playHistorySaveQueue = Future<void>.value();
   final Set<int> _autoWatchedEpisodeIds = {};
@@ -533,7 +532,6 @@ class PlaySession {
   }
 
   void dispose() {
-    _appLifecycleListener.dispose();
     unawaited(_savePlayHistory());
     if (Platform.isWindows) {
       WindowsTitleBarVisibility.reset();

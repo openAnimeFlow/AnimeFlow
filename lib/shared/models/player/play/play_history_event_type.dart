@@ -1,6 +1,6 @@
 enum PlayHistoryEventType {
-  defaults('default'),
-  forceOverwrite('force_overwrite');
+  defaults('DEFAULT'),
+  forceOverwrite('FORCE_OVERWRITE');
 
   final String value;
   const PlayHistoryEventType(this.value);

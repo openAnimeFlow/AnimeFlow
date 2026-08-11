@@ -8,8 +8,8 @@ import 'package:anime_flow/core/logger/logger.dart';
 import 'package:anime_flow/core/utils/system_util.dart';
 import 'package:anime_flow/core/utils/utils.dart';
 import 'package:anime_flow/shared/widgets/animation_network_image.dart';
-import 'package:flutter/material.dart';
 import 'package:flutter/foundation.dart';
+import 'package:flutter/material.dart';
 import 'package:hive_ce_flutter/hive_flutter.dart';
 
 class PlayRecordView extends StatefulWidget {
@@ -34,6 +34,7 @@ class _PlayRecordViewState extends State<PlayRecordView> {
     _scrollController.addListener(_updateScrollButtons);
     // 监听 Hive Box 变化，写入记录后自动刷新
     _playHistoryListenable.addListener(_getPlayHistoryList);
+    _autoSyncFromServer();
   }
 
   @override
@@ -84,6 +85,14 @@ class _PlayRecordViewState extends State<PlayRecordView> {
       }
     } catch (e) {
       LiggLogger().e(e);
+    }
+  }
+
+  Future<void> _autoSyncFromServer() async {
+    try {
+      await PlayHistoryService.autoSyncFromServer();
+    } catch (e) {
+      LiggLogger().e('首页自动同步播放记录失败: $e');
     }
   }
 

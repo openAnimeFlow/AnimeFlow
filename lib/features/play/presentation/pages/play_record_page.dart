@@ -25,6 +25,8 @@ class _PlayRecordPageState extends State<PlayRecordPage> {
   List<PlayHistory>? playHistoryList;
   bool isLoading = false;
   bool _isSyncing = false;
+  bool _isClearing = false;
+  bool _hasAutoSynced = false;
 
   @override
   void initState() {
@@ -32,6 +34,9 @@ class _PlayRecordPageState extends State<PlayRecordPage> {
     _playHistoryListenable = PlayHistoryService.listenable();
     _playHistoryListenable.addListener(_getPlayHistoryList);
     _getPlayHistoryList();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _autoSyncFromServer();
+    });
   }
 
   @override
@@ -94,7 +99,8 @@ class _PlayRecordPageState extends State<PlayRecordPage> {
     } catch (e) {
       LiggLogger().e('手动同步播放记录失败: $e');
       if (mounted) {
-        NotificationToast.show('提示', AppLocalizations.of(context).syncStatusFailed);
+        NotificationToast.show(
+            '提示', AppLocalizations.of(context).syncStatusFailed);
       }
     } finally {
       if (mounted) {
@@ -130,6 +136,136 @@ class _PlayRecordPageState extends State<PlayRecordPage> {
     }
   }
 
+  Future<void> _syncFromServer() async {
+    if (_isSyncing) return;
+    setState(() {
+      _isSyncing = true;
+    });
+
+    try {
+      final result = await PlayHistoryService.syncFromServer();
+      if (!mounted) return;
+
+      final l10n = AppLocalizations.of(context);
+      final message = result.requiresLogin
+          ? l10n.loginToManageAccount
+          : result.changed > 0
+              ? l10n.syncedItems(result.changed)
+              : l10n.syncStatusSuccess;
+      NotificationToast.show('提示', message);
+    } catch (e) {
+      LiggLogger().e('从云端同步播放记录失败: $e');
+      if (mounted) {
+        NotificationToast.show(
+          '提示',
+          AppLocalizations.of(context).syncStatusFailed,
+        );
+      }
+    } finally {
+      if (mounted) {
+        setState(() {
+          _isSyncing = false;
+        });
+      }
+    }
+  }
+
+  Future<void> _autoSyncFromServer() async {
+    if (_hasAutoSynced || _isSyncing) return;
+    _hasAutoSynced = true;
+    setState(() {
+      _isSyncing = true;
+    });
+
+    try {
+      await PlayHistoryService.autoSyncFromServer();
+    } catch (e) {
+      LiggLogger().e('自动同步播放记录失败: $e');
+    } finally {
+      if (mounted) {
+        setState(() {
+          _isSyncing = false;
+        });
+      }
+    }
+  }
+
+  Future<void> _confirmAndSyncFromServer() async {
+    if (_isSyncing) return;
+    final l10n = AppLocalizations.of(context);
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (dialogContext) => AlertDialog(
+        title: Text(l10n.confirm),
+        content: const Text('是否将云端播放记录同步到本地？本地未同步记录不会被覆盖。'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(dialogContext).pop(false),
+            child: Text(l10n.cancel),
+          ),
+          FilledButton(
+            onPressed: () => Navigator.of(dialogContext).pop(true),
+            child: Text(l10n.confirm),
+          ),
+        ],
+      ),
+    );
+    if (confirmed == true && mounted) {
+      await _syncFromServer();
+    }
+  }
+
+  Future<void> _clearLocalRecords() async {
+    if (_isClearing) return;
+    setState(() {
+      _isClearing = true;
+    });
+
+    try {
+      await PlayHistoryService.clearLocal();
+      if (mounted) {
+        NotificationToast.show(
+            '提示', AppLocalizations.of(context).deleteSuccess);
+      }
+    } catch (e) {
+      LiggLogger().e('清理本地播放记录失败: $e');
+      if (mounted) {
+        NotificationToast.show('提示', AppLocalizations.of(context).deleteFailed);
+      }
+    } finally {
+      if (mounted) {
+        setState(() {
+          _isClearing = false;
+        });
+      }
+    }
+  }
+
+  Future<void> _confirmAndClearLocalRecords() async {
+    if (_isClearing) return;
+    final l10n = AppLocalizations.of(context);
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (dialogContext) => AlertDialog(
+        title: Text(l10n.confirm),
+        content: const Text('是否清空本地播放记录？云端播放记录不会被删除，可稍后重新从云端同步。'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(dialogContext).pop(false),
+            child: Text(l10n.cancel),
+          ),
+          FilledButton(
+            onPressed: () => Navigator.of(dialogContext).pop(true),
+            child: Text(l10n.confirm),
+          ),
+        ],
+      ),
+    );
+    if (confirmed == true && mounted) {
+      await _clearLocalRecords();
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
@@ -137,6 +273,17 @@ class _PlayRecordPageState extends State<PlayRecordPage> {
       appBar: AppBar(
         title: Text(l10n.playbackHistory),
         actions: [
+          IconButton(
+            tooltip: _isSyncing ? l10n.syncInProgress : l10n.syncStatusIdle,
+            onPressed: _isSyncing ? null : _confirmAndSyncFromServer,
+            icon: _isSyncing
+                ? const SizedBox(
+                    width: 20,
+                    height: 20,
+                    child: CircularProgressIndicator(strokeWidth: 2),
+                  )
+                : const Icon(Icons.cloud_download_outlined),
+          ),
           IconButton(
             tooltip: _isSyncing ? l10n.syncInProgress : l10n.syncStatusIdle,
             onPressed: _isSyncing ? null : _confirmAndSyncPendingRecords,
@@ -147,6 +294,17 @@ class _PlayRecordPageState extends State<PlayRecordPage> {
                     child: CircularProgressIndicator(strokeWidth: 2),
                   )
                 : const Icon(Icons.cloud_upload_outlined),
+          ),
+          IconButton(
+            tooltip: l10n.delete,
+            onPressed: _isClearing ? null : _confirmAndClearLocalRecords,
+            icon: _isClearing
+                ? const SizedBox(
+                    width: 20,
+                    height: 20,
+                    child: CircularProgressIndicator(strokeWidth: 2),
+                  )
+                : const Icon(Icons.delete_outline),
           ),
         ],
       ),

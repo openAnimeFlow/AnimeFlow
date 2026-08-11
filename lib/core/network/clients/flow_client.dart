@@ -56,7 +56,7 @@ class AnimeFlowResponse {
     return AnimeFlowResponse(
       code: json['code'] as int,
       message: json['message'] as String? ?? '',
-      data: json['data'],
+      data: json['data'] as dynamic,
     );
   }
 }

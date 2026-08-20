@@ -1,5 +1,5 @@
 <div align="center">
-  <img width="200" alt="file_00000000f82071f79ac51eb74f68d0d5" src="https://github.com/user-attachments/assets/012a476e-1f24-4fac-963b-56b861823a43" />
+  <img width="200" alt="file_00000000f82071f79ac51eb74f68d0d5" src="assets/image/logo/logo.webp" />
 </div>
 
 <div align="center">

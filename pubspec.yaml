@@ -155,17 +155,18 @@ flutter_launcher_icons:
     generate: true
   macos:
     generate: true
-  image_path: "assets/image/logo/logo_icon.png"
+  image_path: "assets/image/logo/logo.webp"
   remove_alpha_ios: true  # 添加这一行来移除iOS图标的alpha通道
   adaptive_icon_background: "#FFFFFF"
 
 # 启动logo: dart run flutter_native_splash:create
 flutter_native_splash:
-  color: "#0F172A"
+  color: "#A0C4F5"
   image: assets/image/logo/logo.png
   android_12:
-    image: assets/image/logo/logo.png
-    color: "#0F172A"
+    # Android 12+ 会把启动图标裁剪成中心圆，使用预置好安全边距的专用图片。
+    image: assets/image/logo/logo_android_12.png
+    color: "#A0C4F5"
   android: true
   ios: true
 

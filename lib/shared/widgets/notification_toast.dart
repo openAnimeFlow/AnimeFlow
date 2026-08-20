@@ -30,7 +30,7 @@ class NotificationToast {
   }
 
   static void show(
-    String title,
+    String? title,
     String message, {
     BorderRadius borderRadius = defaultBorderRadius,
     Duration duration = defaultDuration,
@@ -61,7 +61,7 @@ class NotificationToast {
               ),
               child: ListTile(
                 leading: Image.asset(iconPath),
-                title: Text(title),
+                title: title != null ? Text(title) : null,
                 subtitle: Text(message),
               ),
             ),

@@ -155,10 +155,11 @@ class _BackgroundGridSectionState extends ConsumerState<BackgroundGridSection>
     if (!mounted) return;
     setState(() => _loadingItemId = null);
     if (error != null) {
-      NotificationToast.show('提示', error);
+      NotificationToast.show(error, title: '提示');
       return;
     }
-    NotificationToast.show('提示', backgroundId != null ? '背景图已更新' : '背景图已清除');
+    NotificationToast.show(backgroundId != null ? '背景图已更新' : '背景图已清除',
+        title: '提示');
   }
 
   @override

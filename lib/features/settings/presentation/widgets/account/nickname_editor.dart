@@ -57,7 +57,7 @@ class _NicknameEditorState extends State<NicknameEditorView> {
 
     final newNickname = _controller.text.trim();
     if (newNickname.isEmpty) {
-      NotificationToast.show('提示', '昵称不能为空');
+      NotificationToast.show('昵称不能为空', title: '提示');
       return;
     }
 

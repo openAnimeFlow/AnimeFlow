@@ -40,8 +40,8 @@ class UserPage extends ConsumerWidget {
               shouldNotifyError ? l10n.profileLoadFailed : l10n.profileExpired;
           WidgetsBinding.instance.addPostFrameCallback((_) {
             if (!context.mounted) return;
-            NotificationToast.show(l10n.tip, message,
-                align: Alignment.topCenter);
+            NotificationToast.show(message,
+                title: l10n.tip, align: Alignment.topCenter);
           });
         });
 

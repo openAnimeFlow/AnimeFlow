@@ -25,7 +25,7 @@ class _BangumiCollectionSyncSectionState
       await ref.read(bgmCollectionSyncProvider.notifier).triggerSync();
       if (!mounted) return;
       final l10n = AppLocalizations.of(context);
-      NotificationToast.show(l10n.tip, l10n.collectionSyncStarted);
+      NotificationToast.show(l10n.collectionSyncStarted, title: l10n.tip);
     } catch (e) {
       if (!mounted) return;
       final message = e is AnimeFlowApiException
@@ -33,7 +33,7 @@ class _BangumiCollectionSyncSectionState
           : e is StateError
               ? e.message
               : AppLocalizations.of(context).syncStartFailed;
-      NotificationToast.show(AppLocalizations.of(context).tip, message);
+      NotificationToast.show(message, title: AppLocalizations.of(context).tip);
     } finally {
       if (mounted) {
         setState(() => _isSubmitting = false);
@@ -49,7 +49,7 @@ class _BangumiCollectionSyncSectionState
       final message = e is AnimeFlowApiException
           ? e.message
           : AppLocalizations.of(context).refreshStatusFailed;
-      NotificationToast.show(AppLocalizations.of(context).tip, message);
+      NotificationToast.show(message, title: AppLocalizations.of(context).tip);
     }
   }
 

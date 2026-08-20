@@ -67,11 +67,12 @@ class _PluginsPageState extends State<PluginsPage> {
     try {
       await sourceRepository.deleteSource(name);
       if (!mounted) return;
-      NotificationToast.show(l10n.deleteSuccess, l10n.sourceDeleted(name));
+      NotificationToast.show(l10n.sourceDeleted(name),
+          title: l10n.deleteSuccess);
     } catch (e) {
       NotificationToast.show(
-        l10n.deleteFailed,
         l10n.sourceDeleteFailed(name, e.toString()),
+        title: l10n.deleteFailed,
       );
     }
   }

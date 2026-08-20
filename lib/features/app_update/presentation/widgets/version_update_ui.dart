@@ -27,8 +27,8 @@ Future<void> handleVersionCheckResult(
 }) async {
   if (result.hasToast) {
     NotificationToast.show(
-      result.toastTitle!,
       result.toastMessage!,
+      title: result.toastTitle!,
       maxWidth: 500,
     );
   }
@@ -48,7 +48,7 @@ Future<void> handleVersionCheckResult(
     case VersionType.sameVersion:
       if (notifyWhenUpToDate) {
         final l10n = AppLocalizations.of(context);
-        NotificationToast.show(l10n.checkForUpdates, l10n.latestVersion);
+        NotificationToast.show(l10n.latestVersion, title: l10n.checkForUpdates);
       }
       break;
     case VersionType.localNewer:
@@ -96,8 +96,8 @@ Future<void> showVersionUpdateDialog(
             Navigator.of(dialogContext, rootNavigator: true).pop();
           }
           NotificationToast.show(
-            l10n.downloadFailed,
             l10n.updateDownloadFailed(e.toString()),
+            title: l10n.downloadFailed,
             maxWidth: 500,
           );
         }
@@ -105,9 +105,8 @@ Future<void> showVersionUpdateDialog(
       onCancelDownload: () {
         onCancelDownload();
         final l10n = AppLocalizations.of(context);
-        NotificationToast.show(
-            l10n.downloadCancelled, l10n.downloadCancelledMessage,
-            maxWidth: 500);
+        NotificationToast.show(l10n.downloadCancelledMessage,
+            title: l10n.downloadCancelled, maxWidth: 500);
       },
     ),
   );
@@ -162,8 +161,8 @@ Future<void> showWindowsDownloadCompleteDialog(
                 Navigator.of(dialogContext).pop();
               }
               NotificationToast.show(
-                l10n.openFailed,
                 l10n.openFileManagerFailed(e.toString()),
+                title: l10n.openFailed,
                 maxWidth: 500,
               );
             }

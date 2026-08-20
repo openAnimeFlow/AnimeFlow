@@ -300,8 +300,8 @@ class InfoHeadView extends StatelessWidget {
                   );
                   if (context.mounted) {
                     NotificationToast.show(
-                      '收藏更新',
                       '已${type.label}',
+                      title: '收藏更新',
                       maxWidth: 500,
                     );
                   }
@@ -309,8 +309,8 @@ class InfoHeadView extends StatelessWidget {
                 } on AnimeFlowApiException catch (e) {
                   if (context.mounted) {
                     NotificationToast.show(
-                      '收藏更新失败',
                       e.message,
+                      title: '收藏更新失败',
                       maxWidth: 500,
                     );
                   }
@@ -338,13 +338,13 @@ class InfoHeadView extends StatelessWidget {
                             )
                             .updateEpisodeWatched(episodeId: episodeId);
                         if (!context.mounted) return;
-                        NotificationToast.show('提示', '已更新观看进度');
+                        NotificationToast.show('已更新观看进度', title: '提示');
                       } on AnimeFlowApiException catch (e) {
                         if (!context.mounted) return;
-                        NotificationToast.show('更新失败', e.message);
+                        NotificationToast.show(e.message, title: '更新失败');
                       } catch (e) {
                         if (!context.mounted) return;
-                        NotificationToast.show('更新失败', e.toString());
+                        NotificationToast.show(e.toString(), title: '更新失败');
                       }
                     },
                   ),

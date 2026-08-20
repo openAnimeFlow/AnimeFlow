@@ -54,15 +54,15 @@ class _LoginPageState extends ConsumerState<LoginPage> {
       ref.invalidate(currentUserInfoProvider);
       ref.invalidate(userCollectionsProvider);
       final l10n = AppLocalizations.of(context);
-      NotificationToast.show(l10n.tip, l10n.loginSuccess,
-          align: Alignment.topCenter);
+      NotificationToast.show(l10n.loginSuccess,
+          title: l10n.tip, align: Alignment.topCenter);
       const UserRoute().go(context);
     } on AnimeFlowApiException catch (e) {
       if (!mounted) return;
-      NotificationToast.show('提示', e.message);
+      NotificationToast.show(e.message, title: '提示');
     } catch (e) {
       if (!mounted) return;
-      NotificationToast.show('提示', e.toString());
+      NotificationToast.show(e.toString(), title: '提示');
     } finally {
       if (mounted) {
         setState(() => _isSubmitting = false);

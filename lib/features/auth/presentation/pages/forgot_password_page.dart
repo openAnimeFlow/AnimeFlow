@@ -43,11 +43,11 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
     final l10n = AppLocalizations.of(context);
     final email = _emailController.text.trim();
     if (email.isEmpty || !email.contains('@')) {
-      NotificationToast.show(l10n.tip, l10n.invalidEmail);
+      NotificationToast.show(l10n.invalidEmail, title: l10n.tip);
       return false;
     }
     if (!_graphicCaptchaController.isReady) {
-      NotificationToast.show(l10n.tip, l10n.enterGraphicCaptcha);
+      NotificationToast.show(l10n.enterGraphicCaptcha, title: l10n.tip);
       return false;
     }
 
@@ -58,17 +58,17 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
         captcha: _graphicCaptchaController.text,
       );
       if (!mounted) return false;
-      NotificationToast.show(l10n.tip, l10n.emailCodeSent);
+      NotificationToast.show(l10n.emailCodeSent, title: l10n.tip);
       unawaited(_graphicCaptchaController.reload());
       return true;
     } on AnimeFlowApiException catch (e) {
       if (!mounted) return false;
-      NotificationToast.show(l10n.tip, e.message);
+      NotificationToast.show(e.message, title: l10n.tip);
       unawaited(_graphicCaptchaController.reload());
       return false;
     } catch (e) {
       if (!mounted) return false;
-      NotificationToast.show(l10n.tip, e.toString());
+      NotificationToast.show(e.toString(), title: l10n.tip);
       unawaited(_graphicCaptchaController.reload());
       return false;
     }
@@ -86,14 +86,14 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
         emailCaptcha: _emailCodeController.text.trim(),
       );
       if (!mounted) return;
-      NotificationToast.show(l10n.tip, l10n.passwordResetSuccess);
+      NotificationToast.show(l10n.passwordResetSuccess, title: l10n.tip);
       context.pop();
     } on AnimeFlowApiException catch (e) {
       if (!mounted) return;
-      NotificationToast.show(l10n.tip, e.message);
+      NotificationToast.show(e.message, title: l10n.tip);
     } catch (e) {
       if (!mounted) return;
-      NotificationToast.show(l10n.tip, e.toString());
+      NotificationToast.show(e.toString(), title: l10n.tip);
     } finally {
       if (mounted) {
         setState(() => _isSubmitting = false);

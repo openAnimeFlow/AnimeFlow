@@ -939,8 +939,8 @@ class _VideoSourceDrawersState extends ConsumerState<VideoSourceDrawers> {
               logger.e('获取视频源失败', error: e);
               final l10n = AppLocalizations.of(context);
               NotificationToast.show(
-                l10n.error,
                 l10n.videoSourceLoadFailed(e.toString()),
+                title: l10n.error,
               );
             }
           },
@@ -1123,7 +1123,8 @@ class _CaptchaViewState extends State<CaptchaView> {
     dataSourceController.markCaptchaVerified(websiteName);
     setState(() {});
     final l10n = AppLocalizations.of(context);
-    NotificationToast.show(l10n.verificationSuccess, l10n.verificationRetrying);
+    NotificationToast.show(l10n.verificationRetrying,
+        title: l10n.verificationSuccess);
     Future<void>.delayed(const Duration(seconds: 3), () {
       dataSourceController.retryResources(websiteName);
     });
@@ -1134,7 +1135,7 @@ class _CaptchaViewState extends State<CaptchaView> {
     if (config == null || _isSubmitting) return;
     if (_codeController.text.trim().isEmpty) {
       final l10n = AppLocalizations.of(context);
-      NotificationToast.show(l10n.tip, l10n.enterCaptcha);
+      NotificationToast.show(l10n.enterCaptcha, title: l10n.tip);
       return;
     }
     setState(() => _isSubmitting = true);
@@ -1157,7 +1158,7 @@ class _CaptchaViewState extends State<CaptchaView> {
           _codeController.clear();
         });
         final l10n = AppLocalizations.of(context);
-        NotificationToast.show(l10n.tip, l10n.captchaMayBeWrong);
+        NotificationToast.show(l10n.captchaMayBeWrong, title: l10n.tip);
         await _reloadCaptchaImage();
       });
     }

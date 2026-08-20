@@ -84,11 +84,11 @@ class _EvaluateDialogState extends State<InfoEvaluateDialog> {
 
       if (mounted) {
         context.pop();
-        NotificationToast.show('评价成功', '评价已保存', maxWidth: 500);
+        NotificationToast.show('评价已保存', title: '评价成功', maxWidth: 500);
       }
     } catch (e) {
       if (mounted) {
-        NotificationToast.show('评价失败', e.toString(), maxWidth: 500);
+        NotificationToast.show(e.toString(), title: '评价失败', maxWidth: 500);
       }
     } finally {
       if (mounted) {

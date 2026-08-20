@@ -30,8 +30,8 @@ class NotificationToast {
   }
 
   static void show(
-    String? title,
     String message, {
+    String? title,
     BorderRadius borderRadius = defaultBorderRadius,
     Duration duration = defaultDuration,
     double maxWidth = 500.0,

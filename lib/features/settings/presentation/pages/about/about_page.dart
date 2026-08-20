@@ -123,8 +123,8 @@ class _AboutSettingsPageState extends ConsumerState<AboutSettingsPage> {
               if (await canLaunchUrl(uri)) {
                 await launchUrl(uri);
               } else {
-                NotificationToast.show(
-                    l10n.unableOpenWeb, l10n.deviceUnsupportedWeb);
+                NotificationToast.show(l10n.deviceUnsupportedWeb,
+                    title: l10n.unableOpenWeb);
               }
             },
           ),

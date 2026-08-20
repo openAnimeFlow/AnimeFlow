@@ -110,12 +110,12 @@ class _DownloadPluginsPageState extends State<DownloadPluginsPage> {
       setState(() {
         hasChanged = true;
       });
-      NotificationToast.show(
-          l10n.downloadSuccess, l10n.pluginDownloaded(pluginName));
+      NotificationToast.show(l10n.pluginDownloaded(pluginName),
+          title: l10n.downloadSuccess);
     } catch (e) {
       NotificationToast.show(
-        l10n.downloadFailed,
         l10n.pluginDownloadFailed(pluginName, e.toString()),
+        title: l10n.downloadFailed,
       );
     } finally {
       if (mounted) {
@@ -152,13 +152,13 @@ class _DownloadPluginsPageState extends State<DownloadPluginsPage> {
         hasChanged = true;
       });
       NotificationToast.show(
-        l10n.updateSuccess,
         l10n.pluginUpdated(pluginName, pluginVersion),
+        title: l10n.updateSuccess,
       );
     } catch (e) {
       NotificationToast.show(
-        l10n.updateFailed,
         l10n.pluginUpdateFailed(pluginName, e.toString()),
+        title: l10n.updateFailed,
       );
     } finally {
       if (mounted) {

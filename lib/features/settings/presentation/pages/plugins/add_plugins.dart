@@ -211,8 +211,8 @@ class _AddPluginsPageState extends State<AddPluginsPage> {
     } catch (e) {
       if (mounted) {
         final l10n = AppLocalizations.of(context);
-        NotificationToast.show(
-            l10n.saveFailed, l10n.dataSaveFailed(e.toString()));
+        NotificationToast.show(l10n.dataSaveFailed(e.toString()),
+            title: l10n.saveFailed);
       }
       return false;
     }

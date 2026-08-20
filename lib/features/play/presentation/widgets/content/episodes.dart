@@ -99,13 +99,13 @@ class _EpisodesListViewState extends ConsumerState<EpisodesListView> {
     try {
       await playSession.updateEpisodeWatched(episodeId);
       if (!mounted) return;
-      NotificationToast.show('提示', '已更新观看进度');
+      NotificationToast.show('已更新观看进度', title: '提示');
     } on AnimeFlowApiException catch (e) {
       if (!mounted) return;
-      NotificationToast.show('更新失败', e.message);
+      NotificationToast.show(e.message, title: '更新失败');
     } catch (e) {
       if (!mounted) return;
-      NotificationToast.show('更新失败', e.toString());
+      NotificationToast.show(e.toString(), title: '更新失败');
     }
   }
 

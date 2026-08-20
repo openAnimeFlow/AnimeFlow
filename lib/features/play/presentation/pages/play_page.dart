@@ -245,7 +245,7 @@ class _ContentViewState extends ConsumerState<_ContentView>
     final l10n = AppLocalizations.of(context);
     final userId = ref.read(currentUserInfoProvider).value?.id;
     if (userId == null) {
-      NotificationToast.show(l10n.pleaseLogin, l10n.loginBeforeDanmaku);
+      NotificationToast.show(l10n.loginBeforeDanmaku, title: l10n.pleaseLogin);
       return;
     }
     final success = await playSession.sendDanmaku(
@@ -254,8 +254,8 @@ class _ContentViewState extends ConsumerState<_ContentView>
     );
     if (!mounted) return;
     NotificationToast.show(
-      l10n.tip,
       success ? l10n.danmakuSent : l10n.danmakuUnsupported,
+      title: l10n.tip,
     );
   }
 

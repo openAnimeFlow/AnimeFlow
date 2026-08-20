@@ -70,10 +70,12 @@ class _GraphicCaptchaViewState extends State<GraphicCaptchaView> {
       });
     } on AnimeFlowApiException catch (e) {
       if (!mounted) return;
-      NotificationToast.show(AppLocalizations.of(context).tip, e.toString());
+      NotificationToast.show(e.toString(),
+          title: AppLocalizations.of(context).tip);
     } catch (e) {
       if (!mounted) return;
-      NotificationToast.show(AppLocalizations.of(context).tip, e.toString());
+      NotificationToast.show(e.toString(),
+          title: AppLocalizations.of(context).tip);
     } finally {
       if (mounted) {
         setState(() => _isLoading = false);

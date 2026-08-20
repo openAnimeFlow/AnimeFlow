@@ -42,11 +42,11 @@ class _BindEmailSectionState extends ConsumerState<BindEmailSection> {
   Future<bool> _sendEmailCode() async {
     final email = _emailController.text.trim();
     if (email.isEmpty || !email.contains('@')) {
-      NotificationToast.show('提示', '请先填写有效邮箱');
+      NotificationToast.show('请先填写有效邮箱', title: '提示');
       return false;
     }
     if (!_graphicCaptchaController.isReady) {
-      NotificationToast.show('提示', '请先填写图形验证码');
+      NotificationToast.show('请先填写图形验证码', title: '提示');
       return false;
     }
 
@@ -57,17 +57,17 @@ class _BindEmailSectionState extends ConsumerState<BindEmailSection> {
         captcha: _graphicCaptchaController.text,
       );
       if (!mounted) return false;
-      NotificationToast.show('提示', '验证码已发送，请查收邮件');
+      NotificationToast.show('验证码已发送，请查收邮件', title: '提示');
       unawaited(_graphicCaptchaController.reload());
       return true;
     } on AnimeFlowApiException catch (e) {
       if (!mounted) return false;
-      NotificationToast.show('提示', e.message);
+      NotificationToast.show(e.message, title: '提示');
       unawaited(_graphicCaptchaController.reload());
       return false;
     } catch (e) {
       if (!mounted) return false;
-      NotificationToast.show('提示', e.toString());
+      NotificationToast.show(e.toString(), title: '提示');
       unawaited(_graphicCaptchaController.reload());
       return false;
     }
@@ -85,13 +85,13 @@ class _BindEmailSectionState extends ConsumerState<BindEmailSection> {
       );
       if (!mounted) return;
       ref.invalidate(currentUserInfoProvider);
-      NotificationToast.show('提示', '邮箱绑定成功');
+      NotificationToast.show('邮箱绑定成功', title: '提示');
     } on AnimeFlowApiException catch (e) {
       if (!mounted) return;
-      NotificationToast.show('提示', e.message);
+      NotificationToast.show(e.message, title: '提示');
     } catch (e) {
       if (!mounted) return;
-      NotificationToast.show('提示', e.toString());
+      NotificationToast.show(e.toString(), title: '提示');
     } finally {
       if (mounted) {
         setState(() => _isSubmitting = false);

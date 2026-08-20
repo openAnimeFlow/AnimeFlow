@@ -62,16 +62,16 @@ class BottomAreaControl extends ConsumerWidget {
       await playController.updateEpisodeWatched(episodeId);
       if (!dialogContext.mounted) return;
       final l10n = AppLocalizations.of(dialogContext);
-      NotificationToast.show(l10n.tip, l10n.updatedProgress);
+      NotificationToast.show(l10n.updatedProgress, title: l10n.tip);
     } on AnimeFlowApiException catch (e) {
       if (!dialogContext.mounted) return;
-      NotificationToast.show(
-          AppLocalizations.of(dialogContext).updateFailed, e.message);
+      NotificationToast.show(e.message,
+          title: AppLocalizations.of(dialogContext).updateFailed);
     } catch (e) {
       if (!dialogContext.mounted) return;
       LiggLogger().e(e);
-      NotificationToast.show(
-          AppLocalizations.of(dialogContext).updateFailed, e.toString());
+      NotificationToast.show(e.toString(),
+          title: AppLocalizations.of(dialogContext).updateFailed);
     }
   }
 

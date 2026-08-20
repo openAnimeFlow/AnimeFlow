@@ -141,7 +141,7 @@ class UserController extends _$UserController {
     ref.invalidate(currentUserInfoProvider);
     ref.invalidate(bangumiBindProvider);
     ref.invalidate(userCollectionsProvider);
-    NotificationToast.show('提示', 'Bangumi 授权登录成功');
+    NotificationToast.show('Bangumi 授权登录成功', title: '提示');
     return flowToken;
   }
 
@@ -149,7 +149,7 @@ class UserController extends _$UserController {
     final bind = await FlowApi.bindBangumiService(code: code);
     ref.invalidate(bangumiBindProvider);
     ref.invalidate(bgmCollectionSyncProvider);
-    NotificationToast.show('提示', 'Bangumi 账号绑定成功');
+    NotificationToast.show('Bangumi 账号绑定成功', title: '提示');
     return bind;
   }
 
@@ -158,7 +158,7 @@ class UserController extends _$UserController {
     final bind = await FlowApi.unbindBangumiService();
     ref.invalidate(bangumiBindProvider);
     ref.invalidate(bgmCollectionSyncProvider);
-    NotificationToast.show('提示', 'Bangumi 账号已解绑');
+    NotificationToast.show('Bangumi 账号已解绑', title: '提示');
     return bind;
   }
 
@@ -172,8 +172,8 @@ class UserController extends _$UserController {
       if (code == null || code.isEmpty) {
         LiggLogger().w('轮询超时，未获取到 OAuth 授权码');
         NotificationToast.show(
-          '提示',
           '授权超时，请重试',
+          title: '提示',
           duration: const Duration(seconds: 10),
         );
         return false;
@@ -221,8 +221,8 @@ class UserController extends _$UserController {
     final message = _oauthErrorMessage(error, purpose);
     LiggLogger().e(message, error: error, stackTrace: stackTrace);
     NotificationToast.show(
-      '提示',
       message,
+      title: '提示',
       duration: const Duration(seconds: 10),
     );
   }

@@ -116,7 +116,7 @@ class _VideoResourcesViewState extends ConsumerState<VideoResourcesView> {
     final l10n = AppLocalizations.of(context);
     final url = videoUrl.trim();
     await Clipboard.setData(ClipboardData(text: url));
-    NotificationToast.show(l10n.copied, l10n.sourceLinkCopied);
+    NotificationToast.show(l10n.sourceLinkCopied, title: l10n.copied);
   }
 
   Widget _buildSourceActionMenu(String videoUrl, AppLocalizations l10n) {

@@ -57,7 +57,7 @@ class _AccountSettingsPageState extends ConsumerState<AccountSettingsPage> {
 
     await ref.read(userControllerProvider.notifier).clearUserInfo();
     if (!context.mounted) return;
-    NotificationToast.show(l10n.tip, l10n.logoutSuccess);
+    NotificationToast.show(l10n.logoutSuccess, title: l10n.tip);
   }
 
   Future<void> _bindBangumi() async {
@@ -67,12 +67,12 @@ class _AccountSettingsPageState extends ConsumerState<AccountSettingsPage> {
       if (!context.mounted) return;
     } on StateError catch (e) {
       if (!context.mounted) return;
-      NotificationToast.show(l10n.tip, e.message);
+      NotificationToast.show(e.message, title: l10n.tip);
     } catch (e) {
       if (!context.mounted) return;
       NotificationToast.show(
-        l10n.tip,
         resolveAnimeFlowErrorMessage(e, fallback: l10n.openAuthorizationFailed),
+        title: l10n.tip,
       );
     }
   }
@@ -92,8 +92,8 @@ class _AccountSettingsPageState extends ConsumerState<AccountSettingsPage> {
           .uploadAvatar(cropped);
       if (!context.mounted) return;
       if (error != null) {
-        NotificationToast.show('提示', error,
-            duration: const Duration(seconds: 5));
+        NotificationToast.show(error,
+            title: '提示', duration: const Duration(seconds: 5));
         return;
       }
     } finally {
@@ -287,10 +287,10 @@ class _AccountSettingsPageState extends ConsumerState<AccountSettingsPage> {
                 .read(currentUserInfoProvider.notifier)
                 .updateNickname(newNickname);
             if (error != null) {
-              NotificationToast.show(l10n.tip, error);
+              NotificationToast.show(error, title: l10n.tip);
               throw error;
             }
-            NotificationToast.show(l10n.tip, l10n.nicknameUpdated);
+            NotificationToast.show(l10n.nicknameUpdated, title: l10n.tip);
           },
         ),
         if (user.email.isEmpty) ...[

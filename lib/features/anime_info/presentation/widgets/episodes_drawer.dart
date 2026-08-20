@@ -101,13 +101,13 @@ class _EpisodesDrawerViewState extends ConsumerState<EpisodesDrawerView> {
           .read(subjectEpisodesProvider(widget.subjectItem.id).notifier)
           .markAllEpisodesWatched();
       if (!mounted) return;
-      NotificationToast.show(l10n.tip, l10n.markAllWatchedSuccess);
+      NotificationToast.show(l10n.markAllWatchedSuccess, title: l10n.tip);
     } on AnimeFlowApiException catch (e) {
       if (!mounted) return;
-      NotificationToast.show(l10n.updateFailed, e.message);
+      NotificationToast.show(e.message, title: l10n.updateFailed);
     } catch (e) {
       if (!mounted) return;
-      NotificationToast.show(l10n.updateFailed, e.toString());
+      NotificationToast.show(e.toString(), title: l10n.updateFailed);
     } finally {
       if (mounted) {
         setState(() => _isMarkingAllWatched = false);

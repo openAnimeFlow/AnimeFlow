@@ -99,7 +99,7 @@ class AvatarDialog extends StatelessWidget {
 
     final bytes = await file.readAsBytes();
     if (bytes.lengthInBytes > _maxImageSize) {
-      NotificationToast.show('提示', '图片大小不能超过 2MB');
+      NotificationToast.show('图片大小不能超过 2MB', title: '提示');
       return null;
     }
 
@@ -186,7 +186,7 @@ class _AvatarCropDialogState extends State<AvatarCropDialog> {
                       Navigator.of(context).pop(croppedImage);
                     case CropFailure():
                       setState(() => _isCropping = false);
-                      NotificationToast.show('提示', '裁剪失败，请重试');
+                      NotificationToast.show('裁剪失败，请重试', title: '提示');
                   }
                 },
                 onStatusChanged: (status) {

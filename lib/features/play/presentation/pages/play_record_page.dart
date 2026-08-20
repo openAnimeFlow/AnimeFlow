@@ -95,12 +95,12 @@ class _PlayRecordPageState extends State<PlayRecordPage> {
               : result.total == 0
                   ? l10n.syncStatusSuccess
                   : l10n.syncedItems(result.synced);
-      NotificationToast.show('提示', message);
+      NotificationToast.show(message, title: '提示');
     } catch (e) {
       LiggLogger().e('手动同步播放记录失败: $e');
       if (mounted) {
-        NotificationToast.show(
-            '提示', AppLocalizations.of(context).syncStatusFailed);
+        NotificationToast.show(AppLocalizations.of(context).syncStatusFailed,
+            title: '提示');
       }
     } finally {
       if (mounted) {
@@ -152,13 +152,13 @@ class _PlayRecordPageState extends State<PlayRecordPage> {
           : result.changed > 0
               ? l10n.syncedItems(result.changed)
               : l10n.syncStatusSuccess;
-      NotificationToast.show('提示', message);
+      NotificationToast.show(message, title: '提示');
     } catch (e) {
       LiggLogger().e('从云端同步播放记录失败: $e');
       if (mounted) {
         NotificationToast.show(
-          '提示',
           AppLocalizations.of(context).syncStatusFailed,
+          title: '提示',
         );
       }
     } finally {
@@ -224,13 +224,14 @@ class _PlayRecordPageState extends State<PlayRecordPage> {
     try {
       await PlayHistoryService.clearLocal();
       if (mounted) {
-        NotificationToast.show(
-            '提示', AppLocalizations.of(context).deleteSuccess);
+        NotificationToast.show(AppLocalizations.of(context).deleteSuccess,
+            title: '提示');
       }
     } catch (e) {
       LiggLogger().e('清理本地播放记录失败: $e');
       if (mounted) {
-        NotificationToast.show('提示', AppLocalizations.of(context).deleteFailed);
+        NotificationToast.show(AppLocalizations.of(context).deleteFailed,
+            title: '提示');
       }
     } finally {
       if (mounted) {

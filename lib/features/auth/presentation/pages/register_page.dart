@@ -43,11 +43,11 @@ class _RegisterPageState extends State<RegisterPage> {
     final email = _emailController.text.trim();
     final l10n = AppLocalizations.of(context);
     if (email.isEmpty || !email.contains('@')) {
-      NotificationToast.show(l10n.tip, l10n.invalidEmail);
+      NotificationToast.show(l10n.invalidEmail, title: l10n.tip);
       return false;
     }
     if (!_graphicCaptchaController.isReady) {
-      NotificationToast.show(l10n.tip, l10n.enterGraphicCaptcha);
+      NotificationToast.show(l10n.enterGraphicCaptcha, title: l10n.tip);
       return false;
     }
 
@@ -58,18 +58,18 @@ class _RegisterPageState extends State<RegisterPage> {
         captcha: _graphicCaptchaController.text,
       );
       if (!mounted) return false;
-      NotificationToast.show(l10n.tip, l10n.emailCodeSent);
+      NotificationToast.show(l10n.emailCodeSent, title: l10n.tip);
       // 图形验证码校验成功后服务端会删除，需刷新以便再次发送
       unawaited(_graphicCaptchaController.reload());
       return true;
     } on AnimeFlowApiException catch (e) {
       if (!mounted) return false;
-      NotificationToast.show('提示', e.message);
+      NotificationToast.show(e.message, title: '提示');
       unawaited(_graphicCaptchaController.reload());
       return false;
     } catch (e) {
       if (!mounted) return false;
-      NotificationToast.show('提示', e.toString());
+      NotificationToast.show(e.toString(), title: '提示');
       unawaited(_graphicCaptchaController.reload());
       return false;
     }
@@ -87,14 +87,14 @@ class _RegisterPageState extends State<RegisterPage> {
         emailCaptcha: _emailCodeController.text.trim(),
       );
       if (!mounted) return;
-      NotificationToast.show(l10n.tip, l10n.registerSuccess);
+      NotificationToast.show(l10n.registerSuccess, title: l10n.tip);
       context.pop();
     } on AnimeFlowApiException catch (e) {
       if (!mounted) return;
-      NotificationToast.show('提示', e.message);
+      NotificationToast.show(e.message, title: '提示');
     } catch (e) {
       if (!mounted) return;
-      NotificationToast.show('提示', e.toString());
+      NotificationToast.show(e.toString(), title: '提示');
     } finally {
       if (mounted) {
         setState(() => _isSubmitting = false);

@@ -29,7 +29,8 @@ class InfoAppbar extends ConsumerWidget {
     if (await canLaunchUrl(uri)) {
       await launchUrl(uri, mode: LaunchMode.externalApplication);
     } else {
-      NotificationToast.show(l10n.error, l10n.unableOpenLink, maxWidth: 500);
+      NotificationToast.show(l10n.unableOpenLink,
+          title: l10n.error, maxWidth: 500);
     }
   }
 
@@ -40,8 +41,8 @@ class InfoAppbar extends ConsumerWidget {
   ) async {
     await Clipboard.setData(ClipboardData(text: url));
     if (context.mounted) {
-      NotificationToast.show(l10n.copied, l10n.websiteLinkCopied,
-          maxWidth: 500);
+      NotificationToast.show(l10n.websiteLinkCopied,
+          title: l10n.copied, maxWidth: 500);
     }
   }
 
@@ -52,14 +53,14 @@ class InfoAppbar extends ConsumerWidget {
   ) async {
     try {
       final message = await Api.downloadImage(image, name);
-      NotificationToast.show(l10n.tip, message, maxWidth: 500);
+      NotificationToast.show(message, title: l10n.tip, maxWidth: 500);
     } on StoragePermissionDeniedException catch (e) {
       LiggLogger().e('保存图片失败:$e');
-      NotificationToast.show(l10n.tip, e.message, maxWidth: 500);
+      NotificationToast.show(e.message, title: l10n.tip, maxWidth: 500);
     } catch (e) {
       LiggLogger().e('保存图片失败:$e');
-      NotificationToast.show(l10n.tip, l10n.saveImageFailed(e.toString()),
-          maxWidth: 500);
+      NotificationToast.show(l10n.saveImageFailed(e.toString()),
+          title: l10n.tip, maxWidth: 500);
     }
   }
 

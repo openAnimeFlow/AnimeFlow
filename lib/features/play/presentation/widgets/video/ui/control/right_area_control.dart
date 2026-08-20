@@ -43,23 +43,28 @@ class RightAreaControl extends ConsumerWidget {
                                   uint8List,
                                   name: 'video_screenshot',
                                 );
-                                NotificationToast.show('提示', message,
-                                    align: Alignment.topCenter, maxWidth: 500);
-                              } else {
-                                NotificationToast.show(
+                                NotificationToast.show(message,
+                                    title: '提示',
                                     align: Alignment.topCenter,
-                                    '提示',
-                                    '截图失败，无法获取截图数据',
+                                    maxWidth: 500);
+                              } else {
+                                NotificationToast.show('截图失败，无法获取截图数据',
+                                    align: Alignment.topCenter,
+                                    title: '提示',
                                     maxWidth: 500);
                               }
                             } on StoragePermissionDeniedException catch (e) {
                               LiggLogger().e(e);
-                              NotificationToast.show('提示', e.message,
-                                  align: Alignment.topCenter, maxWidth: 500);
+                              NotificationToast.show(e.message,
+                                  title: '提示',
+                                  align: Alignment.topCenter,
+                                  maxWidth: 500);
                             } catch (e) {
                               LiggLogger().e(e);
-                              NotificationToast.show('提示', '截图失败: $e',
-                                  align: Alignment.topCenter, maxWidth: 500);
+                              NotificationToast.show('截图失败: $e',
+                                  title: '提示',
+                                  align: Alignment.topCenter,
+                                  maxWidth: 500);
                             }
                           },
                           child: Container(

@@ -1433,6 +1433,9 @@ class AppLocalizationsZh extends AppLocalizations {
   String get syncInProgress => '同步進行中…';
 
   @override
+  String get manualSync => '手動同步';
+
+  @override
   String get syncBangumiCollection => '同步 Bangumi 收藏';
 
   @override
@@ -3073,6 +3076,9 @@ class AppLocalizationsZhHans extends AppLocalizationsZh {
   String get syncInProgress => '同步进行中…';
 
   @override
+  String get manualSync => '手动同步';
+
+  @override
   String get syncBangumiCollection => '同步 Bangumi 收藏';
 
   @override
@@ -4628,6 +4634,9 @@ class AppLocalizationsZhHantHk extends AppLocalizationsZh {
 
   @override
   String get syncInProgress => '同步進行中…';
+
+  @override
+  String get manualSync => '手動同步';
 
   @override
   String get syncBangumiCollection => '同步 Bangumi 收藏';
@@ -6186,6 +6195,9 @@ class AppLocalizationsZhHantTw extends AppLocalizationsZh {
 
   @override
   String get syncInProgress => '同步進行中…';
+
+  @override
+  String get manualSync => '手動同步';
 
   @override
   String get syncBangumiCollection => '同步 Bangumi 收藏';

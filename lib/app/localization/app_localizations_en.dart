@@ -1469,6 +1469,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get syncInProgress => 'Syncing…';
 
   @override
+  String get manualSync => 'Manual sync';
+
+  @override
   String get syncBangumiCollection => 'Sync Bangumi collection';
 
   @override

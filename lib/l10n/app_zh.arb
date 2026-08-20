@@ -400,6 +400,7 @@
   "syncedItems": "已同步 {count} 條",
   "@syncedItems": {"placeholders": {"count": {}}},
   "syncInProgress": "同步進行中…",
+  "manualSync": "手動同步",
   "syncBangumiCollection": "同步 Bangumi 收藏",
   "syncStatusLoadFailed": "取得同步狀態失敗",
   "syncStatusIdle": "未同步",

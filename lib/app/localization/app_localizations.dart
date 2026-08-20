@@ -2773,6 +2773,12 @@ abstract class AppLocalizations {
   /// **'同步进行中…'**
   String get syncInProgress;
 
+  /// No description provided for @manualSync.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'手动同步'**
+  String get manualSync;
+
   /// No description provided for @syncBangumiCollection.
   ///
   /// In zh_Hans, this message translates to:

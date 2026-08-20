@@ -415,6 +415,7 @@
   "syncedItems": "Synced {count} items",
   "@syncedItems": {"placeholders": {"count": {}}},
   "syncInProgress": "Syncing…",
+  "manualSync": "Manual sync",
   "syncBangumiCollection": "Sync Bangumi collection",
   "syncStatusLoadFailed": "Failed to load sync status",
   "syncStatusIdle": "Not synced",

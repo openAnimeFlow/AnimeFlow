@@ -8,6 +8,7 @@ import 'package:anime_flow/core/auth/repository/flow_token_storage.dart';
 import 'package:hive_ce/hive.dart';
 
 class PlayRepository {
+  static const int _playHistoryMaxPages = 20;
   static final playHistoryStorage = Storage.playHistory;
 
   /// 保存播放记录
@@ -93,14 +94,17 @@ class PlayRepository {
     const limit = 50;
     final remoteRecords = <PlayHistoryItem>[];
     var offset = 0;
-    while (true) {
-      final page = await FlowApi.getPlayHistoryService(
+    for (var page = 0; page < _playHistoryMaxPages; page++) {
+      final pageData = await FlowApi.getPlayHistoryService(
         limit: limit,
         offset: offset,
       );
-      remoteRecords.addAll(page);
-      if (page.length < limit) break;
+      remoteRecords.addAll(pageData);
+      if (pageData.length < limit) break;
       offset += limit;
+      if (page == _playHistoryMaxPages - 1) {
+        LiggLogger().w('播放记录拉取达到最大页数限制: $_playHistoryMaxPages');
+      }
     }
 
     var imported = 0;

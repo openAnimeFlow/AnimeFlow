@@ -1,27 +1,22 @@
 import 'package:anime_flow/app/localization/app_localizations.dart';
 import 'package:anime_flow/app/router/app_router.dart';
 import 'package:anime_flow/app/router/model/info_route_extra.dart';
-import 'package:anime_flow/features/play/application/play_history_service.dart';
-import 'package:anime_flow/shared/models/player/play/play_history.dart';
+import 'package:anime_flow/features/play/presentation/providers/play_history_provider.dart';
 import 'package:anime_flow/app/router/model/play_route_extra.dart';
-import 'package:anime_flow/core/logger/logger.dart';
 import 'package:anime_flow/core/utils/system_util.dart';
 import 'package:anime_flow/core/utils/utils.dart';
 import 'package:anime_flow/shared/widgets/animation_network_image.dart';
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:hive_ce_flutter/hive_flutter.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-class PlayRecordView extends StatefulWidget {
+class PlayRecordView extends ConsumerStatefulWidget {
   const PlayRecordView({super.key});
 
   @override
-  State<PlayRecordView> createState() => _PlayRecordViewState();
+  ConsumerState<PlayRecordView> createState() => _PlayRecordViewState();
 }
 
-class _PlayRecordViewState extends State<PlayRecordView> {
-  late final ValueListenable<Box<PlayHistory>> _playHistoryListenable;
-  List<PlayHistory>? playHistoryList;
+class _PlayRecordViewState extends ConsumerState<PlayRecordView> {
   final ScrollController _scrollController = ScrollController();
   bool _canScrollLeft = false;
   bool _canScrollRight = false;
@@ -29,17 +24,11 @@ class _PlayRecordViewState extends State<PlayRecordView> {
   @override
   void initState() {
     super.initState();
-    _playHistoryListenable = PlayHistoryService.listenable();
-    _getPlayHistoryList();
     _scrollController.addListener(_updateScrollButtons);
-    // 监听 Hive Box 变化，写入记录后自动刷新
-    _playHistoryListenable.addListener(_getPlayHistoryList);
-    _autoSyncFromServer();
   }
 
   @override
   void dispose() {
-    _playHistoryListenable.removeListener(_getPlayHistoryList);
     _scrollController.removeListener(_updateScrollButtons);
     _scrollController.dispose();
     super.dispose();
@@ -74,37 +63,16 @@ class _PlayRecordViewState extends State<PlayRecordView> {
     );
   }
 
-  void _getPlayHistoryList() async {
-    try {
-      final playHistoryList = await PlayHistoryService.getAll();
-      playHistoryList.sort((a, b) => b.updateAt.compareTo(a.updateAt));
-      if (mounted) {
-        setState(() {
-          this.playHistoryList = playHistoryList;
-        });
-      }
-    } catch (e) {
-      LiggLogger().e(e);
-    }
-  }
-
-  Future<void> _autoSyncFromServer() async {
-    try {
-      await PlayHistoryService.autoSyncFromServer();
-    } catch (e) {
-      LiggLogger().e('首页自动同步播放记录失败: $e');
-    }
-  }
-
   double windowWidth(BuildContext context) => MediaQuery.of(context).size.width;
 
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
-    if (playHistoryList == null || playHistoryList!.isEmpty) {
+    final playHistoryList = ref.watch(playHistoryControllerProvider).value;
+    if (playHistoryList == null || playHistoryList.isEmpty) {
       return const SliverToBoxAdapter(child: SizedBox.shrink());
     } else {
-      final playHistory = playHistoryList!;
+      final playHistory = playHistoryList;
       final filterHistory = playHistory.take(6).toList();
       return SliverMainAxisGroup(
         slivers: [

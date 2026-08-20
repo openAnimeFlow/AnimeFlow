@@ -857,12 +857,17 @@ class FlowApi {
     if (data is! List) {
       return const [];
     }
-    return data
-        .whereType<Map>()
-        .map((item) => PlayHistoryItem.fromJson(
-              Map<String, dynamic>.from(item),
-            ))
-        .toList(growable: false);
+    final result = <PlayHistoryItem>[];
+    for (final item in data.whereType<Map>()) {
+      try {
+        result.add(PlayHistoryItem.fromJson(
+          Map<String, dynamic>.from(item),
+        ));
+      } catch (e) {
+        LiggLogger().w('解析播放记录失败: $e');
+      }
+    }
+    return result;
   }
 
   /// 保存当前用户的播放记录。

@@ -1,5 +1,4 @@
-import 'package:anime_flow/features/play/application/play_history_service.dart';
-import 'package:anime_flow/shared/models/player/play/play_history.dart';
+import 'package:anime_flow/features/play/presentation/providers/play_history_provider.dart';
 import 'package:anime_flow/app/router/app_router.dart';
 import 'package:anime_flow/app/router/model/info_route_extra.dart';
 import 'package:anime_flow/app/router/model/play_route_extra.dart';
@@ -8,67 +7,20 @@ import 'package:anime_flow/core/logger/logger.dart';
 import 'package:anime_flow/core/utils/utils.dart';
 import 'package:anime_flow/shared/widgets/animation_network_image.dart';
 import 'package:anime_flow/shared/widgets/notification_toast.dart';
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:hive_ce_flutter/hive_flutter.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:anime_flow/app/localization/app_localizations.dart';
 
-class PlayRecordPage extends StatefulWidget {
+class PlayRecordPage extends ConsumerStatefulWidget {
   const PlayRecordPage({super.key});
 
   @override
-  State<PlayRecordPage> createState() => _PlayRecordPageState();
+  ConsumerState<PlayRecordPage> createState() => _PlayRecordPageState();
 }
 
-class _PlayRecordPageState extends State<PlayRecordPage> {
-  late final ValueListenable<Box<PlayHistory>> _playHistoryListenable;
-  List<PlayHistory>? playHistoryList;
-  bool isLoading = false;
+class _PlayRecordPageState extends ConsumerState<PlayRecordPage> {
   bool _isSyncing = false;
   bool _isClearing = false;
-  bool _hasAutoSynced = false;
-
-  @override
-  void initState() {
-    super.initState();
-    _playHistoryListenable = PlayHistoryService.listenable();
-    _playHistoryListenable.addListener(_getPlayHistoryList);
-    _getPlayHistoryList();
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      _autoSyncFromServer();
-    });
-  }
-
-  @override
-  void dispose() {
-    _playHistoryListenable.removeListener(_getPlayHistoryList);
-    super.dispose();
-  }
-
-  void _getPlayHistoryList() async {
-    if (mounted) {
-      setState(() {
-        isLoading = true;
-      });
-    }
-    try {
-      final playHistoryList = await PlayHistoryService.getAll();
-      playHistoryList.sort((a, b) => b.updateAt.compareTo(a.updateAt));
-      if (mounted) {
-        setState(() {
-          this.playHistoryList = playHistoryList;
-          isLoading = false;
-        });
-      }
-    } catch (e) {
-      LiggLogger().e(e);
-      if (mounted) {
-        setState(() {
-          isLoading = false;
-        });
-      }
-    }
-  }
 
   int _calculateCrossAxisCount(BuildContext context) {
     final width = MediaQuery.of(context).size.width;
@@ -84,7 +36,8 @@ class _PlayRecordPageState extends State<PlayRecordPage> {
     });
 
     try {
-      final result = await PlayHistoryService.syncPending();
+      final result =
+          await ref.read(playHistoryControllerProvider.notifier).syncPending();
       if (!mounted) return;
 
       final l10n = AppLocalizations.of(context);
@@ -136,85 +89,6 @@ class _PlayRecordPageState extends State<PlayRecordPage> {
     }
   }
 
-  Future<void> _syncFromServer() async {
-    if (_isSyncing) return;
-    setState(() {
-      _isSyncing = true;
-    });
-
-    try {
-      final result = await PlayHistoryService.syncFromServer();
-      if (!mounted) return;
-
-      final l10n = AppLocalizations.of(context);
-      final message = result.requiresLogin
-          ? l10n.loginToManageAccount
-          : result.changed > 0
-              ? l10n.syncedItems(result.changed)
-              : l10n.syncStatusSuccess;
-      NotificationToast.show(message, title: '提示');
-    } catch (e) {
-      LiggLogger().e('从云端同步播放记录失败: $e');
-      if (mounted) {
-        NotificationToast.show(
-          AppLocalizations.of(context).syncStatusFailed,
-          title: '提示',
-        );
-      }
-    } finally {
-      if (mounted) {
-        setState(() {
-          _isSyncing = false;
-        });
-      }
-    }
-  }
-
-  Future<void> _autoSyncFromServer() async {
-    if (_hasAutoSynced || _isSyncing) return;
-    _hasAutoSynced = true;
-    setState(() {
-      _isSyncing = true;
-    });
-
-    try {
-      await PlayHistoryService.autoSyncFromServer();
-    } catch (e) {
-      LiggLogger().e('自动同步播放记录失败: $e');
-    } finally {
-      if (mounted) {
-        setState(() {
-          _isSyncing = false;
-        });
-      }
-    }
-  }
-
-  Future<void> _confirmAndSyncFromServer() async {
-    if (_isSyncing) return;
-    final l10n = AppLocalizations.of(context);
-    final confirmed = await showDialog<bool>(
-      context: context,
-      builder: (dialogContext) => AlertDialog(
-        title: Text(l10n.confirm),
-        content: const Text('是否将云端播放记录同步到本地？本地未同步记录不会被覆盖。'),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(dialogContext).pop(false),
-            child: Text(l10n.cancel),
-          ),
-          FilledButton(
-            onPressed: () => Navigator.of(dialogContext).pop(true),
-            child: Text(l10n.confirm),
-          ),
-        ],
-      ),
-    );
-    if (confirmed == true && mounted) {
-      await _syncFromServer();
-    }
-  }
-
   Future<void> _clearLocalRecords() async {
     if (_isClearing) return;
     setState(() {
@@ -222,7 +96,7 @@ class _PlayRecordPageState extends State<PlayRecordPage> {
     });
 
     try {
-      await PlayHistoryService.clearLocal();
+      await ref.read(playHistoryControllerProvider.notifier).clearLocal();
       if (mounted) {
         NotificationToast.show(AppLocalizations.of(context).deleteSuccess,
             title: '提示');
@@ -275,18 +149,7 @@ class _PlayRecordPageState extends State<PlayRecordPage> {
         title: Text(l10n.playbackHistory),
         actions: [
           IconButton(
-            tooltip: _isSyncing ? l10n.syncInProgress : l10n.syncStatusIdle,
-            onPressed: _isSyncing ? null : _confirmAndSyncFromServer,
-            icon: _isSyncing
-                ? const SizedBox(
-                    width: 20,
-                    height: 20,
-                    child: CircularProgressIndicator(strokeWidth: 2),
-                  )
-                : const Icon(Icons.cloud_download_outlined),
-          ),
-          IconButton(
-            tooltip: _isSyncing ? l10n.syncInProgress : l10n.syncStatusIdle,
+            tooltip: _isSyncing ? l10n.syncInProgress : l10n.manualSync,
             onPressed: _isSyncing ? null : _confirmAndSyncPendingRecords,
             icon: _isSyncing
                 ? const SizedBox(
@@ -310,13 +173,15 @@ class _PlayRecordPageState extends State<PlayRecordPage> {
         ],
       ),
       body: Center(
-        child: Builder(
-          builder: (context) {
-            if (isLoading) {
+        child: Consumer(
+          builder: (context, ref, child) {
+            final playHistoryAsync = ref.watch(playHistoryControllerProvider);
+            final playHistoryList = playHistoryAsync.value;
+            if (playHistoryAsync.isLoading && playHistoryList == null) {
               return const Center(
                 child: CircularProgressIndicator(),
               );
-            } else if (playHistoryList == null || playHistoryList!.isEmpty) {
+            } else if (playHistoryList == null || playHistoryList.isEmpty) {
               return Center(
                 child: Text(l10n.noData),
               );
@@ -328,7 +193,7 @@ class _PlayRecordPageState extends State<PlayRecordPage> {
                       left: 16,
                       right: 16,
                       bottom: MediaQuery.of(context).padding.bottom),
-                  itemCount: playHistoryList!.length,
+                  itemCount: playHistoryList.length,
                   gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
                     crossAxisCount: _calculateCrossAxisCount(context),
                     crossAxisSpacing: 12,
@@ -336,7 +201,7 @@ class _PlayRecordPageState extends State<PlayRecordPage> {
                     childAspectRatio: 2.5,
                   ),
                   itemBuilder: (context, index) {
-                    final playHistory = playHistoryList![index];
+                    final playHistory = playHistoryList[index];
                     return InkWell(
                       borderRadius: BorderRadius.circular(8),
                       onTap: () => AnimeInfoRoute.fromExtra(InfoRouteExtra(

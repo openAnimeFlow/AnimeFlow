@@ -5,7 +5,7 @@ import 'package:anime_flow/core/network/api/api.dart';
 import 'package:anime_flow/shared/models/download_info.dart';
 import 'package:anime_flow/core/logger/logger.dart';
 import 'package:dio/dio.dart';
-import 'package:open_filex/open_filex.dart';
+import 'package:open_file/open_file.dart';
 import 'package:path_provider/path_provider.dart'
     show getExternalStorageDirectory;
 
@@ -32,7 +32,7 @@ class ApplyUpdatesAndroidController implements ApplyUpdatesController {
         cancelToken: _cancelToken,
       );
 
-      final result = await OpenFilex.open(File(savePath).path);
+      final result = await OpenFile.open(File(savePath).path);
       if (result.type != ResultType.done) {
         LiggLogger().e('无法打开安装程序，请检查是否授予了安装权限');
         return;

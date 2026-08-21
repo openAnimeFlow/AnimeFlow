@@ -19,6 +19,11 @@ int APIENTRY wWinMain(_In_ HINSTANCE instance, _In_opt_ HINSTANCE prev,
 
   flutter::DartProject project(L"data");
 
+  // Windows Impeller snapshot path crashes in GrDirectContext::flush when a
+  // GPU-surface external texture (media_kit video texture) is on a route that
+  // is being pushed/popped. See flutter/flutter#190774. Use Skia until fixed.
+  project.set_impeller_switch(flutter::ImpellerSwitch::Disabled);
+
   std::vector<std::string> command_line_arguments =
       GetCommandLineArguments();
 

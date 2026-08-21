@@ -1,6 +1,8 @@
 import 'package:anime_flow/app/localization/app_localizations.dart';
 import 'package:anime_flow/core/constants/storage_key.dart';
+import 'package:anime_flow/features/play/application/danmaku_chinese_mode.dart';
 import 'package:anime_flow/features/play/presentation/providers/play_provider.dart';
+import 'package:anime_flow/features/play/presentation/providers/danmaku_chinese_mode_provider.dart';
 import 'package:anime_flow/core/storage/storage.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -29,9 +31,13 @@ class _DanmakuSettingState extends ConsumerState<DanmakuSetting> {
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
     final danmakuController = playController.danmakuController;
+    if (danmakuController == null) {
+      return const SizedBox.shrink();
+    }
     final hideScroll = danmakuController.option.hideScroll;
     final hideTop = danmakuController.option.hideTop;
     final hideBottom = danmakuController.option.hideBottom;
+    final danmakuChineseMode = ref.watch(danmakuChineseModeProvider);
 
     final fixedValues = [0.1, 0.25, 0.5, 0.75, 1.0];
     int currentIndex = 0;
@@ -77,6 +83,56 @@ class _DanmakuSettingState extends ConsumerState<DanmakuSetting> {
                         fontSize: 18,
                         fontWeight: FontWeight.bold,
                         color: Theme.of(context).textTheme.titleLarge?.color,
+                      ),
+                    ),
+                  ),
+                  Text(
+                    l10n.danmakuChineseConversion,
+                    style: TextStyle(
+                      fontSize: 18,
+                      fontWeight: FontWeight.bold,
+                      color: Theme.of(context).textTheme.titleLarge?.color,
+                    ),
+                  ),
+                  Padding(
+                    padding: const EdgeInsets.only(top: 12, bottom: 16),
+                    child: SizedBox(
+                      width: double.infinity,
+                      child: SegmentedButton<DanmakuChineseMode>(
+                        segments: [
+                          ButtonSegment(
+                            value: DanmakuChineseMode.none,
+                            label: Text(
+                              l10n.danmakuChineseNone,
+                              maxLines: 2,
+                              textAlign: TextAlign.center,
+                            ),
+                          ),
+                          ButtonSegment(
+                            value: DanmakuChineseMode.s2t,
+                            label: Text(
+                              l10n.danmakuChineseToTraditional,
+                              maxLines: 2,
+                              textAlign: TextAlign.center,
+                            ),
+                          ),
+                          ButtonSegment(
+                            value: DanmakuChineseMode.t2s,
+                            label: Text(
+                              l10n.danmakuChineseToSimplified,
+                              maxLines: 2,
+                              textAlign: TextAlign.center,
+                            ),
+                          ),
+                        ],
+                        selected: {danmakuChineseMode},
+                        showSelectedIcon: false,
+                        expandedInsets: EdgeInsets.zero,
+                        onSelectionChanged: (selection) {
+                          ref
+                              .read(danmakuChineseModeProvider.notifier)
+                              .setMode(selection.first);
+                        },
                       ),
                     ),
                   ),

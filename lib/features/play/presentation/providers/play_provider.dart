@@ -44,7 +44,8 @@ part 'play_provider.g.dart';
 )
 PlaySession playSession(Ref ref) {
   ref.watch(playExtraProvider);
-  final initialDanmakuChineseMode = ref.watch(danmakuChineseModeProvider);
+  // 模式变化由下方 ref.listen 处理，不能 watch 重建整个播放会话。
+  final initialDanmakuChineseMode = ref.read(danmakuChineseModeProvider);
   final controller = PlaySession(
     shadersDirectory: ref.watch(shadersDirectoryProvider).requireValue,
     playStateActions: ref.watch(playStateProvider.notifier),
@@ -421,7 +422,7 @@ class PlaySession {
   int episodeId = 0;
 
   ///弹幕相关
-  late DanmakuController danmakuController;
+  DanmakuController? danmakuController;
   Timer? _saveSettingsTimer;
 
   /// 记录原始倍速
@@ -511,13 +512,13 @@ class PlaySession {
   }
 
   void _syncDanmakuPauseWithPlayback(bool playing) {
-    try {
-      if (playing) {
-        danmakuController.resume();
-      } else {
-        danmakuController.pause();
-      }
-    } catch (_) {}
+    final controller = danmakuController;
+    if (controller == null) return;
+    if (playing) {
+      controller.resume();
+    } else {
+      controller.pause();
+    }
   }
 
   void _autoSwitchToNextEpisode() {
@@ -775,9 +776,7 @@ class PlaySession {
     _playStateActions.setHiddenPlatforms(_loadHiddenPlatformsFromStorage());
 
     // 同步后清空屏幕弹幕，让新设置生效
-    try {
-      danmakuController.clear();
-    } catch (_) {}
+    danmakuController?.clear();
   }
 
   void updateIsWideScreen(bool value) {
@@ -838,11 +837,7 @@ class PlaySession {
   /// 处理全屏变化
   /// 在全屏切换时清空弹幕
   void handleFullscreenChange() {
-    try {
-      danmakuController.clear();
-    } catch (_) {
-      // 如果控制器未初始化，忽略错误
-    }
+    danmakuController?.clear();
   }
 
   void addDanmakuAll(List<Danmaku> danmaku) {
@@ -928,7 +923,7 @@ class PlaySession {
       itemType = DanmakuItemType.scroll;
     }
     try {
-      danmakuController.addDanmaku(
+      danmakuController?.addDanmaku(
         DanmakuContentItem(
           danmaku.message,
           color: danmaku.color,
@@ -946,9 +941,7 @@ class PlaySession {
   }
 
   void _clearDanmakuCanvas() {
-    try {
-      danmakuController.clear();
-    } catch (_) {}
+    danmakuController?.clear();
   }
 
   /// 切换弹幕开关
@@ -957,9 +950,7 @@ class PlaySession {
     final danmakuOn = _playStateActions.value.danmakuOn;
     Storage.setting.put(DanmakuKey.danmakuOn, danmakuOn);
     if (!danmakuOn) {
-      try {
-        danmakuController.clear();
-      } catch (_) {}
+      danmakuController?.clear();
     }
   }
 
@@ -972,9 +963,7 @@ class PlaySession {
   void togglePlatformVisibility(String platform) {
     _playStateActions.toggleHiddenPlatform(platform);
     // 清空屏幕上的弹幕，新弹幕会按照新的隐藏状态过滤
-    try {
-      danmakuController.clear();
-    } catch (_) {}
+    danmakuController?.clear();
   }
 
   /// 检查平台是否被隐藏

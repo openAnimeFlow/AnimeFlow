@@ -165,7 +165,7 @@ jobs:
       - name: Build iOS
         if: matrix.platform == 'ios'
         run: |
-          flutter build ios --release --no-codesign \
+          flutter build ios --release --no-codesign --verbose \
             --dart-define=ANIME_FLOW_APP_ID="$ANIME_FLOW_APP_ID" \
             --dart-define=ANIME_FLOW_SECRET="$ANIME_FLOW_SECRET"
 

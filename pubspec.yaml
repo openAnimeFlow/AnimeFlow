@@ -47,17 +47,17 @@ dependencies:
   media_kit: # media_kit 播放器核心。
     git:
       url: https://github.com/Predidit/media-kit.git
-      ref: 652cfc765a43792be8bec429ea72296d5d96fb7d
+      ref: 994465d9bfca3f39d0b41199d16e7fd93fe97881
       path: ./media_kit
   media_kit_video: # media_kit 的 Flutter 视频渲染组件。
     git:
       url: https://github.com/Predidit/media-kit.git
-      ref: 652cfc765a43792be8bec429ea72296d5d96fb7d
+      ref: 994465d9bfca3f39d0b41199d16e7fd93fe97881
       path: ./media_kit_video
   media_kit_libs_video: # media_kit 通用平台视频运行库。
     git:
       url: https://github.com/Predidit/media-kit.git
-      ref: 652cfc765a43792be8bec429ea72296d5d96fb7d
+      ref: 994465d9bfca3f39d0b41199d16e7fd93fe97881
       path: ./libs/universal/media_kit_libs_video
   canvas_danmaku: ^0.3.1 # 渲染视频弹幕层。
   screen_brightness_platform_interface: ^2.1.0 # 抽象屏幕亮度控制平台接口。
@@ -123,27 +123,27 @@ dependency_overrides:
   media_kit_libs_linux: # 覆盖 Linux 平台 media_kit 运行库来源。
     git:
       url: https://github.com/Predidit/media-kit.git
-      ref: 652cfc765a43792be8bec429ea72296d5d96fb7d
+      ref: 994465d9bfca3f39d0b41199d16e7fd93fe97881
       path: ./libs/linux/media_kit_libs_linux
   media_kit_libs_ios_video: # 覆盖 iOS 平台 media_kit 视频运行库来源。
     git:
       url: https://github.com/Predidit/media-kit.git
-      ref: 652cfc765a43792be8bec429ea72296d5d96fb7d
+      ref: 994465d9bfca3f39d0b41199d16e7fd93fe97881
       path: ./libs/ios/media_kit_libs_ios_video
   media_kit_libs_android_video: # 覆盖 Android 平台 media_kit 视频运行库来源。
     git:
       url: https://github.com/Predidit/media-kit.git
-      ref: 652cfc765a43792be8bec429ea72296d5d96fb7d
+      ref: 994465d9bfca3f39d0b41199d16e7fd93fe97881
       path: ./libs/android/media_kit_libs_android_video
   media_kit_libs_windows_video: # 覆盖 Windows 平台 media_kit 视频运行库来源。
     git:
       url: https://github.com/Predidit/media-kit.git
-      ref: 652cfc765a43792be8bec429ea72296d5d96fb7d
+      ref: 994465d9bfca3f39d0b41199d16e7fd93fe97881
       path: ./libs/windows/media_kit_libs_windows_video
   media_kit_libs_macos_video: # 覆盖 macOS 平台 media_kit 视频运行库来源。
     git:
       url: https://github.com/Predidit/media-kit.git
-      ref: 652cfc765a43792be8bec429ea72296d5d96fb7d
+      ref: 994465d9bfca3f39d0b41199d16e7fd93fe97881
       path: ./libs/macos/media_kit_libs_macos_video
 
 # logo图标生成生成命令:dart run flutter_launcher_icons

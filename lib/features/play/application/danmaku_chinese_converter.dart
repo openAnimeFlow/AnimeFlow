@@ -37,8 +37,14 @@ class DanmakuChineseConverter {
     List<Danmaku> danmakus,
     DanmakuChineseMode mode,
   ) async {
-    if (mode == DanmakuChineseMode.none || danmakus.isEmpty) {
+    if (danmakus.isEmpty) {
       return danmakus;
+    }
+    if (mode == DanmakuChineseMode.none) {
+      return [
+        for (final danmaku in danmakus)
+          danmaku.copyWith(message: danmaku.originalMessage),
+      ];
     }
 
     final dataDir = await _ensureDataDir();
@@ -62,7 +68,10 @@ class DanmakuChineseConverter {
       ];
     } on Object {
       // 转换失败时保留原始文本。
-      return danmakus;
+      return [
+        for (final danmaku in danmakus)
+          danmaku.copyWith(message: danmaku.originalMessage),
+      ];
     }
   }
 

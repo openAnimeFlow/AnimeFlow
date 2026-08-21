@@ -10,7 +10,7 @@ void main() {
 
     tearDown(converter.dispose);
 
-    test('returns same list when mode is none', () async {
+    test('restores original messages when mode is none', () async {
       final danmakus = [
         _danmaku('开放中文转换'),
         _danmaku('鼠标与软件'),
@@ -21,8 +21,10 @@ void main() {
         DanmakuChineseMode.none,
       );
 
-      expect(result, same(danmakus));
+      expect(result, isNot(same(danmakus)));
+      expect(result[0], isNot(same(danmakus[0])));
       expect(result[0].message, '开放中文转换');
+      expect(result[0].originalMessage, '开放中文转换');
     });
 
     test('returns empty list without loading native resources', () async {

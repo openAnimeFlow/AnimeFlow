@@ -25,7 +25,8 @@ class DanmakuKey {
       danmakuUseSystemFont = 'danmaku_use_system_font',
       danmakuPlatformBilibili = 'danmaku_platform_bilibili',
       danmakuPlatformGamer = 'danmaku_platform_gamer',
-      danmakuPlatformDanDanPlay = 'danmaku_platform_dandanplay';
+      danmakuPlatformDanDanPlay = 'danmaku_platform_dandanplay',
+      danmakuChineseMode = 'danmaku_chinese_mode';
 }
 
 class PlaybackKey {

@@ -110,6 +110,7 @@ dependencies:
   connectivity_plus: ^6.0.5 # 检测网络连接类型与状态。
   window_manager: ^0.5.1 # 控制桌面窗口、全屏和窗口事件。
   url_launcher: ^6.3.2 # 打开外部链接、邮件和系统 URL。
+  flutter_opencc_plus: ^0.1.0 # OpenCC 文字转换工具。
 
   # 内容编辑与展示
   flutter_markdown_plus: ^1.0.7 # 渲染 Markdown 富文本内容。

@@ -844,6 +844,18 @@ class AppLocalizationsEn extends AppLocalizations {
   String get danmakuDisplayType => 'Danmaku display type';
 
   @override
+  String get danmakuChineseConversion => 'Chinese conversion';
+
+  @override
+  String get danmakuChineseNone => 'Off';
+
+  @override
+  String get danmakuChineseToTraditional => 'Simplified to traditional';
+
+  @override
+  String get danmakuChineseToSimplified => 'Traditional to simplified';
+
+  @override
   String get scrollingDanmaku => 'Scrolling danmaku';
 
   @override

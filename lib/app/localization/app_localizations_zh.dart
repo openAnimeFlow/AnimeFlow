@@ -835,6 +835,18 @@ class AppLocalizationsZh extends AppLocalizations {
   String get danmakuDisplayType => '弹幕显示类型';
 
   @override
+  String get danmakuChineseConversion => '简繁转换';
+
+  @override
+  String get danmakuChineseNone => '关闭';
+
+  @override
+  String get danmakuChineseToTraditional => '简体转繁体';
+
+  @override
+  String get danmakuChineseToSimplified => '繁体转简体';
+
+  @override
   String get scrollingDanmaku => '滚动弹幕';
 
   @override
@@ -2476,6 +2488,18 @@ class AppLocalizationsZhHans extends AppLocalizationsZh {
 
   @override
   String get danmakuDisplayType => '弹幕显示类型';
+
+  @override
+  String get danmakuChineseConversion => '简繁转换';
+
+  @override
+  String get danmakuChineseNone => '关闭';
+
+  @override
+  String get danmakuChineseToTraditional => '简体转繁体';
+
+  @override
+  String get danmakuChineseToSimplified => '繁体转简体';
 
   @override
   String get scrollingDanmaku => '滚动弹幕';
@@ -4120,6 +4144,18 @@ class AppLocalizationsZhHantHk extends AppLocalizationsZh {
   String get danmakuDisplayType => '彈幕顯示類型';
 
   @override
+  String get danmakuChineseConversion => '簡繁轉換';
+
+  @override
+  String get danmakuChineseNone => '關閉';
+
+  @override
+  String get danmakuChineseToTraditional => '簡體轉繁體';
+
+  @override
+  String get danmakuChineseToSimplified => '繁體轉簡體';
+
+  @override
   String get scrollingDanmaku => '滾動彈幕';
 
   @override
@@ -5679,6 +5715,18 @@ class AppLocalizationsZhHantTw extends AppLocalizationsZh {
 
   @override
   String get danmakuDisplayType => '彈幕顯示類型';
+
+  @override
+  String get danmakuChineseConversion => '簡繁轉換';
+
+  @override
+  String get danmakuChineseNone => '關閉';
+
+  @override
+  String get danmakuChineseToTraditional => '簡體轉繁體';
+
+  @override
+  String get danmakuChineseToSimplified => '繁體轉簡體';
 
   @override
   String get scrollingDanmaku => '滾動彈幕';

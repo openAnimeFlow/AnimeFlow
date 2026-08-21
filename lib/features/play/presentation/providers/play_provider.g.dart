@@ -67,7 +67,7 @@ final class PlaySessionProvider
   }
 }
 
-String _$playSessionHash() => r'd29634eaf228202730edb3ca2076f3959a732ef8';
+String _$playSessionHash() => r'0949d929f173cbd51f2cff448717ca7ebedd0d5b';
 
 @ProviderFor(PlayStateNotifier)
 final playStateProvider = PlayStateNotifierProvider._();
@@ -105,7 +105,7 @@ final class PlayStateNotifierProvider
   }
 }
 
-String _$playStateNotifierHash() => r'3be31cdc9d20018075bc71a3ccba842c51fc7079';
+String _$playStateNotifierHash() => r'477f823834dcd2c3c32bc456e5e944cef3a55b5b';
 
 abstract class _$PlayStateNotifier extends $Notifier<PlayState> {
   PlayState build();

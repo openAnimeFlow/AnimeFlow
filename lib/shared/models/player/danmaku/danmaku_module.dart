@@ -5,6 +5,9 @@ class Danmaku {
   // 弹幕内容
   String message;
 
+  // 原始文本，切换简繁转换模式时作为转换输入
+  final String originalMessage;
+
   // 弹幕时间
   double time;
 
@@ -20,12 +23,15 @@ class Danmaku {
   int? bgmUserId;
 
   Danmaku(
-      {required this.message,
+      {required String message,
       required this.time,
       required this.type,
       required this.color,
       this.bgmUserId,
-      required this.source});
+      required this.source,
+      String? originalMessage})
+      : message = message,
+        originalMessage = originalMessage ?? message;
 
   factory Danmaku.fromJson(Map<String, dynamic> json) {
     String messageValue = json['m'];
@@ -39,10 +45,23 @@ class Danmaku {
     return Danmaku(
         time: timeValue,
         message: messageValue,
+        originalMessage: messageValue,
         type: typeValue,
         color: color,
         source: sourceValue,
         bgmUserId: bgmUserIdValue);
+  }
+
+  Danmaku copyWith({String? message}) {
+    return Danmaku(
+      message: message ?? this.message,
+      originalMessage: originalMessage,
+      time: time,
+      type: type,
+      color: color,
+      bgmUserId: bgmUserId,
+      source: source,
+    );
   }
 
   @override

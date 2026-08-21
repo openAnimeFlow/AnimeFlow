@@ -1,7 +1,10 @@
 import 'package:anime_flow/core/constants/storage_key.dart';
+import 'package:anime_flow/features/play/application/danmaku_chinese_mode.dart';
+import 'package:anime_flow/features/play/presentation/providers/danmaku_chinese_mode_provider.dart';
 import 'package:anime_flow/features/settings/presentation/providers/setting_provider.dart';
 import 'package:anime_flow/core/storage/storage.dart';
 import 'package:anime_flow/core/utils/system_util.dart';
+import 'package:anime_flow/shared/widgets/drop_down_menu.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:hive_ce/hive.dart';
@@ -31,6 +34,7 @@ class _DanmakuSettingPageState extends State<DanmakuSettingPage> {
   late bool _platformBilibili;
   late bool _platformGamer;
   late bool _platformDanDanPlay;
+  bool _isChineseModeMenuOpen = false;
 
   @override
   void initState() {
@@ -156,6 +160,106 @@ class _DanmakuSettingPageState extends State<DanmakuSettingPage> {
                         setting.put(
                             DanmakuKey.danmakuPlatformDanDanPlay, value);
                       });
+                    },
+                  ),
+                  const SizedBox(height: 16),
+
+                  // 简繁转换
+                  Consumer(
+                    builder: (context, ref, _) {
+                      final danmakuChineseMode =
+                          ref.watch(danmakuChineseModeProvider);
+                      final colorScheme = Theme.of(context).colorScheme;
+                      return Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          _buildSectionTitle(l10n.danmakuChineseConversion),
+                          Padding(
+                            padding: const EdgeInsets.symmetric(horizontal: 16),
+                            child: Align(
+                              alignment: Alignment.centerRight,
+                              child: DropDownMenu<DanmakuChineseMode>(
+                                items: DanmakuChineseMode.values,
+                                selectedItem: danmakuChineseMode,
+                                tooltip: l10n.danmakuChineseConversion,
+                                onOpenedChanged: (isOpen) {
+                                  if (_isChineseModeMenuOpen == isOpen) return;
+                                  setState(
+                                    () => _isChineseModeMenuOpen = isOpen,
+                                  );
+                                },
+                                buttonBuilder: (context, _) {
+                                  return Container(
+                                    padding: const EdgeInsets.symmetric(
+                                      horizontal: 12,
+                                      vertical: 4,
+                                    ),
+                                    decoration: BoxDecoration(
+                                      border: Border.all(
+                                        color: colorScheme.outlineVariant,
+                                      ),
+                                      borderRadius: BorderRadius.circular(8),
+                                    ),
+                                    child: Row(
+                                      mainAxisSize: MainAxisSize.min,
+                                      children: [
+                                        Text(
+                                          _danmakuChineseModeLabel(
+                                            danmakuChineseMode,
+                                            l10n,
+                                          ),
+                                          style: const TextStyle(
+                                            fontSize: 14,
+                                          ),
+                                        ),
+                                        const SizedBox(width: 4),
+                                        AnimatedRotation(
+                                          turns:
+                                              _isChineseModeMenuOpen ? 0.5 : 0,
+                                          duration: const Duration(
+                                            milliseconds: 180,
+                                          ),
+                                          curve: Curves.easeOutCubic,
+                                          child: Icon(
+                                            Icons.arrow_drop_down,
+                                            color: colorScheme.primary,
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  );
+                                },
+                                itemBuilder: (context, mode, isSelected) {
+                                  return Row(
+                                    children: [
+                                      SizedBox(
+                                        width: 24,
+                                        child: isSelected
+                                            ? Icon(
+                                                Icons.check,
+                                                size: 18,
+                                                color: colorScheme.primary,
+                                              )
+                                            : null,
+                                      ),
+                                      Text(
+                                        _danmakuChineseModeLabel(mode, l10n),
+                                      ),
+                                    ],
+                                  );
+                                },
+                                onSelected: (mode) {
+                                  ref
+                                      .read(
+                                        danmakuChineseModeProvider.notifier,
+                                      )
+                                      .setMode(mode);
+                                },
+                              ),
+                            ),
+                          ),
+                        ],
+                      );
                     },
                   ),
                   const SizedBox(height: 16),
@@ -389,6 +493,17 @@ class _DanmakuSettingPageState extends State<DanmakuSettingPage> {
         ),
       ),
     );
+  }
+
+  String _danmakuChineseModeLabel(
+    DanmakuChineseMode mode,
+    AppLocalizations l10n,
+  ) {
+    return switch (mode) {
+      DanmakuChineseMode.none => l10n.danmakuChineseNone,
+      DanmakuChineseMode.s2t => l10n.danmakuChineseToTraditional,
+      DanmakuChineseMode.t2s => l10n.danmakuChineseToSimplified,
+    };
   }
 
   Widget _buildSectionTitle(String title) {

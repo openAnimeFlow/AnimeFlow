@@ -84,6 +84,7 @@ class _DanmakuViewState extends ConsumerState<DanmakuView>
           playState.danmakuOn) {
         final currentSecond = currentPosition.inSeconds;
         final danmakus = playState.danDanmakus[currentSecond];
+        final danmakuEpoch = playState.danmakuEpoch;
 
         if (danmakus != null && danmakus.isNotEmpty) {
           // 按索引延迟添加弹幕
@@ -94,6 +95,7 @@ class _DanmakuViewState extends ConsumerState<DanmakuView>
               ),
               () {
                 if (!mounted ||
+                    danmakuEpoch != ref.read(playStateProvider).danmakuEpoch ||
                     !ref.read(playStateProvider).playing ||
                     !ref.read(playStateProvider).danmakuOn) {
                   return;

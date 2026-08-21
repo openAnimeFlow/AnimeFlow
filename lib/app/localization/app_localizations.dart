@@ -1651,6 +1651,30 @@ abstract class AppLocalizations {
   /// **'弹幕显示类型'**
   String get danmakuDisplayType;
 
+  /// No description provided for @danmakuChineseConversion.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'简繁转换'**
+  String get danmakuChineseConversion;
+
+  /// No description provided for @danmakuChineseNone.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'关闭'**
+  String get danmakuChineseNone;
+
+  /// No description provided for @danmakuChineseToTraditional.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'简体转繁体'**
+  String get danmakuChineseToTraditional;
+
+  /// No description provided for @danmakuChineseToSimplified.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'繁体转简体'**
+  String get danmakuChineseToSimplified;
+
   /// No description provided for @scrollingDanmaku.
   ///
   /// In zh_Hans, this message translates to:

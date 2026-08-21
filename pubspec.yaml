@@ -59,7 +59,10 @@ dependencies:
       url: https://github.com/Predidit/media-kit.git
       ref: 994465d9bfca3f39d0b41199d16e7fd93fe97881
       path: ./libs/universal/media_kit_libs_video
-  canvas_danmaku: ^0.3.1 # 渲染视频弹幕层。
+  canvas_danmaku: # 渲染视频弹幕层。
+    git:
+      url: https://github.com/LiggMax/canvas_danmaku.git
+      ref: 89cb4fc336b2d7aac550094a010ea892a2ba1553
   screen_brightness_platform_interface: ^2.1.0 # 抽象屏幕亮度控制平台接口。
   screen_brightness_android: ^2.1.3 # Android 端屏幕亮度控制实现。
   screen_brightness_ios: ^2.1.2 # iOS 端屏幕亮度控制实现。

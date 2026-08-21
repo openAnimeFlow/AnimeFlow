@@ -188,10 +188,11 @@ packages:
   canvas_danmaku:
     dependency: "direct main"
     description:
-      name: canvas_danmaku
-      sha256: "59018315feefe497dd6b5a5c8059a1c40a4849b985f273704acc2faf20cd0d98"
-      url: "https://pub.dev"
-    source: hosted
+      path: "."
+      ref: "89cb4fc336b2d7aac550094a010ea892a2ba1553"
+      resolved-ref: "89cb4fc336b2d7aac550094a010ea892a2ba1553"
+      url: "https://github.com/LiggMax/canvas_danmaku.git"
+    source: git
     version: "0.3.1"
   change_app_package_name:
     dependency: "direct dev"

@@ -188,12 +188,11 @@ packages:
   canvas_danmaku:
     dependency: "direct main"
     description:
-      path: "."
-      ref: "89cb4fc336b2d7aac550094a010ea892a2ba1553"
-      resolved-ref: "89cb4fc336b2d7aac550094a010ea892a2ba1553"
-      url: "https://github.com/LiggMax/canvas_danmaku.git"
-    source: git
-    version: "0.3.1"
+      name: canvas_danmaku
+      sha256: "36a233f6ab5a6abce4ddd01b7db551307e25f2370ec88b35fb6f477927402a18"
+      url: "https://pub.dev"
+    source: hosted
+    version: "0.3.2"
   change_app_package_name:
     dependency: "direct dev"
     description:
@@ -570,10 +569,10 @@ packages:
     dependency: "direct main"
     description:
       name: flutter_opencc_plus
-      sha256: "5cbbaebdfbba4373e4b1b3636401a13658127ceadb7d48019aecae4ebd7e6348"
+      sha256: a4c4ea9f27598447971f06ad28ed578451ed13595050f004804c05a9f55db8c2
       url: "https://pub.dev"
     source: hosted
-    version: "0.1.0"
+    version: "0.1.1"
   flutter_plugin_android_lifecycle:
     dependency: transitive
     description:

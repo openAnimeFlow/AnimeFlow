@@ -9,158 +9,60 @@ on:
       tag:
         description: 'Tag to release'
         required: true
+      platform:
+        type: choice
+        description: "选择构建的平台"
+        options:
+          - android
+          - ios
+          - macos
+          - windows
+          - linux
+          - all
+        default: all
 
 env:
   ANIME_FLOW_APP_ID: ${{ secrets.ANIME_FLOW_APP_ID }}
   ANIME_FLOW_SECRET: ${{ secrets.ANIME_FLOW_SECRET }}
 
 jobs:
-  flutter-build-ios:
-    runs-on: macos-14
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v5
-
-      - name: Extract version
-        run: |
-          VERSION=$(grep '^version:' pubspec.yaml | sed 's/version: //')
-          echo "VERSION=${VERSION}" >> $GITHUB_ENV
-
-      - name: Install Flutter
-        uses: subosito/flutter-action@v2
-        with:
-          flutter-version-file: pubspec.yaml
-          channel: stable
-
-      - name: Install dependencies
-        run: flutter pub get
-
-      - name: Validate API signature env
-        run: |
-          if [ -z "$ANIME_FLOW_APP_ID" ] || [ -z "$ANIME_FLOW_SECRET" ]; then
-            echo "::error::ANIME_FLOW_APP_ID and ANIME_FLOW_SECRET must be set (repository secrets)."
-            exit 1
-          fi
-
-      # 输出可用模拟器和 SDK
-      - name: Show available simulators
-        run: |
-          xcrun simctl list devices
-          xcodebuild -showsdks
-
-      - name: Build iOS
-        run: |
-          flutter build ios --release --no-codesign \
-            --dart-define=ANIME_FLOW_APP_ID="$ANIME_FLOW_APP_ID" \
-            --dart-define=ANIME_FLOW_SECRET="$ANIME_FLOW_SECRET"
-
-      - name: Create IPA
-        run: |
-          mkdir Payload
-          cp -R build/ios/iphoneos/Runner.app Payload/Runner.app
-          zip -q -r "AnimeFlow-ios-${{ env.VERSION }}.ipa" Payload
-
-      - name: Upload IPA artifact
-        uses: actions/upload-artifact@v6
-        with:
-          name: ios
-          path: AnimeFlow-ios-${{ env.VERSION }}.ipa
-
-  flutter-build-android:
+  resolve-platforms:
     runs-on: ubuntu-latest
+    outputs:
+      matrix: ${{ steps.resolve.outputs.matrix }}
     steps:
-      - name: Checkout repository
-        uses: actions/checkout@v5
-
-      - name: Extract version
+      - name: Resolve build matrix
+        id: resolve
+        shell: bash
         run: |
-          VERSION=$(grep '^version:' pubspec.yaml | sed 's/version: //')
-          echo "VERSION=${VERSION}" >> $GITHUB_ENV
+          PLATFORM="${{ github.event.inputs.platform }}"
+          ALL='[{"platform":"ios","os":"macos-15"},{"platform":"android","os":"ubuntu-latest"},{"platform":"windows","os":"windows-2025"},{"platform":"linux","os":"ubuntu-latest"},{"platform":"macos","os":"macos-14"}]'
+          case "$PLATFORM" in
+            ""|all) MATRIX="$ALL" ;;
+            ios) MATRIX='[{"platform":"ios","os":"macos-15"}]' ;;
+            android) MATRIX='[{"platform":"android","os":"ubuntu-latest"}]' ;;
+            windows) MATRIX='[{"platform":"windows","os":"windows-2025"}]' ;;
+            linux) MATRIX='[{"platform":"linux","os":"ubuntu-latest"}]' ;;
+            macos) MATRIX='[{"platform":"macos","os":"macos-14"}]' ;;
+            *) echo "::error::Unsupported platform: $PLATFORM" >&2; exit 1 ;;
+          esac
+          echo "matrix=$MATRIX" >> "$GITHUB_OUTPUT"
 
-      - name: Set up JDK 17
-        uses: actions/setup-java@v5
-        with:
-          java-version: '17'
-          distribution: 'temurin'
+  build:
+    name: Build ${{ matrix.platform }}
+    needs: resolve-platforms
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 120
+    strategy:
+      fail-fast: false
+      matrix:
+        include: ${{ fromJSON(needs.resolve-platforms.outputs.matrix) }}
 
-      - name: Setup Flutter
-        uses: subosito/flutter-action@v2.16.0
-        with:
-          channel: stable
-          flutter-version-file: pubspec.yaml
-
-      - name: Install dependencies
-        run: flutter pub get
-
-      - name: Validate API signature env
-        run: |
-          if [ -z "$ANIME_FLOW_APP_ID" ] || [ -z "$ANIME_FLOW_SECRET" ]; then
-            echo "::error::ANIME_FLOW_APP_ID and ANIME_FLOW_SECRET must be set (repository secrets)."
-            exit 1
-          fi
-
-      - name: Setup Android signing
-        run: |
-          # Read base64 encoded key file from secrets and decode
-          if [ -n "${{ secrets.ANDROID_KEYSTORE_BASE64 }}" ]; then
-            echo "${{ secrets.ANDROID_KEYSTORE_BASE64 }}" | base64 -d > android/app/key.jks
-            echo "Key store file created from base64"
-          fi
-
-          # create key.properties flie
-          mkdir -p android
-          cat > android/key.properties << EOF
-          storePassword=${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
-          keyPassword=${{ secrets.ANDROID_KEY_PASSWORD }}
-          keyAlias=${{ secrets.ANDROID_KEY_ALIAS || 'key' }}
-          storeFile=key.jks
-          EOF
-
-          # verifyFileExists
-          if [ -f android/app/key.jks ]; then
-            echo "✓ Key store file exists"
-            ls -lh android/app/key.jks
-          else
-            echo "⚠ Warning: Key store file not found, build will use debug signing"
-          fi
-
-      - name: Build apk
-        run: |
-          flutter --version
-          flutter build apk --split-per-abi --release \
-            --dart-define=ANIME_FLOW_APP_ID="$ANIME_FLOW_APP_ID" \
-            --dart-define=ANIME_FLOW_SECRET="$ANIME_FLOW_SECRET"
-          echo "Android build completed"
-
-      - name: Rename APK files
-        run: |
-          cd build/app/outputs/flutter-apk
-          if [ -f app-armeabi-v7a-release.apk ]; then
-            mv app-armeabi-v7a-release.apk "AnimeFlow-android-v7a-${{ env.VERSION }}.apk"
-          fi
-          if [ -f app-arm64-v8a-release.apk ]; then
-            mv app-arm64-v8a-release.apk "AnimeFlow-android-arm64-${{ env.VERSION }}.apk"
-          fi
-          if [ -f app-x86_64-release.apk ]; then
-            mv app-x86_64-release.apk "AnimeFlow-android-x86_64-${{ env.VERSION }}.apk"
-          fi
-          echo "Renamed APK files:"
-          ls -lh AnimeFlow-android-*.apk || true
-
-      - name: Archive artifacts
-        uses: actions/upload-artifact@v6
-        with:
-          name: android
-          path: build/app/outputs/flutter-apk/AnimeFlow-android-*.apk
-          if-no-files-found: ignore
-
-  flutter-build-windows:
-    runs-on: windows-2025
     steps:
-      - name: Checkout repository
-        uses: actions/checkout@v5
+      - uses: actions/checkout@v5
 
-      - name: Extract version
+      - name: Extract version (Windows)
+        if: matrix.platform == 'windows'
         shell: pwsh
         run: |
           $version = (Select-String -Path pubspec.yaml -Pattern '^version:' | ForEach-Object { $_.Line -replace 'version: ', '' }).Trim()
@@ -168,7 +70,28 @@ jobs:
           echo "VERSION=$version" >> $env:GITHUB_ENV
           echo "INSTALLER_VERSION=$semver" >> $env:GITHUB_ENV
 
-      - name: Setup Flutter
+      - name: Extract version
+        if: matrix.platform != 'windows'
+        shell: bash
+        run: |
+          VERSION=$(grep '^version:' pubspec.yaml | sed 's/version: //')
+          echo "VERSION=${VERSION}" >> $GITHUB_ENV
+          echo "INSTALLER_VERSION=${VERSION%%+*}" >> $GITHUB_ENV
+
+      - name: Set up Xcode
+        if: matrix.platform == 'ios'
+        uses: maxim-lobanov/setup-xcode@v1
+        with:
+          xcode-version: 16.4
+
+      - name: Set up JDK 17
+        if: matrix.platform == 'android'
+        uses: actions/setup-java@v5
+        with:
+          java-version: '17'
+          distribution: 'temurin'
+
+      - name: Set up Flutter
         uses: subosito/flutter-action@v2.23.0
         with:
           channel: stable
@@ -178,100 +101,26 @@ jobs:
         run: flutter pub get
 
       - name: Validate API signature env
+        if: matrix.platform != 'windows'
+        shell: bash
+        run: |
+          if [ -z "$ANIME_FLOW_APP_ID" ] || [ -z "$ANIME_FLOW_SECRET" ]; then
+            echo "::error::ANIME_FLOW_APP_ID and ANIME_FLOW_SECRET must be set (repository secrets)."
+            exit 1
+          fi
+
+      - name: Validate API signature env (Windows)
+        if: matrix.platform == 'windows'
         shell: pwsh
         run: |
-          if ([string]::IsNullOrWhiteSpace($env:ANIME_FLOW_APP_ID) -or
-              [string]::IsNullOrWhiteSpace($env:ANIME_FLOW_SECRET)) {
+          if ([string]::IsNullOrWhiteSpace($env:ANIME_FLOW_APP_ID) -or [string]::IsNullOrWhiteSpace($env:ANIME_FLOW_SECRET)) {
             Write-Error 'ANIME_FLOW_APP_ID and ANIME_FLOW_SECRET must be set (repository secrets).'
             exit 1
           }
 
-      - name: Build Windows
-        run: |
-          flutter build windows `
-            --dart-define=ANIME_FLOW_APP_ID=$env:ANIME_FLOW_APP_ID `
-            --dart-define=ANIME_FLOW_SECRET=$env:ANIME_FLOW_SECRET
-          echo "Windows build completed"
-        shell: pwsh
-
-      - name: Create ZIP archive
-        shell: pwsh
-        run: |
-          Compress-Archive -Path "build/windows/x64/runner/Release/*" -DestinationPath "AnimeFlow-windows-${{ env.VERSION }}.zip" -Force
-          echo "Created AnimeFlow-windows-${{ env.VERSION }}.zip"
-
-      - name: Install Inno Setup 6
-        shell: pwsh
-        run: |
-          $ErrorActionPreference = 'Stop'
-          function Find-Iscc {
-            $candidates = @(
-              (Join-Path ${env:ProgramFiles(x86)} 'Inno Setup 6\ISCC.exe'),
-              (Join-Path $env:ProgramFiles 'Inno Setup 6\ISCC.exe')
-            )
-            foreach ($candidate in $candidates) {
-              if (Test-Path $candidate) { return $candidate }
-            }
-            return $null
-          }
-
-          $iscc = Find-Iscc
-          if (-not $iscc) {
-            choco install innosetup --yes --no-progress
-            $iscc = Find-Iscc
-          }
-          if (-not (Test-Path $iscc)) { throw "ISCC.exe not found after Inno Setup install" }
-          echo "ISCC_PATH=$iscc" >> $env:GITHUB_ENV
-          $innoDir = Split-Path $iscc -Parent
-          $langDir = Join-Path $innoDir 'Languages'
-          if (-not (Test-Path $langDir)) { throw "Inno Setup Languages folder not found: $langDir" }
-          $srcIsl = Join-Path $PWD 'assets\inno-setup\Chinese.isl'
-          if (-not (Test-Path $srcIsl)) { throw "Missing repo file: $srcIsl" }
-          Copy-Item -LiteralPath $srcIsl -Destination (Join-Path $langDir 'Chinese.isl') -Force
-
-      - name: Patch installer.iss version and compile setup
-        shell: pwsh
-        run: |
-          $ErrorActionPreference = 'Stop'
-          $v = $env:INSTALLER_VERSION
-          if ([string]::IsNullOrWhiteSpace($v)) { throw 'INSTALLER_VERSION is empty; check pubspec version line.' }
-          $path = Join-Path $PWD 'installer.iss'
-          $c = [System.IO.File]::ReadAllText($path, [System.Text.UTF8Encoding]::new($false))
-          $defLine = [regex]::Match($c, '(?m)^\s*#define\s+MyAppVersion\s+"[^"]*"')
-          if (-not $defLine.Success) {
-            throw 'installer.iss: no line matching #define MyAppVersion "..."; cannot patch.'
-          }
-          $c = $c -replace '(?m)^\s*#define\s+MyAppVersion\s+"[^"]*"', "#define MyAppVersion    `"$v`""
-          $mavLine = ($c -split "`r?`n" | Where-Object { $_ -match '^\s*#define\s+MyAppVersion\s+' } | Select-Object -First 1)
-          if ($mavLine -notmatch [regex]::Escape($v)) {
-            throw "installer.iss: MyAppVersion not updated to $v. Line: $mavLine"
-          }
-          [System.IO.File]::WriteAllText($path, $c, [System.Text.UTF8Encoding]::new($false))
-          Start-Process -FilePath $env:ISCC_PATH -ArgumentList "`"$path`"" -Wait -NoNewWindow
-          $exe = "AnimeFlow-windows-setup-$v.exe"
-          if (-not (Test-Path $exe)) { throw "Expected installer not found: $exe" }
-
-      - name: Archive artifacts
-        uses: actions/upload-artifact@v6
-        with:
-          name: windows
-          path: |
-            AnimeFlow-windows-${{ env.VERSION }}.zip
-            AnimeFlow-windows-setup-${{ env.INSTALLER_VERSION }}.exe
-          if-no-files-found: ignore
-
-  flutter-build-linux:
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v5
-
-      - name: Extract version
-        run: |
-          VERSION=$(grep '^version:' pubspec.yaml | sed 's/version: //')
-          echo "VERSION=${VERSION}" >> $GITHUB_ENV
-
       - name: Install Linux build dependencies
+        if: matrix.platform == 'linux'
+        shell: bash
         run: |
           sudo apt-get update
           sudo apt-get install -y clang cmake libgtk-3-dev ninja-build libayatana-appindicator3-dev unzip webkit2gtk-4.1 libasound2-dev libsecret-1-dev libmpv-dev
@@ -288,40 +137,180 @@ jobs:
               linux-libc-dev nasm ninja-build pkg-config python3 python3-docutils wayland-protocols \
               x11proto-core-dev zlib1g-dev libfdk-aac-dev libtheora-dev libwebp-dev \
               unixodbc-dev libpq-dev libxxhash-dev libaom-dev
+
+      - name: Setup Android signing
+        if: matrix.platform == 'android'
         shell: bash
-
-      - name: Setup Flutter
-        uses: subosito/flutter-action@v2.16.0
-        with:
-          channel: stable
-          flutter-version-file: pubspec.yaml
-
-      - name: Install dependencies
-        run: flutter pub get
-
-      - name: Validate API signature env
         run: |
-          if [ -z "$ANIME_FLOW_APP_ID" ] || [ -z "$ANIME_FLOW_SECRET" ]; then
-            echo "::error::ANIME_FLOW_APP_ID and ANIME_FLOW_SECRET must be set (repository secrets)."
-            exit 1
+          if [ -n "${{ secrets.ANDROID_KEYSTORE_BASE64 }}" ]; then
+            echo "${{ secrets.ANDROID_KEYSTORE_BASE64 }}" | base64 -d > android/app/key.jks
+          fi
+          mkdir -p android
+          cat > android/key.properties << EOF
+          storePassword=${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
+          keyPassword=${{ secrets.ANDROID_KEY_PASSWORD }}
+          keyAlias=${{ secrets.ANDROID_KEY_ALIAS || 'key' }}
+          storeFile=key.jks
+          EOF
+          if [ -f android/app/key.jks ]; then
+            echo "Key store file exists"
+            ls -lh android/app/key.jks
+          else
+            echo "Warning: Key store file not found, build will use debug signing"
           fi
 
+      - name: Show available simulators
+        if: matrix.platform == 'ios'
+        run: |
+          xcrun simctl list devices
+          xcodebuild -showsdks
+
+      - name: Build iOS
+        if: matrix.platform == 'ios'
+        run: |
+          flutter build ios --release --no-codesign \
+            --dart-define=ANIME_FLOW_APP_ID="$ANIME_FLOW_APP_ID" \
+            --dart-define=ANIME_FLOW_SECRET="$ANIME_FLOW_SECRET"
+
+      - name: Create IPA
+        if: matrix.platform == 'ios'
+        run: |
+          mkdir Payload
+          cp -R build/ios/iphoneos/Runner.app Payload/Runner.app
+          zip -q -r "AnimeFlow-ios-${{ env.VERSION }}.ipa" Payload
+
+      - name: Upload IPA artifact
+        if: matrix.platform == 'ios'
+        uses: actions/upload-artifact@v6
+        with:
+          name: ios
+          path: AnimeFlow-ios-${{ env.VERSION }}.ipa
+
+      - name: Build APK
+        if: matrix.platform == 'android'
+        shell: bash
+        run: |
+          flutter --version
+          flutter build apk --split-per-abi --release \
+            --dart-define=ANIME_FLOW_APP_ID="$ANIME_FLOW_APP_ID" \
+            --dart-define=ANIME_FLOW_SECRET="$ANIME_FLOW_SECRET"
+          echo "Android build completed"
+
+      - name: Rename APK files
+        if: matrix.platform == 'android'
+        shell: bash
+        run: |
+          cd build/app/outputs/flutter-apk
+          if [ -f app-armeabi-v7a-release.apk ]; then
+            mv app-armeabi-v7a-release.apk "AnimeFlow-android-v7a-${{ env.VERSION }}.apk"
+          fi
+          if [ -f app-arm64-v8a-release.apk ]; then
+            mv app-arm64-v8a-release.apk "AnimeFlow-android-arm64-${{ env.VERSION }}.apk"
+          fi
+          if [ -f app-x86_64-release.apk ]; then
+            mv app-x86_64-release.apk "AnimeFlow-android-x86_64-${{ env.VERSION }}.apk"
+          fi
+          ls -lh AnimeFlow-android-*.apk || true
+
+      - name: Upload Android artifacts
+        if: matrix.platform == 'android'
+        uses: actions/upload-artifact@v6
+        with:
+          name: android
+          path: build/app/outputs/flutter-apk/AnimeFlow-android-*.apk
+          if-no-files-found: ignore
+
+      - name: Build Windows
+        if: matrix.platform == 'windows'
+        shell: pwsh
+        run: |
+          flutter build windows `
+            --dart-define=ANIME_FLOW_APP_ID=$env:ANIME_FLOW_APP_ID `
+            --dart-define=ANIME_FLOW_SECRET=$env:ANIME_FLOW_SECRET
+          echo "Windows build completed"
+
+      - name: Create Windows ZIP
+        if: matrix.platform == 'windows'
+        shell: pwsh
+        run: |
+          Compress-Archive -Path "build/windows/x64/runner/Release/*" -DestinationPath "AnimeFlow-windows-${{ env.VERSION }}.zip" -Force
+          echo "Created AnimeFlow-windows-${{ env.VERSION }}.zip"
+
+      - name: Install Inno Setup 6
+        if: matrix.platform == 'windows'
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = 'Stop'
+          function Find-Iscc {
+            $candidates = @(
+              (Join-Path ${env:ProgramFiles(x86)} 'Inno Setup 6\ISCC.exe'),
+              (Join-Path $env:ProgramFiles 'Inno Setup 6\ISCC.exe')
+            )
+            foreach ($candidate in $candidates) {
+              if (Test-Path $candidate) { return $candidate }
+            }
+            return $null
+          }
+          $iscc = Find-Iscc
+          if (-not $iscc) {
+            choco install innosetup --yes --no-progress
+            $iscc = Find-Iscc
+          }
+          if (-not (Test-Path $iscc)) { throw "ISCC.exe not found after Inno Setup install" }
+          echo "ISCC_PATH=$iscc" >> $env:GITHUB_ENV
+          $innoDir = Split-Path $iscc -Parent
+          $langDir = Join-Path $innoDir 'Languages'
+          if (-not (Test-Path $langDir)) { throw "Inno Setup Languages folder not found: $langDir" }
+          $srcIsl = Join-Path $PWD 'assets\inno-setup\Chinese.isl'
+          if (-not (Test-Path $srcIsl)) { throw "Missing repo file: $srcIsl" }
+          Copy-Item -LiteralPath $srcIsl -Destination (Join-Path $langDir 'Chinese.isl') -Force
+
+      - name: Patch installer.iss version and compile setup
+        if: matrix.platform == 'windows'
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = 'Stop'
+          $v = $env:INSTALLER_VERSION
+          if ([string]::IsNullOrWhiteSpace($v)) { throw 'INSTALLER_VERSION is empty; check pubspec version line.' }
+          $path = Join-Path $PWD 'installer.iss'
+          $c = [System.IO.File]::ReadAllText($path, [System.Text.UTF8Encoding]::new($false))
+          $defLine = [regex]::Match($c, '(?m)^\s*#define\s+MyAppVersion\s+"[^"]*"')
+          if (-not $defLine.Success) { throw 'installer.iss: no line matching #define MyAppVersion "..."; cannot patch.' }
+          $c = $c -replace '(?m)^\s*#define\s+MyAppVersion\s+"[^"]*"', "#define MyAppVersion    `"$v`""
+          $mavLine = ($c -split "`r?`n" | Where-Object { $_ -match '^\s*#define\s+MyAppVersion\s+' } | Select-Object -First 1)
+          if ($mavLine -notmatch [regex]::Escape($v)) { throw "installer.iss: MyAppVersion not updated to $v." }
+          [System.IO.File]::WriteAllText($path, $c, [System.Text.UTF8Encoding]::new($false))
+          Start-Process -FilePath $env:ISCC_PATH -ArgumentList "`"$path`"" -Wait -NoNewWindow
+          $exe = "AnimeFlow-windows-setup-$v.exe"
+          if (-not (Test-Path $exe)) { throw "Expected installer not found: $exe" }
+
+      - name: Upload Windows artifacts
+        if: matrix.platform == 'windows'
+        uses: actions/upload-artifact@v6
+        with:
+          name: windows
+          path: |
+            AnimeFlow-windows-${{ env.VERSION }}.zip
+            AnimeFlow-windows-setup-${{ env.INSTALLER_VERSION }}.exe
+          if-no-files-found: ignore
+
       - name: Build Linux
+        if: matrix.platform == 'linux'
         run: |
           flutter build linux \
             --dart-define=ANIME_FLOW_APP_ID="$ANIME_FLOW_APP_ID" \
             --dart-define=ANIME_FLOW_SECRET="$ANIME_FLOW_SECRET"
           echo "Linux build completed"
 
-      - name: Create TAR.GZ archive
+      - name: Create Linux TAR.GZ
+        if: matrix.platform == 'linux'
         run: |
           cd build/linux/x64/release
-          tar -czf ../../../../AnimeFlow-linux-${{ env.VERSION }}.tar.gz -C bundle .
-          echo "Created AnimeFlow-linux-${{ env.VERSION }}.tar.gz"
+          tar -czf ../../../../AnimeFlow-${{ env.VERSION }}.tar.gz -C bundle .
 
       - name: Create DEB package
+        if: matrix.platform == 'linux'
         run: |
-          # 创建 Debian 包目录结构
           PACKAGE_NAME="animeflow"
           PACKAGE_DIR="animeflow_${{ env.VERSION }}_amd64"
           APP_DIR="${PACKAGE_DIR}/usr/lib/animeflow"
@@ -330,19 +319,13 @@ jobs:
           mkdir -p ${PACKAGE_DIR}/usr/bin
           mkdir -p ${PACKAGE_DIR}/usr/share/applications
           mkdir -p ${PACKAGE_DIR}/usr/share/pixmaps
-          
-          # 复制应用文件到 /usr/lib/animeflow
           cp -r build/linux/x64/release/bundle/* ${APP_DIR}/
-          
-          # 创建启动脚本
           cat > ${PACKAGE_DIR}/usr/bin/animeflow << 'EOF'
           #!/bin/bash
           cd /usr/lib/animeflow
           ./anime_flow "$@"
           EOF
           chmod +x ${PACKAGE_DIR}/usr/bin/animeflow
-          
-          # 创建 control 文件
           cat > ${PACKAGE_DIR}/DEBIAN/control << EOF
           Package: ${PACKAGE_NAME}
           Version: ${{ env.VERSION }}
@@ -353,8 +336,6 @@ jobs:
           Description: Anime video player
            AnimeFlow is an anime video player application.
           EOF
-          
-          # 创建 desktop 文件
           cat > ${PACKAGE_DIR}/usr/share/applications/animeflow.desktop << EOF
           [Desktop Entry]
           Version=1.0
@@ -366,16 +347,13 @@ jobs:
           Terminal=false
           Categories=Video;Player;
           EOF
-          
           if [ -f build/linux/x64/release/bundle/data/flutter_assets/assets/logo/Logo.png ]; then
             cp build/linux/x64/release/bundle/data/flutter_assets/assets/logo/Logo.png ${PACKAGE_DIR}/usr/share/pixmaps/animeflow.png
           fi
-          
-          # 构建 deb 包
           dpkg-deb --build ${PACKAGE_DIR} AnimeFlow-linux-${{ env.VERSION }}.deb
-          echo "Created AnimeFlow-linux-${{ env.VERSION }}.deb"
 
-      - name: Archive artifacts
+      - name: Upload Linux artifacts
+        if: matrix.platform == 'linux'
         uses: actions/upload-artifact@v6
         with:
           name: linux
@@ -384,34 +362,8 @@ jobs:
             AnimeFlow-linux-${{ env.VERSION }}.deb
           if-no-files-found: ignore
 
-  flutter-build-macos:
-    runs-on: macos-14
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v5
-
-      - name: Extract version
-        run: |
-          VERSION=$(grep '^version:' pubspec.yaml | sed 's/version: //')
-          echo "VERSION=${VERSION}" >> $GITHUB_ENV
-
-      - name: Setup Flutter
-        uses: subosito/flutter-action@v2
-        with:
-          channel: stable
-          flutter-version-file: pubspec.yaml
-
-      - name: Install dependencies
-        run: flutter pub get
-
-      - name: Validate API signature env
-        run: |
-          if [ -z "$ANIME_FLOW_APP_ID" ] || [ -z "$ANIME_FLOW_SECRET" ]; then
-            echo "::error::ANIME_FLOW_APP_ID and ANIME_FLOW_SECRET must be set (repository secrets)."
-            exit 1
-          fi
-
       - name: Build macOS
+        if: matrix.platform == 'macos'
         run: |
           flutter build macos --release \
             --dart-define=ANIME_FLOW_APP_ID="$ANIME_FLOW_APP_ID" \
@@ -419,13 +371,15 @@ jobs:
           echo "macOS build completed"
 
       - name: Create DMG
+        if: matrix.platform == 'macos'
         run: |
           mkdir -p build/dist
           cp -a build/macos/Build/Products/Release/*.app build/dist
           ln -s /Applications build/dist/Applications
           hdiutil create -fs HFS+ -volname "${{ env.VERSION }}" -srcfolder build/dist build/dist/AnimeFlow-macos-${{ env.VERSION }}.dmg
 
-      - name: Archive artifacts
+      - name: Upload macOS artifact
+        if: matrix.platform == 'macos'
         uses: actions/upload-artifact@v6
         with:
           name: macos
@@ -433,7 +387,7 @@ jobs:
           if-no-files-found: ignore
 
   release:
-    needs: [flutter-build-ios, flutter-build-android, flutter-build-windows, flutter-build-linux, flutter-build-macos]
+    needs: build
     runs-on: ubuntu-latest
     permissions:
       contents: write
@@ -449,13 +403,8 @@ jobs:
 
       - name: Generate release notes
         run: |
-          # 读取 CHANGELOG.md 内容
           CHANGELOG_CONTENT=$(cat .github/workflows/CHANGELOG.md)
-          
-          # 读取 release-template.md 模板
           TEMPLATE=$(cat .github/workflows/release-template.md)
-          
-          # 在第一个 --- 之前插入 CHANGELOG 内容
           RELEASE_NOTES=$(echo "$TEMPLATE" | awk -v changelog="$CHANGELOG_CONTENT" '
             /^---$/ {
               if (found_first == 0) {
@@ -466,7 +415,6 @@ jobs:
             }
             { print }
           ')
-          
           echo "$RELEASE_NOTES" > release_notes.md
           echo "Generated release notes:"
           cat release_notes.md

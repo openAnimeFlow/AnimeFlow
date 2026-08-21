@@ -361,7 +361,7 @@ class PlaySession {
     required PlayStateNotifier playStateActions,
     required VideoUiStateActions videoUiStateActions,
     required Episodes episodesActions,
-    required DanmakuChineseConverter danmakuChineseConverter,
+    required this.danmakuChineseConverter,
     required DanmakuChineseMode initialDanmakuChineseMode,
     required void Function({
       required int subjectId,
@@ -372,7 +372,6 @@ class PlaySession {
         _videoUiStateActions = videoUiStateActions,
         _episodesActions = episodesActions,
         _setEpisodeWatched = setEpisodeWatched,
-        danmakuChineseConverter = danmakuChineseConverter,
         _danmakuChineseMode = initialDanmakuChineseMode;
 
   late Player player;
@@ -382,6 +381,7 @@ class PlaySession {
   final Episodes _episodesActions;
   final DanmakuChineseConverter danmakuChineseConverter;
   DanmakuChineseMode _danmakuChineseMode;
+  int _danmakuChineseModeRevision = 0;
   final void Function({
     required int subjectId,
     required int episodeId,
@@ -614,15 +614,18 @@ class PlaySession {
     try {
       if (!_isLoadingDanmaku && episode != 0) {
         _isLoadingDanmaku = true;
-        final bgmBangumiId =
-            await FlowApi.getDanDanBangumiIDByBgmBangumiID(subjectId);
-        if (bgmBangumiId != null) {
-          final danmaku = await FlowApi.getDanDanmaku(bgmBangumiId, episode);
-          final converted = await danmakuChineseConverter.convertDanmakus(
-            danmaku,
-            _danmakuChineseMode,
-          );
-          addDanmakuAll(converted);
+        try {
+          final bgmBangumiId =
+              await FlowApi.getDanDanBangumiIDByBgmBangumiID(subjectId);
+          if (bgmBangumiId != null) {
+            final danmaku = await FlowApi.getDanDanmaku(bgmBangumiId, episode);
+            final converted = await danmakuChineseConverter.convertDanmakus(
+              danmaku,
+              _danmakuChineseMode,
+            );
+            addDanmakuAll(converted);
+          }
+        } finally {
           _isLoadingDanmaku = false;
         }
       }
@@ -856,6 +859,7 @@ class PlaySession {
   Future<void> applyDanmakuChineseMode(DanmakuChineseMode mode) async {
     if (_danmakuChineseMode == mode) return;
     _danmakuChineseMode = mode;
+    final revision = ++_danmakuChineseModeRevision;
 
     final state = _playStateActions.value;
     final all = state.danDanmakus.values.expand((items) => items).toList();
@@ -865,6 +869,7 @@ class PlaySession {
     _clearDanmakuCanvas();
 
     final converted = await danmakuChineseConverter.convertDanmakus(all, mode);
+    if (revision != _danmakuChineseModeRevision) return;
     final grouped = <int, List<Danmaku>>{};
     for (final item in converted) {
       grouped.putIfAbsent(item.time.toInt(), () => []).add(item);
@@ -935,6 +940,7 @@ class PlaySession {
   }
 
   void removeDanmaku() {
+    _danmakuChineseModeRevision++;
     _clearDanmakuCanvas();
     _playStateActions.clearDanDanmakus();
   }

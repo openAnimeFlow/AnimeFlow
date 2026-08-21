@@ -1,4 +1,6 @@
 import 'package:anime_flow/core/constants/storage_key.dart';
+import 'package:anime_flow/features/play/application/danmaku_chinese_mode.dart';
+import 'package:anime_flow/features/play/presentation/providers/danmaku_chinese_mode_provider.dart';
 import 'package:anime_flow/features/settings/presentation/providers/setting_provider.dart';
 import 'package:anime_flow/core/storage/storage.dart';
 import 'package:anime_flow/core/utils/system_util.dart';
@@ -156,6 +158,63 @@ class _DanmakuSettingPageState extends State<DanmakuSettingPage> {
                         setting.put(
                             DanmakuKey.danmakuPlatformDanDanPlay, value);
                       });
+                    },
+                  ),
+                  const SizedBox(height: 16),
+
+                  // 简繁转换
+                  Consumer(
+                    builder: (context, ref, _) {
+                      final danmakuChineseMode =
+                          ref.watch(danmakuChineseModeProvider);
+                      return Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          _buildSectionTitle(l10n.danmakuChineseConversion),
+                          Padding(
+                            padding: const EdgeInsets.symmetric(horizontal: 16),
+                            child: SizedBox(
+                              width: double.infinity,
+                              child: SegmentedButton<DanmakuChineseMode>(
+                                segments: [
+                                  ButtonSegment(
+                                    value: DanmakuChineseMode.none,
+                                    label: Text(
+                                      l10n.danmakuChineseNone,
+                                      maxLines: 2,
+                                      textAlign: TextAlign.center,
+                                    ),
+                                  ),
+                                  ButtonSegment(
+                                    value: DanmakuChineseMode.s2t,
+                                    label: Text(
+                                      l10n.danmakuChineseToTraditional,
+                                      maxLines: 2,
+                                      textAlign: TextAlign.center,
+                                    ),
+                                  ),
+                                  ButtonSegment(
+                                    value: DanmakuChineseMode.t2s,
+                                    label: Text(
+                                      l10n.danmakuChineseToSimplified,
+                                      maxLines: 2,
+                                      textAlign: TextAlign.center,
+                                    ),
+                                  ),
+                                ],
+                                selected: {danmakuChineseMode},
+                                showSelectedIcon: false,
+                                expandedInsets: EdgeInsets.zero,
+                                onSelectionChanged: (selection) {
+                                  ref
+                                      .read(danmakuChineseModeProvider.notifier)
+                                      .setMode(selection.first);
+                                },
+                              ),
+                            ),
+                          ),
+                        ],
+                      );
                     },
                   ),
                   const SizedBox(height: 16),

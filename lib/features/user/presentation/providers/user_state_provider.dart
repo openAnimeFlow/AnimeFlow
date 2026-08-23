@@ -1,30 +1,16 @@
 import 'dart:typed_data';
 
 import 'package:anime_flow/core/network/clients/flow_client.dart';
-import 'package:anime_flow/core/network/interceptors/bgm_refresh_token_interceptor.dart';
 import 'package:anime_flow/core/network/interceptors/flow_refresh_token_interceptor.dart';
 import 'package:anime_flow/core/network/api/flow_api.dart';
 import 'package:anime_flow/shared/models/flow/bangumi_bind_item.dart';
 import 'package:anime_flow/core/auth/models/flow_token.dart';
 import 'package:anime_flow/shared/models/flow/flow_users.dart';
-import 'package:anime_flow/core/auth/models/token_item.dart';
 import 'package:anime_flow/features/auth/application/token_providers.dart';
 import 'package:anime_flow/features/user/data/repository/user_repository_provider.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 part 'user_state_provider.g.dart';
-
-@Riverpod(keepAlive: true)
-class CurrentUserToken extends _$CurrentUserToken {
-  @override
-  Future<TokenItem?> build() async {
-    BgmRefreshTokenInterceptor.onSessionExpired = () {
-      ref.invalidateSelf();
-      ref.invalidate(currentUserInfoProvider);
-    };
-    return ref.watch(tokenRepositoryProvider).getToken();
-  }
-}
 
 @Riverpod(keepAlive: true)
 class CurrentFlowToken extends _$CurrentFlowToken {

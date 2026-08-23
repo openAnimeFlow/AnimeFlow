@@ -30,11 +30,9 @@ import 'package:anime_flow/shared/models/flow/bgm_collection_sync_status_item.da
 import 'package:anime_flow/shared/models/flow/bangumi_bind_item.dart';
 import 'package:anime_flow/core/auth/models/flow_token.dart';
 import 'package:anime_flow/shared/models/flow/flow_users.dart';
-import 'package:anime_flow/core/auth/models/token_item.dart';
 import 'package:anime_flow/shared/models/player/play/play_history_event_type.dart';
 import 'package:anime_flow/shared/models/player/play/play_history_item.dart';
 import 'package:anime_flow/shared/models/search/search_suggestions_item.dart';
-import 'package:anime_flow/core/auth/repository/bangumi_token.dart';
 import 'package:anime_flow/core/auth/repository/flow_token_storage.dart';
 import 'package:anime_flow/core/logger/logger.dart';
 import 'package:anime_flow/core/utils/system_util.dart';
@@ -43,25 +41,6 @@ import 'package:dio/dio.dart';
 
 class FlowApi {
   static final FlowClient _client = FlowClient.instance;
-
-  static Future<TokenItem> getTokenService({required String code}) async {
-    final response = await _client.post(
-      AnimeFlowApi.token,
-      queryParameters: {'code': code},
-    );
-    return TokenItem.fromJson(response.data);
-  }
-
-  ///刷新token
-  static Future<TokenItem> refreshTokenService({
-    required String refreshToken,
-  }) async {
-    final response = await _client.post(
-      AnimeFlowApi.refreshToken,
-      queryParameters: {'refreshToken': refreshToken},
-    );
-    return TokenItem.fromJson(response.data);
-  }
 
   //回调api
   static Future<Map<String, dynamic>> callbackService(
@@ -89,32 +68,6 @@ class FlowApi {
       },
     );
     return response.data;
-  }
-
-  // 持续轮询直到获取到 token 或超时（60秒，与 session 过期时间一致）
-  static Future<TokenItem?> pollTokenService({required String state}) async {
-    const maxDuration = Duration(seconds: 60);
-    const pollInterval = Duration(seconds: 2);
-    final startTime = DateTime.now();
-
-    while (DateTime.now().difference(startTime) < maxDuration) {
-      try {
-        final response = await _client.get(
-          AnimeFlowApi.token,
-          queryParameters: {'sessionId': state},
-        );
-
-        if (response.code == 200 && response.data.isNotEmpty) {
-          return TokenItem.fromJson(response.data);
-        }
-      } catch (e) {
-        // 忽略错误，继续轮询
-      }
-
-      await Future.delayed(pollInterval);
-    }
-
-    return null;
   }
 
   /// 桌面端绑定模式：轮询 OAuth 授权码
@@ -218,7 +171,7 @@ class FlowApi {
     required int type,
     required Color color,
   }) async {
-    final token = await BangumiToken.instance.getToken();
+    final token = await FlowTokenStorage.instance.getToken();
     final episodeID =
         int.parse('$bangumiID${episode.toString().padLeft(4, '0')}');
     final colorValue = Utils.colorToDecimalRgb(color);

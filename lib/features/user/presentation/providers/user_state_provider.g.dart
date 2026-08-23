@@ -9,47 +9,6 @@ part of 'user_state_provider.dart';
 // GENERATED CODE - DO NOT MODIFY BY HAND
 // ignore_for_file: type=lint, type=warning
 
-@ProviderFor(CurrentUserToken)
-final currentUserTokenProvider = CurrentUserTokenProvider._();
-
-final class CurrentUserTokenProvider
-    extends $AsyncNotifierProvider<CurrentUserToken, TokenItem?> {
-  CurrentUserTokenProvider._()
-      : super(
-          from: null,
-          argument: null,
-          retry: null,
-          name: r'currentUserTokenProvider',
-          isAutoDispose: false,
-          dependencies: null,
-          $allTransitiveDependencies: null,
-        );
-
-  @override
-  String debugGetCreateSourceHash() => _$currentUserTokenHash();
-
-  @$internal
-  @override
-  CurrentUserToken create() => CurrentUserToken();
-}
-
-String _$currentUserTokenHash() => r'be21408f0cd645a61035bd085cbf85c19c5cc454';
-
-abstract class _$CurrentUserToken extends $AsyncNotifier<TokenItem?> {
-  FutureOr<TokenItem?> build();
-  @$mustCallSuper
-  @override
-  void runBuild() {
-    final ref = this.ref as $Ref<AsyncValue<TokenItem?>, TokenItem?>;
-    final element = ref.element as $ClassProviderElement<
-        AnyNotifier<AsyncValue<TokenItem?>, TokenItem?>,
-        AsyncValue<TokenItem?>,
-        Object?,
-        Object?>;
-    element.handleCreate(ref, build);
-  }
-}
-
 @ProviderFor(CurrentFlowToken)
 final currentFlowTokenProvider = CurrentFlowTokenProvider._();
 

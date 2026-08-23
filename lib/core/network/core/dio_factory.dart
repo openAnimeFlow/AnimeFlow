@@ -1,9 +1,6 @@
 import 'package:anime_flow/core/network/api_path.dart';
-import 'package:anime_flow/core/network/interceptors/bgm_authInterceptor.dart';
-import 'package:anime_flow/core/network/interceptors/bgm_refresh_token_interceptor.dart';
 import 'package:anime_flow/core/network/interceptors/dio_logger_interceptor.dart';
 import 'package:anime_flow/core/network/interceptors/flow_refresh_token_interceptor.dart';
-import 'package:anime_flow/core/auth/repository/bangumi_token.dart';
 import 'package:anime_flow/core/auth/repository/flow_token_storage.dart';
 import 'package:anime_flow/core/utils/utils.dart';
 import 'package:dio/dio.dart';
@@ -17,7 +14,6 @@ class DioFactory {
   static Dio? _githubDio;
   static Dio? _pluginDio;
   static Dio? _downloadDio;
-  static Dio? _bangumiDio;
   static Dio? _animeFlowDio;
   static String? _deviceUserAgent;
 
@@ -79,28 +75,11 @@ class DioFactory {
         },
       );
 
-  static Dio get bangumiDio {
-    if (_bangumiDio != null) return _bangumiDio!;
-    final tokenRepo = BangumiToken.instance;
-    final dio = _create(
-      NetworkConfig.fromSettings(
-        connectTimeout: const Duration(seconds: 15),
-        receiveTimeout: const Duration(seconds: 30),
-      ),
-      interceptors: [BgmAuthInterceptor(tokenRepo)],
-      baseUrl: BgmNextApi.baseUrl,
-    );
-    // BgmRefreshTokeninterceptor 在 Dio 创建后注册（需要同一个 dio 做重试）
-    dio.interceptors.add(BgmRefreshTokenInterceptor(dio, tokenRepo));
-    return _bangumiDio = dio;
-  }
-
   static void reset() {
     _apiDio = null;
     _githubDio = null;
     _pluginDio = null;
     _downloadDio = null;
-    _bangumiDio = null;
     _animeFlowDio = null;
   }
 

@@ -101,11 +101,11 @@ class _PlaybackSettingsPageState extends State<PlaybackSettingsPage> {
                             children: [
                               Text(
                                 l10n.skipDuration,
-                                style: TextStyle(fontSize: 16),
+                                style: const TextStyle(fontSize: 16),
                               ),
                               Text(
                                 l10n.skipDurationSubtitle,
-                                style: TextStyle(fontSize: 12),
+                                style: const TextStyle(fontSize: 12),
                               )
                             ],
                           ),
@@ -171,7 +171,7 @@ class _PlaybackSettingsPageState extends State<PlaybackSettingsPage> {
                           children: [
                             Text(
                               l10n.longPressFastForwardSpeed,
-                              style: TextStyle(fontSize: 16),
+                              style: const TextStyle(fontSize: 16),
                             ),
                             Text(
                               '${_fastForwardSpeed.toStringAsFixed(1)}x',

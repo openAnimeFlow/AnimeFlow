@@ -152,7 +152,7 @@ class _CollectionTabView extends ConsumerWidget {
                     ),
                   )
                 else if (collectionsItem == null)
-                  SliverFillRemaining(
+                  const SliverFillRemaining(
                     child: Center(child: CircularProgressIndicator()),
                   )
                 else if (collectionsItem.data.isEmpty)
@@ -315,7 +315,7 @@ class _CollectionFooter extends StatelessWidget {
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
     if (isLoadingMore) {
-      return Padding(
+      return const Padding(
         padding: EdgeInsets.symmetric(vertical: 16),
         child: Center(
           child: CircularProgressIndicator(),
@@ -344,7 +344,7 @@ class _CollectionFooter extends StatelessWidget {
 
     if (!hasMore) {
       return Padding(
-        padding: EdgeInsets.symmetric(vertical: 16),
+        padding: const EdgeInsets.symmetric(vertical: 16),
         child: Center(
           child: Text(l10n.noMore),
         ),

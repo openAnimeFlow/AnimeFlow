@@ -46,7 +46,7 @@ class IntroView extends ConsumerWidget {
                         children: [
                           Text(
                             l10n.statistics,
-                            style: TextStyle(
+                            style: const TextStyle(
                                 fontSize: 18, fontWeight: FontWeight.bold),
                           ),
                           UserSpaceStatisticsSection(userPageItem: data)
@@ -63,7 +63,7 @@ class IntroView extends ConsumerWidget {
                 if (hasBio) ...[
                   Text(
                     l10n.bio,
-                    style: TextStyle(
+                    style: const TextStyle(
                       fontSize: 18,
                       fontWeight: FontWeight.bold,
                     ),
@@ -75,7 +75,7 @@ class IntroView extends ConsumerWidget {
                 if (hasLocation) ...[
                   Text(
                     l10n.location,
-                    style: TextStyle(
+                    style: const TextStyle(
                       fontSize: 18,
                       fontWeight: FontWeight.bold,
                     ),
@@ -87,7 +87,7 @@ class IntroView extends ConsumerWidget {
                 if (hasSite) ...[
                   Text(
                     l10n.website,
-                    style: TextStyle(
+                    style: const TextStyle(
                       fontSize: 18,
                       fontWeight: FontWeight.bold,
                     ),

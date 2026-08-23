@@ -56,22 +56,22 @@ class VideoWebviewWindowsImpl
 
   @override
   Future<void> unloadPage() async {
-    subscriptions.forEach((s) {
+    for (var s in subscriptions) {
       try {
         s.cancel();
       } catch (_) {}
-    });
+    }
     subscriptions.clear();
     await redirect2Blank();
   }
 
   @override
   void dispose() {
-    subscriptions.forEach((s) {
+    for (var s in subscriptions) {
       try {
         s.cancel();
       } catch (_) {}
-    });
+    }
     subscriptions.clear();
     webviewController?.dispose();
     webviewController = null;

@@ -14,10 +14,6 @@ class _ForumPageState extends State<ForumPage>
   List<TimelineItem> timelineData = [];
   bool isLoading = false;
 
-  @override
-  void initState() {
-    super.initState();
-  }
 
   @override
   bool get wantKeepAlive => true;

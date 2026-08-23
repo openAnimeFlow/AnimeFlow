@@ -101,7 +101,7 @@ class _FontSettingsPageState extends ConsumerState<FontSettingsPage> {
                   children: [
                     Text(
                       l10n.fontLibrary,
-                      style: TextStyle(
+                      style: const TextStyle(
                         fontSize: 20,
                         fontWeight: FontWeight.bold,
                       ),
@@ -119,7 +119,7 @@ class _FontSettingsPageState extends ConsumerState<FontSettingsPage> {
                             ),
                             Text(
                               l10n.fontDelayHint,
-                              style: TextStyle(fontSize: 10),
+                              style: const TextStyle(fontSize: 10),
                             )
                           ],
                         ),
@@ -138,7 +138,7 @@ class _FontSettingsPageState extends ConsumerState<FontSettingsPage> {
                 ),
                 Text(
                   l10n.fontRestartHint,
-                  style: TextStyle(fontWeight: FontWeight.bold),
+                  style: const TextStyle(fontWeight: FontWeight.bold),
                 ),
                 const SizedBox(height: 10),
                 fontsAsync.when(
@@ -204,7 +204,7 @@ class _FontSettingsPageState extends ConsumerState<FontSettingsPage> {
                   const SizedBox(height: 20),
                   Text(
                     l10n.downloadedOrphanFonts,
-                    style: TextStyle(
+                    style: const TextStyle(
                       fontSize: 18,
                       fontWeight: FontWeight.bold,
                     ),

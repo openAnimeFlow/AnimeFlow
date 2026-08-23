@@ -272,7 +272,7 @@ class _SearchPageState extends ConsumerState<SearchPage> {
                                         : const SizedBox.shrink()
                                     : Center(
                                         child: Padding(
-                                        padding: EdgeInsets.all(8.0),
+                                        padding: const EdgeInsets.all(8.0),
                                         child: Text(l10n.noMoreContent),
                                       ));
                               }
@@ -314,15 +314,15 @@ class _SearchPageState extends ConsumerState<SearchPage> {
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              Icon(
+              const Icon(
                 Icons.search,
                 size: 80,
                 color: Colors.grey,
               ),
-              SizedBox(height: 16),
+              const SizedBox(height: 16),
               Text(
                 l10n.enterKeywordToSearch,
-                style: TextStyle(
+                style: const TextStyle(
                   fontSize: 16,
                   color: Colors.grey,
                 ),
@@ -501,7 +501,7 @@ class _StickySearchHeaderDelegate extends SliverPersistentHeaderDelegate {
                     ),
                     Text(
                       l10n.search,
-                      style: TextStyle(
+                      style: const TextStyle(
                         fontSize: 20,
                         fontWeight: FontWeight.w500,
                       ),

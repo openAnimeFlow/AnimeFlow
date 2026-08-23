@@ -109,7 +109,7 @@ class _GraphicCaptchaViewState extends State<GraphicCaptchaView> {
             textInputAction: TextInputAction.next,
             decoration: InputDecoration(
               labelText: AppLocalizations.of(context).enterGraphicCaptchaCode,
-              prefixIcon: Icon(Icons.verified_outlined),
+              prefixIcon: const Icon(Icons.verified_outlined),
             ),
           ),
         ),

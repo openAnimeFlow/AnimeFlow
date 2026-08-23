@@ -133,7 +133,7 @@ class _CommentsViewState extends ConsumerState<CommentsView>
               children: [
                 Text(
                   l10n.commentsTitle,
-                  style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+                  style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
                 ),
                 const Spacer(),
                 Text(
@@ -490,7 +490,7 @@ class _CommentButtonState extends State<_CommentButton> {
                 : CrossFadeState.showSecond,
             firstChild: const SizedBox.shrink(),
             secondChild: Padding(
-              padding: EdgeInsets.only(left: 8),
+              padding: const EdgeInsets.only(left: 8),
               child: Text(
                 AppLocalizations.of(context).commentsAction,
                 style: labelStyle,

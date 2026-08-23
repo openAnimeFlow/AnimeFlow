@@ -183,7 +183,7 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
                             textInputAction: TextInputAction.next,
                             decoration: InputDecoration(
                               labelText: l10n.email,
-                              prefixIcon: Icon(Icons.email_outlined),
+                              prefixIcon: const Icon(Icons.email_outlined),
                             ),
                             validator: (value) {
                               final email = value?.trim() ?? '';
@@ -268,7 +268,7 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
                                   decoration: InputDecoration(
                                     labelText: l10n.emailCode,
                                     prefixIcon:
-                                        Icon(Icons.mark_email_read_outlined),
+                                        const Icon(Icons.mark_email_read_outlined),
                                   ),
                                   validator: (value) {
                                     final code = value?.trim() ?? '';
@@ -305,7 +305,7 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
                                   )
                                 : Text(
                                     l10n.resetPassword,
-                                    style: TextStyle(
+                                    style: const TextStyle(
                                       fontSize: 16,
                                       fontWeight: FontWeight.bold,
                                     ),

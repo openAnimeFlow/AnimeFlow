@@ -91,8 +91,9 @@ class CaptchaWebviewWindowsImpl
   }
 
   Future<bool> _isCaptchaPresent() async {
-    if (_currentCaptchaImageXpath.isEmpty || _headlessWebview == null)
+    if (_currentCaptchaImageXpath.isEmpty || _headlessWebview == null) {
       return false;
+    }
     final escaped = _currentCaptchaImageXpath
         .replaceAll('\\', '\\\\')
         .replaceAll("'", "\\'");

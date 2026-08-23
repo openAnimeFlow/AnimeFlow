@@ -91,7 +91,7 @@ class _VideoSettingState extends ConsumerState<VideoSetting> {
                     children: [
                       Text(
                         l10n.videoSettingsTitle,
-                        style: TextStyle(
+                        style: const TextStyle(
                           decoration: TextDecoration.none,
                           fontSize: 20,
                           fontWeight: FontWeight.bold,

@@ -67,7 +67,6 @@ class _BBCodeWidgetState extends State<BBCodeWidget> {
   @override
   Widget build(BuildContext context) {
     BBCodeParser.checkVersion();
-    BBCodeParser.checkVersion();
     final input = InputStream.fromString(widget.bbcode);
     final lexer = BBCodeLexer(input);
     final tokens = CommonTokenStream(lexer);
@@ -80,7 +79,7 @@ class _BBCodeWidgetState extends State<BBCodeWidget> {
     // 如果指定了 fit 参数，检查是否只包含图片，如果是则填充整个区域
     if (widget.fit != null) {
       final imageElements = bbcodeBaseListener.bbcode
-          .where((e) => e is BBCodeImg)
+          .whereType<BBCodeImg>()
           .toList();
       final hasOnlyImage = bbcodeBaseListener.bbcode.length == 1 &&
           imageElements.length == 1;
@@ -89,7 +88,7 @@ class _BBCodeWidgetState extends State<BBCodeWidget> {
         return LayoutBuilder(
           builder: (context, constraints) {
             return AnimationNetworkImage(
-              url: (imageElements.first as BBCodeImg).imageUrl,
+              url: (imageElements.first).imageUrl,
               width: constraints.maxWidth,
               height: constraints.maxHeight,
               fit: widget.fit,

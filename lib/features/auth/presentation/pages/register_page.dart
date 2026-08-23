@@ -186,7 +186,7 @@ class _RegisterPageState extends State<RegisterPage> {
                                 textInputAction: TextInputAction.next,
                                 decoration: InputDecoration(
                                   labelText: l10n.email,
-                                  prefixIcon: Icon(Icons.email_outlined),
+                                  prefixIcon: const Icon(Icons.email_outlined),
                                 ),
                                 validator: (value) {
                                   final email = value?.trim() ?? '';

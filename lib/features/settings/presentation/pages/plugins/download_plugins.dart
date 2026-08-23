@@ -221,7 +221,7 @@ class _DownloadPluginsPageState extends State<DownloadPluginsPage> {
             if (isLoading)
               Center(
                 child: ListTile(
-                  leading: CircularProgressIndicator(),
+                  leading: const CircularProgressIndicator(),
                   title: Text(l10n.loading),
                 ),
               ),
@@ -321,14 +321,14 @@ class _DownloadPluginsPageState extends State<DownloadPluginsPage> {
                                     ? Row(
                                         mainAxisSize: MainAxisSize.min,
                                         children: [
-                                          SizedBox(
+                                          const SizedBox(
                                             width: 16,
                                             height: 16,
                                             child: CircularProgressIndicator(
                                               strokeWidth: 2,
                                             ),
                                           ),
-                                          SizedBox(width: 8),
+                                          const SizedBox(width: 8),
                                           Text(l10n.updating),
                                         ],
                                       )

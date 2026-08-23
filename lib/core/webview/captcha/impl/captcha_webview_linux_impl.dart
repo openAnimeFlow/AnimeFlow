@@ -14,7 +14,7 @@ class CaptchaWebviewLinuxImpl extends CaptchaWebviewController<Webview> {
   Future<void> init() async {
     // final proxyConfig = _getProxyConfiguration();
     webviewController ??= await WebviewWindow.create(
-      configuration: CreateConfiguration(
+      configuration: const CreateConfiguration(
         headless: true,
         // proxy: proxyConfig,
       ),
@@ -107,8 +107,9 @@ class CaptchaWebviewLinuxImpl extends CaptchaWebviewController<Webview> {
   }
 
   Future<bool> _isCaptchaPresent() async {
-    if (_currentCaptchaImageXpath.isEmpty || webviewController == null)
+    if (_currentCaptchaImageXpath.isEmpty || webviewController == null) {
       return false;
+    }
     final escaped = _currentCaptchaImageXpath
         .replaceAll('\\', '\\\\')
         .replaceAll("'", "\\'");

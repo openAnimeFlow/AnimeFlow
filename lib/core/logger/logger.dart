@@ -1,4 +1,4 @@
-/// 源码来自: https://github.com/Predidit/Kazumi/blob/main/lib/utils/logger.dart
+/// 源码来自: https://github.com/Predidit/Kazumi/blob/main/lib/services/logging/logger.dart
 library;
 
 import 'dart:async';
@@ -126,7 +126,7 @@ class KazumiLogOutput extends LogOutput {
   @override
   void output(OutputEvent event) {
     for (var line in event.lines) {
-      print(line);
+      stdout.writeln(line);
     }
 
     // Write to file if: warning/error/fatal OR forceLog is enabled
@@ -157,7 +157,7 @@ class KazumiLogOutput extends LogOutput {
           mode: FileMode.writeOnlyAppend,
         );
       } catch (e) {
-        print('Failed to write log to file: $e');
+        stdout.writeln('Failed to write log to file: $e');
       }
     });
   }
@@ -263,7 +263,7 @@ Future<bool> clearLogs() async {
     });
     return true;
   } catch (e) {
-    print('Error clearing file: $e');
+    stdout.writeln('Error clearing file: $e');
     return false;
   }
 }

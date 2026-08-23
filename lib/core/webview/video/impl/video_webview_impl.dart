@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'dart:ui';
+import 'package:anime_flow/core/logger/logger.dart';
 import 'package:anime_flow/core/utils/utils.dart';
 import 'package:anime_flow/core/webview/video/video_webview_controller.dart';
 import 'package:flutter_inappwebview_platform_interface/flutter_inappwebview_platform_interface.dart';
@@ -23,7 +24,7 @@ class VideoWebviewImpl
           mixedContentMode: MixedContentMode.MIXED_CONTENT_COMPATIBILITY_MODE,
         ),
         onWebViewCreated: (controller) {
-          print('[WebView] Created (legacy fallback)');
+          LiggLogger().i('[WebView] Created (legacy fallback)');
           webviewController = controller;
           initEventController.add(true);
         },

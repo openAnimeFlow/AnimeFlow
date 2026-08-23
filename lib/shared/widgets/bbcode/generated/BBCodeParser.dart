@@ -350,7 +350,7 @@ class DocumentContext extends ParserRuleContext {
   TerminalNode? EOF() => getToken(BBCodeParser.TOKEN_EOF, 0);
   List<ElementContext> elements() => getRuleContexts<ElementContext>();
   ElementContext? element(int i) => getRuleContext<ElementContext>(i);
-  DocumentContext([ParserRuleContext? parent, int? invokingState]) : super(parent, invokingState);
+  DocumentContext([ParserRuleContext? super.parent, super.invokingState]);
   @override
   int get ruleIndex => RULE_document;
   @override
@@ -369,7 +369,7 @@ class ElementContext extends ParserRuleContext {
   BgmContext? bgm() => getRuleContext<BgmContext>(0);
   MusumeContext? musume() => getRuleContext<MusumeContext>(0);
   StickerContext? sticker() => getRuleContext<StickerContext>(0);
-  ElementContext([ParserRuleContext? parent, int? invokingState]) : super(parent, invokingState);
+  ElementContext([ParserRuleContext? super.parent, super.invokingState]);
   @override
   int get ruleIndex => RULE_element;
   @override
@@ -390,7 +390,7 @@ class TagContext extends ParserRuleContext {
   TerminalNode? STRING(int i) => getToken(BBCodeParser.TOKEN_STRING, i);
   List<ElementContext> elements() => getRuleContexts<ElementContext>();
   ElementContext? element(int i) => getRuleContext<ElementContext>(i);
-  TagContext([ParserRuleContext? parent, int? invokingState]) : super(parent, invokingState);
+  TagContext([ParserRuleContext? super.parent, super.invokingState]);
   @override
   int get ruleIndex => RULE_tag;
   @override
@@ -406,7 +406,7 @@ class TagContext extends ParserRuleContext {
 class PlainContext extends ParserRuleContext {
   List<TerminalNode> STRINGs() => getTokens(BBCodeParser.TOKEN_STRING);
   TerminalNode? STRING(int i) => getToken(BBCodeParser.TOKEN_STRING, i);
-  PlainContext([ParserRuleContext? parent, int? invokingState]) : super(parent, invokingState);
+  PlainContext([ParserRuleContext? super.parent, super.invokingState]);
   @override
   int get ruleIndex => RULE_plain;
   @override
@@ -422,7 +422,7 @@ class PlainContext extends ParserRuleContext {
 class BgmContext extends ParserRuleContext {
   Token? id;
   TerminalNode? STRING() => getToken(BBCodeParser.TOKEN_STRING, 0);
-  BgmContext([ParserRuleContext? parent, int? invokingState]) : super(parent, invokingState);
+  BgmContext([ParserRuleContext? super.parent, super.invokingState]);
   @override
   int get ruleIndex => RULE_bgm;
   @override
@@ -438,7 +438,7 @@ class BgmContext extends ParserRuleContext {
 class MusumeContext extends ParserRuleContext {
   Token? id;
   TerminalNode? STRING() => getToken(BBCodeParser.TOKEN_STRING, 0);
-  MusumeContext([ParserRuleContext? parent, int? invokingState]) : super(parent, invokingState);
+  MusumeContext([ParserRuleContext? super.parent, super.invokingState]);
   @override
   int get ruleIndex => RULE_musume;
   @override
@@ -452,7 +452,7 @@ class MusumeContext extends ParserRuleContext {
 }
 
 class StickerContext extends ParserRuleContext {
-  StickerContext([ParserRuleContext? parent, int? invokingState]) : super(parent, invokingState);
+  StickerContext([ParserRuleContext? super.parent, super.invokingState]);
   @override
   int get ruleIndex => RULE_sticker;
   @override

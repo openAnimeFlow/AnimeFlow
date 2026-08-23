@@ -45,7 +45,7 @@ class _ThemePageState extends State<ThemePage> {
             children: [
               Text(
                 l10n.themeMode,
-                style: TextStyle(
+                style: const TextStyle(
                   fontSize: 20,
                   fontWeight: FontWeight.bold,
                 ),
@@ -122,7 +122,7 @@ class _ThemePageState extends State<ThemePage> {
               const SizedBox(height: 10),
               Text(
                 l10n.themeColor,
-                style: TextStyle(
+                style: const TextStyle(
                   fontSize: 20,
                   fontWeight: FontWeight.bold,
                 ),
@@ -205,7 +205,7 @@ class _ThemePageState extends State<ThemePage> {
                 ),
                 title: Text(
                   l10n.fontStyle,
-                  style: TextStyle(
+                  style: const TextStyle(
                     fontSize: 16,
                     fontWeight: FontWeight.w600,
                   ),

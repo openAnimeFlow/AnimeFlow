@@ -402,7 +402,7 @@ if (!_checkAndClick()) {
   Future<String> getCookieString(String pageUrl) async {
     try {
       final PlatformCookieManager cookieManager = PlatformCookieManager(
-        PlatformCookieManagerCreationParams(),
+        const PlatformCookieManagerCreationParams(),
       );
       final cookies = await cookieManager.getCookies(url: WebUri(pageUrl));
       return cookies.map((c) => '${c.name}=${c.value}').join('; ');

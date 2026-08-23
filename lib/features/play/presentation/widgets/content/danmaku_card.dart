@@ -115,7 +115,7 @@ class _DanmakuCardState extends ConsumerState<DanmakuCard>
                 children: [
                   Text(
                     l10n.danmakuSource,
-                    style: TextStyle(fontWeight: FontWeight.bold),
+                    style: const TextStyle(fontWeight: FontWeight.bold),
                   ),
                   if (allDanmakus.isNotEmpty) ...[
                     const SizedBox(width: 5),
@@ -377,7 +377,7 @@ class _DanmakuCardState extends ConsumerState<DanmakuCard>
               child: episodesResponse.episodes.isEmpty
                   ? Center(
                       child: Padding(
-                        padding: EdgeInsets.all(16.0),
+                        padding: const EdgeInsets.all(16.0),
                         child: Text(
                           AppLocalizations.of(context).noDanmakuEpisodes,
                         ),

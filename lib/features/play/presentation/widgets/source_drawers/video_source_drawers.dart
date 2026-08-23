@@ -1311,9 +1311,9 @@ class _CaptchaViewState extends State<CaptchaView> {
                       enabled: !_isSubmitting,
                       decoration: InputDecoration(
                         labelText: l10n.enterCaptcha,
-                        border: OutlineInputBorder(),
+                        border: const OutlineInputBorder(),
                         contentPadding:
-                            EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+                            const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
                       ),
                       onSubmitted: _isSubmitting ? null : (_) => _submit(),
                     ),

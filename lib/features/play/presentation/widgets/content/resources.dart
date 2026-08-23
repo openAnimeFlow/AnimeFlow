@@ -206,7 +206,7 @@ class _VideoResourcesViewState extends ConsumerState<VideoResourcesView> {
                 children: [
                   Text(
                     l10n.videoSource,
-                    style: TextStyle(
+                    style: const TextStyle(
                       fontSize: 15,
                     ),
                   ),

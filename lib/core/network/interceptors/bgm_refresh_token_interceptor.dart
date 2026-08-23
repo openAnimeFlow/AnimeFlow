@@ -49,7 +49,7 @@ class BgmRefreshTokenInterceptor extends Interceptor {
         _refreshFuture = refreshFuture;
         try {
           await refreshFuture;
-          return _retryAfterRefresh(e, handler);
+          return await _retryAfterRefresh(e, handler);
         } catch (refreshError) {
           LiggLogger().e('刷新 token 失败: $refreshError');
           return handler.next(e);

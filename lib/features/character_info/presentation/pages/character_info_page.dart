@@ -168,7 +168,7 @@ class _CharacterInfoState extends State<CharacterInfo> {
                 },
               ),
               SliverPadding(
-                padding: EdgeInsets.only(
+                padding: const EdgeInsets.only(
                   left: 20,
                   right: 20,
                   top: 20,
@@ -177,7 +177,7 @@ class _CharacterInfoState extends State<CharacterInfo> {
                 sliver: SliverToBoxAdapter(
                   child: Text(
                     l10n.characterWorks,
-                    style: TextStyle(
+                    style: const TextStyle(
                       fontSize: 20,
                       fontWeight: FontWeight.bold,
                     ),
@@ -186,7 +186,7 @@ class _CharacterInfoState extends State<CharacterInfo> {
               ),
               const CharacterWorksView(),
               SliverPadding(
-                padding: EdgeInsets.only(
+                padding: const EdgeInsets.only(
                   left: 20,
                   right: 20,
                   top: 20,
@@ -195,7 +195,7 @@ class _CharacterInfoState extends State<CharacterInfo> {
                 sliver: SliverToBoxAdapter(
                   child: Text(
                     l10n.commentsTitle,
-                    style: TextStyle(
+                    style: const TextStyle(
                       fontSize: 20,
                       fontWeight: FontWeight.bold,
                     ),

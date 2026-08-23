@@ -21,6 +21,7 @@ import 'package:anime_flow/shared/models/bangumi/user_collections_item.dart';
 import 'package:anime_flow/shared/models/bangumi/user_info_item.dart';
 import 'package:anime_flow/core/logger/logger.dart';
 
+/// bgm api都集成到了animeflow的后端服务器，这里的接口以及不再使用
 class BgmApi {
   static const String _nextBaseUrl = BgmNextApi.baseUrl;
   static final LiggLogger _logger = LiggLogger();

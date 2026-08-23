@@ -306,7 +306,7 @@ jobs:
         if: matrix.platform == 'linux'
         run: |
           cd build/linux/x64/release
-          tar -czf ../../../../AnimeFlow-${{ env.VERSION }}.tar.gz -C bundle .
+          tar -czf ../../../../AnimeFlow-linux-${{ env.VERSION }}.tar.gz -C bundle .
 
       - name: Create DEB package
         if: matrix.platform == 'linux'

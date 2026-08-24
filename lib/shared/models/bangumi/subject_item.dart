@@ -37,6 +37,7 @@ class Subject {
   final String nameCN;
   final int type;
   final String info;
+  final List<String> metaTags;
   final Rating rating;
   final bool locked;
   final bool nsfw;
@@ -48,6 +49,7 @@ class Subject {
     required this.nameCN,
     required this.type,
     required this.info,
+    this.metaTags = const [],
     required this.rating,
     required this.locked,
     required this.nsfw,
@@ -62,6 +64,9 @@ class Subject {
       nameCN: json['nameCN'] as String? ?? '',
       type: json['type'] as int,
       info: json['info'] as String,
+      metaTags: json['metaTags'] is List
+          ? List<String>.from(json['metaTags'] as List)
+          : const [],
       rating: Rating.fromJson(json['rating'] as Map<String, dynamic>),
       locked: json['locked'] as bool,
       nsfw: json['nsfw'] as bool,
@@ -78,6 +83,7 @@ class Subject {
       'nameCN': nameCN,
       'type': type,
       'info': info,
+      'metaTags': metaTags,
       'rating': rating.toJson(),
       'locked': locked,
       'nsfw': nsfw,

@@ -785,6 +785,10 @@ class AppLocalizationsEn extends AppLocalizations {
   String get errorLogsClear => 'Clear logs';
 
   @override
+  String get errorLogsClearConfirmation =>
+      'Are you sure you want to clear logs?';
+
+  @override
   String get errorLogsCopy => 'Copy logs';
 
   @override
@@ -798,6 +802,18 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get errorLogsCopyFailed => 'Failed to copy logs';
+
+  @override
+  String get errorLogsAnalyze => 'Analyze log file';
+
+  @override
+  String get errorLogsOpen => 'Open log file';
+
+  @override
+  String get errorLogsOpenFailed => 'Failed to open log file';
+
+  @override
+  String get errorLogsShareFailed => 'Failed to share log file';
 
   @override
   String get themeMode => 'Theme mode';

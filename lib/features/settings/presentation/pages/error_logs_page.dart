@@ -1,10 +1,11 @@
 import 'package:anime_flow/app/localization/app_localizations.dart';
 import 'package:anime_flow/core/logger/logger.dart';
+import 'package:anime_flow/core/utils/system_util.dart';
 import 'package:anime_flow/features/settings/presentation/providers/setting_provider.dart';
 import 'package:anime_flow/shared/widgets/notification_toast.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:share_plus/share_plus.dart';
 
 class ErrorLogsPage extends StatefulWidget {
   const ErrorLogsPage({super.key});
@@ -20,7 +21,6 @@ class _ErrorLogsPageState extends State<ErrorLogsPage> {
   final List<String> _logLines = [];
   final ScrollController _scrollController = ScrollController();
   List<String> _allLines = [];
-  String _fullContent = '';
   int _displayedLines = 0;
   bool _isLoading = true;
   bool _hasError = false;
@@ -61,8 +61,6 @@ class _ErrorLogsPageState extends State<ErrorLogsPage> {
       if (_allLines.isNotEmpty && _allLines.last.isEmpty) {
         _allLines.removeLast();
       }
-      _fullContent = content;
-
       final initialCount = _allLines.length < _initialLoadCount
           ? _allLines.length
           : _initialLoadCount;
@@ -103,6 +101,25 @@ class _ErrorLogsPageState extends State<ErrorLogsPage> {
   }
 
   Future<void> _clearLogs(AppLocalizations l10n) async {
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (dialogContext) => AlertDialog(
+        title: Text(l10n.errorLogsClear),
+        content: Text(l10n.errorLogsClearConfirmation),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(dialogContext).pop(false),
+            child: Text(l10n.cancel),
+          ),
+          FilledButton(
+            onPressed: () => Navigator.of(dialogContext).pop(true),
+            child: Text(l10n.confirm),
+          ),
+        ],
+      ),
+    );
+    if (confirmed != true || !mounted) return;
+
     final success = await clearLogs();
     if (!mounted) return;
 
@@ -110,7 +127,6 @@ class _ErrorLogsPageState extends State<ErrorLogsPage> {
       setState(() {
         _logLines.clear();
         _allLines.clear();
-        _fullContent = '';
         _displayedLines = 0;
       });
       NotificationToast.show(l10n.errorLogsCleared);
@@ -119,14 +135,31 @@ class _ErrorLogsPageState extends State<ErrorLogsPage> {
     }
   }
 
-  Future<void> _copyLogs(AppLocalizations l10n) async {
+  Future<void> _openLogs(AppLocalizations l10n) async {
     try {
-      await Clipboard.setData(ClipboardData(text: _fullContent));
-      if (!mounted) return;
-      NotificationToast.show(l10n.errorLogsCopied);
+      final box =
+          SystemUtil.isMobile ? context.findRenderObject() as RenderBox? : null;
+      final origin =
+          box == null ? null : box.localToGlobal(Offset.zero) & box.size;
+      final file = await getLogsPath();
+      if (SystemUtil.isMobile) {
+        await SharePlus.instance.share(
+          ShareParams(
+            files: [XFile(file.path)],
+            title: l10n.errorLogsAnalyze,
+            sharePositionOrigin: origin,
+          ),
+        );
+      } else {
+        await SystemUtil.openContainingDirectory(file.path);
+      }
     } catch (_) {
       if (!mounted) return;
-      NotificationToast.show(l10n.errorLogsCopyFailed);
+      NotificationToast.show(
+        SystemUtil.isMobile
+            ? l10n.errorLogsShareFailed
+            : l10n.errorLogsOpenFailed,
+      );
     }
   }
 
@@ -217,14 +250,15 @@ class _ErrorLogsPageState extends State<ErrorLogsPage> {
           heroTag: 'clearLogs',
           onPressed: () => _clearLogs(l10n),
           tooltip: l10n.errorLogsClear,
-          child: const Icon(Icons.clear_all),
+          child: const Icon(Icons.delete_forever),
         ),
         const SizedBox(width: 15),
         FloatingActionButton(
-          heroTag: 'copyLogs',
-          onPressed: () => _copyLogs(l10n),
-          tooltip: l10n.errorLogsCopy,
-          child: const Icon(Icons.copy),
+          heroTag: 'openLogs',
+          onPressed: () => _openLogs(l10n),
+          tooltip:
+              SystemUtil.isMobile ? l10n.errorLogsAnalyze : l10n.errorLogsOpen,
+          child: const Icon(Icons.open_in_new),
         ),
       ],
     );

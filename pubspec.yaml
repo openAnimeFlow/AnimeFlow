@@ -115,15 +115,15 @@ dependencies:
   window_manager: ^0.5.1 # 控制桌面窗口、全屏和窗口事件。
   url_launcher: ^6.3.2 # 打开外部链接、邮件和系统 URL。
   flutter_opencc_plus: ^0.1.1 # OpenCC 文字转换工具。
+  logger: ^2.6.2 # 输出结构化调试日志。
+  synchronized: ^3.4.1+2 # 串行化日志文件写入。
+  share_plus: ^12.0.2
 
   # 内容编辑与展示
   flutter_markdown_plus: ^1.0.7 # 渲染 Markdown 富文本内容。
   image_picker: ^1.2.1 # 从相册或相机选择图片。
   crop_your_image: ^2.0.0 # 裁剪用户选择的图片。
 
-  # 日志
-  logger: ^2.6.2 # 输出结构化调试日志。
-  synchronized: ^3.4.1+2 # 串行化日志文件写入。
 
 dependency_overrides:
   media_kit_libs_linux: # 覆盖 Linux 平台 media_kit 运行库来源。

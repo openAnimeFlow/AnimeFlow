@@ -83,6 +83,22 @@ class SystemUtil {
         defaultTargetPlatform == TargetPlatform.iOS;
   }
 
+  /// 在系统文件管理器中打开文件所在目录。
+  static Future<void> openContainingDirectory(String filePath) async {
+    final directory = File(filePath).parent.path;
+    if (Platform.isWindows) {
+      await Process.start(
+        'explorer.exe',
+        ['/select,', filePath],
+        runInShell: true,
+      );
+    } else if (Platform.isMacOS) {
+      await Process.start('open', ['-R', filePath]);
+    } else {
+      await Process.start('xdg-open', [directory], runInShell: true);
+    }
+  }
+
   /// 是否支持系统音量同步
   static bool get supportsSystemVolumeSync =>
       !kIsWeb && (isMobile || isDesktop);

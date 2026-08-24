@@ -1537,6 +1537,12 @@ abstract class AppLocalizations {
   /// **'清空日志'**
   String get errorLogsClear;
 
+  /// No description provided for @errorLogsClearConfirmation.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'确定要清空日志吗？'**
+  String get errorLogsClearConfirmation;
+
   /// No description provided for @errorLogsCopy.
   ///
   /// In zh_Hans, this message translates to:
@@ -1566,6 +1572,30 @@ abstract class AppLocalizations {
   /// In zh_Hans, this message translates to:
   /// **'复制日志失败'**
   String get errorLogsCopyFailed;
+
+  /// No description provided for @errorLogsAnalyze.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'分析日志文件'**
+  String get errorLogsAnalyze;
+
+  /// No description provided for @errorLogsOpen.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'打开日志文件'**
+  String get errorLogsOpen;
+
+  /// No description provided for @errorLogsOpenFailed.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'打开日志文件失败'**
+  String get errorLogsOpenFailed;
+
+  /// No description provided for @errorLogsShareFailed.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'分享日志文件失败'**
+  String get errorLogsShareFailed;
 
   /// No description provided for @themeMode.
   ///

@@ -8,6 +8,7 @@ import 'package:anime_flow/features/shaders/shaders_controller.dart';
 import 'package:anime_flow/features/settings/presentation/providers/font_provider.dart';
 import 'package:anime_flow/core/network/network_runtime_config.dart';
 import 'package:anime_flow/core/network/core/dio_factory.dart';
+import 'package:anime_flow/core/logger/logger.dart';
 import 'package:anime_flow/core/storage/storage.dart';
 import 'package:anime_flow/core/utils/crawl_config.dart';
 import 'package:flutter/material.dart';
@@ -19,6 +20,7 @@ import 'package:window_manager/window_manager.dart';
 
 Future<void> bootstrap() async {
   WidgetsFlutterBinding.ensureInitialized();
+  initializeErrorLogging();
   MediaKit.ensureInitialized();
   await Hive.initFlutter();
   await Storage.init();

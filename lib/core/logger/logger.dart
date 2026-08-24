@@ -1,4 +1,4 @@
-/// 源码来自: https://github.com/Predidit/Kazumi/blob/main/lib/services/logging/logger.dart
+/// 源码来自: https://github.com/Predidit/Kazumi/blob/main/lib/services/logging/logger.dart 进行改进
 library;
 
 import 'dart:async';
@@ -9,6 +9,7 @@ import 'package:logger/logger.dart';
 import 'package:path/path.dart' as p;
 import 'package:path_provider/path_provider.dart';
 import 'package:synchronized/synchronized.dart';
+import 'package:flutter/foundation.dart';
 
 const Symbol _forceLogKey = #_forceLog;
 
@@ -36,10 +37,10 @@ class LiggLogPrinter extends LogPrinter {
     final level = _colorizeLevel(event.level);
     final message = _singleLineLogText(_stringifyMessage(event.message));
     final error =
-    event.error == null ? '' : ' | ${_singleLineLogText(event.error)}';
+        event.error == null ? '' : ' | ${_singleLineLogText(event.error)}';
     final lines = <String>['$time $level $message$error'];
 
-    if (event.level == Level.fatal) {
+    if (event.level == Level.fatal || event.level == Level.error) {
       lines.addAll(_formatStackTrace(event.stackTrace ?? StackTrace.current));
     }
 
@@ -88,18 +89,18 @@ class LiggLogPrinter extends LogPrinter {
         .toString()
         .split('\n')
         .where((line) =>
-    line.trim().isNotEmpty &&
-        !line.contains('package:logger/') &&
-        !line.contains('package:anime_flow/core/logger/logger.dart'))
+            line.trim().isNotEmpty &&
+            !line.contains('package:logger/') &&
+            !line.contains('package:anime_flow/core/logger/logger.dart'))
         .take(_fatalStackFrameLimit)
         .map((line) => '  ${line.trim()}');
   }
 }
 
-
 class LiggLogOutput extends LogOutput {
   static final Lock _logLock = Lock();
   static String? _logFilePath;
+  static const int _maxLogFileBytes = 5 * 1024 * 1024;
 
   static Future<String> _getLogFilePath() async {
     if (_logFilePath != null) return _logFilePath!;
@@ -120,11 +121,10 @@ class LiggLogOutput extends LogOutput {
       stdout.writeln(line);
     }
 
-    // Write to file if: warning/error/fatal OR forceLog is enabled
-    final forceLog = Zone.current[_forceLogKey] as bool? ?? false;
-    if (event.level.index >= Level.warning.index || forceLog) {
-      _writeToFile(event);
+    if (event.level == Level.info) {
+      return;
     }
+    _writeToFile(event);
   }
 
   void _writeToFile(OutputEvent event) {
@@ -132,6 +132,10 @@ class LiggLogOutput extends LogOutput {
       try {
         final filePath = await _getLogFilePath();
         final file = File(filePath);
+
+        if (await file.exists() && await file.length() > _maxLogFileBytes) {
+          await file.writeAsString('');
+        }
 
         final buffer = StringBuffer();
         for (var line in event.lines) {
@@ -181,38 +185,43 @@ class LiggLogger {
   /// Trace log - lowest level, very detailed information
   void t(dynamic message,
       {Object? error, StackTrace? stackTrace, bool forceLog = false}) {
-    _log(() => _logger.t(message, error: error), forceLog);
+    _log(() => _logger.t(message, error: error, stackTrace: stackTrace),
+        forceLog);
   }
 
   /// Debug log - detailed information for debugging
   void d(dynamic message,
       {Object? error, StackTrace? stackTrace, bool forceLog = false}) {
-    _log(() => _logger.d(message, error: error), forceLog);
+    _log(() => _logger.d(message, error: error, stackTrace: stackTrace),
+        forceLog);
   }
 
   /// Info log - informational messages
   void i(dynamic message,
       {Object? error, StackTrace? stackTrace, bool forceLog = false}) {
-    _log(() => _logger.i(message, error: error), forceLog);
+    _log(() => _logger.i(message, error: error, stackTrace: stackTrace),
+        forceLog);
   }
 
   /// Warning log - potentially harmful situations
   void w(dynamic message,
       {Object? error, StackTrace? stackTrace, bool forceLog = false}) {
-    _log(() => _logger.w(message, error: error), forceLog);
+    _log(() => _logger.w(message, error: error, stackTrace: stackTrace),
+        forceLog);
   }
 
   /// Error log - error events that might still allow the app to continue
   void e(dynamic message,
       {Object? error, StackTrace? stackTrace, bool forceLog = false}) {
-    _log(() => _logger.e(message, error: error), forceLog);
+    _log(() => _logger.e(message, error: error, stackTrace: stackTrace),
+        forceLog);
   }
 
   /// Fatal log - very severe error events that may cause the app to abort.
   void f(dynamic message,
       {Object? error, StackTrace? stackTrace, bool forceLog = false}) {
     _log(
-          () => _logger.f(
+      () => _logger.f(
         message,
         error: error,
         stackTrace: stackTrace ?? StackTrace.current,
@@ -220,6 +229,36 @@ class LiggLogger {
       forceLog,
     );
   }
+}
+
+bool _errorLoggingInitialized = false;
+
+void initializeErrorLogging() {
+  if (_errorLoggingInitialized) return;
+  _errorLoggingInitialized = true;
+
+  final previousFlutterError = FlutterError.onError;
+  FlutterError.onError = (details) {
+    LiggLogger().e(
+      details.exceptionAsString(),
+      error: details.exception,
+      stackTrace: details.stack,
+    );
+    if (previousFlutterError != null) {
+      previousFlutterError(details);
+    } else {
+      FlutterError.presentError(details);
+    }
+  };
+
+  PlatformDispatcher.instance.onError = (error, stackTrace) {
+    LiggLogger().f(
+      'Unhandled platform error',
+      error: error,
+      stackTrace: stackTrace,
+    );
+    return true;
+  };
 }
 
 Future<File> getLogsPath() async {

@@ -20,6 +20,7 @@ import 'package:anime_flow/features/settings/presentation/pages/about/about_page
 import 'package:anime_flow/features/settings/presentation/pages/about/thanks_page.dart';
 import 'package:anime_flow/features/settings/presentation/pages/agreement/agreement_page.dart';
 import 'package:anime_flow/features/settings/presentation/pages/danmaku_setting_page.dart';
+import 'package:anime_flow/features/settings/presentation/pages/error_logs_page.dart';
 import 'package:anime_flow/features/settings/presentation/pages/font/font_page.dart';
 import 'package:anime_flow/features/settings/presentation/pages/general_settings.dart';
 import 'package:anime_flow/features/settings/presentation/pages/playback_settings.dart';
@@ -335,6 +336,15 @@ class SettingAccountRoute extends GoRouteData with $SettingAccountRoute {
   @override
   Widget build(BuildContext context, GoRouterState state) =>
       const AccountSettingsPage();
+}
+
+@TypedGoRoute<SettingLogsRoute>(path: '/settings/logs')
+class SettingLogsRoute extends GoRouteData with $SettingLogsRoute {
+  const SettingLogsRoute();
+
+  @override
+  Widget build(BuildContext context, GoRouterState state) =>
+      const ErrorLogsPage();
 }
 
 @TypedGoRoute<SettingGeneralRoute>(path: '/settings/general')

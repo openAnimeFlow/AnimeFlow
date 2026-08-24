@@ -1513,6 +1513,60 @@ abstract class AppLocalizations {
   /// **'关于'**
   String get about;
 
+  /// No description provided for @errorLogs.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'错误日志'**
+  String get errorLogs;
+
+  /// No description provided for @errorLogsEmpty.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'暂无日志'**
+  String get errorLogsEmpty;
+
+  /// No description provided for @errorLogsLoadFailed.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'加载日志失败'**
+  String get errorLogsLoadFailed;
+
+  /// No description provided for @errorLogsClear.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'清空日志'**
+  String get errorLogsClear;
+
+  /// No description provided for @errorLogsCopy.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'复制日志'**
+  String get errorLogsCopy;
+
+  /// No description provided for @errorLogsCopied.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'已复制到剪贴板'**
+  String get errorLogsCopied;
+
+  /// No description provided for @errorLogsCleared.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'日志已清空'**
+  String get errorLogsCleared;
+
+  /// No description provided for @errorLogsClearFailed.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'清空日志失败'**
+  String get errorLogsClearFailed;
+
+  /// No description provided for @errorLogsCopyFailed.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'复制日志失败'**
+  String get errorLogsCopyFailed;
+
   /// No description provided for @themeMode.
   ///
   /// In zh_Hans, this message translates to:

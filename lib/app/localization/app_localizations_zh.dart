@@ -766,6 +766,33 @@ class AppLocalizationsZh extends AppLocalizations {
   String get about => '关于';
 
   @override
+  String get errorLogs => '错误日志';
+
+  @override
+  String get errorLogsEmpty => '暂无日志';
+
+  @override
+  String get errorLogsLoadFailed => '加载日志失败';
+
+  @override
+  String get errorLogsClear => '清空日志';
+
+  @override
+  String get errorLogsCopy => '复制日志';
+
+  @override
+  String get errorLogsCopied => '已复制到剪贴板';
+
+  @override
+  String get errorLogsCleared => '日志已清空';
+
+  @override
+  String get errorLogsClearFailed => '清空日志失败';
+
+  @override
+  String get errorLogsCopyFailed => '复制日志失败';
+
+  @override
   String get themeMode => '主题模式';
 
   @override
@@ -2419,6 +2446,33 @@ class AppLocalizationsZhHans extends AppLocalizationsZh {
 
   @override
   String get about => '关于';
+
+  @override
+  String get errorLogs => '错误日志';
+
+  @override
+  String get errorLogsEmpty => '暂无日志';
+
+  @override
+  String get errorLogsLoadFailed => '加载日志失败';
+
+  @override
+  String get errorLogsClear => '清空日志';
+
+  @override
+  String get errorLogsCopy => '复制日志';
+
+  @override
+  String get errorLogsCopied => '已复制到剪贴板';
+
+  @override
+  String get errorLogsCleared => '日志已清空';
+
+  @override
+  String get errorLogsClearFailed => '清空日志失败';
+
+  @override
+  String get errorLogsCopyFailed => '复制日志失败';
 
   @override
   String get themeMode => '主题模式';
@@ -4075,6 +4129,33 @@ class AppLocalizationsZhHantHk extends AppLocalizationsZh {
   String get about => '關於';
 
   @override
+  String get errorLogs => '錯誤日誌';
+
+  @override
+  String get errorLogsEmpty => '暫無日誌';
+
+  @override
+  String get errorLogsLoadFailed => '載入日誌失敗';
+
+  @override
+  String get errorLogsClear => '清空日誌';
+
+  @override
+  String get errorLogsCopy => '複製日誌';
+
+  @override
+  String get errorLogsCopied => '已複製到剪貼簿';
+
+  @override
+  String get errorLogsCleared => '日誌已清空';
+
+  @override
+  String get errorLogsClearFailed => '清空日誌失敗';
+
+  @override
+  String get errorLogsCopyFailed => '複製日誌失敗';
+
+  @override
   String get themeMode => '主題模式';
 
   @override
@@ -5646,6 +5727,33 @@ class AppLocalizationsZhHantTw extends AppLocalizationsZh {
 
   @override
   String get about => '關於';
+
+  @override
+  String get errorLogs => '錯誤日誌';
+
+  @override
+  String get errorLogsEmpty => '暫無日誌';
+
+  @override
+  String get errorLogsLoadFailed => '載入日誌失敗';
+
+  @override
+  String get errorLogsClear => '清空日誌';
+
+  @override
+  String get errorLogsCopy => '複製日誌';
+
+  @override
+  String get errorLogsCopied => '已複製到剪貼簿';
+
+  @override
+  String get errorLogsCleared => '日誌已清空';
+
+  @override
+  String get errorLogsClearFailed => '清空日誌失敗';
+
+  @override
+  String get errorLogsCopyFailed => '複製日誌失敗';
 
   @override
   String get themeMode => '主題模式';

@@ -123,6 +123,7 @@ dependencies:
 
   # 日志
   logger: ^2.6.2 # 输出结构化调试日志。
+  synchronized: ^3.4.1+2 # 串行化日志文件写入。
 
 dependency_overrides:
   media_kit_libs_linux: # 覆盖 Linux 平台 media_kit 运行库来源。

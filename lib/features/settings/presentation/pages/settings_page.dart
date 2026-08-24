@@ -12,6 +12,7 @@ import 'package:anime_flow/features/settings/presentation/pages/account_settings
 import 'package:anime_flow/features/settings/presentation/pages/general_settings.dart';
 import 'package:anime_flow/features/settings/presentation/pages/playback_settings.dart';
 import 'package:anime_flow/features/settings/presentation/pages/about/about_page.dart';
+import 'package:anime_flow/features/settings/presentation/pages/error_logs_page.dart';
 
 ///设置页面
 class SettingsPage extends StatefulWidget {
@@ -87,6 +88,12 @@ class _SettingsPageState extends State<SettingsPage> {
       _SettingsCategory(
         title: l10n.otherSettings,
         items: [
+          _SettingsMenuItem(
+            title: l10n.errorLogs,
+            icon: Icons.receipt_long_outlined,
+            route: const SettingLogsRoute(),
+            page: const ErrorLogsPage(),
+          ),
           _SettingsMenuItem(
             title: l10n.about,
             icon: Icons.info_outline,

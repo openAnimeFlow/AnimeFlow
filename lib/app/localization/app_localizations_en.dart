@@ -773,6 +773,33 @@ class AppLocalizationsEn extends AppLocalizations {
   String get about => 'About';
 
   @override
+  String get errorLogs => 'Error Logs';
+
+  @override
+  String get errorLogsEmpty => 'No logs yet';
+
+  @override
+  String get errorLogsLoadFailed => 'Failed to load logs';
+
+  @override
+  String get errorLogsClear => 'Clear logs';
+
+  @override
+  String get errorLogsCopy => 'Copy logs';
+
+  @override
+  String get errorLogsCopied => 'Copied to clipboard';
+
+  @override
+  String get errorLogsCleared => 'Logs cleared';
+
+  @override
+  String get errorLogsClearFailed => 'Failed to clear logs';
+
+  @override
+  String get errorLogsCopyFailed => 'Failed to copy logs';
+
+  @override
   String get themeMode => 'Theme mode';
 
   @override

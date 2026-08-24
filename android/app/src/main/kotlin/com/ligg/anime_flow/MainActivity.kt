@@ -1,9 +1,12 @@
 package com.ligg.anime_flow
 
+import android.os.Build
+import android.os.Process
 import android.net.TrafficStats
 import android.os.SystemClock
 import io.flutter.embedding.android.FlutterActivity
 import io.flutter.embedding.engine.FlutterEngine
+import io.flutter.embedding.engine.FlutterShellArgs
 import io.flutter.plugin.common.MethodCall
 import io.flutter.plugin.common.MethodChannel
 import io.flutter.plugin.common.MethodChannel.MethodCallHandler
@@ -12,6 +15,14 @@ import kotlin.math.max
 class MainActivity : FlutterActivity() {
     private val channelName = "network_speed_monitor"
     private lateinit var methodChannel: MethodChannel
+
+    override fun getFlutterShellArgs(): FlutterShellArgs {
+        val args = super.getFlutterShellArgs()
+        if (Build.SUPPORTED_ABIS.contains("armeabi-v7a") && !Process.is64Bit()) {
+            args.add(FlutterShellArgs.ARG_DISABLE_IMPELLER)
+        }
+        return args
+    }
 
     // Native 侧用于计算速率的基准值
     private var lastRxBytes: Long? = null

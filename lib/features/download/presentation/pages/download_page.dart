@@ -1,4 +1,6 @@
 import 'package:anime_flow/app/localization/app_localizations.dart';
+import 'package:anime_flow/app/router/app_router.dart';
+import 'package:anime_flow/app/router/model/play_route_extra.dart';
 import 'package:anime_flow/features/download/presentation/providers/download_provider.dart';
 import 'package:anime_flow/shared/models/download/download_episode.dart';
 import 'package:anime_flow/shared/models/download/download_record.dart';
@@ -128,6 +130,9 @@ class _DownloadEpisodeTile extends ConsumerWidget {
         episode.status == DownloadStatus.pending;
     final canRetry = episode.status == DownloadStatus.paused ||
         episode.status == DownloadStatus.failed;
+    final localMediaPath =
+        ref.watch(downloadManagerProvider).getLocalMediaPath(episode);
+    final canPlay = localMediaPath != null;
 
     return Row(
       children: [
@@ -163,6 +168,18 @@ class _DownloadEpisodeTile extends ConsumerWidget {
           ),
         ),
         const SizedBox(width: 8),
+        IconButton(
+          tooltip: l10n.play,
+          icon: const Icon(Icons.play_arrow_rounded),
+          onPressed: canPlay
+              ? () => _playOfflineEpisode(
+                    context,
+                    record: record,
+                    episode: episode,
+                    localMediaPath: localMediaPath,
+                  )
+              : null,
+        ),
         if (canPause)
           IconButton(
             tooltip: l10n.pause,
@@ -209,6 +226,36 @@ class _DownloadEpisodeTile extends ConsumerWidget {
         ),
       ],
     );
+  }
+
+  void _playOfflineEpisode(
+    BuildContext context, {
+    required DownloadRecord record,
+    required DownloadEpisode episode,
+    required String localMediaPath,
+  }) {
+    final completedEpisodes = record.episodes.values
+        .where((item) => item.status == DownloadStatus.completed)
+        .toList();
+    PlayRoute.fromExtra(
+      PlayRouteExtra(
+        playExtra: PlayExtra(
+          subjectId: record.subjectId,
+          subjectName: record.subjectName,
+          subjectCover: record.subjectCover,
+          subjectAliases: const [],
+        ),
+        continueEpisodeId:
+            episode.bangumiEpisodeId > 0 ? episode.bangumiEpisodeId : null,
+        isOfflineMode: true,
+        offlineMediaPath: localMediaPath,
+        offlineDanmakuPath: episode.localDanmakuPath.trim().isEmpty
+            ? null
+            : episode.localDanmakuPath,
+        offlineEpisodeUrl: episode.episodeUrl,
+        offlineEpisodes: completedEpisodes,
+      ),
+    ).push(context);
   }
 
   String _episodeTitle(AppLocalizations l10n, DownloadEpisode episode) {

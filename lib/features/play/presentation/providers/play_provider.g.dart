@@ -67,7 +67,7 @@ final class PlaySessionProvider
   }
 }
 
-String _$playSessionHash() => r'0949d929f173cbd51f2cff448717ca7ebedd0d5b';
+String _$playSessionHash() => r'babd974b51a0150f17d839a1bf105e40886e87ae';
 
 @ProviderFor(PlayStateNotifier)
 final playStateProvider = PlayStateNotifierProvider._();

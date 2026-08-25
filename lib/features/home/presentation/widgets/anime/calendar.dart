@@ -434,6 +434,13 @@ class _CalendarViewState extends State<CalendarView> {
               minHeight: 50,
               minWidth: 50
             ),
+            style: ButtonStyle(
+              mouseCursor: WidgetStatePropertyAll(
+                enabled
+                    ? SystemMouseCursors.click
+                    : SystemMouseCursors.forbidden,
+              ),
+            ),
           ),
         ),
       ),

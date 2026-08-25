@@ -311,6 +311,10 @@ class _PlayRecordViewState extends ConsumerState<PlayRecordView> {
             onPressed: enabled ? onPressed : null,
             constraints: const BoxConstraints(minHeight: 50, minWidth: 50),
             icon: Icon(icon),
+            style: ButtonStyle(
+                mouseCursor: WidgetStatePropertyAll(
+              enabled ? SystemMouseCursors.click : SystemMouseCursors.forbidden,
+            )),
           ),
         ),
       ),

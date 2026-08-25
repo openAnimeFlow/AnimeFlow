@@ -1668,6 +1668,49 @@ class AppLocalizationsZh extends AppLocalizations {
   }
 
   @override
+  String get downloadsTitle => '下載管理';
+
+  @override
+  String get downloadTasksEmpty => '暫無下載任務';
+
+  @override
+  String get downloadSelectionTitle => '下載選集';
+
+  @override
+  String selectedEpisodesCount(Object count) {
+    return '已選 $count 集';
+  }
+
+  @override
+  String get startDownload => '開始下載';
+
+  @override
+  String get deleteDownloadTask => '刪除下載任務';
+
+  @override
+  String downloadTaskProgress(Object completed, Object total) {
+    return '已完成 $completed/$total';
+  }
+
+  @override
+  String get downloadQueued => '排隊中';
+
+  @override
+  String get downloadResolving => '解析中';
+
+  @override
+  String get downloadDownloadingStatus => '下載中';
+
+  @override
+  String get downloadCompletedStatus => '已完成';
+
+  @override
+  String get downloadFailedStatus => '已失敗';
+
+  @override
+  String get downloadPausedStatus => '已暫停';
+
+  @override
   String get resetPassword => '重設密碼';
 
   @override
@@ -3364,6 +3407,49 @@ class AppLocalizationsZhHans extends AppLocalizationsZh {
   }
 
   @override
+  String get downloadsTitle => '下载管理';
+
+  @override
+  String get downloadTasksEmpty => '暂无下载任务';
+
+  @override
+  String get downloadSelectionTitle => '下载选集';
+
+  @override
+  String selectedEpisodesCount(Object count) {
+    return '已选 $count 集';
+  }
+
+  @override
+  String get startDownload => '开始下载';
+
+  @override
+  String get deleteDownloadTask => '删除下载任务';
+
+  @override
+  String downloadTaskProgress(Object completed, Object total) {
+    return '已完成 $completed/$total';
+  }
+
+  @override
+  String get downloadQueued => '排队中';
+
+  @override
+  String get downloadResolving => '解析中';
+
+  @override
+  String get downloadDownloadingStatus => '下载中';
+
+  @override
+  String get downloadCompletedStatus => '已完成';
+
+  @override
+  String get downloadFailedStatus => '已失败';
+
+  @override
+  String get downloadPausedStatus => '已暂停';
+
+  @override
   String get resetPassword => '重置密码';
 
   @override
@@ -4979,6 +5065,49 @@ class AppLocalizationsZhHantHk extends AppLocalizationsZh {
   }
 
   @override
+  String get downloadsTitle => '下載管理';
+
+  @override
+  String get downloadTasksEmpty => '暫無下載任務';
+
+  @override
+  String get downloadSelectionTitle => '下載選集';
+
+  @override
+  String selectedEpisodesCount(Object count) {
+    return '已選 $count 集';
+  }
+
+  @override
+  String get startDownload => '開始下載';
+
+  @override
+  String get deleteDownloadTask => '刪除下載任務';
+
+  @override
+  String downloadTaskProgress(Object completed, Object total) {
+    return '已完成 $completed/$total';
+  }
+
+  @override
+  String get downloadQueued => '排隊中';
+
+  @override
+  String get downloadResolving => '解析中';
+
+  @override
+  String get downloadDownloadingStatus => '下載中';
+
+  @override
+  String get downloadCompletedStatus => '已完成';
+
+  @override
+  String get downloadFailedStatus => '已失敗';
+
+  @override
+  String get downloadPausedStatus => '已暫停';
+
+  @override
   String get resetPassword => '重設密碼';
 
   @override
@@ -6592,6 +6721,49 @@ class AppLocalizationsZhHantTw extends AppLocalizationsZh {
   String playEpisode(Object episode) {
     return '播放（$episode）';
   }
+
+  @override
+  String get downloadsTitle => '下載管理';
+
+  @override
+  String get downloadTasksEmpty => '暫無下載任務';
+
+  @override
+  String get downloadSelectionTitle => '下載選集';
+
+  @override
+  String selectedEpisodesCount(Object count) {
+    return '已選 $count 集';
+  }
+
+  @override
+  String get startDownload => '開始下載';
+
+  @override
+  String get deleteDownloadTask => '刪除下載任務';
+
+  @override
+  String downloadTaskProgress(Object completed, Object total) {
+    return '已完成 $completed/$total';
+  }
+
+  @override
+  String get downloadQueued => '排隊中';
+
+  @override
+  String get downloadResolving => '解析中';
+
+  @override
+  String get downloadDownloadingStatus => '下載中';
+
+  @override
+  String get downloadCompletedStatus => '已完成';
+
+  @override
+  String get downloadFailedStatus => '已失敗';
+
+  @override
+  String get downloadPausedStatus => '已暫停';
 
   @override
   String get resetPassword => '重設密碼';

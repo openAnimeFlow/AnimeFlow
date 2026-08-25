@@ -217,6 +217,15 @@ class DownloadController extends _$DownloadController {
     _refresh();
   }
 
+  Future<void> deleteEpisode(String recordKey, String episodeUrl) async {
+    ref.read(downloadManagerProvider).cancel(recordKey, episodeUrl);
+    await ref.read(downloadRepositoryProvider).deleteEpisode(
+          recordKey,
+          episodeUrl,
+        );
+    _refresh(speed: 0);
+  }
+
   Future<void> resume(StartDownloadParams params) {
     return startDownload(params);
   }

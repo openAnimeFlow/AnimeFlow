@@ -485,6 +485,21 @@
   "episodeNumber": "Episode {episode}",
   "watchedLabel": "Watched {progress}",
   "playEpisode": "Play ({episode})"
+  ,"downloadsTitle": "Downloads"
+  ,"downloadTasksEmpty": "No download tasks"
+  ,"downloadSelectionTitle": "Download episodes"
+  ,"selectedEpisodesCount": "{count} selected"
+  ,"@selectedEpisodesCount": {"placeholders": {"count": {}}}
+  ,"startDownload": "Start download"
+  ,"deleteDownloadTask": "Delete download task"
+  ,"downloadTaskProgress": "{completed}/{total} completed"
+  ,"@downloadTaskProgress": {"placeholders": {"completed": {}, "total": {}}}
+  ,"downloadQueued": "Queued"
+  ,"downloadResolving": "Resolving"
+  ,"downloadDownloadingStatus": "Downloading"
+  ,"downloadCompletedStatus": "Completed"
+  ,"downloadFailedStatus": "Failed"
+  ,"downloadPausedStatus": "Paused"
   ,"resetPassword": "Reset password"
   ,"newPassword": "New password"
   ,"emailCode": "Email verification code"

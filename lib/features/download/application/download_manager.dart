@@ -350,7 +350,7 @@ class DownloadManager implements IDownloadManager {
       existingBytes = await tmpFile.length();
     }
 
-    final headers = Map<String, String>.from(request.httpHeaders);
+    var headers = _directDownloadHeaders(request.httpHeaders);
     if (existingBytes > 0) {
       headers['Range'] = 'bytes=$existingBytes-';
     }
@@ -369,6 +369,16 @@ class DownloadManager implements IDownloadManager {
         await tmpFile.delete();
         existingBytes = 0;
         headers.remove('Range');
+        response = await _httpClient.getStream(
+          request.networkMediaUrl,
+          headers: headers,
+          cancelToken: task.cancelToken,
+        );
+      } else if (_shouldRetryWithoutReferer(error, headers)) {
+        headers = _withoutReferer(headers);
+        if (existingBytes > 0) {
+          headers['Range'] = 'bytes=$existingBytes-';
+        }
         response = await _httpClient.getStream(
           request.networkMediaUrl,
           headers: headers,
@@ -495,6 +505,10 @@ class DownloadManager implements IDownloadManager {
     DownloadRequest request,
     _DownloadTask task,
   ) async {
+    if (!_looksLikeM3u8Url(request.networkMediaUrl)) {
+      return null;
+    }
+
     try {
       final content = await _fetchPlaylistText(
         request.networkMediaUrl,
@@ -534,6 +548,45 @@ class DownloadManager implements IDownloadManager {
     );
     task.throwIfStopped();
     return content;
+  }
+
+  Map<String, String> _directDownloadHeaders(Map<String, String> headers) {
+    return {
+      ...headers,
+      'accept': headers['accept'] ?? headers['Accept'] ?? '*/*',
+    };
+  }
+
+  bool _shouldRetryWithoutReferer(
+    DioException error,
+    Map<String, String> headers,
+  ) {
+    final status = error.response?.statusCode;
+    if (status != HttpStatus.badRequest && status != HttpStatus.forbidden) {
+      return false;
+    }
+    return headers.keys.any((key) => key.toLowerCase() == 'referer');
+  }
+
+  Map<String, String> _withoutReferer(Map<String, String> headers) {
+    return Map<String, String>.fromEntries(
+      headers.entries.where((entry) {
+        final key = entry.key.toLowerCase();
+        return key != 'referer' && key != 'origin';
+      }),
+    );
+  }
+
+  bool _looksLikeM3u8Url(String url) {
+    final uri = Uri.tryParse(url);
+    if (uri == null) {
+      return url.toLowerCase().contains('.m3u8');
+    }
+    final path = uri.path.toLowerCase();
+    if (path.endsWith('.m3u8')) {
+      return true;
+    }
+    return uri.query.toLowerCase().contains('m3u8');
   }
 
   Future<String> _prepareEpisodeDirectory(DownloadRequest request) async {

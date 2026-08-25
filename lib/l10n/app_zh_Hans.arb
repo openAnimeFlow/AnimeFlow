@@ -527,6 +527,21 @@
   "episodeNumber": "第{episode}集",
   "watchedLabel": "观看{progress}",
   "playEpisode": "播放（{episode}）"
+  ,"downloadsTitle": "下载管理"
+  ,"downloadTasksEmpty": "暂无下载任务"
+  ,"downloadSelectionTitle": "下载选集"
+  ,"selectedEpisodesCount": "已选 {count} 集"
+  ,"@selectedEpisodesCount": {"placeholders": {"count": {}}}
+  ,"startDownload": "开始下载"
+  ,"deleteDownloadTask": "删除下载任务"
+  ,"downloadTaskProgress": "已完成 {completed}/{total}"
+  ,"@downloadTaskProgress": {"placeholders": {"completed": {}, "total": {}}}
+  ,"downloadQueued": "排队中"
+  ,"downloadResolving": "解析中"
+  ,"downloadDownloadingStatus": "下载中"
+  ,"downloadCompletedStatus": "已完成"
+  ,"downloadFailedStatus": "已失败"
+  ,"downloadPausedStatus": "已暂停"
   ,"resetPassword": "重置密码"
   ,"newPassword": "新密码"
   ,"emailCode": "邮箱验证码"

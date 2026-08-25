@@ -1710,6 +1710,49 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
+  String get downloadsTitle => 'Downloads';
+
+  @override
+  String get downloadTasksEmpty => 'No download tasks';
+
+  @override
+  String get downloadSelectionTitle => 'Download episodes';
+
+  @override
+  String selectedEpisodesCount(Object count) {
+    return '$count selected';
+  }
+
+  @override
+  String get startDownload => 'Start download';
+
+  @override
+  String get deleteDownloadTask => 'Delete download task';
+
+  @override
+  String downloadTaskProgress(Object completed, Object total) {
+    return '$completed/$total completed';
+  }
+
+  @override
+  String get downloadQueued => 'Queued';
+
+  @override
+  String get downloadResolving => 'Resolving';
+
+  @override
+  String get downloadDownloadingStatus => 'Downloading';
+
+  @override
+  String get downloadCompletedStatus => 'Completed';
+
+  @override
+  String get downloadFailedStatus => 'Failed';
+
+  @override
+  String get downloadPausedStatus => 'Paused';
+
+  @override
   String get resetPassword => 'Reset password';
 
   @override

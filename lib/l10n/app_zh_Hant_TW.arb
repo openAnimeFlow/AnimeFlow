@@ -516,4 +516,19 @@
   ,"verifyButtonXPath": "驗證按鈕 XPath"
   ,"submitCaptchaHint": "輸入驗證碼後要點擊的按鈕"
   ,"autoClickCaptchaHint": "偵測到後自動點擊的驗證按鈕（例如「我不是機器人」）"
+  ,"downloadsTitle": "下載管理"
+  ,"downloadTasksEmpty": "暫無下載任務"
+  ,"downloadSelectionTitle": "下載選集"
+  ,"selectedEpisodesCount": "已選 {count} 集"
+  ,"@selectedEpisodesCount": {"placeholders": {"count": {}}}
+  ,"startDownload": "開始下載"
+  ,"deleteDownloadTask": "刪除下載任務"
+  ,"downloadTaskProgress": "已完成 {completed}/{total}"
+  ,"@downloadTaskProgress": {"placeholders": {"completed": {}, "total": {}}}
+  ,"downloadQueued": "排隊中"
+  ,"downloadResolving": "解析中"
+  ,"downloadDownloadingStatus": "下載中"
+  ,"downloadCompletedStatus": "已完成"
+  ,"downloadFailedStatus": "已失敗"
+  ,"downloadPausedStatus": "已暫停"
 }

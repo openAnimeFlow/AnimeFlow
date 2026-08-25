@@ -54,6 +54,47 @@ void main() {
       expect(File(result.localMediaPath).readAsStringSync(), 'direct-body');
     });
 
+    test('downloads direct media without playlist probing', () async {
+      final episode = _episode(url: 'direct-no-probe');
+      final manager = _manager(tempDir);
+
+      final completed = _waitForCompletion(manager);
+      await manager.enqueue(
+        _request(
+          episode: episode,
+          episodeUrl: 'direct-no-probe',
+          baseUri: baseUri,
+          networkMediaUrl: baseUri.resolve('/direct-no-probe.mp4').toString(),
+        ),
+      );
+
+      final result = await completed;
+
+      expect(result.status, DownloadStatus.completed);
+      expect(File(result.localMediaPath).readAsStringSync(), 'no-probe-body');
+    });
+
+    test('retries direct media without referer after client error', () async {
+      final episode = _episode(url: 'direct-referer-retry');
+      final manager = _manager(tempDir);
+
+      final completed = _waitForCompletion(manager);
+      await manager.enqueue(
+        _request(
+          episode: episode,
+          episodeUrl: 'direct-referer-retry',
+          baseUri: baseUri,
+          networkMediaUrl:
+              baseUri.resolve('/direct-referer-retry.mp4').toString(),
+        ),
+      );
+
+      final result = await completed;
+
+      expect(result.status, DownloadStatus.completed);
+      expect(File(result.localMediaPath).readAsStringSync(), 'retry-body');
+    });
+
     test('resumes direct media from existing tmp file with Range header',
         () async {
       final episode = _episode(url: 'range');
@@ -174,6 +215,18 @@ void _serveRequests(HttpServer server) {
     switch (request.uri.path) {
       case '/direct.mp4':
         request.response.write('direct-body');
+      case '/direct-no-probe.mp4':
+        if (request.headers.value(HttpHeaders.acceptHeader) != '*/*') {
+          request.response.statusCode = HttpStatus.badRequest;
+        } else {
+          request.response.write('no-probe-body');
+        }
+      case '/direct-referer-retry.mp4':
+        if (request.headers.value(HttpHeaders.refererHeader) != null) {
+          request.response.statusCode = HttpStatus.badRequest;
+        } else {
+          request.response.write('retry-body');
+        }
       case '/range.mp4':
         final full = utf8.encode('direct-body');
         final range = request.headers.value(HttpHeaders.rangeHeader);

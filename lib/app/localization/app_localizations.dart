@@ -3193,6 +3193,84 @@ abstract class AppLocalizations {
   /// **'播放（{episode}）'**
   String playEpisode(Object episode);
 
+  /// No description provided for @downloadsTitle.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'下载管理'**
+  String get downloadsTitle;
+
+  /// No description provided for @downloadTasksEmpty.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'暂无下载任务'**
+  String get downloadTasksEmpty;
+
+  /// No description provided for @downloadSelectionTitle.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'下载选集'**
+  String get downloadSelectionTitle;
+
+  /// No description provided for @selectedEpisodesCount.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'已选 {count} 集'**
+  String selectedEpisodesCount(Object count);
+
+  /// No description provided for @startDownload.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'开始下载'**
+  String get startDownload;
+
+  /// No description provided for @deleteDownloadTask.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'删除下载任务'**
+  String get deleteDownloadTask;
+
+  /// No description provided for @downloadTaskProgress.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'已完成 {completed}/{total}'**
+  String downloadTaskProgress(Object completed, Object total);
+
+  /// No description provided for @downloadQueued.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'排队中'**
+  String get downloadQueued;
+
+  /// No description provided for @downloadResolving.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'解析中'**
+  String get downloadResolving;
+
+  /// No description provided for @downloadDownloadingStatus.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'下载中'**
+  String get downloadDownloadingStatus;
+
+  /// No description provided for @downloadCompletedStatus.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'已完成'**
+  String get downloadCompletedStatus;
+
+  /// No description provided for @downloadFailedStatus.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'已失败'**
+  String get downloadFailedStatus;
+
+  /// No description provided for @downloadPausedStatus.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'已暂停'**
+  String get downloadPausedStatus;
+
   /// No description provided for @resetPassword.
   ///
   /// In zh_Hans, this message translates to:

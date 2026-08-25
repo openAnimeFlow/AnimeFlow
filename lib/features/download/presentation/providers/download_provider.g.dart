@@ -172,7 +172,7 @@ final class DownloadControllerProvider
 }
 
 String _$downloadControllerHash() =>
-    r'ca6c3c7e4f36de8e3c5ae060cf9f41614aec60de';
+    r'75c0150e01437b08cf81962bf6888788f5c4d1b7';
 
 abstract class _$DownloadController extends $Notifier<DownloadState> {
   DownloadState build();

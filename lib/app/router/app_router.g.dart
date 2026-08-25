@@ -19,6 +19,7 @@ List<RouteBase> get $appRoutes => [
       $charactersRoute,
       $characterInfoRoute,
       $playRecordRoute,
+      $downloadRoute,
       $userSpaceRoute,
       $imageSearchRoute,
       $settingsRoute,
@@ -490,6 +491,33 @@ mixin $PlayRecordRoute on GoRouteData {
   @override
   String get location => GoRouteData.$location(
         '/play_record',
+      );
+
+  @override
+  void go(BuildContext context) => context.go(location);
+
+  @override
+  Future<T?> push<T>(BuildContext context) => context.push<T>(location);
+
+  @override
+  void pushReplacement(BuildContext context) =>
+      context.pushReplacement(location);
+
+  @override
+  void replace(BuildContext context) => context.replace(location);
+}
+
+RouteBase get $downloadRoute => GoRouteData.$route(
+      path: '/download',
+      factory: $DownloadRoute._fromState,
+    );
+
+mixin $DownloadRoute on GoRouteData {
+  static DownloadRoute _fromState(GoRouterState state) => const DownloadRoute();
+
+  @override
+  String get location => GoRouteData.$location(
+        '/download',
       );
 
   @override

@@ -1,0 +1,303 @@
+import 'package:anime_flow/core/constants/constants.dart';
+import 'package:anime_flow/core/crawler/cookie_manager.dart';
+import 'package:anime_flow/features/download/application/download_manager.dart';
+import 'package:anime_flow/features/download/application/video_source_resolver_pool.dart';
+import 'package:anime_flow/features/download/data/repositories/download_repository.dart';
+import 'package:anime_flow/features/play/presentation/providers/video_source_service.dart';
+import 'package:anime_flow/shared/models/download/download_episode.dart';
+import 'package:anime_flow/shared/models/download/download_record.dart';
+import 'package:anime_flow/shared/models/download/download_status.dart';
+import 'package:anime_flow/core/utils/utils.dart';
+import 'package:riverpod_annotation/riverpod_annotation.dart';
+
+part 'download_provider.g.dart';
+
+class DownloadState {
+  const DownloadState({
+    this.records = const [],
+    this.currentSpeed = 0,
+    this.totalTasks = 0,
+    this.completedTasks = 0,
+  });
+
+  final List<DownloadRecord> records;
+  final double currentSpeed;
+  final int totalTasks;
+  final int completedTasks;
+
+  DownloadState copyWith({
+    List<DownloadRecord>? records,
+    double? currentSpeed,
+    int? totalTasks,
+    int? completedTasks,
+  }) {
+    return DownloadState(
+      records: records ?? this.records,
+      currentSpeed: currentSpeed ?? this.currentSpeed,
+      totalTasks: totalTasks ?? this.totalTasks,
+      completedTasks: completedTasks ?? this.completedTasks,
+    );
+  }
+}
+
+class StartDownloadParams {
+  const StartDownloadParams({
+    required this.subjectId,
+    required this.subjectName,
+    required this.subjectCover,
+    required this.sourceName,
+    required this.sourceBaseUrl,
+    required this.lineIndex,
+    required this.episodeUrl,
+    required this.episodeTitle,
+    required this.bangumiEpisodeId,
+    required this.episodeSort,
+    required this.episodeIndex,
+    this.useLegacyParser = false,
+    this.networkMediaUrl = '',
+  });
+
+  final int subjectId;
+  final String subjectName;
+  final String subjectCover;
+  final String sourceName;
+  final String sourceBaseUrl;
+  final int lineIndex;
+  final String episodeUrl;
+  final String episodeTitle;
+  final int bangumiEpisodeId;
+  final double episodeSort;
+  final int episodeIndex;
+  final bool useLegacyParser;
+
+  /// Optional pre-resolved M3U8/MP4 URL. When empty, the controller resolves
+  /// [episodeUrl] with an independent WebView resolver from the pool.
+  final String networkMediaUrl;
+
+  String get recordKey => DownloadRecord.buildKey(
+        sourceName: sourceName,
+        subjectId: subjectId,
+      );
+}
+
+@Riverpod(keepAlive: true)
+IDownloadRepository downloadRepository(Ref ref) {
+  return DownloadRepository();
+}
+
+@Riverpod(keepAlive: true)
+IDownloadManager downloadManager(Ref ref) {
+  return DownloadManager(repository: ref.watch(downloadRepositoryProvider));
+}
+
+@Riverpod(keepAlive: true)
+IVideoSourceResolverPool videoSourceResolverPool(Ref ref) {
+  final pool = VideoSourceResolverPool();
+  ref.onDispose(pool.dispose);
+  return pool;
+}
+
+@Riverpod(keepAlive: true)
+class DownloadController extends _$DownloadController {
+  @override
+  DownloadState build() {
+    final manager = ref.watch(downloadManagerProvider);
+    final resolverPool = ref.watch(videoSourceResolverPoolProvider);
+    manager.onProgress = (recordKey, episodeUrl, episode, speed) {
+      _refresh(speed: speed);
+    };
+    ref.onDispose(() {
+      manager.onProgress = null;
+      resolverPool.cancelAll();
+    });
+    return _buildState(
+      ref.watch(downloadRepositoryProvider).getAllRecords(),
+      speed: 0,
+    );
+  }
+
+  Future<void> startDownload(StartDownloadParams params) async {
+    final repository = ref.read(downloadRepositoryProvider);
+    final record = repository.getRecord(params.recordKey) ??
+        DownloadRecord(
+          subjectId: params.subjectId,
+          subjectName: params.subjectName,
+          subjectCover: params.subjectCover,
+          sourceName: params.sourceName,
+          sourceBaseUrl: params.sourceBaseUrl,
+          episodes: {},
+          createdAt: DateTime.now(),
+        );
+
+    final normalizedEpisodeUrl = _resolveEpisodeUrl(
+      params.sourceBaseUrl,
+      params.episodeUrl,
+    );
+    final existing = record.episodes[normalizedEpisodeUrl];
+    final episode = existing ??
+        DownloadEpisode(
+          episodeUrl: normalizedEpisodeUrl,
+          bangumiEpisodeId: params.bangumiEpisodeId,
+          episodeSort: params.episodeSort,
+          episodeIndex: params.episodeIndex,
+          episodeTitle: params.episodeTitle,
+          lineIndex: params.lineIndex,
+          sourceName: params.sourceName,
+          status: DownloadStatus.resolving,
+        );
+
+    episode
+      ..status = DownloadStatus.resolving
+      ..errorMessage = '';
+    record.episodes = Map<String, DownloadEpisode>.from(record.episodes)
+      ..[normalizedEpisodeUrl] = episode;
+    await repository.putRecord(record);
+    _refresh();
+
+    try {
+      final mediaUrl = params.networkMediaUrl.trim().isNotEmpty
+          ? params.networkMediaUrl.trim()
+          : await _resolveNetworkMediaUrl(
+              normalizedEpisodeUrl,
+              useLegacyParser: params.useLegacyParser,
+            );
+
+      episode.networkMediaUrl = mediaUrl;
+      await repository.updateEpisode(
+        params.recordKey,
+        normalizedEpisodeUrl,
+        episode,
+      );
+
+      await ref.read(downloadManagerProvider).enqueue(
+            DownloadRequest(
+              recordKey: params.recordKey,
+              subjectId: params.subjectId,
+              sourceName: params.sourceName,
+              episodeUrl: normalizedEpisodeUrl,
+              networkMediaUrl: mediaUrl,
+              httpHeaders: await _buildHeaders(
+                params.sourceBaseUrl,
+                normalizedEpisodeUrl,
+                params.sourceName,
+              ),
+              episode: episode,
+            ),
+          );
+      _refresh();
+    } catch (error) {
+      if (error is VideoSourceCancelledException) {
+        episode.status = DownloadStatus.paused;
+      } else {
+        episode
+          ..status = DownloadStatus.failed
+          ..errorMessage = error.toString();
+      }
+      await repository.updateEpisode(
+        params.recordKey,
+        normalizedEpisodeUrl,
+        episode,
+      );
+      _refresh();
+    }
+  }
+
+  Future<void> startDownloads(List<StartDownloadParams> paramsList) async {
+    for (final params in paramsList) {
+      await startDownload(params);
+    }
+  }
+
+  void pause(String recordKey, String episodeUrl) {
+    ref.read(downloadManagerProvider).pause(recordKey, episodeUrl);
+  }
+
+  void cancel(String recordKey, String episodeUrl) {
+    ref.read(downloadManagerProvider).cancel(recordKey, episodeUrl);
+    _refresh();
+  }
+
+  Future<void> resume(StartDownloadParams params) {
+    return startDownload(params);
+  }
+
+  Future<String> _resolveNetworkMediaUrl(
+    String episodeUrl, {
+    required bool useLegacyParser,
+  }) async {
+    final source = await ref.read(videoSourceResolverPoolProvider).resolve(
+          VideoSourceResolveRequest(
+            episodeUrl: episodeUrl,
+            useLegacyParser: useLegacyParser,
+          ),
+        );
+    return source.url;
+  }
+
+  Future<Map<String, String>> _buildHeaders(
+    String sourceBaseUrl,
+    String episodeUrl,
+    String sourceName,
+  ) async {
+    final cookie = await _cookieHeaderFor(episodeUrl, sourceName);
+    return {
+      'referer': '${sourceBaseUrl.replaceAll(RegExp(r'/+$'), '')}/',
+      'accept-language': Utils.getRandomAcceptedLanguage(),
+      'connection': 'keep-alive',
+      Constants.userAgentName: Utils.getRandomUA(),
+      if (cookie.isNotEmpty) 'Cookie': cookie,
+    };
+  }
+
+  Future<String> _cookieHeaderFor(String url, String name) async {
+    if (!CookieManager.instance.hasCookies(name)) {
+      return '';
+    }
+    final uri = Uri.tryParse(url);
+    if (uri == null) {
+      return '';
+    }
+    try {
+      final cookies =
+          await CookieManager.instance.getJar(name).loadForRequest(uri);
+      return cookies.map((cookie) => '${cookie.name}=${cookie.value}').join(
+            '; ',
+          );
+    } catch (_) {
+      return '';
+    }
+  }
+
+  void _refresh({double? speed}) {
+    final currentSpeed = speed ?? state.currentSpeed;
+    state = _buildState(
+      ref.read(downloadRepositoryProvider).getAllRecords(),
+      speed: currentSpeed,
+    );
+  }
+
+  DownloadState _buildState(
+    List<DownloadRecord> records, {
+    double? speed,
+  }) {
+    final episodes = records.expand((record) => record.episodes.values);
+    final totalTasks = episodes.length;
+    final completedTasks = episodes
+        .where((episode) => episode.status == DownloadStatus.completed)
+        .length;
+    return DownloadState(
+      records: records,
+      currentSpeed: speed ?? 0,
+      totalTasks: totalTasks,
+      completedTasks: completedTasks,
+    );
+  }
+
+  String _resolveEpisodeUrl(String baseUrl, String episodeUrl) {
+    final uri = Uri.tryParse(episodeUrl);
+    if (uri != null && uri.hasScheme) {
+      return episodeUrl;
+    }
+    return Uri.parse(baseUrl).resolve(episodeUrl).toString();
+  }
+}

@@ -64,6 +64,79 @@ void main() {
       expect(manager.requests.single.networkMediaUrl,
           'https://cdn.test/resolved.m3u8');
     });
+
+    test('resets incomplete downloads to paused on build', () async {
+      final repository = _FakeDownloadRepository();
+      final manager = _FakeDownloadManager();
+      final resolverPool = _FakeResolverPool();
+      final record = DownloadRecord(
+        subjectId: 1,
+        subjectName: 'Subject',
+        subjectCover: '',
+        sourceName: 'source',
+        sourceBaseUrl: 'https://source.test',
+        episodes: {
+          'downloading': _episode('downloading', DownloadStatus.downloading),
+          'pending': _episode('pending', DownloadStatus.pending),
+          'resolving': _episode('resolving', DownloadStatus.resolving),
+          'completed': _episode('completed', DownloadStatus.completed),
+        },
+        createdAt: DateTime(2026),
+      );
+      await repository.putRecord(record);
+      final container = ProviderContainer(
+        overrides: [
+          downloadRepositoryProvider.overrideWithValue(repository),
+          downloadManagerProvider.overrideWithValue(manager),
+          videoSourceResolverPoolProvider.overrideWithValue(resolverPool),
+        ],
+      );
+      addTearDown(container.dispose);
+
+      container.read(downloadControllerProvider);
+      await Future<void>.delayed(Duration.zero);
+
+      final episodes = repository.records.single.episodes;
+      expect(episodes['downloading']?.status, DownloadStatus.paused);
+      expect(episodes['pending']?.status, DownloadStatus.paused);
+      expect(episodes['resolving']?.status, DownloadStatus.paused);
+      expect(episodes['completed']?.status, DownloadStatus.completed);
+    });
+
+    test('delete episode cancels task, deletes files, and removes record entry',
+        () async {
+      final repository = _FakeDownloadRepository();
+      final manager = _FakeDownloadManager();
+      final resolverPool = _FakeResolverPool();
+      final record = DownloadRecord(
+        subjectId: 1,
+        subjectName: 'Subject',
+        subjectCover: '',
+        sourceName: 'source',
+        sourceBaseUrl: 'https://source.test',
+        episodes: {
+          'ep1': _episode('ep1', DownloadStatus.completed),
+        },
+        createdAt: DateTime(2026),
+      );
+      await repository.putRecord(record);
+      final container = ProviderContainer(
+        overrides: [
+          downloadRepositoryProvider.overrideWithValue(repository),
+          downloadManagerProvider.overrideWithValue(manager),
+          videoSourceResolverPoolProvider.overrideWithValue(resolverPool),
+        ],
+      );
+      addTearDown(container.dispose);
+
+      await container
+          .read(downloadControllerProvider.notifier)
+          .deleteEpisode(record.key, 'ep1');
+
+      expect(manager.cancelled, [(record.key, 'ep1')]);
+      expect(manager.deletedEpisodes.single.episodeUrl, 'ep1');
+      expect(repository.getRecord(record.key), isNull);
+    });
   });
 }
 
@@ -81,6 +154,19 @@ StartDownloadParams _params({required String networkMediaUrl}) {
     episodeSort: 1,
     episodeIndex: 1,
     networkMediaUrl: networkMediaUrl,
+  );
+}
+
+DownloadEpisode _episode(String url, int status) {
+  return DownloadEpisode(
+    episodeUrl: url,
+    bangumiEpisodeId: 1,
+    episodeSort: 1,
+    episodeIndex: 1,
+    episodeTitle: 'Episode 1',
+    lineIndex: 0,
+    sourceName: 'source',
+    status: status,
   );
 }
 
@@ -116,7 +202,14 @@ class _FakeDownloadRepository implements IDownloadRepository {
 
   @override
   Future<void> deleteEpisode(String recordKey, String episodeUrl) async {
-    recordsByKey[recordKey]?.episodes.remove(episodeUrl);
+    final record = recordsByKey[recordKey];
+    if (record == null) {
+      return;
+    }
+    record.episodes.remove(episodeUrl);
+    if (record.episodes.isEmpty) {
+      recordsByKey.remove(recordKey);
+    }
   }
 
   @override
@@ -146,12 +239,23 @@ class _FakeDownloadRepository implements IDownloadRepository {
 
 class _FakeDownloadManager implements IDownloadManager {
   final requests = <DownloadRequest>[];
+  final cancelled = <(String, String)>[];
+  final deletedEpisodes = <DownloadEpisode>[];
 
   @override
   DownloadProgressCallback? onProgress;
 
   @override
-  void cancel(String recordKey, String episodeUrl) {}
+  void cancel(String recordKey, String episodeUrl) {
+    cancelled.add((recordKey, episodeUrl));
+  }
+
+  @override
+  Future<void> deleteEpisodeFiles(DownloadEpisode? episode) async {
+    if (episode != null) {
+      deletedEpisodes.add(episode);
+    }
+  }
 
   @override
   Future<void> enqueue(DownloadRequest request) async {

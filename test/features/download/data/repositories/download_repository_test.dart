@@ -75,6 +75,52 @@ void main() {
       expect(repository.getRecord(record.key), isNull);
     });
 
+    test('exposes same-status progress through repository cache', () async {
+      final record = _record(
+        subjectId: 1,
+        sourceName: 'source',
+        episode: _episode(url: 'https://example.com/1'),
+      );
+      await repository.putRecord(record);
+
+      await repository.updateEpisode(
+        record.key,
+        'https://example.com/1',
+        _episode(url: 'https://example.com/1')..progressPercent = 42,
+      );
+
+      expect(
+        repository
+            .getRecord(record.key)
+            ?.episodes['https://example.com/1']
+            ?.progressPercent,
+        42,
+      );
+    });
+
+    test('persists episode when status changes', () async {
+      final record = _record(
+        subjectId: 1,
+        sourceName: 'source',
+        episode: _episode(url: 'https://example.com/1'),
+      );
+      await repository.putRecord(record);
+
+      await repository.updateEpisode(
+        record.key,
+        'https://example.com/1',
+        _episode(
+          url: 'https://example.com/1',
+          status: DownloadStatus.completed,
+        )..progressPercent = 1,
+      );
+
+      expect(
+        box.get(record.key)?.episodes['https://example.com/1']?.status,
+        DownloadStatus.completed,
+      );
+    });
+
     test('returns completed episodes ordered by line then episode sort',
         () async {
       final record = DownloadRecord(

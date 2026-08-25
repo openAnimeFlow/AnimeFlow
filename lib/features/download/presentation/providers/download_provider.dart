@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:anime_flow/core/constants/constants.dart';
 import 'package:anime_flow/core/crawler/cookie_manager.dart';
 import 'package:anime_flow/features/download/application/download_manager.dart';
@@ -110,6 +112,7 @@ class DownloadController extends _$DownloadController {
       manager.onProgress = null;
       resolverPool.cancelAll();
     });
+    unawaited(_resetIncompleteDownloads());
     return _buildState(
       ref.watch(downloadRepositoryProvider).getAllRecords(),
       speed: 0,
@@ -218,11 +221,16 @@ class DownloadController extends _$DownloadController {
   }
 
   Future<void> deleteEpisode(String recordKey, String episodeUrl) async {
-    ref.read(downloadManagerProvider).cancel(recordKey, episodeUrl);
-    await ref.read(downloadRepositoryProvider).deleteEpisode(
-          recordKey,
-          episodeUrl,
-        );
+    final manager = ref.read(downloadManagerProvider);
+    final repository = ref.read(downloadRepositoryProvider);
+    final record = repository.getRecord(recordKey);
+    final episode = record?.episodes[episodeUrl];
+    manager.cancel(recordKey, episodeUrl);
+    await manager.deleteEpisodeFiles(episode);
+    await repository.deleteEpisode(
+      recordKey,
+      episodeUrl,
+    );
     _refresh(speed: 0);
   }
 
@@ -283,6 +291,37 @@ class DownloadController extends _$DownloadController {
       ref.read(downloadRepositoryProvider).getAllRecords(),
       speed: currentSpeed,
     );
+  }
+
+  Future<void> _resetIncompleteDownloads() async {
+    final repository = ref.read(downloadRepositoryProvider);
+    var changed = false;
+    final records = repository.getAllRecords();
+    for (final record in records) {
+      var recordChanged = false;
+      final episodes = Map<String, DownloadEpisode>.from(record.episodes);
+      for (final entry in episodes.entries) {
+        final episode = entry.value;
+        if (_isIncompleteStatus(episode.status)) {
+          episode.status = DownloadStatus.paused;
+          recordChanged = true;
+          changed = true;
+        }
+      }
+      if (recordChanged) {
+        record.episodes = episodes;
+        await repository.putRecord(record);
+      }
+    }
+    if (changed) {
+      _refresh(speed: 0);
+    }
+  }
+
+  bool _isIncompleteStatus(int status) {
+    return status == DownloadStatus.resolving ||
+        status == DownloadStatus.pending ||
+        status == DownloadStatus.downloading;
   }
 
   DownloadState _buildState(

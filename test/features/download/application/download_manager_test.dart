@@ -153,6 +153,18 @@ void main() {
       expect(playlist, contains('seg_00001.ts'));
       expect(playlist, contains('URI="key_0.key"'));
     });
+
+    test('deletes episode download directory', () async {
+      final episodeDir = p.join(tempDir.path, 'source_1', 'delete-me');
+      await Directory(episodeDir).create(recursive: true);
+      await File(p.join(episodeDir, 'video.mp4')).writeAsString('body');
+      final episode = _episode(url: 'delete')..downloadDirectory = episodeDir;
+      final manager = _manager(tempDir);
+
+      await manager.deleteEpisodeFiles(episode);
+
+      expect(Directory(episodeDir).existsSync(), isFalse);
+    });
   });
 }
 

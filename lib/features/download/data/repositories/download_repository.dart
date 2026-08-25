@@ -36,22 +36,35 @@ class DownloadRepository implements IDownloadRepository {
       : _storage = storage ?? Storage.downloads;
 
   final Box<DownloadRecord> _storage;
+  final Map<String, Map<String, DownloadEpisode>> _progressCache = {};
+  final Map<String, int> _lastPersistedStatus = {};
 
   @override
   List<DownloadRecord> getAllRecords() {
     final records = _storage.values.toList();
+    for (final record in records) {
+      _mergeProgressCache(record);
+    }
     records.sort((a, b) => b.createdAt.compareTo(a.createdAt));
     return records;
   }
 
   @override
   DownloadRecord? getRecord(String key) {
-    return _storage.get(key);
+    final record = _storage.get(key);
+    if (record != null) {
+      _mergeProgressCache(record);
+    }
+    return record;
   }
 
   @override
   Future<void> putRecord(DownloadRecord record) async {
     await _storage.put(record.key, record);
+    for (final entry in record.episodes.entries) {
+      _lastPersistedStatus[_statusKey(record.key, entry.key)] =
+          entry.value.status;
+    }
   }
 
   @override
@@ -65,9 +78,17 @@ class DownloadRepository implements IDownloadRepository {
       return;
     }
 
+    _progressCache.putIfAbsent(recordKey, () => {})[episodeUrl] = episode;
+    final statusKey = _statusKey(recordKey, episodeUrl);
+    final lastStatus = _lastPersistedStatus[statusKey];
+    if (lastStatus == episode.status) {
+      return;
+    }
+
     record.episodes = Map<String, DownloadEpisode>.from(record.episodes)
       ..[episodeUrl] = episode;
     await _storage.put(recordKey, record);
+    _lastPersistedStatus[statusKey] = episode.status;
   }
 
   @override
@@ -81,11 +102,17 @@ class DownloadRepository implements IDownloadRepository {
       ..remove(episodeUrl);
     if (episodes.isEmpty) {
       await _storage.delete(recordKey);
+      _progressCache.remove(recordKey);
+      _lastPersistedStatus.removeWhere((key, _) {
+        return key.startsWith('$recordKey|');
+      });
       return;
     }
 
     record.episodes = episodes;
     await _storage.put(recordKey, record);
+    _progressCache[recordKey]?.remove(episodeUrl);
+    _lastPersistedStatus.remove(_statusKey(recordKey, episodeUrl));
   }
 
   @override
@@ -123,5 +150,18 @@ class DownloadRepository implements IDownloadRepository {
       DownloadRecord.buildKey(sourceName: sourceName, subjectId: subjectId),
     );
     return record?.episodes[episodeUrl];
+  }
+
+  void _mergeProgressCache(DownloadRecord record) {
+    final cachedEpisodes = _progressCache[record.key];
+    if (cachedEpisodes == null || cachedEpisodes.isEmpty) {
+      return;
+    }
+    record.episodes = Map<String, DownloadEpisode>.from(record.episodes)
+      ..addAll(cachedEpisodes);
+  }
+
+  String _statusKey(String recordKey, String episodeUrl) {
+    return '$recordKey|$episodeUrl';
   }
 }

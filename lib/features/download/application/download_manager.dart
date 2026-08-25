@@ -57,6 +57,8 @@ abstract interface class IDownloadManager {
   void cancel(String recordKey, String episodeUrl);
 
   String? getLocalMediaPath(DownloadEpisode? episode);
+
+  Future<void> deleteEpisodeFiles(DownloadEpisode? episode);
 }
 
 class DownloadManager implements IDownloadManager {
@@ -163,6 +165,21 @@ class DownloadManager implements IDownloadManager {
     return File(episode.localMediaPath).existsSync()
         ? episode.localMediaPath
         : null;
+  }
+
+  @override
+  Future<void> deleteEpisodeFiles(DownloadEpisode? episode) async {
+    if (episode == null) {
+      return;
+    }
+    final downloadDirectory = episode.downloadDirectory.trim();
+    if (downloadDirectory.isEmpty) {
+      return;
+    }
+    final directory = Directory(downloadDirectory);
+    if (await directory.exists()) {
+      await directory.delete(recursive: true);
+    }
   }
 
   void _startTask(_DownloadTask task) {

@@ -4,6 +4,7 @@ class StorageKey {
       settingsKey = 'settings_key',
       playPositionKey = 'play_position_key',
       playHistoryKey = 'play_history_key',
+      downloadsKey = 'downloads_key',
       autoUpdateKey = 'auto_update_key',
       searchHistoryKey = 'search_history_key';
 }

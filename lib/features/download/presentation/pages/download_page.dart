@@ -6,6 +6,7 @@ import 'package:anime_flow/shared/models/download/download_episode.dart';
 import 'package:anime_flow/shared/models/download/download_record.dart';
 import 'package:anime_flow/shared/models/download/download_status.dart';
 import 'package:anime_flow/shared/widgets/animation_network_image.dart';
+import 'package:anime_flow/core/utils/utils.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -357,7 +358,10 @@ class _DownloadEpisodeTile extends ConsumerWidget {
       _ => l10n.downloadQueued,
     };
     if (episode.status == DownloadStatus.completed) {
-      return status;
+      if (episode.totalBytes <= 0) {
+        return status;
+      }
+      return '$status - ${Utils.formatBytes(episode.totalBytes)}';
     }
     final progress =
         '${episode.progressPercent.clamp(0, 100).toStringAsFixed(1)}%';

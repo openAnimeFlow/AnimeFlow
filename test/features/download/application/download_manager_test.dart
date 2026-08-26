@@ -10,6 +10,8 @@ import 'package:dio/dio.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:path/path.dart' as p;
 
+var _transientDirectAttempts = 0;
+
 void main() {
   late Directory tempDir;
   late HttpServer server;
@@ -21,6 +23,7 @@ void main() {
     );
     server = await HttpServer.bind(InternetAddress.loopbackIPv4, 0);
     baseUri = Uri.parse('http://${server.address.host}:${server.port}');
+    _transientDirectAttempts = 0;
     _serveRequests(server);
   });
 
@@ -93,6 +96,27 @@ void main() {
 
       expect(result.status, DownloadStatus.completed);
       expect(File(result.localMediaPath).readAsStringSync(), 'retry-body');
+    });
+
+    test('retries transient direct media failures', () async {
+      final episode = _episode(url: 'transient-direct');
+      final manager = _manager(tempDir);
+
+      final completed = _waitForCompletion(manager);
+      await manager.enqueue(
+        _request(
+          episode: episode,
+          episodeUrl: 'transient-direct',
+          baseUri: baseUri,
+          networkMediaUrl: baseUri.resolve('/transient-direct.mp4').toString(),
+        ),
+      );
+
+      final result = await completed;
+
+      expect(result.status, DownloadStatus.completed);
+      expect(File(result.localMediaPath).readAsStringSync(), 'retry-body');
+      expect(_transientDirectAttempts, 3);
     });
 
     test('resumes direct media from existing tmp file with Range header',
@@ -276,6 +300,13 @@ void _serveRequests(HttpServer server) {
       case '/direct-referer-retry.mp4':
         if (request.headers.value(HttpHeaders.refererHeader) != null) {
           request.response.statusCode = HttpStatus.badRequest;
+        } else {
+          request.response.write('retry-body');
+        }
+      case '/transient-direct.mp4':
+        _transientDirectAttempts++;
+        if (_transientDirectAttempts < 3) {
+          request.response.statusCode = HttpStatus.serviceUnavailable;
         } else {
           request.response.write('retry-body');
         }

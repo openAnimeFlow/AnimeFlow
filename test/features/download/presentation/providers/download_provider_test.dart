@@ -444,6 +444,12 @@ class _FakeDownloadManager implements IDownloadManager {
   final deletedEpisodes = <DownloadEpisode>[];
 
   @override
+  int maxParallelEpisodes = 2;
+
+  @override
+  int maxParallelSegments = 3;
+
+  @override
   DownloadProgressCallback? onProgress;
 
   @override

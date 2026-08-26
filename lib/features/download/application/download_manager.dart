@@ -42,6 +42,12 @@ typedef DownloadProgressCallback = void Function(
 abstract interface class IDownloadManager {
   DownloadProgressCallback? onProgress;
 
+  int get maxParallelEpisodes;
+  set maxParallelEpisodes(int value);
+
+  int get maxParallelSegments;
+  set maxParallelSegments(int value);
+
   bool isDownloading(String recordKey, String episodeUrl);
 
   double getSpeed(String recordKey, String episodeUrl);
@@ -80,7 +86,10 @@ class DownloadManager implements IDownloadManager {
   @override
   DownloadProgressCallback? onProgress;
 
+  @override
   int maxParallelEpisodes;
+
+  @override
   int maxParallelSegments;
 
   final _activeTasks = <String, _DownloadTask>{};

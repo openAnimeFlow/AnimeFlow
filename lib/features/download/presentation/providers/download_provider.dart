@@ -94,7 +94,29 @@ IDownloadRepository downloadRepository(Ref ref) {
 
 @Riverpod(keepAlive: true)
 IDownloadManager downloadManager(Ref ref) {
-  return DownloadManager(repository: ref.watch(downloadRepositoryProvider));
+  return DownloadManager(
+    repository: ref.watch(downloadRepositoryProvider),
+    maxParallelEpisodes: _downloadSettingInt(
+      DownloadKey.maxParallelEpisodes,
+      fallback: 2,
+    ),
+    maxParallelSegments: _downloadSettingInt(
+      DownloadKey.maxParallelSegments,
+      fallback: 3,
+    ),
+  );
+}
+
+int _downloadSettingInt(String key, {required int fallback}) {
+  try {
+    final value = Storage.setting.get(key, defaultValue: fallback);
+    if (value is int) {
+      return value.clamp(1, 10).toInt();
+    }
+  } catch (_) {
+    // Use the defaults when storage is unavailable during startup.
+  }
+  return fallback;
 }
 
 @Riverpod(keepAlive: true)

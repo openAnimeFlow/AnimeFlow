@@ -40,6 +40,8 @@ class PlaybackKey {
 
 class DownloadKey {
   static const String downloadDanmaku = 'download_danmaku';
+  static const String maxParallelEpisodes = 'download_max_parallel_episodes';
+  static const String maxParallelSegments = 'download_max_parallel_segments';
 }
 
 class SettingKey {

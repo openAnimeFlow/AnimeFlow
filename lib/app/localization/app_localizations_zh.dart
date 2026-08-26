@@ -748,7 +748,7 @@ class AppLocalizationsZh extends AppLocalizations {
   String get themeStyle => '主题样式';
 
   @override
-  String get playbackHistoryVideoSource => '播放历史与视频源';
+  String get playbackResources => '播放資源';
 
   @override
   String get sourceManagement => '数据源管理';
@@ -1680,10 +1680,25 @@ class AppLocalizationsZh extends AppLocalizations {
   String get downloadResources => '下載資源';
 
   @override
+  String get downloadSettings => '下載設定';
+
+  @override
   String get downloadDanmaku => '同時下載彈幕';
 
   @override
   String get downloadDanmakuDescription => '下載完成後保存本地彈幕，失敗不影響影片';
+
+  @override
+  String get downloadParallelEpisodes => '同時下載劇集數';
+
+  @override
+  String get downloadParallelEpisodesDescription => '同時下載的劇集數量';
+
+  @override
+  String get downloadParallelSegments => '分片並發數';
+
+  @override
+  String get downloadParallelSegmentsDescription => '單集同時下載的影片分片數量';
 
   @override
   String get downloadWithDanmaku => '含彈幕';
@@ -2514,7 +2529,7 @@ class AppLocalizationsZhHans extends AppLocalizationsZh {
   String get themeStyle => '主题样式';
 
   @override
-  String get playbackHistoryVideoSource => '播放历史与视频源';
+  String get playbackResources => '播放资源';
 
   @override
   String get sourceManagement => '数据源管理';
@@ -3445,10 +3460,25 @@ class AppLocalizationsZhHans extends AppLocalizationsZh {
   String get downloadResources => '下载资源';
 
   @override
+  String get downloadSettings => '下载设置';
+
+  @override
   String get downloadDanmaku => '同时下载弹幕';
 
   @override
   String get downloadDanmakuDescription => '下载完成后保存本地弹幕，失败不影响视频';
+
+  @override
+  String get downloadParallelEpisodes => '同时下载剧集数';
+
+  @override
+  String get downloadParallelEpisodesDescription => '同时下载的剧集数量';
+
+  @override
+  String get downloadParallelSegments => '分片并发数';
+
+  @override
+  String get downloadParallelSegmentsDescription => '单集同时下载的视频分片数量';
 
   @override
   String get downloadWithDanmaku => '含弹幕';
@@ -4279,7 +4309,7 @@ class AppLocalizationsZhHantHk extends AppLocalizationsZh {
   String get themeStyle => '主題樣式';
 
   @override
-  String get playbackHistoryVideoSource => '播放記錄與影片來源';
+  String get playbackResources => '播放資源';
 
   @override
   String get sourceManagement => '資料來源管理';
@@ -5129,10 +5159,25 @@ class AppLocalizationsZhHantHk extends AppLocalizationsZh {
   String get downloadResources => '下載資源';
 
   @override
+  String get downloadSettings => '下載設定';
+
+  @override
   String get downloadDanmaku => '同時下載彈幕';
 
   @override
   String get downloadDanmakuDescription => '下載完成後保存本地彈幕，失敗不影響影片';
+
+  @override
+  String get downloadParallelEpisodes => '同時下載劇集數';
+
+  @override
+  String get downloadParallelEpisodesDescription => '同時下載的劇集數量';
+
+  @override
+  String get downloadParallelSegments => '分片並發數';
+
+  @override
+  String get downloadParallelSegmentsDescription => '單集同時下載的影片分片數量';
 
   @override
   String get downloadWithDanmaku => '含彈幕';
@@ -5963,7 +6008,7 @@ class AppLocalizationsZhHantTw extends AppLocalizationsZh {
   String get themeStyle => '主題樣式';
 
   @override
-  String get playbackHistoryVideoSource => '播放記錄與影片來源';
+  String get playbackResources => '播放資源';
 
   @override
   String get sourceManagement => '資料來源管理';
@@ -6813,10 +6858,25 @@ class AppLocalizationsZhHantTw extends AppLocalizationsZh {
   String get downloadResources => '下載資源';
 
   @override
+  String get downloadSettings => '下載設定';
+
+  @override
   String get downloadDanmaku => '同時下載彈幕';
 
   @override
   String get downloadDanmakuDescription => '下載完成後保存本機彈幕，失敗不影響影片';
+
+  @override
+  String get downloadParallelEpisodes => '同時下載劇集數';
+
+  @override
+  String get downloadParallelEpisodesDescription => '同時下載的劇集數量';
+
+  @override
+  String get downloadParallelSegments => '分片並發數';
+
+  @override
+  String get downloadParallelSegmentsDescription => '單集同時下載的影片分片數量';
 
   @override
   String get downloadWithDanmaku => '含彈幕';

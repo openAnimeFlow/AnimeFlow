@@ -239,7 +239,7 @@
   "accountSettings": "帳戶設定",
   "appAppearance": "應用程式與外觀",
   "themeStyle": "主題樣式",
-  "playbackHistoryVideoSource": "播放記錄與影片來源",
+  "playbackResources": "播放資源",
   "sourceManagement": "資料來源管理",
   "playerSettings": "播放器設定",
   "playbackSettings": "播放",
@@ -520,8 +520,13 @@
   ,"downloadTasksEmpty": "暫無下載任務"
   ,"downloadSelectionTitle": "下載選集"
   ,"downloadResources": "下載資源"
+  ,"downloadSettings": "下載設定"
   ,"downloadDanmaku": "同時下載彈幕"
   ,"downloadDanmakuDescription": "下載完成後保存本地彈幕，失敗不影響影片"
+  ,"downloadParallelEpisodes": "同時下載劇集數"
+  ,"downloadParallelEpisodesDescription": "同時下載的劇集數量"
+  ,"downloadParallelSegments": "分片並發數"
+  ,"downloadParallelSegmentsDescription": "單集同時下載的影片分片數量"
   ,"downloadWithDanmaku": "含彈幕"
   ,"downloadWithoutDanmaku": "無彈幕"
   ,"expandDownloadEpisodes": "展開劇集"

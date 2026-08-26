@@ -755,7 +755,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get themeStyle => 'Theme';
 
   @override
-  String get playbackHistoryVideoSource => 'Playback history and video sources';
+  String get playbackResources => 'Playback resources';
 
   @override
   String get sourceManagement => 'Source management';
@@ -1722,11 +1722,28 @@ class AppLocalizationsEn extends AppLocalizations {
   String get downloadResources => 'Download resources';
 
   @override
+  String get downloadSettings => 'Download settings';
+
+  @override
   String get downloadDanmaku => 'Download danmaku too';
 
   @override
   String get downloadDanmakuDescription =>
       'Save local danmaku after the video finishes. Failures will not affect the video.';
+
+  @override
+  String get downloadParallelEpisodes => 'Episodes downloaded at the same time';
+
+  @override
+  String get downloadParallelEpisodesDescription =>
+      'Maximum number of episodes downloading concurrently';
+
+  @override
+  String get downloadParallelSegments => 'Segment concurrency';
+
+  @override
+  String get downloadParallelSegmentsDescription =>
+      'Maximum number of video segments downloaded concurrently for one episode';
 
   @override
   String get downloadWithDanmaku => 'With danmaku';

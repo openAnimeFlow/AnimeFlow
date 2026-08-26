@@ -239,7 +239,7 @@
   "accountSettings": "Account settings",
   "appAppearance": "App and appearance",
   "themeStyle": "Theme",
-  "playbackHistoryVideoSource": "Playback history and video sources",
+  "playbackResources": "Playback resources",
   "sourceManagement": "Source management",
   "playerSettings": "Player settings",
   "playbackSettings": "Playback",
@@ -489,8 +489,13 @@
   ,"downloadTasksEmpty": "No download tasks"
   ,"downloadSelectionTitle": "Download episodes"
   ,"downloadResources": "Download resources"
+  ,"downloadSettings": "Download settings"
   ,"downloadDanmaku": "Download danmaku too"
   ,"downloadDanmakuDescription": "Save local danmaku after the video finishes. Failures will not affect the video."
+  ,"downloadParallelEpisodes": "Episodes downloaded at the same time"
+  ,"downloadParallelEpisodesDescription": "Maximum number of episodes downloading concurrently"
+  ,"downloadParallelSegments": "Segment concurrency"
+  ,"downloadParallelSegmentsDescription": "Maximum number of video segments downloaded concurrently for one episode"
   ,"downloadWithDanmaku": "With danmaku"
   ,"downloadWithoutDanmaku": "No danmaku"
   ,"expandDownloadEpisodes": "Expand episodes"

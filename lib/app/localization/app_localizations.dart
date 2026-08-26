@@ -1477,11 +1477,11 @@ abstract class AppLocalizations {
   /// **'主题样式'**
   String get themeStyle;
 
-  /// No description provided for @playbackHistoryVideoSource.
+  /// No description provided for @playbackResources.
   ///
   /// In zh_Hans, this message translates to:
-  /// **'播放历史与视频源'**
-  String get playbackHistoryVideoSource;
+  /// **'播放资源'**
+  String get playbackResources;
 
   /// No description provided for @sourceManagement.
   ///
@@ -3217,6 +3217,12 @@ abstract class AppLocalizations {
   /// **'下载资源'**
   String get downloadResources;
 
+  /// No description provided for @downloadSettings.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'下载设置'**
+  String get downloadSettings;
+
   /// No description provided for @downloadDanmaku.
   ///
   /// In zh_Hans, this message translates to:
@@ -3228,6 +3234,30 @@ abstract class AppLocalizations {
   /// In zh_Hans, this message translates to:
   /// **'下载完成后保存本地弹幕，失败不影响视频'**
   String get downloadDanmakuDescription;
+
+  /// No description provided for @downloadParallelEpisodes.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'同时下载剧集数'**
+  String get downloadParallelEpisodes;
+
+  /// No description provided for @downloadParallelEpisodesDescription.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'同时下载的剧集数量'**
+  String get downloadParallelEpisodesDescription;
+
+  /// No description provided for @downloadParallelSegments.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'分片并发数'**
+  String get downloadParallelSegments;
+
+  /// No description provided for @downloadParallelSegmentsDescription.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'单集同时下载的视频分片数量'**
+  String get downloadParallelSegmentsDescription;
 
   /// No description provided for @downloadWithDanmaku.
   ///

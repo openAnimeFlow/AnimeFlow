@@ -1,4 +1,5 @@
 import 'package:anime_flow/features/settings/presentation/pages/danmaku_setting_page.dart';
+import 'package:anime_flow/features/settings/presentation/pages/download_settings.dart';
 import 'package:anime_flow/features/settings/presentation/pages/plugins/plugins.dart';
 import 'package:anime_flow/features/settings/presentation/pages/theme.dart';
 import 'package:anime_flow/features/settings/presentation/providers/setting_provider.dart';
@@ -58,13 +59,19 @@ class _SettingsPageState extends State<SettingsPage> {
         ],
       ),
       _SettingsCategory(
-        title: l10n.playbackHistoryVideoSource,
+        title: l10n.playbackResources,
         items: [
           _SettingsMenuItem(
             title: l10n.sourceManagement,
             icon: Icons.smart_display_rounded,
             route: const SettingPluginsRoute(),
             page: const PluginsPage(),
+          ),
+          _SettingsMenuItem(
+            title: l10n.downloadSettings,
+            icon: Icons.download_for_offline_outlined,
+            route: const SettingDownloadRoute(),
+            page: const DownloadSettingsPage(),
           ),
         ],
       ),

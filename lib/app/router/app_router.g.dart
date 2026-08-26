@@ -29,6 +29,7 @@ List<RouteBase> get $appRoutes => [
       $settingPlaybackRoute,
       $settingDownloadPluginsRoute,
       $settingDanmakuRoute,
+      $settingDownloadRoute,
       $settingAboutRoute,
       $settingPluginsRoute,
       $settingAddPluginsRoute,
@@ -45,6 +46,7 @@ RouteBase get $mainShellRoute => StatefulShellRouteData.$route(
           routes: [
             GoRouteData.$route(
               path: '/recommend',
+              hasOverriddenOnExit: false,
               factory: $RecommendRoute._fromState,
             ),
           ],
@@ -53,6 +55,7 @@ RouteBase get $mainShellRoute => StatefulShellRouteData.$route(
           routes: [
             GoRouteData.$route(
               path: '/ranking',
+              hasOverriddenOnExit: false,
               factory: $RankingRoute._fromState,
             ),
           ],
@@ -61,6 +64,7 @@ RouteBase get $mainShellRoute => StatefulShellRouteData.$route(
           routes: [
             GoRouteData.$route(
               path: '/user',
+              hasOverriddenOnExit: false,
               factory: $UserRoute._fromState,
             ),
           ],
@@ -142,6 +146,7 @@ mixin $UserRoute on GoRouteData {
 
 RouteBase get $loginRoute => GoRouteData.$route(
       path: '/login',
+      hasOverriddenOnExit: false,
       factory: $LoginRoute._fromState,
     );
 
@@ -169,6 +174,7 @@ mixin $LoginRoute on GoRouteData {
 
 RouteBase get $registerRoute => GoRouteData.$route(
       path: '/register',
+      hasOverriddenOnExit: false,
       factory: $RegisterRoute._fromState,
     );
 
@@ -196,6 +202,7 @@ mixin $RegisterRoute on GoRouteData {
 
 RouteBase get $forgotPasswordRoute => GoRouteData.$route(
       path: '/forgot_password',
+      hasOverriddenOnExit: false,
       factory: $ForgotPasswordRoute._fromState,
     );
 
@@ -224,6 +231,7 @@ mixin $ForgotPasswordRoute on GoRouteData {
 
 RouteBase get $oauthCallbackRoute => GoRouteData.$route(
       path: '/oauth/callback',
+      hasOverriddenOnExit: false,
       factory: $OauthCallbackRoute._fromState,
     );
 
@@ -252,6 +260,7 @@ mixin $OauthCallbackRoute on GoRouteData {
 
 RouteBase get $animeInfoRoute => GoRouteData.$route(
       path: '/anime_info',
+      hasOverriddenOnExit: false,
       factory: $AnimeInfoRoute._fromState,
     );
 
@@ -293,6 +302,7 @@ mixin $AnimeInfoRoute on GoRouteData {
 
 RouteBase get $playRoute => GoRouteData.$route(
       path: '/play',
+      hasOverriddenOnExit: false,
       factory: $PlayRoute._fromState,
     );
 
@@ -347,6 +357,7 @@ T? _$convertMapValue<T>(
 
 RouteBase get $searchRoute => GoRouteData.$route(
       path: '/search',
+      hasOverriddenOnExit: false,
       factory: $SearchRoute._fromState,
     );
 
@@ -381,6 +392,7 @@ mixin $SearchRoute on GoRouteData {
 
 RouteBase get $calendarRoute => GoRouteData.$route(
       path: '/calendar',
+      hasOverriddenOnExit: false,
       factory: $CalendarRoute._fromState,
     );
 
@@ -408,6 +420,7 @@ mixin $CalendarRoute on GoRouteData {
 
 RouteBase get $charactersRoute => GoRouteData.$route(
       path: '/characters',
+      hasOverriddenOnExit: false,
       factory: $CharactersRoute._fromState,
     );
 
@@ -442,6 +455,7 @@ mixin $CharactersRoute on GoRouteData {
 
 RouteBase get $characterInfoRoute => GoRouteData.$route(
       path: '/character_info',
+      hasOverriddenOnExit: false,
       factory: $CharacterInfoRoute._fromState,
     );
 
@@ -481,6 +495,7 @@ mixin $CharacterInfoRoute on GoRouteData {
 
 RouteBase get $playRecordRoute => GoRouteData.$route(
       path: '/play_record',
+      hasOverriddenOnExit: false,
       factory: $PlayRecordRoute._fromState,
     );
 
@@ -509,6 +524,7 @@ mixin $PlayRecordRoute on GoRouteData {
 
 RouteBase get $downloadRoute => GoRouteData.$route(
       path: '/download',
+      hasOverriddenOnExit: false,
       factory: $DownloadRoute._fromState,
     );
 
@@ -536,6 +552,7 @@ mixin $DownloadRoute on GoRouteData {
 
 RouteBase get $userSpaceRoute => GoRouteData.$route(
       path: '/user_space',
+      hasOverriddenOnExit: false,
       factory: $UserSpaceRoute._fromState,
     );
 
@@ -570,6 +587,7 @@ mixin $UserSpaceRoute on GoRouteData {
 
 RouteBase get $imageSearchRoute => GoRouteData.$route(
       path: '/image_search',
+      hasOverriddenOnExit: false,
       factory: $ImageSearchRoute._fromState,
     );
 
@@ -598,6 +616,7 @@ mixin $ImageSearchRoute on GoRouteData {
 
 RouteBase get $settingsRoute => GoRouteData.$route(
       path: '/settings',
+      hasOverriddenOnExit: false,
       factory: $SettingsRoute._fromState,
     );
 
@@ -625,6 +644,7 @@ mixin $SettingsRoute on GoRouteData {
 
 RouteBase get $settingAccountRoute => GoRouteData.$route(
       path: '/settings/account',
+      hasOverriddenOnExit: false,
       factory: $SettingAccountRoute._fromState,
     );
 
@@ -653,6 +673,7 @@ mixin $SettingAccountRoute on GoRouteData {
 
 RouteBase get $settingLogsRoute => GoRouteData.$route(
       path: '/settings/logs',
+      hasOverriddenOnExit: false,
       factory: $SettingLogsRoute._fromState,
     );
 
@@ -681,6 +702,7 @@ mixin $SettingLogsRoute on GoRouteData {
 
 RouteBase get $settingGeneralRoute => GoRouteData.$route(
       path: '/settings/general',
+      hasOverriddenOnExit: false,
       factory: $SettingGeneralRoute._fromState,
     );
 
@@ -709,6 +731,7 @@ mixin $SettingGeneralRoute on GoRouteData {
 
 RouteBase get $settingPlaybackRoute => GoRouteData.$route(
       path: '/settings/playback',
+      hasOverriddenOnExit: false,
       factory: $SettingPlaybackRoute._fromState,
     );
 
@@ -737,6 +760,7 @@ mixin $SettingPlaybackRoute on GoRouteData {
 
 RouteBase get $settingDownloadPluginsRoute => GoRouteData.$route(
       path: '/settings/downloadPlugins',
+      hasOverriddenOnExit: false,
       factory: $SettingDownloadPluginsRoute._fromState,
     );
 
@@ -765,6 +789,7 @@ mixin $SettingDownloadPluginsRoute on GoRouteData {
 
 RouteBase get $settingDanmakuRoute => GoRouteData.$route(
       path: '/settings/danmaku',
+      hasOverriddenOnExit: false,
       factory: $SettingDanmakuRoute._fromState,
     );
 
@@ -791,8 +816,38 @@ mixin $SettingDanmakuRoute on GoRouteData {
   void replace(BuildContext context) => context.replace(location);
 }
 
+RouteBase get $settingDownloadRoute => GoRouteData.$route(
+      path: '/settings/download',
+      hasOverriddenOnExit: false,
+      factory: $SettingDownloadRoute._fromState,
+    );
+
+mixin $SettingDownloadRoute on GoRouteData {
+  static SettingDownloadRoute _fromState(GoRouterState state) =>
+      const SettingDownloadRoute();
+
+  @override
+  String get location => GoRouteData.$location(
+        '/settings/download',
+      );
+
+  @override
+  void go(BuildContext context) => context.go(location);
+
+  @override
+  Future<T?> push<T>(BuildContext context) => context.push<T>(location);
+
+  @override
+  void pushReplacement(BuildContext context) =>
+      context.pushReplacement(location);
+
+  @override
+  void replace(BuildContext context) => context.replace(location);
+}
+
 RouteBase get $settingAboutRoute => GoRouteData.$route(
       path: '/settings/about',
+      hasOverriddenOnExit: false,
       factory: $SettingAboutRoute._fromState,
     );
 
@@ -821,6 +876,7 @@ mixin $SettingAboutRoute on GoRouteData {
 
 RouteBase get $settingPluginsRoute => GoRouteData.$route(
       path: '/settings/Plugins',
+      hasOverriddenOnExit: false,
       factory: $SettingPluginsRoute._fromState,
     );
 
@@ -849,6 +905,7 @@ mixin $SettingPluginsRoute on GoRouteData {
 
 RouteBase get $settingAddPluginsRoute => GoRouteData.$route(
       path: '/settings/addPlugins',
+      hasOverriddenOnExit: false,
       factory: $SettingAddPluginsRoute._fromState,
     );
 
@@ -885,6 +942,7 @@ mixin $SettingAddPluginsRoute on GoRouteData {
 
 RouteBase get $settingThemeRoute => GoRouteData.$route(
       path: '/settings/theme',
+      hasOverriddenOnExit: false,
       factory: $SettingThemeRoute._fromState,
     );
 
@@ -913,6 +971,7 @@ mixin $SettingThemeRoute on GoRouteData {
 
 RouteBase get $settingFontRoute => GoRouteData.$route(
       path: '/settings/font',
+      hasOverriddenOnExit: false,
       factory: $SettingFontRoute._fromState,
     );
 
@@ -941,6 +1000,7 @@ mixin $SettingFontRoute on GoRouteData {
 
 RouteBase get $settingThanksRoute => GoRouteData.$route(
       path: '/settings/thanks',
+      hasOverriddenOnExit: false,
       factory: $SettingThanksRoute._fromState,
     );
 
@@ -969,6 +1029,7 @@ mixin $SettingThanksRoute on GoRouteData {
 
 RouteBase get $settingAgreementRoute => GoRouteData.$route(
       path: '/settings/agreement',
+      hasOverriddenOnExit: false,
       factory: $SettingAgreementRoute._fromState,
     );
 

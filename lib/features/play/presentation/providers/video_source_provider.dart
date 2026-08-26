@@ -10,15 +10,24 @@ import 'package:anime_flow/features/play/data/repository/play_repository.dart';
 import 'package:anime_flow/features/play/presentation/providers/episodes_provider.dart';
 import 'package:anime_flow/features/play/presentation/providers/play_provider.dart';
 import 'package:anime_flow/features/play/application/video_source_service.dart';
-import 'package:anime_flow/features/play/application/webview_video_source_provider.dart';
+import 'package:anime_flow/features/play/application/webview_video_source_service.dart';
 import 'package:anime_flow/features/source/data/repositories/source_repository_provider.dart';
 import 'package:anime_flow/shared/models/player/play/video/episode_resources_item.dart';
 import 'package:anime_flow/shared/models/player/play/video/resources_item.dart';
 import 'package:anime_flow/app/router/routes_args.dart';
 import 'package:anime_flow/core/logger/logger.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 part 'video_source_provider.g.dart';
+
+/// 播放解析 WebView 的生命周期独立于页面状态。
+///
+/// 页面 Provider 可能因为依赖变化而重建，但 WebView2 环境是进程级共享
+/// 资源，不能跟随每次页面重建反复销毁和创建。
+final webViewVideoSourceProvider = Provider<WebViewVideoSourceService>((ref) {
+  return WebViewVideoSourceService.shared;
+});
 
 class VideoSourceState {
   const VideoSourceState({
@@ -101,7 +110,6 @@ class ManualEpisodeSource {
   dependencies: [Episodes, playExtra, PlayStateNotifier, playSession],
 )
 class VideoSourceNotifier extends _$VideoSourceNotifier {
-  WebViewVideoSourceProvider? _webViewVideoProvider;
   final LiggLogger _logger = LiggLogger();
 
   static const _maxSearchItems = 5;
@@ -115,7 +123,6 @@ class VideoSourceNotifier extends _$VideoSourceNotifier {
   String? _preferredAutoSelectWebsiteName;
   int _videoPageLoadToken = 0;
   final Set<String> _attemptedAutoLoadUrls = {};
-  Future<void> _providerDisposeTail = Future<void>.value();
 
   int get currentEpisodeIndex => state.currentEpisodeIndex;
   List<ResourcesItem> get videoResources => state.videoResources;
@@ -158,12 +165,8 @@ class VideoSourceNotifier extends _$VideoSourceNotifier {
   Future<void> _dispose() async {
     _searchSessionId++;
     _videoPageLoadToken++;
-    final provider = _webViewVideoProvider;
-    _webViewVideoProvider = null;
     _websiteRequestTokens.clear();
     _attemptedAutoLoadUrls.clear();
-    _providerDisposeTail = provider?.dispose() ?? Future<void>.value();
-    await _providerDisposeTail;
   }
 
   Future<void> initVideoResources() async {
@@ -854,16 +857,15 @@ class VideoSourceNotifier extends _$VideoSourceNotifier {
     }
     if (!ref.mounted) return false;
     final loadToken = ++_videoPageLoadToken;
-    _webViewVideoProvider?.cancel();
+    final webViewVideoProvider = ref.read(webViewVideoSourceProvider);
+    webViewVideoProvider.cancel();
 
     final playController = ref.read(playSessionProvider);
     ref.read(playStateProvider.notifier).setIsParsing(true);
 
-    await _providerDisposeTail;
     if (!ref.mounted || loadToken != _videoPageLoadToken) return false;
 
-    _webViewVideoProvider ??= WebViewVideoSourceProvider();
-    await _webViewVideoProvider!.ensureInitialized();
+    await webViewVideoProvider.ensureInitialized();
     if (!ref.mounted) return false;
     if (loadToken != _videoPageLoadToken) {
       return false;
@@ -890,8 +892,8 @@ class VideoSourceNotifier extends _$VideoSourceNotifier {
     try {
       ref.read(playStateProvider.notifier).setParseResult('正在解析视频源...');
 
-      final source = await _webViewVideoProvider!
-          .resolve(url, useLegacyParser: false, offset: offset);
+      final source = await webViewVideoProvider.resolve(url,
+          useLegacyParser: false, offset: offset);
       if (!ref.mounted) return false;
       final canUseResult = loadToken == _videoPageLoadToken &&
           (shouldUseResult == null || shouldUseResult());

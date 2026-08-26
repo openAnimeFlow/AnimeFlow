@@ -2,7 +2,7 @@ import 'dart:async';
 import 'dart:collection';
 
 import 'package:anime_flow/features/play/application/video_source_service.dart';
-import 'package:anime_flow/features/play/application/webview_video_source_provider.dart';
+import 'package:anime_flow/features/play/application/webview_video_source_service.dart';
 
 class VideoSourceResolveRequest {
   const VideoSourceResolveRequest({
@@ -32,7 +32,7 @@ class VideoSourceResolverPool implements IVideoSourceResolverPool {
     IVideoSourceProvider Function()? providerFactory,
   })  : _workerCount = workerCount < 1 ? 1 : workerCount,
         _providerFactory =
-            providerFactory ?? (() => WebViewVideoSourceProvider());
+            providerFactory ?? (() => WebViewVideoSourceService());
 
   final int _workerCount;
   final IVideoSourceProvider Function() _providerFactory;

@@ -463,6 +463,7 @@ class PlaySession {
   final Set<int> _autoWatchedEpisodeUpdatesInFlight = {};
 
   final List<StreamSubscription<Object?>> _playerSubscriptions = [];
+  bool _isDisposed = false;
 
   static const Duration _bufferingPositionTolerance =
       Duration(milliseconds: 500);
@@ -573,6 +574,7 @@ class PlaySession {
   }
 
   void dispose() {
+    _isDisposed = true;
     unawaited(_savePlayHistory());
     if (Platform.isWindows) {
       WindowsTitleBarVisibility.reset();
@@ -602,7 +604,9 @@ class PlaySession {
 
   /// 初始化播放状态
   Future<void> initPlayState(PlayRequest state) async {
+    if (_isDisposed) return;
     await stopCurrentMedia();
+    if (_isDisposed) return;
     removeDanmaku();
     videoUrl = state.videoUrl;
     offset = state.offset;
@@ -617,11 +621,17 @@ class PlaySession {
     localDanmakuPath = state.localDanmakuPath;
     if (state.videoUrl.isEmpty) return;
     await player.open(Media(state.videoUrl), play: false);
+    if (_isDisposed) return;
     await player.stream.duration.firstWhere((d) => d > Duration.zero);
+    if (_isDisposed) return;
     await Future.delayed(const Duration(milliseconds: 800), () {
-      player.seek(Duration(seconds: offset));
+      if (!_isDisposed) {
+        unawaited(player.seek(Duration(seconds: offset)));
+      }
     });
+    if (_isDisposed) return;
     await player.play();
+    if (_isDisposed) return;
     final logger = LiggLogger();
 
     ///加载弹幕
@@ -631,11 +641,13 @@ class PlaySession {
         try {
           if (isLocalPlayback) {
             final danmaku = await _loadLocalDanmaku(localDanmakuPath);
+            if (_isDisposed) return;
             if (danmaku.isNotEmpty) {
               final converted = await danmakuChineseConverter.convertDanmakus(
                 danmaku,
                 _danmakuChineseMode,
               );
+              if (_isDisposed) return;
               addDanmakuAll(converted);
             }
           } else {
@@ -644,10 +656,12 @@ class PlaySession {
             if (bgmBangumiId != null) {
               final danmaku =
                   await FlowApi.getDanDanmaku(bgmBangumiId, episode);
+              if (_isDisposed) return;
               final converted = await danmakuChineseConverter.convertDanmakus(
                 danmaku,
                 _danmakuChineseMode,
               );
+              if (_isDisposed) return;
               addDanmakuAll(converted);
             }
           }

@@ -381,46 +381,17 @@ class DownloadManager implements IDownloadManager {
       existingBytes = await tmpFile.length();
     }
 
-    var headers = _directDownloadHeaders(request.httpHeaders);
-    if (existingBytes > 0) {
-      headers['Range'] = 'bytes=$existingBytes-';
+    var response = await _getDirectStreamWithRetry(
+      request,
+      task,
+      existingBytes: existingBytes,
+      tmpFile: tmpFile,
+    );
+    if (response.existingBytes != existingBytes) {
+      existingBytes = response.existingBytes;
     }
 
-    Response<ResponseBody> response;
-    try {
-      response = await _httpClient.getStream(
-        request.networkMediaUrl,
-        headers: headers,
-        cancelToken: task.cancelToken,
-      );
-    } on DioException catch (error) {
-      if (error.response?.statusCode ==
-              HttpStatus.requestedRangeNotSatisfiable &&
-          existingBytes > 0) {
-        await tmpFile.delete();
-        existingBytes = 0;
-        headers.remove('Range');
-        response = await _httpClient.getStream(
-          request.networkMediaUrl,
-          headers: headers,
-          cancelToken: task.cancelToken,
-        );
-      } else if (_shouldRetryWithoutReferer(error, headers)) {
-        headers = _withoutReferer(headers);
-        if (existingBytes > 0) {
-          headers['Range'] = 'bytes=$existingBytes-';
-        }
-        response = await _httpClient.getStream(
-          request.networkMediaUrl,
-          headers: headers,
-          cancelToken: task.cancelToken,
-        );
-      } else {
-        rethrow;
-      }
-    }
-
-    final totalSize = _totalSize(response, existingBytes);
+    final totalSize = _totalSize(response.response, existingBytes);
     episode
       ..mediaType = 'direct'
       ..totalSegments = 1
@@ -436,7 +407,7 @@ class DownloadManager implements IDownloadManager {
     var received = existingBytes;
 
     try {
-      await for (final chunk in response.data!.stream) {
+      await for (final chunk in response.response.data!.stream) {
         task.throwIfStopped();
         sink.add(chunk);
         received += chunk.length;
@@ -463,6 +434,72 @@ class DownloadManager implements IDownloadManager {
       ..localMediaPath = filePath
       ..completedAt = DateTime.now();
     await _persistAndNotify(request, speed: 0);
+  }
+
+  Future<_DirectStreamResult> _getDirectStreamWithRetry(
+    DownloadRequest request,
+    _DownloadTask task, {
+    required int existingBytes,
+    required File tmpFile,
+    int maxRetries = 3,
+  }) async {
+    for (var attempt = 0; attempt < maxRetries; attempt++) {
+      var headers = _directDownloadHeaders(request.httpHeaders);
+      if (existingBytes > 0) {
+        headers['Range'] = 'bytes=$existingBytes-';
+      }
+      try {
+        final response = await _httpClient.getStream(
+          request.networkMediaUrl,
+          headers: headers,
+          cancelToken: task.cancelToken,
+        );
+        return _DirectStreamResult(response, existingBytes);
+      } on DioException catch (caughtError) {
+        var error = caughtError;
+        if (error.response?.statusCode ==
+                HttpStatus.requestedRangeNotSatisfiable &&
+            existingBytes > 0) {
+          if (await tmpFile.exists()) {
+            await tmpFile.delete();
+          }
+          existingBytes = 0;
+          continue;
+        }
+        if (_shouldRetryWithoutReferer(error, headers)) {
+          headers = _withoutReferer(headers);
+          if (existingBytes > 0) {
+            headers['Range'] = 'bytes=$existingBytes-';
+          }
+          try {
+            final response = await _httpClient.getStream(
+              request.networkMediaUrl,
+              headers: headers,
+              cancelToken: task.cancelToken,
+            );
+            return _DirectStreamResult(response, existingBytes);
+          } on DioException catch (refererError) {
+            error = refererError;
+          }
+        }
+        task.throwIfStopped();
+        if (!_shouldRetryDirect(error) || attempt == maxRetries - 1) {
+          throw error;
+        }
+        await Future<void>.delayed(Duration(seconds: [1, 3, 9][attempt]));
+      }
+    }
+    throw StateError('直链下载失败');
+  }
+
+  bool _shouldRetryDirect(DioException error) {
+    final status = error.response?.statusCode;
+    return error.type == DioExceptionType.connectionError ||
+        error.type == DioExceptionType.connectionTimeout ||
+        error.type == DioExceptionType.receiveTimeout ||
+        status == HttpStatus.requestTimeout ||
+        status == HttpStatus.tooManyRequests ||
+        (status != null && status >= 500);
   }
 
   Future<Map<String, String>> _downloadKeys(
@@ -700,6 +737,13 @@ class DownloadManager implements IDownloadManager {
         0;
     return existingBytes + contentLength;
   }
+}
+
+class _DirectStreamResult {
+  const _DirectStreamResult(this.response, this.existingBytes);
+
+  final Response<ResponseBody> response;
+  final int existingBytes;
 }
 
 class _DownloadTask {

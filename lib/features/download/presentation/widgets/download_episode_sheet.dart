@@ -19,17 +19,35 @@ Future<void> showDownloadEpisodeSheet(BuildContext context, WidgetRef ref) {
   return showModalBottomSheet<void>(
     context: context,
     isScrollControlled: true,
+    showDragHandle: true,
     builder: (context) {
       return UncontrolledProviderScope(
         container: container,
-        child: const DownloadEpisodeSheet(),
+        child: DraggableScrollableSheet(
+          expand: false,
+          initialChildSize: 0.6,
+          minChildSize: 0.3,
+          maxChildSize: 0.95,
+          snap: true,
+          snapSizes: const [0.52, 0.95],
+          builder: (context, scrollController) {
+            return DownloadEpisodeSheet(
+              scrollController: scrollController,
+            );
+          },
+        ),
       );
     },
   );
 }
 
 class DownloadEpisodeSheet extends ConsumerStatefulWidget {
-  const DownloadEpisodeSheet({super.key});
+  const DownloadEpisodeSheet({
+    super.key,
+    required this.scrollController,
+  });
+
+  final ScrollController scrollController;
 
   @override
   ConsumerState<DownloadEpisodeSheet> createState() =>
@@ -68,188 +86,182 @@ class _DownloadEpisodeSheetState extends ConsumerState<DownloadEpisodeSheet> {
     }).toList(growable: false);
 
     return SafeArea(
-      child: ConstrainedBox(
-        constraints: BoxConstraints(
-          maxHeight: MediaQuery.of(context).size.height * 0.82,
-        ),
-        child: Padding(
-          padding: const EdgeInsets.fromLTRB(16, 12, 16, 16),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Row(
-                children: [
-                  Expanded(
-                    child: Text(
-                      l10n.downloadSelectionTitle,
-                      style: Theme.of(context).textTheme.titleLarge,
-                    ),
-                  ),
-                  IconButton(
-                    tooltip: l10n.cancel,
-                    icon: const Icon(Icons.close_rounded),
-                    onPressed: () => Navigator.of(context).pop(),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 8),
-              if (source != null)
-                Text(
-                  '${source.websiteName} - ${videoSourceState.lineName}',
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                  style: TextStyle(
-                    color: Theme.of(context).colorScheme.onSurfaceVariant,
+      child: Padding(
+        padding: const EdgeInsets.fromLTRB(16, 12, 16, 16),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: [
+                Expanded(
+                  child: Text(
+                    l10n.downloadSelectionTitle,
+                    style: Theme.of(context).textTheme.titleLarge,
                   ),
                 ),
-              const SizedBox(height: 12),
-              if (candidates.isEmpty)
-                Padding(
-                  padding: const EdgeInsets.symmetric(vertical: 36),
-                  child: Center(child: Text(l10n.noSelectableEpisodes)),
-                )
-              else ...[
-                Row(
-                  children: [
-                    TextButton.icon(
-                      onPressed: () {
-                        setState(() {
-                          if (_selectedUrls.length ==
-                              selectableCandidates.length) {
-                            _selectedUrls.clear();
-                          } else {
-                            _selectedUrls
-                              ..clear()
-                              ..addAll(
-                                selectableCandidates.map((candidate) {
-                                  return candidate.sourceEpisode.like;
-                                }),
-                              );
-                          }
-                        });
-                      },
-                      icon: Icon(
-                        _selectedUrls.length == selectableCandidates.length
-                            ? Icons.check_box_rounded
-                            : Icons.check_box_outline_blank_rounded,
-                      ),
-                      label: Text(l10n.all),
-                    ),
-                    const Spacer(),
-                    Text(l10n.selectedEpisodesCount(_selectedUrls.length)),
-                  ],
-                ),
-                Flexible(
-                  child: ListView.builder(
-                    shrinkWrap: true,
-                    itemCount: candidates.length,
-                    itemBuilder: (context, index) {
-                      final candidate = candidates[index];
-                      final selected = _selectedUrls.contains(
-                        candidate.sourceEpisode.like,
-                      );
-                      final canSelect =
-                          _canSelectCandidate(candidate.downloadEpisode);
-                      return CheckboxListTile(
-                        value: selected && canSelect,
-                        controlAffinity: ListTileControlAffinity.leading,
-                        title: Text(
-                          candidate.displayTitle(l10n),
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                        ),
-                        subtitle: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            if (candidate.downloadEpisode != null) ...[
-                              const SizedBox(height: 4),
-                              Text(
-                                _statusText(l10n, candidate.downloadEpisode!),
-                                maxLines: 1,
-                                overflow: TextOverflow.ellipsis,
-                                style: TextStyle(
-                                  color: _statusColor(
-                                    context,
-                                    candidate.downloadEpisode!,
-                                  ),
-                                ),
-                              ),
-                            ],
-                          ],
-                        ),
-                        secondary:
-                            _canDownloadDanmaku(candidate.downloadEpisode)
-                                ? _danmakuDownloadingUrls.contains(
-                                    candidate.downloadEpisode!.episodeUrl,
-                                  )
-                                    ? const SizedBox.square(
-                                        dimension: 24,
-                                        child: CircularProgressIndicator(
-                                          strokeWidth: 2,
-                                        ),
-                                      )
-                                    : IconButton(
-                                        tooltip: l10n.downloadDanmaku,
-                                        icon: const Icon(
-                                          Icons.download_for_offline_rounded,
-                                        ),
-                                        onPressed: () => _downloadDanmaku(
-                                          candidate.downloadEpisode!,
-                                          sourceName: source!.websiteName,
-                                        ),
-                                      )
-                                : null,
-                        onChanged: canSelect
-                            ? (value) {
-                                setState(() {
-                                  if (value ?? false) {
-                                    _selectedUrls.add(
-                                      candidate.sourceEpisode.like,
-                                    );
-                                  } else {
-                                    _selectedUrls.remove(
-                                      candidate.sourceEpisode.like,
-                                    );
-                                  }
-                                });
-                              }
-                            : null,
-                      );
-                    },
-                  ),
+                IconButton(
+                  tooltip: l10n.cancel,
+                  icon: const Icon(Icons.close_rounded),
+                  onPressed: () => Navigator.of(context).pop(),
                 ),
               ],
-              SwitchListTile(
-                contentPadding: EdgeInsets.zero,
-                value: _downloadDanmakuEnabled,
-                title: Text(l10n.downloadDanmaku),
-                subtitle: Text(l10n.downloadDanmakuDescription),
-                onChanged: (value) {
-                  setState(() {
-                    _downloadDanmakuEnabled = value;
-                  });
-                  Storage.setting.put(DownloadKey.downloadDanmaku, value);
-                },
+            ),
+            const SizedBox(height: 8),
+            if (source != null)
+              Text(
+                '${source.websiteName} - ${videoSourceState.lineName}',
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                style: TextStyle(
+                  color: Theme.of(context).colorScheme.onSurfaceVariant,
+                ),
               ),
-              const SizedBox(height: 12),
-              SizedBox(
-                width: double.infinity,
-                child: FilledButton.icon(
-                  onPressed: _selectedUrls.isEmpty || _isSubmitting
-                      ? null
-                      : () => _startDownloads(l10n, source!, candidates),
-                  icon: _isSubmitting
-                      ? const SizedBox.square(
-                          dimension: 16,
-                          child: CircularProgressIndicator(strokeWidth: 2),
-                        )
-                      : const Icon(Icons.download_rounded),
-                  label: Text(l10n.startDownload),
+            const SizedBox(height: 12),
+            if (candidates.isEmpty)
+              Padding(
+                padding: const EdgeInsets.symmetric(vertical: 36),
+                child: Center(child: Text(l10n.noSelectableEpisodes)),
+              )
+            else ...[
+              Row(
+                children: [
+                  TextButton.icon(
+                    onPressed: () {
+                      setState(() {
+                        if (_selectedUrls.length ==
+                            selectableCandidates.length) {
+                          _selectedUrls.clear();
+                        } else {
+                          _selectedUrls
+                            ..clear()
+                            ..addAll(
+                              selectableCandidates.map((candidate) {
+                                return candidate.sourceEpisode.like;
+                              }),
+                            );
+                        }
+                      });
+                    },
+                    icon: Icon(
+                      _selectedUrls.length == selectableCandidates.length
+                          ? Icons.check_box_rounded
+                          : Icons.check_box_outline_blank_rounded,
+                    ),
+                    label: Text(l10n.all),
+                  ),
+                  const Spacer(),
+                  Text(l10n.selectedEpisodesCount(_selectedUrls.length)),
+                ],
+              ),
+              Flexible(
+                child: ListView.builder(
+                  controller: widget.scrollController,
+                  itemCount: candidates.length,
+                  itemBuilder: (context, index) {
+                    final candidate = candidates[index];
+                    final selected = _selectedUrls.contains(
+                      candidate.sourceEpisode.like,
+                    );
+                    final canSelect =
+                        _canSelectCandidate(candidate.downloadEpisode);
+                    return CheckboxListTile(
+                      value: selected && canSelect,
+                      controlAffinity: ListTileControlAffinity.leading,
+                      title: Text(
+                        candidate.displayTitle(l10n),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                      subtitle: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          if (candidate.downloadEpisode != null) ...[
+                            const SizedBox(height: 4),
+                            Text(
+                              _statusText(l10n, candidate.downloadEpisode!),
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                              style: TextStyle(
+                                color: _statusColor(
+                                  context,
+                                  candidate.downloadEpisode!,
+                                ),
+                              ),
+                            ),
+                          ],
+                        ],
+                      ),
+                      secondary: _canDownloadDanmaku(candidate.downloadEpisode)
+                          ? _danmakuDownloadingUrls.contains(
+                              candidate.downloadEpisode!.episodeUrl,
+                            )
+                              ? const SizedBox.square(
+                                  dimension: 24,
+                                  child: CircularProgressIndicator(
+                                    strokeWidth: 2,
+                                  ),
+                                )
+                              : IconButton(
+                                  tooltip: l10n.downloadDanmaku,
+                                  icon: const Icon(
+                                    Icons.download_for_offline_rounded,
+                                  ),
+                                  onPressed: () => _downloadDanmaku(
+                                    candidate.downloadEpisode!,
+                                    sourceName: source!.websiteName,
+                                  ),
+                                )
+                          : null,
+                      onChanged: canSelect
+                          ? (value) {
+                              setState(() {
+                                if (value ?? false) {
+                                  _selectedUrls.add(
+                                    candidate.sourceEpisode.like,
+                                  );
+                                } else {
+                                  _selectedUrls.remove(
+                                    candidate.sourceEpisode.like,
+                                  );
+                                }
+                              });
+                            }
+                          : null,
+                    );
+                  },
                 ),
               ),
             ],
-          ),
+            SwitchListTile(
+              contentPadding: EdgeInsets.zero,
+              value: _downloadDanmakuEnabled,
+              title: Text(l10n.downloadDanmaku),
+              subtitle: Text(l10n.downloadDanmakuDescription),
+              onChanged: (value) {
+                setState(() {
+                  _downloadDanmakuEnabled = value;
+                });
+                Storage.setting.put(DownloadKey.downloadDanmaku, value);
+              },
+            ),
+            const SizedBox(height: 12),
+            SizedBox(
+              width: double.infinity,
+              child: FilledButton.icon(
+                onPressed: _selectedUrls.isEmpty || _isSubmitting
+                    ? null
+                    : () => _startDownloads(l10n, source!, candidates),
+                icon: _isSubmitting
+                    ? const SizedBox.square(
+                        dimension: 16,
+                        child: CircularProgressIndicator(strokeWidth: 2),
+                      )
+                    : const Icon(Icons.download_rounded),
+                label: Text(l10n.startDownload),
+              ),
+            ),
+          ],
         ),
       ),
     );

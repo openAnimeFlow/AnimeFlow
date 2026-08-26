@@ -3457,6 +3457,12 @@ abstract class AppLocalizations {
   /// In zh_Hans, this message translates to:
   /// **'暂停全部'**
   String get downloadPauseAll;
+
+  /// No description provided for @downloadSizeProgress.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'已下载 {downloaded} / 总大小 {total}'**
+  String downloadSizeProgress(Object downloaded, Object total);
 }
 
 class _AppLocalizationsDelegate

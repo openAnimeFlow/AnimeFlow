@@ -568,4 +568,6 @@
   ,"downloadNotificationStatus": "{active} active - {completed}/{total} - {speed}"
   ,"@downloadNotificationStatus": {"placeholders": {"active": {}, "completed": {}, "total": {}, "speed": {}}}
   ,"downloadPauseAll": "Pause all"
+  ,"downloadSizeProgress": "Downloaded {downloaded} / Total {total}"
+  ,"@downloadSizeProgress": {"placeholders": {"downloaded": {}, "total": {}}}
 }

@@ -306,6 +306,7 @@ class DownloadManager implements IDownloadManager {
 
     episode
       ..totalBytes = existingBytes
+      ..totalSizeBytes = 0
       ..progressPercent = episode.totalSegments == 0
           ? 0
           : episode.downloadedSegments / episode.totalSegments * 100;
@@ -425,6 +426,7 @@ class DownloadManager implements IDownloadManager {
       ..totalSegments = 1
       ..downloadedSegments = existingBytes > 0 ? 0 : 0
       ..totalBytes = existingBytes
+      ..totalSizeBytes = totalSize
       ..progressPercent = totalSize > 0 ? existingBytes / totalSize * 100 : 0;
     await _persistAndNotify(request, speed: speedTracker.currentSpeed);
 

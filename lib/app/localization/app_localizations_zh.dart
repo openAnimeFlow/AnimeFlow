@@ -1807,6 +1807,11 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get downloadPauseAll => '暫停全部';
+
+  @override
+  String downloadSizeProgress(Object downloaded, Object total) {
+    return '已下載 $downloaded / 總大小 $total';
+  }
 }
 
 /// The translations for Chinese, using the Han script (`zh_Hans`).
@@ -3611,6 +3616,11 @@ class AppLocalizationsZhHans extends AppLocalizationsZh {
 
   @override
   String get downloadPauseAll => '暂停全部';
+
+  @override
+  String downloadSizeProgress(Object downloaded, Object total) {
+    return '已下载 $downloaded / 总大小 $total';
+  }
 }
 
 /// The translations for Chinese, as used in Hong Kong, using the Han script (`zh_Hant_HK`).
@@ -5334,6 +5344,11 @@ class AppLocalizationsZhHantHk extends AppLocalizationsZh {
 
   @override
   String get downloadPauseAll => '暫停全部';
+
+  @override
+  String downloadSizeProgress(Object downloaded, Object total) {
+    return '已下載 $downloaded / 總大小 $total';
+  }
 }
 
 /// The translations for Chinese, as used in Taiwan, using the Han script (`zh_Hant_TW`).
@@ -7057,4 +7072,9 @@ class AppLocalizationsZhHantTw extends AppLocalizationsZh {
 
   @override
   String get downloadPauseAll => '暫停全部';
+
+  @override
+  String downloadSizeProgress(Object downloaded, Object total) {
+    return '已下載 $downloaded / 總大小 $total';
+  }
 }

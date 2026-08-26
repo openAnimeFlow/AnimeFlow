@@ -67,6 +67,9 @@ class DownloadEpisode {
   @HiveField(20)
   int danDanBangumiID;
 
+  @HiveField(21)
+  int totalSizeBytes;
+
   DownloadEpisode({
     required this.episodeUrl,
     required this.bangumiEpisodeId,
@@ -89,5 +92,6 @@ class DownloadEpisode {
     this.danmakuDownloaded = false,
     this.localDanmakuPath = '',
     this.danDanBangumiID = 0,
+    this.totalSizeBytes = 0,
   });
 }

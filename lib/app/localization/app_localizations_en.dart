@@ -1855,4 +1855,9 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get downloadPauseAll => 'Pause all';
+
+  @override
+  String downloadSizeProgress(Object downloaded, Object total) {
+    return 'Downloaded $downloaded / Total $total';
+  }
 }

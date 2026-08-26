@@ -50,6 +50,22 @@ class _DownloadRecordCardState extends ConsumerState<_DownloadRecordCard> {
   bool _isExpanded = false;
 
   @override
+  void initState() {
+    super.initState();
+    _isExpanded = _hasActiveDownload(widget.record);
+  }
+
+  @override
+  void didUpdateWidget(covariant _DownloadRecordCard oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (!_isExpanded &&
+        !_hasActiveDownload(oldWidget.record) &&
+        _hasActiveDownload(widget.record)) {
+      _isExpanded = true;
+    }
+  }
+
+  @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
     final colorScheme = Theme.of(context).colorScheme;
@@ -150,6 +166,14 @@ class _DownloadRecordCardState extends ConsumerState<_DownloadRecordCard> {
       ),
     );
   }
+
+  bool _hasActiveDownload(DownloadRecord record) {
+    return record.episodes.values.any((episode) {
+      return episode.status == DownloadStatus.pending ||
+          episode.status == DownloadStatus.resolving ||
+          episode.status == DownloadStatus.downloading;
+    });
+  }
 }
 
 class _DownloadEpisodeTile extends ConsumerWidget {
@@ -186,7 +210,8 @@ class _DownloadEpisodeTile extends ConsumerWidget {
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
               ),
-              if (episode.status != DownloadStatus.completed) ...[
+              if (episode.status != DownloadStatus.completed &&
+                  episode.status != DownloadStatus.failed) ...[
                 const SizedBox(height: 6),
                 LinearProgressIndicator(
                   value: progress == 0 ? null : progress,
@@ -369,12 +394,12 @@ class _DownloadEpisodeTile extends ConsumerWidget {
       );
       return details.isEmpty ? status : '$status - ${details.join(' - ')}';
     }
+    if (episode.status == DownloadStatus.failed) {
+      final detail = episode.errorMessage.trim();
+      return detail.isEmpty ? status : '$status - $detail';
+    }
     final progress =
         '${episode.progressPercent.clamp(0, 100).toStringAsFixed(1)}%';
-    final detail = episode.errorMessage.trim();
-    if (detail.isNotEmpty && episode.status == DownloadStatus.failed) {
-      return '$status - $detail';
-    }
     return '$status - $progress';
   }
 }

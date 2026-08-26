@@ -38,6 +38,10 @@ class PlaybackKey {
       skipDuration = 'playback_skip_duration';
 }
 
+class DownloadKey {
+  static const String downloadDanmaku = 'download_danmaku';
+}
+
 class SettingKey {
   static const String isMirror = 'setting_is_mirror',
       themeMode = 'theme_mode',

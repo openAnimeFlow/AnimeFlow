@@ -1,7 +1,10 @@
 import 'dart:async';
 
 import 'package:anime_flow/core/constants/constants.dart';
+import 'package:anime_flow/core/constants/storage_key.dart';
 import 'package:anime_flow/core/crawler/cookie_manager.dart';
+import 'package:anime_flow/core/storage/storage.dart';
+import 'package:anime_flow/features/download/application/download_danmaku_service.dart';
 import 'package:anime_flow/features/download/application/download_manager.dart';
 import 'package:anime_flow/features/download/application/video_source_resolver_pool.dart';
 import 'package:anime_flow/features/download/data/repositories/download_repository.dart';
@@ -57,6 +60,7 @@ class StartDownloadParams {
     required this.episodeIndex,
     this.useLegacyParser = false,
     this.networkMediaUrl = '',
+    this.downloadDanmaku,
   });
 
   final int subjectId;
@@ -75,6 +79,7 @@ class StartDownloadParams {
   /// Optional pre-resolved M3U8/MP4 URL. When empty, the controller resolves
   /// [episodeUrl] with an independent WebView resolver from the pool.
   final String networkMediaUrl;
+  final bool? downloadDanmaku;
 
   String get recordKey => DownloadRecord.buildKey(
         sourceName: sourceName,
@@ -93,6 +98,11 @@ IDownloadManager downloadManager(Ref ref) {
 }
 
 @Riverpod(keepAlive: true)
+IDownloadDanmakuService downloadDanmakuService(Ref ref) {
+  return DownloadDanmakuService();
+}
+
+@Riverpod(keepAlive: true)
 IVideoSourceResolverPool videoSourceResolverPool(Ref ref) {
   final pool = VideoSourceResolverPool();
   ref.onDispose(pool.dispose);
@@ -101,11 +111,17 @@ IVideoSourceResolverPool videoSourceResolverPool(Ref ref) {
 
 @Riverpod(keepAlive: true)
 class DownloadController extends _$DownloadController {
+  final _downloadDanmakuByTask = <String, bool>{};
+  final _runningDanmakuTasks = <String>{};
+
   @override
   DownloadState build() {
     final manager = ref.watch(downloadManagerProvider);
     final resolverPool = ref.watch(videoSourceResolverPoolProvider);
     manager.onProgress = (recordKey, episodeUrl, episode, speed) {
+      if (episode.status == DownloadStatus.completed) {
+        unawaited(_downloadDanmakuIfNeeded(recordKey, episodeUrl, episode));
+      }
       _refresh(speed: speed);
     };
     ref.onDispose(() {
@@ -136,6 +152,9 @@ class DownloadController extends _$DownloadController {
       params.sourceBaseUrl,
       params.episodeUrl,
     );
+    final taskKey = _taskKey(params.recordKey, normalizedEpisodeUrl);
+    _downloadDanmakuByTask[taskKey] =
+        params.downloadDanmaku ?? _downloadDanmakuEnabled;
     final existing = record.episodes[normalizedEpisodeUrl];
     final episode = existing ??
         DownloadEpisode(
@@ -255,6 +274,58 @@ class DownloadController extends _$DownloadController {
     return startDownload(params);
   }
 
+  Future<void> _downloadDanmakuIfNeeded(
+    String recordKey,
+    String episodeUrl,
+    DownloadEpisode episode,
+  ) async {
+    final taskKey = _taskKey(recordKey, episodeUrl);
+    final shouldDownload =
+        _downloadDanmakuByTask[taskKey] ?? _downloadDanmakuEnabled;
+    if (!shouldDownload || episode.danmakuDownloaded) {
+      _downloadDanmakuByTask.remove(taskKey);
+      return;
+    }
+    if (_runningDanmakuTasks.contains(taskKey)) {
+      return;
+    }
+
+    _runningDanmakuTasks.add(taskKey);
+    try {
+      final result = await ref.read(downloadDanmakuServiceProvider).download(
+            subjectId: ref
+                    .read(downloadRepositoryProvider)
+                    .getRecord(recordKey)
+                    ?.subjectId ??
+                0,
+            episode: episode,
+          );
+      if (result != null) {
+        episode
+          ..danDanBangumiID = result.danDanBangumiId
+          ..danmakuDownloaded = result.hasDanmaku
+          ..localDanmakuPath = result.localPath;
+      } else {
+        episode
+          ..danmakuDownloaded = false
+          ..localDanmakuPath = '';
+      }
+    } catch (_) {
+      episode
+        ..danmakuDownloaded = false
+        ..localDanmakuPath = '';
+    } finally {
+      _runningDanmakuTasks.remove(taskKey);
+      _downloadDanmakuByTask.remove(taskKey);
+      await ref.read(downloadRepositoryProvider).updateEpisode(
+            recordKey,
+            episodeUrl,
+            episode,
+          );
+      _refresh(speed: 0);
+    }
+  }
+
   Future<String> _resolveNetworkMediaUrl(
     String episodeUrl, {
     required bool useLegacyParser,
@@ -364,6 +435,21 @@ class DownloadController extends _$DownloadController {
       return episodeUrl;
     }
     return Uri.parse(baseUrl).resolve(episodeUrl).toString();
+  }
+
+  bool get _downloadDanmakuEnabled {
+    try {
+      return Storage.setting.get(
+        DownloadKey.downloadDanmaku,
+        defaultValue: true,
+      );
+    } catch (_) {
+      return true;
+    }
+  }
+
+  static String _taskKey(String recordKey, String episodeUrl) {
+    return '$recordKey::$episodeUrl';
   }
 
   bool _isEpisodePaused(String recordKey, String episodeUrl) {

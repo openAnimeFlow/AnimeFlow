@@ -3217,6 +3217,30 @@ abstract class AppLocalizations {
   /// **'下载资源'**
   String get downloadResources;
 
+  /// No description provided for @downloadDanmaku.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'同时下载弹幕'**
+  String get downloadDanmaku;
+
+  /// No description provided for @downloadDanmakuDescription.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'下载完成后保存本地弹幕，失败不影响视频'**
+  String get downloadDanmakuDescription;
+
+  /// No description provided for @downloadWithDanmaku.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'含弹幕'**
+  String get downloadWithDanmaku;
+
+  /// No description provided for @downloadWithoutDanmaku.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'无弹幕'**
+  String get downloadWithoutDanmaku;
+
   /// No description provided for @expandDownloadEpisodes.
   ///
   /// In zh_Hans, this message translates to:

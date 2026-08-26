@@ -358,10 +358,16 @@ class _DownloadEpisodeTile extends ConsumerWidget {
       _ => l10n.downloadQueued,
     };
     if (episode.status == DownloadStatus.completed) {
-      if (episode.totalBytes <= 0) {
-        return status;
+      final details = <String>[];
+      if (episode.totalBytes > 0) {
+        details.add(Utils.formatBytes(episode.totalBytes));
       }
-      return '$status - ${Utils.formatBytes(episode.totalBytes)}';
+      details.add(
+        episode.danmakuDownloaded
+            ? l10n.downloadWithDanmaku
+            : l10n.downloadWithoutDanmaku,
+      );
+      return details.isEmpty ? status : '$status - ${details.join(' - ')}';
     }
     final progress =
         '${episode.progressPercent.clamp(0, 100).toStringAsFixed(1)}%';

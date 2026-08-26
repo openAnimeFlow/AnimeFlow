@@ -1,3 +1,6 @@
+import 'dart:async';
+
+import 'package:anime_flow/features/download/application/download_danmaku_service.dart';
 import 'package:anime_flow/features/download/application/download_manager.dart';
 import 'package:anime_flow/features/download/application/video_source_resolver_pool.dart';
 import 'package:anime_flow/features/download/data/repositories/download_repository.dart';
@@ -184,10 +187,111 @@ void main() {
         DownloadStatus.paused,
       );
     });
+
+    test('downloads danmaku after video completes when enabled', () async {
+      final repository = _FakeDownloadRepository();
+      final manager = _FakeDownloadManager();
+      final resolverPool = _FakeResolverPool();
+      final danmakuService = _FakeDownloadDanmakuService(
+        result: const DownloadDanmakuResult(
+          danDanBangumiId: 2026,
+          localPath: 'downloads/ep1/danmaku.json',
+          hasDanmaku: true,
+        ),
+      );
+      final container = ProviderContainer(
+        overrides: [
+          downloadRepositoryProvider.overrideWithValue(repository),
+          downloadManagerProvider.overrideWithValue(manager),
+          videoSourceResolverPoolProvider.overrideWithValue(resolverPool),
+          downloadDanmakuServiceProvider.overrideWithValue(danmakuService),
+        ],
+      );
+      addTearDown(container.dispose);
+
+      await container.read(downloadControllerProvider.notifier).startDownload(
+            _params(
+              networkMediaUrl: 'https://cdn.test/ep1.m3u8',
+              downloadDanmaku: true,
+            ),
+          );
+
+      final request = manager.requests.single;
+      request.episode
+        ..status = DownloadStatus.completed
+        ..downloadDirectory = 'downloads/ep1';
+      manager.onProgress?.call(
+        request.recordKey,
+        request.episodeUrl,
+        request.episode,
+        0,
+      );
+      await danmakuService.waitForDownload();
+      await Future<void>.delayed(Duration.zero);
+
+      final episode = repository
+          .getRecord(request.recordKey)!
+          .episodes[request.episodeUrl]!;
+      expect(danmakuService.requestedSubjectIds, [1]);
+      expect(episode.danDanBangumiID, 2026);
+      expect(episode.danmakuDownloaded, isTrue);
+      expect(episode.localDanmakuPath, 'downloads/ep1/danmaku.json');
+    });
+
+    test('skips danmaku download when disabled for the task', () async {
+      final repository = _FakeDownloadRepository();
+      final manager = _FakeDownloadManager();
+      final resolverPool = _FakeResolverPool();
+      final danmakuService = _FakeDownloadDanmakuService(
+        result: const DownloadDanmakuResult(
+          danDanBangumiId: 2026,
+          localPath: 'downloads/ep1/danmaku.json',
+          hasDanmaku: true,
+        ),
+      );
+      final container = ProviderContainer(
+        overrides: [
+          downloadRepositoryProvider.overrideWithValue(repository),
+          downloadManagerProvider.overrideWithValue(manager),
+          videoSourceResolverPoolProvider.overrideWithValue(resolverPool),
+          downloadDanmakuServiceProvider.overrideWithValue(danmakuService),
+        ],
+      );
+      addTearDown(container.dispose);
+
+      await container.read(downloadControllerProvider.notifier).startDownload(
+            _params(
+              networkMediaUrl: 'https://cdn.test/ep1.m3u8',
+              downloadDanmaku: false,
+            ),
+          );
+
+      final request = manager.requests.single;
+      request.episode
+        ..status = DownloadStatus.completed
+        ..downloadDirectory = 'downloads/ep1';
+      manager.onProgress?.call(
+        request.recordKey,
+        request.episodeUrl,
+        request.episode,
+        0,
+      );
+      await Future<void>.delayed(Duration.zero);
+
+      final episode = repository
+          .getRecord(request.recordKey)!
+          .episodes[request.episodeUrl]!;
+      expect(danmakuService.requestedSubjectIds, isEmpty);
+      expect(episode.danmakuDownloaded, isFalse);
+      expect(episode.localDanmakuPath, isEmpty);
+    });
   });
 }
 
-StartDownloadParams _params({required String networkMediaUrl}) {
+StartDownloadParams _params({
+  required String networkMediaUrl,
+  bool downloadDanmaku = false,
+}) {
   return StartDownloadParams(
     subjectId: 1,
     subjectName: 'Subject',
@@ -201,6 +305,7 @@ StartDownloadParams _params({required String networkMediaUrl}) {
     episodeSort: 1,
     episodeIndex: 1,
     networkMediaUrl: networkMediaUrl,
+    downloadDanmaku: downloadDanmaku,
   );
 }
 
@@ -335,6 +440,33 @@ class _FakeDownloadManager implements IDownloadManager {
   @override
   Future<void> resume(DownloadRequest request) async {
     return enqueue(request);
+  }
+}
+
+class _FakeDownloadDanmakuService implements IDownloadDanmakuService {
+  _FakeDownloadDanmakuService({required this.result});
+
+  final DownloadDanmakuResult? result;
+  final requestedSubjectIds = <int>[];
+  final _downloads = <Completer<void>>[];
+
+  @override
+  Future<DownloadDanmakuResult?> download({
+    required int subjectId,
+    required DownloadEpisode episode,
+  }) async {
+    requestedSubjectIds.add(subjectId);
+    final completer = Completer<void>();
+    _downloads.add(completer);
+    completer.complete();
+    return result;
+  }
+
+  Future<void> waitForDownload() async {
+    while (_downloads.isEmpty) {
+      await Future<void>.delayed(Duration.zero);
+    }
+    await _downloads.last.future;
   }
 }
 

@@ -95,6 +95,50 @@ final class DownloadManagerProvider extends $FunctionalProvider<
 
 String _$downloadManagerHash() => r'243775f960e4a600e4a606cd268e102790b1c10e';
 
+@ProviderFor(downloadDanmakuService)
+final downloadDanmakuServiceProvider = DownloadDanmakuServiceProvider._();
+
+final class DownloadDanmakuServiceProvider extends $FunctionalProvider<
+    IDownloadDanmakuService,
+    IDownloadDanmakuService,
+    IDownloadDanmakuService> with $Provider<IDownloadDanmakuService> {
+  DownloadDanmakuServiceProvider._()
+      : super(
+          from: null,
+          argument: null,
+          retry: null,
+          name: r'downloadDanmakuServiceProvider',
+          isAutoDispose: false,
+          dependencies: null,
+          $allTransitiveDependencies: null,
+        );
+
+  @override
+  String debugGetCreateSourceHash() => _$downloadDanmakuServiceHash();
+
+  @$internal
+  @override
+  $ProviderElement<IDownloadDanmakuService> $createElement(
+          $ProviderPointer pointer) =>
+      $ProviderElement(pointer);
+
+  @override
+  IDownloadDanmakuService create(Ref ref) {
+    return downloadDanmakuService(ref);
+  }
+
+  /// {@macro riverpod.override_with_value}
+  Override overrideWithValue(IDownloadDanmakuService value) {
+    return $ProviderOverride(
+      origin: this,
+      providerOverride: $SyncValueProvider<IDownloadDanmakuService>(value),
+    );
+  }
+}
+
+String _$downloadDanmakuServiceHash() =>
+    r'ab5b80675f497f155919c2f986fac1763b3d1106';
+
 @ProviderFor(videoSourceResolverPool)
 final videoSourceResolverPoolProvider = VideoSourceResolverPoolProvider._();
 
@@ -172,7 +216,7 @@ final class DownloadControllerProvider
 }
 
 String _$downloadControllerHash() =>
-    r'2b6871705aa0f855b2bfb93567c11b3e177a225c';
+    r'c5be615ed6104ba697161a6762d08a84664d3288';
 
 abstract class _$DownloadController extends $Notifier<DownloadState> {
   DownloadState build();

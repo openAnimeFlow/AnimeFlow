@@ -1,5 +1,7 @@
 import 'package:anime_flow/app/localization/app_localizations.dart';
 import 'package:anime_flow/app/router/routes_args.dart';
+import 'package:anime_flow/core/constants/storage_key.dart';
+import 'package:anime_flow/core/storage/storage.dart';
 import 'package:anime_flow/features/download/presentation/providers/download_provider.dart';
 import 'package:anime_flow/features/play/presentation/providers/episodes_provider.dart';
 import 'package:anime_flow/features/play/presentation/providers/video_source_provider.dart';
@@ -36,6 +38,13 @@ class DownloadEpisodeSheet extends ConsumerStatefulWidget {
 class _DownloadEpisodeSheetState extends ConsumerState<DownloadEpisodeSheet> {
   final Set<String> _selectedUrls = {};
   bool _isSubmitting = false;
+  late bool _downloadDanmaku;
+
+  @override
+  void initState() {
+    super.initState();
+    _downloadDanmaku = _storedDownloadDanmaku;
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -187,6 +196,18 @@ class _DownloadEpisodeSheetState extends ConsumerState<DownloadEpisodeSheet> {
                   ),
                 ),
               ],
+              SwitchListTile(
+                contentPadding: EdgeInsets.zero,
+                value: _downloadDanmaku,
+                title: Text(l10n.downloadDanmaku),
+                subtitle: Text(l10n.downloadDanmakuDescription),
+                onChanged: (value) {
+                  setState(() {
+                    _downloadDanmaku = value;
+                  });
+                  Storage.setting.put(DownloadKey.downloadDanmaku, value);
+                },
+              ),
               const SizedBox(height: 12),
               SizedBox(
                 width: double.infinity,
@@ -373,12 +394,24 @@ class _DownloadEpisodeSheetState extends ConsumerState<DownloadEpisodeSheet> {
         episodeSort: candidate.sourceEpisode.episodeSort.toDouble(),
         episodeIndex:
             bangumiEpisode?.sort.toInt() ?? candidate.sourceEpisode.episodeSort,
+        downloadDanmaku: _downloadDanmaku,
       );
     }).toList();
 
     await ref.read(downloadControllerProvider.notifier).startDownloads(params);
     if (!mounted) {
       return;
+    }
+  }
+
+  bool get _storedDownloadDanmaku {
+    try {
+      return Storage.setting.get(
+        DownloadKey.downloadDanmaku,
+        defaultValue: true,
+      );
+    } catch (_) {
+      return true;
     }
   }
 }

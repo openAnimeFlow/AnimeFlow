@@ -1680,6 +1680,18 @@ class AppLocalizationsZh extends AppLocalizations {
   String get downloadResources => '下載資源';
 
   @override
+  String get downloadDanmaku => '同時下載彈幕';
+
+  @override
+  String get downloadDanmakuDescription => '下載完成後保存本地彈幕，失敗不影響影片';
+
+  @override
+  String get downloadWithDanmaku => '含彈幕';
+
+  @override
+  String get downloadWithoutDanmaku => '無彈幕';
+
+  @override
   String get expandDownloadEpisodes => '展開劇集';
 
   @override
@@ -3433,6 +3445,18 @@ class AppLocalizationsZhHans extends AppLocalizationsZh {
   String get downloadResources => '下载资源';
 
   @override
+  String get downloadDanmaku => '同时下载弹幕';
+
+  @override
+  String get downloadDanmakuDescription => '下载完成后保存本地弹幕，失败不影响视频';
+
+  @override
+  String get downloadWithDanmaku => '含弹幕';
+
+  @override
+  String get downloadWithoutDanmaku => '无弹幕';
+
+  @override
   String get expandDownloadEpisodes => '展开剧集';
 
   @override
@@ -5105,6 +5129,18 @@ class AppLocalizationsZhHantHk extends AppLocalizationsZh {
   String get downloadResources => '下載資源';
 
   @override
+  String get downloadDanmaku => '同時下載彈幕';
+
+  @override
+  String get downloadDanmakuDescription => '下載完成後保存本地彈幕，失敗不影響影片';
+
+  @override
+  String get downloadWithDanmaku => '含彈幕';
+
+  @override
+  String get downloadWithoutDanmaku => '無彈幕';
+
+  @override
   String get expandDownloadEpisodes => '展開劇集';
 
   @override
@@ -6775,6 +6811,18 @@ class AppLocalizationsZhHantTw extends AppLocalizationsZh {
 
   @override
   String get downloadResources => '下載資源';
+
+  @override
+  String get downloadDanmaku => '同時下載彈幕';
+
+  @override
+  String get downloadDanmakuDescription => '下載完成後保存本機彈幕，失敗不影響影片';
+
+  @override
+  String get downloadWithDanmaku => '含彈幕';
+
+  @override
+  String get downloadWithoutDanmaku => '無彈幕';
 
   @override
   String get expandDownloadEpisodes => '展開劇集';

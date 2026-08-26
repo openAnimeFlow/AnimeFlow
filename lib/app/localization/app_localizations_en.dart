@@ -1722,6 +1722,19 @@ class AppLocalizationsEn extends AppLocalizations {
   String get downloadResources => 'Download resources';
 
   @override
+  String get downloadDanmaku => 'Download danmaku too';
+
+  @override
+  String get downloadDanmakuDescription =>
+      'Save local danmaku after the video finishes. Failures will not affect the video.';
+
+  @override
+  String get downloadWithDanmaku => 'With danmaku';
+
+  @override
+  String get downloadWithoutDanmaku => 'No danmaku';
+
+  @override
   String get expandDownloadEpisodes => 'Expand episodes';
 
   @override

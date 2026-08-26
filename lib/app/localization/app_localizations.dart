@@ -3211,6 +3211,12 @@ abstract class AppLocalizations {
   /// **'下载选集'**
   String get downloadSelectionTitle;
 
+  /// No description provided for @downloadResources.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'下载资源'**
+  String get downloadResources;
+
   /// No description provided for @selectedEpisodesCount.
   ///
   /// In zh_Hans, this message translates to:

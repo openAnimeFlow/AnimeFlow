@@ -14,7 +14,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter/services.dart';
 import 'package:url_launcher/url_launcher.dart';
 
-enum _SourceAction { openPageUrl, copyPageUrl }
+enum _SourceAction { downloadResources, openPageUrl, copyPageUrl }
 
 class VideoResourcesView extends ConsumerStatefulWidget {
   const VideoResourcesView({super.key});
@@ -120,9 +120,20 @@ class _VideoResourcesViewState extends ConsumerState<VideoResourcesView> {
     NotificationToast.show(l10n.sourceLinkCopied, title: l10n.copied);
   }
 
-  Widget _buildSourceActionMenu(String videoUrl, AppLocalizations l10n) {
+  Widget _buildSourceActionMenu({
+    required String videoUrl,
+    required bool canDownload,
+    required AppLocalizations l10n,
+  }) {
+    final actions = [
+      if (canDownload) _SourceAction.downloadResources,
+      if (videoUrl.trim().isNotEmpty) ...[
+        _SourceAction.openPageUrl,
+        _SourceAction.copyPageUrl,
+      ],
+    ];
     return DropDownMenu<_SourceAction>(
-      items: _SourceAction.values,
+      items: actions,
       tooltip: l10n.sourceActions,
       disableSelected: false,
       onOpenedChanged: (isOpen) {
@@ -151,6 +162,10 @@ class _VideoResourcesViewState extends ConsumerState<VideoResourcesView> {
       },
       itemBuilder: (context, action, _) {
         final (icon, label) = switch (action) {
+          _SourceAction.downloadResources => (
+              Icons.download_rounded,
+              l10n.downloadResources
+            ),
           _SourceAction.openPageUrl => (
               Icons.open_in_browser_rounded,
               l10n.openPlaybackPage
@@ -173,6 +188,8 @@ class _VideoResourcesViewState extends ConsumerState<VideoResourcesView> {
       },
       onSelected: (action) {
         switch (action) {
+          case _SourceAction.downloadResources:
+            showDownloadEpisodeSheet(context, ref);
           case _SourceAction.openPageUrl:
             _openSourcePageInBrowser(videoUrl);
           case _SourceAction.copyPageUrl:
@@ -275,6 +292,7 @@ class _VideoResourcesViewState extends ConsumerState<VideoResourcesView> {
             ),
             const SizedBox(width: 8),
             Column(
+              crossAxisAlignment: CrossAxisAlignment.end,
               spacing: 10,
               children: [
                 OutlinedButton.icon(
@@ -287,15 +305,12 @@ class _VideoResourcesViewState extends ConsumerState<VideoResourcesView> {
                   icon: const Icon(Icons.sync_alt_rounded),
                   label: Text(l10n.switchSource),
                 ),
-                if (videoSourceState.isSearchCompleted)
-                  OutlinedButton.icon(
-                    onPressed: () => showDownloadEpisodeSheet(context, ref),
-                    icon: const Icon(Icons.download_rounded),
-                    label: Text(l10n.downloadSelectionTitle),
+                if (videoSourceState.isSearchCompleted || hasSourceUrl)
+                  _buildSourceActionMenu(
+                    videoUrl: videoSourceState.videoUrl,
+                    canDownload: videoSourceState.isSearchCompleted,
+                    l10n: l10n,
                   ),
-                if (hasSourceUrl) ...[
-                  _buildSourceActionMenu(videoSourceState.videoUrl, l10n),
-                ],
               ],
             ),
           ],

@@ -260,10 +260,18 @@ class _DownloadEpisodeTile extends ConsumerWidget {
 
   String _episodeTitle(AppLocalizations l10n, DownloadEpisode episode) {
     final name = episode.episodeTitle.trim();
+    final episodeNumber = l10n.episodeNumber(_episodeNumberLabel(episode));
     if (name.isNotEmpty) {
-      return l10n.playEpisode(name);
+      return '$episodeNumber · $name';
     }
-    return l10n.playEpisode(episode.episodeIndex);
+    return episodeNumber;
+  }
+
+  Object _episodeNumberLabel(DownloadEpisode episode) {
+    if (episode.episodeSort % 1 == 0) {
+      return episode.episodeSort.toInt();
+    }
+    return episode.episodeSort;
   }
 
   String _statusText(AppLocalizations l10n, DownloadEpisode episode) {
@@ -276,6 +284,9 @@ class _DownloadEpisodeTile extends ConsumerWidget {
       DownloadStatus.paused => l10n.downloadPausedStatus,
       _ => l10n.downloadQueued,
     };
+    if (episode.status == DownloadStatus.completed) {
+      return status;
+    }
     final progress =
         '${episode.progressPercent.clamp(0, 100).toStringAsFixed(1)}%';
     final detail = episode.errorMessage.trim();

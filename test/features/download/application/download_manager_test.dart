@@ -49,7 +49,7 @@ void main() {
 
       expect(result.status, DownloadStatus.completed);
       expect(result.mediaType, 'direct');
-      expect(result.progressPercent, 1);
+      expect(result.progressPercent, 100);
       expect(result.localMediaPath.endsWith('video.mp4'), isTrue);
       expect(File(result.localMediaPath).readAsStringSync(), 'direct-body');
     });
@@ -141,6 +141,7 @@ void main() {
       expect(result.status, DownloadStatus.completed);
       expect(result.mediaType, 'm3u8');
       expect(result.downloadedSegments, 2);
+      expect(result.progressPercent, 100);
       expect(File(p.join(episodeDir.path, 'seg_00000.ts')).readAsStringSync(),
           'segment-0');
       expect(File(p.join(episodeDir.path, 'seg_00001.ts')).readAsStringSync(),

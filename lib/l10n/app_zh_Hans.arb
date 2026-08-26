@@ -530,6 +530,7 @@
   ,"downloadsTitle": "下载管理"
   ,"downloadTasksEmpty": "暂无下载任务"
   ,"downloadSelectionTitle": "下载选集"
+  ,"downloadResources": "下载资源"
   ,"selectedEpisodesCount": "已选 {count} 集"
   ,"@selectedEpisodesCount": {"placeholders": {"count": {}}}
   ,"startDownload": "开始下载"

@@ -519,6 +519,7 @@
   ,"downloadsTitle": "下載管理"
   ,"downloadTasksEmpty": "暫無下載任務"
   ,"downloadSelectionTitle": "下載選集"
+  ,"downloadResources": "下載資源"
   ,"selectedEpisodesCount": "已選 {count} 集"
   ,"@selectedEpisodesCount": {"placeholders": {"count": {}}}
   ,"startDownload": "開始下載"

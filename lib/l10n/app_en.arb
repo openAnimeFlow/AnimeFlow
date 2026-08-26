@@ -488,6 +488,7 @@
   ,"downloadsTitle": "Downloads"
   ,"downloadTasksEmpty": "No download tasks"
   ,"downloadSelectionTitle": "Download episodes"
+  ,"downloadResources": "Download resources"
   ,"selectedEpisodesCount": "{count} selected"
   ,"@selectedEpisodesCount": {"placeholders": {"count": {}}}
   ,"startDownload": "Start download"

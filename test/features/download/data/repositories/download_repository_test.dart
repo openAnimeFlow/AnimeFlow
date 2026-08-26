@@ -112,7 +112,7 @@ void main() {
         _episode(
           url: 'https://example.com/1',
           status: DownloadStatus.completed,
-        )..progressPercent = 1,
+        )..progressPercent = 100,
       );
 
       expect(

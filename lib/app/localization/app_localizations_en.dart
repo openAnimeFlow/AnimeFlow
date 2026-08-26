@@ -1719,6 +1719,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get downloadSelectionTitle => 'Download episodes';
 
   @override
+  String get downloadResources => 'Download resources';
+
+  @override
   String selectedEpisodesCount(Object count) {
     return '$count selected';
   }

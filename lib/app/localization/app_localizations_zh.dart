@@ -1677,6 +1677,9 @@ class AppLocalizationsZh extends AppLocalizations {
   String get downloadSelectionTitle => '下載選集';
 
   @override
+  String get downloadResources => '下載資源';
+
+  @override
   String selectedEpisodesCount(Object count) {
     return '已選 $count 集';
   }
@@ -3416,6 +3419,9 @@ class AppLocalizationsZhHans extends AppLocalizationsZh {
   String get downloadSelectionTitle => '下载选集';
 
   @override
+  String get downloadResources => '下载资源';
+
+  @override
   String selectedEpisodesCount(Object count) {
     return '已选 $count 集';
   }
@@ -5074,6 +5080,9 @@ class AppLocalizationsZhHantHk extends AppLocalizationsZh {
   String get downloadSelectionTitle => '下載選集';
 
   @override
+  String get downloadResources => '下載資源';
+
+  @override
   String selectedEpisodesCount(Object count) {
     return '已選 $count 集';
   }
@@ -6730,6 +6739,9 @@ class AppLocalizationsZhHantTw extends AppLocalizationsZh {
 
   @override
   String get downloadSelectionTitle => '下載選集';
+
+  @override
+  String get downloadResources => '下載資源';
 
   @override
   String selectedEpisodesCount(Object count) {

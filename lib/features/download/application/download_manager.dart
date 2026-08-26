@@ -295,7 +295,7 @@ class DownloadManager implements IDownloadManager {
       ..totalBytes = existingBytes
       ..progressPercent = episode.totalSegments == 0
           ? 0
-          : episode.downloadedSegments / episode.totalSegments;
+          : episode.downloadedSegments / episode.totalSegments * 100;
     await _persistAndNotify(request, speed: speedTracker.currentSpeed);
 
     var sessionBytes = 0;
@@ -318,7 +318,7 @@ class DownloadManager implements IDownloadManager {
             ..downloadedSegments = episode.downloadedSegments + 1
             ..totalBytes = existingBytes + sessionBytes
             ..progressPercent =
-                episode.downloadedSegments / episode.totalSegments;
+                episode.downloadedSegments / episode.totalSegments * 100;
           speedTracker.update(sessionBytes);
           await _persistAndNotify(request, speed: speedTracker.currentSpeed);
         } catch (error) {
@@ -345,7 +345,7 @@ class DownloadManager implements IDownloadManager {
 
     episode
       ..status = DownloadStatus.completed
-      ..progressPercent = 1
+      ..progressPercent = 100
       ..localMediaPath = localPlaylistPath
       ..completedAt = DateTime.now();
     await _persistAndNotify(request, speed: 0);
@@ -412,7 +412,7 @@ class DownloadManager implements IDownloadManager {
       ..totalSegments = 1
       ..downloadedSegments = existingBytes > 0 ? 0 : 0
       ..totalBytes = existingBytes
-      ..progressPercent = totalSize > 0 ? existingBytes / totalSize : 0;
+      ..progressPercent = totalSize > 0 ? existingBytes / totalSize * 100 : 0;
     await _persistAndNotify(request, speed: speedTracker.currentSpeed);
 
     final sink = tmpFile.openWrite(
@@ -427,7 +427,7 @@ class DownloadManager implements IDownloadManager {
         received += chunk.length;
         episode
           ..totalBytes = received
-          ..progressPercent = totalSize > 0 ? received / totalSize : 0;
+          ..progressPercent = totalSize > 0 ? received / totalSize * 100 : 0;
         speedTracker.update(received);
         await _persistAndNotify(request, speed: speedTracker.currentSpeed);
       }
@@ -444,7 +444,7 @@ class DownloadManager implements IDownloadManager {
     episode
       ..status = DownloadStatus.completed
       ..downloadedSegments = 1
-      ..progressPercent = 1
+      ..progressPercent = 100
       ..localMediaPath = filePath
       ..completedAt = DateTime.now();
     await _persistAndNotify(request, speed: 0);

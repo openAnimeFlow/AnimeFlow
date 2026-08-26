@@ -564,4 +564,8 @@
   ,"verifyButtonXPath": "Verification button XPath"
   ,"submitCaptchaHint": "The button to click after entering the CAPTCHA"
   ,"autoClickCaptchaHint": "The verification button to click automatically when detected (such as “I am not a robot”)"
+  ,"downloadNotificationTitle": "AnimeFlow downloads"
+  ,"downloadNotificationStatus": "{active} active - {completed}/{total} - {speed}"
+  ,"@downloadNotificationStatus": {"placeholders": {"active": {}, "completed": {}, "total": {}, "speed": {}}}
+  ,"downloadPauseAll": "Pause all"
 }

@@ -549,4 +549,8 @@
   ,"downloadCompletedStatus": "已完成"
   ,"downloadFailedStatus": "已失敗"
   ,"downloadPausedStatus": "已暫停"
+  ,"downloadNotificationTitle": "AnimeFlow 下載"
+  ,"downloadNotificationStatus": "正在下載 {active} 個任務 · 已完成 {completed}/{total} · {speed}"
+  ,"@downloadNotificationStatus": {"placeholders": {"active": {}, "completed": {}, "total": {}, "speed": {}}}
+  ,"downloadPauseAll": "暫停全部"
 }

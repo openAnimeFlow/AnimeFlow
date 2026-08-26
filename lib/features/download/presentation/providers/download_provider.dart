@@ -3,8 +3,11 @@ import 'dart:async';
 import 'package:anime_flow/core/constants/constants.dart';
 import 'package:anime_flow/core/constants/storage_key.dart';
 import 'package:anime_flow/core/crawler/cookie_manager.dart';
+import 'package:anime_flow/app/localization/locale_provider.dart';
+import 'package:flutter/material.dart';
 import 'package:anime_flow/core/storage/storage.dart';
 import 'package:anime_flow/features/download/application/download_danmaku_service.dart';
+import 'package:anime_flow/features/download/application/download_foreground_service.dart';
 import 'package:anime_flow/features/download/application/download_manager.dart';
 import 'package:anime_flow/features/download/application/video_source_resolver_pool.dart';
 import 'package:anime_flow/features/download/data/repositories/download_repository.dart';
@@ -161,9 +164,14 @@ class DownloadController extends _$DownloadController {
         unawaited(_downloadDanmakuIfNeeded(recordKey, episodeUrl, episode));
       }
       _refresh(speed: speed);
+      unawaited(_syncForegroundService());
+    };
+    DownloadForegroundService.onPauseAll = () {
+      unawaited(pauseAll());
     };
     ref.onDispose(() {
       manager.onProgress = null;
+      DownloadForegroundService.onPauseAll = null;
       resolverPool.cancelAll();
     });
     unawaited(_resetIncompleteDownloads());
@@ -273,6 +281,19 @@ class DownloadController extends _$DownloadController {
   Future<void> startDownloads(List<StartDownloadParams> paramsList) async {
     for (final params in paramsList) {
       await startDownload(params);
+    }
+  }
+
+  Future<void> pauseAll() async {
+    final repository = ref.read(downloadRepositoryProvider);
+    final activeEpisodes = [
+      for (final record in repository.getAllRecords())
+        for (final episode in record.episodes.values)
+          if (_isIncompleteStatus(episode.status))
+            (record.key, episode.episodeUrl),
+    ];
+    for (final (recordKey, episodeUrl) in activeEpisodes) {
+      await pause(recordKey, episodeUrl);
     }
   }
 
@@ -432,6 +453,29 @@ class DownloadController extends _$DownloadController {
     state = _buildState(
       ref.read(downloadRepositoryProvider).getAllRecords(),
       speed: currentSpeed,
+    );
+  }
+
+  Future<void> _syncForegroundService() {
+    final episodes = state.records.expand((record) => record.episodes.values);
+    final activeTasks = episodes.where((episode) {
+      return _isIncompleteStatus(episode.status);
+    }).length;
+    Locale locale;
+    try {
+      locale = ref.read(localeProvider);
+    } catch (_) {
+      locale = const Locale.fromSubtags(
+        languageCode: 'zh',
+        scriptCode: 'Hans',
+      );
+    }
+    return DownloadForegroundService.sync(
+      activeTasks: activeTasks,
+      completedTasks: state.completedTasks,
+      totalTasks: state.totalTasks,
+      speed: state.currentSpeed,
+      locale: locale,
     );
   }
 

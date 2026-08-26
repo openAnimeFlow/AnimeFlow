@@ -571,4 +571,8 @@
   ,"enterConfirmNewPassword": "请再次输入新密码"
   ,"sendEmailCode": "发送验证码"
   ,"enterGraphicCaptchaCode": "输入6位验证码"
+  ,"downloadNotificationTitle": "AnimeFlow 下载"
+  ,"downloadNotificationStatus": "正在下载 {active} 个任务 · 已完成 {completed}/{total} · {speed}"
+  ,"@downloadNotificationStatus": {"placeholders": {"active": {}, "completed": {}, "total": {}, "speed": {}}}
+  ,"downloadPauseAll": "暂停全部"
 }

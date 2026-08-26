@@ -1795,6 +1795,18 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get enterGraphicCaptchaCode => '輸入6位驗證碼';
+
+  @override
+  String get downloadNotificationTitle => 'AnimeFlow 下載';
+
+  @override
+  String downloadNotificationStatus(
+      Object active, Object completed, Object total, Object speed) {
+    return '正在下載 $active 個任務 · 已完成 $completed/$total · $speed';
+  }
+
+  @override
+  String get downloadPauseAll => '暫停全部';
 }
 
 /// The translations for Chinese, using the Han script (`zh_Hans`).
@@ -3587,6 +3599,18 @@ class AppLocalizationsZhHans extends AppLocalizationsZh {
 
   @override
   String get enterGraphicCaptchaCode => '输入6位验证码';
+
+  @override
+  String get downloadNotificationTitle => 'AnimeFlow 下载';
+
+  @override
+  String downloadNotificationStatus(
+      Object active, Object completed, Object total, Object speed) {
+    return '正在下载 $active 个任务 · 已完成 $completed/$total · $speed';
+  }
+
+  @override
+  String get downloadPauseAll => '暂停全部';
 }
 
 /// The translations for Chinese, as used in Hong Kong, using the Han script (`zh_Hant_HK`).
@@ -5298,6 +5322,18 @@ class AppLocalizationsZhHantHk extends AppLocalizationsZh {
 
   @override
   String get enterGraphicCaptchaCode => '輸入6位驗證碼';
+
+  @override
+  String get downloadNotificationTitle => 'AnimeFlow 下載';
+
+  @override
+  String downloadNotificationStatus(
+      Object active, Object completed, Object total, Object speed) {
+    return '正在下載 $active 個任務 · 已完成 $completed/$total · $speed';
+  }
+
+  @override
+  String get downloadPauseAll => '暫停全部';
 }
 
 /// The translations for Chinese, as used in Taiwan, using the Han script (`zh_Hant_TW`).
@@ -7009,4 +7045,16 @@ class AppLocalizationsZhHantTw extends AppLocalizationsZh {
 
   @override
   String get enterGraphicCaptchaCode => '輸入6位驗證碼';
+
+  @override
+  String get downloadNotificationTitle => 'AnimeFlow 下載';
+
+  @override
+  String downloadNotificationStatus(
+      Object active, Object completed, Object total, Object speed) {
+    return '正在下載 $active 個任務 · 已完成 $completed/$total · $speed';
+  }
+
+  @override
+  String get downloadPauseAll => '暫停全部';
 }

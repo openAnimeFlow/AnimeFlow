@@ -1843,4 +1843,16 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get enterGraphicCaptchaCode => 'Enter the 6-digit CAPTCHA';
+
+  @override
+  String get downloadNotificationTitle => 'AnimeFlow downloads';
+
+  @override
+  String downloadNotificationStatus(
+      Object active, Object completed, Object total, Object speed) {
+    return '$active active - $completed/$total - $speed';
+  }
+
+  @override
+  String get downloadPauseAll => 'Pause all';
 }

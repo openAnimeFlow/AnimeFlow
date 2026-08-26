@@ -3438,6 +3438,25 @@ abstract class AppLocalizations {
   /// In zh_Hans, this message translates to:
   /// **'输入6位验证码'**
   String get enterGraphicCaptchaCode;
+
+  /// No description provided for @downloadNotificationTitle.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'AnimeFlow 下载'**
+  String get downloadNotificationTitle;
+
+  /// No description provided for @downloadNotificationStatus.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'正在下载 {active} 个任务 · 已完成 {completed}/{total} · {speed}'**
+  String downloadNotificationStatus(
+      Object active, Object completed, Object total, Object speed);
+
+  /// No description provided for @downloadPauseAll.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'暂停全部'**
+  String get downloadPauseAll;
 }
 
 class _AppLocalizationsDelegate

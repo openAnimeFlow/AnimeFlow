@@ -16,20 +16,31 @@ class DownloadPage extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final l10n = AppLocalizations.of(context);
-    final state = ref.watch(downloadControllerProvider);
+    // Keep byte-level progress out of the list-level rebuild.
+    ref.watch(
+      downloadControllerProvider.select(
+        (state) => state.records
+            .map(
+              (record) =>
+                  '${record.key}:${record.episodes.values.map((episode) => '${episode.episodeUrl}:${episode.status}').join(',')}',
+            )
+            .join('|'),
+      ),
+    );
+    final records = ref.read(downloadControllerProvider).records;
 
     return Scaffold(
       appBar: AppBar(
         title: Text(l10n.downloadsTitle),
       ),
-      body: state.records.isEmpty
+      body: records.isEmpty
           ? Center(child: Text(l10n.downloadTasksEmpty))
           : ListView.separated(
               padding: const EdgeInsets.all(12),
-              itemCount: state.records.length,
+              itemCount: records.length,
               separatorBuilder: (_, __) => const SizedBox(height: 12),
               itemBuilder: (context, index) {
-                return _DownloadRecordCard(record: state.records[index]);
+                return _DownloadRecordCard(record: records[index]);
               },
             ),
     );
@@ -187,6 +198,18 @@ class _DownloadEpisodeTile extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    ref.watch(
+      downloadControllerProvider.select(
+        (state) => state.records
+            .expand((record) => record.episodes.values)
+            .where((item) => item.episodeUrl == episode.episodeUrl)
+            .map(
+              (item) =>
+                  '${item.status}:${item.progressPercent}:${item.totalBytes}:${item.totalSizeBytes}:${item.danmakuDownloaded}',
+            )
+            .join('|'),
+      ),
+    );
     final l10n = AppLocalizations.of(context);
     final colorScheme = Theme.of(context).colorScheme;
     final progress = episode.progressPercent.clamp(0, 100) / 100;
@@ -199,89 +222,93 @@ class _DownloadEpisodeTile extends ConsumerWidget {
         ref.watch(downloadManagerProvider).getLocalMediaPath(episode);
     final canPlay = localMediaPath != null;
 
-    return Row(
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Expanded(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                _episodeTitle(l10n, episode),
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
-              ),
-              if (episode.status != DownloadStatus.completed &&
-                  episode.status != DownloadStatus.failed) ...[
-                const SizedBox(height: 6),
-                LinearProgressIndicator(
-                  value: progress == 0 ? null : progress,
-                  minHeight: 4,
-                ),
-              ],
-              const SizedBox(height: 6),
-              Text(
-                _statusText(l10n, episode),
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
-                style: TextStyle(
-                  fontSize: 12,
-                  color: colorScheme.onSurfaceVariant,
-                ),
-              ),
-            ],
-          ),
-        ),
-        const SizedBox(width: 8),
-        IconButton(
-          tooltip: l10n.play,
-          icon: const Icon(Icons.play_arrow_rounded),
-          onPressed: canPlay
-              ? () => _playOfflineEpisode(
-                    context,
-                    record: record,
-                    episode: episode,
-                    localMediaPath: localMediaPath,
-                  )
-              : null,
-        ),
-        if (canPause)
-          IconButton(
-            tooltip: l10n.pause,
-            icon: const Icon(Icons.pause_rounded),
-            onPressed: () {
-              ref.read(downloadControllerProvider.notifier).pause(
-                    record.key,
-                    episode.episodeUrl,
-                  );
-            },
-          ),
-        if (canRetry)
-          IconButton(
-            tooltip: l10n.retry,
-            icon: const Icon(Icons.refresh_rounded),
-            onPressed: () {
-              ref.read(downloadControllerProvider.notifier).resume(
-                    StartDownloadParams(
-                      subjectId: record.subjectId,
-                      subjectName: record.subjectName,
-                      subjectCover: record.subjectCover,
-                      sourceName: record.sourceName,
-                      sourceBaseUrl: record.sourceBaseUrl,
-                      lineIndex: episode.lineIndex,
-                      episodeUrl: episode.episodeUrl,
-                      episodeTitle: episode.episodeTitle,
-                      bangumiEpisodeId: episode.bangumiEpisodeId,
-                      episodeSort: episode.episodeSort,
-                      episodeIndex: episode.episodeIndex,
-                      networkMediaUrl: episode.networkMediaUrl,
+        Row(
+          children: [
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    _episodeTitle(l10n, episode),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                  if (episode.status != DownloadStatus.completed &&
+                      episode.status != DownloadStatus.failed) ...[
+                    const SizedBox(height: 6),
+                    LinearProgressIndicator(
+                      value: progress == 0 ? null : progress,
+                      minHeight: 4,
                     ),
-                  );
-            },
+                  ],
+                ],
+              ),
+            ),
+            const SizedBox(width: 8),
+            IconButton(
+              tooltip: l10n.play,
+              icon: const Icon(Icons.play_arrow_rounded),
+              onPressed: canPlay
+                  ? () => _playOfflineEpisode(
+                        context,
+                        record: record,
+                        episode: episode,
+                        localMediaPath: localMediaPath,
+                      )
+                  : null,
+            ),
+            if (canPause)
+              IconButton(
+                tooltip: l10n.pause,
+                icon: const Icon(Icons.pause_rounded),
+                onPressed: () {
+                  ref.read(downloadControllerProvider.notifier).pause(
+                        record.key,
+                        episode.episodeUrl,
+                      );
+                },
+              ),
+            if (canRetry)
+              IconButton(
+                tooltip: l10n.retry,
+                icon: const Icon(Icons.refresh_rounded),
+                onPressed: () {
+                  ref.read(downloadControllerProvider.notifier).resume(
+                        StartDownloadParams(
+                          subjectId: record.subjectId,
+                          subjectName: record.subjectName,
+                          subjectCover: record.subjectCover,
+                          sourceName: record.sourceName,
+                          sourceBaseUrl: record.sourceBaseUrl,
+                          lineIndex: episode.lineIndex,
+                          episodeUrl: episode.episodeUrl,
+                          episodeTitle: episode.episodeTitle,
+                          bangumiEpisodeId: episode.bangumiEpisodeId,
+                          episodeSort: episode.episodeSort,
+                          episodeIndex: episode.episodeIndex,
+                          networkMediaUrl: episode.networkMediaUrl,
+                        ),
+                      );
+                },
+              ),
+            IconButton(
+              tooltip: l10n.deleteDownloadTask,
+              icon: const Icon(Icons.delete_outline_rounded),
+              onPressed: () => _confirmDeleteEpisode(context, ref),
+            ),
+          ],
+        ),
+        Text(
+          _statusText(l10n, episode),
+          maxLines: 1,
+          overflow: TextOverflow.ellipsis,
+          style: TextStyle(
+            fontSize: 12,
+            color: colorScheme.onSurfaceVariant,
           ),
-        IconButton(
-          tooltip: l10n.deleteDownloadTask,
-          icon: const Icon(Icons.delete_outline_rounded),
-          onPressed: () => _confirmDeleteEpisode(context, ref),
         ),
       ],
     );
@@ -397,6 +424,9 @@ class _DownloadEpisodeTile extends ConsumerWidget {
     if (episode.status == DownloadStatus.failed) {
       final detail = episode.errorMessage.trim();
       return detail.isEmpty ? status : '$status - $detail';
+    }
+    if (episode.totalSizeBytes > 0) {
+      return '$status - ${l10n.downloadSizeProgress(Utils.formatBytes(episode.totalBytes), Utils.formatBytes(episode.totalSizeBytes))}';
     }
     final progress =
         '${episode.progressPercent.clamp(0, 100).toStringAsFixed(1)}%';

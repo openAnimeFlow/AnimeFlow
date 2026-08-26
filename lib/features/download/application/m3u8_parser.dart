@@ -71,17 +71,23 @@ class M3u8Variant {
     required this.bandwidth,
     required this.uri,
     this.resolution,
+    this.audioGroupId,
   });
 
   final int bandwidth;
   final String uri;
   final String? resolution;
+  final String? audioGroupId;
 }
 
 class M3u8MasterPlaylist {
-  const M3u8MasterPlaylist({required this.variants});
+  const M3u8MasterPlaylist({
+    required this.variants,
+    required this.audioRenditions,
+  });
 
   final List<M3u8Variant> variants;
+  final Map<String, String> audioRenditions;
 
   M3u8Variant get bestVariant {
     if (variants.isEmpty) {
@@ -89,6 +95,10 @@ class M3u8MasterPlaylist {
     }
     return variants.reduce((a, b) => a.bandwidth >= b.bandwidth ? a : b);
   }
+
+  String? audioUriFor(M3u8Variant variant) => variant.audioGroupId == null
+      ? null
+      : audioRenditions[variant.audioGroupId];
 }
 
 class M3u8MediaPlaylist {
@@ -129,6 +139,18 @@ class M3u8Parser {
   ) {
     final lines = _normalizedLines(content);
     final variants = <M3u8Variant>[];
+    final audioRenditions = <String, String>{};
+
+    for (final line in lines) {
+      if (!line.startsWith('#EXT-X-MEDIA:')) continue;
+      final attrs = _parseAttributes(line.substring('#EXT-X-MEDIA:'.length));
+      if (attrs['TYPE'] == 'AUDIO' &&
+          attrs['GROUP-ID'] != null &&
+          attrs['URI'] != null) {
+        audioRenditions[attrs['GROUP-ID']!] =
+            resolveUrl(baseUrl, attrs['URI']!);
+      }
+    }
 
     for (var i = 0; i < lines.length; i++) {
       final line = lines[i];
@@ -147,12 +169,16 @@ class M3u8Parser {
         M3u8Variant(
           bandwidth: int.tryParse(attrs['BANDWIDTH'] ?? '') ?? 0,
           resolution: attrs['RESOLUTION'],
+          audioGroupId: attrs['AUDIO'],
           uri: resolveUrl(baseUrl, uriLine),
         ),
       );
     }
 
-    return M3u8MasterPlaylist(variants: variants);
+    return M3u8MasterPlaylist(
+      variants: variants,
+      audioRenditions: audioRenditions,
+    );
   }
 
   static M3u8MediaPlaylist parseMediaPlaylist(
@@ -165,7 +191,6 @@ class M3u8Parser {
     var targetDuration = 0.0;
     var hasEndList = false;
     var isExplicitVod = false;
-    var isLiveEvent = false;
     var discontinuityGroup = 0;
     var currentDuration = 0.0;
     M3u8Key? currentKey;
@@ -194,7 +219,6 @@ class M3u8Parser {
       }
 
       if (line == '#EXT-X-PLAYLIST-TYPE:EVENT') {
-        isLiveEvent = true;
         continue;
       }
 
@@ -273,8 +297,7 @@ class M3u8Parser {
       }
     }
 
-    final isVod =
-        hasEndList || isExplicitVod || (!isLiveEvent && segments.isNotEmpty);
+    final isVod = hasEndList || (isExplicitVod && hasEndList);
 
     return M3u8MediaPlaylist(
       segments: segments,
@@ -316,40 +339,36 @@ class M3u8Parser {
         continue;
       }
 
-      try {
-        final content = await fetcher(segment.uri);
-        var playlistUrl = segment.uri;
-        var mediaContent = content;
+      final content = await fetcher(segment.uri);
+      var playlistUrl = segment.uri;
+      var mediaContent = content;
 
-        if (detectType(content) == M3u8Type.master) {
-          final master = parseMasterPlaylist(content, segment.uri);
-          playlistUrl = master.bestVariant.uri;
-          mediaContent = await fetcher(playlistUrl);
-        }
-
-        final nestedPlaylist = parseMediaPlaylist(mediaContent, playlistUrl);
-        final nestedSegments = await resolveNestedSegments(
-          nestedPlaylist.segments,
-          fetcher,
-          maxDepth: maxDepth - 1,
-        );
-
-        if (nestedSegments.isEmpty) {
-          continue;
-        }
-
-        final nestedBase = segment.discontinuityGroup + groupOffset;
-        var maxNestedGroup = 0;
-        for (final nested in nestedSegments) {
-          if (nested.discontinuityGroup > maxNestedGroup) {
-            maxNestedGroup = nested.discontinuityGroup;
-          }
-          result.add(_copySegment(nested, groupOffset: nestedBase));
-        }
-        groupOffset += maxNestedGroup;
-      } catch (_) {
-        result.add(_copySegment(segment, groupOffset: groupOffset));
+      if (detectType(content) == M3u8Type.master) {
+        final master = parseMasterPlaylist(content, segment.uri);
+        playlistUrl = master.bestVariant.uri;
+        mediaContent = await fetcher(playlistUrl);
       }
+
+      final nestedPlaylist = parseMediaPlaylist(mediaContent, playlistUrl);
+      final nestedSegments = await resolveNestedSegments(
+        nestedPlaylist.segments,
+        fetcher,
+        maxDepth: maxDepth - 1,
+      );
+
+      if (nestedSegments.isEmpty || !nestedPlaylist.isVod) {
+        throw StateError('Nested M3U8 playlist is empty or live');
+      }
+
+      final nestedBase = segment.discontinuityGroup + groupOffset;
+      var maxNestedGroup = 0;
+      for (final nested in nestedSegments) {
+        if (nested.discontinuityGroup > maxNestedGroup) {
+          maxNestedGroup = nested.discontinuityGroup;
+        }
+        result.add(_copySegment(nested, groupOffset: nestedBase));
+      }
+      groupOffset += maxNestedGroup;
     }
 
     return result;
@@ -361,9 +380,11 @@ class M3u8Parser {
     Map<String, String> keyUriToLocal = const {},
     Map<M3u8Initialization, String> initializationToLocal = const {},
   }) {
+    final version =
+        segments.any((segment) => segment.initialization != null) ? 5 : 3;
     final buffer = StringBuffer()
       ..writeln('#EXTM3U')
-      ..writeln('#EXT-X-VERSION:3')
+      ..writeln('#EXT-X-VERSION:$version')
       ..writeln('#EXT-X-TARGETDURATION:${targetDuration.ceil()}')
       ..writeln('#EXT-X-MEDIA-SEQUENCE:0');
 

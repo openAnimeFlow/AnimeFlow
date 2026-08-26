@@ -39,14 +39,14 @@ class DownloadHttpClient {
     );
   }
 
-  Future<void> download(
+  Future<Response<dynamic>> download(
     String url,
     String savePath, {
     required Map<String, String> headers,
     CancelToken? cancelToken,
     ProgressCallback? onReceiveProgress,
   }) async {
-    await _dio.download(
+    return _dio.download(
       url,
       savePath,
       cancelToken: cancelToken,

@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:io';
 
+import 'package:crypto/crypto.dart';
 import 'package:anime_flow/features/download/application/download_http_client.dart';
 import 'package:anime_flow/features/download/application/m3u8_parser.dart';
 import 'package:anime_flow/features/download/data/repositories/download_repository.dart';
@@ -93,7 +94,7 @@ class DownloadManager implements IDownloadManager {
   int maxParallelSegments;
 
   final _activeTasks = <String, _DownloadTask>{};
-  final _queue = <DownloadRequest>[];
+  final _queue = <_DownloadTask>[];
   final _speedTrackers = <String, _SpeedTracker>{};
   var _runningCount = 0;
 
@@ -124,13 +125,13 @@ class DownloadManager implements IDownloadManager {
 
     request.episode.status = DownloadStatus.pending;
     await _persistAndNotify(request, speed: 0);
-    _queue.add(request);
+    _queue.add(task);
   }
 
   @override
   Future<void> enqueuePriority(DownloadRequest request) async {
     final key = _taskKey(request.recordKey, request.episodeUrl);
-    _queue.removeWhere((item) => _requestKey(item) == key);
+    _queue.removeWhere((item) => _requestKey(item.request) == key);
     final previous = _activeTasks.remove(key);
     previous?.cancel();
     if (previous != null && !previous.started) {
@@ -139,13 +140,13 @@ class DownloadManager implements IDownloadManager {
 
     final task = _DownloadTask(request: request);
     _activeTasks[key] = task;
-    _startTask(task);
+    _queue.insert(0, task);
+    _processQueue();
   }
 
   @override
   Future<void> resume(DownloadRequest request) async {
-    final key = _taskKey(request.recordKey, request.episodeUrl);
-    _activeTasks.remove(key);
+    await cancel(request.recordKey, request.episodeUrl);
     await enqueue(request);
   }
 
@@ -157,12 +158,17 @@ class DownloadManager implements IDownloadManager {
       return;
     }
     task.pause();
+    if (!task.started) {
+      _queue.remove(task);
+      _activeTasks.remove(key);
+      task.complete();
+    }
   }
 
   @override
   Future<void> cancel(String recordKey, String episodeUrl) async {
     final key = _taskKey(recordKey, episodeUrl);
-    _queue.removeWhere((request) => _requestKey(request) == key);
+    _queue.removeWhere((task) => _requestKey(task.request) == key);
     final task = _activeTasks.remove(key);
     if (task == null) return;
     task.cancel();
@@ -279,7 +285,11 @@ class DownloadManager implements IDownloadManager {
         playlistContent,
         request.networkMediaUrl,
       );
-      mediaUrl = master.bestVariant.uri;
+      final variant = master.bestVariant;
+      if (master.audioUriFor(variant) != null) {
+        throw StateError('暂不支持下载独立音频轨的 HLS 播放列表');
+      }
+      mediaUrl = variant.uri;
       mediaContent = await _fetchPlaylistText(mediaUrl, request, task);
     }
 
@@ -612,14 +622,22 @@ class DownloadManager implements IDownloadManager {
     _DownloadTask task, {
     int? byteRangeLength,
     int? byteRangeStart,
-  }) {
+  }) async {
     final headers = <String, String>{...request.httpHeaders};
     if (byteRangeLength != null) {
       final start = byteRangeStart ?? 0;
       headers['Range'] = 'bytes=$start-${start + byteRangeLength - 1}';
     }
-    return _httpClient.download(url, path,
-        headers: headers, cancelToken: task.cancelToken);
+    final response = await _httpClient.download(
+      url,
+      path,
+      headers: headers,
+      cancelToken: task.cancelToken,
+    );
+    if (byteRangeLength != null &&
+        response.statusCode != HttpStatus.partialContent) {
+      throw StateError('Server ignored byte range for $url');
+    }
   }
 
   Future<int> _downloadSegmentWithRetry(
@@ -635,15 +653,13 @@ class DownloadManager implements IDownloadManager {
     for (var attempt = 0; attempt < maxRetries; attempt++) {
       try {
         task.throwIfStopped();
-        await _httpClient.download(
+        await _downloadRanged(
           url,
           tmpPath,
-          headers: _rangeHeaders(
-            request.httpHeaders,
-            byteRangeLength: byteRangeLength,
-            byteRangeStart: byteRangeStart,
-          ),
-          cancelToken: task.cancelToken,
+          request,
+          task,
+          byteRangeLength: byteRangeLength,
+          byteRangeStart: byteRangeStart,
         );
         final tmpFile = File(tmpPath);
         if (await File(savePath).exists()) {
@@ -742,19 +758,6 @@ class DownloadManager implements IDownloadManager {
     );
   }
 
-  Map<String, String> _rangeHeaders(
-    Map<String, String> headers, {
-    int? byteRangeLength,
-    int? byteRangeStart,
-  }) {
-    if (byteRangeLength == null) return headers;
-    final start = byteRangeStart ?? 0;
-    return {
-      ...headers,
-      'Range': 'bytes=$start-${start + byteRangeLength - 1}',
-    };
-  }
-
   bool _looksLikeM3u8Url(String url) {
     final uri = Uri.tryParse(url);
     if (uri == null) {
@@ -773,16 +776,22 @@ class DownloadManager implements IDownloadManager {
         ? existing
         : p.join(
             await _baseDirectoryProvider(),
-            '${request.sourceName}_${request.subjectId}',
-            request.episode.episodeIndex.toString(),
+            '${_safeDirectoryName(request.sourceName)}_${request.subjectId}',
+            '${request.episode.lineIndex}_${request.episode.episodeIndex}_${_episodeHash(request.episodeUrl)}',
           );
     await Directory(directory).create(recursive: true);
     return directory;
   }
 
   bool _isSafeEpisodeDirectory(String path, DownloadEpisode episode) {
-    if (!p.isAbsolute(path) ||
-        p.basename(path) != episode.episodeIndex.toString()) {
+    final directoryName = p.basename(path);
+    final currentName =
+        '${episode.lineIndex}_${episode.episodeIndex}_${_episodeHash(episode.episodeUrl)}';
+    if (!p.isAbsolute(path)) {
+      return false;
+    }
+    if (directoryName != currentName &&
+        directoryName != episode.episodeIndex.toString()) {
       return false;
     }
     final normalized = p.normalize(path);
@@ -791,7 +800,9 @@ class DownloadManager implements IDownloadManager {
     // the current root, while still rejecting roots and high-level paths.
     final episodeParent = p.dirname(normalized);
     final subjectDirectory = p.dirname(episodeParent);
-    return p.basename(episodeParent).startsWith('${episode.sourceName}_') &&
+    return p.basename(episodeParent).startsWith(
+              '${_safeDirectoryName(episode.sourceName)}_',
+            ) &&
         p.basename(subjectDirectory).isNotEmpty &&
         p.dirname(subjectDirectory) != subjectDirectory;
   }
@@ -815,10 +826,9 @@ class DownloadManager implements IDownloadManager {
 
   void _processQueue() {
     while (_runningCount < maxParallelEpisodes && _queue.isNotEmpty) {
-      final request = _queue.removeAt(0);
-      final key = _requestKey(request);
-      final task = _activeTasks[key];
-      if (task == null || task.isStopped) {
+      final task = _queue.removeAt(0);
+      final key = _requestKey(task.request);
+      if (!identical(_activeTasks[key], task) || task.isStopped) {
         _activeTasks.remove(key);
         continue;
       }
@@ -842,6 +852,12 @@ class DownloadManager implements IDownloadManager {
   static String _requestKey(DownloadRequest request) {
     return _taskKey(request.recordKey, request.episodeUrl);
   }
+
+  static String _episodeHash(String episodeUrl) =>
+      sha1.convert(episodeUrl.codeUnits).toString().substring(0, 12);
+
+  static String _safeDirectoryName(String value) =>
+      value.replaceAll(RegExp(r'[<>:"/\\|?*]'), '_');
 
   static String _segmentPath(String episodeDir, int index) {
     return p.join(episodeDir, 'seg_${index.toString().padLeft(5, '0')}.ts');

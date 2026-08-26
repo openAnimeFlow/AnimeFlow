@@ -137,6 +137,37 @@ seg.ts
       expect(resolved.single.duration, 5);
     });
 
+    test('treats playlists without ENDLIST as live', () {
+      final playlist = M3u8Parser.parseMediaPlaylist(
+        '''
+#EXTM3U
+#EXT-X-TARGETDURATION:5
+#EXTINF:5,
+segment.ts
+''',
+        'https://example.com/live.m3u8',
+      );
+
+      expect(playlist.isVod, isFalse);
+    });
+
+    test('detects alternate audio for a master variant', () {
+      final master = M3u8Parser.parseMasterPlaylist(
+        '''
+#EXTM3U
+#EXT-X-MEDIA:TYPE=AUDIO,GROUP-ID="audio",URI="audio.m3u8"
+#EXT-X-STREAM-INF:BANDWIDTH=1000,AUDIO="audio"
+video.m3u8
+''',
+        'https://example.com/master.m3u8',
+      );
+
+      expect(
+        master.audioUriFor(master.bestVariant),
+        'https://example.com/audio.m3u8',
+      );
+    });
+
     test('parses query m3u8 URLs, initialization maps, and byte ranges', () {
       final playlist = M3u8Parser.parseMediaPlaylist(
         '''

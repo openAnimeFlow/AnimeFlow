@@ -59,6 +59,37 @@ void main() {
       expect(File(result.localMediaPath).readAsStringSync(), 'direct-body');
     });
 
+    test('isolates files for different lines of the same episode', () async {
+      final first = _episode(url: 'line-one');
+      final second = _episode(url: 'line-two')..lineIndex = 1;
+      final manager = _manager(tempDir);
+      final completed = <DownloadEpisode>[];
+      manager.onProgress = (_, __, episode, ___) {
+        if (episode.status == DownloadStatus.completed) completed.add(episode);
+      };
+
+      await manager.enqueue(
+        _request(
+          episode: first,
+          episodeUrl: 'line-one',
+          baseUri: baseUri,
+          networkMediaUrl: baseUri.resolve('/direct.mp4').toString(),
+        ),
+      );
+      await manager.enqueue(
+        _request(
+          episode: second,
+          episodeUrl: 'line-two',
+          baseUri: baseUri,
+          networkMediaUrl: baseUri.resolve('/direct.mp4').toString(),
+        ),
+      );
+      await Future<void>.delayed(const Duration(milliseconds: 100));
+
+      expect(completed, hasLength(2));
+      expect(first.downloadDirectory, isNot(second.downloadDirectory));
+    });
+
     test('downloads direct media without playlist probing', () async {
       final episode = _episode(url: 'direct-no-probe');
       final manager = _manager(tempDir);

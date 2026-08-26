@@ -285,6 +285,54 @@ void main() {
       expect(episode.danmakuDownloaded, isFalse);
       expect(episode.localDanmakuPath, isEmpty);
     });
+
+    test(
+        'downloads danmaku for a completed episode without redownloading video',
+        () async {
+      final repository = _FakeDownloadRepository();
+      final manager = _FakeDownloadManager();
+      final resolverPool = _FakeResolverPool();
+      final danmakuService = _FakeDownloadDanmakuService(
+        result: const DownloadDanmakuResult(
+          danDanBangumiId: 2026,
+          localPath: 'downloads/ep1/danmaku.json',
+          hasDanmaku: true,
+        ),
+      );
+      final record = DownloadRecord(
+        subjectId: 1,
+        subjectName: 'Subject',
+        subjectCover: '',
+        sourceName: 'source',
+        sourceBaseUrl: 'https://source.test',
+        episodes: {
+          'ep1': _episode('ep1', DownloadStatus.completed)
+            ..downloadDirectory = 'downloads/ep1',
+        },
+        createdAt: DateTime(2026),
+      );
+      await repository.putRecord(record);
+      final container = ProviderContainer(
+        overrides: [
+          downloadRepositoryProvider.overrideWithValue(repository),
+          downloadManagerProvider.overrideWithValue(manager),
+          videoSourceResolverPoolProvider.overrideWithValue(resolverPool),
+          downloadDanmakuServiceProvider.overrideWithValue(danmakuService),
+        ],
+      );
+      addTearDown(container.dispose);
+
+      await container
+          .read(downloadControllerProvider.notifier)
+          .downloadDanmaku(record.key, 'ep1');
+      await danmakuService.waitForDownload();
+
+      final episode = repository.getRecord(record.key)!.episodes['ep1']!;
+      expect(manager.requests, isEmpty);
+      expect(danmakuService.requestedSubjectIds, [1]);
+      expect(episode.danmakuDownloaded, isTrue);
+      expect(episode.localDanmakuPath, 'downloads/ep1/danmaku.json');
+    });
   });
 }
 

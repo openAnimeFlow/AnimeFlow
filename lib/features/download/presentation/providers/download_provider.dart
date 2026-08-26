@@ -274,15 +274,31 @@ class DownloadController extends _$DownloadController {
     return startDownload(params);
   }
 
+  Future<void> downloadDanmaku(String recordKey, String episodeUrl) async {
+    final episode = ref
+        .read(downloadRepositoryProvider)
+        .getEpisodeByRecordKey(recordKey, episodeUrl);
+    if (episode == null || episode.status != DownloadStatus.completed) {
+      return;
+    }
+    await _downloadDanmakuIfNeeded(
+      recordKey,
+      episodeUrl,
+      episode,
+      force: true,
+    );
+  }
+
   Future<void> _downloadDanmakuIfNeeded(
     String recordKey,
     String episodeUrl,
-    DownloadEpisode episode,
-  ) async {
+    DownloadEpisode episode, {
+    bool force = false,
+  }) async {
     final taskKey = _taskKey(recordKey, episodeUrl);
     final shouldDownload =
-        _downloadDanmakuByTask[taskKey] ?? _downloadDanmakuEnabled;
-    if (!shouldDownload || episode.danmakuDownloaded) {
+        force || (_downloadDanmakuByTask[taskKey] ?? _downloadDanmakuEnabled);
+    if (!shouldDownload || (episode.danmakuDownloaded && !force)) {
       _downloadDanmakuByTask.remove(taskKey);
       return;
     }

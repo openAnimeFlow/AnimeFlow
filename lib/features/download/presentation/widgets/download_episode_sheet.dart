@@ -6,6 +6,7 @@ import 'package:anime_flow/features/download/presentation/providers/download_pro
 import 'package:anime_flow/features/play/presentation/providers/episodes_provider.dart';
 import 'package:anime_flow/features/play/presentation/providers/video_source_provider.dart';
 import 'package:anime_flow/shared/models/download/download_episode.dart';
+import 'package:anime_flow/shared/models/download/download_record.dart';
 import 'package:anime_flow/shared/models/download/download_status.dart';
 import 'package:anime_flow/shared/models/player/bangumi/episodes_item.dart';
 import 'package:anime_flow/shared/models/player/play/video/episode_resources_item.dart';
@@ -37,13 +38,14 @@ class DownloadEpisodeSheet extends ConsumerStatefulWidget {
 
 class _DownloadEpisodeSheetState extends ConsumerState<DownloadEpisodeSheet> {
   final Set<String> _selectedUrls = {};
+  final Set<String> _danmakuDownloadingUrls = {};
   bool _isSubmitting = false;
-  late bool _downloadDanmaku;
+  late bool _downloadDanmakuEnabled;
 
   @override
   void initState() {
     super.initState();
-    _downloadDanmaku = _storedDownloadDanmaku;
+    _downloadDanmakuEnabled = _storedDownloadDanmaku;
   }
 
   @override
@@ -176,6 +178,28 @@ class _DownloadEpisodeSheetState extends ConsumerState<DownloadEpisodeSheet> {
                             ],
                           ],
                         ),
+                        secondary:
+                            _canDownloadDanmaku(candidate.downloadEpisode)
+                                ? _danmakuDownloadingUrls.contains(
+                                    candidate.downloadEpisode!.episodeUrl,
+                                  )
+                                    ? const SizedBox.square(
+                                        dimension: 24,
+                                        child: CircularProgressIndicator(
+                                          strokeWidth: 2,
+                                        ),
+                                      )
+                                    : IconButton(
+                                        tooltip: l10n.downloadDanmaku,
+                                        icon: const Icon(
+                                          Icons.download_for_offline_rounded,
+                                        ),
+                                        onPressed: () => _downloadDanmaku(
+                                          candidate.downloadEpisode!,
+                                          sourceName: source!.websiteName,
+                                        ),
+                                      )
+                                : null,
                         onChanged: canSelect
                             ? (value) {
                                 setState(() {
@@ -198,12 +222,12 @@ class _DownloadEpisodeSheetState extends ConsumerState<DownloadEpisodeSheet> {
               ],
               SwitchListTile(
                 contentPadding: EdgeInsets.zero,
-                value: _downloadDanmaku,
+                value: _downloadDanmakuEnabled,
                 title: Text(l10n.downloadDanmaku),
                 subtitle: Text(l10n.downloadDanmakuDescription),
                 onChanged: (value) {
                   setState(() {
-                    _downloadDanmaku = value;
+                    _downloadDanmakuEnabled = value;
                   });
                   Storage.setting.put(DownloadKey.downloadDanmaku, value);
                 },
@@ -329,6 +353,40 @@ class _DownloadEpisodeSheetState extends ConsumerState<DownloadEpisodeSheet> {
         episode.status == DownloadStatus.failed;
   }
 
+  bool _canDownloadDanmaku(DownloadEpisode? episode) {
+    return episode != null &&
+        episode.status == DownloadStatus.completed &&
+        !episode.danmakuDownloaded;
+  }
+
+  Future<void> _downloadDanmaku(
+    DownloadEpisode episode, {
+    required String sourceName,
+  }) async {
+    final episodeUrl = episode.episodeUrl;
+    if (!_danmakuDownloadingUrls.add(episodeUrl)) {
+      return;
+    }
+    setState(() {});
+    try {
+      final recordKey = DownloadRecord.buildKey(
+        sourceName: sourceName,
+        subjectId: ref.read(playExtraProvider).playExtra.subjectId,
+      );
+      await ref
+          .read(downloadControllerProvider.notifier)
+          .downloadDanmaku(recordKey, episodeUrl);
+    } finally {
+      if (mounted) {
+        setState(() {
+          _danmakuDownloadingUrls.remove(episodeUrl);
+        });
+      } else {
+        _danmakuDownloadingUrls.remove(episodeUrl);
+      }
+    }
+  }
+
   String _statusText(AppLocalizations l10n, DownloadEpisode episode) {
     final status = switch (episode.status) {
       DownloadStatus.pending => l10n.downloadQueued,
@@ -340,7 +398,10 @@ class _DownloadEpisodeSheetState extends ConsumerState<DownloadEpisodeSheet> {
       _ => l10n.downloadQueued,
     };
     if (episode.status == DownloadStatus.completed) {
-      return status;
+      final danmakuStatus = episode.danmakuDownloaded
+          ? l10n.downloadWithDanmaku
+          : l10n.downloadWithoutDanmaku;
+      return '$status - $danmakuStatus';
     }
     final progress =
         '${episode.progressPercent.clamp(0, 100).toStringAsFixed(1)}%';
@@ -394,7 +455,7 @@ class _DownloadEpisodeSheetState extends ConsumerState<DownloadEpisodeSheet> {
         episodeSort: candidate.sourceEpisode.episodeSort.toDouble(),
         episodeIndex:
             bangumiEpisode?.sort.toInt() ?? candidate.sourceEpisode.episodeSort,
-        downloadDanmaku: _downloadDanmaku,
+        downloadDanmaku: _downloadDanmakuEnabled,
       );
     }).toList();
 

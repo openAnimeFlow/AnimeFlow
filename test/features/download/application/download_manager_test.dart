@@ -247,7 +247,7 @@ void main() {
     });
 
     test('deletes episode download directory', () async {
-      final episodeDir = p.join(tempDir.path, 'source_1', 'delete-me');
+      final episodeDir = p.join(tempDir.path, 'source_1', '1');
       await Directory(episodeDir).create(recursive: true);
       await File(p.join(episodeDir, 'video.mp4')).writeAsString('body');
       final episode = _episode(url: 'delete')..downloadDirectory = episodeDir;

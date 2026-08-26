@@ -60,7 +60,7 @@ abstract interface class IDownloadManager {
 
   void pause(String recordKey, String episodeUrl);
 
-  void cancel(String recordKey, String episodeUrl);
+  Future<void> cancel(String recordKey, String episodeUrl);
 
   String? getLocalMediaPath(DownloadEpisode? episode);
 
@@ -131,7 +131,11 @@ class DownloadManager implements IDownloadManager {
   Future<void> enqueuePriority(DownloadRequest request) async {
     final key = _taskKey(request.recordKey, request.episodeUrl);
     _queue.removeWhere((item) => _requestKey(item) == key);
-    _activeTasks.remove(key)?.cancel();
+    final previous = _activeTasks.remove(key);
+    previous?.cancel();
+    if (previous != null && !previous.started) {
+      previous.complete();
+    }
 
     final task = _DownloadTask(request: request);
     _activeTasks[key] = task;
@@ -156,10 +160,16 @@ class DownloadManager implements IDownloadManager {
   }
 
   @override
-  void cancel(String recordKey, String episodeUrl) {
+  Future<void> cancel(String recordKey, String episodeUrl) async {
     final key = _taskKey(recordKey, episodeUrl);
     _queue.removeWhere((request) => _requestKey(request) == key);
-    _activeTasks.remove(key)?.cancel();
+    final task = _activeTasks.remove(key);
+    if (task == null) return;
+    task.cancel();
+    if (!task.started) {
+      task.complete();
+    }
+    await task.done;
     _speedTrackers.remove(key);
   }
 
@@ -183,7 +193,7 @@ class DownloadManager implements IDownloadManager {
     }
     final downloadDirectory = episode.downloadDirectory.trim();
     if (downloadDirectory.isEmpty ||
-        !_isSafeEpisodeDirectory(downloadDirectory)) {
+        !_isSafeEpisodeDirectory(downloadDirectory, episode)) {
       return;
     }
     final directory = Directory(downloadDirectory);
@@ -193,6 +203,7 @@ class DownloadManager implements IDownloadManager {
   }
 
   void _startTask(_DownloadTask task) {
+    task.started = true;
     unawaited(_runTask(task));
     _runningCount++;
   }
@@ -250,6 +261,7 @@ class DownloadManager implements IDownloadManager {
       }
       _runningCount = _runningCount > 0 ? _runningCount - 1 : 0;
       _processQueue();
+      task.complete();
     }
   }
 
@@ -768,8 +780,9 @@ class DownloadManager implements IDownloadManager {
     return directory;
   }
 
-  bool _isSafeEpisodeDirectory(String path) {
-    if (!p.isAbsolute(path)) {
+  bool _isSafeEpisodeDirectory(String path, DownloadEpisode episode) {
+    if (!p.isAbsolute(path) ||
+        p.basename(path) != episode.episodeIndex.toString()) {
       return false;
     }
     final normalized = p.normalize(path);
@@ -778,8 +791,7 @@ class DownloadManager implements IDownloadManager {
     // the current root, while still rejecting roots and high-level paths.
     final episodeParent = p.dirname(normalized);
     final subjectDirectory = p.dirname(episodeParent);
-    return p.basename(normalized).isNotEmpty &&
-        p.basename(episodeParent).isNotEmpty &&
+    return p.basename(episodeParent).startsWith('${episode.sourceName}_') &&
         p.basename(subjectDirectory).isNotEmpty &&
         p.dirname(subjectDirectory) != subjectDirectory;
   }
@@ -866,6 +878,10 @@ class _DownloadTask {
   final CancelToken cancelToken = CancelToken();
   var isPaused = false;
   var isCancelled = false;
+  var started = false;
+  final _doneCompleter = Completer<void>();
+
+  Future<void> get done => _doneCompleter.future;
 
   bool get isStopped => isPaused || isCancelled || cancelToken.isCancelled;
 
@@ -877,6 +893,12 @@ class _DownloadTask {
   void cancel() {
     isCancelled = true;
     cancelToken.cancel('cancelled');
+  }
+
+  void complete() {
+    if (!_doneCompleter.isCompleted) {
+      _doneCompleter.complete();
+    }
   }
 
   void throwIfStopped() {

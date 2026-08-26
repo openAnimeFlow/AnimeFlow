@@ -311,7 +311,7 @@ class DownloadController extends _$DownloadController {
   }
 
   void cancel(String recordKey, String episodeUrl) {
-    ref.read(downloadManagerProvider).cancel(recordKey, episodeUrl);
+    unawaited(ref.read(downloadManagerProvider).cancel(recordKey, episodeUrl));
     _refresh();
   }
 
@@ -320,7 +320,7 @@ class DownloadController extends _$DownloadController {
     final repository = ref.read(downloadRepositoryProvider);
     final record = repository.getRecord(recordKey);
     final episode = record?.episodes[episodeUrl];
-    manager.cancel(recordKey, episodeUrl);
+    await manager.cancel(recordKey, episodeUrl);
     await manager.deleteEpisodeFiles(episode);
     await repository.deleteEpisode(
       recordKey,

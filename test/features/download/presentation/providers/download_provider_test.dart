@@ -453,7 +453,7 @@ class _FakeDownloadManager implements IDownloadManager {
   DownloadProgressCallback? onProgress;
 
   @override
-  void cancel(String recordKey, String episodeUrl) {
+  Future<void> cancel(String recordKey, String episodeUrl) async {
     cancelled.add((recordKey, episodeUrl));
   }
 

@@ -136,5 +136,40 @@ seg.ts
       expect(resolved.single.uri, 'https://example.com/nested/seg.ts');
       expect(resolved.single.duration, 5);
     });
+
+    test('parses query m3u8 URLs, initialization maps, and byte ranges', () {
+      final playlist = M3u8Parser.parseMediaPlaylist(
+        '''
+#EXTM3U
+#EXT-X-TARGETDURATION:6
+#EXT-X-MAP:URI="media.mp4",BYTERANGE="100@20"
+#EXT-X-BYTERANGE:50@120
+#EXTINF:6,
+media.mp4?part.m3u8
+#EXT-X-BYTERANGE:25
+#EXTINF:6,
+media.mp4?part.m3u8
+#EXT-X-ENDLIST
+''',
+        'https://example.com/v/index.m3u8',
+      );
+
+      expect(playlist.segments, hasLength(2));
+      expect(playlist.segments[0].byteRangeLength, 50);
+      expect(playlist.segments[0].byteRangeStart, 120);
+      expect(playlist.segments[1].byteRangeLength, 25);
+      expect(playlist.segments[1].byteRangeStart, 170);
+      expect(playlist.segments[0].initialization?.uri,
+          'https://example.com/v/media.mp4');
+      final local = M3u8Parser.buildLocalM3u8(
+        playlist.segments,
+        targetDuration: playlist.targetDuration,
+        initializationToLocal: {
+          playlist.segments[0].initialization!: 'init_000.mp4',
+        },
+      );
+      expect(local, contains('#EXT-X-MAP:URI="init_000.mp4"'));
+      expect(local, isNot(contains('#EXT-X-BYTERANGE')));
+    });
   });
 }

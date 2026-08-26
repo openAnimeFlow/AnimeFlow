@@ -257,6 +257,24 @@ void main() {
 
       expect(Directory(episodeDir).existsSync(), isFalse);
     });
+
+    test('deletes downloads created under an old download root', () async {
+      final oldRoot = p.join(tempDir.path, 'old-downloads');
+      final newRoot = p.join(tempDir.path, 'new-downloads');
+      final episodeDir = p.join(oldRoot, 'source_1', '1');
+      await Directory(episodeDir).create(recursive: true);
+      await File(p.join(episodeDir, 'video.mp4')).writeAsString('body');
+      final episode = _episode(url: 'old-root')..downloadDirectory = episodeDir;
+      final manager = DownloadManager(
+        httpClient: DownloadHttpClient(dio: Dio()),
+        baseDirectoryProvider: () async => newRoot,
+      );
+
+      await manager.deleteEpisodeFiles(episode);
+
+      expect(Directory(episodeDir).existsSync(), isFalse);
+      expect(Directory(oldRoot).existsSync(), isTrue);
+    });
   });
 }
 

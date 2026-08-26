@@ -182,7 +182,8 @@ class DownloadManager implements IDownloadManager {
       return;
     }
     final downloadDirectory = episode.downloadDirectory.trim();
-    if (downloadDirectory.isEmpty) {
+    if (downloadDirectory.isEmpty ||
+        !_isSafeEpisodeDirectory(downloadDirectory)) {
       return;
     }
     final directory = Directory(downloadDirectory);
@@ -241,8 +242,12 @@ class DownloadManager implements IDownloadManager {
         ..errorMessage = error.toString();
       await _persistAndNotify(request, speed: 0);
     } finally {
-      _activeTasks.remove(key);
-      _speedTrackers.remove(key);
+      if (identical(_activeTasks[key], task)) {
+        _activeTasks.remove(key);
+      }
+      if (identical(_speedTrackers[key], speedTracker)) {
+        _speedTrackers.remove(key);
+      }
       _runningCount = _runningCount > 0 ? _runningCount - 1 : 0;
       _processQueue();
     }
@@ -290,6 +295,12 @@ class DownloadManager implements IDownloadManager {
       request,
       task,
     );
+    final initializationToLocal = await _downloadInitializations(
+      resolvedSegments,
+      episodeDir,
+      request,
+      task,
+    );
 
     var existingBytes = 0;
     final pendingIndices = <int>[];
@@ -326,6 +337,8 @@ class DownloadManager implements IDownloadManager {
             _segmentPath(episodeDir, index),
             request,
             task,
+            byteRangeLength: resolvedSegments[index].byteRangeLength,
+            byteRangeStart: resolvedSegments[index].byteRangeStart,
           );
           sessionBytes += bytes;
           episode
@@ -354,6 +367,7 @@ class DownloadManager implements IDownloadManager {
         resolvedSegments,
         targetDuration: playlist.targetDuration,
         keyUriToLocal: keyUriToLocal,
+        initializationToLocal: initializationToLocal,
       ),
     );
 
@@ -381,17 +395,10 @@ class DownloadManager implements IDownloadManager {
       existingBytes = await tmpFile.length();
     }
 
-    var response = await _getDirectStreamWithRetry(
-      request,
-      task,
-      existingBytes: existingBytes,
-      tmpFile: tmpFile,
-    );
-    if (response.existingBytes != existingBytes) {
-      existingBytes = response.existingBytes;
-    }
-
-    final totalSize = _totalSize(response.response, existingBytes);
+    var response = await _getDirectStreamWithRetry(request, task,
+        existingBytes: existingBytes, tmpFile: tmpFile);
+    existingBytes = response.existingBytes;
+    var totalSize = _totalSize(response.response, existingBytes);
     episode
       ..mediaType = 'direct'
       ..totalSegments = 1
@@ -401,24 +408,42 @@ class DownloadManager implements IDownloadManager {
       ..progressPercent = totalSize > 0 ? existingBytes / totalSize * 100 : 0;
     await _persistAndNotify(request, speed: speedTracker.currentSpeed);
 
-    final sink = tmpFile.openWrite(
+    IOSink sink = tmpFile.openWrite(
       mode: existingBytes > 0 ? FileMode.append : FileMode.write,
     );
     var received = existingBytes;
 
-    try {
-      await for (final chunk in response.response.data!.stream) {
+    var streamAttempts = 0;
+    while (true) {
+      try {
+        await for (final chunk in response.response.data!.stream) {
+          task.throwIfStopped();
+          sink.add(chunk);
+          received += chunk.length;
+          episode
+            ..totalBytes = received
+            ..progressPercent = totalSize > 0 ? received / totalSize * 100 : 0;
+          speedTracker.update(received);
+          await _persistAndNotify(request, speed: speedTracker.currentSpeed);
+        }
+        await sink.close();
+        break;
+      } catch (error) {
+        await sink.close();
         task.throwIfStopped();
-        sink.add(chunk);
-        received += chunk.length;
-        episode
-          ..totalBytes = received
-          ..progressPercent = totalSize > 0 ? received / totalSize * 100 : 0;
-        speedTracker.update(received);
-        await _persistAndNotify(request, speed: speedTracker.currentSpeed);
+        if (streamAttempts++ >= 2) rethrow;
+        await Future<void>.delayed(
+            Duration(seconds: [1, 3][streamAttempts - 1]));
+        existingBytes = await tmpFile.length();
+        response = await _getDirectStreamWithRetry(request, task,
+            existingBytes: existingBytes, tmpFile: tmpFile);
+        existingBytes = response.existingBytes;
+        totalSize = _totalSize(response.response, existingBytes);
+        received = existingBytes;
+        sink = tmpFile.openWrite(
+          mode: existingBytes > 0 ? FileMode.append : FileMode.write,
+        );
       }
-    } finally {
-      await sink.close();
     }
 
     task.throwIfStopped();
@@ -454,6 +479,11 @@ class DownloadManager implements IDownloadManager {
           headers: headers,
           cancelToken: task.cancelToken,
         );
+        if (existingBytes > 0 &&
+            response.statusCode != HttpStatus.partialContent) {
+          if (await tmpFile.exists()) await tmpFile.delete();
+          existingBytes = 0;
+        }
         return _DirectStreamResult(response, existingBytes);
       } on DioException catch (caughtError) {
         var error = caughtError;
@@ -477,6 +507,11 @@ class DownloadManager implements IDownloadManager {
               headers: headers,
               cancelToken: task.cancelToken,
             );
+            if (existingBytes > 0 &&
+                response.statusCode != HttpStatus.partialContent) {
+              if (await tmpFile.exists()) await tmpFile.delete();
+              existingBytes = 0;
+            }
             return _DirectStreamResult(response, existingBytes);
           } on DioException catch (refererError) {
             error = refererError;
@@ -532,12 +567,57 @@ class DownloadManager implements IDownloadManager {
     return keyUriToLocal;
   }
 
+  Future<Map<M3u8Initialization, String>> _downloadInitializations(
+    List<M3u8Segment> segments,
+    String episodeDir,
+    DownloadRequest request,
+    _DownloadTask task,
+  ) async {
+    final result = <M3u8Initialization, String>{};
+    for (final initialization in {
+      for (final segment in segments)
+        if (segment.initialization != null) segment.initialization!,
+    }) {
+      task.throwIfStopped();
+      final fileName = 'init_${result.length.toString().padLeft(3, '0')}.mp4';
+      await _downloadRanged(
+        initialization.uri,
+        p.join(episodeDir, fileName),
+        request,
+        task,
+        byteRangeLength: initialization.byteRangeLength,
+        byteRangeStart: initialization.byteRangeStart,
+      );
+      result[initialization] = fileName;
+    }
+    return result;
+  }
+
+  Future<void> _downloadRanged(
+    String url,
+    String path,
+    DownloadRequest request,
+    _DownloadTask task, {
+    int? byteRangeLength,
+    int? byteRangeStart,
+  }) {
+    final headers = <String, String>{...request.httpHeaders};
+    if (byteRangeLength != null) {
+      final start = byteRangeStart ?? 0;
+      headers['Range'] = 'bytes=$start-${start + byteRangeLength - 1}';
+    }
+    return _httpClient.download(url, path,
+        headers: headers, cancelToken: task.cancelToken);
+  }
+
   Future<int> _downloadSegmentWithRetry(
     String url,
     String savePath,
     DownloadRequest request,
     _DownloadTask task, {
     int maxRetries = 3,
+    int? byteRangeLength,
+    int? byteRangeStart,
   }) async {
     final tmpPath = '$savePath.tmp';
     for (var attempt = 0; attempt < maxRetries; attempt++) {
@@ -546,7 +626,11 @@ class DownloadManager implements IDownloadManager {
         await _httpClient.download(
           url,
           tmpPath,
-          headers: request.httpHeaders,
+          headers: _rangeHeaders(
+            request.httpHeaders,
+            byteRangeLength: byteRangeLength,
+            byteRangeStart: byteRangeStart,
+          ),
           cancelToken: task.cancelToken,
         );
         final tmpFile = File(tmpPath);
@@ -646,6 +730,19 @@ class DownloadManager implements IDownloadManager {
     );
   }
 
+  Map<String, String> _rangeHeaders(
+    Map<String, String> headers, {
+    int? byteRangeLength,
+    int? byteRangeStart,
+  }) {
+    if (byteRangeLength == null) return headers;
+    final start = byteRangeStart ?? 0;
+    return {
+      ...headers,
+      'Range': 'bytes=$start-${start + byteRangeLength - 1}',
+    };
+  }
+
   bool _looksLikeM3u8Url(String url) {
     final uri = Uri.tryParse(url);
     if (uri == null) {
@@ -669,6 +766,22 @@ class DownloadManager implements IDownloadManager {
           );
     await Directory(directory).create(recursive: true);
     return directory;
+  }
+
+  bool _isSafeEpisodeDirectory(String path) {
+    if (!p.isAbsolute(path)) {
+      return false;
+    }
+    final normalized = p.normalize(path);
+    // The directory may belong to an older download root after the user
+    // changes the setting. Validate its shape instead of comparing it with
+    // the current root, while still rejecting roots and high-level paths.
+    final episodeParent = p.dirname(normalized);
+    final subjectDirectory = p.dirname(episodeParent);
+    return p.basename(normalized).isNotEmpty &&
+        p.basename(episodeParent).isNotEmpty &&
+        p.basename(subjectDirectory).isNotEmpty &&
+        p.dirname(subjectDirectory) != subjectDirectory;
   }
 
   Future<void> _persistAndNotify(

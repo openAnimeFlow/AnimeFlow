@@ -28,12 +28,42 @@ class M3u8Segment {
     required this.uri,
     required this.discontinuityGroup,
     this.key,
+    this.byteRangeLength,
+    this.byteRangeStart,
+    this.initialization,
   });
 
   final double duration;
   final String uri;
   final int discontinuityGroup;
   final M3u8Key? key;
+  final int? byteRangeLength;
+  final int? byteRangeStart;
+  final M3u8Initialization? initialization;
+}
+
+class M3u8Initialization {
+  const M3u8Initialization({
+    required this.uri,
+    this.byteRangeLength,
+    this.byteRangeStart,
+  });
+
+  final String uri;
+  final int? byteRangeLength;
+  final int? byteRangeStart;
+
+  @override
+  bool operator ==(Object other) {
+    return identical(this, other) ||
+        other is M3u8Initialization &&
+            uri == other.uri &&
+            byteRangeLength == other.byteRangeLength &&
+            byteRangeStart == other.byteRangeStart;
+  }
+
+  @override
+  int get hashCode => Object.hash(uri, byteRangeLength, byteRangeStart);
 }
 
 class M3u8Variant {
@@ -139,6 +169,10 @@ class M3u8Parser {
     var discontinuityGroup = 0;
     var currentDuration = 0.0;
     M3u8Key? currentKey;
+    M3u8Initialization? currentInitialization;
+    final segmentByteRangeEnds = <String, int>{};
+    final initializationByteRangeEnds = <String, int>{};
+    (int, int?)? pendingByteRange;
 
     for (final line in lines) {
       if (line.startsWith('#EXT-X-TARGETDURATION:')) {
@@ -174,6 +208,35 @@ class M3u8Parser {
         continue;
       }
 
+      if (line.startsWith('#EXT-X-MAP:')) {
+        final attrs = _parseAttributes(line.substring('#EXT-X-MAP:'.length));
+        final uri = attrs['URI'];
+        if (uri != null && uri.isNotEmpty) {
+          final range = _parseByteRange(attrs['BYTERANGE']);
+          final resolvedUri = resolveUrl(baseUrl, uri);
+          final start = range?.$2 ?? initializationByteRangeEnds[resolvedUri];
+          currentInitialization = M3u8Initialization(
+            uri: resolvedUri,
+            byteRangeLength: range?.$1,
+            byteRangeStart: start,
+          );
+          if (range != null && start != null) {
+            initializationByteRangeEnds[resolvedUri] = start + range.$1;
+          }
+        }
+        continue;
+      }
+
+      if (line.startsWith('#EXT-X-BYTERANGE:')) {
+        final range = _parseByteRange(
+          line.substring('#EXT-X-BYTERANGE:'.length),
+        );
+        if (range != null) {
+          pendingByteRange = range;
+        }
+        continue;
+      }
+
       if (line.startsWith('#EXTINF:')) {
         currentDuration = double.tryParse(
               line.substring('#EXTINF:'.length).split(',').first,
@@ -183,14 +246,29 @@ class M3u8Parser {
       }
 
       if (line.isNotEmpty && !line.startsWith('#')) {
+        final resolvedUri = resolveUrl(baseUrl, line);
+        final segmentRange = pendingByteRange;
+        if (segmentRange != null && segmentRange.$2 == null) {
+          final previousEnd = segmentByteRangeEnds[resolvedUri];
+          pendingByteRange = (segmentRange.$1, previousEnd);
+        }
+        final resolvedRange = pendingByteRange;
         segments.add(
           M3u8Segment(
             duration: currentDuration,
-            uri: resolveUrl(baseUrl, line),
+            uri: resolvedUri,
             discontinuityGroup: discontinuityGroup,
             key: currentKey,
+            byteRangeLength: resolvedRange?.$1,
+            byteRangeStart: resolvedRange?.$2,
+            initialization: currentInitialization,
           ),
         );
+        if (resolvedRange != null && resolvedRange.$2 != null) {
+          segmentByteRangeEnds[resolvedUri] =
+              resolvedRange.$2! + resolvedRange.$1;
+        }
+        pendingByteRange = null;
         currentDuration = 0;
       }
     }
@@ -281,6 +359,7 @@ class M3u8Parser {
     List<M3u8Segment> segments, {
     required double targetDuration,
     Map<String, String> keyUriToLocal = const {},
+    Map<M3u8Initialization, String> initializationToLocal = const {},
   }) {
     final buffer = StringBuffer()
       ..writeln('#EXTM3U')
@@ -302,6 +381,17 @@ class M3u8Parser {
       if (segment.key != lastKey) {
         buffer.writeln(_formatKey(segment.key, keyUriToLocal));
         lastKey = segment.key;
+      }
+
+      if (segment.initialization != null &&
+          (i == 0 ||
+              segment.initialization != segments[i - 1].initialization)) {
+        final initialization = segment.initialization!;
+        final localPath = initializationToLocal[initialization];
+        if (localPath != null) {
+          buffer.write('#EXT-X-MAP:URI="$localPath"');
+          buffer.writeln();
+        }
       }
 
       buffer
@@ -391,8 +481,20 @@ class M3u8Parser {
     return attrs;
   }
 
+  static (int, int?)? _parseByteRange(String? value) {
+    if (value == null || value.trim().isEmpty) return null;
+    final parts = value.trim().split('@');
+    final length = int.tryParse(parts.first);
+    if (length == null || length <= 0) return null;
+    final start = parts.length > 1 ? int.tryParse(parts[1]) : null;
+    return (length, start);
+  }
+
   static bool _isM3u8Url(String url) {
-    return Uri.parse(url).path.toLowerCase().endsWith('.m3u8');
+    final uri = Uri.tryParse(url);
+    if (uri == null) return url.toLowerCase().contains('.m3u8');
+    return uri.path.toLowerCase().endsWith('.m3u8') ||
+        uri.query.toLowerCase().contains('m3u8');
   }
 
   static M3u8Segment _copySegment(
@@ -404,6 +506,9 @@ class M3u8Parser {
       uri: segment.uri,
       discontinuityGroup: segment.discontinuityGroup + groupOffset,
       key: segment.key,
+      byteRangeLength: segment.byteRangeLength,
+      byteRangeStart: segment.byteRangeStart,
+      initialization: segment.initialization,
     );
   }
 

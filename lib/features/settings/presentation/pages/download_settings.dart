@@ -1,8 +1,12 @@
 import 'package:anime_flow/app/localization/app_localizations.dart';
 import 'package:anime_flow/core/constants/storage_key.dart';
 import 'package:anime_flow/core/storage/storage.dart';
+import 'package:anime_flow/features/download/application/download_manager.dart';
 import 'package:anime_flow/features/download/presentation/providers/download_provider.dart';
 import 'package:anime_flow/features/settings/presentation/providers/setting_provider.dart';
+import 'package:anime_flow/core/utils/system_util.dart';
+import 'package:anime_flow/shared/widgets/notification_toast.dart';
+import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -19,6 +23,7 @@ class _DownloadSettingsPageState extends ConsumerState<DownloadSettingsPage> {
   late bool _downloadDanmaku;
   late int _maxParallelEpisodes;
   late int _maxParallelSegments;
+  late Future<String> _downloadDirectory;
 
   @override
   void initState() {
@@ -35,6 +40,7 @@ class _DownloadSettingsPageState extends ConsumerState<DownloadSettingsPage> {
       DownloadKey.maxParallelSegments,
       defaultValue: 3,
     );
+    _downloadDirectory = _configuredDownloadDirectory();
   }
 
   @override
@@ -61,14 +67,6 @@ class _DownloadSettingsPageState extends ConsumerState<DownloadSettingsPage> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(
-                  l10n.downloadSettings,
-                  style: TextStyle(
-                    color: Theme.of(context).colorScheme.primary,
-                    fontSize: 14,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
                 SwitchListTile(
                   contentPadding: EdgeInsets.zero,
                   title: Text(l10n.downloadDanmaku),
@@ -109,12 +107,77 @@ class _DownloadSettingsPageState extends ConsumerState<DownloadSettingsPage> {
                         value;
                   },
                 ),
+                ListTile(
+                  contentPadding: EdgeInsets.zero,
+                  title: Text(l10n.downloadLocation),
+                  subtitle: FutureBuilder<String>(
+                    future: _downloadDirectory,
+                    builder: (context, snapshot) {
+                      if (snapshot.connectionState != ConnectionState.done) {
+                        return const SizedBox.square(
+                          dimension: 16,
+                          child: CircularProgressIndicator(strokeWidth: 2),
+                        );
+                      }
+                      if (snapshot.hasError || !snapshot.hasData) {
+                        return Text(l10n.downloadLocationUnavailable);
+                      }
+                      return Text(
+                        snapshot.data!,
+                        maxLines: 2,
+                        overflow: TextOverflow.ellipsis,
+                      );
+                    },
+                  ),
+                  trailing: SystemUtil.isDesktop
+                      ? const Icon(Icons.drive_file_move_outline)
+                      : null,
+                  onTap: () => _handleDownloadLocationTap(l10n),
+                ),
               ],
             ),
           ),
         ),
       ),
     );
+  }
+
+  Future<String> _configuredDownloadDirectory() async {
+    try {
+      final configured = setting.get(
+        DownloadKey.downloadDirectory,
+        defaultValue: '',
+      );
+      if (configured is String && configured.trim().isNotEmpty) {
+        return configured.trim();
+      }
+    } catch (_) {}
+    return DownloadManager.getDefaultDownloadDirectory();
+  }
+
+  Future<void> _selectDownloadDirectory(AppLocalizations l10n) async {
+    final selected = await FilePicker.platform.getDirectoryPath(
+      dialogTitle: l10n.downloadLocation,
+    );
+    if (selected == null || selected.trim().isEmpty || !mounted) {
+      return;
+    }
+    final directory = selected.trim();
+    await setting.put(DownloadKey.downloadDirectory, directory);
+    if (!mounted) {
+      return;
+    }
+    setState(() {
+      _downloadDirectory = Future<String>.value(directory);
+    });
+  }
+
+  void _handleDownloadLocationTap(AppLocalizations l10n) {
+    if (SystemUtil.isDesktop) {
+      _selectDownloadDirectory(l10n);
+      return;
+    }
+    NotificationToast.show(l10n.downloadLocationUnsupported);
   }
 
   Widget _buildConcurrencySetting({
@@ -129,38 +192,35 @@ class _DownloadSettingsPageState extends ConsumerState<DownloadSettingsPage> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 16),
-            child: Row(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(title, style: const TextStyle(fontSize: 16)),
-                      const SizedBox(height: 2),
-                      Text(
-                        subtitle,
-                        style: TextStyle(
-                          color: Theme.of(context).colorScheme.onSurfaceVariant,
-                          fontSize: 12,
-                        ),
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(title, style: const TextStyle(fontSize: 16)),
+                    const SizedBox(height: 2),
+                    Text(
+                      subtitle,
+                      style: TextStyle(
+                        color: Theme.of(context).colorScheme.onSurfaceVariant,
+                        fontSize: 12,
                       ),
-                    ],
-                  ),
+                    ),
+                  ],
                 ),
-                const SizedBox(width: 16),
-                Text(
-                  '$value',
-                  style: TextStyle(
-                    color: Theme.of(context).colorScheme.primary,
-                    fontSize: 16,
-                    fontWeight: FontWeight.bold,
-                  ),
+              ),
+              const SizedBox(width: 16),
+              Text(
+                '$value',
+                style: TextStyle(
+                  color: Theme.of(context).colorScheme.primary,
+                  fontSize: 16,
+                  fontWeight: FontWeight.bold,
                 ),
-              ],
-            ),
+              ),
+            ],
           ),
           Slider(
             value: value.toDouble(),

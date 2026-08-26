@@ -63,13 +63,13 @@ class _SettingsPageState extends State<SettingsPage> {
         items: [
           _SettingsMenuItem(
             title: l10n.sourceManagement,
-            icon: Icons.smart_display_rounded,
+            icon: Icons.smart_display_outlined,
             route: const SettingPluginsRoute(),
             page: const PluginsPage(),
           ),
           _SettingsMenuItem(
             title: l10n.downloadSettings,
-            icon: Icons.download_for_offline_outlined,
+            icon: Icons.cloud_download_outlined,
             route: const SettingDownloadRoute(),
             page: const DownloadSettingsPage(),
           ),

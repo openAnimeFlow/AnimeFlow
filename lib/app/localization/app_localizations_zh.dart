@@ -1683,6 +1683,18 @@ class AppLocalizationsZh extends AppLocalizations {
   String get downloadSettings => '下載設定';
 
   @override
+  String get downloadLocation => '資源下載位置';
+
+  @override
+  String get downloadLocationUnavailable => '無法取得下載位置';
+
+  @override
+  String get downloadLocationSelect => '選擇下載位置';
+
+  @override
+  String get downloadLocationUnsupported => '目前裝置不支援自訂下載位置';
+
+  @override
   String get downloadDanmaku => '同時下載彈幕';
 
   @override
@@ -3463,6 +3475,18 @@ class AppLocalizationsZhHans extends AppLocalizationsZh {
   String get downloadSettings => '下载设置';
 
   @override
+  String get downloadLocation => '资源下载位置';
+
+  @override
+  String get downloadLocationUnavailable => '无法获取下载位置';
+
+  @override
+  String get downloadLocationSelect => '选择下载位置';
+
+  @override
+  String get downloadLocationUnsupported => '当前设备不支持自定义下载位置';
+
+  @override
   String get downloadDanmaku => '同时下载弹幕';
 
   @override
@@ -5162,6 +5186,18 @@ class AppLocalizationsZhHantHk extends AppLocalizationsZh {
   String get downloadSettings => '下載設定';
 
   @override
+  String get downloadLocation => '資源下載位置';
+
+  @override
+  String get downloadLocationUnavailable => '無法取得下載位置';
+
+  @override
+  String get downloadLocationSelect => '選擇下載位置';
+
+  @override
+  String get downloadLocationUnsupported => '目前裝置不支援自訂下載位置';
+
+  @override
   String get downloadDanmaku => '同時下載彈幕';
 
   @override
@@ -6859,6 +6895,18 @@ class AppLocalizationsZhHantTw extends AppLocalizationsZh {
 
   @override
   String get downloadSettings => '下載設定';
+
+  @override
+  String get downloadLocation => '資源下載位置';
+
+  @override
+  String get downloadLocationUnavailable => '無法取得下載位置';
+
+  @override
+  String get downloadLocationSelect => '選擇下載位置';
+
+  @override
+  String get downloadLocationUnsupported => '目前裝置不支援自訂下載位置';
 
   @override
   String get downloadDanmaku => '同時下載彈幕';

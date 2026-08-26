@@ -667,6 +667,10 @@ class DownloadManager implements IDownloadManager {
     return p.join(directory.path, 'downloads');
   }
 
+  static Future<String> getDefaultDownloadDirectory() {
+    return _defaultBaseDirectoryProvider();
+  }
+
   static String _taskKey(String recordKey, String episodeUrl) {
     return '$recordKey::$episodeUrl';
   }

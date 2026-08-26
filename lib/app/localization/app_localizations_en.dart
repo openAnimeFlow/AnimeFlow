@@ -1725,6 +1725,19 @@ class AppLocalizationsEn extends AppLocalizations {
   String get downloadSettings => 'Download settings';
 
   @override
+  String get downloadLocation => 'Resource download location';
+
+  @override
+  String get downloadLocationUnavailable => 'Download location unavailable';
+
+  @override
+  String get downloadLocationSelect => 'Choose a download location';
+
+  @override
+  String get downloadLocationUnsupported =>
+      'This device does not support custom download locations';
+
+  @override
   String get downloadDanmaku => 'Download danmaku too';
 
   @override

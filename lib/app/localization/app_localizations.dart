@@ -3223,6 +3223,30 @@ abstract class AppLocalizations {
   /// **'下载设置'**
   String get downloadSettings;
 
+  /// No description provided for @downloadLocation.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'资源下载位置'**
+  String get downloadLocation;
+
+  /// No description provided for @downloadLocationUnavailable.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'无法获取下载位置'**
+  String get downloadLocationUnavailable;
+
+  /// No description provided for @downloadLocationSelect.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'选择下载位置'**
+  String get downloadLocationSelect;
+
+  /// No description provided for @downloadLocationUnsupported.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'当前设备不支持自定义下载位置'**
+  String get downloadLocationUnsupported;
+
   /// No description provided for @downloadDanmaku.
   ///
   /// In zh_Hans, this message translates to:

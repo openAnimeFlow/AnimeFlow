@@ -3,6 +3,8 @@ import 'package:anime_flow/app/router/routes_args.dart';
 import 'package:anime_flow/features/download/presentation/providers/download_provider.dart';
 import 'package:anime_flow/features/play/presentation/providers/episodes_provider.dart';
 import 'package:anime_flow/features/play/presentation/providers/video_source_provider.dart';
+import 'package:anime_flow/shared/models/download/download_episode.dart';
+import 'package:anime_flow/shared/models/download/download_status.dart';
 import 'package:anime_flow/shared/models/player/bangumi/episodes_item.dart';
 import 'package:anime_flow/shared/models/player/play/video/episode_resources_item.dart';
 import 'package:anime_flow/shared/models/player/play/video/resources_item.dart';
@@ -40,11 +42,20 @@ class _DownloadEpisodeSheetState extends ConsumerState<DownloadEpisodeSheet> {
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
     final videoSourceState = ref.watch(videoSourceProvider);
+    final downloadState = ref.watch(downloadControllerProvider);
     final episodesData = ref.watch(episodesProvider).asData?.value;
     final source = _selectedSource(videoSourceState);
     final candidates = source == null
         ? <_DownloadCandidate>[]
-        : _buildCandidates(source, videoSourceState, episodesData);
+        : _buildCandidates(
+            source,
+            videoSourceState,
+            episodesData,
+            downloadState,
+          );
+    final selectableCandidates = candidates.where((candidate) {
+      return _canSelectCandidate(candidate.downloadEpisode);
+    }).toList(growable: false);
 
     return SafeArea(
       child: ConstrainedBox(
@@ -94,13 +105,14 @@ class _DownloadEpisodeSheetState extends ConsumerState<DownloadEpisodeSheet> {
                     TextButton.icon(
                       onPressed: () {
                         setState(() {
-                          if (_selectedUrls.length == candidates.length) {
+                          if (_selectedUrls.length ==
+                              selectableCandidates.length) {
                             _selectedUrls.clear();
                           } else {
                             _selectedUrls
                               ..clear()
                               ..addAll(
-                                candidates.map((candidate) {
+                                selectableCandidates.map((candidate) {
                                   return candidate.sourceEpisode.like;
                                 }),
                               );
@@ -108,7 +120,7 @@ class _DownloadEpisodeSheetState extends ConsumerState<DownloadEpisodeSheet> {
                         });
                       },
                       icon: Icon(
-                        _selectedUrls.length == candidates.length
+                        _selectedUrls.length == selectableCandidates.length
                             ? Icons.check_box_rounded
                             : Icons.check_box_outline_blank_rounded,
                       ),
@@ -127,29 +139,50 @@ class _DownloadEpisodeSheetState extends ConsumerState<DownloadEpisodeSheet> {
                       final selected = _selectedUrls.contains(
                         candidate.sourceEpisode.like,
                       );
+                      final canSelect =
+                          _canSelectCandidate(candidate.downloadEpisode);
                       return CheckboxListTile(
-                        value: selected,
+                        value: selected && canSelect,
                         controlAffinity: ListTileControlAffinity.leading,
                         title: Text(
                           candidate.displayTitle(l10n),
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
                         ),
-                        subtitle: Text(
-                          candidate.sourceEpisode.like,
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
+                        subtitle: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            if (candidate.downloadEpisode != null) ...[
+                              const SizedBox(height: 4),
+                              Text(
+                                _statusText(l10n, candidate.downloadEpisode!),
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                                style: TextStyle(
+                                  color: _statusColor(
+                                    context,
+                                    candidate.downloadEpisode!,
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ],
                         ),
-                        onChanged: (value) {
-                          setState(() {
-                            if (value ?? false) {
-                              _selectedUrls.add(candidate.sourceEpisode.like);
-                            } else {
-                              _selectedUrls
-                                  .remove(candidate.sourceEpisode.like);
-                            }
-                          });
-                        },
+                        onChanged: canSelect
+                            ? (value) {
+                                setState(() {
+                                  if (value ?? false) {
+                                    _selectedUrls.add(
+                                      candidate.sourceEpisode.like,
+                                    );
+                                  } else {
+                                    _selectedUrls.remove(
+                                      candidate.sourceEpisode.like,
+                                    );
+                                  }
+                                });
+                              }
+                            : null,
                       );
                     },
                   ),
@@ -193,7 +226,9 @@ class _DownloadEpisodeSheetState extends ConsumerState<DownloadEpisodeSheet> {
     ResourcesItem source,
     VideoSourceState state,
     EpisodesData? episodesData,
+    DownloadState downloadState,
   ) {
+    final subjectId = ref.read(playExtraProvider).playExtra.subjectId;
     final bangumiEpisodes = _episodesBySort(episodesData?.episodes);
     final lines = source.episodeResources.where((item) {
       if (state.lineName.trim().isEmpty) {
@@ -212,6 +247,13 @@ class _DownloadEpisodeSheetState extends ConsumerState<DownloadEpisodeSheet> {
             lineIndex: lineIndex,
             sourceEpisode: sourceEpisode,
             bangumiEpisode: bangumiEpisodes[sourceEpisode.episodeSort],
+            downloadEpisode: _findDownloadEpisode(
+              downloadState,
+              subjectId: subjectId,
+              sourceName: source.websiteName,
+              sourceBaseUrl: source.baseUrl,
+              episodeUrl: sourceEpisode.like,
+            ),
           ),
         );
       }
@@ -237,13 +279,75 @@ class _DownloadEpisodeSheetState extends ConsumerState<DownloadEpisodeSheet> {
     };
   }
 
+  DownloadEpisode? _findDownloadEpisode(
+    DownloadState state, {
+    required int subjectId,
+    required String sourceName,
+    required String sourceBaseUrl,
+    required String episodeUrl,
+  }) {
+    final normalizedUrl = _resolveEpisodeUrl(sourceBaseUrl, episodeUrl);
+    for (final record in state.records) {
+      if (record.subjectId == subjectId && record.sourceName == sourceName) {
+        return record.episodes[normalizedUrl] ?? record.episodes[episodeUrl];
+      }
+    }
+    return null;
+  }
+
+  String _resolveEpisodeUrl(String baseUrl, String episodeUrl) {
+    final uri = Uri.tryParse(episodeUrl);
+    if (uri != null && uri.hasScheme) {
+      return episodeUrl;
+    }
+    return Uri.parse(baseUrl).resolve(episodeUrl).toString();
+  }
+
+  bool _canSelectCandidate(DownloadEpisode? episode) {
+    return episode == null ||
+        episode.status == DownloadStatus.paused ||
+        episode.status == DownloadStatus.failed;
+  }
+
+  String _statusText(AppLocalizations l10n, DownloadEpisode episode) {
+    final status = switch (episode.status) {
+      DownloadStatus.pending => l10n.downloadQueued,
+      DownloadStatus.resolving => l10n.downloadResolving,
+      DownloadStatus.downloading => l10n.downloadDownloadingStatus,
+      DownloadStatus.completed => l10n.downloadCompletedStatus,
+      DownloadStatus.failed => l10n.downloadFailedStatus,
+      DownloadStatus.paused => l10n.downloadPausedStatus,
+      _ => l10n.downloadQueued,
+    };
+    if (episode.status == DownloadStatus.completed) {
+      return status;
+    }
+    final progress =
+        '${episode.progressPercent.clamp(0, 100).toStringAsFixed(1)}%';
+    final detail = episode.errorMessage.trim();
+    if (detail.isNotEmpty && episode.status == DownloadStatus.failed) {
+      return '$status - $detail';
+    }
+    return '$status - $progress';
+  }
+
+  Color _statusColor(BuildContext context, DownloadEpisode episode) {
+    final colorScheme = Theme.of(context).colorScheme;
+    return switch (episode.status) {
+      DownloadStatus.completed => colorScheme.primary,
+      DownloadStatus.failed => colorScheme.error,
+      _ => colorScheme.onSurfaceVariant,
+    };
+  }
+
   Future<void> _startDownloads(
     AppLocalizations l10n,
     ResourcesItem source,
     List<_DownloadCandidate> candidates,
   ) async {
     final selected = candidates.where((candidate) {
-      return _selectedUrls.contains(candidate.sourceEpisode.like);
+      return _selectedUrls.contains(candidate.sourceEpisode.like) &&
+          _canSelectCandidate(candidate.downloadEpisode);
     }).toList();
     if (selected.isEmpty) {
       return;
@@ -277,8 +381,6 @@ class _DownloadEpisodeSheetState extends ConsumerState<DownloadEpisodeSheet> {
     if (!mounted) {
       return;
     }
-    Navigator.of(context).pop();
-    NotificationToast.show(l10n.downloadSuccess, title: l10n.tip);
   }
 }
 
@@ -287,11 +389,13 @@ class _DownloadCandidate {
     required this.lineIndex,
     required this.sourceEpisode,
     required this.bangumiEpisode,
+    required this.downloadEpisode,
   });
 
   final int lineIndex;
   final Episode sourceEpisode;
   final EpisodeData? bangumiEpisode;
+  final DownloadEpisode? downloadEpisode;
 
   String get episodeTitle {
     final title = bangumiEpisode?.nameCN.trim();

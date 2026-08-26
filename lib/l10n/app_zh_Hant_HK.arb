@@ -469,7 +469,7 @@
   "imageDecodeFailed": "圖片解碼失敗",
   "episodeNumber": "第{episode}集",
   "watchedLabel": "觀看{progress}",
-  "playEpisode": "播放（{episode}）"
+  "playEpisode": "{episode}"
   ,"resetPassword": "重設密碼"
   ,"newPassword": "新密碼"
   ,"emailCode": "電子郵件驗證碼"

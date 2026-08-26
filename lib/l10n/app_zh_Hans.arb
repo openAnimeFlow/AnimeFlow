@@ -526,7 +526,7 @@
   "imageDecodeFailed": "图片解码失败",
   "episodeNumber": "第{episode}集",
   "watchedLabel": "观看{progress}",
-  "playEpisode": "播放（{episode}）"
+  "playEpisode": "{episode}"
   ,"downloadsTitle": "下载管理"
   ,"downloadTasksEmpty": "暂无下载任务"
   ,"downloadSelectionTitle": "下载选集"

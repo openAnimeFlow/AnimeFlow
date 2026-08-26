@@ -1664,7 +1664,7 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String playEpisode(Object episode) {
-    return '播放（$episode）';
+    return '$episode';
   }
 
   @override
@@ -3406,7 +3406,7 @@ class AppLocalizationsZhHans extends AppLocalizationsZh {
 
   @override
   String playEpisode(Object episode) {
-    return '播放（$episode）';
+    return '$episode';
   }
 
   @override
@@ -5067,7 +5067,7 @@ class AppLocalizationsZhHantHk extends AppLocalizationsZh {
 
   @override
   String playEpisode(Object episode) {
-    return '播放（$episode）';
+    return '$episode';
   }
 
   @override
@@ -6728,7 +6728,7 @@ class AppLocalizationsZhHantTw extends AppLocalizationsZh {
 
   @override
   String playEpisode(Object episode) {
-    return '播放（$episode）';
+    return '$episode';
   }
 
   @override

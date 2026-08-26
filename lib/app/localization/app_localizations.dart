@@ -3190,7 +3190,7 @@ abstract class AppLocalizations {
   /// No description provided for @playEpisode.
   ///
   /// In zh_Hans, this message translates to:
-  /// **'播放（{episode}）'**
+  /// **'{episode}'**
   String playEpisode(Object episode);
 
   /// No description provided for @downloadsTitle.

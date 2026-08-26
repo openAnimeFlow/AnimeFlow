@@ -1,8 +1,8 @@
 import 'dart:async';
 import 'dart:collection';
 
-import 'package:anime_flow/features/play/presentation/providers/video_source_service.dart';
-import 'package:anime_flow/features/play/presentation/providers/webview_video_source_provider.dart';
+import 'package:anime_flow/features/play/application/video_source_service.dart';
+import 'package:anime_flow/features/play/application/webview_video_source_provider.dart';
 
 class VideoSourceResolveRequest {
   const VideoSourceResolveRequest({
@@ -73,10 +73,15 @@ class VideoSourceResolverPool implements IVideoSourceResolverPool {
     }
     _disposed = true;
     cancelAll();
-    for (final worker in _workers) {
-      worker.provider.dispose();
-    }
+    final workers = List<_ResolverWorker>.from(_workers);
     _workers.clear();
+    unawaited(_disposeWorkers(workers));
+  }
+
+  Future<void> _disposeWorkers(List<_ResolverWorker> workers) async {
+    await Future.wait(
+      workers.map((worker) => worker.provider.dispose()),
+    );
   }
 
   void _pump() {
@@ -105,9 +110,7 @@ class VideoSourceResolverPool implements IVideoSourceResolverPool {
       }
     } finally {
       worker.isBusy = false;
-      if (_disposed) {
-        worker.provider.dispose();
-      } else {
+      if (!_disposed) {
         _pump();
       }
     }

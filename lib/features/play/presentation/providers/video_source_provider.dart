@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:isolate';
 
 import 'package:anime_flow/core/crawler/cookie_manager.dart';
@@ -8,15 +9,14 @@ import 'package:anime_flow/features/play/application/search_result_rank_service.
 import 'package:anime_flow/features/play/data/repository/play_repository.dart';
 import 'package:anime_flow/features/play/presentation/providers/episodes_provider.dart';
 import 'package:anime_flow/features/play/presentation/providers/play_provider.dart';
-import 'package:anime_flow/features/play/presentation/providers/video_source_service.dart';
-import 'package:anime_flow/features/play/presentation/providers/webview_video_source_provider.dart';
+import 'package:anime_flow/features/play/application/video_source_service.dart';
+import 'package:anime_flow/features/play/application/webview_video_source_provider.dart';
 import 'package:anime_flow/features/source/data/repositories/source_repository_provider.dart';
 import 'package:anime_flow/shared/models/player/play/video/episode_resources_item.dart';
 import 'package:anime_flow/shared/models/player/play/video/resources_item.dart';
 import 'package:anime_flow/app/router/routes_args.dart';
 import 'package:anime_flow/core/logger/logger.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
-import 'package:webview_windows/webview_windows.dart';
 
 part 'video_source_provider.g.dart';
 
@@ -32,7 +32,6 @@ class VideoSourceState {
     this.keyword = '',
     this.isSearchCompleted = false,
     this.selectedWebsiteIndex = 0,
-    this.isInitWebView = false,
     this.userManuallySelected = false,
     this.manualEpisodeSources = const {},
   });
@@ -47,7 +46,6 @@ class VideoSourceState {
   final String keyword;
   final bool isSearchCompleted;
   final int selectedWebsiteIndex;
-  final bool isInitWebView;
   final bool userManuallySelected;
   final Map<int, ManualEpisodeSource> manualEpisodeSources;
 
@@ -62,7 +60,6 @@ class VideoSourceState {
     String? keyword,
     bool? isSearchCompleted,
     int? selectedWebsiteIndex,
-    bool? isInitWebView,
     bool? userManuallySelected,
     Map<int, ManualEpisodeSource>? manualEpisodeSources,
   }) {
@@ -77,7 +74,6 @@ class VideoSourceState {
       keyword: keyword ?? this.keyword,
       isSearchCompleted: isSearchCompleted ?? this.isSearchCompleted,
       selectedWebsiteIndex: selectedWebsiteIndex ?? this.selectedWebsiteIndex,
-      isInitWebView: isInitWebView ?? this.isInitWebView,
       userManuallySelected: userManuallySelected ?? this.userManuallySelected,
       manualEpisodeSources: manualEpisodeSources ?? this.manualEpisodeSources,
     );
@@ -119,6 +115,7 @@ class VideoSourceNotifier extends _$VideoSourceNotifier {
   String? _preferredAutoSelectWebsiteName;
   int _videoPageLoadToken = 0;
   final Set<String> _attemptedAutoLoadUrls = {};
+  Future<void> _providerDisposeTail = Future<void>.value();
 
   int get currentEpisodeIndex => state.currentEpisodeIndex;
   List<ResourcesItem> get videoResources => state.videoResources;
@@ -130,15 +127,9 @@ class VideoSourceNotifier extends _$VideoSourceNotifier {
   String get keyword => state.keyword;
   bool get isSearchCompleted => state.isSearchCompleted;
   int get selectedWebsiteIndex => state.selectedWebsiteIndex;
-  bool get isInitWebView => state.isInitWebView;
   bool get userManuallySelected => state.userManuallySelected;
   Map<int, ManualEpisodeSource> get manualEpisodeSources =>
       state.manualEpisodeSources;
-
-  WebviewController? get windowsWebviewController {
-    final controller = _webViewVideoProvider?.webviewController;
-    return controller is WebviewController ? controller : null;
-  }
 
   bool _requiresCaptcha(CrawlConfigItem config) {
     return config.antiCrawlerConfig.enabled &&
@@ -147,7 +138,9 @@ class VideoSourceNotifier extends _$VideoSourceNotifier {
 
   @override
   VideoSourceState build() {
-    ref.onDispose(_dispose);
+    ref.onDispose(() {
+      unawaited(_dispose());
+    });
     final currentEpisodeIndex =
         ref.read(episodesProvider).asData?.value.episodeIndex ?? 0;
     ref.listen<AsyncValue<EpisodesData>>(
@@ -162,13 +155,15 @@ class VideoSourceNotifier extends _$VideoSourceNotifier {
     return VideoSourceState(currentEpisodeIndex: currentEpisodeIndex);
   }
 
-  void _dispose() {
+  Future<void> _dispose() async {
     _searchSessionId++;
     _videoPageLoadToken++;
-    _webViewVideoProvider?.dispose();
+    final provider = _webViewVideoProvider;
     _webViewVideoProvider = null;
     _websiteRequestTokens.clear();
     _attemptedAutoLoadUrls.clear();
+    _providerDisposeTail = provider?.dispose() ?? Future<void>.value();
+    await _providerDisposeTail;
   }
 
   Future<void> initVideoResources() async {
@@ -864,16 +859,15 @@ class VideoSourceNotifier extends _$VideoSourceNotifier {
     final playController = ref.read(playSessionProvider);
     ref.read(playStateProvider.notifier).setIsParsing(true);
 
+    await _providerDisposeTail;
+    if (!ref.mounted || loadToken != _videoPageLoadToken) return false;
+
     _webViewVideoProvider ??= WebViewVideoSourceProvider();
     await _webViewVideoProvider!.ensureInitialized();
     if (!ref.mounted) return false;
     if (loadToken != _videoPageLoadToken) {
       return false;
     }
-    if (!state.isInitWebView) {
-      state = state.copyWith(isInitWebView: true);
-    }
-
     var offset = 0;
     final subject = ref.read(playExtraProvider).playExtra;
     final episodesState =

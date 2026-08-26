@@ -1,6 +1,7 @@
 import 'package:anime_flow/app/localization/app_localizations.dart';
 import 'package:anime_flow/app/router/routes_args.dart';
 import 'package:anime_flow/core/constants/storage_key.dart';
+import 'package:anime_flow/core/logger/logger.dart';
 import 'package:anime_flow/core/storage/storage.dart';
 import 'package:anime_flow/features/download/presentation/providers/download_provider.dart';
 import 'package:anime_flow/features/play/presentation/providers/episodes_provider.dart';
@@ -419,6 +420,7 @@ class _DownloadEpisodeSheetState extends ConsumerState<DownloadEpisodeSheet> {
         '${episode.progressPercent.clamp(0, 100).toStringAsFixed(1)}%';
     final detail = episode.errorMessage.trim();
     if (detail.isNotEmpty && episode.status == DownloadStatus.failed) {
+      LiggLogger().e('Download failed: $detail');
       return '$status - $detail';
     }
     return '$status - $progress';

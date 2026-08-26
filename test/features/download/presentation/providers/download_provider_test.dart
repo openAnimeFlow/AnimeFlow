@@ -5,7 +5,7 @@ import 'package:anime_flow/features/download/application/download_manager.dart';
 import 'package:anime_flow/features/download/application/video_source_resolver_pool.dart';
 import 'package:anime_flow/features/download/data/repositories/download_repository.dart';
 import 'package:anime_flow/features/download/presentation/providers/download_provider.dart';
-import 'package:anime_flow/features/play/presentation/providers/video_source_service.dart';
+import 'package:anime_flow/features/play/application/video_source_service.dart';
 import 'package:anime_flow/shared/models/download/download_episode.dart';
 import 'package:anime_flow/shared/models/download/download_record.dart';
 import 'package:anime_flow/shared/models/download/download_status.dart';

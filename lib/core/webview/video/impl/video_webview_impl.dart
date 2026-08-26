@@ -426,12 +426,13 @@ class VideoWebviewImpl
   }
 
   @override
-  void dispose() {
+  Future<void> dispose() async {
     videoParserTimer?.cancel();
     videoParserTimer = null;
-    headlessWebView?.dispose();
+    await headlessWebView?.dispose();
     headlessWebView = null;
     webviewController = null;
+    disposeEventControllers();
   }
 
   bool _isM3U8Url(String lower) {

@@ -1,7 +1,7 @@
 import 'dart:async';
 
 import 'package:anime_flow/features/download/application/video_source_resolver_pool.dart';
-import 'package:anime_flow/features/play/presentation/providers/video_source_service.dart';
+import 'package:anime_flow/features/play/application/video_source_service.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
@@ -94,7 +94,7 @@ class _FakeVideoSourceProvider implements IVideoSourceProvider {
   }
 
   @override
-  void dispose() {
+  Future<void> dispose() async {
     disposeCount++;
   }
 }

@@ -67,16 +67,17 @@ class VideoWebviewWindowsImpl
   }
 
   @override
-  void dispose() {
+  Future<void> dispose() async {
     for (var s in subscriptions) {
       try {
         s.cancel();
       } catch (_) {}
     }
     subscriptions.clear();
-    unawaited(headlessWebview?.dispose());
+    await headlessWebview?.dispose();
     headlessWebview = null;
     webviewController = null;
+    disposeEventControllers();
   }
 
   // The webview_windows package does not have a method to unload the current page.

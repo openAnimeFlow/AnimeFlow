@@ -11,6 +11,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:path/path.dart' as p;
 
 var _transientDirectAttempts = 0;
+var _transientSegmentAttempts = 0;
 
 void main() {
   late Directory tempDir;
@@ -24,6 +25,7 @@ void main() {
     server = await HttpServer.bind(InternetAddress.loopbackIPv4, 0);
     baseUri = Uri.parse('http://${server.address.host}:${server.port}');
     _transientDirectAttempts = 0;
+    _transientSegmentAttempts = 0;
     _serveRequests(server);
   });
 
@@ -177,6 +179,50 @@ void main() {
       expect(playlist, contains('seg_00000.ts'));
       expect(playlist, contains('seg_00001.ts'));
       expect(playlist, contains('URI="key_0.key"'));
+    });
+
+    test('retries transient m3u8 segment failures', () async {
+      final episode = _episode(url: 'm3u8-retry');
+      final manager = _manager(tempDir);
+
+      final completed = _waitForCompletion(manager);
+      await manager.enqueue(
+        _request(
+          episode: episode,
+          episodeUrl: 'm3u8-retry',
+          baseUri: baseUri,
+          networkMediaUrl: baseUri.resolve('/playlist-retry.m3u8').toString(),
+        ),
+      );
+
+      final result = await completed;
+
+      expect(result.status, DownloadStatus.completed);
+      expect(_transientSegmentAttempts, 3);
+      expect(
+        File(p.join(result.downloadDirectory, 'seg_00000.ts'))
+            .readAsStringSync(),
+        'retry-segment',
+      );
+    });
+
+    test('rejects live m3u8 playlists', () async {
+      final episode = _episode(url: 'live-m3u8');
+      final manager = _manager(tempDir);
+
+      final failed = _waitForStatus(manager, DownloadStatus.failed);
+      await manager.enqueue(
+        _request(
+          episode: episode,
+          episodeUrl: 'live-m3u8',
+          baseUri: baseUri,
+          networkMediaUrl: baseUri.resolve('/live.m3u8').toString(),
+        ),
+      );
+
+      final result = await failed;
+
+      expect(result.errorMessage, contains('不支持下载直播流'));
     });
 
     test('pauses direct media without surfacing control exception', () async {
@@ -342,12 +388,36 @@ seg0.ts
 seg1.ts
 #EXT-X-ENDLIST
 ''');
+      case '/playlist-retry.m3u8':
+        request.response.write('''
+#EXTM3U
+#EXT-X-TARGETDURATION:5
+#EXT-X-PLAYLIST-TYPE:VOD
+#EXTINF:5,
+retry-seg.ts
+#EXT-X-ENDLIST
+''');
+      case '/live.m3u8':
+        request.response.write('''
+#EXTM3U
+#EXT-X-TARGETDURATION:5
+#EXT-X-PLAYLIST-TYPE:EVENT
+#EXTINF:5,
+seg0.ts
+''');
       case '/key.key':
         request.response.write('secret-key');
       case '/seg0.ts':
         request.response.write('segment-0');
       case '/seg1.ts':
         request.response.write('segment-1');
+      case '/retry-seg.ts':
+        _transientSegmentAttempts++;
+        if (_transientSegmentAttempts < 3) {
+          request.response.statusCode = HttpStatus.serviceUnavailable;
+        } else {
+          request.response.write('retry-segment');
+        }
       default:
         request.response.statusCode = HttpStatus.notFound;
     }

@@ -489,10 +489,14 @@
   ,"downloadTasksEmpty": "No download tasks"
   ,"downloadSelectionTitle": "Download episodes"
   ,"downloadResources": "Download resources"
+  ,"expandDownloadEpisodes": "Expand episodes"
+  ,"collapseDownloadEpisodes": "Collapse episodes"
   ,"selectedEpisodesCount": "{count} selected"
   ,"@selectedEpisodesCount": {"placeholders": {"count": {}}}
   ,"startDownload": "Start download"
   ,"deleteDownloadTask": "Delete download task"
+  ,"deleteDownloadTaskConfirmation": "Delete the downloaded resource for “{episode}”?"
+  ,"@deleteDownloadTaskConfirmation": {"placeholders": {"episode": {}}}
   ,"downloadTaskProgress": "{completed}/{total} completed"
   ,"@downloadTaskProgress": {"placeholders": {"completed": {}, "total": {}}}
   ,"downloadQueued": "Queued"

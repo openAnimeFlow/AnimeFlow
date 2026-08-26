@@ -1722,6 +1722,12 @@ class AppLocalizationsEn extends AppLocalizations {
   String get downloadResources => 'Download resources';
 
   @override
+  String get expandDownloadEpisodes => 'Expand episodes';
+
+  @override
+  String get collapseDownloadEpisodes => 'Collapse episodes';
+
+  @override
   String selectedEpisodesCount(Object count) {
     return '$count selected';
   }
@@ -1731,6 +1737,11 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get deleteDownloadTask => 'Delete download task';
+
+  @override
+  String deleteDownloadTaskConfirmation(Object episode) {
+    return 'Delete the downloaded resource for “$episode”?';
+  }
 
   @override
   String downloadTaskProgress(Object completed, Object total) {

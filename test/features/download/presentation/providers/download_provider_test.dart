@@ -137,6 +137,53 @@ void main() {
       expect(manager.deletedEpisodes.single.episodeUrl, 'ep1');
       expect(repository.getRecord(record.key), isNull);
     });
+
+    test('pause immediately persists paused status and refreshes state',
+        () async {
+      final repository = _FakeDownloadRepository();
+      final manager = _FakeDownloadManager();
+      final resolverPool = _FakeResolverPool();
+      final record = DownloadRecord(
+        subjectId: 1,
+        subjectName: 'Subject',
+        subjectCover: '',
+        sourceName: 'source',
+        sourceBaseUrl: 'https://source.test',
+        episodes: {
+          'ep1': _episode('ep1', DownloadStatus.downloading),
+        },
+        createdAt: DateTime(2026),
+      );
+      await repository.putRecord(record);
+      final container = ProviderContainer(
+        overrides: [
+          downloadRepositoryProvider.overrideWithValue(repository),
+          downloadManagerProvider.overrideWithValue(manager),
+          videoSourceResolverPoolProvider.overrideWithValue(resolverPool),
+        ],
+      );
+      addTearDown(container.dispose);
+
+      await container.read(downloadControllerProvider.notifier).pause(
+            record.key,
+            'ep1',
+          );
+
+      expect(manager.paused, [(record.key, 'ep1')]);
+      expect(
+        repository.getRecord(record.key)?.episodes['ep1']?.status,
+        DownloadStatus.paused,
+      );
+      expect(
+        container
+            .read(downloadControllerProvider)
+            .records
+            .single
+            .episodes['ep1']
+            ?.status,
+        DownloadStatus.paused,
+      );
+    });
   });
 }
 
@@ -240,6 +287,7 @@ class _FakeDownloadRepository implements IDownloadRepository {
 class _FakeDownloadManager implements IDownloadManager {
   final requests = <DownloadRequest>[];
   final cancelled = <(String, String)>[];
+  final paused = <(String, String)>[];
   final deletedEpisodes = <DownloadEpisode>[];
 
   @override
@@ -280,7 +328,9 @@ class _FakeDownloadManager implements IDownloadManager {
   bool isDownloading(String recordKey, String episodeUrl) => false;
 
   @override
-  void pause(String recordKey, String episodeUrl) {}
+  void pause(String recordKey, String episodeUrl) {
+    paused.add((recordKey, episodeUrl));
+  }
 
   @override
   Future<void> resume(DownloadRequest request) async {

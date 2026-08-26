@@ -520,10 +520,14 @@
   ,"downloadTasksEmpty": "暫無下載任務"
   ,"downloadSelectionTitle": "下載選集"
   ,"downloadResources": "下載資源"
+  ,"expandDownloadEpisodes": "展開劇集"
+  ,"collapseDownloadEpisodes": "收起劇集"
   ,"selectedEpisodesCount": "已選 {count} 集"
   ,"@selectedEpisodesCount": {"placeholders": {"count": {}}}
   ,"startDownload": "開始下載"
   ,"deleteDownloadTask": "刪除下載任務"
+  ,"deleteDownloadTaskConfirmation": "確定刪除「{episode}」的下載資源嗎？"
+  ,"@deleteDownloadTaskConfirmation": {"placeholders": {"episode": {}}}
   ,"downloadTaskProgress": "已完成 {completed}/{total}"
   ,"@downloadTaskProgress": {"placeholders": {"completed": {}, "total": {}}}
   ,"downloadQueued": "排隊中"

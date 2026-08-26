@@ -35,15 +35,24 @@ class DownloadPage extends ConsumerWidget {
   }
 }
 
-class _DownloadRecordCard extends ConsumerWidget {
+class _DownloadRecordCard extends ConsumerStatefulWidget {
   const _DownloadRecordCard({required this.record});
 
   final DownloadRecord record;
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<_DownloadRecordCard> createState() =>
+      _DownloadRecordCardState();
+}
+
+class _DownloadRecordCardState extends ConsumerState<_DownloadRecordCard> {
+  bool _isExpanded = false;
+
+  @override
+  Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
     final colorScheme = Theme.of(context).colorScheme;
+    final record = widget.record;
     final episodes = record.episodes.values.toList()
       ..sort((a, b) => a.episodeSort.compareTo(b.episodeSort));
     final completed = episodes
@@ -57,53 +66,84 @@ class _DownloadRecordCard extends ConsumerWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Row(
-              children: [
-                ClipRRect(
-                  borderRadius: BorderRadius.circular(6),
-                  child: AnimationNetworkImage(
-                    url: record.subjectCover,
-                    width: 52,
-                    height: 72,
-                    fit: BoxFit.cover,
+            InkWell(
+              borderRadius: BorderRadius.circular(6),
+              onTap: () => setState(() {
+                _isExpanded = !_isExpanded;
+              }),
+              child: Row(
+                children: [
+                  ClipRRect(
+                    borderRadius: BorderRadius.circular(6),
+                    child: AnimationNetworkImage(
+                      url: record.subjectCover,
+                      width: 52,
+                      height: 72,
+                      fit: BoxFit.cover,
+                    ),
                   ),
-                ),
-                const SizedBox(width: 12),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        record.subjectName,
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                        style: Theme.of(context).textTheme.titleMedium,
-                      ),
-                      const SizedBox(height: 4),
-                      Text(
-                        record.sourceName,
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                        style: TextStyle(color: colorScheme.onSurfaceVariant),
-                      ),
-                      const SizedBox(height: 4),
-                      Text(
-                        l10n.downloadTaskProgress(completed, episodes.length),
-                        style: TextStyle(color: colorScheme.onSurfaceVariant),
-                      ),
-                    ],
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          record.subjectName,
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: Theme.of(context).textTheme.titleMedium,
+                        ),
+                        const SizedBox(height: 4),
+                        Text(
+                          record.sourceName,
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: TextStyle(color: colorScheme.onSurfaceVariant),
+                        ),
+                        const SizedBox(height: 4),
+                        Text(
+                          l10n.downloadTaskProgress(completed, episodes.length),
+                          style: TextStyle(color: colorScheme.onSurfaceVariant),
+                        ),
+                      ],
+                    ),
                   ),
-                ),
-              ],
-            ),
-            const SizedBox(height: 8),
-            for (final episode in episodes) ...[
-              const Divider(height: 16),
-              _DownloadEpisodeTile(
-                record: record,
-                episode: episode,
+                  const SizedBox(width: 8),
+                  IconButton(
+                    tooltip: _isExpanded
+                        ? l10n.collapseDownloadEpisodes
+                        : l10n.expandDownloadEpisodes,
+                    icon: AnimatedRotation(
+                      turns: _isExpanded ? 0.5 : 0,
+                      duration: const Duration(milliseconds: 180),
+                      child: const Icon(Icons.keyboard_arrow_down_rounded),
+                    ),
+                    onPressed: () => setState(() {
+                      _isExpanded = !_isExpanded;
+                    }),
+                  ),
+                ],
               ),
-            ],
+            ),
+            AnimatedSize(
+              duration: const Duration(milliseconds: 180),
+              curve: Curves.easeOutCubic,
+              alignment: Alignment.topCenter,
+              child: _isExpanded
+                  ? Column(
+                      children: [
+                        const SizedBox(height: 8),
+                        for (final episode in episodes) ...[
+                          const Divider(height: 16),
+                          _DownloadEpisodeTile(
+                            record: record,
+                            episode: episode,
+                          ),
+                        ],
+                      ],
+                    )
+                  : const SizedBox.shrink(),
+            ),
           ],
         ),
       ),
@@ -145,15 +185,13 @@ class _DownloadEpisodeTile extends ConsumerWidget {
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
               ),
-              const SizedBox(height: 6),
-              LinearProgressIndicator(
-                value: episode.status == DownloadStatus.completed
-                    ? 1
-                    : progress == 0
-                        ? null
-                        : progress,
-                minHeight: 4,
-              ),
+              if (episode.status != DownloadStatus.completed) ...[
+                const SizedBox(height: 6),
+                LinearProgressIndicator(
+                  value: progress == 0 ? null : progress,
+                  minHeight: 4,
+                ),
+              ],
               const SizedBox(height: 6),
               Text(
                 _statusText(l10n, episode),
@@ -217,15 +255,49 @@ class _DownloadEpisodeTile extends ConsumerWidget {
         IconButton(
           tooltip: l10n.deleteDownloadTask,
           icon: const Icon(Icons.delete_outline_rounded),
-          onPressed: () {
-            ref.read(downloadControllerProvider.notifier).deleteEpisode(
-                  record.key,
-                  episode.episodeUrl,
-                );
-          },
+          onPressed: () => _confirmDeleteEpisode(context, ref),
         ),
       ],
     );
+  }
+
+  Future<void> _confirmDeleteEpisode(
+    BuildContext context,
+    WidgetRef ref,
+  ) async {
+    final l10n = AppLocalizations.of(context);
+    final colorScheme = Theme.of(context).colorScheme;
+    final episodeTitle = _episodeTitle(l10n, episode);
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          title: Text(l10n.deleteDownloadTask),
+          content: Text(l10n.deleteDownloadTaskConfirmation(episodeTitle)),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(false),
+              child: Text(l10n.cancel),
+            ),
+            FilledButton(
+              style: FilledButton.styleFrom(
+                backgroundColor: colorScheme.error,
+                foregroundColor: colorScheme.onError,
+              ),
+              onPressed: () => Navigator.of(context).pop(true),
+              child: Text(l10n.delete),
+            ),
+          ],
+        );
+      },
+    );
+    if (confirmed != true || !context.mounted) {
+      return;
+    }
+    await ref.read(downloadControllerProvider.notifier).deleteEpisode(
+          record.key,
+          episode.episodeUrl,
+        );
   }
 
   void _playOfflineEpisode(

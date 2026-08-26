@@ -1680,6 +1680,12 @@ class AppLocalizationsZh extends AppLocalizations {
   String get downloadResources => '下載資源';
 
   @override
+  String get expandDownloadEpisodes => '展開劇集';
+
+  @override
+  String get collapseDownloadEpisodes => '收起劇集';
+
+  @override
   String selectedEpisodesCount(Object count) {
     return '已選 $count 集';
   }
@@ -1689,6 +1695,11 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get deleteDownloadTask => '刪除下載任務';
+
+  @override
+  String deleteDownloadTaskConfirmation(Object episode) {
+    return '確定刪除「$episode」的下載資源嗎？';
+  }
 
   @override
   String downloadTaskProgress(Object completed, Object total) {
@@ -3422,6 +3433,12 @@ class AppLocalizationsZhHans extends AppLocalizationsZh {
   String get downloadResources => '下载资源';
 
   @override
+  String get expandDownloadEpisodes => '展开剧集';
+
+  @override
+  String get collapseDownloadEpisodes => '收起剧集';
+
+  @override
   String selectedEpisodesCount(Object count) {
     return '已选 $count 集';
   }
@@ -3431,6 +3448,11 @@ class AppLocalizationsZhHans extends AppLocalizationsZh {
 
   @override
   String get deleteDownloadTask => '删除下载任务';
+
+  @override
+  String deleteDownloadTaskConfirmation(Object episode) {
+    return '确定删除「$episode」的下载资源吗？';
+  }
 
   @override
   String downloadTaskProgress(Object completed, Object total) {
@@ -5083,6 +5105,12 @@ class AppLocalizationsZhHantHk extends AppLocalizationsZh {
   String get downloadResources => '下載資源';
 
   @override
+  String get expandDownloadEpisodes => '展開劇集';
+
+  @override
+  String get collapseDownloadEpisodes => '收起劇集';
+
+  @override
   String selectedEpisodesCount(Object count) {
     return '已選 $count 集';
   }
@@ -5092,6 +5120,11 @@ class AppLocalizationsZhHantHk extends AppLocalizationsZh {
 
   @override
   String get deleteDownloadTask => '刪除下載任務';
+
+  @override
+  String deleteDownloadTaskConfirmation(Object episode) {
+    return '確定刪除「$episode」的下載資源嗎？';
+  }
 
   @override
   String downloadTaskProgress(Object completed, Object total) {
@@ -6744,6 +6777,12 @@ class AppLocalizationsZhHantTw extends AppLocalizationsZh {
   String get downloadResources => '下載資源';
 
   @override
+  String get expandDownloadEpisodes => '展開劇集';
+
+  @override
+  String get collapseDownloadEpisodes => '收起劇集';
+
+  @override
   String selectedEpisodesCount(Object count) {
     return '已選 $count 集';
   }
@@ -6753,6 +6792,11 @@ class AppLocalizationsZhHantTw extends AppLocalizationsZh {
 
   @override
   String get deleteDownloadTask => '刪除下載任務';
+
+  @override
+  String deleteDownloadTaskConfirmation(Object episode) {
+    return '確定刪除「$episode」的下載資源嗎？';
+  }
 
   @override
   String downloadTaskProgress(Object completed, Object total) {

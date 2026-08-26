@@ -531,10 +531,14 @@
   ,"downloadTasksEmpty": "暂无下载任务"
   ,"downloadSelectionTitle": "下载选集"
   ,"downloadResources": "下载资源"
+  ,"expandDownloadEpisodes": "展开剧集"
+  ,"collapseDownloadEpisodes": "收起剧集"
   ,"selectedEpisodesCount": "已选 {count} 集"
   ,"@selectedEpisodesCount": {"placeholders": {"count": {}}}
   ,"startDownload": "开始下载"
   ,"deleteDownloadTask": "删除下载任务"
+  ,"deleteDownloadTaskConfirmation": "确定删除「{episode}」的下载资源吗？"
+  ,"@deleteDownloadTaskConfirmation": {"placeholders": {"episode": {}}}
   ,"downloadTaskProgress": "已完成 {completed}/{total}"
   ,"@downloadTaskProgress": {"placeholders": {"completed": {}, "total": {}}}
   ,"downloadQueued": "排队中"

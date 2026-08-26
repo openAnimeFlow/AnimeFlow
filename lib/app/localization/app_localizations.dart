@@ -3217,6 +3217,18 @@ abstract class AppLocalizations {
   /// **'下载资源'**
   String get downloadResources;
 
+  /// No description provided for @expandDownloadEpisodes.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'展开剧集'**
+  String get expandDownloadEpisodes;
+
+  /// No description provided for @collapseDownloadEpisodes.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'收起剧集'**
+  String get collapseDownloadEpisodes;
+
   /// No description provided for @selectedEpisodesCount.
   ///
   /// In zh_Hans, this message translates to:
@@ -3234,6 +3246,12 @@ abstract class AppLocalizations {
   /// In zh_Hans, this message translates to:
   /// **'删除下载任务'**
   String get deleteDownloadTask;
+
+  /// No description provided for @deleteDownloadTaskConfirmation.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'确定删除「{episode}」的下载资源吗？'**
+  String deleteDownloadTaskConfirmation(Object episode);
 
   /// No description provided for @downloadTaskProgress.
   ///

@@ -164,6 +164,10 @@ class DownloadController extends _$DownloadController {
               normalizedEpisodeUrl,
               useLegacyParser: params.useLegacyParser,
             );
+      if (_isEpisodePaused(params.recordKey, normalizedEpisodeUrl)) {
+        _refresh(speed: 0);
+        return;
+      }
 
       episode.networkMediaUrl = mediaUrl;
       await repository.updateEpisode(
@@ -171,6 +175,10 @@ class DownloadController extends _$DownloadController {
         normalizedEpisodeUrl,
         episode,
       );
+      if (_isEpisodePaused(params.recordKey, normalizedEpisodeUrl)) {
+        _refresh(speed: 0);
+        return;
+      }
 
       await ref.read(downloadManagerProvider).enqueue(
             DownloadRequest(
@@ -211,8 +219,17 @@ class DownloadController extends _$DownloadController {
     }
   }
 
-  void pause(String recordKey, String episodeUrl) {
+  Future<void> pause(String recordKey, String episodeUrl) async {
     ref.read(downloadManagerProvider).pause(recordKey, episodeUrl);
+    final repository = ref.read(downloadRepositoryProvider);
+    final episode = repository.getEpisodeByRecordKey(recordKey, episodeUrl);
+    if (episode == null || episode.status == DownloadStatus.completed) {
+      _refresh(speed: 0);
+      return;
+    }
+    episode.status = DownloadStatus.paused;
+    await repository.updateEpisode(recordKey, episodeUrl, episode);
+    _refresh(speed: 0);
   }
 
   void cancel(String recordKey, String episodeUrl) {
@@ -347,5 +364,20 @@ class DownloadController extends _$DownloadController {
       return episodeUrl;
     }
     return Uri.parse(baseUrl).resolve(episodeUrl).toString();
+  }
+
+  bool _isEpisodePaused(String recordKey, String episodeUrl) {
+    return ref
+            .read(downloadRepositoryProvider)
+            .getEpisodeByRecordKey(recordKey, episodeUrl)
+            ?.status ==
+        DownloadStatus.paused;
+  }
+}
+
+extension on IDownloadRepository {
+  DownloadEpisode? getEpisodeByRecordKey(String recordKey, String episodeUrl) {
+    final record = getRecord(recordKey);
+    return record?.episodes[episodeUrl];
   }
 }

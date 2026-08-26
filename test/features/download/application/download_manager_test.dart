@@ -155,6 +155,27 @@ void main() {
       expect(playlist, contains('URI="key_0.key"'));
     });
 
+    test('pauses direct media without surfacing control exception', () async {
+      final episode = _episode(url: 'slow-direct');
+      final manager = _manager(tempDir);
+
+      final paused = _waitForStatus(manager, DownloadStatus.paused);
+      await manager.enqueue(
+        _request(
+          episode: episode,
+          episodeUrl: 'slow-direct',
+          baseUri: baseUri,
+          networkMediaUrl: baseUri.resolve('/slow-direct.mp4').toString(),
+        ),
+      );
+      manager.pause('source_1', 'slow-direct');
+
+      final result = await paused;
+
+      expect(result.status, DownloadStatus.paused);
+      expect(result.errorMessage, isEmpty);
+    });
+
     test('deletes episode download directory', () async {
       final episodeDir = p.join(tempDir.path, 'source_1', 'delete-me');
       await Directory(episodeDir).create(recursive: true);
@@ -223,6 +244,24 @@ Future<DownloadEpisode> _waitForCompletion(DownloadManager manager) {
   return completer.future.timeout(const Duration(seconds: 10));
 }
 
+Future<DownloadEpisode> _waitForStatus(
+  DownloadManager manager,
+  int status,
+) {
+  final completer = Completer<DownloadEpisode>();
+  manager.onProgress = (recordKey, episodeUrl, episode, speed) {
+    if (completer.isCompleted) {
+      return;
+    }
+    if (episode.status == status) {
+      completer.complete(episode);
+    } else if (episode.status == DownloadStatus.failed) {
+      completer.completeError(episode.errorMessage);
+    }
+  };
+  return completer.future.timeout(const Duration(seconds: 10));
+}
+
 void _serveRequests(HttpServer server) {
   server.listen((request) async {
     switch (request.uri.path) {
@@ -252,6 +291,13 @@ void _serveRequests(HttpServer server) {
           request.response.add(full.sublist(7));
         } else {
           request.response.add(full);
+        }
+      case '/slow-direct.mp4':
+        request.response.headers.contentLength = 1024 * 64;
+        for (var i = 0; i < 64; i++) {
+          request.response.add(List<int>.filled(1024, i));
+          await request.response.flush();
+          await Future<void>.delayed(const Duration(milliseconds: 5));
         }
       case '/playlist.m3u8':
         request.response.write('''

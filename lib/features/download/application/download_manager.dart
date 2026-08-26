@@ -216,7 +216,11 @@ class DownloadManager implements IDownloadManager {
       // persisted state. Explicit delete/cancel UI can decide what to show.
     } on DioException catch (error) {
       if (error.type == DioExceptionType.cancel && task.isStopped) {
-        task.throwIfStopped();
+        if (task.isPaused) {
+          request.episode.status = DownloadStatus.paused;
+          await _persistAndNotify(request, speed: 0);
+        }
+        return;
       }
       request.episode
         ..status = DownloadStatus.failed

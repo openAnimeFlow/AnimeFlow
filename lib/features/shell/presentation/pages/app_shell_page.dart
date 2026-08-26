@@ -167,12 +167,6 @@ class AppShellPage extends StatelessWidget {
                       mainAxisSize: MainAxisSize.min,
                       children: [
                         IconButton(
-                          icon: const Icon(Icons.download_outlined),
-                          iconSize: 28,
-                          tooltip: l10n.downloadsTitle,
-                          onPressed: () => const DownloadRoute().push(context),
-                        ),
-                        IconButton(
                           icon: const Icon(Icons.settings_outlined),
                           iconSize: 28,
                           tooltip: l10n.settingsLabel,

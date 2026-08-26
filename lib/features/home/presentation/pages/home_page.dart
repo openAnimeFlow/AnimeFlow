@@ -75,16 +75,22 @@ class _RecommendPageState extends State<RecommendPage>
                     readOnly: true,
                   ),
                 ),
-                const Spacer(),
-                IconButton(
-                  padding: EdgeInsets.zero,
-                  onPressed: () => const PlayRecordRoute().push(context),
-                  icon: const Icon(Icons.access_time_outlined),
-                )
               ],
             )),
           ],
         ),
+        actions: [
+          IconButton(
+            tooltip: l10n.downloadsTitle,
+            onPressed: () => const DownloadRoute().push(context),
+            icon: const Icon(Icons.cloud_download_rounded),
+          ),
+          IconButton(
+            tooltip: l10n.playbackHistory,
+            onPressed: () => const PlayRecordRoute().push(context),
+            icon: const Icon(Icons.access_time_outlined),
+          ),
+        ],
         bottom: TabBar(controller: _tabController, tabs: [
           Tab(text: l10n.animeTab),
           Tab(text: l10n.forumTab),

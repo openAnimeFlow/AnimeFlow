@@ -160,14 +160,19 @@ class AppShellPage extends StatelessWidget {
                   ),
                   trailing: Padding(
                     padding: EdgeInsets.only(
-                        bottom: desktop
-                            ? 16
-                            : MediaQuery.of(context).padding.bottom),
-                    child: IconButton(
-                      icon: const Icon(Icons.settings_outlined),
-                      iconSize: 28,
-                      tooltip: l10n.settingsLabel,
-                      onPressed: () => const SettingsRoute().push(context),
+                      bottom:
+                          desktop ? 16 : MediaQuery.of(context).padding.bottom,
+                    ),
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        IconButton(
+                          icon: const Icon(Icons.settings_outlined),
+                          iconSize: 28,
+                          tooltip: l10n.settingsLabel,
+                          onPressed: () => const SettingsRoute().push(context),
+                        ),
+                      ],
                     ),
                   ),
                   destinations:

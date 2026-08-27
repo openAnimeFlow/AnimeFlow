@@ -755,7 +755,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get themeStyle => 'Theme';
 
   @override
-  String get playbackHistoryVideoSource => 'Playback history and video sources';
+  String get playbackResources => 'Playback resources';
 
   @override
   String get sourceManagement => 'Source management';
@@ -1710,6 +1710,106 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
+  String get downloadsTitle => 'Downloads';
+
+  @override
+  String get downloadTasksEmpty => 'No download tasks';
+
+  @override
+  String get downloadSelectionTitle => 'Download episodes';
+
+  @override
+  String get downloadResources => 'Download resources';
+
+  @override
+  String get downloadSettings => 'Download settings';
+
+  @override
+  String get downloadLocation => 'Resource download location';
+
+  @override
+  String get downloadLocationUnavailable => 'Download location unavailable';
+
+  @override
+  String get downloadLocationSelect => 'Choose a download location';
+
+  @override
+  String get downloadLocationUnsupported =>
+      'This device does not support custom download locations';
+
+  @override
+  String get downloadDanmaku => 'Download danmaku too';
+
+  @override
+  String get downloadDanmakuDescription =>
+      'Save local danmaku after the video finishes. Failures will not affect the video.';
+
+  @override
+  String get downloadParallelEpisodes => 'Episodes downloaded at the same time';
+
+  @override
+  String get downloadParallelEpisodesDescription =>
+      'Maximum number of episodes downloading concurrently';
+
+  @override
+  String get downloadParallelSegments => 'Segment concurrency';
+
+  @override
+  String get downloadParallelSegmentsDescription =>
+      'Maximum number of video segments downloaded concurrently for one episode';
+
+  @override
+  String get downloadWithDanmaku => 'With danmaku';
+
+  @override
+  String get downloadWithoutDanmaku => 'No danmaku';
+
+  @override
+  String get expandDownloadEpisodes => 'Expand episodes';
+
+  @override
+  String get collapseDownloadEpisodes => 'Collapse episodes';
+
+  @override
+  String selectedEpisodesCount(Object count) {
+    return '$count selected';
+  }
+
+  @override
+  String get startDownload => 'Start download';
+
+  @override
+  String get deleteDownloadTask => 'Delete download task';
+
+  @override
+  String deleteDownloadTaskConfirmation(Object episode) {
+    return 'Delete the downloaded resource for “$episode”?';
+  }
+
+  @override
+  String downloadTaskProgress(Object completed, Object total) {
+    return '$completed/$total completed';
+  }
+
+  @override
+  String get downloadQueued => 'Queued';
+
+  @override
+  String get downloadResolving => 'Resolving';
+
+  @override
+  String get downloadDownloadingStatus => 'Downloading';
+
+  @override
+  String get downloadCompletedStatus => 'Completed';
+
+  @override
+  String get downloadFailedStatus => 'Failed';
+
+  @override
+  String get downloadPausedStatus => 'Paused';
+
+  @override
   String get resetPassword => 'Reset password';
 
   @override
@@ -1743,4 +1843,21 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get enterGraphicCaptchaCode => 'Enter the 6-digit CAPTCHA';
+
+  @override
+  String get downloadNotificationTitle => 'AnimeFlow downloads';
+
+  @override
+  String downloadNotificationStatus(
+      Object active, Object completed, Object total, Object speed) {
+    return '$active active - $completed/$total - $speed';
+  }
+
+  @override
+  String get downloadPauseAll => 'Pause all';
+
+  @override
+  String downloadSizeProgress(Object downloaded, Object total) {
+    return 'Downloaded $downloaded / Total $total';
+  }
 }

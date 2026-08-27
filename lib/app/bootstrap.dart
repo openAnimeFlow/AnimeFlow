@@ -5,6 +5,7 @@ import 'package:anime_flow/app/app.dart';
 import 'package:anime_flow/features/app_update/application/app_info_provider.dart';
 import 'package:anime_flow/features/app_update/application/app_provider_container.dart';
 import 'package:anime_flow/features/shaders/shaders_controller.dart';
+import 'package:anime_flow/features/download/application/download_foreground_service.dart';
 import 'package:anime_flow/features/settings/presentation/providers/font_provider.dart';
 import 'package:anime_flow/core/network/network_runtime_config.dart';
 import 'package:anime_flow/core/network/core/dio_factory.dart';
@@ -24,6 +25,7 @@ Future<void> bootstrap() async {
   MediaKit.ensureInitialized();
   await Hive.initFlutter();
   await Storage.init();
+  await DownloadForegroundService.initialize();
   await SelectedFont.initOnStartup();
   appPackageInfo = await PackageInfo.fromPlatform();
   NetworkRuntimeConfig.configure(appVersion: appPackageInfo!.version);

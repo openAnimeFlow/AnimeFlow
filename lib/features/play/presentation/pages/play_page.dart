@@ -1,5 +1,9 @@
+import 'dart:async';
+
+import 'package:anime_flow/app/router/model/play_route_extra.dart';
 import 'package:anime_flow/core/constants/layout_constant.dart';
 import 'package:anime_flow/app/localization/app_localizations.dart';
+import 'package:anime_flow/features/play/data/repository/play_repository.dart';
 import 'package:anime_flow/features/play/presentation/providers/episodes_provider.dart';
 import 'package:anime_flow/features/play/presentation/providers/play_provider.dart';
 import 'package:anime_flow/features/play/presentation/providers/video_source_provider.dart';
@@ -9,6 +13,8 @@ import 'package:anime_flow/features/user/presentation/providers/user_state_provi
 import 'package:anime_flow/app/router/app_route_observer.dart';
 import 'package:anime_flow/app/router/routes_args.dart';
 import 'package:anime_flow/core/utils/system_util.dart';
+import 'package:anime_flow/shared/models/download/download_episode.dart';
+import 'package:anime_flow/shared/models/download/download_status.dart';
 import 'package:anime_flow/shared/widgets/danmaku_text_field.dart';
 import 'package:anime_flow/shared/widgets/notification_toast.dart';
 import 'package:flutter/material.dart';
@@ -36,6 +42,7 @@ class _PlayPageState extends ConsumerState<PlayPage>
   final GlobalKey _contentKey = GlobalKey();
 
   bool _hasInitResources = false;
+  int? _lastOfflineEpisodeId;
   bool? _lastReportedIsWideScreen;
   bool _subscribedRouteObserver = false;
   bool _resumeWhenRouteVisible = false;
@@ -55,7 +62,9 @@ class _PlayPageState extends ConsumerState<PlayPage>
       curve: Curves.easeOutCubic,
       reverseCurve: Curves.easeInCubic,
     );
-    videoSourceController.initVideoResources();
+    if (!ref.read(playExtraProvider).isOfflineMode) {
+      videoSourceController.initVideoResources();
+    }
   }
 
   @override
@@ -98,11 +107,86 @@ class _PlayPageState extends ConsumerState<PlayPage>
   }
 
   void _initResources(String subjectName) {
+    if (ref.read(playExtraProvider).isOfflineMode) return;
     if (_hasInitResources) return;
     if (subjectName.isNotEmpty) {
       _hasInitResources = true;
       videoSourceController.initResources(subjectName);
     }
+  }
+
+  Future<void> _initOfflinePlayback(EpisodesData episodesState) async {
+    final extra = ref.read(playExtraProvider);
+    if (!extra.isOfflineMode) {
+      return;
+    }
+    if (episodesState.episodes == null || episodesState.episodeIndex <= 0) {
+      return;
+    }
+    if (_lastOfflineEpisodeId == episodesState.episodeId) {
+      return;
+    }
+    final episode = _findOfflineEpisode(extra, episodesState);
+    final mediaPath = episode?.localMediaPath.trim().isNotEmpty == true
+        ? episode!.localMediaPath
+        : extra.offlineMediaPath;
+    if (mediaPath == null || mediaPath.isEmpty) {
+      return;
+    }
+    _lastOfflineEpisodeId = episodesState.episodeId;
+
+    var offset = 0;
+    final history =
+        await PlayRepository.getPlayHistory(extra.playExtra.subjectId);
+    if (!mounted) return;
+    if (history != null &&
+        history.position > 0 &&
+        history.episodeId == episodesState.episodeId) {
+      offset = history.position;
+    }
+
+    await playSession.initPlayState(
+      PlayRequest(
+        videoUrl: mediaPath,
+        offset: offset,
+        subjectId: extra.playExtra.subjectId,
+        subjectName: extra.playExtra.subjectName,
+        subjectCover: extra.playExtra.subjectCover,
+        episodeIndex: episodesState.episodeIndex,
+        episodeSort: episodesState.episodeSort.toInt(),
+        episodeId: episodesState.episodeId,
+        alias: extra.playExtra.subjectAliases,
+        localDanmakuPath: episode?.localDanmakuPath.trim().isNotEmpty == true
+            ? episode!.localDanmakuPath
+            : extra.offlineDanmakuPath,
+        isLocalPlayback: true,
+      ),
+    );
+  }
+
+  DownloadEpisode? _findOfflineEpisode(
+    PlayRouteExtra extra,
+    EpisodesData episodesState,
+  ) {
+    final completedEpisodes = extra.offlineEpisodes
+        .where((episode) => episode.status == DownloadStatus.completed)
+        .where((episode) => episode.localMediaPath.trim().isNotEmpty)
+        .toList()
+      ..sort(_compareDownloadEpisodes);
+    if (completedEpisodes.isEmpty) {
+      return null;
+    }
+    final byId = completedEpisodes.indexWhere(
+      (episode) => episode.bangumiEpisodeId == episodesState.episodeId,
+    );
+    if (byId >= 0) {
+      return completedEpisodes[byId];
+    }
+    final byIndex = episodesState.episodeIndex - 1;
+    if (byIndex >= 0 && byIndex < completedEpisodes.length) {
+      return completedEpisodes[byIndex];
+    }
+    return null;
   }
 
   void _syncIsWideScreenAfterBuild(bool isWideScreen) {
@@ -120,8 +204,12 @@ class _PlayPageState extends ConsumerState<PlayPage>
     ref.listen(episodesProvider, (prev, next) {
       final episodesState = next.asData?.value;
       if (episodesState?.episodes != null) {
-        final subjectName = ref.read(playExtraProvider).playExtra.subjectName;
-        _initResources(subjectName);
+        final extra = ref.read(playExtraProvider);
+        if (extra.isOfflineMode) {
+          unawaited(_initOfflinePlayback(episodesState!));
+        } else {
+          _initResources(extra.playExtra.subjectName);
+        }
       }
     });
     ref.listen<bool>(
@@ -212,6 +300,18 @@ class _PlayPageState extends ConsumerState<PlayPage>
       return content;
     });
   }
+}
+
+int _compareDownloadEpisodes(DownloadEpisode a, DownloadEpisode b) {
+  final lineComparison = a.lineIndex.compareTo(b.lineIndex);
+  if (lineComparison != 0) {
+    return lineComparison;
+  }
+  final sortComparison = a.episodeSort.compareTo(b.episodeSort);
+  if (sortComparison != 0) {
+    return sortComparison;
+  }
+  return a.episodeUrl.compareTo(b.episodeUrl);
 }
 
 class _ContentView extends ConsumerStatefulWidget {

@@ -4,6 +4,7 @@ class StorageKey {
       settingsKey = 'settings_key',
       playPositionKey = 'play_position_key',
       playHistoryKey = 'play_history_key',
+      downloadsKey = 'downloads_key',
       autoUpdateKey = 'auto_update_key',
       searchHistoryKey = 'search_history_key';
 }
@@ -35,6 +36,13 @@ class PlaybackKey {
       fastForwardSpeed = 'playback_fast_forward_speed',
       adBlocker = 'playback_ad_blocker',
       skipDuration = 'playback_skip_duration';
+}
+
+class DownloadKey {
+  static const String downloadDanmaku = 'download_danmaku';
+  static const String downloadDirectory = 'download_directory';
+  static const String maxParallelEpisodes = 'download_max_parallel_episodes';
+  static const String maxParallelSegments = 'download_max_parallel_segments';
 }
 
 class SettingKey {

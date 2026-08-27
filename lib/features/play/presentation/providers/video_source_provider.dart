@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:isolate';
 
 import 'package:anime_flow/core/crawler/cookie_manager.dart';
@@ -8,17 +9,25 @@ import 'package:anime_flow/features/play/application/search_result_rank_service.
 import 'package:anime_flow/features/play/data/repository/play_repository.dart';
 import 'package:anime_flow/features/play/presentation/providers/episodes_provider.dart';
 import 'package:anime_flow/features/play/presentation/providers/play_provider.dart';
-import 'package:anime_flow/features/play/presentation/providers/video_source_service.dart';
-import 'package:anime_flow/features/play/presentation/providers/webview_video_source_provider.dart';
+import 'package:anime_flow/features/play/application/video_source_service.dart';
+import 'package:anime_flow/features/play/application/webview_video_source_service.dart';
 import 'package:anime_flow/features/source/data/repositories/source_repository_provider.dart';
 import 'package:anime_flow/shared/models/player/play/video/episode_resources_item.dart';
 import 'package:anime_flow/shared/models/player/play/video/resources_item.dart';
 import 'package:anime_flow/app/router/routes_args.dart';
 import 'package:anime_flow/core/logger/logger.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
-import 'package:webview_windows/webview_windows.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 part 'video_source_provider.g.dart';
+
+/// 播放解析 WebView 的生命周期独立于页面状态。
+///
+/// 页面 Provider 可能因为依赖变化而重建，但 WebView2 环境是进程级共享
+/// 资源，不能跟随每次页面重建反复销毁和创建。
+final webViewVideoSourceProvider = Provider<WebViewVideoSourceService>((ref) {
+  return WebViewVideoSourceService.shared;
+});
 
 class VideoSourceState {
   const VideoSourceState({
@@ -32,7 +41,6 @@ class VideoSourceState {
     this.keyword = '',
     this.isSearchCompleted = false,
     this.selectedWebsiteIndex = 0,
-    this.isInitWebView = false,
     this.userManuallySelected = false,
     this.manualEpisodeSources = const {},
   });
@@ -47,7 +55,6 @@ class VideoSourceState {
   final String keyword;
   final bool isSearchCompleted;
   final int selectedWebsiteIndex;
-  final bool isInitWebView;
   final bool userManuallySelected;
   final Map<int, ManualEpisodeSource> manualEpisodeSources;
 
@@ -62,7 +69,6 @@ class VideoSourceState {
     String? keyword,
     bool? isSearchCompleted,
     int? selectedWebsiteIndex,
-    bool? isInitWebView,
     bool? userManuallySelected,
     Map<int, ManualEpisodeSource>? manualEpisodeSources,
   }) {
@@ -77,7 +83,6 @@ class VideoSourceState {
       keyword: keyword ?? this.keyword,
       isSearchCompleted: isSearchCompleted ?? this.isSearchCompleted,
       selectedWebsiteIndex: selectedWebsiteIndex ?? this.selectedWebsiteIndex,
-      isInitWebView: isInitWebView ?? this.isInitWebView,
       userManuallySelected: userManuallySelected ?? this.userManuallySelected,
       manualEpisodeSources: manualEpisodeSources ?? this.manualEpisodeSources,
     );
@@ -105,7 +110,6 @@ class ManualEpisodeSource {
   dependencies: [Episodes, playExtra, PlayStateNotifier, playSession],
 )
 class VideoSourceNotifier extends _$VideoSourceNotifier {
-  WebViewVideoSourceProvider? _webViewVideoProvider;
   final LiggLogger _logger = LiggLogger();
 
   static const _maxSearchItems = 5;
@@ -130,15 +134,9 @@ class VideoSourceNotifier extends _$VideoSourceNotifier {
   String get keyword => state.keyword;
   bool get isSearchCompleted => state.isSearchCompleted;
   int get selectedWebsiteIndex => state.selectedWebsiteIndex;
-  bool get isInitWebView => state.isInitWebView;
   bool get userManuallySelected => state.userManuallySelected;
   Map<int, ManualEpisodeSource> get manualEpisodeSources =>
       state.manualEpisodeSources;
-
-  WebviewController? get windowsWebviewController {
-    final controller = _webViewVideoProvider?.webviewController;
-    return controller is WebviewController ? controller : null;
-  }
 
   bool _requiresCaptcha(CrawlConfigItem config) {
     return config.antiCrawlerConfig.enabled &&
@@ -147,7 +145,9 @@ class VideoSourceNotifier extends _$VideoSourceNotifier {
 
   @override
   VideoSourceState build() {
-    ref.onDispose(_dispose);
+    ref.onDispose(() {
+      unawaited(_dispose());
+    });
     final currentEpisodeIndex =
         ref.read(episodesProvider).asData?.value.episodeIndex ?? 0;
     ref.listen<AsyncValue<EpisodesData>>(
@@ -162,11 +162,9 @@ class VideoSourceNotifier extends _$VideoSourceNotifier {
     return VideoSourceState(currentEpisodeIndex: currentEpisodeIndex);
   }
 
-  void _dispose() {
+  Future<void> _dispose() async {
     _searchSessionId++;
     _videoPageLoadToken++;
-    _webViewVideoProvider?.dispose();
-    _webViewVideoProvider = null;
     _websiteRequestTokens.clear();
     _attemptedAutoLoadUrls.clear();
   }
@@ -859,21 +857,19 @@ class VideoSourceNotifier extends _$VideoSourceNotifier {
     }
     if (!ref.mounted) return false;
     final loadToken = ++_videoPageLoadToken;
-    _webViewVideoProvider?.cancel();
+    final webViewVideoProvider = ref.read(webViewVideoSourceProvider);
+    webViewVideoProvider.cancel();
 
     final playController = ref.read(playSessionProvider);
     ref.read(playStateProvider.notifier).setIsParsing(true);
 
-    _webViewVideoProvider ??= WebViewVideoSourceProvider();
-    await _webViewVideoProvider!.ensureInitialized();
+    if (!ref.mounted || loadToken != _videoPageLoadToken) return false;
+
+    await webViewVideoProvider.ensureInitialized();
     if (!ref.mounted) return false;
     if (loadToken != _videoPageLoadToken) {
       return false;
     }
-    if (!state.isInitWebView) {
-      state = state.copyWith(isInitWebView: true);
-    }
-
     var offset = 0;
     final subject = ref.read(playExtraProvider).playExtra;
     final episodesState =
@@ -896,8 +892,8 @@ class VideoSourceNotifier extends _$VideoSourceNotifier {
     try {
       ref.read(playStateProvider.notifier).setParseResult('正在解析视频源...');
 
-      final source = await _webViewVideoProvider!
-          .resolve(url, useLegacyParser: false, offset: offset);
+      final source = await webViewVideoProvider.resolve(url,
+          useLegacyParser: false, offset: offset);
       if (!ref.mounted) return false;
       final canUseResult = loadToken == _videoPageLoadToken &&
           (shouldUseResult == null || shouldUseResult());

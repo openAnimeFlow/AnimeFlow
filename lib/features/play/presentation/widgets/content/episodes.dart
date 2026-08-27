@@ -59,6 +59,7 @@ class _EpisodesListViewState extends ConsumerState<EpisodesListView> {
   }
 
   void _onScroll() {
+    if (ref.read(playExtraProvider).isOfflineMode) return;
     if (!controller.hasClients) return;
     final position = controller.position;
     if (position.pixels >=
@@ -252,7 +253,9 @@ class _EpisodesListViewState extends ConsumerState<EpisodesListView> {
                 borderRadius: BorderRadius.circular(10),
                 onTap: () => _selectEpisode(episode, index + 1),
                 // 长按
-                onLongPress: () => _updateEpisodeWatched(episode.id),
+                onLongPress: ref.read(playExtraProvider).isOfflineMode
+                    ? null
+                    : () => _updateEpisodeWatched(episode.id),
                 child: Container(
                   decoration: BoxDecoration(
                     borderRadius: BorderRadius.circular(10),

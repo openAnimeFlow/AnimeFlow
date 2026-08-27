@@ -4,6 +4,7 @@ import 'package:anime_flow/features/character_info/presentation/pages/character_
 import 'package:anime_flow/features/characters/presentation/pages/characters_page.dart';
 import 'package:anime_flow/features/auth/presentation/pages/forgot_password_page.dart';
 import 'package:anime_flow/features/auth/presentation/pages/login_page.dart';
+import 'package:anime_flow/features/download/presentation/pages/download_page.dart';
 import 'package:anime_flow/features/play/presentation/pages/play_page.dart';
 import 'package:anime_flow/features/play/presentation/pages/play_record_page.dart';
 import 'package:anime_flow/features/shell/presentation/pages/app_shell_page.dart';
@@ -20,6 +21,7 @@ import 'package:anime_flow/features/settings/presentation/pages/about/about_page
 import 'package:anime_flow/features/settings/presentation/pages/about/thanks_page.dart';
 import 'package:anime_flow/features/settings/presentation/pages/agreement/agreement_page.dart';
 import 'package:anime_flow/features/settings/presentation/pages/danmaku_setting_page.dart';
+import 'package:anime_flow/features/settings/presentation/pages/download_settings.dart';
 import 'package:anime_flow/features/settings/presentation/pages/error_logs_page.dart';
 import 'package:anime_flow/features/settings/presentation/pages/font/font_page.dart';
 import 'package:anime_flow/features/settings/presentation/pages/general_settings.dart';
@@ -300,6 +302,15 @@ class PlayRecordRoute extends GoRouteData with $PlayRecordRoute {
       const PlayRecordPage();
 }
 
+@TypedGoRoute<DownloadRoute>(path: '/download')
+class DownloadRoute extends GoRouteData with $DownloadRoute {
+  const DownloadRoute();
+
+  @override
+  Widget build(BuildContext context, GoRouterState state) =>
+      const DownloadPage();
+}
+
 @TypedGoRoute<UserSpaceRoute>(path: '/user_space')
 class UserSpaceRoute extends GoRouteData with $UserSpaceRoute {
   const UserSpaceRoute({required this.name});
@@ -382,6 +393,15 @@ class SettingDanmakuRoute extends GoRouteData with $SettingDanmakuRoute {
   @override
   Widget build(BuildContext context, GoRouterState state) =>
       const DanmakuSettingPage();
+}
+
+@TypedGoRoute<SettingDownloadRoute>(path: '/settings/download')
+class SettingDownloadRoute extends GoRouteData with $SettingDownloadRoute {
+  const SettingDownloadRoute();
+
+  @override
+  Widget build(BuildContext context, GoRouterState state) =>
+      const DownloadSettingsPage();
 }
 
 @TypedGoRoute<SettingAboutRoute>(path: '/settings/about')

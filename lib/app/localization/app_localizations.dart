@@ -1477,11 +1477,11 @@ abstract class AppLocalizations {
   /// **'主题样式'**
   String get themeStyle;
 
-  /// No description provided for @playbackHistoryVideoSource.
+  /// No description provided for @playbackResources.
   ///
   /// In zh_Hans, this message translates to:
-  /// **'播放历史与视频源'**
-  String get playbackHistoryVideoSource;
+  /// **'播放资源'**
+  String get playbackResources;
 
   /// No description provided for @sourceManagement.
   ///
@@ -3190,8 +3190,188 @@ abstract class AppLocalizations {
   /// No description provided for @playEpisode.
   ///
   /// In zh_Hans, this message translates to:
-  /// **'播放（{episode}）'**
+  /// **'{episode}'**
   String playEpisode(Object episode);
+
+  /// No description provided for @downloadsTitle.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'下载管理'**
+  String get downloadsTitle;
+
+  /// No description provided for @downloadTasksEmpty.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'暂无下载任务'**
+  String get downloadTasksEmpty;
+
+  /// No description provided for @downloadSelectionTitle.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'下载选集'**
+  String get downloadSelectionTitle;
+
+  /// No description provided for @downloadResources.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'下载资源'**
+  String get downloadResources;
+
+  /// No description provided for @downloadSettings.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'下载设置'**
+  String get downloadSettings;
+
+  /// No description provided for @downloadLocation.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'资源下载位置'**
+  String get downloadLocation;
+
+  /// No description provided for @downloadLocationUnavailable.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'无法获取下载位置'**
+  String get downloadLocationUnavailable;
+
+  /// No description provided for @downloadLocationSelect.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'选择下载位置'**
+  String get downloadLocationSelect;
+
+  /// No description provided for @downloadLocationUnsupported.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'当前设备不支持自定义下载位置'**
+  String get downloadLocationUnsupported;
+
+  /// No description provided for @downloadDanmaku.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'同时下载弹幕'**
+  String get downloadDanmaku;
+
+  /// No description provided for @downloadDanmakuDescription.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'下载完成后保存本地弹幕，失败不影响视频'**
+  String get downloadDanmakuDescription;
+
+  /// No description provided for @downloadParallelEpisodes.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'同时下载剧集数'**
+  String get downloadParallelEpisodes;
+
+  /// No description provided for @downloadParallelEpisodesDescription.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'同时下载的剧集数量'**
+  String get downloadParallelEpisodesDescription;
+
+  /// No description provided for @downloadParallelSegments.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'分片并发数'**
+  String get downloadParallelSegments;
+
+  /// No description provided for @downloadParallelSegmentsDescription.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'单集同时下载的视频分片数量'**
+  String get downloadParallelSegmentsDescription;
+
+  /// No description provided for @downloadWithDanmaku.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'含弹幕'**
+  String get downloadWithDanmaku;
+
+  /// No description provided for @downloadWithoutDanmaku.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'无弹幕'**
+  String get downloadWithoutDanmaku;
+
+  /// No description provided for @expandDownloadEpisodes.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'展开剧集'**
+  String get expandDownloadEpisodes;
+
+  /// No description provided for @collapseDownloadEpisodes.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'收起剧集'**
+  String get collapseDownloadEpisodes;
+
+  /// No description provided for @selectedEpisodesCount.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'已选 {count} 集'**
+  String selectedEpisodesCount(Object count);
+
+  /// No description provided for @startDownload.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'开始下载'**
+  String get startDownload;
+
+  /// No description provided for @deleteDownloadTask.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'删除下载任务'**
+  String get deleteDownloadTask;
+
+  /// No description provided for @deleteDownloadTaskConfirmation.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'确定删除「{episode}」的下载资源吗？'**
+  String deleteDownloadTaskConfirmation(Object episode);
+
+  /// No description provided for @downloadTaskProgress.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'已完成 {completed}/{total}'**
+  String downloadTaskProgress(Object completed, Object total);
+
+  /// No description provided for @downloadQueued.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'排队中'**
+  String get downloadQueued;
+
+  /// No description provided for @downloadResolving.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'解析中'**
+  String get downloadResolving;
+
+  /// No description provided for @downloadDownloadingStatus.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'下载中'**
+  String get downloadDownloadingStatus;
+
+  /// No description provided for @downloadCompletedStatus.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'已完成'**
+  String get downloadCompletedStatus;
+
+  /// No description provided for @downloadFailedStatus.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'已失败'**
+  String get downloadFailedStatus;
+
+  /// No description provided for @downloadPausedStatus.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'已暂停'**
+  String get downloadPausedStatus;
 
   /// No description provided for @resetPassword.
   ///
@@ -3258,6 +3438,31 @@ abstract class AppLocalizations {
   /// In zh_Hans, this message translates to:
   /// **'输入6位验证码'**
   String get enterGraphicCaptchaCode;
+
+  /// No description provided for @downloadNotificationTitle.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'AnimeFlow 下载'**
+  String get downloadNotificationTitle;
+
+  /// No description provided for @downloadNotificationStatus.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'正在下载 {active} 个任务 · 已完成 {completed}/{total} · {speed}'**
+  String downloadNotificationStatus(
+      Object active, Object completed, Object total, Object speed);
+
+  /// No description provided for @downloadPauseAll.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'暂停全部'**
+  String get downloadPauseAll;
+
+  /// No description provided for @downloadSizeProgress.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'已下载 {downloaded} / 总大小 {total}'**
+  String downloadSizeProgress(Object downloaded, Object total);
 }
 
 class _AppLocalizationsDelegate

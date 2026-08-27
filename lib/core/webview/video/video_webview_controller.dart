@@ -56,7 +56,19 @@ abstract class VideoWebviewController<T> {
   Future<void> unloadPage();
 
   /// Webview dispose method
-  void dispose();
+  Future<void> dispose();
+
+  /// Close event streams after the native WebView has been disposed.
+  void disposeEventControllers() {
+    if (!initEventController.isClosed) initEventController.close();
+    if (!logEventController.isClosed) logEventController.close();
+    if (!videoLoadingEventController.isClosed) {
+      videoLoadingEventController.close();
+    }
+    if (!videoParserEventController.isClosed) {
+      videoParserEventController.close();
+    }
+  }
 }
 
 class VideoWebviewControllerFactory {

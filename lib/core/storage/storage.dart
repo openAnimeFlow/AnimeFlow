@@ -1,5 +1,6 @@
 import 'package:anime_flow/core/constants/storage_key.dart';
-import 'package:anime_flow/core/storage/hive_registrar.g.dart';
+import 'package:anime_flow/hive_registrar.g.dart';
+import 'package:anime_flow/shared/models/download/download_record.dart';
 import 'package:anime_flow/shared/models/player/play/play_history.dart';
 import 'package:anime_flow/shared/models/search/search_history_module.dart';
 import 'package:hive_ce/hive.dart';
@@ -9,6 +10,7 @@ class Storage {
   static late final Box<dynamic> crawlConfigs;
   static late final Box<PlayHistory> playHistory;
   static late final Box<SearchHistory> searchHistory;
+  static late final Box<DownloadRecord> downloads;
 
   static Future<void> init() async {
     Hive.registerAdapters();
@@ -18,6 +20,8 @@ class Storage {
         await _openBoxWithFallback<PlayHistory>(StorageKey.playHistoryKey);
     searchHistory =
         await _openBoxWithFallback<SearchHistory>(StorageKey.searchHistoryKey);
+    downloads =
+        await _openBoxWithFallback<DownloadRecord>(StorageKey.downloadsKey);
   }
 
   static Future<Box<T>> _openBoxWithFallback<T>(String boxName) async {

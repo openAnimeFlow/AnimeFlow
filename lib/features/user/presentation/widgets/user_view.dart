@@ -16,7 +16,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'collection_search_dialog.dart';
 import 'collection_tab_view.dart';
 
-enum _LoginOverflowAction { settings, playRecord, logout }
+enum _LoginOverflowAction { settings, playRecord, downloads, logout }
 
 class UserView extends ConsumerStatefulWidget {
   final FlowUsers user;
@@ -287,9 +287,7 @@ class _UserViewState extends ConsumerState<UserView>
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                          user.nickname.isNotEmpty
-                              ? user.nickname
-                              : user.email,
+                          user.nickname.isNotEmpty ? user.nickname : user.email,
                           style: const TextStyle(
                             fontSize: 12,
                             fontWeight: FontWeight.bold,
@@ -353,6 +351,10 @@ class _UserViewState extends ConsumerState<UserView>
                     Icons.smart_display_outlined,
                     l10n.playbackHistory
                   ),
+                _LoginOverflowAction.downloads => (
+                    Icons.cloud_download_outlined,
+                    l10n.downloadsTitle
+                  ),
                 _LoginOverflowAction.logout => (
                     Icons.logout_outlined,
                     l10n.logout
@@ -375,6 +377,8 @@ class _UserViewState extends ConsumerState<UserView>
                   const SettingsRoute().push(context);
                 case _LoginOverflowAction.playRecord:
                   const PlayRecordRoute().push(context);
+                case _LoginOverflowAction.downloads:
+                  const DownloadRoute().push(context);
                 case _LoginOverflowAction.logout:
                   showDialog<void>(
                     context: context,

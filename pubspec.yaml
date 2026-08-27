@@ -109,6 +109,8 @@ dependencies:
 
   # 平台信息与系统集成
   package_info_plus: ^8.3.1 # 读取应用包名、版本号和构建号等元数据。
+  file_picker: ^8.1.7 # 调用平台文件选择器选择文件或目录。
+  flutter_foreground_task: ^11.0.1 # 提供在后台执行任务的插件。
   device_info_plus: ^11.3.0 # 读取设备型号、操作系统和平台相关信息。
   battery_plus: ^7.1.1 # 读取设备电池电量、充电状态和电池状态。
   connectivity_plus: ^6.0.5 # 查询网络连接类型并监听连接状态变化。

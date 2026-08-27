@@ -8,7 +8,6 @@ import 'package:anime_flow/features/play/presentation/providers/episodes_provide
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:media_kit_video/media_kit_video.dart';
-import 'package:webview_windows/webview_windows.dart';
 import 'package:window_manager/window_manager.dart';
 
 import 'ui/danmaku/danmaku_view.dart';
@@ -86,9 +85,6 @@ class _PlayerViewState extends ConsumerState<PlayerView> with WindowListener {
 
   @override
   Widget build(BuildContext context) {
-    final isWebviewInitialized = ref.watch(
-      videoSourceProvider.select((state) => state.isInitWebView),
-    );
     // 监听集数变化：首次设置或切换集数时重新选择资源
     ref.listen<int>(
       episodesProvider.select((state) => state.asData?.value.episodeIndex ?? 0),
@@ -109,11 +105,6 @@ class _PlayerViewState extends ConsumerState<PlayerView> with WindowListener {
     );
     return Stack(
       children: [
-        if ((Platform.isWindows || Platform.isLinux) && isWebviewInitialized)
-          _WindowsWebviewHost(
-            controller: videoSourceController.windowsWebviewController,
-          ),
-
         /// 视频层
         Consumer(
           builder: (context, ref, child) {
@@ -135,22 +126,6 @@ class _PlayerViewState extends ConsumerState<PlayerView> with WindowListener {
         /// UI层
         const Positioned.fill(child: VideoUi()),
       ],
-    );
-  }
-}
-
-class _WindowsWebviewHost extends StatelessWidget {
-  const _WindowsWebviewHost({required this.controller});
-
-  final WebviewController? controller;
-
-  @override
-  Widget build(BuildContext context) {
-    final controller = this.controller;
-    if (controller == null) return const SizedBox.shrink();
-    return SizedBox(
-      height: 0,
-      child: Webview(controller),
     );
   }
 }

@@ -144,7 +144,7 @@ class UserPage extends ConsumerWidget {
                       l10n.playbackHistory
                     ),
                   _NoLoginOverflowAction.downloads => (
-                      Icons.download_outlined,
+                      Icons.cloud_download_outlined,
                       l10n.downloadsTitle
                     ),
                 };

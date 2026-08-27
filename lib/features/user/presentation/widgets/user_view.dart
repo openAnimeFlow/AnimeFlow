@@ -352,7 +352,7 @@ class _UserViewState extends ConsumerState<UserView>
                     l10n.playbackHistory
                   ),
                 _LoginOverflowAction.downloads => (
-                    Icons.download_outlined,
+                    Icons.cloud_download_outlined,
                     l10n.downloadsTitle
                   ),
                 _LoginOverflowAction.logout => (

@@ -83,7 +83,7 @@ class _RecommendPageState extends State<RecommendPage>
           IconButton(
             tooltip: l10n.downloadsTitle,
             onPressed: () => const DownloadRoute().push(context),
-            icon: const Icon(Icons.cloud_download_rounded),
+            icon: const Icon(Icons.cloud_download_outlined),
           ),
           IconButton(
             tooltip: l10n.playbackHistory,

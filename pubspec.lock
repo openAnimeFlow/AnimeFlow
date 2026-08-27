@@ -590,7 +590,7 @@ packages:
     source: hosted
     version: "0.1.2"
   flutter_plugin_android_lifecycle:
-    dependency: "direct overridden"
+    dependency: transitive
     description:
       name: flutter_plugin_android_lifecycle
       sha256: "615a505aef59b151b46bbeef55b36ce2b6ed299d160c51d84281946f0aa0ce0e"
@@ -2041,8 +2041,8 @@ packages:
     dependency: "direct main"
     description:
       path: "."
-      ref: "2b3306d2bfb9f22cbb328743b60e547cf50f0c3c"
-      resolved-ref: "2b3306d2bfb9f22cbb328743b60e547cf50f0c3c"
+      ref: "39c20a6fc5436988d7495a51a704056e4fca4751"
+      resolved-ref: "39c20a6fc5436988d7495a51a704056e4fca4751"
       url: "https://github.com/Predidit/flutter-webview-windows.git"
     source: git
     version: "0.4.0"

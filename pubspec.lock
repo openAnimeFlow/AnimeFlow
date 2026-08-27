@@ -189,10 +189,10 @@ packages:
     dependency: "direct main"
     description:
       name: canvas_danmaku
-      sha256: "36a233f6ab5a6abce4ddd01b7db551307e25f2370ec88b35fb6f477927402a18"
+      sha256: "1ff071d027b1cf3320d4b58ff1aee6811de51ce39b5b5773c2e0d7693e02d401"
       url: "https://pub.dev"
     source: hosted
-    version: "0.3.2"
+    version: "0.3.3"
   change_app_package_name:
     dependency: "direct dev"
     description:
@@ -585,10 +585,10 @@ packages:
     dependency: "direct main"
     description:
       name: flutter_opencc_plus
-      sha256: a4c4ea9f27598447971f06ad28ed578451ed13595050f004804c05a9f55db8c2
+      sha256: "38d9319a5a6f2afb5f37dd93ba80da78f4b0e840999c70627b5c73d7cc6c37b5"
       url: "https://pub.dev"
     source: hosted
-    version: "0.1.1"
+    version: "0.1.2"
   flutter_plugin_android_lifecycle:
     dependency: "direct overridden"
     description:

@@ -102,11 +102,11 @@ IDownloadManager downloadManager(Ref ref) {
     baseDirectoryProvider: _configuredDownloadDirectory,
     maxParallelEpisodes: _downloadSettingInt(
       DownloadKey.maxParallelEpisodes,
-      fallback: 2,
+      fallback: 3,
     ),
     maxParallelSegments: _downloadSettingInt(
       DownloadKey.maxParallelSegments,
-      fallback: 3,
+      fallback: 5,
     ),
   );
 }

@@ -34,11 +34,11 @@ class _DownloadSettingsPageState extends ConsumerState<DownloadSettingsPage> {
     );
     _maxParallelEpisodes = setting.get(
       DownloadKey.maxParallelEpisodes,
-      defaultValue: 2,
+      defaultValue: 3,
     );
     _maxParallelSegments = setting.get(
       DownloadKey.maxParallelSegments,
-      defaultValue: 3,
+      defaultValue: 5,
     );
     _downloadDirectory = _configuredDownloadDirectory();
   }

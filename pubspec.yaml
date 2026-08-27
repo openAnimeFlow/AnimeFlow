@@ -114,7 +114,7 @@ dependencies:
   connectivity_plus: ^6.0.5 # 查询网络连接类型并监听连接状态变化。
   window_manager: ^0.5.1 # 管理桌面应用窗口的尺寸、位置、状态和事件。
   url_launcher: ^6.3.2 # 调用平台应用打开 URL、电话号码、邮件等外部资源。
-  flutter_opencc_plus: ^0.1.1 # 使用 OpenCC 在繁简中文及相关变体之间转换文本。
+  flutter_opencc_plus: ^0.1.2 # 使用 OpenCC 在繁简中文及相关变体之间转换文本。
   logger: ^2.6.2 # 提供分级、可扩展的应用日志输出接口。
   synchronized: ^3.4.1+2 # 为异步代码提供互斥锁和同步执行机制。
   share_plus: ^12.0.2 # 调用平台原生分享面板分享文本、文件或 URI。

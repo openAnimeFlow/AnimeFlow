@@ -30,123 +30,123 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
-  flutter_localizations:
+  flutter_localizations: # 提供 Flutter 内置组件的本地化资源和本地化框架。
     sdk: flutter
-  intl: ^0.20.2
+  intl: ^0.20.2 # 提供国际化、日期格式化、数字格式化和复数规则支持。
 
-  # UI 与视觉
-  cupertino_icons: ^1.0.8 # 提供 iOS 风格 Cupertino 图标。
-  flutter_svg: ^2.2.3 # 渲染 SVG 图标和矢量资源。
-  cached_network_image: ^3.4.1 # 缓存并展示网络图片。
-  shimmer: ^3.0.0 # 构建骨架屏和加载占位效果。
-  photo_view: ^0.15.0 # 提供图片预览、缩放和平移能力。
-  lottie: ^3.3.3 # 播放 Lottie JSON 动画资源。
-  bot_toast: ^4.1.3 # 显示全局 Toast 和通知提示。
+  # 用户界面与视觉组件
+  cupertino_icons: ^1.0.8 # 提供 Flutter Cupertino 风格的图标资源。
+  flutter_svg: ^2.2.3 # 解析并渲染 SVG 矢量图形。
+  cached_network_image: ^3.4.1 # 加载网络图片并提供磁盘与内存缓存。
+  shimmer: ^3.0.0 # 创建带有渐变闪烁效果的加载占位组件。
+  photo_view: ^0.15.0 # 为图片提供缩放、平移和手势查看能力。
+  lottie: ^3.3.3 # 解析并播放 Lottie JSON 动画。
+  bot_toast: ^4.1.3 # 在 Flutter 应用中显示全局 Toast、通知和自定义浮层。
 
-  # 播放器与视频体验
-  media_kit: # media_kit 播放器核心。
+  # 音视频播放与设备控制
+  media_kit:
     git:
       url: https://github.com/Predidit/media-kit.git
       ref: 994465d9bfca3f39d0b41199d16e7fd93fe97881
       path: ./media_kit
-  media_kit_video: # media_kit 的 Flutter 视频渲染组件。
+  media_kit_video:
     git:
       url: https://github.com/Predidit/media-kit.git
       ref: 994465d9bfca3f39d0b41199d16e7fd93fe97881
       path: ./media_kit_video
-  media_kit_libs_video: # media_kit 通用平台视频运行库。
+  media_kit_libs_video:
     git:
       url: https://github.com/Predidit/media-kit.git
       ref: 994465d9bfca3f39d0b41199d16e7fd93fe97881
       path: ./libs/universal/media_kit_libs_video
-  canvas_danmaku: 0.3.2 # 渲染视频弹幕层。
-  screen_brightness_platform_interface: ^2.1.0 # 抽象屏幕亮度控制平台接口。
-  screen_brightness_android: ^2.1.3 # Android 端屏幕亮度控制实现。
-  screen_brightness_ios: ^2.1.2 # iOS 端屏幕亮度控制实现。
-  flutter_volume_controller: ^2.0.1 # 读取、监听和设置系统音量。
+  canvas_danmaku: 0.3.2 # 使用 Flutter Canvas 绘制和管理弹幕。
+  screen_brightness_platform_interface: ^2.1.0 # 定义屏幕亮度插件的跨平台接口契约。
+  screen_brightness_android: ^2.1.3 # 提供 Android 平台的屏幕亮度插件实现。
+  screen_brightness_ios: ^2.1.2 # 提供 iOS 平台的屏幕亮度插件实现。
+  flutter_volume_controller: ^2.0.1 # 读取、监听和设置设备系统音量。
 
-  # WebView 与网页解析
-  webview_flutter: ^4.13.0 # 移动端 WebView 基础能力。
-  flutter_inappwebview_platform_interface: ^1.4.0-beta.3 # inappwebview 平台接口定义。
-  flutter_inappwebview_ios: ^1.2.0-beta.3 # iOS 端 inappwebview 实现。
-  flutter_inappwebview_macos: ^1.2.0-beta.3 # macOS 端 inappwebview 实现。
-  flutter_inappwebview_android:
+  # WebView 与网页容器
+  webview_flutter: ^4.13.0 # 在 Flutter 中嵌入并控制原生 WebView。
+  flutter_inappwebview_platform_interface: ^1.4.0-beta.3 # 定义 InAppWebView 插件的平台接口。
+  flutter_inappwebview_ios: ^1.2.0-beta.3 # 提供 InAppWebView 的 iOS 平台实现。
+  flutter_inappwebview_macos: ^1.2.0-beta.3 # 提供 InAppWebView 的 macOS 平台实现。
+  flutter_inappwebview_android: # 提供 InAppWebView 的 Android 平台实现。
     git:
       url: https://github.com/pichillilorenzo/flutter_inappwebview.git
       ref: v6.2.0-beta.3
       path: flutter_inappwebview_android
-  webview_windows: # Windows WebView 宿主组件。
+  webview_windows: # 提供 Windows 平台的 WebView 容器实现。
     git:
       url: https://github.com/Predidit/flutter-webview-windows.git
       ref: 39c20a6fc5436988d7495a51a704056e4fca4751
-  desktop_webview_window: # Linux 桌面 WebView 窗口实现。
+  desktop_webview_window: # 在 Linux 桌面创建承载 WebView 的独立窗口。
     git:
       url: https://github.com/Predidit/linux_webview_window.git
       ref: b429f8ba6b8a99cd0f7eb5fe8d1621f325635c3d
 
-  # 网络、抓取与解析
-  dio: ^5.10.0 # HTTP 客户端和接口请求。
-  cookie_jar: ^4.0.9 # 管理请求 Cookie 持久化。
-  crypto: ^3.0.6 # 计算签名、哈希和加密摘要。
-  html: ^0.15.6 # 解析 HTML 文档结构。
-  xpath_selector: ^3.0.2 # 使用 XPath 查询解析后的文档。
-  xpath_selector_html_parser: ^3.0.1 # 为 HTML 提供 XPath 解析适配。
-  antlr4: ^4.13.2 # 支持 BBCode 等语法解析器运行。
+  # 网络通信与文本解析
+  dio: ^5.10.0 # 提供支持拦截器、取消请求和文件传输的 HTTP 客户端。
+  cookie_jar: ^4.0.9 # 管理 HTTP Cookie，并支持 Cookie 持久化。
+  crypto: ^3.0.6 # 提供常用密码学哈希、摘要和 HMAC 算法。
+  html: ^0.15.6 # 将 HTML 文本解析为可遍历和操作的文档树。
+  xpath_selector: ^3.0.2 # 使用 XPath 表达式查询 XML 或 HTML 文档节点。
+  xpath_selector_html_parser: ^3.0.1 # 将 HTML 解析器接入 xpath_selector 查询流程。
+  antlr4: ^4.13.2 # 提供 ANTLR 4 生成解析器所需的 Dart 运行时。
 
-  # 状态管理与路由
-  flutter_riverpod: ^3.2.1 # Riverpod 状态管理运行时。
-  riverpod_annotation: ^4.0.2 # Riverpod 注解式 Provider 声明。
-  go_router: ^17.1.0 # 声明式路由和页面导航。
+  # 状态管理与导航
+  flutter_riverpod: ^3.2.1 # 将 Riverpod 状态管理与 Flutter widget 生命周期集成。
+  riverpod_annotation: ^4.0.2 # 提供用于声明 Riverpod Provider 的注解。
+  go_router: ^17.1.0 # 提供基于 URL 的声明式路由和导航。
 
-  # 本地存储与文件
-  flutter_secure_storage: ^10.0.0 # 安全存储 Token 等敏感数据。
-  hive_ce: ^2.19.3 # 本地轻量级键值数据库。
-  hive_ce_flutter: ^2.3.4 # Hive 的 Flutter 初始化与适配。
-  path_provider: ^2.1.5 # 获取应用文档、缓存和下载目录。
-  path: ^1.9.1 # 处理跨平台文件路径。
-  gal: ^2.3.2 # 保存图片到系统相册。
-  open_file: ^4.0.0 # 调用系统应用打开本地文件。
+  # 数据持久化与文件系统
+  flutter_secure_storage: ^10.0.0 # 通过平台安全存储保存键值数据。
+  hive_ce: ^2.19.3 # 提供轻量、基于键值的本地 NoSQL 数据库。
+  hive_ce_flutter: ^2.3.4 # 提供 Hive 在 Flutter 中的初始化与路径适配。
+  path_provider: ^2.1.5 # 获取平台相关的应用文档、缓存和临时目录。
+  path: ^1.9.1 # 以跨平台方式拼接、拆分和规范化文件路径。
+  gal: ^2.3.2 # 将图片保存到设备系统相册或图库。
+  open_file: ^4.0.0 # 使用操作系统关联的默认应用打开文件。
 
-  # 系统能力与平台集成
-  package_info_plus: ^8.3.1 # 获取应用版本和构建信息。
-  device_info_plus: ^11.3.0 # 获取平台设备和系统信息。
-  battery_plus: ^7.1.1 # 读取电池电量与充电状态。
-  connectivity_plus: ^6.0.5 # 检测网络连接类型与状态。
-  window_manager: ^0.5.1 # 控制桌面窗口、全屏和窗口事件。
-  url_launcher: ^6.3.2 # 打开外部链接、邮件和系统 URL。
-  flutter_opencc_plus: ^0.1.1 # OpenCC 文字转换工具。
-  logger: ^2.6.2 # 输出结构化调试日志。
-  synchronized: ^3.4.1+2 # 串行化日志文件写入。
-  share_plus: ^12.0.2
+  # 平台信息与系统集成
+  package_info_plus: ^8.3.1 # 读取应用包名、版本号和构建号等元数据。
+  device_info_plus: ^11.3.0 # 读取设备型号、操作系统和平台相关信息。
+  battery_plus: ^7.1.1 # 读取设备电池电量、充电状态和电池状态。
+  connectivity_plus: ^6.0.5 # 查询网络连接类型并监听连接状态变化。
+  window_manager: ^0.5.1 # 管理桌面应用窗口的尺寸、位置、状态和事件。
+  url_launcher: ^6.3.2 # 调用平台应用打开 URL、电话号码、邮件等外部资源。
+  flutter_opencc_plus: ^0.1.1 # 使用 OpenCC 在繁简中文及相关变体之间转换文本。
+  logger: ^2.6.2 # 提供分级、可扩展的应用日志输出接口。
+  synchronized: ^3.4.1+2 # 为异步代码提供互斥锁和同步执行机制。
+  share_plus: ^12.0.2 # 调用平台原生分享面板分享文本、文件或 URI。
 
-  # 内容编辑与展示
-  flutter_markdown_plus: ^1.0.7 # 渲染 Markdown 富文本内容。
-  image_picker: ^1.2.1 # 从相册或相机选择图片。
-  crop_your_image: ^2.0.0 # 裁剪用户选择的图片。
+  # 文本与图像处理
+  flutter_markdown_plus: ^1.0.7 # 将 Markdown 文本解析并渲染为 Flutter widget。
+  image_picker: ^1.2.1 # 从设备相册选择图片或通过相机采集图片。
+  crop_your_image: ^2.0.0 # 在 Flutter 中对图片进行交互式裁剪。
 
 
 dependency_overrides:
-  media_kit_libs_linux: # 覆盖 Linux 平台 media_kit 运行库来源。
+  media_kit_libs_linux:
     git:
       url: https://github.com/Predidit/media-kit.git
       ref: 994465d9bfca3f39d0b41199d16e7fd93fe97881
       path: ./libs/linux/media_kit_libs_linux
-  media_kit_libs_ios_video: # 覆盖 iOS 平台 media_kit 视频运行库来源。
+  media_kit_libs_ios_video:
     git:
       url: https://github.com/Predidit/media-kit.git
       ref: 994465d9bfca3f39d0b41199d16e7fd93fe97881
       path: ./libs/ios/media_kit_libs_ios_video
-  media_kit_libs_android_video: # 覆盖 Android 平台 media_kit 视频运行库来源。
+  media_kit_libs_android_video:
     git:
       url: https://github.com/Predidit/media-kit.git
       ref: 994465d9bfca3f39d0b41199d16e7fd93fe97881
       path: ./libs/android/media_kit_libs_android_video
-  media_kit_libs_windows_video: # 覆盖 Windows 平台 media_kit 视频运行库来源。
+  media_kit_libs_windows_video:
     git:
       url: https://github.com/Predidit/media-kit.git
       ref: 994465d9bfca3f39d0b41199d16e7fd93fe97881
       path: ./libs/windows/media_kit_libs_windows_video
-  media_kit_libs_macos_video: # 覆盖 macOS 平台 media_kit 视频运行库来源。
+  media_kit_libs_macos_video:
     git:
       url: https://github.com/Predidit/media-kit.git
       ref: 994465d9bfca3f39d0b41199d16e7fd93fe97881
@@ -177,25 +177,23 @@ flutter_native_splash:
   ios: true
 
 dev_dependencies:
-  # 测试
-  flutter_test: # Flutter 官方测试框架。
+  # 测试与代码质量
+  flutter_test: # 提供 Flutter widget、单元和集成测试工具。
     sdk: flutter
-
-  # 代码质量
-  flutter_lints: ^6.0.0 # Flutter 推荐 lint 规则集合。
-  riverpod_lint: ^3.1.3 # Riverpod 专用 lint 规则。
+  flutter_lints: ^6.0.0 # 提供 Flutter 官方推荐的 Dart 静态检查规则。
+  riverpod_lint: ^3.1.3 # 提供针对 Riverpod 用法的静态分析规则。
 
   # 代码生成
-  build_runner: ^2.13.1 # 运行代码生成任务。
-  hive_ce_generator: 1.11.0 # 生成 Hive TypeAdapter。
-  riverpod_generator: ^4.0.3 # 生成 Riverpod Provider 代码。
-  go_router_builder: ^4.3.0 # 生成 go_router 类型安全路由代码。
+  build_runner: ^2.13.1 # 管理 Dart 构建脚本并运行代码生成任务。
+  hive_ce_generator: 1.11.0 # 根据 Hive 模型注解生成 TypeAdapter 代码。
+  riverpod_generator: ^4.0.3 # 根据 Riverpod 注解生成 Provider 代码。
+  go_router_builder: ^4.3.0 # 根据路由定义生成类型安全的 go_router 代码。
 
-  # 应用打包工具
-  rename_app: ^1.6.5 # 批量修改应用显示名称。
-  change_app_package_name: ^1.5.0 # 修改 Android/iOS 应用包名。
-  flutter_launcher_icons: ^0.14.4 # 根据配置生成各平台应用图标。
-  flutter_native_splash: ^2.4.7 # 根据配置生成原生启动屏。
+  # 应用元数据与资源生成
+  rename_app: ^1.6.5 # 修改 Flutter 应用在各平台上的显示名称。
+  change_app_package_name: ^1.5.0 # 修改 Android 和 iOS 应用的包标识符。
+  flutter_launcher_icons: ^0.14.4 # 根据配置为各平台生成应用启动图标。
+  flutter_native_splash: ^2.4.7 # 根据配置生成各平台的原生启动画面。
 
 
 # For information on the generic Dart part of this file, see the

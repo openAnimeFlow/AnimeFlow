@@ -1,5 +1,6 @@
 import 'package:battery_plus/battery_plus.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/widget_previews.dart';
 
 /// 电池图标
 class BatteryIcon extends StatelessWidget {
@@ -58,4 +59,27 @@ class BatteryIcon extends StatelessWidget {
 
     return icon;
   }
+}
+
+
+@Preview(
+  name: '电池',
+  group: 'Battery Icon',
+  size: Size(240, 140),
+)
+Widget batteryChargingPreview() {
+  return const MaterialApp(
+    debugShowCheckedModeBanner: false,
+    home: Scaffold(
+      backgroundColor: Colors.white,
+      body: Center(
+        child: BatteryIcon(
+          battery: 80,
+          batteryState: BatteryState.charging,
+          angle: 90,
+          size: 64,
+        ),
+      ),
+    ),
+  );
 }

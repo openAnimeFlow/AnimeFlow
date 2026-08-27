@@ -303,7 +303,7 @@ class _DownloadEpisodeTile extends ConsumerWidget {
         ),
         Text(
           _statusText(l10n, episode),
-          maxLines: 1,
+          maxLines: 2,
           overflow: TextOverflow.ellipsis,
           style: TextStyle(
             fontSize: 12,

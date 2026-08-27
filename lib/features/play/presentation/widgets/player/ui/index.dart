@@ -1,5 +1,5 @@
-import 'package:anime_flow/features/play/presentation/widgets/video/gesture/desktop_gesture_detector.dart';
-import 'package:anime_flow/features/play/presentation/widgets/video/gesture/mobile_gesture_detector.dart';
+import 'package:anime_flow/features/play/presentation/widgets/player/gesture/desktop_gesture_detector.dart';
+import 'package:anime_flow/features/play/presentation/widgets/player/gesture/mobile_gesture_detector.dart';
 import 'package:anime_flow/core/utils/system_util.dart';
 import 'package:flutter/material.dart';
 

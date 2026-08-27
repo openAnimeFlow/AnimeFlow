@@ -50,3 +50,5 @@ app.*.map.json
 /devtools_options.yaml
 /.cursor/
 /.codegraph/
+# Widget Preview related
+.widget_preview/

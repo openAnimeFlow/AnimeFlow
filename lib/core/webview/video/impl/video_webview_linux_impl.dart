@@ -57,9 +57,10 @@ class VideoWebviewLinuxImpl extends VideoWebviewController<Webview> {
   }
 
   @override
-  void dispose() {
+  Future<void> dispose() async {
     webviewController!.close();
     bridgeInited = false;
+    disposeEventControllers();
   }
 
   Future<void> initJSBridge(bool useLegacyParser) async {

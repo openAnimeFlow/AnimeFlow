@@ -239,7 +239,7 @@
   "accountSettings": "Account settings",
   "appAppearance": "App and appearance",
   "themeStyle": "Theme",
-  "playbackHistoryVideoSource": "Playback history and video sources",
+  "playbackResources": "Playback resources",
   "sourceManagement": "Source management",
   "playerSettings": "Player settings",
   "playbackSettings": "Playback",
@@ -485,6 +485,39 @@
   "episodeNumber": "Episode {episode}",
   "watchedLabel": "Watched {progress}",
   "playEpisode": "Play ({episode})"
+  ,"downloadsTitle": "Downloads"
+  ,"downloadTasksEmpty": "No download tasks"
+  ,"downloadSelectionTitle": "Download episodes"
+  ,"downloadResources": "Download resources"
+  ,"downloadSettings": "Download settings"
+  ,"downloadLocation": "Resource download location"
+  ,"downloadLocationUnavailable": "Download location unavailable"
+  ,"downloadLocationSelect": "Choose a download location"
+  ,"downloadLocationUnsupported": "This device does not support custom download locations"
+  ,"downloadDanmaku": "Download danmaku too"
+  ,"downloadDanmakuDescription": "Save local danmaku after the video finishes. Failures will not affect the video."
+  ,"downloadParallelEpisodes": "Episodes downloaded at the same time"
+  ,"downloadParallelEpisodesDescription": "Maximum number of episodes downloading concurrently"
+  ,"downloadParallelSegments": "Segment concurrency"
+  ,"downloadParallelSegmentsDescription": "Maximum number of video segments downloaded concurrently for one episode"
+  ,"downloadWithDanmaku": "With danmaku"
+  ,"downloadWithoutDanmaku": "No danmaku"
+  ,"expandDownloadEpisodes": "Expand episodes"
+  ,"collapseDownloadEpisodes": "Collapse episodes"
+  ,"selectedEpisodesCount": "{count} selected"
+  ,"@selectedEpisodesCount": {"placeholders": {"count": {}}}
+  ,"startDownload": "Start download"
+  ,"deleteDownloadTask": "Delete download task"
+  ,"deleteDownloadTaskConfirmation": "Delete the downloaded resource for “{episode}”?"
+  ,"@deleteDownloadTaskConfirmation": {"placeholders": {"episode": {}}}
+  ,"downloadTaskProgress": "{completed}/{total} completed"
+  ,"@downloadTaskProgress": {"placeholders": {"completed": {}, "total": {}}}
+  ,"downloadQueued": "Queued"
+  ,"downloadResolving": "Resolving"
+  ,"downloadDownloadingStatus": "Downloading"
+  ,"downloadCompletedStatus": "Completed"
+  ,"downloadFailedStatus": "Failed"
+  ,"downloadPausedStatus": "Paused"
   ,"resetPassword": "Reset password"
   ,"newPassword": "New password"
   ,"emailCode": "Email verification code"
@@ -531,4 +564,10 @@
   ,"verifyButtonXPath": "Verification button XPath"
   ,"submitCaptchaHint": "The button to click after entering the CAPTCHA"
   ,"autoClickCaptchaHint": "The verification button to click automatically when detected (such as “I am not a robot”)"
+  ,"downloadNotificationTitle": "AnimeFlow downloads"
+  ,"downloadNotificationStatus": "{active} active - {completed}/{total} - {speed}"
+  ,"@downloadNotificationStatus": {"placeholders": {"active": {}, "completed": {}, "total": {}, "speed": {}}}
+  ,"downloadPauseAll": "Pause all"
+  ,"downloadSizeProgress": "Downloaded {downloaded} / Total {total}"
+  ,"@downloadSizeProgress": {"placeholders": {"downloaded": {}, "total": {}}}
 }

@@ -748,7 +748,7 @@ class AppLocalizationsZh extends AppLocalizations {
   String get themeStyle => '主题样式';
 
   @override
-  String get playbackHistoryVideoSource => '播放历史与视频源';
+  String get playbackResources => '播放資源';
 
   @override
   String get sourceManagement => '数据源管理';
@@ -1664,8 +1664,104 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String playEpisode(Object episode) {
-    return '播放（$episode）';
+    return '$episode';
   }
+
+  @override
+  String get downloadsTitle => '下載管理';
+
+  @override
+  String get downloadTasksEmpty => '暫無下載任務';
+
+  @override
+  String get downloadSelectionTitle => '下載選集';
+
+  @override
+  String get downloadResources => '下載資源';
+
+  @override
+  String get downloadSettings => '下載設定';
+
+  @override
+  String get downloadLocation => '資源下載位置';
+
+  @override
+  String get downloadLocationUnavailable => '無法取得下載位置';
+
+  @override
+  String get downloadLocationSelect => '選擇下載位置';
+
+  @override
+  String get downloadLocationUnsupported => '目前裝置不支援自訂下載位置';
+
+  @override
+  String get downloadDanmaku => '同時下載彈幕';
+
+  @override
+  String get downloadDanmakuDescription => '下載完成後保存本地彈幕，失敗不影響影片';
+
+  @override
+  String get downloadParallelEpisodes => '同時下載劇集數';
+
+  @override
+  String get downloadParallelEpisodesDescription => '同時下載的劇集數量';
+
+  @override
+  String get downloadParallelSegments => '分片並發數';
+
+  @override
+  String get downloadParallelSegmentsDescription => '單集同時下載的影片分片數量';
+
+  @override
+  String get downloadWithDanmaku => '含彈幕';
+
+  @override
+  String get downloadWithoutDanmaku => '無彈幕';
+
+  @override
+  String get expandDownloadEpisodes => '展開劇集';
+
+  @override
+  String get collapseDownloadEpisodes => '收起劇集';
+
+  @override
+  String selectedEpisodesCount(Object count) {
+    return '已選 $count 集';
+  }
+
+  @override
+  String get startDownload => '開始下載';
+
+  @override
+  String get deleteDownloadTask => '刪除下載任務';
+
+  @override
+  String deleteDownloadTaskConfirmation(Object episode) {
+    return '確定刪除「$episode」的下載資源嗎？';
+  }
+
+  @override
+  String downloadTaskProgress(Object completed, Object total) {
+    return '已完成 $completed/$total';
+  }
+
+  @override
+  String get downloadQueued => '排隊中';
+
+  @override
+  String get downloadResolving => '解析中';
+
+  @override
+  String get downloadDownloadingStatus => '下載中';
+
+  @override
+  String get downloadCompletedStatus => '已完成';
+
+  @override
+  String get downloadFailedStatus => '已失敗';
+
+  @override
+  String get downloadPausedStatus => '已暫停';
 
   @override
   String get resetPassword => '重設密碼';
@@ -1699,6 +1795,23 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get enterGraphicCaptchaCode => '輸入6位驗證碼';
+
+  @override
+  String get downloadNotificationTitle => 'AnimeFlow 下載';
+
+  @override
+  String downloadNotificationStatus(
+      Object active, Object completed, Object total, Object speed) {
+    return '正在下載 $active 個任務 · 已完成 $completed/$total · $speed';
+  }
+
+  @override
+  String get downloadPauseAll => '暫停全部';
+
+  @override
+  String downloadSizeProgress(Object downloaded, Object total) {
+    return '已下載 $downloaded / 總大小 $total';
+  }
 }
 
 /// The translations for Chinese, using the Han script (`zh_Hans`).
@@ -2445,7 +2558,7 @@ class AppLocalizationsZhHans extends AppLocalizationsZh {
   String get themeStyle => '主题样式';
 
   @override
-  String get playbackHistoryVideoSource => '播放历史与视频源';
+  String get playbackResources => '播放资源';
 
   @override
   String get sourceManagement => '数据源管理';
@@ -3360,8 +3473,104 @@ class AppLocalizationsZhHans extends AppLocalizationsZh {
 
   @override
   String playEpisode(Object episode) {
-    return '播放（$episode）';
+    return '$episode';
   }
+
+  @override
+  String get downloadsTitle => '下载管理';
+
+  @override
+  String get downloadTasksEmpty => '暂无下载任务';
+
+  @override
+  String get downloadSelectionTitle => '下载选集';
+
+  @override
+  String get downloadResources => '下载资源';
+
+  @override
+  String get downloadSettings => '下载设置';
+
+  @override
+  String get downloadLocation => '资源下载位置';
+
+  @override
+  String get downloadLocationUnavailable => '无法获取下载位置';
+
+  @override
+  String get downloadLocationSelect => '选择下载位置';
+
+  @override
+  String get downloadLocationUnsupported => '当前设备不支持自定义下载位置';
+
+  @override
+  String get downloadDanmaku => '同时下载弹幕';
+
+  @override
+  String get downloadDanmakuDescription => '下载完成后保存本地弹幕，失败不影响视频';
+
+  @override
+  String get downloadParallelEpisodes => '同时下载剧集数';
+
+  @override
+  String get downloadParallelEpisodesDescription => '同时下载的剧集数量';
+
+  @override
+  String get downloadParallelSegments => '分片并发数';
+
+  @override
+  String get downloadParallelSegmentsDescription => '单集同时下载的视频分片数量';
+
+  @override
+  String get downloadWithDanmaku => '含弹幕';
+
+  @override
+  String get downloadWithoutDanmaku => '无弹幕';
+
+  @override
+  String get expandDownloadEpisodes => '展开剧集';
+
+  @override
+  String get collapseDownloadEpisodes => '收起剧集';
+
+  @override
+  String selectedEpisodesCount(Object count) {
+    return '已选 $count 集';
+  }
+
+  @override
+  String get startDownload => '开始下载';
+
+  @override
+  String get deleteDownloadTask => '删除下载任务';
+
+  @override
+  String deleteDownloadTaskConfirmation(Object episode) {
+    return '确定删除「$episode」的下载资源吗？';
+  }
+
+  @override
+  String downloadTaskProgress(Object completed, Object total) {
+    return '已完成 $completed/$total';
+  }
+
+  @override
+  String get downloadQueued => '排队中';
+
+  @override
+  String get downloadResolving => '解析中';
+
+  @override
+  String get downloadDownloadingStatus => '下载中';
+
+  @override
+  String get downloadCompletedStatus => '已完成';
+
+  @override
+  String get downloadFailedStatus => '已失败';
+
+  @override
+  String get downloadPausedStatus => '已暂停';
 
   @override
   String get resetPassword => '重置密码';
@@ -3395,6 +3604,23 @@ class AppLocalizationsZhHans extends AppLocalizationsZh {
 
   @override
   String get enterGraphicCaptchaCode => '输入6位验证码';
+
+  @override
+  String get downloadNotificationTitle => 'AnimeFlow 下载';
+
+  @override
+  String downloadNotificationStatus(
+      Object active, Object completed, Object total, Object speed) {
+    return '正在下载 $active 个任务 · 已完成 $completed/$total · $speed';
+  }
+
+  @override
+  String get downloadPauseAll => '暂停全部';
+
+  @override
+  String downloadSizeProgress(Object downloaded, Object total) {
+    return '已下载 $downloaded / 总大小 $total';
+  }
 }
 
 /// The translations for Chinese, as used in Hong Kong, using the Han script (`zh_Hant_HK`).
@@ -4141,7 +4367,7 @@ class AppLocalizationsZhHantHk extends AppLocalizationsZh {
   String get themeStyle => '主題樣式';
 
   @override
-  String get playbackHistoryVideoSource => '播放記錄與影片來源';
+  String get playbackResources => '播放資源';
 
   @override
   String get sourceManagement => '資料來源管理';
@@ -4975,8 +5201,104 @@ class AppLocalizationsZhHantHk extends AppLocalizationsZh {
 
   @override
   String playEpisode(Object episode) {
-    return '播放（$episode）';
+    return '$episode';
   }
+
+  @override
+  String get downloadsTitle => '下載管理';
+
+  @override
+  String get downloadTasksEmpty => '暫無下載任務';
+
+  @override
+  String get downloadSelectionTitle => '下載選集';
+
+  @override
+  String get downloadResources => '下載資源';
+
+  @override
+  String get downloadSettings => '下載設定';
+
+  @override
+  String get downloadLocation => '資源下載位置';
+
+  @override
+  String get downloadLocationUnavailable => '無法取得下載位置';
+
+  @override
+  String get downloadLocationSelect => '選擇下載位置';
+
+  @override
+  String get downloadLocationUnsupported => '目前裝置不支援自訂下載位置';
+
+  @override
+  String get downloadDanmaku => '同時下載彈幕';
+
+  @override
+  String get downloadDanmakuDescription => '下載完成後保存本地彈幕，失敗不影響影片';
+
+  @override
+  String get downloadParallelEpisodes => '同時下載劇集數';
+
+  @override
+  String get downloadParallelEpisodesDescription => '同時下載的劇集數量';
+
+  @override
+  String get downloadParallelSegments => '分片並發數';
+
+  @override
+  String get downloadParallelSegmentsDescription => '單集同時下載的影片分片數量';
+
+  @override
+  String get downloadWithDanmaku => '含彈幕';
+
+  @override
+  String get downloadWithoutDanmaku => '無彈幕';
+
+  @override
+  String get expandDownloadEpisodes => '展開劇集';
+
+  @override
+  String get collapseDownloadEpisodes => '收起劇集';
+
+  @override
+  String selectedEpisodesCount(Object count) {
+    return '已選 $count 集';
+  }
+
+  @override
+  String get startDownload => '開始下載';
+
+  @override
+  String get deleteDownloadTask => '刪除下載任務';
+
+  @override
+  String deleteDownloadTaskConfirmation(Object episode) {
+    return '確定刪除「$episode」的下載資源嗎？';
+  }
+
+  @override
+  String downloadTaskProgress(Object completed, Object total) {
+    return '已完成 $completed/$total';
+  }
+
+  @override
+  String get downloadQueued => '排隊中';
+
+  @override
+  String get downloadResolving => '解析中';
+
+  @override
+  String get downloadDownloadingStatus => '下載中';
+
+  @override
+  String get downloadCompletedStatus => '已完成';
+
+  @override
+  String get downloadFailedStatus => '已失敗';
+
+  @override
+  String get downloadPausedStatus => '已暫停';
 
   @override
   String get resetPassword => '重設密碼';
@@ -5010,6 +5332,23 @@ class AppLocalizationsZhHantHk extends AppLocalizationsZh {
 
   @override
   String get enterGraphicCaptchaCode => '輸入6位驗證碼';
+
+  @override
+  String get downloadNotificationTitle => 'AnimeFlow 下載';
+
+  @override
+  String downloadNotificationStatus(
+      Object active, Object completed, Object total, Object speed) {
+    return '正在下載 $active 個任務 · 已完成 $completed/$total · $speed';
+  }
+
+  @override
+  String get downloadPauseAll => '暫停全部';
+
+  @override
+  String downloadSizeProgress(Object downloaded, Object total) {
+    return '已下載 $downloaded / 總大小 $total';
+  }
 }
 
 /// The translations for Chinese, as used in Taiwan, using the Han script (`zh_Hant_TW`).
@@ -5756,7 +6095,7 @@ class AppLocalizationsZhHantTw extends AppLocalizationsZh {
   String get themeStyle => '主題樣式';
 
   @override
-  String get playbackHistoryVideoSource => '播放記錄與影片來源';
+  String get playbackResources => '播放資源';
 
   @override
   String get sourceManagement => '資料來源管理';
@@ -6590,8 +6929,104 @@ class AppLocalizationsZhHantTw extends AppLocalizationsZh {
 
   @override
   String playEpisode(Object episode) {
-    return '播放（$episode）';
+    return '$episode';
   }
+
+  @override
+  String get downloadsTitle => '下載管理';
+
+  @override
+  String get downloadTasksEmpty => '暫無下載任務';
+
+  @override
+  String get downloadSelectionTitle => '下載選集';
+
+  @override
+  String get downloadResources => '下載資源';
+
+  @override
+  String get downloadSettings => '下載設定';
+
+  @override
+  String get downloadLocation => '資源下載位置';
+
+  @override
+  String get downloadLocationUnavailable => '無法取得下載位置';
+
+  @override
+  String get downloadLocationSelect => '選擇下載位置';
+
+  @override
+  String get downloadLocationUnsupported => '目前裝置不支援自訂下載位置';
+
+  @override
+  String get downloadDanmaku => '同時下載彈幕';
+
+  @override
+  String get downloadDanmakuDescription => '下載完成後保存本機彈幕，失敗不影響影片';
+
+  @override
+  String get downloadParallelEpisodes => '同時下載劇集數';
+
+  @override
+  String get downloadParallelEpisodesDescription => '同時下載的劇集數量';
+
+  @override
+  String get downloadParallelSegments => '分片並發數';
+
+  @override
+  String get downloadParallelSegmentsDescription => '單集同時下載的影片分片數量';
+
+  @override
+  String get downloadWithDanmaku => '含彈幕';
+
+  @override
+  String get downloadWithoutDanmaku => '無彈幕';
+
+  @override
+  String get expandDownloadEpisodes => '展開劇集';
+
+  @override
+  String get collapseDownloadEpisodes => '收起劇集';
+
+  @override
+  String selectedEpisodesCount(Object count) {
+    return '已選 $count 集';
+  }
+
+  @override
+  String get startDownload => '開始下載';
+
+  @override
+  String get deleteDownloadTask => '刪除下載任務';
+
+  @override
+  String deleteDownloadTaskConfirmation(Object episode) {
+    return '確定刪除「$episode」的下載資源嗎？';
+  }
+
+  @override
+  String downloadTaskProgress(Object completed, Object total) {
+    return '已完成 $completed/$total';
+  }
+
+  @override
+  String get downloadQueued => '排隊中';
+
+  @override
+  String get downloadResolving => '解析中';
+
+  @override
+  String get downloadDownloadingStatus => '下載中';
+
+  @override
+  String get downloadCompletedStatus => '已完成';
+
+  @override
+  String get downloadFailedStatus => '已失敗';
+
+  @override
+  String get downloadPausedStatus => '已暫停';
 
   @override
   String get resetPassword => '重設密碼';
@@ -6625,4 +7060,21 @@ class AppLocalizationsZhHantTw extends AppLocalizationsZh {
 
   @override
   String get enterGraphicCaptchaCode => '輸入6位驗證碼';
+
+  @override
+  String get downloadNotificationTitle => 'AnimeFlow 下載';
+
+  @override
+  String downloadNotificationStatus(
+      Object active, Object completed, Object total, Object speed) {
+    return '正在下載 $active 個任務 · 已完成 $completed/$total · $speed';
+  }
+
+  @override
+  String get downloadPauseAll => '暫停全部';
+
+  @override
+  String downloadSizeProgress(Object downloaded, Object total) {
+    return '已下載 $downloaded / 總大小 $total';
+  }
 }

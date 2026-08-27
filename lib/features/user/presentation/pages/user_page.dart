@@ -9,7 +9,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:anime_flow/app/localization/app_localizations.dart';
 
-enum _NoLoginOverflowAction { settings, playRecord }
+enum _NoLoginOverflowAction { settings, playRecord, downloads }
 
 /// 用户页
 class UserPage extends ConsumerWidget {
@@ -143,6 +143,10 @@ class UserPage extends ConsumerWidget {
                       Icons.smart_display_outlined,
                       l10n.playbackHistory
                     ),
+                  _NoLoginOverflowAction.downloads => (
+                      Icons.cloud_download_outlined,
+                      l10n.downloadsTitle
+                    ),
                 };
                 return SizedBox(
                   height: 48,
@@ -165,6 +169,8 @@ class UserPage extends ConsumerWidget {
                     const SettingsRoute().push(context);
                   case _NoLoginOverflowAction.playRecord:
                     const PlayRecordRoute().push(context);
+                  case _NoLoginOverflowAction.downloads:
+                    const DownloadRoute().push(context);
                 }
               },
             ),

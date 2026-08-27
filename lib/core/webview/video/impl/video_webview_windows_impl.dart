@@ -7,12 +7,13 @@ class VideoWebviewWindowsImpl
     extends VideoWebviewController<WebviewController> {
   final List<StreamSubscription> subscriptions = [];
 
+  HeadlessWebview? headlessWebview;
+
   @override
   Future<void> init() async {
-    webviewController ??= WebviewController();
-    await webviewController!.initialize();
-    await webviewController!
-        .setPopupWindowPolicy(WebviewPopupWindowPolicy.deny);
+    headlessWebview ??= HeadlessWebview();
+    await headlessWebview!.run();
+    await headlessWebview!.setPopupWindowPolicy(WebviewPopupWindowPolicy.deny);
     initEventController.add(true);
   }
 
@@ -25,8 +26,8 @@ class VideoWebviewWindowsImpl
     isIframeLoaded = false;
     isVideoSourceLoaded = false;
     videoLoadingEventController.add(true);
-    subscriptions.add(webviewController!.onM3USourceLoaded.listen((data) {
-      if (webviewController == null) return;
+    subscriptions.add(headlessWebview!.onM3USourceLoaded.listen((data) {
+      if (headlessWebview == null) return;
       String url = data['url'] ?? '';
       if (url.isEmpty) {
         return;
@@ -38,8 +39,8 @@ class VideoWebviewWindowsImpl
       logEventController.add('Loading m3u8 source: $url');
       videoParserEventController.add((url, offset));
     }));
-    subscriptions.add(webviewController!.onVideoSourceLoaded.listen((data) {
-      if (webviewController == null) return;
+    subscriptions.add(headlessWebview!.onVideoSourceLoaded.listen((data) {
+      if (headlessWebview == null) return;
       String url = data['url'] ?? '';
       if (url.isEmpty) {
         return;
@@ -51,7 +52,7 @@ class VideoWebviewWindowsImpl
       logEventController.add('Loading video source: $url');
       videoParserEventController.add((url, offset));
     }));
-    await webviewController!.loadUrl(url);
+    await headlessWebview!.loadUrl(url);
   }
 
   @override
@@ -66,15 +67,17 @@ class VideoWebviewWindowsImpl
   }
 
   @override
-  void dispose() {
+  Future<void> dispose() async {
     for (var s in subscriptions) {
       try {
         s.cancel();
       } catch (_) {}
     }
     subscriptions.clear();
-    webviewController?.dispose();
+    await headlessWebview?.dispose();
+    headlessWebview = null;
     webviewController = null;
+    disposeEventControllers();
   }
 
   // The webview_windows package does not have a method to unload the current page.
@@ -82,9 +85,9 @@ class VideoWebviewWindowsImpl
   // Directly disposing of the webview controller would require reinitialization when switching episodes, which is costly.
   // Therefore, this method is used to redirect to a blank page instead.
   Future<void> redirect2Blank() async {
-    if (webviewController == null) return;
+    if (headlessWebview == null) return;
     try {
-      await webviewController!.executeScript('''
+      await headlessWebview!.executeScript('''
         window.location.href = 'about:blank';
       ''');
     } catch (e) {

@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:convert';
 import 'dart:io';
 
 import 'package:anime_flow/core/constants/constants.dart';
@@ -340,6 +341,10 @@ class PlayRequest {
   ///剧集id
   final int episodeId;
 
+  final String? localDanmakuPath;
+
+  final bool isLocalPlayback;
+
   const PlayRequest({
     required this.videoUrl,
     required this.offset,
@@ -350,6 +355,8 @@ class PlayRequest {
     required this.subjectName,
     required this.subjectCover,
     required this.alias,
+    this.localDanmakuPath,
+    this.isLocalPlayback = false,
   });
 }
 
@@ -421,6 +428,10 @@ class PlaySession {
   ///剧集id
   int episodeId = 0;
 
+  bool isLocalPlayback = false;
+
+  String? localDanmakuPath;
+
   ///弹幕相关
   DanmakuController? danmakuController;
   Timer? _saveSettingsTimer;
@@ -452,6 +463,7 @@ class PlaySession {
   final Set<int> _autoWatchedEpisodeUpdatesInFlight = {};
 
   final List<StreamSubscription<Object?>> _playerSubscriptions = [];
+  bool _isDisposed = false;
 
   static const Duration _bufferingPositionTolerance =
       Duration(milliseconds: 500);
@@ -562,6 +574,7 @@ class PlaySession {
   }
 
   void dispose() {
+    _isDisposed = true;
     unawaited(_savePlayHistory());
     if (Platform.isWindows) {
       WindowsTitleBarVisibility.reset();
@@ -591,7 +604,9 @@ class PlaySession {
 
   /// 初始化播放状态
   Future<void> initPlayState(PlayRequest state) async {
+    if (_isDisposed) return;
     await stopCurrentMedia();
+    if (_isDisposed) return;
     removeDanmaku();
     videoUrl = state.videoUrl;
     offset = state.offset;
@@ -602,13 +617,21 @@ class PlaySession {
     subjectName = state.subjectName;
     subjectCover = state.subjectCover;
     alias = state.alias;
+    isLocalPlayback = state.isLocalPlayback;
+    localDanmakuPath = state.localDanmakuPath;
     if (state.videoUrl.isEmpty) return;
     await player.open(Media(state.videoUrl), play: false);
+    if (_isDisposed) return;
     await player.stream.duration.firstWhere((d) => d > Duration.zero);
+    if (_isDisposed) return;
     await Future.delayed(const Duration(milliseconds: 800), () {
-      player.seek(Duration(seconds: offset));
+      if (!_isDisposed) {
+        unawaited(player.seek(Duration(seconds: offset)));
+      }
     });
+    if (_isDisposed) return;
     await player.play();
+    if (_isDisposed) return;
     final logger = LiggLogger();
 
     ///加载弹幕
@@ -616,15 +639,31 @@ class PlaySession {
       if (!_isLoadingDanmaku && episode != 0) {
         _isLoadingDanmaku = true;
         try {
-          final bgmBangumiId =
-              await FlowApi.getDanDanBangumiIDByBgmBangumiID(subjectId);
-          if (bgmBangumiId != null) {
-            final danmaku = await FlowApi.getDanDanmaku(bgmBangumiId, episode);
-            final converted = await danmakuChineseConverter.convertDanmakus(
-              danmaku,
-              _danmakuChineseMode,
-            );
-            addDanmakuAll(converted);
+          if (isLocalPlayback) {
+            final danmaku = await _loadLocalDanmaku(localDanmakuPath);
+            if (_isDisposed) return;
+            if (danmaku.isNotEmpty) {
+              final converted = await danmakuChineseConverter.convertDanmakus(
+                danmaku,
+                _danmakuChineseMode,
+              );
+              if (_isDisposed) return;
+              addDanmakuAll(converted);
+            }
+          } else {
+            final bgmBangumiId =
+                await FlowApi.getDanDanBangumiIDByBgmBangumiID(subjectId);
+            if (bgmBangumiId != null) {
+              final danmaku =
+                  await FlowApi.getDanDanmaku(bgmBangumiId, episode);
+              if (_isDisposed) return;
+              final converted = await danmakuChineseConverter.convertDanmakus(
+                danmaku,
+                _danmakuChineseMode,
+              );
+              if (_isDisposed) return;
+              addDanmakuAll(converted);
+            }
           }
         } finally {
           _isLoadingDanmaku = false;
@@ -640,6 +679,7 @@ class PlaySession {
     if (state.duration <= Duration.zero) return;
     if (subjectId <= 0 || episodeId <= 0) return;
     if (subjectName == null || subjectCover == null) return;
+    if (isLocalPlayback) return;
 
     final setting = Storage.setting;
     if (setting.get(PlaybackKey.episodesProgress, defaultValue: true)) {
@@ -880,6 +920,7 @@ class PlaySession {
     Color? color,
     int type = 1,
   }) async {
+    if (isLocalPlayback) return false;
     final bgmBangumiId =
         await FlowApi.getDanDanBangumiIDByBgmBangumiID(subjectId);
     if (bgmBangumiId == null) return false;
@@ -909,6 +950,33 @@ class PlaySession {
         type: item.type,
         color: item.color);
     return true;
+  }
+
+  Future<List<Danmaku>> _loadLocalDanmaku(String? path) async {
+    final trimmedPath = path?.trim();
+    if (trimmedPath == null || trimmedPath.isEmpty) {
+      return const [];
+    }
+    final file = File(trimmedPath);
+    if (!await file.exists()) {
+      return const [];
+    }
+    try {
+      final decoded = jsonDecode(await file.readAsString());
+      final items = switch (decoded) {
+        List<dynamic> value => value,
+        {'data': final List<dynamic> value} => value,
+        {'comments': final List<dynamic> value} => value,
+        _ => const <dynamic>[],
+      };
+      return items
+          .whereType<Map<String, dynamic>>()
+          .map(Danmaku.fromJson)
+          .toList();
+    } catch (e) {
+      LiggLogger().e('加载本地弹幕失败: $e');
+      return const [];
+    }
   }
 
   /// 添加弹幕到画布

@@ -1,4 +1,7 @@
+import 'package:anime_flow/app/router/model/play_route_extra.dart';
 import 'package:anime_flow/features/play/presentation/providers/subject_episodes_provider.dart';
+import 'package:anime_flow/shared/models/download/download_episode.dart';
+import 'package:anime_flow/shared/models/download/download_status.dart';
 import 'package:anime_flow/shared/models/player/bangumi/episodes_item.dart';
 import 'package:anime_flow/app/router/routes_args.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
@@ -76,6 +79,9 @@ class Episodes extends _$Episodes {
     final extra = ref.watch(playExtraProvider);
     final subjectId = extra.playExtra.subjectId;
     final requestedEpisodeId = extra.continueEpisodeId;
+    if (extra.isOfflineMode) {
+      return _buildOfflineEpisodesData(extra);
+    }
     if (_selectedSubjectId != subjectId) {
       _selectedSubjectId = null;
       _selectedEpisodeId = null;
@@ -100,6 +106,53 @@ class Episodes extends _$Episodes {
       _ => await ref.watch(subjectEpisodesProvider(subjectId).future),
     };
     return _buildEpisodesData(subjectId, subjectEpisodes);
+  }
+
+  EpisodesData _buildOfflineEpisodesData(PlayRouteExtra extra) {
+    final subjectId = extra.playExtra.subjectId;
+    final completedEpisodes = extra.offlineEpisodes
+        .where((episode) => episode.status == DownloadStatus.completed)
+        .where((episode) => episode.localMediaPath.trim().isNotEmpty)
+        .toList()
+      ..sort(_compareDownloadEpisodes);
+
+    if (completedEpisodes.isEmpty) {
+      return EpisodesData(subjectId: subjectId);
+    }
+
+    final episodeData = <EpisodeData>[
+      for (var i = 0; i < completedEpisodes.length; i++)
+        _downloadEpisodeToEpisodeData(
+          completedEpisodes[i],
+          subjectId: subjectId,
+          fallbackId: i + 1,
+        ),
+    ];
+    final episodes = EpisodesItem(
+      data: episodeData,
+      total: episodeData.length,
+    );
+    final selectedIndex = _findOfflineEpisodeIndex(
+      completedEpisodes,
+      extra: extra,
+    );
+    final selectedEpisode = completedEpisodes[selectedIndex];
+    final selectedData = episodeData[selectedIndex];
+
+    _selectedSubjectId = subjectId;
+    _selectedEpisodeId = selectedData.id;
+    _lastRequestedEpisodeId = extra.continueEpisodeId;
+
+    return EpisodesData(
+      subjectId: subjectId,
+      episodes: episodes,
+      episodeTitle: _offlineEpisodeTitle(selectedEpisode),
+      episodeSort: selectedEpisode.episodeSort,
+      episodeIndex: selectedIndex + 1,
+      episodeId: selectedData.id,
+      isLoadingMore: false,
+      hasMore: false,
+    );
   }
 
   EpisodesData _buildEpisodesData(
@@ -246,4 +299,71 @@ class Episodes extends _$Episodes {
       ),
     );
   }
+}
+
+int _compareDownloadEpisodes(DownloadEpisode a, DownloadEpisode b) {
+  final lineComparison = a.lineIndex.compareTo(b.lineIndex);
+  if (lineComparison != 0) {
+    return lineComparison;
+  }
+  final sortComparison = a.episodeSort.compareTo(b.episodeSort);
+  if (sortComparison != 0) {
+    return sortComparison;
+  }
+  return a.episodeUrl.compareTo(b.episodeUrl);
+}
+
+EpisodeData _downloadEpisodeToEpisodeData(
+  DownloadEpisode episode, {
+  required int subjectId,
+  required int fallbackId,
+}) {
+  final title = _offlineEpisodeTitle(episode);
+  final id =
+      episode.bangumiEpisodeId > 0 ? episode.bangumiEpisodeId : fallbackId;
+  return EpisodeData(
+    id: id,
+    subjectID: subjectId,
+    sort: episode.episodeSort,
+    type: 0,
+    disc: 0,
+    name: title,
+    nameCN: title,
+    duration: '',
+    airdate: '',
+    comment: 0,
+    desc: '',
+  );
+}
+
+int _findOfflineEpisodeIndex(
+  List<DownloadEpisode> episodes, {
+  required PlayRouteExtra extra,
+}) {
+  final offlineEpisodeUrl = extra.offlineEpisodeUrl;
+  if (offlineEpisodeUrl != null && offlineEpisodeUrl.isNotEmpty) {
+    final byUrl = episodes
+        .indexWhere((episode) => episode.episodeUrl == offlineEpisodeUrl);
+    if (byUrl >= 0) {
+      return byUrl;
+    }
+  }
+  final requestedEpisodeId = extra.continueEpisodeId;
+  if (requestedEpisodeId != null) {
+    final byId = episodes.indexWhere(
+      (episode) => episode.bangumiEpisodeId == requestedEpisodeId,
+    );
+    if (byId >= 0) {
+      return byId;
+    }
+  }
+  return 0;
+}
+
+String _offlineEpisodeTitle(DownloadEpisode episode) {
+  final title = episode.episodeTitle.trim();
+  if (title.isNotEmpty) {
+    return title;
+  }
+  return episode.episodeIndex.toString();
 }

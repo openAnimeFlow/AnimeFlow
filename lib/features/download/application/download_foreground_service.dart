@@ -11,10 +11,11 @@ class DownloadForegroundService {
   static Locale? _localizationLocale;
   static Future<AppLocalizations>? _localization;
   static bool _notificationPermissionRequested = false;
+  static bool _initialized = false;
   static void Function()? onPauseAll;
 
   static Future<void> initialize() async {
-    if (!Platform.isAndroid || FlutterForegroundTask.isInitialized) {
+    if (!Platform.isAndroid || _initialized) {
       return;
     }
 
@@ -38,6 +39,7 @@ class DownloadForegroundService {
         allowAutoRestart: false,
       ),
     );
+    _initialized = true;
   }
 
   static Future<void> sync({

@@ -7,46 +7,79 @@ import 'package:flutter/widget_previews.dart';
 ///
 /// [batteryLevel] 使用 0 至 100 的百分比，并在电池主体中间显示。
 class IosBatteryIcon extends StatelessWidget {
+  /// 绿
+  static const chargingColor = Color(0xFF34C759);
+
+  /// 白
+  static const darkNormalColor = Color(0xFFFFFFFF);
+
+  /// 黄。
+  static const warningColor = Color(0xFFFFCC00);
+
+  /// 红。
+  static const criticalColor = Color(0xFFFF3B30);
+
   const IosBatteryIcon({
     super.key,
     required this.batteryLevel,
-    this.width = 56,
+    this.size = 56,
     this.borderColor = const Color(0xFF9E9E9E),
-    this.levelColor = const Color(0xFF34C759),
+    this.backgroundColor = const Color(0xFF9C9C9C),
+    this.isCharging = false,
+    this.levelColor,
     this.levelTextColor = const Color(0xFF1A1A1A),
   });
 
   /// 电量百分比，超出范围的值会被限制在 0 至 100。
   final num batteryLevel;
 
-  /// 图标总宽度（包含右侧电池头）。
-  final double width;
-  final Color borderColor;
-  final Color levelColor;
+  /// 图标大小
+  final double size;
 
-  /// 电池主体中间的电量文字颜色。
+  /// 图标边框颜色。
+  final Color borderColor;
+
+  /// 电池内部背景颜色。
+  final Color backgroundColor;
+
+  /// 是否正在充电。充电时电池主体始终使用 [chargingColor]。
+  final bool isCharging;
+
+  /// 电池电量颜色。
+  final Color? levelColor;
+
+  /// 电池电量文字颜色。
   final Color levelTextColor;
 
   @override
   Widget build(BuildContext context) {
-    final iconWidth = math.max(1.0, width);
-    final level = (batteryLevel.clamp(0, 100)).toDouble() / 100;
+    final iconWidth = math.max(1.0, size);
+    final clampedLevel = batteryLevel.clamp(0, 100);
+    final level = clampedLevel.toDouble() / 100;
 
     return Semantics(
-      label: '电量 ${batteryLevel.clamp(0, 100)}%',
+      label: '电量 $clampedLevel%',
       child: RepaintBoundary(
         child: CustomPaint(
           size: Size(iconWidth, iconWidth * _IosBatteryPainter.aspectRatio),
           painter: _IosBatteryPainter(
             level: level,
             borderColor: borderColor,
-            levelColor: levelColor,
+            backgroundColor: backgroundColor,
+            levelColor: levelColor ?? _statusColor(clampedLevel),
             levelTextColor: levelTextColor,
-            levelText: '${batteryLevel.clamp(0, 100)}',
+            levelText: '$clampedLevel',
           ),
         ),
       ),
     );
+  }
+
+  Color _statusColor(num level) {
+    if (isCharging) return chargingColor;
+    if (level > 40) return darkNormalColor;
+    if (level > 20) return warningColor;
+    return criticalColor;
   }
 }
 
@@ -54,6 +87,7 @@ class _IosBatteryPainter extends CustomPainter {
   const _IosBatteryPainter({
     required this.level,
     required this.borderColor,
+    required this.backgroundColor,
     required this.levelColor,
     required this.levelTextColor,
     required this.levelText,
@@ -63,6 +97,7 @@ class _IosBatteryPainter extends CustomPainter {
 
   final double level;
   final Color borderColor;
+  final Color backgroundColor;
   final Color levelColor;
   final Color levelTextColor;
   final String levelText;
@@ -122,6 +157,7 @@ class _IosBatteryPainter extends CustomPainter {
 
     canvas.save();
     canvas.clipRRect(contentShape);
+    canvas.drawRRect(contentShape, Paint()..color = backgroundColor);
     if (level > 0) {
       final fillRect = Rect.fromLTWH(
         contentRect.left,
@@ -145,27 +181,32 @@ class _IosBatteryPainter extends CustomPainter {
         text: levelText,
         style: TextStyle(
           color: levelTextColor,
-          fontSize: size.height * .50,
-          fontWeight: FontWeight.w700,
+          // 按电池内部高度缩放。
+          fontSize: contentRect.height * .80,
+          fontWeight: FontWeight.bold,
           height: 1,
         ),
       ),
       maxLines: 1,
+      textAlign: TextAlign.center,
       textDirection: TextDirection.ltr,
-    )..layout(maxWidth: contentRect.width);
-    textPainter.paint(
-      canvas,
-      Offset(
-        bodyRect.center.dx - textPainter.width / 2,
-        bodyRect.center.dy - textPainter.height / 2,
-      ),
+    )..layout(
+        minWidth: contentRect.width,
+        maxWidth: contentRect.width,
+      );
+    final textOffset = Offset(
+      contentRect.left,
+      contentRect.center.dy - textPainter.height / 2,
     );
+
+    textPainter.paint(canvas, textOffset);
   }
 
   @override
   bool shouldRepaint(covariant _IosBatteryPainter oldDelegate) {
     return oldDelegate.level != level ||
         oldDelegate.borderColor != borderColor ||
+        oldDelegate.backgroundColor != backgroundColor ||
         oldDelegate.levelColor != levelColor ||
         oldDelegate.levelTextColor != levelTextColor ||
         oldDelegate.levelText != levelText;
@@ -184,9 +225,8 @@ Widget iosBatteryLowPreview() {
       backgroundColor: Colors.white,
       body: Center(
         child: IosBatteryIcon(
-          levelColor: Colors.redAccent,
-          batteryLevel: 80,
-          width: 120,
+          batteryLevel: 20,
+          size: 120,
         ),
       ),
     ),
@@ -194,7 +234,7 @@ Widget iosBatteryLowPreview() {
 }
 
 @Preview(
-  name: '满电',
+  name: '正常',
   group: 'iOS Battery Icon',
   size: Size(240, 140),
 )
@@ -205,8 +245,8 @@ Widget iosBatteryFullPreview() {
       backgroundColor: Colors.white,
       body: Center(
         child: IosBatteryIcon(
-          batteryLevel: 90,
-          width: 120,
+          batteryLevel: 80,
+          size: 120,
         ),
       ),
     ),
@@ -222,11 +262,12 @@ Widget iosBatteryChargingPreview() {
   return const MaterialApp(
     debugShowCheckedModeBanner: false,
     home: Scaffold(
-      backgroundColor: Colors.white,
+      backgroundColor: Colors.black,
       body: Center(
         child: IosBatteryIcon(
-          batteryLevel: 80,
-          width: 120,
+          batteryLevel: 90,
+          isCharging: true,
+          size: 150,
         ),
       ),
     ),

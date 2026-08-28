@@ -11,10 +11,11 @@ import 'package:anime_flow/features/play/presentation/widgets/player/ui/setting/
 import 'package:anime_flow/core/storage/storage.dart';
 import 'package:anime_flow/core/utils/system_util.dart';
 import 'package:anime_flow/core/utils/utils.dart';
-import 'package:anime_flow/shared/widgets/battery_icon.dart';
+import 'package:anime_flow/shared/widgets/ios_battery_icon.dart';
 import 'package:anime_flow/shared/widgets/network_icon.dart';
 import 'package:anime_flow/features/play/presentation/widgets/source_drawers/video_source_drawers.dart';
 import 'package:anime_flow/app/localization/app_localizations.dart';
+import 'package:battery_plus/battery_plus.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_svg/svg.dart';
@@ -113,7 +114,6 @@ class _TopAreaControlState extends ConsumerState<TopAreaControl> {
                 child: Column(
                   children: [
                     //全屏时顶部信息展示
-                    //Obx细粒度更新机制,只有直接访问了响应式变量的Obx才会被触发重建。
                     if (fullscreen)
                       Container(
                         padding: const EdgeInsets.symmetric(horizontal: 15),
@@ -438,25 +438,19 @@ class _TopAreaControlState extends ConsumerState<TopAreaControl> {
                   videoUiProvider.select((state) => state.batteryState),
                 );
 
+                final isCharging = batteryState == BatteryState.charging;
                 return Row(
                   crossAxisAlignment: CrossAxisAlignment.center,
                   mainAxisAlignment: MainAxisAlignment.end,
                   children: [
-                    Text(
-                      '$battery%',
-                      style: const TextStyle(
-                        color: Colors.white,
-                        fontSize: 10,
-                        fontWeight: FontWeight.w600,
-                      ),
+                    IosBatteryIcon(
+                      batteryLevel: battery,
+                      isCharging: isCharging,
+                      size: 30,
                     ),
-                    const SizedBox(width: 4),
-                    BatteryIcon(
-                      size: 25,
-                      battery: battery,
-                      batteryState: batteryState,
-                      angle: 90,
-                    ),
+                    if (isCharging)
+                      const Icon(Icons.flash_on_outlined,
+                          size: 10, color: IosBatteryIcon.chargingColor),
                   ],
                 );
               },

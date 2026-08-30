@@ -227,7 +227,7 @@ class _TopAreaControlState extends ConsumerState<TopAreaControl> {
                                         width: 25,
                                         height: 25,
                                         colorFilter: const ColorFilter.mode(
-                                            Colors.white70, BlendMode.srcIn),
+                                            Colors.white, BlendMode.srcIn),
                                       ),
                                     ),
                                   ),
@@ -243,7 +243,7 @@ class _TopAreaControlState extends ConsumerState<TopAreaControl> {
                                     },
                                     icon: const Icon(
                                       size: 29,
-                                      color: Colors.white70,
+                                      color: Colors.white,
                                       Icons.settings_outlined,
                                     ),
                                   ),
@@ -287,7 +287,7 @@ class _TopAreaControlState extends ConsumerState<TopAreaControl> {
                                         icon: const Icon(
                                           Icons.reset_tv_outlined,
                                           size: 29,
-                                          color: Colors.white70,
+                                          color: Colors.white,
                                         ),
                                       );
                                     },
@@ -315,7 +315,7 @@ class _TopAreaControlState extends ConsumerState<TopAreaControl> {
                                                   height: 30,
                                                   colorFilter:
                                                       const ColorFilter.mode(
-                                                    Colors.white70,
+                                                    Colors.white,
                                                     BlendMode.srcIn,
                                                   ),
                                                 ),

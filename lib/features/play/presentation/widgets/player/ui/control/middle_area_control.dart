@@ -147,8 +147,7 @@ class _MiddleAreaControlState extends ConsumerState<MiddleAreaControl> {
                   borderRadius: BorderRadius.circular(8),
                 ),
                 child: Consumer(
-                  builder:
-                      (BuildContext context, WidgetRef ref, Widget? child) {
+                  builder: (context, ref, child) {
                     final duration =
                         ref.watch(playStateProvider.select((s) => s.duration));
                     return Text(

@@ -1,4 +1,5 @@
 import 'package:anime_flow/app/localization/app_localizations.dart';
+import 'package:anime_flow/core/constants/constants.dart';
 import 'package:anime_flow/core/constants/layout_constant.dart';
 import 'package:anime_flow/shared/models/player/bangumi/episodes_item.dart';
 import 'package:anime_flow/features/play/presentation/providers/episodes_provider.dart';
@@ -256,11 +257,24 @@ class _EpisodesDialogState extends ConsumerState<EpisodesDialog> {
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            Text(
-                              episode.sort.toString().padLeft(2, '0'),
-                              style: const TextStyle(
-                                fontWeight: FontWeight.bold,
-                              ),
+                            Row(
+                              spacing: 6,
+                              children: [
+                                Text(
+                                  episode.sort.toString().padLeft(2, '0'),
+                                  style: const TextStyle(
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
+                                if (episode.type != 0) ...[
+                                  Text(
+                                    episodesTypeLabels[episode.type] ?? '其他',
+                                    style: Theme.of(context)
+                                        .textTheme
+                                        .labelSmall,
+                                  ),
+                                ],
+                              ],
                             ),
                             const SizedBox(height: 6),
                             Text(

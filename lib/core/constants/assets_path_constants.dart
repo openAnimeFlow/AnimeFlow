@@ -1,12 +1,14 @@
 class AssetsPathConstants {
+
+  AssetsPathConstants._();
   /// 用于Logo
   static const String logo = 'assets/image/logo/logo.webp',
 
       /// 注册页装饰
       purpleCatGirlChibi = 'assets/image/purple_cat_girl_chibi.webp',
 
-      /// 播放动画
-      playJsonIng = 'assets/animation/playing.json',
+      /// 加载动画
+      loadingJson = 'assets/animation/AudioWav.json',
 
       /// 弹幕图标
       danmakuIcon = 'assets/icons/danmaku_setting.svg',

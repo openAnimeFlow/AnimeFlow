@@ -16,7 +16,7 @@ import 'package:anime_flow/core/logger/logger.dart';
 import 'package:anime_flow/core/utils/system_util.dart';
 import 'package:anime_flow/shared/widgets/danmaku_text_field.dart';
 import 'package:anime_flow/shared/widgets/notification_toast.dart';
-import 'package:anime_flow/features/play/presentation/widgets/episode_playing_indicator.dart';
+import 'package:anime_flow/features/play/presentation/widgets/loading_animation.dart';
 import 'package:anime_flow/features/play/presentation/widgets/episodes_dialog.dart';
 import 'package:anime_flow/features/play/presentation/widgets/play_pause_icon.dart';
 import 'package:anime_flow/app/localization/app_localizations.dart';
@@ -379,7 +379,7 @@ class BottomAreaControl extends ConsumerWidget {
                                                     (s) => s.playing,
                                                   ),
                                                 );
-                                                return EpisodePlayingIndicator(
+                                                return LoadingAnimation(
                                                   size: 30,
                                                   isPlaying: playing,
                                                 );

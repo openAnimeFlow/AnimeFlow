@@ -8,16 +8,12 @@ import 'package:anime_flow/core/network/clients/flow_client.dart';
 import 'package:anime_flow/app/router/routes_args.dart';
 import 'package:anime_flow/shared/widgets/notification_toast.dart';
 import 'package:anime_flow/features/play/presentation/widgets/layout_toggle_icon.dart';
+import 'package:anime_flow/features/play/presentation/widgets/loading_animation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 class EpisodesListView extends ConsumerStatefulWidget {
-  const EpisodesListView({
-    super.key,
-    required this.isSelectedIcon,
-  });
-
-  final Widget isSelectedIcon;
+  const EpisodesListView({super.key});
 
   @override
   ConsumerState<EpisodesListView> createState() => _EpisodesListViewState();
@@ -304,7 +300,7 @@ class _EpisodesListViewState extends ConsumerState<EpisodesListView> {
                           ],
                         ),
                       ),
-                      if (isSelected) widget.isSelectedIcon,
+                      if (isSelected) _buildPlayingIndicator(),
                     ],
                   ),
                 ),
@@ -391,7 +387,7 @@ class _EpisodesListViewState extends ConsumerState<EpisodesListView> {
                             isSelected ? FontWeight.bold : FontWeight.normal,
                       ),
                     ),
-                    if (isSelected) widget.isSelectedIcon
+                    if (isSelected) _buildPlayingIndicator()
                   ],
                 ),
               ),
@@ -399,6 +395,20 @@ class _EpisodesListViewState extends ConsumerState<EpisodesListView> {
           );
         },
       ),
+    );
+  }
+
+  Widget _buildPlayingIndicator() {
+    return Consumer(
+      builder: (context, ref, child) {
+        final isPlaying = ref.watch(
+          playStateProvider.select((state) => state.playing),
+        );
+        return LoadingAnimation(
+          size: 35,
+          isPlaying: isPlaying,
+        );
+      },
     );
   }
 

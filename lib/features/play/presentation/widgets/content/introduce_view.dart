@@ -2,9 +2,7 @@ import 'package:anime_flow/features/play/presentation/widgets/content/recommenda
 import 'package:anime_flow/features/play/presentation/widgets/content/danmaku_card.dart';
 import 'package:anime_flow/features/play/presentation/widgets/content/episodes.dart';
 import 'package:anime_flow/features/play/presentation/widgets/content/resources.dart';
-import 'package:anime_flow/features/play/presentation/providers/play_provider.dart';
 import 'package:anime_flow/app/router/routes_args.dart';
-import 'package:anime_flow/features/play/presentation/widgets/episode_playing_indicator.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -42,19 +40,7 @@ class _IntroduceViewState extends State<IntroduceView>
             }),
             const SizedBox(height: 5),
             //章节
-            EpisodesListView(
-              isSelectedIcon: Consumer(
-                builder: (context, ref, _) {
-                  final playing = ref.watch(
-                    playStateProvider.select((s) => s.playing),
-                  );
-                  return EpisodePlayingIndicator(
-                    size: 25,
-                    isPlaying: playing,
-                  );
-                },
-              ),
-            ),
+            const EpisodesListView(),
             //数据源
             const VideoResourcesView(),
             //弹幕

@@ -40,7 +40,7 @@ dependencies:
   cached_network_image: ^3.4.1 # 加载网络图片并提供磁盘与内存缓存。
   shimmer: ^3.0.0 # 创建带有渐变闪烁效果的加载占位组件。
   photo_view: ^0.15.0 # 为图片提供缩放、平移和手势查看能力。
-  lottie: ^3.3.3 # 解析并播放 Lottie JSON 动画。
+  lottie: ^3.3.3 # 解析并播放 Lottie 动画。
   bot_toast: ^4.1.3 # 在 Flutter 应用中显示全局 Toast、通知和自定义浮层。
 
   # 音视频播放与设备控制

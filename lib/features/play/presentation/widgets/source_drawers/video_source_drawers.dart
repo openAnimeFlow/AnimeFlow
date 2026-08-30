@@ -20,7 +20,7 @@ enum _SourceEpisodeMode { matched, all }
 
 class VideoSourceDrawers extends ConsumerStatefulWidget {
   final Function(String url)? onVideoUrlSelected;
-  final VideoSourceNotifier videoSourceController;
+  final VideoSourceNotifier videoSourceNotifier;
   final String subjectName;
   final bool isBottomSheet;
   final ScrollController? scrollController;
@@ -32,7 +32,7 @@ class VideoSourceDrawers extends ConsumerStatefulWidget {
     this.isBottomSheet = false,
     this.scrollController,
     this.draggableController,
-    required this.videoSourceController,
+    required this.videoSourceNotifier,
     required this.subjectName,
   });
 
@@ -45,7 +45,6 @@ class _VideoSourceDrawersState extends ConsumerState<VideoSourceDrawers> {
   static const double _initialSheetSize = 0.52;
   static const double _maxSheetSize = 0.95;
   static const String _allLinesValue = '__all_lines__';
-  static const double _sourceItemExtent = 95;
 
   final logger = LiggLogger();
   _SourceEpisodeMode _sourceEpisodeMode = _SourceEpisodeMode.matched;
@@ -69,7 +68,7 @@ class _VideoSourceDrawersState extends ConsumerState<VideoSourceDrawers> {
   void _setSelectedWebsite(int index) {
     _followInitialAutoSelection = false;
     _drawerSelectedWebsiteIndex = index;
-    widget.videoSourceController.setSelectedWebsiteIndex(index);
+    widget.videoSourceNotifier.setSelectedWebsiteIndex(index);
     setState(() {
       _sourceEpisodeMode = _SourceEpisodeMode.matched;
       _selectedLineName = null;
@@ -80,7 +79,7 @@ class _VideoSourceDrawersState extends ConsumerState<VideoSourceDrawers> {
   void _performSearch() {
     String searchQuery = _searchController.text;
     if (searchQuery.isNotEmpty) {
-      widget.videoSourceController.setSelectedWebsiteIndex(0);
+      widget.videoSourceNotifier.setSelectedWebsiteIndex(0);
       _followInitialAutoSelection = true;
       _drawerSelectedWebsiteIndex = 0;
       setState(() {
@@ -88,12 +87,12 @@ class _VideoSourceDrawersState extends ConsumerState<VideoSourceDrawers> {
         _selectedLineName = null;
         _sortDescending = false;
       });
-      widget.videoSourceController.initResources(searchQuery);
+      widget.videoSourceNotifier.initResources(searchQuery);
     }
   }
 
   int _getDrawerSelectedIndex(List<ResourcesItem> dataSource) {
-    final controller = widget.videoSourceController;
+    final controller = widget.videoSourceNotifier;
     final providerIndex = controller.selectedWebsiteIndex >= dataSource.length
         ? 0
         : controller.selectedWebsiteIndex;
@@ -151,7 +150,7 @@ class _VideoSourceDrawersState extends ConsumerState<VideoSourceDrawers> {
             const SizedBox(height: 16),
             Builder(
               builder: (context) {
-                final dataSource = widget.videoSourceController.videoResources;
+                final dataSource = widget.videoSourceNotifier.videoResources;
                 if (dataSource.isEmpty) {
                   return const SizedBox.shrink();
                 }
@@ -162,7 +161,7 @@ class _VideoSourceDrawersState extends ConsumerState<VideoSourceDrawers> {
             Expanded(
               child: Builder(
                 builder: (context) {
-                  final videoSourceController = widget.videoSourceController;
+                  final videoSourceController = widget.videoSourceNotifier;
                   final dataSource = videoSourceController.videoResources;
                   if (dataSource.isEmpty) {
                     return const SizedBox.shrink();
@@ -254,7 +253,7 @@ class _VideoSourceDrawersState extends ConsumerState<VideoSourceDrawers> {
               const SizedBox(height: 16),
               Builder(
                 builder: (context) {
-                  final videoSourceController = widget.videoSourceController;
+                  final videoSourceController = widget.videoSourceNotifier;
                   final dataSource = videoSourceController.videoResources;
                   if (dataSource.isEmpty) {
                     return const SizedBox.shrink();
@@ -266,7 +265,7 @@ class _VideoSourceDrawersState extends ConsumerState<VideoSourceDrawers> {
               Expanded(
                 child: Builder(
                   builder: (context) {
-                    final videoSourceController = widget.videoSourceController;
+                    final videoSourceController = widget.videoSourceNotifier;
                     final dataSource = videoSourceController.videoResources;
                     if (dataSource.isEmpty) {
                       return const SizedBox.shrink();
@@ -452,7 +451,7 @@ class _VideoSourceDrawersState extends ConsumerState<VideoSourceDrawers> {
     required List<ResourcesItem> dataSource,
     required int selectedIndex,
   }) {
-    final videoSourceController = widget.videoSourceController;
+    final videoSourceController = widget.videoSourceNotifier;
     if (selectedIndex >= dataSource.length) {
       return const SizedBox.shrink();
     }
@@ -755,7 +754,6 @@ class _VideoSourceDrawersState extends ConsumerState<VideoSourceDrawers> {
       controller: widget.isBottomSheet ? _scrollController : null,
       padding: EdgeInsets.zero,
       itemCount: matchedResources.length,
-      itemExtent: _sourceItemExtent,
       itemBuilder: (context, index) {
         final resourceItem = matchedResources[index];
         final currentEpisode = resourceItem.episodes.firstWhere(
@@ -810,7 +808,6 @@ class _VideoSourceDrawersState extends ConsumerState<VideoSourceDrawers> {
       controller: widget.isBottomSheet ? _scrollController : null,
       padding: EdgeInsets.zero,
       itemCount: expandedItems.length,
-      itemExtent: _sourceItemExtent,
       itemBuilder: (context, index) {
         final entry = expandedItems[index];
         return _buildSource(
@@ -867,7 +864,7 @@ class _VideoSourceDrawersState extends ConsumerState<VideoSourceDrawers> {
     return CaptchaView(
       key: ValueKey(resource.websiteName),
       resource: resource,
-      dataSourceController: widget.videoSourceController,
+      dataSourceController: widget.videoSourceNotifier,
       subjectName: widget.subjectName,
     );
   }
@@ -903,7 +900,7 @@ class _VideoSourceDrawersState extends ConsumerState<VideoSourceDrawers> {
       {required String websiteName,
       required String websiteIcon,
       required String baseUrl}) {
-    final videoUrl = widget.videoSourceController.videoUrl;
+    final videoUrl = widget.videoSourceNotifier.videoUrl;
     final isSelected = baseUrl + episode.like == videoUrl;
 
     return Container(
@@ -927,7 +924,7 @@ class _VideoSourceDrawersState extends ConsumerState<VideoSourceDrawers> {
             try {
               context.pop();
               final videoUrl = baseUrl + episode.like;
-              widget.videoSourceController.bindManualSourceForCurrentEpisode(
+              widget.videoSourceNotifier.bindManualSourceForCurrentEpisode(
                 websiteName: websiteName,
                 websiteIcon: websiteIcon,
                 resourceTitle: item.subjectsTitle,

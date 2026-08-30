@@ -68,7 +68,7 @@ class _VideoResourcesViewState extends ConsumerState<VideoResourcesView> {
             child: VideoSourceDrawers(
               isBottomSheet: false,
               onVideoUrlSelected: onVideoUrlSelected,
-              videoSourceController: videoSourceController,
+              videoSourceNotifier: videoSourceController,
               subjectName: subjectName,
             ),
           );
@@ -97,7 +97,7 @@ class _VideoResourcesViewState extends ConsumerState<VideoResourcesView> {
                   scrollController: scrollController,
                   draggableController: drawerController,
                   onVideoUrlSelected: onVideoUrlSelected,
-                  videoSourceController: videoSourceController,
+                  videoSourceNotifier: videoSourceController,
                   subjectName: subjectName,
                 );
               },

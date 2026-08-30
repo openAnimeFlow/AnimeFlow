@@ -278,7 +278,7 @@ class _TopAreaControlState extends ConsumerState<TopAreaControl> {
                                                     .showIndicator();
                                               },
                                               isBottomSheet: false,
-                                              videoSourceController:
+                                              videoSourceNotifier:
                                                   videoSourceController,
                                               subjectName: subjectName,
                                             ),

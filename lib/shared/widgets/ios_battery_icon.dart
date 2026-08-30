@@ -233,6 +233,26 @@ Widget iosBatteryLowPreview() {
   );
 }
 
+
+@Preview(
+  name: '小于40',
+  group: 'iOS Battery Icon',
+  size: Size(240, 140),
+)
+Widget iosBatteryNormalPreview() {
+  return const MaterialApp(
+    debugShowCheckedModeBanner: false,
+    home: Scaffold(
+      backgroundColor: Colors.white,
+      body: Center(
+        child: IosBatteryIcon(
+          batteryLevel: 38,
+          size: 120,
+        ),
+      ),
+    ),
+  );
+}
 @Preview(
   name: '正常',
   group: 'iOS Battery Icon',

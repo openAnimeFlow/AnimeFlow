@@ -3,6 +3,7 @@ name: Build Project
 on:
   push:
     branches:
+      - main
   pull_request:
   workflow_dispatch:
     inputs:
@@ -168,6 +169,73 @@ jobs:
           flutter build ios --release --no-codesign \
             --dart-define=ANIME_FLOW_APP_ID="$ANIME_FLOW_APP_ID" \
             --dart-define=ANIME_FLOW_SECRET="$ANIME_FLOW_SECRET"
+
+      - name: Install iOS rootless packaging tools
+        if: matrix.platform == 'ios'
+        shell: bash
+        run: |
+          brew install ldid dpkg
+          command -v ldid
+          command -v dpkg-deb
+
+      - name: Create Dopamine rootless DEB
+        if: matrix.platform == 'ios'
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          APP_SOURCE="build/ios/iphoneos/Runner.app"
+          APP_NAME="AnimeFlow.app"
+          # Debian package names cannot contain underscores. The bundle ID
+          # remains com.ligg.anime_flow inside the app's Info.plist.
+          PACKAGE_NAME="animeflow"
+          PACKAGE_DIR="animeflow_${INSTALLER_VERSION}_iphoneos-arm64"
+          APP_DEST="${PACKAGE_DIR}/var/jb/Applications/${APP_NAME}"
+
+          if [ ! -d "$APP_SOURCE" ]; then
+            echo "::error::iOS app not found: $APP_SOURCE"
+            exit 1
+          fi
+
+          rm -rf "$PACKAGE_DIR"
+          mkdir -p "$PACKAGE_DIR/DEBIAN"
+          mkdir -p "$(dirname "$APP_DEST")"
+          cp -R "$APP_SOURCE" "$APP_DEST"
+
+          # The iOS build is intentionally unsigned. Sign every Mach-O file
+          # in the app bundle so Flutter frameworks and plugin dylibs are
+          # loadable on a Dopamine rootless device.
+          while IFS= read -r -d '' file; do
+            if file "$file" | grep -q 'Mach-O'; then
+              echo "Signing $file"
+              ldid -S "$file"
+            fi
+          done < <(find "$APP_DEST" -type f -print0)
+
+          cat > "$PACKAGE_DIR/DEBIAN/control" << EOF
+          Package: ${PACKAGE_NAME}
+          Name: AnimeFlow
+          Version: ${INSTALLER_VERSION}
+          Architecture: iphoneos-arm64
+          Section: Applications
+          Priority: optional
+          Maintainer: AnimeFlow Team
+          Description: Anime video player for jailbroken iOS
+          EOF
+
+          chmod 0644 "$PACKAGE_DIR/DEBIAN/control"
+          dpkg-deb --build "$PACKAGE_DIR" "AnimeFlow-ios-rootless-${INSTALLER_VERSION}.deb"
+
+          dpkg-deb --info "AnimeFlow-ios-rootless-${INSTALLER_VERSION}.deb"
+          dpkg-deb --contents "AnimeFlow-ios-rootless-${INSTALLER_VERSION}.deb"
+
+      - name: Upload iOS rootless DEB artifact
+        if: matrix.platform == 'ios'
+        uses: actions/upload-artifact@v6
+        with:
+          name: ios-rootless-deb
+          path: AnimeFlow-ios-rootless-${{ env.INSTALLER_VERSION }}.deb
+          if-no-files-found: error
 
       - name: Create IPA
         if: matrix.platform == 'ios'

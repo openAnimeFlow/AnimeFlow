@@ -12,6 +12,14 @@ import UIKit
     _ application: UIApplication,
     didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?
   ) -> Bool {
+    // Do not rely on Main.storyboard to create the Flutter controller. On
+    // rootless iOS 18 launches, UIKit can abort while instantiating the
+    // storyboard before the Flutter app lifecycle is ready.
+    let controller = FlutterViewController()
+    window = UIWindow(frame: UIScreen.main.bounds)
+    window?.rootViewController = controller
+    window?.makeKeyAndVisible()
+
     GeneratedPluginRegistrant.register(with: self)
     let didFinishLaunching = super.application(
       application,
@@ -22,7 +30,7 @@ import UIKit
     // not exist yet when application(_:didFinishLaunchingWithOptions:) runs.
     // Configure the channel immediately when possible, then retry once the
     // first scene has been attached instead of force-unwrapping `controller`.
-    configureNetworkSpeedChannelIfPossible()
+    configureNetworkSpeedChannelIfPossible(controller: controller)
     DispatchQueue.main.async { [weak self] in
       self?.configureNetworkSpeedChannelIfPossible()
     }
@@ -30,9 +38,11 @@ import UIKit
     return didFinishLaunching
   }
 
-  private func configureNetworkSpeedChannelIfPossible() {
+  private func configureNetworkSpeedChannelIfPossible(
+    controller: FlutterViewController? = nil
+  ) {
     guard !networkSpeedChannelConfigured,
-          let controller = window?.rootViewController as? FlutterViewController else {
+          let controller = controller ?? (window?.rootViewController as? FlutterViewController) else {
       return
     }
 

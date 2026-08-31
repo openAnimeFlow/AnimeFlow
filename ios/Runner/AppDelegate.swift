@@ -6,15 +6,39 @@ import UIKit
   private var lastRxBytes: UInt64? = nil
   private var lastTxBytes: UInt64? = nil
   private var lastTime: TimeInterval? = nil
+  private var networkSpeedChannelConfigured = false
 
   override func application(
     _ application: UIApplication,
     didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?
   ) -> Bool {
-    let controller = window?.rootViewController as? FlutterViewController
+    GeneratedPluginRegistrant.register(with: self)
+    let didFinishLaunching = super.application(
+      application,
+      didFinishLaunchingWithOptions: launchOptions
+    )
+
+    // With the iOS scene lifecycle, the storyboard's root view controller may
+    // not exist yet when application(_:didFinishLaunchingWithOptions:) runs.
+    // Configure the channel immediately when possible, then retry once the
+    // first scene has been attached instead of force-unwrapping `controller`.
+    configureNetworkSpeedChannelIfPossible()
+    DispatchQueue.main.async { [weak self] in
+      self?.configureNetworkSpeedChannelIfPossible()
+    }
+
+    return didFinishLaunching
+  }
+
+  private func configureNetworkSpeedChannelIfPossible() {
+    guard !networkSpeedChannelConfigured,
+          let controller = window?.rootViewController as? FlutterViewController else {
+      return
+    }
+
     let channel = FlutterMethodChannel(
       name: "network_speed_monitor",
-      binaryMessenger: controller!.engine.binaryMessenger
+      binaryMessenger: controller.engine.binaryMessenger
     )
 
     channel.setMethodCallHandler { [weak self] call, result in
@@ -68,8 +92,12 @@ import UIKit
       }
     }
 
-    GeneratedPluginRegistrant.register(with: self)
-    return super.application(application, didFinishLaunchingWithOptions: launchOptions)
+    networkSpeedChannelConfigured = true
+  }
+
+  override func applicationDidBecomeActive(_ application: UIApplication) {
+    super.applicationDidBecomeActive(application)
+    configureNetworkSpeedChannelIfPossible()
   }
 
   private func reset() {

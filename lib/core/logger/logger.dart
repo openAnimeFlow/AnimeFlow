@@ -24,7 +24,7 @@ class KazumiLogFilter extends LogFilter {
     if (forceLog) {
       return true;
     }
-    return event.level.index >= Logger.level.index;
+    return event.level >= level!;
   }
 }
 
@@ -121,7 +121,7 @@ class LiggLogOutput extends LogOutput {
       stdout.writeln(line);
     }
 
-    if (event.level == Level.info) {
+    if (event.level.index < Level.warning.index) {
       return;
     }
     _writeToFile(event);
@@ -165,6 +165,7 @@ class LiggLogger {
       filter: KazumiLogFilter(),
       printer: LiggLogPrinter(),
       output: LiggLogOutput(),
+      level: Level.trace,
     );
   }
 

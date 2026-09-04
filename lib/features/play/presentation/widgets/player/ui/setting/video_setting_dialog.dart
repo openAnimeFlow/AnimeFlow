@@ -383,38 +383,48 @@ class _VideoSettingState extends ConsumerState<VideoSettingDialog> {
             style: const TextStyle(decoration: TextDecoration.none),
           ),
           const Spacer(),
-          DropDownMenu<PlayerKernel>(
-            items: PlayerKernel.values,
-            selectedItem: currentKernel,
-            tooltip: l10n.selectPlayerKernel,
-            offset: const Offset(0, 44),
-            buttonBuilder: (context, selectedKernel) {
-              return Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Text(_kernelLabel(selectedKernel ?? currentKernel)),
-                  const Icon(Icons.arrow_drop_down),
-                ],
-              );
-            },
-            itemBuilder: (context, kernel, isSelected) {
-              return Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Text(_kernelLabel(kernel)),
-                  if (isSelected) ...[
-                    const SizedBox(width: 12),
-                    const Icon(Icons.check, size: 18),
-                  ],
-                ],
-              );
-            },
-            onSelected: (kernel) async {
-              if (kernel == currentKernel) return;
-              final switched = await playController.switchKernel(kernel);
-              if (!context.mounted || switched) return;
-              NotificationToast.show(l10n.playerKernelSwitchFailed);
-            },
+          AnimatedSwitcher(
+            duration: const Duration(milliseconds: 200),
+            child: switchingKernel
+                ? const SizedBox(
+                  width: 16,
+                  height: 16,
+                  child: CircularProgressIndicator(strokeWidth: 2),
+                )
+                : DropDownMenu<PlayerKernel>(
+                    key: const ValueKey('select-player-kernel'),
+                    items: PlayerKernel.values,
+                    selectedItem: currentKernel,
+                    tooltip: l10n.selectPlayerKernel,
+                    offset: const Offset(0, 44),
+                    buttonBuilder: (context, selectedKernel) {
+                      return Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Text(_kernelLabel(selectedKernel ?? currentKernel)),
+                          const Icon(Icons.arrow_drop_down),
+                        ],
+                      );
+                    },
+                    itemBuilder: (context, kernel, isSelected) {
+                      return Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Text(_kernelLabel(kernel)),
+                          if (isSelected) ...[
+                            const SizedBox(width: 12),
+                            const Icon(Icons.check, size: 18),
+                          ],
+                        ],
+                      );
+                    },
+                    onSelected: (kernel) async {
+                      if (switchingKernel || kernel == currentKernel) return;
+                      final switched = await playController.switchKernel(kernel);
+                      if (!context.mounted || switched) return;
+                      NotificationToast.show(l10n.playerKernelSwitchFailed);
+                    },
+                  ),
           )
         ],
       ),

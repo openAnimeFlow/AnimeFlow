@@ -18,7 +18,7 @@ class FvpEngine implements PlayerEngine {
   // only a few pixels on the progress bar, so keep a visible, practical
   // buffer for on-demand playback.
   static const int _bufferRangeMinMilliseconds = 1000;
-  static const int _bufferRangeMaxMilliseconds = 30 * 1000;
+  static const int _bufferRangeMaxMilliseconds = 60 * 1000;
 
   late final fvp.Player _player;
   final StreamController<PlayerEvent> _events =

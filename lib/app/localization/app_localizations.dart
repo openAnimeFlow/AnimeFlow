@@ -3476,6 +3476,24 @@ abstract class AppLocalizations {
   /// **'选择播放器内核'**
   String get selectPlayerKernel;
 
+  /// No description provided for @playerKernelTroubleshootingHint.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'播放页无法播放或发生闪退时，可尝试切换播放器内核。iOS 巨魔安装环境下，MediaKit 内核可能闪退，可切换至 FVP。'**
+  String get playerKernelTroubleshootingHint;
+
+  /// No description provided for @playerKernelSupportsSuperResolution.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'MediaKit 支持 Anime4K 等 GLSL 超分辨率 Shader'**
+  String get playerKernelSupportsSuperResolution;
+
+  /// No description provided for @playerKernelNoSuperResolution.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'FVP 不支持 Anime4K 等 GLSL 超分辨率 Shader'**
+  String get playerKernelNoSuperResolution;
+
   /// No description provided for @playerKernelSwitchFailed.
   ///
   /// In zh_Hans, this message translates to:

@@ -7,6 +7,7 @@ import 'package:anime_flow/core/constants/constants.dart';
 import 'package:anime_flow/core/constants/storage_key.dart';
 import 'package:anime_flow/features/play/application/danmaku_chinese_converter.dart';
 import 'package:anime_flow/features/play/application/danmaku_chinese_mode.dart';
+import 'package:anime_flow/features/play/application/playback_progress_manager.dart';
 import 'package:anime_flow/features/play/application/play_history_service.dart';
 import 'package:anime_flow/features/play/presentation/providers/danmaku_chinese_mode_provider.dart';
 import 'package:anime_flow/features/play/presentation/providers/episodes_provider.dart';
@@ -16,7 +17,6 @@ import 'package:anime_flow/features/shaders/shaders_controller.dart';
 import 'package:anime_flow/core/network/api/flow_api.dart';
 import 'package:anime_flow/shared/models/enums/video_controls_icon_type.dart';
 import 'package:anime_flow/shared/models/player/danmaku/danmaku_module.dart';
-import 'package:anime_flow/shared/models/player/play/play_history.dart';
 import 'package:anime_flow/shared/models/player/play/play_history_event_type.dart';
 import 'package:anime_flow/core/storage/storage.dart';
 import 'package:anime_flow/app/router/routes_args.dart';
@@ -387,7 +387,6 @@ class PlayRequest {
 
 class PlaySession {
   static const _parseSuccessResult = '视频解析成功';
-  static const _watchedProgressThreshold = 0.90;
 
   PlaySession({
     required this.shadersDirectory,
@@ -410,6 +409,7 @@ class PlaySession {
 
   final PlayerEngineFactory engineFactory;
   late final PlaybackCoordinator playbackCoordinator;
+  late final PlaybackProgressManager playbackProgressManager;
   PlayerEngine get engine => playbackCoordinator.engine;
   final PlayStateNotifier _playStateActions;
   final VideoUiStateActions _videoUiStateActions;
@@ -422,7 +422,6 @@ class PlaySession {
     required int episodeId,
     required bool watched,
   }) _setEpisodeWatched;
-  PlayState _latestPlayState = const PlayState();
   final setting = Storage.setting;
 
   /// 着色器所在目录（由 [shadersDirectoryProvider] 在启动时准备）
@@ -486,25 +485,29 @@ class PlaySession {
   bool _isLoadingDanmaku = false;
   bool _isPlayerBuffering = false;
   bool _lastPlayerPlaying = false;
-  DateTime? _lastPausePlayHistorySavedAt;
-
-  Future<void> _playHistorySaveQueue = Future<void>.value();
-  final Set<int> _autoWatchedEpisodeIds = {};
-  final Set<int> _autoWatchedEpisodeUpdatesInFlight = {};
-
   StreamSubscription<PlayerEvent>? _playerSubscription;
   bool _isDisposed = false;
 
   static const Duration _bufferingPositionTolerance =
       Duration(milliseconds: 500);
-  static const Duration _pausePlayHistoryThrottle = Duration(seconds: 1);
-
   void init() {
-    _latestPlayState = _playStateActions.value;
     final adBlocker = setting.get(PlaybackKey.adBlocker, defaultValue: false);
     playbackCoordinator = PlaybackCoordinator(
       engineFactory: engineFactory,
       adBlocker: adBlocker,
+    );
+    playbackProgressManager = PlaybackProgressManager(
+      setEpisodeWatched: ({
+        required subjectId,
+        required episodeId,
+        required watched,
+      }) {
+        _setEpisodeWatched(
+          subjectId: subjectId,
+          episodeId: episodeId,
+          watched: watched,
+        );
+      },
     );
     unawaited(playbackCoordinator.initialize(
       kernel: PlayerKernel.mediaKit,
@@ -543,13 +546,7 @@ class PlaySession {
   void _handlePlayerEvent(PlayerEvent event) {
     if (event is PlayerPlayingChanged) {
       if (_lastPlayerPlaying && !event.playing) {
-        final now = DateTime.now();
-        final lastSavedAt = _lastPausePlayHistorySavedAt;
-        if (lastSavedAt == null ||
-            now.difference(lastSavedAt) >= _pausePlayHistoryThrottle) {
-          _lastPausePlayHistorySavedAt = now;
-          unawaited(_savePlayHistory());
-        }
+        playbackProgressManager.saveOnPause();
       }
       _lastPlayerPlaying = event.playing;
       _playStateActions.setPlaying(event.playing);
@@ -633,7 +630,7 @@ class PlaySession {
 
   void dispose() {
     _isDisposed = true;
-    unawaited(_savePlayHistory());
+    unawaited(playbackProgressManager.save());
     if (Platform.isWindows) {
       WindowsTitleBarVisibility.reset();
     }
@@ -675,6 +672,15 @@ class PlaySession {
     alias = state.alias;
     isLocalPlayback = state.isLocalPlayback;
     localDanmakuPath = state.localDanmakuPath;
+    playbackProgressManager.updateContext(
+      subjectId: subjectId,
+      episodeId: episodeId,
+      episodeSort: episodeSort,
+      subjectName: subjectName,
+      subjectCover: subjectCover,
+      alias: alias,
+      isLocalPlayback: isLocalPlayback,
+    );
     if (state.videoUrl.isEmpty) return;
     _currentSource = PlaybackSource(
       uri: Uri.parse(state.videoUrl),
@@ -741,84 +747,11 @@ class PlaySession {
   }
 
   void _handlePlayStateChanged(PlayState state) {
-    _latestPlayState = state;
-    if (state.duration <= Duration.zero) return;
-    if (subjectId <= 0 || episodeId <= 0) return;
-    if (subjectName == null || subjectCover == null) return;
-    if (isLocalPlayback) return;
-
-    final setting = Storage.setting;
-    if (setting.get(PlaybackKey.episodesProgress, defaultValue: true)) {
-      if (state.playing) {
-        _autoUpdateEpisodeWatchedIfNeeded(state);
-      }
-    }
-  }
-
-  void _autoUpdateEpisodeWatchedIfNeeded(PlayState state) {
-    final progress =
-        state.position.inMilliseconds / state.duration.inMilliseconds;
-    if (progress < _watchedProgressThreshold) {
-      return;
-    }
-    if (_autoWatchedEpisodeIds.contains(episodeId) ||
-        _autoWatchedEpisodeUpdatesInFlight.contains(episodeId)) {
-      return;
-    }
-
-    _autoWatchedEpisodeUpdatesInFlight.add(episodeId);
-    unawaited(_autoUpdateEpisodeWatched(episodeId));
-  }
-
-  Future<void> _autoUpdateEpisodeWatched(int targetEpisodeId) async {
-    try {
-      await updateEpisodeWatched(targetEpisodeId);
-      _autoWatchedEpisodeIds.add(targetEpisodeId);
-    } catch (e) {
-      LiggLogger().e('自动更新观看进度失败: $e');
-    } finally {
-      _autoWatchedEpisodeUpdatesInFlight.remove(targetEpisodeId);
-    }
-  }
-
-  Future<void> _savePlayHistory({
-    Duration? position,
-    PlayHistoryEventType eventType = PlayHistoryEventType.defaults,
-  }) async {
-    final state = _latestPlayState;
-    if (state.duration <= Duration.zero ||
-        subjectId <= 0 ||
-        episodeId <= 0 ||
-        subjectName == null ||
-        subjectCover == null) {
-      return;
-    }
-    final savedPosition = position ?? state.position;
-    final savedSubjectId = subjectId;
-    final savedEpisodeId = episodeId;
-    final savedEpisodeSort = episodeSort;
-    final savedSubjectName = subjectName!;
-    final savedSubjectCover = subjectCover!;
-    final savedAlias = List<String>.from(alias);
-    _playHistorySaveQueue = _playHistorySaveQueue.then((_) async {
-      try {
-        final playHistory = PlayHistory(
-          subjectId: savedSubjectId,
-          subjectName: savedSubjectName,
-          episodeId: savedEpisodeId,
-          episodeSort: savedEpisodeSort,
-          cover: savedSubjectCover,
-          updateAt: DateTime.now(),
-          position: savedPosition.inSeconds,
-          duration: state.duration.inSeconds,
-          alias: savedAlias,
-        );
-        await PlayHistoryService.save(playHistory, eventType: eventType);
-      } catch (e) {
-        LiggLogger().e('保存播放进度失败: $e');
-      }
-    });
-    await _playHistorySaveQueue;
+    playbackProgressManager.handleState(
+      position: state.position,
+      duration: state.duration,
+      playing: state.playing,
+    );
   }
 
   ///更新缓冲状态
@@ -1145,7 +1078,7 @@ class PlaySession {
     unawaited(engine.seek(pos));
     _updateEffectiveBufferingState(position: pos);
     unawaited(
-      _savePlayHistory(
+      playbackProgressManager.save(
         position: pos,
         eventType: PlayHistoryEventType.forceOverwrite,
       ),

@@ -31,6 +31,7 @@ import 'package:anime_flow/features/play/domain/player/player_kernel.dart';
 import 'package:anime_flow/features/play/domain/player/player_snapshot.dart';
 import 'package:anime_flow/features/play/domain/player/playback_source.dart';
 import 'package:anime_flow/features/play/infrastructure/player/player_engine_factory.dart';
+import 'package:anime_flow/features/play/application/playback_coordinator.dart';
 import 'package:canvas_danmaku/canvas_danmaku.dart';
 import 'package:flutter/material.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
@@ -407,8 +408,9 @@ class PlaySession {
         _setEpisodeWatched = setEpisodeWatched,
         _danmakuChineseMode = initialDanmakuChineseMode;
 
-  late PlayerEngine engine;
   final PlayerEngineFactory engineFactory;
+  late final PlaybackCoordinator playbackCoordinator;
+  PlayerEngine get engine => playbackCoordinator.engine;
   final PlayStateNotifier _playStateActions;
   final VideoUiStateActions _videoUiStateActions;
   final Episodes _episodesActions;
@@ -500,17 +502,15 @@ class PlaySession {
   void init() {
     _latestPlayState = _playStateActions.value;
     final adBlocker = setting.get(PlaybackKey.adBlocker, defaultValue: false);
-    engine = engineFactory.create(
-      PlayerKernel.mediaKit,
+    playbackCoordinator = PlaybackCoordinator(
+      engineFactory: engineFactory,
       adBlocker: adBlocker,
     );
-    unawaited(engine.initialize());
-    _listenToEngine();
+    unawaited(playbackCoordinator.initialize(
+      kernel: PlayerKernel.mediaKit,
+    ));
+    _playerSubscription = playbackCoordinator.events.listen(_handlePlayerEvent);
     unawaited(_initSystemVolumeSync());
-  }
-
-  void _listenToEngine() {
-    _playerSubscription = engine.events.listen(_handlePlayerEvent);
   }
 
   /// 在保持播放上下文的前提下切换播放器内核。
@@ -521,7 +521,6 @@ class PlaySession {
     final source = _currentSource;
     if (source == null) return;
 
-    final current = engine;
     final state = _playStateActions.value;
     final snapshot = PlayerSnapshot(
       source: source,
@@ -531,41 +530,14 @@ class PlaySession {
       wasPlaying: state.playing,
       fit: state.videoFit,
     );
-    final adBlocker = setting.get(PlaybackKey.adBlocker, defaultValue: false);
-    PlayerEngine? next;
-
     _playStateActions.setSwitchingKernel(true);
-    try {
-      await current.pause();
-      await _playerSubscription?.cancel();
-      _playerSubscription = null;
-
-      next = engineFactory.create(target, adBlocker: adBlocker);
-      await next.initialize();
-      await next.open(
-        snapshot.source,
-        startPosition: snapshot.position,
-        autoPlay: false,
-      );
-      await next.setVolume(snapshot.volume);
-      await next.setRate(snapshot.rate);
-
-      engine = next;
-      _listenToEngine();
+    final switched = await playbackCoordinator.switchKernel(target, snapshot);
+    if (switched) {
       _playStateActions.setKernel(target);
-      _playStateActions.setSwitchingKernel(false);
-
-      await current.dispose();
-      if (snapshot.wasPlaying) await engine.play();
-    } catch (error, stackTrace) {
-      LiggLogger()
-          .e('切换播放器内核失败: $target', error: error, stackTrace: stackTrace);
-      await next?.dispose();
-      engine = current;
-      _listenToEngine();
-      _playStateActions.setSwitchingKernel(false);
-      if (snapshot.wasPlaying) unawaited(current.play());
+    } else {
+      LiggLogger().e('切换播放器内核失败: $target');
     }
+    _playStateActions.setSwitchingKernel(false);
   }
 
   void _handlePlayerEvent(PlayerEvent event) {
@@ -672,7 +644,7 @@ class PlaySession {
     unawaited(_playerSubscription?.cancel());
     _playerSubscription = null;
     _clearDanmakuCanvas();
-    unawaited(engine.dispose());
+    unawaited(playbackCoordinator.dispose());
   }
 
   void pauseForRouteCover() {

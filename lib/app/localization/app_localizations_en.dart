@@ -1865,9 +1865,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String get playerKernel => 'Player kernel';
 
   @override
-  String get rememberPlayerKernelSelection => 'Remember this selection';
-
-  @override
   String get selectPlayerKernel => 'Select player kernel';
 
   @override

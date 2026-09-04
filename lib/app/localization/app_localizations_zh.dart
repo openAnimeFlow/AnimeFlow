@@ -1817,9 +1817,6 @@ class AppLocalizationsZh extends AppLocalizations {
   String get playerKernel => '播放器內核';
 
   @override
-  String get rememberPlayerKernelSelection => '切換後將記住本次選擇';
-
-  @override
   String get selectPlayerKernel => '選擇播放器內核';
 
   @override
@@ -3644,9 +3641,6 @@ class AppLocalizationsZhHans extends AppLocalizationsZh {
   String get playerKernel => '播放器内核';
 
   @override
-  String get rememberPlayerKernelSelection => '切换后将记住本次选择';
-
-  @override
   String get selectPlayerKernel => '选择播放器内核';
 
   @override
@@ -5390,9 +5384,6 @@ class AppLocalizationsZhHantHk extends AppLocalizationsZh {
   String get playerKernel => '播放器內核';
 
   @override
-  String get rememberPlayerKernelSelection => '切換後將記住本次選擇';
-
-  @override
   String get selectPlayerKernel => '選擇播放器內核';
 
   @override
@@ -7134,9 +7125,6 @@ class AppLocalizationsZhHantTw extends AppLocalizationsZh {
 
   @override
   String get playerKernel => '播放器內核';
-
-  @override
-  String get rememberPlayerKernelSelection => '切換後將記住本次選擇';
 
   @override
   String get selectPlayerKernel => '選擇播放器內核';

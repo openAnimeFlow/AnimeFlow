@@ -556,7 +556,6 @@
   ,"downloadSizeProgress": "已下載 {downloaded} / 總大小 {total}"
   ,"@downloadSizeProgress": {"placeholders": {"downloaded": {}, "total": {}}}
   ,"playerKernel": "播放器內核"
-  ,"rememberPlayerKernelSelection": "切換後將記住本次選擇"
   ,"selectPlayerKernel": "選擇播放器內核"
   ,"playerKernelSwitchFailed": "播放器內核切換失敗"
   ,"mediaKit": "MediaKit"

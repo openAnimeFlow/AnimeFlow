@@ -383,14 +383,10 @@ class _VideoSettingState extends ConsumerState<VideoSettingDialog> {
   ) {
     final l10n = AppLocalizations.of(context);
     return ListTile(
-      contentPadding: const EdgeInsets.symmetric(horizontal: 8),
+      contentPadding: EdgeInsets.zero,
       leading: const Icon(Icons.video_settings_outlined),
       title: Text(
         l10n.playerKernel,
-        style: const TextStyle(decoration: TextDecoration.none),
-      ),
-      subtitle: Text(
-        l10n.rememberPlayerKernelSelection,
         style: const TextStyle(decoration: TextDecoration.none),
       ),
       trailing: IgnorePointer(

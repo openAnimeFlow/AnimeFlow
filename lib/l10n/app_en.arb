@@ -571,7 +571,6 @@
   ,"downloadSizeProgress": "Downloaded {downloaded} / Total {total}"
   ,"@downloadSizeProgress": {"placeholders": {"downloaded": {}, "total": {}}}
   ,"playerKernel": "Player kernel"
-  ,"rememberPlayerKernelSelection": "Remember this selection"
   ,"selectPlayerKernel": "Select player kernel"
   ,"playerKernelSwitchFailed": "Failed to switch player kernel"
   ,"mediaKit": "MediaKit"

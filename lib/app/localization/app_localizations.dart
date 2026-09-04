@@ -3470,12 +3470,6 @@ abstract class AppLocalizations {
   /// **'播放器内核'**
   String get playerKernel;
 
-  /// No description provided for @rememberPlayerKernelSelection.
-  ///
-  /// In zh_Hans, this message translates to:
-  /// **'切换后将记住本次选择'**
-  String get rememberPlayerKernelSelection;
-
   /// No description provided for @selectPlayerKernel.
   ///
   /// In zh_Hans, this message translates to:

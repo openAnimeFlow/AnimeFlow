@@ -10,6 +10,7 @@ import 'package:anime_flow/features/play/application/danmaku_chinese_mode.dart';
 import 'package:anime_flow/features/play/application/danmaku_playback_synchronizer.dart';
 import 'package:anime_flow/features/play/application/playback_progress_manager.dart';
 import 'package:anime_flow/features/play/application/play_history_service.dart';
+import 'package:anime_flow/features/play/application/system_volume_synchronizer.dart';
 import 'package:anime_flow/features/play/presentation/providers/danmaku_chinese_mode_provider.dart';
 import 'package:anime_flow/features/play/presentation/providers/episodes_provider.dart';
 import 'package:anime_flow/features/play/presentation/providers/subject_episodes_provider.dart';
@@ -479,12 +480,7 @@ class PlaySession {
   /// 垂直拖动相关
   double _dragStartVolume = 100.0;
 
-  Timer? _systemVolumeSyncTimer;
-  double? _pendingSystemVolume;
-  double? _lastKnownSystemVolume;
-  DateTime? _ignoreSystemVolumeEventsUntil;
-
-  static const Duration _systemVolumeSyncInterval = Duration(milliseconds: 80);
+  late final SystemVolumeSynchronizer systemVolumeSynchronizer;
 
   /// 定时停止播放的计时器
   Timer? _stopTimer;
@@ -516,11 +512,17 @@ class PlaySession {
         );
       },
     );
+    systemVolumeSynchronizer = SystemVolumeSynchronizer(
+      onSystemVolumeChanged: (volume) => _updateVolume(
+        volume,
+        syncSystemVolume: false,
+      ),
+    );
     unawaited(playbackCoordinator.initialize(
       kernel: PlayerKernel.mediaKit,
     ));
     _playerSubscription = playbackCoordinator.events.listen(_handlePlayerEvent);
-    unawaited(_initSystemVolumeSync());
+    unawaited(systemVolumeSynchronizer.initialize());
   }
 
   /// 在保持播放上下文的前提下切换播放器内核。
@@ -635,8 +637,7 @@ class PlaySession {
     if (Platform.isWindows) {
       WindowsTitleBarVisibility.reset();
     }
-    SystemUtil.removeSystemVolumeListener();
-    _systemVolumeSyncTimer?.cancel();
+    systemVolumeSynchronizer.dispose();
     _saveSettingsTimer?.cancel();
     _stopTimer?.cancel();
     unawaited(_playerSubscription?.cancel());
@@ -1116,69 +1117,8 @@ class PlaySession {
     final clampedVolume = newVolume.clamp(0.0, 100.0);
     _setPlayerVolume(clampedVolume);
     if (syncSystemVolume) {
-      _scheduleSystemVolumeSync(clampedVolume / 100);
+      systemVolumeSynchronizer.scheduleSync(clampedVolume / 100);
     }
-  }
-
-  Future<void> _initSystemVolumeSync() async {
-    if (!SystemUtil.supportsSystemVolumeSync) return;
-
-    await SystemUtil.configureSystemVolumeSync();
-    final systemVolume = await SystemUtil.getSystemVolume();
-    if (systemVolume != null) {
-      _lastKnownSystemVolume = systemVolume;
-      _setPlayerVolume(systemVolume * 100);
-    }
-
-    SystemUtil.addSystemVolumeListener(_handleSystemVolumeChanged);
-  }
-
-  void _handleSystemVolumeChanged(double volume) {
-    final normalized = volume.clamp(0.0, 1.0);
-    final ignoreUntil = _ignoreSystemVolumeEventsUntil;
-    final isSelfTriggered = ignoreUntil != null &&
-        DateTime.now().isBefore(ignoreUntil) &&
-        _isSameVolume(_lastKnownSystemVolume, normalized);
-    if (isSelfTriggered) {
-      return;
-    }
-
-    _lastKnownSystemVolume = normalized;
-    _pendingSystemVolume = null;
-    _updateVolume(normalized * 100, syncSystemVolume: false);
-  }
-
-  void _scheduleSystemVolumeSync(double normalizedVolume) {
-    if (!SystemUtil.supportsSystemVolumeSync) return;
-
-    final clampedVolume = normalizedVolume.clamp(0.0, 1.0);
-    _pendingSystemVolume = clampedVolume;
-
-    if (_systemVolumeSyncTimer?.isActive ?? false) {
-      return;
-    }
-
-    _systemVolumeSyncTimer = Timer(_systemVolumeSyncInterval, () {
-      final pendingVolume = _pendingSystemVolume;
-      _pendingSystemVolume = null;
-      if (pendingVolume == null ||
-          _isSameVolume(_lastKnownSystemVolume, pendingVolume)) {
-        return;
-      }
-      unawaited(_pushSystemVolume(pendingVolume));
-    });
-  }
-
-  Future<void> _pushSystemVolume(double normalizedVolume) async {
-    _lastKnownSystemVolume = normalizedVolume;
-    _ignoreSystemVolumeEventsUntil =
-        DateTime.now().add(_systemVolumeSyncInterval * 2);
-    await SystemUtil.setSystemVolume(normalizedVolume);
-  }
-
-  bool _isSameVolume(double? a, double? b) {
-    if (a == null || b == null) return false;
-    return (a - b).abs() < 0.01;
   }
 
   void startVerticalDrag() {

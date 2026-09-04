@@ -382,48 +382,51 @@ class _VideoSettingState extends ConsumerState<VideoSettingDialog> {
     bool switchingKernel,
   ) {
     final l10n = AppLocalizations.of(context);
-    return ListTile(
-      contentPadding: EdgeInsets.zero,
-      leading: const Icon(Icons.video_settings_outlined),
-      title: Text(
-        l10n.playerKernel,
-        style: const TextStyle(decoration: TextDecoration.none),
-      ),
-      trailing: IgnorePointer(
-        ignoring: switchingKernel,
-        child: DropDownMenu<PlayerKernel>(
-          items: PlayerKernel.values,
-          selectedItem: currentKernel,
-          tooltip: l10n.selectPlayerKernel,
-          offset: const Offset(0, 44),
-          buttonBuilder: (context, selectedKernel) {
-            return Row(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Text(_kernelLabel(selectedKernel ?? currentKernel)),
-                const Icon(Icons.arrow_drop_down),
-              ],
-            );
-          },
-          itemBuilder: (context, kernel, isSelected) {
-            return Row(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Text(_kernelLabel(kernel)),
-                if (isSelected) ...[
-                  const SizedBox(width: 12),
-                  const Icon(Icons.check, size: 18),
+    return Padding(
+      padding: const EdgeInsets.all(8.0),
+      child: Row(
+        spacing: 8,
+        children: [
+          const Icon(Icons.video_settings_outlined),
+          Text(
+            l10n.playerKernel,
+            style: const TextStyle(decoration: TextDecoration.none),
+          ),
+          const Spacer(),
+          DropDownMenu<PlayerKernel>(
+            items: PlayerKernel.values,
+            selectedItem: currentKernel,
+            tooltip: l10n.selectPlayerKernel,
+            offset: const Offset(0, 44),
+            buttonBuilder: (context, selectedKernel) {
+              return Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Text(_kernelLabel(selectedKernel ?? currentKernel)),
+                  const Icon(Icons.arrow_drop_down),
                 ],
-              ],
-            );
-          },
-          onSelected: (kernel) async {
-            if (kernel == currentKernel) return;
-            final switched = await playController.switchKernel(kernel);
-            if (!context.mounted || switched) return;
-            NotificationToast.show(l10n.playerKernelSwitchFailed);
-          },
-        ),
+              );
+            },
+            itemBuilder: (context, kernel, isSelected) {
+              return Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Text(_kernelLabel(kernel)),
+                  if (isSelected) ...[
+                    const SizedBox(width: 12),
+                    const Icon(Icons.check, size: 18),
+                  ],
+                ],
+              );
+            },
+            onSelected: (kernel) async {
+              if (kernel == currentKernel) return;
+              final switched = await playController.switchKernel(kernel);
+              if (!context.mounted || switched) return;
+              NotificationToast.show(l10n.playerKernelSwitchFailed);
+            },
+          )
+        ],
       ),
     );
   }

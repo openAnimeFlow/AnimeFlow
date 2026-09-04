@@ -495,10 +495,16 @@ class PlaySession {
       Duration(milliseconds: 500);
   void init() {
     final adBlocker = setting.get(PlaybackKey.adBlocker, defaultValue: false);
+    final preferredKernel = _readPreferredPlayerKernel();
     playbackCoordinator = PlaybackCoordinator(
       engineFactory: engineFactory,
       adBlocker: adBlocker,
     );
+    scheduleMicrotask(() {
+      if (!_isDisposed) {
+        _playStateActions.setKernel(preferredKernel);
+      }
+    });
     playbackProgressManager = PlaybackProgressManager(
       onEpisodeWatched: ({
         required subjectId,
@@ -519,19 +525,19 @@ class PlaySession {
       ),
     );
     unawaited(playbackCoordinator.initialize(
-      kernel: PlayerKernel.mediaKit,
+      kernel: preferredKernel,
     ));
     _playerSubscription = playbackCoordinator.events.listen(_handlePlayerEvent);
     unawaited(systemVolumeSynchronizer.initialize());
   }
 
   /// 在保持播放上下文的前提下切换播放器内核。
-  Future<void> switchKernel(PlayerKernel target) async {
-    if (_isDisposed || _playStateActions.value.switchingKernel) return;
-    if (engine.kernel == target) return;
+  Future<bool> switchKernel(PlayerKernel target) async {
+    if (_isDisposed || _playStateActions.value.switchingKernel) return false;
+    if (engine.kernel == target) return true;
 
     final source = _currentSource;
-    if (source == null) return;
+    if (source == null) return false;
 
     final state = _playStateActions.value;
     final snapshot = PlayerSnapshot(
@@ -546,10 +552,25 @@ class PlaySession {
     final switched = await playbackCoordinator.switchKernel(target, snapshot);
     if (switched) {
       _playStateActions.setKernel(target);
+      unawaited(
+        setting.put(PlaybackKey.preferredPlayerKernel, target.name),
+      );
     } else {
       LiggLogger().e('切换播放器内核失败: $target');
     }
     _playStateActions.setSwitchingKernel(false);
+    return switched;
+  }
+
+  PlayerKernel _readPreferredPlayerKernel() {
+    final value = setting.get(
+      PlaybackKey.preferredPlayerKernel,
+      defaultValue: PlayerKernel.mediaKit.name,
+    );
+    return PlayerKernel.values.firstWhere(
+      (kernel) => kernel.name == value,
+      orElse: () => PlayerKernel.mediaKit,
+    );
   }
 
   void _handlePlayerEvent(PlayerEvent event) {

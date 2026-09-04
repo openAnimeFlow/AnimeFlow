@@ -973,6 +973,13 @@ abstract class AppLocalizations {
   /// **'视频设置'**
   String get videoSettingsTitle;
 
+  String get playerKernel;
+  String get rememberPlayerKernelSelection;
+  String get selectPlayerKernel;
+  String get playerKernelSwitchFailed;
+  String get mediaKit;
+  String get fvp;
+
   /// No description provided for @scheduledOff.
   ///
   /// In zh_Hans, this message translates to:

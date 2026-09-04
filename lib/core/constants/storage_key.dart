@@ -35,7 +35,8 @@ class PlaybackKey {
       episodesProgress = 'playback_episodes_progress',
       fastForwardSpeed = 'playback_fast_forward_speed',
       adBlocker = 'playback_ad_blocker',
-      skipDuration = 'playback_skip_duration';
+      skipDuration = 'playback_skip_duration',
+      preferredPlayerKernel = 'playback_preferred_player_kernel';
 }
 
 class DownloadKey {

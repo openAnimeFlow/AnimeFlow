@@ -482,6 +482,24 @@ class AppLocalizationsZh extends AppLocalizations {
   String get videoSettingsTitle => '视频设置';
 
   @override
+  String get playerKernel => '播放器内核';
+
+  @override
+  String get rememberPlayerKernelSelection => '切换后将记住本次选择';
+
+  @override
+  String get selectPlayerKernel => '选择播放器内核';
+
+  @override
+  String get playerKernelSwitchFailed => '播放器内核切换失败';
+
+  @override
+  String get mediaKit => 'MediaKit';
+
+  @override
+  String get fvp => 'FVP';
+
+  @override
   String get scheduledOff => '定时关闭';
 
   @override

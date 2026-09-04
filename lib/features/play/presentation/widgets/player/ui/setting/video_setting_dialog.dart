@@ -1,18 +1,21 @@
 import 'package:anime_flow/core/constants/layout_constant.dart';
 import 'package:anime_flow/app/localization/app_localizations.dart';
+import 'package:anime_flow/features/play/domain/player/player_kernel.dart';
 import 'package:anime_flow/features/play/presentation/providers/play_provider.dart';
 import 'package:anime_flow/core/utils/format_time_util.dart';
+import 'package:anime_flow/shared/widgets/notification_toast.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:anime_flow/shared/widgets/drop_down_menu.dart';
 
-class VideoSetting extends ConsumerStatefulWidget {
-  const VideoSetting({super.key});
+class VideoSettingDialog extends ConsumerStatefulWidget {
+  const VideoSettingDialog({super.key});
 
   @override
-  ConsumerState<VideoSetting> createState() => _VideoSettingState();
+  ConsumerState<VideoSettingDialog> createState() => _VideoSettingState();
 }
 
-class _VideoSettingState extends ConsumerState<VideoSetting> {
+class _VideoSettingState extends ConsumerState<VideoSettingDialog> {
   bool isExpandedTime = false;
   int selectedHours = 0; // 选中的小时
   int selectedMinutes = 0; // 选中的分钟
@@ -67,21 +70,26 @@ class _VideoSettingState extends ConsumerState<VideoSetting> {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
-    return Material(
-      color: Colors.transparent,
-      child: Align(
-        alignment: Alignment.centerRight,
+    final currentKernel = ref.watch(
+      playStateProvider.select((state) => state.kernel),
+    );
+    final switchingKernel = ref.watch(
+      playStateProvider.select((state) => state.switchingKernel),
+    );
+    return Align(
+      alignment: Alignment.centerRight,
+      child: Material(
+        color: Theme.of(context).cardColor,
         child: SizedBox(
           width: LayoutConstant.playContentWidth,
           height: MediaQuery.of(context).size.height,
-          child: Container(
+          child: Padding(
             padding: EdgeInsets.only(
               top: MediaQuery.of(context).padding.top,
               left: 16,
               right: 16,
               bottom: 16,
             ),
-            color: Theme.of(context).cardColor,
             child: SingleChildScrollView(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -343,6 +351,13 @@ class _VideoSettingState extends ConsumerState<VideoSetting> {
                   ),
                   const Divider(),
                   const SizedBox(height: 10),
+                  _buildPlayerKernelSetting(
+                    context,
+                    currentKernel,
+                    switchingKernel,
+                  ),
+                  const Divider(),
+                  const SizedBox(height: 10),
                   Text(
                     l10n.moreSettingsBuilding,
                     style: TextStyle(
@@ -359,5 +374,68 @@ class _VideoSettingState extends ConsumerState<VideoSetting> {
         ),
       ),
     );
+  }
+
+  Widget _buildPlayerKernelSetting(
+    BuildContext context,
+    PlayerKernel currentKernel,
+    bool switchingKernel,
+  ) {
+    final l10n = AppLocalizations.of(context);
+    return ListTile(
+      contentPadding: const EdgeInsets.symmetric(horizontal: 8),
+      leading: const Icon(Icons.video_settings_outlined),
+      title: Text(
+        l10n.playerKernel,
+        style: const TextStyle(decoration: TextDecoration.none),
+      ),
+      subtitle: Text(
+        l10n.rememberPlayerKernelSelection,
+        style: const TextStyle(decoration: TextDecoration.none),
+      ),
+      trailing: IgnorePointer(
+        ignoring: switchingKernel,
+        child: DropDownMenu<PlayerKernel>(
+          items: PlayerKernel.values,
+          selectedItem: currentKernel,
+          tooltip: l10n.selectPlayerKernel,
+          offset: const Offset(0, 44),
+          buttonBuilder: (context, selectedKernel) {
+            return Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Text(_kernelLabel(selectedKernel ?? currentKernel)),
+                const Icon(Icons.arrow_drop_down),
+              ],
+            );
+          },
+          itemBuilder: (context, kernel, isSelected) {
+            return Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Text(_kernelLabel(kernel)),
+                if (isSelected) ...[
+                  const SizedBox(width: 12),
+                  const Icon(Icons.check, size: 18),
+                ],
+              ],
+            );
+          },
+          onSelected: (kernel) async {
+            if (kernel == currentKernel) return;
+            final switched = await playController.switchKernel(kernel);
+            if (!context.mounted || switched) return;
+            NotificationToast.show(l10n.playerKernelSwitchFailed);
+          },
+        ),
+      ),
+    );
+  }
+
+  String _kernelLabel(PlayerKernel kernel) {
+    return switch (kernel) {
+      PlayerKernel.mediaKit => AppLocalizations.of(context).mediaKit,
+      PlayerKernel.fvp => AppLocalizations.of(context).fvp,
+    };
   }
 }

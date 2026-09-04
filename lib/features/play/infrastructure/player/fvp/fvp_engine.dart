@@ -9,7 +9,6 @@ import 'package:anime_flow/features/play/domain/player/player_kernel.dart';
 import 'package:fvp/mdk.dart' as fvp;
 import 'package:flutter/material.dart';
 
-
 /// FVP backend player adapter.
 ///
 /// This intentionally uses the backend API instead of fvp.registerWith(), so
@@ -55,7 +54,13 @@ class FvpEngine implements PlayerEngine {
         }
       }),
       _player.onEvent.listen((event) {
-        if (event.error != 0) {
+        // 部分 MDK 事件复用 error 字段传递状态值，而不是错误码：
+        // reader.buffering 是缓冲进度，thread.* 是线程状态，
+        // render.video 是渲染时间戳。
+        final isStatusEvent = event.category == 'reader.buffering' ||
+            event.category == 'render.video' ||
+            event.category.startsWith('thread.');
+        if (!isStatusEvent && event.error != 0) {
           _emit(PlayerError(
             StateError('${event.category}: ${event.detail}'),
           ));
@@ -83,13 +88,15 @@ class FvpEngine implements PlayerEngine {
         if (size == null || size.width <= 0 || size.height <= 0) {
           return SizedBox.expand(child: video);
         }
-        return FittedBox(
-          fit: fit,
-          clipBehavior: Clip.hardEdge,
-          child: SizedBox(
-            width: size.width,
-            height: size.height,
-            child: video,
+        return SizedBox.expand(
+          child: FittedBox(
+            fit: fit,
+            clipBehavior: Clip.hardEdge,
+            child: SizedBox(
+              width: size.width,
+              height: size.height,
+              child: video,
+            ),
           ),
         );
       },

@@ -27,8 +27,10 @@ import 'package:anime_flow/core/utils/vibrate.dart';
 import 'package:anime_flow/shared/widgets/windows_title_bar.dart';
 import 'package:anime_flow/features/play/domain/player/player_engine.dart';
 import 'package:anime_flow/features/play/domain/player/player_event.dart';
+import 'package:anime_flow/features/play/domain/player/player_kernel.dart';
+import 'package:anime_flow/features/play/domain/player/player_snapshot.dart';
 import 'package:anime_flow/features/play/domain/player/playback_source.dart';
-import 'package:anime_flow/features/play/infrastructure/player/media_kit/media_kit_engine.dart';
+import 'package:anime_flow/features/play/infrastructure/player/player_engine_factory.dart';
 import 'package:canvas_danmaku/canvas_danmaku.dart';
 import 'package:flutter/material.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
@@ -56,6 +58,7 @@ PlaySession playSession(Ref ref) {
     videoUiStateActions: ref.watch(videoUiProvider.notifier),
     episodesActions: ref.watch(episodesProvider.notifier),
     danmakuChineseConverter: ref.watch(danmakuChineseConverterProvider),
+    engineFactory: const PlayerEngineFactory(),
     initialDanmakuChineseMode: initialDanmakuChineseMode,
     setEpisodeWatched: ({
       required subjectId,
@@ -105,6 +108,16 @@ class PlayStateNotifier extends _$PlayStateNotifier {
   }
 
   PlayState get value => state;
+
+  void setKernel(PlayerKernel value) {
+    if (state.kernel == value) return;
+    state = state.copyWith(kernel: value);
+  }
+
+  void setSwitchingKernel(bool value) {
+    if (state.switchingKernel == value) return;
+    state = state.copyWith(switchingKernel: value);
+  }
 
   void setSuperResolutionType(int value) {
     state = state.copyWith(superResolutionType: value);
@@ -224,6 +237,8 @@ Set<String> _loadHiddenPlatformsFromStorage() {
 }
 
 class PlayState {
+  final PlayerKernel kernel;
+  final bool switchingKernel;
   final int superResolutionType;
   final bool isWideScreen;
   final bool isContentExpanded;
@@ -246,6 +261,8 @@ class PlayState {
   final int danmakuEpoch;
 
   const PlayState({
+    this.kernel = PlayerKernel.mediaKit,
+    this.switchingKernel = false,
     this.superResolutionType = 0,
     this.isWideScreen = false,
     this.isContentExpanded = true,
@@ -269,6 +286,8 @@ class PlayState {
   });
 
   PlayState copyWith({
+    PlayerKernel? kernel,
+    bool? switchingKernel,
     int? superResolutionType,
     bool? isWideScreen,
     bool? isContentExpanded,
@@ -291,6 +310,8 @@ class PlayState {
     int? danmakuEpoch,
   }) {
     return PlayState(
+      kernel: kernel ?? this.kernel,
+      switchingKernel: switchingKernel ?? this.switchingKernel,
       superResolutionType: superResolutionType ?? this.superResolutionType,
       isWideScreen: isWideScreen ?? this.isWideScreen,
       isContentExpanded: isContentExpanded ?? this.isContentExpanded,
@@ -373,6 +394,7 @@ class PlaySession {
     required VideoUiStateActions videoUiStateActions,
     required Episodes episodesActions,
     required this.danmakuChineseConverter,
+    required this.engineFactory,
     required DanmakuChineseMode initialDanmakuChineseMode,
     required void Function({
       required int subjectId,
@@ -386,6 +408,7 @@ class PlaySession {
         _danmakuChineseMode = initialDanmakuChineseMode;
 
   late PlayerEngine engine;
+  final PlayerEngineFactory engineFactory;
   final PlayStateNotifier _playStateActions;
   final VideoUiStateActions _videoUiStateActions;
   final Episodes _episodesActions;
@@ -434,6 +457,9 @@ class PlaySession {
 
   String? localDanmakuPath;
 
+  /// 当前播放会话使用的统一播放源，用于重新加载和播放器内核切换时恢复上下文。
+  PlaybackSource? _currentSource;
+
   ///弹幕相关
   DanmakuController? danmakuController;
   Timer? _saveSettingsTimer;
@@ -474,9 +500,72 @@ class PlaySession {
   void init() {
     _latestPlayState = _playStateActions.value;
     final adBlocker = setting.get(PlaybackKey.adBlocker, defaultValue: false);
-    engine = MediaKitEngine(adBlocker: adBlocker);
-    _playerSubscription = engine.events.listen(_handlePlayerEvent);
+    engine = engineFactory.create(
+      PlayerKernel.mediaKit,
+      adBlocker: adBlocker,
+    );
+    unawaited(engine.initialize());
+    _listenToEngine();
     unawaited(_initSystemVolumeSync());
+  }
+
+  void _listenToEngine() {
+    _playerSubscription = engine.events.listen(_handlePlayerEvent);
+  }
+
+  /// 在保持播放上下文的前提下切换播放器内核。
+  Future<void> switchKernel(PlayerKernel target) async {
+    if (_isDisposed || _playStateActions.value.switchingKernel) return;
+    if (engine.kernel == target) return;
+
+    final source = _currentSource;
+    if (source == null) return;
+
+    final current = engine;
+    final state = _playStateActions.value;
+    final snapshot = PlayerSnapshot(
+      source: source,
+      position: state.position,
+      volume: state.volume,
+      rate: state.rate,
+      wasPlaying: state.playing,
+      fit: state.videoFit,
+    );
+    final adBlocker = setting.get(PlaybackKey.adBlocker, defaultValue: false);
+    PlayerEngine? next;
+
+    _playStateActions.setSwitchingKernel(true);
+    try {
+      await current.pause();
+      await _playerSubscription?.cancel();
+      _playerSubscription = null;
+
+      next = engineFactory.create(target, adBlocker: adBlocker);
+      await next.initialize();
+      await next.open(
+        snapshot.source,
+        startPosition: snapshot.position,
+        autoPlay: false,
+      );
+      await next.setVolume(snapshot.volume);
+      await next.setRate(snapshot.rate);
+
+      engine = next;
+      _listenToEngine();
+      _playStateActions.setKernel(target);
+      _playStateActions.setSwitchingKernel(false);
+
+      await current.dispose();
+      if (snapshot.wasPlaying) await engine.play();
+    } catch (error, stackTrace) {
+      LiggLogger()
+          .e('切换播放器内核失败: $target', error: error, stackTrace: stackTrace);
+      await next?.dispose();
+      engine = current;
+      _listenToEngine();
+      _playStateActions.setSwitchingKernel(false);
+      if (snapshot.wasPlaying) unawaited(current.play());
+    }
   }
 
   void _handlePlayerEvent(PlayerEvent event) {
@@ -615,11 +704,12 @@ class PlaySession {
     isLocalPlayback = state.isLocalPlayback;
     localDanmakuPath = state.localDanmakuPath;
     if (state.videoUrl.isEmpty) return;
+    _currentSource = PlaybackSource(
+      uri: Uri.parse(state.videoUrl),
+      isLocal: state.isLocalPlayback,
+    );
     await engine.open(
-      PlaybackSource(
-        uri: Uri.parse(state.videoUrl),
-        isLocal: state.isLocalPlayback,
-      ),
+      _currentSource!,
       autoPlay: false,
     );
     if (_isDisposed) return;

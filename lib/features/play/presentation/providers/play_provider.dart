@@ -7,6 +7,7 @@ import 'package:anime_flow/core/constants/constants.dart';
 import 'package:anime_flow/core/constants/storage_key.dart';
 import 'package:anime_flow/features/play/application/danmaku_chinese_converter.dart';
 import 'package:anime_flow/features/play/application/danmaku_chinese_mode.dart';
+import 'package:anime_flow/features/play/application/danmaku_playback_synchronizer.dart';
 import 'package:anime_flow/features/play/application/playback_progress_manager.dart';
 import 'package:anime_flow/features/play/application/play_history_service.dart';
 import 'package:anime_flow/features/play/presentation/providers/danmaku_chinese_mode_provider.dart';
@@ -462,7 +463,13 @@ class PlaySession {
   PlaybackSource? _currentSource;
 
   ///弹幕相关
-  DanmakuController? danmakuController;
+  final DanmakuPlaybackSynchronizer danmakuSynchronizer =
+      DanmakuPlaybackSynchronizer();
+  DanmakuController? get danmakuController => danmakuSynchronizer.controller;
+  set danmakuController(DanmakuController? value) {
+    danmakuSynchronizer.controller = value;
+  }
+
   Timer? _saveSettingsTimer;
 
   /// 记录原始倍速
@@ -579,13 +586,7 @@ class PlaySession {
   }
 
   void _syncDanmakuPauseWithPlayback(bool playing) {
-    final controller = danmakuController;
-    if (controller == null) return;
-    if (playing) {
-      controller.resume();
-    } else {
-      controller.pause();
-    }
+    danmakuSynchronizer.syncPlayback(playing);
   }
 
   void _autoSwitchToNextEpisode() {
@@ -1008,7 +1009,7 @@ class PlaySession {
   }
 
   void _clearDanmakuCanvas() {
-    danmakuController?.clear();
+    danmakuSynchronizer.clear();
   }
 
   /// 切换弹幕开关

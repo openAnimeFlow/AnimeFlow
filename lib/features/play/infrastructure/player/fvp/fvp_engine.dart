@@ -14,6 +14,12 @@ import 'package:flutter/material.dart';
 /// This intentionally uses the backend API instead of fvp.registerWith(), so
 /// MediaKit and FVP can coexist as explicitly selected engines.
 class FvpEngine implements PlayerEngine {
+  // FVP defaults to a 4-second decoded-data buffer. On longer videos that is
+  // only a few pixels on the progress bar, so keep a visible, practical
+  // buffer for on-demand playback.
+  static const int _bufferRangeMinMilliseconds = 1000;
+  static const int _bufferRangeMaxMilliseconds = 30 * 1000;
+
   late final fvp.Player _player;
   final StreamController<PlayerEvent> _events =
       StreamController<PlayerEvent>.broadcast();
@@ -41,6 +47,10 @@ class FvpEngine implements PlayerEngine {
   Future<void> initialize() async {
     if (_initialized) return;
     _player = fvp.Player();
+    _player.setBufferRange(
+      min: _bufferRangeMinMilliseconds,
+      max: _bufferRangeMaxMilliseconds,
+    );
     _subscriptions.addAll([
       _player.onStateChanged.listen((change) {
         final state = change.newValue;
@@ -57,8 +67,15 @@ class FvpEngine implements PlayerEngine {
         // 部分 MDK 事件复用 error 字段传递状态值，而不是错误码：
         // reader.buffering 是缓冲进度，thread.* 是线程状态，
         // render.video 是渲染时间戳。
-        final isStatusEvent = event.category == 'reader.buffering' ||
-            event.category == 'render.video' ||
+        if (event.category == 'reader.buffering') {
+          // FVP updates its buffered duration alongside this event. Reading
+          // it here mirrors the package's official video_player backend and
+          // avoids missing short-lived buffer updates between polling ticks.
+          _emitBufferedPosition();
+          return;
+        }
+
+        final isStatusEvent = event.category == 'render.video' ||
             event.category.startsWith('thread.');
         if (!isStatusEvent && event.error != 0) {
           _emit(PlayerError(
@@ -217,13 +234,29 @@ class FvpEngine implements PlayerEngine {
 
   void _emitCurrentMetrics() {
     if (!_hasMedia || _disposed) return;
-    _emit(PlayerPositionChanged(
-      Duration(milliseconds: _player.position),
-    ));
+    final position = _player.position;
+    _emit(PlayerPositionChanged(Duration(milliseconds: position)));
+
+    // FVP's buffered() value is the amount of media buffered after the
+    // current position. The shared playback state stores the absolute end
+    // position used by the progress bar, so convert it before emitting.
+    _emitBufferedPosition(position: position);
+
     final duration = _player.mediaInfo.duration;
     if (duration > 0) {
       _emit(PlayerDurationChanged(Duration(milliseconds: duration)));
     }
+  }
+
+  void _emitBufferedPosition({int? position}) {
+    if (!_hasMedia || _disposed) return;
+    final currentPosition = position ?? _player.position;
+    final bufferLength = _player.buffered();
+    if (bufferLength < 0) return;
+
+    _emit(PlayerBufferedChanged(
+      Duration(milliseconds: currentPosition + bufferLength),
+    ));
   }
 
   void _ensureReady() {

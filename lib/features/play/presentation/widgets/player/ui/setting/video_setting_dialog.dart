@@ -138,8 +138,8 @@ class _VideoSettingState extends ConsumerState<VideoSettingDialog> {
                               return Text(
                                 scheduledStopDuration == 0
                                     ? l10n.scheduledOff
-                                    : FormatTimeUtil.formatScheduledTime(
-                                        scheduledStopDuration),
+                                    : FormatTimeUtil.formatDuration(Duration(
+                                        seconds: scheduledStopDuration)),
                                 style: TextStyle(
                                   fontSize: 12,
                                   decoration: TextDecoration.none,
@@ -357,16 +357,6 @@ class _VideoSettingState extends ConsumerState<VideoSettingDialog> {
                     switchingKernel,
                   ),
                   const Divider(),
-                  const SizedBox(height: 10),
-                  Text(
-                    l10n.moreSettingsBuilding,
-                    style: TextStyle(
-                      fontSize: 20,
-                      decoration: TextDecoration.none,
-                      fontWeight: FontWeight.w400,
-                      color: Theme.of(context).textTheme.titleMedium?.color,
-                    ),
-                  )
                 ],
               ),
             ),

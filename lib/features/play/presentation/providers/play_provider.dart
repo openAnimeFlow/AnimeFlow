@@ -504,7 +504,7 @@ class PlaySession {
       adBlocker: adBlocker,
     );
     playbackProgressManager = PlaybackProgressManager(
-      setEpisodeWatched: ({
+      onEpisodeWatched: ({
         required subjectId,
         required episodeId,
         required watched,
@@ -553,7 +553,7 @@ class PlaySession {
   void _handlePlayerEvent(PlayerEvent event) {
     if (event is PlayerPlayingChanged) {
       if (_lastPlayerPlaying && !event.playing) {
-        playbackProgressManager.saveOnPause();
+        playbackProgressManager.saveAfterPause();
       }
       _lastPlayerPlaying = event.playing;
       _playStateActions.setPlaying(event.playing);
@@ -673,7 +673,7 @@ class PlaySession {
     alias = state.alias;
     isLocalPlayback = state.isLocalPlayback;
     localDanmakuPath = state.localDanmakuPath;
-    playbackProgressManager.updateContext(
+    playbackProgressManager.setPlaybackContext(
       subjectId: subjectId,
       episodeId: episodeId,
       episodeSort: episodeSort,
@@ -748,7 +748,7 @@ class PlaySession {
   }
 
   void _handlePlayStateChanged(PlayState state) {
-    playbackProgressManager.handleState(
+    playbackProgressManager.updatePlaybackState(
       position: state.position,
       duration: state.duration,
       playing: state.playing,

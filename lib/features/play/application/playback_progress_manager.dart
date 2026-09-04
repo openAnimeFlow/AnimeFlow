@@ -8,20 +8,20 @@ import 'package:anime_flow/features/play/application/play_history_service.dart';
 import 'package:anime_flow/shared/models/player/play/play_history.dart';
 import 'package:anime_flow/shared/models/player/play/play_history_event_type.dart';
 
-typedef SetEpisodeWatched = void Function({
+typedef SetEpisodeWatchedCallback = void Function({
   required int subjectId,
   required int episodeId,
   required bool watched,
 });
 
-/// 播放历史和观看进度协调器。
+/// 播放进度采集器与播放记录写入协调器。
 class PlaybackProgressManager {
-  PlaybackProgressManager({required this.setEpisodeWatched});
+  PlaybackProgressManager({required this.onEpisodeWatched});
 
   static const watchedProgressThreshold = 0.90;
   static const pauseSaveThrottle = Duration(seconds: 1);
 
-  final SetEpisodeWatched setEpisodeWatched;
+  final SetEpisodeWatchedCallback onEpisodeWatched;
   Future<void> _saveQueue = Future<void>.value();
   final Set<int> _autoWatchedEpisodeIds = {};
   final Set<int> _autoWatchedEpisodeUpdatesInFlight = {};
@@ -37,7 +37,7 @@ class PlaybackProgressManager {
   Duration position = Duration.zero;
   Duration duration = Duration.zero;
 
-  void updateContext({
+  void setPlaybackContext({
     required int subjectId,
     required int episodeId,
     required int episodeSort,
@@ -55,7 +55,7 @@ class PlaybackProgressManager {
     this.isLocalPlayback = isLocalPlayback;
   }
 
-  void handleState({
+  void updatePlaybackState({
     required Duration position,
     required Duration duration,
     required bool playing,
@@ -82,7 +82,7 @@ class PlaybackProgressManager {
     unawaited(_autoUpdateEpisodeWatched(targetEpisodeId));
   }
 
-  void saveOnPause() {
+  void saveAfterPause() {
     final now = DateTime.now();
     if (_lastPauseSavedAt != null &&
         now.difference(_lastPauseSavedAt!) < pauseSaveThrottle) {
@@ -129,7 +129,7 @@ class PlaybackProgressManager {
     try {
       await FlowApi.updateEpisodeWatchedService(targetEpisodeId, watched: true);
       _autoWatchedEpisodeIds.add(targetEpisodeId);
-      setEpisodeWatched(
+      onEpisodeWatched(
         subjectId: subjectId,
         episodeId: targetEpisodeId,
         watched: true,

@@ -12,19 +12,22 @@ import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 part 'play_history_provider.g.dart';
 
-/// 播放记录的统一入口，负责读取列表并在本地数据变化后自动刷新。
+/// 播放记录列表状态与同步入口。
+///
+/// 持久化和远程同步由 [PlayHistoryService] 负责，本类只负责将结果
+/// 暴露为 Riverpod 状态，并在本地数据变化后刷新列表。
 @Riverpod(keepAlive: true)
-class PlayHistoryController extends _$PlayHistoryController {
+class PlayHistoryNotifier extends _$PlayHistoryNotifier {
   ValueListenable<Box<PlayHistory>>? _historyListenable;
   Future<void> _operationQueue = Future<void>.value();
   bool _autoSyncQueuedOrRunning = false;
 
   @override
   Future<List<PlayHistory>> build() async {
-    _historyListenable = PlayHistoryService.listenable();
-    _historyListenable?.addListener(_reload);
+    _historyListenable = PlayHistoryService.listenable()
+      ..addListener(_reloadState);
     ref.onDispose(() {
-      _historyListenable?.removeListener(_reload);
+      _historyListenable?.removeListener(_reloadState);
       _historyListenable = null;
     });
     ref.listen<AsyncValue<bool>>(
@@ -33,20 +36,20 @@ class PlayHistoryController extends _$PlayHistoryController {
         final wasLoggedIn = previous?.value ?? false;
         final isLoggedIn = next.value ?? false;
         if (previous != null && isLoggedIn && !wasLoggedIn) {
-          unawaited(autoSyncFromServer());
+          unawaited(syncFromServer());
         }
       },
     );
-    unawaited(autoSyncFromServer());
+    unawaited(syncFromServer());
     try {
-      return await _fetch();
+      return await _loadHistories();
     } catch (e) {
       LiggLogger().e(e);
       rethrow;
     }
   }
 
-  Future<List<PlayHistory>> _fetch() async {
+  Future<List<PlayHistory>> _loadHistories() async {
     final histories = await PlayHistoryService.getAll();
     histories.sort((a, b) => b.updateAt.compareTo(a.updateAt));
     return histories;
@@ -54,12 +57,12 @@ class PlayHistoryController extends _$PlayHistoryController {
 
   Future<void> refresh() async {
     state = const AsyncLoading();
-    state = await AsyncValue.guard(_fetch);
+    state = await AsyncValue.guard(_loadHistories);
   }
 
-  Future<void> _reload() async {
+  Future<void> _reloadState() async {
     try {
-      final histories = await _fetch();
+      final histories = await _loadHistories();
       if (ref.mounted) {
         state = AsyncData(histories);
       }
@@ -70,12 +73,12 @@ class PlayHistoryController extends _$PlayHistoryController {
 
   /// 上传本地未同步的播放记录。
   Future<PlayHistorySyncResult> syncPending() {
-    return _enqueue(_syncPendingOnly);
+    return _enqueue(_syncPendingAndRefresh);
   }
 
-  Future<PlayHistorySyncResult> _syncPendingOnly() async {
+  Future<PlayHistorySyncResult> _syncPendingAndRefresh() async {
     final result = await PlayHistoryService.syncPending();
-    await _reload();
+    await _reloadState();
     return result;
   }
 
@@ -86,7 +89,7 @@ class PlayHistoryController extends _$PlayHistoryController {
 
   Future<void> _clearLocalOnly() async {
     await PlayHistoryService.clearLocal();
-    await _reload();
+    await _reloadState();
   }
 
   Future<T> _enqueue<T>(Future<T> Function() task) {
@@ -102,21 +105,21 @@ class PlayHistoryController extends _$PlayHistoryController {
   }
 
   /// 自动同步：先上传本地未同步记录，再拉取服务器记录并刷新列表。
-  Future<void> autoSyncFromServer() {
+  Future<void> syncFromServer() {
     if (_autoSyncQueuedOrRunning) return Future<void>.value();
     _autoSyncQueuedOrRunning = true;
-    return _enqueue(_autoSync).whenComplete(() {
+    return _enqueue(_syncFromServer).whenComplete(() {
       _autoSyncQueuedOrRunning = false;
     });
   }
 
-  Future<void> _autoSync() async {
+  Future<void> _syncFromServer() async {
     const maxAttempts = 3;
     for (var attempt = 1; attempt <= maxAttempts; attempt++) {
       try {
-        await _syncPendingOnly();
+        await _syncPendingAndRefresh();
         await PlayHistoryService.syncFromServer();
-        await _reload();
+        await _reloadState();
         return;
       } catch (e) {
         LiggLogger().e('自动同步播放记录失败(第 $attempt/$maxAttempts 次): $e');

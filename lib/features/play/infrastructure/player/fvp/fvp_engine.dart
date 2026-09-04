@@ -77,29 +77,32 @@ class FvpEngine implements PlayerEngine {
   @override
   Widget buildVideoSurface({required BoxFit fit}) {
     _ensureReady();
-    return ValueListenableBuilder<int?>(
-      valueListenable: _player.textureId,
-      builder: (context, textureId, child) {
-        if (textureId == null || textureId < 0) {
-          return const SizedBox.expand();
-        }
-        final size = _videoSize;
-        final video = Texture(textureId: textureId);
-        if (size == null || size.width <= 0 || size.height <= 0) {
-          return SizedBox.expand(child: video);
-        }
-        return SizedBox.expand(
-          child: FittedBox(
-            fit: fit,
-            clipBehavior: Clip.hardEdge,
-            child: SizedBox(
-              width: size.width,
-              height: size.height,
-              child: video,
+    return ColoredBox(
+      color: Colors.black,
+      child: ValueListenableBuilder<int?>(
+        valueListenable: _player.textureId,
+        builder: (context, textureId, child) {
+          if (textureId == null || textureId < 0) {
+            return const SizedBox.expand();
+          }
+          final size = _videoSize;
+          final video = Texture(textureId: textureId);
+          if (size == null || size.width <= 0 || size.height <= 0) {
+            return SizedBox.expand(child: video);
+          }
+          return SizedBox.expand(
+            child: FittedBox(
+              fit: fit,
+              clipBehavior: Clip.hardEdge,
+              child: SizedBox(
+                width: size.width,
+                height: size.height,
+                child: video,
+              ),
             ),
-          ),
-        );
-      },
+          );
+        },
+      ),
     );
   }
 

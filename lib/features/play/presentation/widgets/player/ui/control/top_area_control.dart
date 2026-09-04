@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:anime_flow/core/constants/assets_path_constants.dart';
 import 'package:anime_flow/core/constants/storage_key.dart';
 import 'package:anime_flow/core/network_speed/network_speed_provider.dart';
@@ -263,7 +265,8 @@ class _TopAreaControlState extends ConsumerState<TopAreaControl> {
                                             barrierDismissible: true,
                                             child: VideoSourceDrawers(
                                               onVideoUrlSelected: (url) {
-                                                playController.player.stop();
+                                                unawaited(
+                                                    playController.stop());
                                                 videoSourceController
                                                     .loadVideoPage(url);
                                                 videoUiStateController

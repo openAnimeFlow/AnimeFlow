@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
+import 'dart:typed_data';
 
 import 'package:anime_flow/core/constants/constants.dart';
 import 'package:anime_flow/core/constants/storage_key.dart';
@@ -24,10 +25,12 @@ import 'package:anime_flow/core/utils/system_util.dart';
 import 'package:anime_flow/core/utils/utils.dart';
 import 'package:anime_flow/core/utils/vibrate.dart';
 import 'package:anime_flow/shared/widgets/windows_title_bar.dart';
+import 'package:anime_flow/features/play/domain/player/player_engine.dart';
+import 'package:anime_flow/features/play/domain/player/player_event.dart';
+import 'package:anime_flow/features/play/domain/player/playback_source.dart';
+import 'package:anime_flow/features/play/infrastructure/player/media_kit/media_kit_engine.dart';
 import 'package:canvas_danmaku/canvas_danmaku.dart';
 import 'package:flutter/material.dart';
-import 'package:media_kit/media_kit.dart';
-import 'package:media_kit_video/media_kit_video.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:window_manager/window_manager.dart';
 
@@ -382,8 +385,7 @@ class PlaySession {
         _setEpisodeWatched = setEpisodeWatched,
         _danmakuChineseMode = initialDanmakuChineseMode;
 
-  late Player player;
-  late VideoController videoController;
+  late PlayerEngine engine;
   final PlayStateNotifier _playStateActions;
   final VideoUiStateActions _videoUiStateActions;
   final Episodes _episodesActions;
@@ -462,7 +464,7 @@ class PlaySession {
   final Set<int> _autoWatchedEpisodeIds = {};
   final Set<int> _autoWatchedEpisodeUpdatesInFlight = {};
 
-  final List<StreamSubscription<Object?>> _playerSubscriptions = [];
+  StreamSubscription<PlayerEvent>? _playerSubscription;
   bool _isDisposed = false;
 
   static const Duration _bufferingPositionTolerance =
@@ -472,55 +474,50 @@ class PlaySession {
   void init() {
     _latestPlayState = _playStateActions.value;
     final adBlocker = setting.get(PlaybackKey.adBlocker, defaultValue: false);
-    player = Player(configuration: PlayerConfiguration(adBlocker: adBlocker));
-    videoController = VideoController(player);
+    engine = MediaKitEngine(adBlocker: adBlocker);
+    _playerSubscription = engine.events.listen(_handlePlayerEvent);
     unawaited(_initSystemVolumeSync());
+  }
 
-    _playerSubscriptions.addAll([
-      player.stream.playing.listen((playing) {
-        if (_lastPlayerPlaying && !playing) {
-          final now = DateTime.now();
-          final lastSavedAt = _lastPausePlayHistorySavedAt;
-          if (lastSavedAt == null ||
-              now.difference(lastSavedAt) >= _pausePlayHistoryThrottle) {
-            _lastPausePlayHistorySavedAt = now;
-            unawaited(_savePlayHistory());
-          }
+  void _handlePlayerEvent(PlayerEvent event) {
+    if (event is PlayerPlayingChanged) {
+      if (_lastPlayerPlaying && !event.playing) {
+        final now = DateTime.now();
+        final lastSavedAt = _lastPausePlayHistorySavedAt;
+        if (lastSavedAt == null ||
+            now.difference(lastSavedAt) >= _pausePlayHistoryThrottle) {
+          _lastPausePlayHistorySavedAt = now;
+          unawaited(_savePlayHistory());
         }
-        _lastPlayerPlaying = playing;
-        _playStateActions.setPlaying(playing);
-        _syncDanmakuPauseWithPlayback(playing);
-      }),
-      player.stream.volume.listen((vol) {
-        if (!SystemUtil.supportsSystemVolumeSync) {
-          _playStateActions.setVolume(vol);
-        }
-      }),
-      player.stream.buffer.listen((buffered) {
-        _playStateActions.setBuffered(buffered);
-        _updateEffectiveBufferingState(buffered: buffered);
-      }),
-      player.stream.buffering.listen((buffering) {
-        _isPlayerBuffering = buffering;
-        _updateEffectiveBufferingState(playerBuffering: buffering);
-      }),
-      player.stream.rate.listen((r) {
-        _playStateActions.setRate(r);
-      }),
-      player.stream.position.listen((pos) {
-        _playStateActions.setPosition(pos);
-        _updateEffectiveBufferingState(position: pos);
-      }),
-      player.stream.duration.listen((dur) {
-        _playStateActions.setDuration(dur);
-      }),
-      player.stream.completed.listen((completed) {
-        if (completed && subjectId > 0) {
-          _autoSwitchToNextEpisode();
-          unawaited(PlayHistoryService.clearPosition(subjectId));
-        }
-      }),
-    ]);
+      }
+      _lastPlayerPlaying = event.playing;
+      _playStateActions.setPlaying(event.playing);
+      _syncDanmakuPauseWithPlayback(event.playing);
+    } else if (event is PlayerVolumeChanged) {
+      if (!SystemUtil.supportsSystemVolumeSync) {
+        _playStateActions.setVolume(event.volume);
+      }
+    } else if (event is PlayerBufferedChanged) {
+      _playStateActions.setBuffered(event.buffered);
+      _updateEffectiveBufferingState(buffered: event.buffered);
+    } else if (event is PlayerBufferingChanged) {
+      _isPlayerBuffering = event.buffering;
+      _updateEffectiveBufferingState(playerBuffering: event.buffering);
+    } else if (event is PlayerRateChanged) {
+      _playStateActions.setRate(event.rate);
+    } else if (event is PlayerPositionChanged) {
+      _playStateActions.setPosition(event.position);
+      _updateEffectiveBufferingState(position: event.position);
+    } else if (event is PlayerDurationChanged) {
+      _playStateActions.setDuration(event.duration);
+    } else if (event is PlayerCompleted) {
+      if (subjectId > 0) {
+        _autoSwitchToNextEpisode();
+        unawaited(PlayHistoryService.clearPosition(subjectId));
+      }
+    } else if (event is PlayerError) {
+      LiggLogger().e('播放器错误: ${event.error}', error: event.stackTrace);
+    }
   }
 
   void _syncDanmakuPauseWithPlayback(bool playing) {
@@ -583,22 +580,20 @@ class PlaySession {
     _systemVolumeSyncTimer?.cancel();
     _saveSettingsTimer?.cancel();
     _stopTimer?.cancel();
-    for (final subscription in _playerSubscriptions) {
-      subscription.cancel();
-    }
-    _playerSubscriptions.clear();
+    unawaited(_playerSubscription?.cancel());
+    _playerSubscription = null;
     _clearDanmakuCanvas();
-    player.dispose();
+    unawaited(engine.dispose());
   }
 
   void pauseForRouteCover() {
     cancelScheduledStop();
-    unawaited(player.pause());
+    unawaited(engine.pause());
   }
 
   Future<void> stopCurrentMedia() async {
     cancelScheduledStop();
-    await player.stop();
+    await engine.stop();
     _clearDanmakuCanvas();
   }
 
@@ -620,17 +615,26 @@ class PlaySession {
     isLocalPlayback = state.isLocalPlayback;
     localDanmakuPath = state.localDanmakuPath;
     if (state.videoUrl.isEmpty) return;
-    await player.open(Media(state.videoUrl), play: false);
+    await engine.open(
+      PlaybackSource(
+        uri: Uri.parse(state.videoUrl),
+        isLocal: state.isLocalPlayback,
+      ),
+      autoPlay: false,
+    );
     if (_isDisposed) return;
-    await player.stream.duration.firstWhere((d) => d > Duration.zero);
+    await engine.events.firstWhere(
+      (event) =>
+          event is PlayerDurationChanged && event.duration > Duration.zero,
+    );
     if (_isDisposed) return;
     await Future.delayed(const Duration(milliseconds: 800), () {
       if (!_isDisposed) {
-        unawaited(player.seek(Duration(seconds: offset)));
+        unawaited(engine.seek(Duration(seconds: offset)));
       }
     });
     if (_isDisposed) return;
-    await player.play();
+    await engine.play();
     if (_isDisposed) return;
     final logger = LiggLogger();
 
@@ -1042,12 +1046,16 @@ class PlaySession {
   ///暂停/播放
   void playOrPauseVideo() {
     _videoUiStateActions.updateMainAxisAlignmentType(MainAxisAlignment.start);
-    player.playOrPause();
+    if (_playStateActions.value.playing) {
+      unawaited(engine.pause());
+    } else {
+      unawaited(engine.play());
+    }
   }
 
   void _applyPlaybackRate(double speed) {
     _playStateActions.setRate(speed);
-    player.setRate(speed);
+    unawaited(engine.setRate(speed));
   }
 
   /// 设置播放倍数
@@ -1072,7 +1080,7 @@ class PlaySession {
 
   /// 跳转到指定位置
   void seekTo(Duration pos) {
-    player.seek(pos);
+    unawaited(engine.seek(pos));
     _updateEffectiveBufferingState(position: pos);
     unawaited(
       _savePlayHistory(
@@ -1100,9 +1108,9 @@ class PlaySession {
   void _setPlayerVolume(double newVolume) {
     final clampedVolume = newVolume.clamp(0.0, 100.0);
     _playStateActions.setVolume(clampedVolume);
-    player.setVolume(
+    unawaited(engine.setVolume(
       SystemUtil.supportsSystemVolumeSync ? 100.0 : clampedVolume,
-    );
+    ));
   }
 
   void _updateVolume(
@@ -1209,7 +1217,7 @@ class PlaySession {
   /// 开始播放
   Future<void> startPlaying() async {
     try {
-      await player.play();
+      await engine.play();
     } catch (_) {
       return;
     }
@@ -1231,14 +1239,14 @@ class PlaySession {
             scheduledStopDuration - 1,
           );
         } else {
-          unawaited(player.pause());
+          unawaited(engine.pause());
           timer.cancel();
           _stopTimer = null;
         }
       });
     } else {
       _playStateActions.setScheduledStopDuration(0);
-      await player.pause();
+      await engine.pause();
     }
   }
 
@@ -1252,32 +1260,30 @@ class PlaySession {
   ///设置超分辨率
   /// type 1 关闭 2 效率档 3 质量档
   Future<void> setShader(int type) async {
-    var pp = player.platform as NativePlayer;
-    await pp.waitForPlayerInitialization;
-    await pp.waitForVideoControllerInitializationIfAttached;
+    if (!engine.capabilities.supportsShader) {
+      throw UnsupportedError('当前播放器内核不支持 Anime4K');
+    }
     if (type == 2) {
-      await pp.command([
-        'change-list',
-        'glsl-shaders',
-        'set',
-        Utils.buildShadersAbsolutePath(
-            shadersDirectory.path, mpvAnime4KShadersLite),
-      ]);
+      await engine.setShaders(Utils.buildShadersAbsolutePath(
+          shadersDirectory.path, mpvAnime4KShadersLite));
       _playStateActions.setSuperResolutionType(2);
       return;
     }
     if (type == 3) {
-      await pp.command([
-        'change-list',
-        'glsl-shaders',
-        'set',
-        Utils.buildShadersAbsolutePath(
-            shadersDirectory.path, mpvAnime4KShaders),
-      ]);
+      await engine.setShaders(Utils.buildShadersAbsolutePath(
+          shadersDirectory.path, mpvAnime4KShaders));
       _playStateActions.setSuperResolutionType(3);
       return;
     }
-    await pp.command(['change-list', 'glsl-shaders', 'clr', '']);
+    await engine.setShaders('');
     _playStateActions.setSuperResolutionType(1);
   }
+
+  Widget buildVideoSurface({required BoxFit fit}) {
+    return engine.buildVideoSurface(fit: fit);
+  }
+
+  Future<Uint8List?> takeScreenshot() => engine.screenshot();
+
+  Future<void> stop() => engine.stop();
 }

@@ -484,24 +484,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String get videoSettingsTitle => 'Video settings';
 
   @override
-  String get playerKernel => 'Player kernel';
-
-  @override
-  String get rememberPlayerKernelSelection => 'Remember this selection';
-
-  @override
-  String get selectPlayerKernel => 'Select player kernel';
-
-  @override
-  String get playerKernelSwitchFailed => 'Failed to switch player kernel';
-
-  @override
-  String get mediaKit => 'MediaKit';
-
-  @override
-  String get fvp => 'FVP';
-
-  @override
   String get scheduledOff => 'Scheduled stop';
 
   @override
@@ -1878,4 +1860,22 @@ class AppLocalizationsEn extends AppLocalizations {
   String downloadSizeProgress(Object downloaded, Object total) {
     return 'Downloaded $downloaded / Total $total';
   }
+
+  @override
+  String get playerKernel => 'Player kernel';
+
+  @override
+  String get rememberPlayerKernelSelection => 'Remember this selection';
+
+  @override
+  String get selectPlayerKernel => 'Select player kernel';
+
+  @override
+  String get playerKernelSwitchFailed => 'Failed to switch player kernel';
+
+  @override
+  String get mediaKit => 'MediaKit';
+
+  @override
+  String get fvp => 'FVP';
 }

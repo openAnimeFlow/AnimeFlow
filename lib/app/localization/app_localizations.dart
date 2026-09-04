@@ -973,13 +973,6 @@ abstract class AppLocalizations {
   /// **'视频设置'**
   String get videoSettingsTitle;
 
-  String get playerKernel;
-  String get rememberPlayerKernelSelection;
-  String get selectPlayerKernel;
-  String get playerKernelSwitchFailed;
-  String get mediaKit;
-  String get fvp;
-
   /// No description provided for @scheduledOff.
   ///
   /// In zh_Hans, this message translates to:
@@ -3470,6 +3463,42 @@ abstract class AppLocalizations {
   /// In zh_Hans, this message translates to:
   /// **'已下载 {downloaded} / 总大小 {total}'**
   String downloadSizeProgress(Object downloaded, Object total);
+
+  /// No description provided for @playerKernel.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'播放器内核'**
+  String get playerKernel;
+
+  /// No description provided for @rememberPlayerKernelSelection.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'切换后将记住本次选择'**
+  String get rememberPlayerKernelSelection;
+
+  /// No description provided for @selectPlayerKernel.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'选择播放器内核'**
+  String get selectPlayerKernel;
+
+  /// No description provided for @playerKernelSwitchFailed.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'播放器内核切换失败'**
+  String get playerKernelSwitchFailed;
+
+  /// No description provided for @mediaKit.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'MediaKit'**
+  String get mediaKit;
+
+  /// No description provided for @fvp.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'FVP'**
+  String get fvp;
 }
 
 class _AppLocalizationsDelegate

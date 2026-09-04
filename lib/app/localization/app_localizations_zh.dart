@@ -482,24 +482,6 @@ class AppLocalizationsZh extends AppLocalizations {
   String get videoSettingsTitle => '视频设置';
 
   @override
-  String get playerKernel => '播放器内核';
-
-  @override
-  String get rememberPlayerKernelSelection => '切换后将记住本次选择';
-
-  @override
-  String get selectPlayerKernel => '选择播放器内核';
-
-  @override
-  String get playerKernelSwitchFailed => '播放器内核切换失败';
-
-  @override
-  String get mediaKit => 'MediaKit';
-
-  @override
-  String get fvp => 'FVP';
-
-  @override
   String get scheduledOff => '定时关闭';
 
   @override
@@ -1830,6 +1812,24 @@ class AppLocalizationsZh extends AppLocalizations {
   String downloadSizeProgress(Object downloaded, Object total) {
     return '已下載 $downloaded / 總大小 $total';
   }
+
+  @override
+  String get playerKernel => '播放器內核';
+
+  @override
+  String get rememberPlayerKernelSelection => '切換後將記住本次選擇';
+
+  @override
+  String get selectPlayerKernel => '選擇播放器內核';
+
+  @override
+  String get playerKernelSwitchFailed => '播放器內核切換失敗';
+
+  @override
+  String get mediaKit => 'MediaKit';
+
+  @override
+  String get fvp => 'FVP';
 }
 
 /// The translations for Chinese, using the Han script (`zh_Hans`).
@@ -3639,6 +3639,24 @@ class AppLocalizationsZhHans extends AppLocalizationsZh {
   String downloadSizeProgress(Object downloaded, Object total) {
     return '已下载 $downloaded / 总大小 $total';
   }
+
+  @override
+  String get playerKernel => '播放器内核';
+
+  @override
+  String get rememberPlayerKernelSelection => '切换后将记住本次选择';
+
+  @override
+  String get selectPlayerKernel => '选择播放器内核';
+
+  @override
+  String get playerKernelSwitchFailed => '播放器内核切换失败';
+
+  @override
+  String get mediaKit => 'MediaKit';
+
+  @override
+  String get fvp => 'FVP';
 }
 
 /// The translations for Chinese, as used in Hong Kong, using the Han script (`zh_Hant_HK`).
@@ -5367,6 +5385,24 @@ class AppLocalizationsZhHantHk extends AppLocalizationsZh {
   String downloadSizeProgress(Object downloaded, Object total) {
     return '已下載 $downloaded / 總大小 $total';
   }
+
+  @override
+  String get playerKernel => '播放器內核';
+
+  @override
+  String get rememberPlayerKernelSelection => '切換後將記住本次選擇';
+
+  @override
+  String get selectPlayerKernel => '選擇播放器內核';
+
+  @override
+  String get playerKernelSwitchFailed => '播放器內核切換失敗';
+
+  @override
+  String get mediaKit => 'MediaKit';
+
+  @override
+  String get fvp => 'FVP';
 }
 
 /// The translations for Chinese, as used in Taiwan, using the Han script (`zh_Hant_TW`).
@@ -7095,4 +7131,22 @@ class AppLocalizationsZhHantTw extends AppLocalizationsZh {
   String downloadSizeProgress(Object downloaded, Object total) {
     return '已下載 $downloaded / 總大小 $total';
   }
+
+  @override
+  String get playerKernel => '播放器內核';
+
+  @override
+  String get rememberPlayerKernelSelection => '切換後將記住本次選擇';
+
+  @override
+  String get selectPlayerKernel => '選擇播放器內核';
+
+  @override
+  String get playerKernelSwitchFailed => '播放器內核切換失敗';
+
+  @override
+  String get mediaKit => 'MediaKit';
+
+  @override
+  String get fvp => 'FVP';
 }

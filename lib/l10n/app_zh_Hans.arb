@@ -577,4 +577,10 @@
   ,"downloadPauseAll": "暂停全部"
   ,"downloadSizeProgress": "已下载 {downloaded} / 总大小 {total}"
   ,"@downloadSizeProgress": {"placeholders": {"downloaded": {}, "total": {}}}
+  ,"playerKernel": "播放器内核"
+  ,"rememberPlayerKernelSelection": "切换后将记住本次选择"
+  ,"selectPlayerKernel": "选择播放器内核"
+  ,"playerKernelSwitchFailed": "播放器内核切换失败"
+  ,"mediaKit": "MediaKit"
+  ,"fvp": "FVP"
 }

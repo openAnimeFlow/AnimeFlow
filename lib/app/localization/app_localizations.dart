@@ -3511,6 +3511,24 @@ abstract class AppLocalizations {
   /// In zh_Hans, this message translates to:
   /// **'FVP'**
   String get fvp;
+
+  /// No description provided for @hardwareDecoding.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'硬件解码'**
+  String get hardwareDecoding;
+
+  /// No description provided for @hardwareDecodingHint.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'优先使用硬件解码；切换后会重新加载当前视频。'**
+  String get hardwareDecodingHint;
+
+  /// No description provided for @hardwareDecodingFailed.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'切换解码模式失败'**
+  String get hardwareDecodingFailed;
 }
 
 class _AppLocalizationsDelegate

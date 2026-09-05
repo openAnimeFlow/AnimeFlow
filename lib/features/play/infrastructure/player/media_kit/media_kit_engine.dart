@@ -31,12 +31,20 @@ class MediaKitEngine implements PlayerEngine {
 
   MediaKitEngine({
     required this.adBlocker,
+    bool hardwareDecoder = true,
     Player Function()? playerFactory,
     VideoController Function(Player)? controllerFactory,
   })  : _playerFactory = playerFactory ??
             (() => Player(
                 configuration: PlayerConfiguration(adBlocker: adBlocker))),
-        _controllerFactory = controllerFactory ?? VideoController.new {
+        _controllerFactory = controllerFactory ??
+            ((player) => VideoController(
+                  player,
+                  configuration: VideoControllerConfiguration(
+                    enableHardwareAcceleration: hardwareDecoder,
+                    hwdec: hardwareDecoder ? null : 'no',
+                  ),
+                )) {
     _createPlayer();
   }
 

@@ -534,9 +534,29 @@ class PlaySession {
   Future<bool> switchKernel(PlayerKernel target) =>
       _serializePlaybackChange(() => _switchKernel(target));
 
-  Future<bool> _switchKernel(PlayerKernel target) async {
+  Future<bool> setHardwareDecoder(bool enabled) =>
+      _serializePlaybackChange(() async {
+        if (_isDisposed) return false;
+        final previous = setting.get(PlaybackKey.hardwareDecoder,
+            defaultValue: true) as bool;
+        if (previous == enabled) return true;
+        await setting.put(PlaybackKey.hardwareDecoder, enabled);
+        var applied = false;
+        try {
+          applied =
+              await _switchKernel(playbackCoordinator.kernel, force: true);
+          return applied;
+        } finally {
+          if (!_isDisposed) _playStateActions.setSwitchingKernel(false);
+          if (!applied) {
+            await setting.put(PlaybackKey.hardwareDecoder, previous);
+          }
+        }
+      });
+
+  Future<bool> _switchKernel(PlayerKernel target, {bool force = false}) async {
     if (_isDisposed || _playStateActions.value.switchingKernel) return false;
-    if (playbackCoordinator.kernel == target) return true;
+    if (!force && playbackCoordinator.kernel == target) return true;
 
     final source = _currentSource;
 
@@ -550,7 +570,16 @@ class PlaySession {
       fit: state.videoFit,
     );
     _playStateActions.setSwitchingKernel(true);
-    final switched = await playbackCoordinator.switchKernel(target, snapshot);
+    final shaderList = switch (state.superResolutionType) {
+      2 => mpvAnime4KShadersLite,
+      3 => mpvAnime4KShaders,
+      _ => const <String>[],
+    };
+    final switched = await playbackCoordinator.switchKernel(target, snapshot,
+        force: force,
+        shaders: force && shaderList.isNotEmpty
+            ? Utils.buildShadersAbsolutePath(shadersDirectory.path, shaderList)
+            : null);
     if (_isDisposed) return false;
     if (switched) {
       _playStateActions.setKernel(target);

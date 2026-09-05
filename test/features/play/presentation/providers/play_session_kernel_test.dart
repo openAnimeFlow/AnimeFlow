@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:io';
 
 import 'package:anime_flow/core/storage/storage.dart';
+import 'package:anime_flow/core/constants/storage_key.dart';
 import 'package:anime_flow/features/play/application/danmaku_chinese_converter.dart';
 import 'package:anime_flow/features/play/application/danmaku_chinese_mode.dart';
 import 'package:anime_flow/features/play/application/playback_coordinator.dart';
@@ -19,6 +20,29 @@ import 'package:hive_ce/hive.dart';
 
 void main() {
   setUpAll(() => Storage.setting = _Settings());
+  setUp(() => (Storage.setting as _Settings).stored.clear());
+
+  test(
+      'hardware decoding defaults on and persists changes while rebuilding the same kernel',
+      () async {
+    final factory = _Factory();
+    final session = _Session(factory);
+    await session.playbackCoordinator.initialize();
+    addTearDown(session.playbackCoordinator.dispose);
+    expect(await session.setHardwareDecoder(true), isTrue);
+    expect(factory.engines, hasLength(1));
+    await session.initPlayState(_request(1));
+    expect(await session.setHardwareDecoder(false), isTrue);
+    expect(Storage.setting.get(PlaybackKey.hardwareDecoder), isFalse);
+    expect(factory.engines, hasLength(2));
+    expect(factory.engines.last.kernel, PlayerKernel.mediaKit);
+    expect(factory.engines.first.disposeCount, 1);
+    expect(
+        factory.engines.last.source?.uri.toString(), 'https://example.com/1');
+    expect(await session.setHardwareDecoder(true), isTrue);
+    expect(Storage.setting.get(PlaybackKey.hardwareDecoder), isTrue);
+    expect(factory.engines, hasLength(3));
+  });
 
   test('episode context stays on the old episode until switching finishes',
       () async {
@@ -204,8 +228,15 @@ class _Engine implements PlayerEngine {
 }
 
 class _Settings implements Box<dynamic> {
+  final stored = <dynamic, dynamic>{};
   @override
-  Future<void> put(dynamic key, dynamic value) async {}
+  dynamic get(dynamic key, {dynamic defaultValue}) =>
+      stored[key] ?? defaultValue;
+  @override
+  Future<void> put(dynamic key, dynamic value) async {
+    stored[key] = value;
+  }
+
   @override
   dynamic noSuchMethod(Invocation invocation) => null;
 }

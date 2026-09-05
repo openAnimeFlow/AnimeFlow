@@ -1887,4 +1887,14 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get fvp => 'FVP';
+
+  @override
+  String get hardwareDecoding => 'Hardware decoding';
+
+  @override
+  String get hardwareDecodingHint =>
+      'Prefer hardware decoding; changing this reloads the current video.';
+
+  @override
+  String get hardwareDecodingFailed => 'Failed to change decoding mode';
 }

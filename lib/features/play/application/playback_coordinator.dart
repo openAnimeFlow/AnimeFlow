@@ -81,24 +81,21 @@ class PlaybackCoordinator {
   }
 
   /// 切换内核并恢复快照。失败时保留原内核，并恢复原播放状态。
-  Future<bool> switchKernel(
-    PlayerKernel target,
-    PlayerSnapshot snapshot,
-  ) async {
+  Future<bool> switchKernel(PlayerKernel target, PlayerSnapshot snapshot,
+      {bool force = false, String? shaders}) async {
     try {
-      return await _operations.run(() => _switchKernel(target, snapshot));
+      return await _operations.run(() =>
+          _switchKernel(target, snapshot, force: force, shaders: shaders));
     } catch (_) {
       if (_disposed) return false;
       rethrow;
     }
   }
 
-  Future<bool> _switchKernel(
-    PlayerKernel target,
-    PlayerSnapshot snapshot,
-  ) async {
+  Future<bool> _switchKernel(PlayerKernel target, PlayerSnapshot snapshot,
+      {bool force = false, String? shaders}) async {
     _ensureReady();
-    if (target == _engine.kernel) return true;
+    if (!force && target == _engine.kernel) return true;
 
     final current = _engine;
     PlayerEngine? next;
@@ -120,6 +117,9 @@ class PlaybackCoordinator {
       await next.setVolume(snapshot.volume);
       _ensureReady();
       await next.setRate(snapshot.rate);
+      if (shaders != null && next.capabilities.supportsShader) {
+        await next.setShaders(shaders);
+      }
       _ensureReady();
 
       await _engineSubscription?.cancel();

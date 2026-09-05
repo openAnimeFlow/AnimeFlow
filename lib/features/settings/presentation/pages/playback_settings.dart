@@ -22,6 +22,7 @@ class _PlaybackSettingsPageState extends State<PlaybackSettingsPage> {
   late bool _episodesProgress;
   late double _fastForwardSpeed;
   late bool _adBlocker;
+  late bool _hardwareDecoder;
   late int _skipDuration;
   late PlayerKernel _preferredPlayerKernel;
 
@@ -39,6 +40,8 @@ class _PlaybackSettingsPageState extends State<PlaybackSettingsPage> {
       _fastForwardSpeed =
           setting.get(PlaybackKey.fastForwardSpeed, defaultValue: 2.0);
       _adBlocker = setting.get(PlaybackKey.adBlocker, defaultValue: false);
+      _hardwareDecoder =
+          setting.get(PlaybackKey.hardwareDecoder, defaultValue: true);
       _skipDuration = setting.get(PlaybackKey.skipDuration, defaultValue: 85);
       _preferredPlayerKernel = _readPreferredPlayerKernel();
     });
@@ -176,6 +179,16 @@ class _PlaybackSettingsPageState extends State<PlaybackSettingsPage> {
 
                   // 播放器内核设置
                   _buildSectionTitle(l10n.playerKernel),
+                  SwitchListTile(
+                    title: Text(l10n.hardwareDecoding),
+                    value: _hardwareDecoder,
+                    onChanged: (value) {
+                      setState(() {
+                        _hardwareDecoder = value;
+                        setting.put(PlaybackKey.hardwareDecoder, value);
+                      });
+                    },
+                  ),
                   Padding(
                     padding: const EdgeInsets.symmetric(horizontal: 16),
                     child: Row(

@@ -8,6 +8,26 @@ import 'package:flutter/widgets.dart';
 import 'package:fvp/mdk.dart' as fvp;
 
 void main() {
+  test('software decoding excludes native hardware decoders on every player',
+      () async {
+    final players = <_FakePlayer>[];
+    final engine = FvpEngine(
+        hardwareDecoder: false,
+        playerFactory: () {
+          final player = _FakePlayer();
+          players.add(player);
+          return player;
+        });
+    await engine.initialize();
+    addTearDown(engine.dispose);
+    final source = PlaybackSource(uri: Uri.parse('https://example.com/video'));
+    await engine.open(source);
+    await engine.open(source);
+    expect(players, hasLength(2));
+    for (final player in players) {
+      expect(player.videoDecoders, ['FFmpeg', 'dav1d']);
+    }
+  });
   testWidgets('mounted video surface follows the replacement player',
       (tester) async {
     final players = <_FakePlayer>[];
@@ -251,6 +271,8 @@ void main() {
 
 // Implements the Dart API without loading MDK or a platform video texture.
 class _FakePlayer implements fvp.Player {
+  @override
+  List<String> videoDecoders = [];
   @override
   double volume = 1;
   @override

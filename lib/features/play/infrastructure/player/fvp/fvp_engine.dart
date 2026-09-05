@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:io';
 import 'dart:typed_data';
 
 import 'package:anime_flow/features/play/domain/player/playback_source.dart';
@@ -15,10 +16,11 @@ import 'package:flutter/material.dart';
 /// This intentionally uses the backend API instead of fvp.registerWith(), so
 /// MediaKit and FVP can coexist as explicitly selected engines.
 class FvpEngine implements PlayerEngine {
-  FvpEngine({fvp.Player Function()? playerFactory})
+  FvpEngine({fvp.Player Function()? playerFactory, this.hardwareDecoder = true})
       : _playerFactory = playerFactory ?? fvp.Player.new;
 
   final fvp.Player Function() _playerFactory;
+  final bool hardwareDecoder;
   // FVP defaults to a 4-second decoded-data buffer. On longer videos that is
   // only a few pixels on the progress bar, so keep a visible, practical
   // buffer for on-demand playback.
@@ -67,6 +69,12 @@ class FvpEngine implements PlayerEngine {
 
   void _createPlayer() {
     _player = _playerFactory();
+    // Follow FVP 0.38.1's platform priorities with software fallback.
+    _player.videoDecoders = [
+      if (hardwareDecoder) ..._preferredDecoders(),
+      'FFmpeg',
+      'dav1d',
+    ];
     _player.volume = _volume;
     _player.playbackRate = _rate;
     _player.textureId.addListener(_updateTextureId);
@@ -113,6 +121,26 @@ class FvpEngine implements PlayerEngine {
   }
 
   void _updateTextureId() => _textureId.value = _player.textureId.value;
+
+  List<String> _preferredDecoders() {
+    if (Platform.isLinux) {
+      if (File('/dev/mpp_service').existsSync()) {
+        return const ['rockchip', 'rkmpp'];
+      }
+      if (File('/dev/vchiq').existsSync()) {
+        return const ['V4L2M2M', 'FFmpeg:hwcontext=drm'];
+      }
+      return const ['VAAPI', 'CUDA', 'VDPAU', 'hap'];
+    }
+    return switch (Platform.operatingSystem) {
+      'windows' => const ['MFT:d3d=11', 'D3D11', 'DXVA', 'CUDA', 'hap'],
+      'macos' => const ['VT', 'hap'],
+      'ios' => const ['VT'],
+      'android' => const ['AMediaCodec'],
+      'ohos' => const ['OH'],
+      _ => const [],
+    };
+  }
 
   Future<void> _releasePlayer() async {
     _player.textureId.removeListener(_updateTextureId);

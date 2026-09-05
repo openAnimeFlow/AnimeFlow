@@ -563,4 +563,7 @@
   ,"playerKernelSwitchFailed": "播放器內核切換失敗"
   ,"mediaKit": "MediaKit"
   ,"fvp": "FVP"
+  ,"hardwareDecoding": "硬體解碼"
+  ,"hardwareDecodingHint": "優先使用硬體解碼；切換後會重新載入目前影片。"
+  ,"hardwareDecodingFailed": "切換解碼模式失敗"
 }

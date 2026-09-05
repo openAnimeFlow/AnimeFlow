@@ -5,6 +5,8 @@ import 'package:anime_flow/features/play/presentation/providers/play_provider.da
 import 'package:anime_flow/core/utils/format_time_util.dart';
 import 'package:anime_flow/shared/widgets/notification_toast.dart';
 import 'package:flutter/material.dart';
+import 'package:anime_flow/core/storage/storage.dart';
+import 'package:anime_flow/core/constants/storage_key.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:anime_flow/shared/widgets/drop_down_menu.dart';
 
@@ -17,6 +19,8 @@ class VideoSettingDialog extends ConsumerStatefulWidget {
 
 class _VideoSettingState extends ConsumerState<VideoSettingDialog> {
   bool isExpandedTime = false;
+  bool _hardwareDecoder = true;
+  bool _savingDecoder = false;
   int selectedHours = 0; // 选中的小时
   int selectedMinutes = 0; // 选中的分钟
 
@@ -38,6 +42,8 @@ class _VideoSettingState extends ConsumerState<VideoSettingDialog> {
   void initState() {
     super.initState();
     playController = ref.read(playSessionProvider);
+    _hardwareDecoder = Storage.setting
+        .get(PlaybackKey.hardwareDecoder, defaultValue: true) as bool;
   }
 
   @override
@@ -359,6 +365,36 @@ class _VideoSettingState extends ConsumerState<VideoSettingDialog> {
                     context,
                     currentKernel,
                     switchingKernel,
+                  ),
+                  SwitchListTile(
+                    title: Text(l10n.hardwareDecoding),
+                    subtitle: Text(l10n.hardwareDecodingHint),
+                    value: _hardwareDecoder,
+                    onChanged: switchingKernel || _savingDecoder
+                        ? null
+                        : (enabled) async {
+                            setState(() => _savingDecoder = true);
+                            try {
+                              final applied = await playController
+                                  .setHardwareDecoder(enabled);
+                              if (!mounted) return;
+                              if (applied) {
+                                setState(() => _hardwareDecoder = enabled);
+                              } else {
+                                NotificationToast.show(
+                                    l10n.hardwareDecodingFailed);
+                              }
+                            } catch (_) {
+                              if (mounted) {
+                                NotificationToast.show(
+                                    l10n.hardwareDecodingFailed);
+                              }
+                            } finally {
+                              if (mounted) {
+                                setState(() => _savingDecoder = false);
+                              }
+                            }
+                          },
                   ),
                   const Divider(),
                 ],

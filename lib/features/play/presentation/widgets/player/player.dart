@@ -112,9 +112,11 @@ class _PlayerViewState extends ConsumerState<PlayerView> with WindowListener {
                 ref.watch(playStateProvider.select((state) => state.videoFit));
             final kernel =
                 ref.watch(playStateProvider.select((state) => state.kernel));
+            final switching = ref.watch(
+                playStateProvider.select((state) => state.switchingKernel));
             return Positioned.fill(
               child: KeyedSubtree(
-                key: ValueKey(kernel),
+                key: ValueKey((kernel, switching)),
                 child: playController.buildVideoSurface(fit: videoFit),
               ),
             );

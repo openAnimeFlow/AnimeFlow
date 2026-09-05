@@ -578,4 +578,7 @@
   ,"playerKernelSwitchFailed": "Failed to switch player kernel"
   ,"mediaKit": "MediaKit"
   ,"fvp": "FVP"
+  ,"hardwareDecoding": "Hardware decoding"
+  ,"hardwareDecodingHint": "Prefer hardware decoding; changing this reloads the current video."
+  ,"hardwareDecodingFailed": "Failed to change decoding mode"
 }

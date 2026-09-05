@@ -14,6 +14,10 @@ import 'package:flutter/material.dart';
 /// This intentionally uses the backend API instead of fvp.registerWith(), so
 /// MediaKit and FVP can coexist as explicitly selected engines.
 class FvpEngine implements PlayerEngine {
+  FvpEngine({fvp.Player Function()? playerFactory})
+      : _playerFactory = playerFactory ?? fvp.Player.new;
+
+  final fvp.Player Function() _playerFactory;
   // FVP defaults to a 4-second decoded-data buffer. On longer videos that is
   // only a few pixels on the progress bar, so keep a visible, practical
   // buffer for on-demand playback.
@@ -28,6 +32,7 @@ class FvpEngine implements PlayerEngine {
   bool _initialized = false;
   bool _disposed = false;
   bool _hasMedia = false;
+  bool _acceptMediaStatus = false;
   Size? _videoSize;
 
   @override
@@ -46,20 +51,22 @@ class FvpEngine implements PlayerEngine {
   @override
   Future<void> initialize() async {
     if (_initialized) return;
-    _player = fvp.Player();
+    _player = _playerFactory();
     _player.setBufferRange(
       min: _bufferRangeMinMilliseconds,
       max: _bufferRangeMaxMilliseconds,
     );
     _subscriptions.addAll([
-      _player.onStateChanged.listen((change) {
-        final state = change.newValue;
-        _emit(PlayerPlayingChanged(state == fvp.PlaybackState.playing));
+      _player.onStateChanged.listen((_) {
+        _emitPlayingState();
       }),
       _player.onMediaStatus.listen((change) {
-        final status = change.newValue;
-        _emit(PlayerBufferingChanged(status.test(fvp.MediaStatus.buffering)));
-        if (status.test(fvp.MediaStatus.end)) {
+        if (!_acceptMediaStatus) return;
+        _emitBufferingState();
+        if (_hasMedia &&
+            !change.oldValue.test(fvp.MediaStatus.end) &&
+            change.newValue.test(fvp.MediaStatus.end) &&
+            _player.mediaStatus.test(fvp.MediaStatus.end)) {
           _emit(const PlayerCompleted());
         }
       }),
@@ -72,6 +79,7 @@ class FvpEngine implements PlayerEngine {
           // it here mirrors the package's official video_player backend and
           // avoids missing short-lived buffer updates between polling ticks.
           _emitBufferedPosition();
+          _emitBufferingState();
           return;
         }
 
@@ -130,6 +138,8 @@ class FvpEngine implements PlayerEngine {
     bool autoPlay = false,
   }) async {
     _ensureReady();
+    await stop();
+    _videoSize = null;
     final headers = <String, String>{
       ...source.headers,
       if (source.referer != null) 'Referer': source.referer!,
@@ -145,27 +155,35 @@ class FvpEngine implements PlayerEngine {
     if (source.userAgent != null) {
       _player.setProperty('avio.user_agent', source.userAgent!);
     }
-    _player.media = source.uri.toString();
-    final result = await _player.prepare(
-      position: startPosition?.inMilliseconds ?? 0,
-    );
-    if (result < 0) {
-      throw StateError('FVP prepare failed: $result');
-    }
-    final texture = await _player.updateTexture();
-    if (texture < 0) {
-      throw StateError('FVP video texture creation failed: $texture');
-    }
-    final video = _player.mediaInfo.video?.firstOrNull;
-    if (video != null) {
-      _videoSize = Size(
-        video.codec.width.toDouble(),
-        video.codec.height.toDouble(),
+    _acceptMediaStatus = true;
+    try {
+      _player.media = source.uri.toString();
+      final result = await _player.prepare(
+        position: startPosition?.inMilliseconds ?? 0,
       );
+      if (result < 0) {
+        throw StateError('FVP prepare failed: $result');
+      }
+      final texture = await _player.updateTexture();
+      if (texture < 0) {
+        throw StateError('FVP video texture creation failed: $texture');
+      }
+      final video = _player.mediaInfo.video?.firstOrNull;
+      if (video != null) {
+        _videoSize = Size(
+          video.codec.width.toDouble(),
+          video.codec.height.toDouble(),
+        );
+      }
+      _hasMedia = true;
+      _emitCurrentMetrics();
+      if (autoPlay) await play();
+    } catch (_) {
+      _acceptMediaStatus = false;
+      _hasMedia = false;
+      _emit(const PlayerBufferingChanged(false));
+      rethrow;
     }
-    _hasMedia = true;
-    _emitCurrentMetrics();
-    if (autoPlay) await play();
   }
 
   @override
@@ -183,7 +201,28 @@ class FvpEngine implements PlayerEngine {
   @override
   Future<void> stop() async {
     _ensureReady();
+    _hasMedia = false;
+    _acceptMediaStatus = false;
     _player.state = fvp.PlaybackState.stopped;
+    // MDK state requests are asynchronous and are not queued. Do not prepare
+    // another episode until the previous media has actually stopped. Poll
+    // without blocking the isolate so native callbacks can still be handled.
+    final deadline = DateTime.now().add(const Duration(seconds: 10));
+    while (!_player.waitFor(fvp.PlaybackState.stopped, timeout: 0)) {
+      if (DateTime.now().isAfter(deadline)) {
+        throw StateError('FVP timed out waiting for playback to stop');
+      }
+      await Future<void>.delayed(const Duration(milliseconds: 10));
+      _ensureReady();
+    }
+    _emitPlayingState();
+    // The shared state infers buffering from position and buffered position.
+    // Clear both before clearing buffering, otherwise the previous episode's
+    // metrics can keep the loading indicator alive during source resolution.
+    _emit(const PlayerPositionChanged(Duration.zero));
+    _emit(const PlayerBufferedChanged(Duration.zero));
+    _emit(const PlayerDurationChanged(Duration.zero));
+    _emit(const PlayerBufferingChanged(false));
   }
 
   @override
@@ -234,6 +273,7 @@ class FvpEngine implements PlayerEngine {
 
   void _emitCurrentMetrics() {
     if (!_hasMedia || _disposed) return;
+    _emitPlayingState();
     final position = _player.position;
     _emit(PlayerPositionChanged(Duration(milliseconds: position)));
 
@@ -241,11 +281,36 @@ class FvpEngine implements PlayerEngine {
     // current position. The shared playback state stores the absolute end
     // position used by the progress bar, so convert it before emitting.
     _emitBufferedPosition(position: position);
+    _emitBufferingState();
 
     final duration = _player.mediaInfo.duration;
     if (duration > 0) {
       _emit(PlayerDurationChanged(Duration(milliseconds: duration)));
     }
+  }
+
+  void _emitBufferingState() {
+    if (!_acceptMediaStatus || _disposed) return;
+    // Native mediaStatus is authoritative; queued callbacks may still describe
+    // the previous source or a buffering phase that has already finished.
+    final status = _player.mediaStatus;
+    final buffering =
+        status.test(fvp.MediaStatus.buffering | fvp.MediaStatus.stalled) &&
+            !status.test(fvp.MediaStatus.buffered |
+                fvp.MediaStatus.end |
+                fvp.MediaStatus.unloaded |
+                fvp.MediaStatus.invalid);
+    _emit(PlayerBufferingChanged(buffering));
+  }
+
+  void _emitPlayingState() {
+    if (_disposed) return;
+    // Player.state is a Dart cache updated by both commands and delayed native
+    // callbacks. A zero-timeout waitFor reads the native state, so a late event
+    // from the previous episode cannot overwrite the current playback state.
+    _emit(PlayerPlayingChanged(
+      _player.waitFor(fvp.PlaybackState.playing, timeout: 0),
+    ));
   }
 
   void _emitBufferedPosition({int? position}) {

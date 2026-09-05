@@ -637,10 +637,7 @@ class PlaySession {
         VideoControlsIndicatorType.parsingIndicator) {
       return;
     }
-    _videoUiStateActions.hideIndicator();
-    _videoUiStateActions
-        .updateIndicatorType(VideoControlsIndicatorType.noIndicator);
-    _videoUiStateActions.updateMainAxisAlignmentType(MainAxisAlignment.start);
+    _videoUiStateActions.finishParsingIndicator();
   }
 
   /// 选中集与当前播放集不一致时清空弹幕数据与画布（切换集过程中）
@@ -770,6 +767,9 @@ class PlaySession {
   }
 
   void _handlePlayStateChanged(PlayState state) {
+    if (state.isParsing) {
+      _videoUiStateActions.showParsingIndicator();
+    }
     playbackProgressManager.updatePlaybackState(
       position: state.position,
       duration: state.duration,
@@ -779,21 +779,10 @@ class PlaySession {
 
   ///更新缓冲状态
   void _updateBufferingState(bool buffering) {
-    final videoUiStateController = _videoUiStateActions;
-    if (buffering) {
-      videoUiStateController
-          .updateIndicatorType(VideoControlsIndicatorType.bufferingIndicator);
-      videoUiStateController
-          .updateMainAxisAlignmentType(MainAxisAlignment.center);
-      videoUiStateController.showIndicator();
-    } else {
-      if (videoUiStateController.currentIndicatorType ==
-          VideoControlsIndicatorType.bufferingIndicator) {
-        videoUiStateController.hideIndicator();
-        videoUiStateController
-            .updateIndicatorType(VideoControlsIndicatorType.noIndicator);
-      }
-    }
+    _videoUiStateActions.updateBufferingIndicator(
+      buffering,
+      isParsing: _playStateActions.value.isParsing,
+    );
   }
 
   void _updateEffectiveBufferingState({

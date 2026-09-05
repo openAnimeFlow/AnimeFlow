@@ -16,11 +16,39 @@ import 'package:anime_flow/features/play/presentation/providers/episodes_provide
 import 'package:anime_flow/features/play/presentation/providers/play_provider.dart';
 import 'package:anime_flow/features/play/presentation/providers/video_ui_provider.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:flutter/foundation.dart';
 import 'package:hive_ce/hive.dart';
 
 void main() {
   setUpAll(() => Storage.setting = _Settings());
   setUp(() => (Storage.setting as _Settings).stored.clear());
+
+  for (final platform in [
+    TargetPlatform.windows,
+    TargetPlatform.android,
+    TargetPlatform.fuchsia,
+  ]) {
+    test('rebuilding preserves the correct engine volume on $platform', () async {
+      debugDefaultTargetPlatformOverride = platform;
+      addTearDown(() => debugDefaultTargetPlatformOverride = null);
+      final factory = _Factory();
+      final state = _State()..value = const PlayState(playing: true, volume: 35);
+      final session = _Session(factory, state: state);
+      await session.playbackCoordinator.initialize();
+      addTearDown(session.playbackCoordinator.dispose);
+      await session.initPlayState(_request(1));
+
+      for (final enabled in [false, true, false]) {
+        expect(await session.setHardwareDecoder(enabled), isTrue);
+        expect(factory.engines.last.volume,
+            platform == TargetPlatform.fuchsia ? 35 : 100);
+        expect(state.value.volume, 35);
+      }
+      expect(await session.switchKernel(PlayerKernel.fvp), isTrue);
+      expect(factory.engines.last.volume,
+          platform == TargetPlatform.fuchsia ? 35 : 100);
+    });
+  }
 
   test(
       'hardware decoding defaults on and persists changes while rebuilding the same kernel',
@@ -149,10 +177,10 @@ PlayRequest _request(int episode) => PlayRequest(
     );
 
 class _Session extends PlaySession {
-  _Session(_Factory factory)
+  _Session(_Factory factory, {_State? state})
       : super(
           shadersDirectory: Directory.systemTemp,
-          playStateActions: _State(),
+          playStateActions: state ?? _State(),
           videoUiStateActions: _Ui(),
           episodesActions: _Episodes(),
           danmakuChineseConverter: DanmakuChineseConverter(),
@@ -186,6 +214,7 @@ class _Engine implements PlayerEngine {
   PlaybackSource? source;
   final openedUris = <String>[];
   int disposeCount = 0;
+  double? volume;
   @override
   Stream<PlayerEvent> get events => const Stream.empty();
   @override
@@ -215,7 +244,9 @@ class _Engine implements PlayerEngine {
   }
 
   @override
-  Future<void> setVolume(double volume) async {}
+  Future<void> setVolume(double volume) async {
+    this.volume = volume;
+  }
   @override
   Future<void> setRate(double rate) async {}
   @override

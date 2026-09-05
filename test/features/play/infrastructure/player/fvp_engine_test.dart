@@ -67,11 +67,12 @@ void main() {
       await engine.open(
         PlaybackSource(uri: Uri.parse('https://example.com/$episode')),
         autoPlay: true,
-        startPosition: Duration(seconds: episode),
+        startPosition: Duration(milliseconds: episode * 1000 + 375),
       );
       expect(players.length, episode + 1);
       expect(players.last.textureId.value, 1);
-      expect(players.last.initialPosition, episode * 1000);
+      expect(players.last.initialPosition, episode * 1000 + 375);
+      expect(players.last.initialFlags.rawValue, fvp.SeekFlag.fromStart);
       expect(players.last.rendererOperations, ['prepare', 'create']);
       expect(players.take(episode).every((player) => player.disposed), isTrue);
     }
@@ -291,6 +292,7 @@ class _FakePlayer implements fvp.Player {
   fvp.MediaStatus mediaStatus = const fvp.MediaStatus(fvp.MediaStatus.buffered);
   int prepares = 0;
   int initialPosition = 0;
+  fvp.SeekFlag initialFlags = const fvp.SeekFlag(fvp.SeekFlag.defaultFlags);
   final changes = StreamController<
       ({fvp.PlaybackState oldValue, fvp.PlaybackState newValue})>.broadcast();
   final statuses = StreamController<
@@ -336,6 +338,7 @@ class _FakePlayer implements fvp.Player {
     rendererOperations.add('prepare');
     prepares++;
     initialPosition = position;
+    initialFlags = flags;
     nativeState = fvp.PlaybackState.paused;
     return position;
   }

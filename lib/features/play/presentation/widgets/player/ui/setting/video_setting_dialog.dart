@@ -368,8 +368,8 @@ class _VideoSettingState extends ConsumerState<VideoSettingDialog> {
                   ),
                   SwitchListTile(
                     title: Text(l10n.hardwareDecoding),
-                    subtitle: Text(l10n.hardwareDecodingHint),
                     value: _hardwareDecoder,
+                    contentPadding: const EdgeInsets.symmetric(horizontal: 0),
                     onChanged: switchingKernel || _savingDecoder
                         ? null
                         : (enabled) async {

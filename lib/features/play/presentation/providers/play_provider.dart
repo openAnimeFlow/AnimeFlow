@@ -564,7 +564,8 @@ class PlaySession {
     final snapshot = PlayerSnapshot(
       source: source,
       position: state.position,
-      volume: state.volume,
+      // 系统音量已控制输出响度，重建时不能再叠加到播放器内部音量。
+      volume: SystemUtil.supportsSystemVolumeSync ? 100.0 : state.volume,
       rate: state.rate,
       wasPlaying: state.playing,
       fit: state.videoFit,

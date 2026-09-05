@@ -27,7 +27,6 @@ import 'package:anime_flow/core/utils/system_util.dart';
 import 'package:anime_flow/core/utils/utils.dart';
 import 'package:anime_flow/core/utils/vibrate.dart';
 import 'package:anime_flow/shared/widgets/windows_title_bar.dart';
-import 'package:anime_flow/features/play/domain/player/player_engine.dart';
 import 'package:anime_flow/features/play/domain/player/player_event.dart';
 import 'package:anime_flow/features/play/domain/player/player_kernel.dart';
 import 'package:anime_flow/features/play/domain/player/player_snapshot.dart';
@@ -412,7 +411,6 @@ class PlaySession {
   final PlayerEngineFactory engineFactory;
   late final PlaybackCoordinator playbackCoordinator;
   late final PlaybackProgressManager playbackProgressManager;
-  PlayerEngine get engine => playbackCoordinator.engine;
   final PlayStateNotifier _playStateActions;
   final VideoUiStateActions _videoUiStateActions;
   final Episodes _episodesActions;
@@ -481,6 +479,16 @@ class PlaySession {
   bool _lastPlayerPlaying = false;
   StreamSubscription<PlayerEvent>? _playerSubscription;
   bool _isDisposed = false;
+  Future<void> _playbackChanges = Future<void>.value();
+
+  // Keep episode metadata, source opening and kernel snapshots in the same
+  // order. Danmaku loading stays outside this queue so it cannot block playback.
+  Future<T> _serializePlaybackChange<T>(Future<T> Function() change) {
+    final result = _playbackChanges.then((_) => change());
+    _playbackChanges =
+        result.then<void>((_) {}, onError: (Object _, StackTrace __) {});
+    return result;
+  }
 
   static const Duration _bufferingPositionTolerance =
       Duration(milliseconds: 500);
@@ -523,9 +531,12 @@ class PlaySession {
   }
 
   /// 在保持播放上下文的前提下切换播放器内核。
-  Future<bool> switchKernel(PlayerKernel target) async {
+  Future<bool> switchKernel(PlayerKernel target) =>
+      _serializePlaybackChange(() => _switchKernel(target));
+
+  Future<bool> _switchKernel(PlayerKernel target) async {
     if (_isDisposed || _playStateActions.value.switchingKernel) return false;
-    if (engine.kernel == target) return true;
+    if (playbackCoordinator.kernel == target) return true;
 
     final source = _currentSource;
 
@@ -540,6 +551,7 @@ class PlaySession {
     );
     _playStateActions.setSwitchingKernel(true);
     final switched = await playbackCoordinator.switchKernel(target, snapshot);
+    if (_isDisposed) return false;
     if (switched) {
       _playStateActions.setKernel(target);
       unawaited(
@@ -655,7 +667,7 @@ class PlaySession {
 
   void pauseForRouteCover() {
     cancelScheduledStop();
-    unawaited(engine.pause());
+    unawaited(playbackCoordinator.pause());
   }
 
   int _playRequestId = 0;
@@ -665,51 +677,61 @@ class PlaySession {
 
   Future<void> stopCurrentMedia() async {
     _playRequestId++;
-    cancelScheduledStop();
-    await engine.stop();
-    _clearDanmakuCanvas();
+    await _serializePlaybackChange(() async {
+      if (_isDisposed) return;
+      cancelScheduledStop();
+      _currentSource = null;
+      await playbackCoordinator.stop();
+      if (_isDisposed) return;
+      _clearDanmakuCanvas();
+    });
   }
 
   /// 初始化播放状态
   Future<void> initPlayState(PlayRequest state) async {
     if (_isDisposed) return;
-    final stopping = stopCurrentMedia();
-    final requestId = _playRequestId;
-    await stopping;
+    final requestId = ++_playRequestId;
+    await _serializePlaybackChange(() async {
+      if (!_isCurrentPlayRequest(requestId)) return;
+      cancelScheduledStop();
+      _currentSource = null;
+      await playbackCoordinator.stop();
+      if (!_isCurrentPlayRequest(requestId)) return;
+      removeDanmaku();
+      videoUrl = state.videoUrl;
+      subjectId = state.subjectId;
+      episode = state.episodeIndex;
+      episodeSort = state.episodeSort;
+      episodeId = state.episodeId;
+      subjectName = state.subjectName;
+      subjectCover = state.subjectCover;
+      alias = state.alias;
+      isLocalPlayback = state.isLocalPlayback;
+      localDanmakuPath = state.localDanmakuPath;
+      playbackProgressManager.setPlaybackContext(
+        subjectId: subjectId,
+        episodeId: episodeId,
+        episodeSort: episodeSort,
+        subjectName: subjectName,
+        subjectCover: subjectCover,
+        alias: alias,
+        isLocalPlayback: isLocalPlayback,
+      );
+      if (state.videoUrl.isEmpty) return;
+      _currentSource = PlaybackSource(
+        uri: Uri.parse(state.videoUrl),
+        isLocal: state.isLocalPlayback,
+      );
+      await playbackCoordinator.open(
+        _currentSource!,
+        startPosition: Duration(seconds: state.offset),
+        autoPlay: false,
+      );
+      if (!_isCurrentPlayRequest(requestId)) return;
+      await playbackCoordinator.play();
+    });
     if (!_isCurrentPlayRequest(requestId)) return;
-    removeDanmaku();
-    videoUrl = state.videoUrl;
-    subjectId = state.subjectId;
-    episode = state.episodeIndex;
-    episodeSort = state.episodeSort;
-    episodeId = state.episodeId;
-    subjectName = state.subjectName;
-    subjectCover = state.subjectCover;
-    alias = state.alias;
-    isLocalPlayback = state.isLocalPlayback;
-    localDanmakuPath = state.localDanmakuPath;
-    playbackProgressManager.setPlaybackContext(
-      subjectId: subjectId,
-      episodeId: episodeId,
-      episodeSort: episodeSort,
-      subjectName: subjectName,
-      subjectCover: subjectCover,
-      alias: alias,
-      isLocalPlayback: isLocalPlayback,
-    );
     if (state.videoUrl.isEmpty) return;
-    _currentSource = PlaybackSource(
-      uri: Uri.parse(state.videoUrl),
-      isLocal: state.isLocalPlayback,
-    );
-    await engine.open(
-      _currentSource!,
-      startPosition: Duration(seconds: state.offset),
-      autoPlay: false,
-    );
-    if (!_isCurrentPlayRequest(requestId)) return;
-    await engine.play();
-    if (!_isCurrentPlayRequest(requestId)) return;
     await _loadEpisodeDanmaku(state, requestId);
   }
 
@@ -1026,15 +1048,15 @@ class PlaySession {
   void playOrPauseVideo() {
     _videoUiStateActions.updateMainAxisAlignmentType(MainAxisAlignment.start);
     if (_playStateActions.value.playing) {
-      unawaited(engine.pause());
+      unawaited(playbackCoordinator.pause());
     } else {
-      unawaited(engine.play());
+      unawaited(playbackCoordinator.play());
     }
   }
 
   void _applyPlaybackRate(double speed) {
     _playStateActions.setRate(speed);
-    unawaited(engine.setRate(speed));
+    unawaited(playbackCoordinator.setRate(speed));
   }
 
   /// 设置播放倍数
@@ -1059,7 +1081,7 @@ class PlaySession {
 
   /// 跳转到指定位置
   void seekTo(Duration pos) {
-    unawaited(engine.seek(pos));
+    unawaited(playbackCoordinator.seek(pos));
     _updateEffectiveBufferingState(position: pos);
     unawaited(
       playbackProgressManager.save(
@@ -1089,7 +1111,7 @@ class PlaySession {
   }) {
     final clampedVolume = newVolume.clamp(0.0, 100.0);
     _playStateActions.setVolume(clampedVolume);
-    unawaited(engine.setVolume(
+    unawaited(playbackCoordinator.setVolume(
       SystemUtil.supportsSystemVolumeSync ? 100.0 : clampedVolume,
     ));
     if (syncSystemVolume) {
@@ -1126,7 +1148,7 @@ class PlaySession {
   /// 开始播放
   Future<void> startPlaying() async {
     try {
-      await engine.play();
+      await playbackCoordinator.play();
     } catch (_) {
       return;
     }
@@ -1148,14 +1170,14 @@ class PlaySession {
             scheduledStopDuration - 1,
           );
         } else {
-          unawaited(engine.pause());
+          unawaited(playbackCoordinator.pause());
           timer.cancel();
           _stopTimer = null;
         }
       });
     } else {
       _playStateActions.setScheduledStopDuration(0);
-      await engine.pause();
+      await playbackCoordinator.pause();
     }
   }
 
@@ -1169,7 +1191,7 @@ class PlaySession {
   ///设置超分辨率
   /// type 1 关闭 2 效率档 3 质量档
   Future<void> setShader(int type) async {
-    if (!engine.capabilities.supportsShader) {
+    if (!playbackCoordinator.capabilities.supportsShader) {
       throw UnsupportedError('当前播放器内核不支持 Anime4K');
     }
     final shaders = switch (type) {
@@ -1177,17 +1199,17 @@ class PlaySession {
       3 => mpvAnime4KShaders,
       _ => const <String>[],
     };
-    await engine.setShaders(shaders.isEmpty
+    await playbackCoordinator.setShaders(shaders.isEmpty
         ? ''
         : Utils.buildShadersAbsolutePath(shadersDirectory.path, shaders));
     _playStateActions.setSuperResolutionType(type == 2 || type == 3 ? type : 1);
   }
 
   Widget buildVideoSurface({required BoxFit fit}) {
-    return engine.buildVideoSurface(fit: fit);
+    return playbackCoordinator.buildVideoSurface(fit: fit);
   }
 
-  Future<Uint8List?> takeScreenshot() => engine.screenshot();
+  Future<Uint8List?> takeScreenshot() => playbackCoordinator.screenshot();
 
-  Future<void> stop() => engine.stop();
+  Future<void> stop() => stopCurrentMedia();
 }

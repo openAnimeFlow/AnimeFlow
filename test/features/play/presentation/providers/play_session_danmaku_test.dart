@@ -5,8 +5,10 @@ import 'package:anime_flow/core/storage/storage.dart';
 import 'package:anime_flow/features/play/application/danmaku_chinese_converter.dart';
 import 'package:anime_flow/features/play/application/danmaku_chinese_mode.dart';
 import 'package:anime_flow/features/play/application/playback_progress_manager.dart';
+import 'package:anime_flow/features/play/application/playback_coordinator.dart';
 import 'package:anime_flow/features/play/domain/player/playback_source.dart';
 import 'package:anime_flow/features/play/domain/player/player_engine.dart';
+import 'package:anime_flow/features/play/domain/player/player_event.dart';
 import 'package:anime_flow/features/play/infrastructure/player/player_engine_factory.dart';
 import 'package:anime_flow/features/play/presentation/providers/episodes_provider.dart';
 import 'package:anime_flow/features/play/presentation/providers/play_provider.dart';
@@ -25,8 +27,7 @@ void main() {
         await Directory.systemTemp.createTemp('danmaku_request_test');
     addTearDown(() => directory.delete(recursive: true));
     final file = File('${directory.path}/danmaku.json');
-    await file.writeAsString(
-        '[{"m":"test","p":"1,1,16777215,test"}]');
+    await file.writeAsString('[{"m":"test","p":"1,1,16777215,test"}]');
     final converter = _Converter();
     final session = _Session(converter);
     final first = session.initPlayState(_request(1, file.path));
@@ -45,8 +46,7 @@ void main() {
         await Directory.systemTemp.createTemp('danmaku_stop_test');
     addTearDown(() => directory.delete(recursive: true));
     final file = File('${directory.path}/danmaku.json');
-    await file.writeAsString(
-        '[{"m":"test","p":"1,1,16777215,test"}]');
+    await file.writeAsString('[{"m":"test","p":"1,1,16777215,test"}]');
     final converter = _Converter();
     final session = _Session(converter);
     final opening = session.initPlayState(_request(1, file.path));
@@ -86,11 +86,12 @@ class _Session extends PlaySession {
               {required subjectId, required episodeId, required watched}) {},
         ) {
     playbackProgressManager = _Progress();
+    playbackCoordinator = PlaybackCoordinator(
+        engineFactory: _EngineFactory(_engine), adBlocker: false);
+    unawaited(playbackCoordinator.initialize());
   }
   int installs = 0;
   final _engine = _Engine();
-  @override
-  PlayerEngine get engine => _engine;
   @override
   void addDanmakuAll(List<Danmaku> danmaku) {
     installs++;
@@ -114,6 +115,10 @@ class _Converter extends DanmakuChineseConverter {
 
 class _Engine implements PlayerEngine {
   @override
+  Future<void> initialize() async {}
+  @override
+  Stream<PlayerEvent> get events => const Stream.empty();
+  @override
   Future<void> stop() async {}
   @override
   Future<void> play() async {}
@@ -122,6 +127,13 @@ class _Engine implements PlayerEngine {
       {Duration? startPosition, bool autoPlay = false}) async {}
   @override
   dynamic noSuchMethod(Invocation invocation) => null;
+}
+
+class _EngineFactory extends PlayerEngineFactory {
+  const _EngineFactory(this.engine);
+  final PlayerEngine engine;
+  @override
+  PlayerEngine create(kernel, {required bool adBlocker}) => engine;
 }
 
 class _Settings implements Box<dynamic> {

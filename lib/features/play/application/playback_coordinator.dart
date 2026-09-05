@@ -8,6 +8,7 @@ import 'package:anime_flow/features/play/domain/player/player_event.dart';
 import 'package:anime_flow/features/play/domain/player/player_kernel.dart';
 import 'package:anime_flow/features/play/domain/player/player_snapshot.dart';
 import 'package:anime_flow/features/play/infrastructure/player/player_engine_factory.dart';
+import 'package:anime_flow/features/play/infrastructure/player/player_operation_queue.dart';
 import 'package:flutter/material.dart';
 
 /// 播放器基础协调层，负责内核实例生命周期和内核切换。
@@ -25,8 +26,9 @@ class PlaybackCoordinator {
   late PlayerEngine _engine;
   bool _initialized = false;
   bool _disposed = false;
+  late final _operations = PlayerOperationQueue(ensureReady: _ensureReady);
+  Future<void>? _disposal;
 
-  PlayerEngine get engine => _engine;
   PlayerKernel get kernel => _engine.kernel;
   Stream<PlayerEvent> get events => _events.stream;
   PlayerCapabilities get capabilities => _engine.capabilities;
@@ -40,7 +42,8 @@ class PlaybackCoordinator {
   }
 
   Widget buildVideoSurface({required BoxFit fit}) {
-    _ensureReady();
+    // The first widget build can precede completion of initialize(). The engine
+    // already exists at that point and owns its surface readiness checks.
     return _engine.buildVideoSurface(fit: fit);
   }
 
@@ -49,23 +52,48 @@ class PlaybackCoordinator {
     Duration? startPosition,
     bool autoPlay = false,
   }) =>
-      _engine.open(
-        source,
-        startPosition: startPosition,
-        autoPlay: autoPlay,
-      );
+      _runCommand(() => _engine.open(
+            source,
+            startPosition: startPosition,
+            autoPlay: autoPlay,
+          ));
 
-  Future<void> play() => _engine.play();
-  Future<void> pause() => _engine.pause();
-  Future<void> stop() => _engine.stop();
-  Future<void> seek(Duration position) => _engine.seek(position);
-  Future<void> setVolume(double volume) => _engine.setVolume(volume);
-  Future<void> setRate(double rate) => _engine.setRate(rate);
-  Future<Uint8List?> screenshot() => _engine.screenshot();
-  Future<void> setShaders(String shaderList) => _engine.setShaders(shaderList);
+  Future<void> play() => _runCommand(() => _engine.play());
+  Future<void> pause() => _runCommand(() => _engine.pause());
+  Future<void> stop() => _runCommand(() => _engine.stop());
+  Future<void> seek(Duration position) =>
+      _runCommand(() => _engine.seek(position));
+  Future<void> setVolume(double volume) =>
+      _runCommand(() => _engine.setVolume(volume));
+  Future<void> setRate(double rate) => _runCommand(() => _engine.setRate(rate));
+  Future<Uint8List?> screenshot() =>
+      _operations.run(() => _engine.screenshot());
+  Future<void> setShaders(String shaderList) =>
+      _runCommand(() => _engine.setShaders(shaderList));
+
+  Future<void> _runCommand(Future<void> Function() command) async {
+    try {
+      await _operations.run(command);
+    } catch (_) {
+      // Controls already queued when the page exits are cancelled silently.
+      if (!_disposed) rethrow;
+    }
+  }
 
   /// 切换内核并恢复快照。失败时保留原内核，并恢复原播放状态。
   Future<bool> switchKernel(
+    PlayerKernel target,
+    PlayerSnapshot snapshot,
+  ) async {
+    try {
+      return await _operations.run(() => _switchKernel(target, snapshot));
+    } catch (_) {
+      if (_disposed) return false;
+      rethrow;
+    }
+  }
+
+  Future<bool> _switchKernel(
     PlayerKernel target,
     PlayerSnapshot snapshot,
   ) async {
@@ -77,25 +105,38 @@ class PlaybackCoordinator {
     try {
       final source = snapshot.source;
       if (source != null) await current.pause();
+      _ensureReady();
       next = engineFactory.create(target, adBlocker: adBlocker);
       await next.initialize();
+      _ensureReady();
       if (source != null) {
         await next.open(
           source,
           startPosition: snapshot.position,
           autoPlay: false,
         );
+        _ensureReady();
       }
       await next.setVolume(snapshot.volume);
+      _ensureReady();
       await next.setRate(snapshot.rate);
+      _ensureReady();
 
       await _engineSubscription?.cancel();
+      _ensureReady();
       _engine = next;
       _subscribeToEngine(next);
       await current.dispose();
+      _ensureReady();
       if (source != null && snapshot.wasPlaying) await next.play();
-      return true;
+      return !_disposed;
     } catch (_) {
+      // Once committed, dispose() owns the active engine. Before that, the
+      // switching operation owns the candidate and must release it itself.
+      if (_disposed) {
+        if (next != _engine) await next?.dispose();
+        return false;
+      }
       await next?.dispose();
       if (snapshot.source != null && snapshot.wasPlaying) {
         unawaited(current.play());
@@ -104,9 +145,13 @@ class PlaybackCoordinator {
     }
   }
 
-  Future<void> dispose() async {
-    if (_disposed) return;
+  Future<void> dispose() => _disposal ??= _dispose();
+
+  Future<void> _dispose() async {
     _disposed = true;
+    // Mark cancellation immediately, but let pending native work finish before
+    // releasing either engine or closing the shared event stream.
+    await _operations.drained;
     await _engineSubscription?.cancel();
     await _engine.dispose();
     await _events.close();

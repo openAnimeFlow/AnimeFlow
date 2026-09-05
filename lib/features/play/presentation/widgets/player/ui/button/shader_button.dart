@@ -1,38 +1,35 @@
-import 'package:anime_flow/features/play/presentation/providers/play_provider.dart';
-import 'package:anime_flow/features/play/presentation/providers/video_ui_provider.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-class ShaderButton extends ConsumerWidget {
-  final PlaySession playController;
+class ShaderButton extends StatelessWidget {
+  final int value;
+  final ValueChanged<int> onChanged;
+  final VoidCallback? onMenuOpen;
+  final VoidCallback? onMenuClose;
 
-  const ShaderButton({super.key, required this.playController});
+  const ShaderButton({
+    super.key,
+    required this.value,
+    required this.onChanged,
+    this.onMenuOpen,
+    this.onMenuClose,
+  });
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final videoUiStateController = ref.read(videoUiProvider.notifier);
-    final currentType = ref.watch(
-      playStateProvider.select((state) => state.superResolutionType),
-    );
+  Widget build(BuildContext context) {
     final labels = ['关闭', '效率档', '质量档'];
 
     return MenuAnchor(
-      onOpen: () {
-        videoUiStateController.cancelUiTimer();
-      },
-      onClose: () {
-        videoUiStateController.hideControlsUi(
-            duration: const Duration(seconds: 2));
-      },
+      onOpen: onMenuOpen,
+      onClose: onMenuClose,
       menuChildren: List<MenuItemButton>.generate(
         labels.length,
         (int index) {
           final type = index + 1;
-          final isSelected = currentType == type;
+          final isSelected = value == type;
 
           return MenuItemButton(
             onPressed: () {
-              playController.setShader(type);
+              onChanged(type);
             },
             child: Container(
               height: 48,
@@ -70,7 +67,7 @@ class ShaderButton extends ConsumerWidget {
             padding: const EdgeInsets.symmetric(horizontal: 15, vertical: 0),
             decoration: BoxDecoration(
               borderRadius: BorderRadius.circular(10),
-              color: currentType == 2 || currentType == 3
+              color: value == 2 || value == 3
                   ? themePrimary.withValues(alpha: 0.5)
                   : null,
             ),

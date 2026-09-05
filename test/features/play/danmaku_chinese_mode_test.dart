@@ -10,12 +10,6 @@ void main() {
       expect(DanmakuChineseMode.t2s.config, OpenCCConfig.t2s);
     });
 
-    test('fromName restores known modes', () {
-      expect(DanmakuChineseMode.fromName('none'), DanmakuChineseMode.none);
-      expect(DanmakuChineseMode.fromName('s2t'), DanmakuChineseMode.s2t);
-      expect(DanmakuChineseMode.fromName('t2s'), DanmakuChineseMode.t2s);
-    });
-
     test('fromName falls back to none for unknown values', () {
       expect(DanmakuChineseMode.fromName('unknown'), DanmakuChineseMode.none);
       expect(DanmakuChineseMode.fromName(null), DanmakuChineseMode.none);

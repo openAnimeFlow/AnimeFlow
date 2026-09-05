@@ -1,0 +1,4 @@
+enum PlayerKernel {
+  mediaKit,
+  fvp,
+}

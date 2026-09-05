@@ -1812,6 +1812,42 @@ class AppLocalizationsZh extends AppLocalizations {
   String downloadSizeProgress(Object downloaded, Object total) {
     return '已下載 $downloaded / 總大小 $total';
   }
+
+  @override
+  String get playerKernel => '播放器內核';
+
+  @override
+  String get selectPlayerKernel => '選擇播放器內核';
+
+  @override
+  String get playerKernelTroubleshootingHint =>
+      '播放頁無法播放或發生閃退時，可嘗試切換播放器內核。iOS 巨魔安裝環境下，MediaKit 內核可能閃退，可切換至 FVP。';
+
+  @override
+  String get playerKernelSupportsSuperResolution =>
+      'MediaKit 支援 Anime4K 等 GLSL 超解析度 Shader';
+
+  @override
+  String get playerKernelNoSuperResolution =>
+      'FVP 不支援 Anime4K 等 GLSL 超解析度 Shader';
+
+  @override
+  String get playerKernelSwitchFailed => '播放器內核切換失敗';
+
+  @override
+  String get mediaKit => 'MediaKit';
+
+  @override
+  String get fvp => 'FVP';
+
+  @override
+  String get hardwareDecoding => '硬體解碼';
+
+  @override
+  String get hardwareDecodingHint => '優先使用硬體解碼；切換後會重新載入目前影片。';
+
+  @override
+  String get hardwareDecodingFailed => '切換解碼模式失敗';
 }
 
 /// The translations for Chinese, using the Han script (`zh_Hans`).
@@ -3621,6 +3657,42 @@ class AppLocalizationsZhHans extends AppLocalizationsZh {
   String downloadSizeProgress(Object downloaded, Object total) {
     return '已下载 $downloaded / 总大小 $total';
   }
+
+  @override
+  String get playerKernel => '播放器内核';
+
+  @override
+  String get selectPlayerKernel => '选择播放器内核';
+
+  @override
+  String get playerKernelTroubleshootingHint =>
+      '播放页无法播放或发生闪退时，可尝试切换播放器内核。iOS 巨魔安装环境下，MediaKit 内核可能闪退，可切换至 FVP。';
+
+  @override
+  String get playerKernelSupportsSuperResolution =>
+      'MediaKit 支持 Anime4K 等 GLSL 超分辨率 Shader';
+
+  @override
+  String get playerKernelNoSuperResolution =>
+      'FVP 不支持 Anime4K 等 GLSL 超分辨率 Shader';
+
+  @override
+  String get playerKernelSwitchFailed => '播放器内核切换失败';
+
+  @override
+  String get mediaKit => 'MediaKit';
+
+  @override
+  String get fvp => 'FVP';
+
+  @override
+  String get hardwareDecoding => '硬件解码';
+
+  @override
+  String get hardwareDecodingHint => '优先使用硬件解码；切换后会重新加载当前视频。';
+
+  @override
+  String get hardwareDecodingFailed => '切换解码模式失败';
 }
 
 /// The translations for Chinese, as used in Hong Kong, using the Han script (`zh_Hant_HK`).
@@ -5349,6 +5421,42 @@ class AppLocalizationsZhHantHk extends AppLocalizationsZh {
   String downloadSizeProgress(Object downloaded, Object total) {
     return '已下載 $downloaded / 總大小 $total';
   }
+
+  @override
+  String get playerKernel => '播放器內核';
+
+  @override
+  String get selectPlayerKernel => '選擇播放器內核';
+
+  @override
+  String get playerKernelTroubleshootingHint =>
+      '播放頁無法播放或發生閃退時，可嘗試切換播放器內核。iOS 巨魔安裝環境下，MediaKit 內核可能閃退，可切換至 FVP。';
+
+  @override
+  String get playerKernelSupportsSuperResolution =>
+      'MediaKit 支援 Anime4K 等 GLSL 超解析度 Shader';
+
+  @override
+  String get playerKernelNoSuperResolution =>
+      'FVP 不支援 Anime4K 等 GLSL 超解析度 Shader';
+
+  @override
+  String get playerKernelSwitchFailed => '播放器內核切換失敗';
+
+  @override
+  String get mediaKit => 'MediaKit';
+
+  @override
+  String get fvp => 'FVP';
+
+  @override
+  String get hardwareDecoding => '硬件解碼';
+
+  @override
+  String get hardwareDecodingHint => '優先使用硬件解碼；切換後會重新載入目前影片。';
+
+  @override
+  String get hardwareDecodingFailed => '切換解碼模式失敗';
 }
 
 /// The translations for Chinese, as used in Taiwan, using the Han script (`zh_Hant_TW`).
@@ -7077,4 +7185,40 @@ class AppLocalizationsZhHantTw extends AppLocalizationsZh {
   String downloadSizeProgress(Object downloaded, Object total) {
     return '已下載 $downloaded / 總大小 $total';
   }
+
+  @override
+  String get playerKernel => '播放器內核';
+
+  @override
+  String get selectPlayerKernel => '選擇播放器內核';
+
+  @override
+  String get playerKernelTroubleshootingHint =>
+      '播放頁無法播放或發生閃退時，可嘗試切換播放器內核。iOS 巨魔安裝環境下，MediaKit 內核可能閃退，可切換至 FVP。';
+
+  @override
+  String get playerKernelSupportsSuperResolution =>
+      'MediaKit 支援 Anime4K 等 GLSL 超解析度 Shader';
+
+  @override
+  String get playerKernelNoSuperResolution =>
+      'FVP 不支援 Anime4K 等 GLSL 超解析度 Shader';
+
+  @override
+  String get playerKernelSwitchFailed => '播放器內核切換失敗';
+
+  @override
+  String get mediaKit => 'MediaKit';
+
+  @override
+  String get fvp => 'FVP';
+
+  @override
+  String get hardwareDecoding => '硬體解碼';
+
+  @override
+  String get hardwareDecodingHint => '優先使用硬體解碼；切換後會重新載入目前影片。';
+
+  @override
+  String get hardwareDecodingFailed => '切換解碼模式失敗';
 }

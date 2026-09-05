@@ -1,12 +1,16 @@
 import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
+import 'dart:typed_data';
 
 import 'package:anime_flow/core/constants/constants.dart';
 import 'package:anime_flow/core/constants/storage_key.dart';
 import 'package:anime_flow/features/play/application/danmaku_chinese_converter.dart';
 import 'package:anime_flow/features/play/application/danmaku_chinese_mode.dart';
+import 'package:anime_flow/features/play/application/danmaku_playback_synchronizer.dart';
+import 'package:anime_flow/features/play/application/playback_progress_manager.dart';
 import 'package:anime_flow/features/play/application/play_history_service.dart';
+import 'package:anime_flow/features/play/application/system_volume_synchronizer.dart';
 import 'package:anime_flow/features/play/presentation/providers/danmaku_chinese_mode_provider.dart';
 import 'package:anime_flow/features/play/presentation/providers/episodes_provider.dart';
 import 'package:anime_flow/features/play/presentation/providers/subject_episodes_provider.dart';
@@ -15,7 +19,6 @@ import 'package:anime_flow/features/shaders/shaders_controller.dart';
 import 'package:anime_flow/core/network/api/flow_api.dart';
 import 'package:anime_flow/shared/models/enums/video_controls_icon_type.dart';
 import 'package:anime_flow/shared/models/player/danmaku/danmaku_module.dart';
-import 'package:anime_flow/shared/models/player/play/play_history.dart';
 import 'package:anime_flow/shared/models/player/play/play_history_event_type.dart';
 import 'package:anime_flow/core/storage/storage.dart';
 import 'package:anime_flow/app/router/routes_args.dart';
@@ -24,10 +27,14 @@ import 'package:anime_flow/core/utils/system_util.dart';
 import 'package:anime_flow/core/utils/utils.dart';
 import 'package:anime_flow/core/utils/vibrate.dart';
 import 'package:anime_flow/shared/widgets/windows_title_bar.dart';
+import 'package:anime_flow/features/play/domain/player/player_event.dart';
+import 'package:anime_flow/features/play/domain/player/player_kernel.dart';
+import 'package:anime_flow/features/play/domain/player/player_snapshot.dart';
+import 'package:anime_flow/features/play/domain/player/playback_source.dart';
+import 'package:anime_flow/features/play/infrastructure/player/player_engine_factory.dart';
+import 'package:anime_flow/features/play/application/playback_coordinator.dart';
 import 'package:canvas_danmaku/canvas_danmaku.dart';
 import 'package:flutter/material.dart';
-import 'package:media_kit/media_kit.dart';
-import 'package:media_kit_video/media_kit_video.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:window_manager/window_manager.dart';
 
@@ -53,6 +60,7 @@ PlaySession playSession(Ref ref) {
     videoUiStateActions: ref.watch(videoUiProvider.notifier),
     episodesActions: ref.watch(episodesProvider.notifier),
     danmakuChineseConverter: ref.watch(danmakuChineseConverterProvider),
+    engineFactory: const PlayerEngineFactory(),
     initialDanmakuChineseMode: initialDanmakuChineseMode,
     setEpisodeWatched: ({
       required subjectId,
@@ -102,6 +110,16 @@ class PlayStateNotifier extends _$PlayStateNotifier {
   }
 
   PlayState get value => state;
+
+  void setKernel(PlayerKernel value) {
+    if (state.kernel == value) return;
+    state = state.copyWith(kernel: value);
+  }
+
+  void setSwitchingKernel(bool value) {
+    if (state.switchingKernel == value) return;
+    state = state.copyWith(switchingKernel: value);
+  }
 
   void setSuperResolutionType(int value) {
     state = state.copyWith(superResolutionType: value);
@@ -221,6 +239,8 @@ Set<String> _loadHiddenPlatformsFromStorage() {
 }
 
 class PlayState {
+  final PlayerKernel kernel;
+  final bool switchingKernel;
   final int superResolutionType;
   final bool isWideScreen;
   final bool isContentExpanded;
@@ -243,6 +263,8 @@ class PlayState {
   final int danmakuEpoch;
 
   const PlayState({
+    this.kernel = PlayerKernel.mediaKit,
+    this.switchingKernel = false,
     this.superResolutionType = 0,
     this.isWideScreen = false,
     this.isContentExpanded = true,
@@ -266,6 +288,8 @@ class PlayState {
   });
 
   PlayState copyWith({
+    PlayerKernel? kernel,
+    bool? switchingKernel,
     int? superResolutionType,
     bool? isWideScreen,
     bool? isContentExpanded,
@@ -288,6 +312,8 @@ class PlayState {
     int? danmakuEpoch,
   }) {
     return PlayState(
+      kernel: kernel ?? this.kernel,
+      switchingKernel: switchingKernel ?? this.switchingKernel,
       superResolutionType: superResolutionType ?? this.superResolutionType,
       isWideScreen: isWideScreen ?? this.isWideScreen,
       isContentExpanded: isContentExpanded ?? this.isContentExpanded,
@@ -362,7 +388,6 @@ class PlayRequest {
 
 class PlaySession {
   static const _parseSuccessResult = '视频解析成功';
-  static const _watchedProgressThreshold = 0.90;
 
   PlaySession({
     required this.shadersDirectory,
@@ -370,6 +395,7 @@ class PlaySession {
     required VideoUiStateActions videoUiStateActions,
     required Episodes episodesActions,
     required this.danmakuChineseConverter,
+    required this.engineFactory,
     required DanmakuChineseMode initialDanmakuChineseMode,
     required void Function({
       required int subjectId,
@@ -382,8 +408,9 @@ class PlaySession {
         _setEpisodeWatched = setEpisodeWatched,
         _danmakuChineseMode = initialDanmakuChineseMode;
 
-  late Player player;
-  late VideoController videoController;
+  final PlayerEngineFactory engineFactory;
+  late final PlaybackCoordinator playbackCoordinator;
+  late final PlaybackProgressManager playbackProgressManager;
   final PlayStateNotifier _playStateActions;
   final VideoUiStateActions _videoUiStateActions;
   final Episodes _episodesActions;
@@ -395,7 +422,6 @@ class PlaySession {
     required int episodeId,
     required bool watched,
   }) _setEpisodeWatched;
-  PlayState _latestPlayState = const PlayState();
   final setting = Storage.setting;
 
   /// 着色器所在目录（由 [shadersDirectoryProvider] 在启动时准备）
@@ -403,12 +429,6 @@ class PlaySession {
 
   /// 视频地址
   String? videoUrl;
-
-  /// 番剧名称
-  String? animeTitle;
-
-  /// 视频偏移
-  int offset = 0;
 
   /// 番剧id
   int subjectId = 0;
@@ -432,9 +452,16 @@ class PlaySession {
 
   String? localDanmakuPath;
 
+  /// 当前播放会话使用的统一播放源，用于重新加载和播放器内核切换时恢复上下文。
+  PlaybackSource? _currentSource;
+
   ///弹幕相关
-  DanmakuController? danmakuController;
-  Timer? _saveSettingsTimer;
+  final DanmakuPlaybackSynchronizer danmakuSynchronizer =
+      DanmakuPlaybackSynchronizer();
+  DanmakuController? get danmakuController => danmakuSynchronizer.controller;
+  set danmakuController(DanmakuController? value) {
+    danmakuSynchronizer.controller = value;
+  }
 
   /// 记录原始倍速
   double? _speedBeforeBoost;
@@ -443,94 +470,178 @@ class PlaySession {
   /// 垂直拖动相关
   double _dragStartVolume = 100.0;
 
-  Timer? _systemVolumeSyncTimer;
-  double? _pendingSystemVolume;
-  double? _lastKnownSystemVolume;
-  DateTime? _ignoreSystemVolumeEventsUntil;
-
-  static const Duration _systemVolumeSyncInterval = Duration(milliseconds: 80);
+  late final SystemVolumeSynchronizer systemVolumeSynchronizer;
 
   /// 定时停止播放的计时器
   Timer? _stopTimer;
 
-  bool _isLoadingDanmaku = false;
   bool _isPlayerBuffering = false;
   bool _lastPlayerPlaying = false;
-  DateTime? _lastPausePlayHistorySavedAt;
-
-  Future<void> _playHistorySaveQueue = Future<void>.value();
-  final Set<int> _autoWatchedEpisodeIds = {};
-  final Set<int> _autoWatchedEpisodeUpdatesInFlight = {};
-
-  final List<StreamSubscription<Object?>> _playerSubscriptions = [];
+  StreamSubscription<PlayerEvent>? _playerSubscription;
   bool _isDisposed = false;
+  Future<void> _playbackChanges = Future<void>.value();
+
+  // Keep episode metadata, source opening and kernel snapshots in the same
+  // order. Danmaku loading stays outside this queue so it cannot block playback.
+  Future<T> _serializePlaybackChange<T>(Future<T> Function() change) {
+    final result = _playbackChanges.then((_) => change());
+    _playbackChanges =
+        result.then<void>((_) {}, onError: (Object _, StackTrace __) {});
+    return result;
+  }
 
   static const Duration _bufferingPositionTolerance =
       Duration(milliseconds: 500);
-  static const Duration _pausePlayHistoryThrottle = Duration(seconds: 1);
-
   void init() {
-    _latestPlayState = _playStateActions.value;
     final adBlocker = setting.get(PlaybackKey.adBlocker, defaultValue: false);
-    player = Player(configuration: PlayerConfiguration(adBlocker: adBlocker));
-    videoController = VideoController(player);
-    unawaited(_initSystemVolumeSync());
+    final preferredKernel = _readPreferredPlayerKernel();
+    playbackCoordinator = PlaybackCoordinator(
+      engineFactory: engineFactory,
+      adBlocker: adBlocker,
+    );
+    scheduleMicrotask(() {
+      if (!_isDisposed) {
+        _playStateActions.setKernel(preferredKernel);
+      }
+    });
+    playbackProgressManager = PlaybackProgressManager(
+      onEpisodeWatched: ({
+        required subjectId,
+        required episodeId,
+        required watched,
+      }) {
+        _setEpisodeWatched(
+          subjectId: subjectId,
+          episodeId: episodeId,
+          watched: watched,
+        );
+      },
+    );
+    systemVolumeSynchronizer = SystemVolumeSynchronizer(
+      onSystemVolumeChanged: (volume) => _updateVolume(
+        volume,
+        syncSystemVolume: false,
+      ),
+    );
+    unawaited(playbackCoordinator.initialize(
+      kernel: preferredKernel,
+    ));
+    _playerSubscription = playbackCoordinator.events.listen(_handlePlayerEvent);
+    unawaited(systemVolumeSynchronizer.initialize());
+  }
 
-    _playerSubscriptions.addAll([
-      player.stream.playing.listen((playing) {
-        if (_lastPlayerPlaying && !playing) {
-          final now = DateTime.now();
-          final lastSavedAt = _lastPausePlayHistorySavedAt;
-          if (lastSavedAt == null ||
-              now.difference(lastSavedAt) >= _pausePlayHistoryThrottle) {
-            _lastPausePlayHistorySavedAt = now;
-            unawaited(_savePlayHistory());
+  /// 在保持播放上下文的前提下切换播放器内核。
+  Future<bool> switchKernel(PlayerKernel target) =>
+      _serializePlaybackChange(() => _switchKernel(target));
+
+  Future<bool> setHardwareDecoder(bool enabled) =>
+      _serializePlaybackChange(() async {
+        if (_isDisposed) return false;
+        final previous = setting.get(PlaybackKey.hardwareDecoder,
+            defaultValue: true) as bool;
+        if (previous == enabled) return true;
+        await setting.put(PlaybackKey.hardwareDecoder, enabled);
+        var applied = false;
+        try {
+          applied =
+              await _switchKernel(playbackCoordinator.kernel, force: true);
+          return applied;
+        } finally {
+          if (!_isDisposed) _playStateActions.setSwitchingKernel(false);
+          if (!applied) {
+            await setting.put(PlaybackKey.hardwareDecoder, previous);
           }
         }
-        _lastPlayerPlaying = playing;
-        _playStateActions.setPlaying(playing);
-        _syncDanmakuPauseWithPlayback(playing);
-      }),
-      player.stream.volume.listen((vol) {
-        if (!SystemUtil.supportsSystemVolumeSync) {
-          _playStateActions.setVolume(vol);
-        }
-      }),
-      player.stream.buffer.listen((buffered) {
-        _playStateActions.setBuffered(buffered);
-        _updateEffectiveBufferingState(buffered: buffered);
-      }),
-      player.stream.buffering.listen((buffering) {
-        _isPlayerBuffering = buffering;
-        _updateEffectiveBufferingState(playerBuffering: buffering);
-      }),
-      player.stream.rate.listen((r) {
-        _playStateActions.setRate(r);
-      }),
-      player.stream.position.listen((pos) {
-        _playStateActions.setPosition(pos);
-        _updateEffectiveBufferingState(position: pos);
-      }),
-      player.stream.duration.listen((dur) {
-        _playStateActions.setDuration(dur);
-      }),
-      player.stream.completed.listen((completed) {
-        if (completed && subjectId > 0) {
-          _autoSwitchToNextEpisode();
-          unawaited(PlayHistoryService.clearPosition(subjectId));
-        }
-      }),
-    ]);
+      });
+
+  Future<bool> _switchKernel(PlayerKernel target, {bool force = false}) async {
+    if (_isDisposed || _playStateActions.value.switchingKernel) return false;
+    if (!force && playbackCoordinator.kernel == target) return true;
+
+    final source = _currentSource;
+
+    final state = _playStateActions.value;
+    final snapshot = PlayerSnapshot(
+      source: source,
+      position: state.position,
+      // 系统音量已控制输出响度，重建时不能再叠加到播放器内部音量。
+      volume: SystemUtil.supportsSystemVolumeSync ? 100.0 : state.volume,
+      rate: state.rate,
+      wasPlaying: state.playing,
+      fit: state.videoFit,
+    );
+    _playStateActions.setSwitchingKernel(true);
+    final shaderList = switch (state.superResolutionType) {
+      2 => mpvAnime4KShadersLite,
+      3 => mpvAnime4KShaders,
+      _ => const <String>[],
+    };
+    final switched = await playbackCoordinator.switchKernel(target, snapshot,
+        force: force,
+        shaders: force && shaderList.isNotEmpty
+            ? Utils.buildShadersAbsolutePath(shadersDirectory.path, shaderList)
+            : null);
+    if (_isDisposed) return false;
+    if (switched) {
+      _playStateActions.setKernel(target);
+      unawaited(
+        setting.put(PlaybackKey.preferredPlayerKernel, target.name),
+      );
+    } else {
+      LiggLogger().e('切换播放器内核失败: $target');
+    }
+    _playStateActions.setSwitchingKernel(false);
+    return switched;
+  }
+
+  PlayerKernel _readPreferredPlayerKernel() {
+    final value = setting.get(
+      PlaybackKey.preferredPlayerKernel,
+      defaultValue: PlayerKernel.mediaKit.name,
+    );
+    return PlayerKernel.values.firstWhere(
+      (kernel) => kernel.name == value,
+      orElse: () => PlayerKernel.mediaKit,
+    );
+  }
+
+  void _handlePlayerEvent(PlayerEvent event) {
+    if (event is PlayerPlayingChanged) {
+      if (_lastPlayerPlaying && !event.playing) {
+        playbackProgressManager.saveAfterPause();
+      }
+      _lastPlayerPlaying = event.playing;
+      _playStateActions.setPlaying(event.playing);
+      _syncDanmakuPauseWithPlayback(event.playing);
+    } else if (event is PlayerVolumeChanged) {
+      if (!SystemUtil.supportsSystemVolumeSync) {
+        _playStateActions.setVolume(event.volume);
+      }
+    } else if (event is PlayerBufferedChanged) {
+      _playStateActions.setBuffered(event.buffered);
+      _updateEffectiveBufferingState(buffered: event.buffered);
+    } else if (event is PlayerBufferingChanged) {
+      _isPlayerBuffering = event.buffering;
+      _updateEffectiveBufferingState(playerBuffering: event.buffering);
+    } else if (event is PlayerRateChanged) {
+      _playStateActions.setRate(event.rate);
+    } else if (event is PlayerPositionChanged) {
+      _playStateActions.setPosition(event.position);
+      _updateEffectiveBufferingState(position: event.position);
+    } else if (event is PlayerDurationChanged) {
+      _playStateActions.setDuration(event.duration);
+    } else if (event is PlayerCompleted) {
+      if (subjectId > 0) {
+        _autoSwitchToNextEpisode();
+        unawaited(PlayHistoryService.clearPosition(subjectId));
+      }
+    } else if (event is PlayerError) {
+      LiggLogger().e('播放器错误: ${event.error}', error: event.stackTrace);
+    }
   }
 
   void _syncDanmakuPauseWithPlayback(bool playing) {
-    final controller = danmakuController;
-    if (controller == null) return;
-    if (playing) {
-      controller.resume();
-    } else {
-      controller.pause();
-    }
+    danmakuSynchronizer.syncPlayback(playing);
   }
 
   void _autoSwitchToNextEpisode() {
@@ -558,10 +669,7 @@ class PlaySession {
         VideoControlsIndicatorType.parsingIndicator) {
       return;
     }
-    _videoUiStateActions.hideIndicator();
-    _videoUiStateActions
-        .updateIndicatorType(VideoControlsIndicatorType.noIndicator);
-    _videoUiStateActions.updateMainAxisAlignmentType(MainAxisAlignment.start);
+    _videoUiStateActions.finishParsingIndicator();
   }
 
   /// 选中集与当前播放集不一致时清空弹幕数据与画布（切换集过程中）
@@ -575,203 +683,134 @@ class PlaySession {
 
   void dispose() {
     _isDisposed = true;
-    unawaited(_savePlayHistory());
+    unawaited(playbackProgressManager.save());
     if (Platform.isWindows) {
       WindowsTitleBarVisibility.reset();
     }
-    SystemUtil.removeSystemVolumeListener();
-    _systemVolumeSyncTimer?.cancel();
-    _saveSettingsTimer?.cancel();
+    systemVolumeSynchronizer.dispose();
     _stopTimer?.cancel();
-    for (final subscription in _playerSubscriptions) {
-      subscription.cancel();
-    }
-    _playerSubscriptions.clear();
+    unawaited(_playerSubscription?.cancel());
+    _playerSubscription = null;
     _clearDanmakuCanvas();
-    player.dispose();
+    unawaited(playbackCoordinator.dispose());
   }
 
   void pauseForRouteCover() {
     cancelScheduledStop();
-    unawaited(player.pause());
+    unawaited(playbackCoordinator.pause());
   }
 
+  int _playRequestId = 0;
+
+  bool _isCurrentPlayRequest(int requestId) =>
+      !_isDisposed && requestId == _playRequestId;
+
   Future<void> stopCurrentMedia() async {
-    cancelScheduledStop();
-    await player.stop();
-    _clearDanmakuCanvas();
+    _playRequestId++;
+    await _serializePlaybackChange(() async {
+      if (_isDisposed) return;
+      cancelScheduledStop();
+      _currentSource = null;
+      await playbackCoordinator.stop();
+      if (_isDisposed) return;
+      _clearDanmakuCanvas();
+    });
   }
 
   /// 初始化播放状态
   Future<void> initPlayState(PlayRequest state) async {
     if (_isDisposed) return;
-    await stopCurrentMedia();
-    if (_isDisposed) return;
-    removeDanmaku();
-    videoUrl = state.videoUrl;
-    offset = state.offset;
-    subjectId = state.subjectId;
-    episode = state.episodeIndex;
-    episodeSort = state.episodeSort;
-    episodeId = state.episodeId;
-    subjectName = state.subjectName;
-    subjectCover = state.subjectCover;
-    alias = state.alias;
-    isLocalPlayback = state.isLocalPlayback;
-    localDanmakuPath = state.localDanmakuPath;
-    if (state.videoUrl.isEmpty) return;
-    await player.open(Media(state.videoUrl), play: false);
-    if (_isDisposed) return;
-    await player.stream.duration.firstWhere((d) => d > Duration.zero);
-    if (_isDisposed) return;
-    await Future.delayed(const Duration(milliseconds: 800), () {
-      if (!_isDisposed) {
-        unawaited(player.seek(Duration(seconds: offset)));
-      }
+    final requestId = ++_playRequestId;
+    await _serializePlaybackChange(() async {
+      if (!_isCurrentPlayRequest(requestId)) return;
+      cancelScheduledStop();
+      _currentSource = null;
+      await playbackCoordinator.stop();
+      if (!_isCurrentPlayRequest(requestId)) return;
+      removeDanmaku();
+      videoUrl = state.videoUrl;
+      subjectId = state.subjectId;
+      episode = state.episodeIndex;
+      episodeSort = state.episodeSort;
+      episodeId = state.episodeId;
+      subjectName = state.subjectName;
+      subjectCover = state.subjectCover;
+      alias = state.alias;
+      isLocalPlayback = state.isLocalPlayback;
+      localDanmakuPath = state.localDanmakuPath;
+      playbackProgressManager.setPlaybackContext(
+        subjectId: subjectId,
+        episodeId: episodeId,
+        episodeSort: episodeSort,
+        subjectName: subjectName,
+        subjectCover: subjectCover,
+        alias: alias,
+        isLocalPlayback: isLocalPlayback,
+      );
+      if (state.videoUrl.isEmpty) return;
+      _currentSource = PlaybackSource(
+        uri: Uri.parse(state.videoUrl),
+        isLocal: state.isLocalPlayback,
+      );
+      await playbackCoordinator.open(
+        _currentSource!,
+        startPosition: Duration(seconds: state.offset),
+        autoPlay: false,
+      );
+      if (!_isCurrentPlayRequest(requestId)) return;
+      await playbackCoordinator.play();
     });
-    if (_isDisposed) return;
-    await player.play();
-    if (_isDisposed) return;
-    final logger = LiggLogger();
+    if (!_isCurrentPlayRequest(requestId)) return;
+    if (state.videoUrl.isEmpty) return;
+    await _loadEpisodeDanmaku(state, requestId);
+  }
 
-    ///加载弹幕
+  Future<void> _loadEpisodeDanmaku(PlayRequest request, int requestId) async {
+    if (request.episodeIndex == 0) return;
     try {
-      if (!_isLoadingDanmaku && episode != 0) {
-        _isLoadingDanmaku = true;
-        try {
-          if (isLocalPlayback) {
-            final danmaku = await _loadLocalDanmaku(localDanmakuPath);
-            if (_isDisposed) return;
-            if (danmaku.isNotEmpty) {
-              final converted = await danmakuChineseConverter.convertDanmakus(
-                danmaku,
-                _danmakuChineseMode,
-              );
-              if (_isDisposed) return;
-              addDanmakuAll(converted);
-            }
-          } else {
-            final bgmBangumiId =
-                await FlowApi.getDanDanBangumiIDByBgmBangumiID(subjectId);
-            if (bgmBangumiId != null) {
-              final danmaku =
-                  await FlowApi.getDanDanmaku(bgmBangumiId, episode);
-              if (_isDisposed) return;
-              final converted = await danmakuChineseConverter.convertDanmakus(
-                danmaku,
-                _danmakuChineseMode,
-              );
-              if (_isDisposed) return;
-              addDanmakuAll(converted);
-            }
-          }
-        } finally {
-          _isLoadingDanmaku = false;
-        }
+      final List<Danmaku> danmaku;
+      if (request.isLocalPlayback) {
+        danmaku = await _loadLocalDanmaku(request.localDanmakuPath);
+      } else {
+        final bangumiId =
+            await FlowApi.getDanDanBangumiIDByBgmBangumiID(request.subjectId);
+        if (!_isCurrentPlayRequest(requestId) || bangumiId == null) return;
+        danmaku = await FlowApi.getDanDanmaku(bangumiId, request.episodeIndex);
+      }
+      if (danmaku.isEmpty) return;
+      while (_isCurrentPlayRequest(requestId)) {
+        final revision = _danmakuChineseModeRevision;
+        final converted = await danmakuChineseConverter.convertDanmakus(
+          danmaku,
+          _danmakuChineseMode,
+        );
+        if (!_isCurrentPlayRequest(requestId)) return;
+        if (revision != _danmakuChineseModeRevision) continue;
+        addDanmakuAll(converted);
+        return;
       }
     } catch (e) {
-      logger.e(e);
+      LiggLogger().e(e);
     }
   }
 
   void _handlePlayStateChanged(PlayState state) {
-    _latestPlayState = state;
-    if (state.duration <= Duration.zero) return;
-    if (subjectId <= 0 || episodeId <= 0) return;
-    if (subjectName == null || subjectCover == null) return;
-    if (isLocalPlayback) return;
-
-    final setting = Storage.setting;
-    if (setting.get(PlaybackKey.episodesProgress, defaultValue: true)) {
-      if (state.playing) {
-        _autoUpdateEpisodeWatchedIfNeeded(state);
-      }
+    if (state.isParsing) {
+      _videoUiStateActions.showParsingIndicator();
     }
-  }
-
-  void _autoUpdateEpisodeWatchedIfNeeded(PlayState state) {
-    final progress =
-        state.position.inMilliseconds / state.duration.inMilliseconds;
-    if (progress < _watchedProgressThreshold) {
-      return;
-    }
-    if (_autoWatchedEpisodeIds.contains(episodeId) ||
-        _autoWatchedEpisodeUpdatesInFlight.contains(episodeId)) {
-      return;
-    }
-
-    _autoWatchedEpisodeUpdatesInFlight.add(episodeId);
-    unawaited(_autoUpdateEpisodeWatched(episodeId));
-  }
-
-  Future<void> _autoUpdateEpisodeWatched(int targetEpisodeId) async {
-    try {
-      await updateEpisodeWatched(targetEpisodeId);
-      _autoWatchedEpisodeIds.add(targetEpisodeId);
-    } catch (e) {
-      LiggLogger().e('自动更新观看进度失败: $e');
-    } finally {
-      _autoWatchedEpisodeUpdatesInFlight.remove(targetEpisodeId);
-    }
-  }
-
-  Future<void> _savePlayHistory({
-    Duration? position,
-    PlayHistoryEventType eventType = PlayHistoryEventType.defaults,
-  }) async {
-    final state = _latestPlayState;
-    if (state.duration <= Duration.zero ||
-        subjectId <= 0 ||
-        episodeId <= 0 ||
-        subjectName == null ||
-        subjectCover == null) {
-      return;
-    }
-    final savedPosition = position ?? state.position;
-    final savedSubjectId = subjectId;
-    final savedEpisodeId = episodeId;
-    final savedEpisodeSort = episodeSort;
-    final savedSubjectName = subjectName!;
-    final savedSubjectCover = subjectCover!;
-    final savedAlias = List<String>.from(alias);
-    _playHistorySaveQueue = _playHistorySaveQueue.then((_) async {
-      try {
-        final playHistory = PlayHistory(
-          subjectId: savedSubjectId,
-          subjectName: savedSubjectName,
-          episodeId: savedEpisodeId,
-          episodeSort: savedEpisodeSort,
-          cover: savedSubjectCover,
-          updateAt: DateTime.now(),
-          position: savedPosition.inSeconds,
-          duration: state.duration.inSeconds,
-          alias: savedAlias,
-        );
-        await PlayHistoryService.save(playHistory, eventType: eventType);
-      } catch (e) {
-        LiggLogger().e('保存播放进度失败: $e');
-      }
-    });
-    await _playHistorySaveQueue;
+    playbackProgressManager.updatePlaybackState(
+      position: state.position,
+      duration: state.duration,
+      playing: state.playing,
+    );
   }
 
   ///更新缓冲状态
   void _updateBufferingState(bool buffering) {
-    final videoUiStateController = _videoUiStateActions;
-    if (buffering) {
-      videoUiStateController
-          .updateIndicatorType(VideoControlsIndicatorType.bufferingIndicator);
-      videoUiStateController
-          .updateMainAxisAlignmentType(MainAxisAlignment.center);
-      videoUiStateController.showIndicator();
-    } else {
-      if (videoUiStateController.currentIndicatorType ==
-          VideoControlsIndicatorType.bufferingIndicator) {
-        videoUiStateController.hideIndicator();
-        videoUiStateController
-            .updateIndicatorType(VideoControlsIndicatorType.noIndicator);
-      }
-    }
+    _videoUiStateActions.updateBufferingIndicator(
+      buffering,
+      isParsing: _playStateActions.value.isParsing,
+    );
   }
 
   void _updateEffectiveBufferingState({
@@ -904,12 +943,8 @@ class PlaySession {
     _clearDanmakuCanvas();
 
     final converted = await danmakuChineseConverter.convertDanmakus(all, mode);
-    if (revision != _danmakuChineseModeRevision) return;
-    final grouped = <int, List<Danmaku>>{};
-    for (final item in converted) {
-      grouped.putIfAbsent(item.time.toInt(), () => []).add(item);
-    }
-    _playStateActions.setDanDanmakus(grouped);
+    if (_isDisposed || revision != _danmakuChineseModeRevision) return;
+    addDanmakuAll(converted);
   }
 
   /// 发送弹幕
@@ -1009,7 +1044,7 @@ class PlaySession {
   }
 
   void _clearDanmakuCanvas() {
-    danmakuController?.clear();
+    danmakuSynchronizer.clear();
   }
 
   /// 切换弹幕开关
@@ -1042,12 +1077,16 @@ class PlaySession {
   ///暂停/播放
   void playOrPauseVideo() {
     _videoUiStateActions.updateMainAxisAlignmentType(MainAxisAlignment.start);
-    player.playOrPause();
+    if (_playStateActions.value.playing) {
+      unawaited(playbackCoordinator.pause());
+    } else {
+      unawaited(playbackCoordinator.play());
+    }
   }
 
   void _applyPlaybackRate(double speed) {
     _playStateActions.setRate(speed);
-    player.setRate(speed);
+    unawaited(playbackCoordinator.setRate(speed));
   }
 
   /// 设置播放倍数
@@ -1072,10 +1111,10 @@ class PlaySession {
 
   /// 跳转到指定位置
   void seekTo(Duration pos) {
-    player.seek(pos);
+    unawaited(playbackCoordinator.seek(pos));
     _updateEffectiveBufferingState(position: pos);
     unawaited(
-      _savePlayHistory(
+      playbackProgressManager.save(
         position: pos,
         eventType: PlayHistoryEventType.forceOverwrite,
       ),
@@ -1096,85 +1135,18 @@ class PlaySession {
     _applyPlaybackRate(speed);
   }
 
-  ///设置视频音量
-  void _setPlayerVolume(double newVolume) {
-    final clampedVolume = newVolume.clamp(0.0, 100.0);
-    _playStateActions.setVolume(clampedVolume);
-    player.setVolume(
-      SystemUtil.supportsSystemVolumeSync ? 100.0 : clampedVolume,
-    );
-  }
-
   void _updateVolume(
     double newVolume, {
     bool syncSystemVolume = true,
   }) {
     final clampedVolume = newVolume.clamp(0.0, 100.0);
-    _setPlayerVolume(clampedVolume);
+    _playStateActions.setVolume(clampedVolume);
+    unawaited(playbackCoordinator.setVolume(
+      SystemUtil.supportsSystemVolumeSync ? 100.0 : clampedVolume,
+    ));
     if (syncSystemVolume) {
-      _scheduleSystemVolumeSync(clampedVolume / 100);
+      systemVolumeSynchronizer.scheduleSync(clampedVolume / 100);
     }
-  }
-
-  Future<void> _initSystemVolumeSync() async {
-    if (!SystemUtil.supportsSystemVolumeSync) return;
-
-    await SystemUtil.configureSystemVolumeSync();
-    final systemVolume = await SystemUtil.getSystemVolume();
-    if (systemVolume != null) {
-      _lastKnownSystemVolume = systemVolume;
-      _setPlayerVolume(systemVolume * 100);
-    }
-
-    SystemUtil.addSystemVolumeListener(_handleSystemVolumeChanged);
-  }
-
-  void _handleSystemVolumeChanged(double volume) {
-    final normalized = volume.clamp(0.0, 1.0);
-    final ignoreUntil = _ignoreSystemVolumeEventsUntil;
-    final isSelfTriggered = ignoreUntil != null &&
-        DateTime.now().isBefore(ignoreUntil) &&
-        _isSameVolume(_lastKnownSystemVolume, normalized);
-    if (isSelfTriggered) {
-      return;
-    }
-
-    _lastKnownSystemVolume = normalized;
-    _pendingSystemVolume = null;
-    _updateVolume(normalized * 100, syncSystemVolume: false);
-  }
-
-  void _scheduleSystemVolumeSync(double normalizedVolume) {
-    if (!SystemUtil.supportsSystemVolumeSync) return;
-
-    final clampedVolume = normalizedVolume.clamp(0.0, 1.0);
-    _pendingSystemVolume = clampedVolume;
-
-    if (_systemVolumeSyncTimer?.isActive ?? false) {
-      return;
-    }
-
-    _systemVolumeSyncTimer = Timer(_systemVolumeSyncInterval, () {
-      final pendingVolume = _pendingSystemVolume;
-      _pendingSystemVolume = null;
-      if (pendingVolume == null ||
-          _isSameVolume(_lastKnownSystemVolume, pendingVolume)) {
-        return;
-      }
-      unawaited(_pushSystemVolume(pendingVolume));
-    });
-  }
-
-  Future<void> _pushSystemVolume(double normalizedVolume) async {
-    _lastKnownSystemVolume = normalizedVolume;
-    _ignoreSystemVolumeEventsUntil =
-        DateTime.now().add(_systemVolumeSyncInterval * 2);
-    await SystemUtil.setSystemVolume(normalizedVolume);
-  }
-
-  bool _isSameVolume(double? a, double? b) {
-    if (a == null || b == null) return false;
-    return (a - b).abs() < 0.01;
   }
 
   void startVerticalDrag() {
@@ -1201,15 +1173,12 @@ class PlaySession {
 
   void endVerticalDrag() {
     _playStateActions.setIsVerticalDragging(false);
-    Future.delayed(const Duration(seconds: 2), () {
-      if (!_playStateActions.value.isVerticalDragging) {}
-    });
   }
 
   /// 开始播放
   Future<void> startPlaying() async {
     try {
-      await player.play();
+      await playbackCoordinator.play();
     } catch (_) {
       return;
     }
@@ -1231,14 +1200,14 @@ class PlaySession {
             scheduledStopDuration - 1,
           );
         } else {
-          unawaited(player.pause());
+          unawaited(playbackCoordinator.pause());
           timer.cancel();
           _stopTimer = null;
         }
       });
     } else {
       _playStateActions.setScheduledStopDuration(0);
-      await player.pause();
+      await playbackCoordinator.pause();
     }
   }
 
@@ -1252,32 +1221,25 @@ class PlaySession {
   ///设置超分辨率
   /// type 1 关闭 2 效率档 3 质量档
   Future<void> setShader(int type) async {
-    var pp = player.platform as NativePlayer;
-    await pp.waitForPlayerInitialization;
-    await pp.waitForVideoControllerInitializationIfAttached;
-    if (type == 2) {
-      await pp.command([
-        'change-list',
-        'glsl-shaders',
-        'set',
-        Utils.buildShadersAbsolutePath(
-            shadersDirectory.path, mpvAnime4KShadersLite),
-      ]);
-      _playStateActions.setSuperResolutionType(2);
-      return;
+    if (!playbackCoordinator.capabilities.supportsShader) {
+      throw UnsupportedError('当前播放器内核不支持 Anime4K');
     }
-    if (type == 3) {
-      await pp.command([
-        'change-list',
-        'glsl-shaders',
-        'set',
-        Utils.buildShadersAbsolutePath(
-            shadersDirectory.path, mpvAnime4KShaders),
-      ]);
-      _playStateActions.setSuperResolutionType(3);
-      return;
-    }
-    await pp.command(['change-list', 'glsl-shaders', 'clr', '']);
-    _playStateActions.setSuperResolutionType(1);
+    final shaders = switch (type) {
+      2 => mpvAnime4KShadersLite,
+      3 => mpvAnime4KShaders,
+      _ => const <String>[],
+    };
+    await playbackCoordinator.setShaders(shaders.isEmpty
+        ? ''
+        : Utils.buildShadersAbsolutePath(shadersDirectory.path, shaders));
+    _playStateActions.setSuperResolutionType(type == 2 || type == 3 ? type : 1);
   }
+
+  Widget buildVideoSurface({required BoxFit fit}) {
+    return playbackCoordinator.buildVideoSurface(fit: fit);
+  }
+
+  Future<Uint8List?> takeScreenshot() => playbackCoordinator.screenshot();
+
+  Future<void> stop() => stopCurrentMedia();
 }

@@ -3463,6 +3463,72 @@ abstract class AppLocalizations {
   /// In zh_Hans, this message translates to:
   /// **'已下载 {downloaded} / 总大小 {total}'**
   String downloadSizeProgress(Object downloaded, Object total);
+
+  /// No description provided for @playerKernel.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'播放器内核'**
+  String get playerKernel;
+
+  /// No description provided for @selectPlayerKernel.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'选择播放器内核'**
+  String get selectPlayerKernel;
+
+  /// No description provided for @playerKernelTroubleshootingHint.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'播放页无法播放或发生闪退时，可尝试切换播放器内核。iOS 巨魔安装环境下，MediaKit 内核可能闪退，可切换至 FVP。'**
+  String get playerKernelTroubleshootingHint;
+
+  /// No description provided for @playerKernelSupportsSuperResolution.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'MediaKit 支持 Anime4K 等 GLSL 超分辨率 Shader'**
+  String get playerKernelSupportsSuperResolution;
+
+  /// No description provided for @playerKernelNoSuperResolution.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'FVP 不支持 Anime4K 等 GLSL 超分辨率 Shader'**
+  String get playerKernelNoSuperResolution;
+
+  /// No description provided for @playerKernelSwitchFailed.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'播放器内核切换失败'**
+  String get playerKernelSwitchFailed;
+
+  /// No description provided for @mediaKit.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'MediaKit'**
+  String get mediaKit;
+
+  /// No description provided for @fvp.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'FVP'**
+  String get fvp;
+
+  /// No description provided for @hardwareDecoding.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'硬件解码'**
+  String get hardwareDecoding;
+
+  /// No description provided for @hardwareDecodingHint.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'优先使用硬件解码；切换后会重新加载当前视频。'**
+  String get hardwareDecodingHint;
+
+  /// No description provided for @hardwareDecodingFailed.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'切换解码模式失败'**
+  String get hardwareDecodingFailed;
 }
 
 class _AppLocalizationsDelegate

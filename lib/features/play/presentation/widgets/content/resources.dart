@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:anime_flow/app/localization/app_localizations.dart';
 import 'package:anime_flow/features/download/presentation/widgets/download_episode_sheet.dart';
 import 'package:anime_flow/shared/models/enums/video_controls_icon_type.dart';
@@ -31,7 +33,7 @@ class _VideoResourcesViewState extends ConsumerState<VideoResourcesView> {
     final videoUiStateController = ref.read(videoUiProvider.notifier);
     final videoSourceController = ref.read(videoSourceProvider.notifier);
     void onVideoUrlSelected(String url) {
-      playController.player.stop();
+      unawaited(playController.stop());
       videoSourceController.loadVideoPage(url);
       videoUiStateController
           .updateIndicatorType(VideoControlsIndicatorType.parsingIndicator);

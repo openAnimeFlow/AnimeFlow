@@ -10,39 +10,38 @@ part of 'play_history_provider.dart';
 // ignore_for_file: type=lint, type=warning
 /// 播放记录的统一入口，负责读取列表并在本地数据变化后自动刷新。
 
-@ProviderFor(PlayHistoryController)
-final playHistoryControllerProvider = PlayHistoryControllerProvider._();
+@ProviderFor(PlayHistoryNotifier)
+final playHistoryProvider = PlayHistoryNotifierProvider._();
 
 /// 播放记录的统一入口，负责读取列表并在本地数据变化后自动刷新。
-final class PlayHistoryControllerProvider
-    extends $AsyncNotifierProvider<PlayHistoryController, List<PlayHistory>> {
+final class PlayHistoryNotifierProvider
+    extends $AsyncNotifierProvider<PlayHistoryNotifier, List<PlayHistory>> {
   /// 播放记录的统一入口，负责读取列表并在本地数据变化后自动刷新。
-  PlayHistoryControllerProvider._()
+  PlayHistoryNotifierProvider._()
       : super(
           from: null,
           argument: null,
           retry: null,
-          name: r'playHistoryControllerProvider',
+          name: r'playHistoryProvider',
           isAutoDispose: false,
           dependencies: null,
           $allTransitiveDependencies: null,
         );
 
   @override
-  String debugGetCreateSourceHash() => _$playHistoryControllerHash();
+  String debugGetCreateSourceHash() => _$playHistoryNotifierHash();
 
   @$internal
   @override
-  PlayHistoryController create() => PlayHistoryController();
+  PlayHistoryNotifier create() => PlayHistoryNotifier();
 }
 
-String _$playHistoryControllerHash() =>
-    r'926700c32dd73cb82f65414d9208ddf2a81584dd';
+String _$playHistoryNotifierHash() =>
+    r'828a342c30429d68c2387ae00575e57432dfed19';
 
 /// 播放记录的统一入口，负责读取列表并在本地数据变化后自动刷新。
 
-abstract class _$PlayHistoryController
-    extends $AsyncNotifier<List<PlayHistory>> {
+abstract class _$PlayHistoryNotifier extends $AsyncNotifier<List<PlayHistory>> {
   FutureOr<List<PlayHistory>> build();
   @$mustCallSuper
   @override

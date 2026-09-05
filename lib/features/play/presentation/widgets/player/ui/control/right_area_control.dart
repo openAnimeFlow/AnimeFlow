@@ -37,7 +37,7 @@ class RightAreaControl extends ConsumerWidget {
                           onTap: () async {
                             try {
                               final uint8List =
-                                  await playController.player.screenshot();
+                                  await playController.takeScreenshot();
                               if (uint8List != null) {
                                 final message = await SystemUtil.saveImageBytes(
                                   uint8List,

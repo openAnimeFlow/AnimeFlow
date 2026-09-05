@@ -98,6 +98,10 @@ jobs:
       - name: Install dependencies
         run: flutter pub get
 
+      - name: Patch AVFoundation platform import for macOS SPM
+        if: matrix.platform == 'macos'
+        run: dart tool/patch_avfoundation_spm.dart
+
       - name: Validate API signature env
         if: matrix.platform != 'windows'
         shell: bash

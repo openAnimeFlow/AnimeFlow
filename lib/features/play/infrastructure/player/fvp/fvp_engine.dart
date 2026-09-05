@@ -34,6 +34,7 @@ class FvpEngine implements PlayerEngine {
   bool _hasMedia = false;
   bool _acceptMediaStatus = false;
   Size? _videoSize;
+  Future<void> _operations = Future<void>.value();
 
   @override
   PlayerKernel get kernel => PlayerKernel.fvp;
@@ -136,9 +137,23 @@ class FvpEngine implements PlayerEngine {
     PlaybackSource source, {
     Duration? startPosition,
     bool autoPlay = false,
+  }) =>
+      _enqueue(() =>
+          _open(source, startPosition: startPosition, autoPlay: autoPlay));
+
+  Future<void> _open(
+    PlaybackSource source, {
+    Duration? startPosition,
+    required bool autoPlay,
   }) async {
+    await _stop();
+    // ReleaseRT also detaches MDK's native renderer (D3D11 on Windows,
+    // Surface on Android). Do this BEFORE preparing the next decoder, not
+    // inside updateTexture after the new media has already been prepared.
+    if ((_player.textureId.value ?? -1) >= 0) {
+      await _player.updateTexture(width: -1);
+    }
     _ensureReady();
-    await stop();
     _videoSize = null;
     final headers = <String, String>{
       ...source.headers,
@@ -161,12 +176,9 @@ class FvpEngine implements PlayerEngine {
       final result = await _player.prepare(
         position: startPosition?.inMilliseconds ?? 0,
       );
+      _ensureReady();
       if (result < 0) {
         throw StateError('FVP prepare failed: $result');
-      }
-      final texture = await _player.updateTexture();
-      if (texture < 0) {
-        throw StateError('FVP video texture creation failed: $texture');
       }
       final video = _player.mediaInfo.video?.firstOrNull;
       if (video != null) {
@@ -175,9 +187,15 @@ class FvpEngine implements PlayerEngine {
           video.codec.height.toDouble(),
         );
       }
+      // Set geometry before updateTexture notifies the video surface.
+      final texture = await _player.updateTexture();
+      _ensureReady();
+      if (texture < 0) {
+        throw StateError('FVP video texture creation failed: $texture');
+      }
       _hasMedia = true;
       _emitCurrentMetrics();
-      if (autoPlay) await play();
+      if (autoPlay) _player.state = fvp.PlaybackState.playing;
     } catch (_) {
       _acceptMediaStatus = false;
       _hasMedia = false;
@@ -187,19 +205,19 @@ class FvpEngine implements PlayerEngine {
   }
 
   @override
-  Future<void> play() async {
-    _ensureReady();
-    _player.state = fvp.PlaybackState.playing;
-  }
+  Future<void> play() => _enqueue(() async {
+        _player.state = fvp.PlaybackState.playing;
+      });
 
   @override
-  Future<void> pause() async {
-    _ensureReady();
-    _player.state = fvp.PlaybackState.paused;
-  }
+  Future<void> pause() => _enqueue(() async {
+        _player.state = fvp.PlaybackState.paused;
+      });
 
   @override
-  Future<void> stop() async {
+  Future<void> stop() => _enqueue(_stop);
+
+  Future<void> _stop() async {
     _ensureReady();
     _hasMedia = false;
     _acceptMediaStatus = false;
@@ -226,12 +244,12 @@ class FvpEngine implements PlayerEngine {
   }
 
   @override
-  Future<void> seek(Duration position) async {
-    _ensureReady();
-    final result = await _player.seek(position: position.inMilliseconds);
-    if (result < 0) throw StateError('FVP seek failed: $result');
-    _emitCurrentMetrics();
-  }
+  Future<void> seek(Duration position) => _enqueue(() async {
+        final result = await _player.seek(position: position.inMilliseconds);
+        _ensureReady();
+        if (result < 0) throw StateError('FVP seek failed: $result');
+        _emitCurrentMetrics();
+      });
 
   @override
   Future<void> setVolume(double volume) async {
@@ -263,6 +281,8 @@ class FvpEngine implements PlayerEngine {
     if (_disposed) return;
     _disposed = true;
     _pollTimer?.cancel();
+    // A pending platform texture operation must finish before native disposal.
+    await _operations;
     for (final subscription in _subscriptions) {
       await subscription.cancel();
     }
@@ -322,6 +342,17 @@ class FvpEngine implements PlayerEngine {
     _emit(PlayerBufferedChanged(
       Duration(milliseconds: currentPosition + bufferLength),
     ));
+  }
+
+  Future<void> _enqueue(Future<void> Function() operation) {
+    final result = _operations.then((_) {
+      _ensureReady();
+      return operation();
+    });
+    // Preserve errors for the caller without poisoning subsequent requests.
+    _operations =
+        result.then<void>((_) {}, onError: (Object _, StackTrace __) {});
+    return result;
   }
 
   void _ensureReady() {

@@ -4,9 +4,74 @@ import 'package:anime_flow/features/play/domain/player/playback_source.dart';
 import 'package:anime_flow/features/play/domain/player/player_event.dart';
 import 'package:anime_flow/features/play/infrastructure/player/fvp/fvp_engine.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:flutter/foundation.dart';
 import 'package:fvp/mdk.dart' as fvp;
 
 void main() {
+  test('repeated loads detach old rendering output before preparing new media',
+      () async {
+    final player = _FakePlayer();
+    final engine = FvpEngine(playerFactory: () => player);
+    await engine.initialize();
+    addTearDown(engine.dispose);
+    for (var episode = 0; episode < 10; episode++) {
+      await engine.open(
+        PlaybackSource(uri: Uri.parse('https://example.com/$episode')),
+        autoPlay: true,
+      );
+      expect(player.textureId.value, episode + 1);
+    }
+    expect(player.rendererOperations, [
+      'prepare',
+      'create',
+      for (var episode = 1; episode < 10; episode++) ...[
+        'release',
+        'prepare',
+        'create'
+      ],
+    ]);
+  });
+
+  test('overlapping loads wait for pending texture creation', () async {
+    final player = _FakePlayer()..textureGate = Completer<void>();
+    final engine = FvpEngine(playerFactory: () => player);
+    await engine.initialize();
+    addTearDown(engine.dispose);
+    final first = engine.open(
+      PlaybackSource(uri: Uri.parse('https://example.com/1')),
+    );
+    await player.textureStarted.future;
+    final second = engine.open(
+      PlaybackSource(uri: Uri.parse('https://example.com/2')),
+    );
+    await Future<void>.delayed(Duration.zero);
+    expect(player.prepares, 1);
+    expect(player.rendererOperations, ['prepare', 'create']);
+    player.textureGate!.complete();
+    await Future.wait([first, second]);
+    expect(player.rendererOperations,
+        ['prepare', 'create', 'release', 'prepare', 'create']);
+    expect(player.textureId.value, 2);
+  });
+
+  test('dispose waits for pending texture work and stops further loading',
+      () async {
+    final player = _FakePlayer()..textureGate = Completer<void>();
+    final engine = FvpEngine(playerFactory: () => player);
+    await engine.initialize();
+    final opening = engine.open(
+      PlaybackSource(uri: Uri.parse('https://example.com/1')),
+    );
+    final failed = expectLater(opening, throwsStateError);
+    await player.textureStarted.future;
+    final disposing = engine.dispose();
+    expect(player.disposed, isFalse);
+    player.textureGate!.complete();
+    await failed;
+    await disposing;
+    expect(player.disposed, isTrue);
+  });
+
   test('waits for native stop before preparing the next episode', () async {
     final player = _FakePlayer()
       ..nativeState = fvp.PlaybackState.playing
@@ -152,6 +217,13 @@ void main() {
 
 // Implements the Dart API without loading MDK or a platform video texture.
 class _FakePlayer implements fvp.Player {
+  @override
+  final textureId = ValueNotifier<int?>(null);
+  int textureCount = 0;
+  final rendererOperations = <String>[];
+  Completer<void>? textureGate;
+  final textureStarted = Completer<void>();
+  bool disposed = false;
   fvp.PlaybackState nativeState = fvp.PlaybackState.stopped;
   bool delayStop = false;
   int currentPosition = 0;
@@ -200,6 +272,7 @@ class _FakePlayer implements fvp.Player {
     bool reply = false,
   }) async {
     expectSync(nativeState, fvp.PlaybackState.stopped);
+    rendererOperations.add('prepare');
     prepares++;
     nativeState = fvp.PlaybackState.paused;
     return position;
@@ -207,8 +280,18 @@ class _FakePlayer implements fvp.Player {
 
   @override
   Future<int> updateTexture(
-          {int? width, int? height, bool? tunnel, bool? fit}) async =>
-      1;
+      {int? width, int? height, bool? tunnel, bool? fit}) async {
+    if (textureId.value != null) {
+      rendererOperations.add('release');
+      textureId.value = null;
+    }
+    if (width == -1) return -1;
+    rendererOperations.add('create');
+    if (!textureStarted.isCompleted) textureStarted.complete();
+    await textureGate?.future;
+    textureId.value = ++textureCount;
+    return textureId.value!;
+  }
 
   @override
   fvp.MediaInfo get mediaInfo => _FakeMediaInfo();
@@ -221,6 +304,7 @@ class _FakePlayer implements fvp.Player {
 
   @override
   Future<void> dispose() async {
+    disposed = true;
     await changes.close();
     await statuses.close();
   }

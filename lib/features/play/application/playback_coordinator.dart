@@ -10,7 +10,6 @@ import 'package:anime_flow/features/play/domain/player/player_snapshot.dart';
 import 'package:anime_flow/features/play/infrastructure/player/player_engine_factory.dart';
 import 'package:flutter/material.dart';
 
-
 /// 播放器基础协调层，负责内核实例生命周期和内核切换。
 class PlaybackCoordinator {
   PlaybackCoordinator({
@@ -76,14 +75,17 @@ class PlaybackCoordinator {
     final current = _engine;
     PlayerEngine? next;
     try {
-      await current.pause();
+      final source = snapshot.source;
+      if (source != null) await current.pause();
       next = engineFactory.create(target, adBlocker: adBlocker);
       await next.initialize();
-      await next.open(
-        snapshot.source,
-        startPosition: snapshot.position,
-        autoPlay: false,
-      );
+      if (source != null) {
+        await next.open(
+          source,
+          startPosition: snapshot.position,
+          autoPlay: false,
+        );
+      }
       await next.setVolume(snapshot.volume);
       await next.setRate(snapshot.rate);
 
@@ -91,11 +93,13 @@ class PlaybackCoordinator {
       _engine = next;
       _subscribeToEngine(next);
       await current.dispose();
-      if (snapshot.wasPlaying) await next.play();
+      if (source != null && snapshot.wasPlaying) await next.play();
       return true;
     } catch (_) {
       await next?.dispose();
-      if (snapshot.wasPlaying) unawaited(current.play());
+      if (snapshot.source != null && snapshot.wasPlaying) {
+        unawaited(current.play());
+      }
       return false;
     }
   }

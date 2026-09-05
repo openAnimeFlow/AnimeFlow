@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import 'playback_source.dart';
 
 class PlayerSnapshot {
-  final PlaybackSource source;
+  final PlaybackSource? source;
   final Duration position;
   final double volume;
   final double rate;

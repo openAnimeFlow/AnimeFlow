@@ -216,7 +216,7 @@ class _TopAreaControlState extends ConsumerState<TopAreaControl> {
                             return Row(
                               children: [
                                 if (position > Duration.zero &&
-                                    (isWideScreen || fullscreen)) ...[
+                                    (isWideScreen || fullscreen))
                                   Tooltip(
                                     message: l10n.skipSeconds(_skipDuration),
                                     child: IconButton(
@@ -233,23 +233,22 @@ class _TopAreaControlState extends ConsumerState<TopAreaControl> {
                                       ),
                                     ),
                                   ),
-                                  IconButton(
-                                    tooltip: l10n.settings,
-                                    onPressed: () {
-                                      _showRightSlideDialog(
-                                        barrierDismissible: true,
-                                        context: context,
-                                        barrierLabel: 'VideoSetting',
-                                        child: const VideoSettingDialog(),
-                                      );
-                                    },
-                                    icon: const Icon(
-                                      size: 29,
-                                      color: Colors.white,
-                                      Icons.settings_outlined,
-                                    ),
+                                IconButton(
+                                  tooltip: l10n.settings,
+                                  onPressed: () {
+                                    _showRightSlideDialog(
+                                      barrierDismissible: true,
+                                      context: context,
+                                      barrierLabel: 'VideoSetting',
+                                      child: const VideoSettingDialog(),
+                                    );
+                                  },
+                                  icon: const Icon(
+                                    size: 29,
+                                    color: Colors.white,
+                                    Icons.settings_outlined,
                                   ),
-                                ],
+                                ),
                                 if (fullscreen)
                                   Consumer(
                                     builder: (context, ref, child) {

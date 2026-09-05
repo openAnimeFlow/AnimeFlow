@@ -13,6 +13,31 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
+  test('switches kernel before a video source is available', () async {
+    final factory = _FakeEngineFactory();
+    final coordinator =
+        PlaybackCoordinator(engineFactory: factory, adBlocker: false);
+    addTearDown(coordinator.dispose);
+    await coordinator.initialize();
+    final switched = await coordinator.switchKernel(
+        PlayerKernel.fvp,
+        const PlayerSnapshot(
+            source: null,
+            position: Duration.zero,
+            volume: 65,
+            rate: 1.25,
+            wasPlaying: false,
+            fit: BoxFit.contain));
+    expect(switched, isTrue);
+    expect(coordinator.kernel, PlayerKernel.fvp);
+    expect(factory.created.first.pauseCount, 0);
+    expect(factory.created.first.disposeCount, 1);
+    expect(factory.created.last.openedPosition, isNull);
+    expect(factory.created.last.playCount, 0);
+    expect(factory.created.last.volume, 65);
+    expect(factory.created.last.rate, 1.25);
+  });
+
   test('switches kernel and restores the playback snapshot', () async {
     final factory = _FakeEngineFactory();
     final coordinator = PlaybackCoordinator(

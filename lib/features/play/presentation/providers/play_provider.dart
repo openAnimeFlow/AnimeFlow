@@ -528,7 +528,6 @@ class PlaySession {
     if (engine.kernel == target) return true;
 
     final source = _currentSource;
-    if (source == null) return false;
 
     final state = _playStateActions.value;
     final snapshot = PlayerSnapshot(

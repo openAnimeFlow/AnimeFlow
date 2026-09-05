@@ -4,37 +4,65 @@ import 'package:anime_flow/features/play/domain/player/playback_source.dart';
 import 'package:anime_flow/features/play/domain/player/player_event.dart';
 import 'package:anime_flow/features/play/infrastructure/player/fvp/fvp_engine.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:flutter/foundation.dart';
+import 'package:flutter/widgets.dart';
 import 'package:fvp/mdk.dart' as fvp;
 
 void main() {
-  test('repeated loads detach old rendering output before preparing new media',
-      () async {
-    final player = _FakePlayer();
-    final engine = FvpEngine(playerFactory: () => player);
+  testWidgets('mounted video surface follows the replacement player',
+      (tester) async {
+    final players = <_FakePlayer>[];
+    final engine = FvpEngine(playerFactory: () {
+      final player = _FakePlayer()..textureCount = players.length * 100;
+      players.add(player);
+      return player;
+    });
+    await engine.initialize();
+    await engine.setVolume(35);
+    await engine.setRate(1.5);
+    await tester.pumpWidget(engine.buildVideoSurface(fit: BoxFit.contain));
+    final source = PlaybackSource(uri: Uri.parse('https://example.com/video'));
+    await tester.runAsync(() => engine.open(source));
+    await tester.pump();
+    expect(tester.widget<Texture>(find.byType(Texture)).textureId, 1);
+    await tester.runAsync(() => engine.open(source));
+    await tester.pump();
+    expect(tester.widget<Texture>(find.byType(Texture)).textureId, 101);
+    expect(players.first.disposed, isTrue);
+    expect(players.last.volume, 0.35);
+    expect(players.last.playbackRate, 1.5);
+    await tester.pumpWidget(const SizedBox());
+    await tester.runAsync(engine.dispose);
+  });
+
+  test('repeated loads create fresh players with initial positions', () async {
+    final players = <_FakePlayer>[];
+    final engine = FvpEngine(playerFactory: () {
+      final player = _FakePlayer();
+      players.add(player);
+      return player;
+    });
     await engine.initialize();
     addTearDown(engine.dispose);
     for (var episode = 0; episode < 10; episode++) {
       await engine.open(
         PlaybackSource(uri: Uri.parse('https://example.com/$episode')),
         autoPlay: true,
+        startPosition: Duration(seconds: episode),
       );
-      expect(player.textureId.value, episode + 1);
+      expect(players.length, episode + 1);
+      expect(players.last.textureId.value, 1);
+      expect(players.last.initialPosition, episode * 1000);
+      expect(players.last.rendererOperations, ['prepare', 'create']);
+      expect(players.take(episode).every((player) => player.disposed), isTrue);
     }
-    expect(player.rendererOperations, [
-      'prepare',
-      'create',
-      for (var episode = 1; episode < 10; episode++) ...[
-        'release',
-        'prepare',
-        'create'
-      ],
-    ]);
   });
 
   test('overlapping loads wait for pending texture creation', () async {
     final player = _FakePlayer()..textureGate = Completer<void>();
-    final engine = FvpEngine(playerFactory: () => player);
+    final nextPlayer = _FakePlayer();
+    var created = 0;
+    final engine =
+        FvpEngine(playerFactory: () => created++ == 0 ? player : nextPlayer);
     await engine.initialize();
     addTearDown(engine.dispose);
     final first = engine.open(
@@ -49,9 +77,9 @@ void main() {
     expect(player.rendererOperations, ['prepare', 'create']);
     player.textureGate!.complete();
     await Future.wait([first, second]);
-    expect(player.rendererOperations,
-        ['prepare', 'create', 'release', 'prepare', 'create']);
-    expect(player.textureId.value, 2);
+    expect(player.disposed, isTrue);
+    expect(nextPlayer.rendererOperations, ['prepare', 'create']);
+    expect(nextPlayer.textureId.value, 1);
   });
 
   test('dispose waits for pending texture work and stops further loading',
@@ -143,12 +171,18 @@ void main() {
     );
 
     await engine.play();
+    final playing = engine.events.firstWhere(
+      (event) => event is PlayerPlayingChanged && event.playing,
+    );
     player.nativeState = fvp.PlaybackState.playing;
-    await Future<void>.delayed(const Duration(milliseconds: 250));
+    await playing.timeout(const Duration(seconds: 2));
     expect(states.last, isTrue);
     await engine.pause();
+    final paused = engine.events.firstWhere(
+      (event) => event is PlayerPlayingChanged && !event.playing,
+    );
     player.nativeState = fvp.PlaybackState.paused;
-    await Future<void>.delayed(const Duration(milliseconds: 250));
+    await paused.timeout(const Duration(seconds: 2));
     expect(states.last, isFalse);
     await engine.dispose();
   });
@@ -183,8 +217,8 @@ void main() {
 
   test('next episode ignores old buffering status and polling clears buffering',
       () async {
-    final player = _FakePlayer();
-    final engine = FvpEngine(playerFactory: () => player);
+    late _FakePlayer player;
+    final engine = FvpEngine(playerFactory: () => player = _FakePlayer());
     await engine.initialize();
     addTearDown(engine.dispose);
     final buffering = <bool>[];
@@ -218,6 +252,10 @@ void main() {
 // Implements the Dart API without loading MDK or a platform video texture.
 class _FakePlayer implements fvp.Player {
   @override
+  double volume = 1;
+  @override
+  double playbackRate = 1;
+  @override
   final textureId = ValueNotifier<int?>(null);
   int textureCount = 0;
   final rendererOperations = <String>[];
@@ -230,6 +268,7 @@ class _FakePlayer implements fvp.Player {
   @override
   fvp.MediaStatus mediaStatus = const fvp.MediaStatus(fvp.MediaStatus.buffered);
   int prepares = 0;
+  int initialPosition = 0;
   final changes = StreamController<
       ({fvp.PlaybackState oldValue, fvp.PlaybackState newValue})>.broadcast();
   final statuses = StreamController<
@@ -274,6 +313,7 @@ class _FakePlayer implements fvp.Player {
     expectSync(nativeState, fvp.PlaybackState.stopped);
     rendererOperations.add('prepare');
     prepares++;
+    initialPosition = position;
     nativeState = fvp.PlaybackState.paused;
     return position;
   }

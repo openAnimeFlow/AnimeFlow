@@ -669,7 +669,10 @@ class PlaySession {
     unawaited(engine.pause());
   }
 
+  int _playRequestId = 0;
+
   Future<void> stopCurrentMedia() async {
+    _playRequestId++;
     cancelScheduledStop();
     await engine.stop();
     _clearDanmakuCanvas();
@@ -678,8 +681,10 @@ class PlaySession {
   /// 初始化播放状态
   Future<void> initPlayState(PlayRequest state) async {
     if (_isDisposed) return;
-    await stopCurrentMedia();
-    if (_isDisposed) return;
+    final stopping = stopCurrentMedia();
+    final requestId = _playRequestId;
+    await stopping;
+    if (_isDisposed || requestId != _playRequestId) return;
     removeDanmaku();
     videoUrl = state.videoUrl;
     offset = state.offset;
@@ -708,22 +713,12 @@ class PlaySession {
     );
     await engine.open(
       _currentSource!,
+      startPosition: Duration(seconds: state.offset),
       autoPlay: false,
     );
-    if (_isDisposed) return;
-    await engine.events.firstWhere(
-      (event) =>
-          event is PlayerDurationChanged && event.duration > Duration.zero,
-    );
-    if (_isDisposed) return;
-    await Future.delayed(const Duration(milliseconds: 800), () {
-      if (!_isDisposed) {
-        unawaited(engine.seek(Duration(seconds: offset)));
-      }
-    });
-    if (_isDisposed) return;
+    if (_isDisposed || requestId != _playRequestId) return;
     await engine.play();
-    if (_isDisposed) return;
+    if (_isDisposed || requestId != _playRequestId) return;
     final logger = LiggLogger();
 
     ///加载弹幕

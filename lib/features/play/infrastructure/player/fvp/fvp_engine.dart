@@ -24,7 +24,11 @@ class FvpEngine implements PlayerEngine {
   static const int _bufferRangeMinMilliseconds = 1000;
   static const int _bufferRangeMaxMilliseconds = 60 * 1000;
 
-  late final fvp.Player _player;
+  late fvp.Player _player;
+  final ValueNotifier<int?> _textureId = ValueNotifier<int?>(null);
+  bool _opened = false;
+  double _volume = 1;
+  double _rate = 1;
   final StreamController<PlayerEvent> _events =
       StreamController<PlayerEvent>.broadcast();
   final List<StreamSubscription<Object?>> _subscriptions = [];
@@ -52,7 +56,19 @@ class FvpEngine implements PlayerEngine {
   @override
   Future<void> initialize() async {
     if (_initialized) return;
+    _createPlayer();
+    _pollTimer = Timer.periodic(
+      const Duration(milliseconds: 250),
+      (_) => _emitCurrentMetrics(),
+    );
+    _initialized = true;
+  }
+
+  void _createPlayer() {
     _player = _playerFactory();
+    _player.volume = _volume;
+    _player.playbackRate = _rate;
+    _player.textureId.addListener(_updateTextureId);
     _player.setBufferRange(
       min: _bufferRangeMinMilliseconds,
       max: _bufferRangeMaxMilliseconds,
@@ -93,11 +109,19 @@ class FvpEngine implements PlayerEngine {
         }
       }),
     ]);
-    _pollTimer = Timer.periodic(
-      const Duration(milliseconds: 250),
-      (_) => _emitCurrentMetrics(),
-    );
-    _initialized = true;
+  }
+
+  void _updateTextureId() => _textureId.value = _player.textureId.value;
+
+  Future<void> _releasePlayer() async {
+    _player.textureId.removeListener(_updateTextureId);
+    _textureId.value = null;
+    for (final subscription in _subscriptions) {
+      await subscription.cancel();
+    }
+    _subscriptions.clear();
+    // FVP exposes disposal as async void; detach listeners before releasing it.
+    _player.dispose();
   }
 
   @override
@@ -106,7 +130,7 @@ class FvpEngine implements PlayerEngine {
     return ColoredBox(
       color: Colors.black,
       child: ValueListenableBuilder<int?>(
-        valueListenable: _player.textureId,
+        valueListenable: _textureId,
         builder: (context, textureId, child) {
           if (textureId == null || textureId < 0) {
             return const SizedBox.expand();
@@ -147,12 +171,11 @@ class FvpEngine implements PlayerEngine {
     required bool autoPlay,
   }) async {
     await _stop();
-    // ReleaseRT also detaches MDK's native renderer (D3D11 on Windows,
-    // Surface on Android). Do this BEFORE preparing the next decoder, not
-    // inside updateTexture after the new media has already been prepared.
-    if ((_player.textureId.value ?? -1) >= 0) {
-      await _player.updateTexture(width: -1);
+    if (_opened) {
+      await _releasePlayer();
+      _createPlayer();
     }
+    _opened = true;
     _ensureReady();
     _videoSize = null;
     final headers = <String, String>{
@@ -254,14 +277,16 @@ class FvpEngine implements PlayerEngine {
   @override
   Future<void> setVolume(double volume) async {
     _ensureReady();
-    _player.volume = (volume / 100).clamp(0.0, 1.0);
+    _volume = (volume / 100).clamp(0.0, 1.0);
+    _player.volume = _volume;
     _emit(PlayerVolumeChanged(volume.clamp(0.0, 100.0)));
   }
 
   @override
   Future<void> setRate(double rate) async {
     _ensureReady();
-    _player.playbackRate = rate;
+    _rate = rate;
+    _player.playbackRate = _rate;
     _emit(PlayerRateChanged(rate));
   }
 
@@ -283,11 +308,8 @@ class FvpEngine implements PlayerEngine {
     _pollTimer?.cancel();
     // A pending platform texture operation must finish before native disposal.
     await _operations;
-    for (final subscription in _subscriptions) {
-      await subscription.cancel();
-    }
-    _subscriptions.clear();
-    _player.dispose();
+    if (_initialized) await _releasePlayer();
+    _textureId.dispose();
     await _events.close();
   }
 

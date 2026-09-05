@@ -10,18 +10,32 @@ import 'package:flutter/material.dart';
 import 'package:media_kit/media_kit.dart';
 import 'package:media_kit_video/media_kit_video.dart';
 
-
 class MediaKitEngine implements PlayerEngine {
   final bool adBlocker;
-  late final Player _player;
-  late final VideoController _videoController;
+  late Player _player;
+  final ValueNotifier<VideoController?> _videoController = ValueNotifier(null);
+  final Player Function() _playerFactory;
+  final VideoController Function(Player) _controllerFactory;
+  Future<void> _operations = Future<void>.value();
+  bool _opened = false;
+  bool _released = true;
+  double _volume = 100;
+  double _rate = 1;
+  String _shaders = '';
   final StreamController<PlayerEvent> _events =
       StreamController<PlayerEvent>.broadcast();
   final List<StreamSubscription<Object?>> _subscriptions = [];
   bool _initialized = false;
   bool _disposed = false;
 
-  MediaKitEngine({required this.adBlocker}) {
+  MediaKitEngine({
+    required this.adBlocker,
+    Player Function()? playerFactory,
+    VideoController Function(Player)? controllerFactory,
+  })  : _playerFactory = playerFactory ??
+            (() => Player(
+                configuration: PlayerConfiguration(adBlocker: adBlocker))),
+        _controllerFactory = controllerFactory ?? VideoController.new {
     _createPlayer();
   }
 
@@ -46,11 +60,9 @@ class MediaKitEngine implements PlayerEngine {
   }
 
   void _createPlayer() {
-    if (_initialized) return;
-    _player = Player(
-      configuration: PlayerConfiguration(adBlocker: adBlocker),
-    );
-    _videoController = VideoController(_player);
+    _player = _playerFactory();
+    _released = false;
+    _videoController.value = _controllerFactory(_player);
     _subscriptions.addAll([
       _player.stream.playing.listen(
         (value) => _emit(PlayerPlayingChanged(value)),
@@ -82,10 +94,16 @@ class MediaKitEngine implements PlayerEngine {
 
   @override
   Widget buildVideoSurface({required BoxFit fit}) {
-    return Video(
-      controller: _videoController,
-      fit: fit,
-      controls: NoVideoControls,
+    return ValueListenableBuilder<VideoController?>(
+      valueListenable: _videoController,
+      builder: (context, controller, child) => controller == null
+          ? const ColoredBox(color: Colors.black, child: SizedBox.expand())
+          : Video(
+              key: ObjectKey(controller),
+              controller: controller,
+              fit: fit,
+              controls: NoVideoControls,
+            ),
     );
   }
 
@@ -94,44 +112,65 @@ class MediaKitEngine implements PlayerEngine {
     PlaybackSource source, {
     Duration? startPosition,
     bool autoPlay = false,
-  }) async {
-    _ensureReady();
-    await _player.open(
-      Media(
-        source.uri.toString(),
-        httpHeaders: source.headers.isEmpty ? null : source.headers,
-      ),
-      play: false,
-    );
-    if (startPosition != null && startPosition > Duration.zero) {
-      await _player.seek(startPosition);
-    }
-    if (autoPlay) await play();
-  }
+  }) =>
+      _enqueue(() async {
+        if (_opened) {
+          await _releasePlayer();
+          _ensureReady();
+          _createPlayer();
+          await _player.setVolume(_volume);
+          await _player.setRate(_rate);
+          if (_shaders.isNotEmpty) await _applyShaders(_shaders);
+        }
+        _opened = true;
+        _ensureReady();
+        await _player.open(
+          Media(
+            source.uri.toString(),
+            start: startPosition,
+            httpHeaders: source.headers.isEmpty ? null : source.headers,
+          ),
+          play: false,
+        );
+        _ensureReady();
+        if (autoPlay) await _player.play();
+      });
 
   @override
-  Future<void> play() => _player.play();
+  Future<void> play() => _enqueue(() => _player.play());
 
   @override
-  Future<void> pause() => _player.pause();
+  Future<void> pause() => _enqueue(() => _player.pause());
 
   @override
-  Future<void> stop() => _player.stop();
+  Future<void> stop() => _enqueue(() => _player.stop());
 
   @override
-  Future<void> seek(Duration position) => _player.seek(position);
+  Future<void> seek(Duration position) =>
+      _enqueue(() => _player.seek(position));
 
   @override
-  Future<void> setVolume(double volume) => _player.setVolume(volume);
+  Future<void> setVolume(double volume) => _enqueue(() async {
+        await _player.setVolume(volume);
+        _volume = volume;
+      });
 
   @override
-  Future<void> setRate(double rate) => _player.setRate(rate);
+  Future<void> setRate(double rate) => _enqueue(() async {
+        await _player.setRate(rate);
+        _rate = rate;
+      });
 
   @override
-  Future<Uint8List?> screenshot() => _player.screenshot();
+  Future<Uint8List?> screenshot() => _enqueue(() => _player.screenshot());
 
   @override
-  Future<void> setShaders(String shaderList) async {
+  Future<void> setShaders(String shaderList) => _enqueue(() async {
+        await _applyShaders(shaderList);
+        _shaders = shaderList;
+      });
+
+  Future<void> _applyShaders(String shaderList) async {
     _ensureReady();
     final nativePlayer = _player.platform as NativePlayer;
     await nativePlayer.waitForPlayerInitialization;
@@ -148,12 +187,31 @@ class MediaKitEngine implements PlayerEngine {
   Future<void> dispose() async {
     if (_disposed) return;
     _disposed = true;
+    await _operations;
+    await _releasePlayer();
+    _videoController.dispose();
+    await _events.close();
+  }
+
+  Future<void> _releasePlayer() async {
+    if (_released) return;
+    _released = true;
+    _videoController.value = null;
     for (final subscription in _subscriptions) {
       await subscription.cancel();
     }
     _subscriptions.clear();
-    await _events.close();
-    _player.dispose();
+    await _player.dispose();
+  }
+
+  Future<T> _enqueue<T>(Future<T> Function() operation) {
+    final result = _operations.then((_) {
+      _ensureReady();
+      return operation();
+    });
+    _operations =
+        result.then<void>((_) {}, onError: (Object _, StackTrace __) {});
+    return result;
   }
 
   void _ensureReady() {

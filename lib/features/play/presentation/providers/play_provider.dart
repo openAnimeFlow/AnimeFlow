@@ -432,12 +432,6 @@ class PlaySession {
   /// 视频地址
   String? videoUrl;
 
-  /// 番剧名称
-  String? animeTitle;
-
-  /// 视频偏移
-  int offset = 0;
-
   /// 番剧id
   int subjectId = 0;
 
@@ -471,8 +465,6 @@ class PlaySession {
     danmakuSynchronizer.controller = value;
   }
 
-  Timer? _saveSettingsTimer;
-
   /// 记录原始倍速
   double? _speedBeforeBoost;
   bool _isSpeedBoosting = false;
@@ -485,7 +477,6 @@ class PlaySession {
   /// 定时停止播放的计时器
   Timer? _stopTimer;
 
-  bool _isLoadingDanmaku = false;
   bool _isPlayerBuffering = false;
   bool _lastPlayerPlaying = false;
   StreamSubscription<PlayerEvent>? _playerSubscription;
@@ -656,7 +647,6 @@ class PlaySession {
       WindowsTitleBarVisibility.reset();
     }
     systemVolumeSynchronizer.dispose();
-    _saveSettingsTimer?.cancel();
     _stopTimer?.cancel();
     unawaited(_playerSubscription?.cancel());
     _playerSubscription = null;
@@ -671,6 +661,9 @@ class PlaySession {
 
   int _playRequestId = 0;
 
+  bool _isCurrentPlayRequest(int requestId) =>
+      !_isDisposed && requestId == _playRequestId;
+
   Future<void> stopCurrentMedia() async {
     _playRequestId++;
     cancelScheduledStop();
@@ -684,10 +677,9 @@ class PlaySession {
     final stopping = stopCurrentMedia();
     final requestId = _playRequestId;
     await stopping;
-    if (_isDisposed || requestId != _playRequestId) return;
+    if (!_isCurrentPlayRequest(requestId)) return;
     removeDanmaku();
     videoUrl = state.videoUrl;
-    offset = state.offset;
     subjectId = state.subjectId;
     episode = state.episodeIndex;
     episodeSort = state.episodeSort;
@@ -716,48 +708,38 @@ class PlaySession {
       startPosition: Duration(seconds: state.offset),
       autoPlay: false,
     );
-    if (_isDisposed || requestId != _playRequestId) return;
+    if (!_isCurrentPlayRequest(requestId)) return;
     await engine.play();
-    if (_isDisposed || requestId != _playRequestId) return;
-    final logger = LiggLogger();
+    if (!_isCurrentPlayRequest(requestId)) return;
+    await _loadEpisodeDanmaku(state, requestId);
+  }
 
-    ///加载弹幕
+  Future<void> _loadEpisodeDanmaku(PlayRequest request, int requestId) async {
+    if (request.episodeIndex == 0) return;
     try {
-      if (!_isLoadingDanmaku && episode != 0) {
-        _isLoadingDanmaku = true;
-        try {
-          if (isLocalPlayback) {
-            final danmaku = await _loadLocalDanmaku(localDanmakuPath);
-            if (_isDisposed) return;
-            if (danmaku.isNotEmpty) {
-              final converted = await danmakuChineseConverter.convertDanmakus(
-                danmaku,
-                _danmakuChineseMode,
-              );
-              if (_isDisposed) return;
-              addDanmakuAll(converted);
-            }
-          } else {
-            final bgmBangumiId =
-                await FlowApi.getDanDanBangumiIDByBgmBangumiID(subjectId);
-            if (bgmBangumiId != null) {
-              final danmaku =
-                  await FlowApi.getDanDanmaku(bgmBangumiId, episode);
-              if (_isDisposed) return;
-              final converted = await danmakuChineseConverter.convertDanmakus(
-                danmaku,
-                _danmakuChineseMode,
-              );
-              if (_isDisposed) return;
-              addDanmakuAll(converted);
-            }
-          }
-        } finally {
-          _isLoadingDanmaku = false;
-        }
+      final List<Danmaku> danmaku;
+      if (request.isLocalPlayback) {
+        danmaku = await _loadLocalDanmaku(request.localDanmakuPath);
+      } else {
+        final bangumiId =
+            await FlowApi.getDanDanBangumiIDByBgmBangumiID(request.subjectId);
+        if (!_isCurrentPlayRequest(requestId) || bangumiId == null) return;
+        danmaku = await FlowApi.getDanDanmaku(bangumiId, request.episodeIndex);
+      }
+      if (danmaku.isEmpty) return;
+      while (_isCurrentPlayRequest(requestId)) {
+        final revision = _danmakuChineseModeRevision;
+        final converted = await danmakuChineseConverter.convertDanmakus(
+          danmaku,
+          _danmakuChineseMode,
+        );
+        if (!_isCurrentPlayRequest(requestId)) return;
+        if (revision != _danmakuChineseModeRevision) continue;
+        addDanmakuAll(converted);
+        return;
       }
     } catch (e) {
-      logger.e(e);
+      LiggLogger().e(e);
     }
   }
 
@@ -910,12 +892,8 @@ class PlaySession {
     _clearDanmakuCanvas();
 
     final converted = await danmakuChineseConverter.convertDanmakus(all, mode);
-    if (revision != _danmakuChineseModeRevision) return;
-    final grouped = <int, List<Danmaku>>{};
-    for (final item in converted) {
-      grouped.putIfAbsent(item.time.toInt(), () => []).add(item);
-    }
-    _playStateActions.setDanDanmakus(grouped);
+    if (_isDisposed || revision != _danmakuChineseModeRevision) return;
+    addDanmakuAll(converted);
   }
 
   /// 发送弹幕
@@ -1106,21 +1084,15 @@ class PlaySession {
     _applyPlaybackRate(speed);
   }
 
-  ///设置视频音量
-  void _setPlayerVolume(double newVolume) {
-    final clampedVolume = newVolume.clamp(0.0, 100.0);
-    _playStateActions.setVolume(clampedVolume);
-    unawaited(engine.setVolume(
-      SystemUtil.supportsSystemVolumeSync ? 100.0 : clampedVolume,
-    ));
-  }
-
   void _updateVolume(
     double newVolume, {
     bool syncSystemVolume = true,
   }) {
     final clampedVolume = newVolume.clamp(0.0, 100.0);
-    _setPlayerVolume(clampedVolume);
+    _playStateActions.setVolume(clampedVolume);
+    unawaited(engine.setVolume(
+      SystemUtil.supportsSystemVolumeSync ? 100.0 : clampedVolume,
+    ));
     if (syncSystemVolume) {
       systemVolumeSynchronizer.scheduleSync(clampedVolume / 100);
     }
@@ -1150,9 +1122,6 @@ class PlaySession {
 
   void endVerticalDrag() {
     _playStateActions.setIsVerticalDragging(false);
-    Future.delayed(const Duration(seconds: 2), () {
-      if (!_playStateActions.value.isVerticalDragging) {}
-    });
   }
 
   /// 开始播放
@@ -1204,20 +1173,15 @@ class PlaySession {
     if (!engine.capabilities.supportsShader) {
       throw UnsupportedError('当前播放器内核不支持 Anime4K');
     }
-    if (type == 2) {
-      await engine.setShaders(Utils.buildShadersAbsolutePath(
-          shadersDirectory.path, mpvAnime4KShadersLite));
-      _playStateActions.setSuperResolutionType(2);
-      return;
-    }
-    if (type == 3) {
-      await engine.setShaders(Utils.buildShadersAbsolutePath(
-          shadersDirectory.path, mpvAnime4KShaders));
-      _playStateActions.setSuperResolutionType(3);
-      return;
-    }
-    await engine.setShaders('');
-    _playStateActions.setSuperResolutionType(1);
+    final shaders = switch (type) {
+      2 => mpvAnime4KShadersLite,
+      3 => mpvAnime4KShaders,
+      _ => const <String>[],
+    };
+    await engine.setShaders(shaders.isEmpty
+        ? ''
+        : Utils.buildShadersAbsolutePath(shadersDirectory.path, shaders));
+    _playStateActions.setSuperResolutionType(type == 2 || type == 3 ? type : 1);
   }
 
   Widget buildVideoSurface({required BoxFit fit}) {

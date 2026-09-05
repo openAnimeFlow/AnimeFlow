@@ -6,6 +6,7 @@ import 'package:anime_flow/features/play/domain/player/player_capabilities.dart'
 import 'package:anime_flow/features/play/domain/player/player_engine.dart';
 import 'package:anime_flow/features/play/domain/player/player_event.dart';
 import 'package:anime_flow/features/play/domain/player/player_kernel.dart';
+import 'package:anime_flow/features/play/infrastructure/player/player_operation_queue.dart';
 import 'package:flutter/material.dart';
 import 'package:media_kit/media_kit.dart';
 import 'package:media_kit_video/media_kit_video.dart';
@@ -16,7 +17,7 @@ class MediaKitEngine implements PlayerEngine {
   final ValueNotifier<VideoController?> _videoController = ValueNotifier(null);
   final Player Function() _playerFactory;
   final VideoController Function(Player) _controllerFactory;
-  Future<void> _operations = Future<void>.value();
+  late final _operations = PlayerOperationQueue(ensureReady: _ensureReady);
   bool _opened = false;
   bool _released = true;
   double _volume = 100;
@@ -187,7 +188,7 @@ class MediaKitEngine implements PlayerEngine {
   Future<void> dispose() async {
     if (_disposed) return;
     _disposed = true;
-    await _operations;
+    await _operations.drained;
     await _releasePlayer();
     _videoController.dispose();
     await _events.close();
@@ -204,15 +205,8 @@ class MediaKitEngine implements PlayerEngine {
     await _player.dispose();
   }
 
-  Future<T> _enqueue<T>(Future<T> Function() operation) {
-    final result = _operations.then((_) {
-      _ensureReady();
-      return operation();
-    });
-    _operations =
-        result.then<void>((_) {}, onError: (Object _, StackTrace __) {});
-    return result;
-  }
+  Future<T> _enqueue<T>(Future<T> Function() operation) =>
+      _operations.run(operation);
 
   void _ensureReady() {
     if (!_initialized || _disposed) {

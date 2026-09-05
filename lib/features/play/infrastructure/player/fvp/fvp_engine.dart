@@ -6,6 +6,7 @@ import 'package:anime_flow/features/play/domain/player/player_capabilities.dart'
 import 'package:anime_flow/features/play/domain/player/player_engine.dart';
 import 'package:anime_flow/features/play/domain/player/player_event.dart';
 import 'package:anime_flow/features/play/domain/player/player_kernel.dart';
+import 'package:anime_flow/features/play/infrastructure/player/player_operation_queue.dart';
 import 'package:fvp/mdk.dart' as fvp;
 import 'package:flutter/material.dart';
 
@@ -38,7 +39,7 @@ class FvpEngine implements PlayerEngine {
   bool _hasMedia = false;
   bool _acceptMediaStatus = false;
   Size? _videoSize;
-  Future<void> _operations = Future<void>.value();
+  late final _operations = PlayerOperationQueue(ensureReady: _ensureReady);
 
   @override
   PlayerKernel get kernel => PlayerKernel.fvp;
@@ -307,7 +308,7 @@ class FvpEngine implements PlayerEngine {
     _disposed = true;
     _pollTimer?.cancel();
     // A pending platform texture operation must finish before native disposal.
-    await _operations;
+    await _operations.drained;
     if (_initialized) await _releasePlayer();
     _textureId.dispose();
     await _events.close();
@@ -366,16 +367,8 @@ class FvpEngine implements PlayerEngine {
     ));
   }
 
-  Future<void> _enqueue(Future<void> Function() operation) {
-    final result = _operations.then((_) {
-      _ensureReady();
-      return operation();
-    });
-    // Preserve errors for the caller without poisoning subsequent requests.
-    _operations =
-        result.then<void>((_) {}, onError: (Object _, StackTrace __) {});
-    return result;
-  }
+  Future<void> _enqueue(Future<void> Function() operation) =>
+      _operations.run(operation);
 
   void _ensureReady() {
     if (!_initialized || _disposed) {

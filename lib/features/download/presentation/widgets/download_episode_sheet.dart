@@ -5,7 +5,7 @@ import 'package:anime_flow/core/logger/logger.dart';
 import 'package:anime_flow/core/storage/storage.dart';
 import 'package:anime_flow/features/download/presentation/providers/download_provider.dart';
 import 'package:anime_flow/features/download/presentation/widgets/download_danmaku_icon.dart';
-import 'package:anime_flow/features/play/presentation/providers/episodes_provider.dart';
+import 'package:anime_flow/features/play/presentation/providers/subject_episodes_provider.dart';
 import 'package:anime_flow/features/play/presentation/providers/video_source_provider.dart';
 import 'package:anime_flow/shared/models/download/download_episode.dart';
 import 'package:anime_flow/shared/models/download/download_record.dart';
@@ -60,6 +60,8 @@ class _DownloadEpisodeSheetState extends ConsumerState<DownloadEpisodeSheet> {
   final Set<String> _selectedUrls = {};
   final Set<String> _danmakuDownloadingUrls = {};
   bool _isSubmitting = false;
+  bool _isLoadingEpisodePage = false;
+  int? _failedEpisodePageOffset;
   late bool _downloadDanmakuEnabled;
 
   @override
@@ -73,19 +75,41 @@ class _DownloadEpisodeSheetState extends ConsumerState<DownloadEpisodeSheet> {
     final l10n = AppLocalizations.of(context);
     final videoSourceState = ref.watch(videoSourceProvider);
     final downloadState = ref.watch(downloadControllerProvider);
-    final episodesData = ref.watch(episodesProvider).asData?.value;
+    final subjectId = ref.watch(playExtraProvider).playExtra.subjectId;
+    final subjectEpisodes =
+        ref.watch(subjectEpisodesProvider(subjectId)).asData?.value;
     final source = _selectedSource(videoSourceState);
     final candidates = source == null
         ? <_DownloadCandidate>[]
         : _buildCandidates(
             source,
             videoSourceState,
-            episodesData,
+            subjectEpisodes?.episodes,
             downloadState,
           );
     final selectableCandidates = candidates.where((candidate) {
       return _canSelectCandidate(candidate.downloadEpisode);
     }).toList(growable: false);
+    final selectedCount = selectableCandidates
+        .where(
+            (candidate) => _selectedUrls.contains(candidate.sourceEpisode.like))
+        .length;
+    final needsEpisodePage = subjectEpisodes != null &&
+        subjectEpisodes.hasMore &&
+        candidates.any((candidate) => candidate.bangumiEpisode == null);
+    final episodePageFailed = needsEpisodePage &&
+        _failedEpisodePageOffset == subjectEpisodes.episodes.data.length;
+    if (needsEpisodePage &&
+        !episodePageFailed &&
+        !_isLoadingEpisodePage &&
+        !subjectEpisodes.isLoadingMore) {
+      _isLoadingEpisodePage = true;
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (mounted) {
+          _loadEpisodePage(subjectId);
+        }
+      });
+    }
 
     return SafeArea(
       child: Padding(
@@ -131,8 +155,7 @@ class _DownloadEpisodeSheetState extends ConsumerState<DownloadEpisodeSheet> {
                   TextButton.icon(
                     onPressed: () {
                       setState(() {
-                        if (_selectedUrls.length ==
-                            selectableCandidates.length) {
+                        if (selectedCount == selectableCandidates.length) {
                           _selectedUrls.clear();
                         } else {
                           _selectedUrls
@@ -146,18 +169,30 @@ class _DownloadEpisodeSheetState extends ConsumerState<DownloadEpisodeSheet> {
                       });
                     },
                     icon: Icon(
-                      _selectedUrls.length == selectableCandidates.length
+                      selectedCount == selectableCandidates.length
                           ? Icons.check_box_rounded
                           : Icons.check_box_outline_blank_rounded,
                     ),
                     label: Text(l10n.all),
                   ),
                   const Spacer(),
-                  Text(l10n.selectedEpisodesCount(_selectedUrls.length)),
+                  Text(l10n.selectedEpisodesCount(selectedCount)),
                 ],
               ),
+              if (_isLoadingEpisodePage ||
+                  (needsEpisodePage && subjectEpisodes.isLoadingMore))
+                const LinearProgressIndicator(),
+              if (episodePageFailed)
+                TextButton.icon(
+                  onPressed: () => setState(() {
+                    _failedEpisodePageOffset = null;
+                  }),
+                  icon: const Icon(Icons.refresh_rounded),
+                  label: Text('${l10n.episodeLoadFailed} · ${l10n.retry}'),
+                ),
               Flexible(
                 child: ListView.builder(
+                  clipBehavior: Clip.hardEdge,
                   controller: widget.scrollController,
                   itemCount: candidates.length,
                   itemBuilder: (context, index) {
@@ -167,67 +202,118 @@ class _DownloadEpisodeSheetState extends ConsumerState<DownloadEpisodeSheet> {
                     );
                     final canSelect =
                         _canSelectCandidate(candidate.downloadEpisode);
-                    return CheckboxListTile(
-                      value: selected && canSelect,
-                      controlAffinity: ListTileControlAffinity.leading,
-                      title: Text(
-                        candidate.displayTitle(l10n),
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                      ),
-                      subtitle: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          if (candidate.downloadEpisode != null) ...[
-                            const SizedBox(height: 4),
-                            Text(
-                              _statusText(l10n, candidate.downloadEpisode!),
-                              maxLines: 1,
-                              overflow: TextOverflow.ellipsis,
-                              style: TextStyle(
-                                color: _statusColor(
-                                  context,
-                                  candidate.downloadEpisode!,
+                    final isWatched = candidate.bangumiEpisode?.watched == true;
+                    final colorScheme = Theme.of(context).colorScheme;
+                    // Keep tile ink inside the scrolling viewport instead of
+                    // painting it on the bottom sheet's shared Material.
+                    return Material(
+                      type: MaterialType.transparency,
+                      child: CheckboxListTile(
+                        tileColor: isWatched
+                            ? colorScheme.surfaceContainerHighest
+                            : null,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(10),
+                          side: isWatched
+                              ? BorderSide(
+                                  color: colorScheme.secondaryContainer,
+                                  width: 2,
+                                )
+                              : BorderSide.none,
+                        ),
+                        value: selected && canSelect,
+                        controlAffinity: ListTileControlAffinity.leading,
+                        title: Row(
+                          children: [
+                            Expanded(
+                              child: Text(
+                                l10n.episodeNumber(
+                                  candidate.sourceEpisode.episodeSort,
                                 ),
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
                               ),
                             ),
+                            if (isWatched) ...[
+                              const SizedBox(width: 8),
+                              Icon(
+                                Icons.visibility_outlined,
+                                size: 16,
+                                color: colorScheme.onSurfaceVariant,
+                              ),
+                              const SizedBox(width: 4),
+                              Text(
+                                l10n.collectionWatched,
+                                style: TextStyle(
+                                  fontSize: 12,
+                                  color: colorScheme.onSurfaceVariant,
+                                ),
+                              ),
+                            ],
                           ],
-                        ],
-                      ),
-                      secondary: _canDownloadDanmaku(candidate.downloadEpisode)
-                          ? _danmakuDownloadingUrls.contains(
-                              candidate.downloadEpisode!.episodeUrl,
-                            )
-                              ? const SizedBox.square(
-                                  dimension: 24,
-                                  child: CircularProgressIndicator(
-                                    strokeWidth: 2,
-                                  ),
-                                )
-                              : IconButton(
-                                  tooltip: l10n.downloadDanmaku,
-                                  icon: const DownloadDanmakuIcon(),
-                                  onPressed: () => _downloadDanmaku(
+                        ),
+                        subtitle: Column(
+                          mainAxisSize: MainAxisSize.min,
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            const SizedBox(height: 4),
+                            Text(
+                              candidate.episodeTitle,
+                              maxLines: 2,
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                            if (candidate.downloadEpisode != null) ...[
+                              const SizedBox(height: 4),
+                              Text(
+                                _statusText(l10n, candidate.downloadEpisode!),
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                                style: TextStyle(
+                                  color: _statusColor(
+                                    context,
                                     candidate.downloadEpisode!,
-                                    sourceName: source!.websiteName,
                                   ),
-                                )
-                          : null,
-                      onChanged: canSelect
-                          ? (value) {
-                              setState(() {
-                                if (value ?? false) {
-                                  _selectedUrls.add(
-                                    candidate.sourceEpisode.like,
-                                  );
-                                } else {
-                                  _selectedUrls.remove(
-                                    candidate.sourceEpisode.like,
-                                  );
-                                }
-                              });
-                            }
-                          : null,
+                                ),
+                              ),
+                            ],
+                          ],
+                        ),
+                        secondary:
+                            _canDownloadDanmaku(candidate.downloadEpisode)
+                                ? _danmakuDownloadingUrls.contains(
+                                    candidate.downloadEpisode!.episodeUrl,
+                                  )
+                                    ? const SizedBox.square(
+                                        dimension: 24,
+                                        child: CircularProgressIndicator(
+                                          strokeWidth: 2,
+                                        ),
+                                      )
+                                    : IconButton(
+                                        tooltip: l10n.downloadDanmaku,
+                                        icon: const DownloadDanmakuIcon(),
+                                        onPressed: () => _downloadDanmaku(
+                                          candidate.downloadEpisode!,
+                                          sourceName: source!.websiteName,
+                                        ),
+                                      )
+                                : null,
+                        onChanged: canSelect
+                            ? (value) {
+                                setState(() {
+                                  if (value ?? false) {
+                                    _selectedUrls.add(
+                                      candidate.sourceEpisode.like,
+                                    );
+                                  } else {
+                                    _selectedUrls.remove(
+                                      candidate.sourceEpisode.like,
+                                    );
+                                  }
+                                });
+                              }
+                            : null,
+                      ),
                     );
                   },
                 ),
@@ -249,9 +335,9 @@ class _DownloadEpisodeSheetState extends ConsumerState<DownloadEpisodeSheet> {
             SizedBox(
               width: double.infinity,
               child: FilledButton.icon(
-                onPressed: _selectedUrls.isEmpty || _isSubmitting
+                onPressed: selectedCount == 0 || _isSubmitting
                     ? null
-                    : () => _startDownloads(l10n, source!, candidates),
+                    : () => _startDownloads(source!, candidates),
                 icon: _isSubmitting
                     ? const SizedBox.square(
                         dimension: 16,
@@ -265,6 +351,29 @@ class _DownloadEpisodeSheetState extends ConsumerState<DownloadEpisodeSheet> {
         ),
       ),
     );
+  }
+
+  Future<void> _loadEpisodePage(int subjectId) async {
+    final provider = subjectEpisodesProvider(subjectId);
+    final previousCount =
+        ref.read(provider).asData?.value.episodes.data.length ?? 0;
+    try {
+      await ref.read(provider.notifier).loadMore();
+    } finally {
+      if (mounted) {
+        final current = ref.read(provider).asData?.value;
+        setState(() {
+          _isLoadingEpisodePage = false;
+          // loadMore preserves the previous data on failure. Stop automatic
+          // retries if the page made no progress, including empty responses.
+          _failedEpisodePageOffset = current != null &&
+                  current.hasMore &&
+                  current.episodes.data.length <= previousCount
+              ? previousCount
+              : null;
+        });
+      }
+    }
   }
 
   ResourcesItem? _selectedSource(VideoSourceState state) {
@@ -281,11 +390,11 @@ class _DownloadEpisodeSheetState extends ConsumerState<DownloadEpisodeSheet> {
   List<_DownloadCandidate> _buildCandidates(
     ResourcesItem source,
     VideoSourceState state,
-    EpisodesData? episodesData,
+    EpisodesItem? episodes,
     DownloadState downloadState,
   ) {
     final subjectId = ref.read(playExtraProvider).playExtra.subjectId;
-    final bangumiEpisodes = _episodesBySort(episodesData?.episodes);
+    final bangumiEpisodes = _episodesBySort(episodes);
     final lines = source.episodeResources.where((item) {
       if (state.lineName.trim().isEmpty) {
         return true;
@@ -326,13 +435,18 @@ class _DownloadEpisodeSheetState extends ConsumerState<DownloadEpisodeSheet> {
     return candidates;
   }
 
-  Map<int, EpisodeData> _episodesBySort(EpisodesItem? episodes) {
+  Map<num, EpisodeData> _episodesBySort(EpisodesItem? episodes) {
     if (episodes == null) {
       return const {};
     }
-    return {
-      for (final episode in episodes.data) episode.sort.toInt(): episode,
-    };
+    // Prefer main episodes when specials share the same episode number.
+    final bySort = <num, EpisodeData>{};
+    for (final episode in episodes.data) {
+      if (!bySort.containsKey(episode.sort) || episode.type == 0) {
+        bySort[episode.sort] = episode;
+      }
+    }
+    return bySort;
   }
 
   DownloadEpisode? _findDownloadEpisode(
@@ -435,10 +549,12 @@ class _DownloadEpisodeSheetState extends ConsumerState<DownloadEpisodeSheet> {
   }
 
   Future<void> _startDownloads(
-    AppLocalizations l10n,
     ResourcesItem source,
     List<_DownloadCandidate> candidates,
   ) async {
+    if (_isSubmitting) {
+      return;
+    }
     final selected = candidates.where((candidate) {
       return _selectedUrls.contains(candidate.sourceEpisode.like) &&
           _canSelectCandidate(candidate.downloadEpisode);
@@ -446,10 +562,6 @@ class _DownloadEpisodeSheetState extends ConsumerState<DownloadEpisodeSheet> {
     if (selected.isEmpty) {
       return;
     }
-
-    setState(() {
-      _isSubmitting = true;
-    });
 
     final extra = ref.read(playExtraProvider).playExtra;
     final params = selected.map((candidate) {
@@ -472,9 +584,20 @@ class _DownloadEpisodeSheetState extends ConsumerState<DownloadEpisodeSheet> {
       );
     }).toList();
 
-    await ref.read(downloadControllerProvider.notifier).startDownloads(params);
-    if (!mounted) {
-      return;
+    setState(() {
+      _isSubmitting = true;
+      _selectedUrls.removeAll(
+        selected.map((candidate) => candidate.sourceEpisode.like),
+      );
+    });
+    try {
+      await ref
+          .read(downloadControllerProvider.notifier)
+          .startDownloads(params);
+    } finally {
+      if (mounted) {
+        setState(() => _isSubmitting = false);
+      }
     }
   }
 
@@ -513,9 +636,5 @@ class _DownloadCandidate {
       return fallback;
     }
     return sourceEpisode.episodeSort.toString();
-  }
-
-  String displayTitle(AppLocalizations l10n) {
-    return l10n.playEpisode(episodeTitle);
   }
 }

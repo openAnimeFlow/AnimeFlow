@@ -45,27 +45,17 @@ class UserCollections extends _$UserCollections {
       subjectType: collection.type,
     );
     if (!ref.mounted) return;
-    final destinationTotal = (ref
-                .read(currentUserInfoProvider)
-                .asData
-                ?.value
-                ?.collectionCounts
-                .countForType(newType) ??
-            0) +
-        1;
+    final counts =
+        ref.read(currentUserInfoProvider).asData?.value?.collectionCounts;
     state = state.moveCollection(
       collection,
       newType,
-      destinationTotal: destinationTotal,
-      sourceTotal: ((ref
-                      .read(currentUserInfoProvider)
-                      .asData
-                      ?.value
-                      ?.collectionCounts
-                      .countForType(collection.interest.type) ??
-                  1) -
-              1)
-          .clamp(0, 1 << 31),
+      destinationTotal:
+          counts == null ? null : counts.countForType(newType) + 1,
+      sourceTotal: counts == null
+          ? null
+          : (counts.countForType(collection.interest.type) - 1)
+              .clamp(0, 1 << 31),
     );
     ref
         .read(currentUserInfoProvider.notifier)
@@ -182,6 +172,7 @@ class UserCollections extends _$UserCollections {
         return current.copyWith(
           data: data,
           offset: newOffset,
+          hasKnownTotal: true,
           hasMore: page.data.length == _pageSize && loadedCount < page.total,
           clearInitialErrorMessage: true,
           clearLoadMoreErrorMessage: true,

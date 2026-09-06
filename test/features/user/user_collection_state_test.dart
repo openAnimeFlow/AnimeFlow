@@ -19,6 +19,56 @@ UserCollectionData collection(int id, int type) => UserCollectionData.fromJson({
     });
 
 void main() {
+  test('unknown profile totals remain pageable across successive local moves',
+      () {
+    final first = const UserCollectionsState()
+        .moveCollection(collection(1, 0), 3, destinationTotal: null);
+    expect(first.tabState(3).hasKnownTotal, isFalse);
+    expect(first.tabState(3).canLoadMore, isTrue);
+    expect(first.tabState(3).offset, 1);
+
+    final second = first.moveCollection(
+      first.tabState(3).data!.data.single,
+      2,
+      destinationTotal: null,
+    );
+    expect(second.tabState(3).data!.data, isEmpty);
+    expect(second.tabState(3).hasKnownTotal, isFalse);
+    expect(second.tabState(3).canLoadMore, isTrue);
+    expect(second.tabState(3).offset, 0);
+    expect(second.tabState(2).hasKnownTotal, isFalse);
+    expect(second.tabState(2).canLoadMore, isTrue);
+  });
+
+  test('known cached totals are preserved when profile data is unavailable',
+      () {
+    final state = UserCollectionsState(tabs: {
+      2: UserCollectionTabState(
+        data: UserCollectionsItem(data: [collection(2, 2)], total: 1),
+        offset: 1,
+        hasMore: false,
+      ),
+    });
+    final target = state
+        .moveCollection(collection(1, 0), 2, destinationTotal: null)
+        .tabState(2);
+    expect(target.hasKnownTotal, isTrue);
+    expect(target.data!.total, 2);
+    expect(target.canLoadMore, isFalse);
+  });
+
+  test('profile totals cannot determine an uncached filtered result total', () {
+    const state = UserCollectionsState(tabs: {
+      2: UserCollectionTabState(keyword: 'unrelated'),
+    });
+    final target = state
+        .moveCollection(collection(1, 0), 2, destinationTotal: 10)
+        .tabState(2);
+    expect(target.data!.data, isEmpty);
+    expect(target.hasKnownTotal, isFalse);
+    expect(target.canLoadMore, isTrue);
+  });
+
   test('first collection creates only the destination category', () {
     final result = const UserCollectionsState()
         .moveCollection(collection(1, 0), 3, destinationTotal: 1);

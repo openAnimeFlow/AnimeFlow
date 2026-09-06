@@ -5,6 +5,9 @@ class UserCollectionTabState {
   final UserCollectionsItem? data;
   final int offset;
   final bool? hasMore;
+
+  /// False when [data] contains only local edits and its total is a lower bound.
+  final bool hasKnownTotal;
   final bool isInitialLoading;
   final bool isRefreshing;
   final bool isLoadingMore;
@@ -17,6 +20,7 @@ class UserCollectionTabState {
     this.data,
     this.offset = 0,
     this.hasMore,
+    this.hasKnownTotal = true,
     this.isInitialLoading = false,
     this.isRefreshing = false,
     this.isLoadingMore = false,
@@ -34,6 +38,7 @@ class UserCollectionTabState {
     UserCollectionsItem? data,
     int? offset,
     bool? hasMore,
+    bool? hasKnownTotal,
     bool? isInitialLoading,
     bool? isRefreshing,
     bool? isLoadingMore,
@@ -51,6 +56,7 @@ class UserCollectionTabState {
       data: clearData ? null : (data ?? this.data),
       offset: offset ?? this.offset,
       hasMore: clearHasMore ? null : (hasMore ?? this.hasMore),
+      hasKnownTotal: clearData ? true : (hasKnownTotal ?? this.hasKnownTotal),
       isInitialLoading: isInitialLoading ?? this.isInitialLoading,
       isRefreshing: isRefreshing ?? this.isRefreshing,
       isLoadingMore: isLoadingMore ?? this.isLoadingMore,
@@ -87,8 +93,8 @@ class UserCollectionsState {
   UserCollectionsState moveCollection(
     UserCollectionData collection,
     int newType, {
-    required int destinationTotal,
-    int sourceTotal = 0,
+    required int? destinationTotal,
+    int? sourceTotal,
   }) {
     final oldType = collection.interest.type;
     if (oldType == newType) return this;
@@ -112,19 +118,28 @@ class UserCollectionsState {
         final insert = type == newType && matches;
         if (insert) items.insert(0, updated);
         final delta = (insert ? 1 : 0) - removed;
-        final total = tab.data == null
-            ? (type == newType ? destinationTotal : sourceTotal)
-            : (tab.data!.total +
-                    (type == oldType
-                        ? (matches ? -1 : 0)
-                        : (insert && removed == 0 ? 1 : 0)))
-                .clamp(0, 1 << 31);
+        final profileTotal = type == newType ? destinationTotal : sourceTotal;
+        final hasKnownTotal = tab.data != null
+            ? tab.hasKnownTotal
+            : profileTotal != null && keyword.isEmpty;
+        final total = !hasKnownTotal
+            ? items.length
+            : tab.data == null
+                ? profileTotal!
+                : (tab.data!.total +
+                        (type == oldType
+                            ? (matches ? -1 : 0)
+                            : (insert && removed == 0 ? 1 : 0)))
+                    .clamp(0, 1 << 31);
         return tab.copyWith(
           data: UserCollectionsItem(data: items, total: total),
           offset: (tab.offset + delta).clamp(0, 1 << 31),
-          hasMore: tab.data == null
-              ? items.length < total
-              : tab.canLoadMore && items.length < total,
+          hasKnownTotal: hasKnownTotal,
+          hasMore: !hasKnownTotal
+              ? true
+              : tab.data == null
+                  ? items.length < total
+                  : tab.canLoadMore && items.length < total,
           requestVersion: tab.requestVersion + 1,
           isInitialLoading: false,
           isRefreshing: false,

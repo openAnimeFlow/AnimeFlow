@@ -4,6 +4,7 @@ import 'package:anime_flow/core/constants/storage_key.dart';
 import 'package:anime_flow/core/logger/logger.dart';
 import 'package:anime_flow/core/storage/storage.dart';
 import 'package:anime_flow/features/download/presentation/providers/download_provider.dart';
+import 'package:anime_flow/features/download/presentation/widgets/download_danmaku_icon.dart';
 import 'package:anime_flow/features/play/presentation/providers/episodes_provider.dart';
 import 'package:anime_flow/features/play/presentation/providers/video_source_provider.dart';
 import 'package:anime_flow/shared/models/download/download_episode.dart';
@@ -205,9 +206,7 @@ class _DownloadEpisodeSheetState extends ConsumerState<DownloadEpisodeSheet> {
                                 )
                               : IconButton(
                                   tooltip: l10n.downloadDanmaku,
-                                  icon: const Icon(
-                                    Icons.download_for_offline_rounded,
-                                  ),
+                                  icon: const DownloadDanmakuIcon(),
                                   onPressed: () => _downloadDanmaku(
                                     candidate.downloadEpisode!,
                                     sourceName: source!.websiteName,

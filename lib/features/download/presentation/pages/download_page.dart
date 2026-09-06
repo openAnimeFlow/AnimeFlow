@@ -2,6 +2,7 @@ import 'package:anime_flow/app/localization/app_localizations.dart';
 import 'package:anime_flow/app/router/app_router.dart';
 import 'package:anime_flow/app/router/model/play_route_extra.dart';
 import 'package:anime_flow/features/download/presentation/providers/download_provider.dart';
+import 'package:anime_flow/features/download/presentation/widgets/download_danmaku_icon.dart';
 import 'package:anime_flow/shared/models/download/download_episode.dart';
 import 'package:anime_flow/shared/models/download/download_record.dart';
 import 'package:anime_flow/shared/models/download/download_status.dart';
@@ -40,7 +41,10 @@ class DownloadPage extends ConsumerWidget {
               itemCount: records.length,
               separatorBuilder: (_, __) => const SizedBox(height: 12),
               itemBuilder: (context, index) {
-                return _DownloadRecordCard(record: records[index]);
+                return _DownloadRecordCard(
+                  key: ValueKey(records[index].key),
+                  record: records[index],
+                );
               },
             ),
     );
@@ -48,7 +52,7 @@ class DownloadPage extends ConsumerWidget {
 }
 
 class _DownloadRecordCard extends ConsumerStatefulWidget {
-  const _DownloadRecordCard({required this.record});
+  const _DownloadRecordCard({super.key, required this.record});
 
   final DownloadRecord record;
 
@@ -164,6 +168,7 @@ class _DownloadRecordCardState extends ConsumerState<_DownloadRecordCard> {
                         for (final episode in episodes) ...[
                           const Divider(height: 16),
                           _DownloadEpisodeTile(
+                            key: ValueKey(episode.episodeUrl),
                             record: record,
                             episode: episode,
                           ),
@@ -187,8 +192,9 @@ class _DownloadRecordCardState extends ConsumerState<_DownloadRecordCard> {
   }
 }
 
-class _DownloadEpisodeTile extends ConsumerWidget {
+class _DownloadEpisodeTile extends ConsumerStatefulWidget {
   const _DownloadEpisodeTile({
+    super.key,
     required this.record,
     required this.episode,
   });
@@ -197,10 +203,23 @@ class _DownloadEpisodeTile extends ConsumerWidget {
   final DownloadEpisode episode;
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<_DownloadEpisodeTile> createState() =>
+      _DownloadEpisodeTileState();
+}
+
+class _DownloadEpisodeTileState extends ConsumerState<_DownloadEpisodeTile> {
+  bool _isDownloadingDanmaku = false;
+
+  DownloadRecord get record => widget.record;
+
+  DownloadEpisode get episode => widget.episode;
+
+  @override
+  Widget build(BuildContext context) {
     ref.watch(
       downloadControllerProvider.select(
         (state) => state.records
+            .where((item) => item.key == record.key)
             .expand((record) => record.episodes.values)
             .where((item) => item.episodeUrl == episode.episodeUrl)
             .map(
@@ -222,96 +241,135 @@ class _DownloadEpisodeTile extends ConsumerWidget {
         ref.watch(downloadManagerProvider).getLocalMediaPath(episode);
     final canPlay = localMediaPath != null;
 
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Row(
-          children: [
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    _episodeTitle(l10n, episode),
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                  ),
-                  if (episode.status != DownloadStatus.completed &&
-                      episode.status != DownloadStatus.failed) ...[
-                    const SizedBox(height: 6),
-                    LinearProgressIndicator(
-                      value: progress == 0 ? null : progress,
-                      minHeight: 4,
+    return InkWell(
+      onTap: canPlay
+          ? () => _playOfflineEpisode(
+                context,
+                record: record,
+                episode: episode,
+                localMediaPath: localMediaPath,
+              )
+          : null,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      _episodeTitle(l10n, episode),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
                     ),
+                    if (episode.status != DownloadStatus.completed &&
+                        episode.status != DownloadStatus.failed) ...[
+                      const SizedBox(height: 6),
+                      LinearProgressIndicator(
+                        value: progress == 0 ? null : progress,
+                        minHeight: 4,
+                      ),
+                    ],
                   ],
-                ],
+                ),
               ),
-            ),
-            const SizedBox(width: 8),
-            IconButton(
-              tooltip: l10n.play,
-              icon: const Icon(Icons.play_arrow_rounded),
-              onPressed: canPlay
-                  ? () => _playOfflineEpisode(
-                        context,
-                        record: record,
-                        episode: episode,
-                        localMediaPath: localMediaPath,
-                      )
-                  : null,
-            ),
-            if (canPause)
+              const SizedBox(width: 8),
+              if (episode.status == DownloadStatus.completed &&
+                  !episode.danmakuDownloaded)
+                IconButton(
+                  tooltip: l10n.downloadDanmaku,
+                  icon: _isDownloadingDanmaku
+                      ? const SizedBox.square(
+                          dimension: 24,
+                          child: CircularProgressIndicator(strokeWidth: 2),
+                        )
+                      : const DownloadDanmakuIcon(),
+                  onPressed: _isDownloadingDanmaku ? null : _downloadDanmaku,
+                ),
               IconButton(
-                tooltip: l10n.pause,
-                icon: const Icon(Icons.pause_rounded),
-                onPressed: () {
-                  ref.read(downloadControllerProvider.notifier).pause(
-                        record.key,
-                        episode.episodeUrl,
-                      );
-                },
+                tooltip: l10n.play,
+                icon: const Icon(Icons.play_arrow_rounded),
+                onPressed: canPlay
+                    ? () => _playOfflineEpisode(
+                          context,
+                          record: record,
+                          episode: episode,
+                          localMediaPath: localMediaPath,
+                        )
+                    : null,
               ),
-            if (canRetry)
+              if (canPause)
+                IconButton(
+                  tooltip: l10n.pause,
+                  icon: const Icon(Icons.pause_rounded),
+                  onPressed: () {
+                    ref.read(downloadControllerProvider.notifier).pause(
+                          record.key,
+                          episode.episodeUrl,
+                        );
+                  },
+                ),
+              if (canRetry)
+                IconButton(
+                  tooltip: l10n.retry,
+                  icon: const Icon(Icons.refresh_rounded),
+                  onPressed: () {
+                    ref.read(downloadControllerProvider.notifier).resume(
+                          StartDownloadParams(
+                            subjectId: record.subjectId,
+                            subjectName: record.subjectName,
+                            subjectCover: record.subjectCover,
+                            sourceName: record.sourceName,
+                            sourceBaseUrl: record.sourceBaseUrl,
+                            lineIndex: episode.lineIndex,
+                            episodeUrl: episode.episodeUrl,
+                            episodeTitle: episode.episodeTitle,
+                            bangumiEpisodeId: episode.bangumiEpisodeId,
+                            episodeSort: episode.episodeSort,
+                            episodeIndex: episode.episodeIndex,
+                            networkMediaUrl: episode.networkMediaUrl,
+                          ),
+                        );
+                  },
+                ),
               IconButton(
-                tooltip: l10n.retry,
-                icon: const Icon(Icons.refresh_rounded),
-                onPressed: () {
-                  ref.read(downloadControllerProvider.notifier).resume(
-                        StartDownloadParams(
-                          subjectId: record.subjectId,
-                          subjectName: record.subjectName,
-                          subjectCover: record.subjectCover,
-                          sourceName: record.sourceName,
-                          sourceBaseUrl: record.sourceBaseUrl,
-                          lineIndex: episode.lineIndex,
-                          episodeUrl: episode.episodeUrl,
-                          episodeTitle: episode.episodeTitle,
-                          bangumiEpisodeId: episode.bangumiEpisodeId,
-                          episodeSort: episode.episodeSort,
-                          episodeIndex: episode.episodeIndex,
-                          networkMediaUrl: episode.networkMediaUrl,
-                        ),
-                      );
-                },
+                tooltip: l10n.deleteDownloadTask,
+                icon: const Icon(Icons.delete_outline_rounded),
+                onPressed: () => _confirmDeleteEpisode(context, ref),
               ),
-            IconButton(
-              tooltip: l10n.deleteDownloadTask,
-              icon: const Icon(Icons.delete_outline_rounded),
-              onPressed: () => _confirmDeleteEpisode(context, ref),
-            ),
-          ],
-        ),
-        Text(
-          _statusText(l10n, episode),
-          maxLines: 2,
-          overflow: TextOverflow.ellipsis,
-          style: TextStyle(
-            fontSize: 12,
-            color: colorScheme.onSurfaceVariant,
+            ],
           ),
-        ),
-      ],
+          Text(
+            _statusText(l10n, episode),
+            maxLines: 2,
+            overflow: TextOverflow.ellipsis,
+            style: TextStyle(
+              fontSize: 12,
+              color: colorScheme.onSurfaceVariant,
+            ),
+          ),
+        ],
+      ),
     );
+  }
+
+  Future<void> _downloadDanmaku() async {
+    if (_isDownloadingDanmaku) {
+      return;
+    }
+    setState(() => _isDownloadingDanmaku = true);
+    try {
+      await ref.read(downloadControllerProvider.notifier).downloadDanmaku(
+            record.key,
+            episode.episodeUrl,
+          );
+    } finally {
+      if (mounted) {
+        setState(() => _isDownloadingDanmaku = false);
+      }
+    }
   }
 
   Future<void> _confirmDeleteEpisode(

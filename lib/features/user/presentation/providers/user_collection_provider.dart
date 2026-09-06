@@ -4,10 +4,20 @@ import 'package:anime_flow/core/network/api/flow_api.dart';
 import 'package:anime_flow/features/user/presentation/providers/user_collection_state.dart';
 import 'package:anime_flow/features/user/presentation/providers/user_state_provider.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart' show Provider;
 
 part 'user_collection_provider.g.dart';
 
 const _pageSize = 20;
+
+final collectionTypeUpdateProvider =
+    Provider<Future<void> Function(UserCollectionData, int)>((ref) {
+  return (collection, newType) => FlowApi.updateCollectionService(
+        collection.id,
+        type: newType,
+        subjectType: collection.type,
+      );
+});
 
 @Riverpod(keepAlive: true)
 class UserCollections extends _$UserCollections {
@@ -28,22 +38,10 @@ class UserCollections extends _$UserCollections {
     UserCollectionData collection,
     int newType,
   ) async {
-    // A detail page can outlive the collection tab that changed this item.
-    // Prefer the current cache over an older detail-page snapshot.
-    for (final tab in state.tabs.values) {
-      for (final cached in tab.data?.data ?? <UserCollectionData>[]) {
-        if (cached.id == collection.id) {
-          collection = cached;
-          break;
-        }
-      }
-    }
+    // Use the state shown by the caller. Cached tabs may predate a fresh
+    // detail response and must not suppress the user's requested update.
     if (collection.interest.type == newType) return;
-    await FlowApi.updateCollectionService(
-      collection.id,
-      type: newType,
-      subjectType: collection.type,
-    );
+    await ref.read(collectionTypeUpdateProvider)(collection, newType);
     if (!ref.mounted) return;
     final counts =
         ref.read(currentUserInfoProvider).asData?.value?.collectionCounts;

@@ -204,6 +204,17 @@ class _VideoResourcesViewState extends ConsumerState<VideoResourcesView> {
     final l10n = AppLocalizations.of(context);
     final videoSourceState = ref.watch(videoSourceProvider);
     final hasSourceUrl = videoSourceState.videoUrl.trim().isNotEmpty;
+    final resources = videoSourceState.videoResources;
+    final selectedIndex = videoSourceState.selectedWebsiteIndex;
+    final selectedSource = resources.isEmpty
+        ? null
+        : resources[selectedIndex >= 0 && selectedIndex < resources.length
+            ? selectedIndex
+            : 0];
+    // Downloads resolve media independently; other sources may still be searching.
+    final canDownload = selectedSource?.episodeResources
+            .any((line) => line.episodes.isNotEmpty) ??
+        false;
     final resourceTitle = videoSourceState.resourceTitle.trim();
     final lineName = videoSourceState.lineName.trim();
     final displayLineName = lineName.isEmpty ? '' : lineName;
@@ -305,10 +316,10 @@ class _VideoResourcesViewState extends ConsumerState<VideoResourcesView> {
                   icon: const Icon(Icons.sync_alt_rounded),
                   label: Text(l10n.switchSource),
                 ),
-                if (videoSourceState.isSearchCompleted || hasSourceUrl)
+                if (canDownload || hasSourceUrl)
                   _buildSourceActionMenu(
                     videoUrl: videoSourceState.videoUrl,
-                    canDownload: videoSourceState.isSearchCompleted,
+                    canDownload: canDownload,
                     l10n: l10n,
                   ),
               ],

@@ -245,6 +245,7 @@ class _EpisodesDrawerViewState extends ConsumerState<EpisodesDrawerView> {
               return false;
             },
             child: ListView.builder(
+              clipBehavior: Clip.hardEdge,
               controller: widget.scrollController,
               padding: EdgeInsets.only(
                 bottom: MediaQuery.paddingOf(context).bottom,
@@ -267,65 +268,69 @@ class _EpisodesDrawerViewState extends ConsumerState<EpisodesDrawerView> {
                 }
 
                 final episode = sortedEpisodes[index];
-                return ListTile(
-                  tileColor: episode.watched == true
-                      ? Theme.of(context).colorScheme.surfaceContainerHighest
-                      : null,
-                  onLongPress: () => widget.onEpisodeLongPress?.call(
-                    episode.id,
-                  ),
-                  onTap: () {
-                    Navigator.of(context).pop();
-                    PlayRoute.fromExtra(
-                      PlayRouteExtra(
-                        playExtra: PlayExtra(
-                          subjectId: subjectItem.id,
-                          subjectName: widget.subjectName,
-                          subjectCover: widget.subjectImage,
-                          subjectAliases: subjectItem.infobox
-                              .where((item) => item.key == '别名')
-                              .expand((item) => item.values.map((e) => e.v))
-                              .toList(),
+                // Keep watched backgrounds and ink within the scrolling row.
+                return Material(
+                  type: MaterialType.transparency,
+                  child: ListTile(
+                    tileColor: episode.watched == true
+                        ? Theme.of(context).colorScheme.surfaceContainerHighest
+                        : null,
+                    onLongPress: () => widget.onEpisodeLongPress?.call(
+                      episode.id,
+                    ),
+                    onTap: () {
+                      Navigator.of(context).pop();
+                      PlayRoute.fromExtra(
+                        PlayRouteExtra(
+                          playExtra: PlayExtra(
+                            subjectId: subjectItem.id,
+                            subjectName: widget.subjectName,
+                            subjectCover: widget.subjectImage,
+                            subjectAliases: subjectItem.infobox
+                                .where((item) => item.key == '别名')
+                                .expand((item) => item.values.map((e) => e.v))
+                                .toList(),
+                          ),
+                          continueEpisodeId: episode.id,
                         ),
-                        continueEpisodeId: episode.id,
-                      ),
-                    ).push(context);
-                  },
-                  leading: Text(
-                    episode.sort.toString().padLeft(2, '0'),
-                    style: const TextStyle(fontSize: 20),
-                  ),
-                  title: Text(
-                    episode.nameCN.isEmpty ? episode.name : episode.nameCN,
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                  ),
-                  subtitle: Row(
-                    children: [
-                      if (episode.type != 0)
-                        Container(
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 6,
-                            vertical: 2,
+                      ).push(context);
+                    },
+                    leading: Text(
+                      episode.sort.toString().padLeft(2, '0'),
+                      style: const TextStyle(fontSize: 20),
+                    ),
+                    title: Text(
+                      episode.nameCN.isEmpty ? episode.name : episode.nameCN,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                    subtitle: Row(
+                      children: [
+                        if (episode.type != 0)
+                          Container(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 6,
+                              vertical: 2,
+                            ),
+                            decoration: BoxDecoration(
+                              color: Theme.of(context)
+                                  .colorScheme
+                                  .surfaceContainerHighest,
+                              borderRadius: BorderRadius.circular(999),
+                            ),
+                            child: Text(
+                              episodesTypeLabels[episode.type] ?? '',
+                              style: Theme.of(context).textTheme.labelSmall,
+                            ),
                           ),
-                          decoration: BoxDecoration(
-                            color: Theme.of(context)
-                                .colorScheme
-                                .surfaceContainerHighest,
-                            borderRadius: BorderRadius.circular(999),
-                          ),
-                          child: Text(
-                            episodesTypeLabels[episode.type] ?? '',
-                            style: Theme.of(context).textTheme.labelSmall,
-                          ),
-                        ),
-                      if (episode.airdate.isNotEmpty) ...[
-                        if (episode.type != 0) const SizedBox(width: 8),
-                        Text(episode.airdate),
+                        if (episode.airdate.isNotEmpty) ...[
+                          if (episode.type != 0) const SizedBox(width: 8),
+                          Text(episode.airdate),
+                        ],
                       ],
-                    ],
+                    ),
+                    trailing: const Icon(Icons.play_arrow_rounded),
                   ),
-                  trailing: const Icon(Icons.play_arrow_rounded),
                 );
               },
             ),

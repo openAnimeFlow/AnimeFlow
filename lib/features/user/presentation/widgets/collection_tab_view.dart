@@ -1,6 +1,7 @@
 import 'package:anime_flow/core/constants/layout_constant.dart';
 import 'package:anime_flow/core/network/clients/flow_client.dart';
 import 'package:anime_flow/features/user/presentation/providers/user_collection_provider.dart';
+import 'package:anime_flow/features/user/presentation/providers/user_collection_state.dart';
 import 'package:anime_flow/app/router/model/info_route_extra.dart';
 import 'package:anime_flow/app/router/app_router.dart';
 import 'package:anime_flow/shared/widgets/animation_network_image.dart';
@@ -8,6 +9,7 @@ import 'package:anime_flow/shared/widgets/collection_button.dart';
 import 'package:anime_flow/shared/widgets/notification_toast.dart';
 import 'package:anime_flow/shared/widgets/ranking.dart';
 import 'package:anime_flow/shared/widgets/star.dart';
+import 'package:anime_flow/shared/models/bangumi/user_collections_item.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:anime_flow/app/localization/app_localizations.dart';
@@ -52,6 +54,33 @@ class _CollectionTabView extends ConsumerWidget {
       kToolbarHeight + kTextTabBarHeight;
   static const double _minHorizontalPadding = 10;
   static const double _loadMoreTriggerDistance = 200;
+  static const int _pageSize = 20;
+
+  void _scheduleLoadMoreIfNeeded(
+    WidgetRef ref,
+    UserCollectionTabState tabState,
+    UserCollectionsItem? collectionsItem,
+  ) {
+    if (collectionsItem == null ||
+        collectionsItem.data.isEmpty ||
+        collectionsItem.data.length >= _pageSize ||
+        !tabState.canLoadMore ||
+        tabState.isBusy ||
+        tabState.loadMoreErrorMessage != null) {
+      return;
+    }
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      final current = ref.read(userCollectionsProvider).tabState(type);
+      if (current.data == null ||
+          current.data!.data.length >= _pageSize ||
+          !current.canLoadMore ||
+          current.isBusy ||
+          current.loadMoreErrorMessage != null) {
+        return;
+      }
+      ref.read(userCollectionsProvider.notifier).loadMore(type);
+    });
+  }
 
   Future<void> _onRefresh(WidgetRef ref, BuildContext context) async {
     final l10n = AppLocalizations.of(context);
@@ -96,6 +125,7 @@ class _CollectionTabView extends ConsumerWidget {
       userCollectionsProvider.select((state) => state.tabState(type)),
     );
     final collectionsItem = tabState.data;
+    _scheduleLoadMoreIfNeeded(ref, tabState, collectionsItem);
 
     return Builder(
       builder: (BuildContext context) {
@@ -176,8 +206,6 @@ class _CollectionTabView extends ConsumerWidget {
                                     ],
                                     FilledButton.icon(
                                       onPressed: () => _onLoadMore(ref),
-                                      icon:
-                                          const Icon(Icons.expand_more_rounded),
                                       label: Text(
                                         tabState.loadMoreErrorMessage == null
                                             ? l10n.viewMore

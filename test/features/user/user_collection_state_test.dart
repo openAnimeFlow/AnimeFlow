@@ -25,7 +25,7 @@ void main() {
         .moveCollection(collection(1, 0), 3, destinationTotal: null);
     expect(first.tabState(3).hasKnownTotal, isFalse);
     expect(first.tabState(3).canLoadMore, isTrue);
-    expect(first.tabState(3).offset, 1);
+    expect(first.tabState(3).offset, 0);
 
     final second = first.moveCollection(
       first.tabState(3).data!.data.single,
@@ -111,13 +111,13 @@ void main() {
     final result = state.moveCollection(item, 2, destinationTotal: 2);
     expect(result.tabState(1).data!.data, isEmpty);
     expect(result.tabState(1).data!.total, 20);
-    expect(result.tabState(1).offset, 0);
+    expect(result.tabState(1).offset, 1);
     expect(result.tabState(1).hasMore, isTrue);
     expect(result.tabState(1).isLoadingMore, isFalse);
     expect(result.tabState(1).requestVersion, 1);
     final target = result.tabState(2);
     expect(target.data!.data.map((e) => e.id), [1, 2]);
-    expect(target.offset, 2);
+    expect(target.offset, 1);
     expect(target.data!.total, 2);
     expect(target.hasMore, isFalse);
     expect(target.data!.data.first.interest.type, 2);
@@ -148,7 +148,7 @@ void main() {
         .tabState(2);
     expect(target.data!.data.single.id, 1);
     expect(target.data!.total, 31);
-    expect(target.offset, 1);
+    expect(target.offset, 0);
     expect(target.canLoadMore, isTrue);
   });
 }

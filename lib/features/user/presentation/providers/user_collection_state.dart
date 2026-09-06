@@ -117,7 +117,6 @@ class UserCollectionsState {
         items.removeWhere((item) => item.id == collection.id);
         final insert = type == newType && matches;
         if (insert) items.insert(0, updated);
-        final delta = (insert ? 1 : 0) - removed;
         final profileTotal = type == newType ? destinationTotal : sourceTotal;
         final hasKnownTotal = tab.data != null
             ? tab.hasKnownTotal
@@ -133,7 +132,10 @@ class UserCollectionsState {
                     .clamp(0, 1 << 31);
         return tab.copyWith(
           data: UserCollectionsItem(data: items, total: total),
-          offset: (tab.offset + delta).clamp(0, 1 << 31),
+          // Offset tracks the number of items requested from the server.
+          // Local moves must not change it, otherwise the next page skips or
+          // repeats server data (especially for an uncached destination).
+          offset: tab.offset,
           hasKnownTotal: hasKnownTotal,
           hasMore: !hasKnownTotal
               ? true

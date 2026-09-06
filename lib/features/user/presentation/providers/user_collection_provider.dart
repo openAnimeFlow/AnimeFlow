@@ -158,7 +158,7 @@ class UserCollections extends _$UserCollections {
       state = state.updateTab(type, (current) {
         final data = loadMore && !refresh && current.data != null
             ? UserCollectionsItem(
-                data: [...current.data!.data, ...page.data],
+                data: _mergeCollectionPages(current.data!.data, page.data),
                 total: page.total,
               )
             : page;
@@ -209,6 +209,19 @@ class UserCollections extends _$UserCollections {
 
     return refreshFailedWithCache;
   }
+}
+
+List<UserCollectionData> _mergeCollectionPages(
+  List<UserCollectionData> current,
+  List<UserCollectionData> next,
+) {
+  final merged = <int, UserCollectionData>{
+    for (final item in current) item.id: item,
+  };
+  for (final item in next) {
+    merged.putIfAbsent(item.id, () => item);
+  }
+  return merged.values.toList(growable: false);
 }
 
 List<String> buildUserCollectionTabLabels(

@@ -1,5 +1,6 @@
 import 'image_five_item.dart';
 import 'rating_item.dart';
+import 'subjects_info_item.dart';
 
 class UserCollectionsItem {
   final List<UserCollectionData> data;
@@ -61,6 +62,29 @@ class UserCollectionData {
         nsfw = json['nsfw'] ?? false,
         images = ImageFiveItem.fromJson(json['images']),
         interest = UserCollectionInterest.fromJson(json['interest']);
+
+  factory UserCollectionData.fromSubject(SubjectsInfoItem subject) {
+    final interest = subject.interest;
+    return UserCollectionData(
+      id: subject.id,
+      name: subject.name,
+      nameCN: subject.nameCN,
+      type: subject.type,
+      info: subject.info,
+      rating: subject.rating,
+      locked: subject.locked,
+      nsfw: subject.nsfw,
+      images: subject.images,
+      interest: UserCollectionInterest(
+        id: interest?.id ?? 0,
+        rate: interest?.rate ?? 0,
+        type: interest?.type ?? 0,
+        comment: interest?.comment ?? '',
+        tags: interest?.tags.whereType<String>().toList() ?? const [],
+        updatedAt: interest?.updatedAt ?? 0,
+      ),
+    );
+  }
 
   Map<String, dynamic> toJson() {
     return {

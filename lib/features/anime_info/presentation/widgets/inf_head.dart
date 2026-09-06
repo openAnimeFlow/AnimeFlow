@@ -1,18 +1,19 @@
 import 'dart:ui';
 
+import 'package:anime_flow/app/router/app_router.dart';
+
 import 'package:anime_flow/app/localization/app_localizations.dart';
 import 'package:anime_flow/core/constants/layout_constant.dart';
 import 'package:anime_flow/core/network/clients/flow_client.dart';
 import 'package:anime_flow/features/play/presentation/providers/subject_episodes_provider.dart';
 import 'package:anime_flow/shared/models/bangumi/subjects_info_item.dart';
-import 'package:anime_flow/core/network/api/flow_api.dart';
 import 'package:anime_flow/features/anime_info/presentation/providers/anime_info_provider.dart';
 import 'package:anime_flow/features/anime_info/presentation/widgets/episodes_drawer.dart';
 import 'package:anime_flow/features/user/presentation/providers/user_state_provider.dart';
 import 'package:anime_flow/app/router/routes_args.dart';
 import 'package:anime_flow/core/utils/system_util.dart';
 import 'package:anime_flow/shared/widgets/animation_network_image.dart';
-import 'package:anime_flow/features/user/presentation/widgets/collection_button.dart';
+import 'package:anime_flow/shared/widgets/collection_button.dart';
 import 'package:anime_flow/shared/widgets/notification_toast.dart';
 import 'package:anime_flow/shared/widgets/star.dart';
 import 'package:flutter/material.dart';
@@ -213,6 +214,34 @@ class InfoHeadView extends StatelessWidget {
     const double fontSize = 12;
     const FontWeight fontWeight = FontWeight.w600;
     const amberAccent = Colors.amberAccent;
+    final isLoggedIn = ref.watch(isLoggedInProvider).value ?? false;
+    Widget buildCollectionButton(
+      BuildContext context,
+      String label,
+      IconData icon,
+      VoidCallback onPressed,
+    ) {
+      return OutlinedButton.icon(
+        onPressed: onPressed,
+        style: OutlinedButton.styleFrom(
+          minimumSize: const Size(100, 0),
+          side: BorderSide(
+            color: Theme.of(context).colorScheme.primary,
+          ),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(20),
+          ),
+          padding: const EdgeInsets.symmetric(
+            horizontal: 12,
+            vertical: 15,
+          ),
+          textStyle: const TextStyle(fontSize: 12),
+        ),
+        icon: Icon(icon, size: 16),
+        label: Text(label),
+      );
+    }
+
     final collectionTotal =
         subjectItem.collection.data.values.reduce((a, b) => a + b);
     return Column(
@@ -289,35 +318,42 @@ class InfoHeadView extends StatelessWidget {
         Row(
           spacing: 8,
           children: [
-            CollectionButton(
-              collectType: collectTypeFromApiType(subjectItem.interest?.type),
-              onCollectTypeChanged: (type) async {
-                try {
-                  await FlowApi.updateCollectionService(
-                    subjectItem.id,
-                    type: type.value,
-                    subjectType: subjectItem.type,
-                  );
-                  if (context.mounted) {
-                    NotificationToast.show(
-                      '已${type.label}',
-                      title: '收藏更新',
-                      maxWidth: 500,
-                    );
+            if (!isLoggedIn)
+              buildCollectionButton(
+                context,
+                l10n.loginToCollect,
+                Icons.login_rounded,
+                () => const UserRoute().go(context),
+              )
+            else
+              CollectionButton(
+                buttonBuilder: (context, label, icon, onPressed, isOpen) =>
+                    buildCollectionButton(context, label, icon, onPressed),
+                collectType: collectTypeFromApiType(subjectItem.interest?.type),
+                onCollectTypeChanged: (type) async {
+                  try {
+                    await ref
+                        .read(animeInfoProvider.notifier)
+                        .updateCollectionType(type.value);
+                    if (context.mounted) {
+                      NotificationToast.show(
+                        '已${type.label}',
+                        title: '收藏更新',
+                        maxWidth: 500,
+                      );
+                    }
+                  } on AnimeFlowApiException catch (e) {
+                    if (context.mounted) {
+                      NotificationToast.show(
+                        e.message,
+                        title: '收藏更新失败',
+                        maxWidth: 500,
+                      );
+                    }
+                    rethrow;
                   }
-                  ref.invalidate(currentUserInfoProvider);
-                } on AnimeFlowApiException catch (e) {
-                  if (context.mounted) {
-                    NotificationToast.show(
-                      e.message,
-                      title: '收藏更新失败',
-                      maxWidth: 500,
-                    );
-                  }
-                  rethrow;
-                }
-              },
-            ),
+                },
+              ),
             Consumer(
               builder: (context, ref, child) {
                 final image =

@@ -2,6 +2,7 @@ import 'package:anime_flow/shared/models/bangumi/user_collections_item.dart';
 import 'package:anime_flow/shared/models/flow/flow_users.dart';
 import 'package:anime_flow/core/network/api/flow_api.dart';
 import 'package:anime_flow/features/user/presentation/providers/user_collection_state.dart';
+import 'package:anime_flow/features/user/presentation/providers/user_state_provider.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 part 'user_collection_provider.g.dart';
@@ -22,6 +23,54 @@ class UserCollections extends _$UserCollections {
   Future<void> loadInitial(int type) => _load(type);
 
   Future<void> loadMore(int type) => _load(type, loadMore: true);
+
+  Future<void> updateCollectionType(
+    UserCollectionData collection,
+    int newType,
+  ) async {
+    // A detail page can outlive the collection tab that changed this item.
+    // Prefer the current cache over an older detail-page snapshot.
+    for (final tab in state.tabs.values) {
+      for (final cached in tab.data?.data ?? <UserCollectionData>[]) {
+        if (cached.id == collection.id) {
+          collection = cached;
+          break;
+        }
+      }
+    }
+    if (collection.interest.type == newType) return;
+    await FlowApi.updateCollectionService(
+      collection.id,
+      type: newType,
+      subjectType: collection.type,
+    );
+    if (!ref.mounted) return;
+    final destinationTotal = (ref
+                .read(currentUserInfoProvider)
+                .asData
+                ?.value
+                ?.collectionCounts
+                .countForType(newType) ??
+            0) +
+        1;
+    state = state.moveCollection(
+      collection,
+      newType,
+      destinationTotal: destinationTotal,
+      sourceTotal: ((ref
+                      .read(currentUserInfoProvider)
+                      .asData
+                      ?.value
+                      ?.collectionCounts
+                      .countForType(collection.interest.type) ??
+                  1) -
+              1)
+          .clamp(0, 1 << 31),
+    );
+    ref
+        .read(currentUserInfoProvider.notifier)
+        .moveCollectionCount(collection.interest.type, newType);
+  }
 
   Future<void> search(int type, String keyword) async {
     final normalizedKeyword = keyword.trim();

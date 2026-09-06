@@ -56,9 +56,8 @@ class SubjectsInfoItem {
         collection = Collection.fromJson(json['collection']),
         eps = json['eps'],
         id = json['id'],
-        infobox = (json['infobox'] as List)
-            .map((e) => Infobox.fromJson(e))
-            .toList(),
+        infobox =
+            (json['infobox'] as List).map((e) => Infobox.fromJson(e)).toList(),
         info = json['info'],
         metaTags = List<String>.from(json['metaTags']),
         locked = json['locked'],
@@ -78,6 +77,33 @@ class SubjectsInfoItem {
         interest = json['interest'] != null
             ? InterestItem.fromJson(json['interest'])
             : null;
+
+  SubjectsInfoItem copyWith({InterestItem? interest}) {
+    return SubjectsInfoItem(
+      airtime: airtime,
+      collection: collection,
+      eps: eps,
+      id: id,
+      infobox: infobox,
+      info: info,
+      metaTags: metaTags,
+      locked: locked,
+      name: name,
+      nameCN: nameCN,
+      nsfw: nsfw,
+      platform: platform,
+      rating: rating,
+      redirect: redirect,
+      series: series,
+      seriesEntry: seriesEntry,
+      summary: summary,
+      type: type,
+      volumes: volumes,
+      tags: tags,
+      images: images,
+      interest: interest ?? this.interest,
+    );
+  }
 
   Map<String, dynamic> toJson() {
     return {
@@ -141,7 +167,8 @@ class Collection {
 
   Collection({required this.data});
 
-  Collection.fromJson(Map<String, dynamic> json) : data = Map<String, int>.from(json);
+  Collection.fromJson(Map<String, dynamic> json)
+      : data = Map<String, int>.from(json);
 
   Map<String, dynamic> toJson() => Map<String, int>.from(data);
 }
@@ -157,9 +184,8 @@ class Infobox {
 
   Infobox.fromJson(Map<String, dynamic> json)
       : key = json['key'],
-        values = (json['values'] as List)
-            .map((e) => Values.fromJson(e))
-            .toList();
+        values =
+            (json['values'] as List).map((e) => Values.fromJson(e)).toList();
 
   Map<String, dynamic> toJson() {
     return {

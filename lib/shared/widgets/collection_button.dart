@@ -1,0 +1,171 @@
+import 'package:anime_flow/shared/models/enums/collect_type.dart';
+import 'package:flutter/material.dart';
+import 'package:anime_flow/app/localization/app_localizations.dart';
+
+/// Bangumi API type → [CollectType]
+CollectType? collectTypeFromApiType(int? apiType) {
+  if (apiType == null) return null;
+  final type = CollectType.fromValue(apiType);
+  return type == CollectType.none ? null : type;
+}
+
+class CollectionButton extends StatefulWidget {
+  final CollectType? collectType;
+
+  /// Builds the collection menu trigger.
+  /// Wire the onPressed callback to the supplied button to open the menu.
+  final Widget Function(
+    BuildContext context,
+    String label,
+    IconData icon,
+    VoidCallback onPressed,
+    bool isOpen,
+  ) buttonBuilder;
+
+  final Future<void> Function(CollectType type)? onCollectTypeChanged;
+
+  const CollectionButton({
+    super.key,
+    required this.buttonBuilder,
+    this.collectType,
+    this.onCollectTypeChanged,
+  });
+
+  @override
+  State<CollectionButton> createState() => _CollectionButtonState();
+}
+
+class _CollectionButtonState extends State<CollectionButton> {
+  late CollectType? _displayType;
+  bool _isUpdating = false;
+  bool _isOpen = false;
+  final _menuKey = GlobalKey<PopupMenuButtonState<CollectType>>();
+
+  @override
+  void initState() {
+    super.initState();
+    _displayType = widget.collectType;
+  }
+
+  @override
+  void didUpdateWidget(CollectionButton oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.collectType != widget.collectType) {
+      _displayType = widget.collectType;
+    }
+  }
+
+  Future<void> _onCollectTypeSelected(CollectType type) async {
+    if (_isUpdating) return;
+    setState(() => _isUpdating = true);
+    try {
+      await widget.onCollectTypeChanged?.call(type);
+      if (!mounted) return;
+      setState(() => _displayType = type);
+    } catch (_) {
+      // The caller reports the error; retain the previous selection.
+    } finally {
+      if (mounted) {
+        setState(() => _isUpdating = false);
+      }
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final currentCollectType = _displayType;
+
+    final l10n = AppLocalizations.of(context);
+    return PopupMenuButton<CollectType>(
+      enabled: !_isUpdating,
+      key: _menuKey,
+      offset: const Offset(0, 40),
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(12),
+      ),
+      itemBuilder: (BuildContext context) {
+        return CollectType.values
+            .where((type) => type != CollectType.none)
+            .map((type) {
+          final isCurrentType = type == currentCollectType;
+          return PopupMenuItem<CollectType>(
+            value: type,
+            enabled: !isCurrentType,
+            child: Row(
+              children: [
+                Icon(
+                  _getCollectTypeIcon(type),
+                  size: 20,
+                  color: isCurrentType
+                      ? Theme.of(context).disabledColor
+                      : Theme.of(context).colorScheme.primary,
+                ),
+                const SizedBox(width: 8),
+                Text(
+                  _collectTypeLabel(type, l10n),
+                  style: TextStyle(
+                    color:
+                        isCurrentType ? Theme.of(context).disabledColor : null,
+                  ),
+                ),
+              ],
+            ),
+          );
+        }).toList();
+      },
+      onOpened: () => setState(() => _isOpen = true),
+      onCanceled: () => setState(() => _isOpen = false),
+      onSelected: (type) {
+        setState(() => _isOpen = false);
+        _onCollectTypeSelected(type);
+      },
+      child: widget.buttonBuilder(
+        context,
+        currentCollectType == null
+            ? l10n.collectionLabel
+            : _collectTypeLabel(currentCollectType, l10n),
+        currentCollectType == null
+            ? Icons.play_circle_outline
+            : _getCollectTypeIcon(currentCollectType),
+        () {
+          if (!_isUpdating) _menuKey.currentState?.showButtonMenu();
+        },
+        _isOpen,
+      ),
+    );
+  }
+
+  IconData _getCollectTypeIcon(CollectType type) {
+    switch (type) {
+      case CollectType.watching:
+        return Icons.subscriptions_outlined;
+      case CollectType.planToWatch:
+        return Icons.bookmark_outline;
+      case CollectType.onHold:
+        return Icons.pending_actions_outlined;
+      case CollectType.watched:
+        return Icons.task_alt_outlined;
+      case CollectType.abandoned:
+        return Icons.auto_delete_outlined;
+      case CollectType.none:
+        return Icons.circle_outlined;
+    }
+  }
+
+  String _collectTypeLabel(CollectType type, AppLocalizations l10n) {
+    switch (type) {
+      case CollectType.planToWatch:
+        return l10n.collectionPlanToWatch;
+      case CollectType.watched:
+        return l10n.collectionWatched;
+      case CollectType.watching:
+        return l10n.collectionWatching;
+      case CollectType.onHold:
+        return l10n.collectionOnHold;
+      case CollectType.abandoned:
+        return l10n.collectionAbandoned;
+      case CollectType.none:
+        return l10n.collectionLabel;
+    }
+  }
+}

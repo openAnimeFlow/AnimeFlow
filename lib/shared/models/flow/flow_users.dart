@@ -19,6 +19,18 @@ class FlowUsers {
     FlowUserCollectionCounts? collectionCounts,
   }) : collectionCounts = collectionCounts ?? const FlowUserCollectionCounts();
 
+  FlowUsers copyWith({FlowUserCollectionCounts? collectionCounts}) {
+    return FlowUsers(
+      id: id,
+      email: email,
+      nickname: nickname,
+      createTime: createTime,
+      avatar: avatar,
+      background: background,
+      collectionCounts: collectionCounts ?? this.collectionCounts,
+    );
+  }
+
   factory FlowUsers.fromJson(Map<String, dynamic> json) {
     return FlowUsers(
       id: json['id'] as int,

@@ -5,6 +5,9 @@ import 'package:anime_flow/shared/models/bangumi/related_subjects_item.dart';
 import 'package:anime_flow/shared/models/bangumi/subject_comments_item.dart';
 import 'package:anime_flow/shared/models/bangumi/subjects_info_item.dart';
 import 'package:anime_flow/features/user/presentation/providers/user_state_provider.dart';
+import 'package:anime_flow/features/user/presentation/providers/user_collection_provider.dart';
+import 'package:anime_flow/shared/models/bangumi/user_collections_item.dart';
+import 'package:anime_flow/shared/models/bangumi/interest_item.dart';
 import 'package:anime_flow/app/router/routes_args.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/scheduler.dart';
@@ -25,6 +28,32 @@ class AnimeInfo extends _$AnimeInfo {
 
   void setAnimeInfo(SubjectsInfoItem subjectInfo) {
     state = AsyncData(subjectInfo);
+  }
+
+  Future<void> updateCollectionType(int newType) async {
+    final subject = state.asData?.value;
+    if (subject == null) return;
+    await ref.read(userCollectionsProvider.notifier).updateCollectionType(
+          UserCollectionData.fromSubject(subject),
+          newType,
+        );
+    if (!ref.mounted) return;
+    final current = state.asData?.value;
+    if (current == null || current.id != subject.id) return;
+    final interest = current.interest;
+    state = AsyncData(current.copyWith(
+      interest: InterestItem(
+        id: interest?.id ?? 0,
+        rate: interest?.rate ?? 0,
+        type: newType,
+        comment: interest?.comment ?? '',
+        tags: interest?.tags ?? const [],
+        epStatus: interest?.epStatus ?? 0,
+        volStatus: interest?.volStatus ?? 0,
+        private: interest?.private ?? false,
+        updatedAt: DateTime.now().millisecondsSinceEpoch ~/ 1000,
+      ),
+    ));
   }
 }
 

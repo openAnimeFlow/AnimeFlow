@@ -13,6 +13,22 @@ class FlowUserCollectionCounts {
     this.abandoned = 0,
   });
 
+  FlowUserCollectionCounts copyWith({
+    int? planToWatch,
+    int? watched,
+    int? watching,
+    int? onHold,
+    int? abandoned,
+  }) {
+    return FlowUserCollectionCounts(
+      planToWatch: planToWatch ?? this.planToWatch,
+      watched: watched ?? this.watched,
+      watching: watching ?? this.watching,
+      onHold: onHold ?? this.onHold,
+      abandoned: abandoned ?? this.abandoned,
+    );
+  }
+
   factory FlowUserCollectionCounts.fromJson(Map<String, dynamic>? json) {
     if (json == null) {
       return const FlowUserCollectionCounts();

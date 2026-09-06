@@ -1,8 +1,11 @@
 import 'package:anime_flow/core/constants/layout_constant.dart';
+import 'package:anime_flow/core/network/clients/flow_client.dart';
 import 'package:anime_flow/features/user/presentation/providers/user_collection_provider.dart';
 import 'package:anime_flow/app/router/model/info_route_extra.dart';
 import 'package:anime_flow/app/router/app_router.dart';
 import 'package:anime_flow/shared/widgets/animation_network_image.dart';
+import 'package:anime_flow/shared/widgets/collection_button.dart';
+import 'package:anime_flow/shared/widgets/notification_toast.dart';
 import 'package:anime_flow/shared/widgets/ranking.dart';
 import 'package:anime_flow/shared/widgets/star.dart';
 import 'package:flutter/material.dart';
@@ -158,7 +161,32 @@ class _CollectionTabView extends ConsumerWidget {
                 else if (collectionsItem.data.isEmpty)
                   SliverFillRemaining(
                     hasScrollBody: false,
-                    child: Center(child: Text(l10n.noData)),
+                    child: Center(
+                      child: !tabState.canLoadMore
+                          ? Text(l10n.noData)
+                          : tabState.isBusy
+                              ? const CircularProgressIndicator()
+                              : Column(
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    if (tabState.loadMoreErrorMessage !=
+                                        null) ...[
+                                      Text(l10n.collectionLoadMoreFailed),
+                                      const SizedBox(height: 12),
+                                    ],
+                                    FilledButton.icon(
+                                      onPressed: () => _onLoadMore(ref),
+                                      icon:
+                                          const Icon(Icons.expand_more_rounded),
+                                      label: Text(
+                                        tabState.loadMoreErrorMessage == null
+                                            ? l10n.viewMore
+                                            : l10n.retry,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                    ),
                   )
                 else ...[
                   SliverPadding(
@@ -228,9 +256,59 @@ class _CollectionTabView extends ConsumerWidget {
                                                 overflow: TextOverflow.ellipsis,
                                               ),
                                             ),
-                                            const InkWell(
-                                              child: Icon(
-                                                  Icons.expand_more_outlined),
+                                            CollectionButton(
+                                              key: ValueKey(collection.id),
+                                              collectType:
+                                                  collectTypeFromApiType(
+                                                collection.interest.type,
+                                              ),
+                                              buttonBuilder: (context, label,
+                                                  icon, onPressed, isOpen) {
+                                                return IconButton(
+                                                  tooltip: label,
+                                                  onPressed: onPressed,
+                                                  padding: EdgeInsets.zero,
+                                                  constraints:
+                                                      const BoxConstraints(
+                                                    minWidth: 40,
+                                                    minHeight: 40,
+                                                  ),
+                                                  icon: AnimatedRotation(
+                                                    turns: isOpen ? 0.5 : 0,
+                                                    duration: const Duration(
+                                                      milliseconds: 180,
+                                                    ),
+                                                    curve: Curves.easeOutCubic,
+                                                    child: const Icon(Icons
+                                                        .expand_more_outlined),
+                                                  ),
+                                                );
+                                              },
+                                              onCollectTypeChanged:
+                                                  (newType) async {
+                                                try {
+                                                  await ref
+                                                      .read(
+                                                          userCollectionsProvider
+                                                              .notifier)
+                                                      .updateCollectionType(
+                                                        collection,
+                                                        newType.value,
+                                                      );
+                                                } on AnimeFlowApiException catch (e) {
+                                                  NotificationToast.show(
+                                                    e.message,
+                                                    title: l10n.updateFailed,
+                                                  );
+                                                  rethrow;
+                                                } catch (e) {
+                                                  NotificationToast.show(
+                                                    e.toString(),
+                                                    title: l10n.updateFailed,
+                                                  );
+                                                  rethrow;
+                                                }
+                                              },
                                             ),
                                           ],
                                         ),

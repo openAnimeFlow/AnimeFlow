@@ -55,6 +55,28 @@ Future<BangumiBindItem?> bangumiBind(Ref ref) async {
 
 @Riverpod(keepAlive: true)
 class CurrentUserInfo extends _$CurrentUserInfo {
+  void moveCollectionCount(int oldType, int newType) {
+    final user = state.asData?.value;
+    if (user == null || oldType == newType) return;
+    final counts = user.collectionCounts;
+    int updatedCount(int type) {
+      return (counts.countForType(type) +
+              (type == newType ? 1 : 0) -
+              (type == oldType ? 1 : 0))
+          .clamp(0, 1 << 31);
+    }
+
+    state = AsyncData(user.copyWith(
+      collectionCounts: counts.copyWith(
+        planToWatch: updatedCount(1),
+        watched: updatedCount(2),
+        watching: updatedCount(3),
+        onHold: updatedCount(4),
+        abandoned: updatedCount(5),
+      ),
+    ));
+  }
+
   @override
   Future<FlowUsers?> build() async {
     final userRepository = ref.watch(userRepositoryProvider);

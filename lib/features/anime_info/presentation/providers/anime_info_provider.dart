@@ -16,13 +16,25 @@ import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 part 'anime_info_provider.g.dart';
 
+/// Optional detail data supplied by a route that already loaded the subject.
+/// This lets child pages reuse the loaded response without another request.
+final animeInfoInitialProvider = Provider<SubjectsInfoItem?>((ref) => null);
+
 @Riverpod(dependencies: [animeInfoArgs])
 class AnimeInfo extends _$AnimeInfo {
+  bool _initialConsumed = false;
+
   @override
   Future<SubjectsInfoItem> build() async {
     final subjectId = ref.watch(animeInfoArgsProvider.select((e) => e.id));
-    // 登录/登出或 token 刷新后重新拉取，以获取 Bangumi interest
+    // Keep the provider subscribed so account changes invalidate the seeded
+    // response and fetch fresh interest data for the active user.
     ref.watch(currentFlowTokenProvider);
+    final initial = ref.watch(animeInfoInitialProvider);
+    if (!_initialConsumed && initial?.id == subjectId) {
+      _initialConsumed = true;
+      return initial!;
+    }
     return FlowApi.getSubjectByIdService(subjectId);
   }
 

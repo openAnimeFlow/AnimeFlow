@@ -282,6 +282,7 @@ class _EpisodesDrawerViewState extends ConsumerState<EpisodesDrawerView> {
                       Navigator.of(context).pop();
                       PlayRoute.fromExtra(
                         PlayRouteExtra(
+                          subjectInfo: subjectItem,
                           playExtra: PlayExtra(
                             subjectId: subjectItem.id,
                             subjectName: widget.subjectName,

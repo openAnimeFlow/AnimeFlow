@@ -176,6 +176,7 @@ class _AnimeInfoPageState extends State<AnimeInfoPage> {
                       heroTag: 'play_${args.id}',
                       onPressed: () => PlayRoute.fromExtra(
                         PlayRouteExtra(
+                          subjectInfo: subjectsInfo,
                           playExtra: PlayExtra(
                             subjectId: args.id,
                             subjectName: args.name,

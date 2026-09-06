@@ -1,4 +1,5 @@
 import 'package:anime_flow/features/anime_info/presentation/pages/anime_info_page.dart';
+import 'package:anime_flow/features/anime_info/presentation/providers/anime_info_provider.dart';
 import 'package:anime_flow/features/calendar/presentation/pages/calendar_page.dart';
 import 'package:anime_flow/features/character_info/presentation/pages/character_info_page.dart';
 import 'package:anime_flow/features/characters/presentation/pages/characters_page.dart';
@@ -215,6 +216,17 @@ class PlayRoute extends GoRouteData with $PlayRoute {
     return ProviderScope(
       overrides: [
         playExtraProvider.overrideWithValue(extra),
+        animeInfoArgsProvider.overrideWithValue(
+          InfoRouteExtra(
+            id: extra.playExtra.subjectId,
+            name: extra.playExtra.subjectName,
+            image: extra.playExtra.subjectCover,
+          ),
+        ),
+        if (extra.subjectInfo != null)
+          animeInfoInitialProvider.overrideWithValue(
+            extra.subjectInfo,
+          ),
       ],
       child: const PlayPage(),
     );

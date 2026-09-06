@@ -4,6 +4,7 @@ import 'package:anime_flow/app/router/model/info_route_extra.dart';
 import 'package:anime_flow/app/router/app_router.dart';
 import 'package:anime_flow/core/utils/layout_util.dart';
 import 'package:anime_flow/shared/widgets/subject_card.dart';
+import 'package:anime_flow/shared/widgets/subject_card_skeleton.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -30,8 +31,11 @@ class RankingGrid extends ConsumerWidget {
     }
 
     final isLoadingMore = rankingState.isLoadingMore && rankingState.hasMore;
-    final extraItemCount =
-        rankingState.hasMore || rankingState.isReloading ? 1 : 0;
+    final extraItemCount = isLoadingMore
+        ? 3
+        : !rankingState.hasMore || rankingState.isReloading
+            ? 1
+            : 0;
 
     return SliverPadding(
       padding: const EdgeInsets.symmetric(vertical: 10),
@@ -44,18 +48,24 @@ class RankingGrid extends ConsumerWidget {
           childAspectRatio: 0.7,
         ),
         itemBuilder: (context, index) {
-          if (index == rankingState.items.length) {
+          if (index >= rankingState.items.length) {
+            if (isLoadingMore) {
+              return const Center(
+                child: Padding(
+                  padding: EdgeInsets.all(2),
+                  child: SubjectCardSkeleton(),
+                ),
+              );
+            }
             if (rankingState.isReloading) {
               return const Center(child: CircularProgressIndicator());
             }
-            return isLoadingMore
-                ? const Center(child: CircularProgressIndicator())
-                : Center(
-                    child: Padding(
-                      padding: const EdgeInsets.all(8.0),
-                      child: Text(l10n.rankingEnd),
-                    ),
-                  );
+            return Center(
+              child: Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: Text(l10n.rankingEnd),
+              ),
+            );
           }
 
           final data = rankingState.items[index];

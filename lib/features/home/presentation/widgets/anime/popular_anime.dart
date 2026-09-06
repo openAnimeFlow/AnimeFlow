@@ -3,11 +3,10 @@ import 'package:anime_flow/app/router/model/info_route_extra.dart';
 import 'package:anime_flow/features/home/presentation/providers/anime_provider.dart';
 import 'package:anime_flow/app/router/app_router.dart';
 import 'package:anime_flow/core/utils/layout_util.dart';
-import 'package:anime_flow/core/utils/system_util.dart';
 import 'package:anime_flow/shared/widgets/subject_card.dart';
+import 'package:anime_flow/shared/widgets/subject_card_skeleton.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:shimmer/shimmer.dart';
 
 class PopularAnimeView extends ConsumerWidget {
   const PopularAnimeView({super.key});
@@ -32,10 +31,10 @@ class PopularAnimeView extends ConsumerWidget {
               childAspectRatio: 0.7,
             ),
             delegate: SliverChildBuilderDelegate(
-              (BuildContext context, int index) => Center(
+              (BuildContext context, int index) => const Center(
                 child: Padding(
-                  padding: const EdgeInsets.all(2),
-                  child: _buildSkeleton(context),
+                  padding: EdgeInsets.all(2),
+                  child: SubjectCardSkeleton(),
                 ),
               ),
               childCount: _initialSkeletonCount,
@@ -82,10 +81,10 @@ class PopularAnimeView extends ConsumerWidget {
                 final skeletonCount =
                     hotState.hasMore && hotState.isLoading ? 3 : 0;
                 if (index < hotState.items.length + skeletonCount) {
-                  return Center(
+                  return const Center(
                     child: Padding(
-                      padding: const EdgeInsets.all(2),
-                      child: _buildSkeleton(context),
+                      padding: EdgeInsets.all(2),
+                      child: SubjectCardSkeleton(),
                     ),
                   );
                 }
@@ -250,32 +249,6 @@ class PopularAnimeView extends ConsumerWidget {
           ),
         );
       },
-    );
-  }
-
-  Widget _buildSkeleton(BuildContext context) {
-    final isDark = SystemUtil.isDarkTheme(context);
-    final baseColor = isDark ? Colors.grey[850]! : Colors.grey[300]!;
-    final highlightColor = isDark ? Colors.grey[700]! : Colors.grey[100]!;
-    final containerColor = isDark
-        ? Theme.of(context).colorScheme.surfaceContainerHighest
-        : Theme.of(context).colorScheme.surface;
-
-    return Stack(
-      children: [
-        Positioned.fill(
-          child: Shimmer.fromColors(
-            baseColor: baseColor,
-            highlightColor: highlightColor,
-            child: Container(
-              decoration: BoxDecoration(
-                color: containerColor,
-                borderRadius: BorderRadius.circular(8.0),
-              ),
-            ),
-          ),
-        ),
-      ],
     );
   }
 }

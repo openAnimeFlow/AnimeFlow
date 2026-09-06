@@ -68,7 +68,7 @@ class _PlayRecordViewState extends ConsumerState<PlayRecordView> {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
-    final playHistoryList = ref.watch(playHistoryControllerProvider).value;
+    final playHistoryList = ref.watch(playHistoryProvider).value;
     if (playHistoryList == null || playHistoryList.isEmpty) {
       return const SliverToBoxAdapter(child: SizedBox.shrink());
     } else {

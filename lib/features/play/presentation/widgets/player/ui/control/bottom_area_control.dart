@@ -403,8 +403,36 @@ class BottomAreaControl extends ConsumerWidget {
 
                         //超分辨率
                         if (isWideScreen || fullscreen)
-                          ShaderButton(
-                            playController: playController,
+                          Consumer(
+                            builder: (context, ref, child) {
+                              final shaderType = ref.watch(
+                                playStateProvider.select(
+                                  (state) => state.superResolutionType,
+                                ),
+                              );
+                              return ShaderButton(
+                                value: shaderType,
+                                onChanged: (type) async {
+                                  try {
+                                    await playController.setShader(type);
+                                  } catch (error) {
+                                    if (!context.mounted) return;
+                                    NotificationToast.show(
+                                      error is UnsupportedError
+                                          ? error.message ?? error.toString()
+                                          : error.toString(),
+                                      title: l10n.tip,
+                                    );
+                                  }
+                                },
+                                onMenuOpen: () =>
+                                    videoUiStateController.cancelUiTimer(),
+                                onMenuClose: () =>
+                                    videoUiStateController.hideControlsUi(
+                                  duration: const Duration(seconds: 2),
+                                ),
+                              );
+                            },
                           ),
 
                         if (isWideScreen || fullscreen) ...[

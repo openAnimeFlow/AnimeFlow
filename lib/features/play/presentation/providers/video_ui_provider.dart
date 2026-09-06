@@ -19,7 +19,40 @@ abstract class VideoUiStateActions {
 
   void hideIndicator();
 
+  /// Release the persistent parsing indicator after successful resolution.
+  void finishParsingIndicator();
+
   VideoControlsIndicatorType get currentIndicatorType;
+}
+
+extension PlaybackLoadingIndicators on VideoUiStateActions {
+  void showParsingIndicator() {
+    updateIndicatorType(VideoControlsIndicatorType.parsingIndicator);
+    updateMainAxisAlignmentType(MainAxisAlignment.center);
+    showIndicator();
+  }
+
+  void updateBufferingIndicator(bool buffering, {required bool isParsing}) {
+    // Resource selection can show parsing before the resolver sets isParsing.
+    // Only the parse result handler should dismiss that indicator.
+    if (isParsing) {
+      showParsingIndicator();
+      return;
+    }
+    if (currentIndicatorType == VideoControlsIndicatorType.parsingIndicator) {
+      return;
+    }
+    if (buffering) {
+      updateIndicatorType(VideoControlsIndicatorType.bufferingIndicator);
+      updateMainAxisAlignmentType(MainAxisAlignment.center);
+      showIndicator();
+    } else if (currentIndicatorType ==
+        VideoControlsIndicatorType.bufferingIndicator) {
+      hideIndicator();
+      updateIndicatorType(VideoControlsIndicatorType.noIndicator);
+      updateMainAxisAlignmentType(MainAxisAlignment.start);
+    }
+  }
 }
 
 class VideoUiState {
@@ -175,18 +208,39 @@ class VideoUiNotifier extends _$VideoUiNotifier implements VideoUiStateActions {
 
   @override
   void updateMainAxisAlignmentType(MainAxisAlignment type) {
+    if (state.indicatorType == VideoControlsIndicatorType.parsingIndicator &&
+        type != MainAxisAlignment.center) {
+      return;
+    }
     if (state.mainAxisAlignmentType != type) {
       state = state.copyWith(mainAxisAlignmentType: type);
     }
   }
 
   void updateIndicatorTypeAndShowIndicator(VideoControlsIndicatorType type) {
-    state = state.copyWith(indicatorType: type);
+    updateIndicatorType(type);
+    if (state.indicatorType == VideoControlsIndicatorType.parsingIndicator) {
+      return;
+    }
     _showIndicatorSetUp();
   }
 
   @override
   void updateIndicatorType(VideoControlsIndicatorType type) {
+    if (type == VideoControlsIndicatorType.parsingIndicator) {
+      // Parsing is persistent, not a timed gesture notification. Cancel any
+      // previous notification timer before it can dismiss the new indicator.
+      _indicatorTimer?.cancel();
+      state = state.copyWith(
+        indicatorType: type,
+        isShowIndicatorUi: true,
+        mainAxisAlignmentType: MainAxisAlignment.center,
+      );
+      return;
+    }
+    if (state.indicatorType == VideoControlsIndicatorType.parsingIndicator) {
+      return;
+    }
     if (state.indicatorType != type) {
       state = state.copyWith(indicatorType: type);
     }
@@ -200,14 +254,33 @@ class VideoUiNotifier extends _$VideoUiNotifier implements VideoUiStateActions {
 
   @override
   void hideIndicator() {
+    if (state.indicatorType == VideoControlsIndicatorType.parsingIndicator) {
+      return;
+    }
     _indicatorTimer?.cancel();
     state = state.copyWith(isShowIndicatorUi: false);
+  }
+
+  @override
+  void finishParsingIndicator() {
+    if (state.indicatorType != VideoControlsIndicatorType.parsingIndicator) {
+      return;
+    }
+    _indicatorTimer?.cancel();
+    state = state.copyWith(
+      isShowIndicatorUi: false,
+      indicatorType: VideoControlsIndicatorType.noIndicator,
+      mainAxisAlignmentType: MainAxisAlignment.start,
+    );
   }
 
   void _showIndicatorSetUp() {
     _indicatorTimer?.cancel();
     state = state.copyWith(isShowIndicatorUi: true);
     _indicatorTimer = Timer(const Duration(seconds: 3), () {
+      if (state.indicatorType == VideoControlsIndicatorType.parsingIndicator) {
+        return;
+      }
       state = state.copyWith(
         isShowIndicatorUi: false,
         indicatorType: VideoControlsIndicatorType.noIndicator,

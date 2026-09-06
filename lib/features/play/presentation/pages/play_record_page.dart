@@ -36,8 +36,7 @@ class _PlayRecordPageState extends ConsumerState<PlayRecordPage> {
     });
 
     try {
-      final result =
-          await ref.read(playHistoryControllerProvider.notifier).syncPending();
+      final result = await ref.read(playHistoryProvider.notifier).syncPending();
       if (!mounted) return;
 
       final l10n = AppLocalizations.of(context);
@@ -96,7 +95,7 @@ class _PlayRecordPageState extends ConsumerState<PlayRecordPage> {
     });
 
     try {
-      await ref.read(playHistoryControllerProvider.notifier).clearLocal();
+      await ref.read(playHistoryProvider.notifier).clearLocal();
       if (mounted) {
         NotificationToast.show(AppLocalizations.of(context).deleteSuccess,
             title: '提示');
@@ -175,7 +174,7 @@ class _PlayRecordPageState extends ConsumerState<PlayRecordPage> {
       body: Center(
         child: Consumer(
           builder: (context, ref, child) {
-            final playHistoryAsync = ref.watch(playHistoryControllerProvider);
+            final playHistoryAsync = ref.watch(playHistoryProvider);
             final playHistoryList = playHistoryAsync.value;
             if (playHistoryAsync.isLoading && playHistoryList == null) {
               return const Center(

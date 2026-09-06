@@ -555,4 +555,15 @@
   ,"downloadPauseAll": "暫停全部"
   ,"downloadSizeProgress": "已下載 {downloaded} / 總大小 {total}"
   ,"@downloadSizeProgress": {"placeholders": {"downloaded": {}, "total": {}}}
+  ,"playerKernel": "播放器內核"
+  ,"selectPlayerKernel": "選擇播放器內核"
+  ,"playerKernelTroubleshootingHint": "播放頁無法播放或發生閃退時，可嘗試切換播放器內核。iOS 巨魔安裝環境下，MediaKit 內核可能閃退，可切換至 FVP。"
+  ,"playerKernelSupportsSuperResolution": "MediaKit 支援 Anime4K 等 GLSL 超解析度 Shader"
+  ,"playerKernelNoSuperResolution": "FVP 不支援 Anime4K 等 GLSL 超解析度 Shader"
+  ,"playerKernelSwitchFailed": "播放器內核切換失敗"
+  ,"mediaKit": "MediaKit"
+  ,"fvp": "FVP"
+  ,"hardwareDecoding": "硬件解碼"
+  ,"hardwareDecodingHint": "優先使用硬件解碼；切換後會重新載入目前影片。"
+  ,"hardwareDecodingFailed": "切換解碼模式失敗"
 }

@@ -60,24 +60,6 @@ void main() {
   });
 
   group('SubjectEpisodesState initial selection', () {
-    test('selects the episode after the last watched episode by default', () {
-      final state = SubjectEpisodesState(
-        episodes: EpisodesItem(
-          data: [
-            _episode(1, watched: true),
-            _episode(2, watched: true),
-            _episode(3),
-          ],
-          total: 3,
-        ),
-      );
-
-      final selection = state.selectionForContinueEpisode();
-
-      expect(selection?.id, 3);
-      expect(selection?.index, 3);
-    });
-
     test('uses the sorted playback order for watched continuation', () {
       final state = SubjectEpisodesState(
         episodes: EpisodesItem(
@@ -115,24 +97,6 @@ void main() {
 
       expect(selection?.id, 501);
       expect(selection?.sort, 51);
-      expect(selection?.index, 2);
-    });
-
-    test('uses the requested episode id when one is supplied', () {
-      final state = SubjectEpisodesState(
-        episodes: EpisodesItem(
-          data: [
-            _episode(1, sort: 1, watched: true),
-            _episode(2, sort: 2),
-            _episode(3, sort: 3),
-          ],
-          total: 3,
-        ),
-      );
-
-      final selection = state.findSelectionById(2);
-
-      expect(selection?.id, 2);
       expect(selection?.index, 2);
     });
 

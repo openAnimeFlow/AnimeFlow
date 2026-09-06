@@ -1,5 +1,7 @@
+import 'dart:async';
 import 'dart:io';
 
+import 'package:anime_flow/app/router/routes_args.dart';
 import 'package:anime_flow/shared/models/enums/video_controls_icon_type.dart';
 import 'package:anime_flow/features/play/presentation/providers/play_provider.dart';
 import 'package:anime_flow/features/play/presentation/providers/video_ui_provider.dart';
@@ -7,7 +9,6 @@ import 'package:anime_flow/features/play/presentation/providers/video_source_pro
 import 'package:anime_flow/features/play/presentation/providers/episodes_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:media_kit_video/media_kit_video.dart';
 import 'package:window_manager/window_manager.dart';
 
 import 'ui/danmaku/danmaku_view.dart';
@@ -89,6 +90,8 @@ class _PlayerViewState extends ConsumerState<PlayerView> with WindowListener {
     ref.listen<int>(
       episodesProvider.select((state) => state.asData?.value.episodeIndex ?? 0),
       (previous, episode) {
+        // 本地剧集由 PlayPage 打开，不触发在线选源。
+        if (ref.read(playExtraProvider).isOfflineMode) return;
         if (episode <= 0 || episode == lastEpisodeIndex) {
           return;
         }
@@ -98,7 +101,7 @@ class _PlayerViewState extends ConsumerState<PlayerView> with WindowListener {
           playController.clearDanmakuIfEpisodeMismatch(episode);
           videoSourceController.resetManualSelection();
           videoSourceController.resetAutoSelectionForCurrentEpisode();
-          playController.player.stop();
+          unawaited(playController.stop());
         }
         requestAutoSelectResource();
       },
@@ -110,10 +113,15 @@ class _PlayerViewState extends ConsumerState<PlayerView> with WindowListener {
           builder: (context, ref, child) {
             final videoFit =
                 ref.watch(playStateProvider.select((state) => state.videoFit));
-            return Video(
-              controller: playController.videoController,
-              fit: videoFit,
-              controls: NoVideoControls,
+            final kernel =
+                ref.watch(playStateProvider.select((state) => state.kernel));
+            final switching = ref.watch(
+                playStateProvider.select((state) => state.switchingKernel));
+            return Positioned.fill(
+              child: KeyedSubtree(
+                key: ValueKey((kernel, switching)),
+                child: playController.buildVideoSurface(fit: videoFit),
+              ),
             );
           },
         ),

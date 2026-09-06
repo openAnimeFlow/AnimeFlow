@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:anime_flow/core/constants/assets_path_constants.dart';
 import 'package:anime_flow/core/constants/storage_key.dart';
 import 'package:anime_flow/core/network_speed/network_speed_provider.dart';
@@ -7,7 +9,7 @@ import 'package:anime_flow/features/play/presentation/providers/video_source_pro
 import 'package:anime_flow/features/play/presentation/providers/video_ui_provider.dart';
 import 'package:anime_flow/features/play/presentation/providers/episodes_provider.dart';
 import 'package:anime_flow/app/router/routes_args.dart';
-import 'package:anime_flow/features/play/presentation/widgets/player/ui/setting/video_setting.dart';
+import 'package:anime_flow/features/play/presentation/widgets/player/ui/setting/video_setting_dialog.dart';
 import 'package:anime_flow/core/storage/storage.dart';
 import 'package:anime_flow/core/utils/system_util.dart';
 import 'package:anime_flow/core/utils/utils.dart';
@@ -214,7 +216,7 @@ class _TopAreaControlState extends ConsumerState<TopAreaControl> {
                             return Row(
                               children: [
                                 if (position > Duration.zero &&
-                                    (isWideScreen || fullscreen)) ...[
+                                    (isWideScreen || fullscreen))
                                   Tooltip(
                                     message: l10n.skipSeconds(_skipDuration),
                                     child: IconButton(
@@ -231,23 +233,22 @@ class _TopAreaControlState extends ConsumerState<TopAreaControl> {
                                       ),
                                     ),
                                   ),
-                                  IconButton(
-                                    tooltip: l10n.settings,
-                                    onPressed: () {
-                                      _showRightSlideDialog(
-                                        barrierDismissible: true,
-                                        context: context,
-                                        barrierLabel: 'VideoSetting',
-                                        child: const VideoSetting(),
-                                      );
-                                    },
-                                    icon: const Icon(
-                                      size: 29,
-                                      color: Colors.white,
-                                      Icons.settings_outlined,
-                                    ),
+                                IconButton(
+                                  tooltip: l10n.settings,
+                                  onPressed: () {
+                                    _showRightSlideDialog(
+                                      barrierDismissible: true,
+                                      context: context,
+                                      barrierLabel: 'VideoSetting',
+                                      child: const VideoSettingDialog(),
+                                    );
+                                  },
+                                  icon: const Icon(
+                                    size: 29,
+                                    color: Colors.white,
+                                    Icons.settings_outlined,
                                   ),
-                                ],
+                                ),
                                 if (fullscreen)
                                   Consumer(
                                     builder: (context, ref, child) {
@@ -263,7 +264,8 @@ class _TopAreaControlState extends ConsumerState<TopAreaControl> {
                                             barrierDismissible: true,
                                             child: VideoSourceDrawers(
                                               onVideoUrlSelected: (url) {
-                                                playController.player.stop();
+                                                unawaited(
+                                                    playController.stop());
                                                 videoSourceController
                                                     .loadVideoPage(url);
                                                 videoUiStateController

@@ -1,6 +1,8 @@
 import 'package:anime_flow/core/constants/storage_key.dart';
+import 'package:anime_flow/features/play/domain/player/player_kernel.dart';
 import 'package:anime_flow/features/settings/presentation/providers/setting_provider.dart';
 import 'package:anime_flow/core/storage/storage.dart';
+import 'package:anime_flow/shared/widgets/drop_down_menu.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:anime_flow/app/localization/app_localizations.dart';
@@ -20,7 +22,9 @@ class _PlaybackSettingsPageState extends State<PlaybackSettingsPage> {
   late bool _episodesProgress;
   late double _fastForwardSpeed;
   late bool _adBlocker;
+  late bool _hardwareDecoder;
   late int _skipDuration;
+  late PlayerKernel _preferredPlayerKernel;
 
   @override
   void initState() {
@@ -36,8 +40,22 @@ class _PlaybackSettingsPageState extends State<PlaybackSettingsPage> {
       _fastForwardSpeed =
           setting.get(PlaybackKey.fastForwardSpeed, defaultValue: 2.0);
       _adBlocker = setting.get(PlaybackKey.adBlocker, defaultValue: false);
+      _hardwareDecoder =
+          setting.get(PlaybackKey.hardwareDecoder, defaultValue: true);
       _skipDuration = setting.get(PlaybackKey.skipDuration, defaultValue: 85);
+      _preferredPlayerKernel = _readPreferredPlayerKernel();
     });
+  }
+
+  PlayerKernel _readPreferredPlayerKernel() {
+    final storedKernel = setting.get(
+      PlaybackKey.preferredPlayerKernel,
+      defaultValue: PlayerKernel.mediaKit.name,
+    );
+    return PlayerKernel.values.firstWhere(
+      (kernel) => kernel.name == storedKernel,
+      orElse: () => PlayerKernel.mediaKit,
+    );
   }
 
   @override
@@ -159,6 +177,105 @@ class _PlaybackSettingsPageState extends State<PlaybackSettingsPage> {
                   ),
                   const SizedBox(height: 16),
 
+                  // 播放器内核设置
+                  _buildSectionTitle(l10n.playerKernel),
+                  SwitchListTile(
+                    title: Text(l10n.hardwareDecoding),
+                    value: _hardwareDecoder,
+                    onChanged: (value) {
+                      setState(() {
+                        _hardwareDecoder = value;
+                        setting.put(PlaybackKey.hardwareDecoder, value);
+                      });
+                    },
+                  ),
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 16),
+                    child: Row(
+                      spacing: 5,
+                      children: [
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                l10n.playerKernelTroubleshootingHint,
+                                style: const TextStyle(fontSize: 13),
+                              ),
+                            ],
+                          ),
+                        ),
+                        DropDownMenu<PlayerKernel>(
+                          items: PlayerKernel.values,
+                          selectedItem: _preferredPlayerKernel,
+                          tooltip: l10n.selectPlayerKernel,
+                          offset: const Offset(0, 44),
+                          buttonBuilder: (context, selectedKernel) => Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Text(_kernelLabel(
+                                selectedKernel ?? _preferredPlayerKernel,
+                              )),
+                              const Icon(Icons.arrow_drop_down),
+                            ],
+                          ),
+                          itemBuilder: (context, kernel, isSelected) => Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Text(_kernelLabel(kernel)),
+                              if (isSelected) ...[
+                                const SizedBox(width: 12),
+                                const Icon(Icons.check, size: 18),
+                              ],
+                            ],
+                          ),
+                          onSelected: (kernel) {
+                            setState(() {
+                              _preferredPlayerKernel = kernel;
+                              setting.put(
+                                PlaybackKey.preferredPlayerKernel,
+                                kernel.name,
+                              );
+                            });
+                          },
+                        ),
+                      ],
+                    ),
+                  ),
+                  const SizedBox(height: 8),
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 16),
+                    child: Row(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Icon(
+                          _preferredPlayerKernel == PlayerKernel.mediaKit
+                              ? Icons.check_circle_outline
+                              : Icons.info_outline,
+                          size: 16,
+                          color: _preferredPlayerKernel == PlayerKernel.mediaKit
+                              ? Theme.of(context).colorScheme.primary
+                              : Theme.of(context).colorScheme.onSurfaceVariant,
+                        ),
+                        const SizedBox(width: 8),
+                        Expanded(
+                          child: Text(
+                            _preferredPlayerKernel == PlayerKernel.mediaKit
+                                ? l10n.playerKernelSupportsSuperResolution
+                                : l10n.playerKernelNoSuperResolution,
+                            style: TextStyle(
+                              fontSize: 12,
+                              color: Theme.of(context)
+                                  .colorScheme
+                                  .onSurfaceVariant,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  const SizedBox(height: 16),
+
                   // 播放速度设置
                   _buildSectionTitle(l10n.playbackControl),
                   Column(
@@ -251,5 +368,12 @@ class _PlaybackSettingsPageState extends State<PlaybackSettingsPage> {
         ),
       ),
     );
+  }
+
+  String _kernelLabel(PlayerKernel kernel) {
+    return switch (kernel) {
+      PlayerKernel.mediaKit => AppLocalizations.of(context).mediaKit,
+      PlayerKernel.fvp => AppLocalizations.of(context).fvp,
+    };
   }
 }

@@ -224,7 +224,9 @@ class FvpEngine implements PlayerEngine {
     }
     _acceptMediaStatus = true;
     try {
-      _player.media = source.uri.toString();
+      _player.media = source.uri.isScheme('file')
+          ? source.uri.toFilePath()
+          : source.uri.toString();
       final result = await _player.prepare(
         position: startPosition?.inMilliseconds ?? 0,
         // 默认 flags 包含 KeyFrame，会向前跳到关键帧，导致重建时进度漂移。

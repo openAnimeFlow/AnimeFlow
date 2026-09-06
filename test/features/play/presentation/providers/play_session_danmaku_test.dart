@@ -59,7 +59,8 @@ void main() {
 }
 
 PlayRequest _request(int episode, String path) => PlayRequest(
-      videoUrl: 'https://example.com/$episode',
+      videoUrl:
+          '${Directory.systemTemp.path}${Platform.pathSeparator}episode_$episode.mp4',
       offset: 0,
       subjectId: 1,
       episodeIndex: episode,

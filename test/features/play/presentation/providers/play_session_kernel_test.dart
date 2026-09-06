@@ -23,6 +23,19 @@ void main() {
   setUpAll(() => Storage.setting = _Settings());
   setUp(() => (Storage.setting as _Settings).stored.clear());
 
+  test('failed local opening allows retrying the same episode', () async {
+    final factory = _Factory();
+    final session = _Session(factory);
+    await session.playbackCoordinator.initialize();
+    addTearDown(session.playbackCoordinator.dispose);
+    factory.beforeOpen = (_) async => throw StateError('local file unavailable');
+    await expectLater(session.initPlayState(_request(1)), throwsStateError);
+    factory.beforeOpen = null;
+    await session.initPlayState(_request(1));
+    expect(factory.engines.last.source?.uri.toFilePath(), _localPath(1));
+    expect(factory.engines.last.source?.isLocal, isTrue);
+  });
+
   for (final platform in [
     TargetPlatform.windows,
     TargetPlatform.android,
@@ -66,7 +79,8 @@ void main() {
     expect(factory.engines.last.kernel, PlayerKernel.mediaKit);
     expect(factory.engines.first.disposeCount, 1);
     expect(
-        factory.engines.last.source?.uri.toString(), 'https://example.com/1');
+        factory.engines.last.source?.uri, Uri.file(_localPath(1)));
+    expect(factory.engines.last.source?.isLocal, isTrue);
     expect(await session.setHardwareDecoder(true), isTrue);
     expect(Storage.setting.get(PlaybackKey.hardwareDecoder), isTrue);
     expect(factory.engines, hasLength(3));
@@ -98,9 +112,9 @@ void main() {
     await episode;
     expect(session.episodeId, 2);
     expect(
-        factory.engines.last.source?.uri.toString(), 'https://example.com/2');
+        factory.engines.last.source?.uri, Uri.file(_localPath(2)));
     expect(
-        factory.engines.first.source?.uri.toString(), 'https://example.com/1');
+        factory.engines.first.source?.uri, Uri.file(_localPath(1)));
     expect(factory.engines.first.disposeCount, 1);
   });
 
@@ -130,7 +144,7 @@ void main() {
     expect(await switching, isTrue);
     expect(session.episodeId, 2);
     expect(
-        factory.engines.last.source?.uri.toString(), 'https://example.com/2');
+        factory.engines.last.source?.uri, Uri.file(_localPath(2)));
   });
 
   test('latest episode request wins when several arrive during switching',
@@ -157,14 +171,14 @@ void main() {
     await Future.wait([second, third]);
     expect(session.episodeId, 3);
     expect(factory.engines.last.openedUris, [
-      'https://example.com/1',
-      'https://example.com/3',
+      Uri.file(_localPath(1)).toString(),
+      Uri.file(_localPath(3)).toString(),
     ]);
   });
 }
 
 PlayRequest _request(int episode) => PlayRequest(
-      videoUrl: 'https://example.com/$episode',
+      videoUrl: _localPath(episode),
       offset: 0,
       subjectId: 1,
       episodeIndex: episode,
@@ -175,6 +189,9 @@ PlayRequest _request(int episode) => PlayRequest(
       alias: const [],
       isLocalPlayback: true,
     );
+
+String _localPath(int episode) =>
+    '${Directory.systemTemp.path}${Platform.pathSeparator}本地 #100% 第 $episode 集.mp4';
 
 class _Session extends PlaySession {
   _Session(_Factory factory, {_State? state})

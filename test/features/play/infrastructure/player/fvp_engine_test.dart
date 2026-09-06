@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:io';
 
 import 'package:anime_flow/features/play/domain/player/playback_source.dart';
 import 'package:anime_flow/features/play/domain/player/player_event.dart';
@@ -6,8 +7,36 @@ import 'package:anime_flow/features/play/infrastructure/player/fvp/fvp_engine.da
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/widgets.dart';
 import 'package:fvp/mdk.dart' as fvp;
+import 'package:path/path.dart' as p;
 
 void main() {
+  test('local paths and file URIs reach FVP without losing filename characters',
+      () async {
+    final players = <_FakePlayer>[];
+    final engine = FvpEngine(playerFactory: () {
+      final player = _FakePlayer();
+      players.add(player);
+      return player;
+    });
+    await engine.initialize();
+    addTearDown(engine.dispose);
+
+    for (final parts in [
+      ['第 1 集 #100%20.mp4'],
+      ['本地 视频 #100%', 'playlist.m3u8'],
+    ]) {
+      final path = p.joinAll([Directory.systemTemp.path, ...parts]);
+      for (final input in [path, Uri.file(path).toString()]) {
+        await engine.open(PlaybackSource.localFile(input));
+        expect(players.last.media, path);
+      }
+    }
+
+    const remote = 'https://example.com/%E8%A7%86%E9%A2%91%20file.mp4?key=a%2Fb';
+    await engine.open(PlaybackSource(uri: Uri.parse(remote)));
+    expect(players.last.media, remote);
+  });
+
   test('software decoding excludes native hardware decoders on every player',
       () async {
     final players = <_FakePlayer>[];
@@ -272,6 +301,8 @@ void main() {
 
 // Implements the Dart API without loading MDK or a platform video texture.
 class _FakePlayer implements fvp.Player {
+  @override
+  String media = '';
   @override
   List<String> videoDecoders = [];
   @override

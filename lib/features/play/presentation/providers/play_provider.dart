@@ -748,10 +748,9 @@ class PlaySession {
         isLocalPlayback: isLocalPlayback,
       );
       if (state.videoUrl.isEmpty) return;
-      _currentSource = PlaybackSource(
-        uri: Uri.parse(state.videoUrl),
-        isLocal: state.isLocalPlayback,
-      );
+      _currentSource = state.isLocalPlayback
+          ? PlaybackSource.localFile(state.videoUrl)
+          : PlaybackSource(uri: Uri.parse(state.videoUrl));
       await playbackCoordinator.open(
         _currentSource!,
         startPosition: Duration(seconds: state.offset),

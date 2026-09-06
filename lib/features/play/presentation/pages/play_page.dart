@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:anime_flow/app/router/model/play_route_extra.dart';
 import 'package:anime_flow/core/constants/layout_constant.dart';
+import 'package:anime_flow/core/logger/logger.dart';
 import 'package:anime_flow/app/localization/app_localizations.dart';
 import 'package:anime_flow/features/play/data/repository/play_repository.dart';
 import 'package:anime_flow/features/play/presentation/providers/episodes_provider.dart';
@@ -43,6 +44,7 @@ class _PlayPageState extends ConsumerState<PlayPage>
 
   bool _hasInitResources = false;
   int? _lastOfflineEpisodeId;
+  int _offlineRequestId = 0;
   bool? _lastReportedIsWideScreen;
   bool _subscribedRouteObserver = false;
   bool _resumeWhenRouteVisible = false;
@@ -134,34 +136,44 @@ class _PlayPageState extends ConsumerState<PlayPage>
       return;
     }
     _lastOfflineEpisodeId = episodesState.episodeId;
+    final requestId = ++_offlineRequestId;
 
-    var offset = 0;
-    final history =
-        await PlayRepository.getPlayHistory(extra.playExtra.subjectId);
-    if (!mounted) return;
-    if (history != null &&
-        history.position > 0 &&
-        history.episodeId == episodesState.episodeId) {
-      offset = history.position;
+    try {
+      var offset = 0;
+      final history =
+          await PlayRepository.getPlayHistory(extra.playExtra.subjectId);
+      // 读历史记录期间可能已经选中另一集，旧请求不能重新开始播放。
+      if (!mounted || requestId != _offlineRequestId) return;
+      if (history != null &&
+          history.position > 0 &&
+          history.episodeId == episodesState.episodeId) {
+        offset = history.position;
+      }
+
+      await playSession.initPlayState(
+        PlayRequest(
+          videoUrl: mediaPath,
+          offset: offset,
+          subjectId: extra.playExtra.subjectId,
+          subjectName: extra.playExtra.subjectName,
+          subjectCover: extra.playExtra.subjectCover,
+          episodeIndex: episodesState.episodeIndex,
+          episodeSort: episodesState.episodeSort.toInt(),
+          episodeId: episodesState.episodeId,
+          alias: extra.playExtra.subjectAliases,
+          localDanmakuPath: episode?.localDanmakuPath.trim().isNotEmpty == true
+              ? episode!.localDanmakuPath
+              : extra.offlineDanmakuPath,
+          isLocalPlayback: true,
+        ),
+      );
+    } catch (error, stackTrace) {
+      LiggLogger().e('本地视频打开失败', error: error, stackTrace: stackTrace);
+      if (!mounted || requestId != _offlineRequestId) return;
+      // 允许用户重新选择同一集重试，旧请求失败不能清除新请求的标记。
+      _lastOfflineEpisodeId = null;
+      NotificationToast.show(AppLocalizations.of(context).openFailed);
     }
-
-    await playSession.initPlayState(
-      PlayRequest(
-        videoUrl: mediaPath,
-        offset: offset,
-        subjectId: extra.playExtra.subjectId,
-        subjectName: extra.playExtra.subjectName,
-        subjectCover: extra.playExtra.subjectCover,
-        episodeIndex: episodesState.episodeIndex,
-        episodeSort: episodesState.episodeSort.toInt(),
-        episodeId: episodesState.episodeId,
-        alias: extra.playExtra.subjectAliases,
-        localDanmakuPath: episode?.localDanmakuPath.trim().isNotEmpty == true
-            ? episode!.localDanmakuPath
-            : extra.offlineDanmakuPath,
-        isLocalPlayback: true,
-      ),
-    );
   }
 
   DownloadEpisode? _findOfflineEpisode(

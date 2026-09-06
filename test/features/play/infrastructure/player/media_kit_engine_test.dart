@@ -1,12 +1,27 @@
 import 'dart:async';
+import 'dart:io';
 
 import 'package:anime_flow/features/play/domain/player/playback_source.dart';
 import 'package:anime_flow/features/play/infrastructure/player/media_kit/media_kit_engine.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:media_kit/media_kit.dart';
 import 'package:media_kit_video/media_kit_video.dart';
+import 'package:path/path.dart' as p;
 
 void main() {
+  test('normalized local sources retain MediaKit filename handling', () async {
+    final player = _Player();
+    final engine = MediaKitEngine(
+      adBlocker: false,
+      playerFactory: () => player,
+      controllerFactory: (_) => _Controller(),
+    );
+    addTearDown(engine.dispose);
+    final path = p.join(Directory.systemTemp.path, '第 1 集 #100%20.mp4');
+    await engine.open(PlaybackSource.localFile(path));
+    expect(p.equals(player.media!.uri, path), isTrue);
+  });
+
   test('each episode gets a new player and controller with saved settings',
       () async {
     final players = <_Player>[];

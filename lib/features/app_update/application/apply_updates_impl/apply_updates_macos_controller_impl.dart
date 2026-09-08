@@ -6,6 +6,10 @@ import 'package:url_launcher/url_launcher.dart';
 /// macOS 平台更新实现
 class ApplyUpdatesMacOSController implements ApplyUpdatesController {
   @override
+  List<DownloadInfo> prioritizeDownloads(List<DownloadInfo> downloads) =>
+      downloads;
+
+  @override
   Future<void> applyUpdates({
     required DownloadInfo downloadInfo,
     void Function(int received, int total)? onProgress,

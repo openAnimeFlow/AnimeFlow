@@ -222,6 +222,6 @@ class AppInfo extends _$AppInfo {
       }
     }
 
-    return urlList;
+    return ApplyUpdatesFactory.getController().prioritizeDownloads(urlList);
   }
 }

@@ -14,6 +14,17 @@ class ApplyUpdatesAndroidController implements ApplyUpdatesController {
   CancelToken? _cancelToken;
 
   @override
+  List<DownloadInfo> prioritizeDownloads(List<DownloadInfo> downloads) {
+    final arm64Packages = downloads
+        .where((download) => download.fileName.toLowerCase().contains('arm64'))
+        .toList();
+    final otherPackages = downloads
+        .where((download) => !download.fileName.toLowerCase().contains('arm64'))
+        .toList();
+    return [...arm64Packages, ...otherPackages];
+  }
+
+  @override
   Future<void> applyUpdates({
     required DownloadInfo downloadInfo,
     void Function(int received, int total)? onProgress,

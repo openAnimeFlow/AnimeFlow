@@ -8,6 +8,9 @@ import 'apply_updates_impl/apply_updates_macos_controller_impl.dart';
 import 'apply_updates_impl/apply_updates_windows_controller_impl.dart';
 
 abstract class ApplyUpdatesController {
+  /// 按平台策略排列可用的下载包。
+  List<DownloadInfo> prioritizeDownloads(List<DownloadInfo> downloads);
+
   ///应用更新
   /// [downloadUrl] 下载地址
   /// [onProgress] 下载进度回调，参数为 (已下载字节数, 总字节数)

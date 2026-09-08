@@ -10,6 +10,19 @@ class ApplyUpdatesWindowsController implements ApplyUpdatesController {
   CancelToken? _cancelToken;
 
   @override
+  List<DownloadInfo> prioritizeDownloads(List<DownloadInfo> downloads) {
+    final installers = downloads
+        .where((download) =>
+            path.extension(download.fileName).toLowerCase() == '.exe')
+        .toList();
+    final otherDownloads = downloads
+        .where((download) =>
+            path.extension(download.fileName).toLowerCase() != '.exe')
+        .toList();
+    return [...installers, ...otherDownloads];
+  }
+
+  @override
   Future<void> applyUpdates({
     required DownloadInfo downloadInfo,
     void Function(int received, int total)? onProgress,

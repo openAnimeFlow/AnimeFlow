@@ -1,5 +1,6 @@
 import 'package:anime_flow/core/network/api/flow_api.dart';
 import 'package:anime_flow/shared/models/player/bangumi/episodes_item.dart';
+import 'package:flutter/foundation.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 part 'subject_episodes_provider.g.dart';
@@ -10,20 +11,30 @@ class SubjectEpisodesState {
   SubjectEpisodesState({
     required EpisodesItem episodes,
     this.isLoadingMore = false,
+    this.loadMoreError,
+    this.isExhausted = false,
   }) : episodes = _sortEpisodesItem(episodes);
 
   final EpisodesItem episodes;
   final bool isLoadingMore;
+  final Object? loadMoreError;
+  final bool isExhausted;
 
-  bool get hasMore => episodes.data.length < episodes.total;
+  bool get hasMore => !isExhausted && episodes.data.length < episodes.total;
 
   SubjectEpisodesState copyWith({
     EpisodesItem? episodes,
     bool? isLoadingMore,
+    Object? loadMoreError,
+    bool clearLoadMoreError = false,
+    bool? isExhausted,
   }) {
     return SubjectEpisodesState(
       episodes: episodes ?? this.episodes,
       isLoadingMore: isLoadingMore ?? this.isLoadingMore,
+      loadMoreError:
+          clearLoadMoreError ? null : loadMoreError ?? this.loadMoreError,
+      isExhausted: isExhausted ?? this.isExhausted,
     );
   }
 
@@ -155,56 +166,117 @@ int _compareEpisodes(EpisodeData a, EpisodeData b) {
 
 @riverpod
 class SubjectEpisodes extends _$SubjectEpisodes {
+  Future<bool>? _pendingPage;
+  int _revision = 0;
+  int _nextOffset = 0;
+
   @override
   Future<SubjectEpisodesState> build(int subjectId) async {
-    final episodes = await _fetchEpisodesPage(subjectId, offset: 0);
-    return SubjectEpisodesState(episodes: episodes);
+    final revision = ++_revision;
+    _pendingPage = null;
+    ref.onDispose(() => _revision++);
+    final episodes = await fetchPage(subjectId, offset: 0);
+    if (_isCurrent(revision)) _nextOffset = episodes.data.length;
+    return SubjectEpisodesState(
+      episodes: _deduplicate(episodes),
+      isExhausted: episodes.data.isEmpty,
+    );
   }
 
   Future<void> retry() async {
-    state = const AsyncLoading();
-    state = await AsyncValue.guard(() async {
-      final episodes = await _fetchEpisodesPage(subjectId, offset: 0);
-      return SubjectEpisodesState(episodes: episodes);
-    });
+    ref.invalidateSelf();
+    // Initial errors remain exposed through the provider's AsyncError.
+    try {
+      await future;
+    } catch (_) {}
   }
 
-  Future<void> loadMore() async {
-    final current = state.asData?.value;
-    if (current == null || current.isLoadingMore || !current.hasMore) {
-      return;
-    }
+  bool _isCurrent(int revision) => ref.mounted && revision == _revision;
 
-    state = AsyncData(current.copyWith(isLoadingMore: true));
+  /// Returns whether new episodes were added. Concurrent callers share a request.
+  Future<bool> loadMore() {
+    final pending = _pendingPage;
+    if (pending != null) return pending;
+    final revision = _revision;
+    final link = ref.keepAlive();
+    late final Future<bool> request;
+    request = _loadMore(revision).whenComplete(() {
+      if (identical(_pendingPage, request)) _pendingPage = null;
+      link.close();
+    });
+    return _pendingPage = request;
+  }
+
+  Future<bool> _loadMore(int revision) async {
     try {
-      final page = await _fetchEpisodesPage(
+      final current = await future;
+      if (!_isCurrent(revision) || !current.hasMore) return false;
+      state = AsyncData(current.copyWith(
+        isLoadingMore: true,
+        clearLoadMoreError: true,
+      ));
+      final page = await fetchPage(
         subjectId,
-        offset: current.episodes.data.length,
+        offset: _nextOffset,
       );
-      final merged = current.episodes.copyWith(
-        data: [...current.episodes.data, ...page.data],
+      if (!_isCurrent(revision)) return false;
+      // Preserve watched changes made while the page request was in flight.
+      final latest = state.requireValue;
+      final merged = _deduplicate(latest.episodes.copyWith(
+        data: [...latest.episodes.data, ...page.data],
         total: page.total,
-      );
+      ));
+      final progressed = merged.data.length > latest.episodes.data.length;
+      _nextOffset += page.data.length;
       state = AsyncData(
-        SubjectEpisodesState(
+        latest.copyWith(
           episodes: merged,
           isLoadingMore: false,
+          isExhausted: !progressed || _nextOffset >= page.total,
+          clearLoadMoreError: true,
         ),
       );
-    } catch (_) {
-      state = AsyncData(current.copyWith(isLoadingMore: false));
+      return progressed;
+    } catch (error) {
+      if (_isCurrent(revision)) {
+        final current = state.asData?.value;
+        if (current != null) {
+          state = AsyncData(current.copyWith(
+            isLoadingMore: false,
+            loadMoreError: error,
+          ));
+        }
+      }
+      return false;
     }
   }
 
   Future<void> loadUntilEpisodeId(int episodeId) async {
-    var current = state.asData?.value;
-    while (current != null &&
-        current.hasMore &&
-        !_containsEpisodeId(current.episodes, episodeId)) {
-      await loadMore();
-      current = state.asData?.value;
+    final link = ref.keepAlive();
+    final revision = _revision;
+    try {
+      var current = await future;
+      while (_isCurrent(revision)) {
+        if (_containsEpisodeId(current.episodes, episodeId)) return;
+        if (!current.hasMore) {
+          throw StateError('未找到剧集 $episodeId');
+        }
+        final progressed = await loadMore();
+        if (!_isCurrent(revision)) return;
+        current = state.requireValue;
+        if (!progressed) {
+          throw current.loadMoreError ?? StateError('未找到剧集 $episodeId');
+        }
+      }
+    } finally {
+      link.close();
     }
   }
+
+  @protected
+  Future<EpisodesItem> fetchPage(int subjectId, {required int offset}) =>
+      FlowApi.getSubjectEpisodesByIdService(
+          subjectId, _episodesPageSize, offset);
 
   Future<void> updateEpisodeWatched({
     required int episodeId,
@@ -262,14 +334,10 @@ class SubjectEpisodes extends _$SubjectEpisodes {
   }
 }
 
-Future<EpisodesItem> _fetchEpisodesPage(
-  int subjectId, {
-  required int offset,
-}) {
-  return FlowApi.getSubjectEpisodesByIdService(
-    subjectId,
-    _episodesPageSize,
-    offset,
+EpisodesItem _deduplicate(EpisodesItem episodes) {
+  final seen = <int>{};
+  return episodes.copyWith(
+    data: episodes.data.where((episode) => seen.add(episode.id)).toList(),
   );
 }
 

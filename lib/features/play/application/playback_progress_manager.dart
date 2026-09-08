@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:anime_flow/core/auth/repository/flow_token_storage.dart';
 import 'package:anime_flow/core/constants/storage_key.dart';
 import 'package:anime_flow/core/logger/logger.dart';
 import 'package:anime_flow/core/network/api/flow_api.dart';
@@ -127,6 +128,9 @@ class PlaybackProgressManager {
 
   Future<void> _autoUpdateEpisodeWatched(int targetEpisodeId) async {
     try {
+      if (await FlowTokenStorage.instance.getToken() == null) {
+        return;
+      }
       await FlowApi.updateEpisodeWatchedService(targetEpisodeId, watched: true);
       _autoWatchedEpisodeIds.add(targetEpisodeId);
       onEpisodeWatched(

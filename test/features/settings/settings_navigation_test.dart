@@ -154,6 +154,46 @@ void main() {
     expect(tester.takeException(), isNull);
   });
 
+  testWidgets('wide navigation can exit via app bars after shrinking',
+      (tester) async {
+    await mount(tester);
+    await tester.tap(find.text('Enter settings'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text(l10n(tester).generalSettingsTitle));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text(l10n(tester).themeStyle));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Open font'));
+    await tester.pumpAndSettle();
+    tester.view.physicalSize = const Size(400, 900);
+    await tester.pumpAndSettle();
+    await tester.tap(find.byType(BackButton));
+    await tester.pumpAndSettle();
+    expect(find.text('probe:/settings/theme'), findsOneWidget);
+    await tester.tap(find.byType(BackButton));
+    await tester.pumpAndSettle();
+    expect(find.text(l10n(tester).themeStyle), findsOneWidget);
+    expect(find.byType(BackButton), findsOneWidget);
+    await tester.tap(find.byType(BackButton));
+    await tester.pumpAndSettle();
+    expect(find.text('Enter settings'), findsOneWidget);
+    expect(tester.takeException(), isNull);
+  });
+
+  testWidgets('shrinking the wide settings root still exposes an exit button',
+      (tester) async {
+    await mount(tester);
+    await tester.tap(find.text('Enter settings'));
+    await tester.pumpAndSettle();
+    tester.view.physicalSize = const Size(400, 900);
+    await tester.pumpAndSettle();
+    expect(find.byType(BackButton), findsOneWidget);
+    await tester.tap(find.byType(BackButton));
+    await tester.pumpAndSettle();
+    expect(find.text('Enter settings'), findsOneWidget);
+    expect(tester.takeException(), isNull);
+  });
+
   testWidgets('child navigation returns values to caller', (tester) async {
     await mount(tester, initial: '/settings/theme');
     final context = tester.element(find.byType(_Probe));

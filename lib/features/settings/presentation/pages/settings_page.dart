@@ -7,6 +7,15 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+void _exitSettings(BuildContext context) {
+  final navigator = Navigator.of(context, rootNavigator: true);
+  if (navigator.canPop()) {
+    navigator.pop();
+  } else {
+    const RecommendRoute().go(context);
+  }
+}
+
 /// Responsive shell around the settings route navigator.
 class SettingsPage extends StatelessWidget {
   const SettingsPage({super.key, required this.child, required this.location});
@@ -42,6 +51,7 @@ class SettingsMenuPage extends ConsumerWidget {
           ? const AccountSettingsPage()
           : Scaffold(
               appBar: AppBar(
+                  leading: BackButton(onPressed: () => _exitSettings(context)),
                   title: Text(AppLocalizations.of(context).settingsLabel)),
               body: const _SettingsMenu(location: '/settings', wide: false),
             );
@@ -162,7 +172,7 @@ class _SettingsMenu extends StatelessWidget {
               title: Text(item.title),
               trailing: wide ? null : const Icon(Icons.chevron_right),
               onTap: () {
-                if (wide) {
+                if (wide && location != const SettingsRoute().location) {
                   if (location != item.route.location) {
                     item.route.replace(context);
                   }
@@ -185,12 +195,7 @@ class _SettingsMenu extends StatelessWidget {
             leading: const Icon(Icons.arrow_back),
             title: Text(AppLocalizations.of(context).settingsLabel),
             onTap: () {
-              final navigator = Navigator.of(context);
-              if (navigator.canPop()) {
-                navigator.pop();
-              } else {
-                const RecommendRoute().go(context);
-              }
+              _exitSettings(context);
             },
           ),
           const Divider(height: 1),

@@ -47,6 +47,7 @@ class _IntroduceViewState extends State<IntroduceView>
                   Expanded(
                     child: InkWell(
                       onTap: widget.onShowDetails,
+                      borderRadius: BorderRadius.circular(10),
                       child: Text(
                         extra.subjectName,
                         style: const TextStyle(

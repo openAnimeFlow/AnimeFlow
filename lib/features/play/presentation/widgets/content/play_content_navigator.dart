@@ -1,6 +1,7 @@
 import 'package:anime_flow/app/localization/app_localizations.dart';
 import 'package:anime_flow/features/anime_info/presentation/widgets/anime_info_view.dart';
 import 'package:anime_flow/features/play/presentation/providers/play_content_actions.dart';
+import 'package:anime_flow/features/play/presentation/providers/play_provider.dart';
 import 'package:anime_flow/features/play/presentation/widgets/content/introduce_view.dart';
 import 'package:anime_flow/shared/widgets/notification_toast.dart';
 import 'package:flutter/material.dart';
@@ -51,44 +52,81 @@ class _PlayContentNavigatorState extends ConsumerState<PlayContentNavigator>
   @override
   Widget build(BuildContext context) {
     super.build(context);
-    return NavigatorPopHandler<void>(
-      enabled: widget.isActive,
-      onPopWithResult: (_) {
-        if (widget.isActive && _showDetails) {
-          _navigatorKey.currentState?.pop();
-        }
-      },
-      child: Navigator(
-        key: _navigatorKey,
-        onDidRemovePage: (page) {
-          if (page.key == ValueKey<int>(_detailsId) && _showDetails) {
-            setState(() => _showDetails = false);
+    final isWideScreen = ref.watch(
+      playStateProvider.select((state) => state.isWideScreen),
+    );
+    return Theme(
+      data: Theme.of(context).copyWith(
+        pageTransitionsTheme: PageTransitionsTheme(
+          builders: {
+            for (final platform in TargetPlatform.values)
+              platform:
+                  _ContentPageTransitionsBuilder(isWideScreen: isWideScreen),
+          },
+        ),
+      ),
+      child: NavigatorPopHandler<void>(
+        enabled: widget.isActive,
+        onPopWithResult: (_) {
+          if (widget.isActive && _showDetails) {
+            _navigatorKey.currentState?.pop();
           }
         },
-        pages: [
-          MaterialPage<void>(
-            key: const ValueKey('introduction'),
-            child: IntroduceView(
-              onShowDetails: () => setState(() {
-                _detailsId++;
-                _showDetails = true;
-              }),
-            ),
-          ),
-          if (_showDetails)
+        child: Navigator(
+          key: _navigatorKey,
+          onDidRemovePage: (page) {
+            if (page.key == ValueKey<int>(_detailsId) && _showDetails) {
+              setState(() => _showDetails = false);
+            }
+          },
+          pages: [
             MaterialPage<void>(
-              key: ValueKey<int>(_detailsId),
-              child: AbsorbPointer(
-                absorbing: _busy,
-                child: AnimeInfoView(
-                  onPlay: () => _play((actions) => actions.resume()),
-                  onPlayEpisode: (id) =>
-                      _play((actions) => actions.selectEpisode(id)),
-                ),
+              key: const ValueKey('introduction'),
+              child: IntroduceView(
+                onShowDetails: () => setState(() {
+                  _detailsId++;
+                  _showDetails = true;
+                }),
               ),
             ),
-        ],
+            if (_showDetails)
+              MaterialPage<void>(
+                key: ValueKey<int>(_detailsId),
+                child: AbsorbPointer(
+                  absorbing: _busy,
+                  child: AnimeInfoView(
+                    onPlay: () => _play((actions) => actions.resume()),
+                    onPlayEpisode: (id) =>
+                        _play((actions) => actions.selectEpisode(id)),
+                  ),
+                ),
+              ),
+          ],
+        ),
       ),
+    );
+  }
+}
+
+class _ContentPageTransitionsBuilder extends PageTransitionsBuilder {
+  const _ContentPageTransitionsBuilder({required this.isWideScreen});
+
+  final bool isWideScreen;
+
+  @override
+  Widget buildTransitions<T>(
+    PageRoute<T> route,
+    BuildContext context,
+    Animation<double> animation,
+    Animation<double> secondaryAnimation,
+    Widget child,
+  ) {
+    return SlideTransition(
+      position: Tween<Offset>(
+        begin: isWideScreen ? const Offset(1, 0) : const Offset(0, 1),
+        end: Offset.zero,
+      ).animate(CurveTween(curve: Curves.easeInOutCubic).animate(animation)),
+      child: child,
     );
   }
 }

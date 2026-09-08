@@ -6,12 +6,9 @@ import 'package:anime_flow/features/play/application/video_source_service.dart';
 /// WebView 视频源提供者
 ///
 /// 使用 WebView 解析视频页面，提取视频源 URL。
-/// WebView 实例在 Provider 生命周期内复用，解析任务串行执行，
+/// 每个服务独立持有 WebView 实例，在服务生命周期内复用，解析任务串行执行，
 /// 仅在 [dispose] 时才真正销毁 WebView。
 class WebViewVideoSourceService implements IVideoSourceProvider {
-  /// WebView2 环境是进程级资源，播放页之间必须复用同一个服务实例。
-  static final shared = WebViewVideoSourceService();
-
   VideoWebviewController? _webview;
   StreamSubscription? _logSubscription;
   Future<void>? _initialization;

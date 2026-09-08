@@ -108,6 +108,7 @@ class _AboutSettingsPageState extends ConsumerState<AboutSettingsPage> {
                 context,
                 result,
                 onStartDownload: notifier.performUpdateDownload,
+                onDownloadedPackageAction: notifier.openDownloadedPackage,
                 onCancelDownload: notifier.cancelUpdateDownload,
                 notifyWhenUpToDate: true,
               );

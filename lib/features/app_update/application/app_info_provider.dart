@@ -1,5 +1,3 @@
-import 'dart:io';
-
 import 'package:anime_flow/core/constants/storage_key.dart';
 import 'package:anime_flow/features/app_update/application/app_info_state.dart';
 import 'package:anime_flow/features/app_update/application/app_provider_container.dart';
@@ -15,8 +13,6 @@ import 'package:anime_flow/core/logger/logger.dart';
 import 'package:anime_flow/core/utils/system_util.dart';
 import 'package:anime_flow/core/utils/utils.dart';
 import 'package:package_info_plus/package_info_plus.dart';
-import 'package:path/path.dart' as path;
-import 'package:path_provider/path_provider.dart' show getDownloadsDirectory;
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 part 'app_info_provider.g.dart';
@@ -134,15 +130,18 @@ class AppInfo extends _$AppInfo {
     }
   }
 
-  Future<String?> performUpdateDownload(DownloadInfo downloadInfo) async {
-    state = state.copyWith(
-      download: const VersionDownloadState(isDownloading: true),
-    );
-
+  Future<UpdateDownloadResult?> performUpdateDownload(
+      DownloadInfo downloadInfo) async {
     _updateController = ApplyUpdatesFactory.getController();
+    final controller = _updateController!;
+    if (controller.supportsInAppDownload) {
+      state = state.copyWith(
+        download: const VersionDownloadState(isDownloading: true),
+      );
+    }
 
     try {
-      await _updateController!.applyUpdates(
+      return await controller.applyUpdates(
         downloadInfo: downloadInfo,
         onProgress: (received, total) {
           state = state.copyWith(
@@ -155,18 +154,16 @@ class AppInfo extends _$AppInfo {
           );
         },
       );
-
-      if (Platform.isWindows) {
-        final tempDir = await getDownloadsDirectory();
-        return path.join(tempDir!.path, downloadInfo.fileName);
-      }
-      return null;
     } on UpdateDownloadCancelledException {
       rethrow;
     } finally {
       _resetDownloadState();
       _updateController = null;
     }
+  }
+
+  Future<void> openDownloadedPackage(String filePath) async {
+    await ApplyUpdatesFactory.getController().openDownloadedPackage(filePath);
   }
 
   void cancelUpdateDownload() {

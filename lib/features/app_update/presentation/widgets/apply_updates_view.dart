@@ -9,7 +9,7 @@ import 'package:flutter_markdown_plus/flutter_markdown_plus.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:hive_ce/hive.dart';
 
-class ApplyUpdatesView extends ConsumerStatefulWidget {
+class ApplyUpdatesView extends StatefulWidget {
   final List<DownloadInfo> download;
   final String body;
   final Future<void> Function(String url, String fileName) onStartDownload;
@@ -26,89 +26,119 @@ class ApplyUpdatesView extends ConsumerStatefulWidget {
   });
 
   @override
-  ConsumerState<ApplyUpdatesView> createState() => _ApplyUpdatesViewState();
+  State<ApplyUpdatesView> createState() => _ApplyUpdatesViewState();
 }
 
-class _ApplyUpdatesViewState extends ConsumerState<ApplyUpdatesView> {
+class _ApplyUpdatesViewState extends State<ApplyUpdatesView> {
   int _selectedIndex = 0;
+  final ScrollController _scrollController = ScrollController();
+  bool _hasScrolledToDownloadProgress = false;
+
+  @override
+  void dispose() {
+    _scrollController.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
     final colorScheme = Theme.of(context).colorScheme;
 
-    return AlertDialog(
-      title: Text(l10n.updateAvailable),
-      content: SingleChildScrollView(
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            MarkdownBody(
-              data: widget.body,
-              styleSheet: MarkdownStyleSheet(
-                p: TextStyle(
-                  fontSize: 14,
-                  color: colorScheme.onSurface,
+    return Consumer(
+      builder: (context, ref, _) {
+        final download = ref.watch(
+          appInfoProvider.select((s) => s.download),
+        );
+        final isDownloading = download.isDownloading;
+        if (download.isDownloading && !_hasScrolledToDownloadProgress) {
+          _hasScrolledToDownloadProgress = true;
+          WidgetsBinding.instance.addPostFrameCallback((_) {
+            if (!mounted || !_scrollController.hasClients) return;
+            _scrollController.animateTo(
+              _scrollController.position.maxScrollExtent,
+              duration: const Duration(milliseconds: 250),
+              curve: Curves.easeOut,
+            );
+          });
+        } else if (!download.isDownloading) {
+          _hasScrolledToDownloadProgress = false;
+        }
+        return AlertDialog(
+          title: Text(l10n.updateAvailable),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              ConstrainedBox(
+                constraints: BoxConstraints(
+                  maxHeight: MediaQuery.sizeOf(context).height * 0.6,
                 ),
-                h3: TextStyle(
-                  fontSize: 16,
-                  fontWeight: FontWeight.bold,
-                  color: colorScheme.onSurface,
-                ),
-                listBullet: TextStyle(
-                  fontSize: 14,
-                  color: colorScheme.onSurface,
-                ),
-                code: TextStyle(
-                  fontSize: 12,
-                  fontFamily: 'monospace',
-                  color: colorScheme.onSurfaceVariant,
-                  backgroundColor: colorScheme.surfaceContainerHighest,
-                ),
-                codeblockDecoration: BoxDecoration(
-                  color: colorScheme.surfaceContainerHighest,
-                  borderRadius: BorderRadius.circular(4),
+                child: SingleChildScrollView(
+                  controller: _scrollController,
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      MarkdownBody(
+                        data: widget.body,
+                        styleSheet: MarkdownStyleSheet(
+                          p: TextStyle(
+                            fontSize: 14,
+                            color: colorScheme.onSurface,
+                          ),
+                          h3: TextStyle(
+                            fontSize: 16,
+                            fontWeight: FontWeight.bold,
+                            color: colorScheme.onSurface,
+                          ),
+                          listBullet: TextStyle(
+                            fontSize: 14,
+                            color: colorScheme.onSurface,
+                          ),
+                          code: TextStyle(
+                            fontSize: 12,
+                            fontFamily: 'monospace',
+                            color: colorScheme.onSurfaceVariant,
+                            backgroundColor:
+                                colorScheme.surfaceContainerHighest,
+                          ),
+                          codeblockDecoration: BoxDecoration(
+                            color: colorScheme.surfaceContainerHighest,
+                            borderRadius: BorderRadius.circular(4),
+                          ),
+                        ),
+                      ),
+                      const SizedBox(height: 10),
+                      if (!download.isDownloading)
+                        _DownloadUrlSection(
+                          downloadList: widget.download,
+                          selectedIndex: _selectedIndex,
+                          onSelected: (index) =>
+                              setState(() => _selectedIndex = index),
+                        ),
+                      if (download.isDownloading)
+                        _DownloadProgressSection(download: download),
+                    ],
+                  ),
                 ),
               ),
-            ),
-            const SizedBox(height: 10),
-            Consumer(
-              builder: (context, ref, _) {
-                final download = ref.watch(
-                  appInfoProvider.select((s) => s.download),
-                );
-                if (download.isDownloading) {
-                  return _DownloadProgressSection(download: download);
-                }
-                return _DownloadUrlSection(
-                  downloadList: widget.download,
-                  selectedIndex: _selectedIndex,
-                  onSelected: (index) => setState(() => _selectedIndex = index),
-                );
-              },
-            ),
-          ],
-        ),
-      ),
-      actions: [
-        Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          crossAxisAlignment: CrossAxisAlignment.end,
-          children: [
-            TextButton(
-              onPressed: () {
-                widget.setting.put(StorageKey.autoUpdateKey, false);
-                Navigator.of(context).pop();
-              },
-              child: Text(l10n.disableAutoUpdate),
-            ),
-            Consumer(
-              builder: (context, ref, _) {
-                final isDownloading = ref.watch(
-                  appInfoProvider.select((s) => s.download.isDownloading),
-                );
-                return Column(
+            ],
+          ),
+          actionsAlignment: MainAxisAlignment.end,
+          actions: [
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              crossAxisAlignment: CrossAxisAlignment.end,
+              children: [
+                TextButton(
+                  onPressed: () {
+                    widget.setting.put(StorageKey.autoUpdateKey, false);
+                    Navigator.of(context).pop();
+                  },
+                  child: Text(l10n.disableAutoUpdate),
+                ),
+                Column(
                   children: [
                     TextButton(
                       onPressed: isDownloading
@@ -124,7 +154,8 @@ class _ApplyUpdatesViewState extends ConsumerState<ApplyUpdatesView> {
                     else
                       TextButton(
                         onPressed: () async {
-                          final downloadData = widget.download[_selectedIndex];
+                          final downloadData =
+                              widget.download[_selectedIndex];
                           await widget.onStartDownload(
                             downloadData.url,
                             downloadData.fileName,
@@ -133,12 +164,12 @@ class _ApplyUpdatesViewState extends ConsumerState<ApplyUpdatesView> {
                         child: Text(l10n.updateNow),
                       ),
                   ],
-                );
-              },
+                ),
+              ],
             ),
           ],
-        ),
-      ],
+        );
+      },
     );
   }
 }

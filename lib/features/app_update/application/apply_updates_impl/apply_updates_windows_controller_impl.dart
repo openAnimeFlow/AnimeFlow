@@ -4,10 +4,14 @@ import 'package:anime_flow/core/network/api/api.dart';
 import 'package:dio/dio.dart';
 import 'package:path_provider/path_provider.dart' show getDownloadsDirectory;
 import 'package:path/path.dart' as path;
+import 'dart:io';
 
 /// Windows 平台更新实现
 class ApplyUpdatesWindowsController implements ApplyUpdatesController {
   CancelToken? _cancelToken;
+
+  @override
+  bool get supportsInAppDownload => true;
 
   @override
   List<DownloadInfo> prioritizeDownloads(List<DownloadInfo> downloads) {
@@ -23,7 +27,21 @@ class ApplyUpdatesWindowsController implements ApplyUpdatesController {
   }
 
   @override
-  Future<void> applyUpdates({
+  Future<void> openDownloadedPackage(String filePath) async {
+    if (path.extension(filePath).toLowerCase() == '.exe') {
+      await Process.start(filePath, const [], runInShell: true);
+      return;
+    }
+
+    await Process.start(
+      'explorer.exe',
+      ['/select,', filePath],
+      runInShell: true,
+    );
+  }
+
+  @override
+  Future<UpdateDownloadResult?> applyUpdates({
     required DownloadInfo downloadInfo,
     void Function(int received, int total)? onProgress,
   }) async {
@@ -38,6 +56,12 @@ class ApplyUpdatesWindowsController implements ApplyUpdatesController {
           onProgress?.call(received, total);
         },
         cancelToken: _cancelToken,
+      );
+      return UpdateDownloadResult(
+        filePath: savePath,
+        action: path.extension(savePath).toLowerCase() == '.exe'
+            ? DownloadedPackageAction.runInstaller
+            : DownloadedPackageAction.openFolder,
       );
     } catch (e) {
       if (e.toString().contains('下载已取消')) {

@@ -14,6 +14,9 @@ class ApplyUpdatesAndroidController implements ApplyUpdatesController {
   CancelToken? _cancelToken;
 
   @override
+  bool get supportsInAppDownload => true;
+
+  @override
   List<DownloadInfo> prioritizeDownloads(List<DownloadInfo> downloads) {
     final arm64Packages = downloads
         .where((download) => download.fileName.toLowerCase().contains('arm64'))
@@ -25,7 +28,12 @@ class ApplyUpdatesAndroidController implements ApplyUpdatesController {
   }
 
   @override
-  Future<void> applyUpdates({
+  Future<void> openDownloadedPackage(String filePath) async {
+    throw UnsupportedError('Android 不支持此操作');
+  }
+
+  @override
+  Future<UpdateDownloadResult?> applyUpdates({
     required DownloadInfo downloadInfo,
     void Function(int received, int total)? onProgress,
   }) async {
@@ -46,8 +54,9 @@ class ApplyUpdatesAndroidController implements ApplyUpdatesController {
       final result = await OpenFile.open(File(savePath).path);
       if (result.type != ResultType.done) {
         LiggLogger().e('无法打开安装程序，请检查是否授予了安装权限');
-        return;
+        return null;
       }
+      return null;
     } catch (e) {
       // 如果是取消操作，不抛出异常
       if (e.toString().contains('下载已取消')) {

@@ -1,5 +1,3 @@
-import 'dart:io';
-
 import 'package:anime_flow/app/localization/app_localizations.dart';
 import 'package:anime_flow/features/app_update/application/apply_updates_controller.dart';
 import 'package:anime_flow/shared/models/download_info.dart';
@@ -10,10 +8,11 @@ import 'package:anime_flow/features/app_update/presentation/widgets/apply_update
 import 'package:anime_flow/shared/widgets/notification_toast.dart';
 import 'package:flutter/material.dart';
 
-/// 开始下载，成功时返回 Windows 安装包路径
-typedef OnVersionStartDownload = Future<String?> Function(
+/// 开始下载，成功时返回平台定义的下载完成动作
+typedef OnVersionStartDownload = Future<UpdateDownloadResult?> Function(
   DownloadInfo downloadInfo,
 );
+typedef OnDownloadedPackageAction = Future<void> Function(String filePath);
 
 typedef OnVersionCancelDownload = void Function();
 
@@ -23,6 +22,7 @@ Future<void> handleVersionCheckResult(
   VersionCheckResult result, {
   required OnVersionStartDownload onStartDownload,
   required OnVersionCancelDownload onCancelDownload,
+  required OnDownloadedPackageAction onDownloadedPackageAction,
   bool notifyWhenUpToDate = false,
 }) async {
   if (result.hasToast) {
@@ -42,6 +42,7 @@ Future<void> handleVersionCheckResult(
           updateInfo: updateInfo,
           onStartDownload: onStartDownload,
           onCancelDownload: onCancelDownload,
+          onDownloadedPackageAction: onDownloadedPackageAction,
         );
       }
       break;
@@ -61,6 +62,7 @@ Future<void> showVersionUpdateDialog(
   required VersionUpdateInfo updateInfo,
   required OnVersionStartDownload onStartDownload,
   required OnVersionCancelDownload onCancelDownload,
+  required OnDownloadedPackageAction onDownloadedPackageAction,
 }) async {
   if (!context.mounted) return;
   final l10n = AppLocalizations.of(context);
@@ -79,14 +81,18 @@ Future<void> showVersionUpdateDialog(
         );
 
         try {
-          final savePath = await onStartDownload(downloadInfo);
+          final downloadResult = await onStartDownload(downloadInfo);
 
           if (dialogContext.mounted) {
             Navigator.of(dialogContext, rootNavigator: true).pop();
           }
 
-          if (savePath != null && context.mounted) {
-            await showWindowsDownloadCompleteDialog(context, savePath);
+          if (downloadResult != null && context.mounted) {
+            await   showDownloadCompleteDialog(
+              context,
+              downloadResult,
+              onAction: onDownloadedPackageAction,
+            );
           }
         } catch (e) {
           if (e is UpdateDownloadCancelledException) {
@@ -112,10 +118,9 @@ Future<void> showVersionUpdateDialog(
   );
 }
 
-Future<void> showWindowsDownloadCompleteDialog(
-  BuildContext context,
-  String savePath,
-) async {
+Future<void> showDownloadCompleteDialog(
+    BuildContext context, UpdateDownloadResult downloadResult,
+    {required OnDownloadedPackageAction onAction}) async {
   if (!context.mounted) return;
   final l10n = AppLocalizations.of(context);
 
@@ -131,7 +136,7 @@ Future<void> showWindowsDownloadCompleteDialog(
           Text(l10n.packageDownloaded),
           const SizedBox(height: 8),
           SelectableText(
-            savePath,
+            downloadResult.filePath,
             style: TextStyle(
               fontSize: 12,
               color: Theme.of(dialogContext).colorScheme.onSurfaceVariant,
@@ -148,11 +153,7 @@ Future<void> showWindowsDownloadCompleteDialog(
         TextButton(
           onPressed: () async {
             try {
-              await Process.start(
-                'explorer.exe',
-                ['/select,', savePath],
-                runInShell: true,
-              );
+              await onAction(downloadResult.filePath);
               if (dialogContext.mounted) {
                 Navigator.of(dialogContext).pop();
               }
@@ -167,7 +168,11 @@ Future<void> showWindowsDownloadCompleteDialog(
               );
             }
           },
-          child: Text(l10n.openPackageFolder),
+          child: Text(
+            downloadResult.action == DownloadedPackageAction.runInstaller
+                ? l10n.updateNow
+                : l10n.openPackageFolder,
+          ),
         ),
       ],
     ),

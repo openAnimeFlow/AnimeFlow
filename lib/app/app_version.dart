@@ -21,18 +21,19 @@ class AppVersionUpdateListener extends ConsumerStatefulWidget {
 class _AppVersionUpdateListenerState
     extends ConsumerState<AppVersionUpdateListener> {
   ProviderSubscription<AppInfoState>? _appInfoSubscription;
+  late final AppInfo _appInfoNotifier;
 
   @override
   void initState() {
     super.initState();
+    _appInfoNotifier = ref.read(appInfoProvider.notifier);
     _appInfoSubscription = ref.listenManual(
       appInfoProvider,
       (previous, next) async => _handlePendingVersionResult(next),
     );
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (!mounted) return;
-      unawaited(
-          ref.read(appInfoProvider.notifier).triggerStartupVersionCheck());
+      unawaited(_appInfoNotifier.triggerStartupVersionCheck());
       _handlePendingVersionResult(ref.read(appInfoProvider));
     });
   }
@@ -51,13 +52,14 @@ class _AppVersionUpdateListenerState
       return;
     }
 
-    ref.read(appInfoProvider.notifier).consumeStartupVersionResult();
+    _appInfoNotifier.consumeStartupVersionResult();
 
     await handleVersionCheckResult(
       navigatorContext,
       result,
-      onStartDownload: ref.read(appInfoProvider.notifier).performUpdateDownload,
-      onCancelDownload: ref.read(appInfoProvider.notifier).cancelUpdateDownload,
+      onStartDownload: _appInfoNotifier.performUpdateDownload,
+      onDownloadedPackageAction: _appInfoNotifier.openDownloadedPackage,
+      onCancelDownload: _appInfoNotifier.cancelUpdateDownload,
     );
   }
 

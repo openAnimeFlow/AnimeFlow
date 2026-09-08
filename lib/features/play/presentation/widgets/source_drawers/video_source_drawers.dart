@@ -1119,9 +1119,9 @@ class _CaptchaViewState extends State<CaptchaView> {
     _disposeSession();
     dataSourceController.markCaptchaVerified(websiteName);
     setState(() {});
-    final l10n = AppLocalizations.of(context);
-    NotificationToast.show(l10n.verificationRetrying,
-        title: l10n.verificationSuccess);
+    // final l10n = AppLocalizations.of(context);
+    // NotificationToast.show(l10n.verificationRetrying,
+    //     title: l10n.verificationSuccess);
     Future<void>.delayed(const Duration(seconds: 3), () {
       dataSourceController.retryResources(websiteName);
     });

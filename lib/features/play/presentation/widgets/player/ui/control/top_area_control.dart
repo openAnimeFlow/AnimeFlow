@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:anime_flow/core/constants/assets_path_constants.dart';
 import 'package:anime_flow/core/constants/storage_key.dart';
+import 'package:anime_flow/core/network/clients/flow_client.dart';
 import 'package:anime_flow/core/network_speed/network_speed_provider.dart';
 import 'package:anime_flow/shared/models/enums/video_controls_icon_type.dart';
 import 'package:anime_flow/features/play/presentation/providers/play_provider.dart';
@@ -15,7 +16,11 @@ import 'package:anime_flow/core/utils/system_util.dart';
 import 'package:anime_flow/core/utils/utils.dart';
 import 'package:anime_flow/shared/widgets/ios_battery_icon.dart';
 import 'package:anime_flow/shared/widgets/network_icon.dart';
+import 'package:anime_flow/shared/widgets/collection_button.dart';
+import 'package:anime_flow/shared/widgets/notification_toast.dart';
 import 'package:anime_flow/features/play/presentation/widgets/source_drawers/video_source_drawers.dart';
+import 'package:anime_flow/features/anime_info/presentation/providers/anime_info_provider.dart';
+import 'package:anime_flow/features/user/presentation/providers/user_state_provider.dart';
 import 'package:anime_flow/app/localization/app_localizations.dart';
 import 'package:battery_plus/battery_plus.dart';
 import 'package:flutter/material.dart';
@@ -88,6 +93,11 @@ class _TopAreaControlState extends ConsumerState<TopAreaControl> {
         ref.watch(videoUiProvider.select((s) => s.isShowControlsUi));
     final fullscreen =
         ref.watch(playStateProvider.select((s) => s.isFullscreen));
+    final isLoggedIn = ref.watch(isLoggedInProvider).value ?? false;
+    final subject = isLoggedIn && fullscreen
+        ? ref.watch(animeInfoProvider).asData?.value
+        : null;
+    final collectType = collectTypeFromApiType(subject?.interest?.type);
     final leftPadding = MediaQuery.of(context).padding.left;
     return AnimatedSwitcher(
       duration: const Duration(milliseconds: 200),
@@ -233,6 +243,50 @@ class _TopAreaControlState extends ConsumerState<TopAreaControl> {
                                       ),
                                     ),
                                   ),
+                                if (fullscreen && subject != null)
+                                  CollectionButton(
+                                    key: ValueKey(subject.id),
+                                    collectType: collectType,
+                                    buttonBuilder:
+                                        (context, label, _, onPressed, isOpen) {
+                                      return IconButton(
+                                        tooltip: label,
+                                        onPressed: onPressed,
+                                        padding: EdgeInsets.zero,
+                                        constraints: const BoxConstraints(
+                                          minWidth: 40,
+                                          minHeight: 40,
+                                        ),
+                                        icon: Icon(
+                                          collectType == null
+                                              ? Icons.favorite_border
+                                              : Icons.favorite,
+                                          color: Colors.white,
+                                          size: 29,
+                                        ),
+                                      );
+                                    },
+                                    onCollectTypeChanged: (newType) async {
+                                      try {
+                                        await ref
+                                            .read(animeInfoProvider.notifier)
+                                            .updateCollectionType(
+                                                newType.value);
+                                      } on AnimeFlowApiException catch (e) {
+                                        NotificationToast.show(
+                                          e.message,
+                                          title: l10n.updateFailed,
+                                        );
+                                        rethrow;
+                                      } catch (e) {
+                                        NotificationToast.show(
+                                          e.toString(),
+                                          title: l10n.updateFailed,
+                                        );
+                                        rethrow;
+                                      }
+                                    },
+                                  ),
                                 IconButton(
                                   tooltip: l10n.settings,
                                   onPressed: () {
@@ -356,57 +410,52 @@ class _TopAreaControlState extends ConsumerState<TopAreaControl> {
             children: [
               const NetworkIcon(),
               Consumer(builder: (context, ref, child) {
-                return Builder(
-                  builder: (context) {
-                    final speedAsync =
-                        ref.watch(networkSpeedStreamProvider(2000));
-                    final data = speedAsync.asData?.value;
-                    final download = data?.download ?? 0;
-                    final upload = data?.upload ?? 0;
+                final speedAsync = ref.watch(networkSpeedStreamProvider(2000));
+                final data = speedAsync.asData?.value;
+                final download = data?.download ?? 0;
+                final upload = data?.upload ?? 0;
 
-                    return Row(
-                      crossAxisAlignment: CrossAxisAlignment.center,
-                      children: [
-                        if (download > 0) ...[
-                          const RotatedBox(
-                            quarterTurns: 1,
-                            child: Icon(
-                              Icons.arrow_right_alt_outlined,
-                              size: 15,
-                              fontWeight: FontWeight.bold,
-                              color: Colors.white,
-                            ),
-                          ),
-                          Text(
-                            Utils.formatBytesPerSec(download),
-                            style: const TextStyle(
-                              fontSize: 10,
-                              color: Colors.white,
-                            ),
-                          ),
-                          const SizedBox(width: 5),
-                        ],
-                        if (upload > 0) ...[
-                          const RotatedBox(
-                            quarterTurns: 3,
-                            child: Icon(
-                              Icons.arrow_right_alt_outlined,
-                              size: 15,
-                              fontWeight: FontWeight.bold,
-                              color: Colors.white,
-                            ),
-                          ),
-                          Text(
-                            Utils.formatBytesPerSec(upload),
-                            style: const TextStyle(
-                              fontSize: 10,
-                              color: Colors.white,
-                            ),
-                          )
-                        ],
-                      ],
-                    );
-                  },
+                return Row(
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  children: [
+                    if (download > 0) ...[
+                      const RotatedBox(
+                        quarterTurns: 1,
+                        child: Icon(
+                          Icons.arrow_right_alt_outlined,
+                          size: 15,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.white,
+                        ),
+                      ),
+                      Text(
+                        Utils.formatBytesPerSec(download),
+                        style: const TextStyle(
+                          fontSize: 10,
+                          color: Colors.white,
+                        ),
+                      ),
+                      const SizedBox(width: 5),
+                    ],
+                    if (upload > 0) ...[
+                      const RotatedBox(
+                        quarterTurns: 3,
+                        child: Icon(
+                          Icons.arrow_right_alt_outlined,
+                          size: 15,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.white,
+                        ),
+                      ),
+                      Text(
+                        Utils.formatBytesPerSec(upload),
+                        style: const TextStyle(
+                          fontSize: 10,
+                          color: Colors.white,
+                        ),
+                      )
+                    ],
+                  ],
                 );
               })
             ],

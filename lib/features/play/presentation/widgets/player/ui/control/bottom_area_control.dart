@@ -341,64 +341,61 @@ class BottomAreaControl extends ConsumerWidget {
                         ),
                         //选集
                         if (fullscreen || !isContentExpanded)
-                          Consumer(
-                            builder: (context, ref, _) {
-                              return TextButton(
-                                  onPressed: () {
-                                    final container =
-                                        ProviderScope.containerOf(context);
-                                    showGeneralDialog(
-                                      context: context,
-                                      barrierDismissible: true,
-                                      barrierLabel: 'EpisodesDialog',
-                                      barrierColor: Colors.black54,
-                                      transitionDuration:
-                                          const Duration(milliseconds: 300),
-                                      transitionBuilder: (context, animation,
-                                          secondaryAnimation, child) {
-                                        return SlideTransition(
-                                          position: Tween<Offset>(
-                                            begin: const Offset(1, 0),
-                                            end: Offset.zero,
-                                          ).animate(CurvedAnimation(
-                                            parent: animation,
-                                            curve: Curves.easeOut,
-                                          )),
-                                          child: child,
-                                        );
-                                      },
-                                      pageBuilder: (dialogContext, animation,
-                                          secondaryAnimation) {
-                                        return UncontrolledProviderScope(
-                                          container: container,
-                                          child: EpisodesDialog(
-                                            isSelectedIcon: Consumer(
-                                              builder: (context, ref, _) {
-                                                final playing = ref.watch(
-                                                  playStateProvider.select(
-                                                    (s) => s.playing,
-                                                  ),
-                                                );
-                                                return LoadingAnimation(
-                                                  size: 30,
-                                                  isPlaying: playing,
-                                                );
-                                              },
+                          TextButton(
+                            onPressed: () {
+                              final container =
+                                  ProviderScope.containerOf(context);
+                              showGeneralDialog(
+                                context: context,
+                                barrierDismissible: true,
+                                barrierLabel: 'EpisodesDialog',
+                                barrierColor: Colors.black54,
+                                transitionDuration:
+                                    const Duration(milliseconds: 300),
+                                transitionBuilder: (context, animation,
+                                    secondaryAnimation, child) {
+                                  return SlideTransition(
+                                    position: Tween<Offset>(
+                                      begin: const Offset(1, 0),
+                                      end: Offset.zero,
+                                    ).animate(CurvedAnimation(
+                                      parent: animation,
+                                      curve: Curves.easeOut,
+                                    )),
+                                    child: child,
+                                  );
+                                },
+                                pageBuilder: (dialogContext, animation,
+                                    secondaryAnimation) {
+                                  return UncontrolledProviderScope(
+                                    container: container,
+                                    child: EpisodesDialog(
+                                      isSelectedIcon: Consumer(
+                                        builder: (context, ref, _) {
+                                          final playing = ref.watch(
+                                            playStateProvider.select(
+                                              (s) => s.playing,
                                             ),
-                                            onEpisodeLongPress: (episodeId) {
-                                              _updateEpisodeWatched(
-                                                dialogContext,
-                                                container,
-                                                episodeId,
-                                              );
-                                            },
-                                          ),
+                                          );
+                                          return LoadingAnimation(
+                                            size: 30,
+                                            isPlaying: playing,
+                                          );
+                                        },
+                                      ),
+                                      onEpisodeLongPress: (episodeId) {
+                                        _updateEpisodeWatched(
+                                          dialogContext,
+                                          container,
+                                          episodeId,
                                         );
                                       },
-                                    );
-                                  },
-                                  child: Text(l10n.episodeSelection));
+                                    ),
+                                  );
+                                },
+                              );
                             },
+                            child: Text(l10n.episodeSelection),
                           ),
 
                         //超分辨率

@@ -24,6 +24,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../widgets/content/comments_view.dart';
 import '../widgets/content/play_content_navigator.dart';
+import '../widgets/content/play_content_safe_area.dart';
 
 class PlayPage extends ConsumerStatefulWidget {
   const PlayPage({super.key});
@@ -392,69 +393,71 @@ class _ContentViewState extends ConsumerState<_ContentView>
         ref.watch(playStateProvider.select((state) => state.isContentExpanded));
     final isContentVisible =
         !isFullscreen && (!isWideScreen || isContentExpanded);
-    return PreferredSize(
-      preferredSize: const Size.fromHeight(100),
-      child: Column(
-        children: [
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              TabBar(
-                padding:
-                    EdgeInsets.only(top: MediaQuery.of(context).padding.top),
-                dividerHeight: 0,
-                controller: tabController,
-                tabAlignment: TabAlignment.start,
-                isScrollable: true,
-                tabs: [
-                  Tab(text: AppLocalizations.of(context).playIntroTab),
-                  Tab(text: AppLocalizations.of(context).playCommentsTab),
-                ],
-              ),
-              isWideScreen
-                  ? const Spacer()
-                  : Consumer(
-                      builder: (context, ref, _) {
-                        final danmakuOn = ref.watch(
-                          playStateProvider.select((state) => state.danmakuOn),
-                        );
-                        return Padding(
-                          padding: const EdgeInsets.all(8.0),
-                          child: DanmakuTextField(
-                            inputVisible: danmakuOn,
-                            onFocusChange: (hasFocus) {
-                              if (hasFocus) {
-                                playSession.stopPlaying();
-                                videoUiStateController.cancelUiTimer();
-                              } else {
-                                playSession.startPlaying();
-                                videoUiStateController.hideControlsUi();
-                              }
-                            },
-                            onSend: (text) => onSendDanmaku(text),
-                            onClose: playSession.toggleDanmaku,
-                          ),
-                        );
-                      },
-                    )
-            ],
-          ),
-          const Divider(height: 1),
-          Expanded(
-            child: AnimatedBuilder(
-              animation: tabController,
-              builder: (context, _) => TabBarView(
-                controller: tabController,
-                children: [
-                  PlayContentNavigator(
-                    isActive: tabController.index == 0 && isContentVisible,
-                  ),
-                  const CommentsView(),
-                ],
+    return PlayContentSafeArea(
+      isWideScreen: isWideScreen,
+      child: PreferredSize(
+        preferredSize: const Size.fromHeight(100),
+        child: Column(
+          children: [
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                TabBar(
+                  dividerHeight: 0,
+                  controller: tabController,
+                  tabAlignment: TabAlignment.start,
+                  isScrollable: true,
+                  tabs: [
+                    Tab(text: AppLocalizations.of(context).playIntroTab),
+                    Tab(text: AppLocalizations.of(context).playCommentsTab),
+                  ],
+                ),
+                isWideScreen
+                    ? const Spacer()
+                    : Consumer(
+                        builder: (context, ref, _) {
+                          final danmakuOn = ref.watch(
+                            playStateProvider
+                                .select((state) => state.danmakuOn),
+                          );
+                          return Padding(
+                            padding: const EdgeInsets.all(8.0),
+                            child: DanmakuTextField(
+                              inputVisible: danmakuOn,
+                              onFocusChange: (hasFocus) {
+                                if (hasFocus) {
+                                  playSession.stopPlaying();
+                                  videoUiStateController.cancelUiTimer();
+                                } else {
+                                  playSession.startPlaying();
+                                  videoUiStateController.hideControlsUi();
+                                }
+                              },
+                              onSend: (text) => onSendDanmaku(text),
+                              onClose: playSession.toggleDanmaku,
+                            ),
+                          );
+                        },
+                      )
+              ],
+            ),
+            const Divider(height: 1),
+            Expanded(
+              child: AnimatedBuilder(
+                animation: tabController,
+                builder: (context, _) => TabBarView(
+                  controller: tabController,
+                  children: [
+                    PlayContentNavigator(
+                      isActive: tabController.index == 0 && isContentVisible,
+                    ),
+                    const CommentsView(),
+                  ],
+                ),
               ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }

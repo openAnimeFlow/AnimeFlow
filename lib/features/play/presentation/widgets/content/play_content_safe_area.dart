@@ -18,6 +18,7 @@ class PlayContentSafeArea extends StatelessWidget {
         removeLeft: isWideScreen,
         child: SafeArea(
           left: !isWideScreen,
+          bottom: false,
           child: child,
         ),
       );

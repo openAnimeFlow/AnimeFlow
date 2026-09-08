@@ -3479,19 +3479,19 @@ abstract class AppLocalizations {
   /// No description provided for @playerKernelTroubleshootingHint.
   ///
   /// In zh_Hans, this message translates to:
-  /// **'播放页无法播放或发生闪退时，可尝试切换播放器内核。iOS 巨魔安装环境下，MediaKit 内核可能闪退，可切换至 FVP。'**
+  /// **'播放页无法播放或发生闪退时，可尝试切换播放器内核。iOS 巨魔安装环境下，mpv 内核可能闪退，可切换至 MDK。'**
   String get playerKernelTroubleshootingHint;
 
   /// No description provided for @playerKernelSupportsSuperResolution.
   ///
   /// In zh_Hans, this message translates to:
-  /// **'MediaKit 支持 Anime4K 等 GLSL 超分辨率 Shader'**
+  /// **'mpv 支持 Anime4K 等 GLSL 超分辨率 Shader'**
   String get playerKernelSupportsSuperResolution;
 
   /// No description provided for @playerKernelNoSuperResolution.
   ///
   /// In zh_Hans, this message translates to:
-  /// **'FVP 不支持 Anime4K 等 GLSL 超分辨率 Shader'**
+  /// **'MDK 不支持 Anime4K 等 GLSL 超分辨率 Shader'**
   String get playerKernelNoSuperResolution;
 
   /// No description provided for @playerKernelSwitchFailed.
@@ -3500,17 +3500,17 @@ abstract class AppLocalizations {
   /// **'播放器内核切换失败'**
   String get playerKernelSwitchFailed;
 
-  /// No description provided for @mediaKit.
+  /// No description provided for @playerKernelMpv.
   ///
   /// In zh_Hans, this message translates to:
-  /// **'MediaKit'**
-  String get mediaKit;
+  /// **'mpv'**
+  String get playerKernelMpv;
 
-  /// No description provided for @fvp.
+  /// No description provided for @playerKernelMdk.
   ///
   /// In zh_Hans, this message translates to:
-  /// **'FVP'**
-  String get fvp;
+  /// **'MDK'**
+  String get playerKernelMdk;
 
   /// No description provided for @hardwareDecoding.
   ///

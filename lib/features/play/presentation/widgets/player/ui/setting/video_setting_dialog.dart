@@ -1,3 +1,4 @@
+import 'package:anime_flow/features/play/presentation/extensions/player_kernel_localization.dart';
 import 'package:anime_flow/core/constants/layout_constant.dart';
 import 'package:anime_flow/app/localization/app_localizations.dart';
 import 'package:anime_flow/features/play/domain/player/player_kernel.dart';
@@ -441,7 +442,8 @@ class _VideoSettingState extends ConsumerState<VideoSettingDialog> {
                       return Row(
                         mainAxisSize: MainAxisSize.min,
                         children: [
-                          Text(_kernelLabel(selectedKernel ?? currentKernel)),
+                          Text(AppLocalizations.of(context)
+                              .kernelLabel(selectedKernel ?? currentKernel)),
                           const Icon(Icons.arrow_drop_down),
                         ],
                       );
@@ -450,7 +452,8 @@ class _VideoSettingState extends ConsumerState<VideoSettingDialog> {
                       return Row(
                         mainAxisSize: MainAxisSize.min,
                         children: [
-                          Text(_kernelLabel(kernel)),
+                          Text(
+                              AppLocalizations.of(context).kernelLabel(kernel)),
                           if (isSelected) ...[
                             const SizedBox(width: 12),
                             const Icon(Icons.check, size: 18),
@@ -470,12 +473,5 @@ class _VideoSettingState extends ConsumerState<VideoSettingDialog> {
         ],
       ),
     );
-  }
-
-  String _kernelLabel(PlayerKernel kernel) {
-    return switch (kernel) {
-      PlayerKernel.mediaKit => AppLocalizations.of(context).mediaKit,
-      PlayerKernel.fvp => AppLocalizations.of(context).fvp,
-    };
   }
 }

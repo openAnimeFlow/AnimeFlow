@@ -1821,24 +1821,24 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get playerKernelTroubleshootingHint =>
-      '播放頁無法播放或發生閃退時，可嘗試切換播放器內核。iOS 巨魔安裝環境下，MediaKit 內核可能閃退，可切換至 FVP。';
+      '播放頁無法播放或發生閃退時，可嘗試切換播放器內核。iOS 巨魔安裝環境下，mpv 內核可能閃退，可切換至 MDK。';
 
   @override
   String get playerKernelSupportsSuperResolution =>
-      'MediaKit 支援 Anime4K 等 GLSL 超解析度 Shader';
+      'mpv 支援 Anime4K 等 GLSL 超解析度 Shader';
 
   @override
   String get playerKernelNoSuperResolution =>
-      'FVP 不支援 Anime4K 等 GLSL 超解析度 Shader';
+      'MDK 不支援 Anime4K 等 GLSL 超解析度 Shader';
 
   @override
   String get playerKernelSwitchFailed => '播放器內核切換失敗';
 
   @override
-  String get mediaKit => 'MediaKit';
+  String get playerKernelMpv => 'mpv';
 
   @override
-  String get fvp => 'FVP';
+  String get playerKernelMdk => 'MDK';
 
   @override
   String get hardwareDecoding => '硬體解碼';
@@ -3666,24 +3666,24 @@ class AppLocalizationsZhHans extends AppLocalizationsZh {
 
   @override
   String get playerKernelTroubleshootingHint =>
-      '播放页无法播放或发生闪退时，可尝试切换播放器内核。iOS 巨魔安装环境下，MediaKit 内核可能闪退，可切换至 FVP。';
+      '播放页无法播放或发生闪退时，可尝试切换播放器内核。iOS 巨魔安装环境下，mpv 内核可能闪退，可切换至 MDK。';
 
   @override
   String get playerKernelSupportsSuperResolution =>
-      'MediaKit 支持 Anime4K 等 GLSL 超分辨率 Shader';
+      'mpv 支持 Anime4K 等 GLSL 超分辨率 Shader';
 
   @override
   String get playerKernelNoSuperResolution =>
-      'FVP 不支持 Anime4K 等 GLSL 超分辨率 Shader';
+      'MDK 不支持 Anime4K 等 GLSL 超分辨率 Shader';
 
   @override
   String get playerKernelSwitchFailed => '播放器内核切换失败';
 
   @override
-  String get mediaKit => 'MediaKit';
+  String get playerKernelMpv => 'mpv';
 
   @override
-  String get fvp => 'FVP';
+  String get playerKernelMdk => 'MDK';
 
   @override
   String get hardwareDecoding => '硬件解码';
@@ -5430,24 +5430,24 @@ class AppLocalizationsZhHantHk extends AppLocalizationsZh {
 
   @override
   String get playerKernelTroubleshootingHint =>
-      '播放頁無法播放或發生閃退時，可嘗試切換播放器內核。iOS 巨魔安裝環境下，MediaKit 內核可能閃退，可切換至 FVP。';
+      '播放頁無法播放或發生閃退時，可嘗試切換播放器內核。iOS 巨魔安裝環境下，mpv 內核可能閃退，可切換至 MDK。';
 
   @override
   String get playerKernelSupportsSuperResolution =>
-      'MediaKit 支援 Anime4K 等 GLSL 超解析度 Shader';
+      'mpv 支援 Anime4K 等 GLSL 超解析度 Shader';
 
   @override
   String get playerKernelNoSuperResolution =>
-      'FVP 不支援 Anime4K 等 GLSL 超解析度 Shader';
+      'MDK 不支援 Anime4K 等 GLSL 超解析度 Shader';
 
   @override
   String get playerKernelSwitchFailed => '播放器內核切換失敗';
 
   @override
-  String get mediaKit => 'MediaKit';
+  String get playerKernelMpv => 'mpv';
 
   @override
-  String get fvp => 'FVP';
+  String get playerKernelMdk => 'MDK';
 
   @override
   String get hardwareDecoding => '硬件解碼';
@@ -7194,24 +7194,24 @@ class AppLocalizationsZhHantTw extends AppLocalizationsZh {
 
   @override
   String get playerKernelTroubleshootingHint =>
-      '播放頁無法播放或發生閃退時，可嘗試切換播放器內核。iOS 巨魔安裝環境下，MediaKit 內核可能閃退，可切換至 FVP。';
+      '播放頁無法播放或發生閃退時，可嘗試切換播放器內核。iOS 巨魔安裝環境下，mpv 內核可能閃退，可切換至 MDK。';
 
   @override
   String get playerKernelSupportsSuperResolution =>
-      'MediaKit 支援 Anime4K 等 GLSL 超解析度 Shader';
+      'mpv 支援 Anime4K 等 GLSL 超解析度 Shader';
 
   @override
   String get playerKernelNoSuperResolution =>
-      'FVP 不支援 Anime4K 等 GLSL 超解析度 Shader';
+      'MDK 不支援 Anime4K 等 GLSL 超解析度 Shader';
 
   @override
   String get playerKernelSwitchFailed => '播放器內核切換失敗';
 
   @override
-  String get mediaKit => 'MediaKit';
+  String get playerKernelMpv => 'mpv';
 
   @override
-  String get fvp => 'FVP';
+  String get playerKernelMdk => 'MDK';
 
   @override
   String get hardwareDecoding => '硬體解碼';

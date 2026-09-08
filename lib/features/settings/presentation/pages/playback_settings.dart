@@ -1,3 +1,4 @@
+import 'package:anime_flow/features/play/presentation/extensions/player_kernel_localization.dart';
 import 'package:anime_flow/core/constants/storage_key.dart';
 import 'package:anime_flow/features/play/domain/player/player_kernel.dart';
 import 'package:anime_flow/features/settings/presentation/providers/setting_provider.dart';
@@ -213,7 +214,7 @@ class _PlaybackSettingsPageState extends State<PlaybackSettingsPage> {
                           buttonBuilder: (context, selectedKernel) => Row(
                             mainAxisSize: MainAxisSize.min,
                             children: [
-                              Text(_kernelLabel(
+                              Text(AppLocalizations.of(context).kernelLabel(
                                 selectedKernel ?? _preferredPlayerKernel,
                               )),
                               const Icon(Icons.arrow_drop_down),
@@ -222,7 +223,8 @@ class _PlaybackSettingsPageState extends State<PlaybackSettingsPage> {
                           itemBuilder: (context, kernel, isSelected) => Row(
                             mainAxisSize: MainAxisSize.min,
                             children: [
-                              Text(_kernelLabel(kernel)),
+                              Text(AppLocalizations.of(context)
+                                  .kernelLabel(kernel)),
                               if (isSelected) ...[
                                 const SizedBox(width: 12),
                                 const Icon(Icons.check, size: 18),
@@ -368,12 +370,5 @@ class _PlaybackSettingsPageState extends State<PlaybackSettingsPage> {
         ),
       ),
     );
-  }
-
-  String _kernelLabel(PlayerKernel kernel) {
-    return switch (kernel) {
-      PlayerKernel.mediaKit => AppLocalizations.of(context).mediaKit,
-      PlayerKernel.fvp => AppLocalizations.of(context).fvp,
-    };
   }
 }

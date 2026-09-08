@@ -1869,24 +1869,24 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get playerKernelTroubleshootingHint =>
-      'If playback fails or crashes, try another player kernel. On iOS TrollStore installations, MediaKit may crash; use FVP instead.';
+      'If playback fails or crashes, try another player kernel. On iOS TrollStore installations, mpv may crash; use MDK instead.';
 
   @override
   String get playerKernelSupportsSuperResolution =>
-      'MediaKit supports Anime4K and other GLSL super-resolution shaders';
+      'mpv supports Anime4K and other GLSL super-resolution shaders';
 
   @override
   String get playerKernelNoSuperResolution =>
-      'FVP does not support Anime4K or other GLSL super-resolution shaders';
+      'MDK does not support Anime4K or other GLSL super-resolution shaders';
 
   @override
   String get playerKernelSwitchFailed => 'Failed to switch player kernel';
 
   @override
-  String get mediaKit => 'MediaKit';
+  String get playerKernelMpv => 'mpv';
 
   @override
-  String get fvp => 'FVP';
+  String get playerKernelMdk => 'MDK';
 
   @override
   String get hardwareDecoding => 'Hardware decoding';

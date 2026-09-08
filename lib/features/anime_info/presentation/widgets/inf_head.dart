@@ -233,7 +233,7 @@ class InfoHeadView extends StatelessWidget {
           ),
           padding: const EdgeInsets.symmetric(
             horizontal: 12,
-            vertical: 15,
+            vertical: 12,
           ),
           textStyle: const TextStyle(fontSize: 12),
         ),
@@ -330,6 +330,7 @@ class InfoHeadView extends StatelessWidget {
                 buttonBuilder: (context, label, icon, onPressed, isOpen) =>
                     buildCollectionButton(context, label, icon, onPressed),
                 collectType: collectTypeFromApiType(subjectItem.interest?.type),
+                offset: const Offset(0,50),
                 onCollectTypeChanged: (type) async {
                   try {
                     await ref

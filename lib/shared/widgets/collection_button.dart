@@ -11,6 +11,7 @@ CollectType? collectTypeFromApiType(int? apiType) {
 
 class CollectionButton extends StatefulWidget {
   final CollectType? collectType;
+  final Offset offset;
 
   /// Builds the collection menu trigger.
   /// Wire the onPressed callback to the supplied button to open the menu.
@@ -29,6 +30,7 @@ class CollectionButton extends StatefulWidget {
     required this.buttonBuilder,
     this.collectType,
     this.onCollectTypeChanged,
+    this.offset = const Offset(0, 40),
   });
 
   @override
@@ -79,7 +81,7 @@ class _CollectionButtonState extends State<CollectionButton> {
     return PopupMenuButton<CollectType>(
       enabled: !_isUpdating,
       key: _menuKey,
-      offset: const Offset(0, 40),
+      offset: widget.offset,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(12),
       ),

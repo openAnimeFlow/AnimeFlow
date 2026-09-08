@@ -1,6 +1,5 @@
 import 'dart:async';
 
-import 'package:anime_flow/core/auth/repository/flow_token_storage.dart';
 import 'package:anime_flow/core/constants/storage_key.dart';
 import 'package:anime_flow/core/logger/logger.dart';
 import 'package:anime_flow/core/network/api/flow_api.dart';
@@ -60,9 +59,11 @@ class PlaybackProgressManager {
     required Duration position,
     required Duration duration,
     required bool playing,
+    required bool isLoggedIn,
   }) {
     this.position = position;
     this.duration = duration;
+    if (!isLoggedIn) return;
     if (!playing || duration <= Duration.zero) return;
     if (isLocalPlayback || subjectId <= 0 || episodeId <= 0) return;
     if (subjectName == null || subjectCover == null) return;
@@ -78,9 +79,8 @@ class PlaybackProgressManager {
       return;
     }
 
-    final targetEpisodeId = episodeId;
-    _autoWatchedEpisodeUpdatesInFlight.add(targetEpisodeId);
-    unawaited(_autoUpdateEpisodeWatched(targetEpisodeId));
+    _autoWatchedEpisodeUpdatesInFlight.add(episodeId);
+    unawaited(_autoUpdateEpisodeWatched(episodeId));
   }
 
   void saveAfterPause() {
@@ -128,9 +128,6 @@ class PlaybackProgressManager {
 
   Future<void> _autoUpdateEpisodeWatched(int targetEpisodeId) async {
     try {
-      if (await FlowTokenStorage.instance.getToken() == null) {
-        return;
-      }
       await FlowApi.updateEpisodeWatchedService(targetEpisodeId, watched: true);
       _autoWatchedEpisodeIds.add(targetEpisodeId);
       onEpisodeWatched(

@@ -16,6 +16,7 @@ import 'package:anime_flow/features/play/presentation/providers/episodes_provide
 import 'package:anime_flow/features/play/presentation/providers/subject_episodes_provider.dart';
 import 'package:anime_flow/features/play/presentation/providers/video_ui_provider.dart';
 import 'package:anime_flow/features/shaders/shaders_controller.dart';
+import 'package:anime_flow/features/user/presentation/providers/user_state_provider.dart';
 import 'package:anime_flow/core/network/api/flow_api.dart';
 import 'package:anime_flow/shared/models/enums/video_controls_icon_type.dart';
 import 'package:anime_flow/shared/models/player/danmaku/danmaku_module.dart';
@@ -86,7 +87,10 @@ PlaySession playSession(Ref ref) {
   ref.listen<PlayState>(
     playStateProvider,
     (previous, next) {
-      controller._handlePlayStateChanged(next);
+      controller._handlePlayStateChanged(
+        next,
+        isLoggedIn: ref.read(isLoggedInProvider).value ?? false,
+      );
       controller._handleParseResultChanged(
         previous?.parseResult,
         next.parseResult,
@@ -793,7 +797,7 @@ class PlaySession {
     }
   }
 
-  void _handlePlayStateChanged(PlayState state) {
+  void _handlePlayStateChanged(PlayState state, {required bool isLoggedIn}) {
     if (state.isParsing) {
       _videoUiStateActions.showParsingIndicator();
     }
@@ -801,6 +805,7 @@ class PlaySession {
       position: state.position,
       duration: state.duration,
       playing: state.playing,
+      isLoggedIn: isLoggedIn,
     );
   }
 

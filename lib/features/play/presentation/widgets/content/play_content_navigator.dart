@@ -22,18 +22,24 @@ class _PlayContentNavigatorState extends ConsumerState<PlayContentNavigator>
   final _navigatorKey = GlobalKey<NavigatorState>();
   bool _showDetails = false;
   bool _busy = false;
+  int _detailsId = 0;
+
+  bool _isCurrentDetails(int id) => mounted && _showDetails && _detailsId == id;
 
   @override
   bool get wantKeepAlive => true;
 
   Future<void> _play(Future<void> Function(PlayContentActions) action) async {
     if (_busy) return;
+    final detailsId = _detailsId;
     setState(() => _busy = true);
     try {
       await action(ref.read(playContentActionsProvider));
-      if (mounted) setState(() => _showDetails = false);
+      if (_isCurrentDetails(detailsId)) {
+        setState(() => _showDetails = false);
+      }
     } catch (error) {
-      if (mounted) {
+      if (mounted && _isCurrentDetails(detailsId)) {
         NotificationToast.show(error.toString(),
             title: AppLocalizations.of(context).error);
       }
@@ -55,7 +61,7 @@ class _PlayContentNavigatorState extends ConsumerState<PlayContentNavigator>
       child: Navigator(
         key: _navigatorKey,
         onDidRemovePage: (page) {
-          if (page.key == const ValueKey('details') && _showDetails) {
+          if (page.key == ValueKey<int>(_detailsId) && _showDetails) {
             setState(() => _showDetails = false);
           }
         },
@@ -63,12 +69,15 @@ class _PlayContentNavigatorState extends ConsumerState<PlayContentNavigator>
           MaterialPage<void>(
             key: const ValueKey('introduction'),
             child: IntroduceView(
-              onShowDetails: () => setState(() => _showDetails = true),
+              onShowDetails: () => setState(() {
+                _detailsId++;
+                _showDetails = true;
+              }),
             ),
           ),
           if (_showDetails)
             MaterialPage<void>(
-              key: const ValueKey('details'),
+              key: ValueKey<int>(_detailsId),
               child: AbsorbPointer(
                 absorbing: _busy,
                 child: AnimeInfoView(

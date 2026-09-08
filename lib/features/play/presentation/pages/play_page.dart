@@ -386,6 +386,12 @@ class _ContentViewState extends ConsumerState<_ContentView>
   Widget build(BuildContext context) {
     final isFullscreen =
         ref.watch(playStateProvider.select((state) => state.isFullscreen));
+    final isWideScreen =
+        ref.watch(playStateProvider.select((state) => state.isWideScreen));
+    final isContentExpanded =
+        ref.watch(playStateProvider.select((state) => state.isContentExpanded));
+    final isContentVisible =
+        !isFullscreen && (!isWideScreen || isContentExpanded);
     return PreferredSize(
       preferredSize: const Size.fromHeight(100),
       child: Column(
@@ -405,7 +411,7 @@ class _ContentViewState extends ConsumerState<_ContentView>
                   Tab(text: AppLocalizations.of(context).playCommentsTab),
                 ],
               ),
-              ref.watch(playStateProvider.select((state) => state.isWideScreen))
+              isWideScreen
                   ? const Spacer()
                   : Consumer(
                       builder: (context, ref, _) {
@@ -441,7 +447,7 @@ class _ContentViewState extends ConsumerState<_ContentView>
                 controller: tabController,
                 children: [
                   PlayContentNavigator(
-                    isActive: tabController.index == 0 && !isFullscreen,
+                    isActive: tabController.index == 0 && isContentVisible,
                   ),
                   const CommentsView(),
                 ],

@@ -8,12 +8,16 @@ part of 'setting_provider.dart';
 
 // GENERATED CODE - DO NOT MODIFY BY HAND
 // ignore_for_file: type=lint, type=warning
+/// Scoped by the settings shell, including direct child-route navigation.
 
-@ProviderFor(SettingsLayout)
+@ProviderFor(settingsLayout)
 final settingsLayoutProvider = SettingsLayoutProvider._();
 
-final class SettingsLayoutProvider
-    extends $NotifierProvider<SettingsLayout, bool> {
+/// Scoped by the settings shell, including direct child-route navigation.
+
+final class SettingsLayoutProvider extends $FunctionalProvider<bool, bool, bool>
+    with $Provider<bool> {
+  /// Scoped by the settings shell, including direct child-route navigation.
   SettingsLayoutProvider._()
       : super(
           from: null,
@@ -21,8 +25,8 @@ final class SettingsLayoutProvider
           retry: null,
           name: r'settingsLayoutProvider',
           isAutoDispose: true,
-          dependencies: null,
-          $allTransitiveDependencies: null,
+          dependencies: <ProviderOrFamily>[],
+          $allTransitiveDependencies: <ProviderOrFamily>[],
         );
 
   @override
@@ -30,7 +34,13 @@ final class SettingsLayoutProvider
 
   @$internal
   @override
-  SettingsLayout create() => SettingsLayout();
+  $ProviderElement<bool> $createElement($ProviderPointer pointer) =>
+      $ProviderElement(pointer);
+
+  @override
+  bool create(Ref ref) {
+    return settingsLayout(ref);
+  }
 
   /// {@macro riverpod.override_with_value}
   Override overrideWithValue(bool value) {
@@ -41,16 +51,4 @@ final class SettingsLayoutProvider
   }
 }
 
-String _$settingsLayoutHash() => r'b36421dedffff123b945522d7c58321e67773597';
-
-abstract class _$SettingsLayout extends $Notifier<bool> {
-  bool build();
-  @$mustCallSuper
-  @override
-  void runBuild() {
-    final ref = this.ref as $Ref<bool, bool>;
-    final element = ref.element as $ClassProviderElement<
-        AnyNotifier<bool, bool>, bool, Object?, Object?>;
-    element.handleCreate(ref, build);
-  }
-}
+String _$settingsLayoutHash() => r'ac3ef280f2845a2a77e0655879f15ebef2b9f04e';

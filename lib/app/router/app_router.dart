@@ -343,16 +343,42 @@ class ImageSearchRoute extends GoRouteData with $ImageSearchRoute {
       const ImageSearchPage();
 }
 
-@TypedGoRoute<SettingsRoute>(path: '/settings')
+@TypedShellRoute<SettingsShellRoute>(
+  routes: [
+    TypedGoRoute<SettingsRoute>(path: '/settings', routes: [
+      TypedGoRoute<SettingAccountRoute>(path: 'account'),
+      TypedGoRoute<SettingLogsRoute>(path: 'logs'),
+      TypedGoRoute<SettingGeneralRoute>(path: 'general'),
+      TypedGoRoute<SettingPlaybackRoute>(path: 'playback'),
+      TypedGoRoute<SettingDownloadPluginsRoute>(path: 'downloadPlugins'),
+      TypedGoRoute<SettingDanmakuRoute>(path: 'danmaku'),
+      TypedGoRoute<SettingDownloadRoute>(path: 'download'),
+      TypedGoRoute<SettingAboutRoute>(path: 'about'),
+      TypedGoRoute<SettingPluginsRoute>(path: 'Plugins'),
+      TypedGoRoute<SettingAddPluginsRoute>(path: 'addPlugins'),
+      TypedGoRoute<SettingThemeRoute>(path: 'theme'),
+      TypedGoRoute<SettingFontRoute>(path: 'font'),
+      TypedGoRoute<SettingThanksRoute>(path: 'thanks'),
+      TypedGoRoute<SettingAgreementRoute>(path: 'agreement'),
+    ]),
+  ],
+)
+class SettingsShellRoute extends ShellRouteData {
+  const SettingsShellRoute();
+
+  @override
+  Widget builder(BuildContext context, GoRouterState state, Widget navigator) =>
+      SettingsPage(location: state.uri.path, child: navigator);
+}
+
 class SettingsRoute extends GoRouteData with $SettingsRoute {
   const SettingsRoute();
 
   @override
   Widget build(BuildContext context, GoRouterState state) =>
-      const SettingsPage();
+      const SettingsMenuPage();
 }
 
-@TypedGoRoute<SettingAccountRoute>(path: '/settings/account')
 class SettingAccountRoute extends GoRouteData with $SettingAccountRoute {
   const SettingAccountRoute();
 
@@ -361,7 +387,6 @@ class SettingAccountRoute extends GoRouteData with $SettingAccountRoute {
       const AccountSettingsPage();
 }
 
-@TypedGoRoute<SettingLogsRoute>(path: '/settings/logs')
 class SettingLogsRoute extends GoRouteData with $SettingLogsRoute {
   const SettingLogsRoute();
 
@@ -370,7 +395,6 @@ class SettingLogsRoute extends GoRouteData with $SettingLogsRoute {
       const ErrorLogsPage();
 }
 
-@TypedGoRoute<SettingGeneralRoute>(path: '/settings/general')
 class SettingGeneralRoute extends GoRouteData with $SettingGeneralRoute {
   const SettingGeneralRoute();
 
@@ -379,7 +403,6 @@ class SettingGeneralRoute extends GoRouteData with $SettingGeneralRoute {
       const GeneralSettingsPage();
 }
 
-@TypedGoRoute<SettingPlaybackRoute>(path: '/settings/playback')
 class SettingPlaybackRoute extends GoRouteData with $SettingPlaybackRoute {
   const SettingPlaybackRoute();
 
@@ -388,7 +411,6 @@ class SettingPlaybackRoute extends GoRouteData with $SettingPlaybackRoute {
       const PlaybackSettingsPage();
 }
 
-@TypedGoRoute<SettingDownloadPluginsRoute>(path: '/settings/downloadPlugins')
 class SettingDownloadPluginsRoute extends GoRouteData
     with $SettingDownloadPluginsRoute {
   const SettingDownloadPluginsRoute();
@@ -398,7 +420,6 @@ class SettingDownloadPluginsRoute extends GoRouteData
       const DownloadPluginsPage();
 }
 
-@TypedGoRoute<SettingDanmakuRoute>(path: '/settings/danmaku')
 class SettingDanmakuRoute extends GoRouteData with $SettingDanmakuRoute {
   const SettingDanmakuRoute();
 
@@ -407,7 +428,6 @@ class SettingDanmakuRoute extends GoRouteData with $SettingDanmakuRoute {
       const DanmakuSettingPage();
 }
 
-@TypedGoRoute<SettingDownloadRoute>(path: '/settings/download')
 class SettingDownloadRoute extends GoRouteData with $SettingDownloadRoute {
   const SettingDownloadRoute();
 
@@ -416,7 +436,6 @@ class SettingDownloadRoute extends GoRouteData with $SettingDownloadRoute {
       const DownloadSettingsPage();
 }
 
-@TypedGoRoute<SettingAboutRoute>(path: '/settings/about')
 class SettingAboutRoute extends GoRouteData with $SettingAboutRoute {
   const SettingAboutRoute();
 
@@ -425,7 +444,6 @@ class SettingAboutRoute extends GoRouteData with $SettingAboutRoute {
       const AboutSettingsPage();
 }
 
-@TypedGoRoute<SettingPluginsRoute>(path: '/settings/Plugins')
 class SettingPluginsRoute extends GoRouteData with $SettingPluginsRoute {
   const SettingPluginsRoute();
 
@@ -434,7 +452,6 @@ class SettingPluginsRoute extends GoRouteData with $SettingPluginsRoute {
       const PluginsPage();
 }
 
-@TypedGoRoute<SettingAddPluginsRoute>(path: '/settings/addPlugins')
 class SettingAddPluginsRoute extends GoRouteData with $SettingAddPluginsRoute {
   const SettingAddPluginsRoute({this.editPluginKey});
 
@@ -445,7 +462,6 @@ class SettingAddPluginsRoute extends GoRouteData with $SettingAddPluginsRoute {
       AddPluginsPage(editPluginKey: editPluginKey);
 }
 
-@TypedGoRoute<SettingThemeRoute>(path: '/settings/theme')
 class SettingThemeRoute extends GoRouteData with $SettingThemeRoute {
   const SettingThemeRoute();
 
@@ -453,7 +469,6 @@ class SettingThemeRoute extends GoRouteData with $SettingThemeRoute {
   Widget build(BuildContext context, GoRouterState state) => const ThemePage();
 }
 
-@TypedGoRoute<SettingFontRoute>(path: '/settings/font')
 class SettingFontRoute extends GoRouteData with $SettingFontRoute {
   const SettingFontRoute();
 
@@ -462,7 +477,6 @@ class SettingFontRoute extends GoRouteData with $SettingFontRoute {
       const FontSettingsPage();
 }
 
-@TypedGoRoute<SettingThanksRoute>(path: '/settings/thanks')
 class SettingThanksRoute extends GoRouteData with $SettingThanksRoute {
   const SettingThanksRoute();
 
@@ -470,7 +484,6 @@ class SettingThanksRoute extends GoRouteData with $SettingThanksRoute {
   Widget build(BuildContext context, GoRouterState state) => const ThanksPage();
 }
 
-@TypedGoRoute<SettingAgreementRoute>(path: '/settings/agreement')
 class SettingAgreementRoute extends GoRouteData with $SettingAgreementRoute {
   const SettingAgreementRoute();
 

@@ -22,21 +22,7 @@ List<RouteBase> get $appRoutes => [
       $downloadRoute,
       $userSpaceRoute,
       $imageSearchRoute,
-      $settingsRoute,
-      $settingAccountRoute,
-      $settingLogsRoute,
-      $settingGeneralRoute,
-      $settingPlaybackRoute,
-      $settingDownloadPluginsRoute,
-      $settingDanmakuRoute,
-      $settingDownloadRoute,
-      $settingAboutRoute,
-      $settingPluginsRoute,
-      $settingAddPluginsRoute,
-      $settingThemeRoute,
-      $settingFontRoute,
-      $settingThanksRoute,
-      $settingAgreementRoute,
+      $settingsShellRoute,
     ];
 
 RouteBase get $mainShellRoute => StatefulShellRouteData.$route(
@@ -614,11 +600,93 @@ mixin $ImageSearchRoute on GoRouteData {
   void replace(BuildContext context) => context.replace(location);
 }
 
-RouteBase get $settingsRoute => GoRouteData.$route(
-      path: '/settings',
-      hasOverriddenOnExit: false,
-      factory: $SettingsRoute._fromState,
+RouteBase get $settingsShellRoute => ShellRouteData.$route(
+      factory: $SettingsShellRouteExtension._fromState,
+      routes: [
+        GoRouteData.$route(
+          path: '/settings',
+          hasOverriddenOnExit: false,
+          factory: $SettingsRoute._fromState,
+          routes: [
+            GoRouteData.$route(
+              path: 'account',
+              hasOverriddenOnExit: false,
+              factory: $SettingAccountRoute._fromState,
+            ),
+            GoRouteData.$route(
+              path: 'logs',
+              hasOverriddenOnExit: false,
+              factory: $SettingLogsRoute._fromState,
+            ),
+            GoRouteData.$route(
+              path: 'general',
+              hasOverriddenOnExit: false,
+              factory: $SettingGeneralRoute._fromState,
+            ),
+            GoRouteData.$route(
+              path: 'playback',
+              hasOverriddenOnExit: false,
+              factory: $SettingPlaybackRoute._fromState,
+            ),
+            GoRouteData.$route(
+              path: 'downloadPlugins',
+              hasOverriddenOnExit: false,
+              factory: $SettingDownloadPluginsRoute._fromState,
+            ),
+            GoRouteData.$route(
+              path: 'danmaku',
+              hasOverriddenOnExit: false,
+              factory: $SettingDanmakuRoute._fromState,
+            ),
+            GoRouteData.$route(
+              path: 'download',
+              hasOverriddenOnExit: false,
+              factory: $SettingDownloadRoute._fromState,
+            ),
+            GoRouteData.$route(
+              path: 'about',
+              hasOverriddenOnExit: false,
+              factory: $SettingAboutRoute._fromState,
+            ),
+            GoRouteData.$route(
+              path: 'Plugins',
+              hasOverriddenOnExit: false,
+              factory: $SettingPluginsRoute._fromState,
+            ),
+            GoRouteData.$route(
+              path: 'addPlugins',
+              hasOverriddenOnExit: false,
+              factory: $SettingAddPluginsRoute._fromState,
+            ),
+            GoRouteData.$route(
+              path: 'theme',
+              hasOverriddenOnExit: false,
+              factory: $SettingThemeRoute._fromState,
+            ),
+            GoRouteData.$route(
+              path: 'font',
+              hasOverriddenOnExit: false,
+              factory: $SettingFontRoute._fromState,
+            ),
+            GoRouteData.$route(
+              path: 'thanks',
+              hasOverriddenOnExit: false,
+              factory: $SettingThanksRoute._fromState,
+            ),
+            GoRouteData.$route(
+              path: 'agreement',
+              hasOverriddenOnExit: false,
+              factory: $SettingAgreementRoute._fromState,
+            ),
+          ],
+        ),
+      ],
     );
+
+extension $SettingsShellRouteExtension on SettingsShellRoute {
+  static SettingsShellRoute _fromState(GoRouterState state) =>
+      const SettingsShellRoute();
+}
 
 mixin $SettingsRoute on GoRouteData {
   static SettingsRoute _fromState(GoRouterState state) => const SettingsRoute();
@@ -641,12 +709,6 @@ mixin $SettingsRoute on GoRouteData {
   @override
   void replace(BuildContext context) => context.replace(location);
 }
-
-RouteBase get $settingAccountRoute => GoRouteData.$route(
-      path: '/settings/account',
-      hasOverriddenOnExit: false,
-      factory: $SettingAccountRoute._fromState,
-    );
 
 mixin $SettingAccountRoute on GoRouteData {
   static SettingAccountRoute _fromState(GoRouterState state) =>
@@ -671,12 +733,6 @@ mixin $SettingAccountRoute on GoRouteData {
   void replace(BuildContext context) => context.replace(location);
 }
 
-RouteBase get $settingLogsRoute => GoRouteData.$route(
-      path: '/settings/logs',
-      hasOverriddenOnExit: false,
-      factory: $SettingLogsRoute._fromState,
-    );
-
 mixin $SettingLogsRoute on GoRouteData {
   static SettingLogsRoute _fromState(GoRouterState state) =>
       const SettingLogsRoute();
@@ -699,12 +755,6 @@ mixin $SettingLogsRoute on GoRouteData {
   @override
   void replace(BuildContext context) => context.replace(location);
 }
-
-RouteBase get $settingGeneralRoute => GoRouteData.$route(
-      path: '/settings/general',
-      hasOverriddenOnExit: false,
-      factory: $SettingGeneralRoute._fromState,
-    );
 
 mixin $SettingGeneralRoute on GoRouteData {
   static SettingGeneralRoute _fromState(GoRouterState state) =>
@@ -729,12 +779,6 @@ mixin $SettingGeneralRoute on GoRouteData {
   void replace(BuildContext context) => context.replace(location);
 }
 
-RouteBase get $settingPlaybackRoute => GoRouteData.$route(
-      path: '/settings/playback',
-      hasOverriddenOnExit: false,
-      factory: $SettingPlaybackRoute._fromState,
-    );
-
 mixin $SettingPlaybackRoute on GoRouteData {
   static SettingPlaybackRoute _fromState(GoRouterState state) =>
       const SettingPlaybackRoute();
@@ -757,12 +801,6 @@ mixin $SettingPlaybackRoute on GoRouteData {
   @override
   void replace(BuildContext context) => context.replace(location);
 }
-
-RouteBase get $settingDownloadPluginsRoute => GoRouteData.$route(
-      path: '/settings/downloadPlugins',
-      hasOverriddenOnExit: false,
-      factory: $SettingDownloadPluginsRoute._fromState,
-    );
 
 mixin $SettingDownloadPluginsRoute on GoRouteData {
   static SettingDownloadPluginsRoute _fromState(GoRouterState state) =>
@@ -787,12 +825,6 @@ mixin $SettingDownloadPluginsRoute on GoRouteData {
   void replace(BuildContext context) => context.replace(location);
 }
 
-RouteBase get $settingDanmakuRoute => GoRouteData.$route(
-      path: '/settings/danmaku',
-      hasOverriddenOnExit: false,
-      factory: $SettingDanmakuRoute._fromState,
-    );
-
 mixin $SettingDanmakuRoute on GoRouteData {
   static SettingDanmakuRoute _fromState(GoRouterState state) =>
       const SettingDanmakuRoute();
@@ -815,12 +847,6 @@ mixin $SettingDanmakuRoute on GoRouteData {
   @override
   void replace(BuildContext context) => context.replace(location);
 }
-
-RouteBase get $settingDownloadRoute => GoRouteData.$route(
-      path: '/settings/download',
-      hasOverriddenOnExit: false,
-      factory: $SettingDownloadRoute._fromState,
-    );
 
 mixin $SettingDownloadRoute on GoRouteData {
   static SettingDownloadRoute _fromState(GoRouterState state) =>
@@ -845,12 +871,6 @@ mixin $SettingDownloadRoute on GoRouteData {
   void replace(BuildContext context) => context.replace(location);
 }
 
-RouteBase get $settingAboutRoute => GoRouteData.$route(
-      path: '/settings/about',
-      hasOverriddenOnExit: false,
-      factory: $SettingAboutRoute._fromState,
-    );
-
 mixin $SettingAboutRoute on GoRouteData {
   static SettingAboutRoute _fromState(GoRouterState state) =>
       const SettingAboutRoute();
@@ -874,12 +894,6 @@ mixin $SettingAboutRoute on GoRouteData {
   void replace(BuildContext context) => context.replace(location);
 }
 
-RouteBase get $settingPluginsRoute => GoRouteData.$route(
-      path: '/settings/Plugins',
-      hasOverriddenOnExit: false,
-      factory: $SettingPluginsRoute._fromState,
-    );
-
 mixin $SettingPluginsRoute on GoRouteData {
   static SettingPluginsRoute _fromState(GoRouterState state) =>
       const SettingPluginsRoute();
@@ -902,12 +916,6 @@ mixin $SettingPluginsRoute on GoRouteData {
   @override
   void replace(BuildContext context) => context.replace(location);
 }
-
-RouteBase get $settingAddPluginsRoute => GoRouteData.$route(
-      path: '/settings/addPlugins',
-      hasOverriddenOnExit: false,
-      factory: $SettingAddPluginsRoute._fromState,
-    );
 
 mixin $SettingAddPluginsRoute on GoRouteData {
   static SettingAddPluginsRoute _fromState(GoRouterState state) =>
@@ -940,12 +948,6 @@ mixin $SettingAddPluginsRoute on GoRouteData {
   void replace(BuildContext context) => context.replace(location);
 }
 
-RouteBase get $settingThemeRoute => GoRouteData.$route(
-      path: '/settings/theme',
-      hasOverriddenOnExit: false,
-      factory: $SettingThemeRoute._fromState,
-    );
-
 mixin $SettingThemeRoute on GoRouteData {
   static SettingThemeRoute _fromState(GoRouterState state) =>
       const SettingThemeRoute();
@@ -968,12 +970,6 @@ mixin $SettingThemeRoute on GoRouteData {
   @override
   void replace(BuildContext context) => context.replace(location);
 }
-
-RouteBase get $settingFontRoute => GoRouteData.$route(
-      path: '/settings/font',
-      hasOverriddenOnExit: false,
-      factory: $SettingFontRoute._fromState,
-    );
 
 mixin $SettingFontRoute on GoRouteData {
   static SettingFontRoute _fromState(GoRouterState state) =>
@@ -998,12 +994,6 @@ mixin $SettingFontRoute on GoRouteData {
   void replace(BuildContext context) => context.replace(location);
 }
 
-RouteBase get $settingThanksRoute => GoRouteData.$route(
-      path: '/settings/thanks',
-      hasOverriddenOnExit: false,
-      factory: $SettingThanksRoute._fromState,
-    );
-
 mixin $SettingThanksRoute on GoRouteData {
   static SettingThanksRoute _fromState(GoRouterState state) =>
       const SettingThanksRoute();
@@ -1026,12 +1016,6 @@ mixin $SettingThanksRoute on GoRouteData {
   @override
   void replace(BuildContext context) => context.replace(location);
 }
-
-RouteBase get $settingAgreementRoute => GoRouteData.$route(
-      path: '/settings/agreement',
-      hasOverriddenOnExit: false,
-      factory: $SettingAgreementRoute._fromState,
-    );
 
 mixin $SettingAgreementRoute on GoRouteData {
   static SettingAgreementRoute _fromState(GoRouterState state) =>

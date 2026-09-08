@@ -2,8 +2,6 @@ name: Build Project
 
 on:
   push:
-    branches:
-      - main
   pull_request:
   workflow_dispatch:
     inputs:
@@ -19,12 +17,31 @@ on:
           - all
         default: all
 
-env:
-  ANIME_FLOW_APP_ID: ${{ secrets.ANIME_FLOW_APP_ID }}
-  ANIME_FLOW_SECRET: ${{ secrets.ANIME_FLOW_SECRET }}
-
 jobs:
+  flutter-test:
+    runs-on: ubuntu-latest
+    concurrency:
+      group: unit-tests-${{ github.workflow }}-${{ github.ref }}
+      cancel-in-progress: true
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v5
+
+      - name: Setup Flutter
+        uses: subosito/flutter-action@v2.23.0
+        with:
+          channel: stable
+          flutter-version-file: pubspec.yaml
+          cache: true
+
+      - name: Install dependencies
+        run: flutter pub get
+
+      - name: Run unit tests
+        run: flutter test
+
   resolve-platforms:
+    if: github.event_name != 'push' || github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
     outputs:
       matrix: ${{ steps.resolve.outputs.matrix }}
@@ -48,8 +65,11 @@ jobs:
 
   build:
     name: Build ${{ matrix.platform }}
-    needs: resolve-platforms
+    needs: [flutter-test, resolve-platforms]
     runs-on: ${{ matrix.os }}
+    env:
+      ANIME_FLOW_APP_ID: ${{ secrets.ANIME_FLOW_APP_ID }}
+      ANIME_FLOW_SECRET: ${{ secrets.ANIME_FLOW_SECRET }}
     timeout-minutes: 120
     strategy:
       fail-fast: false

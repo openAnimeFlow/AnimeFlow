@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:anime_flow/app/router/routes_args.dart';
 import 'package:anime_flow/shared/models/enums/video_controls_icon_type.dart';
 import 'package:anime_flow/core/utils/system_util.dart';
 import 'package:anime_flow/core/utils/vibrate.dart';
@@ -112,7 +113,8 @@ class VideoUiState {
   }
 }
 
-@Riverpod(keepAlive: true)
+// Keep controls alive while hidden, but own them in the playback route scope.
+@Riverpod(keepAlive: true, dependencies: [playExtra])
 class VideoUiNotifier extends _$VideoUiNotifier implements VideoUiStateActions {
   Timer? _indicatorTimer;
   Timer? _controlsUiTimer;
@@ -126,7 +128,7 @@ class VideoUiNotifier extends _$VideoUiNotifier implements VideoUiStateActions {
   double _dragStartX = 0;
   Duration _dragStartPosition = Duration.zero;
   double _dragStartBrightness = 0.5;
-  bool _initialized = false;
+  int _runtimeRevision = 0;
 
   bool get isShowControlsUi => state.isShowControlsUi;
   bool get isHorizontalDragging => state.isHorizontalDragging;
@@ -144,25 +146,30 @@ class VideoUiNotifier extends _$VideoUiNotifier implements VideoUiStateActions {
 
   @override
   VideoUiState build() {
+    // Route arguments establish ownership; UI state lasts for the route.
+    ref.read(playExtraProvider);
+    final revision = ++_runtimeRevision;
     ref.onDispose(_dispose);
     final initialState = VideoUiState(
       currentTime: SystemUtil.getCurrentTimeWithoutSeconds(),
     );
     state = initialState;
-    if (!_initialized) {
-      _initialized = true;
-      unawaited(_initializeRuntimeState());
-    }
+    unawaited(_initializeRuntimeState(revision));
     return initialState;
   }
 
-  Future<void> _initializeRuntimeState() async {
-    await _initializeBrightness();
+  bool _isCurrentRuntime(int revision) =>
+      ref.mounted && revision == _runtimeRevision;
+
+  Future<void> _initializeRuntimeState(int revision) async {
+    await _initializeBrightness(revision);
+    if (!_isCurrentRuntime(revision)) return;
     _startTimeUpdate();
-    await _initializeBattery();
+    await _initializeBattery(revision);
   }
 
   void _dispose() {
+    _runtimeRevision++;
     _indicatorTimer?.cancel();
     _controlsUiTimer?.cancel();
     _timeUpdateTimer?.cancel();
@@ -180,25 +187,30 @@ class VideoUiNotifier extends _$VideoUiNotifier implements VideoUiStateActions {
     });
   }
 
-  Future<void> _initializeBattery() async {
-    await _updateBatteryInfo();
+  Future<void> _initializeBattery(int revision) async {
+    await _updateBatteryInfo(revision);
+    if (!_isCurrentRuntime(revision)) return;
 
     await _batteryStateSubscription?.cancel();
+    if (!_isCurrentRuntime(revision)) return;
     _batteryStateSubscription = SystemUtil.batteryStateStream.listen((state) {
+      if (!_isCurrentRuntime(revision)) return;
       this.state = this.state.copyWith(batteryState: state);
-      _updateBatteryInfo();
+      unawaited(_updateBatteryInfo(revision));
     });
 
     _batteryUpdateTimer?.cancel();
     _batteryUpdateTimer = Timer.periodic(const Duration(seconds: 30), (_) {
-      _updateBatteryInfo();
+      unawaited(_updateBatteryInfo(revision));
     });
   }
 
-  Future<void> _updateBatteryInfo() async {
+  Future<void> _updateBatteryInfo(int revision) async {
     try {
       final level = await SystemUtil.getBatteryLevel();
+      if (!_isCurrentRuntime(revision)) return;
       final currentState = await SystemUtil.getBatteryState();
+      if (!_isCurrentRuntime(revision)) return;
       state = state.copyWith(
         batteryLevel: level,
         batteryState: currentState,
@@ -363,12 +375,14 @@ class VideoUiNotifier extends _$VideoUiNotifier implements VideoUiStateActions {
     }
   }
 
-  Future<void> _initializeBrightness() async {
+  Future<void> _initializeBrightness(int revision) async {
     try {
       final brightness = await _screenBrightness.application;
+      if (!_isCurrentRuntime(revision)) return;
       _originalBrightness = brightness;
       state = state.copyWith(currentBrightness: brightness);
     } catch (_) {
+      if (!_isCurrentRuntime(revision)) return;
       _originalBrightness = 0.5;
       state = state.copyWith(currentBrightness: 0.5);
     }
@@ -420,17 +434,15 @@ class VideoUiNotifier extends _$VideoUiNotifier implements VideoUiStateActions {
   }
 
   Future<void> _resetBrightness() async {
-    WidgetsBinding.instance.addPostFrameCallback((_) async {
+    // Cleanup must not wait for another frame or write disposed provider state.
+    final originalBrightness = _originalBrightness;
+    try {
+      await _screenBrightness.resetApplicationScreenBrightness();
+    } catch (_) {
       try {
-        await _screenBrightness.resetApplicationScreenBrightness();
-        state = state.copyWith(currentBrightness: _originalBrightness);
-      } catch (_) {
-        try {
-          await _screenBrightness
-              .setApplicationScreenBrightness(_originalBrightness);
-          state = state.copyWith(currentBrightness: _originalBrightness);
-        } catch (_) {}
-      }
-    });
+        await _screenBrightness
+            .setApplicationScreenBrightness(originalBrightness);
+      } catch (_) {}
+    }
   }
 }

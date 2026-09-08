@@ -497,11 +497,11 @@ class _TopAreaControlState extends ConsumerState<TopAreaControl> {
                     IosBatteryIcon(
                       batteryLevel: battery,
                       isCharging: isCharging,
-                      size: 30,
+                      size: 35,
                     ),
                     if (isCharging)
                       const Icon(Icons.flash_on_outlined,
-                          size: 10, color: IosBatteryIcon.chargingColor),
+                          size: 13, color: IosBatteryIcon.chargingColor),
                   ],
                 );
               },

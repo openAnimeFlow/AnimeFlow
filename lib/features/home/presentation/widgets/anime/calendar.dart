@@ -20,6 +20,7 @@ class CalendarView extends StatefulWidget {
 class _CalendarViewState extends State<CalendarView> {
   final ScrollController _scrollController = ScrollController();
   final weekday = DateTime.now().weekday;
+  bool _isHovering = false;
   bool _canScrollLeft = false;
   bool _canScrollRight = false;
 
@@ -394,22 +395,41 @@ class _CalendarViewState extends State<CalendarView> {
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (mounted) _updateScrollButtons();
     });
-    return Stack(
-      children: [
-        Positioned.fill(child: child),
-        _buildScrollButton(
-          alignment: Alignment.centerLeft,
-          icon: Icons.chevron_left_rounded,
-          enabled: _canScrollLeft,
-          onPressed: () => _scrollBy(-windowWidth(context) * 0.55),
-        ),
-        _buildScrollButton(
-          alignment: Alignment.centerRight,
-          icon: Icons.chevron_right_rounded,
-          enabled: _canScrollRight,
-          onPressed: () => _scrollBy(windowWidth(context) * 0.55),
-        ),
-      ],
+    return MouseRegion(
+      onEnter: (_) => setState(() => _isHovering = true),
+      onExit: (_) => setState(() => _isHovering = false),
+      child: Stack(
+        children: [
+          Positioned.fill(child: child),
+          IgnorePointer(
+            ignoring: !_isHovering,
+            child: ExcludeFocus(
+              excluding: !_isHovering,
+              child: AnimatedOpacity(
+                opacity: _isHovering ? 1 : 0,
+                duration: const Duration(milliseconds: 200),
+                curve: Curves.easeInOut,
+                child: Stack(
+                  children: [
+                    _buildScrollButton(
+                      alignment: Alignment.centerLeft,
+                      icon: Icons.chevron_left_rounded,
+                      enabled: _canScrollLeft,
+                      onPressed: () => _scrollBy(-windowWidth(context) * 0.55),
+                    ),
+                    _buildScrollButton(
+                      alignment: Alignment.centerRight,
+                      icon: Icons.chevron_right_rounded,
+                      enabled: _canScrollRight,
+                      onPressed: () => _scrollBy(windowWidth(context) * 0.55),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ),
+        ],
+      ),
     );
   }
 
@@ -429,11 +449,8 @@ class _CalendarViewState extends State<CalendarView> {
           elevation: 2,
           child: IconButton(
             onPressed: enabled ? onPressed : null,
-            icon: Icon(icon),
-            constraints: const BoxConstraints(
-              minHeight: 50,
-              minWidth: 50
-            ),
+            icon: Icon(icon, size: 30),
+            constraints: const BoxConstraints(minHeight: 60, minWidth: 60),
             style: ButtonStyle(
               mouseCursor: WidgetStatePropertyAll(
                 enabled

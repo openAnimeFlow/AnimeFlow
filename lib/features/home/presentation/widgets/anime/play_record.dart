@@ -18,6 +18,7 @@ class PlayRecordView extends ConsumerStatefulWidget {
 
 class _PlayRecordViewState extends ConsumerState<PlayRecordView> {
   final ScrollController _scrollController = ScrollController();
+  bool _isHovering = false;
   bool _canScrollLeft = false;
   bool _canScrollRight = false;
 
@@ -126,19 +127,19 @@ class _PlayRecordViewState extends ConsumerState<PlayRecordView> {
                       width: 300,
                       padding: EdgeInsets.only(
                           right: index == filterHistory.length - 1 ? 0 : 10),
-                      child: InkWell(
-                        borderRadius: BorderRadius.circular(8),
-                        onTap: () {
-                          AnimeInfoRoute.fromExtra(subjectBasicData)
-                              .push(context);
-                        },
-                        child: Column(
-                          mainAxisSize: MainAxisSize.min,
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Expanded(
-                              child: ClipRRect(
+                      child: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Expanded(
+                            child: ClipRRect(
+                              borderRadius: BorderRadius.circular(8),
+                              child: InkWell(
                                 borderRadius: BorderRadius.circular(8),
+                                onTap: () {
+                                  AnimeInfoRoute.fromExtra(subjectBasicData)
+                                      .push(context);
+                                },
                                 child: Stack(
                                   children: [
                                     Positioned.fill(
@@ -247,16 +248,16 @@ class _PlayRecordViewState extends ConsumerState<PlayRecordView> {
                                 ),
                               ),
                             ),
-                            const SizedBox(height: 4),
-                            Text(
-                              history.subjectName,
-                              maxLines: 1,
-                              overflow: TextOverflow.ellipsis,
-                              style: const TextStyle(
-                                  fontSize: 15, fontWeight: FontWeight.bold),
-                            ),
-                          ],
-                        ),
+                          ),
+                          const SizedBox(height: 4),
+                          Text(
+                            history.subjectName,
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            style: const TextStyle(
+                                fontSize: 15, fontWeight: FontWeight.bold),
+                          ),
+                        ],
                       ),
                     );
                   },
@@ -274,22 +275,41 @@ class _PlayRecordViewState extends ConsumerState<PlayRecordView> {
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (mounted) _updateScrollButtons();
     });
-    return Stack(
-      children: [
-        Positioned.fill(child: child),
-        _buildScrollButton(
-          alignment: Alignment.centerLeft,
-          icon: Icons.chevron_left_rounded,
-          enabled: _canScrollLeft,
-          onPressed: () => _scrollBy(-windowWidth(context) * 0.55),
-        ),
-        _buildScrollButton(
-          alignment: Alignment.centerRight,
-          icon: Icons.chevron_right_rounded,
-          enabled: _canScrollRight,
-          onPressed: () => _scrollBy(windowWidth(context) * 0.55),
-        ),
-      ],
+    return MouseRegion(
+      onEnter: (_) => setState(() => _isHovering = true),
+      onExit: (_) => setState(() => _isHovering = false),
+      child: Stack(
+        children: [
+          Positioned.fill(child: child),
+          IgnorePointer(
+            ignoring: !_isHovering,
+            child: ExcludeFocus(
+              excluding: !_isHovering,
+              child: AnimatedOpacity(
+                opacity: _isHovering ? 1 : 0,
+                duration: const Duration(milliseconds: 200),
+                curve: Curves.easeInOut,
+                child: Stack(
+                  children: [
+                    _buildScrollButton(
+                      alignment: Alignment.centerLeft,
+                      icon: Icons.chevron_left_rounded,
+                      enabled: _canScrollLeft,
+                      onPressed: () => _scrollBy(-windowWidth(context) * 0.55),
+                    ),
+                    _buildScrollButton(
+                      alignment: Alignment.centerRight,
+                      icon: Icons.chevron_right_rounded,
+                      enabled: _canScrollRight,
+                      onPressed: () => _scrollBy(windowWidth(context) * 0.55),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ),
+        ],
+      ),
     );
   }
 
@@ -309,8 +329,8 @@ class _PlayRecordViewState extends ConsumerState<PlayRecordView> {
           elevation: 2,
           child: IconButton(
             onPressed: enabled ? onPressed : null,
-            constraints: const BoxConstraints(minHeight: 50, minWidth: 50),
-            icon: Icon(icon),
+            constraints: const BoxConstraints(minHeight: 60, minWidth: 60),
+            icon: Icon(icon, size: 35),
             style: ButtonStyle(
                 mouseCursor: WidgetStatePropertyAll(
               enabled ? SystemMouseCursors.click : SystemMouseCursors.forbidden,

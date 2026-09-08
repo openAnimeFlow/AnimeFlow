@@ -23,11 +23,13 @@ import 'package:shimmer/shimmer.dart';
 class InfoHeadView extends StatelessWidget {
   final double statusBarHeight;
   final double contentHeight;
+  final ValueChanged<int> onPlayEpisode;
 
   const InfoHeadView({
     super.key,
     required this.statusBarHeight,
     required this.contentHeight,
+    required this.onPlayEpisode,
   });
 
   @override
@@ -330,7 +332,7 @@ class InfoHeadView extends StatelessWidget {
                 buttonBuilder: (context, label, icon, onPressed, isOpen) =>
                     buildCollectionButton(context, label, icon, onPressed),
                 collectType: collectTypeFromApiType(subjectItem.interest?.type),
-                offset: const Offset(0,50),
+                offset: const Offset(0, 50),
                 onCollectTypeChanged: (type) async {
                   try {
                     await ref
@@ -367,6 +369,7 @@ class InfoHeadView extends StatelessWidget {
                     subjectItem: subjectItem,
                     subjectName: name,
                     subjectImage: image,
+                    onPlayEpisode: onPlayEpisode,
                     onEpisodeLongPress: (episodeId) async {
                       try {
                         await ref

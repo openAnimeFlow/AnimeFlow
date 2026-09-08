@@ -23,7 +23,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../widgets/content/comments_view.dart';
-import '../widgets/content/introduce_view.dart';
+import '../widgets/content/play_content_navigator.dart';
 
 class PlayPage extends ConsumerStatefulWidget {
   const PlayPage({super.key});
@@ -246,7 +246,18 @@ class _PlayPageState extends ConsumerState<PlayPage>
         content = Scaffold(
           backgroundColor: Colors.black,
           resizeToAvoidBottomInset: !SystemUtil.isMobile,
-          body: PlayerView(key: _videoKey),
+          body: Stack(
+            fit: StackFit.expand,
+            children: [
+              PlayerView(key: _videoKey),
+              Offstage(
+                child: TickerMode(
+                  enabled: false,
+                  child: _ContentView(key: _contentKey),
+                ),
+              ),
+            ],
+          ),
         );
       } else {
         content = isWideScreen
@@ -373,6 +384,8 @@ class _ContentViewState extends ConsumerState<_ContentView>
 
   @override
   Widget build(BuildContext context) {
+    final isFullscreen =
+        ref.watch(playStateProvider.select((state) => state.isFullscreen));
     return PreferredSize(
       preferredSize: const Size.fromHeight(100),
       child: Column(
@@ -422,12 +435,17 @@ class _ContentViewState extends ConsumerState<_ContentView>
           ),
           const Divider(height: 1),
           Expanded(
-            child: TabBarView(
-              controller: tabController,
-              children: const [
-                IntroduceView(),
-                CommentsView(),
-              ],
+            child: AnimatedBuilder(
+              animation: tabController,
+              builder: (context, _) => TabBarView(
+                controller: tabController,
+                children: [
+                  PlayContentNavigator(
+                    isActive: tabController.index == 0 && !isFullscreen,
+                  ),
+                  const CommentsView(),
+                ],
+              ),
             ),
           ),
         ],

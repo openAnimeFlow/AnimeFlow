@@ -278,6 +278,28 @@ class Episodes extends _$Episodes {
     );
   }
 
+  /// Select from the current session's episodes, including offline sessions.
+  void selectEpisode(int episodeId) {
+    final current = _currentData;
+    final episodes = current?.episodes;
+    if (current == null || episodes == null) {
+      throw StateError('剧集尚未加载');
+    }
+    final selection =
+        SubjectEpisodesState(episodes: episodes).findSelectionById(episodeId);
+    if (selection == null) {
+      throw StateError('当前播放会话中没有可播放的该剧集');
+    }
+    _selectedSubjectId = current.subjectId;
+    _selectedEpisodeId = selection.id;
+    state = AsyncData(current.copyWith(
+      episodeSort: selection.sort,
+      episodeIndex: selection.index,
+      episodeId: selection.id,
+      episodeTitle: selection.title,
+    ));
+  }
+
   /// 切换到下一集
   void switchToNextEpisode() {
     final current = _currentData;

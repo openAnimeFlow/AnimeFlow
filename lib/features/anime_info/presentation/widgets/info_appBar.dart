@@ -13,7 +13,6 @@ import 'package:anime_flow/shared/widgets/star.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:go_router/go_router.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 class InfoAppbar extends ConsumerWidget {
@@ -93,7 +92,7 @@ class InfoAppbar extends ConsumerWidget {
           padding: EdgeInsets.zero,
           iconSize: 25,
           icon: const Icon(Icons.arrow_back_rounded),
-          onPressed: () => context.pop(),
+          onPressed: () => Navigator.of(context).maybePop(),
         ),
         Expanded(
           child: _buildInfo(ref),

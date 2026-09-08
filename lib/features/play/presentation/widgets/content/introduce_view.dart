@@ -13,7 +13,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 class IntroduceView extends StatefulWidget {
-  const IntroduceView({super.key});
+  const IntroduceView({super.key, required this.onShowDetails});
+
+  final VoidCallback onShowDetails;
 
   @override
   State<IntroduceView> createState() => _IntroduceViewState();
@@ -37,26 +39,27 @@ class _IntroduceViewState extends State<IntroduceView>
             Consumer(builder: (context, ref, child) {
               final extra = ref.watch(playExtraProvider).playExtra;
               final isLoggedIn = ref.watch(isLoggedInProvider).value ?? false;
-              final subjectInfo =
-                  isLoggedIn ? ref.watch(animeInfoProvider) : null;
-              final subject = subjectInfo?.asData?.value;
+              final subject = ref.watch(animeInfoProvider).asData?.value;
               final l10n = AppLocalizations.of(context);
 
               return Row(
                 children: [
                   Expanded(
-                    child: Text(
-                      extra.subjectName,
-                      style: const TextStyle(
-                        fontSize: 20,
-                        fontWeight: FontWeight.bold,
+                    child: InkWell(
+                      onTap: widget.onShowDetails,
+                      child: Text(
+                        extra.subjectName,
+                        style: const TextStyle(
+                          fontSize: 20,
+                          fontWeight: FontWeight.bold,
+                        ),
+                        textAlign: TextAlign.left,
+                        maxLines: 2,
+                        overflow: TextOverflow.ellipsis,
                       ),
-                      textAlign: TextAlign.left,
-                      maxLines: 2,
-                      overflow: TextOverflow.ellipsis,
                     ),
                   ),
-                  if (subject != null)
+                  if (isLoggedIn && subject != null)
                     CollectionButton(
                       key: ValueKey(extra.subjectId),
                       collectType:

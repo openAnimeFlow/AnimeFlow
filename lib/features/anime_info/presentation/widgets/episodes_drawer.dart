@@ -4,8 +4,6 @@ import 'package:anime_flow/features/play/presentation/providers/subject_episodes
 import 'package:anime_flow/shared/models/bangumi/subjects_info_item.dart';
 import 'package:anime_flow/core/network/clients/flow_client.dart';
 import 'package:anime_flow/features/user/presentation/providers/user_state_provider.dart';
-import 'package:anime_flow/app/router/model/play_route_extra.dart';
-import 'package:anime_flow/app/router/app_router.dart';
 import 'package:anime_flow/core/logger/logger.dart';
 import 'package:anime_flow/shared/widgets/notification_toast.dart';
 import 'package:flutter/material.dart';
@@ -17,6 +15,7 @@ class EpisodesDrawerView extends ConsumerStatefulWidget {
   final String subjectImage;
   final ScrollController scrollController;
   final void Function(int episodeId)? onEpisodeLongPress;
+  final ValueChanged<int> onPlayEpisode;
 
   const EpisodesDrawerView({
     super.key,
@@ -25,6 +24,7 @@ class EpisodesDrawerView extends ConsumerStatefulWidget {
     required this.subjectImage,
     required this.scrollController,
     this.onEpisodeLongPress,
+    required this.onPlayEpisode,
   });
 
   static void show(
@@ -33,6 +33,7 @@ class EpisodesDrawerView extends ConsumerStatefulWidget {
     required String subjectName,
     required String subjectImage,
     void Function(int episodeId)? onEpisodeLongPress,
+    required ValueChanged<int> onPlayEpisode,
   }) {
     final providerContainer = ProviderScope.containerOf(context);
     showModalBottomSheet<void>(
@@ -56,6 +57,7 @@ class EpisodesDrawerView extends ConsumerStatefulWidget {
                 subjectName: subjectName,
                 subjectImage: subjectImage,
                 onEpisodeLongPress: onEpisodeLongPress,
+                onPlayEpisode: onPlayEpisode,
               );
             },
           ),
@@ -280,21 +282,7 @@ class _EpisodesDrawerViewState extends ConsumerState<EpisodesDrawerView> {
                     ),
                     onTap: () {
                       Navigator.of(context).pop();
-                      PlayRoute.fromExtra(
-                        PlayRouteExtra(
-                          subjectInfo: subjectItem,
-                          playExtra: PlayExtra(
-                            subjectId: subjectItem.id,
-                            subjectName: widget.subjectName,
-                            subjectCover: widget.subjectImage,
-                            subjectAliases: subjectItem.infobox
-                                .where((item) => item.key == '别名')
-                                .expand((item) => item.values.map((e) => e.v))
-                                .toList(),
-                          ),
-                          continueEpisodeId: episode.id,
-                        ),
-                      ).push(context);
+                      widget.onPlayEpisode(episode.id);
                     },
                     leading: Text(
                       episode.sort.toString().padLeft(2, '0'),

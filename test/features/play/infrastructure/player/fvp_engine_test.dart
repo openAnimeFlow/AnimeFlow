@@ -10,6 +10,95 @@ import 'package:fvp/mdk.dart' as fvp;
 import 'package:path/path.dart' as p;
 
 void main() {
+  test('EOF at 90 percent completes only after native playback stops',
+      () async {
+    final player = _FakePlayer()..currentPosition = 54000;
+    final engine = FvpEngine(playerFactory: () => player);
+    await engine.initialize();
+    addTearDown(engine.dispose);
+    final events = <PlayerEvent>[];
+    final subscription = engine.events.listen(events.add);
+    addTearDown(subscription.cancel);
+    await engine.open(
+      PlaybackSource(uri: Uri.parse('https://example.com/video')),
+      autoPlay: true,
+    );
+    player.nativeState = fvp.PlaybackState.playing;
+    player.mediaStatus = const fvp.MediaStatus(fvp.MediaStatus.end);
+    player.emitMediaStatus(player.mediaStatus);
+    await Future<void>.delayed(Duration.zero);
+    expect(events.whereType<PlayerCompleted>(), isEmpty);
+
+    // A queued stopped callback must not override the current native state.
+    player.emitStopped();
+    await Future<void>.delayed(Duration.zero);
+    expect(events.whereType<PlayerCompleted>(), isEmpty);
+
+    player.currentPosition = 60000;
+    player.nativeState = fvp.PlaybackState.stopped;
+    player.emitStopped();
+    await Future<void>.delayed(Duration.zero);
+    expect(events.whereType<PlayerCompleted>(), hasLength(1));
+    player.emitStopped();
+    player.emitMediaStatus(player.mediaStatus);
+    await Future<void>.delayed(Duration.zero);
+    expect(events.whereType<PlayerCompleted>(), hasLength(1));
+  });
+
+  test('explicit stop and source replacement do not complete playback',
+      () async {
+    late _FakePlayer player;
+    final engine = FvpEngine(playerFactory: () => player = _FakePlayer());
+    await engine.initialize();
+    addTearDown(engine.dispose);
+    final events = <PlayerEvent>[];
+    final subscription = engine.events.listen(events.add);
+    addTearDown(subscription.cancel);
+    final source = PlaybackSource(uri: Uri.parse('https://example.com/video'));
+    await engine.open(source);
+    player.mediaStatus = const fvp.MediaStatus(fvp.MediaStatus.end);
+    await engine.stop();
+    player.emitStopped();
+    await Future<void>.delayed(Duration.zero);
+    expect(events.whereType<PlayerCompleted>(), isEmpty);
+
+    await engine.open(source);
+    player.mediaStatus = const fvp.MediaStatus(fvp.MediaStatus.end);
+    await engine.open(source);
+    await Future<void>.delayed(Duration.zero);
+    expect(events.whereType<PlayerCompleted>(), isEmpty);
+
+    // The new source must still be able to complete normally.
+    player.mediaStatus = const fvp.MediaStatus(fvp.MediaStatus.end);
+    player.nativeState = fvp.PlaybackState.stopped;
+    player.emitStopped();
+    await Future<void>.delayed(Duration.zero);
+    expect(events.whereType<PlayerCompleted>(), hasLength(1));
+    await engine.open(source);
+    player.mediaStatus = const fvp.MediaStatus(fvp.MediaStatus.end);
+    player.nativeState = fvp.PlaybackState.stopped;
+    player.emitStopped();
+    await Future<void>.delayed(Duration.zero);
+    expect(events.whereType<PlayerCompleted>(), hasLength(2));
+  });
+
+  test('stopping without EOF does not report natural completion', () async {
+    final player = _FakePlayer();
+    final engine = FvpEngine(playerFactory: () => player);
+    await engine.initialize();
+    addTearDown(engine.dispose);
+    final events = <PlayerEvent>[];
+    final subscription = engine.events.listen(events.add);
+    addTearDown(subscription.cancel);
+    await engine.open(
+      PlaybackSource(uri: Uri.parse('https://example.com/video')),
+    );
+    player.nativeState = fvp.PlaybackState.stopped;
+    player.emitStopped();
+    await Future<void>.delayed(Duration.zero);
+    expect(events.whereType<PlayerCompleted>(), isEmpty);
+  });
+
   test('local paths and file URIs reach FVP without losing filename characters',
       () async {
     final players = <_FakePlayer>[];
@@ -32,7 +121,8 @@ void main() {
       }
     }
 
-    const remote = 'https://example.com/%E8%A7%86%E9%A2%91%20file.mp4?key=a%2Fb';
+    const remote =
+        'https://example.com/%E8%A7%86%E9%A2%91%20file.mp4?key=a%2Fb';
     await engine.open(PlaybackSource(uri: Uri.parse(remote)));
     expect(players.last.media, remote);
   });
@@ -334,10 +424,16 @@ class _FakePlayer implements fvp.Player {
         newValue: status,
       ));
 
+  void emitStopped() => changes.add((
+        oldValue: fvp.PlaybackState.playing,
+        newValue: fvp.PlaybackState.stopped,
+      ));
+
   @override
   set state(fvp.PlaybackState value) {
     if (value == fvp.PlaybackState.stopped && !delayStop) {
       nativeState = value;
+      emitStopped();
     }
   }
 

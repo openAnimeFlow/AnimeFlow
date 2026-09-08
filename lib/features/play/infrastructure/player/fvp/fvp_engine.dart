@@ -40,6 +40,7 @@ class FvpEngine implements PlayerEngine {
   bool _disposed = false;
   bool _hasMedia = false;
   bool _acceptMediaStatus = false;
+  bool _completionEmitted = false;
   Size? _videoSize;
   late final _operations = PlayerOperationQueue(ensureReady: _ensureReady);
 
@@ -83,18 +84,24 @@ class FvpEngine implements PlayerEngine {
       max: _bufferRangeMaxMilliseconds,
     );
     _subscriptions.addAll([
-      _player.onStateChanged.listen((_) {
+      _player.onStateChanged.listen((change) {
         _emitPlayingState();
-      }),
-      _player.onMediaStatus.listen((change) {
-        if (!_acceptMediaStatus) return;
-        _emitBufferingState();
-        if (_hasMedia &&
-            !change.oldValue.test(fvp.MediaStatus.end) &&
-            change.newValue.test(fvp.MediaStatus.end) &&
+        // MediaStatus.end only means EOF was read; buffered frames may still
+        // be playing. Complete only after native playback has actually stopped.
+        // _stop clears _hasMedia before requesting a stop, excluding commands.
+        if (!_disposed &&
+            _hasMedia &&
+            !_completionEmitted &&
+            change.newValue == fvp.PlaybackState.stopped &&
+            _player.waitFor(fvp.PlaybackState.stopped, timeout: 0) &&
             _player.mediaStatus.test(fvp.MediaStatus.end)) {
+          _completionEmitted = true;
           _emit(const PlayerCompleted());
         }
+      }),
+      _player.onMediaStatus.listen((_) {
+        if (!_acceptMediaStatus) return;
+        _emitBufferingState();
       }),
       _player.onEvent.listen((event) {
         // 部分 MDK 事件复用 error 字段传递状态值，而不是错误码：
@@ -200,6 +207,7 @@ class FvpEngine implements PlayerEngine {
     required bool autoPlay,
   }) async {
     await _stop();
+    _completionEmitted = false;
     if (_opened) {
       await _releasePlayer();
       _createPlayer();
@@ -304,6 +312,7 @@ class FvpEngine implements PlayerEngine {
         final result = await _player.seek(position: position.inMilliseconds);
         _ensureReady();
         if (result < 0) throw StateError('FVP seek failed: $result');
+        _completionEmitted = false;
         _emitCurrentMetrics();
       });
 

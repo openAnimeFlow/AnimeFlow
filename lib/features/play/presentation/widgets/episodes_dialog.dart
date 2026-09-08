@@ -223,16 +223,7 @@ class _EpisodesDialogState extends ConsumerState<EpisodesDialog> {
             elevation: 0,
             child: InkWell(
               onTap: () {
-                final episodeIndex = index + 1;
-                final notifier = ref.read(episodesProvider.notifier);
-                notifier.setEpisodeSort(
-                  episodeId: episode.id,
-                  episodeIndex: episodeIndex,
-                  sort: episode.sort,
-                );
-                notifier.setEpisodeTitle(
-                  episode.nameCN.isEmpty ? episode.name : episode.nameCN,
-                );
+                ref.read(episodesProvider.notifier).selectEpisode(episode.id);
                 context.pop();
               },
               // 长按
@@ -269,9 +260,8 @@ class _EpisodesDialogState extends ConsumerState<EpisodesDialog> {
                                 if (episode.type != 0) ...[
                                   Text(
                                     episodesTypeLabels[episode.type] ?? '其他',
-                                    style: Theme.of(context)
-                                        .textTheme
-                                        .labelSmall,
+                                    style:
+                                        Theme.of(context).textTheme.labelSmall,
                                   ),
                                 ],
                               ],

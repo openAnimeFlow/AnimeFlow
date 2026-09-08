@@ -238,34 +238,6 @@ class Episodes extends _$Episodes {
     return subjectEpisodes.selectionForContinueEpisode();
   }
 
-  void setEpisodeTitle(String title) {
-    final current = _currentData;
-    if (current == null || current.episodeTitle == title) {
-      return;
-    }
-    state = AsyncData(current.copyWith(episodeTitle: title));
-  }
-
-  void setEpisodeSort({
-    required num sort,
-    required int episodeIndex,
-    required int episodeId,
-  }) {
-    final current = _currentData;
-    if (current == null) {
-      return;
-    }
-    _selectedSubjectId = current.subjectId;
-    _selectedEpisodeId = episodeId;
-    state = AsyncData(
-      current.copyWith(
-        episodeSort: sort.toDouble(),
-        episodeIndex: episodeIndex,
-        episodeId: episodeId,
-      ),
-    );
-  }
-
   /// 是否存在下一集（下一集的 name 字段不为空字符串）
   bool get hasNextEpisode {
     final current = _currentData;
@@ -290,6 +262,7 @@ class Episodes extends _$Episodes {
     if (selection == null) {
       throw StateError('当前播放会话中没有可播放的该剧集');
     }
+    if (current.episodeId == selection.id) return;
     _selectedSubjectId = current.subjectId;
     _selectedEpisodeId = selection.id;
     state = AsyncData(current.copyWith(
@@ -310,16 +283,7 @@ class Episodes extends _$Episodes {
     final selection = SubjectEpisodesState(episodes: episodesData)
         .nextEpisodeSelection(current.episodeIndex);
     if (selection == null) return;
-    _selectedSubjectId = current.subjectId;
-    _selectedEpisodeId = selection.id;
-    state = AsyncData(
-      current.copyWith(
-        episodeSort: selection.sort,
-        episodeIndex: selection.index,
-        episodeId: selection.id,
-        episodeTitle: selection.title,
-      ),
-    );
+    selectEpisode(selection.id);
   }
 }
 

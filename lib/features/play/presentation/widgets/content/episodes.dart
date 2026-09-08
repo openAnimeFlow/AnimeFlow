@@ -247,7 +247,7 @@ class _EpisodesListViewState extends ConsumerState<EpisodesListView> {
               elevation: 0,
               child: InkWell(
                 borderRadius: BorderRadius.circular(10),
-                onTap: () => _selectEpisode(episode, index + 1),
+                onTap: () => _selectEpisode(episode),
                 // 长按
                 onLongPress: ref.read(playExtraProvider).isOfflineMode
                     ? null
@@ -361,7 +361,7 @@ class _EpisodesListViewState extends ConsumerState<EpisodesListView> {
             elevation: 0,
             child: InkWell(
               borderRadius: BorderRadius.circular(10),
-              onTap: () => _selectEpisode(episode, index + 1),
+              onTap: () => _selectEpisode(episode),
               child: DecoratedBox(
                 decoration: BoxDecoration(
                     borderRadius: BorderRadius.circular(10),
@@ -412,15 +412,7 @@ class _EpisodesListViewState extends ConsumerState<EpisodesListView> {
     );
   }
 
-  void _selectEpisode(EpisodeData episode, int episodeIndex) {
-    final notifier = ref.read(episodesProvider.notifier);
-    notifier.setEpisodeSort(
-      episodeId: episode.id,
-      episodeIndex: episodeIndex,
-      sort: episode.sort,
-    );
-    notifier.setEpisodeTitle(
-      episode.nameCN.isEmpty ? episode.name : episode.nameCN,
-    );
+  void _selectEpisode(EpisodeData episode) {
+    ref.read(episodesProvider.notifier).selectEpisode(episode.id);
   }
 }

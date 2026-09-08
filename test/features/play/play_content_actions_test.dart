@@ -76,19 +76,46 @@ void main() {
     expect(session.resumed, 1);
   });
 
-  test('selection updates id, playback index, sort and title together',
+  for (final entry in [
+    'embedded details',
+    'episode selection',
+    'next episode'
+  ]) {
+    test('$entry updates id, playback index, sort and title together',
+        () async {
+      await container.read(episodesProvider.future);
+      final updates = <EpisodesData>[];
+      container.listen(episodesProvider, (_, next) {
+        if (next.asData != null) updates.add(next.asData!.value);
+      });
+      switch (entry) {
+        case 'embedded details':
+          await container.read(playContentActionsProvider).selectEpisode(20);
+        case 'episode selection':
+          container.read(episodesProvider.notifier).selectEpisode(20);
+        case 'next episode':
+          container.read(episodesProvider.notifier).switchToNextEpisode();
+      }
+      expect(updates, hasLength(1));
+      expect(updates.single.episodeId, 20);
+      expect(updates.single.episodeIndex, 2);
+      expect(updates.single.episodeSort, 51);
+      expect(updates.single.episodeTitle, 'Episode 20');
+    });
+  }
+
+  test('reselecting and advancing past the last episode publish no updates',
       () async {
     await container.read(episodesProvider.future);
+    final notifier = container.read(episodesProvider.notifier);
+    notifier.selectEpisode(20);
     final updates = <EpisodesData>[];
     container.listen(episodesProvider, (_, next) {
       if (next.asData != null) updates.add(next.asData!.value);
     });
-    await container.read(playContentActionsProvider).selectEpisode(20);
-    expect(updates, hasLength(1));
-    expect(updates.single.episodeId, 20);
-    expect(updates.single.episodeIndex, 2);
-    expect(updates.single.episodeSort, 51);
-    expect(updates.single.episodeTitle, 'Episode 20');
+    notifier.selectEpisode(20);
+    notifier.switchToNextEpisode();
+    expect(updates, isEmpty);
   });
 
   test('selecting the current episode resumes without changing selection',

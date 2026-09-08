@@ -296,14 +296,9 @@ class BottomAreaControl extends ConsumerWidget {
                             return IconButton(
                               tooltip: l10n.nextEpisode,
                               onPressed: () {
-                                final notifier =
-                                    ref.read(episodesProvider.notifier);
-                                notifier.setEpisodeSort(
-                                  episodeId: selection.id,
-                                  episodeIndex: selection.index,
-                                  sort: selection.sort,
-                                );
-                                notifier.setEpisodeTitle(selection.title);
+                                ref
+                                    .read(episodesProvider.notifier)
+                                    .switchToNextEpisode();
                               },
                               icon: const Icon(
                                 Icons.skip_next_rounded,

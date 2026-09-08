@@ -9,6 +9,7 @@ import 'package:anime_flow/shared/models/download/download_status.dart';
 import 'package:anime_flow/shared/widgets/animation_network_image.dart';
 import 'package:anime_flow/core/utils/utils.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 class DownloadPage extends ConsumerWidget {
@@ -17,33 +18,28 @@ class DownloadPage extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final l10n = AppLocalizations.of(context);
-    // Keep byte-level progress out of the list-level rebuild.
-    ref.watch(
-      downloadControllerProvider.select(
-        (state) => state.records
-            .map(
-              (record) =>
-                  '${record.key}:${record.episodes.values.map((episode) => '${episode.episodeUrl}:${episode.status}').join(',')}',
-            )
-            .join('|'),
-      ),
-    );
-    final records = ref.read(downloadControllerProvider).records;
+    final recordKeys = ref
+        .watch(
+          downloadControllerProvider.select(
+            (state) => _ValueList(state.records.map((record) => record.key)),
+          ),
+        )
+        .values;
 
     return Scaffold(
       appBar: AppBar(
         title: Text(l10n.downloadsTitle),
       ),
-      body: records.isEmpty
+      body: recordKeys.isEmpty
           ? Center(child: Text(l10n.downloadTasksEmpty))
           : ListView.separated(
               padding: const EdgeInsets.all(12),
-              itemCount: records.length,
+              itemCount: recordKeys.length,
               separatorBuilder: (_, __) => const SizedBox(height: 12),
               itemBuilder: (context, index) {
                 return _DownloadRecordCard(
-                  key: ValueKey(records[index].key),
-                  record: records[index],
+                  key: ValueKey(recordKeys[index]),
+                  recordKey: recordKeys[index],
                 );
               },
             ),
@@ -52,9 +48,9 @@ class DownloadPage extends ConsumerWidget {
 }
 
 class _DownloadRecordCard extends ConsumerStatefulWidget {
-  const _DownloadRecordCard({super.key, required this.record});
+  const _DownloadRecordCard({super.key, required this.recordKey});
 
-  final DownloadRecord record;
+  final String recordKey;
 
   @override
   ConsumerState<_DownloadRecordCard> createState() =>
@@ -63,28 +59,33 @@ class _DownloadRecordCard extends ConsumerStatefulWidget {
 
 class _DownloadRecordCardState extends ConsumerState<_DownloadRecordCard> {
   bool _isExpanded = false;
-
-  @override
-  void initState() {
-    super.initState();
-    _isExpanded = _hasActiveDownload(widget.record);
-  }
-
-  @override
-  void didUpdateWidget(covariant _DownloadRecordCard oldWidget) {
-    super.didUpdateWidget(oldWidget);
-    if (!_isExpanded &&
-        !_hasActiveDownload(oldWidget.record) &&
-        _hasActiveDownload(widget.record)) {
-      _isExpanded = true;
-    }
-  }
+  bool _hadActiveDownload = false;
 
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
     final colorScheme = Theme.of(context).colorScheme;
-    final record = widget.record;
+    ref.watch(downloadControllerProvider.select((state) {
+      final record = _findRecord(state, widget.recordKey);
+      if (record == null) return null;
+      return (
+        record.subjectName,
+        record.subjectCover,
+        record.sourceName,
+        _hasActiveDownload(record),
+        record.episodes.values
+            .where((e) => e.status == DownloadStatus.completed)
+            .length,
+        _ValueList(
+            record.episodes.values.map((e) => (e.episodeUrl, e.episodeSort))),
+      );
+    }));
+    final record =
+        _findRecord(ref.read(downloadControllerProvider), widget.recordKey);
+    if (record == null) return const SizedBox.shrink();
+    final active = _hasActiveDownload(record);
+    if (active && !_hadActiveDownload) _isExpanded = true;
+    _hadActiveDownload = active;
     final episodes = record.episodes.values.toList()
       ..sort((a, b) => a.episodeSort.compareTo(b.episodeSort));
     final completed = episodes
@@ -169,8 +170,8 @@ class _DownloadRecordCardState extends ConsumerState<_DownloadRecordCard> {
                           const Divider(height: 16),
                           _DownloadEpisodeTile(
                             key: ValueKey(episode.episodeUrl),
-                            record: record,
-                            episode: episode,
+                            recordKey: widget.recordKey,
+                            episodeUrl: episode.episodeUrl,
                           ),
                         ],
                       ],
@@ -195,12 +196,12 @@ class _DownloadRecordCardState extends ConsumerState<_DownloadRecordCard> {
 class _DownloadEpisodeTile extends ConsumerStatefulWidget {
   const _DownloadEpisodeTile({
     super.key,
-    required this.record,
-    required this.episode,
+    required this.recordKey,
+    required this.episodeUrl,
   });
 
-  final DownloadRecord record;
-  final DownloadEpisode episode;
+  final String recordKey;
+  final String episodeUrl;
 
   @override
   ConsumerState<_DownloadEpisodeTile> createState() =>
@@ -210,25 +211,44 @@ class _DownloadEpisodeTile extends ConsumerStatefulWidget {
 class _DownloadEpisodeTileState extends ConsumerState<_DownloadEpisodeTile> {
   bool _isDownloadingDanmaku = false;
 
-  DownloadRecord get record => widget.record;
-
-  DownloadEpisode get episode => widget.episode;
-
   @override
   Widget build(BuildContext context) {
     ref.watch(
       downloadControllerProvider.select(
-        (state) => state.records
-            .where((item) => item.key == record.key)
-            .expand((record) => record.episodes.values)
-            .where((item) => item.episodeUrl == episode.episodeUrl)
-            .map(
-              (item) =>
-                  '${item.status}:${item.progressPercent}:${item.totalBytes}:${item.totalSizeBytes}:${item.danmakuDownloaded}',
-            )
-            .join('|'),
+        (state) {
+          final record = _findRecord(state, widget.recordKey);
+          final item = record?.episodes[widget.episodeUrl];
+          if (item == null) return null;
+          return (
+            record!.subjectId,
+            record.subjectName,
+            record.subjectCover,
+            record.sourceName,
+            record.sourceBaseUrl,
+            item.status,
+            item.progressPercent,
+            item.totalBytes,
+            item.totalSizeBytes,
+            item.danmakuDownloaded,
+            item.errorMessage,
+            item.localMediaPath,
+            item.localDanmakuPath,
+            item.episodeTitle,
+            item.episodeSort,
+            item.bangumiEpisodeId,
+            item.episodeIndex,
+            item.lineIndex,
+            item.networkMediaUrl,
+          );
+        },
       ),
     );
+    // Hive objects can be mutated or replaced. Resolve current data by stable
+    // keys after watching scalar values, never retain a widget's old object.
+    final record =
+        _findRecord(ref.read(downloadControllerProvider), widget.recordKey);
+    final episode = record?.episodes[widget.episodeUrl];
+    if (record == null || episode == null) return const SizedBox.shrink();
     final l10n = AppLocalizations.of(context);
     final colorScheme = Theme.of(context).colorScheme;
     final progress = episode.progressPercent.clamp(0, 100) / 100;
@@ -242,14 +262,7 @@ class _DownloadEpisodeTileState extends ConsumerState<_DownloadEpisodeTile> {
     final canPlay = localMediaPath != null;
 
     return InkWell(
-      onTap: canPlay
-          ? () => _playOfflineEpisode(
-                context,
-                record: record,
-                episode: episode,
-                localMediaPath: localMediaPath,
-              )
-          : null,
+      onTap: canPlay ? () => _playOfflineEpisode(context) : null,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -291,14 +304,7 @@ class _DownloadEpisodeTileState extends ConsumerState<_DownloadEpisodeTile> {
               IconButton(
                 tooltip: l10n.play,
                 icon: const Icon(Icons.play_arrow_rounded),
-                onPressed: canPlay
-                    ? () => _playOfflineEpisode(
-                          context,
-                          record: record,
-                          episode: episode,
-                          localMediaPath: localMediaPath,
-                        )
-                    : null,
+                onPressed: canPlay ? () => _playOfflineEpisode(context) : null,
               ),
               if (canPause)
                 IconButton(
@@ -337,7 +343,7 @@ class _DownloadEpisodeTileState extends ConsumerState<_DownloadEpisodeTile> {
               IconButton(
                 tooltip: l10n.deleteDownloadTask,
                 icon: const Icon(Icons.delete_outline_rounded),
-                onPressed: () => _confirmDeleteEpisode(context, ref),
+                onPressed: () => _confirmDeleteEpisode(context, ref, episode),
               ),
             ],
           ),
@@ -362,8 +368,8 @@ class _DownloadEpisodeTileState extends ConsumerState<_DownloadEpisodeTile> {
     setState(() => _isDownloadingDanmaku = true);
     try {
       await ref.read(downloadControllerProvider.notifier).downloadDanmaku(
-            record.key,
-            episode.episodeUrl,
+            widget.recordKey,
+            widget.episodeUrl,
           );
     } finally {
       if (mounted) {
@@ -375,6 +381,7 @@ class _DownloadEpisodeTileState extends ConsumerState<_DownloadEpisodeTile> {
   Future<void> _confirmDeleteEpisode(
     BuildContext context,
     WidgetRef ref,
+    DownloadEpisode episode,
   ) async {
     final l10n = AppLocalizations.of(context);
     final colorScheme = Theme.of(context).colorScheme;
@@ -406,17 +413,19 @@ class _DownloadEpisodeTileState extends ConsumerState<_DownloadEpisodeTile> {
       return;
     }
     await ref.read(downloadControllerProvider.notifier).deleteEpisode(
-          record.key,
-          episode.episodeUrl,
+          widget.recordKey,
+          widget.episodeUrl,
         );
   }
 
-  void _playOfflineEpisode(
-    BuildContext context, {
-    required DownloadRecord record,
-    required DownloadEpisode episode,
-    required String localMediaPath,
-  }) {
+  void _playOfflineEpisode(BuildContext context) {
+    final record =
+        _findRecord(ref.read(downloadControllerProvider), widget.recordKey);
+    final episode = record?.episodes[widget.episodeUrl];
+    if (record == null || episode == null) return;
+    final localMediaPath =
+        ref.read(downloadManagerProvider).getLocalMediaPath(episode);
+    if (localMediaPath == null) return;
     final completedEpisodes = record.episodes.values
         .where((item) => item.status == DownloadStatus.completed)
         .toList();
@@ -490,4 +499,24 @@ class _DownloadEpisodeTileState extends ConsumerState<_DownloadEpisodeTile> {
         '${episode.progressPercent.clamp(0, 100).toStringAsFixed(1)}%';
     return '$status - $progress';
   }
+}
+
+DownloadRecord? _findRecord(DownloadState state, String key) {
+  for (final record in state.records) {
+    if (record.key == key) return record;
+  }
+  return null;
+}
+
+/// Value equality over copied scalar keys, independent of mutable Hive models.
+class _ValueList<T> {
+  _ValueList(Iterable<T> values) : values = List.unmodifiable(values);
+  final List<T> values;
+
+  @override
+  bool operator ==(Object other) =>
+      other is _ValueList<T> && listEquals(values, other.values);
+
+  @override
+  int get hashCode => Object.hashAll(values);
 }

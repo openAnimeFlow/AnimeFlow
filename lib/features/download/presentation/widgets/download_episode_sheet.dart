@@ -20,6 +20,8 @@ Future<void> showDownloadEpisodeSheet(BuildContext context, WidgetRef ref) {
   final container = ProviderScope.containerOf(context);
   return showModalBottomSheet<void>(
     context: context,
+    // Use the full page height, outside the introduction's nested navigator.
+    useRootNavigator: true,
     isScrollControlled: true,
     showDragHandle: true,
     builder: (context) {

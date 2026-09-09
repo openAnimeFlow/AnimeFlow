@@ -80,6 +80,8 @@ class _VideoResourcesViewState extends ConsumerState<VideoResourcesView> {
       final drawerController = DraggableScrollableController();
       showModalBottomSheet<void>(
         context: context,
+        // Use the full page height, outside the introduction's nested navigator.
+        useRootNavigator: true,
         isScrollControlled: true,
         backgroundColor: Colors.transparent,
         builder: (sheetContext) {

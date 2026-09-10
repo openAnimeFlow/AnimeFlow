@@ -3,6 +3,7 @@ import 'dart:convert';
 
 import 'package:anime_flow/core/constants/layout_constant.dart';
 import 'package:anime_flow/core/crawler/itme/anti_crawler_config.dart';
+import 'package:anime_flow/core/utils/utils.dart';
 import 'package:anime_flow/shared/models/player/play/video/episode_resources_item.dart';
 import 'package:anime_flow/shared/models/player/play/video/resources_item.dart';
 import 'package:anime_flow/features/play/presentation/providers/video_source_provider.dart';
@@ -901,7 +902,7 @@ class _VideoSourceDrawersState extends ConsumerState<VideoSourceDrawers> {
       required String websiteIcon,
       required String baseUrl}) {
     final videoUrl = widget.videoSourceNotifier.videoUrl;
-    final isSelected = baseUrl + episode.like == videoUrl;
+    final isSelected = resolveSourceUrl(baseUrl, episode.like) == videoUrl;
 
     return Container(
       margin: const EdgeInsets.only(bottom: 8),
@@ -923,7 +924,7 @@ class _VideoSourceDrawersState extends ConsumerState<VideoSourceDrawers> {
           onTap: () async {
             try {
               context.pop();
-              final videoUrl = baseUrl + episode.like;
+              final videoUrl = resolveSourceUrl(baseUrl, episode.like);
               widget.videoSourceNotifier.bindManualSourceForCurrentEpisode(
                 websiteName: websiteName,
                 websiteIcon: websiteIcon,

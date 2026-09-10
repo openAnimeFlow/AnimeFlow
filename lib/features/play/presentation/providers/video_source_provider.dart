@@ -5,6 +5,7 @@ import 'package:anime_flow/core/crawler/cookie_manager.dart';
 import 'package:anime_flow/core/crawler/html_request.dart';
 import 'package:anime_flow/core/crawler/itme/anti_crawler_config.dart';
 import 'package:anime_flow/core/crawler/itme/crawler_config_item.dart';
+import 'package:anime_flow/core/utils/utils.dart' show resolveSourceUrl;
 import 'package:anime_flow/features/play/application/search_result_rank_service.dart';
 import 'package:anime_flow/features/play/data/repository/play_repository.dart';
 import 'package:anime_flow/features/play/presentation/providers/episodes_provider.dart';
@@ -800,7 +801,8 @@ class VideoSourceNotifier extends _$VideoSourceNotifier {
           state.videoResources,
           preferredWebsiteName: preferredWebsiteName,
         ).where((candidate) {
-          final url = candidate.resource.baseUrl + candidate.episode.like;
+          final url = resolveSourceUrl(
+              candidate.resource.baseUrl, candidate.episode.like);
           return !_attemptedAutoLoadUrls.contains(url);
         }).toList(growable: false);
 
@@ -809,8 +811,8 @@ class VideoSourceNotifier extends _$VideoSourceNotifier {
         }
 
         final candidate = candidates.first;
-        final candidateUrl =
-            candidate.resource.baseUrl + candidate.episode.like;
+        final candidateUrl = resolveSourceUrl(
+            candidate.resource.baseUrl, candidate.episode.like);
         _attemptedAutoLoadUrls.add(candidateUrl);
 
         state = state.copyWith(selectedWebsiteIndex: candidate.websiteIndex);

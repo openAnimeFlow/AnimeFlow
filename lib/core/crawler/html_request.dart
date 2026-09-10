@@ -58,13 +58,7 @@ class WebRequest {
   ///获取剧集资源列表
   static Future<List<CrawlerEpisodeResourcesItem>> getResourcesListService(
       String link, CrawlConfigItem crawlConfig) async {
-    final String baseURL = crawlConfig.baseUrl;
-    String linkUrl;
-    if (link.startsWith("http")) {
-      linkUrl = link;
-    } else {
-      linkUrl = baseURL + link;
-    }
+    final linkUrl = resolveSourceUrl(crawlConfig.baseUrl, link);
     final cookie = await _cookieHeaderFor(linkUrl, crawlConfig.name);
     final httpHeaders = {
       'referer': '${crawlConfig.baseUrl}/',

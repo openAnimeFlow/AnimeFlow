@@ -555,15 +555,18 @@ class FlowApi {
   }
 
   /// 登出当前会话，销毁服务端 token（无本地 token 时跳过）
-  static Future<void> logoutService() async {
-    final token = await FlowTokenStorage.instance.getToken();
+  static Future<void> logoutService({FlowToken? sessionToken}) async {
+    final token = sessionToken ?? await FlowTokenStorage.instance.getToken();
     if (token == null) {
       return;
     }
     await _client.post(
       AnimeFlowApi.logout,
       skipFlowTokenRefresh: true,
-      requireFlowToken: true,
+      includeFlowToken: false,
+      options: Options(headers: {
+        Constants.authorization: '${token.tokenType} ${token.accessToken}',
+      }),
     );
   }
 

@@ -16,10 +16,10 @@ class FlowTokenStorage implements TokenRepository<FlowToken> {
 
   @override
   Future<FlowToken?> getToken() async {
+    // Storage failures must propagate without deleting valid credentials.
+    final raw = await _storage.read(key: _tokenKey);
+    if (raw == null || raw.isEmpty) return null;
     try {
-      final raw = await _storage.read(key: _tokenKey);
-      if (raw == null || raw.isEmpty) return null;
-
       final decoded = jsonDecode(raw);
       if (decoded is! Map) {
         await removeToken();
@@ -27,7 +27,10 @@ class FlowTokenStorage implements TokenRepository<FlowToken> {
       }
 
       return FlowToken.fromJson(Map<String, dynamic>.from(decoded));
-    } catch (_) {
+    } on FormatException {
+      await removeToken();
+      return null;
+    } on TypeError {
       await removeToken();
       return null;
     }

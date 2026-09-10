@@ -1,5 +1,6 @@
 import 'dart:io';
 
+import 'package:anime_flow/core/network/interceptors/flow_refresh_token_interceptor.dart';
 import 'package:anime_flow/core/constants/constants.dart';
 import 'package:anime_flow/core/network/api_path.dart';
 import 'package:anime_flow/core/network/clients/flow_client.dart';
@@ -30,14 +31,18 @@ class UserController extends _$UserController {
 
   Future<void> clearUserInfo() async {
     cancelOAuthWaiting();
-    await ref.read(flowTokenRepositoryProvider).removeToken();
+    final repository = ref.read(flowTokenRepositoryProvider);
+    FlowRefreshTokenInterceptor.invalidatePendingRefresh(repository);
+    final sessionToken = await repository.getToken();
+    await repository.removeToken();
     ref.invalidate(currentFlowTokenProvider);
     ref.invalidate(isLoggedInProvider);
     ref.invalidate(currentUserInfoProvider);
     ref.invalidate(bangumiBindProvider);
     ref.invalidate(bgmCollectionSyncProvider);
     ref.invalidate(userCollectionsProvider);
-    FlowApi.logoutService().catchError((e) {
+    if (sessionToken == null) return;
+    FlowApi.logoutService(sessionToken: sessionToken).catchError((e) {
       LiggLogger().w('服务端登出失败: $e');
     });
   }

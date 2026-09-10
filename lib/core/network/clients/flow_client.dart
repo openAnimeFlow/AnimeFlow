@@ -12,10 +12,12 @@ class AnimeFlowApiException implements Exception {
   const AnimeFlowApiException({
     required this.code,
     required this.message,
+    this.authReason,
   });
 
   final int code;
   final String message;
+  final String? authReason;
 
   @override
   String toString() => message;
@@ -74,6 +76,7 @@ class FlowClient {
         throw AnimeFlowApiException(
           code: response.code,
           message: response.message,
+          authReason: raw['authReason'] as String?,
         );
       }
 

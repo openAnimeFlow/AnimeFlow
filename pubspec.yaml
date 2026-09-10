@@ -79,7 +79,7 @@ dependencies:
   webview_windows: # 提供 Windows 平台的 WebView 容器实现。
     git:
       url: https://github.com/Predidit/flutter-webview-windows.git
-      ref: 39c20a6fc5436988d7495a51a704056e4fca4751
+      ref: 2b3306d2bfb9f22cbb328743b60e547cf50f0c3c
   desktop_webview_window: # 在 Linux 桌面创建承载 WebView 的独立窗口。
     git:
       url: https://github.com/Predidit/linux_webview_window.git

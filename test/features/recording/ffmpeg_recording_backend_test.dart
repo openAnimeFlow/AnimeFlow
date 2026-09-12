@@ -27,7 +27,7 @@ void main() {
   ClipExportRequest request({String id = 'clip', int? audio = 2}) =>
       ClipExportRequest(
         taskId: id,
-        inputPath: input,
+        input: LocalRecordingInput(input),
         outputDirectory: directory.path,
         start: const Duration(seconds: 2),
         duration: const Duration(seconds: 3),
@@ -81,6 +81,14 @@ void main() {
             .list(recursive: true)
             .any((f) => f.path.endsWith('.mkv')),
         isFalse);
+  });
+
+  test('a decodable but truncated output is not published', () async {
+    runner.outputDuration = '0.3';
+    final result = await (await backend.exportClip(request())).completed;
+    expect(result.status, ExportStatus.failed);
+    expect(result.failure!.stage, ExportStage.validating);
+    expect(result.localPath, isNull);
   });
 
   test('decode failure removes incomplete output even when probe succeeded',
@@ -141,6 +149,7 @@ void main() {
 class _Runner implements FfmpegRunner {
   int calls = 0;
   int outputFrames = 75;
+  String outputDuration = '3.0';
   bool failDecode = false;
   bool failProbe = false;
   bool decoded = false;
@@ -165,7 +174,7 @@ class _Runner implements FfmpegRunner {
               failProbe ? null : 0,
               jsonEncode({
                 'format': {
-                  'duration': isOutput ? '3.0' : '10.0',
+                  'duration': isOutput ? outputDuration : '10.0',
                   'format_name': 'matroska'
                 },
                 'streams': [

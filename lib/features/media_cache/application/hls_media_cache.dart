@@ -259,6 +259,7 @@ class HlsMediaCache {
       }
       download.result.complete(resource.file!);
     } catch (error, stack) {
+      resource.session._readFailureRevision++;
       try {
         if (partial != null && await partial.exists()) await partial.delete();
       } catch (_) {}
@@ -441,6 +442,7 @@ class HlsCacheSession {
   int _references = 1;
   bool _playbackReleased = false;
   bool _invalid = false;
+  int _readFailureRevision = 0;
   void Function(MediaCacheIssue issue)? onIssue;
   PlaybackSource get playbackSource => PlaybackSource(
       uri: _cache._uri(id, 'index.m3u8'), subtitle: source.subtitle);
@@ -503,6 +505,21 @@ class HlsCacheLease {
   Duration _end = Duration.zero;
   Duration inputOffset = Duration.zero;
   bool _released = false;
+  bool get isReleased => _released;
+  int get readFailureRevision => session._readFailureRevision;
+  Future<void> prepare({void Function()? checkCancelled}) async {
+    checkAvailable();
+    for (var i = _first; i <= _last; i++) {
+      checkCancelled?.call();
+      await session.withSegment(i, (_) async {}, priority: CacheReadPriority.export);
+    }
+    checkCancelled?.call();
+  }
+  void checkAvailable() {
+    if (_released) throw StateError('Lease released');
+    session._check();
+  }
+
   Uri get playlistUri => session._cache._uri(session.id, _name);
   Duration get relativeStart => start - inputOffset;
   void extend(Duration end) {

@@ -3601,6 +3601,126 @@ abstract class AppLocalizations {
   /// In zh_Hans, this message translates to:
   /// **'正在切换弹幕…'**
   String get danmakuSwitching;
+
+  /// No description provided for @recordingFiles.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'录制文件'**
+  String get recordingFiles;
+
+  /// No description provided for @recordingLoadFailed.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'无法读取录制目录'**
+  String get recordingLoadFailed;
+
+  /// No description provided for @recordingLocalOnly.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'保存源视频与声音，不包含弹幕和滤镜；当前仅保存到本地，尚未导入相册。'**
+  String get recordingLocalOnly;
+
+  /// No description provided for @recordingEmpty.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'暂无录制片段'**
+  String get recordingEmpty;
+
+  /// No description provided for @recordingQueued.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'等待生成'**
+  String get recordingQueued;
+
+  /// No description provided for @recordingSaved.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'已保存到本地'**
+  String get recordingSaved;
+
+  /// No description provided for @recordingFailed.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'生成失败'**
+  String get recordingFailed;
+
+  /// No description provided for @recordingCancelled.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'已取消'**
+  String get recordingCancelled;
+
+  /// No description provided for @recordingPreparing.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'准备录制'**
+  String get recordingPreparing;
+
+  /// No description provided for @recordingValidating.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'正在校验音视频'**
+  String get recordingValidating;
+
+  /// No description provided for @recordingSaving.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'正在保存'**
+  String get recordingSaving;
+
+  /// No description provided for @recordingExporting.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'正在生成视频'**
+  String get recordingExporting;
+
+  /// No description provided for @recordingOpen.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'播放文件'**
+  String get recordingOpen;
+
+  /// No description provided for @recordingTranscodeRetry.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'转为 H.264/AAC 重试'**
+  String get recordingTranscodeRetry;
+
+  /// No description provided for @recordingDeletePrompt.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'删除此录制文件和任务记录？'**
+  String get recordingDeletePrompt;
+
+  /// No description provided for @recordingDiscard.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'放弃并释放缓存'**
+  String get recordingDiscard;
+
+  /// No description provided for @recordingActionFailed.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'操作失败，请检查文件和访问权限'**
+  String get recordingActionFailed;
+
+  /// No description provided for @recordingStart.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'开始录制（原始画面与声音，边界受关键帧影响）'**
+  String get recordingStart;
+
+  /// No description provided for @recordingStop.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'结束录制'**
+  String get recordingStop;
+
+  /// No description provided for @recordingUnavailable.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'请在播放设置启用共享媒体缓存，并重新打开支持的视频'**
+  String get recordingUnavailable;
 }
 
 class _AppLocalizationsDelegate

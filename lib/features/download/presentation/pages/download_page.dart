@@ -11,6 +11,7 @@ import 'package:anime_flow/core/utils/utils.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:anime_flow/features/recording/presentation/recording_tasks_page.dart';
 
 class DownloadPage extends ConsumerWidget {
   const DownloadPage({super.key});
@@ -29,6 +30,14 @@ class DownloadPage extends ConsumerWidget {
     return Scaffold(
       appBar: AppBar(
         title: Text(l10n.downloadsTitle),
+        actions: [
+          IconButton(
+              tooltip: l10n.recordingFiles,
+              icon: const Icon(Icons.video_library_outlined),
+              onPressed: () => Navigator.of(context).push(
+                  MaterialPageRoute<void>(
+                      builder: (_) => const RecordingTasksPage())))
+        ],
       ),
       body: recordKeys.isEmpty
           ? Center(child: Text(l10n.downloadTasksEmpty))

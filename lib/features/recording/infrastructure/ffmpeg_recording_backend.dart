@@ -7,8 +7,8 @@ import 'package:path/path.dart' as p;
 import '../domain/recording_backend.dart';
 import 'ffmpeg_kit_runner.dart';
 
-/// Local-file technical baseline. Does not imply network recording or gallery
-/// support. A successful result has passed probe, frame counts and full decode.
+/// Exports local files or finite playlists owned by the shared cache.
+/// A successful result has passed probe, frame counts and full decode.
 class FfmpegRecordingBackend implements RecordingBackend {
   const FfmpegRecordingBackend({this.runner = const FfmpegKitRunner()});
 
@@ -16,8 +16,14 @@ class FfmpegRecordingBackend implements RecordingBackend {
 
   @override
   Future<MediaProbeResult> probe(String localPath) async {
-    _requireLocalPath(localPath);
-    final command = await runner.start(_probeArguments(localPath), probe: true);
+    return probeInput(LocalRecordingInput(localPath));
+  }
+
+  @override
+  Future<MediaProbeResult> probeInput(RecordingInput input) async {
+    _checkInput(input);
+    final command = await runner
+        .start(_probeArguments(input.location, input: input), probe: true);
     final result = await command.completed;
     if (!result.succeeded) {
       throw const RecordingFailure(ExportStage.preparing, '无法探测本地媒体');
@@ -27,9 +33,14 @@ class FfmpegRecordingBackend implements RecordingBackend {
 
   @override
   Future<ExportHandle> exportClip(ClipExportRequest request) async {
-    _requireLocalPath(request.inputPath);
+    _checkInput(request.input);
     _requireLocalPath(request.outputDirectory);
     if (!RegExp(r'^[a-zA-Z0-9_-]{1,80}$').hasMatch(request.taskId) ||
+        request.fileName.isEmpty ||
+        request.fileName.length > 120 ||
+        RegExp(r'[<>:"/\\|?*\x00-\x1f]').hasMatch(request.fileName) ||
+        request.fileName.endsWith('.') ||
+        request.fileName.endsWith(' ') ||
         request.start < Duration.zero ||
         request.duration <= Duration.zero ||
         request.videoStreamIndex < 0 ||
@@ -50,14 +61,38 @@ class FfmpegRecordingBackend implements RecordingBackend {
     }
   }
 
+  static void _checkInput(RecordingInput input) {
+    switch (input) {
+      case LocalRecordingInput():
+        _requireLocalPath(input.location);
+      case CachedRecordingInput():
+        input.lease.checkAvailable();
+    }
+  }
+
+  static List<String> _inputOptions(RecordingInput input) => [
+        '-protocol_whitelist',
+        input is CachedRecordingInput ? 'http,tcp' : 'file',
+        '-format_whitelist',
+        input is CachedRecordingInput
+            ? 'hls,mpegts'
+            : 'mov,matroska,webm,mpegts,avi',
+        if (input is CachedRecordingInput) ...['-rw_timeout', '60000000'],
+      ];
+
   static List<String> _probeArguments(String path,
-          {bool countFrames = false}) =>
+          {bool countFrames = false, RecordingInput? input}) =>
       [
-        '-v', 'error', '-protocol_whitelist', 'file',
-        // Exclude playlists and indirect/network demuxers in this phase.
-        '-format_whitelist', 'mov,matroska,webm,mpegts,avi',
+        '-v',
+        'error',
+        ..._inputOptions(input ?? LocalRecordingInput(path)),
         if (countFrames) '-count_frames',
-        '-show_format', '-show_streams', '-of', 'json', '-i', path,
+        '-show_format',
+        '-show_streams',
+        '-of',
+        'json',
+        '-i',
+        path,
       ];
 
   static MediaProbeResult parseProbe(String output) {
@@ -153,11 +188,18 @@ class _ExportTask implements ExportHandle {
     ExportResult result;
     try {
       _setStage(ExportStage.preparing);
-      if (!await File(request.inputPath).exists()) {
+      FfmpegRecordingBackend._checkInput(request.input);
+      final cachedInput = request.input is CachedRecordingInput
+          ? request.input as CachedRecordingInput : null;
+      await cachedInput?.lease.prepare(checkCancelled: _checkCancelled);
+      final readRevision = cachedInput?.lease.readFailureRevision;
+      if (request.input is LocalRecordingInput &&
+          !await File(request.input.location).exists()) {
         throw const RecordingFailure(ExportStage.preparing, '本地源文件不存在');
       }
       final input = FfmpegRecordingBackend.parseProbe((await _execute(
-        FfmpegRecordingBackend._probeArguments(request.inputPath),
+        FfmpegRecordingBackend._probeArguments(request.input.location,
+            input: request.input),
         probe: true,
       ))
           .output);
@@ -188,18 +230,16 @@ class _ExportTask implements ExportHandle {
       final copy = request.encoding == ClipEncoding.streamCopy;
       await _execute([
         '-hide_banner',
+        '-xerror',
         '-v',
         'error',
         '-nostdin',
         '-n',
-        '-protocol_whitelist',
-        'file',
-        '-format_whitelist',
-        'mov,matroska,webm,mpegts,avi',
+        ...FfmpegRecordingBackend._inputOptions(request.input),
         '-ss',
         _seconds(request.start),
         '-i',
-        request.inputPath,
+        request.input.location,
         '-t',
         _seconds(request.duration),
         '-map',
@@ -235,6 +275,12 @@ class _ExportTask implements ExportHandle {
         copy ? 'matroska' : 'mp4',
         _partial!.path,
       ]);
+      if (cachedInput != null) {
+        cachedInput.lease.checkAvailable();
+        if (cachedInput.lease.readFailureRevision != readRevision) {
+          throw const RecordingFailure(ExportStage.exporting, '读取缓存分片失败，未将不完整片段保存为成品');
+        }
+      }
       _setStage(ExportStage.validating);
       final output = FfmpegRecordingBackend.parseProbe((await _execute(
         FfmpegRecordingBackend._probeArguments(_partial!.path,
@@ -244,7 +290,8 @@ class _ExportTask implements ExportHandle {
           .output);
       final video = output.streams.where((s) => s.type == 'video').toList();
       final audio = output.streams.where((s) => s.type == 'audio').toList();
-      if (video.length != 1 ||
+      if (output.duration + const Duration(milliseconds: 500) < request.duration ||
+          video.length != 1 ||
           audio.length != (input.hasAudio ? 1 : 0) ||
           [...video, ...audio].any((s) => (s.frames ?? 0) <= 0) ||
           video.single.codec != (copy ? videos.single.codec : 'h264') ||
@@ -274,8 +321,8 @@ class _ExportTask implements ExportHandle {
       ]);
       _checkCancelled();
       _setStage(ExportStage.saving);
-      final saved =
-          await _partial!.rename(p.join(_directory!.path, 'clip.$extension'));
+      final saved = await _partial!
+          .rename(p.join(_directory!.path, '${request.fileName}.$extension'));
       result = ExportResult(
           taskId: request.taskId,
           status: ExportStatus.savedLocal,

@@ -21,11 +21,76 @@ import 'package:anime_flow/features/play/presentation/providers/play_provider.da
 import 'package:anime_flow/features/play/presentation/providers/video_ui_provider.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/foundation.dart';
+import 'package:flutter/widgets.dart' show AppLifecycleState;
 import 'package:hive_ce/hive.dart';
+import 'package:anime_flow/features/recording/application/recording_controller.dart';
+import 'package:anime_flow/features/recording/application/recording_service.dart';
+import 'package:anime_flow/features/recording/domain/recording_backend.dart';
+import 'package:anime_flow/shared/models/player/play/play_history_event_type.dart';
+import 'package:anime_flow/shared/models/enums/video_controls_icon_type.dart';
+import '../../../recording/recording_test_support.dart';
 
 void main() {
   setUpAll(() => Storage.setting = _Settings());
   setUp(() => (Storage.setting as _Settings).stored.clear());
+
+  for (final action in ['seek', 'pause', 'episode', 'cover', 'background']) {
+    test('recording freezes old media interval before $action', () async {
+      final root = await Directory.systemTemp.createTemp('recording-session-');
+      final backend = ControlledRecordingBackend();
+      final service = RecordingService(directory: root, backend: backend);
+      final recorder = RecordingController(serviceFactory: () async => service);
+      final state = _State();
+      final factory = _Factory();
+      final session = _Session(factory, state: state, recorder: recorder);
+      await session.playbackCoordinator.initialize();
+      await session.initPlayState(_request(1));
+      state.value = state.value.copyWith(position: const Duration(seconds: 10));
+      await session.toggleRecording();
+      recorder.updatePosition(const Duration(seconds: 13));
+      state.value = state.value.copyWith(position: const Duration(seconds: 13));
+      switch (action) {
+        case 'seek':
+          session.seekTo(const Duration(seconds: 50));
+        case 'pause':
+          session.playOrPauseVideo();
+        case 'episode':
+          await session.initPlayState(_request(2));
+        case 'cover':
+          session.pauseForRouteCover();
+        case 'background':
+          session.didChangeAppLifecycleState(AppLifecycleState.paused);
+      }
+      expect(service.tasks.single.start, const Duration(seconds: 10));
+      expect(service.tasks.single.end, const Duration(seconds: 13));
+      expect(recorder.active, isFalse);
+      await eventually(() => backend.handles.isNotEmpty);
+      backend.handles.single.finish(ExportStatus.cancelled);
+      await eventually(() => !service.tasks.single.busy);
+      await service.remove(service.tasks.single);
+      recorder.dispose();
+      await session.playbackCoordinator.dispose();
+      await root.delete(recursive: true);
+    });
+  }
+
+  test('kernel switch preserves an active marker on the same source', () async {
+    final root = await Directory.systemTemp.createTemp('recording-kernel-');
+    final backend = ControlledRecordingBackend();
+    final service = RecordingService(directory: root, backend: backend);
+    final recorder = RecordingController(serviceFactory: () async => service);
+    final factory = _Factory();
+    final session = _Session(factory, recorder: recorder);
+    await session.playbackCoordinator.initialize();
+    await session.initPlayState(_request(1));
+    await session.toggleRecording();
+    expect(await session.switchKernel(PlayerKernel.fvp), isTrue);
+    expect(recorder.value.status, RecordingMarkerStatus.marking);
+    recorder.dispose(); // No progress means no task.
+    expect(service.tasks, isEmpty);
+    await session.playbackCoordinator.dispose();
+    await root.delete(recursive: true);
+  });
 
   test('cache stays opt-in and direct sources retain authentication headers',
       () async {
@@ -319,9 +384,11 @@ String _localPath(int episode) =>
 class _Session extends PlaySession {
   _Session(_Factory factory,
       {_State? state,
+      RecordingController? recorder,
       bool adBlocker = false,
       Future<HlsMediaCache> Function()? cacheFactory})
       : super(
+          recordingController: recorder,
           mediaCacheFactory: cacheFactory ?? sharedMediaCache,
           shadersDirectory: Directory.systemTemp,
           playStateActions: state ?? _State(),
@@ -395,6 +462,8 @@ class _Engine implements PlayerEngine {
   @override
   Future<void> setRate(double rate) async {}
   @override
+  Future<void> seek(Duration position) async {}
+  @override
   Future<void> dispose() async {
     disposeCount++;
   }
@@ -436,6 +505,9 @@ class _State implements PlayStateNotifier {
 
 class _Ui implements VideoUiStateActions {
   @override
+  VideoControlsIndicatorType get currentIndicatorType =>
+      VideoControlsIndicatorType.noIndicator;
+  @override
   dynamic noSuchMethod(Invocation invocation) => null;
 }
 
@@ -445,6 +517,10 @@ class _Episodes implements Episodes {
 }
 
 class _Progress implements PlaybackProgressManager {
+  @override
+  Future<void> save(
+      {Duration? position,
+      PlayHistoryEventType eventType = PlayHistoryEventType.defaults}) async {}
   @override
   dynamic noSuchMethod(Invocation invocation) => null;
 }

@@ -1,5 +1,24 @@
-/// Stage 0 accepts prepared local files only. Network/cache inputs are added
-/// once the shared proxy has its own capability and lifetime checks.
+import 'package:anime_flow/features/media_cache/application/hls_media_cache.dart';
+
+/// A cache input requires a live application-owned lease, never an arbitrary URL.
+sealed class RecordingInput {
+  const RecordingInput();
+  String get location;
+}
+
+class LocalRecordingInput extends RecordingInput {
+  const LocalRecordingInput(this.location);
+  @override
+  final String location;
+}
+
+class CachedRecordingInput extends RecordingInput {
+  const CachedRecordingInput(this.lease);
+  final HlsCacheLease lease;
+  @override
+  String get location => lease.playlistUri.toString();
+}
+
 enum ClipEncoding { streamCopy, h264Aac }
 
 enum ExportStage { preparing, exporting, validating, saving }
@@ -9,17 +28,19 @@ enum ExportStatus { savedLocal, cancelled, failed }
 class ClipExportRequest {
   const ClipExportRequest({
     required this.taskId,
-    required this.inputPath,
+    required this.input,
     required this.outputDirectory,
     required this.start,
     required this.duration,
     required this.videoStreamIndex,
     required this.audioStreamIndex,
     this.encoding = ClipEncoding.streamCopy,
+    this.fileName = 'clip',
   });
 
   final String taskId;
-  final String inputPath;
+  final RecordingInput input;
+  final String fileName;
   final String outputDirectory;
   final Duration start;
   final Duration duration;
@@ -105,4 +126,5 @@ abstract interface class ExportHandle {
 abstract interface class RecordingBackend {
   Future<ExportHandle> exportClip(ClipExportRequest request);
   Future<MediaProbeResult> probe(String localPath);
+  Future<MediaProbeResult> probeInput(RecordingInput input);
 }

@@ -1885,6 +1885,66 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get danmakuSwitching => '正在切換彈幕…';
+
+  @override
+  String get recordingFiles => '录制文件';
+
+  @override
+  String get recordingLoadFailed => '无法读取录制目录';
+
+  @override
+  String get recordingLocalOnly => '保存源视频与声音，不包含弹幕和滤镜；当前仅保存到本地，尚未导入相册。';
+
+  @override
+  String get recordingEmpty => '暂无录制片段';
+
+  @override
+  String get recordingQueued => '等待生成';
+
+  @override
+  String get recordingSaved => '已保存到本地';
+
+  @override
+  String get recordingFailed => '生成失败';
+
+  @override
+  String get recordingCancelled => '已取消';
+
+  @override
+  String get recordingPreparing => '准备录制';
+
+  @override
+  String get recordingValidating => '正在校验音视频';
+
+  @override
+  String get recordingSaving => '正在保存';
+
+  @override
+  String get recordingExporting => '正在生成视频';
+
+  @override
+  String get recordingOpen => '播放文件';
+
+  @override
+  String get recordingTranscodeRetry => '转为 H.264/AAC 重试';
+
+  @override
+  String get recordingDeletePrompt => '删除此录制文件和任务记录？';
+
+  @override
+  String get recordingDiscard => '放弃并释放缓存';
+
+  @override
+  String get recordingActionFailed => '操作失败，请检查文件和访问权限';
+
+  @override
+  String get recordingStart => '开始录制（原始画面与声音，边界受关键帧影响）';
+
+  @override
+  String get recordingStop => '结束录制';
+
+  @override
+  String get recordingUnavailable => '请在播放设置启用共享媒体缓存，并重新打开支持的视频';
 }
 
 /// The translations for Chinese, using the Han script (`zh_Hans`).
@@ -3767,6 +3827,66 @@ class AppLocalizationsZhHans extends AppLocalizationsZh {
 
   @override
   String get danmakuSwitching => '正在切换弹幕…';
+
+  @override
+  String get recordingFiles => '录制文件';
+
+  @override
+  String get recordingLoadFailed => '无法读取录制目录';
+
+  @override
+  String get recordingLocalOnly => '保存源视频与声音，不包含弹幕和滤镜；当前仅保存到本地，尚未导入相册。';
+
+  @override
+  String get recordingEmpty => '暂无录制片段';
+
+  @override
+  String get recordingQueued => '等待生成';
+
+  @override
+  String get recordingSaved => '已保存到本地';
+
+  @override
+  String get recordingFailed => '生成失败';
+
+  @override
+  String get recordingCancelled => '已取消';
+
+  @override
+  String get recordingPreparing => '准备录制';
+
+  @override
+  String get recordingValidating => '正在校验音视频';
+
+  @override
+  String get recordingSaving => '正在保存';
+
+  @override
+  String get recordingExporting => '正在生成视频';
+
+  @override
+  String get recordingOpen => '播放文件';
+
+  @override
+  String get recordingTranscodeRetry => '转为 H.264/AAC 重试';
+
+  @override
+  String get recordingDeletePrompt => '删除此录制文件和任务记录？';
+
+  @override
+  String get recordingDiscard => '放弃并释放缓存';
+
+  @override
+  String get recordingActionFailed => '操作失败，请检查文件和访问权限';
+
+  @override
+  String get recordingStart => '开始录制（原始画面与声音，边界受关键帧影响）';
+
+  @override
+  String get recordingStop => '结束录制';
+
+  @override
+  String get recordingUnavailable => '请在播放设置启用共享媒体缓存，并重新打开支持的视频';
 }
 
 /// The translations for Chinese, as used in Hong Kong, using the Han script (`zh_Hant_HK`).
@@ -5568,6 +5688,66 @@ class AppLocalizationsZhHantHk extends AppLocalizationsZh {
 
   @override
   String get danmakuSwitching => '正在切換彈幕…';
+
+  @override
+  String get recordingFiles => '录制文件';
+
+  @override
+  String get recordingLoadFailed => '无法读取录制目录';
+
+  @override
+  String get recordingLocalOnly => '保存源视频与声音，不包含弹幕和滤镜；当前仅保存到本地，尚未导入相册。';
+
+  @override
+  String get recordingEmpty => '暂无录制片段';
+
+  @override
+  String get recordingQueued => '等待生成';
+
+  @override
+  String get recordingSaved => '已保存到本地';
+
+  @override
+  String get recordingFailed => '生成失败';
+
+  @override
+  String get recordingCancelled => '已取消';
+
+  @override
+  String get recordingPreparing => '准备录制';
+
+  @override
+  String get recordingValidating => '正在校验音视频';
+
+  @override
+  String get recordingSaving => '正在保存';
+
+  @override
+  String get recordingExporting => '正在生成视频';
+
+  @override
+  String get recordingOpen => '播放文件';
+
+  @override
+  String get recordingTranscodeRetry => '转为 H.264/AAC 重试';
+
+  @override
+  String get recordingDeletePrompt => '删除此录制文件和任务记录？';
+
+  @override
+  String get recordingDiscard => '放弃并释放缓存';
+
+  @override
+  String get recordingActionFailed => '操作失败，请检查文件和访问权限';
+
+  @override
+  String get recordingStart => '开始录制（原始画面与声音，边界受关键帧影响）';
+
+  @override
+  String get recordingStop => '结束录制';
+
+  @override
+  String get recordingUnavailable => '请在播放设置启用共享媒体缓存，并重新打开支持的视频';
 }
 
 /// The translations for Chinese, as used in Taiwan, using the Han script (`zh_Hant_TW`).
@@ -7369,4 +7549,64 @@ class AppLocalizationsZhHantTw extends AppLocalizationsZh {
 
   @override
   String get danmakuSwitching => '正在切換彈幕…';
+
+  @override
+  String get recordingFiles => '录制文件';
+
+  @override
+  String get recordingLoadFailed => '无法读取录制目录';
+
+  @override
+  String get recordingLocalOnly => '保存源视频与声音，不包含弹幕和滤镜；当前仅保存到本地，尚未导入相册。';
+
+  @override
+  String get recordingEmpty => '暂无录制片段';
+
+  @override
+  String get recordingQueued => '等待生成';
+
+  @override
+  String get recordingSaved => '已保存到本地';
+
+  @override
+  String get recordingFailed => '生成失败';
+
+  @override
+  String get recordingCancelled => '已取消';
+
+  @override
+  String get recordingPreparing => '准备录制';
+
+  @override
+  String get recordingValidating => '正在校验音视频';
+
+  @override
+  String get recordingSaving => '正在保存';
+
+  @override
+  String get recordingExporting => '正在生成视频';
+
+  @override
+  String get recordingOpen => '播放文件';
+
+  @override
+  String get recordingTranscodeRetry => '转为 H.264/AAC 重试';
+
+  @override
+  String get recordingDeletePrompt => '删除此录制文件和任务记录？';
+
+  @override
+  String get recordingDiscard => '放弃并释放缓存';
+
+  @override
+  String get recordingActionFailed => '操作失败，请检查文件和访问权限';
+
+  @override
+  String get recordingStart => '开始录制（原始画面与声音，边界受关键帧影响）';
+
+  @override
+  String get recordingStop => '结束录制';
+
+  @override
+  String get recordingUnavailable => '请在播放设置启用共享媒体缓存，并重新打开支持的视频';
 }

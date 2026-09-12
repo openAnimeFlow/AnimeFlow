@@ -60,6 +60,13 @@ android {
             }
         }
     }
+
+    packaging {
+        jniLibs {
+            // Package one copy per ABI; keep duplicate checks for other libraries.
+            pickFirsts += "lib/**/libc++_shared.so"
+        }
+    }
 }
 
 flutter {

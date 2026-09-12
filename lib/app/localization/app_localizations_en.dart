@@ -1939,4 +1939,69 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get danmakuSwitching => 'Switching danmaku…';
+
+  @override
+  String get recordingFiles => 'Recordings';
+
+  @override
+  String get recordingLoadFailed => 'Could not read the recordings folder';
+
+  @override
+  String get recordingLocalOnly =>
+      'Saves source video and audio without comments or filters. Files are saved locally; gallery export is not available yet.';
+
+  @override
+  String get recordingEmpty => 'No recorded clips';
+
+  @override
+  String get recordingQueued => 'Queued';
+
+  @override
+  String get recordingSaved => 'Saved locally';
+
+  @override
+  String get recordingFailed => 'Export failed';
+
+  @override
+  String get recordingCancelled => 'Cancelled';
+
+  @override
+  String get recordingPreparing => 'Preparing recording';
+
+  @override
+  String get recordingValidating => 'Validating video and audio';
+
+  @override
+  String get recordingSaving => 'Saving';
+
+  @override
+  String get recordingExporting => 'Generating video';
+
+  @override
+  String get recordingOpen => 'Play file';
+
+  @override
+  String get recordingTranscodeRetry => 'Retry as H.264/AAC';
+
+  @override
+  String get recordingDeletePrompt =>
+      'Delete this recording file and its task record?';
+
+  @override
+  String get recordingDiscard => 'Discard and release cache';
+
+  @override
+  String get recordingActionFailed =>
+      'Operation failed. Check the file and access permissions.';
+
+  @override
+  String get recordingStart =>
+      'Start recording (source video and audio; keyframe-aligned boundaries)';
+
+  @override
+  String get recordingStop => 'Stop recording';
+
+  @override
+  String get recordingUnavailable =>
+      'Enable shared media cache in playback settings, then reopen a supported video';
 }

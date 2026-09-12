@@ -8,6 +8,8 @@ import 'package:anime_flow/features/play/domain/player/player_event.dart';
 import 'package:anime_flow/features/play/infrastructure/player/fvp/fvp_engine.dart';
 import 'package:anime_flow/features/play/infrastructure/player/media_kit/media_kit_engine.dart';
 import 'package:anime_flow/features/recording/infrastructure/ffmpeg_kit_runner.dart';
+import 'package:anime_flow/features/recording/application/recording_controller.dart';
+import 'package:anime_flow/features/recording/application/recording_service.dart';
 import 'package:anime_flow/features/recording/infrastructure/ffmpeg_recording_backend.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -35,7 +37,10 @@ void main() {
       FvpEngine(hardwareDecoder: false),
     ];
     const runner = FfmpegKitRunner();
-    final backend = FfmpegRecordingBackend(runner: runner);
+    const backend = FfmpegRecordingBackend(runner: runner);
+    final service = RecordingService(
+        directory: Directory(p.join(root.path, 'recordings')),
+        backend: backend);
     Future<void> execute(List<String> arguments) async {
       final command = await runner.start(arguments);
       final result = await command.completed
@@ -45,6 +50,25 @@ void main() {
         throw TimeoutException('Native FFmpeg timeout');
       });
       expect(result.returnCode, 0, reason: result.output);
+    }
+
+    Future<List<String>> frameHashes(String input, String name) async {
+      final output = File(p.join(root.path, '$name.framemd5'));
+      await execute([
+        '-v',
+        'error',
+        '-i',
+        input,
+        '-map',
+        '0:v:0',
+        '-f',
+        'framemd5',
+        output.path
+      ]);
+      return (await output.readAsLines())
+          .where((line) => line.isNotEmpty && !line.startsWith('#'))
+          .map((line) => line.split(',').last.trim())
+          .toList();
     }
 
     HlsCacheSession? session;
@@ -87,6 +111,9 @@ void main() {
         p.join(root.path, 's%d.ts'),
         p.join(root.path, 'index.m3u8'),
       ]);
+      final sourceFrames =
+          await frameHashes(p.join(root.path, 'index.m3u8'), 'source');
+      expect(sourceFrames, hasLength(150));
       origin.listen((request) async {
         if (request.headers.value('authorization') != 'Bearer test-only') {
           request.response.statusCode = 401;
@@ -111,6 +138,9 @@ void main() {
       ));
       lease = session.retainRange(Duration.zero, session.timeline.duration);
       for (final engine in engines) {
+        final recorder =
+            RecordingController(serviceFactory: () async => service);
+        var currentPosition = Duration.zero;
         await engine.initialize();
         subscriptions.add(engine.events.listen((e) {
           if (e is PlayerError) errors.add(e.error);
@@ -121,10 +151,15 @@ void main() {
                 height: 180,
                 child: engine.buildVideoSurface(fit: BoxFit.contain))));
         var progressed = false;
+        final startAt = engine == engines.first ? 300 : 4300;
         subscriptions.add(engine.events.listen((e) {
           if (e is PlayerPositionChanged &&
-              e.position > const Duration(milliseconds: 200)) {
+              e.position.inMilliseconds > startAt) {
             progressed = true;
+          }
+          if (e is PlayerPositionChanged) {
+            currentPosition = e.position;
+            recorder.updatePosition(e.position);
           }
         }));
         await engine.open(session.playbackSource, autoPlay: true);
@@ -136,42 +171,60 @@ void main() {
         final screenshot = await engine.screenshot();
         expect(screenshot, isNotNull);
         expect(screenshot, isNotEmpty);
-        final output = p.join(root.path, '${engine.kernel.name}.mkv');
-        await execute([
-          '-v',
-          'error',
-          '-nostdin',
-          '-y',
-          '-protocol_whitelist',
-          'http,tcp',
-          '-i',
-          lease.playlistUri.toString(),
-          '-map',
-          '0:v:0',
-          '-map',
-          '0:a:0',
-          '-c',
-          'copy',
-          output,
-        ]);
-        final probe = await backend.probe(output);
+        final originalKernel = engine.kernel;
+        await recorder.start(
+            title: '${engine.kernel.name} test',
+            position: currentPosition,
+            cache: session);
+        expect(recorder.value.status, RecordingMarkerStatus.marking,
+            reason: recorder.value.message);
+        final stopAt = engine == engines.first ? 3300 : 5700;
+        for (var i = 0;
+            i < 100 && currentPosition.inMilliseconds < stopAt;
+            i++) {
+          await tester.pump(const Duration(milliseconds: 100));
+        }
+        final task = recorder.freeze();
+        expect(task, isNotNull);
+        recorder.dispose();
+        if (engine == engines.last) {
+          // A frozen job is independent of the playback owner and controller.
+          await engine.stop();
+          await session.releasePlayback();
+          await lease.release();
+        }
+        for (var i = 0; i < 600 && task!.busy; i++) {
+          await tester.pump(const Duration(milliseconds: 100));
+        }
+        expect(task!.status, RecordingTaskStatus.saved, reason: task.error);
+        expect(engine.kernel, originalKernel);
+        final clipFrames =
+            await frameHashes(task.localPath!, engine.kernel.name);
+        expect(clipFrames, isNotEmpty);
+        final firstSourceFrame = sourceFrames.indexOf(clipFrames.first);
+        final lastSourceFrame = sourceFrames.indexOf(clipFrames.last);
+        expect(firstSourceFrame, greaterThanOrEqualTo(0));
+        expect(lastSourceFrame, greaterThanOrEqualTo(firstSourceFrame));
+        // Compare decoded content with the fixture, not only container duration.
+        expect(
+            firstSourceFrame / 25,
+            inInclusiveRange(
+                (task.start.inMilliseconds / 1000 - 2.2).clamp(0, 6),
+                task.start.inMilliseconds / 1000 + .2));
+        expect(
+            lastSourceFrame / 25, closeTo(task.end.inMilliseconds / 1000, .25));
+        final probe = await backend.probe(task.localPath!);
         expect(probe.hasAudio, isTrue);
         expect(probe.streams.any((s) => s.type == 'video'), isTrue);
-        expect(probe.duration.inMilliseconds, inInclusiveRange(5800, 6300));
-        await execute([
-          '-v',
-          'error',
-          '-xerror',
-          '-i',
-          output,
-          '-map',
-          '0:v:0',
-          '-map',
-          '0:a:0',
-          '-f',
-          'null',
-          '-'
-        ]);
+        // Fixture GOP is two seconds. Stream copy may include a preceding GOP.
+        expect(
+            probe.duration.inMilliseconds,
+            inInclusiveRange(
+                (task.duration.inMilliseconds - 200).clamp(500, 10000),
+                task.duration.inMilliseconds + 2200));
+        if (engine == engines.last) {
+          expect(task.start.inMilliseconds, greaterThan(4000));
+        }
         await engine.stop();
       }
       expect(errors, isEmpty);
@@ -182,19 +235,11 @@ void main() {
           .toList();
       expect(segmentCounts, hasLength(3));
       expect(segmentCounts, everyElement(1));
-      await session.releasePlayback();
-      // The lease must keep the proxy alive after the playback owner is gone.
-      await execute([
-        '-v',
-        'error',
-        '-protocol_whitelist',
-        'http,tcp',
-        '-i',
-        lease.playlistUri.toString(),
-        '-f',
-        'null',
-        '-'
-      ]);
+      expect(service.tasks, hasLength(2));
+      expect(
+          service.tasks
+              .every((task) => task.status == RecordingTaskStatus.saved),
+          isTrue);
       expect(counts.values, everyElement(1));
     } finally {
       await tester.pumpWidget(const SizedBox.shrink());

@@ -8,6 +8,7 @@ import 'package:anime_flow/core/utils/system_util.dart';
 import 'package:anime_flow/shared/widgets/notification_toast.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:anime_flow/features/recording/presentation/recording_controls.dart';
 
 class RightAreaControl extends ConsumerWidget {
   const RightAreaControl({super.key});
@@ -20,6 +21,7 @@ class RightAreaControl extends ConsumerWidget {
     final fullscreen =
         ref.watch(playStateProvider.select((s) => s.isFullscreen));
     final position = ref.watch(playStateProvider.select((s) => s.position));
+    final playing = ref.watch(playStateProvider.select((s) => s.playing));
     final isWideScreen =
         ref.watch(playStateProvider.select((s) => s.isWideScreen));
     return AnimatedSwitcher(
@@ -34,6 +36,7 @@ class RightAreaControl extends ConsumerWidget {
                 key: ValueKey<bool>(isShowControlsUi),
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
+                  RecordingControls(session: playController, playing: playing),
                   ValueListenableBuilder<MediaCacheIssue>(
                     valueListenable: playController.cacheStatus,
                     builder: (context, status, _) {

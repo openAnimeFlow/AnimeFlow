@@ -6,6 +6,7 @@ import 'dart:typed_data';
 import 'package:anime_flow/features/media_cache/application/hls_media_cache.dart';
 import 'package:anime_flow/features/media_cache/application/shared_media_cache.dart';
 import 'package:anime_flow/features/media_cache/domain/hls_snapshot.dart';
+import 'package:anime_flow/features/recording/application/recording_controller.dart';
 
 import 'package:anime_flow/core/constants/constants.dart';
 import 'package:anime_flow/core/constants/storage_key.dart';
@@ -407,10 +408,11 @@ class PlayRequest {
   });
 }
 
-class PlaySession {
+class PlaySession with WidgetsBindingObserver {
   static const _parseSuccessResult = '视频解析成功';
 
   PlaySession({
+    RecordingController? recordingController,
     this.mediaCacheFactory = sharedMediaCache,
     required this.shadersDirectory,
     required PlayStateNotifier playStateActions,
@@ -424,13 +426,15 @@ class PlaySession {
       required int episodeId,
       required bool watched,
     }) setEpisodeWatched,
-  })  : _playStateActions = playStateActions,
+  })  : recording = recordingController ?? RecordingController(),
+        _playStateActions = playStateActions,
         _videoUiStateActions = videoUiStateActions,
         _episodesActions = episodesActions,
         _setEpisodeWatched = setEpisodeWatched,
         _danmakuChineseMode = initialDanmakuChineseMode;
 
   final PlayerEngineFactory engineFactory;
+  final RecordingController recording;
   final Future<HlsMediaCache> Function() mediaCacheFactory;
   final cacheStatus = ValueNotifier<MediaCacheIssue>(MediaCacheIssue.disabled);
   HlsCacheSession? _cacheSession;
@@ -527,6 +531,7 @@ class PlaySession {
   static const Duration _bufferingPositionTolerance =
       Duration(milliseconds: 500);
   void init() {
+    WidgetsBinding.instance.addObserver(this);
     final adBlocker = setting.get(PlaybackKey.adBlocker, defaultValue: false);
     final preferredKernel = _readPreferredPlayerKernel();
     playbackCoordinator = PlaybackCoordinator(
@@ -640,6 +645,19 @@ class PlaySession {
   }
 
   void _handlePlayerEvent(PlayerEvent event) {
+    if (_isDisposed) return;
+    if (!_playStateActions.value.switchingKernel) {
+      if (event is PlayerPositionChanged) {
+        recording.updatePosition(event.position);
+      }
+      if (event is PlayerCompleted ||
+          event is PlayerError ||
+          (event is PlayerPlayingChanged &&
+              !event.playing &&
+              !_isPlayerBuffering)) {
+        recording.freeze();
+      }
+    }
     if (event is PlayerPlayingChanged) {
       if (_lastPlayerPlaying && !event.playing) {
         playbackProgressManager.saveAfterPause();
@@ -718,6 +736,8 @@ class PlaySession {
   }
 
   void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
+    recording.dispose();
     _isDisposed = true;
     cacheStatus.dispose();
     unawaited(playbackProgressManager.save());
@@ -733,6 +753,7 @@ class PlaySession {
   }
 
   void pauseForRouteCover() {
+    recording.freeze();
     cancelScheduledStop();
     unawaited(playbackCoordinator.pause());
   }
@@ -744,6 +765,7 @@ class PlaySession {
       !_isDisposed && requestId == _playRequestId;
 
   Future<void> stopCurrentMedia() async {
+    recording.freeze();
     _playRequestId++;
     _danmakuRequestId++;
     _playStateActions.setDanmakuLoadStatus(DanmakuLoadStatus.waitingForVideo);
@@ -761,6 +783,7 @@ class PlaySession {
   /// 初始化播放状态
   Future<void> initPlayState(PlayRequest state) async {
     if (_isDisposed) return;
+    recording.freeze();
     final requestId = ++_playRequestId;
     int? automaticDanmakuRequestId;
     _danmakuRequestId++;
@@ -824,6 +847,7 @@ class PlaySession {
             cached.onIssue = (issue) {
               if (!_isDisposed && identical(_cacheSession, cached)) {
                 cacheStatus.value = issue;
+                recording.freeze();
               }
             };
           } catch (error) {
@@ -1207,6 +1231,7 @@ class PlaySession {
   void playOrPauseVideo() {
     _videoUiStateActions.updateMainAxisAlignmentType(MainAxisAlignment.start);
     if (_playStateActions.value.playing) {
+      recording.freeze();
       unawaited(playbackCoordinator.pause());
     } else {
       unawaited(playbackCoordinator.play());
@@ -1240,7 +1265,10 @@ class PlaySession {
 
   /// 跳转到指定位置
   void seekTo(Duration pos) {
-    unawaited(playbackCoordinator.seek(pos));
+    recording.freeze();
+    unawaited(_serializePlaybackChange(() async {
+      if (!_isDisposed) await playbackCoordinator.seek(pos);
+    }));
     _updateEffectiveBufferingState(position: pos);
     unawaited(
       playbackProgressManager.save(
@@ -1329,6 +1357,7 @@ class PlaySession {
             scheduledStopDuration - 1,
           );
         } else {
+          recording.freeze();
           unawaited(playbackCoordinator.pause());
           timer.cancel();
           _stopTimer = null;
@@ -1336,6 +1365,7 @@ class PlaySession {
       });
     } else {
       _playStateActions.setScheduledStopDuration(0);
+      recording.freeze();
       await playbackCoordinator.pause();
     }
   }
@@ -1371,4 +1401,33 @@ class PlaySession {
   Future<Uint8List?> takeScreenshot() => playbackCoordinator.screenshot();
 
   Future<void> stop() => stopCurrentMedia();
+
+  Future<void> toggleRecording() {
+    if (recording.active) {
+      recording.freeze();
+      return Future.value();
+    }
+    return _serializePlaybackChange(() async {
+      if (_isDisposed ||
+          !_playStateActions.value.playing ||
+          _currentSource == null) {
+        return;
+      }
+      await recording.start(
+          title: '${subjectName ?? 'Video'} E$episodeSort',
+          position: _playStateActions.value.position,
+          cache:
+              cacheStatus.value == MediaCacheIssue.ready ? _cacheSession : null,
+          localPath: isLocalPlayback ? _currentSource!.uri.toFilePath() : null);
+    });
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (state == AppLifecycleState.paused ||
+        state == AppLifecycleState.hidden ||
+        state == AppLifecycleState.detached) {
+      recording.freeze();
+    }
+  }
 }

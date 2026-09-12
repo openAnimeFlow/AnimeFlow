@@ -130,14 +130,16 @@ class FlowApi {
     return danmakus;
   }
 
-  /// 搜索番剧元素
-  static Future<DanmakuSearchResponse> searchResponse(
-    String title, {
-    int type = 1,
-  }) async {
+  /// 使用 AnimeFlow 的新版弹弹Play剧集搜索接口搜索番剧。
+  static Future<DanmakuSearchResponse> searchDanmakuEpisodes(
+    String title,
+  ) async {
     final response = await _client.get(
-      AnimeFlowApi.dandanPlaySearch,
-      queryParameters: {'keyword': title, 'type': type},
+      AnimeFlowApi.dandanPlayEpisodesSearch,
+      queryParameters: {
+        'anime': title,
+        'v2': true,
+      },
     );
     return DanmakuSearchResponse.fromJson(response.data);
   }

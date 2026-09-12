@@ -338,7 +338,7 @@ class _DanmakuCardState extends ConsumerState<DanmakuCard>
                     danmakuSearchResponse = null;
                   });
                   try {
-                    final response = await FlowApi.searchResponse(
+                    final response = await FlowApi.searchDanmakuEpisodes(
                       danmakuFieldController.text,
                     );
                     setDialogState(() {
@@ -346,6 +346,7 @@ class _DanmakuCardState extends ConsumerState<DanmakuCard>
                       isSearchLoading = false;
                     });
                   } catch (e) {
+                    debugPrint('手动搜索弹幕失败: $e');
                     setDialogState(() {
                       isSearchLoading = false;
                     });

@@ -123,8 +123,8 @@ class AnimeFlowApi {
       /// 回调
       callback = '/api/oauth/callback',
 
-      /// 搜索番剧
-      dandanPlaySearch = '/api/v1/danmaku/search',
+      /// 弹弹Play新版剧集搜索
+      dandanPlayEpisodesSearch = '/api/v1/danmaku/search/episodes',
 
       /// 番剧详情
       animeDetail = '/api/v1/danmaku/bangumi',

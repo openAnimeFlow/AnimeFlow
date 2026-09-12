@@ -65,6 +65,7 @@ dependencies:
   screen_brightness_android: ^2.1.3 # 提供 Android 平台的屏幕亮度插件实现。
   screen_brightness_ios: ^2.1.2 # 提供 iOS 平台的屏幕亮度插件实现。
   flutter_volume_controller: ^2.0.1 # 读取、监听和设置设备系统音量。
+  ffmpeg_kit_flutter_new: 4.6.2 # 录制后端；固定原生验证使用的插件版本。
 
   # WebView 与网页容器
   webview_flutter: ^4.13.0 # 在 Flutter 中嵌入并控制原生 WebView。

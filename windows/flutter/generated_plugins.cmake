@@ -5,6 +5,7 @@
 list(APPEND FLUTTER_PLUGIN_LIST
   battery_plus
   connectivity_plus
+  ffmpeg_kit_flutter_new
   file_selector_windows
   flutter_secure_storage_windows
   flutter_volume_controller

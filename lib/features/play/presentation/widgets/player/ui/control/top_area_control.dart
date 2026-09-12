@@ -287,22 +287,23 @@ class _TopAreaControlState extends ConsumerState<TopAreaControl> {
                                       }
                                     },
                                   ),
-                                IconButton(
-                                  tooltip: l10n.settings,
-                                  onPressed: () {
-                                    _showRightSlideDialog(
-                                      barrierDismissible: true,
-                                      context: context,
-                                      barrierLabel: 'VideoSetting',
-                                      child: const VideoSettingDialog(),
-                                    );
-                                  },
-                                  icon: const Icon(
-                                    size: 29,
-                                    color: Colors.white,
-                                    Icons.settings_outlined,
+                                if (fullscreen)
+                                  IconButton(
+                                    tooltip: l10n.settings,
+                                    onPressed: () {
+                                      _showRightSlideDialog(
+                                        barrierDismissible: true,
+                                        context: context,
+                                        barrierLabel: 'VideoSetting',
+                                        child: const VideoSettingDialog(),
+                                      );
+                                    },
+                                    icon: const Icon(
+                                      size: 29,
+                                      color: Colors.white,
+                                      Icons.settings_outlined,
+                                    ),
                                   ),
-                                ),
                                 if (fullscreen)
                                   Consumer(
                                     builder: (context, ref, child) {

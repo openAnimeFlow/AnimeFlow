@@ -587,5 +587,8 @@
   ,"playerKernelMdk": "MDK"
   ,"hardwareDecoding": "硬件解码"
   ,"hardwareDecodingHint": "优先使用硬件解码；切换后会重新加载当前视频。"
-  ,"hardwareDecodingFailed": "切换解码模式失败"
+  ,"hardwareDecodingFailed": "切换解码模式失败",
+  "danmakuWaitingForVideo": "等待视频加载完毕...",
+  "danmakuLoading": "弹幕加载中…",
+  "danmakuSwitching": "正在切换弹幕…"
 }

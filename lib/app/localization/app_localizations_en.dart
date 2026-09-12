@@ -1897,4 +1897,13 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get hardwareDecodingFailed => 'Failed to change decoding mode';
+
+  @override
+  String get danmakuWaitingForVideo => 'Waiting for video to finish loading...';
+
+  @override
+  String get danmakuLoading => 'Loading danmaku…';
+
+  @override
+  String get danmakuSwitching => 'Switching danmaku…';
 }

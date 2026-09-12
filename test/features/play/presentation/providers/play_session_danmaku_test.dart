@@ -32,12 +32,21 @@ void main() {
     final session = _Session(converter);
     final first = session.initPlayState(_request(1, file.path));
     await converter.started.future;
+    expect(
+        session.statuses,
+        containsAllInOrder([
+          DanmakuLoadStatus.waitingForVideo,
+          DanmakuLoadStatus.loading,
+        ]));
     await session.initPlayState(_request(2, file.path));
     expect(converter.calls, 2);
     expect(session.installs, 1);
+    expect(session.statuses.last, DanmakuLoadStatus.idle);
+    final statusCount = session.statuses.length;
     converter.gate.complete();
     await first;
     expect(session.installs, 1);
+    expect(session.statuses.length, statusCount);
   });
 
   test('stopping during conversion prevents installing the pending result',
@@ -52,9 +61,12 @@ void main() {
     final opening = session.initPlayState(_request(1, file.path));
     await converter.started.future;
     await session.stopCurrentMedia();
+    expect(session.statuses.last, DanmakuLoadStatus.waitingForVideo);
+    final statusCount = session.statuses.length;
     converter.gate.complete();
     await opening;
     expect(session.installs, 0);
+    expect(session.statuses.length, statusCount);
   });
 }
 
@@ -74,10 +86,12 @@ PlayRequest _request(int episode, String path) => PlayRequest(
     );
 
 class _Session extends PlaySession {
-  _Session(DanmakuChineseConverter converter)
+  _Session(DanmakuChineseConverter converter) : this._(converter, _State());
+
+  _Session._(DanmakuChineseConverter converter, this.testState)
       : super(
           shadersDirectory: Directory.systemTemp,
-          playStateActions: _State(),
+          playStateActions: testState,
           videoUiStateActions: _Ui(),
           episodesActions: _Episodes(),
           danmakuChineseConverter: converter,
@@ -91,6 +105,8 @@ class _Session extends PlaySession {
         engineFactory: _EngineFactory(_engine), adBlocker: false);
     unawaited(playbackCoordinator.initialize());
   }
+  final _State testState;
+  List<DanmakuLoadStatus> get statuses => testState.statuses;
   int installs = 0;
   final _engine = _Engine();
   @override
@@ -143,6 +159,9 @@ class _Settings implements Box<dynamic> {
 }
 
 class _State implements PlayStateNotifier {
+  final statuses = <DanmakuLoadStatus>[];
+  @override
+  void setDanmakuLoadStatus(DanmakuLoadStatus value) => statuses.add(value);
   @override
   dynamic noSuchMethod(Invocation invocation) => null;
 }

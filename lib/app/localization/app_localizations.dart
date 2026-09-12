@@ -3529,6 +3529,24 @@ abstract class AppLocalizations {
   /// In zh_Hans, this message translates to:
   /// **'切换解码模式失败'**
   String get hardwareDecodingFailed;
+
+  /// No description provided for @danmakuWaitingForVideo.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'等待视频加载完毕...'**
+  String get danmakuWaitingForVideo;
+
+  /// No description provided for @danmakuLoading.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'弹幕加载中…'**
+  String get danmakuLoading;
+
+  /// No description provided for @danmakuSwitching.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'正在切换弹幕…'**
+  String get danmakuSwitching;
 }
 
 class _AppLocalizationsDelegate

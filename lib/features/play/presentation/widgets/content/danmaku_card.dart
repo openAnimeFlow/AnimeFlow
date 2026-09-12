@@ -82,6 +82,16 @@ class _DanmakuCardState extends ConsumerState<DanmakuCard>
     final danDanmakus = ref.watch(
       playStateProvider.select((s) => s.danDanmakus),
     );
+    final loadStatus = ref.watch(
+      playStateProvider.select((s) => s.danmakuLoadStatus),
+    );
+    final statusText = switch (loadStatus) {
+      DanmakuLoadStatus.waitingForVideo => l10n.danmakuWaitingForVideo,
+      DanmakuLoadStatus.loading => l10n.danmakuLoading,
+      DanmakuLoadStatus.switching => l10n.danmakuSwitching,
+      DanmakuLoadStatus.failed => l10n.loadFailed,
+      DanmakuLoadStatus.idle => null,
+    };
     final hiddenPlatforms = ref.watch(
       playStateProvider.select((s) => s.hiddenPlatforms),
     );
@@ -117,14 +127,18 @@ class _DanmakuCardState extends ConsumerState<DanmakuCard>
                     l10n.danmakuSource,
                     style: const TextStyle(fontWeight: FontWeight.bold),
                   ),
-                  if (allDanmakus.isNotEmpty) ...[
-                    const SizedBox(width: 5),
-                    Text(l10n.totalDanmaku(allDanmakus.length),
-                        style: Theme.of(context).textTheme.bodySmall),
-                    const Spacer(),
-                  ] else ...[
-                    const Spacer(),
-                  ],
+                  const SizedBox(width: 5),
+                  Expanded(
+                    child: Text(
+                      statusText ??
+                          (allDanmakus.isNotEmpty
+                              ? l10n.totalDanmaku(allDanmakus.length)
+                              : ''),
+                      style: Theme.of(context).textTheme.bodySmall,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                  ),
                   IconButton(
                     onPressed: _toggleExpanded,
                     icon: AnimatedRotation(
@@ -255,6 +269,8 @@ class _DanmakuCardState extends ConsumerState<DanmakuCard>
   Widget get danmakuDialog {
     DanmakuSearchResponse? danmakuSearchResponse;
     bool isSearchLoading = false;
+    int? loadingAnimeId;
+    String? errorText;
     return StatefulBuilder(
       builder: (BuildContext dialogContext, StateSetter setDialogState) {
         return AlertDialog(
@@ -276,6 +292,7 @@ class _DanmakuCardState extends ConsumerState<DanmakuCard>
                     ),
                   ),
                   const SizedBox(height: 16),
+                  if (errorText != null) Text(errorText!),
                   if (isSearchLoading) ...[
                     const Padding(
                       padding: EdgeInsets.all(16.0),
@@ -303,19 +320,42 @@ class _DanmakuCardState extends ConsumerState<DanmakuCard>
                               anime.animeTitle,
                               style: Theme.of(listContext).textTheme.bodyLarge,
                             ),
-                            onTap: () async {
-                              final episodes = await FlowApi
-                                  .getDanDanEpisodesByDanDanBangumiID(
-                                      anime.animeId);
-                              if (!dialogContext.mounted) return;
-                              dialogContext.pop();
-                              if (!mounted) return;
-                              _showEpisodesDialog(
-                                context,
-                                episodes,
-                                anime.animeTitle,
-                              );
-                            },
+                            trailing: loadingAnimeId == anime.animeId
+                                ? const SizedBox(
+                                    width: 20,
+                                    height: 20,
+                                    child: CircularProgressIndicator(
+                                        strokeWidth: 2))
+                                : null,
+                            onTap: loadingAnimeId != null
+                                ? null
+                                : () async {
+                                    setDialogState(() {
+                                      loadingAnimeId = anime.animeId;
+                                      errorText = null;
+                                    });
+                                    try {
+                                      final episodes = await FlowApi
+                                          .getDanDanEpisodesByDanDanBangumiID(
+                                              anime.animeId);
+                                      if (!dialogContext.mounted) return;
+                                      dialogContext.pop();
+                                      if (!mounted) return;
+                                      _showEpisodesDialog(
+                                        context,
+                                        episodes,
+                                        anime.animeTitle,
+                                      );
+                                    } catch (e) {
+                                      if (!dialogContext.mounted) return;
+                                      setDialogState(() {
+                                        loadingAnimeId = null;
+                                        errorText =
+                                            AppLocalizations.of(dialogContext)
+                                                .loadFailed;
+                                      });
+                                    }
+                                  },
                           );
                         },
                       ),
@@ -331,28 +371,35 @@ class _DanmakuCardState extends ConsumerState<DanmakuCard>
               child: Text(AppLocalizations.of(context).cancel),
             ),
             TextButton(
-              onPressed: () async {
-                if (danmakuFieldController.text.isNotEmpty) {
-                  setDialogState(() {
-                    isSearchLoading = true;
-                    danmakuSearchResponse = null;
-                  });
-                  try {
-                    final response = await FlowApi.searchDanmakuEpisodes(
-                      danmakuFieldController.text,
-                    );
-                    setDialogState(() {
-                      danmakuSearchResponse = response;
-                      isSearchLoading = false;
-                    });
-                  } catch (e) {
-                    debugPrint('手动搜索弹幕失败: $e');
-                    setDialogState(() {
-                      isSearchLoading = false;
-                    });
-                  }
-                }
-              },
+              onPressed: isSearchLoading || loadingAnimeId != null
+                  ? null
+                  : () async {
+                      if (danmakuFieldController.text.isNotEmpty) {
+                        setDialogState(() {
+                          errorText = null;
+                          isSearchLoading = true;
+                          danmakuSearchResponse = null;
+                        });
+                        try {
+                          final response = await FlowApi.searchDanmakuEpisodes(
+                            danmakuFieldController.text,
+                          );
+                          if (!dialogContext.mounted) return;
+                          setDialogState(() {
+                            danmakuSearchResponse = response;
+                            isSearchLoading = false;
+                          });
+                        } catch (e) {
+                          debugPrint('手动搜索弹幕失败: $e');
+                          if (!dialogContext.mounted) return;
+                          setDialogState(() {
+                            isSearchLoading = false;
+                            errorText =
+                                AppLocalizations.of(dialogContext).loadFailed;
+                          });
+                        }
+                      }
+                    },
               child: Text(AppLocalizations.of(context).submit),
             )
           ],
@@ -366,64 +413,98 @@ class _DanmakuCardState extends ConsumerState<DanmakuCard>
     DanmakuEpisodeResponse episodesResponse,
     String animeTitle,
   ) {
+    int? switchingEpisodeId;
+    String? switchError;
     showDialog(
       context: context,
-      builder: (BuildContext context) {
-        return AlertDialog(
-          title: Text(animeTitle),
-          content: ConstrainedBox(
-            constraints: const BoxConstraints(maxWidth: 500),
-            child: SizedBox(
-              width: double.maxFinite,
-              child: episodesResponse.episodes.isEmpty
-                  ? Center(
-                      child: Padding(
-                        padding: const EdgeInsets.all(16.0),
-                        child: Text(
-                          AppLocalizations.of(context).noDanmakuEpisodes,
+      builder: (BuildContext context) => StatefulBuilder(
+        builder: (context, setEpisodeState) {
+          return AlertDialog(
+            title: Text(animeTitle),
+            icon: switchingEpisodeId != null
+                ? Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      const SizedBox(
+                          width: 16,
+                          height: 16,
+                          child: CircularProgressIndicator(strokeWidth: 2)),
+                      const SizedBox(width: 8),
+                      Flexible(
+                          child: Text(
+                              AppLocalizations.of(context).danmakuSwitching)),
+                    ],
+                  )
+                : switchError != null
+                    ? Text(switchError!)
+                    : null,
+            content: ConstrainedBox(
+              constraints: const BoxConstraints(maxWidth: 500),
+              child: SizedBox(
+                width: double.maxFinite,
+                child: episodesResponse.episodes.isEmpty
+                    ? Center(
+                        child: Padding(
+                          padding: const EdgeInsets.all(16.0),
+                          child: Text(
+                            AppLocalizations.of(context).noDanmakuEpisodes,
+                          ),
+                        ),
+                      )
+                    : ConstrainedBox(
+                        constraints: const BoxConstraints(
+                          maxHeight: 400,
+                          minHeight: 200,
+                        ),
+                        child: ListView.builder(
+                          shrinkWrap: true,
+                          itemCount: episodesResponse.episodes.length,
+                          itemBuilder: (context, index) {
+                            final episode = episodesResponse.episodes[index];
+                            return ListTile(
+                              title: Text(
+                                episode.episodeTitle,
+                                style: Theme.of(context).textTheme.bodyLarge,
+                              ),
+                              onTap: switchingEpisodeId != null
+                                  ? null
+                                  : () async {
+                                      setEpisodeState(() {
+                                        switchingEpisodeId = episode.episodeId;
+                                        switchError = null;
+                                      });
+                                      final success = await playController
+                                          .switchDanmakuEpisode(
+                                              episode.episodeId);
+                                      if (!context.mounted) return;
+                                      if (success) {
+                                        Navigator.of(context).pop();
+                                      } else {
+                                        setEpisodeState(() {
+                                          switchingEpisodeId = null;
+                                          switchError =
+                                              AppLocalizations.of(context)
+                                                  .loadFailed;
+                                        });
+                                      }
+                                    },
+                            );
+                          },
                         ),
                       ),
-                    )
-                  : ConstrainedBox(
-                      constraints: const BoxConstraints(
-                        maxHeight: 400,
-                        minHeight: 200,
-                      ),
-                      child: ListView.builder(
-                        shrinkWrap: true,
-                        itemCount: episodesResponse.episodes.length,
-                        itemBuilder: (context, index) {
-                          final episode = episodesResponse.episodes[index];
-                          return ListTile(
-                            title: Text(
-                              episode.episodeTitle,
-                              style: Theme.of(context).textTheme.bodyLarge,
-                            ),
-                            onTap: () async {
-                              final danmaku =
-                                  await FlowApi.getDanDanmakuByEpisodeID(
-                                      episode.episodeId);
-                              if (!context.mounted) return;
-                              playController.removeDanmaku();
-                              playController.addDanmakuAll(danmaku);
-                              Navigator.of(context).pop();
-                            },
-                          );
-                        },
-                      ),
-                    ),
+              ),
             ),
-          ),
-          actions: [
-            TextButton(
-              onPressed: () {
-                Navigator.of(context).pop();
-              },
-              child: Text(AppLocalizations.of(context).close),
-            ),
-          ],
-        );
-      },
+            actions: [
+              TextButton(
+                onPressed: () {
+                  Navigator.of(context).pop();
+                },
+                child: Text(AppLocalizations.of(context).close),
+              ),
+            ],
+          );
+        },
+      ),
     );
   }
 }

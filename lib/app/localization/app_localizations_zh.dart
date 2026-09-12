@@ -1848,6 +1848,15 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get hardwareDecodingFailed => '切換解碼模式失敗';
+
+  @override
+  String get danmakuWaitingForVideo => '等待影片載入完畢...';
+
+  @override
+  String get danmakuLoading => '彈幕載入中…';
+
+  @override
+  String get danmakuSwitching => '正在切換彈幕…';
 }
 
 /// The translations for Chinese, using the Han script (`zh_Hans`).
@@ -3693,6 +3702,15 @@ class AppLocalizationsZhHans extends AppLocalizationsZh {
 
   @override
   String get hardwareDecodingFailed => '切换解码模式失败';
+
+  @override
+  String get danmakuWaitingForVideo => '等待视频加载完毕...';
+
+  @override
+  String get danmakuLoading => '弹幕加载中…';
+
+  @override
+  String get danmakuSwitching => '正在切换弹幕…';
 }
 
 /// The translations for Chinese, as used in Hong Kong, using the Han script (`zh_Hant_HK`).
@@ -5457,6 +5475,15 @@ class AppLocalizationsZhHantHk extends AppLocalizationsZh {
 
   @override
   String get hardwareDecodingFailed => '切換解碼模式失敗';
+
+  @override
+  String get danmakuWaitingForVideo => '等待影片載入完畢...';
+
+  @override
+  String get danmakuLoading => '彈幕載入中…';
+
+  @override
+  String get danmakuSwitching => '正在切換彈幕…';
 }
 
 /// The translations for Chinese, as used in Taiwan, using the Han script (`zh_Hant_TW`).
@@ -7221,4 +7248,13 @@ class AppLocalizationsZhHantTw extends AppLocalizationsZh {
 
   @override
   String get hardwareDecodingFailed => '切換解碼模式失敗';
+
+  @override
+  String get danmakuWaitingForVideo => '等待影片載入完畢...';
+
+  @override
+  String get danmakuLoading => '彈幕載入中…';
+
+  @override
+  String get danmakuSwitching => '正在切換彈幕…';
 }

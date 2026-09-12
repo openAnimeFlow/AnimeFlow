@@ -155,6 +155,10 @@ class PlayStateNotifier extends _$PlayStateNotifier {
     state = state.copyWith(parseResult: value);
   }
 
+  void setDanmakuLoadStatus(DanmakuLoadStatus value) {
+    state = state.copyWith(danmakuLoadStatus: value);
+  }
+
   void setDanDanmakus(Map<int, List<Danmaku>> value) {
     state = state.copyWith(danDanmakus: value);
   }
@@ -242,6 +246,8 @@ Set<String> _loadHiddenPlatformsFromStorage() {
   };
 }
 
+enum DanmakuLoadStatus { waitingForVideo, loading, switching, idle, failed }
+
 class PlayState {
   final PlayerKernel kernel;
   final bool switchingKernel;
@@ -253,6 +259,7 @@ class PlayState {
   final bool isParsing;
   final String parseResult;
   final Map<int, List<Danmaku>> danDanmakus;
+  final DanmakuLoadStatus danmakuLoadStatus;
   final bool danmakuOn;
   final Set<String> hiddenPlatforms;
   final bool playing;
@@ -277,6 +284,7 @@ class PlayState {
     this.isParsing = false,
     this.parseResult = '',
     this.danDanmakus = const {},
+    this.danmakuLoadStatus = DanmakuLoadStatus.waitingForVideo,
     this.danmakuOn = true,
     this.hiddenPlatforms = const {},
     this.playing = false,
@@ -302,6 +310,7 @@ class PlayState {
     bool? isParsing,
     String? parseResult,
     Map<int, List<Danmaku>>? danDanmakus,
+    DanmakuLoadStatus? danmakuLoadStatus,
     bool? danmakuOn,
     Set<String>? hiddenPlatforms,
     bool? playing,
@@ -326,6 +335,7 @@ class PlayState {
       isParsing: isParsing ?? this.isParsing,
       parseResult: parseResult ?? this.parseResult,
       danDanmakus: danDanmakus ?? this.danDanmakus,
+      danmakuLoadStatus: danmakuLoadStatus ?? this.danmakuLoadStatus,
       danmakuOn: danmakuOn ?? this.danmakuOn,
       hiddenPlatforms: hiddenPlatforms ?? this.hiddenPlatforms,
       playing: playing ?? this.playing,
@@ -681,6 +691,8 @@ class PlaySession {
     if (selectedIndex != episode) {
       try {
         removeDanmaku();
+        _playStateActions
+            .setDanmakuLoadStatus(DanmakuLoadStatus.waitingForVideo);
       } catch (_) {}
     }
   }
@@ -705,12 +717,15 @@ class PlaySession {
   }
 
   int _playRequestId = 0;
+  int _danmakuRequestId = 0;
 
   bool _isCurrentPlayRequest(int requestId) =>
       !_isDisposed && requestId == _playRequestId;
 
   Future<void> stopCurrentMedia() async {
     _playRequestId++;
+    _danmakuRequestId++;
+    _playStateActions.setDanmakuLoadStatus(DanmakuLoadStatus.waitingForVideo);
     await _serializePlaybackChange(() async {
       if (_isDisposed) return;
       cancelScheduledStop();
@@ -725,6 +740,9 @@ class PlaySession {
   Future<void> initPlayState(PlayRequest state) async {
     if (_isDisposed) return;
     final requestId = ++_playRequestId;
+    int? automaticDanmakuRequestId;
+    _danmakuRequestId++;
+    _playStateActions.setDanmakuLoadStatus(DanmakuLoadStatus.waitingForVideo);
     await _serializePlaybackChange(() async {
       if (!_isCurrentPlayRequest(requestId)) return;
       cancelScheduledStop();
@@ -732,6 +750,7 @@ class PlaySession {
       await playbackCoordinator.stop();
       if (!_isCurrentPlayRequest(requestId)) return;
       removeDanmaku();
+      automaticDanmakuRequestId = _danmakuRequestId;
       videoUrl = state.videoUrl;
       subjectId = state.subjectId;
       episode = state.episodeIndex;
@@ -765,11 +784,21 @@ class PlaySession {
     });
     if (!_isCurrentPlayRequest(requestId)) return;
     if (state.videoUrl.isEmpty) return;
+    if (automaticDanmakuRequestId != _danmakuRequestId) return;
     await _loadEpisodeDanmaku(state, requestId);
   }
 
   Future<void> _loadEpisodeDanmaku(PlayRequest request, int requestId) async {
-    if (request.episodeIndex == 0) return;
+    if (request.episodeIndex == 0) {
+      _playStateActions.setDanmakuLoadStatus(DanmakuLoadStatus.idle);
+      return;
+    }
+    final danmakuRequestId = ++_danmakuRequestId;
+    bool isCurrent() =>
+        _isCurrentPlayRequest(requestId) &&
+        danmakuRequestId == _danmakuRequestId;
+    _playStateActions.setDanmakuLoadStatus(DanmakuLoadStatus.loading);
+    var failed = false;
     try {
       final List<Danmaku> danmaku;
       if (request.isLocalPlayback) {
@@ -777,24 +806,59 @@ class PlaySession {
       } else {
         final bangumiId =
             await FlowApi.getDanDanBangumiIDByBgmBangumiID(request.subjectId);
-        if (!_isCurrentPlayRequest(requestId) || bangumiId == null) return;
+        if (!isCurrent() || bangumiId == null) return;
         danmaku = await FlowApi.getDanDanmaku(bangumiId, request.episodeIndex);
       }
       if (danmaku.isEmpty) return;
-      while (_isCurrentPlayRequest(requestId)) {
+      while (isCurrent()) {
         final revision = _danmakuChineseModeRevision;
         final converted = await danmakuChineseConverter.convertDanmakus(
           danmaku,
           _danmakuChineseMode,
         );
-        if (!_isCurrentPlayRequest(requestId)) return;
+        if (!isCurrent()) return;
         if (revision != _danmakuChineseModeRevision) continue;
         addDanmakuAll(converted);
         return;
       }
     } catch (e) {
+      failed = true;
       LiggLogger().e(e);
+    } finally {
+      if (isCurrent()) {
+        _playStateActions.setDanmakuLoadStatus(
+          failed ? DanmakuLoadStatus.failed : DanmakuLoadStatus.idle,
+        );
+      }
     }
+  }
+
+  Future<bool> switchDanmakuEpisode(int episodeId) async {
+    final requestId = ++_danmakuRequestId;
+    bool isCurrent() => !_isDisposed && requestId == _danmakuRequestId;
+    _playStateActions.setDanmakuLoadStatus(DanmakuLoadStatus.switching);
+    try {
+      final items = await FlowApi.getDanDanmakuByEpisodeID(episodeId);
+      while (isCurrent()) {
+        final revision = _danmakuChineseModeRevision;
+        final converted = await danmakuChineseConverter.convertDanmakus(
+          items,
+          _danmakuChineseMode,
+        );
+        if (!isCurrent()) return false;
+        if (revision != _danmakuChineseModeRevision) continue;
+        removeDanmaku();
+        addDanmakuAll(converted);
+        _playStateActions.setDanmakuLoadStatus(DanmakuLoadStatus.idle);
+        return true;
+      }
+    } catch (e) {
+      LiggLogger().e(e);
+      if (isCurrent()) {
+        _playStateActions.setDanmakuLoadStatus(DanmakuLoadStatus.failed);
+      }
+    }
+    return false;
   }
 
   void _handlePlayStateChanged(PlayState state, {required bool isLoggedIn}) {
@@ -1042,6 +1106,7 @@ class PlaySession {
   }
 
   void removeDanmaku() {
+    _danmakuRequestId++;
     _danmakuChineseModeRevision++;
     _clearDanmakuCanvas();
     _playStateActions.clearDanDanmakus();

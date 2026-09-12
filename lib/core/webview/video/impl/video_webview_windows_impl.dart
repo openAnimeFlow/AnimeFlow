@@ -10,6 +10,23 @@ class VideoWebviewWindowsImpl
   HeadlessWebview? headlessWebview;
 
   @override
+  Future<Map<String, String>> mediaRequestHeaders(String url) async {
+    final headers = <String, String>{};
+    try {
+      final cookies = await headlessWebview?.getCookies(url);
+      if (cookies != null && cookies.isNotEmpty) headers['cookie'] = cookies;
+      final userAgent =
+          await headlessWebview?.executeScript('navigator.userAgent');
+      if (userAgent is String && userAgent.isNotEmpty) {
+        headers['user-agent'] = userAgent;
+      }
+    } catch (_) {
+      /* Unavailable credentials must not prevent normal playback. */
+    }
+    return headers;
+  }
+
+  @override
   Future<void> init() async {
     headlessWebview ??= HeadlessWebview();
     await headlessWebview!.run();

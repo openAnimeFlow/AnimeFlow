@@ -1,4 +1,6 @@
 import 'package:anime_flow/features/play/presentation/providers/play_provider.dart';
+import 'package:anime_flow/features/media_cache/domain/hls_snapshot.dart';
+import 'package:anime_flow/app/localization/app_localizations.dart';
 import 'package:anime_flow/features/play/presentation/providers/video_ui_provider.dart';
 import 'package:anime_flow/core/exception/storage_exception.dart';
 import 'package:anime_flow/core/logger/logger.dart';
@@ -32,6 +34,43 @@ class RightAreaControl extends ConsumerWidget {
                 key: ValueKey<bool>(isShowControlsUi),
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
+                  ValueListenableBuilder<MediaCacheIssue>(
+                    valueListenable: playController.cacheStatus,
+                    builder: (context, status, _) {
+                      if (status == MediaCacheIssue.disabled ||
+                          status == MediaCacheIssue.localFile) {
+                        return const SizedBox.shrink();
+                      }
+                      final l10n = AppLocalizations.of(context);
+                      final message = switch (status) {
+                        MediaCacheIssue.ready => l10n.sharedMediaCacheReady,
+                        MediaCacheIssue.preparing =>
+                          l10n.sharedMediaCachePreparing,
+                        MediaCacheIssue.timelineChanged =>
+                          l10n.sharedMediaCacheTimeline,
+                        MediaCacheIssue.unsupported =>
+                          l10n.sharedMediaCacheUnsupported,
+                        MediaCacheIssue.capacity =>
+                          l10n.sharedMediaCacheCapacity,
+                        MediaCacheIssue.sourceChanged =>
+                          l10n.sharedMediaCacheChanged,
+                        _ => l10n.sharedMediaCacheUnavailable,
+                      };
+                      return Tooltip(
+                          message: message,
+                          triggerMode: TooltipTriggerMode.tap,
+                          child: Padding(
+                              padding: const EdgeInsets.only(bottom: 8),
+                              child: Icon(
+                                  status == MediaCacheIssue.ready
+                                      ? Icons.storage
+                                      : Icons.info_outline,
+                                  color: status == MediaCacheIssue.ready
+                                      ? Colors.greenAccent
+                                      : Colors.white70,
+                                  size: 24)));
+                    },
+                  ),
                   position > Duration.zero && (isWideScreen || fullscreen)
                       ? InkWell(
                           onTap: () async {

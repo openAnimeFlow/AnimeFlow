@@ -9,6 +9,39 @@ class AppLocalizationsEn extends AppLocalizations {
   AppLocalizationsEn([String locale = 'en']) : super(locale);
 
   @override
+  String get sharedMediaCache => 'Shared media cache';
+
+  @override
+  String get sharedMediaCacheSubtitle =>
+      'Supports selected on-demand HLS streams, using up to 256 MB. Applies to the next video opened; unavailable with ad blocking.';
+
+  @override
+  String get sharedMediaCacheReady => 'Shared cache enabled';
+
+  @override
+  String get sharedMediaCachePreparing => 'Preparing shared cache';
+
+  @override
+  String get sharedMediaCacheTimeline =>
+      'Ad blocking changes the timeline; using direct playback';
+
+  @override
+  String get sharedMediaCacheUnsupported =>
+      'Shared cache does not support this source';
+
+  @override
+  String get sharedMediaCacheCapacity =>
+      'Shared cache is full. Release retained clips or disable shared caching';
+
+  @override
+  String get sharedMediaCacheChanged =>
+      'The media source changed. Reload the video';
+
+  @override
+  String get sharedMediaCacheUnavailable =>
+      'Shared cache unavailable. Reload the video or disable shared caching';
+
+  @override
   String get generalSettingsTitle => 'General Settings';
 
   @override

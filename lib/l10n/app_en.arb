@@ -1,4 +1,13 @@
 {
+  "sharedMediaCache": "Shared media cache",
+  "sharedMediaCacheSubtitle": "Supports selected on-demand HLS streams, using up to 256 MB. Applies to the next video opened; unavailable with ad blocking.",
+  "sharedMediaCacheReady": "Shared cache enabled",
+  "sharedMediaCachePreparing": "Preparing shared cache",
+  "sharedMediaCacheTimeline": "Ad blocking changes the timeline; using direct playback",
+  "sharedMediaCacheUnsupported": "Shared cache does not support this source",
+  "sharedMediaCacheCapacity": "Shared cache is full. Release retained clips or disable shared caching",
+  "sharedMediaCacheChanged": "The media source changed. Reload the video",
+  "sharedMediaCacheUnavailable": "Shared cache unavailable. Reload the video or disable shared caching",
   "@@locale": "en",
   "generalSettingsTitle": "General Settings",
   "languageLabel": "Language",

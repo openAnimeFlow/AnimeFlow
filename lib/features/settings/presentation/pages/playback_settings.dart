@@ -23,6 +23,7 @@ class _PlaybackSettingsPageState extends State<PlaybackSettingsPage> {
   late bool _episodesProgress;
   late double _fastForwardSpeed;
   late bool _adBlocker;
+  late bool _sharedMediaCache;
   late bool _hardwareDecoder;
   late int _skipDuration;
   late PlayerKernel _preferredPlayerKernel;
@@ -41,6 +42,8 @@ class _PlaybackSettingsPageState extends State<PlaybackSettingsPage> {
       _fastForwardSpeed =
           setting.get(PlaybackKey.fastForwardSpeed, defaultValue: 2.0);
       _adBlocker = setting.get(PlaybackKey.adBlocker, defaultValue: false);
+      _sharedMediaCache =
+          setting.get(PlaybackKey.sharedMediaCache, defaultValue: false);
       _hardwareDecoder =
           setting.get(PlaybackKey.hardwareDecoder, defaultValue: true);
       _skipDuration = setting.get(PlaybackKey.skipDuration, defaultValue: 85);
@@ -108,6 +111,15 @@ class _PlaybackSettingsPageState extends State<PlaybackSettingsPage> {
                         _adBlocker = value;
                         setting.put(PlaybackKey.adBlocker, _adBlocker);
                       });
+                    },
+                  ),
+                  SwitchListTile(
+                    title: Text(l10n.sharedMediaCache),
+                    subtitle: Text(l10n.sharedMediaCacheSubtitle),
+                    value: _sharedMediaCache,
+                    onChanged: (value) {
+                      setState(() => _sharedMediaCache = value);
+                      setting.put(PlaybackKey.sharedMediaCache, value);
                     },
                   ),
                   Padding(

@@ -2,6 +2,7 @@ import 'dart:io';
 import 'dart:async';
 
 import 'package:anime_flow/core/utils/utils.dart';
+import 'package:flutter_inappwebview_platform_interface/flutter_inappwebview_platform_interface.dart';
 
 import 'impl/video_webview_android_impl.dart';
 import 'impl/video_webview_apple_impl.dart';
@@ -19,6 +20,29 @@ abstract class VideoWebviewController<T> {
   int offset = 0;
   bool isIframeLoaded = false;
   bool isVideoSourceLoaded = false;
+  Map<String, String> capturedMediaHeaders = const {};
+  Future<Map<String, String>> mediaRequestHeaders(String url) async {
+    final headers = <String, String>{...capturedMediaHeaders};
+    final controller = webviewController;
+    if (controller is PlatformInAppWebViewController) {
+      try {
+        final settings = await controller.getSettings();
+        if (settings?.userAgent?.isNotEmpty ?? false) {
+          headers['user-agent'] = settings!.userAgent!;
+        }
+        final cookies = await PlatformCookieManager(
+                const PlatformCookieManagerCreationParams())
+            .getCookies(url: WebUri(url));
+        if (cookies.isNotEmpty) {
+          headers['cookie'] =
+              cookies.map((c) => '${c.name}=${c.value}').join('; ');
+        }
+      } catch (_) {
+        /* Keep directly captured headers if the platform cannot read cookies. */
+      }
+    }
+    return headers;
+  }
 
   /// Webview initialization method
   Future<void> init();

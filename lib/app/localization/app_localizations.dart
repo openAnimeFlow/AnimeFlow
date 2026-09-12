@@ -103,6 +103,60 @@ abstract class AppLocalizations {
         languageCode: 'zh', countryCode: 'TW', scriptCode: 'Hant')
   ];
 
+  /// No description provided for @sharedMediaCache.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'共享媒体缓存'**
+  String get sharedMediaCache;
+
+  /// No description provided for @sharedMediaCacheSubtitle.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'支持部分点播 HLS，最多使用 256 MB。下次打开视频生效；开启广告过滤时不可用。'**
+  String get sharedMediaCacheSubtitle;
+
+  /// No description provided for @sharedMediaCacheReady.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'共享缓存已启用'**
+  String get sharedMediaCacheReady;
+
+  /// No description provided for @sharedMediaCachePreparing.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'正在准备共享缓存'**
+  String get sharedMediaCachePreparing;
+
+  /// No description provided for @sharedMediaCacheTimeline.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'广告过滤会改变时间轴，当前使用直连播放'**
+  String get sharedMediaCacheTimeline;
+
+  /// No description provided for @sharedMediaCacheUnsupported.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'当前源不支持共享缓存'**
+  String get sharedMediaCacheUnsupported;
+
+  /// No description provided for @sharedMediaCacheCapacity.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'共享缓存空间不足，请释放保留片段或关闭共享缓存'**
+  String get sharedMediaCacheCapacity;
+
+  /// No description provided for @sharedMediaCacheChanged.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'媒体源已变化，请重新加载视频'**
+  String get sharedMediaCacheChanged;
+
+  /// No description provided for @sharedMediaCacheUnavailable.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'共享缓存不可用，请重新加载或关闭共享缓存'**
+  String get sharedMediaCacheUnavailable;
+
   /// No description provided for @generalSettingsTitle.
   ///
   /// In zh_Hans, this message translates to:

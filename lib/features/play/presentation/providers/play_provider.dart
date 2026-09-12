@@ -3,6 +3,10 @@ import 'dart:convert';
 import 'dart:io';
 import 'dart:typed_data';
 
+import 'package:anime_flow/features/media_cache/application/hls_media_cache.dart';
+import 'package:anime_flow/features/media_cache/application/shared_media_cache.dart';
+import 'package:anime_flow/features/media_cache/domain/hls_snapshot.dart';
+
 import 'package:anime_flow/core/constants/constants.dart';
 import 'package:anime_flow/core/constants/storage_key.dart';
 import 'package:anime_flow/features/play/application/danmaku_chinese_converter.dart';
@@ -354,6 +358,8 @@ class PlayState {
 }
 
 class PlayRequest {
+  final Map<String, String> headers;
+
   /// 播放地址
   final String videoUrl;
 
@@ -386,6 +392,7 @@ class PlayRequest {
   final bool isLocalPlayback;
 
   const PlayRequest({
+    this.headers = const {},
     required this.videoUrl,
     required this.offset,
     required this.subjectId,
@@ -404,6 +411,7 @@ class PlaySession {
   static const _parseSuccessResult = '视频解析成功';
 
   PlaySession({
+    this.mediaCacheFactory = sharedMediaCache,
     required this.shadersDirectory,
     required PlayStateNotifier playStateActions,
     required VideoUiStateActions videoUiStateActions,
@@ -423,6 +431,18 @@ class PlaySession {
         _danmakuChineseMode = initialDanmakuChineseMode;
 
   final PlayerEngineFactory engineFactory;
+  final Future<HlsMediaCache> Function() mediaCacheFactory;
+  final cacheStatus = ValueNotifier<MediaCacheIssue>(MediaCacheIssue.disabled);
+  HlsCacheSession? _cacheSession;
+  HlsCacheSession? get cacheSession => _cacheSession;
+
+  Future<void> _releaseCache() async {
+    final previous = _cacheSession;
+    _cacheSession = null;
+    if (!_isDisposed) cacheStatus.value = MediaCacheIssue.disabled;
+    await previous?.releasePlayback();
+  }
+
   late final PlaybackCoordinator playbackCoordinator;
   late final PlaybackProgressManager playbackProgressManager;
   final PlayStateNotifier _playStateActions;
@@ -699,6 +719,7 @@ class PlaySession {
 
   void dispose() {
     _isDisposed = true;
+    cacheStatus.dispose();
     unawaited(playbackProgressManager.save());
     if (Platform.isWindows) {
       WindowsTitleBarVisibility.reset();
@@ -708,7 +729,7 @@ class PlaySession {
     unawaited(_playerSubscription?.cancel());
     _playerSubscription = null;
     _clearDanmakuCanvas();
-    unawaited(playbackCoordinator.dispose());
+    unawaited(playbackCoordinator.dispose().whenComplete(_releaseCache));
   }
 
   void pauseForRouteCover() {
@@ -731,6 +752,7 @@ class PlaySession {
       cancelScheduledStop();
       _currentSource = null;
       await playbackCoordinator.stop();
+      await _releaseCache();
       if (_isDisposed) return;
       _clearDanmakuCanvas();
     });
@@ -748,6 +770,7 @@ class PlaySession {
       cancelScheduledStop();
       _currentSource = null;
       await playbackCoordinator.stop();
+      await _releaseCache();
       if (!_isCurrentPlayRequest(requestId)) return;
       removeDanmaku();
       automaticDanmakuRequestId = _danmakuRequestId;
@@ -773,7 +796,44 @@ class PlaySession {
       if (state.videoUrl.isEmpty) return;
       _currentSource = state.isLocalPlayback
           ? PlaybackSource.localFile(state.videoUrl)
-          : PlaybackSource(uri: Uri.parse(state.videoUrl));
+          : PlaybackSource(
+              uri: Uri.parse(state.videoUrl),
+              headers: Map.unmodifiable(state.headers));
+      final cacheEnabled = !state.isLocalPlayback &&
+          setting.get(PlaybackKey.sharedMediaCache, defaultValue: false) ==
+              true;
+      cacheStatus.value = state.isLocalPlayback
+          ? MediaCacheIssue.localFile
+          : MediaCacheIssue.disabled;
+      if (cacheEnabled && !state.isLocalPlayback) {
+        if (playbackCoordinator.adBlocker) {
+          cacheStatus.value = MediaCacheIssue.timelineChanged;
+        } else {
+          cacheStatus.value = MediaCacheIssue.preparing;
+          try {
+            final cache = await mediaCacheFactory();
+            if (!_isCurrentPlayRequest(requestId)) return;
+            final cached = await cache.open(_currentSource!);
+            if (!_isCurrentPlayRequest(requestId)) {
+              await cached.releasePlayback();
+              return;
+            }
+            _cacheSession = cached;
+            _currentSource = cached.playbackSource;
+            cacheStatus.value = MediaCacheIssue.ready;
+            cached.onIssue = (issue) {
+              if (!_isDisposed && identical(_cacheSession, cached)) {
+                cacheStatus.value = issue;
+              }
+            };
+          } catch (error) {
+            if (!_isCurrentPlayRequest(requestId)) return;
+            cacheStatus.value = error is MediaCacheException
+                ? error.issue
+                : MediaCacheIssue.unavailable;
+          }
+        }
+      }
       await playbackCoordinator.open(
         _currentSource!,
         startPosition: Duration(seconds: state.offset),

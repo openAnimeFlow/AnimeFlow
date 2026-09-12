@@ -181,6 +181,8 @@ flutter_native_splash:
   ios: true
 
 dev_dependencies:
+  integration_test:
+    sdk: flutter
   # 测试与代码质量
   flutter_test: # 提供 Flutter widget、单元和集成测试工具。
     sdk: flutter

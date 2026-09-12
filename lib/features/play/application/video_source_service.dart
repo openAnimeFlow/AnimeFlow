@@ -19,11 +19,13 @@ class VideoSource {
 
   /// 视频源类型
   final VideoSourceType type;
+  final Map<String, String> headers;
 
   const VideoSource({
     required this.url,
     required this.offset,
     required this.type,
+    this.headers = const {},
   });
 
   @override

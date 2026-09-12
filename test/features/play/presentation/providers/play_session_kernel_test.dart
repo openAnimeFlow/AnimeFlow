@@ -1,6 +1,10 @@
 import 'dart:async';
 import 'dart:io';
 
+import 'package:anime_flow/features/media_cache/application/hls_media_cache.dart';
+import 'package:anime_flow/features/media_cache/application/shared_media_cache.dart';
+import 'package:anime_flow/features/media_cache/domain/hls_snapshot.dart';
+
 import 'package:anime_flow/core/storage/storage.dart';
 import 'package:anime_flow/core/constants/storage_key.dart';
 import 'package:anime_flow/features/play/application/danmaku_chinese_converter.dart';
@@ -23,12 +27,121 @@ void main() {
   setUpAll(() => Storage.setting = _Settings());
   setUp(() => (Storage.setting as _Settings).stored.clear());
 
+  test('cache stays opt-in and direct sources retain authentication headers',
+      () async {
+    final factory = _Factory();
+    final session = _Session(factory,
+        cacheFactory: () async => throw StateError('Must not create cache'));
+    await session.playbackCoordinator.initialize();
+    addTearDown(session.playbackCoordinator.dispose);
+    await session
+        .initPlayState(_networkRequest('https://example.test/index.m3u8'));
+    expect(
+        factory.engines.single.source!.headers['Authorization'], 'Bearer test');
+    expect(session.cacheStatus.value, MediaCacheIssue.disabled);
+  });
+
+  test('ad filtering disables cache without switching player kernel', () async {
+    await Storage.setting.put(PlaybackKey.sharedMediaCache, true);
+    final factory = _Factory();
+    final session = _Session(factory,
+        adBlocker: true,
+        cacheFactory: () async => throw StateError('Must not create cache'));
+    await session.playbackCoordinator.initialize();
+    addTearDown(session.playbackCoordinator.dispose);
+    await session
+        .initPlayState(_networkRequest('https://example.test/index.m3u8'));
+    expect(session.cacheStatus.value, MediaCacheIssue.timelineChanged);
+    expect(factory.engines, hasLength(1));
+    expect(factory.engines.single.source!.uri.host, 'example.test');
+  });
+
+  test('unsupported cache source falls back to its authenticated direct source',
+      () async {
+    await Storage.setting.put(PlaybackKey.sharedMediaCache, true);
+    final factory = _Factory();
+    final session = _Session(factory,
+        cacheFactory: () async => throw const MediaCacheException(
+            MediaCacheIssue.unsupported, 'unsupported'));
+    await session.playbackCoordinator.initialize();
+    addTearDown(session.playbackCoordinator.dispose);
+    await session
+        .initPlayState(_networkRequest('https://example.test/index.m3u8'));
+    expect(session.cacheStatus.value, MediaCacheIssue.unsupported);
+    expect(
+        factory.engines.single.source!.headers['Authorization'], 'Bearer test');
+  });
+
+  for (final stale in [false, true]) {
+    test('network cache lifecycle with kernel switch and stale source=$stale',
+        () async {
+      await Storage.setting.put(PlaybackKey.sharedMediaCache, true);
+      final directory =
+          await Directory.systemTemp.createTemp('play-cache-test-');
+      final origin = await HttpServer.bind(InternetAddress.loopbackIPv4, 0);
+      final cache = HlsMediaCache(directory: directory);
+      final started = Completer<void>();
+      final gate = Completer<void>();
+      origin.listen((request) async {
+        if (request.uri.path.endsWith('.m3u8')) {
+          request.response.write(
+              '#EXTM3U\n#EXT-X-TARGETDURATION:2\n#EXTINF:2,\ns.ts\n#EXT-X-ENDLIST\n');
+        } else {
+          if (!started.isCompleted) started.complete();
+          if (stale) await gate.future;
+          final bytes = Uint8List(564);
+          bytes[0] = bytes[188] = bytes[376] = 0x47;
+          request.response.add(bytes);
+        }
+        await request.response.close();
+      });
+      final factory = _Factory();
+      final session = _Session(factory, cacheFactory: () async => cache);
+      await session.playbackCoordinator.initialize();
+      try {
+        final opening = session.initPlayState(
+            _networkRequest('http://127.0.0.1:${origin.port}/index.m3u8'));
+        await started.future;
+        if (stale) {
+          final next = session.initPlayState(_request(2));
+          gate.complete();
+          await Future.wait([opening, next]);
+          expect(session.cacheSession, isNull);
+          expect(cache.cachedBytes, 0);
+          expect(factory.engines.single.source!.isLocal, isTrue);
+        } else {
+          await opening;
+          final sourceSession = session.cacheSession!;
+          final lease = sourceSession.retainRange(
+              Duration.zero, const Duration(seconds: 2));
+          final uri = factory.engines.single.source!.uri;
+          expect(factory.engines.single.source!.headers, isEmpty);
+          expect(await session.switchKernel(PlayerKernel.fvp), isTrue);
+          expect(factory.engines.last.source!.uri, uri);
+          expect(session.cacheSession, same(sourceSession));
+          await session.stopCurrentMedia();
+          expect(await sourceSession.directory.exists(), isTrue);
+          await lease.release();
+          expect(await sourceSession.directory.exists(), isFalse);
+        }
+      } finally {
+        if (!gate.isCompleted) gate.complete();
+        await session.stopCurrentMedia();
+        await session.playbackCoordinator.dispose();
+        await cache.close();
+        await origin.close(force: true);
+        await directory.delete(recursive: true);
+      }
+    });
+  }
+
   test('failed local opening allows retrying the same episode', () async {
     final factory = _Factory();
     final session = _Session(factory);
     await session.playbackCoordinator.initialize();
     addTearDown(session.playbackCoordinator.dispose);
-    factory.beforeOpen = (_) async => throw StateError('local file unavailable');
+    factory.beforeOpen =
+        (_) async => throw StateError('local file unavailable');
     await expectLater(session.initPlayState(_request(1)), throwsStateError);
     factory.beforeOpen = null;
     await session.initPlayState(_request(1));
@@ -41,11 +154,13 @@ void main() {
     TargetPlatform.android,
     TargetPlatform.fuchsia,
   ]) {
-    test('rebuilding preserves the correct engine volume on $platform', () async {
+    test('rebuilding preserves the correct engine volume on $platform',
+        () async {
       debugDefaultTargetPlatformOverride = platform;
       addTearDown(() => debugDefaultTargetPlatformOverride = null);
       final factory = _Factory();
-      final state = _State()..value = const PlayState(playing: true, volume: 35);
+      final state = _State()
+        ..value = const PlayState(playing: true, volume: 35);
       final session = _Session(factory, state: state);
       await session.playbackCoordinator.initialize();
       addTearDown(session.playbackCoordinator.dispose);
@@ -78,8 +193,7 @@ void main() {
     expect(factory.engines, hasLength(2));
     expect(factory.engines.last.kernel, PlayerKernel.mediaKit);
     expect(factory.engines.first.disposeCount, 1);
-    expect(
-        factory.engines.last.source?.uri, Uri.file(_localPath(1)));
+    expect(factory.engines.last.source?.uri, Uri.file(_localPath(1)));
     expect(factory.engines.last.source?.isLocal, isTrue);
     expect(await session.setHardwareDecoder(true), isTrue);
     expect(Storage.setting.get(PlaybackKey.hardwareDecoder), isTrue);
@@ -111,10 +225,8 @@ void main() {
     expect(await switching, isTrue);
     await episode;
     expect(session.episodeId, 2);
-    expect(
-        factory.engines.last.source?.uri, Uri.file(_localPath(2)));
-    expect(
-        factory.engines.first.source?.uri, Uri.file(_localPath(1)));
+    expect(factory.engines.last.source?.uri, Uri.file(_localPath(2)));
+    expect(factory.engines.first.source?.uri, Uri.file(_localPath(1)));
     expect(factory.engines.first.disposeCount, 1);
   });
 
@@ -143,8 +255,7 @@ void main() {
     await episode;
     expect(await switching, isTrue);
     expect(session.episodeId, 2);
-    expect(
-        factory.engines.last.source?.uri, Uri.file(_localPath(2)));
+    expect(factory.engines.last.source?.uri, Uri.file(_localPath(2)));
   });
 
   test('latest episode request wins when several arrive during switching',
@@ -190,12 +301,28 @@ PlayRequest _request(int episode) => PlayRequest(
       isLocalPlayback: true,
     );
 
+PlayRequest _networkRequest(String url) => PlayRequest(
+    videoUrl: url,
+    offset: 0,
+    subjectId: 0,
+    episodeIndex: 0,
+    episodeSort: 0,
+    episodeId: 0,
+    subjectName: 'test',
+    subjectCover: '',
+    alias: const [],
+    headers: const {'Authorization': 'Bearer test'});
+
 String _localPath(int episode) =>
     '${Directory.systemTemp.path}${Platform.pathSeparator}本地 #100% 第 $episode 集.mp4';
 
 class _Session extends PlaySession {
-  _Session(_Factory factory, {_State? state})
+  _Session(_Factory factory,
+      {_State? state,
+      bool adBlocker = false,
+      Future<HlsMediaCache> Function()? cacheFactory})
       : super(
+          mediaCacheFactory: cacheFactory ?? sharedMediaCache,
           shadersDirectory: Directory.systemTemp,
           playStateActions: state ?? _State(),
           videoUiStateActions: _Ui(),
@@ -207,7 +334,7 @@ class _Session extends PlaySession {
               {required subjectId, required episodeId, required watched}) {},
         ) {
     playbackCoordinator =
-        PlaybackCoordinator(engineFactory: factory, adBlocker: false);
+        PlaybackCoordinator(engineFactory: factory, adBlocker: adBlocker);
     playbackProgressManager = _Progress();
   }
 }
@@ -264,6 +391,7 @@ class _Engine implements PlayerEngine {
   Future<void> setVolume(double volume) async {
     this.volume = volume;
   }
+
   @override
   Future<void> setRate(double rate) async {}
   @override

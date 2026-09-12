@@ -116,6 +116,7 @@ class WebViewVideoSourceService implements IVideoSourceProvider {
       });
 
       didStartLoad = true;
+      _webview!.capturedMediaHeaders = const {};
       await _webview!.loadUrl(
         episodeUrl,
         useLegacyParser,
@@ -126,10 +127,28 @@ class WebViewVideoSourceService implements IVideoSourceProvider {
       final event = await Future.any([parserFuture, cancelFuture]);
       request.throwIfNotCurrent(_activeRequest);
 
+      final headers = await _webview!.mediaRequestHeaders(event.$1).timeout(
+            const Duration(seconds: 3),
+            onTimeout: () => const <String, String>{},
+          );
+      request.throwIfNotCurrent(_activeRequest);
+
       return VideoSource(
         url: event.$1,
         offset: event.$2,
         type: VideoSourceType.online,
+        headers: Map.unmodifiable({
+          for (final entry in headers.entries)
+            if (!{
+              'host',
+              'range',
+              'connection',
+              'content-length',
+              'accept-encoding',
+              'transfer-encoding'
+            }.contains(entry.key.toLowerCase()))
+              entry.key.toLowerCase(): entry.value,
+        }),
       );
     } catch (error) {
       if (error is VideoSourceCancelledException) rethrow;

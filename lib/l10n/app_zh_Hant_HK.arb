@@ -1,4 +1,13 @@
 {
+  "sharedMediaCache": "共用媒體快取",
+  "sharedMediaCacheSubtitle": "支援部分點播 HLS，最多使用 256 MB。下次開啟影片生效；開啟廣告過濾時不可用。",
+  "sharedMediaCacheReady": "已啟用共用快取",
+  "sharedMediaCachePreparing": "正在準備共用快取",
+  "sharedMediaCacheTimeline": "廣告過濾會改變時間軸，目前使用直接播放",
+  "sharedMediaCacheUnsupported": "目前來源不支援共用快取",
+  "sharedMediaCacheCapacity": "共用快取空間不足，請釋放保留片段或關閉共用快取",
+  "sharedMediaCacheChanged": "媒體來源已變更，請重新載入影片",
+  "sharedMediaCacheUnavailable": "共用快取不可用，請重新載入或關閉共用快取",
   "@@locale": "zh_Hant_HK",
   "generalSettingsTitle": "一般設定",
   "languageLabel": "語言",

@@ -9,6 +9,34 @@ class AppLocalizationsZh extends AppLocalizations {
   AppLocalizationsZh([String locale = 'zh']) : super(locale);
 
   @override
+  String get sharedMediaCache => '共享媒体缓存';
+
+  @override
+  String get sharedMediaCacheSubtitle =>
+      '支持部分点播 HLS，最多使用 256 MB。下次打开视频生效；开启广告过滤时不可用。';
+
+  @override
+  String get sharedMediaCacheReady => '共享缓存已启用';
+
+  @override
+  String get sharedMediaCachePreparing => '正在准备共享缓存';
+
+  @override
+  String get sharedMediaCacheTimeline => '广告过滤会改变时间轴，当前使用直连播放';
+
+  @override
+  String get sharedMediaCacheUnsupported => '当前源不支持共享缓存';
+
+  @override
+  String get sharedMediaCacheCapacity => '共享缓存空间不足，请释放保留片段或关闭共享缓存';
+
+  @override
+  String get sharedMediaCacheChanged => '媒体源已变化，请重新加载视频';
+
+  @override
+  String get sharedMediaCacheUnavailable => '共享缓存不可用，请重新加载或关闭共享缓存';
+
+  @override
   String get generalSettingsTitle => '通用设置';
 
   @override
@@ -1862,6 +1890,34 @@ class AppLocalizationsZh extends AppLocalizations {
 /// The translations for Chinese, using the Han script (`zh_Hans`).
 class AppLocalizationsZhHans extends AppLocalizationsZh {
   AppLocalizationsZhHans() : super('zh_Hans');
+
+  @override
+  String get sharedMediaCache => '共享媒体缓存';
+
+  @override
+  String get sharedMediaCacheSubtitle =>
+      '支持部分点播 HLS，最多使用 256 MB。下次打开视频生效；开启广告过滤时不可用。';
+
+  @override
+  String get sharedMediaCacheReady => '共享缓存已启用';
+
+  @override
+  String get sharedMediaCachePreparing => '正在准备共享缓存';
+
+  @override
+  String get sharedMediaCacheTimeline => '广告过滤会改变时间轴，当前使用直连播放';
+
+  @override
+  String get sharedMediaCacheUnsupported => '当前源不支持共享缓存';
+
+  @override
+  String get sharedMediaCacheCapacity => '共享缓存空间不足，请释放保留片段或关闭共享缓存';
+
+  @override
+  String get sharedMediaCacheChanged => '媒体源已变化，请重新加载视频';
+
+  @override
+  String get sharedMediaCacheUnavailable => '共享缓存不可用，请重新加载或关闭共享缓存';
 
   @override
   String get generalSettingsTitle => '通用设置';
@@ -3718,6 +3774,34 @@ class AppLocalizationsZhHantHk extends AppLocalizationsZh {
   AppLocalizationsZhHantHk() : super('zh_Hant_HK');
 
   @override
+  String get sharedMediaCache => '共用媒體快取';
+
+  @override
+  String get sharedMediaCacheSubtitle =>
+      '支援部分點播 HLS，最多使用 256 MB。下次開啟影片生效；開啟廣告過濾時不可用。';
+
+  @override
+  String get sharedMediaCacheReady => '已啟用共用快取';
+
+  @override
+  String get sharedMediaCachePreparing => '正在準備共用快取';
+
+  @override
+  String get sharedMediaCacheTimeline => '廣告過濾會改變時間軸，目前使用直接播放';
+
+  @override
+  String get sharedMediaCacheUnsupported => '目前來源不支援共用快取';
+
+  @override
+  String get sharedMediaCacheCapacity => '共用快取空間不足，請釋放保留片段或關閉共用快取';
+
+  @override
+  String get sharedMediaCacheChanged => '媒體來源已變更，請重新載入影片';
+
+  @override
+  String get sharedMediaCacheUnavailable => '共用快取不可用，請重新載入或關閉共用快取';
+
+  @override
   String get generalSettingsTitle => '一般設定';
 
   @override
@@ -5489,6 +5573,34 @@ class AppLocalizationsZhHantHk extends AppLocalizationsZh {
 /// The translations for Chinese, as used in Taiwan, using the Han script (`zh_Hant_TW`).
 class AppLocalizationsZhHantTw extends AppLocalizationsZh {
   AppLocalizationsZhHantTw() : super('zh_Hant_TW');
+
+  @override
+  String get sharedMediaCache => '共用媒體快取';
+
+  @override
+  String get sharedMediaCacheSubtitle =>
+      '支援部分點播 HLS，最多使用 256 MB。下次開啟影片生效；開啟廣告過濾時不可用。';
+
+  @override
+  String get sharedMediaCacheReady => '已啟用共用快取';
+
+  @override
+  String get sharedMediaCachePreparing => '正在準備共用快取';
+
+  @override
+  String get sharedMediaCacheTimeline => '廣告過濾會改變時間軸，目前使用直接播放';
+
+  @override
+  String get sharedMediaCacheUnsupported => '目前來源不支援共用快取';
+
+  @override
+  String get sharedMediaCacheCapacity => '共用快取空間不足，請釋放保留片段或關閉共用快取';
+
+  @override
+  String get sharedMediaCacheChanged => '媒體來源已變更，請重新載入影片';
+
+  @override
+  String get sharedMediaCacheUnavailable => '共用快取不可用，請重新載入或關閉共用快取';
 
   @override
   String get generalSettingsTitle => '一般設定';

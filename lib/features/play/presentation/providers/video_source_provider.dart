@@ -913,6 +913,7 @@ class VideoSourceNotifier extends _$VideoSourceNotifier {
       await playController.initPlayState(
         PlayRequest(
           videoUrl: source.url,
+          headers: source.headers,
           offset: source.offset,
           subjectId: subjectId,
           subjectName: subjectName,

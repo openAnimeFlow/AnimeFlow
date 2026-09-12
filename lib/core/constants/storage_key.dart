@@ -35,6 +35,7 @@ class PlaybackKey {
       episodesProgress = 'playback_episodes_progress',
       fastForwardSpeed = 'playback_fast_forward_speed',
       adBlocker = 'playback_ad_blocker',
+      sharedMediaCache = 'playback_shared_media_cache',
       skipDuration = 'playback_skip_duration',
       hardwareDecoder = 'playback_hardware_decoder',
       preferredPlayerKernel = 'playback_preferred_player_kernel';

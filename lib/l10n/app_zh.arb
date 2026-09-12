@@ -1,4 +1,13 @@
 {
+  "sharedMediaCache": "共享媒体缓存",
+  "sharedMediaCacheSubtitle": "支持部分点播 HLS，最多使用 256 MB。下次打开视频生效；开启广告过滤时不可用。",
+  "sharedMediaCacheReady": "共享缓存已启用",
+  "sharedMediaCachePreparing": "正在准备共享缓存",
+  "sharedMediaCacheTimeline": "广告过滤会改变时间轴，当前使用直连播放",
+  "sharedMediaCacheUnsupported": "当前源不支持共享缓存",
+  "sharedMediaCacheCapacity": "共享缓存空间不足，请释放保留片段或关闭共享缓存",
+  "sharedMediaCacheChanged": "媒体源已变化，请重新加载视频",
+  "sharedMediaCacheUnavailable": "共享缓存不可用，请重新加载或关闭共享缓存",
   "@@locale": "zh",
   "generalSettingsTitle": "通用设置",
   "languageLabel": "语言",

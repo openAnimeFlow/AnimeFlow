@@ -38,6 +38,8 @@ class VideoWebviewImpl
             logEventController.add('Native intercepted video URL: $url');
             isIframeLoaded = true;
             isVideoSourceLoaded = true;
+            capturedMediaHeaders =
+                Map.unmodifiable(request.headers ?? const <String, String>{});
             videoLoadingEventController.add(false);
             unloadPage();
             videoParserEventController.add((url, offset));

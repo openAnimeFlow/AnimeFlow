@@ -1,20 +1,22 @@
 import 'package:anime_flow/core/logger/logger.dart';
+import 'package:anime_flow/core/auth/models/flow_token.dart';
+import 'package:anime_flow/core/auth/repository/token_repository.dart';
 import 'package:anime_flow/core/network/api/flow_api.dart';
 import 'package:anime_flow/core/network/interceptors/flow_refresh_token_interceptor.dart';
-import 'package:anime_flow/features/auth/application/token_providers.dart';
-import 'package:anime_flow/features/user/application/bgm_collection_sync_provider.dart';
-import 'package:anime_flow/features/user/presentation/providers/user_collection_provider.dart';
-import 'package:anime_flow/features/user/presentation/providers/user_state_provider.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 /// 当前 AnimeFlow 账号的业务操作。
 ///
-/// OAuth 授权状态由 [UserOAuthController] 管理；本服务只负责账号会话
-/// 和密码等账号级操作，避免把无状态业务混入 OAuth 状态控制器。
+/// OAuth 授权状态由 UserOAuthController 管理；本服务只负责账号会话
+/// 和密码等账号级操作。
 class AccountService {
-  const AccountService(this._ref);
+  const AccountService({
+    required TokenRepository<FlowToken> tokenRepository,
+    required void Function() onSessionCleared,
+  })  : _tokenRepository = tokenRepository,
+        _onSessionCleared = onSessionCleared;
 
-  final Ref _ref;
+  final TokenRepository<FlowToken> _tokenRepository;
+  final void Function() _onSessionCleared;
 
   Future<void> changePassword({
     required String oldPassword,
@@ -29,23 +31,13 @@ class AccountService {
   }
 
   Future<void> clearUserInfo({bool notifyServer = true}) async {
-    final repository = _ref.read(flowTokenRepositoryProvider);
-    FlowRefreshTokenInterceptor.invalidatePendingRefresh(repository);
-    final sessionToken = await repository.getToken();
-    await repository.removeToken();
-    _ref.invalidate(currentFlowTokenProvider);
-    _ref.invalidate(isLoggedInProvider);
-    _ref.invalidate(currentUserInfoProvider);
-    _ref.invalidate(bangumiBindProvider);
-    _ref.invalidate(bgmCollectionSyncProvider);
-    _ref.invalidate(userCollectionsProvider);
+    FlowRefreshTokenInterceptor.invalidatePendingRefresh(_tokenRepository);
+    final sessionToken = await _tokenRepository.getToken();
+    await _tokenRepository.removeToken();
+    _onSessionCleared();
     if (!notifyServer || sessionToken == null) return;
     FlowApi.logoutService(sessionToken: sessionToken).catchError((error) {
       LiggLogger().w('服务端登出失败: $error');
     });
   }
 }
-
-final accountServiceProvider = Provider<AccountService>(
-  (ref) => AccountService(ref),
-);

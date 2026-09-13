@@ -8,9 +8,9 @@ import 'package:anime_flow/features/settings/presentation/widgets/account/bgm_co
 import 'package:anime_flow/features/settings/presentation/widgets/account/bind_email_section.dart';
 import 'package:anime_flow/features/settings/presentation/widgets/account/change_password_dialog.dart';
 import 'package:anime_flow/features/settings/presentation/providers/setting_provider.dart';
-import 'package:anime_flow/features/user/application/account_service.dart';
 import 'package:anime_flow/features/user/application/user_oauth_controller.dart';
 import 'package:anime_flow/features/user/application/user_oauth_state.dart';
+import 'package:anime_flow/features/user/presentation/providers/account_provider.dart';
 import 'package:anime_flow/features/user/presentation/providers/user_state_provider.dart';
 import 'package:anime_flow/app/router/app_router.dart';
 import 'package:anime_flow/shared/widgets/animation_network_image.dart';

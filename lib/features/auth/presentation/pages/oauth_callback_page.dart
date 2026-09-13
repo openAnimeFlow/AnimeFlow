@@ -1,4 +1,4 @@
-import 'package:anime_flow/features/user/application/user_controller.dart';
+import 'package:anime_flow/features/user/application/user_oauth_controller.dart';
 import 'package:anime_flow/features/user/application/user_oauth_state.dart';
 import 'package:anime_flow/app/router/app_router.dart';
 import 'package:anime_flow/core/logger/logger.dart';
@@ -29,7 +29,7 @@ class _OAuthCallbackPageState extends ConsumerState<OAuthCallbackPage> {
     OAuthPurpose purpose = OAuthPurpose.login;
     try {
       final result = await ref
-          .read(userControllerProvider.notifier)
+          .read(userOAuthControllerProvider.notifier)
           .handleDeepLink(widget.callbackUri.toString());
       purpose = result.purpose;
       if (!mounted) return;
@@ -81,8 +81,8 @@ class _OAuthCallbackPageState extends ConsumerState<OAuthCallbackPage> {
   Widget build(BuildContext context) {
     final cs = Theme.of(context).colorScheme;
     final tt = Theme.of(context).textTheme;
-    final isBinding =
-        ref.watch(userControllerProvider).purpose == OAuthPurpose.bindBangumi;
+    final isBinding = ref.watch(userOAuthControllerProvider).purpose ==
+        OAuthPurpose.bindBangumi;
 
     return Scaffold(
       body: DecoratedBox(

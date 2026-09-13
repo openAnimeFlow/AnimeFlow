@@ -4,7 +4,7 @@ import 'package:anime_flow/core/network/api_path.dart';
 import 'package:anime_flow/core/network/clients/flow_client.dart';
 import 'package:anime_flow/features/auth/application/login_service.dart';
 import 'package:anime_flow/features/user/presentation/providers/user_collection_provider.dart';
-import 'package:anime_flow/features/user/application/user_controller.dart';
+import 'package:anime_flow/features/user/application/user_oauth_controller.dart';
 import 'package:anime_flow/features/user/presentation/providers/user_state_provider.dart';
 import 'package:anime_flow/app/router/app_router.dart';
 import 'package:anime_flow/shared/widgets/network_check_button.dart';
@@ -233,7 +233,9 @@ class _LoginPageState extends ConsumerState<LoginPage> {
               Expanded(
                 child: OutlinedButton.icon(
                   onPressed: () {
-                    ref.read(userControllerProvider.notifier).openOAuthPage();
+                    ref
+                        .read(userOAuthControllerProvider.notifier)
+                        .openOAuthPage();
                   },
                   icon: SvgPicture.asset(
                     AssetsPathConstants.bangumi,

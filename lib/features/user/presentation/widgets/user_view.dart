@@ -3,7 +3,7 @@ import 'dart:ui';
 import 'package:anime_flow/shared/models/flow/flow_users.dart';
 import 'package:anime_flow/features/user/presentation/providers/user_collection_provider.dart';
 import 'package:anime_flow/features/user/presentation/providers/user_collection_state.dart';
-import 'package:anime_flow/features/user/application/user_controller.dart';
+import 'package:anime_flow/features/user/application/account_service.dart';
 import 'package:anime_flow/app/router/app_router.dart';
 import 'package:anime_flow/core/utils/format_time_util.dart';
 import 'package:anime_flow/core/utils/system_util.dart';
@@ -395,7 +395,7 @@ class _UserViewState extends ConsumerState<UserView>
                             onPressed: () async {
                               Navigator.of(dialogContext).pop();
                               await ref
-                                  .read(userControllerProvider.notifier)
+                                  .read(accountServiceProvider)
                                   .clearUserInfo();
                             },
                             child: Text(l10n.confirm),

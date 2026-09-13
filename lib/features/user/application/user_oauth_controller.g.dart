@@ -1,6 +1,6 @@
 // GENERATED CODE - DO NOT MODIFY BY HAND
 
-part of 'user_controller.dart';
+part of 'user_oauth_controller.dart';
 
 // **************************************************************************
 // RiverpodGenerator
@@ -9,28 +9,28 @@ part of 'user_controller.dart';
 // GENERATED CODE - DO NOT MODIFY BY HAND
 // ignore_for_file: type=lint, type=warning
 
-@ProviderFor(UserController)
-final userControllerProvider = UserControllerProvider._();
+@ProviderFor(UserOAuthController)
+final userOAuthControllerProvider = UserOAuthControllerProvider._();
 
-final class UserControllerProvider
-    extends $NotifierProvider<UserController, UserOAuthState> {
-  UserControllerProvider._()
+final class UserOAuthControllerProvider
+    extends $NotifierProvider<UserOAuthController, UserOAuthState> {
+  UserOAuthControllerProvider._()
       : super(
           from: null,
           argument: null,
           retry: null,
-          name: r'userControllerProvider',
+          name: r'userOAuthControllerProvider',
           isAutoDispose: false,
           dependencies: null,
           $allTransitiveDependencies: null,
         );
 
   @override
-  String debugGetCreateSourceHash() => _$userControllerHash();
+  String debugGetCreateSourceHash() => _$userOAuthControllerHash();
 
   @$internal
   @override
-  UserController create() => UserController();
+  UserOAuthController create() => UserOAuthController();
 
   /// {@macro riverpod.override_with_value}
   Override overrideWithValue(UserOAuthState value) {
@@ -41,9 +41,10 @@ final class UserControllerProvider
   }
 }
 
-String _$userControllerHash() => r'706bb2ed98a1765c7dac160a49bfdc72ec694cd1';
+String _$userOAuthControllerHash() =>
+    r'b8033c00e418bcb9323927d1fe2ecb1bc1f6d230';
 
-abstract class _$UserController extends $Notifier<UserOAuthState> {
+abstract class _$UserOAuthController extends $Notifier<UserOAuthState> {
   UserOAuthState build();
   @$mustCallSuper
   @override

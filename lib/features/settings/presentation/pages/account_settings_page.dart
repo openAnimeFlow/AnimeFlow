@@ -8,7 +8,8 @@ import 'package:anime_flow/features/settings/presentation/widgets/account/bgm_co
 import 'package:anime_flow/features/settings/presentation/widgets/account/bind_email_section.dart';
 import 'package:anime_flow/features/settings/presentation/widgets/account/change_password_dialog.dart';
 import 'package:anime_flow/features/settings/presentation/providers/setting_provider.dart';
-import 'package:anime_flow/features/user/application/user_controller.dart';
+import 'package:anime_flow/features/user/application/account_service.dart';
+import 'package:anime_flow/features/user/application/user_oauth_controller.dart';
 import 'package:anime_flow/features/user/application/user_oauth_state.dart';
 import 'package:anime_flow/features/user/presentation/providers/user_state_provider.dart';
 import 'package:anime_flow/app/router/app_router.dart';
@@ -36,7 +37,7 @@ class _AccountSettingsPageState extends ConsumerState<AccountSettingsPage> {
 
   Future<void> _changePassword() async {
     final l10n = AppLocalizations.of(context);
-    final controller = ref.read(userControllerProvider.notifier);
+    final controller = ref.read(accountServiceProvider);
     final changed = await showDialog<bool>(
       context: context,
       barrierDismissible: false,
@@ -69,7 +70,7 @@ class _AccountSettingsPageState extends ConsumerState<AccountSettingsPage> {
 
     if (confirmed != true || !context.mounted) return;
 
-    await ref.read(userControllerProvider.notifier).clearUserInfo();
+    await ref.read(accountServiceProvider).clearUserInfo();
     if (!context.mounted) return;
     NotificationToast.show(l10n.logoutSuccess, title: l10n.tip);
   }
@@ -77,7 +78,9 @@ class _AccountSettingsPageState extends ConsumerState<AccountSettingsPage> {
   Future<void> _bindBangumi() async {
     final l10n = AppLocalizations.of(context);
     try {
-      await ref.read(userControllerProvider.notifier).openOAuthPageForBind();
+      await ref
+          .read(userOAuthControllerProvider.notifier)
+          .openOAuthPageForBind();
       if (!context.mounted) return;
     } on StateError catch (e) {
       if (!context.mounted) return;
@@ -121,7 +124,7 @@ class _AccountSettingsPageState extends ConsumerState<AccountSettingsPage> {
     final isLoggedInAsync = ref.watch(isLoggedInProvider);
     final userInfoAsync = ref.watch(currentUserInfoProvider);
     final bangumiBindAsync = ref.watch(bangumiBindProvider);
-    final oauthState = ref.watch(userControllerProvider);
+    final oauthState = ref.watch(userOAuthControllerProvider);
     final isBinding = oauthState.isAuthorizing &&
         oauthState.purpose == OAuthPurpose.bindBangumi;
 
@@ -228,7 +231,8 @@ class _AccountSettingsPageState extends ConsumerState<AccountSettingsPage> {
                               return OutlinedButton.icon(
                                 onPressed: () {
                                   ref
-                                      .read(userControllerProvider.notifier)
+                                      .read(
+                                          userOAuthControllerProvider.notifier)
                                       .openOAuthPage();
                                 },
                                 icon: SvgPicture.asset(
@@ -423,7 +427,7 @@ class _AccountSettingsPageState extends ConsumerState<AccountSettingsPage> {
                   ),
                   TextButton(
                     onPressed: () => ref
-                        .read(userControllerProvider.notifier)
+                        .read(userOAuthControllerProvider.notifier)
                         .cancelOAuthWaiting(),
                     child: Text(l10n.cancel),
                   ),
@@ -593,7 +597,7 @@ class _AccountSettingsPageState extends ConsumerState<AccountSettingsPage> {
                 );
                 if (confirmed == true) {
                   await ref
-                      .read(userControllerProvider.notifier)
+                      .read(userOAuthControllerProvider.notifier)
                       .unbindBangumi();
                 }
               },

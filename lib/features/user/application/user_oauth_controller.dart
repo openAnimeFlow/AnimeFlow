@@ -1,6 +1,5 @@
 import 'dart:io';
 
-import 'package:anime_flow/core/network/interceptors/flow_refresh_token_interceptor.dart';
 import 'package:anime_flow/core/constants/constants.dart';
 import 'package:anime_flow/core/network/api_path.dart';
 import 'package:anime_flow/core/network/clients/flow_client.dart';
@@ -18,45 +17,15 @@ import 'package:anime_flow/shared/widgets/notification_toast.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:url_launcher/url_launcher.dart';
 
-part 'user_controller.g.dart';
+part 'user_oauth_controller.g.dart';
 
 @Riverpod(keepAlive: true)
-class UserController extends _$UserController {
+class UserOAuthController extends _$UserOAuthController {
   @override
   UserOAuthState build() => const UserOAuthState();
 
   void cancelOAuthWaiting() {
     state = const UserOAuthState();
-  }
-
-  Future<void> changePassword({
-    required String oldPassword,
-    required String newPassword,
-  }) async {
-    await FlowApi.changePasswordService(
-      oldPassword: oldPassword,
-      newPassword: newPassword,
-    );
-    // 服务端已撤销全部会话，无需再发送登出请求。
-    await clearUserInfo(notifyServer: false);
-  }
-
-  Future<void> clearUserInfo({bool notifyServer = true}) async {
-    cancelOAuthWaiting();
-    final repository = ref.read(flowTokenRepositoryProvider);
-    FlowRefreshTokenInterceptor.invalidatePendingRefresh(repository);
-    final sessionToken = await repository.getToken();
-    await repository.removeToken();
-    ref.invalidate(currentFlowTokenProvider);
-    ref.invalidate(isLoggedInProvider);
-    ref.invalidate(currentUserInfoProvider);
-    ref.invalidate(bangumiBindProvider);
-    ref.invalidate(bgmCollectionSyncProvider);
-    ref.invalidate(userCollectionsProvider);
-    if (!notifyServer || sessionToken == null) return;
-    FlowApi.logoutService(sessionToken: sessionToken).catchError((e) {
-      LiggLogger().w('服务端登出失败: $e');
-    });
   }
 
   Future<OAuthHandleResult> handleDeepLink(String deepLink) async {

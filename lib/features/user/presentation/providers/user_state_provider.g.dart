@@ -33,7 +33,7 @@ final class CurrentFlowTokenProvider
   CurrentFlowToken create() => CurrentFlowToken();
 }
 
-String _$currentFlowTokenHash() => r'6344bd3d595a4693694b6e88efb5ee144a8a3fe0';
+String _$currentFlowTokenHash() => r'97de2b4e00ba83c5e96af955961049ea65b4aaef';
 
 abstract class _$CurrentFlowToken extends $AsyncNotifier<FlowToken?> {
   FutureOr<FlowToken?> build();
@@ -143,7 +143,7 @@ final class CurrentUserInfoProvider
   CurrentUserInfo create() => CurrentUserInfo();
 }
 
-String _$currentUserInfoHash() => r'db6cb867658b4db17597ad2af63adf242643ad9d';
+String _$currentUserInfoHash() => r'6c51f6b76b3106703e9af0f161e259067538c608';
 
 abstract class _$CurrentUserInfo extends $AsyncNotifier<FlowUsers?> {
   FutureOr<FlowUsers?> build();

@@ -95,7 +95,7 @@ class UserPage extends ConsumerWidget {
                           );
                           if (confirmed == true && context.mounted) {
                             await ref
-                                .read(accountServiceProvider)
+                                .read(accountControllerProvider.notifier)
                                 .clearUserInfo();
                           }
                         },

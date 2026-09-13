@@ -12,15 +12,20 @@ import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 part 'user_state_provider.g.dart';
 
+/// 使当前用户会话相关状态失效并触发重新读取。
+void invalidateUserSession(Ref ref) {
+  ref.invalidate(currentFlowTokenProvider);
+  ref.invalidate(isLoggedInProvider);
+  ref.invalidate(currentUserInfoProvider);
+  ref.invalidate(bangumiBindProvider);
+}
+
 @Riverpod(keepAlive: true)
 class CurrentFlowToken extends _$CurrentFlowToken {
   @override
   Future<FlowToken?> build() async {
     FlowRefreshTokenInterceptor.onSessionExpired = () {
-      ref.invalidateSelf();
-      ref.invalidate(isLoggedInProvider);
-      ref.invalidate(currentUserInfoProvider);
-      ref.invalidate(bangumiBindProvider);
+      invalidateUserSession(ref);
     };
     FlowRefreshTokenInterceptor.onTokenRefreshed = () {
       ref.invalidateSelf();

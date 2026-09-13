@@ -37,7 +37,7 @@ class _AccountSettingsPageState extends ConsumerState<AccountSettingsPage> {
 
   Future<void> _changePassword() async {
     final l10n = AppLocalizations.of(context);
-    final controller = ref.read(accountServiceProvider);
+    final controller = ref.read(accountControllerProvider.notifier);
     final changed = await showDialog<bool>(
       context: context,
       barrierDismissible: false,
@@ -70,7 +70,7 @@ class _AccountSettingsPageState extends ConsumerState<AccountSettingsPage> {
 
     if (confirmed != true || !context.mounted) return;
 
-    await ref.read(accountServiceProvider).clearUserInfo();
+    await ref.read(accountControllerProvider.notifier).clearUserInfo();
     if (!context.mounted) return;
     NotificationToast.show(l10n.logoutSuccess, title: l10n.tip);
   }

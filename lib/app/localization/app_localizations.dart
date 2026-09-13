@@ -103,6 +103,42 @@ abstract class AppLocalizations {
         languageCode: 'zh', countryCode: 'TW', scriptCode: 'Hant')
   ];
 
+  /// No description provided for @changePassword.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'修改密码'**
+  String get changePassword;
+
+  /// No description provided for @oldPassword.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'旧密码'**
+  String get oldPassword;
+
+  /// No description provided for @enterOldPassword.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'请输入旧密码'**
+  String get enterOldPassword;
+
+  /// No description provided for @changePasswordDescription.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'修改成功后，所有设备的登录会话都会失效，请使用新密码重新登录。'**
+  String get changePasswordDescription;
+
+  /// No description provided for @passwordChangeSuccess.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'密码修改成功，请使用新密码重新登录'**
+  String get passwordChangeSuccess;
+
+  /// No description provided for @passwordChangeFailed.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'修改密码失败，请重试'**
+  String get passwordChangeFailed;
+
   /// No description provided for @generalSettingsTitle.
   ///
   /// In zh_Hans, this message translates to:

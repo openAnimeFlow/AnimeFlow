@@ -29,7 +29,19 @@ class UserController extends _$UserController {
     state = const UserOAuthState();
   }
 
-  Future<void> clearUserInfo() async {
+  Future<void> changePassword({
+    required String oldPassword,
+    required String newPassword,
+  }) async {
+    await FlowApi.changePasswordService(
+      oldPassword: oldPassword,
+      newPassword: newPassword,
+    );
+    // 服务端已撤销全部会话，无需再发送登出请求。
+    await clearUserInfo(notifyServer: false);
+  }
+
+  Future<void> clearUserInfo({bool notifyServer = true}) async {
     cancelOAuthWaiting();
     final repository = ref.read(flowTokenRepositoryProvider);
     FlowRefreshTokenInterceptor.invalidatePendingRefresh(repository);
@@ -41,7 +53,7 @@ class UserController extends _$UserController {
     ref.invalidate(bangumiBindProvider);
     ref.invalidate(bgmCollectionSyncProvider);
     ref.invalidate(userCollectionsProvider);
-    if (sessionToken == null) return;
+    if (!notifyServer || sessionToken == null) return;
     FlowApi.logoutService(sessionToken: sessionToken).catchError((e) {
       LiggLogger().w('服务端登出失败: $e');
     });

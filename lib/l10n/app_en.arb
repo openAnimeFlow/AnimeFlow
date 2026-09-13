@@ -1,4 +1,10 @@
 {
+  "changePassword": "Change password",
+  "oldPassword": "Current password",
+  "enterOldPassword": "Please enter your current password",
+  "changePasswordDescription": "Changing your password signs you out on all devices. Please log in again with your new password.",
+  "passwordChangeSuccess": "Password changed. Please log in with your new password.",
+  "passwordChangeFailed": "Failed to change password. Please try again.",
   "@@locale": "en",
   "generalSettingsTitle": "General Settings",
   "languageLabel": "Language",

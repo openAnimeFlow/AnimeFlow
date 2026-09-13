@@ -1,4 +1,10 @@
 {
+  "changePassword": "修改密碼",
+  "oldPassword": "舊密碼",
+  "enterOldPassword": "請輸入舊密碼",
+  "changePasswordDescription": "修改成功後，所有裝置的登入工作階段都會失效，請使用新密碼重新登入。",
+  "passwordChangeSuccess": "密碼修改成功，請使用新密碼重新登入",
+  "passwordChangeFailed": "修改密碼失敗，請重試",
   "@@locale": "zh",
   "generalSettingsTitle": "通用设置",
   "languageLabel": "语言",

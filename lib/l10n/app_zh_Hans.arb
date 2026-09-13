@@ -1,4 +1,10 @@
 {
+  "changePassword": "修改密码",
+  "oldPassword": "旧密码",
+  "enterOldPassword": "请输入旧密码",
+  "changePasswordDescription": "修改成功后，所有设备的登录会话都会失效，请使用新密码重新登录。",
+  "passwordChangeSuccess": "密码修改成功，请使用新密码重新登录",
+  "passwordChangeFailed": "修改密码失败，请重试",
   "@@locale": "zh_Hans",
   "generalSettingsTitle": "通用设置",
   "languageLabel": "语言",

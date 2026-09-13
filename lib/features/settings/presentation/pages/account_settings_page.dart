@@ -6,6 +6,7 @@ import 'package:anime_flow/shared/models/flow/flow_users.dart';
 import 'package:anime_flow/features/auth/presentation/pages/login_page.dart';
 import 'package:anime_flow/features/settings/presentation/widgets/account/bgm_collection_sync_section.dart';
 import 'package:anime_flow/features/settings/presentation/widgets/account/bind_email_section.dart';
+import 'package:anime_flow/features/settings/presentation/widgets/account/change_password_dialog.dart';
 import 'package:anime_flow/features/settings/presentation/providers/setting_provider.dart';
 import 'package:anime_flow/features/user/application/user_controller.dart';
 import 'package:anime_flow/features/user/application/user_oauth_state.dart';
@@ -32,6 +33,19 @@ class AccountSettingsPage extends ConsumerStatefulWidget {
 
 class _AccountSettingsPageState extends ConsumerState<AccountSettingsPage> {
   bool _isAvatarUploading = false;
+
+  Future<void> _changePassword() async {
+    final l10n = AppLocalizations.of(context);
+    final controller = ref.read(userControllerProvider.notifier);
+    final changed = await showDialog<bool>(
+      context: context,
+      barrierDismissible: false,
+      builder: (_) => ChangePasswordDialog(onSubmit: controller.changePassword),
+    );
+    if (changed == true && mounted) {
+      NotificationToast.show(l10n.passwordChangeSuccess, title: l10n.tip);
+    }
+  }
 
   Future<void> _confirmLogout() async {
     final l10n = AppLocalizations.of(context);
@@ -307,6 +321,15 @@ class _AccountSettingsPageState extends ConsumerState<AccountSettingsPage> {
         ),
         const SizedBox(height: 24),
         _buildSectionTitle(l10n.accountActions),
+        if (user.email.isNotEmpty)
+          Card(
+            child: ListTile(
+              leading: const Icon(Icons.lock_outline),
+              title: Text(l10n.changePassword),
+              trailing: const Icon(Icons.chevron_right),
+              onTap: _changePassword,
+            ),
+          ),
         Card(
           child: ListTile(
             leading: Icon(

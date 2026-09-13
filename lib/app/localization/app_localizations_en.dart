@@ -9,6 +9,27 @@ class AppLocalizationsEn extends AppLocalizations {
   AppLocalizationsEn([String locale = 'en']) : super(locale);
 
   @override
+  String get changePassword => 'Change password';
+
+  @override
+  String get oldPassword => 'Current password';
+
+  @override
+  String get enterOldPassword => 'Please enter your current password';
+
+  @override
+  String get changePasswordDescription =>
+      'Changing your password signs you out on all devices. Please log in again with your new password.';
+
+  @override
+  String get passwordChangeSuccess =>
+      'Password changed. Please log in with your new password.';
+
+  @override
+  String get passwordChangeFailed =>
+      'Failed to change password. Please try again.';
+
+  @override
   String get generalSettingsTitle => 'General Settings';
 
   @override

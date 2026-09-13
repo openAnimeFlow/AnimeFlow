@@ -632,6 +632,21 @@ class FlowApi {
     return FlowUsers.fromJson(response.data as Map<String, dynamic>);
   }
 
+  /// 修改密码。
+  static Future<void> changePasswordService({
+    required String oldPassword,
+    required String newPassword,
+  }) async {
+    await _client.put(
+      AnimeFlowApi.changePassword,
+      data: {
+        'oldPassword': oldPassword,
+        'newPassword': newPassword,
+      },
+      requireFlowToken: true,
+    );
+  }
+
   /// 查询当前账号的 Bangumi 绑定状态
   static Future<BangumiBindItem> getBangumiBindService() async {
     final response = await _client.get(

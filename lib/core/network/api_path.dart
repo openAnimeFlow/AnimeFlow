@@ -210,6 +210,9 @@ class AnimeFlowApi {
       /// 用户信息
       flowUsers = '/api/v1/users',
 
+      /// 修改当前用户密码
+      changePassword = '/api/v1/users/password',
+
       /// 当前用户 Bangumi 收藏
       flowUserCollections = '/api/v1/users/collections',
 

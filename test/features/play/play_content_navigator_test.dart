@@ -290,11 +290,13 @@ void main() {
   }
 
   testWidgets(
-      'default wheels adjust volume',
+      'default wheels adjust volume and horizontal scrolling is ignored',
       (tester) async {
     await mount(tester);
     await scrollPlayer(tester, const Offset(0, -20));
     await scrollPlayer(tester, const Offset(0, 20));
+    await scrollPlayer(tester, const Offset(20, 0));
+    await scrollPlayer(tester, const Offset(-20, 0));
     expect(session.volumeChanges, [5.0, -5.0]);
   });
 

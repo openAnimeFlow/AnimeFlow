@@ -156,7 +156,7 @@ class _DesktopGestureDetectorState
       child: Listener(
         // 鼠标指针信号事件监听（用于鼠标滚轮）
         onPointerSignal: (event) {
-          if (event is PointerScrollEvent) {
+          if (event is PointerScrollEvent && event.scrollDelta.dy != 0) {
             final binding = PlayerShortcutBinding.wheel(
               event.scrollDelta.dy < 0 ? 5.0 : -5.0,
             );

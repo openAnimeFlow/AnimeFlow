@@ -15,6 +15,7 @@ import 'package:anime_flow/shared/widgets/notification_toast.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:anime_flow/app/localization/app_localizations.dart';
+import 'package:dio/dio.dart';
 
 class DownloadPluginsPage extends StatefulWidget {
   const DownloadPluginsPage({super.key});
@@ -33,6 +34,8 @@ class _DownloadPluginsPageState extends State<DownloadPluginsPage> {
   // List<CrawlConfigItem>? plugins;
   List<dynamic>? pluginRepo;
   bool hasChanged = false; // 跟踪是否有插件被下载或更新
+  int _pluginsRequestId = 0;
+  CancelToken? _pluginsCancelToken;
 
   /// 正在下载或更新中的插件名
   final Set<String> _busyPluginNames = {};
@@ -44,8 +47,13 @@ class _DownloadPluginsPageState extends State<DownloadPluginsPage> {
     _getPlugins();
   }
 
-  void _getPlugins() async {
-    if (!isLoading && mounted) {
+  Future<void> _getPlugins() async {
+    _pluginsCancelToken?.cancel('插件列表请求已被新的请求替换');
+    final cancelToken = _pluginsCancelToken = CancelToken();
+    final requestId = ++_pluginsRequestId;
+    final mirrorEnabled = isMirror;
+
+    if (mounted) {
       setState(() {
         isLoading = true;
         errorMessage = null;
@@ -53,19 +61,19 @@ class _DownloadPluginsPageState extends State<DownloadPluginsPage> {
     }
     try {
       String url = '${CommonApi.pluginRepo}/index.json';
-      if (isMirror) url = Utils.jsDelivrCdnUrl(url);
-      final data = await Api.getResources(url);
+      if (mirrorEnabled) url = Utils.jsDelivrCdnUrl(url);
+      final data = await Api.getResources(url, cancelToken: cancelToken);
       final plugins = data is String
           ? jsonDecode(data) as List<dynamic>
           : data as List<dynamic>;
-      if (mounted) {
+      if (mounted && requestId == _pluginsRequestId) {
         setState(() {
           isLoading = false;
           pluginRepo = plugins;
         });
       }
     } catch (e) {
-      if (mounted) {
+      if (mounted && requestId == _pluginsRequestId) {
         setState(() {
           errorMessage = e.toString();
           isLoading = false;
@@ -73,6 +81,13 @@ class _DownloadPluginsPageState extends State<DownloadPluginsPage> {
       }
       LiggLogger().e(e);
     }
+  }
+
+  @override
+  void dispose() {
+    _pluginsRequestId++;
+    _pluginsCancelToken?.cancel('页面已销毁');
+    super.dispose();
   }
 
   Future<void> _persistPlugin(
@@ -187,7 +202,7 @@ class _DownloadPluginsPageState extends State<DownloadPluginsPage> {
         ),
         body: RefreshIndicator(
           onRefresh: () async {
-            _getPlugins();
+            await _getPlugins();
           },
           child: ListView(padding: EdgeInsets.zero, children: [
             ListTile(

@@ -18,13 +18,18 @@ class Api {
   static final Client _client = Client.instance;
 
   /// 获取资源，返回原始响应数据
-  static Future<T> getResources<T>(String url, {Options? options}) async {
+  static Future<T> getResources<T>(
+    String url, {
+    Options? options,
+    CancelToken? cancelToken,
+  }) async {
     return (await _client.get(
       url,
       options: options ??
           Options(headers: {
             Constants.userAgentName: Utils.getRandomUA(),
           }),
+      cancelToken: cancelToken,
     ))
         .data as T;
   }

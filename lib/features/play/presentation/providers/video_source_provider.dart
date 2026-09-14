@@ -18,8 +18,14 @@ import 'package:anime_flow/shared/models/player/play/video/resources_item.dart';
 import 'package:anime_flow/app/router/routes_args.dart';
 import 'package:anime_flow/core/logger/logger.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 part 'video_source_provider.g.dart';
+
+/// 播放解析 WebView 的生命周期独立于页面状态。
+final webViewVideoSourceProvider = Provider<WebViewVideoSourceService>((ref) {
+  return WebViewVideoSourceService.shared;
+});
 
 class VideoSourceState {
   const VideoSourceState({
@@ -102,9 +108,6 @@ class ManualEpisodeSource {
   dependencies: [Episodes, playExtra, PlayStateNotifier, playSession],
 )
 class VideoSourceNotifier extends _$VideoSourceNotifier {
-  // 随播放页作用域释放，同一页面内切集时复用。
-  WebViewVideoSourceService? _webViewVideoService;
-  Future<void> _serviceDisposeTail = Future<void>.value();
   final LiggLogger _logger = LiggLogger();
 
   static const _maxSearchItems = 5;
@@ -160,16 +163,8 @@ class VideoSourceNotifier extends _$VideoSourceNotifier {
   Future<void> _dispose() async {
     _searchSessionId++;
     _videoPageLoadToken++;
-    final service = _webViewVideoService;
-    _webViewVideoService = null;
     _websiteRequestTokens.clear();
     _attemptedAutoLoadUrls.clear();
-    if (service != null) {
-      _serviceDisposeTail = service.dispose().catchError((Object error) {
-        _logger.e(error);
-      });
-    }
-    await _serviceDisposeTail;
   }
 
   Future<void> initVideoResources() async {
@@ -861,42 +856,40 @@ class VideoSourceNotifier extends _$VideoSourceNotifier {
     }
     if (!ref.mounted) return false;
     final loadToken = ++_videoPageLoadToken;
-    _webViewVideoService?.cancel();
+    final webViewVideoProvider = ref.read(webViewVideoSourceProvider);
+    webViewVideoProvider.cancel();
 
     final playController = ref.read(playSessionProvider);
     ref.read(playStateProvider.notifier).setIsParsing(true);
 
+    if (!ref.mounted || loadToken != _videoPageLoadToken) return false;
+
+    await webViewVideoProvider.ensureInitialized();
+    if (!ref.mounted) return false;
+    if (loadToken != _videoPageLoadToken) return false;
+    var offset = 0;
+    final subject = ref.read(playExtraProvider).playExtra;
+    final episodesState =
+        ref.read(episodesProvider).asData?.value ?? const EpisodesData();
+    final subjectId = subject.subjectId;
+    final episodeIndex = episodesState.episodeIndex;
+    final episodeSort = episodesState.episodeSort.toInt();
+    final episodeId = episodesState.episodeId;
+    final subjectName = subject.subjectName;
+    final subjectCover = subject.subjectCover;
+    final subjectAlias = subject.subjectAliases;
+    final position = await PlayRepository.getPlayHistory(subjectId);
+    if (!ref.mounted) return false;
+    if (position != null &&
+        position.position > 0 &&
+        position.episodeId == episodeId) {
+      offset = position.position;
+    }
+
     try {
-      // Provider 重建时，先等待上一实例释放，再创建新的实例。
-      await _serviceDisposeTail;
-      if (!ref.mounted || loadToken != _videoPageLoadToken) return false;
-
-      final webViewVideoService =
-          _webViewVideoService ??= WebViewVideoSourceService();
-      await webViewVideoService.ensureInitialized();
-      if (!ref.mounted || loadToken != _videoPageLoadToken) return false;
-      var offset = 0;
-      final subject = ref.read(playExtraProvider).playExtra;
-      final episodesState =
-          ref.read(episodesProvider).asData?.value ?? const EpisodesData();
-      final subjectId = subject.subjectId;
-      final episodeIndex = episodesState.episodeIndex;
-      final episodeSort = episodesState.episodeSort.toInt();
-      final episodeId = episodesState.episodeId;
-      final subjectName = subject.subjectName;
-      final subjectCover = subject.subjectCover;
-      final subjectAlias = subject.subjectAliases;
-      final position = await PlayRepository.getPlayHistory(subjectId);
-      if (!ref.mounted || loadToken != _videoPageLoadToken) return false;
-      if (position != null &&
-          position.position > 0 &&
-          position.episodeId == episodeId) {
-        offset = position.position;
-      }
-
       ref.read(playStateProvider.notifier).setParseResult('正在解析视频源...');
 
-      final source = await webViewVideoService.resolve(url,
+      final source = await webViewVideoProvider.resolve(url,
           useLegacyParser: false, offset: offset);
       if (!ref.mounted) return false;
       final canUseResult = loadToken == _videoPageLoadToken &&

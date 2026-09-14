@@ -49,6 +49,96 @@ class _DesktopGestureDetectorState
     }
   }
 
+  KeyEventResult _handleShortcut(int pressed, {bool isRepeat = false}) {
+    final shortcut = {
+      for (final action in PlayerShortcutAction.values)
+        action: action.readBindings().map((binding) => binding.id).toSet(),
+    };
+    // 已绑定快捷键的重复事件也必须消费，避免方向键长按触发
+    // Flutter 默认的焦点遍历；每次按下仍只执行一次播放器操作。
+    if (isRepeat) {
+      return shortcut.values.any((bindings) => bindings.contains(pressed))
+          ? KeyEventResult.handled
+          : KeyEventResult.ignored;
+    }
+    // 空格键：暂停/播放
+    if (shortcut[PlayerShortcutAction.playPause]!.contains(pressed)) {
+      playSession.playOrPauseVideo();
+      videoUiNotifier.updateIndicatorTypeAndShowIndicator(
+          VideoControlsIndicatorType.playStatusIndicator);
+      return KeyEventResult.handled;
+    }
+    // 左方向键：快退10秒
+    if (shortcut[PlayerShortcutAction.seekBackward]!.contains(pressed)) {
+      final playState = ref.read(playStateProvider);
+      final currentPosition = playState.position;
+      final duration = playState.duration;
+      final newPositionMs =
+          (currentPosition - const Duration(seconds: 10)).inMilliseconds;
+      final clampedMs = newPositionMs.clamp(0, duration.inMilliseconds);
+      playSession.seekTo(Duration(milliseconds: clampedMs));
+      hoverTimer?.cancel();
+      videoUiNotifier.showControlsUi();
+      hoverTimer = Timer(const Duration(seconds: 3), () {
+        videoUiNotifier.hideControlsUi();
+      });
+      return KeyEventResult.handled;
+    }
+    // 右方向键：快进10秒
+    if (shortcut[PlayerShortcutAction.seekForward]!.contains(pressed)) {
+      final playState = ref.read(playStateProvider);
+      final currentPosition = playState.position;
+      final duration = playState.duration;
+      final newPositionMs =
+          (currentPosition + const Duration(seconds: 10)).inMilliseconds;
+      final clampedMs = newPositionMs.clamp(0, duration.inMilliseconds);
+      playSession.seekTo(Duration(milliseconds: clampedMs));
+      hoverTimer?.cancel();
+      videoUiNotifier.showControlsUi();
+      hoverTimer = Timer(const Duration(seconds: 3), () {
+        videoUiNotifier.hideControlsUi();
+      });
+      return KeyEventResult.handled;
+    }
+    // 上方向键：增加音量
+    if (shortcut[PlayerShortcutAction.volumeUp]!.contains(pressed)) {
+      videoUiNotifier.updateMainAxisAlignmentType(MainAxisAlignment.start);
+      videoUiNotifier.updateIndicatorTypeAndShowIndicator(
+          VideoControlsIndicatorType.volumeIndicator);
+      playSession.adjustVolumeByWheel(5.0); // 每次增加5%
+      return KeyEventResult.handled;
+    }
+    // 下方向键：减少音量
+    if (shortcut[PlayerShortcutAction.volumeDown]!.contains(pressed)) {
+      videoUiNotifier.updateMainAxisAlignmentType(MainAxisAlignment.start);
+      videoUiNotifier.updateIndicatorTypeAndShowIndicator(
+          VideoControlsIndicatorType.volumeIndicator);
+      playSession.adjustVolumeByWheel(-5.0); // 每次减少5%
+      return KeyEventResult.handled;
+    }
+    if (shortcut[PlayerShortcutAction.enterFullscreen]!.contains(pressed)) {
+      playSession.toggleFullScreen();
+      return KeyEventResult.handled;
+    }
+    if (shortcut[PlayerShortcutAction.exitFullscreen]!.contains(pressed)) {
+      playSession.exitFullScreen();
+      return KeyEventResult.handled;
+    }
+    if (shortcut[PlayerShortcutAction.screenshot]!.contains(pressed)) {
+      unawaited(_takeScreenshot());
+      return KeyEventResult.handled;
+    }
+    if (shortcut[PlayerShortcutAction.toggleDanmaku]!.contains(pressed)) {
+      playSession.toggleDanmaku();
+      return KeyEventResult.handled;
+    }
+    if (shortcut[PlayerShortcutAction.nextEpisode]!.contains(pressed)) {
+      playSession.switchToNextEpisode();
+      return KeyEventResult.handled;
+    }
+    return KeyEventResult.ignored;
+  }
+
   @override
   Widget build(BuildContext context) {
     return Focus(
@@ -56,98 +146,10 @@ class _DesktopGestureDetectorState
       autofocus: true,
       onKeyEvent: (node, event) {
         if (event is KeyDownEvent || event is KeyRepeatEvent) {
-          final pressed = event.logicalKey.keyId;
-          final shortcut = {
-            for (final action in PlayerShortcutAction.values)
-              action:
-                  action.readBindings().map((binding) => binding.id).toSet(),
-          };
-          // 已绑定快捷键的重复事件也必须消费，避免方向键长按触发
-          // Flutter 默认的焦点遍历；每次按下仍只执行一次播放器操作。
-          if (event is KeyRepeatEvent) {
-            return shortcut.values.any((bindings) => bindings.contains(pressed))
-                ? KeyEventResult.handled
-                : KeyEventResult.ignored;
-          }
-          // 空格键：暂停/播放
-          if (shortcut[PlayerShortcutAction.playPause]!.contains(pressed)) {
-            playSession.playOrPauseVideo();
-            videoUiNotifier.updateIndicatorTypeAndShowIndicator(
-                VideoControlsIndicatorType.playStatusIndicator);
-            return KeyEventResult.handled;
-          }
-          // 左方向键：快退10秒
-          if (shortcut[PlayerShortcutAction.seekBackward]!.contains(pressed)) {
-            final playState = ref.read(playStateProvider);
-            final currentPosition = playState.position;
-            final duration = playState.duration;
-            final newPositionMs =
-                (currentPosition - const Duration(seconds: 10)).inMilliseconds;
-            final clampedMs = newPositionMs.clamp(0, duration.inMilliseconds);
-            playSession.seekTo(Duration(milliseconds: clampedMs));
-            hoverTimer?.cancel();
-            videoUiNotifier.showControlsUi();
-            hoverTimer = Timer(const Duration(seconds: 3), () {
-              videoUiNotifier.hideControlsUi();
-            });
-            return KeyEventResult.handled;
-          }
-          // 右方向键：快进10秒
-          if (shortcut[PlayerShortcutAction.seekForward]!.contains(pressed)) {
-            final playState = ref.read(playStateProvider);
-            final currentPosition = playState.position;
-            final duration = playState.duration;
-            final newPositionMs =
-                (currentPosition + const Duration(seconds: 10)).inMilliseconds;
-            final clampedMs = newPositionMs.clamp(0, duration.inMilliseconds);
-            playSession.seekTo(Duration(milliseconds: clampedMs));
-            hoverTimer?.cancel();
-            videoUiNotifier.showControlsUi();
-            hoverTimer = Timer(const Duration(seconds: 3), () {
-              videoUiNotifier.hideControlsUi();
-            });
-            return KeyEventResult.handled;
-          }
-          // 上方向键：增加音量
-          if (shortcut[PlayerShortcutAction.volumeUp]!.contains(pressed)) {
-            videoUiNotifier
-                .updateMainAxisAlignmentType(MainAxisAlignment.start);
-            videoUiNotifier.updateIndicatorTypeAndShowIndicator(
-                VideoControlsIndicatorType.volumeIndicator);
-            playSession.adjustVolumeByWheel(5.0); // 每次增加5%
-            return KeyEventResult.handled;
-          }
-          // 下方向键：减少音量
-          if (shortcut[PlayerShortcutAction.volumeDown]!.contains(pressed)) {
-            videoUiNotifier
-                .updateMainAxisAlignmentType(MainAxisAlignment.start);
-            videoUiNotifier.updateIndicatorTypeAndShowIndicator(
-                VideoControlsIndicatorType.volumeIndicator);
-            playSession.adjustVolumeByWheel(-5.0); // 每次减少5%
-            return KeyEventResult.handled;
-          }
-          if (shortcut[PlayerShortcutAction.enterFullscreen]!
-              .contains(pressed)) {
-            playSession.toggleFullScreen();
-            return KeyEventResult.handled;
-          }
-          if (shortcut[PlayerShortcutAction.exitFullscreen]!
-              .contains(pressed)) {
-            playSession.exitFullScreen();
-            return KeyEventResult.handled;
-          }
-          if (shortcut[PlayerShortcutAction.screenshot]!.contains(pressed)) {
-            unawaited(_takeScreenshot());
-            return KeyEventResult.handled;
-          }
-          if (shortcut[PlayerShortcutAction.toggleDanmaku]!.contains(pressed)) {
-            playSession.toggleDanmaku();
-            return KeyEventResult.handled;
-          }
-          if (shortcut[PlayerShortcutAction.nextEpisode]!.contains(pressed)) {
-            playSession.switchToNextEpisode();
-            return KeyEventResult.handled;
-          }
+          return _handleShortcut(
+            event.logicalKey.keyId,
+            isRepeat: event is KeyRepeatEvent,
+          );
         }
         return KeyEventResult.ignored;
       },
@@ -155,20 +157,10 @@ class _DesktopGestureDetectorState
         // 鼠标指针信号事件监听（用于鼠标滚轮）
         onPointerSignal: (event) {
           if (event is PointerScrollEvent) {
-            final delta = event.scrollDelta.dy < 0 ? 5.0 : -5.0;
-            final action = delta > 0
-                ? PlayerShortcutAction.volumeUp
-                : PlayerShortcutAction.volumeDown;
-            if (!action.readBindings().any(
-                (binding) => binding.isWheel && binding.wheelDelta == delta)) {
-              return;
-            }
-            videoUiNotifier
-                .updateMainAxisAlignmentType(MainAxisAlignment.start);
-            videoUiNotifier.updateIndicatorTypeAndShowIndicator(
-                VideoControlsIndicatorType.volumeIndicator);
-
-            playSession.adjustVolumeByWheel(delta);
+            final binding = PlayerShortcutBinding.wheel(
+              event.scrollDelta.dy < 0 ? 5.0 : -5.0,
+            );
+            _handleShortcut(binding.id);
           }
         },
         child: MouseRegion(

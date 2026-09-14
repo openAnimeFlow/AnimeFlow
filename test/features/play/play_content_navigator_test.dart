@@ -8,6 +8,7 @@ import 'package:anime_flow/app/router/routes_args.dart';
 import 'package:anime_flow/features/anime_info/presentation/providers/anime_info_provider.dart';
 import 'package:anime_flow/features/anime_info/presentation/widgets/anime_info_view.dart';
 import 'package:anime_flow/features/play/presentation/providers/episodes_provider.dart';
+import 'package:anime_flow/features/play/domain/player/player_shortcut.dart';
 import 'package:anime_flow/features/play/presentation/providers/play_content_actions.dart';
 import 'package:anime_flow/features/play/presentation/providers/play_provider.dart';
 import 'package:anime_flow/features/play/presentation/providers/recommendation_provider.dart';
@@ -20,6 +21,7 @@ import 'package:anime_flow/features/user/presentation/providers/user_state_provi
 import 'package:anime_flow/shared/models/bangumi/subject_item.dart';
 import 'package:anime_flow/shared/models/bangumi/subjects_info_item.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/gestures.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -27,8 +29,15 @@ import 'package:go_router/go_router.dart';
 import 'package:hive_ce/hive.dart';
 
 class _Settings implements Box<dynamic> {
+  final storedValues = <dynamic, dynamic>{};
+
   @override
-  dynamic get(dynamic key, {dynamic defaultValue}) => defaultValue;
+  dynamic get(dynamic key, {dynamic defaultValue}) =>
+      storedValues[key] ?? defaultValue;
+
+  @override
+  Future<void> put(dynamic key, dynamic value) async =>
+      storedValues[key] = value;
 
   @override
   dynamic noSuchMethod(Invocation invocation) => super.noSuchMethod(invocation);
@@ -58,6 +67,7 @@ class _Sources extends VideoSourceNotifier {
 
 class _Session implements PlaySession {
   int toggles = 0;
+  final actions = <PlayerShortcutAction>[];
   final seeks = <Duration>[];
   final volumeChanges = <double>[];
 
@@ -69,6 +79,24 @@ class _Session implements PlaySession {
 
   @override
   void playOrPauseVideo() => toggles++;
+
+  @override
+  void toggleFullScreen() => actions.add(PlayerShortcutAction.enterFullscreen);
+
+  @override
+  void exitFullScreen() => actions.add(PlayerShortcutAction.exitFullscreen);
+
+  @override
+  Future<Uint8List?> takeScreenshot() async {
+    actions.add(PlayerShortcutAction.screenshot);
+    return null;
+  }
+
+  @override
+  void toggleDanmaku() => actions.add(PlayerShortcutAction.toggleDanmaku);
+
+  @override
+  void switchToNextEpisode() => actions.add(PlayerShortcutAction.nextEpisode);
 
   @override
   dynamic noSuchMethod(Invocation invocation) => super.noSuchMethod(invocation);
@@ -150,7 +178,9 @@ Future<void> _frames(WidgetTester tester) async {
 }
 
 void main() {
-  setUpAll(() => Storage.setting = _Settings());
+  final settings = _Settings();
+  setUpAll(() => Storage.setting = settings);
+  setUp(() => settings.storedValues.clear());
 
   late GoRouter router;
   late GlobalKey<_HostState> host;
@@ -203,6 +233,83 @@ void main() {
     expect(find.byType(AnimeInfoView), findsOneWidget);
   }
 
+  Future<void> scrollPlayer(WidgetTester tester, Offset delta) async {
+    await tester.sendEventToBinding(PointerScrollEvent(
+      position: tester.getCenter(find.byType(DesktopGestureDetector)),
+      scrollDelta: delta,
+    ));
+  }
+
+  for (final action in PlayerShortcutAction.values) {
+    for (final delta in [-20.0, 20.0]) {
+      testWidgets('wheel $delta executes saved ${action.name} binding',
+          (tester) async {
+        // Free both default wheel bindings, as the editor does before reassignment.
+        for (final volumeAction in [
+          PlayerShortcutAction.volumeUp,
+          PlayerShortcutAction.volumeDown,
+        ]) {
+          volumeAction.saveBindings(volumeAction.defaultBindings
+              .where((binding) => !binding.isWheel)
+              .toList());
+        }
+        action.saveBindings([PlayerShortcutBinding.wheel(delta < 0 ? 5 : -5)]);
+        await mount(tester);
+        await scrollPlayer(tester, Offset(0, delta));
+        expect(
+            session.toggles, action == PlayerShortcutAction.playPause ? 1 : 0);
+        expect(
+            session.seeks.length,
+            [
+              PlayerShortcutAction.seekBackward,
+              PlayerShortcutAction.seekForward
+            ].contains(action)
+                ? 1
+                : 0);
+        expect(
+            session.volumeChanges,
+            switch (action) {
+              PlayerShortcutAction.volumeUp => [5.0],
+              PlayerShortcutAction.volumeDown => [-5.0],
+              _ => isEmpty,
+            });
+        expect(
+            session.actions,
+            switch (action) {
+              PlayerShortcutAction.enterFullscreen ||
+              PlayerShortcutAction.exitFullscreen ||
+              PlayerShortcutAction.screenshot ||
+              PlayerShortcutAction.toggleDanmaku ||
+              PlayerShortcutAction.nextEpisode =>
+                [action],
+              _ => isEmpty,
+            });
+        await tester.pumpWidget(const SizedBox.shrink());
+      });
+    }
+  }
+
+  testWidgets(
+      'default wheels adjust volume',
+      (tester) async {
+    await mount(tester);
+    await scrollPlayer(tester, const Offset(0, -20));
+    await scrollPlayer(tester, const Offset(0, 20));
+    expect(session.volumeChanges, [5.0, -5.0]);
+  });
+
+  testWidgets('removed wheel binding is ignored', (tester) async {
+    PlayerShortcutAction.volumeUp.saveBindings([
+      const PlayerShortcutBinding.keyboard(LogicalKeyboardKey.arrowUp),
+    ]);
+    await mount(tester);
+    await scrollPlayer(tester, const Offset(0, -20));
+    expect(session.volumeChanges, isEmpty);
+    expect(session.toggles, 0);
+    expect(session.seeks, isEmpty);
+    expect(session.actions, isEmpty);
+  });
+
   testWidgets('introduction does not steal initial player keyboard focus',
       (tester) async {
     await mount(tester);
@@ -223,7 +330,8 @@ void main() {
     LogicalKeyboardKey.arrowUp,
     LogicalKeyboardKey.arrowDown,
   ]) {
-    testWidgets('${key.keyLabel} keeps player focus on initial press and repeat',
+    testWidgets(
+        '${key.keyLabel} keeps player focus on initial press and repeat',
         (tester) async {
       await mount(tester);
       final playerFocus = FocusManager.instance.primaryFocus;

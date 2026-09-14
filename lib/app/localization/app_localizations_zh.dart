@@ -784,10 +784,10 @@ class AppLocalizationsZh extends AppLocalizations {
   String get about => '关于';
 
   @override
-  String get projectUpdates => '项目更新';
+  String get projectUpdates => '更新信息';
 
   @override
-  String get projectUpdatesLoadFailed => '项目更新加载失败';
+  String get projectUpdatesLoadFailed => '更新信息加载失败';
 
   @override
   String get errorLogs => '错误日志';
@@ -2663,10 +2663,10 @@ class AppLocalizationsZhHans extends AppLocalizationsZh {
   String get about => '关于';
 
   @override
-  String get projectUpdates => '项目更新';
+  String get projectUpdates => '更新信息';
 
   @override
-  String get projectUpdatesLoadFailed => '项目更新加载失败';
+  String get projectUpdatesLoadFailed => '更新信息加载失败';
 
   @override
   String get errorLogs => '错误日志';
@@ -4541,10 +4541,10 @@ class AppLocalizationsZhHantHk extends AppLocalizationsZh {
   String get about => '關於';
 
   @override
-  String get projectUpdates => '專案更新';
+  String get projectUpdates => '更新資訊';
 
   @override
-  String get projectUpdatesLoadFailed => '專案更新載入失敗';
+  String get projectUpdatesLoadFailed => '更新資訊載入失敗';
 
   @override
   String get errorLogs => '錯誤日誌';
@@ -6338,10 +6338,10 @@ class AppLocalizationsZhHantTw extends AppLocalizationsZh {
   String get about => '關於';
 
   @override
-  String get projectUpdates => '專案更新';
+  String get projectUpdates => '更新資訊';
 
   @override
-  String get projectUpdatesLoadFailed => '專案更新載入失敗';
+  String get projectUpdatesLoadFailed => '更新資訊載入失敗';
 
   @override
   String get errorLogs => '錯誤日誌';

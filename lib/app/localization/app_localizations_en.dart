@@ -794,10 +794,10 @@ class AppLocalizationsEn extends AppLocalizations {
   String get about => 'About';
 
   @override
-  String get projectUpdates => 'Project updates';
+  String get projectUpdates => 'Update information';
 
   @override
-  String get projectUpdatesLoadFailed => 'Failed to load project updates';
+  String get projectUpdatesLoadFailed => 'Failed to load update information';
 
   @override
   String get errorLogs => 'Error Logs';

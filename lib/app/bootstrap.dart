@@ -3,7 +3,6 @@ import 'dart:io';
 
 import 'package:anime_flow/app/app.dart';
 import 'package:anime_flow/features/app_update/application/app_info_provider.dart';
-import 'package:anime_flow/features/app_update/application/app_provider_container.dart';
 import 'package:anime_flow/features/shaders/shaders_controller.dart';
 import 'package:anime_flow/features/download/application/download_foreground_service.dart';
 import 'package:anime_flow/features/settings/presentation/providers/font_provider.dart';
@@ -44,7 +43,6 @@ Future<void> bootstrap() async {
   }
 
   final container = ProviderContainer();
-  appProviderContainer = container;
   container.read(appInfoProvider);
   unawaited(container.read(shadersDirectoryProvider.future));
   unawaited(CrawlConfig.initCrawlConfigs());

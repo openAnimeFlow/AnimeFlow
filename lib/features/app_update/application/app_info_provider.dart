@@ -1,6 +1,5 @@
 import 'package:anime_flow/core/constants/storage_key.dart';
 import 'package:anime_flow/features/app_update/application/app_info_state.dart';
-import 'package:anime_flow/features/app_update/application/app_provider_container.dart';
 import 'package:anime_flow/features/app_update/application/apply_updates_controller.dart';
 import 'package:anime_flow/core/network/api_path.dart';
 import 'package:anime_flow/core/network/api/api.dart';
@@ -16,6 +15,8 @@ import 'package:package_info_plus/package_info_plus.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 part 'app_info_provider.g.dart';
+
+PackageInfo? appPackageInfo;
 
 @Riverpod(keepAlive: true)
 String appVersion(Ref ref) {

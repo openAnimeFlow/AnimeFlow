@@ -11,11 +11,15 @@ import 'package:anime_flow/features/play/presentation/providers/play_content_act
 import 'package:anime_flow/features/play/presentation/providers/play_provider.dart';
 import 'package:anime_flow/features/play/presentation/providers/recommendation_provider.dart';
 import 'package:anime_flow/features/play/presentation/providers/video_source_provider.dart';
+import 'package:anime_flow/features/play/presentation/providers/video_ui_provider.dart';
 import 'package:anime_flow/features/play/presentation/widgets/content/play_content_navigator.dart';
+import 'package:anime_flow/features/play/presentation/widgets/player/gesture/desktop_gesture_detector.dart';
+import 'package:anime_flow/shared/models/enums/video_controls_icon_type.dart';
 import 'package:anime_flow/features/user/presentation/providers/user_state_provider.dart';
 import 'package:anime_flow/shared/models/bangumi/subject_item.dart';
 import 'package:anime_flow/shared/models/bangumi/subjects_info_item.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:go_router/go_router.dart';
@@ -43,8 +47,20 @@ class _Sources extends VideoSourceNotifier {
 }
 
 class _Session implements PlaySession {
+  int toggles = 0;
+  @override
+  void playOrPauseVideo() => toggles++;
+
   @override
   dynamic noSuchMethod(Invocation invocation) => super.noSuchMethod(invocation);
+}
+
+class _VideoUi extends VideoUiNotifier {
+  @override
+  VideoUiState build() => const VideoUiState();
+
+  @override
+  void updateIndicatorTypeAndShowIndicator(VideoControlsIndicatorType type) {}
 }
 
 class _Actions extends PlayContentActions {
@@ -84,6 +100,13 @@ class _HostState extends State<_Host> with SingleTickerProviderStateMixin {
             child: AnimatedBuilder(
               animation: tabs,
               builder: (context, child) => Column(children: [
+                const DesktopGestureDetector(
+                  child: SizedBox(
+                    width: 200,
+                    height: 80,
+                    child: ColoredBox(color: Colors.black),
+                  ),
+                ),
                 TabBar(controller: tabs, tabs: const [
                   Tab(text: 'Intro tab'),
                   Tab(text: 'Comments tab')
@@ -111,6 +134,7 @@ void main() {
   late GoRouter router;
   late GlobalKey<_HostState> host;
   late _Actions actions;
+  late _Session session;
   Future<void> mount(WidgetTester tester) async {
     host = GlobalKey<_HostState>();
     router = GoRouter(routes: [
@@ -133,7 +157,8 @@ void main() {
           animeInfoProvider.overrideWith(_Info.new),
           episodesProvider.overrideWith(_Episodes.new),
           playStateProvider.overrideWith(_PlayState.new),
-          playSessionProvider.overrideWithValue(_Session()),
+          playSessionProvider.overrideWithValue(session = _Session()),
+          videoUiProvider.overrideWith(_VideoUi.new),
           videoSourceProvider.overrideWith(_Sources.new),
           isLoggedInProvider.overrideWith((ref) async => false),
           recommendationProvider
@@ -156,6 +181,38 @@ void main() {
     await _frames(tester);
     expect(find.byType(AnimeInfoView), findsOneWidget);
   }
+
+  testWidgets('introduction does not steal initial player keyboard focus',
+      (tester) async {
+    await mount(tester);
+    await tester.sendKeyEvent(LogicalKeyboardKey.space);
+    expect(session.toggles, 1);
+    await details(tester);
+    await tester.sendKeyEvent(LogicalKeyboardKey.space);
+    expect(session.toggles, 2);
+    await tester.binding.handlePopRoute();
+    await _frames(tester);
+    await tester.sendKeyEvent(LogicalKeyboardKey.space);
+    expect(session.toggles, 3);
+  });
+
+  testWidgets('clicking the player restores focus from the content navigator',
+      (tester) async {
+    await mount(tester);
+    final navigator = tester.state<NavigatorState>(find.descendant(
+      of: find.byType(PlayContentNavigator),
+      matching: find.byType(Navigator),
+    ));
+    navigator.focusNode.requestFocus();
+    await tester.pump();
+    await tester.sendKeyEvent(LogicalKeyboardKey.space);
+    expect(session.toggles, 0);
+    await tester.tap(find.byType(DesktopGestureDetector));
+    await _frames(tester);
+    expect(session.toggles, 1);
+    await tester.sendKeyEvent(LogicalKeyboardKey.space);
+    expect(session.toggles, 2);
+  });
 
   testWidgets('real detail back and system back preserve then exit the host',
       (tester) async {

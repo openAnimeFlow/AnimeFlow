@@ -22,33 +22,35 @@ class DesktopGestureDetector extends ConsumerStatefulWidget {
 class _DesktopGestureDetectorState
     extends ConsumerState<DesktopGestureDetector> {
   Timer? hoverTimer;
-  late final PlaySession playPageController;
-
-  VideoUiNotifier get videoUiStateController =>
-      ref.read(videoUiProvider.notifier);
+  final _focusNode = FocusNode(debugLabel: 'Desktop player');
+  late final PlaySession playSession;
+  late final VideoUiNotifier videoUiNotifier;
 
   @override
   void initState() {
     super.initState();
-    playPageController = ref.read(playSessionProvider);
+    playSession = ref.read(playSessionProvider);
+    videoUiNotifier = ref.read(videoUiProvider.notifier);
   }
 
   @override
   void dispose() {
     hoverTimer?.cancel();
+    _focusNode.dispose();
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
     return Focus(
+      focusNode: _focusNode,
       autofocus: true,
       onKeyEvent: (node, event) {
         if (event is KeyDownEvent) {
           // 空格键：暂停/播放
           if (event.logicalKey == LogicalKeyboardKey.space) {
-            playPageController.playOrPauseVideo();
-            videoUiStateController.updateIndicatorTypeAndShowIndicator(
+            playSession.playOrPauseVideo();
+            videoUiNotifier.updateIndicatorTypeAndShowIndicator(
                 VideoControlsIndicatorType.playStatusIndicator);
             return KeyEventResult.handled;
           }
@@ -60,9 +62,12 @@ class _DesktopGestureDetectorState
             final newPositionMs =
                 (currentPosition - const Duration(seconds: 10)).inMilliseconds;
             final clampedMs = newPositionMs.clamp(0, duration.inMilliseconds);
-            playPageController.seekTo(Duration(milliseconds: clampedMs));
-            videoUiStateController.updateIndicatorTypeAndShowIndicator(
-                VideoControlsIndicatorType.horizontalDraggingIndicator);
+            playSession.seekTo(Duration(milliseconds: clampedMs));
+            hoverTimer?.cancel();
+            videoUiNotifier.showControlsUi();
+            hoverTimer = Timer(const Duration(seconds: 3), () {
+              videoUiNotifier.hideControlsUi();
+            });
             return KeyEventResult.handled;
           }
           // 右方向键：快进10秒
@@ -73,27 +78,30 @@ class _DesktopGestureDetectorState
             final newPositionMs =
                 (currentPosition + const Duration(seconds: 10)).inMilliseconds;
             final clampedMs = newPositionMs.clamp(0, duration.inMilliseconds);
-            playPageController.seekTo(Duration(milliseconds: clampedMs));
-            videoUiStateController.updateIndicatorTypeAndShowIndicator(
-                VideoControlsIndicatorType.horizontalDraggingIndicator);
+            playSession.seekTo(Duration(milliseconds: clampedMs));
+            hoverTimer?.cancel();
+            videoUiNotifier.showControlsUi();
+            hoverTimer = Timer(const Duration(seconds: 3), () {
+              videoUiNotifier.hideControlsUi();
+            });
             return KeyEventResult.handled;
           }
           // 上方向键：增加音量
           if (event.logicalKey == LogicalKeyboardKey.arrowUp) {
-            videoUiStateController
+            videoUiNotifier
                 .updateMainAxisAlignmentType(MainAxisAlignment.start);
-            videoUiStateController.updateIndicatorTypeAndShowIndicator(
+            videoUiNotifier.updateIndicatorTypeAndShowIndicator(
                 VideoControlsIndicatorType.volumeIndicator);
-            playPageController.adjustVolumeByWheel(5.0); // 每次增加5%
+            playSession.adjustVolumeByWheel(5.0); // 每次增加5%
             return KeyEventResult.handled;
           }
           // 下方向键：减少音量
           if (event.logicalKey == LogicalKeyboardKey.arrowDown) {
-            videoUiStateController
+            videoUiNotifier
                 .updateMainAxisAlignmentType(MainAxisAlignment.start);
-            videoUiStateController.updateIndicatorTypeAndShowIndicator(
+            videoUiNotifier.updateIndicatorTypeAndShowIndicator(
                 VideoControlsIndicatorType.volumeIndicator);
-            playPageController.adjustVolumeByWheel(-5.0); // 每次减少5%
+            playSession.adjustVolumeByWheel(-5.0); // 每次减少5%
             return KeyEventResult.handled;
           }
         }
@@ -103,16 +111,16 @@ class _DesktopGestureDetectorState
         // 鼠标指针信号事件监听（用于鼠标滚轮）
         onPointerSignal: (event) {
           if (event is PointerScrollEvent) {
-            videoUiStateController
+            videoUiNotifier
                 .updateMainAxisAlignmentType(MainAxisAlignment.start);
-            videoUiStateController.updateIndicatorTypeAndShowIndicator(
+            videoUiNotifier.updateIndicatorTypeAndShowIndicator(
                 VideoControlsIndicatorType.volumeIndicator);
 
             // 处理鼠标滚轮事件：调整音量
             // 向上滚动增加音量，向下滚动减少音量
             // 除以20是为了控制调整幅度（每次约5%）
             var scrollDelta = -event.scrollDelta.dy / 20;
-            playPageController.adjustVolumeByWheel(scrollDelta);
+            playSession.adjustVolumeByWheel(scrollDelta);
           }
         },
         child: MouseRegion(
@@ -124,29 +132,31 @@ class _DesktopGestureDetectorState
           // 鼠标悬停事件
           onHover: (event) {
             hoverTimer?.cancel();
-            videoUiStateController.showControlsUi();
+            videoUiNotifier.showControlsUi();
             hoverTimer = Timer(const Duration(seconds: 3), () {
-              videoUiStateController.hideControlsUi();
+              videoUiNotifier.hideControlsUi();
             });
           },
 
           // 鼠标移出事件
           onExit: (event) {
             hoverTimer?.cancel();
-            videoUiStateController.hideControlsUi(
+            videoUiNotifier.hideControlsUi(
                 duration: const Duration(seconds: 3));
           },
 
           child: GestureDetector(
             // 双击事件
             onDoubleTap: () {
-              playPageController.toggleFullScreen();
+              _focusNode.requestFocus();
+              playSession.toggleFullScreen();
             },
 
             // 单击事件
             onTap: () {
-              playPageController.playOrPauseVideo();
-              videoUiStateController.updateIndicatorTypeAndShowIndicator(
+              _focusNode.requestFocus();
+              playSession.playOrPauseVideo();
+              videoUiNotifier.updateIndicatorTypeAndShowIndicator(
                   VideoControlsIndicatorType.playStatusIndicator);
             },
             child: widget.child,

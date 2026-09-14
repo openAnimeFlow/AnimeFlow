@@ -74,6 +74,8 @@ class _PlayContentNavigatorState extends ConsumerState<PlayContentNavigator>
         },
         child: Navigator(
           key: _navigatorKey,
+          // 内嵌简介/详情路由不应抢走播放器的键盘焦点。
+          requestFocus: false,
           onDidRemovePage: (page) {
             if (page.key == ValueKey<int>(_detailsId) && _showDetails) {
               setState(() => _showDetails = false);

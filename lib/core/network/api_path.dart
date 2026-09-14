@@ -70,10 +70,6 @@ class CommonApi {
   static const String bgmTV = 'https://bgm.tv',
       bangumiTV = 'https://bangumi.tv',
 
-      /// bangumi请求头
-      bangumiUserAgent =
-          'AnimeFlow/{version} (https://github.com/openAnimeFlow/AnimeFlow.git)',
-
       ///AnimeFLow版本信息
       animeFlowVersion = '/repos/openAnimeFlow/AnimeFlow/releases/latest',
 
@@ -104,6 +100,11 @@ class CommonApi {
 class AnimeFlowApi {
   /// AnimeFlow API Server
   static const String animeFlowApi = 'https://ligg.top',
+
+      apiLigg = 'https://api.ligg.top',
+
+      /// 版本信息
+      releases = '/releases',
 
       /// dev url
       animeFlowApiDev = 'http://localhost:1024',

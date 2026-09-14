@@ -1,14 +1,19 @@
 class Constants {
   ///空image
-  static const String notImage = 'https://bgm.tv/img/info_only.png';
+  static const String notImage = 'https://bgm.tv/img/info_only.png',
 
-  ///常规请求头
-  static const String userAgentName = 'User-Agent';
+      ///常规请求头
+      userAgentName = 'User-Agent',
+      authorization = 'Authorization',
 
-  static const String authorization = 'Authorization';
+      /// Bangumi ClientId
+      bgmClientId = 'bgm5267694605415a325',
 
-  /// Bangumi ClientId
-  static const String bgmClientId = 'bgm5267694605415a325';
+      /// bangumi请求头
+      bangumiUserAgent = 'AnimeFlow/{version} (https://github.com/openAnimeFlow/AnimeFlow.git)',
+
+      /// AnimeFlow GitHub地址
+      animeFlow = 'https://github.com/openAnimeFlow/AnimeFlow';
 }
 
 /// 随机UA列表

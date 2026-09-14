@@ -775,6 +775,48 @@ class AppLocalizationsZh extends AppLocalizations {
   String get playerSettings => '播放器设置';
 
   @override
+  String get playerShortcuts => '播放器快捷键';
+
+  @override
+  String get playerShortcutsDescription => '在播放页面使用以下键盘快捷键控制播放器。';
+
+  @override
+  String get playerShortcutPlayPause => '播放 / 暂停';
+
+  @override
+  String get playerShortcutSeekBackward => '快退 10 秒';
+
+  @override
+  String get playerShortcutSeekForward => '快进 10 秒';
+
+  @override
+  String get playerShortcutVolumeUp => '增加音量';
+
+  @override
+  String get playerShortcutVolumeDown => '减少音量';
+
+  @override
+  String get playerShortcutPressKey => '请按下按键';
+
+  @override
+  String get playerShortcutConflict => '该按键已被其他功能使用';
+
+  @override
+  String get playerShortcutEnterFullscreen => '进入全屏';
+
+  @override
+  String get playerShortcutExitFullscreen => '退出全屏';
+
+  @override
+  String get playerShortcutScreenshot => '截图';
+
+  @override
+  String get playerShortcutToggleDanmaku => '开关弹幕';
+
+  @override
+  String get playerShortcutNextEpisode => '下一集';
+
+  @override
   String get playbackSettings => '播放';
 
   @override
@@ -2652,6 +2694,48 @@ class AppLocalizationsZhHans extends AppLocalizationsZh {
 
   @override
   String get playerSettings => '播放器设置';
+
+  @override
+  String get playerShortcuts => '播放器快捷键';
+
+  @override
+  String get playerShortcutsDescription => '在播放页面使用以下键盘快捷键控制播放器。';
+
+  @override
+  String get playerShortcutPlayPause => '播放 / 暂停';
+
+  @override
+  String get playerShortcutSeekBackward => '快退 10 秒';
+
+  @override
+  String get playerShortcutSeekForward => '快进 10 秒';
+
+  @override
+  String get playerShortcutVolumeUp => '增加音量';
+
+  @override
+  String get playerShortcutVolumeDown => '减少音量';
+
+  @override
+  String get playerShortcutPressKey => '请按下按键';
+
+  @override
+  String get playerShortcutConflict => '该按键已被其他功能使用';
+
+  @override
+  String get playerShortcutEnterFullscreen => '进入全屏';
+
+  @override
+  String get playerShortcutExitFullscreen => '退出全屏';
+
+  @override
+  String get playerShortcutScreenshot => '截图';
+
+  @override
+  String get playerShortcutToggleDanmaku => '开关弹幕';
+
+  @override
+  String get playerShortcutNextEpisode => '下一集';
 
   @override
   String get playbackSettings => '播放';
@@ -4532,6 +4616,48 @@ class AppLocalizationsZhHantHk extends AppLocalizationsZh {
   String get playerSettings => '播放器設定';
 
   @override
+  String get playerShortcuts => '播放器快捷鍵';
+
+  @override
+  String get playerShortcutsDescription => '在播放頁面使用以下鍵盤快捷鍵控制播放器。';
+
+  @override
+  String get playerShortcutPlayPause => '播放 / 暫停';
+
+  @override
+  String get playerShortcutSeekBackward => '快退 10 秒';
+
+  @override
+  String get playerShortcutSeekForward => '快進 10 秒';
+
+  @override
+  String get playerShortcutVolumeUp => '增加音量';
+
+  @override
+  String get playerShortcutVolumeDown => '減少音量';
+
+  @override
+  String get playerShortcutPressKey => '請按下按鍵';
+
+  @override
+  String get playerShortcutConflict => '該按鍵已被其他功能使用';
+
+  @override
+  String get playerShortcutEnterFullscreen => '進入全螢幕';
+
+  @override
+  String get playerShortcutExitFullscreen => '退出全螢幕';
+
+  @override
+  String get playerShortcutScreenshot => '截圖';
+
+  @override
+  String get playerShortcutToggleDanmaku => '開關彈幕';
+
+  @override
+  String get playerShortcutNextEpisode => '下一集';
+
+  @override
   String get playbackSettings => '播放';
 
   @override
@@ -6327,6 +6453,48 @@ class AppLocalizationsZhHantTw extends AppLocalizationsZh {
 
   @override
   String get playerSettings => '播放器設定';
+
+  @override
+  String get playerShortcuts => '播放器快捷鍵';
+
+  @override
+  String get playerShortcutsDescription => '在播放頁面使用以下鍵盤快捷鍵控制播放器。';
+
+  @override
+  String get playerShortcutPlayPause => '播放 / 暫停';
+
+  @override
+  String get playerShortcutSeekBackward => '快退 10 秒';
+
+  @override
+  String get playerShortcutSeekForward => '快進 10 秒';
+
+  @override
+  String get playerShortcutVolumeUp => '增加音量';
+
+  @override
+  String get playerShortcutVolumeDown => '減少音量';
+
+  @override
+  String get playerShortcutPressKey => '請按下按鍵';
+
+  @override
+  String get playerShortcutConflict => '該按鍵已被其他功能使用';
+
+  @override
+  String get playerShortcutEnterFullscreen => '進入全螢幕';
+
+  @override
+  String get playerShortcutExitFullscreen => '退出全螢幕';
+
+  @override
+  String get playerShortcutScreenshot => '截圖';
+
+  @override
+  String get playerShortcutToggleDanmaku => '開關彈幕';
+
+  @override
+  String get playerShortcutNextEpisode => '下一集';
 
   @override
   String get playbackSettings => '播放';

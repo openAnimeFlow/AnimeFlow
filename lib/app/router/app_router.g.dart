@@ -629,6 +629,11 @@ RouteBase get $settingsShellRoute => ShellRouteData.$route(
               factory: $SettingPlaybackRoute._fromState,
             ),
             GoRouteData.$route(
+              path: 'playerShortcuts',
+              hasOverriddenOnExit: false,
+              factory: $SettingPlayerShortcutsRoute._fromState,
+            ),
+            GoRouteData.$route(
               path: 'downloadPlugins',
               hasOverriddenOnExit: false,
               factory: $SettingDownloadPluginsRoute._fromState,
@@ -791,6 +796,29 @@ mixin $SettingPlaybackRoute on GoRouteData {
   @override
   String get location => GoRouteData.$location(
         '/settings/playback',
+      );
+
+  @override
+  void go(BuildContext context) => context.go(location);
+
+  @override
+  Future<T?> push<T>(BuildContext context) => context.push<T>(location);
+
+  @override
+  void pushReplacement(BuildContext context) =>
+      context.pushReplacement(location);
+
+  @override
+  void replace(BuildContext context) => context.replace(location);
+}
+
+mixin $SettingPlayerShortcutsRoute on GoRouteData {
+  static SettingPlayerShortcutsRoute _fromState(GoRouterState state) =>
+      const SettingPlayerShortcutsRoute();
+
+  @override
+  String get location => GoRouteData.$location(
+        '/settings/playerShortcuts',
       );
 
   @override

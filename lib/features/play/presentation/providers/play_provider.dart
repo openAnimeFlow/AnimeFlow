@@ -1126,6 +1126,8 @@ class PlaySession {
     }
   }
 
+  void switchToNextEpisode() => _episodesActions.switchToNextEpisode();
+
   /// 切换视频画面填充模式
   void toggleVideoFit(BoxFit fits) {
     _playStateActions.setVideoFit(fits);

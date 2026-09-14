@@ -297,7 +297,7 @@ class BottomAreaControl extends ConsumerWidget {
                               tooltip: l10n.nextEpisode,
                               onPressed: () {
                                 ref
-                                    .read(episodesProvider.notifier)
+                                    .read(playSessionProvider)
                                     .switchToNextEpisode();
                               },
                               icon: const Icon(

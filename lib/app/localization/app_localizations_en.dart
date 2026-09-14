@@ -785,6 +785,50 @@ class AppLocalizationsEn extends AppLocalizations {
   String get playerSettings => 'Player settings';
 
   @override
+  String get playerShortcuts => 'Player shortcuts';
+
+  @override
+  String get playerShortcutsDescription =>
+      'Use these keyboard shortcuts to control the player on the playback page.';
+
+  @override
+  String get playerShortcutPlayPause => 'Play / pause';
+
+  @override
+  String get playerShortcutSeekBackward => 'Seek backward 10 seconds';
+
+  @override
+  String get playerShortcutSeekForward => 'Seek forward 10 seconds';
+
+  @override
+  String get playerShortcutVolumeUp => 'Increase volume';
+
+  @override
+  String get playerShortcutVolumeDown => 'Decrease volume';
+
+  @override
+  String get playerShortcutPressKey => 'Press a key';
+
+  @override
+  String get playerShortcutConflict =>
+      'That key is already assigned to another action';
+
+  @override
+  String get playerShortcutEnterFullscreen => 'Enter fullscreen';
+
+  @override
+  String get playerShortcutExitFullscreen => 'Exit fullscreen';
+
+  @override
+  String get playerShortcutScreenshot => 'Screenshot';
+
+  @override
+  String get playerShortcutToggleDanmaku => 'Toggle danmaku';
+
+  @override
+  String get playerShortcutNextEpisode => 'Next episode';
+
+  @override
   String get playbackSettings => 'Playback';
 
   @override

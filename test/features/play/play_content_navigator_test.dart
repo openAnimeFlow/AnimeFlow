@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:anime_flow/core/storage/storage.dart';
 import 'package:anime_flow/app/localization/app_localizations.dart';
 import 'package:anime_flow/app/router/model/info_route_extra.dart';
 import 'package:anime_flow/app/router/model/play_route_extra.dart';
@@ -23,6 +24,15 @@ import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:go_router/go_router.dart';
+import 'package:hive_ce/hive.dart';
+
+class _Settings implements Box<dynamic> {
+  @override
+  dynamic get(dynamic key, {dynamic defaultValue}) => defaultValue;
+
+  @override
+  dynamic noSuchMethod(Invocation invocation) => super.noSuchMethod(invocation);
+}
 
 // Keep external data pending: the real introduction/detail widgets and navigator
 // are mounted, but tests do not need networking, storage or a video engine.
@@ -48,6 +58,15 @@ class _Sources extends VideoSourceNotifier {
 
 class _Session implements PlaySession {
   int toggles = 0;
+  final seeks = <Duration>[];
+  final volumeChanges = <double>[];
+
+  @override
+  void seekTo(Duration position) => seeks.add(position);
+
+  @override
+  void adjustVolumeByWheel(double delta) => volumeChanges.add(delta);
+
   @override
   void playOrPauseVideo() => toggles++;
 
@@ -131,6 +150,8 @@ Future<void> _frames(WidgetTester tester) async {
 }
 
 void main() {
+  setUpAll(() => Storage.setting = _Settings());
+
   late GoRouter router;
   late GlobalKey<_HostState> host;
   late _Actions actions;
@@ -195,6 +216,31 @@ void main() {
     await tester.sendKeyEvent(LogicalKeyboardKey.space);
     expect(session.toggles, 3);
   });
+
+  for (final key in [
+    LogicalKeyboardKey.arrowLeft,
+    LogicalKeyboardKey.arrowRight,
+    LogicalKeyboardKey.arrowUp,
+    LogicalKeyboardKey.arrowDown,
+  ]) {
+    testWidgets('${key.keyLabel} keeps player focus on initial press and repeat',
+        (tester) async {
+      await mount(tester);
+      final playerFocus = FocusManager.instance.primaryFocus;
+      expect(playerFocus?.debugLabel, 'Desktop player');
+      await tester.sendKeyDownEvent(key);
+      await tester.pump();
+      expect(session.seeks.length + session.volumeChanges.length, 1);
+      expect(FocusManager.instance.primaryFocus, same(playerFocus));
+      await tester.sendKeyRepeatEvent(key);
+      await tester.pump();
+      expect(FocusManager.instance.primaryFocus, same(playerFocus));
+      await tester.sendKeyUpEvent(key);
+      await tester.sendKeyEvent(LogicalKeyboardKey.space);
+      expect(session.toggles, 1);
+      await tester.pumpWidget(const SizedBox.shrink());
+    });
+  }
 
   testWidgets('clicking the player restores focus from the content navigator',
       (tester) async {

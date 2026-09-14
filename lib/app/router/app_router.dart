@@ -28,6 +28,7 @@ import 'package:anime_flow/features/settings/presentation/pages/error_logs_page.
 import 'package:anime_flow/features/settings/presentation/pages/font_page.dart';
 import 'package:anime_flow/features/settings/presentation/pages/general_settings.dart';
 import 'package:anime_flow/features/settings/presentation/pages/playback_settings.dart';
+import 'package:anime_flow/features/settings/presentation/pages/player_shortcuts_page.dart';
 import 'package:anime_flow/features/settings/presentation/pages/plugins/add_plugins.dart';
 import 'package:anime_flow/features/settings/presentation/pages/plugins/download_plugins.dart';
 import 'package:anime_flow/features/settings/presentation/pages/plugins/plugins.dart';
@@ -351,6 +352,7 @@ class ImageSearchRoute extends GoRouteData with $ImageSearchRoute {
       TypedGoRoute<SettingLogsRoute>(path: 'logs'),
       TypedGoRoute<SettingGeneralRoute>(path: 'general'),
       TypedGoRoute<SettingPlaybackRoute>(path: 'playback'),
+      TypedGoRoute<SettingPlayerShortcutsRoute>(path: 'playerShortcuts'),
       TypedGoRoute<SettingDownloadPluginsRoute>(path: 'downloadPlugins'),
       TypedGoRoute<SettingDanmakuRoute>(path: 'danmaku'),
       TypedGoRoute<SettingDownloadRoute>(path: 'download'),
@@ -411,6 +413,15 @@ class SettingPlaybackRoute extends GoRouteData with $SettingPlaybackRoute {
   @override
   Widget build(BuildContext context, GoRouterState state) =>
       const PlaybackSettingsPage();
+}
+
+class SettingPlayerShortcutsRoute extends GoRouteData
+    with $SettingPlayerShortcutsRoute {
+  const SettingPlayerShortcutsRoute();
+
+  @override
+  Widget build(BuildContext context, GoRouterState state) =>
+      const PlayerShortcutsPage();
 }
 
 class SettingDownloadPluginsRoute extends GoRouteData

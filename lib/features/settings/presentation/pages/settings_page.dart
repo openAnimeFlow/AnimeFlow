@@ -124,6 +124,11 @@ class _SettingsMenu extends StatelessWidget {
             route: const SettingPlaybackRoute(),
           ),
           _SettingsMenuItem(
+            title: l10n.playerShortcuts,
+            icon: Icons.keyboard_outlined,
+            route: const SettingPlayerShortcutsRoute(),
+          ),
+          _SettingsMenuItem(
             title: l10n.danmakuSettings,
             icon: Icons.subtitles_outlined,
             route: const SettingDanmakuRoute(),

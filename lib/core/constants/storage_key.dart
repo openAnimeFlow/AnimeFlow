@@ -40,6 +40,19 @@ class PlaybackKey {
       preferredPlayerKernel = 'playback_preferred_player_kernel';
 }
 
+class PlayerShortcutKey {
+  static const String playPause = 'player_shortcut_play_pause',
+      seekBackward = 'player_shortcut_seek_backward',
+      seekForward = 'player_shortcut_seek_forward',
+      volumeUp = 'player_shortcut_volume_up',
+      volumeDown = 'player_shortcut_volume_down',
+      enterFullscreen = 'player_shortcut_enter_fullscreen',
+      exitFullscreen = 'player_shortcut_exit_fullscreen',
+      screenshot = 'player_shortcut_screenshot',
+      toggleDanmaku = 'player_shortcut_toggle_danmaku',
+      nextEpisode = 'player_shortcut_next_episode';
+}
+
 class DownloadKey {
   static const String downloadDanmaku = 'download_danmaku';
   static const String downloadDirectory = 'download_directory';

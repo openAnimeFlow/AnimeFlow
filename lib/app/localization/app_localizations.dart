@@ -1531,6 +1531,90 @@ abstract class AppLocalizations {
   /// **'播放器设置'**
   String get playerSettings;
 
+  /// No description provided for @playerShortcuts.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'播放器快捷键'**
+  String get playerShortcuts;
+
+  /// No description provided for @playerShortcutsDescription.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'在播放页面使用以下键盘快捷键控制播放器。'**
+  String get playerShortcutsDescription;
+
+  /// No description provided for @playerShortcutPlayPause.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'播放 / 暂停'**
+  String get playerShortcutPlayPause;
+
+  /// No description provided for @playerShortcutSeekBackward.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'快退 10 秒'**
+  String get playerShortcutSeekBackward;
+
+  /// No description provided for @playerShortcutSeekForward.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'快进 10 秒'**
+  String get playerShortcutSeekForward;
+
+  /// No description provided for @playerShortcutVolumeUp.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'增加音量'**
+  String get playerShortcutVolumeUp;
+
+  /// No description provided for @playerShortcutVolumeDown.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'减少音量'**
+  String get playerShortcutVolumeDown;
+
+  /// No description provided for @playerShortcutPressKey.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'请按下按键'**
+  String get playerShortcutPressKey;
+
+  /// No description provided for @playerShortcutConflict.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'该按键已被其他功能使用'**
+  String get playerShortcutConflict;
+
+  /// No description provided for @playerShortcutEnterFullscreen.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'进入全屏'**
+  String get playerShortcutEnterFullscreen;
+
+  /// No description provided for @playerShortcutExitFullscreen.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'退出全屏'**
+  String get playerShortcutExitFullscreen;
+
+  /// No description provided for @playerShortcutScreenshot.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'截图'**
+  String get playerShortcutScreenshot;
+
+  /// No description provided for @playerShortcutToggleDanmaku.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'开关弹幕'**
+  String get playerShortcutToggleDanmaku;
+
+  /// No description provided for @playerShortcutNextEpisode.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'下一集'**
+  String get playerShortcutNextEpisode;
+
   /// No description provided for @playbackSettings.
   ///
   /// In zh_Hans, this message translates to:

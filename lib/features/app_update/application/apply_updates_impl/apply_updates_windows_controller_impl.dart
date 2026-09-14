@@ -14,7 +14,9 @@ class ApplyUpdatesWindowsController implements ApplyUpdatesController {
   bool get supportsInAppDownload => true;
 
   @override
-  List<DownloadInfo> prioritizeDownloads(List<DownloadInfo> downloads) {
+  Future<List<DownloadInfo>> prioritizeDownloads(
+    List<DownloadInfo> downloads,
+  ) async {
     final installers = downloads
         .where((download) =>
             path.extension(download.fileName).toLowerCase() == '.exe')

@@ -21,7 +21,7 @@ abstract class ApplyUpdatesController {
   bool get supportsInAppDownload;
 
   /// 按平台策略排列可用的下载包。
-  List<DownloadInfo> prioritizeDownloads(List<DownloadInfo> downloads);
+  Future<List<DownloadInfo>> prioritizeDownloads(List<DownloadInfo> downloads);
 
   /// 处理下载完成后的平台动作，例如运行安装包或打开所在目录。
   Future<void> openDownloadedPackage(String filePath);

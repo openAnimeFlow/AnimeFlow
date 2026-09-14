@@ -102,7 +102,7 @@ class AppInfo extends _$AppInfo {
             .map((e) => Map<String, dynamic>.from(e))
             .toList();
 
-        final download = _getDownloadInfo(downloadInfo, htmlUrl ?? '');
+        final download = await _getDownloadInfo(downloadInfo, htmlUrl ?? '');
 
         if (download.isEmpty) {
           return const VersionCheckResult(
@@ -175,10 +175,10 @@ class AppInfo extends _$AppInfo {
     state = state.copyWith(download: VersionDownloadState.idle);
   }
 
-  List<DownloadInfo> _getDownloadInfo(
+  Future<List<DownloadInfo>> _getDownloadInfo(
     List<Map<String, dynamic>> assets,
     String htmlUrl,
-  ) {
+  ) async {
     final platform = SystemUtil.getDevice();
     final List<DownloadInfo> urlList = [];
 
@@ -219,6 +219,7 @@ class AppInfo extends _$AppInfo {
       }
     }
 
-    return ApplyUpdatesFactory.getController().prioritizeDownloads(urlList);
+    return await ApplyUpdatesFactory.getController()
+        .prioritizeDownloads(urlList);
   }
 }

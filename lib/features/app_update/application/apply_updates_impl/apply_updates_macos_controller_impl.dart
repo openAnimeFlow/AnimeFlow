@@ -9,8 +9,9 @@ class ApplyUpdatesMacOSController implements ApplyUpdatesController {
   bool get supportsInAppDownload => false;
 
   @override
-  List<DownloadInfo> prioritizeDownloads(List<DownloadInfo> downloads) =>
-      downloads;
+  Future<List<DownloadInfo>> prioritizeDownloads(
+          List<DownloadInfo> downloads) =>
+      Future.value(downloads);
 
   @override
   Future<void> openDownloadedPackage(String filePath) async {

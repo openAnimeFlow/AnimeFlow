@@ -1549,6 +1549,18 @@ abstract class AppLocalizations {
   /// **'关于'**
   String get about;
 
+  /// No description provided for @projectUpdates.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'项目更新'**
+  String get projectUpdates;
+
+  /// No description provided for @projectUpdatesLoadFailed.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'项目更新加载失败'**
+  String get projectUpdatesLoadFailed;
+
   /// No description provided for @errorLogs.
   ///
   /// In zh_Hans, this message translates to:

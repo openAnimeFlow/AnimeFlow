@@ -1,4 +1,5 @@
 import 'package:anime_flow/core/constants/assets_path_constants.dart';
+import 'package:anime_flow/core/constants/constants.dart';
 import 'package:anime_flow/core/constants/storage_key.dart';
 import 'package:anime_flow/features/app_update/application/app_info_provider.dart';
 import 'package:anime_flow/features/settings/presentation/providers/setting_provider.dart';
@@ -116,11 +117,16 @@ class _AboutSettingsPageState extends ConsumerState<AboutSettingsPage> {
           ),
           const Divider(),
           ListTile(
+            title: Text(l10n.projectUpdates),
+            trailing: const Icon(Icons.article_outlined),
+            onTap: () => const SettingUpdatesRoute().push(context),
+          ),
+          const Divider(),
+          ListTile(
             title: Text(l10n.openSource),
             trailing: const Icon(Icons.open_in_new),
             onTap: () async {
-              final uri =
-                  Uri.parse('https://github.com/openAnimeFlow/AnimeFlow');
+              final uri = Uri.parse(Constants.animeFlow);
               if (await canLaunchUrl(uri)) {
                 await launchUrl(uri);
               } else {

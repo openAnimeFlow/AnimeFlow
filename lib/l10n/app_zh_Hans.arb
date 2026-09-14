@@ -251,6 +251,8 @@
   "playbackSettings": "播放",
     "otherSettings": "其他",
   "about": "关于",
+  "projectUpdates": "项目更新",
+  "projectUpdatesLoadFailed": "项目更新加载失败",
   "errorLogs": "错误日志",
   "errorLogsEmpty": "暂无日志",
   "errorLogsLoadFailed": "加载日志失败",

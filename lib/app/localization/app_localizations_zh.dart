@@ -784,6 +784,12 @@ class AppLocalizationsZh extends AppLocalizations {
   String get about => '关于';
 
   @override
+  String get projectUpdates => '项目更新';
+
+  @override
+  String get projectUpdatesLoadFailed => '项目更新加载失败';
+
+  @override
   String get errorLogs => '错误日志';
 
   @override
@@ -2655,6 +2661,12 @@ class AppLocalizationsZhHans extends AppLocalizationsZh {
 
   @override
   String get about => '关于';
+
+  @override
+  String get projectUpdates => '项目更新';
+
+  @override
+  String get projectUpdatesLoadFailed => '项目更新加载失败';
 
   @override
   String get errorLogs => '错误日志';
@@ -4529,6 +4541,12 @@ class AppLocalizationsZhHantHk extends AppLocalizationsZh {
   String get about => '關於';
 
   @override
+  String get projectUpdates => '專案更新';
+
+  @override
+  String get projectUpdatesLoadFailed => '專案更新載入失敗';
+
+  @override
   String get errorLogs => '錯誤日誌';
 
   @override
@@ -6318,6 +6336,12 @@ class AppLocalizationsZhHantTw extends AppLocalizationsZh {
 
   @override
   String get about => '關於';
+
+  @override
+  String get projectUpdates => '專案更新';
+
+  @override
+  String get projectUpdatesLoadFailed => '專案更新載入失敗';
 
   @override
   String get errorLogs => '錯誤日誌';

@@ -15,6 +15,7 @@ class DioFactory {
   static Dio? _pluginDio;
   static Dio? _downloadDio;
   static Dio? _animeFlowDio;
+  static Dio? _liggDio;
   static String? _deviceUserAgent;
 
   static Future<void> initialize() async {
@@ -47,6 +48,15 @@ class DioFactory {
     );
     return _animeFlowDio = dio;
   }
+
+  static Dio get liggDio => _liggDio ??= _create(
+        NetworkConfig.fromSettings(),
+        baseUrl: AnimeFlowApi.apiLigg,
+        defaultHeaders: {
+          'accept': 'application/json',
+          'user-agent': _deviceUserAgent ?? Utils.getRandomUA(),
+        },
+      );
 
   static Dio get githubDio => _githubDio ??= _create(
         NetworkConfig.fromSettings(),
@@ -81,6 +91,7 @@ class DioFactory {
     _pluginDio = null;
     _downloadDio = null;
     _animeFlowDio = null;
+    _liggDio = null;
   }
 
   static Dio _create(

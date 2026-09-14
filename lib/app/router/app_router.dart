@@ -21,11 +21,11 @@ import 'package:anime_flow/features/settings/presentation/pages/account_settings
 import 'package:anime_flow/features/settings/presentation/pages/about/about_page.dart';
 import 'package:anime_flow/features/settings/presentation/pages/about/thanks_page.dart';
 import 'package:anime_flow/features/settings/presentation/pages/about/updates_page.dart';
-import 'package:anime_flow/features/settings/presentation/pages/agreement/agreement_page.dart';
+import 'package:anime_flow/features/settings/presentation/pages/agreement_page.dart';
 import 'package:anime_flow/features/settings/presentation/pages/danmaku_setting_page.dart';
 import 'package:anime_flow/features/settings/presentation/pages/download_settings.dart';
 import 'package:anime_flow/features/settings/presentation/pages/error_logs_page.dart';
-import 'package:anime_flow/features/settings/presentation/pages/font/font_page.dart';
+import 'package:anime_flow/features/settings/presentation/pages/font_page.dart';
 import 'package:anime_flow/features/settings/presentation/pages/general_settings.dart';
 import 'package:anime_flow/features/settings/presentation/pages/playback_settings.dart';
 import 'package:anime_flow/features/settings/presentation/pages/plugins/add_plugins.dart';

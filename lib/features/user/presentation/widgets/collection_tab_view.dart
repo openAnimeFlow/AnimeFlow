@@ -381,6 +381,8 @@ class _CollectionTabView extends ConsumerWidget {
                                                   color: colorScheme
                                                       .onSurfaceVariant
                                                       .withValues(alpha: 0.8)),
+                                              maxLines: 2,
+                                              overflow: TextOverflow.ellipsis,
                                             ),
                                             const Spacer(),
                                             Row(

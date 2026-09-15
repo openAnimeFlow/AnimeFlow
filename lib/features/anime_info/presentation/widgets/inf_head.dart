@@ -263,7 +263,7 @@ class InfoHeadView extends StatelessWidget {
           runSpacing: 5,
           children: [
             Text(
-              '${subjectItem.airtime.date}(${subjectItem.platform.typeCN})',
+              '${subjectItem.airtime?.date ?? l10n.noData}(${subjectItem.platform.typeCN})',
               style:
                   const TextStyle(fontSize: fontSize, fontWeight: fontWeight),
               maxLines: 1,

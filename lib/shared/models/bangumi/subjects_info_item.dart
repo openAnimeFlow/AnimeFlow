@@ -3,7 +3,7 @@ import 'interest_item.dart';
 import 'rating_item.dart';
 
 class SubjectsInfoItem {
-  final Airtime airtime;
+  final Airtime? airtime;
   final Collection collection;
   final int eps;
   final int id;
@@ -52,7 +52,9 @@ class SubjectsInfoItem {
   });
 
   SubjectsInfoItem.fromJson(Map<String, dynamic> json)
-      : airtime = Airtime.fromJson(json['airtime']),
+      : airtime = json['airtime'] is Map
+            ? Airtime.fromJson(Map<String, dynamic>.from(json['airtime']))
+            : null,
         collection = Collection.fromJson(json['collection']),
         eps = json['eps'],
         id = json['id'],
@@ -105,32 +107,6 @@ class SubjectsInfoItem {
     );
   }
 
-  Map<String, dynamic> toJson() {
-    return {
-      'airtime': airtime.toJson(),
-      'collection': collection.toJson(),
-      'eps': eps,
-      'id': id,
-      'infobox': infobox.map((e) => e.toJson()).toList(),
-      'info': info,
-      'metaTags': metaTags,
-      'locked': locked,
-      'name': name,
-      if (nameCN != null) 'nameCN': nameCN,
-      'nsfw': nsfw,
-      'platform': platform.toJson(),
-      'rating': rating.toJson(),
-      'redirect': redirect,
-      'series': series,
-      'seriesEntry': seriesEntry,
-      'summary': summary,
-      'type': type,
-      'volumes': volumes,
-      'tags': tags.map((e) => e.toJson()).toList(),
-      'images': images.toJson(),
-      if (interest != null) 'interest': interest!.toJson(),
-    };
-  }
 }
 
 class Airtime {

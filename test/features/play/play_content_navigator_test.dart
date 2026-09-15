@@ -340,12 +340,17 @@ void main() {
       expect(playerFocus?.debugLabel, 'Desktop player');
       await tester.sendKeyDownEvent(key);
       await tester.pump();
-      expect(session.seeks.length + session.volumeChanges.length, 1);
+      // Right arrow also starts the long-press fast-forward gesture, so a
+      // normal seek is deferred until KeyUp to avoid triggering it immediately
+      // for a long press.
+      expect(session.seeks.length + session.volumeChanges.length,
+          key == LogicalKeyboardKey.arrowRight ? 0 : 1);
       expect(FocusManager.instance.primaryFocus, same(playerFocus));
       await tester.sendKeyRepeatEvent(key);
       await tester.pump();
       expect(FocusManager.instance.primaryFocus, same(playerFocus));
       await tester.sendKeyUpEvent(key);
+      expect(session.seeks.length + session.volumeChanges.length, 1);
       await tester.sendKeyEvent(LogicalKeyboardKey.space);
       expect(session.toggles, 1);
       await tester.pumpWidget(const SizedBox.shrink());

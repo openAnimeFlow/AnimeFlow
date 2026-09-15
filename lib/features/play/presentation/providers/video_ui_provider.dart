@@ -12,6 +12,10 @@ import 'package:screen_brightness_platform_interface/screen_brightness_platform_
 part 'video_ui_provider.g.dart';
 
 abstract class VideoUiStateActions {
+  void restartControlsAutoHideTimer({
+    Duration duration = const Duration(seconds: 3),
+  });
+
   void updateMainAxisAlignmentType(MainAxisAlignment type);
 
   void updateIndicatorType(VideoControlsIndicatorType type);
@@ -307,6 +311,17 @@ class VideoUiNotifier extends _$VideoUiNotifier implements VideoUiStateActions {
 
   void showControlsUi() {
     state = state.copyWith(isShowControlsUi: true);
+  }
+
+  @override
+  void restartControlsAutoHideTimer({
+    Duration duration = const Duration(seconds: 3),
+  }) {
+    _controlsUiTimer?.cancel();
+    showControlsUi();
+    _controlsUiTimer = Timer(duration, () {
+      state = state.copyWith(isShowControlsUi: false);
+    });
   }
 
   void hideControlsUi({Duration? duration}) {

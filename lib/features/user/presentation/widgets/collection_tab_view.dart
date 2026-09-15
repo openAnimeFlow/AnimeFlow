@@ -9,6 +9,7 @@ import 'package:anime_flow/shared/widgets/collection_button.dart';
 import 'package:anime_flow/shared/widgets/notification_toast.dart';
 import 'package:anime_flow/shared/widgets/ranking.dart';
 import 'package:anime_flow/shared/widgets/star.dart';
+import 'package:anime_flow/shared/widgets/no_more_indicator.dart';
 import 'package:anime_flow/shared/models/bangumi/user_collections_item.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -496,11 +497,8 @@ class _CollectionFooter extends StatelessWidget {
     }
 
     if (!hasMore) {
-      return Padding(
-        padding: const EdgeInsets.symmetric(vertical: 16),
-        child: Center(
-          child: Text(l10n.noMore),
-        ),
+      return const NoMoreIndicator(
+        padding: EdgeInsets.symmetric(vertical: 16),
       );
     }
 

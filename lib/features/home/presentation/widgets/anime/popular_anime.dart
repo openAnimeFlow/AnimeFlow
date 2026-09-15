@@ -5,6 +5,7 @@ import 'package:anime_flow/app/router/app_router.dart';
 import 'package:anime_flow/core/utils/layout_util.dart';
 import 'package:anime_flow/shared/widgets/subject_card.dart';
 import 'package:anime_flow/shared/widgets/subject_card_skeleton.dart';
+import 'package:anime_flow/shared/widgets/no_more_indicator.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -118,28 +119,8 @@ class PopularAnimeView extends ConsumerWidget {
               ),
             ),
           if (!hotState.hasMore && hotState.errorMessage == null)
-            SliverToBoxAdapter(
-              child: Padding(
-                padding: const EdgeInsets.all(16.0),
-                child: Center(
-                  child: Row(
-                    children: [
-                      Expanded(child: _buildHorizontalRuleIcons(context)),
-                      Padding(
-                        padding: const EdgeInsets.symmetric(horizontal: 8.0),
-                        child: Text(
-                          l10n.noMore,
-                          style: TextStyle(
-                            color:
-                                Theme.of(context).colorScheme.onSurfaceVariant,
-                          ),
-                        ),
-                      ),
-                      Expanded(child: _buildHorizontalRuleIcons(context)),
-                    ],
-                  ),
-                ),
-              ),
+            const SliverToBoxAdapter(
+              child: NoMoreIndicator(),
             ),
         ],
       ),
@@ -219,36 +200,6 @@ class PopularAnimeView extends ConsumerWidget {
           ),
         ],
       ),
-    );
-  }
-
-  Widget _buildHorizontalRuleIcons(BuildContext context) {
-    return LayoutBuilder(
-      builder: (context, constraints) {
-        const iconSize = 24.0;
-        const spacing = 4.0;
-        const iconWidth = iconSize + spacing;
-        final iconCount = (constraints.maxWidth / iconWidth).floor();
-
-        return Row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: List.generate(
-            iconCount > 0 ? iconCount : 1,
-            (index) => Padding(
-              padding:
-                  EdgeInsets.only(right: index < iconCount - 1 ? spacing : 0),
-              child: Icon(
-                Icons.horizontal_rule_rounded,
-                size: iconSize,
-                color: Theme.of(context)
-                    .colorScheme
-                    .onSurfaceVariant
-                    .withValues(alpha: 0.5),
-              ),
-            ),
-          ),
-        );
-      },
     );
   }
 }

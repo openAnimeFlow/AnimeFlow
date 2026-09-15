@@ -5,6 +5,7 @@ import 'package:anime_flow/features/search/presentation/providers/search_control
 import 'package:anime_flow/features/search/presentation/widgets/search_details_content.dart';
 import 'package:anime_flow/features/search/presentation/widgets/search_omitted_content.dart';
 import 'package:anime_flow/app/router/app_router.dart';
+import 'package:anime_flow/shared/widgets/no_more_indicator.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -234,61 +235,61 @@ class _SearchPageState extends ConsumerState<SearchPage> {
                     child: Center(
                       child: ConstrainedBox(
                         constraints: const BoxConstraints(maxWidth: maxWidth),
-                        child: AnimatedSwitcher(
-                          duration: const Duration(milliseconds: 300),
-                          switchInCurve: Curves.easeInOut,
-                          switchOutCurve: Curves.easeInOut,
-                          child: GridView.builder(
-                            key: ValueKey(_isDetailsContent),
-                            padding: EdgeInsets.only(
-                              left: 10,
-                              right: 10,
-                              bottom: MediaQuery.of(context).padding.bottom,
+                        child: Column(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            AnimatedSwitcher(
+                              duration: const Duration(milliseconds: 300),
+                              switchInCurve: Curves.easeInOut,
+                              switchOutCurve: Curves.easeInOut,
+                              child: GridView.builder(
+                                key: ValueKey(_isDetailsContent),
+                                padding: EdgeInsets.only(
+                                  left: 10,
+                                  right: 10,
+                                  bottom: MediaQuery.of(context).padding.bottom,
+                                ),
+                                shrinkWrap: true,
+                                physics: const NeverScrollableScrollPhysics(),
+                                gridDelegate: _isDetailsContent
+                                    ? SliverGridDelegateWithFixedCrossAxisCount(
+                                        crossAxisCount: crossAxisCount,
+                                        crossAxisSpacing: 16,
+                                        mainAxisSpacing: 16,
+                                        mainAxisExtent: detailsItemHeight,
+                                      )
+                                    : SliverGridDelegateWithFixedCrossAxisCount(
+                                        crossAxisCount: crossAxisCount,
+                                        crossAxisSpacing: 16,
+                                        mainAxisSpacing: 16,
+                                        childAspectRatio: 2 / 3,
+                                      ),
+                                itemCount:
+                                    searchState.searchResults!.data.length,
+                                itemBuilder: (context, index) {
+                                  final searchData =
+                                      searchState.searchResults!.data[index];
+                                  return _isDetailsContent
+                                      ? SearchDetailsContentView(
+                                          searchData: searchData,
+                                          itemHeight: detailsItemHeight,
+                                        )
+                                      : SearchOmittedContent(
+                                          searchData: searchData,
+                                        );
+                                },
+                              ),
                             ),
-                            shrinkWrap: true,
-                            physics: const NeverScrollableScrollPhysics(),
-                            gridDelegate: _isDetailsContent
-                                ? SliverGridDelegateWithFixedCrossAxisCount(
-                                    crossAxisCount: crossAxisCount,
-                                    crossAxisSpacing: 16,
-                                    mainAxisSpacing: 16,
-                                    mainAxisExtent: detailsItemHeight,
-                                  )
-                                : SliverGridDelegateWithFixedCrossAxisCount(
-                                    crossAxisCount: crossAxisCount,
-                                    crossAxisSpacing: 16,
-                                    mainAxisSpacing: 16,
-                                    childAspectRatio: 2 / 3,
-                                  ),
-                            itemCount:
-                                searchState.searchResults!.data.length + 1,
-                            itemBuilder: (context, index) {
-                              if (index ==
-                                  searchState.searchResults!.data.length) {
-                                return searchState.hasMore
-                                    ? searchState.isSearching
-                                        ? const Center(
-                                            child: CircularProgressIndicator())
-                                        : const SizedBox.shrink()
-                                    : Center(
-                                        child: Padding(
-                                        padding: const EdgeInsets.all(8.0),
-                                        child: Text(l10n.noMore),
-                                      ));
-                              }
-
-                              final searchData =
-                                  searchState.searchResults!.data[index];
-                              return _isDetailsContent
-                                  ? SearchDetailsContentView(
-                                      searchData: searchData,
-                                      itemHeight: detailsItemHeight,
-                                    )
-                                  : SearchOmittedContent(
-                                      searchData: searchData,
-                                    );
-                            },
-                          ),
+                            if (searchState.hasMore && searchState.isSearching)
+                              const Padding(
+                                padding: EdgeInsets.all(8.0),
+                                child: CircularProgressIndicator(),
+                              )
+                            else if (!searchState.hasMore)
+                              const NoMoreIndicator(
+                                padding: EdgeInsets.symmetric(vertical: 20),
+                              ),
+                          ],
                         ),
                       ),
                     ),

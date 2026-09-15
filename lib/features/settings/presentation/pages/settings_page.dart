@@ -19,6 +19,7 @@ void _exitSettings(BuildContext context) {
 /// Responsive shell around the settings route navigator.
 class SettingsPage extends StatelessWidget {
   const SettingsPage({super.key, required this.child, required this.location});
+
   final Widget child;
   final String location;
 
@@ -45,6 +46,7 @@ class SettingsPage extends StatelessWidget {
 /// Root settings route: menu on narrow screens, default category on wide screens.
 class SettingsMenuPage extends ConsumerWidget {
   const SettingsMenuPage({super.key});
+
   @override
   Widget build(BuildContext context, WidgetRef ref) =>
       ref.watch(settingsLayoutProvider)
@@ -59,6 +61,7 @@ class SettingsMenuPage extends ConsumerWidget {
 
 class _SettingsMenu extends StatelessWidget {
   const _SettingsMenu({required this.location, required this.wide});
+
   final String location;
   final bool wide;
 
@@ -123,11 +126,12 @@ class _SettingsMenu extends StatelessWidget {
             icon: Icons.play_circle_outline,
             route: const SettingPlaybackRoute(),
           ),
-          _SettingsMenuItem(
-            title: l10n.playerShortcuts,
-            icon: Icons.keyboard_outlined,
-            route: const SettingPlayerShortcutsRoute(),
-          ),
+          if (SystemUtil.isDesktop)
+            _SettingsMenuItem(
+              title: l10n.playerShortcuts,
+              icon: Icons.keyboard_outlined,
+              route: const SettingPlayerShortcutsRoute(),
+            ),
           _SettingsMenuItem(
             title: l10n.danmakuSettings,
             icon: Icons.subtitles_outlined,
@@ -217,6 +221,7 @@ class _SettingsMenu extends StatelessWidget {
 
 class _SettingsCategory {
   const _SettingsCategory({required this.title, required this.items});
+
   final String title;
   final List<_SettingsMenuItem> items;
 }
@@ -224,6 +229,7 @@ class _SettingsCategory {
 class _SettingsMenuItem {
   const _SettingsMenuItem(
       {required this.title, required this.icon, required this.route});
+
   final String title;
   final IconData icon;
   final GoRouteData route;

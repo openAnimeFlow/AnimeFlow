@@ -128,7 +128,7 @@ class PopularAnimeView extends ConsumerWidget {
                       Padding(
                         padding: const EdgeInsets.symmetric(horizontal: 8.0),
                         child: Text(
-                          l10n.noMoreContent,
+                          l10n.noMore,
                           style: TextStyle(
                             color:
                                 Theme.of(context).colorScheme.onSurfaceVariant,

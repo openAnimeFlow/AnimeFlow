@@ -199,12 +199,6 @@ abstract class AppLocalizations {
   /// **'我的'**
   String get mineTab;
 
-  /// No description provided for @settingsLabel.
-  ///
-  /// In zh_Hans, this message translates to:
-  /// **'设置'**
-  String get settingsLabel;
-
   /// No description provided for @animeTab.
   ///
   /// In zh_Hans, this message translates to:
@@ -403,12 +397,6 @@ abstract class AppLocalizations {
   /// **'暂无许可证信息'**
   String get noLicenseInfo;
 
-  /// No description provided for @noMoreContent.
-  ///
-  /// In zh_Hans, this message translates to:
-  /// **'没有更多了'**
-  String get noMoreContent;
-
   /// No description provided for @reload.
   ///
   /// In zh_Hans, this message translates to:
@@ -582,12 +570,6 @@ abstract class AppLocalizations {
   /// In zh_Hans, this message translates to:
   /// **'名称'**
   String get sortTitle;
-
-  /// No description provided for @rankingNoData.
-  ///
-  /// In zh_Hans, this message translates to:
-  /// **'暂无数据'**
-  String get rankingNoData;
 
   /// No description provided for @rankingEnd.
   ///
@@ -768,12 +750,6 @@ abstract class AppLocalizations {
   /// In zh_Hans, this message translates to:
   /// **'简介'**
   String get playIntroTab;
-
-  /// No description provided for @playCommentsTab.
-  ///
-  /// In zh_Hans, this message translates to:
-  /// **'吐槽'**
-  String get playCommentsTab;
 
   /// No description provided for @pleaseLogin.
   ///
@@ -1152,12 +1128,6 @@ abstract class AppLocalizations {
   /// In zh_Hans, this message translates to:
   /// **'抛弃'**
   String get collectionAbandoned;
-
-  /// No description provided for @collectionLabel.
-  ///
-  /// In zh_Hans, this message translates to:
-  /// **'收藏'**
-  String get collectionLabel;
 
   /// No description provided for @searchCollection.
   ///
@@ -1591,12 +1561,6 @@ abstract class AppLocalizations {
   /// **'进入全屏'**
   String get playerShortcutEnterFullscreen;
 
-  /// No description provided for @playerShortcutExitFullscreen.
-  ///
-  /// In zh_Hans, this message translates to:
-  /// **'退出全屏'**
-  String get playerShortcutExitFullscreen;
-
   /// No description provided for @playerShortcutScreenshot.
   ///
   /// In zh_Hans, this message translates to:
@@ -1608,12 +1572,6 @@ abstract class AppLocalizations {
   /// In zh_Hans, this message translates to:
   /// **'开关弹幕'**
   String get playerShortcutToggleDanmaku;
-
-  /// No description provided for @playerShortcutNextEpisode.
-  ///
-  /// In zh_Hans, this message translates to:
-  /// **'下一集'**
-  String get playerShortcutNextEpisode;
 
   /// No description provided for @playbackSettings.
   ///
@@ -2473,12 +2431,6 @@ abstract class AppLocalizations {
   /// **'刷新失败：{error}'**
   String fontRefreshFailed(Object error);
 
-  /// No description provided for @fontStylePageTitle.
-  ///
-  /// In zh_Hans, this message translates to:
-  /// **'字体样式'**
-  String get fontStylePageTitle;
-
   /// No description provided for @refreshFontList.
   ///
   /// In zh_Hans, this message translates to:
@@ -2538,12 +2490,6 @@ abstract class AppLocalizations {
   /// In zh_Hans, this message translates to:
   /// **'加载字体列表失败'**
   String get fontListLoadFailed;
-
-  /// No description provided for @systemFont.
-  ///
-  /// In zh_Hans, this message translates to:
-  /// **'跟随系统'**
-  String get systemFont;
 
   /// No description provided for @systemFontSubtitle.
   ///
@@ -3516,12 +3462,6 @@ abstract class AppLocalizations {
   /// In zh_Hans, this message translates to:
   /// **'新密码'**
   String get newPassword;
-
-  /// No description provided for @emailCode.
-  ///
-  /// In zh_Hans, this message translates to:
-  /// **'邮箱验证码'**
-  String get emailCode;
 
   /// No description provided for @backToLogin.
   ///

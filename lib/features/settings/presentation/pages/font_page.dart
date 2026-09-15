@@ -71,7 +71,7 @@ class _FontSettingsPageState extends ConsumerState<FontSettingsPage> {
       appBar: PreferredSize(
         preferredSize: const Size.fromHeight(kToolbarHeight),
         child: AppBar(
-          title: Text(l10n.fontStylePageTitle),
+          title: Text(l10n.fontStyle),
           actions: [
             if (SystemUtil.isDesktop)
               IconButton(
@@ -338,7 +338,7 @@ class _SystemFontListTile extends ConsumerWidget {
         children: [
           Expanded(
             child: Text(
-              l10n.systemFont,
+              l10n.followSystem,
               maxLines: 1,
               overflow: TextOverflow.ellipsis,
             ),

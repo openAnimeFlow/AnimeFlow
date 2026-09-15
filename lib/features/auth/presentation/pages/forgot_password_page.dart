@@ -266,7 +266,7 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
                                   textInputAction: TextInputAction.done,
                                   onFieldSubmitted: (_) => _submit(),
                                   decoration: InputDecoration(
-                                    labelText: l10n.emailCode,
+                                    labelText: l10n.emailVerificationCode,
                                     prefixIcon:
                                         const Icon(Icons.mark_email_read_outlined),
                                   ),

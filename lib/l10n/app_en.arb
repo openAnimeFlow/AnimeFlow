@@ -16,7 +16,6 @@
   "recommendTab": "Recommended",
   "rankingTab": "Ranking",
   "mineTab": "Mine",
-  "settingsLabel": "Settings",
   "animeTab": "Anime",
   "forumTab": "Forum",
   "searchAnimeHint": "Search anime...",
@@ -53,7 +52,6 @@
   "openPackageFolder": "Open package folder",
   "openSourceLicense": "Open Source License",
   "noLicenseInfo": "No license information",
-  "noMoreContent": "No more content",
   "reload": "Reload",
   "todayBroadcast": "Today's Broadcasts",
   "back": "Back",
@@ -88,7 +86,6 @@
   "sortCollects": "Collections",
   "sortDate": "Date",
   "sortTitle": "Title",
-  "rankingNoData": "No data",
   "rankingEnd": "End of list",
   "rankingLoadFailed": "Failed to load: {error}",
   "@rankingLoadFailed": {"placeholders": {"error": {}}},
@@ -120,7 +117,6 @@
   "watchingCount": "{count} watching/",
   "droppedCount": "{count} dropped",
   "playIntroTab": "Introduction",
-  "playCommentsTab": "Comments",
   "pleaseLogin": "Please log in",
   "loginBeforeDanmaku": "Please log in before sending danmaku",
   "tip": "Tip",
@@ -184,7 +180,6 @@
   "collectionWatching": "Watching",
   "collectionOnHold": "On hold",
   "collectionAbandoned": "Abandoned",
-  "collectionLabel": "Collection",
   "searchCollection": "Search collection",
   "collectionKeywordHint": "Enter collection keywords",
   "search": "Search",
@@ -258,10 +253,8 @@
   "playerShortcutPressKey": "Press a key",
   "playerShortcutConflict": "That key is already assigned to another action",
   "playerShortcutEnterFullscreen": "Enter fullscreen",
-  "playerShortcutExitFullscreen": "Exit fullscreen",
   "playerShortcutScreenshot": "Screenshot",
   "playerShortcutToggleDanmaku": "Toggle danmaku",
-  "playerShortcutNextEpisode": "Next episode",
   "playbackSettings": "Playback",
     "otherSettings": "Other",
   "about": "About",
@@ -406,7 +399,6 @@
   "anime4kDescription": "Super-resolution technology for improved video quality",
   "traceMoeDescription": "Provides anime recognition from images",
   "fontRefreshFailed": "Refresh failed: {error}",
-  "fontStylePageTitle": "Font style",
   "refreshFontList": "Refresh font list",
   "fontLibrary": "Font library",
   "cdnAcceleration": "CDN acceleration",
@@ -417,7 +409,6 @@
   "downloadedOrphanFonts": "Downloaded locally (removed remotely)",
   "orphanFontDescription": "These fonts are no longer in the remote repository but remain on your device. You can delete or continue using them here.",
   "fontListLoadFailed": "Failed to load font list",
-  "systemFont": "Follow system",
   "systemFontSubtitle": "Use the system default font",
   "fontAuthorInfo": "Author: {author} - Font size: {size}",
   "downloadFont": "Download font",
@@ -542,7 +533,6 @@
   ,"downloadPausedStatus": "Paused"
   ,"resetPassword": "Reset password"
   ,"newPassword": "New password"
-  ,"emailCode": "Email verification code"
   ,"backToLogin": "Back to login"
   ,"resetPasswordDescription": "Reset your login password with an email verification code. Each email can be reset once per day."
   ,"passwordResetSuccess": "Password reset successfully. Please log in with your new password."

@@ -169,7 +169,7 @@ class AppShellPage extends StatelessWidget {
                         IconButton(
                           icon: const Icon(Icons.settings_outlined),
                           iconSize: 28,
-                          tooltip: l10n.settingsLabel,
+                          tooltip: l10n.settings,
                           onPressed: () => const SettingsRoute().push(context),
                         ),
                       ],

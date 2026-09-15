@@ -141,7 +141,7 @@ class UserPage extends ConsumerWidget {
                 final (icon, label) = switch (action) {
                   _NoLoginOverflowAction.settings => (
                       Icons.settings_outlined,
-                      l10n.settingsLabel
+                      l10n.settings
                     ),
                   _NoLoginOverflowAction.playRecord => (
                       Icons.smart_display_outlined,

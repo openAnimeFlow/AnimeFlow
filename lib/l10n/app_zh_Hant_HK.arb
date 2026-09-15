@@ -16,7 +16,6 @@
   "recommendTab": "推薦",
   "rankingTab": "排行",
   "mineTab": "我的",
-  "settingsLabel": "設定",
   "animeTab": "動畫",
   "forumTab": "論壇",
   "searchAnimeHint": "搜尋動畫番組...",
@@ -53,7 +52,6 @@
   "openPackageFolder": "開啟安裝包資料夾",
   "openSourceLicense": "開源授權條款",
   "noLicenseInfo": "暫無授權資訊",
-  "noMoreContent": "沒有更多了",
   "reload": "重新載入",
   "todayBroadcast": "今日放送",
   "back": "返回",
@@ -88,7 +86,6 @@
   "sortCollects": "收藏",
   "sortDate": "日期",
   "sortTitle": "名稱",
-  "rankingNoData": "暫無資料",
   "rankingEnd": "到底了",
   "rankingLoadFailed": "載入失敗: {error}",
   "@rankingLoadFailed": {"placeholders": {"error": {}}},
@@ -120,7 +117,6 @@
   "watchingCount": "{count}再看/",
   "droppedCount": "{count}放棄",
   "playIntroTab": "簡介",
-  "playCommentsTab": "評論",
   "pleaseLogin": "請先登入",
   "loginBeforeDanmaku": "請先登入後再發送彈幕",
   "tip": "提示",
@@ -184,7 +180,6 @@
   "collectionWatching": "在看",
   "collectionOnHold": "擱置",
   "collectionAbandoned": "拋棄",
-  "collectionLabel": "收藏",
   "searchCollection": "搜尋收藏",
   "collectionKeywordHint": "輸入收藏關鍵字",
   "search": "搜尋",
@@ -258,10 +253,8 @@
   "playerShortcutPressKey": "請按下按鍵",
   "playerShortcutConflict": "該按鍵已被其他功能使用",
   "playerShortcutEnterFullscreen": "進入全螢幕",
-  "playerShortcutExitFullscreen": "退出全螢幕",
   "playerShortcutScreenshot": "截圖",
   "playerShortcutToggleDanmaku": "開關彈幕",
-  "playerShortcutNextEpisode": "下一集",
   "playbackSettings": "播放",
     "otherSettings": "其他",
   "about": "關於",
@@ -406,7 +399,6 @@
   "anime4kDescription": "超解析度技術，提升影片畫質",
   "traceMoeDescription": "提供以圖識別番劇功能",
   "fontRefreshFailed": "重新整理失敗：{error}",
-  "fontStylePageTitle": "字型樣式",
   "refreshFontList": "重新整理字型列表",
   "fontLibrary": "字型庫",
   "cdnAcceleration": "CDN 加速",
@@ -417,7 +409,6 @@
   "downloadedOrphanFonts": "本機已下載（遠端已下架）",
   "orphanFontDescription": "以下字型不再出現在遠端儲存庫，但本機仍保留字型檔案。可在此處直接刪除或繼續套用。",
   "fontListLoadFailed": "載入字型列表失敗",
-  "systemFont": "跟隨系統",
   "systemFontSubtitle": "使用系統預設字型",
   "fontAuthorInfo": "作者：{author} - 字型包大小：{size}",
   "downloadFont": "下載字型",
@@ -494,7 +485,6 @@
   "playEpisode": "{episode}"
   ,"resetPassword": "重設密碼"
   ,"newPassword": "新密碼"
-  ,"emailCode": "電子郵件驗證碼"
   ,"backToLogin": "返回登入"
   ,"resetPasswordDescription": "透過電子郵件驗證碼重設登入密碼，每個電子郵件每天只能重設一次"
   ,"passwordResetSuccess": "密碼重設成功，請使用新密碼登入"

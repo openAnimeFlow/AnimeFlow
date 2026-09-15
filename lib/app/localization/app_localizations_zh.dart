@@ -57,9 +57,6 @@ class AppLocalizationsZh extends AppLocalizations {
   String get mineTab => '我的';
 
   @override
-  String get settingsLabel => '设置';
-
-  @override
   String get animeTab => '动漫';
 
   @override
@@ -165,9 +162,6 @@ class AppLocalizationsZh extends AppLocalizations {
   String get noLicenseInfo => '暫無授權資訊';
 
   @override
-  String get noMoreContent => '没有更多了';
-
-  @override
   String get reload => '重新加载';
 
   @override
@@ -263,9 +257,6 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get sortTitle => '名称';
-
-  @override
-  String get rankingNoData => '暂无数据';
 
   @override
   String get rankingEnd => '到底了';
@@ -372,9 +363,6 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get playIntroTab => '简介';
-
-  @override
-  String get playCommentsTab => '吐槽';
 
   @override
   String get pleaseLogin => '请先登录';
@@ -580,9 +568,6 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get collectionAbandoned => '抛弃';
-
-  @override
-  String get collectionLabel => '收藏';
 
   @override
   String get searchCollection => '搜索收藏';
@@ -805,16 +790,10 @@ class AppLocalizationsZh extends AppLocalizations {
   String get playerShortcutEnterFullscreen => '进入全屏';
 
   @override
-  String get playerShortcutExitFullscreen => '退出全屏';
-
-  @override
   String get playerShortcutScreenshot => '截图';
 
   @override
   String get playerShortcutToggleDanmaku => '开关弹幕';
-
-  @override
-  String get playerShortcutNextEpisode => '下一集';
 
   @override
   String get playbackSettings => '播放';
@@ -1254,9 +1233,6 @@ class AppLocalizationsZh extends AppLocalizations {
   }
 
   @override
-  String get fontStylePageTitle => '字体样式';
-
-  @override
   String get refreshFontList => '刷新字体列表';
 
   @override
@@ -1286,9 +1262,6 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get fontListLoadFailed => '加载字体列表失败';
-
-  @override
-  String get systemFont => '跟随系统';
 
   @override
   String get systemFontSubtitle => '使用系统默认字体';
@@ -1836,9 +1809,6 @@ class AppLocalizationsZh extends AppLocalizations {
   String get newPassword => '新密碼';
 
   @override
-  String get emailCode => '電子郵件驗證碼';
-
-  @override
   String get backToLogin => '返回登入';
 
   @override
@@ -1978,9 +1948,6 @@ class AppLocalizationsZhHans extends AppLocalizationsZh {
   String get mineTab => '我的';
 
   @override
-  String get settingsLabel => '设置';
-
-  @override
   String get animeTab => '动漫';
 
   @override
@@ -2086,9 +2053,6 @@ class AppLocalizationsZhHans extends AppLocalizationsZh {
   String get noLicenseInfo => '暂无许可证信息';
 
   @override
-  String get noMoreContent => '没有更多了';
-
-  @override
   String get reload => '重新加载';
 
   @override
@@ -2184,9 +2148,6 @@ class AppLocalizationsZhHans extends AppLocalizationsZh {
 
   @override
   String get sortTitle => '名称';
-
-  @override
-  String get rankingNoData => '暂无数据';
 
   @override
   String get rankingEnd => '到底了';
@@ -2293,9 +2254,6 @@ class AppLocalizationsZhHans extends AppLocalizationsZh {
 
   @override
   String get playIntroTab => '简介';
-
-  @override
-  String get playCommentsTab => '吐槽';
 
   @override
   String get pleaseLogin => '请先登录';
@@ -2501,9 +2459,6 @@ class AppLocalizationsZhHans extends AppLocalizationsZh {
 
   @override
   String get collectionAbandoned => '抛弃';
-
-  @override
-  String get collectionLabel => '收藏';
 
   @override
   String get searchCollection => '搜索收藏';
@@ -2726,16 +2681,10 @@ class AppLocalizationsZhHans extends AppLocalizationsZh {
   String get playerShortcutEnterFullscreen => '进入全屏';
 
   @override
-  String get playerShortcutExitFullscreen => '退出全屏';
-
-  @override
   String get playerShortcutScreenshot => '截图';
 
   @override
   String get playerShortcutToggleDanmaku => '开关弹幕';
-
-  @override
-  String get playerShortcutNextEpisode => '下一集';
 
   @override
   String get playbackSettings => '播放';
@@ -3175,9 +3124,6 @@ class AppLocalizationsZhHans extends AppLocalizationsZh {
   }
 
   @override
-  String get fontStylePageTitle => '字体样式';
-
-  @override
   String get refreshFontList => '刷新字体列表';
 
   @override
@@ -3207,9 +3153,6 @@ class AppLocalizationsZhHans extends AppLocalizationsZh {
 
   @override
   String get fontListLoadFailed => '加载字体列表失败';
-
-  @override
-  String get systemFont => '跟随系统';
 
   @override
   String get systemFontSubtitle => '使用系统默认字体';
@@ -3756,9 +3699,6 @@ class AppLocalizationsZhHans extends AppLocalizationsZh {
   String get newPassword => '新密码';
 
   @override
-  String get emailCode => '邮箱验证码';
-
-  @override
   String get backToLogin => '返回登录';
 
   @override
@@ -3898,9 +3838,6 @@ class AppLocalizationsZhHantHk extends AppLocalizationsZh {
   String get mineTab => '我的';
 
   @override
-  String get settingsLabel => '設定';
-
-  @override
   String get animeTab => '動畫';
 
   @override
@@ -4006,9 +3943,6 @@ class AppLocalizationsZhHantHk extends AppLocalizationsZh {
   String get noLicenseInfo => '暫無授權資訊';
 
   @override
-  String get noMoreContent => '沒有更多了';
-
-  @override
   String get reload => '重新載入';
 
   @override
@@ -4104,9 +4038,6 @@ class AppLocalizationsZhHantHk extends AppLocalizationsZh {
 
   @override
   String get sortTitle => '名稱';
-
-  @override
-  String get rankingNoData => '暫無資料';
 
   @override
   String get rankingEnd => '到底了';
@@ -4213,9 +4144,6 @@ class AppLocalizationsZhHantHk extends AppLocalizationsZh {
 
   @override
   String get playIntroTab => '簡介';
-
-  @override
-  String get playCommentsTab => '評論';
 
   @override
   String get pleaseLogin => '請先登入';
@@ -4421,9 +4349,6 @@ class AppLocalizationsZhHantHk extends AppLocalizationsZh {
 
   @override
   String get collectionAbandoned => '拋棄';
-
-  @override
-  String get collectionLabel => '收藏';
 
   @override
   String get searchCollection => '搜尋收藏';
@@ -4646,16 +4571,10 @@ class AppLocalizationsZhHantHk extends AppLocalizationsZh {
   String get playerShortcutEnterFullscreen => '進入全螢幕';
 
   @override
-  String get playerShortcutExitFullscreen => '退出全螢幕';
-
-  @override
   String get playerShortcutScreenshot => '截圖';
 
   @override
   String get playerShortcutToggleDanmaku => '開關彈幕';
-
-  @override
-  String get playerShortcutNextEpisode => '下一集';
 
   @override
   String get playbackSettings => '播放';
@@ -5095,9 +5014,6 @@ class AppLocalizationsZhHantHk extends AppLocalizationsZh {
   }
 
   @override
-  String get fontStylePageTitle => '字型樣式';
-
-  @override
   String get refreshFontList => '重新整理字型列表';
 
   @override
@@ -5127,9 +5043,6 @@ class AppLocalizationsZhHantHk extends AppLocalizationsZh {
 
   @override
   String get fontListLoadFailed => '載入字型列表失敗';
-
-  @override
-  String get systemFont => '跟隨系統';
 
   @override
   String get systemFontSubtitle => '使用系統預設字型';
@@ -5595,9 +5508,6 @@ class AppLocalizationsZhHantHk extends AppLocalizationsZh {
   String get newPassword => '新密碼';
 
   @override
-  String get emailCode => '電子郵件驗證碼';
-
-  @override
   String get backToLogin => '返回登入';
 
   @override
@@ -5737,9 +5647,6 @@ class AppLocalizationsZhHantTw extends AppLocalizationsZh {
   String get mineTab => '我的';
 
   @override
-  String get settingsLabel => '設定';
-
-  @override
   String get animeTab => '動畫';
 
   @override
@@ -5845,9 +5752,6 @@ class AppLocalizationsZhHantTw extends AppLocalizationsZh {
   String get noLicenseInfo => '暫無授權資訊';
 
   @override
-  String get noMoreContent => '沒有更多了';
-
-  @override
   String get reload => '重新載入';
 
   @override
@@ -5943,9 +5847,6 @@ class AppLocalizationsZhHantTw extends AppLocalizationsZh {
 
   @override
   String get sortTitle => '名稱';
-
-  @override
-  String get rankingNoData => '暫無資料';
 
   @override
   String get rankingEnd => '到底了';
@@ -6052,9 +5953,6 @@ class AppLocalizationsZhHantTw extends AppLocalizationsZh {
 
   @override
   String get playIntroTab => '簡介';
-
-  @override
-  String get playCommentsTab => '吐槽';
 
   @override
   String get pleaseLogin => '請先登入';
@@ -6260,9 +6158,6 @@ class AppLocalizationsZhHantTw extends AppLocalizationsZh {
 
   @override
   String get collectionAbandoned => '拋棄';
-
-  @override
-  String get collectionLabel => '收藏';
 
   @override
   String get searchCollection => '搜尋收藏';
@@ -6485,16 +6380,10 @@ class AppLocalizationsZhHantTw extends AppLocalizationsZh {
   String get playerShortcutEnterFullscreen => '進入全螢幕';
 
   @override
-  String get playerShortcutExitFullscreen => '退出全螢幕';
-
-  @override
   String get playerShortcutScreenshot => '截圖';
 
   @override
   String get playerShortcutToggleDanmaku => '開關彈幕';
-
-  @override
-  String get playerShortcutNextEpisode => '下一集';
 
   @override
   String get playbackSettings => '播放';
@@ -6934,9 +6823,6 @@ class AppLocalizationsZhHantTw extends AppLocalizationsZh {
   }
 
   @override
-  String get fontStylePageTitle => '字型樣式';
-
-  @override
   String get refreshFontList => '重新整理字型列表';
 
   @override
@@ -6966,9 +6852,6 @@ class AppLocalizationsZhHantTw extends AppLocalizationsZh {
 
   @override
   String get fontListLoadFailed => '載入字型列表失敗';
-
-  @override
-  String get systemFont => '跟隨系統';
 
   @override
   String get systemFontSubtitle => '使用系統預設字型';
@@ -7432,9 +7315,6 @@ class AppLocalizationsZhHantTw extends AppLocalizationsZh {
 
   @override
   String get newPassword => '新密碼';
-
-  @override
-  String get emailCode => '電子郵件驗證碼';
 
   @override
   String get backToLogin => '返回登入';

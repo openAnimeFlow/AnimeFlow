@@ -60,9 +60,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String get mineTab => 'Mine';
 
   @override
-  String get settingsLabel => 'Settings';
-
-  @override
   String get animeTab => 'Anime';
 
   @override
@@ -169,9 +166,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String get noLicenseInfo => 'No license information';
 
   @override
-  String get noMoreContent => 'No more content';
-
-  @override
   String get reload => 'Reload';
 
   @override
@@ -267,9 +261,6 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get sortTitle => 'Title';
-
-  @override
-  String get rankingNoData => 'No data';
 
   @override
   String get rankingEnd => 'End of list';
@@ -377,9 +368,6 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get playIntroTab => 'Introduction';
-
-  @override
-  String get playCommentsTab => 'Comments';
 
   @override
   String get pleaseLogin => 'Please log in';
@@ -585,9 +573,6 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get collectionAbandoned => 'Abandoned';
-
-  @override
-  String get collectionLabel => 'Collection';
 
   @override
   String get searchCollection => 'Search collection';
@@ -817,16 +802,10 @@ class AppLocalizationsEn extends AppLocalizations {
   String get playerShortcutEnterFullscreen => 'Enter fullscreen';
 
   @override
-  String get playerShortcutExitFullscreen => 'Exit fullscreen';
-
-  @override
   String get playerShortcutScreenshot => 'Screenshot';
 
   @override
   String get playerShortcutToggleDanmaku => 'Toggle danmaku';
-
-  @override
-  String get playerShortcutNextEpisode => 'Next episode';
 
   @override
   String get playbackSettings => 'Playback';
@@ -1283,9 +1262,6 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
-  String get fontStylePageTitle => 'Font style';
-
-  @override
   String get refreshFontList => 'Refresh font list';
 
   @override
@@ -1317,9 +1293,6 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get fontListLoadFailed => 'Failed to load font list';
-
-  @override
-  String get systemFont => 'Follow system';
 
   @override
   String get systemFontSubtitle => 'Use the system default font';
@@ -1885,9 +1858,6 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get newPassword => 'New password';
-
-  @override
-  String get emailCode => 'Email verification code';
 
   @override
   String get backToLogin => 'Back to login';

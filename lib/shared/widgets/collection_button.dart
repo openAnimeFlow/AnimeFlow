@@ -124,7 +124,7 @@ class _CollectionButtonState extends State<CollectionButton> {
       child: widget.buttonBuilder(
         context,
         currentCollectType == null
-            ? l10n.collectionLabel
+            ? l10n.collection
             : _collectTypeLabel(currentCollectType, l10n),
         currentCollectType == null
             ? Icons.play_circle_outline
@@ -167,7 +167,7 @@ class _CollectionButtonState extends State<CollectionButton> {
       case CollectType.abandoned:
         return l10n.collectionAbandoned;
       case CollectType.none:
-        return l10n.collectionLabel;
+        return l10n.collection;
     }
   }
 }

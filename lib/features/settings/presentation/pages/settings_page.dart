@@ -52,7 +52,7 @@ class SettingsMenuPage extends ConsumerWidget {
           : Scaffold(
               appBar: AppBar(
                   leading: BackButton(onPressed: () => _exitSettings(context)),
-                  title: Text(AppLocalizations.of(context).settingsLabel)),
+                  title: Text(AppLocalizations.of(context).settings)),
               body: const _SettingsMenu(location: '/settings', wide: false),
             );
 }
@@ -198,7 +198,7 @@ class _SettingsMenu extends StatelessWidget {
         child: Column(children: [
           ListTile(
             leading: const Icon(Icons.arrow_back),
-            title: Text(AppLocalizations.of(context).settingsLabel),
+            title: Text(AppLocalizations.of(context).settings),
             onTap: () {
               _exitSettings(context);
             },

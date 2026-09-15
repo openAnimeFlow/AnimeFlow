@@ -26,7 +26,7 @@ class RankingGrid extends ConsumerWidget {
 
     if (rankingState.items.isEmpty) {
       return SliverFillRemaining(
-        child: Center(child: Text(l10n.rankingNoData)),
+        child: Center(child: Text(l10n.noData)),
       );
     }
 

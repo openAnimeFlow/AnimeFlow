@@ -101,10 +101,10 @@ class _PlayerShortcutsPageState extends ConsumerState<PlayerShortcutsPage> {
       PlayerShortcutAction.volumeUp: l10n.playerShortcutVolumeUp,
       PlayerShortcutAction.volumeDown: l10n.playerShortcutVolumeDown,
       PlayerShortcutAction.enterFullscreen: l10n.playerShortcutEnterFullscreen,
-      PlayerShortcutAction.exitFullscreen: l10n.playerShortcutExitFullscreen,
+      PlayerShortcutAction.exitFullscreen: l10n.exitFullscreen,
       PlayerShortcutAction.screenshot: l10n.playerShortcutScreenshot,
       PlayerShortcutAction.toggleDanmaku: l10n.playerShortcutToggleDanmaku,
-      PlayerShortcutAction.nextEpisode: l10n.playerShortcutNextEpisode,
+      PlayerShortcutAction.nextEpisode: l10n.nextEpisode,
     };
     return Scaffold(
       appBar: AppBar(

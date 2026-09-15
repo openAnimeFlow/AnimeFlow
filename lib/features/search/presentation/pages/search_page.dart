@@ -273,7 +273,7 @@ class _SearchPageState extends ConsumerState<SearchPage> {
                                     : Center(
                                         child: Padding(
                                         padding: const EdgeInsets.all(8.0),
-                                        child: Text(l10n.noMoreContent),
+                                        child: Text(l10n.noMore),
                                       ));
                               }
 

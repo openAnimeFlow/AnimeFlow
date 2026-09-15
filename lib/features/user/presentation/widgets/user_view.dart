@@ -346,7 +346,7 @@ class _UserViewState extends ConsumerState<UserView>
               final (icon, label) = switch (action) {
                 _LoginOverflowAction.settings => (
                     Icons.settings_outlined,
-                    l10n.settingsLabel
+                    l10n.settings
                   ),
                 _LoginOverflowAction.playRecord => (
                     Icons.smart_display_outlined,

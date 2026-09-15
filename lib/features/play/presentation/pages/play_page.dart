@@ -409,7 +409,7 @@ class _ContentViewState extends ConsumerState<_ContentView>
                   isScrollable: true,
                   tabs: [
                     Tab(text: AppLocalizations.of(context).playIntroTab),
-                    Tab(text: AppLocalizations.of(context).playCommentsTab),
+                    Tab(text: AppLocalizations.of(context).commentsTitle),
                   ],
                 ),
                 isWideScreen

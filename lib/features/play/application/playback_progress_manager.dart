@@ -19,13 +19,14 @@ class PlaybackProgressManager {
   PlaybackProgressManager({required this.onEpisodeWatched});
 
   static const watchedProgressThreshold = 0.90;
-  static const pauseSaveThrottle = Duration(seconds: 1);
+  static const saveDebounce = Duration(seconds: 3);
 
   final SetEpisodeWatchedCallback onEpisodeWatched;
   Future<void> _saveQueue = Future<void>.value();
   final Set<int> _autoWatchedEpisodeIds = {};
   final Set<int> _autoWatchedEpisodeUpdatesInFlight = {};
-  DateTime? _lastPauseSavedAt;
+  Timer? _saveTimer;
+  Duration? _pendingSeekPosition;
 
   int subjectId = 0;
   int episodeId = 0;
@@ -83,20 +84,36 @@ class PlaybackProgressManager {
     unawaited(_autoUpdateEpisodeWatched(episodeId));
   }
 
-  void saveAfterPause() {
-    final now = DateTime.now();
-    if (_lastPauseSavedAt != null &&
-        now.difference(_lastPauseSavedAt!) < pauseSaveThrottle) {
-      return;
-    }
-    _lastPauseSavedAt = now;
-    unawaited(save());
+  /// 合并暂停和开始播放产生的连续保存事件。
+  void saveAfterPlaybackChange() {
+    _scheduleSave();
+  }
+
+  /// 拖动期间只保留最后一个位置，停止拖动一小段时间后再提交。
+  void saveAfterSeek(Duration position) {
+    _pendingSeekPosition = position;
+    _scheduleSave();
+  }
+
+  void _scheduleSave() {
+    _saveTimer?.cancel();
+    _saveTimer = Timer(saveDebounce, () {
+      _saveTimer = null;
+      final pendingPosition = _takePendingSeekPosition();
+      unawaited(save(
+        position: pendingPosition,
+        eventType: pendingPosition == null
+            ? PlayHistoryEventType.defaults
+            : PlayHistoryEventType.forceOverwrite,
+      ));
+    });
   }
 
   Future<void> save({
     Duration? position,
     PlayHistoryEventType eventType = PlayHistoryEventType.defaults,
   }) async {
+    final pendingSeekPosition = _takePendingSeekPosition();
     if (duration <= Duration.zero ||
         subjectId <= 0 ||
         episodeId <= 0 ||
@@ -104,7 +121,11 @@ class PlaybackProgressManager {
         subjectCover == null) {
       return;
     }
-    final savedPosition = position ?? this.position;
+    final savedPosition = position ?? pendingSeekPosition ?? this.position;
+    final effectiveEventType = pendingSeekPosition != null &&
+            eventType == PlayHistoryEventType.defaults
+        ? PlayHistoryEventType.forceOverwrite
+        : eventType;
     final playHistory = PlayHistory(
       subjectId: subjectId,
       subjectName: subjectName!,
@@ -118,12 +139,23 @@ class PlaybackProgressManager {
     );
     _saveQueue = _saveQueue.then((_) async {
       try {
-        await PlayHistoryService.save(playHistory, eventType: eventType);
+        await PlayHistoryService.save(
+          playHistory,
+          eventType: effectiveEventType,
+        );
       } catch (e) {
         LiggLogger().e('保存播放进度失败: $e');
       }
     });
     await _saveQueue;
+  }
+
+  Duration? _takePendingSeekPosition() {
+    _saveTimer?.cancel();
+    _saveTimer = null;
+    final position = _pendingSeekPosition;
+    _pendingSeekPosition = null;
+    return position;
   }
 
   Future<void> _autoUpdateEpisodeWatched(int targetEpisodeId) async {

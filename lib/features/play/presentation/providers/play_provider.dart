@@ -20,7 +20,6 @@ import 'package:anime_flow/features/user/presentation/providers/user_state_provi
 import 'package:anime_flow/core/network/api/flow_api.dart';
 import 'package:anime_flow/shared/models/enums/video_controls_icon_type.dart';
 import 'package:anime_flow/shared/models/player/danmaku/danmaku_module.dart';
-import 'package:anime_flow/shared/models/player/play/play_history_event_type.dart';
 import 'package:anime_flow/core/storage/storage.dart';
 import 'package:anime_flow/app/router/routes_args.dart';
 import 'package:anime_flow/core/logger/logger.dart';
@@ -490,7 +489,6 @@ class PlaySession {
   Timer? _stopTimer;
 
   bool _isPlayerBuffering = false;
-  bool _lastPlayerPlaying = false;
   StreamSubscription<PlayerEvent>? _playerSubscription;
   bool _isDisposed = false;
   Future<void> _playbackChanges = Future<void>.value();
@@ -621,10 +619,7 @@ class PlaySession {
 
   void _handlePlayerEvent(PlayerEvent event) {
     if (event is PlayerPlayingChanged) {
-      if (_lastPlayerPlaying && !event.playing) {
-        playbackProgressManager.saveAfterPause();
-      }
-      _lastPlayerPlaying = event.playing;
+      playbackProgressManager.saveAfterPlaybackChange();
       _playStateActions.setPlaying(event.playing);
       _syncDanmakuPauseWithPlayback(event.playing);
     } else if (event is PlayerVolumeChanged) {
@@ -1184,12 +1179,7 @@ class PlaySession {
   void seekTo(Duration pos) {
     unawaited(playbackCoordinator.seek(pos));
     _updateEffectiveBufferingState(position: pos);
-    unawaited(
-      playbackProgressManager.save(
-        position: pos,
-        eventType: PlayHistoryEventType.forceOverwrite,
-      ),
-    );
+    playbackProgressManager.saveAfterSeek(pos);
   }
 
   void updateBufferingForPendingSeek(Duration pos) {

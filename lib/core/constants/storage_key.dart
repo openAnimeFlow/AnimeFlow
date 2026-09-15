@@ -50,7 +50,8 @@ class PlayerShortcutKey {
       exitFullscreen = 'player_shortcut_exit_fullscreen',
       screenshot = 'player_shortcut_screenshot',
       toggleDanmaku = 'player_shortcut_toggle_danmaku',
-      nextEpisode = 'player_shortcut_next_episode';
+      nextEpisode = 'player_shortcut_next_episode',
+      longPressFastForward = 'player_shortcut_long_press_fast_forward';
 }
 
 class DownloadKey {

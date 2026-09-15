@@ -796,6 +796,9 @@ class AppLocalizationsZh extends AppLocalizations {
   String get playerShortcutToggleDanmaku => '开关弹幕';
 
   @override
+  String get playerShortcutLongPressFastForward => '长按加速';
+
+  @override
   String get playbackSettings => '播放';
 
   @override
@@ -2685,6 +2688,9 @@ class AppLocalizationsZhHans extends AppLocalizationsZh {
 
   @override
   String get playerShortcutToggleDanmaku => '开关弹幕';
+
+  @override
+  String get playerShortcutLongPressFastForward => '长按加速';
 
   @override
   String get playbackSettings => '播放';
@@ -4577,6 +4583,9 @@ class AppLocalizationsZhHantHk extends AppLocalizationsZh {
   String get playerShortcutToggleDanmaku => '開關彈幕';
 
   @override
+  String get playerShortcutLongPressFastForward => '長按加速';
+
+  @override
   String get playbackSettings => '播放';
 
   @override
@@ -6384,6 +6393,9 @@ class AppLocalizationsZhHantTw extends AppLocalizationsZh {
 
   @override
   String get playerShortcutToggleDanmaku => '開關彈幕';
+
+  @override
+  String get playerShortcutLongPressFastForward => '長按加速';
 
   @override
   String get playbackSettings => '播放';

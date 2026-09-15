@@ -117,6 +117,11 @@ class _Indicators implements VideoUiStateActions {
   MainAxisAlignment alignment = MainAxisAlignment.start;
 
   @override
+  void restartControlsAutoHideTimer({
+    Duration duration = const Duration(seconds: 3),
+  }) {}
+
+  @override
   void updateIndicatorType(VideoControlsIndicatorType type) {
     currentIndicatorType = type;
   }

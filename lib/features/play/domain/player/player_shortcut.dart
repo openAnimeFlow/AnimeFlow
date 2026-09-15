@@ -12,7 +12,8 @@ enum PlayerShortcutAction {
   exitFullscreen,
   screenshot,
   toggleDanmaku,
-  nextEpisode
+  nextEpisode,
+  longPressFastForward
 }
 
 class PlayerShortcutBinding {
@@ -37,6 +38,8 @@ extension PlayerShortcutActionDetails on PlayerShortcutAction {
         PlayerShortcutAction.screenshot => PlayerShortcutKey.screenshot,
         PlayerShortcutAction.toggleDanmaku => PlayerShortcutKey.toggleDanmaku,
         PlayerShortcutAction.nextEpisode => PlayerShortcutKey.nextEpisode,
+        PlayerShortcutAction.longPressFastForward =>
+          PlayerShortcutKey.longPressFastForward,
       };
 
   List<PlayerShortcutBinding> get defaultBindings => switch (this) {
@@ -71,6 +74,9 @@ extension PlayerShortcutActionDetails on PlayerShortcutAction {
           ],
         PlayerShortcutAction.nextEpisode => [
             const PlayerShortcutBinding.keyboard(LogicalKeyboardKey.keyN)
+          ],
+        PlayerShortcutAction.longPressFastForward => [
+            const PlayerShortcutBinding.keyboard(LogicalKeyboardKey.arrowRight)
           ],
       };
 

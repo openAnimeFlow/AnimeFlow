@@ -4,6 +4,8 @@ import 'package:anime_flow/shared/models/enums/video_controls_icon_type.dart';
 import 'package:anime_flow/features/play/presentation/providers/play_provider.dart';
 import 'package:anime_flow/features/play/presentation/providers/video_ui_provider.dart';
 import 'package:anime_flow/features/play/domain/player/player_shortcut.dart';
+import 'package:anime_flow/core/constants/storage_key.dart';
+import 'package:anime_flow/core/storage/storage.dart';
 import 'package:anime_flow/core/utils/system_util.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
@@ -27,19 +29,70 @@ class _DesktopGestureDetectorState
   final _focusNode = FocusNode(debugLabel: 'Desktop player');
   late final PlaySession playSession;
   late final VideoUiNotifier videoUiNotifier;
+  late final double fastForwardSpeed;
+  bool _isSpeedBoosting = false;
+  Timer? _fastForwardPendingTimer;
 
   @override
   void initState() {
     super.initState();
     playSession = ref.read(playSessionProvider);
     videoUiNotifier = ref.read(videoUiProvider.notifier);
+    fastForwardSpeed =
+        Storage.setting.get(PlaybackKey.fastForwardSpeed, defaultValue: 2.0);
   }
 
   @override
   void dispose() {
     hoverTimer?.cancel();
+    _fastForwardPendingTimer?.cancel();
+    _endTemporaryFastForward();
     _focusNode.dispose();
     super.dispose();
+  }
+
+  bool _isFastForwardShortcut(int pressed) =>
+      PlayerShortcutAction.longPressFastForward
+          .readBindings()
+          .any((binding) => binding.id == pressed);
+
+  void _startTemporaryFastForward() {
+    if (_isSpeedBoosting || !ref.read(playStateProvider).playing) return;
+
+    _isSpeedBoosting = true;
+    playSession.setPlaybackRate(fastForwardSpeed, temporary: true);
+    videoUiNotifier.updateMainAxisAlignmentType(MainAxisAlignment.start);
+    videoUiNotifier.updateIndicatorTypeAndShowIndicator(
+        VideoControlsIndicatorType.speedIndicator);
+  }
+
+  void _endTemporaryFastForward() {
+    if (!_isSpeedBoosting) return;
+
+    _isSpeedBoosting = false;
+    playSession.endTemporaryPlaybackRate();
+    videoUiNotifier.updateIndicatorType(VideoControlsIndicatorType.noIndicator);
+  }
+
+  void _scheduleTemporaryFastForward() {
+    _fastForwardPendingTimer?.cancel();
+    _fastForwardPendingTimer = Timer(const Duration(milliseconds: 500), () {
+      _fastForwardPendingTimer = null;
+      _startTemporaryFastForward();
+    });
+  }
+
+  KeyEventResult _finishFastForwardKey(int pressed) {
+    _fastForwardPendingTimer?.cancel();
+    _fastForwardPendingTimer = null;
+
+    if (_isSpeedBoosting) {
+      _endTemporaryFastForward();
+      return KeyEventResult.handled;
+    }
+
+    // 未达到长按阈值，按普通快捷键处理一次，例如快进 10 秒。
+    return _handleShortcut(pressed);
   }
 
   Future<void> _takeScreenshot() async {
@@ -145,6 +198,21 @@ class _DesktopGestureDetectorState
       focusNode: _focusNode,
       autofocus: true,
       onKeyEvent: (node, event) {
+        final isFastForwardShortcut =
+        _isFastForwardShortcut(event.logicalKey.keyId);
+        if (isFastForwardShortcut) {
+          final pressed = event.logicalKey.keyId;
+          if (event is KeyDownEvent) {
+            _scheduleTemporaryFastForward();
+            return KeyEventResult.handled;
+          }
+          if (event is KeyRepeatEvent) {
+            return KeyEventResult.handled;
+          }
+          if (event is KeyUpEvent) {
+            return _finishFastForwardKey(pressed);
+          }
+        }
         if (event is KeyDownEvent || event is KeyRepeatEvent) {
           return _handleShortcut(
             event.logicalKey.keyId,

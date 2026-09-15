@@ -808,6 +808,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get playerShortcutToggleDanmaku => 'Toggle danmaku';
 
   @override
+  String get playerShortcutLongPressFastForward => 'Long-press fast-forward';
+
+  @override
   String get playbackSettings => 'Playback';
 
   @override

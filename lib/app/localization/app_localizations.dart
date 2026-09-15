@@ -1573,6 +1573,12 @@ abstract class AppLocalizations {
   /// **'开关弹幕'**
   String get playerShortcutToggleDanmaku;
 
+  /// No description provided for @playerShortcutLongPressFastForward.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'长按加速'**
+  String get playerShortcutLongPressFastForward;
+
   /// No description provided for @playbackSettings.
   ///
   /// In zh_Hans, this message translates to:

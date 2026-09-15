@@ -53,7 +53,10 @@ class _PlayerShortcutsPageState extends ConsumerState<PlayerShortcutsPage> {
     if (action == null || event is! KeyDownEvent) return;
     final key = PlayerShortcutBinding.keyboard(event.logicalKey);
     final conflict = _keys.entries.any((entry) =>
-        entry.key != action && entry.value.any((bound) => bound.id == key.id));
+        entry.key != action &&
+        entry.key != PlayerShortcutAction.longPressFastForward &&
+        action != PlayerShortcutAction.longPressFastForward &&
+        entry.value.any((bound) => bound.id == key.id));
     final duplicate = _keys[action]!.any((bound) => bound.id == key.id);
     if (conflict || duplicate) {
       NotificationToast.show(
@@ -76,6 +79,8 @@ class _PlayerShortcutsPageState extends ConsumerState<PlayerShortcutsPage> {
         PlayerShortcutBinding.wheel(event.scrollDelta.dy < 0 ? 5 : -5);
     final conflict = _keys.entries.any((entry) =>
         entry.key != action &&
+        entry.key != PlayerShortcutAction.longPressFastForward &&
+        action != PlayerShortcutAction.longPressFastForward &&
         entry.value.any((bound) => bound.id == binding.id));
     final duplicate = _keys[action]!.any((bound) => bound.id == binding.id);
     if (conflict || duplicate) {
@@ -105,6 +110,8 @@ class _PlayerShortcutsPageState extends ConsumerState<PlayerShortcutsPage> {
       PlayerShortcutAction.screenshot: l10n.playerShortcutScreenshot,
       PlayerShortcutAction.toggleDanmaku: l10n.playerShortcutToggleDanmaku,
       PlayerShortcutAction.nextEpisode: l10n.nextEpisode,
+      PlayerShortcutAction.longPressFastForward:
+          l10n.playerShortcutLongPressFastForward,
     };
     return Scaffold(
       appBar: AppBar(

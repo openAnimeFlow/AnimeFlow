@@ -26,7 +26,7 @@ class DioFactory {
         NetworkConfig.fromSettings(),
         defaultHeaders: {
           'referer': '',
-          'user-agent': _deviceUserAgent ?? Utils.getRandomUA(),
+          'user-agent': Utils.getRandomUA(),
         },
       );
 

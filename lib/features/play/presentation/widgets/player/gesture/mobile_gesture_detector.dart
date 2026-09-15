@@ -183,27 +183,13 @@ class _MobileGestureDetectorState extends ConsumerState<MobileGestureDetector> {
         if (_isRightSide) {
           // 垂直拖动结束（右半屏）：应用新的音量
           playController.endVerticalDrag();
-          // 保持指示器显示，2秒后自动隐藏
-          videoUiStateController.showIndicator();
-          Future.delayed(const Duration(seconds: 2), () {
-            if (!ref.read(playStateProvider).isVerticalDragging) {
-              videoUiStateController.hideIndicator();
-              videoUiStateController
-                  .updateIndicatorType(VideoControlsIndicatorType.noIndicator);
-            }
-          });
+          videoUiStateController.updateIndicatorTypeAndShowIndicator(
+              VideoControlsIndicatorType.volumeIndicator);
         } else {
           // 垂直拖动结束（左半屏）：结束亮度调整
           videoUiStateController.setBrightnessDragging(false);
-          // 保持指示器显示，2秒后自动隐藏
-          videoUiStateController.showIndicator();
-          Future.delayed(const Duration(seconds: 2), () {
-            if (!videoUiStateController.isBrightnessDragging) {
-              videoUiStateController.hideIndicator();
-              videoUiStateController
-                  .updateIndicatorType(VideoControlsIndicatorType.noIndicator);
-            }
-          });
+          videoUiStateController.updateIndicatorTypeAndShowIndicator(
+              VideoControlsIndicatorType.brightnessIndicator);
         }
       },
 

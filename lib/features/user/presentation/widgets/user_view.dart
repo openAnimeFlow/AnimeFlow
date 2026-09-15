@@ -117,6 +117,7 @@ class _UserViewState extends ConsumerState<UserView>
     );
     _tabController.addListener(_onTabChanged);
     WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
       ref.read(userCollectionsProvider.notifier).loadInitial(_currentType);
     });
   }

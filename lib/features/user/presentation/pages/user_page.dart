@@ -21,6 +21,7 @@ class UserPage extends ConsumerWidget {
     final isLoggedInAsync = ref.watch(isLoggedInProvider);
     final colorScheme = Theme.of(context).colorScheme;
     return isLoggedInAsync.when(
+      skipLoadingOnRefresh: false,
       data: (isLoggedIn) {
         if (!isLoggedIn) {
           return _buildLoginPage(context, colorScheme);
@@ -47,6 +48,9 @@ class UserPage extends ConsumerWidget {
 
         final userInfoAsync = ref.watch(currentUserInfoProvider);
         return userInfoAsync.when(
+          // Login invalidates the previous session's cached null profile.
+          // Show loading until the new profile request has completed.
+          skipLoadingOnRefresh: false,
           data: (userInfo) => userInfo == null
               ? Scaffold(
                   body: Center(child: Text(l10n.noUserProfile)),

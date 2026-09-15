@@ -57,6 +57,7 @@ class _CollectionTabView extends ConsumerWidget {
   static const int _pageSize = 20;
 
   void _scheduleLoadMoreIfNeeded(
+    BuildContext context,
     WidgetRef ref,
     UserCollectionTabState tabState,
     UserCollectionsItem? collectionsItem,
@@ -70,8 +71,10 @@ class _CollectionTabView extends ConsumerWidget {
       return;
     }
     WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!context.mounted) return;
       final current = ref.read(userCollectionsProvider).tabState(type);
       if (current.data == null ||
+          current.data!.data.isEmpty ||
           current.data!.data.length >= _pageSize ||
           !current.canLoadMore ||
           current.isBusy ||
@@ -79,6 +82,33 @@ class _CollectionTabView extends ConsumerWidget {
         return;
       }
       ref.read(userCollectionsProvider.notifier).loadMore(type);
+    });
+  }
+
+  void _scheduleLoadMoreForMetrics(
+    BuildContext context,
+    WidgetRef ref,
+    ScrollMetrics metrics,
+    int depth,
+  ) {
+    if (depth != 0 ||
+        metrics.axis != Axis.vertical ||
+        !_shouldTriggerLoadMore(metrics)) {
+      return;
+    }
+    // Metrics notifications may arrive during layout. Recheck live state
+    // after the frame to guard against duplicate notifications and errors.
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!context.mounted) return;
+      final current = ref.read(userCollectionsProvider).tabState(type);
+      if (current.data == null ||
+          current.data!.data.isEmpty ||
+          !current.canLoadMore ||
+          current.isBusy ||
+          current.loadMoreErrorMessage != null) {
+        return;
+      }
+      _onLoadMore(ref);
     });
   }
 
@@ -125,7 +155,7 @@ class _CollectionTabView extends ConsumerWidget {
       userCollectionsProvider.select((state) => state.tabState(type)),
     );
     final collectionsItem = tabState.data;
-    _scheduleLoadMoreIfNeeded(ref, tabState, collectionsItem);
+    _scheduleLoadMoreIfNeeded(context, ref, tabState, collectionsItem);
 
     return Builder(
       builder: (BuildContext context) {
@@ -140,19 +170,16 @@ class _CollectionTabView extends ConsumerWidget {
           notificationPredicate: (notification) =>
               notification.depth == 0 &&
               notification.metrics.axis == Axis.vertical,
-          child: NotificationListener<ScrollNotification>(
+          child: NotificationListener<Notification>(
             onNotification: (notification) {
-              if (notification is ScrollUpdateNotification ||
-                  notification is ScrollMetricsNotification ||
+              if (notification is ScrollMetricsNotification) {
+                _scheduleLoadMoreForMetrics(
+                    context, ref, notification.metrics, notification.depth);
+              } else if (notification is ScrollUpdateNotification ||
                   notification is ScrollEndNotification) {
-                final metrics = notification.metrics;
-                if (_shouldTriggerLoadMore(metrics) &&
-                    collectionsItem != null &&
-                    collectionsItem.data.isNotEmpty &&
-                    tabState.canLoadMore &&
-                    !tabState.isLoadingMore) {
-                  _onLoadMore(ref);
-                }
+                final scroll = notification as ScrollNotification;
+                _scheduleLoadMoreForMetrics(
+                    context, ref, scroll.metrics, scroll.depth);
               }
               return false;
             },

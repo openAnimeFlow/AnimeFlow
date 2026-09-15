@@ -10,6 +10,22 @@ part 'user_collection_provider.g.dart';
 
 const _pageSize = 20;
 
+typedef CollectionPageLoader = Future<UserCollectionsItem> Function({
+  required int type,
+  required int offset,
+  String? keyword,
+});
+
+final collectionPageLoaderProvider = Provider<CollectionPageLoader>((ref) {
+  return ({required type, required offset, keyword}) =>
+      FlowApi.myCollectionsService(
+        type: type,
+        limit: _pageSize,
+        offset: offset,
+        keyword: keyword,
+      );
+});
+
 final collectionTypeUpdateProvider =
     Provider<Future<void> Function(UserCollectionData, int)>((ref) {
   return (collection, newType) => FlowApi.updateCollectionService(
@@ -21,12 +37,16 @@ final collectionTypeUpdateProvider =
 
 @Riverpod(keepAlive: true)
 class UserCollections extends _$UserCollections {
+  Object _session = Object();
+
   @override
   UserCollectionsState build() {
+    _session = Object();
     return const UserCollectionsState();
   }
 
   void reset() {
+    _session = Object();
     state = const UserCollectionsState();
   }
 
@@ -41,8 +61,9 @@ class UserCollections extends _$UserCollections {
     // Use the state shown by the caller. Cached tabs may predate a fresh
     // detail response and must not suppress the user's requested update.
     if (collection.interest.type == newType) return;
+    final session = _session;
     await ref.read(collectionTypeUpdateProvider)(collection, newType);
-    if (!ref.mounted) return;
+    if (!ref.mounted || session != _session) return;
     final counts =
         ref.read(currentUserInfoProvider).asData?.value?.collectionCounts;
     state = state.moveCollection(
@@ -98,9 +119,8 @@ class UserCollections extends _$UserCollections {
     required int offset,
     String? keyword,
   }) {
-    return FlowApi.myCollectionsService(
+    return ref.read(collectionPageLoaderProvider)(
       type: type,
-      limit: _pageSize,
       offset: offset,
       keyword: keyword,
     );
@@ -112,7 +132,12 @@ class UserCollections extends _$UserCollections {
     bool refresh = false,
   }) async {
     final tab = state.tabState(type);
+    final session = _session;
     final requestVersion = tab.requestVersion;
+    bool isCurrentRequest() =>
+        ref.mounted &&
+        session == _session &&
+        state.tabState(type).requestVersion == requestVersion;
     final keyword = tab.keyword;
     if (tab.isBusy) {
       return false;
@@ -151,7 +176,7 @@ class UserCollections extends _$UserCollections {
         offset: offset,
         keyword: keyword,
       );
-      if (state.tabState(type).requestVersion != requestVersion) {
+      if (!isCurrentRequest()) {
         return false;
       }
 
@@ -177,7 +202,7 @@ class UserCollections extends _$UserCollections {
         );
       });
     } catch (_) {
-      if (state.tabState(type).requestVersion != requestVersion) {
+      if (!isCurrentRequest()) {
         return false;
       }
       refreshFailedWithCache = refresh && state.tabState(type).data != null;
@@ -195,7 +220,7 @@ class UserCollections extends _$UserCollections {
         return current;
       });
     } finally {
-      if (state.tabState(type).requestVersion == requestVersion) {
+      if (isCurrentRequest()) {
         state = state.updateTab(
           type,
           (current) => current.copyWith(

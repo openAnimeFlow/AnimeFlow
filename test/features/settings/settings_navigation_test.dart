@@ -108,7 +108,7 @@ void main() {
     await tester.tap(find.text(l10n(tester).generalSettingsTitle));
     await tester.pumpAndSettle();
     expect(find.text('probe:/settings/general'), findsOneWidget);
-    await tester.tap(find.text(l10n(tester).settingsLabel));
+    await tester.tap(find.text(l10n(tester).settings));
     await tester.pumpAndSettle();
     expect(find.text('Enter settings'), findsOneWidget);
     expect(tester.takeException(), isNull);

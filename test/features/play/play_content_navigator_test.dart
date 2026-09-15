@@ -1,6 +1,6 @@
 import 'dart:async';
 
-import 'package:anime_flow/core/storage/storage.dart';
+import 'package:anime_flow/core/settings/storage.dart';
 import 'package:anime_flow/app/localization/app_localizations.dart';
 import 'package:anime_flow/app/router/model/info_route_extra.dart';
 import 'package:anime_flow/app/router/model/play_route_extra.dart';

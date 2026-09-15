@@ -5,7 +5,7 @@ import 'package:anime_flow/core/constants/storage_key.dart';
 import 'package:anime_flow/core/crawler/cookie_manager.dart';
 import 'package:anime_flow/app/localization/locale_provider.dart';
 import 'package:flutter/material.dart';
-import 'package:anime_flow/core/storage/storage.dart';
+import 'package:anime_flow/core/settings/storage.dart';
 import 'package:anime_flow/features/download/application/download_danmaku_service.dart';
 import 'package:anime_flow/features/download/application/download_foreground_service.dart';
 import 'package:anime_flow/features/download/application/download_manager.dart';

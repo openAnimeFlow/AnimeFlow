@@ -1,4 +1,4 @@
-import 'package:anime_flow/core/storage/storage.dart';
+import 'package:anime_flow/core/settings/storage.dart';
 import 'package:anime_flow/shared/models/download/download_episode.dart';
 import 'package:anime_flow/shared/models/download/download_record.dart';
 import 'package:anime_flow/shared/models/download/download_status.dart';

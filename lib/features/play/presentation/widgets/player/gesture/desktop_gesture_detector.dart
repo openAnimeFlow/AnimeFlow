@@ -4,8 +4,7 @@ import 'package:anime_flow/shared/models/enums/video_controls_icon_type.dart';
 import 'package:anime_flow/features/play/presentation/providers/play_provider.dart';
 import 'package:anime_flow/features/play/presentation/providers/video_ui_provider.dart';
 import 'package:anime_flow/features/play/domain/player/player_shortcut.dart';
-import 'package:anime_flow/core/constants/storage_key.dart';
-import 'package:anime_flow/core/storage/storage.dart';
+import 'package:anime_flow/core/settings/app_settings.dart';
 import 'package:anime_flow/core/utils/system_util.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
@@ -29,7 +28,6 @@ class _DesktopGestureDetectorState
   final _focusNode = FocusNode(debugLabel: 'Desktop player');
   late final PlaySession playSession;
   late final VideoUiNotifier videoUiNotifier;
-  late final double fastForwardSpeed;
   bool _isSpeedBoosting = false;
   Timer? _fastForwardPendingTimer;
 
@@ -38,8 +36,6 @@ class _DesktopGestureDetectorState
     super.initState();
     playSession = ref.read(playSessionProvider);
     videoUiNotifier = ref.read(videoUiProvider.notifier);
-    fastForwardSpeed =
-        Storage.setting.get(PlaybackKey.fastForwardSpeed, defaultValue: 2.0);
   }
 
   @override
@@ -60,7 +56,7 @@ class _DesktopGestureDetectorState
     if (_isSpeedBoosting || !ref.read(playStateProvider).playing) return;
 
     _isSpeedBoosting = true;
-    playSession.setPlaybackRate(fastForwardSpeed, temporary: true);
+    playSession.setPlaybackRate(AppSettings.fastForwardSpeed, temporary: true);
     videoUiNotifier.updateMainAxisAlignmentType(MainAxisAlignment.start);
     videoUiNotifier.updateIndicatorTypeAndShowIndicator(
         VideoControlsIndicatorType.speedIndicator);
@@ -199,7 +195,7 @@ class _DesktopGestureDetectorState
       autofocus: true,
       onKeyEvent: (node, event) {
         final isFastForwardShortcut =
-        _isFastForwardShortcut(event.logicalKey.keyId);
+            _isFastForwardShortcut(event.logicalKey.keyId);
         if (isFastForwardShortcut) {
           final pressed = event.logicalKey.keyId;
           if (event is KeyDownEvent) {

@@ -1,8 +1,7 @@
-import 'package:anime_flow/core/constants/storage_key.dart';
 import 'package:anime_flow/shared/models/enums/video_controls_icon_type.dart';
+import 'package:anime_flow/core/settings/app_settings.dart';
 import 'package:anime_flow/features/play/presentation/providers/play_provider.dart';
 import 'package:anime_flow/features/play/presentation/providers/video_ui_provider.dart';
-import 'package:anime_flow/core/storage/storage.dart';
 import 'package:anime_flow/core/utils/vibrate.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -19,11 +18,9 @@ class MobileGestureDetector extends ConsumerStatefulWidget {
 }
 
 class _MobileGestureDetectorState extends ConsumerState<MobileGestureDetector> {
-  final setting = Storage.setting;
   double _verticalDragStartY = 0; // 垂直拖动开始时的Y坐标
   bool _isRightSide = false; // 是否在屏幕右半侧开始垂直拖动
   bool _isSpeedBoosting = false;
-  late double fastForwardSpeed;
   late final PlaySession playController;
 
   VideoUiNotifier get videoUiStateController =>
@@ -52,8 +49,6 @@ class _MobileGestureDetectorState extends ConsumerState<MobileGestureDetector> {
   void initState() {
     super.initState();
     playController = ref.read(playSessionProvider);
-    fastForwardSpeed =
-        setting.get(PlaybackKey.fastForwardSpeed, defaultValue: 2.0);
   }
 
   @override
@@ -81,7 +76,8 @@ class _MobileGestureDetectorState extends ConsumerState<MobileGestureDetector> {
         if (ref.read(playStateProvider).playing) {
           vibrateMedium();
           _isSpeedBoosting = true;
-          playController.setPlaybackRate(fastForwardSpeed, temporary: true);
+          playController.setPlaybackRate(AppSettings.fastForwardSpeed,
+              temporary: true);
           videoUiStateController
               .updateMainAxisAlignmentType(MainAxisAlignment.start);
           videoUiStateController

@@ -1,5 +1,5 @@
 import 'package:anime_flow/shared/models/search/search_history_module.dart';
-import 'package:anime_flow/core/storage/storage.dart';
+import 'package:anime_flow/core/settings/storage.dart';
 import 'package:anime_flow/core/logger/logger.dart';
 
 class SearchHistoryManager {

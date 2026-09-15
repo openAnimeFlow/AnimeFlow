@@ -1,7 +1,7 @@
 import 'dart:async';
 
 import 'package:anime_flow/core/constants/assets_path_constants.dart';
-import 'package:anime_flow/core/constants/storage_key.dart';
+import 'package:anime_flow/core/settings/app_settings.dart';
 import 'package:anime_flow/core/network/clients/flow_client.dart';
 import 'package:anime_flow/core/network_speed/network_speed_provider.dart';
 import 'package:anime_flow/shared/models/enums/video_controls_icon_type.dart';
@@ -11,7 +11,6 @@ import 'package:anime_flow/features/play/presentation/providers/video_ui_provide
 import 'package:anime_flow/features/play/presentation/providers/episodes_provider.dart';
 import 'package:anime_flow/app/router/routes_args.dart';
 import 'package:anime_flow/features/play/presentation/widgets/player/ui/setting/video_setting_dialog.dart';
-import 'package:anime_flow/core/storage/storage.dart';
 import 'package:anime_flow/core/utils/system_util.dart';
 import 'package:anime_flow/core/utils/utils.dart';
 import 'package:anime_flow/shared/widgets/ios_battery_icon.dart';
@@ -37,7 +36,6 @@ class TopAreaControl extends ConsumerStatefulWidget {
 }
 
 class _TopAreaControlState extends ConsumerState<TopAreaControl> {
-  final setting = Storage.setting;
   late final PlaySession playController;
   late int _skipDuration;
 
@@ -48,7 +46,7 @@ class _TopAreaControlState extends ConsumerState<TopAreaControl> {
   void initState() {
     super.initState();
     playController = ref.read(playSessionProvider);
-    _skipDuration = setting.get(PlaybackKey.skipDuration, defaultValue: 85);
+    _skipDuration = AppSettings.skipDuration;
   }
 
   Future<T?> _showRightSlideDialog<T>({

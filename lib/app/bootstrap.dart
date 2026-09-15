@@ -9,7 +9,7 @@ import 'package:anime_flow/features/settings/presentation/providers/font_provide
 import 'package:anime_flow/core/network/network_runtime_config.dart';
 import 'package:anime_flow/core/network/core/dio_factory.dart';
 import 'package:anime_flow/core/logger/logger.dart';
-import 'package:anime_flow/core/storage/storage.dart';
+import 'package:anime_flow/core/settings/storage.dart';
 import 'package:anime_flow/core/utils/crawl_config.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';

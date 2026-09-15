@@ -4,7 +4,7 @@ import 'dart:io';
 import 'dart:typed_data';
 
 import 'package:anime_flow/core/constants/constants.dart';
-import 'package:anime_flow/core/constants/storage_key.dart';
+import 'package:anime_flow/core/settings/app_settings.dart';
 import 'package:anime_flow/features/play/application/danmaku_chinese_converter.dart';
 import 'package:anime_flow/features/play/application/danmaku_chinese_mode.dart';
 import 'package:anime_flow/features/play/application/danmaku_playback_synchronizer.dart';
@@ -20,7 +20,6 @@ import 'package:anime_flow/features/user/presentation/providers/user_state_provi
 import 'package:anime_flow/core/network/api/flow_api.dart';
 import 'package:anime_flow/shared/models/enums/video_controls_icon_type.dart';
 import 'package:anime_flow/shared/models/player/danmaku/danmaku_module.dart';
-import 'package:anime_flow/core/storage/storage.dart';
 import 'package:anime_flow/app/router/routes_args.dart';
 import 'package:anime_flow/core/logger/logger.dart';
 import 'package:anime_flow/core/utils/system_util.dart';
@@ -107,7 +106,7 @@ class PlayStateNotifier extends _$PlayStateNotifier {
   PlayState build() {
     ref.watch(playExtraProvider);
     return PlayState(
-      danmakuOn: Storage.setting.get(DanmakuKey.danmakuOn, defaultValue: true),
+      danmakuOn: AppSettings.danmakuOn,
       hiddenPlatforms: _loadHiddenPlatformsFromStorage(),
     );
   }
@@ -226,13 +225,9 @@ class PlayStateNotifier extends _$PlayStateNotifier {
 }
 
 Set<String> _loadHiddenPlatformsFromStorage() {
-  final setting = Storage.setting;
-  final platformBilibili =
-      setting.get(DanmakuKey.danmakuPlatformBilibili, defaultValue: true);
-  final platformGamer =
-      setting.get(DanmakuKey.danmakuPlatformGamer, defaultValue: true);
-  final platformDanDanPlay =
-      setting.get(DanmakuKey.danmakuPlatformDanDanPlay, defaultValue: true);
+  final platformBilibili = AppSettings.danmakuPlatformBilibili;
+  final platformGamer = AppSettings.danmakuPlatformGamer;
+  final platformDanDanPlay = AppSettings.danmakuPlatformDanDanPlay;
 
   const platformNameBilibili = 'BiliBili';
   const platformNameGamer = 'Gamer';
@@ -435,7 +430,6 @@ class PlaySession {
     required int episodeId,
     required bool watched,
   }) _setEpisodeWatched;
-  final setting = Storage.setting;
 
   /// 着色器所在目录（由 [shadersDirectoryProvider] 在启动时准备）
   final Directory shadersDirectory;
@@ -505,7 +499,7 @@ class PlaySession {
   static const Duration _bufferingPositionTolerance =
       Duration(milliseconds: 500);
   void init() {
-    final adBlocker = setting.get(PlaybackKey.adBlocker, defaultValue: false);
+    final adBlocker = AppSettings.adBlocker;
     final preferredKernel = _readPreferredPlayerKernel();
     playbackCoordinator = PlaybackCoordinator(
       engineFactory: engineFactory,
@@ -549,10 +543,9 @@ class PlaySession {
   Future<bool> setHardwareDecoder(bool enabled) =>
       _serializePlaybackChange(() async {
         if (_isDisposed) return false;
-        final previous = setting.get(PlaybackKey.hardwareDecoder,
-            defaultValue: true) as bool;
+        final previous = AppSettings.hardwareDecoder;
         if (previous == enabled) return true;
-        await setting.put(PlaybackKey.hardwareDecoder, enabled);
+        await AppSettings.setHardwareDecoder(enabled);
         var applied = false;
         try {
           applied =
@@ -561,7 +554,7 @@ class PlaySession {
         } finally {
           if (!_isDisposed) _playStateActions.setSwitchingKernel(false);
           if (!applied) {
-            await setting.put(PlaybackKey.hardwareDecoder, previous);
+            await AppSettings.setHardwareDecoder(previous);
           }
         }
       });
@@ -597,7 +590,7 @@ class PlaySession {
     if (switched) {
       _playStateActions.setKernel(target);
       unawaited(
-        setting.put(PlaybackKey.preferredPlayerKernel, target.name),
+        AppSettings.setPreferredPlayerKernel(target.name),
       );
     } else {
       LiggLogger().e('切换播放器内核失败: $target');
@@ -607,10 +600,7 @@ class PlaySession {
   }
 
   PlayerKernel _readPreferredPlayerKernel() {
-    final value = setting.get(
-      PlaybackKey.preferredPlayerKernel,
-      defaultValue: PlayerKernel.mediaKit.name,
-    );
+    final value = AppSettings.preferredPlayerKernelName;
     return PlayerKernel.values.firstWhere(
       (kernel) => kernel.name == value,
       orElse: () => PlayerKernel.mediaKit,
@@ -1115,7 +1105,7 @@ class PlaySession {
   void toggleDanmaku() {
     _playStateActions.toggleDanmakuOn();
     final danmakuOn = _playStateActions.value.danmakuOn;
-    Storage.setting.put(DanmakuKey.danmakuOn, danmakuOn);
+    AppSettings.setDanmakuOn(danmakuOn);
     if (!danmakuOn) {
       danmakuController?.clear();
     }

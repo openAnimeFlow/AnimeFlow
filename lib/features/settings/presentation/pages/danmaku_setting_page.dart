@@ -1,13 +1,11 @@
 import 'package:anime_flow/core/constants/storage_key.dart';
+import 'package:anime_flow/core/settings/app_settings.dart';
 import 'package:anime_flow/features/play/application/danmaku_chinese_mode.dart';
 import 'package:anime_flow/features/play/presentation/providers/danmaku_chinese_mode_provider.dart';
 import 'package:anime_flow/features/settings/presentation/providers/setting_provider.dart';
-import 'package:anime_flow/core/storage/storage.dart';
-import 'package:anime_flow/core/utils/system_util.dart';
 import 'package:anime_flow/shared/widgets/drop_down_menu.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:hive_ce/hive.dart';
 import 'package:anime_flow/app/localization/app_localizations.dart';
 
 class DanmakuSettingPage extends StatefulWidget {
@@ -18,8 +16,6 @@ class DanmakuSettingPage extends StatefulWidget {
 }
 
 class _DanmakuSettingPageState extends State<DanmakuSettingPage> {
-  Box setting = Storage.setting;
-
   // 弹幕配置状态
   late double _opacity;
   late double _fontSize;
@@ -44,27 +40,19 @@ class _DanmakuSettingPageState extends State<DanmakuSettingPage> {
 
   void _loadSettings() {
     setState(() {
-      _opacity = setting.get(DanmakuKey.danmakuOpacity, defaultValue: 1.0);
-      _fontSize = setting.get(DanmakuKey.danmakuFontSize,
-          defaultValue: SystemUtil.isMobile ? 16.0 : 25.0);
-      _danmakuArea = setting.get(DanmakuKey.danmakuArea, defaultValue: 0.25);
-      _danmakuDuration =
-          setting.get(DanmakuKey.danmakuDuration, defaultValue: 8.0);
-      _massiveMode =
-          setting.get(DanmakuKey.danmakuMassiveMode, defaultValue: false);
-      _border = setting.get(DanmakuKey.danmakuBorder, defaultValue: true);
-      _danmakuColor = setting.get(DanmakuKey.danmakuColor, defaultValue: true);
-      _hideTop = setting.get(DanmakuKey.danmakuHideTop, defaultValue: false);
-      _hideBottom =
-          setting.get(DanmakuKey.danmakuHideBottom, defaultValue: false);
-      _hideScroll =
-          setting.get(DanmakuKey.danmakuHideScroll, defaultValue: false);
-      _platformBilibili =
-          setting.get(DanmakuKey.danmakuPlatformBilibili, defaultValue: true);
-      _platformGamer =
-          setting.get(DanmakuKey.danmakuPlatformGamer, defaultValue: true);
-      _platformDanDanPlay =
-          setting.get(DanmakuKey.danmakuPlatformDanDanPlay, defaultValue: true);
+      _opacity = AppSettings.danmakuOpacity;
+      _fontSize = AppSettings.danmakuFontSize;
+      _danmakuArea = AppSettings.danmakuArea;
+      _danmakuDuration = AppSettings.danmakuDuration;
+      _massiveMode = AppSettings.danmakuMassiveMode;
+      _border = AppSettings.danmakuBorder;
+      _danmakuColor = AppSettings.danmakuColor;
+      _hideTop = AppSettings.danmakuHideTop;
+      _hideBottom = AppSettings.danmakuHideBottom;
+      _hideScroll = AppSettings.danmakuHideScroll;
+      _platformBilibili = AppSettings.danmakuPlatformBilibili;
+      _platformGamer = AppSettings.danmakuPlatformGamer;
+      _platformDanDanPlay = AppSettings.danmakuPlatformDanDanPlay;
     });
   }
 
@@ -103,7 +91,8 @@ class _DanmakuSettingPageState extends State<DanmakuSettingPage> {
                     onChanged: (value) {
                       setState(() {
                         _hideScroll = !value;
-                        setting.put(DanmakuKey.danmakuHideScroll, _hideScroll);
+                        AppSettings.setDanmakuValue(
+                            DanmakuKey.danmakuHideScroll, _hideScroll);
                       });
                     },
                   ),
@@ -113,7 +102,8 @@ class _DanmakuSettingPageState extends State<DanmakuSettingPage> {
                     onChanged: (value) {
                       setState(() {
                         _hideTop = !value;
-                        setting.put(DanmakuKey.danmakuHideTop, _hideTop);
+                        AppSettings.setDanmakuValue(
+                            DanmakuKey.danmakuHideTop, _hideTop);
                       });
                     },
                   ),
@@ -123,7 +113,8 @@ class _DanmakuSettingPageState extends State<DanmakuSettingPage> {
                     onChanged: (value) {
                       setState(() {
                         _hideBottom = !value;
-                        setting.put(DanmakuKey.danmakuHideBottom, _hideBottom);
+                        AppSettings.setDanmakuValue(
+                            DanmakuKey.danmakuHideBottom, _hideBottom);
                       });
                     },
                   ),
@@ -137,7 +128,8 @@ class _DanmakuSettingPageState extends State<DanmakuSettingPage> {
                     onChanged: (value) {
                       setState(() {
                         _platformBilibili = value;
-                        setting.put(DanmakuKey.danmakuPlatformBilibili, value);
+                        AppSettings.setDanmakuValue(
+                            DanmakuKey.danmakuPlatformBilibili, value);
                       });
                     },
                   ),
@@ -147,7 +139,8 @@ class _DanmakuSettingPageState extends State<DanmakuSettingPage> {
                     onChanged: (value) {
                       setState(() {
                         _platformGamer = value;
-                        setting.put(DanmakuKey.danmakuPlatformGamer, value);
+                        AppSettings.setDanmakuValue(
+                            DanmakuKey.danmakuPlatformGamer, value);
                       });
                     },
                   ),
@@ -157,7 +150,7 @@ class _DanmakuSettingPageState extends State<DanmakuSettingPage> {
                     onChanged: (value) {
                       setState(() {
                         _platformDanDanPlay = value;
-                        setting.put(
+                        AppSettings.setDanmakuValue(
                             DanmakuKey.danmakuPlatformDanDanPlay, value);
                       });
                     },
@@ -272,7 +265,8 @@ class _DanmakuSettingPageState extends State<DanmakuSettingPage> {
                     onChanged: (value) {
                       setState(() {
                         _border = value;
-                        setting.put(DanmakuKey.danmakuBorder, _border);
+                        AppSettings.setDanmakuValue(
+                            DanmakuKey.danmakuBorder, _border);
                       });
                     },
                   ),
@@ -282,7 +276,8 @@ class _DanmakuSettingPageState extends State<DanmakuSettingPage> {
                     onChanged: (value) {
                       setState(() {
                         _danmakuColor = value;
-                        setting.put(DanmakuKey.danmakuColor, _danmakuColor);
+                        AppSettings.setDanmakuValue(
+                            DanmakuKey.danmakuColor, _danmakuColor);
                       });
                     },
                   ),
@@ -292,7 +287,7 @@ class _DanmakuSettingPageState extends State<DanmakuSettingPage> {
                     onChanged: (value) {
                       setState(() {
                         _massiveMode = value;
-                        setting.put(
+                        AppSettings.setDanmakuValue(
                             DanmakuKey.danmakuMassiveMode, _massiveMode);
                       });
                     },
@@ -346,7 +341,7 @@ class _DanmakuSettingPageState extends State<DanmakuSettingPage> {
                                       (speedPercentValue / 100.0) *
                                           (maxDuration - minDuration);
                                   _danmakuDuration = newDuration;
-                                  setting.put(
+                                  AppSettings.setDanmakuValue(
                                       DanmakuKey.danmakuDuration, newDuration);
                                 });
                               },
@@ -386,7 +381,8 @@ class _DanmakuSettingPageState extends State<DanmakuSettingPage> {
                           onChanged: (value) {
                             setState(() {
                               _opacity = value;
-                              setting.put(DanmakuKey.danmakuOpacity, _opacity);
+                              AppSettings.setDanmakuValue(
+                                  DanmakuKey.danmakuOpacity, _opacity);
                             });
                           },
                         ),
@@ -424,7 +420,7 @@ class _DanmakuSettingPageState extends State<DanmakuSettingPage> {
                           onChanged: (value) {
                             setState(() {
                               _fontSize = value;
-                              setting.put(
+                              AppSettings.setDanmakuValue(
                                   DanmakuKey.danmakuFontSize, _fontSize);
                             });
                           },
@@ -476,7 +472,7 @@ class _DanmakuSettingPageState extends State<DanmakuSettingPage> {
                                 final index = value.round().clamp(0, 4);
                                 setState(() {
                                   _danmakuArea = fixedValues[index];
-                                  setting.put(
+                                  AppSettings.setDanmakuValue(
                                       DanmakuKey.danmakuArea, _danmakuArea);
                                 });
                               },

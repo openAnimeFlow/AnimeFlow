@@ -1,7 +1,7 @@
 import 'dart:convert';
 
 import 'package:anime_flow/core/crawler/itme/crawler_config_item.dart';
-import 'package:anime_flow/core/storage/storage.dart';
+import 'package:anime_flow/core/settings/storage.dart';
 import 'package:flutter/services.dart';
 import 'package:hive_ce/hive.dart';
 import 'package:anime_flow/core/logger/logger.dart';

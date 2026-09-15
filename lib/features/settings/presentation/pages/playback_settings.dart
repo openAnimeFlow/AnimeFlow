@@ -1,8 +1,7 @@
 import 'package:anime_flow/features/play/presentation/extensions/player_kernel_localization.dart';
-import 'package:anime_flow/core/constants/storage_key.dart';
+import 'package:anime_flow/core/settings/app_settings.dart';
 import 'package:anime_flow/features/play/domain/player/player_kernel.dart';
 import 'package:anime_flow/features/settings/presentation/providers/setting_provider.dart';
-import 'package:anime_flow/core/storage/storage.dart';
 import 'package:anime_flow/shared/widgets/drop_down_menu.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -16,8 +15,6 @@ class PlaybackSettingsPage extends StatefulWidget {
 }
 
 class _PlaybackSettingsPageState extends State<PlaybackSettingsPage> {
-  final setting = Storage.setting;
-
   // 播放配置状态
   late bool _autoPlayNext;
   late bool _episodesProgress;
@@ -35,24 +32,18 @@ class _PlaybackSettingsPageState extends State<PlaybackSettingsPage> {
 
   void _loadSettings() {
     setState(() {
-      _autoPlayNext = setting.get(PlaybackKey.autoPlayNext, defaultValue: true);
-      _episodesProgress =
-          setting.get(PlaybackKey.episodesProgress, defaultValue: true);
-      _fastForwardSpeed =
-          setting.get(PlaybackKey.fastForwardSpeed, defaultValue: 2.0);
-      _adBlocker = setting.get(PlaybackKey.adBlocker, defaultValue: false);
-      _hardwareDecoder =
-          setting.get(PlaybackKey.hardwareDecoder, defaultValue: true);
-      _skipDuration = setting.get(PlaybackKey.skipDuration, defaultValue: 85);
+      _autoPlayNext = AppSettings.autoPlayNext;
+      _episodesProgress = AppSettings.episodesProgress;
+      _fastForwardSpeed = AppSettings.fastForwardSpeed;
+      _adBlocker = AppSettings.adBlocker;
+      _hardwareDecoder = AppSettings.hardwareDecoder;
+      _skipDuration = AppSettings.skipDuration;
       _preferredPlayerKernel = _readPreferredPlayerKernel();
     });
   }
 
   PlayerKernel _readPreferredPlayerKernel() {
-    final storedKernel = setting.get(
-      PlaybackKey.preferredPlayerKernel,
-      defaultValue: PlayerKernel.mediaKit.name,
-    );
+    final storedKernel = AppSettings.preferredPlayerKernelName;
     return PlayerKernel.values.firstWhere(
       (kernel) => kernel.name == storedKernel,
       orElse: () => PlayerKernel.mediaKit,
@@ -95,7 +86,7 @@ class _PlaybackSettingsPageState extends State<PlaybackSettingsPage> {
                     onChanged: (value) {
                       setState(() {
                         _autoPlayNext = value;
-                        setting.put(PlaybackKey.autoPlayNext, _autoPlayNext);
+                        AppSettings.setAutoPlayNext(_autoPlayNext);
                       });
                     },
                   ),
@@ -106,7 +97,7 @@ class _PlaybackSettingsPageState extends State<PlaybackSettingsPage> {
                     onChanged: (value) {
                       setState(() {
                         _adBlocker = value;
-                        setting.put(PlaybackKey.adBlocker, _adBlocker);
+                        AppSettings.setAdBlocker(_adBlocker);
                       });
                     },
                   ),
@@ -151,8 +142,7 @@ class _PlaybackSettingsPageState extends State<PlaybackSettingsPage> {
                               if (parsed != null && parsed > 0) {
                                 setState(() {
                                   _skipDuration = parsed;
-                                  setting.put(
-                                      PlaybackKey.skipDuration, _skipDuration);
+                                  AppSettings.setSkipDuration(_skipDuration);
                                 });
                               }
                             },
@@ -171,8 +161,7 @@ class _PlaybackSettingsPageState extends State<PlaybackSettingsPage> {
                     onChanged: (value) {
                       setState(() {
                         _episodesProgress = value;
-                        setting.put(
-                            PlaybackKey.episodesProgress, _episodesProgress);
+                        AppSettings.setEpisodesProgress(_episodesProgress);
                       });
                     },
                   ),
@@ -186,7 +175,7 @@ class _PlaybackSettingsPageState extends State<PlaybackSettingsPage> {
                     onChanged: (value) {
                       setState(() {
                         _hardwareDecoder = value;
-                        setting.put(PlaybackKey.hardwareDecoder, value);
+                        AppSettings.setHardwareDecoder(value);
                       });
                     },
                   ),
@@ -234,10 +223,7 @@ class _PlaybackSettingsPageState extends State<PlaybackSettingsPage> {
                           onSelected: (kernel) {
                             setState(() {
                               _preferredPlayerKernel = kernel;
-                              setting.put(
-                                PlaybackKey.preferredPlayerKernel,
-                                kernel.name,
-                              );
+                              AppSettings.setPreferredPlayerKernel(kernel.name);
                             });
                           },
                         ),
@@ -316,7 +302,7 @@ class _PlaybackSettingsPageState extends State<PlaybackSettingsPage> {
                           onChanged: (value) {
                             setState(() {
                               _fastForwardSpeed = value;
-                              setting.put(PlaybackKey.fastForwardSpeed,
+                              AppSettings.setFastForwardSpeed(
                                   _fastForwardSpeed);
                             });
                           },

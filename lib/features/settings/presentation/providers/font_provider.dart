@@ -4,7 +4,7 @@ import 'package:anime_flow/core/constants/storage_key.dart';
 import 'package:anime_flow/core/network/api/github_api.dart';
 import 'package:anime_flow/shared/models/font_item.dart';
 import 'package:anime_flow/app/theme/theme_provider.dart';
-import 'package:anime_flow/core/storage/storage.dart';
+import 'package:anime_flow/core/settings/storage.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter/services.dart';
 import 'package:path_provider/path_provider.dart';

@@ -1,9 +1,8 @@
 import 'dart:async';
 
-import 'package:anime_flow/core/constants/storage_key.dart';
+import 'package:anime_flow/core/settings/app_settings.dart';
 import 'package:anime_flow/core/logger/logger.dart';
 import 'package:anime_flow/core/network/api/flow_api.dart';
-import 'package:anime_flow/core/storage/storage.dart';
 import 'package:anime_flow/features/play/application/play_history_service.dart';
 import 'package:anime_flow/shared/models/player/play/play_history.dart';
 import 'package:anime_flow/shared/models/player/play/play_history_event_type.dart';
@@ -68,8 +67,7 @@ class PlaybackProgressManager {
     if (!playing || duration <= Duration.zero) return;
     if (isLocalPlayback || subjectId <= 0 || episodeId <= 0) return;
     if (subjectName == null || subjectCover == null) return;
-    if (!Storage.setting
-        .get(PlaybackKey.episodesProgress, defaultValue: true)) {
+    if (!AppSettings.episodesProgress) {
       return;
     }
 

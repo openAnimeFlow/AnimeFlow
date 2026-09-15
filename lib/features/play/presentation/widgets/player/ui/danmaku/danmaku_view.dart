@@ -1,8 +1,7 @@
 import 'dart:async';
-import 'package:anime_flow/core/constants/storage_key.dart';
+import 'package:anime_flow/core/settings/app_settings.dart';
 import 'package:anime_flow/features/user/presentation/providers/user_state_provider.dart';
 import 'package:anime_flow/features/play/presentation/providers/play_provider.dart';
-import 'package:anime_flow/core/storage/storage.dart';
 import 'package:canvas_danmaku/canvas_danmaku.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -16,7 +15,6 @@ class DanmakuView extends ConsumerStatefulWidget {
 
 class _DanmakuViewState extends ConsumerState<DanmakuView>
     with AutomaticKeepAliveClientMixin {
-  final setting = Storage.setting;
   late final PlaySession playController;
   Timer? _danmakuTimer;
 
@@ -44,26 +42,19 @@ class _DanmakuViewState extends ConsumerState<DanmakuView>
     playController = ref.read(playSessionProvider);
 
     // 初始化弹幕配置
-    _border = setting.get(DanmakuKey.danmakuBorder, defaultValue: true);
-    _opacity = setting.get(DanmakuKey.danmakuOpacity, defaultValue: 1.0);
-    _fontSize = setting.get(DanmakuKey.danmakuFontSize, defaultValue: 16.0);
-    _danmakuArea = setting.get(DanmakuKey.danmakuArea, defaultValue: 0.25);
-    _hideTop = setting.get(DanmakuKey.danmakuHideTop, defaultValue: false);
-    _hideBottom =
-        setting.get(DanmakuKey.danmakuHideBottom, defaultValue: false);
-    _hideScroll =
-        setting.get(DanmakuKey.danmakuHideScroll, defaultValue: false);
-    _massiveMode =
-        setting.get(DanmakuKey.danmakuMassiveMode, defaultValue: false);
-    _danmakuColor = setting.get(DanmakuKey.danmakuColor, defaultValue: true);
-    _danmakuDuration =
-        setting.get(DanmakuKey.danmakuDuration, defaultValue: 8.0);
-    _danmakuLineHeight =
-        setting.get(DanmakuKey.danmakuLineHeight, defaultValue: 1.6);
-    _danmakuFontWeight =
-        setting.get(DanmakuKey.danmakuFontWeight, defaultValue: 4);
-    _danmakuUseSystemFont =
-        setting.get(DanmakuKey.danmakuUseSystemFont, defaultValue: false);
+    _border = AppSettings.danmakuBorder;
+    _opacity = AppSettings.danmakuOpacity;
+    _fontSize = AppSettings.danmakuFontSize;
+    _danmakuArea = AppSettings.danmakuArea;
+    _hideTop = AppSettings.danmakuHideTop;
+    _hideBottom = AppSettings.danmakuHideBottom;
+    _hideScroll = AppSettings.danmakuHideScroll;
+    _massiveMode = AppSettings.danmakuMassiveMode;
+    _danmakuColor = AppSettings.danmakuColor;
+    _danmakuDuration = AppSettings.danmakuDuration;
+    _danmakuLineHeight = AppSettings.danmakuLineHeight;
+    _danmakuFontWeight = AppSettings.danmakuFontWeight;
+    _danmakuUseSystemFont = AppSettings.danmakuUseSystemFont;
 
     // 启动弹幕定时器
     _startDanmakuTimer();

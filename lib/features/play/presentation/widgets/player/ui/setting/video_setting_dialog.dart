@@ -4,10 +4,9 @@ import 'package:anime_flow/app/localization/app_localizations.dart';
 import 'package:anime_flow/features/play/domain/player/player_kernel.dart';
 import 'package:anime_flow/features/play/presentation/providers/play_provider.dart';
 import 'package:anime_flow/core/utils/format_time_util.dart';
+import 'package:anime_flow/core/settings/app_settings.dart';
 import 'package:anime_flow/shared/widgets/notification_toast.dart';
 import 'package:flutter/material.dart';
-import 'package:anime_flow/core/storage/storage.dart';
-import 'package:anime_flow/core/constants/storage_key.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:anime_flow/shared/widgets/drop_down_menu.dart';
 
@@ -43,8 +42,7 @@ class _VideoSettingState extends ConsumerState<VideoSettingDialog> {
   void initState() {
     super.initState();
     playController = ref.read(playSessionProvider);
-    _hardwareDecoder = Storage.setting
-        .get(PlaybackKey.hardwareDecoder, defaultValue: true) as bool;
+    _hardwareDecoder = AppSettings.hardwareDecoder;
   }
 
   @override

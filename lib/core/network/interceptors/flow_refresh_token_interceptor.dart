@@ -101,7 +101,7 @@ class FlowRefreshTokenInterceptor extends Interceptor {
 
   bool _allowsFlowRefresh(dynamic data) {
     final reason = data is Map ? data['authReason'] : null;
-    return reason == null || reason == 'access_token_expired';
+    return reason == 'access_token_expired';
   }
 
   bool _isFlowAccessFailure(dynamic data) =>
@@ -132,20 +132,17 @@ class FlowRefreshTokenInterceptor extends Interceptor {
           '${oldToken.tokenType} ${oldToken.accessToken}') {
         return true;
       }
-      if (oldToken.refreshToken.isEmpty) return false;
+      if (oldToken.refreshToken.isEmpty) {
+        await _clearSession(oldToken, state, generation);
+        return false;
+      }
 
       FlowToken newToken;
       try {
         newToken = await _refreshToken(refreshToken: oldToken.refreshToken);
       } on AnimeFlowApiException catch (error) {
-        // The backend also uses 401 for signatures and Bangumi authorization.
-        // Only this refresh-endpoint error confirms that the Flow session ended.
-        if (error.code == 401 &&
-            (error.authReason == 'refresh_token_invalid' ||
-                (error.authReason == null && error.message == '刷新令牌无效或已过期')) &&
-            await _isCurrent(oldToken, state, generation)) {
-          await _flowTokenRepository.removeToken();
-          onSessionExpired?.call();
+        if (error.code == 401 && error.authReason == 'refresh_token_invalid') {
+          await _clearSession(oldToken, state, generation);
           return false;
         }
         rethrow;
@@ -155,10 +152,17 @@ class FlowRefreshTokenInterceptor extends Interceptor {
       onTokenRefreshed?.call();
       return true;
     } catch (error) {
-      // Timeouts, rate limits, storage errors and upstream failures are retryable.
-      LiggLogger().w('刷新 FlowToken 未完成，保留未失效的会话 (${error.runtimeType})');
+      // Temporary refresh and storage failures preserve the current session.
+      LiggLogger().w('处理 FlowToken 刷新失败 (${error.runtimeType})');
       return false;
     }
+  }
+
+  Future<void> _clearSession(
+      FlowToken oldToken, _RefreshState state, int generation) async {
+    if (!await _isCurrent(oldToken, state, generation)) return;
+    await _flowTokenRepository.removeToken();
+    onSessionExpired?.call();
   }
 
   Future<bool> _isCurrent(

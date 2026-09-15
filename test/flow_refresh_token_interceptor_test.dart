@@ -10,6 +10,12 @@ import 'package:anime_flow/core/network/core/network_exception.dart';
 import 'package:anime_flow/core/network/interceptors/flow_refresh_token_interceptor.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:anime_flow/features/auth/application/token_providers.dart';
+import 'package:anime_flow/features/user/presentation/providers/user_state_provider.dart';
+import 'package:anime_flow/features/user/presentation/providers/user_collection_provider.dart';
+import 'package:anime_flow/shared/models/bangumi/user_collections_item.dart';
+import 'package:anime_flow/shared/models/flow/flow_users.dart';
 
 FlowToken token(String value) => FlowToken(
     accessToken: value,
@@ -52,10 +58,29 @@ class Adapter implements HttpClientAdapter {
   void close({bool force = false}) {}
 }
 
-ResponseBody reply(int code, {int status = 200}) =>
-    ResponseBody.fromString(jsonEncode({'code': code}), status, headers: {
-      Headers.contentTypeHeader: [Headers.jsonContentType]
-    });
+ResponseBody reply(int code, {int status = 200}) => ResponseBody.fromString(
+        jsonEncode({
+          'code': code,
+          if (code == 401) 'authReason': 'access_token_expired'
+        }),
+        status,
+        headers: {
+          Headers.contentTypeHeader: [Headers.jsonContentType]
+        });
+
+class CachedUserInfo extends CurrentUserInfo {
+  bool _firstBuild = true;
+
+  @override
+  Future<FlowUsers?> build() async {
+    if (_firstBuild) {
+      _firstBuild = false;
+      return FlowUsers(
+          id: 1, email: 'user@example.test', nickname: 'User', createTime: 0);
+    }
+    return super.build();
+  }
+}
 
 void main() {
   tearDown(() {
@@ -77,7 +102,13 @@ void main() {
       dio.get<dynamic>('https://example.test/api/v1/users/me',
           options: Options(headers: {Constants.authorization: 'Bearer old'}));
 
-  for (final reason in ['bangumi_auth_required', 'api_signature_invalid']) {
+  for (final reason in [
+    null,
+    'bangumi_auth_required',
+    'api_signature_invalid',
+    'invalid_user_agent',
+    'unknown_reason'
+  ]) {
     for (final status in [200, 401]) {
       test('does not refresh for $reason with HTTP $status', () async {
         final repository = Repository();
@@ -87,7 +118,11 @@ void main() {
           return token('new');
         },
             (_) => ResponseBody.fromString(
-                    jsonEncode({'code': 401, 'authReason': reason}), status,
+                    jsonEncode({
+                      'code': 401,
+                      if (reason != null) 'authReason': reason
+                    }),
+                    status,
                     headers: {
                       Headers.contentTypeHeader: [Headers.jsonContentType]
                     }));
@@ -184,17 +219,85 @@ void main() {
         statusCode: 429),
     const AnimeFlowApiException(code: 500, message: 'server error'),
     const AnimeFlowApiException(code: 401, message: '未授权'),
+    const AnimeFlowApiException(code: 401, message: '刷新令牌无效或已过期'),
+    const AnimeFlowApiException(
+        code: 401,
+        message: 'Signature invalid',
+        authReason: 'api_signature_invalid'),
+    const AnimeFlowApiException(
+        code: 401,
+        message: 'Bangumi expired',
+        authReason: 'bangumi_auth_required'),
+    const AnimeFlowApiException(
+        code: 500,
+        message: 'Server error',
+        authReason: 'refresh_token_invalid'),
     const FormatException('invalid response'),
   ]) {
-    test('refresh failure preserves credentials: $error', () async {
+    test('temporary or unrelated refresh failure preserves the session: $error',
+        () async {
       final repository = Repository();
+      var expired = 0;
+      FlowRefreshTokenInterceptor.onSessionExpired = () => expired++;
       final dio = client(repository,
           ({required refreshToken}) async => throw error, (_) => reply(401));
       expect((await request(dio)).data['code'], 401);
       expect(repository.value?.accessToken, 'old');
       expect(repository.removals, 0);
+      expect(expired, 0);
     });
   }
+
+  test('invalid refresh clears cached login, profile and collections',
+      () async {
+    final repository = Repository();
+    final container = ProviderContainer(overrides: [
+      flowTokenRepositoryProvider.overrideWithValue(repository),
+      currentUserInfoProvider.overrideWith(CachedUserInfo.new),
+      collectionPageLoaderProvider.overrideWithValue(
+        ({required type, required offset, keyword}) async =>
+            UserCollectionsItem(data: [], total: 0),
+      ),
+    ]);
+    addTearDown(container.dispose);
+    expect(await container.read(isLoggedInProvider.future), isTrue);
+    expect(await container.read(currentUserInfoProvider.future), isNotNull);
+    await container.read(userCollectionsProvider.notifier).loadInitial(1);
+    expect(container.read(userCollectionsProvider).tabState(1).data, isNotNull);
+
+    final dio = client(repository, ({required refreshToken}) async {
+      throw const AnimeFlowApiException(
+          code: 401,
+          message: 'Refresh rejected',
+          authReason: 'refresh_token_invalid');
+    }, (_) => reply(401));
+    await request(dio);
+
+    expect(await container.read(isLoggedInProvider.future), isFalse);
+    expect(await container.read(currentFlowTokenProvider.future), isNull);
+    expect(await container.read(currentUserInfoProvider.future), isNull);
+    expect(await container.read(bangumiBindProvider.future), isNull);
+    expect(container.read(userCollectionsProvider).tabState(1).data, isNull);
+  });
+
+  test('missing refresh token clears the unusable session', () async {
+    final repository = Repository()
+      ..value = FlowToken(
+          accessToken: 'old',
+          refreshToken: '',
+          tokenType: 'Bearer',
+          expiresIn: 7200,
+          refreshExpiresIn: 0,
+          sessionId: 'session');
+    var expired = 0;
+    FlowRefreshTokenInterceptor.onSessionExpired = () => expired++;
+    final dio = client(repository, ({required refreshToken}) async {
+      fail('Must not refresh without a refresh token');
+    }, (_) => reply(401));
+    await request(dio);
+    expect(repository.value, isNull);
+    expect(expired, 1);
+  });
 
   test('confirmed invalid refresh clears credentials exactly once', () async {
     final repository = Repository();
@@ -203,7 +306,10 @@ void main() {
       expired++;
     };
     final dio = client(repository, ({required refreshToken}) async {
-      throw const AnimeFlowApiException(code: 401, message: '刷新令牌无效或已过期');
+      throw const AnimeFlowApiException(
+          code: 401,
+          message: '刷新令牌无效或已过期',
+          authReason: 'refresh_token_invalid');
     }, (_) => reply(401));
     await request(dio);
     expect(repository.value, isNull);
@@ -225,8 +331,10 @@ void main() {
       await started.future;
       await repository.saveToken(token('other-login'));
       if (invalid) {
-        result.completeError(
-            const AnimeFlowApiException(code: 401, message: '刷新令牌无效或已过期'));
+        result.completeError(const AnimeFlowApiException(
+            code: 401,
+            message: '刷新令牌无效或已过期',
+            authReason: 'refresh_token_invalid'));
       } else {
         result.complete(token('new'));
       }

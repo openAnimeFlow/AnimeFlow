@@ -2,8 +2,6 @@ import 'package:anime_flow/core/logger/logger.dart';
 import 'package:anime_flow/core/network/api/flow_api.dart';
 import 'package:anime_flow/core/network/interceptors/flow_refresh_token_interceptor.dart';
 import 'package:anime_flow/features/auth/application/token_providers.dart';
-import 'package:anime_flow/features/user/application/bgm_collection_sync_provider.dart';
-import 'package:anime_flow/features/user/presentation/providers/user_collection_provider.dart';
 import 'package:anime_flow/features/user/presentation/providers/user_state_provider.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
@@ -31,16 +29,10 @@ class AccountController extends _$AccountController {
     FlowRefreshTokenInterceptor.invalidatePendingRefresh(repository);
     final sessionToken = await repository.getToken();
     await repository.removeToken();
-    _invalidateAccountState();
+    invalidateUserSession(ref);
     if (!notifyServer || sessionToken == null) return;
     FlowApi.logoutService(sessionToken: sessionToken).catchError((error) {
       LiggLogger().w('服务端登出失败: $error');
     });
-  }
-
-  void _invalidateAccountState() {
-    invalidateUserSession(ref);
-    ref.invalidate(bgmCollectionSyncProvider);
-    ref.invalidate(userCollectionsProvider);
   }
 }

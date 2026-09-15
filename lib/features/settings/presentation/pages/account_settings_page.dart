@@ -12,7 +12,6 @@ import 'package:anime_flow/features/user/application/user_oauth_controller.dart'
 import 'package:anime_flow/features/user/application/user_oauth_state.dart';
 import 'package:anime_flow/features/user/presentation/providers/account_provider.dart';
 import 'package:anime_flow/features/user/presentation/providers/user_state_provider.dart';
-import 'package:anime_flow/app/router/app_router.dart';
 import 'package:anime_flow/shared/widgets/animation_network_image.dart';
 import 'package:anime_flow/shared/widgets/network_check_button.dart';
 import 'package:anime_flow/shared/widgets/notification_toast.dart';
@@ -152,7 +151,7 @@ class _AccountSettingsPageState extends ConsumerState<AccountSettingsPage> {
               }
               return userInfoAsync.when(
                 data: (user) => user == null
-                    ? _buildNotLoggedIn(context)
+                    ? _buildErrorState(l10n.profileLoadFailed)
                     : _buildLoggedInContent(
                         context,
                         user,
@@ -168,120 +167,6 @@ class _AccountSettingsPageState extends ConsumerState<AccountSettingsPage> {
           ),
         ),
       ),
-    );
-  }
-
-  Widget _buildNotLoggedIn(BuildContext context) {
-    final colorScheme = Theme.of(context).colorScheme;
-    final l10n = AppLocalizations.of(context);
-
-    return ListView(
-      padding: const EdgeInsets.all(16),
-      children: [
-        Card(
-          child: Padding(
-            padding: const EdgeInsets.symmetric(vertical: 32, horizontal: 24),
-            child: Column(
-              children: [
-                CircleAvatar(
-                  radius: 48,
-                  backgroundColor: colorScheme.surfaceContainerHighest,
-                  child: Icon(
-                    Icons.account_circle_outlined,
-                    size: 64,
-                    color: colorScheme.onSurfaceVariant,
-                  ),
-                ),
-                const SizedBox(height: 16),
-                Text(
-                  l10n.notLoggedIn,
-                  style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                        fontWeight: FontWeight.bold,
-                      ),
-                ),
-                const SizedBox(height: 8),
-                Text(
-                  l10n.loginToManageAccount,
-                  textAlign: TextAlign.center,
-                  style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                        color: colorScheme.onSurfaceVariant,
-                      ),
-                ),
-                const SizedBox(height: 24),
-                Center(
-                  child: ConstrainedBox(
-                    constraints: const BoxConstraints(maxWidth: 400),
-                    child: Column(children: [
-                      FilledButton.icon(
-                        onPressed: () => const LoginRoute().push(context),
-                        icon: const Icon(Icons.login_outlined),
-                        label: Text(l10n.login),
-                        style: FilledButton.styleFrom(
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(8),
-                          ),
-                          minimumSize: const Size.fromHeight(44),
-                        ),
-                      ),
-                      const SizedBox(height: 12),
-                      Row(
-                        children: [
-                          Expanded(
-                            child: Consumer(builder: (context, ref, _) {
-                              return OutlinedButton.icon(
-                                onPressed: () {
-                                  ref
-                                      .read(
-                                          userOAuthControllerProvider.notifier)
-                                      .openOAuthPage();
-                                },
-                                icon: SvgPicture.asset(
-                                  AssetsPathConstants.bangumi,
-                                  height: 20,
-                                  width: 20,
-                                ),
-                                label: Text(
-                                  l10n.authorizeLogin,
-                                  overflow: TextOverflow.ellipsis,
-                                  maxLines: 1,
-                                ),
-                                style: OutlinedButton.styleFrom(
-                                  minimumSize: const Size.fromHeight(44),
-                                  shape: RoundedRectangleBorder(
-                                    borderRadius: BorderRadius.circular(8),
-                                  ),
-                                ),
-                              );
-                            }),
-                          ),
-                          const SizedBox(width: 12),
-                          Expanded(
-                            child: OutlinedButton(
-                              onPressed: () =>
-                                  const RegisterRoute().push(context),
-                              style: OutlinedButton.styleFrom(
-                                minimumSize: const Size.fromHeight(44),
-                                shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(8),
-                                ),
-                              ),
-                              child: Text(
-                                l10n.registerAccount,
-                                overflow: TextOverflow.ellipsis,
-                                maxLines: 1,
-                              ),
-                            ),
-                          ),
-                        ],
-                      ),
-                    ]),
-                  ),
-                )
-              ],
-            ),
-          ),
-        ),
-      ],
     );
   }
 

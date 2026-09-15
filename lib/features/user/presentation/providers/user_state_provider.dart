@@ -1,5 +1,7 @@
 import 'dart:typed_data';
 
+import 'package:anime_flow/features/user/application/bgm_collection_sync_provider.dart';
+import 'package:anime_flow/features/user/presentation/providers/user_collection_provider.dart';
 import 'package:anime_flow/core/network/clients/flow_client.dart';
 import 'package:anime_flow/core/network/interceptors/flow_refresh_token_interceptor.dart';
 import 'package:anime_flow/core/network/api/flow_api.dart';
@@ -14,10 +16,16 @@ part 'user_state_provider.g.dart';
 
 /// 使当前用户会话相关状态失效并触发重新读取。
 void invalidateUserSession(Ref ref) {
-  ref.invalidate(currentFlowTokenProvider);
-  ref.invalidate(isLoggedInProvider);
-  ref.invalidate(currentUserInfoProvider);
-  ref.invalidate(bangumiBindProvider);
+  // Session expiry can originate from CurrentFlowToken itself. Use the
+  // container to invalidate dependents without creating a dependency cycle
+  // or accessing a ref after its provider has been invalidated.
+  final container = ref.container;
+  container.invalidate(currentFlowTokenProvider);
+  container.invalidate(isLoggedInProvider);
+  container.invalidate(currentUserInfoProvider);
+  container.invalidate(bangumiBindProvider);
+  container.invalidate(bgmCollectionSyncProvider);
+  container.invalidate(userCollectionsProvider);
 }
 
 @Riverpod(keepAlive: true)

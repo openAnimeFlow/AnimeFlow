@@ -1132,8 +1132,6 @@ class PlaySession {
 
   ///暂停/播放
   void playOrPauseVideo() {
-    _videoUiStateActions.restartControlsAutoHideTimer();
-    _videoUiStateActions.updateMainAxisAlignmentType(MainAxisAlignment.start);
     if (_playStateActions.value.playing) {
       unawaited(playbackCoordinator.pause());
     } else {

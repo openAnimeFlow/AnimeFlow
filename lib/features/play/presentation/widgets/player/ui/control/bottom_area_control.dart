@@ -266,6 +266,8 @@ class BottomAreaControl extends ConsumerWidget {
                               onPressed: () {
                                 playController.playOrPauseVideo();
                                 videoUiStateController
+                                    .restartControlsAutoHideTimer();
+                                videoUiStateController
                                     .updateIndicatorTypeAndShowIndicator(
                                   VideoControlsIndicatorType
                                       .playStatusIndicator,

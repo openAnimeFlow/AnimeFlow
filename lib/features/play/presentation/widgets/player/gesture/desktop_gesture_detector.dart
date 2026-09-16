@@ -113,6 +113,7 @@ class _DesktopGestureDetectorState
     // 空格键：暂停/播放
     if (shortcut[PlayerShortcutAction.playPause]!.contains(pressed)) {
       playSession.playOrPauseVideo();
+      videoUiNotifier.updateMainAxisAlignmentType(MainAxisAlignment.start);
       videoUiNotifier.updateIndicatorTypeAndShowIndicator(
           VideoControlsIndicatorType.playStatusIndicator);
       return KeyEventResult.handled;
@@ -260,6 +261,7 @@ class _DesktopGestureDetectorState
             onTap: () {
               _focusNode.requestFocus();
               playSession.playOrPauseVideo();
+              videoUiNotifier.updateMainAxisAlignmentType(MainAxisAlignment.start);
               videoUiNotifier.updateIndicatorTypeAndShowIndicator(
                   VideoControlsIndicatorType.playStatusIndicator);
             },

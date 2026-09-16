@@ -56,12 +56,13 @@ class IosBatteryIcon extends StatelessWidget {
     final iconWidth = math.max(1.0, size);
     final clampedLevel = batteryLevel.clamp(0, 100);
     final level = clampedLevel.toDouble() / 100;
+    const aspectRatio = 0.55;
 
     return Semantics(
       label: '电量 $clampedLevel%',
       child: RepaintBoundary(
         child: CustomPaint(
-          size: Size(iconWidth, iconWidth * _IosBatteryPainter.aspectRatio),
+          size: Size(iconWidth, iconWidth * aspectRatio),
           painter: _IosBatteryPainter(
             level: level,
             borderColor: borderColor,
@@ -93,7 +94,6 @@ class _IosBatteryPainter extends CustomPainter {
     required this.levelText,
   });
 
-  static const aspectRatio = 0.5;
 
   final double level;
   final Color borderColor;
@@ -181,10 +181,9 @@ class _IosBatteryPainter extends CustomPainter {
         text: levelText,
         style: TextStyle(
           color: levelTextColor,
-          // 按电池内部高度缩放。
-          fontSize: contentRect.height * .80,
+          fontSize: contentRect.height,
           fontWeight: FontWeight.bold,
-          height: 1,
+          height: 1.2,
         ),
       ),
       maxLines: 1,

@@ -1,5 +1,5 @@
 import 'package:anime_flow/app/localization/app_localizations.dart';
-import 'package:anime_flow/core/network/api/ligg_api.dart';
+import 'package:anime_flow/core/network/api/flow_api.dart';
 import 'package:anime_flow/core/network/clients/flow_client.dart';
 import 'package:anime_flow/core/network/core/network_exception.dart';
 import 'package:anime_flow/shared/models/github_release.dart';
@@ -52,7 +52,7 @@ class _UpdatesPageState extends State<UpdatesPage> {
     }
 
     try {
-      final releases = await LiggApi.getReleases(page: 1);
+      final releases = await FlowApi.getReleases(page: 1);
       if (!mounted) return;
       setState(() {
         _releases.addAll(releases);
@@ -78,7 +78,7 @@ class _UpdatesPageState extends State<UpdatesPage> {
 
     try {
       final nextPage = _page + 1;
-      final releases = await LiggApi.getReleases(page: nextPage);
+      final releases = await FlowApi.getReleases(page: nextPage);
       if (!mounted) return;
       setState(() {
         _page = nextPage;

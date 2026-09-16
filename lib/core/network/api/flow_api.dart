@@ -30,6 +30,7 @@ import 'package:anime_flow/shared/models/flow/bgm_collection_sync_status_item.da
 import 'package:anime_flow/shared/models/flow/bangumi_bind_item.dart';
 import 'package:anime_flow/core/auth/models/flow_token.dart';
 import 'package:anime_flow/shared/models/flow/flow_users.dart';
+import 'package:anime_flow/shared/models/github_release.dart';
 import 'package:anime_flow/shared/models/player/play/play_history_event_type.dart';
 import 'package:anime_flow/shared/models/player/play/play_history_item.dart';
 import 'package:anime_flow/shared/models/search/search_suggestions_item.dart';
@@ -41,6 +42,28 @@ import 'package:dio/dio.dart';
 
 class FlowApi {
   static final FlowClient _client = FlowClient.instance;
+
+  /// 获取 AnimeFlow 发布版本列表。
+  static Future<List<GithubRelease>> getReleases({
+    int page = 1,
+    CancelToken? cancelToken,
+  }) async {
+    final response = await _client.get(
+      AnimeFlowApi.releases,
+      queryParameters: {'page': page},
+      cancelToken: cancelToken,
+    );
+    final data = response.data;
+    if (data == null) return const [];
+    if (data is! List) {
+      throw const FormatException('AnimeFlow releases response must be a list');
+    }
+
+    return data
+        .whereType<Map>()
+        .map((item) => GithubRelease.fromJson(Map<String, dynamic>.from(item)))
+        .toList(growable: false);
+  }
 
   //回调api
   static Future<Map<String, dynamic>> callbackService(

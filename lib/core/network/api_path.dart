@@ -101,10 +101,8 @@ class AnimeFlowApi {
   /// AnimeFlow API Server
   static const String animeFlowApi = 'https://ligg.top',
 
-      apiLigg = 'https://api.ligg.top',
-
       /// 版本信息
-      releases = '/releases',
+      releases = '/api/v1/releases',
 
       /// dev url
       animeFlowApiDev = 'http://localhost:1024',

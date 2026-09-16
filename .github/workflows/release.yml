@@ -448,3 +448,32 @@ jobs:
           prerelease: false
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Clear latest release cache
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          if [ -z "${ANIME_FLOW_APP_ID:-}" ] || \
+             [ -z "${ANIME_FLOW_SECRET:-}" ]; then
+            echo "::error::ANIME_FLOW_APP_ID and ANIME_FLOW_SECRET must be set (repository secrets)."
+            exit 1
+          fi
+
+          API_PATH="/api/v1/releases/latest"
+          TIMESTAMP="$(date +%s)"
+          SIGNATURE_DATA="${ANIME_FLOW_APP_ID}${TIMESTAMP}${API_PATH}${ANIME_FLOW_SECRET}"
+          SIGNATURE="$(printf '%s' "$SIGNATURE_DATA" | openssl dgst -sha256 -binary | base64 -w 0)"
+          API_URL="https://ligg.top${API_PATH}"
+
+          echo "Clearing latest release cache..."
+          curl --fail-with-body --silent --show-error --retry 2 --retry-all-errors \
+            --request DELETE "$API_URL" \
+            --header 'User-Agent: AnimeFlow-GitHubActions' \
+            --header 'X-Auth: 1' \
+            --header "X-AppId: ${ANIME_FLOW_APP_ID}" \
+            --header "X-Timestamp: ${TIMESTAMP}" \
+            --header "X-Signature: ${SIGNATURE}" \
+            --write-out '\nHTTP status: %{http_code}\nRequest time: %{time_total}s\n'
+          echo
+          echo "Latest release cache cleared."

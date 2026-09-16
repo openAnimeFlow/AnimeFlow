@@ -71,155 +71,177 @@ class _CharacterInfoState extends State<CharacterInfo> {
           },
         ),
       ),
-      body: Center(
-        child: ConstrainedBox(
-          constraints: const BoxConstraints(maxWidth: maxWidth),
-          child: CustomScrollView(
+      body: LayoutBuilder(
+        builder: (context, constraints) {
+          final contentInset = ((constraints.maxWidth - maxWidth) / 2)
+              .clamp(0.0, double.infinity);
+
+          return CustomScrollView(
             controller: _scrollController,
             slivers: [
               SliverPadding(
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
-                sliver: SliverToBoxAdapter(
-                  child: Consumer(
-                    builder: (context, ref, _) {
-                      final args = ref.watch(characterInfoArgsProvider);
-                      final detailAsync =
-                          ref.watch(characterInfoDetailProvider);
-                      final imageUrl = args.characterImage;
-                      final heroTag = ImageViewer.heroTagFor(imageUrl, 0);
-                      return Row(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          GestureDetector(
-                            onTap: () {
-                              ImagePreviewRoute.fromArgs(
-                                ImageViewerRouteArgs(
-                                  imageUrls: [imageUrl],
-                                  heroTag: heroTag,
-                                ),
-                              ).push(context);
-                            },
-                            child: Hero(
-                              tag: heroTag,
-                              child: AnimationNetworkImage(
-                                fit: BoxFit.cover,
-                                alignment: Alignment.topCenter,
-                                borderRadius: BorderRadius.circular(20),
-                                height: 250,
-                                width: 150,
-                                url: args.characterImage,
-                              ),
-                            ),
-                          ),
-                          const SizedBox(width: 5),
-                          Expanded(
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text(
-                                  args.characterName,
-                                  style: const TextStyle(
-                                    fontSize: 30,
-                                    fontWeight: FontWeight.bold,
-                                  ),
-                                ),
-                                const SizedBox(height: 10),
-                                detailAsync.when(
-                                  data: (character) => Text(
-                                    character.info,
-                                    style: const TextStyle(
-                                      fontSize: 16,
-                                      fontWeight: FontWeight.w500,
-                                    ),
-                                  ),
-                                  loading: () => const SizedBox.shrink(),
-                                  error: (_, __) => const SizedBox.shrink(),
-                                ),
-                              ],
-                            ),
-                          ),
-                        ],
-                      );
-                    },
+                padding: EdgeInsets.symmetric(horizontal: contentInset),
+                sliver: SliverPadding(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 20,
+                    vertical: 16,
                   ),
-                ),
-              ),
-              Consumer(
-                builder: (context, ref, _) {
-                  final detailAsync = ref.watch(characterInfoDetailProvider);
-                  return detailAsync.when(
-                    data: (characterDetail) => SliverPadding(
-                      padding: const EdgeInsets.symmetric(horizontal: 20),
-                      sliver: SliverToBoxAdapter(
-                        child: Column(
+                  sliver: SliverToBoxAdapter(
+                    child: Consumer(
+                      builder: (context, ref, _) {
+                        final args = ref.watch(characterInfoArgsProvider);
+                        final detailAsync =
+                            ref.watch(characterInfoDetailProvider);
+                        final imageUrl = args.characterImage;
+                        final heroTag = ImageViewer.heroTagFor(imageUrl, 0);
+                        return Row(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            const SizedBox(height: 20),
-                            Text(
-                              l10n.introduction,
-                              style: const TextStyle(
-                                fontSize: 20,
-                                fontWeight: FontWeight.bold,
+                            GestureDetector(
+                              onTap: () {
+                                ImagePreviewRoute.fromArgs(
+                                  ImageViewerRouteArgs(
+                                    imageUrls: [imageUrl],
+                                    heroTag: heroTag,
+                                  ),
+                                ).push(context);
+                              },
+                              child: Hero(
+                                tag: heroTag,
+                                child: AnimationNetworkImage(
+                                  fit: BoxFit.cover,
+                                  alignment: Alignment.topCenter,
+                                  borderRadius: BorderRadius.circular(20),
+                                  height: 250,
+                                  width: 150,
+                                  url: args.characterImage,
+                                ),
                               ),
                             ),
-                            const SizedBox(height: 10),
-                            Text(
-                              characterDetail.summary,
-                              style: const TextStyle(fontSize: 16),
+                            const SizedBox(width: 5),
+                            Expanded(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    args.characterName,
+                                    style: const TextStyle(
+                                      fontSize: 30,
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                  ),
+                                  const SizedBox(height: 10),
+                                  detailAsync.when(
+                                    data: (character) => Text(
+                                      character.info,
+                                      style: const TextStyle(
+                                        fontSize: 16,
+                                        fontWeight: FontWeight.w500,
+                                      ),
+                                    ),
+                                    loading: () => const SizedBox.shrink(),
+                                    error: (_, __) => const SizedBox.shrink(),
+                                  ),
+                                ],
+                              ),
                             ),
                           ],
+                        );
+                      },
+                    ),
+                  ),
+                ),
+              ),
+              SliverPadding(
+                padding: EdgeInsets.symmetric(horizontal: contentInset),
+                sliver: Consumer(
+                  builder: (context, ref, _) {
+                    final detailAsync = ref.watch(characterInfoDetailProvider);
+                    return detailAsync.when(
+                      data: (characterDetail) => SliverPadding(
+                        padding: const EdgeInsets.symmetric(horizontal: 20),
+                        sliver: SliverToBoxAdapter(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              const SizedBox(height: 20),
+                              Text(
+                                l10n.introduction,
+                                style: const TextStyle(
+                                  fontSize: 20,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                              const SizedBox(height: 10),
+                              Text(
+                                characterDetail.summary,
+                                style: const TextStyle(fontSize: 16),
+                              ),
+                            ],
+                          ),
                         ),
                       ),
-                    ),
-                    loading: () => const SliverToBoxAdapter(
-                      child: SizedBox.shrink(),
-                    ),
-                    error: (_, __) => const SliverToBoxAdapter(
-                      child: SizedBox.shrink(),
-                    ),
-                  );
-                },
+                      loading: () => const SliverToBoxAdapter(
+                        child: SizedBox.shrink(),
+                      ),
+                      error: (_, __) => const SliverToBoxAdapter(
+                        child: SizedBox.shrink(),
+                      ),
+                    );
+                  },
+                ),
               ),
               SliverPadding(
-                padding: const EdgeInsets.only(
-                  left: 20,
-                  right: 20,
-                  top: 20,
-                  bottom: 8,
-                ),
-                sliver: SliverToBoxAdapter(
-                  child: Text(
-                    l10n.characterWorks,
-                    style: const TextStyle(
-                      fontSize: 20,
-                      fontWeight: FontWeight.bold,
+                padding: EdgeInsets.symmetric(horizontal: contentInset),
+                sliver: SliverPadding(
+                  padding: const EdgeInsets.only(
+                    left: 20,
+                    right: 20,
+                    top: 20,
+                    bottom: 8,
+                  ),
+                  sliver: SliverToBoxAdapter(
+                    child: Text(
+                      l10n.characterWorks,
+                      style: const TextStyle(
+                        fontSize: 20,
+                        fontWeight: FontWeight.bold,
+                      ),
                     ),
                   ),
                 ),
               ),
-              const CharacterWorksView(),
               SliverPadding(
-                padding: const EdgeInsets.only(
-                  left: 20,
-                  right: 20,
-                  top: 20,
-                  bottom: 8,
-                ),
-                sliver: SliverToBoxAdapter(
-                  child: Text(
-                    l10n.commentsTitle,
-                    style: const TextStyle(
-                      fontSize: 20,
-                      fontWeight: FontWeight.bold,
+                padding: EdgeInsets.symmetric(horizontal: contentInset),
+                sliver: const CharacterWorksView(),
+              ),
+              SliverPadding(
+                padding: EdgeInsets.symmetric(horizontal: contentInset),
+                sliver: SliverPadding(
+                  padding: const EdgeInsets.only(
+                    left: 20,
+                    right: 20,
+                    top: 20,
+                    bottom: 8,
+                  ),
+                  sliver: SliverToBoxAdapter(
+                    child: Text(
+                      l10n.commentsTitle,
+                      style: const TextStyle(
+                        fontSize: 20,
+                        fontWeight: FontWeight.bold,
+                      ),
                     ),
                   ),
                 ),
               ),
-              const CharacterCommentsView(),
+              SliverPadding(
+                padding: EdgeInsets.symmetric(horizontal: contentInset),
+                sliver: const CharacterCommentsView(),
+              ),
             ],
-          ),
-        ),
+          );
+        },
       ),
       floatingActionButton: _showBackToTop
           ? FloatingActionButton(

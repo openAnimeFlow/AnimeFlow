@@ -867,6 +867,7 @@ class _VideoSourceDrawersState extends ConsumerState<VideoSourceDrawers> {
       resource: resource,
       dataSourceController: widget.videoSourceNotifier,
       subjectName: widget.subjectName,
+      isBottomSheet: widget.isBottomSheet,
     );
   }
 
@@ -961,7 +962,8 @@ class _VideoSourceDrawersState extends ConsumerState<VideoSourceDrawers> {
                           text: item.subjectsTitle,
                           children: [
                             TextSpan(
-                            text: ' ${AppLocalizations.of(context).episodeNumber(episode.episodeSort.toString().padLeft(2, '0'))}',
+                              text:
+                                  ' ${AppLocalizations.of(context).episodeNumber(episode.episodeSort.toString().padLeft(2, '0'))}',
                               style: const TextStyle(
                                 fontSize: 12,
                                 fontWeight: FontWeight.w600,
@@ -1021,11 +1023,13 @@ class CaptchaView extends StatefulWidget {
     required this.resource,
     required this.dataSourceController,
     required this.subjectName,
+    this.isBottomSheet = false,
   });
 
   final ResourcesItem resource;
   final VideoSourceNotifier dataSourceController;
   final String subjectName;
+  final bool isBottomSheet;
 
   @override
   State<CaptchaView> createState() => _CaptchaViewState();
@@ -1205,6 +1209,8 @@ class _CaptchaViewState extends State<CaptchaView> {
   Widget build(BuildContext context) {
     final r = widget.resource;
     final l10n = AppLocalizations.of(context);
+    final keyboardInset = MediaQuery.viewInsetsOf(context).bottom;
+    final compact = widget.isBottomSheet && keyboardInset > 0;
 
     if (!_sessionActive) {
       return Center(
@@ -1269,16 +1275,19 @@ class _CaptchaViewState extends State<CaptchaView> {
             padding: EdgeInsets.only(
                 left: 16,
                 right: 16,
-                bottom: View.of(context).viewInsets.bottom),
+                // The bottom sheet already avoids the keyboard as a whole.
+                bottom: widget.isBottomSheet ? 0 : keyboardInset),
             child: Column(
               mainAxisAlignment: MainAxisAlignment.start,
               children: [
-                Icon(Icons.shield_outlined,
-                    size: 36, color: Theme.of(context).colorScheme.primary),
-                const SizedBox(height: 8),
-                Text(l10n.captchaVerification(r.websiteName),
-                    style: Theme.of(context).textTheme.titleSmall),
-                const SizedBox(height: 16),
+                if (!compact) ...[
+                  Icon(Icons.shield_outlined,
+                      size: 36, color: Theme.of(context).colorScheme.primary),
+                  const SizedBox(height: 8),
+                  Text(l10n.captchaVerification(r.websiteName),
+                      style: Theme.of(context).textTheme.titleSmall),
+                  const SizedBox(height: 16),
+                ],
                 if (_imageData == null) ...[
                   const CircularProgressIndicator(),
                   const SizedBox(height: 12),
@@ -1293,15 +1302,21 @@ class _CaptchaViewState extends State<CaptchaView> {
                               _codeController.clear();
                               _reloadCaptchaImage();
                             },
-                      child: Image.memory(
-                        width: double.infinity,
-                        base64Decode(_imageData!.split(',').last),
-                        fit: BoxFit.contain,
-                        errorBuilder: (ctx, err, _) => Text(l10n.imageDecodeFailed),
+                      child: ConstrainedBox(
+                        constraints: BoxConstraints(
+                          maxHeight: compact ? 100 : double.infinity,
+                        ),
+                        child: Image.memory(
+                          width: double.infinity,
+                          base64Decode(_imageData!.split(',').last),
+                          fit: BoxFit.contain,
+                          errorBuilder: (ctx, err, _) =>
+                              Text(l10n.imageDecodeFailed),
+                        ),
                       ),
                     ),
                   ),
-                  const SizedBox(height: 20),
+                  SizedBox(height: compact ? 12 : 20),
                   SizedBox(
                     child: TextField(
                       controller: _codeController,
@@ -1310,8 +1325,8 @@ class _CaptchaViewState extends State<CaptchaView> {
                       decoration: InputDecoration(
                         labelText: l10n.enterCaptcha,
                         border: const OutlineInputBorder(),
-                        contentPadding:
-                            const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+                        contentPadding: const EdgeInsets.symmetric(
+                            horizontal: 12, vertical: 10),
                       ),
                       onSubmitted: _isSubmitting ? null : (_) => _submit(),
                     ),

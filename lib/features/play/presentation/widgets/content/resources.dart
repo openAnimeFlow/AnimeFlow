@@ -83,28 +83,39 @@ class _VideoResourcesViewState extends ConsumerState<VideoResourcesView> {
         // Use the full page height, outside the introduction's nested navigator.
         useRootNavigator: true,
         isScrollControlled: true,
+        useSafeArea: true,
         backgroundColor: Colors.transparent,
         builder: (sheetContext) {
+          final keyboardInset = MediaQuery.viewInsetsOf(sheetContext).bottom;
+          final keyboardVisible = keyboardInset > 0;
           return UncontrolledProviderScope(
             container: providerContainer,
-            child: DraggableScrollableSheet(
-              controller: drawerController,
-              expand: false,
-              initialChildSize: 0.60,
-              minChildSize: 0.3,
-              maxChildSize: 0.95,
-              snap: true,
-              snapSizes: const [0.52, 0.95],
-              builder: (context, scrollController) {
-                return VideoSourceDrawers(
-                  isBottomSheet: true,
-                  scrollController: scrollController,
-                  draggableController: drawerController,
-                  onVideoUrlSelected: onVideoUrlSelected,
-                  videoSourceNotifier: videoSourceController,
-                  subjectName: subjectName,
-                );
-              },
+            child: AnimatedPadding(
+              padding: EdgeInsets.only(bottom: keyboardInset),
+              duration: const Duration(milliseconds: 200),
+              curve: Curves.easeOutCubic,
+              child: DraggableScrollableSheet(
+                controller: drawerController,
+                expand: false,
+                // Give the form the available space above the keyboard, even
+                // when the user previously collapsed the drawer.
+                initialChildSize: keyboardVisible ? 0.95 : 0.60,
+                minChildSize: keyboardVisible ? 0.95 : 0.3,
+                maxChildSize: 0.95,
+                shouldCloseOnMinExtent: !keyboardVisible,
+                snap: !keyboardVisible,
+                snapSizes: keyboardVisible ? const [0.95] : const [0.52, 0.95],
+                builder: (context, scrollController) {
+                  return VideoSourceDrawers(
+                    isBottomSheet: true,
+                    scrollController: scrollController,
+                    draggableController: drawerController,
+                    onVideoUrlSelected: onVideoUrlSelected,
+                    videoSourceNotifier: videoSourceController,
+                    subjectName: subjectName,
+                  );
+                },
+              ),
             ),
           );
         },

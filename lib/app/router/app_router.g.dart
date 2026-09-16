@@ -22,6 +22,7 @@ List<RouteBase> get $appRoutes => [
       $downloadRoute,
       $userSpaceRoute,
       $imageSearchRoute,
+      $imagePreviewRoute,
       $settingsShellRoute,
     ];
 
@@ -598,6 +599,40 @@ mixin $ImageSearchRoute on GoRouteData {
 
   @override
   void replace(BuildContext context) => context.replace(location);
+}
+
+RouteBase get $imagePreviewRoute => GoRouteData.$route(
+      path: '/image-preview',
+      hasOverriddenOnExit: false,
+      factory: $ImagePreviewRoute._fromState,
+    );
+
+mixin $ImagePreviewRoute on GoRouteData {
+  static ImagePreviewRoute _fromState(GoRouterState state) => ImagePreviewRoute(
+        $extra: state.extra as ImageViewerRouteArgs,
+      );
+
+  ImagePreviewRoute get _self => this as ImagePreviewRoute;
+
+  @override
+  String get location => GoRouteData.$location(
+        '/image-preview',
+      );
+
+  @override
+  void go(BuildContext context) => context.go(location, extra: _self.$extra);
+
+  @override
+  Future<T?> push<T>(BuildContext context) =>
+      context.push<T>(location, extra: _self.$extra);
+
+  @override
+  void pushReplacement(BuildContext context) =>
+      context.pushReplacement(location, extra: _self.$extra);
+
+  @override
+  void replace(BuildContext context) =>
+      context.replace(location, extra: _self.$extra);
 }
 
 RouteBase get $settingsShellRoute => ShellRouteData.$route(

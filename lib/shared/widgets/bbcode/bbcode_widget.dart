@@ -1,5 +1,8 @@
 import 'dart:ui' as ui;
+import 'package:anime_flow/app/router/app_router.dart';
+import 'package:anime_flow/app/router/model/image_viewer_extra.dart';
 import 'package:anime_flow/shared/widgets/animation_network_image.dart';
+import 'package:anime_flow/shared/widgets/image_preview.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:antlr4/antlr4.dart';
@@ -20,7 +23,8 @@ class BBCodeWidget extends StatefulWidget {
       {super.key,
       required this.bbcode,
       this.borderRadius = BorderRadius.zero,
-      this.fit, this.imagPreview = false});
+      this.fit,
+      this.imagPreview = false});
 
   @override
   State<StatefulWidget> createState() => _BBCodeWidgetState();
@@ -64,6 +68,27 @@ class _BBCodeWidgetState extends State<BBCodeWidget> {
     }
   }
 
+  Widget _previewImage({
+    required BuildContext context,
+    required Widget child,
+    required List<String> imageUrls,
+    required int index,
+  }) {
+    if (!widget.imagPreview) return child;
+    final imageUrl = imageUrls[index];
+    final heroTag = ImageViewer.heroTagFor(imageUrl, index);
+    return GestureDetector(
+      onTap: () => ImagePreviewRoute.fromArgs(
+        ImageViewerRouteArgs(
+          imageUrls: imageUrls,
+          initialIndex: index,
+          heroTag: heroTag,
+        ),
+      ).push(context),
+      child: Hero(tag: heroTag, child: child),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     BBCodeParser.checkVersion();
@@ -76,29 +101,39 @@ class _BBCodeWidgetState extends State<BBCodeWidget> {
     ParseTreeWalker.DEFAULT.walk(bbcodeBaseListener, tree);
     bbCodeTag.clear();
 
+    final imageUrls = bbcodeBaseListener.bbcode
+        .whereType<BBCodeImg>()
+        .map((image) => image.imageUrl)
+        .toList(growable: false);
+
     // 如果指定了 fit 参数，检查是否只包含图片，如果是则填充整个区域
     if (widget.fit != null) {
-      final imageElements = bbcodeBaseListener.bbcode
-          .whereType<BBCodeImg>()
-          .toList();
-      final hasOnlyImage = bbcodeBaseListener.bbcode.length == 1 &&
-          imageElements.length == 1;
-      
+      final imageElements =
+          bbcodeBaseListener.bbcode.whereType<BBCodeImg>().toList();
+      final hasOnlyImage =
+          bbcodeBaseListener.bbcode.length == 1 && imageElements.length == 1;
+
       if (hasOnlyImage) {
         return LayoutBuilder(
           builder: (context, constraints) {
-            return AnimationNetworkImage(
-              url: (imageElements.first).imageUrl,
-              width: constraints.maxWidth,
-              height: constraints.maxHeight,
-              fit: widget.fit,
-              borderRadius: widget.borderRadius,
+            return _previewImage(
+              context: context,
+              imageUrls: imageUrls,
+              index: 0,
+              child: AnimationNetworkImage(
+                url: imageElements.first.imageUrl,
+                width: constraints.maxWidth,
+                height: constraints.maxHeight,
+                fit: widget.fit,
+                borderRadius: widget.borderRadius,
+              ),
             );
           },
         );
       }
     }
 
+    var imageIndex = 0;
     return Wrap(
       children: [
         SelectableText.rich(
@@ -149,12 +184,17 @@ class _BBCodeWidgetState extends State<BBCodeWidget> {
                   ),
                 );
               } else if (e is BBCodeImg) {
+                final currentIndex = imageIndex++;
                 return WidgetSpan(
-                  child: AnimationNetworkImage(
-                    preview: widget.imagPreview,
-                    borderRadius: widget.borderRadius,
-                    url: e.imageUrl,
-                    fit: widget.fit,
+                  child: _previewImage(
+                    context: context,
+                    imageUrls: imageUrls,
+                    index: currentIndex,
+                    child: AnimationNetworkImage(
+                      borderRadius: widget.borderRadius,
+                      url: e.imageUrl,
+                      fit: widget.fit,
+                    ),
                   ),
                 );
               } else if (e is BBCodeBgm) {
@@ -178,7 +218,8 @@ class _BBCodeWidgetState extends State<BBCodeWidget> {
               } else if (e is BBCodeMusume) {
                 return WidgetSpan(
                   child: AnimationNetworkImage(
-                    url: 'https://lain.bgm.tv/img/smiles/musume/musume_${e.id}.gif',
+                    url:
+                        'https://lain.bgm.tv/img/smiles/musume/musume_${e.id}.gif',
                     fit: widget.fit,
                   ),
                 );

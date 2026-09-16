@@ -51,14 +51,12 @@ class SubjectCard extends StatelessWidget {
                       borderRadius: borderRadius,
                       url: image,
                       fit: BoxFit.cover,
-                      useExternalHero: true,
                     ),
                   )
                 : AnimationNetworkImage(
                     borderRadius: borderRadius,
                     url: image,
                     fit: BoxFit.cover,
-                    useExternalHero: true,
                   ),
           ),
           if (title.isNotEmpty)

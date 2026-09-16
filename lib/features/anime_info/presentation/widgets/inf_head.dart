@@ -3,6 +3,7 @@ import 'dart:ui';
 import 'package:anime_flow/app/router/app_router.dart';
 
 import 'package:anime_flow/app/localization/app_localizations.dart';
+import 'package:anime_flow/app/router/model/image_viewer_extra.dart';
 import 'package:anime_flow/core/constants/layout_constant.dart';
 import 'package:anime_flow/core/network/clients/flow_client.dart';
 import 'package:anime_flow/features/play/presentation/providers/subject_episodes_provider.dart';
@@ -107,14 +108,20 @@ class InfoHeadView extends StatelessWidget {
                                     animeInfoArgsProvider
                                         .select((e) => e.image),
                                   );
-                                  return Hero(
-                                    tag: image,
-                                    child: AnimationNetworkImage(
-                                      preview: true,
-                                      useExternalHero: true,
-                                      borderRadius: BorderRadius.circular(8),
-                                      url: image,
-                                      fit: BoxFit.cover,
+                                  return GestureDetector(
+                                    onTap: () => ImagePreviewRoute.fromArgs(
+                                      ImageViewerRouteArgs(
+                                        imageUrls: [image],
+                                        heroTag: image,
+                                      ),
+                                    ).push(context),
+                                    child: Hero(
+                                      tag: image,
+                                      child: AnimationNetworkImage(
+                                        borderRadius: BorderRadius.circular(8),
+                                        url: image,
+                                        fit: BoxFit.cover,
+                                      ),
                                     ),
                                   );
                                 },

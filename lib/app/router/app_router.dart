@@ -34,6 +34,7 @@ import 'package:anime_flow/features/settings/presentation/pages/plugins/download
 import 'package:anime_flow/features/settings/presentation/pages/plugins/plugins.dart';
 import 'package:anime_flow/features/settings/presentation/pages/theme.dart';
 import 'package:anime_flow/features/user_space/presentation/pages/user_space_page.dart';
+import 'package:anime_flow/shared/widgets/image_preview.dart';
 import 'package:anime_flow/features/user/application/user_oauth_controller.dart';
 import 'package:anime_flow/app/router/model/info_route_extra.dart';
 import 'package:anime_flow/app/router/routes_args.dart';
@@ -44,6 +45,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import 'model/character_info_extra.dart';
+import 'model/image_viewer_extra.dart';
 import 'model/play_route_extra.dart';
 
 part 'app_router.g.dart';
@@ -343,6 +345,31 @@ class ImageSearchRoute extends GoRouteData with $ImageSearchRoute {
   @override
   Widget build(BuildContext context, GoRouterState state) =>
       const ImageSearchPage();
+}
+
+@TypedGoRoute<ImagePreviewRoute>(path: '/image-preview')
+class ImagePreviewRoute extends GoRouteData with $ImagePreviewRoute {
+  const ImagePreviewRoute({required this.$extra});
+
+  factory ImagePreviewRoute.fromArgs(ImageViewerRouteArgs args) =>
+      ImagePreviewRoute($extra: args);
+
+  final ImageViewerRouteArgs $extra;
+
+  @override
+  Page<void> buildPage(BuildContext context, GoRouterState state) {
+    return CustomTransitionPage<void>(
+      key: state.pageKey,
+      opaque: false,
+      child: ImageViewer(
+        imageUrls: $extra.imageUrls,
+        initialIndex: $extra.initialIndex,
+        heroTag: $extra.heroTag,
+      ),
+      transitionsBuilder: (context, animation, secondaryAnimation, child) =>
+          FadeTransition(opacity: animation, child: child),
+    );
+  }
 }
 
 @TypedShellRoute<SettingsShellRoute>(

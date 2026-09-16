@@ -1,8 +1,6 @@
-import 'dart:math';
 import 'package:anime_flow/core/utils/system_util.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
-import 'image_preview.dart';
 
 class AnimationNetworkImage extends StatelessWidget {
   final String url;
@@ -10,8 +8,6 @@ class AnimationNetworkImage extends StatelessWidget {
   final Color? color;
   final double? width;
   final double? height;
-  final bool preview;
-  final bool useExternalHero;
   final Duration fadeInDuration;
   final Duration fadeOutDuration;
   final FilterQuality filterQuality;
@@ -24,8 +20,6 @@ class AnimationNetworkImage extends StatelessWidget {
     this.fit,
     this.width,
     this.height,
-    this.preview = false,
-    this.useExternalHero = false,
     this.borderRadius = BorderRadius.zero,
     this.fadeInDuration = const Duration(milliseconds: 500),
     this.fadeOutDuration = const Duration(milliseconds: 300),
@@ -36,29 +30,6 @@ class AnimationNetworkImage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    if (preview && !useExternalHero) {
-      final heroTag = 'emoji_${url.hashCode}_${Random().nextInt(10000)}';
-      return GestureDetector(
-        onTap: () {
-          ImageViewer.show(context, url, heroTag: heroTag);
-        },
-        child: Hero(tag: heroTag, child: _buildImage()),
-      );
-    } else if (preview && useExternalHero) {
-      // 如果有外层 Hero，只添加点击手势，不创建内部的 Hero
-      return GestureDetector(
-        onTap: () {
-          // 如果没有 Hero tag，预览功能可能不工作
-          ImageViewer.show(context, url);
-        },
-        child: _buildImage(),
-      );
-    } else {
-      return _buildImage();
-    }
-  }
-
-  Widget _buildImage() {
     return ClipRRect(
       borderRadius: borderRadius,
       child: CachedNetworkImage(
@@ -75,8 +46,7 @@ class AnimationNetworkImage extends StatelessWidget {
           return const _ShimmerLoading();
         },
         errorWidget: (context, error, stackTrace) {
-          return const Center(
-              child: SizedBox.shrink());
+          return const Center(child: SizedBox.shrink());
         },
       ),
     );

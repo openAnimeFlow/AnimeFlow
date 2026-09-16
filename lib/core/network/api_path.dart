@@ -70,12 +70,6 @@ class CommonApi {
   static const String bgmTV = 'https://bgm.tv',
       bangumiTV = 'https://bangumi.tv',
 
-      ///AnimeFLow版本信息
-      animeFlowVersion = '/repos/openAnimeFlow/AnimeFlow/releases/latest',
-
-      ///GitHubApi
-      githubApi = 'https://api.github.com',
-
       /// Github镜像
       gitMirror = 'https://ghfast.top/',
 
@@ -103,6 +97,7 @@ class AnimeFlowApi {
 
       /// 版本信息
       releases = '/api/v1/releases',
+      latestRelease = '/api/v1/releases/latest',
 
       /// dev url
       animeFlowApiDev = 'http://localhost:1024',

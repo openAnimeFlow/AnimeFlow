@@ -65,6 +65,23 @@ class FlowApi {
         .toList(growable: false);
   }
 
+  /// 获取 AnimeFlow 最新发布版本。
+  static Future<GithubRelease> getLatestRelease({
+    CancelToken? cancelToken,
+  }) async {
+    final response = await _client.get(
+      AnimeFlowApi.latestRelease,
+      cancelToken: cancelToken,
+    );
+    final data = response.data;
+    if (data is! Map) {
+      throw const FormatException(
+        'AnimeFlow latest release response must be an object',
+      );
+    }
+    return GithubRelease.fromJson(Map<String, dynamic>.from(data));
+  }
+
   //回调api
   static Future<Map<String, dynamic>> callbackService(
     String code,

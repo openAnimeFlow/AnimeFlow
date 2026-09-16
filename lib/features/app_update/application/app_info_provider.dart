@@ -1,9 +1,9 @@
 import 'package:anime_flow/core/constants/storage_key.dart';
 import 'package:anime_flow/features/app_update/application/app_info_state.dart';
 import 'package:anime_flow/features/app_update/application/apply_updates_controller.dart';
-import 'package:anime_flow/core/network/api_path.dart';
-import 'package:anime_flow/core/network/api/api.dart';
+import 'package:anime_flow/core/network/api/flow_api.dart';
 import 'package:anime_flow/shared/models/download_info.dart';
+import 'package:anime_flow/shared/models/github_release.dart';
 import 'package:anime_flow/shared/models/enums/version_type.dart';
 import 'package:anime_flow/shared/models/version_check_result.dart';
 import 'package:anime_flow/shared/models/version_download_state.dart';
@@ -75,16 +75,15 @@ class AppInfo extends _$AppInfo {
 
   Future<VersionCheckResult> checkVersion() async {
     try {
-      final release = await Api.getResources<Map<String, dynamic>>(
-          CommonApi.githubApi + CommonApi.animeFlowVersion);
-      final remoteVersion = release['tag_name']?.toString();
-      if (remoteVersion == null || remoteVersion.isEmpty) {
+      final release = await FlowApi.getLatestRelease();
+      final remoteVersion = release.tagName;
+      if (remoteVersion.isEmpty) {
         return const VersionCheckResult(type: VersionType.localNewer);
       }
 
       final String localVersion = state.version;
 
-      final cleanRemoteVersion = remoteVersion.startsWith('v')
+      final cleanRemoteVersion = remoteVersion.toLowerCase().startsWith('v')
           ? remoteVersion.substring(1)
           : remoteVersion;
 
@@ -92,18 +91,12 @@ class AppInfo extends _$AppInfo {
           Utils.compareVersionNumbers(cleanRemoteVersion, localVersion);
 
       if (comparison > 0) {
-        final assets = release['assets'];
-        final htmlUrl = release['html_url']?.toString();
-        if (assets == null || assets is! List) {
+        if (release.assets.isEmpty) {
           return const VersionCheckResult(type: VersionType.localNewer);
         }
 
-        final downloadInfo = assets
-            .whereType<Map>()
-            .map((e) => Map<String, dynamic>.from(e))
-            .toList();
-
-        final download = await _getDownloadInfo(downloadInfo, htmlUrl ?? '');
+        final download =
+            await _getDownloadInfo(release.assets, release.htmlUrl);
 
         if (download.isEmpty) {
           return const VersionCheckResult(
@@ -115,10 +108,9 @@ class AppInfo extends _$AppInfo {
 
         _resetDownloadState();
 
-        final body = release['body']?.toString() ?? '';
         return VersionCheckResult(
           type: VersionType.newVersion,
-          updateInfo: VersionUpdateInfo(download: download, body: body),
+          updateInfo: VersionUpdateInfo(download: download, body: release.body),
         );
       } else if (comparison < 0) {
         return const VersionCheckResult(type: VersionType.localNewer);
@@ -177,44 +169,44 @@ class AppInfo extends _$AppInfo {
   }
 
   Future<List<DownloadInfo>> _getDownloadInfo(
-    List<Map<String, dynamic>> assets,
+    List<GithubReleaseAsset> assets,
     String htmlUrl,
   ) async {
     final platform = SystemUtil.getDevice();
     final List<DownloadInfo> urlList = [];
 
     for (var asset in assets) {
-      final name = asset['name']?.toString() ?? '';
-      final url = asset['browser_download_url']?.toString();
+      final name = asset.name;
+      final url = asset.browserDownloadUrl;
 
-      if (url == null || url.isEmpty) continue;
+      if (url.isEmpty) continue;
 
       switch (platform) {
         case 'android':
           if (name.toLowerCase().contains('android')) {
-            urlList.add(DownloadInfo.fromJson(asset, htmlUrl));
+            urlList.add(DownloadInfo(url, name, asset.size, htmlUrl));
           }
           break;
         case 'ios':
           if (name.toLowerCase().contains('ios')) {
-            urlList.add(DownloadInfo.fromJson(asset, htmlUrl));
+            urlList.add(DownloadInfo(url, name, asset.size, htmlUrl));
           }
           break;
         case 'macos':
           if (name.toLowerCase().contains('macos') ||
               name.toLowerCase().contains('mac')) {
-            urlList.add(DownloadInfo.fromJson(asset, htmlUrl));
+            urlList.add(DownloadInfo(url, name, asset.size, htmlUrl));
           }
           break;
         case 'windows':
           if (name.toLowerCase().contains('windows') ||
               name.toLowerCase().contains('win')) {
-            urlList.add(DownloadInfo.fromJson(asset, htmlUrl));
+            urlList.add(DownloadInfo(url, name, asset.size, htmlUrl));
           }
           break;
         case 'linux':
           if (name.toLowerCase().contains('linux')) {
-            urlList.add(DownloadInfo.fromJson(asset, htmlUrl));
+            urlList.add(DownloadInfo(url, name, asset.size, htmlUrl));
           }
           break;
       }

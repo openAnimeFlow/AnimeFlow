@@ -408,7 +408,7 @@ class _ContentViewState extends ConsumerState<_ContentView>
                   tabAlignment: TabAlignment.start,
                   isScrollable: true,
                   tabs: [
-                    Tab(text: AppLocalizations.of(context).playIntroTab),
+                    Tab(text: AppLocalizations.of(context).introduction),
                     Tab(text: AppLocalizations.of(context).commentsTitle),
                   ],
                 ),

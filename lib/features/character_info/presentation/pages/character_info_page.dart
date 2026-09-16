@@ -157,7 +157,7 @@ class _CharacterInfoState extends State<CharacterInfo> {
                           children: [
                             const SizedBox(height: 20),
                             Text(
-                              l10n.summaryTitle,
+                              l10n.introduction,
                               style: const TextStyle(
                                 fontSize: 20,
                                 fontWeight: FontWeight.bold,

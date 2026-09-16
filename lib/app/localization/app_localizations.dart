@@ -187,12 +187,6 @@ abstract class AppLocalizations {
   /// **'推荐'**
   String get recommendTab;
 
-  /// No description provided for @rankingTab.
-  ///
-  /// In zh_Hans, this message translates to:
-  /// **'排行'**
-  String get rankingTab;
-
   /// No description provided for @mineTab.
   ///
   /// In zh_Hans, this message translates to:
@@ -553,23 +547,11 @@ abstract class AppLocalizations {
   /// **'热门'**
   String get sortTrends;
 
-  /// No description provided for @sortCollects.
-  ///
-  /// In zh_Hans, this message translates to:
-  /// **'收藏'**
-  String get sortCollects;
-
   /// No description provided for @sortDate.
   ///
   /// In zh_Hans, this message translates to:
   /// **'日期'**
   String get sortDate;
-
-  /// No description provided for @sortTitle.
-  ///
-  /// In zh_Hans, this message translates to:
-  /// **'名称'**
-  String get sortTitle;
 
   /// No description provided for @rankingEnd.
   ///
@@ -588,12 +570,6 @@ abstract class AppLocalizations {
   /// In zh_Hans, this message translates to:
   /// **'重试'**
   String get retry;
-
-  /// No description provided for @summaryTitle.
-  ///
-  /// In zh_Hans, this message translates to:
-  /// **'简介'**
-  String get summaryTitle;
 
   /// No description provided for @tagsTitle.
   ///
@@ -744,12 +720,6 @@ abstract class AppLocalizations {
   /// In zh_Hans, this message translates to:
   /// **'{count}抛弃'**
   String droppedCount(Object count);
-
-  /// No description provided for @playIntroTab.
-  ///
-  /// In zh_Hans, this message translates to:
-  /// **'简介'**
-  String get playIntroTab;
 
   /// No description provided for @pleaseLogin.
   ///
@@ -2341,12 +2311,6 @@ abstract class AppLocalizations {
   /// **'自动更新'**
   String get autoUpdate;
 
-  /// No description provided for @checkUpdate.
-  ///
-  /// In zh_Hans, this message translates to:
-  /// **'检查更新'**
-  String get checkUpdate;
-
   /// No description provided for @openSource.
   ///
   /// In zh_Hans, this message translates to:
@@ -3010,7 +2974,7 @@ abstract class AppLocalizations {
   /// No description provided for @introduction.
   ///
   /// In zh_Hans, this message translates to:
-  /// **'介绍'**
+  /// **'简介'**
   String get introduction;
 
   /// No description provided for @collection.

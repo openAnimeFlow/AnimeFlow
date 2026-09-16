@@ -51,9 +51,6 @@ class AppLocalizationsZh extends AppLocalizations {
   String get recommendTab => '推荐';
 
   @override
-  String get rankingTab => '排行';
-
-  @override
   String get mineTab => '我的';
 
   @override
@@ -250,13 +247,7 @@ class AppLocalizationsZh extends AppLocalizations {
   String get sortTrends => '热门';
 
   @override
-  String get sortCollects => '收藏';
-
-  @override
   String get sortDate => '日期';
-
-  @override
-  String get sortTitle => '名称';
 
   @override
   String get rankingEnd => '到底了';
@@ -268,9 +259,6 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get retry => '重试';
-
-  @override
-  String get summaryTitle => '简介';
 
   @override
   String get tagsTitle => '标签';
@@ -360,9 +348,6 @@ class AppLocalizationsZh extends AppLocalizations {
   String droppedCount(Object count) {
     return '$count抛弃';
   }
-
-  @override
-  String get playIntroTab => '简介';
 
   @override
   String get pleaseLogin => '请先登录';
@@ -1186,9 +1171,6 @@ class AppLocalizationsZh extends AppLocalizations {
   String get autoUpdate => '自动更新';
 
   @override
-  String get checkUpdate => '检查更新';
-
-  @override
   String get openSource => '开源地址';
 
   @override
@@ -1315,31 +1297,31 @@ class AppLocalizationsZh extends AppLocalizations {
   String get orphanFontMissing => '本地字体文件已丢失，可在此处清理记录';
 
   @override
-  String get confirmDelete => '确认删除';
+  String get confirmDelete => '確認刪除';
 
   @override
   String deleteSourceConfirmation(Object name) {
-    return '确定要删除数据源 \"$name\" 吗？此操作不可恢复。';
+    return '確定要刪除資料來源 \"$name\" 嗎？此操作不可恢復。';
   }
 
   @override
-  String get deleteSuccess => '删除成功';
+  String get deleteSuccess => '刪除成功';
 
   @override
-  String get deleteFailed => '删除失败';
+  String get deleteFailed => '刪除失敗';
 
   @override
   String sourceDeleted(Object name) {
-    return '数据源 \"$name\" 已被删除';
+    return '資料來源 \"$name\" 已被刪除';
   }
 
   @override
   String sourceDeleteFailed(Object error, Object name) {
-    return '删除数据源 \"$name\" 时发生错误：$error';
+    return '刪除資料來源 \"$name\" 時發生錯誤：$error';
   }
 
   @override
-  String get downloadConfig => '下载配置';
+  String get downloadConfig => '下載設定';
 
   @override
   String get addSource => '新增資料來源';
@@ -1451,16 +1433,16 @@ class AppLocalizationsZh extends AppLocalizations {
   String get autoClickCaptchaHint => '偵測到後自動點擊的驗證按鈕（例如「我不是機器人」）';
 
   @override
-  String get downloadSuccess => '下载成功';
+  String get downloadSuccess => '下載成功';
 
   @override
   String pluginDownloaded(Object name) {
-    return '插件 \"$name\" 已下载';
+    return '外掛 \"$name\" 已下載';
   }
 
   @override
   String pluginDownloadFailed(Object error, Object name) {
-    return '下载插件 \"$name\" 时发生错误：$error';
+    return '下載外掛 \"$name\" 時發生錯誤：$error';
   }
 
   @override
@@ -1468,31 +1450,31 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String pluginUpdated(Object name, Object version) {
-    return '插件 \"$name\" 已更新到版本 $version';
+    return '外掛 \"$name\" 已更新至版本 $version';
   }
 
   @override
   String pluginUpdateFailed(Object error, Object name) {
-    return '更新插件 \"$name\" 时发生错误：$error';
+    return '更新外掛 \"$name\" 時發生錯誤：$error';
   }
 
   @override
-  String get downloadSources => '下载数据源';
+  String get downloadSources => '下載資料來源';
 
   @override
-  String get downloadSourcesSubtitle => '当前会从 GitHub 仓库中下载数据源，注意网络环境，下拉刷新数据';
+  String get downloadSourcesSubtitle => '目前會從 GitHub 儲存庫下載資料來源，請注意網路環境，下拉刷新資料';
 
   @override
-  String get useMirror => '使用镜像';
+  String get useMirror => '使用鏡像';
 
   @override
-  String get useMirrorSubtitle => '无法直连 GitHub 时开启，通过镜像拉取插件列表';
+  String get useMirrorSubtitle => '無法直接連接 GitHub 時開啟，通過鏡像取得外掛列表';
 
   @override
-  String get noDataRefresh => '没有找到数据，请刷新';
+  String get noDataRefresh => '找不到資料，請刷新';
 
   @override
-  String get downloaded => '已下载';
+  String get downloaded => '已下載';
 
   @override
   String get updating => '更新中…';
@@ -1550,7 +1532,7 @@ class AppLocalizationsZh extends AppLocalizations {
   String get syncStatusFailed => '同步失敗';
 
   @override
-  String get introduction => '介紹';
+  String get introduction => '简介';
 
   @override
   String get collection => '收藏';
@@ -1945,9 +1927,6 @@ class AppLocalizationsZhHans extends AppLocalizationsZh {
   String get recommendTab => '推荐';
 
   @override
-  String get rankingTab => '排行';
-
-  @override
   String get mineTab => '我的';
 
   @override
@@ -2144,13 +2123,7 @@ class AppLocalizationsZhHans extends AppLocalizationsZh {
   String get sortTrends => '热门';
 
   @override
-  String get sortCollects => '收藏';
-
-  @override
   String get sortDate => '日期';
-
-  @override
-  String get sortTitle => '名称';
 
   @override
   String get rankingEnd => '到底了';
@@ -2162,9 +2135,6 @@ class AppLocalizationsZhHans extends AppLocalizationsZh {
 
   @override
   String get retry => '重试';
-
-  @override
-  String get summaryTitle => '简介';
 
   @override
   String get tagsTitle => '标签';
@@ -2254,9 +2224,6 @@ class AppLocalizationsZhHans extends AppLocalizationsZh {
   String droppedCount(Object count) {
     return '$count抛弃';
   }
-
-  @override
-  String get playIntroTab => '简介';
 
   @override
   String get pleaseLogin => '请先登录';
@@ -3080,9 +3047,6 @@ class AppLocalizationsZhHans extends AppLocalizationsZh {
   String get autoUpdate => '自动更新';
 
   @override
-  String get checkUpdate => '检查更新';
-
-  @override
   String get openSource => '开源地址';
 
   @override
@@ -3444,7 +3408,7 @@ class AppLocalizationsZhHans extends AppLocalizationsZh {
   String get syncStatusFailed => '同步失败';
 
   @override
-  String get introduction => '介绍';
+  String get introduction => '简介';
 
   @override
   String get collection => '收藏';
@@ -3838,9 +3802,6 @@ class AppLocalizationsZhHantHk extends AppLocalizationsZh {
   String get recommendTab => '推薦';
 
   @override
-  String get rankingTab => '排行';
-
-  @override
   String get mineTab => '我的';
 
   @override
@@ -4037,13 +3998,7 @@ class AppLocalizationsZhHantHk extends AppLocalizationsZh {
   String get sortTrends => '熱門';
 
   @override
-  String get sortCollects => '收藏';
-
-  @override
   String get sortDate => '日期';
-
-  @override
-  String get sortTitle => '名稱';
 
   @override
   String get rankingEnd => '到底了';
@@ -4055,9 +4010,6 @@ class AppLocalizationsZhHantHk extends AppLocalizationsZh {
 
   @override
   String get retry => '重試';
-
-  @override
-  String get summaryTitle => '簡介';
 
   @override
   String get tagsTitle => '標籤';
@@ -4147,9 +4099,6 @@ class AppLocalizationsZhHantHk extends AppLocalizationsZh {
   String droppedCount(Object count) {
     return '$count放棄';
   }
-
-  @override
-  String get playIntroTab => '簡介';
 
   @override
   String get pleaseLogin => '請先登入';
@@ -4973,9 +4922,6 @@ class AppLocalizationsZhHantHk extends AppLocalizationsZh {
   String get autoUpdate => '自動更新';
 
   @override
-  String get checkUpdate => '檢查更新';
-
-  @override
   String get openSource => '開源地址';
 
   @override
@@ -5102,6 +5048,33 @@ class AppLocalizationsZhHantHk extends AppLocalizationsZh {
   String get orphanFontMissing => '本機字型檔案已遺失，可在此處清理記錄';
 
   @override
+  String get confirmDelete => '確認刪除';
+
+  @override
+  String deleteSourceConfirmation(Object name) {
+    return '確定要刪除資料來源 \"$name\" 嗎？此操作不可恢復。';
+  }
+
+  @override
+  String get deleteSuccess => '刪除成功';
+
+  @override
+  String get deleteFailed => '刪除失敗';
+
+  @override
+  String sourceDeleted(Object name) {
+    return '資料來源 \"$name\" 已被刪除';
+  }
+
+  @override
+  String sourceDeleteFailed(Object error, Object name) {
+    return '刪除資料來源 \"$name\" 時發生錯誤：$error';
+  }
+
+  @override
+  String get downloadConfig => '下載設定';
+
+  @override
   String get addSource => '新增資料來源';
 
   @override
@@ -5211,6 +5184,61 @@ class AppLocalizationsZhHantHk extends AppLocalizationsZh {
   String get autoClickCaptchaHint => '偵測到後自動點擊的驗證按鈕（例如「我不是機器人」）';
 
   @override
+  String get downloadSuccess => '下載成功';
+
+  @override
+  String pluginDownloaded(Object name) {
+    return '外掛 \"$name\" 已下載';
+  }
+
+  @override
+  String pluginDownloadFailed(Object error, Object name) {
+    return '下載外掛 \"$name\" 時發生錯誤：$error';
+  }
+
+  @override
+  String get updateSuccess => '更新成功';
+
+  @override
+  String pluginUpdated(Object name, Object version) {
+    return '外掛 \"$name\" 已更新至版本 $version';
+  }
+
+  @override
+  String pluginUpdateFailed(Object error, Object name) {
+    return '更新外掛 \"$name\" 時發生錯誤：$error';
+  }
+
+  @override
+  String get downloadSources => '下載資料來源';
+
+  @override
+  String get downloadSourcesSubtitle => '目前會從 GitHub 儲存庫下載資料來源，請注意網絡環境，下拉刷新資料';
+
+  @override
+  String get useMirror => '使用鏡像';
+
+  @override
+  String get useMirrorSubtitle => '無法直接連接 GitHub 時開啟，通過鏡像取得外掛列表';
+
+  @override
+  String get noDataRefresh => '找不到資料，請刷新';
+
+  @override
+  String get downloaded => '已下載';
+
+  @override
+  String get updating => '更新中…';
+
+  @override
+  String get update => '更新';
+
+  @override
+  String pluginVersionDate(Object date, Object version) {
+    return '版本：$version - $date';
+  }
+
+  @override
   String get collectionSyncTitle => '收藏同步';
 
   @override
@@ -5255,7 +5283,7 @@ class AppLocalizationsZhHantHk extends AppLocalizationsZh {
   String get syncStatusFailed => '同步失敗';
 
   @override
-  String get introduction => '介紹';
+  String get introduction => '簡介';
 
   @override
   String get collection => '收藏';
@@ -5650,9 +5678,6 @@ class AppLocalizationsZhHantTw extends AppLocalizationsZh {
   String get recommendTab => '推薦';
 
   @override
-  String get rankingTab => '排行';
-
-  @override
   String get mineTab => '我的';
 
   @override
@@ -5849,13 +5874,7 @@ class AppLocalizationsZhHantTw extends AppLocalizationsZh {
   String get sortTrends => '熱門';
 
   @override
-  String get sortCollects => '收藏';
-
-  @override
   String get sortDate => '日期';
-
-  @override
-  String get sortTitle => '名稱';
 
   @override
   String get rankingEnd => '到底了';
@@ -5867,9 +5886,6 @@ class AppLocalizationsZhHantTw extends AppLocalizationsZh {
 
   @override
   String get retry => '重試';
-
-  @override
-  String get summaryTitle => '簡介';
 
   @override
   String get tagsTitle => '標籤';
@@ -5959,9 +5975,6 @@ class AppLocalizationsZhHantTw extends AppLocalizationsZh {
   String droppedCount(Object count) {
     return '$count拋棄';
   }
-
-  @override
-  String get playIntroTab => '簡介';
 
   @override
   String get pleaseLogin => '請先登入';
@@ -6785,9 +6798,6 @@ class AppLocalizationsZhHantTw extends AppLocalizationsZh {
   String get autoUpdate => '自動更新';
 
   @override
-  String get checkUpdate => '檢查更新';
-
-  @override
   String get openSource => '開源地址';
 
   @override
@@ -6914,6 +6924,33 @@ class AppLocalizationsZhHantTw extends AppLocalizationsZh {
   String get orphanFontMissing => '本機字型檔案已遺失，可在此處清理記錄';
 
   @override
+  String get confirmDelete => '確認刪除';
+
+  @override
+  String deleteSourceConfirmation(Object name) {
+    return '確定要刪除資料來源 \"$name\" 嗎？此操作不可復原。';
+  }
+
+  @override
+  String get deleteSuccess => '刪除成功';
+
+  @override
+  String get deleteFailed => '刪除失敗';
+
+  @override
+  String sourceDeleted(Object name) {
+    return '資料來源 \"$name\" 已被刪除';
+  }
+
+  @override
+  String sourceDeleteFailed(Object error, Object name) {
+    return '刪除資料來源 \"$name\" 時發生錯誤：$error';
+  }
+
+  @override
+  String get downloadConfig => '下載設定';
+
+  @override
   String get addSource => '新增資料來源';
 
   @override
@@ -7023,6 +7060,62 @@ class AppLocalizationsZhHantTw extends AppLocalizationsZh {
   String get autoClickCaptchaHint => '偵測到後自動點擊的驗證按鈕（例如「我不是機器人」）';
 
   @override
+  String get downloadSuccess => '下載成功';
+
+  @override
+  String pluginDownloaded(Object name) {
+    return '外掛 \"$name\" 已下載';
+  }
+
+  @override
+  String pluginDownloadFailed(Object error, Object name) {
+    return '下載外掛 \"$name\" 時發生錯誤：$error';
+  }
+
+  @override
+  String get updateSuccess => '更新成功';
+
+  @override
+  String pluginUpdated(Object name, Object version) {
+    return '外掛 \"$name\" 已更新至版本 $version';
+  }
+
+  @override
+  String pluginUpdateFailed(Object error, Object name) {
+    return '更新外掛 \"$name\" 時發生錯誤：$error';
+  }
+
+  @override
+  String get downloadSources => '下載資料來源';
+
+  @override
+  String get downloadSourcesSubtitle =>
+      '目前會從 GitHub 儲存庫下載資料來源，請注意網路環境，下拉重新整理資料';
+
+  @override
+  String get useMirror => '使用鏡像';
+
+  @override
+  String get useMirrorSubtitle => '無法直接連線 GitHub 時開啟，透過鏡像取得外掛列表';
+
+  @override
+  String get noDataRefresh => '找不到資料，請重新整理';
+
+  @override
+  String get downloaded => '已下載';
+
+  @override
+  String get updating => '更新中…';
+
+  @override
+  String get update => '更新';
+
+  @override
+  String pluginVersionDate(Object date, Object version) {
+    return '版本：$version - $date';
+  }
+
+  @override
   String get collectionSyncTitle => '收藏同步';
 
   @override
@@ -7067,7 +7160,7 @@ class AppLocalizationsZhHantTw extends AppLocalizationsZh {
   String get syncStatusFailed => '同步失敗';
 
   @override
-  String get introduction => '介紹';
+  String get introduction => '簡介';
 
   @override
   String get collection => '收藏';

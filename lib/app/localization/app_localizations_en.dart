@@ -54,9 +54,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String get recommendTab => 'Recommended';
 
   @override
-  String get rankingTab => 'Ranking';
-
-  @override
   String get mineTab => 'Mine';
 
   @override
@@ -254,13 +251,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get sortTrends => 'Trending';
 
   @override
-  String get sortCollects => 'Collections';
-
-  @override
   String get sortDate => 'Date';
-
-  @override
-  String get sortTitle => 'Title';
 
   @override
   String get rankingEnd => 'End of list';
@@ -272,9 +263,6 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get retry => 'Retry';
-
-  @override
-  String get summaryTitle => 'Summary';
 
   @override
   String get tagsTitle => 'Tags';
@@ -365,9 +353,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String droppedCount(Object count) {
     return '$count dropped';
   }
-
-  @override
-  String get playIntroTab => 'Introduction';
 
   @override
   String get pleaseLogin => 'Please log in';
@@ -1209,9 +1194,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String get autoUpdate => 'Automatic updates';
 
   @override
-  String get checkUpdate => 'Check for updates';
-
-  @override
   String get openSource => 'Open source';
 
   @override
@@ -1348,27 +1330,27 @@ class AppLocalizationsEn extends AppLocalizations {
       'The local font file is missing; you can clean up this record here';
 
   @override
-  String get confirmDelete => '确认删除';
+  String get confirmDelete => 'Confirm deletion';
 
   @override
   String deleteSourceConfirmation(Object name) {
-    return '确定要删除数据源 \"$name\" 吗？此操作不可恢复。';
+    return 'Are you sure you want to delete data source \"$name\"? This action cannot be undone.';
   }
 
   @override
-  String get deleteSuccess => '删除成功';
+  String get deleteSuccess => 'Deleted successfully';
 
   @override
-  String get deleteFailed => '删除失败';
+  String get deleteFailed => 'Deletion failed';
 
   @override
   String sourceDeleted(Object name) {
-    return '数据源 \"$name\" 已被删除';
+    return 'Data source \"$name\" was deleted';
   }
 
   @override
   String sourceDeleteFailed(Object error, Object name) {
-    return '删除数据源 \"$name\" 时发生错误：$error';
+    return 'Error deleting data source \"$name\": $error';
   }
 
   @override
@@ -1544,7 +1526,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String pluginVersionDate(Object date, Object version) {
-    return '版本：$version - $date';
+    return 'Version: $version - $date';
   }
 
   @override

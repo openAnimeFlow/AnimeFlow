@@ -22,7 +22,7 @@ class AppShellPage extends StatelessWidget {
           activeIcon: Icons.smart_display_rounded,
         ),
         TabItem(
-          title: l10n.rankingTab,
+          title: l10n.rankingTitle,
           icon: Icons.leaderboard_outlined,
           activeIcon: Icons.leaderboard_rounded,
         ),

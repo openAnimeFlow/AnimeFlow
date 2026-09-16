@@ -99,7 +99,7 @@ class _AboutSettingsPageState extends ConsumerState<AboutSettingsPage> {
           ),
           const Divider(),
           ListTile(
-            title: Text(l10n.checkUpdate),
+            title: Text(l10n.checkForUpdates),
             trailing: const Icon(Icons.browser_updated_outlined),
             onTap: () async {
               final notifier = ref.read(appInfoProvider.notifier);

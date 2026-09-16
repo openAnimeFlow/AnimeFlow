@@ -14,7 +14,6 @@
   "traditionalChineseHongKong": "繁體中文（香港）",
   "englishLanguage": "English",
   "recommendTab": "推荐",
-  "rankingTab": "排行",
   "mineTab": "我的",
   "animeTab": "动漫",
   "forumTab": "论坛",
@@ -83,14 +82,11 @@
   "@monthSuffix": {"placeholders": {"month": {}}},
   "sortRank": "排名",
   "sortTrends": "热门",
-  "sortCollects": "收藏",
   "sortDate": "日期",
-  "sortTitle": "名称",
   "rankingEnd": "到底了",
   "rankingLoadFailed": "加载失败: {error}",
   "@rankingLoadFailed": {"placeholders": {"error": {}}},
   "retry": "重试",
-  "summaryTitle": "简介",
   "tagsTitle": "标签",
   "detailsTitle": "详情",
   "charactersTitle": "角色",
@@ -116,7 +112,6 @@
   "collectionCount": "{count}收藏/",
   "watchingCount": "{count}再看/",
   "droppedCount": "{count}抛弃",
-  "playIntroTab": "简介",
   "pleaseLogin": "请先登录",
   "loginBeforeDanmaku": "请先登录后再发送弹幕",
   "tip": "提示",
@@ -384,7 +379,6 @@
   "bangumiBindFailureHint": "授权或绑定 Bangumi 时，建议开启 VPN 或代理后重试。",
   "version": "版本 {version}",
   "autoUpdate": "自动更新",
-  "checkUpdate": "检查更新",
   "openSource": "开源地址",
   "unableOpenWeb": "无法打开网页",
   "deviceUnsupportedWeb": "你的设备可能不支持此功能",
@@ -439,7 +433,7 @@
   "syncStatusRunning": "同步中",
   "syncStatusSuccess": "同步完成",
   "syncStatusFailed": "同步失敗",
-  "introduction": "介紹",
+   "introduction": "简介",
   "collection": "收藏",
   "timeline": "時間軸",
   "userInfoUnavailable": "無法取得使用者資訊",
@@ -582,4 +576,26 @@
   "danmakuWaitingForVideo": "等待影片載入完畢...",
   "danmakuLoading": "彈幕載入中…",
   "danmakuSwitching": "正在切換彈幕…"
+  ,"confirmDelete": "確認刪除"
+  ,"deleteSourceConfirmation": "確定要刪除資料來源 \"{name}\" 嗎？此操作不可恢復。"
+  ,"deleteSuccess": "刪除成功"
+  ,"deleteFailed": "刪除失敗"
+  ,"sourceDeleted": "資料來源 \"{name}\" 已被刪除"
+  ,"sourceDeleteFailed": "刪除資料來源 \"{name}\" 時發生錯誤：{error}"
+  ,"downloadConfig": "下載設定"
+  ,"downloadSuccess": "下載成功"
+  ,"pluginDownloaded": "外掛 \"{name}\" 已下載"
+  ,"pluginDownloadFailed": "下載外掛 \"{name}\" 時發生錯誤：{error}"
+  ,"updateSuccess": "更新成功"
+  ,"pluginUpdated": "外掛 \"{name}\" 已更新至版本 {version}"
+  ,"pluginUpdateFailed": "更新外掛 \"{name}\" 時發生錯誤：{error}"
+  ,"downloadSources": "下載資料來源"
+  ,"downloadSourcesSubtitle": "目前會從 GitHub 儲存庫下載資料來源，請注意網路環境，下拉刷新資料"
+  ,"useMirror": "使用鏡像"
+  ,"useMirrorSubtitle": "無法直接連接 GitHub 時開啟，通過鏡像取得外掛列表"
+  ,"noDataRefresh": "找不到資料，請刷新"
+  ,"downloaded": "已下載"
+  ,"updating": "更新中…"
+  ,"update": "更新"
+  ,"pluginVersionDate": "版本：{version} - {date}"
 }

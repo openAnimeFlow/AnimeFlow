@@ -14,7 +14,6 @@
   "traditionalChineseHongKong": "Traditional Chinese (Hong Kong)",
   "englishLanguage": "English",
   "recommendTab": "Recommended",
-  "rankingTab": "Ranking",
   "mineTab": "Mine",
   "animeTab": "Anime",
   "forumTab": "Forum",
@@ -83,14 +82,11 @@
   "@monthSuffix": {"placeholders": {"month": {}}},
   "sortRank": "Rank",
   "sortTrends": "Trending",
-  "sortCollects": "Collections",
   "sortDate": "Date",
-  "sortTitle": "Title",
   "rankingEnd": "End of list",
   "rankingLoadFailed": "Failed to load: {error}",
   "@rankingLoadFailed": {"placeholders": {"error": {}}},
-  "retry": "Retry"
-  ,"summaryTitle": "Summary",
+   "retry": "Retry",
   "tagsTitle": "Tags",
   "detailsTitle": "Details",
   "charactersTitle": "Characters",
@@ -116,7 +112,6 @@
   "collectionCount": "{count} collected/",
   "watchingCount": "{count} watching/",
   "droppedCount": "{count} dropped",
-  "playIntroTab": "Introduction",
   "pleaseLogin": "Please log in",
   "loginBeforeDanmaku": "Please log in before sending danmaku",
   "tip": "Tip",
@@ -384,7 +379,6 @@
   "bangumiBindFailureHint": "If Bangumi authorization or binding fails, try enabling a VPN or proxy.",
   "version": "Version {version}",
   "autoUpdate": "Automatic updates",
-  "checkUpdate": "Check for updates",
   "openSource": "Open source",
   "unableOpenWeb": "Unable to open webpage",
   "deviceUnsupportedWeb": "Your device may not support this feature",
@@ -597,4 +591,11 @@
   "danmakuWaitingForVideo": "Waiting for video to finish loading...",
   "danmakuLoading": "Loading danmaku…",
   "danmakuSwitching": "Switching danmaku…"
+  ,"confirmDelete": "Confirm deletion"
+  ,"deleteSourceConfirmation": "Are you sure you want to delete data source \"{name}\"? This action cannot be undone."
+  ,"deleteSuccess": "Deleted successfully"
+  ,"deleteFailed": "Deletion failed"
+  ,"sourceDeleted": "Data source \"{name}\" was deleted"
+  ,"sourceDeleteFailed": "Error deleting data source \"{name}\": {error}"
+  ,"pluginVersionDate": "Version: {version} - {date}"
 }

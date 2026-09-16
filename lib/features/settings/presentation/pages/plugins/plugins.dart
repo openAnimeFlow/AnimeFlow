@@ -57,7 +57,7 @@ class _PluginsPageState extends State<PluginsPage> {
             style: TextButton.styleFrom(
               foregroundColor: Theme.of(dialogContext).colorScheme.error,
             ),
-            child: Text(l10n.deleteFont),
+            child: Text(l10n.delete),
           ),
         ],
       ),

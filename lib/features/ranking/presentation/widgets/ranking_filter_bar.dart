@@ -115,9 +115,9 @@ class RankingFilterBar extends ConsumerWidget {
     return switch (type) {
       SortType.rank => l10n.sortRank,
       SortType.trends => l10n.sortTrends,
-      SortType.collects => l10n.sortCollects,
+      SortType.collects => l10n.collection,
       SortType.date => l10n.sortDate,
-      SortType.title => l10n.sortTitle,
+      SortType.title => l10n.sourceName,
     };
   }
 }

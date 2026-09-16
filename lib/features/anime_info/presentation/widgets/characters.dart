@@ -97,16 +97,12 @@ class CharactersView extends StatelessWidget {
                                     ).push(context),
                                     child: AspectRatio(
                                       aspectRatio: 1,
-                                      child: Hero(
-                                        tag:
-                                            'character:${actor.character.images.large}',
-                                        child: AnimationNetworkImage(
-                                          borderRadius:
-                                              BorderRadius.circular(10),
-                                          url: actor.character.images.large,
-                                          fit: BoxFit.cover,
-                                          alignment: Alignment.topCenter,
-                                        ),
+                                      child: AnimationNetworkImage(
+                                        borderRadius:
+                                            BorderRadius.circular(10),
+                                        url: actor.character.images.large,
+                                        fit: BoxFit.cover,
+                                        alignment: Alignment.topCenter,
                                       ),
                                     ),
                                   ),

@@ -33,10 +33,7 @@ class PopularAnimeView extends ConsumerWidget {
             ),
             delegate: SliverChildBuilderDelegate(
               (BuildContext context, int index) => const Center(
-                child: Padding(
-                  padding: EdgeInsets.all(2),
-                  child: SubjectCardSkeleton(),
-                ),
+                child: SubjectCardSkeleton(),
               ),
               childCount: _initialSkeletonCount,
             ),

@@ -43,7 +43,10 @@ class AnimationNetworkImage extends StatelessWidget {
         fadeInDuration: fadeInDuration,
         fadeOutDuration: fadeOutDuration,
         placeholder: (context, url) {
-          return const _ShimmerLoading();
+          return _ShimmerLoading(
+            width: width ?? 50,
+            height: height ?? 50,
+          );
         },
         errorWidget: (context, error, stackTrace) {
           return const Center(child: SizedBox.shrink());
@@ -55,7 +58,10 @@ class AnimationNetworkImage extends StatelessWidget {
 
 /// Shimmer 渐变加载动画组件
 class _ShimmerLoading extends StatefulWidget {
-  const _ShimmerLoading();
+  const _ShimmerLoading({required this.width, required this.height});
+
+  final double width;
+  final double height;
 
   @override
   State<_ShimmerLoading> createState() => _ShimmerLoadingState();
@@ -92,19 +98,23 @@ class _ShimmerLoadingState extends State<_ShimmerLoading>
     return AnimatedBuilder(
       animation: _animation,
       builder: (context, child) {
-        return Container(
-          decoration: BoxDecoration(
-            gradient: LinearGradient(
-              begin: Alignment.topLeft,
-              end: Alignment.bottomRight,
-              stops: [
-                _animation.value - 0.3,
-                _animation.value,
-                _animation.value + 0.3,
-              ].map((stop) => stop.clamp(0.0, 1.0)).toList(),
-              colors: isDark
-                  ? [Colors.grey[850]!, Colors.grey[700]!, Colors.grey[850]!]
-                  : [Colors.grey[300]!, Colors.grey[100]!, Colors.grey[300]!],
+        return SizedBox(
+          width: widget.width,
+          height: widget.height,
+          child: DecoratedBox(
+            decoration: BoxDecoration(
+              gradient: LinearGradient(
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+                stops: [
+                  _animation.value - 0.3,
+                  _animation.value,
+                  _animation.value + 0.3,
+                ].map((stop) => stop.clamp(0.0, 1.0)).toList(),
+                colors: isDark
+                    ? [Colors.grey[850]!, Colors.grey[700]!, Colors.grey[850]!]
+                    : [Colors.grey[300]!, Colors.grey[100]!, Colors.grey[300]!],
+              ),
             ),
           ),
         );

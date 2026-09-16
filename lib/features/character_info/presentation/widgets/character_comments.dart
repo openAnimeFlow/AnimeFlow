@@ -115,8 +115,6 @@ class CharacterCommentsView extends StatelessWidget {
                 ),
                 const SizedBox(height: 4),
                 BBCodeWidget(
-                  imagPreview: true,
-                  borderRadius: BorderRadius.circular(8),
                   bbcode: comment.content,
                 ),
                 if (comment.replies.isNotEmpty) ...[
@@ -191,8 +189,6 @@ class CharacterCommentsView extends StatelessWidget {
             if (reply.content.isNotEmpty) ...[
               const SizedBox(height: 4),
               BBCodeWidget(
-                imagPreview: true,
-                borderRadius: BorderRadius.circular(8),
                 bbcode: reply.content,
               ),
             ],

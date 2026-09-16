@@ -6,7 +6,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import 'package:anime_flow/features/anime_info/presentation/widgets/evaluate_dialog.dart';
-import 'package:anime_flow/features/anime_info/presentation/widgets/info_appBar.dart';
+import 'package:anime_flow/features/anime_info/presentation/widgets/info_app_bar.dart';
 import 'package:anime_flow/features/anime_info/presentation/widgets/synopsis.dart';
 
 class AnimeInfoView extends StatefulWidget {

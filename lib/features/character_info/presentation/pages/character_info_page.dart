@@ -2,8 +2,11 @@ import 'package:anime_flow/app/localization/app_localizations.dart';
 import 'package:anime_flow/features/character_info/presentation/widgets/character_comments.dart';
 import 'package:anime_flow/features/character_info/presentation/widgets/character_works.dart';
 import 'package:anime_flow/features/character_info/presentation/providers/character_info_provider.dart';
+import 'package:anime_flow/app/router/app_router.dart';
 import 'package:anime_flow/app/router/routes_args.dart';
+import 'package:anime_flow/app/router/model/image_viewer_extra.dart';
 import 'package:anime_flow/shared/widgets/animation_network_image.dart';
+import 'package:anime_flow/shared/widgets/image_preview.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -83,19 +86,30 @@ class _CharacterInfoState extends State<CharacterInfo> {
                       final args = ref.watch(characterInfoArgsProvider);
                       final detailAsync =
                           ref.watch(characterInfoDetailProvider);
-
+                      final imageUrl = args.characterImage;
+                      final heroTag = ImageViewer.heroTagFor(imageUrl, 0);
                       return Row(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Hero(
-                            tag: 'character:${args.characterImage}',
-                            child: AnimationNetworkImage(
-                              fit: BoxFit.cover,
-                              alignment: Alignment.topCenter,
-                              borderRadius: BorderRadius.circular(20),
-                              height: 250,
-                              width: 150,
-                              url: args.characterImage,
+                          GestureDetector(
+                            onTap: () {
+                              ImagePreviewRoute.fromArgs(
+                                ImageViewerRouteArgs(
+                                  imageUrls: [imageUrl],
+                                  heroTag: heroTag,
+                                ),
+                              ).push(context);
+                            },
+                            child: Hero(
+                              tag: heroTag,
+                              child: AnimationNetworkImage(
+                                fit: BoxFit.cover,
+                                alignment: Alignment.topCenter,
+                                borderRadius: BorderRadius.circular(20),
+                                height: 250,
+                                width: 150,
+                                url: args.characterImage,
+                              ),
                             ),
                           ),
                           const SizedBox(width: 5),

@@ -47,17 +47,17 @@ dependencies:
   media_kit:
     git:
       url: https://github.com/Predidit/media-kit.git
-      ref: 994465d9bfca3f39d0b41199d16e7fd93fe97881
+      ref: 78d4cce7b49d5b6b918f78b18ec1fbb7c400b9da
       path: ./media_kit
   media_kit_video:
     git:
       url: https://github.com/Predidit/media-kit.git
-      ref: 994465d9bfca3f39d0b41199d16e7fd93fe97881
+      ref: 78d4cce7b49d5b6b918f78b18ec1fbb7c400b9da
       path: ./media_kit_video
   media_kit_libs_video:
     git:
       url: https://github.com/Predidit/media-kit.git
-      ref: 994465d9bfca3f39d0b41199d16e7fd93fe97881
+      ref: 78d4cce7b49d5b6b918f78b18ec1fbb7c400b9da
       path: ./libs/universal/media_kit_libs_video
   fvp: ^0.38.1 # 基于 libmdk 的跨平台备用播放器内核。
   canvas_danmaku: 0.3.3 # 使用 Flutter Canvas 绘制和管理弹幕。
@@ -117,7 +117,7 @@ dependencies:
   connectivity_plus: ^6.0.5 # 查询网络连接类型并监听连接状态变化。
   window_manager: ^0.5.1 # 管理桌面应用窗口的尺寸、位置、状态和事件。
   url_launcher: ^6.3.2 # 调用平台应用打开 URL、电话号码、邮件等外部资源。
-  flutter_opencc_plus: ^0.1.2 # 使用 OpenCC 在繁简中文及相关变体之间转换文本。
+  flutter_opencc_plus: ^0.1.3 # 使用 OpenCC 在繁简中文及相关变体之间转换文本。
   logger: ^2.6.2 # 提供分级、可扩展的应用日志输出接口。
   synchronized: ^3.4.1+2 # 为异步代码提供互斥锁和同步执行机制。
   share_plus: ^12.0.2 # 调用平台原生分享面板分享文本、文件或 URI。
@@ -132,27 +132,27 @@ dependency_overrides:
   media_kit_libs_linux:
     git:
       url: https://github.com/Predidit/media-kit.git
-      ref: 994465d9bfca3f39d0b41199d16e7fd93fe97881
+      ref: 78d4cce7b49d5b6b918f78b18ec1fbb7c400b9da
       path: ./libs/linux/media_kit_libs_linux
   media_kit_libs_ios_video:
     git:
       url: https://github.com/Predidit/media-kit.git
-      ref: 994465d9bfca3f39d0b41199d16e7fd93fe97881
+      ref: 78d4cce7b49d5b6b918f78b18ec1fbb7c400b9da
       path: ./libs/ios/media_kit_libs_ios_video
   media_kit_libs_android_video:
     git:
       url: https://github.com/Predidit/media-kit.git
-      ref: 994465d9bfca3f39d0b41199d16e7fd93fe97881
+      ref: 78d4cce7b49d5b6b918f78b18ec1fbb7c400b9da
       path: ./libs/android/media_kit_libs_android_video
   media_kit_libs_windows_video:
     git:
       url: https://github.com/Predidit/media-kit.git
-      ref: 994465d9bfca3f39d0b41199d16e7fd93fe97881
+      ref: 78d4cce7b49d5b6b918f78b18ec1fbb7c400b9da
       path: ./libs/windows/media_kit_libs_windows_video
   media_kit_libs_macos_video:
     git:
       url: https://github.com/Predidit/media-kit.git
-      ref: 994465d9bfca3f39d0b41199d16e7fd93fe97881
+      ref: 78d4cce7b49d5b6b918f78b18ec1fbb7c400b9da
       path: ./libs/macos/media_kit_libs_macos_video
 
 # logo图标生成生成命令:dart run flutter_launcher_icons

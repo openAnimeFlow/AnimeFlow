@@ -1,7 +1,9 @@
 import 'package:anime_flow/app/localization/app_localizations.dart';
+import 'package:anime_flow/app/router/routes_args.dart';
 import 'package:anime_flow/features/anime_info/presentation/widgets/anime_info_view.dart';
-import 'package:anime_flow/features/play/presentation/providers/play_content_actions.dart';
+import 'package:anime_flow/features/play/presentation/providers/episodes_provider.dart';
 import 'package:anime_flow/features/play/presentation/providers/play_provider.dart';
+import 'package:anime_flow/features/play/presentation/providers/subject_episodes_provider.dart';
 import 'package:anime_flow/features/play/presentation/widgets/content/introduce_view.dart';
 import 'package:anime_flow/shared/widgets/notification_toast.dart';
 import 'package:flutter/material.dart';
@@ -30,12 +32,12 @@ class _PlayContentNavigatorState extends ConsumerState<PlayContentNavigator>
   @override
   bool get wantKeepAlive => true;
 
-  Future<void> _play(Future<void> Function(PlayContentActions) action) async {
+  Future<void> _play(Future<void> Function() action) async {
     if (_busy) return;
     final detailsId = _detailsId;
     setState(() => _busy = true);
     try {
-      await action(ref.read(playContentActionsProvider));
+      await action();
       if (_isCurrentDetails(detailsId)) {
         setState(() => _showDetails = false);
       }
@@ -47,6 +49,23 @@ class _PlayContentNavigatorState extends ConsumerState<PlayContentNavigator>
     } finally {
       if (mounted) setState(() => _busy = false);
     }
+  }
+
+  Future<void> _selectEpisode(int episodeId) async {
+    final extra = ref.read(playExtraProvider);
+    if (!extra.isOfflineMode) {
+      await ref
+          .read(subjectEpisodesProvider(extra.playExtra.subjectId).notifier)
+          .loadUntilEpisodeId(episodeId);
+    }
+    if (!mounted) return;
+    final current = await ref.read(episodesProvider.future);
+    if (!mounted) return;
+    if (current.episodeId == episodeId) {
+      await ref.read(playSessionProvider).startPlaying();
+      return;
+    }
+    ref.read(episodesProvider.notifier).selectEpisode(episodeId);
   }
 
   @override
@@ -97,9 +116,10 @@ class _PlayContentNavigatorState extends ConsumerState<PlayContentNavigator>
                 child: AbsorbPointer(
                   absorbing: _busy,
                   child: AnimeInfoView(
-                    onPlay: () => _play((actions) => actions.resume()),
-                    onPlayEpisode: (id) =>
-                        _play((actions) => actions.selectEpisode(id)),
+                    onPlay: () => _play(
+                          () => ref.read(playSessionProvider).startPlaying(),
+                        ),
+                    onPlayEpisode: (id) => _play(() => _selectEpisode(id)),
                   ),
                 ),
               ),

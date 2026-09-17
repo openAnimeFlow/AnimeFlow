@@ -10,7 +10,6 @@ import 'package:anime_flow/features/anime_info/presentation/widgets/anime_info_v
 import 'package:anime_flow/features/play/presentation/providers/episodes_provider.dart';
 import 'package:anime_flow/features/play/domain/player/player_shortcut.dart';
 import 'package:anime_flow/features/play/application/danmaku_session.dart';
-import 'package:anime_flow/features/play/presentation/providers/play_content_actions.dart';
 import 'package:anime_flow/features/play/presentation/providers/play_provider.dart';
 import 'package:anime_flow/features/play/presentation/providers/recommendation_provider.dart';
 import 'package:anime_flow/features/play/presentation/providers/video_source_provider.dart';
@@ -69,6 +68,8 @@ class _Sources extends VideoSourceNotifier {
 class _Session implements PlaySession {
   @override
   late final DanmakuSession danmaku = _Danmaku(this);
+  final completion = Completer<void>();
+  int starts = 0;
   int toggles = 0;
   final actions = <PlayerShortcutAction>[];
   final seeks = <Duration>[];
@@ -99,6 +100,12 @@ class _Session implements PlaySession {
   void switchToNextEpisode() => actions.add(PlayerShortcutAction.nextEpisode);
 
   @override
+  Future<void> startPlaying() {
+    starts++;
+    return completion.future;
+  }
+
+  @override
   dynamic noSuchMethod(Invocation invocation) => super.noSuchMethod(invocation);
 }
 
@@ -120,17 +127,6 @@ class _VideoUi extends VideoUiNotifier {
 
   @override
   void updateIndicatorTypeAndShowIndicator(VideoControlsIndicatorType type) {}
-}
-
-class _Actions extends PlayContentActions {
-  _Actions(super.ref);
-  final completion = Completer<void>();
-  int calls = 0;
-  @override
-  Future<void> resume() {
-    calls++;
-    return completion.future;
-  }
 }
 
 class _Host extends StatefulWidget {
@@ -196,7 +192,6 @@ void main() {
 
   late GoRouter router;
   late GlobalKey<_HostState> host;
-  late _Actions actions;
   late _Session session;
   Future<void> mount(WidgetTester tester) async {
     host = GlobalKey<_HostState>();
@@ -226,8 +221,6 @@ void main() {
           isLoggedInProvider.overrideWith((ref) async => false),
           recommendationProvider
               .overrideWith((ref) => Completer<SubjectItem>().future),
-          playContentActionsProvider
-              .overrideWith((ref) => actions = _Actions(ref)),
         ],
         child: MaterialApp.router(
           routerConfig: router,
@@ -453,8 +446,8 @@ void main() {
     view.onPlay();
     view.onPlay();
     await _frames(tester);
-    expect(actions.calls, 1);
-    actions.completion.complete();
+    expect(session.starts, 1);
+    session.completion.complete();
     await _frames(tester);
     expect(find.byType(AnimeInfoView), findsNothing);
     expect(find.text('Player host'), findsOneWidget);
@@ -472,7 +465,7 @@ void main() {
     await tester.binding.handlePopRoute();
     await _frames(tester);
     expect(find.text('Home'), findsOneWidget);
-    actions.completion.completeError(StateError('disposed request'));
+    session.completion.completeError(StateError('disposed request'));
     await _frames(tester);
     expect(tester.takeException(), isNull);
   });
@@ -487,15 +480,15 @@ void main() {
       // separate from this navigation/async-lifetime regression.
       tester.widget<AnimeInfoView>(find.byType(AnimeInfoView)).onPlay();
       await _frames(tester);
-      expect(actions.calls, 1);
+      expect(session.starts, 1);
       await tester.binding.handlePopRoute();
       await _frames(tester);
       await details(tester);
       final newState = tester.state(find.byType(AnimeInfoView));
       if (fail) {
-        actions.completion.completeError(StateError('old request'));
+        session.completion.completeError(StateError('old request'));
       } else {
-        actions.completion.complete();
+        session.completion.complete();
       }
       await _frames(tester);
       expect(tester.state(find.byType(AnimeInfoView)), same(newState));

@@ -1,18 +1,38 @@
 <div align="center">
-  <img width="200" alt="file_00000000f82071f79ac51eb74f68d0d5" src="assets/image/logo/logo.webp" />
+  <img width="200" alt="AnimeFlow Logo" src="assets/image/logo/logo.webp" />
 </div>
 
 <div align="center">
 
+[![GitHub Stars](https://img.shields.io/github/stars/openAnimeFlow/AnimeFlow?style=flat)](https://github.com/openAnimeFlow/AnimeFlow/stargazers)
+[![GitHub Forks](https://img.shields.io/github/forks/openAnimeFlow/AnimeFlow?style=flat)](https://github.com/openAnimeFlow/AnimeFlow/network/members)
 [![Release](https://img.shields.io/github/v/release/openAnimeFlow/AnimeFlow)](https://github.com/openAnimeFlow/AnimeFlow/releases)
 [![Downloads](https://img.shields.io/github/downloads/openAnimeFlow/AnimeFlow/total)](https://github.com/openAnimeFlow/AnimeFlow/releases)
 </div>
 
-# AnimeFlow
+# AnimeFlow · 跨平台看番与追番客户端
 
-一个跨平台的动漫视频播放应用，支持多数据源、支持实时视频4k超分辨率、自定义爬虫配置，对接Bangumi服务同步用户收藏数据，为您提供流畅的观影体验。
+AnimeFlow 是一款跨平台的看番软件、追番软件与动漫播放器。支持 Android、iOS、Windows、macOS 和 Linux，提供多数据源播放、弹幕、Anime4K 实时视频超分辨率、Bangumi 收藏同步和自定义爬虫配置。
 
-[下载](https://github.com/openAnimeFlow/AnimeFlow/releases)
+无论是查找新番、管理追番列表，还是播放动漫视频，AnimeFlow 都希望让从“找番”到“看番”的过程更简单。
+
+> 项目仍在持续开发中，部分功能和数据源可能会发生变化。欢迎通过 Issue 反馈问题或提出建议。
+
+## 📥 下载
+
+- [下载最新版本](https://github.com/openAnimeFlow/AnimeFlow/releases)
+- [提交问题或建议](https://github.com/openAnimeFlow/AnimeFlow/issues)
+
+## ✨ 功能概览
+
+| 功能 | 说明 |
+| --- | --- |
+| 跨平台播放 | Android、iOS、Windows、macOS、Linux |
+| 番剧管理 | 连接 Bangumi，管理收藏、追番列表与观看信息 |
+| 视频播放 | 多数据源、自定义数据源与线路切换 |
+| 弹幕 | Bilibili、Gamer、弹弹Play 等弹幕源 |
+| 实时超分辨率 | 基于 Anime4K，提供效率档与质量档 |
+| 番剧识别 | 使用 trace.moe 通过截图识别番剧 |
 
 ## ✨ 主要功能
 
@@ -114,7 +134,7 @@
 
 | 工具 | 版本要求 |
 |---|---|
-| Flutter | `3.44.0`（见 `pubspec.yaml`） |
+| Flutter | `3.47.2`（见 `pubspec.yaml`） |
 | Dart SDK | `>= 3.3.4` |
 | Android 构建 | JDK 17、Android SDK |
 | iOS 构建 | macOS + Xcode |

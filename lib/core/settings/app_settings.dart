@@ -18,7 +18,7 @@ abstract final class AppSettings {
   static const double defaultDanmakuLineHeight = 1.6;
   static const int defaultDanmakuFontWeight = 4;
   static const bool defaultDanmakuMassiveMode = false;
-  static const bool defaultDanmakuBorder = true;
+  static const double defaultDanmakuStrokeWidth = 1.5;
   static const bool defaultDanmakuColor = true;
   static const bool defaultDanmakuHideScroll = false;
   static const bool defaultDanmakuHideTop = false;
@@ -49,12 +49,21 @@ abstract final class AppSettings {
 
   static bool get danmakuMassiveMode =>
       _readBool(DanmakuKey.danmakuMassiveMode, defaultDanmakuMassiveMode);
-  static bool get danmakuBorder =>
-      _readBool(DanmakuKey.danmakuBorder, defaultDanmakuBorder);
+  static double get danmakuStrokeWidth {
+    final value = Storage.setting.get(DanmakuKey.danmakuBorder);
+    if (value is bool) {
+      // 兼容旧版本的开关配置。
+      return value ? defaultDanmakuStrokeWidth : 0.0;
+    }
+    if (value is num) {
+      return value.toDouble().clamp(0.0, 3.0).toDouble();
+    }
+    return defaultDanmakuStrokeWidth;
+  }
+
   static bool get danmakuColor =>
       _readBool(DanmakuKey.danmakuColor, defaultDanmakuColor);
-  static bool get danmakuUseFont =>
-      _readBool(DanmakuKey.danmakuUseFont, true);
+  static bool get danmakuUseFont => _readBool(DanmakuKey.danmakuUseFont, true);
   static bool get danmakuHideScroll =>
       _readBool(DanmakuKey.danmakuHideScroll, defaultDanmakuHideScroll);
   static bool get danmakuHideTop =>

@@ -20,7 +20,7 @@ class _DanmakuViewState extends ConsumerState<DanmakuView>
   late final PlaySession playController;
 
   // 弹幕配置
-  late bool _border;
+  late double _strokeWidth;
   late double _opacity;
   late double _fontSize;
   late double _danmakuArea;
@@ -41,7 +41,7 @@ class _DanmakuViewState extends ConsumerState<DanmakuView>
     playController = ref.read(playSessionProvider);
 
     // 初始化弹幕配置
-    _border = AppSettings.danmakuBorder;
+    _strokeWidth = AppSettings.danmakuStrokeWidth;
     _opacity = AppSettings.danmakuOpacity;
     _fontSize = AppSettings.danmakuFontSize;
     _danmakuArea = AppSettings.danmakuArea;
@@ -116,7 +116,7 @@ class _DanmakuViewState extends ConsumerState<DanmakuView>
           fontSize: _fontSize,
           duration: _danmakuDuration / rate,
           lineHeight: _danmakuLineHeight,
-          strokeWidth: _border ? 1.5 : 0.0,
+          strokeWidth: _strokeWidth,
           fontWeight: _danmakuFontWeight,
           massiveMode: _massiveMode,
           fontFamily: projectFontFamily,

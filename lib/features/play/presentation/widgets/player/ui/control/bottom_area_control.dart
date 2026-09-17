@@ -8,7 +8,7 @@ import 'package:anime_flow/features/play/presentation/providers/episodes_provide
 import 'package:anime_flow/features/play/presentation/widgets/player/ui/button/fit_button.dart';
 import 'package:anime_flow/features/play/presentation/widgets/player/ui/button/rate_button.dart';
 import 'package:anime_flow/features/play/presentation/widgets/player/ui/button/shader_button.dart';
-import 'package:anime_flow/features/play/presentation/widgets/player/ui/danmaku/danmaku_setting.dart';
+import 'package:anime_flow/features/play/presentation/widgets/player/ui/danmaku/danmaku_setting_dialog.dart';
 import 'package:anime_flow/features/play/presentation/widgets/player/ui/player_progress_bar.dart';
 import 'package:anime_flow/features/play/presentation/widgets/player/ui/player_time_display.dart';
 import 'package:anime_flow/features/play/presentation/providers/subject_episodes_provider.dart';
@@ -158,14 +158,41 @@ class BottomAreaControl extends ConsumerWidget {
                 tooltip: l10n.danmakuSettings,
                 onPressed: () {
                   final container = ProviderScope.containerOf(context);
-                  showModalBottomSheet(
+                  showGeneralDialog<void>(
                     context: context,
-                    isScrollControlled: true,
-                    backgroundColor: Colors.transparent,
-                    builder: (context) {
-                      return UncontrolledProviderScope(
-                        container: container,
-                        child: const DanmakuSetting(),
+                    barrierDismissible: true,
+                    barrierLabel: l10n.danmakuSettings,
+                    barrierColor: Colors.black54,
+                    transitionDuration: const Duration(milliseconds: 220),
+                    pageBuilder: (context, animation, secondaryAnimation) {
+                      return Material(
+                        type: MaterialType.transparency,
+                        child: UncontrolledProviderScope(
+                          container: container,
+                          child: Align(
+                            alignment: Alignment.centerRight,
+                            child: SizedBox(
+                              width: (MediaQuery.sizeOf(context).width * 0.75)
+                                  .clamp(300.0, 360.0)
+                                  .toDouble(),
+                              height: MediaQuery.sizeOf(context).height,
+                              child: const DanmakuSettingDialog(),
+                            ),
+                          ),
+                        ),
+                      );
+                    },
+                    transitionBuilder:
+                        (context, animation, secondaryAnimation, child) {
+                      return SlideTransition(
+                        position: Tween<Offset>(
+                          begin: const Offset(1, 0),
+                          end: Offset.zero,
+                        ).animate(CurvedAnimation(
+                          parent: animation,
+                          curve: Curves.easeOutCubic,
+                        )),
+                        child: child,
                       );
                     },
                   );

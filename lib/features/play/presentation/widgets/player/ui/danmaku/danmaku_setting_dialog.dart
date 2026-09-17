@@ -5,20 +5,80 @@ import 'package:anime_flow/features/play/presentation/providers/play_provider.da
 import 'package:anime_flow/features/play/presentation/widgets/player/ui/danmaku/canvas_danmaku_adapter.dart';
 import 'package:anime_flow/features/play/presentation/providers/danmaku_chinese_mode_provider.dart';
 import 'package:anime_flow/core/settings/storage.dart';
+import 'package:anime_flow/shared/widgets/drop_down_menu.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:hive_ce/hive.dart';
 
 /// 弹幕设置弹窗
-class DanmakuSetting extends ConsumerStatefulWidget {
-  const DanmakuSetting({super.key});
+class DanmakuSettingDialog extends ConsumerStatefulWidget {
+  const DanmakuSettingDialog({super.key});
 
   @override
-  ConsumerState<DanmakuSetting> createState() => _DanmakuSettingState();
+  ConsumerState<DanmakuSettingDialog> createState() => _DanmakuSettingState();
 }
 
-class _DanmakuSettingState extends ConsumerState<DanmakuSetting> {
+/// 独立管理滑块状态，避免拖动时重建整个弹幕设置弹窗。
+class _DanmakuOptionSlider extends StatefulWidget {
+  const _DanmakuOptionSlider({
+    required this.initialValue,
+    required this.min,
+    required this.max,
+    required this.labelBuilder,
+    required this.onChanged,
+    this.divisions,
+  });
+
+  final double initialValue;
+  final double min;
+  final double max;
+  final int? divisions;
+  final String Function(double value) labelBuilder;
+  final ValueChanged<double> onChanged;
+
+  @override
+  State<_DanmakuOptionSlider> createState() => _DanmakuOptionSliderState();
+}
+
+class _DanmakuOptionSliderState extends State<_DanmakuOptionSlider> {
+  late double _value =
+      widget.initialValue.clamp(widget.min, widget.max).toDouble();
+
+  @override
+  Widget build(BuildContext context) {
+    final label = widget.labelBuilder(_value);
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          label,
+          style: TextStyle(
+            fontSize: 14,
+            color: Theme.of(context).textTheme.bodyMedium?.color,
+          ),
+        ),
+        SliderTheme(
+          data: SliderTheme.of(context).copyWith(trackHeight: 15),
+          child: Slider(
+            value: _value,
+            min: widget.min,
+            max: widget.max,
+            divisions: widget.divisions,
+            padding: const EdgeInsets.symmetric(horizontal: 0, vertical: 5),
+            label: label,
+            onChanged: (value) {
+              setState(() => _value = value);
+              widget.onChanged(value);
+            },
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+class _DanmakuSettingState extends ConsumerState<DanmakuSettingDialog> {
   late final PlaySession playController;
   Box setting = Storage.setting;
 
@@ -49,25 +109,33 @@ class _DanmakuSettingState extends ConsumerState<DanmakuSetting> {
       }
     }
     return Container(
+      width: double.infinity,
+      height: double.infinity,
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
         color: Theme.of(context).cardColor,
-        borderRadius: const BorderRadius.vertical(top: Radius.circular(15)),
+        borderRadius: const BorderRadius.horizontal(left: Radius.circular(15)),
       ),
       child: Column(
-        mainAxisSize: MainAxisSize.min,
         children: [
-          // 顶部指示条
-          Center(
-            child: Container(
-              width: 40,
-              height: 5,
-              margin: const EdgeInsets.only(bottom: 16),
-              decoration: BoxDecoration(
-                color: Colors.grey.withValues(alpha: 0.3),
-                borderRadius: BorderRadius.circular(2.5),
+          Row(
+            children: [
+              Expanded(
+                child: Text(
+                  l10n.danmakuSettings,
+                  style: TextStyle(
+                    fontSize: 18,
+                    fontWeight: FontWeight.bold,
+                    color: Theme.of(context).textTheme.titleLarge?.color,
+                  ),
+                ),
               ),
-            ),
+              IconButton(
+                tooltip: MaterialLocalizations.of(context).closeButtonTooltip,
+                onPressed: () => Navigator.of(context).pop(),
+                icon: const Icon(Icons.close),
+              ),
+            ],
           ),
           Flexible(
             child: SingleChildScrollView(
@@ -87,53 +155,58 @@ class _DanmakuSettingState extends ConsumerState<DanmakuSetting> {
                       ),
                     ),
                   ),
-                  Text(
-                    l10n.danmakuChineseConversion,
-                    style: TextStyle(
-                      fontSize: 18,
-                      fontWeight: FontWeight.bold,
-                      color: Theme.of(context).textTheme.titleLarge?.color,
-                    ),
-                  ),
+                  Text(l10n.danmakuChineseConversion),
                   Padding(
                     padding: const EdgeInsets.only(top: 12, bottom: 16),
-                    child: SizedBox(
-                      width: double.infinity,
-                      child: SegmentedButton<DanmakuChineseMode>(
-                        segments: [
-                          ButtonSegment(
-                            value: DanmakuChineseMode.none,
-                            label: Text(
-                              l10n.danmakuChineseNone,
-                              maxLines: 2,
-                              textAlign: TextAlign.center,
-                            ),
+                    child: Align(
+                      alignment: Alignment.centerRight,
+                      child: DropDownMenu<DanmakuChineseMode>(
+                        items: DanmakuChineseMode.values,
+                        selectedItem: danmakuChineseMode,
+                        tooltip: l10n.danmakuChineseConversion,
+                        buttonBuilder: (context, selected) => Container(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 12,
+                            vertical: 8,
                           ),
-                          ButtonSegment(
-                            value: DanmakuChineseMode.s2t,
-                            label: Text(
-                              l10n.danmakuChineseToTraditional,
-                              maxLines: 2,
-                              textAlign: TextAlign.center,
+                          decoration: BoxDecoration(
+                            border: Border.all(
+                              color:
+                                  Theme.of(context).colorScheme.outlineVariant,
                             ),
+                            borderRadius: BorderRadius.circular(8),
                           ),
-                          ButtonSegment(
-                            value: DanmakuChineseMode.t2s,
-                            label: Text(
-                              l10n.danmakuChineseToSimplified,
-                              maxLines: 2,
-                              textAlign: TextAlign.center,
+                          child: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Text(_danmakuChineseModeLabel(selected!, l10n)),
+                              const SizedBox(width: 4),
+                              Icon(
+                                Icons.arrow_drop_down,
+                                color: Theme.of(context).colorScheme.primary,
+                              ),
+                            ],
+                          ),
+                        ),
+                        itemBuilder: (context, mode, isSelected) => Row(
+                          children: [
+                            SizedBox(
+                              width: 24,
+                              child: isSelected
+                                  ? Icon(
+                                      Icons.check,
+                                      size: 18,
+                                      color:
+                                          Theme.of(context).colorScheme.primary,
+                                    )
+                                  : null,
                             ),
-                          ),
-                        ],
-                        selected: {danmakuChineseMode},
-                        showSelectedIcon: false,
-                        expandedInsets: EdgeInsets.zero,
-                        onSelectionChanged: (selection) {
-                          ref
-                              .read(danmakuChineseModeProvider.notifier)
-                              .setMode(selection.first);
-                        },
+                            Text(_danmakuChineseModeLabel(mode, l10n)),
+                          ],
+                        ),
+                        onSelected: (mode) => ref
+                            .read(danmakuChineseModeProvider.notifier)
+                            .setMode(mode),
                       ),
                     ),
                   ),
@@ -281,6 +354,20 @@ class _DanmakuSettingState extends ConsumerState<DanmakuSetting> {
                       });
                     },
                   ),
+                  _DanmakuOptionSlider(
+                    initialValue: danmakuController.option.strokeWidth,
+                    min: 0,
+                    max: 3,
+                    divisions: 6,
+                    labelBuilder: (value) =>
+                        '${l10n.fontStroke}: ${value.toStringAsFixed(1)}px',
+                    onChanged: (value) {
+                      danmakuController.updateOption(
+                        danmakuController.option.copyWith(strokeWidth: value),
+                      );
+                      setting.put(DanmakuKey.danmakuBorder, value);
+                    },
+                  ),
                   const SizedBox(height: 16),
                   Builder(
                     builder: (context) {
@@ -295,159 +382,88 @@ class _DanmakuSettingState extends ConsumerState<DanmakuSetting> {
                               (maxDuration - minDuration) *
                               100)
                           .round();
-                      return Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            l10n.danmakuSpeed(speedPercent),
-                            style: TextStyle(
-                              fontSize: 14,
-                              color:
-                                  Theme.of(context).textTheme.bodyMedium?.color,
-                            ),
-                          ),
-                          SliderTheme(
-                            data: SliderTheme.of(context).copyWith(
-                              trackHeight: 15,
-                            ),
-                            child: Slider(
-                              value: speedPercent.toDouble(),
-                              min: 0.0,
-                              max: 100.0,
-                              divisions: 20,
-                              padding: const EdgeInsets.symmetric(
-                                  horizontal: 0, vertical: 5),
-                              label: '$speedPercent%',
-                              onChanged: (speedPercentValue) {
-                                setState(() {
-                                  // 将速度百分比转换回 duration
-                                  // duration = maxDuration - speedPercent / 100 * (maxDuration - minDuration)
-                                  final newDuration = maxDuration -
-                                      (speedPercentValue / 100.0) *
-                                          (maxDuration - minDuration);
-                                  danmakuController.updateOption(
-                                    danmakuController.option.copyWith(
-                                      duration: newDuration,
-                                    ),
-                                  );
-                                  setting.put(
-                                      DanmakuKey.danmakuDuration, newDuration);
-                                });
-                              },
-                            ),
-                          )
-                        ],
+                      return _DanmakuOptionSlider(
+                        initialValue: speedPercent.toDouble(),
+                        min: 0,
+                        max: 100,
+                        divisions: 20,
+                        labelBuilder: (value) =>
+                            l10n.danmakuSpeed(value.round()),
+                        onChanged: (value) {
+                          final newDuration = maxDuration -
+                              (value / 100.0) * (maxDuration - minDuration);
+                          danmakuController.updateOption(
+                            danmakuController.option
+                                .copyWith(duration: newDuration),
+                          );
+                          setting.put(DanmakuKey.danmakuDuration, newDuration);
+                        },
                       );
                     },
                   ),
                   const SizedBox(height: 16),
-                  Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        '${l10n.opacity}: ${(danmakuController.option.opacity * 100).toInt()}%',
-                        style: TextStyle(
-                          fontSize: 14,
-                          color: Theme.of(context).textTheme.bodyMedium?.color,
-                        ),
-                      ),
-                      SliderTheme(
-                        data: SliderTheme.of(context).copyWith(
-                          trackHeight: 15,
-                        ),
-                        child: Slider(
-                          value: danmakuController.option.opacity,
-                          min: 0.1,
-                          max: 1.0,
-                          padding: const EdgeInsets.symmetric(
-                              horizontal: 0, vertical: 5),
-                          label:
-                              '${(danmakuController.option.opacity * 100).round()}%',
-                          onChanged: (value) {
-                            setState(() {
-                              danmakuController.updateOption(
-                                danmakuController.option.copyWith(
-                                  opacity: value,
-                                ),
-                              );
-                              setting.put(DanmakuKey.danmakuOpacity, value);
-                            });
-                          },
-                        ),
-                      )
-                    ],
+                  _DanmakuOptionSlider(
+                    initialValue: danmakuController.option.opacity,
+                    min: 0.1,
+                    max: 1,
+                    labelBuilder: (value) =>
+                        '${l10n.opacity}: ${(value * 100).round()}%',
+                    onChanged: (value) {
+                      danmakuController.updateOption(
+                        danmakuController.option.copyWith(opacity: value),
+                      );
+                      setting.put(DanmakuKey.danmakuOpacity, value);
+                    },
                   ),
                   const SizedBox(height: 8),
-                  Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        '${l10n.fontSize}: ${danmakuController.option.fontSize.toInt()}px',
-                        style: TextStyle(
-                          fontSize: 14,
-                          color: Theme.of(context).textTheme.bodyMedium?.color,
-                        ),
-                      ),
-                      SliderTheme(
-                        data: SliderTheme.of(context).copyWith(
-                          trackHeight: 15,
-                        ),
-                        child: Slider(
-                          value: danmakuController.option.fontSize,
-                          min: 12.0,
-                          max: 30.0,
-                          divisions: 18,
-                          padding: const EdgeInsets.symmetric(
-                              horizontal: 0, vertical: 5),
-                          onChanged: (value) {
-                            setState(() {
-                              danmakuController.updateOption(
-                                danmakuController.option
-                                    .copyWith(fontSize: value),
-                              );
-                              setting.put(DanmakuKey.danmakuFontSize, value);
-                            });
-                          },
-                        ),
-                      )
-                    ],
+                  _DanmakuOptionSlider(
+                    initialValue:
+                        danmakuController.option.fontWeight.toDouble(),
+                    min: 0,
+                    max: 8,
+                    divisions: 8,
+                    labelBuilder: (value) =>
+                        '${l10n.fontWeight}: ${(value.round() + 1) * 100}',
+                    onChanged: (value) {
+                      final fontWeight = value.round();
+                      danmakuController.updateOption(
+                        danmakuController.option
+                            .copyWith(fontWeight: fontWeight),
+                      );
+                      setting.put(DanmakuKey.danmakuFontWeight, fontWeight);
+                    },
                   ),
                   const SizedBox(height: 8),
-                  Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        '${l10n.displayArea}: ${(danmakuController.option.area * 100).toInt()}%',
-                        style: TextStyle(
-                          fontSize: 14,
-                          color: Theme.of(context).textTheme.bodyMedium?.color,
-                        ),
-                      ),
-                      SliderTheme(
-                        data: SliderTheme.of(context).copyWith(
-                          trackHeight: 15,
-                        ),
-                        child: Slider(
-                          value: currentIndex.toDouble(),
-                          min: 0.0,
-                          max: 4.0,
-                          divisions: 4,
-                          padding: const EdgeInsets.symmetric(
-                              horizontal: 0, vertical: 5),
-                          onChanged: (value) {
-                            final index = value.round().clamp(0, 4);
-                            setState(() {
-                              danmakuController.updateOption(
-                                danmakuController.option
-                                    .copyWith(area: fixedValues[index]),
-                              );
-                              setting.put(
-                                  DanmakuKey.danmakuArea, fixedValues[index]);
-                            });
-                          },
-                        ),
-                      )
-                    ],
+                  _DanmakuOptionSlider(
+                    initialValue: danmakuController.option.fontSize,
+                    min: 12,
+                    max: 30,
+                    divisions: 18,
+                    labelBuilder: (value) =>
+                        '${l10n.fontSize}: ${value.toInt()}px',
+                    onChanged: (value) {
+                      danmakuController.updateOption(
+                        danmakuController.option.copyWith(fontSize: value),
+                      );
+                      setting.put(DanmakuKey.danmakuFontSize, value);
+                    },
+                  ),
+                  const SizedBox(height: 8),
+                  _DanmakuOptionSlider(
+                    initialValue: currentIndex.toDouble(),
+                    min: 0,
+                    max: 4,
+                    divisions: 4,
+                    labelBuilder: (value) =>
+                        '${l10n.displayArea}: ${(fixedValues[value.round()] * 100).toInt()}%',
+                    onChanged: (value) {
+                      final index = value.round().clamp(0, 4);
+                      danmakuController.updateOption(
+                        danmakuController.option
+                            .copyWith(area: fixedValues[index]),
+                      );
+                      setting.put(DanmakuKey.danmakuArea, fixedValues[index]);
+                    },
                   ),
                   SizedBox(height: MediaQuery.of(context).padding.bottom),
                 ],
@@ -457,6 +473,17 @@ class _DanmakuSettingState extends ConsumerState<DanmakuSetting> {
         ],
       ),
     );
+  }
+
+  String _danmakuChineseModeLabel(
+    DanmakuChineseMode mode,
+    AppLocalizations l10n,
+  ) {
+    return switch (mode) {
+      DanmakuChineseMode.none => l10n.danmakuChineseNone,
+      DanmakuChineseMode.s2t => l10n.danmakuChineseToTraditional,
+      DanmakuChineseMode.t2s => l10n.danmakuChineseToSimplified,
+    };
   }
 
   Widget _buildSettingItem({

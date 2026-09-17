@@ -955,6 +955,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get showBorder => 'Show border';
 
   @override
+  String get fontStroke => 'Font stroke';
+
+  @override
   String get showColor => 'Show color';
 
   @override
@@ -973,6 +976,9 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get fontSize => 'Font size';
+
+  @override
+  String get fontWeight => 'Font weight';
 
   @override
   String get displayArea => 'Display area';

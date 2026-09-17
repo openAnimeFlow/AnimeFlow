@@ -940,6 +940,9 @@ class AppLocalizationsZh extends AppLocalizations {
   String get showBorder => '显示边框';
 
   @override
+  String get fontStroke => '字体描边';
+
+  @override
   String get showColor => '显示颜色';
 
   @override
@@ -958,6 +961,9 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get fontSize => '字体大小';
+
+  @override
+  String get fontWeight => '字体粗细';
 
   @override
   String get displayArea => '显示区域';
@@ -2816,6 +2822,9 @@ class AppLocalizationsZhHans extends AppLocalizationsZh {
   String get showBorder => '显示边框';
 
   @override
+  String get fontStroke => '字体描边';
+
+  @override
   String get showColor => '显示颜色';
 
   @override
@@ -2834,6 +2843,9 @@ class AppLocalizationsZhHans extends AppLocalizationsZh {
 
   @override
   String get fontSize => '字体大小';
+
+  @override
+  String get fontWeight => '字体粗细';
 
   @override
   String get displayArea => '显示区域';
@@ -4691,6 +4703,9 @@ class AppLocalizationsZhHantHk extends AppLocalizationsZh {
   String get showBorder => '顯示邊框';
 
   @override
+  String get fontStroke => '字型描邊';
+
+  @override
   String get showColor => '顯示顏色';
 
   @override
@@ -4709,6 +4724,9 @@ class AppLocalizationsZhHantHk extends AppLocalizationsZh {
 
   @override
   String get fontSize => '字型大小';
+
+  @override
+  String get fontWeight => '字型粗幼';
 
   @override
   String get displayArea => '顯示區域';
@@ -6567,6 +6585,9 @@ class AppLocalizationsZhHantTw extends AppLocalizationsZh {
   String get showBorder => '顯示邊框';
 
   @override
+  String get fontStroke => '字型描邊';
+
+  @override
   String get showColor => '顯示顏色';
 
   @override
@@ -6585,6 +6606,9 @@ class AppLocalizationsZhHantTw extends AppLocalizationsZh {
 
   @override
   String get fontSize => '字型大小';
+
+  @override
+  String get fontWeight => '字型粗細';
 
   @override
   String get displayArea => '顯示區域';

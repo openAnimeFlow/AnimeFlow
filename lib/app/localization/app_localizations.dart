@@ -1861,6 +1861,12 @@ abstract class AppLocalizations {
   /// **'显示边框'**
   String get showBorder;
 
+  /// No description provided for @fontStroke.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'字体描边'**
+  String get fontStroke;
+
   /// No description provided for @showColor.
   ///
   /// In zh_Hans, this message translates to:
@@ -1896,6 +1902,12 @@ abstract class AppLocalizations {
   /// In zh_Hans, this message translates to:
   /// **'字体大小'**
   String get fontSize;
+
+  /// No description provided for @fontWeight.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'字体粗细'**
+  String get fontWeight;
 
   /// No description provided for @displayArea.
   ///

@@ -3,6 +3,16 @@ import 'package:anime_flow/core/settings/storage.dart';
 
 /// 应用持久化配置的统一访问入口。
 abstract final class AppSettings {
+  static T? getSetting<T>(String key, {T? defaultValue}) {
+    final value = Storage.setting.get(key, defaultValue: defaultValue);
+    return value is T ? value : defaultValue;
+  }
+
+  static Future<void> setSetting(String key, Object? value) =>
+      Storage.setting.put(key, value);
+
+  static Future<void> deleteSetting(String key) => Storage.setting.delete(key);
+
   static const bool defaultAutoPlayNext = true;
   static const bool defaultEpisodesProgress = true;
   static const double defaultFastForwardSpeed = 2.0;
@@ -22,7 +32,7 @@ abstract final class AppSettings {
   static const bool defaultDanmakuColor = true;
   static const bool defaultDanmakuHideScroll = false;
   static const bool defaultDanmakuHideTop = false;
-  static const bool defaultDanmakuHideBottom = false;
+  static const bool defaultDanmakuHideBottom = true;
   static const bool defaultDanmakuPlatformEnabled = true;
   static const String defaultDanmakuChineseMode = 'none';
 

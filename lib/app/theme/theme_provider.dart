@@ -1,5 +1,5 @@
 import 'package:anime_flow/core/constants/storage_key.dart';
-import 'package:anime_flow/core/settings/storage.dart';
+import 'package:anime_flow/core/settings/app_settings.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
@@ -93,22 +93,21 @@ class ThemeNotifier extends _$ThemeNotifier {
   }
 
   ThemeState _loadThemeFromStorage() {
-    final setting = Storage.setting;
-
     ThemeMode themeMode = ThemeMode.system;
-    final themeModeIndex =
-        setting.get(SettingKey.themeMode, defaultValue: ThemeMode.system.index);
+    final themeModeIndex = AppSettings.getSetting<int>(SettingKey.themeMode,
+        defaultValue: ThemeMode.system.index);
     if (themeModeIndex is int && themeModeIndex >= 0 && themeModeIndex <= 2) {
       themeMode = ThemeMode.values[themeModeIndex];
     }
 
     Color seedColor = themeColors[0].color;
-    final seedColorValue = setting.get(SettingKey.seedColor);
+    final seedColorValue =
+        AppSettings.getSetting<Object?>(SettingKey.seedColor);
     if (seedColorValue is int) {
       seedColor = Color(seedColorValue);
     }
 
-    final fontFamily = setting.get(SettingKey.fontFamily) as String?;
+    final fontFamily = AppSettings.getSetting<String>(SettingKey.fontFamily);
 
     return ThemeState(
       themeMode: themeMode,
@@ -119,12 +118,12 @@ class ThemeNotifier extends _$ThemeNotifier {
 
   void setThemeMode(ThemeMode mode) {
     state = state.copyWith(themeMode: mode);
-    Storage.setting.put(SettingKey.themeMode, mode.index);
+    AppSettings.setSetting(SettingKey.themeMode, mode.index);
   }
 
   void setSeedColor(Color color) {
     state = state.copyWith(seedColor: color);
-    Storage.setting.put(SettingKey.seedColor, color.toARGB32());
+    AppSettings.setSetting(SettingKey.seedColor, color.toARGB32());
   }
 
   void setFontFamily(String? family) {

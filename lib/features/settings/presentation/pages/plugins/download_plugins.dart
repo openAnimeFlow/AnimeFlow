@@ -4,7 +4,7 @@ import 'package:anime_flow/core/constants/storage_key.dart';
 import 'package:anime_flow/core/crawler/itme/crawler_config_item.dart';
 import 'package:anime_flow/core/network/api_path.dart';
 import 'package:anime_flow/core/network/api/api.dart';
-import 'package:anime_flow/core/settings/storage.dart';
+import 'package:anime_flow/core/settings/app_settings.dart';
 import 'package:anime_flow/features/source/data/repositories/source_repository.dart';
 import 'package:anime_flow/core/utils/format_time_util.dart';
 import 'package:anime_flow/core/logger/logger.dart';
@@ -26,7 +26,6 @@ class DownloadPluginsPage extends StatefulWidget {
 
 class _DownloadPluginsPageState extends State<DownloadPluginsPage> {
   final sourceRepository = SourceRepository.instance;
-  final setting = Storage.setting;
   bool isLoading = false;
   late bool isMirror;
   String? errorMessage;
@@ -43,7 +42,9 @@ class _DownloadPluginsPageState extends State<DownloadPluginsPage> {
   @override
   void initState() {
     super.initState();
-    isMirror = setting.get(SettingKey.isMirror, defaultValue: false);
+    isMirror = AppSettings.getSetting<bool>(SettingKey.isMirror,
+            defaultValue: false) ??
+        false;
     _getPlugins();
   }
 
@@ -227,7 +228,7 @@ class _DownloadPluginsPageState extends State<DownloadPluginsPage> {
               value: isMirror,
               onChanged: (v) {
                 setState(() {
-                  setting.put(SettingKey.isMirror, v);
+                  AppSettings.setSetting(SettingKey.isMirror, v);
                   isMirror = v;
                 });
                 _getPlugins();

@@ -1,15 +1,14 @@
 import 'package:anime_flow/app/localization/app_localizations.dart';
 import 'package:anime_flow/core/constants/storage_key.dart';
+import 'package:anime_flow/core/settings/app_settings.dart';
 import 'package:anime_flow/features/play/application/danmaku_chinese_mode.dart';
 import 'package:anime_flow/features/play/presentation/providers/play_provider.dart';
 import 'package:anime_flow/features/play/presentation/widgets/player/ui/danmaku/canvas_danmaku_adapter.dart';
 import 'package:anime_flow/features/play/presentation/providers/danmaku_chinese_mode_provider.dart';
-import 'package:anime_flow/core/settings/storage.dart';
 import 'package:anime_flow/shared/widgets/drop_down_menu.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_svg/svg.dart';
-import 'package:hive_ce/hive.dart';
 
 /// 弹幕设置弹窗
 class DanmakuSettingDialog extends ConsumerStatefulWidget {
@@ -80,7 +79,6 @@ class _DanmakuOptionSliderState extends State<_DanmakuOptionSlider> {
 
 class _DanmakuSettingState extends ConsumerState<DanmakuSettingDialog> {
   late final PlaySession playController;
-  Box setting = Storage.setting;
 
   @override
   void initState() {
@@ -222,7 +220,7 @@ class _DanmakuSettingState extends ConsumerState<DanmakuSettingDialog> {
                                   danmakuController.option
                                       .copyWith(hideScroll: newHideScroll),
                                 );
-                                setting.put(
+                                AppSettings.setSetting(
                                   DanmakuKey.danmakuHideScroll,
                                   newHideScroll,
                                 );
@@ -264,7 +262,7 @@ class _DanmakuSettingState extends ConsumerState<DanmakuSettingDialog> {
                                   danmakuController.option
                                       .copyWith(hideTop: newHideTop),
                                 );
-                                setting.put(
+                                AppSettings.setSetting(
                                   DanmakuKey.danmakuHideTop,
                                   newHideTop,
                                 );
@@ -306,7 +304,7 @@ class _DanmakuSettingState extends ConsumerState<DanmakuSettingDialog> {
                                   danmakuController.option
                                       .copyWith(hideBottom: newHideBottom),
                                 );
-                                setting.put(
+                                AppSettings.setSetting(
                                   DanmakuKey.danmakuHideBottom,
                                   newHideBottom,
                                 );
@@ -350,7 +348,8 @@ class _DanmakuSettingState extends ConsumerState<DanmakuSettingDialog> {
                         danmakuController.updateOption(
                           danmakuController.option.copyWith(massiveMode: value),
                         );
-                        setting.put(DanmakuKey.danmakuMassiveMode, value);
+                        AppSettings.setSetting(
+                            DanmakuKey.danmakuMassiveMode, value);
                       });
                     },
                   ),
@@ -365,7 +364,7 @@ class _DanmakuSettingState extends ConsumerState<DanmakuSettingDialog> {
                       danmakuController.updateOption(
                         danmakuController.option.copyWith(strokeWidth: value),
                       );
-                      setting.put(DanmakuKey.danmakuBorder, value);
+                      AppSettings.setSetting(DanmakuKey.danmakuBorder, value);
                     },
                   ),
                   const SizedBox(height: 16),
@@ -396,7 +395,8 @@ class _DanmakuSettingState extends ConsumerState<DanmakuSettingDialog> {
                             danmakuController.option
                                 .copyWith(duration: newDuration),
                           );
-                          setting.put(DanmakuKey.danmakuDuration, newDuration);
+                          AppSettings.setSetting(
+                              DanmakuKey.danmakuDuration, newDuration);
                         },
                       );
                     },
@@ -412,7 +412,7 @@ class _DanmakuSettingState extends ConsumerState<DanmakuSettingDialog> {
                       danmakuController.updateOption(
                         danmakuController.option.copyWith(opacity: value),
                       );
-                      setting.put(DanmakuKey.danmakuOpacity, value);
+                      AppSettings.setSetting(DanmakuKey.danmakuOpacity, value);
                     },
                   ),
                   const SizedBox(height: 8),
@@ -430,7 +430,8 @@ class _DanmakuSettingState extends ConsumerState<DanmakuSettingDialog> {
                         danmakuController.option
                             .copyWith(fontWeight: fontWeight),
                       );
-                      setting.put(DanmakuKey.danmakuFontWeight, fontWeight);
+                      AppSettings.setSetting(
+                          DanmakuKey.danmakuFontWeight, fontWeight);
                     },
                   ),
                   const SizedBox(height: 8),
@@ -445,7 +446,7 @@ class _DanmakuSettingState extends ConsumerState<DanmakuSettingDialog> {
                       danmakuController.updateOption(
                         danmakuController.option.copyWith(fontSize: value),
                       );
-                      setting.put(DanmakuKey.danmakuFontSize, value);
+                      AppSettings.setSetting(DanmakuKey.danmakuFontSize, value);
                     },
                   ),
                   const SizedBox(height: 8),
@@ -462,7 +463,8 @@ class _DanmakuSettingState extends ConsumerState<DanmakuSettingDialog> {
                         danmakuController.option
                             .copyWith(area: fixedValues[index]),
                       );
-                      setting.put(DanmakuKey.danmakuArea, fixedValues[index]);
+                      AppSettings.setSetting(
+                          DanmakuKey.danmakuArea, fixedValues[index]);
                     },
                   ),
                   SizedBox(height: MediaQuery.of(context).padding.bottom),

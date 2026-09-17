@@ -1,5 +1,5 @@
 import 'package:anime_flow/core/constants/storage_key.dart';
-import 'package:anime_flow/core/settings/storage.dart';
+import 'package:anime_flow/core/settings/app_settings.dart';
 import 'package:flutter/material.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
@@ -9,12 +9,12 @@ part 'locale_provider.g.dart';
 class LocaleNotifier extends _$LocaleNotifier {
   @override
   Locale build() {
-    return _parseLocale(Storage.setting.get(SettingKey.locale));
+    return _parseLocale(AppSettings.getSetting<Object?>(SettingKey.locale));
   }
 
   void setLocale(Locale locale) {
     state = locale;
-    Storage.setting.put(SettingKey.locale, _localeKey(locale));
+    AppSettings.setSetting(SettingKey.locale, _localeKey(locale));
   }
 
   static Locale _parseLocale(Object? value) {

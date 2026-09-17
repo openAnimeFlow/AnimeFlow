@@ -22,7 +22,8 @@ bool isFontRequestCancelled(Object error) {
 }
 
 bool _readFontRepoUseCdnFromStorage() {
-  final v = Storage.setting.get(SettingKey.fontRepoUseCdn, defaultValue: false);
+  final v = AppSettings.getSetting<Object?>(SettingKey.fontRepoUseCdn,
+      defaultValue: false);
   if (v is bool) return v;
   if (v is int) return v != 0;
   return true;
@@ -40,7 +41,7 @@ class FontRepoCdn extends _$FontRepoCdn {
   void setEnabled(bool value) {
     if (state == value) return;
     ref.read(fontNetworkTasksProvider.notifier).cancelAll();
-    Storage.setting.put(SettingKey.fontRepoUseCdn, value);
+    AppSettings.setSetting(SettingKey.fontRepoUseCdn, value);
     state = value;
     ref.read(fontProvider.notifier).reload();
   }
@@ -182,7 +183,7 @@ class DownloadedFontMetas extends _$DownloadedFontMetas {
   }
 
   static Map<String, FontItem> _readMetasFromStorage() {
-    final raw = Storage.setting.get(SettingKey.downloadedFontsMeta);
+    final raw = AppSettings.getSetting<Object?>(SettingKey.downloadedFontsMeta);
     if (raw is! Map) return {};
     final result = <String, FontItem>{};
     raw.forEach((k, v) {
@@ -199,21 +200,21 @@ class DownloadedFontMetas extends _$DownloadedFontMetas {
   }
 
   Map<String, dynamic> _readRawMap() {
-    final raw = Storage.setting.get(SettingKey.downloadedFontsMeta);
+    final raw = AppSettings.getSetting<Object?>(SettingKey.downloadedFontsMeta);
     return raw is Map ? Map<String, dynamic>.from(raw) : <String, dynamic>{};
   }
 
   Future<void> save(FontItem font) async {
     final map = _readRawMap();
     map[font.id] = font.toJson();
-    await Storage.setting.put(SettingKey.downloadedFontsMeta, map);
+    await AppSettings.setSetting(SettingKey.downloadedFontsMeta, map);
     state = {...state, font.id: font};
   }
 
   Future<void> remove(String fontId) async {
     final map = _readRawMap();
     if (map.remove(fontId) == null && !state.containsKey(fontId)) return;
-    await Storage.setting.put(SettingKey.downloadedFontsMeta, map);
+    await AppSettings.setSetting(SettingKey.downloadedFontsMeta, map);
     final next = Map<String, FontItem>.from(state)..remove(fontId);
     state = next;
   }
@@ -223,7 +224,8 @@ class DownloadedFontMetas extends _$DownloadedFontMetas {
   /// 兼容旧版本（仅有路径、无元数据）的数据：对此类条目合成占位 [FontItem]，
   /// 至少保证用户仍能在 UI 中看到并删除它们。
   List<FontItem> orphansFor(Set<String> remoteIds) {
-    final pathsRaw = Storage.setting.get(SettingKey.downloadedFonts);
+    final pathsRaw =
+        AppSettings.getSetting<Object?>(SettingKey.downloadedFonts);
     final pathIds = pathsRaw is Map
         ? pathsRaw.keys.map((e) => e.toString()).toSet()
         : <String>{};
@@ -246,7 +248,7 @@ class DownloadedFontMetas extends _$DownloadedFontMetas {
 
   /// 为已存在于 [SettingKey.downloadedFonts] 但缺失元数据的旧版本数据回填信息。
   Future<void> backfillFromRemote(List<FontItem> remote) async {
-    final paths = Storage.setting.get(SettingKey.downloadedFonts);
+    final paths = AppSettings.getSetting<Object?>(SettingKey.downloadedFonts);
     if (paths is! Map || paths.isEmpty) return;
     final pathKeys = paths.keys.map((e) => e.toString()).toSet();
     final map = _readRawMap();
@@ -260,7 +262,7 @@ class DownloadedFontMetas extends _$DownloadedFontMetas {
       changed = true;
     }
     if (!changed) return;
-    await Storage.setting.put(SettingKey.downloadedFontsMeta, map);
+    await AppSettings.setSetting(SettingKey.downloadedFontsMeta, map);
     state = next;
   }
 }
@@ -286,7 +288,7 @@ class FontDownload extends _$FontDownload {
   }
 
   Map<String, String> _getSavedPaths() {
-    final raw = Storage.setting.get(SettingKey.downloadedFonts);
+    final raw = AppSettings.getSetting<Object?>(SettingKey.downloadedFonts);
     if (raw is Map) {
       return Map<String, String>.fromEntries(
         raw.entries.map((e) => MapEntry(e.key.toString(), e.value.toString())),
@@ -337,7 +339,7 @@ class FontDownload extends _$FontDownload {
 
       final savedPaths = _getSavedPaths();
       savedPaths[font.id] = filePath;
-      await Storage.setting.put(SettingKey.downloadedFonts, savedPaths);
+      await AppSettings.setSetting(SettingKey.downloadedFonts, savedPaths);
       await ref.read(downloadedFontMetasProvider.notifier).save(font);
 
       state = FontDownloadState(
@@ -382,11 +384,11 @@ class FontDownload extends _$FontDownload {
       }
     }
 
-    await Storage.setting.put(SettingKey.downloadedFonts, savedPaths);
+    await AppSettings.setSetting(SettingKey.downloadedFonts, savedPaths);
     await ref.read(downloadedFontMetasProvider.notifier).remove(fontId);
 
     final selectedId =
-        Storage.setting.get(SettingKey.selectedFontId) as String?;
+        AppSettings.getSetting<Object?>(SettingKey.selectedFontId) as String?;
     if (selectedId == fontId) {
       await ref.read(selectedFontProvider.notifier).clearFont();
     }
@@ -404,11 +406,13 @@ class SelectedFont extends _$SelectedFont {
   /// 在 [Storage.init] 之后、[runApp] 之前调用，注册已持久化的自定义字体。
   static Future<void> initOnStartup() async {
     try {
-      final fontFamily = Storage.setting.get(SettingKey.fontFamily) as String?;
-      final fontId = Storage.setting.get(SettingKey.selectedFontId) as String?;
+      final fontFamily =
+          AppSettings.getSetting<Object?>(SettingKey.fontFamily) as String?;
+      final fontId =
+          AppSettings.getSetting<Object?>(SettingKey.selectedFontId) as String?;
       if (fontFamily == null || fontId == null) return;
 
-      final raw = Storage.setting.get(SettingKey.downloadedFonts);
+      final raw = AppSettings.getSetting<Object?>(SettingKey.downloadedFonts);
       if (raw is! Map) return;
 
       final savedPaths = Map<String, String>.fromEntries(
@@ -420,8 +424,8 @@ class SelectedFont extends _$SelectedFont {
 
       final file = File(filePath);
       if (!file.existsSync()) {
-        await Storage.setting.delete(SettingKey.fontFamily);
-        await Storage.setting.delete(SettingKey.selectedFontId);
+        await AppSettings.deleteSetting(SettingKey.fontFamily);
+        await AppSettings.deleteSetting(SettingKey.selectedFontId);
         return;
       }
 
@@ -436,7 +440,7 @@ class SelectedFont extends _$SelectedFont {
 
   @override
   String? build() {
-    return Storage.setting.get(SettingKey.fontFamily) as String?;
+    return AppSettings.getSetting<Object?>(SettingKey.fontFamily) as String?;
   }
 
   /// 注册字体并持久化选中状态
@@ -446,8 +450,8 @@ class SelectedFont extends _$SelectedFont {
       ..addFont(Future.value(ByteData.sublistView(bytes)));
     await loader.load();
 
-    await Storage.setting.put(SettingKey.fontFamily, font.family);
-    await Storage.setting.put(SettingKey.selectedFontId, font.id);
+    await AppSettings.setSetting(SettingKey.fontFamily, font.family);
+    await AppSettings.setSetting(SettingKey.selectedFontId, font.id);
 
     state = font.family;
     ref.read(themeProvider.notifier).setFontFamily(font.family);
@@ -455,8 +459,8 @@ class SelectedFont extends _$SelectedFont {
 
   /// 清除自定义字体，恢复系统字体
   Future<void> clearFont() async {
-    await Storage.setting.delete(SettingKey.fontFamily);
-    await Storage.setting.delete(SettingKey.selectedFontId);
+    await AppSettings.deleteSetting(SettingKey.fontFamily);
+    await AppSettings.deleteSetting(SettingKey.selectedFontId);
     state = null;
     ref.read(themeProvider.notifier).setFontFamily(null);
   }

@@ -18,7 +18,6 @@ import 'package:anime_flow/features/play/presentation/providers/video_ui_provide
 import 'package:anime_flow/features/shaders/shaders_controller.dart';
 import 'package:anime_flow/features/user/presentation/providers/user_state_provider.dart';
 import 'package:anime_flow/core/network/api/flow_api.dart';
-import 'package:anime_flow/shared/models/enums/video_controls_icon_type.dart';
 import 'package:anime_flow/app/router/routes_args.dart';
 import 'package:anime_flow/core/logger/logger.dart';
 import 'package:anime_flow/core/utils/system_util.dart';
@@ -29,6 +28,7 @@ import 'package:anime_flow/features/play/domain/player/player_event.dart';
 import 'package:anime_flow/features/play/domain/player/player_kernel.dart';
 import 'package:anime_flow/features/play/domain/player/player_snapshot.dart';
 import 'package:anime_flow/features/play/domain/player/playback_source.dart';
+import 'package:anime_flow/features/play/domain/player/playback_phase.dart';
 import 'package:anime_flow/features/play/infrastructure/player/player_engine_factory.dart';
 import 'package:anime_flow/features/play/application/playback_coordinator.dart';
 import 'package:flutter/material.dart';
@@ -102,9 +102,9 @@ PlaySession playSession(Ref ref) {
         next,
         isLoggedIn: ref.read(isLoggedInProvider).value ?? false,
       );
-      controller._handleParseResultChanged(
-        previous?.parseResult,
-        next.parseResult,
+      controller._handlePlaybackPhaseChanged(
+        previous?.phase,
+        next.phase,
       );
     },
   );
@@ -155,12 +155,11 @@ class PlayStateNotifier extends _$PlayStateNotifier {
     state = state.copyWith(videoFit: value);
   }
 
-  void setIsParsing(bool value) {
-    state = state.copyWith(isParsing: value);
-  }
-
-  void setParseResult(String value) {
-    state = state.copyWith(parseResult: value);
+  void setPlaybackPhase(PlaybackPhase phase, {String? message}) {
+    state = state.copyWith(
+      phase: phase,
+      statusMessage: message ?? '',
+    );
   }
 
   void setPlaying(bool value) {
@@ -208,8 +207,8 @@ class PlayState {
   final bool isContentExpanded;
   final bool isFullscreen;
   final BoxFit videoFit;
-  final bool isParsing;
-  final String parseResult;
+  final PlaybackPhase phase;
+  final String statusMessage;
   final bool playing;
   final Duration position;
   final Duration duration;
@@ -228,8 +227,8 @@ class PlayState {
     this.isContentExpanded = true,
     this.isFullscreen = false,
     this.videoFit = BoxFit.contain,
-    this.isParsing = false,
-    this.parseResult = '',
+    this.phase = PlaybackPhase.idle,
+    this.statusMessage = '',
     this.playing = false,
     this.position = Duration.zero,
     this.duration = Duration.zero,
@@ -249,8 +248,8 @@ class PlayState {
     bool? isContentExpanded,
     bool? isFullscreen,
     BoxFit? videoFit,
-    bool? isParsing,
-    String? parseResult,
+    PlaybackPhase? phase,
+    String? statusMessage,
     bool? playing,
     Duration? position,
     Duration? duration,
@@ -269,8 +268,8 @@ class PlayState {
       isContentExpanded: isContentExpanded ?? this.isContentExpanded,
       isFullscreen: isFullscreen ?? this.isFullscreen,
       videoFit: videoFit ?? this.videoFit,
-      isParsing: isParsing ?? this.isParsing,
-      parseResult: parseResult ?? this.parseResult,
+      phase: phase ?? this.phase,
+      statusMessage: statusMessage ?? this.statusMessage,
       playing: playing ?? this.playing,
       position: position ?? this.position,
       duration: duration ?? this.duration,
@@ -333,8 +332,6 @@ class PlayRequest {
 }
 
 class PlaySession {
-  static const _parseSuccessResult = '视频解析成功';
-
   PlaySession({
     required this.shadersDirectory,
     required PlayStateNotifier playStateActions,
@@ -537,6 +534,12 @@ class PlaySession {
     if (event is PlayerPlayingChanged) {
       playbackProgressManager.saveAfterPlaybackChange();
       _playStateActions.setPlaying(event.playing);
+      if (event.playing) {
+        _playStateActions.setPlaybackPhase(PlaybackPhase.playing);
+      } else if (_playStateActions.value.phase == PlaybackPhase.playing ||
+          _playStateActions.value.phase == PlaybackPhase.buffering) {
+        _playStateActions.setPlaybackPhase(PlaybackPhase.paused);
+      }
       danmaku.onPlaybackChanged(event.playing);
     } else if (event is PlayerVolumeChanged) {
       if (!SystemUtil.supportsSystemVolumeSync) {
@@ -547,6 +550,17 @@ class PlaySession {
       _updateEffectiveBufferingState(buffered: event.buffered);
     } else if (event is PlayerBufferingChanged) {
       _isPlayerBuffering = event.buffering;
+      if (event.buffering &&
+          _playStateActions.value.phase != PlaybackPhase.resolving) {
+        _playStateActions.setPlaybackPhase(PlaybackPhase.buffering);
+      } else if (!event.buffering &&
+          _playStateActions.value.phase == PlaybackPhase.buffering) {
+        _playStateActions.setPlaybackPhase(
+          _playStateActions.value.playing
+              ? PlaybackPhase.playing
+              : PlaybackPhase.paused,
+        );
+      }
       _updateEffectiveBufferingState(playerBuffering: event.buffering);
     } else if (event is PlayerRateChanged) {
       _playStateActions.setRate(event.rate);
@@ -556,6 +570,7 @@ class PlaySession {
     } else if (event is PlayerDurationChanged) {
       _playStateActions.setDuration(event.duration);
     } else if (event is PlayerCompleted) {
+      _playStateActions.setPlaybackPhase(PlaybackPhase.completed);
       if (subjectId > 0) {
         _autoSwitchToNextEpisode();
         unawaited(PlayHistoryService.clearPosition(subjectId));
@@ -575,22 +590,19 @@ class PlaySession {
     }
   }
 
-  void _handleParseResultChanged(
-    String? previousParseResult,
-    String nextParseResult,
+  void _handlePlaybackPhaseChanged(
+    PlaybackPhase? previousPhase,
+    PlaybackPhase nextPhase,
   ) {
-    if (previousParseResult == nextParseResult) {
+    if (previousPhase == nextPhase) {
       return;
     }
-    if (nextParseResult != _parseSuccessResult) {
-      return;
+    if (nextPhase == PlaybackPhase.playing ||
+        nextPhase == PlaybackPhase.buffering ||
+        nextPhase == PlaybackPhase.paused ||
+        nextPhase == PlaybackPhase.completed) {
+      _videoUiStateActions.finishParsingIndicator();
     }
-
-    if (_videoUiStateActions.currentIndicatorType !=
-        VideoControlsIndicatorType.parsingIndicator) {
-      return;
-    }
-    _videoUiStateActions.finishParsingIndicator();
   }
 
   /// 选中集与当前播放集不一致时清空弹幕数据与画布（切换集过程中）
@@ -642,6 +654,10 @@ class PlaySession {
   /// 初始化播放状态
   Future<void> initPlayState(PlayRequest state) async {
     if (_isDisposed) return;
+    _playStateActions.setPlaybackPhase(
+      PlaybackPhase.opening,
+      message: '资源解析成功，准备播放',
+    );
     danmaku.beginPlaybackChange();
     final requestId = ++_playRequestId;
     int? automaticDanmakuRequestId;
@@ -702,7 +718,7 @@ class PlaySession {
   }
 
   void _handlePlayStateChanged(PlayState state, {required bool isLoggedIn}) {
-    if (state.isParsing) {
+    if (state.phase.keepsStartupIndicator) {
       _videoUiStateActions.showParsingIndicator();
     }
     playbackProgressManager.updatePlaybackState(
@@ -717,7 +733,7 @@ class PlaySession {
   void _updateBufferingState(bool buffering) {
     _videoUiStateActions.updateBufferingIndicator(
       buffering,
-      isParsing: _playStateActions.value.isParsing,
+      isParsing: _playStateActions.value.phase.isResolving,
     );
   }
 

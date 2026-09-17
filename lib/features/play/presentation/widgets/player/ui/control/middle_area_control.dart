@@ -172,10 +172,10 @@ class _MiddleAreaControlState extends ConsumerState<MiddleAreaControl> {
                   Consumer(
                     builder:
                         (BuildContext context, WidgetRef ref, Widget? child) {
-                      final parseResult = ref.watch(
-                          playStateProvider.select((s) => s.parseResult));
+                      final statusMessage = ref.watch(
+                          playStateProvider.select((s) => s.statusMessage));
                       return Text(
-                        parseResult,
+                        statusMessage,
                         style: const TextStyle(
                             color: Colors.white,
                             fontWeight: FontWeight.bold,

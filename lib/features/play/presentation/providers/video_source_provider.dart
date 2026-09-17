@@ -10,6 +10,7 @@ import 'package:anime_flow/features/play/application/search_result_rank_service.
 import 'package:anime_flow/features/play/data/repository/play_repository.dart';
 import 'package:anime_flow/features/play/presentation/providers/episodes_provider.dart';
 import 'package:anime_flow/features/play/presentation/providers/play_provider.dart';
+import 'package:anime_flow/features/play/domain/player/playback_phase.dart';
 import 'package:anime_flow/features/play/application/video_source_service.dart';
 import 'package:anime_flow/features/play/application/webview_video_source_service.dart';
 import 'package:anime_flow/features/source/data/repositories/source_repository_provider.dart';
@@ -860,7 +861,10 @@ class VideoSourceNotifier extends _$VideoSourceNotifier {
     webViewVideoProvider.cancel();
 
     final playController = ref.read(playSessionProvider);
-    ref.read(playStateProvider.notifier).setIsParsing(true);
+    ref.read(playStateProvider.notifier).setPlaybackPhase(
+          PlaybackPhase.resolving,
+          message: '正在解析视频源...',
+        );
 
     if (!ref.mounted || loadToken != _videoPageLoadToken) return false;
 
@@ -887,8 +891,6 @@ class VideoSourceNotifier extends _$VideoSourceNotifier {
     }
 
     try {
-      ref.read(playStateProvider.notifier).setParseResult('正在解析视频源...');
-
       final source = await webViewVideoProvider.resolve(url,
           useLegacyParser: false, offset: offset);
       if (!ref.mounted) return false;
@@ -896,13 +898,17 @@ class VideoSourceNotifier extends _$VideoSourceNotifier {
           (shouldUseResult == null || shouldUseResult());
       if (!canUseResult) {
         if (loadToken == _videoPageLoadToken) {
-          ref.read(playStateProvider.notifier).setIsParsing(false);
+          ref.read(playStateProvider.notifier).setPlaybackPhase(
+                PlaybackPhase.idle,
+              );
         }
         return false;
       }
 
-      ref.read(playStateProvider.notifier).setIsParsing(false);
-      ref.read(playStateProvider.notifier).setParseResult('视频解析成功');
+      ref.read(playStateProvider.notifier).setPlaybackPhase(
+            PlaybackPhase.resolved,
+            message: '资源解析成功，准备播放',
+          );
       await playController.initPlayState(
         PlayRequest(
           videoUrl: source.url,
@@ -921,22 +927,26 @@ class VideoSourceNotifier extends _$VideoSourceNotifier {
     } on VideoSourceTimeoutException {
       if (!ref.mounted) return false;
       if (loadToken == _videoPageLoadToken) {
-        ref.read(playStateProvider.notifier).setIsParsing(false);
-        ref.read(playStateProvider.notifier).setParseResult('视频解析超时，请重试');
+        ref.read(playStateProvider.notifier).setPlaybackPhase(
+              PlaybackPhase.error,
+              message: '视频解析超时，请重试',
+            );
       }
     } on VideoSourceNotFoundException {
       if (!ref.mounted) return false;
       if (loadToken == _videoPageLoadToken) {
-        ref.read(playStateProvider.notifier).setIsParsing(false);
-        ref.read(playStateProvider.notifier).setParseResult('未找到视频资源，请切换数据源重试');
+        ref.read(playStateProvider.notifier).setPlaybackPhase(
+              PlaybackPhase.error,
+              message: '未找到视频资源，请切换数据源重试',
+            );
       }
     } catch (e) {
       if (!ref.mounted) return false;
       if (loadToken == _videoPageLoadToken) {
-        ref.read(playStateProvider.notifier).setIsParsing(false);
-        ref
-            .read(playStateProvider.notifier)
-            .setParseResult('视频解析失败: ${e.toString()}');
+        ref.read(playStateProvider.notifier).setPlaybackPhase(
+              PlaybackPhase.error,
+              message: '视频解析失败: ${e.toString()}',
+            );
         _logger.e(e);
       }
     }

@@ -1,5 +1,7 @@
 import 'package:anime_flow/app/localization/app_localizations.dart';
 import 'package:anime_flow/core/network/api/flow_api.dart';
+import 'package:anime_flow/features/play/application/danmaku_state.dart';
+import 'package:anime_flow/features/play/presentation/providers/danmaku_state_provider.dart';
 import 'package:anime_flow/features/play/presentation/providers/play_provider.dart';
 import 'package:anime_flow/shared/models/player/danmaku/danmaku_episode_response.dart';
 import 'package:anime_flow/shared/models/player/danmaku/danmaku_module.dart';
@@ -80,10 +82,10 @@ class _DanmakuCardState extends ConsumerState<DanmakuCard>
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
     final danDanmakus = ref.watch(
-      playStateProvider.select((s) => s.danDanmakus),
+      danmakuStateProvider.select((s) => s.danmakus),
     );
     final loadStatus = ref.watch(
-      playStateProvider.select((s) => s.danmakuLoadStatus),
+      danmakuStateProvider.select((s) => s.loadStatus),
     );
     final statusText = switch (loadStatus) {
       DanmakuLoadStatus.waitingForVideo => l10n.danmakuWaitingForVideo,
@@ -93,7 +95,7 @@ class _DanmakuCardState extends ConsumerState<DanmakuCard>
       DanmakuLoadStatus.idle => null,
     };
     final hiddenPlatforms = ref.watch(
-      playStateProvider.select((s) => s.hiddenPlatforms),
+      danmakuStateProvider.select((s) => s.hiddenPlatforms),
     );
     return Builder(builder: (context) {
       final allDanmakus = <Danmaku>[];
@@ -219,7 +221,7 @@ class _DanmakuCardState extends ConsumerState<DanmakuCard>
                                       .surfaceContainerHighest
                                   : null,
                               onPressed: () {
-                                playController
+                                playController.danmaku
                                     .togglePlatformVisibility(platform);
                               },
                             );
@@ -474,8 +476,8 @@ class _DanmakuCardState extends ConsumerState<DanmakuCard>
                                         switchError = null;
                                       });
                                       final success = await playController
-                                          .switchDanmakuEpisode(
-                                              episode.episodeId);
+                                          .danmaku
+                                          .switchEpisode(episode.episodeId);
                                       if (!context.mounted) return;
                                       if (success) {
                                         Navigator.of(context).pop();

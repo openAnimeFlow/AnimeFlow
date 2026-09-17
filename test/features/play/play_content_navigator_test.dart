@@ -9,6 +9,7 @@ import 'package:anime_flow/features/anime_info/presentation/providers/anime_info
 import 'package:anime_flow/features/anime_info/presentation/widgets/anime_info_view.dart';
 import 'package:anime_flow/features/play/presentation/providers/episodes_provider.dart';
 import 'package:anime_flow/features/play/domain/player/player_shortcut.dart';
+import 'package:anime_flow/features/play/application/danmaku_session.dart';
 import 'package:anime_flow/features/play/presentation/providers/play_content_actions.dart';
 import 'package:anime_flow/features/play/presentation/providers/play_provider.dart';
 import 'package:anime_flow/features/play/presentation/providers/recommendation_provider.dart';
@@ -66,6 +67,8 @@ class _Sources extends VideoSourceNotifier {
 }
 
 class _Session implements PlaySession {
+  @override
+  late final DanmakuSession danmaku = _Danmaku(this);
   int toggles = 0;
   final actions = <PlayerShortcutAction>[];
   final seeks = <Duration>[];
@@ -93,13 +96,22 @@ class _Session implements PlaySession {
   }
 
   @override
-  void toggleDanmaku() => actions.add(PlayerShortcutAction.toggleDanmaku);
-
-  @override
   void switchToNextEpisode() => actions.add(PlayerShortcutAction.nextEpisode);
 
   @override
   dynamic noSuchMethod(Invocation invocation) => super.noSuchMethod(invocation);
+}
+
+class _Danmaku implements DanmakuSession {
+  _Danmaku(this.session);
+  final _Session session;
+
+  @override
+  void toggleEnabled() =>
+      session.actions.add(PlayerShortcutAction.toggleDanmaku);
+
+  @override
+  dynamic noSuchMethod(Invocation invocation) => null;
 }
 
 class _VideoUi extends VideoUiNotifier {

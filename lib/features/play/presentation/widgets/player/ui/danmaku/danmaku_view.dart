@@ -1,10 +1,10 @@
-import 'dart:async';
 import 'package:anime_flow/core/settings/app_settings.dart';
-import 'package:anime_flow/features/user/presentation/providers/user_state_provider.dart';
 import 'package:anime_flow/features/play/presentation/providers/play_provider.dart';
 import 'package:canvas_danmaku/canvas_danmaku.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+
+import 'canvas_danmaku_adapter.dart';
 
 class DanmakuView extends ConsumerStatefulWidget {
   const DanmakuView({super.key});
@@ -16,7 +16,6 @@ class DanmakuView extends ConsumerStatefulWidget {
 class _DanmakuViewState extends ConsumerState<DanmakuView>
     with AutomaticKeepAliveClientMixin {
   late final PlaySession playController;
-  Timer? _danmakuTimer;
 
   // 弹幕配置
   late bool _border;
@@ -27,7 +26,6 @@ class _DanmakuViewState extends ConsumerState<DanmakuView>
   late bool _hideBottom;
   late bool _hideScroll;
   late bool _massiveMode;
-  late bool _danmakuColor;
   late double _danmakuDuration;
   late double _danmakuLineHeight;
   late int _danmakuFontWeight;
@@ -50,81 +48,21 @@ class _DanmakuViewState extends ConsumerState<DanmakuView>
     _hideBottom = AppSettings.danmakuHideBottom;
     _hideScroll = AppSettings.danmakuHideScroll;
     _massiveMode = AppSettings.danmakuMassiveMode;
-    _danmakuColor = AppSettings.danmakuColor;
     _danmakuDuration = AppSettings.danmakuDuration;
     _danmakuLineHeight = AppSettings.danmakuLineHeight;
     _danmakuFontWeight = AppSettings.danmakuFontWeight;
     _danmakuUseSystemFont = AppSettings.danmakuUseSystemFont;
-
-    // 启动弹幕定时器
-    _startDanmakuTimer();
-  }
-
-  void _startDanmakuTimer() {
-    _danmakuTimer?.cancel();
-    _danmakuTimer = Timer.periodic(const Duration(seconds: 1), (timer) {
-      if (!mounted) return;
-
-      final playState = ref.read(playStateProvider);
-      final currentPosition = playState.position;
-      final playing = playState.playing;
-
-      // 只有在播放时才添加弹幕
-      if (currentPosition.inMicroseconds != 0 &&
-          playing &&
-          playState.danmakuOn) {
-        final currentSecond = currentPosition.inSeconds;
-        final danmakus = playState.danDanmakus[currentSecond];
-        final danmakuEpoch = playState.danmakuEpoch;
-
-        if (danmakus != null && danmakus.isNotEmpty) {
-          // 按索引延迟添加弹幕
-          danmakus.asMap().forEach((idx, danmaku) {
-            Future.delayed(
-              Duration(
-                milliseconds: idx * 1000 ~/ danmakus.length,
-              ),
-              () {
-                if (!mounted ||
-                    danmakuEpoch != ref.read(playStateProvider).danmakuEpoch ||
-                    !ref.read(playStateProvider).playing ||
-                    !ref.read(playStateProvider).danmakuOn) {
-                  return;
-                }
-
-                // 本人弹幕不参与平台隐藏
-                // if (!danmaku.selfSend) {
-                final regex = RegExp(r'\[([^\]]+)\]');
-                final match = regex.firstMatch(danmaku.source);
-                final platform = match?.group(1) ?? '弹弹Play';
-                if (playController.isPlatformHidden(platform)) {
-                  return;
-                }
-                // }
-
-                // 处理颜色
-                if (!_danmakuColor) {
-                  danmaku.color = Colors.white;
-                }
-
-                // 添加弹幕
-                playController.addDanDanmaku(
-                  danmaku,
-                  ref.read(currentUserInfoProvider).value?.id,
-                );
-              },
-            );
-          });
-        }
-      }
-    });
   }
 
   @override
   void dispose() {
-    _danmakuTimer?.cancel();
+    if (identical(playController.danmaku.canvas, _adapter)) {
+      playController.danmaku.canvas = null;
+    }
     super.dispose();
   }
+
+  CanvasDanmakuAdapter? _adapter;
 
   @override
   Widget build(BuildContext context) {
@@ -138,9 +76,13 @@ class _DanmakuViewState extends ConsumerState<DanmakuView>
       child: DanmakuScreen(
         createdController: (DanmakuController controller) {
           // 更新全局控制器引用
-          playController.danmakuController = controller;
+          _adapter = CanvasDanmakuAdapter(controller);
+          playController.danmaku.canvas = _adapter;
           // 应用保存的设置
           WidgetsBinding.instance.addPostFrameCallback((_) {
+            if (!mounted || !identical(_adapter?.controller, controller)) {
+              return;
+            }
             try {
               controller.updateOption(
                 controller.option.copyWith(

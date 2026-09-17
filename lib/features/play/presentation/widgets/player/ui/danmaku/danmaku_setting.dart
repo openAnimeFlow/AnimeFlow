@@ -2,6 +2,7 @@ import 'package:anime_flow/app/localization/app_localizations.dart';
 import 'package:anime_flow/core/constants/storage_key.dart';
 import 'package:anime_flow/features/play/application/danmaku_chinese_mode.dart';
 import 'package:anime_flow/features/play/presentation/providers/play_provider.dart';
+import 'package:anime_flow/features/play/presentation/widgets/player/ui/danmaku/canvas_danmaku_adapter.dart';
 import 'package:anime_flow/features/play/presentation/providers/danmaku_chinese_mode_provider.dart';
 import 'package:anime_flow/core/settings/storage.dart';
 import 'package:flutter/material.dart';
@@ -30,7 +31,7 @@ class _DanmakuSettingState extends ConsumerState<DanmakuSetting> {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
-    final danmakuController = playController.danmakuController;
+    final danmakuController = playController.danmaku.controller;
     if (danmakuController == null) {
       return const SizedBox.shrink();
     }

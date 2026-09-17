@@ -25,6 +25,7 @@ final class PlaySessionProvider
           dependencies: <ProviderOrFamily>[
             shadersDirectoryProvider,
             playStateProvider,
+            danmakuStateProvider,
             videoUiProvider,
             episodesProvider,
             playExtraProvider
@@ -35,6 +36,7 @@ final class PlaySessionProvider
             PlaySessionProvider.$allTransitiveDependencies2,
             PlaySessionProvider.$allTransitiveDependencies3,
             PlaySessionProvider.$allTransitiveDependencies4,
+            PlaySessionProvider.$allTransitiveDependencies5,
           },
         );
 
@@ -42,8 +44,9 @@ final class PlaySessionProvider
   static final $allTransitiveDependencies1 = playStateProvider;
   static final $allTransitiveDependencies2 =
       PlayStateNotifierProvider.$allTransitiveDependencies0;
-  static final $allTransitiveDependencies3 = videoUiProvider;
-  static final $allTransitiveDependencies4 = episodesProvider;
+  static final $allTransitiveDependencies3 = danmakuStateProvider;
+  static final $allTransitiveDependencies4 = videoUiProvider;
+  static final $allTransitiveDependencies5 = episodesProvider;
 
   @override
   String debugGetCreateSourceHash() => _$playSessionHash();
@@ -67,7 +70,7 @@ final class PlaySessionProvider
   }
 }
 
-String _$playSessionHash() => r'babd974b51a0150f17d839a1bf105e40886e87ae';
+String _$playSessionHash() => r'dbe0b82b50972b2ed8a3e722e04bae0ce7291d13';
 
 @ProviderFor(PlayStateNotifier)
 final playStateProvider = PlayStateNotifierProvider._();
@@ -105,7 +108,7 @@ final class PlayStateNotifierProvider
   }
 }
 
-String _$playStateNotifierHash() => r'477f823834dcd2c3c32bc456e5e944cef3a55b5b';
+String _$playStateNotifierHash() => r'1a4971e70d30d1157b364cbf1ccfc999b8fcc306';
 
 abstract class _$PlayStateNotifier extends $Notifier<PlayState> {
   PlayState build();

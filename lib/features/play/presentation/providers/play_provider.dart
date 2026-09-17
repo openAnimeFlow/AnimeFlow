@@ -1,5 +1,4 @@
 import 'dart:async';
-import 'dart:convert';
 import 'dart:io';
 import 'dart:typed_data';
 
@@ -7,11 +6,12 @@ import 'package:anime_flow/core/constants/constants.dart';
 import 'package:anime_flow/core/settings/app_settings.dart';
 import 'package:anime_flow/features/play/application/danmaku_chinese_converter.dart';
 import 'package:anime_flow/features/play/application/danmaku_chinese_mode.dart';
-import 'package:anime_flow/features/play/application/danmaku_playback_synchronizer.dart';
+import 'package:anime_flow/features/play/application/danmaku_session.dart';
 import 'package:anime_flow/features/play/application/playback_progress_manager.dart';
 import 'package:anime_flow/features/play/application/play_history_service.dart';
 import 'package:anime_flow/features/play/application/system_volume_synchronizer.dart';
 import 'package:anime_flow/features/play/presentation/providers/danmaku_chinese_mode_provider.dart';
+import 'package:anime_flow/features/play/presentation/providers/danmaku_state_provider.dart';
 import 'package:anime_flow/features/play/presentation/providers/episodes_provider.dart';
 import 'package:anime_flow/features/play/presentation/providers/subject_episodes_provider.dart';
 import 'package:anime_flow/features/play/presentation/providers/video_ui_provider.dart';
@@ -19,7 +19,6 @@ import 'package:anime_flow/features/shaders/shaders_controller.dart';
 import 'package:anime_flow/features/user/presentation/providers/user_state_provider.dart';
 import 'package:anime_flow/core/network/api/flow_api.dart';
 import 'package:anime_flow/shared/models/enums/video_controls_icon_type.dart';
-import 'package:anime_flow/shared/models/player/danmaku/danmaku_module.dart';
 import 'package:anime_flow/app/router/routes_args.dart';
 import 'package:anime_flow/core/logger/logger.dart';
 import 'package:anime_flow/core/utils/system_util.dart';
@@ -32,7 +31,6 @@ import 'package:anime_flow/features/play/domain/player/player_snapshot.dart';
 import 'package:anime_flow/features/play/domain/player/playback_source.dart';
 import 'package:anime_flow/features/play/infrastructure/player/player_engine_factory.dart';
 import 'package:anime_flow/features/play/application/playback_coordinator.dart';
-import 'package:canvas_danmaku/canvas_danmaku.dart';
 import 'package:flutter/material.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:window_manager/window_manager.dart';
@@ -44,6 +42,7 @@ part 'play_provider.g.dart';
   dependencies: [
     shadersDirectory,
     PlayStateNotifier,
+    DanmakuStateNotifier,
     VideoUiNotifier,
     Episodes,
     playExtra,
@@ -53,14 +52,28 @@ PlaySession playSession(Ref ref) {
   ref.watch(playExtraProvider);
   // 模式变化由下方 ref.listen 处理，不能 watch 重建整个播放会话。
   final initialDanmakuChineseMode = ref.read(danmakuChineseModeProvider);
+  final playStateActions = ref.watch(playStateProvider.notifier);
+  final danmaku = DanmakuSession(
+    store: ref.watch(danmakuStateProvider.notifier),
+    converter: ref.watch(danmakuChineseConverterProvider),
+    initialChineseMode: initialDanmakuChineseMode,
+    readPlayback: () {
+      final state = playStateActions.value;
+      return DanmakuPlaybackSnapshot(
+        position: state.position,
+        duration: state.duration,
+        playing: state.playing,
+      );
+    },
+    currentUserId: () => ref.read(currentUserInfoProvider).value?.id,
+  );
   final controller = PlaySession(
     shadersDirectory: ref.watch(shadersDirectoryProvider).requireValue,
-    playStateActions: ref.watch(playStateProvider.notifier),
+    playStateActions: playStateActions,
     videoUiStateActions: ref.watch(videoUiProvider.notifier),
     episodesActions: ref.watch(episodesProvider.notifier),
-    danmakuChineseConverter: ref.watch(danmakuChineseConverterProvider),
+    danmaku: danmaku,
     engineFactory: const PlayerEngineFactory(),
-    initialDanmakuChineseMode: initialDanmakuChineseMode,
     setEpisodeWatched: ({
       required subjectId,
       required episodeId,
@@ -77,7 +90,7 @@ PlaySession playSession(Ref ref) {
     danmakuChineseModeProvider,
     (previous, next) {
       if (previous != next) {
-        unawaited(controller.applyDanmakuChineseMode(next));
+        unawaited(danmaku.applyChineseMode(next));
       }
     },
   );
@@ -105,10 +118,7 @@ class PlayStateNotifier extends _$PlayStateNotifier {
   @override
   PlayState build() {
     ref.watch(playExtraProvider);
-    return PlayState(
-      danmakuOn: AppSettings.danmakuOn,
-      hiddenPlatforms: _loadHiddenPlatformsFromStorage(),
-    );
+    return const PlayState();
   }
 
   PlayState get value => state;
@@ -153,40 +163,6 @@ class PlayStateNotifier extends _$PlayStateNotifier {
     state = state.copyWith(parseResult: value);
   }
 
-  void setDanmakuLoadStatus(DanmakuLoadStatus value) {
-    state = state.copyWith(danmakuLoadStatus: value);
-  }
-
-  void setDanDanmakus(Map<int, List<Danmaku>> value) {
-    state = state.copyWith(danDanmakus: value);
-  }
-
-  void incrementDanmakuEpoch() {
-    state = state.copyWith(danmakuEpoch: state.danmakuEpoch + 1);
-  }
-
-  void clearDanDanmakus() {
-    state = state.copyWith(danDanmakus: const {});
-  }
-
-  void toggleDanmakuOn() {
-    state = state.copyWith(danmakuOn: !state.danmakuOn);
-  }
-
-  void setHiddenPlatforms(Set<String> value) {
-    state = state.copyWith(hiddenPlatforms: value);
-  }
-
-  void toggleHiddenPlatform(String platform) {
-    final nextHiddenPlatforms = {...state.hiddenPlatforms};
-    if (nextHiddenPlatforms.contains(platform)) {
-      nextHiddenPlatforms.remove(platform);
-    } else {
-      nextHiddenPlatforms.add(platform);
-    }
-    state = state.copyWith(hiddenPlatforms: nextHiddenPlatforms);
-  }
-
   void setPlaying(bool value) {
     state = state.copyWith(playing: value);
   }
@@ -224,24 +200,6 @@ class PlayStateNotifier extends _$PlayStateNotifier {
   }
 }
 
-Set<String> _loadHiddenPlatformsFromStorage() {
-  final platformBilibili = AppSettings.danmakuPlatformBilibili;
-  final platformGamer = AppSettings.danmakuPlatformGamer;
-  final platformDanDanPlay = AppSettings.danmakuPlatformDanDanPlay;
-
-  const platformNameBilibili = 'BiliBili';
-  const platformNameGamer = 'Gamer';
-  const platformNameDanDanPlay = '弹弹Play';
-
-  return {
-    if (!platformBilibili) platformNameBilibili,
-    if (!platformGamer) platformNameGamer,
-    if (!platformDanDanPlay) platformNameDanDanPlay,
-  };
-}
-
-enum DanmakuLoadStatus { waitingForVideo, loading, switching, idle, failed }
-
 class PlayState {
   final PlayerKernel kernel;
   final bool switchingKernel;
@@ -252,10 +210,6 @@ class PlayState {
   final BoxFit videoFit;
   final bool isParsing;
   final String parseResult;
-  final Map<int, List<Danmaku>> danDanmakus;
-  final DanmakuLoadStatus danmakuLoadStatus;
-  final bool danmakuOn;
-  final Set<String> hiddenPlatforms;
   final bool playing;
   final Duration position;
   final Duration duration;
@@ -265,7 +219,6 @@ class PlayState {
   final double rate;
   final bool buffering;
   final int scheduledStopDuration;
-  final int danmakuEpoch;
 
   const PlayState({
     this.kernel = PlayerKernel.mediaKit,
@@ -277,10 +230,6 @@ class PlayState {
     this.videoFit = BoxFit.contain,
     this.isParsing = false,
     this.parseResult = '',
-    this.danDanmakus = const {},
-    this.danmakuLoadStatus = DanmakuLoadStatus.waitingForVideo,
-    this.danmakuOn = true,
-    this.hiddenPlatforms = const {},
     this.playing = false,
     this.position = Duration.zero,
     this.duration = Duration.zero,
@@ -290,7 +239,6 @@ class PlayState {
     this.rate = 1.0,
     this.buffering = false,
     this.scheduledStopDuration = 0,
-    this.danmakuEpoch = 0,
   });
 
   PlayState copyWith({
@@ -303,10 +251,6 @@ class PlayState {
     BoxFit? videoFit,
     bool? isParsing,
     String? parseResult,
-    Map<int, List<Danmaku>>? danDanmakus,
-    DanmakuLoadStatus? danmakuLoadStatus,
-    bool? danmakuOn,
-    Set<String>? hiddenPlatforms,
     bool? playing,
     Duration? position,
     Duration? duration,
@@ -316,7 +260,6 @@ class PlayState {
     double? rate,
     bool? buffering,
     int? scheduledStopDuration,
-    int? danmakuEpoch,
   }) {
     return PlayState(
       kernel: kernel ?? this.kernel,
@@ -328,10 +271,6 @@ class PlayState {
       videoFit: videoFit ?? this.videoFit,
       isParsing: isParsing ?? this.isParsing,
       parseResult: parseResult ?? this.parseResult,
-      danDanmakus: danDanmakus ?? this.danDanmakus,
-      danmakuLoadStatus: danmakuLoadStatus ?? this.danmakuLoadStatus,
-      danmakuOn: danmakuOn ?? this.danmakuOn,
-      hiddenPlatforms: hiddenPlatforms ?? this.hiddenPlatforms,
       playing: playing ?? this.playing,
       position: position ?? this.position,
       duration: duration ?? this.duration,
@@ -342,7 +281,6 @@ class PlayState {
       buffering: buffering ?? this.buffering,
       scheduledStopDuration:
           scheduledStopDuration ?? this.scheduledStopDuration,
-      danmakuEpoch: danmakuEpoch ?? this.danmakuEpoch,
     );
   }
 }
@@ -402,9 +340,8 @@ class PlaySession {
     required PlayStateNotifier playStateActions,
     required VideoUiStateActions videoUiStateActions,
     required Episodes episodesActions,
-    required this.danmakuChineseConverter,
+    required this.danmaku,
     required this.engineFactory,
-    required DanmakuChineseMode initialDanmakuChineseMode,
     required void Function({
       required int subjectId,
       required int episodeId,
@@ -413,8 +350,7 @@ class PlaySession {
   })  : _playStateActions = playStateActions,
         _videoUiStateActions = videoUiStateActions,
         _episodesActions = episodesActions,
-        _setEpisodeWatched = setEpisodeWatched,
-        _danmakuChineseMode = initialDanmakuChineseMode;
+        _setEpisodeWatched = setEpisodeWatched;
 
   final PlayerEngineFactory engineFactory;
   late final PlaybackCoordinator playbackCoordinator;
@@ -422,9 +358,7 @@ class PlaySession {
   final PlayStateNotifier _playStateActions;
   final VideoUiStateActions _videoUiStateActions;
   final Episodes _episodesActions;
-  final DanmakuChineseConverter danmakuChineseConverter;
-  DanmakuChineseMode _danmakuChineseMode;
-  int _danmakuChineseModeRevision = 0;
+  final DanmakuSession danmaku;
   final void Function({
     required int subjectId,
     required int episodeId,
@@ -461,14 +395,6 @@ class PlaySession {
 
   /// 当前播放会话使用的统一播放源，用于重新加载和播放器内核切换时恢复上下文。
   PlaybackSource? _currentSource;
-
-  ///弹幕相关
-  final DanmakuPlaybackSynchronizer danmakuSynchronizer =
-      DanmakuPlaybackSynchronizer();
-  DanmakuController? get danmakuController => danmakuSynchronizer.controller;
-  set danmakuController(DanmakuController? value) {
-    danmakuSynchronizer.controller = value;
-  }
 
   /// 记录原始倍速
   double? _speedBeforeBoost;
@@ -611,7 +537,7 @@ class PlaySession {
     if (event is PlayerPlayingChanged) {
       playbackProgressManager.saveAfterPlaybackChange();
       _playStateActions.setPlaying(event.playing);
-      _syncDanmakuPauseWithPlayback(event.playing);
+      danmaku.onPlaybackChanged(event.playing);
     } else if (event is PlayerVolumeChanged) {
       if (!SystemUtil.supportsSystemVolumeSync) {
         _playStateActions.setVolume(event.volume);
@@ -637,10 +563,6 @@ class PlaySession {
     } else if (event is PlayerError) {
       LiggLogger().e('播放器错误: ${event.error}', error: event.stackTrace);
     }
-  }
-
-  void _syncDanmakuPauseWithPlayback(bool playing) {
-    danmakuSynchronizer.syncPlayback(playing);
   }
 
   void _autoSwitchToNextEpisode() {
@@ -675,15 +597,15 @@ class PlaySession {
   void clearDanmakuIfEpisodeMismatch(int selectedIndex) {
     if (selectedIndex != episode) {
       try {
-        removeDanmaku();
-        _playStateActions
-            .setDanmakuLoadStatus(DanmakuLoadStatus.waitingForVideo);
+        danmaku.clear();
+        danmaku.beginPlaybackChange();
       } catch (_) {}
     }
   }
 
   void dispose() {
     _isDisposed = true;
+    danmaku.dispose();
     unawaited(playbackProgressManager.save());
     if (Platform.isWindows) {
       WindowsTitleBarVisibility.reset();
@@ -692,7 +614,6 @@ class PlaySession {
     _stopTimer?.cancel();
     unawaited(_playerSubscription?.cancel());
     _playerSubscription = null;
-    _clearDanmakuCanvas();
     unawaited(playbackCoordinator.dispose());
   }
 
@@ -702,40 +623,36 @@ class PlaySession {
   }
 
   int _playRequestId = 0;
-  int _danmakuRequestId = 0;
-
   bool _isCurrentPlayRequest(int requestId) =>
       !_isDisposed && requestId == _playRequestId;
 
   Future<void> stopCurrentMedia() async {
     _playRequestId++;
-    _danmakuRequestId++;
-    _playStateActions.setDanmakuLoadStatus(DanmakuLoadStatus.waitingForVideo);
+    danmaku.beginPlaybackChange();
     await _serializePlaybackChange(() async {
       if (_isDisposed) return;
       cancelScheduledStop();
       _currentSource = null;
       await playbackCoordinator.stop();
       if (_isDisposed) return;
-      _clearDanmakuCanvas();
+      danmaku.clearCanvas();
     });
   }
 
   /// 初始化播放状态
   Future<void> initPlayState(PlayRequest state) async {
     if (_isDisposed) return;
+    danmaku.beginPlaybackChange();
     final requestId = ++_playRequestId;
     int? automaticDanmakuRequestId;
-    _danmakuRequestId++;
-    _playStateActions.setDanmakuLoadStatus(DanmakuLoadStatus.waitingForVideo);
     await _serializePlaybackChange(() async {
       if (!_isCurrentPlayRequest(requestId)) return;
       cancelScheduledStop();
       _currentSource = null;
       await playbackCoordinator.stop();
       if (!_isCurrentPlayRequest(requestId)) return;
-      removeDanmaku();
-      automaticDanmakuRequestId = _danmakuRequestId;
+      danmaku.clear();
+      automaticDanmakuRequestId = danmaku.requestId;
       videoUrl = state.videoUrl;
       subjectId = state.subjectId;
       episode = state.episodeIndex;
@@ -746,6 +663,11 @@ class PlaySession {
       alias = state.alias;
       isLocalPlayback = state.isLocalPlayback;
       localDanmakuPath = state.localDanmakuPath;
+      danmaku.setPlaybackContext(
+        subjectId: subjectId,
+        episode: episode,
+        isLocalPlayback: isLocalPlayback,
+      );
       playbackProgressManager.setPlaybackContext(
         subjectId: subjectId,
         episodeId: episodeId,
@@ -769,81 +691,14 @@ class PlaySession {
     });
     if (!_isCurrentPlayRequest(requestId)) return;
     if (state.videoUrl.isEmpty) return;
-    if (automaticDanmakuRequestId != _danmakuRequestId) return;
-    await _loadEpisodeDanmaku(state, requestId);
-  }
-
-  Future<void> _loadEpisodeDanmaku(PlayRequest request, int requestId) async {
-    if (request.episodeIndex == 0) {
-      _playStateActions.setDanmakuLoadStatus(DanmakuLoadStatus.idle);
-      return;
-    }
-    final danmakuRequestId = ++_danmakuRequestId;
-    bool isCurrent() =>
-        _isCurrentPlayRequest(requestId) &&
-        danmakuRequestId == _danmakuRequestId;
-    _playStateActions.setDanmakuLoadStatus(DanmakuLoadStatus.loading);
-    var failed = false;
-    try {
-      final List<Danmaku> danmaku;
-      if (request.isLocalPlayback) {
-        danmaku = await _loadLocalDanmaku(request.localDanmakuPath);
-      } else {
-        final bangumiId =
-            await FlowApi.getDanDanBangumiIDByBgmBangumiID(request.subjectId);
-        if (!isCurrent() || bangumiId == null) return;
-        danmaku = await FlowApi.getDanDanmaku(bangumiId, request.episodeIndex);
-      }
-      if (danmaku.isEmpty) return;
-      while (isCurrent()) {
-        final revision = _danmakuChineseModeRevision;
-        final converted = await danmakuChineseConverter.convertDanmakus(
-          danmaku,
-          _danmakuChineseMode,
-        );
-        if (!isCurrent()) return;
-        if (revision != _danmakuChineseModeRevision) continue;
-        addDanmakuAll(converted);
-        return;
-      }
-    } catch (e) {
-      failed = true;
-      LiggLogger().e(e);
-    } finally {
-      if (isCurrent()) {
-        _playStateActions.setDanmakuLoadStatus(
-          failed ? DanmakuLoadStatus.failed : DanmakuLoadStatus.idle,
-        );
-      }
-    }
-  }
-
-  Future<bool> switchDanmakuEpisode(int episodeId) async {
-    final requestId = ++_danmakuRequestId;
-    bool isCurrent() => !_isDisposed && requestId == _danmakuRequestId;
-    _playStateActions.setDanmakuLoadStatus(DanmakuLoadStatus.switching);
-    try {
-      final items = await FlowApi.getDanDanmakuByEpisodeID(episodeId);
-      while (isCurrent()) {
-        final revision = _danmakuChineseModeRevision;
-        final converted = await danmakuChineseConverter.convertDanmakus(
-          items,
-          _danmakuChineseMode,
-        );
-        if (!isCurrent()) return false;
-        if (revision != _danmakuChineseModeRevision) continue;
-        removeDanmaku();
-        addDanmakuAll(converted);
-        _playStateActions.setDanmakuLoadStatus(DanmakuLoadStatus.idle);
-        return true;
-      }
-    } catch (e) {
-      LiggLogger().e(e);
-      if (isCurrent()) {
-        _playStateActions.setDanmakuLoadStatus(DanmakuLoadStatus.failed);
-      }
-    }
-    return false;
+    await danmaku.loadEpisode(
+      subjectId: state.subjectId,
+      episode: state.episodeIndex,
+      isLocalPlayback: state.isLocalPlayback,
+      localPath: state.localDanmakuPath,
+      expectedRequestId: automaticDanmakuRequestId!,
+      isPlaybackCurrent: () => _isCurrentPlayRequest(requestId),
+    );
   }
 
   void _handlePlayStateChanged(PlayState state, {required bool isLoggedIn}) {
@@ -903,14 +758,6 @@ class PlaySession {
     );
   }
 
-  /// 从存储同步平台显示/隐藏状态
-  void syncPlatformVisibilityFromStorage() {
-    _playStateActions.setHiddenPlatforms(_loadHiddenPlatformsFromStorage());
-
-    // 同步后清空屏幕弹幕，让新设置生效
-    danmakuController?.clear();
-  }
-
   void updateIsWideScreen(bool value) {
     _playStateActions.setIsWideScreen(value);
   }
@@ -966,168 +813,11 @@ class PlaySession {
     }
   }
 
-  /// 处理全屏变化
-  /// 在全屏切换时清空弹幕
-  void handleFullscreenChange() {
-    danmakuController?.clear();
-  }
-
-  void addDanmakuAll(List<Danmaku> danmaku) {
-    // 按时间分组
-    final groupedDanmakus = <int, List<Danmaku>>{};
-    for (var item in danmaku) {
-      int second = item.time.toInt();
-      groupedDanmakus.putIfAbsent(second, () => []).add(item);
-    }
-    _playStateActions.setDanDanmakus(groupedDanmakus);
-  }
-
-  /// 播放中切换简繁转换模式时，基于原文重新转换当前剧集弹幕。
-  Future<void> applyDanmakuChineseMode(DanmakuChineseMode mode) async {
-    if (_danmakuChineseMode == mode) return;
-    _danmakuChineseMode = mode;
-    final revision = ++_danmakuChineseModeRevision;
-
-    final state = _playStateActions.value;
-    final all = state.danDanmakus.values.expand((items) => items).toList();
-    if (all.isEmpty) return;
-
-    _playStateActions.incrementDanmakuEpoch();
-    _clearDanmakuCanvas();
-
-    final converted = await danmakuChineseConverter.convertDanmakus(all, mode);
-    if (_isDisposed || revision != _danmakuChineseModeRevision) return;
-    addDanmakuAll(converted);
-  }
-
-  /// 发送弹幕
-  /// [type]：1 滚动、4 底部、5 顶部。
-  Future<bool> sendDanmaku(
-    String message, {
-    required int bgmUserId,
-    Color? color,
-    int type = 1,
-  }) async {
-    if (isLocalPlayback) return false;
-    final bgmBangumiId =
-        await FlowApi.getDanDanBangumiIDByBgmBangumiID(subjectId);
-    if (bgmBangumiId == null) return false;
-    final trimmed = message.trim();
-    if (trimmed.isEmpty) return false;
-    final playState = _playStateActions.value;
-    if (playState.duration == Duration.zero &&
-        playState.position == Duration.zero &&
-        episode <= 0) {
-      return false;
-    }
-    final time =
-        playState.position.inMicroseconds / Duration.microsecondsPerSecond;
-
-    final item = Danmaku(
-      message: trimmed,
-      time: time,
-      type: type,
-      color: color ?? Colors.white,
-      bgmUserId: bgmUserId,
-      source: 'AnimeFlow',
-    );
-    addDanDanmaku(item, bgmUserId);
-    await FlowApi.sendDanmaku(bgmBangumiId, episode,
-        message: item.message,
-        time: item.time,
-        type: item.type,
-        color: item.color);
-    return true;
-  }
-
-  Future<List<Danmaku>> _loadLocalDanmaku(String? path) async {
-    final trimmedPath = path?.trim();
-    if (trimmedPath == null || trimmedPath.isEmpty) {
-      return const [];
-    }
-    final file = File(trimmedPath);
-    if (!await file.exists()) {
-      return const [];
-    }
-    try {
-      final decoded = jsonDecode(await file.readAsString());
-      final items = switch (decoded) {
-        List<dynamic> value => value,
-        {'data': final List<dynamic> value} => value,
-        {'comments': final List<dynamic> value} => value,
-        _ => const <dynamic>[],
-      };
-      return items
-          .whereType<Map<String, dynamic>>()
-          .map(Danmaku.fromJson)
-          .toList();
-    } catch (e) {
-      LiggLogger().e('加载本地弹幕失败: $e');
-      return const [];
-    }
-  }
-
-  /// 添加弹幕到画布
-  /// [bgmUserId] 当前登录用户的 Bangumi id；未登录时为 null，此时 [DanmakuContentItem.selfSend] 恒为 false。
-  void addDanDanmaku(Danmaku danmaku, int? bgmUserId) {
-    final DanmakuItemType itemType;
-    if (danmaku.type == 4) {
-      itemType = DanmakuItemType.bottom;
-    } else if (danmaku.type == 5) {
-      itemType = DanmakuItemType.top;
-    } else {
-      itemType = DanmakuItemType.scroll;
-    }
-    try {
-      danmakuController?.addDanmaku(
-        DanmakuContentItem(
-          danmaku.message,
-          color: danmaku.color,
-          type: itemType,
-          selfSend: danmaku.bgmUserId != null && danmaku.bgmUserId == bgmUserId,
-        ),
-      );
-    } catch (_) {}
-  }
-
-  void removeDanmaku() {
-    _danmakuRequestId++;
-    _danmakuChineseModeRevision++;
-    _clearDanmakuCanvas();
-    _playStateActions.clearDanDanmakus();
-  }
-
-  void _clearDanmakuCanvas() {
-    danmakuSynchronizer.clear();
-  }
-
-  /// 切换弹幕开关
-  void toggleDanmaku() {
-    _playStateActions.toggleDanmakuOn();
-    final danmakuOn = _playStateActions.value.danmakuOn;
-    AppSettings.setDanmakuOn(danmakuOn);
-    if (!danmakuOn) {
-      danmakuController?.clear();
-    }
-  }
-
   void switchToNextEpisode() => _episodesActions.switchToNextEpisode();
 
   /// 切换视频画面填充模式
   void toggleVideoFit(BoxFit fits) {
     _playStateActions.setVideoFit(fits);
-  }
-
-  /// 切换平台显示/隐藏状态
-  void togglePlatformVisibility(String platform) {
-    _playStateActions.toggleHiddenPlatform(platform);
-    // 清空屏幕上的弹幕，新弹幕会按照新的隐藏状态过滤
-    danmakuController?.clear();
-  }
-
-  /// 检查平台是否被隐藏
-  bool isPlatformHidden(String platform) {
-    return _playStateActions.value.hiddenPlatforms.contains(platform);
   }
 
   ///暂停/播放
@@ -1166,6 +856,7 @@ class PlaySession {
 
   /// 跳转到指定位置
   void seekTo(Duration pos) {
+    danmaku.onSeek();
     unawaited(playbackCoordinator.seek(pos));
     _updateEffectiveBufferingState(position: pos);
     playbackProgressManager.saveAfterSeek(pos);

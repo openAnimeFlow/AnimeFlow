@@ -6,6 +6,7 @@ import 'package:anime_flow/core/logger/logger.dart';
 import 'package:anime_flow/app/localization/app_localizations.dart';
 import 'package:anime_flow/features/play/data/repository/play_repository.dart';
 import 'package:anime_flow/features/play/presentation/providers/episodes_provider.dart';
+import 'package:anime_flow/features/play/presentation/providers/danmaku_state_provider.dart';
 import 'package:anime_flow/features/play/presentation/providers/play_provider.dart';
 import 'package:anime_flow/features/play/presentation/providers/video_source_provider.dart';
 import 'package:anime_flow/features/play/presentation/providers/video_ui_provider.dart';
@@ -372,7 +373,7 @@ class _ContentViewState extends ConsumerState<_ContentView>
       NotificationToast.show(l10n.loginBeforeDanmaku, title: l10n.pleaseLogin);
       return;
     }
-    final success = await playSession.sendDanmaku(
+    final success = await playSession.danmaku.send(
       text,
       bgmUserId: userId,
     );
@@ -417,8 +418,8 @@ class _ContentViewState extends ConsumerState<_ContentView>
                     : Consumer(
                         builder: (context, ref, _) {
                           final danmakuOn = ref.watch(
-                            playStateProvider
-                                .select((state) => state.danmakuOn),
+                            danmakuStateProvider
+                                .select((state) => state.enabled),
                           );
                           return Padding(
                             padding: const EdgeInsets.all(8.0),
@@ -434,7 +435,7 @@ class _ContentViewState extends ConsumerState<_ContentView>
                                 }
                               },
                               onSend: (text) => onSendDanmaku(text),
-                              onClose: playSession.toggleDanmaku,
+                              onClose: playSession.danmaku.toggleEnabled,
                             ),
                           );
                         },

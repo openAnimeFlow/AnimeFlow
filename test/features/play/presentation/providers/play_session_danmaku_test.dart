@@ -1,124 +1,104 @@
 import 'dart:async';
 import 'dart:io';
 
-import 'package:anime_flow/core/settings/storage.dart';
 import 'package:anime_flow/features/play/application/danmaku_chinese_converter.dart';
 import 'package:anime_flow/features/play/application/danmaku_chinese_mode.dart';
-import 'package:anime_flow/features/play/application/playback_progress_manager.dart';
-import 'package:anime_flow/features/play/application/playback_coordinator.dart';
-import 'package:anime_flow/features/play/domain/player/playback_source.dart';
-import 'package:anime_flow/features/play/domain/player/player_engine.dart';
-import 'package:anime_flow/features/play/domain/player/player_event.dart';
-import 'package:anime_flow/features/play/infrastructure/player/player_engine_factory.dart';
-import 'package:anime_flow/features/play/presentation/providers/episodes_provider.dart';
-import 'package:anime_flow/features/play/presentation/providers/play_provider.dart';
-import 'package:anime_flow/features/play/presentation/providers/video_ui_provider.dart';
+import 'package:anime_flow/features/play/application/danmaku_session.dart';
+import 'package:anime_flow/features/play/application/danmaku_state.dart';
 import 'package:anime_flow/shared/models/player/danmaku/danmaku_module.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:hive_ce/hive.dart';
 
 void main() {
-  setUpAll(() => Storage.setting = _Settings());
-
-  test(
-      'new episode loads while old conversion is pending and rejects old result',
-      () async {
-    final directory =
-        await Directory.systemTemp.createTemp('danmaku_request_test');
-    addTearDown(() => directory.delete(recursive: true));
-    final file = File('${directory.path}/danmaku.json');
-    await file.writeAsString('[{"m":"test","p":"1,1,16777215,test"}]');
+  test('new episode rejects an older pending conversion', () async {
+    final file = await _danmakuFile();
     final converter = _Converter();
-    final session = _Session(converter);
-    final first = session.initPlayState(_request(1, file.path));
+    final store = _Store();
+    final session = _session(store, converter);
+    addTearDown(session.dispose);
+
+    session.beginPlaybackChange();
+    session.clear();
+    final first = _load(session, file.path);
     await converter.started.future;
     expect(
-        session.statuses,
+        store.statuses,
         containsAllInOrder([
           DanmakuLoadStatus.waitingForVideo,
           DanmakuLoadStatus.loading,
         ]));
-    await session.initPlayState(_request(2, file.path));
+
+    session.beginPlaybackChange();
+    session.clear();
+    await _load(session, file.path);
     expect(converter.calls, 2);
-    expect(session.installs, 1);
-    expect(session.statuses.last, DanmakuLoadStatus.idle);
-    final statusCount = session.statuses.length;
+    expect(store.installs, 1);
+    expect(store.value.loadStatus, DanmakuLoadStatus.idle);
+    final statusCount = store.statuses.length;
+
     converter.gate.complete();
     await first;
-    expect(session.installs, 1);
-    expect(session.statuses.length, statusCount);
+    expect(store.installs, 1);
+    expect(store.statuses.length, statusCount);
   });
 
-  test('stopping during conversion prevents installing the pending result',
-      () async {
-    final directory =
-        await Directory.systemTemp.createTemp('danmaku_stop_test');
-    addTearDown(() => directory.delete(recursive: true));
-    final file = File('${directory.path}/danmaku.json');
-    await file.writeAsString('[{"m":"test","p":"1,1,16777215,test"}]');
+  test('stopping during conversion discards the pending result', () async {
+    final file = await _danmakuFile();
     final converter = _Converter();
-    final session = _Session(converter);
-    final opening = session.initPlayState(_request(1, file.path));
+    final store = _Store();
+    final session = _session(store, converter);
+    addTearDown(session.dispose);
+
+    session.beginPlaybackChange();
+    session.clear();
+    final loading = _load(session, file.path);
     await converter.started.future;
-    await session.stopCurrentMedia();
-    expect(session.statuses.last, DanmakuLoadStatus.waitingForVideo);
-    final statusCount = session.statuses.length;
+    session.beginPlaybackChange();
+    session.clear();
+    final statusCount = store.statuses.length;
+
     converter.gate.complete();
-    await opening;
-    expect(session.installs, 0);
-    expect(session.statuses.length, statusCount);
+    await loading;
+    expect(store.installs, 0);
+    expect(store.value.loadStatus, DanmakuLoadStatus.waitingForVideo);
+    expect(store.statuses.length, statusCount);
   });
 }
 
-PlayRequest _request(int episode, String path) => PlayRequest(
-      videoUrl:
-          '${Directory.systemTemp.path}${Platform.pathSeparator}episode_$episode.mp4',
-      offset: 0,
-      subjectId: 1,
-      episodeIndex: episode,
-      episodeSort: episode,
-      episodeId: episode,
-      subjectName: 'test',
-      subjectCover: '',
-      alias: const [],
-      isLocalPlayback: true,
-      localDanmakuPath: path,
+Future<File> _danmakuFile() async {
+  final directory =
+      await Directory.systemTemp.createTemp('danmaku_session_test');
+  addTearDown(() => directory.delete(recursive: true));
+  final file = File('${directory.path}/danmaku.json');
+  await file.writeAsString('[{"m":"test","p":"1,1,16777215,test"}]');
+  return file;
+}
+
+DanmakuSession _session(_Store store, _Converter converter) => DanmakuSession(
+      store: store,
+      converter: converter,
+      initialChineseMode: DanmakuChineseMode.none,
+      readPlayback: () => const DanmakuPlaybackSnapshot(
+        position: Duration.zero,
+        duration: Duration.zero,
+        playing: false,
+      ),
+      currentUserId: () => null,
     );
 
-class _Session extends PlaySession {
-  _Session(DanmakuChineseConverter converter) : this._(converter, _State());
-
-  _Session._(DanmakuChineseConverter converter, this.testState)
-      : super(
-          shadersDirectory: Directory.systemTemp,
-          playStateActions: testState,
-          videoUiStateActions: _Ui(),
-          episodesActions: _Episodes(),
-          danmakuChineseConverter: converter,
-          engineFactory: const PlayerEngineFactory(),
-          initialDanmakuChineseMode: DanmakuChineseMode.none,
-          setEpisodeWatched: (
-              {required subjectId, required episodeId, required watched}) {},
-        ) {
-    playbackProgressManager = _Progress();
-    playbackCoordinator = PlaybackCoordinator(
-        engineFactory: _EngineFactory(_engine), adBlocker: false);
-    unawaited(playbackCoordinator.initialize());
-  }
-  final _State testState;
-  List<DanmakuLoadStatus> get statuses => testState.statuses;
-  int installs = 0;
-  final _engine = _Engine();
-  @override
-  void addDanmakuAll(List<Danmaku> danmaku) {
-    installs++;
-  }
-}
+Future<void> _load(DanmakuSession session, String path) => session.loadEpisode(
+      subjectId: 1,
+      episode: 1,
+      isLocalPlayback: true,
+      localPath: path,
+      expectedRequestId: session.requestId,
+      isPlaybackCurrent: () => true,
+    );
 
 class _Converter extends DanmakuChineseConverter {
   final started = Completer<void>();
   final gate = Completer<void>();
   int calls = 0;
+
   @override
   Future<List<Danmaku>> convertDanmakus(
       List<Danmaku> items, DanmakuChineseMode mode) async {
@@ -130,53 +110,43 @@ class _Converter extends DanmakuChineseConverter {
   }
 }
 
-class _Engine implements PlayerEngine {
-  @override
-  Future<void> initialize() async {}
-  @override
-  Stream<PlayerEvent> get events => const Stream.empty();
-  @override
-  Future<void> stop() async {}
-  @override
-  Future<void> play() async {}
-  @override
-  Future<void> open(PlaybackSource source,
-      {Duration? startPosition, bool autoPlay = false}) async {}
-  @override
-  dynamic noSuchMethod(Invocation invocation) => null;
-}
-
-class _EngineFactory extends PlayerEngineFactory {
-  const _EngineFactory(this.engine);
-  final PlayerEngine engine;
-  @override
-  PlayerEngine create(kernel, {required bool adBlocker}) => engine;
-}
-
-class _Settings implements Box<dynamic> {
-  @override
-  dynamic noSuchMethod(Invocation invocation) => null;
-}
-
-class _State implements PlayStateNotifier {
+class _Store implements DanmakuStore {
+  DanmakuState _state = const DanmakuState();
   final statuses = <DanmakuLoadStatus>[];
-  @override
-  void setDanmakuLoadStatus(DanmakuLoadStatus value) => statuses.add(value);
-  @override
-  dynamic noSuchMethod(Invocation invocation) => null;
-}
+  int installs = 0;
 
-class _Ui implements VideoUiStateActions {
   @override
-  dynamic noSuchMethod(Invocation invocation) => null;
-}
+  DanmakuState get value => _state;
 
-class _Episodes implements Episodes {
   @override
-  dynamic noSuchMethod(Invocation invocation) => null;
-}
+  void setLoadStatus(DanmakuLoadStatus value) {
+    statuses.add(value);
+    _state = _state.copyWith(loadStatus: value);
+  }
 
-class _Progress implements PlaybackProgressManager {
   @override
-  dynamic noSuchMethod(Invocation invocation) => null;
+  void setDanmakus(Map<int, List<Danmaku>> value) {
+    installs++;
+    _state = _state.copyWith(danmakus: value);
+  }
+
+  @override
+  void clearDanmakus() => _state = _state.copyWith(danmakus: const {});
+
+  @override
+  void incrementEpoch() => _state = _state.copyWith(epoch: _state.epoch + 1);
+
+  @override
+  void setHiddenPlatforms(Set<String> value) =>
+      _state = _state.copyWith(hiddenPlatforms: value);
+
+  @override
+  void toggleEnabled() => _state = _state.copyWith(enabled: !_state.enabled);
+
+  @override
+  void toggleHiddenPlatform(String platform) {
+    final next = {..._state.hiddenPlatforms};
+    if (!next.remove(platform)) next.add(platform);
+    _state = _state.copyWith(hiddenPlatforms: next);
+  }
 }

@@ -179,7 +179,7 @@ class _DesktopGestureDetectorState
       return KeyEventResult.handled;
     }
     if (shortcut[PlayerShortcutAction.toggleDanmaku]!.contains(pressed)) {
-      playSession.toggleDanmaku();
+      playSession.danmaku.toggleEnabled();
       return KeyEventResult.handled;
     }
     if (shortcut[PlayerShortcutAction.nextEpisode]!.contains(pressed)) {

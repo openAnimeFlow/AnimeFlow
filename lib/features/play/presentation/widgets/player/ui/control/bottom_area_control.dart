@@ -2,6 +2,7 @@ import 'package:anime_flow/core/constants/assets_path_constants.dart';
 import 'package:anime_flow/shared/models/enums/video_controls_icon_type.dart';
 import 'package:anime_flow/core/network/clients/flow_client.dart';
 import 'package:anime_flow/features/play/presentation/providers/play_provider.dart';
+import 'package:anime_flow/features/play/presentation/providers/danmaku_state_provider.dart';
 import 'package:anime_flow/features/play/presentation/providers/video_ui_provider.dart';
 import 'package:anime_flow/features/play/presentation/providers/episodes_provider.dart';
 import 'package:anime_flow/features/play/presentation/widgets/player/ui/button/fit_button.dart';
@@ -36,7 +37,7 @@ class BottomAreaControl extends ConsumerWidget {
     String text,
     int bgmUserId,
   ) async {
-    final success = await playController.sendDanmaku(
+    final success = await playController.danmaku.send(
       text,
       bgmUserId: bgmUserId,
     );
@@ -142,7 +143,7 @@ class BottomAreaControl extends ConsumerWidget {
             //弹幕开关
             IconButton(
               tooltip: danmakuOn ? l10n.turnOffDanmaku : l10n.turnOnDanmaku,
-              onPressed: () => playController.toggleDanmaku(),
+              onPressed: () => playController.danmaku.toggleEnabled(),
               icon: Icon(
                 danmakuOn
                     ? Icons.subtitles_outlined
@@ -201,7 +202,7 @@ class BottomAreaControl extends ConsumerWidget {
     final videoUiStateController = ref.read(videoUiProvider.notifier);
     final fullscreen =
         ref.watch(playStateProvider.select((s) => s.isFullscreen));
-    final danmakuOn = ref.watch(playStateProvider.select((s) => s.danmakuOn));
+    final danmakuOn = ref.watch(danmakuStateProvider.select((s) => s.enabled));
     final isWideScreen =
         ref.watch(playStateProvider.select((s) => s.isWideScreen));
     final isContentExpanded =

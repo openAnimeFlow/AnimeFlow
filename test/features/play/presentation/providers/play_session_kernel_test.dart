@@ -5,6 +5,8 @@ import 'package:anime_flow/core/settings/storage.dart';
 import 'package:anime_flow/core/constants/storage_key.dart';
 import 'package:anime_flow/features/play/application/danmaku_chinese_converter.dart';
 import 'package:anime_flow/features/play/application/danmaku_chinese_mode.dart';
+import 'package:anime_flow/features/play/application/danmaku_session.dart';
+import 'package:anime_flow/features/play/application/danmaku_state.dart';
 import 'package:anime_flow/features/play/application/playback_coordinator.dart';
 import 'package:anime_flow/features/play/application/playback_progress_manager.dart';
 import 'package:anime_flow/features/play/domain/player/playback_source.dart';
@@ -28,7 +30,8 @@ void main() {
     final session = _Session(factory);
     await session.playbackCoordinator.initialize();
     addTearDown(session.playbackCoordinator.dispose);
-    factory.beforeOpen = (_) async => throw StateError('local file unavailable');
+    factory.beforeOpen =
+        (_) async => throw StateError('local file unavailable');
     await expectLater(session.initPlayState(_request(1)), throwsStateError);
     factory.beforeOpen = null;
     await session.initPlayState(_request(1));
@@ -41,11 +44,13 @@ void main() {
     TargetPlatform.android,
     TargetPlatform.fuchsia,
   ]) {
-    test('rebuilding preserves the correct engine volume on $platform', () async {
+    test('rebuilding preserves the correct engine volume on $platform',
+        () async {
       debugDefaultTargetPlatformOverride = platform;
       addTearDown(() => debugDefaultTargetPlatformOverride = null);
       final factory = _Factory();
-      final state = _State()..value = const PlayState(playing: true, volume: 35);
+      final state = _State()
+        ..value = const PlayState(playing: true, volume: 35);
       final session = _Session(factory, state: state);
       await session.playbackCoordinator.initialize();
       addTearDown(session.playbackCoordinator.dispose);
@@ -78,8 +83,7 @@ void main() {
     expect(factory.engines, hasLength(2));
     expect(factory.engines.last.kernel, PlayerKernel.mediaKit);
     expect(factory.engines.first.disposeCount, 1);
-    expect(
-        factory.engines.last.source?.uri, Uri.file(_localPath(1)));
+    expect(factory.engines.last.source?.uri, Uri.file(_localPath(1)));
     expect(factory.engines.last.source?.isLocal, isTrue);
     expect(await session.setHardwareDecoder(true), isTrue);
     expect(Storage.setting.get(PlaybackKey.hardwareDecoder), isTrue);
@@ -111,10 +115,8 @@ void main() {
     expect(await switching, isTrue);
     await episode;
     expect(session.episodeId, 2);
-    expect(
-        factory.engines.last.source?.uri, Uri.file(_localPath(2)));
-    expect(
-        factory.engines.first.source?.uri, Uri.file(_localPath(1)));
+    expect(factory.engines.last.source?.uri, Uri.file(_localPath(2)));
+    expect(factory.engines.first.source?.uri, Uri.file(_localPath(1)));
     expect(factory.engines.first.disposeCount, 1);
   });
 
@@ -143,8 +145,7 @@ void main() {
     await episode;
     expect(await switching, isTrue);
     expect(session.episodeId, 2);
-    expect(
-        factory.engines.last.source?.uri, Uri.file(_localPath(2)));
+    expect(factory.engines.last.source?.uri, Uri.file(_localPath(2)));
   });
 
   test('latest episode request wins when several arrive during switching',
@@ -200,9 +201,18 @@ class _Session extends PlaySession {
           playStateActions: state ?? _State(),
           videoUiStateActions: _Ui(),
           episodesActions: _Episodes(),
-          danmakuChineseConverter: DanmakuChineseConverter(),
+          danmaku: DanmakuSession(
+            store: _DanmakuStore(),
+            converter: DanmakuChineseConverter(),
+            initialChineseMode: DanmakuChineseMode.none,
+            readPlayback: () => const DanmakuPlaybackSnapshot(
+              position: Duration.zero,
+              duration: Duration.zero,
+              playing: false,
+            ),
+            currentUserId: () => null,
+          ),
           engineFactory: factory,
-          initialDanmakuChineseMode: DanmakuChineseMode.none,
           setEpisodeWatched: (
               {required subjectId, required episodeId, required watched}) {},
         ) {
@@ -210,6 +220,14 @@ class _Session extends PlaySession {
         PlaybackCoordinator(engineFactory: factory, adBlocker: false);
     playbackProgressManager = _Progress();
   }
+}
+
+class _DanmakuStore implements DanmakuStore {
+  @override
+  DanmakuState get value => const DanmakuState();
+
+  @override
+  dynamic noSuchMethod(Invocation invocation) => null;
 }
 
 class _Factory extends PlayerEngineFactory {
@@ -264,6 +282,7 @@ class _Engine implements PlayerEngine {
   Future<void> setVolume(double volume) async {
     this.volume = volume;
   }
+
   @override
   Future<void> setRate(double rate) async {}
   @override

@@ -1,5 +1,5 @@
 <div align="center">
-  <img width="200" alt="AnimeFlow Logo" src="assets/image/logo/logo.webp" />
+  <img width="100%" alt="AnimeFlow Logo" src="assets/features/readme-banner.svg" />
 </div>
 
 <div align="center">

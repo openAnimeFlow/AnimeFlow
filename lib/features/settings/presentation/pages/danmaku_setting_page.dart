@@ -3,19 +3,22 @@ import 'package:anime_flow/core/settings/app_settings.dart';
 import 'package:anime_flow/features/play/application/danmaku_chinese_mode.dart';
 import 'package:anime_flow/features/play/presentation/providers/danmaku_chinese_mode_provider.dart';
 import 'package:anime_flow/features/settings/presentation/providers/setting_provider.dart';
+import 'package:anime_flow/features/settings/presentation/providers/font_provider.dart';
+import 'package:anime_flow/shared/models/font_item.dart';
 import 'package:anime_flow/shared/widgets/drop_down_menu.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:anime_flow/app/localization/app_localizations.dart';
 
-class DanmakuSettingPage extends StatefulWidget {
+class DanmakuSettingPage extends ConsumerStatefulWidget {
   const DanmakuSettingPage({super.key});
 
   @override
-  State<DanmakuSettingPage> createState() => _DanmakuSettingPageState();
+  ConsumerState<DanmakuSettingPage> createState() =>
+      _DanmakuSettingPageState();
 }
 
-class _DanmakuSettingPageState extends State<DanmakuSettingPage> {
+class _DanmakuSettingPageState extends ConsumerState<DanmakuSettingPage> {
   // 弹幕配置状态
   late double _opacity;
   late double _fontSize;
@@ -31,6 +34,7 @@ class _DanmakuSettingPageState extends State<DanmakuSettingPage> {
   late bool _platformGamer;
   late bool _platformDanDanPlay;
   bool _isChineseModeMenuOpen = false;
+  bool _isFontMenuOpen = false;
 
   @override
   void initState() {
@@ -294,6 +298,93 @@ class _DanmakuSettingPageState extends State<DanmakuSettingPage> {
                   ),
                   const SizedBox(height: 16),
 
+                  // 弹幕字体
+                  Consumer(
+                    builder: (context, ref, _) {
+                      final downloadedFonts = ref
+                          .watch(downloadedFontMetasProvider)
+                          .values
+                          .where((font) =>
+                              ref.watch(fontDownloadProvider(font.id)).status ==
+                              FontDownloadStatus.done)
+                          .toList()
+                        ..sort((a, b) => a.name.compareTo(b.name));
+                      final selectedFamily =
+                          ref.watch(danmakuFontFamilyProvider);
+                      final options = [
+                        const _DanmakuFontOption.project(),
+                        ...downloadedFonts.map(_DanmakuFontOption.downloaded),
+                      ];
+                      final selected = options.firstWhere(
+                        (option) => option.family == selectedFamily,
+                        orElse: () => options.first,
+                      );
+                      final colorScheme = Theme.of(context).colorScheme;
+                      return Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          _buildSectionTitle(l10n.fontStyle),
+                          SwitchListTile(
+                            title: Text(l10n.customAppFont),
+                            value: ref.watch(danmakuFontEnabledProvider),
+                            onChanged: (enabled) {
+                              ref
+                                  .read(danmakuFontEnabledProvider.notifier)
+                                  .setEnabled(enabled);
+                            },
+                          ),
+                          Padding(
+                            padding: const EdgeInsets.symmetric(horizontal: 16),
+                            child: Align(
+                              alignment: Alignment.centerRight,
+                              child: DropDownMenu<_DanmakuFontOption>(
+                                items: options,
+                                selectedItem: selected,
+                                tooltip: l10n.fontStyle,
+                                onOpenedChanged: (isOpen) {
+                                  if (_isFontMenuOpen == isOpen) return;
+                                  setState(() => _isFontMenuOpen = isOpen);
+                                },
+                                buttonBuilder: (context, _) {
+                                  return _buildFontMenuButton(
+                                    context,
+                                    selected.label(l10n),
+                                    colorScheme,
+                                  );
+                                },
+                                itemBuilder: (context, option, isSelected) {
+                                  return Row(
+                                    children: [
+                                      SizedBox(
+                                        width: 24,
+                                        child: isSelected
+                                            ? Icon(
+                                                Icons.check,
+                                                size: 18,
+                                                color: colorScheme.primary,
+                                              )
+                                            : null,
+                                      ),
+                                      Expanded(
+                                        child: Text(option.label(l10n)),
+                                      ),
+                                    ],
+                                  );
+                                },
+                                onSelected: (option) {
+                                  ref
+                                      .read(danmakuFontFamilyProvider.notifier)
+                                      .setFamily(option.family);
+                                },
+                              ),
+                            ),
+                          ),
+                        ],
+                      );
+                    },
+                  ),
+                  const SizedBox(height: 16),
+
                   // 弹幕速度
                   _buildSectionTitle(l10n.danmakuSpeedTitle),
                   Builder(
@@ -502,6 +593,36 @@ class _DanmakuSettingPageState extends State<DanmakuSettingPage> {
     };
   }
 
+  Widget _buildFontMenuButton(
+    BuildContext context,
+    String label,
+    ColorScheme colorScheme,
+  ) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+      decoration: BoxDecoration(
+        border: Border.all(color: colorScheme.outlineVariant),
+        borderRadius: BorderRadius.circular(8),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Text(label, style: const TextStyle(fontSize: 14)),
+          const SizedBox(width: 4),
+          AnimatedRotation(
+            turns: _isFontMenuOpen ? 0.5 : 0,
+            duration: const Duration(milliseconds: 180),
+            curve: Curves.easeOutCubic,
+            child: Icon(
+              Icons.arrow_drop_down,
+              color: colorScheme.primary,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
   Widget _buildSectionTitle(String title) {
     return Padding(
       padding: const EdgeInsets.only(top: 16, bottom: 8, left: 16),
@@ -515,4 +636,16 @@ class _DanmakuSettingPageState extends State<DanmakuSettingPage> {
       ),
     );
   }
+}
+
+class _DanmakuFontOption {
+  const _DanmakuFontOption.project() : font = null;
+
+  const _DanmakuFontOption.downloaded(this.font);
+
+  final FontItem? font;
+
+  String? get family => font?.family;
+
+  String label(AppLocalizations l10n) => font?.name ?? l10n.customAppFont;
 }

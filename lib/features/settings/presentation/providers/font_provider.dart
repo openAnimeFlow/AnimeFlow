@@ -2,6 +2,7 @@ import 'dart:io';
 
 import 'package:anime_flow/core/constants/storage_key.dart';
 import 'package:anime_flow/core/network/api/github_api.dart';
+import 'package:anime_flow/core/settings/app_settings.dart';
 import 'package:anime_flow/shared/models/font_item.dart';
 import 'package:anime_flow/app/theme/theme_provider.dart';
 import 'package:anime_flow/core/settings/storage.dart';
@@ -458,5 +459,29 @@ class SelectedFont extends _$SelectedFont {
     await Storage.setting.delete(SettingKey.selectedFontId);
     state = null;
     ref.read(themeProvider.notifier).setFontFamily(null);
+  }
+}
+
+/// 弹幕专用字体。为空时跟随项目主题字体。
+@riverpod
+class DanmakuFontFamily extends _$DanmakuFontFamily {
+  @override
+  String? build() => AppSettings.danmakuFontFamily;
+
+  Future<void> setFamily(String? family) async {
+    await AppSettings.setDanmakuValue(DanmakuKey.danmakuFontFamily, family);
+    state = family;
+  }
+}
+
+/// 是否在弹幕画布中应用项目或自定义字体。
+@riverpod
+class DanmakuFontEnabled extends _$DanmakuFontEnabled {
+  @override
+  bool build() => AppSettings.danmakuUseFont;
+
+  Future<void> setEnabled(bool enabled) async {
+    await AppSettings.setDanmakuValue(DanmakuKey.danmakuUseFont, enabled);
+    state = enabled;
   }
 }

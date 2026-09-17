@@ -1,5 +1,7 @@
 import 'package:anime_flow/core/settings/app_settings.dart';
+import 'package:anime_flow/app/theme/theme_provider.dart';
 import 'package:anime_flow/features/play/presentation/providers/play_provider.dart';
+import 'package:anime_flow/features/settings/presentation/providers/font_provider.dart';
 import 'package:canvas_danmaku/canvas_danmaku.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -29,7 +31,6 @@ class _DanmakuViewState extends ConsumerState<DanmakuView>
   late double _danmakuDuration;
   late double _danmakuLineHeight;
   late int _danmakuFontWeight;
-  late bool _danmakuUseSystemFont;
 
   @override
   bool get wantKeepAlive => true;
@@ -51,7 +52,6 @@ class _DanmakuViewState extends ConsumerState<DanmakuView>
     _danmakuDuration = AppSettings.danmakuDuration;
     _danmakuLineHeight = AppSettings.danmakuLineHeight;
     _danmakuFontWeight = AppSettings.danmakuFontWeight;
-    _danmakuUseSystemFont = AppSettings.danmakuUseSystemFont;
   }
 
   @override
@@ -70,6 +70,11 @@ class _DanmakuViewState extends ConsumerState<DanmakuView>
     final rate = ref.watch(
       playStateProvider.select((state) => state.rate),
     );
+    final useFont = ref.watch(danmakuFontEnabledProvider);
+    final projectFontFamily = useFont
+        ? ref.watch(danmakuFontFamilyProvider) ??
+            ref.watch(themeProvider.select((state) => state.fontFamily))
+        : null;
     return IgnorePointer(
       // 弹幕层不拦截点击事件，让播放器控件可以正常交互
       ignoring: true,
@@ -94,6 +99,7 @@ class _DanmakuViewState extends ConsumerState<DanmakuView>
                   hideBottom: _hideBottom,
                   duration: _danmakuDuration / rate,
                   massiveMode: _massiveMode,
+                  fontFamily: projectFontFamily,
                 ),
               );
             } catch (_) {
@@ -113,7 +119,7 @@ class _DanmakuViewState extends ConsumerState<DanmakuView>
           strokeWidth: _border ? 1.5 : 0.0,
           fontWeight: _danmakuFontWeight,
           massiveMode: _massiveMode,
-          fontFamily: _danmakuUseSystemFont ? null : null, // 可以设置自定义字体
+          fontFamily: projectFontFamily,
         ),
       ),
     );

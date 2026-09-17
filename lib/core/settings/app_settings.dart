@@ -2,8 +2,6 @@ import 'package:anime_flow/core/constants/storage_key.dart';
 import 'package:anime_flow/core/settings/storage.dart';
 
 /// 应用持久化配置的统一访问入口。
-///
-/// 各功能的配置都应通过此类访问，避免默认值、类型转换和存储逻辑分散。
 abstract final class AppSettings {
   static const bool defaultAutoPlayNext = true;
   static const bool defaultEpisodesProgress = true;
@@ -22,7 +20,6 @@ abstract final class AppSettings {
   static const bool defaultDanmakuMassiveMode = false;
   static const bool defaultDanmakuBorder = true;
   static const bool defaultDanmakuColor = true;
-  static const bool defaultDanmakuUseSystemFont = false;
   static const bool defaultDanmakuHideScroll = false;
   static const bool defaultDanmakuHideTop = false;
   static const bool defaultDanmakuHideBottom = false;
@@ -47,6 +44,8 @@ abstract final class AppSettings {
       _readDouble(DanmakuKey.danmakuLineHeight, defaultDanmakuLineHeight);
   static int get danmakuFontWeight =>
       _readInt(DanmakuKey.danmakuFontWeight, defaultDanmakuFontWeight);
+  static String? get danmakuFontFamily =>
+      Storage.setting.get(DanmakuKey.danmakuFontFamily) as String?;
 
   static bool get danmakuMassiveMode =>
       _readBool(DanmakuKey.danmakuMassiveMode, defaultDanmakuMassiveMode);
@@ -54,8 +53,8 @@ abstract final class AppSettings {
       _readBool(DanmakuKey.danmakuBorder, defaultDanmakuBorder);
   static bool get danmakuColor =>
       _readBool(DanmakuKey.danmakuColor, defaultDanmakuColor);
-  static bool get danmakuUseSystemFont =>
-      _readBool(DanmakuKey.danmakuUseSystemFont, defaultDanmakuUseSystemFont);
+  static bool get danmakuUseFont =>
+      _readBool(DanmakuKey.danmakuUseFont, true);
   static bool get danmakuHideScroll =>
       _readBool(DanmakuKey.danmakuHideScroll, defaultDanmakuHideScroll);
   static bool get danmakuHideTop =>

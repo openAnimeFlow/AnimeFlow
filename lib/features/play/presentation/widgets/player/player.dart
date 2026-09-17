@@ -12,7 +12,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:window_manager/window_manager.dart';
 
 import 'ui/danmaku/danmaku_view.dart';
-import 'ui/index.dart';
+import 'ui/video_ui.dart';
 
 class PlayerView extends ConsumerStatefulWidget {
   const PlayerView({super.key});

@@ -3,12 +3,25 @@ import 'dart:io';
 
 import 'package:anime_flow/features/play/application/danmaku_chinese_converter.dart';
 import 'package:anime_flow/features/play/application/danmaku_chinese_mode.dart';
+import 'package:anime_flow/features/play/application/danmaku_canvas.dart';
 import 'package:anime_flow/features/play/application/danmaku_session.dart';
 import 'package:anime_flow/features/play/application/danmaku_state.dart';
 import 'package:anime_flow/shared/models/player/danmaku/danmaku_module.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
+  test('seeking clears the danmaku canvas', () {
+    final canvas = _Canvas();
+    final session = _session(_Store(), DanmakuChineseConverter())
+      ..canvas = canvas;
+    addTearDown(session.dispose);
+
+    session.onSeek();
+
+    expect(canvas.clears, 1);
+  });
+
   test('new episode rejects an older pending conversion', () async {
     final file = await _danmakuFile();
     final converter = _Converter();
@@ -73,7 +86,10 @@ Future<File> _danmakuFile() async {
   return file;
 }
 
-DanmakuSession _session(_Store store, _Converter converter) => DanmakuSession(
+DanmakuSession _session(
+  _Store store,
+  DanmakuChineseConverter converter,
+) => DanmakuSession(
       store: store,
       converter: converter,
       initialChineseMode: DanmakuChineseMode.none,
@@ -149,4 +165,17 @@ class _Store implements DanmakuStore {
     if (!next.remove(platform)) next.add(platform);
     _state = _state.copyWith(hiddenPlatforms: next);
   }
+}
+
+class _Canvas implements DanmakuCanvas {
+  int clears = 0;
+
+  @override
+  void addDanmaku(Danmaku danmaku, int? currentUserId, {Color? color}) {}
+
+  @override
+  void clear() => clears++;
+
+  @override
+  void syncPlayback(bool playing) {}
 }

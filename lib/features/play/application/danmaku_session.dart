@@ -82,7 +82,12 @@ class DanmakuSession {
   }
 
   void onPlaybackChanged(bool playing) => _canvas?.syncPlayback(playing);
-  void onSeek() => _scheduler.invalidate();
+
+  void onSeek() {
+    _scheduler.invalidate();
+    clearCanvas();
+  }
+
   void clearCanvas() => _canvas?.clear();
 
   /// 新的视频请求开始时立即废弃旧请求及待显示弹幕。

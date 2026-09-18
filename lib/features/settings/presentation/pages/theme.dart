@@ -197,22 +197,35 @@ class _ThemePageState extends State<ThemePage> {
                 },
               ),
               const SizedBox(height: 10),
-              ListTile(
-                contentPadding: EdgeInsets.zero,
-                leading: Icon(
-                  Icons.text_fields_outlined,
-                  color: Theme.of(context).colorScheme.primary,
-                ),
-                title: Text(
-                  l10n.fontStyle,
-                  style: const TextStyle(
-                    fontSize: 16,
-                    fontWeight: FontWeight.w600,
-                  ),
-                ),
-                subtitle: Text(l10n.customAppFont),
-                trailing: const Icon(Icons.chevron_right),
+              InkWell(
+                borderRadius: BorderRadius.circular(10),
                 onTap: () => const SettingFontRoute().push(context),
+                child: Row(
+                  spacing: 10,
+                  children: [
+                     Icon(
+                      Icons.text_fields_outlined,
+                      color: ColorScheme.of(context).primary,
+                    ),
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          l10n.fontStyle,
+                          style: const TextStyle(
+                            fontSize: 16,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                        Text(l10n.customAppFont, style: TextStyle(
+                          color: ColorScheme.of(context).onSurface.withValues(alpha: .8),
+                        ),)
+                      ],
+                    ),
+                    const Spacer(),
+                    const Icon(Icons.chevron_right),
+                  ],
+                ),
               ),
             ],
           ),

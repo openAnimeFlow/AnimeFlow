@@ -68,7 +68,10 @@ class FlowClient {
 
   static final FlowClient instance = FlowClient._();
 
-  static AnimeFlowResponse _parseEnvelope(dynamic raw) {
+  static AnimeFlowResponse _parseEnvelope(dynamic raw, {int? statusCode}) {
+    if (statusCode == 204 || raw == null) {
+      return const AnimeFlowResponse(code: 200, message: '', data: null);
+    }
     if (raw is Map) {
       final response =
           AnimeFlowResponse.fromJson(Map<String, dynamic>.from(raw));
@@ -151,7 +154,7 @@ class FlowClient {
         ),
         cancelToken: cancelToken,
       );
-      return _parseEnvelope(response.data);
+      return _parseEnvelope(response.data, statusCode: response.statusCode);
     } on DioException catch (e) {
       throw await NetworkErrorMapper.mapException(e);
     }
@@ -184,7 +187,7 @@ class FlowClient {
         ),
         cancelToken: cancelToken,
       );
-      return _parseEnvelope(response.data);
+      return _parseEnvelope(response.data, statusCode: response.statusCode);
     } on DioException catch (e) {
       throw await NetworkErrorMapper.mapException(e);
     }
@@ -217,7 +220,7 @@ class FlowClient {
         ),
         cancelToken: cancelToken,
       );
-      return _parseEnvelope(response.data);
+      return _parseEnvelope(response.data, statusCode: response.statusCode);
     } on DioException catch (e) {
       throw await NetworkErrorMapper.mapException(e);
     }
@@ -248,7 +251,7 @@ class FlowClient {
         ),
         cancelToken: cancelToken,
       );
-      return _parseEnvelope(response.data);
+      return _parseEnvelope(response.data, statusCode: response.statusCode);
     } on DioException catch (e) {
       throw await NetworkErrorMapper.mapException(e);
     }

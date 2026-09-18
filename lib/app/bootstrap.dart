@@ -7,6 +7,7 @@ import 'package:anime_flow/features/shaders/shaders_controller.dart';
 import 'package:anime_flow/features/download/application/download_foreground_service.dart';
 import 'package:anime_flow/features/settings/presentation/providers/font_provider.dart';
 import 'package:anime_flow/core/network/core/dio_factory.dart';
+import 'package:anime_flow/core/presence/presence_service.dart';
 import 'package:anime_flow/core/logger/logger.dart';
 import 'package:anime_flow/core/settings/storage.dart';
 import 'package:anime_flow/features/source/data/services/source_config_initializer.dart';
@@ -27,6 +28,9 @@ Future<void> bootstrap() async {
   await SelectedFont.initOnStartup();
   appPackageInfo = await PackageInfo.fromPlatform();
   await DioFactory.initialize();
+  unawaited(
+    PresenceService.instance.start(appVersion: appPackageInfo!.version),
+  );
 
   if (Platform.isWindows || Platform.isLinux || Platform.isMacOS) {
     await windowManager.ensureInitialized();

@@ -2,6 +2,7 @@ import 'package:anime_flow/core/crawler/itme/crawler_config_item.dart';
 import 'package:anime_flow/core/crawler/itme/anti_crawler_config.dart';
 import 'package:anime_flow/features/source/data/repositories/source_repository.dart';
 import 'package:anime_flow/shared/widgets/notification_toast.dart';
+import 'package:anime_flow/shared/widgets/drop_down_menu.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:anime_flow/app/localization/app_localizations.dart';
@@ -92,22 +93,24 @@ class _AddPluginsPageState extends State<AddPluginsPage> {
     final editConfig = await sourceRepository.getSource(_originalKey!);
     if (editConfig != null && mounted) {
       final anti = editConfig.antiCrawlerConfig;
-      _antiEnabled = anti.enabled;
-      _captchaType = anti.captchaType;
-      _captchaImageController.text = anti.captchaImage;
-      _captchaInputController.text = anti.captchaInput;
-      _captchaButtonController.text = anti.captchaButton;
-      _controllers[0].text = editConfig.version;
-      _controllers[1].text = editConfig.name;
-      _controllers[2].text = editConfig.iconUrl;
-      _controllers[3].text = editConfig.baseUrl;
-      _controllers[4].text = editConfig.searchUrl;
-      _controllers[5].text = editConfig.searchList;
-      _controllers[6].text = editConfig.searchName;
-      _controllers[7].text = editConfig.searchLink;
-      _controllers[8].text = editConfig.lineNames;
-      _controllers[9].text = editConfig.lineList;
-      _controllers[10].text = editConfig.episode;
+      setState(() {
+        _antiEnabled = anti.enabled;
+        _captchaType = anti.captchaType;
+        _captchaImageController.text = anti.captchaImage;
+        _captchaInputController.text = anti.captchaInput;
+        _captchaButtonController.text = anti.captchaButton;
+        _controllers[0].text = editConfig.version;
+        _controllers[1].text = editConfig.name;
+        _controllers[2].text = editConfig.iconUrl;
+        _controllers[3].text = editConfig.baseUrl;
+        _controllers[4].text = editConfig.searchUrl;
+        _controllers[5].text = editConfig.searchList;
+        _controllers[6].text = editConfig.searchName;
+        _controllers[7].text = editConfig.searchLink;
+        _controllers[8].text = editConfig.lineNames;
+        _controllers[9].text = editConfig.lineList;
+        _controllers[10].text = editConfig.episode;
+      });
     }
 
     // 监听输入变化，清除错误状态
@@ -390,27 +393,49 @@ class _AddPluginsPageState extends State<AddPluginsPage> {
                 borderRadius: BorderRadius.circular(10),
               ),
             ),
-            child: DropdownButtonHideUnderline(
-              child: DropdownButton<int>(
-                isExpanded: true,
-                value: _captchaType,
-                items: [
-                  DropdownMenuItem(
-                    value: CaptchaType.imageCaptcha,
-                    child: Text(l10n.imageCaptchaManual),
+            child: DropDownMenu<int>(
+              items: const [
+                CaptchaType.imageCaptcha,
+                CaptchaType.autoClickButton,
+              ],
+              selectedItem: _captchaType,
+              buttonBuilder: (context, selectedType) {
+                return Align(
+                  alignment: Alignment.centerRight,
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Text(
+                        selectedType == CaptchaType.autoClickButton
+                            ? l10n.autoClickCaptcha
+                            : l10n.imageCaptchaManual,
+                      ),
+                      const Icon(Icons.arrow_drop_down),
+                    ],
                   ),
-                  DropdownMenuItem(
-                    value: CaptchaType.autoClickButton,
-                    child: Text(l10n.autoClickCaptcha),
-                  ),
-                ],
-                onChanged: (v) {
-                  if (v == null) return;
-                  setState(() {
-                    _captchaType = v;
-                  });
-                },
-              ),
+                );
+              },
+              itemBuilder: (context, type, isSelected) {
+                return Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Text(
+                      type == CaptchaType.autoClickButton
+                          ? l10n.autoClickCaptcha
+                          : l10n.imageCaptchaManual,
+                    ),
+                    if (isSelected) ...[
+                      const SizedBox(width: 12),
+                      const Icon(Icons.check, size: 18),
+                    ],
+                  ],
+                );
+              },
+              onSelected: (type) {
+                setState(() {
+                  _captchaType = type;
+                });
+              },
             ),
           ),
         ),

@@ -13,7 +13,7 @@ import 'package:anime_flow/features/play/presentation/providers/play_provider.da
 import 'package:anime_flow/features/play/domain/player/playback_phase.dart';
 import 'package:anime_flow/features/play/application/video_source_service.dart';
 import 'package:anime_flow/features/play/application/webview_video_source_service.dart';
-import 'package:anime_flow/features/source/data/repositories/source_repository_provider.dart';
+import 'package:anime_flow/features/source/application/providers/source_repository_provider.dart';
 import 'package:anime_flow/shared/models/player/play/video/episode_resources_item.dart';
 import 'package:anime_flow/shared/models/player/play/video/resources_item.dart';
 import 'package:anime_flow/app/router/routes_args.dart';

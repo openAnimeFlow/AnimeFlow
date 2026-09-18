@@ -1,22 +1,24 @@
 import 'package:anime_flow/core/crawler/itme/crawler_config_item.dart';
 import 'package:anime_flow/core/crawler/itme/anti_crawler_config.dart';
 import 'package:anime_flow/features/source/data/repositories/source_repository.dart';
+import 'package:anime_flow/features/source/application/providers/source_repository_provider.dart';
 import 'package:anime_flow/shared/widgets/notification_toast.dart';
 import 'package:anime_flow/shared/widgets/drop_down_menu.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:anime_flow/app/localization/app_localizations.dart';
 
-class AddPluginsPage extends StatefulWidget {
+class AddPluginsPage extends ConsumerStatefulWidget {
   final String? editPluginKey;
 
   const AddPluginsPage({super.key, this.editPluginKey});
 
   @override
-  State<AddPluginsPage> createState() => _AddPluginsPageState();
+  ConsumerState<AddPluginsPage> createState() => _AddPluginsPageState();
 }
 
-class _AddPluginsPageState extends State<AddPluginsPage> {
+class _AddPluginsPageState extends ConsumerState<AddPluginsPage> {
   static const _fieldCount = 11;
 
   List<_Field> _localizedTextFields(AppLocalizations l10n) => [
@@ -61,7 +63,7 @@ class _AddPluginsPageState extends State<AddPluginsPage> {
   late final List<TextEditingController> _controllers;
   final Set<int> _errorFields = {};
   final Set<String> _antiFieldErrors = {};
-  final sourceRepository = SourceRepository.instance;
+  SourceRepository get sourceRepository => ref.read(sourceRepositoryProvider);
   String? _originalKey; // 保存原始key值，用于编辑模式下删除旧数据
 
   late final TextEditingController _captchaImageController;

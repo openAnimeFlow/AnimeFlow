@@ -7,10 +7,6 @@ class SourceRepository {
   SourceRepository({SourceLocalDataSource? localDataSource})
       : _localDataSource = localDataSource ?? SourceLocalDataSource();
 
-  static final SourceRepository instance = SourceRepository._internal();
-
-  SourceRepository._internal() : _localDataSource = SourceLocalDataSource();
-
   final SourceLocalDataSource _localDataSource;
 
   Listenable get listenable => _localDataSource.listenable;

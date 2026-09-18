@@ -9,7 +9,7 @@ import 'package:anime_flow/features/settings/presentation/providers/font_provide
 import 'package:anime_flow/core/network/core/dio_factory.dart';
 import 'package:anime_flow/core/logger/logger.dart';
 import 'package:anime_flow/core/settings/storage.dart';
-import 'package:anime_flow/core/utils/crawl_config.dart';
+import 'package:anime_flow/features/source/data/services/source_config_initializer.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:hive_ce_flutter/hive_flutter.dart';
@@ -43,7 +43,7 @@ Future<void> bootstrap() async {
   final container = ProviderContainer();
   container.read(appInfoProvider);
   unawaited(container.read(shadersDirectoryProvider.future));
-  unawaited(CrawlConfig.initCrawlConfigs());
+  unawaited(SourceConfigInitializer().initialize());
 
   runApp(
     UncontrolledProviderScope(

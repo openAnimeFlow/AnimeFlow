@@ -1,23 +1,26 @@
 import 'package:anime_flow/core/crawler/itme/crawler_config_item.dart';
 import 'package:anime_flow/features/settings/presentation/providers/setting_provider.dart';
+import 'package:anime_flow/features/source/application/providers/plugin_provider.dart';
 import 'package:anime_flow/app/router/app_router.dart';
 import 'package:anime_flow/features/source/data/repositories/source_repository.dart';
+import 'package:anime_flow/features/source/application/providers/source_repository_provider.dart';
+import 'package:anime_flow/core/utils/utils.dart';
 import 'package:anime_flow/shared/widgets/animation_network_image.dart';
 import 'package:anime_flow/shared/widgets/notification_toast.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:anime_flow/app/localization/app_localizations.dart';
 
-class PluginsPage extends StatefulWidget {
+class PluginsPage extends ConsumerStatefulWidget {
   const PluginsPage({super.key});
 
   @override
-  State<PluginsPage> createState() => _PluginsPageState();
+  ConsumerState<PluginsPage> createState() => _PluginsPageState();
 }
 
-class _PluginsPageState extends State<PluginsPage> {
+class _PluginsPageState extends ConsumerState<PluginsPage> {
   List<CrawlConfigItem> dataSources = [];
-  final sourceRepository = SourceRepository.instance;
+  SourceRepository get sourceRepository => ref.read(sourceRepositoryProvider);
 
   @override
   void initState() {
@@ -80,6 +83,13 @@ class _PluginsPageState extends State<PluginsPage> {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
+    final remotePlugins = ref.watch(pluginCatalogProvider).whenOrNull(
+              data: (plugins) => plugins,
+            ) ??
+        const <PluginCatalogItem>[];
+    final remotePluginsByName = {
+      for (final plugin in remotePlugins) plugin.name: plugin,
+    };
     return Scaffold(
       appBar: PreferredSize(
         preferredSize: const Size.fromHeight(kToolbarHeight),
@@ -119,6 +129,10 @@ class _PluginsPageState extends State<PluginsPage> {
         },
         itemBuilder: (context, index) {
           final data = dataSources[index];
+          final remotePlugin = remotePluginsByName[data.name];
+          final hasUpdate = remotePlugin != null &&
+              Utils.compareVersionNumbers(remotePlugin.version, data.version) >
+                  0;
           return InkWell(
             key: ValueKey(data.name),
             onTap: () =>
@@ -149,7 +163,23 @@ class _PluginsPageState extends State<PluginsPage> {
                             data.name,
                             style: const TextStyle(fontWeight: FontWeight.bold),
                           ),
-                          Text(data.version)
+                          Row(
+                            children: [
+                              Text(data.version),
+                              if (hasUpdate) ...[
+                                const SizedBox(width: 8),
+                                Tooltip(
+                                  message: l10n.updateAvailable,
+                                  child: Icon(
+                                    Icons.system_update_alt,
+                                    size: 16,
+                                    color:
+                                        Theme.of(context).colorScheme.primary,
+                                  ),
+                                ),
+                              ],
+                            ],
+                          )
                         ]),
                   ),
                   IconButton(

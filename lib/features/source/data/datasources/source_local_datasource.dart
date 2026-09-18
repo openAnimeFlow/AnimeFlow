@@ -1,5 +1,6 @@
 import 'package:anime_flow/core/crawler/itme/crawler_config_item.dart';
 import 'package:anime_flow/core/constants/storage_key.dart';
+import 'package:anime_flow/core/settings/app_settings.dart';
 import 'package:anime_flow/core/settings/storage.dart';
 import 'package:flutter/foundation.dart';
 import 'package:hive_ce_flutter/adapters.dart';
@@ -9,8 +10,6 @@ import 'package:hive_ce_flutter/adapters.dart';
 /// 该类只负责 Hive 读写，不包含排序业务和页面状态。
 class SourceLocalDataSource {
   Box<dynamic> get configBox => Storage.crawlConfigs;
-
-  Box<dynamic> get settingBox => Storage.setting;
 
   Listenable get listenable => configBox.listenable();
 
@@ -41,12 +40,12 @@ class SourceLocalDataSource {
   }
 
   Future<List<String>> loadOrder() async {
-    final value = settingBox.get(StorageKey.crawlConfigOrder);
+    final value = AppSettings.getSetting<Object?>(StorageKey.crawlConfigOrder);
     if (value is! List) return const [];
     return value.map((item) => item.toString()).toList();
   }
 
   Future<void> saveOrder(List<String> names) {
-    return settingBox.put(StorageKey.crawlConfigOrder, names);
+    return AppSettings.setSetting(StorageKey.crawlConfigOrder, names);
   }
 }

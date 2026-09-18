@@ -1,6 +1,6 @@
 import 'package:anime_flow/app/localization/app_localizations.dart';
 import 'package:anime_flow/features/home/presentation/widgets/anime/anime_view.dart';
-import 'package:anime_flow/features/home/presentation/widgets/forum/forum_view.dart';
+import 'package:anime_flow/features/home/presentation/widgets/community/community_view.dart';
 import 'package:anime_flow/app/router/app_router.dart';
 import 'package:flutter/material.dart';
 
@@ -38,7 +38,7 @@ class _RecommendPageState extends State<RecommendPage>
             Expanded(
                 child: Row(
               children: [
-                Text(l10n.recommendTab),
+                Text(l10n.recommend),
                 const SizedBox(width: 10),
                 Container(
                   width: 200,
@@ -92,15 +92,15 @@ class _RecommendPageState extends State<RecommendPage>
           ),
         ],
         bottom: TabBar(controller: _tabController, tabs: [
-          Tab(text: l10n.animeTab),
-          Tab(text: l10n.forumTab),
+          Tab(text: l10n.anime),
+          Tab(text: l10n.community),
         ]),
       ),
       body: TabBarView(
         controller: _tabController,
         children: [
           AnimePage(key: _animeKey),
-          ForumPage(key: _timelineKey),
+          CommunityPage(key: _timelineKey),
         ],
       ),
     );

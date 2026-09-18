@@ -48,16 +48,16 @@ class AppLocalizationsZh extends AppLocalizations {
   String get englishLanguage => 'English';
 
   @override
-  String get recommendTab => '推荐';
+  String get recommend => '推荐';
 
   @override
-  String get mineTab => '我的';
+  String get mine => '我的';
 
   @override
-  String get animeTab => '动漫';
+  String get anime => '动漫';
 
   @override
-  String get forumTab => '论坛';
+  String get community => '社区';
 
   @override
   String get searchAnimeHint => '搜索动漫番剧...';
@@ -1967,16 +1967,16 @@ class AppLocalizationsZhHans extends AppLocalizationsZh {
   String get englishLanguage => 'English';
 
   @override
-  String get recommendTab => '推荐';
+  String get recommend => '推荐';
 
   @override
-  String get mineTab => '我的';
+  String get mine => '我的';
 
   @override
-  String get animeTab => '动漫';
+  String get anime => '动漫';
 
   @override
-  String get forumTab => '论坛';
+  String get community => '社区';
 
   @override
   String get searchAnimeHint => '搜索动漫番剧...';
@@ -3885,16 +3885,16 @@ class AppLocalizationsZhHantHk extends AppLocalizationsZh {
   String get englishLanguage => 'English';
 
   @override
-  String get recommendTab => '推薦';
+  String get recommend => '推薦';
 
   @override
-  String get mineTab => '我的';
+  String get mine => '我的';
 
   @override
-  String get animeTab => '動畫';
+  String get anime => '動畫';
 
   @override
-  String get forumTab => '論壇';
+  String get community => '社區';
 
   @override
   String get searchAnimeHint => '搜尋動畫番組...';
@@ -5804,16 +5804,16 @@ class AppLocalizationsZhHantTw extends AppLocalizationsZh {
   String get englishLanguage => 'English';
 
   @override
-  String get recommendTab => '推薦';
+  String get recommend => '推薦';
 
   @override
-  String get mineTab => '我的';
+  String get mine => '我的';
 
   @override
-  String get animeTab => '動畫';
+  String get anime => '動畫';
 
   @override
-  String get forumTab => '論壇';
+  String get community => '社區';
 
   @override
   String get searchAnimeHint => '搜尋動畫番劇...';

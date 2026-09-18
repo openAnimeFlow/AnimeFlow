@@ -181,29 +181,29 @@ abstract class AppLocalizations {
   /// **'English'**
   String get englishLanguage;
 
-  /// No description provided for @recommendTab.
+  /// No description provided for @recommend.
   ///
   /// In zh_Hans, this message translates to:
   /// **'推荐'**
-  String get recommendTab;
+  String get recommend;
 
-  /// No description provided for @mineTab.
+  /// No description provided for @mine.
   ///
   /// In zh_Hans, this message translates to:
   /// **'我的'**
-  String get mineTab;
+  String get mine;
 
-  /// No description provided for @animeTab.
+  /// No description provided for @anime.
   ///
   /// In zh_Hans, this message translates to:
   /// **'动漫'**
-  String get animeTab;
+  String get anime;
 
-  /// No description provided for @forumTab.
+  /// No description provided for @community.
   ///
   /// In zh_Hans, this message translates to:
-  /// **'论坛'**
-  String get forumTab;
+  /// **'社区'**
+  String get community;
 
   /// No description provided for @searchAnimeHint.
   ///

@@ -5,7 +5,6 @@ import 'package:anime_flow/core/constants/storage_key.dart';
 import 'package:anime_flow/core/logger/logger.dart';
 import 'package:anime_flow/core/network/api/flow_api.dart';
 import 'package:anime_flow/core/settings/app_settings.dart';
-import 'package:anime_flow/core/settings/storage.dart';
 import 'package:flutter/widgets.dart';
 import 'package:uuid/uuid.dart';
 
@@ -16,12 +15,16 @@ class PresenceService with WidgetsBindingObserver {
   static final PresenceService instance = PresenceService._();
   static const Uuid _uuid = Uuid();
 
-  static const _heartbeatInterval = Duration(seconds: 30);
+  static const _heartbeatInterval = Duration(minutes: 1);
 
   Timer? _timer;
   String? _visitorId;
   String? _presenceId;
   String? _appVersion;
+  int? _subjectId;
+  int? _episodeId;
+  int? _positionSeconds;
+  String _status = 'online';
   bool _started = false;
   bool _heartbeatInFlight = false;
 
@@ -47,6 +50,38 @@ class PresenceService with WidgetsBindingObserver {
   /// 在登录、登出等身份变化后立即刷新一次在线身份口径。
   Future<void> heartbeatNow() => _sendHeartbeat();
 
+  /// 更新当前播放上下文。实际网络请求仍由应用级心跳定时器统一发送。
+  void setPlaybackContext({
+    required int subjectId,
+    required int episodeId,
+    required bool watching,
+    int? positionSeconds,
+  }) {
+    if (subjectId <= 0 || episodeId <= 0) return;
+    final nextStatus = watching ? 'watching' : 'paused';
+    final changed = _subjectId != subjectId ||
+        _episodeId != episodeId ||
+        _status != nextStatus;
+    _subjectId = subjectId;
+    _episodeId = episodeId;
+    _positionSeconds = positionSeconds;
+    _status = nextStatus;
+    if (changed && _started) {
+      unawaited(_sendHeartbeat());
+    }
+  }
+
+  void clearPlaybackContext() {
+    final changed = _subjectId != null || _episodeId != null || _status != 'online';
+    _subjectId = null;
+    _episodeId = null;
+    _positionSeconds = null;
+    _status = 'online';
+    if (changed && _started) {
+      unawaited(_sendHeartbeat());
+    }
+  }
+
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
     switch (state) {
@@ -54,6 +89,9 @@ class PresenceService with WidgetsBindingObserver {
         _timer ??= Timer.periodic(_heartbeatInterval, (_) => _sendHeartbeat());
         unawaited(_sendHeartbeat());
       case AppLifecycleState.inactive:
+        // 桌面端窗口失去焦点仍可能在播放，不能视为离线。
+        _timer ??= Timer.periodic(_heartbeatInterval, (_) => _sendHeartbeat());
+        unawaited(_sendHeartbeat());
       case AppLifecycleState.hidden:
       case AppLifecycleState.paused:
       case AppLifecycleState.detached:
@@ -72,6 +110,10 @@ class PresenceService with WidgetsBindingObserver {
         presenceId: _presenceId!,
         clientType: Platform.operatingSystem.toUpperCase(),
         appVersion: _appVersion,
+        subjectId: _subjectId,
+        episodeId: _episodeId,
+        positionSeconds: _positionSeconds,
+        status: _status,
       );
     } catch (error, stackTrace) {
       LiggLogger().w('在线状态心跳失败', error: error, stackTrace: stackTrace);

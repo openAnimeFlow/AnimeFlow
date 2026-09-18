@@ -160,11 +160,15 @@ class _PluginsPageState extends State<PluginsPage> {
                     ),
                     onPressed: () => deleteDataSource(data.name),
                   ),
-                  ReorderableDragStartListener(
-                    index: index,
-                    child: const Padding(
-                      padding: EdgeInsets.symmetric(horizontal: 8),
-                      child: Icon(Icons.drag_handle),
+                  GestureDetector(
+                    behavior: HitTestBehavior.opaque,
+                    onTap: () {},
+                    child: ReorderableDragStartListener(
+                      index: index,
+                      child: const Padding(
+                        padding: EdgeInsets.symmetric(horizontal: 8),
+                        child: Icon(Icons.drag_handle),
+                      ),
                     ),
                   ),
                 ],

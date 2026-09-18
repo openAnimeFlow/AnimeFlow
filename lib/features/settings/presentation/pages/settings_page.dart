@@ -3,6 +3,8 @@ import 'package:anime_flow/app/localization/app_localizations.dart';
 import 'package:anime_flow/core/utils/system_util.dart';
 import 'package:anime_flow/features/settings/presentation/pages/account_settings_page.dart';
 import 'package:anime_flow/features/settings/presentation/providers/setting_provider.dart';
+import 'package:anime_flow/features/user/presentation/providers/user_state_provider.dart';
+import 'package:anime_flow/shared/widgets/animation_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -59,7 +61,7 @@ class SettingsMenuPage extends ConsumerWidget {
             );
 }
 
-class _SettingsMenu extends StatelessWidget {
+class _SettingsMenu extends ConsumerWidget {
   const _SettingsMenu({required this.location, required this.wide});
 
   final String location;
@@ -75,7 +77,7 @@ class _SettingsMenu extends StatelessWidget {
         _ => location,
       };
 
-  List<_SettingsCategory> _categories(BuildContext context) {
+  List<_SettingsCategory> _categories(BuildContext context, String? avatar) {
     final l10n = AppLocalizations.of(context);
     return [
       _SettingsCategory(
@@ -84,6 +86,7 @@ class _SettingsMenu extends StatelessWidget {
           _SettingsMenuItem(
             title: l10n.accountSettings,
             icon: Icons.account_circle_outlined,
+            avatar: avatar,
             route: const SettingAccountRoute(),
           ),
         ],
@@ -158,8 +161,13 @@ class _SettingsMenu extends StatelessWidget {
   }
 
   @override
-  Widget build(BuildContext context) {
-    final categories = _categories(context);
+  Widget build(BuildContext context, WidgetRef ref) {
+    final userInfo = ref.watch(currentUserInfoProvider).value;
+    final isLoggedIn = ref.watch(isLoggedInProvider).value ?? false;
+    final avatar = isLoggedIn && (userInfo?.avatar?.isNotEmpty ?? false)
+        ? userInfo!.avatar
+        : null;
+    final categories = _categories(context, avatar);
     final menu = ListView(
       padding: EdgeInsets.symmetric(horizontal: wide ? 15 : 0, vertical: 8),
       children: [
@@ -177,7 +185,25 @@ class _SettingsMenu extends StatelessWidget {
               shape: wide ? const StadiumBorder() : null,
               selected: wide && categoryLocation == item.route.location,
               selectedTileColor: Theme.of(context).colorScheme.primaryContainer,
-              leading: Icon(item.icon),
+              leading: item.avatar != null
+                  ? DecoratedBox(
+                      decoration: BoxDecoration(
+                        border: Border.all(
+                          color: Theme.of(context).colorScheme.primary,
+                          width: 2,
+                        ),
+                        borderRadius: BorderRadius.circular(50),
+                      ),
+                      position: DecorationPosition.foreground,
+                      child: AnimationNetworkImage(
+                        borderRadius: BorderRadius.circular(50),
+                        url: item.avatar!,
+                        width: 24,
+                        height: 24,
+                        fit: BoxFit.cover,
+                      ),
+                    )
+                  : Icon(item.icon),
               title: Text(item.title),
               trailing: wide ? null : const Icon(Icons.chevron_right),
               onTap: () {
@@ -228,9 +254,13 @@ class _SettingsCategory {
 
 class _SettingsMenuItem {
   const _SettingsMenuItem(
-      {required this.title, required this.icon, required this.route});
+      {required this.title,
+      required this.icon,
+      required this.route,
+      this.avatar});
 
   final String title;
   final IconData icon;
   final GoRouteData route;
+  final String? avatar;
 }

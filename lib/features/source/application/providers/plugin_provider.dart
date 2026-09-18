@@ -5,6 +5,7 @@ import 'package:anime_flow/core/network/api/api.dart';
 import 'package:anime_flow/core/network/api_path.dart';
 import 'package:anime_flow/core/settings/app_settings.dart';
 import 'package:anime_flow/core/utils/utils.dart';
+import 'package:dio/dio.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 part 'plugin_provider.g.dart';
@@ -45,16 +46,25 @@ bool _isPluginMirrorEnabled() {
 
 @riverpod
 class PluginCatalog extends _$PluginCatalog {
+  CancelToken? _cancelToken;
+
   @override
-  Future<List<PluginCatalogItem>> build() => _fetch();
+  Future<List<PluginCatalogItem>> build() {
+    ref.onDispose(() {
+      _cancelToken?.cancel('插件目录 Provider 已销毁');
+    });
+    return _fetch();
+  }
 
   Future<List<PluginCatalogItem>> _fetch() async {
+    _cancelToken?.cancel('插件目录请求已被新的请求替换');
+    final cancelToken = _cancelToken = CancelToken();
     var url = '${CommonApi.pluginRepo}/index.json';
     if (_isPluginMirrorEnabled()) {
       url = Utils.jsDelivrCdnUrl(url);
     }
 
-    final data = await Api.getResources(url);
+    final data = await Api.getResources(url, cancelToken: cancelToken);
     final json = data is String ? jsonDecode(data) : data;
     if (json is! List) {
       throw const FormatException('插件目录格式无效');
@@ -68,7 +78,10 @@ class PluginCatalog extends _$PluginCatalog {
   }
 
   Future<void> reload() async {
+    if (!ref.mounted) return;
     state = const AsyncLoading();
-    state = await AsyncValue.guard(_fetch);
+    final nextState = await AsyncValue.guard(_fetch);
+    if (!ref.mounted) return;
+    state = nextState;
   }
 }

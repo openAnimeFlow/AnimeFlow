@@ -1,17 +1,33 @@
 import 'anti_crawler_config.dart';
+import 'package:hive_ce/hive.dart';
 
+part 'crawler_config_item.g.dart';
+
+@HiveType(typeId: 12)
 class CrawlConfigItem {
+  @HiveField(0)
   final String version;
+  @HiveField(1)
   final String name;
+  @HiveField(2)
   final String iconUrl;
+  @HiveField(3)
   final String baseUrl;
+  @HiveField(4)
   final String searchUrl;
+  @HiveField(5)
   final String searchList;
+  @HiveField(6)
   final String searchName;
+  @HiveField(7)
   final String searchLink;
+  @HiveField(8)
   final String lineNames;
+  @HiveField(9)
   final String lineList;
+  @HiveField(10)
   final String episode;
+  @HiveField(11)
   AntiCrawlerConfig antiCrawlerConfig;
 
   CrawlConfigItem({

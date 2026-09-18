@@ -3,6 +3,8 @@
 // Check in to version control
 
 import 'package:hive_ce/hive_ce.dart';
+import 'package:anime_flow/core/crawler/itme/anti_crawler_config.dart';
+import 'package:anime_flow/core/crawler/itme/crawler_config_item.dart';
 import 'package:anime_flow/shared/models/download/download_episode.dart';
 import 'package:anime_flow/shared/models/download/download_record.dart';
 import 'package:anime_flow/shared/models/player/play/play_history.dart';
@@ -11,6 +13,8 @@ import 'package:anime_flow/shared/models/search/search_history_module.dart';
 
 extension HiveRegistrar on HiveInterface {
   void registerAdapters() {
+    registerAdapter(AntiCrawlerConfigAdapter());
+    registerAdapter(CrawlConfigItemAdapter());
     registerAdapter(DownloadEpisodeAdapter());
     registerAdapter(DownloadRecordAdapter());
     registerAdapter(PlayHistoryAdapter());
@@ -21,6 +25,8 @@ extension HiveRegistrar on HiveInterface {
 
 extension IsolatedHiveRegistrar on IsolatedHiveInterface {
   void registerAdapters() {
+    registerAdapter(AntiCrawlerConfigAdapter());
+    registerAdapter(CrawlConfigItemAdapter());
     registerAdapter(DownloadEpisodeAdapter());
     registerAdapter(DownloadRecordAdapter());
     registerAdapter(PlayHistoryAdapter());

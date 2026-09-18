@@ -1,9 +1,4 @@
-import 'dart:convert';
-
 import 'package:anime_flow/core/constants/storage_key.dart';
-import 'package:anime_flow/core/crawler/itme/crawler_config_item.dart';
-import 'package:anime_flow/core/network/api_path.dart';
-import 'package:anime_flow/core/network/api/api.dart';
 import 'package:anime_flow/core/settings/app_settings.dart';
 import 'package:anime_flow/features/source/data/repositories/source_repository.dart';
 import 'package:anime_flow/features/source/application/providers/source_repository_provider.dart';
@@ -46,18 +41,6 @@ class _DownloadPluginsPageState extends ConsumerState<DownloadPluginsPage> {
     await ref.read(pluginCatalogProvider.notifier).reload();
   }
 
-  Future<void> _persistPlugin(
-    String pluginName,
-    CrawlConfigItem pluginData,
-    String catalogVersion,
-  ) async {
-    final data = pluginData.toJson();
-    data['version'] = catalogVersion;
-    await sourceRepository.saveSource(
-      CrawlConfigItem.fromJson(data),
-    );
-  }
-
   Future<void> _downloadPlugin(PluginCatalogItem plugin) async {
     final l10n = AppLocalizations.of(context);
     final pluginName = plugin.name;
@@ -67,16 +50,10 @@ class _DownloadPluginsPageState extends ConsumerState<DownloadPluginsPage> {
       _busyPluginNames.add(pluginName);
     });
     try {
-      final pluginPath = plugin.path;
-      var downloadUrl = '${CommonApi.pluginRepo}/$pluginPath';
-      if (isMirror) downloadUrl = Utils.jsDelivrCdnUrl(downloadUrl);
-      final raw = await Api.getResources(downloadUrl);
-      final jsonMap = raw is String
-          ? jsonDecode(raw) as Map<String, dynamic>
-          : raw as Map<String, dynamic>;
-      final pluginData = CrawlConfigItem.fromJson(jsonMap);
-      final catalogVersion = plugin.version;
-      await _persistPlugin(pluginName, pluginData, catalogVersion);
+      await sourceRepository.downloadPlugin(
+        pluginPath: plugin.path,
+        catalogVersion: plugin.version,
+      );
       if (!mounted) return;
       setState(() {
         hasChanged = true;
@@ -109,15 +86,10 @@ class _DownloadPluginsPageState extends ConsumerState<DownloadPluginsPage> {
       _busyPluginNames.add(pluginName);
     });
     try {
-      final pluginPath = plugin.path;
-      var downloadUrl = '${CommonApi.pluginRepo}/$pluginPath';
-      if (isMirror) downloadUrl = Utils.jsDelivrCdnUrl(downloadUrl);
-      final raw = await Api.getResources(downloadUrl);
-      final jsonMap = raw is String
-          ? jsonDecode(raw) as Map<String, dynamic>
-          : raw as Map<String, dynamic>;
-      final pluginData = CrawlConfigItem.fromJson(jsonMap);
-      await _persistPlugin(pluginName, pluginData, pluginVersion);
+      await sourceRepository.updatePlugin(
+        pluginPath: plugin.path,
+        catalogVersion: pluginVersion,
+      );
       if (!mounted) return;
       setState(() {
         hasChanged = true;

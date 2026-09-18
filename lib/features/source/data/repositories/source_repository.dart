@@ -1,4 +1,11 @@
+import 'dart:convert';
+
 import 'package:anime_flow/core/crawler/itme/crawler_config_item.dart';
+import 'package:anime_flow/core/constants/storage_key.dart';
+import 'package:anime_flow/core/network/api/api.dart';
+import 'package:anime_flow/core/network/api_path.dart';
+import 'package:anime_flow/core/settings/app_settings.dart';
+import 'package:anime_flow/core/utils/utils.dart';
 import 'package:anime_flow/features/source/data/datasources/source_local_datasource.dart';
 import 'package:flutter/foundation.dart';
 
@@ -60,6 +67,50 @@ class SourceRepository {
     );
   }
 
+  Future<void> downloadPlugin({
+    required String pluginPath,
+    required String catalogVersion,
+  }) {
+    return _installPlugin(
+      pluginPath: pluginPath,
+      catalogVersion: catalogVersion,
+    );
+  }
+
+  Future<void> updatePlugin({
+    required String pluginPath,
+    required String catalogVersion,
+  }) {
+    return _installPlugin(
+      pluginPath: pluginPath,
+      catalogVersion: catalogVersion,
+    );
+  }
+
+  Future<void> _installPlugin({
+    required String pluginPath,
+    required String catalogVersion,
+  }) async {
+    var downloadUrl = '${CommonApi.pluginRepo}/$pluginPath';
+    if (_isPluginMirrorEnabled()) {
+      downloadUrl = Utils.jsDelivrCdnUrl(downloadUrl);
+    }
+
+    final raw = await Api.getResources(downloadUrl);
+    final json = raw is String ? jsonDecode(raw) : raw;
+    if (json is! Map) {
+      throw const FormatException('插件配置格式无效');
+    }
+
+    final data = CrawlConfigItem.fromJson(Map<String, dynamic>.from(json));
+    await saveSource(
+      CrawlConfigItem.fromJson({
+        ...data.toJson(),
+        'version': catalogVersion,
+      }),
+    );
+  }
+
   Future<void> deleteSource(String name) async {
     await _localDataSource.deleteConfig(name);
     final order = await _localDataSource.loadOrder();
@@ -108,5 +159,13 @@ class SourceRepository {
       if (left[i] != right[i]) return false;
     }
     return true;
+  }
+
+  bool _isPluginMirrorEnabled() {
+    return AppSettings.getSetting<bool>(
+          SettingKey.isMirror,
+          defaultValue: false,
+        ) ??
+        false;
   }
 }

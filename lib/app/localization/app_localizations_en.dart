@@ -1505,6 +1505,43 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
+  String get sharePlugin => 'Share plugin';
+
+  @override
+  String get importPlugin => 'Import plugin';
+
+  @override
+  String pluginShareFailed(Object error, Object name) {
+    return 'Failed to share plugin \"$name\": $error';
+  }
+
+  @override
+  String pluginImported(Object name) {
+    return 'Plugin \"$name\" imported';
+  }
+
+  @override
+  String pluginImportFailed(Object error) {
+    return 'Failed to import plugin: $error';
+  }
+
+  @override
+  String get copyPlugin => 'Copy plugin';
+
+  @override
+  String get pastePlugin => 'Import plugin from clipboard';
+
+  @override
+  String pluginCopied(Object name) {
+    return 'Plugin \"$name\" copied to clipboard';
+  }
+
+  @override
+  String pluginCopyFailed(Object error, Object name) {
+    return 'Failed to copy plugin \"$name\": $error';
+  }
+
+  @override
   String get downloadSources => 'Download data sources';
 
   @override

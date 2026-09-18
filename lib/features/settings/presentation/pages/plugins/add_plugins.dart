@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:anime_flow/core/crawler/itme/crawler_config_item.dart';
 import 'package:anime_flow/core/crawler/itme/anti_crawler_config.dart';
 import 'package:anime_flow/features/source/data/repositories/source_repository.dart';
@@ -5,6 +7,7 @@ import 'package:anime_flow/features/source/application/providers/source_reposito
 import 'package:anime_flow/shared/widgets/notification_toast.dart';
 import 'package:anime_flow/shared/widgets/drop_down_menu.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:anime_flow/app/localization/app_localizations.dart';
@@ -223,6 +226,89 @@ class _AddPluginsPageState extends ConsumerState<AddPluginsPage> {
     }
   }
 
+  Future<void> _pastePluginConfig() async {
+    final l10n = AppLocalizations.of(context);
+    try {
+      final clipboardData = await Clipboard.getData(Clipboard.kTextPlain);
+      final content = clipboardData?.text ?? '';
+
+      if (!mounted) return;
+      final controller = TextEditingController(text: content);
+      final editedContent = await showDialog<String>(
+        context: context,
+        builder: (dialogContext) => AlertDialog(
+          title: Text(l10n.pastePlugin),
+          content: ConstrainedBox(
+            constraints: const BoxConstraints(maxHeight: 360, maxWidth: 450),
+            child: TextField(
+              controller: controller,
+              minLines: 8,
+              maxLines: null,
+              keyboardType: TextInputType.multiline,
+              decoration: const InputDecoration(
+                border: OutlineInputBorder(),
+                alignLabelWithHint: true,
+              ),
+            ),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(dialogContext).pop(),
+              child: Text(l10n.cancel),
+            ),
+            FilledButton(
+              onPressed: () => Navigator.of(dialogContext).pop(controller.text),
+              child: Text(l10n.importPlugin),
+            ),
+          ],
+        ),
+      );
+      controller.dispose();
+      if (editedContent == null || !mounted) return;
+      if (editedContent.trim().isEmpty) {
+        throw const FormatException('剪切板中没有插件配置');
+      }
+
+      final decoded = jsonDecode(editedContent);
+      if (decoded is! Map) {
+        throw const FormatException('插件配置格式无效');
+      }
+      final config = CrawlConfigItem.fromJson(
+        Map<String, dynamic>.from(decoded),
+      );
+      if (config.name.trim().isEmpty) {
+        throw const FormatException('插件名称不能为空');
+      }
+
+      setState(() {
+        _antiEnabled = config.antiCrawlerConfig.enabled;
+        _captchaType = config.antiCrawlerConfig.captchaType;
+        _captchaImageController.text = config.antiCrawlerConfig.captchaImage;
+        _captchaInputController.text = config.antiCrawlerConfig.captchaInput;
+        _captchaButtonController.text = config.antiCrawlerConfig.captchaButton;
+        _controllers[0].text = config.version;
+        _controllers[1].text = config.name;
+        _controllers[2].text = config.iconUrl;
+        _controllers[3].text = config.baseUrl;
+        _controllers[4].text = config.searchUrl;
+        _controllers[5].text = config.searchList;
+        _controllers[6].text = config.searchName;
+        _controllers[7].text = config.searchLink;
+        _controllers[8].text = config.lineNames;
+        _controllers[9].text = config.lineList;
+        _controllers[10].text = config.episode;
+        _errorFields.clear();
+        _antiFieldErrors.clear();
+      });
+    } catch (error) {
+      if (!mounted) return;
+      NotificationToast.show(
+        l10n.pluginImportFailed(error.toString()),
+        title: l10n.pastePlugin,
+      );
+    }
+  }
+
   @override
   void dispose() {
     for (var controller in _controllers) {
@@ -241,6 +327,13 @@ class _AddPluginsPageState extends ConsumerState<AddPluginsPage> {
     return Scaffold(
       appBar: AppBar(
         title: Text(_originalKey != null ? l10n.editSource : l10n.addSource),
+        actions: [
+          IconButton(
+            tooltip: l10n.pastePlugin,
+            onPressed: _pastePluginConfig,
+            icon: const Icon(Icons.content_paste),
+          ),
+        ],
       ),
       floatingActionButton: FloatingActionButton(
         heroTag: 'add_source_save',
@@ -403,7 +496,7 @@ class _AddPluginsPageState extends ConsumerState<AddPluginsPage> {
               selectedItem: _captchaType,
               buttonBuilder: (context, selectedType) {
                 return Align(
-                  alignment: Alignment.centerRight,
+                  alignment: Alignment.center,
                   child: Row(
                     mainAxisSize: MainAxisSize.min,
                     children: [
@@ -412,6 +505,7 @@ class _AddPluginsPageState extends ConsumerState<AddPluginsPage> {
                             ? l10n.autoClickCaptcha
                             : l10n.imageCaptchaManual,
                       ),
+                      const Spacer(),
                       const Icon(Icons.arrow_drop_down),
                     ],
                   ),

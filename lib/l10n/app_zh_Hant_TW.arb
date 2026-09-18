@@ -590,7 +590,16 @@
   ,"pluginDownloadFailed": "下載外掛 \"{name}\" 時發生錯誤：{error}"
   ,"updateSuccess": "更新成功"
   ,"pluginUpdated": "外掛 \"{name}\" 已更新至版本 {version}"
-  ,"pluginUpdateFailed": "更新外掛 \"{name}\" 時發生錯誤：{error}"
+  ,"pluginUpdateFailed": "更新外掛 \"{name}\" 時發生錯誤：{error}",
+  "sharePlugin": "分享外掛",
+  "importPlugin": "匯入外掛",
+  "pluginShareFailed": "分享外掛 \"{name}\" 失敗：{error}",
+  "pluginImported": "外掛 \"{name}\" 已匯入",
+  "pluginImportFailed": "匯入外掛失敗：{error}"
+  ,"copyPlugin": "複製外掛"
+  ,"pastePlugin": "從剪貼簿匯入外掛"
+  ,"pluginCopied": "外掛 \"{name}\" 已複製到剪貼簿"
+  ,"pluginCopyFailed": "複製外掛 \"{name}\" 失敗：{error}"
   ,"downloadSources": "下載資料來源"
   ,"downloadSourcesSubtitle": "目前會從 GitHub 儲存庫下載資料來源，請注意網路環境，下拉重新整理資料"
   ,"useMirror": "使用鏡像"

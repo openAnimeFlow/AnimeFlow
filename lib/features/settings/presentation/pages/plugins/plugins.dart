@@ -8,6 +8,7 @@ import 'package:anime_flow/core/utils/utils.dart';
 import 'package:anime_flow/shared/widgets/animation_network_image.dart';
 import 'package:anime_flow/shared/widgets/notification_toast.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:anime_flow/app/localization/app_localizations.dart';
 
@@ -93,6 +94,25 @@ class _PluginsPageState extends ConsumerState<PluginsPage> {
           _busyPluginNames.remove(plugin.name);
         });
       }
+    }
+  }
+
+  Future<void> _copyPlugin(String name) async {
+    final l10n = AppLocalizations.of(context);
+    try {
+      final content = await _sourceRepository.exportPlugin(name);
+      await Clipboard.setData(ClipboardData(text: content));
+      if (!mounted) return;
+      NotificationToast.show(
+        l10n.pluginCopied(name),
+        title: l10n.copyPlugin,
+      );
+    } catch (error) {
+      if (!mounted) return;
+      NotificationToast.show(
+        l10n.pluginCopyFailed(name, error.toString()),
+        title: l10n.copyPlugin,
+      );
     }
   }
 
@@ -215,6 +235,11 @@ class _PluginsPageState extends ConsumerState<PluginsPage> {
                               )
                             : Text(l10n.update),
                       ),
+                    IconButton(
+                      tooltip: l10n.copyPlugin,
+                      icon: const Icon(Icons.content_copy_outlined),
+                      onPressed: () => _copyPlugin(data.name),
+                    ),
                     IconButton(
                       tooltip: l10n.delete,
                       icon: Icon(

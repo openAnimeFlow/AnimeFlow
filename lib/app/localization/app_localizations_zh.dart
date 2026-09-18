@@ -1465,6 +1465,43 @@ class AppLocalizationsZh extends AppLocalizations {
   }
 
   @override
+  String get sharePlugin => '分享插件';
+
+  @override
+  String get importPlugin => '匯入插件';
+
+  @override
+  String pluginShareFailed(Object error, Object name) {
+    return '分享插件 \"$name\" 失敗：$error';
+  }
+
+  @override
+  String pluginImported(Object name) {
+    return '插件 \"$name\" 已匯入';
+  }
+
+  @override
+  String pluginImportFailed(Object error) {
+    return '匯入插件失敗：$error';
+  }
+
+  @override
+  String get copyPlugin => '複製插件';
+
+  @override
+  String get pastePlugin => '從剪貼簿匯入插件';
+
+  @override
+  String pluginCopied(Object name) {
+    return '插件 \"$name\" 已複製到剪貼簿';
+  }
+
+  @override
+  String pluginCopyFailed(Object error, Object name) {
+    return '複製插件 \"$name\" 失敗：$error';
+  }
+
+  @override
   String get downloadSources => '下載資料來源';
 
   @override
@@ -3344,6 +3381,43 @@ class AppLocalizationsZhHans extends AppLocalizationsZh {
   @override
   String pluginUpdateFailed(Object error, Object name) {
     return '更新插件 \"$name\" 时发生错误：$error';
+  }
+
+  @override
+  String get sharePlugin => '分享插件';
+
+  @override
+  String get importPlugin => '导入插件';
+
+  @override
+  String pluginShareFailed(Object error, Object name) {
+    return '分享插件 \"$name\" 失败：$error';
+  }
+
+  @override
+  String pluginImported(Object name) {
+    return '插件 \"$name\" 已导入';
+  }
+
+  @override
+  String pluginImportFailed(Object error) {
+    return '导入插件失败：$error';
+  }
+
+  @override
+  String get copyPlugin => '复制插件';
+
+  @override
+  String get pastePlugin => '从剪切板导入插件';
+
+  @override
+  String pluginCopied(Object name) {
+    return '插件 \"$name\" 已复制到剪切板';
+  }
+
+  @override
+  String pluginCopyFailed(Object error, Object name) {
+    return '复制插件 \"$name\" 失败：$error';
   }
 
   @override
@@ -5228,6 +5302,43 @@ class AppLocalizationsZhHantHk extends AppLocalizationsZh {
   }
 
   @override
+  String get sharePlugin => '分享外掛';
+
+  @override
+  String get importPlugin => '匯入外掛';
+
+  @override
+  String pluginShareFailed(Object error, Object name) {
+    return '分享外掛 \"$name\" 失敗：$error';
+  }
+
+  @override
+  String pluginImported(Object name) {
+    return '外掛 \"$name\" 已匯入';
+  }
+
+  @override
+  String pluginImportFailed(Object error) {
+    return '匯入外掛失敗：$error';
+  }
+
+  @override
+  String get copyPlugin => '複製外掛';
+
+  @override
+  String get pastePlugin => '從剪貼簿匯入外掛';
+
+  @override
+  String pluginCopied(Object name) {
+    return '外掛 \"$name\" 已複製到剪貼簿';
+  }
+
+  @override
+  String pluginCopyFailed(Object error, Object name) {
+    return '複製外掛 \"$name\" 失敗：$error';
+  }
+
+  @override
   String get downloadSources => '下載資料來源';
 
   @override
@@ -7107,6 +7218,43 @@ class AppLocalizationsZhHantTw extends AppLocalizationsZh {
   @override
   String pluginUpdateFailed(Object error, Object name) {
     return '更新外掛 \"$name\" 時發生錯誤：$error';
+  }
+
+  @override
+  String get sharePlugin => '分享外掛';
+
+  @override
+  String get importPlugin => '匯入外掛';
+
+  @override
+  String pluginShareFailed(Object error, Object name) {
+    return '分享外掛 \"$name\" 失敗：$error';
+  }
+
+  @override
+  String pluginImported(Object name) {
+    return '外掛 \"$name\" 已匯入';
+  }
+
+  @override
+  String pluginImportFailed(Object error) {
+    return '匯入外掛失敗：$error';
+  }
+
+  @override
+  String get copyPlugin => '複製外掛';
+
+  @override
+  String get pastePlugin => '從剪貼簿匯入外掛';
+
+  @override
+  String pluginCopied(Object name) {
+    return '外掛 \"$name\" 已複製到剪貼簿';
+  }
+
+  @override
+  String pluginCopyFailed(Object error, Object name) {
+    return '複製外掛 \"$name\" 失敗：$error';
   }
 
   @override

@@ -2845,6 +2845,60 @@ abstract class AppLocalizations {
   /// **'更新插件 \"{name}\" 时发生错误：{error}'**
   String pluginUpdateFailed(Object error, Object name);
 
+  /// No description provided for @sharePlugin.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'分享插件'**
+  String get sharePlugin;
+
+  /// No description provided for @importPlugin.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'导入插件'**
+  String get importPlugin;
+
+  /// No description provided for @pluginShareFailed.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'分享插件 \"{name}\" 失败：{error}'**
+  String pluginShareFailed(Object error, Object name);
+
+  /// No description provided for @pluginImported.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'插件 \"{name}\" 已导入'**
+  String pluginImported(Object name);
+
+  /// No description provided for @pluginImportFailed.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'导入插件失败：{error}'**
+  String pluginImportFailed(Object error);
+
+  /// No description provided for @copyPlugin.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'复制插件'**
+  String get copyPlugin;
+
+  /// No description provided for @pastePlugin.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'从剪切板导入插件'**
+  String get pastePlugin;
+
+  /// No description provided for @pluginCopied.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'插件 \"{name}\" 已复制到剪切板'**
+  String pluginCopied(Object name);
+
+  /// No description provided for @pluginCopyFailed.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'复制插件 \"{name}\" 失败：{error}'**
+  String pluginCopyFailed(Object error, Object name);
+
   /// No description provided for @downloadSources.
   ///
   /// In zh_Hans, this message translates to:

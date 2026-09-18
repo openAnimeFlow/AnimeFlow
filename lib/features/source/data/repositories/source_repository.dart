@@ -34,6 +34,14 @@ class SourceRepository {
     return _localDataSource.loadConfig(name);
   }
 
+  Future<String> exportPlugin(String name) async {
+    final config = await getSource(name);
+    if (config == null) {
+      throw StateError('找不到插件：$name');
+    }
+    return jsonEncode(config.toJson());
+  }
+
   CrawlConfigItem? getSourceSync(String name) {
     return _localDataSource.loadConfigSync(name);
   }

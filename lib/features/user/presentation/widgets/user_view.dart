@@ -1,3 +1,5 @@
+import 'package:anime_flow/features/user/application/collection_revision_provider.dart';
+import 'collection_sync_pending_banner.dart';
 import 'dart:ui';
 
 import 'package:anime_flow/shared/models/flow/flow_users.dart';
@@ -138,9 +140,17 @@ class _UserViewState extends ConsumerState<UserView>
 
   @override
   Widget build(BuildContext context) {
+    ref.listen(collectionRevisionProvider, (_, __) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (mounted) {
+          ref.read(userCollectionsProvider.notifier).loadInitial(_currentType);
+        }
+      });
+    });
     final tabs = _buildTabs(context);
     final double statusBarHeight = MediaQuery.of(context).padding.top;
     return Scaffold(
+      bottomNavigationBar: const CollectionSyncPendingBanner(),
       body: NotificationListener<ScrollNotification>(
         onNotification: (notification) {
           if (notification.depth == 0 &&

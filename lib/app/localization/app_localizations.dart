@@ -2266,7 +2266,7 @@ abstract class AppLocalizations {
   /// No description provided for @bindBangumiHint.
   ///
   /// In zh_Hans, this message translates to:
-  /// **'绑定 Bangumi 账号后可同步收藏等数据'**
+  /// **'无需绑定即可使用本地收藏；绑定 Bangumi 后可同步收藏'**
   String get bindBangumiHint;
 
   /// No description provided for @bindBangumiAccount.
@@ -3655,6 +3655,168 @@ abstract class AppLocalizations {
   /// In zh_Hans, this message translates to:
   /// **'正在切换弹幕…'**
   String get danmakuSwitching;
+
+  /// No description provided for @collectionSaved.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'收藏已保存'**
+  String get collectionSaved;
+
+  /// No description provided for @collectionSavedLocally.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'收藏已保存到本地'**
+  String get collectionSavedLocally;
+
+  /// No description provided for @collectionSavedPending.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'本地已保存，Bangumi 暂未同步，服务端将自动重试'**
+  String get collectionSavedPending;
+
+  /// No description provided for @collectionSavedAuthRequired.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'本地已保存，请重新授权 Bangumi 后再次保存收藏'**
+  String get collectionSavedAuthRequired;
+
+  /// No description provided for @collectionSavedConflict.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'本地已保存，Bangumi 数据已变化，自动同步已暂停'**
+  String get collectionSavedConflict;
+
+  /// No description provided for @collectionSavedSynced.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'收藏已保存并同步到 Bangumi'**
+  String get collectionSavedSynced;
+
+  /// No description provided for @collectionSelectType.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'请选择收藏分类'**
+  String get collectionSelectType;
+
+  /// No description provided for @syncConflictsTitle.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'处理收藏分类冲突'**
+  String get syncConflictsTitle;
+
+  /// No description provided for @syncPendingSummary.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'收藏同步：{conflicts} 条冲突，{failed} 条失败'**
+  String syncPendingSummary(int conflicts, int failed);
+
+  /// No description provided for @syncConflictSides.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'本地：{local} · Bangumi：{remote}'**
+  String syncConflictSides(String local, String remote);
+
+  /// No description provided for @syncUseLocal.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'已加载条目采用本地'**
+  String get syncUseLocal;
+
+  /// No description provided for @syncUseRemote.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'已加载条目采用 Bangumi'**
+  String get syncUseRemote;
+
+  /// No description provided for @syncSubmitSelected.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'提交已选 {count} 项'**
+  String syncSubmitSelected(int count);
+
+  /// No description provided for @syncLoadMore.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'加载更多冲突'**
+  String get syncLoadMore;
+
+  /// No description provided for @syncNoConflicts.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'当前没有待选择的冲突'**
+  String get syncNoConflicts;
+
+  /// No description provided for @syncAccepted.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'选择已接收，后台正在处理。可关闭此窗口，稍后查看结果。'**
+  String get syncAccepted;
+
+  /// No description provided for @syncResolveFailed.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'部分选择可能已接收。请刷新核对；变化的条目需重新选择。'**
+  String get syncResolveFailed;
+
+  /// No description provided for @syncRefreshRequired.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'刷新后继续处理'**
+  String get syncRefreshRequired;
+
+  /// No description provided for @syncQueued.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'排队中'**
+  String get syncQueued;
+
+  /// No description provided for @syncWaitingConflict.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'等待处理冲突'**
+  String get syncWaitingConflict;
+
+  /// No description provided for @syncPartialFailed.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'部分失败'**
+  String get syncPartialFailed;
+
+  /// No description provided for @syncCancelled.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'已取消'**
+  String get syncCancelled;
+
+  /// No description provided for @syncUnknown.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'未知状态，请刷新'**
+  String get syncUnknown;
+
+  /// No description provided for @syncRetryMessage.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'同步暂时失败，服务端会自动重试。恢复后继续检查冲突。'**
+  String get syncRetryMessage;
+
+  /// No description provided for @syncBindingChanged.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'账号或 Bangumi 绑定已变更，请关闭后重新打开。'**
+  String get syncBindingChanged;
+
+  /// No description provided for @syncOpenConflicts.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'处理冲突'**
+  String get syncOpenConflicts;
+
+  /// No description provided for @syncSubject.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'条目 {id}'**
+  String syncSubject(int id);
 }
 
 class _AppLocalizationsDelegate

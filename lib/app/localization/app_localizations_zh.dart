@@ -1145,7 +1145,7 @@ class AppLocalizationsZh extends AppLocalizations {
   String get bindStatusLoadFailed => '获取绑定状态失败';
 
   @override
-  String get bindBangumiHint => '绑定 Bangumi 账号后可同步收藏等数据';
+  String get bindBangumiHint => '无需绑定即可使用本地收藏；绑定 Bangumi 后可同步收藏';
 
   @override
   String get bindBangumiAccount => '绑定 Bangumi 账号';
@@ -1921,6 +1921,95 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get danmakuSwitching => '正在切換彈幕…';
+
+  @override
+  String get collectionSaved => '收藏已保存';
+
+  @override
+  String get collectionSavedLocally => '收藏已保存到本地';
+
+  @override
+  String get collectionSavedPending => '本地已保存，Bangumi 暂未同步，服务端将自动重试';
+
+  @override
+  String get collectionSavedAuthRequired => '本地已保存，请重新授权 Bangumi 后再次保存收藏';
+
+  @override
+  String get collectionSavedConflict => '本地已保存，Bangumi 数据已变化，自动同步已暂停';
+
+  @override
+  String get collectionSavedSynced => '收藏已保存并同步到 Bangumi';
+
+  @override
+  String get collectionSelectType => '请选择收藏分类';
+
+  @override
+  String get syncConflictsTitle => '处理收藏分类冲突';
+
+  @override
+  String syncPendingSummary(int conflicts, int failed) {
+    return '收藏同步：$conflicts 条冲突，$failed 条失败';
+  }
+
+  @override
+  String syncConflictSides(String local, String remote) {
+    return '本地：$local · Bangumi：$remote';
+  }
+
+  @override
+  String get syncUseLocal => '已加载条目采用本地';
+
+  @override
+  String get syncUseRemote => '已加载条目采用 Bangumi';
+
+  @override
+  String syncSubmitSelected(int count) {
+    return '提交已选 $count 项';
+  }
+
+  @override
+  String get syncLoadMore => '加载更多冲突';
+
+  @override
+  String get syncNoConflicts => '当前没有待选择的冲突';
+
+  @override
+  String get syncAccepted => '选择已接收，后台正在处理。可关闭此窗口，稍后查看结果。';
+
+  @override
+  String get syncResolveFailed => '部分选择可能已接收。请刷新核对；变化的条目需重新选择。';
+
+  @override
+  String get syncRefreshRequired => '刷新后继续处理';
+
+  @override
+  String get syncQueued => '排队中';
+
+  @override
+  String get syncWaitingConflict => '等待处理冲突';
+
+  @override
+  String get syncPartialFailed => '部分失败';
+
+  @override
+  String get syncCancelled => '已取消';
+
+  @override
+  String get syncUnknown => '未知状态，请刷新';
+
+  @override
+  String get syncRetryMessage => '同步暂时失败，服务端会自动重试。恢复后继续检查冲突。';
+
+  @override
+  String get syncBindingChanged => '账号或 Bangumi 绑定已变更，请关闭后重新打开。';
+
+  @override
+  String get syncOpenConflicts => '处理冲突';
+
+  @override
+  String syncSubject(int id) {
+    return '条目 $id';
+  }
 }
 
 /// The translations for Chinese, using the Han script (`zh_Hans`).
@@ -3064,7 +3153,7 @@ class AppLocalizationsZhHans extends AppLocalizationsZh {
   String get bindStatusLoadFailed => '获取绑定状态失败';
 
   @override
-  String get bindBangumiHint => '绑定 Bangumi 账号后可同步收藏等数据';
+  String get bindBangumiHint => '无需绑定即可使用本地收藏；绑定 Bangumi 后可同步收藏';
 
   @override
   String get bindBangumiAccount => '绑定 Bangumi 账号';
@@ -3839,6 +3928,95 @@ class AppLocalizationsZhHans extends AppLocalizationsZh {
 
   @override
   String get danmakuSwitching => '正在切换弹幕…';
+
+  @override
+  String get collectionSaved => '收藏已保存';
+
+  @override
+  String get collectionSavedLocally => '收藏已保存到本地';
+
+  @override
+  String get collectionSavedPending => '本地已保存，Bangumi 暂未同步，服务端将自动重试';
+
+  @override
+  String get collectionSavedAuthRequired => '本地已保存，请重新授权 Bangumi 后再次保存收藏';
+
+  @override
+  String get collectionSavedConflict => '本地已保存，Bangumi 数据已变化，自动同步已暂停';
+
+  @override
+  String get collectionSavedSynced => '收藏已保存并同步到 Bangumi';
+
+  @override
+  String get collectionSelectType => '请选择收藏分类';
+
+  @override
+  String get syncConflictsTitle => '处理收藏分类冲突';
+
+  @override
+  String syncPendingSummary(int conflicts, int failed) {
+    return '收藏同步：$conflicts 条冲突，$failed 条失败';
+  }
+
+  @override
+  String syncConflictSides(String local, String remote) {
+    return '本地：$local · Bangumi：$remote';
+  }
+
+  @override
+  String get syncUseLocal => '已加载条目采用本地';
+
+  @override
+  String get syncUseRemote => '已加载条目采用 Bangumi';
+
+  @override
+  String syncSubmitSelected(int count) {
+    return '提交已选 $count 项';
+  }
+
+  @override
+  String get syncLoadMore => '加载更多冲突';
+
+  @override
+  String get syncNoConflicts => '当前没有待选择的冲突';
+
+  @override
+  String get syncAccepted => '选择已接收，后台正在处理。可关闭此窗口，稍后查看结果。';
+
+  @override
+  String get syncResolveFailed => '部分选择可能已接收。请刷新核对；变化的条目需重新选择。';
+
+  @override
+  String get syncRefreshRequired => '刷新后继续处理';
+
+  @override
+  String get syncQueued => '排队中';
+
+  @override
+  String get syncWaitingConflict => '等待处理冲突';
+
+  @override
+  String get syncPartialFailed => '部分失败';
+
+  @override
+  String get syncCancelled => '已取消';
+
+  @override
+  String get syncUnknown => '未知状态，请刷新';
+
+  @override
+  String get syncRetryMessage => '同步暂时失败，服务端会自动重试。恢复后继续检查冲突。';
+
+  @override
+  String get syncBindingChanged => '账号或 Bangumi 绑定已变更，请关闭后重新打开。';
+
+  @override
+  String get syncOpenConflicts => '处理冲突';
+
+  @override
+  String syncSubject(int id) {
+    return '条目 $id';
+  }
 }
 
 /// The translations for Chinese, as used in Hong Kong, using the Han script (`zh_Hant_HK`).
@@ -4982,7 +5160,7 @@ class AppLocalizationsZhHantHk extends AppLocalizationsZh {
   String get bindStatusLoadFailed => '取得綁定狀態失敗';
 
   @override
-  String get bindBangumiHint => '綁定 Bangumi 帳戶後可同步收藏等資料';
+  String get bindBangumiHint => '無需綁定即可使用本機收藏；綁定 Bangumi 後可同步收藏';
 
   @override
   String get bindBangumiAccount => '綁定 Bangumi 帳戶';
@@ -5758,6 +5936,95 @@ class AppLocalizationsZhHantHk extends AppLocalizationsZh {
 
   @override
   String get danmakuSwitching => '正在切換彈幕…';
+
+  @override
+  String get collectionSaved => '收藏已儲存';
+
+  @override
+  String get collectionSavedLocally => '收藏已儲存到本機';
+
+  @override
+  String get collectionSavedPending => '已儲存到本機，Bangumi 尚未同步，伺服器將自動重試';
+
+  @override
+  String get collectionSavedAuthRequired => '已儲存到本機，請重新授權 Bangumi 後再次儲存收藏';
+
+  @override
+  String get collectionSavedConflict => '已儲存到本機，Bangumi 資料已變更，自動同步已暫停';
+
+  @override
+  String get collectionSavedSynced => '收藏已儲存並同步到 Bangumi';
+
+  @override
+  String get collectionSelectType => '請選擇收藏分類';
+
+  @override
+  String get syncConflictsTitle => '處理收藏分類衝突';
+
+  @override
+  String syncPendingSummary(int conflicts, int failed) {
+    return '收藏同步：$conflicts 條衝突，$failed 條失敗';
+  }
+
+  @override
+  String syncConflictSides(String local, String remote) {
+    return '本機：$local · Bangumi：$remote';
+  }
+
+  @override
+  String get syncUseLocal => '已載入項目採用本機';
+
+  @override
+  String get syncUseRemote => '已載入項目採用 Bangumi';
+
+  @override
+  String syncSubmitSelected(int count) {
+    return '提交已選 $count 項';
+  }
+
+  @override
+  String get syncLoadMore => '載入更多衝突';
+
+  @override
+  String get syncNoConflicts => '目前沒有待選擇的衝突';
+
+  @override
+  String get syncAccepted => '選擇已接收，背景正在處理。可關閉此視窗，稍後查看結果。';
+
+  @override
+  String get syncResolveFailed => '部分選擇可能已接收。請重新整理核對；變更的項目需重新選擇。';
+
+  @override
+  String get syncRefreshRequired => '重新整理後繼續處理';
+
+  @override
+  String get syncQueued => '排隊中';
+
+  @override
+  String get syncWaitingConflict => '等待處理衝突';
+
+  @override
+  String get syncPartialFailed => '部分失敗';
+
+  @override
+  String get syncCancelled => '已取消';
+
+  @override
+  String get syncUnknown => '未知狀態，請重新整理';
+
+  @override
+  String get syncRetryMessage => '同步暫時失敗，伺服器會自動重試。恢復後繼續檢查衝突。';
+
+  @override
+  String get syncBindingChanged => '帳號或 Bangumi 綁定已變更，請關閉後重新開啟。';
+
+  @override
+  String get syncOpenConflicts => '處理衝突';
+
+  @override
+  String syncSubject(int id) {
+    return '項目 $id';
+  }
 }
 
 /// The translations for Chinese, as used in Taiwan, using the Han script (`zh_Hant_TW`).
@@ -6901,7 +7168,7 @@ class AppLocalizationsZhHantTw extends AppLocalizationsZh {
   String get bindStatusLoadFailed => '取得綁定狀態失敗';
 
   @override
-  String get bindBangumiHint => '綁定 Bangumi 帳戶後可同步收藏等資料';
+  String get bindBangumiHint => '無需綁定即可使用本機收藏；綁定 Bangumi 後可同步收藏';
 
   @override
   String get bindBangumiAccount => '綁定 Bangumi 帳戶';
@@ -7678,4 +7945,93 @@ class AppLocalizationsZhHantTw extends AppLocalizationsZh {
 
   @override
   String get danmakuSwitching => '正在切換彈幕…';
+
+  @override
+  String get collectionSaved => '收藏已儲存';
+
+  @override
+  String get collectionSavedLocally => '收藏已儲存到本機';
+
+  @override
+  String get collectionSavedPending => '已儲存到本機，Bangumi 尚未同步，伺服器將自動重試';
+
+  @override
+  String get collectionSavedAuthRequired => '已儲存到本機，請重新授權 Bangumi 後再次儲存收藏';
+
+  @override
+  String get collectionSavedConflict => '已儲存到本機，Bangumi 資料已變更，自動同步已暫停';
+
+  @override
+  String get collectionSavedSynced => '收藏已儲存並同步到 Bangumi';
+
+  @override
+  String get collectionSelectType => '請選擇收藏分類';
+
+  @override
+  String get syncConflictsTitle => '處理收藏分類衝突';
+
+  @override
+  String syncPendingSummary(int conflicts, int failed) {
+    return '收藏同步：$conflicts 條衝突，$failed 條失敗';
+  }
+
+  @override
+  String syncConflictSides(String local, String remote) {
+    return '本機：$local · Bangumi：$remote';
+  }
+
+  @override
+  String get syncUseLocal => '已載入項目採用本機';
+
+  @override
+  String get syncUseRemote => '已載入項目採用 Bangumi';
+
+  @override
+  String syncSubmitSelected(int count) {
+    return '提交已選 $count 項';
+  }
+
+  @override
+  String get syncLoadMore => '載入更多衝突';
+
+  @override
+  String get syncNoConflicts => '目前沒有待選擇的衝突';
+
+  @override
+  String get syncAccepted => '選擇已接收，背景正在處理。可關閉此視窗，稍後查看結果。';
+
+  @override
+  String get syncResolveFailed => '部分選擇可能已接收。請重新整理核對；變更的項目需重新選擇。';
+
+  @override
+  String get syncRefreshRequired => '重新整理後繼續處理';
+
+  @override
+  String get syncQueued => '排隊中';
+
+  @override
+  String get syncWaitingConflict => '等待處理衝突';
+
+  @override
+  String get syncPartialFailed => '部分失敗';
+
+  @override
+  String get syncCancelled => '已取消';
+
+  @override
+  String get syncUnknown => '未知狀態，請重新整理';
+
+  @override
+  String get syncRetryMessage => '同步暫時失敗，伺服器會自動重試。恢復後繼續檢查衝突。';
+
+  @override
+  String get syncBindingChanged => '帳號或 Bangumi 綁定已變更，請關閉後重新開啟。';
+
+  @override
+  String get syncOpenConflicts => '處理衝突';
+
+  @override
+  String syncSubject(int id) {
+    return '項目 $id';
+  }
 }

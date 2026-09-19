@@ -76,12 +76,13 @@ class UserCollectionData {
       nsfw: subject.nsfw,
       images: subject.images,
       interest: UserCollectionInterest(
-        id: interest?.id ?? 0,
+        id: interest?.id,
         rate: interest?.rate ?? 0,
         type: interest?.type ?? 0,
         comment: interest?.comment ?? '',
         tags: interest?.tags.whereType<String>().toList() ?? const [],
         updatedAt: interest?.updatedAt ?? 0,
+        remoteSyncStatus: interest?.remoteSyncStatus,
       ),
     );
   }
@@ -103,12 +104,13 @@ class UserCollectionData {
 }
 
 class UserCollectionInterest {
-  final int id;
+  final int? id;
   final int rate;
   final int type;
   final String comment;
   final List<String> tags;
   final int updatedAt;
+  final String? remoteSyncStatus;
 
   UserCollectionInterest({
     required this.id,
@@ -117,6 +119,7 @@ class UserCollectionInterest {
     required this.comment,
     required this.tags,
     required this.updatedAt,
+    this.remoteSyncStatus,
   });
 
   UserCollectionInterest.fromJson(Map<String, dynamic> json)
@@ -125,7 +128,8 @@ class UserCollectionInterest {
         type = json['type'],
         comment = json['comment'] ?? '',
         tags = List<String>.from(json['tags'] ?? []),
-        updatedAt = json['updatedAt'];
+        updatedAt = json['updatedAt'] ?? 0,
+        remoteSyncStatus = json['remoteSyncStatus'] as String?;
 
   Map<String, dynamic> toJson() {
     return {
@@ -135,6 +139,7 @@ class UserCollectionInterest {
       'comment': comment,
       'tags': tags,
       'updatedAt': updatedAt,
+      'remoteSyncStatus': remoteSyncStatus,
     };
   }
 }

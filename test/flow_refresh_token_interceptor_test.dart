@@ -102,6 +102,35 @@ void main() {
       dio.get<dynamic>('https://example.test/api/v1/users/me',
           options: Options(headers: {Constants.authorization: 'Bearer old'}));
 
+  for (final statusCode in [200, 401]) {
+    test('refreshes JSON auth failure during SSE handshake HTTP $statusCode',
+        () async {
+      final repository = Repository();
+      var refreshes = 0;
+      final dio = client(repository, ({required refreshToken}) async {
+        refreshes++;
+        return token('new');
+      }, (options) {
+        if (options.headers[Constants.authorization] == 'Bearer old') {
+          return reply(401, status: statusCode);
+        }
+        return ResponseBody.fromString(': heartbeat\n\n', 200, headers: {
+          'content-type': ['text/event-stream']
+        });
+      });
+      final result = await dio.get<dynamic>(
+          'https://example.test/api/v1/users/collections/sync/events',
+          options: Options(
+              responseType: ResponseType.stream,
+              headers: {Constants.authorization: 'Bearer old'}));
+      expect(result.data, isA<ResponseBody>());
+      expect(
+          await utf8.decoder.bind((result.data as ResponseBody).stream).join(),
+          ': heartbeat\n\n');
+      expect(refreshes, 1);
+    });
+  }
+
   for (final reason in [
     null,
     'bangumi_auth_required',

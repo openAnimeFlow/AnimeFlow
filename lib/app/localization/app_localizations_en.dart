@@ -1165,7 +1165,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get bindBangumiHint =>
-      'Bind a Bangumi account to sync collections and more';
+      'Use local collections without binding an account. Bind Bangumi to sync collections.';
 
   @override
   String get bindBangumiAccount => 'Bind Bangumi account';
@@ -1975,4 +1975,100 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get danmakuSwitching => 'Switching danmaku…';
+
+  @override
+  String get collectionSaved => 'Collection saved';
+
+  @override
+  String get collectionSavedLocally => 'Collection saved locally';
+
+  @override
+  String get collectionSavedPending =>
+      'Saved locally. The server will retry syncing to Bangumi.';
+
+  @override
+  String get collectionSavedAuthRequired =>
+      'Saved locally. Reauthorize Bangumi, then save the collection again.';
+
+  @override
+  String get collectionSavedConflict =>
+      'Saved locally. Bangumi has changed; automatic sync is paused.';
+
+  @override
+  String get collectionSavedSynced => 'Collection saved and synced to Bangumi';
+
+  @override
+  String get collectionSelectType => 'Choose a collection category';
+
+  @override
+  String get syncConflictsTitle => 'Resolve collection conflicts';
+
+  @override
+  String syncPendingSummary(int conflicts, int failed) {
+    return 'Collection sync: $conflicts conflicts, $failed failed';
+  }
+
+  @override
+  String syncConflictSides(String local, String remote) {
+    return 'Local: $local · Bangumi: $remote';
+  }
+
+  @override
+  String get syncUseLocal => 'Use local for loaded items';
+
+  @override
+  String get syncUseRemote => 'Use Bangumi for loaded items';
+
+  @override
+  String syncSubmitSelected(int count) {
+    return 'Submit $count selected';
+  }
+
+  @override
+  String get syncLoadMore => 'Load more conflicts';
+
+  @override
+  String get syncNoConflicts => 'No conflicts awaiting a choice';
+
+  @override
+  String get syncAccepted =>
+      'Choices received and queued for processing. You can close this window and check the result later.';
+
+  @override
+  String get syncResolveFailed =>
+      'Some choices may have been received. Refresh to check; changed items need a new choice.';
+
+  @override
+  String get syncRefreshRequired => 'Refresh to continue';
+
+  @override
+  String get syncQueued => 'Queued';
+
+  @override
+  String get syncWaitingConflict => 'Awaiting conflict resolution';
+
+  @override
+  String get syncPartialFailed => 'Partially failed';
+
+  @override
+  String get syncCancelled => 'Cancelled';
+
+  @override
+  String get syncUnknown => 'Unknown status; refresh';
+
+  @override
+  String get syncRetryMessage =>
+      'Sync temporarily failed. The server will retry and continue checking conflicts.';
+
+  @override
+  String get syncBindingChanged =>
+      'Your account or Bangumi binding changed. Close and reopen this window.';
+
+  @override
+  String get syncOpenConflicts => 'Resolve conflicts';
+
+  @override
+  String syncSubject(int id) {
+    return 'Subject $id';
+  }
 }

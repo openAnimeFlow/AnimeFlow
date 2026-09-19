@@ -1,5 +1,7 @@
+import 'package:go_router/go_router.dart';
 import 'package:anime_flow/app/localization/app_localizations.dart';
 import 'package:anime_flow/core/network/clients/flow_client.dart';
+import 'collection_conflicts_dialog.dart';
 import 'package:anime_flow/shared/models/flow/bgm_collection_sync_status_item.dart';
 import 'package:anime_flow/features/user/application/bgm_collection_sync_provider.dart';
 import 'package:anime_flow/shared/widgets/notification_toast.dart';
@@ -18,14 +20,51 @@ class BangumiCollectionSyncSection extends ConsumerStatefulWidget {
 class _BangumiCollectionSyncSectionState
     extends ConsumerState<BangumiCollectionSyncSection> {
   bool _isSubmitting = false;
+  final Object _subscriptionOwner = Object();
+  GoRouterDelegate? _routerDelegate;
+  ProviderContainer? _container;
+  bool _pageVisible = false;
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    _container = ProviderScope.containerOf(context, listen: false);
+    final information = GoRouter.maybeOf(context)?.routerDelegate;
+    if (!identical(information, _routerDelegate)) {
+      _routerDelegate?.removeListener(_updateSubscription);
+      _routerDelegate = information;
+      _routerDelegate?.addListener(_updateSubscription);
+    }
+    _updateSubscription();
+  }
+
+  void _updateSubscription() {
+    if (!mounted) return;
+    final path = _routerDelegate?.state.uri.path;
+    // /settings itself renders the account page only in the wide layout.
+    final visible =
+        path == null || path == '/settings' || path == '/settings/account';
+    if (visible == _pageVisible) return;
+    _pageVisible = visible;
+    _container!
+        .read(bgmCollectionSyncProvider.notifier)
+        .setPageSubscription(_subscriptionOwner, visible);
+  }
+
+  @override
+  void dispose() {
+    _routerDelegate?.removeListener(_updateSubscription);
+    _container
+        ?.read(bgmCollectionSyncProvider.notifier)
+        .setPageSubscription(_subscriptionOwner, false);
+    super.dispose();
+  }
 
   Future<void> _triggerSync() async {
     setState(() => _isSubmitting = true);
     try {
       await ref.read(bgmCollectionSyncProvider.notifier).triggerSync();
       if (!mounted) return;
-      final l10n = AppLocalizations.of(context);
-      NotificationToast.show(l10n.collectionSyncStarted, title: l10n.tip);
     } catch (e) {
       if (!mounted) return;
       final message = e is AnimeFlowApiException
@@ -53,6 +92,13 @@ class _BangumiCollectionSyncSectionState
     }
   }
 
+  Future<void> _resolveConflicts(int taskId) async {
+    await showDialog<void>(
+        context: context,
+        builder: (_) => CollectionConflictsDialog(taskId: taskId));
+    if (mounted) await _refreshStatus();
+  }
+
   @override
   Widget build(BuildContext context) {
     final syncAsync = ref.watch(bgmCollectionSyncProvider);
@@ -63,8 +109,16 @@ class _BangumiCollectionSyncSectionState
       data: (status) {
         final item = status;
         final isRunning = item?.isRunning == true || _isSubmitting;
+        final hasConflicts = (item?.pendingConflictCount ?? 0) > 0 ||
+            item?.status == BgmCollectionSyncStatus.waitingConflict;
         final statusLabel = _statusLabel(l10n, item?.status);
-        final message = item?.message;
+        final message = switch (item?.message) {
+          'SYNC_RETRY_REQUIRED' ||
+          'ITEM_RETRY_REQUIRED' =>
+            l10n.syncRetryMessage,
+          'SYNC_BINDING_CHANGED' => l10n.syncBindingChanged,
+          _ => item?.message,
+        };
         final syncedCount = item?.syncedCount ?? 0;
         final totalCount = item?.totalCount ?? 0;
         final hasProgress = isRunning && totalCount > 0;
@@ -122,10 +176,21 @@ class _BangumiCollectionSyncSectionState
                 ),
               ),
             ],
+            if (hasConflicts && item?.taskId != null) ...[
+              const SizedBox(height: 8),
+              Row(children: [
+                Expanded(
+                    child: Text(l10n.syncPendingSummary(
+                        item!.pendingConflictCount, item.failedCount))),
+                OutlinedButton(
+                    onPressed: () => _resolveConflicts(item.taskId!),
+                    child: Text(l10n.syncOpenConflicts)),
+              ]),
+            ],
             if (hasProgress) ...[
               const SizedBox(height: 8),
               LinearProgressIndicator(
-                value: syncedCount / totalCount,
+                value: (syncedCount / totalCount).clamp(0.0, 1.0),
                 minHeight: 6,
                 borderRadius: BorderRadius.circular(3),
               ),
@@ -151,7 +216,8 @@ class _BangumiCollectionSyncSectionState
             SizedBox(
               width: double.infinity,
               child: OutlinedButton.icon(
-                onPressed: isRunning ? null : _triggerSync,
+                key: const ValueKey('start-bangumi-sync'),
+                onPressed: isRunning || hasConflicts ? null : _triggerSync,
                 icon: const Icon(Icons.cloud_download_outlined, size: 18),
                 label: Text(isRunning
                     ? l10n.syncInProgress
@@ -197,8 +263,18 @@ class _BangumiCollectionSyncSectionState
     BgmCollectionSyncStatus? status,
   ) {
     switch (status ?? BgmCollectionSyncStatus.idle) {
+      case BgmCollectionSyncStatus.unknown:
+        return l10n.syncUnknown;
       case BgmCollectionSyncStatus.idle:
         return l10n.syncStatusIdle;
+      case BgmCollectionSyncStatus.queued:
+        return l10n.syncQueued;
+      case BgmCollectionSyncStatus.waitingConflict:
+        return l10n.syncWaitingConflict;
+      case BgmCollectionSyncStatus.partialFailed:
+        return l10n.syncPartialFailed;
+      case BgmCollectionSyncStatus.cancelled:
+        return l10n.syncCancelled;
       case BgmCollectionSyncStatus.running:
         return l10n.syncStatusRunning;
       case BgmCollectionSyncStatus.success:
@@ -228,6 +304,13 @@ class SyncStatusChip extends StatelessWidget {
           colorScheme.primaryContainer,
           colorScheme.onPrimaryContainer,
         ),
+      BgmCollectionSyncStatus.queued ||
+      BgmCollectionSyncStatus.waitingConflict ||
+      BgmCollectionSyncStatus.partialFailed =>
+        (
+          colorScheme.secondaryContainer,
+          colorScheme.onSecondaryContainer,
+        ),
       BgmCollectionSyncStatus.success => (
           colorScheme.tertiaryContainer,
           colorScheme.onTertiaryContainer,
@@ -237,6 +320,10 @@ class SyncStatusChip extends StatelessWidget {
           colorScheme.onErrorContainer,
         ),
       BgmCollectionSyncStatus.idle => (
+          colorScheme.surfaceContainerHighest,
+          colorScheme.onSurfaceVariant,
+        ),
+      BgmCollectionSyncStatus.cancelled || BgmCollectionSyncStatus.unknown => (
           colorScheme.surfaceContainerHighest,
           colorScheme.onSurfaceVariant,
         ),

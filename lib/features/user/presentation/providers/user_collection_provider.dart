@@ -1,3 +1,4 @@
+import 'package:anime_flow/shared/models/flow/collection_update_result.dart';
 import 'package:anime_flow/shared/models/bangumi/user_collections_item.dart';
 import 'package:anime_flow/shared/models/flow/flow_users.dart';
 import 'package:anime_flow/core/network/api/flow_api.dart';
@@ -27,7 +28,7 @@ final collectionPageLoaderProvider = Provider<CollectionPageLoader>((ref) {
 });
 
 final collectionTypeUpdateProvider =
-    Provider<Future<void> Function(UserCollectionData, int)>((ref) {
+    Provider<Future<CollectionUpdateResult> Function(UserCollectionData, int)>((ref) {
   return (collection, newType) => FlowApi.updateCollectionService(
         collection.id,
         type: newType,
@@ -54,20 +55,29 @@ class UserCollections extends _$UserCollections {
 
   Future<void> loadMore(int type) => _load(type, loadMore: true);
 
-  Future<void> updateCollectionType(
+  Future<CollectionUpdateResult?> updateCollectionType(
     UserCollectionData collection,
     int newType,
   ) async {
     // Use the state shown by the caller. Cached tabs may predate a fresh
     // detail response and must not suppress the user's requested update.
-    if (collection.interest.type == newType) return;
+
     final session = _session;
-    await ref.read(collectionTypeUpdateProvider)(collection, newType);
-    if (!ref.mounted || session != _session) return;
+    final result = await ref.read(collectionTypeUpdateProvider)(collection, newType);
+    if (!ref.mounted || session != _session) return null;
+    if (collection.interest.type == newType) {
+      await refresh(newType);
+      return ref.mounted && session == _session ? result : null;
+    }
+    final updatedJson = collection.toJson();
+    updatedJson['interest'] = {
+      ...collection.interest.toJson(),
+      'remoteSyncStatus': result.remoteSyncStatus.apiValue,
+    };
     final counts =
         ref.read(currentUserInfoProvider).asData?.value?.collectionCounts;
     state = state.moveCollection(
-      collection,
+      UserCollectionData.fromJson(updatedJson),
       newType,
       destinationTotal:
           counts == null ? null : counts.countForType(newType) + 1,
@@ -79,6 +89,7 @@ class UserCollections extends _$UserCollections {
     ref
         .read(currentUserInfoProvider.notifier)
         .moveCollectionCount(collection.interest.type, newType);
+    return result;
   }
 
   Future<void> search(int type, String keyword) async {

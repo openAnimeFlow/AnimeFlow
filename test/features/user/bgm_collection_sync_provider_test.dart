@@ -1,3 +1,4 @@
+import 'package:dio/dio.dart';
 import 'dart:async';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -30,6 +31,19 @@ class Profile extends CurrentUserInfo {
 
 class Repository extends CollectionSyncRepository {
   int reads = 0, starts = 0;
+  final streams = <StreamController<BgmCollectionSyncStatusItem?>>[];
+  final cancellations = <CancelToken>[];
+  @override
+  Stream<BgmCollectionSyncStatusItem?> events(CancelToken cancelToken) {
+    final controller = StreamController<BgmCollectionSyncStatusItem?>();
+    streams.add(controller);
+    cancellations.add(cancelToken);
+    cancelToken.whenCancel.then((_) {
+      controller.close();
+    });
+    return controller.stream;
+  }
+
   Future<BgmCollectionSyncStatusItem> Function()? loader;
   @override
   Future<BgmCollectionSyncStatusItem> status() async {
@@ -57,6 +71,34 @@ void main() {
             (ref) async => const BangumiBindItem(bound: true, platformUid: 1)),
         collectionSyncRepositoryProvider.overrideWithValue(repository),
       ]);
+
+  testWidgets('token rebuild cancels old SSE and retains background visibility',
+      (tester) async {
+    final repo = Repository();
+    final c = create(repo);
+    await c.read(bgmCollectionSyncProvider.future);
+    final owner = Object();
+    c.read(bgmCollectionSyncProvider.notifier).setPageSubscription(owner, true);
+    await tester.pump();
+    expect(repo.streams.length, 1);
+    c.invalidate(currentFlowTokenProvider);
+    await c.read(bgmCollectionSyncProvider.future);
+    await tester.pump();
+    expect(repo.cancellations.first.isCancelled, isTrue);
+    expect(repo.streams.length, 2);
+    c.read(bgmCollectionSyncProvider.notifier).setForeground(false);
+    c.invalidate(bgmCollectionSyncProvider);
+    await c.read(bgmCollectionSyncProvider.future);
+    await tester.pump();
+    expect(repo.cancellations.last.isCancelled, isTrue);
+    expect(repo.streams.length, 2);
+    c.read(bgmCollectionSyncProvider.notifier).setForeground(true);
+    await tester.pump();
+    expect(repo.streams.length, 3);
+    c.dispose();
+    await tester.pump();
+    expect(repo.cancellations.every((token) => token.isCancelled), isTrue);
+  });
 
   test('discovery only reads status and merges overlapping refreshes',
       () async {

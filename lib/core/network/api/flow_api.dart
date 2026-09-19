@@ -43,6 +43,11 @@ import 'package:anime_flow/core/utils/utils.dart';
 import 'package:dio/dio.dart';
 
 class FlowApi {
+  static Future<ResponseBody> openCollectionSyncEvents(
+          CancelToken cancelToken) =>
+      _client.openEventStream(
+          AnimeFlowApi.bangumiCollectionSyncEvents, cancelToken);
+
   static final FlowClient _client = FlowClient.instance;
 
   /// 获取 AnimeFlow 发布版本列表。
@@ -765,9 +770,12 @@ class FlowApi {
     );
     final data = response.data;
     if (data is! List) return const [];
-    return data.whereType<Map>().map((item) => CollectionConflictItem.fromJson(
-      Map<String, dynamic>.from(item),
-    )).toList(growable: false);
+    return data
+        .whereType<Map>()
+        .map((item) => CollectionConflictItem.fromJson(
+              Map<String, dynamic>.from(item),
+            ))
+        .toList(growable: false);
   }
 
   static Future<BgmCollectionSyncStatusItem> resolveCollectionConflictsService({

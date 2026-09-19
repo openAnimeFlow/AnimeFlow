@@ -230,6 +230,7 @@ class AnimeFlowApi {
 
       /// Bangumi 收藏同步
       bangumiCollectionSync = '/api/v1/users/collections/sync',
+      bangumiCollectionSyncEvents = '/api/v1/users/collections/sync/events',
 
       /// Bangumi 收藏同步冲突列表
       bangumiCollectionSyncConflicts =

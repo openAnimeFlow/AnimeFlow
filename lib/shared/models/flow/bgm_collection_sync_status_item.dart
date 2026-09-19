@@ -89,12 +89,6 @@ class BgmCollectionSyncStatusItem {
       status == BgmCollectionSyncStatus.running ||
       status == BgmCollectionSyncStatus.queued;
 
-  /// 非终态任务可在后台恢复，或由另一台设备提交冲突决议。
-  bool get shouldPoll =>
-      isRunning ||
-      status == BgmCollectionSyncStatus.partialFailed ||
-      status == BgmCollectionSyncStatus.waitingConflict;
-
   factory BgmCollectionSyncStatusItem.fromJson(Map<String, dynamic> json) {
     return BgmCollectionSyncStatusItem(
       status: BgmCollectionSyncStatus.fromJson(json['status'] as String?),

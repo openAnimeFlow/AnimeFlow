@@ -20,7 +20,7 @@ class BangumiCollectionSyncSection extends ConsumerStatefulWidget {
 class _BangumiCollectionSyncSectionState
     extends ConsumerState<BangumiCollectionSyncSection> {
   bool _isSubmitting = false;
-  final Object _pollingOwner = Object();
+  final Object _subscriptionOwner = Object();
   GoRouterDelegate? _routerDelegate;
   ProviderContainer? _container;
   bool _pageVisible = false;
@@ -31,14 +31,14 @@ class _BangumiCollectionSyncSectionState
     _container = ProviderScope.containerOf(context, listen: false);
     final information = GoRouter.maybeOf(context)?.routerDelegate;
     if (!identical(information, _routerDelegate)) {
-      _routerDelegate?.removeListener(_updatePolling);
+      _routerDelegate?.removeListener(_updateSubscription);
       _routerDelegate = information;
-      _routerDelegate?.addListener(_updatePolling);
+      _routerDelegate?.addListener(_updateSubscription);
     }
-    _updatePolling();
+    _updateSubscription();
   }
 
-  void _updatePolling() {
+  void _updateSubscription() {
     if (!mounted) return;
     final path = _routerDelegate?.state.uri.path;
     // /settings itself renders the account page only in the wide layout.
@@ -48,27 +48,15 @@ class _BangumiCollectionSyncSectionState
     _pageVisible = visible;
     _container!
         .read(bgmCollectionSyncProvider.notifier)
-        .setPagePolling(_pollingOwner, visible);
-    if (visible) {
-      WidgetsBinding.instance.addPostFrameCallback((_) async {
-        if (!mounted || !_pageVisible) return;
-        // Initial provider loading already performs the first query.
-        if (_container!.read(bgmCollectionSyncProvider).isLoading) return;
-        try {
-          await _container!
-              .read(bgmCollectionSyncProvider.notifier)
-              .refreshStatus();
-        } catch (_) {}
-      });
-    }
+        .setPageSubscription(_subscriptionOwner, visible);
   }
 
   @override
   void dispose() {
-    _routerDelegate?.removeListener(_updatePolling);
+    _routerDelegate?.removeListener(_updateSubscription);
     _container
         ?.read(bgmCollectionSyncProvider.notifier)
-        .setPagePolling(_pollingOwner, false);
+        .setPageSubscription(_subscriptionOwner, false);
     super.dispose();
   }
 

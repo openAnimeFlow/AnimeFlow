@@ -1,3 +1,4 @@
+import 'package:anime_flow/features/user/application/bgm_collection_sync_provider.dart';
 import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -20,7 +21,7 @@ const waiting = BgmCollectionSyncStatusItem(
 void main() {
   for (final accountPath in ['/settings', '/settings/account']) {
     testWidgets(
-        'polls only on $accountPath and late responses cannot restart it after exit',
+        'subscribes only on $accountPath and cancels on exit without reconnecting',
         (tester) async {
       final repo = Repository()..loader = (() async => waiting);
       final c = ProviderContainer(overrides: [
@@ -70,31 +71,76 @@ void main() {
                   find.byKey(const ValueKey('start-bangumi-sync')))
               .onPressed,
           isNull);
-      final entered = repo.reads;
-      await tester.pump(const Duration(seconds: 10));
+      expect(repo.streams.length, 1);
+      repo.streams.last.add(waiting);
       await tester.pump();
-      expect(repo.reads, entered + 1);
-      unawaited(
-          router.push('/other')); // Account route remains mounted underneath.
-      await tester.pumpAndSettle();
-      final left = repo.reads;
+      final entered = repo.reads;
       await tester.pump(const Duration(seconds: 30));
-      expect(repo.reads, left);
+      expect(repo.reads, entered); // State arrives via events, not GET polling.
+      unawaited(router.push('/other'));
+      await tester.pumpAndSettle();
+      expect(repo.cancellations.last.isCancelled, isTrue);
+      await tester.pump(const Duration(seconds: 90));
+      expect(repo.streams.length, 1);
       router.pop();
       await tester.pumpAndSettle();
-      expect(repo.reads, left + 1); // One immediate refresh when returning.
+      expect(repo.streams.length, 2);
+      repo.streams.last.add(waiting);
+      await tester.pump();
+      final notifier = c.read(bgmCollectionSyncProvider.notifier);
+      notifier.setForeground(false);
+      await tester.pump(const Duration(seconds: 90));
+      expect(repo.streams.length, 2);
+      expect(repo.cancellations.last.isCancelled, isTrue);
+      notifier.setForeground(true);
+      await tester.pump();
+      expect(repo.streams.length, 3);
+      // Connection failure retries, but an intentional exit must cancel the retry.
+      repo.streams.last.addError(StateError('disconnected'));
+      await tester.pump();
+      await tester.pump(const Duration(seconds: 1));
+      expect(repo.streams.length, 4);
+      repo.streams.last.add(null); // heartbeat
+      await tester.pump();
+      await tester.pump(const Duration(seconds: 50));
+      repo.streams.last.add(null);
+      await tester.pump();
+      await tester.pump(const Duration(seconds: 50));
+      expect(repo.streams.length, 4);
+      await tester
+          .pump(const Duration(seconds: 10)); // silent connection expires
+      expect(repo.cancellations.last.isCancelled, isTrue);
+      await tester.pump(const Duration(seconds: 1));
+      expect(repo.streams.length, 5);
+      repo.streams.last.add(const BgmCollectionSyncStatusItem(
+          status: BgmCollectionSyncStatus.waitingConflict,
+          taskId: 1,
+          statusVersion: 3,
+          pendingConflictCount: 2));
+      await tester.pump();
+      repo.streams.last.add(const BgmCollectionSyncStatusItem(
+          status: BgmCollectionSyncStatus.running,
+          taskId: 1,
+          statusVersion: 2));
+      await tester.pump();
+      repo.streams.last.add(const BgmCollectionSyncStatusItem(
+          status: BgmCollectionSyncStatus.idle));
+      await tester.pump();
+      expect(c.read(bgmCollectionSyncProvider).value?.statusVersion, 3);
       final pending = Completer<BgmCollectionSyncStatusItem>();
       repo.loader = () => pending.future;
-      await tester.pump(const Duration(seconds: 10));
+      final refresh = notifier.refreshStatus();
       await tester.pump();
       final inFlight = repo.reads;
+      repo.streams.last.addError(StateError('retry pending'));
+      await tester.pump();
       router.pop();
       await tester.pumpAndSettle();
       pending.complete(waiting);
-      await tester.pump();
-      await tester.pump();
-      await tester.pump(const Duration(seconds: 30));
+      await refresh;
+      await tester.pump(const Duration(seconds: 90));
       expect(repo.reads, inFlight);
+      expect(repo.streams.length, 5);
       expect(repo.starts, 0);
       expect(tester.takeException(), isNull);
       await tester.pumpWidget(const SizedBox());

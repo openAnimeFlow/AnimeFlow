@@ -24,15 +24,17 @@ class _CollectionSyncLifecycleState
       onPause: () =>
           ref.read(bgmCollectionSyncProvider.notifier).setForeground(false),
       onResume: () async {
+        ref.read(bgmCollectionSyncProvider.notifier).setForeground(true);
         if (ref.read(bgmCollectionSyncProvider).hasError) {
           ref.invalidate(bangumiBindProvider);
           ref.invalidate(bgmCollectionSyncProvider);
           return;
         }
         final notifier = ref.read(bgmCollectionSyncProvider.notifier);
-        notifier.setForeground(true);
         try {
-          await notifier.refreshStatus();
+          if (ref.read(collectionSyncConnectionScopeProvider).owners.isEmpty) {
+            await notifier.refreshStatus();
+          }
         } catch (_) {}
       },
     );

@@ -1,3 +1,5 @@
+import 'package:anime_flow/core/logger/logger.dart';
+import 'package:dio/dio.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart' show Provider;
 import 'dart:async';
 import 'package:anime_flow/features/user/data/repository/collection_sync_repository.dart';
@@ -9,28 +11,37 @@ import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 part 'bgm_collection_sync_provider.g.dart';
 
-// Page leases survive notifier rebuilds caused by login/binding changes.
-final collectionSyncPollingOwnersProvider =
-    Provider<Set<Object>>((ref) => <Object>{});
+// Page visibility survives notifier rebuilds caused by login/token changes.
+class CollectionSyncConnectionScope {
+  final owners = <Object>{};
+  bool foreground = true;
+}
+
+final collectionSyncConnectionScopeProvider =
+    Provider((ref) => CollectionSyncConnectionScope());
 
 @Riverpod(keepAlive: true)
 class BgmCollectionSync extends _$BgmCollectionSync {
-  Timer? _pollTimer;
+  StreamSubscription<BgmCollectionSyncStatusItem?>? _subscription;
+  CancelToken? _cancelToken;
+  Timer? _retryTimer, _heartbeatTimer;
+  int _connectionGeneration = 0, _retryAttempt = 0;
+  bool _ready = false;
   Future<void>? _refresh;
   Object _generation = Object();
-  bool _foreground = true;
 
   bool _current(Object generation) =>
       ref.mounted && identical(generation, _generation);
 
   @override
   Future<BgmCollectionSyncStatusItem?> build() async {
-    _stopPolling();
+    _ready = false;
+    _stopConnection();
     final generation = _generation = Object();
     _refresh = null;
     ref.onDispose(() {
       _generation = Object();
-      _stopPolling();
+      _stopConnection();
     });
     final token = await ref.watch(currentFlowTokenProvider.future);
     if (!_current(generation) || token == null) return null;
@@ -38,7 +49,10 @@ class BgmCollectionSync extends _$BgmCollectionSync {
     if (!_current(generation) || bind?.bound != true) return null;
     final status = await ref.read(collectionSyncRepositoryProvider).status();
     if (!_current(generation)) return null;
-    _ensurePolling(status);
+    _ready = true;
+    scheduleMicrotask(() {
+      if (_current(generation)) _ensureConnection();
+    });
     if (status.syncedCount > 0) {
       scheduleMicrotask(() {
         if (_current(generation)) _refreshCollections();
@@ -69,16 +83,30 @@ class BgmCollectionSync extends _$BgmCollectionSync {
     final bind = await ref.read(bangumiBindProvider.future);
     if (!_current(generation)) return;
     if (bind?.bound != true) {
+      _ready = false;
       state = const AsyncData(null);
-      _stopPolling();
+      _stopConnection();
       return;
     }
     final status = await ref.read(collectionSyncRepositoryProvider).status();
-    if (_current(generation)) _accept(status);
+    if (_current(generation)) {
+      _ready = true;
+      _accept(status);
+    }
   }
 
   void _accept(BgmCollectionSyncStatusItem status) {
     final previous = state.value;
+    if (previous?.taskId != null && status.taskId == null) return;
+    if (previous?.taskId != null && status.taskId != null) {
+      if (status.taskId! < previous!.taskId!) return;
+      if (status.taskId == previous.taskId &&
+          status.statusVersion != null &&
+          previous.statusVersion != null &&
+          status.statusVersion! < previous.statusVersion!) {
+        return;
+      }
+    }
     state = AsyncData(status);
     if (status.syncedCount > 0 &&
         (previous?.taskId != status.taskId ||
@@ -87,7 +115,7 @@ class BgmCollectionSync extends _$BgmCollectionSync {
                 status.status == BgmCollectionSyncStatus.success))) {
       _refreshCollections();
     }
-    _ensurePolling(status);
+    _ensureConnection();
   }
 
   void _refreshCollections() {
@@ -96,43 +124,93 @@ class BgmCollectionSync extends _$BgmCollectionSync {
     ref.read(collectionRevisionProvider.notifier).changed();
   }
 
-  void setPagePolling(Object owner, bool enabled) {
-    final owners = ref.read(collectionSyncPollingOwnersProvider);
+  void setPageSubscription(Object owner, bool enabled) {
+    final scope = ref.read(collectionSyncConnectionScopeProvider);
     if (enabled) {
-      owners.add(owner);
+      scope.owners.add(owner);
     } else {
-      owners.remove(owner);
+      scope.owners.remove(owner);
     }
-    _ensurePolling(state.value);
+    _ensureConnection();
   }
 
   void setForeground(bool value) {
-    _foreground = value;
-    if (!value) {
-      _stopPolling();
-    } else {
-      _ensurePolling(state.value);
-    }
+    ref.read(collectionSyncConnectionScopeProvider).foreground = value;
+    _ensureConnection();
   }
 
-  void _ensurePolling(BgmCollectionSyncStatusItem? status) {
-    _stopPolling();
-    if (!_foreground ||
-        ref.read(collectionSyncPollingOwnersProvider).isEmpty ||
-        status == null ||
-        !status.shouldPoll) {
+  bool get _shouldConnect {
+    final scope = ref.read(collectionSyncConnectionScopeProvider);
+    return _ready && scope.foreground && scope.owners.isNotEmpty;
+  }
+
+  void _ensureConnection() {
+    if (!_shouldConnect) {
+      _stopConnection();
+      _retryAttempt = 0;
       return;
     }
-    _pollTimer =
-        Timer.periodic(Duration(seconds: status.isRunning ? 2 : 10), (_) async {
-      try {
-        await refreshStatus();
-      } catch (_) {/* Retain state and retry next tick. */}
-    });
+    if (_cancelToken != null || _retryTimer != null) return;
+    final generation = _generation;
+    final connection = ++_connectionGeneration;
+    final cancelToken = _cancelToken = CancelToken();
+    bool current() =>
+        _current(generation) && connection == _connectionGeneration;
+
+    void disconnected() {
+      if (!current()) return;
+      _stopConnection();
+      if (!_shouldConnect) return;
+      final seconds = (1 << _retryAttempt.clamp(0, 5)).clamp(1, 30);
+      _retryAttempt++;
+      _retryTimer = Timer(Duration(seconds: seconds), () {
+        _retryTimer = null;
+        if (_current(generation)) _ensureConnection();
+      });
+    }
+
+    void heartbeat() {
+      _heartbeatTimer?.cancel();
+      _heartbeatTimer = Timer(const Duration(seconds: 60), disconnected);
+    }
+
+    heartbeat(); // Also bounds a handshake that never produces an event.
+    _subscription =
+        ref.read(collectionSyncRepositoryProvider).events(cancelToken).listen(
+      (status) {
+        if (!current()) return;
+        _retryAttempt = 0;
+        heartbeat();
+        if (status != null) _accept(status);
+      },
+      onError: (Object error, StackTrace stack) {
+        if (!current()) return;
+        // Keep credentials and response bodies out of connection diagnostics.
+        final detail = error is DioException
+            ? '${error.type.name}, HTTP ${error.response?.statusCode ?? "—"}'
+            : error is FormatException
+                ? error.message
+                : error.runtimeType.toString();
+        LiggLogger().w('收藏同步 SSE 连接异常，将重试：$detail');
+        disconnected();
+      },
+      onDone: disconnected,
+    );
   }
 
-  void _stopPolling() {
-    _pollTimer?.cancel();
-    _pollTimer = null;
+  void _stopConnection() {
+    // Invalidate callbacks before cancellation, so an intentional close never reconnects.
+    _connectionGeneration++;
+    _retryTimer?.cancel();
+    _retryTimer = null;
+    _heartbeatTimer?.cancel();
+    _heartbeatTimer = null;
+    final token = _cancelToken;
+    _cancelToken = null;
+    if (token != null && !token.isCancelled) {
+      token.cancel('collection status subscription closed');
+    }
+    unawaited(_subscription?.cancel());
+    _subscription = null;
   }
 }

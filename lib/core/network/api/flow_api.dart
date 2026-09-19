@@ -28,6 +28,7 @@ import 'package:anime_flow/shared/models/player/danmaku/danmaku_module.dart';
 import 'package:anime_flow/shared/models/player/danmaku/danmaku_search_response.dart';
 import 'package:anime_flow/shared/models/flow/background_image_item.dart';
 import 'package:anime_flow/shared/models/flow/bgm_collection_sync_status_item.dart';
+import 'package:anime_flow/shared/models/flow/collection_conflict_item.dart';
 import 'package:anime_flow/shared/models/flow/bangumi_bind_item.dart';
 import 'package:anime_flow/core/auth/models/flow_token.dart';
 import 'package:anime_flow/shared/models/flow/flow_users.dart';
@@ -647,7 +648,7 @@ class FlowApi {
       'file': MultipartFile.fromBytes(imageBytes, filename: filename),
     });
     final response = await _client.post(
-      '${AnimeFlowApi.flowUsers}/avatar',
+      AnimeFlowApi.flowUserAvatar,
       data: formData,
       requireFlowToken: true,
     );
@@ -736,10 +737,48 @@ class FlowApi {
   /// 提交 Bangumi 收藏同步任务
   static Future<BgmCollectionSyncStatusItem> triggerBgmCollectionSyncService({
     int subjectType = 2,
+    String? requestId,
   }) async {
     final response = await _client.post(
       AnimeFlowApi.bangumiCollectionSync,
-      queryParameters: {'subjectType': subjectType},
+      queryParameters: {
+        'subjectType': subjectType,
+        if (requestId != null) 'requestId': requestId,
+      },
+      requireFlowToken: true,
+    );
+    return BgmCollectionSyncStatusItem.fromJson(
+      response.data as Map<String, dynamic>,
+    );
+  }
+
+  static Future<List<CollectionConflictItem>> getCollectionConflictsService({
+    required int taskId,
+    int offset = 0,
+    int limit = 20,
+  }) async {
+    final response = await _client.get(
+      AnimeFlowApi.bangumiCollectionSyncConflicts
+          .replaceFirst('{taskId}', taskId.toString()),
+      queryParameters: {'offset': offset, 'limit': limit},
+      requireFlowToken: true,
+    );
+    final data = response.data;
+    if (data is! List) return const [];
+    return data.whereType<Map>().map((item) => CollectionConflictItem.fromJson(
+      Map<String, dynamic>.from(item),
+    )).toList(growable: false);
+  }
+
+  static Future<BgmCollectionSyncStatusItem> resolveCollectionConflictsService({
+    required int taskId,
+    required List<Map<String, dynamic>> items,
+    String? requestId,
+  }) async {
+    final response = await _client.post(
+      AnimeFlowApi.bangumiCollectionSyncConflictResolve
+          .replaceFirst('{taskId}', taskId.toString()),
+      data: {'requestId': requestId, 'items': items},
       requireFlowToken: true,
     );
     return BgmCollectionSyncStatusItem.fromJson(

@@ -29,6 +29,7 @@ class BgmCollectionSync extends _$BgmCollectionSync {
   Future<void> triggerSync({int subjectType = 2}) async {
     final status = await FlowApi.triggerBgmCollectionSyncService(
       subjectType: subjectType,
+      requestId: 'desktop-${DateTime.now().microsecondsSinceEpoch}',
     );
     state = AsyncData(status);
     _ensurePolling(status);
@@ -50,7 +51,7 @@ class BgmCollectionSync extends _$BgmCollectionSync {
       final previous = state.value;
       final status = await FlowApi.getBgmCollectionSyncStatusService();
       state = AsyncData(status);
-      if (previous?.isRunning == true &&
+      if (previous?.shouldPoll == true &&
           status.status == BgmCollectionSyncStatus.success) {
         ref.invalidate(currentUserInfoProvider);
       }
@@ -62,11 +63,16 @@ class BgmCollectionSync extends _$BgmCollectionSync {
 
   void _ensurePolling(BgmCollectionSyncStatusItem? status) {
     _stopPolling();
-    if (status == null || !status.isRunning) {
+    if (status == null || !status.shouldPoll) {
       return;
     }
-    _pollTimer = Timer.periodic(const Duration(seconds: 2), (_) {
-      refreshStatus();
+    final interval = Duration(seconds: status.isRunning ? 2 : 10);
+    _pollTimer = Timer.periodic(interval, (_) async {
+      try {
+        await refreshStatus();
+      } catch (_) {
+        // 保留最近状态，网络恢复后继续轮询；手动刷新仍向用户报告错误。
+      }
     });
   }
 

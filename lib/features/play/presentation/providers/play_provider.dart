@@ -18,6 +18,7 @@ import 'package:anime_flow/features/play/presentation/providers/video_ui_provide
 import 'package:anime_flow/features/shaders/shaders_controller.dart';
 import 'package:anime_flow/features/user/presentation/providers/user_state_provider.dart';
 import 'package:anime_flow/core/network/api/flow_api.dart';
+import 'package:anime_flow/core/presence/presence_service.dart';
 import 'package:anime_flow/app/router/routes_args.dart';
 import 'package:anime_flow/core/logger/logger.dart';
 import 'package:anime_flow/core/utils/system_util.dart';
@@ -727,6 +728,14 @@ class PlaySession {
       playing: state.playing,
       isLoggedIn: isLoggedIn,
     );
+    if (subjectId > 0 && episodeId > 0) {
+      PresenceService.instance.setPlaybackContext(
+        subjectId: subjectId,
+        episodeId: episodeId,
+        watching: state.playing || state.buffering,
+        positionSeconds: state.position.inSeconds,
+      );
+    }
   }
 
   ///更新缓冲状态

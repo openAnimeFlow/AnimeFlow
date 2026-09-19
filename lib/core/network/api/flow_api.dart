@@ -30,6 +30,8 @@ import 'package:anime_flow/shared/models/flow/bgm_collection_sync_status_item.da
 import 'package:anime_flow/shared/models/flow/bangumi_bind_item.dart';
 import 'package:anime_flow/core/auth/models/flow_token.dart';
 import 'package:anime_flow/shared/models/flow/flow_users.dart';
+import 'package:anime_flow/shared/models/flow/online_count.dart';
+import 'package:anime_flow/shared/models/flow/watching_subject.dart';
 import 'package:anime_flow/shared/models/github_release.dart';
 import 'package:anime_flow/shared/models/player/play/play_history_event_type.dart';
 import 'package:anime_flow/shared/models/player/play/play_history_item.dart';
@@ -42,6 +44,64 @@ import 'package:dio/dio.dart';
 
 class FlowApi {
   static final FlowClient _client = FlowClient.instance;
+
+  /// 更新当前客户端在线状态。允许匿名请求，登录 token 会由 FlowClient 自动附带。
+  static Future<void> presenceHeartbeat({
+    required String visitorId,
+    required String presenceId,
+    required String clientType,
+    String? appVersion,
+    int? subjectId,
+    int? episodeId,
+    int? positionSeconds,
+    String status = 'online',
+  }) async {
+    await _client.put(
+      '${AnimeFlowApi.presence}/$presenceId',
+      data: {
+        'visitorId': visitorId,
+        'clientType': clientType,
+        if (appVersion != null && appVersion.isNotEmpty) 'appVersion': appVersion,
+        'status': status,
+        if (subjectId != null) 'subjectId': subjectId,
+        if (episodeId != null) 'episodeId': episodeId,
+        if (positionSeconds != null) 'positionSeconds': positionSeconds,
+      },
+    );
+  }
+
+  /// 主动移除当前客户端在线状态；服务端 TTL 仍是最终离线判定。
+  static Future<void> presenceOffline({required String presenceId}) async {
+    await _client.delete(
+      '${AnimeFlowApi.presence}/$presenceId',
+    );
+  }
+
+  static Future<OnlineCount> getPresenceOnlineCount() async {
+    final response = await _client.get(AnimeFlowApi.presenceOnlineCount);
+    return OnlineCount.fromJson(Map<String, dynamic>.from(response.data as Map));
+  }
+
+  static Future<OnlineCount> getSubjectPresenceOnlineCount(int subjectId) async {
+    final response = await _client.get(
+      '${AnimeFlowApi.presence}/subjects/$subjectId/online-count',
+    );
+    return OnlineCount.fromJson(Map<String, dynamic>.from(response.data as Map));
+  }
+
+  static Future<List<WatchingSubject>> getWatchingSubjects() async {
+    final response = await _client.get(
+      '${AnimeFlowApi.presence}/watching-subjects',
+    );
+    final data = response.data;
+    if (data is! List) return const [];
+    return data
+        .whereType<Map>()
+        .map((item) => WatchingSubject.fromJson(
+              Map<String, dynamic>.from(item),
+            ))
+        .toList();
+  }
 
   /// 获取 AnimeFlow 发布版本列表。
   static Future<List<GithubRelease>> getReleases({

@@ -51,16 +51,16 @@ class AppLocalizationsEn extends AppLocalizations {
   String get englishLanguage => 'English';
 
   @override
-  String get recommendTab => 'Recommended';
+  String get recommend => 'Recommended';
 
   @override
-  String get mineTab => 'Mine';
+  String get mine => 'Mine';
 
   @override
-  String get animeTab => 'Anime';
+  String get anime => 'Anime';
 
   @override
-  String get forumTab => 'Forum';
+  String get community => 'Community';
 
   @override
   String get searchAnimeHint => 'Search anime...';

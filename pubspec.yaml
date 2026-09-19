@@ -89,6 +89,7 @@ dependencies:
   dio: ^5.10.0 # 提供支持拦截器、取消请求和文件传输的 HTTP 客户端。
   cookie_jar: ^4.0.9 # 管理 HTTP Cookie，并支持 Cookie 持久化。
   crypto: ^3.0.6 # 提供常用密码学哈希、摘要和 HMAC 算法。
+  uuid: ^4.5.1 # 生成标准 UUID v4 客户端身份标识。
   html: ^0.15.6 # 将 HTML 文本解析为可遍历和操作的文档树。
   xpath_selector: ^3.0.2 # 使用 XPath 表达式查询 XML 或 HTML 文档节点。
   xpath_selector_html_parser: ^3.0.1 # 将 HTML 解析器接入 xpath_selector 查询流程。

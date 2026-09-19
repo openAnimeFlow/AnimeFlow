@@ -253,7 +253,13 @@ class AnimeFlowApi {
 
       /// 清除当前用户指定番剧的播放进度
       subjectPlayHistoryProgress =
-          '/api/v1/users/play-history/subjects/{subjectId}/progress';
+          '/api/v1/users/play-history/subjects/{subjectId}/progress',
+
+      /// 在线状态资源
+      presence = '/api/v1/presence',
+
+      /// 当前在线人数
+      presenceOnlineCount = '/api/v1/presence/online-count';
 }
 
 class DamakuApi {

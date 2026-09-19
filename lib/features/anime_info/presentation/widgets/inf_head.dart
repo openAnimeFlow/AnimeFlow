@@ -1,3 +1,4 @@
+import 'package:anime_flow/shared/widgets/collection_save_notice.dart';
 import 'dart:ui';
 
 import 'package:anime_flow/app/router/app_router.dart';
@@ -342,15 +343,11 @@ class InfoHeadView extends StatelessWidget {
                 offset: const Offset(0, 50),
                 onCollectTypeChanged: (type) async {
                   try {
-                    await ref
+                    final result = await ref
                         .read(animeInfoProvider.notifier)
                         .updateCollectionType(type.value);
                     if (context.mounted) {
-                      NotificationToast.show(
-                        '已${type.label}',
-                        title: '收藏更新',
-                        maxWidth: 500,
-                      );
+                      showCollectionSaveNotice(context, result);
                     }
                   } on AnimeFlowApiException catch (e) {
                     if (context.mounted) {

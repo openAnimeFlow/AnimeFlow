@@ -1,3 +1,4 @@
+import 'package:anime_flow/shared/models/flow/collection_update_result.dart';
 import 'dart:typed_data';
 import 'dart:ui';
 
@@ -805,8 +806,8 @@ class FlowApi {
     }
   }
 
-  /// 更新当前用户对条目的 Bangumi 收藏（需登录且已绑定 Bangumi）
-  static Future<void> updateCollectionService(
+  /// 保存本地收藏；返回独立的 Bangumi 同步状态。
+  static Future<CollectionUpdateResult> updateCollectionService(
     int subjectId, {
     int? type,
     bool? isPrivate,
@@ -825,11 +826,12 @@ class FlowApi {
     if (tags != null) data['tags'] = tags;
     if (subjectType != null) data['subjectType'] = subjectType;
 
-    await _client.put(
+    final response = await _client.put(
       '${AnimeFlowApi.flowUserCollections}/$subjectId',
       data: data,
       requireFlowToken: true,
     );
+    return CollectionUpdateResult.fromResponse(response.data);
   }
 
   /// 更新剧集观看状态

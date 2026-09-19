@@ -371,7 +371,7 @@
   "unbound": "Not bound",
   "loading": "Loading...",
   "bindStatusLoadFailed": "Failed to get binding status",
-  "bindBangumiHint": "Bind a Bangumi account to sync collections and more",
+  "bindBangumiHint": "Use local collections without binding an account. Bind Bangumi to sync collections.",
   "bindBangumiAccount": "Bind Bangumi account",
   "confirmUnbind": "Confirm unbinding",
   "unbindConfirmation": "Are you sure you want to unbind your Bangumi account? Some features may be affected.",
@@ -608,5 +608,12 @@
   ,"deleteFailed": "Deletion failed"
   ,"sourceDeleted": "Data source \"{name}\" was deleted"
   ,"sourceDeleteFailed": "Error deleting data source \"{name}\": {error}"
-  ,"pluginVersionDate": "Version: {version} - {date}"
+  ,"pluginVersionDate": "Version: {version} - {date}",
+  "collectionSaved": "Collection saved",
+  "collectionSavedLocally": "Collection saved locally",
+  "collectionSavedPending": "Saved locally. The server will retry syncing to Bangumi.",
+  "collectionSavedAuthRequired": "Saved locally. Reauthorize Bangumi, then save the collection again.",
+  "collectionSavedConflict": "Saved locally. Bangumi has changed; automatic sync is paused.",
+  "collectionSavedSynced": "Collection saved and synced to Bangumi",
+  "collectionSelectType": "Choose a collection category"
 }

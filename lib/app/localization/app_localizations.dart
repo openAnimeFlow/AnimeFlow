@@ -2266,7 +2266,7 @@ abstract class AppLocalizations {
   /// No description provided for @bindBangumiHint.
   ///
   /// In zh_Hans, this message translates to:
-  /// **'绑定 Bangumi 账号后可同步收藏等数据'**
+  /// **'无需绑定即可使用本地收藏；绑定 Bangumi 后可同步收藏'**
   String get bindBangumiHint;
 
   /// No description provided for @bindBangumiAccount.
@@ -3655,6 +3655,48 @@ abstract class AppLocalizations {
   /// In zh_Hans, this message translates to:
   /// **'正在切换弹幕…'**
   String get danmakuSwitching;
+
+  /// No description provided for @collectionSaved.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'收藏已保存'**
+  String get collectionSaved;
+
+  /// No description provided for @collectionSavedLocally.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'收藏已保存到本地'**
+  String get collectionSavedLocally;
+
+  /// No description provided for @collectionSavedPending.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'本地已保存，Bangumi 暂未同步，服务端将自动重试'**
+  String get collectionSavedPending;
+
+  /// No description provided for @collectionSavedAuthRequired.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'本地已保存，请重新授权 Bangumi 后再次保存收藏'**
+  String get collectionSavedAuthRequired;
+
+  /// No description provided for @collectionSavedConflict.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'本地已保存，Bangumi 数据已变化，自动同步已暂停'**
+  String get collectionSavedConflict;
+
+  /// No description provided for @collectionSavedSynced.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'收藏已保存并同步到 Bangumi'**
+  String get collectionSavedSynced;
+
+  /// No description provided for @collectionSelectType.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'请选择收藏分类'**
+  String get collectionSelectType;
 }
 
 class _AppLocalizationsDelegate

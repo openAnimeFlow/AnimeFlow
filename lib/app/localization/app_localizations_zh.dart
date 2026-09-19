@@ -1145,7 +1145,7 @@ class AppLocalizationsZh extends AppLocalizations {
   String get bindStatusLoadFailed => '获取绑定状态失败';
 
   @override
-  String get bindBangumiHint => '绑定 Bangumi 账号后可同步收藏等数据';
+  String get bindBangumiHint => '无需绑定即可使用本地收藏；绑定 Bangumi 后可同步收藏';
 
   @override
   String get bindBangumiAccount => '绑定 Bangumi 账号';
@@ -1921,6 +1921,27 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get danmakuSwitching => '正在切換彈幕…';
+
+  @override
+  String get collectionSaved => '收藏已保存';
+
+  @override
+  String get collectionSavedLocally => '收藏已保存到本地';
+
+  @override
+  String get collectionSavedPending => '本地已保存，Bangumi 暂未同步，服务端将自动重试';
+
+  @override
+  String get collectionSavedAuthRequired => '本地已保存，请重新授权 Bangumi 后再次保存收藏';
+
+  @override
+  String get collectionSavedConflict => '本地已保存，Bangumi 数据已变化，自动同步已暂停';
+
+  @override
+  String get collectionSavedSynced => '收藏已保存并同步到 Bangumi';
+
+  @override
+  String get collectionSelectType => '请选择收藏分类';
 }
 
 /// The translations for Chinese, using the Han script (`zh_Hans`).
@@ -3064,7 +3085,7 @@ class AppLocalizationsZhHans extends AppLocalizationsZh {
   String get bindStatusLoadFailed => '获取绑定状态失败';
 
   @override
-  String get bindBangumiHint => '绑定 Bangumi 账号后可同步收藏等数据';
+  String get bindBangumiHint => '无需绑定即可使用本地收藏；绑定 Bangumi 后可同步收藏';
 
   @override
   String get bindBangumiAccount => '绑定 Bangumi 账号';
@@ -3839,6 +3860,27 @@ class AppLocalizationsZhHans extends AppLocalizationsZh {
 
   @override
   String get danmakuSwitching => '正在切换弹幕…';
+
+  @override
+  String get collectionSaved => '收藏已保存';
+
+  @override
+  String get collectionSavedLocally => '收藏已保存到本地';
+
+  @override
+  String get collectionSavedPending => '本地已保存，Bangumi 暂未同步，服务端将自动重试';
+
+  @override
+  String get collectionSavedAuthRequired => '本地已保存，请重新授权 Bangumi 后再次保存收藏';
+
+  @override
+  String get collectionSavedConflict => '本地已保存，Bangumi 数据已变化，自动同步已暂停';
+
+  @override
+  String get collectionSavedSynced => '收藏已保存并同步到 Bangumi';
+
+  @override
+  String get collectionSelectType => '请选择收藏分类';
 }
 
 /// The translations for Chinese, as used in Hong Kong, using the Han script (`zh_Hant_HK`).
@@ -4982,7 +5024,7 @@ class AppLocalizationsZhHantHk extends AppLocalizationsZh {
   String get bindStatusLoadFailed => '取得綁定狀態失敗';
 
   @override
-  String get bindBangumiHint => '綁定 Bangumi 帳戶後可同步收藏等資料';
+  String get bindBangumiHint => '無需綁定即可使用本機收藏；綁定 Bangumi 後可同步收藏';
 
   @override
   String get bindBangumiAccount => '綁定 Bangumi 帳戶';
@@ -5758,6 +5800,27 @@ class AppLocalizationsZhHantHk extends AppLocalizationsZh {
 
   @override
   String get danmakuSwitching => '正在切換彈幕…';
+
+  @override
+  String get collectionSaved => '收藏已儲存';
+
+  @override
+  String get collectionSavedLocally => '收藏已儲存到本機';
+
+  @override
+  String get collectionSavedPending => '已儲存到本機，Bangumi 尚未同步，伺服器將自動重試';
+
+  @override
+  String get collectionSavedAuthRequired => '已儲存到本機，請重新授權 Bangumi 後再次儲存收藏';
+
+  @override
+  String get collectionSavedConflict => '已儲存到本機，Bangumi 資料已變更，自動同步已暫停';
+
+  @override
+  String get collectionSavedSynced => '收藏已儲存並同步到 Bangumi';
+
+  @override
+  String get collectionSelectType => '請選擇收藏分類';
 }
 
 /// The translations for Chinese, as used in Taiwan, using the Han script (`zh_Hant_TW`).
@@ -6901,7 +6964,7 @@ class AppLocalizationsZhHantTw extends AppLocalizationsZh {
   String get bindStatusLoadFailed => '取得綁定狀態失敗';
 
   @override
-  String get bindBangumiHint => '綁定 Bangumi 帳戶後可同步收藏等資料';
+  String get bindBangumiHint => '無需綁定即可使用本機收藏；綁定 Bangumi 後可同步收藏';
 
   @override
   String get bindBangumiAccount => '綁定 Bangumi 帳戶';
@@ -7678,4 +7741,25 @@ class AppLocalizationsZhHantTw extends AppLocalizationsZh {
 
   @override
   String get danmakuSwitching => '正在切換彈幕…';
+
+  @override
+  String get collectionSaved => '收藏已儲存';
+
+  @override
+  String get collectionSavedLocally => '收藏已儲存到本機';
+
+  @override
+  String get collectionSavedPending => '已儲存到本機，Bangumi 尚未同步，伺服器將自動重試';
+
+  @override
+  String get collectionSavedAuthRequired => '已儲存到本機，請重新授權 Bangumi 後再次儲存收藏';
+
+  @override
+  String get collectionSavedConflict => '已儲存到本機，Bangumi 資料已變更，自動同步已暫停';
+
+  @override
+  String get collectionSavedSynced => '收藏已儲存並同步到 Bangumi';
+
+  @override
+  String get collectionSelectType => '請選擇收藏分類';
 }

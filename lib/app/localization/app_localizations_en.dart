@@ -1165,7 +1165,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get bindBangumiHint =>
-      'Bind a Bangumi account to sync collections and more';
+      'Use local collections without binding an account. Bind Bangumi to sync collections.';
 
   @override
   String get bindBangumiAccount => 'Bind Bangumi account';
@@ -1975,4 +1975,28 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get danmakuSwitching => 'Switching danmaku…';
+
+  @override
+  String get collectionSaved => 'Collection saved';
+
+  @override
+  String get collectionSavedLocally => 'Collection saved locally';
+
+  @override
+  String get collectionSavedPending =>
+      'Saved locally. The server will retry syncing to Bangumi.';
+
+  @override
+  String get collectionSavedAuthRequired =>
+      'Saved locally. Reauthorize Bangumi, then save the collection again.';
+
+  @override
+  String get collectionSavedConflict =>
+      'Saved locally. Bangumi has changed; automatic sync is paused.';
+
+  @override
+  String get collectionSavedSynced => 'Collection saved and synced to Bangumi';
+
+  @override
+  String get collectionSelectType => 'Choose a collection category';
 }

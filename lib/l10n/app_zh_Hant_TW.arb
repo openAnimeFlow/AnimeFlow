@@ -371,7 +371,7 @@
   "unbound": "未綁定",
   "loading": "載入中...",
   "bindStatusLoadFailed": "取得綁定狀態失敗",
-  "bindBangumiHint": "綁定 Bangumi 帳戶後可同步收藏等資料",
+  "bindBangumiHint": "無需綁定即可使用本機收藏；綁定 Bangumi 後可同步收藏",
   "bindBangumiAccount": "綁定 Bangumi 帳戶",
   "confirmUnbind": "確認解除綁定",
   "unbindConfirmation": "確定要解除綁定 Bangumi 帳戶嗎？解除後可能影響部分功能。",
@@ -608,5 +608,12 @@
   ,"downloaded": "已下載"
   ,"updating": "更新中…"
   ,"update": "更新"
-  ,"pluginVersionDate": "版本：{version} - {date}"
+  ,"pluginVersionDate": "版本：{version} - {date}",
+  "collectionSaved": "收藏已儲存",
+  "collectionSavedLocally": "收藏已儲存到本機",
+  "collectionSavedPending": "已儲存到本機，Bangumi 尚未同步，伺服器將自動重試",
+  "collectionSavedAuthRequired": "已儲存到本機，請重新授權 Bangumi 後再次儲存收藏",
+  "collectionSavedConflict": "已儲存到本機，Bangumi 資料已變更，自動同步已暫停",
+  "collectionSavedSynced": "收藏已儲存並同步到 Bangumi",
+  "collectionSelectType": "請選擇收藏分類"
 }

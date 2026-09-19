@@ -2,6 +2,12 @@ import 'package:anime_flow/shared/models/flow/bgm_collection_sync_status_item.da
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
+  test('unknown server status is not mistaken for idle', () {
+    expect(BgmCollectionSyncStatus.fromJson('FUTURE_STATE'),
+        BgmCollectionSyncStatus.unknown);
+    expect(
+        BgmCollectionSyncStatus.fromJson('IDLE'), BgmCollectionSyncStatus.idle);
+  });
   test('后台可恢复或等待决议的任务继续刷新，终态停止刷新', () {
     for (final status in BgmCollectionSyncStatus.values) {
       final item = BgmCollectionSyncStatusItem(status: status);

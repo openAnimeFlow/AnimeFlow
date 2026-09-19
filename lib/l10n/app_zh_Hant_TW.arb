@@ -615,5 +615,60 @@
   "collectionSavedAuthRequired": "已儲存到本機，請重新授權 Bangumi 後再次儲存收藏",
   "collectionSavedConflict": "已儲存到本機，Bangumi 資料已變更，自動同步已暫停",
   "collectionSavedSynced": "收藏已儲存並同步到 Bangumi",
-  "collectionSelectType": "請選擇收藏分類"
+  "collectionSelectType": "請選擇收藏分類",
+  "syncConflictsTitle": "處理收藏分類衝突",
+  "syncPendingSummary": "收藏同步：{conflicts} 條衝突，{failed} 條失敗",
+  "@syncPendingSummary": {
+    "placeholders": {
+      "conflicts": {
+        "type": "int"
+      },
+      "failed": {
+        "type": "int"
+      }
+    }
+  },
+  "syncConflictSides": "本機：{local} · Bangumi：{remote}",
+  "@syncConflictSides": {
+    "placeholders": {
+      "local": {
+        "type": "String"
+      },
+      "remote": {
+        "type": "String"
+      }
+    }
+  },
+  "syncUseLocal": "已載入項目採用本機",
+  "syncUseRemote": "已載入項目採用 Bangumi",
+  "syncSubmitSelected": "提交已選 {count} 項",
+  "@syncSubmitSelected": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "syncLoadMore": "載入更多衝突",
+  "syncNoConflicts": "目前沒有待選擇的衝突",
+  "syncAccepted": "選擇已接收，背景正在處理。可關閉此視窗，稍後查看結果。",
+  "syncResolveFailed": "部分選擇可能已接收。請重新整理核對；變更的項目需重新選擇。",
+  "syncRefreshRequired": "重新整理後繼續處理",
+  "syncQueued": "排隊中",
+  "syncWaitingConflict": "等待處理衝突",
+  "syncPartialFailed": "部分失敗",
+  "syncCancelled": "已取消",
+  "syncUnknown": "未知狀態，請重新整理",
+  "syncRetryMessage": "同步暫時失敗，伺服器會自動重試。恢復後繼續檢查衝突。",
+  "syncBindingChanged": "帳號或 Bangumi 綁定已變更，請關閉後重新開啟。",
+  "syncOpenConflicts": "處理衝突",
+  "syncSubject": "項目 {id}",
+  "@syncSubject": {
+    "placeholders": {
+      "id": {
+        "type": "int"
+      }
+    }
+  }
+
 }

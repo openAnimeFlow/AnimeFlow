@@ -1,3 +1,4 @@
+import 'package:anime_flow/features/user/application/collection_revision_provider.dart';
 import 'package:anime_flow/shared/models/flow/collection_update_result.dart';
 import 'package:anime_flow/core/network/api/flow_api.dart';
 import 'package:anime_flow/shared/models/bangumi/actor_item.dart';
@@ -31,6 +32,7 @@ class AnimeInfo extends _$AnimeInfo {
     // Keep the provider subscribed so account changes invalidate the seeded
     // response and fetch fresh interest data for the active user.
     ref.watch(currentFlowTokenProvider);
+    ref.watch(collectionRevisionProvider);
     final initial = ref.watch(animeInfoInitialProvider);
     if (!_initialConsumed && initial?.id == subjectId) {
       _initialConsumed = true;

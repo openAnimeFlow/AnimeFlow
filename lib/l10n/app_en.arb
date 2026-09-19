@@ -615,5 +615,60 @@
   "collectionSavedAuthRequired": "Saved locally. Reauthorize Bangumi, then save the collection again.",
   "collectionSavedConflict": "Saved locally. Bangumi has changed; automatic sync is paused.",
   "collectionSavedSynced": "Collection saved and synced to Bangumi",
-  "collectionSelectType": "Choose a collection category"
+  "collectionSelectType": "Choose a collection category",
+  "syncConflictsTitle": "Resolve collection conflicts",
+  "syncPendingSummary": "Collection sync: {conflicts} conflicts, {failed} failed",
+  "@syncPendingSummary": {
+    "placeholders": {
+      "conflicts": {
+        "type": "int"
+      },
+      "failed": {
+        "type": "int"
+      }
+    }
+  },
+  "syncConflictSides": "Local: {local} · Bangumi: {remote}",
+  "@syncConflictSides": {
+    "placeholders": {
+      "local": {
+        "type": "String"
+      },
+      "remote": {
+        "type": "String"
+      }
+    }
+  },
+  "syncUseLocal": "Use local for loaded items",
+  "syncUseRemote": "Use Bangumi for loaded items",
+  "syncSubmitSelected": "Submit {count} selected",
+  "@syncSubmitSelected": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "syncLoadMore": "Load more conflicts",
+  "syncNoConflicts": "No conflicts awaiting a choice",
+  "syncAccepted": "Choices received and queued for processing. You can close this window and check the result later.",
+  "syncResolveFailed": "Some choices may have been received. Refresh to check; changed items need a new choice.",
+  "syncRefreshRequired": "Refresh to continue",
+  "syncQueued": "Queued",
+  "syncWaitingConflict": "Awaiting conflict resolution",
+  "syncPartialFailed": "Partially failed",
+  "syncCancelled": "Cancelled",
+  "syncUnknown": "Unknown status; refresh",
+  "syncRetryMessage": "Sync temporarily failed. The server will retry and continue checking conflicts.",
+  "syncBindingChanged": "Your account or Bangumi binding changed. Close and reopen this window.",
+  "syncOpenConflicts": "Resolve conflicts",
+  "syncSubject": "Subject {id}",
+  "@syncSubject": {
+    "placeholders": {
+      "id": {
+        "type": "int"
+      }
+    }
+  }
+
 }

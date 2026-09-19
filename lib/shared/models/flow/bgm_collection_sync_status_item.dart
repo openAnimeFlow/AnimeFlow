@@ -6,7 +6,8 @@ enum BgmCollectionSyncStatus {
   partialFailed,
   success,
   failed,
-  cancelled;
+  cancelled,
+  unknown;
 
   static BgmCollectionSyncStatus fromJson(String? value) {
     switch (value?.toUpperCase()) {
@@ -24,13 +25,17 @@ enum BgmCollectionSyncStatus {
         return BgmCollectionSyncStatus.failed;
       case 'CANCELLED':
         return BgmCollectionSyncStatus.cancelled;
-      default:
+      case 'IDLE':
         return BgmCollectionSyncStatus.idle;
+      default:
+        return BgmCollectionSyncStatus.unknown;
     }
   }
 
   String get label {
     switch (this) {
+      case BgmCollectionSyncStatus.unknown:
+        return '未知状态';
       case BgmCollectionSyncStatus.idle:
         return '未同步';
       case BgmCollectionSyncStatus.queued:

@@ -1,6 +1,7 @@
+import 'package:go_router/go_router.dart';
 import 'package:anime_flow/app/localization/app_localizations.dart';
 import 'package:anime_flow/core/network/clients/flow_client.dart';
-import 'package:anime_flow/core/network/api/flow_api.dart';
+import 'collection_conflicts_dialog.dart';
 import 'package:anime_flow/shared/models/flow/bgm_collection_sync_status_item.dart';
 import 'package:anime_flow/features/user/application/bgm_collection_sync_provider.dart';
 import 'package:anime_flow/shared/widgets/notification_toast.dart';
@@ -19,14 +20,63 @@ class BangumiCollectionSyncSection extends ConsumerStatefulWidget {
 class _BangumiCollectionSyncSectionState
     extends ConsumerState<BangumiCollectionSyncSection> {
   bool _isSubmitting = false;
+  final Object _pollingOwner = Object();
+  GoRouterDelegate? _routerDelegate;
+  ProviderContainer? _container;
+  bool _pageVisible = false;
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    _container = ProviderScope.containerOf(context, listen: false);
+    final information = GoRouter.maybeOf(context)?.routerDelegate;
+    if (!identical(information, _routerDelegate)) {
+      _routerDelegate?.removeListener(_updatePolling);
+      _routerDelegate = information;
+      _routerDelegate?.addListener(_updatePolling);
+    }
+    _updatePolling();
+  }
+
+  void _updatePolling() {
+    if (!mounted) return;
+    final path = _routerDelegate?.state.uri.path;
+    // /settings itself renders the account page only in the wide layout.
+    final visible =
+        path == null || path == '/settings' || path == '/settings/account';
+    if (visible == _pageVisible) return;
+    _pageVisible = visible;
+    _container!
+        .read(bgmCollectionSyncProvider.notifier)
+        .setPagePolling(_pollingOwner, visible);
+    if (visible) {
+      WidgetsBinding.instance.addPostFrameCallback((_) async {
+        if (!mounted || !_pageVisible) return;
+        // Initial provider loading already performs the first query.
+        if (_container!.read(bgmCollectionSyncProvider).isLoading) return;
+        try {
+          await _container!
+              .read(bgmCollectionSyncProvider.notifier)
+              .refreshStatus();
+        } catch (_) {}
+      });
+    }
+  }
+
+  @override
+  void dispose() {
+    _routerDelegate?.removeListener(_updatePolling);
+    _container
+        ?.read(bgmCollectionSyncProvider.notifier)
+        .setPagePolling(_pollingOwner, false);
+    super.dispose();
+  }
 
   Future<void> _triggerSync() async {
     setState(() => _isSubmitting = true);
     try {
       await ref.read(bgmCollectionSyncProvider.notifier).triggerSync();
       if (!mounted) return;
-      final l10n = AppLocalizations.of(context);
-      NotificationToast.show(l10n.collectionSyncStarted, title: l10n.tip);
     } catch (e) {
       if (!mounted) return;
       final message = e is AnimeFlowApiException
@@ -55,86 +105,11 @@ class _BangumiCollectionSyncSectionState
   }
 
   Future<void> _resolveConflicts(int taskId) async {
-    try {
-      final conflicts =
-          await FlowApi.getCollectionConflictsService(taskId: taskId);
-      if (!mounted || conflicts.isEmpty) return;
-      final selected = <int, int>{};
-      final confirmed = await showDialog<bool>(
+    await showDialog<void>(
         context: context,
-        builder: (dialogContext) => StatefulBuilder(
-          builder: (context, setDialogState) => AlertDialog(
-            title: const Text('处理收藏分类冲突'),
-            content: SizedBox(
-              width: 520,
-              child: ListView.builder(
-                shrinkWrap: true,
-                itemCount: conflicts.length,
-                itemBuilder: (_, index) {
-                  final item = conflicts[index];
-                  return ListTile(
-                    title: Text(item.subjectName ?? '条目 ${item.subjectId}'),
-                    subtitle: Text(
-                        '本地：${_typeName(item.localType)}  Bangumi：${_typeName(item.remoteType)}'),
-                    trailing: DropdownButton<int>(
-                      value: selected[item.conflictId],
-                      hint: const Text('选择'),
-                      items: List.generate(
-                          5,
-                          (i) => DropdownMenuItem(
-                              value: i + 1, child: Text(_typeName(i + 1)))),
-                      onChanged: (value) {
-                        if (value != null) {
-                          setDialogState(
-                              () => selected[item.conflictId] = value);
-                        }
-                      },
-                    ),
-                  );
-                },
-              ),
-            ),
-            actions: [
-              TextButton(
-                  onPressed: () => Navigator.pop(dialogContext, false),
-                  child: const Text('稍后处理')),
-              FilledButton(
-                onPressed: selected.length == conflicts.length
-                    ? () => Navigator.pop(dialogContext, true)
-                    : null,
-                child: const Text('提交选择'),
-              ),
-            ],
-          ),
-        ),
-      );
-      if (confirmed != true || !mounted) return;
-      final byId = {for (final item in conflicts) item.conflictId: item};
-      await FlowApi.resolveCollectionConflictsService(
-        taskId: taskId,
-        items: selected.entries.map((entry) {
-          final item = byId[entry.key]!;
-          return {
-            'conflictId': item.conflictId,
-            'conflictVersion': item.conflictVersion,
-            'selectedType': entry.value
-          };
-        }).toList(),
-      );
-      await _refreshStatus();
-    } catch (error) {
-      if (mounted) NotificationToast.show(error.toString(), title: '冲突处理失败');
-    }
+        builder: (_) => CollectionConflictsDialog(taskId: taskId));
+    if (mounted) await _refreshStatus();
   }
-
-  String _typeName(int? type) => switch (type) {
-        1 => '想看',
-        2 => '看过',
-        3 => '在看',
-        4 => '搁置',
-        5 => '抛弃',
-        _ => '未知',
-      };
 
   @override
   Widget build(BuildContext context) {
@@ -146,12 +121,14 @@ class _BangumiCollectionSyncSectionState
       data: (status) {
         final item = status;
         final isRunning = item?.isRunning == true || _isSubmitting;
+        final hasConflicts = (item?.pendingConflictCount ?? 0) > 0 ||
+            item?.status == BgmCollectionSyncStatus.waitingConflict;
         final statusLabel = _statusLabel(l10n, item?.status);
         final message = switch (item?.message) {
           'SYNC_RETRY_REQUIRED' ||
           'ITEM_RETRY_REQUIRED' =>
-            '同步暂时失败，服务端会自动重试。恢复后将继续检查收藏冲突。',
-          'SYNC_BINDING_CHANGED' => 'Bangumi 绑定已变更，请重新发起同步。',
+            l10n.syncRetryMessage,
+          'SYNC_BINDING_CHANGED' => l10n.syncBindingChanged,
           _ => item?.message,
         };
         final syncedCount = item?.syncedCount ?? 0;
@@ -211,21 +188,21 @@ class _BangumiCollectionSyncSectionState
                 ),
               ),
             ],
-            if ((item?.pendingConflictCount ?? 0) > 0 &&
-                item?.taskId != null) ...[
+            if (hasConflicts && item?.taskId != null) ...[
               const SizedBox(height: 8),
               Row(children: [
                 Expanded(
-                    child: Text('有 ${item!.pendingConflictCount} 条收藏分类冲突待处理')),
+                    child: Text(l10n.syncPendingSummary(
+                        item!.pendingConflictCount, item.failedCount))),
                 OutlinedButton(
                     onPressed: () => _resolveConflicts(item.taskId!),
-                    child: const Text('处理冲突')),
+                    child: Text(l10n.syncOpenConflicts)),
               ]),
             ],
             if (hasProgress) ...[
               const SizedBox(height: 8),
               LinearProgressIndicator(
-                value: syncedCount / totalCount,
+                value: (syncedCount / totalCount).clamp(0.0, 1.0),
                 minHeight: 6,
                 borderRadius: BorderRadius.circular(3),
               ),
@@ -251,7 +228,8 @@ class _BangumiCollectionSyncSectionState
             SizedBox(
               width: double.infinity,
               child: OutlinedButton.icon(
-                onPressed: isRunning ? null : _triggerSync,
+                key: const ValueKey('start-bangumi-sync'),
+                onPressed: isRunning || hasConflicts ? null : _triggerSync,
                 icon: const Icon(Icons.cloud_download_outlined, size: 18),
                 label: Text(isRunning
                     ? l10n.syncInProgress
@@ -297,16 +275,18 @@ class _BangumiCollectionSyncSectionState
     BgmCollectionSyncStatus? status,
   ) {
     switch (status ?? BgmCollectionSyncStatus.idle) {
+      case BgmCollectionSyncStatus.unknown:
+        return l10n.syncUnknown;
       case BgmCollectionSyncStatus.idle:
         return l10n.syncStatusIdle;
       case BgmCollectionSyncStatus.queued:
-        return '排队中';
+        return l10n.syncQueued;
       case BgmCollectionSyncStatus.waitingConflict:
-        return '等待处理冲突';
+        return l10n.syncWaitingConflict;
       case BgmCollectionSyncStatus.partialFailed:
-        return '部分失败';
+        return l10n.syncPartialFailed;
       case BgmCollectionSyncStatus.cancelled:
-        return '已取消';
+        return l10n.syncCancelled;
       case BgmCollectionSyncStatus.running:
         return l10n.syncStatusRunning;
       case BgmCollectionSyncStatus.success:
@@ -355,7 +335,7 @@ class SyncStatusChip extends StatelessWidget {
           colorScheme.surfaceContainerHighest,
           colorScheme.onSurfaceVariant,
         ),
-      BgmCollectionSyncStatus.cancelled => (
+      BgmCollectionSyncStatus.cancelled || BgmCollectionSyncStatus.unknown => (
           colorScheme.surfaceContainerHighest,
           colorScheme.onSurfaceVariant,
         ),

@@ -129,15 +129,18 @@ class FlowClient {
     );
   }
 
-  /// Authenticated SSE handshake. Events bypass the normal JSON envelope parser.
+  /// SSE handshake. Events bypass the normal JSON envelope parser.
   Future<ResponseBody> openEventStream(
-      String path, CancelToken cancelToken) async {
+    String path,
+    CancelToken cancelToken, {
+    bool requireFlowToken = true,
+  }) async {
     final response = await DioFactory.animeFlowDio.get<dynamic>(
       path,
       options: await _resolveOptions(
         path: path,
         signRequest: true,
-        requireFlowToken: true,
+        requireFlowToken: requireFlowToken,
         options: Options(
           responseType: ResponseType.stream,
           receiveTimeout: const Duration(seconds: 60),

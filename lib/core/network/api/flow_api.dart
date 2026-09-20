@@ -6,6 +6,7 @@ import 'package:anime_flow/core/constants/constants.dart';
 import 'package:anime_flow/core/crawler/itme/bgm_user_page_item.dart';
 import 'package:anime_flow/core/network/api_path.dart';
 import 'package:anime_flow/core/network/clients/flow_client.dart';
+import 'package:anime_flow/core/network/sse/json_sse_parser.dart';
 import 'package:anime_flow/shared/models/enums/sort_type.dart';
 import 'package:anime_flow/shared/models/bangumi/actor_item.dart';
 import 'package:anime_flow/shared/models/bangumi/calendar_item.dart';
@@ -85,10 +86,25 @@ class FlowApi {
     );
   }
 
-  static Future<OnlineCount> getPresenceOnlineCount() async {
-    final response = await _client.get(AnimeFlowApi.presenceOnlineCount);
-    return OnlineCount.fromJson(
-        Map<String, dynamic>.from(response.data as Map));
+  static Stream<OnlineCount> getPresenceOnlineCount(
+      CancelToken cancelToken) async* {
+    while (!cancelToken.isCancelled) {
+      try {
+        final response = await _client.openEventStream(
+          AnimeFlowApi.presenceOnlineCount,
+          cancelToken,
+          requireFlowToken: false,
+        );
+        await for (final data in decodeJsonSseEvents(response.stream)) {
+          if (data is Map) {
+            yield OnlineCount.fromJson(Map<String, dynamic>.from(data));
+          }
+        }
+      } catch (_) {
+        if (cancelToken.isCancelled) return;
+        await Future<void>.delayed(const Duration(seconds: 2));
+      }
+    }
   }
 
   static Future<OnlineCount> getSubjectPresenceOnlineCount(
@@ -101,16 +117,29 @@ class FlowApi {
         Map<String, dynamic>.from(response.data as Map));
   }
 
-  static Future<List<WatchingSubject>> getWatchingSubjects() async {
-    final response = await _client.get(AnimeFlowApi.presenceWatchingSubjects);
-    final data = response.data;
-    if (data is! List) return const [];
-    return data
-        .whereType<Map>()
-        .map((item) => WatchingSubject.fromJson(
-              Map<String, dynamic>.from(item),
-            ))
-        .toList();
+  static Stream<List<WatchingSubject>> getWatchingSubjects(
+      CancelToken cancelToken) async* {
+    while (!cancelToken.isCancelled) {
+      try {
+        final response = await _client.openEventStream(
+          AnimeFlowApi.presenceWatchingSubjects,
+          cancelToken,
+          requireFlowToken: false,
+        );
+        await for (final data in decodeJsonSseEvents(response.stream)) {
+          if (data is! List) continue;
+          yield data
+              .whereType<Map>()
+              .map((item) => WatchingSubject.fromJson(
+                    Map<String, dynamic>.from(item),
+                  ))
+              .toList(growable: false);
+        }
+      } catch (_) {
+        if (cancelToken.isCancelled) return;
+        await Future<void>.delayed(const Duration(seconds: 2));
+      }
+    }
   }
 
   /// 获取 AnimeFlow 发布版本列表。

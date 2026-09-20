@@ -152,7 +152,7 @@ class _BangumiCollectionSyncSectionState
             ),
             const SizedBox(height: 8),
             Text(
-              l10n.collectionSyncDescription,
+              l10n.collectionSyncHint,
               style: TextStyle(
                 fontSize: 13,
                 color: colorScheme.onSurfaceVariant,

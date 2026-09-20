@@ -422,6 +422,7 @@
   "orphanFontMissing": "本機字型檔案已遺失，可在此處清理記錄",
   "collectionSyncTitle": "收藏同步",
   "collectionSyncDescription": "綁定後，AnimeFlow 與 Bangumi 的收藏會雙向同步",
+  "collectionSyncHint": "當你發現 Bangumi 與 AnimeFlow 收藏不同步時，可以點擊「同步 Bangumi 收藏」進行雙向同步",
   "collectionSyncStarted": "收藏同步已開始",
   "syncStartFailed": "啟動同步失敗",
   "refreshStatus": "重新整理狀態",

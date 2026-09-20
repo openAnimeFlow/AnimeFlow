@@ -446,6 +446,7 @@
   "pluginCopyFailed": "Failed to copy plugin \"{name}\": {error}",
   "collectionSyncTitle": "Collection Sync",
   "collectionSyncDescription": "Collections are synced both ways between AnimeFlow and Bangumi.",
+  "collectionSyncHint": "If your Bangumi and AnimeFlow collections differ, click Sync Bangumi Collection to sync them both ways.",
   "collectionSyncStarted": "Collection sync started",
   "syncStartFailed": "Failed to start sync",
   "refreshStatus": "Refresh status",

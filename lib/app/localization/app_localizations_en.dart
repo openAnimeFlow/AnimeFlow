@@ -1580,6 +1580,10 @@ class AppLocalizationsEn extends AppLocalizations {
       'Collections are synced both ways between AnimeFlow and Bangumi.';
 
   @override
+  String get collectionSyncHint =>
+      'If your Bangumi and AnimeFlow collections differ, click Sync Bangumi Collection to sync them both ways.';
+
+  @override
   String get collectionSyncStarted => 'Collection sync started';
 
   @override

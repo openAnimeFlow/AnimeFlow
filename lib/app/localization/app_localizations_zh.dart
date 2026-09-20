@@ -1537,6 +1537,10 @@ class AppLocalizationsZh extends AppLocalizations {
   String get collectionSyncDescription => '绑定后，AnimeFlow 与 Bangumi 的收藏会双向同步';
 
   @override
+  String get collectionSyncHint =>
+      '你发现 Bangumi 和 AnimeFlow 收藏不同步时，可以点击“同步 Bangumi 收藏”进行双向同步';
+
+  @override
   String get collectionSyncStarted => '收藏同步已開始';
 
   @override
@@ -3546,6 +3550,10 @@ class AppLocalizationsZhHans extends AppLocalizationsZh {
 
   @override
   String get collectionSyncDescription => '绑定后，AnimeFlow 与 Bangumi 的收藏会双向同步';
+
+  @override
+  String get collectionSyncHint =>
+      '你发现 Bangumi 和 AnimeFlow 收藏不同步时，可以点击“同步 Bangumi 收藏”进行双向同步';
 
   @override
   String get collectionSyncStarted => '收藏同步已开始';
@@ -5558,6 +5566,10 @@ class AppLocalizationsZhHantHk extends AppLocalizationsZh {
   String get collectionSyncDescription => '綁定後，AnimeFlow 與 Bangumi 的收藏會雙向同步';
 
   @override
+  String get collectionSyncHint =>
+      '當你發現 Bangumi 與 AnimeFlow 收藏不同步時，可以點擊「同步 Bangumi 收藏」進行雙向同步';
+
+  @override
   String get collectionSyncStarted => '收藏同步已開始';
 
   @override
@@ -7568,6 +7580,10 @@ class AppLocalizationsZhHantTw extends AppLocalizationsZh {
 
   @override
   String get collectionSyncDescription => '綁定後，AnimeFlow 與 Bangumi 的收藏會雙向同步';
+
+  @override
+  String get collectionSyncHint =>
+      '當你發現 Bangumi 與 AnimeFlow 收藏不同步時，可以點擊「同步 Bangumi 收藏」進行雙向同步';
 
   @override
   String get collectionSyncStarted => '收藏同步已開始';

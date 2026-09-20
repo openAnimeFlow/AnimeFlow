@@ -46,12 +46,12 @@ import 'package:anime_flow/core/utils/utils.dart';
 import 'package:dio/dio.dart';
 
 class FlowApi {
+  static final FlowClient _client = FlowClient.instance;
+
   static Future<ResponseBody> openCollectionSyncEvents(
           CancelToken cancelToken) =>
       _client.openEventStream(
           AnimeFlowApi.bangumiCollectionSyncEvents, cancelToken);
-
-  static final FlowClient _client = FlowClient.instance;
 
   /// 更新当前客户端在线状态。允许匿名请求，登录 token 会由 FlowClient 自动附带。
   static Future<void> presenceHeartbeat({
@@ -88,6 +88,8 @@ class FlowApi {
 
   static Stream<OnlineCount> getPresenceOnlineCount(
       CancelToken cancelToken) async* {
+    var hasReceivedEvent = false;
+    var initialRetryCount = 0;
     while (!cancelToken.isCancelled) {
       try {
         final response = await _client.openEventStream(
@@ -95,13 +97,24 @@ class FlowApi {
           cancelToken,
           requireFlowToken: false,
         );
+        var receivedEventFromConnection = false;
         await for (final data in decodeJsonSseEvents(response.stream)) {
           if (data is Map) {
-            yield OnlineCount.fromJson(Map<String, dynamic>.from(data));
+            final count = OnlineCount.fromJson(Map<String, dynamic>.from(data));
+            receivedEventFromConnection = true;
+            hasReceivedEvent = true;
+            initialRetryCount = 0;
+            yield count;
           }
+        }
+        if (!receivedEventFromConnection && !hasReceivedEvent) {
+          throw StateError(
+            'Presence online count SSE closed before its first event',
+          );
         }
       } catch (_) {
         if (cancelToken.isCancelled) return;
+        if (!hasReceivedEvent && ++initialRetryCount >= 3) rethrow;
         await Future<void>.delayed(const Duration(seconds: 2));
       }
     }
@@ -119,6 +132,8 @@ class FlowApi {
 
   static Stream<List<WatchingSubject>> getWatchingSubjects(
       CancelToken cancelToken) async* {
+    var hasReceivedEvent = false;
+    var initialRetryCount = 0;
     while (!cancelToken.isCancelled) {
       try {
         final response = await _client.openEventStream(
@@ -126,17 +141,28 @@ class FlowApi {
           cancelToken,
           requireFlowToken: false,
         );
+        var receivedEventFromConnection = false;
         await for (final data in decodeJsonSseEvents(response.stream)) {
           if (data is! List) continue;
-          yield data
+          final subjects = data
               .whereType<Map>()
               .map((item) => WatchingSubject.fromJson(
                     Map<String, dynamic>.from(item),
                   ))
               .toList(growable: false);
+          receivedEventFromConnection = true;
+          hasReceivedEvent = true;
+          initialRetryCount = 0;
+          yield subjects;
+        }
+        if (!receivedEventFromConnection && !hasReceivedEvent) {
+          throw StateError(
+            'Watching subjects SSE closed before its first event',
+          );
         }
       } catch (_) {
         if (cancelToken.isCancelled) return;
+        if (!hasReceivedEvent && ++initialRetryCount >= 3) rethrow;
         await Future<void>.delayed(const Duration(seconds: 2));
       }
     }

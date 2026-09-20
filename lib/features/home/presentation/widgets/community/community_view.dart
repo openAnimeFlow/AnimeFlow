@@ -1,6 +1,9 @@
+import 'dart:math' as math;
+
 import 'package:anime_flow/app/localization/app_localizations.dart';
 import 'package:anime_flow/app/router/app_router.dart';
 import 'package:anime_flow/core/constants/assets_path_constants.dart';
+import 'package:anime_flow/core/constants/layout_constant.dart';
 import 'package:anime_flow/features/home/presentation/providers/community_provider.dart';
 import 'package:anime_flow/shared/models/flow/online_count.dart';
 import 'package:anime_flow/shared/models/flow/watching_subject.dart';
@@ -15,11 +18,7 @@ class CommunityPage extends ConsumerStatefulWidget {
   ConsumerState<CommunityPage> createState() => _CommunityPageState();
 }
 
-class _CommunityPageState extends ConsumerState<CommunityPage>
-    with AutomaticKeepAliveClientMixin {
-  @override
-  bool get wantKeepAlive => true;
-
+class _CommunityPageState extends ConsumerState<CommunityPage> {
   Future<void> _refresh() async {
     await Future.wait([
       ref.read(communityWatchingSubjectsProvider.notifier).refresh(),
@@ -29,7 +28,6 @@ class _CommunityPageState extends ConsumerState<CommunityPage>
 
   @override
   Widget build(BuildContext context) {
-    super.build(context);
     final watching = ref.watch(communityWatchingSubjectsProvider);
     final onlineCount = ref.watch(communityOnlineCountProvider);
     final l10n = AppLocalizations.of(context);
@@ -82,7 +80,10 @@ class _CommunityContent extends StatelessWidget {
 
     return LayoutBuilder(
       builder: (context, constraints) {
-        final horizontalPadding = constraints.maxWidth >= 900 ? 32.0 : 16.0;
+        final horizontalPadding = math.max(
+          10.0,
+          (constraints.maxWidth - LayoutConstant.maxWidth) / 2 + 10,
+        );
         final gridWidth = constraints.maxWidth - horizontalPadding * 2;
         final estimatedColumns = (gridWidth / 444).ceil();
         var crossAxisCount = estimatedColumns;

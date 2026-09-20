@@ -33,9 +33,10 @@ class _CommunityPageState extends ConsumerState<CommunityPage>
     final watching = ref.watch(communityWatchingSubjectsProvider);
     final onlineCount = ref.watch(communityOnlineCountProvider);
     final l10n = AppLocalizations.of(context);
+    final colorScheme = Theme.of(context).colorScheme;
 
     return RefreshIndicator(
-      color: const Color(0xff8b7cff),
+      color: colorScheme.primary,
       onRefresh: _refresh,
       child: watching.when(
         loading: () => const _CommunityLoading(),
@@ -82,6 +83,12 @@ class _CommunityContent extends StatelessWidget {
     return LayoutBuilder(
       builder: (context, constraints) {
         final horizontalPadding = constraints.maxWidth >= 900 ? 32.0 : 16.0;
+        final gridWidth = constraints.maxWidth - horizontalPadding * 2;
+        final estimatedColumns = (gridWidth / 444).ceil();
+        var crossAxisCount = estimatedColumns;
+        if (crossAxisCount < 2) crossAxisCount = 2;
+        if (crossAxisCount > 4) crossAxisCount = 4;
+        final compactGrid = constraints.maxWidth < 500;
         return CustomScrollView(
           physics: const AlwaysScrollableScrollPhysics(),
           slivers: [
@@ -148,11 +155,11 @@ class _CommunityContent extends StatelessWidget {
                     ),
                     childCount: subjects.length,
                   ),
-                  gridDelegate: SliverGridDelegateWithMaxCrossAxisExtent(
-                    maxCrossAxisExtent: 430,
-                    mainAxisSpacing: 14,
-                    crossAxisSpacing: 14,
-                    childAspectRatio: constraints.maxWidth < 500 ? 0.92 : 1.28,
+                  gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                    crossAxisCount: crossAxisCount,
+                    mainAxisSpacing: compactGrid ? 6 : 5,
+                    crossAxisSpacing: compactGrid ? 6 : 5,
+                    childAspectRatio: compactGrid ? 1.05 : 1.28,
                   ),
                 ),
               ),
@@ -177,7 +184,6 @@ class _CommunityHero extends StatelessWidget {
         const Text(
           '社区在线',
           style: TextStyle(
-            color: Colors.white,
             fontSize: 32,
             fontWeight: FontWeight.w800,
             letterSpacing: 1,
@@ -186,7 +192,7 @@ class _CommunityHero extends StatelessWidget {
         const SizedBox(height: 6),
         const Text(
           '因为热爱而相聚 · 与更多同好一起看番',
-          style: TextStyle(color: Colors.white70, fontSize: 14),
+          style: TextStyle(fontSize: 14),
         ),
         const SizedBox(height: 22),
         onlineCount.when(
@@ -214,26 +220,22 @@ class _StatsCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
     final values = count == null
         ? const [0, 0, 0]
         : [count!.onlineUsers, count!.anonymousUsers, count!.loggedInUsers];
     final items = [
-      (Icons.groups_rounded, '总人数', values[0], const Color(0xff79f2bb)),
-      (
-        Icons.visibility_off_rounded,
-        '匿名用户',
-        values[1],
-        const Color(0xff8ea2ff)
-      ),
-      (Icons.person_rounded, '登录用户', values[2], const Color(0xffff75c9)),
+      (Icons.groups_rounded, '总人数', values[0], colorScheme.primary),
+      (Icons.visibility_off_rounded, '匿名用户', values[1], colorScheme.secondary),
+      (Icons.person_rounded, '登录用户', values[2], colorScheme.tertiary),
     ];
 
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 16),
       decoration: BoxDecoration(
-        color: Colors.white.withValues(alpha: .10),
+        color: colorScheme.surfaceContainerHighest,
         borderRadius: BorderRadius.circular(22),
-        border: Border.all(color: Colors.white.withValues(alpha: .16)),
+        border: Border.all(color: colorScheme.outlineVariant),
       ),
       child: Row(
         children: [
@@ -241,14 +243,17 @@ class _StatsCard extends StatelessWidget {
             Expanded(child: _StatItem(item: items[index], loading: loading)),
             if (index != items.length - 1)
               Container(
-                  height: 45,
-                  width: 1,
-                  color: Colors.white.withValues(alpha: .16)),
+                height: 45,
+                width: 1,
+                color: colorScheme.outlineVariant,
+              ),
           ],
           if (loading && onRetry != null)
             IconButton(
               onPressed: onRetry,
-              icon: const Icon(Icons.refresh_rounded, color: Colors.white70),
+              icon: const Icon(
+                Icons.refresh_rounded,
+              ),
             ),
         ],
       ),
@@ -264,6 +269,7 @@ class _StatItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 8),
       child: Row(
@@ -278,14 +284,18 @@ class _StatItem extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(item.$2,
-                    style:
-                        const TextStyle(color: Colors.white70, fontSize: 12)),
+                Text(
+                  item.$2,
+                  style: TextStyle(
+                    color: colorScheme.onSurfaceVariant,
+                    fontSize: 12,
+                  ),
+                ),
                 const SizedBox(height: 2),
                 Text(
                   loading ? '--' : '${item.$3}',
-                  style: const TextStyle(
-                    color: Colors.white,
+                  style: TextStyle(
+                    color: colorScheme.onSurface,
                     fontSize: 20,
                     fontWeight: FontWeight.w800,
                   ),
@@ -309,22 +319,23 @@ class _SectionHeader extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colorScheme = ColorScheme.of(context);
     return Row(
       children: [
         Container(
           padding: const EdgeInsets.all(7),
           decoration: BoxDecoration(
-            color: ColorScheme.of(context).primary,
+            color: colorScheme.primary,
             borderRadius: BorderRadius.circular(9),
           ),
-          child: Icon(icon, color: Colors.white, size: 19),
+          child: Icon(icon, color: colorScheme.onPrimary, size: 19),
         ),
         const SizedBox(width: 10),
         Expanded(
           child: Text(
             title,
-            style: const TextStyle(
-              color: Colors.white,
+            style: TextStyle(
+              color: colorScheme.onSurface,
               fontSize: 20,
               fontWeight: FontWeight.w800,
             ),
@@ -335,7 +346,10 @@ class _SectionHeader extends StatelessWidget {
             child: Text(
               subtitle!,
               textAlign: TextAlign.right,
-              style: const TextStyle(color: Colors.white70, fontSize: 12),
+              style: TextStyle(
+                color: colorScheme.onSurfaceVariant,
+                fontSize: 12,
+              ),
             ),
           ),
       ],
@@ -352,15 +366,16 @@ class _WatchingSubjectCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
     final imageUrl = subject.images?.common ?? subject.images?.medium ?? '';
     return Card(
       margin: EdgeInsets.zero,
       clipBehavior: Clip.antiAlias,
-      color: Colors.white.withValues(alpha: .10),
+      color: colorScheme.surfaceContainerHighest,
       elevation: 0,
       shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(18),
-        side: BorderSide(color: Colors.white.withValues(alpha: .14)),
+        borderRadius: BorderRadius.circular(14),
+        side: BorderSide(color: colorScheme.outlineVariant),
       ),
       child: InkWell(
         onTap: () => AnimeInfoRoute(
@@ -372,29 +387,46 @@ class _WatchingSubjectCard extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
             Expanded(
-              child: AnimationNetworkImage(url: imageUrl),
+              child: AnimationNetworkImage(
+                url: imageUrl,
+                fit: BoxFit.cover,
+                width: double.infinity,
+                height: double.infinity,
+              ),
             ),
             Padding(
-              padding: const EdgeInsets.fromLTRB(12, 9, 12, 11),
-              child: Row(
+              padding: const EdgeInsets.fromLTRB(9, 7, 9, 8),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Expanded(
-                    child: Text(
-                      subject.displayName,
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                      style: const TextStyle(
-                          color: Colors.white, fontWeight: FontWeight.w700),
+                  Text(
+                    subject.displayName,
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
+                    style: TextStyle(
+                      color: colorScheme.onSurface,
+                      fontSize: 13,
+                      fontWeight: FontWeight.w700,
                     ),
                   ),
-                  const SizedBox(width: 7),
-                  const Icon(Icons.visibility_rounded,
-                      size: 15, color: Colors.white70),
-                  const SizedBox(width: 4),
-                  Text(
-                    '${subject.online.onlineUsers}',
-                    style: const TextStyle(color: Colors.white70, fontSize: 12),
-                  ),
+                  const SizedBox(width: 5),
+                  Row(
+                    spacing: 5,
+                    children: [
+                      Icon(
+                        Icons.visibility_rounded,
+                        size: 16,
+                        color: colorScheme.onSurfaceVariant,
+                      ),
+                      Text(
+                        '${subject.online.onlineUsers} 人在看',
+                        style: TextStyle(
+                          color: colorScheme.onSurfaceVariant,
+                          fontSize: 12,
+                        ),
+                      ),
+                    ],
+                  )
                 ],
               ),
             ),
@@ -418,12 +450,13 @@ class _EmptyCommunityCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
     return Container(
       padding: const EdgeInsets.all(18),
       decoration: BoxDecoration(
-        color: Colors.white.withValues(alpha: .10),
+        color: colorScheme.surfaceContainerHighest,
         borderRadius: BorderRadius.circular(22),
-        border: Border.all(color: Colors.white.withValues(alpha: .15)),
+        border: Border.all(color: colorScheme.outlineVariant),
       ),
       child: onlineCount.when(
         loading: () => const SizedBox(height: 130, child: _LoadingIndicator()),
@@ -441,17 +474,21 @@ class _EmptyCommunityCard extends StatelessWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  const Text(
+                  Text(
                     '当前还没有用户在观看番剧',
                     style: TextStyle(
-                        color: Colors.white,
-                        fontSize: 17,
-                        fontWeight: FontWeight.w800),
+                      color: colorScheme.onSurface,
+                      fontSize: 17,
+                      fontWeight: FontWeight.w800,
+                    ),
                   ),
                   const SizedBox(height: 5),
                   Text(
-                    '总在线 ${count.onlineUsers} 人 · 匿名 ${count.anonymousUsers} · 非匿名 ${count.loggedInUsers}',
-                    style: const TextStyle(color: Colors.white70, fontSize: 12),
+                    '总在线 ${count.onlineUsers} 人 · 匿名 ${count.anonymousUsers} · 登录 ${count.loggedInUsers}',
+                    style: TextStyle(
+                      color: colorScheme.onSurfaceVariant,
+                      fontSize: 12,
+                    ),
                   ),
                   const SizedBox(height: 12),
                   FilledButton.icon(
@@ -459,8 +496,8 @@ class _EmptyCommunityCard extends StatelessWidget {
                     icon: const Icon(Icons.refresh_rounded, size: 17),
                     label: Text(retryLabel),
                     style: FilledButton.styleFrom(
-                      backgroundColor: const Color(0xff7567f5),
-                      foregroundColor: Colors.white,
+                      backgroundColor: colorScheme.primary,
+                      foregroundColor: colorScheme.onPrimary,
                     ),
                   ),
                 ],
@@ -481,11 +518,19 @@ class _EmptyMessage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
     return Column(
       children: [
-        const Icon(Icons.cloud_off_outlined, color: Colors.white54, size: 38),
+        Icon(
+          Icons.cloud_off_outlined,
+          color: colorScheme.outline,
+          size: 38,
+        ),
         const SizedBox(height: 8),
-        const Text('在线人数暂时无法获取', style: TextStyle(color: Colors.white70)),
+        Text(
+          '在线人数暂时无法获取',
+          style: TextStyle(color: colorScheme.onSurfaceVariant),
+        ),
         const SizedBox(height: 10),
         OutlinedButton(onPressed: onRetry, child: Text(retryLabel)),
       ],
@@ -508,6 +553,7 @@ class _CommunityMessage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
     return ListView(
       physics: const AlwaysScrollableScrollPhysics(),
       children: [
@@ -517,9 +563,12 @@ class _CommunityMessage extends StatelessWidget {
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
-                Icon(icon, size: 42, color: Colors.white54),
+                Icon(icon, size: 42, color: colorScheme.outline),
                 const SizedBox(height: 12),
-                Text(message, style: const TextStyle(color: Colors.white70)),
+                Text(
+                  message,
+                  style: TextStyle(color: colorScheme.onSurfaceVariant),
+                ),
                 const SizedBox(height: 12),
                 OutlinedButton(onPressed: onRetry, child: Text(retryLabel)),
               ],
@@ -536,8 +585,11 @@ class _CommunityLoading extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return const Center(
-        child: CircularProgressIndicator(color: Color(0xffa99dff)));
+    return Center(
+      child: CircularProgressIndicator(
+        color: Theme.of(context).colorScheme.primary,
+      ),
+    );
   }
 }
 
@@ -546,7 +598,10 @@ class _LoadingIndicator extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return const Center(
-        child: CircularProgressIndicator(color: Color(0xffa99dff)));
+    return Center(
+      child: CircularProgressIndicator(
+        color: Theme.of(context).colorScheme.primary,
+      ),
+    );
   }
 }

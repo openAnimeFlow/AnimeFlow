@@ -227,8 +227,8 @@ class _StatsCard extends StatelessWidget {
         : [count!.onlineUsers, count!.anonymousUsers, count!.loggedInUsers];
     final items = [
       (Icons.groups_rounded, '总人数', values[0], colorScheme.primary),
-      (Icons.visibility_off_rounded, '匿名用户', values[1], colorScheme.secondary),
-      (Icons.person_rounded, '登录用户', values[2], colorScheme.tertiary),
+      (Icons.visibility_off_rounded, '匿名', values[1], colorScheme.secondary),
+      (Icons.person_rounded, '登录', values[2], colorScheme.tertiary),
     ];
 
     return Container(

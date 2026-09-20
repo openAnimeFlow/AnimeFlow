@@ -784,7 +784,7 @@ class FlowApi {
     String? requestId,
   }) async {
     final response = await _client.post(
-      AnimeFlowApi.bangumiCollectionSyncConflictResolve
+      AnimeFlowApi.bangumiCollectionSyncConflicts
           .replaceFirst('{taskId}', taskId.toString()),
       data: {'requestId': requestId, 'items': items},
       requireFlowToken: true,

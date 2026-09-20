@@ -236,10 +236,6 @@ class AnimeFlowApi {
       bangumiCollectionSyncConflicts =
           '/api/v1/users/collections/sync/{taskId}/conflicts',
 
-      /// 提交 Bangumi 收藏同步冲突决议
-      bangumiCollectionSyncConflictResolve =
-          '/api/v1/users/collections/sync/{taskId}/conflicts/resolve',
-
       /// Bangumi 第三方授权登录
       bangumiLogin = '/api/v1/account/oauth/bangumi/login',
 

@@ -371,7 +371,7 @@
   "unbound": "Not bound",
   "loading": "Loading...",
   "bindStatusLoadFailed": "Failed to get binding status",
-  "bindBangumiHint": "Use local collections without binding an account. Bind Bangumi to sync collections.",
+  "bindBangumiHint": "Link Bangumi to sync collection data in both directions.",
   "bindBangumiAccount": "Bind Bangumi account",
   "confirmUnbind": "Confirm unbinding",
   "unbindConfirmation": "Are you sure you want to unbind your Bangumi account? Some features may be affected.",
@@ -610,10 +610,10 @@
   ,"sourceDeleteFailed": "Error deleting data source \"{name}\": {error}"
   ,"pluginVersionDate": "Version: {version} - {date}",
   "collectionSaved": "Collection saved",
-  "collectionSavedLocally": "Collection saved locally",
-  "collectionSavedPending": "Saved locally. The server will retry syncing to Bangumi.",
-  "collectionSavedAuthRequired": "Saved locally. Reauthorize Bangumi, then save the collection again.",
-  "collectionSavedConflict": "Saved locally. Bangumi has changed; automatic sync is paused.",
+  "collectionSavedLocally": "Collection saved, but not synced to Bangumi yet",
+  "collectionSavedPending": "Collection saved; waiting to sync to Bangumi. The server will retry automatically.",
+  "collectionSavedAuthRequired": "Collection saved, but not synced to Bangumi. Reauthorize Bangumi and try again.",
+  "collectionSavedConflict": "Collection saved, but it conflicts with Bangumi. Automatic sync is paused.",
   "collectionSavedSynced": "Collection saved and synced to Bangumi",
   "collectionSelectType": "Choose a collection category",
   "syncConflictsTitle": "Resolve collection conflicts",
@@ -628,7 +628,7 @@
       }
     }
   },
-  "syncConflictSides": "Local: {local} · Bangumi: {remote}",
+  "syncConflictSides": "AnimeFlow: {local} · Bangumi: {remote}",
   "@syncConflictSides": {
     "placeholders": {
       "local": {
@@ -639,7 +639,7 @@
       }
     }
   },
-  "syncUseLocal": "Use local for loaded items",
+  "syncUseLocal": "Use AnimeFlow for loaded items",
   "syncUseRemote": "Use Bangumi for loaded items",
   "syncSubmitSelected": "Submit {count} selected",
   "@syncSubmitSelected": {

@@ -1165,7 +1165,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get bindBangumiHint =>
-      'Use local collections without binding an account. Bind Bangumi to sync collections.';
+      'Link Bangumi to sync collection data in both directions.';
 
   @override
   String get bindBangumiAccount => 'Bind Bangumi account';
@@ -1980,19 +1980,20 @@ class AppLocalizationsEn extends AppLocalizations {
   String get collectionSaved => 'Collection saved';
 
   @override
-  String get collectionSavedLocally => 'Collection saved locally';
+  String get collectionSavedLocally =>
+      'Collection saved, but not synced to Bangumi yet';
 
   @override
   String get collectionSavedPending =>
-      'Saved locally. The server will retry syncing to Bangumi.';
+      'Collection saved; waiting to sync to Bangumi. The server will retry automatically.';
 
   @override
   String get collectionSavedAuthRequired =>
-      'Saved locally. Reauthorize Bangumi, then save the collection again.';
+      'Collection saved, but not synced to Bangumi. Reauthorize Bangumi and try again.';
 
   @override
   String get collectionSavedConflict =>
-      'Saved locally. Bangumi has changed; automatic sync is paused.';
+      'Collection saved, but it conflicts with Bangumi. Automatic sync is paused.';
 
   @override
   String get collectionSavedSynced => 'Collection saved and synced to Bangumi';
@@ -2010,11 +2011,11 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String syncConflictSides(String local, String remote) {
-    return 'Local: $local · Bangumi: $remote';
+    return 'AnimeFlow: $local · Bangumi: $remote';
   }
 
   @override
-  String get syncUseLocal => 'Use local for loaded items';
+  String get syncUseLocal => 'Use AnimeFlow for loaded items';
 
   @override
   String get syncUseRemote => 'Use Bangumi for loaded items';

@@ -2266,7 +2266,7 @@ abstract class AppLocalizations {
   /// No description provided for @bindBangumiHint.
   ///
   /// In zh_Hans, this message translates to:
-  /// **'无需绑定即可使用本地收藏；绑定 Bangumi 后可同步收藏'**
+  /// **'绑定 Bangumi 后可双向同步收藏数据'**
   String get bindBangumiHint;
 
   /// No description provided for @bindBangumiAccount.
@@ -3665,25 +3665,25 @@ abstract class AppLocalizations {
   /// No description provided for @collectionSavedLocally.
   ///
   /// In zh_Hans, this message translates to:
-  /// **'收藏已保存到本地'**
+  /// **'收藏已保存，暂未同步到 Bangumi'**
   String get collectionSavedLocally;
 
   /// No description provided for @collectionSavedPending.
   ///
   /// In zh_Hans, this message translates to:
-  /// **'本地已保存，Bangumi 暂未同步，服务端将自动重试'**
+  /// **'收藏已保存，等待同步到 Bangumi，服务端将自动重试'**
   String get collectionSavedPending;
 
   /// No description provided for @collectionSavedAuthRequired.
   ///
   /// In zh_Hans, this message translates to:
-  /// **'本地已保存，请重新授权 Bangumi 后再次保存收藏'**
+  /// **'收藏已保存，但尚未同步到 Bangumi；请重新授权后再试'**
   String get collectionSavedAuthRequired;
 
   /// No description provided for @collectionSavedConflict.
   ///
   /// In zh_Hans, this message translates to:
-  /// **'本地已保存，Bangumi 数据已变化，自动同步已暂停'**
+  /// **'收藏已保存，但与 Bangumi 数据存在冲突，自动同步已暂停'**
   String get collectionSavedConflict;
 
   /// No description provided for @collectionSavedSynced.
@@ -3713,13 +3713,13 @@ abstract class AppLocalizations {
   /// No description provided for @syncConflictSides.
   ///
   /// In zh_Hans, this message translates to:
-  /// **'本地：{local} · Bangumi：{remote}'**
+  /// **'AnimeFlow：{local} · Bangumi：{remote}'**
   String syncConflictSides(String local, String remote);
 
   /// No description provided for @syncUseLocal.
   ///
   /// In zh_Hans, this message translates to:
-  /// **'已加载条目采用本地'**
+  /// **'已加载条目采用 AnimeFlow'**
   String get syncUseLocal;
 
   /// No description provided for @syncUseRemote.

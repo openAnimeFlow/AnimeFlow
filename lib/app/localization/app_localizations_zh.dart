@@ -1145,7 +1145,7 @@ class AppLocalizationsZh extends AppLocalizations {
   String get bindStatusLoadFailed => '获取绑定状态失败';
 
   @override
-  String get bindBangumiHint => '无需绑定即可使用本地收藏；绑定 Bangumi 后可同步收藏';
+  String get bindBangumiHint => '绑定 Bangumi 后可双向同步收藏数据';
 
   @override
   String get bindBangumiAccount => '绑定 Bangumi 账号';
@@ -1926,16 +1926,16 @@ class AppLocalizationsZh extends AppLocalizations {
   String get collectionSaved => '收藏已保存';
 
   @override
-  String get collectionSavedLocally => '收藏已保存到本地';
+  String get collectionSavedLocally => '收藏已保存，暂未同步到 Bangumi';
 
   @override
-  String get collectionSavedPending => '本地已保存，Bangumi 暂未同步，服务端将自动重试';
+  String get collectionSavedPending => '收藏已保存，等待同步到 Bangumi，服务端将自动重试';
 
   @override
-  String get collectionSavedAuthRequired => '本地已保存，请重新授权 Bangumi 后再次保存收藏';
+  String get collectionSavedAuthRequired => '收藏已保存，但尚未同步到 Bangumi；请重新授权后再试';
 
   @override
-  String get collectionSavedConflict => '本地已保存，Bangumi 数据已变化，自动同步已暂停';
+  String get collectionSavedConflict => '收藏已保存，但与 Bangumi 数据存在冲突，自动同步已暂停';
 
   @override
   String get collectionSavedSynced => '收藏已保存并同步到 Bangumi';
@@ -1953,11 +1953,11 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String syncConflictSides(String local, String remote) {
-    return '本地：$local · Bangumi：$remote';
+    return 'AnimeFlow：$local · Bangumi：$remote';
   }
 
   @override
-  String get syncUseLocal => '已加载条目采用本地';
+  String get syncUseLocal => '已加载条目采用 AnimeFlow';
 
   @override
   String get syncUseRemote => '已加载条目采用 Bangumi';
@@ -3153,7 +3153,7 @@ class AppLocalizationsZhHans extends AppLocalizationsZh {
   String get bindStatusLoadFailed => '获取绑定状态失败';
 
   @override
-  String get bindBangumiHint => '无需绑定即可使用本地收藏；绑定 Bangumi 后可同步收藏';
+  String get bindBangumiHint => '绑定 Bangumi 后可双向同步收藏数据';
 
   @override
   String get bindBangumiAccount => '绑定 Bangumi 账号';
@@ -3933,16 +3933,16 @@ class AppLocalizationsZhHans extends AppLocalizationsZh {
   String get collectionSaved => '收藏已保存';
 
   @override
-  String get collectionSavedLocally => '收藏已保存到本地';
+  String get collectionSavedLocally => '收藏已保存，暂未同步到 Bangumi';
 
   @override
-  String get collectionSavedPending => '本地已保存，Bangumi 暂未同步，服务端将自动重试';
+  String get collectionSavedPending => '收藏已保存，等待同步到 Bangumi，服务端将自动重试';
 
   @override
-  String get collectionSavedAuthRequired => '本地已保存，请重新授权 Bangumi 后再次保存收藏';
+  String get collectionSavedAuthRequired => '收藏已保存，但尚未同步到 Bangumi；请重新授权后再试';
 
   @override
-  String get collectionSavedConflict => '本地已保存，Bangumi 数据已变化，自动同步已暂停';
+  String get collectionSavedConflict => '收藏已保存，但与 Bangumi 数据存在冲突，自动同步已暂停';
 
   @override
   String get collectionSavedSynced => '收藏已保存并同步到 Bangumi';
@@ -3960,11 +3960,11 @@ class AppLocalizationsZhHans extends AppLocalizationsZh {
 
   @override
   String syncConflictSides(String local, String remote) {
-    return '本地：$local · Bangumi：$remote';
+    return 'AnimeFlow：$local · Bangumi：$remote';
   }
 
   @override
-  String get syncUseLocal => '已加载条目采用本地';
+  String get syncUseLocal => '已加载条目采用 AnimeFlow';
 
   @override
   String get syncUseRemote => '已加载条目采用 Bangumi';
@@ -5160,7 +5160,7 @@ class AppLocalizationsZhHantHk extends AppLocalizationsZh {
   String get bindStatusLoadFailed => '取得綁定狀態失敗';
 
   @override
-  String get bindBangumiHint => '無需綁定即可使用本機收藏；綁定 Bangumi 後可同步收藏';
+  String get bindBangumiHint => '綁定 Bangumi 後可雙向同步收藏資料';
 
   @override
   String get bindBangumiAccount => '綁定 Bangumi 帳戶';
@@ -5941,16 +5941,16 @@ class AppLocalizationsZhHantHk extends AppLocalizationsZh {
   String get collectionSaved => '收藏已儲存';
 
   @override
-  String get collectionSavedLocally => '收藏已儲存到本機';
+  String get collectionSavedLocally => '收藏已儲存，尚未同步到 Bangumi';
 
   @override
-  String get collectionSavedPending => '已儲存到本機，Bangumi 尚未同步，伺服器將自動重試';
+  String get collectionSavedPending => '收藏已儲存，等待同步到 Bangumi，伺服器將自動重試';
 
   @override
-  String get collectionSavedAuthRequired => '已儲存到本機，請重新授權 Bangumi 後再次儲存收藏';
+  String get collectionSavedAuthRequired => '收藏已儲存，但尚未同步到 Bangumi；請重新授權後再試';
 
   @override
-  String get collectionSavedConflict => '已儲存到本機，Bangumi 資料已變更，自動同步已暫停';
+  String get collectionSavedConflict => '收藏已儲存，但與 Bangumi 資料存在衝突，自動同步已暫停';
 
   @override
   String get collectionSavedSynced => '收藏已儲存並同步到 Bangumi';
@@ -5968,11 +5968,11 @@ class AppLocalizationsZhHantHk extends AppLocalizationsZh {
 
   @override
   String syncConflictSides(String local, String remote) {
-    return '本機：$local · Bangumi：$remote';
+    return 'AnimeFlow：$local · Bangumi：$remote';
   }
 
   @override
-  String get syncUseLocal => '已載入項目採用本機';
+  String get syncUseLocal => '已載入項目採用 AnimeFlow';
 
   @override
   String get syncUseRemote => '已載入項目採用 Bangumi';
@@ -7168,7 +7168,7 @@ class AppLocalizationsZhHantTw extends AppLocalizationsZh {
   String get bindStatusLoadFailed => '取得綁定狀態失敗';
 
   @override
-  String get bindBangumiHint => '無需綁定即可使用本機收藏；綁定 Bangumi 後可同步收藏';
+  String get bindBangumiHint => '綁定 Bangumi 後可雙向同步收藏資料';
 
   @override
   String get bindBangumiAccount => '綁定 Bangumi 帳戶';
@@ -7950,16 +7950,16 @@ class AppLocalizationsZhHantTw extends AppLocalizationsZh {
   String get collectionSaved => '收藏已儲存';
 
   @override
-  String get collectionSavedLocally => '收藏已儲存到本機';
+  String get collectionSavedLocally => '收藏已儲存，尚未同步到 Bangumi';
 
   @override
-  String get collectionSavedPending => '已儲存到本機，Bangumi 尚未同步，伺服器將自動重試';
+  String get collectionSavedPending => '收藏已儲存，等待同步到 Bangumi，伺服器將自動重試';
 
   @override
-  String get collectionSavedAuthRequired => '已儲存到本機，請重新授權 Bangumi 後再次儲存收藏';
+  String get collectionSavedAuthRequired => '收藏已儲存，但尚未同步到 Bangumi；請重新授權後再試';
 
   @override
-  String get collectionSavedConflict => '已儲存到本機，Bangumi 資料已變更，自動同步已暫停';
+  String get collectionSavedConflict => '收藏已儲存，但與 Bangumi 資料存在衝突，自動同步已暫停';
 
   @override
   String get collectionSavedSynced => '收藏已儲存並同步到 Bangumi';
@@ -7977,11 +7977,11 @@ class AppLocalizationsZhHantTw extends AppLocalizationsZh {
 
   @override
   String syncConflictSides(String local, String remote) {
-    return '本機：$local · Bangumi：$remote';
+    return 'AnimeFlow：$local · Bangumi：$remote';
   }
 
   @override
-  String get syncUseLocal => '已載入項目採用本機';
+  String get syncUseLocal => '已載入項目採用 AnimeFlow';
 
   @override
   String get syncUseRemote => '已載入項目採用 Bangumi';

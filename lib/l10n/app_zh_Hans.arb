@@ -371,7 +371,7 @@
   "unbound": "未绑定",
   "loading": "加载中...",
   "bindStatusLoadFailed": "获取绑定状态失败",
-  "bindBangumiHint": "无需绑定即可使用本地收藏；绑定 Bangumi 后可同步收藏",
+  "bindBangumiHint": "绑定 Bangumi 后可双向同步收藏数据",
   "bindBangumiAccount": "绑定 Bangumi 账号",
   "confirmUnbind": "确认解绑",
   "unbindConfirmation": "确定要解绑 Bangumi 账号吗？解绑后可能影响部分功能。",
@@ -610,10 +610,10 @@
   "danmakuLoading": "弹幕加载中…",
   "danmakuSwitching": "正在切换弹幕…",
   "collectionSaved": "收藏已保存",
-  "collectionSavedLocally": "收藏已保存到本地",
-  "collectionSavedPending": "本地已保存，Bangumi 暂未同步，服务端将自动重试",
-  "collectionSavedAuthRequired": "本地已保存，请重新授权 Bangumi 后再次保存收藏",
-  "collectionSavedConflict": "本地已保存，Bangumi 数据已变化，自动同步已暂停",
+  "collectionSavedLocally": "收藏已保存，暂未同步到 Bangumi",
+  "collectionSavedPending": "收藏已保存，等待同步到 Bangumi，服务端将自动重试",
+  "collectionSavedAuthRequired": "收藏已保存，但尚未同步到 Bangumi；请重新授权后再试",
+  "collectionSavedConflict": "收藏已保存，但与 Bangumi 数据存在冲突，自动同步已暂停",
   "collectionSavedSynced": "收藏已保存并同步到 Bangumi",
   "collectionSelectType": "请选择收藏分类",
   "syncConflictsTitle": "处理收藏分类冲突",
@@ -628,7 +628,7 @@
       }
     }
   },
-  "syncConflictSides": "本地：{local} · Bangumi：{remote}",
+  "syncConflictSides": "AnimeFlow：{local} · Bangumi：{remote}",
   "@syncConflictSides": {
     "placeholders": {
       "local": {
@@ -639,7 +639,7 @@
       }
     }
   },
-  "syncUseLocal": "已加载条目采用本地",
+  "syncUseLocal": "已加载条目采用 AnimeFlow",
   "syncUseRemote": "已加载条目采用 Bangumi",
   "syncSubmitSelected": "提交已选 {count} 项",
   "@syncSubmitSelected": {

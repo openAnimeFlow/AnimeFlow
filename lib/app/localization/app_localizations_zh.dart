@@ -205,6 +205,43 @@ class AppLocalizationsZh extends AppLocalizations {
   String get totalWatchers => '總觀看人數';
 
   @override
+  String get communityOnlineTitle => '社區在線';
+
+  @override
+  String get communityOnlineSubtitle => '因為熱愛而相聚 · 與更多同好一起看番';
+
+  @override
+  String get watchingAnimeTitle => '正在觀看的番劇';
+
+  @override
+  String watchingAnimeSummary(Object count, Object viewers) {
+    return '共 $count 部 · $viewers 人正在觀看';
+  }
+
+  @override
+  String communityOnlineSummary(
+      Object total, Object anonymous, Object loggedIn) {
+    return '總在線 $total 人 · 匿名 $anonymous · 登入 $loggedIn';
+  }
+
+  @override
+  String get totalOnlineUsers => '總人數';
+
+  @override
+  String get anonymousUsers => '匿名';
+
+  @override
+  String get loggedInUsers => '登入';
+
+  @override
+  String watchingPeople(Object count) {
+    return '$count 人在看';
+  }
+
+  @override
+  String get noUsersWatchingAnime => '目前還沒有使用者正在觀看番劇';
+
+  @override
   String get averageRating => '平均評分';
 
   @override
@@ -2218,6 +2255,43 @@ class AppLocalizationsZhHans extends AppLocalizationsZh {
 
   @override
   String get totalWatchers => '总观看人数';
+
+  @override
+  String get communityOnlineTitle => '社区在线';
+
+  @override
+  String get communityOnlineSubtitle => '因为热爱而相聚 · 与更多同好一起看番';
+
+  @override
+  String get watchingAnimeTitle => '正在观看的番剧';
+
+  @override
+  String watchingAnimeSummary(Object count, Object viewers) {
+    return '共 $count 部 · $viewers 人正在观看';
+  }
+
+  @override
+  String communityOnlineSummary(
+      Object total, Object anonymous, Object loggedIn) {
+    return '总在线 $total 人 · 匿名 $anonymous · 登录 $loggedIn';
+  }
+
+  @override
+  String get totalOnlineUsers => '总人数';
+
+  @override
+  String get anonymousUsers => '匿名';
+
+  @override
+  String get loggedInUsers => '登录';
+
+  @override
+  String watchingPeople(Object count) {
+    return '$count 人在看';
+  }
+
+  @override
+  String get noUsersWatchingAnime => '当前还没有用户在观看番剧';
 
   @override
   String get averageRating => '平均评分';
@@ -4234,6 +4308,43 @@ class AppLocalizationsZhHantHk extends AppLocalizationsZh {
   String get totalWatchers => '總觀看人數';
 
   @override
+  String get communityOnlineTitle => '社區在線';
+
+  @override
+  String get communityOnlineSubtitle => '因為熱愛而相聚 · 與更多同好一起看番';
+
+  @override
+  String get watchingAnimeTitle => '正在觀看的番劇';
+
+  @override
+  String watchingAnimeSummary(Object count, Object viewers) {
+    return '共 $count 部 · $viewers 人正在觀看';
+  }
+
+  @override
+  String communityOnlineSummary(
+      Object total, Object anonymous, Object loggedIn) {
+    return '總在線 $total 人 · 匿名 $anonymous · 登入 $loggedIn';
+  }
+
+  @override
+  String get totalOnlineUsers => '總人數';
+
+  @override
+  String get anonymousUsers => '匿名';
+
+  @override
+  String get loggedInUsers => '登入';
+
+  @override
+  String watchingPeople(Object count) {
+    return '$count 人在看';
+  }
+
+  @override
+  String get noUsersWatchingAnime => '目前還沒有使用者正在觀看番劇';
+
+  @override
   String get averageRating => '平均評分';
 
   @override
@@ -6247,6 +6358,43 @@ class AppLocalizationsZhHantTw extends AppLocalizationsZh {
 
   @override
   String get totalWatchers => '總觀看人數';
+
+  @override
+  String get communityOnlineTitle => '社群在線';
+
+  @override
+  String get communityOnlineSubtitle => '因為熱愛而相聚 · 與更多同好一起看番';
+
+  @override
+  String get watchingAnimeTitle => '正在觀看的番劇';
+
+  @override
+  String watchingAnimeSummary(Object count, Object viewers) {
+    return '共 $count 部 · $viewers 人正在觀看';
+  }
+
+  @override
+  String communityOnlineSummary(
+      Object total, Object anonymous, Object loggedIn) {
+    return '總在線 $total 人 · 匿名 $anonymous · 登入 $loggedIn';
+  }
+
+  @override
+  String get totalOnlineUsers => '總人數';
+
+  @override
+  String get anonymousUsers => '匿名';
+
+  @override
+  String get loggedInUsers => '登入';
+
+  @override
+  String watchingPeople(Object count) {
+    return '$count 人在看';
+  }
+
+  @override
+  String get noUsersWatchingAnime => '目前還沒有使用者正在觀看番劇';
 
   @override
   String get averageRating => '平均評分';

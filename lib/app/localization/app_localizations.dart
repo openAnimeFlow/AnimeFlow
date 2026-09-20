@@ -475,6 +475,67 @@ abstract class AppLocalizations {
   /// **'总观看人数'**
   String get totalWatchers;
 
+  /// No description provided for @communityOnlineTitle.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'社区在线'**
+  String get communityOnlineTitle;
+
+  /// No description provided for @communityOnlineSubtitle.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'因为热爱而相聚 · 与更多同好一起看番'**
+  String get communityOnlineSubtitle;
+
+  /// No description provided for @watchingAnimeTitle.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'正在观看的番剧'**
+  String get watchingAnimeTitle;
+
+  /// No description provided for @watchingAnimeSummary.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'共 {count} 部 · {viewers} 人正在观看'**
+  String watchingAnimeSummary(Object count, Object viewers);
+
+  /// No description provided for @communityOnlineSummary.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'总在线 {total} 人 · 匿名 {anonymous} · 登录 {loggedIn}'**
+  String communityOnlineSummary(
+      Object total, Object anonymous, Object loggedIn);
+
+  /// No description provided for @totalOnlineUsers.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'总人数'**
+  String get totalOnlineUsers;
+
+  /// No description provided for @anonymousUsers.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'匿名'**
+  String get anonymousUsers;
+
+  /// No description provided for @loggedInUsers.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'登录'**
+  String get loggedInUsers;
+
+  /// No description provided for @watchingPeople.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'{count} 人在看'**
+  String watchingPeople(Object count);
+
+  /// No description provided for @noUsersWatchingAnime.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'当前还没有用户在观看番剧'**
+  String get noUsersWatchingAnime;
+
   /// No description provided for @averageRating.
   ///
   /// In zh_Hans, this message translates to:

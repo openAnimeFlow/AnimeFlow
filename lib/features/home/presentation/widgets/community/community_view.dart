@@ -48,7 +48,16 @@ class _CommunityPageState extends ConsumerState<CommunityPage> {
           subjects: subjects,
           onlineCount: onlineCount,
           retryLabel: l10n.retry,
-          watcherLabel: l10n.totalWatchers,
+          sectionTitle: l10n.watchingAnimeTitle,
+          sectionSummary: (count, viewers) =>
+              l10n.watchingAnimeSummary(count, viewers),
+          watchingPeopleLabel: l10n.watchingPeople,
+          emptyMessage: l10n.noUsersWatchingAnime,
+          onlineSummary: (count) => l10n.communityOnlineSummary(
+            count.onlineUsers,
+            count.anonymousUsers,
+            count.loggedInUsers,
+          ),
           onRetry: _refresh,
         ),
       ),
@@ -61,14 +70,22 @@ class _CommunityContent extends StatelessWidget {
     required this.subjects,
     required this.onlineCount,
     required this.retryLabel,
-    required this.watcherLabel,
+    required this.sectionTitle,
+    required this.sectionSummary,
+    required this.watchingPeopleLabel,
+    required this.emptyMessage,
+    required this.onlineSummary,
     required this.onRetry,
   });
 
   final List<WatchingSubject> subjects;
   final AsyncValue<OnlineCount> onlineCount;
   final String retryLabel;
-  final String watcherLabel;
+  final String sectionTitle;
+  final String Function(int count, int viewers) sectionSummary;
+  final String Function(int count) watchingPeopleLabel;
+  final String emptyMessage;
+  final String Function(OnlineCount count) onlineSummary;
   final Future<void> Function() onRetry;
 
   @override
@@ -103,6 +120,12 @@ class _CommunityContent extends StatelessWidget {
               sliver: SliverToBoxAdapter(
                 child: _CommunityHero(
                   onlineCount: onlineCount,
+                  title: AppLocalizations.of(context).communityOnlineTitle,
+                  subtitle:
+                      AppLocalizations.of(context).communityOnlineSubtitle,
+                  totalLabel: AppLocalizations.of(context).totalOnlineUsers,
+                  anonymousLabel: AppLocalizations.of(context).anonymousUsers,
+                  loggedInLabel: AppLocalizations.of(context).loggedInUsers,
                   onRetry: onRetry,
                 ),
               ),
@@ -116,10 +139,10 @@ class _CommunityContent extends StatelessWidget {
               ),
               sliver: SliverToBoxAdapter(
                 child: _SectionHeader(
-                  title: '正在观看的番剧',
+                  title: sectionTitle,
                   subtitle: subjects.isEmpty
                       ? null
-                      : '共 ${subjects.length} 部 · $totalWatching 人正在观看',
+                      : sectionSummary(subjects.length, totalWatching),
                   icon: Icons.ondemand_video_outlined,
                 ),
               ),
@@ -136,6 +159,8 @@ class _CommunityContent extends StatelessWidget {
                   child: _EmptyCommunityCard(
                     onlineCount: onlineCount,
                     retryLabel: retryLabel,
+                    emptyMessage: emptyMessage,
+                    onlineSummary: onlineSummary,
                     onRetry: onRetry,
                   ),
                 ),
@@ -152,7 +177,7 @@ class _CommunityContent extends StatelessWidget {
                   delegate: SliverChildBuilderDelegate(
                     (context, index) => _WatchingSubjectCard(
                       subject: subjects[index],
-                      watcherLabel: watcherLabel,
+                      watchingPeopleLabel: watchingPeopleLabel,
                     ),
                     childCount: subjects.length,
                   ),
@@ -172,9 +197,22 @@ class _CommunityContent extends StatelessWidget {
 }
 
 class _CommunityHero extends StatelessWidget {
-  const _CommunityHero({required this.onlineCount, required this.onRetry});
+  const _CommunityHero({
+    required this.onlineCount,
+    required this.title,
+    required this.subtitle,
+    required this.totalLabel,
+    required this.anonymousLabel,
+    required this.loggedInLabel,
+    required this.onRetry,
+  });
 
   final AsyncValue<OnlineCount> onlineCount;
+  final String title;
+  final String subtitle;
+  final String totalLabel;
+  final String anonymousLabel;
+  final String loggedInLabel;
   final Future<void> Function() onRetry;
 
   @override
@@ -182,24 +220,38 @@ class _CommunityHero extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const Text(
-          '社区在线',
-          style: TextStyle(
+        Text(
+          title,
+          style: const TextStyle(
             fontSize: 32,
             fontWeight: FontWeight.w800,
             letterSpacing: 1,
           ),
         ),
         const SizedBox(height: 6),
-        const Text(
-          '因为热爱而相聚 · 与更多同好一起看番',
-          style: TextStyle(fontSize: 14),
+        Text(
+          subtitle,
+          style: const TextStyle(fontSize: 14),
         ),
         const SizedBox(height: 22),
         onlineCount.when(
-          loading: () => const _StatsCard.loading(),
-          error: (_, __) => _StatsCard.loading(onRetry: onRetry),
-          data: (count) => _StatsCard(count: count),
+          loading: () => _StatsCard.loading(
+            totalLabel: totalLabel,
+            anonymousLabel: anonymousLabel,
+            loggedInLabel: loggedInLabel,
+          ),
+          error: (_, __) => _StatsCard.loading(
+            totalLabel: totalLabel,
+            anonymousLabel: anonymousLabel,
+            loggedInLabel: loggedInLabel,
+            onRetry: onRetry,
+          ),
+          data: (count) => _StatsCard(
+            count: count,
+            totalLabel: totalLabel,
+            anonymousLabel: anonymousLabel,
+            loggedInLabel: loggedInLabel,
+          ),
         ),
       ],
     );
@@ -207,15 +259,26 @@ class _CommunityHero extends StatelessWidget {
 }
 
 class _StatsCard extends StatelessWidget {
-  const _StatsCard({required this.count})
-      : onRetry = null,
+  const _StatsCard({
+    required this.count,
+    required this.totalLabel,
+    required this.anonymousLabel,
+    required this.loggedInLabel,
+  })  : onRetry = null,
         loading = false;
 
-  const _StatsCard.loading({this.onRetry})
-      : count = null,
+  const _StatsCard.loading({
+    required this.totalLabel,
+    required this.anonymousLabel,
+    required this.loggedInLabel,
+    this.onRetry,
+  })  : count = null,
         loading = true;
 
   final OnlineCount? count;
+  final String totalLabel;
+  final String anonymousLabel;
+  final String loggedInLabel;
   final Future<void> Function()? onRetry;
   final bool loading;
 
@@ -226,9 +289,14 @@ class _StatsCard extends StatelessWidget {
         ? const [0, 0, 0]
         : [count!.onlineUsers, count!.anonymousUsers, count!.loggedInUsers];
     final items = [
-      (Icons.groups_rounded, '总人数', values[0], colorScheme.primary),
-      (Icons.visibility_off_rounded, '匿名', values[1], colorScheme.secondary),
-      (Icons.person_rounded, '登录', values[2], colorScheme.tertiary),
+      (Icons.groups_rounded, totalLabel, values[0], colorScheme.primary),
+      (
+        Icons.visibility_off_rounded,
+        anonymousLabel,
+        values[1],
+        colorScheme.secondary
+      ),
+      (Icons.person_rounded, loggedInLabel, values[2], colorScheme.tertiary),
     ];
 
     return Container(
@@ -360,10 +428,10 @@ class _SectionHeader extends StatelessWidget {
 
 class _WatchingSubjectCard extends StatelessWidget {
   const _WatchingSubjectCard(
-      {required this.subject, required this.watcherLabel});
+      {required this.subject, required this.watchingPeopleLabel});
 
   final WatchingSubject subject;
-  final String watcherLabel;
+  final String Function(int count) watchingPeopleLabel;
 
   @override
   Widget build(BuildContext context) {
@@ -420,7 +488,7 @@ class _WatchingSubjectCard extends StatelessWidget {
                         color: colorScheme.onSurfaceVariant,
                       ),
                       Text(
-                        '${subject.online.onlineUsers} 人在看',
+                        watchingPeopleLabel(subject.online.onlineUsers),
                         style: TextStyle(
                           color: colorScheme.onSurfaceVariant,
                           fontSize: 12,
@@ -442,11 +510,15 @@ class _EmptyCommunityCard extends StatelessWidget {
   const _EmptyCommunityCard({
     required this.onlineCount,
     required this.retryLabel,
+    required this.emptyMessage,
+    required this.onlineSummary,
     required this.onRetry,
   });
 
   final AsyncValue<OnlineCount> onlineCount;
   final String retryLabel;
+  final String emptyMessage;
+  final String Function(OnlineCount count) onlineSummary;
   final Future<void> Function() onRetry;
 
   @override
@@ -476,7 +548,7 @@ class _EmptyCommunityCard extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    '当前还没有用户在观看番剧',
+                    emptyMessage,
                     style: TextStyle(
                       color: colorScheme.onSurface,
                       fontSize: 17,
@@ -485,7 +557,7 @@ class _EmptyCommunityCard extends StatelessWidget {
                   ),
                   const SizedBox(height: 5),
                   Text(
-                    '总在线 ${count.onlineUsers} 人 · 匿名 ${count.anonymousUsers} · 登录 ${count.loggedInUsers}',
+                    onlineSummary(count),
                     style: TextStyle(
                       color: colorScheme.onSurfaceVariant,
                       fontSize: 12,

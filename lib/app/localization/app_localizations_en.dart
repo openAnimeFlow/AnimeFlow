@@ -209,6 +209,44 @@ class AppLocalizationsEn extends AppLocalizations {
   String get totalWatchers => 'Total viewers';
 
   @override
+  String get communityOnlineTitle => 'Community Online';
+
+  @override
+  String get communityOnlineSubtitle =>
+      'Gather because we love anime · Watch with fellow fans';
+
+  @override
+  String get watchingAnimeTitle => 'Currently Watching';
+
+  @override
+  String watchingAnimeSummary(Object count, Object viewers) {
+    return '$count titles · $viewers watching';
+  }
+
+  @override
+  String communityOnlineSummary(
+      Object total, Object anonymous, Object loggedIn) {
+    return '$total online · $anonymous anonymous · $loggedIn logged in';
+  }
+
+  @override
+  String get totalOnlineUsers => 'Total';
+
+  @override
+  String get anonymousUsers => 'Anonymous';
+
+  @override
+  String get loggedInUsers => 'Logged in';
+
+  @override
+  String watchingPeople(Object count) {
+    return '$count watching';
+  }
+
+  @override
+  String get noUsersWatchingAnime => 'No users are watching anime right now';
+
+  @override
   String get averageRating => 'Average rating';
 
   @override

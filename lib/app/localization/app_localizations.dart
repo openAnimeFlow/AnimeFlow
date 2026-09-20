@@ -2959,6 +2959,12 @@ abstract class AppLocalizations {
   /// **'收藏同步'**
   String get collectionSyncTitle;
 
+  /// No description provided for @collectionSyncDescription.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'绑定后，AnimeFlow 与 Bangumi 的收藏会双向同步'**
+  String get collectionSyncDescription;
+
   /// No description provided for @collectionSyncStarted.
   ///
   /// In zh_Hans, this message translates to:
@@ -3004,7 +3010,7 @@ abstract class AppLocalizations {
   /// No description provided for @syncBangumiCollection.
   ///
   /// In zh_Hans, this message translates to:
-  /// **'同步 Bangumi 收藏'**
+  /// **'同步收藏'**
   String get syncBangumiCollection;
 
   /// No description provided for @syncStatusLoadFailed.

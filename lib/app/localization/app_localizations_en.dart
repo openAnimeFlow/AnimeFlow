@@ -1576,6 +1576,10 @@ class AppLocalizationsEn extends AppLocalizations {
   String get collectionSyncTitle => 'Collection Sync';
 
   @override
+  String get collectionSyncDescription =>
+      'Collections are synced both ways between AnimeFlow and Bangumi.';
+
+  @override
   String get collectionSyncStarted => 'Collection sync started';
 
   @override
@@ -1599,7 +1603,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get manualSync => 'Manual sync';
 
   @override
-  String get syncBangumiCollection => 'Sync Bangumi collection';
+  String get syncBangumiCollection => 'Sync collections';
 
   @override
   String get syncStatusLoadFailed => 'Failed to load sync status';

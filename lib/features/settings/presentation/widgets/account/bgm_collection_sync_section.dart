@@ -151,6 +151,14 @@ class _BangumiCollectionSyncSectionState
               ],
             ),
             const SizedBox(height: 8),
+            Text(
+              l10n.collectionSyncDescription,
+              style: TextStyle(
+                fontSize: 13,
+                color: colorScheme.onSurfaceVariant,
+              ),
+            ),
+            const SizedBox(height: 8),
             Row(
               children: [
                 SyncStatusChip(

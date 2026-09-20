@@ -82,7 +82,8 @@ void main() {
   testWidgets('unbinding disables old dialog decisions', (tester) async {
     final repo = Repo();
     final c = await mount(tester, repo);
-    await tester.tap(find.text('Use local for loaded items'));
+    await tester
+        .tap(find.byKey(const ValueKey('collection-conflicts-use-animeflow')));
     await tester.pumpAndSettle();
     repo.bound = false;
     c.invalidate(bangumiBindProvider);
@@ -110,14 +111,17 @@ void main() {
       (tester) async {
     final repo = Repo();
     await mount(tester, repo);
-    await tester.scrollUntilVisible(find.text('Load more conflicts'), 300,
+    await tester.scrollUntilVisible(
+        find.byKey(const ValueKey('collection-conflicts-load-more')), 300,
         scrollable: find.byType(Scrollable).last, maxScrolls: 40);
-    await tester.tap(find.text('Load more conflicts'));
+    await tester
+        .tap(find.byKey(const ValueKey('collection-conflicts-load-more')));
     await tester.pumpAndSettle();
     expect(repo.offsets, [0, 20]);
-    await tester.tap(find.text('Use local for loaded items'));
+    await tester
+        .tap(find.byKey(const ValueKey('collection-conflicts-use-animeflow')));
     await tester.pumpAndSettle();
-    await tester.tap(find.text('Submit 21 selected'));
+    await tester.tap(find.byKey(const ValueKey('collection-conflicts-submit')));
     await tester.pumpAndSettle();
     expect(repo.submitted.length, 21);
     expect(repo.submitted.every((e) => e['selectedType'] == 3), isTrue);
@@ -132,8 +136,8 @@ void main() {
     final repo = Repo();
     await mount(tester, repo);
     expect(find.byType(Image), findsNothing);
-    expect(find.text('Bangumi'), findsWidgets);
-    expect(find.text('AnimeFlow'), findsWidgets);
+    expect(find.byKey(const ValueKey('conflict-0-bangumi')), findsOneWidget);
+    expect(find.byKey(const ValueKey('conflict-0-animeflow')), findsOneWidget);
     expect(tester.widget<FilledButton>(find.byType(FilledButton)).onPressed,
         isNull);
     await tester.tap(find.byKey(const ValueKey('conflict-0-bangumi')));
@@ -149,7 +153,7 @@ void main() {
     final right = tester.getTopLeft(highlight).dx;
     expect(middle, greaterThan(left));
     expect(middle, lessThan(right));
-    await tester.tap(find.text('Submit 1 selected'));
+    await tester.tap(find.byKey(const ValueKey('collection-conflicts-submit')));
     await tester.pumpAndSettle();
     expect(repo.submitted.single['conflictId'], 0);
     expect(repo.submitted.single['selectedType'], 3);
@@ -160,12 +164,18 @@ void main() {
       (tester) async {
     final repo = Repo()..partialFailure = true;
     await mount(tester, repo);
-    await tester.tap(find.text('Use Bangumi for loaded items'));
+    await tester
+        .tap(find.byKey(const ValueKey('collection-conflicts-use-bangumi')));
     await tester.pumpAndSettle();
-    await tester.tap(find.text('Submit 20 selected'));
+    await tester.tap(find.byKey(const ValueKey('collection-conflicts-submit')));
     await tester.pumpAndSettle();
     expect(repo.offsets, [0, 0]);
-    expect(find.text('Submit 0 selected'), findsOneWidget);
+    expect(
+        tester
+            .widget<FilledButton>(
+                find.byKey(const ValueKey('collection-conflicts-submit')))
+            .onPressed,
+        isNull);
     expect(repo.rows.first.conflictVersion, 2);
     expect(find.textContaining('Some choices may have been received'),
         findsOneWidget);

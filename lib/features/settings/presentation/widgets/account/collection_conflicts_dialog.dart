@@ -184,9 +184,13 @@ class _CollectionConflictsDialogState
                   : Column(children: [
                       Wrap(spacing: 8, children: [
                         TextButton(
+                            key: const ValueKey(
+                                'collection-conflicts-use-animeflow'),
                             onPressed: enabled ? () => _chooseSide(true) : null,
                             child: Text(l10n.syncUseLocal)),
                         TextButton(
+                            key: const ValueKey(
+                                'collection-conflicts-use-bangumi'),
                             onPressed:
                                 enabled ? () => _chooseSide(false) : null,
                             child: Text(l10n.syncUseRemote)),
@@ -238,6 +242,8 @@ class _CollectionConflictsDialogState
                                       ]))),
                         if (_hasMore && !_requiresRefresh)
                           TextButton(
+                              key: const ValueKey(
+                                  'collection-conflicts-load-more'),
                               onPressed: _busy ? null : () => _load(),
                               child: Text(
                                   _loadError ? l10n.retry : l10n.syncLoadMore)),
@@ -251,6 +257,7 @@ class _CollectionConflictsDialogState
         TextButton(
             onPressed: () => Navigator.pop(context), child: Text(l10n.close)),
         FilledButton(
+            key: const ValueKey('collection-conflicts-submit'),
             onPressed: enabled && _selected.isNotEmpty ? _submit : null,
             child: Text(l10n.syncSubmitSelected(_selected.length))),
       ],

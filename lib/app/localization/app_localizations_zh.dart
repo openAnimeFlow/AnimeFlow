@@ -1534,6 +1534,9 @@ class AppLocalizationsZh extends AppLocalizations {
   String get collectionSyncTitle => '收藏同步';
 
   @override
+  String get collectionSyncDescription => '绑定后，AnimeFlow 与 Bangumi 的收藏会双向同步';
+
+  @override
   String get collectionSyncStarted => '收藏同步已開始';
 
   @override
@@ -1557,7 +1560,7 @@ class AppLocalizationsZh extends AppLocalizations {
   String get manualSync => '手動同步';
 
   @override
-  String get syncBangumiCollection => '同步 Bangumi 收藏';
+  String get syncBangumiCollection => '同步收藏';
 
   @override
   String get syncStatusLoadFailed => '取得同步狀態失敗';
@@ -3542,6 +3545,9 @@ class AppLocalizationsZhHans extends AppLocalizationsZh {
   String get collectionSyncTitle => '收藏同步';
 
   @override
+  String get collectionSyncDescription => '绑定后，AnimeFlow 与 Bangumi 的收藏会双向同步';
+
+  @override
   String get collectionSyncStarted => '收藏同步已开始';
 
   @override
@@ -3565,7 +3571,7 @@ class AppLocalizationsZhHans extends AppLocalizationsZh {
   String get manualSync => '手动同步';
 
   @override
-  String get syncBangumiCollection => '同步 Bangumi 收藏';
+  String get syncBangumiCollection => '同步收藏';
 
   @override
   String get syncStatusLoadFailed => '获取同步状态失败';
@@ -5549,6 +5555,9 @@ class AppLocalizationsZhHantHk extends AppLocalizationsZh {
   String get collectionSyncTitle => '收藏同步';
 
   @override
+  String get collectionSyncDescription => '綁定後，AnimeFlow 與 Bangumi 的收藏會雙向同步';
+
+  @override
   String get collectionSyncStarted => '收藏同步已開始';
 
   @override
@@ -5572,7 +5581,7 @@ class AppLocalizationsZhHantHk extends AppLocalizationsZh {
   String get manualSync => '手動同步';
 
   @override
-  String get syncBangumiCollection => '同步 Bangumi 收藏';
+  String get syncBangumiCollection => '同步收藏';
 
   @override
   String get syncStatusLoadFailed => '取得同步狀態失敗';
@@ -7558,6 +7567,9 @@ class AppLocalizationsZhHantTw extends AppLocalizationsZh {
   String get collectionSyncTitle => '收藏同步';
 
   @override
+  String get collectionSyncDescription => '綁定後，AnimeFlow 與 Bangumi 的收藏會雙向同步';
+
+  @override
   String get collectionSyncStarted => '收藏同步已開始';
 
   @override
@@ -7581,7 +7593,7 @@ class AppLocalizationsZhHantTw extends AppLocalizationsZh {
   String get manualSync => '手動同步';
 
   @override
-  String get syncBangumiCollection => '同步 Bangumi 收藏';
+  String get syncBangumiCollection => '同步收藏';
 
   @override
   String get syncStatusLoadFailed => '取得同步狀態失敗';

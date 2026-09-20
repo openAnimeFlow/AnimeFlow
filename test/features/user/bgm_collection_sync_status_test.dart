@@ -18,4 +18,12 @@ void main() {
     expect(item.taskId, 2);
     expect(item.pendingConflictCount, 3);
   });
+
+  test('旧同步进度字段缺失时扫描计数默认为零', () {
+    final item = BgmCollectionSyncStatusItem.fromJson({
+      'status': 'RUNNING',
+      'phase': 'SCANNING',
+    });
+    expect(item.scannedCount, 0);
+  });
 }

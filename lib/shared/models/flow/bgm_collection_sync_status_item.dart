@@ -60,6 +60,7 @@ class BgmCollectionSyncStatusItem {
   final BgmCollectionSyncStatus status;
   final int? userId;
   final int syncedCount;
+  final int scannedCount;
   final int totalCount;
   final String? message;
   final int? startedAt;
@@ -74,6 +75,7 @@ class BgmCollectionSyncStatusItem {
     required this.status,
     this.userId,
     this.syncedCount = 0,
+    this.scannedCount = 0,
     this.totalCount = 0,
     this.message,
     this.startedAt,
@@ -94,6 +96,7 @@ class BgmCollectionSyncStatusItem {
       status: BgmCollectionSyncStatus.fromJson(json['status'] as String?),
       userId: json['userId'] as int?,
       syncedCount: json['syncedCount'] as int? ?? 0,
+      scannedCount: json['scannedCount'] as int? ?? 0,
       totalCount: json['totalCount'] as int? ?? 0,
       message: json['message'] as String?,
       startedAt: json['startedAt'] as int?,

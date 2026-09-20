@@ -120,6 +120,7 @@ class _BangumiCollectionSyncSectionState
           _ => item?.message,
         };
         final syncedCount = item?.syncedCount ?? 0;
+        final scannedCount = item?.scannedCount ?? 0;
         final totalCount = item?.totalCount ?? 0;
         final hasProgress = isRunning && totalCount > 0;
 
@@ -202,10 +203,11 @@ class _BangumiCollectionSyncSectionState
                   color: colorScheme.onSurfaceVariant,
                 ),
               ),
-            ] else if (isRunning && syncedCount > 0) ...[
+            ] else if (isRunning && (syncedCount > 0 || scannedCount > 0)) ...[
               const SizedBox(height: 8),
               Text(
-                l10n.syncedItems(syncedCount),
+                l10n.syncedItems(
+                    item?.phase == 'SCANNING' ? scannedCount : syncedCount),
                 style: TextStyle(
                   fontSize: 12,
                   color: colorScheme.onSurfaceVariant,

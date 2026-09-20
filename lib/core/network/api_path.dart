@@ -100,7 +100,7 @@ class AnimeFlowApi {
       latestRelease = '/api/v1/releases/latest',
 
       /// dev url
-      animeFlowApiDev = 'http://localhost:1024',
+      animeFlowApiDev = 'http://192.168.3.8:1024',
 
       /// 申请Token
       token = '/api/oauth/token',
@@ -267,7 +267,14 @@ class AnimeFlowApi {
       presence = '/api/v1/presence',
 
       /// 当前在线人数
-      presenceOnlineCount = '/api/v1/presence/online-count';
+      presenceOnlineCount = '/api/v1/presence/online-count',
+
+      /// 指定番剧当前在线人数
+      presenceSubjectOnlineCount =
+          '/api/v1/presence/subjects/{subjectId}/online-count',
+
+      /// 当前正在观看的番剧
+      presenceWatchingSubjects = '/api/v1/presence/watching-subjects';
 }
 
 class DamakuApi {

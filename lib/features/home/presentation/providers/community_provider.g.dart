@@ -52,3 +52,45 @@ abstract class _$CommunityWatchingSubjects
     element.handleCreate(ref, build);
   }
 }
+
+@ProviderFor(CommunityOnlineCount)
+final communityOnlineCountProvider = CommunityOnlineCountProvider._();
+
+final class CommunityOnlineCountProvider
+    extends $AsyncNotifierProvider<CommunityOnlineCount, OnlineCount> {
+  CommunityOnlineCountProvider._()
+      : super(
+          from: null,
+          argument: null,
+          retry: null,
+          name: r'communityOnlineCountProvider',
+          isAutoDispose: true,
+          dependencies: null,
+          $allTransitiveDependencies: null,
+        );
+
+  @override
+  String debugGetCreateSourceHash() => _$communityOnlineCountHash();
+
+  @$internal
+  @override
+  CommunityOnlineCount create() => CommunityOnlineCount();
+}
+
+String _$communityOnlineCountHash() =>
+    r'6b6b9b2f6f6f4e3b9e4b5d3e4d6f7a8b9c0d1e2f';
+
+abstract class _$CommunityOnlineCount extends $AsyncNotifier<OnlineCount> {
+  FutureOr<OnlineCount> build();
+  @$mustCallSuper
+  @override
+  void runBuild() {
+    final ref = this.ref as $Ref<AsyncValue<OnlineCount>, OnlineCount>;
+    final element = ref.element as $ClassProviderElement<
+        AnyNotifier<AsyncValue<OnlineCount>, OnlineCount>,
+        AsyncValue<OnlineCount>,
+        Object?,
+        Object?>;
+    element.handleCreate(ref, build);
+  }
+}

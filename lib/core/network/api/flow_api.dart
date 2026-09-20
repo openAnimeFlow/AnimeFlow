@@ -68,7 +68,8 @@ class FlowApi {
       data: {
         'visitorId': visitorId,
         'clientType': clientType,
-        if (appVersion != null && appVersion.isNotEmpty) 'appVersion': appVersion,
+        if (appVersion != null && appVersion.isNotEmpty)
+          'appVersion': appVersion,
         'status': status,
         if (subjectId != null) 'subjectId': subjectId,
         if (episodeId != null) 'episodeId': episodeId,
@@ -86,20 +87,22 @@ class FlowApi {
 
   static Future<OnlineCount> getPresenceOnlineCount() async {
     final response = await _client.get(AnimeFlowApi.presenceOnlineCount);
-    return OnlineCount.fromJson(Map<String, dynamic>.from(response.data as Map));
+    return OnlineCount.fromJson(
+        Map<String, dynamic>.from(response.data as Map));
   }
 
-  static Future<OnlineCount> getSubjectPresenceOnlineCount(int subjectId) async {
+  static Future<OnlineCount> getSubjectPresenceOnlineCount(
+      int subjectId) async {
     final response = await _client.get(
-      '${AnimeFlowApi.presence}/subjects/$subjectId/online-count',
+      AnimeFlowApi.presenceSubjectOnlineCount
+          .replaceFirst('{subjectId}', subjectId.toString()),
     );
-    return OnlineCount.fromJson(Map<String, dynamic>.from(response.data as Map));
+    return OnlineCount.fromJson(
+        Map<String, dynamic>.from(response.data as Map));
   }
 
   static Future<List<WatchingSubject>> getWatchingSubjects() async {
-    final response = await _client.get(
-      '${AnimeFlowApi.presence}/watching-subjects',
-    );
+    final response = await _client.get(AnimeFlowApi.presenceWatchingSubjects);
     final data = response.data;
     if (data is! List) return const [];
     return data

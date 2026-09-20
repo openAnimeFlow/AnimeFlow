@@ -371,7 +371,7 @@
   "unbound": "未绑定",
   "loading": "加载中...",
   "bindStatusLoadFailed": "获取绑定状态失败",
-  "bindBangumiHint": "绑定 Bangumi 账号后可同步收藏等数据",
+  "bindBangumiHint": "绑定 Bangumi 后可双向同步收藏数据",
   "bindBangumiAccount": "绑定 Bangumi 账号",
   "confirmUnbind": "确认解绑",
   "unbindConfirmation": "确定要解绑 Bangumi 账号吗？解绑后可能影响部分功能。",
@@ -421,6 +421,8 @@
   "orphanFontAvailable": "远程仓库已下架，仍可继续使用本地字体",
   "orphanFontMissing": "本地字体文件已丢失，可在此处清理记录",
   "collectionSyncTitle": "收藏同步",
+  "collectionSyncDescription": "绑定后，AnimeFlow 与 Bangumi 的收藏会双向同步",
+  "collectionSyncHint": "你发现 Bangumi 和 AnimeFlow 收藏不同步时，可以点击“同步 Bangumi 收藏”进行双向同步",
   "collectionSyncStarted": "收藏同步已開始",
   "syncStartFailed": "啟動同步失敗",
   "refreshStatus": "重新整理狀態",
@@ -429,7 +431,7 @@
   "@syncedItems": {"placeholders": {"count": {}}},
   "syncInProgress": "同步進行中…",
   "manualSync": "手動同步",
-  "syncBangumiCollection": "同步 Bangumi 收藏",
+  "syncBangumiCollection": "同步收藏",
   "syncStatusLoadFailed": "取得同步狀態失敗",
   "syncStatusIdle": "未同步",
   "syncStatusRunning": "同步中",
@@ -608,5 +610,67 @@
   ,"downloaded": "已下載"
   ,"updating": "更新中…"
   ,"update": "更新"
-  ,"pluginVersionDate": "版本：{version} - {date}"
+  ,"pluginVersionDate": "版本：{version} - {date}",
+  "collectionSaved": "收藏已保存",
+  "collectionSavedLocally": "收藏已保存，暂未同步到 Bangumi",
+  "collectionSavedPending": "收藏已保存，等待同步到 Bangumi，服务端将自动重试",
+  "collectionSavedAuthRequired": "收藏已保存，但尚未同步到 Bangumi；请重新授权后再试",
+  "collectionSavedConflict": "收藏已保存，但与 Bangumi 数据存在冲突，自动同步已暂停",
+  "collectionSavedSynced": "收藏已保存并同步到 Bangumi",
+  "collectionSelectType": "请选择收藏分类",
+  "syncConflictsTitle": "处理收藏分类冲突",
+  "syncPendingSummary": "收藏同步：{conflicts} 条冲突，{failed} 条失败",
+  "@syncPendingSummary": {
+    "placeholders": {
+      "conflicts": {
+        "type": "int"
+      },
+      "failed": {
+        "type": "int"
+      }
+    }
+  },
+  "syncConflictSides": "AnimeFlow：{local} · Bangumi：{remote}",
+  "@syncConflictSides": {
+    "placeholders": {
+      "local": {
+        "type": "String"
+      },
+      "remote": {
+        "type": "String"
+      }
+    }
+  },
+  "syncUseLocal": "已加载条目采用 AnimeFlow",
+  "syncUseRemote": "已加载条目采用 Bangumi",
+  "syncSubmitSelected": "提交已选 {count} 项",
+  "@syncSubmitSelected": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "syncLoadMore": "加载更多冲突",
+  "syncNoConflicts": "当前没有待选择的冲突",
+  "syncAccepted": "选择已接收，后台正在处理。可关闭此窗口，稍后查看结果。",
+  "syncResolveFailed": "部分选择可能已接收。请刷新核对；变化的条目需重新选择。",
+  "syncRefreshRequired": "刷新后继续处理",
+  "syncQueued": "排队中",
+  "syncWaitingConflict": "等待处理冲突",
+  "syncPartialFailed": "部分失败",
+  "syncCancelled": "已取消",
+  "syncUnknown": "未知状态，请刷新",
+  "syncRetryMessage": "同步暂时失败，服务端会自动重试。恢复后继续检查冲突。",
+  "syncBindingChanged": "账号或 Bangumi 绑定已变更，请关闭后重新打开。",
+  "syncOpenConflicts": "处理冲突",
+  "syncSubject": "条目 {id}",
+  "@syncSubject": {
+    "placeholders": {
+      "id": {
+        "type": "int"
+      }
+    }
+  }
+
 }

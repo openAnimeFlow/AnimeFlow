@@ -1,3 +1,5 @@
+import 'package:anime_flow/features/user/application/collection_revision_provider.dart';
+import 'package:anime_flow/shared/models/flow/collection_update_result.dart';
 import 'package:anime_flow/core/network/api/flow_api.dart';
 import 'package:anime_flow/shared/models/bangumi/actor_item.dart';
 import 'package:anime_flow/shared/models/bangumi/producers_item.dart';
@@ -30,6 +32,7 @@ class AnimeInfo extends _$AnimeInfo {
     // Keep the provider subscribed so account changes invalidate the seeded
     // response and fetch fresh interest data for the active user.
     ref.watch(currentFlowTokenProvider);
+    ref.watch(collectionRevisionProvider);
     final initial = ref.watch(animeInfoInitialProvider);
     if (!_initialConsumed && initial?.id == subjectId) {
       _initialConsumed = true;
@@ -42,20 +45,21 @@ class AnimeInfo extends _$AnimeInfo {
     state = AsyncData(subjectInfo);
   }
 
-  Future<void> updateCollectionType(int newType) async {
+  Future<CollectionUpdateResult?> updateCollectionType(int newType) async {
     final subject = state.asData?.value;
-    if (subject == null) return;
-    await ref.read(userCollectionsProvider.notifier).updateCollectionType(
+    if (subject == null) return null;
+    final token = ref.read(currentFlowTokenProvider).value?.sessionId;
+    final result = await ref.read(userCollectionsProvider.notifier).updateCollectionType(
           UserCollectionData.fromSubject(subject),
           newType,
         );
-    if (!ref.mounted) return;
+    if (!ref.mounted || ref.read(currentFlowTokenProvider).value?.sessionId != token) return null;
     final current = state.asData?.value;
-    if (current == null || current.id != subject.id) return;
+    if (current == null || current.id != subject.id) return null;
     final interest = current.interest;
     state = AsyncData(current.copyWith(
       interest: InterestItem(
-        id: interest?.id ?? 0,
+        id: interest?.id,
         rate: interest?.rate ?? 0,
         type: newType,
         comment: interest?.comment ?? '',
@@ -64,8 +68,10 @@ class AnimeInfo extends _$AnimeInfo {
         volStatus: interest?.volStatus ?? 0,
         private: interest?.private ?? false,
         updatedAt: DateTime.now().millisecondsSinceEpoch ~/ 1000,
+        remoteSyncStatus: result?.remoteSyncStatus.apiValue,
       ),
     ));
+    return result;
   }
 }
 

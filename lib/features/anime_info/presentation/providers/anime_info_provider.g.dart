@@ -37,7 +37,7 @@ final class AnimeInfoProvider
   AnimeInfo create() => AnimeInfo();
 }
 
-String _$animeInfoHash() => r'5903a11c2aea08e665ec360b7697a7ecdc30be74';
+String _$animeInfoHash() => r'de89ab758b99d18f1b1d56ec5193847079801118';
 
 abstract class _$AnimeInfo extends $AsyncNotifier<SubjectsInfoItem> {
   FutureOr<SubjectsInfoItem> build();

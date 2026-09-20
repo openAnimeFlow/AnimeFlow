@@ -1,3 +1,5 @@
+import 'package:anime_flow/shared/models/flow/collection_update_result.dart';
+import 'package:anime_flow/shared/widgets/collection_save_notice.dart';
 import 'package:anime_flow/core/constants/layout_constant.dart';
 import 'package:anime_flow/core/network/clients/flow_client.dart';
 import 'package:anime_flow/features/user/presentation/providers/user_collection_provider.dart';
@@ -312,6 +314,16 @@ class _CollectionTabView extends ConsumerWidget {
                                                         TextOverflow.ellipsis,
                                                   ),
                                                 ),
+                                                if (['PENDING', 'AUTH_REQUIRED', 'CONFLICT']
+                                                    .contains(collection.interest.remoteSyncStatus))
+                                                  Tooltip(
+                                                    message: collectionSaveMessage(l10n,
+                                                      CollectionRemoteSyncStatus.parse(collection.interest.remoteSyncStatus)),
+                                                    child: const Padding(
+                                                      padding: EdgeInsets.all(8),
+                                                      child: Icon(Icons.cloud_off_outlined, size: 18),
+                                                    ),
+                                                  ),
                                                 CollectionButton(
                                                   key: ValueKey(collection.id),
                                                   collectType:
@@ -348,7 +360,7 @@ class _CollectionTabView extends ConsumerWidget {
                                                   onCollectTypeChanged:
                                                       (newType) async {
                                                     try {
-                                                      await ref
+                                                      final result = await ref
                                                           .read(
                                                               userCollectionsProvider
                                                                   .notifier)
@@ -356,6 +368,9 @@ class _CollectionTabView extends ConsumerWidget {
                                                             collection,
                                                             newType.value,
                                                           );
+                                                      if (context.mounted) {
+                                                        showCollectionSaveNotice(context, result);
+                                                      }
                                                     } on AnimeFlowApiException catch (e) {
                                                       NotificationToast.show(
                                                         e.message,

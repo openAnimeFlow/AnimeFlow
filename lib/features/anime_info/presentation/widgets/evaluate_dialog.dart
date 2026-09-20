@@ -1,3 +1,10 @@
+import 'package:anime_flow/app/localization/app_localizations.dart';
+import 'package:anime_flow/shared/models/bangumi/interest_item.dart';
+import 'package:anime_flow/shared/models/enums/collect_type.dart';
+import 'package:anime_flow/shared/widgets/collection_save_notice.dart';
+import 'package:anime_flow/features/user/presentation/providers/user_collection_provider.dart';
+import 'package:anime_flow/features/user/presentation/providers/user_state_provider.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:anime_flow/core/network/api/flow_api.dart';
 import 'package:anime_flow/shared/models/bangumi/subjects_info_item.dart';
 import 'package:anime_flow/shared/widgets/notification_toast.dart';
@@ -5,7 +12,7 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
 /// 评价对话框
-class InfoEvaluateDialog extends StatefulWidget {
+class InfoEvaluateDialog extends ConsumerStatefulWidget {
   final SubjectsInfoItem subjectsInfo;
   final ValueChanged<SubjectsInfoItem> onSaved;
 
@@ -16,14 +23,15 @@ class InfoEvaluateDialog extends StatefulWidget {
   });
 
   @override
-  State<InfoEvaluateDialog> createState() => _EvaluateDialogState();
+  ConsumerState<InfoEvaluateDialog> createState() => _EvaluateDialogState();
 }
 
-class _EvaluateDialogState extends State<InfoEvaluateDialog> {
+class _EvaluateDialogState extends ConsumerState<InfoEvaluateDialog> {
   late TextEditingController _commentController;
   late TextEditingController _tagsController;
   int _selectedRate = 0; // 0-10分，0表示未评分
   bool _isSubmitting = false;
+  int? _selectedType;
   final Set<String> _selectedTags = {}; // 选中的标签集合
 
   @override
@@ -33,11 +41,13 @@ class _EvaluateDialogState extends State<InfoEvaluateDialog> {
     // 初始化已有数据
     if (interest != null) {
       _selectedRate = interest.rate;
+      _selectedType = interest.type;
+      _selectedTags.addAll(interest.tags.whereType<String>());
       _commentController = TextEditingController(text: interest.comment);
     } else {
       _commentController = TextEditingController();
     }
-    _tagsController = TextEditingController();
+    _tagsController = TextEditingController(text: _selectedTags.join(' '));
   }
 
   @override
@@ -49,6 +59,11 @@ class _EvaluateDialogState extends State<InfoEvaluateDialog> {
 
   Future<void> _submitEvaluation() async {
     if (_isSubmitting) return;
+    if (_selectedType == null) {
+      NotificationToast.show(AppLocalizations.of(context).collectionSelectType);
+      return;
+    }
+    final session = ref.read(currentFlowTokenProvider).value?.sessionId;
 
     setState(() {
       _isSubmitting = true;
@@ -56,35 +71,46 @@ class _EvaluateDialogState extends State<InfoEvaluateDialog> {
 
     try {
       final comment = _commentController.text.trim();
-      final rate = _selectedRate > 0 ? _selectedRate : null;
-      final tags = _selectedTags.isNotEmpty ? _selectedTags.toList() : null;
-
+      final tags = _tagsController.text
+          .split(RegExp(r'\s+'))
+          .where((tag) => tag.isNotEmpty)
+          .toSet()
+          .toList();
       final currentAnimeInfo = widget.subjectsInfo;
-      if (currentAnimeInfo.interest != null) {
-        if (rate != null) {
-          currentAnimeInfo.interest!.rate = rate;
-        }
-        if (comment.isNotEmpty) {
-          currentAnimeInfo.interest!.comment = comment;
-        }
-        if (tags != null) {
-          currentAnimeInfo.interest!.tags = tags;
-        }
-      }
-
-      await FlowApi.updateCollectionService(
+      final submittedType = _selectedType!;
+      final submittedRate = _selectedRate;
+      final result = await FlowApi.updateCollectionService(
         currentAnimeInfo.id,
-        rate: rate,
+        type: currentAnimeInfo.interest == null ? submittedType : null,
+        rate: submittedRate,
         tags: tags,
-        comment: comment.isNotEmpty ? comment : null,
+        comment: comment,
         subjectType: currentAnimeInfo.type,
       );
-
-      widget.onSaved(currentAnimeInfo);
-
+      if (!mounted ||
+          ref.read(currentFlowTokenProvider).value?.sessionId != session) {
+        return;
+      }
+      final previous = currentAnimeInfo.interest;
+      final updated = currentAnimeInfo.copyWith(
+          interest: InterestItem(
+        id: previous?.id,
+        type: submittedType,
+        rate: submittedRate,
+        tags: tags,
+        comment: comment,
+        epStatus: previous?.epStatus ?? 0,
+        volStatus: previous?.volStatus ?? 0,
+        private: previous?.private ?? false,
+        updatedAt: DateTime.now().millisecondsSinceEpoch ~/ 1000,
+        remoteSyncStatus: result.remoteSyncStatus.apiValue,
+      ));
+      ref.invalidate(userCollectionsProvider);
+      ref.invalidate(currentUserInfoProvider);
+      widget.onSaved(updated);
       if (mounted) {
+        showCollectionSaveNotice(context, result);
         context.pop();
-        NotificationToast.show('评价已保存', title: '评价成功', maxWidth: 500);
       }
     } catch (e) {
       if (mounted) {
@@ -150,6 +176,27 @@ class _EvaluateDialogState extends State<InfoEvaluateDialog> {
                     mainAxisSize: MainAxisSize.min,
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
+                      if (animeInfo.interest == null) ...[
+                        DropdownButtonFormField<int>(
+                          initialValue: _selectedType,
+                          decoration: InputDecoration(
+                            labelText: AppLocalizations.of(context)
+                                .collectionSelectType,
+                          ),
+                          items: CollectType.values
+                              .where((type) => type.isCollected)
+                              .map((type) => DropdownMenuItem(
+                                    value: type.value,
+                                    child: Text(type.label),
+                                  ))
+                              .toList(),
+                          onChanged: _isSubmitting
+                              ? null
+                              : (value) =>
+                                  setState(() => _selectedType = value),
+                        ),
+                        const SizedBox(height: 12),
+                      ],
                       // 评分选择
                       _buildStarRating(primaryColor),
                       const SizedBox(height: 12),

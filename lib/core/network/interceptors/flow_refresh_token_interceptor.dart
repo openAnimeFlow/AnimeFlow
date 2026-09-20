@@ -1,3 +1,4 @@
+import 'dart:convert';
 import 'package:anime_flow/core/constants/constants.dart';
 import 'package:anime_flow/core/network/api/flow_api.dart';
 import 'package:anime_flow/core/network/clients/flow_client.dart';
@@ -43,6 +44,7 @@ class FlowRefreshTokenInterceptor extends Interceptor {
   @override
   Future<void> onResponse(
       Response<dynamic> response, ResponseInterceptorHandler handler) async {
+    await _decodeStreamError(response);
     if (_shouldSkip(response.requestOptions) ||
         !_isFlowAccessFailure(response.data) ||
         !_hasAuthorization(response.requestOptions)) {
@@ -65,6 +67,7 @@ class FlowRefreshTokenInterceptor extends Interceptor {
   @override
   Future<void> onError(
       DioException err, ErrorInterceptorHandler handler) async {
+    if (err.response != null) await _decodeStreamError(err.response!);
     if (err.response?.statusCode != 401 ||
         !_allowsFlowRefresh(err.response?.data) ||
         _shouldSkip(err.requestOptions) ||
@@ -81,6 +84,21 @@ class FlowRefreshTokenInterceptor extends Interceptor {
       handler.resolve(await _retryRequest(err.requestOptions));
     } catch (error, stackTrace) {
       handler.next(_asDioError(error, stackTrace, err.requestOptions));
+    }
+  }
+
+  // Streaming handshakes can still return ordinary JSON authentication errors.
+  Future<void> _decodeStreamError(Response<dynamic> response) async {
+    final body = response.data;
+    if (body is! ResponseBody ||
+        response.headers.value('content-type')?.contains('application/json') !=
+            true) {
+      return;
+    }
+    try {
+      response.data = jsonDecode(await utf8.decoder.bind(body.stream).join());
+    } catch (_) {
+      response.data = null;
     }
   }
 

@@ -129,6 +129,32 @@ class FlowClient {
     );
   }
 
+  /// Authenticated SSE handshake. Events bypass the normal JSON envelope parser.
+  Future<ResponseBody> openEventStream(
+      String path, CancelToken cancelToken) async {
+    final response = await DioFactory.animeFlowDio.get<dynamic>(
+      path,
+      options: await _resolveOptions(
+        path: path,
+        signRequest: true,
+        requireFlowToken: true,
+        options: Options(
+          responseType: ResponseType.stream,
+          receiveTimeout: const Duration(seconds: 60),
+          headers: {'Accept': 'text/event-stream, application/json'},
+        ),
+      ),
+      cancelToken: cancelToken,
+    );
+    if (response.data is Map) _parseEnvelope(response.data);
+    if (response.data is! ResponseBody ||
+        response.headers.value('content-type')?.contains('text/event-stream') !=
+            true) {
+      throw const FormatException('Expected a collection status event stream');
+    }
+    return response.data as ResponseBody;
+  }
+
   /// GET 请求
   Future<AnimeFlowResponse> get(
     String path, {

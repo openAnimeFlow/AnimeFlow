@@ -204,6 +204,9 @@ class AnimeFlowApi {
       /// 用户信息
       flowUsers = '/api/v1/users',
 
+      /// 当前用户头像
+      flowUserAvatar = '/api/v1/users/avatar',
+
       /// 修改当前用户密码
       changePassword = '/api/v1/users/password',
 
@@ -227,6 +230,11 @@ class AnimeFlowApi {
 
       /// Bangumi 收藏同步
       bangumiCollectionSync = '/api/v1/users/collections/sync',
+      bangumiCollectionSyncEvents = '/api/v1/users/collections/sync/events',
+
+      /// Bangumi 收藏同步冲突列表
+      bangumiCollectionSyncConflicts =
+          '/api/v1/users/collections/sync/{taskId}/conflicts',
 
       /// Bangumi 第三方授权登录
       bangumiLogin = '/api/v1/account/oauth/bangumi/login',

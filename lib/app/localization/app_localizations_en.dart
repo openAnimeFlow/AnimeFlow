@@ -1165,7 +1165,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get bindBangumiHint =>
-      'Bind a Bangumi account to sync collections and more';
+      'Link Bangumi to sync collection data in both directions.';
 
   @override
   String get bindBangumiAccount => 'Bind Bangumi account';
@@ -1576,6 +1576,14 @@ class AppLocalizationsEn extends AppLocalizations {
   String get collectionSyncTitle => 'Collection Sync';
 
   @override
+  String get collectionSyncDescription =>
+      'Collections are synced both ways between AnimeFlow and Bangumi.';
+
+  @override
+  String get collectionSyncHint =>
+      'If your Bangumi and AnimeFlow collections differ, click Sync Bangumi Collection to sync them both ways.';
+
+  @override
   String get collectionSyncStarted => 'Collection sync started';
 
   @override
@@ -1599,7 +1607,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get manualSync => 'Manual sync';
 
   @override
-  String get syncBangumiCollection => 'Sync Bangumi collection';
+  String get syncBangumiCollection => 'Sync collections';
 
   @override
   String get syncStatusLoadFailed => 'Failed to load sync status';
@@ -1975,4 +1983,101 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get danmakuSwitching => 'Switching danmaku…';
+
+  @override
+  String get collectionSaved => 'Collection saved';
+
+  @override
+  String get collectionSavedLocally =>
+      'Collection saved, but not synced to Bangumi yet';
+
+  @override
+  String get collectionSavedPending =>
+      'Collection saved; waiting to sync to Bangumi. The server will retry automatically.';
+
+  @override
+  String get collectionSavedAuthRequired =>
+      'Collection saved, but not synced to Bangumi. Reauthorize Bangumi and try again.';
+
+  @override
+  String get collectionSavedConflict =>
+      'Collection saved, but it conflicts with Bangumi. Automatic sync is paused.';
+
+  @override
+  String get collectionSavedSynced => 'Collection saved and synced to Bangumi';
+
+  @override
+  String get collectionSelectType => 'Choose a collection category';
+
+  @override
+  String get syncConflictsTitle => 'Resolve collection conflicts';
+
+  @override
+  String syncPendingSummary(int conflicts, int failed) {
+    return 'Collection sync: $conflicts conflicts, $failed failed';
+  }
+
+  @override
+  String syncConflictSides(String local, String remote) {
+    return 'AnimeFlow: $local · Bangumi: $remote';
+  }
+
+  @override
+  String get syncUseLocal => 'Use AnimeFlow for loaded items';
+
+  @override
+  String get syncUseRemote => 'Use Bangumi for loaded items';
+
+  @override
+  String syncSubmitSelected(int count) {
+    return 'Submit $count selected';
+  }
+
+  @override
+  String get syncLoadMore => 'Load more conflicts';
+
+  @override
+  String get syncNoConflicts => 'No conflicts awaiting a choice';
+
+  @override
+  String get syncAccepted =>
+      'Choices received and queued for processing. You can close this window and check the result later.';
+
+  @override
+  String get syncResolveFailed =>
+      'Some choices may have been received. Refresh to check; changed items need a new choice.';
+
+  @override
+  String get syncRefreshRequired => 'Refresh to continue';
+
+  @override
+  String get syncQueued => 'Queued';
+
+  @override
+  String get syncWaitingConflict => 'Awaiting conflict resolution';
+
+  @override
+  String get syncPartialFailed => 'Partially failed';
+
+  @override
+  String get syncCancelled => 'Cancelled';
+
+  @override
+  String get syncUnknown => 'Unknown status; refresh';
+
+  @override
+  String get syncRetryMessage =>
+      'Sync temporarily failed. The server will retry and continue checking conflicts.';
+
+  @override
+  String get syncBindingChanged =>
+      'Your account or Bangumi binding changed. Close and reopen this window.';
+
+  @override
+  String get syncOpenConflicts => 'Resolve conflicts';
+
+  @override
+  String syncSubject(int id) {
+    return 'Subject $id';
+  }
 }

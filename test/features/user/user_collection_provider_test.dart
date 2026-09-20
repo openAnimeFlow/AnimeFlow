@@ -1,3 +1,4 @@
+import 'package:anime_flow/shared/models/flow/collection_update_result.dart';
 import 'dart:async';
 
 import 'package:anime_flow/features/user/presentation/providers/user_collection_provider.dart';
@@ -34,6 +35,50 @@ class _UserInfo extends CurrentUserInfo {
 }
 
 void main() {
+  test('pending remote upload still moves local collection and returns status',
+      () async {
+    final container = ProviderContainer(overrides: [
+      userCollectionsProvider.overrideWith(_Collections.new),
+      currentUserInfoProvider.overrideWith(_UserInfo.new),
+      collectionTypeUpdateProvider.overrideWithValue((_, __) async =>
+          const CollectionUpdateResult(
+              remoteSyncStatus: CollectionRemoteSyncStatus.pending)),
+    ]);
+    addTearDown(container.dispose);
+    await container.read(currentUserInfoProvider.future);
+    final result = await container
+        .read(userCollectionsProvider.notifier)
+        .updateCollectionType(_item(1), 3);
+    expect(result!.remoteSyncStatus, CollectionRemoteSyncStatus.pending);
+    final state = container.read(userCollectionsProvider);
+    expect(state.tabState(1).data!.data, isEmpty);
+    expect(state.tabState(3).data!.data.single.interest.remoteSyncStatus,
+        'PENDING');
+  });
+
+  test('saving the same category retries without changing collection counts',
+      () async {
+    var saves = 0;
+    final container = ProviderContainer(overrides: [
+      userCollectionsProvider.overrideWith(_Collections.new),
+      collectionTypeUpdateProvider.overrideWithValue((_, __) async {
+        saves++;
+        return const CollectionUpdateResult(
+            remoteSyncStatus: CollectionRemoteSyncStatus.synced);
+      }),
+      collectionPageLoaderProvider.overrideWithValue(
+        ({required type, required offset, keyword}) async =>
+            UserCollectionsItem(data: [_item(1)], total: 1),
+      ),
+    ]);
+    addTearDown(container.dispose);
+    await container
+        .read(userCollectionsProvider.notifier)
+        .updateCollectionType(_item(1), 1);
+    expect(saves, 1);
+    expect(container.read(userCollectionsProvider).tabState(1).data!.total, 1);
+  });
+
   for (final failOldRequest in [false, true]) {
     test('reset ignores old request (failure: $failOldRequest)', () async {
       final oldPage = Completer<UserCollectionsItem>();
@@ -84,7 +129,7 @@ void main() {
   });
 
   test('reset ignores a pending collection update', () async {
-    final update = Completer<void>();
+    final update = Completer<CollectionUpdateResult>();
     final container = ProviderContainer(overrides: [
       userCollectionsProvider.overrideWith(_Collections.new),
       collectionTypeUpdateProvider.overrideWithValue((_, __) => update.future),
@@ -93,7 +138,8 @@ void main() {
     final notifier = container.read(userCollectionsProvider.notifier);
     final request = notifier.updateCollectionType(_item(1), 3);
     notifier.reset();
-    update.complete();
+    update.complete(const CollectionUpdateResult(
+        remoteSyncStatus: CollectionRemoteSyncStatus.localOnly));
     await request;
     expect(container.read(userCollectionsProvider).tabs, isEmpty);
   });
@@ -107,6 +153,8 @@ void main() {
       collectionTypeUpdateProvider
           .overrideWithValue((collection, newType) async {
         requests.add((collection.interest.type, newType));
+        return const CollectionUpdateResult(
+            remoteSyncStatus: CollectionRemoteSyncStatus.localOnly);
       }),
     ]);
     addTearDown(container.dispose);

@@ -371,7 +371,7 @@
   "unbound": "Not bound",
   "loading": "Loading...",
   "bindStatusLoadFailed": "Failed to get binding status",
-  "bindBangumiHint": "Bind a Bangumi account to sync collections and more",
+  "bindBangumiHint": "Link Bangumi to sync collection data in both directions.",
   "bindBangumiAccount": "Bind Bangumi account",
   "confirmUnbind": "Confirm unbinding",
   "unbindConfirmation": "Are you sure you want to unbind your Bangumi account? Some features may be affected.",
@@ -445,6 +445,8 @@
   "pluginCopied": "Plugin \"{name}\" copied to clipboard",
   "pluginCopyFailed": "Failed to copy plugin \"{name}\": {error}",
   "collectionSyncTitle": "Collection Sync",
+  "collectionSyncDescription": "Collections are synced both ways between AnimeFlow and Bangumi.",
+  "collectionSyncHint": "If your Bangumi and AnimeFlow collections differ, click Sync Bangumi Collection to sync them both ways.",
   "collectionSyncStarted": "Collection sync started",
   "syncStartFailed": "Failed to start sync",
   "refreshStatus": "Refresh status",
@@ -453,7 +455,7 @@
   "@syncedItems": {"placeholders": {"count": {}}},
   "syncInProgress": "Syncing…",
   "manualSync": "Manual sync",
-  "syncBangumiCollection": "Sync Bangumi collection",
+  "syncBangumiCollection": "Sync collections",
   "syncStatusLoadFailed": "Failed to load sync status",
   "syncStatusIdle": "Not synced",
   "syncStatusRunning": "Syncing",
@@ -608,5 +610,67 @@
   ,"deleteFailed": "Deletion failed"
   ,"sourceDeleted": "Data source \"{name}\" was deleted"
   ,"sourceDeleteFailed": "Error deleting data source \"{name}\": {error}"
-  ,"pluginVersionDate": "Version: {version} - {date}"
+  ,"pluginVersionDate": "Version: {version} - {date}",
+  "collectionSaved": "Collection saved",
+  "collectionSavedLocally": "Collection saved, but not synced to Bangumi yet",
+  "collectionSavedPending": "Collection saved; waiting to sync to Bangumi. The server will retry automatically.",
+  "collectionSavedAuthRequired": "Collection saved, but not synced to Bangumi. Reauthorize Bangumi and try again.",
+  "collectionSavedConflict": "Collection saved, but it conflicts with Bangumi. Automatic sync is paused.",
+  "collectionSavedSynced": "Collection saved and synced to Bangumi",
+  "collectionSelectType": "Choose a collection category",
+  "syncConflictsTitle": "Resolve collection conflicts",
+  "syncPendingSummary": "Collection sync: {conflicts} conflicts, {failed} failed",
+  "@syncPendingSummary": {
+    "placeholders": {
+      "conflicts": {
+        "type": "int"
+      },
+      "failed": {
+        "type": "int"
+      }
+    }
+  },
+  "syncConflictSides": "AnimeFlow: {local} · Bangumi: {remote}",
+  "@syncConflictSides": {
+    "placeholders": {
+      "local": {
+        "type": "String"
+      },
+      "remote": {
+        "type": "String"
+      }
+    }
+  },
+  "syncUseLocal": "Use AnimeFlow for loaded items",
+  "syncUseRemote": "Use Bangumi for loaded items",
+  "syncSubmitSelected": "Submit {count} selected",
+  "@syncSubmitSelected": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "syncLoadMore": "Load more conflicts",
+  "syncNoConflicts": "No conflicts awaiting a choice",
+  "syncAccepted": "Choices received and queued for processing. You can close this window and check the result later.",
+  "syncResolveFailed": "Some choices may have been received. Refresh to check; changed items need a new choice.",
+  "syncRefreshRequired": "Refresh to continue",
+  "syncQueued": "Queued",
+  "syncWaitingConflict": "Awaiting conflict resolution",
+  "syncPartialFailed": "Partially failed",
+  "syncCancelled": "Cancelled",
+  "syncUnknown": "Unknown status; refresh",
+  "syncRetryMessage": "Sync temporarily failed. The server will retry and continue checking conflicts.",
+  "syncBindingChanged": "Your account or Bangumi binding changed. Close and reopen this window.",
+  "syncOpenConflicts": "Resolve conflicts",
+  "syncSubject": "Subject {id}",
+  "@syncSubject": {
+    "placeholders": {
+      "id": {
+        "type": "int"
+      }
+    }
+  }
+
 }

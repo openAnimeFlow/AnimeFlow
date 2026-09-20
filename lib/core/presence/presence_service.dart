@@ -26,7 +26,7 @@ class PresenceService with WidgetsBindingObserver {
   int? _positionSeconds;
   String _status = 'online';
   bool _started = false;
-  bool _heartbeatInFlight = false;
+  Future<void> _presenceRequestTail = Future<void>.value();
 
   Future<void> start({required String appVersion}) async {
     if (_started) return;
@@ -72,7 +72,8 @@ class PresenceService with WidgetsBindingObserver {
   }
 
   void clearPlaybackContext() {
-    final changed = _subjectId != null || _episodeId != null || _status != 'online';
+    final changed =
+        _subjectId != null || _episodeId != null || _status != 'online';
     _subjectId = null;
     _episodeId = null;
     _positionSeconds = null;
@@ -102,34 +103,47 @@ class PresenceService with WidgetsBindingObserver {
   }
 
   Future<void> _sendHeartbeat() async {
-    if (_heartbeatInFlight || _visitorId == null || _presenceId == null) return;
-    _heartbeatInFlight = true;
-    try {
-      await FlowApi.presenceHeartbeat(
-        visitorId: _visitorId!,
-        presenceId: _presenceId!,
-        clientType: Platform.operatingSystem.toUpperCase(),
-        appVersion: _appVersion,
-        subjectId: _subjectId,
-        episodeId: _episodeId,
-        positionSeconds: _positionSeconds,
-        status: _status,
-      );
-    } catch (error, stackTrace) {
-      LiggLogger().w('在线状态心跳失败', error: error, stackTrace: stackTrace);
-    } finally {
-      _heartbeatInFlight = false;
-    }
+    if (!_started || _visitorId == null || _presenceId == null) return;
+    await _enqueuePresenceRequest(() async {
+      // stop() may have been called while an earlier request was in flight.
+      if (!_started || _visitorId == null || _presenceId == null) return;
+      try {
+        await FlowApi.presenceHeartbeat(
+          visitorId: _visitorId!,
+          presenceId: _presenceId!,
+          clientType: Platform.operatingSystem.toUpperCase(),
+          appVersion: _appVersion,
+          subjectId: _subjectId,
+          episodeId: _episodeId,
+          positionSeconds: _positionSeconds,
+          status: _status,
+        );
+      } catch (error, stackTrace) {
+        LiggLogger().w('在线状态心跳失败', error: error, stackTrace: stackTrace);
+      }
+    });
   }
 
   Future<void> _sendOffline() async {
     final presenceId = _presenceId;
     if (presenceId == null) return;
-    try {
-      await FlowApi.presenceOffline(presenceId: presenceId);
-    } catch (error, stackTrace) {
-      LiggLogger().w('结束在线状态失败', error: error, stackTrace: stackTrace);
-    }
+    await _enqueuePresenceRequest(() async {
+      try {
+        await FlowApi.presenceOffline(presenceId: presenceId);
+      } catch (error, stackTrace) {
+        LiggLogger().w('结束在线状态失败', error: error, stackTrace: stackTrace);
+      }
+    });
+  }
+
+  /// 心跳和下线共用一个队列，保证下线请求不会与旧心跳并发发送。
+  Future<void> _enqueuePresenceRequest(
+    Future<void> Function() request,
+  ) {
+    final pending = _presenceRequestTail.then((_) => request());
+    // 单次请求失败不能阻塞后续的心跳或下线请求。
+    _presenceRequestTail = pending.catchError((_) {});
+    return pending;
   }
 
   Future<String> _getOrCreateId(String key, String prefix) async {

@@ -1,8 +1,11 @@
 class AssetsPathConstants {
-
   AssetsPathConstants._();
+
   /// 用于Logo
   static const String logo = 'assets/image/logo.webp',
+
+      /// 背景
+      ambientWaveBackground = 'assets/image/ambient_wave_background.svg',
 
       /// 注册页装饰
       purpleCatGirlChibi = 'assets/image/purple_cat_girl_chibi.webp',
@@ -18,10 +21,8 @@ class AssetsPathConstants {
 
       /// 块茎图标
       blockGrove = 'assets/icons/FormkitFastforward.svg',
-
       blockGroveFastForward = 'assets/icons/MajesticonsFastForward.svg',
-
-      readmebBanner = 'assets/image/readme-banner.svg' ,
+      readmebBanner = 'assets/image/readme-banner.svg',
 
       /// 侧面板关闭图标
       rightPanelClose = 'assets/icons/right_panel_close.svg';

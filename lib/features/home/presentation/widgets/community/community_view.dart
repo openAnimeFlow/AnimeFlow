@@ -10,6 +10,7 @@ import 'package:anime_flow/shared/models/flow/watching_subject.dart';
 import 'package:anime_flow/shared/widgets/animation_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 
 class CommunityPage extends ConsumerStatefulWidget {
   const CommunityPage({super.key});
@@ -33,34 +34,70 @@ class _CommunityPageState extends ConsumerState<CommunityPage> {
     final l10n = AppLocalizations.of(context);
     final colorScheme = Theme.of(context).colorScheme;
 
-    return RefreshIndicator(
-      color: colorScheme.primary,
-      onRefresh: _refresh,
-      child: watching.when(
-        loading: () => const _CommunityLoading(),
-        error: (error, _) => _CommunityMessage(
-          icon: Icons.cloud_off_outlined,
-          message: error.toString(),
-          retryLabel: l10n.retry,
-          onRetry: _refresh,
-        ),
-        data: (subjects) => _CommunityContent(
-          subjects: subjects,
-          onlineCount: onlineCount,
-          retryLabel: l10n.retry,
-          sectionTitle: l10n.watchingAnimeTitle,
-          sectionSummary: (count, viewers) =>
-              l10n.watchingAnimeSummary(count, viewers),
-          watchingPeopleLabel: l10n.watchingPeople,
-          emptyMessage: l10n.noUsersWatchingAnime,
-          onlineSummary: (count) => l10n.communityOnlineSummary(
-            count.onlineUsers,
-            count.anonymousUsers,
-            count.loggedInUsers,
+    return Stack(
+      children: [
+        Positioned(
+          top: 0,
+          left: 0,
+          right: 0,
+          child: IgnorePointer(
+            child: SizedBox(
+              height: 360,
+              child: ShaderMask(
+                blendMode: BlendMode.dstIn,
+                shaderCallback: (bounds) => const LinearGradient(
+                  begin: Alignment.topCenter,
+                  end: Alignment.bottomCenter,
+                  colors: [
+                    Colors.white,
+                    Colors.white,
+                    Colors.transparent,
+                  ],
+                  stops: [0, 0.62, 1],
+                ).createShader(bounds),
+                child: SvgPicture.asset(
+                  AssetsPathConstants.ambientWaveBackground,
+                  alignment: Alignment.topCenter,
+                  fit: BoxFit.cover,
+                  colorFilter: ColorFilter.mode(
+                    colorScheme.primary.withValues(alpha: 0.42),
+                    BlendMode.srcIn,
+                  ),
+                ),
+              ),
+            ),
           ),
-          onRetry: _refresh,
         ),
-      ),
+        RefreshIndicator(
+          color: colorScheme.primary,
+          onRefresh: _refresh,
+          child: watching.when(
+            loading: () => const _CommunityLoading(),
+            error: (error, _) => _CommunityMessage(
+              icon: Icons.cloud_off_outlined,
+              message: error.toString(),
+              retryLabel: l10n.retry,
+              onRetry: _refresh,
+            ),
+            data: (subjects) => _CommunityContent(
+              subjects: subjects,
+              onlineCount: onlineCount,
+              retryLabel: l10n.retry,
+              sectionTitle: l10n.watchingAnimeTitle,
+              sectionSummary: (count, viewers) =>
+                  l10n.watchingAnimeSummary(count, viewers),
+              watchingPeopleLabel: l10n.watchingPeople,
+              emptyMessage: l10n.noUsersWatchingAnime,
+              onlineSummary: (count) => l10n.communityOnlineSummary(
+                count.onlineUsers,
+                count.anonymousUsers,
+                count.loggedInUsers,
+              ),
+              onRetry: _refresh,
+            ),
+          ),
+        ),
+      ],
     );
   }
 }

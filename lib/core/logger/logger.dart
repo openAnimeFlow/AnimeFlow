@@ -118,7 +118,7 @@ class LiggLogOutput extends LogOutput {
   @override
   void output(OutputEvent event) {
     for (var line in event.lines) {
-      stdout.writeln(line);
+      debugPrint(line);
     }
 
     if (event.level.index < Level.warning.index) {

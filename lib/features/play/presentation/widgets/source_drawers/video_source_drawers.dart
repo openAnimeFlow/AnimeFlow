@@ -179,13 +179,13 @@ class _VideoSourceDrawersState extends ConsumerState<VideoSourceDrawers> {
   @override
   Widget build(BuildContext context) {
     if (widget.isBottomSheet) {
+      final paddingBottom = MediaQuery.paddingOf(context).bottom;
       return Material(
         color: Theme.of(context).cardColor,
         borderRadius: const BorderRadius.vertical(top: Radius.circular(16)),
         clipBehavior: Clip.antiAlias,
         child: Padding(
-          padding: EdgeInsets.fromLTRB(
-              16, 20, 16, 16 + MediaQuery.of(context).padding.bottom),
+          padding: EdgeInsets.fromLTRB(16, 20, 16, paddingBottom),
           child: _buildDrawerContent(includeDragHandle: true),
         ),
       );

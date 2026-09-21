@@ -38,7 +38,6 @@ class DioFactory {
       ),
       baseUrl: AnimeFlowApi.animeFlowApi,
       defaultHeaders: {
-        'referer': '',
         'user-agent': _deviceUserAgent ?? Utils.getRandomUA(),
       },
     );

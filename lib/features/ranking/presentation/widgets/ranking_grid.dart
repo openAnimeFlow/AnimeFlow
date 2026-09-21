@@ -4,7 +4,6 @@ import 'package:anime_flow/app/router/model/info_route_extra.dart';
 import 'package:anime_flow/features/ranking/presentation/providers/ranking_provider.dart';
 import 'package:anime_flow/shared/models/bangumi/subject_item.dart';
 import 'package:anime_flow/shared/widgets/animation_network_image.dart';
-import 'package:anime_flow/shared/widgets/subject_card_skeleton.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -45,15 +44,9 @@ class RankingGrid extends ConsumerWidget {
             title: l10n.sortTrends, subtitle: l10n.rankingTitle),
         _RankingList(items: listItems, width: contentWidth),
         if (showProgress)
-          Padding(
-            padding: const EdgeInsets.symmetric(vertical: 18),
-            child: rankingState.isReloading
-                ? const Center(child: CircularProgressIndicator())
-                : const SizedBox(
-                    width: double.infinity,
-                    height: 94,
-                    child: SubjectCardSkeleton(),
-                  ),
+          const Padding(
+            padding: EdgeInsets.symmetric(vertical: 18),
+            child: Center(child: CircularProgressIndicator()),
           )
         else
           Padding(

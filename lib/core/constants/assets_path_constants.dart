@@ -2,7 +2,7 @@ class AssetsPathConstants {
 
   AssetsPathConstants._();
   /// 用于Logo
-  static const String logo = 'assets/image/logo/logo.webp',
+  static const String logo = 'assets/image/logo.webp',
 
       /// 注册页装饰
       purpleCatGirlChibi = 'assets/image/purple_cat_girl_chibi.webp',

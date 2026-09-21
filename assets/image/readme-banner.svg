@@ -1,0 +1,42 @@
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="960" height="320" viewBox="0 0 960 320" role="img" aria-labelledby="title desc">
+  <title id="title">AnimeFlow Logo</title>
+  <desc id="desc">蓝色猫耳 Logo，搭配天蓝渐变、柔和流线与星光背景。</desc>
+  <defs>
+    <linearGradient id="background" x2="1" y2="1">
+      <stop stop-color="#edf6ff"/><stop offset=".5" stop-color="#dcecff"/><stop offset="1" stop-color="#eef8ff"/>
+    </linearGradient>
+    <radialGradient id="halo">
+      <stop stop-color="#fff" stop-opacity=".95"/><stop offset="1" stop-color="#fff" stop-opacity="0"/>
+    </radialGradient>
+    <linearGradient id="wave" x2="1" y2="0">
+      <stop stop-color="#67a8ef" stop-opacity=".08"/><stop offset=".5" stop-color="#78b6f7" stop-opacity=".3"/><stop offset="1" stop-color="#a9d7ff" stop-opacity=".12"/>
+    </linearGradient>
+    <clipPath id="panel"><rect width="960" height="320" rx="28"/></clipPath>
+    <path id="sparkle" d="M0-10 Q2-2 10 0 Q2 2 0 10 Q-2 2-10 0 Q-2-2 0-10Z"/>
+  </defs>
+  <g clip-path="url(#panel)">
+    <!-- Background layer -->
+    <rect width="960" height="320" fill="url(#background)"/>
+    <ellipse cx="480" cy="144" rx="330" ry="220" fill="url(#halo)"/>
+    <circle cx="48" cy="32" r="138" fill="#b9d8ff" opacity=".28"/>
+    <circle cx="935" cy="300" r="166" fill="#b9d8ff" opacity=".25"/>
+    <path d="M-40 218C120 78 218 318 412 224S718 88 1000 176V340H-40Z" fill="url(#wave)"/>
+    <path d="M-40 264C156 148 255 328 479 264S754 165 1000 240" fill="none" stroke="#fff" stroke-width="2" opacity=".8"/>
+    <path d="M-40 107C175 220 220 15 449 80S761 205 1000 61" fill="none" stroke="#9cc6f6" stroke-width="1.5" opacity=".42"/>
+    <ellipse cx="480" cy="160" rx="153" ry="139" fill="none" stroke="#fff" stroke-width="1.5" opacity=".75"/>
+    <g fill="#689de1">
+      <use xlink:href="#sparkle" transform="translate(223 91)"/>
+      <use xlink:href="#sparkle" transform="translate(730 227) scale(1.2)"/>
+      <use xlink:href="#sparkle" transform="translate(785 83) scale(.6)"/>
+    </g>
+    <g fill="#fff">
+      <use xlink:href="#sparkle" transform="translate(275 238) scale(.7)"/>
+      <use xlink:href="#sparkle" transform="translate(673 66) scale(.8)"/>
+      <circle cx="175" cy="177" r="4"/><circle cx="813" cy="166" r="3"/>
+    </g>
+    <g fill="#7dabdf" opacity=".4">
+      <circle cx="307" cy="63" r="3"/><circle cx="659" cy="253" r="3"/>
+      <circle cx="128" cy="232" r="2"/><circle cx="849" cy="112" r="2"/>
+    </g>
+  </g>
+</svg>

@@ -1,6 +1,7 @@
 import 'package:anime_flow/app/localization/app_localizations.dart';
 import 'package:anime_flow/core/constants/constants.dart';
 import 'package:anime_flow/features/play/presentation/providers/subject_episodes_provider.dart';
+import 'package:anime_flow/shared/models/player/bangumi/episodes_item.dart';
 import 'package:anime_flow/shared/models/bangumi/subjects_info_item.dart';
 import 'package:anime_flow/core/network/clients/flow_client.dart';
 import 'package:anime_flow/features/user/presentation/providers/user_state_provider.dart';
@@ -14,7 +15,7 @@ class EpisodesDrawerView extends ConsumerStatefulWidget {
   final String subjectName;
   final String subjectImage;
   final ScrollController scrollController;
-  final void Function(int episodeId)? onEpisodeLongPress;
+  final void Function(EpisodeData episode)? onEpisodeLongPress;
   final ValueChanged<int> onPlayEpisode;
 
   const EpisodesDrawerView({
@@ -32,7 +33,7 @@ class EpisodesDrawerView extends ConsumerStatefulWidget {
     required SubjectsInfoItem subjectItem,
     required String subjectName,
     required String subjectImage,
-    void Function(int episodeId)? onEpisodeLongPress,
+    void Function(EpisodeData episode)? onEpisodeLongPress,
     required ValueChanged<int> onPlayEpisode,
   }) {
     final providerContainer = ProviderScope.containerOf(context);
@@ -277,9 +278,7 @@ class _EpisodesDrawerViewState extends ConsumerState<EpisodesDrawerView> {
                     tileColor: episode.watched == true
                         ? Theme.of(context).colorScheme.surfaceContainerHighest
                         : null,
-                    onLongPress: () => widget.onEpisodeLongPress?.call(
-                      episode.id,
-                    ),
+                    onLongPress: () => widget.onEpisodeLongPress?.call(episode),
                     onTap: () {
                       Navigator.of(context).pop();
                       widget.onPlayEpisode(episode.id);

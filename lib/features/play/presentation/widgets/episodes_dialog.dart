@@ -13,7 +13,7 @@ class EpisodesDialog extends ConsumerStatefulWidget {
   static const double _loadMoreTriggerDistance = 80;
   static const double _estimatedEpisodeItemExtent = 86;
 
-  final void Function(int episodeId)? onEpisodeLongPress;
+  final void Function(EpisodeData episode)? onEpisodeLongPress;
   final Widget isSelectedIcon;
 
   const EpisodesDialog({
@@ -227,7 +227,7 @@ class _EpisodesDialogState extends ConsumerState<EpisodesDialog> {
                 context.pop();
               },
               // 长按
-              onLongPress: () => widget.onEpisodeLongPress?.call(episode.id),
+              onLongPress: () => widget.onEpisodeLongPress?.call(episode),
               child: DecoratedBox(
                 decoration: BoxDecoration(
                     borderRadius: BorderRadius.circular(10),

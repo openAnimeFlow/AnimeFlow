@@ -1,5 +1,6 @@
 import 'package:anime_flow/core/constants/assets_path_constants.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:anime_flow/app/localization/app_localizations.dart';
 
@@ -56,8 +57,10 @@ class ThanksPage extends StatelessWidget {
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
     return Scaffold(
+      extendBodyBehindAppBar: true,
       appBar: AppBar(
         title: Text(l10n.thanks),
+        backgroundColor: Colors.transparent,
       ),
       body: LayoutBuilder(
         builder: (context, constraints) {
@@ -65,53 +68,91 @@ class ThanksPage extends StatelessWidget {
               ? (constraints.maxWidth > 900 ? 3 : 2)
               : 1;
           final viewPadding = MediaQuery.of(context).viewPadding.left;
+          final topPadding = MediaQuery.paddingOf(context).top + kToolbarHeight;
           return CustomScrollView(
             slivers: [
               // 顶部 logo 和标题
               SliverToBoxAdapter(
-                child: Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 10),
-                  child: Column(
-                    children: [
-                      Image.asset(
-                        AssetsPathConstants.logo,
-                        height: 200,
-                        width: 200,
-                      ),
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          Text(
-                            l10n.specialThanks,
-                            style: Theme.of(context)
-                                .textTheme
-                                .headlineSmall
-                                ?.copyWith(
-                                  fontWeight: FontWeight.bold,
-                                  letterSpacing: 0.5,
-                                ),
+                child: Stack(
+                  children: [
+                    Positioned.fill(
+                      child: ShaderMask(
+                        blendMode: BlendMode.dstIn,
+                        shaderCallback: (bounds) => const LinearGradient(
+                          begin: Alignment.topCenter,
+                          end: Alignment.bottomCenter,
+                          colors: [
+                            Colors.white,
+                            Colors.white,
+                            Colors.transparent,
+                          ],
+                          stops: [0, 0.68, 1],
+                        ).createShader(bounds),
+                        child: SvgPicture.asset(
+                          AssetsPathConstants.ambientWaveBackground,
+                          fit: BoxFit.cover,
+                          colorFilter: ColorFilter.mode(
+                            Theme.of(context)
+                                .colorScheme
+                                .primary
+                                .withValues(alpha: 0.42),
+                            BlendMode.srcIn,
                           ),
-                          const Icon(Icons.code_rounded)
-                        ],
+                        ),
                       ),
-                      const SizedBox(height: 12),
-                      Padding(
-                        padding: const EdgeInsets.symmetric(horizontal: 24),
-                        child: Text(
-                          l10n.thanksDescription,
-                          style:
-                              Theme.of(context).textTheme.bodyMedium?.copyWith(
+                    ),
+                    Padding(
+                      padding: EdgeInsets.fromLTRB(
+                        10,
+                        topPadding,
+                        10,
+                        16,
+                      ),
+                      child: Column(
+                        children: [
+                          Image.asset(
+                            AssetsPathConstants.logo,
+                            height: 200,
+                            width: 200,
+                          ),
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Text(
+                                l10n.specialThanks,
+                                style: Theme.of(context)
+                                    .textTheme
+                                    .headlineSmall
+                                    ?.copyWith(
+                                      fontWeight: FontWeight.bold,
+                                      letterSpacing: 0.5,
+                                    ),
+                              ),
+                              const Icon(Icons.code_rounded)
+                            ],
+                          ),
+                          const SizedBox(height: 12),
+                          Padding(
+                            padding: const EdgeInsets.symmetric(horizontal: 24),
+                            child: Text(
+                              l10n.thanksDescription,
+                              style: Theme.of(context)
+                                  .textTheme
+                                  .bodyMedium
+                                  ?.copyWith(
                                     color: Theme.of(context)
                                         .colorScheme
                                         .onSurfaceVariant,
                                     height: 1.5,
                                   ),
-                          textAlign: TextAlign.center,
-                        ),
+                              textAlign: TextAlign.center,
+                            ),
+                          ),
+                          const SizedBox(height: 16),
+                        ],
                       ),
-                      const SizedBox(height: 16),
-                    ],
-                  ),
+                    ),
+                  ],
                 ),
               ),
 

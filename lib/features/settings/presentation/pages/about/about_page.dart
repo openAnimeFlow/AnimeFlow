@@ -32,6 +32,7 @@ class _AboutSettingsPageState extends ConsumerState<AboutSettingsPage> {
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
     return Scaffold(
+      extendBodyBehindAppBar: true,
       appBar: PreferredSize(
         preferredSize: const Size.fromHeight(kToolbarHeight),
         child: Consumer(
@@ -40,6 +41,7 @@ class _AboutSettingsPageState extends ConsumerState<AboutSettingsPage> {
             return AppBar(
               title: Text(l10n.about),
               automaticallyImplyLeading: !isWideScreen,
+              backgroundColor: Colors.transparent,
             );
           },
         ),
@@ -51,66 +53,71 @@ class _AboutSettingsPageState extends ConsumerState<AboutSettingsPage> {
             builder: (context, ref, _) {
               final appInfo = ref.watch(appInfoProvider);
               final colorScheme = Theme.of(context).colorScheme;
-              return ClipRect(
-                child: Stack(
-                  children: [
-                    Positioned.fill(
-                      child: ShaderMask(
-                        blendMode: BlendMode.dstIn,
-                        shaderCallback: (bounds) => const LinearGradient(
-                          begin: Alignment.topCenter,
-                          end: Alignment.bottomCenter,
-                          colors: [
-                            Colors.white,
-                            Colors.white,
-                            Colors.transparent,
-                          ],
-                          stops: [0, 0.68, 1],
-                        ).createShader(bounds),
-                        child: SvgPicture.asset(
-                          AssetsPathConstants.ambientWaveBackground,
-                          fit: BoxFit.cover,
-                          colorFilter: ColorFilter.mode(
-                            colorScheme.primary.withValues(alpha: 0.42),
-                            BlendMode.srcIn,
+              final topPadding =
+                  MediaQuery.paddingOf(context).top + kToolbarHeight;
+              return Stack(
+                children: [
+                  Positioned.fill(
+                    child: ShaderMask(
+                      blendMode: BlendMode.dstIn,
+                      shaderCallback: (bounds) => const LinearGradient(
+                        begin: Alignment.topCenter,
+                        end: Alignment.bottomCenter,
+                        colors: [
+                          Colors.white,
+                          Colors.white,
+                          Colors.transparent,
+                        ],
+                        stops: [0, 0.68, 1],
+                      ).createShader(bounds),
+                      child: SvgPicture.asset(
+                        AssetsPathConstants.ambientWaveBackground,
+                        fit: BoxFit.cover,
+                        colorFilter: ColorFilter.mode(
+                          colorScheme.primary.withValues(alpha: 0.42),
+                          BlendMode.srcIn,
+                        ),
+                      ),
+                    ),
+                  ),
+                  Padding(
+                    padding: EdgeInsets.fromLTRB(
+                      16,
+                      topPadding + 28,
+                      16,
+                      44,
+                    ),
+                    child: Center(
+                      child: Column(
+                        children: [
+                          CircleAvatar(
+                            radius: 80,
+                            backgroundColor: Colors.transparent,
+                            child: Image.asset(
+                              AssetsPathConstants.logo,
+                            ),
                           ),
-                        ),
+                          Text(
+                            appInfo.appName,
+                            style: const TextStyle(
+                              fontSize: 24,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                          const SizedBox(height: 8),
+                          Text(
+                            l10n.version(appInfo.version),
+                            style: TextStyle(
+                              color: Theme.of(context)
+                                  .colorScheme
+                                  .onSurfaceVariant,
+                            ),
+                          ),
+                        ],
                       ),
                     ),
-                    Padding(
-                      padding: const EdgeInsets.fromLTRB(16, 28, 16, 44),
-                      child: Center(
-                        child: Column(
-                          children: [
-                            CircleAvatar(
-                              radius: 80,
-                              backgroundColor: Colors.transparent,
-                              child: Image.asset(
-                                AssetsPathConstants.logo,
-                              ),
-                            ),
-                            Text(
-                              appInfo.appName,
-                              style: const TextStyle(
-                                fontSize: 24,
-                                fontWeight: FontWeight.bold,
-                              ),
-                            ),
-                            const SizedBox(height: 8),
-                            Text(
-                              l10n.version(appInfo.version),
-                              style: TextStyle(
-                                color: Theme.of(context)
-                                    .colorScheme
-                                    .onSurfaceVariant,
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
+                  ),
+                ],
               );
             },
           ),

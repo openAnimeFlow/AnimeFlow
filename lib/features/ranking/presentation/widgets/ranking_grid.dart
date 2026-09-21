@@ -88,7 +88,7 @@ class _FeaturedRankings extends StatelessWidget {
                 child: ListView.separated(
                   scrollDirection: Axis.horizontal,
                   itemCount: cards.length,
-                  separatorBuilder: (_, __) => const SizedBox(width: 12),
+                  separatorBuilder: (_, __) => const SizedBox(width: 5),
                   itemBuilder: (_, index) => cards[index],
                 ),
               )
@@ -396,31 +396,16 @@ class _RankingListTileState extends State<_RankingListTile> {
                 ),
               ),
               child: SizedBox(
-                height: 94,
+                height: 160,
                 child: Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 9),
+                  padding: const EdgeInsets.only(right: 10),
                   child: Row(
                     crossAxisAlignment: CrossAxisAlignment.stretch,
                     children: [
                       SizedBox(
-                        width: 34,
-                        child: Center(
-                            child: Text(
-                          '$rank',
-                          textAlign: TextAlign.center,
-                          style: theme.textTheme.titleMedium?.copyWith(
-                            color: rank <= 5
-                                ? scheme.primary
-                                : scheme.onSurfaceVariant,
-                            fontWeight: FontWeight.w900,
-                          ),
-                        )),
-                      ),
-                      const SizedBox(width: 8),
-                      SizedBox(
-                        width: 58,
+                        width: 100,
                         child: AnimationNetworkImage(
-                          borderRadius: BorderRadius.zero,
+                          borderRadius: BorderRadius.circular(15),
                           url: subject.images.small,
                           fit: BoxFit.cover,
                         ),
@@ -496,6 +481,20 @@ class _RankingListTileState extends State<_RankingListTile> {
                                 ],
                               ),
                             ],
+                          ),
+                        ),
+                      ),
+                      const SizedBox(width: 8),
+                      Center(
+                        child: Text(
+                          '$rank',
+                          textAlign: TextAlign.center,
+                          style: theme.textTheme.titleMedium?.copyWith(
+                            color: rank <= 5
+                                ? scheme.primary
+                                : scheme.onSurfaceVariant,
+                            fontWeight: FontWeight.w900,
+                            fontSize: 25
                           ),
                         ),
                       ),

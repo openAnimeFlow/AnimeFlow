@@ -4,8 +4,10 @@ import 'package:anime_flow/app/router/model/info_route_extra.dart';
 import 'package:anime_flow/features/ranking/presentation/providers/ranking_provider.dart';
 import 'package:anime_flow/shared/models/bangumi/subject_item.dart';
 import 'package:anime_flow/shared/widgets/animation_network_image.dart';
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:palette_generator_plus/palette_generator_plus.dart';
 
 class RankingGrid extends ConsumerWidget {
   const RankingGrid({super.key, required this.contentWidth});
@@ -311,11 +313,44 @@ class _RankingSectionHeader extends StatelessWidget {
   }
 }
 
-class _RankingListTile extends StatelessWidget {
+class _RankingListTile extends StatefulWidget {
   const _RankingListTile({required this.subject, required this.rank});
 
   final Subject subject;
   final int rank;
+
+  @override
+  State<_RankingListTile> createState() => _RankingListTileState();
+}
+
+class _RankingListTileState extends State<_RankingListTile> {
+  late Future<PaletteGenerator> _paletteFuture;
+
+  @override
+  void initState() {
+    super.initState();
+    _paletteFuture = _loadPalette(widget.subject.images.small);
+  }
+
+  @override
+  void didUpdateWidget(covariant _RankingListTile oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    final oldUrl = oldWidget.subject.images.small;
+    final newUrl = widget.subject.images.small;
+    if (oldUrl != newUrl) {
+      _paletteFuture = _loadPalette(newUrl);
+    }
+  }
+
+  Future<PaletteGenerator> _loadPalette(String imageUrl) {
+    return PaletteGenerator.fromImageProvider(
+      CachedNetworkImageProvider(imageUrl),
+      maximumColorCount: 16,
+    );
+  }
+
+  Subject get subject => widget.subject;
+  int get rank => widget.rank;
 
   @override
   Widget build(BuildContext context) {
@@ -324,128 +359,148 @@ class _RankingListTile extends StatelessWidget {
     final title = subject.nameCN.isEmpty ? subject.name : subject.nameCN;
     final tags = subject.metaTags.take(3).toList();
 
-    return Card(
-      margin: EdgeInsets.zero,
-      elevation: 0,
-      color: scheme.surfaceContainerHighest.withValues(alpha: .48),
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(16),
-        side: BorderSide(color: scheme.outlineVariant.withValues(alpha: .5)),
-      ),
-      child: InkWell(
-        borderRadius: BorderRadius.circular(16),
-        onTap: () => AnimeInfoRoute.fromExtra(
-          InfoRouteExtra(
-              id: subject.id, name: title, image: subject.images.large),
-        ).push(context),
-        child: Padding(
-          padding: const EdgeInsets.all(9),
-          child: Row(
-            children: [
-              SizedBox(
-                width: 34,
-                child: Text(
-                  '$rank',
-                  textAlign: TextAlign.center,
-                  style: theme.textTheme.titleMedium?.copyWith(
-                    color: rank <= 5 ? scheme.primary : scheme.onSurfaceVariant,
-                    fontWeight: FontWeight.w900,
-                  ),
+    return FutureBuilder<PaletteGenerator>(
+      future: _paletteFuture,
+      builder: (context, snapshot) {
+        final dominantColor = snapshot.data?.dominantColor?.color;
+        final surfaceColor = scheme.surfaceContainerHighest;
+        final startColor = dominantColor?.withValues(alpha: .42) ??
+            surfaceColor.withValues(alpha: .48);
+        final endColor = Color.alphaBlend(
+          surfaceColor.withValues(alpha: .76),
+          dominantColor ?? surfaceColor,
+        );
+
+        return Card(
+          margin: EdgeInsets.zero,
+          elevation: 0,
+          color: Colors.transparent,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(16),
+            side:
+                BorderSide(color: scheme.outlineVariant.withValues(alpha: .5)),
+          ),
+          clipBehavior: Clip.antiAlias,
+          child: InkWell(
+            borderRadius: BorderRadius.circular(16),
+            onTap: () => AnimeInfoRoute.fromExtra(
+              InfoRouteExtra(
+                  id: subject.id, name: title, image: subject.images.large),
+            ).push(context),
+            child: DecoratedBox(
+              decoration: BoxDecoration(
+                gradient: LinearGradient(
+                  begin: Alignment.centerLeft,
+                  end: Alignment.centerRight,
+                  colors: [startColor, endColor],
                 ),
               ),
-              const SizedBox(width: 8),
-              ClipRRect(
-                borderRadius: BorderRadius.circular(10),
-                child: SizedBox(
-                  width: 58,
-                  height: 76,
-                  child: AnimationNetworkImage(
-                    url: subject.images.small,
-                    fit: BoxFit.cover,
-                  ),
-                ),
-              ),
-              const SizedBox(width: 12),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      title,
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                      style: theme.textTheme.titleSmall?.copyWith(
-                        fontWeight: FontWeight.w700,
+              child: SizedBox(
+                height: 94,
+                child: Padding(
+                  padding: const EdgeInsets.all(9),
+                  child: Row(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: [
+                      SizedBox(
+                        width: 34,
+                        child: Text(
+                          '$rank',
+                          textAlign: TextAlign.center,
+                          style: theme.textTheme.titleMedium?.copyWith(
+                            color: rank <= 5
+                                ? scheme.primary
+                                : scheme.onSurfaceVariant,
+                            fontWeight: FontWeight.w900,
+                          ),
+                        ),
                       ),
-                    ),
-                    if (tags.isNotEmpty) ...[
-                      const SizedBox(height: 7),
-                      Wrap(
-                        spacing: 4,
-                        runSpacing: 4,
-                        children: tags.map((tag) {
-                          return Container(
-                            padding: const EdgeInsets.symmetric(
-                                horizontal: 6, vertical: 2),
-                            decoration: BoxDecoration(
-                              color: scheme.primary.withValues(alpha: .12),
-                              borderRadius: BorderRadius.circular(5),
-                            ),
-                            child: Text(
-                              tag,
-                              style: theme.textTheme.labelSmall?.copyWith(
-                                color: scheme.primary,
+                      const SizedBox(width: 8),
+                      SizedBox(
+                        width: 58,
+                        child: AnimationNetworkImage(
+                          borderRadius: BorderRadius.circular(10),
+                          url: subject.images.small,
+                          fit: BoxFit.cover,
+                        ),
+                      ),
+                      const SizedBox(width: 12),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              title,
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                              style: theme.textTheme.titleSmall?.copyWith(
+                                fontWeight: FontWeight.w700,
                               ),
                             ),
-                          );
-                        }).toList(),
+                            if (tags.isNotEmpty) ...[
+                              const SizedBox(height: 7),
+                              Wrap(
+                                spacing: 4,
+                                runSpacing: 4,
+                                children: tags.map((tag) {
+                                  return Container(
+                                    padding: const EdgeInsets.symmetric(
+                                        horizontal: 6, vertical: 2),
+                                    decoration: BoxDecoration(
+                                      color:
+                                          scheme.primary.withValues(alpha: .12),
+                                      borderRadius: BorderRadius.circular(5),
+                                    ),
+                                    child: Text(
+                                      tag,
+                                      style:
+                                          theme.textTheme.labelSmall?.copyWith(
+                                        color: scheme.primary,
+                                      ),
+                                    ),
+                                  );
+                                }).toList(),
+                              ),
+                            ],
+                            const SizedBox(height: 8),
+                            Row(
+                              children: [
+                                Icon(Icons.star_rounded,
+                                    size: 16, color: scheme.secondary),
+                                const SizedBox(width: 3),
+                                Text(
+                                  subject.rating.score.toStringAsFixed(1),
+                                  style: theme.textTheme.labelMedium?.copyWith(
+                                    color: scheme.secondary,
+                                    fontWeight: FontWeight.w800,
+                                  ),
+                                ),
+                                const SizedBox(width: 10),
+                                Icon(Icons.people_alt_rounded,
+                                    size: 14, color: scheme.onSurfaceVariant),
+                                const SizedBox(width: 3),
+                                Flexible(
+                                  child: Text(
+                                    '${subject.rating.total}',
+                                    overflow: TextOverflow.ellipsis,
+                                    style: theme.textTheme.labelSmall?.copyWith(
+                                      color: scheme.onSurfaceVariant,
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ],
+                        ),
                       ),
                     ],
-                    const SizedBox(height: 8),
-                    Row(
-                      children: [
-                        Icon(Icons.star_rounded,
-                            size: 16, color: scheme.secondary),
-                        const SizedBox(width: 3),
-                        Text(
-                          subject.rating.score.toStringAsFixed(1),
-                          style: theme.textTheme.labelMedium?.copyWith(
-                            color: scheme.secondary,
-                            fontWeight: FontWeight.w800,
-                          ),
-                        ),
-                        const SizedBox(width: 10),
-                        Icon(Icons.people_alt_rounded,
-                            size: 14, color: scheme.onSurfaceVariant),
-                        const SizedBox(width: 3),
-                        Flexible(
-                          child: Text(
-                            '${subject.rating.total}',
-                            overflow: TextOverflow.ellipsis,
-                            style: theme.textTheme.labelSmall?.copyWith(
-                              color: scheme.onSurfaceVariant,
-                            ),
-                          ),
-                        ),
-                        const Spacer(),
-                        Icon(
-                          rank.isEven
-                              ? Icons.trending_up_rounded
-                              : Icons.arrow_forward_rounded,
-                          size: 20,
-                          color: rank.isEven
-                              ? Colors.greenAccent
-                              : scheme.onSurfaceVariant,
-                        ),
-                      ],
-                    ),
-                  ],
+                  ),
                 ),
               ),
-            ],
+            ),
           ),
-        ),
-      ),
+        );
+      },
     );
   }
 }

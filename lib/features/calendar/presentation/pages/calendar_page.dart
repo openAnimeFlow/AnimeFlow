@@ -7,6 +7,7 @@ import 'package:anime_flow/app/router/model/info_route_extra.dart';
 import 'package:anime_flow/app/router/app_router.dart';
 import 'package:anime_flow/shared/widgets/animation_network_image.dart';
 import 'package:anime_flow/shared/widgets/ranking.dart';
+import 'package:anime_flow/features/home/presentation/providers/anime_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_svg/flutter_svg.dart';
@@ -64,13 +65,7 @@ class _CalendarPageState extends State<CalendarPage>
     return Scaffold(
       appBar: AppBar(
         title: Text(l10n.todayBroadcast),
-        actions: [
-          IconButton(
-            tooltip: '筛选季度',
-            onPressed: () => _showSeasonFilter(context),
-            icon: const Icon(Icons.calendar_month_outlined),
-          ),
-        ],
+        titleSpacing: 8,
         leading: Tooltip(
           message: l10n.back,
           child: IconButton(
@@ -81,9 +76,7 @@ class _CalendarPageState extends State<CalendarPage>
           preferredSize: const Size.fromHeight(kTextTabBarHeight),
           child: Consumer(
             builder: (context, ref, _) {
-              final calendarAsync = ref.watch(calendarSeasonProvider(
-                (year: _selectedYear, month: _selectedMonth),
-              ));
+              final calendarAsync = _watchCalendar(ref);
               return calendarAsync.maybeWhen(
                 data: (calendar) =>
                     _buildTabBarSection(context, calendar, l10n),
@@ -95,16 +88,12 @@ class _CalendarPageState extends State<CalendarPage>
       ),
       body: Consumer(
         builder: (context, ref, _) {
-          final calendarAsync = ref.watch(calendarSeasonProvider(
-            (year: _selectedYear, month: _selectedMonth),
-          ));
+          final calendarAsync = _watchCalendar(ref);
           return calendarAsync.when(
             loading: () => const Center(child: CircularProgressIndicator()),
             error: (error, stackTrace) => Center(
               child: InkWell(
-                onTap: () => ref.invalidate(calendarSeasonProvider(
-                  (year: _selectedYear, month: _selectedMonth),
-                )),
+                onTap: () => _invalidateCalendar(ref),
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   spacing: 8,
@@ -128,75 +117,134 @@ class _CalendarPageState extends State<CalendarPage>
     );
   }
 
+  AsyncValue<Calendar> _watchCalendar(WidgetRef ref) {
+    if (_isCurrentSeason) {
+      return ref.watch(animeCalendarProvider);
+    }
+    return ref.watch(calendarSeasonProvider(
+      (year: _selectedYear, month: _selectedMonth),
+    ));
+  }
+
+  void _invalidateCalendar(WidgetRef ref) {
+    if (_isCurrentSeason) {
+      ref.invalidate(animeCalendarProvider);
+      return;
+    }
+    ref.invalidate(calendarSeasonProvider(
+      (year: _selectedYear, month: _selectedMonth),
+    ));
+  }
+
+  bool get _isCurrentSeason {
+    final now = DateTime.now();
+    final currentSeasonMonth = ((now.month - 1) ~/ 3) * 3 + 1;
+    return _selectedYear == now.year && _selectedMonth == currentSeasonMonth;
+  }
+
   Future<void> _showSeasonFilter(BuildContext context) async {
     final selected = await showModalBottomSheet<({int year, int month})>(
       context: context,
       isScrollControlled: true,
+      showDragHandle: false,
       backgroundColor: Theme.of(context).colorScheme.surface,
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(28)),
       ),
       builder: (context) {
-        final currentYear = DateTime.now().year;
-        final currentMonth = DateTime.now().month;
-        final currentSeasonMonth = ((currentMonth - 1) ~/ 3) * 3 + 1;
-        final theme = Theme.of(context);
-        final colorScheme = theme.colorScheme;
+        final isDesktop = MediaQuery.sizeOf(context).width >= 600;
+        return DraggableScrollableSheet(
+          expand: false,
+          initialChildSize: isDesktop ? 0.90 : 0.60,
+          minChildSize: 0.30,
+          maxChildSize: 0.95,
+          snap: true,
+          snapSizes: isDesktop ? const [0.90, 0.95] : const [0.52, 0.95],
+          builder: (context, scrollController) {
+            final currentYear = DateTime.now().year;
+            final currentMonth = DateTime.now().month;
+            final currentSeasonMonth = ((currentMonth - 1) ~/ 3) * 3 + 1;
+            final theme = Theme.of(context);
+            final colorScheme = theme.colorScheme;
 
-        return SafeArea(
-          child: FractionallySizedBox(
-            heightFactor: 0.94,
-            child: ListView(
-              padding: const EdgeInsets.fromLTRB(30, 20, 30, 28),
-              children: [
-                Row(
-                  children: [
-                    Text(
-                      '放送季度',
-                      style: theme.textTheme.headlineSmall?.copyWith(
-                        fontWeight: FontWeight.w700,
+            return SafeArea(
+              child: Column(
+                children: [
+                  Padding(
+                    padding: const EdgeInsets.fromLTRB(10, 20, 10, 0),
+                    child: Column(
+                      children: [
+                        Row(
+                          children: [
+                            Text(
+                              '放送季度',
+                              style: theme.textTheme.headlineSmall?.copyWith(
+                                fontWeight: FontWeight.w700,
+                              ),
+                            ),
+                            const Spacer(),
+                            IconButton(
+                              tooltip: '关闭',
+                              onPressed: () => Navigator.of(context).pop(),
+                              icon: const Icon(Icons.close),
+                            ),
+                          ],
+                        ),
+                        const SizedBox(height: 8),
+                        Align(
+                          alignment: Alignment.centerLeft,
+                          child: Text(
+                            '正在查看 $_selectedYear年${_seasonLabel(_selectedMonth)}',
+                            style: theme.textTheme.titleMedium?.copyWith(
+                              color: colorScheme.onSurfaceVariant,
+                            ),
+                          ),
+                        ),
+                        const SizedBox(height: 22),
+                      ],
+                    ),
+                  ),
+                  Expanded(
+                    child: ScrollConfiguration(
+                      behavior: ScrollConfiguration.of(context).copyWith(
+                        scrollbars: false,
+                      ),
+                      child: ListView(
+                        controller: scrollController,
+                        padding: const EdgeInsets.fromLTRB(10, 0, 10, 28),
+                        children: [
+                          for (int year = currentYear;
+                              year >= currentYear - 4;
+                              year--)
+                            Padding(
+                              padding: const EdgeInsets.only(bottom: 22),
+                              child: _buildSeasonYearSection(
+                                context,
+                                year: year,
+                                currentYear: currentYear,
+                                currentSeasonMonth: currentSeasonMonth,
+                                colorScheme: colorScheme,
+                              ),
+                            ),
+                        ],
                       ),
                     ),
-                    const Spacer(),
-                    IconButton(
-                      tooltip: '关闭',
-                      onPressed: () => Navigator.of(context).pop(),
-                      icon: const Icon(Icons.close),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 8),
-                Text(
-                  '正在查看 $_selectedYear年${_seasonLabel(_selectedMonth)}',
-                  style: theme.textTheme.titleMedium?.copyWith(
-                    color: colorScheme.onSurfaceVariant,
                   ),
-                ),
-                const SizedBox(height: 22),
-                for (int year = currentYear; year >= currentYear - 4; year--)
-                  Padding(
-                    padding: const EdgeInsets.only(bottom: 22),
-                    child: _buildSeasonYearSection(
-                      context,
-                      year: year,
-                      currentYear: currentYear,
-                      currentSeasonMonth: currentSeasonMonth,
-                      colorScheme: colorScheme,
-                    ),
-                  ),
-              ],
-            ),
-          ),
+                ],
+              ),
+            );
+          },
         );
       },
     );
-    if (!mounted || selected == null) return;
-    if (selected.year == _selectedYear && selected.month == _selectedMonth) {
+    final result = selected;
+    if (!mounted || result == null) return;
+    if (result.year == _selectedYear && result.month == _selectedMonth) {
       return;
     }
     setState(() {
-      _selectedYear = selected.year;
-      _selectedMonth = selected.month;
+      _selectedYear = result.year;
+      _selectedMonth = result.month;
     });
     _tabController.index = 0;
   }
@@ -330,49 +378,73 @@ class _CalendarPageState extends State<CalendarPage>
     };
   }
 
+  String _formatAirdate(String airdate) {
+    final value = airdate.trim();
+    if (value.isEmpty) return '待定';
+
+    final match = RegExp(
+      r'^(\d{4})-(\d{2})-(\d{2})(?:[T\s](\d{2}):(\d{2}))?',
+    ).firstMatch(value);
+    if (match == null) return value;
+
+    final date = '${match.group(1)}-${match.group(2)}-${match.group(3)}';
+    final hour = match.group(4);
+    final minute = match.group(5);
+    return hour == null || minute == null ? date : '$date $hour:$minute';
+  }
+
   Widget _buildTabBarSection(
     BuildContext context,
     Calendar calendar,
     AppLocalizations l10n,
   ) {
     final weekdayLabels = _weekdayLabels(l10n);
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
     return Center(
-      child: Column(
-        children: [
-          Column(
-            children: [
-              ConstrainedBox(
-                  constraints: const BoxConstraints(maxWidth: 1800),
-                  child: TabBar(
-                    tabAlignment: TabAlignment.start,
-                    controller: _tabController,
-                    isScrollable: true,
-                    dividerColor: Colors.transparent,
-                    tabs: List.generate(7, (index) {
-                      final weekday = (index + 1).toString();
-                      final items = calendar.calendarData[weekday] ?? [];
-                      return Tab(
-                        child: Column(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            Text(weekdayLabels[index]),
-                            Text(
-                              l10n.releaseCount(items.length),
-                              style: const TextStyle(fontSize: 10),
-                            ),
-                          ],
-                        ),
-                      );
-                    }),
-                  )),
-              Divider(
-                height: 1,
-                thickness: 1,
-                color: Theme.of(context).dividerColor,
+      child: ConstrainedBox(
+        constraints: const BoxConstraints(maxWidth: 1800),
+        child: TabBar(
+          tabAlignment: TabAlignment.start,
+          controller: _tabController,
+          isScrollable: true,
+          // dividerColor: Colors.transparent,
+          indicatorSize: TabBarIndicatorSize.tab,
+          indicator: BoxDecoration(
+            color: colorScheme.primaryContainer,
+            borderRadius: BorderRadius.circular(14),
+          ),
+          labelColor: colorScheme.onPrimaryContainer,
+          unselectedLabelColor: colorScheme.onSurfaceVariant,
+          overlayColor: WidgetStatePropertyAll(
+            colorScheme.primary.withValues(alpha: 0.08),
+          ),
+          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 6),
+          tabs: List.generate(7, (index) {
+            final weekday = (index + 1).toString();
+            final items = calendar.calendarData[weekday] ?? [];
+            return SizedBox(
+              width: 76,
+              child: Tab(
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Text(
+                      weekdayLabels[index],
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                    const SizedBox(height: 2),
+                    Text(
+                      l10n.releaseCount(items.length),
+                      style: const TextStyle(fontSize: 10),
+                    ),
+                  ],
+                ),
               ),
-            ],
-          )
-        ],
+            );
+          }),
+        ),
       ),
     );
   }
@@ -418,31 +490,45 @@ class _CalendarPageState extends State<CalendarPage>
               padding: EdgeInsets.symmetric(horizontal: horizontalPadding),
               sliver: SliverMainAxisGroup(
                 slivers: [
+                  SliverToBoxAdapter(
+                    child: _buildSeasonBanner(context, calendar, l10n),
+                  ),
                   // 统计信息
                   SliverPadding(
-                    padding: const EdgeInsets.symmetric(
-                        horizontal: 10, vertical: 10),
+                    padding: const EdgeInsets.fromLTRB(10, 4, 10, 12),
                     sliver: SliverToBoxAdapter(
-                      child: Container(
-                        padding: const EdgeInsets.all(10),
-                        decoration: BoxDecoration(
-                          color: Theme.of(context)
-                              .colorScheme
-                              .surfaceContainerHighest,
-                          borderRadius: BorderRadius.circular(8),
-                        ),
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceAround,
-                          children: [
-                            _buildStatItem(l10n.animeCount,
-                                l10n.releaseCount(items.length)),
-                            _buildStatItem(
-                                l10n.totalWatchers, '$totalWatchers'),
-                            if (avgScore > 0)
-                              _buildStatItem(l10n.averageRating,
-                                  avgScore.toStringAsFixed(1)),
-                          ],
-                        ),
+                      child: Row(
+                        children: [
+                          Expanded(
+                            child: _buildStatItem(
+                              context,
+                              l10n.animeCount,
+                              l10n.releaseCount(items.length),
+                              Icons.play_circle_fill_rounded,
+                              Theme.of(context).colorScheme.primary,
+                            ),
+                          ),
+                          const SizedBox(width: 8),
+                          Expanded(
+                            child: _buildStatItem(
+                              context,
+                              l10n.totalWatchers,
+                              '$totalWatchers',
+                              Icons.people_outline_rounded,
+                              Theme.of(context).colorScheme.secondary,
+                            ),
+                          ),
+                          const SizedBox(width: 8),
+                          Expanded(
+                            child: _buildStatItem(
+                              context,
+                              l10n.averageRating,
+                              avgScore > 0 ? avgScore.toStringAsFixed(1) : '--',
+                              Icons.star_rate_rounded,
+                              Theme.of(context).colorScheme.tertiary,
+                            ),
+                          ),
+                        ],
                       ),
                     ),
                   ),
@@ -462,7 +548,7 @@ class _CalendarPageState extends State<CalendarPage>
                               crossAxisCount: columnCount,
                               crossAxisSpacing: 10,
                               mainAxisSpacing: 10,
-                              mainAxisExtent: columnCount == 1 ? 184 : 192,
+                              mainAxisExtent: columnCount == 1 ? 184 : 214,
                             ),
                             delegate: SliverChildBuilderDelegate(
                               (context, index) {
@@ -488,26 +574,144 @@ class _CalendarPageState extends State<CalendarPage>
     );
   }
 
-  Widget _buildStatItem(String label, String value) {
-    return Column(
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        Text(
-          value,
-          style: const TextStyle(
-            fontSize: 16,
-            fontWeight: FontWeight.bold,
+  Widget _buildSeasonBanner(
+    BuildContext context,
+    Calendar calendar,
+    AppLocalizations l10n,
+  ) {
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(10, 14, 10, 8),
+      child: Semantics(
+        button: true,
+        label: '筛选季度',
+        child: DecoratedBox(
+          decoration: BoxDecoration(
+            gradient: LinearGradient(
+              colors: [
+                colorScheme.primaryContainer,
+                colorScheme.secondaryContainer.withValues(alpha: 0.72),
+              ],
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+            ),
+            borderRadius: BorderRadius.circular(20),
+            border: Border.all(
+              color: colorScheme.outlineVariant.withValues(alpha: 0.55),
+            ),
+          ),
+          child: Material(
+            color: Colors.transparent,
+            borderRadius: BorderRadius.circular(20),
+            clipBehavior: Clip.antiAlias,
+            child: InkWell(
+              onTap: () => _showSeasonFilter(context),
+              borderRadius: BorderRadius.circular(20),
+              child: Padding(
+                padding: const EdgeInsets.fromLTRB(18, 16, 18, 16),
+                child: Row(
+                  children: [
+                    DecoratedBox(
+                      decoration: BoxDecoration(
+                        color: colorScheme.surface.withValues(alpha: 0.72),
+                        shape: BoxShape.circle,
+                      ),
+                      child: Padding(
+                        padding: const EdgeInsets.all(11),
+                        child: Icon(
+                          Icons.calendar_month_rounded,
+                          color: colorScheme.primary,
+                          size: 24,
+                        ),
+                      ),
+                    ),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            '$_selectedYear ${_seasonLabel(_selectedMonth)}',
+                            style: theme.textTheme.titleLarge?.copyWith(
+                              fontWeight: FontWeight.w800,
+                              color: colorScheme.onPrimaryContainer,
+                            ),
+                          ),
+                          const SizedBox(height: 3),
+                          Text(
+                            '${l10n.todayBroadcast} · ${l10n.releaseCount(calendar.calendarData.values.fold<int>(0, (sum, value) => sum + value.length))}',
+                            style: theme.textTheme.bodyMedium?.copyWith(
+                              color: colorScheme.onPrimaryContainer.withValues(
+                                alpha: 0.72,
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                    if (MediaQuery.sizeOf(context).width >= 600)
+                      Icon(
+                        Icons.auto_awesome_rounded,
+                        color: colorScheme.tertiary,
+                      ),
+                  ],
+                ),
+              ),
+            ),
           ),
         ),
-        const SizedBox(height: 4),
-        Text(
-          label,
-          style: const TextStyle(
-            fontSize: 12,
-            color: Colors.grey,
+      ),
+    );
+  }
+
+  Widget _buildStatItem(
+    BuildContext context,
+    String label,
+    String value,
+    IconData icon,
+    Color accent,
+  ) {
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+    return Container(
+      constraints: const BoxConstraints(minHeight: 76),
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+      decoration: BoxDecoration(
+        color: colorScheme.surfaceContainerHighest.withValues(alpha: 0.62),
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: colorScheme.outlineVariant),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Text(
+            label,
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+            style: theme.textTheme.labelMedium?.copyWith(
+              color: colorScheme.onSurfaceVariant,
+            ),
           ),
-        ),
-      ],
+          const SizedBox(width: 8),
+          Row(
+            spacing: 3,
+            children: [
+              Icon(icon, color: accent, size: 25),
+              Text(
+                value,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                style: theme.textTheme.titleMedium?.copyWith(
+                  fontWeight: FontWeight.w800,
+                ),
+              ),
+              const SizedBox(height: 2),
+            ],
+          ),
+        ],
+      ),
     );
   }
 
@@ -536,7 +740,9 @@ class _CalendarPageState extends State<CalendarPage>
 
     return Material(
       color: theme.colorScheme.surfaceContainerLow,
-      borderRadius: BorderRadius.circular(10),
+      borderRadius: BorderRadius.circular(16),
+      elevation: 1,
+      shadowColor: theme.colorScheme.shadow.withValues(alpha: 0.24),
       clipBehavior: Clip.antiAlias,
       child: InkWell(
         onTap: () {
@@ -547,14 +753,14 @@ class _CalendarPageState extends State<CalendarPage>
           )).push(context);
         },
         child: Padding(
-          padding: const EdgeInsets.all(10),
+          padding: const EdgeInsets.all(9),
           child: Row(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
               SizedBox(
-                width: 96,
+                width: 104,
                 child: ClipRRect(
-                  borderRadius: BorderRadius.circular(8),
+                  borderRadius: BorderRadius.circular(10),
                   child: Stack(
                     fit: StackFit.expand,
                     children: [
@@ -584,9 +790,8 @@ class _CalendarPageState extends State<CalendarPage>
                   children: [
                     Text(
                       displayName,
-                      style: const TextStyle(
-                        fontSize: 15,
-                        fontWeight: FontWeight.bold,
+                      style: theme.textTheme.titleSmall?.copyWith(
+                        fontWeight: FontWeight.w700,
                       ),
                       maxLines: 2,
                       overflow: TextOverflow.ellipsis,
@@ -596,7 +801,7 @@ class _CalendarPageState extends State<CalendarPage>
                       const SizedBox(height: 6),
                     ],
                     const Spacer(),
-                    _buildScheduleRow(item, l10n),
+                    _buildScheduleRow(context, item, l10n),
                     _buildMetricsRow(context, item, l10n),
                   ],
                 ),
@@ -637,6 +842,7 @@ class _CalendarPageState extends State<CalendarPage>
   }
 
   Widget _buildScheduleRow(
+    BuildContext context,
     CalendarItem item,
     AppLocalizations l10n,
   ) {
@@ -646,27 +852,60 @@ class _CalendarPageState extends State<CalendarPage>
       return const SizedBox.shrink();
     }
 
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+    final scheduleText = latest?.airdate.isNotEmpty == true
+        ? _formatAirdate(latest!.airdate)
+        : (latest != null ? l10n.episodeNumber(latest.sort) : '');
+
     return Column(
       mainAxisSize: MainAxisSize.min,
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         if (latest != null)
-          Text(
-            latest.sort > 0
-                ? '正在播放:${l10n.episodeNumber(latest.sort)}'
-                : latest.airdate,
-            maxLines: 1,
-            overflow: TextOverflow.ellipsis,
+          Row(
+            children: [
+              const Icon(Icons.play_arrow_rounded, size: 17),
+              const SizedBox(width: 2),
+              Expanded(
+                child: Text(
+                  scheduleText.isEmpty
+                      ? '正在播放 ${l10n.episodeNumber(latest.sort)}'
+                      : scheduleText,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: const TextStyle(
+                    fontSize: 12,
+                    fontWeight: FontWeight.w700,
+                  ),
+                ),
+              ),
+            ],
           ),
-        if (latest != null && next != null) const SizedBox(height: 4),
-        if (next != null)
-          Text(
-            next.sort > 0
-                ? '${l10n.nextEpisode} ${l10n.episodeNumber(next.sort)} ${next.airdate}'
-                : '${l10n.nextEpisode} ${next.airdate}',
-            maxLines: 1,
-            overflow: TextOverflow.ellipsis,
+        if (next != null) ...[
+          const SizedBox(height: 4),
+          Row(
+            children: [
+              const Icon(
+                Icons.skip_next_rounded,
+                size: 17,
+              ),
+              const SizedBox(width: 4),
+              Expanded(
+                child: Text(
+                  next.sort > 0
+                      ? '${l10n.episodeNumber(next.sort)} · ${_formatAirdate(next.airdate)}'
+                      : _formatAirdate(next.airdate),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: theme.textTheme.bodySmall?.copyWith(
+                    color: colorScheme.onSurfaceVariant,
+                  ),
+                ),
+              ),
+            ],
           ),
+        ],
       ],
     );
   }
@@ -683,10 +922,10 @@ class _CalendarPageState extends State<CalendarPage>
     return Row(
       children: [
         if (score > 0) ...[
-          const Icon(
+          Icon(
             Icons.star_rate_rounded,
             size: 16,
-            color: Colors.amber,
+            color: theme.colorScheme.tertiary,
           ),
           const SizedBox(width: 2),
           Text(

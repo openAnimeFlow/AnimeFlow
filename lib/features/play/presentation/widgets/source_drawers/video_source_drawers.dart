@@ -172,56 +172,28 @@ class _VideoSourceDrawersState extends ConsumerState<VideoSourceDrawers> {
 
   @override
   Widget build(BuildContext context) {
-    ref.watch(videoSourceProvider);
     if (widget.isBottomSheet) {
-      return buildBottomSheetContent(context);
+      return Material(
+        color: Theme.of(context).cardColor,
+        borderRadius: const BorderRadius.vertical(top: Radius.circular(16)),
+        clipBehavior: Clip.antiAlias,
+        child: Padding(
+          padding: EdgeInsets.fromLTRB(
+              16, 20, 16, 16 + MediaQuery.of(context).padding.bottom),
+          child: _buildDrawerContent(includeDragHandle: true),
+        ),
+      );
     }
-    return buildSideDrawerContent(context);
-  }
-
-  /// 底部抽屉内容
-  Widget buildBottomSheetContent(BuildContext context) {
-    return Material(
-      color: Theme.of(context).cardColor,
-      borderRadius: const BorderRadius.vertical(top: Radius.circular(16)),
-      clipBehavior: Clip.antiAlias,
-      child: Padding(
-        padding: EdgeInsets.fromLTRB(
-            16, 20, 16, 16 + MediaQuery.of(context).padding.bottom),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            _buildDragHandle(context),
-            buildHeader(),
-            _manualSearch(),
-            const SizedBox(height: 16),
-            Builder(
-              builder: (context) {
-                final dataSource = widget.videoSourceNotifier.videoResources;
-                if (dataSource.isEmpty) {
-                  return const SizedBox.shrink();
-                }
-                return _buildWebsiteSelector(dataSource: dataSource);
-              },
-            ),
-            const SizedBox(height: 16),
-            Expanded(
-              child: Builder(
-                builder: (context) {
-                  final videoSourceController = widget.videoSourceNotifier;
-                  final dataSource = videoSourceController.videoResources;
-                  if (dataSource.isEmpty) {
-                    return const SizedBox.shrink();
-                  }
-                  final selectedIndex = _getDrawerSelectedIndex(dataSource);
-                  return _buildVideoSource(
-                    dataSource: dataSource,
-                    selectedIndex: selectedIndex,
-                  );
-                },
-              ),
-            ),
-          ],
+    return Align(
+      alignment: Alignment.centerRight,
+      child: SizedBox(
+        width: LayoutConstant.playContentWidth,
+        height: MediaQuery.of(context).size.height,
+        child: Container(
+          padding: EdgeInsets.only(
+              top: MediaQuery.of(context).padding.top, left: 16, right: 16),
+          color: Theme.of(context).cardColor,
+          child: _buildDrawerContent(),
         ),
       ),
     );
@@ -281,54 +253,61 @@ class _VideoSourceDrawersState extends ConsumerState<VideoSourceDrawers> {
     );
   }
 
-  /// 侧边抽屉内容
-  Widget buildSideDrawerContent(BuildContext context) {
-    return Align(
-      alignment: Alignment.centerRight,
-      child: SizedBox(
-        width: LayoutConstant.playContentWidth,
-        height: MediaQuery.of(context).size.height,
-        child: Container(
-          padding: EdgeInsets.only(
-              top: MediaQuery.of(context).padding.top, left: 16, right: 16),
-          color: Theme.of(context).cardColor,
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              buildHeader(),
-              _manualSearch(),
-              const SizedBox(height: 16),
-              Builder(
-                builder: (context) {
-                  final videoSourceController = widget.videoSourceNotifier;
-                  final dataSource = videoSourceController.videoResources;
-                  if (dataSource.isEmpty) {
-                    return const SizedBox.shrink();
-                  }
-                  return _buildWebsiteSelector(dataSource: dataSource);
-                },
-              ),
-              const SizedBox(height: 16),
-              Expanded(
-                child: Builder(
-                  builder: (context) {
-                    final videoSourceController = widget.videoSourceNotifier;
-                    final dataSource = videoSourceController.videoResources;
-                    if (dataSource.isEmpty) {
-                      return const SizedBox.shrink();
-                    }
-                    final selectedIndex = _getDrawerSelectedIndex(dataSource);
-                    return _buildVideoSource(
-                      dataSource: dataSource,
-                      selectedIndex: selectedIndex,
-                    );
-                  },
+  Widget _buildDrawerContent({bool includeDragHandle = false}) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        if (includeDragHandle) _buildDragHandle(context),
+        buildHeader(),
+        _manualSearch(),
+        const SizedBox(height: 16),
+        Consumer(
+          builder: (context, ref, child) {
+            final sourceState = ref.watch(
+              videoSourceProvider.select(
+                (state) => (
+                  videoResources: state.videoResources,
+                  selectedWebsiteIndex: state.selectedWebsiteIndex,
+                  webSiteTitle: state.webSiteTitle,
                 ),
               ),
-            ],
+            );
+            if (sourceState.videoResources.isEmpty) {
+              return const SizedBox.shrink();
+            }
+            return _buildWebsiteSelector(
+              dataSource: sourceState.videoResources,
+            );
+          },
+        ),
+        const SizedBox(height: 16),
+        Expanded(
+          child: Consumer(
+            builder: (context, ref, child) {
+              final sourceState = ref.watch(
+                videoSourceProvider.select(
+                  (state) => (
+                    videoResources: state.videoResources,
+                    currentEpisodeIndex: state.currentEpisodeIndex,
+                    selectedWebsiteIndex: state.selectedWebsiteIndex,
+                    webSiteTitle: state.webSiteTitle,
+                    videoUrl: state.videoUrl,
+                  ),
+                ),
+              );
+              if (sourceState.videoResources.isEmpty) {
+                return const SizedBox.shrink();
+              }
+              return _buildVideoSource(
+                dataSource: sourceState.videoResources,
+                selectedIndex: _getDrawerSelectedIndex(
+                  sourceState.videoResources,
+                ),
+              );
+            },
           ),
         ),
-      ),
+      ],
     );
   }
 
@@ -948,16 +927,6 @@ class _VideoSourceDrawersState extends ConsumerState<VideoSourceDrawers> {
           ),
         ],
       ),
-    );
-  }
-
-  Widget _buildCaptchaRequired(ResourcesItem resource) {
-    return CaptchaView(
-      key: ValueKey(resource.websiteName),
-      resource: resource,
-      dataSourceController: widget.videoSourceNotifier,
-      subjectName: widget.subjectName,
-      isBottomSheet: widget.isBottomSheet,
     );
   }
 

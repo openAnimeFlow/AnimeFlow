@@ -487,6 +487,12 @@ abstract class AppLocalizations {
   /// **'因为热爱而相聚 · 与更多同好一起看番'**
   String get communityOnlineSubtitle;
 
+  /// No description provided for @communityOnlineVersionNotice.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'社区在线仅展示 2.6.0+版本 的在线用户'**
+  String get communityOnlineVersionNotice;
+
   /// No description provided for @watchingAnimeTitle.
   ///
   /// In zh_Hans, this message translates to:

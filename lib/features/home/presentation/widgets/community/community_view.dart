@@ -123,6 +123,8 @@ class _CommunityContent extends StatelessWidget {
                   title: AppLocalizations.of(context).communityOnlineTitle,
                   subtitle:
                       AppLocalizations.of(context).communityOnlineSubtitle,
+                  versionNotice:
+                      AppLocalizations.of(context).communityOnlineVersionNotice,
                   totalLabel: AppLocalizations.of(context).totalOnlineUsers,
                   anonymousLabel: AppLocalizations.of(context).anonymousUsers,
                   loggedInLabel: AppLocalizations.of(context).loggedInUsers,
@@ -201,6 +203,7 @@ class _CommunityHero extends StatelessWidget {
     required this.onlineCount,
     required this.title,
     required this.subtitle,
+    required this.versionNotice,
     required this.totalLabel,
     required this.anonymousLabel,
     required this.loggedInLabel,
@@ -210,6 +213,7 @@ class _CommunityHero extends StatelessWidget {
   final AsyncValue<OnlineCount> onlineCount;
   final String title;
   final String subtitle;
+  final String versionNotice;
   final String totalLabel;
   final String anonymousLabel;
   final String loggedInLabel;
@@ -233,6 +237,14 @@ class _CommunityHero extends StatelessWidget {
           subtitle,
           style: const TextStyle(fontSize: 14),
         ),
+        const SizedBox(height: 4),
+        Text(
+          versionNotice,
+          style: TextStyle(
+            color: Theme.of(context).colorScheme.onSurfaceVariant,
+            fontSize: 12,
+          ),
+        ),
         const SizedBox(height: 22),
         onlineCount.when(
           loading: () => _StatsCard.loading(
@@ -240,7 +252,8 @@ class _CommunityHero extends StatelessWidget {
             anonymousLabel: anonymousLabel,
             loggedInLabel: loggedInLabel,
           ),
-          error: (_, __) => _StatsCard.loading(
+          error: (error, __) => _StatsCard.error(
+            error: error,
             totalLabel: totalLabel,
             anonymousLabel: anonymousLabel,
             loggedInLabel: loggedInLabel,
@@ -265,15 +278,26 @@ class _StatsCard extends StatelessWidget {
     required this.anonymousLabel,
     required this.loggedInLabel,
   })  : onRetry = null,
-        loading = false;
+        loading = false,
+        error = null;
 
   const _StatsCard.loading({
     required this.totalLabel,
     required this.anonymousLabel,
     required this.loggedInLabel,
+  })  : count = null,
+        loading = true,
+        error = null,
+        onRetry = null;
+
+  const _StatsCard.error({
+    required this.error,
+    required this.totalLabel,
+    required this.anonymousLabel,
+    required this.loggedInLabel,
     this.onRetry,
   })  : count = null,
-        loading = true;
+        loading = false;
 
   final OnlineCount? count;
   final String totalLabel;
@@ -281,10 +305,43 @@ class _StatsCard extends StatelessWidget {
   final String loggedInLabel;
   final Future<void> Function()? onRetry;
   final bool loading;
+  final Object? error;
 
   @override
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
+
+    if (error != null) {
+      return Container(
+        padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 16),
+        decoration: BoxDecoration(
+          color: colorScheme.surfaceContainerHighest,
+          borderRadius: BorderRadius.circular(22),
+          border: Border.all(color: colorScheme.error.withValues(alpha: .45)),
+        ),
+        child: Row(
+          children: [
+            Icon(Icons.error_outline_rounded, color: colorScheme.error),
+            const SizedBox(width: 12),
+            Expanded(
+              child: Text(
+                error.toString(),
+                maxLines: 3,
+                overflow: TextOverflow.ellipsis,
+                style: TextStyle(color: colorScheme.onSurfaceVariant),
+              ),
+            ),
+            if (onRetry != null)
+              IconButton(
+                tooltip: '重试',
+                onPressed: onRetry,
+                icon: const Icon(Icons.refresh_rounded),
+              ),
+          ],
+        ),
+      );
+    }
+
     final values = count == null
         ? const [0, 0, 0]
         : [count!.onlineUsers, count!.anonymousUsers, count!.loggedInUsers];
@@ -317,13 +374,6 @@ class _StatsCard extends StatelessWidget {
                 color: colorScheme.outlineVariant,
               ),
           ],
-          if (loading && onRetry != null)
-            IconButton(
-              onPressed: onRetry,
-              icon: const Icon(
-                Icons.refresh_rounded,
-              ),
-            ),
         ],
       ),
     );
@@ -524,6 +574,8 @@ class _EmptyCommunityCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
+    final refreshing = onlineCount.isLoading;
+
     return Container(
       padding: const EdgeInsets.all(18),
       decoration: BoxDecoration(
@@ -565,8 +617,17 @@ class _EmptyCommunityCard extends StatelessWidget {
                   ),
                   const SizedBox(height: 12),
                   FilledButton.icon(
-                    onPressed: onRetry,
-                    icon: const Icon(Icons.refresh_rounded, size: 17),
+                    onPressed: refreshing ? null : onRetry,
+                    icon: refreshing
+                        ? SizedBox(
+                            width: 17,
+                            height: 17,
+                            child: CircularProgressIndicator(
+                              strokeWidth: 2,
+                              color: colorScheme.onPrimary,
+                            ),
+                          )
+                        : const Icon(Icons.refresh_rounded, size: 17),
                     label: Text(retryLabel),
                     style: FilledButton.styleFrom(
                       backgroundColor: colorScheme.primary,

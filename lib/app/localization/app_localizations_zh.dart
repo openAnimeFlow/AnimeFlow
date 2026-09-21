@@ -211,6 +211,9 @@ class AppLocalizationsZh extends AppLocalizations {
   String get communityOnlineSubtitle => '因為熱愛而相聚 · 與更多同好一起看番';
 
   @override
+  String get communityOnlineVersionNotice => '社區在線僅展示 2.6.0+版本 的在線使用者';
+
+  @override
   String get watchingAnimeTitle => '正在觀看的番劇';
 
   @override
@@ -2261,6 +2264,9 @@ class AppLocalizationsZhHans extends AppLocalizationsZh {
 
   @override
   String get communityOnlineSubtitle => '因为热爱而相聚 · 与更多同好一起看番';
+
+  @override
+  String get communityOnlineVersionNotice => '社区在线仅展示 2.6.0+版本 的在线用户';
 
   @override
   String get watchingAnimeTitle => '正在观看的番剧';
@@ -4314,6 +4320,9 @@ class AppLocalizationsZhHantHk extends AppLocalizationsZh {
   String get communityOnlineSubtitle => '因為熱愛而相聚 · 與更多同好一起看番';
 
   @override
+  String get communityOnlineVersionNotice => '社區在線僅展示 2.6.0+版本 的在線使用者';
+
+  @override
   String get watchingAnimeTitle => '正在觀看的番劇';
 
   @override
@@ -6364,6 +6373,9 @@ class AppLocalizationsZhHantTw extends AppLocalizationsZh {
 
   @override
   String get communityOnlineSubtitle => '因為熱愛而相聚 · 與更多同好一起看番';
+
+  @override
+  String get communityOnlineVersionNotice => '社群在線僅展示 2.6.0+版本 的在線使用者';
 
   @override
   String get watchingAnimeTitle => '正在觀看的番劇';

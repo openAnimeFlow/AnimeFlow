@@ -216,6 +216,10 @@ class AppLocalizationsEn extends AppLocalizations {
       'Gather because we love anime · Watch with fellow fans';
 
   @override
+  String get communityOnlineVersionNotice =>
+      'Only users on version 2.6.0+ are shown as online';
+
+  @override
   String get watchingAnimeTitle => 'Currently Watching';
 
   @override

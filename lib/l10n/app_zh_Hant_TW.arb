@@ -69,6 +69,7 @@
   "totalWatchers": "總觀看人數",
   "communityOnlineTitle": "社群在線",
   "communityOnlineSubtitle": "因為熱愛而相聚 · 與更多同好一起看番",
+  "communityOnlineVersionNotice": "社群在線僅展示 2.6.0+版本 的在線使用者",
   "watchingAnimeTitle": "正在觀看的番劇",
   "watchingAnimeSummary": "共 {count} 部 · {viewers} 人正在觀看",
   "communityOnlineSummary": "總在線 {total} 人 · 匿名 {anonymous} · 登入 {loggedIn}",

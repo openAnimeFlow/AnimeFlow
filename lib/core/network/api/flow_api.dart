@@ -112,9 +112,12 @@ class FlowApi {
             'Presence online count SSE closed before its first event',
           );
         }
-      } catch (_) {
+      } catch (error, stackTrace) {
         if (cancelToken.isCancelled) return;
-        if (!hasReceivedEvent && ++initialRetryCount >= 3) rethrow;
+        if (_isRateLimited(error) ||
+            (!hasReceivedEvent && ++initialRetryCount >= 3)) {
+          Error.throwWithStackTrace(error, stackTrace);
+        }
         await Future<void>.delayed(const Duration(seconds: 2));
       }
     }
@@ -160,12 +163,19 @@ class FlowApi {
             'Watching subjects SSE closed before its first event',
           );
         }
-      } catch (_) {
+      } catch (error, stackTrace) {
         if (cancelToken.isCancelled) return;
-        if (!hasReceivedEvent && ++initialRetryCount >= 3) rethrow;
+        if (_isRateLimited(error) ||
+            (!hasReceivedEvent && ++initialRetryCount >= 3)) {
+          Error.throwWithStackTrace(error, stackTrace);
+        }
         await Future<void>.delayed(const Duration(seconds: 2));
       }
     }
+  }
+
+  static bool _isRateLimited(Object error) {
+    return error is DioException && error.response?.statusCode == 429;
   }
 
   /// 获取 AnimeFlow 发布版本列表。

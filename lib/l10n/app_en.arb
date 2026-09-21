@@ -69,6 +69,7 @@
   "totalWatchers": "Total viewers",
   "communityOnlineTitle": "Community Online",
   "communityOnlineSubtitle": "Gather because we love anime · Watch with fellow fans",
+  "communityOnlineVersionNotice": "Only users on version 2.6.0+ are shown as online",
   "watchingAnimeTitle": "Currently Watching",
   "watchingAnimeSummary": "{count} titles · {viewers} watching",
   "communityOnlineSummary": "{total} online · {anonymous} anonymous · {loggedIn} logged in",

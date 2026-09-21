@@ -76,31 +76,23 @@ class _CommunityPageState extends ConsumerState<CommunityPage> {
               final onlineCount = ref.watch(communityOnlineCountProvider);
               final connection = ref.watch(communityConnectionProvider);
 
-              return watching.when(
-                loading: () => const _CommunityLoading(),
-                error: (error, _) => _CommunityMessage(
-                  icon: Icons.cloud_off_outlined,
-                  message: error.toString(),
-                  retryLabel: l10n.retry,
-                  onRetry: _refresh,
+              return _CommunityContent(
+                subjects: watching.value ?? const <WatchingSubject>[],
+                onlineCount: onlineCount,
+                connection: connection,
+                connectionError: watching.error ?? onlineCount.error,
+                retryLabel: l10n.retry,
+                sectionTitle: l10n.watchingAnimeTitle,
+                sectionSummary: (count, viewers) =>
+                    l10n.watchingAnimeSummary(count, viewers),
+                watchingPeopleLabel: l10n.watchingPeople,
+                emptyMessage: l10n.noUsersWatchingAnime,
+                onlineSummary: (count) => l10n.communityOnlineSummary(
+                  count.onlineUsers,
+                  count.anonymousUsers,
+                  count.loggedInUsers,
                 ),
-                data: (subjects) => _CommunityContent(
-                  subjects: subjects,
-                  onlineCount: onlineCount,
-                  connection: connection,
-                  retryLabel: l10n.retry,
-                  sectionTitle: l10n.watchingAnimeTitle,
-                  sectionSummary: (count, viewers) =>
-                      l10n.watchingAnimeSummary(count, viewers),
-                  watchingPeopleLabel: l10n.watchingPeople,
-                  emptyMessage: l10n.noUsersWatchingAnime,
-                  onlineSummary: (count) => l10n.communityOnlineSummary(
-                    count.onlineUsers,
-                    count.anonymousUsers,
-                    count.loggedInUsers,
-                  ),
-                  onRetry: _refresh,
-                ),
+                onRetry: _refresh,
               );
             },
           ),
@@ -115,6 +107,7 @@ class _CommunityContent extends StatelessWidget {
     required this.subjects,
     required this.onlineCount,
     required this.connection,
+    required this.connectionError,
     required this.retryLabel,
     required this.sectionTitle,
     required this.sectionSummary,
@@ -127,6 +120,7 @@ class _CommunityContent extends StatelessWidget {
   final List<WatchingSubject> subjects;
   final AsyncValue<OnlineCount> onlineCount;
   final CommunityConnectionState connection;
+  final Object? connectionError;
   final String retryLabel;
   final String sectionTitle;
   final String Function(int count, int viewers) sectionSummary;
@@ -168,6 +162,7 @@ class _CommunityContent extends StatelessWidget {
                 child: _CommunityHero(
                   onlineCount: onlineCount,
                   connection: connection,
+                  connectionError: connectionError,
                   title: AppLocalizations.of(context).communityOnlineTitle,
                   subtitle:
                       AppLocalizations.of(context).communityOnlineSubtitle,
@@ -250,6 +245,7 @@ class _CommunityHero extends StatelessWidget {
   const _CommunityHero({
     required this.onlineCount,
     required this.connection,
+    required this.connectionError,
     required this.title,
     required this.subtitle,
     required this.versionNotice,
@@ -261,6 +257,7 @@ class _CommunityHero extends StatelessWidget {
 
   final AsyncValue<OnlineCount> onlineCount;
   final CommunityConnectionState connection;
+  final Object? connectionError;
   final String title;
   final String subtitle;
   final String versionNotice;
@@ -291,6 +288,7 @@ class _CommunityHero extends StatelessWidget {
                 _ConnectionIndicator(
                   status: connection.overall,
                   l10n: AppLocalizations.of(context),
+                  detail: connectionError?.toString(),
                 ),
                 if (connection.overall == SseConnectionStatus.error)
                   IconButton(
@@ -342,10 +340,15 @@ class _CommunityHero extends StatelessWidget {
 }
 
 class _ConnectionIndicator extends StatelessWidget {
-  const _ConnectionIndicator({required this.status, required this.l10n});
+  const _ConnectionIndicator({
+    required this.status,
+    required this.l10n,
+    this.detail,
+  });
 
   final SseConnectionStatus status;
   final AppLocalizations l10n;
+  final String? detail;
 
   @override
   Widget build(BuildContext context) {
@@ -378,19 +381,39 @@ class _ConnectionIndicator extends StatelessWidget {
         ),
     };
 
-    return Row(
+    return Column(
       mainAxisSize: MainAxisSize.min,
+      crossAxisAlignment: CrossAxisAlignment.end,
       children: [
-        Icon(icon, size: 15, color: color),
-        const SizedBox(width: 5),
-        Text(
-          label,
-          style: TextStyle(
-            color: color,
-            fontSize: 12,
-            fontWeight: FontWeight.w600,
-          ),
+        Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(icon, size: 15, color: color),
+            const SizedBox(width: 5),
+            Text(
+              label,
+              style: TextStyle(
+                color: color,
+                fontSize: 12,
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+          ],
         ),
+        if (detail != null && status == SseConnectionStatus.error)
+          SizedBox(
+            width: 180,
+            child: Text(
+              detail!,
+              maxLines: 2,
+              overflow: TextOverflow.ellipsis,
+              textAlign: TextAlign.right,
+              style: TextStyle(
+                color: colorScheme.error,
+                fontSize: 10,
+              ),
+            ),
+          ),
       ],
     );
   }
@@ -763,61 +786,6 @@ class _EmptyMessage extends StatelessWidget {
         const SizedBox(height: 10),
         OutlinedButton(onPressed: onRetry, child: Text(retryLabel)),
       ],
-    );
-  }
-}
-
-class _CommunityMessage extends StatelessWidget {
-  const _CommunityMessage({
-    required this.icon,
-    required this.message,
-    required this.retryLabel,
-    required this.onRetry,
-  });
-
-  final IconData icon;
-  final String message;
-  final String retryLabel;
-  final Future<void> Function() onRetry;
-
-  @override
-  Widget build(BuildContext context) {
-    final colorScheme = Theme.of(context).colorScheme;
-    return ListView(
-      physics: const AlwaysScrollableScrollPhysics(),
-      children: [
-        SizedBox(
-          height: 340,
-          child: Center(
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Icon(icon, size: 42, color: colorScheme.outline),
-                const SizedBox(height: 12),
-                Text(
-                  message,
-                  style: TextStyle(color: colorScheme.onSurfaceVariant),
-                ),
-                const SizedBox(height: 12),
-                OutlinedButton(onPressed: onRetry, child: Text(retryLabel)),
-              ],
-            ),
-          ),
-        ),
-      ],
-    );
-  }
-}
-
-class _CommunityLoading extends StatelessWidget {
-  const _CommunityLoading();
-
-  @override
-  Widget build(BuildContext context) {
-    return Center(
-      child: CircularProgressIndicator(
-        color: Theme.of(context).colorScheme.primary,
-      ),
     );
   }
 }

@@ -48,8 +48,10 @@ class _VideoSourceDrawersState extends ConsumerState<VideoSourceDrawers> {
   String? _selectedLineName;
   bool _sortDescending = false;
   final _searchController = TextEditingController();
+  final Map<String, TextEditingController> _siteSearchControllers = {};
   int? _drawerSelectedWebsiteIndex;
   bool _followInitialAutoSelection = true;
+  bool _sourceControlsCollapsed = false;
   late final ScrollController _fallbackScrollController;
 
   ScrollController get _scrollController =>
@@ -59,7 +61,21 @@ class _VideoSourceDrawersState extends ConsumerState<VideoSourceDrawers> {
   void initState() {
     super.initState();
     _fallbackScrollController = ScrollController();
+    _scrollController.addListener(_handleSourceListScroll);
     _searchController.text = widget.subjectName;
+  }
+
+  void _handleSourceListScroll() {
+    final shouldCollapse = _scrollController.hasClients &&
+        _scrollController.offset > 8 &&
+        !_sourceControlsCollapsed;
+    final shouldExpand = _scrollController.hasClients &&
+        _scrollController.offset <= 8 &&
+        _sourceControlsCollapsed;
+    if (!shouldCollapse && !shouldExpand) return;
+    setState(() {
+      _sourceControlsCollapsed = shouldCollapse;
+    });
   }
 
   void _setSelectedWebsite(int index) {
@@ -76,6 +92,9 @@ class _VideoSourceDrawersState extends ConsumerState<VideoSourceDrawers> {
   void _performSearch() {
     String searchQuery = _searchController.text;
     if (searchQuery.isNotEmpty) {
+      _disposeSiteSearchControllers();
+      final preserveCurrentPlayback =
+          widget.videoSourceNotifier.videoUrl.isNotEmpty;
       widget.videoSourceNotifier.setSelectedWebsiteIndex(0);
       _followInitialAutoSelection = true;
       _drawerSelectedWebsiteIndex = 0;
@@ -84,8 +103,37 @@ class _VideoSourceDrawersState extends ConsumerState<VideoSourceDrawers> {
         _selectedLineName = null;
         _sortDescending = false;
       });
-      widget.videoSourceNotifier.initResources(searchQuery);
+      widget.videoSourceNotifier.initResources(
+        searchQuery,
+        preserveCurrentPlayback: preserveCurrentPlayback,
+      );
     }
+  }
+
+  TextEditingController _siteSearchControllerFor(ResourcesItem resource) {
+    return _siteSearchControllers.putIfAbsent(
+      resource.websiteName,
+      () => TextEditingController(text: widget.videoSourceNotifier.keyword),
+    );
+  }
+
+  void _disposeSiteSearchControllers() {
+    for (final controller in _siteSearchControllers.values) {
+      controller.dispose();
+    }
+    _siteSearchControllers.clear();
+  }
+
+  void _retrySiteSearch(
+    ResourcesItem resource,
+    TextEditingController controller,
+  ) {
+    final keyword = controller.text.trim();
+    if (keyword.isEmpty) return;
+    widget.videoSourceNotifier.retryResources(
+      resource.websiteName,
+      keyword: keyword,
+    );
   }
 
   int _getDrawerSelectedIndex(List<ResourcesItem> dataSource) {
@@ -113,9 +161,11 @@ class _VideoSourceDrawersState extends ConsumerState<VideoSourceDrawers> {
 
   @override
   void dispose() {
+    _scrollController.removeListener(_handleSourceListScroll);
     if (widget.scrollController == null) {
       _fallbackScrollController.dispose();
     }
+    _disposeSiteSearchControllers();
     _searchController.dispose();
     super.dispose();
   }
@@ -497,6 +547,7 @@ class _VideoSourceDrawersState extends ConsumerState<VideoSourceDrawers> {
     }
 
     if (episodeResources.isEmpty) {
+      final siteSearchController = _siteSearchControllerFor(selectedResource);
       return _buildResourceStatusView(
         icon: Icon(
           Icons.search_off_rounded,
@@ -505,10 +556,10 @@ class _VideoSourceDrawersState extends ConsumerState<VideoSourceDrawers> {
         ),
         title: l10n.resourceNotFoundForSite(selectedResource.websiteName),
         message: l10n.noPlayableSourceHint,
-        action: ElevatedButton(
-          onPressed: () => videoSourceController
-              .retryResources(selectedResource.websiteName),
-          child: Text(l10n.searchAgain),
+        action: _buildSiteSearchAction(
+          controller: siteSearchController,
+          onSearch: () =>
+              _retrySiteSearch(selectedResource, siteSearchController),
         ),
       );
     }
@@ -535,9 +586,15 @@ class _VideoSourceDrawersState extends ConsumerState<VideoSourceDrawers> {
     return Material(
       child: Column(
         children: [
-          _buildSourceControls(
-            lineNames: lineNames,
-            selectedLineName: selectedLineName,
+          AnimatedSize(
+            duration: const Duration(milliseconds: 180),
+            curve: Curves.easeOutCubic,
+            child: _sourceControlsCollapsed
+                ? const SizedBox.shrink()
+                : _buildSourceControls(
+                    lineNames: lineNames,
+                    selectedLineName: selectedLineName,
+                  ),
           ),
           const SizedBox(height: 8),
           _buildEpisodeModeSelector(
@@ -754,7 +811,7 @@ class _VideoSourceDrawersState extends ConsumerState<VideoSourceDrawers> {
     }
 
     return ListView.builder(
-      controller: widget.isBottomSheet ? _scrollController : null,
+      controller: _scrollController,
       padding: EdgeInsets.zero,
       itemCount: matchedResources.length,
       itemBuilder: (context, index) {
@@ -808,7 +865,7 @@ class _VideoSourceDrawersState extends ConsumerState<VideoSourceDrawers> {
     }
 
     return ListView.builder(
-      controller: widget.isBottomSheet ? _scrollController : null,
+      controller: _scrollController,
       padding: EdgeInsets.zero,
       itemCount: expandedItems.length,
       itemBuilder: (context, index) {
@@ -860,6 +917,47 @@ class _VideoSourceDrawersState extends ConsumerState<VideoSourceDrawers> {
           ),
         ),
       ),
+    );
+  }
+
+  Widget _buildSiteSearchAction({
+    required TextEditingController controller,
+    required VoidCallback onSearch,
+  }) {
+    final l10n = AppLocalizations.of(context);
+    return SizedBox(
+      width: double.infinity,
+      child: Column(
+        children: [
+          TextField(
+            controller: controller,
+            textInputAction: TextInputAction.search,
+            onSubmitted: (_) => onSearch(),
+            decoration: InputDecoration(
+              hintText: l10n.manualSearchResource,
+              isDense: true,
+              border: const OutlineInputBorder(),
+              contentPadding:
+                  const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+            ),
+          ),
+          const SizedBox(height: 12),
+          ElevatedButton(
+            onPressed: controller.text.trim().isEmpty ? null : onSearch,
+            child: Text(l10n.searchAgain),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildCaptchaRequired(ResourcesItem resource) {
+    return CaptchaView(
+      key: ValueKey(resource.websiteName),
+      resource: resource,
+      dataSourceController: widget.videoSourceNotifier,
+      subjectName: widget.subjectName,
+      isBottomSheet: widget.isBottomSheet,
     );
   }
 

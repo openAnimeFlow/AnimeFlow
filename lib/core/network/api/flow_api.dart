@@ -132,14 +132,47 @@ class FlowApi {
     }
   }
 
-  static Future<OnlineCount> getSubjectPresenceOnlineCount(
-      int subjectId) async {
-    final response = await _client.get(
-      AnimeFlowApi.presenceSubjectOnlineCount
-          .replaceFirst('{subjectId}', subjectId.toString()),
-    );
-    return OnlineCount.fromJson(
-        Map<String, dynamic>.from(response.data as Map));
+  static Stream<OnlineCount> getSubjectPresenceOnlineCount(
+      int subjectId, String? presenceId, CancelToken cancelToken) async* {
+    var hasReceivedEvent = false;
+    var initialRetryCount = 0;
+    final path = AnimeFlowApi.presenceSubjectOnlineCount
+        .replaceFirst('{subjectId}', subjectId.toString());
+
+    while (!cancelToken.isCancelled) {
+      try {
+        final response = await _client.openEventStream(
+          path,
+          cancelToken,
+          requireFlowToken: false,
+          queryParameters: {
+            if (presenceId != null && presenceId.isNotEmpty)
+              'presenceId': presenceId,
+          },
+        );
+        var receivedEventFromConnection = false;
+        await for (final data in decodeJsonSseEvents(response.stream)) {
+          if (data is! Map) continue;
+          receivedEventFromConnection = true;
+          hasReceivedEvent = true;
+          initialRetryCount = 0;
+          yield OnlineCount.fromJson(Map<String, dynamic>.from(data));
+        }
+        if (!receivedEventFromConnection && !hasReceivedEvent) {
+          throw StateError(
+            'Subject online count SSE closed before its first event',
+          );
+        }
+        await Future<void>.delayed(const Duration(seconds: 2));
+      } catch (error, stackTrace) {
+        if (cancelToken.isCancelled) return;
+        if (_isRateLimited(error) ||
+            (!hasReceivedEvent && ++initialRetryCount >= 3)) {
+          Error.throwWithStackTrace(error, stackTrace);
+        }
+        await Future<void>.delayed(const Duration(seconds: 2));
+      }
+    }
   }
 
   static Stream<List<WatchingSubject>> getWatchingSubjects(

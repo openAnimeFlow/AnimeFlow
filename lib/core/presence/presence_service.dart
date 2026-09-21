@@ -15,6 +15,8 @@ class PresenceService with WidgetsBindingObserver {
   static final PresenceService instance = PresenceService._();
   static const Uuid _uuid = Uuid();
 
+  String? get presenceId => _presenceId;
+
   static const _heartbeatInterval = Duration(minutes: 1);
 
   Timer? _timer;

@@ -9,6 +9,7 @@ import 'package:anime_flow/features/play/presentation/providers/play_provider.da
 import 'package:anime_flow/features/play/presentation/providers/video_source_provider.dart';
 import 'package:anime_flow/features/play/presentation/providers/video_ui_provider.dart';
 import 'package:anime_flow/features/play/presentation/providers/episodes_provider.dart';
+import 'package:anime_flow/features/play/presentation/providers/subject_online_count_provider.dart';
 import 'package:anime_flow/app/router/routes_args.dart';
 import 'package:anime_flow/features/play/presentation/widgets/player/ui/setting/video_setting_dialog.dart';
 import 'package:anime_flow/core/utils/system_util.dart';
@@ -399,6 +400,7 @@ class _TopAreaControlState extends ConsumerState<TopAreaControl> {
 
   ///顶部信息栏
   Widget _buildTopInfoBar(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     return Row(
       children: [
         //网络图标
@@ -476,38 +478,96 @@ class _TopAreaControlState extends ConsumerState<TopAreaControl> {
             );
           },
         ),
-        //电池图标
-        if (SystemUtil.isMobile)
-          Expanded(
-            child: Consumer(
-              builder: (context, ref, child) {
-                final battery = ref.watch(
-                  videoUiProvider.select((state) => state.batteryLevel),
-                );
-                final batteryState = ref.watch(
-                  videoUiProvider.select((state) => state.batteryState),
-                );
-
-                final isCharging = batteryState == BatteryState.charging;
-                return Row(
-                  crossAxisAlignment: CrossAxisAlignment.center,
-                  mainAxisAlignment: MainAxisAlignment.end,
-                  children: [
-                    IosBatteryIcon(
-                      batteryLevel: battery,
-                      isCharging: isCharging,
-                      size: 35,
+        Expanded(
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.end,
+            children: [
+              Consumer(
+                builder: (context, ref, child) {
+                  final extra = ref.watch(playExtraProvider);
+                  if (extra.isOfflineMode || extra.playExtra.subjectId <= 0) {
+                    return const SizedBox.shrink();
+                  }
+                  final onlineCount = ref.watch(
+                    subjectOnlineCountProvider(extra.playExtra.subjectId),
+                  );
+                  final count = onlineCount.asData?.value.onlineUsers;
+                  if (count == null || count <= 0) {
+                    return const SizedBox.shrink();
+                  }
+                  return Tooltip(
+                    message: l10n.totalWatchers,
+                    child: SizedBox(
+                      height: 18,
+                      child: Row(
+                        spacing: 2,
+                        mainAxisSize: MainAxisSize.min,
+                        crossAxisAlignment: CrossAxisAlignment.center,
+                        children: [
+                          const SizedBox(
+                            width: 18,
+                            height: 18,
+                            child: Center(
+                              child: Icon(
+                                Icons.people_outline_rounded,
+                                size: 16,
+                                color: Colors.white,
+                              ),
+                            ),
+                          ),
+                          SizedBox(
+                            height: 18,
+                            child: Center(
+                              child: Text(
+                                count.toString(),
+                                style: const TextStyle(
+                                  color: Colors.white,
+                                  fontSize: 12,
+                                  height: 1,
+                                  fontWeight: FontWeight.w600,
+                                ),
+                                textAlign: TextAlign.center,
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
                     ),
-                    if (isCharging)
-                      const Icon(Icons.flash_on_outlined,
-                          size: 13, color: IosBatteryIcon.chargingColor),
-                  ],
-                );
-              },
-            ),
-          )
-        else
-          const Spacer()
+                  );
+                },
+              ),
+              if (SystemUtil.isMobile) ...[
+                const SizedBox(width: 8),
+                //电池图标
+                Consumer(
+                  builder: (context, ref, child) {
+                    final battery = ref.watch(
+                      videoUiProvider.select((state) => state.batteryLevel),
+                    );
+                    final batteryState = ref.watch(
+                      videoUiProvider.select((state) => state.batteryState),
+                    );
+                    final isCharging = batteryState == BatteryState.charging;
+                    return Row(
+                      crossAxisAlignment: CrossAxisAlignment.center,
+                      mainAxisAlignment: MainAxisAlignment.end,
+                      children: [
+                        IosBatteryIcon(
+                          batteryLevel: battery,
+                          isCharging: isCharging,
+                          size: 35,
+                        ),
+                        if (isCharging)
+                          const Icon(Icons.flash_on_outlined,
+                              size: 13, color: IosBatteryIcon.chargingColor),
+                      ],
+                    );
+                  },
+                ),
+              ]
+            ],
+          ),
+        )
       ],
     );
   }

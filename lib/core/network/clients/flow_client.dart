@@ -134,9 +134,11 @@ class FlowClient {
     String path,
     CancelToken cancelToken, {
     bool requireFlowToken = true,
+    Map<String, dynamic>? queryParameters,
   }) async {
     final response = await DioFactory.animeFlowDio.get<dynamic>(
       path,
+      queryParameters: queryParameters,
       options: await _resolveOptions(
         path: path,
         signRequest: true,

@@ -7,6 +7,7 @@ import 'package:anime_flow/core/crawler/itme/bgm_user_page_item.dart';
 import 'package:anime_flow/core/network/api_path.dart';
 import 'package:anime_flow/core/network/clients/flow_client.dart';
 import 'package:anime_flow/core/network/sse/json_sse_parser.dart';
+import 'package:anime_flow/core/network/sse/sse_connection_status.dart';
 import 'package:anime_flow/shared/models/enums/sort_type.dart';
 import 'package:anime_flow/shared/models/bangumi/actor_item.dart';
 import 'package:anime_flow/shared/models/bangumi/calendar_item.dart';
@@ -86,11 +87,14 @@ class FlowApi {
     );
   }
 
-  static Stream<OnlineCount> getPresenceOnlineCount(
-      CancelToken cancelToken) async* {
+  static Stream<OnlineCount> getPresenceOnlineCount(CancelToken cancelToken,
+      {void Function(SseConnectionStatus status)? onStatus}) async* {
     var hasReceivedEvent = false;
     var initialRetryCount = 0;
     while (!cancelToken.isCancelled) {
+      onStatus?.call(hasReceivedEvent
+          ? SseConnectionStatus.reconnecting
+          : SseConnectionStatus.connecting);
       try {
         final response = await _client.openEventStream(
           AnimeFlowApi.presenceOnlineCount,
@@ -104,6 +108,7 @@ class FlowApi {
             receivedEventFromConnection = true;
             hasReceivedEvent = true;
             initialRetryCount = 0;
+            onStatus?.call(SseConnectionStatus.connected);
             yield count;
           }
         }
@@ -112,12 +117,16 @@ class FlowApi {
             'Presence online count SSE closed before its first event',
           );
         }
+        onStatus?.call(SseConnectionStatus.reconnecting);
+        await Future<void>.delayed(const Duration(seconds: 2));
       } catch (error, stackTrace) {
         if (cancelToken.isCancelled) return;
         if (_isRateLimited(error) ||
             (!hasReceivedEvent && ++initialRetryCount >= 3)) {
+          onStatus?.call(SseConnectionStatus.error);
           Error.throwWithStackTrace(error, stackTrace);
         }
+        onStatus?.call(SseConnectionStatus.reconnecting);
         await Future<void>.delayed(const Duration(seconds: 2));
       }
     }
@@ -134,10 +143,14 @@ class FlowApi {
   }
 
   static Stream<List<WatchingSubject>> getWatchingSubjects(
-      CancelToken cancelToken) async* {
+      CancelToken cancelToken,
+      {void Function(SseConnectionStatus status)? onStatus}) async* {
     var hasReceivedEvent = false;
     var initialRetryCount = 0;
     while (!cancelToken.isCancelled) {
+      onStatus?.call(hasReceivedEvent
+          ? SseConnectionStatus.reconnecting
+          : SseConnectionStatus.connecting);
       try {
         final response = await _client.openEventStream(
           AnimeFlowApi.presenceWatchingSubjects,
@@ -156,6 +169,7 @@ class FlowApi {
           receivedEventFromConnection = true;
           hasReceivedEvent = true;
           initialRetryCount = 0;
+          onStatus?.call(SseConnectionStatus.connected);
           yield subjects;
         }
         if (!receivedEventFromConnection && !hasReceivedEvent) {
@@ -163,12 +177,16 @@ class FlowApi {
             'Watching subjects SSE closed before its first event',
           );
         }
+        onStatus?.call(SseConnectionStatus.reconnecting);
+        await Future<void>.delayed(const Duration(seconds: 2));
       } catch (error, stackTrace) {
         if (cancelToken.isCancelled) return;
         if (_isRateLimited(error) ||
             (!hasReceivedEvent && ++initialRetryCount >= 3)) {
+          onStatus?.call(SseConnectionStatus.error);
           Error.throwWithStackTrace(error, stackTrace);
         }
+        onStatus?.call(SseConnectionStatus.reconnecting);
         await Future<void>.delayed(const Duration(seconds: 2));
       }
     }

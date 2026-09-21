@@ -220,6 +220,24 @@ class AppLocalizationsEn extends AppLocalizations {
       'Only users on version 2.6.0+ are shown as online';
 
   @override
+  String get communityConnectionConnected => 'Connected · Live updates';
+
+  @override
+  String get communityConnectionConnecting => 'Connecting';
+
+  @override
+  String get communityConnectionReconnecting => 'Reconnecting';
+
+  @override
+  String get communityConnectionError => 'Connection failed';
+
+  @override
+  String get communityConnectionDisconnected => 'Not connected';
+
+  @override
+  String get communityConnectionRetry => 'Retry connection';
+
+  @override
   String get watchingAnimeTitle => 'Currently Watching';
 
   @override

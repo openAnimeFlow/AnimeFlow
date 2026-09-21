@@ -214,6 +214,24 @@ class AppLocalizationsZh extends AppLocalizations {
   String get communityOnlineVersionNotice => '社區在線僅展示 2.6.0+版本 的在線使用者';
 
   @override
+  String get communityConnectionConnected => '已連接 · 即時更新';
+
+  @override
+  String get communityConnectionConnecting => '連接中';
+
+  @override
+  String get communityConnectionReconnecting => '重連中';
+
+  @override
+  String get communityConnectionError => '連接失敗';
+
+  @override
+  String get communityConnectionDisconnected => '未連接';
+
+  @override
+  String get communityConnectionRetry => '重試連接';
+
+  @override
   String get watchingAnimeTitle => '正在觀看的番劇';
 
   @override
@@ -2267,6 +2285,24 @@ class AppLocalizationsZhHans extends AppLocalizationsZh {
 
   @override
   String get communityOnlineVersionNotice => '社区在线仅展示 2.6.0+版本 的在线用户';
+
+  @override
+  String get communityConnectionConnected => '已连接 · 实时更新';
+
+  @override
+  String get communityConnectionConnecting => '连接中';
+
+  @override
+  String get communityConnectionReconnecting => '重连中';
+
+  @override
+  String get communityConnectionError => '连接失败';
+
+  @override
+  String get communityConnectionDisconnected => '未连接';
+
+  @override
+  String get communityConnectionRetry => '重试连接';
 
   @override
   String get watchingAnimeTitle => '正在观看的番剧';
@@ -4323,6 +4359,24 @@ class AppLocalizationsZhHantHk extends AppLocalizationsZh {
   String get communityOnlineVersionNotice => '社區在線僅展示 2.6.0+版本 的在線使用者';
 
   @override
+  String get communityConnectionConnected => '已連接 · 即時更新';
+
+  @override
+  String get communityConnectionConnecting => '連接中';
+
+  @override
+  String get communityConnectionReconnecting => '重連中';
+
+  @override
+  String get communityConnectionError => '連接失敗';
+
+  @override
+  String get communityConnectionDisconnected => '未連接';
+
+  @override
+  String get communityConnectionRetry => '重試連接';
+
+  @override
   String get watchingAnimeTitle => '正在觀看的番劇';
 
   @override
@@ -6376,6 +6430,24 @@ class AppLocalizationsZhHantTw extends AppLocalizationsZh {
 
   @override
   String get communityOnlineVersionNotice => '社群在線僅展示 2.6.0+版本 的在線使用者';
+
+  @override
+  String get communityConnectionConnected => '已連線 · 即時更新';
+
+  @override
+  String get communityConnectionConnecting => '連線中';
+
+  @override
+  String get communityConnectionReconnecting => '重新連線中';
+
+  @override
+  String get communityConnectionError => '連線失敗';
+
+  @override
+  String get communityConnectionDisconnected => '未連線';
+
+  @override
+  String get communityConnectionRetry => '重試連線';
 
   @override
   String get watchingAnimeTitle => '正在觀看的番劇';

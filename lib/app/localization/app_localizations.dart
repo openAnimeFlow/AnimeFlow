@@ -493,6 +493,42 @@ abstract class AppLocalizations {
   /// **'社区在线仅展示 2.6.0+版本 的在线用户'**
   String get communityOnlineVersionNotice;
 
+  /// No description provided for @communityConnectionConnected.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'已连接 · 实时更新'**
+  String get communityConnectionConnected;
+
+  /// No description provided for @communityConnectionConnecting.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'连接中'**
+  String get communityConnectionConnecting;
+
+  /// No description provided for @communityConnectionReconnecting.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'重连中'**
+  String get communityConnectionReconnecting;
+
+  /// No description provided for @communityConnectionError.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'连接失败'**
+  String get communityConnectionError;
+
+  /// No description provided for @communityConnectionDisconnected.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'未连接'**
+  String get communityConnectionDisconnected;
+
+  /// No description provided for @communityConnectionRetry.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'重试连接'**
+  String get communityConnectionRetry;
+
   /// No description provided for @watchingAnimeTitle.
   ///
   /// In zh_Hans, this message translates to:

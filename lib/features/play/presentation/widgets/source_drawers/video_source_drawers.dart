@@ -141,15 +141,21 @@ class _VideoSourceDrawersState extends ConsumerState<VideoSourceDrawers> {
     final providerIndex = controller.selectedWebsiteIndex >= dataSource.length
         ? 0
         : controller.selectedWebsiteIndex;
+    final currentWebsiteIndex = controller.webSiteTitle.isEmpty
+        ? -1
+        : dataSource.indexWhere(
+            (resource) => resource.websiteName == controller.webSiteTitle,
+          );
+    final initialIndex =
+        currentWebsiteIndex >= 0 ? currentWebsiteIndex : providerIndex;
 
     if (_drawerSelectedWebsiteIndex == null ||
         _drawerSelectedWebsiteIndex! >= dataSource.length) {
-      _drawerSelectedWebsiteIndex = providerIndex;
+      _drawerSelectedWebsiteIndex = initialIndex;
     }
 
-    if (_followInitialAutoSelection &&
-        _drawerSelectedWebsiteIndex != providerIndex) {
-      _drawerSelectedWebsiteIndex = providerIndex;
+    if (_followInitialAutoSelection) {
+      _drawerSelectedWebsiteIndex = initialIndex;
     }
 
     if (_followInitialAutoSelection && controller.webSiteTitle.isNotEmpty) {

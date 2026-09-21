@@ -66,90 +66,98 @@ class _RankingPageState extends ConsumerState<RankingPage> {
       appBar: AppBar(
         title: Text(l10n.rankingTitle),
       ),
-      body: RefreshIndicator(
-        onRefresh: () => ref.read(rankingProvider.notifier).refresh(),
-        child: NotificationListener<ScrollNotification>(
-          onNotification: (notification) {
-            if (notification is ScrollUpdateNotification) {
-              final metrics = notification.metrics;
-              final state = rankingAsync.asData?.value;
-              if (metrics.pixels >= metrics.maxScrollExtent - 200 &&
-                  state != null &&
-                  state.items.isNotEmpty &&
-                  !state.isReloading &&
-                  !state.isLoadingMore &&
-                  state.hasMore) {
-                ref.read(rankingProvider.notifier).loadMore();
-              }
-            }
-            return false;
-          },
-          child: CustomScrollView(
-            controller: scrollController,
-            slivers: [
-              const SliverAppBar(
-                pinned: true,
-                floating: true,
-                title: RankingFilterBar(),
-              ),
-              if (rankingState?.errorMessage case final errorMessage?)
-                SliverToBoxAdapter(
-                  child: Padding(
-                    padding: const EdgeInsets.only(top: 12),
-                    child: Material(
-                      color: Theme.of(context).colorScheme.errorContainer,
-                      borderRadius: BorderRadius.circular(12),
+      body: LayoutBuilder(
+        builder: (context, constraints) {
+          final horizontalPadding = _horizontalPadding(constraints.maxWidth);
+          final contentWidth = constraints.maxWidth - horizontalPadding * 2;
+          return RefreshIndicator(
+            onRefresh: () => ref.read(rankingProvider.notifier).refresh(),
+            child: NotificationListener<ScrollNotification>(
+              onNotification: (notification) {
+                if (notification is ScrollUpdateNotification) {
+                  final metrics = notification.metrics;
+                  final state = rankingAsync.asData?.value;
+                  if (metrics.pixels >= metrics.maxScrollExtent - 200 &&
+                      state != null &&
+                      state.items.isNotEmpty &&
+                      !state.isReloading &&
+                      !state.isLoadingMore &&
+                      state.hasMore) {
+                    ref.read(rankingProvider.notifier).loadMore();
+                  }
+                }
+                return false;
+              },
+              child: CustomScrollView(
+                controller: scrollController,
+                slivers: [
+                  const SliverAppBar(
+                    pinned: true,
+                    floating: true,
+                    title: RankingFilterBar(),
+                  ),
+                  if (rankingState?.errorMessage case final errorMessage?)
+                    SliverToBoxAdapter(
                       child: Padding(
-                        padding: const EdgeInsets.all(12),
-                        child: Text(
-                          errorMessage,
-                          style: TextStyle(
-                            color:
-                                Theme.of(context).colorScheme.onErrorContainer,
+                        padding: const EdgeInsets.only(top: 12),
+                        child: Material(
+                          color: Theme.of(context).colorScheme.errorContainer,
+                          borderRadius: BorderRadius.circular(12),
+                          child: Padding(
+                            padding: const EdgeInsets.all(12),
+                            child: Text(
+                              errorMessage,
+                              style: TextStyle(
+                                color: Theme.of(context)
+                                    .colorScheme
+                                    .onErrorContainer,
+                              ),
+                            ),
                           ),
+                        ),
+                      ),
+                    ),
+                  SliverToBoxAdapter(
+                    child: Padding(
+                      padding: EdgeInsets.symmetric(
+                        horizontal: horizontalPadding,
+                      ),
+                      child: SizedBox(
+                        width: double.infinity,
+                        child: rankingAsync.when(
+                          loading: () => const SizedBox(
+                            height: 320,
+                            child: Center(child: CircularProgressIndicator()),
+                          ),
+                          error: (error, _) => SizedBox(
+                            height: 320,
+                            child: Center(
+                              child: Column(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  Text(
+                                      l10n.rankingLoadFailed(error.toString())),
+                                  const SizedBox(height: 12),
+                                  FilledButton(
+                                    onPressed: () => ref
+                                        .read(rankingProvider.notifier)
+                                        .refresh(),
+                                    child: Text(l10n.retry),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ),
+                          data: (_) => RankingGrid(contentWidth: contentWidth),
                         ),
                       ),
                     ),
                   ),
-                ),
-              SliverLayoutBuilder(
-                builder: (context, constraints) {
-                  return SliverPadding(
-                    padding: EdgeInsets.symmetric(
-                      horizontal:
-                          _horizontalPadding(constraints.crossAxisExtent),
-                    ),
-                    sliver: rankingAsync.when(
-                      loading: () => const SliverFillRemaining(
-                        child: Center(
-                          child: CircularProgressIndicator(),
-                        ),
-                      ),
-                      error: (error, _) => SliverFillRemaining(
-                        child: Center(
-                          child: Column(
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              Text(l10n.rankingLoadFailed(error.toString())),
-                              const SizedBox(height: 12),
-                              FilledButton(
-                                onPressed: () => ref
-                                    .read(rankingProvider.notifier)
-                                    .refresh(),
-                                child: Text(l10n.retry),
-                              ),
-                            ],
-                          ),
-                        ),
-                      ),
-                      data: (_) => const RankingGrid(),
-                    ),
-                  );
-                },
+                ],
               ),
-            ],
-          ),
-        ),
+            ),
+          );
+        },
       ),
       floatingActionButton: showBackToTop
           ? FloatingActionButton(

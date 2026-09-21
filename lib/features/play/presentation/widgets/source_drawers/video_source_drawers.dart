@@ -1,18 +1,14 @@
-import 'dart:async';
-import 'dart:convert';
-
 import 'package:anime_flow/core/constants/layout_constant.dart';
-import 'package:anime_flow/core/crawler/itme/anti_crawler_config.dart';
 import 'package:anime_flow/core/utils/utils.dart';
 import 'package:anime_flow/shared/models/player/play/video/episode_resources_item.dart';
 import 'package:anime_flow/shared/models/player/play/video/resources_item.dart';
 import 'package:anime_flow/features/play/presentation/providers/video_source_provider.dart';
-import 'package:anime_flow/features/play/presentation/providers/captcha_provider.dart';
 import 'package:anime_flow/core/logger/logger.dart';
 import 'package:anime_flow/shared/widgets/animation_network_image.dart';
 import 'package:anime_flow/shared/widgets/drop_down_menu.dart';
 import 'package:anime_flow/shared/widgets/notification_toast.dart';
 import 'package:anime_flow/app/localization/app_localizations.dart';
+import 'captcha_view.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -52,8 +48,10 @@ class _VideoSourceDrawersState extends ConsumerState<VideoSourceDrawers> {
   String? _selectedLineName;
   bool _sortDescending = false;
   final _searchController = TextEditingController();
+  final Map<String, TextEditingController> _siteSearchControllers = {};
   int? _drawerSelectedWebsiteIndex;
   bool _followInitialAutoSelection = true;
+  bool _sourceControlsCollapsed = false;
   late final ScrollController _fallbackScrollController;
 
   ScrollController get _scrollController =>
@@ -63,7 +61,21 @@ class _VideoSourceDrawersState extends ConsumerState<VideoSourceDrawers> {
   void initState() {
     super.initState();
     _fallbackScrollController = ScrollController();
+    _scrollController.addListener(_handleSourceListScroll);
     _searchController.text = widget.subjectName;
+  }
+
+  void _handleSourceListScroll() {
+    final shouldCollapse = _scrollController.hasClients &&
+        _scrollController.offset > 8 &&
+        !_sourceControlsCollapsed;
+    final shouldExpand = _scrollController.hasClients &&
+        _scrollController.offset <= 8 &&
+        _sourceControlsCollapsed;
+    if (!shouldCollapse && !shouldExpand) return;
+    setState(() {
+      _sourceControlsCollapsed = shouldCollapse;
+    });
   }
 
   void _setSelectedWebsite(int index) {
@@ -80,6 +92,9 @@ class _VideoSourceDrawersState extends ConsumerState<VideoSourceDrawers> {
   void _performSearch() {
     String searchQuery = _searchController.text;
     if (searchQuery.isNotEmpty) {
+      _disposeSiteSearchControllers();
+      final preserveCurrentPlayback =
+          widget.videoSourceNotifier.videoUrl.isNotEmpty;
       widget.videoSourceNotifier.setSelectedWebsiteIndex(0);
       _followInitialAutoSelection = true;
       _drawerSelectedWebsiteIndex = 0;
@@ -88,8 +103,37 @@ class _VideoSourceDrawersState extends ConsumerState<VideoSourceDrawers> {
         _selectedLineName = null;
         _sortDescending = false;
       });
-      widget.videoSourceNotifier.initResources(searchQuery);
+      widget.videoSourceNotifier.initResources(
+        searchQuery,
+        preserveCurrentPlayback: preserveCurrentPlayback,
+      );
     }
+  }
+
+  TextEditingController _siteSearchControllerFor(ResourcesItem resource) {
+    return _siteSearchControllers.putIfAbsent(
+      resource.websiteName,
+      () => TextEditingController(text: widget.videoSourceNotifier.keyword),
+    );
+  }
+
+  void _disposeSiteSearchControllers() {
+    for (final controller in _siteSearchControllers.values) {
+      controller.dispose();
+    }
+    _siteSearchControllers.clear();
+  }
+
+  void _retrySiteSearch(
+    ResourcesItem resource,
+    TextEditingController controller,
+  ) {
+    final keyword = controller.text.trim();
+    if (keyword.isEmpty) return;
+    widget.videoSourceNotifier.retryResources(
+      resource.websiteName,
+      keyword: keyword,
+    );
   }
 
   int _getDrawerSelectedIndex(List<ResourcesItem> dataSource) {
@@ -117,65 +161,39 @@ class _VideoSourceDrawersState extends ConsumerState<VideoSourceDrawers> {
 
   @override
   void dispose() {
+    _scrollController.removeListener(_handleSourceListScroll);
     if (widget.scrollController == null) {
       _fallbackScrollController.dispose();
     }
+    _disposeSiteSearchControllers();
     _searchController.dispose();
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
-    ref.watch(videoSourceProvider);
     if (widget.isBottomSheet) {
-      return buildBottomSheetContent(context);
+      return Material(
+        color: Theme.of(context).cardColor,
+        borderRadius: const BorderRadius.vertical(top: Radius.circular(16)),
+        clipBehavior: Clip.antiAlias,
+        child: Padding(
+          padding: EdgeInsets.fromLTRB(
+              16, 20, 16, 16 + MediaQuery.of(context).padding.bottom),
+          child: _buildDrawerContent(includeDragHandle: true),
+        ),
+      );
     }
-    return buildSideDrawerContent(context);
-  }
-
-  /// 底部抽屉内容
-  Widget buildBottomSheetContent(BuildContext context) {
-    return Material(
-      color: Theme.of(context).cardColor,
-      borderRadius: const BorderRadius.vertical(top: Radius.circular(16)),
-      clipBehavior: Clip.antiAlias,
-      child: Padding(
-        padding: EdgeInsets.fromLTRB(
-            16, 20, 16, 16 + MediaQuery.of(context).padding.bottom),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            _buildDragHandle(context),
-            buildHeader(),
-            _manualSearch(),
-            const SizedBox(height: 16),
-            Builder(
-              builder: (context) {
-                final dataSource = widget.videoSourceNotifier.videoResources;
-                if (dataSource.isEmpty) {
-                  return const SizedBox.shrink();
-                }
-                return _buildWebsiteSelector(dataSource: dataSource);
-              },
-            ),
-            const SizedBox(height: 16),
-            Expanded(
-              child: Builder(
-                builder: (context) {
-                  final videoSourceController = widget.videoSourceNotifier;
-                  final dataSource = videoSourceController.videoResources;
-                  if (dataSource.isEmpty) {
-                    return const SizedBox.shrink();
-                  }
-                  final selectedIndex = _getDrawerSelectedIndex(dataSource);
-                  return _buildVideoSource(
-                    dataSource: dataSource,
-                    selectedIndex: selectedIndex,
-                  );
-                },
-              ),
-            ),
-          ],
+    return Align(
+      alignment: Alignment.centerRight,
+      child: SizedBox(
+        width: LayoutConstant.playContentWidth,
+        height: MediaQuery.of(context).size.height,
+        child: Container(
+          padding: EdgeInsets.only(
+              top: MediaQuery.of(context).padding.top, left: 16, right: 16),
+          color: Theme.of(context).cardColor,
+          child: _buildDrawerContent(),
         ),
       ),
     );
@@ -235,54 +253,61 @@ class _VideoSourceDrawersState extends ConsumerState<VideoSourceDrawers> {
     );
   }
 
-  /// 侧边抽屉内容
-  Widget buildSideDrawerContent(BuildContext context) {
-    return Align(
-      alignment: Alignment.centerRight,
-      child: SizedBox(
-        width: LayoutConstant.playContentWidth,
-        height: MediaQuery.of(context).size.height,
-        child: Container(
-          padding: EdgeInsets.only(
-              top: MediaQuery.of(context).padding.top, left: 16, right: 16),
-          color: Theme.of(context).cardColor,
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              buildHeader(),
-              _manualSearch(),
-              const SizedBox(height: 16),
-              Builder(
-                builder: (context) {
-                  final videoSourceController = widget.videoSourceNotifier;
-                  final dataSource = videoSourceController.videoResources;
-                  if (dataSource.isEmpty) {
-                    return const SizedBox.shrink();
-                  }
-                  return _buildWebsiteSelector(dataSource: dataSource);
-                },
-              ),
-              const SizedBox(height: 16),
-              Expanded(
-                child: Builder(
-                  builder: (context) {
-                    final videoSourceController = widget.videoSourceNotifier;
-                    final dataSource = videoSourceController.videoResources;
-                    if (dataSource.isEmpty) {
-                      return const SizedBox.shrink();
-                    }
-                    final selectedIndex = _getDrawerSelectedIndex(dataSource);
-                    return _buildVideoSource(
-                      dataSource: dataSource,
-                      selectedIndex: selectedIndex,
-                    );
-                  },
+  Widget _buildDrawerContent({bool includeDragHandle = false}) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        if (includeDragHandle) _buildDragHandle(context),
+        buildHeader(),
+        _manualSearch(),
+        const SizedBox(height: 16),
+        Consumer(
+          builder: (context, ref, child) {
+            final sourceState = ref.watch(
+              videoSourceProvider.select(
+                (state) => (
+                  videoResources: state.videoResources,
+                  selectedWebsiteIndex: state.selectedWebsiteIndex,
+                  webSiteTitle: state.webSiteTitle,
                 ),
               ),
-            ],
+            );
+            if (sourceState.videoResources.isEmpty) {
+              return const SizedBox.shrink();
+            }
+            return _buildWebsiteSelector(
+              dataSource: sourceState.videoResources,
+            );
+          },
+        ),
+        const SizedBox(height: 16),
+        Expanded(
+          child: Consumer(
+            builder: (context, ref, child) {
+              final sourceState = ref.watch(
+                videoSourceProvider.select(
+                  (state) => (
+                    videoResources: state.videoResources,
+                    currentEpisodeIndex: state.currentEpisodeIndex,
+                    selectedWebsiteIndex: state.selectedWebsiteIndex,
+                    webSiteTitle: state.webSiteTitle,
+                    videoUrl: state.videoUrl,
+                  ),
+                ),
+              );
+              if (sourceState.videoResources.isEmpty) {
+                return const SizedBox.shrink();
+              }
+              return _buildVideoSource(
+                dataSource: sourceState.videoResources,
+                selectedIndex: _getDrawerSelectedIndex(
+                  sourceState.videoResources,
+                ),
+              );
+            },
           ),
         ),
-      ),
+      ],
     );
   }
 
@@ -462,7 +487,13 @@ class _VideoSourceDrawersState extends ConsumerState<VideoSourceDrawers> {
     final episodeResources = selectedResource.episodeResources;
 
     if (selectedResource.needsCaptcha) {
-      return _buildCaptchaRequired(selectedResource);
+      return CaptchaView(
+        key: ValueKey(selectedResource.websiteName),
+        resource: selectedResource,
+        dataSourceController: widget.videoSourceNotifier,
+        subjectName: widget.subjectName,
+        isBottomSheet: widget.isBottomSheet,
+      );
     }
 
     if (selectedResource.isLoading) {
@@ -495,6 +526,7 @@ class _VideoSourceDrawersState extends ConsumerState<VideoSourceDrawers> {
     }
 
     if (episodeResources.isEmpty) {
+      final siteSearchController = _siteSearchControllerFor(selectedResource);
       return _buildResourceStatusView(
         icon: Icon(
           Icons.search_off_rounded,
@@ -503,10 +535,10 @@ class _VideoSourceDrawersState extends ConsumerState<VideoSourceDrawers> {
         ),
         title: l10n.resourceNotFoundForSite(selectedResource.websiteName),
         message: l10n.noPlayableSourceHint,
-        action: ElevatedButton(
-          onPressed: () => videoSourceController
-              .retryResources(selectedResource.websiteName),
-          child: Text(l10n.searchAgain),
+        action: _buildSiteSearchAction(
+          controller: siteSearchController,
+          onSearch: () =>
+              _retrySiteSearch(selectedResource, siteSearchController),
         ),
       );
     }
@@ -533,9 +565,15 @@ class _VideoSourceDrawersState extends ConsumerState<VideoSourceDrawers> {
     return Material(
       child: Column(
         children: [
-          _buildSourceControls(
-            lineNames: lineNames,
-            selectedLineName: selectedLineName,
+          AnimatedSize(
+            duration: const Duration(milliseconds: 180),
+            curve: Curves.easeOutCubic,
+            child: _sourceControlsCollapsed
+                ? const SizedBox.shrink()
+                : _buildSourceControls(
+                    lineNames: lineNames,
+                    selectedLineName: selectedLineName,
+                  ),
           ),
           const SizedBox(height: 8),
           _buildEpisodeModeSelector(
@@ -752,7 +790,7 @@ class _VideoSourceDrawersState extends ConsumerState<VideoSourceDrawers> {
     }
 
     return ListView.builder(
-      controller: widget.isBottomSheet ? _scrollController : null,
+      controller: _scrollController,
       padding: EdgeInsets.zero,
       itemCount: matchedResources.length,
       itemBuilder: (context, index) {
@@ -806,7 +844,7 @@ class _VideoSourceDrawersState extends ConsumerState<VideoSourceDrawers> {
     }
 
     return ListView.builder(
-      controller: widget.isBottomSheet ? _scrollController : null,
+      controller: _scrollController,
       padding: EdgeInsets.zero,
       itemCount: expandedItems.length,
       itemBuilder: (context, index) {
@@ -861,13 +899,34 @@ class _VideoSourceDrawersState extends ConsumerState<VideoSourceDrawers> {
     );
   }
 
-  Widget _buildCaptchaRequired(ResourcesItem resource) {
-    return CaptchaView(
-      key: ValueKey(resource.websiteName),
-      resource: resource,
-      dataSourceController: widget.videoSourceNotifier,
-      subjectName: widget.subjectName,
-      isBottomSheet: widget.isBottomSheet,
+  Widget _buildSiteSearchAction({
+    required TextEditingController controller,
+    required VoidCallback onSearch,
+  }) {
+    final l10n = AppLocalizations.of(context);
+    return SizedBox(
+      width: double.infinity,
+      child: Column(
+        children: [
+          TextField(
+            controller: controller,
+            textInputAction: TextInputAction.search,
+            onSubmitted: (_) => onSearch(),
+            decoration: InputDecoration(
+              hintText: l10n.manualSearchResource,
+              isDense: true,
+              border: const OutlineInputBorder(),
+              contentPadding:
+                  const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+            ),
+          ),
+          const SizedBox(height: 12),
+          ElevatedButton(
+            onPressed: controller.text.trim().isEmpty ? null : onSearch,
+            child: Text(l10n.searchAgain),
+          ),
+        ],
+      ),
     );
   }
 
@@ -1007,356 +1066,6 @@ class _VideoSourceDrawersState extends ConsumerState<VideoSourceDrawers> {
                     _buildMatchRatioBadge(item.matchRatio),
                   ],
                 ),
-              ],
-            ),
-          ),
-        ),
-      ),
-    );
-  }
-}
-
-/// 验证ui
-class CaptchaView extends StatefulWidget {
-  const CaptchaView({
-    super.key,
-    required this.resource,
-    required this.dataSourceController,
-    required this.subjectName,
-    this.isBottomSheet = false,
-  });
-
-  final ResourcesItem resource;
-  final VideoSourceNotifier dataSourceController;
-  final String subjectName;
-  final bool isBottomSheet;
-
-  @override
-  State<CaptchaView> createState() => _CaptchaViewState();
-}
-
-class _CaptchaViewState extends State<CaptchaView> {
-  CaptchaProvider? _provider;
-  Timer? _verifyTimer;
-  StreamSubscription? _imageSub;
-  final _codeController = TextEditingController();
-  String? _imageData;
-  bool _sessionActive = false;
-  bool _isSubmitting = false;
-  bool _isAutoVerifying = false;
-
-  @override
-  void dispose() {
-    _codeController.dispose();
-    _disposeSession();
-    super.dispose();
-  }
-
-  void _disposeSession() {
-    _imageSub?.cancel();
-    _imageSub = null;
-    _verifyTimer?.cancel();
-    _verifyTimer = null;
-    _provider?.dispose();
-    _provider = null;
-    _sessionActive = false;
-    _isSubmitting = false;
-    _isAutoVerifying = false;
-    _imageData = null;
-  }
-
-  void _startVerification() {
-    final config = widget.resource.antiCrawlerConfig;
-    if (config == null) return;
-    final keyword = widget.subjectName;
-
-    _disposeSession();
-    _provider = CaptchaProvider();
-    final name = widget.resource.websiteName;
-    final url = widget.resource.searchUrl.replaceFirst(
-      '{keyword}',
-      Uri.encodeQueryComponent(keyword),
-    );
-
-    if (config.captchaType == CaptchaType.autoClickButton) {
-      setState(() {
-        _sessionActive = true;
-        _isAutoVerifying = true;
-      });
-      _provider!.loadForButtonClick(
-        url: url,
-        buttonXpath: config.captchaButton,
-        pluginName: name,
-        onVerified: () => _onVerified(name),
-      );
-    } else {
-      setState(() {
-        _sessionActive = true;
-        _imageData = null;
-        _isSubmitting = false;
-      });
-
-      _imageSub = _provider!.onCaptchaImageUrl.listen((imageUrl) {
-        if (imageUrl != null && mounted) {
-          setState(() {
-            _imageData = imageUrl;
-            if (_isSubmitting) {
-              _isSubmitting = false;
-              _codeController.clear();
-              _verifyTimer?.cancel();
-              _verifyTimer = null;
-            }
-          });
-        }
-      });
-
-      _provider!.loadForCaptcha(
-        url,
-        config.captchaImage,
-        inputXpath: config.captchaInput,
-      );
-    }
-  }
-
-  void _onVerified(String websiteName) {
-    if (!mounted) return;
-    final dataSourceController = widget.dataSourceController;
-    _disposeSession();
-    dataSourceController.markCaptchaVerified(websiteName);
-    setState(() {});
-    // final l10n = AppLocalizations.of(context);
-    // NotificationToast.show(l10n.verificationRetrying,
-    //     title: l10n.verificationSuccess);
-    Future<void>.delayed(const Duration(seconds: 3), () {
-      dataSourceController.retryResources(websiteName);
-    });
-  }
-
-  Future<void> _submit() async {
-    final config = widget.resource.antiCrawlerConfig;
-    if (config == null || _isSubmitting) return;
-    if (_codeController.text.trim().isEmpty) {
-      final l10n = AppLocalizations.of(context);
-      NotificationToast.show(l10n.enterCaptcha, title: l10n.tip);
-      return;
-    }
-    setState(() => _isSubmitting = true);
-    final name = widget.resource.websiteName;
-
-    await _provider?.submitCaptcha(
-      captchaCode: _codeController.text.trim(),
-      inputXpath: config.captchaInput,
-      buttonXpath: config.captchaButton,
-      pluginName: name,
-      onVerified: () => _onVerified(name),
-    );
-
-    if (_sessionActive && mounted) {
-      _verifyTimer?.cancel();
-      _verifyTimer = Timer(const Duration(seconds: 8), () async {
-        if (!_sessionActive || !mounted) return;
-        setState(() {
-          _isSubmitting = false;
-          _codeController.clear();
-        });
-        final l10n = AppLocalizations.of(context);
-        NotificationToast.show(l10n.captchaMayBeWrong, title: l10n.tip);
-        await _reloadCaptchaImage();
-      });
-    }
-  }
-
-  /// 重新拉取验证码图
-  Future<void> _reloadCaptchaImage() async {
-    final config = widget.resource.antiCrawlerConfig;
-    final p = _provider;
-    if (config == null || p == null || !_sessionActive || _isAutoVerifying) {
-      return;
-    }
-    _verifyTimer?.cancel();
-    _verifyTimer = null;
-    if (!mounted) return;
-    setState(() {
-      _imageData = null;
-      _isSubmitting = false;
-    });
-    await p.reloadCaptchaImage(config.captchaImage,
-        inputXpath: config.captchaInput);
-  }
-
-  void _cancel() {
-    final name = widget.resource.websiteName;
-    final provider = _provider;
-    _provider = null;
-    _imageSub?.cancel();
-    _imageSub = null;
-    _verifyTimer?.cancel();
-    _verifyTimer = null;
-    setState(() {
-      _sessionActive = false;
-      _isSubmitting = false;
-      _isAutoVerifying = false;
-      _imageData = null;
-      _codeController.clear();
-    });
-    provider?.saveAndUnload(name).then((_) {
-      provider.dispose();
-      widget.dataSourceController.retryResources(name);
-    });
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    final r = widget.resource;
-    final l10n = AppLocalizations.of(context);
-    final keyboardInset = MediaQuery.viewInsetsOf(context).bottom;
-    final compact = widget.isBottomSheet && keyboardInset > 0;
-
-    if (!_sessionActive) {
-      return Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Icon(Icons.shield_outlined,
-                size: 48, color: Theme.of(context).colorScheme.primary),
-            const SizedBox(height: 16),
-            Text(l10n.siteRequiresCaptcha(r.websiteName),
-                style: Theme.of(context).textTheme.bodyMedium),
-            const SizedBox(height: 16),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                FilledButton.icon(
-                  onPressed: _startVerification,
-                  icon: const Icon(Icons.verified_user_outlined, size: 18),
-                  label: Text(l10n.verify),
-                ),
-                const SizedBox(width: 12),
-                OutlinedButton.icon(
-                  onPressed: () =>
-                      widget.dataSourceController.retryResources(r.websiteName),
-                  icon: const Icon(Icons.refresh, size: 18),
-                  label: Text(l10n.retry),
-                ),
-              ],
-            ),
-          ],
-        ),
-      );
-    }
-
-    if (_isAutoVerifying) {
-      return Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            const CircularProgressIndicator(),
-            const SizedBox(height: 16),
-            Text(l10n.siteAutoVerifying(r.websiteName),
-                style: Theme.of(context).textTheme.bodyMedium,
-                textAlign: TextAlign.center),
-            const SizedBox(height: 16),
-            TextButton(
-              onPressed: _cancel,
-              child: Text(l10n.cancel,
-                  style:
-                      TextStyle(color: Theme.of(context).colorScheme.outline)),
-            ),
-          ],
-        ),
-      );
-    }
-
-    return Material(
-      color: Colors.transparent,
-      child: Center(
-        child: SingleChildScrollView(
-          child: Padding(
-            padding: EdgeInsets.only(
-                left: 16,
-                right: 16,
-                // The bottom sheet already avoids the keyboard as a whole.
-                bottom: widget.isBottomSheet ? 0 : keyboardInset),
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.start,
-              children: [
-                if (!compact) ...[
-                  Icon(Icons.shield_outlined,
-                      size: 36, color: Theme.of(context).colorScheme.primary),
-                  const SizedBox(height: 8),
-                  Text(l10n.captchaVerification(r.websiteName),
-                      style: Theme.of(context).textTheme.titleSmall),
-                  const SizedBox(height: 16),
-                ],
-                if (_imageData == null) ...[
-                  const CircularProgressIndicator(),
-                  const SizedBox(height: 12),
-                  Text(l10n.loadingCaptchaImage),
-                ] else ...[
-                  ClipRRect(
-                    borderRadius: BorderRadius.circular(8),
-                    child: GestureDetector(
-                      onTap: (_isSubmitting || _imageData == null)
-                          ? null
-                          : () {
-                              _codeController.clear();
-                              _reloadCaptchaImage();
-                            },
-                      child: ConstrainedBox(
-                        constraints: BoxConstraints(
-                          maxHeight: compact ? 100 : double.infinity,
-                        ),
-                        child: Image.memory(
-                          width: double.infinity,
-                          base64Decode(_imageData!.split(',').last),
-                          fit: BoxFit.contain,
-                          errorBuilder: (ctx, err, _) =>
-                              Text(l10n.imageDecodeFailed),
-                        ),
-                      ),
-                    ),
-                  ),
-                  SizedBox(height: compact ? 12 : 20),
-                  SizedBox(
-                    child: TextField(
-                      controller: _codeController,
-                      autofocus: true,
-                      enabled: !_isSubmitting,
-                      decoration: InputDecoration(
-                        labelText: l10n.enterCaptcha,
-                        border: const OutlineInputBorder(),
-                        contentPadding: const EdgeInsets.symmetric(
-                            horizontal: 12, vertical: 10),
-                      ),
-                      onSubmitted: _isSubmitting ? null : (_) => _submit(),
-                    ),
-                  ),
-                  const SizedBox(height: 12),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.end,
-                    children: [
-                      TextButton(
-                        onPressed: _cancel,
-                        child: Text(l10n.cancel,
-                            style: TextStyle(
-                                color: Theme.of(context).colorScheme.outline)),
-                      ),
-                      const SizedBox(width: 12),
-                      FilledButton(
-                        onPressed: (_imageData == null || _isSubmitting)
-                            ? null
-                            : _submit,
-                        child: _isSubmitting
-                            ? const SizedBox(
-                                width: 18,
-                                height: 18,
-                                child:
-                                    CircularProgressIndicator(strokeWidth: 2))
-                            : Text(l10n.submit),
-                      ),
-                    ],
-                  ),
-                ],
               ],
             ),
           ),

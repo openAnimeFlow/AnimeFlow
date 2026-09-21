@@ -174,7 +174,10 @@ class VideoSourceNotifier extends _$VideoSourceNotifier {
     _syncVideoResources(configs);
   }
 
-  Future<void> initResources(String keyword) async {
+  Future<void> initResources(
+    String keyword, {
+    bool preserveCurrentPlayback = false,
+  }) async {
     final normalizedKeyword = keyword.trim();
     if (normalizedKeyword.isEmpty) {
       return;
@@ -188,14 +191,15 @@ class VideoSourceNotifier extends _$VideoSourceNotifier {
     _clearAllResources(configs);
     state = state.copyWith(
       keyword: normalizedKeyword,
-      userManuallySelected: false,
+      userManuallySelected:
+          preserveCurrentPlayback ? state.userManuallySelected : false,
       isSearchCompleted: false,
       selectedWebsiteIndex: 0,
-      webSiteTitle: '',
-      webSiteIcon: '',
-      resourceTitle: '',
-      lineName: '',
-      videoUrl: '',
+      webSiteTitle: preserveCurrentPlayback ? state.webSiteTitle : '',
+      webSiteIcon: preserveCurrentPlayback ? state.webSiteIcon : '',
+      resourceTitle: preserveCurrentPlayback ? state.resourceTitle : '',
+      lineName: preserveCurrentPlayback ? state.lineName : '',
+      videoUrl: preserveCurrentPlayback ? state.videoUrl : '',
     );
 
     final eligibleConfigs = <CrawlConfigItem>[];
@@ -306,7 +310,10 @@ class VideoSourceNotifier extends _$VideoSourceNotifier {
     );
   }
 
-  Future<void> retryResources(String websiteName) async {
+  Future<void> retryResources(
+    String websiteName, {
+    String? keyword,
+  }) async {
     final configs = await _loadSources();
     if (!ref.mounted) return;
     _syncVideoResources(configs);
@@ -315,9 +322,12 @@ class VideoSourceNotifier extends _$VideoSourceNotifier {
       return;
     }
     final fallbackKeyword = ref.read(playExtraProvider).playExtra.subjectName;
-    final retryKeyword = state.keyword.trim().isNotEmpty
-        ? state.keyword.trim()
-        : fallbackKeyword.trim();
+    final customKeyword = keyword?.trim() ?? '';
+    final retryKeyword = customKeyword.isNotEmpty
+        ? customKeyword
+        : state.keyword.trim().isNotEmpty
+            ? state.keyword.trim()
+            : fallbackKeyword.trim();
     if (retryKeyword.isEmpty) {
       return;
     }

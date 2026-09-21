@@ -12,6 +12,7 @@ import 'package:anime_flow/features/play/presentation/widgets/player/ui/danmaku/
 import 'package:anime_flow/features/play/presentation/widgets/player/ui/player_progress_bar.dart';
 import 'package:anime_flow/features/play/presentation/widgets/player/ui/player_time_display.dart';
 import 'package:anime_flow/features/play/presentation/providers/subject_episodes_provider.dart';
+import 'package:anime_flow/shared/models/player/bangumi/episodes_item.dart';
 import 'package:anime_flow/features/user/presentation/providers/user_state_provider.dart';
 import 'package:anime_flow/core/logger/logger.dart';
 import 'package:anime_flow/core/utils/system_util.dart';
@@ -56,11 +57,14 @@ class BottomAreaControl extends ConsumerWidget {
   Future<void> _updateEpisodeWatched(
     BuildContext dialogContext,
     ProviderContainer container,
-    int episodeId,
+    EpisodeData episode,
   ) async {
     try {
       final playController = container.read(playSessionProvider);
-      await playController.updateEpisodeWatched(episodeId);
+      await playController.updateEpisodeWatched(
+        episode.id,
+        watched: episode.watched != true,
+      );
       if (!dialogContext.mounted) return;
       final l10n = AppLocalizations.of(dialogContext);
       NotificationToast.show(l10n.updatedProgress, title: l10n.tip);
@@ -408,11 +412,11 @@ class BottomAreaControl extends ConsumerWidget {
                                           );
                                         },
                                       ),
-                                      onEpisodeLongPress: (episodeId) {
+                                      onEpisodeLongPress: (episode) {
                                         _updateEpisodeWatched(
                                           dialogContext,
                                           container,
-                                          episodeId,
+                                          episode,
                                         );
                                       },
                                     ),

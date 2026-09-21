@@ -374,13 +374,16 @@ class InfoHeadView extends StatelessWidget {
                     subjectName: name,
                     subjectImage: image,
                     onPlayEpisode: onPlayEpisode,
-                    onEpisodeLongPress: (episodeId) async {
+                    onEpisodeLongPress: (episode) async {
                       try {
                         await ref
                             .read(
                               subjectEpisodesProvider(subjectItem.id).notifier,
                             )
-                            .updateEpisodeWatched(episodeId: episodeId);
+                            .updateEpisodeWatched(
+                              episodeId: episode.id,
+                              watched: episode.watched != true,
+                            );
                         if (!context.mounted) return;
                         NotificationToast.show('已更新观看进度', title: '提示');
                       } on AnimeFlowApiException catch (e) {

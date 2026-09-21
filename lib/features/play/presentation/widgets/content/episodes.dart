@@ -92,9 +92,12 @@ class _EpisodesListViewState extends ConsumerState<EpisodesListView> {
   }
 
   /// 更新剧集观看状态
-  Future<void> _updateEpisodeWatched(int episodeId) async {
+  Future<void> _updateEpisodeWatched(EpisodeData episode) async {
     try {
-      await playSession.updateEpisodeWatched(episodeId);
+      await playSession.updateEpisodeWatched(
+        episode.id,
+        watched: episode.watched != true,
+      );
       if (!mounted) return;
       NotificationToast.show('已更新观看进度', title: '提示');
     } on AnimeFlowApiException catch (e) {
@@ -251,7 +254,7 @@ class _EpisodesListViewState extends ConsumerState<EpisodesListView> {
                 // 长按
                 onLongPress: ref.read(playExtraProvider).isOfflineMode
                     ? null
-                    : () => _updateEpisodeWatched(episode.id),
+                    : () => _updateEpisodeWatched(episode),
                 child: Container(
                   decoration: BoxDecoration(
                     borderRadius: BorderRadius.circular(10),

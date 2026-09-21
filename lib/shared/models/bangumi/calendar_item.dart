@@ -2,8 +2,18 @@ import 'package:anime_flow/shared/models/bangumi/subject_item.dart';
 
 class Calendar {
   final Map<String, List<CalendarItem>> calendarData;
+  final int? year;
+  final int? month;
+  final String? seasonName;
+  final int? total;
 
-  Calendar({required this.calendarData});
+  Calendar({
+    required this.calendarData,
+    this.year,
+    this.month,
+    this.seasonName,
+    this.total,
+  });
 
   factory Calendar.fromJson(Map<String, dynamic> json) {
     final calendarData = <String, List<CalendarItem>>{};
@@ -17,7 +27,13 @@ class Calendar {
       }
     }
 
-    return Calendar(calendarData: calendarData);
+    return Calendar(
+      calendarData: calendarData,
+      year: (json['year'] as num?)?.toInt(),
+      month: (json['month'] as num?)?.toInt(),
+      seasonName: json['seasonName'] as String?,
+      total: (json['total'] as num?)?.toInt(),
+    );
   }
 
   Map<String, dynamic> toJson() {
@@ -25,6 +41,10 @@ class Calendar {
     calendarData.forEach((key, value) {
       data[key] = value.map((item) => item.toJson()).toList();
     });
+    data['year'] = year;
+    data['month'] = month;
+    data['seasonName'] = seasonName;
+    data['total'] = total;
     return data;
   }
 }

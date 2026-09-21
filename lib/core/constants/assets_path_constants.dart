@@ -1,6 +1,6 @@
 class AssetsPathConstants {
-
   AssetsPathConstants._();
+
   /// 用于Logo
   static const String logo = 'assets/image/logo/logo.webp',
 
@@ -18,9 +18,14 @@ class AssetsPathConstants {
 
       /// 块茎图标
       blockGrove = 'assets/icons/FormkitFastforward.svg',
-
       blockGroveFastForward = 'assets/icons/MajesticonsFastForward.svg',
 
       /// 侧面板关闭图标
-      rightPanelClose = 'assets/icons/right_panel_close.svg';
+      rightPanelClose = 'assets/icons/right_panel_close.svg',
+
+      /// 四季图标
+      spring = 'assets/icons/spring.svg',
+      summer = 'assets/icons/summer.svg',
+      autumn = 'assets/icons/autumn.svg',
+      winter = 'assets/icons/winter.svg';
 }

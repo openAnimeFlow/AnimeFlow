@@ -398,13 +398,14 @@ class _RankingListTileState extends State<_RankingListTile> {
               child: SizedBox(
                 height: 94,
                 child: Padding(
-                  padding: const EdgeInsets.all(9),
+                  padding: const EdgeInsets.symmetric(horizontal: 9),
                   child: Row(
                     crossAxisAlignment: CrossAxisAlignment.stretch,
                     children: [
                       SizedBox(
                         width: 34,
-                        child: Text(
+                        child: Center(
+                            child: Text(
                           '$rank',
                           textAlign: TextAlign.center,
                           style: theme.textTheme.titleMedium?.copyWith(
@@ -413,84 +414,89 @@ class _RankingListTileState extends State<_RankingListTile> {
                                 : scheme.onSurfaceVariant,
                             fontWeight: FontWeight.w900,
                           ),
-                        ),
+                        )),
                       ),
                       const SizedBox(width: 8),
                       SizedBox(
                         width: 58,
                         child: AnimationNetworkImage(
-                          borderRadius: BorderRadius.circular(10),
+                          borderRadius: BorderRadius.zero,
                           url: subject.images.small,
                           fit: BoxFit.cover,
                         ),
                       ),
                       const SizedBox(width: 12),
                       Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              title,
-                              maxLines: 1,
-                              overflow: TextOverflow.ellipsis,
-                              style: theme.textTheme.titleSmall?.copyWith(
-                                fontWeight: FontWeight.w700,
-                              ),
-                            ),
-                            if (tags.isNotEmpty) ...[
-                              const SizedBox(height: 7),
-                              Wrap(
-                                spacing: 4,
-                                runSpacing: 4,
-                                children: tags.map((tag) {
-                                  return Container(
-                                    padding: const EdgeInsets.symmetric(
-                                        horizontal: 6, vertical: 2),
-                                    decoration: BoxDecoration(
-                                      color:
-                                          scheme.primary.withValues(alpha: .12),
-                                      borderRadius: BorderRadius.circular(5),
-                                    ),
-                                    child: Text(
-                                      tag,
-                                      style:
-                                          theme.textTheme.labelSmall?.copyWith(
-                                        color: scheme.primary,
-                                      ),
-                                    ),
-                                  );
-                                }).toList(),
-                              ),
-                            ],
-                            const SizedBox(height: 8),
-                            Row(
-                              children: [
-                                Icon(Icons.star_rounded,
-                                    size: 16, color: scheme.secondary),
-                                const SizedBox(width: 3),
-                                Text(
-                                  subject.rating.score.toStringAsFixed(1),
-                                  style: theme.textTheme.labelMedium?.copyWith(
-                                    color: scheme.secondary,
-                                    fontWeight: FontWeight.w800,
-                                  ),
+                        child: Padding(
+                          padding: const EdgeInsets.symmetric(vertical: 9),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                title,
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                                style: theme.textTheme.titleSmall?.copyWith(
+                                  fontWeight: FontWeight.w700,
                                 ),
-                                const SizedBox(width: 10),
-                                Icon(Icons.people_alt_rounded,
-                                    size: 14, color: scheme.onSurfaceVariant),
-                                const SizedBox(width: 3),
-                                Flexible(
-                                  child: Text(
-                                    '${subject.rating.total}',
-                                    overflow: TextOverflow.ellipsis,
-                                    style: theme.textTheme.labelSmall?.copyWith(
-                                      color: scheme.onSurfaceVariant,
-                                    ),
-                                  ),
+                              ),
+                              if (tags.isNotEmpty) ...[
+                                const SizedBox(height: 7),
+                                Wrap(
+                                  spacing: 4,
+                                  runSpacing: 4,
+                                  children: tags.map((tag) {
+                                    return Container(
+                                      padding: const EdgeInsets.symmetric(
+                                          horizontal: 6, vertical: 2),
+                                      decoration: BoxDecoration(
+                                        color: scheme.primary
+                                            .withValues(alpha: .12),
+                                        borderRadius: BorderRadius.circular(5),
+                                      ),
+                                      child: Text(
+                                        tag,
+                                        style: theme.textTheme.labelSmall
+                                            ?.copyWith(
+                                          color: scheme.primary,
+                                        ),
+                                      ),
+                                    );
+                                  }).toList(),
                                 ),
                               ],
-                            ),
-                          ],
+                              const SizedBox(height: 8),
+                              Row(
+                                children: [
+                                  Icon(Icons.star_rounded,
+                                      size: 16, color: scheme.secondary),
+                                  const SizedBox(width: 3),
+                                  Text(
+                                    subject.rating.score.toStringAsFixed(1),
+                                    style:
+                                        theme.textTheme.labelMedium?.copyWith(
+                                      color: scheme.secondary,
+                                      fontWeight: FontWeight.w800,
+                                    ),
+                                  ),
+                                  const SizedBox(width: 10),
+                                  Icon(Icons.people_alt_rounded,
+                                      size: 14, color: scheme.onSurfaceVariant),
+                                  const SizedBox(width: 3),
+                                  Flexible(
+                                    child: Text(
+                                      '${subject.rating.total}',
+                                      overflow: TextOverflow.ellipsis,
+                                      style:
+                                          theme.textTheme.labelSmall?.copyWith(
+                                        color: scheme.onSurfaceVariant,
+                                      ),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ],
+                          ),
                         ),
                       ),
                     ],

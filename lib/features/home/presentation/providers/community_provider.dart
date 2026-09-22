@@ -113,10 +113,6 @@ class CommunityWatchingSubjects extends _$CommunityWatchingSubjects {
     });
     return firstValue.future;
   }
-
-  Future<void> refresh() async {
-    ref.invalidateSelf();
-  }
 }
 
 @riverpod
@@ -153,9 +149,5 @@ class CommunityOnlineCount extends _$CommunityOnlineCount {
       unawaited(subscription.cancel());
     });
     return firstValue.future;
-  }
-
-  Future<void> refresh() async {
-    ref.invalidateSelf();
   }
 }

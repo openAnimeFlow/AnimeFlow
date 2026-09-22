@@ -23,8 +23,8 @@ class CommunityPage extends ConsumerStatefulWidget {
 class _CommunityPageState extends ConsumerState<CommunityPage> {
   Future<void> _refresh() async {
     await Future.wait([
-      ref.read(communityWatchingSubjectsProvider.notifier).refresh(),
-      ref.read(communityOnlineCountProvider.notifier).refresh(),
+      ref.refresh(communityWatchingSubjectsProvider.future),
+      ref.refresh(communityOnlineCountProvider.future),
     ]);
   }
 
@@ -78,6 +78,7 @@ class _CommunityPageState extends ConsumerState<CommunityPage> {
 
               return _CommunityContent(
                 subjects: watching.value ?? const <WatchingSubject>[],
+                isWatchingLoading: watching.isLoading && !watching.hasValue,
                 onlineCount: onlineCount,
                 connection: connection,
                 connectionError: watching.error ?? onlineCount.error,
@@ -105,6 +106,7 @@ class _CommunityPageState extends ConsumerState<CommunityPage> {
 class _CommunityContent extends StatelessWidget {
   const _CommunityContent({
     required this.subjects,
+    required this.isWatchingLoading,
     required this.onlineCount,
     required this.connection,
     required this.connectionError,
@@ -118,6 +120,7 @@ class _CommunityContent extends StatelessWidget {
   });
 
   final List<WatchingSubject> subjects;
+  final bool isWatchingLoading;
   final AsyncValue<OnlineCount> onlineCount;
   final CommunityConnectionState connection;
   final Object? connectionError;
@@ -192,7 +195,19 @@ class _CommunityContent extends StatelessWidget {
                 ),
               ),
             ),
-            if (subjects.isEmpty)
+            if (isWatchingLoading)
+              SliverPadding(
+                padding: EdgeInsets.fromLTRB(
+                  horizontalPadding,
+                  8,
+                  horizontalPadding,
+                  32,
+                ),
+                sliver: const SliverToBoxAdapter(
+                  child: SizedBox(height: 180, child: _LoadingIndicator()),
+                ),
+              )
+            else if (subjects.isEmpty)
               SliverPadding(
                 padding: EdgeInsets.fromLTRB(
                   horizontalPadding,

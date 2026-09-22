@@ -339,7 +339,7 @@ class _CommunityHero extends StatelessWidget {
   }
 }
 
-class _ConnectionIndicator extends StatelessWidget {
+class _ConnectionIndicator extends StatefulWidget {
   const _ConnectionIndicator({
     required this.status,
     required this.l10n,
@@ -351,33 +351,80 @@ class _ConnectionIndicator extends StatelessWidget {
   final String? detail;
 
   @override
+  State<_ConnectionIndicator> createState() => _ConnectionIndicatorState();
+}
+
+class _ConnectionIndicatorState extends State<_ConnectionIndicator>
+    with SingleTickerProviderStateMixin {
+  late final AnimationController _rotationController;
+
+  @override
+  void initState() {
+    super.initState();
+    _rotationController = AnimationController(
+      vsync: this,
+      duration: const Duration(seconds: 2),
+    );
+    _updateRotation();
+  }
+
+  @override
+  void didUpdateWidget(covariant _ConnectionIndicator oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.status != widget.status) {
+      _updateRotation();
+    }
+  }
+
+  void _updateRotation() {
+    switch (widget.status) {
+      case SseConnectionStatus.reconnecting:
+      case SseConnectionStatus.connecting:
+        if (!_rotationController.isAnimating) {
+          _rotationController.repeat();
+        }
+      case SseConnectionStatus.connected:
+      case SseConnectionStatus.error:
+      case SseConnectionStatus.disconnected:
+        _rotationController.stop();
+        _rotationController.value = 0;
+    }
+  }
+
+  @override
+  void dispose() {
+    _rotationController.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
-    final (label, color, icon) = switch (status) {
+    final (label, color, icon) = switch (widget.status) {
       SseConnectionStatus.connected => (
-          l10n.communityConnectionConnected,
+          widget.l10n.communityConnectionConnected,
           Colors.green,
-          Icons.wifi_tethering_rounded,
+          const Icon(Icons.wifi_tethering_rounded, size: 15),
         ),
       SseConnectionStatus.reconnecting => (
-          l10n.communityConnectionReconnecting,
+          widget.l10n.communityConnectionReconnecting,
           colorScheme.tertiary,
-          Icons.sync_rounded,
+          _buildRotatingIcon(colorScheme.tertiary),
         ),
       SseConnectionStatus.error => (
-          l10n.communityConnectionError,
+          widget.l10n.communityConnectionError,
           colorScheme.error,
-          Icons.wifi_off_rounded,
+          const Icon(Icons.wifi_off_rounded, size: 15),
         ),
       SseConnectionStatus.disconnected => (
-          l10n.communityConnectionDisconnected,
+          widget.l10n.communityConnectionDisconnected,
           colorScheme.outline,
-          Icons.cloud_off_rounded,
+          const Icon(Icons.cloud_off_rounded, size: 15),
         ),
       SseConnectionStatus.connecting => (
-          l10n.communityConnectionConnecting,
+          widget.l10n.communityConnectionConnecting,
           colorScheme.primary,
-          Icons.sync_rounded,
+          _buildRotatingIcon(colorScheme.primary),
         ),
     };
 
@@ -388,7 +435,7 @@ class _ConnectionIndicator extends StatelessWidget {
         Row(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Icon(icon, size: 15, color: color),
+            icon,
             const SizedBox(width: 5),
             Text(
               label,
@@ -400,11 +447,11 @@ class _ConnectionIndicator extends StatelessWidget {
             ),
           ],
         ),
-        if (detail != null && status == SseConnectionStatus.error)
+        if (widget.detail != null && widget.status == SseConnectionStatus.error)
           SizedBox(
             width: 180,
             child: Text(
-              detail!,
+              widget.detail!,
               maxLines: 2,
               overflow: TextOverflow.ellipsis,
               textAlign: TextAlign.right,
@@ -415,6 +462,13 @@ class _ConnectionIndicator extends StatelessWidget {
             ),
           ),
       ],
+    );
+  }
+
+  Widget _buildRotatingIcon(Color color) {
+    return RotationTransition(
+      turns: ReverseAnimation(_rotationController),
+      child: Icon(Icons.sync_rounded, size: 15, color: color),
     );
   }
 }

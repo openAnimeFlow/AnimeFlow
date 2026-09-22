@@ -414,6 +414,7 @@ class _TopAreaControlState extends ConsumerState<TopAreaControl> {
     AsyncValue<OnlineCount>? onlineCount,
   ) {
     final l10n = AppLocalizations.of(context);
+    final onlineUsers = onlineCount?.asData?.value.onlineUsers;
     return Row(
       children: [
         //网络图标
@@ -495,53 +496,48 @@ class _TopAreaControlState extends ConsumerState<TopAreaControl> {
           child: Row(
             mainAxisAlignment: MainAxisAlignment.end,
             children: [
-              Consumer(
-                builder: (context, ref, child) {
-                  final count = onlineCount?.asData?.value.onlineUsers;
-                  if (count == null || count <= 0) {
-                    return const SizedBox.shrink();
-                  }
-                  return Tooltip(
-                    message: l10n.totalWatchers,
-                    child: SizedBox(
-                      height: 18,
-                      child: Row(
-                        spacing: 2,
-                        mainAxisSize: MainAxisSize.min,
-                        crossAxisAlignment: CrossAxisAlignment.center,
-                        children: [
-                          const SizedBox(
-                            width: 18,
-                            height: 18,
-                            child: Center(
-                              child: Icon(
-                                Icons.people_outline_rounded,
-                                size: 16,
+              if (onlineUsers == null || onlineUsers <= 0)
+                const SizedBox.shrink()
+              else
+                Tooltip(
+                  message: l10n.totalWatchers,
+                  child: SizedBox(
+                    height: 18,
+                    child: Row(
+                      spacing: 2,
+                      mainAxisSize: MainAxisSize.min,
+                      crossAxisAlignment: CrossAxisAlignment.center,
+                      children: [
+                        const SizedBox(
+                          width: 18,
+                          height: 18,
+                          child: Center(
+                            child: Icon(
+                              Icons.people_outline_rounded,
+                              size: 16,
+                              color: Colors.white,
+                            ),
+                          ),
+                        ),
+                        SizedBox(
+                          height: 18,
+                          child: Center(
+                            child: Text(
+                              onlineUsers.toString(),
+                              style: const TextStyle(
                                 color: Colors.white,
+                                fontSize: 12,
+                                height: 1,
+                                fontWeight: FontWeight.w600,
                               ),
+                              textAlign: TextAlign.center,
                             ),
                           ),
-                          SizedBox(
-                            height: 18,
-                            child: Center(
-                              child: Text(
-                                count.toString(),
-                                style: const TextStyle(
-                                  color: Colors.white,
-                                  fontSize: 12,
-                                  height: 1,
-                                  fontWeight: FontWeight.w600,
-                                ),
-                                textAlign: TextAlign.center,
-                              ),
-                            ),
-                          ),
-                        ],
-                      ),
+                        ),
+                      ],
                     ),
-                  );
-                },
-              ),
+                  ),
+                ),
               if (SystemUtil.isMobile) ...[
                 const SizedBox(width: 8),
                 //电池图标

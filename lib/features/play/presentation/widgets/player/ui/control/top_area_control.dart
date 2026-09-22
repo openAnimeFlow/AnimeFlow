@@ -10,6 +10,7 @@ import 'package:anime_flow/features/play/presentation/providers/video_source_pro
 import 'package:anime_flow/features/play/presentation/providers/video_ui_provider.dart';
 import 'package:anime_flow/features/play/presentation/providers/episodes_provider.dart';
 import 'package:anime_flow/features/play/presentation/providers/subject_online_count_provider.dart';
+import 'package:anime_flow/shared/models/flow/online_count.dart';
 import 'package:anime_flow/app/router/routes_args.dart';
 import 'package:anime_flow/features/play/presentation/widgets/player/ui/setting/video_setting_dialog.dart';
 import 'package:anime_flow/core/utils/system_util.dart';
@@ -92,6 +93,15 @@ class _TopAreaControlState extends ConsumerState<TopAreaControl> {
         ref.watch(videoUiProvider.select((s) => s.isShowControlsUi));
     final fullscreen =
         ref.watch(playStateProvider.select((s) => s.isFullscreen));
+    final isOfflineMode = ref.watch(
+      playExtraProvider.select((state) => state.isOfflineMode),
+    );
+    final subjectId = ref.watch(
+      playExtraProvider.select((state) => state.playExtra.subjectId),
+    );
+    final onlineCount = fullscreen && !isOfflineMode && subjectId > 0
+        ? ref.watch(subjectOnlineCountProvider)
+        : null;
     final isLoggedIn = ref.watch(isLoggedInProvider).value ?? false;
     final subject = isLoggedIn && fullscreen
         ? ref.watch(animeInfoProvider).asData?.value
@@ -129,7 +139,7 @@ class _TopAreaControlState extends ConsumerState<TopAreaControl> {
                       Container(
                         padding: const EdgeInsets.symmetric(horizontal: 15),
                         height: 16,
-                        child: _buildTopInfoBar(context),
+                        child: _buildTopInfoBar(context, onlineCount),
                       ),
                     Row(
                       children: [
@@ -399,7 +409,10 @@ class _TopAreaControlState extends ConsumerState<TopAreaControl> {
   }
 
   ///顶部信息栏
-  Widget _buildTopInfoBar(BuildContext context) {
+  Widget _buildTopInfoBar(
+    BuildContext context,
+    AsyncValue<OnlineCount>? onlineCount,
+  ) {
     final l10n = AppLocalizations.of(context);
     return Row(
       children: [
@@ -484,14 +497,7 @@ class _TopAreaControlState extends ConsumerState<TopAreaControl> {
             children: [
               Consumer(
                 builder: (context, ref, child) {
-                  final extra = ref.watch(playExtraProvider);
-                  if (extra.isOfflineMode || extra.playExtra.subjectId <= 0) {
-                    return const SizedBox.shrink();
-                  }
-                  final onlineCount = ref.watch(
-                    subjectOnlineCountProvider(extra.playExtra.subjectId),
-                  );
-                  final count = onlineCount.asData?.value.onlineUsers;
+                  final count = onlineCount?.asData?.value.onlineUsers;
                   if (count == null || count <= 0) {
                     return const SizedBox.shrink();
                   }

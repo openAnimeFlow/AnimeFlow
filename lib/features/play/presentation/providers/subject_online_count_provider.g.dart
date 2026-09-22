@@ -10,31 +10,28 @@ part of 'subject_online_count_provider.dart';
 // ignore_for_file: type=lint, type=warning
 
 @ProviderFor(subjectOnlineCount)
-final subjectOnlineCountProvider = SubjectOnlineCountFamily._();
+final subjectOnlineCountProvider = SubjectOnlineCountProvider._();
 
 final class SubjectOnlineCountProvider extends $FunctionalProvider<
         AsyncValue<OnlineCount>, OnlineCount, Stream<OnlineCount>>
     with $FutureModifier<OnlineCount>, $StreamProvider<OnlineCount> {
-  SubjectOnlineCountProvider._(
-      {required SubjectOnlineCountFamily super.from,
-      required int super.argument})
+  SubjectOnlineCountProvider._()
       : super(
+          from: null,
+          argument: null,
           retry: null,
           name: r'subjectOnlineCountProvider',
           isAutoDispose: true,
-          dependencies: null,
-          $allTransitiveDependencies: null,
+          dependencies: <ProviderOrFamily>[playExtraProvider],
+          $allTransitiveDependencies: <ProviderOrFamily>[
+            SubjectOnlineCountProvider.$allTransitiveDependencies0,
+          ],
         );
+
+  static final $allTransitiveDependencies0 = playExtraProvider;
 
   @override
   String debugGetCreateSourceHash() => _$subjectOnlineCountHash();
-
-  @override
-  String toString() {
-    return r'subjectOnlineCountProvider'
-        ''
-        '($argument)';
-  }
 
   @$internal
   @override
@@ -44,43 +41,9 @@ final class SubjectOnlineCountProvider extends $FunctionalProvider<
 
   @override
   Stream<OnlineCount> create(Ref ref) {
-    final argument = this.argument as int;
-    return subjectOnlineCount(
-      ref,
-      argument,
-    );
-  }
-
-  @override
-  bool operator ==(Object other) {
-    return other is SubjectOnlineCountProvider && other.argument == argument;
-  }
-
-  @override
-  int get hashCode {
-    return argument.hashCode;
+    return subjectOnlineCount(ref);
   }
 }
 
 String _$subjectOnlineCountHash() =>
-    r'50b4d3d70763cdbaba78dd0d4e4411a786209d8b';
-
-final class SubjectOnlineCountFamily extends $Family
-    with $FunctionalFamilyOverride<Stream<OnlineCount>, int> {
-  SubjectOnlineCountFamily._()
-      : super(
-          retry: null,
-          name: r'subjectOnlineCountProvider',
-          dependencies: null,
-          $allTransitiveDependencies: null,
-          isAutoDispose: true,
-        );
-
-  SubjectOnlineCountProvider call(
-    int subjectId,
-  ) =>
-      SubjectOnlineCountProvider._(argument: subjectId, from: this);
-
-  @override
-  String toString() => r'subjectOnlineCountProvider';
-}
+    r'01acef47c8d508fc90bcd8c56f026385044ad974';

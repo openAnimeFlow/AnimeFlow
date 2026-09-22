@@ -74,7 +74,11 @@ class _RankingPageState extends ConsumerState<RankingPage> {
             onRefresh: () => ref.read(rankingProvider.notifier).refresh(),
             child: NotificationListener<ScrollNotification>(
               onNotification: (notification) {
-                if (notification is ScrollUpdateNotification) {
+                // 内部横向列表（例如前三名卡片）也会冒泡滚动通知，
+                // 只有外层纵向滚动视图才能触发分页加载。
+                if (notification is ScrollUpdateNotification &&
+                    notification.depth == 0 &&
+                    notification.metrics.axis == Axis.vertical) {
                   final metrics = notification.metrics;
                   final state = rankingAsync.asData?.value;
                   if (metrics.pixels >= metrics.maxScrollExtent - 200 &&
@@ -117,40 +121,38 @@ class _RankingPageState extends ConsumerState<RankingPage> {
                         ),
                       ),
                     ),
-                  SliverToBoxAdapter(
-                    child: Padding(
+                  rankingAsync.when(
+                    loading: () => const SliverToBoxAdapter(
+                      child: SizedBox(
+                        height: 320,
+                        child: Center(child: CircularProgressIndicator()),
+                      ),
+                    ),
+                    error: (error, _) => SliverToBoxAdapter(
+                      child: SizedBox(
+                        height: 320,
+                        child: Center(
+                          child: Column(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Text(l10n.rankingLoadFailed(error.toString())),
+                              const SizedBox(height: 12),
+                              FilledButton(
+                                onPressed: () => ref
+                                    .read(rankingProvider.notifier)
+                                    .refresh(),
+                                child: Text(l10n.retry),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+                    ),
+                    data: (_) => SliverPadding(
                       padding: EdgeInsets.symmetric(
                         horizontal: horizontalPadding,
                       ),
-                      child: SizedBox(
-                        width: double.infinity,
-                        child: rankingAsync.when(
-                          loading: () => const SizedBox(
-                            height: 320,
-                            child: Center(child: CircularProgressIndicator()),
-                          ),
-                          error: (error, _) => SizedBox(
-                            height: 320,
-                            child: Center(
-                              child: Column(
-                                mainAxisSize: MainAxisSize.min,
-                                children: [
-                                  Text(
-                                      l10n.rankingLoadFailed(error.toString())),
-                                  const SizedBox(height: 12),
-                                  FilledButton(
-                                    onPressed: () => ref
-                                        .read(rankingProvider.notifier)
-                                        .refresh(),
-                                    child: Text(l10n.retry),
-                                  ),
-                                ],
-                              ),
-                            ),
-                          ),
-                          data: (_) => RankingGrid(contentWidth: contentWidth),
-                        ),
-                      ),
+                      sliver: RankingGrid(contentWidth: contentWidth),
                     ),
                   ),
                 ],

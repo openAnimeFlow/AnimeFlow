@@ -35,24 +35,49 @@ class RankingGrid extends ConsumerWidget {
     final items = rankingState.items;
     final isLoadingMore = rankingState.isLoadingMore && rankingState.hasMore;
     final showProgress = isLoadingMore || rankingState.isReloading;
-    final listItems = items.skip(3).toList();
+    final listItemCount = items.length > 3 ? items.length - 3 : 0;
+    final columnCount = contentWidth >= 900
+        ? 3
+        : contentWidth >= 600
+            ? 2
+            : 1;
 
-    return Column(
-      children: [
-        _FeaturedRankings(items: items.take(3).toList()),
-        _RankingSectionHeader(
-            title: l10n.sortTrends, subtitle: l10n.rankingTitle),
-        _RankingList(items: listItems, width: contentWidth),
-        if (showProgress)
-          const Padding(
-            padding: EdgeInsets.symmetric(vertical: 18),
-            child: Center(child: CircularProgressIndicator()),
-          )
-        else
-          Padding(
-            padding: const EdgeInsets.fromLTRB(0, 8, 0, 24),
-            child: Center(child: Text(l10n.rankingEnd)),
+    return SliverMainAxisGroup(
+      slivers: [
+        SliverToBoxAdapter(
+          child: _FeaturedRankings(items: items.take(3).toList()),
+        ),
+        SliverToBoxAdapter(
+          child: _RankingSectionHeader(
+            title: l10n.sortTrends,
+            subtitle: l10n.rankingTitle,
           ),
+        ),
+        if (listItemCount > 0)
+          SliverGrid.builder(
+            itemCount: listItemCount,
+            gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+              crossAxisCount: columnCount,
+              crossAxisSpacing: 10,
+              mainAxisSpacing: 10,
+              mainAxisExtent: 160,
+            ),
+            itemBuilder: (context, index) => _RankingListTile(
+              subject: items[index + 3],
+              rank: index + 4,
+            ),
+          ),
+        SliverToBoxAdapter(
+          child: showProgress
+              ? const Padding(
+                  padding: EdgeInsets.symmetric(vertical: 18),
+                  child: Center(child: CircularProgressIndicator()),
+                )
+              : Padding(
+                  padding: const EdgeInsets.fromLTRB(0, 8, 0, 24),
+                  child: Center(child: Text(l10n.rankingEnd)),
+                ),
+        ),
       ],
     );
   }
@@ -105,52 +130,6 @@ class _FeaturedRankings extends StatelessWidget {
               ),
       ),
     );
-  }
-}
-
-class _RankingList extends StatelessWidget {
-  const _RankingList({required this.items, required this.width});
-
-  final List<Subject> items;
-  final double width;
-
-  @override
-  Widget build(BuildContext context) {
-    final columnCount = width >= 900
-        ? 3
-        : width >= 600
-            ? 2
-            : 1;
-    final rows = <Widget>[];
-    for (var index = 0; index < items.length; index += columnCount) {
-      final rowItems = <Widget>[];
-      for (var offset = 0; offset < columnCount; offset++) {
-        final itemIndex = index + offset;
-        rowItems.add(
-          Expanded(
-            child: itemIndex < items.length
-                ? _RankingListTile(
-                    subject: items[itemIndex], rank: itemIndex + 4)
-                : const SizedBox(),
-          ),
-        );
-      }
-      rows.add(
-        Padding(
-          padding: const EdgeInsets.only(bottom: 10),
-          child: Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              for (var column = 0; column < rowItems.length; column++) ...[
-                if (column > 0) const SizedBox(width: 10),
-                rowItems[column],
-              ],
-            ],
-          ),
-        ),
-      );
-    }
-    return Column(children: rows);
   }
 }
 

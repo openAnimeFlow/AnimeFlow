@@ -66,66 +66,71 @@ class _RankingPageState extends ConsumerState<RankingPage> {
       appBar: AppBar(
         title: Text(l10n.rankingTitle),
       ),
-      body: RefreshIndicator(
-        onRefresh: () => ref.read(rankingProvider.notifier).refresh(),
-        child: NotificationListener<ScrollNotification>(
-          onNotification: (notification) {
-            if (notification is ScrollUpdateNotification) {
-              final metrics = notification.metrics;
-              final state = rankingAsync.asData?.value;
-              if (metrics.pixels >= metrics.maxScrollExtent - 200 &&
-                  state != null &&
-                  state.items.isNotEmpty &&
-                  !state.isReloading &&
-                  !state.isLoadingMore &&
-                  state.hasMore) {
-                ref.read(rankingProvider.notifier).loadMore();
-              }
-            }
-            return false;
-          },
-          child: CustomScrollView(
-            controller: scrollController,
-            slivers: [
-              const SliverAppBar(
-                pinned: true,
-                floating: true,
-                title: RankingFilterBar(),
-              ),
-              if (rankingState?.errorMessage case final errorMessage?)
-                SliverToBoxAdapter(
-                  child: Padding(
-                    padding: const EdgeInsets.only(top: 12),
-                    child: Material(
-                      color: Theme.of(context).colorScheme.errorContainer,
-                      borderRadius: BorderRadius.circular(12),
+      body: LayoutBuilder(
+        builder: (context, constraints) {
+          final horizontalPadding = _horizontalPadding(constraints.maxWidth);
+          final contentWidth = constraints.maxWidth - horizontalPadding * 2;
+          return RefreshIndicator(
+            onRefresh: () => ref.read(rankingProvider.notifier).refresh(),
+            child: NotificationListener<ScrollNotification>(
+              onNotification: (notification) {
+                // 内部横向列表（例如前三名卡片）也会冒泡滚动通知，
+                // 只有外层纵向滚动视图才能触发分页加载。
+                if (notification is ScrollUpdateNotification &&
+                    notification.depth == 0 &&
+                    notification.metrics.axis == Axis.vertical) {
+                  final metrics = notification.metrics;
+                  final state = rankingAsync.asData?.value;
+                  if (metrics.pixels >= metrics.maxScrollExtent - 200 &&
+                      state != null &&
+                      state.items.isNotEmpty &&
+                      !state.isReloading &&
+                      !state.isLoadingMore &&
+                      state.hasMore) {
+                    ref.read(rankingProvider.notifier).loadMore();
+                  }
+                }
+                return false;
+              },
+              child: CustomScrollView(
+                controller: scrollController,
+                slivers: [
+                  const SliverAppBar(
+                    pinned: true,
+                    floating: true,
+                    title: RankingFilterBar(),
+                  ),
+                  if (rankingState?.errorMessage case final errorMessage?)
+                    SliverToBoxAdapter(
                       child: Padding(
-                        padding: const EdgeInsets.all(12),
-                        child: Text(
-                          errorMessage,
-                          style: TextStyle(
-                            color:
-                                Theme.of(context).colorScheme.onErrorContainer,
+                        padding: const EdgeInsets.only(top: 12),
+                        child: Material(
+                          color: Theme.of(context).colorScheme.errorContainer,
+                          borderRadius: BorderRadius.circular(12),
+                          child: Padding(
+                            padding: const EdgeInsets.all(12),
+                            child: Text(
+                              errorMessage,
+                              style: TextStyle(
+                                color: Theme.of(context)
+                                    .colorScheme
+                                    .onErrorContainer,
+                              ),
+                            ),
                           ),
                         ),
                       ),
                     ),
-                  ),
-                ),
-              SliverLayoutBuilder(
-                builder: (context, constraints) {
-                  return SliverPadding(
-                    padding: EdgeInsets.symmetric(
-                      horizontal:
-                          _horizontalPadding(constraints.crossAxisExtent),
-                    ),
-                    sliver: rankingAsync.when(
-                      loading: () => const SliverFillRemaining(
-                        child: Center(
-                          child: CircularProgressIndicator(),
-                        ),
+                  rankingAsync.when(
+                    loading: () => const SliverToBoxAdapter(
+                      child: SizedBox(
+                        height: 320,
+                        child: Center(child: CircularProgressIndicator()),
                       ),
-                      error: (error, _) => SliverFillRemaining(
+                    ),
+                    error: (error, _) => SliverToBoxAdapter(
+                      child: SizedBox(
+                        height: 320,
                         child: Center(
                           child: Column(
                             mainAxisSize: MainAxisSize.min,
@@ -142,14 +147,19 @@ class _RankingPageState extends ConsumerState<RankingPage> {
                           ),
                         ),
                       ),
-                      data: (_) => const RankingGrid(),
                     ),
-                  );
-                },
+                    data: (_) => SliverPadding(
+                      padding: EdgeInsets.symmetric(
+                        horizontal: horizontalPadding,
+                      ),
+                      sliver: RankingGrid(contentWidth: contentWidth),
+                    ),
+                  ),
+                ],
               ),
-            ],
-          ),
-        ),
+            ),
+          );
+        },
       ),
       floatingActionButton: showBackToTop
           ? FloatingActionButton(

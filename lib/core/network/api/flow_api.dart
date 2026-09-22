@@ -422,10 +422,14 @@ class FlowApi {
   }
 
   ///每日放送
-  static Future<Calendar> calendarService() async {
-    return await _client
-        .get(AnimeFlowApi.calendar)
-        .then((value) => Calendar.fromJson(value.data));
+  static Future<Calendar> calendarService({int? year, int? month}) async {
+    return await _client.get(
+      AnimeFlowApi.calendar,
+      queryParameters: {
+        if (year != null) 'year': year,
+        if (month != null) 'month': month,
+      },
+    ).then((value) => Calendar.fromJson(value.data));
   }
 
   /// 获取热门

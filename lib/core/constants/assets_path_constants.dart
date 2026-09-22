@@ -25,5 +25,11 @@ class AssetsPathConstants {
       readmebBanner = 'assets/image/readme-banner.svg',
 
       /// 侧面板关闭图标
-      rightPanelClose = 'assets/icons/right_panel_close.svg';
+      rightPanelClose = 'assets/icons/right_panel_close.svg',
+
+      /// 四季图标
+      spring = 'assets/icons/spring.svg',
+      summer = 'assets/icons/summer.svg',
+      autumn = 'assets/icons/autumn.svg',
+      winter = 'assets/icons/winter.svg';
 }

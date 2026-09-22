@@ -18,96 +18,95 @@ class RankingFilterBar extends ConsumerWidget {
     final selectedYear = rankingState?.selectedYear;
     final selectedMonth = rankingState?.selectedMonth;
 
-    return Center(
-      child: Wrap(
-        spacing: 5,
-        children: [
-          PopupMenuButton<SortType>(
-            offset: const Offset(0, 40),
-            initialValue: selectedSort,
-            itemBuilder: (context) {
-              return SortType.values.map((type) {
-                return PopupMenuItem<SortType>(
-                  value: type,
-                  child: Text(_sortLabel(type, l10n)),
+    return Wrap(
+      alignment: WrapAlignment.start,
+      spacing: 5,
+      children: [
+        PopupMenuButton<SortType>(
+          offset: const Offset(0, 40),
+          initialValue: selectedSort,
+          itemBuilder: (context) {
+            return SortType.values.map((type) {
+              return PopupMenuItem<SortType>(
+                value: type,
+                child: Text(_sortLabel(type, l10n)),
+              );
+            }).toList();
+          },
+          onSelected: notifier.setSort,
+          child: _FilterChip(
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                const Icon(Icons.sort, size: 16),
+                const SizedBox(width: 4),
+                Text(
+                  _sortLabel(selectedSort, l10n),
+                  style: const TextStyle(fontSize: 14),
+                ),
+              ],
+            ),
+          ),
+        ),
+        PopupMenuButton<int>(
+          offset: const Offset(0, 40),
+          initialValue: selectedYear ?? -1,
+          child: _FilterChip(
+            child: Text(
+              selectedYear == null
+                  ? l10n.allYears
+                  : l10n.yearSuffix(selectedYear),
+              style: const TextStyle(fontSize: 14),
+            ),
+          ),
+          itemBuilder: (context) {
+            return [
+              PopupMenuItem<int>(
+                value: -1,
+                child: Text(l10n.all),
+              ),
+              ...years.map((year) {
+                return PopupMenuItem<int>(
+                  value: year,
+                  child: Text(l10n.yearSuffix(year)),
                 );
-              }).toList();
-            },
-            onSelected: notifier.setSort,
-            child: _FilterChip(
-              child: Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  const Icon(Icons.sort, size: 16),
-                  const SizedBox(width: 4),
-                  Text(
-                    _sortLabel(selectedSort, l10n),
-                    style: const TextStyle(fontSize: 14),
-                  ),
-                ],
-              ),
+              }),
+            ];
+          },
+          onSelected: (value) {
+            notifier.setYear(value == -1 ? null : value);
+          },
+        ),
+        PopupMenuButton<int>(
+          offset: const Offset(0, 40),
+          initialValue: selectedMonth ?? -1,
+          child: _FilterChip(
+            child: Text(
+              selectedMonth == null
+                  ? l10n.allMonths
+                  : l10n.monthSuffix(selectedMonth),
+              style: const TextStyle(fontSize: 14),
             ),
           ),
-          PopupMenuButton<int>(
-            offset: const Offset(0, 40),
-            initialValue: selectedYear ?? -1,
-            child: _FilterChip(
-              child: Text(
-                selectedYear == null
-                    ? l10n.allYears
-                    : l10n.yearSuffix(selectedYear),
-                style: const TextStyle(fontSize: 14),
+          itemBuilder: (context) {
+            return [
+              PopupMenuItem<int>(
+                value: -1,
+                child: Text(l10n.all),
               ),
-            ),
-            itemBuilder: (context) {
-              return [
-                PopupMenuItem<int>(
-                  value: -1,
-                  child: Text(l10n.all),
-                ),
-                ...years.map((year) {
-                  return PopupMenuItem<int>(
-                    value: year,
-                    child: Text(l10n.yearSuffix(year)),
-                  );
-                }),
-              ];
-            },
-            onSelected: (value) {
-              notifier.setYear(value == -1 ? null : value);
-            },
-          ),
-          PopupMenuButton<int>(
-            offset: const Offset(0, 40),
-            initialValue: selectedMonth ?? -1,
-            child: _FilterChip(
-              child: Text(
-                selectedMonth == null
-                    ? l10n.allMonths
-                    : l10n.monthSuffix(selectedMonth),
-                style: const TextStyle(fontSize: 14),
-              ),
-            ),
-            itemBuilder: (context) {
-              return [
-                PopupMenuItem<int>(
-                  value: -1,
-                  child: Text(l10n.all),
-                ),
-                ...months.map((month) {
-                  return PopupMenuItem<int>(
-                    value: month,
-                    child: Text(l10n.monthSuffix(month)),
-                  );
-                }),
-              ];
-            },
-            onSelected: (value) {
-              notifier.setMonth(value == -1 ? null : value);
-            },
-          ),
-        ],
-      ),
+              ...months.map((month) {
+                return PopupMenuItem<int>(
+                  value: month,
+                  child: Text(l10n.monthSuffix(month)),
+                );
+              }),
+            ];
+          },
+          onSelected: (value) {
+            notifier.setMonth(value == -1 ? null : value);
+          },
+        ),
+      ],
     );
   }
 

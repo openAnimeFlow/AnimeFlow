@@ -1,5 +1,8 @@
 <div align="center">
-  <img width="100%" alt="AnimeFlow Logo" src="assets/features/readme-banner.svg" />
+  <div style="position: relative; width: 100%; max-width: 960px; aspect-ratio: 3 / 1; overflow: hidden; line-height: 0;">
+    <img width="100%" height="100%" alt="AnimeFlow Banner Background" src="assets/image/readme-banner.svg" style="position: absolute; inset: 0; width: 100%; height: 100%;" />
+    <img alt="AnimeFlow Logo" src="assets/image/logo.webp" style="position: absolute; left: 39.5833%; top: 18.75%; width: 20.8333%; height: auto; filter: drop-shadow(0 12px 14px rgba(60, 120, 189, 0.23));" />
+  </div>
 </div>
 
 <div align="center">

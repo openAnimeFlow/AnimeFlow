@@ -17,7 +17,7 @@ class AppShellPage extends StatelessWidget {
 
   List<TabItem> _tabs(AppLocalizations l10n) => [
         TabItem(
-          title: l10n.recommendTab,
+          title: l10n.recommend,
           icon: Icons.smart_display_outlined,
           activeIcon: Icons.smart_display_rounded,
         ),
@@ -27,7 +27,7 @@ class AppShellPage extends StatelessWidget {
           activeIcon: Icons.leaderboard_rounded,
         ),
         TabItem(
-          title: l10n.mineTab,
+          title: l10n.mine,
           icon: Icons.person_outline,
           activeIcon: Icons.person,
         ),

@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:anime_flow/app/router/model/play_route_extra.dart';
 import 'package:anime_flow/core/constants/layout_constant.dart';
 import 'package:anime_flow/core/logger/logger.dart';
+import 'package:anime_flow/core/presence/presence_service.dart';
 import 'package:anime_flow/app/localization/app_localizations.dart';
 import 'package:anime_flow/features/play/data/repository/play_repository.dart';
 import 'package:anime_flow/features/play/presentation/providers/episodes_provider.dart';
@@ -73,6 +74,7 @@ class _PlayPageState extends ConsumerState<PlayPage>
 
   @override
   void dispose() {
+    PresenceService.instance.clearPlaybackContext();
     if (_subscribedRouteObserver) {
       appRouteObserver.unsubscribe(this);
     }

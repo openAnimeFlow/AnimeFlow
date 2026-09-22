@@ -68,7 +68,10 @@ class FlowClient {
 
   static final FlowClient instance = FlowClient._();
 
-  static AnimeFlowResponse _parseEnvelope(dynamic raw) {
+  static AnimeFlowResponse _parseEnvelope(dynamic raw, {int? statusCode}) {
+    if (statusCode == 204 || raw == null) {
+      return const AnimeFlowResponse(code: 200, message: '', data: null);
+    }
     if (raw is Map) {
       final response =
           AnimeFlowResponse.fromJson(Map<String, dynamic>.from(raw));
@@ -126,15 +129,20 @@ class FlowClient {
     );
   }
 
-  /// Authenticated SSE handshake. Events bypass the normal JSON envelope parser.
+  /// SSE handshake. Events bypass the normal JSON envelope parser.
   Future<ResponseBody> openEventStream(
-      String path, CancelToken cancelToken) async {
+    String path,
+    CancelToken cancelToken, {
+    bool requireFlowToken = true,
+    Map<String, dynamic>? queryParameters,
+  }) async {
     final response = await DioFactory.animeFlowDio.get<dynamic>(
       path,
+      queryParameters: queryParameters,
       options: await _resolveOptions(
         path: path,
         signRequest: true,
-        requireFlowToken: true,
+        requireFlowToken: requireFlowToken,
         options: Options(
           responseType: ResponseType.stream,
           receiveTimeout: const Duration(seconds: 60),
@@ -177,7 +185,7 @@ class FlowClient {
         ),
         cancelToken: cancelToken,
       );
-      return _parseEnvelope(response.data);
+      return _parseEnvelope(response.data, statusCode: response.statusCode);
     } on DioException catch (e) {
       throw await NetworkErrorMapper.mapException(e);
     }
@@ -210,7 +218,7 @@ class FlowClient {
         ),
         cancelToken: cancelToken,
       );
-      return _parseEnvelope(response.data);
+      return _parseEnvelope(response.data, statusCode: response.statusCode);
     } on DioException catch (e) {
       throw await NetworkErrorMapper.mapException(e);
     }
@@ -243,7 +251,7 @@ class FlowClient {
         ),
         cancelToken: cancelToken,
       );
-      return _parseEnvelope(response.data);
+      return _parseEnvelope(response.data, statusCode: response.statusCode);
     } on DioException catch (e) {
       throw await NetworkErrorMapper.mapException(e);
     }
@@ -274,7 +282,7 @@ class FlowClient {
         ),
         cancelToken: cancelToken,
       );
-      return _parseEnvelope(response.data);
+      return _parseEnvelope(response.data, statusCode: response.statusCode);
     } on DioException catch (e) {
       throw await NetworkErrorMapper.mapException(e);
     }

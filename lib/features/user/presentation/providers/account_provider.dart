@@ -1,6 +1,7 @@
 import 'package:anime_flow/core/logger/logger.dart';
 import 'package:anime_flow/core/network/api/flow_api.dart';
 import 'package:anime_flow/core/network/interceptors/flow_refresh_token_interceptor.dart';
+import 'package:anime_flow/core/presence/presence_service.dart';
 import 'package:anime_flow/features/auth/application/token_providers.dart';
 import 'package:anime_flow/features/user/presentation/providers/user_state_provider.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
@@ -30,6 +31,7 @@ class AccountController extends _$AccountController {
     final sessionToken = await repository.getToken();
     await repository.removeToken();
     invalidateUserSession(ref);
+    await PresenceService.instance.heartbeatNow();
     if (!notifyServer || sessionToken == null) return;
     FlowApi.logoutService(sessionToken: sessionToken).catchError((error) {
       LiggLogger().w('服务端登出失败: $error');

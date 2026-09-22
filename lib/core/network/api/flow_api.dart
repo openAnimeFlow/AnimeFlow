@@ -6,6 +6,8 @@ import 'package:anime_flow/core/constants/constants.dart';
 import 'package:anime_flow/core/crawler/itme/bgm_user_page_item.dart';
 import 'package:anime_flow/core/network/api_path.dart';
 import 'package:anime_flow/core/network/clients/flow_client.dart';
+import 'package:anime_flow/core/network/sse/json_sse_parser.dart';
+import 'package:anime_flow/core/network/sse/sse_connection_status.dart';
 import 'package:anime_flow/shared/models/enums/sort_type.dart';
 import 'package:anime_flow/shared/models/bangumi/actor_item.dart';
 import 'package:anime_flow/shared/models/bangumi/calendar_item.dart';
@@ -32,6 +34,8 @@ import 'package:anime_flow/shared/models/flow/collection_conflict_item.dart';
 import 'package:anime_flow/shared/models/flow/bangumi_bind_item.dart';
 import 'package:anime_flow/core/auth/models/flow_token.dart';
 import 'package:anime_flow/shared/models/flow/flow_users.dart';
+import 'package:anime_flow/shared/models/flow/online_count.dart';
+import 'package:anime_flow/shared/models/flow/watching_subject.dart';
 import 'package:anime_flow/shared/models/github_release.dart';
 import 'package:anime_flow/shared/models/player/play/play_history_event_type.dart';
 import 'package:anime_flow/shared/models/player/play/play_history_item.dart';
@@ -43,12 +47,187 @@ import 'package:anime_flow/core/utils/utils.dart';
 import 'package:dio/dio.dart';
 
 class FlowApi {
+  static final FlowClient _client = FlowClient.instance;
+
   static Future<ResponseBody> openCollectionSyncEvents(
           CancelToken cancelToken) =>
       _client.openEventStream(
           AnimeFlowApi.bangumiCollectionSyncEvents, cancelToken);
 
-  static final FlowClient _client = FlowClient.instance;
+  /// 更新当前客户端在线状态。允许匿名请求，登录 token 会由 FlowClient 自动附带。
+  static Future<void> presenceHeartbeat({
+    required String visitorId,
+    required String presenceId,
+    required String clientType,
+    String? appVersion,
+    int? subjectId,
+    int? episodeId,
+    int? positionSeconds,
+    String status = 'online',
+  }) async {
+    await _client.put(
+      '${AnimeFlowApi.presence}/$presenceId',
+      data: {
+        'visitorId': visitorId,
+        'clientType': clientType,
+        if (appVersion != null && appVersion.isNotEmpty)
+          'appVersion': appVersion,
+        'status': status,
+        if (subjectId != null) 'subjectId': subjectId,
+        if (episodeId != null) 'episodeId': episodeId,
+        if (positionSeconds != null) 'positionSeconds': positionSeconds,
+      },
+    );
+  }
+
+  /// 主动移除当前客户端在线状态；服务端 TTL 仍是最终离线判定。
+  static Future<void> presenceOffline({required String presenceId}) async {
+    await _client.delete(
+      '${AnimeFlowApi.presence}/$presenceId',
+    );
+  }
+
+  static Stream<OnlineCount> getPresenceOnlineCount(CancelToken cancelToken,
+      {void Function(SseConnectionStatus status)? onStatus}) async* {
+    var hasReceivedEvent = false;
+    var initialRetryCount = 0;
+    while (!cancelToken.isCancelled) {
+      onStatus?.call(hasReceivedEvent
+          ? SseConnectionStatus.reconnecting
+          : SseConnectionStatus.connecting);
+      try {
+        final response = await _client.openEventStream(
+          AnimeFlowApi.presenceOnlineCount,
+          cancelToken,
+          requireFlowToken: false,
+        );
+        var receivedEventFromConnection = false;
+        await for (final data in decodeJsonSseEvents(response.stream)) {
+          if (data is Map) {
+            final count = OnlineCount.fromJson(Map<String, dynamic>.from(data));
+            receivedEventFromConnection = true;
+            hasReceivedEvent = true;
+            initialRetryCount = 0;
+            onStatus?.call(SseConnectionStatus.connected);
+            yield count;
+          }
+        }
+        if (!receivedEventFromConnection && !hasReceivedEvent) {
+          throw StateError(
+            'Presence online count SSE closed before its first event',
+          );
+        }
+        onStatus?.call(SseConnectionStatus.reconnecting);
+        await Future<void>.delayed(const Duration(seconds: 2));
+      } catch (error, stackTrace) {
+        if (cancelToken.isCancelled) return;
+        if (_isRateLimited(error) ||
+            (!hasReceivedEvent && ++initialRetryCount >= 3)) {
+          onStatus?.call(SseConnectionStatus.error);
+          Error.throwWithStackTrace(error, stackTrace);
+        }
+        onStatus?.call(SseConnectionStatus.reconnecting);
+        await Future<void>.delayed(const Duration(seconds: 2));
+      }
+    }
+  }
+
+  static Stream<OnlineCount> getSubjectPresenceOnlineCount(
+      int subjectId, String? presenceId, CancelToken cancelToken) async* {
+    var hasReceivedEvent = false;
+    var initialRetryCount = 0;
+    final path = AnimeFlowApi.presenceSubjectOnlineCount
+        .replaceFirst('{subjectId}', subjectId.toString());
+
+    while (!cancelToken.isCancelled) {
+      try {
+        final response = await _client.openEventStream(
+          path,
+          cancelToken,
+          requireFlowToken: false,
+          queryParameters: {
+            if (presenceId != null && presenceId.isNotEmpty)
+              'presenceId': presenceId,
+          },
+        );
+        var receivedEventFromConnection = false;
+        await for (final data in decodeJsonSseEvents(response.stream)) {
+          if (data is! Map) continue;
+          receivedEventFromConnection = true;
+          hasReceivedEvent = true;
+          initialRetryCount = 0;
+          yield OnlineCount.fromJson(Map<String, dynamic>.from(data));
+        }
+        if (!receivedEventFromConnection && !hasReceivedEvent) {
+          throw StateError(
+            'Subject online count SSE closed before its first event',
+          );
+        }
+        await Future<void>.delayed(const Duration(seconds: 2));
+      } catch (error, stackTrace) {
+        if (cancelToken.isCancelled) return;
+        if (_isRateLimited(error) ||
+            (!hasReceivedEvent && ++initialRetryCount >= 3)) {
+          Error.throwWithStackTrace(error, stackTrace);
+        }
+        await Future<void>.delayed(const Duration(seconds: 2));
+      }
+    }
+  }
+
+  static Stream<List<WatchingSubject>> getWatchingSubjects(
+      CancelToken cancelToken,
+      {void Function(SseConnectionStatus status)? onStatus}) async* {
+    var hasReceivedEvent = false;
+    var initialRetryCount = 0;
+    while (!cancelToken.isCancelled) {
+      onStatus?.call(hasReceivedEvent
+          ? SseConnectionStatus.reconnecting
+          : SseConnectionStatus.connecting);
+      try {
+        final response = await _client.openEventStream(
+          AnimeFlowApi.presenceWatchingSubjects,
+          cancelToken,
+          requireFlowToken: false,
+        );
+        var receivedEventFromConnection = false;
+        await for (final data in decodeJsonSseEvents(response.stream)) {
+          if (data is! List) continue;
+          final subjects = data
+              .whereType<Map>()
+              .map((item) => WatchingSubject.fromJson(
+                    Map<String, dynamic>.from(item),
+                  ))
+              .toList(growable: false);
+          receivedEventFromConnection = true;
+          hasReceivedEvent = true;
+          initialRetryCount = 0;
+          onStatus?.call(SseConnectionStatus.connected);
+          yield subjects;
+        }
+        if (!receivedEventFromConnection && !hasReceivedEvent) {
+          throw StateError(
+            'Watching subjects SSE closed before its first event',
+          );
+        }
+        onStatus?.call(SseConnectionStatus.reconnecting);
+        await Future<void>.delayed(const Duration(seconds: 2));
+      } catch (error, stackTrace) {
+        if (cancelToken.isCancelled) return;
+        if (_isRateLimited(error) ||
+            (!hasReceivedEvent && ++initialRetryCount >= 3)) {
+          onStatus?.call(SseConnectionStatus.error);
+          Error.throwWithStackTrace(error, stackTrace);
+        }
+        onStatus?.call(SseConnectionStatus.reconnecting);
+        await Future<void>.delayed(const Duration(seconds: 2));
+      }
+    }
+  }
+
+  static bool _isRateLimited(Object error) {
+    return error is DioException && error.response?.statusCode == 429;
+  }
 
   /// 获取 AnimeFlow 发布版本列表。
   static Future<List<GithubRelease>> getReleases({

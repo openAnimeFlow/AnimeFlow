@@ -1,0 +1,20 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="960" height="360" viewBox="0 0 960 360" fill="none">
+  <defs>
+    <path id="sparkle" d="M0-12Q2-3 12 0Q2 3 0 12Q-2 3-12 0Q-2-3 0-12Z"/>
+  </defs>
+  <circle cx="128" cy="-24" r="190" fill="white" fill-opacity=".14"/>
+  <circle cx="900" cy="330" r="220" fill="white" fill-opacity=".10"/>
+  <path d="M-40 278C116 138 236 352 430 250S718 116 1000 202V390H-40V278Z" fill="white" fill-opacity=".10"/>
+  <path d="M-30 296C132 184 260 352 476 286S758 178 1000 250" stroke="white" stroke-width="2" stroke-opacity=".28"/>
+  <path d="M-20 96C164 204 286 18 480 88S764 216 980 72" stroke="white" stroke-width="1.5" stroke-opacity=".20"/>
+  <ellipse cx="490" cy="184" rx="208" ry="156" stroke="white" stroke-width="1.5" stroke-opacity=".20"/>
+  <g fill="white">
+    <use href="#sparkle" transform="translate(174 92) scale(.62)" fill-opacity=".60"/>
+    <use href="#sparkle" transform="translate(776 238) scale(.82)" fill-opacity=".48"/>
+    <use href="#sparkle" transform="translate(820 82) scale(.42)" fill-opacity=".70"/>
+    <circle cx="88" cy="214" r="4" fill-opacity=".45"/>
+    <circle cx="864" cy="158" r="3" fill-opacity=".55"/>
+    <circle cx="302" cy="54" r="3" fill-opacity=".36"/>
+    <circle cx="666" cy="292" r="3" fill-opacity=".38"/>
+  </g>
+</svg>

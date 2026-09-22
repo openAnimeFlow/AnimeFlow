@@ -48,16 +48,16 @@ class AppLocalizationsZh extends AppLocalizations {
   String get englishLanguage => 'English';
 
   @override
-  String get recommendTab => '推荐';
+  String get recommend => '推荐';
 
   @override
-  String get mineTab => '我的';
+  String get mine => '我的';
 
   @override
-  String get animeTab => '动漫';
+  String get anime => '动漫';
 
   @override
-  String get forumTab => '论坛';
+  String get community => '社区';
 
   @override
   String get searchAnimeHint => '搜索动漫番剧...';
@@ -203,6 +203,64 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get totalWatchers => '總觀看人數';
+
+  @override
+  String get communityOnlineTitle => '社區在線';
+
+  @override
+  String get communityOnlineSubtitle => '因為熱愛而相聚 · 與更多同好一起看番';
+
+  @override
+  String get communityOnlineVersionNotice => '社區在線僅展示 2.6.0+版本 的在線使用者';
+
+  @override
+  String get communityConnectionConnected => '已連接 · 即時更新';
+
+  @override
+  String get communityConnectionConnecting => '連接中';
+
+  @override
+  String get communityConnectionReconnecting => '重連中';
+
+  @override
+  String get communityConnectionError => '連接失敗';
+
+  @override
+  String get communityConnectionDisconnected => '未連接';
+
+  @override
+  String get communityConnectionRetry => '重試連接';
+
+  @override
+  String get watchingAnimeTitle => '正在觀看的番劇';
+
+  @override
+  String watchingAnimeSummary(Object count, Object viewers) {
+    return '共 $count 部 · $viewers 人正在觀看';
+  }
+
+  @override
+  String communityOnlineSummary(
+      Object total, Object anonymous, Object loggedIn) {
+    return '總在線 $total 人 · 匿名 $anonymous · 登入 $loggedIn';
+  }
+
+  @override
+  String get totalOnlineUsers => '總人數';
+
+  @override
+  String get anonymousUsers => '匿名';
+
+  @override
+  String get loggedInUsers => '登入';
+
+  @override
+  String watchingPeople(Object count) {
+    return '$count 人在看';
+  }
+
+  @override
+  String get noUsersWatchingAnime => '目前還沒有使用者正在觀看番劇';
 
   @override
   String get averageRating => '平均評分';
@@ -2063,16 +2121,16 @@ class AppLocalizationsZhHans extends AppLocalizationsZh {
   String get englishLanguage => 'English';
 
   @override
-  String get recommendTab => '推荐';
+  String get recommend => '推荐';
 
   @override
-  String get mineTab => '我的';
+  String get mine => '我的';
 
   @override
-  String get animeTab => '动漫';
+  String get anime => '动漫';
 
   @override
-  String get forumTab => '论坛';
+  String get community => '社区';
 
   @override
   String get searchAnimeHint => '搜索动漫番剧...';
@@ -2218,6 +2276,64 @@ class AppLocalizationsZhHans extends AppLocalizationsZh {
 
   @override
   String get totalWatchers => '总观看人数';
+
+  @override
+  String get communityOnlineTitle => '社区在线';
+
+  @override
+  String get communityOnlineSubtitle => '因为热爱而相聚 · 与更多同好一起看番';
+
+  @override
+  String get communityOnlineVersionNotice => '社区在线仅展示 2.6.0+版本 的在线用户';
+
+  @override
+  String get communityConnectionConnected => '已连接 · 实时更新';
+
+  @override
+  String get communityConnectionConnecting => '连接中';
+
+  @override
+  String get communityConnectionReconnecting => '重连中';
+
+  @override
+  String get communityConnectionError => '连接失败';
+
+  @override
+  String get communityConnectionDisconnected => '未连接';
+
+  @override
+  String get communityConnectionRetry => '重试连接';
+
+  @override
+  String get watchingAnimeTitle => '正在观看的番剧';
+
+  @override
+  String watchingAnimeSummary(Object count, Object viewers) {
+    return '共 $count 部 · $viewers 人正在观看';
+  }
+
+  @override
+  String communityOnlineSummary(
+      Object total, Object anonymous, Object loggedIn) {
+    return '总在线 $total 人 · 匿名 $anonymous · 登录 $loggedIn';
+  }
+
+  @override
+  String get totalOnlineUsers => '总人数';
+
+  @override
+  String get anonymousUsers => '匿名';
+
+  @override
+  String get loggedInUsers => '登录';
+
+  @override
+  String watchingPeople(Object count) {
+    return '$count 人在看';
+  }
+
+  @override
+  String get noUsersWatchingAnime => '当前还没有用户在观看番剧';
 
   @override
   String get averageRating => '平均评分';
@@ -4077,16 +4193,16 @@ class AppLocalizationsZhHantHk extends AppLocalizationsZh {
   String get englishLanguage => 'English';
 
   @override
-  String get recommendTab => '推薦';
+  String get recommend => '推薦';
 
   @override
-  String get mineTab => '我的';
+  String get mine => '我的';
 
   @override
-  String get animeTab => '動畫';
+  String get anime => '動畫';
 
   @override
-  String get forumTab => '論壇';
+  String get community => '社區';
 
   @override
   String get searchAnimeHint => '搜尋動畫番組...';
@@ -4232,6 +4348,64 @@ class AppLocalizationsZhHantHk extends AppLocalizationsZh {
 
   @override
   String get totalWatchers => '總觀看人數';
+
+  @override
+  String get communityOnlineTitle => '社區在線';
+
+  @override
+  String get communityOnlineSubtitle => '因為熱愛而相聚 · 與更多同好一起看番';
+
+  @override
+  String get communityOnlineVersionNotice => '社區在線僅展示 2.6.0+版本 的在線使用者';
+
+  @override
+  String get communityConnectionConnected => '已連接 · 即時更新';
+
+  @override
+  String get communityConnectionConnecting => '連接中';
+
+  @override
+  String get communityConnectionReconnecting => '重連中';
+
+  @override
+  String get communityConnectionError => '連接失敗';
+
+  @override
+  String get communityConnectionDisconnected => '未連接';
+
+  @override
+  String get communityConnectionRetry => '重試連接';
+
+  @override
+  String get watchingAnimeTitle => '正在觀看的番劇';
+
+  @override
+  String watchingAnimeSummary(Object count, Object viewers) {
+    return '共 $count 部 · $viewers 人正在觀看';
+  }
+
+  @override
+  String communityOnlineSummary(
+      Object total, Object anonymous, Object loggedIn) {
+    return '總在線 $total 人 · 匿名 $anonymous · 登入 $loggedIn';
+  }
+
+  @override
+  String get totalOnlineUsers => '總人數';
+
+  @override
+  String get anonymousUsers => '匿名';
+
+  @override
+  String get loggedInUsers => '登入';
+
+  @override
+  String watchingPeople(Object count) {
+    return '$count 人在看';
+  }
+
+  @override
+  String get noUsersWatchingAnime => '目前還沒有使用者正在觀看番劇';
 
   @override
   String get averageRating => '平均評分';
@@ -6092,16 +6266,16 @@ class AppLocalizationsZhHantTw extends AppLocalizationsZh {
   String get englishLanguage => 'English';
 
   @override
-  String get recommendTab => '推薦';
+  String get recommend => '推薦';
 
   @override
-  String get mineTab => '我的';
+  String get mine => '我的';
 
   @override
-  String get animeTab => '動畫';
+  String get anime => '動畫';
 
   @override
-  String get forumTab => '論壇';
+  String get community => '社區';
 
   @override
   String get searchAnimeHint => '搜尋動畫番劇...';
@@ -6247,6 +6421,64 @@ class AppLocalizationsZhHantTw extends AppLocalizationsZh {
 
   @override
   String get totalWatchers => '總觀看人數';
+
+  @override
+  String get communityOnlineTitle => '社群在線';
+
+  @override
+  String get communityOnlineSubtitle => '因為熱愛而相聚 · 與更多同好一起看番';
+
+  @override
+  String get communityOnlineVersionNotice => '社群在線僅展示 2.6.0+版本 的在線使用者';
+
+  @override
+  String get communityConnectionConnected => '已連線 · 即時更新';
+
+  @override
+  String get communityConnectionConnecting => '連線中';
+
+  @override
+  String get communityConnectionReconnecting => '重新連線中';
+
+  @override
+  String get communityConnectionError => '連線失敗';
+
+  @override
+  String get communityConnectionDisconnected => '未連線';
+
+  @override
+  String get communityConnectionRetry => '重試連線';
+
+  @override
+  String get watchingAnimeTitle => '正在觀看的番劇';
+
+  @override
+  String watchingAnimeSummary(Object count, Object viewers) {
+    return '共 $count 部 · $viewers 人正在觀看';
+  }
+
+  @override
+  String communityOnlineSummary(
+      Object total, Object anonymous, Object loggedIn) {
+    return '總在線 $total 人 · 匿名 $anonymous · 登入 $loggedIn';
+  }
+
+  @override
+  String get totalOnlineUsers => '總人數';
+
+  @override
+  String get anonymousUsers => '匿名';
+
+  @override
+  String get loggedInUsers => '登入';
+
+  @override
+  String watchingPeople(Object count) {
+    return '$count 人在看';
+  }
+
+  @override
+  String get noUsersWatchingAnime => '目前還沒有使用者正在觀看番劇';
 
   @override
   String get averageRating => '平均評分';

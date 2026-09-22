@@ -3,6 +3,7 @@ import 'package:anime_flow/core/auth/models/flow_token.dart';
 import 'package:anime_flow/core/auth/repository/flow_token_storage.dart';
 import 'package:anime_flow/core/auth/repository/token_repository.dart';
 import 'package:anime_flow/core/utils/system_util.dart';
+import 'package:anime_flow/core/presence/presence_service.dart';
 
 typedef EmailLoginFn = Future<FlowToken> Function({
   required String email,
@@ -32,6 +33,7 @@ class LoginService {
       platform: SystemUtil.getDevice().toUpperCase(),
     );
     await _flowTokenRepository.saveToken(token);
+    await PresenceService.instance.heartbeatNow();
     return token;
   }
 }

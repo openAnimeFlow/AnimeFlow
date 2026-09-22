@@ -181,29 +181,29 @@ abstract class AppLocalizations {
   /// **'English'**
   String get englishLanguage;
 
-  /// No description provided for @recommendTab.
+  /// No description provided for @recommend.
   ///
   /// In zh_Hans, this message translates to:
   /// **'推荐'**
-  String get recommendTab;
+  String get recommend;
 
-  /// No description provided for @mineTab.
+  /// No description provided for @mine.
   ///
   /// In zh_Hans, this message translates to:
   /// **'我的'**
-  String get mineTab;
+  String get mine;
 
-  /// No description provided for @animeTab.
+  /// No description provided for @anime.
   ///
   /// In zh_Hans, this message translates to:
   /// **'动漫'**
-  String get animeTab;
+  String get anime;
 
-  /// No description provided for @forumTab.
+  /// No description provided for @community.
   ///
   /// In zh_Hans, this message translates to:
-  /// **'论坛'**
-  String get forumTab;
+  /// **'社区'**
+  String get community;
 
   /// No description provided for @searchAnimeHint.
   ///
@@ -474,6 +474,109 @@ abstract class AppLocalizations {
   /// In zh_Hans, this message translates to:
   /// **'总观看人数'**
   String get totalWatchers;
+
+  /// No description provided for @communityOnlineTitle.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'社区在线'**
+  String get communityOnlineTitle;
+
+  /// No description provided for @communityOnlineSubtitle.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'因为热爱而相聚 · 与更多同好一起看番'**
+  String get communityOnlineSubtitle;
+
+  /// No description provided for @communityOnlineVersionNotice.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'社区在线仅展示 2.6.0+版本 的在线用户'**
+  String get communityOnlineVersionNotice;
+
+  /// No description provided for @communityConnectionConnected.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'已连接 · 实时更新'**
+  String get communityConnectionConnected;
+
+  /// No description provided for @communityConnectionConnecting.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'连接中'**
+  String get communityConnectionConnecting;
+
+  /// No description provided for @communityConnectionReconnecting.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'重连中'**
+  String get communityConnectionReconnecting;
+
+  /// No description provided for @communityConnectionError.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'连接失败'**
+  String get communityConnectionError;
+
+  /// No description provided for @communityConnectionDisconnected.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'未连接'**
+  String get communityConnectionDisconnected;
+
+  /// No description provided for @communityConnectionRetry.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'重试连接'**
+  String get communityConnectionRetry;
+
+  /// No description provided for @watchingAnimeTitle.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'正在观看的番剧'**
+  String get watchingAnimeTitle;
+
+  /// No description provided for @watchingAnimeSummary.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'共 {count} 部 · {viewers} 人正在观看'**
+  String watchingAnimeSummary(Object count, Object viewers);
+
+  /// No description provided for @communityOnlineSummary.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'总在线 {total} 人 · 匿名 {anonymous} · 登录 {loggedIn}'**
+  String communityOnlineSummary(
+      Object total, Object anonymous, Object loggedIn);
+
+  /// No description provided for @totalOnlineUsers.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'总人数'**
+  String get totalOnlineUsers;
+
+  /// No description provided for @anonymousUsers.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'匿名'**
+  String get anonymousUsers;
+
+  /// No description provided for @loggedInUsers.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'登录'**
+  String get loggedInUsers;
+
+  /// No description provided for @watchingPeople.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'{count} 人在看'**
+  String watchingPeople(Object count);
+
+  /// No description provided for @noUsersWatchingAnime.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'当前还没有用户在观看番剧'**
+  String get noUsersWatchingAnime;
 
   /// No description provided for @averageRating.
   ///

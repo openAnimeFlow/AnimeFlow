@@ -89,6 +89,7 @@ dependencies:
   dio: ^5.10.0 # 提供支持拦截器、取消请求和文件传输的 HTTP 客户端。
   cookie_jar: ^4.0.9 # 管理 HTTP Cookie，并支持 Cookie 持久化。
   crypto: ^3.0.6 # 提供常用密码学哈希、摘要和 HMAC 算法。
+  uuid: ^4.5.1 # 生成标准 UUID v4 客户端身份标识。
   html: ^0.15.6 # 将 HTML 文本解析为可遍历和操作的文档树。
   xpath_selector: ^3.0.2 # 使用 XPath 表达式查询 XML 或 HTML 文档节点。
   xpath_selector_html_parser: ^3.0.1 # 将 HTML 解析器接入 xpath_selector 查询流程。
@@ -164,17 +165,17 @@ flutter_launcher_icons:
     generate: true
   macos:
     generate: true
-  image_path: "assets/image/logo/logo.webp"
+  image_path: "assets/image/logo.webp"
   remove_alpha_ios: true  # 添加这一行来移除iOS图标的alpha通道
   adaptive_icon_background: "#FFFFFF"
 
 # 启动logo: dart run flutter_native_splash:create
 flutter_native_splash:
   color: "#A0C4F5"
-  image: assets/image/logo/logo.png
+  image: assets/features/logo.png
   android_12:
     # Android 12+ 会把启动图标裁剪成中心圆，使用预置好安全边距的专用图片。
-    image: assets/image/logo/logo_android_12.png
+    image: assets/features/logo_android_12.png
     color: "#A0C4F5"
   android: true
   ios: true
@@ -217,8 +218,7 @@ flutter:
     - assets/plugins/
     - assets/shaders/
     - assets/animation/
-    - assets/image/logo/logo.webp
-    - assets/image/purple_cat_girl_chibi.webp
+    - assets/image/
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/to/resolution-aware-images
 

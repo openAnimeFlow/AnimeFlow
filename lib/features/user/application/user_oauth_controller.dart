@@ -13,6 +13,7 @@ import 'package:anime_flow/features/user/presentation/providers/user_state_provi
 import 'package:anime_flow/features/auth/application/token_providers.dart';
 import 'package:anime_flow/core/logger/logger.dart';
 import 'package:anime_flow/core/utils/system_util.dart';
+import 'package:anime_flow/core/presence/presence_service.dart';
 import 'package:anime_flow/shared/widgets/notification_toast.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:url_launcher/url_launcher.dart';
@@ -120,6 +121,7 @@ class UserOAuthController extends _$UserOAuthController {
       platform: SystemUtil.getDevice().toUpperCase(),
     );
     await ref.read(flowTokenRepositoryProvider).saveToken(flowToken);
+    await PresenceService.instance.heartbeatNow();
     ref.invalidate(currentFlowTokenProvider);
     ref.invalidate(isLoggedInProvider);
     ref.invalidate(currentUserInfoProvider);

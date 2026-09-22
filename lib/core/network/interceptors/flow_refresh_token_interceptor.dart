@@ -52,6 +52,10 @@ class FlowRefreshTokenInterceptor extends Interceptor {
     }
     try {
       if (!await _refreshTokenIfNeeded(response.requestOptions)) {
+        if (_isPresenceRequest(response.requestOptions)) {
+          return handler.resolve(
+              await _retryWithoutFlowToken(response.requestOptions));
+        }
         return handler.next(response);
       }
       handler.resolve(await _retryRequest(response.requestOptions));
@@ -72,6 +76,9 @@ class FlowRefreshTokenInterceptor extends Interceptor {
     }
     try {
       if (!await _refreshTokenIfNeeded(err.requestOptions)) {
+        if (_isPresenceRequest(err.requestOptions)) {
+          return handler.resolve(await _retryWithoutFlowToken(err.requestOptions));
+        }
         return handler.next(err);
       }
       handler.resolve(await _retryRequest(err.requestOptions));
@@ -116,6 +123,9 @@ class FlowRefreshTokenInterceptor extends Interceptor {
 
   bool _hasAuthorization(RequestOptions options) =>
       options.headers[Constants.authorization]?.toString().isNotEmpty == true;
+
+  bool _isPresenceRequest(RequestOptions options) =>
+      options.path.startsWith('/api/v1/presence/');
 
   bool _allowsFlowRefresh(dynamic data) {
     final reason = data is Map ? data['authReason'] : null;
@@ -206,6 +216,19 @@ class FlowRefreshTokenInterceptor extends Interceptor {
       },
       extra: {...options.extra, _retriedKey: true},
       data: data is FormData ? data.clone() : data,
+    ));
+  }
+
+  Future<Response<dynamic>> _retryWithoutFlowToken(RequestOptions options) {
+    final headers = <String, dynamic>{...options.headers};
+    headers.remove(Constants.authorization);
+    return _dio.fetch(options.copyWith(
+      headers: headers,
+      extra: {
+        ...options.extra,
+        skipKey: true,
+        _retriedKey: true,
+      },
     ));
   }
 }

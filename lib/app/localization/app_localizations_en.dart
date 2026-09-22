@@ -51,16 +51,16 @@ class AppLocalizationsEn extends AppLocalizations {
   String get englishLanguage => 'English';
 
   @override
-  String get recommendTab => 'Recommended';
+  String get recommend => 'Recommended';
 
   @override
-  String get mineTab => 'Mine';
+  String get mine => 'Mine';
 
   @override
-  String get animeTab => 'Anime';
+  String get anime => 'Anime';
 
   @override
-  String get forumTab => 'Forum';
+  String get community => 'Community';
 
   @override
   String get searchAnimeHint => 'Search anime...';
@@ -207,6 +207,66 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get totalWatchers => 'Total viewers';
+
+  @override
+  String get communityOnlineTitle => 'Community Online';
+
+  @override
+  String get communityOnlineSubtitle =>
+      'Gather because we love anime · Watch with fellow fans';
+
+  @override
+  String get communityOnlineVersionNotice =>
+      'Only users on version 2.6.0+ are shown as online';
+
+  @override
+  String get communityConnectionConnected => 'Connected · Live updates';
+
+  @override
+  String get communityConnectionConnecting => 'Connecting';
+
+  @override
+  String get communityConnectionReconnecting => 'Reconnecting';
+
+  @override
+  String get communityConnectionError => 'Connection failed';
+
+  @override
+  String get communityConnectionDisconnected => 'Not connected';
+
+  @override
+  String get communityConnectionRetry => 'Retry connection';
+
+  @override
+  String get watchingAnimeTitle => 'Currently Watching';
+
+  @override
+  String watchingAnimeSummary(Object count, Object viewers) {
+    return '$count titles · $viewers watching';
+  }
+
+  @override
+  String communityOnlineSummary(
+      Object total, Object anonymous, Object loggedIn) {
+    return '$total online · $anonymous anonymous · $loggedIn logged in';
+  }
+
+  @override
+  String get totalOnlineUsers => 'Total';
+
+  @override
+  String get anonymousUsers => 'Anonymous';
+
+  @override
+  String get loggedInUsers => 'Logged in';
+
+  @override
+  String watchingPeople(Object count) {
+    return '$count watching';
+  }
+
+  @override
+  String get noUsersWatchingAnime => 'No users are watching anime right now';
 
   @override
   String get averageRating => 'Average rating';

@@ -31,6 +31,7 @@ class _AboutSettingsPageState extends ConsumerState<AboutSettingsPage> {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
+    final colorScheme = Theme.of(context).colorScheme;
     return Scaffold(
       extendBodyBehindAppBar: true,
       appBar: PreferredSize(
@@ -46,41 +47,48 @@ class _AboutSettingsPageState extends ConsumerState<AboutSettingsPage> {
           },
         ),
       ),
-      body: ListView(
-        padding: EdgeInsets.zero,
+      body: Stack(
         children: [
-          Consumer(
-            builder: (context, ref, _) {
-              final appInfo = ref.watch(appInfoProvider);
-              final colorScheme = Theme.of(context).colorScheme;
-              final topPadding =
-                  MediaQuery.paddingOf(context).top + kToolbarHeight;
-              return Stack(
-                children: [
-                  Positioned.fill(
-                    child: ShaderMask(
-                      blendMode: BlendMode.dstIn,
-                      shaderCallback: (bounds) => const LinearGradient(
-                        begin: Alignment.topCenter,
-                        end: Alignment.bottomCenter,
-                        colors: [
-                          Colors.white,
-                          Colors.white,
-                          Colors.transparent,
-                        ],
-                        stops: [0, 0.68, 1],
-                      ).createShader(bounds),
-                      child: SvgPicture.asset(
-                        AssetsPathConstants.ambientWaveBackground,
-                        fit: BoxFit.cover,
-                        colorFilter: ColorFilter.mode(
-                          colorScheme.primary.withValues(alpha: 0.42),
-                          BlendMode.srcIn,
-                        ),
-                      ),
+          Positioned(
+            top: 0,
+            left: 0,
+            right: 0,
+            child: IgnorePointer(
+              child: SizedBox(
+                height: 360,
+                child: ShaderMask(
+                  blendMode: BlendMode.dstIn,
+                  shaderCallback: (bounds) => const LinearGradient(
+                    begin: Alignment.topCenter,
+                    end: Alignment.bottomCenter,
+                    colors: [
+                      Colors.white,
+                      Colors.white,
+                      Colors.transparent,
+                    ],
+                    stops: [0, 0.68, 1],
+                  ).createShader(bounds),
+                  child: SvgPicture.asset(
+                    AssetsPathConstants.ambientWaveBackground,
+                    fit: BoxFit.cover,
+                    colorFilter: ColorFilter.mode(
+                      colorScheme.primary.withValues(alpha: 0.42),
+                      BlendMode.srcIn,
                     ),
                   ),
-                  Padding(
+                ),
+              ),
+            ),
+          ),
+          ListView(
+            padding: EdgeInsets.zero,
+            children: [
+              Consumer(
+                builder: (context, ref, _) {
+                  final appInfo = ref.watch(appInfoProvider);
+                  final topPadding =
+                      MediaQuery.paddingOf(context).top + kToolbarHeight;
+                  return Padding(
                     padding: EdgeInsets.fromLTRB(
                       16,
                       topPadding + 28,
@@ -116,91 +124,92 @@ class _AboutSettingsPageState extends ConsumerState<AboutSettingsPage> {
                         ],
                       ),
                     ),
-                  ),
-                ],
-              );
-            },
-          ),
-          Padding(
-            padding: const EdgeInsets.all(16),
-            child: Column(
-              children: [
-                const SizedBox(height: 16),
-                const Divider(),
-                Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 15),
-                  child: Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Text(l10n.autoUpdate),
-                        Switch(
-                          value: autoUpdate,
-                          onChanged: (bool value) {
-                            setState(() {
-                              setting.put(StorageKey.autoUpdateKey, value);
-                              autoUpdate = value;
-                            });
-                          },
-                        ),
-                      ]),
+                  );
+                },
+              ),
+              Padding(
+                padding: const EdgeInsets.all(16),
+                child: Column(
+                  children: [
+                    const SizedBox(height: 16),
+                    const Divider(),
+                    Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 15),
+                      child: Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            Text(l10n.autoUpdate),
+                            Switch(
+                              value: autoUpdate,
+                              onChanged: (bool value) {
+                                setState(() {
+                                  setting.put(StorageKey.autoUpdateKey, value);
+                                  autoUpdate = value;
+                                });
+                              },
+                            ),
+                          ]),
+                    ),
+                    const Divider(),
+                    ListTile(
+                      title: Text(l10n.checkForUpdates),
+                      trailing: const Icon(Icons.browser_updated_outlined),
+                      onTap: () async {
+                        final notifier = ref.read(appInfoProvider.notifier);
+                        final result = await notifier.checkVersion();
+                        if (!context.mounted) return;
+                        await handleVersionCheckResult(
+                          context,
+                          result,
+                          onStartDownload: notifier.performUpdateDownload,
+                          onDownloadedPackageAction:
+                              notifier.openDownloadedPackage,
+                          onCancelDownload: notifier.cancelUpdateDownload,
+                          notifyWhenUpToDate: true,
+                        );
+                      },
+                    ),
+                    const Divider(),
+                    ListTile(
+                      title: Text(l10n.projectUpdates),
+                      trailing: const Icon(Icons.article_outlined),
+                      onTap: () => const SettingUpdatesRoute().push(context),
+                    ),
+                    const Divider(),
+                    ListTile(
+                      title: Text(l10n.openSource),
+                      trailing: const Icon(Icons.open_in_new),
+                      onTap: () async {
+                        final uri = Uri.parse(Constants.animeFlow);
+                        if (await canLaunchUrl(uri)) {
+                          await launchUrl(uri);
+                        } else {
+                          NotificationToast.show(l10n.deviceUnsupportedWeb,
+                              title: l10n.unableOpenWeb);
+                        }
+                      },
+                    ),
+                    const Divider(),
+                    ListTile(
+                      title: Text(l10n.thanks),
+                      trailing: const Icon(Icons.chevron_right),
+                      onTap: () {
+                        const SettingThanksRoute().push(context);
+                      },
+                    ),
+                    const Divider(),
+                    ListTile(
+                      title: Text(l10n.privacyPolicy),
+                      trailing: const Icon(Icons.chevron_right),
+                      onTap: () {
+                        const SettingAgreementRoute().push(context);
+                      },
+                    ),
+                    const Divider(),
+                  ],
                 ),
-                const Divider(),
-                ListTile(
-                  title: Text(l10n.checkForUpdates),
-                  trailing: const Icon(Icons.browser_updated_outlined),
-                  onTap: () async {
-                    final notifier = ref.read(appInfoProvider.notifier);
-                    final result = await notifier.checkVersion();
-                    if (!context.mounted) return;
-                    await handleVersionCheckResult(
-                      context,
-                      result,
-                      onStartDownload: notifier.performUpdateDownload,
-                      onDownloadedPackageAction: notifier.openDownloadedPackage,
-                      onCancelDownload: notifier.cancelUpdateDownload,
-                      notifyWhenUpToDate: true,
-                    );
-                  },
-                ),
-                const Divider(),
-                ListTile(
-                  title: Text(l10n.projectUpdates),
-                  trailing: const Icon(Icons.article_outlined),
-                  onTap: () => const SettingUpdatesRoute().push(context),
-                ),
-                const Divider(),
-                ListTile(
-                  title: Text(l10n.openSource),
-                  trailing: const Icon(Icons.open_in_new),
-                  onTap: () async {
-                    final uri = Uri.parse(Constants.animeFlow);
-                    if (await canLaunchUrl(uri)) {
-                      await launchUrl(uri);
-                    } else {
-                      NotificationToast.show(l10n.deviceUnsupportedWeb,
-                          title: l10n.unableOpenWeb);
-                    }
-                  },
-                ),
-                const Divider(),
-                ListTile(
-                  title: Text(l10n.thanks),
-                  trailing: const Icon(Icons.chevron_right),
-                  onTap: () {
-                    const SettingThanksRoute().push(context);
-                  },
-                ),
-                const Divider(),
-                ListTile(
-                  title: Text(l10n.privacyPolicy),
-                  trailing: const Icon(Icons.chevron_right),
-                  onTap: () {
-                    const SettingAgreementRoute().push(context);
-                  },
-                ),
-                const Divider(),
-              ],
-            ),
+              ),
+            ],
           ),
         ],
       ),

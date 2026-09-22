@@ -69,39 +69,47 @@ class ThanksPage extends StatelessWidget {
               : 1;
           final viewPadding = MediaQuery.of(context).viewPadding.left;
           final topPadding = MediaQuery.paddingOf(context).top + kToolbarHeight;
-          return CustomScrollView(
-            slivers: [
-              // 顶部 logo 和标题
-              SliverToBoxAdapter(
-                child: Stack(
-                  children: [
-                    Positioned.fill(
-                      child: ShaderMask(
-                        blendMode: BlendMode.dstIn,
-                        shaderCallback: (bounds) => const LinearGradient(
-                          begin: Alignment.topCenter,
-                          end: Alignment.bottomCenter,
-                          colors: [
-                            Colors.white,
-                            Colors.white,
-                            Colors.transparent,
-                          ],
-                          stops: [0, 0.68, 1],
-                        ).createShader(bounds),
-                        child: SvgPicture.asset(
-                          AssetsPathConstants.ambientWaveBackground,
-                          fit: BoxFit.cover,
-                          colorFilter: ColorFilter.mode(
-                            Theme.of(context)
-                                .colorScheme
-                                .primary
-                                .withValues(alpha: 0.42),
-                            BlendMode.srcIn,
-                          ),
+          return Stack(
+            children: [
+              Positioned(
+                top: 0,
+                left: 0,
+                right: 0,
+                child: IgnorePointer(
+                  child: SizedBox(
+                    height: 360,
+                    child: ShaderMask(
+                      blendMode: BlendMode.dstIn,
+                      shaderCallback: (bounds) => const LinearGradient(
+                        begin: Alignment.topCenter,
+                        end: Alignment.bottomCenter,
+                        colors: [
+                          Colors.white,
+                          Colors.white,
+                          Colors.transparent,
+                        ],
+                        stops: [0, 0.68, 1],
+                      ).createShader(bounds),
+                      child: SvgPicture.asset(
+                        AssetsPathConstants.ambientWaveBackground,
+                        fit: BoxFit.cover,
+                        colorFilter: ColorFilter.mode(
+                          Theme.of(context)
+                              .colorScheme
+                              .primary
+                              .withValues(alpha: 0.42),
+                          BlendMode.srcIn,
                         ),
                       ),
                     ),
-                    Padding(
+                  ),
+                ),
+              ),
+              CustomScrollView(
+                slivers: [
+                  // 顶部 logo 和标题
+                  SliverToBoxAdapter(
+                    child: Padding(
                       padding: EdgeInsets.fromLTRB(
                         10,
                         topPadding,
@@ -152,41 +160,41 @@ class ThanksPage extends StatelessWidget {
                         ],
                       ),
                     ),
-                  ],
-                ),
-              ),
-
-              // 鸣谢项目 Grid
-              SliverPadding(
-                padding: EdgeInsets.only(
-                    left: viewPadding > 0 ? viewPadding : 10, right: 10),
-                sliver: SliverGrid(
-                  // 设置内边距
-                  gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                    crossAxisCount: crossAxisCount,
-                    mainAxisSpacing: 4,
-                    crossAxisSpacing: 4,
-                    mainAxisExtent: 110,
                   ),
-                  delegate: SliverChildBuilderDelegate(
-                    (context, index) {
-                      final item = _thanksItems(l10n)[index];
-                      return _buildThanksCard(
-                        context: context,
-                        icon: item['icon'] as Widget,
-                        title: item['title'] as String,
-                        description: item['description'] as String,
-                        url: item['url'] as String?,
-                      );
-                    },
-                    childCount: _thanksItems(l10n).length,
-                  ),
-                ),
-              ),
 
-              // 底部间距
-              const SliverToBoxAdapter(
-                child: SizedBox(height: 24),
+                  // 鸣谢项目 Grid
+                  SliverPadding(
+                    padding: EdgeInsets.only(
+                        left: viewPadding > 0 ? viewPadding : 10, right: 10),
+                    sliver: SliverGrid(
+                      // 设置内边距
+                      gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                        crossAxisCount: crossAxisCount,
+                        mainAxisSpacing: 4,
+                        crossAxisSpacing: 4,
+                        mainAxisExtent: 110,
+                      ),
+                      delegate: SliverChildBuilderDelegate(
+                        (context, index) {
+                          final item = _thanksItems(l10n)[index];
+                          return _buildThanksCard(
+                            context: context,
+                            icon: item['icon'] as Widget,
+                            title: item['title'] as String,
+                            description: item['description'] as String,
+                            url: item['url'] as String?,
+                          );
+                        },
+                        childCount: _thanksItems(l10n).length,
+                      ),
+                    ),
+                  ),
+
+                  // 底部间距
+                  const SliverToBoxAdapter(
+                    child: SizedBox(height: 24),
+                  ),
+                ],
               ),
             ],
           );

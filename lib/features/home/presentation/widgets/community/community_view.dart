@@ -648,15 +648,6 @@ class _SectionHeader extends StatelessWidget {
     final colorScheme = ColorScheme.of(context);
     return Row(
       children: [
-        Container(
-          padding: const EdgeInsets.all(7),
-          decoration: BoxDecoration(
-            color: colorScheme.primary,
-            borderRadius: BorderRadius.circular(9),
-          ),
-          child: Icon(icon, color: colorScheme.onPrimary, size: 19),
-        ),
-        const SizedBox(width: 10),
         Expanded(
           child: Text(
             title,

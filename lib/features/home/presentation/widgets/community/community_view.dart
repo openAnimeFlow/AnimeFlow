@@ -243,8 +243,8 @@ class _CommunityContent extends StatelessWidget {
                   ),
                   gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
                     crossAxisCount: crossAxisCount,
-                    mainAxisSpacing: compactGrid ? 6 : 5,
-                    crossAxisSpacing: compactGrid ? 6 : 5,
+                    mainAxisSpacing: compactGrid ? 10 : 8,
+                    crossAxisSpacing: compactGrid ? 10 : 8,
                     childAspectRatio: compactGrid ? 1.05 : 1.28,
                   ),
                 ),
@@ -647,26 +647,23 @@ class _SectionHeader extends StatelessWidget {
   Widget build(BuildContext context) {
     final colorScheme = ColorScheme.of(context);
     return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
-        Expanded(
-          child: Text(
-            title,
-            style: TextStyle(
-              color: colorScheme.onSurface,
-              fontSize: 20,
-              fontWeight: FontWeight.w800,
-            ),
+        Text(
+          title,
+          style: TextStyle(
+            color: colorScheme.onSurface,
+            fontSize: 20,
+            fontWeight: FontWeight.w800,
           ),
         ),
         if (subtitle != null)
-          Flexible(
-            child: Text(
-              subtitle!,
-              textAlign: TextAlign.right,
-              style: TextStyle(
-                color: colorScheme.onSurfaceVariant,
-                fontSize: 12,
-              ),
+          Text(
+            subtitle!,
+            textAlign: TextAlign.right,
+            style: TextStyle(
+              color: colorScheme.onSurfaceVariant,
+              fontSize: 12,
             ),
           ),
       ],

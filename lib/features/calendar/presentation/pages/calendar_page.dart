@@ -257,13 +257,13 @@ class _CalendarPageState extends State<CalendarPage>
     required ColorScheme colorScheme,
   }) {
     final theme = Theme.of(context);
-    const seasonMonths = [4, 7, 10, 1];
-    const seasonLabels = ['春季', '夏季', '秋季', '冬季'];
+    const seasonMonths = [1, 4, 7, 10];
+    const seasonLabels = ['冬季', '春季', '夏季', '秋季'];
     const seasonIcons = [
+      AssetsPathConstants.winter,
       AssetsPathConstants.spring,
       AssetsPathConstants.summer,
       AssetsPathConstants.autumn,
-      AssetsPathConstants.winter,
     ];
     const yearColors = [
       Color(0xFF5B6F9F),

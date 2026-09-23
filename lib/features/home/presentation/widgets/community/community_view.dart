@@ -181,9 +181,9 @@ class _CommunityContent extends StatelessWidget {
             SliverPadding(
               padding: EdgeInsets.fromLTRB(
                 horizontalPadding,
-                28,
+                10,
                 horizontalPadding,
-                12,
+                10,
               ),
               sliver: SliverToBoxAdapter(
                 child: _SectionHeader(
@@ -243,8 +243,8 @@ class _CommunityContent extends StatelessWidget {
                   ),
                   gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
                     crossAxisCount: crossAxisCount,
-                    mainAxisSpacing: compactGrid ? 10 : 8,
-                    crossAxisSpacing: compactGrid ? 10 : 8,
+                    mainAxisSpacing: 10,
+                    crossAxisSpacing: 10,
                     childAspectRatio: compactGrid ? 1.05 : 1.28,
                   ),
                 ),

@@ -88,6 +88,7 @@ class _SearchPageState extends ConsumerState<SearchPage> {
 
   /// 写入关键词并搜索（不触发搜索建议接口）
   Future<void> _searchWithKeyword(String keyword) async {
+    searchFocusNode.unfocus();
     _cancelSearchSuggestions();
     _suppressSuggestions = true;
     searchController.text = keyword;

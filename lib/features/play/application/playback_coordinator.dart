@@ -11,7 +11,7 @@ import 'package:anime_flow/features/play/infrastructure/player/player_engine_fac
 import 'package:anime_flow/features/play/infrastructure/player/player_operation_queue.dart';
 import 'package:flutter/material.dart';
 
-/// 播放器基础协调层，负责内核实例生命周期和内核切换。
+/// 播放器基础协调层。
 class PlaybackCoordinator {
   PlaybackCoordinator({
     required this.engineFactory,

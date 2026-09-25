@@ -48,7 +48,7 @@ final class GitHubAuthApiProvider
   }
 }
 
-String _$gitHubAuthApiHash() => r'1f17735240731ddf561383029bf87d13aa6fce89';
+String _$gitHubAuthApiHash() => r'93c33640e7ce3865bc685ad59bc26e0e16669289';
 
 @ProviderFor(gitHubTokenRepository)
 final gitHubTokenRepositoryProvider = GitHubTokenRepositoryProvider._();
@@ -94,6 +94,50 @@ final class GitHubTokenRepositoryProvider extends $FunctionalProvider<
 String _$gitHubTokenRepositoryHash() =>
     r'70d999fcc2c3ae59363696edee476256a8755e1e';
 
+@ProviderFor(gitHubTokenManager)
+final gitHubTokenManagerProvider = GitHubTokenManagerProvider._();
+
+final class GitHubTokenManagerProvider extends $FunctionalProvider<
+    GitHubTokenManager,
+    GitHubTokenManager,
+    GitHubTokenManager> with $Provider<GitHubTokenManager> {
+  GitHubTokenManagerProvider._()
+      : super(
+          from: null,
+          argument: null,
+          retry: null,
+          name: r'gitHubTokenManagerProvider',
+          isAutoDispose: false,
+          dependencies: null,
+          $allTransitiveDependencies: null,
+        );
+
+  @override
+  String debugGetCreateSourceHash() => _$gitHubTokenManagerHash();
+
+  @$internal
+  @override
+  $ProviderElement<GitHubTokenManager> $createElement(
+          $ProviderPointer pointer) =>
+      $ProviderElement(pointer);
+
+  @override
+  GitHubTokenManager create(Ref ref) {
+    return gitHubTokenManager(ref);
+  }
+
+  /// {@macro riverpod.override_with_value}
+  Override overrideWithValue(GitHubTokenManager value) {
+    return $ProviderOverride(
+      origin: this,
+      providerOverride: $SyncValueProvider<GitHubTokenManager>(value),
+    );
+  }
+}
+
+String _$gitHubTokenManagerHash() =>
+    r'c7542e0e13ba6fcfec13137afc918edf8ee5224b';
+
 @ProviderFor(GitHubAuthController)
 final gitHubAuthControllerProvider = GitHubAuthControllerProvider._();
 
@@ -127,7 +171,7 @@ final class GitHubAuthControllerProvider
 }
 
 String _$gitHubAuthControllerHash() =>
-    r'17b1eade52c07a1f504934bd5e8fe0179c7431f2';
+    r'd87ff58b979d798e1a68151a71b952d99b809c77';
 
 abstract class _$GitHubAuthController extends $Notifier<GitHubAuthState> {
   GitHubAuthState build();

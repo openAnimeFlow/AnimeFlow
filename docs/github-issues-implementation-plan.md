@@ -73,6 +73,8 @@ Device Flow 的用户体验是：App 展示 `user_code`，打开 `https://github
 2. GitHub 刷新后会轮换 refresh token，须把新 access/refresh token 和两个新到期时间一起覆盖旧值；同一时刻仅允许一次刷新，其他请求等待其结果，避免复用已失效的旧 refresh token。
 3. `bad_refresh_token`、令牌撤销或 refresh token 过期时清理本地状态并要求重新授权；网络失败保留现有状态供重试，不能误报为已退出。
 
+当前客户端实现由 `GitHubTokenManager` 统一执行到期检查与并发刷新，授权状态恢复时先取得可用令牌，再请求 GitHub `/user`；已连接期间在到期前五分钟自动刷新。收到 `/user` 的 401 后强制刷新并重试一次。刷新成功会把两个轮换后的令牌一同写入安全存储；断开授权会等待进行中的刷新结束后清除凭据。
+
 **完成标准**：临近到期自动刷新、并发请求只刷新一次、轮换后的令牌跨重启可用；失效令牌可引导重新授权。
 
 ## 阶段 4：客户端直连 GitHub API 创建 Issue

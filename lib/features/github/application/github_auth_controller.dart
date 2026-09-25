@@ -4,7 +4,9 @@ import 'package:anime_flow/core/auth/repository/github_token_storage.dart';
 import 'package:anime_flow/core/auth/repository/token_repository.dart';
 import 'package:anime_flow/core/network/clients/flow_client.dart';
 import 'package:anime_flow/features/github/data/github_auth_api.dart';
+import 'package:anime_flow/features/github/application/github_token_manager.dart';
 import 'package:anime_flow/features/github/domain/github_auth_models.dart';
+import 'package:dio/dio.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 part 'github_auth_controller.g.dart';
@@ -28,20 +30,30 @@ class GitHubAuthState {
 }
 
 @Riverpod(keepAlive: true)
-GitHubAuthApi gitHubAuthApi(Ref ref) => const GitHubAuthApiImpl();
+GitHubAuthApi gitHubAuthApi(Ref ref) => GitHubAuthApiImpl();
 
 @Riverpod(keepAlive: true)
 TokenRepository<GitHubToken> gitHubTokenRepository(Ref ref) =>
     GitHubTokenStorage.instance;
 
 @Riverpod(keepAlive: true)
+GitHubTokenManager gitHubTokenManager(Ref ref) => GitHubTokenManager(
+      ref.read(gitHubTokenRepositoryProvider),
+      ref.read(gitHubAuthApiProvider),
+    );
+
+@Riverpod(keepAlive: true)
 class GitHubAuthController extends _$GitHubAuthController {
   int _generation = 0;
   bool _busy = false;
+  Timer? _refreshTimer;
 
   @override
   GitHubAuthState build() {
-    ref.onDispose(() => _generation++);
+    ref.onDispose(() {
+      _generation++;
+      _refreshTimer?.cancel();
+    });
     unawaited(_restore());
     return const GitHubAuthState(GitHubAuthPhase.loading);
   }
@@ -55,16 +67,37 @@ class GitHubAuthController extends _$GitHubAuthController {
         state = const GitHubAuthState(GitHubAuthPhase.signedOut);
         return;
       }
-      if (DateTime.now().isAfter(token.accessExpiresAt)) {
-        state = const GitHubAuthState(GitHubAuthPhase.failed,
-            error: 'GitHub 授权已到期，请重新授权');
-        return;
+      var usableToken =
+          await ref.read(gitHubTokenManagerProvider).refreshIfNeeded();
+      if (generation != _generation) return;
+      GitHubUser user;
+      try {
+        user = await ref
+            .read(gitHubAuthApiProvider)
+            .getCurrentUser(usableToken.accessToken);
+      } on DioException catch (error) {
+        if (error.response?.statusCode != 401) rethrow;
+        usableToken = await ref
+            .read(gitHubTokenManagerProvider)
+            .refreshIfNeeded(force: true);
+        try {
+          user = await ref
+              .read(gitHubAuthApiProvider)
+              .getCurrentUser(usableToken.accessToken);
+        } on DioException catch (retryError) {
+          if (retryError.response?.statusCode != 401) rethrow;
+          await ref.read(gitHubTokenManagerProvider).clear();
+          throw const GitHubReauthorizationRequired();
+        }
       }
-      final user = await ref
-          .read(gitHubAuthApiProvider)
-          .getCurrentUser(token.accessToken);
       if (generation == _generation) {
         state = GitHubAuthState(GitHubAuthPhase.connected, user: user);
+        _scheduleRefresh(usableToken, generation);
+      }
+    } on GitHubReauthorizationRequired {
+      if (generation == _generation) {
+        state = const GitHubAuthState(GitHubAuthPhase.failed,
+            error: 'GitHub 授权已失效，请重新授权');
       }
     } catch (_) {
       if (generation == _generation) {
@@ -82,6 +115,7 @@ class GitHubAuthController extends _$GitHubAuthController {
     }
     _busy = true;
     final generation = ++_generation;
+    _refreshTimer?.cancel();
     state = const GitHubAuthState(GitHubAuthPhase.requesting);
     try {
       final session = await ref.read(gitHubAuthApiProvider).requestDeviceCode();
@@ -136,6 +170,7 @@ class GitHubAuthController extends _$GitHubAuthController {
                 .getCurrentUser(token.accessToken);
             if (generation == _generation) {
               state = GitHubAuthState(GitHubAuthPhase.connected, user: user);
+              _scheduleRefresh(token, generation);
             } else {
               await _discardStaleToken(token);
             }
@@ -170,6 +205,36 @@ class GitHubAuthController extends _$GitHubAuthController {
     }
   }
 
+  void _scheduleRefresh(GitHubToken token, int generation) {
+    _refreshTimer?.cancel();
+    if (generation != _generation) return;
+    final delay = token.accessExpiresAt
+        .difference(DateTime.now().add(GitHubTokenManager.refreshBeforeExpiry));
+    _refreshTimer = Timer(delay.isNegative ? Duration.zero : delay,
+        () => unawaited(_refreshInBackground(generation)));
+  }
+
+  Future<void> _refreshInBackground(int generation) async {
+    try {
+      final token =
+          await ref.read(gitHubTokenManagerProvider).refreshIfNeeded();
+      if (generation != _generation) return;
+      state = GitHubAuthState(GitHubAuthPhase.connected, user: state.user);
+      _scheduleRefresh(token, generation);
+    } on GitHubReauthorizationRequired {
+      if (generation == _generation) {
+        state = const GitHubAuthState(GitHubAuthPhase.failed,
+            error: 'GitHub 授权已失效，请重新授权');
+      }
+    } catch (_) {
+      if (generation != _generation) return;
+      state = GitHubAuthState(GitHubAuthPhase.connected,
+          user: state.user, error: 'GitHub 授权刷新暂时失败，将自动重试');
+      _refreshTimer = Timer(const Duration(minutes: 1),
+          () => unawaited(_refreshInBackground(generation)));
+    }
+  }
+
   Future<void> _discardStaleToken(GitHubToken token) async {
     final repository = ref.read(gitHubTokenRepositoryProvider);
     final saved = await repository.getToken();
@@ -179,16 +244,18 @@ class GitHubAuthController extends _$GitHubAuthController {
   }
 
   void cancel() {
-    _generation++;
-    if (state.phase == GitHubAuthPhase.waiting ||
-        state.phase == GitHubAuthPhase.requesting) {
-      state = const GitHubAuthState(GitHubAuthPhase.signedOut);
+    if (state.phase != GitHubAuthPhase.waiting &&
+        state.phase != GitHubAuthPhase.requesting) {
+      return;
     }
+    _generation++;
+    state = const GitHubAuthState(GitHubAuthPhase.signedOut);
   }
 
   Future<void> disconnect() async {
     _generation++;
-    await ref.read(gitHubTokenRepositoryProvider).removeToken();
+    _refreshTimer?.cancel();
+    await ref.read(gitHubTokenManagerProvider).clear();
     state = const GitHubAuthState(GitHubAuthPhase.signedOut);
   }
 

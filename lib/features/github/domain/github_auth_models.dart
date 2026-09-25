@@ -87,6 +87,33 @@ class GitHubToken {
     );
   }
 
+  factory GitHubToken.fromRefresh(Map<String, dynamic> json, DateTime now) {
+    final access = json['access_token'];
+    final refresh = json['refresh_token'];
+    final accessSeconds = (json['expires_in'] as num?)?.toInt();
+    final refreshSeconds = (json['refresh_token_expires_in'] as num?)?.toInt();
+    final type = json['token_type'];
+    if (access is! String ||
+        access.isEmpty ||
+        refresh is! String ||
+        refresh.isEmpty ||
+        accessSeconds == null ||
+        accessSeconds <= 0 ||
+        refreshSeconds == null ||
+        refreshSeconds <= 0 ||
+        type is! String ||
+        type.toLowerCase() != 'bearer') {
+      throw const FormatException('Invalid GitHub refresh response');
+    }
+    return GitHubToken(
+      accessToken: access,
+      refreshToken: refresh,
+      accessExpiresAt: now.add(Duration(seconds: accessSeconds)),
+      refreshExpiresAt: now.add(Duration(seconds: refreshSeconds)),
+      tokenType: type,
+    );
+  }
+
   factory GitHubToken.fromJson(Map<String, dynamic> json) {
     final access = json['accessToken'];
     final refresh = json['refreshToken'];

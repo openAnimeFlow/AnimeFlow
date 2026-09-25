@@ -70,6 +70,7 @@ class GitHubApi {
   static const String oauthBaseUrl = 'https://github.com';
   static const String apiBaseUrl = 'https://api.github.com';
   static const String deviceCode = '/login/device/code';
+  static const String accessToken = '/login/oauth/access_token';
   static const String currentUser = '/user';
 }
 

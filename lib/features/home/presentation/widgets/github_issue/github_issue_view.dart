@@ -105,6 +105,12 @@ class _GitHubIssueViewState extends ConsumerState<GitHubIssueView> {
                       Expanded(child: Text('@${auth.user?.login ?? ''}')),
                     ]),
                     if (auth.user != null) Text('ID: ${auth.user!.id}'),
+                    if (auth.error != null) ...[
+                      const SizedBox(height: 12),
+                      Text(auth.error!,
+                          style: TextStyle(
+                              color: Theme.of(context).colorScheme.error)),
+                    ],
                     const SizedBox(height: 12),
                     Text(l10n.githubConnectedHint),
                     const SizedBox(height: 12),
@@ -126,6 +132,11 @@ class _GitHubIssueViewState extends ConsumerState<GitHubIssueView> {
                       icon: const Icon(Icons.login),
                       label: Text(l10n.githubConnect),
                     ),
+                    if (auth.phase == GitHubAuthPhase.failed)
+                      TextButton(
+                        onPressed: controller.retryRestore,
+                        child: Text(l10n.retry),
+                      ),
                   ],
                 ],
               ),

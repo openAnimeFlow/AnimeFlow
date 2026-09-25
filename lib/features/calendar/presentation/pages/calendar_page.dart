@@ -31,6 +31,7 @@ class _CalendarPageState extends State<CalendarPage>
   late TabController _tabController;
   late int _selectedYear;
   late int _selectedMonth;
+  final Map<String, String> _selectedTags = {};
 
   List<String> _weekdayLabels(AppLocalizations l10n) => [
         l10n.monday,
@@ -245,6 +246,7 @@ class _CalendarPageState extends State<CalendarPage>
     setState(() {
       _selectedYear = result.year;
       _selectedMonth = result.month;
+      _selectedTags.clear();
     });
     _tabController.index = 0;
   }
@@ -419,6 +421,7 @@ class _CalendarPageState extends State<CalendarPage>
           overlayColor: WidgetStatePropertyAll(
             colorScheme.primary.withValues(alpha: 0.08),
           ),
+          splashBorderRadius: BorderRadius.circular(14),
           padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 6),
           tabs: List.generate(7, (index) {
             final weekday = (index + 1).toString();
@@ -467,17 +470,22 @@ class _CalendarPageState extends State<CalendarPage>
       );
     }
 
-    // 统计信息
-    final totalWatchers = items.fold(0, (sum, item) => sum + item.watchers);
-    final ratedItems =
-        items.where((item) => item.subject.rating.score > 0).toList();
-    final avgScore = ratedItems.isEmpty
-        ? 0.0
-        : ratedItems.fold(
-              0.0,
-              (sum, item) => sum + item.subject.rating.score,
-            ) /
-            ratedItems.length;
+    final availableTags = items
+        .expand((item) => item.subject.metaTags)
+        .map((tag) => tag.trim())
+        .where((tag) => tag.isNotEmpty)
+        .toSet()
+        .toList()
+      ..sort();
+    final selectedTag = availableTags.contains(_selectedTags[weekday])
+        ? _selectedTags[weekday]
+        : null;
+    final filteredItems = selectedTag == null
+        ? items
+        : items
+            .where((item) =>
+                item.subject.metaTags.any((tag) => tag.trim() == selectedTag))
+            .toList();
 
     return CustomScrollView(
       slivers: [
@@ -490,48 +498,21 @@ class _CalendarPageState extends State<CalendarPage>
               padding: EdgeInsets.symmetric(horizontal: horizontalPadding),
               sliver: SliverMainAxisGroup(
                 slivers: [
+                  // 季度
                   SliverToBoxAdapter(
                     child: _buildSeasonBanner(context, calendar, l10n),
                   ),
-                  // 统计信息
-                  SliverPadding(
-                    padding: const EdgeInsets.fromLTRB(10, 4, 10, 12),
-                    sliver: SliverToBoxAdapter(
-                      child: Row(
-                        children: [
-                          Expanded(
-                            child: _buildStatItem(
-                              context,
-                              l10n.animeCount,
-                              l10n.releaseCount(items.length),
-                              Icons.play_circle_fill_rounded,
-                              Theme.of(context).colorScheme.primary,
-                            ),
-                          ),
-                          const SizedBox(width: 8),
-                          Expanded(
-                            child: _buildStatItem(
-                              context,
-                              l10n.totalWatchers,
-                              '$totalWatchers',
-                              Icons.people_outline_rounded,
-                              Theme.of(context).colorScheme.secondary,
-                            ),
-                          ),
-                          const SizedBox(width: 8),
-                          Expanded(
-                            child: _buildStatItem(
-                              context,
-                              l10n.averageRating,
-                              avgScore > 0 ? avgScore.toStringAsFixed(1) : '--',
-                              Icons.star_rate_rounded,
-                              Theme.of(context).colorScheme.tertiary,
-                            ),
-                          ),
-                        ],
+                  // 标签
+                  if (availableTags.isNotEmpty)
+                    SliverToBoxAdapter(
+                      child: _buildTagFilter(
+                        context,
+                        weekday,
+                        availableTags,
+                        selectedTag,
+                        l10n,
                       ),
                     ),
-                  ),
                   // 番剧列表
                   SliverPadding(
                     padding: EdgeInsets.only(
@@ -554,11 +535,12 @@ class _CalendarPageState extends State<CalendarPage>
                               (context, index) {
                                 return _buildCard(
                                   context,
-                                  items[index],
+                                  filteredItems[index],
                                   l10n,
+                                  selectedTag: selectedTag,
                                 );
                               },
-                              childCount: items.length,
+                              childCount: filteredItems.length,
                             ),
                           ),
                         );
@@ -571,6 +553,42 @@ class _CalendarPageState extends State<CalendarPage>
           },
         ),
       ],
+    );
+  }
+
+  Widget _buildTagFilter(
+    BuildContext context,
+    String weekday,
+    List<String> tags,
+    String? selectedTag,
+    AppLocalizations l10n,
+  ) {
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(10, 0, 10, 12),
+      child: SingleChildScrollView(
+        scrollDirection: Axis.horizontal,
+        child: Row(
+          children: [
+            for (final tag in <String?>[null, ...tags]) ...[
+              if (tag != null) const SizedBox(width: 8),
+              ChoiceChip(
+                label: Text(tag ?? l10n.all),
+                selected: selectedTag == tag,
+                showCheckmark: false,
+                onSelected: (_) {
+                  setState(() {
+                    if (tag == null) {
+                      _selectedTags.remove(weekday);
+                    } else {
+                      _selectedTags[weekday] = tag;
+                    }
+                  });
+                },
+              ),
+            ],
+          ],
+        ),
+      ),
     );
   }
 
@@ -665,56 +683,6 @@ class _CalendarPageState extends State<CalendarPage>
     );
   }
 
-  Widget _buildStatItem(
-    BuildContext context,
-    String label,
-    String value,
-    IconData icon,
-    Color accent,
-  ) {
-    final theme = Theme.of(context);
-    final colorScheme = theme.colorScheme;
-    return Container(
-      constraints: const BoxConstraints(minHeight: 76),
-      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
-      decoration: BoxDecoration(
-        color: colorScheme.surfaceContainerHighest.withValues(alpha: 0.62),
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: colorScheme.outlineVariant),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Text(
-            label,
-            maxLines: 1,
-            overflow: TextOverflow.ellipsis,
-            style: theme.textTheme.labelMedium?.copyWith(
-              color: colorScheme.onSurfaceVariant,
-            ),
-          ),
-          const SizedBox(width: 8),
-          Row(
-            spacing: 3,
-            children: [
-              Icon(icon, color: accent, size: 25),
-              Text(
-                value,
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
-                style: theme.textTheme.titleMedium?.copyWith(
-                  fontWeight: FontWeight.w800,
-                ),
-              ),
-              const SizedBox(height: 2),
-            ],
-          ),
-        ],
-      ),
-    );
-  }
-
   static int _getColumnCount(double width) {
     if (width >= 1600) {
       return 5;
@@ -729,14 +697,16 @@ class _CalendarPageState extends State<CalendarPage>
   }
 
   Widget _buildCard(
-    BuildContext context,
-    CalendarItem item,
-    AppLocalizations l10n,
-  ) {
+      BuildContext context, CalendarItem item, AppLocalizations l10n,
+      {String? selectedTag}) {
     final subject = item.subject;
     final theme = Theme.of(context);
     final displayName = subject.nameCN.isEmpty ? subject.name : subject.nameCN;
     final tags = subject.metaTags.take(4).toList();
+    if (selectedTag != null && !tags.contains(selectedTag)) {
+      if (tags.length == 4) tags.removeLast();
+      tags.add(selectedTag);
+    }
 
     return Material(
       color: theme.colorScheme.surfaceContainerLow,

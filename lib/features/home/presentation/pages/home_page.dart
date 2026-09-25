@@ -29,6 +29,7 @@ class _RecommendPageState extends State<RecommendPage>
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
+    final colorScheme = Theme.of(context).colorScheme;
     return Scaffold(
       appBar: AppBar(
         title: Row(
@@ -42,22 +43,20 @@ class _RecommendPageState extends State<RecommendPage>
                   width: 200,
                   height: 35,
                   decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(20),
-                    border: Border.all(
-                      color: Theme.of(context).colorScheme.primary,
-                      width: 1,
-                    ),
+                    color: colorScheme.surfaceContainerHighest,
+                    borderRadius: BorderRadius.circular(24),
                   ),
                   child: TextField(
                     decoration: InputDecoration(
                       hintText: l10n.searchAnimeHint,
                       hintStyle: TextStyle(
-                        color: Colors.grey.shade600,
+                        color: colorScheme.onSurfaceVariant,
                         fontSize: 14,
                       ),
-                      prefixIcon: const Icon(
-                        Icons.search,
-                        size: 25,
+                      prefixIcon: Icon(
+                        Icons.search_rounded,
+                        color: colorScheme.onSurfaceVariant,
+                        size: 22,
                       ),
                       filled: false,
                       border: const OutlineInputBorder(

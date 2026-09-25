@@ -9,14 +9,14 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import 'play_record.dart';
 
-class AnimePage extends ConsumerStatefulWidget {
-  const AnimePage({super.key});
+class AnimeView extends ConsumerStatefulWidget {
+  const AnimeView({super.key});
 
   @override
-  ConsumerState<AnimePage> createState() => _AnimePageState();
+  ConsumerState<AnimeView> createState() => _AnimePageState();
 }
 
-class _AnimePageState extends ConsumerState<AnimePage>
+class _AnimePageState extends ConsumerState<AnimeView>
     with AutomaticKeepAliveClientMixin {
   final _scrollController = ScrollController();
   bool _showBackToTopButton = false;

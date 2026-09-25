@@ -14,8 +14,6 @@ class RecommendPage extends StatefulWidget {
 class _RecommendPageState extends State<RecommendPage>
     with SingleTickerProviderStateMixin {
   late TabController _tabController;
-  final _animeKey = GlobalKey();
-  final _timelineKey = GlobalKey();
   @override
   void initState() {
     super.initState();
@@ -98,9 +96,9 @@ class _RecommendPageState extends State<RecommendPage>
       ),
       body: TabBarView(
         controller: _tabController,
-        children: [
-          AnimePage(key: _animeKey),
-          CommunityPage(key: _timelineKey),
+        children: const [
+          AnimeView(),
+          CommunityView(),
         ],
       ),
     );

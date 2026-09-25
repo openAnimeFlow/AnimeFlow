@@ -8,19 +8,20 @@ import 'package:anime_flow/core/network/sse/sse_connection_status.dart';
 import 'package:anime_flow/features/home/presentation/providers/community_provider.dart';
 import 'package:anime_flow/shared/models/flow/online_count.dart';
 import 'package:anime_flow/shared/models/flow/watching_subject.dart';
-import 'package:anime_flow/shared/widgets/animation_network_image.dart';
+import 'package:anime_flow/shared/widgets/subject_card.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 
-class CommunityPage extends ConsumerStatefulWidget {
-  const CommunityPage({super.key});
+class CommunityView extends ConsumerStatefulWidget {
+  const CommunityView({super.key});
 
   @override
-  ConsumerState<CommunityPage> createState() => _CommunityPageState();
+  ConsumerState<CommunityView> createState() => _CommunityPageState();
 }
 
-class _CommunityPageState extends ConsumerState<CommunityPage> {
+class _CommunityPageState extends ConsumerState<CommunityView>
+    with AutomaticKeepAliveClientMixin {
   Future<void> _refresh() async {
     await Future.wait([
       ref.refresh(communityWatchingSubjectsProvider.future),
@@ -29,7 +30,11 @@ class _CommunityPageState extends ConsumerState<CommunityPage> {
   }
 
   @override
+  bool get wantKeepAlive => true;
+
+  @override
   Widget build(BuildContext context) {
+    super.build(context);
     final l10n = AppLocalizations.of(context);
     final colorScheme = Theme.of(context).colorScheme;
 
@@ -141,16 +146,23 @@ class _CommunityContent extends StatelessWidget {
 
     return LayoutBuilder(
       builder: (context, constraints) {
+        final compact = constraints.maxWidth < 600;
         final horizontalPadding = math.max(
           10.0,
           (constraints.maxWidth - LayoutConstant.maxWidth) / 2 + 10,
         );
         final gridWidth = constraints.maxWidth - horizontalPadding * 2;
-        final estimatedColumns = (gridWidth / 444).ceil();
-        var crossAxisCount = estimatedColumns;
-        if (crossAxisCount < 2) crossAxisCount = 2;
-        if (crossAxisCount > 4) crossAxisCount = 4;
-        final compactGrid = constraints.maxWidth < 500;
+        final spacing = compact ? 12.0 : 24.0;
+        final minCardWidth = compact ? 140.0 : 220.0;
+        final crossAxisCount =
+            ((gridWidth + spacing) / (minCardWidth + spacing))
+                .floor()
+                .clamp(1, 6);
+        final cardWidth =
+            (gridWidth - spacing * (crossAxisCount - 1)) / crossAxisCount;
+        final textScaler = MediaQuery.textScalerOf(context);
+        final viewerLabelHeight = textScaler.scale(13) * 1.4;
+        final footerHeight = viewerLabelHeight + (compact ? 8 : 12);
         return CustomScrollView(
           physics: const AlwaysScrollableScrollPhysics(),
           slivers: [
@@ -243,9 +255,9 @@ class _CommunityContent extends StatelessWidget {
                   ),
                   gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
                     crossAxisCount: crossAxisCount,
-                    mainAxisSpacing: 10,
-                    crossAxisSpacing: 10,
-                    childAspectRatio: compactGrid ? 1.05 : 1.28,
+                    mainAxisSpacing: spacing,
+                    crossAxisSpacing: spacing,
+                    mainAxisExtent: cardWidth * 1.5 + footerHeight,
                   ),
                 ),
               ),
@@ -682,70 +694,47 @@ class _WatchingSubjectCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
     final imageUrl = subject.images?.common ?? subject.images?.medium ?? '';
-    return Card(
-      margin: EdgeInsets.zero,
-      clipBehavior: Clip.antiAlias,
-      color: colorScheme.surfaceContainerHighest,
-      elevation: 0,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(14),
-        side: BorderSide(color: colorScheme.outlineVariant),
-      ),
-      child: InkWell(
-        onTap: () => AnimeInfoRoute(
-          id: subject.subjectId,
-          name: subject.displayName,
-          image: imageUrl,
-        ).push(context),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            Expanded(
-              child: AnimationNetworkImage(
-                url: imageUrl,
-                fit: BoxFit.cover,
-                width: double.infinity,
-                height: double.infinity,
-              ),
-            ),
-            Padding(
-              padding: const EdgeInsets.fromLTRB(9, 7, 9, 8),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
+    return InkWell(
+      borderRadius: BorderRadius.circular(15),
+      onTap: () => AnimeInfoRoute(
+        id: subject.subjectId,
+        name: subject.displayName,
+        image: imageUrl,
+      ).push(context),
+      child: Column(
+        children: [
+          AspectRatio(
+            aspectRatio: 2 / 3,
+            child: SubjectCard(image: imageUrl, title: subject.displayName),
+          ),
+          Expanded(
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 8),
+              child: Row(
                 children: [
-                  Text(
-                    subject.displayName,
-                    maxLines: 2,
-                    overflow: TextOverflow.ellipsis,
-                    style: TextStyle(
-                      color: colorScheme.onSurface,
-                      fontSize: 13,
-                      fontWeight: FontWeight.w700,
+                  Icon(
+                    Icons.visibility_rounded,
+                    size: 16,
+                    color: colorScheme.onSurfaceVariant,
+                  ),
+                  const SizedBox(width: 8),
+                  Expanded(
+                    child: Text(
+                      watchingPeopleLabel(subject.online.onlineUsers),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: TextStyle(
+                        color: colorScheme.onSurfaceVariant,
+                        fontSize: 13,
+                        height: 1.4,
+                      ),
                     ),
                   ),
-                  const SizedBox(width: 5),
-                  Row(
-                    spacing: 5,
-                    children: [
-                      Icon(
-                        Icons.visibility_rounded,
-                        size: 16,
-                        color: colorScheme.onSurfaceVariant,
-                      ),
-                      Text(
-                        watchingPeopleLabel(subject.online.onlineUsers),
-                        style: TextStyle(
-                          color: colorScheme.onSurfaceVariant,
-                          fontSize: 12,
-                        ),
-                      ),
-                    ],
-                  )
                 ],
               ),
             ),
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }

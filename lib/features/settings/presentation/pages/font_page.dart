@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:anime_flow/shared/models/font_item.dart';
 import 'package:anime_flow/features/settings/presentation/providers/font_provider.dart';
 import 'package:anime_flow/core/logger/logger.dart';
@@ -36,7 +38,12 @@ class _FontSettingsPageState extends ConsumerState<FontSettingsPage> {
 
   Future<void> _refreshFontList() async {
     ref.read(fontNetworkTasksProvider.notifier).cancelAll();
-    await ref.read(fontProvider.notifier).reload();
+    ref.invalidate(fontProvider);
+    try {
+      await ref.read(fontProvider.future);
+    } catch (_) {
+      // The provider exposes the current error below.
+    }
     if (!mounted) return;
     final result = ref.read(fontProvider);
     if (result.hasError) {
@@ -58,14 +65,25 @@ class _FontSettingsPageState extends ConsumerState<FontSettingsPage> {
     final leftPadding = MediaQuery.of(context).padding.left;
     final fontsAsync = ref.watch(fontProvider);
     ref.watch(fontNetworkTasksProvider);
-    ref.watch(downloadedFontMetasProvider);
+    final downloadedMetas = ref.watch(downloadedFontMetasProvider);
 
-    final remoteIds = fontsAsync.maybeWhen(
-      data: (fonts) => fonts.map((f) => f.id).toSet(),
-      orElse: () => <String>{},
-    );
-    final orphans =
-        ref.read(downloadedFontMetasProvider.notifier).orphansFor(remoteIds);
+    final localFonts = ref
+        .read(downloadedFontMetasProvider.notifier)
+        .orphansFor(<String>{})
+        .where((font) =>
+            ref.watch(fontDownloadProvider(font.id)).status ==
+            FontDownloadStatus.done)
+        .toList();
+
+    final remoteIds =
+        fontsAsync.hasValue && !fontsAsync.isLoading && !fontsAsync.hasError
+            ? fontsAsync.requireValue.map((font) => font.id).toSet()
+            : <String>{};
+    final orphans = fontsAsync.hasValue &&
+            !fontsAsync.isLoading &&
+            !fontsAsync.hasError
+        ? ref.read(downloadedFontMetasProvider.notifier).orphansFor(remoteIds)
+        : <FontItem>[];
 
     return Scaffold(
       appBar: PreferredSize(
@@ -142,12 +160,18 @@ class _FontSettingsPageState extends ConsumerState<FontSettingsPage> {
                 ),
                 const SizedBox(height: 10),
                 fontsAsync.when(
-                  loading: () => const _FontGlassPanel(
-                    padding: EdgeInsets.symmetric(vertical: 4),
+                  skipLoadingOnRefresh: false,
+                  skipLoadingOnReload: false,
+                  loading: () => _FontGlassPanel(
+                    padding: const EdgeInsets.symmetric(vertical: 4),
                     child: Column(
                       children: [
-                        _SystemFontListTile(),
-                        Padding(
+                        const _SystemFontListTile(),
+                        ...localFonts.map((font) => _FontListTile(
+                              font: font,
+                              previewRefreshKey: _previewRefreshKey,
+                            )),
+                        const Padding(
                           padding: EdgeInsets.symmetric(vertical: 24),
                           child: Center(child: CircularProgressIndicator()),
                         ),
@@ -156,9 +180,15 @@ class _FontSettingsPageState extends ConsumerState<FontSettingsPage> {
                   ),
                   error: (error, _) => Column(
                     children: [
-                      const _FontGlassPanel(
-                        padding: EdgeInsets.symmetric(vertical: 4),
-                        child: _SystemFontListTile(),
+                      _FontGlassPanel(
+                        padding: const EdgeInsets.symmetric(vertical: 4),
+                        child: Column(children: [
+                          const _SystemFontListTile(),
+                          ...localFonts.map((font) => _FontListTile(
+                                font: font,
+                                previewRefreshKey: _previewRefreshKey,
+                              )),
+                        ]),
                       ),
                       _FontListError(
                         message: error.toString(),
@@ -192,7 +222,12 @@ class _FontSettingsPageState extends ConsumerState<FontSettingsPage> {
                         else
                           ...fonts.map(
                             (font) => _FontListTile(
-                              font: font,
+                              font: ref
+                                          .watch(fontDownloadProvider(font.id))
+                                          .status ==
+                                      FontDownloadStatus.done
+                                  ? downloadedMetas[font.id] ?? font
+                                  : font,
                               previewRefreshKey: _previewRefreshKey,
                             ),
                           ),
@@ -414,7 +449,9 @@ class _FontListTile extends ConsumerWidget {
             overflow: TextOverflow.ellipsis,
           ),
           _PreviewFontLoader(
-            key: ValueKey('preview-${font.id}-$previewRefreshKey'),
+            key: ValueKey(
+              'preview-${font.id}-$previewRefreshKey-${downloadState.status}',
+            ),
             font: font,
             builder: (context,
                 {required loaded, required failed, required family}) {
@@ -677,10 +714,11 @@ class _PreviewFontLoader extends ConsumerStatefulWidget {
 class _PreviewFontLoaderState extends ConsumerState<_PreviewFontLoader> {
   bool _loaded = false;
   bool _failed = false;
+  String _loadedFamily = '';
+  int _loadSerial = 0;
   CancelToken? _previewCancelToken;
   ProviderSubscription<bool>? _cdnSubscription;
   late final FontNetworkTasks _fontNetworkTasks;
-  late final Font _font;
 
   String get _taskKey => 'preview:${widget.font.id}';
 
@@ -688,7 +726,6 @@ class _PreviewFontLoaderState extends ConsumerState<_PreviewFontLoader> {
   void initState() {
     super.initState();
     _fontNetworkTasks = ref.read(fontNetworkTasksProvider.notifier);
-    _font = ref.read(fontProvider.notifier);
     _cdnSubscription = ref.listenManual(
       fontRepoCdnProvider,
       (previous, next) {
@@ -708,14 +745,17 @@ class _PreviewFontLoaderState extends ConsumerState<_PreviewFontLoader> {
   void dispose() {
     _cdnSubscription?.close();
     _previewCancelToken?.cancel();
-    _fontNetworkTasks.unregister(_taskKey);
+    final token = _previewCancelToken;
+    if (token != null) _fontNetworkTasks.unregister(_taskKey, token);
     super.dispose();
   }
 
   @override
   void didUpdateWidget(covariant _PreviewFontLoader oldWidget) {
     super.didUpdateWidget(oldWidget);
-    if (oldWidget.font.id != widget.font.id) {
+    if (oldWidget.font.id != widget.font.id ||
+        oldWidget.font.preview != widget.font.preview ||
+        oldWidget.font.family != widget.font.family) {
       _loaded = false;
       _failed = false;
       _loadPreviewFont();
@@ -724,15 +764,23 @@ class _PreviewFontLoaderState extends ConsumerState<_PreviewFontLoader> {
 
   Future<void> _loadPreviewFont() async {
     _previewCancelToken?.cancel();
+    final font = widget.font;
     final cancelToken = CancelToken();
     _previewCancelToken = cancelToken;
     _fontNetworkTasks.register(_taskKey, cancelToken);
+    final previewFamily =
+        'AnimeFlowPreview_${font.id}_${identityHashCode(this)}_${++_loadSerial}';
 
     try {
-      final bytes = await _font.loadingFont(
-        widget.font.preview,
-        cancelToken: cancelToken,
-      );
+      final downloadState = ref.read(fontDownloadProvider(font.id));
+      final bytes = downloadState.status == FontDownloadStatus.done &&
+              downloadState.filePath != null
+          ? await File(downloadState.filePath!).readAsBytes()
+          : await ref.read(fontProvider.notifier).loadingFont(
+                font.preview,
+                cancelToken: cancelToken,
+              );
+      if (cancelToken.isCancelled) return;
       if (bytes.isEmpty) {
         throw StateError('字体预览数据为空');
       }
@@ -741,18 +789,18 @@ class _PreviewFontLoaderState extends ConsumerState<_PreviewFontLoader> {
           ? ByteData.sublistView(bytes)
           : ByteData.sublistView(Uint8List.fromList(bytes));
 
-      final loader = FontLoader(widget.font.family)
-        ..addFont(Future.value(byteData));
+      final loader = FontLoader(previewFamily)..addFont(Future.value(byteData));
       await loader.load();
 
-      if (mounted) {
+      if (mounted && !cancelToken.isCancelled) {
         setState(() {
           _loaded = true;
           _failed = false;
+          _loadedFamily = previewFamily;
         });
       }
     } catch (e) {
-      if (isFontRequestCancelled(e)) return;
+      if (cancelToken.isCancelled || isFontRequestCancelled(e)) return;
       if (mounted) {
         setState(() {
           _failed = true;
@@ -760,9 +808,7 @@ class _PreviewFontLoaderState extends ConsumerState<_PreviewFontLoader> {
         });
       }
     } finally {
-      if (mounted) {
-        _fontNetworkTasks.unregister(_taskKey);
-      }
+      _fontNetworkTasks.unregister(_taskKey, cancelToken);
     }
   }
 
@@ -772,7 +818,7 @@ class _PreviewFontLoaderState extends ConsumerState<_PreviewFontLoader> {
       context,
       loaded: _loaded,
       failed: _failed,
-      family: widget.font.family,
+      family: _loadedFamily,
     );
   }
 }

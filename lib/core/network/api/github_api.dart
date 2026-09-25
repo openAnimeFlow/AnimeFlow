@@ -10,13 +10,16 @@ class GithubApi {
   static final GithubClient _client = GithubClient.instance;
 
   /// 获取仓库字体列表
-  static Future<List<FontItem>> getRepoFonts({bool useCdn = false}) async {
+  static Future<List<FontItem>> getRepoFonts({
+    bool useCdn = false,
+    CancelToken? cancelToken,
+  }) async {
     var fontRepoUrl = '${CommonApi.fontRepo}/index.json';
     if (useCdn) {
       fontRepoUrl = Utils.jsDelivrCdnUrl(fontRepoUrl);
     }
 
-    final response = await _client.get(fontRepoUrl);
+    final response = await _client.get(fontRepoUrl, cancelToken: cancelToken);
     final List<dynamic> list;
     if (response.data is String) {
       list = jsonDecode(response.data as String) as List<dynamic>;

@@ -318,104 +318,106 @@ class _RankingListTile extends StatelessWidget {
         ).push(context),
         child: SizedBox(
           height: 160,
-          child: Padding(
-            padding: const EdgeInsets.only(right: 10),
-            child: Row(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                SizedBox(
-                  width: 100,
-                  child: AnimationNetworkImage(
-                    borderRadius: BorderRadius.circular(15),
-                    url: subject.images.small,
-                    fit: BoxFit.cover,
-                  ),
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              SizedBox(
+                width: 100,
+                child: AnimationNetworkImage(
+                  borderRadius: BorderRadius.circular(15),
+                  url: subject.images.small,
+                  fit: BoxFit.cover,
                 ),
-                const SizedBox(width: 12),
-                Expanded(
-                  child: Padding(
-                    padding: const EdgeInsets.symmetric(vertical: 9),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          title,
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                          style: theme.textTheme.titleSmall?.copyWith(
-                            fontWeight: FontWeight.w700,
-                          ),
-                        ),
-                        if (tags.isNotEmpty) ...[
-                          const SizedBox(height: 7),
-                          Wrap(
-                            spacing: 4,
-                            runSpacing: 4,
-                            children: tags.map((tag) {
-                              return Container(
-                                padding: const EdgeInsets.symmetric(
-                                    horizontal: 6, vertical: 2),
-                                decoration: BoxDecoration(
-                                  color: scheme.primary.withValues(alpha: .12),
-                                  borderRadius: BorderRadius.circular(5),
-                                ),
-                                child: Text(
-                                  tag,
-                                  style: theme.textTheme.labelSmall?.copyWith(
-                                    color: scheme.primary,
-                                  ),
-                                ),
-                              );
-                            }).toList(),
-                          ),
-                        ],
-                        const SizedBox(height: 8),
-                        Row(
+              ),
+              Expanded(
+                child: Padding(
+                  padding:
+                      const EdgeInsets.symmetric(vertical: 9, horizontal: 10),
+                  child: Row(
+                    children: [
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            Icon(Icons.star_rounded,
-                                size: 16, color: scheme.secondary),
-                            const SizedBox(width: 3),
                             Text(
-                              subject.rating.score.toStringAsFixed(1),
-                              style: theme.textTheme.labelMedium?.copyWith(
-                                color: scheme.secondary,
-                                fontWeight: FontWeight.w800,
+                              title,
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                              style: theme.textTheme.titleSmall?.copyWith(
+                                fontWeight: FontWeight.w700,
                               ),
                             ),
-                            const SizedBox(width: 10),
-                            Icon(Icons.people_alt_rounded,
-                                size: 14, color: scheme.onSurfaceVariant),
-                            const SizedBox(width: 3),
-                            Flexible(
-                              child: Text(
-                                '${subject.rating.total}',
-                                overflow: TextOverflow.ellipsis,
-                                style: theme.textTheme.labelSmall?.copyWith(
-                                  color: scheme.onSurfaceVariant,
-                                ),
+                            if (tags.isNotEmpty) ...[
+                              const SizedBox(height: 7),
+                              Wrap(
+                                spacing: 4,
+                                runSpacing: 4,
+                                children: tags.map((tag) {
+                                  return Container(
+                                    padding: const EdgeInsets.symmetric(
+                                        horizontal: 6, vertical: 2),
+                                    decoration: BoxDecoration(
+                                      color:
+                                          scheme.primary.withValues(alpha: .12),
+                                      borderRadius: BorderRadius.circular(5),
+                                    ),
+                                    child: Text(
+                                      tag,
+                                      style:
+                                          theme.textTheme.labelSmall?.copyWith(
+                                        color: scheme.primary,
+                                      ),
+                                    ),
+                                  );
+                                }).toList(),
                               ),
+                            ],
+                            const SizedBox(height: 8),
+                            Row(
+                              children: [
+                                Icon(Icons.star_rounded,
+                                    size: 16, color: scheme.secondary),
+                                const SizedBox(width: 3),
+                                Text(
+                                  subject.rating.score.toStringAsFixed(1),
+                                  style: theme.textTheme.labelMedium?.copyWith(
+                                    color: scheme.secondary,
+                                    fontWeight: FontWeight.w800,
+                                  ),
+                                ),
+                                const SizedBox(width: 10),
+                                Icon(Icons.people_alt_rounded,
+                                    size: 14, color: scheme.onSurfaceVariant),
+                                const SizedBox(width: 3),
+                                Flexible(
+                                  child: Text(
+                                    '${subject.rating.total}',
+                                    overflow: TextOverflow.ellipsis,
+                                    style: theme.textTheme.labelSmall?.copyWith(
+                                      color: scheme.onSurfaceVariant,
+                                    ),
+                                  ),
+                                ),
+                              ],
                             ),
                           ],
                         ),
-                      ],
-                    ),
+                      ),
+                      Text(
+                        '$rank',
+                        textAlign: TextAlign.center,
+                        style: theme.textTheme.titleMedium?.copyWith(
+                            color: rank <= 5
+                                ? scheme.primary
+                                : scheme.onSurfaceVariant,
+                            fontWeight: FontWeight.w900,
+                            fontSize: 25),
+                      )
+                    ],
                   ),
                 ),
-                const SizedBox(width: 8),
-                Center(
-                  child: Text(
-                    '$rank',
-                    textAlign: TextAlign.center,
-                    style: theme.textTheme.titleMedium?.copyWith(
-                        color: rank <= 5
-                            ? scheme.primary
-                            : scheme.onSurfaceVariant,
-                        fontWeight: FontWeight.w900,
-                        fontSize: 25),
-                  ),
-                ),
-              ],
-            ),
+              ),
+            ],
           ),
         ),
       ),

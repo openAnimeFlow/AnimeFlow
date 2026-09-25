@@ -7,6 +7,7 @@ import 'package:anime_flow/features/search/presentation/widgets/search_omitted_c
 import 'package:anime_flow/app/router/app_router.dart';
 import 'package:anime_flow/shared/widgets/no_more_indicator.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
@@ -20,7 +21,8 @@ class SearchPage extends ConsumerStatefulWidget {
   ConsumerState<SearchPage> createState() => _SearchPageState();
 }
 
-class _SearchPageState extends ConsumerState<SearchPage> {
+class _SearchPageState extends ConsumerState<SearchPage>
+    with SingleTickerProviderStateMixin {
   final TextEditingController searchController = TextEditingController();
   final ScrollController scrollController = ScrollController();
   final FocusNode searchFocusNode = FocusNode();
@@ -31,6 +33,12 @@ class _SearchPageState extends ConsumerState<SearchPage> {
 
   /// 程序化写入搜索框（历史、建议等）时不触发搜索建议
   bool _suppressSuggestions = false;
+  ({
+    String keyword,
+    int count,
+    bool details,
+    Size viewport
+  })? _lastAutoLoadAttempt;
 
   @override
   void initState() {
@@ -90,10 +98,46 @@ class _SearchPageState extends ConsumerState<SearchPage> {
   Future<void> _searchWithKeyword(String keyword) async {
     searchFocusNode.unfocus();
     _cancelSearchSuggestions();
+    _lastAutoLoadAttempt = null;
     _suppressSuggestions = true;
     searchController.text = keyword;
     _suppressSuggestions = false;
     await ref.read(searchPageControllerProvider.notifier).search(keyword);
+  }
+
+  void _loadMoreIfViewportIsNotFilled(SearchPageState searchState) {
+    final results = searchState.searchResults;
+    if (results == null || searchState.isSearching || !searchState.hasMore) {
+      return;
+    }
+
+    final attempt = (
+      keyword: searchState.currentKeyword,
+      count: results.data.length,
+      details: _isDetailsContent,
+      viewport: MediaQuery.sizeOf(context),
+    );
+    if (_lastAutoLoadAttempt == attempt) return;
+
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted ||
+          !scrollController.hasClients ||
+          _lastAutoLoadAttempt == attempt) {
+        return;
+      }
+      final current = ref.read(searchPageControllerProvider);
+      if (current.currentKeyword != attempt.keyword ||
+          current.searchResults?.data.length != attempt.count ||
+          current.isSearching ||
+          !current.hasMore ||
+          _isDetailsContent != attempt.details) {
+        return;
+      }
+      if (scrollController.position.maxScrollExtent > 0) return;
+
+      _lastAutoLoadAttempt = attempt;
+      ref.read(searchPageControllerProvider.notifier).loadMore();
+    });
   }
 
   // 详情视图列数
@@ -116,6 +160,7 @@ class _SearchPageState extends ConsumerState<SearchPage> {
     final screenWidth = MediaQuery.of(context).size.width - 32; // 减去左右 padding
     const maxWidth = 1400.0;
     final searchState = ref.watch(searchPageControllerProvider);
+    _loadMoreIfViewportIsNotFilled(searchState);
 
     // 根据视图类型计算列数
     final effectiveWidth = screenWidth.clamp(0.0, maxWidth - 32);
@@ -134,12 +179,14 @@ class _SearchPageState extends ConsumerState<SearchPage> {
             // 可折叠的 AppBar + 吸顶搜索框
             SliverPersistentHeader(
               pinned: true,
+              floating: true,
               delegate: _StickySearchHeaderDelegate(
                 searchController: searchController,
                 focusNode: searchFocusNode,
                 onSearch: _searchWithKeyword,
                 maxWidth: maxWidth,
                 onClear: () {
+                  _lastAutoLoadAttempt = null;
                   ref
                       .read(searchPageControllerProvider.notifier)
                       .clearResults();
@@ -147,6 +194,7 @@ class _SearchPageState extends ConsumerState<SearchPage> {
                   _cancelSearchSuggestions();
                 },
                 topPadding: topPadding,
+                vsync: this,
               ),
             ),
             if (searchState.isSearching && searchState.searchResults == null)
@@ -428,6 +476,8 @@ class _StickySearchHeaderDelegate extends SliverPersistentHeaderDelegate {
   final VoidCallback onClear;
   final double topPadding;
   final double maxWidth;
+  @override
+  final TickerProvider vsync;
 
   // AppBar 高度
   static const double _appBarHeight = 60;
@@ -444,6 +494,7 @@ class _StickySearchHeaderDelegate extends SliverPersistentHeaderDelegate {
     required this.onClear,
     required this.topPadding,
     required this.maxWidth,
+    required this.vsync,
   });
 
   @override
@@ -451,6 +502,13 @@ class _StickySearchHeaderDelegate extends SliverPersistentHeaderDelegate {
 
   @override
   double get maxExtent => _appBarHeight + _searchBarHeight + topPadding;
+
+  @override
+  FloatingHeaderSnapConfiguration get snapConfiguration =>
+      FloatingHeaderSnapConfiguration(
+        curve: Curves.easeOutCubic,
+        duration: const Duration(milliseconds: 220),
+      );
 
   @override
   Widget build(
@@ -584,6 +642,7 @@ class _StickySearchHeaderDelegate extends SliverPersistentHeaderDelegate {
   bool shouldRebuild(covariant _StickySearchHeaderDelegate oldDelegate) {
     return oldDelegate.topPadding != topPadding ||
         oldDelegate.maxWidth != maxWidth ||
+        oldDelegate.vsync != vsync ||
         oldDelegate.searchController != searchController ||
         oldDelegate.focusNode != focusNode;
   }

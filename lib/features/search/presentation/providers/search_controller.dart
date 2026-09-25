@@ -126,8 +126,7 @@ class SearchPageController extends _$SearchPageController {
       _offset = offset + value.data.length;
       state = state.copyWith(
         searchResults: nextResults,
-        hasMore: value.data.length == _limit &&
-            nextResults.data.length < value.total,
+        hasMore: value.data.isNotEmpty && nextResults.data.length < value.total,
       );
     } catch (_) {
     } finally {

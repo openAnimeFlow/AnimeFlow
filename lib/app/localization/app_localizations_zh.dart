@@ -2072,6 +2072,45 @@ class AppLocalizationsZh extends AppLocalizations {
   String get syncOpenConflicts => '处理冲突';
 
   @override
+  String get githubFeedbackTab => '反馈';
+
+  @override
+  String get githubFeedbackTitle => 'GitHub 反馈';
+
+  @override
+  String get githubConnectHint => '授权 GitHub 账号后，可在此提交问题和建议。';
+
+  @override
+  String get githubConnect => '授权 GitHub';
+
+  @override
+  String get githubDeviceInstructions => '请在浏览器中登录 GitHub，并输入下方授权码。完成后返回本应用。';
+
+  @override
+  String get githubUserCodeLabel => '授权码';
+
+  @override
+  String get githubCopyCode => '复制授权码';
+
+  @override
+  String get githubOpenBrowser => '打开 GitHub';
+
+  @override
+  String get githubCancel => '取消授权';
+
+  @override
+  String get githubWaiting => '正在等待 GitHub 授权…';
+
+  @override
+  String get githubOpenFailed => '无法打开浏览器，请手动访问 github.com/login/device';
+
+  @override
+  String get githubConnectedHint => 'GitHub 已连接。后续可在此填写并提交 Issue。';
+
+  @override
+  String get githubDisconnect => '断开 GitHub 授权';
+
+  @override
   String syncSubject(int id) {
     return '条目 $id';
   }
@@ -4142,6 +4181,45 @@ class AppLocalizationsZhHans extends AppLocalizationsZh {
 
   @override
   String get syncOpenConflicts => '处理冲突';
+
+  @override
+  String get githubFeedbackTab => '反馈';
+
+  @override
+  String get githubFeedbackTitle => 'GitHub 反馈';
+
+  @override
+  String get githubConnectHint => '授权 GitHub 账号后，可在此提交问题和建议。';
+
+  @override
+  String get githubConnect => '授权 GitHub';
+
+  @override
+  String get githubDeviceInstructions => '请在浏览器中登录 GitHub，并输入下方授权码。完成后返回本应用。';
+
+  @override
+  String get githubUserCodeLabel => '授权码';
+
+  @override
+  String get githubCopyCode => '复制授权码';
+
+  @override
+  String get githubOpenBrowser => '打开 GitHub';
+
+  @override
+  String get githubCancel => '取消授权';
+
+  @override
+  String get githubWaiting => '正在等待 GitHub 授权…';
+
+  @override
+  String get githubOpenFailed => '无法打开浏览器，请手动访问 github.com/login/device';
+
+  @override
+  String get githubConnectedHint => 'GitHub 已连接。后续可在此填写并提交 Issue。';
+
+  @override
+  String get githubDisconnect => '断开 GitHub 授权';
 
   @override
   String syncSubject(int id) {
@@ -6217,6 +6295,45 @@ class AppLocalizationsZhHantHk extends AppLocalizationsZh {
   String get syncOpenConflicts => '處理衝突';
 
   @override
+  String get githubFeedbackTab => '意見回饋';
+
+  @override
+  String get githubFeedbackTitle => 'GitHub 意見回饋';
+
+  @override
+  String get githubConnectHint => '授權 GitHub 帳戶後，可在此提交問題及建議。';
+
+  @override
+  String get githubConnect => '授權 GitHub';
+
+  @override
+  String get githubDeviceInstructions => '請在瀏覽器登入 GitHub，並輸入下方授權碼。完成後返回本應用程式。';
+
+  @override
+  String get githubUserCodeLabel => '授權碼';
+
+  @override
+  String get githubCopyCode => '複製授權碼';
+
+  @override
+  String get githubOpenBrowser => '開啟 GitHub';
+
+  @override
+  String get githubCancel => '取消授權';
+
+  @override
+  String get githubWaiting => '正在等待 GitHub 授權…';
+
+  @override
+  String get githubOpenFailed => '無法開啟瀏覽器，請手動前往 github.com/login/device';
+
+  @override
+  String get githubConnectedHint => 'GitHub 已連接。之後可在此填寫並提交 Issue。';
+
+  @override
+  String get githubDisconnect => '中斷 GitHub 授權';
+
+  @override
   String syncSubject(int id) {
     return '項目 $id';
   }
@@ -8289,6 +8406,45 @@ class AppLocalizationsZhHantTw extends AppLocalizationsZh {
 
   @override
   String get syncOpenConflicts => '處理衝突';
+
+  @override
+  String get githubFeedbackTab => '回饋';
+
+  @override
+  String get githubFeedbackTitle => 'GitHub 回饋';
+
+  @override
+  String get githubConnectHint => '授權 GitHub 帳號後，可在此提交問題和建議。';
+
+  @override
+  String get githubConnect => '授權 GitHub';
+
+  @override
+  String get githubDeviceInstructions => '請在瀏覽器登入 GitHub，並輸入下方授權碼。完成後返回本應用程式。';
+
+  @override
+  String get githubUserCodeLabel => '授權碼';
+
+  @override
+  String get githubCopyCode => '複製授權碼';
+
+  @override
+  String get githubOpenBrowser => '開啟 GitHub';
+
+  @override
+  String get githubCancel => '取消授權';
+
+  @override
+  String get githubWaiting => '正在等待 GitHub 授權…';
+
+  @override
+  String get githubOpenFailed => '無法開啟瀏覽器，請手動前往 github.com/login/device';
+
+  @override
+  String get githubConnectedHint => 'GitHub 已連接。之後可在此填寫並提交 Issue。';
+
+  @override
+  String get githubDisconnect => '中斷 GitHub 授權';
 
   @override
   String syncSubject(int id) {

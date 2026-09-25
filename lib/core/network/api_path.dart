@@ -66,6 +66,13 @@ class BgmApi {
   static const String oauth = '/oauth/authorize';
 }
 
+class GitHubApi {
+  static const String oauthBaseUrl = 'https://github.com';
+  static const String apiBaseUrl = 'https://api.github.com';
+  static const String deviceCode = '/login/device/code';
+  static const String currentUser = '/user';
+}
+
 class CommonApi {
   static const String bgmTV = 'https://bgm.tv',
       bangumiTV = 'https://bangumi.tv',
@@ -94,6 +101,7 @@ class CommonApi {
 class AnimeFlowApi {
   /// AnimeFlow API Server
   static const String animeFlowApi = 'https://ligg.top',
+      githubDeviceExchange = '/api/v1/github/oauth/device/exchange',
 
       /// 版本信息
       releases = '/api/v1/releases',

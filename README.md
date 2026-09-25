@@ -165,7 +165,8 @@ flutter pub get
 ```bash
 flutter run \
   --dart-define=ANIME_FLOW_APP_ID=your_app_id \
-  --dart-define=ANIME_FLOW_SECRET=your_secret
+  --dart-define=ANIME_FLOW_SECRET=your_secret \
+  --dart-define=GITHUB_APP_CLIENT_ID=your_github_app_client_id
 ```
 
 **方式 B：使用配置文件**
@@ -175,7 +176,8 @@ flutter run \
 ```json
 {
   "ANIME_FLOW_APP_ID": "your_app_id",
-  "ANIME_FLOW_SECRET": "your_secret"
+  "ANIME_FLOW_SECRET": "your_secret",
+  "GITHUB_APP_CLIENT_ID": "your_github_app_client_id"
 }
 ```
 
@@ -198,7 +200,7 @@ flutter run --dart-define-from-file=dart_defines.json
 或直接写：
 
 ```
---dart-define=ANIME_FLOW_APP_ID=your_app_id --dart-define=ANIME_FLOW_SECRET=your_secret
+--dart-define=ANIME_FLOW_APP_ID=your_app_id --dart-define=ANIME_FLOW_SECRET=your_secret --dart-define=GITHUB_APP_CLIENT_ID=your_github_app_client_id
 ```
 
 > 修改 `--dart-define` 后需完全重启应用（Hot Restart 不会重新加载编译期变量）。

@@ -3927,6 +3927,84 @@ abstract class AppLocalizations {
   /// **'处理冲突'**
   String get syncOpenConflicts;
 
+  /// No description provided for @githubFeedbackTab.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'反馈'**
+  String get githubFeedbackTab;
+
+  /// No description provided for @githubFeedbackTitle.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'GitHub 反馈'**
+  String get githubFeedbackTitle;
+
+  /// No description provided for @githubConnectHint.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'授权 GitHub 账号后，可在此提交问题和建议。'**
+  String get githubConnectHint;
+
+  /// No description provided for @githubConnect.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'授权 GitHub'**
+  String get githubConnect;
+
+  /// No description provided for @githubDeviceInstructions.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'请在浏览器中登录 GitHub，并输入下方授权码。完成后返回本应用。'**
+  String get githubDeviceInstructions;
+
+  /// No description provided for @githubUserCodeLabel.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'授权码'**
+  String get githubUserCodeLabel;
+
+  /// No description provided for @githubCopyCode.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'复制授权码'**
+  String get githubCopyCode;
+
+  /// No description provided for @githubOpenBrowser.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'打开 GitHub'**
+  String get githubOpenBrowser;
+
+  /// No description provided for @githubCancel.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'取消授权'**
+  String get githubCancel;
+
+  /// No description provided for @githubWaiting.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'正在等待 GitHub 授权…'**
+  String get githubWaiting;
+
+  /// No description provided for @githubOpenFailed.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'无法打开浏览器，请手动访问 github.com/login/device'**
+  String get githubOpenFailed;
+
+  /// No description provided for @githubConnectedHint.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'GitHub 已连接。后续可在此填写并提交 Issue。'**
+  String get githubConnectedHint;
+
+  /// No description provided for @githubDisconnect.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'断开 GitHub 授权'**
+  String get githubDisconnect;
+
   /// No description provided for @syncSubject.
   ///
   /// In zh_Hans, this message translates to:

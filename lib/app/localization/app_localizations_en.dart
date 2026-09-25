@@ -2137,6 +2137,49 @@ class AppLocalizationsEn extends AppLocalizations {
   String get syncOpenConflicts => 'Resolve conflicts';
 
   @override
+  String get githubFeedbackTab => 'Feedback';
+
+  @override
+  String get githubFeedbackTitle => 'GitHub feedback';
+
+  @override
+  String get githubConnectHint =>
+      'Connect your GitHub account to submit issues and suggestions here.';
+
+  @override
+  String get githubConnect => 'Connect GitHub';
+
+  @override
+  String get githubDeviceInstructions =>
+      'Sign in to GitHub in your browser and enter the code below. Then return to this app.';
+
+  @override
+  String get githubUserCodeLabel => 'Authorization code';
+
+  @override
+  String get githubCopyCode => 'Copy code';
+
+  @override
+  String get githubOpenBrowser => 'Open GitHub';
+
+  @override
+  String get githubCancel => 'Cancel';
+
+  @override
+  String get githubWaiting => 'Waiting for GitHub authorization…';
+
+  @override
+  String get githubOpenFailed =>
+      'Could not open the browser. Visit github.com/login/device manually.';
+
+  @override
+  String get githubConnectedHint =>
+      'GitHub is connected. You can submit an issue here in a later update.';
+
+  @override
+  String get githubDisconnect => 'Disconnect GitHub';
+
+  @override
   String syncSubject(int id) {
     return 'Subject $id';
   }

@@ -2,7 +2,6 @@ import 'package:anime_flow/app/localization/app_localizations.dart';
 import 'package:anime_flow/app/router/model/info_route_extra.dart';
 import 'package:anime_flow/features/home/presentation/providers/anime_provider.dart';
 import 'package:anime_flow/app/router/app_router.dart';
-import 'package:anime_flow/core/utils/layout_util.dart';
 import 'package:anime_flow/shared/widgets/subject_card.dart';
 import 'package:anime_flow/shared/widgets/subject_card_skeleton.dart';
 import 'package:anime_flow/shared/widgets/no_more_indicator.dart';
@@ -24,14 +23,8 @@ class PopularAnimeView extends ConsumerWidget {
       loading: () => SliverMainAxisGroup(
         slivers: [
           _buildTitleSliver(l10n),
-          SliverGrid(
-            gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-              crossAxisCount: LayoutUtil.getCrossAxisCount(context),
-              crossAxisSpacing: 10,
-              mainAxisSpacing: 10,
-              childAspectRatio: 0.7,
-            ),
-            delegate: SliverChildBuilderDelegate(
+          _buildGrid(
+            SliverChildBuilderDelegate(
               (BuildContext context, int index) => const Center(
                 child: SubjectCardSkeleton(),
               ),
@@ -48,14 +41,8 @@ class PopularAnimeView extends ConsumerWidget {
       data: (hotState) => SliverMainAxisGroup(
         slivers: [
           _buildTitleSliver(l10n),
-          SliverGrid(
-            gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-              crossAxisCount: LayoutUtil.getCrossAxisCount(context),
-              crossAxisSpacing: 10,
-              mainAxisSpacing: 10,
-              childAspectRatio: 0.7,
-            ),
-            delegate: SliverChildBuilderDelegate(
+          _buildGrid(
+            SliverChildBuilderDelegate(
               (BuildContext context, int index) {
                 if (index < hotState.items.length) {
                   final subject = hotState.items[index].subject;
@@ -121,6 +108,31 @@ class PopularAnimeView extends ConsumerWidget {
             ),
         ],
       ),
+    );
+  }
+
+  Widget _buildGrid(SliverChildDelegate delegate) {
+    return SliverLayoutBuilder(
+      builder: (context, constraints) {
+        final gridWidth = constraints.crossAxisExtent;
+        final compact = gridWidth < 600;
+        final spacing = compact ? 10.0 : 15.0;
+        final minCardWidth = compact ? 140.0 : 220.0;
+        final crossAxisCount =
+            ((gridWidth + spacing) / (minCardWidth + spacing))
+                .floor()
+                .clamp(3, 6);
+
+        return SliverGrid(
+          gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+            crossAxisCount: crossAxisCount,
+            crossAxisSpacing: spacing,
+            mainAxisSpacing: spacing,
+            childAspectRatio: 0.7,
+          ),
+          delegate: delegate,
+        );
+      },
     );
   }
 

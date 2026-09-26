@@ -2,7 +2,7 @@
 
 ## 重要修复
 
-- 修复图片加载失败问题
+- 修复图片加载失败问题 [ech_http](https://github.com/ech-research/ech_http)
 
 ## 新增
 

@@ -151,6 +151,90 @@ abstract class AppLocalizations {
   /// **'语言'**
   String get languageLabel;
 
+  /// No description provided for @echImageLoading.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'ECH 图片加载优化'**
+  String get echImageLoading;
+
+  /// No description provided for @echImageLoadingDescription.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'使用 ECH 加载图片代理资源'**
+  String get echImageLoadingDescription;
+
+  /// No description provided for @echImageRoute.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'ECH 图片连接'**
+  String get echImageRoute;
+
+  /// No description provided for @echImageRouteHint.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'自定义域名需支持相同的图片接口并发布 ECH 配置。可添加多个固定 IP，留空时使用 DNS 地址。'**
+  String get echImageRouteHint;
+
+  /// No description provided for @echImageHost.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'图片域名'**
+  String get echImageHost;
+
+  /// No description provided for @echImageFixedIp.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'固定 IP'**
+  String get echImageFixedIp;
+
+  /// No description provided for @echImageAddIp.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'添加 IP'**
+  String get echImageAddIp;
+
+  /// No description provided for @echImageSave.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'保存'**
+  String get echImageSave;
+
+  /// No description provided for @echImageRestoreDefaults.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'恢复默认值'**
+  String get echImageRestoreDefaults;
+
+  /// No description provided for @echImageRestartRequired.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'更改将在重启应用后生效。'**
+  String get echImageRestartRequired;
+
+  /// No description provided for @echImageAutomaticIp.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'自动解析 IP'**
+  String get echImageAutomaticIp;
+
+  /// No description provided for @echImageInvalidHost.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'请输入有效域名，不含协议或路径'**
+  String get echImageInvalidHost;
+
+  /// No description provided for @echImageIpRequired.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'IP 不能为空'**
+  String get echImageIpRequired;
+
+  /// No description provided for @echImageInvalidIp.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'请输入有效的 IPv4 或 IPv6 地址'**
+  String get echImageInvalidIp;
+
   /// No description provided for @selectLanguageTooltip.
   ///
   /// In zh_Hans, this message translates to:
@@ -2479,6 +2563,12 @@ abstract class AppLocalizations {
   /// In zh_Hans, this message translates to:
   /// **'跨平台视频播放器，支持高质量视频播放'**
   String get mediaKitDescription;
+
+  /// No description provided for @echHttpDescription.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'提供 ECH 支持，改善图片加载体验'**
+  String get echHttpDescription;
 
   /// No description provided for @canvasDanmakuDescription.
   ///

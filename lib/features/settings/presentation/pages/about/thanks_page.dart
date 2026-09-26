@@ -22,6 +22,12 @@ class ThanksPage extends StatelessWidget {
           'url': 'https://github.com/media-kit/media-kit',
         },
         {
+          'icon': const Icon(Icons.image_outlined),
+          'title': 'ech_http',
+          'description': l10n.echHttpDescription,
+          'url': 'https://github.com/ech-research/ech_http',
+        },
+        {
           'icon': const Icon(Icons.subtitles),
           'title': 'canvas_danmaku',
           'description': l10n.canvasDanmakuDescription,

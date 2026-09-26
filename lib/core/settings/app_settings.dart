@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:anime_flow/core/constants/storage_key.dart';
 import 'package:anime_flow/core/settings/storage.dart';
 
@@ -12,6 +14,58 @@ abstract final class AppSettings {
       Storage.setting.put(key, value);
 
   static Future<void> deleteSetting(String key) => Storage.setting.delete(key);
+
+  static bool get echImageLoading =>
+      getSetting<bool>(SettingKey.echImageLoading, defaultValue: true) ?? true;
+
+  static Future<void> setEchImageLoading(bool value) =>
+      setSetting(SettingKey.echImageLoading, value);
+
+  static const defaultEchImageHost = 'wsrv.nl';
+
+  static String get echImageHost {
+    final host = getSetting<String>(
+      SettingKey.echImageHost,
+      defaultValue: defaultEchImageHost,
+    )?.trim().toLowerCase();
+    return host != null && isValidEchImageHost(host)
+        ? host
+        : defaultEchImageHost;
+  }
+
+  static List<String> get echImageFixedIps {
+    final saved = getSetting<String>(SettingKey.echImageFixedIp) ?? '';
+    return List.unmodifiable(
+      parseEchImageFixedIps(saved).where(
+        (ip) => InternetAddress.tryParse(ip) != null,
+      ),
+    );
+  }
+
+  static List<String> parseEchImageFixedIps(String value) => value
+      .split(RegExp(r'[\s,，;；]+'))
+      .map((ip) => ip.trim())
+      .where((ip) => ip.isNotEmpty)
+      .toSet()
+      .toList();
+
+  static bool isValidEchImageHost(String value) {
+    final host = value.trim().toLowerCase();
+    if (host.isEmpty || host.length > 253) return false;
+    final label = RegExp(r'^[a-z0-9](?:[a-z0-9-]*[a-z0-9])?$');
+    return host.split('.').every(
+          (part) => part.length <= 63 && label.hasMatch(part),
+        );
+  }
+
+  static Future<void> setEchImageRoute({
+    required String host,
+    List<String> fixedIps = const [],
+  }) =>
+      Storage.setting.putAll({
+        SettingKey.echImageHost: host.trim().toLowerCase(),
+        SettingKey.echImageFixedIp: fixedIps.join('\n'),
+      });
 
   static const bool defaultAutoPlayNext = true;
   static const bool defaultEpisodesProgress = true;

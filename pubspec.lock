@@ -245,10 +245,10 @@ packages:
     dependency: transitive
     description:
       name: code_assets
-      sha256: cfd4f5f575a49c5f10ca856e9846073f1e6c3ee94912377eea5f6cefc5272941
+      sha256: "828110d598123b5ea96c00c9f3c72105bf79f8ee36c20a39b26209ade421ec57"
       url: "https://pub.dev"
     source: hosted
-    version: "2.0.0"
+    version: "2.1.0"
   code_builder:
     dependency: transitive
     description:
@@ -402,6 +402,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "2.2.1"
+  ech_http:
+    dependency: "direct main"
+    description:
+      name: ech_http
+      sha256: "1768828082169c1371aae2efca331afc52e9bf920bf738a13c36ff6089c529bb"
+      url: "https://pub.dev"
+    source: hosted
+    version: "0.1.2"
   expressions:
     dependency: transitive
     description:
@@ -488,7 +496,7 @@ packages:
     source: sdk
     version: "0.0.0"
   flutter_cache_manager:
-    dependency: transitive
+    dependency: "direct main"
     description:
       name: flutter_cache_manager
       sha256: "1de7849213b4c73c85aca7e0ac687a9a5d82ccdb594366b9dcc26cb6a2189cd2"
@@ -784,7 +792,7 @@ packages:
     source: hosted
     version: "0.15.6"
   http:
-    dependency: transitive
+    dependency: "direct main"
     description:
       name: http
       sha256: "87721a4a50b19c7f1d49001e51409bddc46303966ce89a65af4f4e6004896412"

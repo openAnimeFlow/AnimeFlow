@@ -214,6 +214,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get todayBroadcast => 'Today\'s Broadcasts';
 
   @override
+  String get animeScheduleTitle => 'Anime Release Schedule';
+
+  @override
   String get back => 'Back';
 
   @override

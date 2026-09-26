@@ -487,6 +487,12 @@ abstract class AppLocalizations {
   /// **'今日放送'**
   String get todayBroadcast;
 
+  /// No description provided for @animeScheduleTitle.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'新番时间表'**
+  String get animeScheduleTitle;
+
   /// No description provided for @back.
   ///
   /// In zh_Hans, this message translates to:

@@ -208,6 +208,9 @@ class AppLocalizationsZh extends AppLocalizations {
   String get todayBroadcast => '今日放送';
 
   @override
+  String get animeScheduleTitle => '新番時間表';
+
+  @override
   String get back => '返回';
 
   @override
@@ -2325,6 +2328,9 @@ class AppLocalizationsZhHans extends AppLocalizationsZh {
 
   @override
   String get todayBroadcast => '今日放送';
+
+  @override
+  String get animeScheduleTitle => '新番时间表';
 
   @override
   String get back => '返回';
@@ -4445,6 +4451,9 @@ class AppLocalizationsZhHantHk extends AppLocalizationsZh {
   String get todayBroadcast => '今日放送';
 
   @override
+  String get animeScheduleTitle => '新番時間表';
+
+  @override
   String get back => '返回';
 
   @override
@@ -6562,6 +6571,9 @@ class AppLocalizationsZhHantTw extends AppLocalizationsZh {
 
   @override
   String get todayBroadcast => '今日放送';
+
+  @override
+  String get animeScheduleTitle => '新番時間表';
 
   @override
   String get back => '返回';

@@ -59,7 +59,7 @@ class _CalendarPageState extends State<CalendarPage>
     final l10n = AppLocalizations.of(context);
     return Scaffold(
       appBar: AppBar(
-        title: Text(l10n.todayBroadcast),
+        title: Text(l10n.animeScheduleTitle),
         titleSpacing: 8,
         leading: Tooltip(
           message: l10n.back,

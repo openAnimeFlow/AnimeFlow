@@ -1,6 +1,6 @@
 import 'package:anime_flow/app/localization/app_localizations.dart';
+import 'package:anime_flow/features/calendar/presentation/providers/calendar_provider.dart';
 import 'package:anime_flow/shared/models/bangumi/calendar_item.dart';
-import 'package:anime_flow/features/home/presentation/providers/anime_provider.dart';
 import 'package:anime_flow/app/router/model/info_route_extra.dart';
 import 'package:anime_flow/app/router/app_router.dart';
 import 'package:anime_flow/core/utils/system_util.dart';
@@ -92,7 +92,7 @@ class _CalendarViewState extends State<CalendarView> {
     return Consumer(
       builder: (context, ref, child) {
         final l10n = AppLocalizations.of(context);
-        final calendarAsync = ref.watch(animeCalendarProvider);
+        final calendarAsync = ref.watch(calendarProvider(null));
 
         return calendarAsync.when(
           loading: () => _buildCalendarSection(
@@ -104,9 +104,7 @@ class _CalendarViewState extends State<CalendarView> {
             context,
             content: Center(
               child: InkWell(
-                onTap: () => ref
-                    .read(animeCalendarProvider.notifier)
-                    .refreshCalendarDate(),
+                onTap: () => ref.invalidate(calendarProvider(null)),
                 child: Padding(
                   padding: const EdgeInsets.all(8.0),
                   child: Row(
@@ -123,7 +121,8 @@ class _CalendarViewState extends State<CalendarView> {
             ),
             l10n: l10n,
           ),
-          data: (calendar) {
+          data: (calendarData) {
+            final calendar = calendarData.calendar;
             final numberOfReleases =
                 calendar.calendarData[weekday.toString()]?.length ?? 0;
             final numberOfViewers = calendar.calendarData[weekday.toString()]

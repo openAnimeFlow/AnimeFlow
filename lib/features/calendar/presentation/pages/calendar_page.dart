@@ -1,22 +1,16 @@
 import 'package:anime_flow/app/localization/app_localizations.dart';
 import 'package:anime_flow/core/constants/layout_constant.dart';
 import 'package:anime_flow/core/constants/assets_path_constants.dart';
-import 'package:anime_flow/core/network/api/flow_api.dart';
+import 'package:anime_flow/features/calendar/presentation/providers/calendar_provider.dart';
 import 'package:anime_flow/shared/models/bangumi/calendar_item.dart';
 import 'package:anime_flow/app/router/model/info_route_extra.dart';
 import 'package:anime_flow/app/router/app_router.dart';
 import 'package:anime_flow/shared/widgets/animation_network_image.dart';
 import 'package:anime_flow/shared/widgets/ranking.dart';
-import 'package:anime_flow/features/home/presentation/providers/anime_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:go_router/go_router.dart';
-
-final calendarSeasonProvider = FutureProvider.autoDispose
-    .family<Calendar, ({int year, int month})>((ref, season) {
-  return FlowApi.calendarService(year: season.year, month: season.month);
-});
 
 // 每日放送页面
 class CalendarPage extends StatefulWidget {
@@ -31,7 +25,7 @@ class _CalendarPageState extends State<CalendarPage>
   late TabController _tabController;
   late int _selectedYear;
   late int _selectedMonth;
-  final Map<String, String> _selectedTags = {};
+  final Set<String> _excludedTags = {};
 
   List<String> _weekdayLabels(AppLocalizations l10n) => [
         l10n.monday,
@@ -77,10 +71,10 @@ class _CalendarPageState extends State<CalendarPage>
           preferredSize: const Size.fromHeight(kTextTabBarHeight),
           child: Consumer(
             builder: (context, ref, _) {
-              final calendarAsync = _watchCalendar(ref);
+              final calendarAsync = ref.watch(calendarProvider(_selectedSeason));
               return calendarAsync.maybeWhen(
-                data: (calendar) =>
-                    _buildTabBarSection(context, calendar, l10n),
+                data: (calendarData) =>
+                    _buildTabBarSection(context, calendarData.calendar, l10n),
                 orElse: () => const SizedBox.shrink(),
               );
             },
@@ -89,12 +83,12 @@ class _CalendarPageState extends State<CalendarPage>
       ),
       body: Consumer(
         builder: (context, ref, _) {
-          final calendarAsync = _watchCalendar(ref);
+          final calendarAsync = ref.watch(calendarProvider(_selectedSeason));
           return calendarAsync.when(
             loading: () => const Center(child: CircularProgressIndicator()),
             error: (error, stackTrace) => Center(
               child: InkWell(
-                onTap: () => _invalidateCalendar(ref),
+                onTap: () => ref.invalidate(calendarProvider(_selectedSeason)),
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   spacing: 8,
@@ -105,36 +99,30 @@ class _CalendarPageState extends State<CalendarPage>
                 ),
               ),
             ),
-            data: (calendar) => TabBarView(
-              controller: _tabController,
-              children: List.generate(7, (index) {
-                final weekday = (index + 1).toString();
-                return _buildWeekdayContent(context, calendar, weekday, l10n);
-              }),
-            ),
+            data: (calendarData) {
+              return TabBarView(
+                controller: _tabController,
+                children: List.generate(7, (index) {
+                  final weekday = (index + 1).toString();
+                  return _buildWeekdayContent(
+                    context,
+                    calendarData.calendar,
+                    weekday,
+                    calendarData.tags,
+                    l10n,
+                  );
+                }),
+              );
+            },
           );
         },
       ),
     );
   }
 
-  AsyncValue<Calendar> _watchCalendar(WidgetRef ref) {
-    if (_isCurrentSeason) {
-      return ref.watch(animeCalendarProvider);
-    }
-    return ref.watch(calendarSeasonProvider(
-      (year: _selectedYear, month: _selectedMonth),
-    ));
-  }
-
-  void _invalidateCalendar(WidgetRef ref) {
-    if (_isCurrentSeason) {
-      ref.invalidate(animeCalendarProvider);
-      return;
-    }
-    ref.invalidate(calendarSeasonProvider(
-      (year: _selectedYear, month: _selectedMonth),
-    ));
+  CalendarSeason? get _selectedSeason {
+    if (_isCurrentSeason) return null;
+    return (year: _selectedYear, month: _selectedMonth);
   }
 
   bool get _isCurrentSeason {
@@ -246,7 +234,7 @@ class _CalendarPageState extends State<CalendarPage>
     setState(() {
       _selectedYear = result.year;
       _selectedMonth = result.month;
-      _selectedTags.clear();
+      _excludedTags.clear();
     });
     _tabController.index = 0;
   }
@@ -395,6 +383,9 @@ class _CalendarPageState extends State<CalendarPage>
     return hour == null || minute == null ? date : '$date $hour:$minute';
   }
 
+  bool _isVisible(CalendarItem item) =>
+      !item.subject.metaTags.any((tag) => _excludedTags.contains(tag.trim()));
+
   Widget _buildTabBarSection(
     BuildContext context,
     Calendar calendar,
@@ -426,6 +417,7 @@ class _CalendarPageState extends State<CalendarPage>
           tabs: List.generate(7, (index) {
             final weekday = (index + 1).toString();
             final items = calendar.calendarData[weekday] ?? [];
+            final visibleCount = items.where(_isVisible).length;
             return SizedBox(
               width: 76,
               child: Tab(
@@ -439,7 +431,7 @@ class _CalendarPageState extends State<CalendarPage>
                     ),
                     const SizedBox(height: 2),
                     Text(
-                      l10n.releaseCount(items.length),
+                      l10n.releaseCount(visibleCount),
                       style: const TextStyle(fontSize: 10),
                     ),
                   ],
@@ -456,36 +448,12 @@ class _CalendarPageState extends State<CalendarPage>
     BuildContext context,
     Calendar calendar,
     String weekday,
+    List<String> availableTags,
     AppLocalizations l10n,
   ) {
     final items = calendar.calendarData[weekday] ?? [];
     final weekdayLabel = _weekdayLabels(l10n)[int.parse(weekday) - 1];
-
-    if (items.isEmpty) {
-      return Center(
-        child: Text(
-          l10n.noUpdatesOnWeekday(weekdayLabel),
-          style: const TextStyle(fontSize: 16, color: Colors.grey),
-        ),
-      );
-    }
-
-    final availableTags = items
-        .expand((item) => item.subject.metaTags)
-        .map((tag) => tag.trim())
-        .where((tag) => tag.isNotEmpty)
-        .toSet()
-        .toList()
-      ..sort();
-    final selectedTag = availableTags.contains(_selectedTags[weekday])
-        ? _selectedTags[weekday]
-        : null;
-    final filteredItems = selectedTag == null
-        ? items
-        : items
-            .where((item) =>
-                item.subject.metaTags.any((tag) => tag.trim() == selectedTag))
-            .toList();
+    final filteredItems = items.where(_isVisible).toList();
 
     return CustomScrollView(
       slivers: [
@@ -507,46 +475,61 @@ class _CalendarPageState extends State<CalendarPage>
                     SliverToBoxAdapter(
                       child: _buildTagFilter(
                         context,
-                        weekday,
                         availableTags,
-                        selectedTag,
                         l10n,
                       ),
                     ),
                   // 番剧列表
-                  SliverPadding(
-                    padding: EdgeInsets.only(
-                        bottom: MediaQuery.of(context).padding.bottom),
-                    sliver: SliverLayoutBuilder(
-                      builder: (context, constraints) {
-                        final columnCount =
-                            _getColumnCount(constraints.crossAxisExtent);
-                        return SliverPadding(
-                          padding: const EdgeInsets.symmetric(horizontal: 10),
-                          sliver: SliverGrid(
-                            gridDelegate:
-                                SliverGridDelegateWithFixedCrossAxisCount(
-                              crossAxisCount: columnCount,
-                              crossAxisSpacing: 10,
-                              mainAxisSpacing: 10,
-                              mainAxisExtent: columnCount == 1 ? 184 : 214,
-                            ),
-                            delegate: SliverChildBuilderDelegate(
-                              (context, index) {
-                                return _buildCard(
-                                  context,
-                                  filteredItems[index],
-                                  l10n,
-                                  selectedTag: selectedTag,
-                                );
-                              },
-                              childCount: filteredItems.length,
+                  if (filteredItems.isEmpty)
+                    SliverToBoxAdapter(
+                      child: Padding(
+                        padding: const EdgeInsets.all(24),
+                        child: Center(
+                          child: Text(
+                            items.isEmpty
+                                ? l10n.noUpdatesOnWeekday(weekdayLabel)
+                                : l10n.noData,
+                            style: const TextStyle(
+                              fontSize: 16,
+                              color: Colors.grey,
                             ),
                           ),
-                        );
-                      },
+                        ),
+                      ),
+                    )
+                  else
+                    SliverPadding(
+                      padding: EdgeInsets.only(
+                          bottom: MediaQuery.of(context).padding.bottom),
+                      sliver: SliverLayoutBuilder(
+                        builder: (context, constraints) {
+                          final columnCount =
+                              _getColumnCount(constraints.crossAxisExtent);
+                          return SliverPadding(
+                            padding: const EdgeInsets.symmetric(horizontal: 10),
+                            sliver: SliverGrid(
+                              gridDelegate:
+                                  SliverGridDelegateWithFixedCrossAxisCount(
+                                crossAxisCount: columnCount,
+                                crossAxisSpacing: 10,
+                                mainAxisSpacing: 10,
+                                mainAxisExtent: columnCount == 1 ? 184 : 214,
+                              ),
+                              delegate: SliverChildBuilderDelegate(
+                                (context, index) {
+                                  return _buildCard(
+                                    context,
+                                    filteredItems[index],
+                                    l10n,
+                                  );
+                                },
+                                childCount: filteredItems.length,
+                              ),
+                            ),
+                          );
+                        },
+                      ),
                     ),
-                  ),
                 ],
               ),
             );
@@ -558,9 +541,7 @@ class _CalendarPageState extends State<CalendarPage>
 
   Widget _buildTagFilter(
     BuildContext context,
-    String weekday,
     List<String> tags,
-    String? selectedTag,
     AppLocalizations l10n,
   ) {
     return Padding(
@@ -569,18 +550,25 @@ class _CalendarPageState extends State<CalendarPage>
         scrollDirection: Axis.horizontal,
         child: Row(
           children: [
-            for (final tag in <String?>[null, ...tags]) ...[
-              if (tag != null) const SizedBox(width: 8),
-              ChoiceChip(
-                label: Text(tag ?? l10n.all),
-                selected: selectedTag == tag,
-                showCheckmark: false,
-                onSelected: (_) {
+            Text('排除标签', style: Theme.of(context).textTheme.labelLarge),
+            const SizedBox(width: 8),
+            ChoiceChip(
+              label: Text(l10n.all),
+              selected: _excludedTags.isEmpty,
+              showCheckmark: false,
+              onSelected: (_) => setState(_excludedTags.clear),
+            ),
+            for (final tag in tags) ...[
+              const SizedBox(width: 8),
+              FilterChip(
+                label: Text(tag),
+                selected: _excludedTags.contains(tag),
+                onSelected: (selected) {
                   setState(() {
-                    if (tag == null) {
-                      _selectedTags.remove(weekday);
+                    if (selected) {
+                      _excludedTags.add(tag);
                     } else {
-                      _selectedTags[weekday] = tag;
+                      _excludedTags.remove(tag);
                     }
                   });
                 },
@@ -658,7 +646,7 @@ class _CalendarPageState extends State<CalendarPage>
                           ),
                           const SizedBox(height: 3),
                           Text(
-                            '${l10n.todayBroadcast} · ${l10n.releaseCount(calendar.calendarData.values.fold<int>(0, (sum, value) => sum + value.length))}',
+                            '${l10n.todayBroadcast} · ${l10n.releaseCount(calendar.calendarData.values.expand((items) => items).where(_isVisible).length)}',
                             style: theme.textTheme.bodyMedium?.copyWith(
                               color: colorScheme.onPrimaryContainer.withValues(
                                 alpha: 0.72,
@@ -697,16 +685,11 @@ class _CalendarPageState extends State<CalendarPage>
   }
 
   Widget _buildCard(
-      BuildContext context, CalendarItem item, AppLocalizations l10n,
-      {String? selectedTag}) {
+      BuildContext context, CalendarItem item, AppLocalizations l10n) {
     final subject = item.subject;
     final theme = Theme.of(context);
     final displayName = subject.nameCN.isEmpty ? subject.name : subject.nameCN;
     final tags = subject.metaTags.take(4).toList();
-    if (selectedTag != null && !tags.contains(selectedTag)) {
-      if (tags.length == 4) tags.removeLast();
-      tags.add(selectedTag);
-    }
 
     return Material(
       color: theme.colorScheme.surfaceContainerLow,

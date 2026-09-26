@@ -2180,6 +2180,36 @@ class AppLocalizationsEn extends AppLocalizations {
   String get githubDisconnect => 'Disconnect GitHub';
 
   @override
+  String get githubIssuesTitle => 'Repository issues';
+
+  @override
+  String get githubIssuesRefresh => 'Refresh issues';
+
+  @override
+  String get githubIssuesEmpty => 'No issues in this repository yet.';
+
+  @override
+  String get githubIssuesNoResultsYet =>
+      'No issues on this page. Load more to continue.';
+
+  @override
+  String get githubIssuesLoadFailed =>
+      'Could not load issues. Please try again.';
+
+  @override
+  String get githubIssuesLoadMore => 'Load more issues';
+
+  @override
+  String get githubIssueOpen => 'Open';
+
+  @override
+  String get githubIssueClosed => 'Closed';
+
+  @override
+  String get githubIssueOpenFailed =>
+      'Could not open this issue in the browser.';
+
+  @override
   String syncSubject(int id) {
     return 'Subject $id';
   }

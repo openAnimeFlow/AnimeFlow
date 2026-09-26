@@ -697,6 +697,15 @@
   "githubOpenFailed": "Could not open the browser. Visit github.com/login/device manually.",
   "githubConnectedHint": "GitHub is connected. You can submit an issue here in a later update.",
   "githubDisconnect": "Disconnect GitHub",
+  "githubIssuesTitle": "Repository issues",
+  "githubIssuesRefresh": "Refresh issues",
+  "githubIssuesEmpty": "No issues in this repository yet.",
+  "githubIssuesNoResultsYet": "No issues on this page. Load more to continue.",
+  "githubIssuesLoadFailed": "Could not load issues. Please try again.",
+  "githubIssuesLoadMore": "Load more issues",
+  "githubIssueOpen": "Open",
+  "githubIssueClosed": "Closed",
+  "githubIssueOpenFailed": "Could not open this issue in the browser.",
   "syncSubject": "Subject {id}",
   "@syncSubject": {
     "placeholders": {

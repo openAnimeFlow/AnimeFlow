@@ -697,6 +697,15 @@
   "githubOpenFailed": "无法打开浏览器，请手动访问 github.com/login/device",
   "githubConnectedHint": "GitHub 已连接。后续可在此填写并提交 Issue。",
   "githubDisconnect": "断开 GitHub 授权",
+  "githubIssuesTitle": "仓库已有 Issues",
+  "githubIssuesRefresh": "刷新 Issues",
+  "githubIssuesEmpty": "仓库中暂无 Issue。",
+  "githubIssuesNoResultsYet": "此页没有 Issue，可继续加载下一页。",
+  "githubIssuesLoadFailed": "加载 Issues 失败，请重试。",
+  "githubIssuesLoadMore": "加载更多 Issues",
+  "githubIssueOpen": "进行中",
+  "githubIssueClosed": "已关闭",
+  "githubIssueOpenFailed": "无法在浏览器中打开此 Issue。",
   "syncSubject": "条目 {id}",
   "@syncSubject": {
     "placeholders": {

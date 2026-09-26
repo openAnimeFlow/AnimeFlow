@@ -697,6 +697,15 @@
   "githubOpenFailed": "無法開啟瀏覽器，請手動前往 github.com/login/device",
   "githubConnectedHint": "GitHub 已連接。之後可在此填寫並提交 Issue。",
   "githubDisconnect": "中斷 GitHub 授權",
+  "githubIssuesTitle": "儲存庫現有 Issues",
+  "githubIssuesRefresh": "重新整理 Issues",
+  "githubIssuesEmpty": "儲存庫中目前沒有 Issue。",
+  "githubIssuesNoResultsYet": "此頁沒有 Issue，可繼續載入下一頁。",
+  "githubIssuesLoadFailed": "載入 Issues 失敗，請重試。",
+  "githubIssuesLoadMore": "載入更多 Issues",
+  "githubIssueOpen": "進行中",
+  "githubIssueClosed": "已關閉",
+  "githubIssueOpenFailed": "無法在瀏覽器中開啟此 Issue。",
   "syncSubject": "項目 {id}",
   "@syncSubject": {
     "placeholders": {

@@ -2111,6 +2111,33 @@ class AppLocalizationsZh extends AppLocalizations {
   String get githubDisconnect => '断开 GitHub 授权';
 
   @override
+  String get githubIssuesTitle => '仓库已有 Issues';
+
+  @override
+  String get githubIssuesRefresh => '刷新 Issues';
+
+  @override
+  String get githubIssuesEmpty => '仓库中暂无 Issue。';
+
+  @override
+  String get githubIssuesNoResultsYet => '此页没有 Issue，可继续加载下一页。';
+
+  @override
+  String get githubIssuesLoadFailed => '加载 Issues 失败，请重试。';
+
+  @override
+  String get githubIssuesLoadMore => '加载更多 Issues';
+
+  @override
+  String get githubIssueOpen => '进行中';
+
+  @override
+  String get githubIssueClosed => '已关闭';
+
+  @override
+  String get githubIssueOpenFailed => '无法在浏览器中打开此 Issue。';
+
+  @override
   String syncSubject(int id) {
     return '条目 $id';
   }
@@ -4220,6 +4247,33 @@ class AppLocalizationsZhHans extends AppLocalizationsZh {
 
   @override
   String get githubDisconnect => '断开 GitHub 授权';
+
+  @override
+  String get githubIssuesTitle => '仓库已有 Issues';
+
+  @override
+  String get githubIssuesRefresh => '刷新 Issues';
+
+  @override
+  String get githubIssuesEmpty => '仓库中暂无 Issue。';
+
+  @override
+  String get githubIssuesNoResultsYet => '此页没有 Issue，可继续加载下一页。';
+
+  @override
+  String get githubIssuesLoadFailed => '加载 Issues 失败，请重试。';
+
+  @override
+  String get githubIssuesLoadMore => '加载更多 Issues';
+
+  @override
+  String get githubIssueOpen => '进行中';
+
+  @override
+  String get githubIssueClosed => '已关闭';
+
+  @override
+  String get githubIssueOpenFailed => '无法在浏览器中打开此 Issue。';
 
   @override
   String syncSubject(int id) {
@@ -6334,6 +6388,33 @@ class AppLocalizationsZhHantHk extends AppLocalizationsZh {
   String get githubDisconnect => '中斷 GitHub 授權';
 
   @override
+  String get githubIssuesTitle => '儲存庫現有 Issues';
+
+  @override
+  String get githubIssuesRefresh => '重新整理 Issues';
+
+  @override
+  String get githubIssuesEmpty => '儲存庫中目前沒有 Issue。';
+
+  @override
+  String get githubIssuesNoResultsYet => '此頁沒有 Issue，可繼續載入下一頁。';
+
+  @override
+  String get githubIssuesLoadFailed => '載入 Issues 失敗，請重試。';
+
+  @override
+  String get githubIssuesLoadMore => '載入更多 Issues';
+
+  @override
+  String get githubIssueOpen => '進行中';
+
+  @override
+  String get githubIssueClosed => '已關閉';
+
+  @override
+  String get githubIssueOpenFailed => '無法在瀏覽器中開啟此 Issue。';
+
+  @override
   String syncSubject(int id) {
     return '項目 $id';
   }
@@ -8445,6 +8526,33 @@ class AppLocalizationsZhHantTw extends AppLocalizationsZh {
 
   @override
   String get githubDisconnect => '中斷 GitHub 授權';
+
+  @override
+  String get githubIssuesTitle => '儲存庫現有 Issues';
+
+  @override
+  String get githubIssuesRefresh => '重新整理 Issues';
+
+  @override
+  String get githubIssuesEmpty => '儲存庫中目前沒有 Issue。';
+
+  @override
+  String get githubIssuesNoResultsYet => '此頁沒有 Issue，可繼續載入下一頁。';
+
+  @override
+  String get githubIssuesLoadFailed => '載入 Issues 失敗，請重試。';
+
+  @override
+  String get githubIssuesLoadMore => '載入更多 Issues';
+
+  @override
+  String get githubIssueOpen => '進行中';
+
+  @override
+  String get githubIssueClosed => '已關閉';
+
+  @override
+  String get githubIssueOpenFailed => '無法在瀏覽器中開啟此 Issue。';
 
   @override
   String syncSubject(int id) {

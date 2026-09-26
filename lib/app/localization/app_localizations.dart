@@ -4005,6 +4005,60 @@ abstract class AppLocalizations {
   /// **'断开 GitHub 授权'**
   String get githubDisconnect;
 
+  /// No description provided for @githubIssuesTitle.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'仓库已有 Issues'**
+  String get githubIssuesTitle;
+
+  /// No description provided for @githubIssuesRefresh.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'刷新 Issues'**
+  String get githubIssuesRefresh;
+
+  /// No description provided for @githubIssuesEmpty.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'仓库中暂无 Issue。'**
+  String get githubIssuesEmpty;
+
+  /// No description provided for @githubIssuesNoResultsYet.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'此页没有 Issue，可继续加载下一页。'**
+  String get githubIssuesNoResultsYet;
+
+  /// No description provided for @githubIssuesLoadFailed.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'加载 Issues 失败，请重试。'**
+  String get githubIssuesLoadFailed;
+
+  /// No description provided for @githubIssuesLoadMore.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'加载更多 Issues'**
+  String get githubIssuesLoadMore;
+
+  /// No description provided for @githubIssueOpen.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'进行中'**
+  String get githubIssueOpen;
+
+  /// No description provided for @githubIssueClosed.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'已关闭'**
+  String get githubIssueClosed;
+
+  /// No description provided for @githubIssueOpenFailed.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'无法在浏览器中打开此 Issue。'**
+  String get githubIssueOpenFailed;
+
   /// No description provided for @syncSubject.
   ///
   /// In zh_Hans, this message translates to:

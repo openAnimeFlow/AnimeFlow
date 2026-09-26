@@ -79,6 +79,8 @@ Device Flow 的用户体验是：App 展示 `user_code`，打开 `https://github
 
 ## 阶段 4：客户端直连 GitHub API 创建 Issue
 
+已先实现公开仓库 Issue 列表：反馈 Tab 直接向 GitHub 请求 `GET /repos/openAnimeFlow/AnimeFlow/issues`，以 `state=all`、更新时间倒序和每页 30 条加载；按响应的 `Link: rel="next"` 翻页，过滤 Pull Request。列表无需授权即可浏览，提供刷新、加载更多、失败重试和跳转到 GitHub Issue 页面。创建 Issue 仍按下述步骤继续实现。
+
 **建议新增**：专用于带凭据请求的 `GitHubAuthorizedClient` 和 `GitHubIssueRepository`。不要复用 [dio_factory.dart](../lib/core/network/core/dio_factory.dart) 中现有的 `githubDio`：它会把 `api.github.com` 请求重写到第三方镜像。授权请求应直连 GitHub、强制校验证书、不允许自定义上游域名，并禁止记录 Authorization 头或响应令牌。
 
 请求为 `POST https://api.github.com/repos/openAnimeFlow/AnimeFlow/issues`，使用 `Authorization: Bearer <access_token>`、`Accept: application/vnd.github+json`，正文首期只提交 `title` 和 `body`。成功后读取 `number`、`html_url` 并在 App 内显示成功页和“查看 Issue”入口。GitHub 文档要求用户及 GitHub App 对该仓库有相应权限，并列出 `201`、`403`、`404`、`410`、`422` 等结果。[创建 Issue API](https://docs.github.com/en/rest/issues/issues)

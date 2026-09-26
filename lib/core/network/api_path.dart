@@ -72,6 +72,8 @@ class GitHubApi {
   static const String deviceCode = '/login/device/code';
   static const String accessToken = '/login/oauth/access_token';
   static const String currentUser = '/user';
+  static const String repositoryIssues =
+      '/repos/openAnimeFlow/AnimeFlow/issues';
 }
 
 class CommonApi {

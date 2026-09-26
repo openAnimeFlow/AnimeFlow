@@ -66,6 +66,9 @@ class DownloadKey {
 
 class SettingKey {
   static const String isMirror = 'setting_is_mirror',
+      echImageLoading = 'ech_image_loading',
+      echImageHost = 'ech_image_host',
+      echImageFixedIp = 'ech_image_fixed_ip',
       themeMode = 'theme_mode',
       seedColor = 'theme_seed_color',
       locale = 'app_locale',

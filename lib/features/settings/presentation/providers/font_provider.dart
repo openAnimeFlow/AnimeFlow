@@ -109,13 +109,13 @@ class Font extends _$Font {
       // 远程列表拿到后，顺手为已下载但缺少元数据的旧版本数据回填元信息，
       // 以便后续即使远程下架也能在本地正常展示并删除。
       if (!cancelToken.isCancelled) {
-        Future.microtask(() {
+        Future.microtask(() async {
           try {
             if (cancelToken.isCancelled ||
                 ref.read(fontRepoCdnProvider) != useCdn) {
               return;
             }
-            ref
+            await ref
                 .read(downloadedFontMetasProvider.notifier)
                 .backfillFromRemote(list);
           } catch (_) {}

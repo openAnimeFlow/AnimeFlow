@@ -7,6 +7,7 @@ import 'package:anime_flow/features/search/presentation/providers/search_control
 import 'package:anime_flow/core/utils/format_time_util.dart';
 import 'package:anime_flow/core/logger/logger.dart';
 import 'package:anime_flow/shared/widgets/animation_network_image.dart';
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:image_picker/image_picker.dart';
@@ -442,21 +443,16 @@ class _ImageSearchPageState extends ConsumerState<ImageSearchPage> {
                 ],
               ),
             )
-          : Image.network(
-              _previewUrl,
+          : CachedNetworkImage(
+              imageUrl: _previewUrl,
               fit: BoxFit.contain,
-              loadingBuilder: (context, child, loadingProgress) {
-                if (loadingProgress == null) {
-                  return child;
-                }
-                final total = loadingProgress.expectedTotalBytes;
-                final loaded = loadingProgress.cumulativeBytesLoaded;
+              progressIndicatorBuilder: (context, url, progress) {
                 return Center(
                   child: Column(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
                       CircularProgressIndicator(
-                        value: total != null ? loaded / total : null,
+                        value: progress.progress,
                         strokeWidth: 2.5,
                       ),
                       const SizedBox(height: 12),
@@ -470,7 +466,7 @@ class _ImageSearchPageState extends ConsumerState<ImageSearchPage> {
                   ),
                 );
               },
-              errorBuilder: (context, error, stackTrace) => Center(
+              errorWidget: (context, url, error) => Center(
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [

@@ -37,6 +37,11 @@ jobs:
       - name: Install dependencies
         run: flutter pub get
 
+      - name: Install ECH native build tools
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y cmake ninja-build g++
+
       - name: Run unit tests
         run: flutter test
 
@@ -117,6 +122,10 @@ jobs:
 
       - name: Install dependencies
         run: flutter pub get
+
+      - name: Install ECH native build tools on Apple runners
+        if: matrix.platform == 'ios' || matrix.platform == 'macos'
+        run: brew install cmake ninja
 
       - name: Patch AVFoundation platform import for macOS SPM
         if: matrix.platform == 'macos'

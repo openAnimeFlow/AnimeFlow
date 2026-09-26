@@ -36,6 +36,51 @@ class AppLocalizationsEn extends AppLocalizations {
   String get languageLabel => 'Language';
 
   @override
+  String get echImageLoading => 'ECH image loading';
+
+  @override
+  String get echImageLoadingDescription => 'Use ECH for image proxy requests';
+
+  @override
+  String get echImageRoute => 'ECH image connection';
+
+  @override
+  String get echImageRouteHint =>
+      'Custom domains must support the same image API and publish an ECH config. Add multiple IP addresses if needed, or leave them empty to use DNS addresses.';
+
+  @override
+  String get echImageHost => 'Image domain';
+
+  @override
+  String get echImageFixedIp => 'Fixed IP address';
+
+  @override
+  String get echImageAddIp => 'Add IP';
+
+  @override
+  String get echImageSave => 'Save';
+
+  @override
+  String get echImageRestoreDefaults => 'Restore defaults';
+
+  @override
+  String get echImageRestartRequired =>
+      'Changes take effect after restarting the app.';
+
+  @override
+  String get echImageAutomaticIp => 'Resolve IP automatically';
+
+  @override
+  String get echImageInvalidHost =>
+      'Enter a valid domain without a scheme or path';
+
+  @override
+  String get echImageIpRequired => 'IP address cannot be empty';
+
+  @override
+  String get echImageInvalidIp => 'Enter a valid IPv4 or IPv6 address';
+
+  @override
   String get selectLanguageTooltip => 'Select language';
 
   @override
@@ -167,6 +212,9 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get todayBroadcast => 'Today\'s Broadcasts';
+
+  @override
+  String get animeScheduleTitle => 'Anime Release Schedule';
 
   @override
   String get back => 'Back';
@@ -1288,6 +1336,10 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get mediaKitDescription =>
       'Cross-platform video player with high-quality playback';
+
+  @override
+  String get echHttpDescription =>
+      'Provides ECH support to improve image loading';
 
   @override
   String get canvasDanmakuDescription =>

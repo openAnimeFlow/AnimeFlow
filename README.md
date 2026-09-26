@@ -325,6 +325,8 @@ Release 包输出目录：
 
 ## 🙏 致谢
 
+特别感谢 [ech_http](https://github.com/ech-research/ech_http)，本项目使用它提供的 ECH 支持改善图片加载体验。
+
 特别感谢 [Anime4K](https://github.com/bloc97/Anime4K) 本项目使用 Anime4K 进行实时超分辨率处理。
 
 特别感谢 [Bangumi](https://bangumi.tv/) 本项目使用了 Bangumi 开放 API 以提供番剧元数据和用户数据同步。

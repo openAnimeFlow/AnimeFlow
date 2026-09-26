@@ -16,7 +16,7 @@ publish_to: 'none' # Remove this line if you wish to publish to pub.dev
 # https://developer.apple.com/library/archive/documentation/General/Reference/InfoPlistKeyReference/Articles/CoreFoundationKeys.html
 # In Windows, build-name is used as the major, minor, and patch parts
 # of the product and file versions while build-number is used as the build suffix.
-version: 2.6.0
+version: 2.6.1
 
 environment:
   sdk: ">=3.3.4 <4.0.0"
@@ -38,6 +38,9 @@ dependencies:
   cupertino_icons: ^1.0.8 # 提供 Flutter Cupertino 风格的图标资源。
   flutter_svg: ^2.2.3 # 解析并渲染 SVG 矢量图形。
   cached_network_image: ^3.4.1 # 加载网络图片并提供磁盘与内存缓存。
+  flutter_cache_manager: ^3.4.1 # 为图片请求接入自定义网络客户端。
+  ech_http: ^0.1.2 # 使用 ECH 加载 wsrv.nl 图片。
+  http: ^1.6.0 # 图片服务的流式 HTTP 接口。
   shimmer: ^3.0.0 # 创建带有渐变闪烁效果的加载占位组件。
   photo_view: ^0.15.0 # 为图片提供缩放、平移和手势查看能力。
   lottie: ^3.3.3 # 解析并播放 Lottie 动画。
@@ -219,6 +222,7 @@ flutter:
     - assets/shaders/
     - assets/animation/
     - assets/image/
+    - licenses/ech_http/
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/to/resolution-aware-images
 

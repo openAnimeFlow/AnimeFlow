@@ -33,6 +33,49 @@ class AppLocalizationsZh extends AppLocalizations {
   String get languageLabel => '语言';
 
   @override
+  String get echImageLoading => 'ECH 图片加载优化';
+
+  @override
+  String get echImageLoadingDescription => '使用 ECH 加载图片代理资源';
+
+  @override
+  String get echImageRoute => 'ECH 图片连接';
+
+  @override
+  String get echImageRouteHint =>
+      '自定义域名需支持相同的图片接口并发布 ECH 配置。可添加多个固定 IP，留空时使用 DNS 地址。';
+
+  @override
+  String get echImageHost => '图片域名';
+
+  @override
+  String get echImageFixedIp => '固定 IP';
+
+  @override
+  String get echImageAddIp => '添加 IP';
+
+  @override
+  String get echImageSave => '保存';
+
+  @override
+  String get echImageRestoreDefaults => '恢复默认值';
+
+  @override
+  String get echImageRestartRequired => '更改将在重启应用后生效。';
+
+  @override
+  String get echImageAutomaticIp => '自动解析 IP';
+
+  @override
+  String get echImageInvalidHost => '请输入有效域名，不含协议或路径';
+
+  @override
+  String get echImageIpRequired => 'IP 不能为空';
+
+  @override
+  String get echImageInvalidIp => '请输入有效的 IPv4 或 IPv6 地址';
+
+  @override
   String get selectLanguageTooltip => '选择语言';
 
   @override
@@ -163,6 +206,9 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get todayBroadcast => '今日放送';
+
+  @override
+  String get animeScheduleTitle => '新番時間表';
 
   @override
   String get back => '返回';
@@ -1262,6 +1308,9 @@ class AppLocalizationsZh extends AppLocalizations {
   String get mediaKitDescription => '跨平台视频播放器，支持高质量视频播放';
 
   @override
+  String get echHttpDescription => '提供 ECH 支持，改善图片加载体验';
+
+  @override
   String get canvasDanmakuDescription => '弹幕插件，提供流畅的弹幕绘制';
 
   @override
@@ -2172,6 +2221,49 @@ class AppLocalizationsZhHans extends AppLocalizationsZh {
   String get languageLabel => '语言';
 
   @override
+  String get echImageLoading => 'ECH 图片加载优化';
+
+  @override
+  String get echImageLoadingDescription => '使用 ECH 加载图片代理资源';
+
+  @override
+  String get echImageRoute => 'ECH 图片连接';
+
+  @override
+  String get echImageRouteHint =>
+      '自定义域名需支持相同的图片接口并发布 ECH 配置。可添加多个固定 IP，留空时使用 DNS 地址。';
+
+  @override
+  String get echImageHost => '图片域名';
+
+  @override
+  String get echImageFixedIp => '固定 IP';
+
+  @override
+  String get echImageAddIp => '添加 IP';
+
+  @override
+  String get echImageSave => '保存';
+
+  @override
+  String get echImageRestoreDefaults => '恢复默认值';
+
+  @override
+  String get echImageRestartRequired => '更改将在重启应用后生效。';
+
+  @override
+  String get echImageAutomaticIp => '自动解析 IP';
+
+  @override
+  String get echImageInvalidHost => '请输入有效域名，不含协议或路径';
+
+  @override
+  String get echImageIpRequired => 'IP 不能为空';
+
+  @override
+  String get echImageInvalidIp => '请输入有效的 IPv4 或 IPv6 地址';
+
+  @override
   String get selectLanguageTooltip => '选择语言';
 
   @override
@@ -2302,6 +2394,9 @@ class AppLocalizationsZhHans extends AppLocalizationsZh {
 
   @override
   String get todayBroadcast => '今日放送';
+
+  @override
+  String get animeScheduleTitle => '新番时间表';
 
   @override
   String get back => '返回';
@@ -3401,6 +3496,9 @@ class AppLocalizationsZhHans extends AppLocalizationsZh {
   String get mediaKitDescription => '跨平台视频播放器，支持高质量视频播放';
 
   @override
+  String get echHttpDescription => '提供 ECH 支持，改善图片加载体验';
+
+  @override
   String get canvasDanmakuDescription => '弹幕插件，提供流畅的弹幕绘制';
 
   @override
@@ -4310,6 +4408,49 @@ class AppLocalizationsZhHantHk extends AppLocalizationsZh {
   String get languageLabel => '語言';
 
   @override
+  String get echImageLoading => 'ECH 圖片載入優化';
+
+  @override
+  String get echImageLoadingDescription => '使用 ECH 載入圖片代理資源';
+
+  @override
+  String get echImageRoute => 'ECH 圖片連線';
+
+  @override
+  String get echImageRouteHint =>
+      '自訂網域須支援相同的圖片介面並發布 ECH 設定。可新增多個固定 IP，留空時使用 DNS 位址。';
+
+  @override
+  String get echImageHost => '圖片網域';
+
+  @override
+  String get echImageFixedIp => '固定 IP';
+
+  @override
+  String get echImageAddIp => '新增 IP';
+
+  @override
+  String get echImageSave => '儲存';
+
+  @override
+  String get echImageRestoreDefaults => '還原預設值';
+
+  @override
+  String get echImageRestartRequired => '變更將在重新啟動應用程式後生效。';
+
+  @override
+  String get echImageAutomaticIp => '自動解析 IP';
+
+  @override
+  String get echImageInvalidHost => '請輸入有效網域，不含協定或路徑';
+
+  @override
+  String get echImageIpRequired => 'IP 不能留空';
+
+  @override
+  String get echImageInvalidIp => '請輸入有效的 IPv4 或 IPv6 位址';
+
+  @override
   String get selectLanguageTooltip => '選擇語言';
 
   @override
@@ -4440,6 +4581,9 @@ class AppLocalizationsZhHantHk extends AppLocalizationsZh {
 
   @override
   String get todayBroadcast => '今日放送';
+
+  @override
+  String get animeScheduleTitle => '新番時間表';
 
   @override
   String get back => '返回';
@@ -5539,6 +5683,9 @@ class AppLocalizationsZhHantHk extends AppLocalizationsZh {
   String get mediaKitDescription => '跨平台影片播放器，支援高品質影片播放';
 
   @override
+  String get echHttpDescription => '提供 ECH 支援，改善圖片載入體驗';
+
+  @override
   String get canvasDanmakuDescription => '彈幕插件，提供流暢的彈幕繪製';
 
   @override
@@ -6449,6 +6596,49 @@ class AppLocalizationsZhHantTw extends AppLocalizationsZh {
   String get languageLabel => '語言';
 
   @override
+  String get echImageLoading => 'ECH 圖片載入優化';
+
+  @override
+  String get echImageLoadingDescription => '使用 ECH 載入圖片代理資源';
+
+  @override
+  String get echImageRoute => 'ECH 圖片連線';
+
+  @override
+  String get echImageRouteHint =>
+      '自訂網域須支援相同的圖片介面並發布 ECH 設定。可新增多個固定 IP，留空時使用 DNS 位址。';
+
+  @override
+  String get echImageHost => '圖片網域';
+
+  @override
+  String get echImageFixedIp => '固定 IP';
+
+  @override
+  String get echImageAddIp => '新增 IP';
+
+  @override
+  String get echImageSave => '儲存';
+
+  @override
+  String get echImageRestoreDefaults => '還原預設值';
+
+  @override
+  String get echImageRestartRequired => '變更將在重新啟動應用程式後生效。';
+
+  @override
+  String get echImageAutomaticIp => '自動解析 IP';
+
+  @override
+  String get echImageInvalidHost => '請輸入有效網域，不含協定或路徑';
+
+  @override
+  String get echImageIpRequired => 'IP 不能留空';
+
+  @override
+  String get echImageInvalidIp => '請輸入有效的 IPv4 或 IPv6 位址';
+
+  @override
   String get selectLanguageTooltip => '選擇語言';
 
   @override
@@ -6579,6 +6769,9 @@ class AppLocalizationsZhHantTw extends AppLocalizationsZh {
 
   @override
   String get todayBroadcast => '今日放送';
+
+  @override
+  String get animeScheduleTitle => '新番時間表';
 
   @override
   String get back => '返回';
@@ -7676,6 +7869,9 @@ class AppLocalizationsZhHantTw extends AppLocalizationsZh {
 
   @override
   String get mediaKitDescription => '跨平台影片播放器，支援高品質影片播放';
+
+  @override
+  String get echHttpDescription => '提供 ECH 支援，改善圖片載入體驗';
 
   @override
   String get canvasDanmakuDescription => '彈幕插件，提供流暢的彈幕繪製';

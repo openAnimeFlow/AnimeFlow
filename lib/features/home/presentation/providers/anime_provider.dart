@@ -1,22 +1,8 @@
 import 'package:anime_flow/core/network/api/flow_api.dart';
-import 'package:anime_flow/shared/models/bangumi/calendar_item.dart';
 import 'package:anime_flow/shared/models/bangumi/hot_item.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 part 'anime_provider.g.dart';
-
-@riverpod
-class AnimeCalendar extends _$AnimeCalendar {
-  @override
-  Future<Calendar> build() async {
-    return FlowApi.calendarService();
-  }
-
-  Future<void> refreshCalendarDate() async {
-    state = const AsyncLoading();
-    state = await AsyncValue.guard(() => FlowApi.calendarService());
-  }
-}
 
 class AnimeHotState {
   const AnimeHotState({

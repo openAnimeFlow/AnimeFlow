@@ -1,5 +1,8 @@
+import 'dart:io';
+
 import 'package:anime_flow/app/localization/app_localizations.dart';
 import 'package:anime_flow/app/localization/locale_provider.dart';
+import 'package:anime_flow/core/settings/app_settings.dart';
 import 'package:anime_flow/features/settings/presentation/providers/setting_provider.dart';
 import 'package:anime_flow/shared/widgets/drop_down_menu.dart';
 import 'package:flutter/material.dart';
@@ -15,6 +18,38 @@ class GeneralSettingsPage extends ConsumerStatefulWidget {
 
 class _GeneralSettingsPageState extends ConsumerState<GeneralSettingsPage> {
   bool _isLanguageMenuOpen = false;
+  late bool _echImageLoading;
+  final _echRouteFormKey = GlobalKey<FormState>();
+  late final TextEditingController _echHostController;
+  final List<TextEditingController> _echIpControllers = [];
+
+  @override
+  void initState() {
+    super.initState();
+    _echImageLoading = AppSettings.echImageLoading;
+    _echHostController = TextEditingController(text: AppSettings.echImageHost);
+    _echIpControllers.addAll(
+      AppSettings.echImageFixedIps.map((ip) => TextEditingController(text: ip)),
+    );
+  }
+
+  @override
+  void dispose() {
+    _echHostController.dispose();
+    for (final controller in _echIpControllers) {
+      controller.dispose();
+    }
+    super.dispose();
+  }
+
+  void _addEchIp() {
+    setState(() => _echIpControllers.add(TextEditingController()));
+  }
+
+  void _removeEchIp(TextEditingController controller) {
+    setState(() => _echIpControllers.remove(controller));
+    WidgetsBinding.instance.addPostFrameCallback((_) => controller.dispose());
+  }
 
   _LanguageOption _languageForLocale(Locale locale) {
     if (locale.languageCode == 'en') {
@@ -31,6 +66,33 @@ class _GeneralSettingsPageState extends ConsumerState<GeneralSettingsPage> {
 
   void _setLanguage(_LanguageOption language) {
     ref.read(localeProvider.notifier).setLocale(language.locale);
+  }
+
+  Future<void> _saveEchImageRoute() async {
+    if (_echRouteFormKey.currentState?.validate() != true) return;
+    await AppSettings.setEchImageRoute(
+      host: _echHostController.text,
+      fixedIps: AppSettings.parseEchImageFixedIps(
+        _echIpControllers.map((controller) => controller.text).join('\n'),
+      ),
+    );
+    if (mounted) FocusScope.of(context).unfocus();
+  }
+
+  Future<void> _restoreEchImageRoute() async {
+    _echRouteFormKey.currentState?.reset();
+    _echHostController.text = AppSettings.defaultEchImageHost;
+    final removed = _echIpControllers.toList();
+    setState(_echIpControllers.clear);
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      for (final controller in removed) {
+        controller.dispose();
+      }
+    });
+    await AppSettings.setEchImageRoute(
+      host: AppSettings.defaultEchImageHost,
+    );
+    if (mounted) FocusScope.of(context).unfocus();
   }
 
   @override
@@ -107,6 +169,143 @@ class _GeneralSettingsPageState extends ConsumerState<GeneralSettingsPage> {
                 },
                 onSelected: _setLanguage,
               ),
+            ),
+          ),
+          Card(
+            clipBehavior: Clip.antiAlias,
+            child: Column(
+              children: [
+                SwitchListTile(
+                  secondary: const Icon(Icons.image_outlined),
+                  title: Text(l10n.echImageLoading),
+                  subtitle: Text(l10n.echImageLoadingDescription),
+                  value: _echImageLoading,
+                  onChanged: (value) async {
+                    await AppSettings.setEchImageLoading(value);
+                    if (mounted) setState(() => _echImageLoading = value);
+                  },
+                ),
+                AnimatedSize(
+                  duration: const Duration(milliseconds: 180),
+                  alignment: Alignment.topCenter,
+                  child: _echImageLoading
+                      ? Padding(
+                          padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
+                          child: Form(
+                            key: _echRouteFormKey,
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                const Divider(),
+                                const SizedBox(height: 8),
+                                Text(
+                                  l10n.echImageRoute,
+                                  style:
+                                      Theme.of(context).textTheme.titleMedium,
+                                ),
+                                const SizedBox(height: 8),
+                                Text(l10n.echImageRouteHint),
+                                const SizedBox(height: 12),
+                                TextFormField(
+                                  controller: _echHostController,
+                                  decoration: InputDecoration(
+                                    labelText: l10n.echImageHost,
+                                  ),
+                                  textInputAction: TextInputAction.next,
+                                  validator: (value) {
+                                    return AppSettings.isValidEchImageHost(
+                                      value ?? '',
+                                    )
+                                        ? null
+                                        : l10n.echImageInvalidHost;
+                                  },
+                                ),
+                                const SizedBox(height: 12),
+                                LayoutBuilder(
+                                  builder: (context, constraints) {
+                                    final fieldWidth =
+                                        constraints.maxWidth < 248
+                                            ? constraints.maxWidth
+                                            : 248.0;
+                                    return Wrap(
+                                      spacing: 8,
+                                      runSpacing: 8,
+                                      crossAxisAlignment:
+                                          WrapCrossAlignment.center,
+                                      children: [
+                                        for (final controller
+                                            in _echIpControllers)
+                                          SizedBox(
+                                            width: fieldWidth,
+                                            child: TextFormField(
+                                              key: ValueKey(controller),
+                                              controller: controller,
+                                              decoration: InputDecoration(
+                                                labelText: l10n.echImageFixedIp,
+                                                suffixIcon: IconButton(
+                                                  tooltip: l10n.delete,
+                                                  icon: const Icon(Icons.close),
+                                                  onPressed: () =>
+                                                      _removeEchIp(controller),
+                                                ),
+                                              ),
+                                              keyboardType: TextInputType.url,
+                                              validator: (value) {
+                                                final ip = value?.trim() ?? '';
+                                                if (ip.isEmpty) {
+                                                  return l10n
+                                                      .echImageIpRequired;
+                                                }
+                                                return InternetAddress.tryParse(
+                                                          ip,
+                                                        ) !=
+                                                        null
+                                                    ? null
+                                                    : l10n.echImageInvalidIp;
+                                              },
+                                            ),
+                                          ),
+                                        TextButton.icon(
+                                          onPressed: _addEchIp,
+                                          icon: const Icon(Icons.add),
+                                          label: Text(l10n.echImageAddIp),
+                                        ),
+                                      ],
+                                    );
+                                  },
+                                ),
+                                const SizedBox(height: 12),
+                                Wrap(
+                                  spacing: 8,
+                                  runSpacing: 8,
+                                  children: [
+                                    OutlinedButton(
+                                      onPressed: _restoreEchImageRoute,
+                                      child: Text(l10n.echImageRestoreDefaults),
+                                    ),
+                                    FilledButton(
+                                      onPressed: _saveEchImageRoute,
+                                      child: Text(l10n.echImageSave),
+                                    ),
+                                  ],
+                                ),
+                              ],
+                            ),
+                          ),
+                        )
+                      : const SizedBox.shrink(),
+                ),
+                Padding(
+                  padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
+                  child: Row(
+                    children: [
+                      const Icon(Icons.info_outline, size: 18),
+                      const SizedBox(width: 8),
+                      Expanded(child: Text(l10n.echImageRestartRequired)),
+                    ],
+                  ),
+                ),
+              ],
             ),
           ),
         ],

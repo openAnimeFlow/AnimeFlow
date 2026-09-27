@@ -97,7 +97,7 @@ class _DanmakuSettingState extends ConsumerState<DanmakuSettingDialog> {
     final hideTop = danmakuController.option.hideTop;
     final hideBottom = danmakuController.option.hideBottom;
     final danmakuChineseMode = ref.watch(danmakuChineseModeProvider);
-
+    final paddingOf = MediaQuery.paddingOf(context);
     final fixedValues = [0.1, 0.25, 0.5, 0.75, 1.0];
     int currentIndex = 0;
     for (int i = 0; i < fixedValues.length; i++) {
@@ -109,7 +109,8 @@ class _DanmakuSettingState extends ConsumerState<DanmakuSettingDialog> {
     return Container(
       width: double.infinity,
       height: double.infinity,
-      padding: const EdgeInsets.all(16),
+      padding: EdgeInsets.only(
+          left: 15, right: 15, top: paddingOf.top, bottom: paddingOf.bottom),
       decoration: BoxDecoration(
         color: Theme.of(context).cardColor,
         borderRadius: const BorderRadius.horizontal(left: Radius.circular(15)),
@@ -141,7 +142,71 @@ class _DanmakuSettingState extends ConsumerState<DanmakuSettingDialog> {
                 mainAxisSize: MainAxisSize.min,
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  // 标题
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Text(l10n.danmakuChineseConversion),
+                      Padding(
+                        padding: const EdgeInsets.only(top: 12, bottom: 16),
+                        child: Align(
+                          alignment: Alignment.centerRight,
+                          child: DropDownMenu<DanmakuChineseMode>(
+                            items: DanmakuChineseMode.values,
+                            selectedItem: danmakuChineseMode,
+                            tooltip: l10n.danmakuChineseConversion,
+                            buttonBuilder: (context, selected) => Container(
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 12,
+                                vertical: 8,
+                              ),
+                              decoration: BoxDecoration(
+                                border: Border.all(
+                                  color: Theme.of(context)
+                                      .colorScheme
+                                      .outlineVariant,
+                                ),
+                                borderRadius: BorderRadius.circular(8),
+                              ),
+                              child: Row(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  Text(_danmakuChineseModeLabel(
+                                      selected!, l10n)),
+                                  const SizedBox(width: 4),
+                                  Icon(
+                                    Icons.arrow_drop_down,
+                                    color:
+                                        Theme.of(context).colorScheme.primary,
+                                  ),
+                                ],
+                              ),
+                            ),
+                            itemBuilder: (context, mode, isSelected) => Row(
+                              children: [
+                                SizedBox(
+                                  width: 24,
+                                  child: isSelected
+                                      ? Icon(
+                                          Icons.check,
+                                          size: 18,
+                                          color: Theme.of(context)
+                                              .colorScheme
+                                              .primary,
+                                        )
+                                      : null,
+                                ),
+                                Text(_danmakuChineseModeLabel(mode, l10n)),
+                              ],
+                            ),
+                            onSelected: (mode) => ref
+                                .read(danmakuChineseModeProvider.notifier)
+                                .setMode(mode),
+                          ),
+                        ),
+                      )
+                    ],
+                  ),
+                  // 弹幕显示类型
                   Padding(
                     padding: const EdgeInsets.only(bottom: 16),
                     child: Text(
@@ -150,61 +215,6 @@ class _DanmakuSettingState extends ConsumerState<DanmakuSettingDialog> {
                         fontSize: 18,
                         fontWeight: FontWeight.bold,
                         color: Theme.of(context).textTheme.titleLarge?.color,
-                      ),
-                    ),
-                  ),
-                  Text(l10n.danmakuChineseConversion),
-                  Padding(
-                    padding: const EdgeInsets.only(top: 12, bottom: 16),
-                    child: Align(
-                      alignment: Alignment.centerRight,
-                      child: DropDownMenu<DanmakuChineseMode>(
-                        items: DanmakuChineseMode.values,
-                        selectedItem: danmakuChineseMode,
-                        tooltip: l10n.danmakuChineseConversion,
-                        buttonBuilder: (context, selected) => Container(
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 12,
-                            vertical: 8,
-                          ),
-                          decoration: BoxDecoration(
-                            border: Border.all(
-                              color:
-                                  Theme.of(context).colorScheme.outlineVariant,
-                            ),
-                            borderRadius: BorderRadius.circular(8),
-                          ),
-                          child: Row(
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              Text(_danmakuChineseModeLabel(selected!, l10n)),
-                              const SizedBox(width: 4),
-                              Icon(
-                                Icons.arrow_drop_down,
-                                color: Theme.of(context).colorScheme.primary,
-                              ),
-                            ],
-                          ),
-                        ),
-                        itemBuilder: (context, mode, isSelected) => Row(
-                          children: [
-                            SizedBox(
-                              width: 24,
-                              child: isSelected
-                                  ? Icon(
-                                      Icons.check,
-                                      size: 18,
-                                      color:
-                                          Theme.of(context).colorScheme.primary,
-                                    )
-                                  : null,
-                            ),
-                            Text(_danmakuChineseModeLabel(mode, l10n)),
-                          ],
-                        ),
-                        onSelected: (mode) => ref
-                            .read(danmakuChineseModeProvider.notifier)
-                            .setMode(mode),
                       ),
                     ),
                   ),
@@ -340,19 +350,39 @@ class _DanmakuSettingState extends ConsumerState<DanmakuSettingDialog> {
                       )
                     ],
                   ),
-                  _buildSettingItem(
-                    title: l10n.massiveMode,
-                    value: danmakuController.option.massiveMode,
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Text(l10n.massiveMode,
+                          style: const TextStyle(fontSize: 14)),
+                      Switch(
+                        value: danmakuController.option.massiveMode,
+                        onChanged: (value) {
+                          danmakuController.updateOption(
+                            danmakuController.option
+                                .copyWith(massiveMode: value),
+                          );
+                          AppSettings.setSetting(
+                              DanmakuKey.danmakuMassiveMode, value);
+                        },
+                      )
+                    ],
+                  ),
+                  _DanmakuOptionSlider(
+                    initialValue: danmakuController.option.fontSize,
+                    min: 12,
+                    max: 30,
+                    divisions: 18,
+                    labelBuilder: (value) =>
+                    '${l10n.fontSize}: ${value.toInt()}px',
                     onChanged: (value) {
-                      setState(() {
-                        danmakuController.updateOption(
-                          danmakuController.option.copyWith(massiveMode: value),
-                        );
-                        AppSettings.setSetting(
-                            DanmakuKey.danmakuMassiveMode, value);
-                      });
+                      danmakuController.updateOption(
+                        danmakuController.option.copyWith(fontSize: value),
+                      );
+                      AppSettings.setSetting(DanmakuKey.danmakuFontSize, value);
                     },
                   ),
+                  const SizedBox(height: 8),
                   _DanmakuOptionSlider(
                     initialValue: danmakuController.option.strokeWidth,
                     min: 0,
@@ -436,21 +466,6 @@ class _DanmakuSettingState extends ConsumerState<DanmakuSettingDialog> {
                   ),
                   const SizedBox(height: 8),
                   _DanmakuOptionSlider(
-                    initialValue: danmakuController.option.fontSize,
-                    min: 12,
-                    max: 30,
-                    divisions: 18,
-                    labelBuilder: (value) =>
-                        '${l10n.fontSize}: ${value.toInt()}px',
-                    onChanged: (value) {
-                      danmakuController.updateOption(
-                        danmakuController.option.copyWith(fontSize: value),
-                      );
-                      AppSettings.setSetting(DanmakuKey.danmakuFontSize, value);
-                    },
-                  ),
-                  const SizedBox(height: 8),
-                  _DanmakuOptionSlider(
                     initialValue: currentIndex.toDouble(),
                     min: 0,
                     max: 4,
@@ -486,24 +501,5 @@ class _DanmakuSettingState extends ConsumerState<DanmakuSettingDialog> {
       DanmakuChineseMode.s2t => l10n.danmakuChineseToTraditional,
       DanmakuChineseMode.t2s => l10n.danmakuChineseToSimplified,
     };
-  }
-
-  Widget _buildSettingItem({
-    required String title,
-    required bool value,
-    required ValueChanged<bool> onChanged,
-  }) {
-    return ListTile(
-      dense: true,
-      contentPadding: const EdgeInsets.symmetric(horizontal: 0),
-      title: Text(
-        title,
-        style: const TextStyle(fontSize: 14),
-      ),
-      trailing: Switch(
-        value: value,
-        onChanged: onChanged,
-      ),
-    );
   }
 }

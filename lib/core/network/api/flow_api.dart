@@ -1064,6 +1064,14 @@ class FlowApi {
     return CollectionUpdateResult.fromResponse(response.data);
   }
 
+  /// 只取消 AnimeFlow 本地收藏；服务端保留取消标记。
+  static Future<void> cancelCollectionService(int subjectId) async {
+    await _client.delete(
+      '${AnimeFlowApi.flowUserCollections}/$subjectId',
+      requireFlowToken: true,
+    );
+  }
+
   /// 更新剧集观看状态
   static Future<void> updateEpisodeWatchedService(int episodeId,
       {required bool watched}) async {

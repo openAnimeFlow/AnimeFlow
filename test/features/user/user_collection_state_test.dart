@@ -19,6 +19,23 @@ UserCollectionData collection(int id, int type) => UserCollectionData.fromJson({
     });
 
 void main() {
+  test('cancellation keeps paged list offset aligned with server rows', () {
+    final state = UserCollectionsState(tabs: {
+      3: UserCollectionTabState(
+        data: UserCollectionsItem(data: [collection(1, 3)], total: 2),
+        offset: 1,
+        hasMore: true,
+      ),
+    });
+
+    final cancelled = state.removeCollection(collection(1, 3)).tabState(3);
+
+    expect(cancelled.data!.data, isEmpty);
+    expect(cancelled.data!.total, 1);
+    expect(cancelled.offset, 0);
+    expect(cancelled.canLoadMore, isTrue);
+  });
+
   test('unknown profile totals remain pageable across successive local moves',
       () {
     final first = const UserCollectionsState()

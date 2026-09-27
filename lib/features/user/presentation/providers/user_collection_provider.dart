@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:anime_flow/shared/models/flow/collection_update_result.dart';
 import 'package:anime_flow/shared/models/bangumi/user_collections_item.dart';
 import 'package:anime_flow/shared/models/flow/flow_users.dart';
@@ -17,6 +19,10 @@ typedef CollectionPageLoader = Future<UserCollectionsItem> Function({
   String? keyword,
 });
 
+final collectionCancelProvider = Provider<Future<void> Function(int)>((ref) {
+  return FlowApi.cancelCollectionService;
+});
+
 final collectionPageLoaderProvider = Provider<CollectionPageLoader>((ref) {
   return ({required type, required offset, keyword}) =>
       FlowApi.myCollectionsService(
@@ -28,7 +34,8 @@ final collectionPageLoaderProvider = Provider<CollectionPageLoader>((ref) {
 });
 
 final collectionTypeUpdateProvider =
-    Provider<Future<CollectionUpdateResult> Function(UserCollectionData, int)>((ref) {
+    Provider<Future<CollectionUpdateResult> Function(UserCollectionData, int)>(
+        (ref) {
   return (collection, newType) => FlowApi.updateCollectionService(
         collection.id,
         type: newType,
@@ -63,7 +70,24 @@ class UserCollections extends _$UserCollections {
     // detail response and must not suppress the user's requested update.
 
     final session = _session;
-    final result = await ref.read(collectionTypeUpdateProvider)(collection, newType);
+    if (newType == 0) {
+      await ref.read(collectionCancelProvider)(collection.id);
+      if (!ref.mounted || session != _session) return null;
+      final loadingTypes = state.tabs.entries
+          .where((entry) => entry.value.data == null && entry.value.isBusy)
+          .map((entry) => entry.key)
+          .toList();
+      state = state.removeCollection(collection);
+      for (final type in loadingTypes) {
+        unawaited(loadInitial(type));
+      }
+      ref
+          .read(currentUserInfoProvider.notifier)
+          .moveCollectionCount(collection.interest.type, 0);
+      return null;
+    }
+    final result =
+        await ref.read(collectionTypeUpdateProvider)(collection, newType);
     if (!ref.mounted || session != _session) return null;
     if (collection.interest.type == newType) {
       await refresh(newType);

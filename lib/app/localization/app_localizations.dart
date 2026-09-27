@@ -1292,6 +1292,12 @@ abstract class AppLocalizations {
   /// **'抛弃'**
   String get collectionAbandoned;
 
+  /// No description provided for @cancelCollection.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'取消收藏'**
+  String get cancelCollection;
+
   /// No description provided for @searchCollection.
   ///
   /// In zh_Hans, this message translates to:

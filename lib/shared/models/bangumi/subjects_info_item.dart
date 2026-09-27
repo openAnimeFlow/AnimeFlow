@@ -80,7 +80,8 @@ class SubjectsInfoItem {
             ? InterestItem.fromJson(json['interest'])
             : null;
 
-  SubjectsInfoItem copyWith({InterestItem? interest}) {
+  SubjectsInfoItem copyWith(
+      {InterestItem? interest, bool clearInterest = false}) {
     return SubjectsInfoItem(
       airtime: airtime,
       collection: collection,
@@ -103,10 +104,9 @@ class SubjectsInfoItem {
       volumes: volumes,
       tags: tags,
       images: images,
-      interest: interest ?? this.interest,
+      interest: clearInterest ? null : interest ?? this.interest,
     );
   }
-
 }
 
 class Airtime {

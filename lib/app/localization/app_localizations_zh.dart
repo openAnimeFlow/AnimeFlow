@@ -659,6 +659,9 @@ class AppLocalizationsZh extends AppLocalizations {
   String get collectionAbandoned => '抛弃';
 
   @override
+  String get cancelCollection => '取消收藏';
+
+  @override
   String get searchCollection => '搜索收藏';
 
   @override
@@ -2779,6 +2782,9 @@ class AppLocalizationsZhHans extends AppLocalizationsZh {
 
   @override
   String get collectionAbandoned => '抛弃';
+
+  @override
+  String get cancelCollection => '取消收藏';
 
   @override
   String get searchCollection => '搜索收藏';
@@ -4902,6 +4908,9 @@ class AppLocalizationsZhHantHk extends AppLocalizationsZh {
   String get collectionAbandoned => '拋棄';
 
   @override
+  String get cancelCollection => '取消收藏';
+
+  @override
   String get searchCollection => '搜尋收藏';
 
   @override
@@ -7022,6 +7031,9 @@ class AppLocalizationsZhHantTw extends AppLocalizationsZh {
 
   @override
   String get collectionAbandoned => '拋棄';
+
+  @override
+  String get cancelCollection => '取消收藏';
 
   @override
   String get searchCollection => '搜尋收藏';

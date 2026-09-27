@@ -49,13 +49,21 @@ class AnimeInfo extends _$AnimeInfo {
     final subject = state.asData?.value;
     if (subject == null) return null;
     final token = ref.read(currentFlowTokenProvider).value?.sessionId;
-    final result = await ref.read(userCollectionsProvider.notifier).updateCollectionType(
-          UserCollectionData.fromSubject(subject),
-          newType,
-        );
-    if (!ref.mounted || ref.read(currentFlowTokenProvider).value?.sessionId != token) return null;
+    final result =
+        await ref.read(userCollectionsProvider.notifier).updateCollectionType(
+              UserCollectionData.fromSubject(subject),
+              newType,
+            );
+    if (!ref.mounted ||
+        ref.read(currentFlowTokenProvider).value?.sessionId != token) {
+      return null;
+    }
     final current = state.asData?.value;
     if (current == null || current.id != subject.id) return null;
+    if (newType == 0) {
+      state = AsyncData(current.copyWith(clearInterest: true));
+      return null;
+    }
     final interest = current.interest;
     state = AsyncData(current.copyWith(
       interest: InterestItem(

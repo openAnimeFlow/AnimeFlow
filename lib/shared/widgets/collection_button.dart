@@ -63,7 +63,7 @@ class _CollectionButtonState extends State<CollectionButton> {
     try {
       await widget.onCollectTypeChanged?.call(type);
       if (!mounted) return;
-      setState(() => _displayType = type);
+      setState(() => _displayType = type == CollectType.none ? null : type);
     } catch (_) {
       // The caller reports the error; retain the previous selection.
     } finally {
@@ -87,7 +87,8 @@ class _CollectionButtonState extends State<CollectionButton> {
       ),
       itemBuilder: (BuildContext context) {
         return CollectType.values
-            .where((type) => type != CollectType.none)
+            .where((type) =>
+                type != CollectType.none || currentCollectType != null)
             .map((type) {
           final isCurrentType = type == currentCollectType;
           return PopupMenuItem<CollectType>(
@@ -103,11 +104,15 @@ class _CollectionButtonState extends State<CollectionButton> {
                       : Theme.of(context).colorScheme.primary,
                 ),
                 const SizedBox(width: 8),
-                Text(
-                  _collectTypeLabel(type, l10n),
-                  style: TextStyle(
-                    color:
-                        isCurrentType ? Theme.of(context).disabledColor : null,
+                Flexible(
+                  child: Text(
+                    _collectTypeLabel(type, l10n),
+                    overflow: TextOverflow.ellipsis,
+                    style: TextStyle(
+                      color: isCurrentType
+                          ? Theme.of(context).disabledColor
+                          : null,
+                    ),
                   ),
                 ),
               ],
@@ -150,7 +155,7 @@ class _CollectionButtonState extends State<CollectionButton> {
       case CollectType.abandoned:
         return Icons.auto_delete_outlined;
       case CollectType.none:
-        return Icons.circle_outlined;
+        return Icons.bookmark_remove_outlined;
     }
   }
 
@@ -167,7 +172,7 @@ class _CollectionButtonState extends State<CollectionButton> {
       case CollectType.abandoned:
         return l10n.collectionAbandoned;
       case CollectType.none:
-        return l10n.collection;
+        return l10n.cancelCollection;
     }
   }
 }

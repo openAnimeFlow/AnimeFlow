@@ -668,6 +668,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get collectionAbandoned => 'Abandoned';
 
   @override
+  String get cancelCollection => 'Remove from collection';
+
+  @override
   String get searchCollection => 'Search collection';
 
   @override

@@ -210,6 +210,7 @@
   "collectionWatching": "在看",
   "collectionOnHold": "搁置",
   "collectionAbandoned": "抛弃",
+  "cancelCollection": "取消收藏",
   "searchCollection": "搜索收藏",
   "collectionKeywordHint": "输入收藏关键词",
   "search": "搜索",

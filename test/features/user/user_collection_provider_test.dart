@@ -35,6 +35,100 @@ class _UserInfo extends CurrentUserInfo {
 }
 
 void main() {
+  test('cancelling uses DELETE path and removes the local collection',
+      () async {
+    final cancelledIds = <int>[];
+    final container = ProviderContainer(overrides: [
+      userCollectionsProvider.overrideWith(_Collections.new),
+      currentUserInfoProvider.overrideWith(_UserInfo.new),
+      collectionCancelProvider.overrideWithValue((subjectId) async {
+        cancelledIds.add(subjectId);
+      }),
+      collectionTypeUpdateProvider.overrideWithValue((_, __) async {
+        throw StateError('PUT must not be used for cancellation');
+      }),
+    ]);
+    addTearDown(container.dispose);
+    await container.read(currentUserInfoProvider.future);
+
+    final result = await container
+        .read(userCollectionsProvider.notifier)
+        .updateCollectionType(_item(1), 0);
+
+    expect(result, isNull);
+    expect(cancelledIds, [42]);
+    final state = container.read(userCollectionsProvider);
+    expect(state.tabState(1).data!.data, isEmpty);
+    expect(state.tabState(1).data!.total, 0);
+    expect(state.tabs.containsKey(0), isFalse);
+  });
+
+  test('failed cancellation leaves the collection visible', () async {
+    final container = ProviderContainer(overrides: [
+      userCollectionsProvider.overrideWith(_Collections.new),
+      collectionCancelProvider.overrideWithValue((_) async {
+        throw StateError('DELETE failed');
+      }),
+    ]);
+    addTearDown(container.dispose);
+
+    await expectLater(
+      container
+          .read(userCollectionsProvider.notifier)
+          .updateCollectionType(_item(1), 0),
+      throwsStateError,
+    );
+    expect(container.read(userCollectionsProvider).tabState(1).data!.data,
+        hasLength(1));
+  });
+
+  test('cancellation removes stale cached category from a newer detail state',
+      () async {
+    final container = ProviderContainer(overrides: [
+      userCollectionsProvider.overrideWith(_Collections.new),
+      collectionCancelProvider.overrideWithValue((_) async {}),
+    ]);
+    addTearDown(container.dispose);
+
+    await container
+        .read(userCollectionsProvider.notifier)
+        .updateCollectionType(_item(3), 0);
+
+    expect(container.read(userCollectionsProvider).tabState(1).data!.data,
+        isEmpty);
+    expect(container.read(userCollectionsProvider).tabState(1).data!.total, 0);
+  });
+
+  test('cancellation restarts an in-flight page to avoid stale results',
+      () async {
+    final oldPage = Completer<UserCollectionsItem>();
+    var requests = 0;
+    final container = ProviderContainer(overrides: [
+      userCollectionsProvider.overrideWith(_Collections.new),
+      collectionCancelProvider.overrideWithValue((_) async {}),
+      collectionPageLoaderProvider.overrideWithValue(
+        ({required type, required offset, keyword}) {
+          requests++;
+          return requests == 1
+              ? oldPage.future
+              : Future.value(UserCollectionsItem(data: [], total: 0));
+        },
+      ),
+    ]);
+    addTearDown(container.dispose);
+    final notifier = container.read(userCollectionsProvider.notifier);
+    final originalLoad = notifier.loadInitial(2);
+
+    await notifier.updateCollectionType(_item(1), 0);
+    await Future<void>.delayed(Duration.zero);
+    oldPage.complete(UserCollectionsItem(data: [_item(1)], total: 1));
+    await originalLoad;
+
+    expect(requests, 2);
+    expect(container.read(userCollectionsProvider).tabState(2).data!.data,
+        isEmpty);
+  });
+
   test('pending remote upload still moves local collection and returns status',
       () async {
     final container = ProviderContainer(overrides: [

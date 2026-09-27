@@ -90,6 +90,42 @@ class UserCollectionsState {
     );
   }
 
+  /// 取消收藏后清除所有已缓存分类中的同一条目，包括过期的分类缓存。
+  UserCollectionsState removeCollection(UserCollectionData collection) {
+    var result = this;
+    for (final type in tabs.keys.where((type) => type >= 1 && type <= 5)) {
+      result = result.updateTab(type, (tab) {
+        final items = [...?tab.data?.data];
+        final removed = items.where((item) => item.id == collection.id).length;
+        items.removeWhere((item) => item.id == collection.id);
+        final keyword = tab.keyword?.trim().toLowerCase() ?? '';
+        final matches = keyword.isEmpty ||
+            collection.name.toLowerCase().contains(keyword) ||
+            (collection.nameCN?.toLowerCase().contains(keyword) ?? false);
+        final decreaseTotal =
+            removed > 0 || (type == collection.interest.type && matches);
+        final total = tab.data == null
+            ? null
+            : (tab.data!.total - (decreaseTotal ? 1 : 0)).clamp(0, 1 << 31);
+        return tab.copyWith(
+          data: total == null
+              ? null
+              : UserCollectionsItem(data: items, total: total),
+          // 删除已加载的条目后，服务端后续页整体前移相同数量。
+          offset: (tab.offset - removed).clamp(0, 1 << 31),
+          hasMore: total == null || !tab.hasKnownTotal
+              ? true
+              : tab.canLoadMore && items.length < total,
+          requestVersion: tab.requestVersion + 1,
+          isInitialLoading: false,
+          isRefreshing: false,
+          isLoadingMore: false,
+        );
+      });
+    }
+    return result;
+  }
+
   UserCollectionsState moveCollection(
     UserCollectionData collection,
     int newType, {
@@ -106,7 +142,10 @@ class UserCollectionsState {
     };
     final updated = UserCollectionData.fromJson(json);
     var result = this;
-    for (final type in {if (oldType >= 1 && oldType <= 5) oldType, newType}) {
+    for (final type in {
+      if (oldType >= 1 && oldType <= 5) oldType,
+      if (newType >= 1 && newType <= 5) newType,
+    }) {
       result = result.updateTab(type, (tab) {
         final keyword = tab.keyword?.trim().toLowerCase() ?? '';
         final matches = keyword.isEmpty ||

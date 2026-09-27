@@ -98,6 +98,7 @@ class _GeneralSettingsPageState extends ConsumerState<GeneralSettingsPage> {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
+    final paddingOf = MediaQuery.paddingOf(context);
     final selectedLanguage = _languageForLocale(ref.watch(localeProvider));
     return Scaffold(
       appBar: PreferredSize(
@@ -112,203 +113,224 @@ class _GeneralSettingsPageState extends ConsumerState<GeneralSettingsPage> {
           },
         ),
       ),
-      body: ListView(
-        padding: const EdgeInsets.all(16),
-        children: [
-          Card(
-            clipBehavior: Clip.antiAlias,
-            child: ListTile(
-              leading: const Icon(Icons.language),
-              title: Text(l10n.languageLabel),
-              trailing: DropDownMenu<_LanguageOption>(
-                items: _LanguageOption.values,
-                selectedItem: selectedLanguage,
-                tooltip: l10n.selectLanguageTooltip,
-                onOpenedChanged: (isOpen) {
-                  if (_isLanguageMenuOpen == isOpen) return;
-                  setState(() => _isLanguageMenuOpen = isOpen);
-                },
-                buttonBuilder: (context, _) {
-                  final colorScheme = Theme.of(context).colorScheme;
-                  return Row(
-                    mainAxisSize: MainAxisSize.min,
+      body: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 10),
+        child: Center(
+          child: ConstrainedBox(
+            constraints: const BoxConstraints(maxWidth: 1500),
+            child: ListView(
+              padding: EdgeInsets.only(top: 16, bottom: 16 + paddingOf.bottom),
+              children: [
+                Card(
+                  clipBehavior: Clip.antiAlias,
+                  child: ListTile(
+                    leading: const Icon(Icons.language),
+                    title: Text(l10n.languageLabel),
+                    trailing: DropDownMenu<_LanguageOption>(
+                      items: _LanguageOption.values,
+                      selectedItem: selectedLanguage,
+                      tooltip: l10n.selectLanguageTooltip,
+                      onOpenedChanged: (isOpen) {
+                        if (_isLanguageMenuOpen == isOpen) return;
+                        setState(() => _isLanguageMenuOpen = isOpen);
+                      },
+                      buttonBuilder: (context, _) {
+                        final colorScheme = Theme.of(context).colorScheme;
+                        return Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Text(
+                              selectedLanguage.label,
+                              style: TextStyle(color: colorScheme.primary),
+                            ),
+                            AnimatedRotation(
+                              turns: _isLanguageMenuOpen ? 0.5 : 0,
+                              duration: const Duration(milliseconds: 180),
+                              curve: Curves.easeOutCubic,
+                              child: Icon(
+                                Icons.arrow_drop_down,
+                                color: colorScheme.primary,
+                              ),
+                            ),
+                          ],
+                        );
+                      },
+                      itemBuilder: (context, language, isSelected) {
+                        return Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            SizedBox(
+                              width: 24,
+                              child: isSelected
+                                  ? Icon(
+                                      Icons.check,
+                                      size: 18,
+                                      color:
+                                          Theme.of(context).colorScheme.primary,
+                                    )
+                                  : null,
+                            ),
+                            Text(language.label),
+                          ],
+                        );
+                      },
+                      onSelected: _setLanguage,
+                    ),
+                  ),
+                ),
+                Card(
+                  clipBehavior: Clip.antiAlias,
+                  child: Column(
                     children: [
-                      Text(
-                        selectedLanguage.label,
-                        style: TextStyle(color: colorScheme.primary),
+                      SwitchListTile(
+                        secondary: const Icon(Icons.image_outlined),
+                        title: Text(l10n.echImageLoading),
+                        subtitle: Text(l10n.echImageLoadingDescription),
+                        value: _echImageLoading,
+                        onChanged: (value) async {
+                          await AppSettings.setEchImageLoading(value);
+                          if (mounted) setState(() => _echImageLoading = value);
+                        },
                       ),
-                      AnimatedRotation(
-                        turns: _isLanguageMenuOpen ? 0.5 : 0,
+                      AnimatedSize(
                         duration: const Duration(milliseconds: 180),
-                        curve: Curves.easeOutCubic,
-                        child: Icon(
-                          Icons.arrow_drop_down,
-                          color: colorScheme.primary,
+                        alignment: Alignment.topCenter,
+                        child: _echImageLoading
+                            ? Padding(
+                                padding:
+                                    const EdgeInsets.fromLTRB(16, 0, 16, 16),
+                                child: Form(
+                                  key: _echRouteFormKey,
+                                  child: Column(
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
+                                    children: [
+                                      const Divider(),
+                                      const SizedBox(height: 8),
+                                      Text(
+                                        l10n.echImageRoute,
+                                        style: Theme.of(context)
+                                            .textTheme
+                                            .titleMedium,
+                                      ),
+                                      const SizedBox(height: 8),
+                                      Text(l10n.echImageRouteHint),
+                                      const SizedBox(height: 12),
+                                      TextFormField(
+                                        controller: _echHostController,
+                                        decoration: InputDecoration(
+                                          labelText: l10n.echImageHost,
+                                        ),
+                                        textInputAction: TextInputAction.next,
+                                        validator: (value) {
+                                          return AppSettings
+                                                  .isValidEchImageHost(
+                                            value ?? '',
+                                          )
+                                              ? null
+                                              : l10n.echImageInvalidHost;
+                                        },
+                                      ),
+                                      const SizedBox(height: 12),
+                                      LayoutBuilder(
+                                        builder: (context, constraints) {
+                                          final fieldWidth =
+                                              constraints.maxWidth < 248
+                                                  ? constraints.maxWidth
+                                                  : 248.0;
+                                          return Wrap(
+                                            spacing: 8,
+                                            runSpacing: 8,
+                                            crossAxisAlignment:
+                                                WrapCrossAlignment.center,
+                                            children: [
+                                              for (final controller
+                                                  in _echIpControllers)
+                                                SizedBox(
+                                                  width: fieldWidth,
+                                                  child: TextFormField(
+                                                    key: ValueKey(controller),
+                                                    controller: controller,
+                                                    decoration: InputDecoration(
+                                                      labelText:
+                                                          l10n.echImageFixedIp,
+                                                      suffixIcon: IconButton(
+                                                        tooltip: l10n.delete,
+                                                        icon: const Icon(
+                                                            Icons.close),
+                                                        onPressed: () =>
+                                                            _removeEchIp(
+                                                                controller),
+                                                      ),
+                                                    ),
+                                                    keyboardType:
+                                                        TextInputType.url,
+                                                    validator: (value) {
+                                                      final ip =
+                                                          value?.trim() ?? '';
+                                                      if (ip.isEmpty) {
+                                                        return l10n
+                                                            .echImageIpRequired;
+                                                      }
+                                                      return InternetAddress
+                                                                  .tryParse(
+                                                                ip,
+                                                              ) !=
+                                                              null
+                                                          ? null
+                                                          : l10n
+                                                              .echImageInvalidIp;
+                                                    },
+                                                  ),
+                                                ),
+                                              TextButton.icon(
+                                                onPressed: _addEchIp,
+                                                icon: const Icon(Icons.add),
+                                                label: Text(l10n.echImageAddIp),
+                                              ),
+                                            ],
+                                          );
+                                        },
+                                      ),
+                                      const SizedBox(height: 12),
+                                      Wrap(
+                                        spacing: 8,
+                                        runSpacing: 8,
+                                        children: [
+                                          OutlinedButton(
+                                            onPressed: _restoreEchImageRoute,
+                                            child: Text(
+                                                l10n.echImageRestoreDefaults),
+                                          ),
+                                          FilledButton(
+                                            onPressed: _saveEchImageRoute,
+                                            child: Text(l10n.echImageSave),
+                                          ),
+                                        ],
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              )
+                            : const SizedBox.shrink(),
+                      ),
+                      Padding(
+                        padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
+                        child: Row(
+                          children: [
+                            const Icon(Icons.info_outline, size: 18),
+                            const SizedBox(width: 8),
+                            Expanded(child: Text(l10n.echImageRestartRequired)),
+                          ],
                         ),
                       ),
-                    ],
-                  );
-                },
-                itemBuilder: (context, language, isSelected) {
-                  return Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      SizedBox(
-                        width: 24,
-                        child: isSelected
-                            ? Icon(
-                                Icons.check,
-                                size: 18,
-                                color: Theme.of(context).colorScheme.primary,
-                              )
-                            : null,
-                      ),
-                      Text(language.label),
-                    ],
-                  );
-                },
-                onSelected: _setLanguage,
-              ),
-            ),
-          ),
-          Card(
-            clipBehavior: Clip.antiAlias,
-            child: Column(
-              children: [
-                SwitchListTile(
-                  secondary: const Icon(Icons.image_outlined),
-                  title: Text(l10n.echImageLoading),
-                  subtitle: Text(l10n.echImageLoadingDescription),
-                  value: _echImageLoading,
-                  onChanged: (value) async {
-                    await AppSettings.setEchImageLoading(value);
-                    if (mounted) setState(() => _echImageLoading = value);
-                  },
-                ),
-                AnimatedSize(
-                  duration: const Duration(milliseconds: 180),
-                  alignment: Alignment.topCenter,
-                  child: _echImageLoading
-                      ? Padding(
-                          padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
-                          child: Form(
-                            key: _echRouteFormKey,
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                const Divider(),
-                                const SizedBox(height: 8),
-                                Text(
-                                  l10n.echImageRoute,
-                                  style:
-                                      Theme.of(context).textTheme.titleMedium,
-                                ),
-                                const SizedBox(height: 8),
-                                Text(l10n.echImageRouteHint),
-                                const SizedBox(height: 12),
-                                TextFormField(
-                                  controller: _echHostController,
-                                  decoration: InputDecoration(
-                                    labelText: l10n.echImageHost,
-                                  ),
-                                  textInputAction: TextInputAction.next,
-                                  validator: (value) {
-                                    return AppSettings.isValidEchImageHost(
-                                      value ?? '',
-                                    )
-                                        ? null
-                                        : l10n.echImageInvalidHost;
-                                  },
-                                ),
-                                const SizedBox(height: 12),
-                                LayoutBuilder(
-                                  builder: (context, constraints) {
-                                    final fieldWidth =
-                                        constraints.maxWidth < 248
-                                            ? constraints.maxWidth
-                                            : 248.0;
-                                    return Wrap(
-                                      spacing: 8,
-                                      runSpacing: 8,
-                                      crossAxisAlignment:
-                                          WrapCrossAlignment.center,
-                                      children: [
-                                        for (final controller
-                                            in _echIpControllers)
-                                          SizedBox(
-                                            width: fieldWidth,
-                                            child: TextFormField(
-                                              key: ValueKey(controller),
-                                              controller: controller,
-                                              decoration: InputDecoration(
-                                                labelText: l10n.echImageFixedIp,
-                                                suffixIcon: IconButton(
-                                                  tooltip: l10n.delete,
-                                                  icon: const Icon(Icons.close),
-                                                  onPressed: () =>
-                                                      _removeEchIp(controller),
-                                                ),
-                                              ),
-                                              keyboardType: TextInputType.url,
-                                              validator: (value) {
-                                                final ip = value?.trim() ?? '';
-                                                if (ip.isEmpty) {
-                                                  return l10n
-                                                      .echImageIpRequired;
-                                                }
-                                                return InternetAddress.tryParse(
-                                                          ip,
-                                                        ) !=
-                                                        null
-                                                    ? null
-                                                    : l10n.echImageInvalidIp;
-                                              },
-                                            ),
-                                          ),
-                                        TextButton.icon(
-                                          onPressed: _addEchIp,
-                                          icon: const Icon(Icons.add),
-                                          label: Text(l10n.echImageAddIp),
-                                        ),
-                                      ],
-                                    );
-                                  },
-                                ),
-                                const SizedBox(height: 12),
-                                Wrap(
-                                  spacing: 8,
-                                  runSpacing: 8,
-                                  children: [
-                                    OutlinedButton(
-                                      onPressed: _restoreEchImageRoute,
-                                      child: Text(l10n.echImageRestoreDefaults),
-                                    ),
-                                    FilledButton(
-                                      onPressed: _saveEchImageRoute,
-                                      child: Text(l10n.echImageSave),
-                                    ),
-                                  ],
-                                ),
-                              ],
-                            ),
-                          ),
-                        )
-                      : const SizedBox.shrink(),
-                ),
-                Padding(
-                  padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
-                  child: Row(
-                    children: [
-                      const Icon(Icons.info_outline, size: 18),
-                      const SizedBox(width: 8),
-                      Expanded(child: Text(l10n.echImageRestartRequired)),
                     ],
                   ),
                 ),
               ],
             ),
           ),
-        ],
+        ),
       ),
     );
   }

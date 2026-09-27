@@ -1,3 +1,5 @@
+import 'dart:math' as math;
+
 import 'package:anime_flow/core/constants/storage_key.dart';
 import 'package:anime_flow/core/settings/app_settings.dart';
 import 'package:anime_flow/features/source/data/repositories/source_repository.dart';
@@ -116,6 +118,7 @@ class _DownloadPluginsPageState extends ConsumerState<DownloadPluginsPage> {
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
     final l10n = AppLocalizations.of(context);
+    final paddingOf = MediaQuery.paddingOf(context);
     return PopScope(
       canPop: !hasChanged, // 如果有变化，不允许默认返回
       onPopInvokedWithResult: (didPop, result) {
@@ -132,168 +135,190 @@ class _DownloadPluginsPageState extends ConsumerState<DownloadPluginsPage> {
           onRefresh: () async {
             await _getPlugins();
           },
-          child: ListView(padding: EdgeInsets.zero, children: [
-            ListTile(
-              title: Text(
-                l10n.downloadSources,
-                style:
-                    const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
-              ),
-              subtitle: Text(l10n.downloadSourcesSubtitle),
-              trailing: SystemUtil.isDesktop
-                  ? IconButton(
-                      onPressed: () {
-                        _getPlugins();
-                      },
-                      icon: const Icon(Icons.refresh),
-                    )
-                  : null,
-            ),
-            SwitchListTile(
-              title: Text(l10n.useMirror),
-              subtitle: Text(l10n.useMirrorSubtitle),
-              value: isMirror,
-              onChanged: (v) {
-                setState(() {
-                  AppSettings.setSetting(SettingKey.isMirror, v);
-                  isMirror = v;
-                });
-                _getPlugins();
-              },
-            ),
-            ...ref.watch(pluginCatalogProvider).when(
-                  loading: () => [
-                    Center(
-                      child: ListTile(
-                        leading: const CircularProgressIndicator(),
-                        title: Text(l10n.loading),
-                      ),
-                    ),
-                  ],
-                  error: (error, _) => [
-                    ListTile(
-                      leading: Icon(Icons.error, color: colorScheme.error),
-                      title: Text(
-                        error.toString(),
-                        style: TextStyle(color: colorScheme.error),
-                      ),
-                    ),
-                  ],
-                  data: (plugins) => plugins.isEmpty
-                      ? [
-                          ListTile(
-                            title: Text(l10n.noDataRefresh),
-                          ),
-                        ]
-                      : plugins.map((plugin) {
-                          final pluginName = plugin.name;
-                          final localPlugin =
-                              sourceRepository.getSourceSync(pluginName);
-                          final isPluginBusy =
-                              _busyPluginNames.contains(pluginName);
-                          return Padding(
-                            padding: const EdgeInsets.only(left: 10, right: 10),
-                            child: Card(
-                              elevation: 0.2,
-                              child: Row(
-                                children: [
-                                  Expanded(
-                                      child: Padding(
-                                          padding: const EdgeInsets.symmetric(
-                                              horizontal: 10, vertical: 10),
-                                          child: Row(
-                                            children: [
-                                              AnimationNetworkImage(
-                                                  height: 50,
-                                                  width: 50,
-                                                  borderRadius:
-                                                      const BorderRadius.all(
-                                                          Radius.circular(10)),
-                                                  url: plugin.icon ?? ''),
-                                              const SizedBox(width: 10),
-                                              Expanded(
-                                                child: Column(
-                                                  crossAxisAlignment:
-                                                      CrossAxisAlignment.start,
-                                                  children: [
-                                                    Text(
-                                                      pluginName,
-                                                      style: const TextStyle(
-                                                          fontSize: 16,
-                                                          fontWeight:
-                                                              FontWeight.bold),
-                                                    ),
-                                                    Text(l10n.pluginVersionDate(
-                                                      plugin.version,
-                                                      FormatTimeUtil
-                                                          .formatUpdateTime(
-                                                        plugin.updateTime,
-                                                      ),
-                                                    )),
-                                                  ],
-                                                ),
-                                              ),
-                                            ],
-                                          ))),
-                                  if (localPlugin == null)
-                                    IconButton(
-                                        onPressed: isPluginBusy
-                                            ? null
-                                            : () => _downloadPlugin(plugin),
-                                        icon: isPluginBusy
-                                            ? const SizedBox(
-                                                width: 24,
-                                                height: 24,
-                                                child:
-                                                    CircularProgressIndicator(
-                                                  strokeWidth: 2,
-                                                ),
-                                              )
-                                            : const Icon(Icons.download))
-                                  else
-                                    Builder(builder: (context) {
-                                      final config = localPlugin;
-                                      final pluginVersion = plugin.version;
-                                      final isNew = Utils.compareVersionNumbers(
-                                          pluginVersion, config.version);
-                                      if (isNew == 0 || isNew == -1) {
-                                        return TextButton(
-                                          onPressed: () {},
-                                          child: Text(l10n.downloaded),
-                                        );
-                                      } else {
-                                        return TextButton(
-                                          onPressed: isPluginBusy
-                                              ? null
-                                              : () => _updatePlugin(plugin),
-                                          child: isPluginBusy
-                                              ? Row(
-                                                  mainAxisSize:
-                                                      MainAxisSize.min,
-                                                  children: [
-                                                    const SizedBox(
-                                                      width: 16,
-                                                      height: 16,
-                                                      child:
-                                                          CircularProgressIndicator(
-                                                        strokeWidth: 2,
-                                                      ),
-                                                    ),
-                                                    const SizedBox(width: 8),
-                                                    Text(l10n.updating),
-                                                  ],
-                                                )
-                                              : Text(l10n.update),
-                                        );
-                                      }
-                                    })
-                                ],
-                              ),
-                            ),
-                          );
-                        }).toList(),
+          child: LayoutBuilder(
+            builder: (context, constraints) {
+              final horizontal =
+                  math.max(10.0, (constraints.maxWidth - 1500.0) / 2);
+              return ListView(
+                padding: EdgeInsets.fromLTRB(
+                  horizontal,
+                  0,
+                  horizontal,
+                  paddingOf.bottom,
                 ),
-          ]),
+                children: [
+                  ListTile(
+                    title: Text(
+                      l10n.downloadSources,
+                      style: const TextStyle(
+                          fontSize: 20, fontWeight: FontWeight.bold),
+                    ),
+                    subtitle: Text(l10n.downloadSourcesSubtitle),
+                    trailing: SystemUtil.isDesktop
+                        ? IconButton(
+                            onPressed: () {
+                              _getPlugins();
+                            },
+                            icon: const Icon(Icons.refresh),
+                          )
+                        : null,
+                  ),
+                  SwitchListTile(
+                    title: Text(l10n.useMirror),
+                    subtitle: Text(l10n.useMirrorSubtitle),
+                    value: isMirror,
+                    onChanged: (v) {
+                      setState(() {
+                        AppSettings.setSetting(SettingKey.isMirror, v);
+                        isMirror = v;
+                      });
+                      _getPlugins();
+                    },
+                  ),
+                  ...ref.watch(pluginCatalogProvider).when(
+                        loading: () => [
+                          Center(
+                            child: ListTile(
+                              leading: const CircularProgressIndicator(),
+                              title: Text(l10n.loading),
+                            ),
+                          ),
+                        ],
+                        error: (error, _) => [
+                          ListTile(
+                            leading:
+                                Icon(Icons.error, color: colorScheme.error),
+                            title: Text(
+                              error.toString(),
+                              style: TextStyle(color: colorScheme.error),
+                            ),
+                          ),
+                        ],
+                        data: (plugins) => plugins.isEmpty
+                            ? [
+                                ListTile(
+                                  title: Text(l10n.noDataRefresh),
+                                ),
+                              ]
+                            : plugins.map((plugin) {
+                                final pluginName = plugin.name;
+                                final localPlugin =
+                                    sourceRepository.getSourceSync(pluginName);
+                                final isPluginBusy =
+                                    _busyPluginNames.contains(pluginName);
+                                return Card(
+                                  elevation: 0.2,
+                                  child: Row(
+                                    children: [
+                                      Expanded(
+                                          child: Padding(
+                                              padding:
+                                                  const EdgeInsets.symmetric(
+                                                      horizontal: 10,
+                                                      vertical: 10),
+                                              child: Row(
+                                                children: [
+                                                  AnimationNetworkImage(
+                                                      height: 50,
+                                                      width: 50,
+                                                      borderRadius:
+                                                          const BorderRadius
+                                                              .all(
+                                                              Radius.circular(
+                                                                  10)),
+                                                      url: plugin.icon ?? ''),
+                                                  const SizedBox(width: 10),
+                                                  Expanded(
+                                                    child: Column(
+                                                      crossAxisAlignment:
+                                                          CrossAxisAlignment
+                                                              .start,
+                                                      children: [
+                                                        Text(
+                                                          pluginName,
+                                                          style: const TextStyle(
+                                                              fontSize: 16,
+                                                              fontWeight:
+                                                                  FontWeight
+                                                                      .bold),
+                                                        ),
+                                                        Text(l10n
+                                                            .pluginVersionDate(
+                                                          plugin.version,
+                                                          FormatTimeUtil
+                                                              .formatUpdateTime(
+                                                            plugin.updateTime,
+                                                          ),
+                                                        )),
+                                                      ],
+                                                    ),
+                                                  ),
+                                                ],
+                                              ))),
+                                      if (localPlugin == null)
+                                        IconButton(
+                                            onPressed: isPluginBusy
+                                                ? null
+                                                : () => _downloadPlugin(plugin),
+                                            icon: isPluginBusy
+                                                ? const SizedBox(
+                                                    width: 24,
+                                                    height: 24,
+                                                    child:
+                                                        CircularProgressIndicator(
+                                                      strokeWidth: 2,
+                                                    ),
+                                                  )
+                                                : const Icon(Icons.download))
+                                      else
+                                        Builder(builder: (context) {
+                                          final config = localPlugin;
+                                          final pluginVersion = plugin.version;
+                                          final isNew =
+                                              Utils.compareVersionNumbers(
+                                                  pluginVersion,
+                                                  config.version);
+                                          if (isNew == 0 || isNew == -1) {
+                                            return TextButton(
+                                              onPressed: () {},
+                                              child: Text(l10n.downloaded),
+                                            );
+                                          } else {
+                                            return TextButton(
+                                              onPressed: isPluginBusy
+                                                  ? null
+                                                  : () => _updatePlugin(plugin),
+                                              child: isPluginBusy
+                                                  ? Row(
+                                                      mainAxisSize:
+                                                          MainAxisSize.min,
+                                                      children: [
+                                                        const SizedBox(
+                                                          width: 16,
+                                                          height: 16,
+                                                          child:
+                                                              CircularProgressIndicator(
+                                                            strokeWidth: 2,
+                                                          ),
+                                                        ),
+                                                        const SizedBox(
+                                                            width: 8),
+                                                        Text(l10n.updating),
+                                                      ],
+                                                    )
+                                                  : Text(l10n.update),
+                                            );
+                                          }
+                                        })
+                                    ],
+                                  ),
+                                );
+                              }).toList(),
+                      ),
+                ],
+              );
+            },
+          ),
         ),
       ),
     );

@@ -20,7 +20,7 @@ class _ThemePageState extends State<ThemePage> {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
-    final leftMediaQueryPadding = MediaQuery.of(context).padding.left;
+    final paddingOf = MediaQuery.paddingOf(context);
 
     return Scaffold(
       appBar: PreferredSize(
@@ -35,199 +35,210 @@ class _ThemePageState extends State<ThemePage> {
           },
         ),
       ),
-      body: Center(
-        child: ConstrainedBox(
-          constraints: const BoxConstraints(maxWidth: 1200),
-          child: ListView(
-            padding: EdgeInsets.only(
-                left: leftMediaQueryPadding == 0 ? 16 : leftMediaQueryPadding,
-                right: 16),
-            children: [
-              Text(
-                l10n.themeMode,
-                style: const TextStyle(
-                  fontSize: 20,
-                  fontWeight: FontWeight.bold,
+      body: SingleChildScrollView(
+        padding: EdgeInsets.only(left: 10, right: 10, bottom: paddingOf.bottom),
+        child: Center(
+          child: ConstrainedBox(
+            constraints: const BoxConstraints(maxWidth: 1500),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  l10n.themeMode,
+                  style: const TextStyle(
+                    fontSize: 20,
+                    fontWeight: FontWeight.bold,
+                  ),
                 ),
-              ),
-              const SizedBox(height: 10),
-              Consumer(
-                builder: (context, ref, child) {
-                  final themeState = ref.watch(themeProvider);
-                  final themeNotifier = ref.read(themeProvider.notifier);
+                const SizedBox(height: 10),
+                Consumer(
+                  builder: (context, ref, child) {
+                    final themeState = ref.watch(themeProvider);
+                    final themeNotifier = ref.read(themeProvider.notifier);
 
-                  return IntrinsicWidth(
-                    child: glassPanel(
-                      padding: const EdgeInsets.symmetric(
-                          horizontal: 8, vertical: 10),
-                      child: Row(
-                        children: [
-                          GestureDetector(
-                            onTap: () =>
-                                themeNotifier.setThemeMode(ThemeMode.dark),
-                            child: ThemePreviewCard(
-                              bg: const Color(0xFF020617),
-                              primary: const Color(0xFF3B82F6),
-                              titleColor: Colors.white,
-                              subtitleColor: const Color(0xFF6B7280),
-                              icon: Icons.nightlight_round,
-                              title: l10n.darkMode,
-                              subtitle: l10n.darkModeSubtitle,
-                              selected: themeState.themeMode == ThemeMode.dark,
-                            ),
-                          ),
-                          const SizedBox(width: 5),
-                          GestureDetector(
-                            onTap: () =>
-                                themeNotifier.setThemeMode(ThemeMode.light),
-                            child: ThemePreviewCard(
-                              bg: const Color(0xFFF8FAFC),
-                              primary: const Color(0xFFFACC15),
-                              titleColor: Colors.black,
-                              subtitleColor: Colors.black54,
-                              icon: Icons.wb_sunny,
-                              title: l10n.lightMode,
-                              subtitle: l10n.lightModeSubtitle,
-                              selected: themeState.themeMode == ThemeMode.light,
-                            ),
-                          ),
-                          const SizedBox(width: 5),
-                          GestureDetector(
-                            onTap: () =>
-                                themeNotifier.setThemeMode(ThemeMode.system),
-                            child: Container(
-                              decoration: BoxDecoration(
-                                borderRadius: BorderRadius.circular(18),
-                              ),
+                    return IntrinsicWidth(
+                      child: glassPanel(
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 8, vertical: 10),
+                        child: Row(
+                          children: [
+                            GestureDetector(
+                              onTap: () =>
+                                  themeNotifier.setThemeMode(ThemeMode.dark),
                               child: ThemePreviewCard(
                                 bg: const Color(0xFF020617),
-                                primary: Theme.of(context).colorScheme.primary,
+                                primary: const Color(0xFF3B82F6),
                                 titleColor: Colors.white,
-                                subtitleColor: Colors.white60,
-                                icon: Icons.settings,
-                                title: l10n.followSystem,
-                                subtitle: l10n.autoAdapt,
-                                overlay: const DiagonalOverlay(),
+                                subtitleColor: const Color(0xFF6B7280),
+                                icon: Icons.nightlight_round,
+                                title: l10n.darkMode,
+                                subtitle: l10n.darkModeSubtitle,
                                 selected:
-                                    themeState.themeMode == ThemeMode.system,
+                                    themeState.themeMode == ThemeMode.dark,
                               ),
                             ),
+                            const SizedBox(width: 5),
+                            GestureDetector(
+                              onTap: () =>
+                                  themeNotifier.setThemeMode(ThemeMode.light),
+                              child: ThemePreviewCard(
+                                bg: const Color(0xFFF8FAFC),
+                                primary: const Color(0xFFFACC15),
+                                titleColor: Colors.black,
+                                subtitleColor: Colors.black54,
+                                icon: Icons.wb_sunny,
+                                title: l10n.lightMode,
+                                subtitle: l10n.lightModeSubtitle,
+                                selected:
+                                    themeState.themeMode == ThemeMode.light,
+                              ),
+                            ),
+                            const SizedBox(width: 5),
+                            GestureDetector(
+                              onTap: () =>
+                                  themeNotifier.setThemeMode(ThemeMode.system),
+                              child: Container(
+                                decoration: BoxDecoration(
+                                  borderRadius: BorderRadius.circular(18),
+                                ),
+                                child: ThemePreviewCard(
+                                  bg: const Color(0xFF020617),
+                                  primary:
+                                      Theme.of(context).colorScheme.primary,
+                                  titleColor: Colors.white,
+                                  subtitleColor: Colors.white60,
+                                  icon: Icons.settings,
+                                  title: l10n.followSystem,
+                                  subtitle: l10n.autoAdapt,
+                                  overlay: const DiagonalOverlay(),
+                                  selected:
+                                      themeState.themeMode == ThemeMode.system,
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    );
+                  },
+                ),
+                const SizedBox(height: 10),
+                Text(
+                  l10n.themeColor,
+                  style: const TextStyle(
+                    fontSize: 20,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                const SizedBox(height: 10),
+                Consumer(
+                  builder: (context, ref, child) {
+                    final themeState = ref.watch(themeProvider);
+                    final themeNotifier = ref.read(themeProvider.notifier);
+                    final selectedIndex =
+                        ThemeNotifier.getColorIndex(themeState.seedColor);
+
+                    return Wrap(
+                      spacing: 10,
+                      runSpacing: 10,
+                      children: List.generate(ThemeNotifier.themeColors.length,
+                          (index) {
+                        final themeColorData = ThemeNotifier.themeColors[index];
+                        final color = themeColorData.color;
+                        final isSelected = index == selectedIndex;
+                        return GestureDetector(
+                          onTap: () => themeNotifier.setSeedColor(color),
+                          child: SizedBox(
+                            width: 56,
+                            child: Column(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                AnimatedContainer(
+                                  duration: const Duration(milliseconds: 200),
+                                  width: 40,
+                                  height: 40,
+                                  decoration: BoxDecoration(
+                                    color: color,
+                                    shape: BoxShape.circle,
+                                    border: Border.all(
+                                      color: isSelected
+                                          ? Theme.of(context)
+                                              .colorScheme
+                                              .primary
+                                          : Theme.of(context)
+                                              .colorScheme
+                                              .outlineVariant
+                                              .withValues(alpha: 0.5),
+                                      width: isSelected ? 2.5 : 1,
+                                    ),
+                                  ),
+                                  child: isSelected
+                                      ? Icon(
+                                          Icons.check_rounded,
+                                          size: 18,
+                                          color: color.computeLuminance() > 0.55
+                                              ? Colors.black87
+                                              : Colors.white,
+                                        )
+                                      : null,
+                                ),
+                                const SizedBox(height: 4),
+                                Text(
+                                  themeColorData.name,
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis,
+                                  textAlign: TextAlign.center,
+                                  style: Theme.of(context)
+                                      .textTheme
+                                      .labelSmall
+                                      ?.copyWith(fontSize: 11),
+                                ),
+                              ],
+                            ),
                           ),
+                        );
+                      }),
+                    );
+                  },
+                ),
+                const SizedBox(height: 10),
+                InkWell(
+                  borderRadius: BorderRadius.circular(10),
+                  onTap: () => const SettingFontRoute().push(context),
+                  child: Row(
+                    spacing: 10,
+                    children: [
+                      Icon(
+                        Icons.text_fields_outlined,
+                        color: ColorScheme.of(context).primary,
+                      ),
+                      Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            l10n.fontStyle,
+                            style: const TextStyle(
+                              fontSize: 16,
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
+                          Text(
+                            l10n.customAppFont,
+                            style: TextStyle(
+                              color: ColorScheme.of(context)
+                                  .onSurface
+                                  .withValues(alpha: .8),
+                            ),
+                          )
                         ],
                       ),
-                    ),
-                  );
-                },
-              ),
-              const SizedBox(height: 10),
-              Text(
-                l10n.themeColor,
-                style: const TextStyle(
-                  fontSize: 20,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-              const SizedBox(height: 10),
-              Consumer(
-                builder: (context, ref, child) {
-                  final themeState = ref.watch(themeProvider);
-                  final themeNotifier = ref.read(themeProvider.notifier);
-                  final selectedIndex =
-                      ThemeNotifier.getColorIndex(themeState.seedColor);
-
-                  return Wrap(
-                    spacing: 10,
-                    runSpacing: 10,
-                    children: List.generate(ThemeNotifier.themeColors.length,
-                        (index) {
-                      final themeColorData = ThemeNotifier.themeColors[index];
-                      final color = themeColorData.color;
-                      final isSelected = index == selectedIndex;
-                      return GestureDetector(
-                        onTap: () => themeNotifier.setSeedColor(color),
-                        child: SizedBox(
-                          width: 56,
-                          child: Column(
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              AnimatedContainer(
-                                duration: const Duration(milliseconds: 200),
-                                width: 40,
-                                height: 40,
-                                decoration: BoxDecoration(
-                                  color: color,
-                                  shape: BoxShape.circle,
-                                  border: Border.all(
-                                    color: isSelected
-                                        ? Theme.of(context).colorScheme.primary
-                                        : Theme.of(context)
-                                            .colorScheme
-                                            .outlineVariant
-                                            .withValues(alpha: 0.5),
-                                    width: isSelected ? 2.5 : 1,
-                                  ),
-                                ),
-                                child: isSelected
-                                    ? Icon(
-                                        Icons.check_rounded,
-                                        size: 18,
-                                        color: color.computeLuminance() > 0.55
-                                            ? Colors.black87
-                                            : Colors.white,
-                                      )
-                                    : null,
-                              ),
-                              const SizedBox(height: 4),
-                              Text(
-                                themeColorData.name,
-                                maxLines: 1,
-                                overflow: TextOverflow.ellipsis,
-                                textAlign: TextAlign.center,
-                                style: Theme.of(context)
-                                    .textTheme
-                                    .labelSmall
-                                    ?.copyWith(fontSize: 11),
-                              ),
-                            ],
-                          ),
-                        ),
-                      );
-                    }),
-                  );
-                },
-              ),
-              const SizedBox(height: 10),
-              InkWell(
-                borderRadius: BorderRadius.circular(10),
-                onTap: () => const SettingFontRoute().push(context),
-                child: Row(
-                  spacing: 10,
-                  children: [
-                     Icon(
-                      Icons.text_fields_outlined,
-                      color: ColorScheme.of(context).primary,
-                    ),
-                    Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          l10n.fontStyle,
-                          style: const TextStyle(
-                            fontSize: 16,
-                            fontWeight: FontWeight.w600,
-                          ),
-                        ),
-                        Text(l10n.customAppFont, style: TextStyle(
-                          color: ColorScheme.of(context).onSurface.withValues(alpha: .8),
-                        ),)
-                      ],
-                    ),
-                    const Spacer(),
-                    const Icon(Icons.chevron_right),
-                  ],
-                ),
-              ),
-            ],
+                      const Spacer(),
+                      const Icon(Icons.chevron_right),
+                    ],
+                  ),
+                )
+              ],
+            ),
           ),
         ),
       ),

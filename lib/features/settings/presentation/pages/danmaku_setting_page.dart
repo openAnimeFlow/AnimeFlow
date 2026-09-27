@@ -52,6 +52,7 @@ class _DanmakuSettingPageState extends ConsumerState<DanmakuSettingPage> {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
+    final paddingOf = MediaQuery.paddingOf(context);
     return Scaffold(
       appBar: PreferredSize(
         preferredSize: const Size.fromHeight(kToolbarHeight),
@@ -65,364 +66,358 @@ class _DanmakuSettingPageState extends ConsumerState<DanmakuSettingPage> {
           },
         ),
       ),
-      body: Center(
-        child: ConstrainedBox(
-          constraints: const BoxConstraints(maxWidth: 1200),
-          child: ScrollConfiguration(
-            behavior: const ScrollBehavior().copyWith(scrollbars: false),
-            // 隐藏滚动条
-            child: SingleChildScrollView(
-              padding: const EdgeInsets.all(16),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  // 弹幕显示类型
-                  _buildSectionTitle(l10n.danmakuDisplayType),
-                  SwitchListTile(
-                    title: Text(l10n.scrollingDanmaku),
-                    value: !_hideScroll,
-                    onChanged: (value) {
-                      setState(() {
-                        _hideScroll = !value;
-                        AppSettings.setDanmakuValue(
-                            DanmakuKey.danmakuHideScroll, _hideScroll);
-                      });
-                    },
-                  ),
-                  SwitchListTile(
-                    title: Text(l10n.topDanmaku),
-                    value: !_hideTop,
-                    onChanged: (value) {
-                      setState(() {
-                        _hideTop = !value;
-                        AppSettings.setDanmakuValue(
-                            DanmakuKey.danmakuHideTop, _hideTop);
-                      });
-                    },
-                  ),
-                  SwitchListTile(
-                    title: Text(l10n.bottomDanmaku),
-                    value: !_hideBottom,
-                    onChanged: (value) {
-                      setState(() {
-                        _hideBottom = !value;
-                        AppSettings.setDanmakuValue(
-                            DanmakuKey.danmakuHideBottom, _hideBottom);
-                      });
-                    },
-                  ),
-                  const SizedBox(height: 16),
+      body: SingleChildScrollView(
+        padding: EdgeInsets.only(left: 10, right: 10, bottom: paddingOf.bottom),
+        child: Center(
+          child: ConstrainedBox(
+            constraints: const BoxConstraints(maxWidth: 1500),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                // 弹幕显示类型
+                _buildSectionTitle(l10n.danmakuDisplayType),
+                SwitchListTile(
+                  title: Text(l10n.scrollingDanmaku),
+                  value: !_hideScroll,
+                  onChanged: (value) {
+                    setState(() {
+                      _hideScroll = !value;
+                      AppSettings.setDanmakuValue(
+                          DanmakuKey.danmakuHideScroll, _hideScroll);
+                    });
+                  },
+                ),
+                SwitchListTile(
+                  title: Text(l10n.topDanmaku),
+                  value: !_hideTop,
+                  onChanged: (value) {
+                    setState(() {
+                      _hideTop = !value;
+                      AppSettings.setDanmakuValue(
+                          DanmakuKey.danmakuHideTop, _hideTop);
+                    });
+                  },
+                ),
+                SwitchListTile(
+                  title: Text(l10n.bottomDanmaku),
+                  value: !_hideBottom,
+                  onChanged: (value) {
+                    setState(() {
+                      _hideBottom = !value;
+                      AppSettings.setDanmakuValue(
+                          DanmakuKey.danmakuHideBottom, _hideBottom);
+                    });
+                  },
+                ),
+                const SizedBox(height: 16),
 
-                  // 弹幕来源平台
-                  _buildSectionTitle(l10n.danmakuSourcePlatform),
-                  SwitchListTile(
-                    title: const Text('Bilibili'),
-                    value: _platformBilibili,
-                    onChanged: (value) {
-                      setState(() {
-                        _platformBilibili = value;
-                        AppSettings.setDanmakuValue(
-                            DanmakuKey.danmakuPlatformBilibili, value);
-                      });
-                    },
-                  ),
-                  SwitchListTile(
-                    title: const Text('Gamer'),
-                    value: _platformGamer,
-                    onChanged: (value) {
-                      setState(() {
-                        _platformGamer = value;
-                        AppSettings.setDanmakuValue(
-                            DanmakuKey.danmakuPlatformGamer, value);
-                      });
-                    },
-                  ),
-                  SwitchListTile(
-                    title: const Text('弹弹Play'),
-                    value: _platformDanDanPlay,
-                    onChanged: (value) {
-                      setState(() {
-                        _platformDanDanPlay = value;
-                        AppSettings.setDanmakuValue(
-                            DanmakuKey.danmakuPlatformDanDanPlay, value);
-                      });
-                    },
-                  ),
-                  const SizedBox(height: 16),
+                // 弹幕来源平台
+                _buildSectionTitle(l10n.danmakuSourcePlatform),
+                SwitchListTile(
+                  title: const Text('Bilibili'),
+                  value: _platformBilibili,
+                  onChanged: (value) {
+                    setState(() {
+                      _platformBilibili = value;
+                      AppSettings.setDanmakuValue(
+                          DanmakuKey.danmakuPlatformBilibili, value);
+                    });
+                  },
+                ),
+                SwitchListTile(
+                  title: const Text('Gamer'),
+                  value: _platformGamer,
+                  onChanged: (value) {
+                    setState(() {
+                      _platformGamer = value;
+                      AppSettings.setDanmakuValue(
+                          DanmakuKey.danmakuPlatformGamer, value);
+                    });
+                  },
+                ),
+                SwitchListTile(
+                  title: const Text('弹弹Play'),
+                  value: _platformDanDanPlay,
+                  onChanged: (value) {
+                    setState(() {
+                      _platformDanDanPlay = value;
+                      AppSettings.setDanmakuValue(
+                          DanmakuKey.danmakuPlatformDanDanPlay, value);
+                    });
+                  },
+                ),
+                const SizedBox(height: 16),
 
-                  // 简繁转换
-                  Consumer(
-                    builder: (context, ref, _) {
-                      final danmakuChineseMode =
-                          ref.watch(danmakuChineseModeProvider);
-                      final colorScheme = Theme.of(context).colorScheme;
-                      return Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          _buildSectionTitle(l10n.danmakuChineseConversion),
-                          Padding(
-                            padding: const EdgeInsets.symmetric(horizontal: 16),
-                            child: Align(
-                              alignment: Alignment.centerRight,
-                              child: DropDownMenu<DanmakuChineseMode>(
-                                items: DanmakuChineseMode.values,
-                                selectedItem: danmakuChineseMode,
-                                tooltip: l10n.danmakuChineseConversion,
-                                onOpenedChanged: (isOpen) {
-                                  if (_isChineseModeMenuOpen == isOpen) return;
-                                  setState(
-                                    () => _isChineseModeMenuOpen = isOpen,
-                                  );
-                                },
-                                buttonBuilder: (context, _) {
-                                  return Container(
-                                    padding: const EdgeInsets.symmetric(
-                                      horizontal: 12,
-                                      vertical: 4,
+                // 简繁转换
+                Consumer(
+                  builder: (context, ref, _) {
+                    final danmakuChineseMode =
+                        ref.watch(danmakuChineseModeProvider);
+                    final colorScheme = Theme.of(context).colorScheme;
+                    return Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        _buildSectionTitle(l10n.danmakuChineseConversion),
+                        Padding(
+                          padding: const EdgeInsets.symmetric(horizontal: 16),
+                          child: Align(
+                            alignment: Alignment.centerRight,
+                            child: DropDownMenu<DanmakuChineseMode>(
+                              items: DanmakuChineseMode.values,
+                              selectedItem: danmakuChineseMode,
+                              tooltip: l10n.danmakuChineseConversion,
+                              onOpenedChanged: (isOpen) {
+                                if (_isChineseModeMenuOpen == isOpen) return;
+                                setState(
+                                  () => _isChineseModeMenuOpen = isOpen,
+                                );
+                              },
+                              buttonBuilder: (context, _) {
+                                return Container(
+                                  padding: const EdgeInsets.symmetric(
+                                    horizontal: 12,
+                                    vertical: 4,
+                                  ),
+                                  decoration: BoxDecoration(
+                                    border: Border.all(
+                                      color: colorScheme.outlineVariant,
                                     ),
-                                    decoration: BoxDecoration(
-                                      border: Border.all(
-                                        color: colorScheme.outlineVariant,
-                                      ),
-                                      borderRadius: BorderRadius.circular(8),
-                                    ),
-                                    child: Row(
-                                      mainAxisSize: MainAxisSize.min,
-                                      children: [
-                                        Text(
-                                          _danmakuChineseModeLabel(
-                                            danmakuChineseMode,
-                                            l10n,
-                                          ),
-                                          style: const TextStyle(
-                                            fontSize: 14,
-                                          ),
-                                        ),
-                                        const SizedBox(width: 4),
-                                        AnimatedRotation(
-                                          turns:
-                                              _isChineseModeMenuOpen ? 0.5 : 0,
-                                          duration: const Duration(
-                                            milliseconds: 180,
-                                          ),
-                                          curve: Curves.easeOutCubic,
-                                          child: Icon(
-                                            Icons.arrow_drop_down,
-                                            color: colorScheme.primary,
-                                          ),
-                                        ),
-                                      ],
-                                    ),
-                                  );
-                                },
-                                itemBuilder: (context, mode, isSelected) {
-                                  return Row(
+                                    borderRadius: BorderRadius.circular(8),
+                                  ),
+                                  child: Row(
+                                    mainAxisSize: MainAxisSize.min,
                                     children: [
-                                      SizedBox(
-                                        width: 24,
-                                        child: isSelected
-                                            ? Icon(
-                                                Icons.check,
-                                                size: 18,
-                                                color: colorScheme.primary,
-                                              )
-                                            : null,
-                                      ),
                                       Text(
-                                        _danmakuChineseModeLabel(mode, l10n),
+                                        _danmakuChineseModeLabel(
+                                          danmakuChineseMode,
+                                          l10n,
+                                        ),
+                                        style: const TextStyle(
+                                          fontSize: 14,
+                                        ),
+                                      ),
+                                      const SizedBox(width: 4),
+                                      AnimatedRotation(
+                                        turns: _isChineseModeMenuOpen ? 0.5 : 0,
+                                        duration: const Duration(
+                                          milliseconds: 180,
+                                        ),
+                                        curve: Curves.easeOutCubic,
+                                        child: Icon(
+                                          Icons.arrow_drop_down,
+                                          color: colorScheme.primary,
+                                        ),
                                       ),
                                     ],
-                                  );
-                                },
-                                onSelected: (mode) {
-                                  ref
-                                      .read(
-                                        danmakuChineseModeProvider.notifier,
-                                      )
-                                      .setMode(mode);
-                                },
-                              ),
+                                  ),
+                                );
+                              },
+                              itemBuilder: (context, mode, isSelected) {
+                                return Row(
+                                  children: [
+                                    SizedBox(
+                                      width: 24,
+                                      child: isSelected
+                                          ? Icon(
+                                              Icons.check,
+                                              size: 18,
+                                              color: colorScheme.primary,
+                                            )
+                                          : null,
+                                    ),
+                                    Text(
+                                      _danmakuChineseModeLabel(mode, l10n),
+                                    ),
+                                  ],
+                                );
+                              },
+                              onSelected: (mode) {
+                                ref
+                                    .read(
+                                      danmakuChineseModeProvider.notifier,
+                                    )
+                                    .setMode(mode);
+                              },
                             ),
                           ),
-                        ],
-                      );
-                    },
-                  ),
-                  const SizedBox(height: 16),
+                        ),
+                      ],
+                    );
+                  },
+                ),
+                const SizedBox(height: 16),
 
-                  // 弹幕样式
-                  _buildSectionTitle(l10n.danmakuStyle),
-                  _buildSectionTitle(l10n.fontStroke),
-                  _DanmakuSlider(
-                    initialValue: AppSettings.danmakuStrokeWidth,
-                    min: 0,
-                    max: 3,
-                    divisions: 6,
-                    labelBuilder: (value) => '${value.toStringAsFixed(1)}px',
-                    onChanged: (value) => AppSettings.setDanmakuValue(
-                      DanmakuKey.danmakuBorder,
-                      value,
-                    ),
+                // 弹幕样式
+                _buildSectionTitle(l10n.danmakuStyle),
+                _buildSectionTitle(l10n.fontStroke),
+                _DanmakuSlider(
+                  initialValue: AppSettings.danmakuStrokeWidth,
+                  min: 0,
+                  max: 3,
+                  divisions: 6,
+                  labelBuilder: (value) => '${value.toStringAsFixed(1)}px',
+                  onChanged: (value) => AppSettings.setDanmakuValue(
+                    DanmakuKey.danmakuBorder,
+                    value,
                   ),
-                  SwitchListTile(
-                    title: Text(l10n.showColor),
-                    value: _danmakuColor,
-                    onChanged: (value) {
-                      setState(() {
-                        _danmakuColor = value;
-                        AppSettings.setDanmakuValue(
-                            DanmakuKey.danmakuColor, _danmakuColor);
-                      });
-                    },
-                  ),
-                  SwitchListTile(
-                    title: Text(l10n.massiveMode),
-                    value: _massiveMode,
-                    onChanged: (value) {
-                      setState(() {
-                        _massiveMode = value;
-                        AppSettings.setDanmakuValue(
-                            DanmakuKey.danmakuMassiveMode, _massiveMode);
-                      });
-                    },
-                  ),
-                  const SizedBox(height: 16),
+                ),
+                SwitchListTile(
+                  title: Text(l10n.showColor),
+                  value: _danmakuColor,
+                  onChanged: (value) {
+                    setState(() {
+                      _danmakuColor = value;
+                      AppSettings.setDanmakuValue(
+                          DanmakuKey.danmakuColor, _danmakuColor);
+                    });
+                  },
+                ),
+                SwitchListTile(
+                  title: Text(l10n.massiveMode),
+                  value: _massiveMode,
+                  onChanged: (value) {
+                    setState(() {
+                      _massiveMode = value;
+                      AppSettings.setDanmakuValue(
+                          DanmakuKey.danmakuMassiveMode, _massiveMode);
+                    });
+                  },
+                ),
+                const SizedBox(height: 16),
 
-                  // 弹幕字体
-                  Consumer(
-                    builder: (context, ref, _) {
-                      final downloadedFonts = ref
-                          .watch(downloadedFontMetasProvider)
-                          .values
-                          .where((font) =>
-                              ref.watch(fontDownloadProvider(font.id)).status ==
-                              FontDownloadStatus.done)
-                          .toList()
-                        ..sort((a, b) => a.name.compareTo(b.name));
-                      final selectedFamily =
-                          ref.watch(danmakuFontFamilyProvider);
-                      final options = [
-                        const _DanmakuFontOption.project(),
-                        ...downloadedFonts.map(_DanmakuFontOption.downloaded),
-                      ];
-                      final selected = options.firstWhere(
-                        (option) => option.family == selectedFamily,
-                        orElse: () => options.first,
-                      );
-                      final colorScheme = Theme.of(context).colorScheme;
-                      return Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          _buildSectionTitle(l10n.fontStyle),
-                          SwitchListTile(
-                            title: Text(l10n.customAppFont),
-                            value: ref.watch(danmakuFontEnabledProvider),
-                            onChanged: (enabled) {
-                              ref
-                                  .read(danmakuFontEnabledProvider.notifier)
-                                  .setEnabled(enabled);
-                            },
-                          ),
-                          Padding(
-                            padding: const EdgeInsets.symmetric(horizontal: 16),
-                            child: Align(
-                              alignment: Alignment.centerRight,
-                              child: DropDownMenu<_DanmakuFontOption>(
-                                items: options,
-                                selectedItem: selected,
-                                tooltip: l10n.fontStyle,
-                                onOpenedChanged: (isOpen) {
-                                  if (_isFontMenuOpen == isOpen) return;
-                                  setState(() => _isFontMenuOpen = isOpen);
-                                },
-                                buttonBuilder: (context, _) {
-                                  return _buildFontMenuButton(
-                                    context,
-                                    selected.label(l10n),
-                                    colorScheme,
-                                  );
-                                },
-                                itemBuilder: (context, option, isSelected) {
-                                  return Row(
-                                    children: [
-                                      SizedBox(
-                                        width: 24,
-                                        child: isSelected
-                                            ? Icon(
-                                                Icons.check,
-                                                size: 18,
-                                                color: colorScheme.primary,
-                                              )
-                                            : null,
-                                      ),
-                                      Expanded(
-                                        child: Text(option.label(l10n)),
-                                      ),
-                                    ],
-                                  );
-                                },
-                                onSelected: (option) {
-                                  ref
-                                      .read(danmakuFontFamilyProvider.notifier)
-                                      .setFamily(option.family);
-                                },
-                              ),
+                // 弹幕字体
+                Consumer(
+                  builder: (context, ref, _) {
+                    final downloadedFonts = ref
+                        .watch(downloadedFontMetasProvider)
+                        .values
+                        .where((font) =>
+                            ref.watch(fontDownloadProvider(font.id)).status ==
+                            FontDownloadStatus.done)
+                        .toList()
+                      ..sort((a, b) => a.name.compareTo(b.name));
+                    final selectedFamily = ref.watch(danmakuFontFamilyProvider);
+                    final options = [
+                      const _DanmakuFontOption.project(),
+                      ...downloadedFonts.map(_DanmakuFontOption.downloaded),
+                    ];
+                    final selected = options.firstWhere(
+                      (option) => option.family == selectedFamily,
+                      orElse: () => options.first,
+                    );
+                    final colorScheme = Theme.of(context).colorScheme;
+                    return Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        _buildSectionTitle(l10n.fontStyle),
+                        SwitchListTile(
+                          title: Text(l10n.customAppFont),
+                          value: ref.watch(danmakuFontEnabledProvider),
+                          onChanged: (enabled) {
+                            ref
+                                .read(danmakuFontEnabledProvider.notifier)
+                                .setEnabled(enabled);
+                          },
+                        ),
+                        Padding(
+                          padding: const EdgeInsets.symmetric(horizontal: 16),
+                          child: Align(
+                            alignment: Alignment.centerRight,
+                            child: DropDownMenu<_DanmakuFontOption>(
+                              items: options,
+                              selectedItem: selected,
+                              tooltip: l10n.fontStyle,
+                              onOpenedChanged: (isOpen) {
+                                if (_isFontMenuOpen == isOpen) return;
+                                setState(() => _isFontMenuOpen = isOpen);
+                              },
+                              buttonBuilder: (context, _) {
+                                return _buildFontMenuButton(
+                                  context,
+                                  selected.label(l10n),
+                                  colorScheme,
+                                );
+                              },
+                              itemBuilder: (context, option, isSelected) {
+                                return Row(
+                                  children: [
+                                    SizedBox(
+                                      width: 24,
+                                      child: isSelected
+                                          ? Icon(
+                                              Icons.check,
+                                              size: 18,
+                                              color: colorScheme.primary,
+                                            )
+                                          : null,
+                                    ),
+                                    Expanded(
+                                      child: Text(option.label(l10n)),
+                                    ),
+                                  ],
+                                );
+                              },
+                              onSelected: (option) {
+                                ref
+                                    .read(danmakuFontFamilyProvider.notifier)
+                                    .setFamily(option.family);
+                              },
                             ),
                           ),
-                        ],
-                      );
-                    },
-                  ),
-                  const SizedBox(height: 16),
+                        ),
+                      ],
+                    );
+                  },
+                ),
+                const SizedBox(height: 16),
 
-                  // 弹幕速度
-                  _buildSectionTitle(l10n.danmakuSpeedTitle),
-                  _buildSpeedSlider(context, l10n),
-                  const SizedBox(height: 16),
+                // 弹幕速度
+                _buildSectionTitle(l10n.danmakuSpeedTitle),
+                _buildSpeedSlider(context, l10n),
+                const SizedBox(height: 16),
 
-                  // 透明度
-                  _buildSectionTitle(l10n.opacity),
-                  _DanmakuSlider(
-                    initialValue: AppSettings.danmakuOpacity,
-                    min: 0.1,
-                    max: 1.0,
-                    labelBuilder: (value) => '${(value * 100).round()}%',
-                    onChanged: (value) => AppSettings.setDanmakuValue(
-                        DanmakuKey.danmakuOpacity, value),
-                  ),
-                  const SizedBox(height: 16),
+                // 透明度
+                _buildSectionTitle(l10n.opacity),
+                _DanmakuSlider(
+                  initialValue: AppSettings.danmakuOpacity,
+                  min: 0.1,
+                  max: 1.0,
+                  labelBuilder: (value) => '${(value * 100).round()}%',
+                  onChanged: (value) => AppSettings.setDanmakuValue(
+                      DanmakuKey.danmakuOpacity, value),
+                ),
+                const SizedBox(height: 16),
 
-                  // 字体大小
-                  _buildSectionTitle(l10n.fontSize),
-                  _DanmakuSlider(
-                    initialValue: AppSettings.danmakuFontSize,
-                    min: 12.0,
-                    max: 30.0,
-                    divisions: 18,
-                    labelBuilder: (value) => '${value.toInt()}px',
-                    onChanged: (value) => AppSettings.setDanmakuValue(
-                        DanmakuKey.danmakuFontSize, value),
-                  ),
-                  const SizedBox(height: 16),
+                // 字体大小
+                _buildSectionTitle(l10n.fontSize),
+                _DanmakuSlider(
+                  initialValue: AppSettings.danmakuFontSize,
+                  min: 12.0,
+                  max: 30.0,
+                  divisions: 18,
+                  labelBuilder: (value) => '${value.toInt()}px',
+                  onChanged: (value) => AppSettings.setDanmakuValue(
+                      DanmakuKey.danmakuFontSize, value),
+                ),
+                const SizedBox(height: 16),
 
-                  // 字体粗细
-                  _buildSectionTitle(l10n.fontWeight),
-                  _DanmakuSlider(
-                    initialValue: AppSettings.danmakuFontWeight.toDouble(),
-                    min: 0,
-                    max: 8,
-                    divisions: 8,
-                    labelBuilder: (value) => '${(value.round() + 1) * 100}',
-                    onChanged: (value) => AppSettings.setDanmakuValue(
-                        DanmakuKey.danmakuFontWeight, value.round()),
-                  ),
-                  const SizedBox(height: 16),
+                // 字体粗细
+                _buildSectionTitle(l10n.fontWeight),
+                _DanmakuSlider(
+                  initialValue: AppSettings.danmakuFontWeight.toDouble(),
+                  min: 0,
+                  max: 8,
+                  divisions: 8,
+                  labelBuilder: (value) => '${(value.round() + 1) * 100}',
+                  onChanged: (value) => AppSettings.setDanmakuValue(
+                      DanmakuKey.danmakuFontWeight, value.round()),
+                ),
+                const SizedBox(height: 16),
 
-                  // 显示区域
-                  _buildSectionTitle(l10n.displayArea),
-                  _buildAreaSlider(),
-                ],
-              ),
+                // 显示区域
+                _buildSectionTitle(l10n.displayArea),
+                _buildAreaSlider(),
+              ],
             ),
           ),
         ),

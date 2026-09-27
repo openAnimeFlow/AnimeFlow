@@ -15,6 +15,7 @@ import 'package:anime_flow/app/localization/app_localizations.dart';
 
 class AboutSettingsPage extends ConsumerStatefulWidget {
   const AboutSettingsPage({super.key});
+
   @override
   ConsumerState<AboutSettingsPage> createState() => _AboutSettingsPageState();
 }
@@ -22,6 +23,7 @@ class AboutSettingsPage extends ConsumerStatefulWidget {
 class _AboutSettingsPageState extends ConsumerState<AboutSettingsPage> {
   final setting = Storage.setting;
   late bool autoUpdate;
+
   @override
   void initState() {
     super.initState();
@@ -32,6 +34,8 @@ class _AboutSettingsPageState extends ConsumerState<AboutSettingsPage> {
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
     final colorScheme = Theme.of(context).colorScheme;
+    final paddingOf = MediaQuery.paddingOf(context);
+    final topPadding = paddingOf.top + kToolbarHeight;
     return Scaffold(
       extendBodyBehindAppBar: true,
       appBar: PreferredSize(
@@ -80,136 +84,134 @@ class _AboutSettingsPageState extends ConsumerState<AboutSettingsPage> {
               ),
             ),
           ),
-          ListView(
-            padding: EdgeInsets.zero,
-            children: [
-              Consumer(
-                builder: (context, ref, _) {
-                  final appInfo = ref.watch(appInfoProvider);
-                  final topPadding =
-                      MediaQuery.paddingOf(context).top + kToolbarHeight;
-                  return Padding(
-                    padding: EdgeInsets.fromLTRB(
-                      16,
-                      topPadding + 28,
-                      16,
-                      44,
-                    ),
-                    child: Center(
-                      child: Column(
-                        children: [
-                          CircleAvatar(
-                            radius: 80,
-                            backgroundColor: Colors.transparent,
-                            child: Image.asset(
-                              AssetsPathConstants.logo,
-                            ),
-                          ),
-                          Text(
-                            appInfo.appName,
-                            style: const TextStyle(
-                              fontSize: 24,
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
-                          const SizedBox(height: 8),
-                          Text(
-                            l10n.version(appInfo.version),
-                            style: TextStyle(
-                              color: Theme.of(context)
-                                  .colorScheme
-                                  .onSurfaceVariant,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  );
-                },
-              ),
-              Padding(
-                padding: const EdgeInsets.all(16),
+          SingleChildScrollView(
+            padding: EdgeInsets.only(top: topPadding, bottom: paddingOf.bottom),
+            child: Center(
+              child: ConstrainedBox(
+                constraints: const BoxConstraints(maxWidth: 1500),
                 child: Column(
                   children: [
-                    const SizedBox(height: 16),
-                    const Divider(),
-                    Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 15),
-                      child: Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            Text(l10n.autoUpdate),
-                            Switch(
-                              value: autoUpdate,
-                              onChanged: (bool value) {
-                                setState(() {
-                                  setting.put(StorageKey.autoUpdateKey, value);
-                                  autoUpdate = value;
-                                });
-                              },
-                            ),
-                          ]),
-                    ),
-                    const Divider(),
-                    ListTile(
-                      title: Text(l10n.checkForUpdates),
-                      trailing: const Icon(Icons.browser_updated_outlined),
-                      onTap: () async {
-                        final notifier = ref.read(appInfoProvider.notifier);
-                        final result = await notifier.checkVersion();
-                        if (!context.mounted) return;
-                        await handleVersionCheckResult(
-                          context,
-                          result,
-                          onStartDownload: notifier.performUpdateDownload,
-                          onDownloadedPackageAction:
-                              notifier.openDownloadedPackage,
-                          onCancelDownload: notifier.cancelUpdateDownload,
-                          notifyWhenUpToDate: true,
+                    Consumer(
+                      builder: (context, ref, _) {
+                        final appInfo = ref.watch(appInfoProvider);
+                        return Center(
+                          child: Column(
+                            children: [
+                              CircleAvatar(
+                                radius: 80,
+                                backgroundColor: Colors.transparent,
+                                child: Image.asset(
+                                  AssetsPathConstants.logo,
+                                ),
+                              ),
+                              Text(
+                                appInfo.appName,
+                                style: const TextStyle(
+                                  fontSize: 24,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                              const SizedBox(height: 8),
+                              Text(
+                                l10n.version(appInfo.version),
+                                style: TextStyle(
+                                  color: Theme.of(context)
+                                      .colorScheme
+                                      .onSurfaceVariant,
+                                ),
+                              ),
+                            ],
+                          ),
                         );
                       },
                     ),
-                    const Divider(),
-                    ListTile(
-                      title: Text(l10n.projectUpdates),
-                      trailing: const Icon(Icons.article_outlined),
-                      onTap: () => const SettingUpdatesRoute().push(context),
-                    ),
-                    const Divider(),
-                    ListTile(
-                      title: Text(l10n.openSource),
-                      trailing: const Icon(Icons.open_in_new),
-                      onTap: () async {
-                        final uri = Uri.parse(Constants.animeFlow);
-                        if (await canLaunchUrl(uri)) {
-                          await launchUrl(uri);
-                        } else {
-                          NotificationToast.show(l10n.deviceUnsupportedWeb,
-                              title: l10n.unableOpenWeb);
-                        }
-                      },
-                    ),
-                    const Divider(),
-                    ListTile(
-                      title: Text(l10n.thanks),
-                      trailing: const Icon(Icons.chevron_right),
-                      onTap: () {
-                        const SettingThanksRoute().push(context);
-                      },
-                    ),
-                    const Divider(),
-                    ListTile(
-                      title: Text(l10n.privacyPolicy),
-                      trailing: const Icon(Icons.chevron_right),
-                      onTap: () {
-                        const SettingAgreementRoute().push(context);
-                      },
-                    ),
-                    const Divider(),
+                    Padding(
+                      padding: const EdgeInsets.all(16),
+                      child: Column(
+                        children: [
+                          const SizedBox(height: 16),
+                          const Divider(),
+                          Padding(
+                            padding: const EdgeInsets.symmetric(horizontal: 15),
+                            child: Row(
+                                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                children: [
+                                  Text(l10n.autoUpdate),
+                                  Switch(
+                                    value: autoUpdate,
+                                    onChanged: (bool value) {
+                                      setState(() {
+                                        setting.put(
+                                            StorageKey.autoUpdateKey, value);
+                                        autoUpdate = value;
+                                      });
+                                    },
+                                  ),
+                                ]),
+                          ),
+                          const Divider(),
+                          ListTile(
+                            title: Text(l10n.checkForUpdates),
+                            trailing: const Icon(Icons.browser_updated_outlined),
+                            onTap: () async {
+                              final notifier = ref.read(appInfoProvider.notifier);
+                              final result = await notifier.checkVersion();
+                              if (!context.mounted) return;
+                              await handleVersionCheckResult(
+                                context,
+                                result,
+                                onStartDownload: notifier.performUpdateDownload,
+                                onDownloadedPackageAction:
+                                    notifier.openDownloadedPackage,
+                                onCancelDownload: notifier.cancelUpdateDownload,
+                                notifyWhenUpToDate: true,
+                              );
+                            },
+                          ),
+                          const Divider(),
+                          ListTile(
+                            title: Text(l10n.projectUpdates),
+                            trailing: const Icon(Icons.article_outlined),
+                            onTap: () => const SettingUpdatesRoute().push(context),
+                          ),
+                          const Divider(),
+                          ListTile(
+                            title: Text(l10n.openSource),
+                            trailing: const Icon(Icons.open_in_new),
+                            onTap: () async {
+                              final uri = Uri.parse(Constants.animeFlow);
+                              if (await canLaunchUrl(uri)) {
+                                await launchUrl(uri);
+                              } else {
+                                NotificationToast.show(l10n.deviceUnsupportedWeb,
+                                    title: l10n.unableOpenWeb);
+                              }
+                            },
+                          ),
+                          const Divider(),
+                          ListTile(
+                            title: Text(l10n.thanks),
+                            trailing: const Icon(Icons.chevron_right),
+                            onTap: () {
+                              const SettingThanksRoute().push(context);
+                            },
+                          ),
+                          const Divider(),
+                          ListTile(
+                            title: Text(l10n.privacyPolicy),
+                            trailing: const Icon(Icons.chevron_right),
+                            onTap: () {
+                              const SettingAgreementRoute().push(context);
+                            },
+                          ),
+                          const Divider(),
+                        ],
+                      ),
+                    )
                   ],
                 ),
               ),
-            ],
+            ),
           ),
         ],
       ),

@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'dart:math' as math;
 
 import 'package:anime_flow/shared/models/font_item.dart';
 import 'package:anime_flow/features/settings/presentation/providers/font_provider.dart';
@@ -62,7 +63,7 @@ class _FontSettingsPageState extends ConsumerState<FontSettingsPage> {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
-    final leftPadding = MediaQuery.of(context).padding.left;
+    final paddingOf = MediaQuery.paddingOf(context);
     final fontsAsync = ref.watch(fontProvider);
     ref.watch(fontNetworkTasksProvider);
     final downloadedMetas = ref.watch(downloadedFontMetasProvider);
@@ -100,18 +101,19 @@ class _FontSettingsPageState extends ConsumerState<FontSettingsPage> {
           ],
         ),
       ),
-      body: Center(
-        child: ConstrainedBox(
-          constraints: const BoxConstraints(maxWidth: 1200),
-          child: RefreshIndicator(
+      body: LayoutBuilder(
+        builder: (context, constraints) {
+          final horizontal =
+              math.max(10.0, (constraints.maxWidth - 1500.0) / 2);
+          return RefreshIndicator(
             onRefresh: _refreshFontList,
             child: ListView(
               physics: const AlwaysScrollableScrollPhysics(),
-              padding: EdgeInsets.only(
-                left: leftPadding == 0 ? 16 : leftPadding,
-                right: 16,
-                top: 16,
-                bottom: 24,
+              padding: EdgeInsets.fromLTRB(
+                horizontal,
+                16,
+                horizontal,
+                24.0 + paddingOf.bottom,
               ),
               children: [
                 Row(
@@ -263,8 +265,8 @@ class _FontSettingsPageState extends ConsumerState<FontSettingsPage> {
                 ],
               ],
             ),
-          ),
-        ),
+          );
+        },
       ),
     );
   }

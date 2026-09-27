@@ -162,6 +162,7 @@ class _SettingsMenu extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final paddingOf = MediaQuery.paddingOf(context);
     final userInfo = ref.watch(currentUserInfoProvider).value;
     final isLoggedIn = ref.watch(isLoggedInProvider).value ?? false;
     final avatar = isLoggedIn && (userInfo?.avatar?.isNotEmpty ?? false)
@@ -169,7 +170,12 @@ class _SettingsMenu extends ConsumerWidget {
         : null;
     final categories = _categories(context, avatar);
     final menu = ListView(
-      padding: EdgeInsets.symmetric(horizontal: wide ? 15 : 0, vertical: 8),
+      padding: EdgeInsets.only(
+        left: wide ? 15 : 0,
+        right: wide ? 15 : 0,
+        top: 8,
+        bottom: wide ? 8 : paddingOf.bottom,
+      ),
       children: [
         for (final category in categories) ...[
           Padding(
@@ -235,10 +241,11 @@ class _SettingsMenu extends ConsumerWidget {
           ),
           const Divider(height: 1),
           Expanded(
-              child: Padding(
-            padding: EdgeInsets.only(left: SystemUtil.isDesktop ? 15 : 0),
-            child: menu,
-          )),
+              child: Material(
+                type: MaterialType.transparency,
+                clipBehavior: Clip.hardEdge,
+                child: menu,
+              )),
         ]),
       ),
     );

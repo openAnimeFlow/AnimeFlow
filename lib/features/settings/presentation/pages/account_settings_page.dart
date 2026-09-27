@@ -1,3 +1,5 @@
+import 'dart:math' as math;
+
 import 'package:anime_flow/core/constants/assets_path_constants.dart';
 import 'package:anime_flow/core/network/api_path.dart';
 import 'package:anime_flow/core/network/clients/flow_client.dart';
@@ -140,32 +142,26 @@ class _AccountSettingsPageState extends ConsumerState<AccountSettingsPage> {
           },
         ),
       ),
-      body: Align(
-        alignment: Alignment.topCenter,
-        child: ConstrainedBox(
-          constraints: const BoxConstraints(maxWidth: 1200),
-          child: isLoggedInAsync.when(
-            data: (isLoggedIn) {
-              if (!isLoggedIn) {
-                return const LoginPage();
-              }
-              return userInfoAsync.when(
-                data: (user) => user == null
-                    ? _buildErrorState(l10n.profileLoadFailed)
-                    : _buildLoggedInContent(
-                        context,
-                        user,
-                        bangumiBindAsync,
-                        isBinding,
-                      ),
-                loading: () => const Center(child: CircularProgressIndicator()),
-                error: (_, __) => _buildErrorState(l10n.profileLoadFailed),
-              );
-            },
+      body: isLoggedInAsync.when(
+        data: (isLoggedIn) {
+          if (!isLoggedIn) {
+            return const LoginPage();
+          }
+          return userInfoAsync.when(
+            data: (user) => user == null
+                ? _buildErrorState(l10n.profileLoadFailed)
+                : _buildLoggedInContent(
+                    context,
+                    user,
+                    bangumiBindAsync,
+                    isBinding,
+                  ),
             loading: () => const Center(child: CircularProgressIndicator()),
-            error: (_, __) => _buildErrorState(l10n.loginStateLoadFailed),
-          ),
-        ),
+            error: (_, __) => _buildErrorState(l10n.profileLoadFailed),
+          );
+        },
+        loading: () => const Center(child: CircularProgressIndicator()),
+        error: (_, __) => _buildErrorState(l10n.loginStateLoadFailed),
       ),
     );
   }
@@ -177,62 +173,73 @@ class _AccountSettingsPageState extends ConsumerState<AccountSettingsPage> {
     bool isBinding,
   ) {
     final l10n = AppLocalizations.of(context);
-    return ListView(
-      padding: const EdgeInsets.all(16),
-      children: [
-        _buildSectionTitle(l10n.accountInfo),
-        AccountContentView(
-          userInfo: user,
-          isAvatarUploading: _isAvatarUploading,
-          onAvatarUpload: () => _handleAvatarUpload(context, user.avatar),
-          onNicknameConfirm: (newNickname) async {
-            final error = await ref
-                .read(currentUserInfoProvider.notifier)
-                .updateNickname(newNickname);
-            if (error != null) {
-              NotificationToast.show(error, title: l10n.tip);
-              throw error;
-            }
-            NotificationToast.show(l10n.nicknameUpdated, title: l10n.tip);
-          },
-        ),
-        if (user.email.isEmpty) ...[
-          const SizedBox(height: 16),
-          const BindEmailSection(),
-        ],
-        const SizedBox(height: 24),
-        _buildSectionTitle(l10n.thirdPartyAccounts),
-        _buildBangumiBindCard(
-          context,
-          ref,
-          bangumiBindAsync,
-          isBinding,
-        ),
-        const SizedBox(height: 24),
-        _buildSectionTitle(l10n.accountActions),
-        if (user.email.isNotEmpty)
-          Card(
-            child: ListTile(
-              leading: const Icon(Icons.lock_outline),
-              title: Text(l10n.changePassword),
-              trailing: const Icon(Icons.chevron_right),
-              onTap: _changePassword,
-            ),
+    final paddingOf = MediaQuery.paddingOf(context);
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final horizontal = math.max(10.0, (constraints.maxWidth - 1500.0) / 2);
+        return ListView(
+          padding: EdgeInsets.fromLTRB(
+            horizontal,
+            16,
+            horizontal,
+            paddingOf.bottom,
           ),
-        Card(
-          child: ListTile(
-            leading: Icon(
-              Icons.logout_outlined,
-              color: Theme.of(context).colorScheme.error,
+          children: [
+            _buildSectionTitle(l10n.accountInfo),
+            AccountContentView(
+              userInfo: user,
+              isAvatarUploading: _isAvatarUploading,
+              onAvatarUpload: () => _handleAvatarUpload(context, user.avatar),
+              onNicknameConfirm: (newNickname) async {
+                final error = await ref
+                    .read(currentUserInfoProvider.notifier)
+                    .updateNickname(newNickname);
+                if (error != null) {
+                  NotificationToast.show(error, title: l10n.tip);
+                  throw error;
+                }
+                NotificationToast.show(l10n.nicknameUpdated, title: l10n.tip);
+              },
             ),
-            onTap: () => _confirmLogout(),
-            title: Text(
-              l10n.logout,
-              style: TextStyle(color: Theme.of(context).colorScheme.error),
+            if (user.email.isEmpty) ...[
+              const SizedBox(height: 16),
+              const BindEmailSection(),
+            ],
+            const SizedBox(height: 24),
+            _buildSectionTitle(l10n.thirdPartyAccounts),
+            _buildBangumiBindCard(
+              context,
+              ref,
+              bangumiBindAsync,
+              isBinding,
             ),
-          ),
-        ),
-      ],
+            const SizedBox(height: 24),
+            _buildSectionTitle(l10n.accountActions),
+            if (user.email.isNotEmpty)
+              Card(
+                child: ListTile(
+                  leading: const Icon(Icons.lock_outline),
+                  title: Text(l10n.changePassword),
+                  trailing: const Icon(Icons.chevron_right),
+                  onTap: _changePassword,
+                ),
+              ),
+            Card(
+              child: ListTile(
+                leading: Icon(
+                  Icons.logout_outlined,
+                  color: Theme.of(context).colorScheme.error,
+                ),
+                onTap: () => _confirmLogout(),
+                title: Text(
+                  l10n.logout,
+                  style: TextStyle(color: Theme.of(context).colorScheme.error),
+                ),
+              ),
+            ),
+          ],
+        );
+      },
     );
   }
 

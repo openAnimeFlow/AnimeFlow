@@ -1,3 +1,5 @@
+import 'dart:math' as math;
+
 import 'package:anime_flow/features/settings/presentation/providers/setting_provider.dart';
 import 'package:anime_flow/features/source/application/providers/plugin_provider.dart';
 import 'package:anime_flow/features/source/application/providers/source_configs_provider.dart';
@@ -119,6 +121,7 @@ class _PluginsPageState extends ConsumerState<PluginsPage> {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
+    final paddingOf = MediaQuery.paddingOf(context);
     final sourceConfigs = ref.watch(sourceConfigsProvider);
     final remotePlugins = ref.watch(pluginCatalogProvider).whenOrNull(
               data: (plugins) => plugins,
@@ -157,111 +160,124 @@ class _PluginsPageState extends ConsumerState<PluginsPage> {
       body: sourceConfigs.when(
         loading: () => const Center(child: CircularProgressIndicator()),
         error: (error, _) => Center(child: Text(error.toString())),
-        data: (dataSources) => ReorderableListView.builder(
-          padding: const EdgeInsets.symmetric(horizontal: 16),
-          itemCount: dataSources.length,
-          buildDefaultDragHandles: false,
-          onReorderItem: (oldIndex, newIndex) async {
-            await _sourceRepository.reorderSources(oldIndex, newIndex);
-          },
-          itemBuilder: (context, index) {
-            final data = dataSources[index];
-            final remotePlugin = remotePluginsByName[data.name];
-            final hasUpdate = remotePlugin != null &&
-                Utils.compareVersionNumbers(
-                        remotePlugin.version, data.version) >
-                    0;
-            final isPluginBusy = _busyPluginNames.contains(data.name);
-            return InkWell(
-              key: ValueKey(data.name),
-              onTap: () => SettingAddPluginsRoute(editPluginKey: data.name)
-                  .push(context),
-              child: Container(
-                margin: const EdgeInsets.symmetric(vertical: 2),
-                padding: const EdgeInsets.symmetric(vertical: 5),
-                decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(10),
-                    color:
-                        Theme.of(context).disabledColor.withValues(alpha: 0.1)),
-                child: Row(
-                  children: [
-                    Padding(
-                      padding: const EdgeInsets.symmetric(
-                          vertical: 5, horizontal: 5),
-                      child: AnimationNetworkImage(
-                          borderRadius: BorderRadius.circular(10),
-                          width: 50,
-                          height: 50,
-                          url: data.iconUrl),
-                    ),
-                    Expanded(
-                      child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              data.name,
-                              style:
-                                  const TextStyle(fontWeight: FontWeight.bold),
-                            ),
-                            Row(
-                              children: [
-                                Text(data.version),
-                                if (hasUpdate) ...[
-                                  const SizedBox(width: 8),
-                                  Text(
-                                    l10n.updateAvailable,
-                                    style: TextStyle(
-                                      color:
-                                          Theme.of(context).colorScheme.primary,
-                                      fontSize: 12,
-                                    ),
-                                  ),
-                                ],
-                              ],
-                            )
-                          ]),
-                    ),
-                    if (hasUpdate)
-                      TextButton(
-                        onPressed: isPluginBusy
-                            ? null
-                            : () => _updatePlugin(remotePlugin),
-                        child: isPluginBusy
-                            ? const SizedBox(
-                                width: 16,
-                                height: 16,
-                                child:
-                                    CircularProgressIndicator(strokeWidth: 2),
-                              )
-                            : Text(l10n.update),
-                      ),
-                    IconButton(
-                      tooltip: l10n.copyPlugin,
-                      icon: const Icon(Icons.content_copy_outlined),
-                      onPressed: () => _copyPlugin(data.name),
-                    ),
-                    IconButton(
-                      tooltip: l10n.delete,
-                      icon: Icon(
-                        Icons.delete_outline,
-                        color: Theme.of(context).colorScheme.error,
-                      ),
-                      onPressed: () => deleteDataSource(data.name),
-                    ),
-                    GestureDetector(
-                      behavior: HitTestBehavior.opaque,
-                      onTap: () {},
-                      child: ReorderableDragStartListener(
-                        index: index,
-                        child: const Padding(
-                          padding: EdgeInsets.symmetric(horizontal: 8),
-                          child: Icon(Icons.drag_handle),
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
+        data: (dataSources) => LayoutBuilder(
+          builder: (context, constraints) {
+            final horizontal =
+                math.max(10.0, (constraints.maxWidth - 1500.0) / 2);
+            return ReorderableListView.builder(
+              padding: EdgeInsets.fromLTRB(
+                horizontal,
+                0,
+                horizontal,
+                paddingOf.bottom,
               ),
+              itemCount: dataSources.length,
+              buildDefaultDragHandles: false,
+              onReorderItem: (oldIndex, newIndex) async {
+                await _sourceRepository.reorderSources(oldIndex, newIndex);
+              },
+              itemBuilder: (context, index) {
+                final data = dataSources[index];
+                final remotePlugin = remotePluginsByName[data.name];
+                final hasUpdate = remotePlugin != null &&
+                    Utils.compareVersionNumbers(
+                            remotePlugin.version, data.version) >
+                        0;
+                final isPluginBusy = _busyPluginNames.contains(data.name);
+                return InkWell(
+                  key: ValueKey(data.name),
+                  onTap: () => SettingAddPluginsRoute(editPluginKey: data.name)
+                      .push(context),
+                  child: Container(
+                    margin: const EdgeInsets.symmetric(vertical: 2),
+                    padding: const EdgeInsets.symmetric(vertical: 5),
+                    decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(10),
+                        color: Theme.of(context)
+                            .disabledColor
+                            .withValues(alpha: 0.1)),
+                    child: Row(
+                      children: [
+                        Padding(
+                          padding: const EdgeInsets.symmetric(
+                              vertical: 5, horizontal: 5),
+                          child: AnimationNetworkImage(
+                              borderRadius: BorderRadius.circular(10),
+                              width: 50,
+                              height: 50,
+                              url: data.iconUrl),
+                        ),
+                        Expanded(
+                          child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  data.name,
+                                  style: const TextStyle(
+                                      fontWeight: FontWeight.bold),
+                                ),
+                                Row(
+                                  children: [
+                                    Text(data.version),
+                                    if (hasUpdate) ...[
+                                      const SizedBox(width: 8),
+                                      Text(
+                                        l10n.updateAvailable,
+                                        style: TextStyle(
+                                          color: Theme.of(context)
+                                              .colorScheme
+                                              .primary,
+                                          fontSize: 12,
+                                        ),
+                                      ),
+                                    ],
+                                  ],
+                                )
+                              ]),
+                        ),
+                        if (hasUpdate)
+                          TextButton(
+                            onPressed: isPluginBusy
+                                ? null
+                                : () => _updatePlugin(remotePlugin),
+                            child: isPluginBusy
+                                ? const SizedBox(
+                                    width: 16,
+                                    height: 16,
+                                    child: CircularProgressIndicator(
+                                        strokeWidth: 2),
+                                  )
+                                : Text(l10n.update),
+                          ),
+                        IconButton(
+                          tooltip: l10n.copyPlugin,
+                          icon: const Icon(Icons.content_copy_outlined),
+                          onPressed: () => _copyPlugin(data.name),
+                        ),
+                        IconButton(
+                          tooltip: l10n.delete,
+                          icon: Icon(
+                            Icons.delete_outline,
+                            color: Theme.of(context).colorScheme.error,
+                          ),
+                          onPressed: () => deleteDataSource(data.name),
+                        ),
+                        GestureDetector(
+                          behavior: HitTestBehavior.opaque,
+                          onTap: () {},
+                          child: ReorderableDragStartListener(
+                            index: index,
+                            child: const Padding(
+                              padding: EdgeInsets.symmetric(horizontal: 8),
+                              child: Icon(Icons.drag_handle),
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                );
+              },
             );
           },
         ),

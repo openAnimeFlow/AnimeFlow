@@ -72,6 +72,7 @@ class SettingKey {
       themeMode = 'theme_mode',
       seedColor = 'theme_seed_color',
       locale = 'app_locale',
+      rankingDetailsLayout = 'ranking_details_layout',
       fontFamily = 'font_family',
       selectedFontId = 'selected_font_id',
       downloadedFonts = 'downloaded_fonts',

@@ -1,28 +1,42 @@
+import 'dart:async';
 import 'dart:math' as math;
 
 import 'package:anime_flow/app/localization/app_localizations.dart';
 import 'package:anime_flow/core/constants/layout_constant.dart';
+import 'package:anime_flow/core/constants/storage_key.dart';
+import 'package:anime_flow/core/settings/app_settings.dart';
 import 'package:anime_flow/features/ranking/presentation/providers/ranking_provider.dart';
 import 'package:anime_flow/features/ranking/presentation/widgets/ranking_filter_bar.dart';
 import 'package:anime_flow/features/ranking/presentation/widgets/ranking_grid.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-class RankingPage extends ConsumerStatefulWidget {
+class RankingPage extends StatefulWidget {
   const RankingPage({super.key});
 
   @override
-  ConsumerState<RankingPage> createState() => _RankingPageState();
+  State<RankingPage> createState() => _RankingPageState();
 }
 
-class _RankingPageState extends ConsumerState<RankingPage> {
+class _RankingPageState extends State<RankingPage> {
   final scrollController = ScrollController();
   bool showBackToTop = false;
+  bool isDetailsContent = true;
 
   @override
   void initState() {
     super.initState();
+    isDetailsContent =
+        AppSettings.getSetting<bool>(SettingKey.rankingDetailsLayout) ?? true;
     scrollController.addListener(scrollListener);
+  }
+
+  void toggleLayout() {
+    setState(() => isDetailsContent = !isDetailsContent);
+    unawaited(AppSettings.setSetting(
+      SettingKey.rankingDetailsLayout,
+      isDetailsContent,
+    ));
   }
 
   void scrollListener() {
@@ -59,8 +73,6 @@ class _RankingPageState extends ConsumerState<RankingPage> {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
-    final rankingAsync = ref.watch(rankingProvider);
-    final rankingState = rankingAsync.asData?.value;
 
     return Scaffold(
       appBar: AppBar(
@@ -70,94 +82,106 @@ class _RankingPageState extends ConsumerState<RankingPage> {
         builder: (context, constraints) {
           final horizontalPadding = _horizontalPadding(constraints.maxWidth);
           final contentWidth = constraints.maxWidth - horizontalPadding * 2;
-          return RefreshIndicator(
-            onRefresh: () => ref.read(rankingProvider.notifier).refresh(),
-            child: NotificationListener<ScrollNotification>(
-              onNotification: (notification) {
-                // 内部横向列表（例如前三名卡片）也会冒泡滚动通知，
-                // 只有外层纵向滚动视图才能触发分页加载。
-                if (notification is ScrollUpdateNotification &&
-                    notification.depth == 0 &&
-                    notification.metrics.axis == Axis.vertical) {
-                  final metrics = notification.metrics;
-                  final state = rankingAsync.asData?.value;
-                  if (metrics.pixels >= metrics.maxScrollExtent - 200 &&
-                      state != null &&
-                      state.items.isNotEmpty &&
-                      !state.isReloading &&
-                      !state.isLoadingMore &&
-                      state.hasMore) {
-                    ref.read(rankingProvider.notifier).loadMore();
-                  }
-                }
-                return false;
-              },
-              child: CustomScrollView(
-                controller: scrollController,
-                slivers: [
-                  const SliverAppBar(
-                    pinned: true,
-                    floating: true,
-                    title: RankingFilterBar(),
-                  ),
-                  if (rankingState?.errorMessage case final errorMessage?)
-                    SliverToBoxAdapter(
-                      child: Padding(
-                        padding: const EdgeInsets.only(top: 12),
-                        child: Material(
-                          color: Theme.of(context).colorScheme.errorContainer,
-                          borderRadius: BorderRadius.circular(12),
-                          child: Padding(
-                            padding: const EdgeInsets.all(12),
-                            child: Text(
-                              errorMessage,
-                              style: TextStyle(
+          return Consumer(
+            builder: (context, ref, child) {
+              final rankingAsync = ref.watch(rankingProvider);
+              final rankingState = rankingAsync.asData?.value;
+              return RefreshIndicator(
+                  onRefresh: () => ref.read(rankingProvider.notifier).refresh(),
+                  child: NotificationListener<ScrollNotification>(
+                    onNotification: (notification) {
+                      // 内部横向列表（例如前三名卡片）也会冒泡滚动通知，
+                      // 只有外层纵向滚动视图才能触发分页加载。
+                      if (notification is ScrollUpdateNotification &&
+                          notification.depth == 0 &&
+                          notification.metrics.axis == Axis.vertical) {
+                        final metrics = notification.metrics;
+                        final state = rankingAsync.asData?.value;
+                        if (metrics.pixels >= metrics.maxScrollExtent - 200 &&
+                            state != null &&
+                            state.items.isNotEmpty &&
+                            !state.isReloading &&
+                            !state.isLoadingMore &&
+                            state.hasMore) {
+                          ref.read(rankingProvider.notifier).loadMore();
+                        }
+                      }
+                      return false;
+                    },
+                    child: CustomScrollView(
+                      controller: scrollController,
+                      slivers: [
+                        const SliverAppBar(
+                          pinned: true,
+                          floating: true,
+                          title: RankingFilterBar(),
+                        ),
+                        if (rankingState?.errorMessage case final errorMessage?)
+                          SliverToBoxAdapter(
+                            child: Padding(
+                              padding: const EdgeInsets.only(top: 12),
+                              child: Material(
                                 color: Theme.of(context)
                                     .colorScheme
-                                    .onErrorContainer,
+                                    .errorContainer,
+                                borderRadius: BorderRadius.circular(12),
+                                child: Padding(
+                                  padding: const EdgeInsets.all(12),
+                                  child: Text(
+                                    errorMessage,
+                                    style: TextStyle(
+                                      color: Theme.of(context)
+                                          .colorScheme
+                                          .onErrorContainer,
+                                    ),
+                                  ),
+                                ),
                               ),
                             ),
                           ),
-                        ),
-                      ),
-                    ),
-                  rankingAsync.when(
-                    loading: () => const SliverToBoxAdapter(
-                      child: SizedBox(
-                        height: 320,
-                        child: Center(child: CircularProgressIndicator()),
-                      ),
-                    ),
-                    error: (error, _) => SliverToBoxAdapter(
-                      child: SizedBox(
-                        height: 320,
-                        child: Center(
-                          child: Column(
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              Text(l10n.rankingLoadFailed(error.toString())),
-                              const SizedBox(height: 12),
-                              FilledButton(
-                                onPressed: () => ref
-                                    .read(rankingProvider.notifier)
-                                    .refresh(),
-                                child: Text(l10n.retry),
+                        rankingAsync.when(
+                          loading: () => const SliverToBoxAdapter(
+                            child: SizedBox(
+                              height: 320,
+                              child: Center(child: CircularProgressIndicator()),
+                            ),
+                          ),
+                          error: (error, _) => SliverToBoxAdapter(
+                            child: SizedBox(
+                              height: 320,
+                              child: Center(
+                                child: Column(
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    Text(l10n
+                                        .rankingLoadFailed(error.toString())),
+                                    const SizedBox(height: 12),
+                                    FilledButton(
+                                      onPressed: () => ref
+                                          .read(rankingProvider.notifier)
+                                          .refresh(),
+                                      child: Text(l10n.retry),
+                                    ),
+                                  ],
+                                ),
                               ),
-                            ],
+                            ),
+                          ),
+                          data: (_) => SliverPadding(
+                            padding: EdgeInsets.symmetric(
+                              horizontal: horizontalPadding,
+                            ),
+                            sliver: RankingGrid(
+                              contentWidth: contentWidth,
+                              isDetailsContent: isDetailsContent,
+                              onToggleLayout: toggleLayout,
+                            ),
                           ),
                         ),
-                      ),
+                      ],
                     ),
-                    data: (_) => SliverPadding(
-                      padding: EdgeInsets.symmetric(
-                        horizontal: horizontalPadding,
-                      ),
-                      sliver: RankingGrid(contentWidth: contentWidth),
-                    ),
-                  ),
-                ],
-              ),
-            ),
+                  ));
+            },
           );
         },
       ),

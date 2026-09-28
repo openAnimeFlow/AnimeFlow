@@ -4,13 +4,21 @@ import 'package:anime_flow/app/router/model/info_route_extra.dart';
 import 'package:anime_flow/features/ranking/presentation/providers/ranking_provider.dart';
 import 'package:anime_flow/shared/models/bangumi/subject_item.dart';
 import 'package:anime_flow/shared/widgets/animation_network_image.dart';
+import 'package:anime_flow/shared/widgets/subject_card.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 class RankingGrid extends ConsumerWidget {
-  const RankingGrid({super.key, required this.contentWidth});
+  const RankingGrid({
+    super.key,
+    required this.contentWidth,
+    required this.isDetailsContent,
+    required this.onToggleLayout,
+  });
 
   final double contentWidth;
+  final bool isDetailsContent;
+  final VoidCallback onToggleLayout;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -41,6 +49,7 @@ class RankingGrid extends ConsumerWidget {
         : contentWidth >= 600
             ? 2
             : 1;
+    final posterColumnCount = (contentWidth / 200).floor().clamp(3, 7);
 
     return SliverMainAxisGroup(
       slivers: [
@@ -51,21 +60,35 @@ class RankingGrid extends ConsumerWidget {
           child: _RankingSectionHeader(
             title: l10n.sortTrends,
             subtitle: l10n.rankingTitle,
+            isDetailsContent: isDetailsContent,
+            onToggleLayout: onToggleLayout,
           ),
         ),
         if (listItemCount > 0)
           SliverGrid.builder(
             itemCount: listItemCount,
-            gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-              crossAxisCount: columnCount,
-              crossAxisSpacing: 10,
-              mainAxisSpacing: 10,
-              mainAxisExtent: 160,
-            ),
-            itemBuilder: (context, index) => _RankingListTile(
-              subject: items[index + 3],
-              rank: index + 4,
-            ),
+            gridDelegate: isDetailsContent
+                ? SliverGridDelegateWithFixedCrossAxisCount(
+                    crossAxisCount: columnCount,
+                    crossAxisSpacing: 10,
+                    mainAxisSpacing: 10,
+                    mainAxisExtent: 160,
+                  )
+                : SliverGridDelegateWithFixedCrossAxisCount(
+                    crossAxisCount: posterColumnCount,
+                    crossAxisSpacing: 10,
+                    mainAxisSpacing: 10,
+                    childAspectRatio: 2 / 3,
+                  ),
+            itemBuilder: (context, index) => isDetailsContent
+                ? _RankingListTile(
+                    subject: items[index + 3],
+                    rank: index + 4,
+                  )
+                : _RankingPosterTile(
+                    subject: items[index + 3],
+                    rank: index + 4,
+                  ),
           ),
         SliverToBoxAdapter(
           child: showProgress
@@ -255,10 +278,17 @@ class _FeaturedCard extends StatelessWidget {
 }
 
 class _RankingSectionHeader extends StatelessWidget {
-  const _RankingSectionHeader({required this.title, required this.subtitle});
+  const _RankingSectionHeader({
+    required this.title,
+    required this.subtitle,
+    required this.isDetailsContent,
+    required this.onToggleLayout,
+  });
 
   final String title;
   final String subtitle;
+  final bool isDetailsContent;
+  final VoidCallback onToggleLayout;
 
   @override
   Widget build(BuildContext context) {
@@ -276,13 +306,38 @@ class _RankingSectionHeader extends StatelessWidget {
                 ),
           ),
           const Spacer(),
-          Text(
-            subtitle,
-            style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                  color: scheme.onSurfaceVariant,
-                ),
+          IconButton(
+            onPressed: onToggleLayout,
+            icon: Icon(
+              isDetailsContent ? Icons.image_outlined : Icons.art_track_rounded,
+            ),
           ),
         ],
+      ),
+    );
+  }
+}
+
+class _RankingPosterTile extends StatelessWidget {
+  const _RankingPosterTile({required this.subject, required this.rank});
+
+  final Subject subject;
+  final int rank;
+
+  @override
+  Widget build(BuildContext context) {
+    final title = subject.nameCN.isEmpty ? subject.name : subject.nameCN;
+
+    return InkWell(
+      borderRadius: BorderRadius.circular(15),
+      onTap: () => AnimeInfoRoute.fromExtra(
+        InfoRouteExtra(
+            id: subject.id, name: title, image: subject.images.large),
+      ).push(context),
+      child: SubjectCard(
+        image: subject.images.large,
+        title: title,
+        rating: rank,
       ),
     );
   }

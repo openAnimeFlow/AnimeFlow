@@ -153,11 +153,11 @@ class _CommunityContent extends StatelessWidget {
         );
         final gridWidth = constraints.maxWidth - horizontalPadding * 2;
         final spacing = compact ? 10.0 : 15.0;
-        final minCardWidth = compact ? 140.0 : 220.0;
+        final minCardWidth = compact ? 120.0 : 200.0;
         final crossAxisCount =
             ((gridWidth + spacing) / (minCardWidth + spacing))
                 .floor()
-                .clamp(3, 6);
+                .clamp(3, 7);
         final cardWidth =
             (gridWidth - spacing * (crossAxisCount - 1)) / crossAxisCount;
         final textScaler = MediaQuery.textScalerOf(context);

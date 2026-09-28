@@ -117,11 +117,11 @@ class PopularAnimeView extends ConsumerWidget {
         final gridWidth = constraints.crossAxisExtent;
         final compact = gridWidth < 600;
         final spacing = compact ? 10.0 : 15.0;
-        final minCardWidth = compact ? 140.0 : 220.0;
+        final minCardWidth = compact ? 120.0 : 200.0;
         final crossAxisCount =
             ((gridWidth + spacing) / (minCardWidth + spacing))
                 .floor()
-                .clamp(3, 6);
+                .clamp(3, 7);
 
         return SliverGrid(
           gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(

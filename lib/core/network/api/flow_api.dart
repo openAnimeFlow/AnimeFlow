@@ -447,6 +447,16 @@ class FlowApi {
     return SubjectsInfoItem.fromJson(response.data);
   }
 
+  /// 获取条目预览图
+  static Future<List<String>> getSubjectStillsService(int subjectId) async {
+    final path =
+        AnimeFlowApi.subjectStills.replaceFirst('{subjectId}', subjectId.toString());
+    final response = await _client.get(path);
+    final data = response.data;
+    if (data is! List) return const [];
+    return data.whereType<String>().where((url) => url.isNotEmpty).toList();
+  }
+
   ///获取条目章节
   static Future<EpisodesItem> getSubjectEpisodesByIdService(
       int id, int limit, int offset) async {

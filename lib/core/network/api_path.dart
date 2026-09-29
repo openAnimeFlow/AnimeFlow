@@ -138,6 +138,9 @@ class AnimeFlowApi {
       ///章节
       episodes = '/api/v1/bangumi/subjects/{subjectId}/episodes',
 
+      ///条目预览图
+      subjectStills = '/api/v1/bangumi/subjects/{subjectId}/stills',
+
       /// 剧集评论
       episodeComments = '/api/v1/bangumi/episodes/{episodeId}/comments',
 

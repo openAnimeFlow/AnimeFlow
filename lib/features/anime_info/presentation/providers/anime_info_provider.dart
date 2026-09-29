@@ -83,6 +83,15 @@ class AnimeInfo extends _$AnimeInfo {
   }
 }
 
+@Riverpod(dependencies: [animeInfoArgs])
+class SubjectStills extends _$SubjectStills {
+  @override
+  Future<List<String>> build() {
+    final subjectId = ref.watch(animeInfoArgsProvider.select((e) => e.id));
+    return FlowApi.getSubjectStillsService(subjectId);
+  }
+}
+
 /// 评论列表 UI 状态（分页加载标记与 [SubjectCommentItem] 绑定）
 class SubjectCommentsViewState {
   const SubjectCommentsViewState({

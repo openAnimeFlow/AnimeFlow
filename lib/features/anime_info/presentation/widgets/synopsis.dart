@@ -8,6 +8,7 @@ import 'package:anime_flow/features/anime_info/presentation/widgets/producers.da
 import 'package:anime_flow/features/anime_info/presentation/providers/anime_info_provider.dart';
 import 'package:anime_flow/features/anime_info/presentation/widgets/related.dart';
 import 'package:anime_flow/features/anime_info/presentation/widgets/tags.dart';
+import 'package:anime_flow/features/anime_info/presentation/widgets/subject_stills.dart';
 import 'package:anime_flow/core/utils/system_util.dart';
 import 'package:anime_flow/shared/widgets/expandable_text.dart';
 import 'package:flutter/material.dart';
@@ -76,7 +77,15 @@ class InfoSynopsisView extends StatelessWidget {
       SliverToBoxAdapter(
         child: _buildContainer(
           context,
+          const SubjectStillsView(),
+          topPadding: 10,
+        ),
+      ),
+      SliverToBoxAdapter(
+        child: _buildContainer(
+          context,
           const CharactersView(),
+          topPadding: 10
         ),
       ),
       SliverToBoxAdapter(

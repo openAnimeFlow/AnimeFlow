@@ -37,7 +37,7 @@ final class AnimeInfoProvider
   AnimeInfo create() => AnimeInfo();
 }
 
-String _$animeInfoHash() => r'de89ab758b99d18f1b1d56ec5193847079801118';
+String _$animeInfoHash() => r'77b7bab2f79503b8ab7cae03b74d41a5237210fb';
 
 abstract class _$AnimeInfo extends $AsyncNotifier<SubjectsInfoItem> {
   FutureOr<SubjectsInfoItem> build();
@@ -49,6 +49,51 @@ abstract class _$AnimeInfo extends $AsyncNotifier<SubjectsInfoItem> {
     final element = ref.element as $ClassProviderElement<
         AnyNotifier<AsyncValue<SubjectsInfoItem>, SubjectsInfoItem>,
         AsyncValue<SubjectsInfoItem>,
+        Object?,
+        Object?>;
+    element.handleCreate(ref, build);
+  }
+}
+
+@ProviderFor(SubjectStills)
+final subjectStillsProvider = SubjectStillsProvider._();
+
+final class SubjectStillsProvider
+    extends $AsyncNotifierProvider<SubjectStills, List<String>> {
+  SubjectStillsProvider._()
+      : super(
+          from: null,
+          argument: null,
+          retry: null,
+          name: r'subjectStillsProvider',
+          isAutoDispose: true,
+          dependencies: <ProviderOrFamily>[animeInfoArgsProvider],
+          $allTransitiveDependencies: <ProviderOrFamily>[
+            SubjectStillsProvider.$allTransitiveDependencies0,
+          ],
+        );
+
+  static final $allTransitiveDependencies0 = animeInfoArgsProvider;
+
+  @override
+  String debugGetCreateSourceHash() => _$subjectStillsHash();
+
+  @$internal
+  @override
+  SubjectStills create() => SubjectStills();
+}
+
+String _$subjectStillsHash() => r'be844dd1321f2abc53309c19cf11d40c68374b74';
+
+abstract class _$SubjectStills extends $AsyncNotifier<List<String>> {
+  FutureOr<List<String>> build();
+  @$mustCallSuper
+  @override
+  void runBuild() {
+    final ref = this.ref as $Ref<AsyncValue<List<String>>, List<String>>;
+    final element = ref.element as $ClassProviderElement<
+        AnyNotifier<AsyncValue<List<String>>, List<String>>,
+        AsyncValue<List<String>>,
         Object?,
         Object?>;
     element.handleCreate(ref, build);

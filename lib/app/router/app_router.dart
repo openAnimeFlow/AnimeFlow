@@ -1,5 +1,6 @@
 import 'package:anime_flow/features/anime_info/presentation/pages/anime_info_page.dart';
 import 'package:anime_flow/features/anime_info/presentation/providers/anime_info_provider.dart';
+import 'package:anime_flow/features/anime_preview/presentation/pages/anime_preview.dart';
 import 'package:anime_flow/features/calendar/presentation/pages/calendar_page.dart';
 import 'package:anime_flow/features/character_info/presentation/pages/character_info_page.dart';
 import 'package:anime_flow/features/characters/presentation/pages/characters_page.dart';
@@ -336,6 +337,22 @@ class UserSpaceRoute extends GoRouteData with $UserSpaceRoute {
   @override
   Widget build(BuildContext context, GoRouterState state) =>
       UserSpacePage(username: name);
+}
+
+@TypedGoRoute<AnimePreviewPageRoute>(path: '/anime_preview')
+class AnimePreviewPageRoute extends GoRouteData with $AnimePreviewPageRoute {
+  final List<String> images;
+  final String? title;
+
+  const AnimePreviewPageRoute({required this.images, this.title});
+
+  @override
+  Widget build(BuildContext context, GoRouterState state) {
+    return AnimePreviewPage(
+      images: images,
+      title: title,
+    );
+  }
 }
 
 @TypedGoRoute<ImageSearchRoute>(path: '/image_search')

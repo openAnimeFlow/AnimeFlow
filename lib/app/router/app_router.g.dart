@@ -21,6 +21,7 @@ List<RouteBase> get $appRoutes => [
       $playRecordRoute,
       $downloadRoute,
       $userSpaceRoute,
+      $animePreviewPageRoute,
       $imageSearchRoute,
       $imagePreviewRoute,
       $settingsShellRoute,
@@ -555,6 +556,46 @@ mixin $UserSpaceRoute on GoRouteData {
         '/user_space',
         queryParams: {
           'name': _self.name,
+        },
+      );
+
+  @override
+  void go(BuildContext context) => context.go(location);
+
+  @override
+  Future<T?> push<T>(BuildContext context) => context.push<T>(location);
+
+  @override
+  void pushReplacement(BuildContext context) =>
+      context.pushReplacement(location);
+
+  @override
+  void replace(BuildContext context) => context.replace(location);
+}
+
+RouteBase get $animePreviewPageRoute => GoRouteData.$route(
+      path: '/anime_preview',
+      hasOverriddenOnExit: false,
+      factory: $AnimePreviewPageRoute._fromState,
+    );
+
+mixin $AnimePreviewPageRoute on GoRouteData {
+  static AnimePreviewPageRoute _fromState(GoRouterState state) =>
+      AnimePreviewPageRoute(
+        images:
+            state.uri.queryParametersAll['images']?.map((e) => e).toList() ??
+                const [],
+        title: state.uri.queryParameters['title'],
+      );
+
+  AnimePreviewPageRoute get _self => this as AnimePreviewPageRoute;
+
+  @override
+  String get location => GoRouteData.$location(
+        '/anime_preview',
+        queryParams: {
+          'images': _self.images.map((e) => e).toList(),
+          if (_self.title != null) 'title': _self.title,
         },
       );
 

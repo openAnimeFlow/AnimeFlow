@@ -179,13 +179,13 @@ class _VideoSourceDrawersState extends ConsumerState<VideoSourceDrawers> {
   @override
   Widget build(BuildContext context) {
     if (widget.isBottomSheet) {
-      final paddingBottom = MediaQuery.paddingOf(context).bottom;
       return Material(
         color: Theme.of(context).cardColor,
         borderRadius: const BorderRadius.vertical(top: Radius.circular(16)),
         clipBehavior: Clip.antiAlias,
         child: Padding(
-          padding: EdgeInsets.fromLTRB(16, 20, 16, paddingBottom),
+          padding: EdgeInsets.fromLTRB(
+              16, 20, 16, MediaQuery.paddingOf(context).bottom),
           child: _buildDrawerContent(includeDragHandle: true),
         ),
       );
@@ -197,7 +197,11 @@ class _VideoSourceDrawersState extends ConsumerState<VideoSourceDrawers> {
         height: MediaQuery.of(context).size.height,
         child: Container(
           padding: EdgeInsets.only(
-              top: MediaQuery.of(context).padding.top, left: 16, right: 16),
+            top: MediaQuery.of(context).padding.top,
+            left: 16,
+            right: 16,
+            bottom: MediaQuery.viewInsetsOf(context).bottom,
+          ),
           color: Theme.of(context).cardColor,
           child: _buildDrawerContent(),
         ),

@@ -363,16 +363,12 @@ class InfoHeadView extends StatelessWidget {
               ),
             Consumer(
               builder: (context, ref, child) {
-                final image =
-                    ref.watch(animeInfoArgsProvider.select((e) => e.image));
                 // Keep episodes cached while the anime info page is alive.
                 ref.watch(subjectEpisodesProvider(subjectItem.id));
                 return IconButton(
                   onPressed: () => EpisodesDrawerView.show(
                     context,
-                    subjectItem: subjectItem,
-                    subjectName: name,
-                    subjectImage: image,
+                    subjectId: subjectItem.id,
                     onPlayEpisode: onPlayEpisode,
                     onEpisodeLongPress: (episode) async {
                       try {

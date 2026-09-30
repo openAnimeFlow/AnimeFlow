@@ -1,28 +1,25 @@
 import 'package:anime_flow/app/localization/app_localizations.dart';
 import 'package:anime_flow/core/constants/constants.dart';
+import 'package:anime_flow/core/utils/system_util.dart';
 import 'package:anime_flow/features/play/presentation/providers/subject_episodes_provider.dart';
 import 'package:anime_flow/shared/models/player/bangumi/episodes_item.dart';
-import 'package:anime_flow/shared/models/bangumi/subjects_info_item.dart';
 import 'package:anime_flow/core/network/clients/flow_client.dart';
 import 'package:anime_flow/features/user/presentation/providers/user_state_provider.dart';
 import 'package:anime_flow/core/logger/logger.dart';
+import 'package:anime_flow/shared/widgets/animation_network_image.dart';
 import 'package:anime_flow/shared/widgets/notification_toast.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 class EpisodesDrawerView extends ConsumerStatefulWidget {
-  final SubjectsInfoItem subjectItem;
-  final String subjectName;
-  final String subjectImage;
+  final int subjectId;
   final ScrollController scrollController;
   final void Function(EpisodeData episode)? onEpisodeLongPress;
   final ValueChanged<int> onPlayEpisode;
 
   const EpisodesDrawerView({
     super.key,
-    required this.subjectItem,
-    required this.subjectName,
-    required this.subjectImage,
+    required this.subjectId,
     required this.scrollController,
     this.onEpisodeLongPress,
     required this.onPlayEpisode,
@@ -30,9 +27,7 @@ class EpisodesDrawerView extends ConsumerStatefulWidget {
 
   static void show(
     BuildContext context, {
-    required SubjectsInfoItem subjectItem,
-    required String subjectName,
-    required String subjectImage,
+    required int subjectId,
     void Function(EpisodeData episode)? onEpisodeLongPress,
     required ValueChanged<int> onPlayEpisode,
   }) {
@@ -46,7 +41,7 @@ class EpisodesDrawerView extends ConsumerStatefulWidget {
           container: providerContainer,
           child: DraggableScrollableSheet(
             expand: false,
-            initialChildSize: 0.60,
+            initialChildSize: SystemUtil.isMobile ? 0.60 : 0.9,
             minChildSize: 0.3,
             maxChildSize: 0.95,
             snap: true,
@@ -54,9 +49,7 @@ class EpisodesDrawerView extends ConsumerStatefulWidget {
             builder: (context, scrollController) {
               return EpisodesDrawerView(
                 scrollController: scrollController,
-                subjectItem: subjectItem,
-                subjectName: subjectName,
-                subjectImage: subjectImage,
+                subjectId: subjectId,
                 onEpisodeLongPress: onEpisodeLongPress,
                 onPlayEpisode: onPlayEpisode,
               );
@@ -101,7 +94,7 @@ class _EpisodesDrawerViewState extends ConsumerState<EpisodesDrawerView> {
     setState(() => _isMarkingAllWatched = true);
     try {
       await ref
-          .read(subjectEpisodesProvider(widget.subjectItem.id).notifier)
+          .read(subjectEpisodesProvider(widget.subjectId).notifier)
           .markAllEpisodesWatched();
       if (!mounted) return;
       NotificationToast.show(l10n.markAllWatchedSuccess, title: l10n.tip);
@@ -138,8 +131,7 @@ class _EpisodesDrawerViewState extends ConsumerState<EpisodesDrawerView> {
 
   @override
   Widget build(BuildContext context) {
-    final subjectItem = widget.subjectItem;
-    final episodesAsync = ref.watch(subjectEpisodesProvider(subjectItem.id));
+    final episodesAsync = ref.watch(subjectEpisodesProvider(widget.subjectId));
     final isLoggedIn = ref.watch(isLoggedInProvider).value ?? false;
     final l10n = AppLocalizations.of(context);
 
@@ -170,7 +162,7 @@ class _EpisodesDrawerViewState extends ConsumerState<EpisodesDrawerView> {
               const SizedBox(height: 12),
               FilledButton.icon(
                 onPressed: () => ref
-                    .read(subjectEpisodesProvider(subjectItem.id).notifier)
+                    .read(subjectEpisodesProvider(widget.subjectId).notifier)
                     .retry(),
                 icon: const Icon(Icons.refresh),
                 label: Text(l10n.retry),
@@ -180,16 +172,18 @@ class _EpisodesDrawerViewState extends ConsumerState<EpisodesDrawerView> {
         );
       },
       data: (episodesState) =>
-          _buildEpisodesList(episodesState, subjectItem, isLoggedIn, l10n),
+          _buildEpisodesList(episodesState, isLoggedIn, l10n),
     );
   }
 
   Widget _buildEpisodesList(
     SubjectEpisodesState episodesState,
-    SubjectsInfoItem subjectItem,
     bool isLoggedIn,
     AppLocalizations l10n,
   ) {
+    if (episodesState.episodes.data.isEmpty) {
+      return Center(child: Text(l10n.noEpisodeData));
+    }
     final sortedEpisodes = [...episodesState.episodes.data]..sort((a, b) {
         final aIsMain = a.type == 0 ? 0 : 1;
         final bIsMain = b.type == 0 ? 0 : 1;
@@ -197,10 +191,6 @@ class _EpisodesDrawerViewState extends ConsumerState<EpisodesDrawerView> {
         if (a.type != b.type) return a.type.compareTo(b.type);
         return a.sort.compareTo(b.sort);
       });
-
-    if (sortedEpisodes.isEmpty) {
-      return Center(child: Text(l10n.noEpisodeData));
-    }
 
     return Column(
       children: [
@@ -243,7 +233,7 @@ class _EpisodesDrawerViewState extends ConsumerState<EpisodesDrawerView> {
           child: NotificationListener<ScrollNotification>(
             onNotification: (notification) {
               if (notification.metrics.axis == Axis.vertical) {
-                _tryLoadMoreEpisodes(subjectItem.id);
+                _tryLoadMoreEpisodes(widget.subjectId);
               }
               return false;
             },
@@ -253,7 +243,6 @@ class _EpisodesDrawerViewState extends ConsumerState<EpisodesDrawerView> {
               padding: EdgeInsets.only(
                 bottom: MediaQuery.paddingOf(context).bottom,
               ),
-              itemExtent: 70,
               itemCount:
                   sortedEpisodes.length + (episodesState.isLoadingMore ? 1 : 0),
               itemBuilder: (context, index) {
@@ -269,26 +258,45 @@ class _EpisodesDrawerViewState extends ConsumerState<EpisodesDrawerView> {
                     ),
                   );
                 }
-
+                final colorScheme = Theme.of(context).colorScheme;
                 final episode = sortedEpisodes[index];
+                final hasCover =
+                    episode.cover != null && episode.cover!.isNotEmpty;
+
                 // Keep watched backgrounds and ink within the scrolling row.
                 return Material(
                   type: MaterialType.transparency,
                   child: ListTile(
                     tileColor: episode.watched == true
-                        ? Theme.of(context).colorScheme.surfaceContainerHighest
+                        ? colorScheme.surfaceContainerHighest
                         : null,
                     onLongPress: () => widget.onEpisodeLongPress?.call(episode),
                     onTap: () {
                       Navigator.of(context).pop();
                       widget.onPlayEpisode(episode.id);
                     },
-                    leading: Text(
-                      episode.sort.toString().padLeft(2, '0'),
-                      style: const TextStyle(fontSize: 20),
+                    leading: AspectRatio(
+                      aspectRatio: 5 / 3,
+                      child: Container(
+                        decoration: BoxDecoration(
+                          color: colorScheme.surfaceContainerHighest,
+                          borderRadius: BorderRadius.circular(6),
+                        ),
+                        child: hasCover
+                            ? AnimationNetworkImage(
+                                url: episode.cover!,
+                                fit: BoxFit.cover,
+                                borderRadius: BorderRadius.circular(6),
+                              )
+                            : Icon(
+                                Icons.image_not_supported_outlined,
+                                size: 18,
+                                color: colorScheme.outline,
+                              ),
+                      ),
                     ),
                     title: Text(
-                      episode.nameCN.isEmpty ? episode.name : episode.nameCN,
+                      '${episode.sort.toString().padLeft(2, '0')}-${episode.nameCN.isEmpty ? episode.name : episode.nameCN}',
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                     ),

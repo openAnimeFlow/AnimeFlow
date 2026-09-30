@@ -45,6 +45,7 @@ class EpisodeData {
   final int comment;
   final bool? watched;
   final String desc;
+  final String? cover;
 
   EpisodeData({
     required this.id,
@@ -59,6 +60,7 @@ class EpisodeData {
     required this.comment,
     required this.desc,
     this.watched,
+    this.cover,
   });
 
   EpisodeData copyWith({
@@ -74,6 +76,7 @@ class EpisodeData {
     int? comment,
     bool? watched,
     String? desc,
+    String? cover,
   }) {
     return EpisodeData(
       id: id ?? this.id,
@@ -88,6 +91,7 @@ class EpisodeData {
       comment: comment ?? this.comment,
       watched: watched ?? this.watched,
       desc: desc ?? this.desc,
+      cover: cover ?? this.cover,
     );
   }
 
@@ -103,7 +107,8 @@ class EpisodeData {
         duration = json['duration'] ?? '',
         airdate = json['airdate'] ?? '',
         comment = json['comment'] ?? 0,
-        desc = json['desc'] ?? '';
+        desc = json['desc'] ?? '',
+        cover = json['cover'] as String?;
 
   Map<String, dynamic> toJson() {
     return {
@@ -119,6 +124,7 @@ class EpisodeData {
       'comment': comment,
       if (watched != null) 'watched': watched,
       'desc': desc,
+      if (cover != null) 'cover': cover,
     };
   }
 }

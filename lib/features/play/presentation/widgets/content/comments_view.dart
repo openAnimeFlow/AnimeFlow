@@ -255,7 +255,7 @@ class _CommentsViewState extends ConsumerState<CommentsView>
                     ),
                     const SizedBox(width: 8),
                     Text(
-                      FormatTimeUtil.formatTimestamp(comment.createdAt),
+                      FormatTimeUtil.formatDate( comment.createdAt),
                       style: TextStyle(
                         fontSize: 12,
                         fontWeight: FontWeight.bold,
@@ -314,7 +314,7 @@ class _CommentsViewState extends ConsumerState<CommentsView>
                         ),
                         const SizedBox(width: 8),
                         Text(
-                          FormatTimeUtil.formatTimestamp(reply.createdAt),
+                          FormatTimeUtil.formatDate(reply.createdAt),
                           style: TextStyle(
                             fontWeight: FontWeight.bold,
                             fontSize: 11,

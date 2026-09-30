@@ -236,6 +236,7 @@ class _EpisodesListViewState extends ConsumerState<EpisodesListView> {
       child: ListView.builder(
         controller: controller,
         itemCount: itemCount,
+        itemExtent: itemHeight,
         padding: EdgeInsets.zero,
         itemBuilder: (context, index) {
           if (index >= episodes.length) {
@@ -244,68 +245,65 @@ class _EpisodesListViewState extends ConsumerState<EpisodesListView> {
           final colorScheme = Theme.of(context).colorScheme;
           final episode = episodes[index];
           final isSelected = selectedEpisodeId == episode.id;
-          return SizedBox(
-            height: itemHeight,
-            child: Card(
-              elevation: 0,
-              child: InkWell(
-                borderRadius: BorderRadius.circular(10),
-                onTap: () => _selectEpisode(episode),
-                // 长按
-                onLongPress: ref.read(playExtraProvider).isOfflineMode
-                    ? null
-                    : () => _updateEpisodeWatched(episode),
-                child: Container(
-                  decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(10),
-                    color: episode.watched == true
-                        ? colorScheme.surfaceContainerHighest
-                        : null,
-                    border: episode.watched == true
-                        ? Border.all(
-                            color: colorScheme.secondaryContainer,
-                            width: 2,
-                          )
-                        : null,
-                  ),
-                  padding: const EdgeInsets.all(8),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Expanded(
-                        child: Column(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          crossAxisAlignment: CrossAxisAlignment.stretch,
-                          children: [
-                            Row(
-                              children: [
-                                Text(episode.sort.toString().padLeft(2, '0')),
-                                if (episode.type != 0) ...[
-                                  const SizedBox(width: 6),
-                                  Text(
-                                    episodesTypeLabels[episode.type] ?? '',
-                                    style: TextStyle(
-                                      fontSize: 10,
-                                      color:
-                                          Theme.of(context).colorScheme.outline,
-                                    ),
+          return Card(
+            elevation: 0,
+            child: InkWell(
+              borderRadius: BorderRadius.circular(10),
+              onTap: () => _selectEpisode(episode),
+              // 长按
+              onLongPress: ref.read(playExtraProvider).isOfflineMode
+                  ? null
+                  : () => _updateEpisodeWatched(episode),
+              child: Container(
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(10),
+                  color: episode.watched == true
+                      ? colorScheme.surfaceContainerHighest
+                      : null,
+                  border: episode.watched == true
+                      ? Border.all(
+                          color: colorScheme.secondaryContainer,
+                          width: 2,
+                        )
+                      : null,
+                ),
+                padding: const EdgeInsets.all(8),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Expanded(
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        crossAxisAlignment: CrossAxisAlignment.stretch,
+                        children: [
+                          Row(
+                            children: [
+                              Text(episode.sort.toString().padLeft(2, '0')),
+                              if (episode.type != 0) ...[
+                                const SizedBox(width: 6),
+                                Text(
+                                  episodesTypeLabels[episode.type] ?? '',
+                                  style: TextStyle(
+                                    fontSize: 10,
+                                    color:
+                                        Theme.of(context).colorScheme.outline,
                                   ),
-                                ],
+                                ),
                               ],
-                            ),
-                            Text(
-                              episode.nameCN.isEmpty
-                                  ? episode.name
-                                  : episode.nameCN,
-                              overflow: TextOverflow.ellipsis,
-                              maxLines: 1,
-                            ),
-                          ],
-                        ),
+                            ],
+                          ),
+                          Text(
+                            episode.nameCN.isEmpty
+                                ? episode.name
+                                : episode.nameCN,
+                            overflow: TextOverflow.ellipsis,
+                            maxLines: 1,
+                          ),
+                        ],
                       ),
-                      if (isSelected) _buildPlayingIndicator(),
-                    ],
-                  ),
+                    ),
+                    if (isSelected) _buildPlayingIndicator(),
+                  ],
                 ),
               ),
             ),

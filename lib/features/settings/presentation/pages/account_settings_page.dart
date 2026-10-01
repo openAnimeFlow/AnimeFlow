@@ -72,8 +72,6 @@ class _AccountSettingsPageState extends ConsumerState<AccountSettingsPage> {
     if (confirmed != true || !context.mounted) return;
 
     await ref.read(accountControllerProvider.notifier).clearUserInfo();
-    if (!context.mounted) return;
-    NotificationToast.show(l10n.logoutSuccess, title: l10n.tip);
   }
 
   Future<void> _bindBangumi() async {

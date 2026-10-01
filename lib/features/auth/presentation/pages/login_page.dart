@@ -53,10 +53,6 @@ class _LoginPageState extends ConsumerState<LoginPage> {
       ref.invalidate(isLoggedInProvider);
       ref.invalidate(currentUserInfoProvider);
       ref.invalidate(userCollectionsProvider);
-      final l10n = AppLocalizations.of(context);
-      NotificationToast.show(l10n.loginSuccess,
-          title: l10n.tip, align: Alignment.topCenter);
-      const UserRoute().go(context);
     } on AnimeFlowApiException catch (e) {
       if (!mounted) return;
       NotificationToast.show(e.message, title: '提示');

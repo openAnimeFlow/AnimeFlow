@@ -1,6 +1,7 @@
 import 'package:anime_flow/app/localization/app_localizations.dart';
 import 'package:anime_flow/features/home/presentation/widgets/anime/anime_view.dart';
 import 'package:anime_flow/features/home/presentation/widgets/community/community_view.dart';
+import 'package:anime_flow/features/home/presentation/widgets/github_issue/github_issue_view.dart';
 import 'package:anime_flow/app/router/app_router.dart';
 import 'package:flutter/material.dart';
 
@@ -17,7 +18,7 @@ class _RecommendPageState extends State<RecommendPage>
   @override
   void initState() {
     super.initState();
-    _tabController = TabController(length: 2, vsync: this);
+    _tabController = TabController(length: 3, vsync: this);
   }
 
   @override
@@ -91,6 +92,7 @@ class _RecommendPageState extends State<RecommendPage>
         bottom: TabBar(controller: _tabController, tabs: [
           Tab(text: l10n.anime),
           Tab(text: l10n.community),
+          Tab(text: l10n.githubFeedbackTab),
         ]),
       ),
       body: TabBarView(
@@ -98,6 +100,7 @@ class _RecommendPageState extends State<RecommendPage>
         children: const [
           AnimeView(),
           CommunityView(),
+          GitHubIssueView(),
         ],
       ),
     );

@@ -86,6 +86,7 @@ class _RankingPageState extends State<RankingPage> {
             builder: (context, ref, child) {
               final rankingAsync = ref.watch(rankingProvider);
               final rankingState = rankingAsync.asData?.value;
+              final isReloading = rankingState?.isReloading ?? false;
               return RefreshIndicator(
                   onRefresh: () => ref.read(rankingProvider.notifier).refresh(),
                   child: NotificationListener<ScrollNotification>(
@@ -111,10 +112,16 @@ class _RankingPageState extends State<RankingPage> {
                     child: CustomScrollView(
                       controller: scrollController,
                       slivers: [
-                        const SliverAppBar(
+                        SliverAppBar(
                           pinned: true,
                           floating: true,
-                          title: RankingFilterBar(),
+                          title: const RankingFilterBar(),
+                          bottom: PreferredSize(
+                            preferredSize: const Size.fromHeight(4),
+                            child: isReloading
+                                ? const LinearProgressIndicator(minHeight: 4)
+                                : const SizedBox.shrink(),
+                          ),
                         ),
                         if (rankingState?.errorMessage case final errorMessage?)
                           SliverToBoxAdapter(

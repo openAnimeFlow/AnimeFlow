@@ -192,19 +192,17 @@ class _VideoSourceDrawersState extends ConsumerState<VideoSourceDrawers> {
     }
     return Align(
       alignment: Alignment.centerRight,
-      child: SizedBox(
+      child: Container(
         width: LayoutConstant.playContentWidth,
         height: MediaQuery.of(context).size.height,
-        child: Container(
-          padding: EdgeInsets.only(
-            top: MediaQuery.of(context).padding.top,
-            left: 16,
-            right: 16,
-            bottom: MediaQuery.viewInsetsOf(context).bottom,
-          ),
-          color: Theme.of(context).cardColor,
-          child: _buildDrawerContent(),
+        padding: EdgeInsets.only(
+          top: MediaQuery.of(context).padding.top,
+          left: 16,
+          right: 16,
+          bottom: MediaQuery.viewInsetsOf(context).bottom,
         ),
+        color: Theme.of(context).cardColor,
+        child: _buildDrawerContent(),
       ),
     );
   }

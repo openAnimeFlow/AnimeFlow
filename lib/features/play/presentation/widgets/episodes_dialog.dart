@@ -1,6 +1,7 @@
 import 'package:anime_flow/app/localization/app_localizations.dart';
 import 'package:anime_flow/core/constants/constants.dart';
 import 'package:anime_flow/core/constants/layout_constant.dart';
+import 'package:anime_flow/core/utils/system_util.dart';
 import 'package:anime_flow/shared/models/player/bangumi/episodes_item.dart';
 import 'package:anime_flow/features/play/presentation/providers/episodes_provider.dart';
 import 'package:anime_flow/features/play/presentation/providers/subject_episodes_provider.dart';
@@ -52,28 +53,34 @@ class _EpisodesDialogState extends ConsumerState<EpisodesDialog> {
       child: Container(
         width: LayoutConstant.playContentWidth,
         height: double.infinity,
-        padding: const EdgeInsets.symmetric(horizontal: 10),
-        color: Theme.of(context).cardColor,
+        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 10),
+        decoration: BoxDecoration(
+            color: Theme.of(context).cardColor,
+            borderRadius: const BorderRadius.only(
+                topLeft: Radius.circular(30), bottomLeft: Radius.circular(30))),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Text(
-                  l10n.episodeSelection,
-                  style: TextStyle(
-                    fontSize: 20,
-                    fontWeight: FontWeight.bold,
-                    color: Theme.of(context).textTheme.titleLarge?.color,
-                    decoration: TextDecoration.none,
+            Padding(
+              padding: const EdgeInsets.only(left: 10, right: 10),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Text(
+                    l10n.episodeSelection,
+                    style: TextStyle(
+                      fontSize: 20,
+                      fontWeight: FontWeight.bold,
+                      color: Theme.of(context).textTheme.titleLarge?.color,
+                      decoration: TextDecoration.none,
+                    ),
                   ),
-                ),
-                IconButton(
-                  onPressed: () => context.pop(),
-                  icon: const Icon(Icons.close_rounded),
-                ),
-              ],
+                  IconButton(
+                    onPressed: () => context.pop(),
+                    icon: const Icon(Icons.close_rounded),
+                  ),
+                ],
+              ),
             ),
             const SizedBox(height: 10),
             Expanded(

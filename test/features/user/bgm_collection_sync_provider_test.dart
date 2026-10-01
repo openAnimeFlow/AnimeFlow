@@ -153,4 +153,24 @@ void main() {
     await c.read(bgmCollectionSyncProvider.notifier).refreshStatus();
     expect(c.read(collectionRevisionProvider), 1);
   });
+
+  test('build-time collection refresh only runs on the initial build',
+      () async {
+    final repo = Repository()
+      ..loader = () async => const BgmCollectionSyncStatusItem(
+          status: BgmCollectionSyncStatus.success, taskId: 1, syncedCount: 5);
+    final c = create(repo);
+    addTearDown(c.dispose);
+
+    await c.read(bgmCollectionSyncProvider.future);
+    await Future<void>.delayed(Duration.zero);
+    expect(c.read(collectionRevisionProvider), 1);
+
+    // A session change rebuilds the provider, but it must not re-refresh
+    // collections because login already invalidates the profile/collections.
+    c.invalidate(currentFlowTokenProvider);
+    await c.read(bgmCollectionSyncProvider.future);
+    await Future<void>.delayed(Duration.zero);
+    expect(c.read(collectionRevisionProvider), 1);
+  });
 }

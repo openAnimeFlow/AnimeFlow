@@ -6,7 +6,6 @@ import 'package:anime_flow/core/network/clients/flow_client.dart';
 import 'package:anime_flow/core/network/api/flow_api.dart';
 import 'package:anime_flow/shared/models/flow/bangumi_bind_item.dart';
 import 'package:anime_flow/core/auth/models/flow_token.dart';
-import 'package:anime_flow/features/user/presentation/providers/user_collection_provider.dart';
 import 'package:anime_flow/features/user/application/bgm_collection_sync_provider.dart';
 import 'package:anime_flow/features/user/application/user_oauth_state.dart';
 import 'package:anime_flow/features/user/presentation/providers/user_state_provider.dart';
@@ -122,11 +121,7 @@ class UserOAuthController extends _$UserOAuthController {
     );
     await ref.read(flowTokenRepositoryProvider).saveToken(flowToken);
     await PresenceService.instance.heartbeatNow();
-    ref.invalidate(currentFlowTokenProvider);
-    ref.invalidate(isLoggedInProvider);
-    ref.invalidate(currentUserInfoProvider);
-    ref.invalidate(bangumiBindProvider);
-    ref.invalidate(userCollectionsProvider);
+    invalidateUserSession(ref);
     NotificationToast.show('Bangumi 授权登录成功', title: '提示');
     return flowToken;
   }

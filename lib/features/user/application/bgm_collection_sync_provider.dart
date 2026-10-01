@@ -53,7 +53,11 @@ class BgmCollectionSync extends _$BgmCollectionSync {
     scheduleMicrotask(() {
       if (_current(generation)) _ensureConnection();
     });
-    if (status.syncedCount > 0) {
+    // Only refresh collections when this provider is first discovered. A
+    // session change such as login already invalidates the profile and
+    // collections, so re-running this on every rebuild would cause a duplicate
+    // refresh right after signing in.
+    if (ref.isFirstBuild && status.syncedCount > 0) {
       scheduleMicrotask(() {
         if (_current(generation)) _refreshCollections();
       });

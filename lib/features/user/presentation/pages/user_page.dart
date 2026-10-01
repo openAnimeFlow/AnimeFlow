@@ -20,8 +20,10 @@ class UserPage extends ConsumerWidget {
     final l10n = AppLocalizations.of(context);
     final isLoggedInAsync = ref.watch(isLoggedInProvider);
     final colorScheme = Theme.of(context).colorScheme;
+    // Keep the login page visible while the login state reloads, so a
+    // successful login only shows one loading state (the profile request below)
+    // instead of two full-screen spinners in a row.
     return isLoggedInAsync.when(
-      skipLoadingOnRefresh: false,
       data: (isLoggedIn) {
         if (!isLoggedIn) {
           return _buildLoginPage(context, colorScheme);

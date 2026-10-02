@@ -383,8 +383,7 @@ class VideoSourceNotifier extends _$VideoSourceNotifier {
       _updateResourceStatus(config.name, isLoading: true, errorMessage: null);
 
       final aliases = ref.read(playExtraProvider).playExtra.subjectAliases;
-      final rawSearchList =
-          await RuleRequest.searchSubjects(keyword, config);
+      final rawSearchList = await RuleRequest.searchSubjects(keyword, config);
       if (!ref.mounted) return;
       if (!_isRequestCurrent(config.name, sessionId, requestToken)) {
         return;

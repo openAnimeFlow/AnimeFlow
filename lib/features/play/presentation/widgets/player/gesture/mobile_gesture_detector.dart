@@ -95,11 +95,11 @@ class _MobileGestureDetectorState extends ConsumerState<MobileGestureDetector> {
 
       // 水平拖动开始：调整播放进度
       onHorizontalDragStart: (DragStartDetails details) {
+        if (!playSession.beginManualSeek()) return;
         videoUiNotifier.startHorizontalDrag(
           details.globalPosition.dx,
           ref.read(playStateProvider).position,
         );
-        playSession.beginManualSeek();
       },
 
       // 水平拖动更新：更新播放进度

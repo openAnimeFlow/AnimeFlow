@@ -11,7 +11,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 
-/// 中间区域控件
+/// 播放器指示器
 class MiddleAreaControl extends ConsumerStatefulWidget {
   const MiddleAreaControl({super.key});
 

@@ -82,10 +82,10 @@ class PlayerProgressBar extends ConsumerWidget {
                 min: 0.0,
                 max: max > 0 ? max : 1.0,
                 onChangeStart: (v) {
+                  if (!playController.beginManualSeek()) return;
                   videoUiStateController.startProgressDrag(
                     Duration(milliseconds: v.toInt()),
                   );
-                  playController.beginManualSeek();
                 },
                 onChanged: (v) {
                   videoUiStateController.setHorizontalDragPosition(

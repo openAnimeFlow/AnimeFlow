@@ -13,6 +13,7 @@ import 'package:anime_flow/features/play/domain/player/playback_source.dart';
 import 'package:anime_flow/features/play/domain/player/player_engine.dart';
 import 'package:anime_flow/features/play/domain/player/player_event.dart';
 import 'package:anime_flow/features/play/domain/player/player_kernel.dart';
+import 'package:anime_flow/features/play/domain/player/playback_phase.dart';
 import 'package:anime_flow/features/play/infrastructure/player/player_engine_factory.dart';
 import 'package:anime_flow/features/play/presentation/providers/episodes_provider.dart';
 import 'package:anime_flow/features/play/presentation/providers/play_provider.dart';
@@ -200,6 +201,43 @@ void main() {
     expect(factory.engines.last.seekPositions, [target]);
     expect(state.value.position, target);
   });
+
+  test('startup phase ignores play and seek requests', () async {
+    final factory = _Factory();
+    final state = _State()
+      ..value = const PlayState(
+        phase: PlaybackPhase.resolving,
+        duration: Duration(minutes: 24),
+      );
+    final session = _Session(factory, state: state);
+    await session.playbackCoordinator.initialize();
+    addTearDown(session.playbackCoordinator.dispose);
+    final engine = factory.engines.single;
+
+    session.playOrPauseVideo();
+    expect(session.beginManualSeek(), isFalse);
+    session.finishManualSeek(const Duration(minutes: 10));
+    session.seekTo(const Duration(minutes: 10));
+    await session.startPlaying();
+    await Future<void>.delayed(Duration.zero);
+
+    expect(engine.playCalls, 0);
+    expect(engine.pauseCalls, 0);
+    expect(engine.seekPositions, isEmpty);
+    expect(state.value.position, Duration.zero);
+
+    // 启动结束后恢复正常的播放与跳转。
+    state.value = state.value.copyWith(
+      phase: PlaybackPhase.playing,
+      playing: true,
+    );
+    session.playOrPauseVideo();
+    session.seekTo(const Duration(minutes: 10));
+    await Future<void>.delayed(Duration.zero);
+
+    expect(engine.pauseCalls, 1);
+    expect(engine.seekPositions, [const Duration(minutes: 10)]);
+  });
 }
 
 PlayRequest _request(int episode) => PlayRequest(
@@ -273,6 +311,8 @@ class _Engine implements PlayerEngine {
   PlaybackSource? source;
   final openedUris = <String>[];
   final seekPositions = <Duration>[];
+  int playCalls = 0;
+  int pauseCalls = 0;
   int disposeCount = 0;
   double? volume;
   @override
@@ -291,11 +331,13 @@ class _Engine implements PlayerEngine {
   @override
   Future<void> play() async {
     expect(disposeCount, 0);
+    playCalls++;
   }
 
   @override
   Future<void> pause() async {
     expect(disposeCount, 0);
+    pauseCalls++;
   }
 
   @override

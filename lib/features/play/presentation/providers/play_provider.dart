@@ -871,12 +871,17 @@ class PlaySession {
 
   ///暂停/播放
   void playOrPauseVideo() {
+    if (_isStartupInProgress) return;
     if (_playStateActions.value.playing) {
       unawaited(playbackCoordinator.pause());
     } else {
       unawaited(playbackCoordinator.play());
     }
   }
+
+  /// 启动流程（解析、打开）进行中：此时播放器还没有可操作的媒体。
+  bool get _isStartupInProgress =>
+      _playStateActions.value.phase.keepsStartupIndicator;
 
   void _applyPlaybackRate(double speed) {
     _playStateActions.setRate(speed);
@@ -904,13 +909,16 @@ class PlaySession {
   }
 
   /// 开始手动拖动进度：暂停播放并记住拖动前的播放状态。
-  void beginManualSeek() {
+  bool beginManualSeek() {
+    if (_isStartupInProgress) return false;
     _resumeAfterManualSeek = _playStateActions.value.playing;
     unawaited(playbackCoordinator.pause());
+    return true;
   }
 
   /// 结束手动拖动进度：跳转到目标并按拖动前的状态恢复播放。
   void finishManualSeek(Duration position) {
+    if (_isStartupInProgress) return;
     seekTo(position);
     _restorePlaybackAfterManualSeek();
   }
@@ -926,6 +934,7 @@ class PlaySession {
 
   /// 跳转到指定位置
   void seekTo(Duration pos) {
+    if (_isStartupInProgress) return;
     danmaku.onSeek();
     final target = _clampSeekTarget(pos);
     // 落点确认前先以目标位置更新播放状态。
@@ -1025,6 +1034,7 @@ class PlaySession {
 
   /// 开始播放
   Future<void> startPlaying() async {
+    if (_isStartupInProgress) return;
     try {
       await playbackCoordinator.play();
     } catch (_) {

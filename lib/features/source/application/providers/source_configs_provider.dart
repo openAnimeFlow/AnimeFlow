@@ -10,12 +10,18 @@ class SourceConfigs extends _$SourceConfigs {
   Future<List<CrawlConfigItem>> build() async {
     final repository = ref.watch(sourceRepositoryProvider);
 
+    final listenable = repository.listenable;
+
     void onChanged() {
-      ref.invalidateSelf();
+      if (!ref.mounted) return;
+      Future<void>.microtask(() {
+        if (!ref.mounted) return;
+        ref.invalidateSelf();
+      });
     }
 
-    repository.listenable.addListener(onChanged);
-    ref.onDispose(() => repository.listenable.removeListener(onChanged));
+    listenable.addListener(onChanged);
+    ref.onDispose(() => listenable.removeListener(onChanged));
 
     return repository.getSources();
   }

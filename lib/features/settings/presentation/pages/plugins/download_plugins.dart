@@ -3,6 +3,7 @@ import 'dart:math' as math;
 import 'package:anime_flow/core/constants/storage_key.dart';
 import 'package:anime_flow/core/settings/app_settings.dart';
 import 'package:anime_flow/features/source/data/repositories/source_repository.dart';
+import 'package:anime_flow/features/settings/presentation/pages/plugins/plugin_install_message.dart';
 import 'package:anime_flow/features/source/application/providers/source_repository_provider.dart';
 import 'package:anime_flow/core/utils/format_time_util.dart';
 import 'package:anime_flow/core/utils/system_util.dart';
@@ -64,7 +65,7 @@ class _DownloadPluginsPageState extends ConsumerState<DownloadPluginsPage> {
           title: l10n.downloadSuccess);
     } catch (e) {
       NotificationToast.show(
-        l10n.pluginDownloadFailed(pluginName, e.toString()),
+        pluginInstallErrorMessage(l10n, pluginName, e, isUpdate: false),
         title: l10n.downloadFailed,
       );
     } finally {
@@ -102,7 +103,7 @@ class _DownloadPluginsPageState extends ConsumerState<DownloadPluginsPage> {
       );
     } catch (e) {
       NotificationToast.show(
-        l10n.pluginUpdateFailed(pluginName, e.toString()),
+        pluginInstallErrorMessage(l10n, pluginName, e, isUpdate: true),
         title: l10n.updateFailed,
       );
     } finally {
@@ -255,7 +256,14 @@ class _DownloadPluginsPageState extends ConsumerState<DownloadPluginsPage> {
                                                   ),
                                                 ],
                                               ))),
-                                      if (localPlugin == null)
+                                      if (plugin.requiresNewerClient)
+                                        TextButton(
+                                          onPressed: null,
+                                          child: Text(
+                                            l10n.pluginNeedsNewerClient,
+                                          ),
+                                        )
+                                      else if (localPlugin == null)
                                         IconButton(
                                             onPressed: isPluginBusy
                                                 ? null

@@ -502,18 +502,22 @@
   "downloadSuccess": "下载成功",
   "pluginDownloaded": "插件 \"{name}\" 已下载",
   "pluginDownloadFailed": "下载插件 \"{name}\" 时发生错误：{error}",
+  "@pluginDownloadFailed": {"placeholders": {"name": {}, "error": {}}},
   "updateSuccess": "更新成功",
   "pluginUpdated": "插件 \"{name}\" 已更新到版本 {version}",
   "pluginUpdateFailed": "更新插件 \"{name}\" 时发生错误：{error}",
+  "@pluginUpdateFailed": {"placeholders": {"name": {}, "error": {}}},
   "sharePlugin": "分享插件",
   "importPlugin": "导入插件",
   "pluginShareFailed": "分享插件 \"{name}\" 失败：{error}",
+  "@pluginShareFailed": {"placeholders": {"name": {}, "error": {}}},
   "pluginImported": "插件 \"{name}\" 已导入",
   "pluginImportFailed": "导入插件失败：{error}",
   "copyPlugin": "复制插件",
   "pastePlugin": "从剪切板导入插件",
   "pluginCopied": "插件 \"{name}\" 已复制到剪切板",
   "pluginCopyFailed": "复制插件 \"{name}\" 失败：{error}",
+  "@pluginCopyFailed": {"placeholders": {"name": {}, "error": {}}},
   "downloadSources": "下载数据源",
   "downloadSourcesSubtitle": "当前会从 GitHub 仓库中下载数据源，注意网络环境，下拉刷新数据",
   "useMirror": "使用镜像",
@@ -523,6 +527,7 @@
   "updating": "更新中…",
   "update": "更新",
   "pluginVersionDate": "版本：{version} - {date}",
+  "@pluginVersionDate": {"placeholders": {"version": {}, "date": {}}},
   "collectionSyncTitle": "收藏同步",
   "collectionSyncDescription": "绑定后，AnimeFlow 与 Bangumi 的收藏会双向同步",
   "collectionSyncHint": "你发现 Bangumi 和 AnimeFlow 收藏不同步时，可以点击“同步 Bangumi 收藏”进行双向同步",
@@ -750,5 +755,8 @@
   "captchaDetectText": "文本",
   "captchaDetectRegex": "正则",
   "invalidJsonFormat": "JSON 格式不正确"
+  ,"pluginRequiresNewerClient": "插件 \"{name}\" 需要更新 AnimeFlow 后才能使用"
+  ,"@pluginRequiresNewerClient": {"placeholders": {"name": {}}}
+  ,"pluginNeedsNewerClient": "需要更新客户端"
 
 }

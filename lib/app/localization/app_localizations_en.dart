@@ -1602,7 +1602,7 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
-  String pluginDownloadFailed(Object error, Object name) {
+  String pluginDownloadFailed(Object name, Object error) {
     return 'Error downloading plugin \"$name\": $error';
   }
 
@@ -1615,7 +1615,7 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
-  String pluginUpdateFailed(Object error, Object name) {
+  String pluginUpdateFailed(Object name, Object error) {
     return 'Error updating plugin \"$name\": $error';
   }
 
@@ -1626,7 +1626,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get importPlugin => 'Import plugin';
 
   @override
-  String pluginShareFailed(Object error, Object name) {
+  String pluginShareFailed(Object name, Object error) {
     return 'Failed to share plugin \"$name\": $error';
   }
 
@@ -1652,7 +1652,7 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
-  String pluginCopyFailed(Object error, Object name) {
+  String pluginCopyFailed(Object name, Object error) {
     return 'Failed to copy plugin \"$name\": $error';
   }
 
@@ -1683,7 +1683,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get update => 'Update';
 
   @override
-  String pluginVersionDate(Object date, Object version) {
+  String pluginVersionDate(Object version, Object date) {
     return 'Version: $version - $date';
   }
 
@@ -2315,4 +2315,12 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get invalidJsonFormat => 'Invalid JSON';
+
+  @override
+  String pluginRequiresNewerClient(Object name) {
+    return 'Plugin \"$name\" requires a newer version of AnimeFlow';
+  }
+
+  @override
+  String get pluginNeedsNewerClient => 'Needs newer client';
 }

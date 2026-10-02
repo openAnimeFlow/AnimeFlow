@@ -3030,7 +3030,7 @@ abstract class AppLocalizations {
   ///
   /// In zh_Hans, this message translates to:
   /// **'下载插件 \"{name}\" 时发生错误：{error}'**
-  String pluginDownloadFailed(Object error, Object name);
+  String pluginDownloadFailed(Object name, Object error);
 
   /// No description provided for @updateSuccess.
   ///
@@ -3048,7 +3048,7 @@ abstract class AppLocalizations {
   ///
   /// In zh_Hans, this message translates to:
   /// **'更新插件 \"{name}\" 时发生错误：{error}'**
-  String pluginUpdateFailed(Object error, Object name);
+  String pluginUpdateFailed(Object name, Object error);
 
   /// No description provided for @sharePlugin.
   ///
@@ -3066,7 +3066,7 @@ abstract class AppLocalizations {
   ///
   /// In zh_Hans, this message translates to:
   /// **'分享插件 \"{name}\" 失败：{error}'**
-  String pluginShareFailed(Object error, Object name);
+  String pluginShareFailed(Object name, Object error);
 
   /// No description provided for @pluginImported.
   ///
@@ -3102,7 +3102,7 @@ abstract class AppLocalizations {
   ///
   /// In zh_Hans, this message translates to:
   /// **'复制插件 \"{name}\" 失败：{error}'**
-  String pluginCopyFailed(Object error, Object name);
+  String pluginCopyFailed(Object name, Object error);
 
   /// No description provided for @downloadSources.
   ///
@@ -3156,7 +3156,7 @@ abstract class AppLocalizations {
   ///
   /// In zh_Hans, this message translates to:
   /// **'版本：{version} - {date}'**
-  String pluginVersionDate(Object date, Object version);
+  String pluginVersionDate(Object version, Object date);
 
   /// No description provided for @collectionSyncTitle.
   ///
@@ -4274,6 +4274,18 @@ abstract class AppLocalizations {
   /// In zh_Hans, this message translates to:
   /// **'JSON 格式不正确'**
   String get invalidJsonFormat;
+
+  /// No description provided for @pluginRequiresNewerClient.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'插件 \"{name}\" 需要更新 AnimeFlow 后才能使用'**
+  String pluginRequiresNewerClient(Object name);
+
+  /// No description provided for @pluginNeedsNewerClient.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'需要更新客户端'**
+  String get pluginNeedsNewerClient;
 }
 
 class _AppLocalizationsDelegate

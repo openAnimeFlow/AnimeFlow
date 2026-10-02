@@ -1557,7 +1557,7 @@ class AppLocalizationsZh extends AppLocalizations {
   }
 
   @override
-  String pluginDownloadFailed(Object error, Object name) {
+  String pluginDownloadFailed(Object name, Object error) {
     return '下載外掛 \"$name\" 時發生錯誤：$error';
   }
 
@@ -1570,7 +1570,7 @@ class AppLocalizationsZh extends AppLocalizations {
   }
 
   @override
-  String pluginUpdateFailed(Object error, Object name) {
+  String pluginUpdateFailed(Object name, Object error) {
     return '更新外掛 \"$name\" 時發生錯誤：$error';
   }
 
@@ -1581,7 +1581,7 @@ class AppLocalizationsZh extends AppLocalizations {
   String get importPlugin => '匯入插件';
 
   @override
-  String pluginShareFailed(Object error, Object name) {
+  String pluginShareFailed(Object name, Object error) {
     return '分享插件 \"$name\" 失敗：$error';
   }
 
@@ -1607,7 +1607,7 @@ class AppLocalizationsZh extends AppLocalizations {
   }
 
   @override
-  String pluginCopyFailed(Object error, Object name) {
+  String pluginCopyFailed(Object name, Object error) {
     return '複製插件 \"$name\" 失敗：$error';
   }
 
@@ -1636,7 +1636,7 @@ class AppLocalizationsZh extends AppLocalizations {
   String get update => '更新';
 
   @override
-  String pluginVersionDate(Object date, Object version) {
+  String pluginVersionDate(Object version, Object date) {
     return '版本：$version - $date';
   }
 
@@ -2247,6 +2247,14 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get invalidJsonFormat => 'JSON 格式不正確';
+
+  @override
+  String pluginRequiresNewerClient(Object name) {
+    return '外掛 \"$name\" 需要更新 AnimeFlow 後才能使用';
+  }
+
+  @override
+  String get pluginNeedsNewerClient => '需要更新用戶端';
 }
 
 /// The translations for Chinese, using the Han script (`zh_Hans`).
@@ -3802,7 +3810,7 @@ class AppLocalizationsZhHans extends AppLocalizationsZh {
   }
 
   @override
-  String pluginDownloadFailed(Object error, Object name) {
+  String pluginDownloadFailed(Object name, Object error) {
     return '下载插件 \"$name\" 时发生错误：$error';
   }
 
@@ -3815,7 +3823,7 @@ class AppLocalizationsZhHans extends AppLocalizationsZh {
   }
 
   @override
-  String pluginUpdateFailed(Object error, Object name) {
+  String pluginUpdateFailed(Object name, Object error) {
     return '更新插件 \"$name\" 时发生错误：$error';
   }
 
@@ -3826,7 +3834,7 @@ class AppLocalizationsZhHans extends AppLocalizationsZh {
   String get importPlugin => '导入插件';
 
   @override
-  String pluginShareFailed(Object error, Object name) {
+  String pluginShareFailed(Object name, Object error) {
     return '分享插件 \"$name\" 失败：$error';
   }
 
@@ -3852,7 +3860,7 @@ class AppLocalizationsZhHans extends AppLocalizationsZh {
   }
 
   @override
-  String pluginCopyFailed(Object error, Object name) {
+  String pluginCopyFailed(Object name, Object error) {
     return '复制插件 \"$name\" 失败：$error';
   }
 
@@ -3881,7 +3889,7 @@ class AppLocalizationsZhHans extends AppLocalizationsZh {
   String get update => '更新';
 
   @override
-  String pluginVersionDate(Object date, Object version) {
+  String pluginVersionDate(Object version, Object date) {
     return '版本：$version - $date';
   }
 
@@ -4491,6 +4499,14 @@ class AppLocalizationsZhHans extends AppLocalizationsZh {
 
   @override
   String get invalidJsonFormat => 'JSON 格式不正确';
+
+  @override
+  String pluginRequiresNewerClient(Object name) {
+    return '插件 \"$name\" 需要更新 AnimeFlow 后才能使用';
+  }
+
+  @override
+  String get pluginNeedsNewerClient => '需要更新客户端';
 }
 
 /// The translations for Chinese, as used in Hong Kong, using the Han script (`zh_Hant_HK`).
@@ -6046,7 +6062,7 @@ class AppLocalizationsZhHantHk extends AppLocalizationsZh {
   }
 
   @override
-  String pluginDownloadFailed(Object error, Object name) {
+  String pluginDownloadFailed(Object name, Object error) {
     return '下載外掛 \"$name\" 時發生錯誤：$error';
   }
 
@@ -6059,7 +6075,7 @@ class AppLocalizationsZhHantHk extends AppLocalizationsZh {
   }
 
   @override
-  String pluginUpdateFailed(Object error, Object name) {
+  String pluginUpdateFailed(Object name, Object error) {
     return '更新外掛 \"$name\" 時發生錯誤：$error';
   }
 
@@ -6070,7 +6086,7 @@ class AppLocalizationsZhHantHk extends AppLocalizationsZh {
   String get importPlugin => '匯入外掛';
 
   @override
-  String pluginShareFailed(Object error, Object name) {
+  String pluginShareFailed(Object name, Object error) {
     return '分享外掛 \"$name\" 失敗：$error';
   }
 
@@ -6096,7 +6112,7 @@ class AppLocalizationsZhHantHk extends AppLocalizationsZh {
   }
 
   @override
-  String pluginCopyFailed(Object error, Object name) {
+  String pluginCopyFailed(Object name, Object error) {
     return '複製外掛 \"$name\" 失敗：$error';
   }
 
@@ -6125,7 +6141,7 @@ class AppLocalizationsZhHantHk extends AppLocalizationsZh {
   String get update => '更新';
 
   @override
-  String pluginVersionDate(Object date, Object version) {
+  String pluginVersionDate(Object version, Object date) {
     return '版本：$version - $date';
   }
 
@@ -6736,6 +6752,14 @@ class AppLocalizationsZhHantHk extends AppLocalizationsZh {
 
   @override
   String get invalidJsonFormat => 'JSON 格式不正確';
+
+  @override
+  String pluginRequiresNewerClient(Object name) {
+    return '外掛 \"$name\" 需要更新 AnimeFlow 後才能使用';
+  }
+
+  @override
+  String get pluginNeedsNewerClient => '需要更新用戶端';
 }
 
 /// The translations for Chinese, as used in Taiwan, using the Han script (`zh_Hant_TW`).
@@ -8291,7 +8315,7 @@ class AppLocalizationsZhHantTw extends AppLocalizationsZh {
   }
 
   @override
-  String pluginDownloadFailed(Object error, Object name) {
+  String pluginDownloadFailed(Object name, Object error) {
     return '下載外掛 \"$name\" 時發生錯誤：$error';
   }
 
@@ -8304,7 +8328,7 @@ class AppLocalizationsZhHantTw extends AppLocalizationsZh {
   }
 
   @override
-  String pluginUpdateFailed(Object error, Object name) {
+  String pluginUpdateFailed(Object name, Object error) {
     return '更新外掛 \"$name\" 時發生錯誤：$error';
   }
 
@@ -8315,7 +8339,7 @@ class AppLocalizationsZhHantTw extends AppLocalizationsZh {
   String get importPlugin => '匯入外掛';
 
   @override
-  String pluginShareFailed(Object error, Object name) {
+  String pluginShareFailed(Object name, Object error) {
     return '分享外掛 \"$name\" 失敗：$error';
   }
 
@@ -8341,7 +8365,7 @@ class AppLocalizationsZhHantTw extends AppLocalizationsZh {
   }
 
   @override
-  String pluginCopyFailed(Object error, Object name) {
+  String pluginCopyFailed(Object name, Object error) {
     return '複製外掛 \"$name\" 失敗：$error';
   }
 
@@ -8371,7 +8395,7 @@ class AppLocalizationsZhHantTw extends AppLocalizationsZh {
   String get update => '更新';
 
   @override
-  String pluginVersionDate(Object date, Object version) {
+  String pluginVersionDate(Object version, Object date) {
     return '版本：$version - $date';
   }
 
@@ -8982,4 +9006,12 @@ class AppLocalizationsZhHantTw extends AppLocalizationsZh {
 
   @override
   String get invalidJsonFormat => 'JSON 格式不正確';
+
+  @override
+  String pluginRequiresNewerClient(Object name) {
+    return '外掛 \"$name\" 需要更新 AnimeFlow 後才能使用';
+  }
+
+  @override
+  String get pluginNeedsNewerClient => '需要更新用戶端';
 }

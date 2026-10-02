@@ -57,9 +57,8 @@ class _DesktopGestureDetectorState
 
     _isSpeedBoosting = true;
     playSession.setPlaybackRate(AppSettings.fastForwardSpeed, temporary: true);
-    videoUiNotifier.updateMainAxisAlignmentType(MainAxisAlignment.start);
-    videoUiNotifier.updateIndicatorTypeAndShowIndicator(
-        VideoControlsIndicatorType.speedIndicator);
+    videoUiNotifier
+        .showTopIndicator(VideoControlsIndicatorType.speedIndicator);
   }
 
   void _endTemporaryFastForward() {
@@ -67,7 +66,7 @@ class _DesktopGestureDetectorState
 
     _isSpeedBoosting = false;
     playSession.endTemporaryPlaybackRate();
-    videoUiNotifier.updateIndicatorType(VideoControlsIndicatorType.noIndicator);
+    videoUiNotifier.clearTopIndicator();
   }
 
   void _scheduleTemporaryFastForward() {
@@ -112,10 +111,9 @@ class _DesktopGestureDetectorState
     }
     // 空格键：暂停/播放
     if (shortcut[PlayerShortcutAction.playPause]!.contains(pressed)) {
-      playSession.playOrPauseVideo();
-      videoUiNotifier.updateMainAxisAlignmentType(MainAxisAlignment.start);
-      videoUiNotifier.updateIndicatorTypeAndShowIndicator(
-          VideoControlsIndicatorType.playStatusIndicator);
+      if (!playSession.playOrPauseVideo()) return KeyEventResult.handled;
+      videoUiNotifier
+          .showTopIndicator(VideoControlsIndicatorType.playStatusIndicator);
       return KeyEventResult.handled;
     }
     // 左方向键：快退10秒
@@ -152,17 +150,15 @@ class _DesktopGestureDetectorState
     }
     // 上方向键：增加音量
     if (shortcut[PlayerShortcutAction.volumeUp]!.contains(pressed)) {
-      videoUiNotifier.updateMainAxisAlignmentType(MainAxisAlignment.start);
-      videoUiNotifier.updateIndicatorTypeAndShowIndicator(
-          VideoControlsIndicatorType.volumeIndicator);
+      videoUiNotifier
+          .showTopIndicator(VideoControlsIndicatorType.volumeIndicator);
       playSession.adjustVolumeByWheel(5.0); // 每次增加5%
       return KeyEventResult.handled;
     }
     // 下方向键：减少音量
     if (shortcut[PlayerShortcutAction.volumeDown]!.contains(pressed)) {
-      videoUiNotifier.updateMainAxisAlignmentType(MainAxisAlignment.start);
-      videoUiNotifier.updateIndicatorTypeAndShowIndicator(
-          VideoControlsIndicatorType.volumeIndicator);
+      videoUiNotifier
+          .showTopIndicator(VideoControlsIndicatorType.volumeIndicator);
       playSession.adjustVolumeByWheel(-5.0); // 每次减少5%
       return KeyEventResult.handled;
     }
@@ -251,6 +247,8 @@ class _DesktopGestureDetectorState
           },
 
           child: GestureDetector(
+            // 整块播放区域都要响应手势，不能依赖子组件参与命中测试。
+            behavior: HitTestBehavior.opaque,
             // 双击事件
             onDoubleTap: () {
               _focusNode.requestFocus();
@@ -260,9 +258,8 @@ class _DesktopGestureDetectorState
             // 单击事件
             onTap: () {
               _focusNode.requestFocus();
-              playSession.playOrPauseVideo();
-              videoUiNotifier.updateMainAxisAlignmentType(MainAxisAlignment.start);
-              videoUiNotifier.updateIndicatorTypeAndShowIndicator(
+              if (!playSession.playOrPauseVideo()) return;
+              videoUiNotifier.showTopIndicator(
                   VideoControlsIndicatorType.playStatusIndicator);
             },
             child: widget.child,

@@ -4,7 +4,6 @@ import 'package:anime_flow/core/constants/assets_path_constants.dart';
 import 'package:anime_flow/core/settings/app_settings.dart';
 import 'package:anime_flow/core/network/clients/flow_client.dart';
 import 'package:anime_flow/core/network_speed/network_speed_provider.dart';
-import 'package:anime_flow/shared/models/enums/video_controls_icon_type.dart';
 import 'package:anime_flow/features/play/presentation/providers/play_provider.dart';
 import 'package:anime_flow/features/play/presentation/providers/video_source_provider.dart';
 import 'package:anime_flow/features/play/presentation/providers/video_ui_provider.dart';
@@ -333,15 +332,7 @@ class _TopAreaControlState extends ConsumerState<TopAreaControl> {
                                                 videoSourceController
                                                     .loadVideoPage(url);
                                                 videoUiStateController
-                                                    .updateIndicatorType(
-                                                        VideoControlsIndicatorType
-                                                            .parsingIndicator);
-                                                videoUiStateController
-                                                    .updateMainAxisAlignmentType(
-                                                        MainAxisAlignment
-                                                            .center);
-                                                videoUiStateController
-                                                    .showIndicator();
+                                                    .showParsingIndicator();
                                               },
                                               isBottomSheet: false,
                                               videoSourceNotifier:

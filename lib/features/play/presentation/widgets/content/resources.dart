@@ -2,7 +2,6 @@ import 'dart:async';
 
 import 'package:anime_flow/app/localization/app_localizations.dart';
 import 'package:anime_flow/features/download/presentation/widgets/download_episode_sheet.dart';
-import 'package:anime_flow/shared/models/enums/video_controls_icon_type.dart';
 import 'package:anime_flow/features/play/presentation/providers/play_provider.dart';
 import 'package:anime_flow/features/play/presentation/providers/video_ui_provider.dart';
 import 'package:anime_flow/features/play/presentation/providers/video_source_provider.dart';
@@ -35,11 +34,7 @@ class _VideoResourcesViewState extends ConsumerState<VideoResourcesView> {
     void onVideoUrlSelected(String url) {
       unawaited(playController.stop());
       videoSourceController.loadVideoPage(url);
-      videoUiStateController
-          .updateIndicatorType(VideoControlsIndicatorType.parsingIndicator);
-      videoUiStateController
-          .updateMainAxisAlignmentType(MainAxisAlignment.center);
-      videoUiStateController.showIndicator();
+      videoUiStateController.showParsingIndicator();
     }
 
     final subjectName = ref.read(playExtraProvider).playExtra.subjectName;

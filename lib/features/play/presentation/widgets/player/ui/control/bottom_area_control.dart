@@ -296,13 +296,11 @@ class BottomAreaControl extends ConsumerWidget {
                             return IconButton(
                               tooltip: playing ? l10n.pause : l10n.play,
                               onPressed: () {
-                                playController.playOrPauseVideo();
+                                if (!playController.playOrPauseVideo()) return;
                                 videoUiStateController
                                     .restartControlsAutoHideTimer();
-                                videoUiStateController
-                                    .updateIndicatorTypeAndShowIndicator(
-                                  VideoControlsIndicatorType
-                                      .playStatusIndicator,
+                                videoUiStateController.showTopIndicator(
+                                  VideoControlsIndicatorType.playStatusIndicator,
                                 );
                               },
                               icon: PlayPauseIcon(

@@ -2,7 +2,6 @@ import 'dart:async';
 import 'dart:io';
 
 import 'package:anime_flow/app/router/routes_args.dart';
-import 'package:anime_flow/shared/models/enums/video_controls_icon_type.dart';
 import 'package:anime_flow/features/play/presentation/providers/play_provider.dart';
 import 'package:anime_flow/features/play/presentation/providers/video_ui_provider.dart';
 import 'package:anime_flow/features/play/presentation/providers/video_source_provider.dart';
@@ -77,11 +76,7 @@ class _PlayerViewState extends ConsumerState<PlayerView> with WindowListener {
       force: true,
       preferCurrentWebsite: true,
     );
-    videoUiStateController
-        .updateIndicatorType(VideoControlsIndicatorType.parsingIndicator);
-    videoUiStateController
-        .updateMainAxisAlignmentType(MainAxisAlignment.center);
-    videoUiStateController.showIndicator();
+    videoUiStateController.showParsingIndicator();
   }
 
   @override

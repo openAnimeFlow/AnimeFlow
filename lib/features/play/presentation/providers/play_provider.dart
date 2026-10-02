@@ -870,13 +870,14 @@ class PlaySession {
   }
 
   ///暂停/播放
-  void playOrPauseVideo() {
-    if (_isStartupInProgress) return;
+  bool playOrPauseVideo() {
+    if (_isStartupInProgress) return false;
     if (_playStateActions.value.playing) {
       unawaited(playbackCoordinator.pause());
     } else {
       unawaited(playbackCoordinator.play());
     }
+    return true;
   }
 
   /// 启动流程（解析、打开）进行中：此时播放器还没有可操作的媒体。

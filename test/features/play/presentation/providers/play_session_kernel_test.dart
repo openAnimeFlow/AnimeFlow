@@ -406,7 +406,7 @@ class _State implements PlayStateNotifier {
 
 class _Ui implements VideoUiStateActions {
   @override
-  VideoControlsIndicatorType get currentIndicatorType =>
+  VideoControlsIndicatorType get centerIndicator =>
       VideoControlsIndicatorType.noIndicator;
 
   @override

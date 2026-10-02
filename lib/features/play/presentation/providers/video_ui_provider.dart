@@ -5,7 +5,6 @@ import 'package:anime_flow/shared/models/enums/video_controls_icon_type.dart';
 import 'package:anime_flow/core/utils/system_util.dart';
 import 'package:anime_flow/core/utils/vibrate.dart';
 import 'package:battery_plus/battery_plus.dart';
-import 'package:flutter/material.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:screen_brightness_platform_interface/screen_brightness_platform_interface.dart';
 
@@ -16,25 +15,35 @@ abstract class VideoUiStateActions {
     Duration duration = const Duration(seconds: 3),
   });
 
-  void updateMainAxisAlignmentType(MainAxisAlignment type);
+  /// 顶部提示：展示 [type]；[autoHide] 到期后自动清除，为空表示保持到显式清除。
+  void showTopIndicator(
+    VideoControlsIndicatorType type, {
+    Duration? autoHide = const Duration(seconds: 3),
+  });
 
-  void updateIndicatorType(VideoControlsIndicatorType type);
+  /// 清除顶部提示。
+  void clearTopIndicator();
 
-  void showIndicator();
+  /// 居中指示器，可长期驻留（解析、缓冲、拖动进度）。
+  void showCenterIndicator(VideoControlsIndicatorType type);
 
-  void hideIndicator();
+  /// 清除居中指示器。
+  void clearCenterIndicator();
 
-  /// Release the persistent parsing indicator after successful resolution.
-  void finishParsingIndicator();
+  VideoControlsIndicatorType get topIndicator;
 
-  VideoControlsIndicatorType get currentIndicatorType;
+  VideoControlsIndicatorType get centerIndicator;
 }
 
 extension PlaybackLoadingIndicators on VideoUiStateActions {
-  void showParsingIndicator() {
-    updateIndicatorType(VideoControlsIndicatorType.parsingIndicator);
-    updateMainAxisAlignmentType(MainAxisAlignment.center);
-    showIndicator();
+  void showParsingIndicator() =>
+      showCenterIndicator(VideoControlsIndicatorType.parsingIndicator);
+
+  /// 解析结果落定后才释放解析指示器。
+  void finishParsingIndicator() {
+    if (centerIndicator == VideoControlsIndicatorType.parsingIndicator) {
+      clearCenterIndicator();
+    }
   }
 
   void updateBufferingIndicator(bool buffering, {required bool isParsing}) {
@@ -44,18 +53,14 @@ extension PlaybackLoadingIndicators on VideoUiStateActions {
       showParsingIndicator();
       return;
     }
-    if (currentIndicatorType == VideoControlsIndicatorType.parsingIndicator) {
+    if (centerIndicator == VideoControlsIndicatorType.parsingIndicator) {
       return;
     }
     if (buffering) {
-      updateIndicatorType(VideoControlsIndicatorType.bufferingIndicator);
-      updateMainAxisAlignmentType(MainAxisAlignment.center);
-      showIndicator();
-    } else if (currentIndicatorType ==
+      showCenterIndicator(VideoControlsIndicatorType.bufferingIndicator);
+    } else if (centerIndicator ==
         VideoControlsIndicatorType.bufferingIndicator) {
-      hideIndicator();
-      updateIndicatorType(VideoControlsIndicatorType.noIndicator);
-      updateMainAxisAlignmentType(MainAxisAlignment.start);
+      clearCenterIndicator();
     }
   }
 }
@@ -65,9 +70,8 @@ class VideoUiState {
     this.isShowControlsUi = true,
     this.isHorizontalDragging = false,
     this.dragPosition = Duration.zero,
-    this.isShowIndicatorUi = false,
-    this.indicatorType = VideoControlsIndicatorType.noIndicator,
-    this.mainAxisAlignmentType = MainAxisAlignment.start,
+    this.topIndicator = VideoControlsIndicatorType.noIndicator,
+    this.centerIndicator = VideoControlsIndicatorType.noIndicator,
     this.currentBrightness = 0.5,
     this.isBrightnessDragging = false,
     this.currentTime = '',
@@ -78,9 +82,8 @@ class VideoUiState {
   final bool isShowControlsUi;
   final bool isHorizontalDragging;
   final Duration dragPosition;
-  final bool isShowIndicatorUi;
-  final VideoControlsIndicatorType indicatorType;
-  final MainAxisAlignment mainAxisAlignmentType;
+  final VideoControlsIndicatorType topIndicator;
+  final VideoControlsIndicatorType centerIndicator;
   final double currentBrightness;
   final bool isBrightnessDragging;
   final String currentTime;
@@ -91,9 +94,8 @@ class VideoUiState {
     bool? isShowControlsUi,
     bool? isHorizontalDragging,
     Duration? dragPosition,
-    bool? isShowIndicatorUi,
-    VideoControlsIndicatorType? indicatorType,
-    MainAxisAlignment? mainAxisAlignmentType,
+    VideoControlsIndicatorType? topIndicator,
+    VideoControlsIndicatorType? centerIndicator,
     double? currentBrightness,
     bool? isBrightnessDragging,
     String? currentTime,
@@ -104,10 +106,8 @@ class VideoUiState {
       isShowControlsUi: isShowControlsUi ?? this.isShowControlsUi,
       isHorizontalDragging: isHorizontalDragging ?? this.isHorizontalDragging,
       dragPosition: dragPosition ?? this.dragPosition,
-      isShowIndicatorUi: isShowIndicatorUi ?? this.isShowIndicatorUi,
-      indicatorType: indicatorType ?? this.indicatorType,
-      mainAxisAlignmentType:
-          mainAxisAlignmentType ?? this.mainAxisAlignmentType,
+      topIndicator: topIndicator ?? this.topIndicator,
+      centerIndicator: centerIndicator ?? this.centerIndicator,
       currentBrightness: currentBrightness ?? this.currentBrightness,
       isBrightnessDragging: isBrightnessDragging ?? this.isBrightnessDragging,
       currentTime: currentTime ?? this.currentTime,
@@ -120,7 +120,7 @@ class VideoUiState {
 // Keep controls alive while hidden, but own them in the playback route scope.
 @Riverpod(keepAlive: true, dependencies: [playExtra])
 class VideoUiNotifier extends _$VideoUiNotifier implements VideoUiStateActions {
-  Timer? _indicatorTimer;
+  Timer? _topIndicatorTimer;
   Timer? _controlsUiTimer;
   Timer? _timeUpdateTimer;
   Timer? _batteryUpdateTimer;
@@ -137,11 +137,10 @@ class VideoUiNotifier extends _$VideoUiNotifier implements VideoUiStateActions {
   bool get isShowControlsUi => state.isShowControlsUi;
   bool get isHorizontalDragging => state.isHorizontalDragging;
   Duration get dragPosition => state.dragPosition;
-  bool get isShowIndicatorUi => state.isShowIndicatorUi;
-  VideoControlsIndicatorType get indicatorType => state.indicatorType;
   @override
-  VideoControlsIndicatorType get currentIndicatorType => state.indicatorType;
-  MainAxisAlignment get mainAxisAlignmentType => state.mainAxisAlignmentType;
+  VideoControlsIndicatorType get topIndicator => state.topIndicator;
+  @override
+  VideoControlsIndicatorType get centerIndicator => state.centerIndicator;
   double get currentBrightness => state.currentBrightness;
   bool get isBrightnessDragging => state.isBrightnessDragging;
   String get currentTime => state.currentTime;
@@ -174,7 +173,7 @@ class VideoUiNotifier extends _$VideoUiNotifier implements VideoUiStateActions {
 
   void _dispose() {
     _runtimeRevision++;
-    _indicatorTimer?.cancel();
+    _topIndicatorTimer?.cancel();
     _controlsUiTimer?.cancel();
     _timeUpdateTimer?.cancel();
     _batteryUpdateTimer?.cancel();
@@ -223,86 +222,44 @@ class VideoUiNotifier extends _$VideoUiNotifier implements VideoUiStateActions {
   }
 
   @override
-  void updateMainAxisAlignmentType(MainAxisAlignment type) {
-    if (state.indicatorType == VideoControlsIndicatorType.parsingIndicator &&
-        type != MainAxisAlignment.center) {
-      return;
+  void showTopIndicator(
+    VideoControlsIndicatorType type, {
+    Duration? autoHide = const Duration(seconds: 3),
+  }) {
+    _topIndicatorTimer?.cancel();
+    _topIndicatorTimer = null;
+    if (state.topIndicator != type) {
+      state = state.copyWith(topIndicator: type);
     }
-    if (state.mainAxisAlignmentType != type) {
-      state = state.copyWith(mainAxisAlignmentType: type);
-    }
-  }
-
-  void updateIndicatorTypeAndShowIndicator(VideoControlsIndicatorType type) {
-    updateIndicatorType(type);
-    if (state.indicatorType == VideoControlsIndicatorType.parsingIndicator) {
-      return;
-    }
-    _showIndicatorSetUp();
-  }
-
-  @override
-  void updateIndicatorType(VideoControlsIndicatorType type) {
-    if (type == VideoControlsIndicatorType.parsingIndicator) {
-      // Parsing is persistent, not a timed gesture notification. Cancel any
-      // previous notification timer before it can dismiss the new indicator.
-      _indicatorTimer?.cancel();
-      state = state.copyWith(
-        indicatorType: type,
-        isShowIndicatorUi: true,
-        mainAxisAlignmentType: MainAxisAlignment.center,
-      );
-      return;
-    }
-    if (state.indicatorType == VideoControlsIndicatorType.parsingIndicator) {
-      return;
-    }
-    if (state.indicatorType != type) {
-      state = state.copyWith(indicatorType: type);
+    if (autoHide != null && autoHide > Duration.zero) {
+      _topIndicatorTimer = Timer(autoHide, clearTopIndicator);
     }
   }
 
   @override
-  void showIndicator() {
-    _indicatorTimer?.cancel();
-    state = state.copyWith(isShowIndicatorUi: true);
-  }
-
-  @override
-  void hideIndicator() {
-    if (state.indicatorType == VideoControlsIndicatorType.parsingIndicator) {
-      return;
-    }
-    _indicatorTimer?.cancel();
-    state = state.copyWith(isShowIndicatorUi: false);
-  }
-
-  @override
-  void finishParsingIndicator() {
-    if (state.indicatorType != VideoControlsIndicatorType.parsingIndicator) {
-      return;
-    }
-    _indicatorTimer?.cancel();
+  void clearTopIndicator() {
+    _topIndicatorTimer?.cancel();
+    _topIndicatorTimer = null;
+    if (state.topIndicator == VideoControlsIndicatorType.noIndicator) return;
     state = state.copyWith(
-      isShowIndicatorUi: false,
-      indicatorType: VideoControlsIndicatorType.noIndicator,
-      mainAxisAlignmentType: MainAxisAlignment.start,
+      topIndicator: VideoControlsIndicatorType.noIndicator,
     );
   }
 
-  void _showIndicatorSetUp() {
-    _indicatorTimer?.cancel();
-    state = state.copyWith(isShowIndicatorUi: true);
-    _indicatorTimer = Timer(const Duration(seconds: 3), () {
-      if (state.indicatorType == VideoControlsIndicatorType.parsingIndicator) {
-        return;
-      }
-      state = state.copyWith(
-        isShowIndicatorUi: false,
-        indicatorType: VideoControlsIndicatorType.noIndicator,
-        mainAxisAlignmentType: MainAxisAlignment.start,
-      );
-    });
+  @override
+  void showCenterIndicator(VideoControlsIndicatorType type) {
+    if (state.centerIndicator == type) return;
+    state = state.copyWith(centerIndicator: type);
+  }
+
+  @override
+  void clearCenterIndicator() {
+    if (state.centerIndicator == VideoControlsIndicatorType.noIndicator) {
+      return;
+    }
+    state = state.copyWith(
+      centerIndicator: VideoControlsIndicatorType.noIndicator,
+    );
   }
 
   void showOrHideControlsUi() {
@@ -408,9 +365,7 @@ class VideoUiNotifier extends _$VideoUiNotifier implements VideoUiStateActions {
     state = state.copyWith(isBrightnessDragging: true);
     _controlsUiTimer?.cancel();
     showControlsUi();
-    updateIndicatorTypeAndShowIndicator(
-      VideoControlsIndicatorType.brightnessIndicator,
-    );
+    showTopIndicator(VideoControlsIndicatorType.brightnessIndicator);
   }
 
   void startBrightnessDragWithoutAutoHide() {
@@ -438,9 +393,7 @@ class VideoUiNotifier extends _$VideoUiNotifier implements VideoUiStateActions {
 
   void endBrightnessDrag() {
     state = state.copyWith(isBrightnessDragging: false);
-    hideIndicator();
-    updateIndicatorType(VideoControlsIndicatorType.noIndicator);
-    updateMainAxisAlignmentType(MainAxisAlignment.start);
+    clearTopIndicator();
     hideControlsUi(duration: const Duration(seconds: 1));
   }
 

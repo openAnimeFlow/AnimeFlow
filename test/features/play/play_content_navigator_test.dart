@@ -82,7 +82,10 @@ class _Session implements PlaySession {
   void adjustVolumeByWheel(double delta) => volumeChanges.add(delta);
 
   @override
-  void playOrPauseVideo() => toggles++;
+  bool playOrPauseVideo() {
+    toggles++;
+    return true;
+  }
 
   @override
   void toggleFullScreen() => actions.add(PlayerShortcutAction.enterFullscreen);
@@ -126,7 +129,10 @@ class _VideoUi extends VideoUiNotifier {
   VideoUiState build() => const VideoUiState();
 
   @override
-  void updateIndicatorTypeAndShowIndicator(VideoControlsIndicatorType type) {}
+  void showTopIndicator(
+    VideoControlsIndicatorType type, {
+    Duration? autoHide = const Duration(seconds: 3),
+  }) {}
 }
 
 class _Host extends StatefulWidget {

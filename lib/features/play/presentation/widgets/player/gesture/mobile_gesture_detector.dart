@@ -31,9 +31,7 @@ class _MobileGestureDetectorState extends ConsumerState<MobileGestureDetector> {
 
     _isSpeedBoosting = false;
     playSession.endTemporaryPlaybackRate();
-    videoUiNotifier.hideIndicator();
-    videoUiNotifier
-        .updateIndicatorType(VideoControlsIndicatorType.noIndicator);
+    videoUiNotifier.clearTopIndicator();
   }
 
   @override
@@ -57,6 +55,8 @@ class _MobileGestureDetectorState extends ConsumerState<MobileGestureDetector> {
     final screenHeight = MediaQuery.of(context).size.height;
 
     return GestureDetector(
+      // 整块播放区域都响应手势。
+      behavior: HitTestBehavior.opaque,
       //单击事件
       onTap: () {
         videoUiNotifier.showOrHideControlsUi();
@@ -66,8 +66,8 @@ class _MobileGestureDetectorState extends ConsumerState<MobileGestureDetector> {
 
       //双击事件
       onDoubleTap: () {
-        playSession.playOrPauseVideo();
-        videoUiNotifier.updateIndicatorTypeAndShowIndicator(
+        if (!playSession.playOrPauseVideo()) return;
+        videoUiNotifier.showTopIndicator(
             VideoControlsIndicatorType.playStatusIndicator);
       },
 
@@ -78,11 +78,10 @@ class _MobileGestureDetectorState extends ConsumerState<MobileGestureDetector> {
           _isSpeedBoosting = true;
           playSession.setPlaybackRate(AppSettings.fastForwardSpeed,
               temporary: true);
-          videoUiNotifier
-              .updateMainAxisAlignmentType(MainAxisAlignment.start);
-          videoUiNotifier
-              .updateIndicatorType(VideoControlsIndicatorType.speedIndicator);
-          videoUiNotifier.showIndicator();
+          videoUiNotifier.showTopIndicator(
+            VideoControlsIndicatorType.speedIndicator,
+            autoHide: null,
+          );
         }
       },
 
@@ -131,24 +130,20 @@ class _MobileGestureDetectorState extends ConsumerState<MobileGestureDetector> {
 
         // 判断是否在屏幕右半侧开始拖动
         _isRightSide = details.globalPosition.dx > screenWidth / 2;
-        videoUiNotifier
-            .updateMainAxisAlignmentType(MainAxisAlignment.start);
         if (_isRightSide) {
           // 右半屏：调整音量
           playSession.startVerticalDrag();
-          videoUiNotifier
-              .updateMainAxisAlignmentType(MainAxisAlignment.start);
-          videoUiNotifier
-              .updateIndicatorType(VideoControlsIndicatorType.volumeIndicator);
-          videoUiNotifier.showIndicator();
+          videoUiNotifier.showTopIndicator(
+            VideoControlsIndicatorType.volumeIndicator,
+            autoHide: null,
+          );
         } else {
           // 左半屏：调整屏幕亮度
           videoUiNotifier.startBrightnessDragWithoutAutoHide();
-          videoUiNotifier
-              .updateMainAxisAlignmentType(MainAxisAlignment.start);
-          videoUiNotifier.updateIndicatorType(
-              VideoControlsIndicatorType.brightnessIndicator);
-          videoUiNotifier.showIndicator();
+          videoUiNotifier.showTopIndicator(
+            VideoControlsIndicatorType.brightnessIndicator,
+            autoHide: null,
+          );
         }
       },
 
@@ -176,12 +171,12 @@ class _MobileGestureDetectorState extends ConsumerState<MobileGestureDetector> {
         if (_isRightSide) {
           // 垂直拖动结束（右半屏）：应用新的音量
           playSession.endVerticalDrag();
-          videoUiNotifier.updateIndicatorTypeAndShowIndicator(
+          videoUiNotifier.showTopIndicator(
               VideoControlsIndicatorType.volumeIndicator);
         } else {
           // 垂直拖动结束（左半屏）：结束亮度调整
           videoUiNotifier.setBrightnessDragging(false);
-          videoUiNotifier.updateIndicatorTypeAndShowIndicator(
+          videoUiNotifier.showTopIndicator(
               VideoControlsIndicatorType.brightnessIndicator);
         }
       },

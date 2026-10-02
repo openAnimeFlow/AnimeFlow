@@ -1,6 +1,7 @@
 import 'dart:convert';
 
 import 'package:anime_flow/core/crawler/item/crawler_config_item.dart';
+import 'package:anime_flow/core/crawler/rule_api_level.dart';
 import 'package:anime_flow/core/constants/storage_key.dart';
 import 'package:anime_flow/core/network/api/api.dart';
 import 'package:anime_flow/core/network/api_path.dart';
@@ -111,6 +112,11 @@ class SourceRepository {
     }
 
     final data = CrawlConfigItem.fromJson(Map<String, dynamic>.from(json));
+    if (!data.isRuleCompatible) {
+      throw FormatException(
+        RuleApiLevel.describe(data.api, ruleName: data.name),
+      );
+    }
     await saveSource(
       CrawlConfigItem.fromJson({
         ...data.toJson(),

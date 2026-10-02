@@ -4,6 +4,7 @@
 
 import 'package:hive_ce/hive_ce.dart';
 import 'package:anime_flow/core/crawler/item/anti_crawler_config.dart';
+import 'package:anime_flow/core/crawler/item/api_rule_config.dart';
 import 'package:anime_flow/core/crawler/item/crawler_config_item.dart';
 import 'package:anime_flow/shared/models/download/download_episode.dart';
 import 'package:anime_flow/shared/models/download/download_record.dart';
@@ -14,6 +15,10 @@ import 'package:anime_flow/shared/models/search/search_history_module.dart';
 extension HiveRegistrar on HiveInterface {
   void registerAdapters() {
     registerAdapter(AntiCrawlerConfigAdapter());
+    registerAdapter(ApiChapterConfigAdapter());
+    registerAdapter(ApiEpisodePageConfigAdapter());
+    registerAdapter(ApiRequestConfigAdapter());
+    registerAdapter(ApiSearchConfigAdapter());
     registerAdapter(CrawlConfigItemAdapter());
     registerAdapter(DownloadEpisodeAdapter());
     registerAdapter(DownloadRecordAdapter());
@@ -26,6 +31,10 @@ extension HiveRegistrar on HiveInterface {
 extension IsolatedHiveRegistrar on IsolatedHiveInterface {
   void registerAdapters() {
     registerAdapter(AntiCrawlerConfigAdapter());
+    registerAdapter(ApiChapterConfigAdapter());
+    registerAdapter(ApiEpisodePageConfigAdapter());
+    registerAdapter(ApiRequestConfigAdapter());
+    registerAdapter(ApiSearchConfigAdapter());
     registerAdapter(CrawlConfigItemAdapter());
     registerAdapter(DownloadEpisodeAdapter());
     registerAdapter(DownloadRecordAdapter());

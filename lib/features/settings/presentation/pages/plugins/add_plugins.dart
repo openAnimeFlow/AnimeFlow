@@ -2,6 +2,7 @@ import 'dart:convert';
 
 import 'package:anime_flow/core/crawler/item/crawler_config_item.dart';
 import 'package:anime_flow/core/crawler/item/anti_crawler_config.dart';
+import 'package:anime_flow/core/crawler/rule_api_level.dart';
 import 'package:anime_flow/features/source/data/repositories/source_repository.dart';
 import 'package:anime_flow/features/source/application/providers/source_repository_provider.dart';
 import 'package:anime_flow/shared/widgets/notification_toast.dart';
@@ -68,6 +69,8 @@ class _AddPluginsPageState extends ConsumerState<AddPluginsPage> {
   final Set<String> _antiFieldErrors = {};
   SourceRepository get sourceRepository => ref.read(sourceRepositoryProvider);
   String? _originalKey; // 保存原始key值，用于编辑模式下删除旧数据
+  /// 编辑已有规则时保留其声明的 api 级别，避免保存时被悄悄降级。
+  String? _originalApi;
 
   late final TextEditingController _captchaImageController;
   late final TextEditingController _captchaInputController;
@@ -98,6 +101,7 @@ class _AddPluginsPageState extends ConsumerState<AddPluginsPage> {
     final editConfig = await sourceRepository.getSource(_originalKey!);
     if (editConfig != null && mounted) {
       final anti = editConfig.antiCrawlerConfig;
+      _originalApi = editConfig.api;
       setState(() {
         _antiEnabled = anti.enabled;
         _captchaType = anti.captchaType;
@@ -212,6 +216,7 @@ class _AddPluginsPageState extends ConsumerState<AddPluginsPage> {
         lineList: _controllers[9].text.trim(),
         episode: _controllers[10].text.trim(),
         antiCrawlerConfig: antiCrawlerConfig,
+        api: _originalApi ?? RuleApiLevel.current.toString(),
       );
 
       await sourceRepository.saveSource(item, originalName: _originalKey);
@@ -279,6 +284,12 @@ class _AddPluginsPageState extends ConsumerState<AddPluginsPage> {
       if (config.name.trim().isEmpty) {
         throw const FormatException('插件名称不能为空');
       }
+      if (!config.isRuleCompatible) {
+        throw FormatException(
+          RuleApiLevel.describe(config.api, ruleName: config.name),
+        );
+      }
+      _originalApi = config.api;
 
       setState(() {
         _antiEnabled = config.antiCrawlerConfig.enabled;

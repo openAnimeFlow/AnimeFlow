@@ -1,5 +1,7 @@
 import 'anti_crawler_config.dart';
+import 'api_rule_config.dart';
 import 'package:hive_ce/hive.dart';
+import '../rule_api_level.dart';
 
 part 'crawler_config_item.g.dart';
 
@@ -30,6 +32,26 @@ class CrawlConfigItem {
   @HiveField(11)
   AntiCrawlerConfig antiCrawlerConfig;
 
+  /// 搜索模式，见 [RuleMode]，默认 [RuleMode.xpath]。
+  @HiveField(12)
+  String searchMode;
+
+  /// 章节模式，见 [RuleMode]，默认 [RuleMode.xpath]。
+  @HiveField(13)
+  String chapterMode;
+
+  /// API 搜索配置；XPath 模式下仍然保留，切换模式后不丢失。
+  @HiveField(14)
+  ApiSearchConfig searchApiConfig;
+
+  /// API 章节配置；XPath 模式下仍然保留，切换模式后不丢失。
+  @HiveField(15)
+  ApiChapterConfig chapterApiConfig;
+
+  /// 规则要求的客户端规则 API 级别，见 [RuleApiLevel]。
+  @HiveField(16)
+  String api;
+
   CrawlConfigItem({
     required this.version,
     required this.name,
@@ -43,7 +65,17 @@ class CrawlConfigItem {
     required this.lineList,
     required this.episode,
     AntiCrawlerConfig? antiCrawlerConfig,
-  }) : antiCrawlerConfig = antiCrawlerConfig ?? AntiCrawlerConfig.empty();
+    String? searchMode,
+    String? chapterMode,
+    ApiSearchConfig? searchApiConfig,
+    ApiChapterConfig? chapterApiConfig,
+    String? api,
+  })  : antiCrawlerConfig = antiCrawlerConfig ?? AntiCrawlerConfig.empty(),
+        searchMode = RuleMode.normalize(searchMode),
+        chapterMode = RuleMode.normalize(chapterMode),
+        searchApiConfig = searchApiConfig ?? ApiSearchConfig(),
+        chapterApiConfig = chapterApiConfig ?? ApiChapterConfig(),
+        api = _normalizeApiLevel(api);
 
   factory CrawlConfigItem.fromJson(Map<String, dynamic> json) {
     return CrawlConfigItem(
@@ -61,7 +93,18 @@ class CrawlConfigItem {
         antiCrawlerConfig: json['antiCrawlerConfig'] != null
             ? AntiCrawlerConfig.fromJson(
                 Map<String, dynamic>.from(json['antiCrawlerConfig']))
-            : AntiCrawlerConfig.empty());
+            : AntiCrawlerConfig.empty(),
+        searchMode: json['searchMode']?.toString(),
+        chapterMode: json['chapterMode']?.toString(),
+        searchApiConfig: json['searchApiConfig'] is Map
+            ? ApiSearchConfig.fromJson(
+                Map<String, dynamic>.from(json['searchApiConfig']))
+            : null,
+        chapterApiConfig: json['chapterApiConfig'] is Map
+            ? ApiChapterConfig.fromJson(
+                Map<String, dynamic>.from(json['chapterApiConfig']))
+            : null,
+        api: json['api']?.toString());
   }
 
   Map<String, dynamic> toJson() {
@@ -78,11 +121,37 @@ class CrawlConfigItem {
       'lineList': lineList,
       'episode': episode,
       'antiCrawlerConfig': antiCrawlerConfig.toJson(),
+      'searchMode': searchMode,
+      'chapterMode': chapterMode,
+      // 持久化/导出会重写整份规则，未激活模式的一侧也必须保留。
+      if (usesApiSearch || searchApiConfig.request.url.isNotEmpty)
+        'searchApiConfig': searchApiConfig.toJson(),
+      if (usesApiChapter || chapterApiConfig.request.url.isNotEmpty)
+        'chapterApiConfig': chapterApiConfig.toJson(),
+      'api': api,
     };
   }
 
+  bool get usesApiSearch => searchMode == RuleMode.api;
+
+  bool get usesApiChapter => chapterMode == RuleMode.api;
+
+  /// 规则文件与当前客户端的兼容性，见 [RuleApiLevel.check]。
+  RuleCompatibility get ruleCompatibility => RuleApiLevel.check(api);
+
+  bool get isRuleCompatible =>
+      ruleCompatibility == RuleCompatibility.compatible;
+
+  bool get requiresNewerClient =>
+      ruleCompatibility == RuleCompatibility.requiresNewerClient;
+
   @override
   String toString() {
-    return 'CrawlConfigItem{version: $version, name: $name, iconUrl: $iconUrl, baseUrl: $baseUrl, searchUrl: $searchUrl, searchList: $searchList, searchName: $searchName, searchLink: $searchLink, lineNames: $lineNames, lineList: $lineList, episode: $episode, antiCrawlerConfig: $antiCrawlerConfig}';
+    return 'CrawlConfigItem{version: $version, name: $name, iconUrl: $iconUrl, baseUrl: $baseUrl, searchUrl: $searchUrl, searchList: $searchList, searchName: $searchName, searchLink: $searchLink, lineNames: $lineNames, lineList: $lineList, episode: $episode, antiCrawlerConfig: $antiCrawlerConfig, searchMode: $searchMode, chapterMode: $chapterMode, searchApiConfig: $searchApiConfig, chapterApiConfig: $chapterApiConfig, api: $api}';
   }
+}
+
+String _normalizeApiLevel(String? api) {
+  final trimmed = api?.trim() ?? '';
+  return trimmed.isEmpty ? RuleApiLevel.defaultApi : trimmed;
 }

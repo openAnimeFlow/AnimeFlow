@@ -511,8 +511,11 @@ class ApiCrawler {
       ...uri.queryParameters,
       ...renderedQuery,
     };
-    return _resolveUrl(
-        baseUrl, uri.replace(queryParameters: mergedQuery).toString());
+    // 空 map 交给 Uri.replace 会留下一个多余的 "?"，
+    // 生成与规范地址不同的字符串，导致播放身份 key 不一致。
+    final pageUri =
+        mergedQuery.isEmpty ? uri : uri.replace(queryParameters: mergedQuery);
+    return _resolveUrl(baseUrl, pageUri.toString());
   }
 
   /// 基于 [baseUrl] 归一化地址；[baseUrl] 缺失或非法时退化为原值去空白。

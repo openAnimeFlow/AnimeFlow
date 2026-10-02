@@ -3,7 +3,7 @@ import 'dart:typed_data';
 import 'dart:ui';
 
 import 'package:anime_flow/core/constants/constants.dart';
-import 'package:anime_flow/core/crawler/itme/bgm_user_page_item.dart';
+import 'package:anime_flow/core/crawler/item/bgm_user_statistics_item.dart';
 import 'package:anime_flow/core/network/api_path.dart';
 import 'package:anime_flow/core/network/clients/flow_client.dart';
 import 'package:anime_flow/core/network/sse/json_sse_parser.dart';

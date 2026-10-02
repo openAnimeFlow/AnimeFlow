@@ -3,8 +3,8 @@
 // Check in to version control
 
 import 'package:hive_ce/hive_ce.dart';
-import 'package:anime_flow/core/crawler/itme/anti_crawler_config.dart';
-import 'package:anime_flow/core/crawler/itme/crawler_config_item.dart';
+import 'package:anime_flow/core/crawler/item/anti_crawler_config.dart';
+import 'package:anime_flow/core/crawler/item/crawler_config_item.dart';
 import 'package:anime_flow/shared/models/download/download_episode.dart';
 import 'package:anime_flow/shared/models/download/download_record.dart';
 import 'package:anime_flow/shared/models/player/play/play_history.dart';

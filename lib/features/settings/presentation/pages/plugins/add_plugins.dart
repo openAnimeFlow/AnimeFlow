@@ -1,7 +1,7 @@
 import 'dart:convert';
 
-import 'package:anime_flow/core/crawler/itme/crawler_config_item.dart';
-import 'package:anime_flow/core/crawler/itme/anti_crawler_config.dart';
+import 'package:anime_flow/core/crawler/item/crawler_config_item.dart';
+import 'package:anime_flow/core/crawler/item/anti_crawler_config.dart';
 import 'package:anime_flow/features/source/data/repositories/source_repository.dart';
 import 'package:anime_flow/features/source/application/providers/source_repository_provider.dart';
 import 'package:anime_flow/shared/widgets/notification_toast.dart';

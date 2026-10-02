@@ -1,7 +1,7 @@
 import 'dart:async';
 import 'dart:convert';
 
-import 'package:anime_flow/core/crawler/itme/anti_crawler_config.dart';
+import 'package:anime_flow/core/crawler/item/anti_crawler_config.dart';
 import 'package:anime_flow/features/play/presentation/providers/captcha_provider.dart';
 import 'package:anime_flow/features/play/presentation/providers/video_source_provider.dart';
 import 'package:anime_flow/app/localization/app_localizations.dart';

@@ -2,9 +2,9 @@ import 'dart:async';
 import 'dart:isolate';
 
 import 'package:anime_flow/core/crawler/cookie_manager.dart';
-import 'package:anime_flow/core/crawler/html_request.dart';
-import 'package:anime_flow/core/crawler/itme/anti_crawler_config.dart';
-import 'package:anime_flow/core/crawler/itme/crawler_config_item.dart';
+import 'package:anime_flow/core/crawler/rule_request.dart';
+import 'package:anime_flow/core/crawler/item/anti_crawler_config.dart';
+import 'package:anime_flow/core/crawler/item/crawler_config_item.dart';
 import 'package:anime_flow/core/utils/utils.dart' show resolveSourceUrl;
 import 'package:anime_flow/features/play/application/search_result_rank_service.dart';
 import 'package:anime_flow/features/play/data/repository/play_repository.dart';
@@ -384,7 +384,7 @@ class VideoSourceNotifier extends _$VideoSourceNotifier {
 
       final aliases = ref.read(playExtraProvider).playExtra.subjectAliases;
       final rawSearchList =
-          await WebRequest.getSearchSubjectListService(keyword, config);
+          await RuleRequest.searchSubjects(keyword, config);
       if (!ref.mounted) return;
       if (!_isRequestCurrent(config.name, sessionId, requestToken)) {
         return;
@@ -424,7 +424,7 @@ class VideoSourceNotifier extends _$VideoSourceNotifier {
         final search = entry.item;
         final matchRatio = entry.matchRatio;
         final crawlerEpisodeResources =
-            await WebRequest.getResourcesListService(search.link, config);
+            await RuleRequest.fetchEpisodeResources(search.link, config);
         if (!ref.mounted) return;
         if (!_isRequestCurrent(config.name, sessionId, requestToken)) {
           return;

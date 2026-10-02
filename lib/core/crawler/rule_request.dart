@@ -1,7 +1,7 @@
 import 'dart:async';
 
 import 'package:anime_flow/core/constants/constants.dart';
-import 'package:anime_flow/core/crawler/itme/crawler_config_item.dart';
+import 'package:anime_flow/core/crawler/item/crawler_config_item.dart';
 import 'package:anime_flow/core/network/api/api.dart';
 import 'package:anime_flow/shared/models/player/play/video/episode_resources_item.dart';
 import 'package:anime_flow/shared/models/player/play/video/search_resources_item.dart';
@@ -25,12 +25,12 @@ class CaptchaRequiredException implements Exception {
       'CaptchaRequiredException: $configName requires captcha verification';
 }
 
-class WebRequest {
+class RuleRequest {
   static LiggLogger logger = LiggLogger();
   static const int _maxAttempts = 3;
 
-  ///获取搜索条目列表
-  static Future<List<SearchResourcesItem>> getSearchSubjectListService(
+  /// 搜索条目列表
+  static Future<List<SearchResourcesItem>> searchSubjects(
       String keyword, CrawlConfigItem crawlConfig) async {
     final requestUrl = crawlConfig.searchUrl.replaceFirst(
       '{keyword}',
@@ -46,19 +46,19 @@ class WebRequest {
       Constants.userAgentName: Utils.getRandomUA(),
       if (cookie.isNotEmpty) 'Cookie': cookie
     };
-    final response = await _getHtmlWithRetry(
+    final response = await _getWithRetry(
       requestUrl,
       httpHeaders,
       crawlConfig,
     );
 
-    return HtmlCrawler.parseSearchHtml(response, crawlConfig);
+    return HtmlCrawler.parseSearch(response, crawlConfig);
   }
 
-  ///获取剧集资源列表
-  static Future<List<CrawlerEpisodeResourcesItem>> getResourcesListService(
-      String link, CrawlConfigItem crawlConfig) async {
-    final linkUrl = resolveSourceUrl(crawlConfig.baseUrl, link);
+  /// 剧集资源列表
+  static Future<List<CrawlerEpisodeResourcesItem>> fetchEpisodeResources(
+      String sourceUrl, CrawlConfigItem crawlConfig) async {
+    final linkUrl = resolveSourceUrl(crawlConfig.baseUrl, sourceUrl);
     final cookie = await _cookieHeaderFor(linkUrl, crawlConfig.name);
     final httpHeaders = {
       'referer': '${crawlConfig.baseUrl}/',
@@ -69,15 +69,15 @@ class WebRequest {
       if (cookie.isNotEmpty) 'Cookie': cookie,
     };
 
-    final response = await _getHtmlWithRetry(
+    final response = await _getWithRetry(
       linkUrl,
       httpHeaders,
       crawlConfig,
     );
-    return HtmlCrawler.parseResourcesHtml(response, crawlConfig);
+    return HtmlCrawler.parseEpisodeResources(response, crawlConfig);
   }
 
-  static Future<String> _getHtmlWithRetry(
+  static Future<String> _getWithRetry(
     String url,
     Map<String, dynamic> headers,
     CrawlConfigItem crawlConfig,
@@ -106,7 +106,7 @@ class WebRequest {
         lastError = error;
         lastStackTrace = stackTrace;
         logger.w(
-          'WebRequest: ${crawlConfig.name} request attempt '
+          'RuleRequest: ${crawlConfig.name} request attempt '
           '$attempt/$_maxAttempts failed: $url',
           error: error,
         );
@@ -139,7 +139,7 @@ class WebRequest {
       (xpath) => htmlElement.queryXPath(xpath).node != null,
     );
     if (captchaDetected) {
-      logger.w('WebRequest: ${crawlConfig.name} detected captcha challenge');
+      logger.w('RuleRequest: ${crawlConfig.name} detected captcha challenge');
       throw CaptchaRequiredException(crawlConfig.name);
     }
   }

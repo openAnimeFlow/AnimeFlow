@@ -2,7 +2,7 @@ import 'dart:io';
 
 import 'package:anime_flow/core/constants/constants.dart';
 import 'package:anime_flow/core/crawler/html_crawler.dart';
-import 'package:anime_flow/core/crawler/itme/bgm_user_page_item.dart';
+import 'package:anime_flow/core/crawler/item/bgm_user_statistics_item.dart';
 import 'package:anime_flow/core/network/api_path.dart';
 import 'package:anime_flow/core/network/clients/client.dart';
 import 'package:anime_flow/shared/models/image_search_item.dart';

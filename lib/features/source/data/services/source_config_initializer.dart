@@ -1,6 +1,6 @@
 import 'dart:convert';
 
-import 'package:anime_flow/core/crawler/itme/crawler_config_item.dart';
+import 'package:anime_flow/core/crawler/item/crawler_config_item.dart';
 import 'package:anime_flow/core/logger/logger.dart';
 import 'package:anime_flow/core/utils/utils.dart';
 import 'package:anime_flow/features/source/data/datasources/source_local_datasource.dart';

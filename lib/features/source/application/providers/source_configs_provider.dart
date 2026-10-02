@@ -1,4 +1,4 @@
-import 'package:anime_flow/core/crawler/itme/crawler_config_item.dart';
+import 'package:anime_flow/core/crawler/item/crawler_config_item.dart';
 import 'package:anime_flow/features/source/application/providers/source_repository_provider.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 

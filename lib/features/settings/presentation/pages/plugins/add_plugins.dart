@@ -77,6 +77,12 @@ class _AddPluginsPageState extends ConsumerState<AddPluginsPage> {
   late final TextEditingController _captchaButtonController;
   bool _antiEnabled = false;
   int _captchaType = CaptchaType.imageCaptcha;
+  // 以下字段当前没有编辑控件（表单在后续阶段补齐），保存时原样保留，
+  // 避免编辑一次规则就把它们抹掉。
+  int _captchaDetectType = CaptchaDetectType.xpath;
+  String _captchaDetectValue = '';
+  String _captchaPageUrl = '';
+  String _captchaScript = '';
 
   @override
   void initState() {
@@ -108,6 +114,10 @@ class _AddPluginsPageState extends ConsumerState<AddPluginsPage> {
         _captchaImageController.text = anti.captchaImage;
         _captchaInputController.text = anti.captchaInput;
         _captchaButtonController.text = anti.captchaButton;
+        _captchaDetectType = anti.captchaDetectType;
+        _captchaDetectValue = anti.captchaDetectValue;
+        _captchaPageUrl = anti.captchaPageUrl;
+        _captchaScript = anti.captchaScript;
         _controllers[0].text = editConfig.version;
         _controllers[1].text = editConfig.name;
         _controllers[2].text = editConfig.iconUrl;
@@ -202,6 +212,10 @@ class _AddPluginsPageState extends ConsumerState<AddPluginsPage> {
         captchaImage: _captchaImageController.text.trim(),
         captchaInput: _captchaInputController.text.trim(),
         captchaButton: _captchaButtonController.text.trim(),
+        captchaDetectType: _captchaDetectType,
+        captchaDetectValue: _captchaDetectValue,
+        captchaPageUrl: _captchaPageUrl,
+        captchaScript: _captchaScript,
       );
       final item = CrawlConfigItem(
         version: _controllers[0].text.trim(),
@@ -297,6 +311,10 @@ class _AddPluginsPageState extends ConsumerState<AddPluginsPage> {
         _captchaImageController.text = config.antiCrawlerConfig.captchaImage;
         _captchaInputController.text = config.antiCrawlerConfig.captchaInput;
         _captchaButtonController.text = config.antiCrawlerConfig.captchaButton;
+        _captchaDetectType = config.antiCrawlerConfig.captchaDetectType;
+        _captchaDetectValue = config.antiCrawlerConfig.captchaDetectValue;
+        _captchaPageUrl = config.antiCrawlerConfig.captchaPageUrl;
+        _captchaScript = config.antiCrawlerConfig.captchaScript;
         _controllers[0].text = config.version;
         _controllers[1].text = config.name;
         _controllers[2].text = config.iconUrl;

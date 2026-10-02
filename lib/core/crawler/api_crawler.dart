@@ -543,3 +543,11 @@ class ApiCrawler {
     return value is String ? value.trim() : value.toString().trim();
   }
 }
+
+/// 渲染含 `{keyword}` 占位符的页面地址模板（验证页等场景使用）。
+///
+/// `@变量` 是 API 请求模板的语法，由 [ApiCrawler.renderTemplate] 处理；
+/// 这里只负责规则里已有的 `{keyword}` 写法，替换值做 URL 编码。
+String renderKeywordUrl(String template, String keyword) {
+  return template.replaceAll('{keyword}', Uri.encodeQueryComponent(keyword));
+}

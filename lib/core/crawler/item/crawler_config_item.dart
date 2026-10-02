@@ -145,6 +145,17 @@ class CrawlConfigItem {
   bool get requiresNewerClient =>
       ruleCompatibility == RuleCompatibility.requiresNewerClient;
 
+  /// 加载验证页时使用的地址模板。
+  ///
+  /// 优先使用规则声明的 [AntiCrawlerConfig.captchaPageUrl]；为空时回退到
+  /// 搜索地址；API 规则没有搜索页，再回退到 API 搜索请求地址。
+  String get captchaPageTemplate {
+    final explicit = antiCrawlerConfig.captchaPageUrl.trim();
+    if (explicit.isNotEmpty) return explicit;
+    if (searchUrl.trim().isNotEmpty) return searchUrl;
+    return searchApiConfig.request.url;
+  }
+
   @override
   String toString() {
     return 'CrawlConfigItem{version: $version, name: $name, iconUrl: $iconUrl, baseUrl: $baseUrl, searchUrl: $searchUrl, searchList: $searchList, searchName: $searchName, searchLink: $searchLink, lineNames: $lineNames, lineList: $lineList, episode: $episode, antiCrawlerConfig: $antiCrawlerConfig, searchMode: $searchMode, chapterMode: $chapterMode, searchApiConfig: $searchApiConfig, chapterApiConfig: $chapterApiConfig, api: $api}';

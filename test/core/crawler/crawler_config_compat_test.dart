@@ -17,6 +17,10 @@ import 'package:hive_ce/src/registry/type_registry_impl.dart';
 /// Hive 二进制值类型中的 String 标记。
 const int _stringType = 4;
 
+/// Hive 二进制值类型中的 int / bool 标记。
+const int _intType = 1;
+const int _boolType = 3;
+
 /// 按 Hive 二进制格式写入一个 String（类型字节 + 小端长度 + UTF-8 内容）。
 void _addString(BytesBuilder out, String value) {
   final bytes = utf8.encode(value);
@@ -60,6 +64,36 @@ Uint8List _legacyCrawlConfigBytes() {
   out
     ..addByte(11)
     ..addByte(0);
+  return out.toBytes();
+}
+
+void _addInt(BytesBuilder out, int value) {
+  out.addByte(_intType);
+  final data = ByteData(8)..setFloat64(0, value.toDouble(), Endian.little);
+  out.add(data.buffer.asUint8List());
+}
+
+void _addBool(BytesBuilder out, bool value) {
+  out
+    ..addByte(_boolType)
+    ..addByte(value ? 1 : 0);
+}
+
+/// 构造一份「老版本」AntiCrawlerConfig 负载：只有前 5 个字段，
+/// 没有 captchaDetectType / captchaDetectValue / captchaPageUrl / captchaScript。
+Uint8List _legacyAntiCrawlerBytes() {
+  final out = BytesBuilder();
+  out.addByte(5);
+  out.addByte(0);
+  _addBool(out, true);
+  out.addByte(1);
+  _addInt(out, CaptchaType.imageCaptcha);
+  out.addByte(2);
+  _addString(out, '//img[@id="cap"]');
+  out.addByte(3);
+  _addString(out, '//input[@name="code"]');
+  out.addByte(4);
+  _addString(out, '//button[@type="submit"]');
   return out.toBytes();
 }
 
@@ -229,6 +263,22 @@ void main() {
       expect(item.isRuleCompatible, isTrue);
       expect(item.searchApiConfig.request.method, 'GET');
       expect(item.chapterApiConfig.episodesPath, r'$.episodes[*]');
+    });
+
+    test('反爬配置老数据缺少新字段时读出默认值', () {
+      final reader = BinaryReaderImpl(
+        _legacyAntiCrawlerBytes(),
+        TypeRegistryImpl.nullImpl,
+      );
+      final config = AntiCrawlerConfigAdapter().read(reader);
+
+      expect(config.enabled, isTrue);
+      expect(config.captchaType, CaptchaType.imageCaptcha);
+      expect(config.captchaButton, '//button[@type="submit"]');
+      expect(config.captchaDetectType, CaptchaDetectType.xpath);
+      expect(config.captchaDetectValue, '');
+      expect(config.captchaPageUrl, '');
+      expect(config.captchaScript, '');
     });
 
     test('新增字段可完整写入并读回', () async {

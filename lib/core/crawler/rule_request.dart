@@ -6,25 +6,18 @@ import 'package:anime_flow/core/crawler/item/api_rule_config.dart';
 import 'package:anime_flow/core/crawler/item/crawler_config_item.dart';
 import 'package:anime_flow/core/logger/logger.dart';
 import 'package:anime_flow/core/network/clients/plugin_site_client.dart';
+import 'package:anime_flow/core/network/core/network_exception.dart';
 import 'package:anime_flow/core/utils/utils.dart';
 import 'package:anime_flow/shared/models/player/play/video/episode_resources_item.dart';
 import 'package:anime_flow/shared/models/player/play/video/search_resources_item.dart';
-import 'package:html/parser.dart' as html_parser;
-import 'package:xpath_selector_html_parser/xpath_selector_html_parser.dart';
+import 'package:dio/dio.dart';
 
+import 'captcha_detector.dart';
 import 'cookie_manager.dart';
 import 'html_crawler.dart';
+import 'rule_exceptions.dart';
 
-/// 搜索响应中检测到验证码质询时抛出
-class CaptchaRequiredException implements Exception {
-  final String configName;
-
-  const CaptchaRequiredException(this.configName);
-
-  @override
-  String toString() =>
-      'CaptchaRequiredException: $configName requires captcha verification';
-}
+export 'rule_exceptions.dart';
 
 /// 统一后的规则请求描述。
 ///
@@ -83,15 +76,43 @@ class RuleRequest {
     String keyword,
     CrawlConfigItem crawlConfig,
   ) async {
-    final request = crawlConfig.usesApiSearch
-        ? _prepareApiSearchRequest(keyword, crawlConfig)
-        : _prepareXPathSearchRequest(keyword, crawlConfig);
-    final response = await _sendWithRetry(request, crawlConfig);
-
-    if (crawlConfig.usesApiSearch) {
-      return ApiCrawler.parseSearch(response, crawlConfig.searchApiConfig);
+    final PreparedRuleRequest request;
+    try {
+      request = crawlConfig.usesApiSearch
+          ? _prepareApiSearchRequest(keyword, crawlConfig)
+          : _prepareXPathSearchRequest(keyword, crawlConfig);
+    } catch (error, stackTrace) {
+      _logFailure(crawlConfig, 'search request preparation', error, stackTrace);
+      throw SearchErrorException(crawlConfig.name, cause: error);
     }
-    return HtmlCrawler.parseSearch(response, crawlConfig);
+
+    final String response;
+    try {
+      response = await _sendWithRetry(request, crawlConfig);
+    } on CaptchaRequiredException {
+      rethrow;
+    } catch (error, stackTrace) {
+      _logFailure(crawlConfig, 'search request', error, stackTrace);
+      throw SearchErrorException(crawlConfig.name, cause: error);
+    }
+
+    try {
+      final List<SearchResourcesItem> items;
+      if (crawlConfig.usesApiSearch) {
+        items = ApiCrawler.parseSearch(response, crawlConfig.searchApiConfig);
+      } else {
+        items = await HtmlCrawler.parseSearch(response, crawlConfig);
+      }
+      if (items.isEmpty) {
+        throw NoResultException(crawlConfig.name);
+      }
+      return items;
+    } on NoResultException {
+      rethrow;
+    } catch (error, stackTrace) {
+      _logFailure(crawlConfig, 'search response parsing', error, stackTrace);
+      throw SearchErrorException(crawlConfig.name, cause: error);
+    }
   }
 
   /// 剧集资源列表
@@ -99,20 +120,41 @@ class RuleRequest {
     String sourceUrl,
     CrawlConfigItem crawlConfig,
   ) async {
-    final request = crawlConfig.usesApiChapter
-        ? _prepareApiChapterRequest(sourceUrl, crawlConfig)
-        : _prepareXPathChapterRequest(sourceUrl, crawlConfig);
-    final response = await _sendWithRetry(request, crawlConfig);
-
-    if (crawlConfig.usesApiChapter) {
-      return ApiCrawler.parseChapters(
-        response,
-        crawlConfig.chapterApiConfig,
-        source: sourceUrl,
-        baseUrl: crawlConfig.baseUrl,
-      );
+    final PreparedRuleRequest request;
+    try {
+      request = crawlConfig.usesApiChapter
+          ? _prepareApiChapterRequest(sourceUrl, crawlConfig)
+          : _prepareXPathChapterRequest(sourceUrl, crawlConfig);
+    } catch (error, stackTrace) {
+      _logFailure(
+          crawlConfig, 'chapter request preparation', error, stackTrace);
+      throw ChapterErrorException(crawlConfig.name, cause: error);
     }
-    return HtmlCrawler.parseEpisodeResources(response, crawlConfig);
+
+    final String response;
+    try {
+      response = await _sendWithRetry(request, crawlConfig);
+    } on CaptchaRequiredException {
+      rethrow;
+    } catch (error, stackTrace) {
+      _logFailure(crawlConfig, 'chapter request', error, stackTrace);
+      throw ChapterErrorException(crawlConfig.name, cause: error);
+    }
+
+    try {
+      if (crawlConfig.usesApiChapter) {
+        return ApiCrawler.parseChapters(
+          response,
+          crawlConfig.chapterApiConfig,
+          source: sourceUrl,
+          baseUrl: crawlConfig.baseUrl,
+        );
+      }
+      return await HtmlCrawler.parseEpisodeResources(response, crawlConfig);
+    } catch (error, stackTrace) {
+      _logFailure(crawlConfig, 'chapter response parsing', error, stackTrace);
+      throw ChapterErrorException(crawlConfig.name, cause: error);
+    }
   }
 
   // ---------------------------------------------------------------------------
@@ -220,6 +262,13 @@ class RuleRequest {
       } on CaptchaRequiredException {
         rethrow;
       } catch (error, stackTrace) {
+        if (_isCaptchaChallengeResponse(error, crawlConfig)) {
+          logger.w(
+            'RuleRequest: ${crawlConfig.name} '
+            'detected captcha challenge response',
+          );
+          throw CaptchaRequiredException(crawlConfig.name);
+        }
         lastError = error;
         lastStackTrace = stackTrace;
         logger.w(
@@ -281,23 +330,56 @@ class RuleRequest {
     String response,
     CrawlConfigItem crawlConfig,
   ) {
-    final antiCrawler = crawlConfig.antiCrawlerConfig;
-    if (!antiCrawler.enabled) return;
-
-    final htmlElement = html_parser.parse(response).documentElement;
-    if (htmlElement == null) return;
-
-    final detectionXpaths = [
-      antiCrawler.captchaImage,
-      antiCrawler.captchaButton,
-    ].where((xpath) => xpath.trim().isNotEmpty);
-    final captchaDetected = detectionXpaths.any(
-      (xpath) => htmlElement.queryXPath(xpath).node != null,
-    );
-    if (captchaDetected) {
+    if (CaptchaDetector.detects(response, crawlConfig.antiCrawlerConfig)) {
       logger.w('RuleRequest: ${crawlConfig.name} detected captcha challenge');
       throw CaptchaRequiredException(crawlConfig.name);
     }
+  }
+
+  /// 判断一次失败是否其实是反爬挑战页。
+  ///
+  /// Dio 会在非 2xx 时先抛出异常，被保护的站点常以 403/429/503 返回挑战页，
+  /// 因此解析层没有机会看到响应体；这里复用被保留的 Dio 响应体与
+  /// `cf-mitigated: challenge` 头来补上这次判断。
+  static bool _isCaptchaChallengeResponse(
+    Object error,
+    CrawlConfigItem crawlConfig,
+  ) {
+    if (!crawlConfig.antiCrawlerConfig.enabled) return false;
+    if (error is! NetworkException ||
+        error.type != NetworkExceptionType.badResponse) {
+      return false;
+    }
+
+    final rawError = error.rawError;
+    if (rawError is! DioException) return false;
+
+    final response = rawError.response;
+    final cfMitigated = response?.headers.value('cf-mitigated');
+    if (cfMitigated?.toLowerCase() == 'challenge') return true;
+
+    final data = response?.data;
+    final raw = data is String ? data : data?.toString() ?? '';
+    if (raw.trim().isEmpty) return false;
+
+    try {
+      return CaptchaDetector.detects(raw, crawlConfig.antiCrawlerConfig);
+    } catch (_) {
+      return false;
+    }
+  }
+
+  static void _logFailure(
+    CrawlConfigItem crawlConfig,
+    String phase,
+    Object error,
+    StackTrace stackTrace,
+  ) {
+    logger.w(
+      'RuleRequest: ${crawlConfig.name} $phase failed',
+      error: error,
+      stackTrace: stackTrace,
+    );
   }
 
   static Future<String> _cookieHeaderFor(String url, String name) async {

@@ -22,13 +22,17 @@ class AntiCrawlerConfigAdapter extends TypeAdapter<AntiCrawlerConfig> {
       captchaImage: fields[2] as String,
       captchaInput: fields[3] as String,
       captchaButton: fields[4] as String,
+      captchaDetectType: (fields[5] as num?)?.toInt(),
+      captchaDetectValue: fields[6] as String?,
+      captchaPageUrl: fields[7] as String?,
+      captchaScript: fields[8] as String?,
     );
   }
 
   @override
   void write(BinaryWriter writer, AntiCrawlerConfig obj) {
     writer
-      ..writeByte(5)
+      ..writeByte(9)
       ..writeByte(0)
       ..write(obj.enabled)
       ..writeByte(1)
@@ -38,7 +42,15 @@ class AntiCrawlerConfigAdapter extends TypeAdapter<AntiCrawlerConfig> {
       ..writeByte(3)
       ..write(obj.captchaInput)
       ..writeByte(4)
-      ..write(obj.captchaButton);
+      ..write(obj.captchaButton)
+      ..writeByte(5)
+      ..write(obj.captchaDetectType)
+      ..writeByte(6)
+      ..write(obj.captchaDetectValue)
+      ..writeByte(7)
+      ..write(obj.captchaPageUrl)
+      ..writeByte(8)
+      ..write(obj.captchaScript);
   }
 
   @override

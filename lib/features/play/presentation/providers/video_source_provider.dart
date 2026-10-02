@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:isolate';
 
 import 'package:anime_flow/core/crawler/cookie_manager.dart';
+import 'package:anime_flow/core/crawler/api_crawler.dart' show renderKeywordUrl;
 import 'package:anime_flow/core/crawler/rule_request.dart';
 import 'package:anime_flow/core/crawler/item/anti_crawler_config.dart';
 import 'package:anime_flow/core/crawler/item/crawler_config_item.dart';
@@ -251,7 +252,7 @@ class VideoSourceNotifier extends _$VideoSourceNotifier {
           websiteName: config.name,
           websiteIcon: config.iconUrl,
           baseUrl: config.baseUrl,
-          searchUrl: config.searchUrl,
+          searchUrl: config.captchaPageTemplate,
           needsCaptcha: _requiresCaptcha(config),
           episodeResources: const [],
         );
@@ -260,7 +261,7 @@ class VideoSourceNotifier extends _$VideoSourceNotifier {
       return previous.copyWith(
         websiteIcon: config.iconUrl,
         baseUrl: config.baseUrl,
-        searchUrl: config.searchUrl,
+        searchUrl: config.captchaPageTemplate,
         needsCaptcha:
             config.antiCrawlerConfig.enabled ? previous.needsCaptcha : false,
         antiCrawlerConfig:
@@ -332,10 +333,8 @@ class VideoSourceNotifier extends _$VideoSourceNotifier {
       return;
     }
 
-    final searchUrl = config.searchUrl.replaceFirst(
-      '{keyword}',
-      Uri.encodeQueryComponent(retryKeyword),
-    );
+    final searchUrl =
+        renderKeywordUrl(config.captchaPageTemplate, retryKeyword);
     final requiresCaptcha = config.antiCrawlerConfig.enabled &&
         !await CookieManager.instance.hasUsableCookies(config.name, searchUrl);
     if (!ref.mounted) return;
@@ -461,6 +460,19 @@ class VideoSourceNotifier extends _$VideoSourceNotifier {
         isLoading: false,
         needsCaptcha: true,
         antiCrawlerConfig: config.antiCrawlerConfig,
+        errorMessage: null,
+      );
+    } on NoResultException {
+      // 解析成功但没有匹配结果：保持空列表，由列表页展示「无结果」状态。
+      if (!ref.mounted) return;
+      if (!_isRequestCurrent(config.name, sessionId, requestToken)) {
+        return;
+      }
+      _updateResourceStatus(
+        config.name,
+        isLoading: false,
+        episodeResources: const [],
+        needsCaptcha: false,
         errorMessage: null,
       );
     } catch (e) {

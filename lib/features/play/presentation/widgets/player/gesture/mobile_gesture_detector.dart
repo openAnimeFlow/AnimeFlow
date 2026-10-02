@@ -21,18 +21,18 @@ class _MobileGestureDetectorState extends ConsumerState<MobileGestureDetector> {
   double _verticalDragStartY = 0; // 垂直拖动开始时的Y坐标
   bool _isRightSide = false; // 是否在屏幕右半侧开始垂直拖动
   bool _isSpeedBoosting = false;
-  late final PlaySession playController;
+  late final PlaySession playSession;
 
-  VideoUiNotifier get videoUiStateController =>
+  VideoUiNotifier get videoUiNotifier =>
       ref.read(videoUiProvider.notifier);
 
   void _endTemporaryPlaybackRate() {
     if (!_isSpeedBoosting) return;
 
     _isSpeedBoosting = false;
-    playController.endTemporaryPlaybackRate();
-    videoUiStateController.hideIndicator();
-    videoUiStateController
+    playSession.endTemporaryPlaybackRate();
+    videoUiNotifier.hideIndicator();
+    videoUiNotifier
         .updateIndicatorType(VideoControlsIndicatorType.noIndicator);
   }
 
@@ -40,7 +40,7 @@ class _MobileGestureDetectorState extends ConsumerState<MobileGestureDetector> {
   void dispose() {
     if (_isSpeedBoosting) {
       _isSpeedBoosting = false;
-      playController.endTemporaryPlaybackRate();
+      playSession.endTemporaryPlaybackRate();
     }
     super.dispose();
   }
@@ -48,7 +48,7 @@ class _MobileGestureDetectorState extends ConsumerState<MobileGestureDetector> {
   @override
   void initState() {
     super.initState();
-    playController = ref.read(playSessionProvider);
+    playSession = ref.read(playSessionProvider);
   }
 
   @override
@@ -59,15 +59,15 @@ class _MobileGestureDetectorState extends ConsumerState<MobileGestureDetector> {
     return GestureDetector(
       //单击事件
       onTap: () {
-        videoUiStateController.showOrHideControlsUi();
-        videoUiStateController.hideControlsUi(
+        videoUiNotifier.showOrHideControlsUi();
+        videoUiNotifier.hideControlsUi(
             duration: const Duration(seconds: 3));
       },
 
       //双击事件
       onDoubleTap: () {
-        playController.playOrPauseVideo();
-        videoUiStateController.updateIndicatorTypeAndShowIndicator(
+        playSession.playOrPauseVideo();
+        videoUiNotifier.updateIndicatorTypeAndShowIndicator(
             VideoControlsIndicatorType.playStatusIndicator);
       },
 
@@ -76,13 +76,13 @@ class _MobileGestureDetectorState extends ConsumerState<MobileGestureDetector> {
         if (ref.read(playStateProvider).playing) {
           vibrateMedium();
           _isSpeedBoosting = true;
-          playController.setPlaybackRate(AppSettings.fastForwardSpeed,
+          playSession.setPlaybackRate(AppSettings.fastForwardSpeed,
               temporary: true);
-          videoUiStateController
+          videoUiNotifier
               .updateMainAxisAlignmentType(MainAxisAlignment.start);
-          videoUiStateController
+          videoUiNotifier
               .updateIndicatorType(VideoControlsIndicatorType.speedIndicator);
-          videoUiStateController.showIndicator();
+          videoUiNotifier.showIndicator();
         }
       },
 
@@ -95,36 +95,33 @@ class _MobileGestureDetectorState extends ConsumerState<MobileGestureDetector> {
 
       // 水平拖动开始：调整播放进度
       onHorizontalDragStart: (DragStartDetails details) {
-        videoUiStateController.startHorizontalDrag(
+        videoUiNotifier.startHorizontalDrag(
           details.globalPosition.dx,
           ref.read(playStateProvider).position,
         );
-        playController.stopPlaying();
+        playSession.beginManualSeek();
       },
 
       // 水平拖动更新：更新播放进度
       onHorizontalDragUpdate: (DragUpdateDetails details) {
         final double scale = 180000 / MediaQuery.sizeOf(context).width;
-        videoUiStateController.updateHorizontalDrag(
+        videoUiNotifier.updateHorizontalDrag(
           details.globalPosition.dx,
           scale,
           ref.read(playStateProvider).duration,
-        );
-        playController.updateBufferingForPendingSeek(
-          videoUiStateController.dragPosition,
         );
       },
 
       // 水平拖动结束：应用新的播放进度
       onHorizontalDragEnd: (DragEndDetails details) {
-        playController.seekTo(videoUiStateController.dragPosition);
-        videoUiStateController.endHorizontalDrag();
-        playController.startPlaying();
+        playSession.finishManualSeek(videoUiNotifier.dragPosition);
+        videoUiNotifier.endHorizontalDrag();
       },
 
       // 水平拖动取消：恢复到拖动前的播放位置
       onHorizontalDragCancel: () {
-        videoUiStateController.cancelHorizontalDrag();
+        videoUiNotifier.cancelHorizontalDrag();
+        playSession.cancelManualSeek();
       },
 
       // 垂直拖动开始：判断是调整音量还是亮度
@@ -134,24 +131,24 @@ class _MobileGestureDetectorState extends ConsumerState<MobileGestureDetector> {
 
         // 判断是否在屏幕右半侧开始拖动
         _isRightSide = details.globalPosition.dx > screenWidth / 2;
-        videoUiStateController
+        videoUiNotifier
             .updateMainAxisAlignmentType(MainAxisAlignment.start);
         if (_isRightSide) {
           // 右半屏：调整音量
-          playController.startVerticalDrag();
-          videoUiStateController
+          playSession.startVerticalDrag();
+          videoUiNotifier
               .updateMainAxisAlignmentType(MainAxisAlignment.start);
-          videoUiStateController
+          videoUiNotifier
               .updateIndicatorType(VideoControlsIndicatorType.volumeIndicator);
-          videoUiStateController.showIndicator();
+          videoUiNotifier.showIndicator();
         } else {
           // 左半屏：调整屏幕亮度
-          videoUiStateController.startBrightnessDragWithoutAutoHide();
-          videoUiStateController
+          videoUiNotifier.startBrightnessDragWithoutAutoHide();
+          videoUiNotifier
               .updateMainAxisAlignmentType(MainAxisAlignment.start);
-          videoUiStateController.updateIndicatorType(
+          videoUiNotifier.updateIndicatorType(
               VideoControlsIndicatorType.brightnessIndicator);
-          videoUiStateController.showIndicator();
+          videoUiNotifier.showIndicator();
         }
       },
 
@@ -161,13 +158,13 @@ class _MobileGestureDetectorState extends ConsumerState<MobileGestureDetector> {
 
         if (_isRightSide) {
           // 垂直拖动（右半屏）：更新音量
-          playController.updateVerticalDrag(
+          playSession.updateVerticalDrag(
             dragDistance, // 拖动的垂直距离
             screenHeight, // 屏幕高度
           );
         } else {
           // 垂直拖动（左半屏）：更新屏幕亮度
-          videoUiStateController.updateBrightnessDrag(
+          videoUiNotifier.updateBrightnessDrag(
             dragDistance, // 拖动的垂直距离
             screenHeight, // 屏幕高度
           );
@@ -178,13 +175,13 @@ class _MobileGestureDetectorState extends ConsumerState<MobileGestureDetector> {
       onVerticalDragEnd: (DragEndDetails details) {
         if (_isRightSide) {
           // 垂直拖动结束（右半屏）：应用新的音量
-          playController.endVerticalDrag();
-          videoUiStateController.updateIndicatorTypeAndShowIndicator(
+          playSession.endVerticalDrag();
+          videoUiNotifier.updateIndicatorTypeAndShowIndicator(
               VideoControlsIndicatorType.volumeIndicator);
         } else {
           // 垂直拖动结束（左半屏）：结束亮度调整
-          videoUiStateController.setBrightnessDragging(false);
-          videoUiStateController.updateIndicatorTypeAndShowIndicator(
+          videoUiNotifier.setBrightnessDragging(false);
+          videoUiNotifier.updateIndicatorTypeAndShowIndicator(
               VideoControlsIndicatorType.brightnessIndicator);
         }
       },
@@ -193,10 +190,10 @@ class _MobileGestureDetectorState extends ConsumerState<MobileGestureDetector> {
       onVerticalDragCancel: () {
         if (_isRightSide) {
           // 垂直拖动取消（右半屏）：结束音量调整并隐藏指示器
-          playController.endVerticalDrag();
+          playSession.endVerticalDrag();
         } else {
           // 垂直拖动取消（左半屏）：结束亮度调整
-          videoUiStateController.endBrightnessDrag();
+          videoUiNotifier.endBrightnessDrag();
         }
       },
 

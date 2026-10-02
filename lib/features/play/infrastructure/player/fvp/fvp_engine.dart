@@ -309,7 +309,11 @@ class FvpEngine implements PlayerEngine {
 
   @override
   Future<void> seek(Duration position) => _enqueue(() async {
-        final result = await _player.seek(position: position.inMilliseconds);
+        // 默认 flags 含 KeyFrame，会落到关键帧导致进度漂移，与 prepare 保持一致。
+        final result = await _player.seek(
+          position: position.inMilliseconds,
+          flags: const fvp.SeekFlag(fvp.SeekFlag.fromStart),
+        );
         _ensureReady();
         if (result < 0) throw StateError('FVP seek failed: $result');
         _completionEmitted = false;

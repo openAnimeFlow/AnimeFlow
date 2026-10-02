@@ -17,6 +17,7 @@ import 'package:anime_flow/features/play/infrastructure/player/player_engine_fac
 import 'package:anime_flow/features/play/presentation/providers/episodes_provider.dart';
 import 'package:anime_flow/features/play/presentation/providers/play_provider.dart';
 import 'package:anime_flow/features/play/presentation/providers/video_ui_provider.dart';
+import 'package:anime_flow/shared/models/enums/video_controls_icon_type.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/foundation.dart';
 import 'package:hive_ce/hive.dart';
@@ -176,6 +177,29 @@ void main() {
       Uri.file(_localPath(3)).toString(),
     ]);
   });
+
+  test('manual seek stops before the end and moves the bar immediately',
+      () async {
+    const duration = Duration(minutes: 24);
+    final factory = _Factory();
+    final state = _State()
+      ..value = const PlayState(
+        playing: true,
+        duration: duration,
+        position: Duration(minutes: 10),
+      );
+    final session = _Session(factory, state: state);
+    await session.playbackCoordinator.initialize();
+    addTearDown(session.playbackCoordinator.dispose);
+    await session.initPlayState(_request(1));
+
+    session.seekTo(duration);
+    await Future<void>.delayed(Duration.zero);
+
+    final target = duration - const Duration(seconds: 1);
+    expect(factory.engines.last.seekPositions, [target]);
+    expect(state.value.position, target);
+  });
 }
 
 PlayRequest _request(int episode) => PlayRequest(
@@ -248,6 +272,7 @@ class _Engine implements PlayerEngine {
   final _Factory factory;
   PlaybackSource? source;
   final openedUris = <String>[];
+  final seekPositions = <Duration>[];
   int disposeCount = 0;
   double? volume;
   @override
@@ -285,6 +310,13 @@ class _Engine implements PlayerEngine {
 
   @override
   Future<void> setRate(double rate) async {}
+
+  @override
+  Future<void> seek(Duration position) async {
+    expect(disposeCount, 0);
+    seekPositions.add(position);
+  }
+
   @override
   Future<void> dispose() async {
     disposeCount++;
@@ -322,10 +354,19 @@ class _State implements PlayStateNotifier {
   }
 
   @override
+  void setPosition(Duration position) {
+    value = value.copyWith(position: position);
+  }
+
+  @override
   dynamic noSuchMethod(Invocation invocation) => null;
 }
 
 class _Ui implements VideoUiStateActions {
+  @override
+  VideoControlsIndicatorType get currentIndicatorType =>
+      VideoControlsIndicatorType.noIndicator;
+
   @override
   dynamic noSuchMethod(Invocation invocation) => null;
 }

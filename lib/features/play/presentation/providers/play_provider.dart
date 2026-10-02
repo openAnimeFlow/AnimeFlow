@@ -406,6 +406,22 @@ class PlaySession {
   /// 定时停止播放的计时器
   Timer? _stopTimer;
 
+  /// 手动跳转落点的判定容差。
+  static const Duration _seekSettleTolerance = Duration(milliseconds: 500);
+
+  /// 手动跳转等待落点的超时时间。
+  static const Duration _seekSettleTimeout = Duration(seconds: 3);
+
+  /// 手动跳转目标与片尾之间保留的最小间隔。
+  static const Duration _seekEndGuard = Duration(seconds: 1);
+
+  /// 手动跳转目标，非空表示正在等待播放器回报新位置。
+  Duration? _pendingSeekPosition;
+  Timer? _pendingSeekTimer;
+
+  /// 拖动进度条前的播放状态，空表示当前没有进行中的拖动。
+  bool? _resumeAfterManualSeek;
+
   bool _isPlayerBuffering = false;
   StreamSubscription<PlayerEvent>? _playerSubscription;
   bool _isDisposed = false;
@@ -422,6 +438,7 @@ class PlaySession {
 
   static const Duration _bufferingPositionTolerance =
       Duration(milliseconds: 500);
+
   void init() {
     final adBlocker = AppSettings.adBlocker;
     final preferredKernel = _readPreferredPlayerKernel();
@@ -566,11 +583,15 @@ class PlaySession {
     } else if (event is PlayerRateChanged) {
       _playStateActions.setRate(event.rate);
     } else if (event is PlayerPositionChanged) {
+      // 只接受已落点的位置回报。
+      if (_isStaleSeekPosition(event.position)) return;
       _playStateActions.setPosition(event.position);
       _updateEffectiveBufferingState(position: event.position);
     } else if (event is PlayerDurationChanged) {
       _playStateActions.setDuration(event.duration);
     } else if (event is PlayerCompleted) {
+      // 落点确认前的完成事件不作处理。
+      if (_pendingSeekPosition != null) return;
       _playStateActions.setPlaybackPhase(PlaybackPhase.completed);
       if (subjectId > 0) {
         _autoSwitchToNextEpisode();
@@ -618,6 +639,7 @@ class PlaySession {
 
   void dispose() {
     _isDisposed = true;
+    _clearPendingSeek();
     danmaku.dispose();
     unawaited(playbackProgressManager.save());
     if (Platform.isWindows) {
@@ -641,6 +663,8 @@ class PlaySession {
 
   Future<void> stopCurrentMedia() async {
     _playRequestId++;
+    _clearPendingSeek();
+    _resumeAfterManualSeek = null;
     danmaku.beginPlaybackChange();
     await _serializePlaybackChange(() async {
       if (_isDisposed) return;
@@ -879,16 +903,74 @@ class PlaySession {
     _applyPlaybackRate(speed);
   }
 
+  /// 开始手动拖动进度：暂停播放并记住拖动前的播放状态。
+  void beginManualSeek() {
+    _resumeAfterManualSeek = _playStateActions.value.playing;
+    unawaited(playbackCoordinator.pause());
+  }
+
+  /// 结束手动拖动进度：跳转到目标并按拖动前的状态恢复播放。
+  void finishManualSeek(Duration position) {
+    seekTo(position);
+    _restorePlaybackAfterManualSeek();
+  }
+
+  /// 取消手动拖动进度：不跳转，只按拖动前的状态恢复播放。
+  void cancelManualSeek() => _restorePlaybackAfterManualSeek();
+
+  void _restorePlaybackAfterManualSeek() {
+    final shouldResume = _resumeAfterManualSeek ?? false;
+    _resumeAfterManualSeek = null;
+    if (shouldResume) unawaited(startPlaying());
+  }
+
   /// 跳转到指定位置
   void seekTo(Duration pos) {
     danmaku.onSeek();
-    unawaited(playbackCoordinator.seek(pos));
-    _updateEffectiveBufferingState(position: pos);
-    playbackProgressManager.saveAfterSeek(pos);
+    final target = _clampSeekTarget(pos);
+    // 落点确认前先以目标位置更新播放状态。
+    _playStateActions.setPosition(target);
+    if (_playStateActions.value.duration > Duration.zero) {
+      _awaitSeekSettle(target);
+    }
+    unawaited(playbackCoordinator.seek(target));
+    _updateEffectiveBufferingState(position: target);
+    playbackProgressManager.saveAfterSeek(target);
   }
 
-  void updateBufferingForPendingSeek(Duration pos) {
-    _updateEffectiveBufferingState(position: pos);
+  /// 把跳转目标收敛到片尾之前。
+  Duration _clampSeekTarget(Duration position) {
+    if (position < Duration.zero) return Duration.zero;
+    final duration = _playStateActions.value.duration;
+    if (duration <= Duration.zero) return position;
+    final guard = duration > const Duration(seconds: 20)
+        ? _seekEndGuard
+        : Duration(milliseconds: duration.inMilliseconds ~/ 20);
+    final maxPosition = duration - guard;
+    return position > maxPosition ? maxPosition : position;
+  }
+
+  /// 记录跳转目标并启动落点等待超时。
+  void _awaitSeekSettle(Duration target) {
+    _pendingSeekPosition = target;
+    _pendingSeekTimer?.cancel();
+    _pendingSeekTimer = Timer(_seekSettleTimeout, _clearPendingSeek);
+  }
+
+  /// 返回 true 表示该位置回报早于手动跳转落点。
+  bool _isStaleSeekPosition(Duration position) {
+    final target = _pendingSeekPosition;
+    if (target == null) return false;
+    if ((position - target).abs() > _seekSettleTolerance) return true;
+    _clearPendingSeek();
+    return false;
+  }
+
+  /// 结束手动跳转的落点等待。
+  void _clearPendingSeek() {
+    _pendingSeekTimer?.cancel();
+    _pendingSeekTimer = null;
+    _pendingSeekPosition = null;
   }
 
   /// 结束临时播放倍速

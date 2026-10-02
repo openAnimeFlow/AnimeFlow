@@ -85,19 +85,18 @@ class PlayerProgressBar extends ConsumerWidget {
                   videoUiStateController.startProgressDrag(
                     Duration(milliseconds: v.toInt()),
                   );
-                  playController.stopPlaying();
+                  playController.beginManualSeek();
                 },
                 onChanged: (v) {
-                  final position = Duration(milliseconds: v.toInt());
                   videoUiStateController.setHorizontalDragPosition(
-                    position,
+                    Duration(milliseconds: v.toInt()),
                   );
-                  playController.updateBufferingForPendingSeek(position);
                 },
                 onChangeEnd: (v) {
-                  playController.seekTo(Duration(milliseconds: v.toInt()));
+                  playController.finishManualSeek(
+                    Duration(milliseconds: v.toInt()),
+                  );
                   videoUiStateController.endHorizontalDrag();
-                  playController.startPlaying();
                 },
               ),
             ),

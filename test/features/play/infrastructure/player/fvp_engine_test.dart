@@ -387,6 +387,23 @@ void main() {
     await recovered.timeout(const Duration(seconds: 2));
     expect(buffering.last, isFalse);
   });
+
+  test('seek keeps the requested position instead of snapping to a keyframe',
+      () async {
+    final player = _FakePlayer();
+    final engine = FvpEngine(playerFactory: () => player);
+    await engine.initialize();
+    addTearDown(engine.dispose);
+    await engine.open(
+      PlaybackSource(uri: Uri.parse('https://example.com/video')),
+    );
+
+    await engine.seek(const Duration(seconds: 30));
+
+    expect(player.seekPosition, 30000);
+    expect(player.seekFlags.rawValue, fvp.SeekFlag.fromStart);
+    expect(player.seekFlags.test(fvp.SeekFlag.keyFrame), isFalse);
+  });
 }
 
 // Implements the Dart API without loading MDK or a platform video texture.
@@ -414,6 +431,8 @@ class _FakePlayer implements fvp.Player {
   int prepares = 0;
   int initialPosition = 0;
   fvp.SeekFlag initialFlags = const fvp.SeekFlag(fvp.SeekFlag.defaultFlags);
+  int? seekPosition;
+  fvp.SeekFlag seekFlags = const fvp.SeekFlag(fvp.SeekFlag.defaultFlags);
   final changes = StreamController<
       ({fvp.PlaybackState oldValue, fvp.PlaybackState newValue})>.broadcast();
   final statuses = StreamController<
@@ -487,6 +506,17 @@ class _FakePlayer implements fvp.Player {
 
   @override
   fvp.MediaInfo get mediaInfo => _FakeMediaInfo();
+
+  @override
+  Future<int> seek({
+    required int position,
+    fvp.SeekFlag flags = const fvp.SeekFlag(fvp.SeekFlag.defaultFlags),
+  }) async {
+    seekPosition = position;
+    seekFlags = flags;
+    currentPosition = position;
+    return position;
+  }
 
   @override
   int get position => currentPosition;

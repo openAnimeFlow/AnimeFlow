@@ -2195,4 +2195,124 @@ class AppLocalizationsEn extends AppLocalizations {
   String syncSubject(int id) {
     return 'Subject $id';
   }
+
+  @override
+  String get sectionBasic => 'Basic info';
+
+  @override
+  String get sectionSearch => 'Search settings';
+
+  @override
+  String get sectionChapter => 'Episode settings';
+
+  @override
+  String get searchModeLabel => 'Search mode';
+
+  @override
+  String get chapterModeLabel => 'Episode mode';
+
+  @override
+  String get requestMethod => 'HTTP method';
+
+  @override
+  String get requestUrl => 'Request URL';
+
+  @override
+  String get requestHeaders => 'Headers (JSON)';
+
+  @override
+  String get requestQuery => 'Query params (JSON)';
+
+  @override
+  String get requestBodyType => 'Body type';
+
+  @override
+  String get requestBody => 'Body (JSON)';
+
+  @override
+  String get bodyTypeNone => 'None';
+
+  @override
+  String get bodyTypeJson => 'JSON';
+
+  @override
+  String get bodyTypeForm => 'Form';
+
+  @override
+  String get apiListPath => 'Result list JSONPath';
+
+  @override
+  String get apiNamePath => 'Name JSONPath';
+
+  @override
+  String get apiSourcePath => 'Link JSONPath';
+
+  @override
+  String get chapterFormat => 'Response format';
+
+  @override
+  String get chapterFormatNested => 'Nested';
+
+  @override
+  String get chapterFormatDelimited => 'Delimited string';
+
+  @override
+  String get apiRoadsPath => 'Line list JSONPath';
+
+  @override
+  String get apiRoadNamePath => 'Line name JSONPath';
+
+  @override
+  String get apiEpisodesPath => 'Episode list JSONPath';
+
+  @override
+  String get apiEpisodeNamePath => 'Episode name JSONPath';
+
+  @override
+  String get apiEpisodeUrlPath => 'Episode URL JSONPath';
+
+  @override
+  String get apiRoadNamesPath => 'Line names JSONPath';
+
+  @override
+  String get apiRoadEpisodesPath => 'Episodes field JSONPath';
+
+  @override
+  String get apiRoadSeparator => 'Line separator';
+
+  @override
+  String get apiEpisodeSeparator => 'Episode separator';
+
+  @override
+  String get apiFieldSeparator => 'Field separator';
+
+  @override
+  String get apiVariables => 'Variables (JSON)';
+
+  @override
+  String get apiEpisodePage => 'Use episode page template';
+
+  @override
+  String get apiEpisodePageUrl => 'Episode page URL template';
+
+  @override
+  String get apiEpisodePageQuery => 'Episode page query (JSON)';
+
+  @override
+  String get captchaDetectType => 'Challenge detection';
+
+  @override
+  String get captchaDetectValue => 'Challenge detection value';
+
+  @override
+  String get captchaPageUrl => 'Challenge page URL';
+
+  @override
+  String get captchaDetectText => 'Text';
+
+  @override
+  String get captchaDetectRegex => 'Regex';
+
+  @override
+  String get invalidJsonFormat => 'Invalid JSON';
 }

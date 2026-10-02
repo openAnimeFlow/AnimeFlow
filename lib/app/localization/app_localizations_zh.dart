@@ -2127,6 +2127,126 @@ class AppLocalizationsZh extends AppLocalizations {
   String syncSubject(int id) {
     return '条目 $id';
   }
+
+  @override
+  String get sectionBasic => '基礎資訊';
+
+  @override
+  String get sectionSearch => '搜尋設定';
+
+  @override
+  String get sectionChapter => '劇集設定';
+
+  @override
+  String get searchModeLabel => '搜尋模式';
+
+  @override
+  String get chapterModeLabel => '劇集模式';
+
+  @override
+  String get requestMethod => '請求方法';
+
+  @override
+  String get requestUrl => '請求位址';
+
+  @override
+  String get requestHeaders => '請求標頭（JSON）';
+
+  @override
+  String get requestQuery => '查詢參數（JSON）';
+
+  @override
+  String get requestBodyType => '請求主體類型';
+
+  @override
+  String get requestBody => '請求主體（JSON）';
+
+  @override
+  String get bodyTypeNone => '無';
+
+  @override
+  String get bodyTypeJson => 'JSON';
+
+  @override
+  String get bodyTypeForm => '表單';
+
+  @override
+  String get apiListPath => '搜尋結果列表 JSONPath';
+
+  @override
+  String get apiNamePath => '名稱 JSONPath';
+
+  @override
+  String get apiSourcePath => '連結 JSONPath';
+
+  @override
+  String get chapterFormat => '回應格式';
+
+  @override
+  String get chapterFormatNested => '嵌套結構';
+
+  @override
+  String get chapterFormatDelimited => '分隔符字串';
+
+  @override
+  String get apiRoadsPath => '線路列表 JSONPath';
+
+  @override
+  String get apiRoadNamePath => '線路名稱 JSONPath';
+
+  @override
+  String get apiEpisodesPath => '劇集列表 JSONPath';
+
+  @override
+  String get apiEpisodeNamePath => '劇集名稱 JSONPath';
+
+  @override
+  String get apiEpisodeUrlPath => '劇集網址 JSONPath';
+
+  @override
+  String get apiRoadNamesPath => '線路名稱欄位 JSONPath';
+
+  @override
+  String get apiRoadEpisodesPath => '劇集內容欄位 JSONPath';
+
+  @override
+  String get apiRoadSeparator => '線路分隔符';
+
+  @override
+  String get apiEpisodeSeparator => '劇集分隔符';
+
+  @override
+  String get apiFieldSeparator => '欄位分隔符';
+
+  @override
+  String get apiVariables => '變數（JSON）';
+
+  @override
+  String get apiEpisodePage => '啟用播放頁模板';
+
+  @override
+  String get apiEpisodePageUrl => '播放頁網址模板';
+
+  @override
+  String get apiEpisodePageQuery => '播放頁查詢參數（JSON）';
+
+  @override
+  String get captchaDetectType => '驗證頁偵測方式';
+
+  @override
+  String get captchaDetectValue => '驗證頁偵測內容';
+
+  @override
+  String get captchaPageUrl => '驗證頁位址';
+
+  @override
+  String get captchaDetectText => '文字';
+
+  @override
+  String get captchaDetectRegex => '正規表達式';
+
+  @override
+  String get invalidJsonFormat => 'JSON 格式不正確';
 }
 
 /// The translations for Chinese, using the Han script (`zh_Hans`).
@@ -4251,6 +4371,126 @@ class AppLocalizationsZhHans extends AppLocalizationsZh {
   String syncSubject(int id) {
     return '条目 $id';
   }
+
+  @override
+  String get sectionBasic => '基础信息';
+
+  @override
+  String get sectionSearch => '搜索配置';
+
+  @override
+  String get sectionChapter => '章节配置';
+
+  @override
+  String get searchModeLabel => '搜索模式';
+
+  @override
+  String get chapterModeLabel => '章节模式';
+
+  @override
+  String get requestMethod => '请求方法';
+
+  @override
+  String get requestUrl => '请求地址';
+
+  @override
+  String get requestHeaders => '请求头（JSON）';
+
+  @override
+  String get requestQuery => '查询参数（JSON）';
+
+  @override
+  String get requestBodyType => '请求体类型';
+
+  @override
+  String get requestBody => '请求体（JSON）';
+
+  @override
+  String get bodyTypeNone => '无';
+
+  @override
+  String get bodyTypeJson => 'JSON';
+
+  @override
+  String get bodyTypeForm => '表单';
+
+  @override
+  String get apiListPath => '搜索结果列表 JSONPath';
+
+  @override
+  String get apiNamePath => '名称 JSONPath';
+
+  @override
+  String get apiSourcePath => '链接 JSONPath';
+
+  @override
+  String get chapterFormat => '响应格式';
+
+  @override
+  String get chapterFormatNested => '嵌套结构';
+
+  @override
+  String get chapterFormatDelimited => '分隔符字符串';
+
+  @override
+  String get apiRoadsPath => '线路列表 JSONPath';
+
+  @override
+  String get apiRoadNamePath => '线路名称 JSONPath';
+
+  @override
+  String get apiEpisodesPath => '剧集列表 JSONPath';
+
+  @override
+  String get apiEpisodeNamePath => '剧集名称 JSONPath';
+
+  @override
+  String get apiEpisodeUrlPath => '剧集地址 JSONPath';
+
+  @override
+  String get apiRoadNamesPath => '线路名称字段 JSONPath';
+
+  @override
+  String get apiRoadEpisodesPath => '剧集内容字段 JSONPath';
+
+  @override
+  String get apiRoadSeparator => '线路分隔符';
+
+  @override
+  String get apiEpisodeSeparator => '剧集分隔符';
+
+  @override
+  String get apiFieldSeparator => '字段分隔符';
+
+  @override
+  String get apiVariables => '变量（JSON）';
+
+  @override
+  String get apiEpisodePage => '启用播放页模板';
+
+  @override
+  String get apiEpisodePageUrl => '播放页地址模板';
+
+  @override
+  String get apiEpisodePageQuery => '播放页查询参数（JSON）';
+
+  @override
+  String get captchaDetectType => '验证页检测方式';
+
+  @override
+  String get captchaDetectValue => '验证页检测内容';
+
+  @override
+  String get captchaPageUrl => '验证页地址';
+
+  @override
+  String get captchaDetectText => '文本';
+
+  @override
+  String get captchaDetectRegex => '正则';
+
+  @override
+  String get invalidJsonFormat => 'JSON 格式不正确';
 }
 
 /// The translations for Chinese, as used in Hong Kong, using the Han script (`zh_Hant_HK`).
@@ -6376,6 +6616,126 @@ class AppLocalizationsZhHantHk extends AppLocalizationsZh {
   String syncSubject(int id) {
     return '項目 $id';
   }
+
+  @override
+  String get sectionBasic => '基礎資訊';
+
+  @override
+  String get sectionSearch => '搜尋設定';
+
+  @override
+  String get sectionChapter => '劇集設定';
+
+  @override
+  String get searchModeLabel => '搜尋模式';
+
+  @override
+  String get chapterModeLabel => '劇集模式';
+
+  @override
+  String get requestMethod => '請求方法';
+
+  @override
+  String get requestUrl => '請求網址';
+
+  @override
+  String get requestHeaders => '請求標頭（JSON）';
+
+  @override
+  String get requestQuery => '查詢參數（JSON）';
+
+  @override
+  String get requestBodyType => '請求主體類型';
+
+  @override
+  String get requestBody => '請求主體（JSON）';
+
+  @override
+  String get bodyTypeNone => '無';
+
+  @override
+  String get bodyTypeJson => 'JSON';
+
+  @override
+  String get bodyTypeForm => '表單';
+
+  @override
+  String get apiListPath => '搜尋結果列表 JSONPath';
+
+  @override
+  String get apiNamePath => '名稱 JSONPath';
+
+  @override
+  String get apiSourcePath => '連結 JSONPath';
+
+  @override
+  String get chapterFormat => '回應格式';
+
+  @override
+  String get chapterFormatNested => '嵌套結構';
+
+  @override
+  String get chapterFormatDelimited => '分隔符字串';
+
+  @override
+  String get apiRoadsPath => '線路列表 JSONPath';
+
+  @override
+  String get apiRoadNamePath => '線路名稱 JSONPath';
+
+  @override
+  String get apiEpisodesPath => '劇集列表 JSONPath';
+
+  @override
+  String get apiEpisodeNamePath => '劇集名稱 JSONPath';
+
+  @override
+  String get apiEpisodeUrlPath => '劇集網址 JSONPath';
+
+  @override
+  String get apiRoadNamesPath => '線路名稱欄位 JSONPath';
+
+  @override
+  String get apiRoadEpisodesPath => '劇集內容欄位 JSONPath';
+
+  @override
+  String get apiRoadSeparator => '線路分隔符';
+
+  @override
+  String get apiEpisodeSeparator => '劇集分隔符';
+
+  @override
+  String get apiFieldSeparator => '欄位分隔符';
+
+  @override
+  String get apiVariables => '變數（JSON）';
+
+  @override
+  String get apiEpisodePage => '啟用播放頁模板';
+
+  @override
+  String get apiEpisodePageUrl => '播放頁網址模板';
+
+  @override
+  String get apiEpisodePageQuery => '播放頁查詢參數（JSON）';
+
+  @override
+  String get captchaDetectType => '驗證頁偵測方式';
+
+  @override
+  String get captchaDetectValue => '驗證頁偵測內容';
+
+  @override
+  String get captchaPageUrl => '驗證頁網址';
+
+  @override
+  String get captchaDetectText => '文字';
+
+  @override
+  String get captchaDetectRegex => '正規表達式';
+
+  @override
+  String get invalidJsonFormat => 'JSON 格式不正確';
 }
 
 /// The translations for Chinese, as used in Taiwan, using the Han script (`zh_Hant_TW`).
@@ -8502,4 +8862,124 @@ class AppLocalizationsZhHantTw extends AppLocalizationsZh {
   String syncSubject(int id) {
     return '項目 $id';
   }
+
+  @override
+  String get sectionBasic => '基礎資訊';
+
+  @override
+  String get sectionSearch => '搜尋設定';
+
+  @override
+  String get sectionChapter => '劇集設定';
+
+  @override
+  String get searchModeLabel => '搜尋模式';
+
+  @override
+  String get chapterModeLabel => '劇集模式';
+
+  @override
+  String get requestMethod => '請求方法';
+
+  @override
+  String get requestUrl => '請求網址';
+
+  @override
+  String get requestHeaders => '請求標頭（JSON）';
+
+  @override
+  String get requestQuery => '查詢參數（JSON）';
+
+  @override
+  String get requestBodyType => '請求主體類型';
+
+  @override
+  String get requestBody => '請求主體（JSON）';
+
+  @override
+  String get bodyTypeNone => '無';
+
+  @override
+  String get bodyTypeJson => 'JSON';
+
+  @override
+  String get bodyTypeForm => '表單';
+
+  @override
+  String get apiListPath => '搜尋結果列表 JSONPath';
+
+  @override
+  String get apiNamePath => '名稱 JSONPath';
+
+  @override
+  String get apiSourcePath => '連結 JSONPath';
+
+  @override
+  String get chapterFormat => '回應格式';
+
+  @override
+  String get chapterFormatNested => '嵌套結構';
+
+  @override
+  String get chapterFormatDelimited => '分隔符字串';
+
+  @override
+  String get apiRoadsPath => '線路列表 JSONPath';
+
+  @override
+  String get apiRoadNamePath => '線路名稱 JSONPath';
+
+  @override
+  String get apiEpisodesPath => '劇集列表 JSONPath';
+
+  @override
+  String get apiEpisodeNamePath => '劇集名稱 JSONPath';
+
+  @override
+  String get apiEpisodeUrlPath => '劇集網址 JSONPath';
+
+  @override
+  String get apiRoadNamesPath => '線路名稱欄位 JSONPath';
+
+  @override
+  String get apiRoadEpisodesPath => '劇集內容欄位 JSONPath';
+
+  @override
+  String get apiRoadSeparator => '線路分隔符';
+
+  @override
+  String get apiEpisodeSeparator => '劇集分隔符';
+
+  @override
+  String get apiFieldSeparator => '欄位分隔符';
+
+  @override
+  String get apiVariables => '變數（JSON）';
+
+  @override
+  String get apiEpisodePage => '啟用播放頁模板';
+
+  @override
+  String get apiEpisodePageUrl => '播放頁網址模板';
+
+  @override
+  String get apiEpisodePageQuery => '播放頁查詢參數（JSON）';
+
+  @override
+  String get captchaDetectType => '驗證頁偵測方式';
+
+  @override
+  String get captchaDetectValue => '驗證頁偵測內容';
+
+  @override
+  String get captchaPageUrl => '驗證頁網址';
+
+  @override
+  String get captchaDetectText => '文字';
+
+  @override
+  String get captchaDetectRegex => '正規表達式';
+
+  @override
+  String get invalidJsonFormat => 'JSON 格式不正確';
 }

@@ -1,18 +1,24 @@
 import 'dart:convert';
 
+import 'package:anime_flow/app/localization/app_localizations.dart';
+import 'package:anime_flow/core/crawler/api_crawler.dart';
+import 'package:anime_flow/core/crawler/item/api_rule_config.dart';
 import 'package:anime_flow/core/crawler/item/crawler_config_item.dart';
-import 'package:anime_flow/core/crawler/item/anti_crawler_config.dart';
 import 'package:anime_flow/core/crawler/rule_api_level.dart';
-import 'package:anime_flow/features/source/data/repositories/source_repository.dart';
+import 'package:anime_flow/features/settings/presentation/pages/plugins/plugin_form_controller.dart';
+import 'package:anime_flow/features/settings/presentation/pages/plugins/plugin_form_view.dart';
 import 'package:anime_flow/features/source/application/providers/source_repository_provider.dart';
+import 'package:anime_flow/features/source/data/repositories/source_repository.dart';
 import 'package:anime_flow/shared/widgets/notification_toast.dart';
-import 'package:anime_flow/shared/widgets/drop_down_menu.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import 'package:anime_flow/app/localization/app_localizations.dart';
 
+/// 新增 / 编辑数据源规则的页面。
+///
+/// 表单状态与校验在 [PluginFormController]，字段渲染在 [PluginFormView]，
+/// 本文件只负责页面生命周期、保存与导入。
 class AddPluginsPage extends ConsumerStatefulWidget {
   final String? editPluginKey;
 
@@ -23,223 +29,73 @@ class AddPluginsPage extends ConsumerStatefulWidget {
 }
 
 class _AddPluginsPageState extends ConsumerState<AddPluginsPage> {
-  static const _fieldCount = 11;
+  final PluginFormController _form = PluginFormController();
 
-  List<_Field> _localizedTextFields(AppLocalizations l10n) => [
-        _Field(
-            title: l10n.versionNumber,
-            message: l10n.versionExample,
-            isRequired: true),
-        _Field(
-            title: l10n.sourceName,
-            message: l10n.sourceNameHint,
-            isRequired: true),
-        _Field(title: l10n.iconLink, message: l10n.iconLink, isRequired: true),
-        _Field(
-            title: l10n.websiteLink,
-            message: l10n.websiteLinkHint,
-            isRequired: true),
-        _Field(
-            title: l10n.searchLink,
-            message: l10n.searchLinkHint('{keyword}'),
-            isRequired: true),
-        _Field(
-            title: l10n.searchContentList,
-            message: l10n.searchContentList,
-            isRequired: true),
-        _Field(
-            title: l10n.searchListName,
-            message: l10n.searchListName,
-            isRequired: true),
-        _Field(
-            title: l10n.searchListLink,
-            message: l10n.searchListLink,
-            isRequired: true),
-        _Field(title: l10n.lineName, message: l10n.lineName, isRequired: true),
-        _Field(
-            title: l10n.episodeList,
-            message: l10n.episodeList,
-            isRequired: true),
-        _Field(
-            title: l10n.episode, message: l10n.episodeHint, isRequired: true),
-      ];
-
-  late final List<TextEditingController> _controllers;
-  final Set<int> _errorFields = {};
-  final Set<String> _antiFieldErrors = {};
   SourceRepository get sourceRepository => ref.read(sourceRepositoryProvider);
-  String? _originalKey; // 保存原始key值，用于编辑模式下删除旧数据
+
+  /// 编辑模式下用于替换旧规则的原名。
+  String? _originalKey;
+
   /// 编辑已有规则时保留其声明的 api 级别，避免保存时被悄悄降级。
   String? _originalApi;
-
-  late final TextEditingController _captchaImageController;
-  late final TextEditingController _captchaInputController;
-  late final TextEditingController _captchaButtonController;
-  bool _antiEnabled = false;
-  int _captchaType = CaptchaType.imageCaptcha;
-  // 以下字段当前没有编辑控件（表单在后续阶段补齐），保存时原样保留，
-  // 避免编辑一次规则就把它们抹掉。
-  int _captchaDetectType = CaptchaDetectType.xpath;
-  String _captchaDetectValue = '';
-  String _captchaPageUrl = '';
-  String _captchaScript = '';
 
   @override
   void initState() {
     super.initState();
-    _controllers = List.generate(
-      _fieldCount,
-      (_) => TextEditingController(),
-    );
-    _captchaImageController = TextEditingController();
-    _captchaInputController = TextEditingController();
-    _captchaButtonController = TextEditingController();
+    _form.onChanged = () {
+      if (mounted) setState(() {});
+    };
 
     _originalKey = widget.editPluginKey;
-
-    // 如果有key，从持久化存储中查询数据并填充表单
     if (_originalKey != null) {
       _loadEditSource();
     }
   }
 
+  @override
+  void dispose() {
+    _form.dispose();
+    super.dispose();
+  }
+
   Future<void> _loadEditSource() async {
     final editConfig = await sourceRepository.getSource(_originalKey!);
-    if (editConfig != null && mounted) {
-      final anti = editConfig.antiCrawlerConfig;
+    if (editConfig == null || !mounted) return;
+    setState(() {
       _originalApi = editConfig.api;
-      setState(() {
-        _antiEnabled = anti.enabled;
-        _captchaType = anti.captchaType;
-        _captchaImageController.text = anti.captchaImage;
-        _captchaInputController.text = anti.captchaInput;
-        _captchaButtonController.text = anti.captchaButton;
-        _captchaDetectType = anti.captchaDetectType;
-        _captchaDetectValue = anti.captchaDetectValue;
-        _captchaPageUrl = anti.captchaPageUrl;
-        _captchaScript = anti.captchaScript;
-        _controllers[0].text = editConfig.version;
-        _controllers[1].text = editConfig.name;
-        _controllers[2].text = editConfig.iconUrl;
-        _controllers[3].text = editConfig.baseUrl;
-        _controllers[4].text = editConfig.searchUrl;
-        _controllers[5].text = editConfig.searchList;
-        _controllers[6].text = editConfig.searchName;
-        _controllers[7].text = editConfig.searchLink;
-        _controllers[8].text = editConfig.lineNames;
-        _controllers[9].text = editConfig.lineList;
-        _controllers[10].text = editConfig.episode;
-      });
-    }
-
-    // 监听输入变化，清除错误状态
-    for (int i = 0; i < _controllers.length; i++) {
-      _controllers[i].addListener(() {
-        if (_errorFields.contains(i) &&
-            _controllers[i].text.trim().isNotEmpty) {
-          setState(() {
-            _errorFields.remove(i);
-          });
-        }
-      });
-    }
-    void clearAntiError(String key) {
-      if (_antiFieldErrors.contains(key)) {
-        setState(() {
-          _antiFieldErrors.remove(key);
-        });
-      }
-    }
-
-    _captchaImageController.addListener(() {
-      if (_captchaImageController.text.trim().isNotEmpty) {
-        clearAntiError('captchaImage');
-      }
-    });
-    _captchaInputController.addListener(() {
-      if (_captchaInputController.text.trim().isNotEmpty) {
-        clearAntiError('captchaInput');
-      }
-    });
-    _captchaButtonController.addListener(() {
-      if (_captchaButtonController.text.trim().isNotEmpty) {
-        clearAntiError('captchaButton');
-      }
+      _form.loadFrom(editConfig);
     });
   }
 
   Future<bool> _saveConfig() async {
-    // 空值校验
-    _errorFields.clear();
-    for (int i = 0; i < _controllers.length; i++) {
-      final controller = _controllers[i];
-      final value = controller.text.trim();
-
-      if (value.isEmpty) {
-        _errorFields.add(i);
-      }
-    }
-
-    _antiFieldErrors.clear();
-    if (_antiEnabled) {
-      if (_captchaType == CaptchaType.imageCaptcha) {
-        if (_captchaImageController.text.trim().isEmpty) {
-          _antiFieldErrors.add('captchaImage');
-        }
-        if (_captchaInputController.text.trim().isEmpty) {
-          _antiFieldErrors.add('captchaInput');
-        }
-        if (_captchaButtonController.text.trim().isEmpty) {
-          _antiFieldErrors.add('captchaButton');
-        }
-      } else {
-        if (_captchaButtonController.text.trim().isEmpty) {
-          _antiFieldErrors.add('captchaButton');
-        }
-      }
-    }
-
-    if (_errorFields.isNotEmpty || _antiFieldErrors.isNotEmpty) {
+    if (!_form.validate()) {
       setState(() {});
       return false;
     }
 
     try {
-      final newName = _controllers[1].text.trim();
-      final antiCrawlerConfig = AntiCrawlerConfig(
-        enabled: _antiEnabled,
-        captchaType: _captchaType,
-        captchaImage: _captchaImageController.text.trim(),
-        captchaInput: _captchaInputController.text.trim(),
-        captchaButton: _captchaButtonController.text.trim(),
-        captchaDetectType: _captchaDetectType,
-        captchaDetectValue: _captchaDetectValue,
-        captchaPageUrl: _captchaPageUrl,
-        captchaScript: _captchaScript,
-      );
-      final item = CrawlConfigItem(
-        version: _controllers[0].text.trim(),
-        name: newName,
-        iconUrl: _controllers[2].text.trim(),
-        baseUrl: _controllers[3].text.trim(),
-        searchUrl: _controllers[4].text.trim(),
-        searchList: _controllers[5].text.trim(),
-        searchName: _controllers[6].text.trim(),
-        searchLink: _controllers[7].text.trim(),
-        lineNames: _controllers[8].text.trim(),
-        lineList: _controllers[9].text.trim(),
-        episode: _controllers[10].text.trim(),
-        antiCrawlerConfig: antiCrawlerConfig,
+      final item = _form.build(
         api: _originalApi ?? RuleApiLevel.current.toString(),
       );
+
+      // 保存前用与运行期一致的校验，避免存进无法执行的规则。
+      // 只校验当前启用的模式，未激活的一侧允许保持半成品配置。
+      if (_form.searchMode == RuleMode.api) {
+        ApiCrawler.validateSearchConfig(item.searchApiConfig);
+      }
+      if (_form.chapterMode == RuleMode.api) {
+        ApiCrawler.validateChapterConfig(item.chapterApiConfig);
+      }
 
       await sourceRepository.saveSource(item, originalName: _originalKey);
       return true;
     } catch (e) {
       if (mounted) {
         final l10n = AppLocalizations.of(context);
-        NotificationToast.show(l10n.dataSaveFailed(e.toString()),
-            title: l10n.saveFailed);
+        NotificationToast.show(
+          l10n.dataSaveFailed(e.toString()),
+          title: l10n.saveFailed,
+        );
       }
       return false;
     }
@@ -303,31 +159,10 @@ class _AddPluginsPageState extends ConsumerState<AddPluginsPage> {
           RuleApiLevel.describe(config.api, ruleName: config.name),
         );
       }
-      _originalApi = config.api;
 
       setState(() {
-        _antiEnabled = config.antiCrawlerConfig.enabled;
-        _captchaType = config.antiCrawlerConfig.captchaType;
-        _captchaImageController.text = config.antiCrawlerConfig.captchaImage;
-        _captchaInputController.text = config.antiCrawlerConfig.captchaInput;
-        _captchaButtonController.text = config.antiCrawlerConfig.captchaButton;
-        _captchaDetectType = config.antiCrawlerConfig.captchaDetectType;
-        _captchaDetectValue = config.antiCrawlerConfig.captchaDetectValue;
-        _captchaPageUrl = config.antiCrawlerConfig.captchaPageUrl;
-        _captchaScript = config.antiCrawlerConfig.captchaScript;
-        _controllers[0].text = config.version;
-        _controllers[1].text = config.name;
-        _controllers[2].text = config.iconUrl;
-        _controllers[3].text = config.baseUrl;
-        _controllers[4].text = config.searchUrl;
-        _controllers[5].text = config.searchList;
-        _controllers[6].text = config.searchName;
-        _controllers[7].text = config.searchLink;
-        _controllers[8].text = config.lineNames;
-        _controllers[9].text = config.lineList;
-        _controllers[10].text = config.episode;
-        _errorFields.clear();
-        _antiFieldErrors.clear();
+        _originalApi = config.api;
+        _form.loadFrom(config);
       });
     } catch (error) {
       if (!mounted) return;
@@ -339,20 +174,8 @@ class _AddPluginsPageState extends ConsumerState<AddPluginsPage> {
   }
 
   @override
-  void dispose() {
-    for (var controller in _controllers) {
-      controller.dispose();
-    }
-    _captchaImageController.dispose();
-    _captchaInputController.dispose();
-    _captchaButtonController.dispose();
-    super.dispose();
-  }
-
-  @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
-    final localizedTextFields = _localizedTextFields(l10n);
     return Scaffold(
       appBar: AppBar(
         title: Text(_originalKey != null ? l10n.editSource : l10n.addSource),
@@ -379,291 +202,10 @@ class _AddPluginsPageState extends ConsumerState<AddPluginsPage> {
           constraints: const BoxConstraints(maxWidth: 1440),
           child: ListView(
             padding: const EdgeInsets.symmetric(vertical: 10),
-            children: [
-              ...List.generate(localizedTextFields.length, (index) {
-                final textField = localizedTextFields[index];
-                final controller = _controllers[index];
-                final hasError = _errorFields.contains(index);
-                return Container(
-                  margin: const EdgeInsets.symmetric(vertical: 5),
-                  padding: const EdgeInsets.symmetric(horizontal: 16),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      TextField(
-                        controller: controller,
-                        decoration: InputDecoration(
-                          labelText: textField.title,
-                          errorText: hasError ? l10n.fieldRequired : null,
-                          errorBorder: hasError
-                              ? OutlineInputBorder(
-                                  borderRadius: BorderRadius.circular(10),
-                                  borderSide: BorderSide(
-                                    color: Theme.of(context).colorScheme.error,
-                                    width: 2,
-                                  ),
-                                )
-                              : null,
-                          focusedErrorBorder: hasError
-                              ? OutlineInputBorder(
-                                  borderRadius: BorderRadius.circular(10),
-                                  borderSide: BorderSide(
-                                    color: Theme.of(context).colorScheme.error,
-                                    width: 2,
-                                  ),
-                                )
-                              : null,
-                          border: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(10),
-                          ),
-                        ),
-                      ),
-                      Padding(
-                        padding: const EdgeInsets.symmetric(
-                            horizontal: 10, vertical: 4),
-                        child: Text(
-                          textField.message,
-                          style: TextStyle(
-                            fontSize: 12,
-                            fontWeight: FontWeight.w600,
-                            color:
-                                Theme.of(context).colorScheme.onSurfaceVariant,
-                          ),
-                        ),
-                      )
-                    ],
-                  ),
-                );
-              }),
-              ..._buildAntiCrawlerSection(context),
-            ],
+            children: PluginFormView.sections(context, _form),
           ),
         ),
       ),
     );
   }
-
-  Widget _antiTextField({
-    required BuildContext context,
-    required TextEditingController controller,
-    required String label,
-    required bool hasError,
-  }) {
-    final l10n = AppLocalizations.of(context);
-    return TextField(
-      controller: controller,
-      decoration: InputDecoration(
-        labelText: label,
-        errorText: hasError ? l10n.fieldRequired : null,
-        errorBorder: hasError
-            ? OutlineInputBorder(
-                borderRadius: BorderRadius.circular(10),
-                borderSide: BorderSide(
-                  color: Theme.of(context).colorScheme.error,
-                  width: 2,
-                ),
-              )
-            : null,
-        focusedErrorBorder: hasError
-            ? OutlineInputBorder(
-                borderRadius: BorderRadius.circular(10),
-                borderSide: BorderSide(
-                  color: Theme.of(context).colorScheme.error,
-                  width: 2,
-                ),
-              )
-            : null,
-        border: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(10),
-        ),
-      ),
-    );
-  }
-
-  List<Widget> _buildAntiCrawlerSection(BuildContext context) {
-    final l10n = AppLocalizations.of(context);
-    final showImageCaptchaFields =
-        _antiEnabled && _captchaType == CaptchaType.imageCaptcha;
-    return [
-      Padding(
-        padding: const EdgeInsets.fromLTRB(16, 16, 16, 4),
-        child: Text(
-          l10n.antiCrawlerOptional,
-          style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                fontWeight: FontWeight.w700,
-              ),
-        ),
-      ),
-      Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 8),
-        child: SwitchListTile(
-          title: Text(l10n.enableWebViewCaptcha),
-          subtitle: Text(l10n.webViewCaptchaSubtitle),
-          value: _antiEnabled,
-          onChanged: (v) {
-            setState(() {
-              _antiEnabled = v;
-            });
-          },
-        ),
-      ),
-      if (_antiEnabled) ...[
-        Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
-          child: InputDecorator(
-            decoration: InputDecoration(
-              labelText: l10n.captchaType,
-              border: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(10),
-              ),
-            ),
-            child: DropDownMenu<int>(
-              items: const [
-                CaptchaType.imageCaptcha,
-                CaptchaType.autoClickButton,
-              ],
-              selectedItem: _captchaType,
-              buttonBuilder: (context, selectedType) {
-                return Align(
-                  alignment: Alignment.center,
-                  child: Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Text(
-                        selectedType == CaptchaType.autoClickButton
-                            ? l10n.autoClickCaptcha
-                            : l10n.imageCaptchaManual,
-                      ),
-                      const Spacer(),
-                      const Icon(Icons.arrow_drop_down),
-                    ],
-                  ),
-                );
-              },
-              itemBuilder: (context, type, isSelected) {
-                return Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Text(
-                      type == CaptchaType.autoClickButton
-                          ? l10n.autoClickCaptcha
-                          : l10n.imageCaptchaManual,
-                    ),
-                    if (isSelected) ...[
-                      const SizedBox(width: 12),
-                      const Icon(Icons.check, size: 18),
-                    ],
-                  ],
-                );
-              },
-              onSelected: (type) {
-                setState(() {
-                  _captchaType = type;
-                });
-              },
-            ),
-          ),
-        ),
-        if (showImageCaptchaFields) ...[
-          Container(
-            margin: const EdgeInsets.symmetric(vertical: 5),
-            padding: const EdgeInsets.symmetric(horizontal: 16),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                _antiTextField(
-                  context: context,
-                  controller: _captchaImageController,
-                  label: l10n.captchaImageXPath,
-                  hasError: _antiFieldErrors.contains('captchaImage'),
-                ),
-                Padding(
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-                  child: Text(
-                    l10n.captchaImageXPathHint,
-                    style: TextStyle(
-                      fontSize: 12,
-                      fontWeight: FontWeight.w600,
-                      color: Theme.of(context).colorScheme.onSurfaceVariant,
-                    ),
-                  ),
-                ),
-              ],
-            ),
-          ),
-          Container(
-            margin: const EdgeInsets.symmetric(vertical: 5),
-            padding: const EdgeInsets.symmetric(horizontal: 16),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                _antiTextField(
-                  context: context,
-                  controller: _captchaInputController,
-                  label: l10n.captchaInputXPath,
-                  hasError: _antiFieldErrors.contains('captchaInput'),
-                ),
-                Padding(
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-                  child: Text(
-                    l10n.captchaInputXPathHint,
-                    style: TextStyle(
-                      fontSize: 12,
-                      fontWeight: FontWeight.w600,
-                      color: Theme.of(context).colorScheme.onSurfaceVariant,
-                    ),
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ],
-        Container(
-          margin: const EdgeInsets.symmetric(vertical: 5),
-          padding: const EdgeInsets.symmetric(horizontal: 16),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              _antiTextField(
-                context: context,
-                controller: _captchaButtonController,
-                label: _captchaType == CaptchaType.imageCaptcha
-                    ? l10n.submitCaptchaXPath
-                    : l10n.verifyButtonXPath,
-                hasError: _antiFieldErrors.contains('captchaButton'),
-              ),
-              Padding(
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-                child: Text(
-                  _captchaType == CaptchaType.imageCaptcha
-                      ? l10n.submitCaptchaHint
-                      : l10n.autoClickCaptchaHint,
-                  style: TextStyle(
-                    fontSize: 12,
-                    fontWeight: FontWeight.w600,
-                    color: Theme.of(context).colorScheme.onSurfaceVariant,
-                  ),
-                ),
-              ),
-            ],
-          ),
-        ),
-      ],
-    ];
-  }
-}
-
-class _Field {
-  final String title;
-  final String message;
-  final bool isRequired;
-
-  _Field({
-    required this.title,
-    required this.message,
-    this.isRequired = false,
-  });
 }

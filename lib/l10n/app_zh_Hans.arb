@@ -708,6 +708,47 @@
         "type": "int"
       }
     }
-  }
+  },
+
+  "sectionBasic": "基础信息",
+  "sectionSearch": "搜索配置",
+  "sectionChapter": "章节配置",
+  "searchModeLabel": "搜索模式",
+  "chapterModeLabel": "章节模式",
+  "requestMethod": "请求方法",
+  "requestUrl": "请求地址",
+  "requestHeaders": "请求头（JSON）",
+  "requestQuery": "查询参数（JSON）",
+  "requestBodyType": "请求体类型",
+  "requestBody": "请求体（JSON）",
+  "bodyTypeNone": "无",
+  "bodyTypeJson": "JSON",
+  "bodyTypeForm": "表单",
+  "apiListPath": "搜索结果列表 JSONPath",
+  "apiNamePath": "名称 JSONPath",
+  "apiSourcePath": "链接 JSONPath",
+  "chapterFormat": "响应格式",
+  "chapterFormatNested": "嵌套结构",
+  "chapterFormatDelimited": "分隔符字符串",
+  "apiRoadsPath": "线路列表 JSONPath",
+  "apiRoadNamePath": "线路名称 JSONPath",
+  "apiEpisodesPath": "剧集列表 JSONPath",
+  "apiEpisodeNamePath": "剧集名称 JSONPath",
+  "apiEpisodeUrlPath": "剧集地址 JSONPath",
+  "apiRoadNamesPath": "线路名称字段 JSONPath",
+  "apiRoadEpisodesPath": "剧集内容字段 JSONPath",
+  "apiRoadSeparator": "线路分隔符",
+  "apiEpisodeSeparator": "剧集分隔符",
+  "apiFieldSeparator": "字段分隔符",
+  "apiVariables": "变量（JSON）",
+  "apiEpisodePage": "启用播放页模板",
+  "apiEpisodePageUrl": "播放页地址模板",
+  "apiEpisodePageQuery": "播放页查询参数（JSON）",
+  "captchaDetectType": "验证页检测方式",
+  "captchaDetectValue": "验证页检测内容",
+  "captchaPageUrl": "验证页地址",
+  "captchaDetectText": "文本",
+  "captchaDetectRegex": "正则",
+  "invalidJsonFormat": "JSON 格式不正确"
 
 }

@@ -708,6 +708,47 @@
         "type": "int"
       }
     }
-  }
+  },
+
+  "sectionBasic": "Basic info",
+  "sectionSearch": "Search settings",
+  "sectionChapter": "Episode settings",
+  "searchModeLabel": "Search mode",
+  "chapterModeLabel": "Episode mode",
+  "requestMethod": "HTTP method",
+  "requestUrl": "Request URL",
+  "requestHeaders": "Headers (JSON)",
+  "requestQuery": "Query params (JSON)",
+  "requestBodyType": "Body type",
+  "requestBody": "Body (JSON)",
+  "bodyTypeNone": "None",
+  "bodyTypeJson": "JSON",
+  "bodyTypeForm": "Form",
+  "apiListPath": "Result list JSONPath",
+  "apiNamePath": "Name JSONPath",
+  "apiSourcePath": "Link JSONPath",
+  "chapterFormat": "Response format",
+  "chapterFormatNested": "Nested",
+  "chapterFormatDelimited": "Delimited string",
+  "apiRoadsPath": "Line list JSONPath",
+  "apiRoadNamePath": "Line name JSONPath",
+  "apiEpisodesPath": "Episode list JSONPath",
+  "apiEpisodeNamePath": "Episode name JSONPath",
+  "apiEpisodeUrlPath": "Episode URL JSONPath",
+  "apiRoadNamesPath": "Line names JSONPath",
+  "apiRoadEpisodesPath": "Episodes field JSONPath",
+  "apiRoadSeparator": "Line separator",
+  "apiEpisodeSeparator": "Episode separator",
+  "apiFieldSeparator": "Field separator",
+  "apiVariables": "Variables (JSON)",
+  "apiEpisodePage": "Use episode page template",
+  "apiEpisodePageUrl": "Episode page URL template",
+  "apiEpisodePageQuery": "Episode page query (JSON)",
+  "captchaDetectType": "Challenge detection",
+  "captchaDetectValue": "Challenge detection value",
+  "captchaPageUrl": "Challenge page URL",
+  "captchaDetectText": "Text",
+  "captchaDetectRegex": "Regex",
+  "invalidJsonFormat": "Invalid JSON"
 
 }

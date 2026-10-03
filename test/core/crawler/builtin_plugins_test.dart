@@ -4,6 +4,7 @@ import 'dart:io';
 import 'package:anime_flow/core/crawler/api_crawler.dart';
 import 'package:anime_flow/core/crawler/item/api_rule_config.dart';
 import 'package:anime_flow/core/crawler/item/crawler_config_item.dart';
+import 'package:anime_flow/core/crawler/rule_api_level.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 /// 读取随应用发布的内置规则（测试工作目录为包根目录）。
@@ -31,6 +32,19 @@ void main() {
         expect(plugin.name.trim(), isNotEmpty, reason: reason);
         expect(plugin.isRuleCompatible, isTrue, reason: reason);
         expect(plugin.ruleCompatibility.name, 'compatible', reason: reason);
+
+        // 规则声明的级别必须覆盖其内容所需的能力。
+        final declaredApi = int.parse(plugin.api);
+        expect(
+          declaredApi,
+          greaterThanOrEqualTo(
+            RuleApiLevel.requiredFor(
+              usesApiSearch: plugin.usesApiSearch,
+              usesApiChapter: plugin.usesApiChapter,
+            ),
+          ),
+          reason: '$reason 的 api 级别低于其内容所需',
+        );
 
         if (plugin.usesApiSearch) {
           expect(
@@ -66,6 +80,11 @@ void main() {
       expect(plugin.searchApiConfig.request.bodyType, ApiBodyType.json);
       expect(plugin.chapterApiConfig.request.method, 'POST');
       expect(plugin.chapterApiConfig.format, ApiChapterFormat.nested);
+    });
+
+    test('声明到 API 模式所需的规则级别', () {
+      expect(plugin.api, '${RuleApiLevel.apiMode}');
+      expect(plugin.isRuleCompatible, isTrue);
     });
 
     test('搜索响应按 listPath 与 title/id 解析', () {

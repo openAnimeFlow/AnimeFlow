@@ -191,6 +191,65 @@ void main() {
       expect(RuleApiLevel.check('0'), RuleCompatibility.invalid);
       expect(RuleApiLevel.check('-1'), RuleCompatibility.invalid);
     });
+
+    test('当前级别覆盖纯 XPath 与 API 模式两种规则', () {
+      expect(RuleApiLevel.legacyXpath, 1);
+      expect(RuleApiLevel.apiMode, 2);
+      expect(RuleApiLevel.current, RuleApiLevel.apiMode);
+      // 向下兼容：低级别规则仍可用。
+      expect(
+        RuleApiLevel.check('${RuleApiLevel.legacyXpath}'),
+        RuleCompatibility.compatible,
+      );
+      expect(
+        RuleApiLevel.check('${RuleApiLevel.apiMode}'),
+        RuleCompatibility.compatible,
+      );
+    });
+
+    test('按规则内容推导应声明的 api', () {
+      // 纯 XPath 规则声明 1。
+      expect(
+        RuleApiLevel.declarationFor(
+          usesApiSearch: false,
+          usesApiChapter: false,
+          declared: null,
+        ),
+        '1',
+      );
+      // 任一侧使用 API 模式就至少声明 2。
+      for (final usesApiSearch in [true, false]) {
+        for (final usesApiChapter in [true, false]) {
+          if (!usesApiSearch && !usesApiChapter) continue;
+          expect(
+            RuleApiLevel.declarationFor(
+              usesApiSearch: usesApiSearch,
+              usesApiChapter: usesApiChapter,
+              declared: null,
+            ),
+            '2',
+          );
+        }
+      }
+      // 原有更高声明不被降级。
+      expect(
+        RuleApiLevel.declarationFor(
+          usesApiSearch: true,
+          usesApiChapter: true,
+          declared: '5',
+        ),
+        '5',
+      );
+      // 原有低声明会被提升到内容所需级别。
+      expect(
+        RuleApiLevel.declarationFor(
+          usesApiSearch: true,
+          usesApiChapter: false,
+          declared: '1',
+        ),
+        '2',
+      );
+    });
   });
 
   group('CrawlConfigItem JSON 兼容', () {

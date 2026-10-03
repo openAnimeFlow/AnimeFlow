@@ -35,6 +35,18 @@ void main() {
       expect(item.requiresNewerClient, isTrue);
     });
 
+    test('目录声明当前客户端级别时兼容', () {
+      final item = PluginCatalogItem.fromJson(_entry(api: 2));
+
+      expect(item.requiresNewerClient, isFalse);
+    });
+
+    test('目录声明高于当前客户端一级时标记为需要更新', () {
+      final item = PluginCatalogItem.fromJson(_entry(api: 3));
+
+      expect(item.requiresNewerClient, isTrue);
+    });
+
     test('目录声明非法 api 时按兼容处理，交由下载后校验兜底', () {
       final item = PluginCatalogItem.fromJson(_entry(api: 'abc'));
 

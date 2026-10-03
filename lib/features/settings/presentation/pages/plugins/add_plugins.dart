@@ -74,9 +74,13 @@ class _AddPluginsPageState extends ConsumerState<AddPluginsPage> {
     }
 
     try {
-      final item = _form.build(
-        api: _originalApi ?? RuleApiLevel.current.toString(),
+      // API 模式规则至少声明到 API 级别，且不降级导入时已有的更高声明。
+      final api = RuleApiLevel.declarationFor(
+        usesApiSearch: _form.searchMode == RuleMode.api,
+        usesApiChapter: _form.chapterMode == RuleMode.api,
+        declared: _originalApi,
       );
+      final item = _form.build(api: api);
 
       // 保存前用与运行期一致的校验，避免存进无法执行的规则。
       // 只校验当前启用的模式，未激活的一侧允许保持半成品配置。

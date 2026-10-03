@@ -8,6 +8,7 @@ import 'package:anime_flow/core/crawler/item/anti_crawler_config.dart';
 import 'package:anime_flow/core/crawler/item/crawler_config_item.dart';
 import 'package:anime_flow/core/utils/utils.dart' show resolveSourceUrl;
 import 'package:anime_flow/features/play/application/search_result_rank_service.dart';
+import 'package:anime_flow/features/play/application/chapter_collection_service.dart';
 import 'package:anime_flow/features/play/data/repository/play_repository.dart';
 import 'package:anime_flow/features/play/presentation/providers/episodes_provider.dart';
 import 'package:anime_flow/features/play/presentation/providers/play_provider.dart';
@@ -416,37 +417,37 @@ class VideoSourceNotifier extends _$VideoSourceNotifier {
               ))
           .toList(growable: false);
 
-      final allEpisodesList = <EpisodeResourcesItem>[];
-
-      for (final entry in searchEntries) {
-        final search = entry.item;
-        final matchRatio = entry.matchRatio;
-        final crawlerEpisodeResources =
-            await RuleRequest.fetchEpisodeResources(search.link, config);
-        if (!ref.mounted) return;
-        if (!_isRequestCurrent(config.name, sessionId, requestToken)) {
-          return;
-        }
-
-        for (final crawlerResource in crawlerEpisodeResources) {
-          allEpisodesList.add(
-            EpisodeResourcesItem(
-              lineNames: crawlerResource.lineNames,
-              episodes: crawlerResource.episodes,
-              subjectsTitle: search.name,
-              matchRatio: matchRatio,
+      final collection = await ChapterCollectionService().collect(
+        candidates: [
+          for (final entry in searchEntries)
+            ChapterCandidate(
+              name: entry.item.name,
+              link: entry.item.link,
+              matchRatio: entry.matchRatio,
             ),
-          );
-        }
-      }
+        ],
+        config: config,
+        isActive: () =>
+            ref.mounted &&
+            _isRequestCurrent(config.name, sessionId, requestToken),
+      );
 
+      if (!ref.mounted) return;
       if (!_isRequestCurrent(config.name, sessionId, requestToken)) {
         return;
       }
+
+      // 只有全部候选都失败才报错；个别条目失败不影响已拿到的来源。
+      if (collection.allFailed) {
+        final cause = collection.lastError;
+        if (cause is ChapterErrorException) throw cause;
+        throw ChapterErrorException(config.name, cause: cause);
+      }
+
       _updateResourceStatus(
         config.name,
         isLoading: false,
-        episodeResources: allEpisodesList,
+        episodeResources: collection.resources,
         needsCaptcha: false,
       );
       autoSelectAvailableResource(preferCurrentWebsite: true);

@@ -57,8 +57,7 @@ class _DesktopGestureDetectorState
 
     _isSpeedBoosting = true;
     playSession.setPlaybackRate(AppSettings.fastForwardSpeed, temporary: true);
-    videoUiNotifier
-        .showTopIndicator(VideoControlsIndicatorType.speedIndicator);
+    videoUiNotifier.showTopIndicator(VideoControlsIndicatorType.speedIndicator);
   }
 
   void _endTemporaryFastForward() {
@@ -91,7 +90,7 @@ class _DesktopGestureDetectorState
   }
 
   Future<void> _takeScreenshot() async {
-    await capturePlayerScreenshot(context, ref);
+    await capturePlayerScreenshot(context, ref, notify: false);
   }
 
   KeyEventResult _handleShortcut(int pressed, {bool isRepeat = false}) {

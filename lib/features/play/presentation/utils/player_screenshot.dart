@@ -13,20 +13,26 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 /// 同时把图片保存到相册/下载目录。
 Future<void> capturePlayerScreenshot(
   BuildContext context,
-  WidgetRef ref,
-) async {
+  WidgetRef ref, {
+  bool notify = true,
+}) async {
   final playController = ref.read(playSessionProvider);
   final videoUi = ref.read(videoUiProvider.notifier);
+
+  void notifyUser(String message) {
+    if (!notify || !context.mounted) return;
+    NotificationToast.show(
+      message,
+      title: '提示',
+      align: Alignment.topCenter,
+      maxWidth: 500,
+    );
+  }
+
   try {
     final bytes = await playController.takeScreenshot();
     if (bytes == null) {
-      if (!context.mounted) return;
-      NotificationToast.show(
-        '截图失败，无法获取截图数据',
-        align: Alignment.topCenter,
-        title: '提示',
-        maxWidth: 500,
-      );
+      notifyUser('截图失败，无法获取截图数据');
       return;
     }
 
@@ -37,30 +43,12 @@ Future<void> capturePlayerScreenshot(
       bytes,
       name: 'video_screenshot',
     );
-    if (!context.mounted) return;
-    NotificationToast.show(
-      message,
-      title: '提示',
-      align: Alignment.topCenter,
-      maxWidth: 500,
-    );
+    notifyUser(message);
   } on StoragePermissionDeniedException catch (e) {
     LiggLogger().e(e);
-    if (!context.mounted) return;
-    NotificationToast.show(
-      e.message,
-      title: '提示',
-      align: Alignment.topCenter,
-      maxWidth: 500,
-    );
+    notifyUser(e.message);
   } catch (e) {
     LiggLogger().e(e);
-    if (!context.mounted) return;
-    NotificationToast.show(
-      '截图失败: $e',
-      title: '提示',
-      align: Alignment.topCenter,
-      maxWidth: 500,
-    );
+    notifyUser('截图失败: $e');
   }
 }

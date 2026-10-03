@@ -123,7 +123,11 @@ class ApiCrawler {
   static final RegExp _braceVariable = RegExp(r'\{([A-Za-z_][A-Za-z0-9_]*)\}');
 
   /// 整个字符串就是一个 `@name`，此时保留变量原始类型。
-  static final RegExp _exactVariable = RegExp(r'^@([A-Za-z_][A-Za-z0-9_]*)$');
+  static final RegExp _exactAtVariable = RegExp(r'^@([A-Za-z_][A-Za-z0-9_]*)$');
+
+  /// 整个字符串就是一个 `{name}`，与 [_exactAtVariable] 行为一致。
+  static final RegExp _exactBraceVariable =
+      RegExp(r'^\{([A-Za-z_][A-Za-z0-9_]*)\}$');
 
   // ---------------------------------------------------------------------------
   // 模板渲染
@@ -137,11 +141,21 @@ class ApiCrawler {
     if (template.isEmpty) return template;
     final withAt = template.replaceAllMapped(
       _atVariable,
-      (match) => _renderVariable(match.group(1)!, variables, encode: encode),
+      (match) => _renderVariable(
+        match.group(1)!,
+        variables,
+        encode: encode,
+        token: match.group(0)!,
+      ),
     );
     return withAt.replaceAllMapped(
       _braceVariable,
-      (match) => _renderVariable(match.group(1)!, variables, encode: encode),
+      (match) => _renderVariable(
+        match.group(1)!,
+        variables,
+        encode: encode,
+        token: match.group(0)!,
+      ),
     );
   }
 
@@ -157,16 +171,22 @@ class ApiCrawler {
     );
   }
 
+  /// 渲染单个值。
+  ///
+  /// 字符串恰好等于 `@name` 或 `{name}` 时按变量原始类型返回（数字仍是数字），
+  /// 其余情况做字符串插值；两种写法在整串与内联场景下行为一致。
   static dynamic renderValue(
     dynamic value,
     Map<String, Object?> variables,
   ) {
     if (value is String) {
-      final exact = _exactVariable.firstMatch(value.trim());
+      final trimmed = value.trim();
+      final exact = _exactAtVariable.firstMatch(trimmed) ??
+          _exactBraceVariable.firstMatch(trimmed);
       if (exact != null) {
         final name = exact.group(1)!;
         if (!variables.containsKey(name)) {
-          throw ApiRuleFormatException('缺少模板变量 @$name');
+          throw ApiRuleFormatException('缺少模板变量 $trimmed');
         }
         return variables[name];
       }
@@ -190,9 +210,10 @@ class ApiCrawler {
     String name,
     Map<String, Object?> variables, {
     required bool encode,
+    required String token,
   }) {
     if (!variables.containsKey(name)) {
-      throw ApiRuleFormatException('缺少模板变量 @$name');
+      throw ApiRuleFormatException('缺少模板变量 $token');
     }
     final value = variables[name]?.toString() ?? '';
     return encode ? Uri.encodeComponent(value) : value;

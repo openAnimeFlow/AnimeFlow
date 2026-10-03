@@ -124,25 +124,57 @@ void main() {
       );
     });
 
-    test('整串 @变量 保留原始类型', () {
-      expect(ApiCrawler.renderValue('@n', <String, Object?>{'n': 2}), 2);
+    test('缺少变量时的提示回显作者写的写法', () {
       expect(
-        ApiCrawler.renderValue('n=@n', <String, Object?>{'n': 2}),
-        'n=2',
+        () => ApiCrawler.renderTemplate('@missing', <String, Object?>{}),
+        throwsA(
+          isA<ApiRuleFormatException>().having(
+              (error) => error.message, 'message', contains('@missing')),
+        ),
       );
+      expect(
+        () => ApiCrawler.renderTemplate('{missing}', <String, Object?>{}),
+        throwsA(
+          isA<ApiRuleFormatException>().having(
+              (error) => error.message, 'message', contains('{missing}')),
+        ),
+      );
+    });
+
+    test('两种写法的整串变量都保留原始类型', () {
+      // 数字不会被转成字符串。
+      expect(ApiCrawler.renderValue('@n', <String, Object?>{'n': 2}), 2);
+      expect(ApiCrawler.renderValue('{n}', <String, Object?>{'n': 2}), 2);
+      // 复杂类型同样保留。
+      expect(
+        ApiCrawler.renderValue('{n}', <String, Object?>{
+          'n': <String, dynamic>{'a': 1},
+        }),
+        <String, dynamic>{'a': 1},
+      );
+      // 内联场景两种写法都按字符串插入。
+      expect(ApiCrawler.renderValue('n=@n', <String, Object?>{'n': 2}), 'n=2');
+      expect(ApiCrawler.renderValue('n={n}', <String, Object?>{'n': 2}), 'n=2');
+    });
+
+    test('整串变量周围的空白不影响类型保留', () {
+      expect(ApiCrawler.renderValue('  @n  ', <String, Object?>{'n': 2}), 2);
+      expect(ApiCrawler.renderValue('  {n}  ', <String, Object?>{'n': 2}), 2);
     });
 
     test('嵌套 Map / List 递归渲染', () {
       final rendered = ApiCrawler.renderValue(
         <String, dynamic>{
           'id': '@source',
-          'tags': <String>['@source', 'fixed'],
+          'altId': '{source}',
+          'tags': <String>['@source', '{source}', 'fixed'],
         },
         <String, Object?>{'source': 'abc'},
       );
       expect(rendered, <String, dynamic>{
         'id': 'abc',
-        'tags': <String>['abc', 'fixed'],
+        'altId': 'abc',
+        'tags': <String>['abc', 'abc', 'fixed'],
       });
     });
   });

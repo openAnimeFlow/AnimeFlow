@@ -1,9 +1,6 @@
 import 'package:anime_flow/features/play/presentation/providers/play_provider.dart';
 import 'package:anime_flow/features/play/presentation/providers/video_ui_provider.dart';
-import 'package:anime_flow/core/exception/storage_exception.dart';
-import 'package:anime_flow/core/logger/logger.dart';
-import 'package:anime_flow/core/utils/system_util.dart';
-import 'package:anime_flow/shared/widgets/notification_toast.dart';
+import 'package:anime_flow/features/play/presentation/utils/player_screenshot.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -12,7 +9,6 @@ class RightAreaControl extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final playController = ref.read(playSessionProvider);
     final isShowControlsUi =
         ref.watch(videoUiProvider.select((state) => state.isShowControlsUi));
     final fullscreen =
@@ -34,39 +30,7 @@ class RightAreaControl extends ConsumerWidget {
                 children: [
                   position > Duration.zero && (isWideScreen || fullscreen)
                       ? InkWell(
-                          onTap: () async {
-                            try {
-                              final uint8List =
-                                  await playController.takeScreenshot();
-                              if (uint8List != null) {
-                                final message = await SystemUtil.saveImageBytes(
-                                  uint8List,
-                                  name: 'video_screenshot',
-                                );
-                                NotificationToast.show(message,
-                                    title: '提示',
-                                    align: Alignment.topCenter,
-                                    maxWidth: 500);
-                              } else {
-                                NotificationToast.show('截图失败，无法获取截图数据',
-                                    align: Alignment.topCenter,
-                                    title: '提示',
-                                    maxWidth: 500);
-                              }
-                            } on StoragePermissionDeniedException catch (e) {
-                              LiggLogger().e(e);
-                              NotificationToast.show(e.message,
-                                  title: '提示',
-                                  align: Alignment.topCenter,
-                                  maxWidth: 500);
-                            } catch (e) {
-                              LiggLogger().e(e);
-                              NotificationToast.show('截图失败: $e',
-                                  title: '提示',
-                                  align: Alignment.topCenter,
-                                  maxWidth: 500);
-                            }
-                          },
+                          onTap: () => capturePlayerScreenshot(context, ref),
                           child: Container(
                             padding: const EdgeInsets.all(5),
                             decoration: BoxDecoration(

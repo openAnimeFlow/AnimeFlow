@@ -3,9 +3,9 @@ import 'dart:async';
 import 'package:anime_flow/shared/models/enums/video_controls_icon_type.dart';
 import 'package:anime_flow/features/play/presentation/providers/play_provider.dart';
 import 'package:anime_flow/features/play/presentation/providers/video_ui_provider.dart';
+import 'package:anime_flow/features/play/presentation/utils/player_screenshot.dart';
 import 'package:anime_flow/features/play/domain/player/player_shortcut.dart';
 import 'package:anime_flow/core/settings/app_settings.dart';
-import 'package:anime_flow/core/utils/system_util.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -91,10 +91,7 @@ class _DesktopGestureDetectorState
   }
 
   Future<void> _takeScreenshot() async {
-    final bytes = await playSession.takeScreenshot();
-    if (bytes != null) {
-      await SystemUtil.saveImageBytes(bytes, name: 'video_screenshot');
-    }
+    await capturePlayerScreenshot(context, ref);
   }
 
   KeyEventResult _handleShortcut(int pressed, {bool isRepeat = false}) {

@@ -380,6 +380,7 @@ class ImagePreviewRoute extends GoRouteData with $ImagePreviewRoute {
       opaque: false,
       child: ImageViewer(
         imageUrls: $extra.imageUrls,
+        imageBytes: $extra.imageBytes,
         initialIndex: $extra.initialIndex,
         heroTag: $extra.heroTag,
       ),

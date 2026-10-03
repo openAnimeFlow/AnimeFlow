@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:typed_data';
 
 import 'package:anime_flow/app/router/routes_args.dart';
 import 'package:anime_flow/shared/models/enums/video_controls_icon_type.dart';
@@ -77,6 +78,7 @@ class VideoUiState {
     this.currentTime = '',
     this.batteryLevel = 0,
     this.batteryState = BatteryState.unknown,
+    this.screenshotPreviewBytes,
   });
 
   final bool isShowControlsUi;
@@ -90,6 +92,9 @@ class VideoUiState {
   final int batteryLevel;
   final BatteryState batteryState;
 
+  /// 最近一次截图的缩略图数据，为空表示不展示预览。
+  final Uint8List? screenshotPreviewBytes;
+
   VideoUiState copyWith({
     bool? isShowControlsUi,
     bool? isHorizontalDragging,
@@ -101,6 +106,8 @@ class VideoUiState {
     String? currentTime,
     int? batteryLevel,
     BatteryState? batteryState,
+    Uint8List? screenshotPreviewBytes,
+    bool clearScreenshotPreview = false,
   }) {
     return VideoUiState(
       isShowControlsUi: isShowControlsUi ?? this.isShowControlsUi,
@@ -113,6 +120,9 @@ class VideoUiState {
       currentTime: currentTime ?? this.currentTime,
       batteryLevel: batteryLevel ?? this.batteryLevel,
       batteryState: batteryState ?? this.batteryState,
+      screenshotPreviewBytes: clearScreenshotPreview
+          ? null
+          : screenshotPreviewBytes ?? this.screenshotPreviewBytes,
     );
   }
 }
@@ -124,6 +134,7 @@ class VideoUiNotifier extends _$VideoUiNotifier implements VideoUiStateActions {
   Timer? _controlsUiTimer;
   Timer? _timeUpdateTimer;
   Timer? _batteryUpdateTimer;
+  Timer? _screenshotPreviewTimer;
   StreamSubscription<BatteryState>? _batteryStateSubscription;
   final ScreenBrightnessPlatform _screenBrightness =
       ScreenBrightnessPlatform.instance;
@@ -146,6 +157,7 @@ class VideoUiNotifier extends _$VideoUiNotifier implements VideoUiStateActions {
   String get currentTime => state.currentTime;
   int get batteryLevel => state.batteryLevel;
   BatteryState get batteryState => state.batteryState;
+  Uint8List? get screenshotPreviewBytes => state.screenshotPreviewBytes;
 
   @override
   VideoUiState build() {
@@ -177,6 +189,7 @@ class VideoUiNotifier extends _$VideoUiNotifier implements VideoUiStateActions {
     _controlsUiTimer?.cancel();
     _timeUpdateTimer?.cancel();
     _batteryUpdateTimer?.cancel();
+    _screenshotPreviewTimer?.cancel();
     _batteryStateSubscription?.cancel();
     unawaited(_resetBrightness());
   }
@@ -290,6 +303,24 @@ class VideoUiNotifier extends _$VideoUiNotifier implements VideoUiStateActions {
     } else {
       state = state.copyWith(isShowControlsUi: false);
     }
+  }
+
+  /// 展示截图缩略图，[duration] 到期后自动隐藏。
+  void showScreenshotPreview(
+    Uint8List bytes, {
+    Duration duration = const Duration(seconds: 4),
+  }) {
+    _screenshotPreviewTimer?.cancel();
+    state = state.copyWith(screenshotPreviewBytes: bytes);
+    _screenshotPreviewTimer = Timer(duration, hideScreenshotPreview);
+  }
+
+  /// 隐藏截图缩略图。
+  void hideScreenshotPreview() {
+    _screenshotPreviewTimer?.cancel();
+    _screenshotPreviewTimer = null;
+    if (state.screenshotPreviewBytes == null) return;
+    state = state.copyWith(clearScreenshotPreview: true);
   }
 
   void startHorizontalDrag(double startX, Duration position) {

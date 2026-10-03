@@ -1,5 +1,7 @@
 library;
 
+import 'dart:typed_data';
+
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:anime_flow/core/utils/system_util.dart';
 import 'package:flutter/gestures.dart';
@@ -11,16 +13,25 @@ import 'package:photo_view/photo_view_gallery.dart';
 class ImageViewer extends StatefulWidget {
   ImageViewer({
     super.key,
-    required List<String> imageUrls,
+    List<String> imageUrls = const [],
+    List<Uint8List> imageBytes = const [],
     this.initialIndex = 0,
     this.heroTag,
-  }) : imageUrls = List.unmodifiable(imageUrls);
+  })  : imageUrls = List.unmodifiable(imageUrls),
+        imageBytes = List.unmodifiable(imageBytes);
 
   final List<String> imageUrls;
+
+  /// 内存中的图片数据，非空时优先于 [imageUrls]。
+  final List<Uint8List> imageBytes;
   final int initialIndex;
   final Object? heroTag;
 
   static Object heroTagFor(String imageUrl, int index) => '$imageUrl-$index';
+
+  /// 当前实际可预览的图片数量。
+  int get imageCount =>
+      imageBytes.isNotEmpty ? imageBytes.length : imageUrls.length;
 
   @override
   State<ImageViewer> createState() => _ImageViewerState();
@@ -37,12 +48,32 @@ class _ImageViewerState extends State<ImageViewer> {
   final Map<int, PhotoViewScaleStateController> _scaleControllers = {};
   final Map<int, double> _initialScales = {};
 
-  bool get _isGallery => widget.imageUrls.length > 1;
+  bool get _isGallery => widget.imageCount > 1;
+
+  bool get _hasImageBytes => widget.imageBytes.isNotEmpty;
+
+  ImageProvider<Object> _providerAt(int index) {
+    if (_hasImageBytes) {
+      return MemoryImage(widget.imageBytes[index]);
+    }
+    return CachedNetworkImageProvider(widget.imageUrls[index]);
+  }
+
+  Object? _heroTagAt(int index) {
+    if (index != _currentIndex) return null;
+    if (widget.heroTag != null && index == widget.initialIndex) {
+      return widget.heroTag;
+    }
+    // 内存图片没有对应的来源 Widget，无法做 Hero 过渡。
+    if (_hasImageBytes) return null;
+    return ImageViewer.heroTagFor(widget.imageUrls[index], index);
+  }
 
   @override
   void initState() {
     super.initState();
-    _currentIndex = widget.initialIndex.clamp(0, widget.imageUrls.length - 1);
+    final count = widget.imageCount;
+    _currentIndex = count == 0 ? 0 : widget.initialIndex.clamp(0, count - 1);
     _pageController = PageController(initialPage: _currentIndex);
   }
 
@@ -87,7 +118,7 @@ class _ImageViewerState extends State<ImageViewer> {
   }
 
   void _goToNextImage() {
-    if (_currentIndex == widget.imageUrls.length - 1) return;
+    if (_currentIndex == widget.imageCount - 1) return;
     _pageController.nextPage(
       duration: const Duration(milliseconds: 250),
       curve: Curves.easeInOut,
@@ -136,7 +167,7 @@ class _ImageViewerState extends State<ImageViewer> {
                       borderRadius: BorderRadius.circular(16),
                     ),
                     child: Text(
-                      '${_currentIndex + 1} / ${widget.imageUrls.length}',
+                      '${_currentIndex + 1} / ${widget.imageCount}',
                       style: const TextStyle(
                         color: Colors.white,
                         fontSize: 14,
@@ -164,7 +195,7 @@ class _ImageViewerState extends State<ImageViewer> {
                 child: Center(
                   child: _buildNavButton(
                     icon: Icons.chevron_right,
-                    onPressed: _currentIndex < widget.imageUrls.length - 1
+                    onPressed: _currentIndex < widget.imageCount - 1
                         ? _goToNextImage
                         : null,
                   ),
@@ -181,7 +212,7 @@ class _ImageViewerState extends State<ImageViewer> {
     if (_isGallery) {
       return PhotoViewGallery.builder(
         pageController: _pageController,
-        itemCount: widget.imageUrls.length,
+        itemCount: widget.imageCount,
         onPageChanged: (index) => setState(() => _currentIndex = index),
         backgroundDecoration: const BoxDecoration(color: Colors.transparent),
         loadingBuilder: (context, event) => const Center(
@@ -197,15 +228,15 @@ class _ImageViewerState extends State<ImageViewer> {
       PhotoViewScaleStateController.new,
     );
     return PhotoView(
-      imageProvider: CachedNetworkImageProvider(widget.imageUrls.first),
+      imageProvider: _providerAt(0),
       controller: controller,
       scaleStateController: scaleController,
       minScale: PhotoViewComputedScale.contained,
       maxScale: PhotoViewComputedScale.covered * 3,
       backgroundDecoration: const BoxDecoration(color: Colors.transparent),
-      heroAttributes: widget.heroTag == null
+      heroAttributes: _heroTagAt(0) == null
           ? null
-          : PhotoViewHeroAttributes(tag: widget.heroTag!),
+          : PhotoViewHeroAttributes(tag: _heroTagAt(0)!),
       loadingBuilder: (context, event) => const Center(
         child: CircularProgressIndicator(color: Colors.white),
       ),
@@ -238,25 +269,20 @@ class _ImageViewerState extends State<ImageViewer> {
       );
 
   PhotoViewGalleryPageOptions _page(BuildContext context, int index) {
-    final imageUrl = widget.imageUrls[index];
     final controller = _controllers.putIfAbsent(index, PhotoViewController.new);
     final scaleController = _scaleControllers.putIfAbsent(
       index,
       PhotoViewScaleStateController.new,
     );
     return PhotoViewGalleryPageOptions(
-      imageProvider: CachedNetworkImageProvider(imageUrl),
+      imageProvider: _providerAt(index),
       controller: controller,
       scaleStateController: scaleController,
       minScale: PhotoViewComputedScale.contained,
       maxScale: PhotoViewComputedScale.covered * 3,
-      heroAttributes: index == _currentIndex
-          ? PhotoViewHeroAttributes(
-              tag: index == widget.initialIndex && widget.heroTag != null
-                  ? widget.heroTag!
-                  : ImageViewer.heroTagFor(imageUrl, index),
-            )
-          : null,
+      heroAttributes: _heroTagAt(index) == null
+          ? null
+          : PhotoViewHeroAttributes(tag: _heroTagAt(index)!),
       errorBuilder: (context, error, stackTrace) => _error(),
     );
   }

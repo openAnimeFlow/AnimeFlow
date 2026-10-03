@@ -7,6 +7,7 @@ import 'control/bottom_area_control.dart';
 import 'control/middle_area_control.dart';
 import 'control/right_area_control.dart';
 import 'control/top_area_control.dart';
+import 'screenshot_preview.dart';
 
 ///播放器ui
 class VideoUi extends StatelessWidget {
@@ -38,6 +39,9 @@ class VideoUi extends StatelessWidget {
         ///右侧
         const Positioned(
             right: 0, top: 0, bottom: 0, child: RightAreaControl()),
+
+        ///截图缩略图
+        const ScreenshotPreviewOverlay(),
       ],
     );
   }

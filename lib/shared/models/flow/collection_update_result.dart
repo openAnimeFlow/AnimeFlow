@@ -23,6 +23,9 @@ enum CollectionRemoteSyncStatus {
         'CONFLICT' => conflict,
         _ => unknown,
       };
+
+  bool get needsAttention =>
+      this == pending || this == authRequired || this == conflict;
 }
 
 class CollectionUpdateResult {

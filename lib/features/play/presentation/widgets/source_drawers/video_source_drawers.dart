@@ -15,6 +15,9 @@ import 'package:go_router/go_router.dart';
 
 enum _SourceEpisodeMode { matched, all }
 
+/// 当前正在播放的源：播放地址 + 线路名 + 资源标题。
+typedef _PlayingSource = ({String url, String lineName, String resourceTitle});
+
 class VideoSourceDrawers extends ConsumerStatefulWidget {
   final Function(String url)? onVideoUrlSelected;
   final VideoSourceNotifier videoSourceNotifier;
@@ -49,8 +52,10 @@ class _VideoSourceDrawersState extends ConsumerState<VideoSourceDrawers> {
   bool _sortDescending = false;
   final _searchController = TextEditingController();
   final Map<String, TextEditingController> _siteSearchControllers = {};
-  int? _drawerSelectedWebsiteIndex;
-  bool _followInitialAutoSelection = true;
+  int? _selectedWebsiteIndex;
+
+  /// 未手动切换数据源前跟随播放器自动选源
+  bool _followAutoSelectedWebsite = true;
   bool _sourceControlsCollapsed = false;
   late final ScrollController _fallbackScrollController;
 
@@ -65,49 +70,51 @@ class _VideoSourceDrawersState extends ConsumerState<VideoSourceDrawers> {
     _searchController.text = widget.subjectName;
   }
 
+  @override
+  void didUpdateWidget(VideoSourceDrawers oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.subjectName != widget.subjectName) {
+      _searchController.text = widget.subjectName;
+    }
+  }
+
   void _handleSourceListScroll() {
-    final shouldCollapse = _scrollController.hasClients &&
-        _scrollController.offset > 8 &&
-        !_sourceControlsCollapsed;
-    final shouldExpand = _scrollController.hasClients &&
-        _scrollController.offset <= 8 &&
-        _sourceControlsCollapsed;
-    if (!shouldCollapse && !shouldExpand) return;
+    if (!_scrollController.hasClients) return;
+    final collapsed = _scrollController.offset > 8;
+    if (collapsed == _sourceControlsCollapsed) return;
     setState(() {
-      _sourceControlsCollapsed = shouldCollapse;
+      _sourceControlsCollapsed = collapsed;
     });
   }
 
   void _setSelectedWebsite(int index) {
-    _followInitialAutoSelection = false;
-    _drawerSelectedWebsiteIndex = index;
+    _followAutoSelectedWebsite = false;
+    _selectedWebsiteIndex = index;
     widget.videoSourceNotifier.setSelectedWebsiteIndex(index);
-    setState(() {
-      _sourceEpisodeMode = _SourceEpisodeMode.matched;
-      _selectedLineName = null;
-      _sortDescending = false;
-    });
+    setState(_resetSourceViewState);
   }
 
   void _performSearch() {
-    String searchQuery = _searchController.text;
-    if (searchQuery.isNotEmpty) {
-      _disposeSiteSearchControllers();
-      final preserveCurrentPlayback =
-          widget.videoSourceNotifier.videoUrl.isNotEmpty;
-      widget.videoSourceNotifier.setSelectedWebsiteIndex(0);
-      _followInitialAutoSelection = true;
-      _drawerSelectedWebsiteIndex = 0;
-      setState(() {
-        _sourceEpisodeMode = _SourceEpisodeMode.matched;
-        _selectedLineName = null;
-        _sortDescending = false;
-      });
-      widget.videoSourceNotifier.initResources(
-        searchQuery,
-        preserveCurrentPlayback: preserveCurrentPlayback,
-      );
-    }
+    final searchQuery = _searchController.text;
+    if (searchQuery.isEmpty) return;
+    _disposeSiteSearchControllers();
+    final preserveCurrentPlayback =
+        widget.videoSourceNotifier.videoUrl.isNotEmpty;
+    widget.videoSourceNotifier.setSelectedWebsiteIndex(0);
+    _followAutoSelectedWebsite = true;
+    _selectedWebsiteIndex = 0;
+    setState(_resetSourceViewState);
+    widget.videoSourceNotifier.initResources(
+      searchQuery,
+      preserveCurrentPlayback: preserveCurrentPlayback,
+    );
+  }
+
+  /// 切换数据源 / 重新搜索后，线路、集数模式与排序都回到默认值。
+  void _resetSourceViewState() {
+    _sourceEpisodeMode = _SourceEpisodeMode.matched;
+    _selectedLineName = null;
+    _sortDescending = false;
   }
 
   TextEditingController _siteSearchControllerFor(ResourcesItem resource) {
@@ -136,33 +143,35 @@ class _VideoSourceDrawersState extends ConsumerState<VideoSourceDrawers> {
     );
   }
 
-  int _getDrawerSelectedIndex(List<ResourcesItem> dataSource) {
+  /// 当前应选中的数据源下标。
+  ///
+  /// 用户手动切换前跟随播放器（自动选源）的结果，切换后保持本地选择。
+  int _resolveSelectedWebsiteIndex(List<ResourcesItem> dataSource) {
+    if (dataSource.isEmpty) return 0;
     final controller = widget.videoSourceNotifier;
-    final providerIndex = controller.selectedWebsiteIndex >= dataSource.length
-        ? 0
-        : controller.selectedWebsiteIndex;
-    final currentWebsiteIndex = controller.webSiteTitle.isEmpty
+    final matchedIndex = controller.webSiteTitle.isEmpty
         ? -1
         : dataSource.indexWhere(
             (resource) => resource.websiteName == controller.webSiteTitle,
           );
-    final initialIndex =
-        currentWebsiteIndex >= 0 ? currentWebsiteIndex : providerIndex;
+    final providerIndex = controller.selectedWebsiteIndex >= dataSource.length
+        ? 0
+        : controller.selectedWebsiteIndex;
+    final autoIndex = matchedIndex >= 0 ? matchedIndex : providerIndex;
 
-    if (_drawerSelectedWebsiteIndex == null ||
-        _drawerSelectedWebsiteIndex! >= dataSource.length) {
-      _drawerSelectedWebsiteIndex = initialIndex;
+    if (_followAutoSelectedWebsite) {
+      _selectedWebsiteIndex = autoIndex;
+      if (controller.webSiteTitle.isNotEmpty) {
+        _followAutoSelectedWebsite = false;
+      }
+      return _selectedWebsiteIndex!;
     }
 
-    if (_followInitialAutoSelection) {
-      _drawerSelectedWebsiteIndex = initialIndex;
+    final current = _selectedWebsiteIndex;
+    if (current == null || current >= dataSource.length) {
+      _selectedWebsiteIndex = autoIndex;
     }
-
-    if (_followInitialAutoSelection && controller.webSiteTitle.isNotEmpty) {
-      _followInitialAutoSelection = false;
-    }
-
-    return _drawerSelectedWebsiteIndex ?? providerIndex;
+    return _selectedWebsiteIndex!;
   }
 
   @override
@@ -262,32 +271,13 @@ class _VideoSourceDrawersState extends ConsumerState<VideoSourceDrawers> {
   }
 
   Widget _buildDrawerContent({bool includeDragHandle = false}) {
+    final l10n = AppLocalizations.of(context);
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         if (includeDragHandle) _buildDragHandle(context),
-        buildHeader(),
-        _manualSearch(),
-        const SizedBox(height: 16),
-        Consumer(
-          builder: (context, ref, child) {
-            final sourceState = ref.watch(
-              videoSourceProvider.select(
-                (state) => (
-                  videoResources: state.videoResources,
-                  selectedWebsiteIndex: state.selectedWebsiteIndex,
-                  webSiteTitle: state.webSiteTitle,
-                ),
-              ),
-            );
-            if (sourceState.videoResources.isEmpty) {
-              return const SizedBox.shrink();
-            }
-            return _buildWebsiteSelector(
-              dataSource: sourceState.videoResources,
-            );
-          },
-        ),
+        _buildHeader(l10n),
+        _buildManualSearch(l10n),
         const SizedBox(height: 16),
         Expanded(
           child: Consumer(
@@ -300,17 +290,37 @@ class _VideoSourceDrawersState extends ConsumerState<VideoSourceDrawers> {
                     selectedWebsiteIndex: state.selectedWebsiteIndex,
                     webSiteTitle: state.webSiteTitle,
                     videoUrl: state.videoUrl,
+                    lineName: state.lineName,
+                    resourceTitle: state.resourceTitle,
                   ),
                 ),
               );
               if (sourceState.videoResources.isEmpty) {
                 return const SizedBox.shrink();
               }
-              return _buildVideoSource(
-                dataSource: sourceState.videoResources,
-                selectedIndex: _getDrawerSelectedIndex(
-                  sourceState.videoResources,
-                ),
+              final selectedIndex =
+                  _resolveSelectedWebsiteIndex(sourceState.videoResources);
+              return Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  _buildWebsiteSelector(
+                    dataSource: sourceState.videoResources,
+                    selectedIndex: selectedIndex,
+                  ),
+                  const SizedBox(height: 16),
+                  Expanded(
+                    child: _buildVideoSource(
+                      dataSource: sourceState.videoResources,
+                      selectedIndex: selectedIndex,
+                      currentEpisodeIndex: sourceState.currentEpisodeIndex,
+                      playing: (
+                        url: sourceState.videoUrl,
+                        lineName: sourceState.lineName,
+                        resourceTitle: sourceState.resourceTitle,
+                      ),
+                    ),
+                  ),
+                ],
               );
             },
           ),
@@ -320,19 +330,10 @@ class _VideoSourceDrawersState extends ConsumerState<VideoSourceDrawers> {
   }
 
   /// 标题行
-  Widget buildHeader() {
-    final l10n = AppLocalizations.of(context);
+  Widget _buildHeader(AppLocalizations l10n) {
     return Row(
       children: [
-        Text(
-          l10n.videoSource,
-          style: TextStyle(
-            fontSize: 20,
-            fontWeight: FontWeight.bold,
-            color: Theme.of(context).textTheme.titleLarge?.color,
-            decoration: TextDecoration.none,
-          ),
-        ),
+        _sectionTitle(l10n.videoSource),
         const Spacer(),
         IconButton(
           onPressed: () => Navigator.of(context).pop(),
@@ -342,148 +343,143 @@ class _VideoSourceDrawersState extends ConsumerState<VideoSourceDrawers> {
     );
   }
 
-  Widget _manualSearch() {
-    final l10n = AppLocalizations.of(context);
+  /// 抽屉内的小节标题样式。
+  Widget _sectionTitle(String text) {
+    return Text(
+      text,
+      style: TextStyle(
+        fontSize: 20,
+        fontWeight: FontWeight.bold,
+        color: Theme.of(context).textTheme.titleLarge?.color,
+        decoration: TextDecoration.none,
+      ),
+    );
+  }
+
+  Widget _buildManualSearch(AppLocalizations l10n) {
     return SizedBox(
       height: 40,
       child: Row(
         children: [
-          Text(
-            l10n.manualSearch,
-            style: TextStyle(
-              fontSize: 20,
-              fontWeight: FontWeight.bold,
-              color: Theme.of(context).textTheme.titleLarge?.color,
-              decoration: TextDecoration.none,
-            ),
-          ),
+          _sectionTitle(l10n.manualSearch),
           const SizedBox(width: 5),
           Expanded(
-              child: Material(
-            child: TextField(
-              controller: _searchController,
-              decoration: InputDecoration(
-                hintText: l10n.manualSearchResource,
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(8),
+            child: Material(
+              child: TextField(
+                controller: _searchController,
+                decoration: InputDecoration(
+                  hintText: l10n.manualSearchResource,
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  contentPadding:
+                      const EdgeInsets.symmetric(horizontal: 12, vertical: 5),
+                  floatingLabelBehavior: FloatingLabelBehavior.always,
                 ),
-                contentPadding:
-                    const EdgeInsets.symmetric(horizontal: 12, vertical: 5),
-                floatingLabelBehavior: FloatingLabelBehavior.always,
+                onSubmitted: (_) => _performSearch(),
               ),
-              onSubmitted: (value) {
-                _performSearch();
-              },
             ),
-          ))
+          ),
         ],
       ),
     );
   }
 
   // 数据源选择器
-  Widget _buildWebsiteSelector({required List<ResourcesItem> dataSource}) {
-    final selectedIndex = _getDrawerSelectedIndex(dataSource);
+  Widget _buildWebsiteSelector({
+    required List<ResourcesItem> dataSource,
+    required int selectedIndex,
+  }) {
+    final colorScheme = Theme.of(context).colorScheme;
     return SizedBox(
-        height: 40,
-        child: Row(
-          children: [
-            Icon(
-              Icons.public,
-              size: 24,
-              color: Theme.of(context).colorScheme.onSurface,
-            ),
-            const SizedBox(width: 8),
-            Expanded(
-                child: ListView.builder(
-                    padding: EdgeInsets.zero,
-                    scrollDirection: Axis.horizontal,
-                    itemCount: dataSource.length,
-                    itemBuilder: (context, index) {
-                      final data = dataSource[index];
-                      final isSelected = selectedIndex == index;
-
-                      // final currentEpisodeCount = resource.episodeResources
-                      //     .where((item) => item.episodes.any((ep) =>
-                      //         ep.episodeSort ==
-                      //         episodesController.episodeIndex.value))
-                      //     .length;
-
-                      return GestureDetector(
-                        onTap: () => _setSelectedWebsite(index),
-                        child: Container(
-                          margin: const EdgeInsets.only(right: 12),
-                          padding: const EdgeInsets.all(8),
-                          decoration: BoxDecoration(
-                            color: isSelected
-                                ? Theme.of(context)
-                                    .colorScheme
-                                    .surfaceContainerHighest
-                                : Theme.of(context)
-                                    .colorScheme
-                                    .surfaceContainerHighest,
-                            borderRadius: BorderRadius.circular(12),
-                            border: Border.all(
-                              color: isSelected
-                                  ? Theme.of(context).colorScheme.primary
-                                  : Colors.transparent,
-                              width: 2,
-                            ),
-                          ),
-                          child: Row(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              ClipOval(
-                                child: AnimationNetworkImage(
-                                    width: 24,
-                                    height: 24,
-                                    url: data.websiteIcon),
-                              ),
-                              if (data.isLoading) ...[
-                                const SizedBox(width: 4),
-                                SizedBox(
-                                  width: 12,
-                                  height: 12,
-                                  child: CircularProgressIndicator(
-                                    strokeWidth: 2,
-                                    color:
-                                        Theme.of(context).colorScheme.primary,
-                                  ),
-                                ),
-                              ] else if (data.needsCaptcha) ...[
-                                const SizedBox(width: 4),
-                                const Icon(
-                                  Icons.shield_outlined,
-                                  size: 14,
-                                  color: Colors.blue,
-                                ),
-                              ] else if (data.errorMessage != null) ...[
-                                const SizedBox(width: 4),
-                                Icon(
-                                  Icons.error_outline,
-                                  size: 14,
-                                  color: Theme.of(context).colorScheme.error,
-                                ),
-                              ] else if (data.episodeResources.isNotEmpty) ...[
-                                const SizedBox(width: 4),
-                                Icon(
-                                  Icons.check_circle_outline,
-                                  size: 14,
-                                  color: Theme.of(context).colorScheme.primary,
-                                ),
-                              ],
-                            ],
+      height: 40,
+      child: Row(
+        children: [
+          Icon(Icons.public, size: 24, color: colorScheme.onSurface),
+          const SizedBox(width: 8),
+          Expanded(
+            child: ListView.builder(
+              padding: EdgeInsets.zero,
+              scrollDirection: Axis.horizontal,
+              itemCount: dataSource.length,
+              itemBuilder: (context, index) {
+                final data = dataSource[index];
+                return GestureDetector(
+                  onTap: () => _setSelectedWebsite(index),
+                  child: Container(
+                    margin: const EdgeInsets.only(right: 12),
+                    padding: const EdgeInsets.all(8),
+                    decoration: BoxDecoration(
+                      color: colorScheme.surfaceContainerHighest,
+                      borderRadius: BorderRadius.circular(12),
+                      border: Border.all(
+                        color: selectedIndex == index
+                            ? colorScheme.primary
+                            : Colors.transparent,
+                        width: 2,
+                      ),
+                    ),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        ClipOval(
+                          child: AnimationNetworkImage(
+                            width: 24,
+                            height: 24,
+                            url: data.websiteIcon,
                           ),
                         ),
-                      );
-                    })),
-          ],
-        ));
+                        _buildWebsiteStatusIcon(data, colorScheme),
+                      ],
+                    ),
+                  ),
+                );
+              },
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  /// 数据源角标：加载中 / 需要验证 / 请求失败 / 已有资源。
+  Widget _buildWebsiteStatusIcon(ResourcesItem data, ColorScheme colorScheme) {
+    if (data.isLoading) {
+      return Padding(
+        padding: const EdgeInsets.only(left: 4),
+        child: SizedBox(
+          width: 12,
+          height: 12,
+          child: CircularProgressIndicator(strokeWidth: 2, color: colorScheme.primary),
+        ),
+      );
+    }
+    if (data.needsCaptcha) {
+      return const Padding(
+        padding: EdgeInsets.only(left: 4),
+        child: Icon(Icons.shield_outlined, size: 14, color: Colors.blue),
+      );
+    }
+    if (data.errorMessage != null) {
+      return Padding(
+        padding: const EdgeInsets.only(left: 4),
+        child: Icon(Icons.error_outline, size: 14, color: colorScheme.error),
+      );
+    }
+    if (data.episodeResources.isEmpty) {
+      return const SizedBox.shrink();
+    }
+    return Padding(
+      padding: const EdgeInsets.only(left: 4),
+      child: Icon(Icons.check_circle_outline, size: 14, color: colorScheme.primary),
+    );
   }
 
   Widget _buildVideoSource({
     required List<ResourcesItem> dataSource,
     required int selectedIndex,
+    required int currentEpisodeIndex,
+    required _PlayingSource playing,
   }) {
     final videoSourceController = widget.videoSourceNotifier;
     if (selectedIndex >= dataSource.length) {
@@ -492,6 +488,7 @@ class _VideoSourceDrawersState extends ConsumerState<VideoSourceDrawers> {
 
     final selectedResource = dataSource[selectedIndex];
     final l10n = AppLocalizations.of(context);
+    final colorScheme = Theme.of(context).colorScheme;
     final episodeResources = selectedResource.episodeResources;
 
     if (selectedResource.needsCaptcha) {
@@ -518,11 +515,7 @@ class _VideoSourceDrawersState extends ConsumerState<VideoSourceDrawers> {
 
     if (selectedResource.errorMessage != null) {
       return _buildResourceStatusView(
-        icon: Icon(
-          Icons.error_outline,
-          size: 44,
-          color: Theme.of(context).colorScheme.error,
-        ),
+        icon: Icon(Icons.error_outline, size: 44, color: colorScheme.error),
         title: l10n.resourceRequestFailed(selectedResource.websiteName),
         message: selectedResource.errorMessage!,
         action: ElevatedButton(
@@ -536,11 +529,8 @@ class _VideoSourceDrawersState extends ConsumerState<VideoSourceDrawers> {
     if (episodeResources.isEmpty) {
       final siteSearchController = _siteSearchControllerFor(selectedResource);
       return _buildResourceStatusView(
-        icon: Icon(
-          Icons.search_off_rounded,
-          size: 44,
-          color: Theme.of(context).colorScheme.onSurfaceVariant,
-        ),
+        icon: Icon(Icons.search_off_rounded,
+            size: 44, color: colorScheme.onSurfaceVariant),
         title: l10n.resourceNotFoundForSite(selectedResource.websiteName),
         message: l10n.noPlayableSourceHint,
         action: _buildSiteSearchAction(
@@ -550,7 +540,7 @@ class _VideoSourceDrawersState extends ConsumerState<VideoSourceDrawers> {
         ),
       );
     }
-    final episodeIndex = videoSourceController.currentEpisodeIndex;
+    final episodeIndex = currentEpisodeIndex;
     final lineNames = _buildLineNames(episodeResources);
     final selectedLineName =
         lineNames.contains(_selectedLineName) ? _selectedLineName : null;
@@ -595,13 +585,16 @@ class _VideoSourceDrawersState extends ConsumerState<VideoSourceDrawers> {
                 ? _buildAllEpisodeSources(
                     episodeResources: filteredEpisodeResources,
                     selectedResource: selectedResource,
+                    currentEpisodeIndex: episodeIndex,
                     sortDescending: _sortDescending,
+                    playing: playing,
                   )
                 : _buildMatchedEpisodeSources(
                     matchedResources: matchedResources,
                     selectedResource: selectedResource,
                     episodeIndex: episodeIndex,
                     excludedEpisodesCount: excludedEpisodesCount,
+                    playing: playing,
                   ),
           ),
         ],
@@ -676,6 +669,7 @@ class _VideoSourceDrawersState extends ConsumerState<VideoSourceDrawers> {
     required String? selectedLineName,
   }) {
     final l10n = AppLocalizations.of(context);
+    final colorScheme = Theme.of(context).colorScheme;
     final value = selectedLineName ?? _allLinesValue;
     final items = [_allLinesValue, ...lineNames];
     return DropDownMenu<String>(
@@ -692,9 +686,7 @@ class _VideoSourceDrawersState extends ConsumerState<VideoSourceDrawers> {
               Icon(
                 isSelected ? Icons.check_rounded : Icons.account_tree_outlined,
                 size: 18,
-                color: isSelected
-                    ? Theme.of(context).colorScheme.primary
-                    : Theme.of(context).colorScheme.onSurfaceVariant,
+                color: isSelected ? colorScheme.primary : colorScheme.onSurfaceVariant,
               ),
               const SizedBox(width: 8),
               Expanded(
@@ -716,7 +708,7 @@ class _VideoSourceDrawersState extends ConsumerState<VideoSourceDrawers> {
           height: 40,
           padding: const EdgeInsets.symmetric(horizontal: 12),
           decoration: BoxDecoration(
-            border: Border.all(color: Theme.of(context).colorScheme.outline),
+            border: Border.all(color: colorScheme.outline),
             borderRadius: BorderRadius.circular(8),
           ),
           child: Row(
@@ -781,14 +773,16 @@ class _VideoSourceDrawersState extends ConsumerState<VideoSourceDrawers> {
     required ResourcesItem selectedResource,
     required int episodeIndex,
     required int excludedEpisodesCount,
+    required _PlayingSource playing,
   }) {
     final l10n = AppLocalizations.of(context);
+    final colorScheme = Theme.of(context).colorScheme;
     if (matchedResources.isEmpty) {
       return _buildResourceStatusView(
         icon: Icon(
           Icons.playlist_remove_rounded,
           size: 44,
-          color: Theme.of(context).colorScheme.onSurfaceVariant,
+          color: colorScheme.onSurfaceVariant,
         ),
         title: l10n.noPlayableSourceForEpisode,
         message: excludedEpisodesCount > 0
@@ -797,21 +791,27 @@ class _VideoSourceDrawersState extends ConsumerState<VideoSourceDrawers> {
       );
     }
 
+    final selectedIndex = _resolveSelectedSourceIndex(
+      length: matchedResources.length,
+      baseUrl: selectedResource.baseUrl,
+      playing: playing,
+      episodeAt: (index) => _episodeOf(matchedResources[index], episodeIndex),
+      itemAt: (index) => matchedResources[index],
+    );
+
     return ListView.builder(
       controller: _scrollController,
       padding: EdgeInsets.zero,
       itemCount: matchedResources.length,
       itemBuilder: (context, index) {
         final resourceItem = matchedResources[index];
-        final currentEpisode = resourceItem.episodes.firstWhere(
-          (ep) => ep.episodeSort == episodeIndex,
-        );
         return _buildSource(
-          currentEpisode,
+          _episodeOf(resourceItem, episodeIndex),
           resourceItem,
           baseUrl: selectedResource.baseUrl,
           websiteName: selectedResource.websiteName,
           websiteIcon: selectedResource.websiteIcon,
+          isSelected: index == selectedIndex,
         );
       },
     );
@@ -820,9 +820,12 @@ class _VideoSourceDrawersState extends ConsumerState<VideoSourceDrawers> {
   Widget _buildAllEpisodeSources({
     required List<EpisodeResourcesItem> episodeResources,
     required ResourcesItem selectedResource,
+    required int currentEpisodeIndex,
     required bool sortDescending,
+    required _PlayingSource playing,
   }) {
     final l10n = AppLocalizations.of(context);
+    final colorScheme = Theme.of(context).colorScheme;
     final expandedItems = episodeResources.expand((item) {
       return item.episodes.map((ep) => (resource: item, episode: ep));
     }).toList(growable: false);
@@ -844,12 +847,21 @@ class _VideoSourceDrawersState extends ConsumerState<VideoSourceDrawers> {
         icon: Icon(
           Icons.search_off_rounded,
           size: 44,
-          color: Theme.of(context).colorScheme.onSurfaceVariant,
+          color: colorScheme.onSurfaceVariant,
         ),
         title: l10n.noSelectableEpisodes,
         message: l10n.siteNoEpisodes,
       );
     }
+
+    final selectedIndex = _resolveSelectedSourceIndex(
+      length: expandedItems.length,
+      baseUrl: selectedResource.baseUrl,
+      episodeSort: currentEpisodeIndex,
+      playing: playing,
+      episodeAt: (index) => expandedItems[index].episode,
+      itemAt: (index) => expandedItems[index].resource,
+    );
 
     return ListView.builder(
       controller: _scrollController,
@@ -863,6 +875,7 @@ class _VideoSourceDrawersState extends ConsumerState<VideoSourceDrawers> {
           baseUrl: selectedResource.baseUrl,
           websiteName: selectedResource.websiteName,
           websiteIcon: selectedResource.websiteIcon,
+          isSelected: index == selectedIndex,
         );
       },
     );
@@ -950,14 +963,14 @@ class _VideoSourceDrawersState extends ConsumerState<VideoSourceDrawers> {
 
   /// 匹配度徽章
   Widget _buildMatchRatioBadge(double ratio) {
-    final cs = Theme.of(context).colorScheme;
+    final colorScheme = Theme.of(context).colorScheme;
     final (Color color, Color containerColor) = ratio >= 0.9
-        ? (cs.primary, cs.primaryContainer)
+        ? (colorScheme.primary, colorScheme.primaryContainer)
         : ratio >= 0.7
-            ? (cs.tertiary, cs.tertiaryContainer)
+            ? (colorScheme.tertiary, colorScheme.tertiaryContainer)
             : ratio >= 0.5
-                ? (cs.secondary, cs.secondaryContainer)
-                : (cs.error, cs.errorContainer);
+                ? (colorScheme.secondary, colorScheme.secondaryContainer)
+                : (colorScheme.error, colorScheme.errorContainer);
 
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
@@ -975,23 +988,73 @@ class _VideoSourceDrawersState extends ConsumerState<VideoSourceDrawers> {
     );
   }
 
-  Widget _buildSource(Episode episode, EpisodeResourcesItem item,
-      {required String websiteName,
-      required String websiteIcon,
-      required String baseUrl}) {
-    final videoUrl = widget.videoSourceNotifier.videoUrl;
-    final isSelected = resolveSourceUrl(baseUrl, episode.like) == videoUrl;
+  /// 播放地址是否与当前正在播放的资源一致。
+  bool _isSameSourceUrl(
+      String baseUrl, Episode episode, _PlayingSource playing) {
+    if (playing.url.isEmpty) return false;
+    return resolveSourceUrl(baseUrl, episode.like) == playing.url;
+  }
 
+  /// 线路名与资源标题是否与当前正在播放的资源一致。
+  bool _isSameSourceMeta(EpisodeResourcesItem item, _PlayingSource playing) {
+    if (playing.lineName.isNotEmpty && playing.lineName != item.lineNames) {
+      return false;
+    }
+    if (playing.resourceTitle.isNotEmpty &&
+        playing.resourceTitle != item.subjectsTitle) {
+      return false;
+    }
+    return true;
+  }
+
+  /// 资源项中对应集数的剧集（调用方已按集数过滤，取首个匹配项即可）。
+  Episode _episodeOf(EpisodeResourcesItem item, int episodeIndex) {
+    return item.episodes.firstWhere((ep) => ep.episodeSort == episodeIndex);
+  }
+
+  /// 计算当前播放源在候选列表中的下标。
+  int _resolveSelectedSourceIndex({
+    required int length,
+    required String baseUrl,
+    required _PlayingSource playing,
+    required Episode Function(int index) episodeAt,
+    required EpisodeResourcesItem Function(int index) itemAt,
+    int? episodeSort,
+  }) {
+    var fallbackIndex = -1;
+    for (var index = 0; index < length; index++) {
+      final episode = episodeAt(index);
+      if (episodeSort != null && episode.episodeSort != episodeSort) {
+        continue;
+      }
+      if (!_isSameSourceUrl(baseUrl, episode, playing)) {
+        continue;
+      }
+      if (fallbackIndex < 0) {
+        fallbackIndex = index;
+      }
+      if (_isSameSourceMeta(itemAt(index), playing)) {
+        return index;
+      }
+    }
+    return fallbackIndex;
+  }
+
+  Widget _buildSource(
+    Episode episode,
+    EpisodeResourcesItem item, {
+    required String websiteName,
+    required String websiteIcon,
+    required String baseUrl,
+    required bool isSelected,
+  }) {
+    final colorScheme = Theme.of(context).colorScheme;
+    final l10n = AppLocalizations.of(context);
     return Container(
       margin: const EdgeInsets.only(bottom: 8),
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(12),
-        border: isSelected
-            ? Border.all(
-                width: 2.5,
-                color: Theme.of(context).colorScheme.primary,
-              )
-            : null,
+        border: isSelected ? Border.all(width: 2.5, color: colorScheme.primary) : null,
       ),
       child: Card.filled(
         margin: EdgeInsets.zero,
@@ -999,7 +1062,7 @@ class _VideoSourceDrawersState extends ConsumerState<VideoSourceDrawers> {
           borderRadius: BorderRadius.circular(12),
         ),
         child: InkWell(
-          onTap: () async {
+          onTap: () {
             try {
               context.pop();
               final videoUrl = resolveSourceUrl(baseUrl, episode.like);
@@ -1013,7 +1076,6 @@ class _VideoSourceDrawersState extends ConsumerState<VideoSourceDrawers> {
               widget.onVideoUrlSelected?.call(videoUrl);
             } catch (e) {
               logger.e('获取视频源失败', error: e);
-              final l10n = AppLocalizations.of(context);
               NotificationToast.show(
                 l10n.videoSourceLoadFailed(e.toString()),
                 title: l10n.error,
@@ -1040,7 +1102,7 @@ class _VideoSourceDrawersState extends ConsumerState<VideoSourceDrawers> {
                           children: [
                             TextSpan(
                               text:
-                                  ' ${AppLocalizations.of(context).episodeNumber(episode.episodeSort.toString().padLeft(2, '0'))}',
+                                  ' ${l10n.episodeNumber(episode.episodeSort.toString().padLeft(2, '0'))}',
                               style: const TextStyle(
                                 fontSize: 12,
                                 fontWeight: FontWeight.w600,
@@ -1057,10 +1119,10 @@ class _VideoSourceDrawersState extends ConsumerState<VideoSourceDrawers> {
                 Row(
                   children: [
                     Text(
-                      AppLocalizations.of(context).lineLabel('').trimRight(),
+                      l10n.lineLabel('').trimRight(),
                       style: TextStyle(
                         fontSize: 12,
-                        color: Theme.of(context).colorScheme.onSurfaceVariant,
+                        color: colorScheme.onSurfaceVariant,
                       ),
                     ),
                     const SizedBox(width: 6),
@@ -1070,16 +1132,12 @@ class _VideoSourceDrawersState extends ConsumerState<VideoSourceDrawers> {
                       overflow: TextOverflow.ellipsis,
                       style: TextStyle(
                         fontSize: 12,
-                        color: Theme.of(context).colorScheme.onSurfaceVariant,
+                        color: colorScheme.onSurfaceVariant,
                       ),
                     ),
-                    Icon(
-                      Icons.link,
-                      size: 16,
-                      color: Theme.of(context).colorScheme.onSurfaceVariant,
-                    ),
+                    Icon(Icons.link, size: 16, color: colorScheme.onSurfaceVariant),
                     const Spacer(),
-                    Text(AppLocalizations.of(context).matchLabel),
+                    Text(l10n.matchLabel),
                     const SizedBox(width: 4),
                     _buildMatchRatioBadge(item.matchRatio),
                   ],

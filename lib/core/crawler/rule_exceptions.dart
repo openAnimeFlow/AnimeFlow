@@ -47,3 +47,13 @@ class ChapterErrorException implements Exception {
   String toString() => 'ChapterErrorException: $configName chapter query failed'
       '${cause == null ? '' : ' ($cause)'}';
 }
+
+/// API 规则配置或响应不符合预期（请求模板非法、响应不是 JSON、JSONPath 非法等）。
+class ApiRuleFormatException implements Exception {
+  const ApiRuleFormatException(this.message);
+
+  final String message;
+
+  @override
+  String toString() => 'ApiRuleFormatException: $message';
+}

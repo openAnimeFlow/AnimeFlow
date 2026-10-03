@@ -5,7 +5,7 @@ import 'package:anime_flow/core/crawler/cookie_manager.dart';
 import 'package:anime_flow/core/crawler/item/anti_crawler_config.dart';
 import 'package:anime_flow/core/crawler/item/api_rule_config.dart';
 import 'package:anime_flow/core/crawler/item/crawler_config_item.dart';
-import 'package:anime_flow/core/crawler/rule_request.dart';
+import 'package:anime_flow/core/crawler/rule_engine.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 const String _pluginName = 'e2e';
@@ -284,7 +284,10 @@ void main() {
   test('API 搜索与章节请求真实走过 HTTP 链路', () async {
     final config = _apiRule(site);
 
-    final items = await RuleRequest.searchSubjects('进击的巨人', config);
+    final items = await RuleEngine().search(
+      keyword: '进击的巨人',
+      config: config,
+    );
     expect(items.map((item) => item.name).toList(), [
       '进击的巨人',
       '进击的巨人 第二季',
@@ -298,9 +301,9 @@ void main() {
     expect(search.header('cookie'), contains('sid=abc123'));
     expect(search.header('user-agent'), isNotEmpty);
 
-    final roads = await RuleRequest.fetchEpisodeResources(
-      items.first.link,
-      config,
+    final roads = await RuleEngine().fetchEpisodeResources(
+      sourceUrl: items.first.link,
+      config: config,
     );
     expect(roads, hasLength(2));
     expect(roads[0].lineNames, '线路A');
@@ -331,7 +334,10 @@ void main() {
       ),
     );
 
-    final roads = await RuleRequest.fetchEpisodeResources('/d/1', config);
+    final roads = await RuleEngine().fetchEpisodeResources(
+      sourceUrl: '/d/1',
+      config: config,
+    );
 
     expect(roads.map((road) => road.lineNames).toList(), ['线路A', '线路B']);
     expect(roads[0].episodes.map((episode) => episode.like).toList(), [
@@ -360,7 +366,10 @@ void main() {
       ),
     );
 
-    final roads = await RuleRequest.fetchEpisodeResources('/d/1', config);
+    final roads = await RuleEngine().fetchEpisodeResources(
+      sourceUrl: '/d/1',
+      config: config,
+    );
 
     expect(roads.single.episodes.map((episode) => episode.like).toList(), [
       '${site.origin}/play/e1?ep=1',
@@ -371,7 +380,10 @@ void main() {
   test('失败后重试，最终成功', () async {
     site.failFirstAttempts = 1;
 
-    final items = await RuleRequest.searchSubjects('巨人', _apiRule(site));
+    final items = await RuleEngine().search(
+      keyword: '巨人',
+      config: _apiRule(site),
+    );
 
     expect(items, hasLength(2));
     expect(site.requests, hasLength(2));
@@ -392,7 +404,7 @@ void main() {
     );
 
     await expectLater(
-      RuleRequest.searchSubjects('巨人', config),
+      RuleEngine().search(keyword: '巨人', config: config),
       throwsA(isA<CaptchaRequiredException>()),
     );
     // 命中验证页后立即上抛，不参与重试。
@@ -415,7 +427,7 @@ void main() {
     );
 
     await expectLater(
-      RuleRequest.searchSubjects('巨人', config),
+      RuleEngine().search(keyword: '巨人', config: config),
       throwsA(isA<CaptchaRequiredException>()),
     );
     expect(site.requests, hasLength(1));
@@ -424,11 +436,17 @@ void main() {
   test('XPath 模式搜索带 Cookie、章节不带（保持既有行为）', () async {
     final config = _xpathRule(site);
 
-    final items = await RuleRequest.searchSubjects('巨人', config);
+    final items = await RuleEngine().search(
+      keyword: '巨人',
+      config: config,
+    );
     expect(items.single.name, '进击的巨人');
     expect(site.requests.last.header('cookie'), contains('sid=abc123'));
 
-    await RuleRequest.fetchEpisodeResources(items.single.link, config);
+    await RuleEngine().fetchEpisodeResources(
+      sourceUrl: items.single.link,
+      config: config,
+    );
     final detail = site.requests.last;
     expect(detail.path, '/d/1');
     expect(detail.header('cookie'), isNull);

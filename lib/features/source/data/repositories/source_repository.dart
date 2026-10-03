@@ -153,12 +153,8 @@ class SourceRepository {
         RuleApiLevel.describe(data.api, ruleName: data.name),
       );
     }
-    await saveSource(
-      CrawlConfigItem.fromJson({
-        ...data.toJson(),
-        'version': catalogVersion,
-      }),
-    );
+    // 目录版本号是这次下载的权威版本，覆盖规则文件里自带的值。
+    await saveSource(data.copyWith(version: catalogVersion));
   }
 
   Future<void> deleteSource(String name) async {

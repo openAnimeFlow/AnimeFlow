@@ -749,8 +749,8 @@
   "captchaPageUrl": "Challenge page URL",
   "captchaDetectText": "Text",
   "captchaDetectRegex": "Regex",
-  "invalidJsonFormat": "Invalid JSON"
-  ,"pluginRequiresNewerClient": "Plugin \"{name}\" requires a newer version of AnimeFlow"
-  ,"pluginNeedsNewerClient": "Needs newer client"
+  "invalidJsonFormat": "Invalid JSON",
+  "pluginRequiresNewerClient": "Plugin \"{name}\" requires a newer version of AnimeFlow",
+  "pluginNeedsNewerClient": "Needs newer client"
 
 }

@@ -754,9 +754,9 @@
   "captchaPageUrl": "验证页地址",
   "captchaDetectText": "文本",
   "captchaDetectRegex": "正则",
-  "invalidJsonFormat": "JSON 格式不正确"
-  ,"pluginRequiresNewerClient": "插件 \"{name}\" 需要更新 AnimeFlow 后才能使用"
-  ,"@pluginRequiresNewerClient": {"placeholders": {"name": {}}}
-  ,"pluginNeedsNewerClient": "需要更新客户端"
+  "invalidJsonFormat": "JSON 格式不正确",
+  "pluginRequiresNewerClient": "插件 \"{name}\" 需要更新 AnimeFlow 后才能使用",
+  "@pluginRequiresNewerClient": {"placeholders": {"name": {}}},
+  "pluginNeedsNewerClient": "需要更新客户端"
 
 }

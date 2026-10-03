@@ -1,223 +1,22 @@
 import 'dart:convert';
 
 import 'package:anime_flow/core/crawler/item/api_rule_config.dart';
+import 'package:anime_flow/core/crawler/restricted_json_path.dart';
+import 'package:anime_flow/core/crawler/rule_exceptions.dart';
+import 'package:anime_flow/core/crawler/rule_template.dart';
 import 'package:anime_flow/core/logger/logger.dart';
 import 'package:anime_flow/core/utils/utils.dart' show resolveSourceUrl;
 import 'package:anime_flow/shared/models/player/play/video/episode_resources_item.dart';
 import 'package:anime_flow/shared/models/player/play/video/search_resources_item.dart';
-import 'package:json_path/json_path.dart';
 
-/// API 规则在准备请求或解析响应时出现的问题。
-class ApiRuleFormatException implements Exception {
-  const ApiRuleFormatException(this.message);
-
-  final String message;
-
-  @override
-  String toString() => 'ApiRuleFormatException: $message';
-}
-
-/// 受限 JSONPath。
+/// API 规则解析器：校验规则 + 用 JSONPath 解析响应。
 ///
-/// 规则文件由第三方提供，**不能**把任意表达式直接交给 JSONPath 求值。
-/// 这里只放行最基础、最常见的语法，其余（函数、过滤器、递归 `..`、联合等）
-/// 一律拒绝，校验通过后再交给 `json_path` 解析。
-class RestrictedJsonPath {
-  const RestrictedJsonPath._();
-
-  static void validate(String expression) {
-    if (expression.isEmpty || !expression.startsWith(r'$')) {
-      throw ApiRuleFormatException('JSONPath 必须以 \$ 开头：$expression');
-    }
-
-    var index = 1;
-    while (index < expression.length) {
-      final char = expression[index];
-
-      if (char == '.') {
-        index++;
-        final start = index;
-        while (index < expression.length &&
-            RegExp(r'[A-Za-z0-9_$-]').hasMatch(expression[index])) {
-          index++;
-        }
-        if (index == start) {
-          throw ApiRuleFormatException('不支持的 JSONPath：$expression');
-        }
-        continue;
-      }
-
-      if (char == '[') {
-        final end = _findBracketEnd(expression, index);
-        final content = expression.substring(index + 1, end).trim();
-        final isIndex = RegExp(r'^\d+$').hasMatch(content);
-        final isWildcard = content == '*';
-        final isQuoted = content.length >= 2 &&
-            ((content.startsWith("'") && content.endsWith("'")) ||
-                (content.startsWith('"') && content.endsWith('"')));
-        if (!isIndex && !isWildcard && !isQuoted) {
-          throw ApiRuleFormatException('不支持的 JSONPath 片段：[$content]');
-        }
-        index = end + 1;
-        continue;
-      }
-
-      throw ApiRuleFormatException('不支持的 JSONPath：$expression');
-    }
-  }
-
-  static int _findBracketEnd(String expression, int start) {
-    String? quote;
-    var escaped = false;
-    for (var i = start + 1; i < expression.length; i++) {
-      final char = expression[i];
-      if (escaped) {
-        escaped = false;
-        continue;
-      }
-      if (char == '\\') {
-        escaped = true;
-        continue;
-      }
-      if (quote != null) {
-        if (char == quote) quote = null;
-        continue;
-      }
-      if (char == "'" || char == '"') {
-        quote = char;
-        continue;
-      }
-      if (char == ']') return i;
-    }
-    throw ApiRuleFormatException('JSONPath 缺少 ]：$expression');
-  }
-
-  static List<Object?> read(dynamic document, String expression) {
-    validate(expression);
-    try {
-      return JsonPath(expression).readValues(document).toList();
-    } catch (error) {
-      throw ApiRuleFormatException('JSONPath 解析失败 $expression：$error');
-    }
-  }
-
-  static Object? readFirst(dynamic document, String expression) {
-    final values = read(document, expression);
-    return values.isEmpty ? null : values.first;
-  }
-}
-
-/// API 规则解析器：请求模板渲染 + JSONPath 响应解析。
-///
-/// 与 [HtmlCrawler] 对称——`HtmlCrawler` 负责 XPath 模式，本类负责 API 模式，
+/// 与 `HtmlCrawler` 对称——`HtmlCrawler` 负责 XPath 模式，本类负责 API 模式；
+/// 请求模板渲染见 `RuleTemplate`，JSONPath 白名单见 `RestrictedJsonPath`。
 /// 两者的出口都是 [SearchResourcesItem] / [CrawlerEpisodeResourcesItem]，
 /// 因此下游的搜索排序、选集、播放解析无需感知模式差异。
 class ApiCrawler {
   static LiggLogger logger = LiggLogger();
-
-  /// `@name` 形式的内联变量。
-  static final RegExp _atVariable =
-      RegExp(r'(?<![A-Za-z0-9_])@([A-Za-z_][A-Za-z0-9_]*)');
-
-  /// `{name}` 形式的兼容变量（XPath 规则的搜索链接使用该写法）。
-  static final RegExp _braceVariable = RegExp(r'\{([A-Za-z_][A-Za-z0-9_]*)\}');
-
-  /// 整个字符串就是一个 `@name`，此时保留变量原始类型。
-  static final RegExp _exactAtVariable = RegExp(r'^@([A-Za-z_][A-Za-z0-9_]*)$');
-
-  /// 整个字符串就是一个 `{name}`，与 [_exactAtVariable] 行为一致。
-  static final RegExp _exactBraceVariable =
-      RegExp(r'^\{([A-Za-z_][A-Za-z0-9_]*)\}$');
-
-  // ---------------------------------------------------------------------------
-  // 模板渲染
-  // ---------------------------------------------------------------------------
-
-  static String renderTemplate(
-    String template,
-    Map<String, Object?> variables, {
-    bool encode = false,
-  }) {
-    if (template.isEmpty) return template;
-    final withAt = template.replaceAllMapped(
-      _atVariable,
-      (match) => _renderVariable(
-        match.group(1)!,
-        variables,
-        encode: encode,
-        token: match.group(0)!,
-      ),
-    );
-    return withAt.replaceAllMapped(
-      _braceVariable,
-      (match) => _renderVariable(
-        match.group(1)!,
-        variables,
-        encode: encode,
-        token: match.group(0)!,
-      ),
-    );
-  }
-
-  static Map<String, dynamic> renderMap(
-    Map<String, dynamic> input,
-    Map<String, Object?> variables,
-  ) {
-    return input.map(
-      (key, value) => MapEntry(
-        renderTemplate(key, variables),
-        renderValue(value, variables),
-      ),
-    );
-  }
-
-  /// 渲染单个值。
-  ///
-  /// 字符串恰好等于 `@name` 或 `{name}` 时按变量原始类型返回（数字仍是数字），
-  /// 其余情况做字符串插值；两种写法在整串与内联场景下行为一致。
-  static dynamic renderValue(
-    dynamic value,
-    Map<String, Object?> variables,
-  ) {
-    if (value is String) {
-      final trimmed = value.trim();
-      final exact = _exactAtVariable.firstMatch(trimmed) ??
-          _exactBraceVariable.firstMatch(trimmed);
-      if (exact != null) {
-        final name = exact.group(1)!;
-        if (!variables.containsKey(name)) {
-          throw ApiRuleFormatException('缺少模板变量 $trimmed');
-        }
-        return variables[name];
-      }
-      return renderTemplate(value, variables);
-    }
-    if (value is List) {
-      return value.map((item) => renderValue(item, variables)).toList();
-    }
-    if (value is Map) {
-      return value.map(
-        (key, item) => MapEntry(
-          key.toString(),
-          renderValue(item, variables),
-        ),
-      );
-    }
-    return value;
-  }
-
-  static String _renderVariable(
-    String name,
-    Map<String, Object?> variables, {
-    required bool encode,
-    required String token,
-  }) {
-    if (!variables.containsKey(name)) {
-      throw ApiRuleFormatException('缺少模板变量 $token');
-    }
-    final value = variables[name]?.toString() ?? '';
-    return encode ? Uri.encodeComponent(value) : value;
-  }
 
   // ---------------------------------------------------------------------------
   // 规则校验（编辑器保存前同样复用）
@@ -519,13 +318,13 @@ class ApiCrawler {
       'episodeIndex': episodeIndex,
       'episodeNumber': episodeIndex + 1,
     };
-    final path = renderTemplate(page.url, variables, encode: true);
+    final path = RuleTemplate.render(page.url, variables, encode: true);
     final uri = Uri.tryParse(path);
     if (uri == null) {
       throw ApiRuleFormatException('剧集页面 URL 无效：$path');
     }
 
-    final renderedQuery = renderMap(page.query, variables).map(
+    final renderedQuery = RuleTemplate.renderMap(page.query, variables).map(
       (key, value) => MapEntry(key, value.toString()),
     );
     final mergedQuery = <String, String>{
@@ -566,12 +365,4 @@ class ApiCrawler {
     if (value == null) return '';
     return value is String ? value.trim() : value.toString().trim();
   }
-}
-
-/// 渲染含 `{keyword}` 占位符的页面地址模板（验证页等场景使用）。
-///
-/// `@变量` 是 API 请求模板的语法，由 [ApiCrawler.renderTemplate] 处理；
-/// 这里只负责规则里已有的 `{keyword}` 写法，替换值做 URL 编码。
-String renderKeywordUrl(String template, String keyword) {
-  return template.replaceAll('{keyword}', Uri.encodeQueryComponent(keyword));
 }

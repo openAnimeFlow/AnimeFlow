@@ -150,7 +150,10 @@ class PluginFormFields {
     int index,
   ) {
     final l10n = AppLocalizations.of(context);
-    final meta = _metaFor(index, l10n);
+    final metas = _metaList(l10n);
+    final meta = index >= 0 && index < metas.length
+        ? metas[index]
+        : const _FieldMeta(title: '', message: '');
     return labeledField(
       context,
       controller: form.xpathControllers[index],
@@ -210,53 +213,39 @@ class PluginFormFields {
     );
   }
 
-  static _FieldMeta _metaFor(int index, AppLocalizations l10n) {
-    return switch (index) {
-      PluginFormIndex.version => _FieldMeta(
+  /// XPath 字段的标题与说明，下标与 [PluginFormIndex] 一一对应。
+  static List<_FieldMeta> _metaList(AppLocalizations l10n) => [
+        _FieldMeta(
           title: l10n.versionNumber,
           message: l10n.versionExample,
         ),
-      PluginFormIndex.name => _FieldMeta(
+        _FieldMeta(
           title: l10n.sourceName,
           message: l10n.sourceNameHint,
         ),
-      PluginFormIndex.icon => _FieldMeta(
-          title: l10n.iconLink,
-          message: l10n.iconLink,
-        ),
-      PluginFormIndex.baseUrl => _FieldMeta(
+        _FieldMeta(title: l10n.iconLink, message: l10n.iconLink),
+        _FieldMeta(
           title: l10n.websiteLink,
           message: l10n.websiteLinkHint,
         ),
-      PluginFormIndex.searchUrl => _FieldMeta(
+        _FieldMeta(
           title: l10n.searchLink,
           message: l10n.searchLinkHint('{keyword}'),
         ),
-      PluginFormIndex.searchList => _FieldMeta(
+        _FieldMeta(
           title: l10n.searchContentList,
           message: l10n.searchContentList,
         ),
-      PluginFormIndex.searchName => _FieldMeta(
+        _FieldMeta(
           title: l10n.searchListName,
           message: l10n.searchListName,
         ),
-      PluginFormIndex.searchLink => _FieldMeta(
+        _FieldMeta(
           title: l10n.searchListLink,
           message: l10n.searchListLink,
         ),
-      PluginFormIndex.lineNames => _FieldMeta(
-          title: l10n.lineName,
-          message: l10n.lineName,
-        ),
-      PluginFormIndex.lineList => _FieldMeta(
-          title: l10n.episodeList,
-          message: l10n.episodeList,
-        ),
-      PluginFormIndex.episode => _FieldMeta(
-          title: l10n.episode,
-          message: l10n.episodeHint,
-        ),
-      _ => const _FieldMeta(title: '', message: ''),
-    };
-  }
+        _FieldMeta(title: l10n.lineName, message: l10n.lineName),
+        _FieldMeta(title: l10n.episodeList, message: l10n.episodeList),
+        _FieldMeta(title: l10n.episode, message: l10n.episodeHint),
+      ];
 }

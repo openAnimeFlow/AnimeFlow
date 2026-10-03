@@ -1,9 +1,7 @@
 import 'dart:async';
-import 'dart:isolate';
-
 import 'package:anime_flow/core/crawler/cookie_manager.dart';
-import 'package:anime_flow/core/crawler/api_crawler.dart' show renderKeywordUrl;
-import 'package:anime_flow/core/crawler/rule_request.dart';
+import 'package:anime_flow/core/crawler/captcha_page_url.dart';
+import 'package:anime_flow/core/crawler/rule_engine.dart';
 import 'package:anime_flow/core/crawler/item/anti_crawler_config.dart';
 import 'package:anime_flow/core/crawler/item/crawler_config_item.dart';
 import 'package:anime_flow/core/utils/utils.dart' show resolveSourceUrl;
@@ -124,6 +122,9 @@ class VideoSourceNotifier extends _$VideoSourceNotifier {
   String? _preferredAutoSelectWebsiteName;
   int _videoPageLoadToken = 0;
   final Set<String> _attemptedAutoLoadUrls = {};
+
+  /// 规则执行引擎；传输实现固定为默认的真实 HTTP。
+  final RuleEngine _ruleEngine = RuleEngine();
 
   int get currentEpisodeIndex => state.currentEpisodeIndex;
   List<ResourcesItem> get videoResources => state.videoResources;
@@ -253,7 +254,7 @@ class VideoSourceNotifier extends _$VideoSourceNotifier {
           websiteName: config.name,
           websiteIcon: config.iconUrl,
           baseUrl: config.baseUrl,
-          searchUrl: config.captchaPageTemplate,
+          searchUrl: captchaPageTemplate(config),
           needsCaptcha: _requiresCaptcha(config),
           episodeResources: const [],
         );
@@ -262,7 +263,7 @@ class VideoSourceNotifier extends _$VideoSourceNotifier {
       return previous.copyWith(
         websiteIcon: config.iconUrl,
         baseUrl: config.baseUrl,
-        searchUrl: config.captchaPageTemplate,
+        searchUrl: captchaPageTemplate(config),
         needsCaptcha:
             config.antiCrawlerConfig.enabled ? previous.needsCaptcha : false,
         antiCrawlerConfig:
@@ -335,7 +336,7 @@ class VideoSourceNotifier extends _$VideoSourceNotifier {
     }
 
     final searchUrl =
-        renderKeywordUrl(config.captchaPageTemplate, retryKeyword);
+        renderKeywordUrl(captchaPageTemplate(config), retryKeyword);
     final requiresCaptcha = config.antiCrawlerConfig.enabled &&
         !await CookieManager.instance.hasUsableCookies(config.name, searchUrl);
     if (!ref.mounted) return;
@@ -383,7 +384,10 @@ class VideoSourceNotifier extends _$VideoSourceNotifier {
       _updateResourceStatus(config.name, isLoading: true, errorMessage: null);
 
       final aliases = ref.read(playExtraProvider).playExtra.subjectAliases;
-      final rawSearchList = await RuleRequest.searchSubjects(keyword, config);
+      final rawSearchList = await _ruleEngine.search(
+        keyword: keyword,
+        config: config,
+      );
       if (!ref.mounted) return;
       if (!_isRequestCurrent(config.name, sessionId, requestToken)) {
         return;
@@ -391,22 +395,13 @@ class VideoSourceNotifier extends _$VideoSourceNotifier {
 
       final names =
           rawSearchList.map((item) => item.name).toList(growable: false);
-      final sortedResult = await Isolate.run(() {
-        final service = SearchResultRankService(
-          searchTerm: keyword,
-          aliases: aliases,
-        );
-        final scores = service.computeScoresBatch(names);
-        final matchRatios = names
-            .map((n) => service.computeMatchRatio(n))
-            .toList(growable: false);
-        final indices = List.generate(names.length, (i) => i, growable: false);
-        indices.sort((a, b) {
-          final cmp = scores[b].compareTo(scores[a]);
-          return cmp != 0 ? cmp : a.compareTo(b);
-        });
-        return (indices: indices, matchRatios: matchRatios);
-      });
+      // 打分排序放在 SearchResultRankService 的静态方法里执行：
+      // 直接在实例方法里 Isolate.run 会把 notifier（含 Logger）带进 isolate 消息。
+      final sortedResult = await SearchResultRankService.rankInIsolate(
+        searchTerm: keyword,
+        aliases: aliases,
+        names: names,
+      );
       if (!ref.mounted) return;
 
       final searchEntries = sortedResult.indices
@@ -476,11 +471,17 @@ class VideoSourceNotifier extends _$VideoSourceNotifier {
         needsCaptcha: false,
         errorMessage: null,
       );
-    } catch (e) {
+    } catch (e, stackTrace) {
       if (!ref.mounted) return;
       if (!_isRequestCurrent(config.name, sessionId, requestToken)) {
         return;
       }
+      // 失败不只写进抽屉状态：同时落到错误日志，避免关掉界面后无从排查。
+      _logger.e(
+        'VideoSource: ${config.name} 解析失败',
+        error: e,
+        stackTrace: stackTrace,
+      );
       _updateResourceStatus(
         config.name,
         isLoading: false,

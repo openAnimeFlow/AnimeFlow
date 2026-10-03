@@ -1,5 +1,5 @@
 import 'package:anime_flow/core/crawler/item/crawler_config_item.dart';
-import 'package:anime_flow/core/crawler/rule_request.dart';
+import 'package:anime_flow/core/crawler/rule_exceptions.dart';
 import 'package:anime_flow/features/play/application/chapter_collection_service.dart';
 import 'package:anime_flow/shared/models/player/play/video/episode_resources_item.dart';
 import 'package:flutter_test/flutter_test.dart';

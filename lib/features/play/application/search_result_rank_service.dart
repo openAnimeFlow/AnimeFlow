@@ -1,6 +1,13 @@
+import 'dart:isolate';
 import 'dart:math';
 
 import 'package:anime_flow/core/utils/utils.dart';
+
+/// 候选标题的打分排序结果。
+///
+/// [indices] 是按得分降序排列的下标（对应入参 `names`），
+/// [matchRatios] 与入参一一对应。
+typedef RankedCandidates = ({List<int> indices, List<double> matchRatios});
 
 /// 根据搜索词条与别名对检索结果进行权重排序。
 class SearchResultRankService {
@@ -14,8 +21,37 @@ class SearchResultRankService {
   static const _searchTermWeight = 100.0;
   static const _aliasWeight = 100.0;
 
+  /// 在后台 isolate 里完成「打分 → 排序」。
+  ///
+  /// 刻意做成**静态方法**：闭包只捕获入参，不会把调用方实例带进 isolate 消息。
+  /// 若在实例方法里直接 `Isolate.run`，同一个方法的上下文会包含 `this`，
+  /// 而 `this` 往往持着 `LiggLogger`（内部 `Logger` 含不可发送的 `Future`），
+  /// 触发 `Illegal argument in isolate message: object is unsendable`。
+  static Future<RankedCandidates> rankInIsolate({
+    required String searchTerm,
+    required List<String> aliases,
+    required List<String> names,
+  }) {
+    return Isolate.run(() {
+      final service = SearchResultRankService(
+        searchTerm: searchTerm,
+        aliases: aliases,
+      );
+      final scores = service.computeScoresBatch(names);
+      final matchRatios = names
+          .map((name) => service.computeMatchRatio(name))
+          .toList(growable: false);
+      final indices = List.generate(names.length, (i) => i, growable: false);
+      indices.sort((a, b) {
+        final cmp = scores[b].compareTo(scores[a]);
+        return cmp != 0 ? cmp : a.compareTo(b);
+      });
+      return (indices: indices, matchRatios: matchRatios);
+    });
+  }
+
   /// 批量计算一组标题的得分，顺序与 [names] 一一对应。
-  /// 设计为可安全传入 [Isolate.run] 闭包使用。
+  /// 设计为可安全传入 isolate 使用。
   List<double> computeScoresBatch(List<String> names) {
     return [for (final name in names) computeScore(name)];
   }

@@ -145,15 +145,47 @@ class CrawlConfigItem {
   bool get requiresNewerClient =>
       ruleCompatibility == RuleCompatibility.requiresNewerClient;
 
-  /// 加载验证页时使用的地址模板。
+  /// 复制并覆盖部分字段。
   ///
-  /// 优先使用规则声明的 [AntiCrawlerConfig.captchaPageUrl]；为空时回退到
-  /// 搜索地址；API 规则没有搜索页，再回退到 API 搜索请求地址。
-  String get captchaPageTemplate {
-    final explicit = antiCrawlerConfig.captchaPageUrl.trim();
-    if (explicit.isNotEmpty) return explicit;
-    if (searchUrl.trim().isNotEmpty) return searchUrl;
-    return searchApiConfig.request.url;
+  /// [antiCrawlerConfig] 等有默认值的字段传 null 时保持原值。
+  CrawlConfigItem copyWith({
+    String? version,
+    String? name,
+    String? iconUrl,
+    String? baseUrl,
+    String? searchUrl,
+    String? searchList,
+    String? searchName,
+    String? searchLink,
+    String? lineNames,
+    String? lineList,
+    String? episode,
+    AntiCrawlerConfig? antiCrawlerConfig,
+    String? searchMode,
+    String? chapterMode,
+    ApiSearchConfig? searchApiConfig,
+    ApiChapterConfig? chapterApiConfig,
+    String? api,
+  }) {
+    return CrawlConfigItem(
+      version: version ?? this.version,
+      name: name ?? this.name,
+      iconUrl: iconUrl ?? this.iconUrl,
+      baseUrl: baseUrl ?? this.baseUrl,
+      searchUrl: searchUrl ?? this.searchUrl,
+      searchList: searchList ?? this.searchList,
+      searchName: searchName ?? this.searchName,
+      searchLink: searchLink ?? this.searchLink,
+      lineNames: lineNames ?? this.lineNames,
+      lineList: lineList ?? this.lineList,
+      episode: episode ?? this.episode,
+      antiCrawlerConfig: antiCrawlerConfig ?? this.antiCrawlerConfig,
+      searchMode: searchMode ?? this.searchMode,
+      chapterMode: chapterMode ?? this.chapterMode,
+      searchApiConfig: searchApiConfig ?? this.searchApiConfig,
+      chapterApiConfig: chapterApiConfig ?? this.chapterApiConfig,
+      api: api ?? this.api,
+    );
   }
 
   @override

@@ -1,23 +1,25 @@
+// 规则请求执行层：统一的请求描述 [PreparedRuleRequest]，以及默认的
+// HTTP 传输实现 [sendRuleRequest]（Cookie / 请求头 / 请求体 / 重试 / 反爬检测）。
+//
+// 编排（准备 + 发送 + 解析 + 异常分类）见 `RuleEngine`。
+
 import 'dart:async';
 
 import 'package:anime_flow/core/constants/constants.dart';
-import 'package:anime_flow/core/crawler/api_crawler.dart';
+import 'package:anime_flow/core/crawler/captcha_detector.dart';
+import 'package:anime_flow/core/crawler/cookie_manager.dart';
 import 'package:anime_flow/core/crawler/item/api_rule_config.dart';
 import 'package:anime_flow/core/crawler/item/crawler_config_item.dart';
+import 'package:anime_flow/core/crawler/rule_exceptions.dart';
 import 'package:anime_flow/core/logger/logger.dart';
 import 'package:anime_flow/core/network/clients/plugin_site_client.dart';
 import 'package:anime_flow/core/network/core/network_exception.dart';
 import 'package:anime_flow/core/utils/utils.dart';
-import 'package:anime_flow/shared/models/player/play/video/episode_resources_item.dart';
-import 'package:anime_flow/shared/models/player/play/video/search_resources_item.dart';
 import 'package:dio/dio.dart';
 
-import 'captcha_detector.dart';
-import 'cookie_manager.dart';
-import 'html_crawler.dart';
-import 'rule_exceptions.dart';
+final LiggLogger _logger = LiggLogger();
 
-export 'rule_exceptions.dart';
+const int _maxAttempts = 3;
 
 /// 统一后的规则请求描述。
 ///
@@ -56,343 +58,148 @@ class PreparedRuleRequest {
 
 /// 规则请求的传输实现。
 ///
-/// 默认走 [PluginSiteClient]；测试可替换它，从而在不发真实请求的前提下
-/// 验证「模式分派 + 请求模板渲染」的结果。
+/// 默认是 [sendRuleRequest]；测试可把它换成假实现，从而在不发真实请求的
+/// 前提下验证引擎的准备与解析逻辑（见 `RuleEngine`）。
 typedef RuleRequestTransport = Future<String> Function(
   PreparedRuleRequest request,
   CrawlConfigItem config,
 );
 
-/// 规则请求入口：按配置的解析模式分派到 XPath 或 API 实现。
-class RuleRequest {
-  static LiggLogger logger = LiggLogger();
-  static const int _maxAttempts = 3;
+/// 默认传输：真实 HTTP 请求，带重试与反爬检测。
+Future<String> sendRuleRequest(
+  PreparedRuleRequest request,
+  CrawlConfigItem crawlConfig,
+) async {
+  Object? lastError;
+  StackTrace? lastStackTrace;
 
-  /// 传输实现，默认 [_send]。
-  static RuleRequestTransport transport = _send;
-
-  /// 搜索条目列表
-  static Future<List<SearchResourcesItem>> searchSubjects(
-    String keyword,
-    CrawlConfigItem crawlConfig,
-  ) async {
-    final PreparedRuleRequest request;
+  for (var attempt = 1; attempt <= _maxAttempts; attempt++) {
     try {
-      request = crawlConfig.usesApiSearch
-          ? _prepareApiSearchRequest(keyword, crawlConfig)
-          : _prepareXPathSearchRequest(keyword, crawlConfig);
-    } catch (error, stackTrace) {
-      _logFailure(crawlConfig, 'search request preparation', error, stackTrace);
-      throw SearchErrorException(crawlConfig.name, cause: error);
-    }
+      final response = await _send(request, crawlConfig);
+      if (response.trim().isEmpty) {
+        throw StateError('empty response');
+      }
 
-    final String response;
-    try {
-      response = await _sendWithRetry(request, crawlConfig);
+      _ensureCaptchaNotDetected(response, crawlConfig);
+      return response;
     } on CaptchaRequiredException {
       rethrow;
     } catch (error, stackTrace) {
-      _logFailure(crawlConfig, 'search request', error, stackTrace);
-      throw SearchErrorException(crawlConfig.name, cause: error);
-    }
-
-    try {
-      final List<SearchResourcesItem> items;
-      if (crawlConfig.usesApiSearch) {
-        items = ApiCrawler.parseSearch(response, crawlConfig.searchApiConfig);
-      } else {
-        items = await HtmlCrawler.parseSearch(response, crawlConfig);
-      }
-      if (items.isEmpty) {
-        throw NoResultException(crawlConfig.name);
-      }
-      return items;
-    } on NoResultException {
-      rethrow;
-    } catch (error, stackTrace) {
-      _logFailure(crawlConfig, 'search response parsing', error, stackTrace);
-      throw SearchErrorException(crawlConfig.name, cause: error);
-    }
-  }
-
-  /// 剧集资源列表
-  static Future<List<CrawlerEpisodeResourcesItem>> fetchEpisodeResources(
-    String sourceUrl,
-    CrawlConfigItem crawlConfig,
-  ) async {
-    final PreparedRuleRequest request;
-    try {
-      request = crawlConfig.usesApiChapter
-          ? _prepareApiChapterRequest(sourceUrl, crawlConfig)
-          : _prepareXPathChapterRequest(sourceUrl, crawlConfig);
-    } catch (error, stackTrace) {
-      _logFailure(
-          crawlConfig, 'chapter request preparation', error, stackTrace);
-      throw ChapterErrorException(crawlConfig.name, cause: error);
-    }
-
-    final String response;
-    try {
-      response = await _sendWithRetry(request, crawlConfig);
-    } on CaptchaRequiredException {
-      rethrow;
-    } catch (error, stackTrace) {
-      _logFailure(crawlConfig, 'chapter request', error, stackTrace);
-      throw ChapterErrorException(crawlConfig.name, cause: error);
-    }
-
-    try {
-      if (crawlConfig.usesApiChapter) {
-        return ApiCrawler.parseChapters(
-          response,
-          crawlConfig.chapterApiConfig,
-          source: sourceUrl,
-          baseUrl: crawlConfig.baseUrl,
+      if (_isCaptchaChallengeResponse(error, crawlConfig)) {
+        _logger.w(
+          'RuleRequest: ${crawlConfig.name} '
+          'detected captcha challenge response',
         );
+        throw CaptchaRequiredException(crawlConfig.name);
       }
-      return await HtmlCrawler.parseEpisodeResources(response, crawlConfig);
-    } catch (error, stackTrace) {
-      _logFailure(crawlConfig, 'chapter response parsing', error, stackTrace);
-      throw ChapterErrorException(crawlConfig.name, cause: error);
-    }
-  }
-
-  // ---------------------------------------------------------------------------
-  // 请求准备
-  // ---------------------------------------------------------------------------
-
-  static PreparedRuleRequest _prepareXPathSearchRequest(
-    String keyword,
-    CrawlConfigItem crawlConfig,
-  ) {
-    final queryUrl = crawlConfig.searchUrl.replaceFirst(
-      '{keyword}',
-      Uri.encodeQueryComponent(keyword),
-    );
-    return PreparedRuleRequest(
-      method: 'GET',
-      url: queryUrl,
-      includeCookies: true,
-    );
-  }
-
-  static PreparedRuleRequest _prepareXPathChapterRequest(
-    String sourceUrl,
-    CrawlConfigItem crawlConfig,
-  ) {
-    // XPath 章节请求历史上不带 Cookie，只有搜索请求带。
-    return PreparedRuleRequest(
-      method: 'GET',
-      url: resolveSourceUrl(crawlConfig.baseUrl, sourceUrl),
-    );
-  }
-
-  static PreparedRuleRequest _prepareApiSearchRequest(
-    String keyword,
-    CrawlConfigItem crawlConfig,
-  ) {
-    return _prepareApiRequest(
-      crawlConfig.searchApiConfig.request,
-      <String, Object?>{'keyword': keyword},
-    );
-  }
-
-  static PreparedRuleRequest _prepareApiChapterRequest(
-    String sourceUrl,
-    CrawlConfigItem crawlConfig,
-  ) {
-    return _prepareApiRequest(
-      crawlConfig.chapterApiConfig.request,
-      <String, Object?>{'source': sourceUrl},
-    );
-  }
-
-  static PreparedRuleRequest _prepareApiRequest(
-    ApiRequestConfig request,
-    Map<String, Object?> variables,
-  ) {
-    final method = request.method.toUpperCase();
-    if (method != 'GET' && method != 'POST') {
-      throw ApiRuleFormatException('仅支持 GET/POST，当前为 $method');
-    }
-
-    final templateUrl = request.url.trim();
-    if (templateUrl.isEmpty) {
-      throw const ApiRuleFormatException('API 请求 URL 不能为空');
-    }
-
-    final url = ApiCrawler.renderTemplate(templateUrl, variables, encode: true);
-    final uri = Uri.tryParse(url);
-    if (uri == null || !uri.hasScheme || uri.host.isEmpty) {
-      throw ApiRuleFormatException('API 请求 URL 无效：$url');
-    }
-
-    final hasBody = method == 'POST' && request.bodyType != ApiBodyType.none;
-    return PreparedRuleRequest(
-      method: method,
-      url: url,
-      headers: ApiCrawler.renderMap(request.headers, variables),
-      query: ApiCrawler.renderMap(request.query, variables),
-      bodyType: request.bodyType,
-      body: hasBody ? ApiCrawler.renderValue(request.body, variables) : null,
-      includeCookies: true,
-    );
-  }
-
-  // ---------------------------------------------------------------------------
-  // 发送
-  // ---------------------------------------------------------------------------
-
-  static Future<String> _sendWithRetry(
-    PreparedRuleRequest request,
-    CrawlConfigItem crawlConfig,
-  ) async {
-    Object? lastError;
-    StackTrace? lastStackTrace;
-
-    for (var attempt = 1; attempt <= _maxAttempts; attempt++) {
-      try {
-        final response = await transport(request, crawlConfig);
-        if (response.trim().isEmpty) {
-          throw StateError('empty response');
-        }
-
-        _ensureCaptchaNotDetected(response, crawlConfig);
-        return response;
-      } on CaptchaRequiredException {
-        rethrow;
-      } catch (error, stackTrace) {
-        if (_isCaptchaChallengeResponse(error, crawlConfig)) {
-          logger.w(
-            'RuleRequest: ${crawlConfig.name} '
-            'detected captcha challenge response',
-          );
-          throw CaptchaRequiredException(crawlConfig.name);
-        }
-        lastError = error;
-        lastStackTrace = stackTrace;
-        logger.w(
-          'RuleRequest: ${crawlConfig.name} request attempt '
-          '$attempt/$_maxAttempts failed: ${request.url}',
-          error: error,
-        );
-        if (attempt < _maxAttempts) {
-          await Future<void>.delayed(
-            Duration(milliseconds: 300 * attempt),
-          );
-        }
+      lastError = error;
+      lastStackTrace = stackTrace;
+      _logger.w(
+        'RuleRequest: ${crawlConfig.name} request attempt '
+        '$attempt/$_maxAttempts failed: ${request.url}',
+        error: error,
+      );
+      if (attempt < _maxAttempts) {
+        await Future<void>.delayed(Duration(milliseconds: 300 * attempt));
       }
     }
-
-    Error.throwWithStackTrace(lastError!, lastStackTrace!);
   }
 
-  static Future<String> _send(
-    PreparedRuleRequest request,
-    CrawlConfigItem crawlConfig,
-  ) async {
-    final cookie = request.includeCookies
-        ? await _cookieHeaderFor(request.url, crawlConfig.name)
-        : '';
+  Error.throwWithStackTrace(lastError!, lastStackTrace!);
+}
 
-    // 规则自定义头最后合并，key 统一小写，便于覆盖上面的默认值。
-    final headers = <String, dynamic>{
-      'referer': '${crawlConfig.baseUrl}/',
-      'Accept-Language': Utils.getRandomAcceptedLanguage(),
-      'Connection': 'keep-alive',
-      Constants.userAgentName: Utils.getRandomUA(),
-      if (cookie.isNotEmpty) 'Cookie': cookie,
-      for (final entry in request.headers.entries)
-        entry.key.toLowerCase(): entry.value,
-    };
+Future<String> _send(
+  PreparedRuleRequest request,
+  CrawlConfigItem crawlConfig,
+) async {
+  final cookie = request.includeCookies
+      ? await _cookieHeaderFor(request.url, crawlConfig.name)
+      : '';
 
-    if (request.method == 'POST') {
-      if (request.bodyType == ApiBodyType.json) {
-        headers.putIfAbsent('content-type', () => 'application/json');
-      } else if (request.bodyType == ApiBodyType.form) {
-        headers.putIfAbsent(
-          'content-type',
-          () => 'application/x-www-form-urlencoded',
-        );
-      }
-    }
+  // 规则自定义头最后合并，key 统一小写，便于覆盖上面的默认值。
+  final headers = <String, dynamic>{
+    'referer': '${crawlConfig.baseUrl}/',
+    'Accept-Language': Utils.getRandomAcceptedLanguage(),
+    'Connection': 'keep-alive',
+    Constants.userAgentName: Utils.getRandomUA(),
+    if (cookie.isNotEmpty) 'Cookie': cookie,
+    for (final entry in request.headers.entries)
+      entry.key.toLowerCase(): entry.value,
+  };
 
-    return PluginSiteClient.instance.requestText(
-      request.url,
-      method: request.method,
-      headers: headers,
-      queryParameters: request.query,
-      data: request.method == 'POST' ? request.body : null,
-    );
-  }
-
-  static void _ensureCaptchaNotDetected(
-    String response,
-    CrawlConfigItem crawlConfig,
-  ) {
-    if (CaptchaDetector.detects(response, crawlConfig.antiCrawlerConfig)) {
-      logger.w('RuleRequest: ${crawlConfig.name} detected captcha challenge');
-      throw CaptchaRequiredException(crawlConfig.name);
+  if (request.method == 'POST') {
+    if (request.bodyType == ApiBodyType.json) {
+      headers.putIfAbsent('content-type', () => 'application/json');
+    } else if (request.bodyType == ApiBodyType.form) {
+      headers.putIfAbsent(
+        'content-type',
+        () => 'application/x-www-form-urlencoded',
+      );
     }
   }
 
-  /// 判断一次失败是否其实是反爬挑战页。
-  ///
-  /// Dio 会在非 2xx 时先抛出异常，被保护的站点常以 403/429/503 返回挑战页，
-  /// 因此解析层没有机会看到响应体；这里复用被保留的 Dio 响应体与
-  /// `cf-mitigated: challenge` 头来补上这次判断。
-  static bool _isCaptchaChallengeResponse(
-    Object error,
-    CrawlConfigItem crawlConfig,
-  ) {
-    if (!crawlConfig.antiCrawlerConfig.enabled) return false;
-    if (error is! NetworkException ||
-        error.type != NetworkExceptionType.badResponse) {
-      return false;
-    }
+  return PluginSiteClient.instance.requestText(
+    request.url,
+    method: request.method,
+    headers: headers,
+    queryParameters: request.query,
+    data: request.method == 'POST' ? request.body : null,
+  );
+}
 
-    final rawError = error.rawError;
-    if (rawError is! DioException) return false;
+void _ensureCaptchaNotDetected(
+  String response,
+  CrawlConfigItem crawlConfig,
+) {
+  if (CaptchaDetector.detects(response, crawlConfig.antiCrawlerConfig)) {
+    _logger.w('RuleRequest: ${crawlConfig.name} detected captcha challenge');
+    throw CaptchaRequiredException(crawlConfig.name);
+  }
+}
 
-    final response = rawError.response;
-    final cfMitigated = response?.headers.value('cf-mitigated');
-    if (cfMitigated?.toLowerCase() == 'challenge') return true;
-
-    final data = response?.data;
-    final raw = data is String ? data : data?.toString() ?? '';
-    if (raw.trim().isEmpty) return false;
-
-    try {
-      return CaptchaDetector.detects(raw, crawlConfig.antiCrawlerConfig);
-    } catch (_) {
-      return false;
-    }
+/// 判断一次失败是否其实是反爬挑战页。
+///
+/// Dio 会在非 2xx 时先抛出异常，被保护的站点常以 403/429/503 返回挑战页，
+/// 因此解析层没有机会看到响应体；这里复用被保留的 Dio 响应体与
+/// `cf-mitigated: challenge` 头来补上这次判断。
+bool _isCaptchaChallengeResponse(
+  Object error,
+  CrawlConfigItem crawlConfig,
+) {
+  if (!crawlConfig.antiCrawlerConfig.enabled) return false;
+  if (error is! NetworkException ||
+      error.type != NetworkExceptionType.badResponse) {
+    return false;
   }
 
-  static void _logFailure(
-    CrawlConfigItem crawlConfig,
-    String phase,
-    Object error,
-    StackTrace stackTrace,
-  ) {
-    logger.w(
-      'RuleRequest: ${crawlConfig.name} $phase failed',
-      error: error,
-      stackTrace: stackTrace,
-    );
-  }
+  final rawError = error.rawError;
+  if (rawError is! DioException) return false;
 
-  static Future<String> _cookieHeaderFor(String url, String name) async {
-    if (!CookieManager.instance.hasCookies(name)) return '';
-    final uri = Uri.tryParse(url);
-    if (uri == null) return '';
-    try {
-      final cookies =
-          await CookieManager.instance.getJar(name).loadForRequest(uri);
-      if (cookies.isEmpty) return '';
-      return cookies.map((c) => '${c.name}=${c.value}').join('; ');
-    } catch (_) {
-      return '';
-    }
+  final response = rawError.response;
+  final cfMitigated = response?.headers.value('cf-mitigated');
+  if (cfMitigated?.toLowerCase() == 'challenge') return true;
+
+  final data = response?.data;
+  final raw = data is String ? data : data?.toString() ?? '';
+  if (raw.trim().isEmpty) return false;
+
+  try {
+    return CaptchaDetector.detects(raw, crawlConfig.antiCrawlerConfig);
+  } catch (_) {
+    return false;
+  }
+}
+
+Future<String> _cookieHeaderFor(String url, String name) async {
+  if (!CookieManager.instance.hasCookies(name)) return '';
+  final uri = Uri.tryParse(url);
+  if (uri == null) return '';
+  try {
+    final cookies =
+        await CookieManager.instance.getJar(name).loadForRequest(uri);
+    if (cookies.isEmpty) return '';
+    return cookies.map((c) => '${c.name}=${c.value}').join('; ');
+  } catch (_) {
+    return '';
   }
 }

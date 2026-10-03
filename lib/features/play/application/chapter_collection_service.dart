@@ -1,5 +1,5 @@
 import 'package:anime_flow/core/crawler/item/crawler_config_item.dart';
-import 'package:anime_flow/core/crawler/rule_request.dart';
+import 'package:anime_flow/core/crawler/rule_engine.dart';
 import 'package:anime_flow/core/logger/logger.dart';
 import 'package:anime_flow/shared/models/player/play/video/episode_resources_item.dart';
 
@@ -50,10 +50,12 @@ class ChapterCollectionResult {
 /// 不影响其它候选——否则一个异常条目会让整个数据源没有任何结果。
 /// 需要人工验证时直接抛出 [CaptchaRequiredException]，由上层切换验证流程。
 class ChapterCollectionService {
-  ChapterCollectionService({ChapterFetcher? fetcher})
-      : _fetch = fetcher ?? RuleRequest.fetchEpisodeResources;
+  ChapterCollectionService({ChapterFetcher? fetcher, RuleEngine? engine})
+      : _fetch = fetcher,
+        _engine = engine ?? RuleEngine();
 
-  final ChapterFetcher _fetch;
+  final ChapterFetcher? _fetch;
+  final RuleEngine _engine;
   final LiggLogger _logger = LiggLogger();
 
   Future<ChapterCollectionResult> collect({
@@ -70,7 +72,7 @@ class ChapterCollectionService {
 
       final List<CrawlerEpisodeResourcesItem> chapters;
       try {
-        chapters = await _fetch(candidate.link, config);
+        chapters = await _fetchChapters(candidate.link, config);
       } on CaptchaRequiredException {
         // 验证码要中断整条链路，不能只跳过当前条目。
         rethrow;
@@ -104,5 +106,14 @@ class ChapterCollectionService {
       failedCount: failedCount,
       lastError: lastError,
     );
+  }
+
+  Future<List<CrawlerEpisodeResourcesItem>> _fetchChapters(
+    String sourceUrl,
+    CrawlConfigItem config,
+  ) {
+    final fetcher = _fetch;
+    if (fetcher != null) return fetcher(sourceUrl, config);
+    return _engine.fetchEpisodeResources(sourceUrl: sourceUrl, config: config);
   }
 }

@@ -2,7 +2,7 @@ import 'dart:async';
 import 'dart:convert';
 
 import 'package:anime_flow/core/crawler/item/anti_crawler_config.dart';
-import 'package:anime_flow/core/crawler/api_crawler.dart' show renderKeywordUrl;
+import 'package:anime_flow/core/crawler/captcha_page_url.dart';
 import 'package:anime_flow/features/play/presentation/providers/captcha_provider.dart';
 import 'package:anime_flow/features/play/presentation/providers/video_source_provider.dart';
 import 'package:anime_flow/app/localization/app_localizations.dart';

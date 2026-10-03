@@ -5,7 +5,9 @@ import 'package:anime_flow/core/crawler/api_crawler.dart';
 import 'package:anime_flow/core/crawler/item/api_rule_config.dart';
 import 'package:anime_flow/core/crawler/item/crawler_config_item.dart';
 import 'package:anime_flow/core/crawler/rule_api_level.dart';
+import 'package:anime_flow/core/logger/logger.dart';
 import 'package:anime_flow/features/settings/presentation/pages/plugins/plugin_form_controller.dart';
+import 'package:anime_flow/features/settings/presentation/pages/plugins/plugin_form_validation.dart';
 import 'package:anime_flow/features/settings/presentation/pages/plugins/plugin_form_view.dart';
 import 'package:anime_flow/features/source/application/providers/source_repository_provider.dart';
 import 'package:anime_flow/features/source/data/repositories/source_repository.dart';
@@ -93,7 +95,13 @@ class _AddPluginsPageState extends ConsumerState<AddPluginsPage> {
 
       await sourceRepository.saveSource(item, originalName: _originalKey);
       return true;
-    } catch (e) {
+    } catch (e, stackTrace) {
+      // 保存失败同样进错误日志：规则问题不该只在页面上闪一下。
+      LiggLogger().e(
+        'AddPlugins: 保存规则失败',
+        error: e,
+        stackTrace: stackTrace,
+      );
       if (mounted) {
         final l10n = AppLocalizations.of(context);
         NotificationToast.show(
@@ -168,8 +176,13 @@ class _AddPluginsPageState extends ConsumerState<AddPluginsPage> {
         _originalApi = config.api;
         _form.loadFrom(config);
       });
-    } catch (error) {
+    } catch (error, stackTrace) {
       if (!mounted) return;
+      LiggLogger().e(
+        'AddPlugins: 导入规则失败',
+        error: error,
+        stackTrace: stackTrace,
+      );
       NotificationToast.show(
         l10n.pluginImportFailed(error.toString()),
         title: l10n.pastePlugin,

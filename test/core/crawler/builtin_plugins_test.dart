@@ -5,6 +5,7 @@ import 'package:anime_flow/core/crawler/api_crawler.dart';
 import 'package:anime_flow/core/crawler/item/api_rule_config.dart';
 import 'package:anime_flow/core/crawler/item/crawler_config_item.dart';
 import 'package:anime_flow/core/crawler/rule_api_level.dart';
+import 'package:anime_flow/core/crawler/rule_template.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 /// 读取随应用发布的内置规则（测试工作目录为包根目录）。
@@ -102,7 +103,7 @@ void main() {
 
     test('请求体中的占位符可正确渲染', () {
       expect(
-        ApiCrawler.renderValue(
+        RuleTemplate.renderValue(
           plugin.searchApiConfig.request.body,
           <String, Object?>{'keyword': '巨人'},
         ),
@@ -113,7 +114,7 @@ void main() {
         },
       );
       expect(
-        ApiCrawler.renderValue(
+        RuleTemplate.renderValue(
           plugin.chapterApiConfig.request.body,
           <String, Object?>{'source': '1548'},
         ),

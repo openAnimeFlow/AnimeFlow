@@ -55,7 +55,12 @@ class PluginFormView {
         for (final index in PluginFormIndex.xpathSearch)
           PluginFormFields.xpathFieldTile(context, form, index)
       else ...[
-        ..._apiRequestFields(context, form, form.searchRequest),
+        ..._apiRequestFields(
+          context,
+          form,
+          form.searchRequest,
+          isSearch: true,
+        ),
         PluginFormFields.labeledField(
           context,
           controller: form.apiListPath,
@@ -105,7 +110,12 @@ class PluginFormView {
     return [
       PluginFormFields.sectionTitle(context, l10n.sectionChapter),
       modeSelector,
-      ..._apiRequestFields(context, form, form.chapterRequest),
+      ..._apiRequestFields(
+        context,
+        form,
+        form.chapterRequest,
+        isSearch: false,
+      ),
       PluginFormFields.dropdownField<String>(
         context,
         label: l10n.chapterFormat,
@@ -219,10 +229,11 @@ class PluginFormView {
   static List<Widget> _apiRequestFields(
     BuildContext context,
     PluginFormController form,
-    ApiRequestControllers target,
-  ) {
+    ApiRequestControllers target, {
+    required bool isSearch,
+  }) {
     final l10n = AppLocalizations.of(context);
-    final prefix = identical(target, form.searchRequest) ? 'search' : 'chapter';
+    final prefix = isSearch ? 'search' : 'chapter';
 
     return [
       PluginFormFields.dropdownField<String>(

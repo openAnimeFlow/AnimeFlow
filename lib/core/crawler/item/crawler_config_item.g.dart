@@ -29,13 +29,18 @@ class CrawlConfigItemAdapter extends TypeAdapter<CrawlConfigItem> {
       lineList: fields[9] as String,
       episode: fields[10] as String,
       antiCrawlerConfig: fields[11] as AntiCrawlerConfig?,
+      searchMode: fields[12] as String?,
+      chapterMode: fields[13] as String?,
+      searchApiConfig: fields[14] as ApiSearchConfig?,
+      chapterApiConfig: fields[15] as ApiChapterConfig?,
+      api: fields[16] as String?,
     );
   }
 
   @override
   void write(BinaryWriter writer, CrawlConfigItem obj) {
     writer
-      ..writeByte(12)
+      ..writeByte(17)
       ..writeByte(0)
       ..write(obj.version)
       ..writeByte(1)
@@ -59,7 +64,17 @@ class CrawlConfigItemAdapter extends TypeAdapter<CrawlConfigItem> {
       ..writeByte(10)
       ..write(obj.episode)
       ..writeByte(11)
-      ..write(obj.antiCrawlerConfig);
+      ..write(obj.antiCrawlerConfig)
+      ..writeByte(12)
+      ..write(obj.searchMode)
+      ..writeByte(13)
+      ..write(obj.chapterMode)
+      ..writeByte(14)
+      ..write(obj.searchApiConfig)
+      ..writeByte(15)
+      ..write(obj.chapterApiConfig)
+      ..writeByte(16)
+      ..write(obj.api);
   }
 
   @override

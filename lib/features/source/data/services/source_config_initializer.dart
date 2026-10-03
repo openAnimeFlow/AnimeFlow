@@ -1,6 +1,7 @@
 import 'dart:convert';
 
-import 'package:anime_flow/core/crawler/itme/crawler_config_item.dart';
+import 'package:anime_flow/core/crawler/item/crawler_config_item.dart';
+import 'package:anime_flow/core/crawler/rule_api_level.dart';
 import 'package:anime_flow/core/logger/logger.dart';
 import 'package:anime_flow/core/utils/utils.dart';
 import 'package:anime_flow/features/source/data/datasources/source_local_datasource.dart';
@@ -32,6 +33,13 @@ class SourceConfigInitializer {
         final config = CrawlConfigItem.fromJson(
           Map<String, dynamic>.from(json),
         );
+        if (!config.isRuleCompatible) {
+          _logger.w(
+            '跳过不兼容的内置配置：'
+            '${RuleApiLevel.describe(config.api, ruleName: config.name)}',
+          );
+          continue;
+        }
         final assetVersion = config.version;
         final localConfig = await _localDataSource.loadConfig(config.name);
 

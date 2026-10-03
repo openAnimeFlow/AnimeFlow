@@ -3030,7 +3030,7 @@ abstract class AppLocalizations {
   ///
   /// In zh_Hans, this message translates to:
   /// **'下载插件 \"{name}\" 时发生错误：{error}'**
-  String pluginDownloadFailed(Object error, Object name);
+  String pluginDownloadFailed(Object name, Object error);
 
   /// No description provided for @updateSuccess.
   ///
@@ -3048,7 +3048,7 @@ abstract class AppLocalizations {
   ///
   /// In zh_Hans, this message translates to:
   /// **'更新插件 \"{name}\" 时发生错误：{error}'**
-  String pluginUpdateFailed(Object error, Object name);
+  String pluginUpdateFailed(Object name, Object error);
 
   /// No description provided for @sharePlugin.
   ///
@@ -3066,7 +3066,7 @@ abstract class AppLocalizations {
   ///
   /// In zh_Hans, this message translates to:
   /// **'分享插件 \"{name}\" 失败：{error}'**
-  String pluginShareFailed(Object error, Object name);
+  String pluginShareFailed(Object name, Object error);
 
   /// No description provided for @pluginImported.
   ///
@@ -3102,7 +3102,7 @@ abstract class AppLocalizations {
   ///
   /// In zh_Hans, this message translates to:
   /// **'复制插件 \"{name}\" 失败：{error}'**
-  String pluginCopyFailed(Object error, Object name);
+  String pluginCopyFailed(Object name, Object error);
 
   /// No description provided for @downloadSources.
   ///
@@ -3156,7 +3156,7 @@ abstract class AppLocalizations {
   ///
   /// In zh_Hans, this message translates to:
   /// **'版本：{version} - {date}'**
-  String pluginVersionDate(Object date, Object version);
+  String pluginVersionDate(Object version, Object date);
 
   /// No description provided for @collectionSyncTitle.
   ///
@@ -4034,6 +4034,258 @@ abstract class AppLocalizations {
   /// In zh_Hans, this message translates to:
   /// **'条目 {id}'**
   String syncSubject(int id);
+
+  /// No description provided for @sectionBasic.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'基础信息'**
+  String get sectionBasic;
+
+  /// No description provided for @sectionSearch.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'搜索配置'**
+  String get sectionSearch;
+
+  /// No description provided for @sectionChapter.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'章节配置'**
+  String get sectionChapter;
+
+  /// No description provided for @searchModeLabel.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'搜索模式'**
+  String get searchModeLabel;
+
+  /// No description provided for @chapterModeLabel.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'章节模式'**
+  String get chapterModeLabel;
+
+  /// No description provided for @requestMethod.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'请求方法'**
+  String get requestMethod;
+
+  /// No description provided for @requestUrl.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'请求地址'**
+  String get requestUrl;
+
+  /// No description provided for @requestHeaders.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'请求头（JSON）'**
+  String get requestHeaders;
+
+  /// No description provided for @requestQuery.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'查询参数（JSON）'**
+  String get requestQuery;
+
+  /// No description provided for @requestBodyType.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'请求体类型'**
+  String get requestBodyType;
+
+  /// No description provided for @requestBody.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'请求体（JSON）'**
+  String get requestBody;
+
+  /// No description provided for @bodyTypeNone.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'无'**
+  String get bodyTypeNone;
+
+  /// No description provided for @bodyTypeJson.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'JSON'**
+  String get bodyTypeJson;
+
+  /// No description provided for @bodyTypeForm.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'表单'**
+  String get bodyTypeForm;
+
+  /// No description provided for @apiListPath.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'搜索结果列表 JSONPath'**
+  String get apiListPath;
+
+  /// No description provided for @apiNamePath.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'名称 JSONPath'**
+  String get apiNamePath;
+
+  /// No description provided for @apiSourcePath.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'链接 JSONPath'**
+  String get apiSourcePath;
+
+  /// No description provided for @chapterFormat.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'响应格式'**
+  String get chapterFormat;
+
+  /// No description provided for @chapterFormatNested.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'嵌套结构'**
+  String get chapterFormatNested;
+
+  /// No description provided for @chapterFormatDelimited.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'分隔符字符串'**
+  String get chapterFormatDelimited;
+
+  /// No description provided for @apiRoadsPath.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'线路列表 JSONPath'**
+  String get apiRoadsPath;
+
+  /// No description provided for @apiRoadNamePath.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'线路名称 JSONPath'**
+  String get apiRoadNamePath;
+
+  /// No description provided for @apiEpisodesPath.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'剧集列表 JSONPath'**
+  String get apiEpisodesPath;
+
+  /// No description provided for @apiEpisodeNamePath.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'剧集名称 JSONPath'**
+  String get apiEpisodeNamePath;
+
+  /// No description provided for @apiEpisodeUrlPath.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'剧集地址 JSONPath'**
+  String get apiEpisodeUrlPath;
+
+  /// No description provided for @apiRoadNamesPath.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'线路名称字段 JSONPath'**
+  String get apiRoadNamesPath;
+
+  /// No description provided for @apiRoadEpisodesPath.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'剧集内容字段 JSONPath'**
+  String get apiRoadEpisodesPath;
+
+  /// No description provided for @apiRoadSeparator.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'线路分隔符'**
+  String get apiRoadSeparator;
+
+  /// No description provided for @apiEpisodeSeparator.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'剧集分隔符'**
+  String get apiEpisodeSeparator;
+
+  /// No description provided for @apiFieldSeparator.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'字段分隔符'**
+  String get apiFieldSeparator;
+
+  /// No description provided for @apiVariables.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'变量（JSON）'**
+  String get apiVariables;
+
+  /// No description provided for @apiEpisodePage.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'启用播放页模板'**
+  String get apiEpisodePage;
+
+  /// No description provided for @apiEpisodePageUrl.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'播放页地址模板'**
+  String get apiEpisodePageUrl;
+
+  /// No description provided for @apiEpisodePageQuery.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'播放页查询参数（JSON）'**
+  String get apiEpisodePageQuery;
+
+  /// No description provided for @captchaDetectType.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'验证页检测方式'**
+  String get captchaDetectType;
+
+  /// No description provided for @captchaDetectValue.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'验证页检测内容'**
+  String get captchaDetectValue;
+
+  /// No description provided for @captchaPageUrl.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'验证页地址'**
+  String get captchaPageUrl;
+
+  /// No description provided for @captchaDetectText.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'文本'**
+  String get captchaDetectText;
+
+  /// No description provided for @captchaDetectRegex.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'正则'**
+  String get captchaDetectRegex;
+
+  /// No description provided for @invalidJsonFormat.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'JSON 格式不正确'**
+  String get invalidJsonFormat;
+
+  /// No description provided for @pluginRequiresNewerClient.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'插件 \"{name}\" 需要更新 AnimeFlow 后才能使用'**
+  String pluginRequiresNewerClient(Object name);
+
+  /// No description provided for @pluginNeedsNewerClient.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'需要更新客户端'**
+  String get pluginNeedsNewerClient;
 }
 
 class _AppLocalizationsDelegate

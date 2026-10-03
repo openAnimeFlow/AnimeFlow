@@ -1,6 +1,7 @@
 import 'dart:convert';
 
-import 'package:anime_flow/core/crawler/itme/crawler_config_item.dart';
+import 'package:anime_flow/core/crawler/item/crawler_config_item.dart';
+import 'package:anime_flow/core/crawler/rule_api_level.dart';
 import 'package:anime_flow/core/constants/storage_key.dart';
 import 'package:anime_flow/core/network/api/api.dart';
 import 'package:anime_flow/core/network/api_path.dart';
@@ -8,6 +9,29 @@ import 'package:anime_flow/core/settings/app_settings.dart';
 import 'package:anime_flow/core/utils/utils.dart';
 import 'package:anime_flow/features/source/data/datasources/source_local_datasource.dart';
 import 'package:flutter/foundation.dart';
+
+/// 规则下载/更新失败的原因。
+enum PluginInstallFailure {
+  /// 规则要求的客户端版本高于当前客户端。
+  requiresNewerClient,
+
+  /// 规则内容不合法（JSON 格式错误、字段非法等）。
+  invalidRule,
+}
+
+/// 规则下载/更新失败。
+///
+/// [failure] 供 UI 区分提示，[message] 是可读原因；
+/// 网络类错误不会包装成本异常，仍按原异常向上抛。
+class PluginInstallException implements Exception {
+  const PluginInstallException(this.failure, this.message);
+
+  final PluginInstallFailure failure;
+  final String message;
+
+  @override
+  String toString() => message;
+}
 
 /// 数据源持久层的统一入口。
 class SourceRepository {
@@ -105,18 +129,32 @@ class SourceRepository {
     }
 
     final raw = await Api.getResources(downloadUrl);
-    final json = raw is String ? jsonDecode(raw) : raw;
-    if (json is! Map) {
-      throw const FormatException('插件配置格式无效');
+    final Map<String, dynamic> json;
+    try {
+      final decoded = raw is String ? jsonDecode(raw) : raw;
+      if (decoded is! Map) {
+        throw const FormatException('插件配置必须是 JSON 对象');
+      }
+      json = Map<String, dynamic>.from(decoded);
+    } on FormatException catch (error) {
+      throw PluginInstallException(
+        PluginInstallFailure.invalidRule,
+        error.message,
+      );
     }
 
-    final data = CrawlConfigItem.fromJson(Map<String, dynamic>.from(json));
-    await saveSource(
-      CrawlConfigItem.fromJson({
-        ...data.toJson(),
-        'version': catalogVersion,
-      }),
-    );
+    final data = CrawlConfigItem.fromJson(json);
+    final compatibility = data.ruleCompatibility;
+    if (compatibility != RuleCompatibility.compatible) {
+      throw PluginInstallException(
+        compatibility == RuleCompatibility.requiresNewerClient
+            ? PluginInstallFailure.requiresNewerClient
+            : PluginInstallFailure.invalidRule,
+        RuleApiLevel.describe(data.api, ruleName: data.name),
+      );
+    }
+    // 目录版本号是这次下载的权威版本，覆盖规则文件里自带的值。
+    await saveSource(data.copyWith(version: catalogVersion));
   }
 
   Future<void> deleteSource(String name) async {

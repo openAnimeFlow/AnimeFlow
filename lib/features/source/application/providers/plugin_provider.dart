@@ -1,6 +1,7 @@
 import 'dart:convert';
 
 import 'package:anime_flow/core/constants/storage_key.dart';
+import 'package:anime_flow/core/crawler/rule_api_level.dart';
 import 'package:anime_flow/core/network/api/api.dart';
 import 'package:anime_flow/core/network/api_path.dart';
 import 'package:anime_flow/core/settings/app_settings.dart';
@@ -17,6 +18,7 @@ class PluginCatalogItem {
     required this.version,
     required this.icon,
     required this.updateTime,
+    this.api,
   });
 
   factory PluginCatalogItem.fromJson(Map<String, dynamic> json) {
@@ -26,6 +28,7 @@ class PluginCatalogItem {
       version: json['version'].toString(),
       icon: json['icon'] as String?,
       updateTime: json['updateTime'],
+      api: json['api']?.toString(),
     );
   }
 
@@ -34,6 +37,14 @@ class PluginCatalogItem {
   final String version;
   final String? icon;
   final dynamic updateTime;
+
+  /// 规则要求的客户端规则 API 级别。
+  ///
+  /// 目录未提供该字段时为 null，此时按兼容处理，真正的拦截在下载后由
+  /// `SourceRepository` 依规则内容判断。
+  final String? api;
+
+  bool get requiresNewerClient => RuleApiLevel.requiresNewerClient(api);
 }
 
 bool _isPluginMirrorEnabled() {

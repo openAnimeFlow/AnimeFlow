@@ -129,14 +129,7 @@ class DanmakuChineseConverter {
   ) async {
     try {
       final dataDir = await _ensureDataDir();
-      final config = mode.config!;
-      return await Isolate.run<List<String>>(
-        () => ZhConverter.run(
-          config,
-          (converter) => converter.convertAll(messages),
-          dataDir: dataDir,
-        ),
-      );
+      return await _runInIsolate(mode, dataDir, messages);
     } on Object catch (error, stackTrace) {
       LiggLogger().e(
         '弹幕简繁转换失败，已回退原文',
@@ -145,6 +138,26 @@ class DanmakuChineseConverter {
       );
       return null;
     }
+  }
+
+  /// 真正的 isolate 调用放在静态方法里。
+  ///
+  /// 实例方法中的闭包会把本对象的上下文一并带进 isolate 消息，一旦该上下文
+  /// 里有不可发送的字段（例如持有 `Future` 的 `Logger`），就会抛
+  /// `Illegal argument in isolate message`。静态方法只捕获入参，规避该风险。
+  static Future<List<String>> _runInIsolate(
+    DanmakuChineseMode mode,
+    String dataDir,
+    List<String> messages,
+  ) {
+    final config = mode.config!;
+    return Isolate.run<List<String>>(
+      () => ZhConverter.run(
+        config,
+        (converter) => converter.convertAll(messages),
+        dataDir: dataDir,
+      ),
+    );
   }
 
   void dispose() {

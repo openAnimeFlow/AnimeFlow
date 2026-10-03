@@ -12,6 +12,7 @@ import 'package:anime_flow/shared/widgets/notification_toast.dart';
 import 'package:anime_flow/shared/widgets/ranking.dart';
 import 'package:anime_flow/shared/widgets/star.dart';
 import 'package:anime_flow/shared/widgets/no_more_indicator.dart';
+import 'package:anime_flow/shared/models/enums/collect_type.dart';
 import 'package:anime_flow/shared/models/bangumi/user_collections_item.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -130,6 +131,30 @@ class _CollectionTabView extends ConsumerWidget {
     ref.read(userCollectionsProvider.notifier).loadMore(type);
   }
 
+  /// 处理卡片上的收藏状态切换：调用 provider 并展示保存结果，失败时提示后向上抛出。
+  Future<void> _onCollectTypeChanged(
+    BuildContext context,
+    WidgetRef ref,
+    UserCollectionData collection,
+    CollectType newType,
+  ) async {
+    final l10n = AppLocalizations.of(context);
+    try {
+      final result = await ref
+          .read(userCollectionsProvider.notifier)
+          .updateCollectionType(collection, newType.value);
+      if (context.mounted) {
+        showCollectionSaveNotice(context, result);
+      }
+    } on AnimeFlowApiException catch (e) {
+      NotificationToast.show(e.message, title: l10n.updateFailed);
+      rethrow;
+    } catch (e) {
+      NotificationToast.show(e.toString(), title: l10n.updateFailed);
+      rethrow;
+    }
+  }
+
   bool _shouldTriggerLoadMore(ScrollMetrics metrics) {
     return metrics.pixels >=
             metrics.maxScrollExtent - _loadMoreTriggerDistance ||
@@ -152,7 +177,6 @@ class _CollectionTabView extends ConsumerWidget {
     );
     final collectionsItem = tabState.data;
     _scheduleLoadMoreIfNeeded(context, ref, tabState, collectionsItem);
-    final colorScheme = ColorScheme.of(context);
 
     return Builder(
       builder: (BuildContext context) {
@@ -262,180 +286,15 @@ class _CollectionTabView extends ConsumerWidget {
                           delegate: SliverChildBuilderDelegate(
                             (context, index) {
                               final collection = collectionsItem.data[index];
-                              final displayName = (collection.nameCN == null ||
-                                      collection.nameCN!.isEmpty)
-                                  ? collection.name
-                                  : collection.nameCN!;
-                              return InkWell(
-                                borderRadius:
-                                    const BorderRadius.all(Radius.circular(12)),
-                                onTap: () {
-                                  AnimeInfoRoute.fromExtra(InfoRouteExtra(
-                                    id: collection.id,
-                                    name: displayName,
-                                    image: collection.images.large,
-                                  )).push(context);
-                                },
-                                child: Row(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    AspectRatio(
-                                      aspectRatio: 2 / 3,
-                                      child: AnimationNetworkImage(
-                                        borderRadius: const BorderRadius.all(
-                                            Radius.circular(12)),
-                                        url: collection.images.large,
-                                        fit: BoxFit.cover,
-                                      ),
-                                    ),
-                                    Expanded(
-                                      child: Padding(
-                                        padding: const EdgeInsets.all(5),
-                                        child: Column(
-                                          crossAxisAlignment:
-                                              CrossAxisAlignment.start,
-                                          mainAxisAlignment:
-                                              MainAxisAlignment.start,
-                                          children: [
-                                            Row(
-                                              crossAxisAlignment:
-                                                  CrossAxisAlignment.start,
-                                              children: [
-                                                Expanded(
-                                                  child: Text(
-                                                    displayName,
-                                                    style: const TextStyle(
-                                                      fontWeight:
-                                                          FontWeight.bold,
-                                                      fontSize: 14,
-                                                    ),
-                                                    maxLines: 2,
-                                                    overflow:
-                                                        TextOverflow.ellipsis,
-                                                  ),
-                                                ),
-                                                if (['PENDING', 'AUTH_REQUIRED', 'CONFLICT']
-                                                    .contains(collection.interest.remoteSyncStatus))
-                                                  Tooltip(
-                                                    message: collectionSaveMessage(l10n,
-                                                      CollectionRemoteSyncStatus.parse(collection.interest.remoteSyncStatus)),
-                                                    child: const Padding(
-                                                      padding: EdgeInsets.all(8),
-                                                      child: Icon(Icons.cloud_off_outlined, size: 18),
-                                                    ),
-                                                  ),
-                                                CollectionButton(
-                                                  key: ValueKey(collection.id),
-                                                  collectType:
-                                                      collectTypeFromApiType(
-                                                    collection.interest.type,
-                                                  ),
-                                                  buttonBuilder: (context,
-                                                      label,
-                                                      icon,
-                                                      onPressed,
-                                                      isOpen) {
-                                                    return IconButton(
-                                                      tooltip: label,
-                                                      onPressed: onPressed,
-                                                      padding: EdgeInsets.zero,
-                                                      constraints:
-                                                          const BoxConstraints(
-                                                        minWidth: 40,
-                                                        minHeight: 40,
-                                                      ),
-                                                      icon: AnimatedRotation(
-                                                        turns: isOpen ? 0.5 : 0,
-                                                        duration:
-                                                            const Duration(
-                                                          milliseconds: 180,
-                                                        ),
-                                                        curve:
-                                                            Curves.easeOutCubic,
-                                                        child: const Icon(Icons
-                                                            .expand_more_outlined),
-                                                      ),
-                                                    );
-                                                  },
-                                                  onCollectTypeChanged:
-                                                      (newType) async {
-                                                    try {
-                                                      final result = await ref
-                                                          .read(
-                                                              userCollectionsProvider
-                                                                  .notifier)
-                                                          .updateCollectionType(
-                                                            collection,
-                                                            newType.value,
-                                                          );
-                                                      if (context.mounted) {
-                                                        showCollectionSaveNotice(context, result);
-                                                      }
-                                                    } on AnimeFlowApiException catch (e) {
-                                                      NotificationToast.show(
-                                                        e.message,
-                                                        title:
-                                                            l10n.updateFailed,
-                                                      );
-                                                      rethrow;
-                                                    } catch (e) {
-                                                      NotificationToast.show(
-                                                        e.toString(),
-                                                        title:
-                                                            l10n.updateFailed,
-                                                      );
-                                                      rethrow;
-                                                    }
-                                                  },
-                                                ),
-                                              ],
-                                            ),
-                                            Text(
-                                              collection.info,
-                                              style: TextStyle(
-                                                  fontSize: 12,
-                                                  color: colorScheme
-                                                      .onSurfaceVariant
-                                                      .withValues(alpha: 0.8)),
-                                              maxLines: 2,
-                                              overflow: TextOverflow.ellipsis,
-                                            ),
-                                            const Spacer(),
-                                            Row(
-                                              children: [
-                                                RankingView(
-                                                    ranking:
-                                                        collection.rating.rank),
-                                                if (collection.rating.score >
-                                                    0) ...[
-                                                  const SizedBox(height: 4),
-                                                  Row(
-                                                    children: [
-                                                      StarView(
-                                                          iconSize: 16,
-                                                          score: collection
-                                                              .rating.score),
-                                                      const SizedBox(width: 4),
-                                                      Text(
-                                                        '${collection.rating.score}',
-                                                        style: TextStyle(
-                                                          fontWeight:
-                                                              FontWeight.bold,
-                                                          fontSize: 12,
-                                                          color:
-                                                              Colors.grey[600],
-                                                        ),
-                                                      ),
-                                                    ],
-                                                  ),
-                                                ],
-                                              ],
-                                            )
-                                          ],
-                                        ),
-                                      ),
-                                    ),
-                                  ],
+                              return _CollectionItemCard(
+                                key: ValueKey(collection.id),
+                                collection: collection,
+                                onCollectTypeChanged: (newType) =>
+                                    _onCollectTypeChanged(
+                                  context,
+                                  ref,
+                                  collection,
+                                  newType,
                                 ),
                               );
                             },
@@ -518,5 +377,163 @@ class _CollectionFooter extends StatelessWidget {
     }
 
     return const SizedBox(height: 16);
+  }
+}
+
+/// 条目卡片。
+class _CollectionItemCard extends StatelessWidget {
+  final UserCollectionData collection;
+  final Future<void> Function(CollectType type) onCollectTypeChanged;
+
+  const _CollectionItemCard({
+    super.key,
+    required this.collection,
+    required this.onCollectTypeChanged,
+  });
+
+  /// 观看进度文案：未看过时省略已看集数；连载中（有下一集）总集数带"预计"，否则为"全"；
+  String get _episodeLabel => [
+        if (collection.watchedEpisode > 0) '看过${collection.watchedEpisode}',
+        collection.nextEpisodeAirDate != null
+            ? '预计${collection.totalEpisodes}集'
+            : '全${collection.totalEpisodes}集',
+        if (collection.nextEpisodeAirDate != null) '下一集$_airDateLabel',
+      ].join(' · ');
+
+  /// 下一集播出日期文案：本年只显示 MM-dd，跨年显示完整日期。
+  String get _airDateLabel {
+    final date = collection.nextEpisodeAirDate!;
+    final currentYearPrefix = '${DateTime.now().year}-';
+    return date.startsWith(currentYearPrefix) && date.length >= 10
+        ? date.substring(5)
+        : date;
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
+    final colorScheme = ColorScheme.of(context);
+    final displayName =
+        (collection.nameCN == null || collection.nameCN!.isEmpty)
+            ? collection.name
+            : collection.nameCN!;
+    final syncStatus =
+        CollectionRemoteSyncStatus.parse(collection.interest.remoteSyncStatus);
+
+    return InkWell(
+      borderRadius: const BorderRadius.all(Radius.circular(12)),
+      onTap: () {
+        AnimeInfoRoute.fromExtra(InfoRouteExtra(
+          id: collection.id,
+          name: displayName,
+          image: collection.images.large,
+        )).push(context);
+      },
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          AspectRatio(
+            aspectRatio: 2 / 3,
+            child: AnimationNetworkImage(
+              borderRadius: const BorderRadius.all(Radius.circular(12)),
+              url: collection.images.large,
+              fit: BoxFit.cover,
+            ),
+          ),
+          Expanded(
+            child: Padding(
+              padding: const EdgeInsets.all(5),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisAlignment: MainAxisAlignment.start,
+                children: [
+                  Row(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Expanded(
+                        child: Text(
+                          displayName,
+                          style: const TextStyle(
+                            fontWeight: FontWeight.bold,
+                            fontSize: 14,
+                          ),
+                          maxLines: 2,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      ),
+                      if (syncStatus.needsAttention)
+                        Tooltip(
+                          message: collectionSaveMessage(l10n, syncStatus),
+                          child: const Padding(
+                            padding: EdgeInsets.all(8),
+                            child: Icon(Icons.cloud_off_outlined, size: 18),
+                          ),
+                        ),
+                      CollectionButton(
+                        key: ValueKey(collection.id),
+                        collectType: collectTypeFromApiType(
+                          collection.interest.type,
+                        ),
+                        buttonBuilder:
+                            (context, label, icon, onPressed, isOpen) {
+                          return IconButton(
+                            tooltip: label,
+                            onPressed: onPressed,
+                            padding: EdgeInsets.zero,
+                            constraints: const BoxConstraints(
+                              minWidth: 40,
+                              minHeight: 40,
+                            ),
+                            icon: AnimatedRotation(
+                              turns: isOpen ? 0.5 : 0,
+                              duration: const Duration(milliseconds: 180),
+                              curve: Curves.easeOutCubic,
+                              child: const Icon(Icons.expand_more_outlined),
+                            ),
+                          );
+                        },
+                        onCollectTypeChanged: onCollectTypeChanged,
+                      ),
+                    ],
+                  ),
+                  Text(
+                    _episodeLabel,
+                    style: TextStyle(
+                        color: colorScheme.onSurfaceVariant
+                            .withValues(alpha: 0.8)),
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                  const Spacer(),
+                  Row(
+                    children: [
+                      RankingView(ranking: collection.rating.rank),
+                      if (collection.rating.score > 0) ...[
+                        const SizedBox(height: 4),
+                        Row(
+                          children: [
+                            StarView(
+                                iconSize: 16, score: collection.rating.score),
+                            const SizedBox(width: 4),
+                            Text(
+                              '${collection.rating.score}',
+                              style: TextStyle(
+                                fontWeight: FontWeight.bold,
+                                fontSize: 12,
+                                color: Colors.grey[600],
+                              ),
+                            ),
+                          ],
+                        ),
+                      ],
+                    ],
+                  )
+                ],
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
   }
 }

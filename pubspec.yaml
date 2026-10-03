@@ -96,6 +96,7 @@ dependencies:
   html: ^0.15.6 # 将 HTML 文本解析为可遍历和操作的文档树。
   xpath_selector: ^3.0.2 # 使用 XPath 表达式查询 XML 或 HTML 文档节点。
   xpath_selector_html_parser: ^3.0.1 # 将 HTML 解析器接入 xpath_selector 查询流程。
+  json_path: ^0.9.0 # 按 RFC 9535 使用 JSONPath 表达式读取 JSON 文档中的值。
   antlr4: ^4.13.2 # 提供 ANTLR 4 生成解析器所需的 Dart 运行时。
 
   # 状态管理与导航

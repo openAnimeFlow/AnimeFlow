@@ -1,4 +1,4 @@
-import 'package:anime_flow/core/crawler/itme/crawler_config_item.dart';
+import 'package:anime_flow/core/crawler/item/crawler_config_item.dart';
 import 'package:anime_flow/core/constants/storage_key.dart';
 import 'package:anime_flow/core/settings/app_settings.dart';
 import 'package:anime_flow/core/settings/storage.dart';
@@ -11,7 +11,14 @@ import 'package:hive_ce_flutter/adapters.dart';
 class SourceLocalDataSource {
   Box<CrawlConfigItem> get configBox => Storage.crawlConfigs;
 
-  Listenable get listenable => configBox.listenable();
+  Listenable? _listenable;
+
+  /// 数据源变更通知。
+  ///
+  /// 必须返回**同一个**实例：`configBox.listenable()` 每次调用都会新建一个
+  /// `_BoxListenable`，用后一次拿到的实例去 `removeListener` 无法移除前一次
+  /// 注册的监听，监听会残留并在持有者销毁后继续触发。
+  Listenable get listenable => _listenable ??= configBox.listenable();
 
   Future<List<CrawlConfigItem>> loadConfigs() async {
     return configBox.values.toList();

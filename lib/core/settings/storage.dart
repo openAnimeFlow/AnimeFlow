@@ -1,5 +1,5 @@
 import 'package:anime_flow/core/constants/storage_key.dart';
-import 'package:anime_flow/core/crawler/itme/crawler_config_item.dart';
+import 'package:anime_flow/core/crawler/item/crawler_config_item.dart';
 import 'package:anime_flow/hive_registrar.g.dart';
 import 'package:anime_flow/shared/models/download/download_record.dart';
 import 'package:anime_flow/shared/models/player/play/play_history.dart';

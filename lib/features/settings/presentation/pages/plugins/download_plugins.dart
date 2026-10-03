@@ -3,10 +3,12 @@ import 'dart:math' as math;
 import 'package:anime_flow/core/constants/storage_key.dart';
 import 'package:anime_flow/core/settings/app_settings.dart';
 import 'package:anime_flow/features/source/data/repositories/source_repository.dart';
+import 'package:anime_flow/features/settings/presentation/pages/plugins/plugin_install_message.dart';
 import 'package:anime_flow/features/source/application/providers/source_repository_provider.dart';
 import 'package:anime_flow/core/utils/format_time_util.dart';
 import 'package:anime_flow/core/utils/system_util.dart';
 import 'package:anime_flow/core/utils/utils.dart';
+import 'package:anime_flow/core/logger/logger.dart';
 import 'package:anime_flow/features/source/application/providers/plugin_provider.dart';
 import 'package:anime_flow/shared/widgets/animation_network_image.dart';
 import 'package:anime_flow/shared/widgets/notification_toast.dart';
@@ -62,9 +64,14 @@ class _DownloadPluginsPageState extends ConsumerState<DownloadPluginsPage> {
       });
       NotificationToast.show(l10n.pluginDownloaded(pluginName),
           title: l10n.downloadSuccess);
-    } catch (e) {
+    } catch (e, stackTrace) {
+      LiggLogger().e(
+        'DownloadPlugins: 下载规则 $pluginName 失败',
+        error: e,
+        stackTrace: stackTrace,
+      );
       NotificationToast.show(
-        l10n.pluginDownloadFailed(pluginName, e.toString()),
+        pluginInstallErrorMessage(l10n, pluginName, e, isUpdate: false),
         title: l10n.downloadFailed,
       );
     } finally {
@@ -100,9 +107,14 @@ class _DownloadPluginsPageState extends ConsumerState<DownloadPluginsPage> {
         l10n.pluginUpdated(pluginName, pluginVersion),
         title: l10n.updateSuccess,
       );
-    } catch (e) {
+    } catch (e, stackTrace) {
+      LiggLogger().e(
+        'DownloadPlugins: 更新规则 $pluginName 失败',
+        error: e,
+        stackTrace: stackTrace,
+      );
       NotificationToast.show(
-        l10n.pluginUpdateFailed(pluginName, e.toString()),
+        pluginInstallErrorMessage(l10n, pluginName, e, isUpdate: true),
         title: l10n.updateFailed,
       );
     } finally {
@@ -255,7 +267,14 @@ class _DownloadPluginsPageState extends ConsumerState<DownloadPluginsPage> {
                                                   ),
                                                 ],
                                               ))),
-                                      if (localPlugin == null)
+                                      if (plugin.requiresNewerClient)
+                                        TextButton(
+                                          onPressed: null,
+                                          child: Text(
+                                            l10n.pluginNeedsNewerClient,
+                                          ),
+                                        )
+                                      else if (localPlugin == null)
                                         IconButton(
                                             onPressed: isPluginBusy
                                                 ? null

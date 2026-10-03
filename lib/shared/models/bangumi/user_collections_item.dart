@@ -37,6 +37,12 @@ class UserCollectionData {
   final bool nsfw;
   final ImageFiveItem images;
   final UserCollectionInterest interest;
+  /// 正片总集数；0 表示本地未收录该条目的剧集信息。
+  final int totalEpisodes;
+  /// 当前用户观看到第几集，已按正片集数封顶。
+  final int watchedEpisode;
+  /// 连载中番剧的下一集播出日期（yyyy-MM-dd）。
+  final String? nextEpisodeAirDate;
 
   UserCollectionData({
     required this.id,
@@ -49,6 +55,9 @@ class UserCollectionData {
     required this.nsfw,
     required this.images,
     required this.interest,
+    this.totalEpisodes = 0,
+    this.watchedEpisode = 0,
+    this.nextEpisodeAirDate,
   });
 
   UserCollectionData.fromJson(Map<String, dynamic> json)
@@ -61,7 +70,10 @@ class UserCollectionData {
         locked = json['locked'] ?? false,
         nsfw = json['nsfw'] ?? false,
         images = ImageFiveItem.fromJson(json['images']),
-        interest = UserCollectionInterest.fromJson(json['interest']);
+        interest = UserCollectionInterest.fromJson(json['interest']),
+        totalEpisodes = json['totalEpisodes'] ?? 0,
+        watchedEpisode = json['watchedEpisode'] ?? 0,
+        nextEpisodeAirDate = json['nextEpisodeAirDate'] as String?;
 
   factory UserCollectionData.fromSubject(SubjectsInfoItem subject) {
     final interest = subject.interest;
@@ -75,6 +87,10 @@ class UserCollectionData {
       locked: subject.locked,
       nsfw: subject.nsfw,
       images: subject.images,
+      totalEpisodes: subject.eps,
+      watchedEpisode: interest?.epStatus ?? 0,
+      // 条目接口没有下一集播出信息，只有收藏列表接口会返回。
+      nextEpisodeAirDate: null,
       interest: UserCollectionInterest(
         id: interest?.id,
         rate: interest?.rate ?? 0,
@@ -98,6 +114,9 @@ class UserCollectionData {
       'locked': locked,
       'nsfw': nsfw,
       'images': images.toJson(),
+      'totalEpisodes': totalEpisodes,
+      'watchedEpisode': watchedEpisode,
+      'nextEpisodeAirDate': nextEpisodeAirDate,
       'interest': interest.toJson(),
     };
   }

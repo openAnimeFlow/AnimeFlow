@@ -1,12 +1,12 @@
 import 'dart:async';
-import 'dart:isolate';
-
 import 'package:anime_flow/core/crawler/cookie_manager.dart';
-import 'package:anime_flow/core/crawler/html_request.dart';
-import 'package:anime_flow/core/crawler/itme/anti_crawler_config.dart';
-import 'package:anime_flow/core/crawler/itme/crawler_config_item.dart';
+import 'package:anime_flow/core/crawler/captcha_page_url.dart';
+import 'package:anime_flow/core/crawler/rule_engine.dart';
+import 'package:anime_flow/core/crawler/item/anti_crawler_config.dart';
+import 'package:anime_flow/core/crawler/item/crawler_config_item.dart';
 import 'package:anime_flow/core/utils/utils.dart' show resolveSourceUrl;
 import 'package:anime_flow/features/play/application/search_result_rank_service.dart';
+import 'package:anime_flow/features/play/application/chapter_collection_service.dart';
 import 'package:anime_flow/features/play/data/repository/play_repository.dart';
 import 'package:anime_flow/features/play/presentation/providers/episodes_provider.dart';
 import 'package:anime_flow/features/play/presentation/providers/play_provider.dart';
@@ -122,6 +122,9 @@ class VideoSourceNotifier extends _$VideoSourceNotifier {
   String? _preferredAutoSelectWebsiteName;
   int _videoPageLoadToken = 0;
   final Set<String> _attemptedAutoLoadUrls = {};
+
+  /// 规则执行引擎；传输实现固定为默认的真实 HTTP。
+  final RuleEngine _ruleEngine = RuleEngine();
 
   int get currentEpisodeIndex => state.currentEpisodeIndex;
   List<ResourcesItem> get videoResources => state.videoResources;
@@ -251,7 +254,7 @@ class VideoSourceNotifier extends _$VideoSourceNotifier {
           websiteName: config.name,
           websiteIcon: config.iconUrl,
           baseUrl: config.baseUrl,
-          searchUrl: config.searchUrl,
+          searchUrl: captchaPageTemplate(config),
           needsCaptcha: _requiresCaptcha(config),
           episodeResources: const [],
         );
@@ -260,7 +263,7 @@ class VideoSourceNotifier extends _$VideoSourceNotifier {
       return previous.copyWith(
         websiteIcon: config.iconUrl,
         baseUrl: config.baseUrl,
-        searchUrl: config.searchUrl,
+        searchUrl: captchaPageTemplate(config),
         needsCaptcha:
             config.antiCrawlerConfig.enabled ? previous.needsCaptcha : false,
         antiCrawlerConfig:
@@ -332,10 +335,8 @@ class VideoSourceNotifier extends _$VideoSourceNotifier {
       return;
     }
 
-    final searchUrl = config.searchUrl.replaceFirst(
-      '{keyword}',
-      Uri.encodeQueryComponent(retryKeyword),
-    );
+    final searchUrl =
+        renderKeywordUrl(captchaPageTemplate(config), retryKeyword);
     final requiresCaptcha = config.antiCrawlerConfig.enabled &&
         !await CookieManager.instance.hasUsableCookies(config.name, searchUrl);
     if (!ref.mounted) return;
@@ -383,8 +384,10 @@ class VideoSourceNotifier extends _$VideoSourceNotifier {
       _updateResourceStatus(config.name, isLoading: true, errorMessage: null);
 
       final aliases = ref.read(playExtraProvider).playExtra.subjectAliases;
-      final rawSearchList =
-          await WebRequest.getSearchSubjectListService(keyword, config);
+      final rawSearchList = await _ruleEngine.search(
+        keyword: keyword,
+        config: config,
+      );
       if (!ref.mounted) return;
       if (!_isRequestCurrent(config.name, sessionId, requestToken)) {
         return;
@@ -392,22 +395,13 @@ class VideoSourceNotifier extends _$VideoSourceNotifier {
 
       final names =
           rawSearchList.map((item) => item.name).toList(growable: false);
-      final sortedResult = await Isolate.run(() {
-        final service = SearchResultRankService(
-          searchTerm: keyword,
-          aliases: aliases,
-        );
-        final scores = service.computeScoresBatch(names);
-        final matchRatios = names
-            .map((n) => service.computeMatchRatio(n))
-            .toList(growable: false);
-        final indices = List.generate(names.length, (i) => i, growable: false);
-        indices.sort((a, b) {
-          final cmp = scores[b].compareTo(scores[a]);
-          return cmp != 0 ? cmp : a.compareTo(b);
-        });
-        return (indices: indices, matchRatios: matchRatios);
-      });
+      // 打分排序放在 SearchResultRankService 的静态方法里执行：
+      // 直接在实例方法里 Isolate.run 会把 notifier（含 Logger）带进 isolate 消息。
+      final sortedResult = await SearchResultRankService.rankInIsolate(
+        searchTerm: keyword,
+        aliases: aliases,
+        names: names,
+      );
       if (!ref.mounted) return;
 
       final searchEntries = sortedResult.indices
@@ -418,37 +412,37 @@ class VideoSourceNotifier extends _$VideoSourceNotifier {
               ))
           .toList(growable: false);
 
-      final allEpisodesList = <EpisodeResourcesItem>[];
-
-      for (final entry in searchEntries) {
-        final search = entry.item;
-        final matchRatio = entry.matchRatio;
-        final crawlerEpisodeResources =
-            await WebRequest.getResourcesListService(search.link, config);
-        if (!ref.mounted) return;
-        if (!_isRequestCurrent(config.name, sessionId, requestToken)) {
-          return;
-        }
-
-        for (final crawlerResource in crawlerEpisodeResources) {
-          allEpisodesList.add(
-            EpisodeResourcesItem(
-              lineNames: crawlerResource.lineNames,
-              episodes: crawlerResource.episodes,
-              subjectsTitle: search.name,
-              matchRatio: matchRatio,
+      final collection = await ChapterCollectionService().collect(
+        candidates: [
+          for (final entry in searchEntries)
+            ChapterCandidate(
+              name: entry.item.name,
+              link: entry.item.link,
+              matchRatio: entry.matchRatio,
             ),
-          );
-        }
-      }
+        ],
+        config: config,
+        isActive: () =>
+            ref.mounted &&
+            _isRequestCurrent(config.name, sessionId, requestToken),
+      );
 
+      if (!ref.mounted) return;
       if (!_isRequestCurrent(config.name, sessionId, requestToken)) {
         return;
       }
+
+      // 只有全部候选都失败才报错；个别条目失败不影响已拿到的来源。
+      if (collection.allFailed) {
+        final cause = collection.lastError;
+        if (cause is ChapterErrorException) throw cause;
+        throw ChapterErrorException(config.name, cause: cause);
+      }
+
       _updateResourceStatus(
         config.name,
         isLoading: false,
-        episodeResources: allEpisodesList,
+        episodeResources: collection.resources,
         needsCaptcha: false,
       );
       autoSelectAvailableResource(preferCurrentWebsite: true);
@@ -464,11 +458,30 @@ class VideoSourceNotifier extends _$VideoSourceNotifier {
         antiCrawlerConfig: config.antiCrawlerConfig,
         errorMessage: null,
       );
-    } catch (e) {
+    } on NoResultException {
+      // 解析成功但没有匹配结果：保持空列表，由列表页展示「无结果」状态。
       if (!ref.mounted) return;
       if (!_isRequestCurrent(config.name, sessionId, requestToken)) {
         return;
       }
+      _updateResourceStatus(
+        config.name,
+        isLoading: false,
+        episodeResources: const [],
+        needsCaptcha: false,
+        errorMessage: null,
+      );
+    } catch (e, stackTrace) {
+      if (!ref.mounted) return;
+      if (!_isRequestCurrent(config.name, sessionId, requestToken)) {
+        return;
+      }
+      // 失败不只写进抽屉状态：同时落到错误日志，避免关掉界面后无从排查。
+      _logger.e(
+        'VideoSource: ${config.name} 解析失败',
+        error: e,
+        stackTrace: stackTrace,
+      );
       _updateResourceStatus(
         config.name,
         isLoading: false,

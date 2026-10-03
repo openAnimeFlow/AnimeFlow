@@ -13,14 +13,25 @@ typedef SetEpisodeWatchedCallback = void Function({
   required bool watched,
 });
 
+typedef MarkEpisodeWatched = Future<void> Function(int episodeId);
+
 /// 播放进度采集器与播放记录写入协调器。
 class PlaybackProgressManager {
-  PlaybackProgressManager({required this.onEpisodeWatched});
+  PlaybackProgressManager({
+    required this.onEpisodeWatched,
+    MarkEpisodeWatched? markEpisodeWatched,
+  }) : _markEpisodeWatched = markEpisodeWatched ?? _markRemotely;
 
   static const watchedProgressThreshold = 0.90;
   static const saveDebounce = Duration(seconds: 3);
 
+  /// 短于该时长的视频不参与「自动标记已看」。
+  ///
+  /// 预告、花絮、切片常常只有几十秒，播到 90% 并不代表这一集看过。
+  static const Duration minDurationForAutoWatched = Duration(minutes: 2);
+
   final SetEpisodeWatchedCallback onEpisodeWatched;
+  final MarkEpisodeWatched _markEpisodeWatched;
   Future<void> _saveQueue = Future<void>.value();
   final Set<int> _autoWatchedEpisodeIds = {};
   final Set<int> _autoWatchedEpisodeUpdatesInFlight = {};
@@ -65,6 +76,7 @@ class PlaybackProgressManager {
     this.duration = duration;
     if (!isLoggedIn) return;
     if (!playing || duration <= Duration.zero) return;
+    if (duration < minDurationForAutoWatched) return;
     if (isLocalPlayback || subjectId <= 0 || episodeId <= 0) return;
     if (subjectName == null || subjectCover == null) return;
     if (!AppSettings.episodesProgress) {
@@ -158,7 +170,7 @@ class PlaybackProgressManager {
 
   Future<void> _autoUpdateEpisodeWatched(int targetEpisodeId) async {
     try {
-      await FlowApi.updateEpisodeWatchedService(targetEpisodeId, watched: true);
+      await _markEpisodeWatched(targetEpisodeId);
       _autoWatchedEpisodeIds.add(targetEpisodeId);
       onEpisodeWatched(
         subjectId: subjectId,
@@ -170,5 +182,9 @@ class PlaybackProgressManager {
     } finally {
       _autoWatchedEpisodeUpdatesInFlight.remove(targetEpisodeId);
     }
+  }
+
+  static Future<void> _markRemotely(int episodeId) {
+    return FlowApi.updateEpisodeWatchedService(episodeId, watched: true);
   }
 }

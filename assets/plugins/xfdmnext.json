@@ -1,0 +1,59 @@
+{
+  "api": "2",
+  "version": "1.1",
+  "name": "xfdmnext",
+  "iconUrl": "https://next.xifanacg.com/favicon.ico",
+  "baseUrl": "https://next.xifanacg.com",
+  "searchUrl": "",
+  "searchList": "",
+  "searchName": "",
+  "searchLink": "",
+  "lineNames": "",
+  "lineList": "",
+  "episode": "",
+  "searchMode": "api",
+  "chapterMode": "api",
+  "searchApiConfig": {
+    "request": {
+      "method": "POST",
+      "url": "https://api.xifanacg.com/rest/v1/rpc/search_animes",
+      "headers": {
+        "apikey": "sb_publishable_OBIVAWACIX6lPXrO98_z24_HcsmalkA",
+        "Authorization": "Bearer sb_publishable_OBIVAWACIX6lPXrO98_z24_HcsmalkA"
+      },
+      "bodyType": "json",
+      "body": {
+        "search_term": "{keyword}",
+        "page_number": 1,
+        "items_per_page": 24
+      }
+    },
+    "listPath": "$[*]",
+    "namePath": "$.title",
+    "sourcePath": "$.id"
+  },
+  "chapterApiConfig": {
+    "request": {
+      "method": "POST",
+      "url": "https://api.xifanacg.com/rest/v1/rpc/get_anime_detail",
+      "headers": {
+        "apikey": "sb_publishable_OBIVAWACIX6lPXrO98_z24_HcsmalkA",
+        "Authorization": "Bearer sb_publishable_OBIVAWACIX6lPXrO98_z24_HcsmalkA"
+      },
+      "bodyType": "json",
+      "body": {
+        "p_id": "{source}"
+      }
+    },
+    "format": "nested",
+    "roadsPath": "$.sources[*]",
+    "roadNamePath": "$.name",
+    "episodesPath": "$.episodes[*]",
+    "episodeNamePath": "$.title",
+    "episodeUrlPath": "$.id",
+    "episodePage": {
+      "url": "https://next.xifanacg.com/anime/{source}/play/{episodeUrl}",
+      "query": {}
+    }
+  }
+}

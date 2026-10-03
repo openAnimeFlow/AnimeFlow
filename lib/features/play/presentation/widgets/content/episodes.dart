@@ -7,6 +7,7 @@ import 'package:anime_flow/shared/models/player/bangumi/episodes_item.dart';
 import 'package:anime_flow/core/network/clients/flow_client.dart';
 import 'package:anime_flow/app/router/routes_args.dart';
 import 'package:anime_flow/shared/widgets/notification_toast.dart';
+import 'package:anime_flow/shared/widgets/animation_network_image.dart';
 import 'package:anime_flow/features/play/presentation/widgets/layout_toggle_icon.dart';
 import 'package:anime_flow/features/play/presentation/widgets/loading_animation.dart';
 import 'package:flutter/material.dart';
@@ -30,7 +31,10 @@ class _EpisodesListViewState extends ConsumerState<EpisodesListView> {
   int? lastScrolledEpisodeId;
 
   /// 剧集列表每行固定高度
-  final double itemHeight = 80;
+  static const double itemHeight = 76;
+
+  /// 每行之间的间距（ListView.separated）
+  static const double itemSpacing = 4;
 
   static const double _loadMoreTriggerDistance = 80;
 
@@ -83,7 +87,7 @@ class _EpisodesListViewState extends ConsumerState<EpisodesListView> {
     );
     if (index < 0) return;
     final maxExtent = controller.position.maxScrollExtent;
-    final offset = (index * itemHeight).clamp(0.0, maxExtent);
+    final offset = (index * (itemHeight + itemSpacing)).clamp(0.0, maxExtent);
     controller.animateTo(
       offset,
       duration: const Duration(milliseconds: 280),
@@ -233,82 +237,172 @@ class _EpisodesListViewState extends ConsumerState<EpisodesListView> {
             .surfaceContainerHighest
             .withValues(alpha: 0.8),
       ),
-      child: ListView.builder(
+      child: ListView.separated(
         controller: controller,
         itemCount: itemCount,
-        itemExtent: itemHeight,
         padding: EdgeInsets.zero,
         itemBuilder: (context, index) {
           if (index >= episodes.length) {
             return _buildLoadMoreFooter(episodesState.isLoadingMore);
           }
-          final colorScheme = Theme.of(context).colorScheme;
           final episode = episodes[index];
-          final isSelected = selectedEpisodeId == episode.id;
-          return Card(
-            elevation: 0,
-            child: InkWell(
-              borderRadius: BorderRadius.circular(10),
-              onTap: () => _selectEpisode(episode),
-              // 长按
-              onLongPress: ref.read(playExtraProvider).isOfflineMode
-                  ? null
-                  : () => _updateEpisodeWatched(episode),
-              child: Container(
-                decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(10),
-                  color: episode.watched == true
-                      ? colorScheme.surfaceContainerHighest
-                      : null,
-                  border: episode.watched == true
-                      ? Border.all(
-                          color: colorScheme.secondaryContainer,
-                          width: 2,
-                        )
-                      : null,
-                ),
-                padding: const EdgeInsets.all(8),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Expanded(
-                      child: Column(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        crossAxisAlignment: CrossAxisAlignment.stretch,
-                        children: [
-                          Row(
-                            children: [
-                              Text(episode.sort.toString().padLeft(2, '0')),
-                              if (episode.type != 0) ...[
-                                const SizedBox(width: 6),
-                                Text(
-                                  episodesTypeLabels[episode.type] ?? '',
-                                  style: TextStyle(
-                                    fontSize: 10,
-                                    color:
-                                        Theme.of(context).colorScheme.outline,
-                                  ),
-                                ),
-                              ],
-                            ],
-                          ),
-                          Text(
-                            episode.nameCN.isEmpty
-                                ? episode.name
-                                : episode.nameCN,
-                            overflow: TextOverflow.ellipsis,
-                            maxLines: 1,
-                          ),
-                        ],
-                      ),
-                    ),
-                    if (isSelected) _buildPlayingIndicator(),
-                  ],
-                ),
-              ),
+          // 列表项必须给定高度：Row + AspectRatio 在无限高度约束下无法确定尺寸
+          return SizedBox(
+            height: itemHeight,
+            child: _buildEpisodeListTile(
+              episode,
+              isSelected: selectedEpisodeId == episode.id,
             ),
           );
         },
+        separatorBuilder: (BuildContext context, int index) {
+          return const SizedBox(height: itemSpacing);
+        },
+      ),
+    );
+  }
+
+  /// 列表模式下的剧集行，封面等布局与剧集抽屉
+  Widget _buildEpisodeListTile(
+    EpisodeData episode, {
+    required bool isSelected,
+  }) {
+    final colorScheme = Theme.of(context).colorScheme;
+    final episodeCover = episode.cover;
+    final hasEpisodeCover = episodeCover != null && episodeCover.isNotEmpty;
+    final subjectCover = ref.watch(
+      playExtraProvider.select((extra) => extra.playExtra.subjectCover),
+    );
+    final coverUrl = hasEpisodeCover ? episodeCover : subjectCover;
+    final watched = episode.watched == true;
+    final theme = Theme.of(context);
+    final cardColor = theme.cardTheme.color ??
+        (theme.useMaterial3
+            ? colorScheme.surfaceContainerLow
+            : theme.cardColor);
+
+    return Container(
+      clipBehavior: Clip.antiAliasWithSaveLayer,
+      decoration: BoxDecoration(
+        color: watched ? colorScheme.surfaceContainerHighest : cardColor,
+        borderRadius: BorderRadius.circular(10),
+        border: watched
+            ? Border.all(
+                color: colorScheme.secondaryContainer,
+                width: 2,
+                strokeAlign: BorderSide.strokeAlignInside,
+              )
+            : null,
+      ),
+      child: Material(
+        type: MaterialType.transparency,
+        child: InkWell(
+          onTap: () => _selectEpisode(episode),
+          onLongPress: ref.read(playExtraProvider).isOfflineMode
+              ? null
+              : () => _updateEpisodeWatched(episode),
+          child: Row(
+            spacing: 5,
+            children: [
+              AspectRatio(
+                aspectRatio: 5 / 3,
+                child: Stack(
+                  children: [
+                    Positioned.fill(
+                      child: Container(
+                          decoration: BoxDecoration(
+                            color: colorScheme.surfaceContainerHighest,
+                          ),
+                          child: AnimationNetworkImage(
+                            url: coverUrl,
+                            fit: BoxFit.cover,
+                          )),
+                    ),
+                    Positioned(
+                      right: 0,
+                      top: 0,
+                      child: Container(
+                        padding: const EdgeInsets.all(3),
+                        decoration: const BoxDecoration(
+                          gradient: LinearGradient(
+                            begin: Alignment.topRight,
+                            end: Alignment.bottomLeft,
+                            colors: [
+                              Colors.black54,
+                              Colors.transparent,
+                            ],
+                          ),
+                          borderRadius: BorderRadius.only(
+                            bottomLeft: Radius.circular(10),
+                          ),
+                        ),
+                        child: Text(episode.sort.toString().padLeft(2, '0')),
+                      ),
+                    )
+                  ],
+                ),
+              ),
+              Expanded(
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(vertical: 5),
+                  child: Row(
+                    children: [
+                      Expanded(
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              episode.nameCN.isEmpty
+                                  ? episode.name
+                                  : episode.nameCN,
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                            Row(
+                              children: [
+                                if (episode.type != 0)
+                                  Container(
+                                    padding: const EdgeInsets.symmetric(
+                                      horizontal: 6,
+                                      vertical: 2,
+                                    ),
+                                    decoration: BoxDecoration(
+                                      color:
+                                          colorScheme.surfaceContainerHighest,
+                                      borderRadius: BorderRadius.circular(10),
+                                    ),
+                                    child: Text(
+                                      episodesTypeLabels[episode.type] ?? '',
+                                      style: Theme.of(context)
+                                          .textTheme
+                                          .labelSmall,
+                                    ),
+                                  ),
+                                if (episode.airdate.isNotEmpty) ...[
+                                  if (episode.type != 0)
+                                    const SizedBox(width: 8),
+                                  Flexible(
+                                    child: Text(
+                                      episode.airdate,
+                                      maxLines: 1,
+                                      overflow: TextOverflow.ellipsis,
+                                    ),
+                                  ),
+                                ],
+                              ],
+                            )
+                          ],
+                        ),
+                      ),
+                      if (isSelected) _buildPlayingIndicator()
+                    ],
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
       ),
     );
   }

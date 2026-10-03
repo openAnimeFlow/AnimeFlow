@@ -1,8 +1,8 @@
 import 'dart:async';
 import 'dart:math' show min;
 
-import 'package:anime_flow/core/crawler/itme/crawler_config_item.dart';
-import 'package:anime_flow/core/crawler/itme/bgm_user_page_item.dart'
+import 'package:anime_flow/core/crawler/item/crawler_config_item.dart';
+import 'package:anime_flow/core/crawler/item/bgm_user_statistics_item.dart'
     show BgmUserStatisticsItem, Statistic;
 import 'package:anime_flow/shared/models/player/play/video/episode_resources_item.dart';
 import 'package:anime_flow/shared/models/player/play/video/search_resources_item.dart';
@@ -14,14 +14,14 @@ import 'package:xpath_selector_html_parser/xpath_selector_html_parser.dart';
 class HtmlCrawler {
   static LiggLogger logger = LiggLogger();
 
-  ///解析html搜索页
-  static Future<List<SearchResourcesItem>> parseSearchHtml(
-      String searchHtml, CrawlConfigItem crawlConfig) async {
+  /// 解析 HTML 搜索页
+  static Future<List<SearchResourcesItem>> parseSearch(
+      String html, CrawlConfigItem crawlConfig) async {
     final String searchList = crawlConfig.searchList;
     final String searchName = crawlConfig.searchName;
     final String searchLink = crawlConfig.searchLink;
 
-    final parser = parse(searchHtml).documentElement!;
+    final parser = parse(html).documentElement!;
 
     final searchListElement = parser.queryXPath(searchList);
     final searchNameElement = parser.queryXPath('$searchList$searchName');
@@ -52,14 +52,14 @@ class HtmlCrawler {
     }
   }
 
-  ///解析html资源页面
-  static Future<List<CrawlerEpisodeResourcesItem>> parseResourcesHtml(
-      String resourcesHtml, CrawlConfigItem crawlConfig) async {
+  /// 解析 HTML 剧集资源页
+  static Future<List<CrawlerEpisodeResourcesItem>> parseEpisodeResources(
+      String html, CrawlConfigItem crawlConfig) async {
     final String lineNames = crawlConfig.lineNames;
     final String lineList = crawlConfig.lineList;
     final String episode = crawlConfig.episode;
 
-    final parser = parse(resourcesHtml).documentElement!;
+    final parser = parse(html).documentElement!;
     final lineNamesElement = parser.queryXPath(lineNames);
     final lineListElement = parser.queryXPath(lineList);
 

@@ -5,8 +5,10 @@ import 'package:anime_flow/features/source/application/providers/plugin_provider
 import 'package:anime_flow/features/source/application/providers/source_configs_provider.dart';
 import 'package:anime_flow/app/router/app_router.dart';
 import 'package:anime_flow/features/source/data/repositories/source_repository.dart';
+import 'package:anime_flow/features/settings/presentation/pages/plugins/plugin_install_message.dart';
 import 'package:anime_flow/features/source/application/providers/source_repository_provider.dart';
 import 'package:anime_flow/core/utils/utils.dart';
+import 'package:anime_flow/core/logger/logger.dart';
 import 'package:anime_flow/shared/widgets/animation_network_image.dart';
 import 'package:anime_flow/shared/widgets/notification_toast.dart';
 import 'package:flutter/material.dart';
@@ -84,10 +86,20 @@ class _PluginsPageState extends ConsumerState<PluginsPage> {
         l10n.pluginUpdated(plugin.name, plugin.version),
         title: l10n.updateSuccess,
       );
-    } catch (error) {
+    } catch (error, stackTrace) {
       if (!mounted) return;
+      LiggLogger().e(
+        'Plugins: 更新规则 ${plugin.name} 失败',
+        error: error,
+        stackTrace: stackTrace,
+      );
       NotificationToast.show(
-        l10n.pluginUpdateFailed(plugin.name, error.toString()),
+        pluginInstallErrorMessage(
+          l10n,
+          plugin.name,
+          error,
+          isUpdate: true,
+        ),
         title: l10n.updateFailed,
       );
     } finally {

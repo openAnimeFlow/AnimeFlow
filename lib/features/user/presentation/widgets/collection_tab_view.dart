@@ -391,13 +391,23 @@ class _CollectionItemCard extends StatelessWidget {
     required this.onCollectTypeChanged,
   });
 
-  /// 观看进度文案：未看过时省略已看集数；连载中（有下一集）总集数带"预计"，否则为"全"。
+  /// 观看进度文案：未看过时省略已看集数；连载中（有下一集）总集数带"预计"，否则为"全"；
   String get _episodeLabel => [
         if (collection.watchedEpisode > 0) '看过${collection.watchedEpisode}',
         collection.nextEpisodeAirDate != null
             ? '预计${collection.totalEpisodes}集'
             : '全${collection.totalEpisodes}集',
+        if (collection.nextEpisodeAirDate != null) '下一集$_airDateLabel',
       ].join(' · ');
+
+  /// 下一集播出日期文案：本年只显示 MM-dd，跨年显示完整日期。
+  String get _airDateLabel {
+    final date = collection.nextEpisodeAirDate!;
+    final currentYearPrefix = '${DateTime.now().year}-';
+    return date.startsWith(currentYearPrefix) && date.length >= 10
+        ? date.substring(5)
+        : date;
+  }
 
   @override
   Widget build(BuildContext context) {

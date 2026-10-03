@@ -27,6 +27,9 @@ class _PluginsPageState extends ConsumerState<PluginsPage> {
   late final SourceRepository _sourceRepository;
   final Set<String> _busyPluginNames = {};
 
+  /// 串行化排序写入。
+  Future<void> _orderWriteChain = Future<void>.value();
+
   @override
   void initState() {
     super.initState();
@@ -130,6 +133,32 @@ class _PluginsPageState extends ConsumerState<PluginsPage> {
     }
   }
 
+  void _onReorder(int oldIndex, int newIndex) {
+    // 先同步更新列表顺序，松手后列表才会立即停在新位置；写入失败时再回滚。
+    ref.read(sourceConfigsProvider.notifier).reorder(oldIndex, newIndex);
+    _orderWriteChain =
+        _orderWriteChain.then((_) => _saveReorder(oldIndex, newIndex));
+  }
+
+  Future<void> _saveReorder(int oldIndex, int newIndex) async {
+    try {
+      await _sourceRepository.reorderSources(oldIndex, newIndex);
+    } catch (error, stackTrace) {
+      if (!mounted) return;
+      LiggLogger().e(
+        'Plugins: 数据源排序保存失败',
+        error: error,
+        stackTrace: stackTrace,
+      );
+      ref.invalidate(sourceConfigsProvider);
+      final l10n = AppLocalizations.of(context);
+      NotificationToast.show(
+        l10n.dataSaveFailed(error.toString()),
+        title: l10n.saveFailed,
+      );
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
@@ -185,9 +214,7 @@ class _PluginsPageState extends ConsumerState<PluginsPage> {
               ),
               itemCount: dataSources.length,
               buildDefaultDragHandles: false,
-              onReorderItem: (oldIndex, newIndex) async {
-                await _sourceRepository.reorderSources(oldIndex, newIndex);
-              },
+              onReorderItem: _onReorder,
               itemBuilder: (context, index) {
                 final data = dataSources[index];
                 final remotePlugin = remotePluginsByName[data.name];

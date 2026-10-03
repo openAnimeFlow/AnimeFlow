@@ -25,4 +25,17 @@ class SourceConfigs extends _$SourceConfigs {
 
     return repository.getSources();
   }
+
+  void reorder(int oldIndex, int newIndex) {
+    final current = state.value;
+    if (current == null) return;
+    if (oldIndex < 0 || oldIndex >= current.length) return;
+    if (newIndex < 0 || newIndex >= current.length) return;
+    if (oldIndex == newIndex) return;
+
+    final reordered = [...current];
+    final moved = reordered.removeAt(oldIndex);
+    reordered.insert(newIndex, moved);
+    state = AsyncData(reordered);
+  }
 }

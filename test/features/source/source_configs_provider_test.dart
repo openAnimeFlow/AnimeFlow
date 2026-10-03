@@ -2,6 +2,7 @@ import 'dart:io';
 
 import 'package:anime_flow/core/crawler/item/crawler_config_item.dart';
 import 'package:anime_flow/core/constants/storage_key.dart';
+import 'package:anime_flow/core/settings/app_settings.dart';
 import 'package:anime_flow/core/settings/storage.dart';
 import 'package:anime_flow/features/source/application/providers/source_configs_provider.dart';
 import 'package:anime_flow/features/source/application/providers/source_repository_provider.dart';
@@ -78,5 +79,39 @@ void main() {
     // 数据源本身仍然可用，说明只是 provider 的监听被正确摘除。
     expect(Storage.crawlConfigs.get('probe')?.name, 'probe');
     expect(listenable, isNotNull);
+  });
+
+  test('reorder 同步更新状态，拖拽松手后不会跳回原顺序', () async {
+    addTearDown(() async {
+      await Storage.crawlConfigs.deleteAll(const ['a', 'b', 'c']);
+      await AppSettings.deleteSetting(StorageKey.crawlConfigOrder);
+    });
+
+    // 上一个用例会往 box 里写入 probe，先清理避免顺序断言被污染。
+    await Storage.crawlConfigs.delete('probe');
+    for (final name in const ['a', 'b', 'c']) {
+      await Storage.crawlConfigs.put(name, _config(name));
+    }
+    // 排序单独存放在设置项里，数据源 box 的监听不会因为排序变化触发。
+    await AppSettings.setSetting(
+      StorageKey.crawlConfigOrder,
+      const ['a', 'b', 'c'],
+    );
+
+    final container = ProviderContainer();
+    addTearDown(container.dispose);
+
+    final before = await container.read(sourceConfigsProvider.future);
+    expect(
+      before.map((source) => source.name),
+      ['a', 'b', 'c'],
+    );
+
+    container.read(sourceConfigsProvider.notifier).reorder(0, 2);
+
+    expect(
+      container.read(sourceConfigsProvider).requireValue.map((s) => s.name),
+      ['b', 'c', 'a'],
+    );
   });
 }

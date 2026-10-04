@@ -46,11 +46,11 @@ void main() {
       }
       await tester.pumpWidget(UncontrolledProviderScope(
         container: container,
-        child: const MaterialApp(
-          locale: Locale('en'),
+        child: MaterialApp(
+          locale: const Locale('en'),
           localizationsDelegates: appLocalizationsDelegates,
           supportedLocales: AppLocalizations.supportedLocales,
-          home: UserPage(),
+          home: const UserPage(),
         ),
       ));
       final l10n = AppLocalizations.of(tester.element(find.byType(UserPage)));

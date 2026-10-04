@@ -62,11 +62,11 @@ void main() {
         downloadControllerProvider.overrideWith(() => controller),
         downloadManagerProvider.overrideWithValue(_Manager()),
       ],
-      child: const MaterialApp(
-        locale: Locale('en'),
+      child: MaterialApp(
+        locale: const Locale('en'),
         localizationsDelegates: appLocalizationsDelegates,
         supportedLocales: AppLocalizations.supportedLocales,
-        home: DownloadPage(),
+        home: const DownloadPage(),
       ),
     ));
     await tester.pump(const Duration(seconds: 1));

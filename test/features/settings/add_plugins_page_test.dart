@@ -11,15 +11,15 @@ Future<void> _mount(WidgetTester tester) async {
   tester.view.physicalSize = const Size(1400, 4200);
   addTearDown(tester.view.reset);
   await tester.pumpWidget(
-    const ProviderScope(
+    ProviderScope(
       child: MaterialApp(
-        locale: Locale.fromSubtags(
+        locale: const Locale.fromSubtags(
           languageCode: 'zh',
           scriptCode: 'Hans',
         ),
         localizationsDelegates: appLocalizationsDelegates,
         supportedLocales: AppLocalizations.supportedLocales,
-        home: AddPluginsPage(),
+        home: const AddPluginsPage(),
       ),
     ),
   );

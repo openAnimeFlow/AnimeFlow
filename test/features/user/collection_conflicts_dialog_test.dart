@@ -70,11 +70,11 @@ void main() {
     await c.read(bangumiBindProvider.future);
     await tester.pumpWidget(UncontrolledProviderScope(
         container: c,
-        child: const MaterialApp(
-          locale: Locale('en'),
+        child: MaterialApp(
+          locale: const Locale('en'),
           localizationsDelegates: appLocalizationsDelegates,
           supportedLocales: AppLocalizations.supportedLocales,
-          home: Scaffold(body: CollectionConflictsDialog(taskId: 1)),
+          home: const Scaffold(body: CollectionConflictsDialog(taskId: 1)),
         )));
     await tester.pumpAndSettle();
     return c;

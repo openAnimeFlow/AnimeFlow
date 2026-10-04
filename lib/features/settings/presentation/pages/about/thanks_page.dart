@@ -70,9 +70,17 @@ class ThanksPage extends StatelessWidget {
       ),
       body: LayoutBuilder(
         builder: (context, constraints) {
-          final contentWidth = constraints.maxWidth - 20;
+          const maxContentWidth = 1500.0;
+          const horizontalMargin = 10.0;
+          final availableWidth = constraints.maxWidth - horizontalMargin * 2;
+          final contentWidth =
+              availableWidth.clamp(0.0, maxContentWidth).toDouble();
           final crossAxisCount =
               contentWidth > 600 ? (contentWidth > 900 ? 3 : 2) : 1;
+          final horizontalPadding = horizontalMargin +
+              (availableWidth > maxContentWidth
+                  ? (availableWidth - maxContentWidth) / 2
+                  : 0.0);
           final paddingOf = MediaQuery.paddingOf(context);
           final topPadding = paddingOf.top + kToolbarHeight;
           return Stack(
@@ -111,12 +119,13 @@ class ThanksPage extends StatelessWidget {
                   ),
                 ),
               ),
-              Center(
-                child: Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 10),
-                  child: ConstrainedBox(
-                    constraints: const BoxConstraints(maxWidth: 1500),
-                    child: CustomScrollView(
+              CustomScrollView(
+                slivers: [
+                  SliverPadding(
+                    padding: EdgeInsets.symmetric(
+                      horizontal: horizontalPadding,
+                    ),
+                    sliver: SliverMainAxisGroup(
                       slivers: [
                         // 顶部 logo 和标题
                         SliverToBoxAdapter(
@@ -202,7 +211,7 @@ class ThanksPage extends StatelessWidget {
                       ],
                     ),
                   ),
-                ),
+                ],
               ),
             ],
           );

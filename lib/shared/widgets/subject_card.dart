@@ -6,6 +6,12 @@ class SubjectCard extends StatelessWidget {
   final String image;
   final String title;
   final int? rating;
+
+  /// 封面共享元素动画的 Hero tag。
+  ///
+  /// 同一路由子树内必须唯一（例如同一张图片在同一页面出现多次会冲突）。
+  /// 为 `null` 时不使用 Hero，避免 tag 重复导致的断言崩溃。
+  final Object? heroTag;
   final bool isCoverAnimation;
   final BorderRadiusGeometry borderRadius;
 
@@ -13,6 +19,7 @@ class SubjectCard extends StatelessWidget {
     super.key,
     required this.image,
     required this.title,
+    this.heroTag,
     this.rating,
     this.isCoverAnimation = true,
     this.borderRadius = const BorderRadius.all(Radius.circular(15.0)),
@@ -35,6 +42,17 @@ class SubjectCard extends StatelessWidget {
     double screenWidth = MediaQuery.of(context).size.width;
     double fontSize = _getFontSizeByScreen(screenWidth);
 
+    final Widget cover = AnimationNetworkImage(
+      borderRadius: borderRadius,
+      url: image,
+      fit: BoxFit.cover,
+    );
+    // 仅当提供了 tag 时才使用 Hero。Hero 要求同一路由子树内 tag 唯一，
+    // 缺省 tag 或重复图片都会触发 "multiple heroes share the same tag" 断言。
+    final Widget coverWithOptionalHero = isCoverAnimation && heroTag != null
+        ? Hero(tag: heroTag!, child: cover)
+        : cover;
+
     return ClipRRect(
       borderRadius: borderRadius,
       child: Stack(
@@ -44,20 +62,7 @@ class SubjectCard extends StatelessWidget {
             left: 0,
             bottom: 0,
             right: 0,
-            child: isCoverAnimation
-                ? Hero(
-                    tag: 'subject_image$image',
-                    child: AnimationNetworkImage(
-                      borderRadius: borderRadius,
-                      url: image,
-                      fit: BoxFit.cover,
-                    ),
-                  )
-                : AnimationNetworkImage(
-                    borderRadius: borderRadius,
-                    url: image,
-                    fit: BoxFit.cover,
-                  ),
+            child: coverWithOptionalHero,
           ),
           if (title.isNotEmpty)
             Positioned(

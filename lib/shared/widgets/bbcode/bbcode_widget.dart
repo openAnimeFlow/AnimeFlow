@@ -3,7 +3,7 @@ import 'package:anime_flow/app/router/model/image_viewer_extra.dart';
 import 'package:anime_flow/shared/widgets/animation_network_image.dart';
 import 'package:anime_flow/shared/widgets/image_preview.dart';
 import 'package:flutter/gestures.dart';
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:antlr4/antlr4.dart';
 import 'package:url_launcher/url_launcher.dart';
 

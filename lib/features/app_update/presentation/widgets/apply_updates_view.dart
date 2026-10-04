@@ -4,7 +4,7 @@ import 'package:anime_flow/features/app_update/application/app_info_provider.dar
 import 'package:anime_flow/shared/models/download_info.dart';
 import 'package:anime_flow/shared/models/version_download_state.dart';
 import 'package:anime_flow/core/utils/utils.dart';
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:flutter_markdown_plus/flutter_markdown_plus.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:hive_ce/hive.dart';

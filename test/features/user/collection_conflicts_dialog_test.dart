@@ -1,7 +1,8 @@
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:anime_flow/app/localization/app_localizations.dart';
+import 'package:anime_flow/app/localization/app_localizations_delegates.dart';
 import 'package:anime_flow/features/settings/presentation/widgets/account/collection_conflicts_dialog.dart';
 import 'package:anime_flow/features/user/application/bgm_collection_sync_provider.dart';
 import 'package:anime_flow/features/user/data/repository/collection_sync_repository.dart';
@@ -71,7 +72,7 @@ void main() {
         container: c,
         child: const MaterialApp(
           locale: Locale('en'),
-          localizationsDelegates: AppLocalizations.localizationsDelegates,
+          localizationsDelegates: appLocalizationsDelegates,
           supportedLocales: AppLocalizations.supportedLocales,
           home: Scaffold(body: CollectionConflictsDialog(taskId: 1)),
         )));

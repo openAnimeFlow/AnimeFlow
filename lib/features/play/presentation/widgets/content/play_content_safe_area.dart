@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 
 /// Owns system insets for the tabs and their nested content. In the wide
 /// layout the panel is on the right, so the display's left inset is unrelated.

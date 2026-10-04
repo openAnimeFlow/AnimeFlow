@@ -1,10 +1,11 @@
 import 'dart:io';
 import 'package:anime_flow/app/localization/app_localizations.dart';
+import 'package:anime_flow/app/localization/app_localizations_delegates.dart';
 import 'package:anime_flow/app/localization/locale_provider.dart';
 import 'package:anime_flow/app/router/app_router.dart';
 import 'package:anime_flow/app/theme/theme_provider.dart';
 import 'package:bot_toast/bot_toast.dart';
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:anime_flow/shared/widgets/windows_title_bar.dart';
 import 'package:anime_flow/app/app_version.dart';
@@ -32,7 +33,7 @@ class MyApp extends StatelessWidget {
               buildDarkTheme(themeState.seedColor, fontFamily: fontFamily),
           themeMode: themeState.themeMode,
           locale: locale,
-          localizationsDelegates: AppLocalizations.localizationsDelegates,
+          localizationsDelegates: appLocalizationsDelegates,
           supportedLocales: AppLocalizations.supportedLocales,
           builder: (context, child) {
             var body = BotToastInit()(context, child);

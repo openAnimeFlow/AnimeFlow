@@ -10,7 +10,7 @@ import 'package:anime_flow/shared/widgets/notification_toast.dart';
 import 'package:anime_flow/shared/widgets/animation_network_image.dart';
 import 'package:anime_flow/features/play/presentation/widgets/layout_toggle_icon.dart';
 import 'package:anime_flow/features/play/presentation/widgets/loading_animation.dart';
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 class EpisodesListView extends ConsumerStatefulWidget {

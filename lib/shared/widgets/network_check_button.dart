@@ -1,5 +1,5 @@
 import 'package:anime_flow/core/utils/network_util.dart';
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 
 class NetworkCheckButton extends StatefulWidget {
   const NetworkCheckButton({

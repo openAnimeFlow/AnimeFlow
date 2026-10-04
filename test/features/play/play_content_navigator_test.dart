@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:anime_flow/core/settings/storage.dart';
 import 'package:anime_flow/app/localization/app_localizations.dart';
+import 'package:anime_flow/app/localization/app_localizations_delegates.dart';
 import 'package:anime_flow/app/router/model/info_route_extra.dart';
 import 'package:anime_flow/app/router/model/play_route_extra.dart';
 import 'package:anime_flow/app/router/routes_args.dart';
@@ -20,7 +21,7 @@ import 'package:anime_flow/shared/models/enums/video_controls_icon_type.dart';
 import 'package:anime_flow/features/user/presentation/providers/user_state_provider.dart';
 import 'package:anime_flow/shared/models/bangumi/subject_item.dart';
 import 'package:anime_flow/shared/models/bangumi/subjects_info_item.dart';
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -230,7 +231,7 @@ void main() {
         ],
         child: MaterialApp.router(
           routerConfig: router,
-          localizationsDelegates: AppLocalizations.localizationsDelegates,
+          localizationsDelegates: appLocalizationsDelegates,
           supportedLocales: AppLocalizations.supportedLocales,
         )));
     router.push<void>('/player');

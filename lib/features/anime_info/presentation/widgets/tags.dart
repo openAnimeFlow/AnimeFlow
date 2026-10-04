@@ -1,5 +1,5 @@
 import 'package:anime_flow/shared/models/bangumi/subjects_info_item.dart';
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 
 /// 标签组件（支持展开/收起）
 class TagView extends StatefulWidget {

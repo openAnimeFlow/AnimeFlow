@@ -1,5 +1,5 @@
 import 'package:anime_flow/shared/models/flow/bgm_collection_sync_status_item.dart';
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:anime_flow/app/localization/app_localizations.dart';
 import 'package:anime_flow/features/user/data/repository/collection_sync_repository.dart';

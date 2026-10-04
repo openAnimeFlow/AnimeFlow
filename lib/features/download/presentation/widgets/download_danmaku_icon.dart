@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 
 /// Uses the player's danmaku symbol with a download arrow.
 class DownloadDanmakuIcon extends StatelessWidget {

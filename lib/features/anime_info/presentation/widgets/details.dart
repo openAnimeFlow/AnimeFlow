@@ -1,6 +1,6 @@
 import 'package:anime_flow/shared/models/bangumi/subjects_info_item.dart';
 import 'dart:io' as io;
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 ///详情信息

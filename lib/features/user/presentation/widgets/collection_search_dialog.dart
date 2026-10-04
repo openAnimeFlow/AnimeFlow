@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:anime_flow/app/localization/app_localizations.dart';
 
 class CollectionSearchDialog extends StatefulWidget {

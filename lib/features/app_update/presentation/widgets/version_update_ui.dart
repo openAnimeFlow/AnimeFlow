@@ -6,7 +6,7 @@ import 'package:anime_flow/shared/models/version_check_result.dart';
 import 'package:anime_flow/core/settings/storage.dart';
 import 'package:anime_flow/features/app_update/presentation/widgets/apply_updates_view.dart';
 import 'package:anime_flow/shared/widgets/notification_toast.dart';
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 
 /// 开始下载，成功时返回平台定义的下载完成动作
 typedef OnVersionStartDownload = Future<UpdateDownloadResult?> Function(

@@ -11,7 +11,7 @@ import 'package:anime_flow/features/user/presentation/providers/user_collection_
 import 'package:anime_flow/shared/models/bangumi/user_collections_item.dart';
 import 'package:anime_flow/shared/models/bangumi/interest_item.dart';
 import 'package:anime_flow/app/router/routes_args.dart';
-import 'package:flutter/cupertino.dart';
+import 'package:cupertino_ui/cupertino_ui.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';

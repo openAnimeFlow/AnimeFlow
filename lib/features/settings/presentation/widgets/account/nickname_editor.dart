@@ -1,5 +1,5 @@
 import 'package:anime_flow/shared/widgets/notification_toast.dart';
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 
 class NicknameEditorView extends StatefulWidget {
   const NicknameEditorView({

@@ -1,7 +1,7 @@
 import 'dart:async';
 import 'package:anime_flow/app/localization/app_localizations.dart';
 import 'package:anime_flow/core/utils/system_util.dart';
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 
 /// 弹幕输入框
 class DanmakuTextField extends StatefulWidget {

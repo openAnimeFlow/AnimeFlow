@@ -5,7 +5,7 @@ import 'package:anime_flow/features/settings/presentation/providers/setting_prov
 import 'package:anime_flow/app/router/app_router.dart';
 import 'package:anime_flow/core/utils/system_util.dart';
 import 'package:anime_flow/shared/widgets/theme_preview.dart';
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:anime_flow/app/localization/app_localizations.dart';
 

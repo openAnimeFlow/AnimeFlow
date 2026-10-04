@@ -1,7 +1,7 @@
 import 'package:anime_flow/features/play/presentation/widgets/player/gesture/desktop_gesture_detector.dart';
 import 'package:anime_flow/features/play/presentation/widgets/player/gesture/mobile_gesture_detector.dart';
 import 'package:anime_flow/core/utils/system_util.dart';
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 
 import 'control/bottom_area_control.dart';
 import 'control/middle_area_control.dart';

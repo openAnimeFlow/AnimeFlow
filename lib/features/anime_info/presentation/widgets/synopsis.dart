@@ -11,7 +11,7 @@ import 'package:anime_flow/features/anime_info/presentation/widgets/tags.dart';
 import 'package:anime_flow/features/anime_info/presentation/widgets/subject_stills.dart';
 import 'package:anime_flow/core/utils/system_util.dart';
 import 'package:anime_flow/shared/widgets/expandable_text.dart';
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shimmer/shimmer.dart';
 

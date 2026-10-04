@@ -1,5 +1,5 @@
 import 'package:anime_flow/shared/models/player/danmaku/danmaku_module.dart';
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {

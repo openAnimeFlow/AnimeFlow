@@ -1,7 +1,7 @@
 import 'package:anime_flow/core/network/api/api.dart';
 import 'package:anime_flow/core/utils/utils.dart';
 import 'package:anime_flow/app/localization/app_localizations.dart';
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 
 class AgreementPage extends StatefulWidget {
   const AgreementPage({super.key});

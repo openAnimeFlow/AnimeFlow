@@ -1,5 +1,5 @@
 import 'package:anime_flow/shared/widgets/ranking.dart';
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 import 'animation_network_image.dart';
 
 class SubjectCard extends StatelessWidget {

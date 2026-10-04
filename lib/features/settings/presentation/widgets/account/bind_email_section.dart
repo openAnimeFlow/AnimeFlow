@@ -6,7 +6,7 @@ import 'package:anime_flow/features/auth/presentation/widgets/graphic_captcha.da
 import 'package:anime_flow/features/auth/presentation/widgets/send_code_button.dart';
 import 'package:anime_flow/features/user/presentation/providers/user_state_provider.dart';
 import 'package:anime_flow/shared/widgets/notification_toast.dart';
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 /// 账户设置页：未绑定邮箱时展示绑定表单。

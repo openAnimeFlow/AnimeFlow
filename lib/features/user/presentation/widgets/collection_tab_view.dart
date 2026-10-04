@@ -14,7 +14,7 @@ import 'package:anime_flow/shared/widgets/star.dart';
 import 'package:anime_flow/shared/widgets/no_more_indicator.dart';
 import 'package:anime_flow/shared/models/enums/collect_type.dart';
 import 'package:anime_flow/shared/models/bangumi/user_collections_item.dart';
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:anime_flow/app/localization/app_localizations.dart';
 

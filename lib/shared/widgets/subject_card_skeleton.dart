@@ -1,5 +1,5 @@
 import 'package:anime_flow/core/utils/system_util.dart';
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:shimmer/shimmer.dart';
 
 class SubjectCardSkeleton extends StatelessWidget {

@@ -41,7 +41,7 @@ import 'package:anime_flow/app/router/model/info_route_extra.dart';
 import 'package:anime_flow/app/router/routes_args.dart';
 import 'package:anime_flow/app/router/app_route_observer.dart';
 import 'package:bot_toast/bot_toast.dart';
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 

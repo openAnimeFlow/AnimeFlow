@@ -7,7 +7,7 @@ import 'package:anime_flow/features/auth/presentation/widgets/graphic_captcha.da
 import 'package:anime_flow/features/auth/presentation/widgets/send_code_button.dart';
 import 'package:anime_flow/shared/widgets/notification_toast.dart';
 import 'package:anime_flow/app/localization/app_localizations.dart';
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:go_router/go_router.dart';
 
 class ForgotPasswordPage extends StatefulWidget {

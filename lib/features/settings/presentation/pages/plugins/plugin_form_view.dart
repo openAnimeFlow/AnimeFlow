@@ -1,7 +1,7 @@
 import 'package:anime_flow/app/localization/app_localizations.dart';
 import 'package:anime_flow/core/crawler/item/anti_crawler_config.dart';
 import 'package:anime_flow/core/crawler/item/api_rule_config.dart';
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 
 import 'plugin_form_controller.dart';
 import 'plugin_form_fields.dart';

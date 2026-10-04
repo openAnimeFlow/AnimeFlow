@@ -2,7 +2,7 @@ import 'dart:async';
 
 import 'package:anime_flow/core/utils/system_util.dart';
 import 'package:connectivity_plus/connectivity_plus.dart';
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 
 /// 网络图标
 class NetworkIcon extends StatefulWidget {

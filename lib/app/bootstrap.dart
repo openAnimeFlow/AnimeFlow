@@ -13,7 +13,7 @@ import 'package:anime_flow/core/presence/presence_service.dart';
 import 'package:anime_flow/core/logger/logger.dart';
 import 'package:anime_flow/core/settings/storage.dart';
 import 'package:anime_flow/features/source/data/services/source_config_initializer.dart';
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:hive_ce_flutter/hive_flutter.dart';

@@ -3,7 +3,7 @@ import 'package:anime_flow/app/theme/theme_provider.dart';
 import 'package:anime_flow/features/play/presentation/providers/play_provider.dart';
 import 'package:anime_flow/features/settings/presentation/providers/font_provider.dart';
 import 'package:canvas_danmaku/canvas_danmaku.dart';
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import 'canvas_danmaku_adapter.dart';

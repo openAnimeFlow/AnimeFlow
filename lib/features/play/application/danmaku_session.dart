@@ -10,7 +10,7 @@ import 'package:anime_flow/features/play/application/danmaku_chinese_mode.dart';
 import 'package:anime_flow/features/play/application/danmaku_dispatch_scheduler.dart';
 import 'package:anime_flow/features/play/application/danmaku_state.dart';
 import 'package:anime_flow/shared/models/player/danmaku/danmaku_module.dart';
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 
 class DanmakuPlaybackSnapshot {
   const DanmakuPlaybackSnapshot({

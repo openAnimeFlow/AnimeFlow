@@ -1,5 +1,5 @@
 import 'package:anime_flow/shared/models/player/danmaku/danmaku_module.dart';
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 
 /// 弹幕会话对画布的最小操作集合，具体绘制由展示层实现。
 abstract interface class DanmakuCanvas {

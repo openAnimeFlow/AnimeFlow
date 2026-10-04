@@ -3,7 +3,7 @@ import 'package:anime_flow/core/network/api/flow_api.dart';
 import 'package:anime_flow/core/network/clients/flow_client.dart';
 import 'package:anime_flow/core/network/core/network_exception.dart';
 import 'package:anime_flow/shared/models/github_release.dart';
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:flutter_markdown_plus/flutter_markdown_plus.dart';
 import 'package:url_launcher/url_launcher.dart';
 

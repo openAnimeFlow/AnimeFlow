@@ -3,7 +3,7 @@ import 'dart:ui';
 import 'package:anime_flow/shared/models/bangumi/user_info_item.dart';
 import 'package:anime_flow/core/utils/format_time_util.dart';
 import 'package:anime_flow/shared/widgets/animation_network_image.dart';
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 
 class HeaderContent extends StatelessWidget {
   final UserInfoItem userInfo;

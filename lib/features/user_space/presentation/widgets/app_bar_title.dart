@@ -1,6 +1,6 @@
 import 'package:anime_flow/shared/models/bangumi/user_info_item.dart';
 import 'package:anime_flow/shared/widgets/animation_network_image.dart';
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:go_router/go_router.dart';
 
 class BarTitleView extends StatelessWidget {

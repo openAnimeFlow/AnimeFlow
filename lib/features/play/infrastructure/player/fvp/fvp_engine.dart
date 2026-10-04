@@ -9,7 +9,7 @@ import 'package:anime_flow/features/play/domain/player/player_event.dart';
 import 'package:anime_flow/features/play/domain/player/player_kernel.dart';
 import 'package:anime_flow/features/play/infrastructure/player/player_operation_queue.dart';
 import 'package:fvp/mdk.dart' as fvp;
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 
 /// FVP backend player adapter.
 ///

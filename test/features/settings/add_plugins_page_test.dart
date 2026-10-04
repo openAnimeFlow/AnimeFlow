@@ -1,6 +1,7 @@
 import 'package:anime_flow/app/localization/app_localizations.dart';
+import 'package:anime_flow/app/localization/app_localizations_delegates.dart';
 import 'package:anime_flow/features/settings/presentation/pages/plugins/add_plugins.dart';
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 
@@ -16,7 +17,7 @@ Future<void> _mount(WidgetTester tester) async {
           languageCode: 'zh',
           scriptCode: 'Hans',
         ),
-        localizationsDelegates: AppLocalizations.localizationsDelegates,
+        localizationsDelegates: appLocalizationsDelegates,
         supportedLocales: AppLocalizations.supportedLocales,
         home: AddPluginsPage(),
       ),

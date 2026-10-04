@@ -1,9 +1,10 @@
 import 'package:anime_flow/app/localization/app_localizations.dart';
+import 'package:anime_flow/app/localization/app_localizations_delegates.dart';
 import 'package:anime_flow/features/user/presentation/providers/user_collection_provider.dart';
 import 'package:anime_flow/features/user/presentation/providers/user_collection_state.dart';
 import 'package:anime_flow/features/user/presentation/widgets/collection_tab_view.dart';
 import 'package:anime_flow/shared/models/bangumi/user_collections_item.dart';
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 
@@ -69,7 +70,7 @@ Widget _page(UserCollections collections) => ProviderScope(
       overrides: [userCollectionsProvider.overrideWith(() => collections)],
       child: MaterialApp(
         locale: const Locale('en'),
-        localizationsDelegates: AppLocalizations.localizationsDelegates,
+        localizationsDelegates: appLocalizationsDelegates,
         supportedLocales: AppLocalizations.supportedLocales,
         home: DefaultTabController(
           length: 1,
@@ -158,7 +159,7 @@ void main() {
       overrides: [userCollectionsProvider.overrideWith(() => collections)],
       child: MaterialApp(
         locale: const Locale('en'),
-        localizationsDelegates: AppLocalizations.localizationsDelegates,
+        localizationsDelegates: appLocalizationsDelegates,
         supportedLocales: AppLocalizations.supportedLocales,
         home: DefaultTabController(
           length: 1,

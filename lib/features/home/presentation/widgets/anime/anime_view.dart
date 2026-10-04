@@ -1,7 +1,7 @@
 import 'dart:math' as math;
 
 import 'package:anime_flow/features/home/presentation/providers/anime_provider.dart';
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:anime_flow/core/constants/layout_constant.dart';
 import 'package:anime_flow/features/home/presentation/widgets/anime/calendar.dart';
 import 'package:anime_flow/features/home/presentation/widgets/anime/popular_anime.dart';

@@ -1,5 +1,5 @@
 import 'package:anime_flow/shared/widgets/animation_network_image.dart';
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 
 class UserAvatarView extends StatefulWidget {
   final String? avatar;

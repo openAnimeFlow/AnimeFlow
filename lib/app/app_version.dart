@@ -2,7 +2,7 @@ import 'dart:async';
 
 import 'package:anime_flow/app/router/app_router.dart';
 import 'package:anime_flow/features/app_update/presentation/widgets/version_update_ui.dart';
-import 'package:flutter/cupertino.dart';
+import 'package:cupertino_ui/cupertino_ui.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import 'package:anime_flow/features/app_update/application/app_info_provider.dart';

@@ -2,7 +2,7 @@ import 'package:anime_flow/app/localization/app_localizations.dart';
 import 'package:anime_flow/features/home/presentation/widgets/anime/anime_view.dart';
 import 'package:anime_flow/features/home/presentation/widgets/community/community_view.dart';
 import 'package:anime_flow/app/router/app_router.dart';
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 
 class RecommendPage extends StatefulWidget {
   const RecommendPage({super.key});

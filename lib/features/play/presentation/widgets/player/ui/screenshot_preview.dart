@@ -4,7 +4,7 @@ import 'package:anime_flow/app/router/app_router.dart';
 import 'package:anime_flow/app/router/model/image_viewer_extra.dart';
 import 'package:anime_flow/features/play/presentation/providers/play_provider.dart';
 import 'package:anime_flow/features/play/presentation/providers/video_ui_provider.dart';
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 /// 播放器右下角的截图缩略图。

@@ -2,7 +2,7 @@ import 'package:anime_flow/features/play/application/danmaku_canvas.dart';
 import 'package:anime_flow/features/play/application/danmaku_session.dart';
 import 'package:anime_flow/shared/models/player/danmaku/danmaku_module.dart';
 import 'package:canvas_danmaku/canvas_danmaku.dart';
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 
 class CanvasDanmakuAdapter implements DanmakuCanvas {
   CanvasDanmakuAdapter(this.controller);

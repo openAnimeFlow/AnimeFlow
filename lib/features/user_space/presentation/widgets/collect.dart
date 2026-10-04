@@ -6,7 +6,7 @@ import 'package:anime_flow/features/user_space/presentation/providers/user_space
 import 'package:anime_flow/app/router/app_router.dart';
 import 'package:anime_flow/core/utils/layout_util.dart';
 import 'package:anime_flow/shared/widgets/subject_card.dart';
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 ///空间收藏页面

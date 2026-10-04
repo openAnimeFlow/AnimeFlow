@@ -1,5 +1,5 @@
 import 'package:anime_flow/core/crawler/item/bgm_user_statistics_item.dart';
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 
 class UserSpaceStatisticsSection extends StatelessWidget {
   final BgmUserStatisticsItem userPageItem;

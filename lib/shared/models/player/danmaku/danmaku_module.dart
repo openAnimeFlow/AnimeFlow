@@ -1,5 +1,5 @@
 import 'package:anime_flow/core/utils/utils.dart';
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 
 class Danmaku {
   // 弹幕内容

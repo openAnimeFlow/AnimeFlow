@@ -107,7 +107,7 @@ dependencies:
   # 状态管理与导航
   flutter_riverpod: ^3.2.1 # 将 Riverpod 状态管理与 Flutter widget 生命周期集成。
   riverpod_annotation: ^4.0.2 # 提供用于声明 Riverpod Provider 的注解。
-  go_router: ^17.1.0 # 提供基于 URL 的声明式路由和导航。
+  go_router: ^18.0.2 # 提供基于 URL 的声明式路由和导航。
 
   # 数据持久化与文件系统
   flutter_secure_storage: ^10.0.0 # 通过平台安全存储保存键值数据。

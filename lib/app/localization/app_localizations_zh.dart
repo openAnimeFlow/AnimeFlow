@@ -1329,6 +1329,60 @@ class AppLocalizationsZh extends AppLocalizations {
   String get traceMoeDescription => '提供以图识别番功能';
 
   @override
+  String get sponsor => '贊助';
+
+  @override
+  String get sponsorHeroTitle => '支持 AnimeFlow';
+
+  @override
+  String get sponsorHeroDescription =>
+      'AnimeFlow 始終堅持免費、開源、無廣告。你的每一份支持，都會用於伺服器與頻寬開銷、持續開發與維護，讓這個專案走得更遠。';
+
+  @override
+  String get sponsorReasonsTitle => '你的支持用在哪裡';
+
+  @override
+  String get sponsorReasonsDescription =>
+      '伺服器與頻寬：番劇資料、外掛與版本更新都依賴伺服器與 CDN，贊助用於分擔這些持續開銷。\n持續開發與維護：修復問題、適配新平台，打磨播放器、彈幕與外掛體驗。\n保持純粹：拒絕開屏與貼片廣告、不販售使用者資料，贊助是讓專案健康運轉的最好方式。';
+
+  @override
+  String get sponsorMethodsTitle => '贊助方式';
+
+  @override
+  String get sponsorAfdian => '愛發電';
+
+  @override
+  String get sponsorAfdianDescription => '適合長期支持，可按月贊助，也能留下你的暱稱。';
+
+  @override
+  String get sponsorAlipay => '支付寶';
+
+  @override
+  String get sponsorAlipayDescription => '掃碼或轉帳，一次性支持，方便快速。';
+
+  @override
+  String get sponsorWechat => '微信讚賞';
+
+  @override
+  String get sponsorWechatDescription => '掃碼讚賞，金額隨心。';
+
+  @override
+  String get sponsorGithub => 'GitHub Sponsors';
+
+  @override
+  String get sponsorGithubDescription => '面向開發者，支持按月贊助並展示在個人主頁。';
+
+  @override
+  String get sponsorUnavailable => '該贊助管道即將開放，敬請期待';
+
+  @override
+  String get sponsorFooterTitle => '感謝每一份支持';
+
+  @override
+  String get sponsorFooterDescription =>
+      '無論金額多少，都謝謝你願意支持 AnimeFlow ❤️ 點個 Star、幫忙宣傳或回報問題，同樣是最好的支持。';
+
+  @override
   String fontRefreshFailed(Object error) {
     return '刷新失败：$error';
   }
@@ -3580,6 +3634,60 @@ class AppLocalizationsZhHans extends AppLocalizationsZh {
 
   @override
   String get traceMoeDescription => '提供以图识别番功能';
+
+  @override
+  String get sponsor => '赞助';
+
+  @override
+  String get sponsorHeroTitle => '支持 AnimeFlow';
+
+  @override
+  String get sponsorHeroDescription =>
+      'AnimeFlow 始终坚持免费、开源、无广告。你的每一份支持，都会用于服务器与带宽开销、持续开发与维护，让这个项目走得更远。';
+
+  @override
+  String get sponsorReasonsTitle => '你的支持用在哪里';
+
+  @override
+  String get sponsorReasonsDescription =>
+      '服务器与带宽：番剧数据、插件与版本更新都依赖服务器和 CDN，赞助用于分担这些持续开销。\n持续开发与维护：修复问题、适配新平台，打磨播放器、弹幕和插件体验。\n保持纯粹：拒绝开屏与贴片广告、不售卖用户数据，赞助是让项目健康运转的最好方式。';
+
+  @override
+  String get sponsorMethodsTitle => '赞助方式';
+
+  @override
+  String get sponsorAfdian => '爱发电';
+
+  @override
+  String get sponsorAfdianDescription => '适合长期支持，可按月赞助，也能留下你的昵称。';
+
+  @override
+  String get sponsorAlipay => '支付宝';
+
+  @override
+  String get sponsorAlipayDescription => '扫码或转账，一次性支持，方便快捷。';
+
+  @override
+  String get sponsorWechat => '微信赞赏';
+
+  @override
+  String get sponsorWechatDescription => '扫码赞赏，金额随心。';
+
+  @override
+  String get sponsorGithub => 'GitHub Sponsors';
+
+  @override
+  String get sponsorGithubDescription => '面向开发者，支持按月赞助并展示在个人主页。';
+
+  @override
+  String get sponsorUnavailable => '该赞助渠道即将开放，敬请期待';
+
+  @override
+  String get sponsorFooterTitle => '感谢每一份支持';
+
+  @override
+  String get sponsorFooterDescription =>
+      '无论金额多少，都谢谢你愿意支持 AnimeFlow ❤️ 点个 Star、帮忙宣传或反馈问题，同样是最好的支持。';
 
   @override
   String fontRefreshFailed(Object error) {
@@ -5834,6 +5942,60 @@ class AppLocalizationsZhHantHk extends AppLocalizationsZh {
   String get traceMoeDescription => '提供以圖識別番劇功能';
 
   @override
+  String get sponsor => '贊助';
+
+  @override
+  String get sponsorHeroTitle => '支持 AnimeFlow';
+
+  @override
+  String get sponsorHeroDescription =>
+      'AnimeFlow 始終堅持免費、開源、無廣告。你的每一份支持，都會用於伺服器與頻寬開銷、持續開發與維護，讓這個專案走得更遠。';
+
+  @override
+  String get sponsorReasonsTitle => '你的支持用在哪裡';
+
+  @override
+  String get sponsorReasonsDescription =>
+      '伺服器與頻寬：番劇資料、外掛與版本更新都依賴伺服器與 CDN，贊助用於分擔這些持續開銷。\n持續開發與維護：修復問題、適配新平台，打磨播放器、彈幕與外掛體驗。\n保持純粹：拒絕開屏與貼片廣告、不販售使用者資料，贊助是讓專案健康運轉的最好方式。';
+
+  @override
+  String get sponsorMethodsTitle => '贊助方式';
+
+  @override
+  String get sponsorAfdian => '愛發電';
+
+  @override
+  String get sponsorAfdianDescription => '適合長期支持，可按月贊助，也能留下你的暱稱。';
+
+  @override
+  String get sponsorAlipay => '支付寶';
+
+  @override
+  String get sponsorAlipayDescription => '掃碼或轉帳，一次性支持，方便快速。';
+
+  @override
+  String get sponsorWechat => '微信讚賞';
+
+  @override
+  String get sponsorWechatDescription => '掃碼讚賞，金額隨心。';
+
+  @override
+  String get sponsorGithub => 'GitHub Sponsors';
+
+  @override
+  String get sponsorGithubDescription => '面向開發者，支持按月贊助並展示在個人主頁。';
+
+  @override
+  String get sponsorUnavailable => '該贊助管道即將開放，敬請期待';
+
+  @override
+  String get sponsorFooterTitle => '感謝每一份支持';
+
+  @override
+  String get sponsorFooterDescription =>
+      '無論金額多少，都謝謝你願意支持 AnimeFlow ❤️ 點個 Star、幫忙宣傳或回報問題，同樣是最好的支持。';
+
+  @override
   String fontRefreshFailed(Object error) {
     return '重新整理失敗：$error';
   }
@@ -8085,6 +8247,60 @@ class AppLocalizationsZhHantTw extends AppLocalizationsZh {
 
   @override
   String get traceMoeDescription => '提供以圖識別番劇功能';
+
+  @override
+  String get sponsor => '贊助';
+
+  @override
+  String get sponsorHeroTitle => '支持 AnimeFlow';
+
+  @override
+  String get sponsorHeroDescription =>
+      'AnimeFlow 始終堅持免費、開源、無廣告。你的每一份支持，都會用於伺服器與頻寬開銷、持續開發與維護，讓這個專案走得更遠。';
+
+  @override
+  String get sponsorReasonsTitle => '你的支持用在哪裡';
+
+  @override
+  String get sponsorReasonsDescription =>
+      '伺服器與頻寬：番劇資料、外掛與版本更新都依賴伺服器與 CDN，贊助用於分擔這些持續開銷。\n持續開發與維護：修復問題、適配新平台，打磨播放器、彈幕與外掛體驗。\n保持純粹：拒絕開屏與貼片廣告、不販售使用者資料，贊助是讓專案健康運轉的最好方式。';
+
+  @override
+  String get sponsorMethodsTitle => '贊助方式';
+
+  @override
+  String get sponsorAfdian => '愛發電';
+
+  @override
+  String get sponsorAfdianDescription => '適合長期支持，可按月贊助，也能留下你的暱稱。';
+
+  @override
+  String get sponsorAlipay => '支付寶';
+
+  @override
+  String get sponsorAlipayDescription => '掃碼或轉帳，一次性支持，方便快速。';
+
+  @override
+  String get sponsorWechat => '微信讚賞';
+
+  @override
+  String get sponsorWechatDescription => '掃碼讚賞，金額隨心。';
+
+  @override
+  String get sponsorGithub => 'GitHub Sponsors';
+
+  @override
+  String get sponsorGithubDescription => '面向開發者，支持按月贊助並展示在個人主頁。';
+
+  @override
+  String get sponsorUnavailable => '該贊助管道即將開放，敬請期待';
+
+  @override
+  String get sponsorFooterTitle => '感謝每一份支持';
+
+  @override
+  String get sponsorFooterDescription =>
+      '無論金額多少，都謝謝你願意支持 AnimeFlow ❤️ 點個 Star、幫忙宣傳或回報問題，同樣是最好的支持。';
 
   @override
   String fontRefreshFailed(Object error) {

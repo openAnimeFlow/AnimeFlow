@@ -2612,6 +2612,108 @@ abstract class AppLocalizations {
   /// **'提供以图识别番功能'**
   String get traceMoeDescription;
 
+  /// No description provided for @sponsor.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'赞助'**
+  String get sponsor;
+
+  /// No description provided for @sponsorHeroTitle.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'支持 AnimeFlow'**
+  String get sponsorHeroTitle;
+
+  /// No description provided for @sponsorHeroDescription.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'AnimeFlow 始终坚持免费、开源、无广告。你的每一份支持，都会用于服务器与带宽开销、持续开发与维护，让这个项目走得更远。'**
+  String get sponsorHeroDescription;
+
+  /// No description provided for @sponsorReasonsTitle.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'你的支持用在哪里'**
+  String get sponsorReasonsTitle;
+
+  /// No description provided for @sponsorReasonsDescription.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'服务器与带宽：番剧数据、插件与版本更新都依赖服务器和 CDN，赞助用于分担这些持续开销。\n持续开发与维护：修复问题、适配新平台，打磨播放器、弹幕和插件体验。\n保持纯粹：拒绝开屏与贴片广告、不售卖用户数据，赞助是让项目健康运转的最好方式。'**
+  String get sponsorReasonsDescription;
+
+  /// No description provided for @sponsorMethodsTitle.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'赞助方式'**
+  String get sponsorMethodsTitle;
+
+  /// No description provided for @sponsorAfdian.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'爱发电'**
+  String get sponsorAfdian;
+
+  /// No description provided for @sponsorAfdianDescription.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'适合长期支持，可按月赞助，也能留下你的昵称。'**
+  String get sponsorAfdianDescription;
+
+  /// No description provided for @sponsorAlipay.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'支付宝'**
+  String get sponsorAlipay;
+
+  /// No description provided for @sponsorAlipayDescription.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'扫码或转账，一次性支持，方便快捷。'**
+  String get sponsorAlipayDescription;
+
+  /// No description provided for @sponsorWechat.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'微信赞赏'**
+  String get sponsorWechat;
+
+  /// No description provided for @sponsorWechatDescription.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'扫码赞赏，金额随心。'**
+  String get sponsorWechatDescription;
+
+  /// No description provided for @sponsorGithub.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'GitHub Sponsors'**
+  String get sponsorGithub;
+
+  /// No description provided for @sponsorGithubDescription.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'面向开发者，支持按月赞助并展示在个人主页。'**
+  String get sponsorGithubDescription;
+
+  /// No description provided for @sponsorUnavailable.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'该赞助渠道即将开放，敬请期待'**
+  String get sponsorUnavailable;
+
+  /// No description provided for @sponsorFooterTitle.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'感谢每一份支持'**
+  String get sponsorFooterTitle;
+
+  /// No description provided for @sponsorFooterDescription.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'无论金额多少，都谢谢你愿意支持 AnimeFlow ❤️ 点个 Star、帮忙宣传或反馈问题，同样是最好的支持。'**
+  String get sponsorFooterDescription;
+
   /// No description provided for @fontRefreshFailed.
   ///
   /// In zh_Hans, this message translates to:

@@ -1363,6 +1363,63 @@ class AppLocalizationsEn extends AppLocalizations {
   String get traceMoeDescription => 'Provides anime recognition from images';
 
   @override
+  String get sponsor => 'Sponsor';
+
+  @override
+  String get sponsorHeroTitle => 'Support AnimeFlow';
+
+  @override
+  String get sponsorHeroDescription =>
+      'AnimeFlow is and always will be free, open source, and ad-free. Every bit of support goes toward server and bandwidth costs, ongoing development and maintenance, so this project can go further.';
+
+  @override
+  String get sponsorReasonsTitle => 'Where your support goes';
+
+  @override
+  String get sponsorReasonsDescription =>
+      'Servers & bandwidth: anime data, plugins, and app updates all rely on servers and CDN, and sponsorship helps cover these ongoing costs.\nOngoing development: fixing issues, supporting new platforms, and polishing the player, danmaku, and plugin experience.\nKeeping it clean: no splash or pre-roll ads and we never sell your data — sponsorship is the healthiest way to keep the project running.';
+
+  @override
+  String get sponsorMethodsTitle => 'Ways to sponsor';
+
+  @override
+  String get sponsorAfdian => 'Afdian';
+
+  @override
+  String get sponsorAfdianDescription =>
+      'Great for long-term support with monthly sponsorship and your name in the credits.';
+
+  @override
+  String get sponsorAlipay => 'Alipay';
+
+  @override
+  String get sponsorAlipayDescription =>
+      'Scan or transfer for a one-time tip, quick and easy.';
+
+  @override
+  String get sponsorWechat => 'WeChat Tip';
+
+  @override
+  String get sponsorWechatDescription => 'Scan to tip any amount you like.';
+
+  @override
+  String get sponsorGithub => 'GitHub Sponsors';
+
+  @override
+  String get sponsorGithubDescription =>
+      'For developers, with monthly sponsorship shown on your profile.';
+
+  @override
+  String get sponsorUnavailable => 'This sponsor channel is coming soon';
+
+  @override
+  String get sponsorFooterTitle => 'Thank you for every bit of support';
+
+  @override
+  String get sponsorFooterDescription =>
+      'No matter the amount, thank you for supporting AnimeFlow ❤️ Starring the repo, spreading the word, or reporting issues helps just as much.';
+
+  @override
   String fontRefreshFailed(Object error) {
     return 'Refresh failed: $error';
   }

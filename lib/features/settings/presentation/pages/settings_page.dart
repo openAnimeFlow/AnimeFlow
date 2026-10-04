@@ -73,7 +73,10 @@ class _SettingsMenu extends ConsumerWidget {
         '/settings/addPlugins' ||
         '/settings/downloadPlugins' =>
           '/settings/Plugins',
-        '/settings/thanks' || '/settings/agreement' => '/settings/about',
+        '/settings/thanks' ||
+        '/settings/sponsor' ||
+        '/settings/agreement' =>
+          '/settings/about',
         _ => location,
       };
 

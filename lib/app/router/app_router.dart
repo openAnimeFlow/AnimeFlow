@@ -21,6 +21,7 @@ import 'package:anime_flow/features/settings/presentation/pages/settings_page.da
 import 'package:anime_flow/features/settings/presentation/pages/account_settings_page.dart';
 import 'package:anime_flow/features/settings/presentation/pages/about/about_page.dart';
 import 'package:anime_flow/features/settings/presentation/pages/about/thanks_page.dart';
+import 'package:anime_flow/features/settings/presentation/pages/about/sponsor_page.dart';
 import 'package:anime_flow/features/settings/presentation/pages/about/updates_page.dart';
 import 'package:anime_flow/features/settings/presentation/pages/agreement_page.dart';
 import 'package:anime_flow/features/settings/presentation/pages/danmaku_setting_page.dart';
@@ -408,6 +409,7 @@ class ImagePreviewRoute extends GoRouteData with $ImagePreviewRoute {
       TypedGoRoute<SettingThemeRoute>(path: 'theme'),
       TypedGoRoute<SettingFontRoute>(path: 'font'),
       TypedGoRoute<SettingThanksRoute>(path: 'thanks'),
+      TypedGoRoute<SettingSponsorRoute>(path: 'sponsor'),
       TypedGoRoute<SettingAgreementRoute>(path: 'agreement'),
     ]),
   ],
@@ -548,6 +550,14 @@ class SettingThanksRoute extends GoRouteData with $SettingThanksRoute {
 
   @override
   Widget build(BuildContext context, GoRouterState state) => const ThanksPage();
+}
+
+class SettingSponsorRoute extends GoRouteData with $SettingSponsorRoute {
+  const SettingSponsorRoute();
+
+  @override
+  Widget build(BuildContext context, GoRouterState state) =>
+      const SponsorPage();
 }
 
 class SettingAgreementRoute extends GoRouteData with $SettingAgreementRoute {

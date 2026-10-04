@@ -760,6 +760,11 @@ RouteBase get $settingsShellRoute => ShellRouteData.$route(
               factory: $SettingThanksRoute._fromState,
             ),
             GoRouteData.$route(
+              path: 'sponsor',
+              hasOverriddenOnExit: false,
+              factory: $SettingSponsorRoute._fromState,
+            ),
+            GoRouteData.$route(
               path: 'agreement',
               hasOverriddenOnExit: false,
               factory: $SettingAgreementRoute._fromState,
@@ -1133,6 +1138,29 @@ mixin $SettingThanksRoute on GoRouteData {
   @override
   String get location => GoRouteData.$location(
         '/settings/thanks',
+      );
+
+  @override
+  void go(BuildContext context) => context.go(location);
+
+  @override
+  Future<T?> push<T>(BuildContext context) => context.push<T>(location);
+
+  @override
+  void pushReplacement(BuildContext context) =>
+      context.pushReplacement(location);
+
+  @override
+  void replace(BuildContext context) => context.replace(location);
+}
+
+mixin $SettingSponsorRoute on GoRouteData {
+  static SettingSponsorRoute _fromState(GoRouterState state) =>
+      const SettingSponsorRoute();
+
+  @override
+  String get location => GoRouteData.$location(
+        '/settings/sponsor',
       );
 
   @override

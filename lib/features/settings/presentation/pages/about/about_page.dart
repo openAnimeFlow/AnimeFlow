@@ -198,6 +198,16 @@ class _AboutSettingsPageState extends ConsumerState<AboutSettingsPage> {
                           ),
                           const Divider(),
                           ListTile(
+                            title: Text(l10n.sponsor),
+                            trailing: const Icon(
+                              Icons.volunteer_activism_outlined,
+                            ),
+                            onTap: () {
+                              const SettingSponsorRoute().push(context);
+                            },
+                          ),
+                          const Divider(),
+                          ListTile(
                             title: Text(l10n.privacyPolicy),
                             trailing: const Icon(Icons.chevron_right),
                             onTap: () {

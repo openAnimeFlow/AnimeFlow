@@ -26,6 +26,18 @@ class AssetsPathConstants {
       /// 侧面板关闭图标
       rightPanelClose = 'assets/icons/right_panel_close.svg',
 
+      /// 爱发电Logo
+      afdianLogo = 'assets/image/afd.png',
+
+      /// GitHub Logo
+      gitHubLogo = 'assets/icons/MdiGithub.svg',
+
+      /// 支付宝Logo
+      alipayLogo = 'assets/icons/MingcuteAlipayFill.svg',
+
+      /// 微信Logo
+      weixinLogo = 'assets/icons/UiwWeixin.svg',
+
       /// 四季图标
       spring = 'assets/icons/spring.svg',
       summer = 'assets/icons/summer.svg',

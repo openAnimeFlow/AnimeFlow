@@ -36,6 +36,7 @@ class _AccountContentViewState extends State<AccountContentView> {
   Widget build(BuildContext context) {
     final user = widget.userInfo;
     return Card(
+      elevation: 0,
       child: Padding(
         padding: const EdgeInsets.all(16),
         child: Column(

@@ -104,6 +104,7 @@ class _BindEmailSectionState extends ConsumerState<BindEmailSection> {
     final colorScheme = Theme.of(context).colorScheme;
 
     return Card(
+      elevation: 0,
       child: Padding(
         padding: const EdgeInsets.all(16),
         child: Form(

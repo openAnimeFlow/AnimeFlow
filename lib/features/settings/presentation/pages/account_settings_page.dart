@@ -215,6 +215,7 @@ class _AccountSettingsPageState extends ConsumerState<AccountSettingsPage> {
             _buildSectionTitle(l10n.accountActions),
             if (user.email.isNotEmpty)
               Card(
+                elevation: 0,
                 child: ListTile(
                   leading: const Icon(Icons.lock_outline),
                   title: Text(l10n.changePassword),
@@ -223,6 +224,7 @@ class _AccountSettingsPageState extends ConsumerState<AccountSettingsPage> {
                 ),
               ),
             Card(
+              elevation: 0,
               child: ListTile(
                 leading: Icon(
                   Icons.logout_outlined,
@@ -251,6 +253,7 @@ class _AccountSettingsPageState extends ConsumerState<AccountSettingsPage> {
     final l10n = AppLocalizations.of(context);
 
     return Card(
+      elevation: 0,
       child: Padding(
         padding: const EdgeInsets.all(16),
         child: Column(

@@ -469,21 +469,12 @@ class _UserViewState extends ConsumerState<UserView>
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 if (hasAvatar)
-                  DecoratedBox(
-                    decoration: BoxDecoration(
-                      border: Border.all(
-                        color: Theme.of(context).colorScheme.primary,
-                      ),
-                      borderRadius: BorderRadius.circular(50),
-                    ),
-                    position: DecorationPosition.foreground,
-                    child: AnimationNetworkImage(
-                      borderRadius: BorderRadius.circular(100),
-                      url: user.avatar!,
-                      fit: BoxFit.cover,
-                      width: 100,
-                      height: 100,
-                    ),
+                  AnimationNetworkImage(
+                    borderRadius: BorderRadius.circular(100),
+                    url: user.avatar!,
+                    fit: BoxFit.cover,
+                    width: 100,
+                    height: 100,
                   )
                 else
                   const Icon(Icons.person, size: 96),

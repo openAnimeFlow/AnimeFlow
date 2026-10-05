@@ -79,7 +79,9 @@ class _CollectionButtonState extends State<CollectionButton> {
 
     final l10n = AppLocalizations.of(context);
     return PopupMenuButton<CollectType>(
-      enabled: !_isUpdating,
+      // The supplied button handles taps and opens this menu through _menuKey.
+      // Disable PopupMenuButton's own InkWell to avoid a second hover overlay.
+      enabled: false,
       key: _menuKey,
       offset: widget.offset,
       shape: RoundedRectangleBorder(

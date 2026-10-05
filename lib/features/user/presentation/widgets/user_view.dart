@@ -31,7 +31,6 @@ class UserView extends ConsumerStatefulWidget {
 
 class _UserViewState extends ConsumerState<UserView>
     with SingleTickerProviderStateMixin {
-  final double _contentHeight = 200.0;
   late TabController _tabController;
   bool isPinned = false;
   bool isHideUserInfo = true;
@@ -148,14 +147,30 @@ class _UserViewState extends ConsumerState<UserView>
       });
     });
     final tabs = _buildTabs(context);
-    final double statusBarHeight = MediaQuery.of(context).padding.top;
+    return LayoutBuilder(
+      builder: (context, constraints) => _buildUserPage(
+        context,
+        tabs,
+        constraints.maxWidth,
+      ),
+    );
+  }
+
+  Widget _buildUserPage(
+    BuildContext context,
+    List<String> tabs,
+    double availableWidth,
+  ) {
+    final contentHeight =
+        (availableWidth * 0.25).clamp(200.0, 360.0).toDouble();
+    final statusBarHeight = MediaQuery.paddingOf(context).top;
     return Scaffold(
       bottomNavigationBar: const CollectionSyncPendingBanner(),
       body: NotificationListener<ScrollNotification>(
         onNotification: (notification) {
           if (notification.depth == 0 &&
               notification is ScrollUpdateNotification) {
-            final bool isPinned = notification.metrics.pixels >= _contentHeight;
+            final bool isPinned = notification.metrics.pixels >= contentHeight;
             if (this.isPinned != isPinned) {
               setState(() {
                 this.isPinned = isPinned;
@@ -180,7 +195,7 @@ class _UserViewState extends ConsumerState<UserView>
                   snap: false,
                   elevation: isPinned ? 4.0 : 0.0,
                   forceElevated: isPinned,
-                  expandedHeight: _contentHeight +
+                  expandedHeight: contentHeight +
                       statusBarHeight +
                       kToolbarHeight +
                       kTextTabBarHeight,

@@ -161,9 +161,9 @@ class _CollectionTabView extends ConsumerWidget {
         metrics.maxScrollExtent <= _loadMoreTriggerDistance;
   }
 
-  double _calculateHorizontalPadding(BuildContext context) {
-    final width = MediaQuery.sizeOf(context).width;
-    final centeredPadding = (width - LayoutConstant.maxWidth) / 2;
+  double _calculateHorizontalPadding(double crossAxisExtent) {
+    final centeredPadding =
+        (crossAxisExtent - LayoutConstant.maxWidth) / 2 + _minHorizontalPadding;
     return centeredPadding > _minHorizontalPadding
         ? centeredPadding
         : _minHorizontalPadding;
@@ -181,8 +181,6 @@ class _CollectionTabView extends ConsumerWidget {
     return Builder(
       builder: (BuildContext context) {
         final handle = NestedScrollView.sliverOverlapAbsorberHandleFor(context);
-        final horizontalPadding = _calculateHorizontalPadding(context);
-
         return RefreshIndicator(
           key: refreshIndicatorKey,
           onRefresh: () => _onRefresh(ref, context),
@@ -204,120 +202,129 @@ class _CollectionTabView extends ConsumerWidget {
               }
               return false;
             },
-            child: CustomScrollView(
-              key: PageStorageKey<int>(type),
-              scrollBehavior: const ScrollBehavior().copyWith(
-                scrollbars: false,
-              ),
-              physics: const AlwaysScrollableScrollPhysics(
-                parent: ClampingScrollPhysics(),
-              ),
-              slivers: <Widget>[
-                SliverOverlapInjector(handle: handle),
-                if (collectionsItem == null &&
-                    tabState.initialErrorMessage != null)
-                  SliverFillRemaining(
-                    hasScrollBody: false,
-                    child: Center(
-                      child: Column(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          Text(l10n.collectionLoadFailed),
-                          const SizedBox(height: 12),
-                          FilledButton(
-                            onPressed: () => _onRefresh(ref, context),
-                            child: Text(l10n.retry),
+            child: LayoutBuilder(
+              builder: (context, constraints) {
+                final horizontalPadding =
+                    _calculateHorizontalPadding(constraints.maxWidth);
+                return CustomScrollView(
+                  key: PageStorageKey<int>(type),
+                  scrollBehavior: const ScrollBehavior().copyWith(
+                    scrollbars: false,
+                  ),
+                  physics: const AlwaysScrollableScrollPhysics(
+                    parent: ClampingScrollPhysics(),
+                  ),
+                  slivers: <Widget>[
+                    SliverOverlapInjector(handle: handle),
+                    if (collectionsItem == null &&
+                        tabState.initialErrorMessage != null)
+                      SliverFillRemaining(
+                        hasScrollBody: false,
+                        child: Center(
+                          child: Column(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Text(l10n.collectionLoadFailed),
+                              const SizedBox(height: 12),
+                              FilledButton(
+                                onPressed: () => _onRefresh(ref, context),
+                                child: Text(l10n.retry),
+                              ),
+                            ],
                           ),
-                        ],
-                      ),
-                    ),
-                  )
-                else if (collectionsItem == null)
-                  const SliverFillRemaining(
-                    child: Center(child: CircularProgressIndicator()),
-                  )
-                else if (collectionsItem.data.isEmpty)
-                  SliverFillRemaining(
-                    hasScrollBody: false,
-                    child: Center(
-                      child: !tabState.canLoadMore
-                          ? Text(l10n.noData)
-                          : tabState.isBusy
-                              ? const CircularProgressIndicator()
-                              : Column(
-                                  mainAxisSize: MainAxisSize.min,
-                                  children: [
-                                    if (tabState.loadMoreErrorMessage !=
-                                        null) ...[
-                                      Text(l10n.collectionLoadMoreFailed),
-                                      const SizedBox(height: 12),
-                                    ],
-                                    FilledButton.icon(
-                                      onPressed: () => _onLoadMore(ref),
-                                      label: Text(
-                                        tabState.loadMoreErrorMessage == null
-                                            ? l10n.viewMore
-                                            : l10n.retry,
-                                      ),
+                        ),
+                      )
+                    else if (collectionsItem == null)
+                      const SliverFillRemaining(
+                        child: Center(child: CircularProgressIndicator()),
+                      )
+                    else if (collectionsItem.data.isEmpty)
+                      SliverFillRemaining(
+                        hasScrollBody: false,
+                        child: Center(
+                          child: !tabState.canLoadMore
+                              ? Text(l10n.noData)
+                              : tabState.isBusy
+                                  ? const CircularProgressIndicator()
+                                  : Column(
+                                      mainAxisSize: MainAxisSize.min,
+                                      children: [
+                                        if (tabState.loadMoreErrorMessage !=
+                                            null) ...[
+                                          Text(l10n.collectionLoadMoreFailed),
+                                          const SizedBox(height: 12),
+                                        ],
+                                        FilledButton.icon(
+                                          onPressed: () => _onLoadMore(ref),
+                                          label: Text(
+                                            tabState.loadMoreErrorMessage ==
+                                                    null
+                                                ? l10n.viewMore
+                                                : l10n.retry,
+                                          ),
+                                        ),
+                                      ],
                                     ),
-                                  ],
-                                ),
-                    ),
-                  )
-                else ...[
-                  SliverPadding(
-                    padding: EdgeInsets.symmetric(
-                      horizontal: horizontalPadding,
-                      vertical: 10,
-                    ),
-                    sliver: SliverLayoutBuilder(
-                      builder: (context, constraints) {
-                        final availableWidth =
-                            constraints.crossAxisExtent - horizontalPadding * 2;
-                        return SliverGrid(
-                          gridDelegate:
-                              SliverGridDelegateWithFixedCrossAxisCount(
-                            crossAxisCount:
-                                (availableWidth / 320.0).floor().clamp(1, 4),
-                            crossAxisSpacing: 12,
-                            mainAxisSpacing: 12,
-                            childAspectRatio: 2.5,
-                          ),
-                          delegate: SliverChildBuilderDelegate(
-                            (context, index) {
-                              final collection = collectionsItem.data[index];
-                              return _CollectionItemCard(
-                                key: ValueKey(collection.id),
-                                collection: collection,
-                                onCollectTypeChanged: (newType) =>
-                                    _onCollectTypeChanged(
-                                  context,
-                                  ref,
-                                  collection,
-                                  newType,
-                                ),
-                              );
-                            },
-                            childCount: collectionsItem.data.length,
-                          ),
-                        );
-                      },
-                    ),
-                  ),
-                  SliverPadding(
-                    padding:
-                        EdgeInsets.symmetric(horizontal: horizontalPadding),
-                    sliver: SliverToBoxAdapter(
-                      child: _CollectionFooter(
-                        isLoadingMore: tabState.isLoadingMore,
-                        hasMore: tabState.canLoadMore,
-                        errorMessage: tabState.loadMoreErrorMessage,
-                        onRetry: () => _onLoadMore(ref),
+                        ),
+                      )
+                    else ...[
+                      SliverPadding(
+                        padding: EdgeInsets.symmetric(
+                          horizontal: horizontalPadding,
+                          vertical: 10,
+                        ),
+                        sliver: SliverLayoutBuilder(
+                          builder: (context, constraints) {
+                            final availableWidth = constraints.crossAxisExtent -
+                                horizontalPadding * 2;
+                            return SliverGrid(
+                              gridDelegate:
+                                  SliverGridDelegateWithFixedCrossAxisCount(
+                                crossAxisCount: (availableWidth / 320.0)
+                                    .floor()
+                                    .clamp(1, 4),
+                                crossAxisSpacing: 12,
+                                mainAxisSpacing: 12,
+                                childAspectRatio: 2.5,
+                              ),
+                              delegate: SliverChildBuilderDelegate(
+                                (context, index) {
+                                  final collection =
+                                      collectionsItem.data[index];
+                                  return _CollectionItemCard(
+                                    key: ValueKey(collection.id),
+                                    collection: collection,
+                                    onCollectTypeChanged: (newType) =>
+                                        _onCollectTypeChanged(
+                                      context,
+                                      ref,
+                                      collection,
+                                      newType,
+                                    ),
+                                  );
+                                },
+                                childCount: collectionsItem.data.length,
+                              ),
+                            );
+                          },
+                        ),
                       ),
-                    ),
-                  ),
-                ],
-              ],
+                      SliverPadding(
+                        padding:
+                            EdgeInsets.symmetric(horizontal: horizontalPadding),
+                        sliver: SliverToBoxAdapter(
+                          child: _CollectionFooter(
+                            isLoadingMore: tabState.isLoadingMore,
+                            hasMore: tabState.canLoadMore,
+                            errorMessage: tabState.loadMoreErrorMessage,
+                            onRetry: () => _onLoadMore(ref),
+                          ),
+                        ),
+                      ),
+                    ],
+                  ],
+                );
+              },
             ),
           ),
         );

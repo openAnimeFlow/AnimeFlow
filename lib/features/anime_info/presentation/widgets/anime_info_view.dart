@@ -23,8 +23,6 @@ class AnimeInfoView extends StatefulWidget {
 class _AnimeInfoViewState extends State<AnimeInfoView> {
   final nestedScrollController = ScrollController();
 
-  /// 内容区域的高度
-  final double contentHeight = 200.0;
   bool isPinned = false;
   bool topButton = false;
 
@@ -36,8 +34,17 @@ class _AnimeInfoViewState extends State<AnimeInfoView> {
 
   @override
   Widget build(BuildContext context) {
-    final statusBarHeight = MediaQuery.of(context).padding.top;
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final contentHeight =
+            (constraints.maxWidth * 0.25).clamp(200.0, 450.0).toDouble();
+        return _buildAnimeInfoPage(context, contentHeight);
+      },
+    );
+  }
 
+  Widget _buildAnimeInfoPage(BuildContext context, double contentHeight) {
+    final statusBarHeight = MediaQuery.paddingOf(context).top;
     return Scaffold(
       body: NotificationListener<ScrollNotification>(
         onNotification: (notification) {

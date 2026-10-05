@@ -336,7 +336,10 @@ class _EpisodesListViewState extends ConsumerState<EpisodesListView> {
                             bottomLeft: Radius.circular(10),
                           ),
                         ),
-                        child: Text(episode.sort.toString().padLeft(2, '0')),
+                        child: Text(
+                          episode.sort.toString().padLeft(2, '0'),
+                          style: const TextStyle(color: Colors.white),
+                        ),
                       ),
                     )
                   ],

@@ -115,43 +115,47 @@ class _FeaturedRankings extends StatelessWidget {
   Widget build(BuildContext context) {
     if (items.isEmpty) return const SizedBox.shrink();
 
-    final isCompact = MediaQuery.sizeOf(context).width < 720;
-    final cards = items.asMap().entries.map((entry) {
-      final rank = entry.key + 1;
-      final card = _FeaturedCard(subject: entry.value, rank: rank);
-      return isCompact
-          ? SizedBox(width: 260, child: card)
-          : Expanded(flex: rank == 1 ? 115 : 100, child: card);
-    }).toList();
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final isCompact = constraints.maxWidth < 720;
+        final cards = items.asMap().entries.map((entry) {
+          final rank = entry.key + 1;
+          final card = _FeaturedCard(subject: entry.value, rank: rank);
+          return isCompact
+              ? SizedBox(width: 260, child: card)
+              : Expanded(flex: rank == 1 ? 115 : 100, child: card);
+        }).toList();
 
-    return SizedBox(
-      width: double.infinity,
-      child: Padding(
-        padding: const EdgeInsets.only(top: 14, bottom: 24),
-        child: isCompact
-            ? SizedBox(
-                height: 300,
-                child: ListView.separated(
-                  scrollDirection: Axis.horizontal,
-                  itemCount: cards.length,
-                  separatorBuilder: (_, __) => const SizedBox(width: 5),
-                  itemBuilder: (_, index) => cards[index],
-                ),
-              )
-            : Row(
-                // The scroll view leaves height unbounded; let cards size themselves.
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  if (cards.length > 1) cards[1],
-                  const SizedBox(width: 12),
-                  cards[0],
-                  if (cards.length > 2) ...[
-                    const SizedBox(width: 12),
-                    cards[2],
-                  ],
-                ],
-              ),
-      ),
+        return SizedBox(
+          width: double.infinity,
+          child: Padding(
+            padding: const EdgeInsets.only(top: 14, bottom: 24),
+            child: isCompact
+                ? SizedBox(
+                    height: 300,
+                    child: ListView.separated(
+                      scrollDirection: Axis.horizontal,
+                      itemCount: cards.length,
+                      separatorBuilder: (_, __) => const SizedBox(width: 5),
+                      itemBuilder: (_, index) => cards[index],
+                    ),
+                  )
+                : Row(
+                    // The scroll view leaves height unbounded; let cards size themselves.
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      if (cards.length > 1) cards[1],
+                      const SizedBox(width: 12),
+                      cards[0],
+                      if (cards.length > 2) ...[
+                        const SizedBox(width: 12),
+                        cards[2],
+                      ],
+                    ],
+                  ),
+          ),
+        );
+      },
     );
   }
 }

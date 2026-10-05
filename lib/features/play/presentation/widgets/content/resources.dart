@@ -145,6 +145,7 @@ class _VideoResourcesViewState extends ConsumerState<VideoResourcesView> {
     return DropDownMenu<_SourceAction>(
       items: actions,
       tooltip: l10n.sourceActions,
+      buttonBorderRadius: BorderRadius.circular(25),
       disableSelected: false,
       onOpenedChanged: (isOpen) {
         if (!mounted || _isSourceActionMenuOpen == isOpen) {
@@ -154,18 +155,21 @@ class _VideoResourcesViewState extends ConsumerState<VideoResourcesView> {
           _isSourceActionMenuOpen = isOpen;
         });
       },
+      offset: const Offset(0, 55),
       buttonBuilder: (context, _) {
         final colorScheme = Theme.of(context).colorScheme;
         return SizedBox.square(
           dimension: 50,
-          child: AnimatedRotation(
-            turns: _isSourceActionMenuOpen ? 0.5 : 0,
-            duration: const Duration(milliseconds: 180),
-            curve: Curves.easeOutCubic,
-            child: Icon(
-              Icons.keyboard_arrow_down_rounded,
-              color: colorScheme.primary,
-              size: 30,
+          child: Center(
+            child: AnimatedRotation(
+              turns: _isSourceActionMenuOpen ? 0.5 : 0,
+              duration: const Duration(milliseconds: 180),
+              curve: Curves.easeOutCubic,
+              child: Icon(
+                Icons.keyboard_arrow_down_rounded,
+                color: colorScheme.onSurface,
+                size: 30,
+              ),
             ),
           ),
         );
@@ -236,86 +240,69 @@ class _VideoResourcesViewState extends ConsumerState<VideoResourcesView> {
       elevation: 0,
       child: Padding(
         padding: const EdgeInsets.all(10),
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        child: Column(
           children: [
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    l10n.videoSource,
-                    style: const TextStyle(
-                      fontSize: 15,
-                    ),
-                  ),
-                  const SizedBox(height: 5),
-                  if (videoSourceState.isSearchCompleted ||
-                      videoSourceState.webSiteTitle.isNotEmpty)
-                    Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      spacing: 5,
-                      children: [
-                        Row(
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        l10n.videoSource,
+                        style: const TextStyle(
+                          fontSize: 15,
+                        ),
+                      ),
+                      const SizedBox(height: 5),
+                      if (videoSourceState.isSearchCompleted ||
+                          videoSourceState.webSiteTitle.isNotEmpty)
+                        Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          spacing: 5,
                           children: [
-                            ClipRRect(
-                              borderRadius: BorderRadius.circular(5),
-                              child: AnimationNetworkImage(
-                                height: 25,
-                                width: 25,
-                                url: videoSourceState.webSiteIcon,
-                              ),
-                            ),
-                            const SizedBox(width: 5),
-                            Expanded(
-                              child: Text(
-                                videoSourceState.webSiteTitle,
-                                maxLines: 1,
-                                overflow: TextOverflow.ellipsis,
-                                style: const TextStyle(
-                                  fontSize: 20,
-                                  fontWeight: FontWeight.bold,
+                            Row(
+                              children: [
+                                ClipRRect(
+                                  borderRadius: BorderRadius.circular(5),
+                                  child: AnimationNetworkImage(
+                                    height: 25,
+                                    width: 25,
+                                    url: videoSourceState.webSiteIcon,
+                                  ),
                                 ),
-                              ),
+                                const SizedBox(width: 5),
+                                Expanded(
+                                  child: Text(
+                                    videoSourceState.webSiteTitle,
+                                    maxLines: 1,
+                                    overflow: TextOverflow.ellipsis,
+                                    style: const TextStyle(
+                                      fontSize: 20,
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                  ),
+                                ),
+                              ],
                             ),
                           ],
-                        ),
-                        if (resourceDetail.isNotEmpty) ...[
-                          const SizedBox(height: 2),
-                          Text(
-                            resourceDetail,
-                            softWrap: true,
-                            maxLines: 2,
-                            overflow: TextOverflow.ellipsis,
-                            style: TextStyle(
-                              color: Theme.of(context)
-                                  .colorScheme
-                                  .onSurfaceVariant,
-                            ),
-                          ),
-                        ],
-                      ],
-                    )
-                  else
-                    Row(
-                      children: [
-                        Text(l10n.autoSelectingResource),
-                        const SizedBox(width: 5),
-                        const SizedBox(
-                          height: 10,
-                          width: 10,
-                          child: CircularProgressIndicator(),
                         )
-                      ],
-                    ),
-                ],
-              ),
-            ),
-            const SizedBox(width: 8),
-            Column(
-              crossAxisAlignment: CrossAxisAlignment.end,
-              spacing: 10,
-              children: [
+                      else
+                        Row(
+                          children: [
+                            Text(l10n.autoSelectingResource),
+                            const SizedBox(width: 5),
+                            const SizedBox(
+                              height: 10,
+                              width: 10,
+                              child: CircularProgressIndicator(),
+                            )
+                          ],
+                        ),
+                    ],
+                  ),
+                ),
                 OutlinedButton.icon(
                   onPressed: _showSourceDrawer,
                   style: OutlinedButton.styleFrom(
@@ -326,6 +313,23 @@ class _VideoResourcesViewState extends ConsumerState<VideoResourcesView> {
                   icon: const Icon(Icons.sync_alt_rounded),
                   label: Text(l10n.switchSource),
                 ),
+              ],
+            ),
+            Row(
+              children: [
+                if (resourceDetail.isNotEmpty) ...[
+                  Expanded(
+                    child: Text(
+                      resourceDetail,
+                      softWrap: true,
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
+                      style: TextStyle(
+                        color: Theme.of(context).colorScheme.onSurfaceVariant,
+                      ),
+                    ),
+                  ),
+                ],
                 if (canDownload || hasSourceUrl)
                   _buildSourceActionMenu(
                     videoUrl: videoSourceState.videoUrl,
@@ -333,7 +337,7 @@ class _VideoResourcesViewState extends ConsumerState<VideoResourcesView> {
                     l10n: l10n,
                   ),
               ],
-            ),
+            )
           ],
         ),
       ),

@@ -125,17 +125,9 @@ class _DanmakuCardState extends ConsumerState<DanmakuCard>
             children: [
               Row(
                 children: [
-                  Text(
-                    l10n.danmakuSource,
-                    style: const TextStyle(fontWeight: FontWeight.bold),
-                  ),
-                  const SizedBox(width: 5),
                   Expanded(
                     child: Text(
-                      statusText ??
-                          (allDanmakus.isNotEmpty
-                              ? l10n.totalDanmaku(allDanmakus.length)
-                              : ''),
+                      '${l10n.danmakuSource} ${statusText ?? (allDanmakus.isNotEmpty ? l10n.totalDanmaku(allDanmakus.length) : '')}',
                       style: Theme.of(context).textTheme.bodySmall,
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,

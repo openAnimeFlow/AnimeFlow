@@ -1,29 +1,34 @@
-import 'package:anime_flow/features/play/presentation/providers/play_provider.dart';
-import 'package:anime_flow/features/play/presentation/providers/video_ui_provider.dart';
 import 'package:material_ui/material_ui.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-class PlayerProgressBar extends ConsumerWidget {
-  const PlayerProgressBar({super.key});
+class PlayerProgressBar extends StatelessWidget {
+  const PlayerProgressBar({
+    super.key,
+    required this.duration,
+    required this.position,
+    required this.buffered,
+    required this.isDragging,
+    required this.dragPosition,
+    required this.onChangeStart,
+    required this.onChanged,
+    required this.onChangeEnd,
+  });
+
+  final Duration duration;
+  final Duration position;
+  final Duration buffered;
+  final bool isDragging;
+  final Duration dragPosition;
+  final ValueChanged<double> onChangeStart;
+  final ValueChanged<double> onChanged;
+  final ValueChanged<double> onChangeEnd;
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final playController = ref.read(playSessionProvider);
-    final videoUiStateController = ref.read(videoUiProvider.notifier);
-    final isHorizontalDragging = ref.watch(
-      videoUiProvider.select((state) => state.isHorizontalDragging),
-    );
-    final dragPosition = ref.watch(
-      videoUiProvider.select((state) => state.dragPosition),
-    );
-    final duration = ref.watch(playStateProvider.select((s) => s.duration));
-    final position = ref.watch(playStateProvider.select((s) => s.position));
-    final buffered = ref.watch(playStateProvider.select((s) => s.buffered));
+  Widget build(BuildContext context) {
     return SizedBox(
       height: 20,
       child: Builder(builder: (context) {
         final max = duration.inMilliseconds.toDouble();
-        final value = isHorizontalDragging
+        final value = isDragging
             ? dragPosition.inMilliseconds.toDouble()
             : position.inMilliseconds.toDouble();
         final buffer = buffered.inMilliseconds.toDouble();
@@ -81,23 +86,9 @@ class PlayerProgressBar extends ConsumerWidget {
                 value: value.clamp(0.0, max > 0 ? max : 1.0),
                 min: 0.0,
                 max: max > 0 ? max : 1.0,
-                onChangeStart: (v) {
-                  if (!playController.beginManualSeek()) return;
-                  videoUiStateController.startProgressDrag(
-                    Duration(milliseconds: v.toInt()),
-                  );
-                },
-                onChanged: (v) {
-                  videoUiStateController.setHorizontalDragPosition(
-                    Duration(milliseconds: v.toInt()),
-                  );
-                },
-                onChangeEnd: (v) {
-                  playController.finishManualSeek(
-                    Duration(milliseconds: v.toInt()),
-                  );
-                  videoUiStateController.endHorizontalDrag();
-                },
+                onChangeStart: onChangeStart,
+                onChanged: onChanged,
+                onChangeEnd: onChangeEnd,
               ),
             ),
           ],

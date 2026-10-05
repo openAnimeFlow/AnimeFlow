@@ -32,6 +32,49 @@ class BottomAreaControl extends ConsumerWidget {
 
   static const double _wideDanmakuControlsMaxWidth = 520;
 
+  Widget _buildProgressBar() {
+    return Consumer(
+      builder: (context, ref, _) {
+        final playController = ref.read(playSessionProvider);
+        final videoUiStateController = ref.read(videoUiProvider.notifier);
+        final duration = ref.watch(playStateProvider.select((s) => s.duration));
+        final position = ref.watch(playStateProvider.select((s) => s.position));
+        final buffered = ref.watch(playStateProvider.select((s) => s.buffered));
+        final isDragging = ref.watch(
+          videoUiProvider.select((state) => state.isHorizontalDragging),
+        );
+        final dragPosition = ref.watch(
+          videoUiProvider.select((state) => state.dragPosition),
+        );
+
+        return PlayerProgressBar(
+          duration: duration,
+          position: position,
+          buffered: buffered,
+          isDragging: isDragging,
+          dragPosition: dragPosition,
+          onChangeStart: (value) {
+            if (!playController.beginManualSeek()) return;
+            videoUiStateController.startProgressDrag(
+              Duration(milliseconds: value.toInt()),
+            );
+          },
+          onChanged: (value) {
+            videoUiStateController.setHorizontalDragPosition(
+              Duration(milliseconds: value.toInt()),
+            );
+          },
+          onChangeEnd: (value) {
+            playController.finishManualSeek(
+              Duration(milliseconds: value.toInt()),
+            );
+            videoUiStateController.endHorizontalDrag();
+          },
+        );
+      },
+    );
+  }
+
   Future<void> onSendDanmaku(
     BuildContext context,
     PlaySession playController,
@@ -279,10 +322,10 @@ class BottomAreaControl extends ConsumerWidget {
                     ),
                     // 进度条
                     if (fullscreen || isWideScreen)
-                      const Padding(
-                        padding:
-                            EdgeInsets.symmetric(horizontal: 10, vertical: 0),
-                        child: PlayerProgressBar(),
+                      Padding(
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 10, vertical: 0),
+                        child: _buildProgressBar(),
                       ),
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -360,10 +403,10 @@ class BottomAreaControl extends ConsumerWidget {
                                           videoUiStateController,
                                     )
                                   // 进度条
-                                  : const Padding(
-                                      padding:
-                                          EdgeInsets.symmetric(horizontal: 5),
-                                      child: PlayerProgressBar(),
+                                  : Padding(
+                                      padding: const EdgeInsets.symmetric(
+                                          horizontal: 5),
+                                      child: _buildProgressBar(),
                                     ),
                         ),
                         //选集

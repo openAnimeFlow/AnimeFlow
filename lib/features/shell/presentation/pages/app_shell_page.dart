@@ -125,11 +125,18 @@ class AppShellPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final bool isDesktop = MediaQuery.of(context).size.width >= 640;
+    return LayoutBuilder(
+      builder: (context, constraints) =>
+          _buildShell(context, constraints.maxWidth >= 640),
+    );
+  }
+
+  Widget _buildShell(BuildContext context, bool isDesktop) {
     final colorScheme = Theme.of(context).colorScheme;
     final l10n = AppLocalizations.of(context);
     final desktop = SystemUtil.isDesktop;
     return Scaffold(
+      backgroundColor: isDesktop ? colorScheme.surfaceContainerHighest : null,
       body: Row(
         children: [
           if (isDesktop)
@@ -180,7 +187,17 @@ class AppShellPage extends StatelessWidget {
                 );
               },
             ),
-          Expanded(child: navigationShell),
+          Expanded(
+            child: ClipRRect(
+              borderRadius: isDesktop
+                  ? const BorderRadius.horizontal(left: Radius.circular(16))
+                  : BorderRadius.zero,
+              child: ColoredBox(
+                color: Theme.of(context).scaffoldBackgroundColor,
+                child: navigationShell,
+              ),
+            ),
+          ),
         ],
       ),
       bottomNavigationBar: isDesktop

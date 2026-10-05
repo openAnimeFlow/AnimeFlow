@@ -1008,6 +1008,12 @@ class AppLocalizationsZh extends AppLocalizations {
   String get saveEpisodeProgressSubtitle => '播放至90%自动保存剧集进度，下次从未观看的剧集开始播放';
 
   @override
+  String get showMiniProgressBar => '显示迷你进度条';
+
+  @override
+  String get showMiniProgressBarSubtitle => '播放器控件隐藏时，在底部显示迷你播放进度';
+
+  @override
   String get playbackControl => '播放控制';
 
   @override
@@ -3313,6 +3319,12 @@ class AppLocalizationsZhHans extends AppLocalizationsZh {
 
   @override
   String get saveEpisodeProgressSubtitle => '播放至90%自动保存剧集进度，下次从未观看的剧集开始播放';
+
+  @override
+  String get showMiniProgressBar => '显示迷你进度条';
+
+  @override
+  String get showMiniProgressBarSubtitle => '播放器控件隐藏时，在底部显示迷你播放进度';
 
   @override
   String get playbackControl => '播放控制';
@@ -5621,6 +5633,12 @@ class AppLocalizationsZhHantHk extends AppLocalizationsZh {
   String get saveEpisodeProgressSubtitle => '播放至90%自動儲存劇集進度，下次從未觀看的劇集開始播放';
 
   @override
+  String get showMiniProgressBar => '顯示迷你進度條';
+
+  @override
+  String get showMiniProgressBarSubtitle => '播放器控制項隱藏時，在底部顯示迷你播放進度';
+
+  @override
   String get playbackControl => '播放控制';
 
   @override
@@ -7926,6 +7944,12 @@ class AppLocalizationsZhHantTw extends AppLocalizationsZh {
 
   @override
   String get saveEpisodeProgressSubtitle => '播放至90%自動儲存劇集進度，下次從未觀看的劇集開始播放';
+
+  @override
+  String get showMiniProgressBar => '顯示迷你進度條';
+
+  @override
+  String get showMiniProgressBarSubtitle => '播放器控制項隱藏時，在底部顯示迷你播放進度';
 
   @override
   String get playbackControl => '播放控制';

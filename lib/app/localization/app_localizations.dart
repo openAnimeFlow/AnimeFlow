@@ -1982,6 +1982,18 @@ abstract class AppLocalizations {
   /// **'播放至90%自动保存剧集进度，下次从未观看的剧集开始播放'**
   String get saveEpisodeProgressSubtitle;
 
+  /// No description provided for @showMiniProgressBar.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'显示迷你进度条'**
+  String get showMiniProgressBar;
+
+  /// No description provided for @showMiniProgressBarSubtitle.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'播放器控件隐藏时，在底部显示迷你播放进度'**
+  String get showMiniProgressBarSubtitle;
+
   /// No description provided for @playbackControl.
   ///
   /// In zh_Hans, this message translates to:

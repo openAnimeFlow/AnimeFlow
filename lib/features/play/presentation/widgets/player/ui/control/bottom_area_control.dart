@@ -1,4 +1,5 @@
 import 'package:anime_flow/core/constants/assets_path_constants.dart';
+import 'package:anime_flow/core/settings/app_settings.dart';
 import 'package:anime_flow/shared/models/enums/video_controls_icon_type.dart';
 import 'package:anime_flow/core/network/clients/flow_client.dart';
 import 'package:anime_flow/features/play/presentation/providers/play_provider.dart';
@@ -31,6 +32,8 @@ class BottomAreaControl extends ConsumerWidget {
   const BottomAreaControl({super.key});
 
   static const double _wideDanmakuControlsMaxWidth = 520;
+  static const ValueKey<String> _miniProgressBarKey =
+      ValueKey('mini-player-progress-bar');
 
   Widget _buildProgressBar() {
     return Consumer(
@@ -70,6 +73,29 @@ class BottomAreaControl extends ConsumerWidget {
             );
             videoUiStateController.endHorizontalDrag();
           },
+        );
+      },
+    );
+  }
+
+  Widget _buildMiniProgressBar() {
+    return Consumer(
+      key: _miniProgressBarKey,
+      builder: (context, ref, _) {
+        if (!AppSettings.showMiniProgressBar) {
+          return const SizedBox.shrink();
+        }
+
+        final duration = ref.watch(playStateProvider.select((s) => s.duration));
+        final position = ref.watch(playStateProvider.select((s) => s.position));
+        final buffered = ref.watch(playStateProvider.select((s) => s.buffered));
+
+        return IgnorePointer(
+          child: MiniPlayerProgressBar(
+            duration: duration,
+            position: position,
+            buffered: buffered,
+          ),
         );
       },
     );
@@ -283,6 +309,7 @@ class BottomAreaControl extends ConsumerWidget {
         ref.watch(playStateProvider.select((s) => s.isContentExpanded));
     final isShowControlsUi =
         ref.watch(videoUiProvider.select((s) => s.isShowControlsUi));
+    final miniProgressBarOffset = fullscreen || isWideScreen ? 50.0 : 30.0;
     final leftPadding = MediaQuery.of(context).padding.left;
     // 全屏 + 不随键盘压缩 body 时，用 viewInsets 把底部控件顶到键盘上方
     final keyboardLift = fullscreen && SystemUtil.isMobile
@@ -291,8 +318,42 @@ class BottomAreaControl extends ConsumerWidget {
 
     return AnimatedSwitcher(
       duration: const Duration(milliseconds: 200),
-      transitionBuilder: (child, animation) =>
-          FadeTransition(opacity: animation, child: child),
+      layoutBuilder: (currentChild, previousChildren) => Stack(
+        alignment: Alignment.bottomCenter,
+        children: [
+          ...previousChildren,
+          if (currentChild != null) currentChild,
+        ],
+      ),
+      transitionBuilder: (child, animation) {
+        final isMiniProgressBar = child.key == _miniProgressBarKey;
+        final verticalOffset = isMiniProgressBar ? -miniProgressBarOffset : 12.0;
+        final transitionAnimation = CurvedAnimation(
+          parent: animation,
+          curve: Curves.easeOutCubic,
+          reverseCurve: Curves.easeInCubic,
+        );
+        final verticalAnimation = Tween<double>(
+          begin: verticalOffset,
+          end: 0,
+        ).animate(transitionAnimation);
+
+        return ClipRect(
+          child: SizeTransition(
+            axis: Axis.vertical,
+            alignment: Alignment.bottomCenter,
+            sizeFactor: transitionAnimation,
+            child: AnimatedBuilder(
+              animation: verticalAnimation,
+              child: child,
+              builder: (context, child) => Transform.translate(
+                offset: Offset(0, verticalAnimation.value),
+                child: child,
+              ),
+            ),
+          ),
+        );
+      },
       child: isShowControlsUi
           ? Container(
               key: ValueKey<bool>(isShowControlsUi),
@@ -343,7 +404,8 @@ class BottomAreaControl extends ConsumerWidget {
                                 videoUiStateController
                                     .restartControlsAutoHideTimer();
                                 videoUiStateController.showTopIndicator(
-                                  VideoControlsIndicatorType.playStatusIndicator,
+                                  VideoControlsIndicatorType
+                                      .playStatusIndicator,
                                 );
                               },
                               icon: PlayPauseIcon(
@@ -550,9 +612,11 @@ class BottomAreaControl extends ConsumerWidget {
                 ),
               ),
             )
-          : SizedBox.shrink(
-              key: ValueKey<bool>(isShowControlsUi),
-            ),
+          : AppSettings.showMiniProgressBar
+              ? _buildMiniProgressBar()
+              : SizedBox.shrink(
+                  key: ValueKey<bool>(isShowControlsUi),
+                ),
     );
   }
 }

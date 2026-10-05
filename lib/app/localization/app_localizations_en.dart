@@ -1027,6 +1027,13 @@ class AppLocalizationsEn extends AppLocalizations {
       'Save progress automatically at 90%, then start the next unwatched episode';
 
   @override
+  String get showMiniProgressBar => 'Show mini progress bar';
+
+  @override
+  String get showMiniProgressBarSubtitle =>
+      'Show playback progress along the bottom when player controls are hidden';
+
+  @override
   String get playbackControl => 'Playback controls';
 
   @override

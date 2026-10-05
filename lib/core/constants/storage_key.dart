@@ -40,7 +40,8 @@ class PlaybackKey {
       adBlocker = 'playback_ad_blocker',
       skipDuration = 'playback_skip_duration',
       hardwareDecoder = 'playback_hardware_decoder',
-      preferredPlayerKernel = 'playback_preferred_player_kernel';
+      preferredPlayerKernel = 'playback_preferred_player_kernel',
+      showMiniProgressBar = 'playback_show_mini_progress_bar';
 }
 
 class PlayerShortcutKey {

@@ -326,6 +326,8 @@
   "playbackProgress": "Playback progress",
   "saveEpisodeProgress": "Save episode progress",
   "saveEpisodeProgressSubtitle": "Save progress automatically at 90%, then start the next unwatched episode",
+  "showMiniProgressBar": "Show mini progress bar",
+  "showMiniProgressBarSubtitle": "Show playback progress along the bottom when player controls are hidden",
   "playbackControl": "Playback controls",
   "longPressFastForwardSpeed": "Long-press fast-forward speed",
   "danmakuDisplayType": "Danmaku display type",

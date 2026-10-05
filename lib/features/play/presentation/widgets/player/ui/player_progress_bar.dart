@@ -98,6 +98,99 @@ class PlayerProgressBar extends StatelessWidget {
   }
 }
 
+class MiniPlayerProgressBar extends StatelessWidget {
+  const MiniPlayerProgressBar({
+    super.key,
+    required this.duration,
+    required this.position,
+    required this.buffered,
+  });
+
+  final Duration duration;
+  final Duration position;
+  final Duration buffered;
+
+  @override
+  Widget build(BuildContext context) {
+    final totalMilliseconds = duration.inMilliseconds;
+    final progress = totalMilliseconds > 0
+        ? (position.inMilliseconds / totalMilliseconds).clamp(0.0, 1.0)
+        : 0.0;
+    final buffer = totalMilliseconds > 0
+        ? (buffered.inMilliseconds / totalMilliseconds).clamp(0.0, 1.0)
+        : 0.0;
+    final colorScheme = Theme.of(context).colorScheme;
+
+    return SizedBox(
+      height: 3,
+      child: CustomPaint(
+        size: Size.infinite,
+        painter: _MiniProgressPainter(
+          progress: progress,
+          buffer: buffer,
+          backgroundColor: colorScheme.onSurface.withValues(alpha: 0.28),
+          bufferColor: colorScheme.onSurface.withValues(alpha: 0.52),
+          progressColor: colorScheme.primary,
+        ),
+      ),
+    );
+  }
+}
+
+class _MiniProgressPainter extends CustomPainter {
+  const _MiniProgressPainter({
+    required this.progress,
+    required this.buffer,
+    required this.backgroundColor,
+    required this.bufferColor,
+    required this.progressColor,
+  });
+
+  final double progress;
+  final double buffer;
+  final Color backgroundColor;
+  final Color bufferColor;
+  final Color progressColor;
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final track = Rect.fromLTWH(0, 0, size.width, size.height);
+    final radius = Radius.circular(size.height / 2);
+    final trackRRect = RRect.fromRectAndRadius(track, radius);
+    canvas.drawRRect(trackRRect, Paint()..color = backgroundColor);
+
+    final bufferWidth = size.width * buffer;
+    if (bufferWidth > 0) {
+      canvas.drawRRect(
+        RRect.fromRectAndRadius(
+          Rect.fromLTWH(0, 0, bufferWidth, size.height),
+          radius,
+        ),
+        Paint()..color = bufferColor,
+      );
+    }
+
+    final progressWidth = size.width * progress;
+    if (progressWidth > 0) {
+      canvas.drawRRect(
+        RRect.fromRectAndRadius(
+          Rect.fromLTWH(0, 0, progressWidth, size.height),
+          radius,
+        ),
+        Paint()..color = progressColor,
+      );
+    }
+  }
+
+  @override
+  bool shouldRepaint(covariant _MiniProgressPainter oldDelegate) =>
+      progress != oldDelegate.progress ||
+      buffer != oldDelegate.buffer ||
+      backgroundColor != oldDelegate.backgroundColor ||
+      bufferColor != oldDelegate.bufferColor ||
+      progressColor != oldDelegate.progressColor;
+}
+
 class _CustomTrackShape extends RoundedRectSliderTrackShape {
   @override
   Rect getPreferredRect({

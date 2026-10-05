@@ -73,6 +73,7 @@ abstract final class AppSettings {
   static const bool defaultAdBlocker = false;
   static const int defaultSkipDuration = 85;
   static const bool defaultHardwareDecoder = true;
+  static const bool defaultShowMiniProgressBar = true;
   static const String defaultPreferredPlayerKernel = 'mediaKit';
   static const bool defaultDanmakuOn = true;
   static const double defaultDanmakuFontSize = 16.0;
@@ -203,6 +204,14 @@ abstract final class AppSettings {
 
   static Future<void> setHardwareDecoder(bool value) =>
       Storage.setting.put(PlaybackKey.hardwareDecoder, value);
+
+  static bool get showMiniProgressBar => _readBool(
+        PlaybackKey.showMiniProgressBar,
+        defaultShowMiniProgressBar,
+      );
+
+  static Future<void> setShowMiniProgressBar(bool value) =>
+      Storage.setting.put(PlaybackKey.showMiniProgressBar, value);
 
   static String get preferredPlayerKernelName =>
       Storage.setting.get(

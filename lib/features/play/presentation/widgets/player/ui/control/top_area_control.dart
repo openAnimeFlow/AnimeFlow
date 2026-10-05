@@ -109,8 +109,39 @@ class _TopAreaControlState extends ConsumerState<TopAreaControl> {
     final leftPadding = MediaQuery.of(context).padding.left;
     return AnimatedSwitcher(
       duration: const Duration(milliseconds: 200),
+      layoutBuilder: (currentChild, previousChildren) => Stack(
+        alignment: Alignment.topCenter,
+        children: [
+          ...previousChildren,
+          if (currentChild != null) currentChild,
+        ],
+      ),
       transitionBuilder: (child, animation) {
-        return FadeTransition(opacity: animation, child: child);
+        final transitionAnimation = CurvedAnimation(
+          parent: animation,
+          curve: Curves.easeOutCubic,
+          reverseCurve: Curves.easeInCubic,
+        );
+        final verticalAnimation = Tween<double>(
+          begin: -12,
+          end: 0,
+        ).animate(transitionAnimation);
+
+        return ClipRect(
+          child: SizeTransition(
+            axis: Axis.vertical,
+            alignment: Alignment.topCenter,
+            sizeFactor: transitionAnimation,
+            child: AnimatedBuilder(
+              animation: verticalAnimation,
+              child: child,
+              builder: (context, child) => Transform.translate(
+                offset: Offset(0, verticalAnimation.value),
+                child: child,
+              ),
+            ),
+          ),
+        );
       },
       child: isShowControlsUi
           ? Container(

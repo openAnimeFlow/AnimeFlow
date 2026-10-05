@@ -18,6 +18,7 @@ class _PlaybackSettingsPageState extends State<PlaybackSettingsPage> {
   // 播放配置状态
   late bool _autoPlayNext;
   late bool _episodesProgress;
+  late bool _showMiniProgressBar;
   late double _fastForwardSpeed;
   late bool _adBlocker;
   late bool _hardwareDecoder;
@@ -34,6 +35,7 @@ class _PlaybackSettingsPageState extends State<PlaybackSettingsPage> {
     setState(() {
       _autoPlayNext = AppSettings.autoPlayNext;
       _episodesProgress = AppSettings.episodesProgress;
+      _showMiniProgressBar = AppSettings.showMiniProgressBar;
       _fastForwardSpeed = AppSettings.fastForwardSpeed;
       _adBlocker = AppSettings.adBlocker;
       _hardwareDecoder = AppSettings.hardwareDecoder;
@@ -160,6 +162,17 @@ class _PlaybackSettingsPageState extends State<PlaybackSettingsPage> {
                     setState(() {
                       _episodesProgress = value;
                       AppSettings.setEpisodesProgress(_episodesProgress);
+                    });
+                  },
+                ),
+                SwitchListTile(
+                  title: Text(l10n.showMiniProgressBar),
+                  subtitle: Text(l10n.showMiniProgressBarSubtitle),
+                  value: _showMiniProgressBar,
+                  onChanged: (value) {
+                    setState(() {
+                      _showMiniProgressBar = value;
+                      AppSettings.setShowMiniProgressBar(value);
                     });
                   },
                 ),

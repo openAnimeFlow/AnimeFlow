@@ -326,6 +326,8 @@
   "playbackProgress": "播放进度",
   "saveEpisodeProgress": "保存剧集进度",
   "saveEpisodeProgressSubtitle": "播放至90%自动保存剧集进度，下次从未观看的剧集开始播放",
+  "showMiniProgressBar": "显示迷你进度条",
+  "showMiniProgressBarSubtitle": "播放器控件隐藏时，在底部显示迷你播放进度",
   "playbackControl": "播放控制",
   "longPressFastForwardSpeed": "长按快进速度",
   "danmakuDisplayType": "弹幕显示类型",

@@ -62,7 +62,7 @@ class _AccountContentViewState extends State<AccountContentView> {
                         },
                       ),
                       const SizedBox(height: 4),
-                      Text(
+                      SelectableText(
                         user.email.isNotEmpty ? user.email : '未绑定邮箱',
                         style: TextStyle(
                           color: user.email.isNotEmpty
@@ -71,12 +71,24 @@ class _AccountContentViewState extends State<AccountContentView> {
                         ),
                       ),
                       const SizedBox(height: 4),
-                      Text(
-                        'ID: ${user.id}',
-                        style: TextStyle(
-                          fontSize: 12,
-                          color: Theme.of(context).disabledColor,
-                        ),
+                      Row(
+                        spacing: 5,
+                        children: [
+                          Text(
+                            'ID:',
+                            style: TextStyle(
+                              fontSize: 12,
+                              color: Theme.of(context).disabledColor,
+                            ),
+                          ),
+                          SelectableText(
+                            '${user.id}',
+                            style: TextStyle(
+                              fontSize: 12,
+                              color: Theme.of(context).disabledColor,
+                            ),
+                          )
+                        ],
                       ),
                       if (user.createTime != 0) ...[
                         const SizedBox(height: 4),

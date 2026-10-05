@@ -154,8 +154,9 @@ class _DanmakuSettingPageState extends ConsumerState<DanmakuSettingPage> {
                     final danmakuChineseMode =
                         ref.watch(danmakuChineseModeProvider);
                     final colorScheme = Theme.of(context).colorScheme;
-                    return Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
+                    return Row(
+                      crossAxisAlignment: CrossAxisAlignment.center,
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
                         _buildSectionTitle(l10n.danmakuChineseConversion),
                         Padding(

@@ -1,4 +1,5 @@
 import 'package:anime_flow/core/network/image/image_file_response.dart';
+import 'package:anime_flow/core/settings/app_settings.dart';
 import 'package:ech_http/ech_http.dart';
 import 'package:flutter_cache_manager/flutter_cache_manager.dart';
 import 'package:flutter/foundation.dart';
@@ -7,6 +8,11 @@ import 'package:http/http.dart' as http;
 /// Downloads images with the ECH route configured in general settings.
 class EchImageService {
   static final _dohEndpoint = Uri.https('dns.alidns.com', '/resolve');
+  static const _defaultFixedIps = [
+    '172.67.134.140',
+    '104.21.6.61',
+    '172.67.73.67',
+  ];
 
   _EchSession? _current;
   final _sessions = <_EchSession>{};
@@ -14,6 +20,10 @@ class EchImageService {
 
   _EchSession _sessionFor(String host, List<String> fixedIps) {
     if (_closed) throw StateError('ECH image service is closed');
+    // Pin Cloudflare addresses for the default image host unless overridden.
+    if (fixedIps.isEmpty && host == AppSettings.defaultEchImageHost) {
+      fixedIps = _defaultFixedIps;
+    }
     final current = _current;
     if (current != null &&
         current.host == host &&

@@ -62,13 +62,19 @@ class PluginCatalog extends _$PluginCatalog {
   @override
   Future<List<PluginCatalogItem>> build() {
     ref.onDispose(() {
-      _cancelToken?.cancel('插件目录 Provider 已销毁');
+      _cancelActiveRequest('插件目录 Provider 已销毁');
     });
     return _fetch();
   }
 
+  void _cancelActiveRequest(String reason) {
+    final cancelToken = _cancelToken;
+    if (cancelToken == null || cancelToken.isCancelled) return;
+    cancelToken.cancel(reason);
+  }
+
   Future<List<PluginCatalogItem>> _fetch() async {
-    _cancelToken?.cancel('插件目录请求已被新的请求替换');
+    _cancelActiveRequest('插件目录请求已被新的请求替换');
     final cancelToken = _cancelToken = CancelToken();
     var url = '${CommonApi.pluginRepo}/index.json';
     if (_isPluginMirrorEnabled()) {

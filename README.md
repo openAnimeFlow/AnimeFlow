@@ -122,19 +122,6 @@ AnimeFlow 是一款跨平台的看番软件、追番软件与动漫播放器。�
   <img src="assets/features/img.png" width="45%" style="border-radius: 10px" alt="添加数据源">
 </div>
 
-[//]: # (### 主题管理)
-
-[//]: # ()
-[//]: # (<div align="center">)
-
-[//]: # (  <img src="assets/features/mobile/img_6.png" alt="添加数据源">)
-
-[//]: # (</div>)
-
-## 演示视频
-
-<video src="assets/features/video.mp4" controls width="100%"></video>
-
 ## 🛠️ 编译与启动
 
 以下步骤适用于在本地从源码编译并运行 AnimeFlow 客户端。

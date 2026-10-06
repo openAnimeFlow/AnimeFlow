@@ -90,31 +90,37 @@ AnimeFlow 是一款跨平台的看番软件、追番软件与动漫播放器。�
 
 ### 桌面端
 
-<div align="center">
-  <img src="assets/features/desktop/img.png" width="45%" style="border-radius: 10px" alt="桌面端截图1">
-  <img src="assets/features/desktop/img_1.png" width="45%" style="border-radius: 10px" alt="桌面端截图2" >
-  <img src="assets/features/desktop/img_2.png" width="45%" style="border-radius: 10px" alt="桌面端截图3">
-  <img src="assets/features/desktop/img_3.png" width="45%" style="border-radius: 10px" alt="桌面端截图4">
-  <img src="assets/features/desktop/img_4.png" width="45%" style="border-radius: 10px" alt="桌面端截图5">
-  <img src="assets/features/desktop/img_5.png" width="45%" style="border-radius: 10px" alt="桌面端截图6">
+<div align="left">
+  <img src="assets/features/desktop/img_2.png" width="45%" style="border-radius: 10px" alt="桌面端截图1">
+  <img src="assets/features/desktop/img_3.png" width="45%" style="border-radius: 10px" alt="桌面端截图2" >
+  <img src="assets/features/desktop/img_4.png" width="45%" style="border-radius: 10px" alt="桌面端截图3">
+  <img src="assets/features/desktop/img_5.png" width="45%" style="border-radius: 10px" alt="桌面端截图4">
+  <img src="assets/features/desktop/img_6.png" width="45%" style="border-radius: 10px" alt="桌面端截图5">
+  <img src="assets/features/desktop/img_7.png" width="45%" style="border-radius: 10px" alt="桌面端截图">
+  <img src="assets/features/desktop/img_8.png" width="45%" style="border-radius: 10px" alt="桌面端截图">
+  <img src="assets/features/desktop/img_9.png" width="45%" style="border-radius: 10px" alt="桌面端截图">
+  <img src="assets/features/desktop/img.png" width="45%" style="border-radius: 10px" alt="桌面端截图">
 </div>
 
 ### 移动端
 
-<div align="center">
-  <img src="assets/features/mobile/img.png" width="30%"   style="border-radius: 10px" alt="移动端截图1">
-  <img src="assets/features/mobile/img_1.png" width="30%" style="border-radius: 10px" alt="移动端截图2">
-  <img src="assets/features/mobile/img_2.png" width="30%" style="border-radius: 10px" alt="移动端截图3">
-  <img src="assets/features/mobile/img_3.png" width="30%" style="border-radius: 10px" alt="移动端截图4">
-  <img src="assets/features/mobile/img_4.png" width="30%" style="border-radius: 10px" alt="移动端截图5">
-  <img src="assets/features/mobile/img_5.png" width="30%" style="border-radius: 10px" alt="移动端截图6">
+<div align="left">
+  <img src="assets/features/mobile/img1.png" width="30%"   style="border-radius: 10px" alt="移动端截图1">
+  <img src="assets/features/mobile/img2.png" width="30%" style="border-radius: 10px" alt="移动端截图2">
+  <img src="assets/features/mobile/img3.png" width="30%" style="border-radius: 10px" alt="移动端截图3">
+  <img src="assets/features/mobile/img4.png" width="30%" style="border-radius: 10px" alt="移动端截图4">
+  <img src="assets/features/mobile/img5.png" width="30%" style="border-radius: 10px" alt="移动端截图5">
+  <img src="assets/features/mobile/img6.png" width="30%" style="border-radius: 10px" alt="移动端截图6">
+  <img src="assets/features/mobile/img7.png" width="30%" style="border-radius: 10px" alt="移动端截图6">
+  <img src="assets/features/mobile/img8.png" width="30%" style="border-radius: 10px" alt="移动端截图6">
+  <img src="assets/features/mobile/img9.png" width="30%" style="border-radius: 10px" alt="移动端截图6">
 </div>
 
 ### 数据源管理
 
-<div align="center">
-  <img src="assets/features/img.png" width="45%"  style="border-radius: 10px" alt="数据源管理列表">
-  <img src="assets/features/img_1.png" width="45%" style="border-radius: 10px" alt="添加数据源">
+<div align="left">
+  <img src="assets/features/img_2.png" width="45%"  style="border-radius: 10px" alt="数据源管理列表">
+  <img src="assets/features/img.png" width="45%" style="border-radius: 10px" alt="添加数据源">
 </div>
 
 [//]: # (### 主题管理)
@@ -125,6 +131,10 @@ AnimeFlow 是一款跨平台的看番软件、追番软件与动漫播放器。�
 [//]: # (  <img src="assets/features/mobile/img_6.png" alt="添加数据源">)
 
 [//]: # (</div>)
+
+## 演示视频
+
+<video src="assets/features/video.mp4" controls width="100%"></video>
 
 ## 🛠️ 编译与启动
 

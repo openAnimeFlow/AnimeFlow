@@ -133,7 +133,7 @@ dependencies:
   share_plus: ^12.0.2 # 调用平台原生分享面板分享文本、文件或 URI。
 
   # 文本与图像处理
-  flutter_markdown_plus: ^1.0.7 # 将 Markdown 文本解析并渲染为 Flutter widget。
+  flutter_markdown_plus: ^1.0.12 # 将 Markdown 文本解析并渲染为 Flutter widget。
   image_picker: ^1.2.1 # 从设备相册选择图片或通过相机采集图片。
   crop_your_image: ^2.0.0 # 在 Flutter 中对图片进行交互式裁剪。
 

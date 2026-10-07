@@ -1,4 +1,6 @@
 import 'package:flutter/widgets.dart' show LocalizationsDelegate;
+import 'package:flutter_localizations/flutter_localizations.dart'
+    as flutter_localizations;
 import 'package:material_ui/material_ui.dart' show GlobalMaterialLocalizations;
 
 import 'app_localizations.dart';
@@ -8,4 +10,5 @@ final List<LocalizationsDelegate<dynamic>> appLocalizationsDelegates =
     <LocalizationsDelegate<dynamic>>[
   AppLocalizations.delegate,
   ...GlobalMaterialLocalizations.delegates,
+  flutter_localizations.GlobalMaterialLocalizations.delegate,
 ];

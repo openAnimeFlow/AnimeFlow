@@ -388,9 +388,9 @@ void main() {
     expect(buffering.last, isFalse);
   });
 
-  test('seek keeps the requested position instead of snapping to a keyframe',
+  test('seek prefers cached media while keeping the requested position',
       () async {
-    final player = _FakePlayer();
+    final player = _FakePlayer()..currentPosition = 10000;
     final engine = FvpEngine(playerFactory: () => player);
     await engine.initialize();
     addTearDown(engine.dispose);
@@ -398,11 +398,19 @@ void main() {
       PlaybackSource(uri: Uri.parse('https://example.com/video')),
     );
 
-    await engine.seek(const Duration(seconds: 30));
+    // Seek inside the reported buffer, beyond it, and back behind playback.
+    // InCache is a preference: MDK handles falling back for cache misses.
+    for (final position in [10500, 30000, 5000]) {
+      await engine.seek(Duration(milliseconds: position));
 
-    expect(player.seekPosition, 30000);
-    expect(player.seekFlags.rawValue, fvp.SeekFlag.fromStart);
-    expect(player.seekFlags.test(fvp.SeekFlag.keyFrame), isFalse);
+      expect(player.seekPosition, position);
+      expect(player.seekFlags.test(fvp.SeekFlag.fromStart), isTrue);
+      expect(player.seekFlags.test(fvp.SeekFlag.inCache), isTrue);
+      expect(player.seekFlags.test(fvp.SeekFlag.keyFrame), isFalse);
+      expect(player.prepares, 1);
+      expect(player.rendererOperations, ['prepare', 'create']);
+      expect(player.disposed, isFalse);
+    }
   });
 }
 

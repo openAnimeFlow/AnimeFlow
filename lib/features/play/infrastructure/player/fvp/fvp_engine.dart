@@ -21,6 +21,7 @@ class FvpEngine implements PlayerEngine {
 
   final fvp.Player Function() _playerFactory;
   final bool hardwareDecoder;
+
   // FVP defaults to a 4-second decoded-data buffer. On longer videos that is
   // only a few pixels on the progress bar, so keep a visible, practical
   // buffer for on-demand playback.
@@ -307,12 +308,14 @@ class FvpEngine implements PlayerEngine {
     _emit(const PlayerBufferingChanged(false));
   }
 
+  /// 精确跳转到指定位置，并优先复用已有缓冲。
   @override
   Future<void> seek(Duration position) => _enqueue(() async {
-        // 默认 flags 含 KeyFrame，会落到关键帧导致进度漂移，与 prepare 保持一致。
         final result = await _player.seek(
           position: position.inMilliseconds,
-          flags: const fvp.SeekFlag(fvp.SeekFlag.fromStart),
+          flags: const fvp.SeekFlag(
+            fvp.SeekFlag.fromStart | fvp.SeekFlag.inCache,
+          ),
         );
         _ensureReady();
         if (result < 0) throw StateError('FVP seek failed: $result');

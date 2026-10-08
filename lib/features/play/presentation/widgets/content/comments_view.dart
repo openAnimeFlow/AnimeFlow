@@ -3,7 +3,6 @@ import 'package:anime_flow/features/play/presentation/providers/episode_comments
 import 'package:anime_flow/shared/models/player/bangumi/episode_comments_item.dart';
 import 'package:anime_flow/app/router/app_router.dart';
 import 'package:anime_flow/core/utils/format_time_util.dart';
-import 'package:anime_flow/core/utils/system_util.dart';
 import 'package:anime_flow/shared/widgets/bbcode/bbcode_widget.dart';
 import 'package:anime_flow/shared/widgets/animation_network_image.dart';
 import 'package:material_ui/material_ui.dart';
@@ -347,13 +346,16 @@ class _CommentsViewState extends ConsumerState<CommentsView>
 
   ///骨架屏
   Widget _skeleton(BuildContext context) {
-    final isDark = SystemUtil.isDarkTheme(context);
-    final baseColor = isDark ? Colors.grey[400]! : Colors.grey[200]!;
-    final highlightColor = isDark ? Colors.grey[300]! : Colors.grey[100]!;
-    final containerColor = isDark
-        ? Theme.of(context).colorScheme.surfaceContainerHighest
-        : Theme.of(context).colorScheme.surface;
+    final colorScheme = Theme.of(context).colorScheme;
+    final isDark = colorScheme.brightness == Brightness.dark;
+    final baseColor = colorScheme.surfaceContainerHighest;
+    final highlightColor = Color.lerp(
+      baseColor,
+      isDark ? colorScheme.onSurface : colorScheme.surface,
+      isDark ? 0.08 : 0.65,
+    )!;
     return Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Shimmer.fromColors(
           baseColor: baseColor,
@@ -362,7 +364,7 @@ class _CommentsViewState extends ConsumerState<CommentsView>
             height: 50,
             width: 50,
             decoration: BoxDecoration(
-              color: containerColor,
+              color: baseColor,
               borderRadius: BorderRadius.circular(8.0),
             ),
           ),
@@ -380,7 +382,7 @@ class _CommentsViewState extends ConsumerState<CommentsView>
                   height: 25,
                   width: 100,
                   decoration: BoxDecoration(
-                    color: containerColor,
+                    color: baseColor,
                     borderRadius: BorderRadius.circular(8.0),
                   ),
                 ),
@@ -390,10 +392,10 @@ class _CommentsViewState extends ConsumerState<CommentsView>
                 baseColor: baseColor,
                 highlightColor: highlightColor,
                 child: Container(
-                  height: 20,
-                  width: 200,
+                  height: 60,
+                  width: double.infinity,
                   decoration: BoxDecoration(
-                    color: containerColor,
+                    color: baseColor,
                     borderRadius: BorderRadius.circular(8.0),
                   ),
                 ),

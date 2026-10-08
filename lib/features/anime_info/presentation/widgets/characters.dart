@@ -29,6 +29,7 @@ class CharactersView extends StatelessWidget {
             data: (characters) {
               if (characters.total > 0) {
                 return Column(
+                  spacing: 8,
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Row(
@@ -64,7 +65,6 @@ class CharactersView extends StatelessWidget {
                         ),
                       ],
                     ),
-                    const SizedBox(height: 8),
                     SizedBox(
                       height: windowsWidth > 600 ? 130 : 120,
                       child: ScrollConfiguration(
@@ -139,14 +139,6 @@ class CharactersView extends StatelessWidget {
                                       overflow: TextOverflow.ellipsis,
                                       textAlign: TextAlign.center,
                                     ),
-                                  // 评论数
-                                  Text(
-                                    '+${actor.character.comment}',
-                                    style: TextStyle(
-                                      fontSize: 10,
-                                      color: Theme.of(context).disabledColor,
-                                    ),
-                                  ),
                                 ],
                               ),
                             );

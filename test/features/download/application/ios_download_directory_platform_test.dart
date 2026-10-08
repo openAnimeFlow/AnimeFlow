@@ -10,22 +10,24 @@ void main() {
   late List<MethodCall> calls;
   var failRestore = false;
   var cancel = false;
+  late Map<String, String> restoredPaths;
 
   setUp(() {
     platform = IosDownloadDirectoryPlatform();
     calls = [];
     failRestore = false;
     cancel = false;
+    restoredPaths = {
+      '/old/root': '/new/root',
+      '/old/root/nested': '/other/nested',
+    };
     TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
         .setMockMethodCallHandler(channel, (call) async {
       calls.add(call);
       switch (call.method) {
         case 'restoreAccess':
           if (failRestore) throw PlatformException(code: 'unavailable');
-          return {
-            '/old/root': '/new/root',
-            '/old/root/nested': '/other/nested'
-          };
+          return restoredPaths;
         case 'selectDirectory':
           return cancel
               ? null
@@ -72,6 +74,32 @@ void main() {
     failRestore = false;
     await platform.initialize();
     expect(platform.resolvePath('/old/root'), '/new/root');
+  });
+
+  test('restores paths created between successive directory moves', () async {
+    restoredPaths = {'/A': '/B', '/B': '/B'};
+    await platform.initialize();
+    final middleMedia = platform.resolvePath('/A/source_1/episode/video.mp4');
+    expect(middleMedia, '/B/source_1/episode/video.mp4');
+
+    // A new instance represents the next launch after moving B to C. Native
+    // storage supplies every historical alias, not just the originally picked A.
+    restoredPaths = {'/A': '/C', '/B': '/C', '/C': '/C'};
+    platform = IosDownloadDirectoryPlatform();
+    await platform.initialize();
+    expect(platform.resolvePath(middleMedia), '/C/source_1/episode/video.mp4');
+    expect(platform.resolvePath('/A/source_1/episode/danmaku.json'),
+        '/C/source_1/episode/danmaku.json');
+    expect(platform.resolvePath('/B_extra/video.mp4'), '/B_extra/video.mp4');
+    expect(platform.fileExists(middleMedia), isTrue);
+
+    await platform.prepareDownloadDirectory('/B/source_1/episode');
+    expect((calls.last.arguments as Map)['path'], '/C/source_1/episode');
+    await platform.prepareForReading(middleMedia);
+    expect(
+        (calls.last.arguments as Map)['path'], '/C/source_1/episode/video.mp4');
+    await platform.deleteDirectory('/B/source_1/episode');
+    expect((calls.last.arguments as Map)['path'], '/C/source_1/episode');
   });
 
   test('selection incorporates bookmark paths and cancellation preserves them',

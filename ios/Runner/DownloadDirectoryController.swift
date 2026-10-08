@@ -116,28 +116,9 @@ final class DownloadDirectoryController: NSObject, UIDocumentPickerDelegate,
     let playbackCache = FileManager.default.urls(for: .cachesDirectory, in: .userDomainMask)[0]
       .appendingPathComponent("download-playback", isDirectory: true)
     try? FileManager.default.removeItem(at: playbackCache)
-    var bookmarks = defaults.dictionary(forKey: bookmarksKey) as? [String: Data] ?? [:]
-    for (original, data) in bookmarks {
-      do {
-        var stale = false
-        // Security-scoped document-picker bookmarks on iOS use empty options;
-        // .withSecurityScope is a macOS-only bookmark creation option.
-        let url = try URL(resolvingBookmarkData: data, options: [], relativeTo: nil,
-                          bookmarkDataIsStale: &stale)
-        try activate(url)
-        roots[original] = url
-        roots[url.path] = url
-        if stale {
-          bookmarks[original] = try url.bookmarkData(options: [],
-            includingResourceValuesForKeys: nil, relativeTo: nil)
-        }
-      } catch {
-        // Keep failed bookmarks so a temporarily disconnected provider can
-        // be restored later. Other granted folders must remain accessible.
-        NSLog("AnimeFlow: could not restore folder %@: %@", original, error.localizedDescription)
-      }
+    roots.merge(Self.restoreBookmarks(in: defaults, key: bookmarksKey, activate: activate)) {
+      _, restored in restored
     }
-    defaults.set(bookmarks, forKey: bookmarksKey)
     staging = defaults.dictionary(forKey: stagingKey) as? [String: String] ?? [:]
     var paths = roots.mapValues { $0.path }
     var previousRoots = defaults.stringArray(forKey: stagingRootKey + ".aliases") ?? []
@@ -149,6 +130,44 @@ final class DownloadDirectoryController: NSObject, UIDocumentPickerDelegate,
     defaults.set(previousRoots, forKey: stagingRootKey + ".aliases")
     defaults.set(stageRoot.path, forKey: stagingRootKey)
     return paths
+  }
+
+  /// Every visited path remains a key in the existing bookmark dictionary.
+  /// After A -> B -> C, both A and B therefore resolve to the current C URL.
+  static func restoreBookmarks(in defaults: UserDefaults, key: String,
+                               activate: (URL) throws -> Void) -> [String: URL] {
+    let saved = defaults.dictionary(forKey: key) as? [String: Data] ?? [:]
+    var bookmarks = saved
+    var restored: [String: URL] = [:]
+    for (original, data) in saved {
+      do {
+        var stale = false
+        // Security-scoped document-picker bookmarks on iOS use empty options;
+        // .withSecurityScope is a macOS-only bookmark creation option.
+        let url = try URL(resolvingBookmarkData: data, options: [], relativeTo: nil,
+                          bookmarkDataIsStale: &stale)
+        try activate(url)
+        let currentBookmark: Data
+        if stale || original != url.path {
+          currentBookmark = try url.bookmarkData(options: [],
+            includingResourceValuesForKeys: nil, relativeTo: nil)
+        } else {
+          currentBookmark = data
+        }
+        // Persist the resolved path before exposing it to downloads. A later
+        // launch can then restore records created under this intermediate path.
+        bookmarks[original] = currentBookmark
+        bookmarks[url.path] = currentBookmark
+        restored[original] = url
+        restored[url.path] = url
+      } catch {
+        // Keep failed bookmarks so a temporarily disconnected provider can
+        // be restored later. Other granted folders must remain accessible.
+        NSLog("AnimeFlow: could not restore folder %@: %@", original, error.localizedDescription)
+      }
+    }
+    defaults.set(bookmarks, forKey: key)
+    return restored
   }
 
   private func resolve(_ path: String) -> URL {

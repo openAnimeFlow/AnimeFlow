@@ -3692,6 +3692,24 @@ abstract class AppLocalizations {
   /// **'当前设备不支持自定义下载位置'**
   String get downloadLocationUnsupported;
 
+  /// No description provided for @downloadLocationPermissionDenied.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'请授予存储访问权限后再修改下载位置'**
+  String get downloadLocationPermissionDenied;
+
+  /// No description provided for @downloadLocationNotWritable.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'无法写入所选目录，请选择其他下载位置'**
+  String get downloadLocationNotWritable;
+
+  /// No description provided for @downloadLocationSelectFailed.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'修改下载位置失败，请重试'**
+  String get downloadLocationSelectFailed;
+
   /// No description provided for @downloadDanmaku.
   ///
   /// In zh_Hans, this message translates to:

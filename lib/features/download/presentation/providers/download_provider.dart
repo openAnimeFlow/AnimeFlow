@@ -9,6 +9,7 @@ import 'package:anime_flow/core/settings/storage.dart';
 import 'package:anime_flow/features/download/application/download_danmaku_service.dart';
 import 'package:anime_flow/features/download/application/download_foreground_service.dart';
 import 'package:anime_flow/features/download/application/download_manager.dart';
+import 'package:anime_flow/features/download/application/download_directory/download_directory_platform.dart';
 import 'package:anime_flow/features/download/application/video_source_resolver_pool.dart';
 import 'package:anime_flow/features/download/data/repositories/download_repository.dart';
 import 'package:anime_flow/features/play/application/video_source_service.dart';
@@ -112,13 +113,15 @@ IDownloadManager downloadManager(Ref ref) {
 }
 
 Future<String> _configuredDownloadDirectory() async {
+  final platform = DownloadDirectoryPlatformFactory.create();
+  await platform.initialize();
   try {
     final configured = Storage.setting.get(
       DownloadKey.downloadDirectory,
       defaultValue: '',
     );
     if (configured is String && configured.trim().isNotEmpty) {
-      return configured.trim();
+      return platform.resolvePath(configured.trim());
     }
   } catch (_) {
     // Fall back to the application support directory during startup.

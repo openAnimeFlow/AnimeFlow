@@ -1,12 +1,11 @@
 import 'package:anime_flow/app/localization/app_localizations.dart';
 import 'package:anime_flow/core/constants/storage_key.dart';
 import 'package:anime_flow/core/settings/storage.dart';
+import 'package:anime_flow/features/download/application/download_directory/download_directory_platform.dart';
 import 'package:anime_flow/features/download/application/download_manager.dart';
 import 'package:anime_flow/features/download/presentation/providers/download_provider.dart';
 import 'package:anime_flow/features/settings/presentation/providers/setting_provider.dart';
-import 'package:anime_flow/core/utils/system_util.dart';
 import 'package:anime_flow/shared/widgets/notification_toast.dart';
-import 'package:file_picker/file_picker.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -24,6 +23,10 @@ class _DownloadSettingsPageState extends ConsumerState<DownloadSettingsPage> {
   late int _maxParallelEpisodes;
   late int _maxParallelSegments;
   late Future<String> _downloadDirectory;
+  bool _selectingDirectory = false;
+
+  late final DownloadDirectoryPlatform _directoryPlatform =
+      DownloadDirectoryPlatformFactory.create();
 
   @override
   void initState() {
@@ -129,10 +132,12 @@ class _DownloadSettingsPageState extends ConsumerState<DownloadSettingsPage> {
                       );
                     },
                   ),
-                  trailing: SystemUtil.isDesktop
+                  trailing: _directoryPlatform.supportsSelection
                       ? const Icon(Icons.drive_file_move_outline)
                       : null,
-                  onTap: () => _handleDownloadLocationTap(l10n),
+                  onTap: _selectingDirectory
+                      ? null
+                      : () => _selectDownloadDirectory(l10n),
                 ),
               ],
             ),
@@ -143,41 +148,57 @@ class _DownloadSettingsPageState extends ConsumerState<DownloadSettingsPage> {
   }
 
   Future<String> _configuredDownloadDirectory() async {
+    await _directoryPlatform.initialize();
     try {
       final configured = setting.get(
         DownloadKey.downloadDirectory,
         defaultValue: '',
       );
       if (configured is String && configured.trim().isNotEmpty) {
-        return configured.trim();
+        return _directoryPlatform.resolvePath(configured.trim());
       }
     } catch (_) {}
     return DownloadManager.getDefaultDownloadDirectory();
   }
 
   Future<void> _selectDownloadDirectory(AppLocalizations l10n) async {
-    final selected = await FilePicker.platform.getDirectoryPath(
-      dialogTitle: l10n.downloadLocation,
-    );
-    if (selected == null || selected.trim().isEmpty || !mounted) {
+    if (_selectingDirectory) return;
+    if (!_directoryPlatform.supportsSelection) {
+      NotificationToast.show(l10n.downloadLocationUnsupported);
       return;
     }
-    final directory = selected.trim();
-    await setting.put(DownloadKey.downloadDirectory, directory);
-    if (!mounted) {
-      return;
+    setState(() => _selectingDirectory = true);
+    try {
+      final granted = await _directoryPlatform.requestAccess();
+      if (!mounted) return;
+      if (!granted) {
+        NotificationToast.show(l10n.downloadLocationPermissionDenied);
+        return;
+      }
+      final selected = await _directoryPlatform.selectDirectory(
+        dialogTitle: l10n.downloadLocation,
+      );
+      if (selected == null || selected.trim().isEmpty || !mounted) return;
+      final directory = selected.trim();
+      try {
+        await _directoryPlatform.verifyWritable(directory);
+      } on DownloadDirectoryNotWritableException {
+        if (mounted) {
+          NotificationToast.show(l10n.downloadLocationNotWritable);
+        }
+        return;
+      }
+      if (!mounted) return;
+      await setting.put(DownloadKey.downloadDirectory, directory);
+      if (!mounted) return;
+      setState(() {
+        _downloadDirectory = Future<String>.value(directory);
+      });
+    } catch (_) {
+      if (mounted) NotificationToast.show(l10n.downloadLocationSelectFailed);
+    } finally {
+      if (mounted) setState(() => _selectingDirectory = false);
     }
-    setState(() {
-      _downloadDirectory = Future<String>.value(directory);
-    });
-  }
-
-  void _handleDownloadLocationTap(AppLocalizations l10n) {
-    if (SystemUtil.isDesktop) {
-      _selectDownloadDirectory(l10n);
-      return;
-    }
-    NotificationToast.show(l10n.downloadLocationUnsupported);
   }
 
   Widget _buildConcurrencySetting({

@@ -1,9 +1,16 @@
 package com.ligg.anime_flow
 
+import android.Manifest
+import android.content.ActivityNotFoundException
+import android.content.Intent
+import android.content.pm.PackageManager
+import android.net.Uri
 import android.os.Build
+import android.os.Environment
 import android.os.Process
 import android.net.TrafficStats
 import android.os.SystemClock
+import android.provider.Settings
 import io.flutter.embedding.android.FlutterActivity
 import io.flutter.embedding.engine.FlutterEngine
 import io.flutter.embedding.engine.FlutterShellArgs
@@ -15,6 +22,8 @@ import kotlin.math.max
 class MainActivity : FlutterActivity() {
     private val channelName = "network_speed_monitor"
     private lateinit var methodChannel: MethodChannel
+    private var storageAccessResult: MethodChannel.Result? = null
+    private val storageAccessRequestCode = 48107
 
     override fun getFlutterShellArgs(): FlutterShellArgs {
         val args = super.getFlutterShellArgs()
@@ -31,6 +40,15 @@ class MainActivity : FlutterActivity() {
 
     override fun configureFlutterEngine(flutterEngine: FlutterEngine) {
         super.configureFlutterEngine(flutterEngine)
+
+        MethodChannel(flutterEngine.dartExecutor.binaryMessenger, "anime_flow/download_storage")
+            .setMethodCallHandler { call, result ->
+                if (call.method == "requestAccess") {
+                    requestDownloadStorageAccess(result)
+                } else {
+                    result.notImplemented()
+                }
+            }
 
         methodChannel = MethodChannel(flutterEngine.dartExecutor.binaryMessenger, channelName)
         methodChannel.setMethodCallHandler(object : MethodCallHandler {
@@ -94,6 +112,64 @@ class MainActivity : FlutterActivity() {
                 }
             }
         })
+    }
+
+    private fun hasDownloadStorageAccess(): Boolean {
+        return when {
+            Build.VERSION.SDK_INT >= Build.VERSION_CODES.R -> Environment.isExternalStorageManager()
+            Build.VERSION.SDK_INT >= Build.VERSION_CODES.M ->
+                checkSelfPermission(Manifest.permission.WRITE_EXTERNAL_STORAGE) == PackageManager.PERMISSION_GRANTED
+            else -> true
+        }
+    }
+
+    private fun requestDownloadStorageAccess(result: MethodChannel.Result) {
+        if (storageAccessResult != null) {
+            result.error("request_in_progress", "A storage access request is already active", null)
+            return
+        }
+        if (hasDownloadStorageAccess()) {
+            result.success(true)
+            return
+        }
+        storageAccessResult = result
+        try {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+                try {
+                    startActivityForResult(
+                        Intent(Settings.ACTION_MANAGE_APP_ALL_FILES_ACCESS_PERMISSION,
+                            Uri.parse("package:$packageName")),
+                        storageAccessRequestCode,
+                    )
+                } catch (_: ActivityNotFoundException) {
+                    startActivityForResult(
+                        Intent(Settings.ACTION_MANAGE_ALL_FILES_ACCESS_PERMISSION),
+                        storageAccessRequestCode,
+                    )
+                }
+            } else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+                requestPermissions(arrayOf(Manifest.permission.WRITE_EXTERNAL_STORAGE), storageAccessRequestCode)
+            }
+        } catch (error: Exception) {
+            storageAccessResult = null
+            result.error("storage_access_failed", error.message, null)
+        }
+    }
+
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+        super.onActivityResult(requestCode, resultCode, data)
+        if (requestCode == storageAccessRequestCode) completeStorageAccessRequest()
+    }
+
+    override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<out String>, grantResults: IntArray) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults)
+        if (requestCode == storageAccessRequestCode) completeStorageAccessRequest()
+    }
+
+    private fun completeStorageAccessRequest() {
+        val result = storageAccessResult
+        storageAccessResult = null
+        result?.success(hasDownloadStorageAccess())
     }
 
     private fun reset() {

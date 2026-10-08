@@ -1939,6 +1939,15 @@ class AppLocalizationsZh extends AppLocalizations {
   String get downloadLocationUnsupported => '目前裝置不支援自訂下載位置';
 
   @override
+  String get downloadLocationPermissionDenied => '請授予儲存空間存取權限後再修改下載位置';
+
+  @override
+  String get downloadLocationNotWritable => '無法寫入所選目錄，請選擇其他下載位置';
+
+  @override
+  String get downloadLocationSelectFailed => '修改下載位置失敗，請重試';
+
+  @override
   String get downloadDanmaku => '同時下載彈幕';
 
   @override
@@ -4269,6 +4278,15 @@ class AppLocalizationsZhHans extends AppLocalizationsZh {
 
   @override
   String get downloadLocationUnsupported => '当前设备不支持自定义下载位置';
+
+  @override
+  String get downloadLocationPermissionDenied => '请授予存储访问权限后再修改下载位置';
+
+  @override
+  String get downloadLocationNotWritable => '无法写入所选目录，请选择其他下载位置';
+
+  @override
+  String get downloadLocationSelectFailed => '修改下载位置失败，请重试';
 
   @override
   String get downloadDanmaku => '同时下载弹幕';
@@ -6604,6 +6622,15 @@ class AppLocalizationsZhHantHk extends AppLocalizationsZh {
   String get downloadLocationUnsupported => '目前裝置不支援自訂下載位置';
 
   @override
+  String get downloadLocationPermissionDenied => '請授予儲存空間存取權限後再修改下載位置';
+
+  @override
+  String get downloadLocationNotWritable => '無法寫入所選目錄，請選擇其他下載位置';
+
+  @override
+  String get downloadLocationSelectFailed => '修改下載位置失敗，請重試';
+
+  @override
   String get downloadDanmaku => '同時下載彈幕';
 
   @override
@@ -8936,6 +8963,15 @@ class AppLocalizationsZhHantTw extends AppLocalizationsZh {
 
   @override
   String get downloadLocationUnsupported => '目前裝置不支援自訂下載位置';
+
+  @override
+  String get downloadLocationPermissionDenied => '請授予儲存空間存取權限後再修改下載位置';
+
+  @override
+  String get downloadLocationNotWritable => '無法寫入所選目錄，請選擇其他下載位置';
+
+  @override
+  String get downloadLocationSelectFailed => '修改下載位置失敗，請重試';
 
   @override
   String get downloadDanmaku => '同時下載彈幕';

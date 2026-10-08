@@ -21,11 +21,40 @@ import 'package:anime_flow/features/play/presentation/providers/video_ui_provide
 import 'package:anime_flow/shared/models/enums/video_controls_icon_type.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/foundation.dart';
+import 'package:flutter/services.dart';
 import 'package:hive_ce/hive.dart';
 
 void main() {
+  TestWidgetsFlutterBinding.ensureInitialized();
   setUpAll(() => Storage.setting = _Settings());
   setUp(() => (Storage.setting as _Settings).stored.clear());
+
+  test('iOS materializes a provider file before opening the local player',
+      () async {
+    debugDefaultTargetPlatformOverride = TargetPlatform.iOS;
+    addTearDown(() => debugDefaultTargetPlatformOverride = null);
+    const channel = MethodChannel('anime_flow/download_storage');
+    final requested = <String>[];
+    TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
+        .setMockMethodCallHandler(channel, (call) async {
+      if (call.method == 'restoreAccess') return <String, String>{};
+      expect(call.method, 'prepareForReading');
+      requested.add((call.arguments as Map)['path'] as String);
+      return _localPath(99);
+    });
+    addTearDown(() => TestDefaultBinaryMessengerBinding
+        .instance.defaultBinaryMessenger
+        .setMockMethodCallHandler(channel, null));
+    final factory = _Factory();
+    final session = _Session(factory);
+    await session.playbackCoordinator.initialize();
+    addTearDown(session.playbackCoordinator.dispose);
+    await session.initPlayState(_request(1));
+    expect(requested, [_localPath(1)]);
+    expect(factory.engines.last.source?.uri.toFilePath(), _localPath(99));
+    expect(session.videoUrl, _localPath(99));
+    expect(factory.engines.last.source?.isLocal, isTrue);
+  });
 
   test('failed local opening allows retrying the same episode', () async {
     final factory = _Factory();

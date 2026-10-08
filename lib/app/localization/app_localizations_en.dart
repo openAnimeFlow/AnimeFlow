@@ -1997,6 +1997,18 @@ class AppLocalizationsEn extends AppLocalizations {
       'This device does not support custom download locations';
 
   @override
+  String get downloadLocationPermissionDenied =>
+      'Grant storage access before changing the download location';
+
+  @override
+  String get downloadLocationNotWritable =>
+      'Cannot write to the selected folder. Choose another download location';
+
+  @override
+  String get downloadLocationSelectFailed =>
+      'Failed to change the download location. Please try again';
+
+  @override
   String get downloadDanmaku => 'Download danmaku too';
 
   @override

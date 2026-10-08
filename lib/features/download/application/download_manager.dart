@@ -3,6 +3,7 @@ import 'dart:io';
 
 import 'package:crypto/crypto.dart';
 import 'package:anime_flow/features/download/application/download_http_client.dart';
+import 'package:anime_flow/features/download/application/download_directory/download_directory_platform.dart';
 import 'package:anime_flow/features/download/application/m3u8_parser.dart';
 import 'package:anime_flow/features/download/data/repositories/download_repository.dart';
 import 'package:anime_flow/shared/models/download/download_episode.dart';
@@ -73,14 +74,18 @@ class DownloadManager implements IDownloadManager {
     DownloadHttpClient? httpClient,
     IDownloadRepository? repository,
     Future<String> Function()? baseDirectoryProvider,
+    DownloadDirectoryPlatform? directoryPlatform,
     this.maxParallelEpisodes = 2,
     this.maxParallelSegments = 3,
   })  : _httpClient = httpClient ?? DownloadHttpClient(),
+        _directoryPlatform =
+            directoryPlatform ?? DownloadDirectoryPlatformFactory.create(),
         _repository = repository,
         _baseDirectoryProvider =
             baseDirectoryProvider ?? _defaultBaseDirectoryProvider;
 
   final DownloadHttpClient _httpClient;
+  final DownloadDirectoryPlatform _directoryPlatform;
   final IDownloadRepository? _repository;
   final Future<String> Function() _baseDirectoryProvider;
 
@@ -187,8 +192,8 @@ class DownloadManager implements IDownloadManager {
     if (episode.localMediaPath.isEmpty) {
       return null;
     }
-    return File(episode.localMediaPath).existsSync()
-        ? episode.localMediaPath
+    return _directoryPlatform.fileExists(episode.localMediaPath)
+        ? _directoryPlatform.resolvePath(episode.localMediaPath)
         : null;
   }
 
@@ -202,10 +207,8 @@ class DownloadManager implements IDownloadManager {
         !_isSafeEpisodeDirectory(downloadDirectory, episode)) {
       return;
     }
-    final directory = Directory(downloadDirectory);
-    if (await directory.exists()) {
-      await directory.delete(recursive: true);
-    }
+    await _directoryPlatform.initialize();
+    await _directoryPlatform.deleteDirectory(downloadDirectory);
   }
 
   void _startTask(_DownloadTask task) {
@@ -235,6 +238,23 @@ class DownloadManager implements IDownloadManager {
       } else {
         await _downloadM3u8(request, task, playlistContent, speedTracker);
       }
+      task.throwIfStopped();
+      final stagingDirectory = episode.downloadDirectory;
+      final publishedDirectory =
+          await _directoryPlatform.publishDownloadDirectory(stagingDirectory);
+      task.throwIfStopped();
+      episode
+        ..downloadDirectory = publishedDirectory
+        ..localMediaPath = p.join(publishedDirectory,
+            p.relative(episode.localMediaPath, from: stagingDirectory))
+        ..status = DownloadStatus.completed
+        ..completedAt = DateTime.now();
+      await _persistAndNotify(request, speed: 0);
+      // Cleanup failure must not turn a successfully published download into
+      // a failed task; the source remains available for later cleanup.
+      try {
+        await _directoryPlatform.discardDownloadStaging(stagingDirectory);
+      } catch (_) {}
     } on _DownloadPaused {
       request.episode.status = DownloadStatus.paused;
       await _persistAndNotify(request, speed: 0);
@@ -394,11 +414,8 @@ class DownloadManager implements IDownloadManager {
     );
 
     episode
-      ..status = DownloadStatus.completed
       ..progressPercent = 100
-      ..localMediaPath = localPlaylistPath
-      ..completedAt = DateTime.now();
-    await _persistAndNotify(request, speed: 0);
+      ..localMediaPath = localPlaylistPath;
   }
 
   Future<void> _downloadDirect(
@@ -475,12 +492,9 @@ class DownloadManager implements IDownloadManager {
     await tmpFile.rename(filePath);
 
     episode
-      ..status = DownloadStatus.completed
       ..downloadedSegments = 1
       ..progressPercent = 100
-      ..localMediaPath = filePath
-      ..completedAt = DateTime.now();
-    await _persistAndNotify(request, speed: 0);
+      ..localMediaPath = filePath;
   }
 
   Future<_DirectStreamResult> _getDirectStreamWithRetry(
@@ -771,6 +785,7 @@ class DownloadManager implements IDownloadManager {
   }
 
   Future<String> _prepareEpisodeDirectory(DownloadRequest request) async {
+    await _directoryPlatform.initialize();
     final existing = request.episode.downloadDirectory.trim();
     final directory = existing.isNotEmpty
         ? existing
@@ -779,8 +794,10 @@ class DownloadManager implements IDownloadManager {
             '${_safeDirectoryName(request.sourceName)}_${request.subjectId}',
             '${request.episode.lineIndex}_${request.episode.episodeIndex}_${_episodeHash(request.episodeUrl)}',
           );
-    await Directory(directory).create(recursive: true);
-    return directory;
+    final prepared =
+        await _directoryPlatform.prepareDownloadDirectory(directory);
+    await Directory(prepared).create(recursive: true);
+    return prepared;
   }
 
   bool _isSafeEpisodeDirectory(String path, DownloadEpisode episode) {

@@ -1,8 +1,8 @@
 import 'dart:convert';
-import 'dart:io';
 
 import 'package:anime_flow/core/network/api/flow_api.dart';
 import 'package:anime_flow/core/utils/utils.dart';
+import 'package:anime_flow/features/download/application/download_directory/download_directory_platform.dart';
 import 'package:anime_flow/shared/models/download/download_episode.dart';
 import 'package:anime_flow/shared/models/player/danmaku/danmaku_module.dart';
 import 'package:path/path.dart' as p;
@@ -56,9 +56,11 @@ class DownloadDanmakuService implements IDownloadDanmakuService {
       );
     }
 
-    await Directory(directory).create(recursive: true);
+    final platform = DownloadDirectoryPlatformFactory.create();
+    await platform.initialize();
     final filePath = p.join(directory, _fileName);
-    await File(filePath).writeAsString(
+    await platform.writeTextFile(
+      filePath,
       jsonEncode({
         'version': 1,
         'danDanBangumiID': bangumiId,

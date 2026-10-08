@@ -4,6 +4,7 @@ import 'dart:typed_data';
 
 import 'package:anime_flow/core/constants/constants.dart';
 import 'package:anime_flow/core/settings/app_settings.dart';
+import 'package:anime_flow/features/download/application/download_directory/download_directory_platform.dart';
 import 'package:anime_flow/features/play/application/danmaku_chinese_converter.dart';
 import 'package:anime_flow/features/play/application/danmaku_chinese_mode.dart';
 import 'package:anime_flow/features/play/application/danmaku_session.dart';
@@ -694,7 +695,13 @@ class PlaySession {
       if (!_isCurrentPlayRequest(requestId)) return;
       danmaku.clear();
       automaticDanmakuRequestId = danmaku.requestId;
-      videoUrl = state.videoUrl;
+      final directoryPlatform = DownloadDirectoryPlatformFactory.create();
+      final resolvedVideoUrl =
+          state.isLocalPlayback && state.videoUrl.isNotEmpty
+              ? await directoryPlatform.prepareForReading(state.videoUrl)
+              : state.videoUrl;
+      if (!_isCurrentPlayRequest(requestId)) return;
+      videoUrl = resolvedVideoUrl;
       subjectId = state.subjectId;
       episode = state.episodeIndex;
       episodeSort = state.episodeSort;
@@ -704,6 +711,16 @@ class PlaySession {
       alias = state.alias;
       isLocalPlayback = state.isLocalPlayback;
       localDanmakuPath = state.localDanmakuPath;
+      if (state.isLocalPlayback && state.localDanmakuPath?.isNotEmpty == true) {
+        try {
+          localDanmakuPath = await directoryPlatform
+              .prepareForReading(state.localDanmakuPath!);
+        } catch (error, stackTrace) {
+          localDanmakuPath = null;
+          LiggLogger().e('本地弹幕读取失败', error: error, stackTrace: stackTrace);
+        }
+      }
+      if (!_isCurrentPlayRequest(requestId)) return;
       danmaku.setPlaybackContext(
         subjectId: subjectId,
         episode: episode,
@@ -720,7 +737,7 @@ class PlaySession {
       );
       if (state.videoUrl.isEmpty) return;
       _currentSource = state.isLocalPlayback
-          ? PlaybackSource.localFile(state.videoUrl)
+          ? PlaybackSource.localFile(resolvedVideoUrl)
           : PlaybackSource(uri: Uri.parse(state.videoUrl));
       await playbackCoordinator.open(
         _currentSource!,
@@ -736,7 +753,7 @@ class PlaySession {
       subjectId: state.subjectId,
       episode: state.episodeIndex,
       isLocalPlayback: state.isLocalPlayback,
-      localPath: state.localDanmakuPath,
+      localPath: localDanmakuPath,
       expectedRequestId: automaticDanmakuRequestId!,
       isPlaybackCurrent: () => _isCurrentPlayRequest(requestId),
     );

@@ -4400,6 +4400,42 @@ abstract class AppLocalizations {
   /// In zh_Hans, this message translates to:
   /// **'需要更新客户端'**
   String get pluginNeedsNewerClient;
+
+  /// No description provided for @voiceActorsTitle.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'声优'**
+  String get voiceActorsTitle;
+
+  /// No description provided for @noVoiceActors.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'暂无声优信息'**
+  String get noVoiceActors;
+
+  /// No description provided for @voiceActorCareers.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'职业：{careers}'**
+  String voiceActorCareers(String careers);
+
+  /// No description provided for @voiceActorCareerSeiyu.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'声优'**
+  String get voiceActorCareerSeiyu;
+
+  /// No description provided for @voiceActorCareerActor.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'演员'**
+  String get voiceActorCareerActor;
+
+  /// No description provided for @voiceActorCareerArtist.
+  ///
+  /// In zh_Hans, this message translates to:
+  /// **'艺人'**
+  String get voiceActorCareerArtist;
 }
 
 class _AppLocalizationsDelegate

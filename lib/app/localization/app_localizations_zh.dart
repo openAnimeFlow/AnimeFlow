@@ -2315,6 +2315,26 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get pluginNeedsNewerClient => '需要更新用戶端';
+
+  @override
+  String get voiceActorsTitle => '声优';
+
+  @override
+  String get noVoiceActors => '暂无声优信息';
+
+  @override
+  String voiceActorCareers(String careers) {
+    return '职业：$careers';
+  }
+
+  @override
+  String get voiceActorCareerSeiyu => '声优';
+
+  @override
+  String get voiceActorCareerActor => '演员';
+
+  @override
+  String get voiceActorCareerArtist => '艺人';
 }
 
 /// The translations for Chinese, using the Han script (`zh_Hans`).
@@ -4627,6 +4647,26 @@ class AppLocalizationsZhHans extends AppLocalizationsZh {
 
   @override
   String get pluginNeedsNewerClient => '需要更新客户端';
+
+  @override
+  String get voiceActorsTitle => '声优';
+
+  @override
+  String get noVoiceActors => '暂无声优信息';
+
+  @override
+  String voiceActorCareers(String careers) {
+    return '职业：$careers';
+  }
+
+  @override
+  String get voiceActorCareerSeiyu => '声优';
+
+  @override
+  String get voiceActorCareerActor => '演员';
+
+  @override
+  String get voiceActorCareerArtist => '艺人';
 }
 
 /// The translations for Chinese, as used in Hong Kong, using the Han script (`zh_Hant_HK`).
@@ -6940,6 +6980,26 @@ class AppLocalizationsZhHantHk extends AppLocalizationsZh {
 
   @override
   String get pluginNeedsNewerClient => '需要更新用戶端';
+
+  @override
+  String get voiceActorsTitle => '聲優';
+
+  @override
+  String get noVoiceActors => '暫無聲優資訊';
+
+  @override
+  String voiceActorCareers(String careers) {
+    return '職業：$careers';
+  }
+
+  @override
+  String get voiceActorCareerSeiyu => '聲優';
+
+  @override
+  String get voiceActorCareerActor => '演員';
+
+  @override
+  String get voiceActorCareerArtist => '藝人';
 }
 
 /// The translations for Chinese, as used in Taiwan, using the Han script (`zh_Hant_TW`).
@@ -9254,4 +9314,24 @@ class AppLocalizationsZhHantTw extends AppLocalizationsZh {
 
   @override
   String get pluginNeedsNewerClient => '需要更新用戶端';
+
+  @override
+  String get voiceActorsTitle => '聲優';
+
+  @override
+  String get noVoiceActors => '暫無聲優資訊';
+
+  @override
+  String voiceActorCareers(String careers) {
+    return '職業：$careers';
+  }
+
+  @override
+  String get voiceActorCareerSeiyu => '聲優';
+
+  @override
+  String get voiceActorCareerActor => '演員';
+
+  @override
+  String get voiceActorCareerArtist => '藝人';
 }

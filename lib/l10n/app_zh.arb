@@ -770,6 +770,12 @@
   "captchaDetectRegex": "正規表達式",
   "invalidJsonFormat": "JSON 格式不正確",
   "pluginRequiresNewerClient": "外掛 \"{name}\" 需要更新 AnimeFlow 後才能使用",
-  "pluginNeedsNewerClient": "需要更新用戶端"
-
+  "pluginNeedsNewerClient": "需要更新用戶端",
+  "voiceActorsTitle": "声优",
+  "noVoiceActors": "暂无声优信息",
+  "voiceActorCareers": "职业：{careers}",
+  "voiceActorCareerSeiyu": "声优",
+  "voiceActorCareerActor": "演员",
+  "voiceActorCareerArtist": "艺人",
+  "@voiceActorCareers": {"placeholders": {"careers": {"type": "String"}}}
 }

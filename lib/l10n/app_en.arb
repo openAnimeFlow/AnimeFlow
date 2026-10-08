@@ -770,6 +770,12 @@
   "captchaDetectRegex": "Regex",
   "invalidJsonFormat": "Invalid JSON",
   "pluginRequiresNewerClient": "Plugin \"{name}\" requires a newer version of AnimeFlow",
-  "pluginNeedsNewerClient": "Needs newer client"
-
+  "pluginNeedsNewerClient": "Needs newer client",
+  "voiceActorsTitle": "Voice actors",
+  "noVoiceActors": "No voice actor information available",
+  "voiceActorCareers": "Careers: {careers}",
+  "voiceActorCareerSeiyu": "Voice actor",
+  "voiceActorCareerActor": "Actor",
+  "voiceActorCareerArtist": "Artist",
+  "@voiceActorCareers": {"placeholders": {"careers": {"type": "String"}}}
 }

@@ -1,6 +1,7 @@
 import 'package:anime_flow/app/localization/app_localizations.dart';
 import 'package:anime_flow/features/character_info/presentation/widgets/character_comments.dart';
 import 'package:anime_flow/features/character_info/presentation/widgets/character_works.dart';
+import 'package:anime_flow/features/character_info/presentation/widgets/character_voice_actors.dart';
 import 'package:anime_flow/features/character_info/presentation/providers/character_info_provider.dart';
 import 'package:anime_flow/app/router/app_router.dart';
 import 'package:anime_flow/app/router/routes_args.dart';
@@ -189,6 +190,17 @@ class _CharacterInfoState extends State<CharacterInfo> {
                       ),
                     );
                   },
+                ),
+              ),
+              SliverPadding(
+                padding: EdgeInsets.fromLTRB(
+                    contentInset + 20, 20, contentInset + 20, 0),
+                sliver: SliverToBoxAdapter(
+                  child: Consumer(
+                    builder: (context, ref, _) => CharacterVoiceActorsView(
+                      casts: ref.watch(characterInfoArgsProvider).casts,
+                    ),
+                  ),
                 ),
               ),
               SliverPadding(

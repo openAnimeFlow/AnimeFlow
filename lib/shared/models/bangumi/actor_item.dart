@@ -12,7 +12,10 @@ class CharactersItem {
   factory CharactersItem.fromJson(Map<String, dynamic> json) {
     return CharactersItem(
       data: json['data'] != null
-          ? (json['data'] as List).map((item) => CharacterActorData.fromJson(item as Map<String, dynamic>)).toList()
+          ? (json['data'] as List)
+              .map((item) =>
+                  CharacterActorData.fromJson(item as Map<String, dynamic>))
+              .toList()
           : <CharacterActorData>[],
       total: json['total'] as int? ?? 0,
     );
@@ -28,16 +31,27 @@ class CharactersItem {
 
 class CharacterActorData {
   final Character character;
-  final List<Actor> actors;
+  final List<CharacterCast> casts;
   final int type;
   final int order;
 
   CharacterActorData({
     required this.character,
-    required this.actors,
+    List<CharacterCast>? casts,
+    List<Actor>? actors,
     required this.type,
     required this.order,
-  });
+  }) : casts = casts ??
+            (actors ?? <Actor>[])
+                .map((person) => CharacterCast(
+                      person: person,
+                      relation: 0,
+                      summary: '',
+                    ))
+                .toList();
+
+  /// Keeps existing character views compatible with the casts response.
+  List<Actor> get actors => casts.map((cast) => cast.person).toList();
 
   factory CharacterActorData.fromJson(Map<String, dynamic> json) {
     return CharacterActorData(
@@ -54,8 +68,16 @@ class CharacterActorData {
               nsfw: false,
               images: ImageFourItem(large: '', medium: '', small: '', grid: ''),
             ),
-      actors: json['actors'] != null
-          ? (json['actors'] as List).map((item) => Actor.fromJson(item as Map<String, dynamic>)).toList()
+      casts: json['casts'] != null
+          ? (json['casts'] as List)
+              .map((item) =>
+                  CharacterCast.fromJson(item as Map<String, dynamic>))
+              .toList()
+          : null,
+      actors: json['casts'] == null && json['actors'] != null
+          ? (json['actors'] as List)
+              .map((item) => Actor.fromJson(item as Map<String, dynamic>))
+              .toList()
           : <Actor>[],
       type: json['type'] as int? ?? 0,
       order: json['order'] as int? ?? 0,
@@ -65,9 +87,37 @@ class CharacterActorData {
   Map<String, dynamic> toJson() {
     return {
       'character': character.toJson(),
-      'actors': actors.map((item) => item.toJson()).toList(),
+      'casts': casts.map((item) => item.toJson()).toList(),
       'type': type,
       'order': order,
+    };
+  }
+}
+
+class CharacterCast {
+  final Actor person;
+  final int relation;
+  final String summary;
+
+  CharacterCast({
+    required this.person,
+    required this.relation,
+    required this.summary,
+  });
+
+  factory CharacterCast.fromJson(Map<String, dynamic> json) {
+    return CharacterCast(
+      person: Actor.fromJson(json['person'] as Map<String, dynamic>),
+      relation: json['relation'] as int,
+      summary: json['summary'] as String,
+    );
+  }
+
+  Map<String, dynamic> toJson() {
+    return {
+      'person': person.toJson(),
+      'relation': relation,
+      'summary': summary,
     };
   }
 }

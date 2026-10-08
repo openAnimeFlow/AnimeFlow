@@ -776,6 +776,12 @@
   "invalidJsonFormat": "JSON 格式不正确",
   "pluginRequiresNewerClient": "插件 \"{name}\" 需要更新 AnimeFlow 后才能使用",
   "@pluginRequiresNewerClient": {"placeholders": {"name": {}}},
-  "pluginNeedsNewerClient": "需要更新客户端"
-
+  "pluginNeedsNewerClient": "需要更新客户端",
+  "voiceActorsTitle": "声优",
+  "noVoiceActors": "暂无声优信息",
+  "voiceActorCareers": "职业：{careers}",
+  "voiceActorCareerSeiyu": "声优",
+  "voiceActorCareerActor": "演员",
+  "voiceActorCareerArtist": "艺人",
+  "@voiceActorCareers": {"placeholders": {"careers": {"type": "String"}}}
 }

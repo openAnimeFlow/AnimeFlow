@@ -2387,4 +2387,24 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get pluginNeedsNewerClient => 'Needs newer client';
+
+  @override
+  String get voiceActorsTitle => 'Voice actors';
+
+  @override
+  String get noVoiceActors => 'No voice actor information available';
+
+  @override
+  String voiceActorCareers(String careers) {
+    return 'Careers: $careers';
+  }
+
+  @override
+  String get voiceActorCareerSeiyu => 'Voice actor';
+
+  @override
+  String get voiceActorCareerActor => 'Actor';
+
+  @override
+  String get voiceActorCareerArtist => 'Artist';
 }

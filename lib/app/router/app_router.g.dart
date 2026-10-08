@@ -453,6 +453,7 @@ mixin $CharacterInfoRoute on GoRouteData {
         id: int.parse(state.uri.queryParameters['id']!),
         name: state.uri.queryParameters['name']!,
         image: state.uri.queryParameters['image']!,
+        $extra: state.extra as CharacterInfoExtra?,
       );
 
   CharacterInfoRoute get _self => this as CharacterInfoRoute;
@@ -468,17 +469,19 @@ mixin $CharacterInfoRoute on GoRouteData {
       );
 
   @override
-  void go(BuildContext context) => context.go(location);
+  void go(BuildContext context) => context.go(location, extra: _self.$extra);
 
   @override
-  Future<T?> push<T>(BuildContext context) => context.push<T>(location);
+  Future<T?> push<T>(BuildContext context) =>
+      context.push<T>(location, extra: _self.$extra);
 
   @override
   void pushReplacement(BuildContext context) =>
-      context.pushReplacement(location);
+      context.pushReplacement(location, extra: _self.$extra);
 
   @override
-  void replace(BuildContext context) => context.replace(location);
+  void replace(BuildContext context) =>
+      context.replace(location, extra: _self.$extra);
 }
 
 RouteBase get $playRecordRoute => GoRouteData.$route(

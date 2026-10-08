@@ -1,0 +1,410 @@
+{
+  "data": [
+    {
+      "character": {
+        "id": 133203,
+        "name": "水之江梅",
+        "nameCN": "水之江梅",
+        "role": 1,
+        "info": "性别 男 / 身高 175cm",
+        "comment": 14,
+        "lock": false,
+        "nsfw": false,
+        "images": {
+          "large": "https://wsrv.nl/?url=https://lain.bgm.tv/pic/crt/l/67/ef/133203_crt_yvyCV.jpg",
+          "medium": "https://wsrv.nl/?url=https://lain.bgm.tv/r/200/pic/crt/l/67/ef/133203_crt_yvyCV.jpg",
+          "small": "https://wsrv.nl/?url=https://lain.bgm.tv/r/100/pic/crt/l/67/ef/133203_crt_yvyCV.jpg",
+          "grid": "https://wsrv.nl/?url=https://lain.bgm.tv/r/100x100/pic/crt/l/67/ef/133203_crt_yvyCV.jpg"
+        }
+      },
+      "casts": [
+        {
+          "person": {
+            "id": 36872,
+            "name": "坂田将吾",
+            "nameCN": "坂田将吾",
+            "type": 1,
+            "info": "性别 男 / 生日 1998年1月23日 / 血型 B型",
+            "career": [
+              "seiyu"
+            ],
+            "comment": 83,
+            "lock": false,
+            "nsfw": false,
+            "images": {
+              "large": "https://wsrv.nl/?url=https://lain.bgm.tv/pic/crt/l/6d/03/36872_prsn_YKVv4.jpg?r=1739708264",
+              "medium": "https://wsrv.nl/?url=https://lain.bgm.tv/r/200/pic/crt/l/6d/03/36872_prsn_YKVv4.jpg?r=1739708264",
+              "small": "https://wsrv.nl/?url=https://lain.bgm.tv/r/100/pic/crt/l/6d/03/36872_prsn_YKVv4.jpg?r=1739708264",
+              "grid": "https://wsrv.nl/?url=https://lain.bgm.tv/r/100x100/pic/crt/l/6d/03/36872_prsn_YKVv4.jpg?r=1739708264"
+            }
+          },
+          "relation": 0,
+          "summary": ""
+        }
+      ],
+      "type": 1,
+      "order": 1
+    },
+    {
+      "character": {
+        "id": 133202,
+        "name": "古都吹寿子",
+        "nameCN": "古都吹寿子",
+        "role": 1,
+        "info": "性别 女 / 身高 160cm",
+        "comment": 33,
+        "lock": false,
+        "nsfw": false,
+        "images": {
+          "large": "https://wsrv.nl/?url=https://lain.bgm.tv/pic/crt/l/17/36/133202_crt_SMEgm.jpg",
+          "medium": "https://wsrv.nl/?url=https://lain.bgm.tv/r/200/pic/crt/l/17/36/133202_crt_SMEgm.jpg",
+          "small": "https://wsrv.nl/?url=https://lain.bgm.tv/r/100/pic/crt/l/17/36/133202_crt_SMEgm.jpg",
+          "grid": "https://wsrv.nl/?url=https://lain.bgm.tv/r/100x100/pic/crt/l/17/36/133202_crt_SMEgm.jpg"
+        }
+      },
+      "casts": [
+        {
+          "person": {
+            "id": 18600,
+            "name": "白石晴香",
+            "nameCN": "白石晴香",
+            "type": 1,
+            "info": "性别 女 / 生日 1995年4月8日 / 血型 AB型 / 身高 160cm",
+            "career": [
+              "seiyu",
+              "actor"
+            ],
+            "comment": 60,
+            "lock": false,
+            "nsfw": false,
+            "images": {
+              "large": "https://wsrv.nl/?url=https://lain.bgm.tv/pic/crt/l/a9/6f/18600_prsn_LGgtC.jpg?r=1585323843",
+              "medium": "https://wsrv.nl/?url=https://lain.bgm.tv/r/200/pic/crt/l/a9/6f/18600_prsn_LGgtC.jpg?r=1585323843",
+              "small": "https://wsrv.nl/?url=https://lain.bgm.tv/r/100/pic/crt/l/a9/6f/18600_prsn_LGgtC.jpg?r=1585323843",
+              "grid": "https://wsrv.nl/?url=https://lain.bgm.tv/r/100x100/pic/crt/l/a9/6f/18600_prsn_LGgtC.jpg?r=1585323843"
+            }
+          },
+          "relation": 0,
+          "summary": ""
+        }
+      ],
+      "type": 1,
+      "order": 2
+    },
+    {
+      "character": {
+        "id": 133201,
+        "name": "陸奥こまろ",
+        "nameCN": "陆奥驹絽",
+        "role": 1,
+        "info": "性别 女 / 生日 11月18日 / 血型 O / 身高 131cm / 体重 36.22kg",
+        "comment": 23,
+        "lock": false,
+        "nsfw": false,
+        "images": {
+          "large": "https://wsrv.nl/?url=https://lain.bgm.tv/pic/crt/l/ed/03/133201_crt_WJ85d.jpg",
+          "medium": "https://wsrv.nl/?url=https://lain.bgm.tv/r/200/pic/crt/l/ed/03/133201_crt_WJ85d.jpg",
+          "small": "https://wsrv.nl/?url=https://lain.bgm.tv/r/100/pic/crt/l/ed/03/133201_crt_WJ85d.jpg",
+          "grid": "https://wsrv.nl/?url=https://lain.bgm.tv/r/100x100/pic/crt/l/ed/03/133201_crt_WJ85d.jpg"
+        }
+      },
+      "casts": [
+        {
+          "person": {
+            "id": 20701,
+            "name": "富田美憂",
+            "nameCN": "富田美忧",
+            "type": 1,
+            "info": "性别 女 / 生日 1999-11-15 / 血型 A / 身高 153cm",
+            "career": [
+              "artist",
+              "seiyu"
+            ],
+            "comment": 127,
+            "lock": false,
+            "nsfw": false,
+            "images": {
+              "large": "https://wsrv.nl/?url=https://lain.bgm.tv/pic/crt/l/e5/a0/20701_prsn_3sfX0.jpg?r=1562761023",
+              "medium": "https://wsrv.nl/?url=https://lain.bgm.tv/r/200/pic/crt/l/e5/a0/20701_prsn_3sfX0.jpg?r=1562761023",
+              "small": "https://wsrv.nl/?url=https://lain.bgm.tv/r/100/pic/crt/l/e5/a0/20701_prsn_3sfX0.jpg?r=1562761023",
+              "grid": "https://wsrv.nl/?url=https://lain.bgm.tv/r/100x100/pic/crt/l/e5/a0/20701_prsn_3sfX0.jpg?r=1562761023"
+            }
+          },
+          "relation": 0,
+          "summary": ""
+        }
+      ],
+      "type": 1,
+      "order": 3
+    },
+    {
+      "character": {
+        "id": 133204,
+        "name": "尾鳥綻",
+        "nameCN": "尾鸟绽",
+        "role": 1,
+        "info": "性别 男 / 身高 148cm",
+        "comment": 44,
+        "lock": false,
+        "nsfw": false,
+        "images": {
+          "large": "https://wsrv.nl/?url=https://lain.bgm.tv/pic/crt/l/16/59/133204_crt_1S9Fi.jpg",
+          "medium": "https://wsrv.nl/?url=https://lain.bgm.tv/r/200/pic/crt/l/16/59/133204_crt_1S9Fi.jpg",
+          "small": "https://wsrv.nl/?url=https://lain.bgm.tv/r/100/pic/crt/l/16/59/133204_crt_1S9Fi.jpg",
+          "grid": "https://wsrv.nl/?url=https://lain.bgm.tv/r/100x100/pic/crt/l/16/59/133204_crt_1S9Fi.jpg"
+        }
+      },
+      "casts": [
+        {
+          "person": {
+            "id": 31411,
+            "name": "河野ひより",
+            "nameCN": "河野日和",
+            "type": 1,
+            "info": "性别 女 / 生日 1998年6月21日 / 血型 A型 / 身高 164cm",
+            "career": [
+              "seiyu"
+            ],
+            "comment": 34,
+            "lock": false,
+            "nsfw": false,
+            "images": {
+              "large": "https://wsrv.nl/?url=https://lain.bgm.tv/pic/crt/l/55/6a/31411_prsn_C0BAL.jpg",
+              "medium": "https://wsrv.nl/?url=https://lain.bgm.tv/r/200/pic/crt/l/55/6a/31411_prsn_C0BAL.jpg",
+              "small": "https://wsrv.nl/?url=https://lain.bgm.tv/r/100/pic/crt/l/55/6a/31411_prsn_C0BAL.jpg",
+              "grid": "https://wsrv.nl/?url=https://lain.bgm.tv/r/100x100/pic/crt/l/55/6a/31411_prsn_C0BAL.jpg"
+            }
+          },
+          "relation": 0,
+          "summary": ""
+        }
+      ],
+      "type": 1,
+      "order": 4
+    },
+    {
+      "character": {
+        "id": 133206,
+        "name": "照井有栖",
+        "nameCN": "照井有栖",
+        "role": 1,
+        "info": "性别 女 / 身高 167cm",
+        "comment": 32,
+        "lock": false,
+        "nsfw": false,
+        "images": {
+          "large": "https://wsrv.nl/?url=https://lain.bgm.tv/pic/crt/l/ed/f3/133206_crt_c3txF.jpg",
+          "medium": "https://wsrv.nl/?url=https://lain.bgm.tv/r/200/pic/crt/l/ed/f3/133206_crt_c3txF.jpg",
+          "small": "https://wsrv.nl/?url=https://lain.bgm.tv/r/100/pic/crt/l/ed/f3/133206_crt_c3txF.jpg",
+          "grid": "https://wsrv.nl/?url=https://lain.bgm.tv/r/100x100/pic/crt/l/ed/f3/133206_crt_c3txF.jpg"
+        }
+      },
+      "casts": [
+        {
+          "person": {
+            "id": 14414,
+            "name": "石上静香",
+            "nameCN": "石上静香",
+            "type": 1,
+            "info": "性别 女 / 生日 1988-09-14 / 血型 B / 身高 151cm",
+            "career": [
+              "artist",
+              "seiyu"
+            ],
+            "comment": 94,
+            "lock": false,
+            "nsfw": false,
+            "images": {
+              "large": "https://wsrv.nl/?url=https://lain.bgm.tv/pic/crt/l/04/f5/14414_prsn_7nPYh.jpg?r=1735460841",
+              "medium": "https://wsrv.nl/?url=https://lain.bgm.tv/r/200/pic/crt/l/04/f5/14414_prsn_7nPYh.jpg?r=1735460841",
+              "small": "https://wsrv.nl/?url=https://lain.bgm.tv/r/100/pic/crt/l/04/f5/14414_prsn_7nPYh.jpg?r=1735460841",
+              "grid": "https://wsrv.nl/?url=https://lain.bgm.tv/r/100x100/pic/crt/l/04/f5/14414_prsn_7nPYh.jpg?r=1735460841"
+            }
+          },
+          "relation": 0,
+          "summary": ""
+        }
+      ],
+      "type": 1,
+      "order": 5
+    },
+    {
+      "character": {
+        "id": 160256,
+        "name": "平塚敏深",
+        "nameCN": "平冢敏深",
+        "role": 1,
+        "info": "性别 女",
+        "comment": 10,
+        "lock": false,
+        "nsfw": false,
+        "images": {
+          "large": "https://wsrv.nl/?url=https://lain.bgm.tv/pic/crt/l/96/d7/160256_crt_jXirQ.jpg",
+          "medium": "https://wsrv.nl/?url=https://lain.bgm.tv/r/200/pic/crt/l/96/d7/160256_crt_jXirQ.jpg",
+          "small": "https://wsrv.nl/?url=https://lain.bgm.tv/r/100/pic/crt/l/96/d7/160256_crt_jXirQ.jpg",
+          "grid": "https://wsrv.nl/?url=https://lain.bgm.tv/r/100x100/pic/crt/l/96/d7/160256_crt_jXirQ.jpg"
+        }
+      },
+      "casts": [
+        {
+          "person": {
+            "id": 6560,
+            "name": "内山夕実",
+            "nameCN": "内山夕实",
+            "type": 1,
+            "info": "性别 女 / 生日 1987年10月30日 / 血型 A型",
+            "career": [
+              "seiyu"
+            ],
+            "comment": 56,
+            "lock": false,
+            "nsfw": false,
+            "images": {
+              "large": "https://wsrv.nl/?url=https://lain.bgm.tv/pic/crt/l/99/e6/6560_prsn_gZezL.jpg",
+              "medium": "https://wsrv.nl/?url=https://lain.bgm.tv/r/200/pic/crt/l/99/e6/6560_prsn_gZezL.jpg",
+              "small": "https://wsrv.nl/?url=https://lain.bgm.tv/r/100/pic/crt/l/99/e6/6560_prsn_gZezL.jpg",
+              "grid": "https://wsrv.nl/?url=https://lain.bgm.tv/r/100x100/pic/crt/l/99/e6/6560_prsn_gZezL.jpg"
+            }
+          },
+          "relation": 0,
+          "summary": ""
+        }
+      ],
+      "type": 2,
+      "order": 0
+    },
+    {
+      "character": {
+        "id": 215462,
+        "name": "楢井詠子",
+        "nameCN": "楢井咏子",
+        "role": 1,
+        "info": "性别 女",
+        "comment": 0,
+        "lock": false,
+        "nsfw": false,
+        "images": {
+          "large": "https://wsrv.nl/?url=https://lain.bgm.tv/pic/crt/l/fd/08/215462_crt_7Q5BZ.jpg",
+          "medium": "https://wsrv.nl/?url=https://lain.bgm.tv/r/200/pic/crt/l/fd/08/215462_crt_7Q5BZ.jpg",
+          "small": "https://wsrv.nl/?url=https://lain.bgm.tv/r/100/pic/crt/l/fd/08/215462_crt_7Q5BZ.jpg",
+          "grid": "https://wsrv.nl/?url=https://lain.bgm.tv/r/100x100/pic/crt/l/fd/08/215462_crt_7Q5BZ.jpg"
+        }
+      },
+      "casts": [],
+      "type": 2,
+      "order": 1
+    },
+    {
+      "character": {
+        "id": 158757,
+        "name": "狐塚稲穂",
+        "nameCN": "狐塚稻穗",
+        "role": 1,
+        "info": "性别 女",
+        "comment": 1,
+        "lock": false,
+        "nsfw": false,
+        "images": {
+          "large": "https://wsrv.nl/?url=https://lain.bgm.tv/pic/crt/l/02/d1/158757_crt_BMt5t.jpg",
+          "medium": "https://wsrv.nl/?url=https://lain.bgm.tv/r/200/pic/crt/l/02/d1/158757_crt_BMt5t.jpg",
+          "small": "https://wsrv.nl/?url=https://lain.bgm.tv/r/100/pic/crt/l/02/d1/158757_crt_BMt5t.jpg",
+          "grid": "https://wsrv.nl/?url=https://lain.bgm.tv/r/100x100/pic/crt/l/02/d1/158757_crt_BMt5t.jpg"
+        }
+      },
+      "casts": [],
+      "type": 2,
+      "order": 1
+    },
+    {
+      "character": {
+        "id": 160257,
+        "name": "青木タツコ",
+        "nameCN": "青木辰子",
+        "role": 1,
+        "info": "性别 女",
+        "comment": 0,
+        "lock": false,
+        "nsfw": false,
+        "images": {
+          "large": "https://wsrv.nl/?url=https://lain.bgm.tv/pic/crt/l/3d/10/160257_crt_Xy1pI.jpg?r=1719679427",
+          "medium": "https://wsrv.nl/?url=https://lain.bgm.tv/r/200/pic/crt/l/3d/10/160257_crt_Xy1pI.jpg?r=1719679427",
+          "small": "https://wsrv.nl/?url=https://lain.bgm.tv/r/100/pic/crt/l/3d/10/160257_crt_Xy1pI.jpg?r=1719679427",
+          "grid": "https://wsrv.nl/?url=https://lain.bgm.tv/r/100x100/pic/crt/l/3d/10/160257_crt_Xy1pI.jpg?r=1719679427"
+        }
+      },
+      "casts": [
+        {
+          "person": {
+            "id": 19808,
+            "name": "春瀬なつみ",
+            "nameCN": "春濑夏美",
+            "type": 1,
+            "info": "性别 女 / 生日 1994年6月17日",
+            "career": [
+              "seiyu"
+            ],
+            "comment": 28,
+            "lock": false,
+            "nsfw": false,
+            "images": {
+              "large": "https://wsrv.nl/?url=https://lain.bgm.tv/pic/crt/l/96/eb/19808_prsn_luu17.jpg?r=1738769269",
+              "medium": "https://wsrv.nl/?url=https://lain.bgm.tv/r/200/pic/crt/l/96/eb/19808_prsn_luu17.jpg?r=1738769269",
+              "small": "https://wsrv.nl/?url=https://lain.bgm.tv/r/100/pic/crt/l/96/eb/19808_prsn_luu17.jpg?r=1738769269",
+              "grid": "https://wsrv.nl/?url=https://lain.bgm.tv/r/100x100/pic/crt/l/96/eb/19808_prsn_luu17.jpg?r=1738769269"
+            }
+          },
+          "relation": 0,
+          "summary": ""
+        }
+      ],
+      "type": 2,
+      "order": 2
+    },
+    {
+      "character": {
+        "id": 160258,
+        "name": "梶リュウジ",
+        "nameCN": "梶龙二",
+        "role": 1,
+        "info": "性别 男",
+        "comment": 0,
+        "lock": false,
+        "nsfw": false,
+        "images": {
+          "large": "https://wsrv.nl/?url=https://lain.bgm.tv/pic/crt/l/b7/1c/160258_crt_3QRZC.jpg",
+          "medium": "https://wsrv.nl/?url=https://lain.bgm.tv/r/200/pic/crt/l/b7/1c/160258_crt_3QRZC.jpg",
+          "small": "https://wsrv.nl/?url=https://lain.bgm.tv/r/100/pic/crt/l/b7/1c/160258_crt_3QRZC.jpg",
+          "grid": "https://wsrv.nl/?url=https://lain.bgm.tv/r/100x100/pic/crt/l/b7/1c/160258_crt_3QRZC.jpg"
+        }
+      },
+      "casts": [
+        {
+          "person": {
+            "id": 41419,
+            "name": "柳晃平",
+            "nameCN": "柳晃平",
+            "type": 1,
+            "info": "性别 男 / 生日 3月23日",
+            "career": [
+              "seiyu"
+            ],
+            "comment": 8,
+            "lock": false,
+            "nsfw": false,
+            "images": {
+              "large": "https://wsrv.nl/?url=https://lain.bgm.tv/pic/crt/l/60/39/41419_prsn_6d3j4.jpg",
+              "medium": "https://wsrv.nl/?url=https://lain.bgm.tv/r/200/pic/crt/l/60/39/41419_prsn_6d3j4.jpg",
+              "small": "https://wsrv.nl/?url=https://lain.bgm.tv/r/100/pic/crt/l/60/39/41419_prsn_6d3j4.jpg",
+              "grid": "https://wsrv.nl/?url=https://lain.bgm.tv/r/100x100/pic/crt/l/60/39/41419_prsn_6d3j4.jpg"
+            }
+          },
+          "relation": 0,
+          "summary": ""
+        }
+      ],
+      "type": 2,
+      "order": 2
+    }
+  ],
+  "total": 23
+}

@@ -282,6 +282,7 @@ class CharacterInfoRoute extends GoRouteData with $CharacterInfoRoute {
     required this.id,
     required this.name,
     required this.image,
+    this.$extra,
   });
 
   factory CharacterInfoRoute.fromExtra(CharacterInfoExtra extra) =>
@@ -289,11 +290,13 @@ class CharacterInfoRoute extends GoRouteData with $CharacterInfoRoute {
         id: extra.characterId,
         name: extra.characterName,
         image: extra.characterImage,
+        $extra: extra,
       );
 
   final int id;
   final String name;
   final String image;
+  final CharacterInfoExtra? $extra;
 
   @override
   Widget build(BuildContext context, GoRouterState state) {
@@ -301,6 +304,7 @@ class CharacterInfoRoute extends GoRouteData with $CharacterInfoRoute {
       characterId: id,
       characterName: name,
       characterImage: image,
+      casts: $extra?.casts ?? const [],
     );
     return ProviderScope(
       overrides: [

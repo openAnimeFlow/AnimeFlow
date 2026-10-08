@@ -1,6 +1,7 @@
 import 'package:anime_flow/shared/models/bangumi/actor_item.dart';
 import 'package:anime_flow/features/characters/presentation/providers/characters_provider.dart';
 import 'package:anime_flow/app/router/app_router.dart';
+import 'package:anime_flow/app/router/model/character_info_extra.dart';
 import 'package:anime_flow/core/utils/bgm_utils.dart';
 import 'package:anime_flow/shared/widgets/animation_network_image.dart';
 import 'package:anime_flow/app/localization/app_localizations.dart';
@@ -179,6 +180,12 @@ class _CharacterPageState extends State<CharacterPage> {
                 ? characterData.character.nameCN
                 : characterData.character.name,
             image: characterData.character.images.large,
+            $extra: CharacterInfoExtra(
+              characterId: characterData.character.id,
+              characterName: characterData.character.name,
+              characterImage: characterData.character.images.large,
+              casts: characterData.casts,
+            ),
           ).push(context);
         },
         child: Row(

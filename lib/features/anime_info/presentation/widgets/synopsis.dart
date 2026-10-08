@@ -9,7 +9,6 @@ import 'package:anime_flow/features/anime_info/presentation/providers/anime_info
 import 'package:anime_flow/features/anime_info/presentation/widgets/related.dart';
 import 'package:anime_flow/features/anime_info/presentation/widgets/tags.dart';
 import 'package:anime_flow/features/anime_info/presentation/widgets/subject_stills.dart';
-import 'package:anime_flow/core/utils/system_util.dart';
 import 'package:anime_flow/shared/widgets/expandable_text.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -210,14 +209,16 @@ class InfoSynopsisView extends StatelessWidget {
 
   ///骨架屏
   Widget _skeletonSliver(BuildContext context) {
-    final isDark = SystemUtil.isDarkTheme(context);
-    final baseColor = isDark ? Colors.grey[850]! : Colors.grey[300]!;
-    final highlightColor = isDark ? Colors.grey[700]! : Colors.grey[100]!;
-    final containerColor = isDark
-        ? Theme.of(context).colorScheme.surfaceContainerHighest
-        : Theme.of(context).colorScheme.surface;
+    final colorScheme = Theme.of(context).colorScheme;
+    final isDark = colorScheme.brightness == Brightness.dark;
+    final baseColor = colorScheme.surfaceContainerHighest;
+    final highlightColor = Color.lerp(
+      baseColor,
+      isDark ? colorScheme.onSurface : colorScheme.surface,
+      isDark ? 0.08 : 0.65,
+    )!;
     final boxDecoration = BoxDecoration(
-      color: containerColor,
+      color: baseColor,
       borderRadius: BorderRadius.circular(8.0),
     );
 

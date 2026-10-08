@@ -1,4 +1,3 @@
-import 'package:anime_flow/core/utils/system_util.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:shimmer/shimmer.dart';
 
@@ -7,12 +6,14 @@ class SubjectCardSkeleton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final isDark = SystemUtil.isDarkTheme(context);
-    final baseColor = isDark ? Colors.grey[850]! : Colors.grey[300]!;
-    final highlightColor = isDark ? Colors.grey[700]! : Colors.grey[100]!;
-    final containerColor = isDark
-        ? Theme.of(context).colorScheme.surfaceContainerHighest
-        : Theme.of(context).colorScheme.surface;
+    final colorScheme = Theme.of(context).colorScheme;
+    final isDark = colorScheme.brightness == Brightness.dark;
+    final baseColor = colorScheme.surfaceContainerHighest;
+    final highlightColor = Color.lerp(
+      baseColor,
+      isDark ? colorScheme.onSurface : colorScheme.surface,
+      isDark ? 0.08 : 0.65,
+    )!;
 
     return Stack(
       children: [
@@ -22,7 +23,7 @@ class SubjectCardSkeleton extends StatelessWidget {
             highlightColor: highlightColor,
             child: Container(
               decoration: BoxDecoration(
-                color: containerColor,
+                color: baseColor,
                 borderRadius: BorderRadius.circular(8.0),
               ),
             ),
